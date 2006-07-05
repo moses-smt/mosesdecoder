@@ -24,32 +24,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
-class FutureScore
+class SquareMatrix
 {
 protected:
 	const size_t m_size;
-	float *m_futureScore;
+	float *m_array;
 
-	FutureScore(); // not implemented
-	FutureScore(const FutureScore &copy); // not implemented
+	SquareMatrix(); // not implemented
+	SquareMatrix(const SquareMatrix &copy); // not implemented
 	
 public:
-	FutureScore(size_t size)
+	SquareMatrix(size_t size)
 	:m_size(size)
 	{
-		m_futureScore = (float*) malloc(sizeof(float) * size * size);
+		m_array = (float*) malloc(sizeof(float) * size * size);
 	}
-	~FutureScore()
+	~SquareMatrix()
 	{
-		free(m_futureScore);
+		free(m_array);
 	}
 	inline float GetScore(size_t row, size_t col) const
 	{
-		return m_futureScore[row * m_size + col];
+		return m_array[row * m_size + col];
 	}
 	inline void SetScore(size_t row, size_t col, float value)
 	{
-		m_futureScore[row * m_size + col] = value;
+		m_array[row * m_size + col] = value;
 	}
 	
 };

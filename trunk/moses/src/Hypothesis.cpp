@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "Util.h"
 #include "Arc.h"
-#include "FutureScore.h"
+#include "SquareMatrix.h"
 
 using namespace std;
 
@@ -365,7 +365,7 @@ void Hypothesis::CalcScore(const LMList		&lmListInitial
 													, const LMList	&lmListEnd
 													, float weightDistortion
 													, float weightWordPenalty
-													, const FutureScore &futureScore)
+													, const SquareMatrix &futureScore)
 {
 	// DISTORTION COST
 	const WordsRange &prevRange = m_prevHypo->GetCurrSourceWordsRange()
@@ -399,7 +399,7 @@ void Hypothesis::CalcScore(const LMList		&lmListInitial
 								+ m_score[FutureScoreEnum];
 }
 
-void Hypothesis::CalcFutureScore(const FutureScore &futureScore)
+void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 {
 	const size_t maxSize= numeric_limits<size_t>::max();
 	size_t	start				= maxSize;
