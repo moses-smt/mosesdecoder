@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisCollectionIntermediate.h"
 #include "PossibleTranslationCollection.h"
 #include "LatticePathList.h"
-#include "FutureScore.h"
+#include "SquareMatrix.h"
 
 class LatticePath;
 
@@ -44,7 +44,7 @@ protected:
 		// no of elements = no of words in source + 1
 	StaticData &m_staticData;
 	PossibleTranslationCollection m_possibleTranslations;
-	FutureScore m_futureScore;
+	SquareMatrix m_futureScore;
 	std::list<TargetPhrase> m_unknownPhrase;
 
 //	PossibleTranslationCollection m_possibleTranslations;
