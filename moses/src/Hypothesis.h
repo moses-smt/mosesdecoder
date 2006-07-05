@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LatticeEdge.h"
 #include "TransScoreComponentCollection.h"
 
-class FutureScore;
+class SquareMatrix;
 class PossibleTranslation;
 
 class Hypothesis : public LatticeEdge
@@ -52,7 +52,7 @@ protected:
 
 	bool IsCompatible(const Phrase &phrase) const;
 	// none of the factors clash
-	void CalcFutureScore(const FutureScore &futureScore);
+	void CalcFutureScore(const SquareMatrix &futureScore);
 	void CalcLMScore(const LMList		&lmListInitial, const LMList	&lmListEnd);
 
 public:
@@ -85,7 +85,7 @@ public:
 							, const LMList &lmListEnd
 							, float weightDistortion
 							, float weightWordPenalty
-							, const FutureScore &futureScore);
+							, const SquareMatrix &futureScore);
 
 	// same as for phrase
 	inline size_t GetSize() const
