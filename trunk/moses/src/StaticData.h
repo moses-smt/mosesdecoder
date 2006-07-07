@@ -68,6 +68,7 @@ public:
 	{
 		LoadPhraseTables(false, "", std::list< Phrase >());
 	}
+	void LoadMapping();
 
 	const PARAM_VEC &GetParam(const std::string &paramName)
 	{

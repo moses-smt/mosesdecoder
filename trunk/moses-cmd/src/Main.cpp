@@ -161,6 +161,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 																	, staticData.GetNBestFilePath());
 		staticData.LoadPhraseTables();
 	}
+	staticData.LoadMapping();
 	timer.check("Created input-output object");
 
 	return inputOutput;

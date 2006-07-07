@@ -132,4 +132,4 @@ class LanguageModel;
 typedef std::list < LanguageModel* >		LMList;
 
 typedef std::pair < DecodeType , int >	DecodeStep;
-		// 2nd = index into m_phraseDictionary or m_generationDictionary
+		// 2nd = pointer to a phraseDictionary or generationDictionary
