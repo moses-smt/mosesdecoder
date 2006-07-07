@@ -299,19 +299,22 @@ void StaticData::LoadPhraseTables(bool filter
 		
 		const vector<string> &translationVector = m_parameter.GetParam("ttable-file");
 		size_t	maxTargetPhrase										= Scan<size_t>(m_parameter.GetParam("ttable-limit")[0]);
-		
+
+		size_t totalPrevNoScoreComponent = 0;		
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>			token		= Tokenize(translationVector[currDict]);
 			vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
 													,output	= Tokenize<FactorType>(token[1], ",");
-			string							filePath= token[2];
+			string							filePath= token[3];
+			size_t							noScoreComponent	= Scan<size_t>(token[2]);
 			// weights for this phrase dictionary
-			vector<float> weight(NUM_PHRASE_SCORES);
-			for (size_t currScore = 0 ; currScore < NUM_PHRASE_SCORES ; currScore++)
+			vector<float> weight(noScoreComponent);
+			for (size_t currScore = 0 ; currScore < noScoreComponent ; currScore++)
 			{
-				weight[currScore] = weightAll[currDict * NUM_PHRASE_SCORES + currScore];
+				weight[currScore] = weightAll[totalPrevNoScoreComponent + currScore]; 
 			}
+			totalPrevNoScoreComponent += noScoreComponent;
 
 			string phraseTableHash	= GetMD5Hash(filePath);
 			string hashFilePath			= GetCachePath() 
@@ -337,7 +340,7 @@ void StaticData::LoadPhraseTables(bool filter
 			}
 			TRACE_ERR(filePath << endl);
 
-			m_phraseDictionary.push_back(new PhraseDictionary());
+			m_phraseDictionary.push_back(new PhraseDictionary(currDict, noScoreComponent));
 			timer.check("Start loading");
 			m_phraseDictionary[currDict]->Load(input
 																				, output
@@ -346,7 +349,6 @@ void StaticData::LoadPhraseTables(bool filter
 																				, hashFilePath
 																				, weight
 																				, maxTargetPhrase
-																				, currDict
 																				, filterPhrase
 																				, inputPhraseList);
 			timer.check("Finished loading");
