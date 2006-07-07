@@ -71,20 +71,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_inputFactorOrder.push_back(Scan<FactorType>(inputFactorVector[i]));
 	}
 
-	// mapping
-	const vector<string> &mappingVector = m_parameter.GetParam("mapping");
-	for(size_t i=0; i<mappingVector.size(); i++) 
-	{
-		vector<string>	token		= Tokenize(mappingVector[i]);
-		if (token.size() == 2) 
-		{
-			DecodeStep decodeStep (
-										token[0] == "T" ? Translate : Generate
-										,Scan<int>(token[1]));
-			m_decodeStepList.push_back(decodeStep);
-		}
-	}
-
 	// load language models
 	if (m_parameter.GetParam("lmodel-file").size() > 0)
 	{
@@ -357,3 +343,22 @@ void StaticData::LoadPhraseTables(bool filter
 
 	timer.check("Finished loading phrase tables");
 }
+
+void StaticData::LoadMapping()
+{
+	// mapping
+	const vector<string> &mappingVector = m_parameter.GetParam("mapping");
+	for(size_t i=0; i<mappingVector.size(); i++) 
+	{
+		vector<string>	token		= Tokenize(mappingVector[i]);
+		if (token.size() == 2) 
+		{
+			DecodeStep decodeStep (
+										token[0] == "T" ? Translate : Generate
+										,Scan<int>(token[1]));
+			m_decodeStepList.push_back(decodeStep);
+		}
+	}
+}
+	
+	
