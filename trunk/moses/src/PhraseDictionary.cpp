@@ -39,12 +39,9 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, const string &hashFilePath
 																			, const vector<float> &weight
 																			, size_t maxTargetPhrase
-																			, size_t id
 																			, bool filter
 																			, const list< Phrase > &inputPhraseList)
 {
-	m_id = id;
-
 	//factors	
 	m_factorsUsed[Source]				= new FactorTypeSet(input);
 	m_factorsUsed[Target]	= new FactorTypeSet(output);
@@ -91,6 +88,8 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 		if (addPhrase)
 		{
 			vector<float> scoreVector = Tokenize<float>(token[2]);
+			assert(scoreVector.size() == m_noScoreComponent);
+			
 			// source
 			Phrase sourcePhrase(Source);
 			sourcePhrase.CreateFromString( input, phraseVector, factorCollection);

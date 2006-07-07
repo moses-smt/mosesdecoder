@@ -36,7 +36,7 @@ class PhraseDictionary
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionary&);
 
 protected:
-	size_t m_id;
+	const size_t m_id, m_noScoreComponent;
 	std::map<Phrase , TargetPhraseCollection > m_collection;
 	// 1st = source
 	// 2nd = target
@@ -51,8 +51,10 @@ protected:
 							, const std::list<Phrase>					&inputPhraseList
 							, const std::vector<FactorType>		&inputFactorType);
 public:
-	PhraseDictionary()
-		:m_factorsUsed(2)
+	PhraseDictionary(size_t id, size_t noScoreComponent)
+		:m_id(id)
+		,m_factorsUsed(2)
+		,m_noScoreComponent(noScoreComponent)
 	{
 	}
 	~PhraseDictionary();
@@ -64,7 +66,6 @@ public:
 								, const std::string &hashFilePath
 								, const std::vector<float> &weight
 								, size_t maxTargetPhrase
-								, size_t id
 								, bool filter
 								, const std::list< Phrase > &inputPhraseList);
 	
@@ -76,7 +77,10 @@ public:
 	{
 		return m_collection.size();
 	}
-
+	size_t GetNoScoreComponent() const
+	{
+		return m_noScoreComponent;
+	}
 	const TargetPhraseCollection *FindEquivPhrase(const Phrase &source) const;
 
 	// for mert

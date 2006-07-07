@@ -92,7 +92,7 @@ bool Parameter::Validate()
   // do files exist?
 	// phrase tables
 	if (ret)
-		ret = FilesExist("ttable-file", 2);
+		ret = FilesExist("ttable-file", 3);
 	// generation tables
 	if (ret)
 		ret = FilesExist("generation-file", 2);
