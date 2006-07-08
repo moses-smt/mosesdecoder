@@ -49,17 +49,17 @@ void LatticeEdge::ResizeComponentScore(const LMList &allLM, const list < DecodeS
 	for (iterDecodeStep = decodeStepList.begin() ; iterDecodeStep != decodeStepList.end() ; ++iterDecodeStep)
 	{
 		const DecodeStep &step = *iterDecodeStep;
-		switch (step.first)
+		switch (step.GetDecodeType())
 		{
 		case Translate:
 		{
-			TransScoreComponent &transScoreComponent = m_transScoreComponent.Add(step.second);
+			TransScoreComponent &transScoreComponent = m_transScoreComponent.Add(step.GetId());
 			transScoreComponent.Reset();
 			break;
 		}
 		case Generate:
 		{
-			m_generationScoreComponent[step.second] = 0.0f;
+			m_generationScoreComponent[step.GetId()] = 0.0f;
 			break;
 		}
 		}
