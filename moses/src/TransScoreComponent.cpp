@@ -56,11 +56,6 @@ void TransScoreComponent::Reset()
 	}
 }
 
-size_t TransScoreComponent::GetPhraseDictionaryId() const
-{
-	return m_phraseDictionary->GetId();
-}
-
 size_t TransScoreComponent::GetNoScoreComponent() const
 {
 	return m_phraseDictionary->GetNoScoreComponent();

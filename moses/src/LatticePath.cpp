@@ -114,13 +114,13 @@ void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc
 	TransScoreComponentCollection::iterator iterTrans;
 	for (iterTrans = m_transScoreComponent.begin() ; iterTrans != m_transScoreComponent.end() ; ++iterTrans)
 	{
-		size_t idPhraseDict							= iterTrans->first;
-		TransScoreComponent &transScore	= *iterTrans->second;
-		const size_t noScoreComponent 	= transScore.GetNoScoreComponent();
+		const PhraseDictionary *phraseDictionary	= iterTrans->first;
+		TransScoreComponent &transScore						= *iterTrans->second;
+		const size_t noScoreComponent 						= phraseDictionary->GetNoScoreComponent();
 			
-		const TransScoreComponent &arcScore		= arcComponent.GetTransScoreComponent(idPhraseDict)
-														,&copyScore	= copyComponent.GetTransScoreComponent(idPhraseDict)
-														,&totalScore	= totalComponent.GetTransScoreComponent(idPhraseDict);
+		const TransScoreComponent &arcScore		= arcComponent.GetTransScoreComponent(phraseDictionary)
+														,&copyScore	= copyComponent.GetTransScoreComponent(phraseDictionary)
+														,&totalScore	= totalComponent.GetTransScoreComponent(phraseDictionary);
 		for (size_t i = 0 ; i < noScoreComponent ; i++)
 		{
 			float adj = arcScore[i] - copyScore[i];
