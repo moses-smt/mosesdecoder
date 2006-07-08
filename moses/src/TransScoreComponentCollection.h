@@ -27,14 +27,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TransScoreComponent.h"
 #include "PhraseDictionary.h"
 
-class TransScoreComponentCollection : public std::map<size_t, TransScoreComponent>
+class TransScoreComponentCollection : public std::map<size_t, TransScoreComponent*>
 {
 public:
 	TransScoreComponent &GetTransScoreComponent(size_t index)
 	{
 		TransScoreComponentCollection::iterator iter = find(index);
 		assert(iter != end());
-		return iter->second;
+		return *iter->second;
 	}
 	const TransScoreComponent &GetTransScoreComponent(size_t index) const
 	{
@@ -43,7 +43,17 @@ public:
 	TransScoreComponent &Add(const TransScoreComponent &transScoreComponent)
 	{
 		size_t idPhraseDictionary = transScoreComponent.GetPhraseDictionaryId();
-		return operator[](idPhraseDictionary) = transScoreComponent;
+		TransScoreComponentCollection::iterator iter = find(idPhraseDictionary);
+		if (iter != end())
+		{ // already have scores for this phrase table. delete it 1st
+			delete iter->second;
+			erase(iter);
+		}
+		// add new into same place
+		TransScoreComponent *newTransScoreComponent = new TransScoreComponent(transScoreComponent);
+		operator[](idPhraseDictionary) = newTransScoreComponent;
+		
+		return *newTransScoreComponent;
 	}
 	TransScoreComponent &Add(const PhraseDictionary &phraseDictionary)
 	{
@@ -57,7 +67,7 @@ inline std::ostream& operator<<(std::ostream &out, const TransScoreComponentColl
 	for (iter = transScoreComponentColl.begin() ; iter != transScoreComponentColl.end() ; ++iter)
 	{
 		size_t idTrans = iter->first;
-		const TransScoreComponent &transScoreComponent = iter->second;
+		const TransScoreComponent &transScoreComponent = *iter->second;
 		out << "[" << idTrans << "=" << transScoreComponent << "] ";
 	}
 	return out;

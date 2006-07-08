@@ -142,7 +142,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		TransScoreComponentCollection::const_iterator iterTrans;
 		for (iterTrans = transScoreComponent.begin() ; iterTrans != transScoreComponent.end() ; ++iterTrans)
 		{
-			const TransScoreComponent &transScore	= iterTrans->second;
+			const TransScoreComponent &transScore	= *iterTrans->second;
 			for (size_t i = 0 ; i < transScore.GetNoScoreComponent() ; i++)
 			{
 				m_nBestFile << transScore[i] << " ";
