@@ -361,4 +361,3 @@ void StaticData::LoadMapping()
 	}
 }
 	
-	

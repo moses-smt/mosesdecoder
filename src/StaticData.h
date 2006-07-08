@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Parameter.h"
 #include "LanguageModel.h"
 #include "InputOutput.h"
+#include "DecodeStep.h"
 
 class StaticData
 {
@@ -97,11 +98,11 @@ public:
 	
 	const PhraseDictionary &GetPhraseDictionary(const DecodeStep &decodeStep) const
 	{
-		return *m_phraseDictionary[decodeStep.second];
+		return *m_phraseDictionary[decodeStep.GetId()];
 	}
 	const GenerationDictionary &GetGenerationDictionary(const DecodeStep &decodeStep) const
 	{
-		return *m_generationDictionary[decodeStep.second];
+		return *m_generationDictionary[decodeStep.GetId()];
 	}
 	const LMList &GetLanguageModel(LMListType type) const
 	{
