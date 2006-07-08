@@ -42,7 +42,6 @@ public:
 	{
 		return m_phraseDictionary;
 	}
-	size_t GetPhraseDictionaryId() const;
 	size_t GetNoScoreComponent() const;
 
 	float operator[](size_t index) const
@@ -53,13 +52,6 @@ public:
 	{
 		return m_scoreComponent[index];
 	}
-
-
-	inline bool operator< (const TransScoreComponent &compare) const
-	{
-		return GetPhraseDictionaryId() < compare.GetPhraseDictionaryId();
-	}
-
 };
 
 std::ostream& operator<<(std::ostream &out, const TransScoreComponent &transScoreComponent);
