@@ -29,7 +29,7 @@ class TransScoreComponent
 {
 protected:
 	const PhraseDictionary *m_phraseDictionary;
-	float		m_scoreComponent[NUM_PHRASE_SCORES];
+	float	*m_scoreComponent;
 public:
 	TransScoreComponent()
 	{ // needed by TransScoreComponentCollection
@@ -37,6 +37,7 @@ public:
 	}
 	TransScoreComponent(const PhraseDictionary *phraseDictionary);
 	TransScoreComponent(const TransScoreComponent &copy);
+	~TransScoreComponent();
 	void Reset();
 
 	size_t GetPhraseDictionaryId() const;
