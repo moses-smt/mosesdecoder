@@ -291,7 +291,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 	}
 	else if (sourceWordsRange.GetWordsCount() == 1 && currTargetLength == 1)
 	{ // unknown handler here
-		const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Target);
+		const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Output);
 		Hypothesis *newHypo = new Hypothesis(hypothesis);
 		
 		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
@@ -308,11 +308,11 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 					switch (factorType)
 					{
 					case POS:
-						unkownfactor = m_staticData.GetFactorCollection().AddFactor(Target, factorType, UNKNOWN_FACTOR);
+						unkownfactor = m_staticData.GetFactorCollection().AddFactor(Output, factorType, UNKNOWN_FACTOR);
 						newHypo->SetFactor(0, factorType, unkownfactor);
 						break;
 					default:
-						unkownfactor = m_staticData.GetFactorCollection().AddFactor(Target, factorType, sourceFactor->GetString());
+						unkownfactor = m_staticData.GetFactorCollection().AddFactor(Output, factorType, sourceFactor->GetString());
 						newHypo->SetFactor(0, factorType, unkownfactor);
 						break;
 					}
@@ -330,7 +330,7 @@ void Manager::CreatePossibleTranslations(const Phrase &phrase
 	for (size_t startPos = 0 ; startPos < phrase.GetSize() ; startPos++)
 	{
 		// reuse phrase, add next word on
-		Phrase sourcePhrase( phrase.GetLanguage());
+		Phrase sourcePhrase( phrase.GetDirection());
 
 		for (size_t endPos = startPos ; endPos < phrase.GetSize() ; endPos++)
 		{
@@ -362,10 +362,10 @@ void Manager::CreatePossibleTranslations(const Phrase &phrase
 			{
 				// unknown word, add to target, and add as poss trans
 				float	weightWP		= m_staticData.GetWeightWordPenalty();
-				const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Target);
+				const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Output);
 				
 				// make sure new phrase isn't deallocated while we're using it
-				m_unknownPhrase.push_back(TargetPhrase(Target, &phraseDictionary));
+				m_unknownPhrase.push_back(TargetPhrase(Output, &phraseDictionary));
 				TargetPhrase &targetPhrase = m_unknownPhrase.back();
 				FactorArray &targetWord = targetPhrase.AddWord();
 
@@ -382,11 +382,11 @@ void Manager::CreatePossibleTranslations(const Phrase &phrase
 						switch (factorType)
 						{
 						case POS:
-							unkownfactor = m_staticData.GetFactorCollection().AddFactor(Target, factorType, UNKNOWN_FACTOR);
+							unkownfactor = m_staticData.GetFactorCollection().AddFactor(Output, factorType, UNKNOWN_FACTOR);
 							targetWord[factorType] = unkownfactor;
 							break;
 						default:
-							unkownfactor = m_staticData.GetFactorCollection().AddFactor(Target, factorType, factor->GetString());
+							unkownfactor = m_staticData.GetFactorCollection().AddFactor(Output, factorType, factor->GetString());
 							targetWord[factorType] = unkownfactor;
 							break;
 						}

@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Phrase.h"
 #include "TypeDef.h"
+#include "Dictionary.h"
 
 class FactorCollection;
 
@@ -33,7 +34,7 @@ typedef std::map < Word , float > OutputWordCollection;
 		// 1st = output phrase
 		// 2nd = log probability (score)
 
-class GenerationDictionary
+class GenerationDictionary : public Dictionary
 {
 protected:
 	std::map<Word , OutputWordCollection> m_collection;
@@ -43,29 +44,29 @@ protected:
 	float									m_weight;
 	size_t								m_id;
 
-	std::vector< FactorTypeSet* > m_factorsUsed;
 public:
 	GenerationDictionary()
-		:m_factorsUsed(2)
+		: Dictionary()
 	{
 	}
-	~GenerationDictionary();
+	virtual ~GenerationDictionary();
 
+	DecodeType GetDecodeType() const
+	{
+		return Generate;
+	}
+	
 	void Load(const std::vector<FactorType> &input
 									, const std::vector<FactorType> &output
 									, FactorCollection &factorCollection
 									, const std::string &filePath
 									, float weight
-									, Language language
+									, FactorDirection direction
 									, size_t id);
 
 	float GetWeight() const
 	{
 		return m_weight;
-	}
-	const FactorTypeSet &GetFactorsUsed(FactorDirection direction) const
-	{
-		return *m_factorsUsed[direction];
 	}
 	size_t GetSize() const
 	{

@@ -64,11 +64,6 @@ typedef const NGramNode* LmId;
 		 
 // enums. 
 // must be 0, 1, 2, ..., unless otherwise stated
-enum Language
-{	
-	Source	= 0
-	,Target	= 1
-};
 
 // can only be 2 at the moment
 const int NUM_LANGUAGES = 2;
