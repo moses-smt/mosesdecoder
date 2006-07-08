@@ -43,8 +43,8 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, const list< Phrase > &inputPhraseList)
 {
 	//factors	
-	m_factorsUsed[Source]				= new FactorTypeSet(input);
-	m_factorsUsed[Target]	= new FactorTypeSet(output);
+	m_factorsUsed[Input]	= new FactorTypeSet(input);
+	m_factorsUsed[Output]	= new FactorTypeSet(output);
 
 	// data from file
 	InputFileStream inFile(filePath);
@@ -91,10 +91,10 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			assert(scoreVector.size() == m_noScoreComponent);
 			
 			// source
-			Phrase sourcePhrase(Source);
+			Phrase sourcePhrase(Input);
 			sourcePhrase.CreateFromString( input, phraseVector, factorCollection);
 			//target
-			TargetPhrase targetPhrase(Target, this);
+			TargetPhrase targetPhrase(Output, this);
 			targetPhrase.CreateFromString( output, token[1], factorCollection);
 
 			// component score, for n-best output

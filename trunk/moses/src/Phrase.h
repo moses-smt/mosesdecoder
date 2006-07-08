@@ -34,7 +34,7 @@ class Phrase
 {
 	friend std::ostream& operator<<(std::ostream&, const Phrase&);
 protected:
-	Language							m_language;
+	FactorDirection				m_direction;
 	size_t								m_phraseSize, m_arraySize;
 	FactorArray						*m_factorArray;
 
@@ -47,8 +47,8 @@ public:
 	}
 	Phrase(const Phrase &copy);
 
-	inline Phrase(Language language)
-		:m_language(language)
+	inline Phrase(FactorDirection direction)
+		:m_direction(direction)
 		, m_phraseSize(0)
 		, m_arraySize(0)
 		, m_factorArray(NULL)
@@ -65,9 +65,9 @@ public:
 											, const std::vector< std::vector<std::string> > &phraseVector
 											, FactorCollection &factorCollection);
 
-	inline Language GetLanguage() const
+	inline FactorDirection GetDirection() const
 	{
-		return m_language;
+		return m_direction;
 	}
 
 	inline size_t GetSize() const

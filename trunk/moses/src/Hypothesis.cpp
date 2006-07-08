@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 Hypothesis::Hypothesis(const Phrase &phrase)
-	: LatticeEdge(Target, NULL)
+	: LatticeEdge(Output, NULL)
 	, m_sourceCompleted(phrase.GetSize())
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
@@ -42,7 +42,7 @@ Hypothesis::Hypothesis(const Phrase &phrase)
 }
 
 Hypothesis::Hypothesis(const Hypothesis &copy)
-	: LatticeEdge							(Target, copy.m_prevHypo)
+	: LatticeEdge							(Output, copy.m_prevHypo)
 	, m_sourceCompleted				(copy.m_sourceCompleted )
 	, m_currSourceWordsRange	(copy.m_currSourceWordsRange)
 	, m_currTargetWordsRange		(copy.m_currTargetWordsRange)
@@ -60,7 +60,7 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 }
 
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const PossibleTranslation &possTrans)
-	: LatticeEdge							(Target, &prevHypo)
+	: LatticeEdge							(Output, &prevHypo)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_currSourceWordsRange	(prevHypo.m_currSourceWordsRange)
 	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1

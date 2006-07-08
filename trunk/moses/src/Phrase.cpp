@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 Phrase::Phrase(const Phrase &copy)
-:m_language(copy.m_language)
+:m_direction(copy.m_direction)
 ,m_phraseSize(copy.m_phraseSize)
 ,m_arraySize(copy.m_arraySize)
 {
@@ -60,7 +60,7 @@ void Phrase::AddWords(const Phrase &copy)
 
 Phrase Phrase::GetSubString(const WordsRange &wordsRange)
 {
-	Phrase retPhrase(m_language);
+	Phrase retPhrase(m_direction);
 
 	for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++)
 	{
@@ -120,7 +120,7 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 		{
 			FactorType factorType = factorOrder[currFactorIndex];
 			const string &factorStr = phraseVector[phrasePos][currFactorIndex];
-			const Factor *factor = factorCollection.AddFactor(m_language, factorType, factorStr); 
+			const Factor *factor = factorCollection.AddFactor(m_direction, factorType, factorStr); 
 			factorArray[factorType] = factor;
 		}
 	}

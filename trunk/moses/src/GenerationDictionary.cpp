@@ -34,7 +34,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 																			, FactorCollection &factorCollection
 																			, const std::string &filePath
 																			, float weight
-																			, Language language
+																			, FactorDirection direction
 																			, size_t id)
 {	
 	m_id = id;
@@ -62,7 +62,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 		for (size_t i = 0 ; i < input.size() ; i++)
 		{
 			FactorType factorType = input[i];
-			const Factor *factor = factorCollection.AddFactor( language, factorType, factorString[i]);
+			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
 			inputWord.SetFactor(factorType, factor);
 		}
 
@@ -71,7 +71,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 		{
 			FactorType factorType = output[i];
 			
-			const Factor *factor = factorCollection.AddFactor( language, factorType, factorString[i]);
+			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
 			outputWord.SetFactor(factorType, factor);
 		}
 
@@ -84,15 +84,15 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 	// ??? temporary solution for unknown words
 	// always assume it POS tags
 	Word outputWord, word2, word3;
-	const Factor *factor = factorCollection.AddFactor( Target, POS, "NNP");
+	const Factor *factor = factorCollection.AddFactor( Output, POS, "NNP");
 	outputWord.SetFactor(POS, factor);
 	m_unknownWord[outputWord] = 0.25f;
 
-	factor = factorCollection.AddFactor( Target, POS, "NN");
+	factor = factorCollection.AddFactor( Output, POS, "NN");
 	word2.SetFactor(POS, factor);
 	m_unknownWord[word2] = 0.25f;
 
-	factor = factorCollection.AddFactor( Target, POS, UNKNOWN_FACTOR);
+	factor = factorCollection.AddFactor( Output, POS, UNKNOWN_FACTOR);
 	word3.SetFactor(POS, factor);
 	m_unknownWord[word3] = 0.5f;
 }

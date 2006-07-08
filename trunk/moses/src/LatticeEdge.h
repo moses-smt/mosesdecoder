@@ -67,9 +67,9 @@ public:
 		m_generationScoreComponent	= generationScoreComponent;
 #endif
 	}
-	LatticeEdge(Language language, const Hypothesis *prevHypo)
+	LatticeEdge(FactorDirection direction, const Hypothesis *prevHypo)
 		:m_prevHypo(prevHypo)
-		,m_phrase(language)
+		,m_phrase(direction)
 	{}
 	virtual ~LatticeEdge()
 	{

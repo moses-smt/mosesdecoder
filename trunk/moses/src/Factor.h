@@ -40,12 +40,12 @@ class Factor
 	friend class FactorCollection;
 
 protected:
-	Language		m_language;
-	FactorType	m_factorType;
+	FactorDirection		m_direction;
+	FactorType				m_factorType;
 	const std::string	*m_ptrString;
-	LmId 				m_lmId;
+	LmId 							m_lmId;
 
-	Factor(Language language, FactorType factorType, const std::string *factorString, LmId lmId);
+	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, LmId lmId);
 	
 	inline void SetLmId(LmId lmId)
 	{
@@ -53,9 +53,9 @@ protected:
 	}
 
 public:
-	inline Language GetLanguage() const
+	inline FactorDirection GetFactorDirection() const
 	{
-		return m_language;
+		return m_direction;
 	}
 	inline FactorType GetFactorType() const
 	{
@@ -78,9 +78,9 @@ public:
 		if (m_ptrString > compare.m_ptrString)
 			return 1;
 
-		if (m_language < compare.m_language)
+		if (m_direction < compare.m_direction)
 			return -1;
-		if (m_language > compare.m_language)
+		if (m_direction > compare.m_direction)
 			return 1;
 
 		if (m_factorType < compare.m_factorType)

@@ -28,10 +28,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "Phrase.h"
 #include "TargetPhrase.h"
+#include "Dictionary.h"
 
 typedef std::list < TargetPhrase > TargetPhraseCollection;
 
-class PhraseDictionary
+class PhraseDictionary : public Dictionary
 {
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionary&);
 
@@ -41,9 +42,6 @@ protected:
 	// 1st = source
 	// 2nd = target
 
-	std::vector< FactorTypeSet* > m_factorsUsed;
-		// should index this by language
-
 	void AddEquivPhrase(const Phrase &source
 											, const TargetPhrase &targetPhrase
 											, size_t maxTargetPhrase);
@@ -52,12 +50,17 @@ protected:
 							, const std::vector<FactorType>		&inputFactorType);
 public:
 	PhraseDictionary(size_t id, size_t noScoreComponent)
-		:m_id(id)
+		:Dictionary()
+		,m_id(id)
 		,m_noScoreComponent(noScoreComponent)
-		,m_factorsUsed(2)
 	{
 	}
 	~PhraseDictionary();
+
+	DecodeType GetDecodeType() const
+	{
+		return Translate;
+	}
 
 	void Load(const std::vector<FactorType> &input
 								, const std::vector<FactorType> &output
@@ -69,10 +72,6 @@ public:
 								, bool filter
 								, const std::list< Phrase > &inputPhraseList);
 	
-	const FactorTypeSet &GetFactorsUsed(const Language &language) const
-	{
-		return *m_factorsUsed[language];
-	}
 	size_t GetSize() const
 	{
 		return m_collection.size();

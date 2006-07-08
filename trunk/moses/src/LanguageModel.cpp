@@ -113,13 +113,13 @@ void LanguageModel::CreateFactors(FactorCollection &factorCollection)
 	while ( (str = iter.next()) != NULL)
 	{
 		LmId lmId = GetLmID(str);
-		factorCollection.AddFactor(Target, m_factorType, str, lmId);
+		factorCollection.AddFactor(Output, m_factorType, str, lmId);
 	}
 	
 	lmId = GetLmID(SENTENCE_START);
-	m_sentenceStart = factorCollection.AddFactor(Target, m_factorType, SENTENCE_START, lmId);
+	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START, lmId);
 	lmId = GetLmID(SENTENCE_END);
-	m_sentenceEnd		= factorCollection.AddFactor(Target, m_factorType, SENTENCE_END, lmId);
+	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END, lmId);
 	
 }
 

@@ -195,7 +195,7 @@ Sentence *ThreadMySQL::ReadSentence(mysqlpp::Connection &conn)
 		long	idIn	= row["idIn"]
 					,idOut= row["idOut"];
 
-		Sentence *sentence = new Sentence(Source);
+		Sentence *sentence = new Sentence(Input);
 		sentence->SetTranslationId(idOut);
 
 		strme.str("");
@@ -212,13 +212,13 @@ Sentence *ThreadMySQL::ReadSentence(mysqlpp::Connection &conn)
 			{
 				FactorArray &factorArray = sentence->AddWord();
 				if (!row["surface"].is_null())
-					factorArray[Surface] = m_factorCollection.AddFactor(Source, Surface, row["surface"].c_str());
+					factorArray[Surface] = m_factorCollection.AddFactor(Input, Surface, row["surface"].c_str());
 				if (!row["pos"].is_null())
-					factorArray[POS] = m_factorCollection.AddFactor(Source, POS, row["pos"].c_str());
+					factorArray[POS] = m_factorCollection.AddFactor(Input, POS, row["pos"].c_str());
 				if (!row["stem"].is_null())
-					factorArray[Stem] = m_factorCollection.AddFactor(Source, Stem, row["stem"].c_str());
+					factorArray[Stem] = m_factorCollection.AddFactor(Input, Stem, row["stem"].c_str());
 				if (!row["morphology"].is_null())
-					factorArray[Morphology] =m_factorCollection.AddFactor(Source, Morphology, row["morphology"].c_str());
+					factorArray[Morphology] =m_factorCollection.AddFactor(Input, Morphology, row["morphology"].c_str());
 			}
 
 			// update output translation to let people know we're currently translating it

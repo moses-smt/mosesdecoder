@@ -78,7 +78,7 @@ inline Sentence *GetInput(std::istream &inputStream
 		boost::trim(line);
 	} while (line == "");
 
-	Sentence *sentence = new Sentence(Source);
+	Sentence *sentence = new Sentence(Input);
 	sentence->CreateFromString(factorOrder, line, factorCollection);
 	return sentence;
 }

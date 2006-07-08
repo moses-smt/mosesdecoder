@@ -35,8 +35,8 @@ protected:
 	{
 	}
 public:
-	Sentence(Language language)
-		:Phrase(language)
+	Sentence(FactorDirection direction)
+		:Phrase(direction)
 	{
 	}
 
