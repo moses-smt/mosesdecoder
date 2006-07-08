@@ -109,8 +109,6 @@ enum ScoreType
 // count of above
 const size_t NUM_SCORES = 7;
 
-const size_t NUM_PHRASE_SCORES = 5;
-
 enum IOMethod
 {
 	IOMethodCommandLine

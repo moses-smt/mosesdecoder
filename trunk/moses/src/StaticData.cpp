@@ -207,19 +207,18 @@ IOMethod StaticData::GetIOMethod()
 
 void StaticData::SetWeightTransModel(const vector<float> &weight)
 {
-	assert(weight.size() == NUM_PHRASE_SCORES * GetPhraseDictionarySize());
-
 	size_t currWeight = 0;
 	vector<PhraseDictionary*>::iterator iter;
 	for(iter = m_phraseDictionary.begin() ; iter != m_phraseDictionary.end(); ++iter) 
 	{
+		PhraseDictionary *phraseDict = *iter;
+		const size_t noScoreComponent 						= phraseDict->GetNoScoreComponent();
 		// weights for this particular dictionary
-		vector<float> dictWeight(NUM_PHRASE_SCORES);
-		for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
+		vector<float> dictWeight(noScoreComponent);
+		for (size_t i = 0 ; i < noScoreComponent ; i++)
 		{
 			dictWeight[i] = weight[currWeight++];
 		}
-		PhraseDictionary *phraseDict = *iter;
 		phraseDict->SetWeightTransModel(dictWeight);
 	}
 }
