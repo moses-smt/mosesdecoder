@@ -48,7 +48,7 @@ void WeightOptimizationImpl::SetWeight(const std::vector<float> &weight)
 
 	// phrase trans
 	{
-		size_t numPhraseDict = NUM_PHRASE_SCORES * m_staticData.GetPhraseDictionarySize();
+		size_t numPhraseDict = 0 ; // NUM_PHRASE_SCORES * m_staticData.GetPhraseDictionarySize();
 		std::vector<float> transModelWeight(numPhraseDict);
 
 		for (size_t i = 0 ; i < numPhraseDict ; i++)

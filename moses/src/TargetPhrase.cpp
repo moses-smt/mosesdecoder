@@ -26,12 +26,11 @@ using namespace std;
 
 void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float> &weightT)
 {
-	assert(scoreVector.size() == NUM_PHRASE_SCORES);
 	assert(weightT.size() == scoreVector.size());
 
 	// calc average score if non-best
 	m_score = 0;
-	for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
+	for (size_t i = 0 ; i < scoreVector.size() ; i++)
 	{
 		float score =  TransformScore(scoreVector[i]);
 #ifdef N_BEST
@@ -45,7 +44,7 @@ void TargetPhrase::SetWeight(const vector<float> &weightT)
 {
 #ifdef N_BEST
 	m_score = 0;
-	for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
+	for (size_t i = 0 ; i < weightT.size() ; i++)
 	{
 		m_score += m_scoreComponent[i] * weightT[i];
 	}
