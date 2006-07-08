@@ -47,7 +47,7 @@ public:
 	}
 	TransScoreComponent &Add(const PhraseDictionary &phraseDictionary)
 	{
-		return Add(TransScoreComponent(phraseDictionary.GetId()));
+		return Add(TransScoreComponent(&phraseDictionary));
 	}
 };
 

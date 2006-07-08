@@ -365,7 +365,7 @@ void Manager::CreatePossibleTranslations(const Phrase &phrase
 				const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Target);
 				
 				// make sure new phrase isn't deallocated while we're using it
-				m_unknownPhrase.push_back(TargetPhrase(Target, phraseDictionary.GetId()));
+				m_unknownPhrase.push_back(TargetPhrase(Target, &phraseDictionary));
 				TargetPhrase &targetPhrase = m_unknownPhrase.back();
 				FactorArray &targetWord = targetPhrase.AddWord();
 
