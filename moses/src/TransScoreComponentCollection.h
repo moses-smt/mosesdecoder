@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <assert.h>
 #include "TransScoreComponent.h"
+#include "PhraseDictionary.h"
 
 class TransScoreComponentCollection : public std::map<size_t, TransScoreComponent>
 {
@@ -44,9 +45,9 @@ public:
 		size_t idPhraseDictionary = transScoreComponent.GetPhraseDictionaryId();
 		return operator[](idPhraseDictionary) = transScoreComponent;
 	}
-	TransScoreComponent &Add(size_t idPhraseDictionary)
+	TransScoreComponent &Add(const PhraseDictionary &phraseDictionary)
 	{
-		return Add(TransScoreComponent(idPhraseDictionary));
+		return Add(TransScoreComponent(phraseDictionary.GetId()));
 	}
 };
 
