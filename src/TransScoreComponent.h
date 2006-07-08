@@ -40,7 +40,12 @@ public:
 	~TransScoreComponent();
 	void Reset();
 
+	const PhraseDictionary *GetPhraseDictionary() const
+	{
+		return m_phraseDictionary;
+	}
 	size_t GetPhraseDictionaryId() const;
+	size_t GetNoScoreComponent() const;
 
 	float operator[](size_t index) const
 	{
@@ -59,13 +64,4 @@ public:
 
 };
 
-inline std::ostream& operator<<(std::ostream &out, const TransScoreComponent &transScoreComponent)
-{
-	out << transScoreComponent[0];
-	for (size_t i = 1 ; i < NUM_PHRASE_SCORES ; i++)
-	{
-		out << "," << transScoreComponent[i];
-	}	
-	return out;
-}
-
+std::ostream& operator<<(std::ostream &out, const TransScoreComponent &transScoreComponent);
