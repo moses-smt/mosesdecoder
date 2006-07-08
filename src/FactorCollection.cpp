@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-void FactorCollection::LoadVocab(Language language, FactorType factorType, const string &fileName)
+void FactorCollection::LoadVocab(FactorDirection direction, FactorType factorType, const string &fileName)
 {
 	ifstream 	inFile(fileName.c_str());
 
@@ -43,14 +43,14 @@ void FactorCollection::LoadVocab(Language language, FactorType factorType, const
 			continue;
 		}		
 		// looks like good line
-		AddFactor(language, factorType, token[1]);
+		AddFactor(direction, factorType, token[1]);
 	}
 }
 
-const Factor *FactorCollection::AddFactor(Language 		language
-																				, FactorType 	factorType
-																				, const string &factorString
-																				, LmId				lmId)
+const Factor *FactorCollection::AddFactor(FactorDirection direction
+																				, FactorType 			factorType
+																				, const string 		&factorString
+																				, LmId						lmId)
 {
 	// find string id
 	const string *ptr;
@@ -67,7 +67,7 @@ const Factor *FactorCollection::AddFactor(Language 		language
 		ptr = &str;
 	}
 
-	Factor findFactor(language, factorType, ptr, lmId);
+	Factor findFactor(direction, factorType, ptr, lmId);
 	FactorSet::const_iterator iter = m_collection.find(findFactor);
 	
 	if (iter == m_collection.end())
@@ -81,11 +81,11 @@ const Factor *FactorCollection::AddFactor(Language 		language
 	}
 }
 
-const Factor *FactorCollection::AddFactor(Language language
-																				, FactorType factorType
-																				, const string &factorString)
+const Factor *FactorCollection::AddFactor(FactorDirection direction
+																				, FactorType 			factorType
+																				, const string 		&factorString)
 {
-	return AddFactor(language, factorType, factorString, LanguageModel::UNKNOWN_LM_ID);
+	return AddFactor(direction, factorType, factorString, LanguageModel::UNKNOWN_LM_ID);
 }
 
 void FactorCollection::SetFactorLmId(const Factor *factor, LmId lmId)

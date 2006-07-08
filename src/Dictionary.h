@@ -21,30 +21,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <set>
-#include <string>
-#include "Factor.h"
-
-class LanguageModel;
-
-typedef std::set<Factor> FactorSet;
-typedef std::set<std::string> StringSet;
-
-class FactorCollection
+class Dictionary
 {
-	friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
-
 protected:
-	
-	FactorSet m_collection;
-	StringSet m_factorStringCollection;
-public:
-	~FactorCollection();
+	std::vector< FactorTypeSet* > m_factorsUsed;
 
-	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);	
-	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString, LmId lmId);	
-	void SetFactorLmId(const Factor *factor, LmId lmId);
-	
-	void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &fileName);
+	Dictionary()	
+		:m_factorsUsed(2)
+	{
+	}
+
+public:
+	const FactorTypeSet &GetFactorsUsed(FactorDirection direction) const
+	{
+		return *m_factorsUsed[direction];
+	}
+
+	virtual DecodeType GetDecodeType() const = 0;
 };
 

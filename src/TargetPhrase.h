@@ -36,8 +36,8 @@ protected:
 #endif
 
 public:
-	TargetPhrase(Language language, const PhraseDictionary *phraseDictionary)
-		:Phrase(language)
+	TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary)
+		:Phrase(direction)
 #ifdef N_BEST
 		,m_scoreComponent(phraseDictionary)
 #endif
