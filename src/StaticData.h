@@ -96,14 +96,6 @@ public:
 		return m_factorCollection;
 	}
 	
-	const PhraseDictionary &GetPhraseDictionary(const DecodeStep &decodeStep) const
-	{
-		return *m_phraseDictionary[decodeStep.GetId()];
-	}
-	const GenerationDictionary &GetGenerationDictionary(const DecodeStep &decodeStep) const
-	{
-		return *m_generationDictionary[decodeStep.GetId()];
-	}
 	const LMList &GetLanguageModel(LMListType type) const
 	{
 		return m_languageModel[type];
