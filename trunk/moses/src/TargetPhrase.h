@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "TransScoreComponent.h"
 
+class PhraseDictionary;
+
 class TargetPhrase: public Phrase
 {
 protected:
@@ -34,10 +36,10 @@ protected:
 #endif
 
 public:
-	TargetPhrase(Language language, size_t idPhraseDictionary)
+	TargetPhrase(Language language, const PhraseDictionary *phraseDictionary)
 		:Phrase(language)
 #ifdef N_BEST
-		,m_scoreComponent(idPhraseDictionary)
+		,m_scoreComponent(phraseDictionary)
 #endif
 	{
 	}
