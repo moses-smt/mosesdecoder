@@ -53,8 +53,7 @@ void Manager::ProcessSentence()
 {
 	list < DecodeStep > &decodeStepList = m_staticData.GetDecodeStepList();
 
-	const PhraseDictionary &phraseDictionary 
-		= m_staticData.GetPhraseDictionary(decodeStepList.front());
+	const PhraseDictionary &phraseDictionary = decodeStepList.front().GetPhraseDictionary();
 	const LMList &lmListInitial = m_staticData.GetLanguageModel(Initial);
 	// create list of all possible translations
 	// this is only valid if:
@@ -264,7 +263,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 {
 	const WordsRange &sourceWordsRange				= hypothesis.GetCurrSourceWordsRange();
 	const Phrase sourcePhrase 								= m_source.GetSubString(sourceWordsRange);
-	const PhraseDictionary &phraseDictionary	= m_staticData.GetPhraseDictionary(decodeStep);
+	const PhraseDictionary &phraseDictionary	= decodeStep.GetPhraseDictionary();
 	const TargetPhraseCollection *phraseColl	=	phraseDictionary.FindEquivPhrase(sourcePhrase);
 	size_t currTargetLength										= hypothesis.GetCurrTargetLength();
 	
@@ -469,7 +468,7 @@ void Manager::ProcessGeneration(const Hypothesis &hypothesis
 																, const DecodeStep &decodeStep
 																, HypothesisCollectionIntermediate &outputHypoColl)
 {
-	const GenerationDictionary &generationDictionary = m_staticData.GetGenerationDictionary(decodeStep);
+	const GenerationDictionary &generationDictionary = decodeStep.GetGenerationDictionary();
 	size_t idDict = generationDictionary.GetId();
 	const float weight = generationDictionary.GetWeight();
 
