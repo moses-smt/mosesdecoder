@@ -34,6 +34,8 @@ public:
 	TransScoreComponent()
 	{ // needed by TransScoreComponentCollection
 		// should try & get rid of it
+		m_phraseDictionary = (PhraseDictionary *) 0x54321;
+		m_scoreComponent = (float*) 0x98765;
 	}
 	TransScoreComponent(const PhraseDictionary *phraseDictionary);
 	TransScoreComponent(const TransScoreComponent &copy);
