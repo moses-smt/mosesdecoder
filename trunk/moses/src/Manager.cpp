@@ -136,7 +136,7 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList
 								,&outputHypoColl	= outputHypoCollVec[indexStep + 1];
 
 		// is it translation or generation
-		switch (decodeStep.first) 
+		switch (decodeStep.GetDecodeType()) 
 		{
 		case Translate:
 			{
