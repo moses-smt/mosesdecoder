@@ -94,7 +94,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			Phrase sourcePhrase(Source);
 			sourcePhrase.CreateFromString( input, phraseVector, factorCollection);
 			//target
-			TargetPhrase targetPhrase(Target, m_id);
+			TargetPhrase targetPhrase(Target, this);
 			targetPhrase.CreateFromString( output, token[1], factorCollection);
 
 			// component score, for n-best output

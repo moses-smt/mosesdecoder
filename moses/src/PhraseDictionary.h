@@ -53,8 +53,8 @@ protected:
 public:
 	PhraseDictionary(size_t id, size_t noScoreComponent)
 		:m_id(id)
-		,m_factorsUsed(2)
 		,m_noScoreComponent(noScoreComponent)
+		,m_factorsUsed(2)
 	{
 	}
 	~PhraseDictionary();

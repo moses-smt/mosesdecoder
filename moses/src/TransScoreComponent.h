@@ -23,34 +23,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <iostream>
 
-//typedef float TransScoreComponent[NUM_PHRASE_SCORES];
+class PhraseDictionary;
 
 class TransScoreComponent
 {
 protected:
-	size_t	m_idPhraseDictionary;
+	const PhraseDictionary *m_phraseDictionary;
 	float		m_scoreComponent[NUM_PHRASE_SCORES];
 public:
 	TransScoreComponent()
-	{
+	{ // needed by TransScoreComponentCollection
+		// should try & get rid of it
 	}
-	TransScoreComponent(size_t idPhraseDictionary)
-	{
-		m_idPhraseDictionary = idPhraseDictionary;
-	}
-	TransScoreComponent(const TransScoreComponent &copy)
-	{
-		m_idPhraseDictionary = copy.m_idPhraseDictionary;
-		for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
-		{
-			m_scoreComponent[i] = copy[i];
-		}
-	}
+	TransScoreComponent(const PhraseDictionary *phraseDictionary);
+	TransScoreComponent(const TransScoreComponent &copy);
+	void Reset();
 
-	inline size_t GetPhraseDictionaryId() const
-	{
-		return m_idPhraseDictionary;
-	}
+	size_t GetPhraseDictionaryId() const;
 
 	float operator[](size_t index) const
 	{
@@ -61,13 +50,6 @@ public:
 		return m_scoreComponent[index];
 	}
 
-	void Reset()
-	{
-		for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
-		{
-			m_scoreComponent[i] = 0;
-		}
-	}
 
 	inline bool operator< (const TransScoreComponent &compare) const
 	{
