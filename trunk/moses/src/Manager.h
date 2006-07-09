@@ -26,10 +26,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Sentence.h"
 #include "Hypothesis.h"
 #include "StaticData.h"
-#include "PossibleTranslation.h"
+#include "TranslationOption.h"
 #include "HypothesisCollection.h"
 #include "HypothesisCollectionIntermediate.h"
-#include "PossibleTranslationCollection.h"
+#include "TranslationOptionCollection.h"
 #include "LatticePathList.h"
 #include "SquareMatrix.h"
 
@@ -43,11 +43,11 @@ protected:
 	std::vector < HypothesisCollection > m_hypoStack;
 		// no of elements = no of words in source + 1
 	StaticData &m_staticData;
-	PossibleTranslationCollection m_possibleTranslations;
+	TranslationOptionCollection m_possibleTranslations;
 	SquareMatrix m_futureScore;
 	std::list<TargetPhrase> m_unknownPhrase;
 
-//	PossibleTranslationCollection m_possibleTranslations;
+//	TranslationOptionCollection m_possibleTranslations;
 
 	// functions
 	void ProcessOneStack(const std::list < DecodeStep > &decodeStepList
@@ -63,7 +63,7 @@ protected:
 	void ProcessGeneration(const Hypothesis &hypothesis
 													, const DecodeStep &decodeStep
 													, HypothesisCollectionIntermediate &outputHypoColl);
-	void CreatePossibleTranslations(const Phrase &phrase
+	void CreateTranslationOptions(const Phrase &phrase
 													, const PhraseDictionary &phraseDictionary
 													, const LMList &lmListInitial);
 	void OutputHypoStack(int stack = -1);

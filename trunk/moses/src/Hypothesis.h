@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 
 class SquareMatrix;
-class PossibleTranslation;
+class TranslationOption;
 
 class Hypothesis : public LatticeEdge
 {
@@ -60,7 +60,7 @@ public:
 	// used to create clone
 	Hypothesis(const Phrase &phrase);
 		// used for initial seeding of trans process
-	Hypothesis(const Hypothesis &prevHypo, const PossibleTranslation &possTrans);
+	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &possTrans);
 		// create next
 	~Hypothesis();
 	inline Hypothesis *Clone() const
@@ -68,8 +68,8 @@ public:
 		return new Hypothesis(*this);
 	}
 
-	Hypothesis *CreateNext(const PossibleTranslation &possTrans) const;
-	Hypothesis *MergeNext(const PossibleTranslation &possTrans) const;
+	Hypothesis *CreateNext(const TranslationOption &possTrans) const;
+	Hypothesis *MergeNext(const TranslationOption &possTrans) const;
 
 	inline const WordsRange &GetCurrSourceWordsRange() const
 	{
