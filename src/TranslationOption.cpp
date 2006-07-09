@@ -19,12 +19,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "PossibleTranslation.h"
+#include "TranslationOption.h"
 #include "WordsBitmap.h"
 
 using namespace std;
 
-PossibleTranslation::PossibleTranslation(const WordsRange &wordsRange
+TranslationOption::TranslationOption(const WordsRange &wordsRange
 										, const TargetPhrase &targetPhrase
 										, float transScore
 										, float weightWP)
@@ -39,7 +39,7 @@ PossibleTranslation::PossibleTranslation(const WordsRange &wordsRange
 {
 }
 
-PossibleTranslation::PossibleTranslation(const WordsRange &wordsRange
+TranslationOption::TranslationOption(const WordsRange &wordsRange
 																			, const TargetPhrase &targetPhrase
 																			, float transScore
 																			, const LMList &lmList
@@ -54,13 +54,13 @@ PossibleTranslation::PossibleTranslation(const WordsRange &wordsRange
 	CalcFutureScore(lmList, weightWP);
 }
 
-bool PossibleTranslation::Overlap(const Hypothesis &hypothesis) const
+bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 {
 	const WordsBitmap &bitmap = hypothesis.GetWordsBitmap();
 	return bitmap.Overlap(GetWordsRange());
 }
 
-void PossibleTranslation::CalcFutureScore(const LMList &lmList, float weightWP)
+void TranslationOption::CalcFutureScore(const LMList &lmList, float weightWP)
 {
 	m_futureScore = 0;
 	m_ngramScore= 0;
@@ -81,21 +81,19 @@ void PossibleTranslation::CalcFutureScore(const LMList &lmList, float weightWP)
 		// total LM score so far
 		m_futureScore += fullScore * weightLM;
 		m_ngramScore	+= nGramScore * weightLM;
+		
 	}
 
 	size_t phraseSize = m_targetPhrase.GetSize();
-	m_futureScore += m_transScore - phraseSize * weightWP;
+	m_futureScore += m_transScore - phraseSize * weightWP;	
 }
 
 // friend
-ostream& operator<<(ostream& out, const PossibleTranslation& possibleTranslation)
+ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 {
 	out << "(" 
 			<< possibleTranslation.GetPhrase() 
-			<< ") "
-			<< possibleTranslation.GetFutureScore()
-			<< ", "
-			<< possibleTranslation.GetNgramScore();
+			<< ") ";
 	return out;
 }
 

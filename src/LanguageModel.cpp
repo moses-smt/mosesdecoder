@@ -51,9 +51,10 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
 	{
 		contextFactor.push_back(phrase.GetFactor(currPos, factorType));		
-		fullScore = GetValue(contextFactor);
+		fullScore += GetValue(contextFactor);
 	}
-
+	
+	contextFactor.push_back(NULL);
 	// main loop
 	for (size_t currPos = m_nGramOrder - 1; currPos < phraseSize ; currPos++)
 	{ // used by hypo to speed up lm score calc
@@ -62,7 +63,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
 		contextFactor[0] = phrase.GetFactor(currPos-2, factorType);
 		contextFactor[1] = phrase.GetFactor(currPos-1, factorType);
 		contextFactor[2] = phrase.GetFactor(currPos, factorType);
-		ngramScore += GetValue(contextFactor);
+		ngramScore += GetValue(contextFactor);		
 	}
 	fullScore += ngramScore;
 	

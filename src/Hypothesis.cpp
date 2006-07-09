@@ -22,8 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <limits>
 #include <assert.h>
-#include "PossibleTranslation.h"
-#include "PossibleTranslationCollection.h"
+#include "TranslationOption.h"
+#include "TranslationOptionCollection.h"
 #include "Hypothesis.h"
 #include "Util.h"
 #include "Arc.h"
@@ -59,7 +59,7 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 #endif
 }
 
-Hypothesis::Hypothesis(const Hypothesis &prevHypo, const PossibleTranslation &possTrans)
+Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &possTrans)
 	: LatticeEdge							(Output, &prevHypo)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_currSourceWordsRange	(prevHypo.m_currSourceWordsRange)
@@ -77,7 +77,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const PossibleTranslation &po
 	// scores
 	SetScore(prevHypo.GetScore());
 	m_score[PhraseTrans]				+= possTrans.GetTranslationScore();
-	m_score[FutureScoreEnum]					+= possTrans.GetFutureScore();
+	m_score[FutureScoreEnum]		+= possTrans.GetFutureScore();
 	m_score[LanguageModelScore]	+= possTrans.GetNgramScore();
 
 #ifdef N_BEST
@@ -121,13 +121,13 @@ Hypothesis::~Hypothesis()
 #endif
 }
 
-Hypothesis *Hypothesis::CreateNext(const PossibleTranslation &possTrans) const
+Hypothesis *Hypothesis::CreateNext(const TranslationOption &possTrans) const
 {
 	Hypothesis *clone	= new Hypothesis(*this, possTrans);
 	return clone;
 }
 
-Hypothesis *Hypothesis::MergeNext(const PossibleTranslation &possTrans) const
+Hypothesis *Hypothesis::MergeNext(const TranslationOption &possTrans) const
 {
 	// check each word is compatible and merge 1-by-1
 	const Phrase &possPhrase = possTrans.GetPhrase();

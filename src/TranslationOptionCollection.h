@@ -22,19 +22,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <list>
-#include "PossibleTranslation.h"
+#include "TranslationOption.h"
 
-class PossibleTranslationCollection : public std::list< PossibleTranslation >
+class TranslationOptionCollection : public std::list< TranslationOption >
 {
 public:
-	PossibleTranslationCollection()
+	TranslationOptionCollection()
 	{
 	}
 };
 
-inline std::ostream& operator<<(std::ostream& out, const PossibleTranslationCollection& coll)
+inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
 {
-	PossibleTranslationCollection::const_iterator iter;
+	TranslationOptionCollection::const_iterator iter;
 	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
 	{
 		TRACE_ERR (*iter << std::endl);

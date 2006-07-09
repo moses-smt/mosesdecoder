@@ -59,7 +59,7 @@ void Manager::ProcessSentence()
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
-	CreatePossibleTranslations(m_source, phraseDictionary, lmListInitial);
+	CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
 
 
 	// output
@@ -194,10 +194,10 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
 	int maxDistortion = m_staticData.GetMaxDistortion();
 	if (maxDistortion < 0)
 	{	// no limit on distortion
-		PossibleTranslationCollection::const_iterator iterPossTrans;
+		TranslationOptionCollection::const_iterator iterPossTrans;
 		for (iterPossTrans = m_possibleTranslations.begin(); iterPossTrans != m_possibleTranslations.end(); ++iterPossTrans)
 		{
-			const PossibleTranslation &possTrans = *iterPossTrans;
+			const TranslationOption &possTrans = *iterPossTrans;
 
 			if ( !possTrans.Overlap(hypothesis)) 
 			{
@@ -213,10 +213,10 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
 			,hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();
 
 		// MAIN LOOP. go through each possible hypo
-		PossibleTranslationCollection::const_iterator iterPossTrans;
+		TranslationOptionCollection::const_iterator iterPossTrans;
 		for (iterPossTrans = m_possibleTranslations.begin(); iterPossTrans != m_possibleTranslations.end(); ++iterPossTrans)
 		{
-			const PossibleTranslation &possTrans = *iterPossTrans;
+			const TranslationOption &possTrans = *iterPossTrans;
 			// calc distortion if using this poss trans
 
 			size_t possTransStartPos = possTrans.GetStartPos();
@@ -277,7 +277,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 			
 			float			transScore		= targetPhrase.GetScore()
 								,weightWP		= m_staticData.GetWeightWordPenalty();
-			PossibleTranslation possTrans(sourceWordsRange
+			TranslationOption possTrans(sourceWordsRange
 																	, targetPhrase
 																	, transScore
 																	, weightWP);
@@ -323,7 +323,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 	}
 }
 
-void Manager::CreatePossibleTranslations(const Phrase &phrase
+void Manager::CreateTranslationOptions(const Phrase &phrase
 																				 , const PhraseDictionary &phraseDictionary
 																				 , const LMList &lmListInitial)
 {	
@@ -350,7 +350,7 @@ void Manager::CreatePossibleTranslations(const Phrase &phrase
 					float				score				= targetPhrase.GetScore()
 											,weightWP		= m_staticData.GetWeightWordPenalty();
 					const WordsRange wordsRange(startPos, endPos);
-					PossibleTranslation possTrans(wordsRange
+					TranslationOption possTrans(wordsRange
 																		, targetPhrase
 																		, score
 																		, lmListInitial
@@ -395,7 +395,7 @@ void Manager::CreatePossibleTranslations(const Phrase &phrase
 
 				targetPhrase.ResetScore();
 
-				PossibleTranslation possTrans(wordsRange
+				TranslationOption possTrans(wordsRange
 																		, targetPhrase
 																		, 0
 																		, lmListInitial
@@ -420,10 +420,10 @@ void Manager::CreatePossibleTranslations(const Phrase &phrase
 
 			for(size_t currLength = 0 ; currLength < length ; currLength++) 
 			{
-				PossibleTranslationCollection::const_iterator iterPossTrans;
+				TranslationOptionCollection::const_iterator iterPossTrans;
 				for(iterPossTrans = m_possibleTranslations.begin() ; iterPossTrans != m_possibleTranslations.end() ; ++iterPossTrans)
 				{
-					const PossibleTranslation &possTrans = *iterPossTrans;
+					const TranslationOption &possTrans = *iterPossTrans;
 					size_t index = currLength + possTrans.GetSize();
 
 					if (possTrans.GetStartPos() == currLength + start 
