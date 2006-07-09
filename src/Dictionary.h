@@ -36,7 +36,9 @@ public:
 	{
 		return *m_factorsUsed[direction];
 	}
-
+	virtual ~Dictionary()
+	{
+	}
 	virtual DecodeType GetDecodeType() const = 0;
 };
 
