@@ -55,7 +55,7 @@ public:
 		,m_noScoreComponent(noScoreComponent)
 	{
 	}
-	~PhraseDictionary();
+	virtual ~PhraseDictionary();
 
 	DecodeType GetDecodeType() const
 	{
