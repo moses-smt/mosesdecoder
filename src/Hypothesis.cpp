@@ -53,7 +53,7 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 	SetScore(copy.GetScore());
 #ifdef N_BEST
 	m_lmScoreComponent 				= copy.GetLMScoreComponent();
-	m_transScoreComponent			= copy.GetTransScoreComponent();
+	m_transScoreComponent			= copy.GetScoreComponent();
 	m_generationScoreComponent	= copy.GetGenerationScoreComponent();
 		
 #endif
@@ -94,12 +94,12 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const PossibleTranslation &po
 	}
 
 	// translation score
-	const TransScoreComponentCollection &prevComponent= prevHypo.GetTransScoreComponent();
+	const ScoreComponentCollection &prevComponent= prevHypo.GetScoreComponent();
 	m_transScoreComponent = prevComponent;
 	
 	// add components specific to poss trans
-	const TransScoreComponent &possComponent	= possTrans.GetScoreComponents();
-	TransScoreComponent &transComponent				= m_transScoreComponent.GetTransScoreComponent(possComponent.GetPhraseDictionary());
+	const ScoreComponent &possComponent	= possTrans.GetScoreComponents();
+	ScoreComponent &transComponent				= m_transScoreComponent.GetScoreComponent(possComponent.GetPhraseDictionary());
 	const size_t noScoreComponent 						= possComponent.GetNoScoreComponent();
 	
 	for (size_t i = 0 ; i < noScoreComponent ; i++)
@@ -151,7 +151,7 @@ Hypothesis *Hypothesis::MergeNext(const PossibleTranslation &possTrans) const
 	}
 
 #ifdef N_BEST
-	const TransScoreComponent &possTransComponent = possTrans.GetScoreComponents();
+	const ScoreComponent &possTransComponent = possTrans.GetScoreComponents();
 	clone->m_transScoreComponent.Add(possTransComponent);
 #endif
 
@@ -439,7 +439,7 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 	}
 	out << "]";
 #ifdef N_BEST
-	out << " " << hypothesis.GetTransScoreComponent();
+	out << " " << hypothesis.GetScoreComponent();
 	out << " " << hypothesis.GetGenerationScoreComponent();
 #endif
 	return out;

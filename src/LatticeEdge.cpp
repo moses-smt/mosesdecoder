@@ -53,7 +53,7 @@ void LatticeEdge::ResizeComponentScore(const LMList &allLM, const list < DecodeS
 		{
 		case Translate:
 		{
-			TransScoreComponent &transScoreComponent = m_transScoreComponent.Add(&step.GetPhraseDictionary());
+			ScoreComponent &transScoreComponent = m_transScoreComponent.Add(&step.GetPhraseDictionary());
 			transScoreComponent.Reset();
 			break;
 		}

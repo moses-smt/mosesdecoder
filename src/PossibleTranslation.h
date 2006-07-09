@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "Util.h"
 #include "TypeDef.h"
-#include "TransScoreComponent.h"
+#include "ScoreComponent.h"
 
 class PossibleTranslation
 {
@@ -37,7 +37,7 @@ protected:
 	WordsRange		m_wordsRange;
 	float					m_transScore, m_futureScore, m_ngramScore;
 #ifdef N_BEST
-	TransScoreComponent	m_transScoreComponent;
+	ScoreComponent	m_transScoreComponent;
 	std::list< std::pair<size_t, float> >	m_lmScoreComponent;
 	std::list< std::pair<size_t, float> >	m_trigramComponent;
 #endif
@@ -89,7 +89,7 @@ public:
 	}
 
 #ifdef N_BEST
-	inline const TransScoreComponent &GetScoreComponents() const
+	inline const ScoreComponent &GetScoreComponents() const
 	{
 		return m_transScoreComponent;
 	}
