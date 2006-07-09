@@ -48,21 +48,24 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	contextFactor.reserve(m_nGramOrder);
 		
 	// start of sentence
-	for (size_t currPos = 0 ; currPos < m_nGramOrder && currPos < phraseSize ; currPos++)
+	for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
 	{
 		contextFactor.push_back(phrase.GetFactor(currPos, factorType));		
 		fullScore = GetValue(contextFactor);
 	}
 
 	// main loop
-	for (size_t currPos = m_nGramOrder ; currPos < phraseSize ; currPos++)
+	for (size_t currPos = m_nGramOrder - 1; currPos < phraseSize ; currPos++)
 	{ // used by hypo to speed up lm score calc
+		//		?? trigram only !!!
+	
 		contextFactor[0] = phrase.GetFactor(currPos-2, factorType);
 		contextFactor[1] = phrase.GetFactor(currPos-1, factorType);
 		contextFactor[2] = phrase.GetFactor(currPos, factorType);
 		ngramScore += GetValue(contextFactor);
 	}
 	fullScore += ngramScore;
+	
 #ifdef N_BEST
 				size_t lmId = GetId();
 				pair<size_t, float> store(lmId, ngramScore);
