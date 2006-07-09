@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include "Phrase.h"
-#include "TransScoreComponent.h"
+#include "ScoreComponent.h"
 
 class PhraseDictionary;
 
@@ -32,7 +32,7 @@ class TargetPhrase: public Phrase
 protected:
 	float m_score;
 #ifdef N_BEST
-	TransScoreComponent m_scoreComponent;
+	ScoreComponent m_scoreComponent;
 #endif
 
 public:
@@ -52,7 +52,7 @@ public:
 	void SetWeight(const std::vector<float> &weightT);
 
 #ifdef N_BEST
-	inline const TransScoreComponent &GetScoreComponents() const
+	inline const ScoreComponent &GetScoreComponents() const
 	{
 		return m_scoreComponent;
 	}

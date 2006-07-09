@@ -35,7 +35,7 @@ LatticePath::LatticePath(const Hypothesis *hypo)
 	}
 #ifdef N_BEST
 	m_lmScoreComponent 				= hypo->GetLMScoreComponent();
-	m_transScoreComponent			= hypo->GetTransScoreComponent();
+	m_transScoreComponent			= hypo->GetScoreComponent();
 	m_generationScoreComponent	= hypo->GetGenerationScoreComponent();
 #endif
 
@@ -104,23 +104,23 @@ void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc
 	}
 
 	// phrase trans
-	m_transScoreComponent = copy.GetTransScoreComponent();
+	m_transScoreComponent = copy.GetScoreComponent();
 
-	const TransScoreComponentCollection
-							&arcComponent		= arc->GetTransScoreComponent()
-							,&copyComponent	= copy.m_path[edgeIndex]->GetTransScoreComponent()
-							,&totalComponent= copy.GetTransScoreComponent();
+	const ScoreComponentCollection
+							&arcComponent		= arc->GetScoreComponent()
+							,&copyComponent	= copy.m_path[edgeIndex]->GetScoreComponent()
+							,&totalComponent= copy.GetScoreComponent();
 	
-	TransScoreComponentCollection::iterator iterTrans;
+	ScoreComponentCollection::iterator iterTrans;
 	for (iterTrans = m_transScoreComponent.begin() ; iterTrans != m_transScoreComponent.end() ; ++iterTrans)
 	{
 		const PhraseDictionary *phraseDictionary	= iterTrans->first;
-		TransScoreComponent &transScore						= *iterTrans->second;
+		ScoreComponent &transScore						= *iterTrans->second;
 		const size_t noScoreComponent 						= phraseDictionary->GetNoScoreComponent();
 			
-		const TransScoreComponent &arcScore		= arcComponent.GetTransScoreComponent(phraseDictionary)
-														,&copyScore	= copyComponent.GetTransScoreComponent(phraseDictionary)
-														,&totalScore	= totalComponent.GetTransScoreComponent(phraseDictionary);
+		const ScoreComponent &arcScore		= arcComponent.GetScoreComponent(phraseDictionary)
+														,&copyScore	= copyComponent.GetScoreComponent(phraseDictionary)
+														,&totalScore	= totalComponent.GetScoreComponent(phraseDictionary);
 		for (size_t i = 0 ; i < noScoreComponent ; i++)
 		{
 			float adj = arcScore[i] - copyScore[i];

@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModel.h"
 #include "Arc.h"
 #include "LatticeEdge.h"
-#include "TransScoreComponentCollection.h"
+#include "ScoreComponentCollection.h"
 
 class SquareMatrix;
 class PossibleTranslation;
@@ -150,7 +150,7 @@ public:
 	inline void AddArc(Hypothesis &loserHypo)
 	{
 		Arc *arc = new Arc(loserHypo.m_score
-											, loserHypo.GetTransScoreComponent()
+											, loserHypo.GetScoreComponent()
 											, loserHypo.GetLMScoreComponent()
 											, loserHypo.GetGenerationScoreComponent()
 											, loserHypo.GetPhrase()
