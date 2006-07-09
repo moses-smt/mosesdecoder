@@ -25,8 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <list>
 #include "TypeDef.h"
 #include "Phrase.h"
-#include "TransScoreComponent.h"
-#include "TransScoreComponentCollection.h"
+#include "ScoreComponent.h"
+#include "ScoreComponentCollection.h"
 #include "ScoreColl.h"
 #include "DecodeStep.h"
 
@@ -44,7 +44,7 @@ protected:
 	Phrase					m_phrase;
 
 #ifdef N_BEST
-	TransScoreComponentCollection	m_transScoreComponent;
+	ScoreComponentCollection	m_transScoreComponent;
 	ScoreColl						m_generationScoreComponent
 											,m_lmScoreComponent;
 #endif
@@ -52,7 +52,7 @@ protected:
 public:
 	LatticeEdge(const LatticeEdge &edge); // not implemented
 	LatticeEdge(const float 												score[NUM_SCORES]
-						, const TransScoreComponentCollection 	&transScoreComponent
+						, const ScoreComponentCollection 	&transScoreComponent
 						, const ScoreColl					 						&lmScoreComponent
 						, const ScoreColl											&generationScoreComponent
 						, const Phrase 												&phrase
@@ -109,7 +109,7 @@ public:
 #ifdef N_BEST
 	virtual const std::list<Arc*> &GetArcList() const = 0;
 
-	inline const TransScoreComponentCollection &GetTransScoreComponent() const
+	inline const ScoreComponentCollection &GetScoreComponent() const
 	{
 		return m_transScoreComponent;
 	}

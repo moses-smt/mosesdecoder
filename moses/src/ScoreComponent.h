@@ -25,17 +25,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class PhraseDictionary;
 
-class TransScoreComponent
+class ScoreComponent
 {
 protected:
 	const PhraseDictionary *m_phraseDictionary;
 	float	*m_scoreComponent;
 
-	TransScoreComponent(); // not implemented
+	ScoreComponent(); // not implemented
 public:
-	TransScoreComponent(const PhraseDictionary *phraseDictionary);
-	TransScoreComponent(const TransScoreComponent &copy);
-	~TransScoreComponent();
+	ScoreComponent(const PhraseDictionary *phraseDictionary);
+	ScoreComponent(const ScoreComponent &copy);
+	~ScoreComponent();
 	void Reset();
 
 	const PhraseDictionary *GetPhraseDictionary() const
@@ -54,4 +54,4 @@ public:
 	}
 };
 
-std::ostream& operator<<(std::ostream &out, const TransScoreComponent &transScoreComponent);
+std::ostream& operator<<(std::ostream &out, const ScoreComponent &transScoreComponent);

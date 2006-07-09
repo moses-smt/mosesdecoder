@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LatticeEdge.h"
 #include "Hypothesis.h"
 #include "TypeDef.h"
-#include "TransScoreComponent.h"
+#include "ScoreComponent.h"
 #include "ScoreColl.h"
 
 class Arc;
@@ -42,7 +42,7 @@ protected:
 	size_t		m_prevEdgeChanged;
 	float			m_score[NUM_SCORES];
 
-	TransScoreComponentCollection	m_transScoreComponent;
+	ScoreComponentCollection	m_transScoreComponent;
 	ScoreColl											m_generationScoreComponent
 																, m_lmScoreComponent;
  
@@ -86,7 +86,7 @@ public:
 	{
 		return m_lmScoreComponent.GetValue(index);
 	}
-	inline const TransScoreComponentCollection &GetTransScoreComponent() const
+	inline const ScoreComponentCollection &GetScoreComponent() const
 	{
 		return m_transScoreComponent;
 	}
@@ -116,7 +116,7 @@ inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
 	}
 	out << "]";
 #ifdef N_BEST
-	out << " " << path.GetTransScoreComponent();
+	out << " " << path.GetScoreComponent();
 	out << " " << path.GetGenerationScoreComponent();
 #endif
 

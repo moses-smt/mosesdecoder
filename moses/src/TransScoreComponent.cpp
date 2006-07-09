@@ -21,16 +21,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "TypeDef.h"
 #include "Util.h"
-#include "TransScoreComponent.h"
+#include "ScoreComponent.h"
 #include "PhraseDictionary.h"
 
-TransScoreComponent::TransScoreComponent(const PhraseDictionary *phraseDictionary)
+ScoreComponent::ScoreComponent(const PhraseDictionary *phraseDictionary)
 :	m_phraseDictionary(phraseDictionary)
 {
 	m_scoreComponent = (float*) malloc(sizeof(float) * phraseDictionary->GetNoScoreComponent());
 }
 
-TransScoreComponent::TransScoreComponent(const TransScoreComponent &copy)
+ScoreComponent::ScoreComponent(const ScoreComponent &copy)
 	:m_phraseDictionary(copy.m_phraseDictionary)
 {
 	const size_t noScoreComponent = m_phraseDictionary->GetNoScoreComponent();
@@ -42,12 +42,12 @@ TransScoreComponent::TransScoreComponent(const TransScoreComponent &copy)
 	}
 }
 
-TransScoreComponent::~TransScoreComponent()
+ScoreComponent::~ScoreComponent()
 {
 	free(m_scoreComponent);
 }
 
-void TransScoreComponent::Reset()
+void ScoreComponent::Reset()
 {
 	const size_t noScoreComponent = m_phraseDictionary->GetNoScoreComponent();
 	for (size_t i = 0 ; i < noScoreComponent ; i++)
@@ -56,12 +56,12 @@ void TransScoreComponent::Reset()
 	}
 }
 
-size_t TransScoreComponent::GetNoScoreComponent() const
+size_t ScoreComponent::GetNoScoreComponent() const
 {
 	return m_phraseDictionary->GetNoScoreComponent();
 }
 
-std::ostream& operator<<(std::ostream &out, const TransScoreComponent &transScoreComponent)
+std::ostream& operator<<(std::ostream &out, const ScoreComponent &transScoreComponent)
 {
 	const size_t noScoreComponent = transScoreComponent.GetNoScoreComponent();
 	out << transScoreComponent[0];
