@@ -30,21 +30,36 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class ScoreComponentCollection : public std::map<const PhraseDictionary *, ScoreComponent*>
 {
 public:
+	ScoreComponentCollection()
+	{
+	}
+	ScoreComponentCollection(const ScoreComponentCollection &copy)
+	{
+		ScoreComponentCollection::const_iterator iter;
+		for (iter = copy.begin() ; iter != copy.end() ; ++iter)
+		{
+			const ScoreComponent *origScoreComponent = iter->second;
+			Add(*origScoreComponent);
+		}
+	}
+
+	~ScoreComponentCollection()
+	{ // ??? memory leak but double free
+		TRACE_ERR(this << std::endl);
+		ScoreComponentCollection::iterator iter;
+		for (iter = begin() ; iter != end() ; ++iter)
+		{
+			TRACE_ERR(iter->second << std::endl);
+			TRACE_ERR(*iter->second << std::endl);			
+			delete iter->second;
+		}				
+	}
+	
 	ScoreComponent &GetScoreComponent(const PhraseDictionary *phraseDictionary)
 	{
 		ScoreComponentCollection::iterator iter = find(phraseDictionary);
 		assert(iter != end());
 		return *iter->second;
-	}
-
-	~ScoreComponentCollection()
-	{ // ??? memory leak but double free
-/*		ScoreComponentCollection::iterator iter;
-		for (iter = begin() ; iter != end() ; ++iter)
-		{
-			delete iter->second;
-		}		
-*/		
 	}
 	
 	const ScoreComponent &GetScoreComponent(const PhraseDictionary *phraseDictionary) const
@@ -69,7 +84,17 @@ public:
 	}
 	ScoreComponent &Add(const PhraseDictionary *phraseDictionary)
 	{
-		return Add(ScoreComponent(phraseDictionary));
+		ScoreComponentCollection::iterator iter = find(phraseDictionary);
+		if (iter != end())
+		{ // already have scores for this phrase table. delete it 1st
+			delete iter->second;
+			erase(iter);
+		}
+		// add new into same place
+		ScoreComponent *newScoreComponent = new ScoreComponent(phraseDictionary);
+		operator[](phraseDictionary) = newScoreComponent;
+		
+		return *newScoreComponent;
 	}
 };
 
