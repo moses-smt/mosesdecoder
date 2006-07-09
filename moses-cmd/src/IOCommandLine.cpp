@@ -97,6 +97,12 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long translationId)
 	{
 		TRACE_ERR("BEST HYPO: " << *hypo << endl);
 		OutputSurface(cout, hypo);
+		
+		while (hypo != NULL)
+		{
+			TRACE_ERR(*hypo << endl);
+			hypo = hypo->GetPrevHypo();
+		}
 	}
 	else
 		TRACE_ERR("NO BEST HYPO" << endl);

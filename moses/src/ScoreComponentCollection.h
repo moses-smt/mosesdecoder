@@ -45,7 +45,7 @@ public:
 
 	~ScoreComponentCollection()
 	{ // ??? memory leak but double free
-		TRACE_ERR(this << std::endl);
+/*		TRACE_ERR(this << std::endl);
 		ScoreComponentCollection::iterator iter;
 		for (iter = begin() ; iter != end() ; ++iter)
 		{
@@ -53,7 +53,7 @@ public:
 			TRACE_ERR(*iter->second << std::endl);			
 			delete iter->second;
 		}				
-	}
+*/	}
 	
 	ScoreComponent &GetScoreComponent(const PhraseDictionary *phraseDictionary)
 	{

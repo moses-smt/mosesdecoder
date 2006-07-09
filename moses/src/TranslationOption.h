@@ -28,9 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "ScoreComponent.h"
 
-class PossibleTranslation
+class TranslationOption
 {
-		friend std::ostream& operator<<(std::ostream& out, const PossibleTranslation& possibleTranslation);
+		friend std::ostream& operator<<(std::ostream& out, const TranslationOption& possibleTranslation);
 
 protected:
 	const Phrase 	&m_targetPhrase;
@@ -44,11 +44,11 @@ protected:
 
 	void CalcFutureScore(const LMList &lmList, float weightWP);
 public:
-	PossibleTranslation(const WordsRange &wordsRange
+	TranslationOption(const WordsRange &wordsRange
 										, const TargetPhrase &targetPhrase
 										, float transScore
 										, float weightWP);
-	PossibleTranslation(const WordsRange &wordsRange
+	TranslationOption(const WordsRange &wordsRange
 										, const TargetPhrase &targetPhrase
 										, float transScore
 										, const LMList &lmList
