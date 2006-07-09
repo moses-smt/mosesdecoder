@@ -26,14 +26,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
 
+class Dictionary;
 class  DecodeStep 
 {
 protected:
 	const DecodeType m_decodeType;
-	const void *m_ptr;
+	const Dictionary *m_ptr;
 		// 2nd = pointer to a phraseDictionary or generationDictionary
 public:
-	DecodeStep(DecodeType decodeType, void *ptr)
+	DecodeStep(DecodeType decodeType, Dictionary *ptr)
 	:m_decodeType(decodeType)
 	,m_ptr(ptr)
 	{
