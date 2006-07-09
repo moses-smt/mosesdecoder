@@ -34,8 +34,11 @@ class Hypothesis;
 class Arc;
 class GenerationDictionary;
 
+
 class LatticeEdge
 {
+	friend std::ostream& operator<<(std::ostream& out, const LatticeEdge& edge);
+	
 protected:
 	// scores
 	float						m_score[NUM_SCORES];
@@ -50,7 +53,7 @@ protected:
 #endif
 
 public:
-	LatticeEdge(const LatticeEdge &edge); // not implemented
+	LatticeEdge(const LatticeEdge &copy); // not implemented
 	LatticeEdge(const float 												score[NUM_SCORES]
 						, const ScoreComponentCollection 	&transScoreComponent
 						, const ScoreColl					 						&lmScoreComponent
@@ -59,13 +62,13 @@ public:
 						, const Hypothesis 										*prevHypo)
 		:m_prevHypo(prevHypo)
 		,m_phrase(phrase)
+#ifdef N_BEST
+		,m_transScoreComponent(transScoreComponent)
+		,m_generationScoreComponent(generationScoreComponent)
+		,m_lmScoreComponent		(lmScoreComponent)
+#endif
 	{
 		SetScore(score);
-#ifdef N_BEST
-		m_transScoreComponent			= transScoreComponent;
-		m_lmScoreComponent					= lmScoreComponent;
-		m_generationScoreComponent	= generationScoreComponent;
-#endif
 	}
 	LatticeEdge(FactorDirection direction, const Hypothesis *prevHypo)
 		:m_prevHypo(prevHypo)
@@ -73,6 +76,7 @@ public:
 	{}
 	virtual ~LatticeEdge()
 	{
+		TRACE_ERR(*this << std::endl);
 	}
 
 	inline const Phrase &GetPhrase() const
