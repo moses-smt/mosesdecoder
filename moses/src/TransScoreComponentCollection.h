@@ -36,6 +36,16 @@ public:
 		assert(iter != end());
 		return *iter->second;
 	}
+
+	~TransScoreComponentCollection()
+	{ // ??? memory leak but double free
+/*		TransScoreComponentCollection::iterator iter;
+		for (iter = begin() ; iter != end() ; ++iter)
+		{
+			delete iter->second;
+		}		
+*/		
+	}
 	
 	const TransScoreComponent &GetTransScoreComponent(const PhraseDictionary *phraseDictionary) const
 	{
