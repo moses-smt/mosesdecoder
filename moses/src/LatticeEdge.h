@@ -76,7 +76,6 @@ public:
 	{}
 	virtual ~LatticeEdge()
 	{
-		TRACE_ERR(*this << std::endl);
 	}
 
 	inline const Phrase &GetPhrase() const
