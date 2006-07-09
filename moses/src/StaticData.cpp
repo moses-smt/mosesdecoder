@@ -355,7 +355,7 @@ void StaticData::LoadMapping()
 			DecodeType decodeType = token[0] == "T" ? Translate : Generate;
 			size_t index = Scan<size_t>(token[1]);
 			DecodeStep decodeStep (decodeType
-														,decodeType == Translate ? (void*) m_phraseDictionary[index] : (void*) m_generationDictionary[index]);
+														,decodeType == Translate ? (Dictionary*) m_phraseDictionary[index] : (Dictionary*) m_generationDictionary[index]);
 			m_decodeStepList.push_back(decodeStep);
 		}
 	}
