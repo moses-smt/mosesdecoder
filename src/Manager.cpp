@@ -194,14 +194,14 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
 	int maxDistortion = m_staticData.GetMaxDistortion();
 	if (maxDistortion < 0)
 	{	// no limit on distortion
-		TranslationOptionCollection::const_iterator iterPossTrans;
-		for (iterPossTrans = m_possibleTranslations.begin(); iterPossTrans != m_possibleTranslations.end(); ++iterPossTrans)
+		TranslationOptionCollection::const_iterator iterTransOpt;
+		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
 		{
-			const TranslationOption &possTrans = *iterPossTrans;
+			const TranslationOption &transOpt = *iterTransOpt;
 
-			if ( !possTrans.Overlap(hypothesis)) 
+			if ( !transOpt.Overlap(hypothesis)) 
 			{
-				Hypothesis *newHypo = hypothesis.CreateNext(possTrans);
+				Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
 				outputHypoColl.AddNoPrune( newHypo );			
 			}
 		}
@@ -213,42 +213,42 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
 			,hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();
 
 		// MAIN LOOP. go through each possible hypo
-		TranslationOptionCollection::const_iterator iterPossTrans;
-		for (iterPossTrans = m_possibleTranslations.begin(); iterPossTrans != m_possibleTranslations.end(); ++iterPossTrans)
+		TranslationOptionCollection::const_iterator iterTransOpt;
+		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
 		{
-			const TranslationOption &possTrans = *iterPossTrans;
+			const TranslationOption &transOpt = *iterTransOpt;
 			// calc distortion if using this poss trans
 
-			size_t possTransStartPos = possTrans.GetStartPos();
+			size_t transOptStartPos = transOpt.GetStartPos();
 
 			if (hypoFirstGapPos == hypoWordCount)
 			{
-				if (possTransStartPos == hypoWordCount
-					|| (possTransStartPos > hypoWordCount 
-					&& possTrans.GetEndPos() <= hypoWordCount + m_staticData.GetMaxDistortion())
+				if (transOptStartPos == hypoWordCount
+					|| (transOptStartPos > hypoWordCount 
+					&& transOpt.GetEndPos() <= hypoWordCount + m_staticData.GetMaxDistortion())
 					)
 				{
-					Hypothesis *newHypo = hypothesis.CreateNext(possTrans);
+					Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
 					outputHypoColl.AddNoPrune( newHypo );			
 				}
 			}
 			else
 			{
-				if (possTransStartPos < hypoWordCount)
+				if (transOptStartPos < hypoWordCount)
 				{
-					if (possTransStartPos >= hypoFirstGapPos
-						&& !possTrans.Overlap(hypothesis))
+					if (transOptStartPos >= hypoFirstGapPos
+						&& !transOpt.Overlap(hypothesis))
 					{
-						Hypothesis *newHypo = hypothesis.CreateNext(possTrans);
+						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
 						outputHypoColl.AddNoPrune( newHypo );			
 					}
 				}
 				else
 				{
-					if (possTrans.GetEndPos() <= hypoFirstGapPos + m_staticData.GetMaxDistortion()
-						&& !possTrans.Overlap(hypothesis))
+					if (transOpt.GetEndPos() <= hypoFirstGapPos + m_staticData.GetMaxDistortion()
+						&& !transOpt.Overlap(hypothesis))
 					{
-						Hypothesis *newHypo = hypothesis.CreateNext(possTrans);
+						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
 						outputHypoColl.AddNoPrune( newHypo );			
 					}
 				}
@@ -277,12 +277,12 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 			
 			float			transScore		= targetPhrase.GetScore()
 								,weightWP		= m_staticData.GetWeightWordPenalty();
-			TranslationOption possTrans(sourceWordsRange
+			TranslationOption transOpt(sourceWordsRange
 																	, targetPhrase
 																	, transScore
 																	, weightWP);
 			
-			Hypothesis *newHypo = hypothesis.MergeNext(possTrans);
+			Hypothesis *newHypo = hypothesis.MergeNext(transOpt);
 			if (newHypo != NULL)
 			{
 				outputHypoColl.AddNoPrune( newHypo );
@@ -350,12 +350,12 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 					float				score				= targetPhrase.GetScore()
 											,weightWP		= m_staticData.GetWeightWordPenalty();
 					const WordsRange wordsRange(startPos, endPos);
-					TranslationOption possTrans(wordsRange
+					TranslationOption transOpt(wordsRange
 																		, targetPhrase
 																		, score
 																		, lmListInitial
 																		, weightWP);
-					m_possibleTranslations.push_back(possTrans);
+					m_possibleTranslations.push_back(transOpt);
 				}
 			}
 			else if (sourcePhrase.GetSize() == 1)
@@ -395,12 +395,12 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 
 				targetPhrase.ResetScore();
 
-				TranslationOption possTrans(wordsRange
+				TranslationOption transOpt(wordsRange
 																		, targetPhrase
 																		, 0
 																		, lmListInitial
 																		, weightWP);
-				m_possibleTranslations.push_back(possTrans);
+				m_possibleTranslations.push_back(transOpt);
 			}
 		}
 	}
@@ -420,17 +420,17 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 
 			for(size_t currLength = 0 ; currLength < length ; currLength++) 
 			{
-				TranslationOptionCollection::const_iterator iterPossTrans;
-				for(iterPossTrans = m_possibleTranslations.begin() ; iterPossTrans != m_possibleTranslations.end() ; ++iterPossTrans)
+				TranslationOptionCollection::const_iterator iterTransOpt;
+				for(iterTransOpt = m_possibleTranslations.begin() ; iterTransOpt != m_possibleTranslations.end() ; ++iterTransOpt)
 				{
-					const TranslationOption &possTrans = *iterPossTrans;
-					size_t index = currLength + possTrans.GetSize();
+					const TranslationOption &transOpt = *iterTransOpt;
+					size_t index = currLength + transOpt.GetSize();
 
-					if (possTrans.GetStartPos() == currLength + start 
-						&& possTrans.GetEndPos() <= end 
-						&& possTrans.GetFutureScore() + score[currLength] > score[index]) 
+					if (transOpt.GetStartPos() == currLength + start 
+						&& transOpt.GetEndPos() <= end 
+						&& transOpt.GetFutureScore() + score[currLength] > score[index]) 
 					{
-						score[index] = possTrans.GetFutureScore() + score[currLength];
+						score[index] = transOpt.GetFutureScore() + score[currLength];
 					}
 				}
 			}
