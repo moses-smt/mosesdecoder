@@ -66,6 +66,7 @@ class HypothesisCollection : public std::set< Hypothesis*, CompareHypothesisColl
 
 protected:
 	float m_bestScore, m_beamThreshold;
+	size_t m_maxHypoStackSize;
 
 //	std::list<Arc> m_arc;
 	void Add(Hypothesis *hypothesis);
@@ -97,6 +98,10 @@ public:
 	inline ~HypothesisCollection()
 	{
 		RemoveAll();
+	}
+	inline void SetMaxHypoStackSize(size_t maxHypoStackSize)
+	{
+		m_maxHypoStackSize = maxHypoStackSize;
 	}
 	inline void SetBeamThreshold(float beamThreshold)
 	{

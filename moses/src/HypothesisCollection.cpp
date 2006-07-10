@@ -46,9 +46,9 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 		m_bestScore = hypo->GetScore(ScoreType::Total);
 	}
 
-	if (size() > MAXIMUM_HYPO_COLL_SIZE)
+	if (size() > m_maxHypoStackSize)
 	{
-		PruneToSize(MAXIMUM_HYPO_COLL_SIZE/2);
+		PruneToSize(m_maxHypoStackSize / 2);
 	}
 }
 
@@ -86,29 +86,6 @@ bool HypothesisCollection::Add(Hypothesis *hypo, float beamThreshold)
 		return false;
 	}
 }
-
-//
-//void HypothesisCollection::Prune()
-//{
-//	if (size() > MAXIMUM_HYPO_COLL_SIZE / 2)
-//	{
-//		float minScore = m_bestScore + m_beamThreshold;
-//		HypothesisCollection::iterator iter = begin();
-//		while (iter != end())
-//		{
-//			Hypothesis *hypo = *iter;
-//			if (hypo->GetScore(ScoreType::Total) < minScore)
-//			{
-//				HypothesisCollection::iterator iterRemove = iter++;
-//				Remove(iterRemove);
-//			}
-//			else
-//			{
-//				iter++;
-//			}
-//		}
-//	}
-//}
 
 void HypothesisCollection::PruneToSize(size_t newSize)
 {

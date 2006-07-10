@@ -31,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
 
-const size_t MAXIMUM_HYPO_COLL_SIZE		= 200;
 const size_t ARRAY_SIZE_INCR					= 20;
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_THRESHOLD		= 0.00001f;
