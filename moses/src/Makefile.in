@@ -65,9 +65,9 @@ am__libmoses_a_SOURCES_DIST = Arc.cpp FactorCollection.cpp Factor.cpp \
 	Hypothesis.cpp InputFileStream.cpp LanguageModel.cpp \
 	LatticeEdge.cpp LatticePath.cpp Manager.cpp md5.cpp \
 	Parameter.cpp Phrase.cpp PhraseDictionary.cpp \
-	PossibleTranslation.cpp Sentence.cpp StaticData.cpp \
+	TranslationOption.cpp Sentence.cpp StaticData.cpp \
 	TargetPhrase.cpp Util.cpp WeightOptimization.cpp Word.cpp \
-	WordsBitmap.cpp NGramCollection.cpp
+	WordsBitmap.cpp UserMessage.cpp NGramCollection.cpp
 @INTERNAL_LM_TRUE@am__objects_1 = NGramCollection.$(OBJEXT)
 am_libmoses_a_OBJECTS = Arc.$(OBJEXT) FactorCollection.$(OBJEXT) \
 	Factor.$(OBJEXT) FactorTypeSet.$(OBJEXT) \
@@ -77,10 +77,10 @@ am_libmoses_a_OBJECTS = Arc.$(OBJEXT) FactorCollection.$(OBJEXT) \
 	LanguageModel.$(OBJEXT) LatticeEdge.$(OBJEXT) \
 	LatticePath.$(OBJEXT) Manager.$(OBJEXT) md5.$(OBJEXT) \
 	Parameter.$(OBJEXT) Phrase.$(OBJEXT) \
-	PhraseDictionary.$(OBJEXT) PossibleTranslation.$(OBJEXT) \
+	PhraseDictionary.$(OBJEXT) TranslationOption.$(OBJEXT) \
 	Sentence.$(OBJEXT) StaticData.$(OBJEXT) TargetPhrase.$(OBJEXT) \
 	Util.$(OBJEXT) WeightOptimization.$(OBJEXT) Word.$(OBJEXT) \
-	WordsBitmap.$(OBJEXT) $(am__objects_1)
+	WordsBitmap.$(OBJEXT) UserMessage.$(OBJEXT) $(am__objects_1)
 libmoses_a_OBJECTS = $(am_libmoses_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -179,9 +179,9 @@ libmoses_a_SOURCES = Arc.cpp FactorCollection.cpp Factor.cpp \
 	Hypothesis.cpp InputFileStream.cpp LanguageModel.cpp \
 	LatticeEdge.cpp LatticePath.cpp Manager.cpp md5.cpp \
 	Parameter.cpp Phrase.cpp PhraseDictionary.cpp \
-	PossibleTranslation.cpp Sentence.cpp StaticData.cpp \
+	TranslationOption.cpp Sentence.cpp StaticData.cpp \
 	TargetPhrase.cpp Util.cpp WeightOptimization.cpp Word.cpp \
-	WordsBitmap.cpp $(am__append_1)
+	WordsBitmap.cpp UserMessage.cpp $(am__append_1)
 all: all-am
 
 .SUFFIXES:
@@ -195,9 +195,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  src/Makefile
+	  $(AUTOMAKE) --foreign  src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -272,10 +272,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Parameter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Phrase.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PhraseDictionary.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PossibleTranslation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Sentence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StaticData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TargetPhrase.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TranslationOption.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UserMessage.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WeightOptimization.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Word.Po@am__quote@
