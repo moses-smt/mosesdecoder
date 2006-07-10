@@ -41,9 +41,9 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 {
 	AddNoPrune(hypo);
 
-	if (hypo->GetScore(Total) > m_bestScore)
+	if (hypo->GetScore(ScoreType::Total) > m_bestScore)
 	{
-		m_bestScore = hypo->GetScore(Total);
+		m_bestScore = hypo->GetScore(ScoreType::Total);
 	}
 
 	if (size() > MAXIMUM_HYPO_COLL_SIZE)
@@ -54,7 +54,7 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 
 bool HypothesisCollection::Add(Hypothesis *hypo, float beamThreshold)
 {
-	if (hypo->GetScore(Total) < m_bestScore + beamThreshold)
+	if (hypo->GetScore(ScoreType::Total) < m_bestScore + beamThreshold)
 		return false;
 
 	// over threshold		
@@ -69,7 +69,7 @@ bool HypothesisCollection::Add(Hypothesis *hypo, float beamThreshold)
 	// found existing hypo with same target ending.
 	// keep the best 1
 	Hypothesis *hypoExisting = *iter;
-	if (hypo->GetScore(Total) > hypoExisting->GetScore(Total))
+	if (hypo->GetScore(ScoreType::Total) > hypoExisting->GetScore(ScoreType::Total))
 	{
 #ifdef N_BEST
 		hypo->AddArc(**iter);
@@ -97,7 +97,7 @@ bool HypothesisCollection::Add(Hypothesis *hypo, float beamThreshold)
 //		while (iter != end())
 //		{
 //			Hypothesis *hypo = *iter;
-//			if (hypo->GetScore(Total) < minScore)
+//			if (hypo->GetScore(ScoreType::Total) < minScore)
 //			{
 //				HypothesisCollection::iterator iterRemove = iter++;
 //				Remove(iterRemove);
@@ -121,7 +121,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 		for (size_t i = 0 ; i < newSize ; i++)
 		{
 			Hypothesis *hypo = *iter;
-			bestScores.insert(hypo->GetScore(Total));
+			bestScores.insert(hypo->GetScore(ScoreType::Total));
 			++iter;
 		}
 		// only add score if better than score threshold
@@ -129,7 +129,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 		while (iter != end())
 		{
 			Hypothesis *hypo = *iter;
-			float score = hypo->GetScore(Total);
+			float score = hypo->GetScore(ScoreType::Total);
 			if (score > scoreThreshold)
 			{
 				bestScores.insert(score);
@@ -143,7 +143,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 		while (iter != end())
 		{
 			Hypothesis *hypo = *iter;
-			float score = hypo->GetScore(Total);
+			float score = hypo->GetScore(ScoreType::Total);
 			if (score < scoreThreshold)
 			{
 				iterator iterRemove = iter++;
@@ -166,7 +166,7 @@ const Hypothesis *HypothesisCollection::GetBestHypothesis() const
 		while (++iter != end())
 		{
 			Hypothesis *hypo = *iter;
-			if (hypo->GetScore(Total) > bestHypo->GetScore(Total))
+			if (hypo->GetScore(ScoreType::Total) > bestHypo->GetScore(ScoreType::Total))
 				bestHypo = hypo;
 		}
 		return bestHypo;
@@ -179,7 +179,7 @@ struct HypothesisSortDescending
 {
 	bool operator()(const Hypothesis*& hypo1, const Hypothesis*& hypo2)
 	{
-		return hypo1->GetScore(Total) > hypo2->GetScore(Total);
+		return hypo1->GetScore(ScoreType::Total) > hypo2->GetScore(ScoreType::Total);
 	}
 };
 

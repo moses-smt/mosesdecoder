@@ -91,16 +91,19 @@ enum DecodeType
 	,Generate
 };
 
-enum ScoreType
-{
-	PhraseTrans
-	,Generation
-	,LanguageModelScore
-	,Distortion
-	,WordPenalty
-	,FutureScoreEnum
-	,Total
+namespace ScoreType {
+	enum ScoreType
+	{
+		PhraseTrans
+		,Generation
+		,LanguageModelScore
+		,Distortion
+		,WordPenalty
+		,FutureScoreEnum
+		,Total
+	};
 };
+
 // count of above
 const size_t NUM_SCORES = 7;
 

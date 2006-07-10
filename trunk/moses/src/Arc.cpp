@@ -45,10 +45,10 @@ std::ostream& operator<<(std::ostream& out, const Arc& arc)
 	out << arc.GetPhrase();
 
 	// score
-	out << " [" << arc.GetScore( static_cast<ScoreType>(0));
+	out << " [" << arc.GetScore( static_cast<ScoreType::ScoreType>(0));
 	for (size_t i = 1 ; i < NUM_SCORES ; i++)
 	{
-		out << "," << arc.GetScore( static_cast<ScoreType>(i));
+		out << "," << arc.GetScore( static_cast<ScoreType::ScoreType>(i));
 	}
 	out << "]";
 
