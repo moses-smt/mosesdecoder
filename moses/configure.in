@@ -20,31 +20,14 @@ AC_ARG_WITH(boost,
             [with_boost=no]
            )
 
-AC_ARG_ENABLE(mysql, AC_HELP_STRING([--enable-mysql], [(optional) build in MySQL support])],
-            [mysql_flag=yes], [mysql_flag=no])
 if test "x$with_boost" != 'xno'
 then
   CPPFLAGS="$CPPFLAGS -I${with_boost}"
+  LDFLAGS="$LDFLAGS -L${with_boost}/lib"
 fi
 
 AC_CHECK_HEADER([boost/algorithm/string.hpp], [], [AC_MSG_ERROR([Cannot find boost.  Use --with-boost=PATH])])
 AC_CHECK_HEADER([boost/iostreams/filtering_stream.hpp], [], [AC_MSG_ERROR([Cannot find boost.  Use --with-boost=PATH])])
-
-if test "$mysql_flag" = 'yes'
-then
-  AC_MYSQLCLIENT(,,
-    [AC_ERROR([Could not locate mysql client libraries.  Try --with-mysql-prefix/-include/-lib])])
-  LDFLAGS="$LDFLAGS $MYSQLCLIENT_LDFLAGS"
-  CPPFLAGS="$CPPFLAGS $MYSQLCLIENT_CPPFLAGS"
-  LIBS="$LIBS $MYSQLCLIENT_LIBS"
-
-  MYSQLPP_DEVEL
-  LIBS="$LIBS -lmysqlpp"
-
-  AM_CONDITIONAL([BUILD_MYSQL_SUPPORT], true)
-else
-  AM_CONDITIONAL([BUILD_MYSQL_SUPPORT], false)
-fi
 
 if test "x$with_srilm" != 'xno'
 then
