@@ -39,7 +39,7 @@ struct HypothesisSort
 {
 	bool operator()(Hypothesis*& hypo1, Hypothesis*& hypo2)
 	{
-		return hypo1->GetScore(Total) < hypo2->GetScore(Total);
+		return hypo1->GetScore(ScoreType::Total) < hypo2->GetScore(ScoreType::Total);
 	}
 };
 

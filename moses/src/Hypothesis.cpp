@@ -76,9 +76,9 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 	// scores
 	SetScore(prevHypo.GetScore());
-	m_score[PhraseTrans]				+= transOpt.GetTranslationScore();
-	m_score[FutureScoreEnum]		+= transOpt.GetFutureScore();
-	m_score[LanguageModelScore]	+= transOpt.GetNgramScore();
+	m_score[ScoreType::PhraseTrans]				+= transOpt.GetTranslationScore();
+	m_score[ScoreType::FutureScoreEnum]		+= transOpt.GetFutureScore();
+	m_score[ScoreType::LanguageModelScore]	+= transOpt.GetNgramScore();
 
 #ifdef N_BEST
 	// language model score (ngram)
@@ -185,7 +185,7 @@ void Hypothesis::MergeFactors(vector< const Word* > mergeWords, size_t idDict, f
 	}
 
 	// score
-	m_score[Generation] += generationScore * weight;
+	m_score[ScoreType::Generation] += generationScore * weight;
 #ifdef N_BEST
 	m_generationScoreComponent[idDict] += generationScore;
 #endif
@@ -300,7 +300,7 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 			contextFactor.back() = languageModel.GetSentenceEnd();
 			lmScore	+= languageModel.GetValue(contextFactor);
 		}
-		m_score[LanguageModelScore] += lmScore * languageModel.GetWeight();
+		m_score[ScoreType::LanguageModelScore] += lmScore * languageModel.GetWeight();
 #ifdef N_BEST
 		size_t lmId = languageModel.GetId();
 		m_lmScoreComponent[lmId] += lmScore;
@@ -354,7 +354,7 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 			contextFactor.back() = languageModel.GetSentenceEnd();
 			lmScore	+= languageModel.GetValue(contextFactor);
 		}
-		m_score[LanguageModelScore] += lmScore * languageModel.GetWeight();
+		m_score[ScoreType::LanguageModelScore] += lmScore * languageModel.GetWeight();
 #ifdef N_BEST
 		size_t lmId = languageModel.GetId();
 		m_lmScoreComponent[lmId] += lmScore;
@@ -375,37 +375,37 @@ void Hypothesis::CalcScore(const LMList		&lmListInitial
 				
 	if (prevRange.GetWordsCount() == 0)
 	{ // 1st hypothesis with translated phrase. NOT the seed hypo.
-		m_score[Distortion]	=  - (float) currRange.GetStartPos();
+		m_score[ScoreType::Distortion]	=  - (float) currRange.GetStartPos();
 	}
 	else
 	{ // add distortion score of current translated phrase to
 		// distortions scores of all previous partial translations
-		m_score[Distortion]	-=  (float) currRange.CalcDistortion(prevRange) ;
+		m_score[ScoreType::Distortion]	-=  (float) currRange.CalcDistortion(prevRange) ;
 	}
 	
 	// LANGUAGE MODEL COST
 	CalcLMScore(lmListInitial, lmListEnd);
 
 	// WORD PENALTY
-	m_score[WordPenalty] = - (float) GetSize();
+	m_score[ScoreType::WordPenalty] = - (float) GetSize();
 
 	// FUTURE COST
 	CalcFutureScore(futureScore);
 
 	// TOTAL COST
-	m_score[Total] = m_score[PhraseTrans]
-								+ m_score[Generation]			
-								+ m_score[LanguageModelScore]
-								+ m_score[Distortion]					* weightDistortion
-								+ m_score[WordPenalty]				* weightWordPenalty
-								+ m_score[FutureScoreEnum];
+	m_score[ScoreType::Total] = m_score[ScoreType::PhraseTrans]
+								+ m_score[ScoreType::Generation]			
+								+ m_score[ScoreType::LanguageModelScore]
+								+ m_score[ScoreType::Distortion]					* weightDistortion
+								+ m_score[ScoreType::WordPenalty]				* weightWordPenalty
+								+ m_score[ScoreType::FutureScoreEnum];
 }
 
 void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 {
 	const size_t maxSize= numeric_limits<size_t>::max();
 	size_t	start				= maxSize;
-	m_score[FutureScoreEnum]	= 0;
+	m_score[ScoreType::FutureScoreEnum]	= 0;
 	for(size_t currPos = 0 ; currPos < m_sourceCompleted.GetSize() ; currPos++) 
 	{
 		if(m_sourceCompleted.GetValue(currPos) == 0 && start == maxSize)
@@ -414,13 +414,13 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 		}
 		if(m_sourceCompleted.GetValue(currPos) == 1 && start != maxSize) 
 		{
-			m_score[FutureScoreEnum] += futureScore.GetScore(start, currPos - 1);
+			m_score[ScoreType::FutureScoreEnum] += futureScore.GetScore(start, currPos - 1);
 			start = maxSize;
 		}
 	}
 	if (start != maxSize)
 	{
-		m_score[FutureScoreEnum] += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
+		m_score[ScoreType::FutureScoreEnum] += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
 	}
 }
 
@@ -432,10 +432,10 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 	out << "[" << hypothesis.m_sourceCompleted << "] ";
 	
 	// scores
-	out << " [" << hypothesis.GetScore( static_cast<ScoreType>(0));
+	out << " [" << hypothesis.GetScore( static_cast<ScoreType::ScoreType>(0));
 	for (size_t i = 1 ; i < NUM_SCORES ; i++)
 	{
-		out << "," << hypothesis.GetScore( static_cast<ScoreType>(i));
+		out << "," << hypothesis.GetScore( static_cast<ScoreType::ScoreType>(i));
 	}
 	out << "]";
 #ifdef N_BEST

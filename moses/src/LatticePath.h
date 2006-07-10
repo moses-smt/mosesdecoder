@@ -61,7 +61,7 @@ public:
 		// reserve arg not used. to differential from other constructor
 		// deviate from edgeIndex. however, all other edges the same
 
-	inline float GetScore(ScoreType scoreType) const
+	inline float GetScore(ScoreType::ScoreType scoreType) const
 	{
 		return m_score[scoreType];
 	}
@@ -109,10 +109,10 @@ inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
 		out << *edge;
 	}
 	// scores
-	out << " [" << path.GetScore( static_cast<ScoreType>(0));
+	out << " [" << path.GetScore( static_cast<ScoreType::ScoreType>(0));
 	for (size_t i = 1 ; i < NUM_SCORES ; i++)
 	{
-		out << "," << path.GetScore( static_cast<ScoreType>(i));
+		out << "," << path.GetScore( static_cast<ScoreType::ScoreType>(i));
 	}
 	out << "]";
 #ifdef N_BEST
