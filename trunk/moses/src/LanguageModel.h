@@ -90,8 +90,8 @@ public:
 			
 #ifdef LM_SRI
 protected:
-	Ngram m_srilmModel;
 	Vocab m_srilmVocab;
+	Ngram m_srilmModel;
 
 	float GetValue(LmId wordId, LmId *context) const
 	{
