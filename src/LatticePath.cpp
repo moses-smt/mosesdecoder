@@ -31,7 +31,7 @@ LatticePath::LatticePath(const Hypothesis *hypo)
 	// initial scores
 	for (size_t i = 0 ; i < NUM_SCORES ; i++)
 	{
-		m_score[i] = hypo->GetScore(static_cast<ScoreType>(i));
+		m_score[i] = hypo->GetScore(static_cast<ScoreType::ScoreType>(i));
 	}
 #ifdef N_BEST
 	m_lmScoreComponent 				= hypo->GetLMScoreComponent();
@@ -85,7 +85,7 @@ void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc
 // calc score
 	for (size_t i = 0 ; i < NUM_SCORES ; i++)
 	{
-		ScoreType scoreType = static_cast<ScoreType>(i);
+		ScoreType::ScoreType scoreType = static_cast<ScoreType::ScoreType>(i);
 		float adj = (arc->GetScore(scoreType) - copy.m_path[edgeIndex]->GetScore(scoreType));
 		m_score[i] = copy.GetScore(scoreType) + adj;
 							

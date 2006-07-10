@@ -99,7 +99,7 @@ public:
 	{
 		return m_score;
 	}
-	inline float GetScore(ScoreType scoreType) const
+	inline float GetScore(ScoreType::ScoreType scoreType) const
 	{
 		return m_score[scoreType];
 	}
