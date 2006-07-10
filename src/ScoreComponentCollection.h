@@ -33,15 +33,7 @@ public:
 	ScoreComponentCollection()
 	{
 	}
-	ScoreComponentCollection(const ScoreComponentCollection &copy)
-	{
-		ScoreComponentCollection::const_iterator iter;
-		for (iter = copy.begin() ; iter != copy.end() ; ++iter)
-		{
-			const ScoreComponent *origScoreComponent = iter->second;
-			Add(*origScoreComponent);
-		}
-	}
+	ScoreComponentCollection(const ScoreComponentCollection &copy);
 
 	~ScoreComponentCollection()
 	{ // ??? memory leak but double free
