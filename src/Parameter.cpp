@@ -141,13 +141,23 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex)
 	return true;
 }
 
+// TODO arg parsing like this does not belong in the library, it belongs
+// in moses-cmd
 string Parameter::FindParam(const string &paramSwitch, int argc, char* argv[])
 {
 	for (int i = 0 ; i < argc ; i++)
 	{
 		if (string(argv[i]) == paramSwitch)
 		{
-			return argv[i+1];
+			if (i+1 < argc)
+			{
+				return argv[i+1];
+			} else {
+				stringstream errorMsg("");
+				errorMsg << "Option " << paramSwitch << " requires a parameter!";
+				UserMessage::Add(errorMsg.str());
+				// TODO return some sort of error, not the empty string
+			}
 		}
 	}
 	return "";
