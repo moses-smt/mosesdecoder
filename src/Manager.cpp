@@ -41,6 +41,7 @@ Manager::Manager(const Sentence &sentence, StaticData &staticData)
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
 		HypothesisCollection &sourceHypoColl = *iterStack;
+		sourceHypoColl.SetMaxHypoStackSize(m_staticData.GetMaxHypoStackSize());
 		sourceHypoColl.SetBeamThreshold(m_staticData.GetBeamThreshold());
 	}
 }
@@ -81,7 +82,7 @@ void Manager::ProcessSentence()
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
 		HypothesisCollection &sourceHypoColl = *iterStack;
-		sourceHypoColl.PruneToSize(MAXIMUM_HYPO_COLL_SIZE/2);
+		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize() / 2);
 		sourceHypoColl.InitializeArcs();
 		//sourceHypoColl.Prune();
 		ProcessOneStack(decodeStepList, sourceHypoColl);
