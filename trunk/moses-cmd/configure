@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE RANLIB ac_ct_RANLIB MYSQLCLIENT_LDFLAGS MYSQLCLIENT_CPPFLAGS MYSQLCLIENT_LIBS BUILD_MYSQL_SUPPORT_TRUE BUILD_MYSQL_SUPPORT_FALSE CXXCPP EGREP SRI_LM_TRUE SRI_LM_FALSE INTERNAL_LM_TRUE INTERNAL_LM_FALSE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE RANLIB ac_ct_RANLIB CXXCPP EGREP MYSQLCLIENT_LDFLAGS MYSQLCLIENT_CPPFLAGS MYSQLCLIENT_LIBS BUILD_MYSQL_SUPPORT_TRUE BUILD_MYSQL_SUPPORT_FALSE SRI_LM_TRUE SRI_LM_FALSE INTERNAL_LM_TRUE INTERNAL_LM_FALSE LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -853,6 +853,8 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-srilm=PATH       (optional) path to SRI's LM toolkit
+  --with-srilm=PATH       path to BOOST libraries
+  --with-moses=PATH       path to moses library
   --with-mysqlclient-prefix=PFX Prefix where mysqlclient is
 installed
   --with-mysqlclient-include=DIR Directory pointing
@@ -2581,6 +2583,26 @@ else
 
 fi;
 
+
+# Check whether --with-boost or --without-boost was given.
+if test "${with_boost+set}" = set; then
+  withval="$with_boost"
+  with_boost=$withval
+else
+  with_boost=no
+
+fi;
+
+
+# Check whether --with-moses or --without-moses was given.
+if test "${with_moses+set}" = set; then
+  withval="$with_moses"
+  with_moses=$withval
+else
+  with_moses=no
+
+fi;
+
 # Check whether --enable-mysql or --disable-mysql was given.
 if test "${enable_mysql+set}" = set; then
   enableval="$enable_mysql"
@@ -2588,374 +2610,21 @@ if test "${enable_mysql+set}" = set; then
 else
   mysql_flag=no
 fi;
-
-if test "$mysql_flag" = 'yes'
+if test "x$with_boost" != 'xno'
 then
-
-
-
-# Check whether --with-mysqlclient-prefix or --without-mysqlclient-prefix was given.
-if test "${with_mysqlclient_prefix+set}" = set; then
-  withval="$with_mysqlclient_prefix"
-  mysqlclient_prefix="$withval"
-else
-  mysqlclient_prefix=""
-fi;
-
-
-# Check whether --with-mysqlclient-include or --without-mysqlclient-include was given.
-if test "${with_mysqlclient_include+set}" = set; then
-  withval="$with_mysqlclient_include"
-  mysqlclient_include="$withval"
-else
-  mysqlclient_include=""
-fi;
-
-
-# Check whether --with-mysqlclient-lib or --without-mysqlclient-lib was given.
-if test "${with_mysqlclient_lib+set}" = set; then
-  withval="$with_mysqlclient_lib"
-  mysqlclient_lib="$withval"
-else
-  mysqlclient_lib=""
-fi;
-
-    echo "$as_me:$LINENO: checking for mysqlclient " >&5
-echo $ECHO_N "checking for mysqlclient ... $ECHO_C" >&6
-    MYSQLCLIENT_LDFLAGS=""
-    MYSQLCLIENT_CPPFLAGS=""
-    MYSQLCLIENT_LIBS="-lmysqlclient"
-    mysqlclient_fail=""
-
-            for tryprefix in /usr /usr/local /usr/mysql /usr/local/mysql /usr/pkg $msqlclient_prefix; do
-                #testloop
-                for hloc in lib/mysql lib lib64/mysql lib64 ; do
-                        if test -e "$tryprefix/$hloc/libmysqlclient.so"; then
-                MYSQLCLIENT_LDFLAGS="-L$tryprefix/$hloc"
-                        fi
-                done
-
-                for iloc in include/mysql include; do
-                        if test -e "$tryprefix/$iloc/mysql.h"; then
-                MYSQLCLIENT_CPPFLAGS="-I$tryprefix/$iloc"
-            fi
-        done
-                # testloop
-        done
-
-        if test "x$mysqlclient_include" != "x" ; then
-                echo "checking for mysql includes... "
-        if test -d "$mysqlclient_include/mysql" ; then
-            MYSQLCLIENT_CPPFLAGS="-I$mysqlclient_include"
-                        echo " found $MYSQLCLIENT_CPPFLAGS"
-        elif test -d "$mysqlclient_include/include/mysql" ; then
-            MYSQLCLIENT_CPPFLAGS="-I$mysqlclient_include/include"
-                        echo " found $MYSQLCLIENT_CPPFLAGS"
-        elif test -d "$mysqlclient_include" ; then
-            MYSQLCLIENT_CPPFLAGS="-I$mysqlclient_include"
-                        echo "found $MYSQLCLIENT_CPPFLAGS"
-                else
-                        echo "not found!  no include dir found in $mysqlclient_include"
-        fi
-    fi
-
-        if test "x$mysqlclient_lib" != "x" ; then
-                echo "checking for mysql libx... "
-        if test -d "$mysqlclient_lib/lib/mysql" ; then
-            MYSQLCLIENT_LDFLAGS="-L$mysqlclient_lib/lib/mysql"
-                        echo "found $MYSQLCLIENT_LDFLAGS"
-        elif test -d "$mysqlclient_lib/lin" ; then
-            MYSQLCLIENT_LDFLAGS="-L$mysqlclient_lib/lib"
-                        echo "found $MYSQLCLIENT_LDFLAGS"
-        else
-            MYSQLCLIENT_LDFLAGS="-L$mysqlclient_lib"
-                        echo "defaultd to $MYSQLCLIENT_LDFLAGS"
-        fi
-    fi
-
-    ac_save_CPPFLAGS="$CPPFLAGS"
-    ac_save_LDFLAGS="$LDFLAGS"
-    ac_save_LIBS="$LIBS"
-    CPPFLAGS="$CPPFLAGS $MYSQLCLIENT_CPPFLAGS"
-    LDFLAGS="$LDFLAGS $MYSQLCLIENT_LDFLAGS"
-    LIBS="$LIBS $MYSQLCLIENT_LIBS"
-                cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-            #include <mysql.h>
-
-int
-main ()
-{
-
-            mysql_real_connect( 0, 0, 0, 0, 0, 0, 0, 0);
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes $MYSQLCLIENT_CPPFLAGS $MYSQLCLIENT_LDFLAGS" >&5
-echo "${ECHO_T}yes $MYSQLCLIENT_CPPFLAGS $MYSQLCLIENT_LDFLAGS" >&6
-           CPPFLAGS="$ac_save_CPPFLAGS"
-           LDFLAGS="$ac_save_LDFLAGS"
-           LIBS="$ac_save_LIBS"
-           :
-
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-                        echo "no"
-                        echo "can't compile a simple app with mysql_connnect in it.
-bad."
-          mysqlclient_fail="yes"
-
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-
-    if test "x$mysqlclient_fail" != "x" ; then
-                        echo
-            echo "***"
-            echo "*** mysqlclient test source had problems, check your config.log ."
-            echo "*** Also try one of the following switches :"
-            echo "***   --with-mysqlclient-prefix=PFX"
-            echo "***   --with-mysqlclient-include=DIR"
-            echo "***   --with-mysqlclient-lib=DIR"
-            echo "***"
-            CPPFLAGS="$ac_save_CPPFLAGS"
-            LDFLAGS="$ac_save_LDFLAGS"
-            LIBS="$ac_save_LIBS"
-            { { echo "$as_me:$LINENO: error: Could not locate mysql client libraries.  Try --with-mysql-prefix/-include/-lib" >&5
-echo "$as_me: error: Could not locate mysql client libraries.  Try --with-mysql-prefix/-include/-lib" >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-
-    CPPFLAGS="$ac_save_CPPFLAGS"
-    LDFLAGS="$ac_save_LDFLAGS"
-    LIBS="$ac_save_LIBS"
-
-
-
-
-  LDFLAGS="$LDFLAGS $MYSQLCLIENT_LDFLAGS"
-  CPPFLAGS="$CPPFLAGS $MYSQLCLIENT_CPPFLAGS"
-  LIBS="$LIBS $MYSQLCLIENT_LIBS"
-
-
-echo "$as_me:$LINENO: checking for MySQL++ libraries" >&5
-echo $ECHO_N "checking for MySQL++ libraries... $ECHO_C" >&6
-if test "${ac_cv_mysqlpp_devel+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-
-	#
-	# Set up configure script macros
-	#
-
-# Check whether --with-mysqlpp or --without-mysqlpp was given.
-if test "${with_mysqlpp+set}" = set; then
-  withval="$with_mysqlpp"
-  MYSQLPP_lib_check="$with_mysqlpp/lib $with_mysqlpp/lib/mysql++"
-		  MYSQLPP_inc_check="$with_mysqlpp/include $with_mysqlpp/include/mysql++"
-else
-  MYSQLPP_lib_check="/usr/local/mysql++/lib /usr/local/lib/mysql++ /opt/mysql++/lib /usr/lib/mysql++ /usr/local/lib /usr/lib"
-		  MYSQLPP_inc_check="/usr/local/mysql++/include /usr/local/include/mysql++ /opt/mysql++/include /usr/local/include/mysql++ /usr/local/include /usr/include/mysql++ /usr/include"
-fi;
-
-# Check whether --with-mysqlpp-lib or --without-mysqlpp-lib was given.
-if test "${with_mysqlpp_lib+set}" = set; then
-  withval="$with_mysqlpp_lib"
-  MYSQLPP_lib_check="$with_mysqlpp_lib $with_mysqlpp_lib/lib $with_mysqlpp_lib/lib/mysql"
-fi;
-
-# Check whether --with-mysqlpp-include or --without-mysqlpp-include was given.
-if test "${with_mysqlpp_include+set}" = set; then
-  withval="$with_mysqlpp_include"
-  MYSQLPP_inc_check="$with_mysqlpp_include $with_mysqlpp_include/include $with_mysqlpp_include/include/mysql"
-fi;
-
-	#
-	# Look for MySQL++ library
-	#
-	MYSQLPP_libdir=
-	for dir in $MYSQLPP_lib_check
-	do
-		if test -d "$dir" && \
-			( test -f "$dir/libmysqlpp.so" ||
-			  test -f "$dir/libmysqlpp.a" )
-		then
-			MYSQLPP_libdir=$dir
-			break
-		fi
-	done
-
-	if test -z "$MYSQLPP_libdir"
-	then
-		{ { echo "$as_me:$LINENO: error: Didn't find the MySQL++ library dir in '$MYSQLPP_lib_check'" >&5
-echo "$as_me: error: Didn't find the MySQL++ library dir in '$MYSQLPP_lib_check'" >&2;}
-   { (exit 1); exit 1; }; }
-	fi
-
-	case "$MYSQLPP_libdir" in
-		/* ) ;;
-		* )  { { echo "$as_me:$LINENO: error: The MySQL++ library directory ($MYSQLPP_libdir) must be an absolute path." >&5
-echo "$as_me: error: The MySQL++ library directory ($MYSQLPP_libdir) must be an absolute path." >&2;}
-   { (exit 1); exit 1; }; } ;;
-	esac
-
-	echo "$as_me:$LINENO: result: lib in $MYSQLPP_libdir" >&5
-echo "${ECHO_T}lib in $MYSQLPP_libdir" >&6
-
-	case "$MYSQLPP_libdir" in
-	  /usr/lib) ;;
-	  *) LDFLAGS="$LDFLAGS -L${MYSQLPP_libdir} -Wl,-rpath ${MYSQLPP_libdir}" ;;
-	esac
-
-	#
-	# Look for MySQL++ headers
-	#
-	echo "$as_me:$LINENO: checking for MySQL++ include directory" >&5
-echo $ECHO_N "checking for MySQL++ include directory... $ECHO_C" >&6
-	MYSQLPP_incdir=
-	for dir in $MYSQLPP_inc_check
-	do
-		if test -d "$dir" && test -f "$dir/mysql++.h"
-		then
-			MYSQLPP_incdir=$dir
-			break
-		fi
-	done
-
-	if test -z "$MYSQLPP_incdir"
-	then
-		{ { echo "$as_me:$LINENO: error: Didn't find the MySQL++ header dir in '$MYSQLPP_inc_check'" >&5
-echo "$as_me: error: Didn't find the MySQL++ header dir in '$MYSQLPP_inc_check'" >&2;}
-   { (exit 1); exit 1; }; }
-	fi
-
-	case "$MYSQLPP_incdir" in
-		/* ) ;;
-		* )  { { echo "$as_me:$LINENO: error: The MySQL++ header directory ($MYSQLPP_incdir) must be an absolute path." >&5
-echo "$as_me: error: The MySQL++ header directory ($MYSQLPP_incdir) must be an absolute path." >&2;}
-   { (exit 1); exit 1; }; } ;;
-	esac
-
-	echo "$as_me:$LINENO: result: $MYSQLPP_incdir" >&5
-echo "${ECHO_T}$MYSQLPP_incdir" >&6
-
-	CPPFLAGS="$CPPFLAGS -I${MYSQLPP_incdir}"
-
-	echo "$as_me:$LINENO: checking that we can build MySQL++ programs" >&5
-echo $ECHO_N "checking that we can build MySQL++ programs... $ECHO_C" >&6
-	cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <mysql++.h>
-int
-main ()
-{
-std::string s; mysqlpp::escape_string(s)
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_mysqlpp_devel=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-{ { echo "$as_me:$LINENO: error: no" >&5
-echo "$as_me: error: no" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-echo "$as_me:$LINENO: result: $ac_cv_mysqlpp_devel" >&5
-echo "${ECHO_T}$ac_cv_mysqlpp_devel" >&6
-  LIBS="$LIBS -lmysqlpp"
-
-
-
-if true; then
-  BUILD_MYSQL_SUPPORT_TRUE=
-  BUILD_MYSQL_SUPPORT_FALSE='#'
-else
-  BUILD_MYSQL_SUPPORT_TRUE='#'
-  BUILD_MYSQL_SUPPORT_FALSE=
+  CPPFLAGS="$CPPFLAGS -I${with_boost}"
+  LDFLAGS="$LDFLAGS -L${with_boost}/lib -L${with_boost}/stage/lib"
 fi
 
-else
-
-
-if false; then
-  BUILD_MYSQL_SUPPORT_TRUE=
-  BUILD_MYSQL_SUPPORT_FALSE='#'
-else
-  BUILD_MYSQL_SUPPORT_TRUE='#'
-  BUILD_MYSQL_SUPPORT_FALSE=
-fi
-
-fi
-
-if test "x$with_srilm" != 'xno'
+if test "x$with_moses" != 'xno'
 then
-  SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_srilm}/include"
+  CPPFLAGS="$CPPFLAGS -I${with_moses}/src"
+  LDFLAGS="$LDFLAGS -L${with_moses}/src"
+fi
+LIBS="$LIBS -lmoses"
 
-  ac_ext=cc
+
+ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -3439,7 +3108,811 @@ fi
 done
 
 
-if test "${ac_cv_header_Ngram_h+set}" = set; then
+if test "${ac_cv_header_Manager_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for Manager.h" >&5
+echo $ECHO_N "checking for Manager.h... $ECHO_C" >&6
+if test "${ac_cv_header_Manager_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_Manager_h" >&5
+echo "${ECHO_T}$ac_cv_header_Manager_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking Manager.h usability" >&5
+echo $ECHO_N "checking Manager.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <Manager.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking Manager.h presence" >&5
+echo $ECHO_N "checking Manager.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <Manager.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_cxx_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: Manager.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: Manager.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: Manager.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: Manager.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: Manager.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: Manager.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: Manager.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: Manager.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: Manager.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: Manager.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: Manager.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: Manager.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: Manager.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: Manager.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: Manager.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: Manager.h: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------------------ ##
+## Report this to the AC_PACKAGE_NAME lists.  ##
+## ------------------------------------------ ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for Manager.h" >&5
+echo $ECHO_N "checking for Manager.h... $ECHO_C" >&6
+if test "${ac_cv_header_Manager_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_Manager_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_Manager_h" >&5
+echo "${ECHO_T}$ac_cv_header_Manager_h" >&6
+
+fi
+if test $ac_cv_header_Manager_h = yes; then
+  :
+else
+  { { echo "$as_me:$LINENO: error: Cannot find moses headers!  Use --with-moses=PATH" >&5
+echo "$as_me: error: Cannot find moses headers!  Use --with-moses=PATH" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+if test "${ac_cv_header_boost_algorithm_string_hpp+set}" = set; then
+  echo "$as_me:$LINENO: checking for boost/algorithm/string.hpp" >&5
+echo $ECHO_N "checking for boost/algorithm/string.hpp... $ECHO_C" >&6
+if test "${ac_cv_header_boost_algorithm_string_hpp+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_boost_algorithm_string_hpp" >&5
+echo "${ECHO_T}$ac_cv_header_boost_algorithm_string_hpp" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking boost/algorithm/string.hpp usability" >&5
+echo $ECHO_N "checking boost/algorithm/string.hpp usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <boost/algorithm/string.hpp>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking boost/algorithm/string.hpp presence" >&5
+echo $ECHO_N "checking boost/algorithm/string.hpp presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <boost/algorithm/string.hpp>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_cxx_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: boost/algorithm/string.hpp: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: boost/algorithm/string.hpp: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/algorithm/string.hpp: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: boost/algorithm/string.hpp: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: boost/algorithm/string.hpp: present but cannot be compiled" >&5
+echo "$as_me: WARNING: boost/algorithm/string.hpp: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/algorithm/string.hpp:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: boost/algorithm/string.hpp:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/algorithm/string.hpp: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: boost/algorithm/string.hpp: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/algorithm/string.hpp:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: boost/algorithm/string.hpp:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/algorithm/string.hpp: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: boost/algorithm/string.hpp: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/algorithm/string.hpp: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: boost/algorithm/string.hpp: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------------------ ##
+## Report this to the AC_PACKAGE_NAME lists.  ##
+## ------------------------------------------ ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for boost/algorithm/string.hpp" >&5
+echo $ECHO_N "checking for boost/algorithm/string.hpp... $ECHO_C" >&6
+if test "${ac_cv_header_boost_algorithm_string_hpp+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_boost_algorithm_string_hpp=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_boost_algorithm_string_hpp" >&5
+echo "${ECHO_T}$ac_cv_header_boost_algorithm_string_hpp" >&6
+
+fi
+if test $ac_cv_header_boost_algorithm_string_hpp = yes; then
+  :
+else
+  { { echo "$as_me:$LINENO: error: Cannot find boost.  Use --with-boost=PATH" >&5
+echo "$as_me: error: Cannot find boost.  Use --with-boost=PATH" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+if test "${ac_cv_header_boost_iostreams_filtering_stream_hpp+set}" = set; then
+  echo "$as_me:$LINENO: checking for boost/iostreams/filtering_stream.hpp" >&5
+echo $ECHO_N "checking for boost/iostreams/filtering_stream.hpp... $ECHO_C" >&6
+if test "${ac_cv_header_boost_iostreams_filtering_stream_hpp+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_boost_iostreams_filtering_stream_hpp" >&5
+echo "${ECHO_T}$ac_cv_header_boost_iostreams_filtering_stream_hpp" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking boost/iostreams/filtering_stream.hpp usability" >&5
+echo $ECHO_N "checking boost/iostreams/filtering_stream.hpp usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <boost/iostreams/filtering_stream.hpp>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking boost/iostreams/filtering_stream.hpp presence" >&5
+echo $ECHO_N "checking boost/iostreams/filtering_stream.hpp presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <boost/iostreams/filtering_stream.hpp>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_cxx_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: boost/iostreams/filtering_stream.hpp: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: boost/iostreams/filtering_stream.hpp: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/iostreams/filtering_stream.hpp: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: boost/iostreams/filtering_stream.hpp: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: boost/iostreams/filtering_stream.hpp: present but cannot be compiled" >&5
+echo "$as_me: WARNING: boost/iostreams/filtering_stream.hpp: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/iostreams/filtering_stream.hpp:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: boost/iostreams/filtering_stream.hpp:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/iostreams/filtering_stream.hpp: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: boost/iostreams/filtering_stream.hpp: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/iostreams/filtering_stream.hpp:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: boost/iostreams/filtering_stream.hpp:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/iostreams/filtering_stream.hpp: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: boost/iostreams/filtering_stream.hpp: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/iostreams/filtering_stream.hpp: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: boost/iostreams/filtering_stream.hpp: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------------------ ##
+## Report this to the AC_PACKAGE_NAME lists.  ##
+## ------------------------------------------ ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for boost/iostreams/filtering_stream.hpp" >&5
+echo $ECHO_N "checking for boost/iostreams/filtering_stream.hpp... $ECHO_C" >&6
+if test "${ac_cv_header_boost_iostreams_filtering_stream_hpp+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_boost_iostreams_filtering_stream_hpp=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_boost_iostreams_filtering_stream_hpp" >&5
+echo "${ECHO_T}$ac_cv_header_boost_iostreams_filtering_stream_hpp" >&6
+
+fi
+if test $ac_cv_header_boost_iostreams_filtering_stream_hpp = yes; then
+  :
+else
+  { { echo "$as_me:$LINENO: error: Cannot find boost.  Use --with-boost=PATH" >&5
+echo "$as_me: error: Cannot find boost.  Use --with-boost=PATH" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+
+if test "$mysql_flag" = 'yes'
+then
+
+
+# Check whether --with-mysqlclient-prefix or --without-mysqlclient-prefix was given.
+if test "${with_mysqlclient_prefix+set}" = set; then
+  withval="$with_mysqlclient_prefix"
+  mysqlclient_prefix="$withval"
+else
+  mysqlclient_prefix=""
+fi;
+
+
+# Check whether --with-mysqlclient-include or --without-mysqlclient-include was given.
+if test "${with_mysqlclient_include+set}" = set; then
+  withval="$with_mysqlclient_include"
+  mysqlclient_include="$withval"
+else
+  mysqlclient_include=""
+fi;
+
+
+# Check whether --with-mysqlclient-lib or --without-mysqlclient-lib was given.
+if test "${with_mysqlclient_lib+set}" = set; then
+  withval="$with_mysqlclient_lib"
+  mysqlclient_lib="$withval"
+else
+  mysqlclient_lib=""
+fi;
+
+    echo "$as_me:$LINENO: checking for mysqlclient " >&5
+echo $ECHO_N "checking for mysqlclient ... $ECHO_C" >&6
+    MYSQLCLIENT_LDFLAGS=""
+    MYSQLCLIENT_CPPFLAGS=""
+    MYSQLCLIENT_LIBS="-lmysqlclient"
+    mysqlclient_fail=""
+
+            for tryprefix in /usr /usr/local /usr/mysql /usr/local/mysql /usr/pkg $msqlclient_prefix; do
+                #testloop
+                for hloc in lib/mysql lib lib64/mysql lib64 ; do
+                        if test -e "$tryprefix/$hloc/libmysqlclient.so"; then
+                MYSQLCLIENT_LDFLAGS="-L$tryprefix/$hloc"
+                        fi
+                done
+
+                for iloc in include/mysql include; do
+                        if test -e "$tryprefix/$iloc/mysql.h"; then
+                MYSQLCLIENT_CPPFLAGS="-I$tryprefix/$iloc"
+            fi
+        done
+                # testloop
+        done
+
+        if test "x$mysqlclient_include" != "x" ; then
+                echo "checking for mysql includes... "
+        if test -d "$mysqlclient_include/mysql" ; then
+            MYSQLCLIENT_CPPFLAGS="-I$mysqlclient_include"
+                        echo " found $MYSQLCLIENT_CPPFLAGS"
+        elif test -d "$mysqlclient_include/include/mysql" ; then
+            MYSQLCLIENT_CPPFLAGS="-I$mysqlclient_include/include"
+                        echo " found $MYSQLCLIENT_CPPFLAGS"
+        elif test -d "$mysqlclient_include" ; then
+            MYSQLCLIENT_CPPFLAGS="-I$mysqlclient_include"
+                        echo "found $MYSQLCLIENT_CPPFLAGS"
+                else
+                        echo "not found!  no include dir found in $mysqlclient_include"
+        fi
+    fi
+
+        if test "x$mysqlclient_lib" != "x" ; then
+                echo "checking for mysql libx... "
+        if test -d "$mysqlclient_lib/lib/mysql" ; then
+            MYSQLCLIENT_LDFLAGS="-L$mysqlclient_lib/lib/mysql"
+                        echo "found $MYSQLCLIENT_LDFLAGS"
+        elif test -d "$mysqlclient_lib/lin" ; then
+            MYSQLCLIENT_LDFLAGS="-L$mysqlclient_lib/lib"
+                        echo "found $MYSQLCLIENT_LDFLAGS"
+        else
+            MYSQLCLIENT_LDFLAGS="-L$mysqlclient_lib"
+                        echo "defaultd to $MYSQLCLIENT_LDFLAGS"
+        fi
+    fi
+
+    ac_save_CPPFLAGS="$CPPFLAGS"
+    ac_save_LDFLAGS="$LDFLAGS"
+    ac_save_LIBS="$LIBS"
+    CPPFLAGS="$CPPFLAGS $MYSQLCLIENT_CPPFLAGS"
+    LDFLAGS="$LDFLAGS $MYSQLCLIENT_LDFLAGS"
+    LIBS="$LIBS $MYSQLCLIENT_LIBS"
+                cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+            #include <mysql.h>
+
+int
+main ()
+{
+
+            mysql_real_connect( 0, 0, 0, 0, 0, 0, 0, 0);
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes $MYSQLCLIENT_CPPFLAGS $MYSQLCLIENT_LDFLAGS" >&5
+echo "${ECHO_T}yes $MYSQLCLIENT_CPPFLAGS $MYSQLCLIENT_LDFLAGS" >&6
+           CPPFLAGS="$ac_save_CPPFLAGS"
+           LDFLAGS="$ac_save_LDFLAGS"
+           LIBS="$ac_save_LIBS"
+           :
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+                        echo "no"
+                        echo "can't compile a simple app with mysql_connnect in it.
+bad."
+          mysqlclient_fail="yes"
+
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+
+    if test "x$mysqlclient_fail" != "x" ; then
+                        echo
+            echo "***"
+            echo "*** mysqlclient test source had problems, check your config.log ."
+            echo "*** Also try one of the following switches :"
+            echo "***   --with-mysqlclient-prefix=PFX"
+            echo "***   --with-mysqlclient-include=DIR"
+            echo "***   --with-mysqlclient-lib=DIR"
+            echo "***"
+            CPPFLAGS="$ac_save_CPPFLAGS"
+            LDFLAGS="$ac_save_LDFLAGS"
+            LIBS="$ac_save_LIBS"
+            { { echo "$as_me:$LINENO: error: Could not locate mysql client libraries.  Try --with-mysql-prefix/-include/-lib" >&5
+echo "$as_me: error: Could not locate mysql client libraries.  Try --with-mysql-prefix/-include/-lib" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
+    CPPFLAGS="$ac_save_CPPFLAGS"
+    LDFLAGS="$ac_save_LDFLAGS"
+    LIBS="$ac_save_LIBS"
+
+
+
+
+  LDFLAGS="$LDFLAGS $MYSQLCLIENT_LDFLAGS"
+  CPPFLAGS="$CPPFLAGS $MYSQLCLIENT_CPPFLAGS"
+  LIBS="$LIBS $MYSQLCLIENT_LIBS"
+
+
+echo "$as_me:$LINENO: checking for MySQL++ libraries" >&5
+echo $ECHO_N "checking for MySQL++ libraries... $ECHO_C" >&6
+if test "${ac_cv_mysqlpp_devel+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+	#
+	# Set up configure script macros
+	#
+
+# Check whether --with-mysqlpp or --without-mysqlpp was given.
+if test "${with_mysqlpp+set}" = set; then
+  withval="$with_mysqlpp"
+  MYSQLPP_lib_check="$with_mysqlpp/lib $with_mysqlpp/lib/mysql++"
+		  MYSQLPP_inc_check="$with_mysqlpp/include $with_mysqlpp/include/mysql++"
+else
+  MYSQLPP_lib_check="/usr/local/mysql++/lib /usr/local/lib/mysql++ /opt/mysql++/lib /usr/lib/mysql++ /usr/local/lib /usr/lib"
+		  MYSQLPP_inc_check="/usr/local/mysql++/include /usr/local/include/mysql++ /opt/mysql++/include /usr/local/include/mysql++ /usr/local/include /usr/include/mysql++ /usr/include"
+fi;
+
+# Check whether --with-mysqlpp-lib or --without-mysqlpp-lib was given.
+if test "${with_mysqlpp_lib+set}" = set; then
+  withval="$with_mysqlpp_lib"
+  MYSQLPP_lib_check="$with_mysqlpp_lib $with_mysqlpp_lib/lib $with_mysqlpp_lib/lib/mysql"
+fi;
+
+# Check whether --with-mysqlpp-include or --without-mysqlpp-include was given.
+if test "${with_mysqlpp_include+set}" = set; then
+  withval="$with_mysqlpp_include"
+  MYSQLPP_inc_check="$with_mysqlpp_include $with_mysqlpp_include/include $with_mysqlpp_include/include/mysql"
+fi;
+
+	#
+	# Look for MySQL++ library
+	#
+	MYSQLPP_libdir=
+	for dir in $MYSQLPP_lib_check
+	do
+		if test -d "$dir" && \
+			( test -f "$dir/libmysqlpp.so" ||
+			  test -f "$dir/libmysqlpp.a" )
+		then
+			MYSQLPP_libdir=$dir
+			break
+		fi
+	done
+
+	if test -z "$MYSQLPP_libdir"
+	then
+		{ { echo "$as_me:$LINENO: error: Didn't find the MySQL++ library dir in '$MYSQLPP_lib_check'" >&5
+echo "$as_me: error: Didn't find the MySQL++ library dir in '$MYSQLPP_lib_check'" >&2;}
+   { (exit 1); exit 1; }; }
+	fi
+
+	case "$MYSQLPP_libdir" in
+		/* ) ;;
+		* )  { { echo "$as_me:$LINENO: error: The MySQL++ library directory ($MYSQLPP_libdir) must be an absolute path." >&5
+echo "$as_me: error: The MySQL++ library directory ($MYSQLPP_libdir) must be an absolute path." >&2;}
+   { (exit 1); exit 1; }; } ;;
+	esac
+
+	echo "$as_me:$LINENO: result: lib in $MYSQLPP_libdir" >&5
+echo "${ECHO_T}lib in $MYSQLPP_libdir" >&6
+
+	case "$MYSQLPP_libdir" in
+	  /usr/lib) ;;
+	  *) LDFLAGS="$LDFLAGS -L${MYSQLPP_libdir} -Wl,-rpath ${MYSQLPP_libdir}" ;;
+	esac
+
+	#
+	# Look for MySQL++ headers
+	#
+	echo "$as_me:$LINENO: checking for MySQL++ include directory" >&5
+echo $ECHO_N "checking for MySQL++ include directory... $ECHO_C" >&6
+	MYSQLPP_incdir=
+	for dir in $MYSQLPP_inc_check
+	do
+		if test -d "$dir" && test -f "$dir/mysql++.h"
+		then
+			MYSQLPP_incdir=$dir
+			break
+		fi
+	done
+
+	if test -z "$MYSQLPP_incdir"
+	then
+		{ { echo "$as_me:$LINENO: error: Didn't find the MySQL++ header dir in '$MYSQLPP_inc_check'" >&5
+echo "$as_me: error: Didn't find the MySQL++ header dir in '$MYSQLPP_inc_check'" >&2;}
+   { (exit 1); exit 1; }; }
+	fi
+
+	case "$MYSQLPP_incdir" in
+		/* ) ;;
+		* )  { { echo "$as_me:$LINENO: error: The MySQL++ header directory ($MYSQLPP_incdir) must be an absolute path." >&5
+echo "$as_me: error: The MySQL++ header directory ($MYSQLPP_incdir) must be an absolute path." >&2;}
+   { (exit 1); exit 1; }; } ;;
+	esac
+
+	echo "$as_me:$LINENO: result: $MYSQLPP_incdir" >&5
+echo "${ECHO_T}$MYSQLPP_incdir" >&6
+
+	CPPFLAGS="$CPPFLAGS -I${MYSQLPP_incdir}"
+
+	echo "$as_me:$LINENO: checking that we can build MySQL++ programs" >&5
+echo $ECHO_N "checking that we can build MySQL++ programs... $ECHO_C" >&6
+	cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <mysql++.h>
+int
+main ()
+{
+std::string s; mysqlpp::escape_string(s)
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_mysqlpp_devel=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+{ { echo "$as_me:$LINENO: error: no" >&5
+echo "$as_me: error: no" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_mysqlpp_devel" >&5
+echo "${ECHO_T}$ac_cv_mysqlpp_devel" >&6
+  LIBS="$LIBS -lmysqlpp"
+
+
+
+if true; then
+  BUILD_MYSQL_SUPPORT_TRUE=
+  BUILD_MYSQL_SUPPORT_FALSE='#'
+else
+  BUILD_MYSQL_SUPPORT_TRUE='#'
+  BUILD_MYSQL_SUPPORT_FALSE=
+fi
+
+else
+
+
+if false; then
+  BUILD_MYSQL_SUPPORT_TRUE=
+  BUILD_MYSQL_SUPPORT_FALSE='#'
+else
+  BUILD_MYSQL_SUPPORT_TRUE='#'
+  BUILD_MYSQL_SUPPORT_FALSE=
+fi
+
+fi
+
+if test "x$with_srilm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_srilm}/include"
+
+  if test "${ac_cv_header_Ngram_h+set}" = set; then
   echo "$as_me:$LINENO: checking for Ngram.h" >&5
 echo $ECHO_N "checking for Ngram.h... $ECHO_C" >&6
 if test "${ac_cv_header_Ngram_h+set}" = set; then
@@ -3642,7 +4115,7 @@ fi
 
 fi
 
-LIBS="$LIBS -lboost_iostreams -lboost_filesystem -lboost_thread"
+LIBS="$LIBS -lboost_iostreams-gcc-mt -lboost_filesystem-gcc-mt -lboost_thread-gcc-mt"
 FMT_LIBS="$FMT_LIBS libboost_iostreams.a libboost_filesystem.a libboost_thread.a"
 
 
@@ -4367,13 +4840,13 @@ s,@am__fastdepCXX_TRUE@,$am__fastdepCXX_TRUE,;t t
 s,@am__fastdepCXX_FALSE@,$am__fastdepCXX_FALSE,;t t
 s,@RANLIB@,$RANLIB,;t t
 s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
+s,@CXXCPP@,$CXXCPP,;t t
+s,@EGREP@,$EGREP,;t t
 s,@MYSQLCLIENT_LDFLAGS@,$MYSQLCLIENT_LDFLAGS,;t t
 s,@MYSQLCLIENT_CPPFLAGS@,$MYSQLCLIENT_CPPFLAGS,;t t
 s,@MYSQLCLIENT_LIBS@,$MYSQLCLIENT_LIBS,;t t
 s,@BUILD_MYSQL_SUPPORT_TRUE@,$BUILD_MYSQL_SUPPORT_TRUE,;t t
 s,@BUILD_MYSQL_SUPPORT_FALSE@,$BUILD_MYSQL_SUPPORT_FALSE,;t t
-s,@CXXCPP@,$CXXCPP,;t t
-s,@EGREP@,$EGREP,;t t
 s,@SRI_LM_TRUE@,$SRI_LM_TRUE,;t t
 s,@SRI_LM_FALSE@,$SRI_LM_FALSE,;t t
 s,@INTERNAL_LM_TRUE@,$INTERNAL_LM_TRUE,;t t
