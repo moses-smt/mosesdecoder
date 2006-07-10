@@ -60,7 +60,7 @@ public:
 	// used to create clone
 	Hypothesis(const Phrase &phrase);
 		// used for initial seeding of trans process
-	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &possTrans);
+	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 		// create next
 	~Hypothesis();
 	inline Hypothesis *Clone() const
@@ -68,8 +68,8 @@ public:
 		return new Hypothesis(*this);
 	}
 
-	Hypothesis *CreateNext(const TranslationOption &possTrans) const;
-	Hypothesis *MergeNext(const TranslationOption &possTrans) const;
+	Hypothesis *CreateNext(const TranslationOption &transOpt) const;
+	Hypothesis *MergeNext(const TranslationOption &transOpt) const;
 
 	inline const WordsRange &GetCurrSourceWordsRange() const
 	{

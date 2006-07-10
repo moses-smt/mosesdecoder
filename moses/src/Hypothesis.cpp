@@ -59,15 +59,15 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 #endif
 }
 
-Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &possTrans)
+Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: LatticeEdge							(Output, &prevHypo)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_currSourceWordsRange	(prevHypo.m_currSourceWordsRange)
 	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
-														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + possTrans.GetPhrase().GetSize())
+														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetPhrase().GetSize())
 {
-	const Phrase &possPhrase				= possTrans.GetPhrase();
-	const WordsRange &wordsRange		= possTrans.GetWordsRange();
+	const Phrase &possPhrase				= transOpt.GetPhrase();
+	const WordsRange &wordsRange		= transOpt.GetWordsRange();
 	m_currSourceWordsRange 					= wordsRange;
 	m_sourceCompleted.SetValue(wordsRange.GetStartPos(), wordsRange.GetEndPos(), true);
 	// add new words from poss trans
@@ -76,14 +76,14 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &poss
 
 	// scores
 	SetScore(prevHypo.GetScore());
-	m_score[PhraseTrans]				+= possTrans.GetTranslationScore();
-	m_score[FutureScoreEnum]		+= possTrans.GetFutureScore();
-	m_score[LanguageModelScore]	+= possTrans.GetNgramScore();
+	m_score[PhraseTrans]				+= transOpt.GetTranslationScore();
+	m_score[FutureScoreEnum]		+= transOpt.GetFutureScore();
+	m_score[LanguageModelScore]	+= transOpt.GetNgramScore();
 
 #ifdef N_BEST
 	// language model score (ngram)
 	m_lmScoreComponent = prevHypo.GetLMScoreComponent();
-	const list< pair<size_t, float> > &nGramComponent = possTrans.GetTrigramComponent();
+	const list< pair<size_t, float> > &nGramComponent = transOpt.GetTrigramComponent();
 
 	list< pair<size_t, float> >::const_iterator iter;
 	for (iter = nGramComponent.begin() ; iter != nGramComponent.end() ; ++iter)
@@ -98,7 +98,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &poss
 	m_transScoreComponent = prevComponent;
 	
 	// add components specific to poss trans
-	const ScoreComponent &possComponent	= possTrans.GetScoreComponents();
+	const ScoreComponent &possComponent	= transOpt.GetScoreComponents();
 	ScoreComponent &transComponent				= m_transScoreComponent.GetScoreComponent(possComponent.GetPhraseDictionary());
 	const size_t noScoreComponent 						= possComponent.GetNoScoreComponent();
 	
@@ -121,16 +121,16 @@ Hypothesis::~Hypothesis()
 #endif
 }
 
-Hypothesis *Hypothesis::CreateNext(const TranslationOption &possTrans) const
+Hypothesis *Hypothesis::CreateNext(const TranslationOption &transOpt) const
 {
-	Hypothesis *clone	= new Hypothesis(*this, possTrans);
+	Hypothesis *clone	= new Hypothesis(*this, transOpt);
 	return clone;
 }
 
-Hypothesis *Hypothesis::MergeNext(const TranslationOption &possTrans) const
+Hypothesis *Hypothesis::MergeNext(const TranslationOption &transOpt) const
 {
 	// check each word is compatible and merge 1-by-1
-	const Phrase &possPhrase = possTrans.GetPhrase();
+	const Phrase &possPhrase = transOpt.GetPhrase();
 	if (! IsCompatible(possPhrase))
 	{
 		return NULL;
@@ -151,8 +151,8 @@ Hypothesis *Hypothesis::MergeNext(const TranslationOption &possTrans) const
 	}
 
 #ifdef N_BEST
-	const ScoreComponent &possTransComponent = possTrans.GetScoreComponents();
-	clone->m_transScoreComponent.Add(possTransComponent);
+	const ScoreComponent &transOptComponent = transOpt.GetScoreComponents();
+	clone->m_transScoreComponent.Add(transOptComponent);
 #endif
 
 	return clone;
@@ -202,18 +202,18 @@ bool Hypothesis::IsCompatible(const Phrase &phrase) const
 	}
 	size_t hypoSize = GetSize();
 
-	size_t possTransPos = 0;
+	size_t transOptPos = 0;
 	for (size_t hypoPos = hypoSize - m_currTargetWordsRange.GetWordsCount() ; hypoPos < hypoSize ; hypoPos++)
 	{
 		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
 			const Factor *thisFactor 		= GetFactor(hypoPos, factorType)
-									,*compareFactor	= phrase.GetFactor(possTransPos, factorType);
+									,*compareFactor	= phrase.GetFactor(transOptPos, factorType);
 			if (thisFactor != NULL && compareFactor != NULL && thisFactor != compareFactor)
 				return false;
 		}
-		possTransPos++;
+		transOptPos++;
 	}
 	return true;
 }
