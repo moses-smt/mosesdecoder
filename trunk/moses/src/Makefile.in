@@ -64,10 +64,10 @@ am__libmoses_a_SOURCES_DIST = Arc.cpp FactorCollection.cpp Factor.cpp \
 	HypothesisCollection.cpp HypothesisCollectionIntermediate.cpp \
 	Hypothesis.cpp InputFileStream.cpp LanguageModel.cpp \
 	LatticeEdge.cpp LatticePath.cpp Manager.cpp md5.cpp \
-	Parameter.cpp Phrase.cpp PhraseDictionary.cpp \
-	TranslationOption.cpp Sentence.cpp StaticData.cpp \
-	TargetPhrase.cpp Util.cpp WeightOptimization.cpp Word.cpp \
-	WordsBitmap.cpp UserMessage.cpp NGramCollection.cpp
+	Parameter.cpp Phrase.cpp PhraseDictionary.cpp Sentence.cpp \
+	StaticData.cpp TargetPhrase.cpp TranslationOption.cpp \
+	UserMessage.cpp Util.cpp WeightOptimization.cpp Word.cpp \
+	WordsBitmap.cpp NGramCollection.cpp
 @INTERNAL_LM_TRUE@am__objects_1 = NGramCollection.$(OBJEXT)
 am_libmoses_a_OBJECTS = Arc.$(OBJEXT) FactorCollection.$(OBJEXT) \
 	Factor.$(OBJEXT) FactorTypeSet.$(OBJEXT) \
@@ -77,10 +77,11 @@ am_libmoses_a_OBJECTS = Arc.$(OBJEXT) FactorCollection.$(OBJEXT) \
 	LanguageModel.$(OBJEXT) LatticeEdge.$(OBJEXT) \
 	LatticePath.$(OBJEXT) Manager.$(OBJEXT) md5.$(OBJEXT) \
 	Parameter.$(OBJEXT) Phrase.$(OBJEXT) \
-	PhraseDictionary.$(OBJEXT) TranslationOption.$(OBJEXT) \
-	Sentence.$(OBJEXT) StaticData.$(OBJEXT) TargetPhrase.$(OBJEXT) \
+	PhraseDictionary.$(OBJEXT) Sentence.$(OBJEXT) \
+	StaticData.$(OBJEXT) TargetPhrase.$(OBJEXT) \
+	TranslationOption.$(OBJEXT) UserMessage.$(OBJEXT) \
 	Util.$(OBJEXT) WeightOptimization.$(OBJEXT) Word.$(OBJEXT) \
-	WordsBitmap.$(OBJEXT) UserMessage.$(OBJEXT) $(am__objects_1)
+	WordsBitmap.$(OBJEXT) $(am__objects_1)
 libmoses_a_OBJECTS = $(am_libmoses_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -178,10 +179,10 @@ libmoses_a_SOURCES = Arc.cpp FactorCollection.cpp Factor.cpp \
 	HypothesisCollection.cpp HypothesisCollectionIntermediate.cpp \
 	Hypothesis.cpp InputFileStream.cpp LanguageModel.cpp \
 	LatticeEdge.cpp LatticePath.cpp Manager.cpp md5.cpp \
-	Parameter.cpp Phrase.cpp PhraseDictionary.cpp \
-	TranslationOption.cpp Sentence.cpp StaticData.cpp \
-	TargetPhrase.cpp Util.cpp WeightOptimization.cpp Word.cpp \
-	WordsBitmap.cpp UserMessage.cpp $(am__append_1)
+	Parameter.cpp Phrase.cpp PhraseDictionary.cpp Sentence.cpp \
+	StaticData.cpp TargetPhrase.cpp TranslationOption.cpp \
+	UserMessage.cpp Util.cpp WeightOptimization.cpp Word.cpp \
+	WordsBitmap.cpp $(am__append_1)
 all: all-am
 
 .SUFFIXES:
