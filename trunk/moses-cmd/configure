@@ -4115,7 +4115,7 @@ fi
 
 fi
 
-LIBS="$LIBS -lboost_iostreams-gcc-mt -lboost_filesystem-gcc-mt -lboost_thread-gcc-mt"
+LIBS="$LIBS -lboost_iostreams-gcc-mt -lboost_filesystem-gcc-mt -lboost_thread-gcc-mt -lz"
 FMT_LIBS="$FMT_LIBS libboost_iostreams.a libboost_filesystem.a libboost_thread.a"
 
 
