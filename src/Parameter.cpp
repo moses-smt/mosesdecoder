@@ -201,7 +201,13 @@ bool Parameter::LoadParam(int argc, char* argv[])
 		return false;
 	}
 	else
-		ReadConfigFile(configPath);
+	{
+		if (!ReadConfigFile(configPath))
+		{
+			UserMessage::Add("Could not read "+configPath);
+			return false;
+		}
+	}
 
 	string inFile = FindParam("-i", argc, argv);
 	if (inFile != "")
@@ -222,7 +228,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 }
 
 // read parameters from a configuration file
-void Parameter::ReadConfigFile( string filePath ) 
+bool Parameter::ReadConfigFile( string filePath ) 
 {
 	InputFileStream inFile(filePath);
 	string line, paramName;
@@ -251,4 +257,5 @@ void Parameter::ReadConfigFile( string filePath )
 			m_setting[paramName].push_back(line);
 		}
 	}
+	return true;
 }
