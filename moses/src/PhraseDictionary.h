@@ -37,7 +37,7 @@ class PhraseDictionary : public Dictionary
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionary&);
 
 protected:
-	const size_t m_id, m_noScoreComponent;
+	const size_t m_noScoreComponent;
 	std::map<Phrase , TargetPhraseCollection > m_collection;
 	// 1st = source
 	// 2nd = target
@@ -49,9 +49,8 @@ protected:
 							, const std::list<Phrase>					&inputPhraseList
 							, const std::vector<FactorType>		&inputFactorType);
 public:
-	PhraseDictionary(size_t id, size_t noScoreComponent)
+	PhraseDictionary(size_t noScoreComponent)
 		:Dictionary()
-		,m_id(id)
 		,m_noScoreComponent(noScoreComponent)
 	{
 	}
@@ -84,9 +83,5 @@ public:
 
 	// for mert
 	void SetWeightTransModel(const std::vector<float> &weightT);
-	size_t GetId() const
-	{
-		return m_id;
-	}
 };
 
