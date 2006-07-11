@@ -58,7 +58,7 @@ Parameter::Parameter()
 	AddParam("input-file");
 	AddParam("cache-path");
 	AddParam("input-file");
-	AddParam("max-hypostack-size");
+	AddParam("stack");
 }
 
 // check if parameter settings make sense
@@ -215,7 +215,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-w", "weight-w", argc, argv);
 	OverwriteParam("-g", "weight-generation", argc, argv);
 	OverwriteParam("-n-best-list", "n-best-list", argc, argv);
-	OverwriteParam("-hypmax", "max-hypostack-size", argc, argv);
+	OverwriteParam("-s", "stack", argc, argv);
 
   // check if parameters make sense
 	return Validate();

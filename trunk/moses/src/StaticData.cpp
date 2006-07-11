@@ -160,8 +160,8 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	TRACE_ERR("weight-w: " << m_weightWordPenalty << endl);
 
 	// misc
-	m_maxHypoStackSize = (m_parameter.GetParam("max-hypostack-size").size() > 0)
-				? Scan<size_t>(m_parameter.GetParam("max-hypostack-size")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
+	m_maxHypoStackSize = (m_parameter.GetParam("stack").size() > 0)
+				? Scan<size_t>(m_parameter.GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
 	m_maxDistortion = (m_parameter.GetParam("distortion-limit").size() > 0) ?
 		Scan<int>(m_parameter.GetParam("distortion-limit")[0])
 		: -1;
