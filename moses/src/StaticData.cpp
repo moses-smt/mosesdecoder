@@ -145,8 +145,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 																		, m_factorCollection
 																		, filePath
 																		, weight[currDict]
-																		, Output		 // always target, for now
-																		, currDict);
+																		, Output);		 // always target, for now
 		}
 	}
 
