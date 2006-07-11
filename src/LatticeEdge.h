@@ -48,8 +48,8 @@ protected:
 
 #ifdef N_BEST
 	ScoreComponentCollection	m_transScoreComponent;
-	ScoreColl						m_generationScoreComponent
-											,m_lmScoreComponent;
+	ScoreColl									m_generationScoreComponent 	// use ptr of dictionary as key
+														,m_lmScoreComponent;
 #endif
 
 public:

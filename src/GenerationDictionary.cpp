@@ -34,10 +34,8 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 																			, FactorCollection &factorCollection
 																			, const std::string &filePath
 																			, float weight
-																			, FactorDirection direction
-																			, size_t id)
+																			, FactorDirection direction)
 {	
-	m_id = id;
 	m_weight = weight;
 
 	//factors	
