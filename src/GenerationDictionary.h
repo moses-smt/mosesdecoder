@@ -42,7 +42,6 @@ protected:
 	// 2nd = target
 	OutputWordCollection	m_unknownWord;
 	float									m_weight;
-	size_t								m_id;
 
 public:
 	GenerationDictionary()
@@ -61,8 +60,7 @@ public:
 									, FactorCollection &factorCollection
 									, const std::string &filePath
 									, float weight
-									, FactorDirection direction
-									, size_t id);
+									, FactorDirection direction);
 
 	float GetWeight() const
 	{
@@ -71,10 +69,6 @@ public:
 	size_t GetSize() const
 	{
 		return m_collection.size();
-	}
-	size_t GetId() const
-	{
-		return m_id;
 	}
 	void SetWeight(float weight)
 	{
