@@ -42,7 +42,7 @@ protected:
 	size_t		m_prevEdgeChanged;
 	float			m_score[NUM_SCORES];
 
-	ScoreComponentCollection	m_transScoreComponent;
+	ScoreComponentCollection	m_ScoreComponent;
 	ScoreColl											m_generationScoreComponent
 																, m_lmScoreComponent;
  
@@ -88,7 +88,7 @@ public:
 	}
 	inline const ScoreComponentCollection &GetScoreComponent() const
 	{
-		return m_transScoreComponent;
+		return m_ScoreComponent;
 	}
 	inline const ScoreColl &GetGenerationScoreComponent() const
 	{
