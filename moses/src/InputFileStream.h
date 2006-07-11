@@ -36,7 +36,8 @@ public:
 	{
 		using namespace boost::iostreams;
 
-		if (filePath.substr(filePath.size() - 3, 3) == ".gz")
+		if (filePath.size() > 3 &&
+				filePath.substr(filePath.size() - 3, 3) == ".gz")
 		{
 			m_file.open(filePath.c_str(), ios_base::in | ios_base::binary);
 			push(gzip_decompressor());
