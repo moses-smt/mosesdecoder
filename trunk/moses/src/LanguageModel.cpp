@@ -57,10 +57,11 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	if (phraseSize >= m_nGramOrder)
 	{
 		contextFactor.push_back(phrase.GetFactor(m_nGramOrder - 1, factorType));
+		ngramScore = GetValue(contextFactor);		
 	}
 	
 	// main loop
-	for (size_t currPos = m_nGramOrder - 1; currPos < phraseSize ; currPos++)
+	for (size_t currPos = m_nGramOrder; currPos < phraseSize ; currPos++)
 	{ // used by hypo to speed up lm score calc
 		for (size_t currNGramOrder = 0 ; currNGramOrder < m_nGramOrder - 1 ; currNGramOrder++)
 		{
