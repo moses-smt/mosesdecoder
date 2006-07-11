@@ -82,7 +82,7 @@ void Manager::ProcessSentence()
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
 		HypothesisCollection &sourceHypoColl = *iterStack;
-		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize() / 2);
+		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize());
 		sourceHypoColl.InitializeArcs();
 		//sourceHypoColl.Prune();
 		ProcessOneStack(decodeStepList, sourceHypoColl);
