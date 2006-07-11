@@ -64,7 +64,8 @@ am__libmoses_a_SOURCES_DIST = Arc.cpp FactorCollection.cpp Factor.cpp \
 	HypothesisCollection.cpp HypothesisCollectionIntermediate.cpp \
 	Hypothesis.cpp InputFileStream.cpp LanguageModel.cpp \
 	LatticeEdge.cpp LatticePath.cpp Manager.cpp md5.cpp \
-	Parameter.cpp Phrase.cpp PhraseDictionary.cpp Sentence.cpp \
+	Parameter.cpp Phrase.cpp PhraseDictionary.cpp \
+	ScoreComponent.cpp ScoreComponentCollection.cpp Sentence.cpp \
 	StaticData.cpp TargetPhrase.cpp TranslationOption.cpp \
 	UserMessage.cpp Util.cpp WeightOptimization.cpp Word.cpp \
 	WordsBitmap.cpp NGramCollection.cpp
@@ -77,7 +78,8 @@ am_libmoses_a_OBJECTS = Arc.$(OBJEXT) FactorCollection.$(OBJEXT) \
 	LanguageModel.$(OBJEXT) LatticeEdge.$(OBJEXT) \
 	LatticePath.$(OBJEXT) Manager.$(OBJEXT) md5.$(OBJEXT) \
 	Parameter.$(OBJEXT) Phrase.$(OBJEXT) \
-	PhraseDictionary.$(OBJEXT) Sentence.$(OBJEXT) \
+	PhraseDictionary.$(OBJEXT) ScoreComponent.$(OBJEXT) \
+	ScoreComponentCollection.$(OBJEXT) Sentence.$(OBJEXT) \
 	StaticData.$(OBJEXT) TargetPhrase.$(OBJEXT) \
 	TranslationOption.$(OBJEXT) UserMessage.$(OBJEXT) \
 	Util.$(OBJEXT) WeightOptimization.$(OBJEXT) Word.$(OBJEXT) \
@@ -179,7 +181,8 @@ libmoses_a_SOURCES = Arc.cpp FactorCollection.cpp Factor.cpp \
 	HypothesisCollection.cpp HypothesisCollectionIntermediate.cpp \
 	Hypothesis.cpp InputFileStream.cpp LanguageModel.cpp \
 	LatticeEdge.cpp LatticePath.cpp Manager.cpp md5.cpp \
-	Parameter.cpp Phrase.cpp PhraseDictionary.cpp Sentence.cpp \
+	Parameter.cpp Phrase.cpp PhraseDictionary.cpp \
+	ScoreComponent.cpp ScoreComponentCollection.cpp Sentence.cpp \
 	StaticData.cpp TargetPhrase.cpp TranslationOption.cpp \
 	UserMessage.cpp Util.cpp WeightOptimization.cpp Word.cpp \
 	WordsBitmap.cpp $(am__append_1)
@@ -273,6 +276,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Parameter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Phrase.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PhraseDictionary.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ScoreComponent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ScoreComponentCollection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Sentence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StaticData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TargetPhrase.Po@am__quote@

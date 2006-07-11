@@ -36,7 +36,7 @@ protected:
 
 	std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
 	void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
-	void ReadConfigFile( std::string filePath );
+	bool ReadConfigFile( std::string filePath );
 	bool FilesExist(const std::string &paramName, size_t tokenizeIndex);
 
 	bool Validate();
