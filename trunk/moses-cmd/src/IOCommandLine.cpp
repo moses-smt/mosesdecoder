@@ -124,7 +124,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 
 		// score
 		// rolled up scores
-		m_nBestFile << path.GetScore(Distortion) << " ";
+		m_nBestFile << path.GetScore(ScoreType::Distortion) << " ";
 
 		// lm
 		ScoreColl::const_iterator iterScoreColl;
@@ -150,7 +150,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		}
 		
 		// WP
-		m_nBestFile << path.GetScore(WordPenalty) << " ";
+		m_nBestFile << path.GetScore(ScoreType::WordPenalty) << " ";
 		
 		// generation
 		const ScoreColl &generationScoreColl = path.GetGenerationScoreComponent();
@@ -161,7 +161,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		}
 		
 		// total						
-		m_nBestFile << "||| " << path.GetScore(Total) << endl;
+		m_nBestFile << "||| " << path.GetScore(ScoreType::Total) << endl;
 	}
 #endif
 }
