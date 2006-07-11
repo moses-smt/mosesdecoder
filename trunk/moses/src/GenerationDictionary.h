@@ -46,7 +46,7 @@ protected:
 
 public:
 	GenerationDictionary()
-		: Dictionary()
+		: Dictionary(1)
 	{
 	}
 	virtual ~GenerationDictionary();

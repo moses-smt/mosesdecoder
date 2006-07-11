@@ -37,7 +37,6 @@ class PhraseDictionary : public Dictionary
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionary&);
 
 protected:
-	const size_t m_noScoreComponent;
 	std::map<Phrase , TargetPhraseCollection > m_collection;
 	// 1st = source
 	// 2nd = target
@@ -50,8 +49,7 @@ protected:
 							, const std::vector<FactorType>		&inputFactorType);
 public:
 	PhraseDictionary(size_t noScoreComponent)
-		:Dictionary()
-		,m_noScoreComponent(noScoreComponent)
+		:Dictionary(noScoreComponent)
 	{
 	}
 	virtual ~PhraseDictionary();
@@ -74,10 +72,6 @@ public:
 	size_t GetSize() const
 	{
 		return m_collection.size();
-	}
-	size_t GetNoScoreComponent() const
-	{
-		return m_noScoreComponent;
 	}
 	const TargetPhraseCollection *FindEquivPhrase(const Phrase &source) const;
 
