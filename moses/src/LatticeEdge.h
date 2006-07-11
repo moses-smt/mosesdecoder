@@ -74,9 +74,8 @@ public:
 		:m_prevHypo(prevHypo)
 		,m_phrase(direction)
 	{}
-	virtual ~LatticeEdge()
-	{
-	}
+
+	virtual ~LatticeEdge();
 
 	inline const Phrase &GetPhrase() const
 	{
