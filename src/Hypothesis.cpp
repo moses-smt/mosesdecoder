@@ -53,7 +53,7 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 	SetScore(copy.GetScore());
 #ifdef N_BEST
 	m_lmScoreComponent 				= copy.GetLMScoreComponent();
-	m_ScoreComponent			= copy.GetScoreComponent();
+	m_transScoreComponent			= copy.GetScoreComponent();
 	m_generationScoreComponent	= copy.GetGenerationScoreComponent();
 		
 #endif
@@ -95,11 +95,11 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 	// translation score
 	const ScoreComponentCollection &prevComponent= prevHypo.GetScoreComponent();
-	m_ScoreComponent = prevComponent;
+	m_transScoreComponent = prevComponent;
 	
 	// add components specific to poss trans
 	const ScoreComponent &possComponent	= transOpt.GetScoreComponents();
-	ScoreComponent &transComponent				= m_ScoreComponent.GetScoreComponent(possComponent.GetPhraseDictionary());
+	ScoreComponent &transComponent				= m_transScoreComponent.GetScoreComponent(possComponent.GetPhraseDictionary());
 	const size_t noScoreComponent 						= possComponent.GetNoScoreComponent();
 	
 	for (size_t i = 0 ; i < noScoreComponent ; i++)
@@ -152,7 +152,7 @@ Hypothesis *Hypothesis::MergeNext(const TranslationOption &transOpt) const
 
 #ifdef N_BEST
 	const ScoreComponent &transOptComponent = transOpt.GetScoreComponents();
-	clone->m_ScoreComponent.Add(transOptComponent);
+	clone->m_transScoreComponent.Add(transOptComponent);
 #endif
 
 	return clone;
