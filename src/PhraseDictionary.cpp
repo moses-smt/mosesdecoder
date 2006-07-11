@@ -167,13 +167,14 @@ void PhraseDictionary::AddEquivPhrase(const Phrase &source
 
 const TargetPhraseCollection *PhraseDictionary::FindEquivPhrase(const Phrase &source) const
 {
-	std::map<Phrase , TargetPhraseCollection >::const_iterator iter = m_collection.find(source);
+	std::map<Phrase , TargetPhraseCollection >::const_iterator iter =
+		m_collection.find(source);
 	if (iter == m_collection.end())
 	{ // can't find source phrase
 		return NULL;
 	}
 	
-	return &(*iter).second;
+	return &iter->second;
 }
 
 PhraseDictionary::~PhraseDictionary()
