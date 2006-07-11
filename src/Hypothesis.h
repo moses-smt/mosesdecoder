@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Sentence.h"
 #include "Phrase.h"
 #include "PhraseDictionary.h"
+#include "GenerationDictionary.h"
 #include "LanguageModel.h"
 #include "Arc.h"
 #include "LatticeEdge.h"
@@ -129,7 +130,7 @@ public:
 		return m_sourceCompleted;
 	}
 
-	void MergeFactors(std::vector< const Word* > mergeWord, size_t idDict, float generationScore, float weight);
+	void MergeFactors(std::vector< const Word* > mergeWord, const GenerationDictionary &generationDictionary, float generationScore, float weight);
 		// used in generation processing
 		// startPos is usually the start of the last phrase
 

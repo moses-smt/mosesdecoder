@@ -53,7 +53,7 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 	SetScore(copy.GetScore());
 #ifdef N_BEST
 	m_lmScoreComponent 				= copy.GetLMScoreComponent();
-	m_transScoreComponent			= copy.GetScoreComponent();
+	m_ScoreComponent			= copy.GetScoreComponent();
 	m_generationScoreComponent	= copy.GetGenerationScoreComponent();
 		
 #endif
@@ -95,11 +95,11 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 	// translation score
 	const ScoreComponentCollection &prevComponent= prevHypo.GetScoreComponent();
-	m_transScoreComponent = prevComponent;
+	m_ScoreComponent = prevComponent;
 	
 	// add components specific to poss trans
 	const ScoreComponent &possComponent	= transOpt.GetScoreComponents();
-	ScoreComponent &transComponent				= m_transScoreComponent.GetScoreComponent(possComponent.GetPhraseDictionary());
+	ScoreComponent &transComponent				= m_ScoreComponent.GetScoreComponent(possComponent.GetPhraseDictionary());
 	const size_t noScoreComponent 						= possComponent.GetNoScoreComponent();
 	
 	for (size_t i = 0 ; i < noScoreComponent ; i++)
@@ -152,14 +152,14 @@ Hypothesis *Hypothesis::MergeNext(const TranslationOption &transOpt) const
 
 #ifdef N_BEST
 	const ScoreComponent &transOptComponent = transOpt.GetScoreComponents();
-	clone->m_transScoreComponent.Add(transOptComponent);
+	clone->m_ScoreComponent.Add(transOptComponent);
 #endif
 
 	return clone;
 
 }
 
-void Hypothesis::MergeFactors(vector< const Word* > mergeWords, size_t idDict, float generationScore, float weight)
+void Hypothesis::MergeFactors(vector< const Word* > mergeWords, const GenerationDictionary &generationDictionary, float generationScore, float weight)
 {
 	assert (mergeWords.size() == m_currTargetWordsRange.GetWordsCount());
 
@@ -187,7 +187,7 @@ void Hypothesis::MergeFactors(vector< const Word* > mergeWords, size_t idDict, f
 	// score
 	m_score[ScoreType::Generation] += generationScore * weight;
 #ifdef N_BEST
-	m_generationScoreComponent[idDict] += generationScore;
+	m_generationScoreComponent[generationDictionary.GetId()] += generationScore;
 #endif
 }
 

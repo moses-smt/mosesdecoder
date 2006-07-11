@@ -470,7 +470,6 @@ void Manager::ProcessGeneration(const Hypothesis &hypothesis
 																, HypothesisCollectionIntermediate &outputHypoColl)
 {
 	const GenerationDictionary &generationDictionary = decodeStep.GetGenerationDictionary();
-	size_t idDict = generationDictionary.GetId();
 	const float weight = generationDictionary.GetWeight();
 
 	size_t hypoSize	= hypothesis.GetSize()
@@ -531,7 +530,7 @@ void Manager::ProcessGeneration(const Hypothesis &hypothesis
 
 		// merge with existing hypothesis
 		Hypothesis *mergeHypo = hypothesis.Clone();
-		mergeHypo->MergeFactors(mergeWords, idDict, generationScore, weight);
+		mergeHypo->MergeFactors(mergeWords, generationDictionary, generationScore, weight);
 		outputHypoColl.AddNoPrune(mergeHypo);
 
 		// increment iterators
