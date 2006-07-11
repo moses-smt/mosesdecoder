@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Sentence.h"
 #include "Hypothesis.h"
 #include "ThreadMySQL.h"
+#include "TypeDef.h"
 
 using namespace std;
 
@@ -117,12 +118,12 @@ void ThreadMySQL::SetTranslation(const Hypothesis *hypo, long translationId)
 		strme << "UPDATE translation"
 			<< " SET unparsed = ' " << unparsed << "'"
 			<< "		,completed_date = NOW()"
-			<< "		,cost_translation = " << hypo->GetScore(PhraseTrans)
-			<< "		,cost_LM = "					<< hypo->GetScore(LanguageModelScore)
-			<< "		,cost_distortion = "	<< hypo->GetScore(Distortion)
-			<< "		,cost_word_penalty = " << hypo->GetScore(WordPenalty)
-			<< "		,cost_future = "			<< hypo->GetScore(FutureScoreEnum)
-			<< "		,cost_total = "				<< hypo->GetScore(Total)
+			<< "		,cost_translation = " << hypo->GetScore(ScoreType::PhraseTrans)
+			<< "		,cost_LM = "					<< hypo->GetScore(ScoreType::LanguageModelScore)
+			<< "		,cost_distortion = "	<< hypo->GetScore(ScoreType::Distortion)
+			<< "		,cost_word_penalty = " << hypo->GetScore(ScoreType::WordPenalty)
+			<< "		,cost_future = "			<< hypo->GetScore(ScoreType::FutureScoreEnum)
+			<< "		,cost_total = "				<< hypo->GetScore(ScoreType::Total)
 			<< " WHERE translation_id = " << translationId;
 	}
 
