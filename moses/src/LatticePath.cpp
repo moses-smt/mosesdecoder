@@ -35,7 +35,7 @@ LatticePath::LatticePath(const Hypothesis *hypo)
 	}
 #ifdef N_BEST
 	m_lmScoreComponent 				= hypo->GetLMScoreComponent();
-	m_ScoreComponent			= hypo->GetScoreComponent();
+	m_transScoreComponent			= hypo->GetScoreComponent();
 	m_generationScoreComponent	= hypo->GetGenerationScoreComponent();
 #endif
 
@@ -104,7 +104,7 @@ void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc
 	}
 
 	// phrase trans
-	m_ScoreComponent = copy.GetScoreComponent();
+	m_transScoreComponent = copy.GetScoreComponent();
 
 	const ScoreComponentCollection
 							&arcComponent		= arc->GetScoreComponent()
@@ -112,7 +112,7 @@ void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc
 							,&totalComponent= copy.GetScoreComponent();
 	
 	ScoreComponentCollection::iterator iterTrans;
-	for (iterTrans = m_ScoreComponent.begin() ; iterTrans != m_ScoreComponent.end() ; ++iterTrans)
+	for (iterTrans = m_transScoreComponent.begin() ; iterTrans != m_transScoreComponent.end() ; ++iterTrans)
 	{
 		const PhraseDictionary *phraseDictionary	= iterTrans->first;
 		ScoreComponent &transScore						= *iterTrans->second;
