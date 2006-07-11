@@ -41,7 +41,8 @@ const float DEFAULT_BEAM_THRESHOLD		= 0.00001f;
 #if HAVE_CONFIG_H
 #include "config.h"
 
-#define TRACE_ENABLE 1   // REMOVE after we figure this out
+#define TRACE_ENABLE 1		// REMOVE after we figure this out
+#define N_BEST 1					// REMOVE
 
 #  ifdef HAVE_SRILM
 #    define LM_SRI 1
