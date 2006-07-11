@@ -48,7 +48,7 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 
 	if (size() > m_maxHypoStackSize)
 	{
-		PruneToSize(m_maxHypoStackSize / 2);
+		PruneToSize(m_maxHypoStackSize);
 	}
 }
 

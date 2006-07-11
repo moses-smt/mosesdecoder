@@ -57,7 +57,6 @@ public:
 	{
 		return m_NGramMaxOrder;
 	}
-
 };
 
 class HypothesisCollection : public std::set< Hypothesis*, CompareHypothesisCollection >
