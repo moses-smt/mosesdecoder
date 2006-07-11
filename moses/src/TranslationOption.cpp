@@ -34,7 +34,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 ,m_futureScore	(0)
 ,m_ngramScore(0)
 #ifdef N_BEST
-,m_transScoreComponent(targetPhrase.GetScoreComponents())
+,m_ScoreComponent(targetPhrase.GetScoreComponents())
 #endif
 {
 }
@@ -48,7 +48,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 ,m_wordsRange	(wordsRange)
 ,m_transScore	(transScore)
 #ifdef N_BEST
-,m_transScoreComponent(targetPhrase.GetScoreComponents())
+,m_ScoreComponent(targetPhrase.GetScoreComponents())
 #endif
 {
 	CalcFutureScore(lmList, weightWP);

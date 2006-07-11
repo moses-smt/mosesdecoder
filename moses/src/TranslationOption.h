@@ -37,7 +37,7 @@ protected:
 	WordsRange		m_wordsRange;
 	float					m_transScore, m_futureScore, m_ngramScore;
 #ifdef N_BEST
-	ScoreComponent	m_transScoreComponent;
+	ScoreComponent	m_ScoreComponent;
 	std::list< std::pair<size_t, float> >	m_lmScoreComponent;
 	std::list< std::pair<size_t, float> >	m_trigramComponent;
 #endif
@@ -91,7 +91,7 @@ public:
 #ifdef N_BEST
 	inline const ScoreComponent &GetScoreComponents() const
 	{
-		return m_transScoreComponent;
+		return m_ScoreComponent;
 	}
 	inline const std::list< std::pair<size_t, float> > &GetLMScoreComponent() const
 	{
