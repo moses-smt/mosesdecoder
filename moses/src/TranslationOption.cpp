@@ -73,8 +73,9 @@ void TranslationOption::CalcFutureScore(const LMList &lmList, float weightWP)
 		float fullScore, nGramScore;
 #ifdef N_BEST
 		languageModel.CalcScore(m_targetPhrase, fullScore, nGramScore, m_trigramComponent);
-#endif
-#ifndef N_BEST
+#else
+    // this is really, really ugly (a reference to an object at NULL
+    // is asking for trouble). TODO
 		languageModel.CalcScore(m_targetPhrase, fullScore, nGramScore, *static_cast< list< pair<size_t, float> >* > (NULL));
 #endif
 
@@ -91,9 +92,9 @@ void TranslationOption::CalcFutureScore(const LMList &lmList, float weightWP)
 // friend
 ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 {
-	out << "(" 
-			<< possibleTranslation.GetPhrase() 
-			<< ") ";
+	out << possibleTranslation.GetPhrase() 
+			<< ", pC=" << possibleTranslation.m_transScore
+      << ", c="  << possibleTranslation.m_futureScore;
 	return out;
 }
 
