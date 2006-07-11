@@ -327,7 +327,7 @@ void StaticData::LoadPhraseTables(bool filter
 			}
 			TRACE_ERR(filePath << endl);
 
-			m_phraseDictionary.push_back(new PhraseDictionary(currDict, noScoreComponent));
+			m_phraseDictionary.push_back(new PhraseDictionary(noScoreComponent));
 			timer.check("Start loading");
 			m_phraseDictionary[currDict]->Load(input
 																				, output

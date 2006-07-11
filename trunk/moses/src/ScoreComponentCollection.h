@@ -95,9 +95,8 @@ inline std::ostream& operator<<(std::ostream &out, const ScoreComponentCollectio
 	ScoreComponentCollection::const_iterator iter;
 	for (iter = transScoreComponentColl.begin() ; iter != transScoreComponentColl.end() ; ++iter)
 	{
-		const PhraseDictionary *phraseDictionary = iter->first;
 		const ScoreComponent &transScoreComponent = *iter->second;
-		out << "[" << phraseDictionary->GetId() << "=" << transScoreComponent << "] ";
+		out << "[" << transScoreComponent << "] ";
 	}
 	return out;
 }
