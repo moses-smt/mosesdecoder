@@ -47,7 +47,7 @@ protected:
 	Phrase					m_phrase;
 
 #ifdef N_BEST
-	ScoreComponentCollection	m_ScoreComponent;
+	ScoreComponentCollection	m_transScoreComponent;
 	ScoreColl						m_generationScoreComponent
 											,m_lmScoreComponent;
 #endif
@@ -63,7 +63,7 @@ public:
 		:m_prevHypo(prevHypo)
 		,m_phrase(phrase)
 #ifdef N_BEST
-		,m_ScoreComponent(transScoreComponent)
+		,m_transScoreComponent(transScoreComponent)
 		,m_generationScoreComponent(generationScoreComponent)
 		,m_lmScoreComponent		(lmScoreComponent)
 #endif
@@ -114,7 +114,7 @@ public:
 
 	inline const ScoreComponentCollection &GetScoreComponent() const
 	{
-		return m_ScoreComponent;
+		return m_transScoreComponent;
 	}
 	inline const ScoreColl &GetLMScoreComponent() const
 	{
