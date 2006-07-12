@@ -190,6 +190,7 @@ std::ostream& operator<<(std::ostream& out, const HypothesisCollection& hypoColl
 	{
 		const Hypothesis &hypo = **iter;
 		out << hypo << endl;
+		
 	}
 	return out;
 }

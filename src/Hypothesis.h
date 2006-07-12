@@ -56,7 +56,12 @@ protected:
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	void CalcLMScore(const LMList		&lmListInitial, const LMList	&lmListEnd);
 
+
 public:
+
+	static int s_numNodes;
+	int m_id;	
+
 	Hypothesis(const Hypothesis &copy); 
 	// used to create clone
 	Hypothesis(const Phrase &phrase);
@@ -70,8 +75,11 @@ public:
 	}
 
 	Hypothesis *CreateNext(const TranslationOption &transOpt) const;
+	
 	Hypothesis *MergeNext(const TranslationOption &transOpt) const;
-
+	
+	void PrintHypothesis(  const Sentence &source, float weightDistortion, float weightWordPenalty) const;
+ // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
 	inline const WordsRange &GetCurrSourceWordsRange() const
 	{
 		return m_currSourceWordsRange;
@@ -86,7 +94,8 @@ public:
 							, const LMList &lmListEnd
 							, float weightDistortion
 							, float weightWordPenalty
-							, const SquareMatrix &futureScore);
+							, const SquareMatrix &futureScore
+							, const Sentence &source) ;
 
 	// same as for phrase
 	inline size_t GetSize() const
