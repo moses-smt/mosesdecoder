@@ -54,11 +54,11 @@ public:
 		erase(transScoreComponent);
 	}
 
-	ScoreComponent &Add(const ScoreComponent &transScoreComponent)
+	ScoreComponent &Add(const ScoreComponent &scoreComponent)
 	{
-		iterator iter = find(transScoreComponent);
+		iterator iter = find(scoreComponent);
 		assert(iter == end());
-		std::pair<iterator, bool> added = insert(transScoreComponent);
+		std::pair<iterator, bool> added = insert(scoreComponent);
 		return *added.first;
 	}
 	ScoreComponent &Add(const Dictionary *dictionary)

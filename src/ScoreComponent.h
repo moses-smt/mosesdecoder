@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <iostream>
+#include <assert.h>
 #include "TypeDef.h"
 
 //typedef float ScoreComponent[NUM_PHRASE_SCORES];
@@ -54,6 +55,8 @@ public:
 		return m_dictionary;
 	}
 
+	size_t GetNoScoreComponent() const;
+
 	float operator[](size_t index) const
 	{
 		return m_scoreComponent[index];
@@ -68,6 +71,17 @@ public:
 		for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
 		{
 			m_scoreComponent[i] = 0;
+		}
+	}
+
+	void Add(const ScoreComponent &source)
+	{
+		const size_t size = GetNoScoreComponent();
+		assert(size == source.GetNoScoreComponent());
+
+		for (size_t i = 0 ; i < size ; i++)
+		{
+			m_scoreComponent[i] += source[i];
 		}
 	}
 };
