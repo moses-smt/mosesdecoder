@@ -1,12 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+# Visual C++ Express 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses", "moses.vcproj", "{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B4E902E1-D423-4BD5-A603-314D06483F46} = {B4E902E1-D423-4BD5-A603-314D06483F46}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mysqlpp", "..\mysqlpp\mysqlpp.vcproj", "{B4E902E1-D423-4BD5-A603-314D06483F46}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-cmd", "..\moses-cmd\moses-cmd.vcproj", "{5BBAC701-84F5-438E-8F54-B3391F451F2A}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -29,14 +24,6 @@ Global
 		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}.Release|Win32.Build.0 = Release|Win32
 		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}.ReleaseNBest|Win32.ActiveCfg = ReleaseNBest|Win32
 		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}.ReleaseNBest|Win32.Build.0 = ReleaseNBest|Win32
-		{B4E902E1-D423-4BD5-A603-314D06483F46}.Debug|Win32.ActiveCfg = Release|Win32
-		{B4E902E1-D423-4BD5-A603-314D06483F46}.Debug|Win32.Build.0 = Release|Win32
-		{B4E902E1-D423-4BD5-A603-314D06483F46}.DebugNBest|Win32.ActiveCfg = Release|Win32
-		{B4E902E1-D423-4BD5-A603-314D06483F46}.DebugNBest|Win32.Build.0 = Release|Win32
-		{B4E902E1-D423-4BD5-A603-314D06483F46}.Release|Win32.ActiveCfg = Release|Win32
-		{B4E902E1-D423-4BD5-A603-314D06483F46}.Release|Win32.Build.0 = Release|Win32
-		{B4E902E1-D423-4BD5-A603-314D06483F46}.ReleaseNBest|Win32.ActiveCfg = Release|Win32
-		{B4E902E1-D423-4BD5-A603-314D06483F46}.ReleaseNBest|Win32.Build.0 = Release|Win32
 		{5BBAC701-84F5-438E-8F54-B3391F451F2A}.Debug|Win32.ActiveCfg = Debug|Win32
 		{5BBAC701-84F5-438E-8F54-B3391F451F2A}.Debug|Win32.Build.0 = Debug|Win32
 		{5BBAC701-84F5-438E-8F54-B3391F451F2A}.DebugNBest|Win32.ActiveCfg = DebugNBest|Win32
