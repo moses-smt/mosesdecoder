@@ -70,12 +70,6 @@ public:
 			m_scoreComponent[i] = 0;
 		}
 	}
-
-	inline bool operator< (const ScoreComponent &compare) const
-	{
-		return GetDictionary() < compare.GetDictionary();
-	}
-
 };
 
 inline std::ostream& operator<<(std::ostream &out, const ScoreComponent &transScoreComponent)
