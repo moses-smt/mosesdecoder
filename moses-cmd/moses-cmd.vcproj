@@ -345,15 +345,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\IOMySQL.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Main.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ThreadMySQL.cpp"
 				>
 			</File>
 		</Filter>
@@ -371,15 +363,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\IOMySQL.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Main.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ThreadMySQL.h"
 				>
 			</File>
 		</Filter>
