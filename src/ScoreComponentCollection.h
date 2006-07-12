@@ -22,44 +22,33 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <iostream>
-#include <set>
+#include <map>
 #include <assert.h>
 #include "ScoreComponent.h"
 
 class Dictionary;
 
-struct CompareScoreComponent
-{
-	bool operator()(const ScoreComponent &a, const ScoreComponent &b) const
-  {
-    return a.GetDictionary() < b.GetDictionary();
-  }
-};
-
-class ScoreComponentCollection : public std::set<ScoreComponent, CompareScoreComponent>
+class ScoreComponentCollection : public std::map<const Dictionary*, ScoreComponent>
 {
 public:
-	ScoreComponent &GetScoreComponent(const Dictionary *index)
+	ScoreComponent &GetScoreComponent(const Dictionary *dictionary)
 	{
-		ScoreComponentCollection::iterator iter = find(index);
+		ScoreComponentCollection::iterator iter = find(dictionary);
 		assert(iter != end());
-		return *iter;
+		return iter->second;
 	}
 	const ScoreComponent &GetScoreComponent(const Dictionary *dictionary) const
 	{
 		return const_cast<ScoreComponentCollection*>(this)->GetScoreComponent(dictionary);
 	}
-	void Remove(const ScoreComponent &transScoreComponent)
+	void Remove(const Dictionary *dictionary)
 	{
-		erase(transScoreComponent);
+		erase(dictionary);
 	}
-
 	ScoreComponent &Add(const ScoreComponent &scoreComponent)
 	{
-		iterator iter = find(scoreComponent);
-		assert(iter == end());
-		std::pair<iterator, bool> added = insert(scoreComponent);
-		return *added.first;
+		const Dictionary *dictionary = scoreComponent.GetDictionary();
+		return operator[](dictionary) = scoreComponent;
 	}
 	ScoreComponent &Add(const Dictionary *dictionary)
 	{
@@ -67,13 +56,13 @@ public:
 	}
 };
 
-inline std::ostream& operator<<(std::ostream &out, const ScoreComponentCollection &transScoreComponentColl)
+inline std::ostream& operator<<(std::ostream &out, const ScoreComponentCollection &scoreComponentColl)
 {
 	ScoreComponentCollection::const_iterator iter;
-	for (iter = transScoreComponentColl.begin() ; iter != transScoreComponentColl.end() ; ++iter)
+	for (iter = scoreComponentColl.begin() ; iter != scoreComponentColl.end() ; ++iter)
 	{
-		const ScoreComponent &transScoreComponent = *iter;
-		out << "[" << transScoreComponent << "] ";
+		const ScoreComponent &scoreComponent = iter->second;
+		out << "[" << scoreComponent << "] ";
 	}
 	return out;
 }
