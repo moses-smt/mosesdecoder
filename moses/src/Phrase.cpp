@@ -58,7 +58,7 @@ void Phrase::AddWords(const Phrase &copy)
 	}
 }
 
-Phrase Phrase::GetSubString(const WordsRange &wordsRange)
+Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 {
 	Phrase retPhrase(m_direction);
 

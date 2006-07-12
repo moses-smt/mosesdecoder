@@ -52,6 +52,7 @@ Manager::~Manager()
 
 void Manager::ProcessSentence()
 {
+	
 	list < DecodeStep > &decodeStepList = m_staticData.GetDecodeStepList();
 
 	const PhraseDictionary &phraseDictionary = decodeStepList.front().GetPhraseDictionary();
@@ -88,12 +89,12 @@ void Manager::ProcessSentence()
 		ProcessOneStack(decodeStepList, sourceHypoColl);
 
 		//OutputHypoStack();
-		OutputHypoStackSize();
+		//OutputHypoStackSize();
 	}
 
 	// output
 	//OutputHypoStack();
-	OutputHypoStackSize();
+	//OutputHypoStackSize();
 }
 
 const Hypothesis *Manager::GetBestHypothesis() const
@@ -173,7 +174,11 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList
 									, m_staticData.GetLanguageModel(Other)
 									, m_staticData.GetWeightDistortion()
 									, m_staticData.GetWeightWordPenalty()
-									, m_futureScore);
+									, m_futureScore, m_source);
+		if(m_staticData.GetVerboseLevel() > 0) 
+		{			
+			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+		}
 		size_t wordsTranslated = hypo->GetWordsBitmap().GetWordsCount();
 
 		if (m_hypoStack[wordsTranslated].Add(hypo, m_staticData.GetBeamThreshold()))
@@ -203,6 +208,7 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
 			if ( !transOpt.Overlap(hypothesis)) 
 			{
 				Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+				//newHypo->PrintHypothesis(m_source);
 				outputHypoColl.AddNoPrune( newHypo );			
 			}
 		}
@@ -230,6 +236,7 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
 					)
 				{
 					Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+					//newHypo->PrintHypothesis(m_source);
 					outputHypoColl.AddNoPrune( newHypo );			
 				}
 			}
@@ -241,6 +248,7 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
 						&& !transOpt.Overlap(hypothesis))
 					{
 						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+						//newHypo->PrintHypothesis(m_source);
 						outputHypoColl.AddNoPrune( newHypo );			
 					}
 				}
@@ -250,6 +258,7 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
 						&& !transOpt.Overlap(hypothesis))
 					{
 						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+						//newHypo->PrintHypothesis(m_source);
 						outputHypoColl.AddNoPrune( newHypo );			
 					}
 				}
@@ -267,7 +276,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 	const PhraseDictionary &phraseDictionary	= decodeStep.GetPhraseDictionary();
 	const TargetPhraseCollection *phraseColl	=	phraseDictionary.FindEquivPhrase(sourcePhrase);
 	size_t currTargetLength										= hypothesis.GetCurrTargetLength();
-	
+	Hypothesis *newHypo;
 	if (phraseColl != NULL)
 	{
 		TargetPhraseCollection::const_iterator iterTargetPhrase;
@@ -283,7 +292,9 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 																	, transScore
 																	, weightWP);
 			
-			Hypothesis *newHypo = hypothesis.MergeNext(transOpt);
+			newHypo = hypothesis.MergeNext(transOpt);
+			
+			
 			if (newHypo != NULL)
 			{
 				outputHypoColl.AddNoPrune( newHypo );
@@ -293,7 +304,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 	else if (sourceWordsRange.GetWordsCount() == 1 && currTargetLength == 1)
 	{ // unknown handler here
 		const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Output);
-		Hypothesis *newHypo = new Hypothesis(hypothesis);
+		newHypo = new Hypothesis(hypothesis);
 		
 		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 		{
@@ -322,6 +333,8 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 		}
 		outputHypoColl.AddNoPrune( newHypo );
 	}
+	
+
 }
 
 void Manager::CreateTranslationOptions(const Phrase &phrase

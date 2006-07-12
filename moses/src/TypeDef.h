@@ -35,6 +35,7 @@ const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t ARRAY_SIZE_INCR					= 20; //amount by which a hypostack gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_THRESHOLD		= 0.00001f;
+const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
 ///////////////////////////////////////////////// 
 // for those using autoconf/automake

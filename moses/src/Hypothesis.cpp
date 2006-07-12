@@ -31,14 +31,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+
+int Hypothesis::s_numNodes = 0;
+
 Hypothesis::Hypothesis(const Phrase &phrase)
 	: LatticeEdge(Output, NULL)
 	, m_sourceCompleted(phrase.GetSize())
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
+	, m_id(s_numNodes++)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	ResetScore();	
+
 }
 
 Hypothesis::Hypothesis(const Hypothesis &copy)
@@ -46,6 +51,7 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 	, m_sourceCompleted				(copy.m_sourceCompleted )
 	, m_currSourceWordsRange	(copy.m_currSourceWordsRange)
 	, m_currTargetWordsRange		(copy.m_currTargetWordsRange)
+	, m_id(s_numNodes++)
 {
 	m_phrase.AddWords( copy.m_phrase );
 
@@ -65,6 +71,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_currSourceWordsRange	(prevHypo.m_currSourceWordsRange)
 	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
 														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetPhrase().GetSize())
+	, m_id(s_numNodes++)
 {
 	const Phrase &possPhrase				= transOpt.GetPhrase();
 	const WordsRange &wordsRange		= transOpt.GetWordsRange();
@@ -128,6 +135,9 @@ Hypothesis *Hypothesis::CreateNext(const TranslationOption &transOpt) const
 	Hypothesis *clone	= new Hypothesis(*this, transOpt);
 	return clone;
 }
+
+
+
 
 Hypothesis *Hypothesis::MergeNext(const TranslationOption &transOpt) const
 {
@@ -254,6 +264,15 @@ int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize) const
 	return 0;
 }
 
+/**
+ * Calculates the overall language model score by combining the scores
+ * of language models generated for each of the factors.  Because the factors
+ * represent a variety of tag sets, and because factors with smaller tag sets 
+ * (such as POS instead of words) allow us to calculate richer statistics, we
+ * allow a different length of n-gram to be specified for each factor.
+ * /param lmListInitial todo - describe this parameter 
+ * /param lmListEnd todo - describe this parameter
+ */
 void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEnd)
 {
 	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
@@ -279,6 +298,9 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 				contextFactor[index++] = languageModel.GetSentenceStart();
 		}		
 		lmScore	= languageModel.GetValue(contextFactor);
+		//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;
+		
+		
 
 		// main loop
 		for (size_t currPos = startPos + 1 ; currPos <= m_currTargetWordsRange.GetEndPos() ; currPos++)
@@ -291,6 +313,8 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 			contextFactor.back() = GetFactor(currPos, factorType);
 
 			lmScore	+= languageModel.GetValue(contextFactor);
+			//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;
+		
 		}
 
 		// end of sentence
@@ -331,6 +355,8 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 				contextFactor[index++] = languageModel.GetSentenceStart();
 		}		
 		lmScore	= languageModel.GetValue(contextFactor);
+		//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;
+		
 
 		// main loop
 		size_t endPos = std::min(startPos + nGramOrder - 2
@@ -345,6 +371,8 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 			contextFactor.back() = GetFactor(currPos, factorType);
 
 			lmScore	+= languageModel.GetValue(contextFactor);
+			//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;
+		
 		}
 
 		// end of sentence
@@ -370,7 +398,7 @@ void Hypothesis::CalcScore(const LMList		&lmListInitial
 													, const LMList	&lmListEnd
 													, float weightDistortion
 													, float weightWordPenalty
-													, const SquareMatrix &futureScore)
+													, const SquareMatrix &futureScore, const Sentence &source) 
 {
 	// DISTORTION COST
 	const WordsRange &prevRange = m_prevHypo->GetCurrSourceWordsRange()
@@ -394,6 +422,9 @@ void Hypothesis::CalcScore(const LMList		&lmListInitial
 
 	// FUTURE COST
 	CalcFutureScore(futureScore);
+
+
+
 
 	// TOTAL COST
 	m_score[ScoreType::Total] = m_score[ScoreType::PhraseTrans]
@@ -425,8 +456,43 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 	{
 		m_score[ScoreType::FutureScoreEnum] += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
 	}
+	
+	
+	
 }
 
+/**
+ * prints hypothesis information for pharaoh style logging
+ */
+void Hypothesis::PrintHypothesis(const Sentence &source, float weightDistortion, float weightWordPenalty) const{
+	int start = m_prevHypo->m_currSourceWordsRange.GetEndPos() -1;
+	int end = m_prevHypo->m_currSourceWordsRange.GetEndPos();
+	cout<<"creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ... ";
+	if(start >= 0) {
+		WordsRange range(start, end);
+		cout<< source.GetSubString(range);
+	}
+	else if (start == -1){
+		WordsRange range(0, end);
+		cout<< "<s> "<<source.GetSubString(range);
+	}
+	else
+	{
+		cout<< "<s> <s>";
+	}
+	cout<<" )"<<endl;
+	cout<<"\tbase score "<<m_prevHypo->m_score[ScoreType::Total]<<endl;
+	cout<<"\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "<< source.GetSubString(m_currSourceWordsRange)  <<endl;
+	cout<<"\ttranslated as: "<<m_phrase<<" => translation cost "<<m_score[ScoreType::PhraseTrans]<<endl;
+	cout<<"\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange()) << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
+	cout<<"\tlanguage model cost "<<m_score[ScoreType::LanguageModelScore]<<endl;
+	cout<<"\tword penalty "<<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
+	cout<<"\tscore "<<m_score[ScoreType::Total] - m_score[ScoreType::FutureScoreEnum]<<" + future cost "<<m_score[ScoreType::FutureScoreEnum]<<" = "<<m_score[ScoreType::Total]<<endl;
+	//PrintLMScores();
+}
+
+
+ 
 // friend
 ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 {	

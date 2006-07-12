@@ -56,6 +56,7 @@ protected:
 	std::string													m_nBestFilePath, m_cachePath;
 	std::vector<std::string>						m_mySQLParam;
 	InputOutput													*m_inputOutput;
+	size_t m_verboseLevel;
 
 public:
 	StaticData();
@@ -145,6 +146,11 @@ public:
 	const std::string GetCachePath() const
 	{
 		return m_cachePath;
+	}
+
+	size_t GetVerboseLevel() const
+	{
+		return m_verboseLevel;
 	}
 
 	// for mert

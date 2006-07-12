@@ -64,6 +64,17 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_nBestSize = 0;
 	}
 
+	// verbose level
+	if (m_parameter.GetParam("verbose").size() == 1)
+	{
+		m_verboseLevel = Scan<size_t>( m_parameter.GetParam("verbose")[0]);
+	}
+	else
+	{
+		m_verboseLevel = 0;
+	}
+
+
 	//input-factors
 	const vector<string> &inputFactorVector = m_parameter.GetParam("input-factors");
 	for(size_t i=0; i<inputFactorVector.size(); i++) 
