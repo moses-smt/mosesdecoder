@@ -175,8 +175,8 @@ void LanguageModel::Load(size_t id
 	m_weight			= weight;
 	m_nGramOrder	= nGramOrder;
 	// make sure start & end tags in factor collection
-	m_sentenceStart	= factorCollection.AddFactor(Target, m_factorType, SENTENCE_START);
-	m_sentenceEnd		= factorCollection.AddFactor(Target, m_factorType, SENTENCE_END);
+	m_sentenceStart	= factorCollection.AddFactor(Output, m_factorType, SENTENCE_START);
+	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END);
 
 	// read in file
 	TRACE_ERR(fileName << endl);
@@ -203,7 +203,7 @@ void LanguageModel::Load(size_t id
 				const Factor *factor;
 				for (int currFactor = (int) factorStr.size() - 1 ; currFactor >= 0  ; currFactor--)
 				{
-					factor = factorCollection.AddFactor(Target, m_factorType, factorStr[currFactor]);
+					factor = factorCollection.AddFactor(Output, m_factorType, factorStr[currFactor]);
 					nGram = ngramColl->GetOrCreateNGram(factor);
 	
 					ngramColl = nGram->GetNGramColl();

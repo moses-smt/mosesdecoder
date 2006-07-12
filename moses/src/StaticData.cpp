@@ -310,7 +310,8 @@ void StaticData::LoadPhraseTables(bool filter
 			bool filterPhrase;
 			if (filter)
 			{
-				if (boost::filesystem::exists(hashFilePath))
+				boost::filesystem::path tempFile(hashFilePath, boost::filesystem::native);
+				if (boost::filesystem::exists(tempFile))
 				{ // load filtered file instead
 					filterPhrase = false;
 					filePath = hashFilePath;
