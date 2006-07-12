@@ -41,9 +41,15 @@ public:
 	{
 		return const_cast<ScoreComponentCollection*>(this)->GetScoreComponent(phraseDictionary);
 	}
+	void Remove(const ScoreComponent &transScoreComponent)
+	{
+		erase(transScoreComponent);
+	}
+
 	ScoreComponent &Add(const ScoreComponent &transScoreComponent)
 	{
-		const PhraseDictionary *phraseDictionary = transScoreComponent.GetPhraseDictionary();
+		iterator iter = find(transScoreComponent);
+		assert(iter == end());
 		std::pair<iterator, bool> added = insert(transScoreComponent);
 		return *added.first;
 	}
