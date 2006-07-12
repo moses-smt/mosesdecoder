@@ -65,10 +65,10 @@ am__libmoses_a_SOURCES_DIST = Arc.cpp FactorCollection.cpp Factor.cpp \
 	Hypothesis.cpp InputFileStream.cpp LanguageModel.cpp \
 	LatticeEdge.cpp LatticePath.cpp Manager.cpp md5.cpp \
 	Parameter.cpp Phrase.cpp PhraseDictionary.cpp \
-	ScoreComponent.cpp ScoreComponentCollection.cpp Sentence.cpp \
-	StaticData.cpp TargetPhrase.cpp TranslationOption.cpp \
-	UserMessage.cpp Util.cpp WeightOptimization.cpp Word.cpp \
-	WordsBitmap.cpp NGramCollection.cpp
+	ScoreComponent.cpp Sentence.cpp StaticData.cpp \
+	TargetPhrase.cpp TranslationOption.cpp UserMessage.cpp \
+	Util.cpp WeightOptimization.cpp Word.cpp WordsBitmap.cpp \
+	NGramCollection.cpp
 @INTERNAL_LM_TRUE@am__objects_1 = NGramCollection.$(OBJEXT)
 am_libmoses_a_OBJECTS = Arc.$(OBJEXT) FactorCollection.$(OBJEXT) \
 	Factor.$(OBJEXT) FactorTypeSet.$(OBJEXT) \
@@ -79,8 +79,7 @@ am_libmoses_a_OBJECTS = Arc.$(OBJEXT) FactorCollection.$(OBJEXT) \
 	LatticePath.$(OBJEXT) Manager.$(OBJEXT) md5.$(OBJEXT) \
 	Parameter.$(OBJEXT) Phrase.$(OBJEXT) \
 	PhraseDictionary.$(OBJEXT) ScoreComponent.$(OBJEXT) \
-	ScoreComponentCollection.$(OBJEXT) Sentence.$(OBJEXT) \
-	StaticData.$(OBJEXT) TargetPhrase.$(OBJEXT) \
+	Sentence.$(OBJEXT) StaticData.$(OBJEXT) TargetPhrase.$(OBJEXT) \
 	TranslationOption.$(OBJEXT) UserMessage.$(OBJEXT) \
 	Util.$(OBJEXT) WeightOptimization.$(OBJEXT) Word.$(OBJEXT) \
 	WordsBitmap.$(OBJEXT) $(am__objects_1)
@@ -106,6 +105,8 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BUILD_MYSQL_SUPPORT_FALSE = @BUILD_MYSQL_SUPPORT_FALSE@
+BUILD_MYSQL_SUPPORT_TRUE = @BUILD_MYSQL_SUPPORT_TRUE@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
@@ -130,6 +131,9 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MYSQLCLIENT_CPPFLAGS = @MYSQLCLIENT_CPPFLAGS@
+MYSQLCLIENT_LDFLAGS = @MYSQLCLIENT_LDFLAGS@
+MYSQLCLIENT_LIBS = @MYSQLCLIENT_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -182,10 +186,10 @@ libmoses_a_SOURCES = Arc.cpp FactorCollection.cpp Factor.cpp \
 	Hypothesis.cpp InputFileStream.cpp LanguageModel.cpp \
 	LatticeEdge.cpp LatticePath.cpp Manager.cpp md5.cpp \
 	Parameter.cpp Phrase.cpp PhraseDictionary.cpp \
-	ScoreComponent.cpp ScoreComponentCollection.cpp Sentence.cpp \
-	StaticData.cpp TargetPhrase.cpp TranslationOption.cpp \
-	UserMessage.cpp Util.cpp WeightOptimization.cpp Word.cpp \
-	WordsBitmap.cpp $(am__append_1)
+	ScoreComponent.cpp Sentence.cpp StaticData.cpp \
+	TargetPhrase.cpp TranslationOption.cpp UserMessage.cpp \
+	Util.cpp WeightOptimization.cpp Word.cpp WordsBitmap.cpp \
+	$(am__append_1)
 all: all-am
 
 .SUFFIXES:
@@ -199,9 +203,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  src/Makefile
+	  $(AUTOMAKE) --gnu  src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -277,7 +281,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Phrase.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PhraseDictionary.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ScoreComponent.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ScoreComponentCollection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Sentence.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StaticData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TargetPhrase.Po@am__quote@

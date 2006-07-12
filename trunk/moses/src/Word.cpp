@@ -87,7 +87,7 @@ std::string Word::ToString(const FactorArray &factorArray)
 {
 	stringstream strme;
 
-	strme << "(";
+//	strme << "(";
 	for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 	{
 			const Factor *factor = factorArray[currFactor];
@@ -97,7 +97,7 @@ std::string Word::ToString(const FactorArray &factorArray)
 		}
 	}
 	string str = strme.str();
-	str = str.substr(0, str.size() - 1) + ") ";
+	str = str.substr(0, str.size() - 1) + " ";
 	return str;
 }
 
@@ -106,7 +106,7 @@ ostream& operator<<(ostream& out, const Word& word)
 {	
 	stringstream strme;
 
-	strme << "(";
+//	strme << "(";
 	for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 	{
 		FactorType factorType = static_cast<FactorType>(currFactor);
@@ -118,7 +118,7 @@ ostream& operator<<(ostream& out, const Word& word)
 	}
 	string str = strme.str();
 	str = str.substr(0, str.size() - 1);
-	out << str << ") ";
+	out << str << " ";
 	return out;
 }
 

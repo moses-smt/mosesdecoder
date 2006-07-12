@@ -59,6 +59,7 @@ Parameter::Parameter()
 	AddParam("cache-path");
 	AddParam("input-file");
 	AddParam("stack");
+	AddParam("verbose");
 }
 
 // check if parameter settings make sense
@@ -222,7 +223,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-g", "weight-generation", argc, argv);
 	OverwriteParam("-n-best-list", "n-best-list", argc, argv);
 	OverwriteParam("-s", "stack", argc, argv);
-
+	OverwriteParam("-v", "verbose", argc, argv);
   // check if parameters make sense
 	return Validate();
 }

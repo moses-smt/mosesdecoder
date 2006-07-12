@@ -99,7 +99,7 @@ public:
 	FactorArray &AddWord();
 	void AddWords(const Phrase &copy);
 
-	Phrase GetSubString(const WordsRange &wordsRange);
+	Phrase GetSubString(const WordsRange &wordsRange) const;
 
 	TO_STRING
 
