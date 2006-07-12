@@ -114,8 +114,8 @@ void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc
 	ScoreComponentCollection::iterator iterTrans;
 	for (iterTrans = m_transScoreComponent.begin() ; iterTrans != m_transScoreComponent.end() ; ++iterTrans)
 	{
-		const PhraseDictionary *phraseDictionary	= iterTrans->first;
-		ScoreComponent &transScore								= iterTrans->second;
+		ScoreComponent &transScore								= *iterTrans;
+		const PhraseDictionary *phraseDictionary	= transScore.GetPhraseDictionary();
 		const size_t noScoreComponent 						= phraseDictionary->GetNoScoreComponent();
 			
 		const ScoreComponent &arcScore		= arcComponent.GetScoreComponent(phraseDictionary)

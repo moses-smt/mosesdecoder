@@ -22,20 +22,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <iostream>
-#include <map>
+#include <set>
 #include <assert.h>
 #include "ScoreComponent.h"
 
 class PhraseDictionary;
 
-class ScoreComponentCollection : public std::map<const PhraseDictionary *, ScoreComponent>
+class ScoreComponentCollection : public std::set<ScoreComponent>
 {
 public:
 	ScoreComponent &GetScoreComponent(const PhraseDictionary *index)
 	{
 		ScoreComponentCollection::iterator iter = find(index);
 		assert(iter != end());
-		return iter->second;
+		return *iter;
 	}
 	const ScoreComponent &GetScoreComponent(const PhraseDictionary *phraseDictionary) const
 	{
@@ -44,7 +44,8 @@ public:
 	ScoreComponent &Add(const ScoreComponent &transScoreComponent)
 	{
 		const PhraseDictionary *phraseDictionary = transScoreComponent.GetPhraseDictionary();
-		return operator[](phraseDictionary) = transScoreComponent;
+		std::pair<iterator, bool> added = insert(transScoreComponent);
+		return *added.first;
 	}
 	ScoreComponent &Add(const PhraseDictionary *phraseDictionary)
 	{
@@ -57,7 +58,7 @@ inline std::ostream& operator<<(std::ostream &out, const ScoreComponentCollectio
 	ScoreComponentCollection::const_iterator iter;
 	for (iter = transScoreComponentColl.begin() ; iter != transScoreComponentColl.end() ; ++iter)
 	{
-		const ScoreComponent &transScoreComponent = iter->second;
+		const ScoreComponent &transScoreComponent = *iter;
 		out << "[" << transScoreComponent << "] ";
 	}
 	return out;
