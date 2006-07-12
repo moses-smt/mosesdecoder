@@ -33,26 +33,15 @@ class TranslationOption
 		friend std::ostream& operator<<(std::ostream& out, const TranslationOption& possibleTranslation);
 
 protected:
-	const Phrase 	&m_targetPhrase;
+	const TargetPhrase 	&m_targetPhrase;
 	WordsRange		m_wordsRange;
-	float					m_transScore, m_futureScore, m_ngramScore;
 #ifdef N_BEST
 	ScoreComponent	m_transScoreComponent;
-	std::list< std::pair<size_t, float> >	m_lmScoreComponent;
-	std::list< std::pair<size_t, float> >	m_trigramComponent;
 #endif
 
-	void CalcFutureScore(const LMList &lmList, float weightWP);
 public:
 	TranslationOption(const WordsRange &wordsRange
-										, const TargetPhrase &targetPhrase
-										, float transScore
-										, float weightWP);
-	TranslationOption(const WordsRange &wordsRange
-										, const TargetPhrase &targetPhrase
-										, float transScore
-										, const LMList &lmList
-										, float weightWP);
+										, const TargetPhrase &targetPhrase);
 
 	bool Overlap(const Hypothesis &hypothesis) const;
 	inline size_t GetStartPos() const
@@ -77,15 +66,15 @@ public:
 	}
 	inline float GetTranslationScore() const
 	{
-		return m_transScore;
+		return m_targetPhrase.GetTranslationScore();
 	}
 	inline float GetFutureScore() const
 	{
-		return m_futureScore;
+		return m_targetPhrase.GetFutureScore();
 	}
 	inline float GetNgramScore() const
 	{
-		return m_ngramScore;
+		return m_targetPhrase.GetNgramScore();
 	}
 
 #ifdef N_BEST
@@ -95,11 +84,11 @@ public:
 	}
 	inline const std::list< std::pair<size_t, float> > &GetLMScoreComponent() const
 	{
-		return m_lmScoreComponent;
+		return m_targetPhrase.GetLMScoreComponent();
 	}
 	inline const std::list< std::pair<size_t, float> > &GetTrigramComponent() const
 	{
-		return m_trigramComponent;
+		return m_targetPhrase.GetNgramComponent();
 	}
 #endif
 

@@ -67,7 +67,9 @@ public:
 								, const std::vector<float> &weight
 								, size_t maxTargetPhrase
 								, bool filter
-								, const std::list< Phrase > &inputPhraseList);
+								, const std::list< Phrase > &inputPhraseList
+								, const LMList &languageModels
+								, float weightWP);
 	
 	size_t GetSize() const
 	{

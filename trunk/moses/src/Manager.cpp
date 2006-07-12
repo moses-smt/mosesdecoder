@@ -285,15 +285,12 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 		{
 			const TargetPhrase &targetPhrase	= *iterTargetPhrase;
 			
-			float			transScore		= targetPhrase.GetScore()
-								,weightWP		= m_staticData.GetWeightWordPenalty();
 			TranslationOption transOpt(sourceWordsRange
-																	, targetPhrase
-																	, transScore
-																	, weightWP);
+																	, targetPhrase);
+	
+			Hypothesis *newHypo = hypothesis.MergeNext(transOpt);
 			
 			newHypo = hypothesis.MergeNext(transOpt);
-			
 			
 			if (newHypo != NULL)
 			{
@@ -368,14 +365,9 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 				{
 					const TargetPhrase	&targetPhrase = *iterTargetPhrase;
 					
-					float				score				= targetPhrase.GetScore()
-											,weightWP		= m_staticData.GetWeightWordPenalty();
 					const WordsRange wordsRange(startPos, endPos);
 					TranslationOption transOpt(wordsRange
-																		, targetPhrase
-																		, score
-																		, lmListInitial
-																		, weightWP);
+																		, targetPhrase);
 					m_possibleTranslations.push_back(transOpt);
 				}
 			}
@@ -417,10 +409,7 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 				targetPhrase.ResetScore();
 
 				TranslationOption transOpt(wordsRange
-																		, targetPhrase
-																		, 0
-																		, lmListInitial
-																		, weightWP);
+																		, targetPhrase);
 				m_possibleTranslations.push_back(transOpt);
 			}
 		}
