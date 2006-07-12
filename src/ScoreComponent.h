@@ -71,13 +71,4 @@ public:
 	}
 };
 
-inline std::ostream& operator<<(std::ostream &out, const ScoreComponent &transScoreComponent)
-{
-	out << transScoreComponent[0];
-	for (size_t i = 1 ; i < NUM_PHRASE_SCORES ; i++)
-	{
-		out << "," << transScoreComponent[i];
-	}	
-	return out;
-}
-
+std::ostream& operator<<(std::ostream &out, const ScoreComponent &scoreComponent);

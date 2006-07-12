@@ -46,3 +46,18 @@ void ScoreComponent::Reset()
 		}
 	}
 }
+
+std::ostream& operator<<(std::ostream &out, const ScoreComponent &scoreComponent)
+{
+	const size_t noScoreComponent = scoreComponent.GetNoScoreComponent();
+	if (noScoreComponent > 0)
+	{
+		out << scoreComponent[0];
+		for (size_t i = 1 ; i < noScoreComponent ; i++)
+		{
+			out << "," << scoreComponent[i];
+		}
+	}
+	return out;
+}
+
