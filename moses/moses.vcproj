@@ -433,6 +433,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Dictionary.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Factor.h"
 				>
 			</File>
@@ -553,11 +557,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\TranslationOptionCollection.h"
+				RelativePath=".\TranslationOptionCollection.h"
 				>
 			</File>
 			<File
-				RelativePath=".\TranslationOptionCollection.h"
+				RelativePath=".\src\TranslationOptionCollection.h"
 				>
 			</File>
 			<File

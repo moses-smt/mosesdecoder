@@ -28,7 +28,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class Dictionary;
 
-class ScoreComponentCollection : public std::set<ScoreComponent>
+struct CompareScoreComponent
+{
+	bool operator()(const ScoreComponent &a, const ScoreComponent &b) const
+  {
+    return a.GetDictionary() < b.GetDictionary();
+  }
+};
+
+class ScoreComponentCollection : public std::set<ScoreComponent, CompareScoreComponent>
 {
 public:
 	ScoreComponent &GetScoreComponent(const Dictionary *index)
