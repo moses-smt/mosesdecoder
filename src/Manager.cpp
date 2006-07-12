@@ -185,6 +185,17 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList
 		{
 			HypothesisCollectionIntermediate::iterator iterCurr = iterHypo++;
 			lastHypoColl.Detach(iterCurr);
+			if(m_staticData.GetVerboseLevel() > 0) 
+				{
+					if(m_hypoStack[wordsTranslated].getBestScore() == hypo->GetScore(ScoreType::Total))
+						{
+							cout<<"new best estimate for this stack"<<endl;
+							
+						}
+					cout<<"added hypothesis on stack "<<wordsTranslated<<" now size "<<m_hypoStack[wordsTranslated].size()<<endl<<endl;
+				
+				}
+
 		}
 		else
 		{
