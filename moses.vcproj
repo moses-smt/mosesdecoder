@@ -565,6 +565,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TranslationOptionCollection.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TransScoreComponent.h"
 				>
 			</File>
