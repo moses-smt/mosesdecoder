@@ -25,68 +25,30 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <assert.h>
 #include "ScoreComponent.h"
-#include "PhraseDictionary.h"
 
-class ScoreComponentCollection : public std::map<const PhraseDictionary *, ScoreComponent*>
+class PhraseDictionary;
+
+class ScoreComponentCollection : public std::map<const PhraseDictionary *, ScoreComponent>
 {
 public:
-	ScoreComponentCollection()
+	ScoreComponent &GetScoreComponent(const PhraseDictionary *index)
 	{
-	}
-	ScoreComponentCollection(const ScoreComponentCollection &copy);
-
-	~ScoreComponentCollection()
-	{ // ??? memory leak but double free
-/*		TRACE_ERR(this << std::endl);
-		ScoreComponentCollection::iterator iter;
-		for (iter = begin() ; iter != end() ; ++iter)
-		{
-			TRACE_ERR(iter->second << std::endl);
-			TRACE_ERR(*iter->second << std::endl);			
-			delete iter->second;
-		}				
-*/	}
-	
-	ScoreComponent &GetScoreComponent(const PhraseDictionary *phraseDictionary)
-	{
-		ScoreComponentCollection::iterator iter = find(phraseDictionary);
+		ScoreComponentCollection::iterator iter = find(index);
 		assert(iter != end());
-		return *iter->second;
+		return iter->second;
 	}
-	
 	const ScoreComponent &GetScoreComponent(const PhraseDictionary *phraseDictionary) const
 	{
 		return const_cast<ScoreComponentCollection*>(this)->GetScoreComponent(phraseDictionary);
 	}
-	
 	ScoreComponent &Add(const ScoreComponent &transScoreComponent)
 	{
 		const PhraseDictionary *phraseDictionary = transScoreComponent.GetPhraseDictionary();
-		ScoreComponentCollection::iterator iter = find(phraseDictionary);
-		if (iter != end())
-		{ // already have scores for this phrase table. delete it 1st
-			delete iter->second;
-			erase(iter);
-		}
-		// add new into same place
-		ScoreComponent *newScoreComponent = new ScoreComponent(transScoreComponent);
-		operator[](phraseDictionary) = newScoreComponent;
-		
-		return *newScoreComponent;
+		return operator[](phraseDictionary) = transScoreComponent;
 	}
 	ScoreComponent &Add(const PhraseDictionary *phraseDictionary)
 	{
-		ScoreComponentCollection::iterator iter = find(phraseDictionary);
-		if (iter != end())
-		{ // already have scores for this phrase table. delete it 1st
-			delete iter->second;
-			erase(iter);
-		}
-		// add new into same place
-		ScoreComponent *newScoreComponent = new ScoreComponent(phraseDictionary);
-		operator[](phraseDictionary) = newScoreComponent;
-		
-		return *newScoreComponent;
+		return Add(ScoreComponent(phraseDictionary));
 	}
 };
 
@@ -95,7 +57,7 @@ inline std::ostream& operator<<(std::ostream &out, const ScoreComponentCollectio
 	ScoreComponentCollection::const_iterator iter;
 	for (iter = transScoreComponentColl.begin() ; iter != transScoreComponentColl.end() ; ++iter)
 	{
-		const ScoreComponent &transScoreComponent = *iter->second;
+		const ScoreComponent &transScoreComponent = iter->second;
 		out << "[" << transScoreComponent << "] ";
 	}
 	return out;

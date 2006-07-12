@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <iostream>
+#include "TypeDef.h"
+
+//typedef float ScoreComponent[NUM_PHRASE_SCORES];
 
 class PhraseDictionary;
 
@@ -29,20 +32,28 @@ class ScoreComponent
 {
 protected:
 	const PhraseDictionary *m_phraseDictionary;
-	float	*m_scoreComponent;
-
-	ScoreComponent(); // not implemented
+	float		m_scoreComponent[NUM_PHRASE_SCORES];
 public:
-	ScoreComponent(const PhraseDictionary *phraseDictionary);
-	ScoreComponent(const ScoreComponent &copy);
-	~ScoreComponent();
-	void Reset();
+	ScoreComponent()
+	{
+	}
+	ScoreComponent(const PhraseDictionary *phraseDictionary)
+		:m_phraseDictionary(phraseDictionary)
+	{
+	}
+	ScoreComponent(const ScoreComponent &copy)
+	{
+		m_phraseDictionary = copy.m_phraseDictionary;
+		for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
+		{
+			m_scoreComponent[i] = copy[i];
+		}
+	}
 
-	const PhraseDictionary *GetPhraseDictionary() const
+	inline const PhraseDictionary * GetPhraseDictionary() const
 	{
 		return m_phraseDictionary;
 	}
-	size_t GetNoScoreComponent() const;
 
 	float operator[](size_t index) const
 	{
@@ -52,6 +63,29 @@ public:
 	{
 		return m_scoreComponent[index];
 	}
+
+	void Reset()
+	{
+		for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
+		{
+			m_scoreComponent[i] = 0;
+		}
+	}
+
+	inline bool operator< (const ScoreComponent &compare) const
+	{
+		return GetPhraseDictionary() < compare.GetPhraseDictionary();
+	}
+
 };
 
-std::ostream& operator<<(std::ostream &out, const ScoreComponent &transScoreComponent);
+inline std::ostream& operator<<(std::ostream &out, const ScoreComponent &transScoreComponent)
+{
+	out << transScoreComponent[0];
+	for (size_t i = 1 ; i < NUM_PHRASE_SCORES ; i++)
+	{
+		out << "," << transScoreComponent[i];
+	}	
+	return out;
+}
+

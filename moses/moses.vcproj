@@ -387,14 +387,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ScoreComponent.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ScoreComponentCollection.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Sentence.cpp"
 				>
 			</File>
