@@ -73,6 +73,10 @@ protected:
 	void RemoveAll();
 
 public:
+
+	//returns the score of the best hypothesis
+	float getBestScore();
+
 	inline HypothesisCollection()
 	{
 		m_bestScore = -std::numeric_limits<float>::infinity();

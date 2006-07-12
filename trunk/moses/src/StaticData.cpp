@@ -68,6 +68,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	// verbose level
 	if (m_parameter.GetParam("verbose").size() == 1)
 	{
+		m_verboseLevel = 1;
 		m_verboseLevel = Scan<size_t>( m_parameter.GetParam("verbose")[0]);
 	}
 	else
