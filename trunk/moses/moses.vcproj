@@ -387,6 +387,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ScoreComponent.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ScoreComponentCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Sentence.cpp"
 				>
 			</File>
@@ -522,6 +530,14 @@
 			</File>
 			<File
 				RelativePath=".\src\ScoreColl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ScoreComponent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ScoreComponentCollection.h"
 				>
 			</File>
 			<File
