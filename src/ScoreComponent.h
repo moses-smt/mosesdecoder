@@ -33,10 +33,9 @@ class ScoreComponent
 protected:
 	const PhraseDictionary *m_phraseDictionary;
 	float		m_scoreComponent[NUM_PHRASE_SCORES];
+
+	ScoreComponent(); // not implemented
 public:
-	ScoreComponent()
-	{
-	}
 	ScoreComponent(const PhraseDictionary *phraseDictionary)
 		:m_phraseDictionary(phraseDictionary)
 	{
