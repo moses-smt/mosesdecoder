@@ -99,7 +99,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	
 	// add components specific to poss trans
 	const ScoreComponent &possComponent	= transOpt.GetScoreComponents();
-	ScoreComponent &transComponent				= m_transScoreComponent.GetScoreComponent(possComponent.GetPhraseDictionary());
+	ScoreComponent &transComponent				= m_transScoreComponent.GetScoreComponent(possComponent.GetDictionary());
 	
 	for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
 	{

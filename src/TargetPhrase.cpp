@@ -21,8 +21,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <assert.h>
 #include "TargetPhrase.h"
+#include "PhraseDictionary.h"
 
 using namespace std;
+
+TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary)
+:Phrase(direction)
+#ifdef N_BEST
+	,m_scoreComponent(phraseDictionary)
+#endif
+{
+}
 
 void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float> &weightT)
 {

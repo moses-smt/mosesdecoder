@@ -26,20 +26,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <assert.h>
 #include "ScoreComponent.h"
 
-class PhraseDictionary;
+class Dictionary;
 
 class ScoreComponentCollection : public std::set<ScoreComponent>
 {
 public:
-	ScoreComponent &GetScoreComponent(const PhraseDictionary *index)
+	ScoreComponent &GetScoreComponent(const Dictionary *index)
 	{
 		ScoreComponentCollection::iterator iter = find(index);
 		assert(iter != end());
 		return *iter;
 	}
-	const ScoreComponent &GetScoreComponent(const PhraseDictionary *phraseDictionary) const
+	const ScoreComponent &GetScoreComponent(const Dictionary *dictionary) const
 	{
-		return const_cast<ScoreComponentCollection*>(this)->GetScoreComponent(phraseDictionary);
+		return const_cast<ScoreComponentCollection*>(this)->GetScoreComponent(dictionary);
 	}
 	void Remove(const ScoreComponent &transScoreComponent)
 	{
@@ -53,9 +53,9 @@ public:
 		std::pair<iterator, bool> added = insert(transScoreComponent);
 		return *added.first;
 	}
-	ScoreComponent &Add(const PhraseDictionary *phraseDictionary)
+	ScoreComponent &Add(const Dictionary *dictionary)
 	{
-		return Add(ScoreComponent(phraseDictionary));
+		return Add(ScoreComponent(dictionary));
 	}
 };
 
