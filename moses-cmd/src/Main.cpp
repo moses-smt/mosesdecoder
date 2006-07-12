@@ -60,6 +60,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #  define USE_MYSQL 1
 #endif
 
+#undef USE_MYSQL
 #ifdef USE_MYSQL
 #include "IOMySQL.h"
 #endif
