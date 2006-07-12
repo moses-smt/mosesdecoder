@@ -29,29 +29,54 @@ class PhraseDictionary;
 
 class TargetPhrase: public Phrase
 {
+  friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
-	float m_score;
+	float m_transScore, m_ngramScore, m_fullScore;
 #ifdef N_BEST
 	ScoreComponent m_scoreComponent;
+	std::list< std::pair<size_t, float> > m_lmScoreComponent;
+	std::list< std::pair<size_t, float> > m_ngramComponent;
 #endif
 
 public:
 	TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary);
 
-	float GetScore() const
-	{
-		return m_score;
-	}
-	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT);
+	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT,
+								const LMList &languageModels, float weightWP);
+	// used when creating translations of unknown words:
 	void ResetScore();
-	void SetWeight(const std::vector<float> &weightT);
+	void SetWeights(const std::vector<float> &weightT);
+
+  inline float GetTranslationScore() const
+  {
+    return m_transScore;
+  }
+  // is this really the best name?
+  inline float GetFutureScore() const
+  {
+    return m_fullScore;
+  }
+  inline float GetNgramScore() const
+  {
+    return m_ngramScore;
+  }
 
 #ifdef N_BEST
 	inline const ScoreComponent &GetScoreComponents() const
 	{
 		return m_scoreComponent;
 	}
+  inline const std::list< std::pair<size_t, float> > &GetLMScoreComponent() const
+  {
+    return m_lmScoreComponent;
+  }
+  inline const std::list< std::pair<size_t, float> > &GetNgramComponent() const
+  {
+    return m_ngramComponent;
+  }
 #endif
 
 };
+
+std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 

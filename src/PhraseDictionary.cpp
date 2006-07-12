@@ -40,7 +40,9 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, const vector<float> &weight
 																			, size_t maxTargetPhrase
 																			, bool filter
-																			, const list< Phrase > &inputPhraseList)
+																			, const list< Phrase > &inputPhraseList
+																			, const LMList &languageModels
+																			, float weightWP)
 {
 	//factors	
 	m_factorsUsed[Input]	= new FactorTypeSet(input);
@@ -98,7 +100,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			targetPhrase.CreateFromString( output, token[1], factorCollection);
 
 			// component score, for n-best output
-			targetPhrase.SetScore(scoreVector, weight);
+			targetPhrase.SetScore(scoreVector, weight, languageModels, weightWP);
 
 			AddEquivPhrase(sourcePhrase, targetPhrase, maxTargetPhrase);
 
@@ -150,7 +152,7 @@ void PhraseDictionary::AddEquivPhrase(const Phrase &source
 		for (iter = phraseColl.begin() ; iter != phraseColl.end() ; ++iter)
 		{
 			TargetPhrase &insertPhrase = *iter;
-			if (targetPhrase.GetScore() < insertPhrase.GetScore())
+			if (targetPhrase.GetFutureScore() < insertPhrase.GetFutureScore())
 			{
 				break;
 			}
@@ -190,13 +192,14 @@ void PhraseDictionary::SetWeightTransModel(const vector<float> &weightT)
 	std::map<Phrase , TargetPhraseCollection >::iterator iterDict;
 	for (iterDict = m_collection.begin() ; iterDict != m_collection.end() ; ++iterDict)
 	{
-		TargetPhraseCollection &targetPhraseCollection = (*iterDict).second;
+		TargetPhraseCollection &targetPhraseCollection = iterDict->second;
 		
-		TargetPhraseCollection::iterator iterPhrase;
-		for (iterPhrase = targetPhraseCollection.begin() ; iterPhrase != targetPhraseCollection.end() ; ++iterPhrase)
+		TargetPhraseCollection::iterator targetPhraseIter;
+		for (targetPhraseIter = targetPhraseCollection.begin();
+					targetPhraseIter != targetPhraseCollection.end();
+					++targetPhraseIter)
 		{
-			TargetPhrase &targetPhrase = *iterPhrase;
-			targetPhrase.SetWeight(weightT);
+			targetPhraseIter->SetWeights(weightT);
 		}
 	}
 }
