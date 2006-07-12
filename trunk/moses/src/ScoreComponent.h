@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include <assert.h>
 #include "TypeDef.h"
 
@@ -32,26 +33,13 @@ class Dictionary;
 class ScoreComponent
 {
 protected:
-	const Dictionary *m_dictionary;
-	float		m_scoreComponent[NUM_PHRASE_SCORES];
+	const Dictionary		*m_dictionary;
+	std::vector<float>	m_scoreComponent;
 
 public:
-	ScoreComponent()
-	{ // used by collection
-	}
-
-	ScoreComponent(const Dictionary *dictionary)
-		:m_dictionary(dictionary)
-	{
-	}
-	ScoreComponent(const ScoreComponent &copy)
-	{
-		m_dictionary = copy.m_dictionary;
-		for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
-		{
-			m_scoreComponent[i] = copy[i];
-		}
-	}
+	ScoreComponent();
+	ScoreComponent(const Dictionary *dictionary);
+	ScoreComponent(const ScoreComponent &copy);
 
 	inline const Dictionary * GetDictionary() const
 	{
@@ -69,13 +57,7 @@ public:
 		return m_scoreComponent[index];
 	}
 
-	void Reset()
-	{
-		for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
-		{
-			m_scoreComponent[i] = 0;
-		}
-	}
+	void Reset();
 
 	void Add(const ScoreComponent &source)
 	{
