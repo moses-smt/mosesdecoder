@@ -48,6 +48,7 @@ public:
 	ScoreComponent &Add(const ScoreComponent &scoreComponent)
 	{
 		const Dictionary *dictionary = scoreComponent.GetDictionary();
+		assert( dictionary != NULL && find(dictionary) == end());
 		return operator[](dictionary) = scoreComponent;
 	}
 	ScoreComponent &Add(const Dictionary *dictionary)
