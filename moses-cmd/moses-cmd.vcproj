@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(OutDir)\mysqlpp.lib&quot; libmysql.lib libboost_thread-vc80-mt-gd.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; mysqlpp.lib libmysql.lib libboost_thread-vc80-mt-gd.lib"
 				OutputFile="$(ProjectDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -137,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(OutDir)\mysqlpp.lib&quot; libmysql.lib libboost_thread-vc80-mt-gd.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; mysqlpp.lib libmysql.lib libboost_thread-vc80-mt-gd.lib"
 				OutputFile="$(ProjectDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
@@ -217,7 +217,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(OutDir)\mysqlpp.lib&quot; libmysql.lib libboost_thread-vc80-mt-gd.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; mysqlpp.lib libmysql.lib libboost_thread-vc80-mt-gd.lib"
 				OutputFile="$(ProjectDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -293,7 +293,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(OutDir)\mysqlpp.lib&quot; libmysql.lib libboost_thread-vc80-mt-gd.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; mysqlpp.lib libmysql.lib libboost_thread-vc80-mt-gd.lib"
 				OutputFile="$(ProjectDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
