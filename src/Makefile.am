@@ -18,7 +18,6 @@ libmoses_a_SOURCES = \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
 	ScoreComponent.cpp \
-	ScoreComponentCollection.cpp \
 	Sentence.cpp \
 	StaticData.cpp \
 	TargetPhrase.cpp \
