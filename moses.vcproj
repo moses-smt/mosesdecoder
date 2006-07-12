@@ -387,10 +387,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PossibleTranslation.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Sentence.cpp"
 				>
 			</File>
@@ -400,6 +396,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TargetPhrase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOption.cpp"
 				>
 			</File>
 			<File
@@ -521,14 +521,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PossibleTranslation.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\PossibleTranslationCollection.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ScoreColl.h"
 				>
 			</File>
@@ -546,6 +538,14 @@
 			</File>
 			<File
 				RelativePath=".\src\Timer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOption.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOptionCollection.h"
 				>
 			</File>
 			<File
