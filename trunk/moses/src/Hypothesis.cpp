@@ -101,7 +101,10 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	const ScoreComponent &possComponent	= transOpt.GetScoreComponents();
 	ScoreComponent &transComponent				= m_transScoreComponent.GetScoreComponent(possComponent.GetDictionary());
 	
-	for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
+	const size_t noScoreComponent = possComponent.GetNoScoreComponent();
+	assert(noScoreComponent == transComponent.GetNoScoreComponent());
+
+	for (size_t i = 0 ; i < noScoreComponent ; i++)
 	{
 		transComponent[i] += possComponent[i];
 	}
