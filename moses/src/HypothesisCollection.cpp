@@ -52,6 +52,13 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 	}
 }
 
+
+float HypothesisCollection::getBestScore(){
+	return m_bestScore;
+}
+
+
+
 bool HypothesisCollection::Add(Hypothesis *hypo, float beamThreshold)
 {
 	if (hypo->GetScore(ScoreType::Total) < m_bestScore + beamThreshold)
