@@ -37,6 +37,7 @@ extern Timer timer;
 StaticData::StaticData()
 :m_languageModel(2)
 ,m_inputOutput(NULL)
+,m_fLMsLoaded(false)
 {
 }
 
@@ -102,13 +103,27 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		for(size_t i=0; i<lmVector.size(); i++) 
 		{
 			vector<string>	token		= Tokenize(lmVector[i]);
-			int type = Scan<int>(token[0]);
+			if (token.size() != 4 )
+			{
+				TRACE_ERR("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filename'");
+				return false;
+			}
+			// type = whether or not to use in future cost calcs
+			// (DEPRECATED, asked hieu)
+			LMListType type = static_cast<LMListType>(Scan<int>(token[0]));
+			// factorType = (see TypeDef.h)
+			//   0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
 			FactorType factorType = Scan<FactorType>(token[1]);
+			// nGramOrder = 2 = bigram, 3 = trigram, etc
 			size_t nGramOrder = Scan<int>(token[2]);
-			nGramMaxOrder = (std::max)(nGramMaxOrder, nGramOrder);
+			// keep track of the largest n-gram length
+			// (used by CompareHypothesisCollection)
+			if (nGramOrder > nGramMaxOrder)
+				nGramMaxOrder = nGramOrder;
 			string &languageModelFile = token[3];
 			
 			LanguageModel *lm = new LanguageModel();
+			// error handling here?
 			lm->Load(i, languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
 			m_languageModel[type].push_back(lm);
 
@@ -126,7 +141,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		}
 		CompareHypothesisCollection::SetMaxNGramOrder(nGramMaxOrder);
 	}
-
+  // flag indicating that language models were loaded,
+  // since phrase table loading requires their presence
+  m_fLMsLoaded = true;
 	timer.check("Finished loading language models");
 
 	// generation tables
@@ -281,6 +298,8 @@ void StaticData::LoadPhraseTables(bool filter
 																	, const string &inputFileHash
 																	, const list< Phrase > &inputPhraseList)
 {
+	// language models must be loaded prior to loading phrase tables
+	assert(m_fLMsLoaded);
 	// load phrase translation tables
   if (m_parameter.GetParam("ttable-file").size() > 0)
 	{
@@ -293,7 +312,7 @@ void StaticData::LoadPhraseTables(bool filter
 				TRACE_ERR(weightAll[i] << "\t");
 		}
 		TRACE_ERR(endl);
-		
+
 		const vector<string> &translationVector = m_parameter.GetParam("ttable-file");
 		size_t	maxTargetPhrase										= Scan<size_t>(m_parameter.GetParam("ttable-limit")[0]);
 
@@ -348,7 +367,10 @@ void StaticData::LoadPhraseTables(bool filter
 																				, weight
 																				, maxTargetPhrase
 																				, filterPhrase
-																				, inputPhraseList);
+																				, inputPhraseList
+																				,	this->GetLanguageModel(Initial)
+																				,	this->GetWeightWordPenalty());
+		
 			timer.check("Finished loading");
 		}
 	}

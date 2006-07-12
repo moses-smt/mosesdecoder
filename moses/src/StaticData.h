@@ -56,6 +56,7 @@ protected:
 	std::string													m_nBestFilePath, m_cachePath;
 	std::vector<std::string>						m_mySQLParam;
 	InputOutput													*m_inputOutput;
+	bool                                m_fLMsLoaded;
 	size_t m_verboseLevel;
 
 public:
