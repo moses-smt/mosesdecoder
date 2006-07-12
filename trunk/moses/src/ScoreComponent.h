@@ -35,8 +35,11 @@ protected:
 	const Dictionary *m_dictionary;
 	float		m_scoreComponent[NUM_PHRASE_SCORES];
 
-	ScoreComponent(); // not implemented
 public:
+	ScoreComponent()
+	{ // used by collection
+	}
+
 	ScoreComponent(const Dictionary *dictionary)
 		:m_dictionary(dictionary)
 	{

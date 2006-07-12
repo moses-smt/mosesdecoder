@@ -151,7 +151,7 @@ Hypothesis *Hypothesis::MergeNext(const TranslationOption &transOpt) const
 
 #ifdef N_BEST
 	const ScoreComponent &transOptComponent = transOpt.GetScoreComponents();
-	clone->m_transScoreComponent.Remove(transOptComponent);
+	clone->m_transScoreComponent.Remove(transOptComponent.GetDictionary());
 	clone->m_transScoreComponent.Add(transOptComponent);
 #endif
 
