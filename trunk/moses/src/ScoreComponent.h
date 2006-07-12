@@ -26,32 +26,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 //typedef float ScoreComponent[NUM_PHRASE_SCORES];
 
-class PhraseDictionary;
+class Dictionary;
 
 class ScoreComponent
 {
 protected:
-	const PhraseDictionary *m_phraseDictionary;
+	const Dictionary *m_dictionary;
 	float		m_scoreComponent[NUM_PHRASE_SCORES];
 
 	ScoreComponent(); // not implemented
 public:
-	ScoreComponent(const PhraseDictionary *phraseDictionary)
-		:m_phraseDictionary(phraseDictionary)
+	ScoreComponent(const Dictionary *dictionary)
+		:m_dictionary(dictionary)
 	{
 	}
 	ScoreComponent(const ScoreComponent &copy)
 	{
-		m_phraseDictionary = copy.m_phraseDictionary;
+		m_dictionary = copy.m_dictionary;
 		for (size_t i = 0 ; i < NUM_PHRASE_SCORES ; i++)
 		{
 			m_scoreComponent[i] = copy[i];
 		}
 	}
 
-	inline const PhraseDictionary * GetPhraseDictionary() const
+	inline const Dictionary * GetDictionary() const
 	{
-		return m_phraseDictionary;
+		return m_dictionary;
 	}
 
 	float operator[](size_t index) const
@@ -73,7 +73,7 @@ public:
 
 	inline bool operator< (const ScoreComponent &compare) const
 	{
-		return GetPhraseDictionary() < compare.GetPhraseDictionary();
+		return GetDictionary() < compare.GetDictionary();
 	}
 
 };

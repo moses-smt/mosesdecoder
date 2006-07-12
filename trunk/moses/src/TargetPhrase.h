@@ -36,13 +36,8 @@ protected:
 #endif
 
 public:
-	TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary)
-		:Phrase(direction)
-#ifdef N_BEST
-		,m_scoreComponent(phraseDictionary)
-#endif
-	{
-	}
+	TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary);
+
 	float GetScore() const
 	{
 		return m_score;
