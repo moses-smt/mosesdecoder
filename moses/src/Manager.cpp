@@ -328,6 +328,13 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 																				 , const PhraseDictionary &phraseDictionary
 																				 , const LMList &lmListInitial)
 {	
+	// loop over all substrings of the source sentence, look them up
+	// in the phraseDictionary (which is the- possibly filtered-- phrase
+	// table loaded on initialization), generate TranslationOption objects
+	// for all phrases
+	//
+	// possible optimization- don't consider phrases longer than the longest
+	// phrase in the PhraseDictionary?
 	for (size_t startPos = 0 ; startPos < phrase.GetSize() ; startPos++)
 	{
 		// reuse phrase, add next word on
