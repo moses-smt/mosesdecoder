@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
 
+const size_t NUM_PHRASE_SCORES				= 5;
 const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t ARRAY_SIZE_INCR					= 20; //amount by which a hypostack gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;
