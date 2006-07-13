@@ -470,8 +470,8 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
  * prints hypothesis information for pharaoh style logging
  */
 void Hypothesis::PrintHypothesis(const Sentence &source, float weightDistortion, float weightWordPenalty) const{
-	size_t start = m_prevHypo->m_currSourceWordsRange.GetEndPos() -1;
-	size_t end = m_prevHypo->m_currSourceWordsRange.GetEndPos();
+	int start = m_prevHypo->m_currSourceWordsRange.GetEndPos() -1;
+	int end = m_prevHypo->m_currSourceWordsRange.GetEndPos();
 	cout<<"creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ... ";
 	if(start >= 0) {
 		WordsRange range(start, end);
