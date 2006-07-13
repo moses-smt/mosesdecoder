@@ -53,6 +53,7 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
   // Replicated from TranslationOptions.cpp
 	float totalFutureScore = 0;
 	float totalNgramScore  = 0;
+	float totalFullScore   = 0;
 
 	LMList::const_iterator lmIter;
 	for (lmIter = languageModels.begin();
@@ -70,11 +71,12 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 #endif
 
 		// total LM score so far
-		totalNgramScore  += fullScore * weightLM;
+		totalNgramScore  += nGramScore * weightLM;
+		totalFullScore   += fullScore * weightLM;
 		
 	}
   m_ngramScore = totalNgramScore;
-	m_fullScore = m_transScore + totalFutureScore + m_ngramScore
+	m_fullScore = m_transScore + totalFutureScore + totalFullScore
 							- (this->GetSize() * weightWP);	 // word penalty
 
 }
