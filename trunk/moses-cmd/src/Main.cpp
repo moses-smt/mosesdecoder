@@ -77,6 +77,15 @@ int main(int argc, char* argv[])
 	if (!staticData.LoadParameters(argc, argv))
 		return EXIT_FAILURE;
 
+	if (staticData.GetVerboseLevel() > 0)
+	{
+#if N_BEST
+		std::cerr << "N_BEST=enabled\n";
+#else
+		std::cerr << "N_BEST=disabled\n";
+#endif
+	}
+
 	// set up read/writing class
 	InputOutput *inputOutput = GetInputOutput(staticData);
 
@@ -155,7 +164,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 	}
 	else
 	{
-		TRACE_ERR("IO from Cmdline" << endl);
+		TRACE_ERR("IO from STDOUT/STDIN" << endl);
 		inputOutput = new IOCommandLine(factorOrder, inputFactorUsed
 																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
