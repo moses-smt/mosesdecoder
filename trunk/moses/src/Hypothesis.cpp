@@ -383,11 +383,11 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 
 			for (size_t i = 0 ; i < nGramOrder - 1 ; i ++)
 			{
-				size_t currPos = size - nGramOrder + i + 1;
+				int currPos = size - nGramOrder + i + 1;
 				if (currPos < 0)
 					contextFactor[i] = languageModel.GetSentenceStart();
 				else
-					contextFactor[i] = GetFactor(currPos, factorType);
+					contextFactor[i] = GetFactor((size_t)currPos, factorType);
 			}
 			lmScore	+= languageModel.GetValue(contextFactor);
 		}
@@ -397,7 +397,6 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 		m_lmScoreComponent[lmId] += lmScore;
 #endif
 	}
-
 }
 
 void Hypothesis::CalcScore(const LMList		&lmListInitial
@@ -519,4 +518,3 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 #endif
 	return out;
 }
-

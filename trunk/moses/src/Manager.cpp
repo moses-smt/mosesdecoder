@@ -424,8 +424,8 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 					}
 				}
 
-				targetPhrase.ResetScore();
-
+				//targetPhrase.SetScore(scoreVector, weight, languageModels, weightWP);
+				
 				TranslationOption transOpt(wordsRange
 																		, targetPhrase);
 				m_possibleTranslations.push_back(transOpt);
