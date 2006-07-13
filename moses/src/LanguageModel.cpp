@@ -290,6 +290,8 @@ float LanguageModel::GetValue(const Factor *factor0, const Factor *factor1) cons
 		}
 	}
 
+	TRACE_ERR( *factor0 << " " << *factor1 
+						<< " = " << FloorSRIScore(score) << endl);
 	return FloorSRIScore(score);
 
 }
@@ -353,6 +355,8 @@ float LanguageModel::GetValue(const Factor *factor0, const Factor *factor1, cons
 		}
 	}
 
+	TRACE_ERR( *factor0 << " " << *factor1 << " " << *factor2 
+						<< " = " << FloorSRIScore(score) << endl);
 	return FloorSRIScore(score);
 
 }
