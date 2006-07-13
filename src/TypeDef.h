@@ -43,7 +43,7 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #include "config.h"
 
 #define TRACE_ENABLE 1		// REMOVE after we figure this out
-// #define N_BEST 1					// REMOVE
+#define N_BEST 1					// REMOVE
 
 #  ifdef HAVE_SRILM
 #    define LM_SRI 1
