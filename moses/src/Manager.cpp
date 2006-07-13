@@ -427,6 +427,7 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 	}
 
 	// create future score matrix
+	// for each span in the source phrase (denoted by start and end)
 	for(size_t start = 0; start < phrase.GetSize() ; start++) 
 	{
 		for(size_t end = start; end < phrase.GetSize() ; end++) 
@@ -435,12 +436,15 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 			vector< float > score(length + 1);
 			score[0] = 0;
 			for(size_t currLength = 1 ; currLength <= length ; currLength++) 
+				// initalize their future cost to -infinity
 			{
 				score[currLength] = - numeric_limits<float>::infinity();
 			}
 
 			for(size_t currLength = 0 ; currLength < length ; currLength++) 
 			{
+				// iterate over possible translations of this source subphrase and
+				// keep track of the highest cost option
 				TranslationOptionCollection::const_iterator iterTransOpt;
 				for(iterTransOpt = m_possibleTranslations.begin() ; iterTransOpt != m_possibleTranslations.end() ; ++iterTransOpt)
 				{
@@ -455,7 +459,15 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 					}
 				}
 			}
+			// record the highest cost option in the future cost table.
 			m_futureScore.SetScore(start, end, score[length]);
+
+			//print information about future cost table when verbose option is set
+
+			if(m_staticData.GetVerboseLevel() > 0) 
+				{		
+					cout<<"future cost from "<<start<<" to "<<end<<" is "<<score[length]<<endl;
+				}
 		}
 	}
 }
