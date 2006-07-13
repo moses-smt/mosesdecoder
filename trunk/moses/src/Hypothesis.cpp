@@ -278,6 +278,7 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
 	LMList::const_iterator iterLM;
 
+	TRACE_ERR(*this << endl);
 	// for LM which are not in PossTran
 	// must go through each trigram in current phrase
 	for (iterLM = lmListEnd.begin() ; iterLM != lmListEnd.end() ; ++iterLM)
@@ -378,11 +379,17 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 		// end of sentence
 		if (m_sourceCompleted.IsComplete())
 		{
-			// shift all args down 1 place
-			for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
-				contextFactor[i] = contextFactor[i + 1];
-
+			const size_t size = GetSize();
 			contextFactor.back() = languageModel.GetSentenceEnd();
+
+			for (size_t i = 0 ; i < nGramOrder - 1 ; i ++)
+			{
+				size_t currPos = size - nGramOrder + i + 1;
+				if (currPos < 0)
+					contextFactor[i] = languageModel.GetSentenceStart();
+				else
+					contextFactor[i] = GetFactor(currPos, factorType);
+			}
 			lmScore	+= languageModel.GetValue(contextFactor);
 		}
 		m_score[ScoreType::LanguageModelScore] += lmScore * languageModel.GetWeight();
@@ -465,8 +472,8 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
  * prints hypothesis information for pharaoh style logging
  */
 void Hypothesis::PrintHypothesis(const Sentence &source, float weightDistortion, float weightWordPenalty) const{
-	int start = m_prevHypo->m_currSourceWordsRange.GetEndPos() -1;
-	int end = m_prevHypo->m_currSourceWordsRange.GetEndPos();
+	size_t start = m_prevHypo->m_currSourceWordsRange.GetEndPos() -1;
+	size_t end = m_prevHypo->m_currSourceWordsRange.GetEndPos();
 	cout<<"creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ... ";
 	if(start >= 0) {
 		WordsRange range(start, end);

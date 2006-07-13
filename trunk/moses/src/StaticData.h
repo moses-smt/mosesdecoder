@@ -51,7 +51,7 @@ protected:
 									// do it differently from old pharaoh
 									// -ve	= no limit on distortion
 									// 0		= no disortion (monotone in old pharaoh)
-	unsigned int                                      m_maxHypoStackSize; //hypothesis-stack size that triggers pruning
+	size_t                              m_maxHypoStackSize; //hypothesis-stack size that triggers pruning
 	size_t															m_nBestSize;
 	std::string													m_nBestFilePath, m_cachePath;
 	std::vector<std::string>						m_mySQLParam;
