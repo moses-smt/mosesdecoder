@@ -26,11 +26,16 @@ AC_ARG_WITH(moses,
             [with_moses=no]
            )
 
+AC_ARG_ENABLE(profiling,
+            [AC_HELP_STRING([--enable-profiling], [moses will dump profiling info])],
+            [CPPFLAGS="$CPPFLAGS -pg"; LDFLAGS="$LDFLAGS -pg" ]
+           )
+
 AC_ARG_ENABLE(mysql, AC_HELP_STRING([--enable-mysql], [(optional) build in MySQL support])],
             [mysql_flag=yes], [mysql_flag=no])
 if test "x$with_boost" != 'xno'
 then
-  CPPFLAGS="$CPPFLAGS -I${with_boost}"
+  CPPFLAGS="$CPPFLAGS -I${with_boost} -I${with_boost}/include"
   LDFLAGS="$LDFLAGS -L${with_boost}/lib -L${with_boost}/stage/lib"
 fi
 
