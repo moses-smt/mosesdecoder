@@ -278,7 +278,6 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
 	LMList::const_iterator iterLM;
 
-	TRACE_ERR(*this << endl);
 	// for LM which are not in PossTran
 	// must go through each trigram in current phrase
 	for (iterLM = lmListEnd.begin() ; iterLM != lmListEnd.end() ; ++iterLM)
