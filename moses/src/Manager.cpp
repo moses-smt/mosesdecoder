@@ -175,7 +175,7 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList
 									, m_staticData.GetWeightDistortion()
 									, m_staticData.GetWeightWordPenalty()
 									, m_futureScore, m_source);
-		if(m_staticData.GetVerboseLevel() > 0) 
+		if(m_staticData.GetVerboseLevel() > 2) 
 		{			
 			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
 		}
@@ -371,6 +371,9 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 			const TargetPhraseCollection *phraseColl =	phraseDictionary.FindEquivPhrase(sourcePhrase);
 			if (phraseColl != NULL)
 			{
+      	if (m_staticData.GetVerboseLevel() >= 3) {
+					cout << "[" << sourcePhrase << "; " << startPos << "-" << endPos << "]\n";
+      	}
 				TargetPhraseCollection::const_iterator iterTargetPhrase;
 				for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != phraseColl->end() ; ++iterTargetPhrase)
 				{
@@ -380,7 +383,11 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 					TranslationOption transOpt(wordsRange
 																		, targetPhrase);
 					m_possibleTranslations.push_back(transOpt);
+      		if (m_staticData.GetVerboseLevel() >= 3) {
+						cout << "\t" << transOpt << "\n";
+      		}
 				}
+        if (m_staticData.GetVerboseLevel() >= 3) { cout << endl; }
 			}
 			else if (sourcePhrase.GetSize() == 1)
 			{
