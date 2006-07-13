@@ -44,6 +44,8 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 	if (hypo->GetScore(ScoreType::Total) > m_bestScore)
 	{
 		m_bestScore = hypo->GetScore(ScoreType::Total);
+        if ( m_bestScore + m_beamThreshold > m_worstScore )
+          m_worstScore = m_bestScore + m_beamThreshold;
 	}
 
 	if (size() > m_maxHypoStackSize)
@@ -59,9 +61,9 @@ float HypothesisCollection::getBestScore(){
 
 
 
-bool HypothesisCollection::Add(Hypothesis *hypo, float beamThreshold)
+bool HypothesisCollection::AddPrune(Hypothesis *hypo)
 {
-	if (hypo->GetScore(ScoreType::Total) < m_bestScore + beamThreshold)
+	if (hypo->GetScore(ScoreType::Total) < m_worstScore)
 		return false;
 
 	// over threshold		
@@ -138,6 +140,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 				++iter;
 			}
 		}
+        m_worstScore = scoreThreshold;
 	}
 }
 

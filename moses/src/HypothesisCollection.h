@@ -64,7 +64,9 @@ class HypothesisCollection : public std::set< Hypothesis*, CompareHypothesisColl
 	friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
 
 protected:
-	float m_bestScore, m_beamThreshold;
+	float m_bestScore;
+    float m_worstScore;
+    float m_beamThreshold;
 	size_t m_maxHypoStackSize;
 
 //	std::list<Arc> m_arc;
@@ -80,6 +82,7 @@ public:
 	inline HypothesisCollection()
 	{
 		m_bestScore = -std::numeric_limits<float>::infinity();
+		m_worstScore = -std::numeric_limits<float>::infinity();
 	}
 
 	inline void AddNoPrune(Hypothesis *hypothesis)
@@ -87,7 +90,8 @@ public:
 		//push_back(hypothesis);
 		insert(hypothesis);
 	}
-	bool Add(Hypothesis *hypothesis, float beamThreshold);
+	bool AddPrune(Hypothesis *hypothesis);
+      // AddPrune adds the hypo, but only if within thresholds (beamThr+stackSize)
 	inline void Detach(const HypothesisCollection::iterator &iter)
 	{
 		erase(iter);

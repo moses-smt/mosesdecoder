@@ -73,6 +73,10 @@ int main(int argc, char* argv[])
 {
 	timer.start("Starting...");
 
+#ifdef N_BEST
+    cerr << "N_BEST flag on\n";
+#endif
+
 	StaticData staticData;
 	if (!staticData.LoadParameters(argc, argv))
 		return EXIT_FAILURE;
@@ -152,14 +156,18 @@ InputOutput *GetInputOutput(StaticData &staticData)
 		list< Phrase >	inputPhraseList;
 		string filePath = staticData.GetParam("input-file")[0];
 
+		TRACE_ERR("About to create ioFile" << endl);
 		IOFile *ioFile = new IOFile(factorOrder, inputFactorUsed
 																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath()
 																	, filePath);
+		TRACE_ERR("About to GetInputPhrase" << endl);
 		ioFile->GetInputPhrase(inputPhraseList);
+		TRACE_ERR("After GetInputPhrase" << endl);
 		inputOutput = ioFile;
 		inputFileHash = GetMD5Hash(filePath);
+		TRACE_ERR("About to LoadPhraseTables" << endl);
 		staticData.LoadPhraseTables(true, inputFileHash, inputPhraseList);
 	}
 	else
