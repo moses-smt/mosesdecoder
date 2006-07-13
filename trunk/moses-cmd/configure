@@ -847,6 +847,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
+  --enable-profiling      moses will dump profiling info
   --enable-mysql          (optional) build in MySQL support]
 
 Optional Packages:
@@ -2603,6 +2604,13 @@ else
 
 fi;
 
+# Check whether --enable-profiling or --disable-profiling was given.
+if test "${enable_profiling+set}" = set; then
+  enableval="$enable_profiling"
+  CPPFLAGS="$CPPFLAGS -pg"; LDFLAGS="$LDFLAGS -pg"
+
+fi;
+
 # Check whether --enable-mysql or --disable-mysql was given.
 if test "${enable_mysql+set}" = set; then
   enableval="$enable_mysql"
@@ -2612,7 +2620,7 @@ else
 fi;
 if test "x$with_boost" != 'xno'
 then
-  CPPFLAGS="$CPPFLAGS -I${with_boost}"
+  CPPFLAGS="$CPPFLAGS -I${with_boost} -I${with_boost}/include"
   LDFLAGS="$LDFLAGS -L${with_boost}/lib -L${with_boost}/stage/lib"
 fi
 

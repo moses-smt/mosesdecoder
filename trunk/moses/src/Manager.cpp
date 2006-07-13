@@ -75,7 +75,7 @@ void Manager::ProcessSentence()
 	LMList allLM = m_staticData.GetAllLM();
 	hypo->ResizeComponentScore(allLM, decodeStepList);
 #endif
-	m_hypoStack[0].Add(hypo, m_staticData.GetBeamThreshold());
+	m_hypoStack[0].AddPrune(hypo);
 	}
 
 	// go thru each stack
@@ -181,7 +181,7 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList
 		}
 		size_t wordsTranslated = hypo->GetWordsBitmap().GetWordsCount();
 
-		if (m_hypoStack[wordsTranslated].Add(hypo, m_staticData.GetBeamThreshold()))
+		if (m_hypoStack[wordsTranslated].AddPrune(hypo))
 		{
 			HypothesisCollectionIntermediate::iterator iterCurr = iterHypo++;
 			lastHypoColl.Detach(iterCurr);
