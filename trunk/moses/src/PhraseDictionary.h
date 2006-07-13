@@ -37,13 +37,11 @@ class PhraseDictionary : public Dictionary
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionary&);
 
 protected:
+	size_t m_maxTargetPhrase;
 	std::map<Phrase , TargetPhraseCollection > m_collection;
 	// 1st = source
 	// 2nd = target
 
-	void AddEquivPhrase(const Phrase &source
-											, const TargetPhrase &targetPhrase
-											, size_t maxTargetPhrase);
 	bool Contains(const std::vector< std::vector<std::string> >	&phraseVector
 							, const std::list<Phrase>					&inputPhraseList
 							, const std::vector<FactorType>		&inputFactorType);
@@ -76,6 +74,8 @@ public:
 		return m_collection.size();
 	}
 	const TargetPhraseCollection *FindEquivPhrase(const Phrase &source) const;
+
+	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 
 	// for mert
 	void SetWeightTransModel(const std::vector<float> &weightT);

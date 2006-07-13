@@ -44,6 +44,8 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, const LMList &languageModels
 																			, float weightWP)
 {
+	m_maxTargetPhrase = maxTargetPhrase;
+
 	//factors	
 	m_factorsUsed[Input]	= new FactorTypeSet(input);
 	m_factorsUsed[Output]	= new FactorTypeSet(output);
@@ -102,7 +104,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			// component score, for n-best output
 			targetPhrase.SetScore(scoreVector, weight, languageModels, weightWP);
 
-			AddEquivPhrase(sourcePhrase, targetPhrase, maxTargetPhrase);
+			AddEquivPhrase(sourcePhrase, targetPhrase);
 
 			// add to hash file
 			if (filter)
@@ -137,11 +139,9 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 	}
 }
 
-void PhraseDictionary::AddEquivPhrase(const Phrase &source
-																			, const TargetPhrase &targetPhrase
-																			, size_t maxTargetPhrase)
+void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
 {
-	if (maxTargetPhrase == 0)
+	if (m_maxTargetPhrase == 0)
 	{	// don't need keep list sorted
 		m_collection[source].push_back(targetPhrase);
 	}
@@ -160,7 +160,7 @@ void PhraseDictionary::AddEquivPhrase(const Phrase &source
 		phraseColl.insert(iter, targetPhrase);
 
 		// get rid of least probably phrase if we have enough
-		if (phraseColl.size() > maxTargetPhrase)
+		if (phraseColl.size() > m_maxTargetPhrase)
 		{
 			phraseColl.erase(phraseColl.begin());
 		}
