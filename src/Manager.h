@@ -64,7 +64,7 @@ protected:
 													, const DecodeStep &decodeStep
 													, HypothesisCollectionIntermediate &outputHypoColl);
 	void CreateTranslationOptions(const Phrase &phrase
-													, const PhraseDictionary &phraseDictionary
+													, PhraseDictionary &phraseDictionary
 													, const LMList &lmListInitial);
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();

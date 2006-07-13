@@ -55,7 +55,7 @@ void Manager::ProcessSentence()
 	
 	list < DecodeStep > &decodeStepList = m_staticData.GetDecodeStepList();
 
-	const PhraseDictionary &phraseDictionary = decodeStepList.front().GetPhraseDictionary();
+	PhraseDictionary &phraseDictionary = decodeStepList.front().GetPhraseDictionary();
 	const LMList &lmListInitial = m_staticData.GetLanguageModel(Initial);
 	// create list of all possible translations
 	// this is only valid if:
@@ -346,7 +346,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 }
 
 void Manager::CreateTranslationOptions(const Phrase &phrase
-																				 , const PhraseDictionary &phraseDictionary
+																				 , PhraseDictionary &phraseDictionary
 																				 , const LMList &lmListInitial)
 {	
 	// loop over all substrings of the source sentence, look them up
@@ -392,13 +392,13 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 			else if (sourcePhrase.GetSize() == 1)
 			{
 				// unknown word, add to target, and add as poss trans
-				float	weightWP		= m_staticData.GetWeightWordPenalty();
+//				float	weightWP		= m_staticData.GetWeightWordPenalty();
 				const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Output);
 				
-				// make sure new phrase isn't deallocated while we're using it
-				m_unknownPhrase.push_back(TargetPhrase(Output, &phraseDictionary));
-				TargetPhrase &targetPhrase = m_unknownPhrase.back();
+				// add to dictionary
+				TargetPhrase targetPhrase(Output, &phraseDictionary);
 				FactorArray &targetWord = targetPhrase.AddWord();
+				phraseDictionary.AddEquivPhrase(sourcePhrase, targetPhrase);
 
 				const FactorArray &sourceWord = sourcePhrase.GetFactorArray(0);
 
