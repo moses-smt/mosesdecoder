@@ -396,9 +396,8 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 				const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Output);
 				
 				// add to dictionary
-				TargetPhrase targetPhrase(Output, &phraseDictionary);
-				FactorArray &targetWord = targetPhrase.AddWord();
-				phraseDictionary.AddEquivPhrase(sourcePhrase, targetPhrase);
+				TargetPhrase targetPhraseOrig(Output, &phraseDictionary);
+				FactorArray &targetWord = targetPhraseOrig.AddWord();
 
 				const FactorArray &sourceWord = sourcePhrase.GetFactorArray(0);
 
@@ -423,11 +422,15 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 						}
 					}
 				}
-
-				//targetPhrase.SetScore(scoreVector, weight, languageModels, weightWP);
 				
-				TranslationOption transOpt(wordsRange
-																		, targetPhrase);
+				LMList languageModels = m_staticData.GetAllLM();;
+				targetPhraseOrig.SetScore(languageModels, m_staticData.GetWeightWordPenalty());
+
+				phraseDictionary.AddEquivPhrase(sourcePhrase, targetPhraseOrig);
+				const TargetPhraseCollection *phraseColl = phraseDictionary.FindEquivPhrase(sourcePhrase);
+				const TargetPhrase &targetPhrase = *phraseColl->begin();
+				
+				TranslationOption transOpt(wordsRange, targetPhrase);
 				m_possibleTranslations.push_back(transOpt);
 			}
 		}
