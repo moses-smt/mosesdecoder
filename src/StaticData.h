@@ -111,7 +111,7 @@ public:
 	{
 		return m_weightWordPenalty;
 	}
-	unsigned int GetMaxHypoStackSize() const
+	size_t GetMaxHypoStackSize() const
 	{
 		return m_maxHypoStackSize;
 	}
