@@ -58,12 +58,15 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
 #ifdef LM_SRI
 typedef unsigned int LmId;
-#endif
+#else
 #ifdef LM_INTERNAL
 class NGramNode;
 typedef const NGramNode* LmId;
+#else
+// if nothing is defined:
+typedef unsigned int LmId;
 #endif
-		 
+#endif
 // enums. 
 // must be 0, 1, 2, ..., unless otherwise stated
 
