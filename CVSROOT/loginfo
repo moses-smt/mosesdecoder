@@ -25,3 +25,14 @@
 #DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
+
+# This line sends all changes to the CVSROOT module to the user specified
+# by USERNAME. It is recommended that someone be watching this module
+# as it shouldn't need to be modified very often.
+CVSROOT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} redpony@gmail.com
+
+# This sends mail to a mailing list, defined by the PROJECTNAME-LISTNAME
+# value. Any changes to any modules in the project will thus generate an
+# email message to the mailing list specified.
+DEFAULT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} ws06osmt@list.clsp.jhu.edu
+
