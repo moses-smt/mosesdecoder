@@ -57,6 +57,7 @@ protected:
 	bool IsCompatible(const Phrase &phrase) const;
 	
 	void CalcFutureScore(const SquareMatrix &futureScore);
+	//void CalcFutureScore(float futureScore[256][256]);
 	void CalcLMScore(const LMList		&lmListInitial, const LMList	&lmListEnd);
 	//TODO: add appropriate arguments to score calculator
   void CalcLexicalReorderingScore();
@@ -70,10 +71,10 @@ public:
 	 * Deep copy
 	 */
 	Hypothesis(const Hypothesis &copy); 
-	/***
-	 * Used for initializing translation process
-	 */
-	Hypothesis(const Phrase &phrase);
+
+	// used to create clone
+	Hypothesis(const Phrase &phrase, const WordsBitmap &initialCoverage);
+		// used for initial seeding of trans process
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 		// create next
 	~Hypothesis();

@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "LatticePathList.h"
 #include "SquareMatrix.h"
+#include "WordsBitmap.h"
 #include "UnknownWordHandler.h"
 
 class LatticePath;
@@ -46,7 +47,6 @@ protected:
 		// no of elements = no of words in source + 1
 	StaticData &m_staticData;
 	TranslationOptionCollection m_possibleTranslations;
-	SquareMatrix m_futureScore;
 
 	// functions
 	void ProcessOneStack(const std::list < DecodeStep > &decodeStepList

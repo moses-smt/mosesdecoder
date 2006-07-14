@@ -35,8 +35,8 @@ Manager::Manager(const Sentence &sentence, StaticData &staticData)
 :m_source(sentence)
 ,m_hypoStack(sentence.GetSize() + 1)
 ,m_staticData(staticData)
-,m_futureScore(sentence.GetSize())
-{	
+,m_possibleTranslations(sentence)
+{
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
@@ -61,8 +61,14 @@ void Manager::ProcessSentence()
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
-	CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
-
+	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
+	m_possibleTranslations.CreateTranslationOptions(decodeStepList
+  														, lmListInitial
+  														, m_staticData.GetAllLM()
+  														, m_staticData.GetFactorCollection()
+  														, m_staticData.GetWeightWordPenalty()
+  														, m_staticData.GetDropUnknown()
+  														, m_staticData.GetVerboseLevel());
 
 	// output
 	//TRACE_ERR (m_possibleTranslations << endl);
@@ -70,12 +76,13 @@ void Manager::ProcessSentence()
 
 	// seed hypothesis
 	{
-	Hypothesis *hypo = new Hypothesis(m_source);
+	Hypothesis *hypo = new Hypothesis(m_source, m_possibleTranslations.GetInitialCoverage());
+	TRACE_ERR(m_possibleTranslations.GetInitialCoverage().GetWordsCount() << endl);
 #ifdef N_BEST
 	LMList allLM = m_staticData.GetAllLM();
 	hypo->ResizeComponentScore(allLM, decodeStepList);
 #endif
-	m_hypoStack[0].AddPrune(hypo);
+	m_hypoStack[m_possibleTranslations.GetInitialCoverage().GetWordsCount()].AddPrune(hypo);
 	}
 	
 	// go thru each stack
@@ -172,18 +179,18 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 									, m_staticData.GetLanguageModel(Other)
 									, m_staticData.GetWeightDistortion()
 									, m_staticData.GetWeightWordPenalty()
-									, m_futureScore, m_source);
-		if(m_staticData.GetVerboseLevel() > 2) 
-		{			
-			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
-		}
+									, m_possibleTranslations.GetFutureScore(), m_source);
+//		if(m_staticData.GetVerboseLevel() > 2) 
+//		{			
+//			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+//		}
 		size_t wordsTranslated = hypo->GetWordsBitmap().GetWordsCount();
 
 		if (m_hypoStack[wordsTranslated].AddPrune(hypo))
 		{
 			HypothesisCollectionIntermediate::iterator iterCurr = iterHypo++;
 			lastHypoColl.Detach(iterCurr);
-			if(m_staticData.GetVerboseLevel() > 0) 
+/*			if(m_staticData.GetVerboseLevel() > 0) 
 				{
 					if(m_hypoStack[wordsTranslated].getBestScore() == hypo->GetScore(ScoreType::Total))
 						{
@@ -191,9 +198,8 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 							
 						}
 					cout<<"added hypothesis on stack "<<wordsTranslated<<" now size "<<m_hypoStack[wordsTranslated].size()<<endl<<endl;
-				
 				}
-
+*/
 		}
 		else
 		{
@@ -371,9 +377,9 @@ void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &p
 			const TargetPhraseCollection *phraseColl =	phraseDictionary.FindEquivPhrase(sourcePhrase);
 			if (phraseColl != NULL)
 			{
-      	if (m_staticData.GetVerboseLevel() >= 3) {
-					cout << "[" << sourcePhrase << "; " << startPos << "-" << endPos << "]\n";
-      	}
+//      	if (m_staticData.GetVerboseLevel() >= 3) {
+//					cout << "[" << sourcePhrase << "; " << startPos << "-" << endPos << "]\n";
+ //     	}
 				TargetPhraseCollection::const_iterator iterTargetPhrase;
 				for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != phraseColl->end() ; ++iterTargetPhrase)
 				{
@@ -382,11 +388,11 @@ void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &p
 					const WordsRange wordsRange(startPos, endPos);
 					TranslationOption transOpt(wordsRange, targetPhrase);
 					m_possibleTranslations.push_back(transOpt);
-      		if (m_staticData.GetVerboseLevel() >= 3) {
-						cout << "\t" << transOpt << "\n";
-      		}
+//      		if (m_staticData.GetVerboseLevel() >= 3) {
+//						cout << "\t" << transOpt << "\n";
+//	     		}
 				}
-        if (m_staticData.GetVerboseLevel() >= 3) { cout << endl; }
+//        if (m_staticData.GetVerboseLevel() >= 3) { cout << endl; }
 			}
 			else if (sourcePhrase.GetSize() == 1)
 			{
@@ -433,14 +439,15 @@ void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &p
 				}
 			}
 			// record the highest cost option in the future cost table.
-			m_futureScore.SetScore(start, end, score[length]);
+//			m_futureScore[start][end] = score[length];
+			//m_futureScore.SetScore(start, end, score[length]);
 
 			//print information about future cost table when verbose option is set
 
-			if(m_staticData.GetVerboseLevel() > 0) 
-				{		
-					cout<<"future cost from "<<start<<" to "<<end<<" is "<<score[length]<<endl;
-				}
+//			if(m_staticData.GetVerboseLevel() > 0) 
+//				{		
+//					cout<<"future cost from "<<start<<" to "<<end<<" is "<<score[length]<<endl;
+//				}
 		}
 	}
 }

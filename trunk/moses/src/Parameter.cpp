@@ -62,6 +62,7 @@ Parameter::Parameter()
  	AddParam("lexreordering-type");
 	AddParam("stack");
 	AddParam("verbose");
+	AddParam("drop-unknown");
 }
 
 // check if parameter settings make sense
@@ -227,6 +228,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-n-best-list", "n-best-list", argc, argv);
 	OverwriteParam("-s", "stack", argc, argv);
 	OverwriteParam("-v", "verbose", argc, argv);
+	OverwriteParam("-drop-unknown", "drop-unknown", argc, argv);
   // check if parameters make sense
 	return Validate();
 }

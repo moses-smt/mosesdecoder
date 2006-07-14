@@ -262,6 +262,14 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		TransformScore(Scan<float>(m_parameter.GetParam("beam-threshold")[0]))
 		: TransformScore(DEFAULT_BEAM_THRESHOLD);
 
+	// Unknown Word Processing -- wade
+	if (m_parameter.GetParam("drop-unknown").size() == 1)
+	  { m_dropUnknown = Scan<size_t>( m_parameter.GetParam("drop-unknown")[0]); }
+	else
+	  { m_dropUnknown = 0; }
+
+  	TRACE_ERR("m_dropUnknown: " << m_dropUnknown << endl);
+
 	return true;
 }
 
