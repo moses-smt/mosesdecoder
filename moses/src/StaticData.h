@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "InputOutput.h"
 #include "DecodeStep.h"
-#include "UnknownWordHandler.h"
+//#include "UnknownWordHandler.h"
 
 class StaticData
 {
@@ -45,7 +45,7 @@ protected:
 	std::vector<FactorType>							m_inputFactorOrder;
 	std::vector<LMList>									m_languageModel;
 	LexicalReordering                   *m_lexReorder;
-	UnknownWordHandler						      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
+//	UnknownWordHandler						      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float																m_beamThreshold
@@ -79,11 +79,11 @@ public:
 		LoadPhraseTables(false, "", std::list< Phrase >());
 	}
 	void LoadMapping();
-	void SetUnknownWordHandler(UnknownWordHandler &unknownWordHandler)
+/*	void SetUnknownWordHandler(UnknownWordHandler &unknownWordHandler)
 	{
 		m_unknownWordHandler = unknownWordHandler;
 	}
-
+*/
 	const PARAM_VEC &GetParam(const std::string &paramName)
 	{
 		return m_parameter.GetParam(paramName);
@@ -108,12 +108,12 @@ public:
   { 
   	return m_dropUnknown; 
   }
-	
+/*	
 	UnknownWordHandler &GetUnknownWordHandler()
 	{
 		return m_unknownWordHandler;
 	}
-	
+*/	
 	FactorCollection &GetFactorCollection()
 	{
 		return m_factorCollection;

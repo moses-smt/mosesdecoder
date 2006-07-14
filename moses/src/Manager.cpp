@@ -404,8 +404,8 @@ void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &p
 				/*
 				 * changed to have an extendable unknown-word translation module -- EVH
 				 */
-				std::list<TranslationOption> unknownWordTranslations = m_staticData.GetUnknownWordHandler().GetPossibleTranslations(wordsRange, sourcePhrase, m_staticData, phraseDictionary);
-				m_possibleTranslations.insert(m_possibleTranslations.end(), unknownWordTranslations.begin(), unknownWordTranslations.end());
+				//std::list<TranslationOption> unknownWordTranslations = m_staticData.GetUnknownWordHandler().GetPossibleTranslations(wordsRange, sourcePhrase, m_staticData, phraseDictionary);
+				//m_possibleTranslations.insert(m_possibleTranslations.end(), unknownWordTranslations.begin(), unknownWordTranslations.end());
 			}
 		}
 	}
