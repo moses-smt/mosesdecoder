@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisCollectionIntermediate.h"
 #include "LatticePath.h"
 #include "LatticePathCollection.h"
+#include "TranslationOption.h"
 
 using namespace std;
 
@@ -399,8 +400,8 @@ void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &p
 				/*
 				 * changed to have an extendable unknown-word translation module -- EVH
 				 */
-				std::list<TranslationOption> > unknownWordTranslations = m_staticData.GetUnknownWordHandler()->GetPossibleTranslations(wordsRange, sourcePhrase, m_staticData, phraseDictionary);
-				m_possibleTranslations.insert(m_possibleTranslations.end(), unknownWordTranslations->begin(), unknownWordTranslations->end());
+				std::list<TranslationOption> unknownWordTranslations = m_staticData.GetUnknownWordHandler().GetPossibleTranslations(wordsRange, sourcePhrase, m_staticData, phraseDictionary);
+				m_possibleTranslations.insert(m_possibleTranslations.end(), unknownWordTranslations.begin(), unknownWordTranslations.end());
 			}
 		}
 	}

@@ -327,6 +327,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LexicalReordering.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Manager.cpp"
 				>
 			</File>
@@ -408,6 +412,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOption.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOptionCollection.cpp"
 				>
 			</File>
 			<File
@@ -501,6 +509,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LexicalReordering.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Manager.h"
 				>
 			</File>
@@ -565,10 +577,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TranslationOptionCollection.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\TranslationOptionCollection.h"
 				>
 			</File>
@@ -582,6 +590,14 @@
 			</File>
 			<File
 				RelativePath=".\src\TypeDef.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnknownWordHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnknownWordHandler.h"
 				>
 			</File>
 			<File

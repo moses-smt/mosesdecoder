@@ -107,6 +107,6 @@ float LexicalReordering::CalcScore(int numSourceWords,
 	size_t curr_target_start = currTargetRange.GetStartPos();
 	size_t curr_target_end = currTargetRange.GetEndPos();
 	
-	
+	return 0;
 }
 	
