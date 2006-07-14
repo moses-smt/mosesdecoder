@@ -62,6 +62,8 @@ protected:
 	std::vector<std::string>						m_mySQLParam;
 	InputOutput													*m_inputOutput;
 	bool                                m_fLMsLoaded;
+	int m_dropUnknown;
+	
 	size_t m_verboseLevel;
 
 public:
@@ -102,12 +104,21 @@ public:
 	{
 		return m_decodeStepList;
 	}
+<<<<<<< StaticData.h
+
+  inline int GetDropUnknown() const 
+  { 
+  	return m_dropUnknown; 
+  }
+
+=======
 	
 	boost::shared_ptr<UnknownWordHandler> GetUnknownWordHandler()
 	{
 		return m_unknownWordHandler;
 	}
 	
+>>>>>>> 1.10
 	FactorCollection &GetFactorCollection()
 	{
 		return m_factorCollection;

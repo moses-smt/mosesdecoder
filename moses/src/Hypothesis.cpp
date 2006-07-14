@@ -36,9 +36,9 @@ using namespace std;
 
 int Hypothesis::s_numNodes = 0;
 
-Hypothesis::Hypothesis(const Phrase &phrase)
+Hypothesis::Hypothesis(const Phrase &phrase, const WordsBitmap &initialCoverage)
 	: LatticeEdge(Output, NULL)
-	, m_sourceCompleted(phrase.GetSize())
+	, m_sourceCompleted(initialCoverage)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_id(s_numNodes++)
@@ -420,7 +420,8 @@ void Hypothesis::CalcScore(const LMList		&lmListInitial
 													, const LMList	&lmListEnd
 													, float weightDistortion
 													, float weightWordPenalty
-													, const SquareMatrix &futureScore, const Sentence &source) 
+													, const SquareMatrix &futureScore
+													, const Sentence &source) 
 {
 	// DISTORTION COST
 	const WordsRange &prevRange = m_prevHypo->GetCurrSourceWordsRange()
@@ -472,12 +473,14 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 		}
 		if(m_sourceCompleted.GetValue(currPos) == 1 && start != maxSize) 
 		{
+//			m_score[ScoreType::FutureScoreEnum] += futureScore[start][currPos - 1];
 			m_score[ScoreType::FutureScoreEnum] += futureScore.GetScore(start, currPos - 1);
 			start = maxSize;
 		}
 	}
 	if (start != maxSize)
 	{
+//		m_score[ScoreType::FutureScoreEnum] += futureScore[start][m_sourceCompleted.GetSize() - 1];
 		m_score[ScoreType::FutureScoreEnum] += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
 	}
 	
