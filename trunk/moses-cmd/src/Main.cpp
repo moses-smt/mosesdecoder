@@ -49,7 +49,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Timer.h"
 #include "IOCommandLine.h"
 #include "IOFile.h"
-#include "UnknownWordHandler.h"
+//#include "UnknownWordHandler.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -78,8 +78,8 @@ int main(int argc, char* argv[])
 	if (!staticData.LoadParameters(argc, argv))
 		return EXIT_FAILURE;
 		
-	boost::shared_ptr<UnknownWordHandler> unknownWordHandler(new UnknownWordHandler);
-	staticData.SetUnknownWordHandler(unknownWordHandler);
+//	boost::shared_ptr<UnknownWordHandler> unknownWordHandler(new UnknownWordHandler);
+//	staticData.SetUnknownWordHandler(unknownWordHandler);
 
 
 		if (staticData.GetVerboseLevel() > 0)
