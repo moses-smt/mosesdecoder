@@ -231,7 +231,7 @@ public:
 
   Ptr const* findKeyPtr(const Key& k) const {
     size_t pos=findKey(k);
-    if(pos<keys.size()) {return &ptr[pos];} else {return 0;}
+		return (pos<keys.size() ? &ptr[pos] : 0);
   }
 
   // find sequence

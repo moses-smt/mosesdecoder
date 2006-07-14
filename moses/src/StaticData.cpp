@@ -27,10 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "HypothesisCollection.h"
 #include "Timer.h"
-#include "PhraseDictionaryTree.h"
 #include "boost/filesystem/operations.hpp" // boost::filesystem::exists
 #include "boost/algorithm/string/case_conv.hpp" //boost::algorithm::to_lower
-#include "InputFileStream.h"
 
 
 using namespace std;
