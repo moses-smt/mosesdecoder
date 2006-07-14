@@ -488,6 +488,15 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 	
 }
 
+
+int Hypothesis::GetId()const{
+	return m_id;
+}
+
+const Hypothesis* Hypothesis::GetPrevHypo()const{
+	return m_prevHypo;
+}
+
 /**
  * prints hypothesis information for pharaoh style logging
  */
@@ -524,19 +533,23 @@ void Hypothesis::PrintHypothesis(const Sentence &source, float weightDistortion,
 ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 {	
 	hypothesis.ToStream(out);
+	
 	// words bitmap
+		
 	out << "[" << hypothesis.m_sourceCompleted << "] ";
 	
-	// scores
-	out << " [" << hypothesis.GetScore( static_cast<ScoreType::ScoreType>(0));
-	for (size_t i = 1 ; i < NUM_SCORES ; i++)
-	{
-		out << "," << hypothesis.GetScore( static_cast<ScoreType::ScoreType>(i));
-	}
-	out << "]";
+	
+		out << " [" << hypothesis.GetScore( static_cast<ScoreType::ScoreType>(0));
+		for (size_t i = 1 ; i < NUM_SCORES ; i++)
+			{
+				out << "," << hypothesis.GetScore( static_cast<ScoreType::ScoreType>(i));
+			}
+		out << "]";
 #ifdef N_BEST
-	out << " " << hypothesis.GetScoreComponent();
-	out << " " << hypothesis.GetGenerationScoreComponent();
+		out << " " << hypothesis.GetScoreComponent();
+		out << " " << hypothesis.GetGenerationScoreComponent();
 #endif
+
+	
 	return out;
 }

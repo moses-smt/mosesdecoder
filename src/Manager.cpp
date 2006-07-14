@@ -191,7 +191,7 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 		{
 			HypothesisCollectionIntermediate::iterator iterCurr = iterHypo++;
 			lastHypoColl.Detach(iterCurr);
-/*			if(m_staticData.GetVerboseLevel() > 0) 
+			if(m_staticData.GetVerboseLevel() > 2) 
 				{
 					if(m_hypoStack[wordsTranslated].getBestScore() == hypo->GetScore(ScoreType::Total))
 						{
@@ -200,13 +200,14 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 						}
 					cout<<"added hypothesis on stack "<<wordsTranslated<<" now size "<<m_hypoStack[wordsTranslated].size()<<endl<<endl;
 				}
-*/
+
 		}
 		else
 		{
 			++iterHypo;
 		}
 	}
+
 }
 
 void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const DecodeStep &decodeStep, HypothesisCollectionIntermediate &outputHypoColl)
@@ -279,6 +280,9 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 			}
 		}
 	}
+
+
+
 }
 
 void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep &decodeStep, HypothesisCollectionIntermediate &outputHypoColl)
@@ -445,10 +449,12 @@ void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &p
 
 			//print information about future cost table when verbose option is set
 
-//			if(m_staticData.GetVerboseLevel() > 0) 
-//				{		
-//					cout<<"future cost from "<<start<<" to "<<end<<" is "<<score[length]<<endl;
-//				}
+
+			if(m_staticData.GetVerboseLevel() > 2) 
+				{		
+					cout<<"future cost from "<<start<<" to "<<end<<" is "<<score[length]<<endl;
+				}
+
 		}
 	}
 }
