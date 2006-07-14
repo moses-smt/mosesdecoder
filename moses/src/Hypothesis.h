@@ -86,7 +86,8 @@ public:
 	Hypothesis *CreateNext(const TranslationOption &transOpt) const;
 	
 	Hypothesis *MergeNext(const TranslationOption &transOpt) const;
-	
+
+	int GetId()const;
 	void PrintHypothesis(  const Sentence &source, float weightDistortion, float weightWordPenalty) const;
  // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
 	inline const WordsRange &GetCurrSourceWordsRange() const
@@ -105,6 +106,8 @@ public:
 							, float weightWordPenalty
 							, const SquareMatrix &futureScore
 							, const Sentence &source) ;
+
+	const Hypothesis* GetPrevHypo() const;
 
 	// same as for phrase
 	inline size_t GetSize() const
