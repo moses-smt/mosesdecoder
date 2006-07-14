@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include <list>
-#include <boost/shared_ptr.hpp>
 #include "Sentence.h"
 #include "Hypothesis.h"
 #include "StaticData.h"
