@@ -51,5 +51,6 @@ public:
 	{
 		return m_setting[paramName];
 	}
+
 };
 

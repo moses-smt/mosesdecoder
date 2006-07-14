@@ -58,7 +58,8 @@ protected:
 	
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	void CalcLMScore(const LMList		&lmListInitial, const LMList	&lmListEnd);
-
+	//TODO: add appropriate arguments to score calculator
+  void CalcLexicalReorderingScore();
 
 public:
 
