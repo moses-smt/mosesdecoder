@@ -73,15 +73,11 @@ int main(int argc, char* argv[])
 {
 	timer.start("Starting...");
 
-#ifdef N_BEST
-    cerr << "N_BEST flag on\n";
-#endif
-
 	StaticData staticData;
 	if (!staticData.LoadParameters(argc, argv))
 		return EXIT_FAILURE;
 
-	if (staticData.GetVerboseLevel() > 0)
+	if (staticData.GetVerboseLevel() >= 0)
 	{
 #if N_BEST
 		std::cerr << "N_BEST=enabled\n";
