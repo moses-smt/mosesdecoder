@@ -20,7 +20,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <list>
-#include <boost/shared_ptr.hpp>
 #include "TargetPhrase.h"
 #include "WordsRange.h"
 #include "PhraseDictionary.h"
@@ -37,7 +36,6 @@ class UnknownWordHandler
 {
 	public:
 	
-		UnknownWordHandler() {}
 		virtual ~UnknownWordHandler() {}
 	
 		/***
@@ -47,6 +45,6 @@ class UnknownWordHandler
 		 * \param phraseDictionary A modifiable phrase table
 		 * \return A list of possible translations for the given source phrase
 		 */
-		virtual boost::shared_ptr<std::list<TranslationOption> > GetPossibleTranslations(
+		virtual std::list<TranslationOption> GetPossibleTranslations(
 			const WordsRange& sourceWordsRange, const Phrase& sourcePhrase, StaticData& staticData, PhraseDictionary& phraseDictionary);
 };
