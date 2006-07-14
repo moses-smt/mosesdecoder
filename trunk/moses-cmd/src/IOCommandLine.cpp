@@ -99,8 +99,10 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long translationId)
 		OutputSurface(cout, hypo);		
 	}
 	else
+	{
 		TRACE_ERR("NO BEST HYPO" << endl);
-
+	}
+	
 	cout << endl;
 }
 
