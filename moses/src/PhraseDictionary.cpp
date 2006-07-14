@@ -128,7 +128,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			remove(tempFilePath);
 		}
 #ifndef _WIN32
-		// change permission to let everyone use chached file
+		// change permission to let everyone use cached file
 		chmod(hashFilePath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
 		TRACE_ERR("Size " << count << " -> " << GetSize() << endl);
@@ -159,7 +159,7 @@ void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &
 		}
 		phraseColl.insert(iter, targetPhrase);
 
-		// get rid of least probably phrase if we have enough
+		// get rid of least probable phrase if we have enough
 		if (phraseColl.size() > m_maxTargetPhrase)
 		{
 			phraseColl.erase(phraseColl.begin());
@@ -169,8 +169,7 @@ void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &
 
 const TargetPhraseCollection *PhraseDictionary::FindEquivPhrase(const Phrase &source) const
 {
-	std::map<Phrase , TargetPhraseCollection >::const_iterator iter =
-		m_collection.find(source);
+	std::map<Phrase , TargetPhraseCollection >::const_iterator iter = m_collection.find(source);
 	if (iter == m_collection.end())
 	{ // can't find source phrase
 		return NULL;

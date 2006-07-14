@@ -28,37 +28,41 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "ScoreComponent.h"
 
+/***
+ * Specify source and target words for a possible translation. m_targetPhrase points to a phrase-table entry.
+ * The source word range is zero-indexed, so it can't refer to an empty range.
+ */
 class TranslationOption
 {
 		friend std::ostream& operator<<(std::ostream& out, const TranslationOption& possibleTranslation);
 
 protected:
+
 	const TargetPhrase 	&m_targetPhrase;
-	WordsRange		m_wordsRange;
+	WordsRange		m_sourceWordsRange;
 #ifdef N_BEST
 	ScoreComponent	m_transScoreComponent;
 #endif
 
 public:
-	TranslationOption(const WordsRange &wordsRange
-										, const TargetPhrase &targetPhrase);
+	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
 
 	bool Overlap(const Hypothesis &hypothesis) const;
 	inline size_t GetStartPos() const
 	{
-		return m_wordsRange.GetStartPos();
+		return m_sourceWordsRange.GetStartPos();
 	}
 	inline size_t GetEndPos() const
 	{
-		return m_wordsRange.GetEndPos();
+		return m_sourceWordsRange.GetEndPos();
 	}
 	inline size_t GetSize() const
 	{
-		return m_wordsRange.GetEndPos() - m_wordsRange.GetStartPos() + 1;
+		return m_sourceWordsRange.GetEndPos() - m_sourceWordsRange.GetStartPos() + 1;
 	}
 	inline const WordsRange &GetWordsRange() const
 	{
-		return m_wordsRange;
+		return m_sourceWordsRange;
 	}
 	inline const Phrase 	&GetPhrase() const
 	{

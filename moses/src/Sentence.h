@@ -43,7 +43,7 @@ public:
 	// for db stuff
 	long GetTranslationId()
 	{
-		return m_translationId;;
+		return m_translationId;
 	}
 	void SetTranslationId(long translationId)
 	{	// for db stuff;

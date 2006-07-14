@@ -353,7 +353,7 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 				contextFactor[index++] = GetFactor(currPos, factorType);
 			else			
 				contextFactor[index++] = languageModel.GetSentenceStart();
-		}		
+		}
 		lmScore	= languageModel.GetValue(contextFactor);
 		//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;
 		

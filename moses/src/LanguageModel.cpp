@@ -57,7 +57,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	if (phraseSize >= m_nGramOrder)
 	{
 		contextFactor.push_back(phrase.GetFactor(m_nGramOrder - 1, factorType));
-		ngramScore = GetValue(contextFactor);		
+		ngramScore = GetValue(contextFactor);
 	}
 	
 	// main loop

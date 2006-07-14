@@ -22,11 +22,13 @@ libmoses_a_SOURCES = \
 	StaticData.cpp \
 	TargetPhrase.cpp \
 	TranslationOption.cpp \
+	UnknownWordHandler.cpp \
  	UserMessage.cpp \
  	Util.cpp \
  	WeightOptimization.cpp \
  	Word.cpp \
- 	WordsBitmap.cpp
+ 	WordsBitmap.cpp \
+	WordsRange.cpp
 
 if INTERNAL_LM
 libmoses_a_SOURCES += NGramCollection.cpp

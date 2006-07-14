@@ -87,7 +87,6 @@ std::string Word::ToString(const FactorArray &factorArray)
 {
 	stringstream strme;
 
-//	strme << "(";
 	for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 	{
 			const Factor *factor = factorArray[currFactor];
