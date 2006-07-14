@@ -109,7 +109,7 @@ public:
   	return m_dropUnknown; 
   }
 	
-	const UnknownWordHandler &GetUnknownWordHandler() const
+	UnknownWordHandler &GetUnknownWordHandler()
 	{
 		return m_unknownWordHandler;
 	}

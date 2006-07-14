@@ -6,6 +6,8 @@
 #include "PhraseDictionary.h"
 #include "FactorCollection.h"
 
+using namespace std;
+
 TranslationOptionCollection::TranslationOptionCollection(const Sentence &inputSentence)
 	: m_inputSentence(inputSentence)
 	,m_futureScore(inputSentence.GetSize())
