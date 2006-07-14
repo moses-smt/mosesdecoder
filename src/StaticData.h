@@ -104,21 +104,20 @@ public:
 	{
 		return m_decodeStepList;
 	}
-<<<<<<< StaticData.h
 
   inline int GetDropUnknown() const 
   { 
   	return m_dropUnknown; 
   }
 
-=======
+
 	
 	boost::shared_ptr<UnknownWordHandler> GetUnknownWordHandler()
 	{
 		return m_unknownWordHandler;
 	}
 	
->>>>>>> 1.10
+
 	FactorCollection &GetFactorCollection()
 	{
 		return m_factorCollection;
