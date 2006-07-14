@@ -29,7 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Timer.h"
 #include "PhraseDictionaryTree.h"
 #include "boost/filesystem/operations.hpp" // boost::filesystem::exists
+#include "boost/algorithm/string/case_conv.hpp" //boost::algorithm::to_lower
 #include "InputFileStream.h"
+
 
 using namespace std;
 
@@ -81,9 +83,68 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	//input-factors
 	const vector<string> &inputFactorVector = m_parameter.GetParam("input-factors");
 	for(size_t i=0; i<inputFactorVector.size(); i++) 
-	{
+  {
 		m_inputFactorOrder.push_back(Scan<FactorType>(inputFactorVector[i]));
 	}
+
+	// load Lexical Reordering model
+	// check to see if the lexical reordering parameter exists
+	const vector<string> &lrFileVector = 
+		m_parameter.GetParam("lexreordering-file");	
+	if (lrFileVector.size() > 0)
+		{
+			// if there is a lexical reordering model, then parse the
+			// parameters associated with it, and create a new Lexical
+			// Reordering object (which will load the probability table)
+			const vector<string> &lrTypeVector = 
+				m_parameter.GetParam("lexreordering-type");	
+			// if type values have been set in the .ini file, then use them;
+			// first initialize to the defaults (msd, bidirectional, fe).
+			int orientation = LexReorderType::Msd, 
+				direction = LexReorderType::Bidirectional, 
+				condition = LexReorderType::Fe;
+			if (lrTypeVector.size() > 0)
+				{
+					// loop through type vector and set the orientation,
+					// direction, and condition to override the defaults
+					int size = lrTypeVector.size();
+					string val;
+					//if multiple parameters of the same type (direction, orientation, condition)
+					//are seen, default behavior is to set the type to the last seen
+					for (int i=0; i<size; i++)
+						{
+							val = lrTypeVector[i];
+							boost::algorithm::to_lower(val);
+							//TODO:Lowercase val!
+							//orientation 
+							if(val == "monotone")
+								orientation = LexReorderType::Monotone;
+							else if(val == "msd")
+								orientation = LexReorderType::Msd;
+							//direction
+							else if(val == "forward")
+								direction == LexReorderType::Forward;
+							else if(val == "backward")
+								direction == LexReorderType::Backward;
+							else if(val == "bidirectional")
+								direction == LexReorderType::Bidirectional;
+							//condition
+							else if(val == "f")
+								condition = LexReorderType::F;
+							else if(val == "fe")
+								condition = LexReorderType::Fe;
+						} 
+				}
+			else // inform the user that the defaults are being employed
+				{
+					//cout << "Lexical reordering is using defaults: Msd, Bidirectional, Fe Parameters" << endl;
+				}
+
+			// for now, assume there is just one lexical reordering model
+			timer.check("Starting to load lexical reorder table...");
+ 			m_lexReorder = new LexicalReordering(lrFileVector[0], orientation, direction, condition);
+			timer.check("Finished loading lexical reorder table.");
+		}
 
 	// load language models
 	if (m_parameter.GetParam("lmodel-file").size() > 0)

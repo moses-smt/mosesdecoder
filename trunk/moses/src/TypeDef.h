@@ -105,12 +105,27 @@ namespace ScoreType {
 		,Distortion
 		,WordPenalty
 		,FutureScoreEnum
+		,LexicalReordering
 		,Total
 	};
 };
 
 // count of above
-const size_t NUM_SCORES = 7;
+const size_t NUM_SCORES = 8;
+
+namespace LexReorderType
+{
+	enum LexReorderType
+		{
+			Monotone
+			,Msd
+			,Forward
+			,Backward
+			,Bidirectional
+			,Fe
+			,F
+		};
+};
 
 enum IOMethod
 {
@@ -131,4 +146,5 @@ typedef const Factor * FactorArray[NUM_FACTORS];
 
 class LanguageModel;
 typedef std::list < LanguageModel* >		LMList;
+
 

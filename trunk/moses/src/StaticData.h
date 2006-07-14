@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "Parameter.h"
 #include "LanguageModel.h"
+#include "LexicalReordering.h"
 #include "InputOutput.h"
 #include "DecodeStep.h"
 #include "UnknownWordHandler.h"
@@ -41,10 +42,11 @@ protected:
 	std::vector<PhraseDictionary*>			m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::list < DecodeStep >						m_decodeStepList;
-	Parameter			m_parameter;
-	std::vector<FactorType>			m_inputFactorOrder;
+	Parameter														m_parameter;
+	std::vector<FactorType>							m_inputFactorOrder;
+	std::vector<LMList>									m_languageModel;
+	LexicalReordering                   *m_lexReorder;
 	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
-	std::vector<LMList>			m_languageModel;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float																m_beamThreshold
