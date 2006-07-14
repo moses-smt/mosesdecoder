@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /***
  * default implementation: assume the word/phrase is a proper noun and set it as its own translation
  */
-boost::shared_ptr<std::list<TranslationOption> > UnknownWordHandler::GetPossibleTranslations(
+std::list<TranslationOption> &UnknownWordHandler::GetPossibleTranslations(
 	const WordsRange& sourceWordsRange, const Phrase& sourcePhrase, StaticData& staticData, PhraseDictionary& phraseDictionary)
 {
 	TargetPhrase targetPhrase(Output, &phraseDictionary);
@@ -63,7 +63,7 @@ boost::shared_ptr<std::list<TranslationOption> > UnknownWordHandler::GetPossible
 	
 	//turn phrase-table entries into TranslationOption objects
 	const TargetPhraseCollection *phraseColl = phraseDictionary.FindEquivPhrase(sourcePhrase);
-	boost::shared_ptr<std::list<TranslationOption> > transOpts(new std::list<TranslationOption>);
+	std::list<TranslationOption> transOpts(new std::list<TranslationOption>);
 	for(TargetPhraseCollection::const_iterator i = phraseColl->begin(); i != phraseColl->end(); i++)
 		transOpts->push_back(TranslationOption(sourceWordsRange, *i));
 	return transOpts;

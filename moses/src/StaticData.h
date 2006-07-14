@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <list>
 #include <vector>
-#include <boost/shared_ptr.hpp>
 #include "TypeDef.h"
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
@@ -46,7 +45,7 @@ protected:
 	std::vector<FactorType>							m_inputFactorOrder;
 	std::vector<LMList>									m_languageModel;
 	LexicalReordering                   *m_lexReorder;
-	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
+	UnknownWordHandler						      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float																m_beamThreshold
@@ -80,7 +79,7 @@ public:
 		LoadPhraseTables(false, "", std::list< Phrase >());
 	}
 	void LoadMapping();
-	void SetUnknownWordHandler(boost::shared_ptr<UnknownWordHandler> unknownWordHandler)
+	void SetUnknownWordHandler(UnknownWordHandler &unknownWordHandler)
 	{
 		m_unknownWordHandler = unknownWordHandler;
 	}
@@ -109,15 +108,12 @@ public:
   { 
   	return m_dropUnknown; 
   }
-
-
 	
-	boost::shared_ptr<UnknownWordHandler> GetUnknownWordHandler()
+	const UnknownWordHandler &GetUnknownWordHandler() const
 	{
 		return m_unknownWordHandler;
 	}
 	
-
 	FactorCollection &GetFactorCollection()
 	{
 		return m_factorCollection;
