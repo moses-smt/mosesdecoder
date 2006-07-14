@@ -91,11 +91,22 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo)
 	}
 }
 
+
+void IOCommandLine::Backtrack(const Hypothesis *hypo){
+
+	if (hypo->m_id != 0) {
+		TRACE_ERR("["<< hypo ->m_id<<" => "<<hypo->GetPrevHypo()->m_id<<"]" <<endl);
+		Backtrack(hypo->GetPrevHypo());
+	}
+}
+
 void IOCommandLine::SetOutput(const Hypothesis *hypo, long translationId)
 {
 	if (hypo != NULL)
 	{
 		TRACE_ERR("BEST HYPO: " << *hypo << endl);
+		Backtrack(hypo);
+
 		OutputSurface(cout, hypo);		
 	}
 	else

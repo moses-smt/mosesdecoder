@@ -81,14 +81,16 @@ int main(int argc, char* argv[])
 	boost::shared_ptr<UnknownWordHandler> unknownWordHandler(new UnknownWordHandler);
 	staticData.SetUnknownWordHandler(unknownWordHandler);
 
-	if (staticData.GetVerboseLevel() >= 0)
-	{
+
+		if (staticData.GetVerboseLevel() > 0)
+		{
+
 #if N_BEST
 		std::cerr << "N_BEST=enabled\n";
 #else
 		std::cerr << "N_BEST=disabled\n";
 #endif
-	}
+		}
 
 	// set up read/writing class
 	InputOutput *inputOutput = GetInputOutput(staticData);
@@ -101,10 +103,10 @@ int main(int argc, char* argv[])
 	while( (sentence = inputOutput->GetInput()) != NULL)
 	{
 		TRACE_ERR(*sentence << endl);
-
 		Manager manager(*sentence, staticData);
 		manager.ProcessSentence();
 		inputOutput->SetOutput(manager.GetBestHypothesis(), sentence->GetTranslationId());
+		
 
 		// n-best
 		size_t nBestSize = staticData.GetNBestSize();
@@ -119,9 +121,11 @@ int main(int argc, char* argv[])
 
 		// delete sentence
 		inputOutput->Release(sentence);
+		
 	}
 	
 	delete inputOutput;
+
 
 	timer.check("End.");
 	return EXIT_SUCCESS;
