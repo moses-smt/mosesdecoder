@@ -23,7 +23,7 @@ libmoses_a_SOURCES = \
 	StaticData.cpp \
 	TargetPhrase.cpp \
 	TranslationOption.cpp \
-	UnknownWordHandler.cpp \
+	TranslationOptionCollection.cpp \
  	UserMessage.cpp \
  	Util.cpp \
  	WeightOptimization.cpp \
