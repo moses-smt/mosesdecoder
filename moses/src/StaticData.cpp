@@ -99,6 +99,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		
 
 		size_t nGramMaxOrder = 0;
+	  timer.check("Start loading LanguageModels");
 		const vector<string> &lmVector = m_parameter.GetParam("lmodel-file");
 
 		for(size_t i=0; i<lmVector.size(); i++) 
@@ -123,9 +124,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				nGramMaxOrder = nGramOrder;
 			string &languageModelFile = token[3];
 			
+			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
 			LanguageModel *lm = new LanguageModel();
 			// error handling here?
 			lm->Load(i, languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
+	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
 			m_languageModel[type].push_back(lm);
 
 			/*
@@ -145,7 +148,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
   // flag indicating that language models were loaded,
   // since phrase table loading requires their presence
   m_fLMsLoaded = true;
-	timer.check("Finished loading language models");
+	timer.check("Finished loading LanguageModels");
 
 	// generation tables
 	if (m_parameter.GetParam("generation-file").size() > 0) 
@@ -359,7 +362,7 @@ void StaticData::LoadPhraseTables(bool filter
 			TRACE_ERR(filePath << endl);
 
 			m_phraseDictionary.push_back(new PhraseDictionary(noScoreComponent));
-			timer.check("Start loading");
+			timer.check("Start loading PhraseTable");
 			m_phraseDictionary[currDict]->Load(input
 																				, output
 																				, m_factorCollection
@@ -372,7 +375,7 @@ void StaticData::LoadPhraseTables(bool filter
 																				,	this->GetLanguageModel(Initial)
 																				,	this->GetWeightWordPenalty());
 		
-			timer.check("Finished loading");
+			timer.check("Finished loading PhraseTable");
 		}
 	}
 
