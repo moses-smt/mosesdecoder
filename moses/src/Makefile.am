@@ -12,6 +12,7 @@ libmoses_a_SOURCES = \
 	LanguageModel.cpp \
 	LatticeEdge.cpp \
 	LatticePath.cpp \
+  LexicalReordering.cpp \
 	Manager.cpp \
 	md5.cpp \
 	Parameter.cpp \

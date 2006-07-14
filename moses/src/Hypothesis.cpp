@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "Arc.h"
 #include "SquareMatrix.h"
+//TODO: add this include in when it compiles
+//#include "LexicalReordering.h"
 
 using namespace std;
 
@@ -263,6 +265,20 @@ int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize) const
 	// identical
 	return 0;
 }
+void Hypothesis::CalcLexicalReorderingScore() 
+{
+//TODO: should referece a copy of the lexical reorderrrrr, rather than pass in
+//	  m_score[ScoreType::LexicalReordering] = LexicalReordering::CalcLexicalReorderingScore(
+//	  	m_sourceCompleted,     //number source words covered, 
+//	  	m_currTargetWordsRange,     //Current Target Range, 
+//	  	LatticeEdge.getPrevHypo().getCurrSourceWordsRange(),     //Previous Source Range, 
+//	  	m_currentSourceWordsRange,     //Current Source Range, 
+//	  	LatticeEdge.getPrevHypo());     //Previous Hypothesis
+}
+
+
+
+
 
 /**
  * Calculates the overall language model score by combining the scores
@@ -273,6 +289,7 @@ int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize) const
  * /param lmListInitial todo - describe this parameter 
  * /param lmListEnd todo - describe this parameter
  */
+
 void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEnd)
 {
 	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
@@ -429,7 +446,8 @@ void Hypothesis::CalcScore(const LMList		&lmListInitial
 	CalcFutureScore(futureScore);
 
 
-
+  //LEXICAL REORDERING COST
+  CalcLexicalReorderingScore();
 
 	// TOTAL COST
 	m_score[ScoreType::Total] = m_score[ScoreType::PhraseTrans]
@@ -437,7 +455,8 @@ void Hypothesis::CalcScore(const LMList		&lmListInitial
 								+ m_score[ScoreType::LanguageModelScore]
 								+ m_score[ScoreType::Distortion]					* weightDistortion
 								+ m_score[ScoreType::WordPenalty]				* weightWordPenalty
-								+ m_score[ScoreType::FutureScoreEnum];
+								+ m_score[ScoreType::FutureScoreEnum]
+								+ m_score[ScoreType::LexicalReordering];
 }
 
 void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
