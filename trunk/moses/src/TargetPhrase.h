@@ -39,7 +39,20 @@ protected:
 #endif
 
 public:
+
 	TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary);
+	
+	/***
+	 * Deep copy
+	 *
+	TargetPhrase(const TargetPhrase& phrase)
+	: Phrase(phrase.GetDirection()), m_transScore(phrase.m_transScore), m_ngramScore(phrase.m_ngramScore), m_fullScore(phrase.m_fullScore)
+#ifdef N_BEST
+	, m_scoreComponent(phrase.m_scoreComponent), m_lmScoreComponent(phrase.m_lmScoreComponent), m_ngramComponent(phrase.m_ngramComponent)
+#endif
+	{
+	}
+	*/
 
 	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT,
 								const LMList &languageModels, float weightWP);
@@ -52,7 +65,7 @@ public:
   {
     return m_transScore;
   }
-  // is this really the best name?
+  //TODO is this really the best name?
   inline float GetFutureScore() const
   {
     return m_fullScore;

@@ -1,0 +1,1 @@
+Sentence.o Sentence.o: Sentence.cpp

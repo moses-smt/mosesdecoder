@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <limits>
-#include <math.h>
+#include <cmath>
 #include "Manager.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -77,7 +77,7 @@ void Manager::ProcessSentence()
 #endif
 	m_hypoStack[0].AddPrune(hypo);
 	}
-
+	
 	// go thru each stack
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
@@ -104,8 +104,7 @@ const Hypothesis *Manager::GetBestHypothesis() const
 	return hypoColl.GetBestHypothesis();
 }
 
-void Manager::ProcessOneStack(const list < DecodeStep > &decodeStepList
-															,HypothesisCollection &sourceHypoColl)
+void Manager::ProcessOneStack(const list < DecodeStep > &decodeStepList, HypothesisCollection &sourceHypoColl)
 {
 	// go thru each hypothesis in the stack
 	HypothesisCollection::iterator iterHypo;
@@ -116,8 +115,7 @@ void Manager::ProcessOneStack(const list < DecodeStep > &decodeStepList
 	}
 }
 
-void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList
-																	 , const Hypothesis &hypothesis)
+void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, const Hypothesis &hypothesis)
 {
 	vector < HypothesisCollectionIntermediate > outputHypoCollVec( decodeStepList.size() );
 	HypothesisCollectionIntermediate::iterator iterHypo;
@@ -204,9 +202,7 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList
 	}
 }
 
-void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
-																				, const DecodeStep &decodeStep
-																				,HypothesisCollectionIntermediate &outputHypoColl)
+void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const DecodeStep &decodeStep, HypothesisCollectionIntermediate &outputHypoColl)
 {
 	int maxDistortion = m_staticData.GetMaxDistortion();
 	if (maxDistortion < 0)
@@ -278,9 +274,7 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
 	}
 }
 
-void Manager::ProcessTranslation(const Hypothesis &hypothesis
-																 , const DecodeStep &decodeStep
-																 ,HypothesisCollectionIntermediate &outputHypoColl)
+void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep &decodeStep, HypothesisCollectionIntermediate &outputHypoColl)
 {
 	const WordsRange &sourceWordsRange				= hypothesis.GetCurrSourceWordsRange();
 	const Phrase sourcePhrase 								= m_source.GetSubString(sourceWordsRange);
@@ -294,7 +288,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 
 		for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != phraseColl->end(); ++iterTargetPhrase)
 		{
-			const TargetPhrase &targetPhrase	= *iterTargetPhrase;
+			const TargetPhrase& targetPhrase	= *iterTargetPhrase;
 			
 			TranslationOption transOpt(sourceWordsRange
 																	, targetPhrase);
@@ -345,9 +339,15 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis
 
 }
 
-void Manager::CreateTranslationOptions(const Phrase &phrase
-																				 , PhraseDictionary &phraseDictionary
-																				 , const LMList &lmListInitial)
+/***
+ * Add to m_possibleTranslations all possible translations the phrase table gives us for
+ * the given phrase
+ * 
+ * \param phrase The source phrase to translate
+ * \param phraseDictionary The phrase table
+ * \param lmListInitial A list of language models
+ */
+void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &phraseDictionary, const LMList &lmListInitial)
 {	
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
@@ -380,8 +380,7 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 					const TargetPhrase	&targetPhrase = *iterTargetPhrase;
 					
 					const WordsRange wordsRange(startPos, endPos);
-					TranslationOption transOpt(wordsRange
-																		, targetPhrase);
+					TranslationOption transOpt(wordsRange, targetPhrase);
 					m_possibleTranslations.push_back(transOpt);
       		if (m_staticData.GetVerboseLevel() >= 3) {
 						cout << "\t" << transOpt << "\n";
@@ -391,47 +390,11 @@ void Manager::CreateTranslationOptions(const Phrase &phrase
 			}
 			else if (sourcePhrase.GetSize() == 1)
 			{
-				// unknown word, add to target, and add as poss trans
-//				float	weightWP		= m_staticData.GetWeightWordPenalty();
-				const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Output);
-				
-				// add to dictionary
-				TargetPhrase targetPhraseOrig(Output, &phraseDictionary);
-				FactorArray &targetWord = targetPhraseOrig.AddWord();
-
-				const FactorArray &sourceWord = sourcePhrase.GetFactorArray(0);
-
-				for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
-				{
-					if (targetFactors.Contains(currFactor))
-					{
-						FactorType factorType = static_cast<FactorType>(currFactor);
-
-						const Factor *factor = sourceWord[factorType]
-												,*unkownfactor;
-						switch (factorType)
-						{
-						case POS:
-							unkownfactor = m_staticData.GetFactorCollection().AddFactor(Output, factorType, UNKNOWN_FACTOR);
-							targetWord[factorType] = unkownfactor;
-							break;
-						default:
-							unkownfactor = m_staticData.GetFactorCollection().AddFactor(Output, factorType, factor->GetString());
-							targetWord[factorType] = unkownfactor;
-							break;
-						}
-					}
-				}
-				
-				LMList languageModels = m_staticData.GetAllLM();;
-				targetPhraseOrig.SetScore(languageModels, m_staticData.GetWeightWordPenalty());
-
-				phraseDictionary.AddEquivPhrase(sourcePhrase, targetPhraseOrig);
-				const TargetPhraseCollection *phraseColl = phraseDictionary.FindEquivPhrase(sourcePhrase);
-				const TargetPhrase &targetPhrase = *phraseColl->begin();
-				
-				TranslationOption transOpt(wordsRange, targetPhrase);
-				m_possibleTranslations.push_back(transOpt);
+				/*
+				 * changed to have an extendable unknown-word translation module -- EVH
+				 */
+				boost::shared_ptr<std::list<TranslationOption> > unknownWordTranslations = m_staticData.GetUnknownWordHandler()->GetPossibleTranslations(wordsRange, sourcePhrase, m_staticData, phraseDictionary);
+				m_possibleTranslations.insert(m_possibleTranslations.end(), unknownWordTranslations->begin(), unknownWordTranslations->end());
 			}
 		}
 	}

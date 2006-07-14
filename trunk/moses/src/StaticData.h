@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <list>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 #include "TypeDef.h"
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
@@ -31,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModel.h"
 #include "InputOutput.h"
 #include "DecodeStep.h"
+#include "UnknownWordHandler.h"
 
 class StaticData
 {
@@ -39,9 +41,10 @@ protected:
 	std::vector<PhraseDictionary*>			m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::list < DecodeStep >						m_decodeStepList;
-	Parameter														m_parameter;
-	std::vector<FactorType>							m_inputFactorOrder;
-	std::vector<LMList>									m_languageModel;
+	Parameter			m_parameter;
+	std::vector<FactorType>			m_inputFactorOrder;
+	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
+	std::vector<LMList>			m_languageModel;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float																m_beamThreshold
@@ -73,6 +76,10 @@ public:
 		LoadPhraseTables(false, "", std::list< Phrase >());
 	}
 	void LoadMapping();
+	void SetUnknownWordHandler(boost::shared_ptr<UnknownWordHandler> unknownWordHandler)
+	{
+		m_unknownWordHandler = unknownWordHandler;
+	}
 
 	const PARAM_VEC &GetParam(const std::string &paramName)
 	{
@@ -93,7 +100,12 @@ public:
 	{
 		return m_decodeStepList;
 	}
-
+	
+	boost::shared_ptr<UnknownWordHandler> GetUnknownWordHandler()
+	{
+		return m_unknownWordHandler;
+	}
+	
 	FactorCollection &GetFactorCollection()
 	{
 		return m_factorCollection;

@@ -28,16 +28,17 @@ class TranslationOptionCollection : public std::list< TranslationOption >
 {
 public:
 	TranslationOptionCollection()
-  {
-  }
+	{
+	}
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
 {
 	TranslationOptionCollection::const_iterator iter;
-  for (iter = coll.begin() ; iter != coll.end() ; ++iter)
-  {
+	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
+	{
 		TRACE_ERR (*iter << std::endl);
-  }       
-  return out;
+	}	
+	return out;
 };
+

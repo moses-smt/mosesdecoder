@@ -31,6 +31,7 @@ class Dictionary;
 class ScoreComponentCollection : public std::map<const Dictionary*, ScoreComponent>
 {
 public:
+	
 	ScoreComponent &GetScoreComponent(const Dictionary *dictionary)
 	{
 		ScoreComponentCollection::iterator iter = find(dictionary);
@@ -41,10 +42,12 @@ public:
 	{
 		return const_cast<ScoreComponentCollection*>(this)->GetScoreComponent(dictionary);
 	}
+	
 	void Remove(const Dictionary *dictionary)
 	{
 		erase(dictionary);
 	}
+	
 	ScoreComponent &Add(const ScoreComponent &scoreComponent)
 	{
 		const Dictionary *dictionary = scoreComponent.GetDictionary();
