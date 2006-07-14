@@ -61,6 +61,7 @@ public:
 	Sentence *GetInput();
 	void SetOutput(const Hypothesis *hypo, long translationId);
 	void SetNBest(const LatticePathList &nBestList, long translationId);
+	void Backtrack(const Hypothesis *hypo);
 };
 
 // help fn
