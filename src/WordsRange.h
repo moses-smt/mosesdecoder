@@ -21,10 +21,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
+#include <iostream>
 #include "TypeDef.h"
 
+/***
+ * Efficient version of WordsBitmap for contiguous ranges
+ */
 class WordsRange
-{ // slimmed down, contiguous version of WordsBitmap
+{
+	friend std::ostream& operator << (std::ostream& out, const WordsRange& range);
+
 	size_t m_startPos, m_endPos;
 public:
 	inline size_t GetStartPos() const

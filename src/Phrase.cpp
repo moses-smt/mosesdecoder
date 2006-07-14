@@ -272,6 +272,7 @@ bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
 // friend
 ostream& operator<<(ostream& out, const Phrase& phrase)
 {
+//	out << "(size " << phrase.GetSize() << ") ";
 	for (size_t pos = 0 ; pos < phrase.GetSize() ; pos++)
 	{
 		const FactorArray &factorArray = phrase.GetFactorArray(pos);

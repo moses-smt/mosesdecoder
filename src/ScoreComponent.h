@@ -33,15 +33,20 @@ class Dictionary;
 class ScoreComponent
 {
 protected:
-	const Dictionary		*m_dictionary;
-	std::vector<float>	m_scoreComponent;
+	const Dictionary *m_dictionary;
+	std::vector<float> m_scoreComponent;
 
 public:
+	
 	ScoreComponent();
 	ScoreComponent(const Dictionary *dictionary);
+	/**
+	 * Deep copy
+	 */
 	ScoreComponent(const ScoreComponent &copy);
+	~ScoreComponent() {}
 
-	inline const Dictionary * GetDictionary() const
+	inline const Dictionary *GetDictionary() const
 	{
 		return m_dictionary;
 	}
@@ -56,7 +61,7 @@ public:
 	{
 		return m_scoreComponent[index];
 	}
-
+	
 	void Reset();
 
 	void Add(const ScoreComponent &source)

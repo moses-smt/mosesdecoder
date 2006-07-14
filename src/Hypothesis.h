@@ -44,15 +44,18 @@ class Hypothesis : public LatticeEdge
 
 protected:
 		// phrase in target language. factors completed will be superset 
-		//				as that in dictionary
+		//				of those in dictionary
 	WordsBitmap				m_sourceCompleted;
 	WordsRange				m_currSourceWordsRange, m_currTargetWordsRange;
 #ifdef N_BEST
-	std::list<Arc*>		m_arcList;
+	std::list<Arc*>		m_arcList; //all arcs that end at the same lattice point as we do
 #endif
 
+	/***
+	 * \return whether none of the factors clash
+	 */
 	bool IsCompatible(const Phrase &phrase) const;
-	// none of the factors clash
+	
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	void CalcLMScore(const LMList		&lmListInitial, const LMList	&lmListEnd);
 
@@ -62,10 +65,14 @@ public:
 	static int s_numNodes;
 	int m_id;	
 
+	/***
+	 * Deep copy
+	 */
 	Hypothesis(const Hypothesis &copy); 
-	// used to create clone
+	/***
+	 * Used for initializing translation process
+	 */
 	Hypothesis(const Phrase &phrase);
-		// used for initial seeding of trans process
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 		// create next
 	~Hypothesis();
@@ -134,6 +141,9 @@ public:
 		return m_phrase.GetFactor(pos - m_currTargetWordsRange.GetStartPos(), factorType);
 	}
 
+	/***
+	 * \return The bitmap of source words we cover
+	 */
 	inline const WordsBitmap &GetWordsBitmap() const
 	{
 		return m_sourceCompleted;

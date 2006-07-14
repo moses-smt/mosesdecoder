@@ -44,7 +44,7 @@ protected:
 	float						m_score[NUM_SCORES];
 
 	const Hypothesis *m_prevHypo;
-	Phrase					m_phrase;
+	Phrase					m_phrase; //target phrase being created at the current decoding step
 
 #ifdef N_BEST
 	ScoreComponentCollection	m_transScoreComponent;
