@@ -18,17 +18,18 @@ libmoses_a_SOURCES = \
 	Parameter.cpp \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
+	PhraseDictionaryTree.cpp \
 	ScoreComponent.cpp \
 	Sentence.cpp \
 	StaticData.cpp \
 	TargetPhrase.cpp \
 	TranslationOption.cpp \
 	TranslationOptionCollection.cpp \
- 	UserMessage.cpp \
- 	Util.cpp \
- 	WeightOptimization.cpp \
- 	Word.cpp \
- 	WordsBitmap.cpp \
+	UserMessage.cpp \
+	Util.cpp \
+	WeightOptimization.cpp \
+	Word.cpp \
+	WordsBitmap.cpp \
 	WordsRange.cpp
 
 if INTERNAL_LM

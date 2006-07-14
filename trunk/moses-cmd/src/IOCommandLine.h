@@ -64,6 +64,7 @@ public:
 	void Backtrack(const Hypothesis *hypo);
 };
 
+
 // help fn
 inline Sentence *GetInput(std::istream &inputStream
 									 , const std::vector<FactorType> &factorOrder
