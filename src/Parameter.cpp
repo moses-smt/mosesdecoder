@@ -191,6 +191,7 @@ void Parameter::OverwriteParam(const string &paramSwitch, const string &paramNam
 	}
 }
 
+// TODO this should be renamed to have at least a plural name
 bool Parameter::LoadParam(int argc, char* argv[]) 
 {
 	// config file (-f) arg mandatory
