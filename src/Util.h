@@ -188,3 +188,9 @@ void RemoveAllInColl(COLL &coll)
 std::string GetTempFolder();
 void CreateTempFile(std::ofstream  &fileStream, std::string &filePath);
 std::string GetMD5Hash(const std::string &filePath);
+
+template<typename T> inline void ShrinkToFit(T& v) {
+  if(v.capacity()>v.size()) T(v).swap(v);assert(v.capacity()==v.size());}
+
+
+
