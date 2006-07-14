@@ -22,13 +22,40 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <list>
+#include "TypeDef.h"
 #include "TranslationOption.h"
+#include "SquareMatrix.h"
+#include "WordsBitmap.h"
+
+class Sentence;
+class DecodeStep;
+class LanguageModel;
+class FactorCollection;
 
 class TranslationOptionCollection : public std::list< TranslationOption >
 {
+protected:
+	const Sentence &m_inputSentence;
+	SquareMatrix m_futureScore;
+	WordsBitmap m_initialCoverage;
+	
 public:
-	TranslationOptionCollection()
+	TranslationOptionCollection(const Sentence &inputSentence);
+  
+  void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
+  														, const LMList &languageModels  														
+  														, const LMList &allLM
+  														, FactorCollection &factorCollection
+  														, float weightWordPenalty
+  														, bool dropUnknown
+  														, size_t verboseLevel);
+	inline const SquareMatrix &GetFutureScore()
 	{
+		return m_futureScore;
+	}
+	inline const WordsBitmap &GetInitialCoverage() const 
+	{
+		return m_initialCoverage;
 	}
 };
 
