@@ -33,7 +33,13 @@ protected:
 
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
+    // this function defines less-than relation on hypotheses
+    // the particular order is not important for us, we need just to figure out
+    // which hypothesis are equal based on:
+    //   the last n-1 target words are the same
+    //   and the covers (source words translated) are the same
 	{
+        // Are the last (n-1) words the same on the target side (n for n-gram LM)?
 		int ret = hypoA->NGramCompare(*hypoB, m_NGramMaxOrder - 1);
 		if (ret != 0)
 		{
