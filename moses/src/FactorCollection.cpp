@@ -53,32 +53,9 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
 																				, LmId						lmId)
 {
 	// find string id
-	const string *ptr;
-	StringSet::const_iterator iterString = m_factorStringCollection.find(factorString);
-	if (iterString == m_factorStringCollection.end())
-	{
-		const pair< StringSet::iterator, bool > &pairRet = m_factorStringCollection.insert(factorString);
-		const string &str = *pairRet.first;
-		ptr = &str;
-	}
-	else
-	{
-		const string &str = *iterString;
-		ptr = &str;
-	}
-
-	Factor findFactor(direction, factorType, ptr, lmId);
-	FactorSet::const_iterator iter = m_collection.find(findFactor);
-	
-	if (iter == m_collection.end())
-	{	// new factor
-		pair< FactorSet::iterator, bool > pairRet = m_collection.insert(findFactor);
-		return &(*pairRet.first);
-	}
-	else
-	{
-		return &(*iter);
-	}
+	const string *ptr=&(*m_factorStringCollection.insert(factorString).first);
+//	Factor findFactor(direction, factorType, ptr, lmId);
+	return &(*m_collection.insert(Factor(direction, factorType, ptr, lmId)).first);
 }
 
 const Factor *FactorCollection::AddFactor(FactorDirection direction
