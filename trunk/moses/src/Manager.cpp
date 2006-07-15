@@ -97,7 +97,7 @@ void Manager::ProcessSentence()
 		ProcessOneStack(decodeStepList, sourceHypoColl);
 
 		//OutputHypoStack();
-		//OutputHypoStackSize();
+		OutputHypoStackSize();
 	}
 
 	// output
