@@ -35,7 +35,7 @@ TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionary *ph
 }
 
 void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
-{
+{ // used when creating translations of unknown words:
 	m_transScore = m_ngramScore = 0;	
 	m_fullScore = weightWP;
 	
@@ -43,23 +43,26 @@ void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
 	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
 	{
 		const LanguageModel &lm = **lmIter;
-		const float weightLM = lm.GetWeight();
-
-		float fullScore, nGramScore;
-
-		#ifdef N_BEST
-				(*lmIter)->CalcScore(*this, fullScore, nGramScore, m_ngramComponent);
-		#else
-		    // this is really, really ugly (a reference to an object at NULL
-		    // is asking for trouble). TODO
-				(*lmIter)->CalcScore(*this, fullScore, nGramScore, *static_cast< list< pair<size_t, float> >* > (NULL));
-		#endif
-
-		m_fullScore   += fullScore * weightLM;
-		m_ngramScore	+= nGramScore * weightLM;
+		FactorType lmFactorType = lm.GetFactorType();
+		
+		if (GetSize() > 0 && GetFactor(0, lmFactorType) != NULL)
+		{ // contains factors used by this LM
+			const float weightLM = lm.GetWeight();
+	
+			float fullScore, nGramScore;
+	
+			#ifdef N_BEST
+					(*lmIter)->CalcScore(*this, fullScore, nGramScore, m_ngramComponent);
+			#else
+			    // this is really, really ugly (a reference to an object at NULL
+			    // is asking for trouble). TODO
+					(*lmIter)->CalcScore(*this, fullScore, nGramScore, *static_cast< list< pair<size_t, float> >* > (NULL));
+			#endif
+	
+			m_fullScore   += fullScore * weightLM;
+			m_ngramScore	+= nGramScore * weightLM;
+		}
 	}	
-
-	m_fullScore = m_fullScore + weightWP;
 }
 
 void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float> &weightT,
@@ -84,24 +87,28 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 	float totalFullScore   = 0;
 
 	LMList::const_iterator lmIter;
-	for (lmIter = languageModels.begin();
-				lmIter != languageModels.end();
-				++lmIter)
+	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
 	{
-		const float weightLM = (*lmIter)->GetWeight();
-		float fullScore, nGramScore;
-#ifdef N_BEST
-		(*lmIter)->CalcScore(*this, fullScore, nGramScore, m_ngramComponent);
-#else
-    // this is really, really ugly (a reference to an object at NULL
-    // is asking for trouble). TODO
-		(*lmIter)->CalcScore(*this, fullScore, nGramScore, *static_cast< list< pair<size_t, float> >* > (NULL));
-#endif
-
-		// total LM score so far
-		totalNgramScore  += nGramScore * weightLM;
-		totalFullScore   += fullScore * weightLM;
+		const LanguageModel &lm = **lmIter;
+		FactorType lmFactorType = lm.GetFactorType();
 		
+		if (GetSize() > 0 && GetFactor(0, lmFactorType) != NULL)
+		{ // contains factors used by this LM
+			const float weightLM = lm.GetWeight();
+			float fullScore, nGramScore;
+#ifdef N_BEST
+			lm.CalcScore(*this, fullScore, nGramScore, m_ngramComponent);
+#else
+	    // this is really, really ugly (a reference to an object at NULL
+	    // is asking for trouble). TODO
+			lm.CalcScore(*this, fullScore, nGramScore, *static_cast< list< pair<size_t, float> >* > (NULL));
+#endif
+	
+			// total LM score so far
+			totalNgramScore  += nGramScore * weightLM;
+			totalFullScore   += fullScore * weightLM;
+			
+		}
 	}
   m_ngramScore = totalNgramScore;
 	m_fullScore = m_transScore + totalFutureScore + totalFullScore
