@@ -593,14 +593,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\UnknownWordHandler.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\UnknownWordHandler.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\UserMessage.h"
 				>
 			</File>
