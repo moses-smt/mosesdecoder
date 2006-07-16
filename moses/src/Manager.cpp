@@ -292,7 +292,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 	const PhraseDictionary &phraseDictionary	= decodeStep.GetPhraseDictionary();
 	const TargetPhraseCollection *phraseColl	=	phraseDictionary.FindEquivPhrase(sourcePhrase);
 	size_t currTargetLength										= hypothesis.GetCurrTargetLength();
-	Hypothesis *newHypo;
+
 	if (phraseColl != NULL)
 	{
 		TargetPhraseCollection::const_iterator iterTargetPhrase;
@@ -306,8 +306,6 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 	
 			Hypothesis *newHypo = hypothesis.MergeNext(transOpt);
 			
-			newHypo = hypothesis.MergeNext(transOpt);
-			
 			if (newHypo != NULL)
 			{
 				outputHypoColl.AddNoPrune( newHypo );
@@ -317,7 +315,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 	else if (sourceWordsRange.GetWordsCount() == 1 && currTargetLength == 1)
 	{ // unknown handler here
 		const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Output);
-		newHypo = new Hypothesis(hypothesis);
+		Hypothesis *newHypo = new Hypothesis(hypothesis);
 		
 		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 		{
