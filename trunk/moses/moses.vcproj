@@ -537,6 +537,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PartialTranslOpt.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PartialTranslOptColl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Phrase.h"
 				>
 			</File>
