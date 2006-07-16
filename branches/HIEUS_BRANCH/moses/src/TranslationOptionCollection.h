@@ -26,11 +26,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
+#include "PartialTranslOpt.h"
+#include "PartialTranslOptColl.h"
 
 class Sentence;
 class DecodeStep;
 class LanguageModel;
 class FactorCollection;
+
 
 class TranslationOptionCollection : public std::list< TranslationOption >
 {
@@ -38,18 +41,24 @@ protected:
 	const Sentence &m_inputSentence;
 	SquareMatrix m_futureScore;
 	WordsBitmap m_initialCoverage;
-	
+
+	void ProcessInitialTranslation(const DecodeStep &decodeStep
+															, const LMList &languageModels
+															, const LMList &allLM
+															, FactorCollection &factorCollection
+															, float weightWordPenalty
+															, int dropUnknown
+															, size_t verboseLevel
+															, PartialTranslOptColl &outputPartialTranslOptColl);
+	void TranslationOptionCollection::ProcessTranslation(
+									const PartialTranslOpt &inputPartialTranslOpt
+									, const DecodeStep &decodeStep
+									, PartialTranslOptColl &outputPartialTranslOptColl);
+
 public:
 	TranslationOptionCollection(const Sentence &inputSentence);
-  
-  void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
-  														, const LMList &languageModels  														
-  														, const LMList &allLM
-  														, FactorCollection &factorCollection
-  														, float weightWordPenalty
-  														, bool dropUnknown
-  														, size_t verboseLevel);
-	inline const SquareMatrix &GetFutureScore()
+
+		inline const SquareMatrix &GetFutureScore()
 	{
 		return m_futureScore;
 	}
@@ -57,6 +66,14 @@ public:
 	{
 		return m_initialCoverage;
 	}
+
+  void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
+  														, const LMList &languageModels  														
+  														, const LMList &allLM
+  														, FactorCollection &factorCollection
+  														, float weightWordPenalty
+  														, int dropUnknown
+  														, size_t verboseLevel);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)

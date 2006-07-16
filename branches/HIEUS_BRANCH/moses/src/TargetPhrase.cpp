@@ -52,11 +52,11 @@ void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
 			float fullScore, nGramScore;
 	
 			#ifdef N_BEST
-					(*lmIter)->CalcScore(*this, fullScore, nGramScore, m_ngramComponent);
+					lm.CalcScore(*this, fullScore, nGramScore, &m_ngramComponent);
 			#else
 			    // this is really, really ugly (a reference to an object at NULL
 			    // is asking for trouble). TODO
-					(*lmIter)->CalcScore(*this, fullScore, nGramScore, *static_cast< list< pair<size_t, float> >* > (NULL));
+					lm.CalcScore(*this, fullScore, nGramScore, NULL);
 			#endif
 	
 			m_fullScore   += fullScore * weightLM;
@@ -97,11 +97,11 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 			const float weightLM = lm.GetWeight();
 			float fullScore, nGramScore;
 #ifdef N_BEST
-			lm.CalcScore(*this, fullScore, nGramScore, m_ngramComponent);
+			lm.CalcScore(*this, fullScore, nGramScore, &m_ngramComponent);
 #else
 	    // this is really, really ugly (a reference to an object at NULL
 	    // is asking for trouble). TODO
-			lm.CalcScore(*this, fullScore, nGramScore, *static_cast< list< pair<size_t, float> >* > (NULL));
+			lm.CalcScore(*this, fullScore, nGramScore, NULL);
 #endif
 	
 			// total LM score so far
@@ -133,6 +133,54 @@ void TargetPhrase::ResetScore()
 #ifdef N_BEST
 	m_scoreComponent.Reset();
 #endif
+}
+
+TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
+{
+	if (! IsCompatible(inputPhrase))
+	{
+		return NULL;
+	}
+
+	// ok, merge
+	TargetPhrase *clone				= new TargetPhrase(*this);
+
+	int currWord = 0;
+	const size_t len = GetSize();
+	for (size_t currPos = 0 ; currPos < len ; currPos++)
+	{
+		const FactorArray &inputWord	= inputPhrase.GetFactorArray(currPos);
+		FactorArray &cloneWord = clone->GetFactorArray(currPos);
+		Word::Merge(cloneWord, inputWord);
+		
+		currWord++;
+	}
+
+	return clone;
+}
+
+bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase) const
+{
+	if (inputPhrase.GetSize() != GetSize())
+	{
+		return false;
+	}
+
+	const size_t size = GetSize();
+
+	for (size_t currPos = 0 ; currPos < size ; currPos++)
+	{
+		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			const Factor *thisFactor 		= GetFactor(currPos, factorType)
+									,*inputFactor	= inputPhrase.GetFactor(currPos, factorType);
+			if (thisFactor != NULL && inputFactor != NULL && thisFactor != inputFactor)
+				return false;
+		}
+	}
+	return true;
+
 }
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)

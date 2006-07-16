@@ -37,7 +37,7 @@ using namespace std;
 void LanguageModel::CalcScore(const Phrase &phrase
 														, float &fullScore
 														, float &ngramScore
-														, list< std::pair<size_t, float> >	&ngramComponent) const
+														, list< std::pair<size_t, float> > *ngramComponent) const
 {
 	fullScore	= 0;
 	ngramScore	= 0;
@@ -76,7 +76,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
 #ifdef N_BEST
 				size_t lmId = GetId();
 				pair<size_t, float> store(lmId, ngramScore);
-				ngramComponent.push_back(store);
+				ngramComponent->push_back(store);
 #endif
 }
 

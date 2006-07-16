@@ -60,6 +60,8 @@ public:
 	// used when creating translations of unknown words:
 	void ResetScore();
 	void SetWeights(const std::vector<float> &weightT);
+	TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
+	bool IsCompatible(const TargetPhrase &inputPhrase) const;
 
   inline float GetTranslationScore() const
   {

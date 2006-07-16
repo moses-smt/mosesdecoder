@@ -69,7 +69,7 @@ public:
 	void CalcScore(const Phrase &phrase
 							, float &fullScore
 							, float &ngramScore
-							, std::list< std::pair<size_t, float> >	&ngramComponent) const;
+							, std::list< std::pair<size_t, float> >	*ngramComponent) const;
 	FactorType GetFactorType() const
 	{
 		return m_factorType;

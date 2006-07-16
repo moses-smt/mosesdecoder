@@ -449,6 +449,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CountedPointer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DecodeStep.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Dictionary.h"
 				>
 			</File>
@@ -462,6 +470,14 @@
 			</File>
 			<File
 				RelativePath=".\src\FactorTypeSet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\File.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FilePtr.h"
 				>
 			</File>
 			<File
@@ -533,7 +549,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ObjectPool.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Parameter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PartialTranslOpt.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PartialTranslOptColl.h"
 				>
 			</File>
 			<File
@@ -542,6 +570,14 @@
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionary.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryTree.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PrefixTree.h"
 				>
 			</File>
 			<File
@@ -558,6 +594,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Sentence.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SquareMatrix.h"
 				>
 			</File>
 			<File

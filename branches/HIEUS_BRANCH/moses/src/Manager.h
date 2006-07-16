@@ -61,9 +61,6 @@ protected:
 	void ProcessGeneration(const Hypothesis &hypothesis
 													, const DecodeStep &decodeStep
 													, HypothesisCollectionIntermediate &outputHypoColl);
-	void CreateTranslationOptions(const Phrase &phrase
-													, PhraseDictionary &phraseDictionary
-													, const LMList &lmListInitial);
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
 public:
