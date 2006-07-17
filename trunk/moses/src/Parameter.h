@@ -29,6 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 typedef std::vector<std::string>						PARAM_VEC;
 typedef std::map<std::string, PARAM_VEC > 	PARAM_MAP;
 
+/***
+ * store raw parameter data (names and values as strings) for StaticData to parse;
+ * to get useful values, see StaticData
+ */
 class Parameter
 {
 protected:
@@ -47,10 +51,13 @@ public:
 	Parameter();
 	bool LoadParam(int argc, char* argv[]);
 
+	/***
+	 * return a vector of strings holding the whitespace-delimited values on the ini-file line 
+	 * corresponding to the given parameter name
+	 */
 	const PARAM_VEC &GetParam(const std::string &paramName)
 	{
 		return m_setting[paramName];
 	}
-
 };
 

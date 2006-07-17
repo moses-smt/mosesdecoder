@@ -26,6 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "Phrase.h"
 
+/***
+ * a Sentence is a Phrase with an ID
+ */
 class Sentence : public Phrase
 {
 protected:
