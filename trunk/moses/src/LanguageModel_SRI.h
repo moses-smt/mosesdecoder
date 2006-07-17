@@ -29,19 +29,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 
 #include "LanguageModel.h"
-#include "Ngram.h"
-#include "Vocab.h"
 
 
 class FactorCollection;
 class Factor;
 class Phrase;
 
+#include "Vocab.h"
+class Vocab; // SRI forward decl
+class Ngram; // SRI forward decl
+
 class LanguageModel_SRI : public LanguageModel
 {
 public:
 	
 	LanguageModel_SRI();
+	~LanguageModel_SRI();
 	void Load(size_t id
 					, const std::string &fileName
 					, FactorCollection &factorCollection
@@ -50,15 +53,10 @@ public:
 					, size_t nGramOrder);
 	
 protected:
-	Vocab m_srilmVocab;  // TODO - make this a ptr, remove #include from header
-	Ngram m_srilmModel;  // "  "
+	Vocab *m_srilmVocab;  // TODO - make this a ptr, remove #include from header
+	Ngram *m_srilmModel;  // "  "
 
-	float GetValue(LmId wordId, VocabIndex *context) const
-	{
-		LanguageModel_SRI *lm = const_cast<LanguageModel_SRI*>(this);	// hack. not sure if supposed to cast this
-		float p = lm->m_srilmModel.wordProb( wordId.sri, context );
-		return FloorSRIScore(TransformSRIScore(p));	 // log10->log
-	}
+	float GetValue(LmId wordId, VocabIndex *context) const;
 
 	LmId GetLmID( const Factor *factor )  const
 	{
@@ -66,15 +64,7 @@ protected:
 	}
 	void CreateFactors(FactorCollection &factorCollection);
 public:
-	static const LmId UNKNOWN_LM_ID;
-	
-	LmId GetLmID( const std::string &str ) const
-	{
-		LanguageModel_SRI *lm = const_cast<LanguageModel_SRI*>(this);	// hack. not sure if supposed to cast this
-		LmId res;
-    res.sri = lm->m_srilmVocab.getIndex( str.c_str(), lm->m_srilmVocab.unkIndex() );
-    return res;
-	}
+	LmId GetLmID( const std::string &str ) const;
 
   virtual float GetValue(const vector<const Factor*> &contextFactor) const;
 };

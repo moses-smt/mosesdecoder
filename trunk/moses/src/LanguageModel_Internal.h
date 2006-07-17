@@ -57,10 +57,7 @@ protected:
 	float GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2) const;
 
 public:
-	LmId GetLmID( const Factor *factor )  const
-	{
-		return factor->GetLmId();
-	}
-	
+	LmId GetLmID( const Factor *factor )  const;
+
 };
 

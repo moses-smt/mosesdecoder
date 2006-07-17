@@ -43,6 +43,7 @@ public:
 	static const LmId UNKNOWN_LM_ID;
 
 	LanguageModel();
+	virtual ~LanguageModel();
 	virtual void Load(size_t id
 					, const std::string &fileName
 					, FactorCollection &factorCollection
@@ -83,5 +84,9 @@ public:
 		return m_id;
 	}
 	virtual float GetValue(const std::vector<const Factor*> &contextFactor) const = 0;
+
+  // one of the following should probably be made available
+  // virtual LmId GetLmID( const Factor *factor )  const = 0;
+  // virtual LmId GetLmID( const std::string &factor )  const = 0;
 };
 
