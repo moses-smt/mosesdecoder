@@ -24,7 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <fstream>
 
-#include "NGramNode.h"
+#include "Ngram.h"
+#include "Vocab.h"
 
 #include "LanguageModel_SRI.h"
 #include "TypeDef.h"
@@ -35,10 +36,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 LanguageModel_SRI::LanguageModel_SRI()
-:m_srilmVocab()
-,m_srilmModel(m_srilmVocab, 3)
+:m_srilmVocab(0)
+,m_srilmModel(0)
 {
-	m_srilmModel.skipOOVs() = false;
+}
+
+LanguageModel_SRI::~LanguageModel_SRI()
+{
+  delete m_srilmModel;
+  delete m_srilmVocab;
 }
 
 void LanguageModel_SRI::Load(size_t id
@@ -48,13 +54,17 @@ void LanguageModel_SRI::Load(size_t id
 												, float weight
 												, size_t nGramOrder)
 {
+	m_srilmVocab  = new Vocab();
+  m_srilmModel	= new Ngram(*m_srilmVocab, nGramOrder);
 	m_id					= id;
 	m_factorType 	= factorType;
 	m_weight			= weight;
 	m_nGramOrder	= nGramOrder;
 
+	m_srilmModel->skipOOVs() = false;
+
 	File file( fileName.c_str(), "r" );
-	if (m_srilmModel.read(file))
+	if (m_srilmModel->read(file))
 	{
 	}
 	else
@@ -71,7 +81,7 @@ void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
 	
 	VocabString str;
 	LmId lmId;
-	VocabIter iter(m_srilmVocab);
+	VocabIter iter(*m_srilmVocab);
 	while ( (str = iter.next()) != NULL)
 	{
 		LmId lmId = GetLmID(str);
@@ -83,6 +93,21 @@ void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
 	lmId = GetLmID(SENTENCE_END);
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END, lmId);
 	
+}
+
+LmId LanguageModel_SRI::GetLmID( const std::string &str ) const
+{
+    LanguageModel_SRI *lm = const_cast<LanguageModel_SRI*>(this); // hack. not sure if supposed to cast this
+    LmId res;
+    res.sri = lm->m_srilmVocab->getIndex( str.c_str(), lm->m_srilmVocab->unkIndex() );
+    return res;
+}
+
+float LanguageModel_SRI::GetValue(LmId wordId, VocabIndex *context) const
+{
+	LanguageModel_SRI *lm = const_cast<LanguageModel_SRI*>(this); // hack. not sure if supposed to cast this
+	float p = lm->m_srilmModel->wordProb( wordId.sri, context );
+	return FloorSRIScore(TransformSRIScore(p));  // log10->log
 }
 
 float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor) const
