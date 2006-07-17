@@ -19,13 +19,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-/*
- * The LexicalReordering class handles everything involved with
- * lexical reordering. It loads a probability table P(orientation|f,e)
- * and computes scores in either forward, backward, or bidirectional
- * direction. 
- */
-
 #pragma once
 
 #include <string>
@@ -40,6 +33,12 @@ class FactorCollection;
 class Factor;
 class Phrase;
 
+/***
+ * The LexicalReordering class handles everything involved with
+ * lexical reordering. It loads a probability table P(orientation|f,e)
+ * and computes scores in either forward, backward, or bidirectional
+ * direction. 
+ */
 class LexicalReordering
 {
 
