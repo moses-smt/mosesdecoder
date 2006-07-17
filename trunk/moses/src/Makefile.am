@@ -40,7 +40,7 @@ if SRI_LM
 libmoses_a_SOURCES += LanguageModel_SRI.cpp
 endif
 
-if IRST_LM
-libmoses_a_SOURCES += LanguageModel_IRST.cpp
-endif
+#if IRST_LM
+#libmoses_a_SOURCES += LanguageModel_IRST.cpp
+#endif
 
