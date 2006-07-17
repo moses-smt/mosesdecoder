@@ -30,6 +30,13 @@ class LanguageModel;
 typedef std::set<Factor> FactorSet;
 typedef std::set<std::string> StringSet;
 
+/** collects factors
+ *
+ * All Factors in moses are accessed and created by a FactorCollection.
+ * By enforcing this strict creation processes (ie, forbidding factors
+ * from being created on the stack, etc), their memory addresses can
+ * be used as keys to uniquely identify them.
+ */
 class FactorCollection
 {
 	friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
@@ -44,7 +51,7 @@ public:
 	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);	
 	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString, LmId lmId);	
 	void SetFactorLmId(const Factor *factor, LmId lmId);
-	
+
 	void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &fileName);
 };
 

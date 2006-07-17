@@ -33,9 +33,15 @@ libmoses_a_SOURCES = \
 	WordsRange.cpp
 
 if INTERNAL_LM
+libmoses_a_SOURCES += NGramCollection.cpp LanguageModel_Internal.cpp
 libmoses_a_SOURCES += NGramCollection.cpp
 endif
 
 if SRI_LM
+libmoses_a_SOURCES += LanguageModel_SRI.cpp
+endif
+
+if IRST_LM
+libmoses_a_SOURCES += LanguageModel_IRST.cpp
 endif
 
