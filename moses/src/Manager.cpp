@@ -181,10 +181,10 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 									, m_staticData.GetWeightDistortion()
 									, m_staticData.GetWeightWordPenalty()
 									, m_possibleTranslations.GetFutureScore(), m_source);
-//		if(m_staticData.GetVerboseLevel() > 2) 
-//		{			
-//			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
-//		}
+		if(m_staticData.GetVerboseLevel() > 2) 
+		{			
+			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+		}
 		size_t wordsTranslated = hypo->GetWordsBitmap().GetWordsCount();
 
 		if (m_hypoStack[wordsTranslated].AddPrune(hypo))
@@ -223,7 +223,6 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 			if ( !transOpt.Overlap(hypothesis)) 
 			{
 				Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-				//newHypo->PrintHypothesis(m_source);
 				outputHypoColl.AddNoPrune( newHypo );			
 			}
 		}
@@ -251,7 +250,6 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 					)
 				{
 					Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-					//newHypo->PrintHypothesis(m_source);
 					outputHypoColl.AddNoPrune( newHypo );			
 				}
 			}
@@ -263,7 +261,6 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 						&& !transOpt.Overlap(hypothesis))
 					{
 						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-						//newHypo->PrintHypothesis(m_source);
 						outputHypoColl.AddNoPrune( newHypo );			
 					}
 				}
@@ -273,7 +270,6 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 						&& !transOpt.Overlap(hypothesis))
 					{
 						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-						//newHypo->PrintHypothesis(m_source);
 						outputHypoColl.AddNoPrune( newHypo );			
 					}
 				}
