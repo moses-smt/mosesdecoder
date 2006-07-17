@@ -3,6 +3,12 @@
 #ifndef COUNTEDPOINTER_H_
 #define COUNTEDPOINTER_H_
 
+/*****
+ * 
+ * why not use boost::shared_ptr? -- EVH
+ * 
+ *****/
+
 // see http://ootips.org/yonat/4dev/counted_ptr.h
 template <class T> class CountedPointer
 {

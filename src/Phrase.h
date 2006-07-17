@@ -35,7 +35,8 @@ class Phrase
 	friend std::ostream& operator<<(std::ostream&, const Phrase&);
 protected:
 	FactorDirection				m_direction;
-	size_t								m_phraseSize, m_arraySize;
+	size_t								m_phraseSize, //number of words
+											m_arraySize;
 	FactorArray						*m_factorArray;
 
 public:
