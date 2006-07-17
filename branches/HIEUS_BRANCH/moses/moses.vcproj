@@ -621,14 +621,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\TransScoreComponent.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\TransScoreComponentCollection.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\TypeDef.h"
 				>
 			</File>
