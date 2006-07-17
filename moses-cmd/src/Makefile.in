@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-SOURCES = $(moses_SOURCES) $(processPhraseTable_SOURCES)
+SOURCES = $(moses_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -36,7 +36,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = moses$(EXEEXT) processPhraseTable$(EXEEXT)
+bin_PROGRAMS = moses$(EXEEXT)
 @BUILD_MYSQL_SUPPORT_TRUE@am__append_1 = IOMySQL.cpp ThreadMySQL.cpp
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -59,9 +59,6 @@ am_moses_OBJECTS = Main.$(OBJEXT) IOCommandLine.$(OBJEXT) \
 moses_OBJECTS = $(am_moses_OBJECTS)
 am__DEPENDENCIES_1 =
 moses_DEPENDENCIES = $(am__DEPENDENCIES_1)
-am_processPhraseTable_OBJECTS = processPhraseTable.$(OBJEXT)
-processPhraseTable_OBJECTS = $(am_processPhraseTable_OBJECTS)
-processPhraseTable_DEPENDENCIES = $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -70,8 +67,8 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(moses_SOURCES) $(processPhraseTable_SOURCES)
-DIST_SOURCES = $(am__moses_SOURCES_DIST) $(processPhraseTable_SOURCES)
+SOURCES = $(moses_SOURCES)
+DIST_SOURCES = $(am__moses_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -178,9 +175,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  src/Makefile
+	  $(AUTOMAKE) --gnu  src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -224,9 +221,6 @@ clean-binPROGRAMS:
 moses$(EXEEXT): $(moses_OBJECTS) $(moses_DEPENDENCIES) 
 	@rm -f moses$(EXEEXT)
 	$(CXXLINK) $(moses_LDFLAGS) $(moses_OBJECTS) $(moses_LDADD) $(LIBS)
-processPhraseTable$(EXEEXT): $(processPhraseTable_OBJECTS) $(processPhraseTable_DEPENDENCIES) 
-	@rm -f processPhraseTable$(EXEEXT)
-	$(CXXLINK) $(processPhraseTable_LDFLAGS) $(processPhraseTable_OBJECTS) $(processPhraseTable_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -239,7 +233,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IOMySQL.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ThreadMySQL.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/processPhraseTable.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
