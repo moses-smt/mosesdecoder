@@ -81,6 +81,9 @@ public:
 	// FactorArray
 	static void Copy(FactorArray &target, const FactorArray &source);
 	static void Initialize(FactorArray &factorArray);
+	/***
+	 * wherever the source word has a given factor that the target word is missing, add it to the target word
+	 */
 	static void Merge(FactorArray &targetWord, const FactorArray &sourceWord);
 	static std::string ToString(const FactorArray &factorArray);
 	static int Compare(const FactorArray &targetWord, const FactorArray &sourceWord);
