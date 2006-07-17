@@ -38,6 +38,7 @@ void TranslationOptionCollection::CreateTranslationOptions(
 	list < DecodeStep >::const_iterator iterStep = decodeStepList.begin();
 	const DecodeStep &decodeStep = *iterStep;
 
+	ProcessUnknownWords();
 	ProcessInitialTranslation(decodeStep, languageModels
 														, allLM, factorCollection
 														, weightWordPenalty, dropUnknown
@@ -49,8 +50,8 @@ void TranslationOptionCollection::CreateTranslationOptions(
 	for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
 	{
 		const DecodeStep &decodeStep = *iterStep;
-		PartialTranslOptColl &inputPhraseList		= outputPartialTranslOptCollVec[indexStep]
-												,&outputPhraseList	= outputPartialTranslOptCollVec[indexStep + 1];
+		PartialTranslOptColl &inputPartialTranslOptColl		= outputPartialTranslOptCollVec[indexStep]
+												,&outputPartialTranslOptColl	= outputPartialTranslOptCollVec[indexStep + 1];
 
 		// is it translation or generation
 		switch (decodeStep.GetDecodeType()) 
@@ -58,29 +59,34 @@ void TranslationOptionCollection::CreateTranslationOptions(
 		case Translate:
 			{
 				// go thru each intermediate trans opt just created
-				PartialTranslOptColl::iterator iterPartialTranslOpt;
-				for (iterPartialTranslOpt = inputPhraseList.begin() ; iterPartialTranslOpt != inputPhraseList.end() ; ++iterPartialTranslOpt)
+				PartialTranslOptColl::const_iterator iterPartialTranslOpt;
+				for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
 				{
-					PartialTranslOpt &inputPartialTranslOpt = *iterPartialTranslOpt;
-					ProcessTranslation(inputPartialTranslOpt, decodeStep, outputPartialTranslOptCollVec[indexStep]);
+					const PartialTranslOpt &inputPartialTranslOpt = *iterPartialTranslOpt;
+					ProcessTranslation(inputPartialTranslOpt, decodeStep, outputPartialTranslOptColl);
 				}
 				break;
 			}
 		case Generate:
 			{
 				// go thru each hypothesis just created
-/*				for (iterHypo = inputHypoColl.begin() ; iterHypo != inputHypoColl.end() ; ++iterHypo)
+				PartialTranslOptColl::const_iterator iterPartialTranslOpt;
+				for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
 				{
-					Hypothesis &inputHypo = **iterHypo;
-					ProcessGeneration(inputHypo, decodeStep, outputHypoColl);
+					const PartialTranslOpt &inputPartialTranslOpt = *iterPartialTranslOpt;
+					ProcessGeneration(inputPartialTranslOpt, decodeStep, outputPartialTranslOptColl);
 				}
-*/				break;
+				break;
 			}
 		}
 
 		indexStep++;
 	} // for (++iterStep 
 
+}
+
+void TranslationOptionCollection::ProcessUnknownWords()
+{
 }
 
 void TranslationOptionCollection::ProcessInitialTranslation(
@@ -284,3 +290,104 @@ void TranslationOptionCollection::ProcessTranslation(
 		// ??? unknown word handler must check for unknown factor across all factor types for this to be unecessary
 	}
 }
+
+// helpers
+typedef pair<Word, float> WordPair;
+typedef list< WordPair > WordList;	
+	// 1st = word 
+	// 2nd = score
+typedef list< WordPair >::const_iterator WordListIterator;
+
+inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
+												, const vector< WordList > &wordListVector)
+{
+	for (size_t currPos = 0 ; currPos < wordListVector.size() ; currPos++)
+	{
+		WordListIterator &iter = wordListIterVector[currPos];
+		iter++;
+		if (iter != wordListVector[currPos].end())
+		{ // eg. 4 -> 5
+			return;
+		}
+		else
+		{ //  eg 9 -> 10
+			iter = wordListVector[currPos].begin();
+		}
+	}
+}
+
+void TranslationOptionCollection::ProcessGeneration(			
+														const PartialTranslOpt &inputPartialTranslOpt
+														, const DecodeStep &decodeStep
+														, PartialTranslOptColl &outputPartialTranslOptColl)
+{
+	const GenerationDictionary &generationDictionary	= decodeStep.GetGenerationDictionary();
+	const WordsRange &sourceWordsRange								= inputPartialTranslOpt.GetSourceWordsRange();
+	const float weight																= generationDictionary.GetWeight();
+
+	const TargetPhrase &targetPhrase = inputPartialTranslOpt.GetTargetPhrase();
+	size_t targetLength	= targetPhrase.GetSize();
+
+	// generation list for each word in hypothesis
+	vector< WordList > wordListVector(targetLength);
+
+	// create generation list
+	int wordListVectorPos = 0;
+	for (size_t currPos = 0 ; currPos < targetLength ; currPos++)
+	{
+		WordList &wordList = wordListVector[wordListVectorPos];
+		const FactorArray &factorArray = targetPhrase.GetFactorArray(currPos);
+
+		const OutputWordCollection *wordColl = generationDictionary.FindWord(factorArray);
+
+		if (wordColl == NULL)
+		{	// word not found in generation dictionary
+			// go no further
+			return;
+		}
+
+		OutputWordCollection::const_iterator iterWordColl;
+		for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
+		{
+			const Word &outputWord = (*iterWordColl).first;
+			float score = (*iterWordColl).second;
+			wordList.push_back(WordPair(outputWord, score));
+		}
+		
+		wordListVectorPos++;
+	}
+
+	// use generation list (wordList)
+	// set up iterators
+	size_t numIteration = 1;
+	vector< WordListIterator >	wordListIterVector(targetLength);
+	vector< const Word* >				mergeWords(targetLength);
+	for (size_t currPos = 0 ; currPos < targetLength ; currPos++)
+	{
+		wordListIterVector[currPos] = wordListVector[currPos].begin();
+		numIteration *= wordListVector[currPos].size();
+	}
+
+	// go thru each possible factor for each word & create hypothesis
+	for (size_t currIter = 0 ; currIter < numIteration ; currIter++)
+	{
+		float generationScore = 0; // total score for this string of words
+
+		// create vector of words with new factors for last phrase
+		for (size_t currPos = 0 ; currPos < targetLength ; currPos++)
+		{
+			const WordPair &wordPair = *wordListIterVector[currPos];
+			mergeWords[currPos] = &(wordPair.first);
+			generationScore += wordPair.second;
+		}
+
+		// merge with existing phrase
+		TargetPhrase newTargetPhrase(targetPhrase);
+		newTargetPhrase.MergeFactors(mergeWords, generationDictionary, generationScore, weight);
+		outputPartialTranslOptColl.Add(PartialTranslOpt(sourceWordsRange, newTargetPhrase));
+
+		// increment iterators
+		IncrementIterators(wordListIterVector, wordListVector);
+	}
+}
+

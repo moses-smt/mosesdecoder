@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <assert.h>
 #include "TargetPhrase.h"
 #include "PhraseDictionary.h"
+#include "GenerationDictionary.h"
 #include "LanguageModel.h"
 
 using namespace std;
@@ -181,6 +182,29 @@ bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase) const
 	}
 	return true;
 
+}
+
+void TargetPhrase::MergeFactors(vector< const Word* > mergeWords, const GenerationDictionary &generationDictionary, float generationScore, float weight)
+{
+	assert (mergeWords.size() == GetSize());
+
+	const size_t size = GetSize();
+
+	for (size_t currPos = 0 ; currPos < size ; currPos++)
+	{
+		const Word &mergeWord = *mergeWords[0];
+		FactorArray &origWord	= GetFactorArray(currPos);
+
+		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			const Factor *factor = mergeWord.GetFactor(factorType);
+			if (factor != NULL)
+			{
+				origWord[factorType] = factor;
+			}
+		}
+	}
 }
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)

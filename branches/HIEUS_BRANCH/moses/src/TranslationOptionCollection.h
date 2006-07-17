@@ -50,10 +50,13 @@ protected:
 															, int dropUnknown
 															, size_t verboseLevel
 															, PartialTranslOptColl &outputPartialTranslOptColl);
-	void TranslationOptionCollection::ProcessTranslation(
-									const PartialTranslOpt &inputPartialTranslOpt
-									, const DecodeStep &decodeStep
-									, PartialTranslOptColl &outputPartialTranslOptColl);
+	void ProcessUnknownWords();
+	void ProcessTranslation(		const PartialTranslOpt &inputPartialTranslOpt
+															, const DecodeStep &decodeStep
+															, PartialTranslOptColl &outputPartialTranslOptColl);
+	void ProcessGeneration(			const PartialTranslOpt &inputPartialTranslOpt
+															, const DecodeStep &decodeStep
+															, PartialTranslOptColl &outputPartialTranslOptColl);
 
 public:
 	TranslationOptionCollection(const Sentence &inputSentence);

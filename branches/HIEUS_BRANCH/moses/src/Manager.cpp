@@ -355,7 +355,7 @@ typedef list< WordPair > WordList;
 	// 2nd = score
 typedef list< WordPair >::const_iterator WordListIterator;
 
-void IncrementIterators(vector< WordListIterator > &wordListIterVector
+inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 												, const vector< WordList > &wordListVector)
 {
 	for (size_t currPos = 0 ; currPos < wordListVector.size() ; currPos++)

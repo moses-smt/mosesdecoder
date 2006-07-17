@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponent.h"
 
 class PhraseDictionary;
+class GenerationDictionary;
 
 class TargetPhrase: public Phrase
 {
@@ -61,7 +62,11 @@ public:
 	void ResetScore();
 	void SetWeights(const std::vector<float> &weightT);
 	TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
+		// used for translation step
 	bool IsCompatible(const TargetPhrase &inputPhrase) const;
+	void MergeFactors(std::vector< const Word* > mergeWord, const GenerationDictionary &generationDictionary, float generationScore, float weight);
+		// used in generation step
+		// must run IsCompatible() to ensure incompatible factors aren't being overwritten
 
   inline float GetTranslationScore() const
   {
