@@ -53,20 +53,25 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #    define LM_INTERNAL 1
 #  endif
 
+#  ifdef HAVE_IRSTLM
+#    define LM_IRST 1
+#    undef LM_INTERNAL
+#    undef LM_SRI
+#  endif
+
 #endif
 ///////////////////////////////////////////////// 
 
-#ifdef LM_SRI
-typedef unsigned int LmId;
-#else
-#ifdef LM_INTERNAL
 class NGramNode;
-typedef const NGramNode* LmId;
-#else
-// if nothing is defined:
-typedef unsigned int LmId;
-#endif
-#endif
+union LmId {
+  unsigned int sri;
+  const NGramNode* internal;
+  int irst;
+  public:
+    LmId() {};
+    LmId(int i) { irst = i; };
+};
+
 // enums. 
 // must be 0, 1, 2, ..., unless otherwise stated
 
@@ -146,5 +151,4 @@ typedef const Factor * FactorArray[NUM_FACTORS];
 
 class LanguageModel;
 typedef std::list < LanguageModel* >		LMList;
-
 
