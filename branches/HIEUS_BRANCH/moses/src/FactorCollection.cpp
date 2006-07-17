@@ -47,15 +47,27 @@ void FactorCollection::LoadVocab(FactorDirection direction, FactorType factorTyp
 	}
 }
 
+bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, const string &factorString)
+{
+	// find string id
+	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
+
+	FactorSet::const_iterator iterFactor;
+	Factor search(direction, factorType, ptrString, LanguageModel::UNKNOWN_LM_ID);
+
+	iterFactor = m_collection.find(search);
+	return iterFactor != m_collection.end();
+}
+
 const Factor *FactorCollection::AddFactor(FactorDirection direction
 																				, FactorType 			factorType
 																				, const string 		&factorString
 																				, LmId						lmId)
 {
 	// find string id
-	const string *ptr=&(*m_factorStringCollection.insert(factorString).first);
+	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
 //	Factor findFactor(direction, factorType, ptr, lmId);
-	return &(*m_collection.insert(Factor(direction, factorType, ptr, lmId)).first);
+	return &(*m_collection.insert(Factor(direction, factorType, ptrString, lmId)).first);
 }
 
 const Factor *FactorCollection::AddFactor(FactorDirection direction

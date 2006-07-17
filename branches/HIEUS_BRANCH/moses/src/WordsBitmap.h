@@ -106,6 +106,10 @@ public:
 	{
 		return m_bitmap[pos];
 	}
+	void SetValue( size_t pos, bool value )
+	{
+		m_bitmap[pos] = value;
+	}
 	void SetValue( size_t startPos, size_t endPos, bool value )
 	{
 		for(size_t pos = startPos ; pos <= endPos ; pos++) 
