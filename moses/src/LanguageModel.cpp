@@ -38,6 +38,7 @@ using namespace std;
 const LmId LanguageModel::UNKNOWN_LM_ID(0);
 
 LanguageModel::LanguageModel() {}
+LanguageModel::~LanguageModel() {}
 
 void LanguageModel::CalcScore(const Phrase &phrase
 														, float &fullScore

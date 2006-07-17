@@ -235,3 +235,8 @@ float LanguageModel_Internal::GetValue(const Factor *factor0, const Factor *fact
 
 }
 
+LmId LanguageModel_Internal::GetLmID( const Factor *factor )  const
+{
+	return factor->GetLmId();
+}
+
