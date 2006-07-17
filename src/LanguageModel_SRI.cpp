@@ -122,7 +122,7 @@ float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor) co
 	context[count-1] = Vocab_None;
 	
 	// call sri lm fn
-	float ret = GetValue(GetLmID(contextFactor[count-1]), context);
+	float ret = GetValue(GetLmID(contextFactor[count-1]->GetString()), context);
 	free(context);
 	return ret;
 }

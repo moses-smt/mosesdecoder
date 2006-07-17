@@ -14,6 +14,12 @@ AC_ARG_WITH(srilm,
             [with_srilm=no]
            )
 
+AC_ARG_WITH(irstlm,
+            [AC_HELP_STRING([--with-irstlm=PATH], [(optional) path to IRST's LM toolkit])],
+            [with_irstlm=$withval],
+            [with_irstlm=no]
+           )
+
 AC_ARG_WITH(boost,
             [AC_HELP_STRING([--with-srilm=PATH], [path to BOOST libraries])],
             [with_boost=$withval],
@@ -53,12 +59,30 @@ then
   FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
   AM_CONDITIONAL([SRI_LM], true)
   AM_CONDITIONAL([INTERNAL_LM], false)
+  AM_CONDITIONAL([IRST_LM], false)
+else if test "x$with_irstlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_irstlm}/include"
+  
+  AC_CHECK_HEADER(ngram.h,
+                 [AC_DEFINE([HAVE_IRSTLM], [], [flag for IRSTLM])],
+                 [AC_MSG_ERROR([Cannot find IRST-LM!])])
+
+  LIB_SRILM="-lirstlm"
+  LDFLAGS="$LDFLAGS -L${with_irstlm}/lib"
+  LIBS="$LIBS $LIB_SRILM"
+  FMTLIBS="$FMTLIBS libirstlm.a"
+  AM_CONDITIONAL([SRI_LM], false)
+  AM_CONDITIONAL([INTERNAL_LM], false)
+  AM_CONDITIONAL([IRST_LM], true)
 else
-  echo "Using internal language model (use --with-srilm to change)!"
+  echo "Using internal language model (use --with-srilm or --with-irstlm to change)!"
   AM_CONDITIONAL([SRI_LM], false)
   AM_CONDITIONAL([INTERNAL_LM], true)
+  AM_CONDITIONAL([IRST_LM], false)
 fi
-
+fi
 LIBS="$LIBS -lboost_iostreams -lboost_filesystem -lboost_thread"
 FMT_LIBS="$FMT_LIBS libboost_iostreams.a libboost_filesystem.a libboost_thread.a"
 
