@@ -23,22 +23,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <vector>
-#include "NGramNode.h"
 #include "Factor.h"
 #include "TypeDef.h"
 #include "Util.h"
+
+#include "LanguageModel.h"
 
 class FactorCollection;
 class Factor;
 class Phrase;
 
 class lmtable;  // irst lm table
+class ngram;
 
 class LanguageModel_IRST : public LanguageModel
 {
 public:
 	
 	LanguageModel_IRST();
+	~LanguageModel_IRST();
 	void Load(size_t id
 					, const std::string &fileName
 					, FactorCollection &factorCollection
@@ -49,28 +52,12 @@ public:
 protected:
 	lmtable* m_lmtb;
 
-	float GetValue(LmId wordId, VocabIndex *context) const
-	{
-		LanguageModel *lm = const_cast<LanguageModel*>(this);	// hack. not sure if supposed to cast this
-		float p = lm->m_srilmModel.wordProb( wordId.sri, context );
-		return FloorSRIScore(TransformSRIScore(p));	 // log10->log
-	}
+//	float GetValue(LmId wordId, ngram *context) const;
 
-	LmId GetLmID( const Factor *factor )  const
-	{
-		return GetLmID(factor->GetString());
-	}
 	void CreateFactors(FactorCollection &factorCollection);
 public:
-	static const LmId UNKNOWN_LM_ID;
-	
-	LmId GetLmID( const std::string &str ) const
-	{
-		LanguageModel *lm = const_cast<LanguageModel*>(this);	// hack. not sure if supposed to cast this
-		LmId res;
-    res.sri = lm->m_srilmVocab.getIndex( str.c_str(), lm->m_srilmVocab.unkIndex() );
-    return res;
-	}
-	
+	LmId GetLmID( const std::string &str ) const;
+  virtual float GetValue(const std::vector<const Factor*> &contextFactor) const;
+
 };
 

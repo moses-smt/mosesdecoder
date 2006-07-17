@@ -57,6 +57,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
 	{
 		contextFactor.push_back(phrase.GetFactor(currPos, factorType));		
+    float score = GetValue(contextFactor);
 		fullScore += GetValue(contextFactor);
 	}
 	
