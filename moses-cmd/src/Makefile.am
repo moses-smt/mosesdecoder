@@ -1,4 +1,4 @@
-bin_PROGRAMS = moses processPhraseTable
+bin_PROGRAMS = moses # processPhraseTable
 moses_SOURCES = Main.cpp IOCommandLine.cpp  IOFile.cpp 
 
 ##MOSESLIB = -L$(top_srcdir)/../moses/src -lmoses
