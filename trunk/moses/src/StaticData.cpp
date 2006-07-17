@@ -406,8 +406,9 @@ void StaticData::LoadPhraseTables(bool filter
 		TRACE_ERR(endl);
 
 		const vector<string> &translationVector = m_parameter.GetParam("ttable-file");
-		size_t	maxTargetPhrase										= Scan<size_t>(m_parameter.GetParam("ttable-limit")[0]);
+		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter.GetParam("ttable-limit"));
 
+		size_t index = 0;
 		size_t totalPrevNoScoreComponent = 0;		
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
@@ -456,12 +457,13 @@ void StaticData::LoadPhraseTables(bool filter
 																				, filePath
 																				, hashFilePath
 																				, weight
-																				, maxTargetPhrase
+																				, maxTargetPhrase[index]
 																				, filterPhrase
 																				, inputPhraseList
 																				,	this->GetLanguageModel(Initial)
 																				,	this->GetWeightWordPenalty());
 
+			index++;
 			timer.check("Finished loading PhraseTable");
 		}
 	}
