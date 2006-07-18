@@ -32,6 +32,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 typedef std::list <TargetPhrase> TargetPhraseCollection;
 
+class StaticData;
+
 class PhraseDictionary : public Dictionary
 {
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionary&);
@@ -67,7 +69,8 @@ public:
 								, bool filter
 								, const std::list< Phrase > &inputPhraseList
 								, const LMList &languageModels
-								, float weightWP);
+								, float weightWP
+								, const StaticData& staticData);
 	
 	size_t GetSize() const
 	{

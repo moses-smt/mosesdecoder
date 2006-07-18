@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputOutput.h"
 #include "DecodeStep.h"
 //#include "UnknownWordHandler.h"
-#include "WordDeletionTable.h"
 
 class StaticData
 {
@@ -42,7 +41,6 @@ protected:
 	FactorCollection										m_factorCollection;
 	std::vector<PhraseDictionary*>			m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
-	WordDeletionTable m_wordDeletionTable;
 	std::list < DecodeStep >						m_decodeStepList;
 	Parameter			m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder;
@@ -52,7 +50,7 @@ protected:
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float																m_beamThreshold
-																			,m_weightDistortion, m_weightWordPenalty, m_wordDeletionWeight;
+																			,m_weightDistortion, m_weightWordPenalty;
 									// PhraseTrans, Generation & LanguageModelScore has multiple weights.
 	int																	m_maxDistortion;
 									// do it differently from old pharaoh
@@ -146,11 +144,7 @@ public:
 	{
 		return m_weightWordPenalty;
 	}
-	float GetWordDeletionWeight() const
-	{
-		return m_wordDeletionWeight;
-	}
-	bool LittleChrisAsksWhetherWordDeletionIsEnabledAndWeAnswerHim() const
+	bool IsWordDeletionEnabled() const
 	{
 		return m_wordDeletionEnabled;
 	}
@@ -191,14 +185,6 @@ public:
 	{
 		return m_cachePath;
 	}
-	/***
-	 * only call this if word deletion is enabled
-	 */
-	const WordDeletionTable& GetWordDeletionTable() const
-	{
-		return m_wordDeletionTable;
-	}
-
 	size_t GetVerboseLevel() const
 	{
 		return m_verboseLevel;

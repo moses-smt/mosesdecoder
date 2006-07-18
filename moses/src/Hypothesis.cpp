@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Arc.h"
 #include "SquareMatrix.h"
 #include "StaticData.h"
-//#include "DeletionHypothesis.h"
 //TODO: add this include in when it compiles
 //#include "LexicalReordering.h"
 
@@ -96,7 +95,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	m_score[ScoreType::PhraseTrans]				+= transOpt.GetTranslationScore();
 	m_score[ScoreType::FutureScoreEnum]		+= transOpt.GetFutureScore();
 	m_score[ScoreType::LanguageModelScore]	+= transOpt.GetNgramScore();
-//  m_wordDeleted = transOpt.IsDeletionOption();
+  m_wordDeleted = transOpt.IsDeletionOption();
 
 #ifdef N_BEST
 	// language model score (ngram)
@@ -461,16 +460,6 @@ void Hypothesis::CalcDistortionScore()
 }
 
 /***
- * calculate the score due to source words dropped; set the appropriate elements of m_score
- */
-void Hypothesis::CalcDeletionScore(const Sentence& sourceSentence, const WordsRange& sourceWordsRange, const WordDeletionTable& wordDeletionTable)
-{
-	m_score[ScoreType::DeletedWords] =
-		wordDeletionTable.GetDeletionCost(sourceSentence.GetSubString(sourceWordsRange));
-}
-
-
-/***
  * calculate the logarithm of our total translation score (sum up components)
  */
 void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &futureScore, const Sentence &source) 
@@ -490,19 +479,12 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 	//LEXICAL REORDERING COST
 	CalcLexicalReorderingScore();
 
-	//cost for deleting source words
-	if (m_wordDeleted)
-	{
-		CalcDeletionScore(source, GetCurrSourceWordsRange(), staticData.GetWordDeletionTable());
-	}
-
 	// TOTAL COST
 	m_score[ScoreType::Total] = m_score[ScoreType::PhraseTrans]
 								+ m_score[ScoreType::Generation]			
 								+ m_score[ScoreType::LanguageModelScore]
 								+ m_score[ScoreType::Distortion]					* staticData.GetWeightDistortion()
 								+ m_score[ScoreType::WordPenalty]					* staticData.GetWeightWordPenalty()
-								+ m_score[ScoreType::DeletedWords]				* staticData.GetWordDeletionWeight()
 								+ m_score[ScoreType::FutureScoreEnum];
 }
 
@@ -565,11 +547,17 @@ void Hypothesis::PrintHypothesis(const Sentence &source, float weightDistortion,
 	cout<<" )"<<endl;
 	cout<<"\tbase score "<<m_prevHypo->m_score[ScoreType::Total]<<endl;
 	cout<<"\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "<< source.GetSubString(m_currSourceWordsRange)  <<endl;
-	cout<<"\ttranslated as: "<<m_targetPhrase<<" => translation cost "<<m_score[ScoreType::PhraseTrans]<<endl;
+	cout<<"\ttranslated as: "<<m_targetPhrase<<" => translation cost "<<m_score[ScoreType::PhraseTrans];
+  if (m_wordDeleted) cout <<"   word_deleted"; 
+  cout<<endl;
 	cout<<"\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange()) << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
 	cout<<"\tlanguage model cost "<<m_score[ScoreType::LanguageModelScore]<<endl;
-	cout<<"\tword penalty "<<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<< "\tdeletion cost "<<m_score[ScoreType::DeletedWords] << endl;
+	cout<<"\tword penalty "<<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
 	cout<<"\tscore "<<m_score[ScoreType::Total] - m_score[ScoreType::FutureScoreEnum]<<" + future cost "<<m_score[ScoreType::FutureScoreEnum]<<" = "<<m_score[ScoreType::Total]<<endl;
+	cout<<"\tscore "<<m_score[ScoreType::Total] - m_score[ScoreType::FutureScoreEnum]<<" + future cost "<<m_score[ScoreType::FutureScoreEnum]<<" = "<<m_score[ScoreType::Total]<<endl;
+#if N_BEST
+  cout<<"\tweighted feature scores: " << this->GetScoreComponent() << endl;
+#endif
 	//PrintLMScores();
 }
 
