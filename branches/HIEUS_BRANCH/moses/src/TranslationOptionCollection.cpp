@@ -61,7 +61,7 @@ void TranslationOptionCollection::CreateTranslationOptions(
 				PartialTranslOptColl::const_iterator iterPartialTranslOpt;
 				for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
 				{
-					const PartialTranslOpt &inputPartialTranslOpt = *iterPartialTranslOpt;
+					const TranslationOption &inputPartialTranslOpt = *iterPartialTranslOpt;
 					ProcessTranslation(inputPartialTranslOpt
 														, decodeStep
 														, outputPartialTranslOptColl
@@ -78,7 +78,7 @@ void TranslationOptionCollection::CreateTranslationOptions(
 				PartialTranslOptColl::const_iterator iterPartialTranslOpt;
 				for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
 				{
-					const PartialTranslOpt &inputPartialTranslOpt = *iterPartialTranslOpt;
+					const TranslationOption &inputPartialTranslOpt = *iterPartialTranslOpt;
 					ProcessGeneration(inputPartialTranslOpt, decodeStep, outputPartialTranslOptColl);
 				}
 				break;
@@ -136,7 +136,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 							
 					const WordsRange wordsRange(startPos, endPos);
 
-					outputPartialTranslOptColl.push_back ( PartialTranslOpt(wordsRange, targetPhrase) );
+					outputPartialTranslOptColl.push_back ( TranslationOption(wordsRange, targetPhrase) );
 
 					if (verboseLevel >= 3) 
 					{
@@ -203,7 +203,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 }
 
 void TranslationOptionCollection::ProcessTranslation(
-								const PartialTranslOpt &inputPartialTranslOpt
+								const TranslationOption &inputPartialTranslOpt
 								, const DecodeStep		 &decodeStep
 								, PartialTranslOptColl &outputPartialTranslOptColl
 								, int dropUnknown
@@ -230,7 +230,7 @@ void TranslationOptionCollection::ProcessTranslation(
 			
 			if (newTargetPhrase != NULL)
 			{
-				outputPartialTranslOptColl.Add( PartialTranslOpt(sourceWordsRange, *newTargetPhrase) );
+				outputPartialTranslOptColl.Add( TranslationOption(sourceWordsRange, *newTargetPhrase) );
 				delete newTargetPhrase;
 			}
 		}
@@ -267,7 +267,7 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 }
 
 void TranslationOptionCollection::ProcessGeneration(			
-														const PartialTranslOpt &inputPartialTranslOpt
+														const TranslationOption &inputPartialTranslOpt
 														, const DecodeStep &decodeStep
 														, PartialTranslOptColl &outputPartialTranslOptColl)
 {
@@ -334,7 +334,7 @@ void TranslationOptionCollection::ProcessGeneration(
 		// merge with existing phrase
 		TargetPhrase newTargetPhrase(targetPhrase);
 		newTargetPhrase.MergeFactors(mergeWords, generationDictionary, generationScore, weight);
-		outputPartialTranslOptColl.Add(PartialTranslOpt(sourceWordsRange, newTargetPhrase));
+		outputPartialTranslOptColl.Add(TranslationOption(sourceWordsRange, newTargetPhrase));
 
 		// increment iterators
 		IncrementIterators(wordListIterVector, wordListVector);

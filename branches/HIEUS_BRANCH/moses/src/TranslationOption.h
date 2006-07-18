@@ -39,13 +39,22 @@ class TranslationOption
 protected:
 
 	const TargetPhrase 	&m_targetPhrase;
-	WordsRange		m_sourceWordsRange;
+	WordsRange					m_sourceWordsRange;
 #ifdef N_BEST
 	ScoreComponent	m_transScoreComponent;
 #endif
 
 public:
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
+
+	inline const TargetPhrase 	&GetTargetPhrase() const
+	{
+		return m_targetPhrase;
+	}
+	inline const WordsRange &GetSourceWordsRange() const
+	{
+		return m_sourceWordsRange;
+	}
 
 	bool Overlap(const Hypothesis &hypothesis) const;
 	inline size_t GetStartPos() const
@@ -59,14 +68,6 @@ public:
 	inline size_t GetSize() const
 	{
 		return m_sourceWordsRange.GetEndPos() - m_sourceWordsRange.GetStartPos() + 1;
-	}
-	inline const WordsRange &GetWordsRange() const
-	{
-		return m_sourceWordsRange;
-	}
-	inline const Phrase 	&GetPhrase() const
-	{
-		return m_targetPhrase;
 	}
 	inline float GetTranslationScore() const
 	{

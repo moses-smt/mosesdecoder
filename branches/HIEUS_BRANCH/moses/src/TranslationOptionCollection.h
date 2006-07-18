@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
-#include "PartialTranslOpt.h"
 #include "PartialTranslOptColl.h"
 
 class Sentence;
@@ -58,14 +57,14 @@ protected:
 															, FactorCollection &factorCollection
 															, const LMList &allLM
 															, float weightWordPenalty);
-	void ProcessTranslation(		const PartialTranslOpt &inputPartialTranslOpt
+	void ProcessTranslation(		const TranslationOption &inputPartialTranslOpt
 															, const DecodeStep &decodeStep
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, int dropUnknown
 															, FactorCollection &factorCollection
 															, const LMList &allLM
 															, float weightWordPenalty);
-	void ProcessGeneration(			const PartialTranslOpt &inputPartialTranslOpt
+	void ProcessGeneration(			const TranslationOption &inputPartialTranslOpt
 															, const DecodeStep &decodeStep
 															, PartialTranslOptColl &outputPartialTranslOptColl);
 

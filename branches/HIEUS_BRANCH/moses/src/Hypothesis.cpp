@@ -72,11 +72,11 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_currSourceWordsRange	(prevHypo.m_currSourceWordsRange)
 	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
-														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetPhrase().GetSize())
+														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
 	, m_id(s_numNodes++)
 {
-	const Phrase &possPhrase				= transOpt.GetPhrase();
-	const WordsRange &wordsRange		= transOpt.GetWordsRange();
+	const Phrase &possPhrase				= transOpt.GetTargetPhrase();
+	const WordsRange &wordsRange		= transOpt.GetSourceWordsRange();
 	m_currSourceWordsRange 					= wordsRange;
 	m_sourceCompleted.SetValue(wordsRange.GetStartPos(), wordsRange.GetEndPos(), true);
 	// add new words from poss trans
@@ -144,7 +144,7 @@ Hypothesis *Hypothesis::CreateNext(const TranslationOption &transOpt) const
 Hypothesis *Hypothesis::MergeNext(const TranslationOption &transOpt) const
 {
 	// check each word is compatible and merge 1-by-1
-	const Phrase &possPhrase = transOpt.GetPhrase();
+	const Phrase &possPhrase = transOpt.GetTargetPhrase();
 	if (! IsCompatible(possPhrase))
 	{
 		return NULL;

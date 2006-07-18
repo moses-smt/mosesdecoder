@@ -36,16 +36,13 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 {
 	const WordsBitmap &bitmap = hypothesis.GetWordsBitmap();
-	return bitmap.Overlap(GetWordsRange());
+	return bitmap.Overlap(GetSourceWordsRange());
 }
 
 // friend
-/***
- * Does not end with a newline.
- */
 ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 {
-	out << possibleTranslation.GetPhrase() 
+	out << possibleTranslation.GetTargetPhrase() 
 			<< ", pC=" << possibleTranslation.GetTranslationScore()
       << ", c="  << possibleTranslation.GetFutureScore();
 	return out;

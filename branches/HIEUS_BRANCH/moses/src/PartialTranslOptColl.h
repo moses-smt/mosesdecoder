@@ -2,12 +2,12 @@
 #pragma once
 
 #include <list>
-#include "PartialTranslOpt.h"
+#include "TranslationOption.h"
 
-class PartialTranslOptColl : public std::list< PartialTranslOpt >
+class PartialTranslOptColl : public std::list< TranslationOption >
 {
 public:
-	void Add(const PartialTranslOpt &partialTranslOpt)
+	void Add(const TranslationOption &partialTranslOpt)
 	{
 		push_back(partialTranslOpt);
 	}
