@@ -183,6 +183,10 @@ public:
 	{
 		return m_nBestFilePath;
 	}
+  // TODO use IsNBestEnabled instead of conditional compilation
+  const bool IsNBestEnabled() const {
+    return !m_nBestFilePath.empty();
+  }
 	void SetWeightDistortion(float weightDistortion)
 	{
 		m_weightDistortion = weightDistortion;
