@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "Util.h"
 #include "InputFileStream.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -42,7 +43,8 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, bool filter
 																			, const list< Phrase > &inputPhraseList
 																			, const LMList &languageModels
-																			, float weightWP)
+																			, float weightWP
+																			, const StaticData& staticData)
 {
 	m_maxTargetPhrase = maxTargetPhrase;
 
@@ -76,8 +78,9 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			TRACE_ERR("Syntax error at " << filePath << ":" << line_num);
 			abort(); // TODO- error handling
 		}
-    if (tokens[1].find_first_not_of(" \t", 0) == string::npos) {
-      TRACE_ERR(filePath << ":" << line_num << ": phrase contains empty target, skipping\n");
+    bool isLHSEmpty = (tokens[1].find_first_not_of(" \t", 0) == string::npos);
+    if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+      TRACE_ERR(filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
 			continue;
     }
 		if (!filter)

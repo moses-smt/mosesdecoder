@@ -2,7 +2,6 @@ lib_LIBRARIES = libmoses.a
 libmoses_a_SOURCES = \
 	Arc.cpp \
 	ConfusionNet.cpp \
-	DeletionHypothesis.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
@@ -32,7 +31,6 @@ libmoses_a_SOURCES = \
  	Util.cpp \
  	WeightOptimization.cpp \
  	Word.cpp \
- 	WordDeletionTable.cpp \
  	WordsBitmap.cpp \
 	WordsRange.cpp
 
