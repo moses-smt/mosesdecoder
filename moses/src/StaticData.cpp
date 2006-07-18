@@ -91,9 +91,17 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	//input-factors
 	const vector<string> &inputFactorVector = m_parameter.GetParam("input-factors");
 	for(size_t i=0; i<inputFactorVector.size(); i++) 
-  {
+	{
 		m_inputFactorOrder.push_back(Scan<FactorType>(inputFactorVector[i]));
 	}
+	
+	//source word deletion
+	if(m_parameter.GetParam("dtable-file").size() > 0)
+	{
+		m_wordDeletionWeight = Scan<float>(m_parameter.GetParam("weight-e")[0]);
+		m_wordDeletionEnabled = true;
+		if (GetVerboseLevel() > 0) { std::cerr << "Word deletion enabled." << std::endl; }
+	} else { m_wordDeletionEnabled = false; }
 
 	// load Lexical Reordering model
 	// check to see if the lexical reordering parameter exists
@@ -281,6 +289,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		: TransformScore(DEFAULT_BEAM_THRESHOLD);
 
 	// Unknown Word Processing -- wade
+	//TODO replace this w/general word dropping -- EVH
 	if (m_parameter.GetParam("drop-unknown").size() == 1)
 	  { m_dropUnknown = Scan<size_t>( m_parameter.GetParam("drop-unknown")[0]); }
 	else
@@ -413,6 +422,7 @@ void StaticData::LoadPhraseTables(bool filter
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>			token		= Tokenize(translationVector[currDict]);
+			//characteristics of the phrase table
 			vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
 													,output	= Tokenize<FactorType>(token[1], ",");
 			string							filePath= token[3];
@@ -467,7 +477,13 @@ void StaticData::LoadPhraseTables(bool filter
 			timer.check("Finished loading PhraseTable");
 		}
 	}
-
+/*
+	//load word deletion table
+	if(m_parameter.GetParam("dtable-file").size() > 0)
+	{
+		m_wordDeletionTable.Load(m_parameter.GetParam("dtable-file")[0], *this);
+	}
+*/
 	timer.check("Finished loading phrase tables");
 }
 

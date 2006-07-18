@@ -1,5 +1,3 @@
-// $Id$
-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -19,39 +17,39 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "Arc.h"
-#include "Hypothesis.h"
+#pragma once
 
-#ifdef N_BEST
+#include <map>
+#include <string>
+#include <stdexcept>
+#include "Phrase.h"
 
-const std::list<Arc*> &Arc::GetArcList() const
+class StaticData;
+
+class WordDeletionTable
 {
-	return m_mainHypo->GetArcList();
-}
-
-#endif
-
-Arc::~Arc()
-{
-}
-
-std::ostream& operator<<(std::ostream& out, const Arc& arc)
-{
-	const Hypothesis *prevHypo = arc.GetPrevHypo();
-	if (prevHypo != NULL)
-	{
-		out << *prevHypo;
-	}
-	out << arc.GetTargetPhrase();
-
-	// score
-	out << " [" << arc.GetScore( static_cast<ScoreType::ScoreType>(0));
-	for (size_t i = 1 ; i < NUM_SCORES ; i++)
-	{
-		out << "," << arc.GetScore( static_cast<ScoreType::ScoreType>(i));
-	}
-	out << "]";
-
-	return out;
-}
-
+	typedef float COST_TYPE;
+	
+	protected:
+	
+		std::map<Phrase, COST_TYPE> m_deletionCosts; //map each source-language phrase to the cost of deleting it
+		
+	public:
+	
+		/***
+		 * should only be called once for a given instance
+		 */
+		void Load(const std::string& filename, StaticData& staticData);
+		
+		/***
+		 * \throw invalid_argument if the given phrase isn't in our table
+		 */
+		COST_TYPE GetDeletionCost(const Phrase& sourcePhrase) const throw(std::invalid_argument)
+		{
+			std::cout << "WordDeletionTable::GetDeletionCost()" << std::endl;
+			std::map<Phrase, COST_TYPE>::const_iterator i = m_deletionCosts.find(sourcePhrase);
+			if(i == m_deletionCosts.end())
+				throw std::invalid_argument("WordDeletionTable::GetDeletionCost()");
+			return i->second;
+		}
+};
