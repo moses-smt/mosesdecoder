@@ -48,6 +48,10 @@ protected:
 	TranslationOptionCollection m_possibleTranslations;
 
 	// functions
+	void ProcessOneStack(HypothesisCollection &sourceHypoColl);
+	void ProcessOneHypothesis(const Hypothesis &hypothesis);
+	void CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisCollectionIntermediate outputHypoColl);
+
 	void ProcessOneStack(const std::list < DecodeStep > &decodeStepList
 													, HypothesisCollection &sourceHypoColl);
 	void ProcessOneHypothesis(const std::list < DecodeStep > &decodeStepList

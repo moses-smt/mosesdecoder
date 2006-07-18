@@ -94,7 +94,8 @@ void Manager::ProcessSentence()
 		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize());
 		sourceHypoColl.InitializeArcs();
 		//sourceHypoColl.Prune();
-		ProcessOneStack(decodeStepList, sourceHypoColl);
+		ProcessOneStack(sourceHypoColl);
+		//ProcessOneStack(decodeStepList, sourceHypoColl);
 
 		//OutputHypoStack();
 		OutputHypoStackSize();
@@ -112,6 +113,132 @@ const Hypothesis *Manager::GetBestHypothesis() const
 	return hypoColl.GetBestHypothesis();
 }
 
+void Manager::ProcessOneStack(HypothesisCollection &sourceHypoColl)
+{
+	// go thru each hypothesis in the stack
+	HypothesisCollection::iterator iterHypo;
+	for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
+	{
+		Hypothesis &hypothesis = **iterHypo;
+		ProcessOneHypothesis(hypothesis);
+	}
+}
+void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
+{
+	HypothesisCollectionIntermediate outputHypoColl;
+	CreateNextHypothesis(hypothesis, outputHypoColl);
+
+	// add to real hypothesis stack
+	HypothesisCollectionIntermediate::iterator iterHypo;
+	for (iterHypo = outputHypoColl.begin() ; iterHypo != outputHypoColl.end() ; )
+	{
+		Hypothesis *hypo = *iterHypo;
+
+		hypo->CalcScore(m_staticData.GetLanguageModel(Initial)
+									, m_staticData.GetLanguageModel(Other)
+									, m_staticData.GetWeightDistortion()
+									, m_staticData.GetWeightWordPenalty()
+									, m_possibleTranslations.GetFutureScore(), m_source);
+//		if(m_staticData.GetVerboseLevel() > 2) 
+//		{			
+//			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+//		}
+		size_t wordsTranslated = hypo->GetWordsBitmap().GetWordsCount();
+
+		if (m_hypoStack[wordsTranslated].AddPrune(hypo))
+		{
+			HypothesisCollectionIntermediate::iterator iterCurr = iterHypo++;
+			outputHypoColl.Detach(iterCurr);
+			if(m_staticData.GetVerboseLevel() > 2) 
+				{
+					if(m_hypoStack[wordsTranslated].getBestScore() == hypo->GetScore(ScoreType::Total))
+						{
+							cout<<"new best estimate for this stack"<<endl;
+						}
+					cout<<"added hypothesis on stack "<<wordsTranslated<<" now size "<<m_hypoStack[wordsTranslated].size()<<endl<<endl;
+				}
+
+		}
+		else
+		{
+			++iterHypo;
+		}
+	}
+
+}
+void Manager::CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisCollectionIntermediate outputHypoColl)
+{
+	int maxDistortion = m_staticData.GetMaxDistortion();
+	if (maxDistortion < 0)
+	{	// no limit on distortion
+		TranslationOptionCollection::const_iterator iterTransOpt;
+		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
+		{
+			const TranslationOption &transOpt = *iterTransOpt;
+
+			if ( !transOpt.Overlap(hypothesis)) 
+			{
+				Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+				//newHypo->PrintHypothesis(m_source);
+				outputHypoColl.AddNoPrune( newHypo );			
+			}
+		}
+	}
+	else
+	{
+		const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
+		size_t hypoWordCount		= hypoBitmap.GetWordsCount()
+			,hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();
+
+		// MAIN LOOP. go through each possible hypo
+		TranslationOptionCollection::const_iterator iterTransOpt;
+		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
+		{
+			const TranslationOption &transOpt = *iterTransOpt;
+			// calc distortion if using this poss trans
+
+			size_t transOptStartPos = transOpt.GetStartPos();
+
+			if (hypoFirstGapPos == hypoWordCount)
+			{
+				if (transOptStartPos == hypoWordCount
+					|| (transOptStartPos > hypoWordCount 
+					&& transOpt.GetEndPos() <= hypoWordCount + m_staticData.GetMaxDistortion())
+					)
+				{
+					Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+					//newHypo->PrintHypothesis(m_source);
+					outputHypoColl.AddNoPrune( newHypo );			
+				}
+			}
+			else
+			{
+				if (transOptStartPos < hypoWordCount)
+				{
+					if (transOptStartPos >= hypoFirstGapPos
+						&& !transOpt.Overlap(hypothesis))
+					{
+						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+						//newHypo->PrintHypothesis(m_source);
+						outputHypoColl.AddNoPrune( newHypo );			
+					}
+				}
+				else
+				{
+					if (transOpt.GetEndPos() <= hypoFirstGapPos + m_staticData.GetMaxDistortion()
+						&& !transOpt.Overlap(hypothesis))
+					{
+						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+						//newHypo->PrintHypothesis(m_source);
+						outputHypoColl.AddNoPrune( newHypo );			
+					}
+				}
+			}
+		}
+	}
+}
+
+// OLD FUNCTIONS
 void Manager::ProcessOneStack(const list < DecodeStep > &decodeStepList, HypothesisCollection &sourceHypoColl)
 {
 	// go thru each hypothesis in the stack
