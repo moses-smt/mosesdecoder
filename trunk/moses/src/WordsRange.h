@@ -41,11 +41,7 @@ public:
 	{
 		return m_endPos;
 	}
-	inline WordsRange(size_t startPos, size_t endPos)
-	{
-		m_startPos	= startPos;
-		m_endPos		= endPos;
-	}
+	inline WordsRange(size_t startPos, size_t endPos) : m_startPos(startPos), m_endPos(endPos) {}
 
 	inline int CalcDistortion(const WordsRange &prevRange) const
 	{
