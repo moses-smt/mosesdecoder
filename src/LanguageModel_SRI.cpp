@@ -103,10 +103,10 @@ LmId LanguageModel_SRI::GetLmID( const std::string &str ) const
     return res;
 }
 
-float LanguageModel_SRI::GetValue(LmId wordId, VocabIndex *context) const
+float LanguageModel_SRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 {
 	LanguageModel_SRI *lm = const_cast<LanguageModel_SRI*>(this); // hack. not sure if supposed to cast this
-	float p = lm->m_srilmModel->wordProb( wordId.sri, context );
+	float p = lm->m_srilmModel->wordProb( wordId, context );
 	return FloorSRIScore(TransformSRIScore(p));  // log10->log
 }
 
@@ -114,16 +114,15 @@ float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor) co
 {
 	// set up context
 	size_t count = contextFactor.size();
-	VocabIndex *context = (VocabIndex*) malloc(count * sizeof(VocabIndex));
+  VocabIndex context[MAX_NGRAM_SIZE];
 	for (size_t i = 0 ; i < count - 1 ; i++)
 	{
-		context[i] = GetLmID(contextFactor[count-2-i]).sri;
+		context[i] = contextFactor[count-2-i]->GetLmId().sri;
 	}
 	context[count-1] = Vocab_None;
 	
 	// call sri lm fn
-	float ret = GetValue(GetLmID(contextFactor[count-1]->GetString()), context);
-	free(context);
+	float ret = GetValue(contextFactor[count-1]->GetLmId().sri, context);
 	return ret;
 }
 
