@@ -110,7 +110,7 @@ float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor) c
   ngram ng(m_lmtb->dict);
 	for (size_t i = 0 ; i < count ; i++)
 	{
-		ng.pushc(GetLmID(contextFactor[i]->GetString()).irst);
+		ng.pushc(contextFactor[i]->GetLmId().irst);
 	}
 	return TransformScore(m_lmtb->prob(ng));
 }

@@ -48,7 +48,7 @@ public:
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder);
-	
+
 protected:
 	lmtable* m_lmtb;
 
