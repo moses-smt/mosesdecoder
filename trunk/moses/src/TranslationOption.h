@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 /***
  * Specify source and target words for a possible translation. m_targetPhrase points to a phrase-table entry.
- * The source word range is zero-indexed, so it can't refer to an empty range.
+ * The source word range is zero-indexed, so it can't refer to an empty range. The target phrase may be empty.
  */
 class TranslationOption
 {
@@ -48,26 +48,48 @@ public:
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
 
 	bool Overlap(const Hypothesis &hypothesis) const;
+	/***
+	 * return start index of source phrase
+	 */
 	inline size_t GetStartPos() const
 	{
 		return m_sourceWordsRange.GetStartPos();
 	}
+	/***
+	 * return end index of source phrase
+	 */
 	inline size_t GetEndPos() const
 	{
 		return m_sourceWordsRange.GetEndPos();
 	}
+	/***
+	 * return length of source phrase
+	 */
 	inline size_t GetSize() const
 	{
 		return m_sourceWordsRange.GetEndPos() - m_sourceWordsRange.GetStartPos() + 1;
 	}
+	/***
+	 * return source words range
+	 */
 	inline const WordsRange &GetWordsRange() const
 	{
 		return m_sourceWordsRange;
 	}
-	inline const Phrase 	&GetPhrase() const
+	/***
+	 * return target phrase
+	 */
+	inline const Phrase& GetPhrase() const
 	{
 		return m_targetPhrase;
 	}
+  /***
+   * returns true if the source phrase translates into nothing
+   */
+	inline bool IsDeletionOption() const
+  {
+    return m_targetPhrase.GetSize() == 0;
+  }
 	inline float GetTranslationScore() const
 	{
 		return m_targetPhrase.GetTranslationScore();
@@ -86,11 +108,11 @@ public:
 	{
 		return m_transScoreComponent;
 	}
-	inline const std::list< std::pair<size_t, float> > &GetLMScoreComponent() const
+	inline const std::vector< std::pair<size_t, float> > &GetLMScoreComponent() const
 	{
 		return m_targetPhrase.GetLMScoreComponent();
 	}
-	inline const std::list< std::pair<size_t, float> > &GetTrigramComponent() const
+	inline const std::vector< std::pair<size_t, float> > &GetTrigramComponent() const
 	{
 		return m_targetPhrase.GetNgramComponent();
 	}

@@ -66,22 +66,32 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 	string line, prevSourcePhrase = "";
 	bool addPhrase = !filter;
 	size_t count = 0;
+  size_t line_num = 0;
 	while(getline(inFile, line)) 
 	{
-		vector<string> token = TokenizeMultiCharSeparator( line , "|||" );
-		
+    ++line_num;
+		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
+		if (tokens.size() != 3)
+		{
+			TRACE_ERR("Syntax error at " << filePath << ":" << line_num);
+			abort(); // TODO- error handling
+		}
+    if (tokens[1].find_first_not_of(" \t", 0) == string::npos) {
+      TRACE_ERR(filePath << ":" << line_num << ": phrase contains empty target, skipping\n");
+			continue;
+    }
 		if (!filter)
 		{
-			if (token[0] != prevSourcePhrase)
-				phraseVector = Phrase::Parse(token[0]);
+			if (tokens[0] != prevSourcePhrase)
+				phraseVector = Phrase::Parse(tokens[0]);
 		}
-		else if (token[0] == prevSourcePhrase)
+		else if (tokens[0] == prevSourcePhrase)
 		{ // same source phrase as prev line.
 		}
 		else
 		{
-			phraseVector = Phrase::Parse(token[0]);
-			prevSourcePhrase = token[0];
+			phraseVector = Phrase::Parse(tokens[0]);
+			prevSourcePhrase = tokens[0];
 
 			if (Contains(phraseVector, inputPhraseList, input))
 				addPhrase = true;
@@ -91,7 +101,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 
 		if (addPhrase)
 		{
-			vector<float> scoreVector = Tokenize<float>(token[2]);
+			vector<float> scoreVector = Tokenize<float>(tokens[2]);
 			assert(scoreVector.size() == m_noScoreComponent);
 			
 			// source
@@ -99,7 +109,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			sourcePhrase.CreateFromString( input, phraseVector, factorCollection);
 			//target
 			TargetPhrase targetPhrase(Output, this);
-			targetPhrase.CreateFromString( output, token[1], factorCollection);
+			targetPhrase.CreateFromString( output, tokens[1], factorCollection);
 
 			// component score, for n-best output
 			targetPhrase.SetScore(scoreVector, weight, languageModels, weightWP);

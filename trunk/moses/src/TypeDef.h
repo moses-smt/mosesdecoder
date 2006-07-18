@@ -105,25 +105,27 @@ enum DecodeType
 namespace ScoreType {
 	enum ScoreType
 	{
-		PhraseTrans
-		,Generation
-		,LanguageModelScore
-		,Distortion
-		,WordPenalty
-		,FutureScoreEnum
-		,LexicalReordering
-		,Total
+		PhraseTrans = 0,
+		Generation,
+		LanguageModelScore,
+		Distortion,
+		WordPenalty,
+		DeletedWords, //source words dropped from translation
+		InsertedWords, //words inserted into target phrase independently of phrase translation
+		FutureScoreEnum,
+		LexicalReordering,
+		Total
 	};
-};
+}
 
 // count of above
-const size_t NUM_SCORES = 8;
+const size_t NUM_SCORES = 10;
 
 namespace LexReorderType
 {
 	enum LexReorderType
 		{
-			Monotone
+			Monotone //TODO what the jiggers do these symbols mean?
 			,Msd
 			,Forward
 			,Backward

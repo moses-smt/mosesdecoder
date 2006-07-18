@@ -19,6 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <cstring> // memset
+
 #include "LatticeEdge.h"
 #include "LanguageModel.h"
 
@@ -30,10 +32,7 @@ LatticeEdge::~LatticeEdge()
 
 void LatticeEdge::ResetScore()
 {
-	for (size_t i = 0 ; i < NUM_SCORES ; i++)
-	{
-		m_score[i]	= 0;
-	}
+  std::memset(m_score, 0, sizeof(float) * NUM_SCORES);
 }
 
 #ifdef N_BEST

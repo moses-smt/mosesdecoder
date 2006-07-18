@@ -2,18 +2,19 @@ lib_LIBRARIES = libmoses.a
 libmoses_a_SOURCES = \
 	Arc.cpp \
 	ConfusionNet.cpp \
-	FactorCollection.cpp \
+	DeletionHypothesis.cpp \
 	Factor.cpp \
+	FactorCollection.cpp \
 	FactorTypeSet.cpp \
 	GenerationDictionary.cpp \
+	Hypothesis.cpp \
 	HypothesisCollection.cpp \
 	HypothesisCollectionIntermediate.cpp \
-	Hypothesis.cpp \
 	InputFileStream.cpp \
 	LanguageModel.cpp \
 	LatticeEdge.cpp \
 	LatticePath.cpp \
-  LexicalReordering.cpp \
+	LexicalReordering.cpp \
 	Manager.cpp \
 	md5.cpp \
 	Parameter.cpp \
@@ -26,11 +27,13 @@ libmoses_a_SOURCES = \
 	TargetPhrase.cpp \
 	TranslationOption.cpp \
 	TranslationOptionCollection.cpp \
-	UserMessage.cpp \
-	Util.cpp \
-	WeightOptimization.cpp \
-	Word.cpp \
-	WordsBitmap.cpp \
+	UnknownWordHandler.cpp \
+ 	UserMessage.cpp \
+ 	Util.cpp \
+ 	WeightOptimization.cpp \
+ 	Word.cpp \
+ 	WordDeletionTable.cpp \
+ 	WordsBitmap.cpp \
 	WordsRange.cpp
 
 if INTERNAL_LM
