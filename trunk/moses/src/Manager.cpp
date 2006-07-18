@@ -281,11 +281,23 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 
 void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep &decodeStep, HypothesisCollectionIntermediate &outputHypoColl)
 {
+	size_t currTargetLength										= hypothesis.GetCurrTargetLength();
+
+	// if the initial translation step dropped a word, the target phrase
+	// length will be 0.  in this case, secondary translation steps will
+	// fail.  see comments in ProcessGeneration
+	if (currTargetLength == 0)
+	{
+		Hypothesis *copyHypo = new Hypothesis(hypothesis);
+		outputHypoColl.AddNoPrune(copyHypo);
+		return;
+	}
+
+	// actual implementation
 	const WordsRange &sourceWordsRange				= hypothesis.GetCurrSourceWordsRange();
 	const Phrase sourcePhrase 								= m_source.GetSubString(sourceWordsRange);
 	const PhraseDictionary &phraseDictionary	= decodeStep.GetPhraseDictionary();
 	const TargetPhraseCollection *phraseColl	=	phraseDictionary.FindEquivPhrase(sourcePhrase);
-	size_t currTargetLength										= hypothesis.GetCurrTargetLength();
 
 	if (phraseColl != NULL)
 	{
@@ -483,6 +495,19 @@ void Manager::ProcessGeneration(const Hypothesis &hypothesis
 
 	size_t hypoSize	= hypothesis.GetSize()
 		, targetLength	= hypothesis.GetCurrTargetLength();
+
+	// if the initial translation step dropped a word, the target phrase
+	// length will be 0.  in this case, generation will fail.  however,
+	// this is not desirable, so we preserve these hypotheses automatically
+	if (targetLength == 0)
+	{
+		Hypothesis *copyHypo = new Hypothesis(hypothesis);
+		// TODO: should there be some sort of extra penalty associated with this?
+		// current thinking: no, if there needs to be a higher penalty, MERT will
+		// do it
+		outputHypoColl.AddNoPrune(copyHypo);
+		return;
+	}
 
 	// generation list for each word in hypothesis
 	vector< WordList > wordListVector(targetLength);
