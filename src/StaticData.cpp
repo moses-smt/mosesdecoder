@@ -96,9 +96,8 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	}
 	
 	//source word deletion
-	if(m_parameter.GetParam("dtable-file").size() > 0)
+	if(m_parameter.GetParam("word-deletion").size() > 0)
 	{
-		m_wordDeletionWeight = Scan<float>(m_parameter.GetParam("weight-e")[0]);
 		m_wordDeletionEnabled = true;
 		if (GetVerboseLevel() > 0) { std::cerr << "Word deletion enabled." << std::endl; }
 	} else { m_wordDeletionEnabled = false; }
@@ -471,19 +470,13 @@ void StaticData::LoadPhraseTables(bool filter
 																				, filterPhrase
 																				, inputPhraseList
 																				,	this->GetLanguageModel(Initial)
-																				,	this->GetWeightWordPenalty());
+																				,	this->GetWeightWordPenalty()
+																				, *this);
 
 			index++;
 			timer.check("Finished loading PhraseTable");
 		}
 	}
-/*
-	//load word deletion table
-	if(m_parameter.GetParam("dtable-file").size() > 0)
-	{
-		m_wordDeletionTable.Load(m_parameter.GetParam("dtable-file")[0], *this);
-	}
-*/
 	timer.check("Finished loading phrase tables");
 }
 

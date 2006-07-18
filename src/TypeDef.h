@@ -110,8 +110,6 @@ namespace ScoreType {
 		LanguageModelScore,
 		Distortion,
 		WordPenalty,
-		DeletedWords, //source words dropped from translation
-		InsertedWords, //words inserted into target phrase independently of phrase translation
 		FutureScoreEnum,
 		LexicalReordering,
 		Total
@@ -119,7 +117,7 @@ namespace ScoreType {
 }
 
 // count of above
-const size_t NUM_SCORES = 10;
+const size_t NUM_SCORES = 8;
 
 namespace LexReorderType
 {
