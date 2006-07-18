@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define UNKNOWN_FACTOR	"UNK"
 
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
+#define MAX_NGRAM_SIZE  20
 
 const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t ARRAY_SIZE_INCR					= 20; //amount by which a hypostack gets resized when necessary

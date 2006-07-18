@@ -56,7 +56,7 @@ protected:
 	Vocab *m_srilmVocab;  // TODO - make this a ptr, remove #include from header
 	Ngram *m_srilmModel;  // "  "
 
-	float GetValue(LmId wordId, VocabIndex *context) const;
+	float GetValue(VocabIndex wordId, VocabIndex *context) const;
 
 	LmId GetLmID( const Factor *factor )  const
 	{
