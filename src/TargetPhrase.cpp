@@ -34,6 +34,9 @@ TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionary *ph
 {
 }
 
+// TODO the two versions of SetScore have two problems:
+//  1) they are badly named- computePhraseScores would probably be better
+//  2) they duplicate way too much code between them
 void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
 { // used when creating translations of unknown words:
 	m_transScore = m_ngramScore = 0;	
