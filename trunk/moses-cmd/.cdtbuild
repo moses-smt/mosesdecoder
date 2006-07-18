@@ -39,6 +39,7 @@
 </option>
 <option id="gnu.cpp.link.option.userobjs.551693347" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/${ConfigName}/libmoses.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/${ConfigName}/libirstlm.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
@@ -100,6 +101,7 @@
 </option>
 <option id="gnu.cpp.link.option.userobjs.1365891611" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/${ConfigName}/libmoses.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/${ConfigName}/libirstlm.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
@@ -162,6 +164,7 @@
 </option>
 <option id="gnu.cpp.link.option.userobjs.2014263007" name="Other objects" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/${ConfigName}/libmoses.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/${ConfigName}/libirstlm.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
@@ -224,6 +227,7 @@
 </option>
 <option id="gnu.cpp.link.option.userobjs.288492909" name="Other objects" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/${ConfigName}/libmoses.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/${ConfigName}/libirstlm.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>

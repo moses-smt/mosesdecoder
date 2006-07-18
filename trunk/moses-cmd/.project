@@ -3,6 +3,7 @@
 	<name>moses-cmd</name>
 	<comment></comment>
 	<projects>
+		<project>irstlm</project>
 		<project>moses</project>
 	</projects>
 	<buildSpec>
