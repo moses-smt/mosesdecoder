@@ -38,7 +38,7 @@ class TranslationOption
 
 protected:
 
-	const TargetPhrase 	&m_targetPhrase;
+	const Phrase 				&m_phrase;
 	const WordsRange		m_sourceWordsRange;
 	float								m_scoreTrans, m_scoreGen;
 #ifdef N_BEST
@@ -54,9 +54,9 @@ public:
 
 	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase);
 
-	inline const TargetPhrase 	&GetTargetPhrase() const
+	inline const Phrase &GetPhrase() const
 	{
-		return m_targetPhrase;
+		return m_phrase;
 	}
 	inline const WordsRange &GetSourceWordsRange() const
 	{
@@ -78,29 +78,13 @@ public:
 	}
 	inline float GetTranslationScore() const
 	{
-		return m_targetPhrase.GetTranslationScore();
-	}
-	inline float GetFutureScore() const
-	{
-		return m_targetPhrase.GetFutureScore();
-	}
-	inline float GetNgramScore() const
-	{
-		return m_targetPhrase.GetNgramScore();
+		return m_scoreTrans;
 	}
 
 #ifdef N_BEST
 	inline const ScoreComponentCollection &GetScoreComponentCollection() const
 	{
 		return m_transScoreComponent;
-	}
-	inline const std::list< std::pair<size_t, float> > &GetLMScoreComponent() const
-	{
-		return m_targetPhrase.GetLMScoreComponent();
-	}
-	inline const std::list< std::pair<size_t, float> > &GetTrigramComponent() const
-	{
-		return m_targetPhrase.GetNgramComponent();
 	}
 #endif
 

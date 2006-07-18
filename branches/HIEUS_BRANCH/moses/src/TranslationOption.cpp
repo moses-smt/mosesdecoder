@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase)
-: m_targetPhrase(targetPhrase)
+: m_phrase(targetPhrase)
 ,m_sourceWordsRange	(wordsRange)
 {	// used by initial translation step
 
@@ -38,7 +38,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 }
 
 TranslationOption::TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase)
-: m_targetPhrase(targetPhrase)
+: m_phrase(targetPhrase)
 ,m_sourceWordsRange	(copy.m_sourceWordsRange)
 #ifdef N_BEST
 ,m_transScoreComponent(copy.m_transScoreComponent)
@@ -68,9 +68,8 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 // friend
 ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 {
-	out << possibleTranslation.GetTargetPhrase() 
-			<< ", pC=" << possibleTranslation.GetTranslationScore()
-      << ", c="  << possibleTranslation.GetFutureScore();
+	out << possibleTranslation.GetPhrase() 
+			<< ", pC=" << possibleTranslation.GetTranslationScore();
 	return out;
 }
 
