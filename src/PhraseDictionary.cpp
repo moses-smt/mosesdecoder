@@ -105,6 +105,10 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 		if (addPhrase)
 		{
 			vector<float> scoreVector = Tokenize<float>(tokens[2]);
+			if (scoreVector.size() != m_noScoreComponent) {
+				TRACE_ERR("Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_noScoreComponent<<") of score components on line " << line_num);
+        abort();
+			}
 			assert(scoreVector.size() == m_noScoreComponent);
 			
 			// source
