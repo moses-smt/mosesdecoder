@@ -2,21 +2,17 @@
 /* Copyright 2005 (c) by RWTH Aachen - Lehrstuhl fuer Informatik VI */
 /* Richard Zens                                                     */
 /* ---------------------------------------------------------------- */
+// $Id$
 #ifndef FILEPTR_H_
 #define FILEPTR_H_
 #include "File.h"
-#ifdef USECPFP
-#include "CountedPointer.h"
-#endif
+
+// smart pointer for on-demand loading from file
+// requirement: T has a constructor T(FILE*)
 
 template<typename T> class FilePtr {
 public:
-#ifdef USECPFP
-  typedef CountedPointer<T> Ptr;
-#else
   typedef T* Ptr;
-#endif
-
 private:
   FILE* f;
   off_t pos;
@@ -26,14 +22,7 @@ public:
   ~FilePtr() {}
 
   void set(FILE* f_,off_t p) {f=f_;pos=p;}
-
-  void free() {
-#ifdef USECPFP
-    t.destroy();
-#else
-    delete t;  t=0;
-#endif
-  }
+  void free() {delete t;  t=0;}
 
   T& operator* () {load();return *t;}
   Ptr operator->() {load();return t;}
@@ -43,6 +32,7 @@ public:
   const Ptr operator->() const {load();return t;}
   operator const Ptr  () const {load();return t;}
 
+  // direct access to pointer, use with care!
   Ptr getPtr() {return t;}
   const Ptr getPtr() const {return t;}
 
