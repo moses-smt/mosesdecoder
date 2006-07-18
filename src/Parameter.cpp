@@ -48,6 +48,7 @@ Parameter::Parameter()
 	AddParam("weight-l");
 	AddParam("weight-t");
 	AddParam("weight-w");
+	AddParam("weight-e"); //source word deletion overall weight
 	AddParam("weight-generation");
 	AddParam("mapping");
 	AddParam("n-best-list");
@@ -224,6 +225,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-lm", "weight-l", argc, argv);
 	OverwriteParam("-tm", "weight-t", argc, argv);
 	OverwriteParam("-w", "weight-w", argc, argv);
+	OverwriteParam("-e", "weight-e", argc, argv);
 	OverwriteParam("-g", "weight-generation", argc, argv);
 	OverwriteParam("-n-best-list", "n-best-list", argc, argv);
 	OverwriteParam("-s", "stack", argc, argv);

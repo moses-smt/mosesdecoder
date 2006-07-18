@@ -34,11 +34,12 @@ TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionary *ph
 {
 }
 
+// used when creating translations of unknown words:
 // TODO the two versions of SetScore have two problems:
 //  1) they are badly named- computePhraseScores would probably be better
 //  2) they duplicate way too much code between them
 void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
-{ // used when creating translations of unknown words:
+{
 	m_transScore = m_ngramScore = 0;	
 	m_fullScore = weightWP;
 	
@@ -54,16 +55,14 @@ void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
 	
 			float fullScore, nGramScore;
 	
-			#ifdef N_BEST
-					(*lmIter)->CalcScore(*this, fullScore, nGramScore);
-          size_t lmId = (*lmIter)->GetId();
-          pair<size_t, float> store(lmId, nGramScore);
-          m_ngramComponent.push_back(store);
-			#else
-			    // this is really, really ugly (a reference to an object at NULL
-			    // is asking for trouble). TODO
-					(*lmIter)->CalcScore(*this, fullScore, nGramScore);
-			#endif
+#ifdef N_BEST
+			(*lmIter)->CalcScore(*this, fullScore, nGramScore);
+			size_t lmId = (*lmIter)->GetId();
+			pair<size_t, float> store(lmId, nGramScore);
+			m_ngramComponent.push_back(store);
+#else
+			(*lmIter)->CalcScore(*this, fullScore, nGramScore);
+#endif
 	
 			m_fullScore   += fullScore * weightLM;
 			m_ngramScore	+= nGramScore * weightLM;
@@ -104,19 +103,16 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 			float fullScore, nGramScore;
 #ifdef N_BEST
 			lm.CalcScore(*this, fullScore, nGramScore);
-      size_t lmId = lm.GetId();
-      pair<size_t, float> store(lmId, nGramScore);
-      m_ngramComponent.push_back(store);
+			size_t lmId = lm.GetId();
+			pair<size_t, float> store(lmId, nGramScore);
+			m_ngramComponent.push_back(store);
 #else
-	    // this is really, really ugly (a reference to an object at NULL
-	    // is asking for trouble). TODO
 			lm.CalcScore(*this, fullScore, nGramScore);
 #endif
 	
 			// total LM score so far
 			totalNgramScore  += nGramScore * weightLM;
 			totalFullScore   += fullScore * weightLM;
-			
 		}
 	}
   m_ngramScore = totalNgramScore;

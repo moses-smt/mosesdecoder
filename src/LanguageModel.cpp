@@ -40,6 +40,9 @@ const LmId LanguageModel::UNKNOWN_LM_ID(0);
 LanguageModel::LanguageModel() {}
 LanguageModel::~LanguageModel() {}
 
+/***
+ * ngramComponent should be an invalid pointer iff n-best ranking is turned off
+ */
 void LanguageModel::CalcScore(const Phrase &phrase
 														, float &fullScore
 														, float &ngramScore) const
@@ -79,4 +82,3 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	}
 	fullScore += ngramScore;
 }
-

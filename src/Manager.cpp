@@ -77,7 +77,7 @@ void Manager::ProcessSentence()
 
 	// seed hypothesis
 	{
-	Hypothesis *hypo = new Hypothesis(m_source, m_possibleTranslations.GetInitialCoverage());
+	Hypothesis *hypo = Hypothesis::Create(m_source, m_possibleTranslations.GetInitialCoverage());
 	TRACE_ERR(m_possibleTranslations.GetInitialCoverage().GetWordsCount() << endl);
 #ifdef N_BEST
 	LMList allLM = m_staticData.GetAllLM();
@@ -176,11 +176,7 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 	{
 		Hypothesis *hypo = *iterHypo;
 
-		hypo->CalcScore(m_staticData.GetLanguageModel(Initial)
-									, m_staticData.GetLanguageModel(Other)
-									, m_staticData.GetWeightDistortion()
-									, m_staticData.GetWeightWordPenalty()
-									, m_possibleTranslations.GetFutureScore(), m_source);
+		hypo->CalcScore(m_staticData, m_possibleTranslations.GetFutureScore(), m_source);
 		if(m_staticData.GetVerboseLevel() > 2) 
 		{			
 			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
@@ -207,7 +203,6 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 			++iterHypo;
 		}
 	}
-
 }
 
 void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const DecodeStep &decodeStep, HypothesisCollectionIntermediate &outputHypoColl)
@@ -222,7 +217,7 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 
 			if ( !transOpt.Overlap(hypothesis)) 
 			{
-				Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+				Hypothesis* newHypo = hypothesis.CreateNext(transOpt);
 				outputHypoColl.AddNoPrune( newHypo );			
 			}
 		}
@@ -276,9 +271,6 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 			}
 		}
 	}
-
-
-
 }
 
 void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep &decodeStep, HypothesisCollectionIntermediate &outputHypoColl)
@@ -398,8 +390,8 @@ void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &p
 				/*
 				 * changed to have an extendable unknown-word translation module -- EVH
 				 */
-				//std::list<TranslationOption> unknownWordTranslations = m_staticData.GetUnknownWordHandler().GetPossibleTranslations(wordsRange, sourcePhrase, m_staticData, phraseDictionary);
-				//m_possibleTranslations.insert(m_possibleTranslations.end(), unknownWordTranslations.begin(), unknownWordTranslations.end());
+//				boost::shared_ptr<std::list<TranslationOption> > unknownWordTranslations = m_staticData.GetUnknownWordHandler()->GetPossibleTranslations(wordsRange, sourcePhrase, m_staticData, phraseDictionary);
+//				m_possibleTranslations.insert(m_possibleTranslations.end(), unknownWordTranslations->begin(), unknownWordTranslations->end());
 			}
 		}
 	}
@@ -443,12 +435,10 @@ void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &p
 
 			//print information about future cost table when verbose option is set
 
-
 			if(m_staticData.GetVerboseLevel() > 2) 
-				{		
-					cout<<"future cost from "<<start<<" to "<<end<<" is "<<score[length]<<endl;
-				}
-
+			{		
+				cout<<"future cost from "<<start<<" to "<<end<<" is "<<score[length]<<endl;
+			}
 		}
 	}
 }
@@ -542,7 +532,7 @@ void Manager::ProcessGeneration(const Hypothesis &hypothesis
 		}
 
 		// merge with existing hypothesis
-		Hypothesis *mergeHypo = hypothesis.Clone();
+		Hypothesis *mergeHypo = new Hypothesis(hypothesis);
 		mergeHypo->MergeFactors(mergeWords, generationDictionary, generationScore, weight);
 		outputHypoColl.AddNoPrune(mergeHypo);
 

@@ -33,7 +33,7 @@ public:
 
 	Arc(const Arc &arc); // not implemented
 	
-	Arc( const float score[NUM_SCORES]
+	Arc( const float score[]
 			, const ScoreComponentCollection 	&transScoreComponent
 			, const ScoreColl					 						&lmScoreComponent
 			, const ScoreColl											&generationScoreColl

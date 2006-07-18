@@ -63,6 +63,9 @@ public:
 	{
 		return m_sentenceEnd;
 	}
+	/***
+	 * ngramComponent should be an invalid pointer iff n-best ranking is turned off
+	 */
 	void CalcScore(const Phrase &phrase
 							, float &fullScore
 							, float &ngramScore) const;
