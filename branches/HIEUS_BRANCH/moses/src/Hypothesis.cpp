@@ -108,7 +108,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	
 	// add components specific to poss trans
 	const ScoreComponent &possComponent	= transOpt.GetScoreComponents();
-	ScoreComponent &transComponent				= m_transScoreComponent.GetScoreComponent(possComponent.GetDictionary());
+	ScoreComponent &transComponent			= m_transScoreComponent.GetScoreComponent(possComponent.GetDictionary());
 	
 	const size_t noScoreComponent = possComponent.GetNoScoreComponent();
 	assert(noScoreComponent == transComponent.GetNoScoreComponent());

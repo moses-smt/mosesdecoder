@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "Util.h"
 #include "TypeDef.h"
-#include "ScoreComponent.h"
+#include "ScoreComponentCollection.h"
 
 /***
  * Specify source and target words for a possible translation. m_targetPhrase points to a phrase-table entry.
@@ -39,13 +39,20 @@ class TranslationOption
 protected:
 
 	const TargetPhrase 	&m_targetPhrase;
-	WordsRange					m_sourceWordsRange;
+	const WordsRange		m_sourceWordsRange;
+	float								m_scoreTrans, m_scoreGen;
 #ifdef N_BEST
-	ScoreComponent	m_transScoreComponent;
+	ScoreComponentCollection	m_transScoreComponent;
+	ScoreColl									m_generationScoreComponent;
 #endif
 
 public:
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
+	// used by initial translation step
+	TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase);
+	// used by MergeTranslation 
+
+	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase);
 
 	inline const TargetPhrase 	&GetTargetPhrase() const
 	{
@@ -83,7 +90,7 @@ public:
 	}
 
 #ifdef N_BEST
-	inline const ScoreComponent &GetScoreComponents() const
+	inline const ScoreComponentCollection &GetScoreComponentCollection() const
 	{
 		return m_transScoreComponent;
 	}

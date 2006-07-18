@@ -111,10 +111,16 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	PhraseDictionary &phraseDictionary = decodeStep.GetPhraseDictionary();
 	for (size_t startPos = 0 ; startPos < m_inputSentence.GetSize() ; startPos++)
 	{
+		if (m_initialCoverage.GetValue(startPos))
+		{ // unknown word. skip 
+			break;
+		}
+
 		// reuse phrase, add next word on
 		Phrase sourcePhrase( m_inputSentence.GetDirection());
 
-		for (size_t endPos = startPos ; endPos < m_inputSentence.GetSize() ; endPos++)
+		bool unknownWord = false;
+		for (size_t endPos = startPos ; !unknownWord && endPos < m_inputSentence.GetSize() ; endPos++)
 		{
 			const WordsRange wordsRange(startPos, endPos);
 
@@ -150,6 +156,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			}
 			else if (sourcePhrase.GetSize() == 1)
 			{
+				unknownWord = true;
 				ProcessUnknownWord(startPos, dropUnknown, factorCollection, allLM, weightWordPenalty);
 				break;
 			}
@@ -227,10 +234,9 @@ void TranslationOptionCollection::ProcessTranslation(
 			const TargetPhrase& targetPhrase	= *iterTargetPhrase;
 	
 			TargetPhrase *newTargetPhrase = partialPhrase.MergeNext(targetPhrase);
-			
 			if (newTargetPhrase != NULL)
 			{
-				outputPartialTranslOptColl.Add( TranslationOption(sourceWordsRange, *newTargetPhrase) );
+				outputPartialTranslOptColl.Add( TranslationOption(inputPartialTranslOpt, *newTargetPhrase) );
 				delete newTargetPhrase;
 			}
 		}

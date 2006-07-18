@@ -27,10 +27,36 @@ using namespace std;
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase)
 : m_targetPhrase(targetPhrase)
 ,m_sourceWordsRange	(wordsRange)
+{	// used by initial translation step
+
+	// set score
+	m_scoreGen		= 0;
+	m_scoreTrans	= targetPhrase.GetTranslationScore();
 #ifdef N_BEST
-,m_transScoreComponent(targetPhrase.GetScoreComponents())
+	m_transScoreComponent.Add(targetPhrase.GetScoreComponents());
 #endif
+}
+
+TranslationOption::TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase)
+: m_targetPhrase(targetPhrase)
+,m_sourceWordsRange	(copy.m_sourceWordsRange)
+#ifdef N_BEST
+,m_transScoreComponent(copy.m_transScoreComponent)
+,m_generationScoreComponent(copy.m_generationScoreComponent)
+#endif
+{ // used in creating the next translation step
+
+	m_scoreTrans	+= targetPhrase.GetTranslationScore();
+	
+#ifdef N_BEST
+	m_transScoreComponent.Add(targetPhrase.GetScoreComponents());
+#endif
+}
+
+TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targetPhrase)
 {
+	TranslationOption *newTransOpt = new TranslationOption(*this, targetPhrase);
+	return newTransOpt;
 }
 
 bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
