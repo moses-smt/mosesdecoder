@@ -375,17 +375,20 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t sourcePos
 				FactorType factorType = static_cast<FactorType>(currFactor);
 				
 				const Factor *factor = sourceWord[currFactor]
-										,*unkownfactor;
-				switch (factorType)
+										,*unknownFactor;
+				if (factor != NULL)
 				{
-				case POS:
-					unkownfactor = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
-					targetWord[factorType] = unkownfactor;
-					break;
-				default:
-					unkownfactor = factorCollection.AddFactor(Output, factorType, factor->GetString());
-					targetWord[factorType] = unkownfactor;
-					break;
+					switch (factorType)
+					{
+					case POS:
+						unknownFactor = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
+						targetWord[factorType] = unknownFactor;
+						break;
+					default:
+						unknownFactor = factorCollection.AddFactor(Output, factorType, factor->GetString());
+						targetWord[factorType] = unknownFactor;
+						break;
+					}
 				}
 			}
 	
