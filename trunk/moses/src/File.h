@@ -2,6 +2,7 @@
 /* Copyright 2005 (c) by RWTH Aachen - Lehrstuhl fuer Informatik VI */
 /* Richard Zens                                                     */
 /* ---------------------------------------------------------------- */
+// $Id$
 #ifndef FILE_H_
 #define FILE_H_
 #include <cstdio>
@@ -63,6 +64,6 @@ inline FILE* fOpen(const char* fn,const char* m) {
     std::cerr<<"ERROR: could not open file "<<fn<<" with mode "<<m<<"\n";
     abort();}
 }
-
+inline void fClose(FILE* f) {fclose(f);} // for consistent function names only
 #endif
 

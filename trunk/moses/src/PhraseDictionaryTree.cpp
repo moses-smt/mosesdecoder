@@ -11,8 +11,8 @@
 #include "FactorCollection.h"
 #include "ObjectPool.h"
 
-template<class T>
-std::ostream& operator<<(std::ostream& out,const std::vector<T>& x) 
+template<typename T>
+std::ostream& operator<<(std::ostream& out,const std::vector<T>& x)
 {
 	out<<x.size()<<" ";
 	typename std::vector<T>::const_iterator iend=x.end();
@@ -29,7 +29,7 @@ typedef std::vector<LabelId> IPhrase;
 typedef std::vector<float> Scores;
 typedef PrefixTreeF<LabelId,off_t> PTF;
 
-template<class A,class B=std::map<A,LabelId> >
+template<typename A,typename B=std::map<A,LabelId> >
 class LVoc {
   typedef A Key;
   typedef B M;
@@ -117,12 +117,11 @@ struct PPimp {
 	PTF const*p;size_t idx;bool root;
 	
 	PPimp(PTF const* x,size_t i,bool b) : p(x),idx(i),root(b) {}
-	bool isValid() const {return root || p;}
+	bool isValid() const {return root || (p && idx<p->size());}
+
 	bool isRoot() const {return root;}
 	PTF const* ptr() const {return p;}
 };
-
-PhraseDictionaryTree::PrefixPtr::PrefixPtr() : imp(0) {}
 
 PhraseDictionaryTree::PrefixPtr::operator bool() const 
 {
@@ -143,12 +142,10 @@ struct PDTimp {
 	WordVoc sv,tv;
 
 	FactorCollection *m_factorCollection;
-	FactorType m_factorType;
-
   ObjectPool<PPimp> pPool;
 
-	PDTimp() : os(0),ot(0),m_factorCollection(0),m_factorType(Surface) {}
-	~PDTimp() {if(os) fclose(os);if(ot) fclose(ot);}
+	PDTimp() : os(0),ot(0),m_factorCollection(0) {PTF::setDefault(InvalidOffT);}
+	~PDTimp() {if(os) fClose(os);if(ot) fClose(ot);}
 
 	void FreeMemory() 
 	{
@@ -158,7 +155,6 @@ struct PDTimp {
 
 	int Read(const std::string& fn) ;
 
-	
 	off_t FindOffT(const IPhrase& f) const 
 	{
   	if(f.empty()) return InvalidOffT;
@@ -169,6 +165,7 @@ struct PDTimp {
 	void GetTargetCandidates(const IPhrase& f,TgtCands& tgtCands) 
 	{
 		off_t tCandOffset=FindOffT(f);
+		//		std::cerr<<"offset of tgtcand: "<<tCandOffset<<" "<<InvalidOffT<<" for phrase '"<<f<<"'\n";
 		if(tCandOffset==InvalidOffT) return;
   	fSeek(ot,tCandOffset);
    	tgtCands.readBin(ot);
@@ -179,53 +176,50 @@ struct PDTimp {
 	void GetTargetCandidates(PPtr p,TgtCands& tgtCands) 
 	{
 		assert(p);
+		if(p.imp->isRoot()) return;
 		off_t tCandOffset=p.imp->ptr()->getData(p.imp->idx);
 		if(tCandOffset==InvalidOffT) return;
   	fSeek(ot,tCandOffset);
    	tgtCands.readBin(ot);
 	}
-
-	void PrintTgtCand(const TgtCands& tcand,std::ostream& out)
+	void PrintTgtCand(const TgtCands& tcands,std::ostream& out) const;
+	void ConvertTgtCand(const TgtCands& tcands,std::vector<FactorTgtCand>& rv,FactorType oft) const
 	{
-		for(size_t i=0;i<tcand.size();++i) 
-			{
-				out<<i<<" -- "<<tcand[i].GetScores()<<" -- ";
-				const IPhrase& iphr=tcand[i].GetPhrase();
-				for(size_t j=0;j<iphr.size();++j)
-					out<<tv.symbol(iphr[j])<<" ";
-				out<<'\n';		
-			}
+		for(TgtCands::const_iterator i=tcands.begin();i!=tcands.end();++i)
+		{
+			const IPhrase& iphrase=i->GetPhrase();
+			std::vector<const Factor*> vf;
+			vf.reserve(iphrase.size());
+			for(size_t j=0;j<iphrase.size();++j)
+				vf.push_back(m_factorCollection->AddFactor(Output,
+																									 oft,tv.symbol(iphrase[j])));
+			rv.push_back(FactorTgtCand(vf,i->GetScores()));
+		}
 	}
 
 	PPtr GetRoot() 
 	{
-		PPtr rv; rv.imp=pPool.get(PPimp(0,0,1)); return rv;
+			return PPtr(pPool.get(PPimp(0,0,1)));
 	}
 
 	PPtr Extend(PPtr p,const std::string& w) 
 	{
 		assert(p);
+		if(w.empty()) return p;
 		LabelId wi=sv.index(w);
-		//		std::cerr<<"extend with id "<<wi<<" for word "<<w<<"\n";
-		PPtr rv; 
-		//		std::cerr<<"rv is "<<(rv ? "valid" : "invalid")<<"\n";
-		if(wi!=InvalidLabelId)
+		if(wi==InvalidLabelId) return PPtr();
+		else if(p.imp->isRoot()) 
 			{
-				if(p.imp->isRoot()) 
+				if(wi<data.size() && data[wi])
 					{
-						if(wi<data.size() && data[wi])
-							{
-								assert(data[wi]->findKeyPtr(wi));
-								rv.imp=pPool.get(PPimp(data[wi],data[wi]->findKey(wi),0));
-							}
+						assert(data[wi]->findKeyPtr(wi));
+						return PPtr(pPool.get(PPimp(data[wi],data[wi]->findKey(wi),0)));
 					}
-				else if(p.imp->ptr()) 
-					rv.imp=pPool.get(PPimp(p.imp->ptr()->getPtr(p.imp->idx),
-																 p.imp->ptr()->getPtr(p.imp->idx)->findKey(wi),
-																 0));
 			}
-		//		std::cerr<<"rv is "<<(rv ? "valid" : "invalid")<<"\n";
-		return rv;
+		else if(PTF const* nextP=p.imp->ptr()->getPtr(p.imp->idx)) 
+			return PPtr(pPool.get(PPimp(nextP,nextP->findKey(wi),0)));
+		
+		return PPtr();
 	}
 };
 
@@ -235,8 +229,6 @@ struct PDTimp {
 // member functions of PDTimp
 //
 ////////////////////////////////////////////////////////////
-
-
 
 int PDTimp::Read(const std::string& fn) 
 {
@@ -248,7 +240,7 @@ int PDTimp::Read(const std::string& fn)
 
 	FILE *ii=fOpen(ifi.c_str(),"rb");
 	fReadVector(ii,srcOffsets);
-	fclose(ii);
+	fClose(ii);
 	
 	os=fOpen(ifs.c_str(),"rb");
 	ot=fOpen(ift.c_str(),"rb");
@@ -265,9 +257,17 @@ int PDTimp::Read(const std::string& fn)
 	return 1;
 }
 
-
-
-
+void PDTimp::PrintTgtCand(const TgtCands& tcand,std::ostream& out) const
+{
+		for(size_t i=0;i<tcand.size();++i) 
+		{
+		  out<<i<<" -- "<<tcand[i].GetScores()<<" -- ";
+		  const IPhrase& iphr=tcand[i].GetPhrase();
+		  for(size_t j=0;j<iphr.size();++j)
+			out<<tv.symbol(iphr[j])<<" ";
+		  out<<'\n';		
+		}
+}
 
 ////////////////////////////////////////////////////////////
 //
@@ -277,11 +277,10 @@ int PDTimp::Read(const std::string& fn)
 
 PhraseDictionaryTree::PhraseDictionaryTree(size_t noScoreComponent,
 																					 FactorCollection *fc,
-																					 FactorType ft)
-	: Dictionary(noScoreComponent),imp(new PDTimp) 
+																					 FactorType ift,FactorType oft)
+	: Dictionary(noScoreComponent),imp(new PDTimp),m_inFactorType(ift),m_outFactorType(oft) 
 {
 	imp->m_factorCollection=fc;
-	imp->m_factorType=ft;
 }
 
 PhraseDictionaryTree::~PhraseDictionaryTree() 
@@ -289,7 +288,7 @@ PhraseDictionaryTree::~PhraseDictionaryTree()
 	delete imp;
 }
 
-void PhraseDictionaryTree::FreeMemory() 
+void PhraseDictionaryTree::FreeMemory() const
 {
 	imp->FreeMemory();
 }
@@ -308,18 +307,8 @@ GetTargetCandidates(const std::vector<const Factor*>& src,
 	TgtCands tgtCands;
 	imp->GetTargetCandidates(f,tgtCands);
 
-	//	for(size_t i=0;i<tgtCands.size();++i) 
-	for(TgtCands::const_iterator i=tgtCands.begin();i!=tgtCands.end();++i)
-		{
-			const IPhrase& iphrase=i->GetPhrase();
-			std::vector<const Factor*> vf;
-			vf.reserve(iphrase.size());
-			for(size_t j=0;j<iphrase.size();++j)
-				vf.push_back(imp->m_factorCollection->
-										 AddFactor(Output,imp->m_factorType,
-															 imp->tv.symbol(iphrase[j])));
-			rv.push_back(FactorTgtCand(vf,i->GetScores()));
-		}
+	imp->ConvertTgtCand(tgtCands,rv,m_outFactorType);
+
 }
 
 void PhraseDictionaryTree::
@@ -450,8 +439,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
   pf.create(*psa,os);
   delete psa;psa=0;
 
- 	fclose(os);
-  fclose(ot);
+ 	fClose(os);
+  fClose(ot);
 
   std::vector<size_t> inv;
   for(size_t i=0;i<vo.size();++i)
@@ -467,7 +456,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
   
   FILE *oi=fOpen(ofi.c_str(),"wb");
   size_t vob=fWriteVector(oi,vo);
-	fclose(oi);
+	fClose(oi);
 
 	imp->sv.Write(ofsv);
 	imp->tv.Write(oftv);
@@ -496,8 +485,226 @@ PhraseDictionaryTree::Extend(PrefixPtr p, const std::string& w) const
 
 void PhraseDictionaryTree::PrintTargetCandidates(PrefixPtr p,std::ostream& out) const 
 {
+	
 	TgtCands tcand;
 	imp->GetTargetCandidates(p,tcand);
 	out<<"there are "<<tcand.size()<<" target candidates\n";
 	imp->PrintTgtCand(tcand,out);
 }
+
+void 
+PhraseDictionaryTree::GetTargetCandidates(PrefixPtr p,
+																					std::vector<FactorTgtCand>& rv) const
+{
+	TgtCands tcands;
+	imp->GetTargetCandidates(p,tcands);
+	imp->ConvertTgtCand(tcands,rv,m_outFactorType);
+}
+
+////////////////////////////////////////////////////////////
+//
+// generate set of target candidates for confusion net
+// later this part should be moved to a different file 
+//
+////////////////////////////////////////////////////////////
+
+#include "Word.h"
+#include "Phrase.h"
+#include "ConfusionNet.h"
+
+// Generates all tuples from  n indexes with ranges 0 to card[j]-1, respectively..
+// Input: number of indexes and  ranges: ranges[0] ... ranges[num_idx-1] 
+// Output: number of tuples and monodimensional array of tuples.
+// Reference: mixed-radix generation algorithm (D. E. Knuth, TAOCP v. 4.2)
+
+size_t GenerateTuples(int num_idx,int* ranges,int *&tuples)
+{
+  int* single_tuple=(int *) new int[num_idx+1];
+  int num_tuples=1;
+
+  for (int k=0;k<num_idx;++k)
+    {
+      num_tuples *= ranges[k];
+      single_tuple[k]=0;
+    }
+
+  tuples=new int[num_idx * num_tuples];
+
+  // we need this additional element for the last iteration
+  single_tuple[num_idx]=0; 
+  int j=0;
+  for (int n=0;n<num_tuples;++n){
+    memcpy((void *)((tuples + n * num_idx)),(void *)single_tuple,num_idx * sizeof(int));
+    j=0;
+    while (single_tuple[j]==ranges[j]-1){single_tuple[j]=0; ++j;}
+    ++single_tuple[j];
+  }
+	delete [] single_tuple;
+  return num_tuples;
+}
+
+
+typedef PhraseDictionaryTree::PrefixPtr PPtr;
+typedef std::vector<PPtr> vPPtr;
+typedef std::pair<size_t,size_t> Range;
+typedef std::vector<std::vector<Factor const*> > mPhrase;
+
+std::ostream& operator<<(std::ostream& out,const mPhrase& p) {
+	for(size_t i=0;i<p.size();++i) {
+		out<<i<<" - ";
+		for(size_t j=0;j<p[i].size();++j)
+			out<<p[i][j]->ToString()<<" ";
+		out<<"|";
+	}
+
+	return out;
+}
+
+struct State {
+	vPPtr ptrs;
+	Range range;
+	float score;
+
+	State() : range(0,0),score(0.0) {}
+	State(size_t b,size_t e,const vPPtr& v,float sc=0.0) : ptrs(v),range(b,e),score(sc) {}
+	
+	size_t begin() const {return range.first;}
+	size_t end() const {return range.second;}
+	float GetScore() const {return score;}
+
+};
+
+std::ostream& operator<<(std::ostream& out,const State& s) {
+	out<<"["<<s.ptrs.size()<<" ("<<s.begin()<<","<<s.end()<<") "<<s.GetScore()<<"]";
+
+	return out;
+}
+
+
+void GenerateCandidates(const ConfusionNet& src,
+												std::vector<PhraseDictionaryTree const*>& pdicts) {
+
+	vPPtr root(pdicts.size());
+	std::vector<FactorType> inF(pdicts.size()),outF(pdicts.size());
+	for(size_t i=0;i<pdicts.size();++i) 
+	{
+		root[i]=pdicts[i]->GetRoot();
+		inF[i]=pdicts[i]->GetInputFactorType();
+		outF[i]=pdicts[i]->GetOutputFactorType();
+	}
+
+	std::vector<State> stack;
+	for(size_t i=0;i<src.size();++i) stack.push_back(State(i,i,root));
+	
+	size_t totalTuples=0,distinctTuples=0,lengthMismatch=0;
+
+	std::map<Range,std::set<mPhrase> > cov2E;
+
+	std::cerr<<"start while loop. initial stack size: "<<stack.size()<<"\n";
+
+	while(!stack.empty()) 
+	{
+		State curr(stack.back());
+		stack.pop_back();
+		
+		std::cerr<<"processing state "<<curr<<" stack size: "<<stack.size()<<"\n";
+
+		assert(curr.end()<src.size());
+		const ConfusionNet::Column &currCol=src[curr.end()];
+		for(size_t i=0;i<currCol.size();++i) 
+		{
+			const Word& w=currCol[i].first;
+			vPPtr nextP(curr.ptrs);
+			for(size_t j=0;j<nextP.size();++j)
+				nextP[j]=pdicts[j]->Extend(nextP[j],w.GetFactor(inF[j])->GetString());
+	
+			bool valid=1;
+			for(size_t j=0;valid && j<nextP.size();++j)
+				if(!nextP[j]) valid=0;
+			//				valid &= (nextP[j] ? 1 : 0);
+			
+			if(valid) 
+			{
+				if(curr.end()+1<src.size())
+					stack.push_back(State(curr.begin(),curr.end()+1,nextP,
+																curr.GetScore()+currCol[i].second));
+
+				
+				std::vector<std::vector<FactorTgtCand>* > tCand;
+
+				// generate candidates for each element of nextP:
+				for(size_t j=0;j<nextP.size();++j) if(nextP[j]) 
+				{
+					if(outF[j]>=tCand.size()) tCand.resize(outF[j]+1,0);
+					if(!tCand[outF[j]]) tCand[outF[j]]=new std::vector<FactorTgtCand>;
+					pdicts[j]->GetTargetCandidates(nextP[j],*(tCand[outF[j]]));
+				}
+				
+				// check if candidates are non-empty
+				bool gotCands=1;
+				for(size_t j=0;gotCands && j<tCand.size();++j)
+					gotCands &= tCand[j] && !tCand[j]->empty();
+				
+				if(gotCands) {
+					// enumerate tuples
+
+
+					std::vector<int> radix(tCand.size());
+					for(size_t i=0;i<tCand.size();++i) radix[i]=tCand[i]->size();
+
+					int *tuples;
+					size_t numTuples=GenerateTuples(radix.size(),&radix[0],tuples);
+
+					totalTuples+=numTuples;
+
+					for(size_t i=0;i<numTuples;++i)
+						{
+							mPhrase e(radix.size());
+							for(size_t j=0;j<radix.size();++j)
+								{
+									assert(tCand[j]); // should be superfluous, but ...
+									assert(tuples[radix.size()*i+j]<tCand[j]->size());
+									e[j]=(*tCand[j])[tuples[radix.size()*i+j]].first;
+								}
+
+							bool mismatch=0;
+							for(size_t j=1;!mismatch && j<e.size();++j)
+								if(e[j].size()!=e[j-1].size()) mismatch=1;
+
+							if(mismatch) ++lengthMismatch;
+							else if(cov2E[Range(curr.begin(),curr.end()+1)].insert(e).second) ++distinctTuples;
+						}
+
+
+					delete [] tuples;
+				}
+					
+			}
+		}
+			
+		//if(curr.begin()==curr.end() && tCand.empty()) {}		
+	}
+
+	std::cerr<<"tuple stats:  total: "<<totalTuples
+					 <<" distinct: "<<distinctTuples<<" ("<<(distinctTuples/(0.01*totalTuples))
+					 <<"%) lengthMismatch: "<<lengthMismatch<<" ("<<(lengthMismatch/(0.01*totalTuples))<<"%)\n";
+	std::cerr<<"per coverage set:\n";
+	for(std::map<Range,std::set<mPhrase> >::const_iterator i=cov2E.begin();i!=cov2E.end();++i) {
+		std::cerr<<i->first.first<<","<<i->first.second<<" -- distinct cands: "<<i->second.size()<<"\n";
+	}
+	std::cerr<<"\n\n";
+
+	std::cerr<<"full list:\n";
+	for(std::map<Range,std::set<mPhrase> >::const_iterator i=cov2E.begin();i!=cov2E.end();++i) {
+		std::cerr<<i->first.first<<","<<i->first.second<<" -- distinct cands: "<<i->second.size()<<"\n";
+		for(std::set<mPhrase>::const_iterator j=i->second.begin();j!=i->second.end();++j)
+			std::cerr<<*j<<"\n";
+	}
+
+
+
+}
+
+
+
+

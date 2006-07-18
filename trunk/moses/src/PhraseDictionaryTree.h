@@ -9,6 +9,8 @@
 
 class Phrase;
 class FactorCollection;
+class Word;
+class ConfusionNet;
 
 // a FactorTgtCand is the Factor-phrase and the vector of scores
 typedef std::pair<std::vector<const Factor*>,std::vector<float> > FactorTgtCand;
@@ -18,19 +20,21 @@ class PPimp;
 
 class PhraseDictionaryTree : public Dictionary {
 	PDTimp *imp; //implementation
+	FactorType m_inFactorType,m_outFactorType;
 public:
 
 	class PrefixPtr {
 		PPimp* imp;
 		friend class PDTimp;
 	public:
-		PrefixPtr();
+		PrefixPtr(PPimp* x=0) : imp(x) {}
 		operator bool() const;
 	};
 
 	PhraseDictionaryTree(size_t noScoreComponent,
 											 FactorCollection* factorCollection=0,
-											 FactorType factorType=Surface);
+											 FactorType inputFactorType=Surface,
+											 FactorType outputFactorType=Surface);
 
 	virtual ~PhraseDictionaryTree();
 
@@ -43,12 +47,15 @@ public:
 		return 0;
 	}
 
+	FactorType GetInputFactorType() const {return m_inFactorType;}
+	FactorType GetOutputFactorType() const {return m_outFactorType;}
+	
 	// convert from ascii phrase table format 
 	int Create(std::istream& In,const std::string& OutFileNamePrefix);
 	int Read(const std::string& FileNamePrefix); 
 
 	// free memory used by the prefix tree
-	void FreeMemory();
+	void FreeMemory() const;
 
 	// access with full src phrase
 	void GetTargetCandidates(const std::vector<const Factor*>& src,
@@ -65,4 +72,10 @@ public:
 	void PrintTargetCandidates(PrefixPtr p,std::ostream& out) const;
 
 };
+
+
+void GenerateCandidates(const ConfusionNet& src,
+												std::vector<PhraseDictionaryTree const*>& pdicts) ;
+
+
 #endif /*PHRASEDICTIONARYTREE_H_*/
