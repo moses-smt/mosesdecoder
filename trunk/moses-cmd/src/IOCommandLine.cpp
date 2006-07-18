@@ -131,7 +131,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
 			const LatticeEdge &edge = *edges[currEdge];
-			OutputSurface(m_nBestFile, edge.GetPhrase());
+			OutputSurface(m_nBestFile, edge.GetTargetPhrase());
 		}
 		m_nBestFile << " ||| ";
 
