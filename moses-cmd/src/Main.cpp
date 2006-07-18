@@ -77,11 +77,10 @@ int main(int argc, char* argv[])
 	StaticData staticData;
 	if (!staticData.LoadParameters(argc, argv))
 		return EXIT_FAILURE;
-		
-//	boost::shared_ptr<UnknownWordHandler> unknownWordHandler(new UnknownWordHandler);
-//	staticData.SetUnknownWordHandler(unknownWordHandler);
-
-
+/*
+	boost::shared_ptr<UnknownWordHandler> unknownWordHandler(new UnknownWordHandler);
+	staticData.SetUnknownWordHandler(unknownWordHandler);
+*/
 		if (staticData.GetVerboseLevel() > 0)
 		{
 
