@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <assert.h>
+#include <cassert>
 #include "TypeDef.h"
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
@@ -46,12 +46,14 @@ public:
 	PhraseDictionary &GetPhraseDictionary() const
 	{
 		assert (m_decodeType == Translate);
-		return *(PhraseDictionary*) m_ptr;
+	  assert (dynamic_cast<PhraseDictionary*>(m_ptr));
+		return *dynamic_cast<PhraseDictionary*>(m_ptr);
 	}
 	const GenerationDictionary &GetGenerationDictionary() const
 	{
 		assert (m_decodeType == Generate);
-		return *(GenerationDictionary*) m_ptr;;
+	  assert (dynamic_cast<GenerationDictionary*>(m_ptr));
+	  return *dynamic_cast<GenerationDictionary*>(m_ptr);
 	}
 	
 	

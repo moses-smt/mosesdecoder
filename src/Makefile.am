@@ -1,6 +1,7 @@
 lib_LIBRARIES = libmoses.a
 libmoses_a_SOURCES = \
 	Arc.cpp \
+	ConfusionNet.cpp \
 	FactorCollection.cpp \
 	Factor.cpp \
 	FactorTypeSet.cpp \
