@@ -42,7 +42,8 @@ protected:
 public:
 
 	TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary);
-	
+	TargetPhrase(FactorDirection direction);
+		// unknown word
 	/***
 	 * Deep copy
 	 *

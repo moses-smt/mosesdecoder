@@ -35,6 +35,11 @@ TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionary *ph
 {
 }
 
+TargetPhrase::TargetPhrase(FactorDirection direction)
+:Phrase(direction)
+{
+}
+
 void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
 { // used when creating translations of unknown words:
 	m_transScore = m_ngramScore = 0;	

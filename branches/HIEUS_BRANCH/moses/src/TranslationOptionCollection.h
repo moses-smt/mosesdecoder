@@ -41,6 +41,9 @@ protected:
 	const Sentence &m_inputSentence;
 	SquareMatrix m_futureScore;
 	WordsBitmap m_initialCoverage;
+	
+	std::set<TargetPhrase> m_unknownTargetPhrase;
+	// make sure phrase doesn't go out of memory while we're using it
 
 	void ProcessInitialTranslation(const DecodeStep &decodeStep
 															, const LMList &languageModels
@@ -50,10 +53,18 @@ protected:
 															, int dropUnknown
 															, size_t verboseLevel
 															, PartialTranslOptColl &outputPartialTranslOptColl);
-	void ProcessUnknownWords();
+	void ProcessUnknownWord(		size_t sourcePos
+															, int dropUnknown
+															, FactorCollection &factorCollection
+															, const LMList &allLM
+															, float weightWordPenalty);
 	void ProcessTranslation(		const PartialTranslOpt &inputPartialTranslOpt
 															, const DecodeStep &decodeStep
-															, PartialTranslOptColl &outputPartialTranslOptColl);
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, int dropUnknown
+															, FactorCollection &factorCollection
+															, const LMList &allLM
+															, float weightWordPenalty);
 	void ProcessGeneration(			const PartialTranslOpt &inputPartialTranslOpt
 															, const DecodeStep &decodeStep
 															, PartialTranslOptColl &outputPartialTranslOptColl);

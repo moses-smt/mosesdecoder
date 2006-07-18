@@ -38,7 +38,6 @@ void TranslationOptionCollection::CreateTranslationOptions(
 	list < DecodeStep >::const_iterator iterStep = decodeStepList.begin();
 	const DecodeStep &decodeStep = *iterStep;
 
-	ProcessUnknownWords();
 	ProcessInitialTranslation(decodeStep, languageModels
 														, allLM, factorCollection
 														, weightWordPenalty, dropUnknown
@@ -63,7 +62,13 @@ void TranslationOptionCollection::CreateTranslationOptions(
 				for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
 				{
 					const PartialTranslOpt &inputPartialTranslOpt = *iterPartialTranslOpt;
-					ProcessTranslation(inputPartialTranslOpt, decodeStep, outputPartialTranslOptColl);
+					ProcessTranslation(inputPartialTranslOpt
+														, decodeStep
+														, outputPartialTranslOptColl
+														, dropUnknown
+														, factorCollection
+														, allLM
+														, weightWordPenalty);
 				}
 				break;
 			}
@@ -83,10 +88,6 @@ void TranslationOptionCollection::CreateTranslationOptions(
 		indexStep++;
 	} // for (++iterStep 
 
-}
-
-void TranslationOptionCollection::ProcessUnknownWords()
-{
 }
 
 void TranslationOptionCollection::ProcessInitialTranslation(
@@ -149,63 +150,8 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			}
 			else if (sourcePhrase.GetSize() == 1)
 			{
-				// unknown word, add to target, and add as poss trans
-				//				float	weightWP		= m_staticData.GetWeightWordPenalty();
-				const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Output);
-				size_t isDigit = 0;
-				if (dropUnknown)
-				{
-					const Factor *f = sourcePhrase.GetFactor(0, static_cast<FactorType>(0)); // surface @ 0
-					std::string s = f->ToString();
-					isDigit = s.find_first_of("0123456789");
-					if (isDigit == string::npos) 
-						isDigit = 0;
-					else 
-						isDigit = 1;
-					// modify the starting bitmap
-				}
-				if (!dropUnknown || isDigit)
-				{
-					// add to dictionary
-					TargetPhrase targetPhraseOrig(Output, &phraseDictionary);
-					FactorArray &targetWord = targetPhraseOrig.AddWord();
-					
-					const FactorArray &sourceWord = sourcePhrase.GetFactorArray(0);
-					
-					for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
-					{
-						if (targetFactors.Contains(currFactor))
-						{
-							FactorType factorType = static_cast<FactorType>(currFactor);
-							
-							const Factor *factor = sourceWord[factorType]
-													,*unkownfactor;
-							switch (factorType)
-							{
-							case POS:
-								unkownfactor = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
-								targetWord[factorType] = unkownfactor;
-								break;
-							default:
-								unkownfactor = factorCollection.AddFactor(Output, factorType, factor->GetString());
-								targetWord[factorType] = unkownfactor;
-								break;
-							}
-						}
-					}
-			
-					targetPhraseOrig.SetScore(allLM, weightWordPenalty);
-					
-					phraseDictionary.AddEquivPhrase(sourcePhrase, targetPhraseOrig);
-					const TargetPhraseCollection *phraseColl = phraseDictionary.FindEquivPhrase(sourcePhrase);
-					const TargetPhrase &targetPhrase = *phraseColl->begin();
-					
-					outputPartialTranslOptColl.push_back( PartialTranslOpt(wordsRange, targetPhrase) );
-				}
-				else // drop source word
-				{ 
-					m_initialCoverage.SetValue(startPos, startPos,1); 
-				}
+				ProcessUnknownWord(startPos, dropUnknown, factorCollection, allLM, weightWordPenalty);
+				break;
 			}
 		}
 	}
@@ -259,7 +205,11 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 void TranslationOptionCollection::ProcessTranslation(
 								const PartialTranslOpt &inputPartialTranslOpt
 								, const DecodeStep		 &decodeStep
-								, PartialTranslOptColl &outputPartialTranslOptColl)
+								, PartialTranslOptColl &outputPartialTranslOptColl
+								, int dropUnknown
+								, FactorCollection &factorCollection
+								, const LMList &allLM
+								, float weightWordPenalty)
 {
 	const TargetPhrase &partialPhrase					= inputPartialTranslOpt.GetTargetPhrase();
 	const WordsRange &sourceWordsRange				= inputPartialTranslOpt.GetSourceWordsRange();
@@ -286,8 +236,8 @@ void TranslationOptionCollection::ProcessTranslation(
 		}
 	}
 	else if (sourceWordsRange.GetWordsCount() == 1)
-	{ // another unknown handler here
-		// ??? unknown word handler must check for unknown factor across all factor types for this to be unecessary
+	{ // unknown handler
+		ProcessUnknownWord(sourceWordsRange.GetStartPos(), dropUnknown, factorCollection, allLM, weightWordPenalty);
 	}
 }
 
@@ -391,3 +341,63 @@ void TranslationOptionCollection::ProcessGeneration(
 	}
 }
 
+void TranslationOptionCollection::ProcessUnknownWord(size_t sourcePos
+																										, int dropUnknown
+																										, FactorCollection &factorCollection
+																										, const LMList &allLM
+																										, float weightWordPenalty)
+{
+		// unknown word, add to target, and add as poss trans
+		//				float	weightWP		= m_staticData.GetWeightWordPenalty();
+
+	const FactorArray &sourceWord = m_inputSentence.GetFactorArray(sourcePos);
+
+		size_t isDigit = 0;
+		if (dropUnknown)
+		{
+			const Factor *f = sourceWord[Surface];
+			std::string s = f->ToString();
+			isDigit = s.find_first_of("0123456789");
+			if (isDigit == string::npos) 
+				isDigit = 0;
+			else 
+				isDigit = 1;
+			// modify the starting bitmap
+		}
+		if (!dropUnknown || isDigit)
+		{
+			// add to dictionary
+			TargetPhrase targetPhraseOrig(Output);
+			FactorArray &targetWord = targetPhraseOrig.AddWord();
+						
+			for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+			{
+				FactorType factorType = static_cast<FactorType>(currFactor);
+				
+				const Factor *factor = sourceWord[currFactor]
+										,*unkownfactor;
+				switch (factorType)
+				{
+				case POS:
+					unkownfactor = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
+					targetWord[factorType] = unkownfactor;
+					break;
+				default:
+					unkownfactor = factorCollection.AddFactor(Output, factorType, factor->GetString());
+					targetWord[factorType] = unkownfactor;
+					break;
+				}
+			}
+	
+			targetPhraseOrig.SetScore(allLM, weightWordPenalty);
+			
+			pair< set<TargetPhrase>::iterator, bool> inserted = m_unknownTargetPhrase.insert(targetPhraseOrig);
+			TranslationOption transOpt(WordsRange(sourcePos, sourcePos), *inserted.first);
+			push_back(transOpt);
+		}
+		else 
+		{ // do nothing. just drop source word
+		}
+
+		m_initialCoverage.SetValue(sourcePos, true); 
+}
