@@ -207,6 +207,12 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 
 void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const DecodeStep &decodeStep, HypothesisCollectionIntermediate &outputHypoColl)
 {
+	const WordsBitmap& hypoBitmap = hypothesis.GetWordsBitmap();
+	size_t hypoWordCount		= hypoBitmap.GetWordsCount() 		// pharaoh: foreignTranslated
+				,hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();	// pharaoh: gapStart
+
+  // TODO: handle this switch polymorphically or with stl algorithms?
+  //       that could make this MUCH cleaner. ask cdyer
 	int maxDistortion = m_staticData.GetMaxDistortion();
 	if (maxDistortion < 0)
 	{	// no limit on distortion
@@ -217,18 +223,15 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 
 			if ( !transOpt.Overlap(hypothesis)) 
 			{
-				Hypothesis* newHypo = hypothesis.CreateNext(transOpt);
-				outputHypoColl.AddNoPrune( newHypo );			
+				if (!transOpt.IsDeletionOption() || transOpt.GetStartPos() == hypoWordCount) {
+					Hypothesis* newHypo = hypothesis.CreateNext(transOpt);
+					outputHypoColl.AddNoPrune( newHypo );			
+				}
 			}
 		}
 	}
-	else
+	else // limited reordering possible (maxDistortion # of words)
 	{
-		const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
-		size_t hypoWordCount		= hypoBitmap.GetWordsCount()
-			,hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();
-
-		// MAIN LOOP. go through each possible hypo
 		TranslationOptionCollection::const_iterator iterTransOpt;
 		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
 		{
@@ -237,23 +240,14 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 
 			size_t transOptStartPos = transOpt.GetStartPos();
 
-			if (hypoFirstGapPos == hypoWordCount)
+			if (!transOpt.IsDeletionOption() || transOpt.GetStartPos() == hypoWordCount)
 			{
-				if (transOptStartPos == hypoWordCount
-					|| (transOptStartPos > hypoWordCount 
-					&& transOpt.GetEndPos() <= hypoWordCount + m_staticData.GetMaxDistortion())
-					)
+				if (hypoFirstGapPos == hypoWordCount) // no gap so far
 				{
-					Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-					outputHypoColl.AddNoPrune( newHypo );			
-				}
-			}
-			else
-			{
-				if (transOptStartPos < hypoWordCount)
-				{
-					if (transOptStartPos >= hypoFirstGapPos
-						&& !transOpt.Overlap(hypothesis))
+					if (transOptStartPos == hypoWordCount
+						|| (transOptStartPos > hypoWordCount 
+						&& transOpt.GetEndPos() <= hypoWordCount + m_staticData.GetMaxDistortion())
+						)
 					{
 						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
 						outputHypoColl.AddNoPrune( newHypo );			
@@ -261,11 +255,23 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 				}
 				else
 				{
-					if (transOpt.GetEndPos() <= hypoFirstGapPos + m_staticData.GetMaxDistortion()
-						&& !transOpt.Overlap(hypothesis))
+					if (transOptStartPos < hypoWordCount)
 					{
-						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-						outputHypoColl.AddNoPrune( newHypo );			
+						if (transOptStartPos >= hypoFirstGapPos
+							&& !transOpt.Overlap(hypothesis))
+						{
+							Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+							outputHypoColl.AddNoPrune( newHypo );			
+						}
+					}
+					else
+					{
+						if (transOpt.GetEndPos() <= hypoFirstGapPos + m_staticData.GetMaxDistortion()
+							&& !transOpt.Overlap(hypothesis))
+						{
+							Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+							outputHypoColl.AddNoPrune( newHypo );			
+						}
 					}
 				}
 			}
@@ -377,8 +383,8 @@ void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &p
 					const TargetPhrase	&targetPhrase = *iterTargetPhrase;
 					
 					const WordsRange wordsRange(startPos, endPos);
-					TranslationOption transOpt(wordsRange, targetPhrase);
-					m_possibleTranslations.push_back(transOpt);
+//					TranslationOption transOpt(wordsRange, targetPhrase);
+					m_possibleTranslations.push_back(TranslationOption(wordsRange, targetPhrase));
 //      		if (m_staticData.GetVerboseLevel() >= 3) {
 //						cout << "\t" << transOpt << "\n";
 //	     		}
