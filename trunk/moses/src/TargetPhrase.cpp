@@ -52,11 +52,14 @@ void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
 			float fullScore, nGramScore;
 	
 			#ifdef N_BEST
-					(*lmIter)->CalcScore(*this, fullScore, nGramScore, m_ngramComponent);
+					(*lmIter)->CalcScore(*this, fullScore, nGramScore);
+          size_t lmId = (*lmIter)->GetId();
+          pair<size_t, float> store(lmId, nGramScore);
+          m_ngramComponent.push_back(store);
 			#else
 			    // this is really, really ugly (a reference to an object at NULL
 			    // is asking for trouble). TODO
-					(*lmIter)->CalcScore(*this, fullScore, nGramScore, *static_cast< list< pair<size_t, float> >* > (NULL));
+					(*lmIter)->CalcScore(*this, fullScore, nGramScore);
 			#endif
 	
 			m_fullScore   += fullScore * weightLM;
@@ -97,11 +100,14 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 			const float weightLM = lm.GetWeight();
 			float fullScore, nGramScore;
 #ifdef N_BEST
-			lm.CalcScore(*this, fullScore, nGramScore, m_ngramComponent);
+			lm.CalcScore(*this, fullScore, nGramScore);
+      size_t lmId = lm.GetId();
+      pair<size_t, float> store(lmId, nGramScore);
+      m_ngramComponent.push_back(store);
 #else
 	    // this is really, really ugly (a reference to an object at NULL
 	    // is asking for trouble). TODO
-			lm.CalcScore(*this, fullScore, nGramScore, *static_cast< list< pair<size_t, float> >* > (NULL));
+			lm.CalcScore(*this, fullScore, nGramScore);
 #endif
 	
 			// total LM score so far

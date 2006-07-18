@@ -51,17 +51,17 @@ public:
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder);
-	
+
+private:
+  // not thread-safe, but not much is
+	mutable VocabIndex m_context[MAX_NGRAM_SIZE];	
+
 protected:
-	Vocab *m_srilmVocab;  // TODO - make this a ptr, remove #include from header
-	Ngram *m_srilmModel;  // "  "
+	Vocab *m_srilmVocab;
+	Ngram *m_srilmModel;
 
 	float GetValue(VocabIndex wordId, VocabIndex *context) const;
 
-	LmId GetLmID( const Factor *factor )  const
-	{
-		return GetLmID(factor->GetString());
-	}
 	void CreateFactors(FactorCollection &factorCollection);
 public:
 	LmId GetLmID( const std::string &str ) const;

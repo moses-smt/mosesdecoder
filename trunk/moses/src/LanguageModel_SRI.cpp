@@ -114,15 +114,14 @@ float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor) co
 {
 	// set up context
 	size_t count = contextFactor.size();
-  VocabIndex context[MAX_NGRAM_SIZE];
 	for (size_t i = 0 ; i < count - 1 ; i++)
 	{
-		context[i] = contextFactor[count-2-i]->GetLmId().sri;
+		m_context[i] = contextFactor[count-2-i]->GetLmId().sri;
 	}
-	context[count-1] = Vocab_None;
+	m_context[count-1] = Vocab_None;
 	
 	// call sri lm fn
-	float ret = GetValue(contextFactor[count-1]->GetLmId().sri, context);
+	float ret = GetValue(contextFactor[count-1]->GetLmId().sri, m_context);
 	return ret;
 }
 

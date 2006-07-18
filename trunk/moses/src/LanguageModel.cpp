@@ -42,8 +42,7 @@ LanguageModel::~LanguageModel() {}
 
 void LanguageModel::CalcScore(const Phrase &phrase
 														, float &fullScore
-														, float &ngramScore
-														, list< std::pair<size_t, float> >	&ngramComponent) const
+														, float &ngramScore) const
 {
 	fullScore	= 0;
 	ngramScore	= 0;
@@ -79,11 +78,5 @@ void LanguageModel::CalcScore(const Phrase &phrase
 		ngramScore += GetValue(contextFactor);		
 	}
 	fullScore += ngramScore;
-	
-#ifdef N_BEST
-				size_t lmId = GetId();
-				pair<size_t, float> store(lmId, ngramScore);
-				ngramComponent.push_back(store);
-#endif
 }
 
