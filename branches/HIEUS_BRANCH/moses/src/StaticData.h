@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "InputOutput.h"
 #include "DecodeStep.h"
+#include "LMList.h"
 //#include "UnknownWordHandler.h"
 
 class StaticData

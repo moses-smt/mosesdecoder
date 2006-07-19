@@ -24,7 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Phrase.h"
 #include "ScoreComponent.h"
+#include "ScoreColl.h"
 
+class LMList;
 class PhraseDictionary;
 class GenerationDictionary;
 
@@ -36,7 +38,7 @@ protected:
 #ifdef N_BEST
 	ScoreComponent m_scoreComponent;
 	std::list< std::pair<size_t, float> > m_lmScoreComponent;
-	std::list< std::pair<size_t, float> > m_ngramComponent;
+	ScoreColl m_ngramComponent;
 #endif
 
 public:
@@ -64,7 +66,6 @@ public:
 	void SetWeights(const std::vector<float> &weightT);
 	TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
 		// used for translation step
-	bool IsCompatible(const TargetPhrase &inputPhrase) const;
 	void MergeFactors(std::vector< const Word* > mergeWord, const GenerationDictionary &generationDictionary, float generationScore, float weight);
 		// used in generation step
 		// must run IsCompatible() to ensure incompatible factors aren't being overwritten
@@ -92,7 +93,7 @@ public:
   {
     return m_lmScoreComponent;
   }
-  inline const std::list< std::pair<size_t, float> > &GetNgramComponent() const
+  inline const ScoreColl &GetNgramComponent() const
   {
     return m_ngramComponent;
   }

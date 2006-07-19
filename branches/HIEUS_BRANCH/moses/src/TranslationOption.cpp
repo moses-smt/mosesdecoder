@@ -21,8 +21,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "TranslationOption.h"
 #include "WordsBitmap.h"
+#include "GenerationDictionary.h"
 
 using namespace std;
+
 
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase)
 : m_phrase(targetPhrase)
@@ -53,9 +55,39 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const Target
 #endif
 }
 
+TranslationOption::TranslationOption(const TranslationOption &copy
+																		, const Phrase &inputPhrase
+																		, const GenerationDictionary *generationDictionary
+																		, float generationScore
+																		, float weight)
+: m_phrase						(inputPhrase)
+, m_sourceWordsRange	(copy.m_sourceWordsRange)
+{
+	m_scoreGen	+= generationScore * weight;
+#ifdef N_BEST
+	m_generationScoreComponent[(size_t)generationDictionary] = generationScore;
+#endif
+}
+
 TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targetPhrase) const
 {
-	TranslationOption *newTransOpt = new TranslationOption(*this, targetPhrase);
+	if (m_phrase.IsCompatible(targetPhrase))
+	{
+		TranslationOption *newTransOpt = new TranslationOption(*this, targetPhrase);
+		return newTransOpt;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+TranslationOption *TranslationOption::MergeGeneration(const Phrase &inputPhrase
+																	, const GenerationDictionary *generationDictionary
+																	, float generationScore
+																	, float weight) const
+{
+	TranslationOption *newTransOpt = new TranslationOption(*this, inputPhrase, generationDictionary, generationScore, weight);
 	return newTransOpt;
 }
 
@@ -63,6 +95,11 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 {
 	const WordsBitmap &bitmap = hypothesis.GetWordsBitmap();
 	return bitmap.Overlap(GetSourceWordsRange());
+}
+
+void TranslationOption::CalcScore(const LMList &allLM, float weightWordPenalty)
+{
+
 }
 
 // friend

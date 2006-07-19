@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "Arc.h"
 #include "SquareMatrix.h"
+#include "LMList.h"
 //TODO: add this include in when it compiles
 //#include "LexicalReordering.h"
 
@@ -85,9 +86,10 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 	// scores
 	SetScore(prevHypo.GetScore());
-	m_score[ScoreType::PhraseTrans]				+= transOpt.GetTranslationScore();
-	m_score[ScoreType::FutureScoreEnum]		+= transOpt.GetFutureScore();
+	m_score[ScoreType::PhraseTrans]					+= transOpt.GetTranslationScore();
+	m_score[ScoreType::FutureScoreEnum]			+= transOpt.GetFutureScore();
 	m_score[ScoreType::LanguageModelScore]	+= transOpt.GetNgramScore();
+	m_score[ScoreType::Generation]					+= transOpt.GetGenerationScore();
 
 #ifdef N_BEST
 	// language model score (ngram)

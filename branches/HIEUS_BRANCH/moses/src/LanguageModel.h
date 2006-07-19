@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class FactorCollection;
 class Factor;
 class Phrase;
+class ScoreColl;
 
 class LanguageModel
 {
@@ -69,7 +70,7 @@ public:
 	void CalcScore(const Phrase &phrase
 							, float &fullScore
 							, float &ngramScore
-							, std::list< std::pair<size_t, float> >	*ngramComponent) const;
+							, ScoreColl	*ngramComponent) const;
 	FactorType GetFactorType() const
 	{
 		return m_factorType;

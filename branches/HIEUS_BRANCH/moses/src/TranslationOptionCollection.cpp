@@ -84,10 +84,43 @@ void TranslationOptionCollection::CreateTranslationOptions(
 				break;
 			}
 		}
-
 		indexStep++;
 	} // for (++iterStep 
 
+		// add to real trans opt list
+	PartialTranslOptColl &lastPartialTranslOptColl	= outputPartialTranslOptCollVec[decodeStepList.size() - 1];
+	iterator iterColl;
+	for (iterColl = lastPartialTranslOptColl.begin() ; iterColl != lastPartialTranslOptColl.end() ; )
+	{
+		TranslationOption &transOpt = *iterColl;
+
+		transOpt.CalcScore(allLM, weightWordPenalty);
+//		if(m_staticData.GetVerboseLevel() > 2) 
+//		{			
+//			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+//		}
+		size_t wordsTranslated = hypo->GetWordsBitmap().GetWordsCount();
+
+		if (m_hypoStack[wordsTranslated].AddPrune(hypo))
+		{
+			HypothesisCollectionIntermediate::iterator iterCurr = iterHypo++;
+			lastHypoColl.Detach(iterCurr);
+			if(m_staticData.GetVerboseLevel() > 2) 
+				{
+					if(m_hypoStack[wordsTranslated].getBestScore() == hypo->GetScore(ScoreType::Total))
+						{
+							cout<<"new best estimate for this stack"<<endl;
+							
+						}
+					cout<<"added hypothesis on stack "<<wordsTranslated<<" now size "<<m_hypoStack[wordsTranslated].size()<<endl<<endl;
+				}
+
+		}
+		else
+		{
+			++iterHypo;
+		}
+	}
 }
 
 void TranslationOptionCollection::ProcessInitialTranslation(
@@ -339,7 +372,7 @@ void TranslationOptionCollection::ProcessGeneration(
 
 		// merge with existing trans opt
 		Phrase mergePhrase(Output, mergeWords);
-		TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(mergePhrase, generationScore, weight);
+		TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(mergePhrase, &generationDictionary, generationScore, weight);
 		if (newTransOpt != NULL)
 		{
 			outputPartialTranslOptColl.Add( *newTransOpt );

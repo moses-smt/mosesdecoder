@@ -23,21 +23,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <iostream>
 #include <fstream>
-
 #include "NGramNode.h"
-
 #include "LanguageModel.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
+#include "ScoreColl.h"
 
 using namespace std;
 
 void LanguageModel::CalcScore(const Phrase &phrase
 														, float &fullScore
 														, float &ngramScore
-														, list< std::pair<size_t, float> > *ngramComponent) const
+														, ScoreColl *ngramComponent) const
 {
 	fullScore	= 0;
 	ngramScore	= 0;
@@ -74,9 +73,8 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	fullScore += ngramScore;
 	
 #ifdef N_BEST
-				size_t lmId = GetId();
-				pair<size_t, float> store(lmId, ngramScore);
-				ngramComponent->push_back(store);
+	size_t lmId = GetId();
+	ngramComponent->SetValue(lmId, ngramScore);
 #endif
 }
 

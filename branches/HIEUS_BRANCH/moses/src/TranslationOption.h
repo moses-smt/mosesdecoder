@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "ScoreComponentCollection.h"
 
+class GenerationDictionary;
+
 /***
  * Specify source and target words for a possible translation. m_targetPhrase points to a phrase-table entry.
  * The source word range is zero-indexed, so it can't refer to an empty range.
@@ -51,9 +53,17 @@ public:
 	// used by initial translation step
 	TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase);
 	// used by MergeTranslation 
+	TranslationOption(const TranslationOption &copy
+											, const Phrase &inputPhrase
+											, const GenerationDictionary *generationDictionary
+											, float generationScore
+											, float weight);
 
 	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase) const;
-	TranslationOption *MergeGeneration(const Phrase &inputPhrase, float generationScore, float weight) const;
+	TranslationOption *MergeGeneration(const Phrase &inputPhrase
+																		, const GenerationDictionary *generationDictionary
+																		, float generationScore
+																		, float weight) const;
 
 	inline const Phrase &GetTargetPhrase() const
 	{
@@ -81,6 +91,10 @@ public:
 	{
 		return m_scoreTrans;
 	}
+	inline float GetGenerationScore() const
+	{
+		return m_scoreGen;
+	}
 	inline float GetFutureScore() const 	 
 	{ 	 
 				 return m_futureScore; 	 
@@ -89,6 +103,8 @@ public:
   { 	 
 		return m_ngramScore; 	 
 	}
+	void CalcScore(const LMList &allLM, float weightWordPenalty);
+
 #ifdef N_BEST
 	inline const ScoreComponentCollection &GetScoreComponentCollection() const
 	{

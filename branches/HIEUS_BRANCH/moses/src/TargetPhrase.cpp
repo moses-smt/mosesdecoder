@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
 #include "LanguageModel.h"
+#include "LMList.h"
 
 using namespace std;
 
@@ -163,30 +164,6 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 	}
 
 	return clone;
-}
-
-bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase) const
-{
-	if (inputPhrase.GetSize() != GetSize())
-	{
-		return false;
-	}
-
-	const size_t size = GetSize();
-
-	for (size_t currPos = 0 ; currPos < size ; currPos++)
-	{
-		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
-		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-			const Factor *thisFactor 		= GetFactor(currPos, factorType)
-									,*inputFactor	= inputPhrase.GetFactor(currPos, factorType);
-			if (thisFactor != NULL && inputFactor != NULL && thisFactor != inputFactor)
-				return false;
-		}
-	}
-	return true;
-
 }
 
 void TargetPhrase::MergeFactors(vector< const Word* > mergeWords, const GenerationDictionary &generationDictionary, float generationScore, float weight)

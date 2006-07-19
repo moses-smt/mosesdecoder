@@ -34,7 +34,11 @@ public:
 		assert(iter != end());
 		return iter->second;
 	}
-	
+	float SetValue(size_t index, float value)
+	{
+		assert(find(index) != end());
+		return operator[](index) = value;
+	}	
 };
 
 inline std::ostream& operator<<(std::ostream &out, const ScoreColl &coll)

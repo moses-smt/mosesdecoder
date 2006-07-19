@@ -66,6 +66,8 @@ public:
 											, const std::vector< std::vector<std::string> > &phraseVector
 											, FactorCollection &factorCollection);
 
+	bool IsCompatible(const Phrase &inputPhrase) const;
+
 	inline FactorDirection GetDirection() const
 	{
 		return m_direction;
