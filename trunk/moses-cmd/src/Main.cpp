@@ -49,6 +49,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Timer.h"
 #include "IOCommandLine.h"
 #include "IOFile.h"
+#include "TranslationOptionCollection.h"
 //#include "UnknownWordHandler.h"
 
 #if HAVE_CONFIG_H
@@ -102,7 +103,8 @@ int main(int argc, char* argv[])
 	while( (sentence = inputOutput->GetInput()) != NULL)
 	{
 		TRACE_ERR(*sentence << endl);
-		Manager manager(*sentence, staticData);
+		TranslationOptionCollection * translationOptionCollection=new TranslationOptionCollectionText(*sentence);
+		Manager manager(*sentence, *translationOptionCollection, staticData);
 		manager.ProcessSentence();
 		inputOutput->SetOutput(manager.GetBestHypothesis(), sentence->GetTranslationId());
 		
@@ -120,7 +122,7 @@ int main(int argc, char* argv[])
 
 		// delete sentence
 		inputOutput->Release(sentence);
-		
+		delete translationOptionCollection;
 	}
 	
 	delete inputOutput;

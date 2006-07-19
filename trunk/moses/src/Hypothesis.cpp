@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Arc.h"
 #include "SquareMatrix.h"
 #include "StaticData.h"
+#include "Input.h"
 //TODO: add this include in when it compiles
 //#include "LexicalReordering.h"
 
@@ -37,7 +38,7 @@ using namespace std;
 
 int Hypothesis::s_numNodes = 0;
 
-Hypothesis::Hypothesis(const Phrase &phrase, const WordsBitmap &initialCoverage)
+Hypothesis::Hypothesis(const WordsBitmap &initialCoverage)
 	: LatticeEdge(Output, NULL)
 	, m_sourceCompleted(initialCoverage)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
@@ -159,10 +160,10 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */
-Hypothesis* Hypothesis::Create(const Phrase& targetPhrase, const WordsBitmap &initialCoverage)
+Hypothesis* Hypothesis::Create(const WordsBitmap &initialCoverage)
 {
 	/*if(s_wordDeletionEnabled && targetPhrase.GetSize() == 0) return new DeletionHypothesis(initialCoverage);
-	else*/ return new Hypothesis(targetPhrase, initialCoverage);
+	else*/ return new Hypothesis(initialCoverage);
 }
 
 /***
@@ -462,7 +463,7 @@ void Hypothesis::CalcDistortionScore()
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &futureScore, const Sentence &source) 
+void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &futureScore) 
 {
 	// DISTORTION COST
 	CalcDistortionScore();
@@ -528,7 +529,7 @@ const Hypothesis* Hypothesis::GetPrevHypo()const{
 /**
  * print hypothesis information for pharaoh-style logging
  */
-void Hypothesis::PrintHypothesis(const Sentence &source, float weightDistortion, float weightWordPenalty) const{
+void Hypothesis::PrintHypothesis(const InputType &source, float weightDistortion, float weightWordPenalty) const{
 	int start = m_prevHypo->m_currSourceWordsRange.GetEndPos() -1;
 	int end = m_prevHypo->m_currSourceWordsRange.GetEndPos();
 	cout<<"creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ... ";

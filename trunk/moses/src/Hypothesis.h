@@ -38,7 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class SquareMatrix;
 class StaticData;
 class TranslationOption;
-class Sentence;
+class InputType;
 class WordsRange;
 class WordDeletionTable;
 
@@ -59,7 +59,7 @@ protected:
 	/***
 	 * Used for initializing translation process
 	 */
-	Hypothesis(const Phrase &phrase, const WordsBitmap &initialCoverage);
+	Hypothesis(const WordsBitmap &initialCoverage);
 	// create next
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
@@ -94,7 +94,7 @@ public:
 	/***
 	 * return the subclass of Hypothesis most appropriate to the given target phrase
 	 */
-	static Hypothesis* Create(const Phrase& targetPhrase, const WordsBitmap &initialCoverage);
+	static Hypothesis* Create(const WordsBitmap &initialCoverage);
 
 	~Hypothesis();
 	
@@ -111,7 +111,7 @@ public:
 	 */
 	Hypothesis* MergeNext(const TranslationOption &transOpt) const;
 	
-	virtual void PrintHypothesis(  const Sentence &source, float weightDistortion, float weightWordPenalty) const;
+	virtual void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
  // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
 	inline const WordsRange &GetCurrSourceWordsRange() const
 	{
@@ -124,7 +124,7 @@ public:
 		return m_currTargetWordsRange.GetWordsCount();
 	}
 
-	virtual void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore, const Sentence &source);
+	virtual void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore);
 
 	int GetId() const;
 

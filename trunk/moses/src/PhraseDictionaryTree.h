@@ -22,6 +22,50 @@ class PhraseDictionaryTree : public Dictionary {
 	PDTimp *imp; //implementation
 	FactorType m_inFactorType,m_outFactorType;
 public:
+	PhraseDictionaryTree(size_t noScoreComponent,
+											 FactorCollection* factorCollection=0,
+											 FactorType inputFactorType=Surface,
+											 FactorType outputFactorType=Surface);
+
+	virtual ~PhraseDictionaryTree();
+
+	DecodeType GetDecodeType() const {return Translate;}
+	size_t GetSize() const {return 0;}
+	FactorType GetInputFactorType() const {return m_inFactorType;}
+	FactorType GetOutputFactorType() const {return m_outFactorType;}
+	
+	// convert from ascii phrase table format 
+	// note: only creates table, does not keep it in memory
+	//        -> use Read(outFileNamePrefix);
+	int Create(std::istream& in,const std::string& outFileNamePrefix);
+
+	int Read(const std::string& fileNamePrefix); 
+
+	// free memory used by the prefix tree etc.
+	void FreeMemory() const;
+
+
+	/**************************************
+	 *   access with full source phrase   *
+	 **************************************/
+	// get the target candidates for a given factor sequence/phrase
+	void GetTargetCandidates(const std::vector<const Factor*>& src,
+													 std::vector<FactorTgtCand>& rv) const;
+
+	// print target candidates for a given phrase, mainly for debugging
+	void PrintTargetCandidates(const std::vector<std::string>& src,
+														 std::ostream& out) const;
+
+
+
+	/*****************************
+	 *   access to prefix tree   *
+	 *****************************/
+
+	// 'pointer' into prefix tree
+	// the only permitted direct operation is a check for NULL,
+	// e.g. PrefixPtr p; if(p) ...
+	// other usage only through PhraseDictionaryTree-functions below
 
 	class PrefixPtr {
 		PPimp* imp;
@@ -31,51 +75,27 @@ public:
 		operator bool() const;
 	};
 
-	PhraseDictionaryTree(size_t noScoreComponent,
-											 FactorCollection* factorCollection=0,
-											 FactorType inputFactorType=Surface,
-											 FactorType outputFactorType=Surface);
-
-	virtual ~PhraseDictionaryTree();
-
-	DecodeType GetDecodeType() const
-	{
-		return Translate;
-	}
-	size_t GetSize() const
-	{
-		return 0;
-	}
-
-	FactorType GetInputFactorType() const {return m_inFactorType;}
-	FactorType GetOutputFactorType() const {return m_outFactorType;}
-	
-	// convert from ascii phrase table format 
-	int Create(std::istream& In,const std::string& OutFileNamePrefix);
-	int Read(const std::string& FileNamePrefix); 
-
-	// free memory used by the prefix tree
-	void FreeMemory() const;
-
-	// access with full src phrase
-	void GetTargetCandidates(const std::vector<const Factor*>& src,
-													 std::vector<FactorTgtCand>& rv) const;
-	void PrintTargetCandidates(const std::vector<std::string>& src,
-														 std::ostream& out) const;
-
-	// access to prefix tree
+	// return pointer to root node
 	PrefixPtr GetRoot() const;
-	PrefixPtr Extend(PrefixPtr,const std::string&) const;
+	// extend pointer with a word/Factorstring and return the resulting successor
+	// pointer. If there is no such successor node, the result will evaluate to 
+	// false. Requirement: the input pointer p evaluates to true.
+	PrefixPtr Extend(PrefixPtr p,const std::string& s) const;
 
+	// get the target candidates for a given prefix pointer
+	// requirement: the pointer has to evaluate to true
 	void GetTargetCandidates(PrefixPtr p,
 													 std::vector<FactorTgtCand>& rv) const;
-	void PrintTargetCandidates(PrefixPtr p,std::ostream& out) const;
 
+	// print target candidates for a given prefix pointer to a stream, mainly 
+	// for debugging
+	void PrintTargetCandidates(PrefixPtr p,std::ostream& out) const;
 };
 
 
 void GenerateCandidates(const ConfusionNet& src,
-												std::vector<PhraseDictionaryTree const*>& pdicts) ;
+												const std::vector<PhraseDictionaryTree const*>& pdicts,
+												const std::vector<std::vector<float> >& weights) ;
 
 
 #endif /*PHRASEDICTIONARYTREE_H_*/
