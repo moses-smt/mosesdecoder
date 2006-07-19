@@ -27,28 +27,33 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
 
-class Sentence;
 class DecodeStep;
 class LanguageModel;
 class FactorCollection;
 
 class TranslationOptionCollection : public std::list< TranslationOption >
 {
+	TranslationOptionCollection(const TranslationOptionCollection&); // no copy constructor
 protected:
-	const Sentence &m_inputSentence;
 	SquareMatrix m_futureScore;
 	WordsBitmap m_initialCoverage;
+
+	TranslationOptionCollection(size_t srcSize);
 	
 public:
-	TranslationOptionCollection(const Sentence &inputSentence);
-  
-  void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
+  virtual ~TranslationOptionCollection();
+
+  virtual void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
   														, const LMList &languageModels  														
   														, const LMList &allLM
   														, FactorCollection &factorCollection
   														, float weightWordPenalty
   														, bool dropUnknown
-  														, size_t verboseLevel);
+  														, size_t verboseLevel) =0;
+	// get length/size of source input
+	virtual size_t GetSourceSize() const=0;
+
+
 	inline const SquareMatrix &GetFutureScore()
 	{
 		return m_futureScore;

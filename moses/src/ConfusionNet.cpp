@@ -5,7 +5,7 @@
 #include "FactorCollection.h"
 #include "Util.h"
 
-ConfusionNet::ConfusionNet(FactorCollection* p) : m_factorCollection(p) {}
+ConfusionNet::ConfusionNet(FactorCollection* p) : InputType(),m_factorCollection(p) {}
 
 void ConfusionNet::SetFactorCollection(FactorCollection *p) 
 {
@@ -31,7 +31,7 @@ void ConfusionNet::String2Word(const std::string& s,Word& w,const std::vector<Fa
 
 bool ConfusionNet::ReadFormat0(std::istream& in,const std::vector<FactorType>& factorOrder) {
 	assert(m_factorCollection);
-	clear();
+	Clear();
 	std::string line;
 	while(getline(in,line)) {
 		std::istringstream is(line);
@@ -55,7 +55,7 @@ bool ConfusionNet::ReadFormat0(std::istream& in,const std::vector<FactorType>& f
 }
 bool ConfusionNet::ReadFormat1(std::istream& in,const std::vector<FactorType>& factorOrder) {
 	assert(m_factorCollection);
-	clear();
+	Clear();
 	std::string line;
 	if(!getline(in,line)) return 0;
 	size_t s;
@@ -74,7 +74,6 @@ bool ConfusionNet::ReadFormat1(std::istream& in,const std::vector<FactorType>& f
 					std::cerr<<"WARN: neg costs: "<<data[i][j].second<<" -> set to 0\n";
 					data[i][j].second=0.0;}
 				String2Word(word,data[i][j].first,factorOrder);
-				//				data[i][j].first.SetFactor(Surface,m_factorCollection->AddFactor(Input,Surface,word));
 			} else return 0;
 	}
 	return !data.empty();
@@ -90,3 +89,12 @@ void ConfusionNet::Print(std::ostream& out) const {
 	}
 	out<<"\n\n";
 }
+
+Phrase ConfusionNet::GetSubString(const WordsRange&) const {
+	std::cerr<<"ERROR: call to ConfusionNet::GetSubString\n";
+	abort();
+	return Phrase();}
+const Factor* ConfusionNet::GetFactor(size_t pos, FactorType factorType) const {
+	std::cerr<<"ERROR: call to ConfusionNet::GetFactor\n";
+	abort();
+	return 0;}

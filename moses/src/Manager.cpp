@@ -32,11 +32,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-Manager::Manager(const Sentence &sentence, StaticData &staticData)
-:m_source(sentence)
-,m_hypoStack(sentence.GetSize() + 1)
+Manager::Manager(InputType const& source, 
+								 TranslationOptionCollection& toc,
+								 StaticData &staticData)
+:m_source(source)
+,m_hypoStack(source.GetSize() + 1)
 ,m_staticData(staticData)
-,m_possibleTranslations(sentence)
+,m_possibleTranslations(toc)  //dynamic_cast<Sentence const&>(source))
 {
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
@@ -77,13 +79,13 @@ void Manager::ProcessSentence()
 
 	// seed hypothesis
 	{
-	Hypothesis *hypo = Hypothesis::Create(m_source, m_possibleTranslations.GetInitialCoverage());
-	TRACE_ERR(m_possibleTranslations.GetInitialCoverage().GetWordsCount() << endl);
+		Hypothesis *hypo = Hypothesis::Create(m_possibleTranslations.GetInitialCoverage());
+		TRACE_ERR(m_possibleTranslations.GetInitialCoverage().GetWordsCount() << endl);
 #ifdef N_BEST
-	LMList allLM = m_staticData.GetAllLM();
-	hypo->ResizeComponentScore(allLM, decodeStepList);
+		LMList allLM = m_staticData.GetAllLM();
+		hypo->ResizeComponentScore(allLM, decodeStepList);
 #endif
-	m_hypoStack[m_possibleTranslations.GetInitialCoverage().GetWordsCount()].AddPrune(hypo);
+		m_hypoStack[m_possibleTranslations.GetInitialCoverage().GetWordsCount()].AddPrune(hypo);
 	}
 	
 	// go thru each stack
@@ -176,7 +178,7 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 	{
 		Hypothesis *hypo = *iterHypo;
 
-		hypo->CalcScore(m_staticData, m_possibleTranslations.GetFutureScore(), m_source);
+		hypo->CalcScore(m_staticData, m_possibleTranslations.GetFutureScore());
 		if(m_staticData.GetVerboseLevel() > 2) 
 		{			
 			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
@@ -295,9 +297,8 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 
 	// actual implementation
 	const WordsRange &sourceWordsRange				= hypothesis.GetCurrSourceWordsRange();
-	const Phrase sourcePhrase 								= m_source.GetSubString(sourceWordsRange);
 	const PhraseDictionary &phraseDictionary	= decodeStep.GetPhraseDictionary();
-	const TargetPhraseCollection *phraseColl	=	phraseDictionary.FindEquivPhrase(sourcePhrase);
+	const TargetPhraseCollection *phraseColl	=	CreateTargetPhraseCollection(&phraseDictionary,&m_source,sourceWordsRange); 
 
 	if (phraseColl != NULL)
 	{
@@ -332,7 +333,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 
 				if (targetFactor == NULL)
 				{
-					const Factor *sourceFactor = sourcePhrase.GetFactor(0, factorType)
+					const Factor *sourceFactor = m_source.GetFactor(sourceWordsRange.GetStartPos(), factorType)
 											,*unkownfactor;
 					switch (factorType)
 					{
@@ -354,6 +355,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 
 }
 
+#if 0
 /***
  * Add to m_possibleTranslations all possible translations the phrase table gives us for
  * the given phrase
@@ -460,6 +462,7 @@ void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &p
 		}
 	}
 }
+#endif
 
 // helpers
 typedef pair<Word, float> WordPair;

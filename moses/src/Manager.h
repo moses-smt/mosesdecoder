@@ -23,13 +23,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include <list>
-#include "Sentence.h"
+#include "Input.h"
 #include "Hypothesis.h"
 #include "StaticData.h"
 #include "TranslationOption.h"
 #include "HypothesisCollection.h"
 #include "HypothesisCollectionIntermediate.h"
-#include "TranslationOptionCollection.h"
+#include "TranslationOptionCollectionText.h"
 #include "LatticePathList.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
@@ -41,11 +41,12 @@ class Manager
 {
 protected:	
 	// data
-	Sentence m_source;
+	InputType const& m_source;
+
 	std::vector < HypothesisCollection > m_hypoStack;
 		// no of elements = no of words in source + 1
 	StaticData &m_staticData;
-	TranslationOptionCollection m_possibleTranslations;
+	TranslationOptionCollection& m_possibleTranslations;
 
 	// functions
 	void ProcessOneStack(const std::list < DecodeStep > &decodeStepList
@@ -61,13 +62,15 @@ protected:
 	void ProcessGeneration(const Hypothesis &hypothesis
 													, const DecodeStep &decodeStep
 													, HypothesisCollectionIntermediate &outputHypoColl);
+#if 0
 	void CreateTranslationOptions(const Phrase &phrase
 													, PhraseDictionary &phraseDictionary
 													, const LMList &lmListInitial);
+#endif
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
 public:
-	Manager(const Sentence &sentence, StaticData &staticData);
+	Manager(InputType const& source, TranslationOptionCollection&, StaticData &staticData);
 	~Manager();
 
 	void ProcessSentence();

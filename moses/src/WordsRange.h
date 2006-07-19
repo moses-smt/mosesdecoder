@@ -53,6 +53,10 @@ public:
 	{
 		return (m_startPos == NOT_FOUND) ? 0 : m_endPos - m_startPos + 1;
 	}
-
+	inline bool operator<(const WordsRange& x) const 
+	{
+		return (m_startPos<x.m_startPos 
+						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
+	}
 };
 

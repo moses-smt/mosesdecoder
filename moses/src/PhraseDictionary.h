@@ -29,8 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "TargetPhrase.h"
 #include "Dictionary.h"
-
-typedef std::list <TargetPhrase> TargetPhraseCollection;
+#include "CreateTargetPhraseCollection.h"
 
 class StaticData;
 
