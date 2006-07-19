@@ -134,7 +134,7 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 	CreateFromString(factorOrder, phraseVector, factorCollection);
 }
 
-bool Phrase::operator< (const Phrase &compare) const
+bool Phrase::operator < (const Phrase &compare) const
 {	
 #ifdef min
 #undef min
