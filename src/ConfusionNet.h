@@ -4,9 +4,11 @@
 #include <vector>
 #include <iostream>
 #include "Word.h"
+#include "Input.h"
+
 class FactorCollection;
 
-class ConfusionNet {
+class ConfusionNet : public InputType {
  public: 
 	typedef std::vector<std::pair<Word,float> > Column;
 
@@ -21,12 +23,18 @@ class ConfusionNet {
 	const Column& GetColumn(size_t i) const {assert(i<data.size());return data[i];}
 	const Column& operator[](size_t i) const {return GetColumn(i);}
 
-	bool empty() const {return data.empty();}
-	size_t size() const {return data.size();}
-	void clear() {data.clear();}
+	bool Empty() const {return data.empty();}
+	size_t GetSize() const {return data.size();}
+	void Clear() {data.clear();}
 
 	bool Read(std::istream&,const std::vector<FactorType>& factorOrder,int format=0);
 	void Print(std::ostream&) const;
+
+
+	
+	Phrase GetSubString(const WordsRange&) const;
+	const Factor* GetFactor(size_t pos, FactorType factorType) const;
+
 
  private:
 	bool ReadFormat0(std::istream&,const std::vector<FactorType>& factorOrder);

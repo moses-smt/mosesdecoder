@@ -25,32 +25,38 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "Word.h"
 #include "Phrase.h"
+#include "Input.h"
+
+class WordsRangs;
 
 /***
  * a Sentence is a Phrase with an ID
  */
-class Sentence : public Phrase
+class Sentence : public Phrase, public InputType
 {
-protected:
-	long m_translationId;
-
+ protected:
 	Sentence()
-	{
-	}
-public:
-	Sentence(FactorDirection direction)
-		:Phrase(direction)
-	{
-	}
+		{
+		}
+ public:
+	Sentence(FactorDirection direction)	: InputType(),Phrase(direction)
+		{
+		}
 
-	// for db stuff
-	long GetTranslationId()
-	{
-		return m_translationId;
-	}
-	void SetTranslationId(long translationId)
-	{	// for db stuff;
-		m_translationId = translationId;
-	}
+	Phrase GetSubString(const WordsRange& r) const 
+		{
+			return Phrase::GetSubString(r);
+		}
+
+	const Factor* GetFactor(size_t pos, FactorType factorType) const
+		{
+			return Phrase::GetFactor(pos,factorType);
+		}
+
+	size_t GetSize() const 
+		{
+			return Phrase::GetSize();
+		}
+
 };
 
