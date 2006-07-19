@@ -58,6 +58,9 @@ public:
 	{
 		return Add(ScoreComponent(dictionary));
 	}
+
+	void Combine(const ScoreComponentCollection &otherComponentCollection);
+
 };
 
 inline std::ostream& operator<<(std::ostream &out, const ScoreComponentCollection &scoreComponentColl)

@@ -96,7 +96,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	m_lmScoreComponent = prevHypo.GetLMScoreComponent();
 	const ScoreColl &nGramComponent = transOpt.GetNgramComponent();
 
-	list< pair<size_t, float> >::const_iterator iter;
+	ScoreColl::const_iterator iter;
 	for (iter = nGramComponent.begin() ; iter != nGramComponent.end() ; ++iter)
 	{
 		size_t lmId = (*iter).first;
@@ -110,16 +110,8 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	m_transScoreComponent = prevComponent;
 	
 	// from trans opt
-	const ScoreComponentCollection &possComponent	= transOpt.GetTransScoreComponent();
-	ScoreComponent &transComponent			= m_transScoreComponent.GetScoreComponent(possComponent.GetDictionary());
-	
-	const size_t noScoreComponent = possComponent.GetNoScoreComponent();
-	assert(noScoreComponent == transComponent.GetNoScoreComponent());
-
-	for (size_t i = 0 ; i < noScoreComponent ; i++)
-	{
-		transComponent[i] += possComponent[i];
-	}
+	const ScoreComponentCollection &transComponentColl	= transOpt.GetTransScoreComponent();
+	m_transScoreComponent.Combine(transComponentColl);
 
 	// generation score
 	m_generationScoreComponent = prevHypo.GetGenerationScoreComponent();
@@ -168,9 +160,8 @@ Hypothesis *Hypothesis::MergeNext(const TranslationOption &transOpt) const
 	}
 
 #ifdef N_BEST
-	const ScoreComponent &transOptComponent = transOpt.GetScoreComponents();
-	clone->m_transScoreComponent.Remove(transOptComponent.GetDictionary());
-	clone->m_transScoreComponent.Add(transOptComponent);
+	const ScoreComponentCollection &transOptComponent = transOpt.GetTransScoreComponent();
+	clone->m_transScoreComponent.Combine(transOptComponent);
 #endif
 
 	return clone;

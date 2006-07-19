@@ -48,6 +48,7 @@ protected:
 	WordsBitmap				m_sourceCompleted;
 	WordsRange				m_currSourceWordsRange, m_currTargetWordsRange;
 #ifdef N_BEST
+	ScoreComponentCollection m_transScoreComponent;
 	std::list<Arc*>		m_arcList; //all arcs that end at the same lattice point as we do
 #endif
 
