@@ -96,11 +96,16 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	}
 	
 	//source word deletion
-	if(m_parameter.GetParam("word-deletion").size() > 0)
+	if(m_parameter.GetParam("weight-e").size() > 0)
 	{
+		m_wordDeletionWeight = Scan<float>(m_parameter.GetParam("weight-e")[0]);
 		m_wordDeletionEnabled = true;
 		if (GetVerboseLevel() > 0) { std::cerr << "Word deletion enabled." << std::endl; }
-	} else { m_wordDeletionEnabled = false; }
+	}
+	else
+	{
+		m_wordDeletionEnabled = false;
+	}
 
 	// load Lexical Reordering model
 	// check to see if the lexical reordering parameter exists
@@ -217,18 +222,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			lm->Load(i, languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
 	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
 			m_languageModel[type].push_back(lm);
-
-			/*
-			const Factor *f0 = m_factorCollection.AddFactor(Target, Surface, "it")
-										,*f1 = m_factorCollection.AddFactor(Target, Surface, "market")
-										,*f2 = m_factorCollection.AddFactor(Target, Surface, "economy");
-			vector<const Factor*> contextFactor(3);
-			contextFactor[0] = f0;
-			contextFactor[1] = f1;
-			contextFactor[2] = f2;
-			float v = UntransformSRIScore(lm->GetValue(contextFactor));
-			TRACE_ERR(v << endl);	
-			*/
 		}
 		CompareHypothesisCollection::SetMaxNGramOrder(nGramMaxOrder);
 	}

@@ -107,7 +107,6 @@ int main(int argc, char* argv[])
 		Manager manager(*sentence, *translationOptionCollection, staticData);
 		manager.ProcessSentence();
 		inputOutput->SetOutput(manager.GetBestHypothesis(), sentence->GetTranslationId());
-		
 
 		// n-best
 		size_t nBestSize = staticData.GetNBestSize();

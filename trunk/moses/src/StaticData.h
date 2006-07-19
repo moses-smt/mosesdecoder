@@ -50,7 +50,7 @@ protected:
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float																m_beamThreshold
-																			,m_weightDistortion, m_weightWordPenalty;
+																			,m_weightDistortion, m_weightWordPenalty, m_wordDeletionWeight;
 									// PhraseTrans, Generation & LanguageModelScore has multiple weights.
 	int																	m_maxDistortion;
 									// do it differently from old pharaoh

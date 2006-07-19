@@ -30,11 +30,12 @@ libmoses_a_SOURCES = \
 	TranslationOptionCollection.cpp \
 	TranslationOptionCollectionText.cpp \
 	TranslationOptionCollectionConfusionNet.cpp \
-	UserMessage.cpp \
-	Util.cpp \
-	WeightOptimization.cpp \
-	Word.cpp \
-	WordsBitmap.cpp \
+	UnknownWordHandler.cpp \
+ 	UserMessage.cpp \
+ 	Util.cpp \
+ 	WeightOptimization.cpp \
+ 	Word.cpp \
+ 	WordsBitmap.cpp \
 	WordsRange.cpp
 
 if INTERNAL_LM

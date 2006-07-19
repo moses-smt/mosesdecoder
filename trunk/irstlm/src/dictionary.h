@@ -144,7 +144,7 @@ class dictionary{
     encode(OOV()); //be sure OOV code exists
     int oovfreq=(int)(oovrate * totfreq());
     std::cerr << "setting OOV rate to: " << oovrate << " -- freq= " << oovfreq << std::endl;
-    freq(oovcode(),oovfreq);
+    return freq(oovcode(),oovfreq);
   }
 
 

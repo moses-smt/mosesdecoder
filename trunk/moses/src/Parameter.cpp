@@ -41,7 +41,6 @@ PARAM_VEC &Parameter::AddParam(const string &paramName)
 Parameter::Parameter() 
 {
 	AddParam("ttable-file");
-	AddParam("dtable-file");
 	AddParam("lmodel-file");
 	AddParam("ttable-limit");
 	AddParam("weight-d");
