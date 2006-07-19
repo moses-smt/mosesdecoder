@@ -33,11 +33,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-Manager::Manager(const Sentence &sentence, StaticData &staticData)
+Manager::Manager(const Sentence &sentence, TranslationOptionCollection &possibleTranslations, StaticData &staticData)
 :m_source(sentence)
 ,m_hypoStack(sentence.GetSize() + 1)
 ,m_staticData(staticData)
-,m_possibleTranslations(sentence)
+,m_possibleTranslations(possibleTranslations)
 {
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)

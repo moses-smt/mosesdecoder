@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 	while( (sentence = inputOutput->GetInput()) != NULL)
 	{
 		TRACE_ERR(*sentence << endl);
-		TranslationOptionCollection * translationOptionCollection=new TranslationOptionCollectionText(*sentence);
+		TranslationOptionCollection * translationOptionCollection=new TranslationOptionCollection(*sentence);
 		Manager manager(*sentence, *translationOptionCollection, staticData);
 		manager.ProcessSentence();
 		inputOutput->SetOutput(manager.GetBestHypothesis(), sentence->GetTranslationId());
@@ -125,7 +125,6 @@ int main(int argc, char* argv[])
 	}
 	
 	delete inputOutput;
-
 
 	timer.check("End.");
 	return EXIT_SUCCESS;

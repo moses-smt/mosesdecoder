@@ -45,7 +45,7 @@ protected:
 	std::vector < HypothesisCollection > m_hypoStack;
 		// no of elements = no of words in source + 1
 	StaticData &m_staticData;
-	TranslationOptionCollection m_possibleTranslations;
+	TranslationOptionCollection &m_possibleTranslations;
 
 	// functions
 	void ProcessOneStack(HypothesisCollection &sourceHypoColl);
@@ -68,7 +68,7 @@ protected:
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
 public:
-	Manager(const Sentence &sentence, StaticData &staticData);
+	Manager(const Sentence &sentence, TranslationOptionCollection &possibleTranslations, StaticData &staticData);
 	~Manager();
 
 	void ProcessSentence();
