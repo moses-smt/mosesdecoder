@@ -116,7 +116,7 @@ const OutputWordCollection *GenerationDictionary::FindWord(const FactorArray &fa
 	}
 	else
 	{
-		ret = &(*iter).second;
+		ret = &iter->second;
 	}
 	return ret;
 }
