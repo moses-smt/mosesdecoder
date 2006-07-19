@@ -189,7 +189,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 					size_t index = currLength + transOpt.GetSize();
 
 					if (transOpt.GetStartPos() == currLength + startPos 
-							&& transOpt.GetEndPos() <= endPos 
+							&& transOpt.GetEndPos() <= endPos
 							&& transOpt.GetFutureScore() + score[currLength] > score[index]) 
 					{
 						score[index] = transOpt.GetFutureScore() + score[currLength];
@@ -218,7 +218,7 @@ void TranslationOptionCollection::ProcessTranslation(
 								, const LMList &allLM
 								, float weightWordPenalty)
 {
-	const TargetPhrase &partialPhrase					= inputPartialTranslOpt.GetTargetPhrase();
+	const Phrase &partialPhrase								= inputPartialTranslOpt.GetTargetPhrase();
 	const WordsRange &sourceWordsRange				= inputPartialTranslOpt.GetSourceWordsRange();
 	const Phrase sourcePhrase 								= m_inputSentence.GetSubString(sourceWordsRange);
 	const PhraseDictionary &phraseDictionary	= decodeStep.GetPhraseDictionary();
@@ -233,11 +233,11 @@ void TranslationOptionCollection::ProcessTranslation(
 		{
 			const TargetPhrase& targetPhrase	= *iterTargetPhrase;
 	
-			TargetPhrase *newTargetPhrase = partialPhrase.MergeNext(targetPhrase);
-			if (newTargetPhrase != NULL)
+			TranslationOption *newTransOpt = inputPartialTranslOpt.MergeTranslation(targetPhrase);
+			if (newTransOpt != NULL)
 			{
-				outputPartialTranslOptColl.Add( TranslationOption(inputPartialTranslOpt, *newTargetPhrase) );
-				delete newTargetPhrase;
+				outputPartialTranslOptColl.Add( *newTransOpt );
+				delete newTransOpt;
 			}
 		}
 	}
@@ -281,8 +281,8 @@ void TranslationOptionCollection::ProcessGeneration(
 	const WordsRange &sourceWordsRange								= inputPartialTranslOpt.GetSourceWordsRange();
 	const float weight																= generationDictionary.GetWeight();
 
-	const TargetPhrase &targetPhrase = inputPartialTranslOpt.GetTargetPhrase();
-	size_t targetLength	= targetPhrase.GetSize();
+	const Phrase &targetPhrase	= inputPartialTranslOpt.GetTargetPhrase();
+	size_t targetLength					= targetPhrase.GetSize();
 
 	// generation list for each word in hypothesis
 	vector< WordList > wordListVector(targetLength);
@@ -337,10 +337,14 @@ void TranslationOptionCollection::ProcessGeneration(
 			generationScore += wordPair.second;
 		}
 
-		// merge with existing phrase
-		TargetPhrase newTargetPhrase(targetPhrase);
-		newTargetPhrase.MergeFactors(mergeWords, generationDictionary, generationScore, weight);
-		outputPartialTranslOptColl.Add(TranslationOption(sourceWordsRange, newTargetPhrase));
+		// merge with existing trans opt
+		Phrase mergePhrase(Output, mergeWords);
+		TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(mergePhrase, generationScore, weight);
+		if (newTransOpt != NULL)
+		{
+			outputPartialTranslOptColl.Add( *newTransOpt );
+			delete newTransOpt;
+		}
 
 		// increment iterators
 		IncrementIterators(wordListIterVector, wordListVector);

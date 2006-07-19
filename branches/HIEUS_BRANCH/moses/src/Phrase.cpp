@@ -44,6 +44,28 @@ Phrase::Phrase(const Phrase &copy)
 	}
 }
 
+Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
+:m_direction(direction)
+{
+	const size_t size = mergeWords.size();
+
+	for (size_t currPos = 0 ; currPos < size ; currPos++)
+	{
+		FactorArray &newWord = AddWord();
+		const Word &mergeWord = *mergeWords[0];
+
+		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			const Factor *factor = mergeWord.GetFactor(factorType);
+			if (factor != NULL)
+			{
+				newWord[factorType] = factor;
+			}
+		}
+	}
+}
+
 Phrase::~Phrase()
 {
 	free (m_factorArray);

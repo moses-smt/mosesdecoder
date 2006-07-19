@@ -40,7 +40,7 @@ protected:
 
 	const Phrase 				&m_phrase;
 	const WordsRange		m_sourceWordsRange;
-	float								m_scoreTrans, m_scoreGen;
+	float								m_scoreTrans, m_scoreGen, m_futureScore, m_ngramScore;
 #ifdef N_BEST
 	ScoreComponentCollection	m_transScoreComponent;
 	ScoreColl									m_generationScoreComponent;
@@ -52,9 +52,10 @@ public:
 	TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase);
 	// used by MergeTranslation 
 
-	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase);
+	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase) const;
+	TranslationOption *MergeGeneration(const Phrase &inputPhrase, float generationScore, float weight) const;
 
-	inline const Phrase &GetPhrase() const
+	inline const Phrase &GetTargetPhrase() const
 	{
 		return m_phrase;
 	}
@@ -80,7 +81,14 @@ public:
 	{
 		return m_scoreTrans;
 	}
-
+	inline float GetFutureScore() const 	 
+	{ 	 
+				 return m_futureScore; 	 
+	}
+	inline float GetNgramScore() const 	 
+  { 	 
+		return m_ngramScore; 	 
+	}
 #ifdef N_BEST
 	inline const ScoreComponentCollection &GetScoreComponentCollection() const
 	{
@@ -90,4 +98,3 @@ public:
 
 
 };
-

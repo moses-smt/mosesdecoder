@@ -53,7 +53,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const Target
 #endif
 }
 
-TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targetPhrase)
+TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targetPhrase) const
 {
 	TranslationOption *newTransOpt = new TranslationOption(*this, targetPhrase);
 	return newTransOpt;
@@ -68,7 +68,7 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 // friend
 ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 {
-	out << possibleTranslation.GetPhrase() 
+	out << possibleTranslation.GetTargetPhrase() 
 			<< ", pC=" << possibleTranslation.GetTranslationScore();
 	return out;
 }
