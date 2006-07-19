@@ -239,6 +239,30 @@ bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
 	}
 	return false;
 }
+
+bool Phrase::IsCompatible(const Phrase &inputPhrase) const
+{
+	if (inputPhrase.GetSize() != GetSize())
+	{
+		return false;
+	}
+
+	const size_t size = GetSize();
+
+	for (size_t currPos = 0 ; currPos < size ; currPos++)
+	{
+		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			const Factor *thisFactor 		= GetFactor(currPos, factorType)
+									,*inputFactor	= inputPhrase.GetFactor(currPos, factorType);
+			if (thisFactor != NULL && inputFactor != NULL && thisFactor != inputFactor)
+				return false;
+		}
+	}
+	return true;
+
+}
 //
 //bool Phrase::Contains(const Phrase &subPhrase) const
 //{
