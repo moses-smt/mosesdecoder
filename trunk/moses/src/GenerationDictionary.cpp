@@ -112,7 +112,7 @@ const OutputWordCollection *GenerationDictionary::FindWord(const FactorArray &fa
 	std::map<Word , OutputWordCollection>::const_iterator iter = m_collection.find(word);
 	if (iter == m_collection.end())
 	{ // can't find source phrase
-		ret = &m_unknownWord;
+		ret = NULL;
 	}
 	else
 	{
