@@ -20,7 +20,7 @@ void LMList::SetScore(const Phrase &phrase, float &retFullScore, float &retNGram
 		#else
 		    // this is really, really ugly (a reference to an object at NULL
 		    // is asking for trouble). TODO
-				lm.CalcScore(*this, fullScore, nGramScore, NULL);
+				lm.CalcScore(phrase, fullScore, nGramScore, NULL);
 		#endif
 
 		retFullScore   += fullScore * weightLM;
