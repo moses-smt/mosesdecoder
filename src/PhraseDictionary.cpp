@@ -96,10 +96,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			phraseVector = Phrase::Parse(tokens[0]);
 			prevSourcePhrase = tokens[0];
 
-			if (Contains(phraseVector, inputPhraseList, input))
-				addPhrase = true;
-			else
-				addPhrase = false;
+			addPhrase = Contains(phraseVector, inputPhraseList, input);
 		}
 
 		if (addPhrase)
@@ -109,7 +106,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 				TRACE_ERR("Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_noScoreComponent<<") of score components on line " << line_num);
         abort();
 			}
-			assert(scoreVector.size() == m_noScoreComponent);
+//			assert(scoreVector.size() == m_noScoreComponent);
 			
 			// source
 			Phrase sourcePhrase(Input);

@@ -351,8 +351,6 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 		}
 		outputHypoColl.AddNoPrune( newHypo );
 	}
-	
-
 }
 
 #if 0
