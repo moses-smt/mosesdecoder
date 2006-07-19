@@ -530,23 +530,22 @@ const Hypothesis* Hypothesis::GetPrevHypo()const{
  * print hypothesis information for pharaoh-style logging
  */
 void Hypothesis::PrintHypothesis(const InputType &source, float weightDistortion, float weightWordPenalty) const{
-	int start = m_prevHypo->m_currSourceWordsRange.GetEndPos() -1;
-	int end = m_prevHypo->m_currSourceWordsRange.GetEndPos();
-	cout<<"creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ... ";
-	if(start >= 0) {
-		WordsRange range(start, end);
-		cout<< source.GetSubString(range);
-	}
-	else if (start == -1){
-		WordsRange range(0, end);
-		cout<< "<s> "<<source.GetSubString(range);
-	}
-	else
-	{
-		cout<< "<s> <s>";
-	}
-	cout<<" )"<<endl;
-	cout<<"\tbase score "<<m_prevHypo->m_score[ScoreType::Total]<<endl;
+  cout<<"creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ";
+  int end = m_prevHypo->m_targetPhrase.GetSize()-1;
+  int start = end-1;
+  if ( start < 0 ) start = 0;
+  if ( m_prevHypo->m_currTargetWordsRange.GetStartPos() == -1 ) {
+    cout << "<s> ";
+  }
+  else {
+    cout << "... ";
+  }
+  if (end>=0) {
+    WordsRange range(start, end);
+    cout << m_prevHypo->m_targetPhrase.GetSubString(range) << " ";
+  }
+  cout<<")"<<endl;
+	cout<<"\tbase score "<< (m_prevHypo->m_score[ScoreType::Total] - m_prevHypo->m_score[ScoreType::FutureScoreEnum]) <<endl;
 	cout<<"\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "<< source.GetSubString(m_currSourceWordsRange)  <<endl;
 	cout<<"\ttranslated as: "<<m_targetPhrase<<" => translation cost "<<m_score[ScoreType::PhraseTrans];
   if (m_wordDeleted) cout <<"   word_deleted"; 
@@ -554,7 +553,6 @@ void Hypothesis::PrintHypothesis(const InputType &source, float weightDistortion
 	cout<<"\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange()) << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
 	cout<<"\tlanguage model cost "<<m_score[ScoreType::LanguageModelScore]<<endl;
 	cout<<"\tword penalty "<<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
-	cout<<"\tscore "<<m_score[ScoreType::Total] - m_score[ScoreType::FutureScoreEnum]<<" + future cost "<<m_score[ScoreType::FutureScoreEnum]<<" = "<<m_score[ScoreType::Total]<<endl;
 	cout<<"\tscore "<<m_score[ScoreType::Total] - m_score[ScoreType::FutureScoreEnum]<<" + future cost "<<m_score[ScoreType::FutureScoreEnum]<<" = "<<m_score[ScoreType::Total]<<endl;
 #if N_BEST
   cout<<"\tweighted feature scores: " << this->GetScoreComponent() << endl;
