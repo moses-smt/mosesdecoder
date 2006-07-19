@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Factor.h"
 #include "TypeDef.h"
 #include "Util.h"
+#include "ScoreColl.h"
 
 #ifdef LM_SRI
 #include "Ngram.h"

@@ -90,36 +90,12 @@ void TranslationOptionCollection::CreateTranslationOptions(
 		// add to real trans opt list
 	PartialTranslOptColl &lastPartialTranslOptColl	= outputPartialTranslOptCollVec[decodeStepList.size() - 1];
 	iterator iterColl;
-	for (iterColl = lastPartialTranslOptColl.begin() ; iterColl != lastPartialTranslOptColl.end() ; )
+	for (iterColl = lastPartialTranslOptColl.begin() ; iterColl != lastPartialTranslOptColl.end() ; iterColl++)
 	{
 		TranslationOption &transOpt = *iterColl;
-
 		transOpt.CalcScore(allLM, weightWordPenalty);
-//		if(m_staticData.GetVerboseLevel() > 2) 
-//		{			
-//			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
-//		}
-		size_t wordsTranslated = hypo->GetWordsBitmap().GetWordsCount();
+		Add(transOpt);
 
-		if (m_hypoStack[wordsTranslated].AddPrune(hypo))
-		{
-			HypothesisCollectionIntermediate::iterator iterCurr = iterHypo++;
-			lastHypoColl.Detach(iterCurr);
-			if(m_staticData.GetVerboseLevel() > 2) 
-				{
-					if(m_hypoStack[wordsTranslated].getBestScore() == hypo->GetScore(ScoreType::Total))
-						{
-							cout<<"new best estimate for this stack"<<endl;
-							
-						}
-					cout<<"added hypothesis on stack "<<wordsTranslated<<" now size "<<m_hypoStack[wordsTranslated].size()<<endl<<endl;
-				}
-
-		}
-		else
-		{
-			++iterHypo;
-		}
 	}
 }
 

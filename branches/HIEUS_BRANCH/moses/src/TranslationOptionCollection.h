@@ -87,6 +87,11 @@ public:
   														, float weightWordPenalty
   														, int dropUnknown
   														, size_t verboseLevel);
+
+	void Add(const TranslationOption &translationOption)
+	{
+		push_back(translationOption);
+	}
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
