@@ -242,23 +242,23 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 
 			size_t transOptStartPos = transOpt.GetStartPos();
 
-			if (!transOpt.IsDeletionOption() || transOpt.GetStartPos() == hypoWordCount)
+			if (!transOpt.IsDeletionOption() || transOptStartPos == hypoWordCount)
 			{
 				if (hypoFirstGapPos == hypoWordCount) // no gap so far
 				{
-					if (transOptStartPos == hypoWordCount
-						|| (transOptStartPos > hypoWordCount 
-						&& transOpt.GetEndPos() <= hypoWordCount + m_staticData.GetMaxDistortion())
+					if (transOptStartPos == hypoWordCount          // monotone
+						|| (transOptStartPos > hypoWordCount         // || skip a few source words, but make sure
+						&& transOpt.GetEndPos() <= hypoWordCount + maxDistortion)  // the end of the source phrase isn't too far away
 						)
 					{
 						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
 						outputHypoColl.AddNoPrune( newHypo );			
 					}
 				}
-				else
+				else  // there has been a gap
 				{
-					if (transOptStartPos < hypoWordCount)
-					{
+					if (transOptStartPos < hypoWordCount)  // go back and fill in a gap?
+					{                                      // yes:
 						if (transOptStartPos >= hypoFirstGapPos
 							&& !transOpt.Overlap(hypothesis))
 						{
@@ -266,9 +266,9 @@ void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const Deco
 							outputHypoColl.AddNoPrune( newHypo );			
 						}
 					}
-					else
+					else                                   // no, don't fill it in yet:
 					{
-						if (transOpt.GetEndPos() <= hypoFirstGapPos + m_staticData.GetMaxDistortion()
+						if (transOpt.GetEndPos() <= hypoFirstGapPos + maxDistortion
 							&& !transOpt.Overlap(hypothesis))
 						{
 							Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
