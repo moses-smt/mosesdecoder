@@ -94,7 +94,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 #ifdef N_BEST
 	// language model score (ngram)
 	m_lmScoreComponent = prevHypo.GetLMScoreComponent();
-	const list< pair<size_t, float> > &nGramComponent = transOpt.GetTrigramComponent();
+	const ScoreColl &nGramComponent = transOpt.GetNgramComponent();
 
 	list< pair<size_t, float> >::const_iterator iter;
 	for (iter = nGramComponent.begin() ; iter != nGramComponent.end() ; ++iter)
@@ -104,12 +104,13 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 		m_lmScoreComponent[lmId] += score;
 	}
 
-	// translation score
+	// translation components 
+	// from prev hypo
 	const ScoreComponentCollection &prevComponent= prevHypo.GetScoreComponent();
 	m_transScoreComponent = prevComponent;
 	
-	// add components specific to poss trans
-	const ScoreComponent &possComponent	= transOpt.GetScoreComponents();
+	// from trans opt
+	const ScoreComponentCollection &possComponent	= transOpt.GetTransScoreComponent();
 	ScoreComponent &transComponent			= m_transScoreComponent.GetScoreComponent(possComponent.GetDictionary());
 	
 	const size_t noScoreComponent = possComponent.GetNoScoreComponent();

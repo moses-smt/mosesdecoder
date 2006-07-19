@@ -45,7 +45,7 @@ protected:
 	float								m_scoreTrans, m_scoreGen, m_futureScore, m_ngramScore;
 #ifdef N_BEST
 	ScoreComponentCollection	m_transScoreComponent;
-	ScoreColl									m_generationScoreComponent;
+	ScoreColl									m_generationScoreComponent, m_ngramComponent;
 #endif
 
 public:
@@ -106,9 +106,13 @@ public:
 	void CalcScore(const LMList &allLM, float weightWordPenalty);
 
 #ifdef N_BEST
-	inline const ScoreComponentCollection &GetScoreComponentCollection() const
+	inline const ScoreComponentCollection &GetTransScoreComponent() const
 	{
 		return m_transScoreComponent;
+	}
+	inline const ScoreColl &GetNgramComponent() const 	 
+	{ 	 
+		return m_ngramComponent; 	 
 	}
 #endif
 

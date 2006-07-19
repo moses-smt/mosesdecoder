@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "WordsBitmap.h"
 #include "GenerationDictionary.h"
+#include "LMList.h"
 
 using namespace std;
 
@@ -99,7 +100,17 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 
 void TranslationOption::CalcScore(const LMList &allLM, float weightWordPenalty)
 {
+	// LM scores
+	m_ngramScore = 0;
+	float retFullScore = 0;
 
+	allLM.SetScore(GetTargetPhrase(), retFullScore, m_ngramScore, m_ngramComponent);
+
+	// future score
+	m_futureScore = retFullScore;
+
+	size_t phraseSize = GetTargetPhrase().GetSize();
+	m_futureScore += m_scoreTrans - phraseSize * weightWordPenalty;
 }
 
 // friend

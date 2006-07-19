@@ -331,6 +331,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LMList.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Manager.cpp"
 				>
 			</File>
@@ -529,6 +533,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LMList.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Manager.h"
 				>
 			</File>
@@ -554,10 +562,6 @@
 			</File>
 			<File
 				RelativePath=".\src\Parameter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\PartialTranslOpt.h"
 				>
 			</File>
 			<File
