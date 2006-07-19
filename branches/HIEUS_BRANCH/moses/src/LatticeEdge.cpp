@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "LatticeEdge.h"
 #include "LanguageModel.h"
+#include "LMList.h"
 
 using namespace std;
 
