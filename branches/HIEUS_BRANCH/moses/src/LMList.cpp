@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void LMList::SetScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreColl &ngramComponent) const
+void LMList::SetScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreColl *ngramComponent) const
 { 
 	const_iterator lmIter;
 	for (lmIter = begin(); lmIter != end(); ++lmIter)

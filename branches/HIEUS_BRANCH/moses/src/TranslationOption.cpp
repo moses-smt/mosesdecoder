@@ -104,8 +104,11 @@ void TranslationOption::CalcScore(const LMList &allLM, float weightWordPenalty)
 	m_ngramScore = 0;
 	float retFullScore = 0;
 
+#ifdef N_BEST
 	allLM.SetScore(GetTargetPhrase(), retFullScore, m_ngramScore, m_ngramComponent);
-
+#else
+	allLM.SetScore(GetTargetPhrase(), retFullScore, m_ngramScore, NULL);
+#endif
 	// future score
 	m_futureScore = retFullScore;
 
