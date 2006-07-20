@@ -150,7 +150,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 
 		// trans components
 		const ScoreComponentCollection 
-						&transScoreComponent = path.GetScoreComponent();
+						&transScoreComponent = path.GetTranslationScoreComponent();
 
 		ScoreComponentCollection::const_iterator iterTrans;
 		for (iterTrans = transScoreComponent.begin() ; iterTrans != transScoreComponent.end() ; ++iterTrans)
