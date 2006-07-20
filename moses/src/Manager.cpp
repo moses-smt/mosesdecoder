@@ -58,7 +58,6 @@ void Manager::ProcessSentence()
 	
 	list < DecodeStep > &decodeStepList = m_staticData.GetDecodeStepList();
 
-	PhraseDictionary &phraseDictionary = decodeStepList.front().GetPhraseDictionary();
 	const LMList &lmListInitial = m_staticData.GetLanguageModel(Initial);
 	// create list of all possible translations
 	// this is only valid if:
@@ -575,10 +574,11 @@ void Manager::ProcessGeneration(const Hypothesis &hypothesis
 
 void Manager::OutputHypoStackSize()
 {
-	std::vector < HypothesisCollection >::const_iterator iterStack;
-	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
+	std::vector < HypothesisCollection >::const_iterator iterStack = m_hypoStack.begin();
+	TRACE_ERR ((int)iterStack->size());
+	for (++iterStack; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
-		TRACE_ERR ( (int)(*iterStack).size() << ", ");
+		TRACE_ERR ( ", " << (int)iterStack->size());
 	}
 	TRACE_ERR (endl);
 }
