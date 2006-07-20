@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
+#include "InputFileStream.h"
 
 using namespace std;
 
@@ -64,8 +65,10 @@ void LanguageModel_IRST::Load(size_t id
 	double decay   = 0.95;
   //
 
+	InputFileStream inp(fileName);
+
 	m_lmtb         = new lmtable(
-		fileName.c_str(),
+		inp,
 		nGramOrder,
 		resolution,
 		decay
@@ -110,8 +113,14 @@ float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor) c
   ngram ng(m_lmtb->dict);
 	for (size_t i = 0 ; i < count ; i++)
 	{
+#ifdef CDYER_DEBUG_LMSCORE
+		std::cout << i <<"="<<contextFactor[i]->GetLmId().irst <<"," << contextFactor[i]->GetString()<<" ";
+#endif
 		ng.pushc(contextFactor[i]->GetLmId().irst);
 	}
+#ifdef CDYER_DEBUG_LMSCORE
+	std::cout <<" (ng='" << ng << "')\n";
+#endif
 	return TransformScore(m_lmtb->prob(ng));
 }
 
