@@ -30,16 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "boost/filesystem/operations.hpp" // boost::filesystem::exists
 #include "boost/algorithm/string/case_conv.hpp" //boost::algorithm::to_lower
 
-#ifdef LM_SRI
-#include "LanguageModel_SRI.h"
-#else
-#ifdef LM_IRST
-#include "LanguageModel_IRST.h"
-#else
-#include "LanguageModel_Internal.h"
-#endif
-#endif
-
+#include "LanguageModel.h"
+#include "LanguageModelFactory.h"
 
 using namespace std;
 
@@ -143,11 +135,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 								orientation = LexReorderType::Msd;
 							//direction
 							else if(val == "forward")
-								direction == LexReorderType::Forward;
+								direction = LexReorderType::Forward;
 							else if(val == "backward")
-								direction == LexReorderType::Backward;
+								direction = LexReorderType::Backward;
 							else if(val == "bidirectional")
-								direction == LexReorderType::Bidirectional;
+								direction = LexReorderType::Bidirectional;
 							//condition
 							else if(val == "f")
 								condition = LexReorderType::F;
@@ -207,16 +199,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			string &languageModelFile = token[3];
 			
 			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
-      LanguageModel *lm = 0;
-#ifdef LM_SRI
-      lm = new LanguageModel_SRI();
-#else
-#ifdef LM_IRST
-      lm = new LanguageModel_IRST();
-#else
-      lm = new LanguageModel_Internal();
-#endif
-#endif
+      LanguageModel *lm = LanguageModelFactory::createLanguageModel();
 
 			// error handling here?
 			lm->Load(i, languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);

@@ -13,6 +13,7 @@ libmoses_a_SOURCES = \
 	Input.cpp \
 	InputFileStream.cpp \
 	LanguageModel.cpp \
+	LanguageModelFactory.cpp \
 	LatticeEdge.cpp \
 	LatticePath.cpp \
 	LexicalReordering.cpp \
