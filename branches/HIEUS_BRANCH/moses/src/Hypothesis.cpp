@@ -38,7 +38,7 @@ using namespace std;
 int Hypothesis::s_numNodes = 0;
 
 Hypothesis::Hypothesis(const Phrase &phrase)
-	: LatticeEdge(Output, NULL)
+	: LatticeEdge(Output)
 	, m_sourceCompleted(phrase.GetSize())
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
