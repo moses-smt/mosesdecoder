@@ -191,14 +191,13 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	{
 		if (m_unknownWordPos.GetValue(startPos))
 		{ // unknown word but already processed. skip 
-			break;
+			continue;
 		}
 
 		// reuse phrase, add next word on
 		Phrase sourcePhrase( m_inputSentence.GetDirection());
 
-		bool unknownWord = false;
-		for (size_t endPos = startPos ; !unknownWord && endPos < m_inputSentence.GetSize() ; endPos++)
+		for (size_t endPos = startPos ; endPos < m_inputSentence.GetSize() ; endPos++)
 		{
 			const WordsRange wordsRange(startPos, endPos);
 
@@ -234,9 +233,8 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			}
 			else if (sourcePhrase.GetSize() == 1)
 			{
-				unknownWord = true;
 				ProcessUnknownWord(startPos, dropUnknown, factorCollection, weightWordPenalty);
-				break;
+				continue;
 			}
 		}
 	}
@@ -255,7 +253,6 @@ void TranslationOptionCollection::ProcessTranslation(
 	const Phrase sourcePhrase 								= m_inputSentence.GetSubString(sourceWordsRange);
 	const PhraseDictionary &phraseDictionary	= decodeStep.GetPhraseDictionary();
 
-	TRACE_ERR(sourcePhrase << endl);
 	const TargetPhraseCollection *phraseColl	=	phraseDictionary.FindEquivPhrase(sourcePhrase);
 
 	if (phraseColl != NULL)
@@ -447,7 +444,8 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t sourcePos
 			push_back(transOpt);
 		}
 		else 
-		{ // do nothing. just drop source word
+		{ // drop source word. create blank trans opt
+			
 		}
 
 		m_unknownWordPos.SetValue(sourcePos, true); 
