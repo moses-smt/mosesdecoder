@@ -258,7 +258,7 @@ void TranslationOptionCollection::ProcessTranslation(
 		for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != phraseColl->end(); ++iterTargetPhrase)
 		{
 			const TargetPhrase& targetPhrase	= *iterTargetPhrase;
-	
+			
 			TranslationOption *newTransOpt = inputPartialTranslOpt.MergeTranslation(targetPhrase);
 			if (newTransOpt != NULL)
 			{
@@ -369,8 +369,8 @@ void TranslationOptionCollection::ProcessGeneration(
 		}
 
 		// merge with existing trans opt
-		Phrase mergePhrase(Output, targetPhrase, mergeWords);
-		TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(mergePhrase, &generationDictionary, generationScore, weight);
+		Phrase genPhrase(Output, mergeWords);
+		TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(genPhrase, &generationDictionary, generationScore, weight);
 		if (newTransOpt != NULL)
 		{
 			outputPartialTranslOptColl.Add( *newTransOpt );

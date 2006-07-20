@@ -45,31 +45,22 @@ Phrase::Phrase(const Phrase &copy)
 	}
 }
 
-Phrase::Phrase(FactorDirection direction, const Phrase &copy, const vector< const Word* > &mergeWords)
+Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
 :m_direction(direction)
 ,m_phraseSize(mergeWords.size())
 ,m_arraySize(mergeWords.size())
 {
-	assert(copy.GetSize() == mergeWords.size());
-
 	m_factorArray = (FactorArray*) malloc(m_arraySize * sizeof(FactorArray));
 	
 	for (size_t currPos = 0 ; currPos < m_phraseSize ; currPos++)
 	{
 		FactorArray &thisWord				= m_factorArray[currPos];
-		const FactorArray &copyWord = copy.GetFactorArray(currPos);
 		const Word &mergeWord				= *mergeWords[currPos];
 
 		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 		{
-			const Factor *factor = copyWord[currFactor];
-			if (factor != NULL)
-				thisWord[currFactor] = factor;
-			else
-			{
-				FactorType factorType = static_cast<FactorType>(currFactor);
-				thisWord[currFactor] = mergeWord.GetFactor(factorType);
-			}
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			thisWord[currFactor] = mergeWord.GetFactor(factorType);
 		}
 	}
 }
@@ -77,6 +68,22 @@ Phrase::Phrase(FactorDirection direction, const Phrase &copy, const vector< cons
 Phrase::~Phrase()
 {
 	free (m_factorArray);
+}
+
+void Phrase::MergeFactors(const Phrase &copy)
+{
+	assert(GetSize() == copy.GetSize());
+	size_t size = GetSize();
+	for (size_t currPos = 0 ; currPos < size ; currPos++)
+	{
+		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			const Factor *factor = copy.GetFactor(currPos, factorType);
+			if (factor != NULL)
+				SetFactor(currPos, factorType, factor);
+		}
+	}
 }
 
 void Phrase::AddWords(const Phrase &copy)

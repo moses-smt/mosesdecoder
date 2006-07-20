@@ -63,7 +63,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 																		, float weight)
 : m_phrase						(inputPhrase)
 , m_sourceWordsRange	(copy.m_sourceWordsRange)
-{
+{ // used in creating the next generation step
 	m_scoreTrans	= copy.GetTranslationScore();
 	m_scoreGen	= copy.GetGenerationScore() + generationScore * weight;
 
@@ -119,8 +119,15 @@ TranslationOption *TranslationOption::MergeGeneration(const Phrase &inputPhrase
 																	, float generationScore
 																	, float weight) const
 {
-	TranslationOption *newTransOpt = new TranslationOption(*this, inputPhrase, generationDictionary, generationScore, weight);
-	return newTransOpt;
+	if (m_phrase.IsCompatible(inputPhrase))
+	{
+		Phrase mergePhrase(GetTargetPhrase());
+		mergePhrase.MergeFactors(inputPhrase);
+		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase, generationDictionary, generationScore, weight);
+		return newTransOpt;
+	}
+	else
+		return NULL;
 }
 
 bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
