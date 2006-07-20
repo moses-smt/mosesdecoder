@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SquareMatrix.h"
 #include "StaticData.h"
 #include "Input.h"
+
+#include "md5.h"
 //TODO: add this include in when it compiles
 //#include "LexicalReordering.h"
 
@@ -48,7 +50,6 @@ Hypothesis::Hypothesis(const WordsBitmap &initialCoverage)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	ResetScore();	
-
 }
 
 Hypothesis::Hypothesis(const Hypothesis &copy)
@@ -265,6 +266,36 @@ bool Hypothesis::IsCompatible(const Phrase &phrase) const
 	return true;
 }
 
+void Hypothesis::GenerateNGramCompareKey(size_t contextSize)
+{
+  struct MD5Context md5c;
+
+  MD5Init(&md5c);
+  size_t thisSize = this->GetSize();
+  size_t effectiveContextSize = std::min(thisSize, contextSize);
+  int start = thisSize - effectiveContextSize;
+
+  if (m_currTargetWordsRange.GetWordsCount() > 0) // initial hypothesis check
+	{
+	  const Hypothesis *curHyp = this;
+	  int curStart = 0;
+	  while (start < (curStart = curHyp->m_currTargetWordsRange.GetStartPos())) {
+	    for (int col = curHyp->m_currTargetWordsRange.GetEndPos(); col >= curStart; col--) {
+	      MD5Update(&md5c,
+	        (unsigned char*)curHyp->GetCurrFactorArray(col - curStart),
+	        sizeof(FactorArray));
+				curHyp = curHyp->m_prevHypo;
+	    }
+	  }
+	  for (int col = curHyp->m_currTargetWordsRange.GetEndPos(); col >= (int)start; col--) {
+	    MD5Update(&md5c,
+	      (unsigned char*)curHyp->GetCurrFactorArray(col - curStart),
+	      sizeof(FactorArray));
+	  }
+	}
+  MD5Final(m_compSignature, &md5c);
+}
+
 int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize) const
 { // -1 = this < compare
 	// +1 = this > compare
@@ -274,7 +305,6 @@ int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize) const
 	size_t compareSize	= compare.GetSize();
 	size_t minSize			= std::min(nGramSize, thisSize)
 			, minCompareSize= std::min(nGramSize, compareSize);
-
 	if ( minSize != minCompareSize )
 	{ // quick decision
 		return (minSize < minCompareSize) ? -1 : 1;
@@ -534,7 +564,7 @@ void Hypothesis::PrintHypothesis(const InputType &source, float weightDistortion
   int end = m_prevHypo->m_targetPhrase.GetSize()-1;
   int start = end-1;
   if ( start < 0 ) start = 0;
-  if ( m_prevHypo->m_currTargetWordsRange.GetStartPos() == -1 ) {
+  if ( m_prevHypo->m_currTargetWordsRange.GetStartPos() == NOT_FOUND ) {
     cout << "<s> ";
   }
   else {

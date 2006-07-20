@@ -45,6 +45,9 @@ class WordDeletionTable;
 class Hypothesis : public LatticeEdge
 {
 	friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
+private:
+  // MD5 checksum for fast comparison
+  unsigned char m_compSignature[16];
 
 protected:
 		// phrase in target language. factors completed will be superset 
@@ -140,7 +143,9 @@ public:
 		return m_targetPhrase;
 	}
 
-	// curr
+	// curr - pos is relative from CURRENT hypothesis's starting index
+  // (ie, start of sentence would be some negative number, which is
+  // not allowed- USE WITH CAUTION)
 	inline FactorArray &GetCurrFactorArray(size_t pos)
 	{
 		return m_targetPhrase.GetFactorArray(pos);
@@ -153,7 +158,7 @@ public:
 	{
 		return m_targetPhrase.GetFactor(pos, factorType);
 	}
-	// recursive
+	// recursive - pos is relative from start of sentence
 	inline const FactorArray &GetFactorArray(size_t pos) const
 	{
 		if (pos < m_currTargetWordsRange.GetStartPos())
@@ -179,7 +184,31 @@ public:
 		// used in generation processing
 		// startPos is usually the start of the last phrase
 
+  /***
+   * requires that GenerateNGramCompareKey was previously run
+   */
+	int	FastNGramCompare(const Hypothesis &compare, size_t nGramSize) const
+	{
+#if 0
+		return memcmp(this->m_compSignature, compare.m_compSignature, sizeof(m_compSignature));
+#else
+		return NGramCompare(compare, nGramSize);
+#endif
+	}
+
 	int	 NGramCompare(const Hypothesis &compare, size_t nGramSize) const;
+
+  /*** Generates a key in m_compSignature that can be used
+   *   for an arbitrary ordering of hypotheses.
+   *
+   * With this key, hypotheses that have identical target
+   * strings for the last n elements are considered equal.
+   *
+   * Currently not used since performance is approximately
+   * identical to the regular comparison engine.  This may
+   * be a better option with higher n-gram LMs.
+   */
+  void GenerateNGramCompareKey(size_t n);
 
 	void ToStream(std::ostream& out) const
 	{

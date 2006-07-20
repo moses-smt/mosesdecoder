@@ -39,7 +39,7 @@ class Sentence : public Phrase, public InputType
 		{
 		}
  public:
-	Sentence(FactorDirection direction)	: InputType(),Phrase(direction)
+	Sentence(FactorDirection direction)	: Phrase(direction), InputType()
 		{
 		}
 

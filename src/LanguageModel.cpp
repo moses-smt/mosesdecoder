@@ -54,12 +54,20 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	size_t phraseSize = phrase.GetSize();
 	vector<const Factor*> contextFactor;
 	contextFactor.reserve(m_nGramOrder);
+
+#undef CDYER_DEBUG_LMSCORE
+#ifdef CDYER_DEBUG_LMSCORE
+	std::cout<<"LM::CalcScore(" << phrase << "):\n";
+#endif
 		
 	// start of sentence
 	for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
 	{
 		contextFactor.push_back(phrase.GetFactor(currPos, factorType));		
+#ifdef CDYER_DEBUG_LMSCORE
     float score = GetValue(contextFactor);
+		std::cout << "\t" << currPos << ": " << score << std::endl;
+#endif
 		fullScore += GetValue(contextFactor);
 	}
 	
@@ -67,6 +75,9 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	{
 		contextFactor.push_back(phrase.GetFactor(m_nGramOrder - 1, factorType));
 		ngramScore = GetValue(contextFactor);
+#ifdef CDYER_DEBUG_LMSCORE
+		std::cout << "\t" << m_nGramOrder-1 << " " << ngramScore << " (first full ngram)" << std::endl;
+#endif
 	}
 	
 	// main loop
@@ -77,8 +88,12 @@ void LanguageModel::CalcScore(const Phrase &phrase
 			contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
 		}
 		contextFactor[m_nGramOrder - 1] = phrase.GetFactor(currPos, factorType);
+		float partScore = GetValue(contextFactor);
+#ifdef CDYER_DEBUG_LMSCORE
+		std::cout << "\t" << currPos << " " << partScore << " (full ngram)" << std::endl;
+#endif
 		
-		ngramScore += GetValue(contextFactor);		
+		ngramScore += partScore;		
 	}
 	fullScore += ngramScore;
 }

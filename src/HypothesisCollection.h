@@ -41,6 +41,7 @@ public:
 	{
         // Are the last (n-1) words the same on the target side (n for n-gram LM)?
 		int ret = hypoA->NGramCompare(*hypoB, m_NGramMaxOrder - 1);
+//		int ret = hypoA->FastNGramCompare(*hypoB, m_NGramMaxOrder - 1);
 		if (ret != 0)
 		{
 			return (ret < 0);
@@ -91,10 +92,13 @@ public:
 		m_worstScore = -std::numeric_limits<float>::infinity();
 	}
 
+	// this function will recombine hypotheses silently!  There is no record
+	// (could affect n-best list generation...TODO)
 	inline void AddNoPrune(Hypothesis *hypothesis)
 	{
 		//push_back(hypothesis);
-		insert(hypothesis);
+		if (!insert(hypothesis).second) {
+    }
 	}
 	bool AddPrune(Hypothesis *hypothesis);
       // AddPrune adds the hypo, but only if within thresholds (beamThr+stackSize)
