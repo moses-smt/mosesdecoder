@@ -48,7 +48,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const Target
 ,m_generationScoreComponent(copy.m_generationScoreComponent)
 #endif
 { // used in creating the next translation step
-
+	m_scoreGen		= copy.GetGenerationScore();
 	m_scoreTrans	= copy.GetTranslationScore() + targetPhrase.GetTranslationScore();
 	
 	#ifdef N_BEST
