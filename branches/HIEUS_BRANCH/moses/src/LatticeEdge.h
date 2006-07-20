@@ -111,7 +111,7 @@ public:
 #ifdef N_BEST
 	virtual const std::list<Arc*> &GetArcList() const = 0;
 
-	inline const ScoreComponentCollection &GetScoreComponent() const
+	inline const ScoreComponentCollection &GetTranslationScoreComponent() const
 	{
 		return m_transScoreComponent;
 	}

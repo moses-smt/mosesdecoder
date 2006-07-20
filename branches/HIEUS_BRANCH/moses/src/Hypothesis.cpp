@@ -62,7 +62,7 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 	SetScore(copy.GetScore());
 #ifdef N_BEST
 	m_lmScoreComponent 				= copy.GetLMScoreComponent();
-	m_transScoreComponent			= copy.GetScoreComponent();
+	m_transScoreComponent			= copy.GetTranslationScoreComponent();
 	m_generationScoreComponent	= copy.GetGenerationScoreComponent();
 		
 #endif
@@ -106,7 +106,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 	// translation components 
 	// from prev hypo
-	const ScoreComponentCollection &prevComponent= prevHypo.GetScoreComponent();
+	const ScoreComponentCollection &prevComponent= prevHypo.GetTranslationScoreComponent();
 	m_transScoreComponent = prevComponent;
 	
 	// from trans opt
@@ -540,10 +540,9 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 			}
 		out << "]";
 #ifdef N_BEST
-		out << " " << hypothesis.GetScoreComponent();
+		out << " " << hypothesis.GetTranslationScoreComponent();
 		out << " " << hypothesis.GetGenerationScoreComponent();
 #endif
-
 	
 	return out;
 }

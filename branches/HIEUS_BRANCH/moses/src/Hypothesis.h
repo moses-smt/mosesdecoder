@@ -176,7 +176,7 @@ public:
 	inline void AddArc(Hypothesis &loserHypo)
 	{
 		Arc *arc = new Arc(loserHypo.m_score
-											, loserHypo.GetScoreComponent()
+											, loserHypo.GetTranslationScoreComponent()
 											, loserHypo.GetLMScoreComponent()
 											, loserHypo.GetGenerationScoreComponent()
 											, loserHypo.GetPhrase()

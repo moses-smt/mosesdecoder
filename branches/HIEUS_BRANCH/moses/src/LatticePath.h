@@ -43,8 +43,8 @@ protected:
 	float			m_score[NUM_SCORES];
 
 	ScoreComponentCollection	m_transScoreComponent;
-	ScoreColl											m_generationScoreComponent
-																, m_lmScoreComponent;
+	ScoreColl									m_generationScoreComponent
+													, m_lmScoreComponent;
  
 	void CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc *arc);
 
@@ -86,7 +86,7 @@ public:
 	{
 		return m_lmScoreComponent.GetValue(index);
 	}
-	inline const ScoreComponentCollection &GetScoreComponent() const
+	inline const ScoreComponentCollection &GetTranslationScoreComponent() const
 	{
 		return m_transScoreComponent;
 	}
@@ -116,7 +116,7 @@ inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
 	}
 	out << "]";
 #ifdef N_BEST
-	out << " " << path.GetScoreComponent();
+	out << " " << path.GetTranslationScoreComponent();
 	out << " " << path.GetGenerationScoreComponent();
 #endif
 
