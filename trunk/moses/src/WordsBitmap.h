@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <vector>
 #include <iostream>
+#include <cstring>
 #include "TypeDef.h"
 #include "WordsRange.h"
 
@@ -147,17 +148,7 @@ public:
 			return (thisSize < compareSize) ? -1 : 1;
 		}
 
-		for (int pos = (int) thisSize - 1 ; pos >= 0 ; pos--)
-		{
-			bool thisValue		= GetValue(pos);
-			bool compareValue	= compare.GetValue(pos);
-			if (thisValue != compareValue)
-			{
-				return compareValue ? -1 : 1;
-			}
-		}
-		// identical
-		return 0;
+    return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
 	}
 };
 
