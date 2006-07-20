@@ -77,7 +77,7 @@ public:
 
 	virtual ~LatticeEdge();
 
-	inline const Phrase &GetPhrase() const
+	inline const Phrase &GetTargetPhrase() const
 	{
 		return m_phrase;
 	}
@@ -130,7 +130,7 @@ public:
 
 inline std::ostream& operator<<(std::ostream& out, const LatticeEdge& edge)
 {
-	out << edge.GetPhrase();
+	out << edge.GetTargetPhrase();
 	return out;
 }
 

@@ -42,7 +42,7 @@ std::ostream& operator<<(std::ostream& out, const Arc& arc)
 	{
 		out << *prevHypo;
 	}
-	out << arc.GetPhrase();
+	out << arc.GetTargetPhrase();
 
 	// score
 	out << " [" << arc.GetScore( static_cast<ScoreType::ScoreType>(0));

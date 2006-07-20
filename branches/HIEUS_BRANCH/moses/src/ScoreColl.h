@@ -39,6 +39,11 @@ public:
 		assert(find(index) != end());
 		return operator[](index) = value;
 	}	
+	float Add(size_t index)
+	{
+		assert(find(index) == end());
+		return operator[](index) = 0;
+	}	
 };
 
 inline std::ostream& operator<<(std::ostream &out, const ScoreColl &coll)

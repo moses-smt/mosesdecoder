@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void LMList::SetScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreColl *ngramComponent) const
+void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreColl *ngramComponent) const
 { 
 	const_iterator lmIter;
 	for (lmIter = begin(); lmIter != end(); ++lmIter)
@@ -16,7 +16,7 @@ void LMList::SetScore(const Phrase &phrase, float &retFullScore, float &retNGram
 		float fullScore, nGramScore;
 
 		#ifdef N_BEST
-				lm.CalcScore(phrase, fullScore, nGramScore, &ngramComponent);
+				lm.CalcScore(phrase, fullScore, nGramScore, ngramComponent);
 		#else
 		    // this is really, really ugly (a reference to an object at NULL
 		    // is asking for trouble). TODO

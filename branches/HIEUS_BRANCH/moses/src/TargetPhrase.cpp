@@ -59,11 +59,10 @@ void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
 			float fullScore, nGramScore;
 	
 			#ifdef N_BEST
-					lm.CalcScore(*this, fullScore, nGramScore, &m_ngramComponent);
+				m_ngramComponent.Add(lm.GetId());
+				lm.CalcScore(*this, fullScore, nGramScore, &m_ngramComponent);
 			#else
-			    // this is really, really ugly (a reference to an object at NULL
-			    // is asking for trouble). TODO
-					lm.CalcScore(*this, fullScore, nGramScore, NULL);
+				lm.CalcScore(*this, fullScore, nGramScore, NULL);
 			#endif
 	
 			m_fullScore   += fullScore * weightLM;
@@ -104,10 +103,9 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 			const float weightLM = lm.GetWeight();
 			float fullScore, nGramScore;
 #ifdef N_BEST
+			m_ngramComponent.Add(lm.GetId());
 			lm.CalcScore(*this, fullScore, nGramScore, &m_ngramComponent);
 #else
-	    // this is really, really ugly (a reference to an object at NULL
-	    // is asking for trouble). TODO
 			lm.CalcScore(*this, fullScore, nGramScore, NULL);
 #endif
 	

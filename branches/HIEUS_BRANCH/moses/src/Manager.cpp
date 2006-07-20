@@ -84,7 +84,7 @@ void Manager::ProcessSentence()
 	LMList allLM = m_staticData.GetAllLM();
 	hypo->ResizeComponentScore(allLM, decodeStepList);
 #endif
-	m_hypoStack[m_possibleTranslations.GetInitialCoverage().GetWordsCount()].AddPrune(hypo);
+	m_hypoStack[0].AddPrune(hypo);
 	}
 	
 	// go thru each stack
@@ -167,7 +167,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	}
 
 }
-void Manager::CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisCollectionIntermediate outputHypoColl)
+void Manager::CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisCollectionIntermediate &outputHypoColl)
 {
 	int maxDistortion = m_staticData.GetMaxDistortion();
 	if (maxDistortion < 0)

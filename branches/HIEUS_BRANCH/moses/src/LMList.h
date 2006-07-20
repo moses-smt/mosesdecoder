@@ -10,6 +10,6 @@ class ScoreColl;
 class LMList : public std::list < LanguageModel* >	
 {
 public:
-	void SetScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreColl *ngramComponent) const;
+	void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreColl *ngramComponent) const;
 
 };
