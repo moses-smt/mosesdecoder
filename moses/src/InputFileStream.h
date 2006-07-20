@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <fstream>
 #include <string>
 #include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
 
 class InputFileStream : public boost::iostreams::filtering_stream<boost::iostreams::input>
 {
@@ -32,26 +31,8 @@ protected:
 	std::ifstream m_file;
 public:
 
-	InputFileStream(const std::string &filePath)
-	{
-		using namespace boost::iostreams;
+	InputFileStream(const std::string &filePath);
 
-		if (filePath.size() > 3 &&
-				filePath.substr(filePath.size() - 3, 3) == ".gz")
-		{
-			m_file.open(filePath.c_str(), ios_base::in | ios_base::binary);
-			push(gzip_decompressor());
-		}
-		else
-		{
-			m_file.open(filePath.c_str());
-		}
-		push(m_file);
-	}
-
-	void Close()
-	{
-		pop();
-	}
+	void Close();
 };
 
