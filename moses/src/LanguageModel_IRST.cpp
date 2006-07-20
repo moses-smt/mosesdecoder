@@ -68,7 +68,7 @@ void LanguageModel_IRST::Load(size_t id
 	InputFileStream inp(fileName);
 
 	m_lmtb         = new lmtable(
-		fileName.c_str(),
+		inp,
 		nGramOrder,
 		resolution,
 		decay
