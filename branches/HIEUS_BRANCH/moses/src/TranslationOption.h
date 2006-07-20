@@ -40,7 +40,7 @@ class TranslationOption
 
 protected:
 
-	const Phrase 				&m_phrase;
+	const Phrase 				m_phrase;
 	const WordsRange		m_sourceWordsRange;
 	float								m_scoreTrans, m_scoreGen, m_futureScore, m_ngramScore;
 #ifdef N_BEST

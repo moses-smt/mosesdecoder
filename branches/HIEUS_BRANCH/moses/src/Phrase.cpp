@@ -19,6 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include "assert.h"
 #include <algorithm>
 #include <sstream>
 #include "memory.h"
@@ -44,23 +45,31 @@ Phrase::Phrase(const Phrase &copy)
 	}
 }
 
-Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
+Phrase::Phrase(FactorDirection direction, const Phrase &copy, const vector< const Word* > &mergeWords)
 :m_direction(direction)
 ,m_phraseSize(mergeWords.size())
 ,m_arraySize(mergeWords.size())
 {
+	assert(copy.GetSize() == mergeWords.size());
+
 	m_factorArray = (FactorArray*) malloc(m_arraySize * sizeof(FactorArray));
 	
 	for (size_t currPos = 0 ; currPos < m_phraseSize ; currPos++)
 	{
-		const Word &mergeWord = *mergeWords[0];
-		FactorArray &factorArray = m_factorArray[currPos];
+		FactorArray &thisWord				= m_factorArray[currPos];
+		const FactorArray &copyWord = copy.GetFactorArray(currPos);
+		const Word &mergeWord				= *mergeWords[currPos];
 
 		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-			const Factor *factor = mergeWord.GetFactor(factorType);
-			factorArray[currFactor] = factor;
+			const Factor *factor = copyWord[currFactor];
+			if (factor != NULL)
+				thisWord[currFactor] = factor;
+			else
+			{
+				FactorType factorType = static_cast<FactorType>(currFactor);
+				thisWord[currFactor] = mergeWord.GetFactor(factorType);
+			}
 		}
 	}
 }

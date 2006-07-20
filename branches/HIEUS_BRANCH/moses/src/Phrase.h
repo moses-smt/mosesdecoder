@@ -54,7 +54,7 @@ public:
 		, m_factorArray(NULL)
 	{
 	}
-	Phrase(FactorDirection direction, const std::vector< const Word* > &mergeWords);
+	Phrase(FactorDirection direction, const Phrase &copy, const std::vector< const Word* > &mergeWords);
 
 	virtual ~Phrase();
 

@@ -139,7 +139,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	for (size_t startPos = 0 ; startPos < m_inputSentence.GetSize() ; startPos++)
 	{
 		if (m_initialCoverage.GetValue(startPos))
-		{ // unknown word. skip 
+		{ // unknown word but already processed. skip 
 			break;
 		}
 
@@ -327,18 +327,21 @@ void TranslationOptionCollection::ProcessGeneration(
 
 		if (wordColl == NULL)
 		{	// word not found in generation dictionary
-			ProcessUnknownWord(currPos, dropUnknown, factorCollection, weightWordPenalty);
+			ProcessUnknownWord(sourceWordsRange.GetStartPos(), dropUnknown, factorCollection, weightWordPenalty);
+			return;
 		}
-
-		OutputWordCollection::const_iterator iterWordColl;
-		for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
+		else
 		{
-			const Word &outputWord = (*iterWordColl).first;
-			float score = (*iterWordColl).second;
-			wordList.push_back(WordPair(outputWord, score));
-		}
+			OutputWordCollection::const_iterator iterWordColl;
+			for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
+			{
+				const Word &outputWord = (*iterWordColl).first;
+				float score = (*iterWordColl).second;
+				wordList.push_back(WordPair(outputWord, score));
+			}
 		
-		wordListVectorPos++;
+			wordListVectorPos++;
+		}
 	}
 
 	// use generation list (wordList)
@@ -366,7 +369,7 @@ void TranslationOptionCollection::ProcessGeneration(
 		}
 
 		// merge with existing trans opt
-		Phrase mergePhrase(Output, mergeWords);
+		Phrase mergePhrase(Output, targetPhrase, mergeWords);
 		TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(mergePhrase, &generationDictionary, generationScore, weight);
 		if (newTransOpt != NULL)
 		{
