@@ -86,7 +86,7 @@ class lmtable{
 
   dictionary     *dict; // dictionary
 
-  lmtable(const char* filename, int maxl,int res,double dec);
+  lmtable(std::istream& in, int maxl,int res,double dec);
 
   ~lmtable(){
     for (int i=1;i<=maxlev;i++){
@@ -102,10 +102,10 @@ class lmtable{
   void savetxt(const char *filename);
   void savebin(const char *filename);
 
-  void loadtxt(const char *filename, int maxl,int res, double dec);
-  void loadbin(const char *filename);
+  void loadtxt(std::istream& in, const char* header, int maxl,int res, double dec);
+  void loadbin(std::istream& in, const char* header);
 
-  void loadQtxt(const char *filename, int maxl);
+  void loadQtxt(std::istream& in, const char* header, int maxl);
 
   double prob(ngram ng); 
 

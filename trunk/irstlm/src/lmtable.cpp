@@ -20,7 +20,8 @@
 
 using namespace std;
 
-#include "mfstream.h"
+#include <iostream>
+#include <fstream>
 #include "math.h"
 #include "mempool.h"
 #include "htable.h"
@@ -29,7 +30,7 @@ using namespace std;
 #include "lmtable.h"
 
 
-lmtable::lmtable(const char* filename, int n, int res, double dec){
+lmtable::lmtable(std::istream &in, int n, int res, double dec){
   
   maxlev=n;
   dict=NULL;
@@ -57,24 +58,22 @@ lmtable::lmtable(const char* filename, int n, int res, double dec){
   }
 
 
-  mfstream inp(filename,ios::in);
-  
   char header[1024];
   char gzip_hdr[3]; gzip_hdr[0]=0x1f; gzip_hdr[1]=0x8b; gzip_hdr[2]=0;
 
-  inp >> header;
+  in >> header;
   
   // cerr << header << "\n";
 
   if (strncmp(header,"Qblmt",6)==0 || strncmp(header,"blmt",4)==0)
-    loadbin(filename);
+    loadbin(in, header);
   else if (strncmp(header,"qARPA",6)==0)
-    loadQtxt(filename,maxlev);
+    loadQtxt(in, header, maxlev);
   else if (strncmp(header, gzip_hdr, 2)==0) {
-    std::cerr << "TODO: implement loading with gzip\n";
+    std::cerr << "gzip'd files cannot be opened directly\n";
     std::abort();
   } else
-    loadtxt(filename, maxlev,res,dec);
+    loadtxt(in, header, maxlev,res,dec);
 
   dict->genoovcode();
   cerr << "OOV code is " << dict->oovcode() << "\n";
@@ -102,17 +101,14 @@ unsigned int parseWords(char *sentence, char **words, unsigned int max)
 }
 
 	    
-void lmtable::loadtxt(const char* filename,int maxOrder,int res,double dec){
+void lmtable::loadtxt(std::istream &inp,const char* header, int maxOrder,int res,double dec){
   
-  ifstream inp(filename,ios::in);
-
   dict=new dictionary(NULL,1000000,NULL,NULL);
   dict->incflag(1);
 
   ngram ng(dict); /* ngram translated to word indices */
 
-  cerr << "loadtxt: " << filename 
-       << "... resolution " << res << "  decay " << dec << "\n";
+  cerr << "loadtxt ... resolution " << res << "  decay " << dec << "\n";
 
   resolution=res;
   decay=dec;
@@ -133,8 +129,9 @@ void lmtable::loadtxt(const char* filename,int maxOrder,int res,double dec){
 		      * -1: pre-header, 0: header,
 		      *  1: 1-grams, 2: 2-grams, ... */
   char line[1024];
+  strncpy(line, header, 1024);
 
-  while (inp.getline(line,1024)){
+  do {  // header was already read in the calling function
 
     if (line[0]=='\0') continue; //skip empty 
     
@@ -284,7 +281,7 @@ void lmtable::loadtxt(const char* filename,int maxOrder,int res,double dec){
 	continue;
       }
     }
-  }
+  } while (inp.getline(line,1024));
   
   dict->incflag(0);  
   cerr << "done\n";
@@ -292,17 +289,15 @@ void lmtable::loadtxt(const char* filename,int maxOrder,int res,double dec){
 };
 
 
-void lmtable::loadQtxt(const char* filename,int maxOrder){
+void lmtable::loadQtxt(std::istream &inp,const char* header,int maxOrder){
   
-  mfstream inp(filename,ios::in);
-
   dict=new dictionary(NULL,1000000,NULL,NULL);
   
   dict->incflag(1);
 
   ngram ng(dict); /* ngram translated to word indices */
 
-  cerr << "loadQtxt: " << filename << "\n";
+  cerr << "loadQtxt\n";
 
   isQtable=1;
   
@@ -568,7 +563,7 @@ int lmtable::mybsearch(char *ar, int n, int size,
 
 void lmtable::savetxt(const char *filename){
 
-  mfstream out(filename,ios::out);
+  std::ofstream out(filename,ios::out);
 
   cerr << "savetxt: " << filename << "\n";
 
@@ -605,7 +600,7 @@ void lmtable::savetxt(const char *filename){
 
 void lmtable::savebin(const char *filename){
 
-  mfstream out(filename,ios::out);
+  std::ofstream out(filename,ios::out);
   
   cerr << "savebin: " << filename << "\n";
 
@@ -640,16 +635,13 @@ void lmtable::savebin(const char *filename){
 }
 
 
-void lmtable::loadbin(const char *filename){
+void lmtable::loadbin(std::istream &inp,const char* h){
   
-  mfstream inp(filename,ios::in);
-
-  cerr << "loadbin ... " << filename << " ";
+  cerr << "loadbin ... ";
 
   char header[1024];
-
   // read header
-  inp >> header; inp >> maxlev;
+  inp >> maxlev;
   
   if (strncmp(header,"Qblmt",6)==0) isQtable=1;
 
@@ -684,7 +676,6 @@ void lmtable::loadbin(const char *filename){
     cerr << "loading " << cursize[i] << " " << i << "-grams\n";
     inp.read(table[i],cursize[i]*nodesize(tbltype[i]));
   }
-  inp.close();
 
   cerr << "done\n";
 }
