@@ -140,29 +140,6 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 	return clone;
 }
 
-void TargetPhrase::MergeFactors(vector< const Word* > mergeWords, const GenerationDictionary &generationDictionary, float generationScore, float weight)
-{
-	assert (mergeWords.size() == GetSize());
-
-	const size_t size = GetSize();
-
-	for (size_t currPos = 0 ; currPos < size ; currPos++)
-	{
-		const Word &mergeWord = *mergeWords[0];
-		FactorArray &origWord	= GetFactorArray(currPos);
-
-		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
-		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-			const Factor *factor = mergeWord.GetFactor(factorType);
-			if (factor != NULL)
-			{
-				origWord[factorType] = factor;
-			}
-		}
-	}
-}
-
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
   os << static_cast<const Phrase&>(tp) << " score=" << tp.m_transScore << ", cmpProb: " << tp.m_fullScore;

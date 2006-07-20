@@ -46,17 +46,18 @@ public:
 	TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary);
 	TargetPhrase(FactorDirection direction);
 		// unknown word
-	/***
-	 * Deep copy
-	 *
 	TargetPhrase(const TargetPhrase& phrase)
-	: Phrase(phrase.GetDirection()), m_transScore(phrase.m_transScore), m_ngramScore(phrase.m_ngramScore), m_fullScore(phrase.m_fullScore)
+	: Phrase(phrase)
+	, m_transScore(phrase.m_transScore)
+	, m_ngramScore(phrase.m_ngramScore)
+	, m_fullScore(phrase.m_fullScore)
 #ifdef N_BEST
-	, m_scoreComponent(phrase.m_scoreComponent), m_lmScoreComponent(phrase.m_lmScoreComponent), m_ngramComponent(phrase.m_ngramComponent)
+	, m_scoreComponent(phrase.m_scoreComponent)
+	, m_lmScoreComponent(phrase.m_lmScoreComponent)
+	, m_ngramComponent(phrase.m_ngramComponent)
 #endif
-	{
+	{ // deep copy
 	}
-	*/
 
 	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT,
 								const LMList &languageModels, float weightWP);
@@ -66,10 +67,7 @@ public:
 	void SetWeights(const std::vector<float> &weightT);
 	TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
 		// used for translation step
-	void MergeFactors(std::vector< const Word* > mergeWord, const GenerationDictionary &generationDictionary, float generationScore, float weight);
-		// used in generation step
-		// must run IsCompatible() to ensure incompatible factors aren't being overwritten
-
+	
   inline float GetTranslationScore() const
   {
     return m_transScore;

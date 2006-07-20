@@ -105,7 +105,9 @@ TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targe
 {
 	if (m_phrase.IsCompatible(targetPhrase))
 	{
-		TranslationOption *newTransOpt = new TranslationOption(*this, targetPhrase);
+		TargetPhrase mergePhrase(targetPhrase);
+		mergePhrase.MergeFactors(m_phrase);
+		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase);
 		return newTransOpt;
 	}
 	else
@@ -121,8 +123,8 @@ TranslationOption *TranslationOption::MergeGeneration(const Phrase &inputPhrase
 {
 	if (m_phrase.IsCompatible(inputPhrase))
 	{
-		Phrase mergePhrase(GetTargetPhrase());
-		mergePhrase.MergeFactors(inputPhrase);
+		Phrase mergePhrase(inputPhrase);
+		mergePhrase.MergeFactors(m_phrase);
 		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase, generationDictionary, generationScore, weight);
 		return newTransOpt;
 	}
