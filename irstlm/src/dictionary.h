@@ -74,7 +74,6 @@ typedef struct{
 
 class strstack;
 class htable;
-class mfstream;
 
 class dictionary{
   strstack   *st;  //!< stack of strings
@@ -175,8 +174,8 @@ class dictionary{
   void generate(char *filename);
   void load(char *filename);
   void save(char *filename,int freqflag=0);
-  void load(mfstream& fd);
-  void save(mfstream& fd);
+  void load(std::istream& fd);
+  void save(std::ostream& fd);
 
   int size(){return n;};
   int getcode(const char *w);

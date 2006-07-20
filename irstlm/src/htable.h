@@ -23,6 +23,8 @@
 #ifndef MF_HTABLE_H
 #define MF_HTABLE_H
 
+#include <iostream>
+
 #define Prime1                 37
 #define Prime2                 1048583
 #define BlockSize              100
@@ -90,7 +92,7 @@ class htable {
   void stat();
   
   //! Print a map of memory use
-  void map(ostream& co=cout, int cols=80);
+  void map(std::ostream& co=std::cout, int cols=80);
 
   //! Returns amount of used memory
   int used(){return 

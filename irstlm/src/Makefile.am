@@ -5,7 +5,6 @@ libirstlm_a_SOURCES = \
 	htable.cpp \
 	lmtable.cpp \
 	mempool.cpp \
-	mfstream.cpp \
 	ngram.cpp
 
 library_includedir=$(includedir)

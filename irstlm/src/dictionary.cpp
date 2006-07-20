@@ -21,7 +21,8 @@
 using namespace std;
 
 #include <iomanip>
-#include "mfstream.h"
+#include <iostream>
+#include <fstream>
 #include "mempool.h"
 #include "htable.h"
 #include "dictionary.h"
@@ -55,7 +56,7 @@ dictionary::dictionary(char *filename,int size,char* isymb,char* oovlexfile){
 
   if (filename==NULL) return;
 
-  mfstream inp(filename,ios::in);
+  std::ifstream inp(filename,ios::in);
   
   if (!inp){
     cerr << "cannot open " << filename << "\n";
@@ -87,7 +88,7 @@ void dictionary::generate(char *filename){
   char *addr;
   int k,c;
 
-  mfstream inp(filename,ios::in);
+  ifstream inp(filename,ios::in);
   
   if (!inp){
     cerr << "cannot open " << filename << "\n";
@@ -131,7 +132,7 @@ void dictionary::load(char* filename){
   char *addr;
   int freqflag=0;
 
-  mfstream inp(filename,ios::in);
+  ifstream inp(filename,ios::in);
   
   if (!inp){
     cerr << "\ncannot open " << filename << "\n";
@@ -184,7 +185,7 @@ void dictionary::load(char* filename){
 }
 
 
-void dictionary::load(mfstream& inp){
+void dictionary::load(std::istream& inp){
   
   char buffer[MAX_WORD];
   char *addr;
@@ -216,7 +217,7 @@ void dictionary::load(mfstream& inp){
   inp.getline(buffer,MAX_WORD-1);
 }
 
-void dictionary::save(mfstream& out){
+void dictionary::save(std::ostream& out){
   out << n << "\n";
   for (int i=0;i<n;i++)
     out << tb[i].word << " " << tb[i].freq << "\n";
@@ -314,7 +315,7 @@ void dictionary::grow(){
 
 void dictionary::save(char *filename,int freqflag){
   
-  mfstream out(filename,ios::out);
+  std::ofstream out(filename,ios::out);
 
   if (!out){
     cerr << "cannot open " << filename << "\n";

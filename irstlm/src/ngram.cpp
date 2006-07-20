@@ -21,7 +21,6 @@
 using namespace std;
 
 #include <iomanip>
-#include "mfstream.h"
 #include "mempool.h"
 #include "htable.h"
 #include "dictionary.h"
