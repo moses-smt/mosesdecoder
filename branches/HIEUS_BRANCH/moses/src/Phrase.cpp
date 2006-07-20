@@ -46,22 +46,21 @@ Phrase::Phrase(const Phrase &copy)
 
 Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
 :m_direction(direction)
+,m_phraseSize(mergeWords.size())
+,m_arraySize(mergeWords.size())
 {
-	const size_t size = mergeWords.size();
-
-	for (size_t currPos = 0 ; currPos < size ; currPos++)
+	m_factorArray = (FactorArray*) malloc(m_arraySize * sizeof(FactorArray));
+	
+	for (size_t currPos = 0 ; currPos < m_phraseSize ; currPos++)
 	{
-		FactorArray &newWord = AddWord();
 		const Word &mergeWord = *mergeWords[0];
+		FactorArray &factorArray = m_factorArray[currPos];
 
 		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
 			const Factor *factor = mergeWord.GetFactor(factorType);
-			if (factor != NULL)
-			{
-				newWord[factorType] = factor;
-			}
+			factorArray[currFactor] = factor;
 		}
 	}
 }

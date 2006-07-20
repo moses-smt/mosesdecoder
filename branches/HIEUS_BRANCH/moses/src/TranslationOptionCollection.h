@@ -41,7 +41,6 @@ protected:
 	const Sentence													&m_inputSentence;
 	SquareMatrix														m_futureScore;
 	WordsBitmap															m_initialCoverage;
-	const LMList														*m_allLM;
 	std::list<const PhraseDictionary*>			m_allPhraseDictionary;
 	std::list<const GenerationDictionary*>	m_allGenerationDictionary;
 	
@@ -66,7 +65,10 @@ protected:
 															, float weightWordPenalty);
 	void ProcessGeneration(			const TranslationOption &inputPartialTranslOpt
 															, const DecodeStep &decodeStep
-															, PartialTranslOptColl &outputPartialTranslOptColl);
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, int dropUnknown
+															, FactorCollection &factorCollection
+															, float weightWordPenalty);
 
 public:
 	TranslationOptionCollection(const Sentence &inputSentence);

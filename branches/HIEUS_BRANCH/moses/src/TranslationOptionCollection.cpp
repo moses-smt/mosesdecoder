@@ -33,7 +33,6 @@ void TranslationOptionCollection::CreateTranslationOptions(
 {
 	vector < PartialTranslOptColl > outputPartialTranslOptCollVec( decodeStepList.size() );
 
-	m_allLM = &allLM;
 	// fill list of dictionaries for unknown word handling
 	{
 		list<DecodeStep>::const_iterator iter;
@@ -95,7 +94,12 @@ void TranslationOptionCollection::CreateTranslationOptions(
 				for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
 				{
 					const TranslationOption &inputPartialTranslOpt = *iterPartialTranslOpt;
-					ProcessGeneration(inputPartialTranslOpt, decodeStep, outputPartialTranslOptColl);
+					ProcessGeneration(inputPartialTranslOpt
+														, decodeStep
+														, outputPartialTranslOptColl
+														, dropUnknown
+														, factorCollection
+														, weightWordPenalty);
 				}
 				break;
 			}
@@ -297,7 +301,10 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 void TranslationOptionCollection::ProcessGeneration(			
 														const TranslationOption &inputPartialTranslOpt
 														, const DecodeStep &decodeStep
-														, PartialTranslOptColl &outputPartialTranslOptColl)
+														, PartialTranslOptColl &outputPartialTranslOptColl
+														, int dropUnknown
+														, FactorCollection &factorCollection
+														, float weightWordPenalty)
 {
 	const GenerationDictionary &generationDictionary	= decodeStep.GetGenerationDictionary();
 	const WordsRange &sourceWordsRange								= inputPartialTranslOpt.GetSourceWordsRange();
@@ -320,8 +327,7 @@ void TranslationOptionCollection::ProcessGeneration(
 
 		if (wordColl == NULL)
 		{	// word not found in generation dictionary
-			// go no further
-			return;
+			ProcessUnknownWord(currPos, dropUnknown, factorCollection, weightWordPenalty);
 		}
 
 		OutputWordCollection::const_iterator iterWordColl;
