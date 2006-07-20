@@ -69,7 +69,7 @@ protected:
 															, int dropUnknown
 															, FactorCollection &factorCollection
 															, float weightWordPenalty);
-
+	void CalcFutureScore(size_t verboseLevel);
 public:
 	TranslationOptionCollection(const Sentence &inputSentence);
 
