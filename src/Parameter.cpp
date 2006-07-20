@@ -168,6 +168,15 @@ string Parameter::FindParam(const string &paramSwitch, int argc, char* argv[])
 	return "";
 }
 
+bool isOption(const char* x) {
+  if (!x) return false;
+  std::string s(x);
+  size_t len = s.size();
+  if (len > 0 && s.substr(0,1) != "-") return false;
+  if (len > 1 && s.substr(1,1).find_first_not_of("0123456789") == 0) return true;
+  return false;
+}
+
 void Parameter::OverwriteParam(const string &paramSwitch, const string &paramName, int argc, char* argv[])
 {
 	int startPos = -1;
@@ -183,7 +192,7 @@ void Parameter::OverwriteParam(const string &paramSwitch, const string &paramNam
 		return;
 
 	int index = 0;
-	while (startPos < argc && string(argv[startPos]).substr(0,1) != "-")
+	while (startPos < argc && (!isOption(argv[startPos])))
 	{
 		if (m_setting[paramName].size() > (size_t)index)
 			m_setting[paramName][index] = argv[startPos];
