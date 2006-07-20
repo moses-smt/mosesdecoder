@@ -73,7 +73,7 @@ CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList,
 							// unknown word, add to target, and add as poss trans
 							//				float	weightWP		= m_staticData.GetWeightWordPenalty();
 							const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Output);
-							int isDigit = 0;
+							std::string::size_type isDigit = 0;
 							if (dropUnknown)
 								{
 									const Factor *f = sourcePhrase.GetFactor(0, static_cast<FactorType>(0)); // surface @ 0

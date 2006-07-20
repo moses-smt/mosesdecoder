@@ -98,7 +98,9 @@ void Manager::ProcessSentence()
 		ProcessOneStack(decodeStepList, sourceHypoColl);
 
 		//OutputHypoStack();
-		OutputHypoStackSize();
+		if (m_staticData.GetVerboseLevel() > 0) {
+			OutputHypoStackSize();
+		}
 	}
 
 	// output

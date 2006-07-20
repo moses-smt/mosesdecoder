@@ -23,10 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <vector>
-#include "NGramNode.h"
 #include "Factor.h"
 #include "TypeDef.h"
-#include "Util.h"
 
 #include "LanguageModel.h"
 

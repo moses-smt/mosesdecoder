@@ -70,8 +70,8 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *a
 }
 
 LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *arc, bool reserve)
-:m_prevEdgeChanged(edgeIndex)
-,m_path(copy.m_path)
+:m_path(copy.m_path)
+,m_prevEdgeChanged(edgeIndex)
 {
 	// 1 deviation
 	m_path[edgeIndex] = arc;
