@@ -58,6 +58,10 @@ public:
 											, const GenerationDictionary *generationDictionary
 											, float generationScore
 											, float weight);
+	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase
+											 , std::list<const PhraseDictionary*>			&allPhraseDictionary
+											 , std::list<const GenerationDictionary*> &allGenerationDictionary);
+	// used to create trans opt from unknown word
 
 	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase) const;
 	TranslationOption *MergeGeneration(const Phrase &inputPhrase

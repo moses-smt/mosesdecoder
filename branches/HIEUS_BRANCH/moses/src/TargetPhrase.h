@@ -60,7 +60,7 @@ public:
 
 	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT,
 								const LMList &languageModels, float weightWP);
-	void SetScore(const LMList &languageModels, float weightWP);
+	void SetScore(float weightWP);
 	// used when creating translations of unknown words:
 	void ResetScore();
 	void SetWeights(const std::vector<float> &weightT);

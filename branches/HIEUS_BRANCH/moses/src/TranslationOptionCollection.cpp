@@ -25,7 +25,6 @@ TranslationOptionCollection::TranslationOptionCollection(const Sentence &inputSe
  */
 void TranslationOptionCollection::CreateTranslationOptions(
 															const list < DecodeStep > &decodeStepList
-															, const LMList &languageModels
 															, const LMList &allLM
 															, FactorCollection &factorCollection
 															, float weightWordPenalty
@@ -34,12 +33,30 @@ void TranslationOptionCollection::CreateTranslationOptions(
 {
 	vector < PartialTranslOptColl > outputPartialTranslOptCollVec( decodeStepList.size() );
 
+	m_allLM = &allLM;
+	// fill list of dictionaries for unknown word handling
+	{
+		list<DecodeStep>::const_iterator iter;
+		for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
+		{
+			switch (iter->GetDecodeType())
+			{
+			case Translate:
+				m_allPhraseDictionary.push_back(&(iter->GetPhraseDictionary()));
+				break;
+			case Generate:
+				m_allGenerationDictionary.push_back(&(iter->GetGenerationDictionary()));
+				break;
+			}
+
+		}
+	}
+
 	// initial translation step
 	list < DecodeStep >::const_iterator iterStep = decodeStepList.begin();
 	const DecodeStep &decodeStep = *iterStep;
 
-	ProcessInitialTranslation(decodeStep, languageModels
-														, allLM, factorCollection
+	ProcessInitialTranslation(decodeStep, factorCollection
 														, weightWordPenalty, dropUnknown
 														, verboseLevel, outputPartialTranslOptCollVec[0]);
 
@@ -67,7 +84,6 @@ void TranslationOptionCollection::CreateTranslationOptions(
 														, outputPartialTranslOptColl
 														, dropUnknown
 														, factorCollection
-														, allLM
 														, weightWordPenalty);
 				}
 				break;
@@ -101,8 +117,6 @@ void TranslationOptionCollection::CreateTranslationOptions(
 
 void TranslationOptionCollection::ProcessInitialTranslation(
 															const DecodeStep &decodeStep
-															, const LMList &languageModels
-															, const LMList &allLM
 															, FactorCollection &factorCollection
 															, float weightWordPenalty
 															, int dropUnknown
@@ -166,7 +180,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			else if (sourcePhrase.GetSize() == 1)
 			{
 				unknownWord = true;
-				ProcessUnknownWord(startPos, dropUnknown, factorCollection, allLM, weightWordPenalty);
+				ProcessUnknownWord(startPos, dropUnknown, factorCollection, weightWordPenalty);
 				break;
 			}
 		}
@@ -224,7 +238,6 @@ void TranslationOptionCollection::ProcessTranslation(
 								, PartialTranslOptColl &outputPartialTranslOptColl
 								, int dropUnknown
 								, FactorCollection &factorCollection
-								, const LMList &allLM
 								, float weightWordPenalty)
 {
 	const Phrase &partialPhrase								= inputPartialTranslOpt.GetTargetPhrase();
@@ -252,7 +265,7 @@ void TranslationOptionCollection::ProcessTranslation(
 	}
 	else if (sourceWordsRange.GetWordsCount() == 1)
 	{ // unknown handler
-		ProcessUnknownWord(sourceWordsRange.GetStartPos(), dropUnknown, factorCollection, allLM, weightWordPenalty);
+		ProcessUnknownWord(sourceWordsRange.GetStartPos(), dropUnknown, factorCollection, weightWordPenalty);
 	}
 }
 
@@ -363,7 +376,6 @@ void TranslationOptionCollection::ProcessGeneration(
 void TranslationOptionCollection::ProcessUnknownWord(size_t sourcePos
 																										, int dropUnknown
 																										, FactorCollection &factorCollection
-																										, const LMList &allLM
 																										, float weightWordPenalty)
 {
 		// unknown word, add to target, and add as poss trans
@@ -411,10 +423,11 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t sourcePos
 				}
 			}
 	
-			targetPhraseOrig.SetScore(allLM, weightWordPenalty);
+			targetPhraseOrig.SetScore(weightWordPenalty);
 			
 			pair< set<TargetPhrase>::iterator, bool> inserted = m_unknownTargetPhrase.insert(targetPhraseOrig);
-			TranslationOption transOpt(WordsRange(sourcePos, sourcePos), *inserted.first);
+			const TargetPhrase &targetPhrase = *inserted.first;
+			TranslationOption transOpt(WordsRange(sourcePos, sourcePos), targetPhrase, m_allPhraseDictionary, m_allGenerationDictionary);
 			push_back(transOpt);
 		}
 		else 

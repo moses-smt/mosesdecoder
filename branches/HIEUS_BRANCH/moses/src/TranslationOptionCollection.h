@@ -32,21 +32,23 @@ class Sentence;
 class DecodeStep;
 class LanguageModel;
 class FactorCollection;
-
+class PhraseDictionary;
+class GenerationDictionary;
 
 class TranslationOptionCollection : public std::list< TranslationOption >
 {
 protected:
-	const Sentence &m_inputSentence;
-	SquareMatrix m_futureScore;
-	WordsBitmap m_initialCoverage;
+	const Sentence													&m_inputSentence;
+	SquareMatrix														m_futureScore;
+	WordsBitmap															m_initialCoverage;
+	const LMList														*m_allLM;
+	std::list<const PhraseDictionary*>			m_allPhraseDictionary;
+	std::list<const GenerationDictionary*>	m_allGenerationDictionary;
 	
 	std::set<TargetPhrase> m_unknownTargetPhrase;
 	// make sure phrase doesn't go out of memory while we're using it
 
 	void ProcessInitialTranslation(const DecodeStep &decodeStep
-															, const LMList &languageModels
-															, const LMList &allLM
 															, FactorCollection &factorCollection
 															, float weightWordPenalty
 															, int dropUnknown
@@ -55,14 +57,12 @@ protected:
 	void ProcessUnknownWord(		size_t sourcePos
 															, int dropUnknown
 															, FactorCollection &factorCollection
-															, const LMList &allLM
 															, float weightWordPenalty);
 	void ProcessTranslation(		const TranslationOption &inputPartialTranslOpt
 															, const DecodeStep &decodeStep
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, int dropUnknown
 															, FactorCollection &factorCollection
-															, const LMList &allLM
 															, float weightWordPenalty);
 	void ProcessGeneration(			const TranslationOption &inputPartialTranslOpt
 															, const DecodeStep &decodeStep
@@ -81,7 +81,6 @@ public:
 	}
 
   void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
-  														, const LMList &languageModels  														
   														, const LMList &allLM
   														, FactorCollection &factorCollection
   														, float weightWordPenalty

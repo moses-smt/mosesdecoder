@@ -58,14 +58,12 @@ void Manager::ProcessSentence()
 	list < DecodeStep > &decodeStepList = m_staticData.GetDecodeStepList();
 
 	PhraseDictionary &phraseDictionary = decodeStepList.front().GetPhraseDictionary();
-	const LMList &lmListInitial = m_staticData.GetLanguageModel(Initial);
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
 	m_possibleTranslations.CreateTranslationOptions(decodeStepList
-  														, lmListInitial
   														, m_staticData.GetAllLM()
   														, m_staticData.GetFactorCollection()
   														, m_staticData.GetWeightWordPenalty()

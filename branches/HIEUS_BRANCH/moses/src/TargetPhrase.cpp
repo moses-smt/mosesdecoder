@@ -41,34 +41,10 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
 {
 }
 
-void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
+void TargetPhrase::SetScore(float weightWP)
 { // used when creating translations of unknown words:
 	m_transScore = m_ngramScore = 0;	
-	m_fullScore = weightWP;
-	
-	LMList::const_iterator lmIter;
-	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
-	{
-		const LanguageModel &lm = **lmIter;
-		FactorType lmFactorType = lm.GetFactorType();
-		
-		if (GetSize() > 0 && GetFactor(0, lmFactorType) != NULL)
-		{ // contains factors used by this LM
-			const float weightLM = lm.GetWeight();
-	
-			float fullScore, nGramScore;
-	
-			#ifdef N_BEST
-				m_ngramComponent.Add(lm.GetId());
-				lm.CalcScore(*this, fullScore, nGramScore, &m_ngramComponent);
-			#else
-				lm.CalcScore(*this, fullScore, nGramScore, NULL);
-			#endif
-	
-			m_fullScore   += fullScore * weightLM;
-			m_ngramScore	+= nGramScore * weightLM;
-		}
-	}	
+	m_fullScore = weightWP;	
 }
 
 void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float> &weightT,

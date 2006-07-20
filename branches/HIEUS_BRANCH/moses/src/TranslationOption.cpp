@@ -51,9 +51,9 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const Target
 
 	m_scoreTrans	+= targetPhrase.GetTranslationScore();
 	
-#ifdef N_BEST
-	m_transScoreComponent.Add(targetPhrase.GetScoreComponents());
-#endif
+	#ifdef N_BEST
+		m_transScoreComponent.Add(targetPhrase.GetScoreComponents());
+	#endif
 }
 
 TranslationOption::TranslationOption(const TranslationOption &copy
@@ -65,9 +65,39 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 , m_sourceWordsRange	(copy.m_sourceWordsRange)
 {
 	m_scoreGen	+= generationScore * weight;
-#ifdef N_BEST
-	m_generationScoreComponent[(size_t)generationDictionary] = generationScore;
-#endif
+
+	#ifdef N_BEST
+		m_generationScoreComponent[(size_t)generationDictionary] = generationScore;
+	#endif
+}
+
+TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase
+																		 , list<const PhraseDictionary*>			&allPhraseDictionary
+																		 , list<const GenerationDictionary*>	&allGenerationDictionary)
+: m_phrase(targetPhrase)
+,m_sourceWordsRange	(wordsRange)
+,m_scoreTrans(0)
+,m_scoreGen(0)
+,m_futureScore(0)
+,m_ngramScore(0)
+{ // used to create trans opt from unknown word
+
+	#ifdef N_BEST
+		// create score components
+		list<const PhraseDictionary*>::iterator iterPhraseDict;
+		for (iterPhraseDict = allPhraseDictionary.begin() ; iterPhraseDict != allPhraseDictionary.end() ; ++iterPhraseDict)
+		{
+			const PhraseDictionary *dict = *iterPhraseDict;
+			m_transScoreComponent.Add(dict);
+		}
+
+		list<const GenerationDictionary*>::iterator iterGenDict;
+		for (iterGenDict = allGenerationDictionary.begin() ; iterGenDict != allGenerationDictionary.end() ; ++iterGenDict)
+		{
+			const GenerationDictionary *dict = *iterGenDict;
+			m_generationScoreComponent.Add((size_t)dict);
+		}
+	#endif
 }
 
 TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targetPhrase) const
@@ -105,6 +135,12 @@ void TranslationOption::CalcScore(const LMList &allLM, float weightWordPenalty)
 	float retFullScore = 0;
 
 #ifdef N_BEST
+	LMList::const_iterator iter;
+	for (iter = allLM.begin() ; iter != allLM.end() ; ++iter)
+	{
+		const LanguageModel &lm = **iter;
+		m_ngramComponent.Add(lm.GetId());
+	}
 	allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, &m_ngramComponent);
 #else
 	allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, NULL);
