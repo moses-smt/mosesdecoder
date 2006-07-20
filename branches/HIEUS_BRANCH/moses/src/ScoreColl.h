@@ -44,6 +44,7 @@ public:
 		assert(find(index) == end());
 		return operator[](index) = 0;
 	}	
+	void Combine(const ScoreColl &other);
 };
 
 inline std::ostream& operator<<(std::ostream &out, const ScoreColl &coll)

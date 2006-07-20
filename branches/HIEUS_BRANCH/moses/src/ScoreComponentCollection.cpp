@@ -9,14 +9,10 @@ void ScoreComponentCollection::Combine(const ScoreComponentCollection &otherComp
 	{
 		const ScoreComponent &newScoreComponent = iter->second;
 		iterator iterThis = find(newScoreComponent.GetDictionary());
-		if (iterThis == end())
-		{ // new. add to this collection
-			Add(newScoreComponent);
-		}
-		else
-		{ // score component for dictionary exists. add numbers
-			ScoreComponent &thisScoreComponent = iterThis->second;
-			thisScoreComponent.Add(newScoreComponent);
-		}
+		assert (iterThis != end());
+		
+		// score component for dictionary exists. add numbers
+		ScoreComponent &thisScoreComponent = iterThis->second;
+		thisScoreComponent.Add(newScoreComponent);
 	}
 }

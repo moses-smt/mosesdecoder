@@ -70,10 +70,8 @@ public:
 	{
 		SetScore(score);
 	}
-	LatticeEdge(FactorDirection direction, const Hypothesis *prevHypo)
-		:m_prevHypo(prevHypo)
-		,m_phrase(direction)
-	{}
+
+	LatticeEdge(FactorDirection direction, const Hypothesis *prevHypo);
 
 	virtual ~LatticeEdge();
 

@@ -114,6 +114,10 @@ public:
 	{
 		return m_transScoreComponent;
 	}
+	inline const ScoreColl &GetGenerationScoreComponent() const
+	{
+		return m_generationScoreComponent;
+	}
 	inline const ScoreColl &GetNgramComponent() const 	 
 	{ 	 
 		return m_ngramComponent; 	 

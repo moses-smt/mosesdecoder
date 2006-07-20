@@ -60,19 +60,13 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 
 	// initialize scores
 	SetScore(copy.GetScore());
-#ifdef N_BEST
-	m_lmScoreComponent 				= copy.GetLMScoreComponent();
-	m_transScoreComponent			= copy.GetTranslationScoreComponent();
-	m_generationScoreComponent	= copy.GetGenerationScoreComponent();
-		
-#endif
 }
 
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: LatticeEdge							(Output, &prevHypo)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_currSourceWordsRange	(prevHypo.m_currSourceWordsRange)
-	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
+	, m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
 														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
 	, m_id(s_numNodes++)
 {
@@ -93,28 +87,13 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 #ifdef N_BEST
 	// language model score (ngram)
-	m_lmScoreComponent = prevHypo.GetLMScoreComponent();
-	const ScoreColl &nGramComponent = transOpt.GetNgramComponent();
+	m_lmScoreComponent.Combine(transOpt.GetNgramComponent());
 
-	ScoreColl::const_iterator iter;
-	for (iter = nGramComponent.begin() ; iter != nGramComponent.end() ; ++iter)
-	{
-		size_t lmId = (*iter).first;
-		float score	= (*iter).second;
-		m_lmScoreComponent[lmId] += score;
-	}
-
-	// translation components 
-	// from prev hypo
-	const ScoreComponentCollection &prevComponent= prevHypo.GetTranslationScoreComponent();
-	m_transScoreComponent = prevComponent;
-	
-	// from trans opt
-	const ScoreComponentCollection &transComponentColl	= transOpt.GetTransScoreComponent();
-	m_transScoreComponent.Combine(transComponentColl);
+	// translation components from trans opt
+	m_transScoreComponent.Combine(transOpt.GetTransScoreComponent());
 
 	// generation score
-	m_generationScoreComponent = prevHypo.GetGenerationScoreComponent();
+	m_generationScoreComponent.Combine(transOpt.GetGenerationScoreComponent());
 		
 #endif
 }
