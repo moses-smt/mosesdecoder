@@ -40,7 +40,7 @@ class TranslationOptionCollection : public std::list< TranslationOption >
 protected:
 	const Sentence													&m_inputSentence;
 	SquareMatrix														m_futureScore;
-	WordsBitmap															m_initialCoverage;
+	WordsBitmap															m_unknownWordPos;
 	std::list<const PhraseDictionary*>			m_allPhraseDictionary;
 	std::list<const GenerationDictionary*>	m_allGenerationDictionary;
 	
@@ -76,10 +76,6 @@ public:
 		inline const SquareMatrix &GetFutureScore()
 	{
 		return m_futureScore;
-	}
-	inline const WordsBitmap &GetInitialCoverage() const 
-	{
-		return m_initialCoverage;
 	}
 
   void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList

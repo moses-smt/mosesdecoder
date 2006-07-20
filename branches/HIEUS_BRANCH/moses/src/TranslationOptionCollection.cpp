@@ -11,7 +11,7 @@ using namespace std;
 TranslationOptionCollection::TranslationOptionCollection(const Sentence &inputSentence)
 	: m_inputSentence(inputSentence)
 	,m_futureScore(inputSentence.GetSize())
-	,m_initialCoverage(inputSentence.GetSize())
+	,m_unknownWordPos(inputSentence.GetSize())
 {
 }
 
@@ -138,7 +138,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	PhraseDictionary &phraseDictionary = decodeStep.GetPhraseDictionary();
 	for (size_t startPos = 0 ; startPos < m_inputSentence.GetSize() ; startPos++)
 	{
-		if (m_initialCoverage.GetValue(startPos))
+		if (m_unknownWordPos.GetValue(startPos))
 		{ // unknown word but already processed. skip 
 			break;
 		}
@@ -443,5 +443,5 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t sourcePos
 		{ // do nothing. just drop source word
 		}
 
-		m_initialCoverage.SetValue(sourcePos, true); 
+		m_unknownWordPos.SetValue(sourcePos, true); 
 }

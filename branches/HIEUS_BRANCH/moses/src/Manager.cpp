@@ -76,8 +76,7 @@ void Manager::ProcessSentence()
 
 	// seed hypothesis
 	{
-	Hypothesis *hypo = new Hypothesis(m_source, m_possibleTranslations.GetInitialCoverage());
-	TRACE_ERR(m_possibleTranslations.GetInitialCoverage().GetWordsCount() << endl);
+	Hypothesis *hypo = new Hypothesis(m_source);
 #ifdef N_BEST
 	LMList allLM = m_staticData.GetAllLM();
 	hypo->ResizeComponentScore(allLM, decodeStepList);

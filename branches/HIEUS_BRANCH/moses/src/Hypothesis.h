@@ -74,7 +74,7 @@ public:
 	Hypothesis(const Hypothesis &copy); 
 
 	// used to create clone
-	Hypothesis(const Phrase &phrase, const WordsBitmap &initialCoverage);
+	Hypothesis(const Phrase &phrase);
 		// used for initial seeding of trans process
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 		// create next
