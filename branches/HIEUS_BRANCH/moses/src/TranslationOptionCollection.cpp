@@ -115,8 +115,10 @@ void TranslationOptionCollection::CreateTranslationOptions(
 		TranslationOption &transOpt = *iterColl;
 		transOpt.CalcScore(allLM, weightWordPenalty);
 		Add(transOpt);
-
 	}
+
+	// future score
+	CalcFutureScore(verboseLevel);
 }
 
 void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
@@ -253,6 +255,7 @@ void TranslationOptionCollection::ProcessTranslation(
 	const Phrase sourcePhrase 								= m_inputSentence.GetSubString(sourceWordsRange);
 	const PhraseDictionary &phraseDictionary	= decodeStep.GetPhraseDictionary();
 
+	TRACE_ERR(sourcePhrase << endl);
 	const TargetPhraseCollection *phraseColl	=	phraseDictionary.FindEquivPhrase(sourcePhrase);
 
 	if (phraseColl != NULL)
