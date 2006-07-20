@@ -63,7 +63,12 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 																		, float weight)
 : m_phrase						(inputPhrase)
 , m_sourceWordsRange	(copy.m_sourceWordsRange)
+#ifdef N_BEST
+,m_transScoreComponent(copy.m_transScoreComponent)
+,m_generationScoreComponent(copy.m_generationScoreComponent)
+#endif
 { // used in creating the next generation step
+
 	m_scoreTrans	= copy.GetTranslationScore();
 	m_scoreGen	= copy.GetGenerationScore() + generationScore * weight;
 
