@@ -97,13 +97,10 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
-	InputType *source;
-	//staticData.GetInputType()
-	while( (source = inputOutput->GetInput()) != NULL)
+	while(InputType *source = inputOutput->GetInput())
 	{
-		if(Sentence* sent=dynamic_cast<Sentence*>(source))
-			TRACE_ERR(*sent << endl);
-		TranslationOptionCollection * translationOptionCollection=CreateTranslationOptionCollection(source);
+		if(Sentence* sent=dynamic_cast<Sentence*>(source)) TRACE_ERR(*sent<<"\n");
+		TranslationOptionCollection *translationOptionCollection=CreateTranslationOptionCollection(source);
 		assert(translationOptionCollection);
 
 		Manager manager(*source, *translationOptionCollection, staticData);
