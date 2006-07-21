@@ -93,11 +93,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	}
 	
 	//source word deletion
-	if(m_parameter.GetParam("weight-e").size() > 0)
+	if(m_parameter.GetParam("phrase-drop-allowed").size() > 0)
 	{
-		m_wordDeletionWeight = Scan<float>(m_parameter.GetParam("weight-e")[0]);
-		m_wordDeletionEnabled = true;
-		if (GetVerboseLevel() > 0) { std::cerr << "Word deletion enabled." << std::endl; }
+		m_wordDeletionEnabled = Scan<bool>(m_parameter.GetParam("phrase-drop-allowed")[0]);
 	}
 	else
 	{
