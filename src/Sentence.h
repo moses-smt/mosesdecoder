@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Input.h"
 
 class WordsRangs;
+class PhraseDictionaryBase;
+
 
 /***
  * a Sentence is a Phrase with an ID
@@ -56,5 +58,8 @@ class Sentence : public Phrase, public InputType
 			return Phrase::GetSize();
 		}
 
+	int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection);
+
+	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const;
 };
 

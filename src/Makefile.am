@@ -3,7 +3,6 @@ AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 libmoses_a_SOURCES = \
 	Arc.cpp \
 	ConfusionNet.cpp \
-	CreateTargetPhraseCollection.cpp \
 	CreateTranslationOptionCollection.cpp \
 	Dictionary.cpp \
 	Factor.cpp \
@@ -15,6 +14,7 @@ libmoses_a_SOURCES = \
 	HypothesisCollectionIntermediate.cpp \
 	Input.cpp \
 	InputFileStream.cpp \
+	InputOutput.cpp \
 	LanguageModel.cpp \
 	LanguageModelFactory.cpp \
 	LatticeEdge.cpp \

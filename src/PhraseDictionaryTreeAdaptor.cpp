@@ -21,7 +21,6 @@ struct PDTAimp {
 	mutable std::vector<TargetPhraseCollection const*> m_tgtColls;
 
 	typedef std::map<Phrase,TargetPhraseCollection const*> MapSrc2Tgt;
-	MapSrc2Tgt m_unks;
 	mutable MapSrc2Tgt m_cache;
 	PhraseDictionaryTreeAdaptor *m_obj;
 	int useCache;
@@ -36,7 +35,6 @@ struct PDTAimp {
 		m_dict->FreeMemory();
 		for(size_t i=0;i<m_tgtColls.size();++i) delete m_tgtColls[i];
 		m_tgtColls.clear();
-		m_unks.clear();
 		m_cache.clear();
 	}
 
@@ -45,24 +43,15 @@ struct PDTAimp {
 		assert(GetTargetPhraseCollection(source)==0);
 		TRACE_ERR("adding unk source phrase "<<source<<"\n");
 		std::pair<MapSrc2Tgt::iterator,bool> p
-			=m_unks.insert(std::make_pair(source,static_cast<TargetPhraseCollection const*>(0)));
-		if(p.second) 
+			=m_cache.insert(std::make_pair(source,static_cast<TargetPhraseCollection const*>(0)));
+		if(p.second || p.first->second==0) 
 			{
 				TargetPhraseCollection *ptr=new TargetPhraseCollection;
 				ptr->push_back(targetPhrase);
 				p.first->second=ptr;
 				m_tgtColls.push_back(ptr);
 			}
-		else std::cerr<<"WARNING: you added the same unknown phrase twice!\n";
-	}
-
-	TargetPhraseCollection const * FindEquivPhrase(const Phrase &source) const 
-	{
-		assert(GetTargetPhraseCollection(source)==0);
-		MapSrc2Tgt::const_iterator i=m_unks.find(source);
-		if(i==m_unks.end()) 
-			std::cerr<<"WARNING: nothing found for unk phrase "<<source<<"\n";
-		return (i!=m_unks.end() ? i->second : 0);
+		else std::cerr<<"WARNING: you added an already existing phrase!\n";
 	}
 
 	TargetPhraseCollection const* 
@@ -70,11 +59,18 @@ struct PDTAimp {
 	{
 		assert(m_dict);
 		if(src.GetSize()==0) return 0;
+
 		std::pair<MapSrc2Tgt::iterator,bool> piter;
-		if(useCache) {
-			piter=m_cache.insert(std::make_pair(src,static_cast<TargetPhraseCollection const*>(0)));
-			if(!piter.second) return piter.first->second;
-		}
+		if(useCache) 
+			{
+				piter=m_cache.insert(std::make_pair(src,static_cast<TargetPhraseCollection const*>(0)));
+				if(!piter.second) return piter.first->second;
+			}
+		else if (m_cache.size()) 
+			{
+				MapSrc2Tgt::const_iterator i=m_cache.find(src);
+				return (i!=m_cache.end() ? i->second : 0);
+			}
 
 		std::vector<std::string> srcString(src.GetSize());
 		// convert source Phrase into vector of strings
@@ -241,13 +237,6 @@ AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
 {
 	imp->AddEquivPhrase(source,targetPhrase);
 }
-
-TargetPhraseCollection const * 
-PhraseDictionaryTreeAdaptor::FindEquivPhrase(const Phrase &source) const 
-{
-	return imp->FindEquivPhrase(source);
-}
-
 void PhraseDictionaryTreeAdaptor::EnableCache()
 {
 	imp->useCache=1;

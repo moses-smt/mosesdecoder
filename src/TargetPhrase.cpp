@@ -19,7 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <assert.h>
+#include <cassert>
+#include <numeric>
 #include "TargetPhrase.h"
 #include "PhraseDictionary.h"
 #include "LanguageModel.h"
@@ -73,18 +74,11 @@ void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
 void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float> &weightT,
 	const LMList &languageModels, float weightWP)
 {
-	assert(weightT.size() == scoreVector.size());
-
 	// calc average score if non-best
-	m_transScore = 0;
-	for (size_t i = 0 ; i < scoreVector.size() ; i++)
-	{
-		float score =  TransformScore(scoreVector[i]);
+	m_transScore=CalcTranslationScore(scoreVector,weightT);
 #ifdef N_BEST
-		m_scoreComponent[i] = score;
+	std::transform(scoreVector.begin(),scoreVector.end(),m_scoreComponent.begin(),TransformScore);
 #endif
-		m_transScore += score * weightT[i];
-	}
 
   // Replicated from TranslationOptions.cpp
 	float totalFutureScore = 0;
@@ -124,11 +118,8 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 void TargetPhrase::SetWeights(const vector<float> &weightT)
 {
 #ifdef N_BEST
-	m_transScore = 0;
-	for (size_t i = 0 ; i < weightT.size() ; i++)
-	{
-		m_transScore += m_scoreComponent[i] * weightT[i];
-	}
+	assert(weightT.size()<=m_scoreComponent.size());
+	m_transScore = std::inner_product(weightT.begin(),weightT.end(),m_scoreComponent.begin(),0.0);
 #endif
 }
 

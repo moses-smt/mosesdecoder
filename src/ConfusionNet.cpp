@@ -11,7 +11,7 @@ void ConfusionNet::SetFactorCollection(FactorCollection *p)
 {
 	m_factorCollection=p;
 }
-bool ConfusionNet::Read(std::istream& in,const std::vector<FactorType>& factorOrder,int format) {
+bool ConfusionNet::ReadF(std::istream& in,const std::vector<FactorType>& factorOrder,int format) {
 	std::cerr<<"cn read with format "<<format<<"\n";
 	switch(format) 
 		{
@@ -22,6 +22,13 @@ bool ConfusionNet::Read(std::istream& in,const std::vector<FactorType>& factorOr
 		}
 	return 0;
 }
+
+int ConfusionNet::Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection) 
+{
+	SetFactorCollection(&factorCollection);
+	return ReadF(in,factorOrder,0);
+}
+
 
 void ConfusionNet::String2Word(const std::string& s,Word& w,const std::vector<FactorType>& factorOrder) {
 	std::vector<std::string> factorStrVector = Tokenize(s, "|");

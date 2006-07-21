@@ -4,7 +4,7 @@
 #include <vector>
 #include "TypeDef.h"
 #include "PhraseDictionary.h"
-#include "CreateTargetPhraseCollection.h"
+#include "TargetPhraseCollection.h"
 
 class Phrase;
 class PDTAimp;
@@ -47,8 +47,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
 	// change model scaling factors
 	void SetWeightTransModel(const std::vector<float> &weightT);
 
-	// these two function can be only used for UNKNOWN source phrases
-	TargetPhraseCollection const * FindEquivPhrase(const Phrase &source) const; 
+	// this function can be only used for UNKNOWN source phrases
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 };
 #endif

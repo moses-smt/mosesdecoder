@@ -101,7 +101,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	{
 		m_wordDeletionEnabled = false;
 	}
-
 	// load Lexical Reordering model
 	// check to see if the lexical reordering parameter exists
 	const vector<string> &lrFileVector = 

@@ -4,8 +4,12 @@
 #include <string>
 #include "TypeDef.h"
 #include "Phrase.h"
+#include "TargetPhraseCollection.h"
+
 class WordsRange;
 class Factor;
+class PhraseDictionaryBase;
+
 
 // base class for sentences and confusion networks
 class InputType 
@@ -27,6 +31,10 @@ protected:
 		m_translationId = translationId;
 	}
 	virtual size_t GetSize() const=0;
+
+	virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection) =0;
+
+	virtual TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const=0;
 
 
 	// these functions are not (yet) well-defined for confusion networks
