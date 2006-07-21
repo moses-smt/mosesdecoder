@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <windows.h>
 #endif
 
+#include <cctype>
+#include <algorithm>
 #include <stdio.h>
 #include <iostream>
 #include <iomanip>
@@ -90,4 +92,13 @@ string GetMD5Hash(const string &filePath)
 
 	return stream.str();
 }
+
+template<>
+bool Scan<bool>(const std::string &input)
+{
+  std::string lc(input);
+  std::transform(lc.begin(), lc.end(), lc.begin(), (int(*)(int))std::tolower);
+  return (lc == "yes" || lc == "y" || lc == "true" || lc == "1");
+}
+
 
