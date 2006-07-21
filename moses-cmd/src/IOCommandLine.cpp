@@ -70,7 +70,8 @@ void OutputSurface(std::ostream &out, const Phrase &phrase)
 	for (size_t pos = 0 ; pos < size ; pos++)
 	{
 		const Factor *factor = phrase.GetFactor(pos, Surface);
-		out << *factor << " ";
+		if (factor != NULL)
+			out << *factor << " ";
 	}
 }
 
