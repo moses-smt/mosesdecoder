@@ -57,8 +57,6 @@ am__moses_SOURCES_DIST = Main.cpp IOCommandLine.cpp IOFile.cpp \
 am_moses_OBJECTS = Main.$(OBJEXT) IOCommandLine.$(OBJEXT) \
 	IOFile.$(OBJEXT) $(am__objects_1)
 moses_OBJECTS = $(am_moses_OBJECTS)
-am__DEPENDENCIES_1 =
-moses_DEPENDENCIES = $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -155,13 +153,9 @@ sharedstatedir = ${prefix}/com
 sysconfdir = ${prefix}/etc
 target_alias = 
 moses_SOURCES = Main.cpp IOCommandLine.cpp IOFile.cpp $(am__append_1)
-MOSESLIB = -lmoses
-processPhraseTable_SOURCES = processPhraseTable.cpp
-processPhraseTable_LDADD = $(MOSESLIB)
-
-# this really needs to be fixed
-### INCLUDES = -I../../src
-moses_LDADD = $(MOSESLIB)
+AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
+moses_LDADD = -lmoses
+moses_DEPENDENCIES = $(top_srcdir)/../moses/src/libmoses.a
 all: all-am
 
 .SUFFIXES:
