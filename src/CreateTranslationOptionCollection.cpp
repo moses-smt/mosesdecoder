@@ -15,7 +15,6 @@ TranslationOptionCollection* CreateTranslationOptionCollection(InputType const* 
 		{
 			std::cerr<<"ERROR: unknown InputType in "<<__FILE__<<"\n";
 			abort();
-			return 0;
 		}
 }
 

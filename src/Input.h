@@ -15,7 +15,6 @@ protected:
  public:
 
 	InputType(long translationId=0);
-	//Input();
 	virtual ~InputType();
 
 	// for db stuff

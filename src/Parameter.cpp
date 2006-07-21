@@ -63,6 +63,7 @@ Parameter::Parameter()
 	AddParam("stack");
 	AddParam("verbose");
 	AddParam("drop-unknown");
+	AddParam("inputtype");
 }
 
 // check if parameter settings make sense
@@ -239,6 +240,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-s", "stack", argc, argv);
 	OverwriteParam("-v", "verbose", argc, argv);
 	OverwriteParam("-drop-unknown", "drop-unknown", argc, argv);
+	OverwriteParam("-inputtype","inputtype",argc,argv);
   // check if parameters make sense
 	return Validate();
 }
