@@ -10,28 +10,9 @@ TranslationOptionCollectionConfusionNet::
 TranslationOptionCollectionConfusionNet(const ConfusionNet &input) 
 	: TranslationOptionCollection(input) {}
 
-void TranslationOptionCollectionConfusionNet::
-CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
-												 , const LMList &languageModels  														
-												 , const LMList &allLM
-												 , FactorCollection &factorCollection
-												 , float weightWordPenalty
-												 , bool dropUnknown
-												 , size_t verboseLevel) 
+int TranslationOptionCollectionConfusionNet::
+HandleUnkownWord(PhraseDictionaryBase&,size_t,FactorCollection&,const LMList &,
+								 bool,float) 
 {
-#if 0
-	ConfusionNet const& source(dynamic_cast<ConfusionNet&>(m_source));
-	assert(dynamic_cast<PhraseDictionaryTreeAdaptor const*>(decodeStepList.front().GetDictionaryPtr()));
-	PhraseDictionaryTreeAdaptor const& pdict
-		=dynamic_cast<PhraseDictionaryTreeAdaptor const&>(*decodeStepList.front().GetDictionaryPtr());
-
-
-	std::vector<State> stack;
-	for(size_t i=0;i<src.GetSize();++i) stack.push_back(State(i,i,data.GetRoot()));
-
-
-
-#else
-	return TranslationOptionCollection::CreateTranslationOptions(decodeStepList,languageModels,allLM,factorCollection,weightWordPenalty,dropUnknown,verboseLevel);
-#endif
+	return 0;
 }

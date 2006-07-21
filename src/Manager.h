@@ -65,11 +65,7 @@ protected:
 	void ProcessFinalNullFertilityInsertion(const Hypothesis &hypothesis
 													, const DecodeStep &decodeStep
 													, HypothesisCollectionIntermediate &outputHypoColl);
-#if 0
-	void CreateTranslationOptions(const Phrase &phrase
-													, PhraseDictionary &phraseDictionary
-													, const LMList &lmListInitial);
-#endif
+
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
 public:

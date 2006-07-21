@@ -23,7 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "TranslationOptionCollectionText.h"
 
-int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection) 
+int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
+									 FactorCollection &factorCollection) 
 {
 	std::string line;
 	do 
@@ -36,12 +37,16 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder, 
 	return 1;
 }
 
-TargetPhraseCollection const* Sentence::CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const 
+TargetPhraseCollection const* Sentence::
+CreateTargetPhraseCollection(PhraseDictionaryBase const& d,
+														 const WordsRange& r) const 
 {
 	Phrase src=GetSubString(r);
 	return d.GetTargetPhraseCollection(src);
 }
-TranslationOptionCollection* Sentence::CreateTranslationOptionCollection() const 
+
+TranslationOptionCollection* 
+Sentence::CreateTranslationOptionCollection() const 
 {
 	return new TranslationOptionCollectionText(*this);
 }

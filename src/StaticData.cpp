@@ -29,10 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Timer.h"
 #include "boost/filesystem/operations.hpp" // boost::filesystem::exists
 #include "boost/algorithm/string/case_conv.hpp" //boost::algorithm::to_lower
-//#define USEBINTTABLE 1
-#ifdef USEBINTTABLE
 #include "PhraseDictionaryTreeAdaptor.h"
-#endif
 
 #include "LanguageModel.h"
 #include "LanguageModelFactory.h"
@@ -442,33 +439,37 @@ void StaticData::LoadPhraseTables(bool filter
 			TRACE_ERR(filePath << endl);
 
 			timer.check("Start loading PhraseTable");
-#ifndef USEBINTTABLE
-			TRACE_ERR("using standard phrase tables");
-			PhraseDictionary *pdict=new PhraseDictionary(noScoreComponent);
-			pdict->Load(input
-									, output
-									, m_factorCollection
-									, filePath
-									, hashFilePath
-									, weight
-									, maxTargetPhrase[index]
-									, filterPhrase
-									, inputPhraseList
-									,	this->GetLanguageModel(Initial)
-									,	this->GetWeightWordPenalty()
-									, *this);
-#else
-			TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
-			PhraseDictionaryTreeAdaptor *pdict=new PhraseDictionaryTreeAdaptor(noScoreComponent);
-			pdict->Create(input,output,m_factorCollection,filePath,weight,
-										maxTargetPhrase[index],
-										this->GetLanguageModel(Initial),
-										this->GetWeightWordPenalty());
+
+			if (!boost::filesystem::exists(filePath+".binphr.idx")) 
+				{
+					TRACE_ERR("using standard phrase tables");
+					PhraseDictionary *pd=new PhraseDictionary(noScoreComponent);
+					pd->Load(input
+									 , output
+									 , m_factorCollection
+									 , filePath
+									 , hashFilePath
+									 , weight
+									 , maxTargetPhrase[index]
+									 , filterPhrase
+									 , inputPhraseList
+									 ,	this->GetLanguageModel(Initial)
+									 ,	this->GetWeightWordPenalty()
+									 , *this);
+					m_phraseDictionary.push_back(pd);
+				}
+			else 
+				{
+					TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
+					PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent);
+					pd->Create(input,output,m_factorCollection,filePath,weight,
+										 maxTargetPhrase[index],
+										 this->GetLanguageModel(Initial),
+										 this->GetWeightWordPenalty());
+					m_phraseDictionary.push_back(pd);
+				}
 
 
-#endif
-
-			m_phraseDictionary.push_back(pdict);
 
 			index++;
 			timer.check("Finished loading PhraseTable");
