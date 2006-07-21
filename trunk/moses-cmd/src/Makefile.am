@@ -1,15 +1,9 @@
-bin_PROGRAMS = moses # processPhraseTable
+bin_PROGRAMS = moses 
 moses_SOURCES = Main.cpp IOCommandLine.cpp  IOFile.cpp 
+AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 
-##MOSESLIB = -L$(top_srcdir)/../moses/src -lmoses
-MOSESLIB = -lmoses
-
-processPhraseTable_SOURCES = processPhraseTable.cpp
-processPhraseTable_LDADD = $(MOSESLIB)
-
-# this really needs to be fixed
-### INCLUDES = -I../../src
-moses_LDADD = $(MOSESLIB)
+moses_LDADD = -lmoses
+moses_DEPENDENCIES = $(top_srcdir)/../moses/src/libmoses.a
 
 if BUILD_MYSQL_SUPPORT
 moses_SOURCES += IOMySQL.cpp ThreadMySQL.cpp
