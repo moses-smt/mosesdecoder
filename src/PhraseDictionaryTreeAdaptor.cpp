@@ -5,6 +5,8 @@
 #include "Phrase.h"
 #include "FactorCollection.h"
 #include "InputFileStream.h"
+#include "Input.h"
+#include "ConfusionNet.h"
 
 inline bool existsFile(const char* filename) {
   struct stat mystat;
@@ -25,9 +27,22 @@ struct PDTAimp {
 	PhraseDictionaryTreeAdaptor *m_obj;
 	int useCache;
 
+	typedef std::vector<TargetPhraseCollection const*> vTPC;
+	std::vector<vTPC> m_rangeCache;
+
+
 	PDTAimp(PhraseDictionaryTreeAdaptor *p) 
 		: m_languageModels(0),m_weightWP(0.0),m_factorCollection(0),m_dict(0),
 			m_obj(p),useCache(1) {}
+
+	void Factors2String(FactorArray const& w,std::string& s) const 
+	{
+		for(size_t j=0;j<m_input.size();++j)
+			{
+				if(s.size()) s+="|";
+				s+=w[m_input[j]]->ToString();
+			}
+	}
 
 	void CleanUp() 
 	{
@@ -36,6 +51,7 @@ struct PDTAimp {
 		for(size_t i=0;i<m_tgtColls.size();++i) delete m_tgtColls[i];
 		m_tgtColls.clear();
 		m_cache.clear();
+		m_rangeCache.clear();
 	}
 
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
@@ -75,11 +91,7 @@ struct PDTAimp {
 		std::vector<std::string> srcString(src.GetSize());
 		// convert source Phrase into vector of strings
 		for(size_t i=0;i<srcString.size();++i)
-			for(size_t j=0;j<m_input.size();++j)
-				{
-					if(srcString[i].size()) srcString[i]+="|";
-					srcString[i]+=src.GetFactor(i,m_input[j])->ToString();
-				}
+			Factors2String(src.GetFactorArray(i),srcString[i]);
 
 		// get target phrases in string representation
 		std::vector<StringTgtCand> cands;
@@ -97,16 +109,7 @@ struct PDTAimp {
 				StringTgtCand::first_type const& factorStrings=cands[i].first;
 				StringTgtCand::second_type const& scoreVector=cands[i].second;
 
-				for(size_t k=0;k<factorStrings.size();++k) 
-					{
-						std::vector<std::string> factors=Tokenize(*factorStrings[k],"|");
-						FactorArray& fa=targetPhrase.AddWord();
-						for(size_t l=0;l<m_output.size();++l)
-							fa[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
-					}
-			
-				targetPhrase.SetScore(scoreVector, m_weights, *m_languageModels, m_weightWP);
-	
+				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector);
 				costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
 				tCands.push_back(targetPhrase);
 			}
@@ -167,6 +170,145 @@ struct PDTAimp {
 		TRACE_ERR("reading bin ttable\n");
 		m_dict->Read(filePath); 	
 	}
+
+	typedef PhraseDictionaryTree::PrefixPtr PPtr;
+	typedef std::pair<size_t,size_t> Range;
+	struct State {
+		PPtr ptr;
+		Range range;
+		float score;
+
+		State() : range(0,0),score(0.0) {}
+		State(size_t b,size_t e,const PPtr& v,float sc=0.0) : ptr(v),range(b,e),score(sc) {}
+		State(Range const& r,const PPtr& v,float sc=0.0) : ptr(v),range(r),score(sc) {}
+
+		size_t begin() const {return range.first;}
+		size_t end() const {return range.second;}
+		float GetScore() const {return score;}
+
+	};
+
+	void CreateTargetPhrase(TargetPhrase& targetPhrase,StringTgtCand::first_type const& factorStrings,StringTgtCand::second_type const& scoreVector) const
+	{
+
+		for(size_t k=0;k<factorStrings.size();++k) 
+			{
+				std::vector<std::string> factors=Tokenize(*factorStrings[k],"|");
+				FactorArray& fa=targetPhrase.AddWord();
+				for(size_t l=0;l<m_output.size();++l)
+					fa[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
+			}
+			
+		targetPhrase.SetScore(scoreVector, m_weights, *m_languageModels, m_weightWP);
+	
+	}
+
+
+	void CacheSource(ConfusionNet const& src) 
+	{
+		assert(m_dict);
+		std::vector<State> stack;
+		for(size_t i=0;i<src.GetSize();++i) stack.push_back(State(i,i,m_dict->GetRoot()));
+
+		typedef StringTgtCand::first_type sPhrase;
+		typedef std::map<StringTgtCand::first_type,std::pair<float,StringTgtCand::second_type> > E2Costs;
+
+		std::map<Range,E2Costs> cov2cand;
+
+		while(!stack.empty()) 
+			{
+				State curr(stack.back());
+				stack.pop_back();
+		
+				//std::cerr<<"processing state "<<curr<<" stack size: "<<stack.size()<<"\n";
+
+				assert(curr.end()<src.GetSize());
+				const ConfusionNet::Column &currCol=src[curr.end()];
+				for(size_t colidx=0;colidx<currCol.size();++colidx) 
+					{
+						const Word& w=currCol[colidx].first;
+						std::string s;
+						Factors2String(w.GetFactorArray(),s);
+						PPtr nextP=m_dict->Extend(curr.ptr,s);
+
+						if(nextP) 
+							{
+								Range newRange(curr.begin(),curr.end()+1);
+								if(newRange.second<src.GetSize())
+									stack.push_back(State(newRange,nextP,
+																				curr.GetScore()+currCol[colidx].second));
+								
+								std::vector<StringTgtCand> tcands;
+								m_dict->GetTargetCandidates(nextP,tcands);
+
+								if(tcands.size()) 
+									{
+										E2Costs& e2costs=cov2cand[newRange];
+
+										for(size_t i=0;i<tcands.size();++i)
+											{
+												float costs=CalcTranslationScore(tcands[i].second,m_weights);
+												costs-=tcands[i].first.size() * m_weightWP;
+												std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].first,std::make_pair(costs,tcands[i].second)));
+												if(!p.second)
+													{
+														if(p.first->second.first>costs)
+															p.first->second=std::make_pair(costs,tcands[i].second);						
+													}
+											}
+
+
+									}
+							}
+					}
+			} // end while(!stack.empty()) 
+
+		m_rangeCache.resize(src.GetSize(),vTPC(src.GetSize(),0));
+
+		
+		for(std::map<Range,E2Costs>::const_iterator i=cov2cand.begin();i!=cov2cand.end();++i)
+			{
+				assert(i->first.first<m_rangeCache.size());
+				assert(i->first.second>0);
+				assert(i->first.second-1<m_rangeCache[i->first.first].size());
+				assert(m_rangeCache[i->first.first][i->first.second-1]==0);
+
+				std::vector<TargetPhrase> tCands;tCands.reserve(i->second.size());
+				std::vector<std::pair<float,size_t> > costs;costs.reserve(i->second.size());
+
+				for(E2Costs::const_iterator j=i->second.begin();j!=i->second.end();++j)
+					{
+						TargetPhrase targetPhrase(Output, m_obj);
+						CreateTargetPhrase(targetPhrase,j->first,j->second.second);
+						costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
+						tCands.push_back(targetPhrase);
+					}
+
+				// prune target candidates and sort according to score
+				std::vector<std::pair<float,size_t> >::iterator nth=costs.end();
+				if(m_obj->m_maxTargetPhrase>0 && costs.size()>m_obj->m_maxTargetPhrase) {
+					nth=costs.begin()+m_obj->m_maxTargetPhrase;
+					std::nth_element(costs.begin(),nth,costs.end(),std::greater<std::pair<float,size_t> >());
+				}
+				std::sort(costs.begin(),nth,std::greater<std::pair<float,size_t> >());
+
+				// convert into TargerPhraseCollection
+				TargetPhraseCollection *rv=new TargetPhraseCollection;
+				for(std::vector<std::pair<float,size_t> >::iterator it=costs.begin();it!=nth;++it) 
+					rv->push_back(tCands[it->second]);
+				
+				if(rv->empty()) 
+					delete rv;
+				else
+					{
+						m_rangeCache[i->first.first][i->first.second-1]=rv;
+						m_tgtColls.push_back(rv);
+					}
+
+			}
+
+
+	}
 };
 
 
@@ -190,6 +332,13 @@ void PhraseDictionaryTreeAdaptor::CleanUp()
 {
 	imp->CleanUp();
 	MyBase::CleanUp();
+}
+
+void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
+{
+	// only required for confusion net
+	if(ConfusionNet const* cn=dynamic_cast<ConfusionNet const*>(&source))
+		imp->CacheSource(*cn);
 }
 
 void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
@@ -223,6 +372,14 @@ TargetPhraseCollection const*
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(Phrase const &src) const
 {
 	return imp->GetTargetPhraseCollection(src);
+}
+TargetPhraseCollection const* 
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(InputType const& src,WordsRange const &range) const
+{
+	if(imp->m_rangeCache.empty())
+		return imp->GetTargetPhraseCollection(src.GetSubString(range));
+	else
+		return imp->m_rangeCache[range.GetStartPos()][range.GetEndPos()];
 }
 
 void PhraseDictionaryTreeAdaptor::

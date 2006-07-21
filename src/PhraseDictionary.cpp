@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "Input.h"
+#include "WordsRange.h"
 
 using namespace std;
 
@@ -39,6 +41,12 @@ PhraseDictionaryBase::PhraseDictionaryBase(size_t noScoreComponent)
 {
 }
 PhraseDictionaryBase::~PhraseDictionaryBase() {}
+	
+const TargetPhraseCollection *PhraseDictionaryBase::
+GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const 
+{
+	return GetTargetPhraseCollection(src.GetSubString(range));
+}
 
 
 void PhraseDictionary::Load(const std::vector<FactorType> &input

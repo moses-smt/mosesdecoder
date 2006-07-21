@@ -4,6 +4,8 @@
 
 #include "FactorCollection.h"
 #include "Util.h"
+#include "PhraseDictionaryTreeAdaptor.h"
+#include "TranslationOptionCollectionConfusionNet.h"
 
 ConfusionNet::ConfusionNet(FactorCollection* p) : InputType(),m_factorCollection(p) {}
 
@@ -55,9 +57,6 @@ bool ConfusionNet::ReadFormat0(std::istream& in,const std::vector<FactorType>& f
 		}
 		else break;
 	}
-	std::cerr<<"conf net read: "<<data.size()<<"\n";
-
-
 	return !data.empty();
 }
 bool ConfusionNet::ReadFormat1(std::istream& in,const std::vector<FactorType>& factorOrder) {
@@ -76,7 +75,7 @@ bool ConfusionNet::ReadFormat1(std::istream& in,const std::vector<FactorType>& f
 		data[i].resize(s);
 		for(size_t j=0;j<s;++j)
 			if(is>>word>>prob) {
-				data[i][j].second=-log(prob); 
+				data[i][j].second=log(prob); 
 				if(data[i][j].second<0) {
 					std::cerr<<"WARN: neg costs: "<<data[i][j].second<<" -> set to 0\n";
 					data[i][j].second=0.0;}
@@ -110,4 +109,18 @@ std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn)
 {
 	cn.Print(out);return out;
 }
+
+TargetPhraseCollection const* ConfusionNet::CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const 
+{
+	if(PhraseDictionaryTreeAdaptor const* pdict=dynamic_cast<PhraseDictionaryTreeAdaptor const*>(&d))
+		return pdict->GetTargetPhraseCollection(*this,r);
+	std::cerr<<"ERROR: wrong phrase dictionary type for confusion net decoding!\n"
+		"has to be PhraseDictionaryTreeAdaptor\n";
+	abort();
+}
+TranslationOptionCollection* ConfusionNet::CreateTranslationOptionCollection() const 
+{
+	return new TranslationOptionCollectionConfusionNet(*this);
+}
+
 

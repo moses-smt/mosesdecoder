@@ -37,6 +37,9 @@ class ConfusionNet : public InputType {
 	const FactorArray& GetFactorArray(size_t pos) const;
 
 
+	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const;
+	TranslationOptionCollection* CreateTranslationOptionCollection() const;
+
 
  private:
 	bool ReadFormat0(std::istream&,const std::vector<FactorType>& factorOrder);
