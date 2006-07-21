@@ -9,7 +9,7 @@
 class WordsRange;
 class Factor;
 class PhraseDictionaryBase;
-
+class TranslationOptionCollection;
 
 // base class for sentences and confusion networks
 class InputType 
@@ -35,7 +35,7 @@ protected:
 	virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection) =0;
 
 	virtual TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const=0;
-
+	virtual TranslationOptionCollection* CreateTranslationOptionCollection() const=0;
 
 	// these functions are not (yet) well-defined for confusion networks
 	virtual Phrase GetSubString(const WordsRange&) const =0;

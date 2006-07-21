@@ -35,6 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStep.h"
 //#include "UnknownWordHandler.h"
 
+class InputType;
+
 class StaticData
 {
 protected:	
@@ -218,6 +220,7 @@ public:
 	void SetWeightGeneration(const std::vector<float> &weight);
 	int GetInputType() const {return m_inputType;}
 
+	void InitializeBeforeSentenceProcessing(InputType const&);
 	void CleanUpAfterSentenceProcessing();
 
 };

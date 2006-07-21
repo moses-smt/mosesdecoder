@@ -46,14 +46,14 @@ protected:
 public:
   virtual ~TranslationOptionCollection();
 
-	void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
-																, const LMList &languageModels  														
-																, const LMList &allLM
-																, FactorCollection &factorCollection
-																, float weightWordPenalty
-																, bool dropUnknown
-																, size_t verboseLevel);
-
+	virtual void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
+																				, const LMList &languageModels  														
+																				, const LMList &allLM
+																				, FactorCollection &factorCollection
+																				, float weightWordPenalty
+																				, bool dropUnknown
+																				, size_t verboseLevel);
+	
 	// get length/size of source input
 	size_t GetSize() const;
 
@@ -77,6 +77,8 @@ public:
 																bool dropUnknown,
 																float weightWordPenalty
 																) =0; 
+
+	void ComputeFutureScores(size_t verboseLevel);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)

@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Sentence.h"
 #include <boost/algorithm/string.hpp>
 #include "PhraseDictionary.h"
+#include "TranslationOptionCollectionText.h"
 
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection) 
 {
@@ -39,4 +40,8 @@ TargetPhraseCollection const* Sentence::CreateTargetPhraseCollection(PhraseDicti
 {
 	Phrase src=GetSubString(r);
 	return d.GetTargetPhraseCollection(src);
+}
+TranslationOptionCollection* Sentence::CreateTranslationOptionCollection() const 
+{
+	return new TranslationOptionCollectionText(*this);
 }

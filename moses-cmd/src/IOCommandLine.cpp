@@ -93,7 +93,7 @@ void IOCommandLine::Backtrack(const Hypothesis *hypo){
 	}
 }
 
-void IOCommandLine::SetOutput(const Hypothesis *hypo, long translationId)
+void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/)
 {
 	if (hypo != NULL)
 	{

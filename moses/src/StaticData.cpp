@@ -502,3 +502,8 @@ void StaticData::CleanUpAfterSentenceProcessing()
 	for(size_t i=0;i<m_generationDictionary.size();++i)
 		m_generationDictionary[i]->CleanUp();
 }
+void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) 
+{
+	for(size_t i=0;i<m_phraseDictionary.size();++i)
+		m_phraseDictionary[i]->InitializeForInput(in);
+}
