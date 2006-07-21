@@ -174,7 +174,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 																	, staticData.GetNBestFilePath()
 																	, filePath);
 		TRACE_ERR("About to GetInputPhrase" << endl);
-		//		ioFile->GetInputPhrase(inputPhraseList);
+		ioFile->GetInputPhrase(inputPhraseList);
 		TRACE_ERR("After GetInputPhrase" << endl);
 		inputOutput = ioFile;
 		inputFileHash = GetMD5Hash(filePath);
