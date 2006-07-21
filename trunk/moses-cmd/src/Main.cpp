@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
-	while(InputType *source = inputOutput->GetInput())
+	while(InputType *source = inputOutput->GetInput(new Sentence(Input)))
 	{
 		if(Sentence* sent=dynamic_cast<Sentence*>(source)) TRACE_ERR(*sent<<"\n");
 		TranslationOptionCollection *translationOptionCollection=CreateTranslationOptionCollection(source);

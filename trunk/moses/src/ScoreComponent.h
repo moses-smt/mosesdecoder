@@ -37,6 +37,8 @@ protected:
 	std::vector<float> m_scoreComponent;
 
 public:
+	typedef std::vector<float>::iterator iterator;
+	typedef std::vector<float>::const_iterator const_iterator;
 	
 	ScoreComponent();
 	ScoreComponent(const Dictionary *dictionary);
@@ -61,6 +63,11 @@ public:
 	{
 		return m_scoreComponent[index];
 	}
+	iterator begin() {return m_scoreComponent.begin();}
+	const_iterator begin() const {return m_scoreComponent.begin();}
+	iterator end() {return m_scoreComponent.end();}
+	const_iterator end() const {return m_scoreComponent.end();}
+	size_t size() const {return m_scoreComponent.size();}
 	
 	void Reset();
 

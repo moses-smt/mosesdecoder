@@ -33,7 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // example file on how to use moses library
 
 #include "IOFile.h"
-
+#include "Sentence.h"
 using namespace std;
 
 IOFile::IOFile(const std::vector<FactorType>	&factorOrder
@@ -48,26 +48,18 @@ IOFile::IOFile(const std::vector<FactorType>	&factorOrder
 {
 }
 
-Sentence *IOFile::GetInput()
+InputType* IOFile::GetInput(InputType* in)
 {
-	static long sentenceId = 0;
-	Sentence *sentence;
-	if ((sentence = ::GetInput(m_inputFile, m_factorOrder, m_factorCollection)) != NULL)
-	{
-		sentence->SetTranslationId(sentenceId++);
-	}
-
-	return sentence;
+	return InputOutput::GetInput(in,m_inputFile, m_factorOrder, m_factorCollection);
 }
 
 void IOFile::GetInputPhrase(std::list<Phrase> &inputPhraseList)
 {
 	ifstream inputFile(m_inputFilePath.c_str());
-	Sentence *sentence;
-	while ((sentence = ::GetInput(inputFile, m_factorOrder, m_factorCollection)) != NULL)
-	{
-		inputPhraseList.push_back(*sentence);
-		Release(sentence);
-	}
+	while(Sentence *sentence=dynamic_cast<Sentence*>(InputOutput::GetInput(new Sentence(Input),inputFile, m_factorOrder, m_factorCollection)))
+		{
+			inputPhraseList.push_back(*sentence);
+			Release(sentence);
+		}
 }
 

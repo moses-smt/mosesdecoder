@@ -63,7 +63,7 @@ boost::shared_ptr<std::list<TranslationOption> > UnknownWordHandler::GetPossible
 	phraseDictionary.AddEquivPhrase(sourcePhrase, targetPhrase);
 	
 	//turn phrase-table entries into TranslationOption objects
-	const TargetPhraseCollection *phraseColl = phraseDictionary.FindEquivPhrase(sourcePhrase);
+	const TargetPhraseCollection *phraseColl = phraseDictionary.GetTargetPhraseCollection(sourcePhrase);
 	boost::shared_ptr<std::list<TranslationOption> > transOpts(new std::list<TranslationOption>);
 	for(TargetPhraseCollection::const_iterator i = phraseColl->begin(); i != phraseColl->end(); i++)
 		transOpts->push_back(TranslationOption(sourceWordsRange, *i));

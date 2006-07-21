@@ -58,31 +58,27 @@ public:
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath);
 
-	Sentence *GetInput();
+	InputType* GetInput(InputType*);
 	void SetOutput(const Hypothesis *hypo, long translationId);
 	void SetNBest(const LatticePathList &nBestList, long translationId);
 	void Backtrack(const Hypothesis *hypo);
 };
 
-
+#if 0
 // help fn
 inline Sentence *GetInput(std::istream &inputStream
 									 , const std::vector<FactorType> &factorOrder
 									 , FactorCollection &factorCollection)
 {
-	std::string line;
-	do 
-	{
-		if (getline(inputStream, line, '\n').eof())
-		{
-			return NULL;
-		}
-		boost::trim(line);
-	} while (line == "");
 
-	Sentence *sentence = new Sentence(Input);
-	sentence->CreateFromString(factorOrder, line, factorCollection);
-	return sentence;
+	return dynamic_cast<Sentence*>(GetInput(new Sentence(Input),inputStream,factorOrder,factorCollection));
+#if 0
+	Sentence *rv=new Sentence(Input);
+	if(rv->Read(inputStream,factorOrder,factorCollection))
+		return rv;
+	else {delete rv; return 0;}
+#endif
 }
 
 
+#endif

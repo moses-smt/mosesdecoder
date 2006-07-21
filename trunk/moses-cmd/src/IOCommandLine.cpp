@@ -58,17 +58,9 @@ IOCommandLine::IOCommandLine(
 	}
 }
 
-Sentence *IOCommandLine::GetInput()
+InputType*IOCommandLine::GetInput(InputType* in)
 {
-	static long sentenceId = 0;
-
-	Sentence *sentence;
-	if ((sentence = ::GetInput(cin, m_factorOrder, m_factorCollection)) != NULL)
-	{
-		sentence->SetTranslationId(sentenceId++);
-	}
-
-	return sentence;
+	return InputOutput::GetInput(in,std::cin,m_factorOrder, m_factorCollection);
 }
 
 // help fn

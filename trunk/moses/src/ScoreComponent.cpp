@@ -60,10 +60,8 @@ void ScoreComponent::Reset()
 	if (m_dictionary != NULL)
 	{
 		const size_t noScoreComponent = GetNoScoreComponent();
-		for (size_t i = 0 ; i < noScoreComponent ; i++)
-		{
-			m_scoreComponent[i] = 0;
-		}
+		assert(noScoreComponent<=m_scoreComponent.size());
+		std::fill(m_scoreComponent.begin(),m_scoreComponent.begin()+noScoreComponent,0.0);
 	}
 }
 

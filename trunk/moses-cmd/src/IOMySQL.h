@@ -68,7 +68,7 @@ public:
 				, FactorCollection							&factorCollection);
 	~IOMySQL();
 	void Connect(mysqlpp::Connection &conn);
-	Sentence *GetInput();
+	InputType *GetInput(InputType*);
 	void SetOutput(const Hypothesis *hypo, long translationId);
 	void SetNBest(const LatticePathList &nBestList, long translationId)
 	{

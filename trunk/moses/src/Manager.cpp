@@ -311,7 +311,8 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 	// actual implementation
 	const WordsRange &sourceWordsRange				= hypothesis.GetCurrSourceWordsRange();
 	const PhraseDictionaryBase &phraseDictionary	= decodeStep.GetPhraseDictionary();
-	const TargetPhraseCollection *phraseColl	=	CreateTargetPhraseCollection(&phraseDictionary,&m_source,sourceWordsRange); 
+	//	const TargetPhraseCollection *phraseColl	=	CreateTargetPhraseCollection(&phraseDictionary,&m_source,sourceWordsRange); 
+	const TargetPhraseCollection *phraseColl	=	m_source.CreateTargetPhraseCollection(phraseDictionary,sourceWordsRange); 
 
 	if (phraseColl != NULL)
 	{

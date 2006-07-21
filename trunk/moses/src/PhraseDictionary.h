@@ -29,9 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "TargetPhrase.h"
 #include "Dictionary.h"
-#include "CreateTargetPhraseCollection.h"
+#include "TargetPhraseCollection.h"
 
 class StaticData;
+
 
 class PhraseDictionaryBase : public Dictionary {
  protected:
@@ -48,8 +49,10 @@ class PhraseDictionaryBase : public Dictionary {
 	
 	virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
 
+	virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
+
 	virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
-	virtual const TargetPhraseCollection *FindEquivPhrase(const Phrase &source) const=0;
+	//	virtual const TargetPhraseCollection *FindEquivPhrase(const Phrase &source) const=0;
 
 };
 
@@ -92,7 +95,8 @@ public:
 	{
 		return m_collection.size();
 	}
-	const TargetPhraseCollection *FindEquivPhrase(const Phrase &source) const;
+
+	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 
