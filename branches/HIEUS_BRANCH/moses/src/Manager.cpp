@@ -123,6 +123,7 @@ void Manager::ProcessOneStack(HypothesisCollection &sourceHypoColl)
 }
 void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 {
+			
 	HypothesisCollectionIntermediate outputHypoColl;
 	CreateNextHypothesis(hypothesis, outputHypoColl);
 
@@ -137,10 +138,6 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 									, m_staticData.GetWeightDistortion()
 									, m_staticData.GetWeightWordPenalty()
 									, m_possibleTranslations.GetFutureScore(), m_source);
-//		if(m_staticData.GetVerboseLevel() > 2) 
-//		{			
-//			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
-//		}
 		size_t wordsTranslated = hypo->GetWordsBitmap().GetWordsCount();
 
 		if (m_hypoStack[wordsTranslated].AddPrune(hypo))

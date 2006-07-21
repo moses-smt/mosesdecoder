@@ -248,13 +248,13 @@ void TranslationOptionCollection::ProcessTranslation(
 								, FactorCollection &factorCollection
 								, float weightWordPenalty)
 {
-	const Phrase &partialPhrase								= inputPartialTranslOpt.GetTargetPhrase();
 	const WordsRange &sourceWordsRange				= inputPartialTranslOpt.GetSourceWordsRange();
 	const Phrase sourcePhrase 								= m_inputSentence.GetSubString(sourceWordsRange);
 	const PhraseDictionary &phraseDictionary	= decodeStep.GetPhraseDictionary();
 
 	const TargetPhraseCollection *phraseColl	=	phraseDictionary.FindEquivPhrase(sourcePhrase);
 
+	
 	if (phraseColl != NULL)
 	{
 		TargetPhraseCollection::const_iterator iterTargetPhrase;

@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class ScoreColl : public std::map<size_t, float>
 {
 public:
+	ScoreColl() {}
+	ScoreColl(const ScoreColl &copy);
 	float GetValue(size_t index) const
 	{
 		const_iterator iter = find(index);
