@@ -1,6 +1,17 @@
 
 #include "ScoreColl.h"
 
+ScoreColl::ScoreColl(const ScoreColl &copy)
+{
+	const_iterator iter;
+	for (iter = copy.begin() ; iter != copy.end() ; iter++)
+	{
+		// score component for dictionary exists. add numbers
+		Add(iter->first);
+		SetValue(iter->first, iter->second);
+	}
+}
+
 void ScoreColl::Combine(const ScoreColl &other)
 {
 	const_iterator iter;
@@ -11,6 +22,6 @@ void ScoreColl::Combine(const ScoreColl &other)
 		assert (iterThis != end());
 		
 		// score component for dictionary exists. add numbers
-		iterThis->second = value;
+		iterThis->second += value;
 	}
 }
