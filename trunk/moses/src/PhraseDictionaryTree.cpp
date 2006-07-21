@@ -530,6 +530,14 @@ PhraseDictionaryTree::GetTargetCandidates(PrefixPtr p,
 	imp->GetTargetCandidates(p,tcands);
 	imp->ConvertTgtCand(tcands,rv,m_outFactorType);
 }
+void PhraseDictionaryTree::
+GetTargetCandidates(PrefixPtr p,
+										std::vector<StringTgtCand>& rv) const 
+{
+	TgtCands tcands;
+	imp->GetTargetCandidates(p,tcands);
+	imp->ConvertTgtCand(tcands,rv);
+}
 
 ////////////////////////////////////////////////////////////
 //

@@ -65,7 +65,7 @@ int TranslationOptionCollectionText::HandleUnkownWord(PhraseDictionaryBase& phra
 			targetPhraseOrig.SetScore(allLM, weightWordPenalty);
 		  
 			phraseDictionary.AddEquivPhrase(sourcePhrase, targetPhraseOrig);
-			const TargetPhraseCollection *phraseColl = phraseDictionary.GetTargetPhraseCollection(sourcePhrase); //FindEquivPhrase(sourcePhrase);
+			const TargetPhraseCollection *phraseColl = phraseDictionary.GetTargetPhraseCollection(sourcePhrase); 
 			assert(phraseColl);
 			const TargetPhrase &targetPhrase = *phraseColl->begin();
 		  

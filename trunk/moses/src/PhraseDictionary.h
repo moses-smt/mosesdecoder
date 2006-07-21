@@ -32,7 +32,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhraseCollection.h"
 
 class StaticData;
-
+class InputType;
+class WordsRange;
 
 class PhraseDictionaryBase : public Dictionary {
  protected:
@@ -47,13 +48,14 @@ class PhraseDictionaryBase : public Dictionary {
 		return Translate;
 	}
 	
+	virtual void InitializeForInput(InputType const&) {}
+
 	virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
 
 	virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
+	virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
 
 	virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
-	//	virtual const TargetPhraseCollection *FindEquivPhrase(const Phrase &source) const=0;
-
 };
 
 

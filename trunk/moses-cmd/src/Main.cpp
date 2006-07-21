@@ -42,15 +42,16 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "LatticePath.h"
 #include "FactorCollection.h"
 #include "Manager.h"
-#include "Sentence.h"
 #include "Phrase.h"
 #include "Util.h"
 #include "LatticePathList.h"
 #include "Timer.h"
 #include "IOCommandLine.h"
 #include "IOFile.h"
-#include "CreateTranslationOptionCollection.h"
 //#include "UnknownWordHandler.h"
+
+#include "Sentence.h"
+#include "ConfusionNet.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -97,12 +98,17 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
-	while(InputType *source = inputOutput->GetInput(new Sentence(Input)))
+	while(InputType *source = inputOutput->GetInput((staticData.GetInputType() ? static_cast<InputType*>(new ConfusionNet) : static_cast<InputType*>(new Sentence(Input)))))
 	{
-		if(Sentence* sent=dynamic_cast<Sentence*>(source)) TRACE_ERR(*sent<<"\n");
-		TranslationOptionCollection *translationOptionCollection=CreateTranslationOptionCollection(source);
+		if(Sentence* sent=dynamic_cast<Sentence*>(source)) 
+			{TRACE_ERR(*sent<<"\n");}
+		else if(ConfusionNet *cn=dynamic_cast<ConfusionNet*>(source)) 
+			{cn->Print(std::cerr);std::cerr<<"\n";}
+
+		TranslationOptionCollection *translationOptionCollection=source->CreateTranslationOptionCollection();
 		assert(translationOptionCollection);
 
+		staticData.InitializeBeforeSentenceProcessing(*source);
 		Manager manager(*source, *translationOptionCollection, staticData);
 		manager.ProcessSentence();
 		inputOutput->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId());
@@ -168,7 +174,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 																	, staticData.GetNBestFilePath()
 																	, filePath);
 		TRACE_ERR("About to GetInputPhrase" << endl);
-		ioFile->GetInputPhrase(inputPhraseList);
+		//		ioFile->GetInputPhrase(inputPhraseList);
 		TRACE_ERR("After GetInputPhrase" << endl);
 		inputOutput = ioFile;
 		inputFileHash = GetMD5Hash(filePath);

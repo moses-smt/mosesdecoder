@@ -17,7 +17,13 @@ class TranslationOptionCollectionConfusionNet : public TranslationOptionCollecti
 												,float //weightWordPenalty
 											 ) {return 0;}
 
-
+	void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
+																, const LMList &languageModels  														
+																, const LMList &allLM
+																, FactorCollection &factorCollection
+																, float weightWordPenalty
+																, bool dropUnknown
+																, size_t verboseLevel);
 
 };
 #endif

@@ -93,6 +93,8 @@ public:
 	// requirement: the pointer has to evaluate to true
 	void GetTargetCandidates(PrefixPtr p,
 													 std::vector<FactorTgtCand>& rv) const;
+	void GetTargetCandidates(PrefixPtr p,
+													 std::vector<StringTgtCand>& rv) const;
 
 	// print target candidates for a given prefix pointer to a stream, mainly 
 	// for debugging

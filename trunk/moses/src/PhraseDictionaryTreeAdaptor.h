@@ -8,6 +8,8 @@
 
 class Phrase;
 class PDTAimp;
+class WordsRange;
+class InputType;
 
 class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
 	typedef PhraseDictionaryBase MyBase;
@@ -40,10 +42,14 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
 	// get translation candidates for a given source phrase
 	// returns null pointer if nothing found
 	TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
+	TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
 
 	// clean up temporary memory etc.
 	void CleanUp();
-	
+
+
+	void InitializeForInput(InputType const& source);
+
 	// change model scaling factors
 	void SetWeightTransModel(const std::vector<float> &weightT);
 

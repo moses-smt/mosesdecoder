@@ -63,7 +63,10 @@ CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
 		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; ++endPos)
 			{
 				WordsRange wordsRange(startPos, endPos);
-				const TargetPhraseCollection *phraseColl= m_source.CreateTargetPhraseCollection(dictionary,wordsRange);
+
+				const TargetPhraseCollection *phraseColl= dictionary.GetTargetPhraseCollection(m_source,wordsRange);
+				//				const TargetPhraseCollection *phraseColl= m_source.CreateTargetPhraseCollection(dictionary,wordsRange);
+
 				mTPC[startPos][endPos]=phraseColl;
 				if (phraseColl != NULL)
 					{
@@ -96,9 +99,12 @@ CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
 					}
 			}
 
+	ComputeFutureScores(verboseLevel);
+}
 	  
-	  
-	  
+void TranslationOptionCollection::ComputeFutureScores(size_t verboseLevel) 
+{
+
 #if 1
 
   // create future score matrix

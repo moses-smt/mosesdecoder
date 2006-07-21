@@ -61,5 +61,6 @@ class Sentence : public Phrase, public InputType
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection);
 
 	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const;
+	TranslationOptionCollection* CreateTranslationOptionCollection() const;
 };
 

@@ -38,7 +38,7 @@ Manager::Manager(InputType const& source,
 :m_source(source)
 ,m_hypoStack(source.GetSize() + 1)
 ,m_staticData(staticData)
-,m_possibleTranslations(toc)  //dynamic_cast<Sentence const&>(source))
+,m_possibleTranslations(toc)  
 {
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
