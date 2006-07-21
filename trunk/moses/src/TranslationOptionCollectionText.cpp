@@ -20,20 +20,19 @@ int TranslationOptionCollectionText::HandleUnkownWord(PhraseDictionaryBase& phra
 																											) 
 {
 	// unknown word, add to target, and add as poss trans
-	//				float	weightWP		= m_staticData.GetWeightWordPenalty();
 	const FactorTypeSet &targetFactors 		= phraseDictionary.GetFactorsUsed(Output);
 	WordsRange wordsRange(startPos,startPos);
 	Phrase sourcePhrase(m_source.GetSubString(wordsRange));
 	int isDigit = 0;
 	if (dropUnknown)
 		{
-			//const Factor *f = sourcePhrase.GetFactor(0, static_cast<FactorType>(0)); // surface @ 0
 			const Factor *f = m_source.GetFactorArray(startPos)[Surface]; 
 			isDigit= (f->ToString().find_first_of("0123456789") == std::string::npos);
-			// modify the starting bitmap
 		}
 	if (!dropUnknown || isDigit)
 		{
+			// keep unknown and use identity translation
+
 			// add to dictionary
 			TargetPhrase targetPhraseOrig(Output, &phraseDictionary);
 			FactorArray &targetWord = targetPhraseOrig.AddWord();
@@ -73,8 +72,8 @@ int TranslationOptionCollectionText::HandleUnkownWord(PhraseDictionaryBase& phra
 		  
 			push_back(transOpt);
 		}
-	else // drop source word
-		{ m_initialCoverage.SetValue(startPos, startPos,1); }
+	else // drop source word -> modify the starting bitmap
+		m_initialCoverage.SetValue(startPos, startPos,1); 
 	return 1;
 }
 
