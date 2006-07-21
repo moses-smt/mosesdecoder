@@ -57,6 +57,9 @@ inline int Scan<int>(const std::string &input)
 }
 
 template<>
+bool Scan<bool>(const std::string &input);
+
+template<>
 inline float Scan<float>(const std::string &input)
 {
 	return (float) atof(input.c_str());

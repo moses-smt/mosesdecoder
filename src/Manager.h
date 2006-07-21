@@ -62,6 +62,9 @@ protected:
 	void ProcessGeneration(const Hypothesis &hypothesis
 													, const DecodeStep &decodeStep
 													, HypothesisCollectionIntermediate &outputHypoColl);
+	void ProcessFinalNullFertilityInsertion(const Hypothesis &hypothesis
+													, const DecodeStep &decodeStep
+													, HypothesisCollectionIntermediate &outputHypoColl);
 #if 0
 	void CreateTranslationOptions(const Phrase &phrase
 													, PhraseDictionary &phraseDictionary

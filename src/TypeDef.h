@@ -101,6 +101,7 @@ enum DecodeType
 {
 	Translate
 	,Generate
+  ,InsertNullFertilityWord //! an optional step that attempts to insert a few closed-class words to improve LM scores
 };
 
 namespace ScoreType {

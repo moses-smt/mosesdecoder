@@ -168,6 +168,16 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 				}
 				break;
 			}
+		case InsertNullFertilityWord:
+			{
+				for (iterHypo = inputHypoColl.begin() ; iterHypo != inputHypoColl.end() ; ++iterHypo)
+				{
+					Hypothesis &inputHypo = **iterHypo;
+					ProcessFinalNullFertilityInsertion(inputHypo, decodeStep, outputHypoColl);
+				}
+				
+				break;
+			}
 		}
 
 		indexStep++;
@@ -574,6 +584,14 @@ void Manager::ProcessGeneration(const Hypothesis &hypothesis
 		// increment iterators
 		IncrementIterators(wordListIterVector, wordListVector);
 	}
+}
+
+void Manager::ProcessFinalNullFertilityInsertion(const Hypothesis &hypothesis
+																				, const DecodeStep & //decodeStep
+																				, HypothesisCollectionIntermediate &outputHypoColl)
+{
+	Hypothesis *copyHypo = new Hypothesis(hypothesis);
+	outputHypoColl.AddNoPrune(copyHypo);
 }
 
 void Manager::OutputHypoStackSize()
