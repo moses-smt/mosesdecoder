@@ -43,11 +43,11 @@ public:
 	{
 		return m_decodeType;
 	}
-	PhraseDictionary &GetPhraseDictionary() const
+	PhraseDictionaryBase &GetPhraseDictionary() const
 	{
 		assert (m_decodeType == Translate);
-	  assert (dynamic_cast<PhraseDictionary*>(m_ptr));
-		return *dynamic_cast<PhraseDictionary*>(m_ptr);
+	  assert (dynamic_cast<PhraseDictionaryBase*>(m_ptr));
+		return *dynamic_cast<PhraseDictionaryBase*>(m_ptr);
 	}
 	const GenerationDictionary &GetGenerationDictionary() const
 	{
@@ -55,6 +55,6 @@ public:
 	  assert (dynamic_cast<GenerationDictionary*>(m_ptr));
 	  return *dynamic_cast<GenerationDictionary*>(m_ptr);
 	}
-	
+	Dictionary* GetDictionaryPtr() const {return m_ptr;}
 	
 };

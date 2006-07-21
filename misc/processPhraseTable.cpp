@@ -1,5 +1,5 @@
 #include <iostream>
-#include <fstream>
+//#include <fstream>
 #include <sstream>
 #include <vector>
 #include <string>
@@ -11,6 +11,7 @@
 #include "ConfusionNet.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
+#include "InputFileStream.h"
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out,const std::vector<T>& x)
@@ -46,6 +47,7 @@ inline bool existsFile(const std::string& filename) {
 int main(int argc,char **argv) {
 	std::string fto;size_t noScoreComponent=5;int cn=0;
 	std::vector<std::pair<std::string,std::pair<char*,char*> > > ftts;
+	int verb=0;
 	for(int i=1;i<argc;++i) {
 		std::string s(argv[i]);
 		if(s=="-ttable") {
@@ -58,6 +60,7 @@ int main(int argc,char **argv) {
 		else if(s=="-out") fto=std::string(argv[++i]);
 		else if(s=="-cn") cn=1;
 		else if(s=="-irst") cn=2;
+		else if(s=="-v") verb=atoi(argv[++i]);
 		else if(s=="-h") 
 			{
 				std::cerr<<"usage "<<argv[0]<<" :\n\n"
@@ -105,7 +108,7 @@ int main(int argc,char **argv) {
 						std::string prefix=ftts[i].first+facStr;
 						if(!existsFile(prefix+".binphr.idx")) {
 							std::cerr<<"bin ttable does not exist -> create it\n";
-							std::ifstream in(prefix.c_str());
+							InputFileStream in(prefix);
 							pdt.Create(in,prefix);
 						}
 						std::cerr<<"reading bin ttable\n";
@@ -173,7 +176,7 @@ int main(int argc,char **argv) {
 
 						while(net.Read(std::cin,factorOrder,cn-1)) {
 							net.Print(std::cerr);
-							GenerateCandidates(net,pdicts,weights);
+							GenerateCandidates(net,pdicts,weights,verb);
 						}
 
 					}

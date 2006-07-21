@@ -32,6 +32,6 @@ protected:
 
 	// these functions are not (yet) well-defined for confusion networks
 	virtual Phrase GetSubString(const WordsRange&) const =0;
-	virtual const Factor* GetFactor(size_t pos, FactorType factorType) const=0;
+	virtual const FactorArray& GetFactorArray(size_t pos) const=0;
 };
 #endif

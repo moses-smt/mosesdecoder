@@ -1,8 +1,11 @@
 lib_LIBRARIES = libmoses.a
+AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 libmoses_a_SOURCES = \
 	Arc.cpp \
 	ConfusionNet.cpp \
 	CreateTargetPhraseCollection.cpp \
+	CreateTranslationOptionCollection.cpp \
+	Dictionary.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
@@ -23,6 +26,7 @@ libmoses_a_SOURCES = \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
 	PhraseDictionaryTree.cpp \
+	PhraseDictionaryTreeAdaptor.cpp \
 	ScoreComponent.cpp \
 	Sentence.cpp \
 	StaticData.cpp \
@@ -32,12 +36,13 @@ libmoses_a_SOURCES = \
 	TranslationOptionCollectionText.cpp \
 	TranslationOptionCollectionConfusionNet.cpp \
 	UnknownWordHandler.cpp \
- 	UserMessage.cpp \
- 	Util.cpp \
- 	WeightOptimization.cpp \
- 	Word.cpp \
- 	WordsBitmap.cpp \
+	UserMessage.cpp \
+	Util.cpp \
+	WeightOptimization.cpp \
+	Word.cpp \
+	WordsBitmap.cpp \
 	WordsRange.cpp
+
 
 if INTERNAL_LM
 libmoses_a_SOURCES += NGramCollection.cpp LanguageModel_Internal.cpp

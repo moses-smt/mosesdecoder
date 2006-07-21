@@ -29,6 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Timer.h"
 #include "boost/filesystem/operations.hpp" // boost::filesystem::exists
 #include "boost/algorithm/string/case_conv.hpp" //boost::algorithm::to_lower
+//#define USEBINTTABLE 1
+#ifdef USEBINTTABLE
+#include "PhraseDictionaryTreeAdaptor.h"
+#endif
 
 #include "LanguageModel.h"
 #include "LanguageModelFactory.h"
@@ -41,6 +45,7 @@ StaticData::StaticData()
 :m_languageModel(2)
 ,m_inputOutput(NULL)
 ,m_fLMsLoaded(false)
+,m_inputType(0)
 {
 }
 
@@ -272,6 +277,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
   	TRACE_ERR("m_dropUnknown: " << m_dropUnknown << endl);
 
+		if(m_parameter.GetParam("inputtype").size()) {
+			m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
+		}
+		TRACE_ERR("input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
+
 	return true;
 }
 
@@ -313,17 +323,17 @@ IOMethod StaticData::GetIOMethod()
 void StaticData::SetWeightTransModel(const vector<float> &weight)
 {
 	size_t currWeight = 0;
-	vector<PhraseDictionary*>::iterator iter;
-	for(iter = m_phraseDictionary.begin() ; iter != m_phraseDictionary.end(); ++iter) 
+	for(vector<PhraseDictionaryBase*>::iterator iter = m_phraseDictionary.begin();
+			iter != m_phraseDictionary.end(); ++iter) 
 	{
-		PhraseDictionary *phraseDict = *iter;
+		PhraseDictionaryBase *phraseDict = *iter;
 		const size_t noScoreComponent 						= phraseDict->GetNoScoreComponent();
 		// weights for this particular dictionary
 		vector<float> dictWeight(noScoreComponent);
 		for (size_t i = 0 ; i < noScoreComponent ; i++)
-		{
-			dictWeight[i] = weight[currWeight++];
-		}
+			{
+				dictWeight[i] = weight[currWeight++];
+			}
 		phraseDict->SetWeightTransModel(dictWeight);
 	}
 }
@@ -434,20 +444,34 @@ void StaticData::LoadPhraseTables(bool filter
 			}
 			TRACE_ERR(filePath << endl);
 
-			m_phraseDictionary.push_back(new PhraseDictionary(noScoreComponent));
 			timer.check("Start loading PhraseTable");
-			m_phraseDictionary[currDict]->Load(input
-																				, output
-																				, m_factorCollection
-																				, filePath
-																				, hashFilePath
-																				, weight
-																				, maxTargetPhrase[index]
-																				, filterPhrase
-																				, inputPhraseList
-																				,	this->GetLanguageModel(Initial)
-																				,	this->GetWeightWordPenalty()
-																				, *this);
+#ifndef USEBINTTABLE
+			TRACE_ERR("using standard phrase tables");
+			PhraseDictionary *pdict=new PhraseDictionary(noScoreComponent);
+			pdict->Load(input
+									, output
+									, m_factorCollection
+									, filePath
+									, hashFilePath
+									, weight
+									, maxTargetPhrase[index]
+									, filterPhrase
+									, inputPhraseList
+									,	this->GetLanguageModel(Initial)
+									,	this->GetWeightWordPenalty()
+									, *this);
+#else
+			TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
+			PhraseDictionaryTreeAdaptor *pdict=new PhraseDictionaryTreeAdaptor(noScoreComponent);
+			pdict->Create(input,output,m_factorCollection,filePath,weight,
+										maxTargetPhrase[index],
+										this->GetLanguageModel(Initial),
+										this->GetWeightWordPenalty());
+
+
+#endif
+
+			m_phraseDictionary.push_back(pdict);
 
 			index++;
 			timer.check("Finished loading PhraseTable");
@@ -474,3 +498,10 @@ void StaticData::LoadMapping()
 	}
 }
 	
+void StaticData::CleanUpAfterSentenceProcessing() 
+{
+	for(size_t i=0;i<m_phraseDictionary.size();++i)
+		m_phraseDictionary[i]->CleanUp();
+	for(size_t i=0;i<m_generationDictionary.size();++i)
+		m_generationDictionary[i]->CleanUp();
+}

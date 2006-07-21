@@ -49,7 +49,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Timer.h"
 #include "IOCommandLine.h"
 #include "IOFile.h"
-#include "TranslationOptionCollection.h"
+#include "CreateTranslationOptionCollection.h"
 //#include "UnknownWordHandler.h"
 
 #if HAVE_CONFIG_H
@@ -68,7 +68,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 using namespace std;
-
 Timer timer;
 
 int main(int argc, char* argv[])
@@ -84,7 +83,6 @@ int main(int argc, char* argv[])
 */
 		if (staticData.GetVerboseLevel() > 0)
 		{
-
 #if N_BEST
 		std::cerr << "N_BEST=enabled\n";
 #else
@@ -99,14 +97,18 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
-	Sentence *sentence;
-	while( (sentence = inputOutput->GetInput()) != NULL)
+	InputType *source;
+	//staticData.GetInputType()
+	while( (source = inputOutput->GetInput()) != NULL)
 	{
-		TRACE_ERR(*sentence << endl);
-		TranslationOptionCollection * translationOptionCollection=new TranslationOptionCollectionText(*sentence);
-		Manager manager(*sentence, *translationOptionCollection, staticData);
+		if(Sentence* sent=dynamic_cast<Sentence*>(source))
+			TRACE_ERR(*sent << endl);
+		TranslationOptionCollection * translationOptionCollection=CreateTranslationOptionCollection(source);
+		assert(translationOptionCollection);
+
+		Manager manager(*source, *translationOptionCollection, staticData);
 		manager.ProcessSentence();
-		inputOutput->SetOutput(manager.GetBestHypothesis(), sentence->GetTranslationId());
+		inputOutput->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId());
 
 		// n-best
 		size_t nBestSize = staticData.GetNBestSize();
@@ -115,12 +117,14 @@ int main(int argc, char* argv[])
 			TRACE_ERR(nBestSize << " " << staticData.GetNBestFilePath() << endl);
 			LatticePathList nBestList;
 			manager.CalcNBest(nBestSize, nBestList);
-			inputOutput->SetNBest(nBestList, sentence->GetTranslationId());
+			inputOutput->SetNBest(nBestList, source->GetTranslationId());
 			RemoveAllInColl< LatticePathList::iterator > (nBestList);
 		}
 
-		// delete sentence
-		inputOutput->Release(sentence);
+		// delete source
+		//		inputOutput->Release(source);
+		staticData.CleanUpAfterSentenceProcessing();
+		delete source;
 		delete translationOptionCollection;
 	}
 	

@@ -33,7 +33,8 @@ class ConfusionNet : public InputType {
 
 	
 	Phrase GetSubString(const WordsRange&) const;
-	const Factor* GetFactor(size_t pos, FactorType factorType) const;
+	const FactorArray& GetFactorArray(size_t pos) const;
+
 
 
  private:
@@ -42,4 +43,5 @@ class ConfusionNet : public InputType {
 	void String2Word(const std::string& s,Word& w,const std::vector<FactorType>& factorOrder);
 };
 
+std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn);
 #endif
