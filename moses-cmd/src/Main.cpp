@@ -173,8 +173,15 @@ InputOutput *GetInputOutput(StaticData &staticData)
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath()
 																	, filePath);
-		TRACE_ERR("About to GetInputPhrase" << endl);
-		ioFile->GetInputPhrase(inputPhraseList);
+		if(staticData.GetInputType()) 
+			{
+				TRACE_ERR("Do not read input phrases for confusion net translation\n");
+			}
+		else
+			{
+				TRACE_ERR("About to GetInputPhrase\n");
+				ioFile->GetInputPhrase(inputPhraseList);
+			}
 		TRACE_ERR("After GetInputPhrase" << endl);
 		inputOutput = ioFile;
 		inputFileHash = GetMD5Hash(filePath);
