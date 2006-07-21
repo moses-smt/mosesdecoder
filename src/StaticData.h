@@ -39,7 +39,7 @@ class StaticData
 {
 protected:	
 	FactorCollection										m_factorCollection;
-	std::vector<PhraseDictionary*>			m_phraseDictionary;
+	std::vector<PhraseDictionaryBase*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::list < DecodeStep >						m_decodeStepList;
 	Parameter			m_parameter;
@@ -68,6 +68,8 @@ protected:
 	 */
 	bool m_dropUnknown;
 	bool m_wordDeletionEnabled;
+
+	int m_inputType;
 		
 	size_t m_verboseLevel;
 
@@ -214,5 +216,9 @@ public:
 	void SetWeightTransModel(const std::vector<float> &weight);
 	void SetWeightLM(const std::vector<float> &weight);
 	void SetWeightGeneration(const std::vector<float> &weight);
+	int GetInputType() const {return m_inputType;}
+
+	void CleanUpAfterSentenceProcessing();
+
 };
 

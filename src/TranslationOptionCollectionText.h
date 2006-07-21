@@ -2,21 +2,19 @@
 #ifndef TRANSLATIONOPTIONCOLLECTIONTEXT_H_
 #define TRANSLATIONOPTIONCOLLECTIONTEXT_H_
 #include "TranslationOptionCollection.h"
-#include "Sentence.h"
+
+class Sentence;
 
 class TranslationOptionCollectionText : public TranslationOptionCollection {
-	Sentence const& m_inputSentence;
  public:
 	TranslationOptionCollectionText(Sentence const& inputSentence);
 
-	void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList,
-																const LMList &languageModels,
-																const LMList &allLM,
-																FactorCollection &factorCollection,
-																float weightWordPenalty,
-																bool dropUnknown,
-																size_t verboseLevel);
-
-	size_t GetSourceSize() const;
+	int HandleUnkownWord(PhraseDictionaryBase& phraseDictionary,
+											 size_t startPos,
+											 FactorCollection &factorCollection,
+											 const LMList &allLM,
+											 bool dropUnknown,
+											 float weightWordPenalty
+											 ); 
 };
 #endif

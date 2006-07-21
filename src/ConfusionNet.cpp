@@ -94,7 +94,13 @@ Phrase ConfusionNet::GetSubString(const WordsRange&) const {
 	std::cerr<<"ERROR: call to ConfusionNet::GetSubString\n";
 	abort();
 	return Phrase();}
-const Factor* ConfusionNet::GetFactor(size_t pos, FactorType factorType) const {
-	std::cerr<<"ERROR: call to ConfusionNet::GetFactor\n";
+const FactorArray& ConfusionNet::GetFactorArray(size_t) const {
+	std::cerr<<"ERROR: call to ConfusionNet::GetFactorArray\n";
 	abort();
-	return 0;}
+}
+
+std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn) 
+{
+	cn.Print(out);return out;
+}
+

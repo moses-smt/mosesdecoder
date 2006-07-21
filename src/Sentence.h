@@ -47,12 +47,10 @@ class Sentence : public Phrase, public InputType
 		{
 			return Phrase::GetSubString(r);
 		}
-
-	const Factor* GetFactor(size_t pos, FactorType factorType) const
+	const FactorArray& GetFactorArray(size_t pos) const
 		{
-			return Phrase::GetFactor(pos,factorType);
+			return Phrase::GetFactorArray(pos);
 		}
-
 	size_t GetSize() const 
 		{
 			return Phrase::GetSize();

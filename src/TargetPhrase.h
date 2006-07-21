@@ -40,7 +40,7 @@ protected:
 
 public:
 
-	TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary);
+	TargetPhrase(FactorDirection direction, const Dictionary *dictionary);
 
 	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT,
 								const LMList &languageModels, float weightWP);

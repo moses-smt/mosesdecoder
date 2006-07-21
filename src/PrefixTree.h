@@ -12,9 +12,6 @@
 #include "Util.h"
 #include "FilePtr.h"
 #include "File.h"
-#ifdef DEBUG
-#include "CountObjects.h"
-#endif
 
 template<typename T,typename D>
 class PrefixTreeSA {
@@ -254,8 +251,6 @@ public:
   // find container
   template<typename cont> const Data& find(const cont& c) const {
     return find(c.begin(),c.end());}
-
-
 
   static void setDefault(const Data& d) {def=d;}
   static const Data& getDefault() {return def;}
