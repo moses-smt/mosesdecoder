@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -106,7 +106,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -167,7 +167,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;N_BEST;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -233,7 +233,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;N_BEST;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -283,6 +283,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ConfusionNet.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CreateTargetPhraseCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Factor.cpp"
 				>
 			</File>
@@ -311,11 +319,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Input.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\InputFileStream.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\LanguageModel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModel_Internal.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModel_IRST.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelFactory.cpp"
 				>
 			</File>
 			<File
@@ -395,10 +419,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ScoreComponentCollection.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Sentence.cpp"
 				>
 			</File>
@@ -416,6 +436,18 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionCollection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOptionCollectionConfusionNet.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOptionCollectionText.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnknownWordHandler.cpp"
 				>
 			</File>
 			<File
@@ -438,6 +470,10 @@
 				RelativePath=".\src\WordsBitmap.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\WordsRange.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -446,6 +482,18 @@
 			>
 			<File
 				RelativePath=".\src\Arc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ConfusionNet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CreateTargetPhraseCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DecodeStep.h"
 				>
 			</File>
 			<File
@@ -465,6 +513,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\File.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FilePtr.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\GenerationDictionary.h"
 				>
 			</File>
@@ -481,6 +537,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Input.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\InputFileStream.h"
 				>
 			</File>
@@ -490,6 +550,22 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModel_Internal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModel_IRST.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModel_SRI.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelFactory.h"
 				>
 			</File>
 			<File
@@ -533,6 +609,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ObjectPool.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Parameter.h"
 				>
 			</File>
@@ -553,6 +633,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryTree.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PrefixTree.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ScoreColl.h"
 				>
 			</File>
@@ -566,6 +654,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Sentence.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SquareMatrix.h"
 				>
 			</File>
 			<File
@@ -589,6 +681,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TranslationOptionCollectionConfusionNet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOptionCollectionText.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TransScoreComponent.h"
 				>
 			</File>
@@ -598,6 +698,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TypeDef.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnknownWordHandler.h"
 				>
 			</File>
 			<File
@@ -614,6 +718,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Word.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\WordInsertionTable.h"
 				>
 			</File>
 			<File
