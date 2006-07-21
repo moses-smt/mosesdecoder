@@ -97,7 +97,7 @@ void IOMySQL::Connect(mysqlpp::Connection &conn)
 	}
 }
 
-Sentence *IOMySQL::GetInput()
+InputType *IOMySQL::GetInput(InputType*)
 {
 	TRACE_ERR("boo" << endl);
 	//return m_threadMySQL->GetSentence();

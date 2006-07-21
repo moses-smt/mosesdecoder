@@ -53,7 +53,7 @@ public:
 				, const std::string							&nBestFilePath
 				, const std::string							&inputFilePath);
 
-	Sentence *GetInput();
+	InputType *GetInput(InputType*);
 	void GetInputPhrase(std::list<Phrase> &inputPhraseList);
 };
 

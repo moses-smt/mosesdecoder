@@ -27,9 +27,10 @@ class ConfusionNet : public InputType {
 	size_t GetSize() const {return data.size();}
 	void Clear() {data.clear();}
 
-	bool Read(std::istream&,const std::vector<FactorType>& factorOrder,int format=0);
+	bool ReadF(std::istream&,const std::vector<FactorType>& factorOrder,int format=0);
 	void Print(std::ostream&) const;
 
+	int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection);
 
 	
 	Phrase GetSubString(const WordsRange&) const;

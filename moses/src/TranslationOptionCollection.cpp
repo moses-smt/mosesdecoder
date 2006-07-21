@@ -53,8 +53,8 @@ CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
   // possible optimization- don't consider phrases longer than the longest
   // phrase in the PhraseDictionary?
   
-  Dictionary *dictionary = decodeStepList.front().GetDictionaryPtr();
-  
+	PhraseDictionaryBase &dictionary= decodeStepList.front().GetPhraseDictionary();
+
   typedef std::vector<TargetPhraseCollection const*> vTPC;
   std::vector<vTPC> mTPC(m_source.GetSize(),vTPC(m_source.GetSize(),0));
   size_t maxLen=0;
@@ -63,8 +63,7 @@ CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
 		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; ++endPos)
 			{
 				WordsRange wordsRange(startPos, endPos);
-				const TargetPhraseCollection *phraseColl= 
-					CreateTargetPhraseCollection(dictionary,&m_source,wordsRange);
+				const TargetPhraseCollection *phraseColl= m_source.CreateTargetPhraseCollection(dictionary,wordsRange);
 				mTPC[startPos][endPos]=phraseColl;
 				if (phraseColl != NULL)
 					{
@@ -86,7 +85,7 @@ CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
 					{
 						// handle unknown word
 
-						if(!HandleUnkownWord(decodeStepList.front().GetPhraseDictionary(),
+						if(!HandleUnkownWord(dictionary,
 																 startPos,
 																 factorCollection,
 																 allLM,
