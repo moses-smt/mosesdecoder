@@ -30,28 +30,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class DecodeStep;
 class LanguageModel;
 class FactorCollection;
+class InputType;
+class PhraseDictionary;
 
 class TranslationOptionCollection : public std::list< TranslationOption >
 {
 	TranslationOptionCollection(const TranslationOptionCollection&); // no copy constructor
 protected:
+	InputType const& m_source;
 	SquareMatrix m_futureScore;
 	WordsBitmap m_initialCoverage;
 
-	TranslationOptionCollection(size_t srcSize);
+	TranslationOptionCollection(InputType const& src);
 	
 public:
   virtual ~TranslationOptionCollection();
 
-  virtual void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
-  														, const LMList &languageModels  														
-  														, const LMList &allLM
-  														, FactorCollection &factorCollection
-  														, float weightWordPenalty
-  														, bool dropUnknown
-  														, size_t verboseLevel) =0;
+	void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
+																, const LMList &languageModels  														
+																, const LMList &allLM
+																, FactorCollection &factorCollection
+																, float weightWordPenalty
+																, bool dropUnknown
+																, size_t verboseLevel);
+
 	// get length/size of source input
-	virtual size_t GetSourceSize() const=0;
+	size_t GetSize() const;
 
 
 	inline const SquareMatrix &GetFutureScore()
@@ -62,6 +66,17 @@ public:
 	{
 		return m_initialCoverage;
 	}
+
+
+
+ protected:
+	virtual int HandleUnkownWord(PhraseDictionaryBase& phraseDictionary,
+																size_t startPos,
+																FactorCollection &factorCollection,
+																const LMList &allLM,
+																bool dropUnknown,
+																float weightWordPenalty
+																) =0; 
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
@@ -72,5 +87,5 @@ inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollec
 		TRACE_ERR (*iter << std::endl);
 	}	
 	return out;
-};
+}
 

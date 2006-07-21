@@ -26,10 +26,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary)
-:Phrase(direction)
+TargetPhrase::TargetPhrase(FactorDirection direction, const Dictionary *dictionary)
+	:Phrase(direction),m_transScore(0.0),m_ngramScore(0.0),m_fullScore(0.0)
 #ifdef N_BEST
-	,m_scoreComponent(phraseDictionary)
+	,m_scoreComponent(dictionary)
 #endif
 {
 }

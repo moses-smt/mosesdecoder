@@ -50,7 +50,7 @@ public:
 		assert(static_cast<size_t>(p.first->second)<data.size());
     return p.first->second;
   }
-  const Key& symbol(LabelId i) const {
+  Key const& symbol(LabelId i) const {
     assert(static_cast<size_t>(i)<data.size());
     return data[i];}
 
@@ -159,8 +159,10 @@ struct PDTimp {
 		if(f.empty()) return;
   	if(f[0]>=data.size()) return;
   	if(!data[f[0]]) return;
-		assert(data[f[0]]->find(f)!=InvalidOffT);
-  	fSeek(ot,data[f[0]]->find(f));
+		assert(data[f[0]]->findKey(f[0])<data[f[0]]->size());
+		off_t tCandOffset=data[f[0]]->find(f);
+		if(tCandOffset==InvalidOffT) return;
+  	fSeek(ot,tCandOffset);
    	tgtCands.readBin(ot);
 	}
 
@@ -190,6 +192,19 @@ struct PDTimp {
 																									 oft,tv.symbol(iphrase[j])));
 			rv.push_back(FactorTgtCand(vf,i->GetScores()));
 		}
+	}
+	// convert target candidates from internal data structure to the external one
+	void ConvertTgtCand(const TgtCands& tcands,std::vector<StringTgtCand>& rv) const
+	{
+		for(TgtCands::const_iterator i=tcands.begin();i!=tcands.end();++i)
+			{
+				const IPhrase& iphrase=i->GetPhrase();
+				std::vector<std::string const*> vs;
+				vs.reserve(iphrase.size());
+				for(size_t j=0;j<iphrase.size();++j)
+					vs.push_back(&tv.symbol(iphrase[j]));
+				rv.push_back(StringTgtCand(vs,i->GetScores()));
+			}
 	}
 
 	PPtr GetRoot() 
@@ -283,6 +298,11 @@ PhraseDictionaryTree::~PhraseDictionaryTree()
 	delete imp;
 }
 
+void PhraseDictionaryTree::SetFactorCollection(FactorCollection* fc) 
+{
+	imp->m_factorCollection=fc;
+}
+
 void PhraseDictionaryTree::FreeMemory() const
 {
 	imp->FreeMemory();
@@ -304,6 +324,21 @@ GetTargetCandidates(const std::vector<const Factor*>& src,
 
 	imp->ConvertTgtCand(tgtCands,rv,m_outFactorType);
 
+}
+void PhraseDictionaryTree::
+GetTargetCandidates(const std::vector<std::string>& src,
+										std::vector<StringTgtCand>& rv) const 
+{
+	IPhrase f(src.size());
+	for(size_t i=0;i<src.size();++i) 
+		{
+			f[i]=imp->sv.index(src[i]);
+			if(f[i]==InvalidLabelId) return;
+		}
+
+	TgtCands tgtCands;
+	imp->GetTargetCandidates(f,tgtCands);
+	imp->ConvertTgtCand(tgtCands,rv);
 }
 
 void PhraseDictionaryTree::
@@ -703,7 +738,8 @@ void GenerateCandidates_(E2Costs& e2costs,const vPPtr& nextP,GCData& data)
 
 void GenerateCandidates(const ConfusionNet& src,
 												const std::vector<PhraseDictionaryTree const*>& pdicts,
-												const std::vector<std::vector<float> >& weights) {
+												const std::vector<std::vector<float> >& weights,
+												int verbose) {
 	GCData data(pdicts,weights);
 
 	std::vector<State> stack;
@@ -749,26 +785,30 @@ void GenerateCandidates(const ConfusionNet& src,
 
 	} // end while(!stack.empty()) 
 
-	// print statistics for debugging purposes
-	std::cerr<<"tuple stats:  total: "<<data.totalTuples
-					 <<" distinct: "<<data.distinctTuples<<" ("
-					 <<(data.distinctTuples/(0.01*data.totalTuples))
-					 <<"%)\n";
-	std::cerr<<"per coverage set:\n";
-	for(std::map<WordsRange,E2Costs>::const_iterator i=cov2E.begin();
-			i!=cov2E.end();++i) {
-		std::cerr<<i->first<<" -- distinct cands: "
-						 <<i->second.size()<<"\n";
+	if(verbose) {
+		// print statistics for debugging purposes
+		std::cerr<<"tuple stats:  total: "<<data.totalTuples
+						 <<" distinct: "<<data.distinctTuples<<" ("
+						 <<(data.distinctTuples/(0.01*data.totalTuples))
+						 <<"%)\n";
+		std::cerr<<"per coverage set:\n";
+		for(std::map<WordsRange,E2Costs>::const_iterator i=cov2E.begin();
+				i!=cov2E.end();++i) {
+			std::cerr<<i->first<<" -- distinct cands: "
+							 <<i->second.size()<<"\n";
+		}
+		std::cerr<<"\n\n";
 	}
-	std::cerr<<"\n\n";
 
-	std::cerr<<"full list:\n";
-	for(std::map<WordsRange,E2Costs>::const_iterator i=cov2E.begin();
-			i!=cov2E.end();++i) {
-		std::cerr<<i->first<<" -- distinct cands: "
-						 <<i->second.size()<<"\n";
-		for(E2Costs::const_iterator j=i->second.begin();j!=i->second.end();++j)
-			std::cerr<<j->first<<" -- "<<j->second<<"\n";
+	if(verbose>10) {
+		std::cerr<<"full list:\n";
+		for(std::map<WordsRange,E2Costs>::const_iterator i=cov2E.begin();
+				i!=cov2E.end();++i) {
+			std::cerr<<i->first<<" -- distinct cands: "
+							 <<i->second.size()<<"\n";
+			for(E2Costs::const_iterator j=i->second.begin();j!=i->second.end();++j)
+				std::cerr<<j->first<<" -- "<<j->second<<"\n";
+		}
 	}
 }
 

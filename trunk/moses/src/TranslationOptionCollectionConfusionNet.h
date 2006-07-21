@@ -6,18 +6,18 @@
 class ConfusionNet;
 
 class TranslationOptionCollectionConfusionNet : public TranslationOptionCollection {
-	const ConfusionNet &m_inputCN;
  public:
-	TranslationOptionCollectionConfusionNet(const ConfusionNet &input);
+	TranslationOptionCollectionConfusionNet(const ConfusionNet &source);
 
-	void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList,
-																const LMList &languageModels,
-																const LMList &allLM,
-																FactorCollection &factorCollection,
-																float weightWordPenalty,
-																bool dropUnknown,
-																size_t verboseLevel);
+	int HandleUnkownWord(PhraseDictionaryBase& //phraseDictionary
+												,size_t //startPos
+												,FactorCollection & //factorCollection
+												,const LMList &//allLM
+												,bool //dropUnknown
+												,float //weightWordPenalty
+											 ) {return 0;}
 
-	size_t GetSourceSize() const;
+
+
 };
 #endif

@@ -57,7 +57,6 @@ void Manager::ProcessSentence()
 {
 	
 	list < DecodeStep > &decodeStepList = m_staticData.GetDecodeStepList();
-
 	const LMList &lmListInitial = m_staticData.GetLanguageModel(Initial);
 	// create list of all possible translations
 	// this is only valid if:
@@ -101,6 +100,7 @@ void Manager::ProcessSentence()
 		if (m_staticData.GetVerboseLevel() > 0) {
 			OutputHypoStackSize();
 		}
+
 	}
 
 	// output
@@ -208,7 +208,9 @@ void Manager::ProcessOneHypothesis(const list < DecodeStep > &decodeStepList, co
 	}
 }
 
-void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis, const DecodeStep &decodeStep, HypothesisCollectionIntermediate &outputHypoColl)
+void Manager::ProcessInitialTranslation(const Hypothesis &hypothesis
+																				, const DecodeStep & //decodeStep
+																				, HypothesisCollectionIntermediate &outputHypoColl)
 {
 	const WordsBitmap& hypoBitmap = hypothesis.GetWordsBitmap();
 	size_t hypoWordCount		= hypoBitmap.GetWordsCount() 		// pharaoh: foreignTranslated
@@ -298,7 +300,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 
 	// actual implementation
 	const WordsRange &sourceWordsRange				= hypothesis.GetCurrSourceWordsRange();
-	const PhraseDictionary &phraseDictionary	= decodeStep.GetPhraseDictionary();
+	const PhraseDictionaryBase &phraseDictionary	= decodeStep.GetPhraseDictionary();
 	const TargetPhraseCollection *phraseColl	=	CreateTargetPhraseCollection(&phraseDictionary,&m_source,sourceWordsRange); 
 
 	if (phraseColl != NULL)
@@ -334,7 +336,7 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 
 				if (targetFactor == NULL)
 				{
-					const Factor *sourceFactor = m_source.GetFactor(sourceWordsRange.GetStartPos(), factorType)
+					const Factor *sourceFactor = m_source.GetFactorArray(sourceWordsRange.GetStartPos())[factorType]
 											,*unkownfactor;
 					switch (factorType)
 					{

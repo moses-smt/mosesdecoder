@@ -33,12 +33,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class StaticData;
 
-class PhraseDictionary : public Dictionary
+class PhraseDictionaryBase : public Dictionary {
+ protected:
+	size_t m_maxTargetPhrase;
+
+ public:
+	PhraseDictionaryBase(size_t noScoreComponent);
+	virtual ~PhraseDictionaryBase();
+		
+	DecodeType GetDecodeType() const
+	{
+		return Translate;
+	}
+	
+	virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
+
+	virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
+	virtual const TargetPhraseCollection *FindEquivPhrase(const Phrase &source) const=0;
+
+};
+
+
+
+class PhraseDictionary : public PhraseDictionaryBase
 {
+	typedef PhraseDictionaryBase MyBase;
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionary&);
 
 protected:
-	size_t m_maxTargetPhrase;
 	std::map<Phrase , TargetPhraseCollection > m_collection;
 	// 1st = source
 	// 2nd = target
@@ -48,15 +70,10 @@ protected:
 							, const std::vector<FactorType>		&inputFactorType);
 public:
 	PhraseDictionary(size_t noScoreComponent)
-		:Dictionary(noScoreComponent)
+		: MyBase(noScoreComponent)
 	{
 	}
 	virtual ~PhraseDictionary();
-
-	DecodeType GetDecodeType() const
-	{
-		return Translate;
-	}
 
 	void Load(const std::vector<FactorType> &input
 								, const std::vector<FactorType> &output

@@ -14,6 +14,8 @@ class ConfusionNet;
 
 // a FactorTgtCand is the Factor-phrase and the vector of scores
 typedef std::pair<std::vector<const Factor*>,std::vector<float> > FactorTgtCand;
+typedef std::pair<std::vector<std::string const*>,std::vector<float> > StringTgtCand;
+
 
 class PDTimp;
 class PPimp;
@@ -34,6 +36,10 @@ public:
 	FactorType GetInputFactorType() const {return m_inFactorType;}
 	FactorType GetOutputFactorType() const {return m_outFactorType;}
 	
+	void SetInputFactorType(FactorType t) {m_inFactorType=t;}
+	void SetOutputFactorType(FactorType t) {m_outFactorType=t;}
+	void SetFactorCollection(FactorCollection*);
+
 	// convert from ascii phrase table format 
 	// note: only creates table, does not keep it in memory
 	//        -> use Read(outFileNamePrefix);
@@ -56,7 +62,8 @@ public:
 	void PrintTargetCandidates(const std::vector<std::string>& src,
 														 std::ostream& out) const;
 
-
+	void GetTargetCandidates(const std::vector<std::string>& src,
+													 std::vector<StringTgtCand>& rv) const;
 
 	/*****************************
 	 *   access to prefix tree   *
@@ -95,7 +102,8 @@ public:
 
 void GenerateCandidates(const ConfusionNet& src,
 												const std::vector<PhraseDictionaryTree const*>& pdicts,
-												const std::vector<std::vector<float> >& weights) ;
+												const std::vector<std::vector<float> >& weights,
+												int verbose=0) ;
 
 
 #endif /*PHRASEDICTIONARYTREE_H_*/

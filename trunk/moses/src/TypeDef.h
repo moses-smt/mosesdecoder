@@ -132,7 +132,7 @@ namespace LexReorderType
 			,Fe
 			,F
 		};
-};
+}
 
 enum IOMethod
 {
