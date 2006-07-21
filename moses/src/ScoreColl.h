@@ -34,6 +34,7 @@ public:
 		assert(iter != end());
 		return iter->second;
 	}
+	void Combine(const ScoreColl &other);
 	
 };
 
