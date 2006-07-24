@@ -847,6 +847,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
+  --enable-optimization   compile with -O3 flag
   --enable-profiling      moses will dump profiling info
   --enable-mysql          (optional) build in MySQL support]
 
@@ -2604,6 +2605,12 @@ else
 
 fi;
 
+# Check whether --enable-optimization or --disable-optimization was given.
+if test "${enable_optimization+set}" = set; then
+  enableval="$enable_optimization"
+  CPPFLAGS="$CPPFLAGS -O3"; LDFLAGS="$LDFLAGS -O3"
+
+fi;
 # Check whether --enable-profiling or --disable-profiling was given.
 if test "${enable_profiling+set}" = set; then
   enableval="$enable_profiling"
