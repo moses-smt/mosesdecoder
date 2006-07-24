@@ -13,7 +13,7 @@ default: processPhraseTable
 processPhraseTable.o: processPhraseTable.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $< -c -o $@
 
-MOSESLIB =$(HOME)/workspace/moses/src/libmoses.a
+MOSESLIB =../moses/src/libmoses.a
 
 processPhraseTable: processPhraseTable.o $(MOSESLIB)
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LIBS)

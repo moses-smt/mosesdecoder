@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define SENTENCE_START	"<s>"
 #define SENTENCE_END		"</s>"
 #define UNKNOWN_FACTOR	"UNK"
+#define EPSILON         "*EPS*"
 
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
 #define MAX_NGRAM_SIZE  20

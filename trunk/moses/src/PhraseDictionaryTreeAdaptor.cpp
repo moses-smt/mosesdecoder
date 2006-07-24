@@ -35,6 +35,7 @@ struct PDTAimp {
 		: m_languageModels(0),m_weightWP(0.0),m_factorCollection(0),m_dict(0),
 			m_obj(p),useCache(1) {}
 
+	// convert FactorArray into string
 	void Factors2String(FactorArray const& w,std::string& s) const 
 	{
 		for(size_t j=0;j<m_input.size();++j)
@@ -44,6 +45,7 @@ struct PDTAimp {
 			}
 	}
 
+	// free temporary memory
 	void CleanUp() 
 	{
 		assert(m_dict);
@@ -54,6 +56,7 @@ struct PDTAimp {
 		m_rangeCache.clear();
 	}
 
+	// add phrase pair till next CleanUp, should be used only for unknowns
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
 	{
 		assert(GetTargetPhraseCollection(source)==0);
@@ -70,12 +73,14 @@ struct PDTAimp {
 		else std::cerr<<"WARNING: you added an already existing phrase!\n";
 	}
 
+	// access with full source phrase
 	TargetPhraseCollection const* 
 	GetTargetPhraseCollection(Phrase const &src) const
 	{
 		assert(m_dict);
 		if(src.GetSize()==0) return 0;
 
+		// look up cache
 		std::pair<MapSrc2Tgt::iterator,bool> piter;
 		if(useCache) 
 			{
@@ -84,6 +89,8 @@ struct PDTAimp {
 			}
 		else if (m_cache.size()) 
 			{
+				// cache is also used for unknowns, so even if the cache is disabled
+				// there may be entries
 				MapSrc2Tgt::const_iterator i=m_cache.find(src);
 				return (i!=m_cache.end() ? i->second : 0);
 			}

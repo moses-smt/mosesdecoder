@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <ext/hash_map>
 
 #include "PrefixTree.h"
 #include "File.h"
@@ -28,6 +29,12 @@ LabelId Epsilon=InvalidLabelId-1;
 typedef std::vector<LabelId> IPhrase;
 typedef std::vector<float> Scores;
 typedef PrefixTreeF<LabelId,off_t> PTF;
+
+namespace __gnu_cxx {
+	template <> struct hash<std::string> {
+		size_t operator()(const std::string& s) const {return __gnu_cxx::__stl_hash_string(s.c_str());}
+	};
+}
 
 template<typename A,typename B=std::map<A,LabelId> >
 class LVoc {
@@ -132,7 +139,8 @@ struct PDTimp {
   typedef PrefixTreeF<LabelId,off_t> PTF;
 	typedef FilePtr<PTF> CPT;
   typedef std::vector<CPT> Data;
-	typedef LVoc<std::string> WordVoc;
+	//	typedef LVoc<std::string> WordVoc;
+	typedef LVoc<std::string,__gnu_cxx::hash_map<std::string,LabelId> > WordVoc;
 
   Data data;
   std::vector<off_t> srcOffsets;
@@ -215,7 +223,7 @@ struct PDTimp {
 	PPtr Extend(PPtr p,const std::string& w) 
 	{
 		assert(p);
-		if(w.empty()) return p;
+		if(w.empty() || w==EPSILON) return p;
 		LabelId wi=sv.index(w);
 		if(wi==InvalidLabelId) return PPtr();
 		else if(p.imp->isRoot()) 
@@ -291,6 +299,13 @@ PhraseDictionaryTree::PhraseDictionaryTree(size_t noScoreComponent,
 	: Dictionary(noScoreComponent),imp(new PDTimp),m_inFactorType(ift),m_outFactorType(oft) 
 {
 	imp->m_factorCollection=fc;
+	if(sizeof(off_t)!=8)
+		{
+			std::cerr<<"ERROR: size of type 'off_t' has to be 64 bit!\n"
+				"use compiler settings '-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES'\n"
+				" -> abort \n\n";
+			abort();
+		}
 }
 
 PhraseDictionaryTree::~PhraseDictionaryTree() 
