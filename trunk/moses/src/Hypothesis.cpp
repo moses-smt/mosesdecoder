@@ -38,7 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 
-int Hypothesis::s_numNodes = 0;
+unsigned int Hypothesis::s_HypothesesCreated = 0;
 
 Hypothesis::Hypothesis(const WordsBitmap &initialCoverage)
 	: LatticeEdge(Output, NULL)
@@ -46,7 +46,7 @@ Hypothesis::Hypothesis(const WordsBitmap &initialCoverage)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
-	, m_id(s_numNodes++)
+	, m_id(s_HypothesesCreated++)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	ResetScore();	
@@ -58,7 +58,7 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 	, m_currSourceWordsRange	(copy.m_currSourceWordsRange)
 	, m_currTargetWordsRange		(copy.m_currTargetWordsRange)
 	, m_wordDeleted(false)
-	, m_id(s_numNodes++)
+	, m_id(s_HypothesesCreated++)
 {
 	m_targetPhrase.AddWords( copy.m_targetPhrase );
 
@@ -82,7 +82,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
 														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetPhrase().GetSize())
 	, m_wordDeleted(false)
-	, m_id(s_numNodes++)
+	, m_id(s_HypothesesCreated++)
 {
 	const Phrase &possPhrase				= transOpt.GetPhrase();
 	const WordsRange &wordsRange		= transOpt.GetWordsRange();
@@ -129,14 +129,12 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 	// generation score
 	m_generationScoreComponent = prevHypo.GetGenerationScoreComponent();
-		
 #endif
 }
 
 Hypothesis::~Hypothesis()
 {
 #ifdef N_BEST
-	
 	RemoveAllInColl< list<Arc*>::iterator >(m_arcList);
 #endif
 }

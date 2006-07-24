@@ -82,7 +82,7 @@ protected:
 
 public:
 
-	static int s_numNodes; //TODO what is this?
+	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total
 	int m_id;
 	
 	/***
