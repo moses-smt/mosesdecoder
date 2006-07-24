@@ -103,6 +103,8 @@ void Manager::ProcessSentence()
 
 	}
 
+    cerr << "Hypotheses created since startup: "<< Hypothesis::s_HypothesesCreated<<endl;
+
 	// output
 	//OutputHypoStack();
 	//OutputHypoStackSize();
