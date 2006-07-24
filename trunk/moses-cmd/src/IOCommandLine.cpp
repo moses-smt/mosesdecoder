@@ -37,6 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Util.h"
 #include "IOCommandLine.h"
 #include "Hypothesis.h"
+#include "WordsRange.h"
 #include "LatticePathList.h"
 #include "ScoreColl.h"
 
@@ -70,17 +71,24 @@ void OutputSurface(std::ostream &out, const Phrase &phrase)
 	for (size_t pos = 0 ; pos < size ; pos++)
 	{
 		const Factor *factor = phrase.GetFactor(pos, Surface);
-		if (factor != NULL)
+		if (factor != NULL) {
 			out << *factor << " ";
+        }
 	}
 }
 
-void OutputSurface(std::ostream &out, const Hypothesis *hypo)
+void OutputSurface(std::ostream &out, const Hypothesis *hypo, bool reportSourceSpan)
 {
 	if ( hypo != NULL)
 	{
-		OutputSurface(out, hypo->GetPrevHypo());
+		OutputSurface(out, hypo->GetPrevHypo(), reportSourceSpan);
 		OutputSurface(out, hypo->GetPhrase());
+
+        if (reportSourceSpan == true
+          && hypo->GetPhrase().GetSize() > 0) {
+          out << "|" << hypo->GetCurrSourceWordsRange().GetStartPos()
+              << "-" << hypo->GetCurrSourceWordsRange().GetEndPos() << "| ";
+        }
 	}
 }
 
@@ -93,14 +101,14 @@ void IOCommandLine::Backtrack(const Hypothesis *hypo){
 	}
 }
 
-void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/)
+void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bool reportSourceSpan)
 {
 	if (hypo != NULL)
 	{
 		TRACE_ERR("BEST HYPO: " << *hypo << endl);
 		Backtrack(hypo);
 
-		OutputSurface(cout, hypo);
+		OutputSurface(cout, hypo, reportSourceSpan);
 	}
 	else
 	{

@@ -69,7 +69,7 @@ public:
 	~IOMySQL();
 	void Connect(mysqlpp::Connection &conn);
 	InputType *GetInput(InputType*);
-	void SetOutput(const Hypothesis *hypo, long translationId);
+	void SetOutput(const Hypothesis *hypo, long translationId, bool reportSourceSpan);
 	void SetNBest(const LatticePathList &nBestList, long translationId)
 	{
 	}

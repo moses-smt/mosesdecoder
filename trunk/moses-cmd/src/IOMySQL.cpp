@@ -104,7 +104,7 @@ InputType *IOMySQL::GetInput(InputType*)
 	return NULL;
 }
 
-void IOMySQL::SetOutput(const Hypothesis *hypo, long translationId)
+void IOMySQL::SetOutput(const Hypothesis *hypo, long translationId, bool reportSourceSpan)
 {
 	//m_threadMySQL->SetTranslation(hypo, translationId);
 }

@@ -62,6 +62,7 @@ Parameter::Parameter()
  	AddParam("lexreordering-type");
 	AddParam("stack");
 	AddParam("verbose");
+	AddParam("report-source-span");
 	AddParam("drop-unknown");
 	AddParam("inputtype");
 }
@@ -253,6 +254,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-n-best-list", "n-best-list", argc, argv);
 	OverwriteParam("-s", "stack", argc, argv);
 	OverwriteParam("-v", "verbose", argc, argv);
+	OverwriteParam("-report-source-span", "report-source-span", argc, argv);
 	OverwriteParam("-drop-unknown", "drop-unknown", argc, argv);
 	OverwriteParam("-inputtype","inputtype",argc,argv);
   // check if parameters make sense
