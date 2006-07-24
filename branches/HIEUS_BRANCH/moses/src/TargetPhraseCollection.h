@@ -1,7 +1,8 @@
 // $Id$
-#ifndef TARGETPHRASECOLLECTION_H_
-#define TARGETPHRASECOLLECTION_H_
+
+#pragma once
+
 #include <list>
 #include "TargetPhrase.h"
 typedef std::list<TargetPhrase> TargetPhraseCollection;
-#endif
+

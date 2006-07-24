@@ -44,7 +44,7 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
 void TargetPhrase::SetScore(float weightWP)
 { // used when creating translations of unknown words:
 	m_transScore = m_ngramScore = 0;	
-	m_fullScore = weightWP;	
+	m_fullScore = - weightWP;	
 }
 
 void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float> &weightT,
@@ -78,12 +78,11 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 		{ // contains factors used by this LM
 			const float weightLM = lm.GetWeight();
 			float fullScore, nGramScore;
-#ifdef N_BEST
-			m_ngramComponent.Add(lm.GetId());
-			lm.CalcScore(*this, fullScore, nGramScore, &m_ngramComponent);
-#else
-			lm.CalcScore(*this, fullScore, nGramScore, NULL);
-#endif
+			lm.CalcScore(*this, fullScore, nGramScore);
+			#ifdef N_BEST
+				m_ngramComponent.Add(lm.GetId());
+				m_ngramComponent.SetValue(lm.GetId(), nGramScore);
+			#endif
 	
 			// total LM score so far
 			totalNgramScore  += nGramScore * weightLM;
@@ -142,6 +141,6 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
-  os << static_cast<const Phrase&>(tp) << " score=" << tp.m_transScore << ", cmpProb: " << tp.m_fullScore;
+  os << static_cast<const Phrase&>(tp) << ", pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
   return os;
 }

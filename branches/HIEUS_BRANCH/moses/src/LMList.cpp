@@ -15,12 +15,11 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 
 		float fullScore, nGramScore;
 
+		lm.CalcScore(phrase, fullScore, nGramScore);
+
 		#ifdef N_BEST
-				lm.CalcScore(phrase, fullScore, nGramScore, ngramComponent);
-		#else
-		    // this is really, really ugly (a reference to an object at NULL
-		    // is asking for trouble). TODO
-				lm.CalcScore(phrase, fullScore, nGramScore, NULL);
+			size_t lmId = lm.GetId();
+			ngramComponent->SetValue(lmId, nGramScore);
 		#endif
 
 		retFullScore   += fullScore * weightLM;

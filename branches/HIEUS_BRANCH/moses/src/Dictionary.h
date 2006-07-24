@@ -22,33 +22,39 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <vector>
+#include "FactorTypeSet.h"
 
-class FactorTypeSet;
 
 class Dictionary
 {
 protected:
-	const size_t m_noScoreComponent;
+	static size_t s_index;
+	
+	const size_t m_noScoreComponent, m_index;
 	std::vector< FactorTypeSet* > m_factorsUsed;
 
-	Dictionary(size_t noScoreComponent)
-		:m_noScoreComponent(noScoreComponent)
-		,m_factorsUsed(2)
-	{
-	}
 
 public:
+	Dictionary(size_t noScoreComponent);
+
 	const FactorTypeSet &GetFactorsUsed(FactorDirection direction) const
 	{
+		assert(static_cast<size_t>(direction)<m_factorsUsed.size());
+		assert(m_factorsUsed[direction]);
 		return *m_factorsUsed[direction];
 	}
-	virtual ~Dictionary()
-	{
-	}
+	virtual ~Dictionary();
+
 	size_t GetNoScoreComponent() const
 	{
 		return m_noScoreComponent;
 	}
-	
+	size_t GetIndex() const
+	{
+		return m_index;
+	}
 	virtual DecodeType GetDecodeType() const = 0;
+
+	// clean up temporary memory, called after processing each sentence
+	virtual void CleanUp();
 };

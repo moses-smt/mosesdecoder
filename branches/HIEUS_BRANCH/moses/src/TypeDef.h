@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <list>
+#include <limits>
 
 #define PROJECT_NAME		"moses"
 
@@ -30,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define UNKNOWN_FACTOR	"UNK"
 
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
+#define MAX_NGRAM_SIZE  20
 
 const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t ARRAY_SIZE_INCR					= 20; //amount by which a hypostack gets resized when necessary
@@ -53,20 +55,25 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #    define LM_INTERNAL 1
 #  endif
 
+#  ifdef HAVE_IRSTLM
+#    define LM_IRST 1
+#    undef LM_INTERNAL
+#    undef LM_SRI
+#  endif
+
 #endif
 ///////////////////////////////////////////////// 
 
-#ifdef LM_SRI
-typedef unsigned int LmId;
-#else
-#ifdef LM_INTERNAL
 class NGramNode;
-typedef const NGramNode* LmId;
-#else
-// if nothing is defined:
-typedef unsigned int LmId;
-#endif
-#endif
+union LmId {
+  unsigned int sri;
+  const NGramNode* internal;
+  int irst;
+  public:
+    LmId() {};
+    LmId(int i) { irst = i; };
+};
+
 // enums. 
 // must be 0, 1, 2, ..., unless otherwise stated
 
@@ -94,21 +101,22 @@ enum DecodeType
 {
 	Translate
 	,Generate
+  ,InsertNullFertilityWord //! an optional step that attempts to insert a few closed-class words to improve LM scores
 };
 
 namespace ScoreType {
 	enum ScoreType
 	{
-		PhraseTrans
-		,Generation
-		,LanguageModelScore
-		,Distortion
-		,WordPenalty
-		,FutureScoreEnum
-		,LexicalReordering
-		,Total
+		PhraseTrans = 0,
+		Generation,
+		LanguageModelScore,
+		Distortion,
+		WordPenalty,
+		FutureScoreEnum,
+		LexicalReordering,
+		Total
 	};
-};
+}
 
 // count of above
 const size_t NUM_SCORES = 8;
@@ -117,7 +125,7 @@ namespace LexReorderType
 {
 	enum LexReorderType
 		{
-			Monotone
+			Monotone //TODO what the jiggers do these symbols mean?
 			,Msd
 			,Forward
 			,Backward
@@ -125,7 +133,7 @@ namespace LexReorderType
 			,Fe
 			,F
 		};
-};
+}
 
 enum IOMethod
 {
@@ -143,4 +151,3 @@ enum LMListType
 // typedef
 class Factor;
 typedef const Factor * FactorArray[NUM_FACTORS];
-

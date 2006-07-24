@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 #include <math.h>
+#include <assert.h>
 
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }
@@ -163,6 +164,17 @@ inline float UntransformSRIScore(float logNScore)
 inline float FloorSRIScore(float sriScore)
 {
 	return (std::max)(sriScore , LOWEST_SCORE);
+}
+
+inline float CalcTranslationScore(const std::vector<float> &scoreVector, 
+																	const std::vector<float> &weightT) 
+{
+	assert(weightT.size()==scoreVector.size());
+	float rv=0.0;
+	for(float const *sb=&scoreVector[0],*se=sb+scoreVector.size(),*wb=&weightT[0];
+			sb!=se;++sb,++wb)
+		rv += TransformScore(*sb) * (*wb);
+	return rv;
 }
 
 #define TO_STRING								\

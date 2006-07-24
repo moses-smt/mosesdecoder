@@ -18,3 +18,35 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
+#include "Sentence.h"
+#include <boost/algorithm/string.hpp>
+#include "PhraseDictionary.h"
+#include "TranslationOptionCollectionText.h"
+
+int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
+									 FactorCollection &factorCollection) 
+{
+	std::string line;
+	do 
+		{
+			if (getline(in, line, '\n').eof())	return 0;
+			boost::trim(line);
+		} while (line == "");
+	
+	CreateFromString(factorOrder, line, factorCollection);
+	return 1;
+}
+
+TargetPhraseCollection const* Sentence::
+CreateTargetPhraseCollection(PhraseDictionaryBase const& d,
+														 const WordsRange& r) const 
+{
+	Phrase src=GetSubString(r);
+	return d.GetTargetPhraseCollection(src);
+}
+
+TranslationOptionCollection* 
+Sentence::CreateTranslationOptionCollection() const 
+{
+	return new TranslationOptionCollectionText(*this);
+}

@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <string>
-#include <assert.h>
+#include <cassert>
 
 #include "StaticData.h"
 #include "Util.h"
@@ -29,7 +29,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Timer.h"
 #include "boost/filesystem/operations.hpp" // boost::filesystem::exists
 #include "boost/algorithm/string/case_conv.hpp" //boost::algorithm::to_lower
+//#define USEBINTTABLE 1
+#ifdef USEBINTTABLE
+#include "PhraseDictionaryTreeAdaptor.h"
+#endif
 
+#include "LanguageModel.h"
+#include "LanguageModelFactory.h"
 
 using namespace std;
 
@@ -39,6 +45,7 @@ StaticData::StaticData()
 :m_languageModel(2)
 ,m_inputOutput(NULL)
 ,m_fLMsLoaded(false)
+,m_inputType(0)
 {
 }
 
@@ -81,10 +88,19 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	//input-factors
 	const vector<string> &inputFactorVector = m_parameter.GetParam("input-factors");
 	for(size_t i=0; i<inputFactorVector.size(); i++) 
-  {
+	{
 		m_inputFactorOrder.push_back(Scan<FactorType>(inputFactorVector[i]));
 	}
-
+	
+	//source word deletion
+	if(m_parameter.GetParam("phrase-drop-allowed").size() > 0)
+	{
+		m_wordDeletionEnabled = Scan<bool>(m_parameter.GetParam("phrase-drop-allowed")[0]);
+	}
+	else
+	{
+		m_wordDeletionEnabled = false;
+	}
 	// load Lexical Reordering model
 	// check to see if the lexical reordering parameter exists
 	const vector<string> &lrFileVector = 
@@ -121,11 +137,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 								orientation = LexReorderType::Msd;
 							//direction
 							else if(val == "forward")
-								direction == LexReorderType::Forward;
+								direction = LexReorderType::Forward;
 							else if(val == "backward")
-								direction == LexReorderType::Backward;
+								direction = LexReorderType::Backward;
 							else if(val == "bidirectional")
-								direction == LexReorderType::Bidirectional;
+								direction = LexReorderType::Bidirectional;
 							//condition
 							else if(val == "f")
 								condition = LexReorderType::F;
@@ -185,23 +201,12 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			string &languageModelFile = token[3];
 			
 			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
-			LanguageModel *lm = new LanguageModel();
+      LanguageModel *lm = LanguageModelFactory::createLanguageModel();
+
 			// error handling here?
 			lm->Load(i, languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
 	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
 			m_languageModel[type].push_back(lm);
-
-			/*
-			const Factor *f0 = m_factorCollection.AddFactor(Target, Surface, "it")
-										,*f1 = m_factorCollection.AddFactor(Target, Surface, "market")
-										,*f2 = m_factorCollection.AddFactor(Target, Surface, "economy");
-			vector<const Factor*> contextFactor(3);
-			contextFactor[0] = f0;
-			contextFactor[1] = f1;
-			contextFactor[2] = f2;
-			float v = UntransformSRIScore(lm->GetValue(contextFactor));
-			TRACE_ERR(v << endl);	
-			*/
 		}
 		CompareHypothesisCollection::SetMaxNGramOrder(nGramMaxOrder);
 	}
@@ -261,12 +266,18 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		: TransformScore(DEFAULT_BEAM_THRESHOLD);
 
 	// Unknown Word Processing -- wade
+	//TODO replace this w/general word dropping -- EVH
 	if (m_parameter.GetParam("drop-unknown").size() == 1)
 	  { m_dropUnknown = Scan<size_t>( m_parameter.GetParam("drop-unknown")[0]); }
 	else
 	  { m_dropUnknown = 0; }
 
   	TRACE_ERR("m_dropUnknown: " << m_dropUnknown << endl);
+
+		if(m_parameter.GetParam("inputtype").size()) {
+			m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
+		}
+		TRACE_ERR("input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
 
 	return true;
 }
@@ -309,17 +320,17 @@ IOMethod StaticData::GetIOMethod()
 void StaticData::SetWeightTransModel(const vector<float> &weight)
 {
 	size_t currWeight = 0;
-	vector<PhraseDictionary*>::iterator iter;
-	for(iter = m_phraseDictionary.begin() ; iter != m_phraseDictionary.end(); ++iter) 
+	for(vector<PhraseDictionaryBase*>::iterator iter = m_phraseDictionary.begin();
+			iter != m_phraseDictionary.end(); ++iter) 
 	{
-		PhraseDictionary *phraseDict = *iter;
+		PhraseDictionaryBase *phraseDict = *iter;
 		const size_t noScoreComponent 						= phraseDict->GetNoScoreComponent();
 		// weights for this particular dictionary
 		vector<float> dictWeight(noScoreComponent);
 		for (size_t i = 0 ; i < noScoreComponent ; i++)
-		{
-			dictWeight[i] = weight[currWeight++];
-		}
+			{
+				dictWeight[i] = weight[currWeight++];
+			}
 		phraseDict->SetWeightTransModel(dictWeight);
 	}
 }
@@ -386,12 +397,14 @@ void StaticData::LoadPhraseTables(bool filter
 		TRACE_ERR(endl);
 
 		const vector<string> &translationVector = m_parameter.GetParam("ttable-file");
-		size_t	maxTargetPhrase										= Scan<size_t>(m_parameter.GetParam("ttable-limit")[0]);
+		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter.GetParam("ttable-limit"));
 
+		size_t index = 0;
 		size_t totalPrevNoScoreComponent = 0;		
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>			token		= Tokenize(translationVector[currDict]);
+			//characteristics of the phrase table
 			vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
 													,output	= Tokenize<FactorType>(token[1], ",");
 			string							filePath= token[3];
@@ -406,6 +419,7 @@ void StaticData::LoadPhraseTables(bool filter
 			string phraseTableHash	= GetMD5Hash(filePath);
 			string hashFilePath			= GetCachePath() 
 															+ PROJECT_NAME + "--"
+															+ token[0] + "--"
 															+ inputFileHash + "--" 
 															+ phraseTableHash + ".txt";
 			bool filterPhrase;
@@ -428,24 +442,39 @@ void StaticData::LoadPhraseTables(bool filter
 			}
 			TRACE_ERR(filePath << endl);
 
-			m_phraseDictionary.push_back(new PhraseDictionary(noScoreComponent));
 			timer.check("Start loading PhraseTable");
-			m_phraseDictionary[currDict]->Load(input
-																				, output
-																				, m_factorCollection
-																				, filePath
-																				, hashFilePath
-																				, weight
-																				, maxTargetPhrase
-																				, filterPhrase
-																				, inputPhraseList
-																				,	this->GetLanguageModel(Initial)
-																				,	this->GetWeightWordPenalty());
+#ifndef USEBINTTABLE
+			TRACE_ERR("using standard phrase tables");
+			PhraseDictionary *pdict=new PhraseDictionary(noScoreComponent);
+			pdict->Load(input
+									, output
+									, m_factorCollection
+									, filePath
+									, hashFilePath
+									, weight
+									, maxTargetPhrase[index]
+									, filterPhrase
+									, inputPhraseList
+									,	this->GetLanguageModel(Initial)
+									,	this->GetWeightWordPenalty()
+									, *this);
+#else
+			TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
+			PhraseDictionaryTreeAdaptor *pdict=new PhraseDictionaryTreeAdaptor(noScoreComponent);
+			pdict->Create(input,output,m_factorCollection,filePath,weight,
+										maxTargetPhrase[index],
+										this->GetLanguageModel(Initial),
+										this->GetWeightWordPenalty());
 
+
+#endif
+
+			m_phraseDictionary.push_back(pdict);
+
+			index++;
 			timer.check("Finished loading PhraseTable");
 		}
 	}
-
 	timer.check("Finished loading phrase tables");
 }
 
@@ -467,3 +496,10 @@ void StaticData::LoadMapping()
 	}
 }
 	
+void StaticData::CleanUpAfterSentenceProcessing() 
+{
+	for(size_t i=0;i<m_phraseDictionary.size();++i)
+		m_phraseDictionary[i]->CleanUp();
+	for(size_t i=0;i<m_generationDictionary.size();++i)
+		m_generationDictionary[i]->CleanUp();
+}

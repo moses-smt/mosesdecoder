@@ -63,6 +63,7 @@ inline FILE* fOpen(const char* fn,const char* m) {
     std::cerr<<"ERROR: could not open file "<<fn<<" with mode "<<m<<"\n";
     abort();}
 }
+inline void fClose(FILE* f) {fclose(f);} // for consistent function names only
 
 #endif
 

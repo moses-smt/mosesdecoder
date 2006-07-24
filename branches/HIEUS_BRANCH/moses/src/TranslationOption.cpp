@@ -149,17 +149,17 @@ void TranslationOption::CalcScore(const LMList &allLM, float weightWordPenalty)
 	m_ngramScore = 0;
 	float retFullScore = 0;
 
-#ifdef N_BEST
 	LMList::const_iterator iter;
 	for (iter = allLM.begin() ; iter != allLM.end() ; ++iter)
 	{
 		const LanguageModel &lm = **iter;
 		m_ngramComponent.Add(lm.GetId());
 	}
-	allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, &m_ngramComponent);
-#else
-	allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, NULL);
-#endif
+	#ifdef N_BEST
+		allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, &m_ngramComponent);
+	#else
+		allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, NULL);
+	#endif
 	// future score
 	m_futureScore = retFullScore;
 
@@ -171,7 +171,9 @@ void TranslationOption::CalcScore(const LMList &allLM, float weightWordPenalty)
 ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 {
 	out << possibleTranslation.GetTargetPhrase() 
-			<< ", pC=" << possibleTranslation.GetTranslationScore();
+			<< ", pC=" << possibleTranslation.GetTranslationScore()
+			<< ", c=" << possibleTranslation.GetFutureScore()
+			<< " [" << possibleTranslation.GetSourceWordsRange() << "]";
 	return out;
 }
 

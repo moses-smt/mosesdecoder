@@ -32,12 +32,12 @@ class GenerationDictionary;
 
 class TargetPhrase: public Phrase
 {
-  friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
+	friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 #ifdef N_BEST
 	ScoreComponent m_scoreComponent;
-	std::list< std::pair<size_t, float> > m_lmScoreComponent;
+	std::vector< std::pair<size_t, float> > m_lmScoreComponent;
 	ScoreColl m_ngramComponent;
 #endif
 
@@ -46,6 +46,7 @@ public:
 	TargetPhrase(FactorDirection direction, const PhraseDictionary *phraseDictionary);
 	TargetPhrase(FactorDirection direction);
 		// unknown word
+
 	TargetPhrase(const TargetPhrase& phrase)
 	: Phrase(phrase)
 	, m_transScore(phrase.m_transScore)
@@ -58,6 +59,7 @@ public:
 #endif
 	{ // deep copy
 	}
+	TargetPhrase(FactorDirection direction, const Dictionary *dictionary);
 
 	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT,
 								const LMList &languageModels, float weightWP);
@@ -65,6 +67,7 @@ public:
 	// used when creating translations of unknown words:
 	void ResetScore();
 	void SetWeights(const std::vector<float> &weightT);
+
 	TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
 		// used for translation step
 	
@@ -81,16 +84,19 @@ public:
   {
     return m_ngramScore;
   }
+  /***
+   * return the estimated score resulting from our being added to a sentence
+   * (it's an estimate because we don't have full n-gram info for the language model
+   *  without using the (unknown) full sentence)
+   * 
+   * TODO is this really the best name?
+   */
 
 #ifdef N_BEST
 	inline const ScoreComponent &GetScoreComponents() const
 	{
 		return m_scoreComponent;
 	}
-  inline const std::list< std::pair<size_t, float> > &GetLMScoreComponent() const
-  {
-    return m_lmScoreComponent;
-  }
   inline const ScoreColl &GetNgramComponent() const
   {
     return m_ngramComponent;

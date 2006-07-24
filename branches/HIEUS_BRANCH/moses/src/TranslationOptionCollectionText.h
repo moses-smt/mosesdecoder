@@ -1,20 +1,46 @@
 // $Id$
-#ifndef TRANSLATIONOPTIONCOLLECTIONTEXT_H_
-#define TRANSLATIONOPTIONCOLLECTIONTEXT_H_
+#pragma once
+
 #include "TranslationOptionCollection.h"
 
 class Sentence;
+class LMList;
 
 class TranslationOptionCollectionText : public TranslationOptionCollection {
+protected:
+	const LMList *m_allLM;
+	
+	void ProcessInitialTranslation(const DecodeStep &decodeStep
+															, FactorCollection &factorCollection
+															, float weightWordPenalty
+															, int dropUnknown
+															, size_t verboseLevel
+															, PartialTranslOptColl &outputPartialTranslOptColl);
+	void ProcessUnknownWord(		size_t sourcePos
+															, int dropUnknown
+															, FactorCollection &factorCollection
+															, float weightWordPenalty);
+	void ProcessTranslation(		const TranslationOption &inputPartialTranslOpt
+															, const DecodeStep &decodeStep
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, int dropUnknown
+															, FactorCollection &factorCollection
+															, float weightWordPenalty);
+	void ProcessGeneration(			const TranslationOption &inputPartialTranslOpt
+															, const DecodeStep &decodeStep
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, int dropUnknown
+															, FactorCollection &factorCollection
+															, float weightWordPenalty);
+	
  public:
 	TranslationOptionCollectionText(Sentence const& inputSentence);
-
-	int HandleUnkownWord(PhraseDictionaryBase& phraseDictionary,
-											 size_t startPos,
-											 FactorCollection &factorCollection,
-											 const LMList &allLM,
-											 bool dropUnknown,
-											 float weightWordPenalty
-											 ); 
+	
+	void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
+																				, const LMList &allLM
+																				, FactorCollection &factorCollection
+																				, float weightWordPenalty
+																				, bool dropUnknown
+																				, size_t verboseLevel);	
 };
-#endif
+

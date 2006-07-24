@@ -19,6 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <cstring> // memset
+
 #include "LatticeEdge.h"
 #include "LanguageModel.h"
 #include "LMList.h"
@@ -28,7 +30,7 @@ using namespace std;
 
 LatticeEdge::LatticeEdge(FactorDirection direction, const Hypothesis *prevHypo)
 	:m_prevHypo(prevHypo)
-	,m_phrase(direction)
+	,m_targetPhrase(direction)
 #ifdef N_BEST
 	,m_lmScoreComponent 				(prevHypo->GetLMScoreComponent())
 	,m_transScoreComponent			(prevHypo->GetTranslationScoreComponent())
@@ -42,10 +44,7 @@ LatticeEdge::~LatticeEdge()
 
 void LatticeEdge::ResetScore()
 {
-	for (size_t i = 0 ; i < NUM_SCORES ; i++)
-	{
-		m_score[i]	= 0;
-	}
+  std::memset(m_score, 0, sizeof(float) * NUM_SCORES);
 }
 
 #ifdef N_BEST

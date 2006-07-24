@@ -33,6 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // example file on how to use moses library
 
 #include <iostream>
+#include <vector>
 #include "TypeDef.h"
 #include "Util.h"
 #include "IOCommandLine.h"
@@ -149,13 +150,12 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		}
 
 		// trans components
-		const ScoreComponentCollection 
-						&transScoreComponent = path.GetTranslationScoreComponent();
+		vector<const ScoreComponent*> sortedScoreComponentCollection = path.GetTranslationScoreComponent().SortForNBestOutput();
 
-		ScoreComponentCollection::const_iterator iterTrans;
-		for (iterTrans = transScoreComponent.begin() ; iterTrans != transScoreComponent.end() ; ++iterTrans)
+		vector<const ScoreComponent*>::const_iterator iterTrans;
+		for (iterTrans = sortedScoreComponentCollection.begin() ; iterTrans != sortedScoreComponentCollection.end() ; ++iterTrans)
 		{
-			const ScoreComponent &transScore	= iterTrans->second;
+			const ScoreComponent &transScore	= **iterTrans;
 			for (size_t i = 0 ; i < transScore.GetNoScoreComponent() ; i++)
 			{
 				m_nBestFile << transScore[i] << " ";

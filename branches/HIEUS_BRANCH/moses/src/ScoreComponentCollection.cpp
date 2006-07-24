@@ -2,6 +2,8 @@
 #include "ScoreComponentCollection.h"
 #include "Dictionary.h"
 
+using namespace std;
+
 void ScoreComponentCollection::Combine(const ScoreComponentCollection &otherComponentCollection)
 {
 	const_iterator iter;
@@ -16,3 +18,21 @@ void ScoreComponentCollection::Combine(const ScoreComponentCollection &otherComp
 		thisScoreComponent.Add(newScoreComponent);
 	}
 }
+
+// helper fns
+bool CompareScoreComponent(const ScoreComponent* a, const ScoreComponent* b)
+{
+	return a->GetDictionary()->GetIndex() < b->GetDictionary()->GetIndex();
+}
+
+// sort by index of dictionaries
+vector<const ScoreComponent*> ScoreComponentCollection::SortForNBestOutput() const
+{
+	vector<const ScoreComponent*> ret;
+	for (const_iterator iter = begin() ; iter != end() ; ++iter)
+		ret.push_back(&iter->second);
+	
+	sort(ret.begin(), ret.end(), CompareScoreComponent);
+	return ret;
+}
+

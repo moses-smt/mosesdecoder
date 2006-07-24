@@ -25,29 +25,42 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "Word.h"
 #include "Phrase.h"
+#include "Input.h"
 
-class Sentence : public Phrase
+class WordsRangs;
+class PhraseDictionaryBase;
+class TranslationOptionCollection;
+
+/***
+ * a Sentence is a Phrase with an ID
+ */
+class Sentence : public Phrase, public InputType
 {
-protected:
-	long m_translationId;
-
+ protected:
 	Sentence()
-	{
-	}
-public:
-	Sentence(FactorDirection direction)
-		:Phrase(direction)
-	{
-	}
+		{
+		}
+ public:
+	Sentence(FactorDirection direction)	: Phrase(direction), InputType()
+		{
+		}
 
-	// for db stuff
-	long GetTranslationId()
-	{
-		return m_translationId;
-	}
-	void SetTranslationId(long translationId)
-	{	// for db stuff;
-		m_translationId = translationId;
-	}
+	Phrase GetSubString(const WordsRange& r) const 
+		{
+			return Phrase::GetSubString(r);
+		}
+	const FactorArray& GetFactorArray(size_t pos) const
+		{
+			return Phrase::GetFactorArray(pos);
+		}
+	size_t GetSize() const 
+		{
+			return Phrase::GetSize();
+		}
+
+	int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection);
+
+	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const;
+	TranslationOptionCollection* CreateTranslationOptionCollection() const;
 };
 

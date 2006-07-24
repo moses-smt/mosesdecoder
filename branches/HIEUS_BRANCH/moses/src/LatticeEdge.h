@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
+#include <cstring> //memcpy()
 #include <iostream>
 #include <list>
 #include "TypeDef.h"
@@ -43,8 +44,8 @@ protected:
 	// scores
 	float						m_score[NUM_SCORES];
 
-	const Hypothesis *m_prevHypo;
-	Phrase					m_phrase; //target phrase being created at the current decoding step
+	const Hypothesis* m_prevHypo;
+	Phrase					m_targetPhrase; //target phrase being created at the current decoding step
 
 #ifdef N_BEST
 	ScoreComponentCollection	m_transScoreComponent;
@@ -54,14 +55,14 @@ protected:
 
 public:
 	LatticeEdge(const LatticeEdge &copy); // not implemented
-	LatticeEdge(const float 												score[NUM_SCORES]
+	LatticeEdge(const float 												score[]
 						, const ScoreComponentCollection 	&transScoreComponent
 						, const ScoreColl					 						&lmScoreComponent
 						, const ScoreColl											&generationScoreComponent
 						, const Phrase 												&phrase
 						, const Hypothesis 										*prevHypo)
 		:m_prevHypo(prevHypo)
-		,m_phrase(phrase)
+		,m_targetPhrase(phrase)
 #ifdef N_BEST
 		,m_transScoreComponent(transScoreComponent)
 		,m_generationScoreComponent(generationScoreComponent)
@@ -73,26 +74,27 @@ public:
 
 	LatticeEdge(FactorDirection direction)
 	:m_prevHypo(NULL)
-	,m_phrase(direction)
-	{}
+	,m_targetPhrase(direction)
+	{
+	}
 	LatticeEdge(FactorDirection direction, const Hypothesis *prevHypo);
 
 	virtual ~LatticeEdge();
 
 	inline const Phrase &GetTargetPhrase() const
 	{
-		return m_phrase;
+		return m_targetPhrase;
 	}
 	inline void SetFactor(size_t pos, FactorType factorType, const Factor *factor)
 	{ // pos starts from current phrase, not from beginning of 1st phrase
-		m_phrase.SetFactor(pos, factorType, factor);
+		m_targetPhrase.SetFactor(pos, factorType, factor);
 	}
-	inline void SetScore(const float score[NUM_SCORES])
+	/***
+	 * score should be of length NUM_SCORES
+	 */
+	inline void SetScore(const float score[])
 	{
-		for (size_t currScore = 0 ; currScore < NUM_SCORES ; currScore++)
-		{
-			m_score[currScore] = score[currScore];
-		}
+		std::memcpy(m_score, score, NUM_SCORES * sizeof(float));
 	}
 	void ResetScore();
 

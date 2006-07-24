@@ -36,76 +36,98 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 
 class SquareMatrix;
+class StaticData;
 class TranslationOption;
+class InputType;
+class WordsRange;
+class WordDeletionTable;
 
 class Hypothesis : public LatticeEdge
 {
 	friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
+private:
+  // MD5 checksum for fast comparison
+  unsigned char m_compSignature[16];
 
 protected:
 		// phrase in target language. factors completed will be superset 
 		//				of those in dictionary
 	WordsBitmap				m_sourceCompleted;
 	WordsRange				m_currSourceWordsRange, m_currTargetWordsRange;
+  bool							m_wordDeleted;
 #ifdef N_BEST
 	std::list<Arc*>		m_arcList; //all arcs that end at the same lattice point as we do
 #endif
 
 	/***
 	 * \return whether none of the factors clash
+	 * \param phrase TODO ???
 	 */
 	bool IsCompatible(const Phrase &phrase) const;
 	
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
 	void CalcLMScore(const LMList		&lmListInitial, const LMList	&lmListEnd);
+	void CalcDistortionScore();
 	//TODO: add appropriate arguments to score calculator
-  void CalcLexicalReorderingScore();
+	void CalcLexicalReorderingScore();
+  void CalcDeletionScore(const Sentence& sourceSentence, const WordsRange& sourceWordsRange, const WordDeletionTable& wordDeletionTable);
 
 public:
 
-	static int s_numNodes;
-	int m_id;	
-
+	static int s_numNodes; //TODO what is this?
+	int m_id;
+	
 	/***
 	 * Deep copy
 	 */
-	Hypothesis(const Hypothesis &copy); 
+	Hypothesis(const Hypothesis &copy);
 
 	// used to create clone
-	Hypothesis(const Phrase &phrase);
+	Hypothesis(InputType const& source);
 		// used for initial seeding of trans process
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 		// create next
 	~Hypothesis();
-	inline Hypothesis *Clone() const
-	{
-		return new Hypothesis(*this);
-	}
+		
+	/***
+	 * return the subclass of Hypothesis most appropriate to the given translation option
+	 */
+	static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
+	/***
+	 * return the subclass of Hypothesis most appropriate to the given target phrase
+	 */
+	static Hypothesis* Create(InputType const& source);
 
-	Hypothesis *CreateNext(const TranslationOption &transOpt) const;
+	/***
+	 * return the subclass of Hypothesis most appropriate to the given translation option
+	 */
+	Hypothesis* CreateNext(const TranslationOption &transOpt) const;
+	/***
+	 * if any factors aren't set in our target phrase but are present in transOpt, copy them over
+	 * (unless the factors that we do have fail to match the corresponding ones in transOpt,
+	 *  in which case presumably there's a programmer's error)
+	 * 
+	 * return NULL if we aren't compatible with the given option
+	 */
+	Hypothesis* MergeNext(const TranslationOption &transOpt) const;
 	
-	Hypothesis *MergeNext(const TranslationOption &transOpt) const;
-
-	int GetId()const;
-	void PrintHypothesis(  const Sentence &source, float weightDistortion, float weightWordPenalty) const;
+	virtual void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
  // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
 	inline const WordsRange &GetCurrSourceWordsRange() const
 	{
 		return m_currSourceWordsRange;
 	}
-	inline size_t GetCurrTargetLength() const
+	
+	// subsequent translation should only translate this sub-phrase
+	virtual size_t GetCurrTargetLength() const
 	{
 		return m_currTargetWordsRange.GetWordsCount();
 	}
-	// subsequent translation should only translate this sub-phrase
 
-	void CalcScore(const LMList &lmListInitial
-							, const LMList &lmListEnd
-							, float weightDistortion
-							, float weightWordPenalty
-							, const SquareMatrix &futureScore
-							, const Sentence &source) ;
+	virtual void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore);
+
+	int GetId() const;
 
 	const Hypothesis* GetPrevHypo() const;
 
@@ -116,34 +138,36 @@ public:
 	}
 	inline const Phrase &GetPhrase() const
 	{
-		return m_phrase;
+		return m_targetPhrase;
 	}
 
-	// curr
+	// curr - pos is relative from CURRENT hypothesis's starting index
+  // (ie, start of sentence would be some negative number, which is
+  // not allowed- USE WITH CAUTION)
 	inline FactorArray &GetCurrFactorArray(size_t pos)
 	{
-		return m_phrase.GetFactorArray(pos);
+		return m_targetPhrase.GetFactorArray(pos);
 	}
 	inline const FactorArray &GetCurrFactorArray(size_t pos) const
 	{
-		return m_phrase.GetFactorArray(pos);
+		return m_targetPhrase.GetFactorArray(pos);
 	}
 	inline const Factor *GetCurrFactor(size_t pos, FactorType factorType) const
 	{
-		return m_phrase.GetFactor(pos, factorType);
+		return m_targetPhrase.GetFactor(pos, factorType);
 	}
-	// recursive
+	// recursive - pos is relative from start of sentence
 	inline const FactorArray &GetFactorArray(size_t pos) const
 	{
 		if (pos < m_currTargetWordsRange.GetStartPos())
 			return m_prevHypo->GetFactorArray(pos);
-		return m_phrase.GetFactorArray(pos - m_currTargetWordsRange.GetStartPos());
+		return m_targetPhrase.GetFactorArray(pos - m_currTargetWordsRange.GetStartPos());
 	}
-	inline const Factor *GetFactor(size_t pos, FactorType factorType) const
+	inline const Factor* GetFactor(size_t pos, FactorType factorType) const
 	{
 		if (pos < m_currTargetWordsRange.GetStartPos())
 			return m_prevHypo->GetFactor(pos, factorType);
-		return m_phrase.GetFactor(pos - m_currTargetWordsRange.GetStartPos(), factorType);
+		return m_targetPhrase.GetFactor(pos - m_currTargetWordsRange.GetStartPos(), factorType);
 	}
 
 	/***
@@ -158,7 +182,31 @@ public:
 		// used in generation processing
 		// startPos is usually the start of the last phrase
 
+  /***
+   * requires that GenerateNGramCompareKey was previously run
+   */
+	int	FastNGramCompare(const Hypothesis &compare, size_t nGramSize) const
+	{
+#if 0
+		return memcmp(this->m_compSignature, compare.m_compSignature, sizeof(m_compSignature));
+#else
+		return NGramCompare(compare, nGramSize);
+#endif
+	}
+
 	int	 NGramCompare(const Hypothesis &compare, size_t nGramSize) const;
+
+  /*** Generates a key in m_compSignature that can be used
+   *   for an arbitrary ordering of hypotheses.
+   *
+   * With this key, hypotheses that have identical target
+   * strings for the last n elements are considered equal.
+   *
+   * Currently not used since performance is approximately
+   * identical to the regular comparison engine.  This may
+   * be a better option with higher n-gram LMs.
+   */
+  void GenerateNGramCompareKey(size_t n);
 
 	void ToStream(std::ostream& out) const
 	{

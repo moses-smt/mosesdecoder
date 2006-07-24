@@ -33,6 +33,12 @@ class WordsRange
 
 	size_t m_startPos, m_endPos;
 public:
+	inline WordsRange(size_t startPos, size_t endPos) : m_startPos(startPos), m_endPos(endPos) {}
+	inline WordsRange(const WordsRange &copy)
+	 : m_startPos(copy.GetStartPos())
+	 , m_endPos(copy.GetEndPos())
+	 {}
+	
 	inline size_t GetStartPos() const
 	{
 		return m_startPos;
@@ -40,11 +46,6 @@ public:
 	inline size_t GetEndPos() const
 	{
 		return m_endPos;
-	}
-	inline WordsRange(size_t startPos, size_t endPos)
-	{
-		m_startPos	= startPos;
-		m_endPos		= endPos;
 	}
 
 	inline int CalcDistortion(const WordsRange &prevRange) const
@@ -57,6 +58,10 @@ public:
 	{
 		return (m_startPos == NOT_FOUND) ? 0 : m_endPos - m_startPos + 1;
 	}
-
+	inline bool operator<(const WordsRange& x) const 
+	{
+		return (m_startPos<x.m_startPos 
+						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
+	}
 };
 

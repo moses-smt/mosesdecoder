@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <list>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 #include "TypeDef.h"
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
@@ -39,18 +40,18 @@ class StaticData
 {
 protected:	
 	FactorCollection										m_factorCollection;
-	std::vector<PhraseDictionary*>			m_phraseDictionary;
+	std::vector<PhraseDictionaryBase*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::list < DecodeStep >						m_decodeStepList;
-	Parameter														m_parameter;
-	std::vector<FactorType>							m_inputFactorOrder;
-	std::vector<LMList>									m_languageModel;
+	Parameter			m_parameter;
+	std::vector<FactorType>			m_inputFactorOrder;
+//	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
+	std::vector<LMList>			m_languageModel;
 	LexicalReordering                   *m_lexReorder;
-//	UnknownWordHandler						      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float																m_beamThreshold
-																			,m_weightDistortion, m_weightWordPenalty;
+																			,m_weightDistortion, m_weightWordPenalty, m_wordDeletionWeight;
 									// PhraseTrans, Generation & LanguageModelScore has multiple weights.
 	int																	m_maxDistortion;
 									// do it differently from old pharaoh
@@ -62,16 +63,30 @@ protected:
 	std::vector<std::string>						m_mySQLParam;
 	InputOutput													*m_inputOutput;
 	bool                                m_fLMsLoaded;
-	int m_dropUnknown;
-	
+	/***
+	 * false = treat unknown words as proper nouns, and translate them as themselves;
+	 * true = drop (ignore) them
+	 */
+	bool m_dropUnknown;
+	bool m_wordDeletionEnabled;
+
+	int m_inputType;
+		
 	size_t m_verboseLevel;
 
 public:
 	StaticData();
 	~StaticData();
 
+	/***
+	 * also initialize the Parameter object
+	 */
 	bool LoadParameters(int argc, char* argv[]);
 
+	/***
+	 * load not only the main phrase table but also any auxiliary tables that depend on which features are being used
+	 * (eg word-deletion, word-insertion tables)
+	 */
 	void LoadPhraseTables(bool filter
 											, const std::string &inputFileHash
 											, const std::list< Phrase > &inputPhraseList);
@@ -80,7 +95,7 @@ public:
 		LoadPhraseTables(false, "", std::list< Phrase >());
 	}
 	void LoadMapping();
-/*	void SetUnknownWordHandler(UnknownWordHandler &unknownWordHandler)
+/*	void SetUnknownWordHandler(boost::shared_ptr<UnknownWordHandler> unknownWordHandler)
 	{
 		m_unknownWordHandler = unknownWordHandler;
 	}
@@ -104,17 +119,17 @@ public:
 	{
 		return m_decodeStepList;
 	}
-
-  inline int GetDropUnknown() const 
-  { 
-  	return m_dropUnknown; 
-  }
+	
+	inline bool GetDropUnknown() const 
+	{ 
+		return m_dropUnknown; 
+	}
 /*	
-	UnknownWordHandler &GetUnknownWordHandler()
+	boost::shared_ptr<UnknownWordHandler> GetUnknownWordHandler()
 	{
 		return m_unknownWordHandler;
 	}
-*/	
+*/
 	FactorCollection &GetFactorCollection()
 	{
 		return m_factorCollection;
@@ -131,6 +146,10 @@ public:
 	float GetWeightWordPenalty() const
 	{
 		return m_weightWordPenalty;
+	}
+	bool IsWordDeletionEnabled() const
+	{
+		return m_wordDeletionEnabled;
 	}
 	size_t GetMaxHypoStackSize() const
 	{
@@ -169,7 +188,6 @@ public:
 	{
 		return m_cachePath;
 	}
-
 	size_t GetVerboseLevel() const
 	{
 		return m_verboseLevel;
@@ -184,6 +202,10 @@ public:
 	{
 		return m_nBestFilePath;
 	}
+  // TODO use IsNBestEnabled instead of conditional compilation
+  const bool IsNBestEnabled() const {
+    return !m_nBestFilePath.empty();
+  }
 	void SetWeightDistortion(float weightDistortion)
 	{
 		m_weightDistortion = weightDistortion;
@@ -195,5 +217,9 @@ public:
 	void SetWeightTransModel(const std::vector<float> &weight);
 	void SetWeightLM(const std::vector<float> &weight);
 	void SetWeightGeneration(const std::vector<float> &weight);
+	int GetInputType() const {return m_inputType;}
+
+	void CleanUpAfterSentenceProcessing();
+
 };
 

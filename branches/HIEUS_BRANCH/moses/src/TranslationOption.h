@@ -32,7 +32,7 @@ class GenerationDictionary;
 
 /***
  * Specify source and target words for a possible translation. m_targetPhrase points to a phrase-table entry.
- * The source word range is zero-indexed, so it can't refer to an empty range.
+ * The source word range is zero-indexed, so it can't refer to an empty range. The target phrase may be empty.
  */
 class TranslationOption
 {
@@ -79,14 +79,23 @@ public:
 	}
 
 	bool Overlap(const Hypothesis &hypothesis) const;
+	/***
+	 * return start index of source phrase
+	 */
 	inline size_t GetStartPos() const
 	{
 		return m_sourceWordsRange.GetStartPos();
 	}
+	/***
+	 * return end index of source phrase
+	 */
 	inline size_t GetEndPos() const
 	{
 		return m_sourceWordsRange.GetEndPos();
 	}
+	/***
+	 * return length of source phrase
+	 */
 	inline size_t GetSize() const
 	{
 		return m_sourceWordsRange.GetEndPos() - m_sourceWordsRange.GetStartPos() + 1;
@@ -95,10 +104,32 @@ public:
 	{
 		return m_scoreTrans;
 	}
+	/***
+	 * return source words range
+	 */
+	inline const WordsRange &GetWordsRange() const
+	{
+		return m_sourceWordsRange;
+	}
+	/***
+	 * return target phrase
+	 */
+	inline const Phrase& GetPhrase() const
+	{
+		return m_phrase;
+	}
 	inline float GetGenerationScore() const
 	{
 		return m_scoreGen;
 	}
+
+  /***
+   * returns true if the source phrase translates into nothing
+   */
+	inline bool IsDeletionOption() const
+  {
+    return m_phrase.GetSize() == 0;
+  }
 	inline float GetFutureScore() const 	 
 	{ 	 
 				 return m_futureScore; 	 
@@ -114,6 +145,14 @@ public:
 	{
 		return m_transScoreComponent;
 	}
+	inline void AddTransScoreComponent(const ScoreComponent &scoreComponent)
+	{
+		m_transScoreComponent.Add(scoreComponent);
+	}
+	inline void AddGenScoreComponent(const GenerationDictionary &dict, float value)
+	{
+		m_generationScoreComponent.Add((size_t)&dict);
+	}
 	inline const ScoreColl &GetGenerationScoreComponent() const
 	{
 		return m_generationScoreComponent;
@@ -124,5 +163,6 @@ public:
 	}
 #endif
 
-
 };
+
+

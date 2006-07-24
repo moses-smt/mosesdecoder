@@ -29,8 +29,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "Util.h"
 #include "InputFileStream.h"
+#include "StaticData.h"
 
 using namespace std;
+
+
+PhraseDictionaryBase::PhraseDictionaryBase(size_t noScoreComponent)
+	: Dictionary(noScoreComponent),m_maxTargetPhrase(0)
+{
+}
+PhraseDictionaryBase::~PhraseDictionaryBase() {}
+
 
 void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
@@ -42,7 +51,8 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, bool filter
 																			, const list< Phrase > &inputPhraseList
 																			, const LMList &languageModels
-																			, float weightWP)
+																			, float weightWP
+																			, const StaticData& staticData)
 {
 	m_maxTargetPhrase = maxTargetPhrase;
 
@@ -66,40 +76,53 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 	string line, prevSourcePhrase = "";
 	bool addPhrase = !filter;
 	size_t count = 0;
+  size_t line_num = 0;
 	while(getline(inFile, line)) 
 	{
-		vector<string> token = TokenizeMultiCharSeparator( line , "|||" );
-		
+    ++line_num;
+		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
+		if (tokens.size() != 3)
+		{
+			TRACE_ERR("Syntax error at " << filePath << ":" << line_num);
+			abort(); // TODO- error handling
+		}
+
+    bool isLHSEmpty = (tokens[1].find_first_not_of(" \t", 0) == string::npos);
+    if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+      TRACE_ERR(filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
+			continue;
+    }
 		if (!filter)
 		{
-			if (token[0] != prevSourcePhrase)
-				phraseVector = Phrase::Parse(token[0]);
+			if (tokens[0] != prevSourcePhrase)
+				phraseVector = Phrase::Parse(tokens[0]);
 		}
-		else if (token[0] == prevSourcePhrase)
+		else if (tokens[0] == prevSourcePhrase)
 		{ // same source phrase as prev line.
 		}
 		else
 		{
-			phraseVector = Phrase::Parse(token[0]);
-			prevSourcePhrase = token[0];
+			phraseVector = Phrase::Parse(tokens[0]);
+			prevSourcePhrase = tokens[0];
 
-			if (Contains(phraseVector, inputPhraseList, input))
-				addPhrase = true;
-			else
-				addPhrase = false;
+			addPhrase = Contains(phraseVector, inputPhraseList, input);
 		}
 
 		if (addPhrase)
 		{
-			vector<float> scoreVector = Tokenize<float>(token[2]);
-			assert(scoreVector.size() == m_noScoreComponent);
+			vector<float> scoreVector = Tokenize<float>(tokens[2]);
+			if (scoreVector.size() != m_noScoreComponent) {
+				TRACE_ERR("Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_noScoreComponent<<") of score components on line " << line_num);
+        abort();
+			}
+//			assert(scoreVector.size() == m_noScoreComponent);
 			
 			// source
 			Phrase sourcePhrase(Input);
 			sourcePhrase.CreateFromString( input, phraseVector, factorCollection);
 			//target
 			TargetPhrase targetPhrase(Output, this);
-			targetPhrase.CreateFromString( output, token[1], factorCollection);
+			targetPhrase.CreateFromString( output, tokens[1], factorCollection);
 
 			// component score, for n-best output
 			targetPhrase.SetScore(scoreVector, weight, languageModels, weightWP);
@@ -167,7 +190,7 @@ void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &
 	}
 }
 
-const TargetPhraseCollection *PhraseDictionary::FindEquivPhrase(const Phrase &source) const
+const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const Phrase &source) const
 {
 	std::map<Phrase , TargetPhraseCollection >::const_iterator iter = m_collection.find(source);
 	if (iter == m_collection.end())
