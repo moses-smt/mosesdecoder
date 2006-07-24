@@ -82,6 +82,13 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	}
 
 
+	// printing source phrase spans
+	if (m_parameter.GetParam("report-source-span").size() > 0)
+		m_reportSourceSpan = Scan<bool>(m_parameter.GetParam("report-source-span")[0]);
+	else
+        m_reportSourceSpan = false;
+
+
 	//input-factors
 	const vector<string> &inputFactorVector = m_parameter.GetParam("input-factors");
 	for(size_t i=0; i<inputFactorVector.size(); i++) 

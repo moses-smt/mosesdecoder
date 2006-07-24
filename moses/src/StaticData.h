@@ -75,6 +75,8 @@ protected:
 		
 	size_t m_verboseLevel;
 
+	bool m_reportSourceSpan;
+
 public:
 	StaticData();
 	~StaticData();
@@ -192,6 +194,10 @@ public:
 	size_t GetVerboseLevel() const
 	{
 		return m_verboseLevel;
+	}
+	size_t GetReportSourceSpan() const
+	{
+		return m_reportSourceSpan;
 	}
 
 	// for mert
