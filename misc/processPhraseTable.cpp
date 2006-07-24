@@ -174,7 +174,7 @@ int main(int argc,char **argv) {
 						for(size_t i=0;i<pdicts.size();++i)
 							weights.push_back(std::vector<float>(noScoreComponent,1/(1.0*noScoreComponent)));
 
-						while(net.Read(std::cin,factorOrder,cn-1)) {
+						while(net.ReadF(std::cin,factorOrder,cn-1)) {
 							net.Print(std::cerr);
 							GenerateCandidates(net,pdicts,weights,verb);
 						}

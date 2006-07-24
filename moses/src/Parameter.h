@@ -41,7 +41,7 @@ protected:
 	std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
 	void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
 	bool ReadConfigFile( std::string filePath );
-	bool FilesExist(const std::string &paramName, size_t tokenizeIndex);
+	bool FilesExist(const std::string &paramName, size_t tokenizeIndex,std::vector<std::string> const& fileExtension=std::vector<std::string>(1,""));
 
 	bool Validate();
 
@@ -59,5 +59,6 @@ public:
 	{
 		return m_setting[paramName];
 	}
+
 };
 

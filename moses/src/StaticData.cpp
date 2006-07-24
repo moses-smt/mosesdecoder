@@ -418,30 +418,31 @@ void StaticData::LoadPhraseTables(bool filter
 															+ PROJECT_NAME + "--"
 															+ inputFileHash + "--" 
 															+ phraseTableHash + ".txt";
-			bool filterPhrase;
-			if (filter)
-			{
-				boost::filesystem::path tempFile(hashFilePath, boost::filesystem::native);
-				if (boost::filesystem::exists(tempFile))
-				{ // load filtered file instead
-					filterPhrase = false;
-					filePath = hashFilePath;
-				}
-				else
-				{ // load original file & create has file
-					filterPhrase = true;
-				}
-			}
-			else
-			{ // load original file
-				filterPhrase = false;
-			}
-			TRACE_ERR(filePath << endl);
 
 			timer.check("Start loading PhraseTable");
-
 			if (!boost::filesystem::exists(filePath+".binphr.idx")) 
 				{
+					bool filterPhrase;
+					if (filter)
+						{
+							boost::filesystem::path tempFile(hashFilePath, boost::filesystem::native);
+							if (boost::filesystem::exists(tempFile))
+								{ // load filtered file instead
+									filterPhrase = false;
+									filePath = hashFilePath;
+								}
+							else
+								{ // load original file & create has file
+									filterPhrase = true;
+								}
+						}
+					else
+						{ // load original file
+							filterPhrase = false;
+						}
+					TRACE_ERR(filePath << endl);
+
+
 					TRACE_ERR("using standard phrase tables");
 					PhraseDictionary *pd=new PhraseDictionary(noScoreComponent);
 					pd->Load(input

@@ -97,8 +97,15 @@ bool Parameter::Validate()
 
   // do files exist?
 	// phrase tables
-	if (ret)
-		ret = FilesExist("ttable-file", 3);
+	if (ret) 
+		{
+			std::vector<std::string> ext;
+			// standard phrase table extension (i.e. full name has to be specified)
+			ext.push_back("");
+			// alternative file extension for binary phrase table format:
+			ext.push_back(".binphr.idx");
+			ret = FilesExist("ttable-file", 3,ext);
+		}
 	// generation tables
 	if (ret)
 		ret = FilesExist("generation-file", 2);
@@ -109,7 +116,7 @@ bool Parameter::Validate()
 	return ret;
 }
 
-bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex)
+bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::vector<std::string> const& extensions)
 {
 	using namespace boost::filesystem;
 	
@@ -135,14 +142,21 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex)
 			return false;
 		}
 		const string &pathStr = vec[tokenizeIndex];
-		path filePath(pathStr, native);
-		if (!exists(filePath))
-		{
-			stringstream errorMsg("");
-			errorMsg << "File " << pathStr << " does not exists";
-			UserMessage::Add(errorMsg.str());
-			return false;
-		}
+
+		bool fileFound=0;
+		for(size_t i=0;i<extensions.size() && !fileFound;++i)
+			{
+				path filePath(pathStr+extensions[i], native);
+				fileFound|=exists(filePath);
+			}
+		if(!fileFound)
+			{
+				stringstream errorMsg("");
+				errorMsg << "File " << pathStr << " does not exists";
+				UserMessage::Add(errorMsg.str());
+				return false;
+			}
+			
 	}
 	return true;
 }
