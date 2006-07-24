@@ -38,7 +38,7 @@ class InputOutput
  public:
 	InputOutput();
 	virtual InputType* GetInput(InputType*) = 0;
-	virtual void SetOutput(const Hypothesis *hypo, long translationId) = 0;
+	virtual void SetOutput(const Hypothesis *hypo, long translationId, bool reportSourceSpan) = 0;
 	virtual void SetNBest(const LatticePathList &nBestList, long translationId) = 0;
 	virtual ~InputOutput();
 	virtual void Release(InputType*);
