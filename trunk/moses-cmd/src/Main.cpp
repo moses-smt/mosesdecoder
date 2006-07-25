@@ -188,6 +188,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 		inputFileHash = GetMD5Hash(filePath);
 		TRACE_ERR("About to LoadPhraseTables" << endl);
 		staticData.LoadPhraseTables(true, inputFileHash, inputPhraseList);
+		ioFile->ResetSentenceId();
 	}
 	else
 	{
