@@ -28,7 +28,7 @@ int DistortionOrientation::GetOrientation(const Hypothesis *curr_hypothesis, int
 
 	if(direction==LexReorderType::Backward)
 	{
-		if(curr_target_start==0 or curr_target_end==numSourceWords or prev_source_end==curr_source_start)
+		if(curr_target_start==0 || curr_target_end==numSourceWords || prev_source_end==curr_source_start)
 		{
 			//the first two conditionals are edge cases which judge first and last phrases as monotonic
 			return DistortionOrientationType::MONO;
