@@ -18,15 +18,15 @@
 
 ******************************************************************************/
 
-using namespace std;
-
 #include <iomanip>
 #include <iostream>
 #include <fstream>
 #include "mempool.h"
 #include "htable.h"
 #include "dictionary.h"
+#include "index.h"
 
+using namespace std;
 
 dictionary::dictionary(char *filename,int size,char* isymb,char* oovlexfile){
 
