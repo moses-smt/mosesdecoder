@@ -291,6 +291,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DistortionOrientation.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Factor.cpp"
 				>
 			</File>
@@ -431,6 +435,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TargetPhraseCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TranslationOption.cpp"
 				>
 			</File>
@@ -489,15 +497,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\CreateTargetPhraseCollection.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\DecodeStep.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\Dictionary.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DistortionOrientation.h"
 				>
 			</File>
 			<File
@@ -666,6 +674,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TargetPhrase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TargetPhraseCollection.h"
 				>
 			</File>
 			<File
