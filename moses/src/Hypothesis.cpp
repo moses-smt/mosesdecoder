@@ -46,8 +46,8 @@ Hypothesis::Hypothesis(InputType const& source)
 	, m_sourceCompleted(source.GetSize())
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
-	, m_id(s_HypothesesCreated++)
 	, m_wordDeleted(false)
+	, m_id(s_HypothesesCreated++)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	ResetScore();	
