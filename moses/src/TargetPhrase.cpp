@@ -30,6 +30,7 @@ using namespace std;
 TargetPhrase::TargetPhrase(FactorDirection direction, const Dictionary *dictionary)
 	:Phrase(direction),m_transScore(0.0),m_ngramScore(0.0),m_fullScore(0.0)
 #ifdef N_BEST
+	,m_inputScore(0.0)
 	,m_scoreComponent(dictionary)
 #endif
 {
@@ -72,12 +73,13 @@ void TargetPhrase::SetScore(const LMList &languageModels, float weightWP)
 }
 
 void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float> &weightT,
-	const LMList &languageModels, float weightWP)
+														const LMList &languageModels, float weightWP,float inputScore, float weightInput)
 {
 	// calc average score if non-best
 	m_transScore=CalcTranslationScore(scoreVector,weightT);
 #ifdef N_BEST
 	std::transform(scoreVector.begin(),scoreVector.end(),m_scoreComponent.begin(),TransformScore);
+	m_inputScore=inputScore;
 #endif
 
   // Replicated from TranslationOptions.cpp
@@ -95,13 +97,11 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 		{ // contains factors used by this LM
 			const float weightLM = lm.GetWeight();
 			float fullScore, nGramScore;
-#ifdef N_BEST
 			lm.CalcScore(*this, fullScore, nGramScore);
+#ifdef N_BEST
 			size_t lmId = lm.GetId();
 			pair<size_t, float> store(lmId, nGramScore);
 			m_ngramComponent.push_back(store);
-#else
-			lm.CalcScore(*this, fullScore, nGramScore);
 #endif
 	
 			// total LM score so far
@@ -110,9 +110,10 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 		}
 	}
   m_ngramScore = totalNgramScore;
+	m_transScore += inputScore * weightInput;
+
 	m_fullScore = m_transScore + totalFutureScore + totalFullScore
 							- (this->GetSize() * weightWP);	 // word penalty
-
 }
 
 void TargetPhrase::SetWeights(const vector<float> &weightT)

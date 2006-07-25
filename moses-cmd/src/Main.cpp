@@ -98,12 +98,11 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
-	while(InputType *source = inputOutput->GetInput((staticData.GetInputType() ? static_cast<InputType*>(new ConfusionNet) : static_cast<InputType*>(new Sentence(Input)))))
+	while(InputType *source = inputOutput->GetInput((staticData.GetInputType() ? 
+																									 static_cast<InputType*>(new ConfusionNet) : 
+																									 static_cast<InputType*>(new Sentence(Input)))))
 	{
-		if(Sentence* sent=dynamic_cast<Sentence*>(source)) 
-			{TRACE_ERR(*sent<<"\n");}
-		else if(ConfusionNet *cn=dynamic_cast<ConfusionNet*>(source)) 
-			{cn->Print(std::cerr);std::cerr<<"\n";}
+		TRACE_ERR(*source<<"\n");
 
 		TranslationOptionCollection *translationOptionCollection=source->CreateTranslationOptionCollection();
 		assert(translationOptionCollection);

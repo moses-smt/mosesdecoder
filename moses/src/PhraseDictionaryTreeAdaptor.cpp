@@ -16,7 +16,7 @@ inline bool existsFile(const char* filename) {
 struct PDTAimp {
 	std::vector<float> m_weights;
 	LMList const* m_languageModels;
-	float m_weightWP;
+	float m_weightWP,m_weightInput;
 	std::vector<FactorType> m_input,m_output;
 	FactorCollection *m_factorCollection;
 	PhraseDictionaryTree *m_dict;
@@ -32,7 +32,7 @@ struct PDTAimp {
 
 
 	PDTAimp(PhraseDictionaryTreeAdaptor *p) 
-		: m_languageModels(0),m_weightWP(0.0),m_factorCollection(0),m_dict(0),
+		: m_languageModels(0),m_weightWP(0.0),m_weightInput(0.0),m_factorCollection(0),m_dict(0),
 			m_obj(p),useCache(1) {}
 
 	// convert FactorArray into string
@@ -116,7 +116,7 @@ struct PDTAimp {
 				StringTgtCand::first_type const& factorStrings=cands[i].first;
 				StringTgtCand::second_type const& scoreVector=cands[i].second;
 
-				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector);
+				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,0.0);
 				costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
 				tCands.push_back(targetPhrase);
 			}
@@ -142,6 +142,7 @@ struct PDTAimp {
 							, const std::vector<float> &weight
 							, const LMList &languageModels
 							, float weightWP
+							, float weightInput
 							)
 	{
 
@@ -153,6 +154,9 @@ struct PDTAimp {
 		m_languageModels=&languageModels;
 		m_weightWP=weightWP;
 		m_weights=weight;
+		m_weightInput=weightInput;
+
+		std::cerr<<"input weight: "<<weightInput<<"\n";
 
 		std::string binFname=filePath+".binphr.idx";
 		if(!existsFile(binFname.c_str())) {
@@ -183,7 +187,8 @@ struct PDTAimp {
 
 	void CreateTargetPhrase(TargetPhrase& targetPhrase,
 													StringTgtCand::first_type const& factorStrings,
-													StringTgtCand::second_type const& scoreVector) const
+													StringTgtCand::second_type const& scoreVector,
+													float inputScore) const
 	{
 		for(size_t k=0;k<factorStrings.size();++k) 
 			{
@@ -192,7 +197,7 @@ struct PDTAimp {
 				for(size_t l=0;l<m_output.size();++l)
 					fa[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
 			}
-		targetPhrase.SetScore(scoreVector, m_weights, *m_languageModels, m_weightWP);
+		targetPhrase.SetScore(scoreVector, m_weights, *m_languageModels, m_weightWP, inputScore, m_weightInput);
 	}
 
 
@@ -213,6 +218,13 @@ struct PDTAimp {
 		return rv;
 	}
 
+	// POD for target phrase scores
+	struct TScores {
+		float total,input;
+		StringTgtCand::second_type trans;
+
+		TScores() : total(0.0),input(0.0) {}
+	};
 
 	void CacheSource(ConfusionNet const& src) 
 	{
@@ -221,7 +233,7 @@ struct PDTAimp {
 		for(size_t i=0;i<src.GetSize();++i) stack.push_back(State(i,i,m_dict->GetRoot()));
 
 		typedef StringTgtCand::first_type sPhrase;
-		typedef std::map<StringTgtCand::first_type,std::pair<float,StringTgtCand::second_type> > E2Costs;
+		typedef std::map<StringTgtCand::first_type,TScores> E2Costs;
 
 		std::map<Range,E2Costs> cov2cand;
 
@@ -241,9 +253,9 @@ struct PDTAimp {
 						if(nextP) 
 							{
 								Range newRange(curr.begin(),curr.end()+1);
+								float newScore=curr.GetScore()+currCol[colidx].second;
 								if(newRange.second<src.GetSize())
-									stack.push_back(State(newRange,nextP,
-																				curr.GetScore()+currCol[colidx].second));
+									stack.push_back(State(newRange,nextP,newScore));
 								
 								std::vector<StringTgtCand> tcands;
 								m_dict->GetTargetCandidates(nextP,tcands);
@@ -254,17 +266,19 @@ struct PDTAimp {
 
 										for(size_t i=0;i<tcands.size();++i)
 											{
-												float costs=CalcTranslationScore(tcands[i].second,m_weights);
-												costs-=tcands[i].first.size() * m_weightWP;
-												std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].first,std::make_pair(costs,tcands[i].second)));
-												if(!p.second)
+												float score=CalcTranslationScore(tcands[i].second,m_weights);
+												score-=tcands[i].first.size() * m_weightWP;
+												score+=newScore*m_weightInput;
+												std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].first,TScores()));
+
+												TScores & scores=p.first->second;
+												if(p.second || scores.total<score)
 													{
-														if(p.first->second.first>costs)
-															p.first->second=std::make_pair(costs,tcands[i].second);						
+														scores.total=score;
+														scores.input=newScore;
+														scores.trans=tcands[i].second;
 													}
 											}
-
-
 									}
 							}
 					}
@@ -272,7 +286,6 @@ struct PDTAimp {
 
 		m_rangeCache.resize(src.GetSize(),vTPC(src.GetSize(),0));
 
-		
 		for(std::map<Range,E2Costs>::const_iterator i=cov2cand.begin();i!=cov2cand.end();++i)
 			{
 				assert(i->first.first<m_rangeCache.size());
@@ -285,8 +298,9 @@ struct PDTAimp {
 
 				for(E2Costs::const_iterator j=i->second.begin();j!=i->second.end();++j)
 					{
+						TScores const & scores=j->second;
 						TargetPhrase targetPhrase(Output, m_obj);
-						CreateTargetPhrase(targetPhrase,j->first,j->second.second);
+						CreateTargetPhrase(targetPhrase,j->first,scores.trans,scores.input);
 						costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
 						tCands.push_back(targetPhrase);
 					}
@@ -299,10 +313,7 @@ struct PDTAimp {
 						m_rangeCache[i->first.first][i->first.second-1]=rv;
 						m_tgtColls.push_back(rv);
 					}
-
 			}
-
-
 	}
 };
 
@@ -344,6 +355,7 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 																				 , size_t maxTargetPhrase
 																				 , const LMList &languageModels
 																				 , float weightWP
+																				 , float weightInput
 																				 )
 {
 	if(m_noScoreComponent!=weight.size()) {
@@ -360,7 +372,7 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 	m_maxTargetPhrase=maxTargetPhrase;
 
 	imp->Create(input,output,factorCollection,filePath,
-							weight,languageModels,weightWP);
+							weight,languageModels,weightWP,weightInput);
 }
 
 TargetPhraseCollection const* 

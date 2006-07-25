@@ -40,6 +40,7 @@ extern Timer timer;
 
 StaticData::StaticData()
 :m_languageModel(2)
+,m_weightInput(0.0)
 ,m_inputOutput(NULL)
 ,m_fLMsLoaded(false)
 ,m_inputType(0)
@@ -276,13 +277,15 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	else
 	  { m_dropUnknown = 0; }
 
-  	TRACE_ERR("m_dropUnknown: " << m_dropUnknown << endl);
+	TRACE_ERR("m_dropUnknown: " << m_dropUnknown << endl);
 
-		if(m_parameter.GetParam("inputtype").size()) {
-			m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
-		}
-		TRACE_ERR("input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
+	if(m_parameter.GetParam("inputtype").size()) 
+		m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
+	TRACE_ERR("input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
 
+	if(m_parameter.GetParam("weight-i").size())
+		m_weightInput=Scan<float>(m_parameter.GetParam("weight-i")[0]);
+	
 	return true;
 }
 
@@ -473,7 +476,8 @@ void StaticData::LoadPhraseTables(bool filter
 					pd->Create(input,output,m_factorCollection,filePath,weight,
 										 maxTargetPhrase[index],
 										 this->GetLanguageModel(Initial),
-										 this->GetWeightWordPenalty());
+										 this->GetWeightWordPenalty(),
+										 m_weightInput);
 					m_phraseDictionary.push_back(pd);
 				}
 
