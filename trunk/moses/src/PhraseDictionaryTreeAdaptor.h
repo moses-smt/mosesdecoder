@@ -1,4 +1,5 @@
 // $Id$
+
 #ifndef PHRASEDICTIONARYTREEADAPTOR_H_
 #define PHRASEDICTIONARYTREEADAPTOR_H_
 #include <vector>

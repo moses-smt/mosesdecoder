@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "InputOutput.h"
 #include "DecodeStep.h"
+#include "LMList.h"
 //#include "UnknownWordHandler.h"
 
 class InputType;
@@ -229,9 +230,7 @@ public:
 	void SetWeightLM(const std::vector<float> &weight);
 	void SetWeightGeneration(const std::vector<float> &weight);
 	int GetInputType() const {return m_inputType;}
-
 	void InitializeBeforeSentenceProcessing(InputType const&);
 	void CleanUpAfterSentenceProcessing();
-
 };
 

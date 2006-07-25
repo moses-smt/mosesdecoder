@@ -1,4 +1,5 @@
 // $Id$
+
 #include "PhraseDictionaryTreeAdaptor.h"
 #include <sys/stat.h>
 #include "PhraseDictionaryTree.h"
@@ -35,7 +36,6 @@ struct PDTAimp {
 		: m_languageModels(0),m_weightWP(0.0),m_weightInput(0.0),m_factorCollection(0),m_dict(0),
 			m_obj(p),useCache(1) {}
 
-	// convert FactorArray into string
 	void Factors2String(FactorArray const& w,std::string& s) const 
 	{
 		for(size_t j=0;j<m_input.size();++j)
@@ -45,7 +45,6 @@ struct PDTAimp {
 			}
 	}
 
-	// free temporary memory
 	void CleanUp() 
 	{
 		assert(m_dict);
@@ -56,7 +55,6 @@ struct PDTAimp {
 		m_rangeCache.clear();
 	}
 
-	// add phrase pair till next CleanUp, should be used only for unknowns
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
 	{
 		assert(GetTargetPhraseCollection(source)==0);
@@ -73,14 +71,12 @@ struct PDTAimp {
 		else std::cerr<<"WARNING: you added an already existing phrase!\n";
 	}
 
-	// access with full source phrase
 	TargetPhraseCollection const* 
 	GetTargetPhraseCollection(Phrase const &src) const
 	{
 		assert(m_dict);
 		if(src.GetSize()==0) return 0;
 
-		// look up cache
 		std::pair<MapSrc2Tgt::iterator,bool> piter;
 		if(useCache) 
 			{
@@ -89,8 +85,6 @@ struct PDTAimp {
 			}
 		else if (m_cache.size()) 
 			{
-				// cache is also used for unknowns, so even if the cache is disabled
-				// there may be entries
 				MapSrc2Tgt::const_iterator i=m_cache.find(src);
 				return (i!=m_cache.end() ? i->second : 0);
 			}
@@ -120,8 +114,20 @@ struct PDTAimp {
 				costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
 				tCands.push_back(targetPhrase);
 			}
-		TargetPhraseCollection *rv=PruneTargetCandidates(tCands,costs);
 
+		// prune target candidates and sort according to score
+		std::vector<std::pair<float,size_t> >::iterator nth=costs.end();
+		if(m_obj->m_maxTargetPhrase>0 && costs.size()>m_obj->m_maxTargetPhrase) {
+			nth=costs.begin()+m_obj->m_maxTargetPhrase;
+			std::nth_element(costs.begin(),nth,costs.end(),std::greater<std::pair<float,size_t> >());
+		}
+		std::sort(costs.begin(),nth,std::greater<std::pair<float,size_t> >());
+
+		// convert into TargerPhraseCollection
+		TargetPhraseCollection *rv=new TargetPhraseCollection;
+		for(std::vector<std::pair<float,size_t> >::iterator i=costs.begin();i!=nth;++i) 
+			rv->push_back(tCands[i->second]);
+	
 		if(rv->empty()) 
 			{
 				delete rv;
@@ -134,6 +140,8 @@ struct PDTAimp {
 				return rv;
 			}
 	}
+
+
 
 	void Create(const std::vector<FactorType> &input
 							, const std::vector<FactorType> &output
@@ -190,6 +198,7 @@ struct PDTAimp {
 													StringTgtCand::second_type const& scoreVector,
 													float inputScore) const
 	{
+
 		for(size_t k=0;k<factorStrings.size();++k) 
 			{
 				std::vector<std::string> factors=Tokenize(*factorStrings[k],"|");
@@ -197,6 +206,7 @@ struct PDTAimp {
 				for(size_t l=0;l<m_output.size();++l)
 					fa[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
 			}
+			
 		targetPhrase.SetScore(scoreVector, m_weights, *m_languageModels, m_weightWP, inputScore, m_weightInput);
 	}
 
@@ -241,6 +251,9 @@ struct PDTAimp {
 			{
 				State curr(stack.back());
 				stack.pop_back();
+		
+				//std::cerr<<"processing state "<<curr<<" stack size: "<<stack.size()<<"\n";
+
 				assert(curr.end()<src.GetSize());
 				const ConfusionNet::Column &currCol=src[curr.end()];
 				for(size_t colidx=0;colidx<currCol.size();++colidx) 
@@ -305,7 +318,19 @@ struct PDTAimp {
 						tCands.push_back(targetPhrase);
 					}
 
-				TargetPhraseCollection *rv=PruneTargetCandidates(tCands,costs);
+				// prune target candidates and sort according to score
+				std::vector<std::pair<float,size_t> >::iterator nth=costs.end();
+				if(m_obj->m_maxTargetPhrase>0 && costs.size()>m_obj->m_maxTargetPhrase) {
+					nth=costs.begin()+m_obj->m_maxTargetPhrase;
+					std::nth_element(costs.begin(),nth,costs.end(),std::greater<std::pair<float,size_t> >());
+				}
+				std::sort(costs.begin(),nth,std::greater<std::pair<float,size_t> >());
+
+				// convert into TargerPhraseCollection
+				TargetPhraseCollection *rv=new TargetPhraseCollection;
+				for(std::vector<std::pair<float,size_t> >::iterator it=costs.begin();it!=nth;++it) 
+					rv->push_back(tCands[it->second]);
+				
 				if(rv->empty()) 
 					delete rv;
 				else

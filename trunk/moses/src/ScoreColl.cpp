@@ -1,6 +1,7 @@
 
 #include "ScoreColl.h"
 
+
 void ScoreColl::Combine(const ScoreColl &other)
 {
 	const_iterator iter;

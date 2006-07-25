@@ -65,5 +65,6 @@ inline FILE* fOpen(const char* fn,const char* m) {
     abort();}
 }
 inline void fClose(FILE* f) {fclose(f);} // for consistent function names only
+
 #endif
 

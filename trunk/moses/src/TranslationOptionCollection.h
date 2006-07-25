@@ -26,57 +26,60 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
+#include "PartialTranslOptColl.h"
+#include "DecodeStep.h"
 
-class DecodeStep;
 class LanguageModel;
 class FactorCollection;
 class InputType;
 class PhraseDictionary;
+class GenerationDictionary;
+class InputType;
+class LMList;
 
 class TranslationOptionCollection : public std::list< TranslationOption >
 {
 	TranslationOptionCollection(const TranslationOptionCollection&); // no copy constructor
 protected:
-	InputType const& m_source;
-	SquareMatrix m_futureScore;
-	WordsBitmap m_initialCoverage;
+	InputType const													&m_source;
+	SquareMatrix														m_futureScore;
+	WordsBitmap															m_unknownWordPos;
+	std::list<const PhraseDictionary*>			m_allPhraseDictionary;
+	std::list<const GenerationDictionary*>	m_allGenerationDictionary;
+	std::set<TargetPhrase> m_unknownTargetPhrase;
+	// make sure phrase doesn't go out of memory while we're using it
 
 	TranslationOptionCollection(InputType const& src);
 	
+	void CalcFutureScore(size_t verboseLevel);
+															
 public:
   virtual ~TranslationOptionCollection();
 
-	virtual void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
-																				, const LMList &languageModels  														
-																				, const LMList &allLM
-																				, FactorCollection &factorCollection
-																				, float weightWordPenalty
-																				, bool dropUnknown
-																				, size_t verboseLevel);
-	
 	// get length/size of source input
 	size_t GetSize() const;
 
+	virtual void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
+																			, const LMList &allLM
+																			, FactorCollection &factorCollection
+																			, float weightWordPenalty
+																			, bool dropUnknown
+																			, size_t verboseLevel) = 0;
 
-	inline const SquareMatrix &GetFutureScore()
+
+	void Add(const TranslationOption &translationOption)
+	{
+		push_back(translationOption);
+	}
+
+	inline virtual const SquareMatrix &GetFutureScore() const
 	{
 		return m_futureScore;
-	}
-	inline const WordsBitmap &GetInitialCoverage() const 
-	{
-		return m_initialCoverage;
 	}
 
 
 
  protected:
-	virtual int HandleUnkownWord(PhraseDictionaryBase& phraseDictionary,
-																size_t startPos,
-																FactorCollection &factorCollection,
-																const LMList &allLM,
-																bool dropUnknown,
-																float weightWordPenalty
-																) =0; 
 
 	void ComputeFutureScores(size_t verboseLevel);
 };

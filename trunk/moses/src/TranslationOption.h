@@ -21,12 +21,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
+#include <list>
 #include "WordsBitmap.h"
+#include "WordsRange.h"
+#include "Phrase.h"
 #include "TargetPhrase.h"
 #include "Hypothesis.h"
 #include "Util.h"
 #include "TypeDef.h"
-#include "ScoreComponent.h"
+#include "ScoreComponentCollection.h"
+
+class PhraseDictionaryBase;
+class GenerationDictionary;
 
 /***
  * Specify source and target words for a possible translation. m_targetPhrase points to a phrase-table entry.
@@ -38,14 +44,44 @@ class TranslationOption
 
 protected:
 
-	const TargetPhrase 	&m_targetPhrase;
-	WordsRange		m_sourceWordsRange;
+	const Phrase 				m_phrase;
+	const WordsRange		m_sourceWordsRange;
+	float								m_scoreTrans, m_scoreGen, m_futureScore, m_ngramScore;
 #ifdef N_BEST
-	ScoreComponent	m_transScoreComponent;
+	ScoreComponentCollection	m_transScoreComponent;
+	ScoreColl									m_generationScoreComponent, m_ngramComponent;
 #endif
 
 public:
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
+	// used by initial translation step
+	TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase);
+	// used by MergeTranslation 
+	TranslationOption(const TranslationOption &copy
+											, const Phrase &inputPhrase
+											, const GenerationDictionary *generationDictionary
+											, float generationScore
+											, float weight);
+	TranslationOption(const WordsRange &wordsRange
+												, const TargetPhrase &targetPhrase
+											 	, std::list<const PhraseDictionaryBase*>	&allPhraseDictionary
+											 	, std::list<const GenerationDictionary*>	 &allGenerationDictionary);
+	// used to create trans opt from unknown word
+	
+	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase) const;
+	TranslationOption *MergeGeneration(const Phrase &inputPhrase
+																		, const GenerationDictionary *generationDictionary
+																		, float generationScore
+																		, float weight) const;
+
+	inline const Phrase &GetTargetPhrase() const
+	{
+		return m_phrase;
+	}
+	inline const WordsRange &GetSourceWordsRange() const
+	{
+		return m_sourceWordsRange;
+	}
 
 	bool Overlap(const Hypothesis &hypothesis) const;
 	/***
@@ -76,48 +112,65 @@ public:
 	{
 		return m_sourceWordsRange;
 	}
+  /***
+   * returns true if the source phrase translates into nothing
+   */
+	inline float GetTranslationScore() const
+	{
+		return m_scoreTrans;
+	}
+	inline float GetGenerationScore() const
+	{
+		return m_scoreGen;
+	}
+	inline float GetFutureScore() const 	 
+	{ 	 
+				 return m_futureScore; 	 
+	}
+	inline float GetNgramScore() const 	 
+  { 	 
+		return m_ngramScore; 	 
+	}
 	/***
 	 * return target phrase
 	 */
 	inline const Phrase& GetPhrase() const
 	{
-		return m_targetPhrase;
+		return m_phrase;
 	}
+
   /***
    * returns true if the source phrase translates into nothing
    */
 	inline bool IsDeletionOption() const
   {
-    return m_targetPhrase.GetSize() == 0;
+    return m_phrase.GetSize() == 0;
   }
-	inline float GetTranslationScore() const
-	{
-		return m_targetPhrase.GetTranslationScore();
-	}
-	inline float GetFutureScore() const
-	{
-		return m_targetPhrase.GetFutureScore();
-	}
-	inline float GetNgramScore() const
-	{
-		return m_targetPhrase.GetNgramScore();
-	}
+	void CalcScore(const LMList &allLM, float weightWordPenalty);
 
 #ifdef N_BEST
-	inline const ScoreComponent &GetScoreComponents() const
+	inline const ScoreComponentCollection &GetTransScoreComponent() const
 	{
 		return m_transScoreComponent;
 	}
-	inline const std::vector< std::pair<size_t, float> > &GetLMScoreComponent() const
+	inline void AddTransScoreComponent(const ScoreComponent &scoreComponent)
 	{
-		return m_targetPhrase.GetLMScoreComponent();
+		m_transScoreComponent.Add(scoreComponent);
 	}
-	inline const std::vector< std::pair<size_t, float> > &GetTrigramComponent() const
+	inline void AddGenScoreComponent(const GenerationDictionary &dict, float value)
 	{
-		return m_targetPhrase.GetNgramComponent();
+		m_generationScoreComponent.Add((size_t)&dict);
+	}
+	inline const ScoreColl &GetGenerationScoreComponent() const
+	{
+		return m_generationScoreComponent;
+	}
+	inline const ScoreColl &GetNgramComponent() const 	 
+	{ 	 
+		return m_ngramComponent; 	 
 	}
 #endif
 
-
 };
+
 

@@ -71,10 +71,13 @@ public:
 	{
 		SetScore(score);
 	}
-	LatticeEdge(FactorDirection direction, const Hypothesis *prevHypo)
-		:m_prevHypo(prevHypo)
-		,m_targetPhrase(direction)
-	{}
+
+	LatticeEdge(FactorDirection direction)
+	:m_prevHypo(NULL)
+	,m_targetPhrase(direction)
+	{
+	}
+	LatticeEdge(FactorDirection direction, const Hypothesis *prevHypo);
 
 	virtual ~LatticeEdge();
 
@@ -112,7 +115,7 @@ public:
 #ifdef N_BEST
 	virtual const std::list<Arc*> &GetArcList() const = 0;
 
-	inline const ScoreComponentCollection &GetScoreComponent() const
+	inline const ScoreComponentCollection &GetTranslationScoreComponent() const
 	{
 		return m_transScoreComponent;
 	}

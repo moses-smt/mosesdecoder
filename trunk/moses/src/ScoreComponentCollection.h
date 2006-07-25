@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <iostream>
 #include <map>
+#include <vector>
+#include <list>
 #include <assert.h>
 #include "ScoreComponent.h"
 
@@ -58,6 +60,9 @@ public:
 	{
 		return Add(ScoreComponent(dictionary));
 	}
+
+	void Combine(const ScoreComponentCollection &otherComponentCollection);
+	std::vector<const ScoreComponent*> SortForNBestOutput() const;
 };
 
 inline std::ostream& operator<<(std::ostream &out, const ScoreComponentCollection &scoreComponentColl)
