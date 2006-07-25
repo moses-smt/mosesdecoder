@@ -29,7 +29,7 @@ class CompareHypothesisCollection
 {
 protected:
 	// static
-	static size_t m_NGramMaxOrder;
+	static size_t s_ngramMaxOrder[NUM_FACTORS];
 
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
@@ -40,7 +40,7 @@ public:
     //   and the covers (source words translated) are the same
 	{
         // Are the last (n-1) words the same on the target side (n for n-gram LM)?
-		int ret = hypoA->NGramCompare(*hypoB, m_NGramMaxOrder - 1);
+		int ret = hypoA->NGramCompare(*hypoB, s_ngramMaxOrder);
 //		int ret = hypoA->FastNGramCompare(*hypoB, m_NGramMaxOrder - 1);
 		if (ret != 0)
 		{
@@ -56,13 +56,11 @@ public:
 	}
 
 	// static 
-	static inline void SetMaxNGramOrder(size_t nGramMaxOrder)
+	static inline void SetMaxNGramOrder(FactorType factorType, size_t ngramMaxOrder)
 	{
-		m_NGramMaxOrder = nGramMaxOrder;
-	}
-	static inline size_t GetMaxNGramOrder()
-	{
-		return m_NGramMaxOrder;
+		assert(factorType < NUM_FACTORS);
+		if (s_ngramMaxOrder[factorType] < ngramMaxOrder)
+			s_ngramMaxOrder[factorType] = ngramMaxOrder;
 	}
 };
 
