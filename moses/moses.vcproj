@@ -287,6 +287,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ConfusionNetWIN32.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Dictionary.cpp"
 				>
 			</File>
@@ -448,10 +452,6 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionCollection.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\TranslationOptionCollectionConfusionNet.cpp"
 				>
 			</File>
 			<File
@@ -694,10 +694,6 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionCollection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\TranslationOptionCollectionConfusionNet.h"
 				>
 			</File>
 			<File

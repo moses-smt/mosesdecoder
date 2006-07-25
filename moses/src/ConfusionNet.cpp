@@ -1,7 +1,9 @@
 // $Id$
-#include "ConfusionNet.h"
-#include <sstream>
 
+#ifndef WIN32
+
+#include <sstream>
+#include "ConfusionNet.h"
 #include "FactorCollection.h"
 #include "Util.h"
 #include "PhraseDictionaryTreeAdaptor.h"
@@ -123,4 +125,4 @@ TranslationOptionCollection* ConfusionNet::CreateTranslationOptionCollection() c
 	return new TranslationOptionCollectionConfusionNet(*this);
 }
 
-
+#endif
