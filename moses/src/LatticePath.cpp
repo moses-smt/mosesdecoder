@@ -159,10 +159,12 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 		for (size_t currEdge = 0 ; currEdge < sizePath ; currEdge++)
 		{
 			const Hypothesis	*hypo		= static_cast<const Hypothesis*>(m_path[currEdge]);
-			const list<Arc*> &arcList = hypo->GetArcList();
+			const vector<Arc*>* pAL = hypo->GetArcList();
+      if (!pAL) continue;
+			const vector<Arc*> &arcList = *pAL;
 
 			// every possible Arc to replace this edge
-			list<Arc*>::const_iterator iterArc;
+			vector<Arc*>::const_iterator iterArc;
 			for (iterArc = arcList.begin() ; iterArc != arcList.end() ; ++iterArc)
 			{
 				const Arc *arc = *iterArc;
@@ -178,9 +180,10 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 			if (currEdge != m_prevEdgeChanged)
 			{
 				const LatticeEdge *edgeOrig = m_path[currEdge];
-
-				const list<Arc*> &arcList = m_path[currEdge]->GetArcList();
-				list<Arc*>::const_iterator iterArc;
+				const vector<Arc*>* pAL = m_path[currEdge]->GetArcList();
+      	if (!pAL) continue;
+				const vector<Arc*> &arcList = *pAL;
+				vector<Arc*>::const_iterator iterArc;
 
 				for (iterArc = arcList.begin() ; iterArc != arcList.end() ; ++iterArc)
 				{	// copy this Path & change 1 edge
