@@ -34,11 +34,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Arc.h"
 #include "LatticeEdge.h"
 #include "ScoreComponentCollection.h"
+#include "LexicalReordering.h"
+#include "Input.h"
 
 class SquareMatrix;
 class StaticData;
 class TranslationOption;
-class InputType;
 class WordsRange;
 class WordDeletionTable;
 
@@ -53,6 +54,10 @@ protected:
 		// phrase in target language. factors completed will be superset 
 		//				of those in dictionary
 	WordsBitmap				m_sourceCompleted;
+	//TODO: how to integrate this into confusion network framework; what if
+	//it's a confusion network in the end???
+	//how to make a general InputType without getting abstract warnings.
+	InputType const&  m_sourceInput;
 	WordsRange				m_currSourceWordsRange, m_currTargetWordsRange;
   bool							m_wordDeleted;
 #ifdef N_BEST
@@ -60,9 +65,19 @@ protected:
 #endif
 
 	/***
-	 * \return whether none of the factors clash
-	 * \param phrase TODO ???
-	 */
+//<<<<<<< Hypothesis.h
+//	 * Used for initializing translation process
+//	 */
+//	Hypothesis(const InputType &source);
+//	// create next
+//	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
+//
+//	/***
+//=======
+////>>>>>>> 1.16
+//	 * \return whether none of the factors clash
+//	 * \param phrase TODO ???
+//	 */
 	bool IsCompatible(const Phrase &phrase) const;
 	
 	void CalcFutureScore(const SquareMatrix &futureScore);
@@ -70,13 +85,15 @@ protected:
 	void CalcLMScore(const LMList		&lmListInitial, const LMList	&lmListEnd);
 	void CalcDistortionScore();
 	//TODO: add appropriate arguments to score calculator
-	void CalcLexicalReorderingScore();
+
   void CalcDeletionScore(const Sentence& sourceSentence, const WordsRange& sourceWordsRange, const WordDeletionTable& wordDeletionTable);
+
 
 public:
 
-	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
-	static int s_numNodes; //TODO what is this?
+
+	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total
+	static unsigned int s_numNodes; // Statistics: how many hypotheses were created in total
 	int m_id;
 	
 	/***
@@ -97,11 +114,13 @@ public:
 	/***
 	 * return the subclass of Hypothesis most appropriate to the given target phrase
 	 */
+
 	static Hypothesis* Create(const WordsBitmap &initialCoverage);
 	/***
 	 * return the subclass of Hypothesis most appropriate to the given target phrase
 	 */
 	static Hypothesis* Create(InputType const& source);
+
 
 	/***
 	 * return the subclass of Hypothesis most appropriate to the given translation option
@@ -124,15 +143,31 @@ public:
 		return m_currSourceWordsRange;
 	}
 	
+	inline const WordsRange &GetCurrTargetWordsRange() const
+	{
+		return m_currTargetWordsRange;
+	}
+	
 	// subsequent translation should only translate this sub-phrase
 	virtual size_t GetCurrTargetLength() const
+
 	{
 		return m_currTargetWordsRange.GetWordsCount();
 	}
 
+
+//	void CalcScore(const LMList &lmListInitial
+//							, const LMList &lmListEnd
+//							, float weightDistortion
+//							, float weightWordPenalty
+//							, const SquareMatrix &futureScore
+//							, const Sentence &source
+//							, LexicalReordering *m_lexreorder=NULL);
+
 	virtual void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore);
 
 	int GetId() const;
+
 
 	const Hypothesis* GetPrevHypo() const;
 
@@ -144,6 +179,10 @@ public:
 	inline const Phrase &GetPhrase() const
 	{
 		return m_targetPhrase;
+	}
+	inline const InputType &GetSourcePhrase() const
+	{
+		return m_sourceInput;
 	}
 
 	// curr - pos is relative from CURRENT hypothesis's starting index

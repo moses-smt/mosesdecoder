@@ -28,22 +28,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "Arc.h"
 #include "SquareMatrix.h"
+#include "LexicalReordering.h"
 #include "StaticData.h"
 #include "Input.h"
 #include "LMList.h"
 #include "md5.h"
 
-//TODO: add this include in when it compiles
-//#include "LexicalReordering.h"
-
 using namespace std;
 
-
+unsigned int Hypothesis::s_numNodes = 0;
 unsigned int Hypothesis::s_HypothesesCreated = 0;
+
 
 Hypothesis::Hypothesis(InputType const& source)
 	: LatticeEdge(Output)
 	, m_sourceCompleted(source.GetSize())
+	, m_sourceInput(source)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
@@ -55,6 +55,7 @@ Hypothesis::Hypothesis(InputType const& source)
 
 Hypothesis::Hypothesis(const Hypothesis &copy)
 	: LatticeEdge							(Output, copy.m_prevHypo)
+	, m_sourceInput          (copy.m_sourceInput)
 	, m_sourceCompleted				(copy.m_sourceCompleted )
 	, m_currSourceWordsRange	(copy.m_currSourceWordsRange)
 	, m_currTargetWordsRange	(copy.m_currTargetWordsRange)
@@ -72,6 +73,8 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
  */
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: LatticeEdge							(Output, &prevHypo)
+
+	, m_sourceInput					(prevHypo.m_sourceInput)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
 	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
@@ -133,6 +136,7 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */
+
 Hypothesis* Hypothesis::Create(InputType const& m_source)
 {
 	return new Hypothesis(m_source);
@@ -297,17 +301,6 @@ int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize) const
 	// identical
 	return 0;
 }
-void Hypothesis::CalcLexicalReorderingScore() 
-{
-//TODO: should referece a copy of the lexical reorderrrrr, rather than pass in
-//	  m_score[ScoreType::LexicalReordering] = LexicalReordering::CalcLexicalReorderingScore(
-//	  	m_sourceCompleted,     //number source words covered, 
-//	  	m_currTargetWordsRange,     //Current Target Range, 
-//	  	LatticeEdge.getPrevHypo().getCurrSourceWordsRange(),     //Previous Source Range, 
-//	  	m_currentSourceWordsRange,     //Current Source Range, 
-//	  	LatticeEdge.getPrevHypo());     //Previous Hypothesis
-}
-
 /**
  * Calculates the overall language model score by combining the scores
  * of language models generated for each of the factors.  Because the factors
@@ -444,7 +437,17 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 	}
 }
 
+
+//void Hypothesis::CalcScore(const LMList		&lmListInitial
+//													, const LMList	&lmListEnd
+//													, float weightDistortion
+//													, float weightWordPenalty
+//													, const SquareMatrix &futureScore
+//													, const Sentence &source
+//													, LexicalReordering *m_lexreorder) 
+//=======
 void Hypothesis::CalcDistortionScore()
+
 {
 	const WordsRange &prevRange = m_prevHypo->GetCurrSourceWordsRange()
 								, &currRange	= GetCurrSourceWordsRange();
@@ -476,9 +479,24 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 
 	// FUTURE COST
 	CalcFutureScore(futureScore);
+
 	
 	//LEXICAL REORDERING COST
-	CalcLexicalReorderingScore();
+	LexicalReordering *m_lexReorder = staticData.GetLexReorder();
+	if(m_lexReorder == NULL)
+		{
+		//we're not scoring lexical reordering, so we add in a zero
+		m_score[ScoreType::LexicalReordering] = 0;
+		}
+	else
+		{
+		//we're scoring lexical reordering, so we add in the score
+		m_score[ScoreType::LexicalReordering] =  m_lexReorder->CalcScore(this);
+		}
+
+
+
+	
 
 	// TOTAL COST
 	m_score[ScoreType::Total] = m_score[ScoreType::PhraseTrans]
@@ -486,7 +504,8 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 								+ m_score[ScoreType::LanguageModelScore]
 								+ m_score[ScoreType::Distortion]					* staticData.GetWeightDistortion()
 								+ m_score[ScoreType::WordPenalty]					* staticData.GetWeightWordPenalty()
-								+ m_score[ScoreType::FutureScoreEnum];
+								+ m_score[ScoreType::FutureScoreEnum]
+								+ m_score[ScoreType::LexicalReordering];
 }
 
 void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)

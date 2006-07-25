@@ -10,6 +10,8 @@
 <option id="gnu.cpp.compiler.option.preprocessor.def.2071633498" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 </option>
 <option id="gnu.cpp.compiler.option.include.paths.560695438" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
@@ -43,7 +45,9 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.444585015" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 <listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 </option>
 </tool>
@@ -58,6 +62,8 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.57605597" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
 <option id="gnu.cpp.compiler.option.preprocessor.def.547610699" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="N_BEST"/>
 </option>
@@ -93,6 +99,8 @@
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.1390867069" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="N_BEST"/>
 </option>

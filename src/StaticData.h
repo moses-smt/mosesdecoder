@@ -147,6 +147,11 @@ public:
 	{
 		return m_languageModel[type];
 	}
+	
+	LexicalReordering *GetLexReorder() const
+	{
+		return m_lexReorder;
+	}
 	float GetWeightDistortion() const
 	{
 		return m_weightDistortion;

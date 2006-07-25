@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "LexicalReordering.h"
 #include "InputFileStream.h"
+#include "DistortionOrientation.h"
 
 using namespace std;
 
@@ -52,7 +53,7 @@ void LexicalReordering::LoadFile()
 					key = f;
 					probs = Scan<float>(Tokenize(tokens[F_PROBS]));
 				}
-			if (m_orientation == LexReorderType::Monotone)
+			if (m_orientation == DistortionOrientationType::Monotone)
 				{
 					assert(probs.size() == MONO_NUM_PROBS); // 2 backward, 2 forward
 				}
@@ -90,23 +91,98 @@ void LexicalReordering::PrintTable()
 		}
 }
 
+float LexicalReordering::GetProbability(Hypothesis *hypothesis, int orientation)
+{
+	vector<float> val;
+	//this phrase declaration is to get around const mumbo jumbo and let me call a
+	//"convert to a string" method 
+	Phrase myphrase = hypothesis->GetPhrase();
+	if(m_condition==LexReorderType::Fe)
+	{
+	//this key string is be F+'|||'+E from the hypothesis	
+	val=m_orientation_table[myphrase.GetStringRep(hypothesis->GetCurrSourceWordsRange())
+													+"|||"
+													+myphrase.GetStringRep(hypothesis->GetCurrTargetWordsRange())];
+
+	}
+	else
+	{
+		//this key string is F from the hypothesis
+		val=m_orientation_table[ myphrase.GetStringRep(hypothesis->GetCurrTargetWordsRange())];
+	}
+	int index = 0;
+	if(m_orientation==DistortionOrientationType::Msd)
+	{
+		if(m_direction==LexReorderType::Backward)
+		{
+			if(orientation==DistortionOrientationType::MONO)
+			{
+				index=BACK_M;
+			}
+			else if(orientation==DistortionOrientationType::SWAP)
+			{
+				index=BACK_S;
+			}
+			else
+			{
+				index=BACK_D;
+			}
+		
+		}
+		else
+		{
+			if(orientation==DistortionOrientationType::MONO)
+			{
+				index=FOR_M;
+			}
+			else if(orientation==DistortionOrientationType::SWAP)
+			{
+				index=FOR_S;
+			}
+			else
+			{
+				index=FOR_D;
+			}
+		}
+	}
+	else
+	{
+		if(m_direction==LexReorderType::Backward)
+		{
+			if(orientation==DistortionOrientationType::MONO)
+			{
+				index=BACK_MONO;
+			}
+			else
+			{
+				index=BACK_NONMONO;
+			}
+		}
+		else
+		{
+			if(orientation==DistortionOrientationType::MONO)
+			{
+				index=FOR_MONO;
+			}
+			else
+			{
+				index=FOR_NONMONO;
+			}
+		}
+	}
+	return val[index];
+}
+
 /*
  * Compute the score for the current hypothesis.
  */
-float LexicalReordering::CalcScore(int numSourceWords, 
-																	 WordsRange &currTargetRange, 
-																	 WordsRange &prevSourceRange, 
-																	 WordsRange &currSourceRange)
+float LexicalReordering::CalcScore(Hypothesis *curr_hypothesis)
 {
+
 	// First determine if this hypothesis is monotonic, non-monotonic,
-	// swap, or discontinuous
-	size_t prev_source_start = prevSourceRange.GetStartPos();
-	size_t prev_source_end = prevSourceRange.GetEndPos();
-	size_t curr_source_start = currSourceRange.GetStartPos();
-	size_t curr_source_end = currSourceRange.GetEndPos();
-	size_t curr_target_start = currTargetRange.GetStartPos();
-	size_t curr_target_end = currTargetRange.GetEndPos();
-	
-	return 0;
+	// swap, or discontinuous. Make this determination using DistortionOrientation class
+	int orientation = DistortionOrientation::GetOrientation(curr_hypothesis, m_direction);
+	//now looking up in the table the appropriate score for these orientation		
+	return GetProbability(curr_hypothesis, orientation);		
 }
 	

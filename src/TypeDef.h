@@ -126,15 +126,26 @@ namespace LexReorderType
 {
 	enum LexReorderType
 		{
-			Monotone //TODO what the jiggers do these symbols mean?
-			,Msd
-			,Forward
+			Forward
 			,Backward
 			,Bidirectional
 			,Fe
 			,F
 		};
 }
+
+namespace DistortionOrientationType
+{
+	enum DistortionOrientationOptions
+		{
+			Monotone
+			,Msd
+		};	
+    // Possible values for orientation.
+	enum ORIENTATIONS { MONO, NON_MONO, SWAP, DISC };
+		
+	
+};
 
 enum IOMethod
 {

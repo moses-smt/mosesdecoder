@@ -107,7 +107,9 @@ public:
 	void AddWords(const Phrase &copy);
 
 	Phrase GetSubString(const WordsRange &wordsRange) const;
-
+	
+  std::string GetStringRep(const WordsRange &wordsRange); 
+  
 	TO_STRING
 
 	// used to insert & find phrase in dictionary
