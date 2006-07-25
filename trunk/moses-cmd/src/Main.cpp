@@ -48,8 +48,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Timer.h"
 #include "IOCommandLine.h"
 #include "IOFile.h"
-//#include "UnknownWordHandler.h"
-
 #include "Sentence.h"
 #include "ConfusionNet.h"
 
