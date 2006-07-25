@@ -64,7 +64,7 @@ public:
 	}
 };
 
-class HypothesisCollection : public std::set< Hypothesis*, CompareHypothesisCollection >
+class HypothesisCollection 
 {
 	friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
 
@@ -73,6 +73,7 @@ protected:
     float m_worstScore;
     float m_beamThreshold;
 	size_t m_maxHypoStackSize;
+  std::set< Hypothesis*, CompareHypothesisCollection > m_hypos;
 
 //	std::list<Arc> m_arc;
 	void Add(Hypothesis *hypothesis);
@@ -80,6 +81,13 @@ protected:
 	void RemoveAll();
 
 public:
+	typedef std::set< Hypothesis*, CompareHypothesisCollection >::iterator iterator;
+	typedef std::set< Hypothesis*, CompareHypothesisCollection >::const_iterator const_iterator;
+	iterator begin() { return m_hypos.begin(); }
+	const_iterator begin() const { return m_hypos.begin(); }
+	iterator end() { return m_hypos.end(); }
+	const_iterator end() const { return m_hypos.end(); }
+	size_t size() const { return m_hypos.size(); }
 
 	//returns the score of the best hypothesis
 	float getBestScore();
@@ -95,14 +103,14 @@ public:
 	inline void AddNoPrune(Hypothesis *hypothesis)
 	{
 		//push_back(hypothesis);
-		if (!insert(hypothesis).second) {
+		if (!m_hypos.insert(hypothesis).second) {
     }
 	}
 	bool AddPrune(Hypothesis *hypothesis);
       // AddPrune adds the hypo, but only if within thresholds (beamThr+stackSize)
 	inline void Detach(const HypothesisCollection::iterator &iter)
 	{
-		erase(iter);
+		m_hypos.erase(iter);
 	}
 	inline void Remove(const HypothesisCollection::iterator &iter)
 	{
