@@ -27,9 +27,10 @@
 
 #ifndef NULL
 const int NULL=0;
-#define NULL=0;
+//#define NULL=0;
 #endif
 
+#include <iostream>  // std::ostream
 
 //! Memory block
 /*! This can be used by:
@@ -70,7 +71,7 @@ class mempool{
   ~mempool();
   
   //! Prints a map of memory occupancy
-  void map(ostream& co);
+  void map(std::ostream& co);
 
   //! Allocates a single memory entry
   char *alloc();

@@ -18,9 +18,24 @@
 
 ******************************************************************************/
 
-// dictionary tables 
-// by M. Federico
-// Copyright Marcello Federico, ITC-irst, 1998
+/*
+ IrstLM: IRST Language Model Toolkit 
+ Copyright (C) 2006 Marcello Federico, ITC-irst Trento, Italy
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #ifndef MF_DICTIONARY_H
 #define MF_DICTIONARY_H
@@ -39,6 +54,7 @@
 #define DICT_INITSIZE 100000
 #endif
 
+
 //Begin of sentence symbol
 #ifndef BOS_
 #define BOS_ "<s>"
@@ -53,16 +69,6 @@
 //End of sentence symbol
 #ifndef OOV_ 
 #define OOV_ "_unk_"
-#endif
-
-//Backoff symbol
-#ifndef BACKOFF_ 
-#define BACKOFF_ "_backoff_"
-#endif
-
-//Dummy symbol
-#ifndef DUMMY_ 
-#define DUMMY_ "_dummy_"
 #endif
 
 
@@ -144,6 +150,8 @@ class dictionary{
     int oovfreq=(int)(oovrate * totfreq());
     std::cerr << "setting OOV rate to: " << oovrate << " -- freq= " << oovfreq << std::endl;
     return freq(oovcode(),oovfreq);
+   
+    return 1;
   }
 
 
@@ -167,7 +175,6 @@ class dictionary{
   void grow();
   //dictionary(int size=400,char* isym=NULL,char* oovlex=NULL);
   dictionary(char *filename=NULL,int size=DICT_INITSIZE,char* isymb=NULL,char* oovlex=NULL);
-
   dictionary(dictionary* d);
 
   ~dictionary();

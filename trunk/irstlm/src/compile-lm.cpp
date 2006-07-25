@@ -116,7 +116,7 @@ int main(int argc, const char **argv)
     std::cerr << "Failed to open " << infile << "!\n";
     exit(1);
   }
-  lmtable lmt(inp, ngram_size, resolution, decay);
+  lmtable lmt(inp);
   std::cout << "Saving to " << outfile << std::endl;
   lmt.savebin(outfile.c_str());
   return 0;

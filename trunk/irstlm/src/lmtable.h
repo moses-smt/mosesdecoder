@@ -18,18 +18,31 @@
 
 ******************************************************************************/
 
-// lm-gram tables 
-// by M. Federico
-// Copyright Marcello Federico, ITC-irst, 2006
+/*
+ IrstLM: IRST Language Model Toolkit 
+ Copyright (C) 2006 Marcello Federico, ITC-irst Trento, Italy
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #ifndef MF_LMTABLE_H
 #define MF_LMTABLE_H
 
 #include "ngram.h"
 
-// internal data structure 
-#define LMTMAXLEV  10+1
+#define LMTMAXLEV  11
 
 #ifndef  LMTCODESIZE
 #define  LMTCODESIZE  (int)3
@@ -62,31 +75,28 @@ class lmtable{
   LMT_TYPE tbltype[LMTMAXLEV]; //table type for each levels
   int      cursize[LMTMAXLEV]; //current size of levels
   int      maxsize[LMTMAXLEV]; //current size of levels
+  int*    startpos[LMTMAXLEV]; //support vector to store start positions
 
   int               maxlev; //max level of table
   char           info[100]; //information put in the header
 
-  // K-means quantization
+  //probability quantization
   bool      isQtable;
   
   int       NumCenters[LMTMAXLEV];
   float*    Pcenters[LMTMAXLEV];
   float*    Bcenters[LMTMAXLEV];
   
-  // log-linear quantization
-  int           resolution; //resolution for quantized prob
-  double            decay;  //decay constant 
-  double         logdecay;  //logdecay constant 
-
-  int         oov_code;
-  int         oov_size;
+  int     lmt_oov_code;
+  int     lmt_oov_size;
   int    backoff_state; 
+
 
  public:
 
   dictionary     *dict; // dictionary
 
-  lmtable(std::istream& in, int maxl,int res,double dec);
+  lmtable(std::istream& in);
 
   ~lmtable(){
     for (int i=1;i<=maxlev;i++){
@@ -97,15 +107,27 @@ class lmtable{
       }
     }
   }
+	
+	void configure(int n,bool quantized){
+		maxlev=n;
+		if (n==1)
+			tbltype[1]=(quantized?QLEAF:LEAF);
+		else{
+			for (int i=1;i<n;i++) tbltype[i]=(quantized?QINTERNAL:INTERNAL);
+			tbltype[n]=(quantized?QLEAF:LEAF);
+			}
+	};
+	
   int maxlevel(){return maxlev;};
 
   void savetxt(const char *filename);
   void savebin(const char *filename);
+  void dumplm(std::ostream& out,ngram ng, int ilev, int elev, int ipos,int epos);
 
-  void loadtxt(std::istream& in, const char* header, int maxl,int res, double dec);
+  void loadtxt(std::istream& in, const char* header);
   void loadbin(std::istream& in, const char* header);
 
-  void loadQtxt(std::istream& in, const char* header, int maxl);
+  void loadcenters(std::istream& inp,int Order);
 
   double prob(ngram ng); 
 
@@ -114,14 +136,14 @@ class lmtable{
 
   int mybsearch(char *ar, int n, int size, unsigned char *key, int *idx);   
   
-  int add(ngram& ng,double logprob,double logbow);
+  int add(ngram& ng,int prob,int bow);
   void checkbounds(int level);
   
   int get(ngram& ng){return get(ng,ng.size,ng.size);}
   int get(ngram& ng,int n,int lev);
 
   int succscan(ngram& h,ngram& ng,LMT_ACTION action,int lev);
-
+	const char *maxsuffptr(ngram ong);
   inline int putmem(char* ptr,int value,int offs,int size){
     assert(ptr!=NULL);
     for (int i=0;i<size;i++)
@@ -153,6 +175,9 @@ class lmtable{
       return LMTCODESIZE + QPROBSIZE;      
     case LEAF:
       return LMTCODESIZE + PROBSIZE;      
+    default:
+      assert(0);
+      return 0;
     }
   }  
 
