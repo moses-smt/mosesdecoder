@@ -14,6 +14,7 @@ libmoses_a_SOURCES = \
 	Input.cpp \
 	InputFileStream.cpp \
 	InputOutput.cpp \
+	LMList.cpp \
 	LanguageModel.cpp \
 	LanguageModelFactory.cpp \
 	LatticeEdge.cpp \
@@ -26,7 +27,9 @@ libmoses_a_SOURCES = \
 	PhraseDictionary.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
+	ScoreColl.cpp \
 	ScoreComponent.cpp \
+	ScoreComponentCollection.cpp \
 	Sentence.cpp \
 	StaticData.cpp \
 	TargetPhrase.cpp \
@@ -34,7 +37,6 @@ libmoses_a_SOURCES = \
 	TranslationOptionCollection.cpp \
 	TranslationOptionCollectionText.cpp \
 	TranslationOptionCollectionConfusionNet.cpp \
-	UnknownWordHandler.cpp \
 	UserMessage.cpp \
 	Util.cpp \
 	WeightOptimization.cpp \
