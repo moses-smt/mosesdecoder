@@ -33,9 +33,9 @@ size_t CompareHypothesisCollection::s_ngramMaxOrder[NUM_FACTORS] = {0,0,0,0};
 
 void HypothesisCollection::RemoveAll()
 {
-	while (begin() != end())
+	while (m_hypos.begin() != m_hypos.end())
 	{
-		Remove(begin());
+		Remove(m_hypos.begin());
 	}
 }
  
@@ -52,7 +52,7 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 	}
 
     // Prune only of stack is twice as big as needed
-	if (size() > 2*m_maxHypoStackSize-10)
+	if (m_hypos.size() > 2*m_maxHypoStackSize-10)
 	{
 		PruneToSize(m_maxHypoStackSize);
 	}
@@ -72,8 +72,8 @@ bool HypothesisCollection::AddPrune(Hypothesis *hypo)
 
 	// over threshold		
 	// recombine if ngram-equivalent to another hypo
-	iterator iter = find(hypo);
-	if (iter == end())
+	iterator iter = m_hypos.find(hypo);
+	if (iter == m_hypos.end())
 	{ // nothing found. add to collection
 		Add(hypo);
 		return true;
@@ -102,7 +102,7 @@ bool HypothesisCollection::AddPrune(Hypothesis *hypo)
 
 void HypothesisCollection::PruneToSize(size_t newSize)
 {
-	if (size() > newSize)
+	if (m_hypos.size() > newSize)
 	{
         // Pruning alg: find a threshold and delete all hypothesis below it
         //   the threshold is chosen so that exactly newSize top items remain on the stack
@@ -114,9 +114,9 @@ void HypothesisCollection::PruneToSize(size_t newSize)
         // cerr << "About to prune from " << size() << " to " << newSize << endl;
         // push all scores to a heap
         //   (but never push scores below m_bestScore+m_beamThreshold)
-		iterator iter = begin();
+		iterator iter = m_hypos.begin();
         float score = 0;
-		while (iter != end())
+		while (iter != m_hypos.end())
 		{
 			Hypothesis *hypo = *iter;
 			score = hypo->GetScore(ScoreType::Total);
@@ -143,8 +143,8 @@ void HypothesisCollection::PruneToSize(size_t newSize)
         // cerr << "threshold: " << scoreThreshold << endl;
 
 		// delete all hypos under score threshold
-		iter = begin();
-		while (iter != end())
+		iter = m_hypos.begin();
+		while (iter != m_hypos.end())
 		{
 			Hypothesis *hypo = *iter;
 			float score = hypo->GetScore(ScoreType::Total);
@@ -167,11 +167,11 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 
 const Hypothesis *HypothesisCollection::GetBestHypothesis() const
 {
-	if (!empty())
+	if (!m_hypos.empty())
 	{
-		const_iterator iter = begin();
+		const_iterator iter = m_hypos.begin();
 		Hypothesis *bestHypo = *iter;
-		while (++iter != end())
+		while (++iter != m_hypos.end())
 		{
 			Hypothesis *hypo = *iter;
 			if (hypo->GetScore(ScoreType::Total) > bestHypo->GetScore(ScoreType::Total))
@@ -194,7 +194,7 @@ struct HypothesisSortDescending
 list<const Hypothesis*> HypothesisCollection::GetSortedList() const
 {
 	list<const Hypothesis*> ret;
-	std::copy(begin(), end(), std::inserter(ret, ret.end()));
+	std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(ret, ret.end()));
 	ret.sort(HypothesisSortDescending());
 
 	return ret;
@@ -205,7 +205,7 @@ void HypothesisCollection::InitializeArcs()
 {
 #ifdef N_BEST
 	iterator iter;
-	for (iter = begin() ; iter != end() ; ++iter)
+	for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter)
 	{
 		Hypothesis *mainHypo = *iter;
 		mainHypo->InitializeArcs();
