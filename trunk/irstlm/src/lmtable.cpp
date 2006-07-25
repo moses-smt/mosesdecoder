@@ -30,8 +30,6 @@ using namespace std;
 #include "lmtable.h"
 
 
-int* a;
-
 inline void error(char* message){
   cerr << message << "\n";
   throw std::runtime_error(message);
@@ -41,6 +39,12 @@ lmtable::lmtable(std::istream& inp){
   
 	//initialization
   maxlev=1; 
+
+	memset(cursize, 0, sizeof(cursize));
+	memset(tbltype, 0, sizeof(tbltype));
+	memset(maxsize, 0, sizeof(maxsize));
+	memset(info, 0, sizeof(info));
+	memset(NumCenters, 0, sizeof(NumCenters));
 
 	dict=new dictionary((char *)NULL,1000000,(char*)NULL,(char*)NULL);
 
