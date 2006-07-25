@@ -48,19 +48,6 @@ public:
 	TargetPhrase(FactorDirection direction);
 		// unknown word
 
-	TargetPhrase(const TargetPhrase& phrase)
-	: Phrase(phrase)
-	, m_transScore(phrase.m_transScore)
-	, m_ngramScore(phrase.m_ngramScore)
-	, m_fullScore(phrase.m_fullScore)
-#ifdef N_BEST
-	, m_scoreComponent(phrase.m_scoreComponent)
-	, m_lmScoreComponent(phrase.m_lmScoreComponent)
-	, m_ngramComponent(phrase.m_ngramComponent)
-#endif
-	{ // deep copy
-	}
-
 	void SetScore(float weightWP);
 	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT,
 								const LMList &languageModels, float weightWP, float inputScore=0.0, float weightInput=0.0);
