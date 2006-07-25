@@ -50,3 +50,7 @@ Sentence::CreateTranslationOptionCollection() const
 {
 	return new TranslationOptionCollectionText(*this);
 }
+void Sentence::Print(std::ostream& out) const
+{
+	out<<*static_cast<Phrase const*>(this)<<"\n";
+}

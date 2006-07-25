@@ -37,6 +37,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
 							, size_t maxTargetPhrase
 							, const LMList &languageModels
 							, float weightWP
+							, float weightInput
 							);
 
 	// get translation candidates for a given source phrase

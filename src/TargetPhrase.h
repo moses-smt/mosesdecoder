@@ -33,6 +33,7 @@ class TargetPhrase: public Phrase
 protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 #ifdef N_BEST
+	float m_inputScore;
 	ScoreComponent m_scoreComponent;
 	std::vector< std::pair<size_t, float> > m_lmScoreComponent;
 	std::vector< std::pair<size_t, float> > m_ngramComponent;
@@ -43,7 +44,7 @@ public:
 	TargetPhrase(FactorDirection direction, const Dictionary *dictionary);
 
 	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT,
-								const LMList &languageModels, float weightWP);
+								const LMList &languageModels, float weightWP, float inputScore=0.0, float weightInput=0.0);
 	void SetScore(const LMList &languageModels, float weightWP);
 	// used when creating translations of unknown words:
 	void ResetScore();

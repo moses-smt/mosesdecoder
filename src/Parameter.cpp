@@ -49,6 +49,7 @@ Parameter::Parameter()
 	AddParam("weight-w");
 	AddParam("weight-e"); //source word deletion overall weight
 	AddParam("weight-generation");
+	AddParam("weight-i");
 	AddParam("mapping");
 	AddParam("n-best-list");
 	AddParam("beam-threshold");
