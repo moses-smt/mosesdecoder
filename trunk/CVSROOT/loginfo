@@ -34,4 +34,4 @@ CVSROOT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} redpony@gmail.com
 # This sends mail to a mailing list, defined by the PROJECTNAME-LISTNAME
 # value. Any changes to any modules in the project will thus generate an
 # email message to the mailing list specified.
-DEFAULT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} redpony@gmail.com,brooke@csail.mit.edu,callison-burch@ed.ac.uk,hieuhoang@gmail.com
+DEFAULT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} redpony@gmail.com,brooke@csail.mit.edu,callison-burch@ed.ac.uk,hieuhoang@gmail.com,corbett@csail.mit.edu
