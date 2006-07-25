@@ -313,23 +313,24 @@ void Hypothesis::GenerateNGramCompareKey(size_t contextSize)
   MD5Final(m_compSignature, &md5c);
 }
 
-int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize) const
+int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize[NUM_FACTORS]) const
 { // -1 = this < compare
 	// +1 = this > compare
 	// 0	= this ==compare
 
-	size_t thisSize			= GetSize();
-	size_t compareSize	= compare.GetSize();
-	size_t minSize			= std::min(nGramSize, thisSize)
-			, minCompareSize= std::min(nGramSize, compareSize);
-	if ( minSize != minCompareSize )
-	{ // quick decision
-		return (minSize < minCompareSize) ? -1 : 1;
-	}
+	const size_t thisSize			= GetSize();
+	const size_t compareSize	= compare.GetSize();
 
-	for (size_t currNGram = 1 ; currNGram <= minSize ; currNGram++)
+	for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 	{
-		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		const size_t minSize		= std::min(nGramSize[currFactor], thisSize)
+					, minCompareSize	= std::min(nGramSize[currFactor], compareSize);
+		if ( minSize != minCompareSize )
+		{ // quick decision
+			return (minSize < minCompareSize) ? -1 : 1;
+		}
+
+		for (size_t currNGram = 1 ; currNGram <= minSize ; currNGram++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
 			const Factor *thisFactor 		= GetFactor(thisSize - currNGram, factorType)
@@ -339,7 +340,7 @@ int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize) const
 				return -1;
 			if (thisFactor > compareFactor)
 				return 1;
-		}		
+		}
 	}
 	// identical
 	return 0;

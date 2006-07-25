@@ -215,8 +215,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			lm->Load(i, languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
 	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
 			m_languageModel[type].push_back(lm);
+
+			CompareHypothesisCollection::SetMaxNGramOrder(factorType, nGramMaxOrder);
 		}
-		CompareHypothesisCollection::SetMaxNGramOrder(nGramMaxOrder);
 	}
   // flag indicating that language models were loaded,
   // since phrase table loading requires their presence

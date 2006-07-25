@@ -64,17 +64,6 @@ protected:
 	std::vector<Arc*>*	m_arcList; //all arcs that end at the same lattice point as we do
 #endif
 
-	/***
-//<<<<<<< Hypothesis.h
-//	 * Used for initializing translation process
-//	 */
-//	Hypothesis(const InputType &source);
-//	// create next
-//	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
-//
-//	/***
-//=======
-////>>>>>>> 1.16
 //	 * \return whether none of the factors clash
 //	 * \param phrase TODO ???
 //	 */
@@ -229,7 +218,7 @@ public:
   /***
    * requires that GenerateNGramCompareKey was previously run
    */
-	int	FastNGramCompare(const Hypothesis &compare, size_t nGramSize) const
+	int	FastNGramCompare(const Hypothesis &compare, size_t nGramSize[NUM_FACTORS]) const
 	{
 #if 0
 		return memcmp(this->m_compSignature, compare.m_compSignature, sizeof(m_compSignature));
@@ -238,7 +227,7 @@ public:
 #endif
 	}
 
-	int	 NGramCompare(const Hypothesis &compare, size_t nGramSize) const;
+	int	 NGramCompare(const Hypothesis &compare, size_t nGramSize[NUM_FACTORS]) const;
 
   /*** Generates a key in m_compSignature that can be used
    *   for an arbitrary ordering of hypotheses.

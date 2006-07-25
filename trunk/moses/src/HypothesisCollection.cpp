@@ -28,7 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-size_t CompareHypothesisCollection::m_NGramMaxOrder;
+size_t CompareHypothesisCollection::s_ngramMaxOrder[NUM_FACTORS] = {0,0,0,0};
+	// need to change if we add more factors, or use a macro
 
 void HypothesisCollection::RemoveAll()
 {
