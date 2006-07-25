@@ -439,17 +439,10 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			continue;
 		}
 
-		// reuse phrase, add next word on
-		Phrase sourcePhrase(Input);
-
 		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
 		{
 			const WordsRange wordsRange(startPos, endPos);
-
-			//			FactorArray &newWord = sourcePhrase.AddWord();
-			//			Word::Copy(newWord, m_source.GetFactorArray(endPos));
-
-			const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(m_source,wordsRange); ////sourcePhrase);
+			const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(m_source,wordsRange); 
 			if (phraseColl != NULL)
 			{
 				if (verboseLevel >= 3) 
