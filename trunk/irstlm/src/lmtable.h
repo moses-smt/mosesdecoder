@@ -129,7 +129,7 @@ class lmtable{
 
   void loadcenters(std::istream& inp,int Order);
 
-  double prob(ngram ng); 
+  double prob(const ngram& ng); 
 
   void *search(char *tb,LMT_TYPE ndt,int lev,int n,int sz,int *w,
 	       LMT_ACTION action,char **found=(char **)NULL);
