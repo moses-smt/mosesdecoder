@@ -670,13 +670,13 @@ const char *lmtable::maxsuffptr(ngram ong){
 
 // returns the probability of an n-gram
 
-double lmtable::prob(ngram ong){
+double lmtable::prob(const ngram& ong){
 
   if (ong.size==0) return 0.0;
-  if (ong.size>maxlev) ong.size=maxlev;
   
   ngram ng(dict);
   ng.trans(ong);
+  if (ong.size>maxlev) ng.size=maxlev;
 
   double rbow;
   int ibow,iprob;
@@ -697,8 +697,8 @@ double lmtable::prob(ngram ong){
 	rbow= (double) (isQtable?Bcenters[ng.size][ibow]:(ibow+1.0)/UNIGRAM_RESOLUTION);
       }
       //prepare recursion step
-      ong.size--;
-      return rbow * prob(ong);
+      ng.size--;
+      return rbow * prob(ng);
     }
   }
 }
