@@ -44,10 +44,11 @@ protected:
 	InputType const													&m_source;
 	SquareMatrix														m_futureScore;
 	WordsBitmap															m_unknownWordPos;
-	std::list<const PhraseDictionary*>			m_allPhraseDictionary;
+	std::list<const PhraseDictionaryBase*>			m_allPhraseDictionary;
 	std::list<const GenerationDictionary*>	m_allGenerationDictionary;
 	std::set<TargetPhrase> m_unknownTargetPhrase;
 	// make sure phrase doesn't go out of memory while we're using it
+	const LMList *m_allLM;
 
 	TranslationOptionCollection(InputType const& src);
 	
@@ -64,7 +65,7 @@ public:
 																			, FactorCollection &factorCollection
 																			, float weightWordPenalty
 																			, bool dropUnknown
-																			, size_t verboseLevel) = 0;
+																			, size_t verboseLevel);
 
 
 	void Add(const TranslationOption &translationOption)
@@ -79,7 +80,31 @@ public:
 
 
 
- protected:
+ protected:	
+	virtual void ProcessInitialTranslation(const DecodeStep &decodeStep
+															, FactorCollection &factorCollection
+															, float weightWordPenalty
+															, int dropUnknown
+															, size_t verboseLevel
+															, PartialTranslOptColl &outputPartialTranslOptColl)=0;
+
+	virtual void ProcessUnknownWord(		size_t sourcePos
+															, int dropUnknown
+															, FactorCollection &factorCollection
+															, float weightWordPenalty)=0;
+
+	void ProcessGeneration(			const TranslationOption &inputPartialTranslOpt
+															, const DecodeStep &decodeStep
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, int dropUnknown
+															, FactorCollection &factorCollection
+															, float weightWordPenalty);
+	void ProcessTranslation(		const TranslationOption &inputPartialTranslOpt
+															, const DecodeStep &decodeStep
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, int dropUnknown
+															, FactorCollection &factorCollection
+															, float weightWordPenalty);
 
 	void ComputeFutureScores(size_t verboseLevel);
 };

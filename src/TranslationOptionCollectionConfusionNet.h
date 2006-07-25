@@ -17,11 +17,16 @@ class TranslationOptionCollectionConfusionNet : public TranslationOptionCollecti
 												,float //weightWordPenalty
 											 ) {return 0;}
 
-	void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
-																, const LMList &allLM
-																, FactorCollection &factorCollection
-																, float weightWordPenalty
-																, bool dropUnknown
-																, size_t verboseLevel);
+	 void ProcessInitialTranslation(const DecodeStep &decodeStep
+															, FactorCollection &factorCollection
+															, float weightWordPenalty
+															, int dropUnknown
+															, size_t verboseLevel
+																	, PartialTranslOptColl &outputPartialTranslOptColl);
+
+	void ProcessUnknownWord(		size_t sourcePos
+															, int dropUnknown
+															, FactorCollection &factorCollection
+															, float weightWordPenalty);
 
 };
