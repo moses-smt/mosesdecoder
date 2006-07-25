@@ -66,6 +66,9 @@ public:
 
 class HypothesisCollection 
 {
+public:
+	typedef std::set< Hypothesis*, CompareHypothesisCollection >::iterator iterator;
+	typedef std::set< Hypothesis*, CompareHypothesisCollection >::const_iterator const_iterator;
 	friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
 
 protected:
@@ -80,9 +83,17 @@ protected:
 		// used by Add(Hypothesis *hypothesis, float beamThreshold);
 	void RemoveAll();
 
+	inline void Detach(const HypothesisCollection::iterator &iter)
+	{
+		m_hypos.erase(iter);
+	}
+	inline void Remove(const HypothesisCollection::iterator &iter)
+	{
+		delete *iter;
+		Detach(iter);
+	}
+
 public:
-	typedef std::set< Hypothesis*, CompareHypothesisCollection >::iterator iterator;
-	typedef std::set< Hypothesis*, CompareHypothesisCollection >::const_iterator const_iterator;
 	const_iterator begin() const { return m_hypos.begin(); }
 	const_iterator end() const { return m_hypos.end(); }
 	size_t size() const { return m_hypos.size(); }
@@ -106,15 +117,6 @@ public:
 	}
 	bool AddPrune(Hypothesis *hypothesis);
       // AddPrune adds the hypo, but only if within thresholds (beamThr+stackSize)
-	inline void Detach(const HypothesisCollection::iterator &iter)
-	{
-		m_hypos.erase(iter);
-	}
-	inline void Remove(const HypothesisCollection::iterator &iter)
-	{
-		delete *iter;
-		Detach(iter);
-	}
 
 	inline ~HypothesisCollection()
 	{
