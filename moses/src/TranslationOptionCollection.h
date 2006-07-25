@@ -86,12 +86,18 @@ public:
 															, float weightWordPenalty
 															, int dropUnknown
 															, size_t verboseLevel
-															, PartialTranslOptColl &outputPartialTranslOptColl)=0;
+															, PartialTranslOptColl &outputPartialTranslOptColl);
 
-	virtual void ProcessUnknownWord(		size_t sourcePos
-															, int dropUnknown
-															, FactorCollection &factorCollection
-															, float weightWordPenalty)=0;
+	virtual void ProcessUnknownWord(size_t sourcePos
+																	, int dropUnknown
+																	, FactorCollection &factorCollection
+																	, float weightWordPenalty)=0;
+
+	virtual void ProcessOneUnknownWord(const FactorArray &sourceWord
+																		 , size_t sourcePos
+																		 , int dropUnknown
+																		 , FactorCollection &factorCollection
+																		 , float weightWordPenalty);
 
 	void ProcessGeneration(			const TranslationOption &inputPartialTranslOpt
 															, const DecodeStep &decodeStep

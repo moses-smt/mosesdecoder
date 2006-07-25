@@ -12,20 +12,16 @@ TranslationOptionCollectionConfusionNet(const ConfusionNet &input)
 	: TranslationOptionCollection(input) {}
 
 void TranslationOptionCollectionConfusionNet::
-ProcessInitialTranslation(const DecodeStep &decodeStep
-													, FactorCollection &factorCollection
-													, float weightWordPenalty
-													, int dropUnknown
-													, size_t verboseLevel
-													, PartialTranslOptColl &outputPartialTranslOptColl) 
-{
-}
-
-void TranslationOptionCollectionConfusionNet::
 ProcessUnknownWord(		size_t sourcePos
 											, int dropUnknown
 											, FactorCollection &factorCollection
 											, float weightWordPenalty) 
 {
+	ConfusionNet const& source=dynamic_cast<ConfusionNet const&>(m_source);
+
+	ConfusionNet::Column const& coll=source.GetColumn(sourcePos);
+	for(ConfusionNet::Column::const_iterator i=coll.begin();i!=coll.end();++i)
+		ProcessOneUnknownWord(i->first.GetFactorArray(),sourcePos,dropUnknown,factorCollection,weightWordPenalty);
+		
 }
 
