@@ -29,9 +29,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Timer.h"
 #include "boost/filesystem/operations.hpp" // boost::filesystem::exists
 #include "boost/algorithm/string/case_conv.hpp" //boost::algorithm::to_lower
-#include "PhraseDictionaryTreeAdaptor.h"
 #include "LanguageModel.h"
 #include "LanguageModelFactory.h"
+
+#ifndef WIN32
+#include "PhraseDictionaryTreeAdaptor.h"
+#endif
 
 using namespace std;
 
@@ -273,7 +276,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH
 	if (m_parameter.GetParam("drop-unknown").size() == 1)
-	  { m_dropUnknown = Scan<size_t>( m_parameter.GetParam("drop-unknown")[0]); }
+	  { m_dropUnknown = Scan<bool>( m_parameter.GetParam("drop-unknown")[0]); }
 	else
 	  { m_dropUnknown = 0; }
 
@@ -474,14 +477,19 @@ void StaticData::LoadPhraseTables(bool filter
 				}
 			else 
 				{
-					TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
-					PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent);
-					pd->Create(input,output,m_factorCollection,filePath,weight,
-										 maxTargetPhrase[index],
-										 this->GetLanguageModel(Initial),
-										 this->GetWeightWordPenalty(),
-										 m_weightInput);
-					m_phraseDictionary.push_back(pd);
+					#ifdef WIN32
+						TRACE_ERR("binary phrase tables not available under Windows\n");
+						assert(false);
+					#else
+						TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
+						PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent);
+						pd->Create(input,output,m_factorCollection,filePath,weight,
+											 maxTargetPhrase[index],
+											 this->GetLanguageModel(Initial),
+											 this->GetWeightWordPenalty(),
+											 m_weightInput);
+						m_phraseDictionary.push_back(pd);
+					#endif
 				}
 
 			index++;

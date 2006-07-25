@@ -88,7 +88,7 @@ void LanguageModel_Internal::Load(size_t id
 
 				NGramNode *rootNGram = m_map.GetNGram(factor);
 				nGram->SetRootNGram(rootNGram);
-				LmId rootlmid;  rootlmid.internal = rootNGram;
+				LmId rootlmid(rootNGram);
 				factorCollection.SetFactorLmId(factor, rootlmid);
 
 				float score = TransformSRIScore(Scan<float>(tokens[0]));
@@ -127,7 +127,7 @@ float LanguageModel_Internal::GetValue(const Factor *factor0) const
 {
 	float prob;
 	const NGramNode *nGram		= factor0->GetLmId().internal;
-	if (nGram == NULL)
+	if (nGram == NULL || factor0->GetLmId().irst == -1)
 	{
 		prob = -numeric_limits<float>::infinity();
 	}
@@ -143,14 +143,14 @@ float LanguageModel_Internal::GetValue(const Factor *factor0, const Factor *fact
 	const NGramNode *nGram[2];
 
 	nGram[1]		= factor1->GetLmId().internal;
-	if (nGram[1] == NULL)
+	if (nGram[1] == NULL || factor1->GetLmId().irst == -1)
 	{
 		score = -numeric_limits<float>::infinity();
 	}
 	else
 	{
 		nGram[0] = nGram[1]->GetNGram(factor0);
-		if (nGram[0] == NULL)
+		if (nGram[0] == NULL || factor0->GetLmId().irst == -1)
 		{ // something unigram
 			nGram[0]	= factor0->GetLmId().internal;
 			if (nGram[0] == NULL)
@@ -178,24 +178,24 @@ float LanguageModel_Internal::GetValue(const Factor *factor0, const Factor *fact
 	const NGramNode *nGram[3];
 
 	nGram[2]		= factor2->GetLmId().internal;
-	if (nGram[2] == NULL)
+	if (nGram[2] == NULL || factor2->GetLmId().irst == -1)
 	{
 		score = -numeric_limits<float>::infinity();
 	}
 	else
 	{
 		nGram[1] = nGram[2]->GetNGram(factor1);
-		if (nGram[1] == NULL)
+		if (nGram[1] == NULL || factor1->GetLmId().irst == -1)
 		{ // something unigram
 			nGram[1]	= factor1->GetLmId().internal;
-			if (nGram[1] == NULL)
+			if (nGram[1] == NULL || factor1->GetLmId().irst == -1)
 			{ // stops at unigram
 				score = nGram[2]->GetScore();
 			}
 			else
 			{
 				nGram[0] = nGram[1]->GetNGram(factor0);
-				if (nGram[0] == NULL)
+				if (nGram[0] == NULL || factor0->GetLmId().irst == -1)
 				{ // unigram unigram
 					score = nGram[2]->GetScore() + nGram[1]->GetLogBackOff();
 				}
