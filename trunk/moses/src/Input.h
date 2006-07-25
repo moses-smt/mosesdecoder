@@ -31,7 +31,7 @@ protected:
 	{	// for db stuff;
 		m_translationId = translationId;
 	}
-	virtual size_t GetSize() const=0;
+	virtual size_t GetSize() const=0; 
 
 	virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection) =0;
 
@@ -40,7 +40,6 @@ protected:
 	virtual TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const=0;
 	virtual TranslationOptionCollection* CreateTranslationOptionCollection() const=0;
 
-	// these functions are not (yet) well-defined for confusion networks
 	virtual Phrase GetSubString(const WordsRange&) const =0;
 	virtual const FactorArray& GetFactorArray(size_t pos) const=0;
 };

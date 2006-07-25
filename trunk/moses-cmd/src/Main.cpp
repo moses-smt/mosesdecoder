@@ -76,12 +76,14 @@ int main(int argc, char* argv[])
 	timer.start("Starting...");
 
 	StaticData staticData;
+
 	if (!staticData.LoadParameters(argc, argv))
 		return EXIT_FAILURE;
-/*
-	boost::shared_ptr<UnknownWordHandler> unknownWordHandler(new UnknownWordHandler);
+	
+	/*
+	 * boost::shared_ptr<UnknownWordHandler> unknownWordHandler(new UnknownWordHandler);
 	staticData.SetUnknownWordHandler(unknownWordHandler);
-*/
+  */
 		if (staticData.GetVerboseLevel() > 0)
 		{
 #if N_BEST
@@ -90,6 +92,7 @@ int main(int argc, char* argv[])
 		std::cerr << "N_BEST=disabled\n";
 #endif
 		}
+
 
 	// set up read/writing class
 	InputOutput *inputOutput = GetInputOutput(staticData);
@@ -129,6 +132,7 @@ int main(int argc, char* argv[])
 		delete source;
 		delete translationOptionCollection;
 	}
+
 	
 	delete inputOutput;
 

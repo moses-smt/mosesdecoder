@@ -62,7 +62,10 @@ void LanguageModel_IRST::Load(size_t id
 
 	InputFileStream inp(fileName);
 
+
+
 	m_lmtb         = new lmtable(inp);
+
 	// LM can be ok, just outputs warnings
 	CreateFactors(factorCollection);		
 
