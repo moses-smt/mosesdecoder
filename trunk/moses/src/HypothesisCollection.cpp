@@ -59,7 +59,7 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 }
 
 
-float HypothesisCollection::getBestScore(){
+float HypothesisCollection::getBestScore() const{
 	return m_bestScore;
 }
 

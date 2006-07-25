@@ -83,14 +83,12 @@ protected:
 public:
 	typedef std::set< Hypothesis*, CompareHypothesisCollection >::iterator iterator;
 	typedef std::set< Hypothesis*, CompareHypothesisCollection >::const_iterator const_iterator;
-	iterator begin() { return m_hypos.begin(); }
 	const_iterator begin() const { return m_hypos.begin(); }
-	iterator end() { return m_hypos.end(); }
 	const_iterator end() const { return m_hypos.end(); }
 	size_t size() const { return m_hypos.size(); }
 
 	//returns the score of the best hypothesis
-	float getBestScore();
+	float getBestScore() const;
 
 	inline HypothesisCollection()
 	{
