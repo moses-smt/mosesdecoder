@@ -150,14 +150,17 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 	{
 		tempFile.close();
 		using namespace boost::filesystem;
-		try 
+		if (!exists(path(hashFilePath, native)))
 		{
-			rename( path(tempFilePath, native) , path(hashFilePath, native) );
-		}
-		catch (...)
-		{ // copy instead
-			copy_file(path(tempFilePath, native) , path(hashFilePath, native) );
-			remove(tempFilePath);
+			try 
+			{
+				rename( path(tempFilePath, native) , path(hashFilePath, native) );
+			}
+			catch (...)
+			{ // copy instead
+				copy_file(path(tempFilePath, native) , path(hashFilePath, native) );
+				remove(tempFilePath);
+			}
 		}
 #ifndef _WIN32
 		// change permission to let everyone use cached file
