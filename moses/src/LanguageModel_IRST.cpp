@@ -67,8 +67,9 @@ void LanguageModel_IRST::Load(size_t id
 	m_lmtb         = new lmtable(inp);
 
 	// LM can be ok, just outputs warnings
-	CreateFactors(factorCollection);		
-
+	CreateFactors(factorCollection);
+  m_unknownId.irst = m_lmtb->dict->oovcode();
+  std::cerr << "IRST: m_unknownId=" << m_unknownId.irst << std::endl;
 }
 
 void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
@@ -88,7 +89,6 @@ void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
 	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START, lmId);
 	lmId = GetLmID(EOS_);
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END, lmId);
-	
 }
 
 LmId LanguageModel_IRST::GetLmID( const std::string &str ) const
@@ -106,10 +106,12 @@ float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor) c
   ngram ng(m_lmtb->dict);
 	for (size_t i = 0 ; i < count ; i++)
 	{
+#undef CDYER_DEBUG_LMSCORE
 #ifdef CDYER_DEBUG_LMSCORE
 		std::cout << i <<"="<<contextFactor[i]->GetLmId().irst <<"," << contextFactor[i]->GetString()<<" ";
 #endif
-		ng.pushc(contextFactor[i]->GetLmId().irst);
+    LmId x = contextFactor[i]->GetLmId();
+		ng.pushc(x.irst==UNKNOWN_LM_ID.irst?m_unknownId.irst:x.irst);
 	}
 #ifdef CDYER_DEBUG_LMSCORE
 	std::cout <<" (ng='" << ng << "')\n";
