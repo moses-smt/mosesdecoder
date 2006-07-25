@@ -73,7 +73,7 @@ void LanguageModel_SRI::Load(size_t id
 	}
 	// LM can be ok, just outputs warnings
 	CreateFactors(factorCollection);		
-
+  m_unknownId.sri = m_srilmVocab->unkIndex();
 }
 
 void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
@@ -99,7 +99,7 @@ LmId LanguageModel_SRI::GetLmID( const std::string &str ) const
 {
     LanguageModel_SRI *lm = const_cast<LanguageModel_SRI*>(this); // hack. not sure if supposed to cast this
     LmId res;
-    res.sri = lm->m_srilmVocab->getIndex( str.c_str(), lm->m_srilmVocab->unkIndex() );
+    res.sri = lm->m_srilmVocab->getIndex( str.c_str(), m_unknownId.sri );
     return res;
 }
 
@@ -116,12 +116,15 @@ float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor) co
 	size_t count = contextFactor.size();
 	for (size_t i = 0 ; i < count - 1 ; i++)
 	{
-		m_context[i] = contextFactor[count-2-i]->GetLmId().sri;
+    LmId x = contextFactor[count-2-i]->GetLmId();
+		m_context[i] = x.sri==UNKNOWN_LM_ID.sri ? m_unknownId.sri : x.sri;
 	}
 	m_context[count-1] = Vocab_None;
 	
 	// call sri lm fn
-	float ret = GetValue(contextFactor[count-1]->GetLmId().sri, m_context);
+  LmId x = contextFactor[count-1]->GetLmId();
+	x.sri = x.sri==UNKNOWN_LM_ID.sri ? m_unknownId.sri : x.sri;
+	float ret = GetValue(x.sri, m_context);
 	return ret;
 }
 
