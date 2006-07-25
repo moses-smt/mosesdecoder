@@ -21,49 +21,56 @@ TranslationOptionCollection::~TranslationOptionCollection()
 
 void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
 {
-	// create future score matrix
-	// for each span in the source phrase (denoted by start and end)
-	for(size_t startPos = 0; startPos < m_source.GetSize() ; startPos++) 
-		{
-			for(size_t endPos = startPos; endPos < m_source.GetSize() ; endPos++) 
-				{
-					size_t length = endPos - startPos + 1;
-					vector< float > score(length + 1);
-					score[0] = 0;
-					for(size_t currLength = 1 ; currLength <= length ; currLength++) 
-						// initalize their future cost to -infinity
-						{
-							score[currLength] = - numeric_limits<float>::infinity();
-						}
+	// create future score matrix in a dynamic programming fashion
 
-					for(size_t currLength = 0 ; currLength < length ; currLength++) 
-						{
-							// iterate over possible translations of this source subphrase and
-							// keep track of the highest cost option
-							TranslationOptionCollection::const_iterator iterTransOpt;
-							for(iterTransOpt = begin() ; iterTransOpt != end() ; ++iterTransOpt)
-								{
-									const TranslationOption &transOpt = *iterTransOpt;
-									size_t index = currLength + transOpt.GetSize();
-									if (transOpt.GetStartPos() == currLength + startPos 
-											&& transOpt.GetEndPos() <= endPos
-											&& transOpt.GetFutureScore() + score[currLength] > score[index]) 
-										{
-											score[index] = transOpt.GetFutureScore() + score[currLength];
-										}
-								}
-						}
-					// record the highest cost option in the future cost table.
-					m_futureScore.SetScore(startPos, endPos, score[length]);
+    // setup the matrix (ignore lower triangle, set upper triangle to -inf
+    size_t size = m_source.GetSize(); // the width of the matrix
+    for(size_t row=0; row<size; row++) {
+      for(size_t col=row; col<size; col++) {
+        m_futureScore.SetScore(row, col, -numeric_limits<float>::infinity());
+      }
+    }
 
-					//print information about future cost table when verbose option is set
+    // walk all the translation options and record the cheapest option for each span
+    TranslationOptionCollection::const_iterator iterTransOpt;
+    for(iterTransOpt = begin() ; iterTransOpt != end() ; ++iterTransOpt) {
+      const TranslationOption &transOpt = *iterTransOpt;
+      size_t startpos = transOpt.GetStartPos();
+      size_t endpos = transOpt.GetEndPos();
+      float score = transOpt.GetFutureScore();
+      if (score > m_futureScore.GetScore(startpos, endpos))
+        m_futureScore.SetScore(startpos, endpos, score);
+    }
 
-					if(verboseLevel > 0) 
-						{		
-							cout<<"future cost from "<<startPos<<" to "<<endPos<<" is "<<score[length]<<endl;
-						}
-				}
-		}
+    // now fill all the cells in the strictly upper triangle
+    //   there is no way to modify the diagonal now, in the case
+    //   where no translation option covers a single-word span,
+    //   we leave the +inf in the matrix
+    // like in chart parsing we want each cell to contain the highest score
+    // of the full-span trOpt or the sum of scores of joining two smaller spans
+
+	for(size_t colstart = 1; colstart < size ; colstart++) {
+		for(size_t diagshift = 0; diagshift < size-colstart ; diagshift++) {
+            size_t startPos = diagshift;
+            size_t endPos = colstart+diagshift;
+			for(size_t joinAt = startPos; joinAt < endPos ; joinAt++)  {
+              float joinedScore = m_futureScore.GetScore(startPos, joinAt)
+                                + m_futureScore.GetScore(joinAt+1, endPos);
+              /* // uncomment to see the cell filling scheme
+              cerr << "[" <<startPos<<","<<endPos<<"] <-? ["<<startPos<<","<<joinAt<<"]+["<<joinAt+1<<","<<endPos
+                << "] (colstart: "<<colstart<<", diagshift: "<<diagshift<<")"<<endl;
+              */
+              if (joinedScore > m_futureScore.GetScore(startPos, endPos))
+                m_futureScore.SetScore(startPos, endPos, joinedScore);
+            }
+        }
+    }
+	if(verboseLevel > 0) 
+	{		
+      for(size_t row=0; row<size; row++)
+        for(size_t col=row; col<size; col++)
+		  cout<<"future cost from "<< row <<" to "<< col <<" is "<< m_futureScore.GetScore(row, col) <<endl;
+	}
 }
 
 

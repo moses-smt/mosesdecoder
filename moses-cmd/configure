@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE RANLIB ac_ct_RANLIB CXXCPP EGREP MYSQLCLIENT_LDFLAGS MYSQLCLIENT_CPPFLAGS MYSQLCLIENT_LIBS BUILD_MYSQL_SUPPORT_TRUE BUILD_MYSQL_SUPPORT_FALSE SRI_LM_TRUE SRI_LM_FALSE INTERNAL_LM_TRUE INTERNAL_LM_FALSE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE RANLIB ac_ct_RANLIB CXXCPP EGREP MYSQLCLIENT_LDFLAGS MYSQLCLIENT_CPPFLAGS MYSQLCLIENT_LIBS BUILD_MYSQL_SUPPORT_TRUE BUILD_MYSQL_SUPPORT_FALSE SRI_LM_TRUE SRI_LM_FALSE INTERNAL_LM_TRUE INTERNAL_LM_FALSE IRST_LM_TRUE IRST_LM_FALSE LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -847,15 +847,16 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
-  --enable-optimization   compile with -O3 flag
   --enable-profiling      moses will dump profiling info
+  --enable-optimization   compile with -O3 flag
   --enable-mysql          (optional) build in MySQL support]
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-srilm=PATH       (optional) path to SRI's LM toolkit
-  --with-srilm=PATH       path to BOOST libraries
+  --with-boost=PATH       path to BOOST libraries
+  --with-irstlm=PATH      (optional) path to IRST's LM toolkit
   --with-moses=PATH       path to moses library
   --with-mysqlclient-prefix=PFX Prefix where mysqlclient is
 installed
@@ -2596,6 +2597,16 @@ else
 fi;
 
 
+# Check whether --with-irstlm or --without-irstlm was given.
+if test "${with_irstlm+set}" = set; then
+  withval="$with_irstlm"
+  with_irstlm=$withval
+else
+  with_irstlm=no
+
+fi;
+
+
 # Check whether --with-moses or --without-moses was given.
 if test "${with_moses+set}" = set; then
   withval="$with_moses"
@@ -2605,16 +2616,17 @@ else
 
 fi;
 
-# Check whether --enable-optimization or --disable-optimization was given.
-if test "${enable_optimization+set}" = set; then
-  enableval="$enable_optimization"
-  CPPFLAGS="$CPPFLAGS -O3"; LDFLAGS="$LDFLAGS -O3"
-
-fi;
 # Check whether --enable-profiling or --disable-profiling was given.
 if test "${enable_profiling+set}" = set; then
   enableval="$enable_profiling"
   CPPFLAGS="$CPPFLAGS -pg"; LDFLAGS="$LDFLAGS -pg"
+
+fi;
+
+# Check whether --enable-optimization or --disable-optimization was given.
+if test "${enable_optimization+set}" = set; then
+  enableval="$enable_optimization"
+  CPPFLAGS="$CPPFLAGS -O3"; LDFLAGS="$LDFLAGS -O3"
 
 fi;
 
@@ -2625,6 +2637,7 @@ if test "${enable_mysql+set}" = set; then
 else
   mysql_flag=no
 fi;
+
 if test "x$with_boost" != 'xno'
 then
   CPPFLAGS="$CPPFLAGS -I${with_boost} -I${with_boost}/include"
@@ -4106,8 +4119,208 @@ else
   INTERNAL_LM_FALSE=
 fi
 
+
+
+if false; then
+  IRST_LM_TRUE=
+  IRST_LM_FALSE='#'
 else
-  echo "Using internal language model (use --with-srilm to change)!"
+  IRST_LM_TRUE='#'
+  IRST_LM_FALSE=
+fi
+
+else if test "x$with_irstlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_irstlm}/include"
+
+  if test "${ac_cv_header_ngram_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for ngram.h" >&5
+echo $ECHO_N "checking for ngram.h... $ECHO_C" >&6
+if test "${ac_cv_header_ngram_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_ngram_h" >&5
+echo "${ECHO_T}$ac_cv_header_ngram_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking ngram.h usability" >&5
+echo $ECHO_N "checking ngram.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <ngram.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking ngram.h presence" >&5
+echo $ECHO_N "checking ngram.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <ngram.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_cxx_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: ngram.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: ngram.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: ngram.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: ngram.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: ngram.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: ngram.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: ngram.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: ngram.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: ngram.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: ngram.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: ngram.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: ngram.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: ngram.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: ngram.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: ngram.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: ngram.h: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------------------ ##
+## Report this to the AC_PACKAGE_NAME lists.  ##
+## ------------------------------------------ ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for ngram.h" >&5
+echo $ECHO_N "checking for ngram.h... $ECHO_C" >&6
+if test "${ac_cv_header_ngram_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_ngram_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_ngram_h" >&5
+echo "${ECHO_T}$ac_cv_header_ngram_h" >&6
+
+fi
+if test $ac_cv_header_ngram_h = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_IRSTLM
+_ACEOF
+
+else
+  { { echo "$as_me:$LINENO: error: Cannot find IRST-LM!" >&5
+echo "$as_me: error: Cannot find IRST-LM!" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+
+  LIB_SRILM="-lirstlm"
+  LDFLAGS="$LDFLAGS -L${with_irstlm}/lib"
+  LIBS="$LIBS $LIB_SRILM"
+  FMTLIBS="$FMTLIBS libirstlm.a"
+
+
+if false; then
+  SRI_LM_TRUE=
+  SRI_LM_FALSE='#'
+else
+  SRI_LM_TRUE='#'
+  SRI_LM_FALSE=
+fi
+
+
+
+if false; then
+  INTERNAL_LM_TRUE=
+  INTERNAL_LM_FALSE='#'
+else
+  INTERNAL_LM_TRUE='#'
+  INTERNAL_LM_FALSE=
+fi
+
+
+
+if true; then
+  IRST_LM_TRUE=
+  IRST_LM_FALSE='#'
+else
+  IRST_LM_TRUE='#'
+  IRST_LM_FALSE=
+fi
+
+else
+  echo "Using internal language model (use --with-srilm or --with-irstlm to change)!"
 
 
 if false; then
@@ -4128,6 +4341,17 @@ else
   INTERNAL_LM_FALSE=
 fi
 
+
+
+if false; then
+  IRST_LM_TRUE=
+  IRST_LM_FALSE='#'
+else
+  IRST_LM_TRUE='#'
+  IRST_LM_FALSE=
+fi
+
+fi
 fi
 
 LIBS="$LIBS -lboost_iostreams-gcc-mt -lboost_filesystem-gcc-mt -lboost_thread-gcc-mt -lz"
@@ -4268,6 +4492,13 @@ echo "$as_me: error: conditional \"INTERNAL_LM\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${IRST_LM_TRUE}" && test -z "${IRST_LM_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"IRST_LM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"IRST_LM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${SRI_LM_TRUE}" && test -z "${SRI_LM_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"SRI_LM\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -4279,6 +4510,34 @@ if test -z "${INTERNAL_LM_TRUE}" && test -z "${INTERNAL_LM_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"INTERNAL_LM\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"INTERNAL_LM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${IRST_LM_TRUE}" && test -z "${IRST_LM_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"IRST_LM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"IRST_LM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${SRI_LM_TRUE}" && test -z "${SRI_LM_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"SRI_LM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"SRI_LM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${INTERNAL_LM_TRUE}" && test -z "${INTERNAL_LM_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"INTERNAL_LM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"INTERNAL_LM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${IRST_LM_TRUE}" && test -z "${IRST_LM_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"IRST_LM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"IRST_LM\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -4866,6 +5125,8 @@ s,@SRI_LM_TRUE@,$SRI_LM_TRUE,;t t
 s,@SRI_LM_FALSE@,$SRI_LM_FALSE,;t t
 s,@INTERNAL_LM_TRUE@,$INTERNAL_LM_TRUE,;t t
 s,@INTERNAL_LM_FALSE@,$INTERNAL_LM_FALSE,;t t
+s,@IRST_LM_TRUE@,$IRST_LM_TRUE,;t t
+s,@IRST_LM_FALSE@,$IRST_LM_FALSE,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
