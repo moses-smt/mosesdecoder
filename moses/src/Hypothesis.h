@@ -60,13 +60,6 @@ protected:
 #endif
 
 	/***
-	 * Used for initializing translation process
-	 */
-	Hypothesis(const WordsBitmap &initialCoverage);
-	// create next
-	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
-
-	/***
 	 * \return whether none of the factors clash
 	 * \param phrase TODO ???
 	 */
@@ -82,13 +75,20 @@ protected:
 
 public:
 
-	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total
+	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
+	static int s_numNodes; //TODO what is this?
 	int m_id;
 	
 	/***
 	 * Deep copy
 	 */
 	Hypothesis(const Hypothesis &copy);
+	// used to create clone
+	Hypothesis(InputType const& source);
+		// used for initial seeding of trans process
+	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
+		// create next
+	~Hypothesis();
 	
 	/***
 	 * return the subclass of Hypothesis most appropriate to the given translation option
@@ -98,9 +98,11 @@ public:
 	 * return the subclass of Hypothesis most appropriate to the given target phrase
 	 */
 	static Hypothesis* Create(const WordsBitmap &initialCoverage);
+	/***
+	 * return the subclass of Hypothesis most appropriate to the given target phrase
+	 */
+	static Hypothesis* Create(InputType const& source);
 
-	~Hypothesis();
-	
 	/***
 	 * return the subclass of Hypothesis most appropriate to the given translation option
 	 */
@@ -115,6 +117,7 @@ public:
 	Hypothesis* MergeNext(const TranslationOption &transOpt) const;
 	
 	virtual void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
+
  // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
 	inline const WordsRange &GetCurrSourceWordsRange() const
 	{
@@ -225,7 +228,7 @@ public:
 	inline void AddArc(Hypothesis &loserHypo)
 	{
 		Arc *arc = new Arc(loserHypo.m_score
-											, loserHypo.GetScoreComponent()
+											, loserHypo.GetTranslationScoreComponent()
 											, loserHypo.GetLMScoreComponent()
 											, loserHypo.GetGenerationScoreComponent()
 											, loserHypo.GetPhrase()

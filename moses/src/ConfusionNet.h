@@ -7,6 +7,7 @@
 #include "Input.h"
 
 class FactorCollection;
+class TranslationOptionCollection;
 
 class ConfusionNet : public InputType {
  public: 

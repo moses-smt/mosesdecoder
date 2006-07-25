@@ -28,14 +28,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class ScoreColl : public std::map<size_t, float>
 {
 public:
+	ScoreColl() {}
 	float GetValue(size_t index) const
 	{
 		const_iterator iter = find(index);
 		assert(iter != end());
 		return iter->second;
 	}
+	float SetValue(size_t index, float value)
+	{
+		assert(find(index) != end());
+		return operator[](index) = value;
+	}	
+	float Add(size_t index)
+	{
+		assert(find(index) == end());
+		return operator[](index) = 0;
+	}	
 	void Combine(const ScoreColl &other);
-	
 };
 
 inline std::ostream& operator<<(std::ostream &out, const ScoreColl &coll)

@@ -30,8 +30,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SquareMatrix.h"
 #include "StaticData.h"
 #include "Input.h"
-
+#include "LMList.h"
 #include "md5.h"
+
 //TODO: add this include in when it compiles
 //#include "LexicalReordering.h"
 
@@ -40,13 +41,13 @@ using namespace std;
 
 unsigned int Hypothesis::s_HypothesesCreated = 0;
 
-Hypothesis::Hypothesis(const WordsBitmap &initialCoverage)
-	: LatticeEdge(Output, NULL)
-	, m_sourceCompleted(initialCoverage)
+Hypothesis::Hypothesis(InputType const& source)
+	: LatticeEdge(Output)
+	, m_sourceCompleted(source.GetSize())
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
-	, m_wordDeleted(false)
 	, m_id(s_HypothesesCreated++)
+	, m_wordDeleted(false)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	ResetScore();	
@@ -56,20 +57,14 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 	: LatticeEdge							(Output, copy.m_prevHypo)
 	, m_sourceCompleted				(copy.m_sourceCompleted )
 	, m_currSourceWordsRange	(copy.m_currSourceWordsRange)
-	, m_currTargetWordsRange		(copy.m_currTargetWordsRange)
-	, m_wordDeleted(false)
-	, m_id(s_HypothesesCreated++)
+	, m_currTargetWordsRange	(copy.m_currTargetWordsRange)
+	, m_wordDeleted						(false)
+	, m_id										(s_HypothesesCreated++)
 {
 	m_targetPhrase.AddWords( copy.m_targetPhrase );
 
 	// initialize scores
 	SetScore(copy.GetScore());
-#ifdef N_BEST
-	m_lmScoreComponent 				= copy.GetLMScoreComponent();
-	m_transScoreComponent			= copy.GetScoreComponent();
-	m_generationScoreComponent	= copy.GetGenerationScoreComponent();
-		
-#endif
 }
 
 /***
@@ -78,57 +73,38 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: LatticeEdge							(Output, &prevHypo)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
-	, m_currSourceWordsRange	(prevHypo.m_currSourceWordsRange)
+	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
 	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
 														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetPhrase().GetSize())
 	, m_wordDeleted(false)
 	, m_id(s_HypothesesCreated++)
 {
-	const Phrase &possPhrase				= transOpt.GetPhrase();
-	const WordsRange &wordsRange		= transOpt.GetWordsRange();
-	m_currSourceWordsRange 					= wordsRange;
-	m_sourceCompleted.SetValue(wordsRange.GetStartPos(), wordsRange.GetEndPos(), true);
+	const Phrase &possPhrase				= transOpt.GetTargetPhrase();
+	
+	m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
 	// add new words from poss trans
 	//m_phrase.AddWords(prev.m_phrase);
 	m_targetPhrase.AddWords(possPhrase);
 
 	// scores
 	SetScore(prevHypo.GetScore());
-	m_score[ScoreType::PhraseTrans]				+= transOpt.GetTranslationScore();
-	m_score[ScoreType::FutureScoreEnum]		+= transOpt.GetFutureScore();
+	m_score[ScoreType::PhraseTrans]					+= transOpt.GetTranslationScore();
+	m_score[ScoreType::FutureScoreEnum]			+= transOpt.GetFutureScore();
 	m_score[ScoreType::LanguageModelScore]	+= transOpt.GetNgramScore();
+	m_score[ScoreType::Generation]					+= transOpt.GetGenerationScore();
+	
   m_wordDeleted = transOpt.IsDeletionOption();
 
 #ifdef N_BEST
 	// language model score (ngram)
-	m_lmScoreComponent = prevHypo.GetLMScoreComponent();
-	const std::vector< std::pair<size_t, float> > &nGramComponent = transOpt.GetTrigramComponent();
-
-	for(unsigned int i = 0; i < nGramComponent.size(); i++)
-	{
-		size_t lmId = nGramComponent[i].first;
-		float score	= nGramComponent[i].second;
-		m_lmScoreComponent[lmId] += score;
-	}
+	m_lmScoreComponent.Combine(transOpt.GetNgramComponent());
 
 	// translation score
-	const ScoreComponentCollection &prevComponent= prevHypo.GetScoreComponent();
-	m_transScoreComponent = prevComponent;
+	m_transScoreComponent.Combine(transOpt.GetTransScoreComponent());
 	
-	// add components specific to poss trans
-	const ScoreComponent &possComponent	= transOpt.GetScoreComponents();
-	ScoreComponent &transComponent				= m_transScoreComponent.GetScoreComponent(possComponent.GetDictionary());
-	
-	const size_t noScoreComponent = possComponent.GetNoScoreComponent();
-	assert(noScoreComponent == transComponent.GetNoScoreComponent());
-
-	for (size_t i = 0 ; i < noScoreComponent ; i++)
-	{
-		transComponent[i] += possComponent[i];
-	}
-
 	// generation score
-	m_generationScoreComponent = prevHypo.GetGenerationScoreComponent();
+	m_generationScoreComponent.Combine(transOpt.GetGenerationScoreComponent());
+		
 #endif
 }
 
@@ -152,17 +128,14 @@ Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
  */
 Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 {
-	/*if(s_wordDeletionEnabled && transOpt.GetPhrase().GetSize() == 0) return new DeletionHypothesis(prevHypo, transOpt);
-	else*/ return new Hypothesis(prevHypo, transOpt);
+	return new Hypothesis(prevHypo, transOpt);
 }
-
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */
-Hypothesis* Hypothesis::Create(const WordsBitmap &initialCoverage)
+Hypothesis* Hypothesis::Create(InputType const& m_source)
 {
-	/*if(s_wordDeletionEnabled && targetPhrase.GetSize() == 0) return new DeletionHypothesis(initialCoverage);
-	else*/ return new Hypothesis(initialCoverage);
+	return new Hypothesis(m_source);
 }
 
 /***
@@ -175,7 +148,7 @@ Hypothesis* Hypothesis::Create(const WordsBitmap &initialCoverage)
 Hypothesis* Hypothesis::MergeNext(const TranslationOption &transOpt) const
 {
 	// check each word is compatible and merge 1-by-1
-	const Phrase &possPhrase = transOpt.GetPhrase();
+	const Phrase &possPhrase = transOpt.GetTargetPhrase();
 	if (! IsCompatible(possPhrase))
 	{
 		return NULL;
@@ -196,9 +169,8 @@ Hypothesis* Hypothesis::MergeNext(const TranslationOption &transOpt) const
 	}
 
 #ifdef N_BEST
-	const ScoreComponent &transOptComponent = transOpt.GetScoreComponents();
-	clone->m_transScoreComponent.Remove(transOptComponent.GetDictionary());
-	clone->m_transScoreComponent.Add(transOptComponent);
+	const ScoreComponentCollection &transOptComponent = transOpt.GetTransScoreComponent();
+	clone->m_transScoreComponent.Combine(transOptComponent);
 #endif
 
 	return clone;
@@ -583,7 +555,7 @@ void Hypothesis::PrintHypothesis(const InputType &source, float weightDistortion
 	cout<<"\tword penalty "<<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
 	cout<<"\tscore "<<m_score[ScoreType::Total] - m_score[ScoreType::FutureScoreEnum]<<" + future cost "<<m_score[ScoreType::FutureScoreEnum]<<" = "<<m_score[ScoreType::Total]<<endl;
 #if N_BEST
-  cout<<"\tweighted feature scores: " << this->GetScoreComponent() << endl;
+  cout<<"\tweighted feature scores: " << this->GetTranslationScoreComponent() << endl;
 #endif
 	//PrintLMScores();
 }
@@ -605,8 +577,8 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 	}
 	out << "]";
 #ifdef N_BEST
-	out << " " << hypothesis.GetScoreComponent();
-	out << " " << hypothesis.GetGenerationScoreComponent();
+		out << " " << hypothesis.GetTranslationScoreComponent();
+		out << " " << hypothesis.GetGenerationScoreComponent();
 #endif
 	return out;
 }

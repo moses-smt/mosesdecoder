@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "HypothesisCollection.h"
 #include "HypothesisCollectionIntermediate.h"
-#include "TranslationOptionCollection.h"
+#include "TranslationOptionCollectionText.h"
 #include "LatticePathList.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
@@ -46,9 +46,14 @@ protected:
 	std::vector < HypothesisCollection > m_hypoStack;
 		// no of elements = no of words in source + 1
 	StaticData &m_staticData;
-	TranslationOptionCollection& m_possibleTranslations;
+	TranslationOptionCollection &m_possibleTranslations;
 
 	// functions
+	void ProcessOneStack(HypothesisCollection &sourceHypoColl);
+	void ProcessOneHypothesis(const Hypothesis &hypothesis);
+	void CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisCollectionIntermediate &outputHypoColl);
+
+	// old function
 	void ProcessOneStack(const std::list < DecodeStep > &decodeStepList
 													, HypothesisCollection &sourceHypoColl);
 	void ProcessOneHypothesis(const std::list < DecodeStep > &decodeStepList
@@ -65,7 +70,11 @@ protected:
 	void ProcessFinalNullFertilityInsertion(const Hypothesis &hypothesis
 													, const DecodeStep &decodeStep
 													, HypothesisCollectionIntermediate &outputHypoColl);
-
+#if 0
+	void CreateTranslationOptions(const Phrase &phrase
+													, PhraseDictionary &phraseDictionary
+													, const LMList &lmListInitial);
+#endif
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
 public:

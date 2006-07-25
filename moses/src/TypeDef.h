@@ -152,7 +152,3 @@ enum LMListType
 // typedef
 class Factor;
 typedef const Factor * FactorArray[NUM_FACTORS];
-
-class LanguageModel;
-typedef std::list < LanguageModel* >		LMList;
-

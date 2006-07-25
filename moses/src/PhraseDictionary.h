@@ -35,6 +35,7 @@ class StaticData;
 class InputType;
 class WordsRange;
 
+
 class PhraseDictionaryBase : public Dictionary {
  protected:
 	size_t m_maxTargetPhrase;
@@ -57,8 +58,6 @@ class PhraseDictionaryBase : public Dictionary {
 
 	virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
 };
-
-
 
 class PhraseDictionary : public PhraseDictionaryBase
 {

@@ -24,8 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Phrase.h"
 #include "ScoreComponent.h"
+#include "ScoreColl.h"
 
-class PhraseDictionary;
+class LMList;
+class PhraseDictionaryBase;
+class GenerationDictionary;
 
 class TargetPhrase: public Phrase
 {
@@ -36,24 +39,51 @@ protected:
 	float m_inputScore;
 	ScoreComponent m_scoreComponent;
 	std::vector< std::pair<size_t, float> > m_lmScoreComponent;
-	std::vector< std::pair<size_t, float> > m_ngramComponent;
+	ScoreColl m_ngramComponent;
 #endif
 
 public:
 
-	TargetPhrase(FactorDirection direction, const Dictionary *dictionary);
+	TargetPhrase(FactorDirection direction, const PhraseDictionaryBase *phraseDictionary);
+	TargetPhrase(FactorDirection direction);
+		// unknown word
 
+	TargetPhrase(const TargetPhrase& phrase)
+	: Phrase(phrase)
+	, m_transScore(phrase.m_transScore)
+	, m_ngramScore(phrase.m_ngramScore)
+	, m_fullScore(phrase.m_fullScore)
+#ifdef N_BEST
+	, m_scoreComponent(phrase.m_scoreComponent)
+	, m_lmScoreComponent(phrase.m_lmScoreComponent)
+	, m_ngramComponent(phrase.m_ngramComponent)
+#endif
+	{ // deep copy
+	}
+
+	void SetScore(float weightWP);
 	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT,
 								const LMList &languageModels, float weightWP, float inputScore=0.0, float weightInput=0.0);
-	void SetScore(const LMList &languageModels, float weightWP);
 	// used when creating translations of unknown words:
 	void ResetScore();
 	void SetWeights(const std::vector<float> &weightT);
 
-	inline float GetTranslationScore() const
-	{
-		return m_transScore;
-	}
+	TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
+		// used for translation step
+	
+  inline float GetTranslationScore() const
+  {
+    return m_transScore;
+  }
+  //TODO is this really the best name?
+  inline float GetFutureScore() const
+  {
+    return m_fullScore;
+  }
+  inline float GetNgramScore() const
+  {
+    return m_ngramScore;
+  }
   /***
    * return the estimated score resulting from our being added to a sentence
    * (it's an estimate because we don't have full n-gram info for the language model
@@ -61,28 +91,16 @@ public:
    * 
    * TODO is this really the best name?
    */
-	inline float GetFutureScore() const
-	{
-		return m_fullScore;
-	}
-	inline float GetNgramScore() const
-	{
-		return m_ngramScore;
-	}
 
 #ifdef N_BEST
 	inline const ScoreComponent &GetScoreComponents() const
 	{
 		return m_scoreComponent;
 	}
-	inline const std::vector< std::pair<size_t, float> > &GetLMScoreComponent() const
-	{
-		return m_lmScoreComponent;
-	}
-	inline const std::vector< std::pair<size_t, float> > &GetNgramComponent() const
-	{
-		return m_ngramComponent;
-	}
+  inline const ScoreColl &GetNgramComponent() const
+  {
+    return m_ngramComponent;
+  }
 #endif
 
 };

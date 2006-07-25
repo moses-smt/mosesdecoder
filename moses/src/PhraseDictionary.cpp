@@ -35,11 +35,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-
 PhraseDictionaryBase::PhraseDictionaryBase(size_t noScoreComponent)
 	: Dictionary(noScoreComponent),m_maxTargetPhrase(0)
 {
 }
+
 PhraseDictionaryBase::~PhraseDictionaryBase() {}
 	
 const TargetPhraseCollection *PhraseDictionaryBase::
@@ -94,11 +94,13 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			TRACE_ERR("Syntax error at " << filePath << ":" << line_num);
 			abort(); // TODO- error handling
 		}
+
     bool isLHSEmpty = (tokens[1].find_first_not_of(" \t", 0) == string::npos);
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
       TRACE_ERR(filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
 			continue;
     }
+
 		if (!filter)
 		{
 			if (tokens[0] != prevSourcePhrase)
