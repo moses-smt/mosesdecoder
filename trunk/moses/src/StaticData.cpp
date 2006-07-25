@@ -432,7 +432,8 @@ void StaticData::LoadPhraseTables(bool filter
 															+ phraseTableHash + ".txt";
 
 			timer.check("Start loading PhraseTable");
-			if (!boost::filesystem::exists(filePath+".binphr.idx")) 
+			using namespace boost::filesystem; 
+			if (!exists(path(filePath+".binphr.idx", native)))
 				{
 					bool filterPhrase;
 					if (filter)
