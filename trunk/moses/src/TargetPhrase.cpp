@@ -19,7 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <assert.h>
+#include <cassert>
 #include "TargetPhrase.h"
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
@@ -29,16 +29,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionaryBase *phraseDictionary)
-:Phrase(direction)
+:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0)
 #ifdef N_BEST
-	,m_scoreComponent(phraseDictionary)
 	,m_inputScore(0.0)
+	,m_scoreComponent(phraseDictionary)
 #endif
 {
 }
 
 TargetPhrase::TargetPhrase(FactorDirection direction)
-:Phrase(direction)
+	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0)
+#ifdef N_BEST
+	,m_inputScore(0.0)
+#endif
 {
 }
 
