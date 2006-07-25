@@ -42,6 +42,7 @@ class InputOutput
 	virtual void SetNBest(const LatticePathList &nBestList, long translationId) = 0;
 	virtual ~InputOutput();
 	virtual void Release(InputType*);
+  void ResetSentenceId() { sentenceId = 0; }
 
  protected:
 	InputType* GetInput(InputType * inputType
