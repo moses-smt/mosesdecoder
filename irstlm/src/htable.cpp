@@ -18,11 +18,12 @@
 
 ******************************************************************************/
 
-using namespace std;
-
 #include <iostream>
+#include <assert.h>
 #include "mempool.h"
 #include "htable.h"
+
+using namespace std;
 
 htable::htable(int n,int kl,HTYPE ht,size_t (*klf)(const char* )){
   

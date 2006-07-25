@@ -17,10 +17,9 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using namespace std;
-
 #include <iostream>
 #include <stdexcept>
+#include <assert.h>
 
 #include "math.h"
 #include "mempool.h"
@@ -29,6 +28,7 @@ using namespace std;
 #include "ngram.h"
 #include "lmtable.h"
 
+using namespace std;
 
 inline void error(char* message){
   cerr << message << "\n";
@@ -659,7 +659,9 @@ const char *lmtable::maxsuffptr(ngram ong){
     return ng.link;
   else{ 
     ong.size--;
+#ifndef WIN32
 #warning maxsuffptr is not implemented
+#endif
 		exit(1);
 //    return getstate(ong);
   }

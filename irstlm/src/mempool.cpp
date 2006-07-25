@@ -22,10 +22,11 @@
 // by M. Federico 
 // Copyright Marcello Federico, ITC-irst, 1998
 
-using namespace std;
-
 #include <iostream>
+#include <assert.h>
 #include "mempool.h"
+
+using namespace std;
 
 /*! The pool contains:
    - entries of size is
