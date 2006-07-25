@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LatticePath.h"
 #include "LatticePathCollection.h"
 #include "TranslationOption.h"
+#include "LMList.h"
 
 using namespace std;
 
@@ -38,7 +39,7 @@ Manager::Manager(InputType const& source,
 :m_source(source)
 ,m_hypoStack(source.GetSize() + 1)
 ,m_staticData(staticData)
-,m_possibleTranslations(toc)  
+,m_possibleTranslations(toc)  //dynamic_cast<Sentence const&>(source))
 {
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
@@ -57,14 +58,12 @@ void Manager::ProcessSentence()
 {
 	
 	list < DecodeStep > &decodeStepList = m_staticData.GetDecodeStepList();
-	const LMList &lmListInitial = m_staticData.GetLanguageModel(Initial);
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
 	m_possibleTranslations.CreateTranslationOptions(decodeStepList
-  														, lmListInitial
   														, m_staticData.GetAllLM()
   														, m_staticData.GetFactorCollection()
   														, m_staticData.GetWeightWordPenalty()
@@ -77,13 +76,12 @@ void Manager::ProcessSentence()
 
 	// seed hypothesis
 	{
-		Hypothesis *hypo = Hypothesis::Create(m_possibleTranslations.GetInitialCoverage());
-		TRACE_ERR(m_possibleTranslations.GetInitialCoverage().GetWordsCount() << endl);
+		Hypothesis *hypo = Hypothesis::Create(m_source);
 #ifdef N_BEST
 		LMList allLM = m_staticData.GetAllLM();
 		hypo->ResizeComponentScore(allLM, decodeStepList);
 #endif
-		m_hypoStack[m_possibleTranslations.GetInitialCoverage().GetWordsCount()].AddPrune(hypo);
+	m_hypoStack[0].AddPrune(hypo);
 	}
 	
 	// go thru each stack
@@ -94,7 +92,8 @@ void Manager::ProcessSentence()
 		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize());
 		sourceHypoColl.InitializeArcs();
 		//sourceHypoColl.Prune();
-		ProcessOneStack(decodeStepList, sourceHypoColl);
+		ProcessOneStack(sourceHypoColl);
+		//ProcessOneStack(decodeStepList, sourceHypoColl);
 
 		//OutputHypoStack();
 		if (m_staticData.GetVerboseLevel() > 0) {
@@ -117,6 +116,130 @@ const Hypothesis *Manager::GetBestHypothesis() const
 	return hypoColl.GetBestHypothesis();
 }
 
+void Manager::ProcessOneStack(HypothesisCollection &sourceHypoColl)
+{
+	// go thru each hypothesis in the stack
+	HypothesisCollection::iterator iterHypo;
+	for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
+	{
+		Hypothesis &hypothesis = **iterHypo;
+		ProcessOneHypothesis(hypothesis);
+	}
+}
+void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
+{
+			
+	HypothesisCollectionIntermediate outputHypoColl;
+	CreateNextHypothesis(hypothesis, outputHypoColl);
+
+	// add to real hypothesis stack
+	HypothesisCollectionIntermediate::iterator iterHypo;
+	for (iterHypo = outputHypoColl.begin() ; iterHypo != outputHypoColl.end() ; )
+	{
+		Hypothesis *hypo = *iterHypo;
+
+		hypo->CalcScore(m_staticData, m_possibleTranslations.GetFutureScore());
+		if(m_staticData.GetVerboseLevel() > 2) 
+		{			
+			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+		}
+
+		size_t wordsTranslated = hypo->GetWordsBitmap().GetWordsCount();
+
+		if (m_hypoStack[wordsTranslated].AddPrune(hypo))
+		{
+			HypothesisCollectionIntermediate::iterator iterCurr = iterHypo++;
+			outputHypoColl.Detach(iterCurr);
+			if(m_staticData.GetVerboseLevel() > 2) 
+				{
+					if(m_hypoStack[wordsTranslated].getBestScore() == hypo->GetScore(ScoreType::Total))
+						{
+							cout<<"new best estimate for this stack"<<endl;
+						}
+					cout<<"added hypothesis on stack "<<wordsTranslated<<" now size "<<m_hypoStack[wordsTranslated].size()<<endl<<endl;
+				}
+
+		}
+		else
+		{
+			++iterHypo;
+		}
+	}
+
+}
+void Manager::CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisCollectionIntermediate &outputHypoColl)
+{
+	int maxDistortion = m_staticData.GetMaxDistortion();
+	if (maxDistortion < 0)
+	{	// no limit on distortion
+		TranslationOptionCollection::const_iterator iterTransOpt;
+		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
+		{
+			const TranslationOption &transOpt = *iterTransOpt;
+
+			if ( !transOpt.Overlap(hypothesis)) 
+			{
+				Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+				//newHypo->PrintHypothesis(m_source);
+				outputHypoColl.AddNoPrune( newHypo );			
+			}
+		}
+	}
+	else
+	{
+		const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
+		size_t hypoWordCount		= hypoBitmap.GetWordsCount()
+			,hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();
+
+		// MAIN LOOP. go through each possible hypo
+		TranslationOptionCollection::const_iterator iterTransOpt;
+		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
+		{
+			const TranslationOption &transOpt = *iterTransOpt;
+			// calc distortion if using this poss trans
+
+			size_t transOptStartPos = transOpt.GetStartPos();
+
+			if (hypoFirstGapPos == hypoWordCount)
+			{
+				if (transOptStartPos == hypoWordCount
+					|| (transOptStartPos > hypoWordCount 
+					&& transOpt.GetEndPos() <= hypoWordCount + m_staticData.GetMaxDistortion())
+					)
+				{
+					Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+					//newHypo->PrintHypothesis(m_source);
+					outputHypoColl.AddNoPrune( newHypo );			
+				}
+			}
+			else
+			{
+				if (transOptStartPos < hypoWordCount)
+				{
+					if (transOptStartPos >= hypoFirstGapPos
+						&& !transOpt.Overlap(hypothesis))
+					{
+						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+						//newHypo->PrintHypothesis(m_source);
+						outputHypoColl.AddNoPrune( newHypo );			
+					}
+				}
+				else
+				{
+					if (transOpt.GetEndPos() <= hypoFirstGapPos + m_staticData.GetMaxDistortion()
+						&& !transOpt.Overlap(hypothesis))
+					{
+						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+						//newHypo->PrintHypothesis(m_source);
+						outputHypoColl.AddNoPrune( newHypo );			
+					}
+				}
+			}
+		}
+	}
+}
+
+// OLD FUNCTIONS
 void Manager::ProcessOneStack(const list < DecodeStep > &decodeStepList, HypothesisCollection &sourceHypoColl)
 {
 	// go thru each hypothesis in the stack
@@ -369,6 +492,116 @@ void Manager::ProcessTranslation(const Hypothesis &hypothesis, const DecodeStep 
 	}
 }
 
+#if 0
+/***
+ * Add to m_possibleTranslations all possible translations the phrase table gives us for
+ * the given phrase
+ * 
+ * \param phrase The source phrase to translate
+ * \param phraseDictionary The phrase table
+ * \param lmListInitial A list of language models
+ */
+void Manager::CreateTranslationOptions(const Phrase &phrase, PhraseDictionary &phraseDictionary, const LMList &lmListInitial)
+{	
+	// loop over all substrings of the source sentence, look them up
+	// in the phraseDictionary (which is the- possibly filtered-- phrase
+	// table loaded on initialization), generate TranslationOption objects
+	// for all phrases
+	//
+	// possible optimization- don't consider phrases longer than the longest
+	// phrase in the PhraseDictionary?
+	for (size_t startPos = 0 ; startPos < phrase.GetSize() ; startPos++)
+	{
+		// reuse phrase, add next word on
+		Phrase sourcePhrase( phrase.GetDirection());
+
+		for (size_t endPos = startPos ; endPos < phrase.GetSize() ; endPos++)
+		{
+			const WordsRange wordsRange(startPos, endPos);
+
+			FactorArray &newWord = sourcePhrase.AddWord();
+			Word::Copy(newWord, phrase.GetFactorArray(endPos));
+
+			const TargetPhraseCollection *phraseColl =	phraseDictionary.FindEquivPhrase(sourcePhrase);
+			if (phraseColl != NULL)
+			{
+//      	if (m_staticData.GetVerboseLevel() >= 3) {
+//					cout << "[" << sourcePhrase << "; " << startPos << "-" << endPos << "]\n";
+ //     	}
+				TargetPhraseCollection::const_iterator iterTargetPhrase;
+				for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != phraseColl->end() ; ++iterTargetPhrase)
+				{
+					const TargetPhrase	&targetPhrase = *iterTargetPhrase;
+					
+					const WordsRange wordsRange(startPos, endPos);
+//					TranslationOption transOpt(wordsRange, targetPhrase);
+					m_possibleTranslations.push_back(TranslationOption(wordsRange, targetPhrase));
+//      		if (m_staticData.GetVerboseLevel() >= 3) {
+//						cout << "\t" << transOpt << "\n";
+//	     		}
+				}
+//        if (m_staticData.GetVerboseLevel() >= 3) { cout << endl; }
+			}
+			else if (sourcePhrase.GetSize() == 1)
+			{
+				/*
+				 * changed to have an extendable unknown-word translation module -- EVH
+				 */
+//				boost::shared_ptr<std::list<TranslationOption> > unknownWordTranslations = m_staticData.GetUnknownWordHandler()->GetPossibleTranslations(wordsRange, sourcePhrase, m_staticData, phraseDictionary);
+//				m_possibleTranslations.insert(m_possibleTranslations.end(), unknownWordTranslations->begin(), unknownWordTranslations->end());
+			}
+		}
+	}
+
+	// create future score matrix
+	// for each span in the source phrase (denoted by start and end)
+	for(size_t start = 0; start < phrase.GetSize() ; start++) 
+	{
+		for(size_t end = start; end < phrase.GetSize() ; end++) 
+		{
+			size_t length = end - start + 1;
+			vector< float > score(length + 1);
+			score[0] = 0;
+			for(size_t currLength = 1 ; currLength <= length ; currLength++) 
+				// initalize their future cost to -infinity
+			{
+				score[currLength] = - numeric_limits<float>::infinity();
+			}
+
+			for(size_t currLength = 0 ; currLength < length ; currLength++) 
+			{
+				// iterate over possible translations of this source subphrase and
+				// keep track of the highest cost option
+				TranslationOptionCollection::const_iterator iterTransOpt;
+				for(iterTransOpt = m_possibleTranslations.begin() ; iterTransOpt != m_possibleTranslations.end() ; ++iterTransOpt)
+				{
+					const TranslationOption &transOpt = *iterTransOpt;
+					size_t index = currLength + transOpt.GetSize();
+
+					if (transOpt.GetStartPos() == currLength + start 
+						&& transOpt.GetEndPos() <= end 
+						&& transOpt.GetFutureScore() + score[currLength] > score[index]) 
+					{
+						score[index] = transOpt.GetFutureScore() + score[currLength];
+					}
+				}
+			}
+			// record the highest cost option in the future cost table.
+//			m_futureScore[start][end] = score[length];
+			//m_futureScore.SetScore(start, end, score[length]);
+
+			//print information about future cost table when verbose option is set
+
+			if(m_staticData.GetVerboseLevel() > 2) 
+			{		
+				cout<<"future cost from "<<start<<" to "<<end<<" is "<<score[length]<<endl;
+			}
+		}
+	}
+>>>>>>> 1.27.2.10
+}
+#endif
+
 // helpers
 typedef pair<Word, float> WordPair;
 typedef list< WordPair > WordList;	
@@ -376,7 +609,7 @@ typedef list< WordPair > WordList;
 	// 2nd = score
 typedef list< WordPair >::const_iterator WordListIterator;
 
-void IncrementIterators(vector< WordListIterator > &wordListIterVector
+inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 												, const vector< WordList > &wordListVector)
 {
 	for (size_t currPos = 0 ; currPos < wordListVector.size() ; currPos++)

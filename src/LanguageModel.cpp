@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
+#include "ScoreColl.h"
 
 using namespace std;
 
@@ -95,5 +96,5 @@ void LanguageModel::CalcScore(const Phrase &phrase
 		
 		ngramScore += partScore;		
 	}
-	fullScore += ngramScore;
+	fullScore += ngramScore;	
 }

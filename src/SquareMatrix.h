@@ -52,5 +52,6 @@ public:
 		m_array[row * m_size + col] = value;
 	}
 	
+	std::string ToString();
 };
 

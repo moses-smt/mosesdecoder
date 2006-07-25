@@ -40,7 +40,7 @@ protected:
 
 public:
 	Word(const Word &copy);
-	//Word(const FactorTypeSet *factorsUsed);
+	Word(const FactorArray &factorArray);
 	Word();
 
 	~Word()

@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "boost/filesystem/operations.hpp" // boost::filesystem::exists
 #include "boost/algorithm/string/case_conv.hpp" //boost::algorithm::to_lower
 #include "PhraseDictionaryTreeAdaptor.h"
-
 #include "LanguageModel.h"
 #include "LanguageModelFactory.h"
 
@@ -426,6 +425,7 @@ void StaticData::LoadPhraseTables(bool filter
 			string phraseTableHash	= GetMD5Hash(filePath);
 			string hashFilePath			= GetCachePath() 
 															+ PROJECT_NAME + "--"
+															+ token[0] + "--"
 															+ inputFileHash + "--" 
 															+ phraseTableHash + ".txt";
 
@@ -481,8 +481,6 @@ void StaticData::LoadPhraseTables(bool filter
 					m_phraseDictionary.push_back(pd);
 				}
 
-
-
 			index++;
 			timer.check("Finished loading PhraseTable");
 		}
@@ -520,3 +518,4 @@ void StaticData::InitializeBeforeSentenceProcessing(InputType const& in)
 	for(size_t i=0;i<m_phraseDictionary.size();++i)
 		m_phraseDictionary[i]->InitializeForInput(in);
 }
+

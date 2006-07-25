@@ -1,4 +1,5 @@
 // $Id$
+
 #ifndef PHRASEDICTIONARYTREE_H_
 #define PHRASEDICTIONARYTREE_H_
 #include <string>

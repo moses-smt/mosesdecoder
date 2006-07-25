@@ -23,8 +23,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "LatticeEdge.h"
 #include "LanguageModel.h"
+#include "LMList.h"
+#include "Hypothesis.h"
 
 using namespace std;
+
+LatticeEdge::LatticeEdge(FactorDirection direction, const Hypothesis *prevHypo)
+	:m_prevHypo(prevHypo)
+	,m_targetPhrase(direction)
+#ifdef N_BEST
+	,m_lmScoreComponent 				(prevHypo->GetLMScoreComponent())
+	,m_transScoreComponent			(prevHypo->GetTranslationScoreComponent())
+	,m_generationScoreComponent	(prevHypo->GetGenerationScoreComponent())
+#endif
+{}
 
 LatticeEdge::~LatticeEdge()
 {

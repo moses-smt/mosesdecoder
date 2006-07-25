@@ -55,6 +55,7 @@ public:
 		, m_factorArray(NULL)
 	{
 	}
+	Phrase(FactorDirection direction, const std::vector< const Word* > &mergeWords);
 
 	virtual ~Phrase();
 
@@ -65,6 +66,11 @@ public:
 	void CreateFromString(const std::vector<FactorType> &factorOrder
 											, const std::vector< std::vector<std::string> > &phraseVector
 											, FactorCollection &factorCollection);
+
+	void MergeFactors(const Phrase &copy);
+	// must run IsCompatible() to ensure incompatible factors aren't being overwritten
+
+	bool IsCompatible(const Phrase &inputPhrase) const;
 
 	inline FactorDirection GetDirection() const
 	{

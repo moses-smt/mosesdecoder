@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 #include <cmath>
+#include <assert.h>
 
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }
@@ -179,11 +180,6 @@ inline float CalcTranslationScore(const std::vector<float> &scoreVector,
 		rv += TransformScore(*sb) * (*wb);
 	return rv;
 }
-
-
-
-
-
 
 #define TO_STRING								\
 	std::string ToString() const	\

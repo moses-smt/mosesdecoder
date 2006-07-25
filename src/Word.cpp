@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 #include "memory.h"
 #include "Word.h"
+#include "TypeDef.h"
 
 using namespace std;
 
@@ -33,6 +34,14 @@ Word::Word(const Word &copy)
 Word::Word()
 {
 	Word::Initialize(m_factorArray);
+}
+
+Word::Word(const FactorArray &factorArray)
+{
+	for (size_t factor = 0 ; factor < NUM_FACTORS ; factor++)
+	{
+		m_factorArray[factor] = factorArray[factor];
+	}
 }
 
 int Word::Compare(const Word &compare) const
