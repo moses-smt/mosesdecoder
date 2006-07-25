@@ -97,6 +97,7 @@ int main(int argc, char* argv[])
 	if (inputOutput == NULL)
 		return EXIT_FAILURE;
 
+
 	// read each sentence & decode
 	while(InputType *source = inputOutput->GetInput((staticData.GetInputType() ? 
 																									 static_cast<InputType*>(new ConfusionNet) : 
