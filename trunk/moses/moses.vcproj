@@ -431,7 +431,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ScoreColl.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ScoreComponent.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ScoreComponentCollection.cpp"
 				>
 			</File>
 			<File
