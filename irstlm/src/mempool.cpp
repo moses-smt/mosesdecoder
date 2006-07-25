@@ -37,7 +37,7 @@ mempool::mempool(int is, int bs){
   // item size must be multiple of memory alignment step (4 bytes)
   // example: is is=9  becomes i=12 (9 + 4 - 9 %4 )
 
-  is=is>sizeof(char *)?is:0;   
+  is=(is>(int)sizeof(char *)?is:0);   
   
   is=is + sizeof(char *) - (is % sizeof(char *));  
   
@@ -162,7 +162,7 @@ void mempool::map (ostream& co){
   memnode *bl=block_list;
   char *fl=free_list;
   
-  char img[block_size+1];
+  char* img=new char[block_size+1];
   img[block_size]='\0';
   
   while (bl !=NULL){
@@ -184,7 +184,7 @@ void mempool::map (ostream& co){
     co << img << "\n";
     bl=bl->next;    
   } 
-
+	delete [] img;
 }
 
 void mempool::stat(){
@@ -193,7 +193,7 @@ void mempool::stat(){
        << "entries " << entries
        << " blocks " << blocknum
        << " used memory " << (blocknum * true_size)/1024 << " Kb\n";
-};
+}
 
 
 
@@ -214,7 +214,7 @@ strstack::strstack(int bs){
   entries=0;
   blocknum=1;
 
-};
+}
 
 
 void strstack::stat(){
@@ -223,7 +223,7 @@ void strstack::stat(){
        << "entries " << entries
        << " blocks " << blocknum
        << " used memory " << memory/1024 << " Kb\n";
-};
+}
 
 
 char *strstack::push(char *s){
@@ -266,7 +266,7 @@ char *strstack::push(char *s){
     
   return &list->block[idx-len-1];
   
-};
+}
 
 
 char *strstack::pop(){
@@ -313,7 +313,7 @@ char *strstack::pop(){
     memset(&list->block[idx],'\0',size);
     return &list->block[0];
   }
-};
+}
 
 
 char *strstack::top(){
@@ -354,7 +354,7 @@ char *strstack::top(){
     return &tlist->block[0];
   }
 
-};
+}
 
 
 strstack::~strstack(){
@@ -365,7 +365,7 @@ strstack::~strstack(){
     delete list;
     list=ptr;
   } 
-};
+}
 
 
 storage::storage(int maxsize,int blocksize)
@@ -377,7 +377,7 @@ storage::storage(int maxsize,int blocksize)
   poolset=new mempool* [setsize+1];
   for (int i=0;i<=setsize;i++)
     poolset[i]=NULL;
-};
+}
 
 
 storage::~storage(){
@@ -385,7 +385,7 @@ storage::~storage(){
     if (poolset[i])
       delete poolset[i];
   delete [] poolset;
-};
+}
 
 
 char *storage::alloc(int size){

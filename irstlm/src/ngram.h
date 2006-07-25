@@ -56,9 +56,13 @@ class ngram{
   ngram(dictionary* d,int sz=0);
   ngram(ngram& ng);
   
-  int *wordp() // n-gram pointer
+  int *wordp()// n-gram pointer
     {return wordp(size);}; 
   int *wordp(int k) // n-gram pointer
+    {return size>=k?&word[MAX_NGRAM-k]:0;}; 
+  const int *wordp() const // n-gram pointer
+    {return wordp(size);}; 
+  const int *wordp(int k) const // n-gram pointer
     {return size>=k?&word[MAX_NGRAM-k]:0;}; 
 
   int shift(){
@@ -83,7 +87,7 @@ class ngram{
   }
     
 
-  void trans(ngram ng);
+  void trans(const ngram& ng);
 
   friend std::ifstream& operator>> (std::ifstream& fi,ngram& ng);
   friend std::ofstream& operator<< (std::ofstream& fi,ngram& ng);

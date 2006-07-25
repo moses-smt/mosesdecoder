@@ -34,7 +34,7 @@ dictionary::dictionary(char *filename,int size,char* isymb,char* oovlexfile){
   if (oovlexfile!=NULL)
     oovlex=new dictionary(oovlexfile,size,isymb,NULL);
   else
-    oovlex=NULL;
+    oovlex=(dictionary *)NULL;
 
   htb = new htable(size/LOAD_FACTOR);
   tb  = new dict_entry[size]; 
@@ -42,7 +42,7 @@ dictionary::dictionary(char *filename,int size,char* isymb,char* oovlexfile){
 
   for (int i=0;i<size;i++) tb[i].freq=0;
   
-  is=NULL;
+  is=(char*) NULL;
   intsymb(isymb);
 
   oov_code = -1;
@@ -51,7 +51,6 @@ dictionary::dictionary(char *filename,int size,char* isymb,char* oovlexfile){
   N  =  0;
   dubv = 0; 
   lim = size;
-  int c=0; // counter
   ifl=0;  //increment flag
 
   if (filename==NULL) return;
@@ -85,8 +84,7 @@ dictionary::dictionary(char *filename,int size,char* isymb,char* oovlexfile){
 void dictionary::generate(char *filename){
 
   char buffer[MAX_WORD];
-  char *addr;
-  int k,c;
+  int k;
 
   ifstream inp(filename,ios::in);
   
@@ -166,7 +164,7 @@ void dictionary::load(char* filename){
     else
       tb[n].freq=0;
 
-    if (addr=htb->search((char  *)&tb[n].word,HT_ENTER))
+    if ((addr=htb->search((char  *)&tb[n].word,HT_ENTER)))
       if (addr!=(char *)&tb[n].word){
 	cerr << "dictionary::loadtxt wrong entry was found (" 
 	     <<  buffer << ") in position " << n << "\n";
@@ -202,7 +200,7 @@ void dictionary::load(std::istream& inp){
     inp >> tb[n].freq;
     N+=tb[n].freq;
 
-    if (addr=htb->search((char  *)&tb[n].word,HT_ENTER))
+    if ((addr=htb->search((char  *)&tb[n].word,HT_ENTER)))
       if (addr!=(char *)&tb[n].word){
 	cerr << "dictionary::loadtxt wrong entry was found (" 
 	     <<  buffer << ") in position " << n << "\n";
@@ -267,9 +265,9 @@ dictionary::dictionary(dictionary* d){
 
     tb[i].code=i;
     htb->search((char  *)&tb[i].word,HT_ENTER);
-  }
+  };
 
-};
+}
 
 
 
@@ -346,18 +344,16 @@ int dictionary::getcode(const char *w){
 
 int dictionary::encode(const char *w){
   
-  if (strlen(w)==0)
-    {
-      cerr << "0";
-      w=OOV();
-    }
+  //case of strange characters
+  if (strlen(w)==0){cerr << "0";w=OOV();}
 
-  dict_entry* ptr=(dict_entry *)htb->search((char *)&w,HT_FIND);
-  if (ptr != 0)
+	dict_entry* ptr;
+	
+	if ((ptr=(dict_entry *)htb->search((char *)&w,HT_FIND))!=NULL) 
     return ptr->code;
   else{
     if (!ifl){ //do not extend dictionary
-      if (oov_code==-1){
+      if (oov_code==-1){ //did not use OOV yet
 	cerr << "starting to use OOV words [" << w << "]\n";
 	tb[n].word=st->push(OOV());
 	htb->search((char  *)&tb[n].word,HT_ENTER);
@@ -366,14 +362,15 @@ int dictionary::encode(const char *w){
 	oov_code=n;
 	if (++n==lim) grow();
       }
+      //if there is an oov lexicon, check if this word belongs to
       dict_entry* oovptr;
-      if (oovlex && (oovptr=(dict_entry *)oovlex->htb->search((char *)&w,HT_FIND))){
+      if (oovlex){
+				if ((oovptr=(dict_entry *)oovlex->htb->search((char *)&w,HT_FIND))!=NULL){
 	in_oov_lex=1;
 	oov_lex_code=oovptr->code;
+				}else
+					in_oov_lex=0;
       }
-      else
-	in_oov_lex=0;
-      
       return encode(OOV()); 
     }
     else{ //extend dictionary

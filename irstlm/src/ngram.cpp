@@ -37,7 +37,7 @@ ngram::ngram(dictionary* d,int sz){
   isym=-1;
   memset(word,0,sizeof(int)*MAX_NGRAM);
   memset(midx,0,sizeof(int)*MAX_NGRAM);
-};
+}
 
 ngram::ngram(ngram& ng){
   size=ng.size;
@@ -53,7 +53,7 @@ ngram::ngram(ngram& ng){
 
 }
 
-void ngram::trans (ngram ng){
+void ngram::trans (const ngram& ng){
   size=ng.size;
   freq=ng.freq;
   if (dict == ng.dict){

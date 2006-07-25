@@ -40,7 +40,7 @@ htable::htable(int n,int kl,HTYPE ht,size_t (*klf)(const char* )){
 
   keylenfunc=(klf?klf:&strlen);
   
-};
+}
 
 
 char *htable::search(char *item, HT_ACTION action)
@@ -125,7 +125,7 @@ char *htable::scan(HT_ACTION action){
 void htable::map(ostream& co,int cols){
 
   entry *p;
-  char img[cols+1];
+  char* img=new char[cols+1];
 
   img[cols]='\0';
   memset(img,'.',cols);
@@ -153,6 +153,8 @@ void htable::map(ostream& co,int cols){
   
   img[size % cols]='\0';
   co << img << "\n";
+	
+	delete []img;
 }
 
 
