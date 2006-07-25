@@ -36,9 +36,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 // static variable init
-const LmId LanguageModel::UNKNOWN_LM_ID(0);
+const LmId LanguageModel::UNKNOWN_LM_ID(-1);
 
-LanguageModel::LanguageModel() {}
+LanguageModel::LanguageModel() : m_unknownId(0) {}
 LanguageModel::~LanguageModel() {}
 
 /***

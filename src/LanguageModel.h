@@ -39,6 +39,7 @@ protected:
 	FactorType	m_factorType;
 	float				m_weight;
 	size_t			m_id, m_nGramOrder;
+	LmId				m_unknownId;
 public:
 
 	static const LmId UNKNOWN_LM_ID;
