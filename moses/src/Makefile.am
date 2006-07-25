@@ -4,6 +4,7 @@ libmoses_a_SOURCES = \
 	Arc.cpp \
 	ConfusionNet.cpp \
 	Dictionary.cpp \
+	DistortionOrientation.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
