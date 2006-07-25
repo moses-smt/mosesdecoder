@@ -60,19 +60,9 @@ void LanguageModel_IRST::Load(size_t id
 	m_weight			 = weight;
 	m_nGramOrder	 = nGramOrder;
 
-	// TODO need to be able to configure these two parameters
-	int resolution = 0;   // for quantized probs
-	double decay   = 0.95;
-  //
-
 	InputFileStream inp(fileName);
 
-	m_lmtb         = new lmtable(
-		inp,
-		nGramOrder,
-		resolution,
-		decay
-	);
+	m_lmtb         = new lmtable(inp);
 	// LM can be ok, just outputs warnings
 	CreateFactors(factorCollection);		
 
