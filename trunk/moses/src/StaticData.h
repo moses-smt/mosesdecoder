@@ -205,7 +205,7 @@ public:
 	{
 		return m_verboseLevel;
 	}
-	size_t GetReportSourceSpan() const
+	bool GetReportSourceSpan() const
 	{
 		return m_reportSourceSpan;
 	}
