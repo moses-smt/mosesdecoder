@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef N_BEST
 
-const std::list<Arc*> &Arc::GetArcList() const
+const std::vector<Arc*> *Arc::GetArcList() const
 {
 	return m_mainHypo->GetArcList();
 }

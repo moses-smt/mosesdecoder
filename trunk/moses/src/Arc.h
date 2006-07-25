@@ -49,7 +49,7 @@ public:
 	}
 	~Arc();
 
-	const std::list<Arc*> &GetArcList() const;
+	const std::vector<Arc*>* GetArcList() const;
 };
 
 std::ostream& operator<<(std::ostream& out, const Arc& arc);

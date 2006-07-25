@@ -199,6 +199,7 @@ list<const Hypothesis*> HypothesisCollection::GetSortedList() const
 	return ret;
 }
 
+
 void HypothesisCollection::InitializeArcs()
 {
 #ifdef N_BEST
@@ -210,6 +211,7 @@ void HypothesisCollection::InitializeArcs()
 	}
 #endif
 }
+
 
 // friend
 std::ostream& operator<<(std::ostream& out, const HypothesisCollection& hypoColl)
