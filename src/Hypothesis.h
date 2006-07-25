@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <iostream>
-#include <list>
+#include <vector>
 #include "Phrase.h"
 #include "TypeDef.h"
 #include "WordsBitmap.h"
@@ -61,7 +61,7 @@ protected:
 	WordsRange				m_currSourceWordsRange, m_currTargetWordsRange;
   bool							m_wordDeleted;
 #ifdef N_BEST
-	std::list<Arc*>		m_arcList; //all arcs that end at the same lattice point as we do
+	std::vector<Arc*>*	m_arcList; //all arcs that end at the same lattice point as we do
 #endif
 
 	/***
@@ -264,31 +264,18 @@ public:
 	TO_STRING;
 
 #ifdef N_BEST
-	inline void AddArc(Hypothesis &loserHypo)
-	{
-		Arc *arc = new Arc(loserHypo.m_score
-											, loserHypo.GetTranslationScoreComponent()
-											, loserHypo.GetLMScoreComponent()
-											, loserHypo.GetGenerationScoreComponent()
-											, loserHypo.GetPhrase()
-											, loserHypo.GetPrevHypo());
-		m_arcList.push_back(arc);
-
-		// add loser's arcs too
-		std::copy(loserHypo.m_arcList.begin(), loserHypo.m_arcList.end()
-			, std::inserter(m_arcList, m_arcList.end()));
-		loserHypo.m_arcList.clear();
-	}
+	void AddArc(Hypothesis &loserHypo);
 	inline void InitializeArcs()
 	{
-		std::list<Arc*>::iterator iter;
-		for (iter = m_arcList.begin() ; iter != m_arcList.end() ; ++iter)
+		if (!m_arcList) return;
+		std::vector<Arc*>::iterator iter = m_arcList->begin();
+		for (; iter != m_arcList->end() ; ++iter)
 		{
 			Arc *arc = *iter;
 			arc->SetMainHypo(*this);
 		}
 	}
-	inline const std::list<Arc*> &GetArcList() const
+	inline const std::vector<Arc*>* GetArcList() const
 	{
 		return m_arcList;
 	}

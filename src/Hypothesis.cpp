@@ -47,6 +47,9 @@ Hypothesis::Hypothesis(InputType const& source)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
+#ifdef N_BEST
+	, m_arcList(0)
+#endif
 	, m_id(s_HypothesesCreated++)
 {	// used for initial seeding of trans process	
 	// initialize scores
@@ -60,6 +63,9 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 	, m_currSourceWordsRange	(copy.m_currSourceWordsRange)
 	, m_currTargetWordsRange	(copy.m_currTargetWordsRange)
 	, m_wordDeleted						(false)
+#ifdef N_BEST
+	, m_arcList(0)
+#endif
 	, m_id										(s_HypothesesCreated++)
 {
 	m_targetPhrase.AddWords( copy.m_targetPhrase );
@@ -80,6 +86,9 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
 														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetPhrase().GetSize())
 	, m_wordDeleted(false)
+#ifdef N_BEST
+	, m_arcList(0)
+#endif
 	, m_id(s_HypothesesCreated++)
 {
 	const Phrase &possPhrase				= transOpt.GetTargetPhrase();
@@ -114,8 +123,42 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 Hypothesis::~Hypothesis()
 {
 #ifdef N_BEST
-	RemoveAllInColl< list<Arc*>::iterator >(m_arcList);
+	if (m_arcList) {
+		RemoveAllInColl< vector<Arc*>::iterator >(*m_arcList);
+		delete m_arcList;
+	}
 #endif
+}
+
+void Hypothesis::AddArc(Hypothesis &loserHypo)
+{
+	if (!m_arcList) {
+		if (loserHypo.m_arcList)  // we don't have an arcList, but loser does
+		{
+			this->m_arcList = loserHypo.m_arcList;  // take ownership, we'll delete
+			loserHypo.m_arcList = 0;                // prevent a double deletion
+		}
+		else
+			{ this->m_arcList = new std::vector<Arc*>(); }
+	} else {
+		if (loserHypo.m_arcList) {  // both have an arc list: merge. delete loser
+			size_t my_size = m_arcList->size();
+			size_t add_size = loserHypo.m_arcList->size();
+			this->m_arcList->resize(my_size + add_size, 0);
+			std::memcpy(&(*m_arcList)[0] + my_size, &(*m_arcList)[0], add_size * sizeof(Arc *));
+			delete loserHypo.m_arcList;
+			loserHypo.m_arcList = 0;
+		} else { // loserHypo doesn't have any arcs
+		  // DO NOTHING
+		}
+	}
+	Arc *arc = new Arc(loserHypo.m_score
+                    , loserHypo.GetTranslationScoreComponent()
+                    , loserHypo.GetLMScoreComponent()
+                    , loserHypo.GetGenerationScoreComponent()
+                    , loserHypo.GetPhrase()
+                    , loserHypo.GetPrevHypo());
+	m_arcList->push_back(arc);
 }
 
 /***
