@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "assert.h"
 #include <algorithm>
 #include <sstream>
+#include <string>
 #include "memory.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
@@ -107,6 +108,21 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 
 	return retPhrase;
 }
+
+std::string Phrase::GetStringRep(const WordsRange &wordsRange)
+{
+	std::string phrase_string = "";
+	Phrase retPhrase(m_direction);
+	for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++)
+	{
+		phrase_string = phrase_string+ " "+ Word::ToString(GetFactorArray(currPos));
+	}
+	return phrase_string;
+}
+
+
+
+
 
 FactorArray &Phrase::AddWord()
 {

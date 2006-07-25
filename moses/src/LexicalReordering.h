@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <map>
 #include "Factor.h"
+#include "Phrase.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
@@ -32,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class FactorCollection;
 class Factor;
 class Phrase;
+class Hypothesis;
+
 
 /***
  * The LexicalReordering class handles everything involved with
@@ -39,6 +42,7 @@ class Phrase;
  * and computes scores in either forward, backward, or bidirectional
  * direction. 
  */
+
 class LexicalReordering
 {
 
@@ -49,7 +53,8 @@ private:
 
 	// This is the order in which the different forward/backward
 	// probabilities are stored in the table.
-	enum TableLookup { BACK_M, BACK_S, BACK_D, FOR_M, FOR_S, FOR_D };
+	enum TableLookupMsd { BACK_M, BACK_S, BACK_D, FOR_M,FOR_S, FOR_D };
+	enum TableLookupMonotone { BACK_MONO, BACK_NONMONO, FOR_MONO, FOR_NONMONO};
 
 	// This is the order in which pieces appear in the orientation table
 	// when conditioning on f and e.
@@ -58,9 +63,6 @@ private:
 	// This is the order in which pieces appear in the orientation table
 	// when conditioning on f only.
 	enum FFileFormat { F_FOREIGN, F_PROBS };
-	
-	// Possible values for orientation.
-	enum ORIENTATIONS { MONO, NON_MONO, SWAP, DISC };
 
 	// different numbers of probabilities for different ranges of
 	// orientation variable
@@ -89,8 +91,7 @@ public:
 	~LexicalReordering(void) {}
 
 	// Compute and return a score for a hypothesis
-	float CalcScore(int numSourceWords, WordsRange &currTargetRange, 
-									WordsRange &prevSourceRange, WordsRange &currSourceRange);
+	float CalcScore(Hypothesis *curr_hypothesis);
 	
 	// Print the orientation probability table
 	void PrintTable(void);
@@ -102,5 +103,7 @@ public:
 	float GetForwardWeight(void);
 	
 	float GetBackwardWeight(void);
+	
+	float GetProbability(Hypothesis *hypothesis, int orientation);
 
 };

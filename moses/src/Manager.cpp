@@ -76,6 +76,7 @@ void Manager::ProcessSentence()
 
 	// seed hypothesis
 	{
+
 		Hypothesis *hypo = Hypothesis::Create(m_source);
 #ifdef N_BEST
 		LMList allLM = m_staticData.GetAllLM();

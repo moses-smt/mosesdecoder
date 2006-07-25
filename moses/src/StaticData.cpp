@@ -41,6 +41,7 @@ StaticData::StaticData()
 :m_languageModel(2)
 ,m_weightInput(0.0)
 ,m_inputOutput(NULL)
+,m_lexReorder(NULL)
 ,m_fLMsLoaded(false)
 ,m_inputType(0)
 {
@@ -107,8 +108,10 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	}
 	// load Lexical Reordering model
 	// check to see if the lexical reordering parameter exists
+	//TODO: doesn't work for bidirectional: yet.
 	const vector<string> &lrFileVector = 
 		m_parameter.GetParam("lexreordering-file");	
+
 	if (lrFileVector.size() > 0)
 		{
 			// if there is a lexical reordering model, then parse the
@@ -118,7 +121,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				m_parameter.GetParam("lexreordering-type");	
 			// if type values have been set in the .ini file, then use them;
 			// first initialize to the defaults (msd, bidirectional, fe).
-			int orientation = LexReorderType::Msd, 
+			int orientation = DistortionOrientationType::Msd, 
 				direction = LexReorderType::Bidirectional, 
 				condition = LexReorderType::Fe;
 			if (lrTypeVector.size() > 0)
@@ -136,9 +139,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 							//TODO:Lowercase val!
 							//orientation 
 							if(val == "monotone")
-								orientation = LexReorderType::Monotone;
+								orientation = DistortionOrientationType::Monotone;
 							else if(val == "msd")
-								orientation = LexReorderType::Msd;
+								orientation = DistortionOrientationType::Msd;
 							//direction
 							else if(val == "forward")
 								direction = LexReorderType::Forward;
@@ -163,9 +166,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
  			m_lexReorder = new LexicalReordering(lrFileVector[0], orientation, direction, condition);
 			timer.check("Finished loading lexical reorder table.");
 		}
-
-	// load language models
-	if (m_parameter.GetParam("lmodel-file").size() > 0)
+		if (m_parameter.GetParam("lmodel-file").size() > 0)
 	{
 		// weights
 		vector<float> weightAll = Scan<float>(m_parameter.GetParam("weight-l"));
@@ -286,6 +287,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_weightInput=Scan<float>(m_parameter.GetParam("weight-i")[0]);
 	
 	return true;
+  
 }
 
 StaticData::~StaticData()
