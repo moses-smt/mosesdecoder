@@ -38,7 +38,6 @@ protected:
 #ifdef N_BEST
 	float m_inputScore;
 	ScoreComponent m_scoreComponent;
-	std::vector< std::pair<size_t, float> > m_lmScoreComponent;
 	ScoreColl m_ngramComponent;
 #endif
 
