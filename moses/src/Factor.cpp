@@ -31,6 +31,8 @@ Factor::Factor(FactorDirection direction, FactorType factorType, const std::stri
 {
 }
 
+TO_STRING_BODY(Factor)
+
 // friend
 ostream& operator<<(ostream& out, const Factor& factor)
 {
