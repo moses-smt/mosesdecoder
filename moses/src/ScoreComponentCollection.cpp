@@ -10,12 +10,12 @@ void ScoreComponentCollection::Combine(const ScoreComponentCollection &otherComp
 	for (iter = otherComponentCollection.begin() ; iter != otherComponentCollection.end() ; iter++)
 	{
 		const ScoreComponent &newScoreComponent = iter->second;
-		iterator iterThis = find(newScoreComponent.GetDictionary());
-		assert (iterThis != end());
+		iterator iterThis = m_scores.find(newScoreComponent.GetDictionary());
+		assert (iterThis != m_scores.end());
 		
 		// score component for dictionary exists. add numbers
 		ScoreComponent &thisScoreComponent = iterThis->second;
-		thisScoreComponent.Add(newScoreComponent);
+		thisScoreComponent.PlusEquals(newScoreComponent);
 	}
 }
 
@@ -29,7 +29,7 @@ bool CompareScoreComponent(const ScoreComponent* a, const ScoreComponent* b)
 vector<const ScoreComponent*> ScoreComponentCollection::SortForNBestOutput() const
 {
 	vector<const ScoreComponent*> ret;
-	for (const_iterator iter = begin() ; iter != end() ; ++iter)
+	for (const_iterator iter = m_scores.begin() ; iter != m_scores.end() ; ++iter)
 		ret.push_back(&iter->second);
 	
 	sort(ret.begin(), ret.end(), CompareScoreComponent);

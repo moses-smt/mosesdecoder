@@ -30,7 +30,7 @@ ScoreComponent::ScoreComponent()
 
 ScoreComponent::ScoreComponent(const Dictionary *dictionary)
 	:m_dictionary(dictionary)
-	,m_scoreComponent(dictionary->GetNoScoreComponent())
+	,m_scoreComponent(dictionary->GetNumScoreComponents())
 {
 }
 
@@ -39,7 +39,7 @@ ScoreComponent::ScoreComponent(const ScoreComponent &copy)
 {
 	if (m_dictionary != NULL)
 	{
-		const size_t noScoreComponent = GetNoScoreComponent();
+		const size_t noScoreComponent = GetNumScoreComponents();
 		for (size_t i = 0 ; i < noScoreComponent ; i++)
 		{
 			m_scoreComponent.push_back(copy[i]);
@@ -47,10 +47,10 @@ ScoreComponent::ScoreComponent(const ScoreComponent &copy)
 	}
 }
 
-size_t ScoreComponent::GetNoScoreComponent() const
+size_t ScoreComponent::GetNumScoreComponents() const
 {
 	if (m_dictionary != NULL)
-		return m_dictionary->GetNoScoreComponent();
+		return m_dictionary->GetNumScoreComponents();
 	else
 		return 0;
 }
@@ -59,7 +59,7 @@ void ScoreComponent::Reset()
 {
 	if (m_dictionary != NULL)
 	{
-		const size_t noScoreComponent = GetNoScoreComponent();
+		const size_t noScoreComponent = GetNumScoreComponents();
 		assert(noScoreComponent<=m_scoreComponent.size());
 		std::fill(m_scoreComponent.begin(),m_scoreComponent.begin()+noScoreComponent,0.0);
 	}
@@ -67,7 +67,7 @@ void ScoreComponent::Reset()
 
 std::ostream& operator<<(std::ostream &out, const ScoreComponent &scoreComponent)
 {
-	const size_t noScoreComponent = scoreComponent.GetNoScoreComponent();
+	const size_t noScoreComponent = scoreComponent.GetNumScoreComponents();
 	if (noScoreComponent > 0)
 	{
 		out << scoreComponent[0];

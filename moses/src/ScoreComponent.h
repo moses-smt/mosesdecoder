@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class Dictionary;
 
+//! TODO This should really be named TranslationCostBreakdown
 class ScoreComponent
 {
 protected:
@@ -53,7 +54,7 @@ public:
 		return m_dictionary;
 	}
 
-	size_t GetNoScoreComponent() const;
+	size_t GetNumScoreComponents() const;
 
 	float operator[](size_t index) const
 	{
@@ -71,10 +72,10 @@ public:
 	
 	void Reset();
 
-	void Add(const ScoreComponent &source)
+	void PlusEquals(const ScoreComponent &source)
 	{
-		const size_t size = GetNoScoreComponent();
-		assert(size == source.GetNoScoreComponent());
+		const size_t size = GetNumScoreComponents();
+		assert(size == source.GetNumScoreComponents());
 
 		for (size_t i = 0 ; i < size ; i++)
 		{
