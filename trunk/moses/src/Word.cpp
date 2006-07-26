@@ -101,7 +101,7 @@ std::string Word::ToString(const FactorArray &factorArray)
 			const Factor *factor = factorArray[currFactor];
 		if (factor != NULL)
 		{
-			strme << *factor << ",";
+			strme << *factor << "|";
 		}
 	}
 	string str = strme.str();
@@ -121,7 +121,7 @@ ostream& operator<<(ostream& out, const Word& word)
 		const Factor *factor = word.GetFactor(factorType);
 		if (factor != NULL)
 		{
-			strme << *factor << ",";
+			strme << *factor << "|";
 		}
 	}
 	string str = strme.str();

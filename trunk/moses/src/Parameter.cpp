@@ -64,6 +64,7 @@ Parameter::Parameter()
 	AddParam("stack");
 	AddParam("verbose");
 	AddParam("report-source-span");
+	AddParam("report-all-factors");
 	AddParam("drop-unknown");
 	AddParam("inputtype");
 }
@@ -256,6 +257,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-s", "stack", argc, argv);
 	OverwriteParam("-v", "verbose", argc, argv);
 	OverwriteParam("-report-source-span", "report-source-span", argc, argv);
+	OverwriteParam("-report-all-factors", "report-all-factors", argc, argv);
 	OverwriteParam("-drop-unknown", "drop-unknown", argc, argv);
 	OverwriteParam("-inputtype","inputtype",argc,argv);
   // check if parameters make sense
