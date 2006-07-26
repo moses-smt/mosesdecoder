@@ -2,56 +2,81 @@
 
 #ifndef WIN32
 
-#include <sstream>
 #include "ConfusionNet.h"
+#include <sstream>
+
 #include "FactorCollection.h"
 #include "Util.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "TranslationOptionCollectionConfusionNet.h"
 
-ConfusionNet::ConfusionNet(FactorCollection* p) : InputType(),m_factorCollection(p) {}
+ConfusionNet::ConfusionNet(FactorCollection* p) 
+	: InputType(),m_factorCollection(p) {}
 
 void ConfusionNet::SetFactorCollection(FactorCollection *p) 
 {
 	m_factorCollection=p;
 }
-bool ConfusionNet::ReadF(std::istream& in,const std::vector<FactorType>& factorOrder,int format) {
-	std::cerr<<"cn read with format "<<format<<"\n";
+bool ConfusionNet::ReadF(std::istream& in,
+												 const std::vector<FactorType>& factorOrder,
+												 int format) 
+{
+	TRACE_ERR("read confusion net with format "<<format<<"\n");
 	switch(format) 
 		{
 		case 0: return ReadFormat0(in,factorOrder);
 		case 1: return ReadFormat1(in,factorOrder);
 		default: 
-			std::cerr<<"ERROR: unknown format '"<<format<<"' in ConfusionNet::Read\n";
+			std::cerr<<"ERROR: unknown format '"<<format
+							 <<"' in ConfusionNet::Read\n";
 		}
 	return 0;
 }
 
-int ConfusionNet::Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection) 
+int ConfusionNet::Read(std::istream& in,
+											 const std::vector<FactorType>& factorOrder, 
+											 FactorCollection &factorCollection) 
 {
 	SetFactorCollection(&factorCollection);
 	return ReadF(in,factorOrder,0);
 }
 
 
-void ConfusionNet::String2Word(const std::string& s,Word& w,const std::vector<FactorType>& factorOrder) {
+void ConfusionNet::String2Word(const std::string& s,Word& w,
+															 const std::vector<FactorType>& factorOrder) 
+{
 	std::vector<std::string> factorStrVector = Tokenize(s, "|");
 	for(size_t i=0;i<factorOrder.size();++i)
-		w.SetFactor(factorOrder[i],m_factorCollection->AddFactor(Input,factorOrder[i],factorStrVector[i]));
+		w.SetFactor(factorOrder[i],
+								m_factorCollection->AddFactor(Input,factorOrder[i],
+																							factorStrVector[i]));
 }
 
-bool ConfusionNet::ReadFormat0(std::istream& in,const std::vector<FactorType>& factorOrder) {
+bool ConfusionNet::ReadFormat0(std::istream& in,
+															 const std::vector<FactorType>& factorOrder) 
+{
 	assert(m_factorCollection);
 	Clear();
 	std::string line;
 	while(getline(in,line)) {
 		std::istringstream is(line);
-		std::string word;float costs;
+		std::string word;double prob;
 		Column col;
-		while(is>>word>>costs) {
+		while(is>>word>>prob) {
 			Word w;
 			String2Word(word,w,factorOrder);
-			col.push_back(std::make_pair(w,costs));
+			if(prob<0.0) 
+				{
+					std::cerr<<"WARN: negative prob: "<<prob<<" ->set to 0.0\n";
+					prob=0.0;
+				}
+			else if (prob>1.0)
+				{
+					std::cerr<<"WARN: prob > 1.0 : "<<prob<<" -> set to 1.0\n";
+					prob=1.0;
+				}
+			col.push_back(std::make_pair(w,std::max(static_cast<float>(log(prob)),
+																							LOWEST_SCORE)));
 		}
 		if(col.size()) {
 			data.push_back(col);
@@ -61,7 +86,9 @@ bool ConfusionNet::ReadFormat0(std::istream& in,const std::vector<FactorType>& f
 	}
 	return !data.empty();
 }
-bool ConfusionNet::ReadFormat1(std::istream& in,const std::vector<FactorType>& factorOrder) {
+bool ConfusionNet::ReadFormat1(std::istream& in,
+															 const std::vector<FactorType>& factorOrder) 
+{
 	assert(m_factorCollection);
 	Clear();
 	std::string line;
@@ -92,7 +119,7 @@ void ConfusionNet::Print(std::ostream& out) const {
 	for(size_t i=0;i<data.size();++i) {
 		out<<i<<" -- ";
 		for(size_t j=0;j<data[i].size();++j)
-			out << "(" << data[i][j].first << ", " << data[i][j].second << ") ";
+			out<<"("<<data[i][j].first.ToString()<<", "<<data[i][j].second<<") ";
 		out<<"\n";
 	}
 	out<<"\n\n";
@@ -112,15 +139,21 @@ std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn)
 	cn.Print(out);return out;
 }
 
-TargetPhraseCollection const* ConfusionNet::CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const 
+TargetPhraseCollection const* ConfusionNet::
+CreateTargetPhraseCollection(PhraseDictionaryBase const& d,
+														 const WordsRange& r) const 
 {
-	if(PhraseDictionaryTreeAdaptor const* pdict=dynamic_cast<PhraseDictionaryTreeAdaptor const*>(&d))
+	if(PhraseDictionaryTreeAdaptor const* pdict=
+		 dynamic_cast<PhraseDictionaryTreeAdaptor const*>(&d))
 		return pdict->GetTargetPhraseCollection(*this,r);
-	std::cerr<<"ERROR: wrong phrase dictionary type for confusion net decoding!\n"
-		"has to be PhraseDictionaryTreeAdaptor\n";
+
+	std::cerr<<"ERROR: wrong phrase dictionary type for confusion net decoding!"
+		"  Has to be PhraseDictionaryTreeAdaptor\n";
 	abort();
 }
-TranslationOptionCollection* ConfusionNet::CreateTranslationOptionCollection() const 
+
+TranslationOptionCollection* 
+ConfusionNet::CreateTranslationOptionCollection() const 
 {
 	return new TranslationOptionCollectionConfusionNet(*this);
 }
