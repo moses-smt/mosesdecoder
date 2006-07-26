@@ -92,7 +92,7 @@ void ConfusionNet::Print(std::ostream& out) const {
 	for(size_t i=0;i<data.size();++i) {
 		out<<i<<" -- ";
 		for(size_t j=0;j<data[i].size();++j)
-			out<<"("<<data[i][j].first.ToString()<<", "<<data[i][j].second<<") ";
+			out << "(" << data[i][j].first << ", " << data[i][j].second << ") ";
 		out<<"\n";
 	}
 	out<<"\n\n";
