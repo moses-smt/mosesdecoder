@@ -81,6 +81,7 @@ protected:
 	size_t m_verboseLevel;
 
 	bool m_reportSourceSpan;
+	bool m_reportAllFactors;
 
 public:
 	StaticData();
@@ -208,6 +209,10 @@ public:
 	bool GetReportSourceSpan() const
 	{
 		return m_reportSourceSpan;
+	}
+	bool GetReportAllFactors() const
+	{
+		return m_reportAllFactors;
 	}
 
 	// for mert

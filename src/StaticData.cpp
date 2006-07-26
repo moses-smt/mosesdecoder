@@ -93,6 +93,13 @@ bool StaticData::LoadParameters(int argc, char* argv[])
         m_reportSourceSpan = false;
 
 
+	// print all factors of output translations
+	if (m_parameter.GetParam("report-all-factors").size() > 0)
+		m_reportAllFactors = Scan<bool>(m_parameter.GetParam("report-all-factors")[0]);
+	else
+        m_reportAllFactors = false;
+
+
 	//input-factors
 	const vector<string> &inputFactorVector = m_parameter.GetParam("input-factors");
 	for(size_t i=0; i<inputFactorVector.size(); i++) 
