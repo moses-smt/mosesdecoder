@@ -15,3 +15,5 @@ inline const char *index(const char *str, char search)
 
 
 #endif
+
+
