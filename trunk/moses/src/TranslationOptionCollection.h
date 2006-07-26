@@ -113,6 +113,8 @@ public:
 															, float weightWordPenalty);
 
 	void ComputeFutureScores(size_t verboseLevel);
+	
+	TO_STRING;	
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)

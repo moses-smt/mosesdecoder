@@ -201,3 +201,5 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 }
 #endif
 
+TO_STRING_BODY(LatticePath);
+

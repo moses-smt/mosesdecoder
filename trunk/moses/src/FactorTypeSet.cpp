@@ -32,3 +32,7 @@ FactorTypeSet::FactorTypeSet(const vector<FactorType> &factors)
 		Add(*iter);
 	}
 }
+
+TO_STRING_BODY(FactorTypeSet);
+
+

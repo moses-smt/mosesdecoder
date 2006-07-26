@@ -55,3 +55,4 @@ std::ostream& operator<<(std::ostream& out, const Arc& arc)
 	return out;
 }
 
+TO_STRING_BODY(Arc);

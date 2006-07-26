@@ -78,6 +78,8 @@ public:
 		unsigned int value = static_cast<unsigned int>(factorType);
 		return  (m_bit & (1 << value)) > 0;
 	}
+	
+	TO_STRING;	
 };
 
 // friend

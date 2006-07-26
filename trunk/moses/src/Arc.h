@@ -43,13 +43,17 @@ public:
 	{
 	}
 
+	~Arc();
+	
 	inline void SetMainHypo(const Hypothesis &hypo)
 	{
 		m_mainHypo = &hypo;
 	}
-	~Arc();
-
+	
 	const std::vector<Arc*>* GetArcList() const;
+	
+	TO_STRING;
+	
 };
 
 std::ostream& operator<<(std::ostream& out, const Arc& arc);

@@ -34,6 +34,8 @@ void HypothesisCollectionIntermediate::RemoveAll()
 	}
 }
 
+TO_STRING_BODY(HypothesisCollectionIntermediate);
+
 // sorting helper
 struct HypothesisSort
 {
