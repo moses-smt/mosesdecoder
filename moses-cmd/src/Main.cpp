@@ -111,7 +111,10 @@ int main(int argc, char* argv[])
 		staticData.InitializeBeforeSentenceProcessing(*source);
 		Manager manager(*source, *translationOptionCollection, staticData);
 		manager.ProcessSentence();
-		inputOutput->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId(), staticData.GetReportSourceSpan());
+		inputOutput->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId(),
+                        staticData.GetReportSourceSpan(),
+                        staticData.GetReportAllFactors()
+                        );
 
 		// n-best
 		size_t nBestSize = staticData.GetNBestSize();

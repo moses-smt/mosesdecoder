@@ -65,24 +65,28 @@ InputType*IOCommandLine::GetInput(InputType* in)
 }
 
 // help fn
-void OutputSurface(std::ostream &out, const Phrase &phrase)
+void OutputSurface(std::ostream &out, const Phrase &phrase, bool reportAllFactors)
 {
-	size_t size = phrase.GetSize();
-	for (size_t pos = 0 ; pos < size ; pos++)
-	{
-		const Factor *factor = phrase.GetFactor(pos, Surface);
-		if (factor != NULL) {
-			out << *factor << " ";
+    if (reportAllFactors == true) {
+        out << phrase;
+    } else {
+	  size_t size = phrase.GetSize();
+	  for (size_t pos = 0 ; pos < size ; pos++)
+	  {
+		  const Factor *factor = phrase.GetFactor(pos, Surface);
+		  if (factor != NULL) {
+			  out << *factor << " ";
+          }
         }
 	}
 }
 
-void OutputSurface(std::ostream &out, const Hypothesis *hypo, bool reportSourceSpan)
+void OutputSurface(std::ostream &out, const Hypothesis *hypo, bool reportSourceSpan, bool reportAllFactors)
 {
 	if ( hypo != NULL)
 	{
-		OutputSurface(out, hypo->GetPrevHypo(), reportSourceSpan);
-		OutputSurface(out, hypo->GetPhrase());
+		OutputSurface(out, hypo->GetPrevHypo(), reportSourceSpan, reportAllFactors);
+		OutputSurface(out, hypo->GetPhrase(), reportAllFactors);
 
         if (reportSourceSpan == true
           && hypo->GetPhrase().GetSize() > 0) {
@@ -101,14 +105,14 @@ void IOCommandLine::Backtrack(const Hypothesis *hypo){
 	}
 }
 
-void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bool reportSourceSpan)
+void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bool reportSourceSpan, bool reportAllFactors)
 {
 	if (hypo != NULL)
 	{
 		TRACE_ERR("BEST HYPO: " << *hypo << endl);
 		Backtrack(hypo);
 
-		OutputSurface(cout, hypo, reportSourceSpan);
+		OutputSurface(cout, hypo, reportSourceSpan, reportAllFactors);
 	}
 	else
 	{
@@ -132,7 +136,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
 			const LatticeEdge &edge = *edges[currEdge];
-			OutputSurface(m_nBestFile, edge.GetTargetPhrase());
+			OutputSurface(m_nBestFile, edge.GetTargetPhrase(), false); // false for not reporting all factors
 		}
 		m_nBestFile << " ||| ";
 
