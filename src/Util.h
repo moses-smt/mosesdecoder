@@ -181,8 +181,10 @@ inline float CalcTranslationScore(const std::vector<float> &scoreVector,
 	return rv;
 }
 
-#define TO_STRING								\
-	std::string ToString() const	\
+#define TO_STRING	 std::string ToString() const;
+
+#define TO_STRING_BODY(CLASS) 	\
+	std::string CLASS::ToString() const	\
 	{															\
 		std::stringstream out;			\
 		out << *this;								\
