@@ -48,33 +48,11 @@ protected:
 	StaticData &m_staticData;
 	TranslationOptionCollection &m_possibleTranslations;
 
-	// functions
+	// functions for creating hypotheses
 	void ProcessOneStack(HypothesisCollection &sourceHypoColl);
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
 	void CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisCollectionIntermediate &outputHypoColl);
 
-	// old function
-	void ProcessOneStack(const std::list < DecodeStep > &decodeStepList
-													, HypothesisCollection &sourceHypoColl);
-	void ProcessOneHypothesis(const std::list < DecodeStep > &decodeStepList
-													, const Hypothesis &hypothesis);
-	void ProcessInitialTranslation(const Hypothesis &hypothesis
-													, const DecodeStep &decodeStep
-													,HypothesisCollectionIntermediate &outputHypoColl);
-	void ProcessTranslation(const Hypothesis &hypothesis
-													, const DecodeStep &decodeStep
-													, HypothesisCollectionIntermediate &outputHypoColl);
-	void ProcessGeneration(const Hypothesis &hypothesis
-													, const DecodeStep &decodeStep
-													, HypothesisCollectionIntermediate &outputHypoColl);
-	void ProcessFinalNullFertilityInsertion(const Hypothesis &hypothesis
-													, const DecodeStep &decodeStep
-													, HypothesisCollectionIntermediate &outputHypoColl);
-#if 0
-	void CreateTranslationOptions(const Phrase &phrase
-													, PhraseDictionary &phraseDictionary
-													, const LMList &lmListInitial);
-#endif
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
 public:

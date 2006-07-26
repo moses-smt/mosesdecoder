@@ -438,7 +438,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 		}
 
 		transOpt->CalcScore(*m_allLM, weightWordPenalty);
-		push_back(*transOpt);
+		Add(*transOpt);
 		delete transOpt;
 
 		m_unknownWordPos.SetValue(sourcePos, true); 
