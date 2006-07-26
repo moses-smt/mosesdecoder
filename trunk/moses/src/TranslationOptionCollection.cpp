@@ -23,11 +23,20 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
 {
 	// create future score matrix in a dynamic programming fashion
 
+
     // setup the matrix (ignore lower triangle, set upper triangle to -inf
     size_t size = m_source.GetSize(); // the width of the matrix
+
+    // counting options per span, for statistics
+    bool printCounts = (verboseLevel > 0);
+    int *counts;
+    if (printCounts == true)
+      counts = (int*) malloc(sizeof(int) * size * size);
+
     for(size_t row=0; row<size; row++) {
       for(size_t col=row; col<size; col++) {
         m_futureScore.SetScore(row, col, -numeric_limits<float>::infinity());
+        if (printCounts == true) counts[row*size+col] = 0;
       }
     }
 
@@ -40,6 +49,8 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
       float score = transOpt.GetFutureScore();
       if (score > m_futureScore.GetScore(startpos, endpos))
         m_futureScore.SetScore(startpos, endpos, score);
+
+      if (printCounts == true) counts[startpos*size + endpos] ++;
     }
 
     // now fill all the cells in the strictly upper triangle
@@ -65,12 +76,25 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
             }
         }
     }
+
+    if (printCounts == true) {
+      int total = 0;
+      for(size_t row=0; row<size; row++)
+        for(size_t col=row; col<size; col++)
+          if (counts[row*size+ col] > 0) {
+	        cout<<"translation options spanning from  "<< row <<" to "<< col <<" is "<< counts[row*size+ col] <<endl;
+            total += counts[row*size+ col];
+          }
+      cout << "translation options generated in total: "<< total << endl;
+      free(counts);
+	}
+
 	if(verboseLevel > 0) 
 	{		
       for(size_t row=0; row<size; row++)
         for(size_t col=row; col<size; col++)
 		  cout<<"future cost from "<< row <<" to "<< col <<" is "<< m_futureScore.GetScore(row, col) <<endl;
-	}
+    }
 }
 
 
