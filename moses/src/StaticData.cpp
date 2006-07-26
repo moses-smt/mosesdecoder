@@ -40,6 +40,8 @@ using namespace std;
 
 extern Timer timer;
 
+StaticData* StaticData::s_instance(0);
+
 StaticData::StaticData()
 :m_languageModel(2)
 ,m_weightInput(0.0)
@@ -48,6 +50,7 @@ StaticData::StaticData()
 ,m_fLMsLoaded(false)
 ,m_inputType(0)
 {
+	s_instance = this;
 }
 
 bool StaticData::LoadParameters(int argc, char* argv[])
