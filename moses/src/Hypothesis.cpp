@@ -130,6 +130,7 @@ Hypothesis::~Hypothesis()
 #endif
 }
 
+#ifdef N_BEST
 void Hypothesis::AddArc(Hypothesis &loserHypo)
 {
 	if (!m_arcList) {
@@ -160,6 +161,7 @@ void Hypothesis::AddArc(Hypothesis &loserHypo)
                     , loserHypo.GetPrevHypo());
 	m_arcList->push_back(arc);
 }
+#endif
 
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
