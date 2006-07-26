@@ -18,6 +18,7 @@ class ConfusionNet : public InputType {
 	FactorCollection *m_factorCollection;
  public:
 	ConfusionNet(FactorCollection* p=0);
+	~ConfusionNet();
 
 	void SetFactorCollection(FactorCollection*);
 
