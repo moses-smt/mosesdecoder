@@ -40,6 +40,8 @@ class InputType;
 
 class StaticData
 {
+private:
+	static StaticData*									s_instance;
 protected:	
 	FactorCollection										m_factorCollection;
 	std::vector<PhraseDictionaryBase*>	m_phraseDictionary;
@@ -86,6 +88,8 @@ protected:
 public:
 	StaticData();
 	~StaticData();
+
+	static const StaticData* Instance() { return s_instance; }
 
 	/***
 	 * also initialize the Parameter object
@@ -193,6 +197,10 @@ public:
 	size_t GetPhraseDictionarySize() const
 	{
 		return m_phraseDictionary.size();
+	}
+	std::vector<PhraseDictionaryBase*> GetPhraseDictionaries() const
+	{
+		return m_phraseDictionary;
 	}
 	size_t GetGenerationDictionarySize() const
 	{
