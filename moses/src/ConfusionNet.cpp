@@ -159,3 +159,4 @@ ConfusionNet::CreateTranslationOptionCollection() const
 }
 
 #endif
+
