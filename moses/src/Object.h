@@ -29,14 +29,6 @@ class Object
 	friend std::ostream& operator<<(std::ostream&, const Object&);
 
 public:
-	virtual void ToStream(std::ostream &out) const = 0
-
-	virtual std::string ToString() const
-	{
-		std::stringstream out;
-		out << *this;
-		return out.str();
-	}
 };
 
 

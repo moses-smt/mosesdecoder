@@ -168,6 +168,8 @@ void TranslationOption::CalcScore(const LMList &allLM, float weightWordPenalty)
 	m_futureScore += m_scoreTrans - phraseSize * weightWordPenalty;
 }
 
+TO_STRING_BODY(TranslationOption);
+
 // friend
 ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 {

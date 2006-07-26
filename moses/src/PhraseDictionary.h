@@ -103,5 +103,8 @@ public:
 
 	// for mert
 	void SetWeightTransModel(const std::vector<float> &weightT);
+	
+	TO_STRING;
+	
 };
 

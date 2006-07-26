@@ -55,5 +55,8 @@ public:
 	{
 		RemoveAll();
 	}
+	
+	TO_STRING;
+	
 };
 

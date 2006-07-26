@@ -21,11 +21,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
+#include <iostream>
 #include "TypeDef.h"
 #include "Util.h"
 
 class SquareMatrix
 {
+	friend std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix);
 protected:
 	const size_t m_size;
 	float *m_array;
@@ -43,6 +45,10 @@ public:
 	{
 		free(m_array);
 	}
+	inline float GetSize() const
+	{
+		return m_size;
+	}
 	inline float GetScore(size_t row, size_t col) const
 	{
 		return m_array[row * m_size + col];
@@ -52,6 +58,18 @@ public:
 		m_array[row * m_size + col] = value;
 	}
 	
-	std::string ToString();
+	TO_STRING;
 };
+
+inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
+{
+	for (size_t col = 0 ; col < matrix.GetSize() ; col++)
+	{
+		for (size_t row = 0 ; row < matrix.GetSize() ; row++)
+			TRACE_ERR(matrix.GetScore(row, col) << " ");
+		TRACE_ERR(std::endl);
+	}
+	
+	return out;
+}
 

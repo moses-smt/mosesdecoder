@@ -154,7 +154,10 @@ public:
 
     return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
 	}
+
+	TO_STRING;
 };
+
 
 // friend 
 inline std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap)

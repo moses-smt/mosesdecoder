@@ -89,3 +89,5 @@ void LatticeEdge::ResizeComponentScore(const LMList &allLM, const list < DecodeS
 
 #endif
 
+TO_STRING_BODY(LatticeEdge);
+

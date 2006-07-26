@@ -45,10 +45,10 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.444585015" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 <listOptionValue builtIn="false" value="LM_SRI"/>
-<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 </option>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.1731276863" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>
@@ -62,10 +62,10 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.57605597" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
 <option id="gnu.cpp.compiler.option.preprocessor.def.547610699" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
-<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
-<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="N_BEST"/>
+<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 </option>
 <option id="gnu.cpp.compiler.option.include.paths.2084651176" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
@@ -99,10 +99,10 @@
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.1390867069" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
-<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
-<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="N_BEST"/>
+<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 </option>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.22025776" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>

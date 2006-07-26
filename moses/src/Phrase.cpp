@@ -346,6 +346,8 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 //	return false;
 //}
 
+TO_STRING_BODY(Phrase);
+
 // friend
 ostream& operator<<(ostream& out, const Phrase& phrase)
 {

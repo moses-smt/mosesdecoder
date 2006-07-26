@@ -92,6 +92,8 @@ FactorCollection::~FactorCollection()
 	//}
 }
 
+TO_STRING_BODY(FactorCollection);
+
 // friend
 ostream& operator<<(ostream& out, const FactorCollection& factorCollection)
 {

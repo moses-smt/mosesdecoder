@@ -76,7 +76,7 @@ public:
 		return Compare(compare) < 0;
 	}
 
-	TO_STRING
+	TO_STRING;
 
 	// FactorArray
 	static void Copy(FactorArray &target, const FactorArray &source);
