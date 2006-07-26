@@ -6,7 +6,9 @@
 <configuration artifactExtension="a" artifactName="irstlm" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.debug.8750958" name="Debug" parent="cdt.managedbuild.config.gnu.lib.debug">
 <toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.1732402088" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.208381076" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
+<option id="gnu.cpp.compiler.option.debugging.gprof.1713594612" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
+</tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.1727542516" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1884793796" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
 <macros/>
@@ -24,7 +26,9 @@
 <configuration artifactExtension="a" artifactName="irstlm" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.debug.1333974501" name="DebugNBest" parent="cdt.managedbuild.config.gnu.lib.debug">
 <toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.365917155" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.100325283" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.955425850" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.955425850" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
+<option id="gnu.cpp.compiler.option.debugging.gprof.2034209861" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
+</tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.370966026" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.720742733" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
 <macros/>

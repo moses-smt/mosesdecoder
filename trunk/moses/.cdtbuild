@@ -23,6 +23,7 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
 </option>
+<option id="gnu.cpp.compiler.option.debugging.gprof.1598624147" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.187676627" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1660142337" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
@@ -77,6 +78,7 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
 </option>
+<option id="gnu.cpp.compiler.option.debugging.gprof.1182039672" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.1451721331" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1914532442" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>

@@ -21,6 +21,7 @@
 <listOptionValue builtIn="false" value="LM_SRI"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 </option>
+<option id="gnu.cpp.compiler.option.debugging.gprof.514527174" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1905266391" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.888044188" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
@@ -60,6 +61,7 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/row.o"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/fields.o"/>
 </option>
+<option id="gnu.cpp.link.option.flags.1995182231" superClass="gnu.cpp.link.option.flags" value="-pg" valueType="string"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1540394737" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
 <macros/>
@@ -146,6 +148,7 @@
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="N_BEST"/>
 </option>
+<option id="gnu.cpp.compiler.option.debugging.gprof.728581842" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.472952110" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1942657060" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
@@ -185,6 +188,7 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/row.o"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/fields.o"/>
 </option>
+<option id="gnu.cpp.link.option.flags.806618667" superClass="gnu.cpp.link.option.flags" value="-pg" valueType="string"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1424900936" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
 <macros/>
