@@ -37,10 +37,11 @@ class GenerationDictionary;
 class InputType;
 class LMList;
 
-class TranslationOptionCollection : public std::list< TranslationOption >
+class TranslationOptionCollection
 {
 	TranslationOptionCollection(const TranslationOptionCollection&); // no copy constructor
 protected:
+	std::list< TranslationOption >					m_collection;
 	InputType const													&m_source;
 	SquareMatrix														m_futureScore;
 	WordsBitmap															m_unknownWordPos;
@@ -53,34 +54,7 @@ protected:
 	TranslationOptionCollection(InputType const& src);
 	
 	void CalcFutureScore(size_t verboseLevel);
-															
-public:
-  virtual ~TranslationOptionCollection();
 
-	// get length/size of source input
-	size_t GetSize() const;
-
-	virtual void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
-																			, const LMList &allLM
-																			, FactorCollection &factorCollection
-																			, float weightWordPenalty
-																			, bool dropUnknown
-																			, size_t verboseLevel);
-
-
-	void Add(const TranslationOption &translationOption)
-	{
-		push_back(translationOption);
-	}
-
-	inline virtual const SquareMatrix &GetFutureScore() const
-	{
-		return m_futureScore;
-	}
-
-
-
- protected:	
 	virtual void ProcessInitialTranslation(const DecodeStep &decodeStep
 															, FactorCollection &factorCollection
 															, float weightWordPenalty
@@ -112,9 +86,42 @@ public:
 															, FactorCollection &factorCollection
 															, float weightWordPenalty);
 
-	void ComputeFutureScores(size_t verboseLevel);
-	
+	void ComputeFutureScores(size_t verboseLevel);	
+															
+public:
+  virtual ~TranslationOptionCollection();
+
+	// get length/size of source input
+	size_t GetSize() const;
+
+	virtual void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
+																			, const LMList &allLM
+																			, FactorCollection &factorCollection
+																			, float weightWordPenalty
+																			, bool dropUnknown
+																			, size_t verboseLevel);
+
+
+	void Add(const TranslationOption &translationOption)
+	{
+		m_collection.push_back(translationOption);
+	}
+
+	inline virtual const SquareMatrix &GetFutureScore() const
+	{
+		return m_futureScore;
+	}
+
 	TO_STRING;	
+
+	// iters
+	typedef std::list< TranslationOption >::iterator iterator;
+	typedef std::list< TranslationOption >::const_iterator const_iterator;
+	iterator begin() { return m_collection.begin(); }
+	iterator end() { return m_collection.end(); }
+	const_iterator begin() const { return m_collection.begin(); }
+	const_iterator end() const { return m_collection.end(); }
+	
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
