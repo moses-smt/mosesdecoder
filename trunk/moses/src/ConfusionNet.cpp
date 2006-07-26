@@ -9,9 +9,47 @@
 #include "Util.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "TranslationOptionCollectionConfusionNet.h"
+ 
+struct CNStats {
+	unsigned created,destr,read,colls,words;
+
+	CNStats() : created(0),destr(0),read(0),colls(0),words(0) {}
+	~CNStats() {print(std::cerr);}
+
+	void createOne() {++created;}
+	void destroyOne() {++destr;}
+
+	void collect(const ConfusionNet& cn)
+	{
+		++read;
+		colls+=cn.GetSize();
+		for(size_t i=0;i<cn.GetSize();++i)
+			words+=cn[i].size();
+	}
+	void print(std::ostream& out) const
+	{
+		if(created>0)
+			{
+				out<<"confusion net statistics:\n"
+					" created:\t"<<created<<"\n"
+					" destroyed:\t"<<destr<<"\n"
+					" succ. read:\t"<<read<<"\n"
+					" columns:\t"<<colls<<"\n"
+					" words:\t"<<words<<"\n"
+					" avg. word/column:\t"<<words/(1.0*colls)<<"\n"
+					" avg. cols/sent:\t"<<colls/(1.0*read)<<"\n"
+					"\n\n";
+			}
+	}
+
+};
+
+CNStats stats;
+
 
 ConfusionNet::ConfusionNet(FactorCollection* p) 
-	: InputType(),m_factorCollection(p) {}
+	: InputType(),m_factorCollection(p) {stats.createOne();}
+ConfusionNet::~ConfusionNet() {stats.destroyOne();}
 
 void ConfusionNet::SetFactorCollection(FactorCollection *p) 
 {
@@ -38,7 +76,9 @@ int ConfusionNet::Read(std::istream& in,
 											 FactorCollection &factorCollection) 
 {
 	SetFactorCollection(&factorCollection);
-	return ReadF(in,factorOrder,0);
+	int rv=ReadF(in,factorOrder,0);
+	if(rv) stats.collect(*this);
+	return rv;
 }
 
 

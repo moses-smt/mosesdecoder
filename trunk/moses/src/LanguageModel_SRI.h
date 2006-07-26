@@ -64,6 +64,6 @@ protected:
 public:
 	LmId GetLmID( const std::string &str ) const;
 
-  virtual float GetValue(const vector<const Factor*> &contextFactor) const;
+  virtual float GetValue(const std::vector<const Factor*> &contextFactor) const;
 };
 

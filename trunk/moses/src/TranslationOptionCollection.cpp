@@ -392,8 +392,6 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 	// unknown word, add to target, and add as poss trans
 	//				float	weightWP		= m_staticData.GetWeightWordPenalty();
 
-	//	const FactorArray &sourceWord = m_source.GetFactorArray(sourcePos);
-
 		size_t isDigit = 0;
 		if (dropUnknown)
 		{

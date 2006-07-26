@@ -135,7 +135,7 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 	for (iter = pathVec.begin() ; iter != pathVec.end() ; ++iter)
 	{
 		StringVec vec = Tokenize(*iter);
-		if (tokenizeIndex > vec.size())
+		if (tokenizeIndex >= vec.size())
 		{
 			stringstream errorMsg("");
 			errorMsg << "Expected " << tokenizeIndex << " tokens per"

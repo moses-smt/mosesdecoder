@@ -73,11 +73,23 @@ int main(int argc, char* argv[])
 {
 	timer.start("Starting...");
 
+	std::cerr
+		<<"============================================================================\n"
+		<<"starting "<<argv[0]<<"  (build on "<<__DATE__<<")\n"
+		<<"============================================================================\n"
+		<<"\n"
+    <<"the command line was: \n";
+	for(int i=0;i<argc;++i) std::cerr<<argv[i]<<" ";
+  std::cerr
+		<<"\n"
+		<<"============================================================================\n";
+
+
 	StaticData staticData;
 
 	if (!staticData.LoadParameters(argc, argv))
 		return EXIT_FAILURE;
-	
+
 	/*
 	 * boost::shared_ptr<UnknownWordHandler> unknownWordHandler(new UnknownWordHandler);
 	staticData.SetUnknownWordHandler(unknownWordHandler);
