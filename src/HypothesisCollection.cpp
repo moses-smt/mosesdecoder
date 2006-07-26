@@ -213,6 +213,8 @@ void HypothesisCollection::InitializeArcs()
 #endif
 }
 
+TO_STRING_BODY(HypothesisCollection);
+
 
 // friend
 std::ostream& operator<<(std::ostream& out, const HypothesisCollection& hypoColl)

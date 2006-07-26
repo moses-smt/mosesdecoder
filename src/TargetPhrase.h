@@ -90,6 +90,7 @@ public:
   }
 #endif
 
+	TO_STRING;
 };
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);

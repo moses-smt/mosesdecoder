@@ -110,7 +110,7 @@ public:
 	
   std::string GetStringRep(const WordsRange &wordsRange); 
   
-	TO_STRING
+	TO_STRING;
 
 	// used to insert & find phrase in dictionary
 	bool operator< (const Phrase &compare) const;

@@ -58,7 +58,7 @@ public:
 	// static 
 	static inline void SetMaxNGramOrder(FactorType factorType, size_t ngramMaxOrder)
 	{
-		assert(factorType < NUM_FACTORS);
+		assert((size_t)factorType < NUM_FACTORS);
 		if (s_ngramMaxOrder[factorType] < ngramMaxOrder)
 			s_ngramMaxOrder[factorType] = ngramMaxOrder;
 	}
@@ -137,4 +137,7 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 	std::list<const Hypothesis*> GetSortedList() const;
 	void InitializeArcs();
+	
+	TO_STRING;
+	
 };

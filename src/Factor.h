@@ -108,7 +108,7 @@ public:
 		return Compare(compare) < 0;
 	}
 	
-	TO_STRING
+	TO_STRING;
 
 };
 

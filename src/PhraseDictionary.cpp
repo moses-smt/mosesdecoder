@@ -252,6 +252,8 @@ bool PhraseDictionary::Contains(const vector< vector<string> > &phraseVector
 	return false;
 }
 
+TO_STRING_BODY(PhraseDictionary);
+
 // friend
 ostream& operator<<(ostream& out, const PhraseDictionary& phraseDict)
 {

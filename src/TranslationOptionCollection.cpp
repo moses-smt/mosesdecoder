@@ -483,3 +483,6 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 		}
 	}
 }
+
+TO_STRING_BODY(TranslationOptionCollection);
+

@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <iostream>
 #include "TypeDef.h"
+#include "Util.h"
 
 /***
  * Efficient version of WordsBitmap for contiguous ranges
@@ -63,5 +64,7 @@ public:
 		return (m_startPos<x.m_startPos 
 						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
 	}
+	
+	TO_STRING;
 };
 

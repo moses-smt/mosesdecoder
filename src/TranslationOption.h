@@ -171,6 +171,7 @@ public:
 	}
 #endif
 
+	TO_STRING;
 };
 
 

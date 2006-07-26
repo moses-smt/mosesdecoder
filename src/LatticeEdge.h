@@ -130,6 +130,9 @@ public:
 	
 	void ResizeComponentScore(const LMList &allLM, const std::list < DecodeStep > &decodeStepList);
 #endif
+
+	TO_STRING;
+
 };
 
 inline std::ostream& operator<<(std::ostream& out, const LatticeEdge& edge)

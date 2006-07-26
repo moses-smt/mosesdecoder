@@ -109,6 +109,8 @@ std::string Word::ToString(const FactorArray &factorArray)
 	return str;
 }
 
+TO_STRING_BODY(Word);
+
 // friend
 ostream& operator<<(ostream& out, const Word& word)
 {	

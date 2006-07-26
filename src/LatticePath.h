@@ -97,6 +97,8 @@ public:
 
 #endif
 
+	TO_STRING;
+
 };
 
 // friend

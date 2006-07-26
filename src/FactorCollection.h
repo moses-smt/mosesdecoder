@@ -54,5 +54,8 @@ public:
 	void SetFactorLmId(const Factor *factor, LmId lmId);
 
 	void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &fileName);
+	
+	TO_STRING;
+	
 };
 
