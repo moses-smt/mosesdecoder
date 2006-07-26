@@ -43,7 +43,7 @@ public:
 	}
 	virtual ~Dictionary();
 
-	size_t GetNoScoreComponent() const
+	size_t GetNumScoreComponents() const
 	{
 		return m_noScoreComponent;
 	}

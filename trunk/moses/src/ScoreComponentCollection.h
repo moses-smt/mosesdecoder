@@ -30,32 +30,43 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class Dictionary;
 
-class ScoreComponentCollection : public std::map<const Dictionary*, ScoreComponent>
+class ScoreComponentCollection
 {
+	friend std::ostream& operator<<(std::ostream &out, const ScoreComponentCollection &scoreComponentColl);
+private:
+	std::map<const Dictionary*, ScoreComponent> m_scores;
 public:
+	typedef std::map<const Dictionary*, ScoreComponent>::iterator iterator;
+	typedef std::map<const Dictionary*, ScoreComponent>::const_iterator const_iterator;
+	iterator begin() { return m_scores.begin(); }
+	iterator end() { return m_scores.end(); }
+	const_iterator begin() const { return m_scores.begin(); }
+	const_iterator end() const { return m_scores.end(); }
 	
 	ScoreComponent &GetScoreComponent(const Dictionary *dictionary)
 	{
-		ScoreComponentCollection::iterator iter = find(dictionary);
-		assert(iter != end());
+		iterator iter = m_scores.find(dictionary);
+		assert(iter != m_scores.end());
 		return iter->second;
 	}
+
 	const ScoreComponent &GetScoreComponent(const Dictionary *dictionary) const
 	{
 		return const_cast<ScoreComponentCollection*>(this)->GetScoreComponent(dictionary);
 	}
-	
+
 	void Remove(const Dictionary *dictionary)
 	{
-		erase(dictionary);
+		m_scores.erase(dictionary);
 	}
 	
 	ScoreComponent &Add(const ScoreComponent &scoreComponent)
 	{
 		const Dictionary *dictionary = scoreComponent.GetDictionary();
-		assert( dictionary != NULL && find(dictionary) == end());
-		return operator[](dictionary) = scoreComponent;
+		assert( dictionary != NULL && m_scores.find(dictionary) == m_scores.end());
+		return m_scores[dictionary] = scoreComponent;
 	}
+
 	ScoreComponent &Add(const Dictionary *dictionary)
 	{
 		return Add(ScoreComponent(dictionary));
@@ -68,7 +79,7 @@ public:
 inline std::ostream& operator<<(std::ostream &out, const ScoreComponentCollection &scoreComponentColl)
 {
 	ScoreComponentCollection::const_iterator iter;
-	for (iter = scoreComponentColl.begin() ; iter != scoreComponentColl.end() ; ++iter)
+	for (iter = scoreComponentColl.m_scores.begin() ; iter != scoreComponentColl.m_scores.end() ; ++iter)
 	{
 		const ScoreComponent &scoreComponent = iter->second;
 		out << "[" << scoreComponent << "] ";

@@ -343,7 +343,7 @@ void StaticData::SetWeightTransModel(const vector<float> &weight)
 			iter != m_phraseDictionary.end(); ++iter) 
 	{
 		PhraseDictionaryBase *phraseDict = *iter;
-		const size_t noScoreComponent 						= phraseDict->GetNoScoreComponent();
+		const size_t noScoreComponent 						= phraseDict->GetNumScoreComponents();
 		// weights for this particular dictionary
 		vector<float> dictWeight(noScoreComponent);
 		for (size_t i = 0 ; i < noScoreComponent ; i++)
