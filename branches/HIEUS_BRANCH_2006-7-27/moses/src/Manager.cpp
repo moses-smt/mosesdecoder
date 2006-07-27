@@ -114,6 +114,19 @@ void Manager::ProcessSentence()
 	}
 }
 
+void AddHypotheses(size_t startPos, size_t endPos, const TranslationOptionCollection &possibleTranslations
+				, const Hypothesis &hypothesis, HypothesisCollectionIntermediate &outputHypoColl)
+{
+	const TranslationOptionList &transOptlist = possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos));
+
+	TranslationOptionList::const_iterator iterTransOpt;
+	for (iterTransOpt = transOptlist.begin(); iterTransOpt != transOptlist.end(); ++iterTransOpt)
+	{
+		Hypothesis *newHypo = hypothesis.CreateNext(**iterTransOpt);
+		outputHypoColl.AddNoPrune( newHypo );
+	}
+}
+
 // find all translation options to expand one hypothesis, trigger expansion
 // this is mostly a check for overlap with already covered words, and for
 // violation of reordering limits.
@@ -125,64 +138,77 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	// no limit of reordering: only check for overlap
 	if (maxDistortion < 0)
 	{	
-		TranslationOptionCollection::const_iterator iterTransOpt;
-		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
-		{
-			const TranslationOption &transOpt = **iterTransOpt;
+		const WordsBitmap hypoBitmap	= hypothesis.GetWordsBitmap();
+		const size_t hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
+								, sourceSize			= m_source.GetSize();
 
-			if ( !transOpt.Overlap(hypothesis)) 
+		for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
+		{
+			for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
 			{
-				ExpandHypothesis(hypothesis,transOpt);
+				ExpandAllHypotheses(hypothesis
+											, m_possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos)));
 			}
 		}
+
 		return; // done with special case (no reordering limit)
 	}
 
 	// if there are reordering limits, make sure it is not violated
 	// the coverage bitmap is handy here (and the position of the first gap)
 	const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
-	size_t hypoWordCount		= hypoBitmap.GetWordsCount();
-	size_t hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();
+	const size_t hypoWordCount		= hypoBitmap.GetWordsCount()
+							, hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
+							, sourceSize			= m_source.GetSize();
 	
 	// MAIN LOOP. go through each possible hypo
-	TranslationOptionCollection::const_iterator iterTransOpt;
-	for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
+	for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
 		{
-			const TranslationOption &transOpt = **iterTransOpt;
-			// calc distortion if using this poss trans
-			
-			size_t transOptStartPos = transOpt.GetStartPos();
-			
 			// no gap so far => don't skip more than allowed limit
 			if (hypoFirstGapPos == hypoWordCount)
 				{
-					if (transOptStartPos == hypoWordCount
-							|| (transOptStartPos > hypoWordCount 
-									&& transOpt.GetEndPos() <= hypoWordCount + maxDistortion)
+					if (startPos == hypoWordCount
+							|| (startPos > hypoWordCount 
+									&& endPos <= hypoWordCount + maxDistortion)
 					)
 				{
-					ExpandHypothesis(hypothesis,transOpt);
+					ExpandAllHypotheses(hypothesis
+												,m_possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos)));
 				}
 			}
 			// filling in gap => just check for overlap
-			else if (transOptStartPos < hypoWordCount)
+			else if (startPos < hypoWordCount)
 				{
-					if (transOptStartPos >= hypoFirstGapPos
-						&& !transOpt.Overlap(hypothesis))
+					if (startPos >= hypoFirstGapPos
+						&& !hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 					{
-						ExpandHypothesis(hypothesis,transOpt);
+						ExpandAllHypotheses(hypothesis
+													,m_possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos)));
 					}
 				}
 			// ignoring, continuing forward => be limited by start of gap
 			else
 				{
-					if (transOpt.GetEndPos() <= hypoFirstGapPos + maxDistortion
-						&& !transOpt.Overlap(hypothesis))
+					if (endPos <= hypoFirstGapPos + maxDistortion
+						&& !hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 					{
-						ExpandHypothesis(hypothesis,transOpt);
+						ExpandAllHypotheses(hypothesis
+													,m_possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos)));
 					}
 				}
 		}
+	}
+}
+
+void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList)
+{
+	TranslationOptionList::const_iterator iter;
+	for (iter = transOptList.begin() ; iter != transOptList.end() ; ++iter)
+	{
+		ExpandHypothesis(hypothesis, **iter);
+	}
 }
 
 // Expand one hypothesis with a translation option.

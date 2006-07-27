@@ -50,6 +50,7 @@ protected:
 
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
+	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
 
 	// logging
