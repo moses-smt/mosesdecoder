@@ -10,7 +10,15 @@
 // for Windows. not implemented
 #pragma warning(disable:4716)
 
-ConfusionNet::ConfusionNet(FactorCollection* p) : InputType(),m_factorCollection(p) {}
+ConfusionNet::ConfusionNet(FactorCollection* p) : InputType(),m_factorCollection(p) 
+{
+	assert(false);
+}
+
+ConfusionNet::~ConfusionNet()
+{
+	assert(false);
+}
 
 void ConfusionNet::SetFactorCollection(FactorCollection *p) 
 {
