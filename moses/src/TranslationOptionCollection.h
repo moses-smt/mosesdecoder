@@ -37,11 +37,13 @@ class GenerationDictionary;
 class InputType;
 class LMList;
 
+typedef std::list<const TranslationOption*> TranslationOptionList;
+
 class TranslationOptionCollection
 {
 	TranslationOptionCollection(const TranslationOptionCollection&); // no copy constructor
 protected:
-	std::list< const TranslationOption* >		m_collection;
+	std::vector< std::vector< TranslationOptionList > >					m_collection;
 	InputType const													&m_source;
 	SquareMatrix														m_futureScore;
 	WordsBitmap															m_unknownWordPos;
@@ -87,7 +89,12 @@ protected:
 															, float weightWordPenalty);
 
 	void ComputeFutureScores(size_t verboseLevel);	
-															
+
+	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
+	{
+		return m_collection[startPos][endPos - startPos];
+	}
+
 public:
   virtual ~TranslationOptionCollection();
 
@@ -102,35 +109,34 @@ public:
 																			, size_t verboseLevel);
 
 
-	void Add(const TranslationOption *translationOption)
-	{
-		m_collection.push_back(translationOption);
-	}
+	void Add(const TranslationOption *translationOption);
 
 	inline virtual const SquareMatrix &GetFutureScore() const
 	{
 		return m_futureScore;
 	}
 
-	TO_STRING;	
+	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const
+	{
+		return m_collection[startPos][endPos - startPos];
+	}
+	const TranslationOptionList &GetTranslationOptionList(const WordsRange &coverage) const
+	{
+		return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
+	}
 
-	// iters
-	typedef std::list< const TranslationOption* >::iterator iterator;
-	typedef std::list< const TranslationOption* >::const_iterator const_iterator;
-	iterator begin() { return m_collection.begin(); }
-	iterator end() { return m_collection.end(); }
-	const_iterator begin() const { return m_collection.begin(); }
-	const_iterator end() const { return m_collection.end(); }
-	
+	TO_STRING;		
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
 {
+	/*
 	TranslationOptionCollection::const_iterator iter;
 	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
 	{
 		TRACE_ERR (*iter << std::endl);
 	}	
+	*/
 	return out;
 }
 
