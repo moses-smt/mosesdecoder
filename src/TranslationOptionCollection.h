@@ -41,7 +41,7 @@ class TranslationOptionCollection
 {
 	TranslationOptionCollection(const TranslationOptionCollection&); // no copy constructor
 protected:
-	std::list< TranslationOption >					m_collection;
+	std::list< const TranslationOption* >		m_collection;
 	InputType const													&m_source;
 	SquareMatrix														m_futureScore;
 	WordsBitmap															m_unknownWordPos;
@@ -102,7 +102,7 @@ public:
 																			, size_t verboseLevel);
 
 
-	void Add(const TranslationOption &translationOption)
+	void Add(const TranslationOption *translationOption)
 	{
 		m_collection.push_back(translationOption);
 	}
@@ -115,8 +115,8 @@ public:
 	TO_STRING;	
 
 	// iters
-	typedef std::list< TranslationOption >::iterator iterator;
-	typedef std::list< TranslationOption >::const_iterator const_iterator;
+	typedef std::list< const TranslationOption* >::iterator iterator;
+	typedef std::list< const TranslationOption* >::const_iterator const_iterator;
 	iterator begin() { return m_collection.begin(); }
 	iterator end() { return m_collection.end(); }
 	const_iterator begin() const { return m_collection.begin(); }
