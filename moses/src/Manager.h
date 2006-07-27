@@ -49,10 +49,10 @@ protected:
 	TranslationOptionCollection &m_possibleTranslations;
 
 	// functions for creating hypotheses
-	void ProcessOneStack(HypothesisCollection &sourceHypoColl);
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
 
+	// logging
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
 public:
