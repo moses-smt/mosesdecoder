@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include "FactorTypeSet.h"
+#include "ScoreProducer.h"
 
 class Dictionary
 {
@@ -43,10 +44,8 @@ public:
 	}
 	virtual ~Dictionary();
 
-	size_t GetNumScoreComponents() const
-	{
-		return m_noScoreComponent;
-	}
+	size_t GetNoScoreComponents() const { return m_noScoreComponent; }
+
 	size_t GetIndex() const
 	{
 		return m_index;

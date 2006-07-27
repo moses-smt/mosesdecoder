@@ -820,3 +820,8 @@ void GenerateCandidates(const ConfusionNet& src,
 	}
 }
 
+const std::string PhraseDictionaryTree::GetScoreProducerDescription() const
+{
+  return "Phrase dictionary tree";
+}
+

@@ -59,6 +59,7 @@ void LanguageModel_IRST::Load(size_t id
 	m_factorType 	 = factorType;
 	m_weight			 = weight;
 	m_nGramOrder	 = nGramOrder;
+	m_filename		 = fileName;
 
 	InputFileStream inp(fileName);
 

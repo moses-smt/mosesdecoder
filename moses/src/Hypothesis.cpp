@@ -254,7 +254,7 @@ void Hypothesis::MergeFactors(vector< const Word* > mergeWords, const Generation
 	// score
 	m_score[ScoreType::Generation] += generationScore * weight;
 #ifdef N_BEST
-	m_generationScoreComponent[(size_t) &generationDictionary] += generationScore;
+	m_generationScoreComponent[generationDictionary.GetScoreBookkeepingID()] += generationScore;
 #endif
 }
 

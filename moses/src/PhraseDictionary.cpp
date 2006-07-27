@@ -48,6 +48,15 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 	return GetTargetPhraseCollection(src.GetSubString(range));
 }
 
+const std::string PhraseDictionaryBase::GetScoreProducerDescription() const
+{
+	return "Translation score, file=" + m_filename;
+}
+
+unsigned int PhraseDictionaryBase::GetNumScoreComponents() const
+{
+	return this->GetNoScoreComponents();
+}
 
 void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
@@ -63,6 +72,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, const StaticData& staticData)
 {
 	m_maxTargetPhrase = maxTargetPhrase;
+	m_filename = filePath;
 
 	//factors	
 	m_factorsUsed[Input]	= new FactorTypeSet(input);

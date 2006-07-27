@@ -36,9 +36,10 @@ class InputType;
 class WordsRange;
 
 
-class PhraseDictionaryBase : public Dictionary {
+class PhraseDictionaryBase : public Dictionary, public ScoreProducer {
  protected:
 	size_t m_maxTargetPhrase;
+	std::string m_filename;    // just for debugging purposes
 
  public:
 	PhraseDictionaryBase(size_t noScoreComponent);
@@ -50,6 +51,8 @@ class PhraseDictionaryBase : public Dictionary {
 	}
 	
 	virtual void InitializeForInput(InputType const&) {}
+	const std::string GetScoreProducerDescription() const;
+  unsigned int GetNumScoreComponents() const;
 
 	virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
 

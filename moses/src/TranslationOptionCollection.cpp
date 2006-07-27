@@ -31,7 +31,7 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
 
     // counting options per span, for statistics
     bool printCounts = (verboseLevel > 0);
-    int *counts;
+    int *counts = 0;
     if (printCounts == true)
       counts = (int*) malloc(sizeof(int) * size * size);
 
