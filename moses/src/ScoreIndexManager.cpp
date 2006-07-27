@@ -1,5 +1,7 @@
-#include <iostream>
 
+#include <iostream>
+#include <string>
+#include <assert.h>
 #include "ScoreIndexManager.h"
 #include "ScoreProducer.h"
 
