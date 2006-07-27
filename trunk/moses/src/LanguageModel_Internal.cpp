@@ -153,7 +153,7 @@ float LanguageModel_Internal::GetValue(const Factor *factor0, const Factor *fact
 		if (nGram[0] == NULL || factor0->GetLmId().irst == -1)
 		{ // something unigram
 			nGram[0]	= factor0->GetLmId().internal;
-			if (nGram[0] == NULL)
+			if (nGram[0] == NULL || factor0->GetLmId().irst == -1)
 			{ // stops at unigram
 				score = nGram[1]->GetScore();
 			}
