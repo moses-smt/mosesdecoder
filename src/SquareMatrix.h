@@ -45,7 +45,7 @@ public:
 	{
 		free(m_array);
 	}
-	inline float GetSize() const
+	inline size_t GetSize() const
 	{
 		return m_size;
 	}

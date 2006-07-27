@@ -78,8 +78,10 @@ protected:
 	size_t m_maxHypoStackSize;
   std::set< Hypothesis*, CompareHypothesisCollection > m_hypos;
 
-//	std::list<Arc> m_arc;
+
 	void Add(Hypothesis *hypothesis);
+		// if returns false, hypothesis not used
+		// caller must take care to delete unused hypo to avoid leak
 		// used by Add(Hypothesis *hypothesis, float beamThreshold);
 	void RemoveAll();
 
