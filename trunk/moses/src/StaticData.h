@@ -25,18 +25,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include "TypeDef.h"
+#include "ScoreIndexManager.h"
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
 #include "FactorCollection.h"
 #include "Parameter.h"
 #include "LanguageModel.h"
-#include "LexicalReordering.h"
 #include "InputOutput.h"
 #include "DecodeStep.h"
 #include "LMList.h"
 //#include "UnknownWordHandler.h"
 
 class InputType;
+class LexicalReordering;
 
 class StaticData
 {
@@ -51,6 +52,7 @@ protected:
 	std::vector<FactorType>			m_inputFactorOrder;
 //	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
 	std::vector<LMList>			m_languageModel;
+	ScoreIndexManager				m_scoreIndexManager;
 	LexicalReordering                   *m_lexReorder;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
@@ -181,7 +183,15 @@ public:
 	{
 		return m_beamThreshold;
 	}
-
+	//! returns the total number of score components across all types, all factors
+	size_t GetTotalScoreComponents() const
+	{
+		return m_scoreIndexManager.GetTotalNumberOfScores();
+	}
+	const ScoreIndexManager& GetScoreIndexManager() const
+	{
+		return m_scoreIndexManager;
+	}
 	IOMethod GetIOMethod();
 	const std::vector<std::string> &GetMySQLParam()
 	{

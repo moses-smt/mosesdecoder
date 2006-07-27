@@ -26,13 +26,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Factor.h"
 #include "TypeDef.h"
 #include "Util.h"
+#include "ScoreProducer.h"
 
 class FactorCollection;
 class Factor;
 class Phrase;
 class ScoreColl;
 
-class LanguageModel
+class LanguageModel : public ScoreProducer
 {
 protected:	
 	const Factor *m_sentenceStart, *m_sentenceEnd;
@@ -40,6 +41,7 @@ protected:
 	float				m_weight;
 	size_t			m_id, m_nGramOrder;
 	LmId				m_unknownId;
+	std::string	m_filename;
 public:
 
 	static const LmId UNKNOWN_LM_ID;
@@ -52,7 +54,10 @@ public:
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder) = 0;
-	
+
+	// see ScoreProducer.h
+	unsigned int GetNumScoreComponents() const;
+
 	size_t GetNGramOrder() const
 	{
 		return m_nGramOrder;
@@ -87,6 +92,7 @@ public:
 	{
 		return m_id;
 	}
+	virtual const std::string GetScoreProducerDescription() const;
 	virtual float GetValue(const std::vector<const Factor*> &contextFactor) const = 0;
 
   // one of the following should probably be made available

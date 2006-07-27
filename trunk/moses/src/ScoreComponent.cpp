@@ -30,7 +30,7 @@ ScoreComponent::ScoreComponent()
 
 ScoreComponent::ScoreComponent(const Dictionary *dictionary)
 	:m_dictionary(dictionary)
-	,m_scoreComponent(dictionary->GetNumScoreComponents())
+	,m_scoreComponent(dictionary->GetNoScoreComponents())
 {
 }
 
@@ -50,7 +50,7 @@ ScoreComponent::ScoreComponent(const ScoreComponent &copy)
 size_t ScoreComponent::GetNumScoreComponents() const
 {
 	if (m_dictionary != NULL)
-		return m_dictionary->GetNumScoreComponents();
+		return m_dictionary->GetNoScoreComponents();
 	else
 		return 0;
 }

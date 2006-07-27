@@ -185,4 +185,14 @@ float LexicalReordering::CalcScore(Hypothesis *curr_hypothesis)
 	//now looking up in the table the appropriate score for these orientation		
 	return GetProbability(curr_hypothesis, orientation);		
 }
-	
+
+unsigned int LexicalReordering::GetNumScoreComponents() const
+{
+	return 1;
+}
+
+const std::string  LexicalReordering::GetScoreProducerDescription() const
+{
+	return "Lexicalized reordering score, file=";
+}
+

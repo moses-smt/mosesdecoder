@@ -107,6 +107,8 @@ int main(int argc, char* argv[])
 	// set up read/writing class
 	InputOutput *inputOutput = GetInputOutput(staticData);
 
+  std::cerr << "The score component vector looks like this:\n" << staticData.GetScoreIndexManager();
+
 	if (inputOutput == NULL)
 		return EXIT_FAILURE;
 

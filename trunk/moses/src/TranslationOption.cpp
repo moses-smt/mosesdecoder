@@ -74,7 +74,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 	m_scoreGen	= copy.GetGenerationScore() + generationScore * weight;
 
 	#ifdef N_BEST
-		m_generationScoreComponent[(size_t)generationDictionary] = generationScore;
+		m_generationScoreComponent[generationDictionary->GetScoreBookkeepingID()] = generationScore;
 	#endif
 }
 
@@ -102,7 +102,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 		for (iterGenDict = allGenerationDictionary.begin() ; iterGenDict != allGenerationDictionary.end() ; ++iterGenDict)
 		{
 			const GenerationDictionary *dict = *iterGenDict;
-			m_generationScoreComponent.Add((size_t)dict);
+			m_generationScoreComponent.Add(dict->GetScoreBookkeepingID());
 		}
 	#endif
 }

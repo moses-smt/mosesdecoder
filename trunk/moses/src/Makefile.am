@@ -31,6 +31,8 @@ libmoses_a_SOURCES = \
 	ScoreColl.cpp \
 	ScoreComponent.cpp \
 	ScoreComponentCollection.cpp \
+	ScoreIndexManager.cpp \
+	ScoreProducer.cpp \
 	Sentence.cpp \
 	StaticData.cpp \
 	TargetPhrase.cpp \

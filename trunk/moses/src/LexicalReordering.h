@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
+#include "ScoreProducer.h"
 
 class FactorCollection;
 class Factor;
@@ -43,7 +44,7 @@ class Hypothesis;
  * direction. 
  */
 
-class LexicalReordering
+class LexicalReordering : public ScoreProducer
 {
 
 private: 
@@ -106,4 +107,6 @@ public:
 	
 	float GetProbability(Hypothesis *hypothesis, int orientation);
 
+	unsigned int GetNumScoreComponents() const;
+	const std::string GetScoreProducerDescription() const;
 };
