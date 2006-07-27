@@ -24,7 +24,6 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& src)
 		}
 	}
 }
-
 TranslationOptionCollection::~TranslationOptionCollection()
 {
 		// delete all trans opt
@@ -33,11 +32,10 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	{
 		for (size_t endPos = startPos ; endPos < size ; ++endPos)
 		{
-			//RemoveAllInColl<TranslationOptionList::iterator>(GetTranslationOptionList(startPos, endPos));
+			RemoveAllInColl<TranslationOptionList::iterator>(GetTranslationOptionList(startPos, endPos));
 		}
 	}
 }
-
 void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
 {
 	// create future score matrix in a dynamic programming fashion
