@@ -5,6 +5,7 @@
 #include "PhraseDictionary.h"
 #include "FactorCollection.h"
 #include "Input.h"
+#include "Util.h"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& src)
 
 TranslationOptionCollection::~TranslationOptionCollection()
 {
+	RemoveAllInColl< std::list< const TranslationOption* >::const_iterator>(m_collection);
 }
 
 void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
@@ -43,7 +45,7 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
     // walk all the translation options and record the cheapest option for each span
     TranslationOptionCollection::const_iterator iterTransOpt;
     for(iterTransOpt = begin() ; iterTransOpt != end() ; ++iterTransOpt) {
-      const TranslationOption &transOpt = *iterTransOpt;
+      const TranslationOption &transOpt = **iterTransOpt;
       size_t startpos = transOpt.GetStartPos();
       size_t endpos = transOpt.GetEndPos();
       float score = transOpt.GetFutureScore();
@@ -369,12 +371,12 @@ void TranslationOptionCollection::CreateTranslationOptions(
 
 	// add to real trans opt list
 	PartialTranslOptColl &lastPartialTranslOptColl	= outputPartialTranslOptCollVec[decodeStepList.size() - 1];
-	iterator iterColl;
+	PartialTranslOptColl::iterator iterColl;
 	for (iterColl = lastPartialTranslOptColl.begin() ; iterColl != lastPartialTranslOptColl.end() ; iterColl++)
 		{
 			TranslationOption &transOpt = *iterColl;
 			transOpt.CalcScore(allLM, weightWordPenalty);
-			Add(transOpt);
+			Add(new TranslationOption(transOpt));
 		}
 
 	// future score
@@ -436,8 +438,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 		}
 
 		transOpt->CalcScore(*m_allLM, weightWordPenalty);
-		Add(*transOpt);
-		delete transOpt;
+		Add(transOpt);
 
 		m_unknownWordPos.SetValue(sourcePos, true); 
 }
