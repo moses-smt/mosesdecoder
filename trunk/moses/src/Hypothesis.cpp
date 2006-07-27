@@ -58,8 +58,8 @@ Hypothesis::Hypothesis(InputType const& source)
 
 Hypothesis::Hypothesis(const Hypothesis &copy)
 	: LatticeEdge							(Output, copy.m_prevHypo)
-	, m_sourceInput          (copy.m_sourceInput)
 	, m_sourceCompleted				(copy.m_sourceCompleted )
+	, m_sourceInput           (copy.m_sourceInput)
 	, m_currSourceWordsRange	(copy.m_currSourceWordsRange)
 	, m_currTargetWordsRange	(copy.m_currTargetWordsRange)
 	, m_wordDeleted						(false)
@@ -80,8 +80,8 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: LatticeEdge							(Output, &prevHypo)
 
-	, m_sourceInput					(prevHypo.m_sourceInput)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
+	, m_sourceInput					(prevHypo.m_sourceInput)
 	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
 	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
 														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetPhrase().GetSize())
@@ -578,7 +578,7 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 		m_score[ScoreType::FutureScoreEnum] += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
 	}
 	
-	
+	//	m_score[ScoreType::FutureScoreEnum] += m_sourceCompleted.GetFutureCosts(m_currSourceWordsRange.GetEndPos()) * StaticData::Instance()->GetWeightDistortion();
 	
 }
 

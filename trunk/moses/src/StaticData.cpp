@@ -299,6 +299,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	if(m_parameter.GetParam("weight-i").size())
 		m_weightInput=Scan<float>(m_parameter.GetParam("weight-i")[0]);
+	TRACE_ERR("input weight is "<<m_weightInput<<"\n");
 	
 	return true;
   
