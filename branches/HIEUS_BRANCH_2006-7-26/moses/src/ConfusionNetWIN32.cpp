@@ -12,6 +12,11 @@
 
 ConfusionNet::ConfusionNet(FactorCollection* p) : InputType(),m_factorCollection(p) {}
 
+ConfusionNet::~ConfusionNet()
+{
+	assert(false);
+}
+
 void ConfusionNet::SetFactorCollection(FactorCollection *p) 
 {
 	assert(false);

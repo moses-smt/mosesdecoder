@@ -119,7 +119,7 @@ const Hypothesis *Manager::GetBestHypothesis() const
 void Manager::ProcessOneStack(HypothesisCollection &sourceHypoColl)
 {
 	// go thru each hypothesis in the stack
-	HypothesisCollection::iterator iterHypo;
+	HypothesisCollection::const_iterator iterHypo;
 	for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
 	{
 		Hypothesis &hypothesis = **iterHypo;

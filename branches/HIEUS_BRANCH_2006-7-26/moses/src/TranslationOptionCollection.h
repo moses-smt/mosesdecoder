@@ -136,7 +136,7 @@ inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollec
 	{
 		TRACE_ERR (*iter << std::endl);
 	}	
-	return out;
 */	
+	return out;
 }
 
