@@ -93,6 +93,7 @@ void Manager::ProcessSentence()
 		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize());
 		sourceHypoColl.InitializeArcs();
 		//sourceHypoColl.Prune();
+
 		ProcessOneStack(sourceHypoColl);
 
 		//OutputHypoStack();
@@ -126,52 +127,18 @@ void Manager::ProcessOneStack(HypothesisCollection &sourceHypoColl)
 		ProcessOneHypothesis(hypothesis);
 	}
 }
+
+// find all translation options to expand one hypothesis, trigger expansion
+// this is mostly a check for overlap with already covered words, and for
+// violation of reordering limits.
 void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 {
-			
-	HypothesisCollectionIntermediate outputHypoColl;
-	CreateNextHypothesis(hypothesis, outputHypoColl);
-
-	// add to real hypothesis stack
-	HypothesisCollectionIntermediate::iterator iterHypo;
-	for (iterHypo = outputHypoColl.begin() ; iterHypo != outputHypoColl.end() ; )
-	{
-		Hypothesis *hypo = *iterHypo;
-
-		hypo->CalcScore(m_staticData, m_possibleTranslations.GetFutureScore());
-		if(m_staticData.GetVerboseLevel() > 2) 
-		{			
-			hypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
-		}
-
-		size_t wordsTranslated = hypo->GetWordsBitmap().GetWordsCount();
-
-		if (m_hypoStack[wordsTranslated].AddPrune(hypo))
-		{
-			HypothesisCollectionIntermediate::iterator iterCurr = iterHypo++;
-			outputHypoColl.Detach(iterCurr);
-			if(m_staticData.GetVerboseLevel() > 2) 
-				{
-					if(m_hypoStack[wordsTranslated].getBestScore() == hypo->GetScore(ScoreType::Total))
-						{
-							cout<<"new best estimate for this stack"<<endl;
-						}
-					cout<<"added hypothesis on stack "<<wordsTranslated<<" now size "<<m_hypoStack[wordsTranslated].size()<<endl<<endl;
-				}
-
-		}
-		else
-		{
-			++iterHypo;
-		}
-	}
-
-}
-void Manager::CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisCollectionIntermediate &outputHypoColl)
-{
+	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = m_staticData.GetMaxDistortion();
+
+	// no limit of reordering: only check for overlap
 	if (maxDistortion < 0)
-	{	// no limit on distortion
+	{	
 		TranslationOptionCollection::const_iterator iterTransOpt;
 		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
 		{
@@ -179,65 +146,98 @@ void Manager::CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisColle
 
 			if ( !transOpt.Overlap(hypothesis)) 
 			{
-				Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-				//newHypo->PrintHypothesis(m_source);
-				outputHypoColl.AddNoPrune( newHypo );			
+				ExpandHypothesis(hypothesis,transOpt);
 			}
 		}
+		return; // done with special case
 	}
-	else
-	{
-		const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
-		size_t hypoWordCount		= hypoBitmap.GetWordsCount()
-			,hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();
 
-		// MAIN LOOP. go through each possible hypo
-		TranslationOptionCollection::const_iterator iterTransOpt;
-		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
+	// if there are reordering limits, make sure it is not violated
+	// the coverage bitmap is handy here (and the position of the first gap)
+	const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
+	size_t hypoWordCount		= hypoBitmap.GetWordsCount();
+	size_t hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();
+	
+	// MAIN LOOP. go through each possible hypo
+	TranslationOptionCollection::const_iterator iterTransOpt;
+	for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
 		{
 			const TranslationOption &transOpt = **iterTransOpt;
 			// calc distortion if using this poss trans
-
+			
 			size_t transOptStartPos = transOpt.GetStartPos();
-
+			
+			// no gap so far => don't skip more than allowed limit
 			if (hypoFirstGapPos == hypoWordCount)
-			{
-				if (transOptStartPos == hypoWordCount
-					|| (transOptStartPos > hypoWordCount 
-					&& transOpt.GetEndPos() <= hypoWordCount + m_staticData.GetMaxDistortion())
+				{
+					if (transOptStartPos == hypoWordCount
+							|| (transOptStartPos > hypoWordCount 
+									&& transOpt.GetEndPos() <= hypoWordCount + maxDistortion)
 					)
 				{
-					Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-					//newHypo->PrintHypothesis(m_source);
-					outputHypoColl.AddNoPrune( newHypo );			
+					ExpandHypothesis(hypothesis,transOpt);
 				}
 			}
-			else
-			{
-				if (transOptStartPos < hypoWordCount)
+			// filling in gap => just check for overlap
+			else if (transOptStartPos < hypoWordCount)
 				{
 					if (transOptStartPos >= hypoFirstGapPos
 						&& !transOpt.Overlap(hypothesis))
 					{
-						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-						//newHypo->PrintHypothesis(m_source);
-						outputHypoColl.AddNoPrune( newHypo );			
+						ExpandHypothesis(hypothesis,transOpt);
 					}
 				}
-				else
+			// ignoring, continuing forward => be limited by start of gap
+			else
 				{
-					if (transOpt.GetEndPos() <= hypoFirstGapPos + m_staticData.GetMaxDistortion()
+					if (transOpt.GetEndPos() <= hypoFirstGapPos + maxDistortion
 						&& !transOpt.Overlap(hypothesis))
 					{
-						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-						//newHypo->PrintHypothesis(m_source);
-						outputHypoColl.AddNoPrune( newHypo );			
+						ExpandHypothesis(hypothesis,transOpt);
 					}
 				}
-			}
 		}
-	}
 }
+
+// expand one hypothesis with a translation option
+// this involves initial creation, scoring and adding it to the proper stack
+void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
+{
+	// create hypothesis and calculate all its scores
+	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+	newHypo->CalcScore(m_staticData, m_possibleTranslations.GetFutureScore());
+	
+	// logging for the curious
+	if(m_staticData.GetVerboseLevel() > 2) 
+		{			
+			newHypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+		}
+
+	// add to hypothesis stack
+	size_t wordsTranslated = newHypo->GetWordsBitmap().GetWordsCount();	
+	if (m_hypoStack[wordsTranslated].AddPrune(newHypo))
+		{
+			// some additional logging
+			if(m_staticData.GetVerboseLevel() > 2) 
+				{
+					if(m_hypoStack[wordsTranslated].getBestScore() == newHypo->GetScore(ScoreType::Total))
+						{
+							cout << "new best estimate for this stack" << endl;
+						}
+					cout << "added hypothesis on stack " << wordsTranslated 
+							 << " now size "<<m_hypoStack[wordsTranslated].size() << endl << endl;
+				}
+		}
+	else 
+		{
+			if(m_staticData.GetVerboseLevel() > 2) 
+				{
+					cout << "below threshold, discarded" << endl << endl;
+				}
+		}
+	
+}
+
 
 // OLD FUNCTIONS
 
