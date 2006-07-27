@@ -45,6 +45,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 	// data from file
 	InputFileStream inFile(filePath);
 
+  m_filename = filePath;
 	string line;
 	while(getline(inFile, line)) 
 	{
@@ -101,6 +102,16 @@ GenerationDictionary::~GenerationDictionary()
 	{
 		delete m_factorsUsed[i];
 	}	
+}
+
+unsigned int GenerationDictionary::GetNumScoreComponents() const
+{
+  return this->GetNoScoreComponents();
+}
+
+const std::string GenerationDictionary::GetScoreProducerDescription() const
+{
+  return "Generation score, file=" + m_filename;
 }
 
 const OutputWordCollection *GenerationDictionary::FindWord(const FactorArray &factorArray) const

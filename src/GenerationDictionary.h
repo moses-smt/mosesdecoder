@@ -34,7 +34,7 @@ typedef std::map < Word , float > OutputWordCollection;
 		// 1st = output phrase
 		// 2nd = log probability (score)
 
-class GenerationDictionary : public Dictionary
+class GenerationDictionary : public Dictionary, public ScoreProducer
 {
 protected:
 	std::map<Word , OutputWordCollection> m_collection;
@@ -42,6 +42,7 @@ protected:
 	// 2nd = target
 	OutputWordCollection	m_unknownWord;
 	float									m_weight;
+	std::string						m_filename;
 
 public:
 	GenerationDictionary()
@@ -61,6 +62,9 @@ public:
 									, const std::string &filePath
 									, float weight
 									, FactorDirection direction);
+
+	unsigned int GetNumScoreComponents() const;
+	const std::string GetScoreProducerDescription() const;
 
 	float GetWeight() const
 	{

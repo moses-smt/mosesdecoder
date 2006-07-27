@@ -60,6 +60,7 @@ void LanguageModel_SRI::Load(size_t id
 	m_factorType 	= factorType;
 	m_weight			= weight;
 	m_nGramOrder	= nGramOrder;
+	m_filename		= fileName;
 
 	m_srilmModel->skipOOVs() = false;
 

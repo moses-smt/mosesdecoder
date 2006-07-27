@@ -19,10 +19,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <assert.h>
+#include <cassert>
 #include <limits>
 #include <iostream>
-#include <fstream>
+#include <sstream>
 
 #include "NGramNode.h"
 
@@ -40,6 +40,20 @@ const LmId LanguageModel::UNKNOWN_LM_ID(-1);
 
 LanguageModel::LanguageModel() : m_unknownId(0) {}
 LanguageModel::~LanguageModel() {}
+
+// don't inline virtual funcs...
+unsigned int LanguageModel::GetNumScoreComponents() const
+{
+	return 1;
+}
+
+const std::string LanguageModel::GetScoreProducerDescription() const
+{
+	std::ostringstream oss;
+	// what about LMs that are over multiple factors at once, POS + stem, for example?
+	oss << m_nGramOrder << "-gram LM score, factor-type=" << GetFactorType() << ", file=" << m_filename;
+	return oss.str();
+} 
 
 /***
  * ngramComponent should be an invalid pointer iff n-best ranking is turned off

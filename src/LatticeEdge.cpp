@@ -74,7 +74,7 @@ void LatticeEdge::ResizeComponentScore(const LMList &allLM, const list < DecodeS
 		}
 		case Generate:
 		{
-			m_generationScoreComponent[(size_t) &step.GetGenerationDictionary()] = 0.0f;
+			m_generationScoreComponent[step.GetGenerationDictionary().GetScoreBookkeepingID()] = 0.0f;
 			break;
 		}
 		}

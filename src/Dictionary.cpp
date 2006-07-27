@@ -14,3 +14,4 @@ Dictionary::Dictionary(size_t noScoreComponent)
 Dictionary::~Dictionary() {}
 
 void Dictionary::CleanUp() {}
+

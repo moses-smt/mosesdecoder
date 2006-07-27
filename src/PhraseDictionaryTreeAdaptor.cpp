@@ -173,7 +173,7 @@ struct PDTAimp {
 			m_dict->Create(in,filePath);
 		}
 		TRACE_ERR("reading bin ttable\n");
-		m_dict->Read(filePath); 	
+		m_dict->Read(filePath);
 	}
 
 	typedef PhraseDictionaryTree::PrefixPtr PPtr;
@@ -388,6 +388,7 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 						 <<" "<<m_noScoreComponent<<"\n";
 		abort();
 	}
+	m_filename = filePath;
 
 	// set Dictionary members
 	m_factorsUsed[Input]	= new FactorTypeSet(input);

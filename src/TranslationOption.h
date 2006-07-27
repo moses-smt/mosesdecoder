@@ -159,7 +159,7 @@ public:
 	}
 	inline void AddGenScoreComponent(const GenerationDictionary &dict, float value)
 	{
-		m_generationScoreComponent.Add((size_t)&dict);
+		m_generationScoreComponent.Add(dict.GetScoreBookkeepingID());
 	}
 	inline const ScoreColl &GetGenerationScoreComponent() const
 	{
