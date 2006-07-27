@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "TargetPhrase.h"
-#include "HypothesisCollectionIntermediate.h"
 #include "LatticePath.h"
 #include "LatticePathCollection.h"
 #include "TranslationOption.h"
@@ -111,19 +110,6 @@ void Manager::ProcessSentence()
     cerr << "Hypotheses created since startup: "<< Hypothesis::s_HypothesesCreated<<endl;
 		//OutputHypoStack();
 		//OutputHypoStackSize();
-	}
-}
-
-void AddHypotheses(size_t startPos, size_t endPos, const TranslationOptionCollection &possibleTranslations
-				, const Hypothesis &hypothesis, HypothesisCollectionIntermediate &outputHypoColl)
-{
-	const TranslationOptionList &transOptlist = possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos));
-
-	TranslationOptionList::const_iterator iterTransOpt;
-	for (iterTransOpt = transOptlist.begin(); iterTransOpt != transOptlist.end(); ++iterTransOpt)
-	{
-		Hypothesis *newHypo = hypothesis.CreateNext(**iterTransOpt);
-		outputHypoColl.AddNoPrune( newHypo );
 	}
 }
 
@@ -242,6 +228,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 		}
 	else 
 		{
+			delete newHypo;
 			if(m_staticData.GetVerboseLevel() > 2) 
 				{
 					cout << "below threshold, discarded" << endl << endl;

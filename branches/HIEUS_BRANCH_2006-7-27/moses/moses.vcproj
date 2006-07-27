@@ -323,10 +323,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HypothesisCollectionIntermediate.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Input.cpp"
 				>
 			</File>
@@ -554,10 +550,6 @@
 			</File>
 			<File
 				RelativePath=".\src\HypothesisCollection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\HypothesisCollectionIntermediate.h"
 				>
 			</File>
 			<File

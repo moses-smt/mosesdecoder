@@ -66,7 +66,9 @@ float HypothesisCollection::getBestScore() const{
 
 
 bool HypothesisCollection::AddPrune(Hypothesis *hypo)
-{
+{ // if returns false, hypothesis not used
+	// caller must take care to delete unused hypo to avoid leak
+
 	if (hypo->GetScore(ScoreType::Total) < m_worstScore)
 		return false;
 
