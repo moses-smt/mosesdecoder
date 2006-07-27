@@ -167,79 +167,81 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	}
 
 }
+
+// helper
+void AddHypotheses(size_t startPos, size_t endPos, const TranslationOptionCollection &possibleTranslations
+				, const Hypothesis &hypothesis, HypothesisCollectionIntermediate &outputHypoColl)
+{
+	const TranslationOptionList &transOptlist = possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos));
+
+	TranslationOptionList::const_iterator iterTransOpt;
+	for (iterTransOpt = transOptlist.begin(); iterTransOpt != transOptlist.end(); ++iterTransOpt)
+	{
+		Hypothesis *newHypo = hypothesis.CreateNext(**iterTransOpt);
+		outputHypoColl.AddNoPrune( newHypo );
+	}
+}
+
 void Manager::CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisCollectionIntermediate &outputHypoColl)
 {
 	int maxDistortion = m_staticData.GetMaxDistortion();
 	if (maxDistortion < 0)
 	{	// no limit on distortion
-		TranslationOptionCollection::const_iterator iterTransOpt;
-		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
+		const size_t firstPos		= hypothesis.GetWordsBitmap().GetFirstGapPos()
+								,sourceSize	= m_source.GetSize();
+		
+		for (size_t startPos = firstPos ; startPos < sourceSize ; ++startPos)
 		{
-			const TranslationOption &transOpt = *iterTransOpt;
-
-			if ( !transOpt.Overlap(hypothesis)) 
+			for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
 			{
-				Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-				//newHypo->PrintHypothesis(m_source);
-				outputHypoColl.AddNoPrune( newHypo );			
+				AddHypotheses(startPos, endPos, m_possibleTranslations, hypothesis, outputHypoColl);
 			}
 		}
 	}
 	else
 	{
-		const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
-		size_t hypoWordCount		= hypoBitmap.GetWordsCount()
-			,hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();
+		const WordsBitmap hypoBitmap 	= hypothesis.GetWordsBitmap();
+		const size_t hypoWordCount		= hypoBitmap.GetWordsCount()
+					,firstPos								= hypoBitmap.GetFirstGapPos()
+					,sourceSize							= m_source.GetSize();
 
 		// MAIN LOOP. go through each possible hypo
-		TranslationOptionCollection::const_iterator iterTransOpt;
-		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
+		for (size_t startPos = firstPos ; startPos < sourceSize ; ++startPos)
 		{
-			const TranslationOption &transOpt = *iterTransOpt;
-			// calc distortion if using this poss trans
-
-			size_t transOptStartPos = transOpt.GetStartPos();
-
-			if (hypoFirstGapPos == hypoWordCount)
-			{
-				if (transOptStartPos == hypoWordCount
-					|| (transOptStartPos > hypoWordCount 
-					&& transOpt.GetEndPos() <= hypoWordCount + m_staticData.GetMaxDistortion())
-					)
+			for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
+			{	
+				if (firstPos == hypoWordCount)
 				{
-					Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-					//newHypo->PrintHypothesis(m_source);
-					outputHypoColl.AddNoPrune( newHypo );			
-				}
-			}
-			else
-			{
-				if (transOptStartPos < hypoWordCount)
-				{
-					if (transOptStartPos >= hypoFirstGapPos
-						&& !transOpt.Overlap(hypothesis))
+					if (startPos == hypoWordCount
+						|| (startPos > hypoWordCount 
+						&& endPos <= hypoWordCount + m_staticData.GetMaxDistortion())
+						)
 					{
-						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-						//newHypo->PrintHypothesis(m_source);
-						outputHypoColl.AddNoPrune( newHypo );			
+						AddHypotheses(startPos, endPos, m_possibleTranslations, hypothesis, outputHypoColl);
 					}
 				}
 				else
 				{
-					if (transOpt.GetEndPos() <= hypoFirstGapPos + m_staticData.GetMaxDistortion()
-						&& !transOpt.Overlap(hypothesis))
+					if (startPos < hypoWordCount)
 					{
-						Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-						//newHypo->PrintHypothesis(m_source);
-						outputHypoColl.AddNoPrune( newHypo );			
+						if (startPos >= firstPos && !hypoBitmap.Overlap(WordsRange(startPos, endPos)))
+						{
+							AddHypotheses(startPos, endPos, m_possibleTranslations, hypothesis, outputHypoColl);
+						}
+					}
+					else
+					{
+						if (endPos <= firstPos + m_staticData.GetMaxDistortion()
+							&& !hypoBitmap.Overlap(WordsRange(startPos, endPos)))
+						{
+							AddHypotheses(startPos, endPos, m_possibleTranslations, hypothesis, outputHypoColl);
+						}
 					}
 				}
-			}
+			}		
 		}
 	}
 }
-
-// OLD FUNCTIONS
 
 void Manager::OutputHypoStackSize()
 {
