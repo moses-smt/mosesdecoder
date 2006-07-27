@@ -260,6 +260,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-report-all-factors", "report-all-factors", argc, argv);
 	OverwriteParam("-drop-unknown", "drop-unknown", argc, argv);
 	OverwriteParam("-inputtype","inputtype",argc,argv);
+	OverwriteParam("-I","weight-i",argc,argv);
   // check if parameters make sense
 	return Validate();
 }

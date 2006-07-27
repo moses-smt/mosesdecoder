@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include <cmath>
 #include "TypeDef.h"
 #include "WordsRange.h"
 
@@ -154,6 +155,9 @@ public:
 
     return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
 	}
+
+
+	int GetFutureCosts(int lastPos) const ;
 
 	TO_STRING;
 };
