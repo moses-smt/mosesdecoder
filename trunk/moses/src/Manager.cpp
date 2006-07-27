@@ -175,7 +175,7 @@ void Manager::CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisColle
 		TranslationOptionCollection::const_iterator iterTransOpt;
 		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
 		{
-			const TranslationOption &transOpt = *iterTransOpt;
+			const TranslationOption &transOpt = **iterTransOpt;
 
 			if ( !transOpt.Overlap(hypothesis)) 
 			{
@@ -195,7 +195,7 @@ void Manager::CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisColle
 		TranslationOptionCollection::const_iterator iterTransOpt;
 		for (iterTransOpt = m_possibleTranslations.begin(); iterTransOpt != m_possibleTranslations.end(); ++iterTransOpt)
 		{
-			const TranslationOption &transOpt = *iterTransOpt;
+			const TranslationOption &transOpt = **iterTransOpt;
 			// calc distortion if using this poss trans
 
 			size_t transOptStartPos = transOpt.GetStartPos();
