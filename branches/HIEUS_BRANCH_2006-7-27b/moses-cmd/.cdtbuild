@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?fileVersion 3.0.0?>
+
+<ManagedProjectBuildInfo>
+<project id="moses-cmd.cdt.managedbuild.target.gnu.exe.880461730" name="Executable (Gnu)" projectType="cdt.managedbuild.target.gnu.exe">
+<configuration artifactName="moses-cmd" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.debug.862821065" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
+<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.442539703" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.626133972" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.381079048" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
+<option id="gnu.cpp.compiler.option.include.paths.1241301640" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../moses/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
+</option>
+<option id="gnu.cpp.compiler.option.preprocessor.def.1028025969" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+</option>
+<option id="gnu.cpp.compiler.option.debugging.gprof.514527174" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1905266391" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.888044188" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
+<option id="gnu.cpp.link.option.libs.427302130" superClass="gnu.cpp.link.option.libs" valueType="libs">
+<listOptionValue builtIn="false" value="pthread"/>
+<listOptionValue builtIn="false" value="mysqlclient"/>
+<listOptionValue builtIn="false" value="z"/>
+<listOptionValue builtIn="false" value="lattice"/>
+<listOptionValue builtIn="false" value="misc"/>
+<listOptionValue builtIn="false" value="dstruct"/>
+<listOptionValue builtIn="false" value="oolm"/>
+</option>
+<option id="gnu.cpp.link.option.paths.1718276622" superClass="gnu.cpp.link.option.paths" valueType="stringList">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/lib"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lib/i686"/>
+</option>
+<option id="gnu.cpp.link.option.userobjs.551693347" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../moses/${ConfigName}/libmoses.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/${ConfigName}/libirstlm.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/manip.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/myset.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/qparms.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/sql_string.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/string_util.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/type_info.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/vallist.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/coldata.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/datetime.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_names.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_types.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/result.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/query.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/connection.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/row.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/fields.o"/>
+</option>
+<option id="gnu.cpp.link.option.flags.1995182231" superClass="gnu.cpp.link.option.flags" value="-pg" valueType="string"/>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1540394737" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
+<macros/>
+</toolChain>
+</configuration>
+<configuration artifactName="moses-cmd" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.release.1126249995" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
+<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.1691856622" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1171408650" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1960479367" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
+<option id="gnu.cpp.compiler.option.include.paths.1986529351" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../moses/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
+</option>
+<option id="gnu.cpp.compiler.option.preprocessor.def.542441515" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.285054015" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1153317521" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
+<option id="gnu.cpp.link.option.libs.1100640875" superClass="gnu.cpp.link.option.libs" valueType="libs">
+<listOptionValue builtIn="false" value="pthread"/>
+<listOptionValue builtIn="false" value="mysqlclient"/>
+<listOptionValue builtIn="false" value="z"/>
+<listOptionValue builtIn="false" value="lattice"/>
+<listOptionValue builtIn="false" value="misc"/>
+<listOptionValue builtIn="false" value="dstruct"/>
+<listOptionValue builtIn="false" value="oolm"/>
+</option>
+<option id="gnu.cpp.link.option.paths.724264639" superClass="gnu.cpp.link.option.paths" valueType="stringList">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/lib"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lib/i686"/>
+</option>
+<option id="gnu.cpp.link.option.userobjs.1365891611" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../moses/${ConfigName}/libmoses.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/${ConfigName}/libirstlm.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/manip.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/myset.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/qparms.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/sql_string.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/string_util.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/type_info.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/vallist.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/coldata.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/datetime.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_names.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_types.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/result.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/query.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/connection.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/row.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/fields.o"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.1402140367" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release"/>
+<macros/>
+</toolChain>
+</configuration>
+<configuration artifactName="moses-cmd" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.debug.807464492" name="DebugNBest" parent="cdt.managedbuild.config.gnu.exe.debug">
+<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.531059494" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.55255226" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.103376107" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
+<option id="gnu.cpp.compiler.option.include.paths.2145251726" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../moses/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
+</option>
+<option id="gnu.cpp.compiler.option.preprocessor.def.196944732" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+<listOptionValue builtIn="false" value="N_BEST"/>
+</option>
+<option id="gnu.cpp.compiler.option.debugging.gprof.728581842" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.472952110" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1942657060" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
+<option id="gnu.cpp.link.option.libs.1462416765" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+<listOptionValue builtIn="false" value="pthread"/>
+<listOptionValue builtIn="false" value="mysqlclient"/>
+<listOptionValue builtIn="false" value="z"/>
+<listOptionValue builtIn="false" value="lattice"/>
+<listOptionValue builtIn="false" value="misc"/>
+<listOptionValue builtIn="false" value="dstruct"/>
+<listOptionValue builtIn="false" value="oolm"/>
+</option>
+<option id="gnu.cpp.link.option.paths.2032452995" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="stringList">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/lib"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lib/i686"/>
+</option>
+<option id="gnu.cpp.link.option.userobjs.2014263007" name="Other objects" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../moses/${ConfigName}/libmoses.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/${ConfigName}/libirstlm.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/manip.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/myset.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/qparms.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/sql_string.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/string_util.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/type_info.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/vallist.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/coldata.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/datetime.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_names.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_types.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/result.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/query.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/connection.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/row.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/fields.o"/>
+</option>
+<option id="gnu.cpp.link.option.flags.806618667" superClass="gnu.cpp.link.option.flags" value="-pg" valueType="string"/>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1424900936" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
+<macros/>
+</toolChain>
+</configuration>
+<configuration artifactName="moses-cmd" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.release.797815336" name="ReleaseNBest" parent="cdt.managedbuild.config.gnu.exe.release">
+<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.1069742386" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.151444721" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1731051429" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
+<option id="gnu.cpp.compiler.option.include.paths.46087237" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../moses/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
+</option>
+<option id="gnu.cpp.compiler.option.preprocessor.def.324132996" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+<listOptionValue builtIn="false" value="N_BEST"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.691341260" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1920640347" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
+<option id="gnu.cpp.link.option.libs.1023851287" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+<listOptionValue builtIn="false" value="pthread"/>
+<listOptionValue builtIn="false" value="mysqlclient"/>
+<listOptionValue builtIn="false" value="z"/>
+<listOptionValue builtIn="false" value="lattice"/>
+<listOptionValue builtIn="false" value="misc"/>
+<listOptionValue builtIn="false" value="dstruct"/>
+<listOptionValue builtIn="false" value="oolm"/>
+</option>
+<option id="gnu.cpp.link.option.paths.995589625" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="stringList">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/lib"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lib/i686"/>
+</option>
+<option id="gnu.cpp.link.option.userobjs.288492909" name="Other objects" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
+<listOptionValue builtIn="false" value="${ProjDirPath}/../moses/${ConfigName}/libmoses.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/${ConfigName}/libirstlm.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/manip.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/myset.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/qparms.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/sql_string.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/string_util.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/type_info.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/vallist.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/coldata.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/datetime.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_names.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_types.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/result.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/query.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/connection.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/row.o"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/fields.o"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.391536868" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release"/>
+<macros/>
+</toolChain>
+</configuration>
+<macros/>
+</project>
+</ManagedProjectBuildInfo>
