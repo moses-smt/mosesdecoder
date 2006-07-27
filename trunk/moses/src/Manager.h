@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "TranslationOption.h"
 #include "HypothesisCollection.h"
-#include "HypothesisCollectionIntermediate.h"
 #include "TranslationOptionCollectionText.h"
 #include "LatticePathList.h"
 #include "SquareMatrix.h"
@@ -50,6 +49,7 @@ protected:
 
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
+	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
 
 	// logging

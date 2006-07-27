@@ -14,53 +14,77 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& src)
 	,m_futureScore(src.GetSize())
 	,m_unknownWordPos(src.GetSize())
 {
+	// create 2-d vector
+	size_t size = src.GetSize();
+	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	{
+		m_collection.push_back( vector< TranslationOptionList >() );
+		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+		{
+			m_collection[startPos].push_back( TranslationOptionList() );
+		}
+	}
 }
 
 TranslationOptionCollection::~TranslationOptionCollection()
 {
-	RemoveAllInColl< std::list< const TranslationOption* >::const_iterator>(m_collection);
+	// delete all trans opt
+	size_t size = m_source.GetSize();
+	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+		{
+			RemoveAllInColl<TranslationOptionList::iterator>(GetTranslationOptionList(startPos, endPos));
+		}
+	}
 }
 
 void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
 {
 	// create future score matrix in a dynamic programming fashion
 
+  // setup the matrix (ignore lower triangle, set upper triangle to -inf
+  size_t size = m_source.GetSize(); // the width of the matrix
 
-    // setup the matrix (ignore lower triangle, set upper triangle to -inf
-    size_t size = m_source.GetSize(); // the width of the matrix
+  // counting options per span, for statistics
+  bool printCounts = (verboseLevel > 0);
+  int *counts = 0;
+  if (printCounts == true)
+    counts = (int*) malloc(sizeof(int) * size * size);
 
-    // counting options per span, for statistics
-    bool printCounts = (verboseLevel > 0);
-    int *counts = 0;
-    if (printCounts == true)
-      counts = (int*) malloc(sizeof(int) * size * size);
-
-    for(size_t row=0; row<size; row++) {
-      for(size_t col=row; col<size; col++) {
-        m_futureScore.SetScore(row, col, -numeric_limits<float>::infinity());
-        if (printCounts == true) counts[row*size+col] = 0;
-      }
+  for(size_t row=0; row<size; row++) {
+    for(size_t col=row; col<size; col++) {
+      m_futureScore.SetScore(row, col, -numeric_limits<float>::infinity());
+      if (printCounts == true) counts[row*size+col] = 0;
     }
+  }
 
-    // walk all the translation options and record the cheapest option for each span
-    TranslationOptionCollection::const_iterator iterTransOpt;
-    for(iterTransOpt = begin() ; iterTransOpt != end() ; ++iterTransOpt) {
-      const TranslationOption &transOpt = **iterTransOpt;
-      size_t startpos = transOpt.GetStartPos();
-      size_t endpos = transOpt.GetEndPos();
-      float score = transOpt.GetFutureScore();
-      if (score > m_futureScore.GetScore(startpos, endpos))
-        m_futureScore.SetScore(startpos, endpos, score);
+  // walk all the translation options and record the cheapest option for each span
+	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; ++endPos)
+		{
+			TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
 
-      if (printCounts == true) counts[startpos*size + endpos] ++;
-    }
+			TranslationOptionList::const_iterator iterTransOpt;
+			for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) 
+			{
+				const TranslationOption &transOpt = **iterTransOpt;
+				float score = transOpt.GetFutureScore();
+				if (score > m_futureScore.GetScore(startPos, endPos))
+					m_futureScore.SetScore(startPos, endPos, score);
 
-    // now fill all the cells in the strictly upper triangle
-    //   there is no way to modify the diagonal now, in the case
-    //   where no translation option covers a single-word span,
-    //   we leave the +inf in the matrix
-    // like in chart parsing we want each cell to contain the highest score
-    // of the full-span trOpt or the sum of scores of joining two smaller spans
+				if (printCounts == true) counts[startPos*size + endPos] ++;
+			}
+		}
+	}
+
+  // now fill all the cells in the strictly upper triangle
+  //   there is no way to modify the diagonal now, in the case
+  //   where no translation option covers a single-word span,
+  //   we leave the +inf in the matrix
+  // like in chart parsing we want each cell to contain the highest score
+  // of the full-span trOpt or the sum of scores of joining two smaller spans
 
 	for(size_t colstart = 1; colstart < size ; colstart++) {
 		for(size_t diagshift = 0; diagshift < size-colstart ; diagshift++) {
@@ -505,6 +529,12 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			}
 		}
 	}
+}
+
+void TranslationOptionCollection::Add(const TranslationOption *translationOption)
+{
+	const WordsRange &coverage = translationOption->GetSourceWordsRange();
+	m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].push_back(translationOption);
 }
 
 TO_STRING_BODY(TranslationOptionCollection);
