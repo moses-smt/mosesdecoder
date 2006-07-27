@@ -35,7 +35,7 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
 		ai   = aip1;
 		aip1 = (i+1==m_size || m_bitmap[i+1]);
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 		if( i>0 ) assert( aim1==(i==0||m_bitmap[i-1]==1));
 		//assert( ai==a[i] );
 		if( i+1<m_size ) assert( aip1==m_bitmap[i+1]);
