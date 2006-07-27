@@ -142,8 +142,8 @@ int main(int argc, char* argv[])
 		// delete source
 		//		inputOutput->Release(source);
 		staticData.CleanUpAfterSentenceProcessing();
-		delete source;
 		delete translationOptionCollection;
+		delete source;
 	}
 
 	
