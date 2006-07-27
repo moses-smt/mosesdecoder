@@ -323,10 +323,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HypothesisCollectionIntermediate.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Input.cpp"
 				>
 			</File>
@@ -443,6 +439,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ScoreIndexManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ScoreProducer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Sentence.cpp"
 				>
 			</File>
@@ -546,10 +550,6 @@
 			</File>
 			<File
 				RelativePath=".\src\HypothesisCollection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\HypothesisCollectionIntermediate.h"
 				>
 			</File>
 			<File
@@ -670,6 +670,14 @@
 			</File>
 			<File
 				RelativePath=".\src\ScoreComponentCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ScoreIndexManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ScoreProducer.h"
 				>
 			</File>
 			<File
