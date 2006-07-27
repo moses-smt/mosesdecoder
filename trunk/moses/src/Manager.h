@@ -51,7 +51,7 @@ protected:
 	// functions for creating hypotheses
 	void ProcessOneStack(HypothesisCollection &sourceHypoColl);
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
-	void CreateNextHypothesis(const Hypothesis &hypothesis, HypothesisCollectionIntermediate &outputHypoColl);
+	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
 
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
