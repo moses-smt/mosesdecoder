@@ -126,7 +126,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	// check to see if the lexical reordering parameter exists
 	//TODO: doesn't work for bidirectional: yet.
 	const vector<string> &lrFileVector = 
-		m_parameter.GetParam("lexreordering-file");	
+		m_parameter.GetParam("distortion-file");	
 
 	if (lrFileVector.size() > 0)
 		{
@@ -134,7 +134,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			// parameters associated with it, and create a new Lexical
 			// Reordering object (which will load the probability table)
 			const vector<string> &lrTypeVector = 
-				m_parameter.GetParam("lexreordering-type");	
+				m_parameter.GetParam("distortion");	
 			// if type values have been set in the .ini file, then use them;
 			// first initialize to the defaults (msd, bidirectional, fe).
 			int orientation = DistortionOrientationType::Msd, 
