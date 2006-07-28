@@ -37,7 +37,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 	m_scoreGen		= 0;
 	m_scoreTrans	= targetPhrase.GetTranslationScore();
 #ifdef N_BEST
-	m_transScoreComponent.Add(targetPhrase.GetScoreComponents());
+	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 #endif
 }
 
@@ -45,15 +45,14 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const Target
 : m_phrase(targetPhrase)
 ,m_sourceWordsRange	(copy.m_sourceWordsRange)
 #ifdef N_BEST
-,m_transScoreComponent(copy.m_transScoreComponent)
-,m_generationScoreComponent(copy.m_generationScoreComponent)
+,m_scoreBreakdown(copy.m_scoreBreakdown)
 #endif
 { // used in creating the next translation step
 	m_scoreGen		= copy.GetGenerationScore();
 	m_scoreTrans	= copy.GetTranslationScore() + targetPhrase.GetTranslationScore();
 	
 	#ifdef N_BEST
-		m_transScoreComponent.Add(targetPhrase.GetScoreComponents());
+		m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 	#endif
 }
 
@@ -65,8 +64,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 : m_phrase						(inputPhrase)
 , m_sourceWordsRange	(copy.m_sourceWordsRange)
 #ifdef N_BEST
-,m_transScoreComponent(copy.m_transScoreComponent)
-,m_generationScoreComponent(copy.m_generationScoreComponent)
+,m_scoreBreakdown(copy.m_scoreBreakdown)
 #endif
 { // used in creating the next generation step
 
@@ -74,7 +72,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 	m_scoreGen	= copy.GetGenerationScore() + generationScore * weight;
 
 	#ifdef N_BEST
-		m_generationScoreComponent[generationDictionary->GetScoreBookkeepingID()] = generationScore;
+		m_scoreBreakdown.PlusEquals(generationDictionary, generationScore);
 	#endif
 }
 
@@ -88,23 +86,6 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 ,m_futureScore(0)
 ,m_ngramScore(0)
 { // used to create trans opt from unknown word
-
-	#ifdef N_BEST
-		// create score components
-		list<const PhraseDictionaryBase*>::iterator iterPhraseDict;
-		for (iterPhraseDict = allPhraseDictionary.begin() ; iterPhraseDict != allPhraseDictionary.end() ; ++iterPhraseDict)
-		{
-			const PhraseDictionaryBase *dict = *iterPhraseDict;
-			m_transScoreComponent.Add(dict);
-		}
-
-		list<const GenerationDictionary*>::iterator iterGenDict;
-		for (iterGenDict = allGenerationDictionary.begin() ; iterGenDict != allGenerationDictionary.end() ; ++iterGenDict)
-		{
-			const GenerationDictionary *dict = *iterGenDict;
-			m_generationScoreComponent.Add(dict->GetScoreBookkeepingID());
-		}
-	#endif
 }
 
 TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targetPhrase) const
@@ -151,13 +132,7 @@ void TranslationOption::CalcScore(const LMList &allLM, float weightWordPenalty)
 	float retFullScore = 0;
 
 	#ifdef N_BEST
-		LMList::const_iterator iter;
-		for (iter = allLM.begin() ; iter != allLM.end() ; ++iter)
-		{
-			const LanguageModel &lm = **iter;
-			m_ngramComponent.Add(lm.GetId());
-		}
-		allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, &m_ngramComponent);
+		allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, &m_scoreBreakdown);
 	#else
 		allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, NULL);
 	#endif

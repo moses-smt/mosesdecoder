@@ -27,8 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LatticeEdge.h"
 #include "Hypothesis.h"
 #include "TypeDef.h"
-#include "ScoreComponent.h"
-#include "ScoreColl.h"
 
 class Arc;
 class LatticePathCollection;
@@ -42,9 +40,7 @@ protected:
 	size_t		m_prevEdgeChanged;
 	float			m_score[NUM_SCORES];
 
-	ScoreComponentCollection	m_transScoreComponent;
-	ScoreColl									m_generationScoreComponent
-													, m_lmScoreComponent;
+	ScoreComponentCollection2	m_scoreBreakdown;
  
 	void CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc *arc);
 
@@ -78,21 +74,9 @@ public:
 #ifdef N_BEST
 	void CreateDeviantPaths(LatticePathCollection &pathColl) const;
 
-	inline const ScoreColl &GetLMScoreComponent() const
+	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
 	{
-		return m_lmScoreComponent;
-	}
-	inline float GetLMScoreComponent(size_t index) const
-	{
-		return m_lmScoreComponent.GetValue(index);
-	}
-	inline const ScoreComponentCollection &GetTranslationScoreComponent() const
-	{
-		return m_transScoreComponent;
-	}
-	inline const ScoreColl &GetGenerationScoreComponent() const
-	{
-		return m_generationScoreComponent;
+		return m_scoreBreakdown;
 	}
 
 #endif
@@ -118,8 +102,7 @@ inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
 	}
 	out << "]";
 #ifdef N_BEST
-	out << " " << path.GetTranslationScoreComponent();
-	out << " " << path.GetGenerationScoreComponent();
+	out << " " << path.GetScoreBreakdown();
 #endif
 
 	return out;

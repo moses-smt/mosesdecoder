@@ -26,8 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/shared_ptr.hpp>
 #include "TypeDef.h"
 #include "ScoreIndexManager.h"
-#include "PhraseDictionary.h"
-#include "GenerationDictionary.h"
 #include "FactorCollection.h"
 #include "Parameter.h"
 #include "LanguageModel.h"
@@ -38,6 +36,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class InputType;
 class LexicalReordering;
+class PhraseDictionaryBase;
+class GenerationDictionary;
 
 class StaticData
 {
@@ -211,6 +211,10 @@ public:
 	std::vector<PhraseDictionaryBase*> GetPhraseDictionaries() const
 	{
 		return m_phraseDictionary;
+	}
+	std::vector<GenerationDictionary*> GetGenerationDictionaries() const
+	{
+		return m_generationDictionary;
 	}
 	size_t GetGenerationDictionarySize() const
 	{

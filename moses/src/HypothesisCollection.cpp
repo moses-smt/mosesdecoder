@@ -80,6 +80,7 @@ bool HypothesisCollection::AddPrune(Hypothesis *hypo)
 		Add(hypo);
 		return true;
   }
+
 	
 	// found existing hypo with same target ending.
 	// keep the best 1

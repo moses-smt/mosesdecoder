@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Phrase.h"
 #include "LatticeEdge.h"
-#include "ScoreComponent.h"
 
 class Arc : public LatticeEdge
 {
@@ -34,12 +33,10 @@ public:
 	Arc(const Arc &arc); // not implemented
 	
 	Arc( const float score[]
-			, const ScoreComponentCollection 	&transScoreComponent
-			, const ScoreColl					 						&lmScoreComponent
-			, const ScoreColl											&generationScoreColl
+			, const ScoreComponentCollection2 &scoreBreakdown
 			, const Phrase												&phrase
 			, const Hypothesis 										*prevHypo) 
-		:LatticeEdge(score, transScoreComponent, lmScoreComponent, generationScoreColl, phrase, prevHypo)
+		:LatticeEdge(score, phrase, prevHypo, scoreBreakdown)
 	{
 	}
 

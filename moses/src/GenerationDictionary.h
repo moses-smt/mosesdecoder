@@ -45,10 +45,7 @@ protected:
 	std::string						m_filename;
 
 public:
-	GenerationDictionary()
-		: Dictionary(1)
-	{
-	}
+	GenerationDictionary();
 	virtual ~GenerationDictionary();
 
 	DecodeType GetDecodeType() const

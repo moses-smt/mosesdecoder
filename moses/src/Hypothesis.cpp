@@ -18,6 +18,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
+#include <cassert>
 #include <iostream>
 #include <limits>
 #include <assert.h>
@@ -91,8 +92,11 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_id(s_HypothesesCreated++)
 {
 	const Phrase &possPhrase				= transOpt.GetTargetPhrase();
-	
-	m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
+
+	assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));	
+
+  m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
+
 	// add new words from poss trans
 	//m_phrase.AddWords(prev.m_phrase);
 	m_targetPhrase.AddWords(possPhrase);
@@ -101,21 +105,15 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	SetScore(prevHypo.GetScore());
 	m_score[ScoreType::PhraseTrans]					+= transOpt.GetTranslationScore();
 	m_score[ScoreType::FutureScoreEnum]			+= transOpt.GetFutureScore();
+	// the language model score (for the parts that can be precomputed, that is, is added here)
+	// there's another call in Manager.cpp to compute the boundary n-gram scores
 	m_score[ScoreType::LanguageModelScore]	+= transOpt.GetNgramScore();
 	m_score[ScoreType::Generation]					+= transOpt.GetGenerationScore();
 	
   m_wordDeleted = transOpt.IsDeletionOption();
 
 #ifdef N_BEST
-	// language model score (ngram)
-	m_lmScoreComponent.Combine(transOpt.GetNgramComponent());
-
-	// translation score
-	m_transScoreComponent.Combine(transOpt.GetTransScoreComponent());
-	
-	// generation score
-	m_generationScoreComponent.Combine(transOpt.GetGenerationScoreComponent());
-		
+	m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
 #endif
 }
 
@@ -153,9 +151,7 @@ void Hypothesis::AddArc(Hypothesis &loserHypo)
 		}
 	}
 	Arc *arc = new Arc(loserHypo.m_score
-                    , loserHypo.GetTranslationScoreComponent()
-                    , loserHypo.GetLMScoreComponent()
-                    , loserHypo.GetGenerationScoreComponent()
+										, loserHypo.GetScoreBreakdown()
                     , loserHypo.GetPhrase()
                     , loserHypo.GetPrevHypo());
 	m_arcList->push_back(arc);
@@ -193,6 +189,7 @@ Hypothesis* Hypothesis::Create(InputType const& m_source)
  * 
  * return NULL if we aren't compatible with the given option
  */
+#if 0
 Hypothesis* Hypothesis::MergeNext(const TranslationOption &transOpt) const
 {
 	// check each word is compatible and merge 1-by-1
@@ -217,14 +214,29 @@ Hypothesis* Hypothesis::MergeNext(const TranslationOption &transOpt) const
 	}
 
 #ifdef N_BEST
-	const ScoreComponentCollection &transOptComponent = transOpt.GetTransScoreComponent();
-	clone->m_transScoreComponent.Combine(transOptComponent);
+#if 0
+// old code, for some reason it only adds the TranslationComponent--
+//	const ScoreComponentCollection &transOptComponent = transOpt.GetTransScoreComponent();
+//	clone->m_transScoreComponent.Combine(transOptComponent);
+
+// here's the equivalent with the new system:
+	const vector<PhraseDictionaryBase*> &pds = StaticData::Instance()->GetPhraseDictionaries();
+  vector<PhraseDictionaryBase*>::const_iterator it = pds.begin();
+	for (; it != pds.end(); ++it)
+		clone->m_scoreBreakdown.PlusEquals(*it, transOpt.GetScoreBreakdown().GetScoresForProducer(*it));
+#else
+
+  // but, we're pretty sure we want to add everything
+	clone->m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
+#endif
 #endif
 
 	return clone;
 
 }
+#endif
 
+#if 0
 void Hypothesis::MergeFactors(vector< const Word* > mergeWords, const GenerationDictionary &generationDictionary, float generationScore, float weight)
 {
 	assert (mergeWords.size() == m_currTargetWordsRange.GetWordsCount());
@@ -256,6 +268,7 @@ void Hypothesis::MergeFactors(vector< const Word* > mergeWords, const Generation
 	m_generationScoreComponent[generationDictionary.GetScoreBookkeepingID()] += generationScore;
 #endif
 }
+#endif
 
 bool Hypothesis::IsCompatible(const Phrase &phrase) const
 {
@@ -409,8 +422,7 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 		}
 		m_score[ScoreType::LanguageModelScore] += lmScore * languageModel.GetWeight();
 #ifdef N_BEST
-		size_t lmId = languageModel.GetId();
-		m_lmScoreComponent[lmId] += lmScore;
+		m_scoreBreakdown.PlusEquals(&languageModel, lmScore);
 #endif
 	}
 
@@ -476,8 +488,7 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 		
 		m_score[ScoreType::LanguageModelScore] += lmScore * languageModel.GetWeight();
 #ifdef N_BEST
-		size_t lmId = languageModel.GetId();
-		m_lmScoreComponent[lmId] += lmScore;
+		m_scoreBreakdown.PlusEquals(&languageModel, lmScore);
 #endif
 	}
 }
@@ -619,7 +630,7 @@ void Hypothesis::PrintHypothesis(const InputType &source, float weightDistortion
 	cout<<"\tword penalty "<<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
 	cout<<"\tscore "<<m_score[ScoreType::Total] - m_score[ScoreType::FutureScoreEnum]<<" + future cost "<<m_score[ScoreType::FutureScoreEnum]<<" = "<<m_score[ScoreType::Total]<<endl;
 #if N_BEST
-  cout<<"\tweighted feature scores: " << this->GetTranslationScoreComponent() << endl;
+  cout << "\tunweighted feature scores: " << m_scoreBreakdown << endl;
 #endif
 	//PrintLMScores();
 }
@@ -641,8 +652,7 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 	}
 	out << "]";
 #ifdef N_BEST
-		out << " " << hypothesis.GetTranslationScoreComponent();
-		out << " " << hypothesis.GetGenerationScoreComponent();
+		out << " " << hypothesis.GetScoreBreakdown();
 #endif
 	return out;
 }
