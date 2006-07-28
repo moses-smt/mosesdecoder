@@ -116,13 +116,14 @@ namespace ScoreType {
 		Distortion,
 		WordPenalty,
 		FutureScoreEnum,
-		LexicalReordering,
+		LexicalReorderingForward,
+		LexicalReorderingBackward,
 		Total
 	};
 }
 
 // count of above
-const size_t NUM_SCORES = 8;
+const size_t NUM_SCORES = 9;
 
 namespace LexReorderType
 {

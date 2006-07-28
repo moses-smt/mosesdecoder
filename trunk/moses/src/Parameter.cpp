@@ -59,8 +59,8 @@ Parameter::Parameter()
 	AddParam("input-file");
 	AddParam("cache-path");
 	AddParam("input-file");
- 	AddParam("lexreordering-file");
- 	AddParam("lexreordering-type");
+ 	AddParam("distortion-file");
+ 	AddParam("distortion");
 	AddParam("stack");
 	AddParam("verbose");
 	AddParam("report-source-span");
