@@ -95,85 +95,117 @@ void LexicalReordering::PrintTable()
 
 float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 {
-	vector<float> val;
-	//this phrase declaration is to get around const mumbo jumbo and let me call a
-	//"convert to a string" method 
-	Phrase myphrase = hypothesis->GetPhrase();
-	int orientation = DistortionOrientation::GetOrientation(hypothesis, direction);
-	if(m_condition==LexReorderType::Fe)
-	{
-	//this key string is be F+'|||'+E from the hypothesis	
-	val=m_orientation_table[myphrase.GetStringRep(hypothesis->GetCurrSourceWordsRange())
-													+"|||"
-													+myphrase.GetStringRep(hypothesis->GetCurrTargetWordsRange())];
-
-	}
-	else
-	{
-		//this key string is F from the hypothesis
-		val=m_orientation_table[ myphrase.GetStringRep(hypothesis->GetCurrTargetWordsRange())];
-	}
-	int index = 0;
-	if(m_orientation==DistortionOrientationType::Msd)
-	{
-		if(direction==LexReorderType::Backward)
+	if(m_direction==LexReorderType::Bidirectional || m_direction==direction){
+		vector<float> val;
+		//this phrase declaration is to get around const mumbo jumbo and let me call a
+		//"convert to a string" method 
+		Phrase myphrase = hypothesis->GetPhrase();
+		int orientation = DistortionOrientation::GetOrientation(hypothesis, direction);
+		if(m_condition==LexReorderType::Fe)
 		{
-			if(orientation==DistortionOrientationType::MONO)
-			{
-				index=BACK_M;
-			}
-			else if(orientation==DistortionOrientationType::SWAP)
-			{
-				index=BACK_S;
-			}
-			else
-			{
-				index=BACK_D;
-			}
+		//this key string is be F+'|||'+E from the hypothesis	
+		val=m_orientation_table[myphrase.GetStringRep(hypothesis->GetCurrSourceWordsRange())
+														+"|||"
+														+myphrase.GetStringRep(hypothesis->GetCurrTargetWordsRange())];
+	
+		}
+		else
+		{
+			//this key string is F from the hypothesis
+			val=m_orientation_table[ myphrase.GetStringRep(hypothesis->GetCurrTargetWordsRange())];
+		}
+		//will tell us where to look in the table for the probability we need
+		int index = 0;
+		//the weight will tell us what to multiply the probability we fetch by
+		float weight = 1;
+		int forward_offset = 0;
+		//the weight vector will be longer if this LexicalReordering is bidirectional, 
+		//containing backward weights then forward weights. 
+		//by probing its size we can see if the LexicalReordering is bidirectional, 
+		//(meaning we need to access the forward weights midvector) and
+		//if it is Monotone or MSD (which changes where midvector is)
+		if(m_weights.size()==5){
+			forward_offset = 2;
+		}
+		else if(m_weights.size()==7){
+			forward_offset = 3;
+		}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 		
-		}
-		else
+		if(m_orientation==DistortionOrientationType::Msd)
 		{
-			if(orientation==DistortionOrientationType::MONO)
+			if(direction==LexReorderType::Backward)
 			{
-				index=FOR_M;
-			}
-			else if(orientation==DistortionOrientationType::SWAP)
-			{
-				index=FOR_S;
+				if(orientation==DistortionOrientationType::MONO)
+				{
+					index=BACK_M;
+					weight=m_weights[1];
+				}
+				else if(orientation==DistortionOrientationType::SWAP)
+				{
+					index=BACK_S;
+					weight=m_weights[2];
+				}
+				else
+				{
+					index=BACK_D;
+					weight=m_weights[3];
+				}
+			
 			}
 			else
 			{
-				index=FOR_D;
+				if(orientation==DistortionOrientationType::MONO)
+				{
+					index=FOR_M;
+					weight=m_weights[1+forward_offset];					
+				}
+				else if(orientation==DistortionOrientationType::SWAP)
+				{
+					index=FOR_S;
+					weight=m_weights[2+forward_offset];					
+				}
+				else
+				{
+					index=FOR_D;
+					weight=m_weights[3+forward_offset];					
+				}
 			}
 		}
+		else
+		{
+			if(direction==LexReorderType::Backward)
+			{
+				if(orientation==DistortionOrientationType::MONO)
+				{
+					index=BACK_MONO;
+					weight=m_weights[1];
+				}
+				else
+				{
+					index=BACK_NONMONO;
+					weight=m_weights[2];					
+				}
+			}
+			else
+			{
+				if(orientation==DistortionOrientationType::MONO)
+				{
+					index=FOR_MONO;
+					weight=m_weights[1+forward_offset];					
+				}
+				else
+				{
+					index=FOR_NONMONO;
+					weight=m_weights[2+forward_offset];				
+				}
+			}
+		}
+		return val[index] * weight;
 	}
 	else
 	{
-		if(direction==LexReorderType::Backward)
-		{
-			if(orientation==DistortionOrientationType::MONO)
-			{
-				index=BACK_MONO;
-			}
-			else
-			{
-				index=BACK_NONMONO;
-			}
-		}
-		else
-		{
-			if(orientation==DistortionOrientationType::MONO)
-			{
-				index=FOR_MONO;
-			}
-			else
-			{
-				index=FOR_NONMONO;
-			}
-		}
+		return 0;
 	}
-	return val[index];
 }
 
 
