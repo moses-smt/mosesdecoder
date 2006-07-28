@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
+#include "DummyScoreProducers.h"
 #include "StaticData.h"
 #include "Util.h"
 #include "FactorCollection.h"
@@ -198,6 +199,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		for (size_t i = 0 ; i < weightAll.size() ; i++)
 		{
 				TRACE_ERR(weightAll[i] << "\t");
+				m_allWeights.push_back(weightAll[i]);
 		}
 		TRACE_ERR(endl);
 		
@@ -269,6 +271,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 													,output	= Tokenize<FactorType>(token[1], ",");
 			string							filePath= token[2];
 
+			m_allWeights.push_back(weight[currDict]);
 			TRACE_ERR(filePath << endl);
 			m_generationDictionary.push_back(new GenerationDictionary());
 			m_generationDictionary.back()->Load(input
@@ -288,7 +291,12 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	m_weightWordPenalty				= Scan<float>( m_parameter.GetParam("weight-w")[0] );
 
 	TRACE_ERR("weight-d: " << m_weightDistortion << endl);
+	m_distortionScoreProducer = new DistortionScoreProducer;
+	m_allWeights.push_back(m_weightDistortion);
+
 	TRACE_ERR("weight-w: " << m_weightWordPenalty << endl);
+	m_wpProducer = new WordPenaltyProducer;
+	m_allWeights.push_back(m_weightWordPenalty);
 
 	// misc
 	m_maxHypoStackSize = (m_parameter.GetParam("stack").size() > 0)
@@ -316,6 +324,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
 	TRACE_ERR("input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
 
+	// weight for the posteriors for the confusion network
 	if(m_parameter.GetParam("weight-i").size())
 		m_weightInput=Scan<float>(m_parameter.GetParam("weight-i")[0]);
 	if(m_inputType)
@@ -458,6 +467,7 @@ void StaticData::LoadPhraseTables(bool filter
 			for (size_t currScore = 0 ; currScore < noScoreComponent ; currScore++)
 			{
 				weight[currScore] = weightAll[totalPrevNoScoreComponent + currScore]; 
+				m_allWeights.push_back(weightAll[totalPrevNoScoreComponent+ currScore]);
 			}
 			totalPrevNoScoreComponent += noScoreComponent;
 			string phraseTableHash	= GetMD5Hash(filePath);

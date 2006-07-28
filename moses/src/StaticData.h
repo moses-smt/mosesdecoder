@@ -39,6 +39,8 @@ class InputType;
 class LexicalReordering;
 class PhraseDictionaryBase;
 class GenerationDictionary;
+class DistortionScoreProducer;
+class WordPenaltyProducer;
 
 class StaticData
 {
@@ -55,6 +57,7 @@ protected:
 	std::vector<LMList>			m_languageModel;
 	std::vector<float>			m_lexWeights;
 	ScoreIndexManager				m_scoreIndexManager;
+	std::vector<float>			m_allWeights;
 	LexicalReordering                   *m_lexReorder;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
@@ -89,7 +92,8 @@ protected:
 	int m_inputType;
 		
 	size_t m_verboseLevel;
-
+	DistortionScoreProducer *m_distortionScoreProducer;
+	WordPenaltyProducer *m_wpProducer;
 	bool m_reportSourceSpan;
 	bool m_reportAllFactors;
 
@@ -284,5 +288,11 @@ public:
 	{
 		return m_sentenceStats;
 	}
+	const std::vector<float>& GetAllWeights() const
+	{
+		return m_allWeights;
+	}
+	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
+	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
 };
 
