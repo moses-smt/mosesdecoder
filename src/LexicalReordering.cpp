@@ -4,6 +4,7 @@
 #include "LexicalReordering.h"
 #include "InputFileStream.h"
 #include "DistortionOrientation.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -18,6 +19,7 @@ LexicalReordering::LexicalReordering(const std::string &filename,
 	m_orientation(orientation), m_direction(direction), m_condition(condition),
 	m_filename(filename)
 {
+	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
 	// Load the file
 	LoadFile();
 	PrintTable();

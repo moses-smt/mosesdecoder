@@ -122,8 +122,10 @@ public:
 	 * 
 	 * return NULL if we aren't compatible with the given option
 	 */
+#if 0
 	Hypothesis* MergeNext(const TranslationOption &transOpt) const;
-	
+#endif
+
 	virtual void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
 
  // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
@@ -211,7 +213,9 @@ public:
 		return m_sourceCompleted;
 	}
 
+#if 0
 	void MergeFactors(std::vector< const Word* > mergeWord, const GenerationDictionary &generationDictionary, float generationScore, float weight);
+#endif
 		// used in generation processing
 		// startPos is usually the start of the last phrase
 

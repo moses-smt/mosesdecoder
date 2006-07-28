@@ -38,6 +38,7 @@ using namespace std;
 PhraseDictionaryBase::PhraseDictionaryBase(size_t noScoreComponent)
 	: Dictionary(noScoreComponent),m_maxTargetPhrase(0)
 {
+	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
 }
 
 PhraseDictionaryBase::~PhraseDictionaryBase() {}

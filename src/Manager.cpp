@@ -71,11 +71,7 @@ void Manager::ProcessSentence()
 	// initial seed hypothesis: nothing translated, no words produced
 	{
 		Hypothesis *hypo = Hypothesis::Create(m_source);
-#ifdef N_BEST
-		LMList allLM = m_staticData.GetAllLM();
-		hypo->ResizeComponentScore(allLM, decodeStepList);
-#endif
-	m_hypoStack[0].AddPrune(hypo);
+		m_hypoStack[0].AddPrune(hypo);
 	}
 	
 	// go through each stack
@@ -96,7 +92,6 @@ void Manager::ProcessSentence()
 				Hypothesis &hypothesis = **iterHypo;
 				ProcessOneHypothesis(hypothesis); // expand the hypothesis
 			}
-		
 		// some logging
 		if (m_staticData.GetVerboseLevel() > 0) {
 			//OutputHypoStack();
@@ -132,8 +127,11 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 		{
 			for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
 			{
-				ExpandAllHypotheses(hypothesis
-											, m_possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos)));
+				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
+				{
+					ExpandAllHypotheses(hypothesis
+												, m_possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos)));
+				}
 			}
 		}
 

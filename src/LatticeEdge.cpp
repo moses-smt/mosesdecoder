@@ -32,9 +32,7 @@ LatticeEdge::LatticeEdge(FactorDirection direction, const Hypothesis *prevHypo)
 	:m_prevHypo(prevHypo)
 	,m_targetPhrase(direction)
 #ifdef N_BEST
-	,m_lmScoreComponent 				(prevHypo->GetLMScoreComponent())
-	,m_transScoreComponent			(prevHypo->GetTranslationScoreComponent())
-	,m_generationScoreComponent	(prevHypo->GetGenerationScoreComponent())
+	,m_scoreBreakdown						(prevHypo->m_scoreBreakdown)
 #endif
 {}
 
@@ -44,11 +42,15 @@ LatticeEdge::~LatticeEdge()
 
 void LatticeEdge::ResetScore()
 {
+#ifdef N_BEST
+	m_scoreBreakdown.ZeroAll();
+#endif
   std::memset(m_score, 0, sizeof(float) * NUM_SCORES);
 }
 
 #ifdef N_BEST
 
+#if 0
 void LatticeEdge::ResizeComponentScore(const LMList &allLM, const list < DecodeStep > &decodeStepList)
 {
 	// LM
@@ -85,7 +87,9 @@ void LatticeEdge::ResizeComponentScore(const LMList &allLM, const list < DecodeS
 	{
 		m_lmScoreComponent[i] = 0;
 	}
+	m_scoreBreakdown.ZeroAll();
 }
+#endif
 
 #endif
 

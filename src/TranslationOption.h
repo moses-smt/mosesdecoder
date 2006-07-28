@@ -48,8 +48,11 @@ protected:
 	const WordsRange		m_sourceWordsRange;
 	float								m_scoreTrans, m_scoreGen, m_futureScore, m_ngramScore;
 #ifdef N_BEST
-	ScoreComponentCollection	m_transScoreComponent;
-	ScoreColl									m_generationScoreComponent, m_ngramComponent;
+	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
+	//! for example, know the full n-gram score since the length of the
+	//! TargetPhrase may be shorter than the n-gram order.  But, if it is
+	//! possible to estimate, it will be known
+	ScoreComponentCollection2	m_scoreBreakdown;
 #endif
 
 public:
@@ -149,25 +152,9 @@ public:
 	void CalcScore(const LMList &allLM, float weightWordPenalty);
 
 #ifdef N_BEST
-	inline const ScoreComponentCollection &GetTransScoreComponent() const
+	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
 	{
-		return m_transScoreComponent;
-	}
-	inline void AddTransScoreComponent(const ScoreComponent &scoreComponent)
-	{
-		m_transScoreComponent.Add(scoreComponent);
-	}
-	inline void AddGenScoreComponent(const GenerationDictionary &dict, float value)
-	{
-		m_generationScoreComponent.Add(dict.GetScoreBookkeepingID());
-	}
-	inline const ScoreColl &GetGenerationScoreComponent() const
-	{
-		return m_generationScoreComponent;
-	}
-	inline const ScoreColl &GetNgramComponent() const 	 
-	{ 	 
-		return m_ngramComponent; 	 
+		return m_scoreBreakdown;
 	}
 #endif
 

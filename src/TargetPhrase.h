@@ -23,12 +23,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include "Phrase.h"
-#include "ScoreComponent.h"
-#include "ScoreColl.h"
+#include "ScoreComponentCollection.h"
 
 class LMList;
 class PhraseDictionaryBase;
 class GenerationDictionary;
+class ScoreProducer;
 
 class TargetPhrase: public Phrase
 {
@@ -37,15 +37,15 @@ protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 #ifdef N_BEST
 	float m_inputScore;
-	ScoreComponent m_scoreComponent;
-	ScoreColl m_ngramComponent;
+	const ScoreProducer* m_sp;
+	ScoreComponentCollection2 m_scoreBreakdown;
 #endif
 
 public:
 
 	TargetPhrase(FactorDirection direction, const PhraseDictionaryBase *phraseDictionary);
-	TargetPhrase(FactorDirection direction);
 		// unknown word
+	TargetPhrase(FactorDirection direction);
 
 	void SetScore(float weightWP);
 	void SetScore(const std::vector<float> &scoreVector, const std::vector<float> &weightT,
@@ -79,14 +79,10 @@ public:
    */
 
 #ifdef N_BEST
-	inline const ScoreComponent &GetScoreComponents() const
+	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
 	{
-		return m_scoreComponent;
+		return m_scoreBreakdown;
 	}
-  inline const ScoreColl &GetNgramComponent() const
-  {
-    return m_ngramComponent;
-  }
 #endif
 
 	TO_STRING;

@@ -34,9 +34,7 @@ LatticePath::LatticePath(const Hypothesis *hypo)
 		m_score[i] = hypo->GetScore(static_cast<ScoreType::ScoreType>(i));
 	}
 #ifdef N_BEST
-	m_lmScoreComponent 				= hypo->GetLMScoreComponent();
-	m_transScoreComponent			= hypo->GetTranslationScoreComponent();
-	m_generationScoreComponent	= hypo->GetGenerationScoreComponent();
+	m_scoreBreakdown					= hypo->GetScoreBreakdown();
 #endif
 
 	// enumerate path using prevHypo
@@ -82,70 +80,19 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *a
 void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc *arc)
 {
 #ifdef N_BEST	
+	ScoreComponentCollection2 adj = arc->GetScoreBreakdown();
+	adj.MinusEquals(copy.m_path[edgeIndex]->GetScoreBreakdown());
+	m_scoreBreakdown = copy.m_scoreBreakdown;
+	m_scoreBreakdown.PlusEquals(adj);	
+
 // calc score
 	for (size_t i = 0 ; i < NUM_SCORES ; i++)
 	{
 		ScoreType::ScoreType scoreType = static_cast<ScoreType::ScoreType>(i);
 		float adj = (arc->GetScore(scoreType) - copy.m_path[edgeIndex]->GetScore(scoreType));
 		m_score[i] = copy.GetScore(scoreType) + adj;
-							
-	}
-	// lm
-	m_lmScoreComponent = copy.GetLMScoreComponent();
-
-	const ScoreColl			 &lmArcComponent		= arc->GetLMScoreComponent()
-												,&lmCopyComponent	= copy.m_path[edgeIndex]->GetLMScoreComponent();
-	ScoreColl::const_iterator iterLM;
-	for (iterLM = lmArcComponent.begin() ; iterLM != lmArcComponent.end() ; ++iterLM)
-	{
-		size_t idLM = iterLM->first;
-		float adj = iterLM->second - lmCopyComponent.GetValue(idLM);
-		m_lmScoreComponent[idLM] = copy.GetLMScoreComponent(idLM) + adj;
 	}
 
-	// phrase trans
-	m_transScoreComponent = copy.GetTranslationScoreComponent();
-
-	const ScoreComponentCollection
-							&arcComponent		= arc->GetTranslationScoreComponent()
-							,&copyComponent	= copy.m_path[edgeIndex]->GetTranslationScoreComponent()
-							,&totalComponent= copy.GetTranslationScoreComponent();
-	
-	ScoreComponentCollection::iterator iterTrans;
-	for (iterTrans = m_transScoreComponent.begin() ; iterTrans != m_transScoreComponent.end() ; ++iterTrans)
-	{
-		ScoreComponent &transScore								= iterTrans->second;
-		const PhraseDictionary *phraseDictionary	= static_cast<const PhraseDictionary*> (transScore.GetDictionary());
-		const size_t noScoreComponent 						= phraseDictionary->GetNumScoreComponents();
-			
-		const ScoreComponent &arcScore		= arcComponent.GetScoreComponent(phraseDictionary)
-														,&copyScore	= copyComponent.GetScoreComponent(phraseDictionary)
-														,&totalScore	= totalComponent.GetScoreComponent(phraseDictionary);
-		for (size_t i = 0 ; i < noScoreComponent ; i++)
-		{
-			float adj = arcScore[i] - copyScore[i];
-			transScore[i] = totalScore[i] + adj;						
-		}
-	}
-	
-	// generation
-	m_generationScoreComponent = copy.GetGenerationScoreComponent();
-
-	const ScoreColl	&arcGenComponent		= arc->GetGenerationScoreComponent()
-									,&copyGenComponent	= copy.m_path[edgeIndex]->GetGenerationScoreComponent();
-
-	ScoreColl::iterator iterGen;
-	for (iterGen = m_generationScoreComponent.begin() ; iterGen != m_generationScoreComponent.end() ; ++iterGen)
-	{
-		pair<const size_t , float> &scorePair = *iterGen;
-		size_t idGenDict			= scorePair.first;
-		float score						= scorePair.second;
-		float arcScore					= arcGenComponent.GetValue(idGenDict);
-		float copyScore				= copyGenComponent.GetValue(idGenDict);
-		float adj 						= arcScore - copyScore;
-		scorePair.second 			= score + adj;
-	}
-	
 #endif
 }
 

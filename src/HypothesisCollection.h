@@ -94,6 +94,11 @@ protected:
 		delete *iter;
 		Detach(iter);
 	}
+	inline void AddNoPrune(Hypothesis *hypothesis)
+	{
+		if (!m_hypos.insert(hypothesis).second) {
+    }
+	}
 
 public:
 	const_iterator begin() const { return m_hypos.begin(); }
@@ -111,12 +116,6 @@ public:
 
 	// this function will recombine hypotheses silently!  There is no record
 	// (could affect n-best list generation...TODO)
-	inline void AddNoPrune(Hypothesis *hypothesis)
-	{
-		//push_back(hypothesis);
-		if (!m_hypos.insert(hypothesis).second) {
-    }
-	}
 	bool AddPrune(Hypothesis *hypothesis);
       // AddPrune adds the hypo, but only if within thresholds (beamThr+stackSize)
 

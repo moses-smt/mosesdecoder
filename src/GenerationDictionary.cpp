@@ -26,8 +26,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "Util.h"
 #include "InputFileStream.h"
+#include "StaticData.h"
 
 using namespace std;
+
+GenerationDictionary::GenerationDictionary()
+  : Dictionary(1)
+{
+	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+}
 
 void GenerationDictionary::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
