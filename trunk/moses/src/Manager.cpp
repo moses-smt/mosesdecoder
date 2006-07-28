@@ -282,7 +282,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret) const
 	if (count <= 0)
 		return;
 
-	list<const Hypothesis*> sortedPureHypo = m_hypoStack.back().GetSortedList();
+	vector<const Hypothesis*> sortedPureHypo = m_hypoStack.back().GetSortedList();
 
 	if (sortedPureHypo.size() == 0)
 		return;
@@ -293,7 +293,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret) const
 	contenders.insert(new LatticePath(*sortedPureHypo.begin()));
 	
 	// used to add next pure hypo path
-	list<const Hypothesis*>::const_iterator iterBestHypo = ++sortedPureHypo.begin();
+	vector<const Hypothesis*>::const_iterator iterBestHypo = ++sortedPureHypo.begin();
 
 	for (size_t currBest = 0 ; currBest <= count && contenders.size() > 0 ; currBest++)
 	{

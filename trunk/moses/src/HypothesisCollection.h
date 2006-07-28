@@ -136,7 +136,7 @@ public:
 	void PruneToSize(size_t newSize);
 
 	const Hypothesis *GetBestHypothesis() const;
-	std::list<const Hypothesis*> GetSortedList() const;
+	std::vector<const Hypothesis*> GetSortedList() const;
 	void InitializeArcs();
 	
 	TO_STRING;
