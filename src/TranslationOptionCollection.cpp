@@ -40,6 +40,46 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	}
 }
 
+// helper
+bool CompareTranslationOption(const TranslationOption *a, const TranslationOption *b)
+{
+	return a->GetTotalScore() > b->GetTotalScore();
+}
+
+void TranslationOptionCollection::Prune()
+{
+	if (m_maxNoTransOptPerCoverage == 0)
+		return;
+	
+	size_t size = m_source.GetSize();
+	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+		{
+			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
+			
+			// sort in vector
+			vector<const TranslationOption*> sortedVector;
+			copy(fullList.begin(), fullList.end(), back_inserter(sortedVector));
+			sort(sortedVector.begin(), sortedVector.end(), CompareTranslationOption);
+			
+			// put back into list
+			fullList.clear();
+			const size_t maxIndex = std::min(m_maxNoTransOptPerCoverage, sortedVector.size());
+			for (size_t i = 0 ; i < maxIndex ; ++i)
+			{
+				fullList.push_back(sortedVector[i]);
+			}
+			
+			// delete the rest
+			for (size_t i = maxIndex ; i < sortedVector.size() ; ++i)
+			{
+				delete sortedVector[i];
+			}
+		}
+	}
+}
+
 void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
 {
 	// create future score matrix in a dynamic programming fashion
@@ -386,6 +426,9 @@ void TranslationOptionCollection::CreateTranslationOptions(
 			transOpt.CalcScore(allLM, weightWordPenalty);
 			Add(new TranslationOption(transOpt));
 		}
+
+	// Prune
+	Prune();
 
 	// future score
 	CalcFutureScore(verboseLevel);
