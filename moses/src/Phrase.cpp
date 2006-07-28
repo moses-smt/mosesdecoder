@@ -111,13 +111,12 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 
 std::string Phrase::GetStringRep(const WordsRange &wordsRange)
 {
-	std::string phrase_string = "";
-	Phrase retPhrase(m_direction);
+	std::stringstream phrase_string("");
 	for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++)
 	{
-		phrase_string = phrase_string+ " "+ Word::ToString(GetFactorArray(currPos));
+		phrase_string << " " << Word::ToString(GetFactorArray(currPos));
 	}
-	return phrase_string;
+	return phrase_string.str();
 }
 
 
