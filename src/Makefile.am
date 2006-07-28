@@ -9,6 +9,7 @@ libmoses_a_SOURCES = \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
 	GenerationDictionary.cpp \
+	hash.cpp \
 	Hypothesis.cpp \
 	HypothesisCollection.cpp \
 	Input.cpp \

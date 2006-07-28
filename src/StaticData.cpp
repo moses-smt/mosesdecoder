@@ -223,10 +223,15 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			size_t nGramOrder = Scan<int>(token[2]);
 			// keep track of the largest n-gram length
 			// (used by CompareHypothesisCollection)
-			if (nGramOrder > nGramMaxOrder)
-				nGramMaxOrder = nGramOrder;
+			if (nGramOrder > nGramMaxOrder) // remove
+				nGramMaxOrder = nGramOrder;  // remove
 			string &languageModelFile = token[3];
-			
+			if ((size_t)factorType >= m_maxNgramOrderForFactor.size()) {
+				m_maxNgramOrderForFactor.resize((size_t)factorType+1, 0);
+			}
+			if (nGramOrder > m_maxNgramOrderForFactor[(size_t)factorType]) {
+				m_maxNgramOrderForFactor[(size_t)factorType] = nGramOrder;
+			}
 			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
       LanguageModel *lm = LanguageModelFactory::createLanguageModel();
 
