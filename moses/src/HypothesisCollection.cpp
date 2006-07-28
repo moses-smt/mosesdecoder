@@ -25,10 +25,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisCollection.h"
 #include "TypeDef.h"
 #include "Util.h"
+#include "StaticData.h"
 
 using namespace std;
 
-size_t CompareHypothesisCollection::s_ngramMaxOrder[NUM_FACTORS] = {0,0,0,0};
+size_t HypothesisRecombinationOrderer::s_ngramMaxOrder[NUM_FACTORS] = {0,0,0,0};
 	// need to change if we add more factors, or use a macro
 
 void HypothesisCollection::RemoveAll()
@@ -62,8 +63,10 @@ bool HypothesisCollection::AddPrune(Hypothesis *hypo)
 { // if returns false, hypothesis not used
 	// caller must take care to delete unused hypo to avoid leak
 
-	if (hypo->GetScore(ScoreType::Total) < m_worstScore)
+	if (hypo->GetScore(ScoreType::Total) < m_worstScore) {
+		StaticData::Instance()->GetSentenceStats().numPruned++;
 		return false;
+	}
 
 	// over threshold		
 	// recombine if ngram-equivalent to another hypo
@@ -74,6 +77,7 @@ bool HypothesisCollection::AddPrune(Hypothesis *hypo)
 		return true;
   }
 
+	StaticData::Instance()->GetSentenceStats().numRecombinations++;
 	
 	// found existing hypo with same target ending.
 	// keep the best 1
@@ -148,6 +152,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 			{
 				iterator iterRemove = iter++;
 				Remove(iterRemove);
+				StaticData::Instance()->GetSentenceStats().numPruned++;
 			}
 			else
 			{

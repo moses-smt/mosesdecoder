@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputOutput.h"
 #include "DecodeStep.h"
 #include "LMList.h"
+#include "SentenceStats.h"
 //#include "UnknownWordHandler.h"
 
 class InputType;
@@ -91,6 +92,8 @@ protected:
 
 	bool m_reportSourceSpan;
 	bool m_reportAllFactors;
+
+	mutable SentenceStats m_sentenceStats;
 
 public:
 	StaticData();
@@ -277,5 +280,9 @@ public:
 	int GetInputType() const {return m_inputType;}
 	void InitializeBeforeSentenceProcessing(InputType const&);
 	void CleanUpAfterSentenceProcessing();
+	SentenceStats& GetSentenceStats() const
+	{
+		return m_sentenceStats;
+	}
 };
 

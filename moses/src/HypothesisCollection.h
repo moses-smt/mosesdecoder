@@ -25,7 +25,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <set>
 #include "Hypothesis.h"
 
-class CompareHypothesisCollection
+#if 0
+//#ifdef __GNUG__
+#include <ext/hash_set>
+#endif
+
+class HypothesisRecombinationOrderer
 {
 protected:
 	// static
@@ -64,11 +69,34 @@ public:
 	}
 };
 
+struct HypothesisRecombinationComparer
+{
+	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
+	{
+		if (hypoA->NGramCompare(*hypoB) != 0) return false;
+		return (hypoA->GetWordsBitmap().Compare(hypoB->GetWordsBitmap()) == 0);
+	}
+};
+
+struct HypothesisRecombinationHasher
+{
+  size_t operator()(const Hypothesis* hypo) const {
+    return hypo->hash();
+  }
+};
+
 class HypothesisCollection 
 {
+private:
+#if 0
+//#ifdef __GNUG__
+	typedef __gnu_cxx::hash_set< Hypothesis*, HypothesisRecombinationHasher, HypothesisRecombinationComparer > _HCType;
+#else
+	typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
+#endif
 public:
-	typedef std::set< Hypothesis*, CompareHypothesisCollection >::iterator iterator;
-	typedef std::set< Hypothesis*, CompareHypothesisCollection >::const_iterator const_iterator;
+	typedef _HCType::iterator iterator;
+	typedef _HCType::const_iterator const_iterator;
 	friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
 
 protected:
@@ -76,7 +104,7 @@ protected:
     float m_worstScore;
     float m_beamThreshold;
 	size_t m_maxHypoStackSize;
-  std::set< Hypothesis*, CompareHypothesisCollection > m_hypos;
+  _HCType m_hypos;
 
 
 	void Add(Hypothesis *hypothesis);
