@@ -108,6 +108,11 @@ int main(int argc, char* argv[])
 	InputOutput *inputOutput = GetInputOutput(staticData);
 
   std::cerr << "The score component vector looks like this:\n" << staticData.GetScoreIndexManager();
+  std::cerr << "The global weight vector looks like this:\n";
+	vector<float> weights = staticData.GetAllWeights();
+	std::cerr << weights[0];
+	for (size_t j=1; j<weights.size(); j++) { std::cerr << ", " << weights[j]; }
+	std::cerr << "\n";
 
 	if (inputOutput == NULL)
 		return EXIT_FAILURE;
