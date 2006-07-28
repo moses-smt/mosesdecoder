@@ -40,7 +40,7 @@ public:
     //   and the covers (source words translated) are the same
 	{
         // Are the last (n-1) words the same on the target side (n for n-gram LM)?
-		int ret = hypoA->NGramCompare(*hypoB, s_ngramMaxOrder);
+		int ret = hypoA->NGramCompare(*hypoB);
 //		int ret = hypoA->FastNGramCompare(*hypoB, m_NGramMaxOrder - 1);
 		if (ret != 0)
 		{

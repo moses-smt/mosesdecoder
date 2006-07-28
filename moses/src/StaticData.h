@@ -76,6 +76,7 @@ protected:
 	std::vector<std::string>						m_mySQLParam;
 	InputOutput													*m_inputOutput;
 	bool                                m_fLMsLoaded;
+	std::vector<size_t>									m_maxNgramOrderForFactor;
 	/***
 	 * false = treat unknown words as proper nouns, and translate them as themselves;
 	 * true = drop (ignore) them
@@ -156,7 +157,11 @@ public:
 	{
 		return m_factorCollection;
 	}
-	
+	size_t GetMaxNGramOrderForFactorId(size_t factorType) const
+	{
+		if (factorType >= m_maxNgramOrderForFactor.size()) return 0;
+		return m_maxNgramOrderForFactor[factorType];
+	}
 	const LMList &GetLanguageModel(LMListType type) const
 	{
 		return m_languageModel[type];
