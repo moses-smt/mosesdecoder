@@ -10,8 +10,8 @@
 
 using namespace std;
 
-TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const &inputSentence) 
-	: TranslationOptionCollection(inputSentence) {}
+TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const &inputSentence, size_t maxNoTransOptPerCoverage) 
+	: TranslationOptionCollection(inputSentence, maxNoTransOptPerCoverage) {}
 
 void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos
 												, int dropUnknown

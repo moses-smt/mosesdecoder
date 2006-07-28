@@ -8,8 +8,8 @@
 #include "LMList.h"
 
 TranslationOptionCollectionConfusionNet::
-TranslationOptionCollectionConfusionNet(const ConfusionNet &input) 
-	: TranslationOptionCollection(input) {}
+TranslationOptionCollectionConfusionNet(const ConfusionNet &input, size_t maxNoTransOptPerCoverage) 
+	: TranslationOptionCollection(input, maxNoTransOptPerCoverage) {}
 
 void TranslationOptionCollectionConfusionNet::
 ProcessUnknownWord(		size_t sourcePos

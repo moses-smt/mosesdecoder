@@ -48,13 +48,14 @@ protected:
 	InputType const													&m_source;
 	SquareMatrix														m_futureScore;
 	WordsBitmap															m_unknownWordPos;
-	std::list<const PhraseDictionaryBase*>			m_allPhraseDictionary;
+	std::list<const PhraseDictionaryBase*>	m_allPhraseDictionary;
 	std::list<const GenerationDictionary*>	m_allGenerationDictionary;
-	std::set<TargetPhrase> m_unknownTargetPhrase;
-	// make sure phrase doesn't go out of memory while we're using it
+	std::set<TargetPhrase> 									m_unknownTargetPhrase;
+				// make sure phrase doesn't go out of memory while we're using it
+	const size_t														m_maxNoTransOptPerCoverage;
 	const LMList *m_allLM;
 
-	TranslationOptionCollection(InputType const& src);
+	TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage);
 	
 	void CalcFutureScore(size_t verboseLevel);
 

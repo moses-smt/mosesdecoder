@@ -15,7 +15,7 @@ protected:
 															, float weightWordPenalty);
 	
  public:
-	TranslationOptionCollectionText(Sentence const& inputSentence);
+	TranslationOptionCollectionText(Sentence const& inputSentence, size_t maxNoTransOptPerCoverage);
 	
 };
 

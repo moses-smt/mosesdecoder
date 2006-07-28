@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/algorithm/string.hpp>
 #include "PhraseDictionary.h"
 #include "TranslationOptionCollectionText.h"
+#include "StaticData.h"
 
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
 									 FactorCollection &factorCollection) 
@@ -48,7 +49,8 @@ CreateTargetPhraseCollection(PhraseDictionaryBase const& d,
 TranslationOptionCollection* 
 Sentence::CreateTranslationOptionCollection() const 
 {
-	return new TranslationOptionCollectionText(*this);
+	size_t maxNoTransOptPerCoverage = StaticData::Instance()->GetMaxNoTransOptPerCoverage();
+	return new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage);
 }
 void Sentence::Print(std::ostream& out) const
 {
