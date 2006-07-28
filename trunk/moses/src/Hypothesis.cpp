@@ -239,7 +239,7 @@ void Hypothesis::GenerateNGramCompareKey(size_t contextSize)
   MD5Final(m_compSignature, &md5c);
 }
 
-int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize[NUM_FACTORS]) const
+int Hypothesis::NGramCompare(const Hypothesis &compare) const
 { // -1 = this < compare
 	// +1 = this > compare
 	// 0	= this ==compare
@@ -249,8 +249,11 @@ int Hypothesis::NGramCompare(const Hypothesis &compare, size_t nGramSize[NUM_FAC
 
 	for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 	{
-		const size_t minSize		= std::min(nGramSize[currFactor], thisSize)
-					, minCompareSize	= std::min(nGramSize[currFactor], compareSize);
+		size_t ngramMax = StaticData::Instance()->GetMaxNGramOrderForFactorId(currFactor);
+		if (ngramMax < 2) continue;  // unigrams have no context
+
+		const size_t minSize		= std::min(ngramMax-1, thisSize)
+					, minCompareSize	= std::min(ngramMax-1, compareSize);
 		if ( minSize != minCompareSize )
 		{ // quick decision
 			return (minSize < minCompareSize) ? -1 : 1;

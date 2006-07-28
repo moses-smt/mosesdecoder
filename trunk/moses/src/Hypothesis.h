@@ -213,16 +213,16 @@ public:
   /***
    * requires that GenerateNGramCompareKey was previously run
    */
-	int	FastNGramCompare(const Hypothesis &compare, size_t nGramSize[NUM_FACTORS]) const
+	int	FastNGramCompare(const Hypothesis &compare) const
 	{
 #if 0
 		return memcmp(this->m_compSignature, compare.m_compSignature, sizeof(m_compSignature));
 #else
-		return NGramCompare(compare, nGramSize);
+		return NGramCompare(compare);
 #endif
 	}
 
-	int	 NGramCompare(const Hypothesis &compare, size_t nGramSize[NUM_FACTORS]) const;
+	int	 NGramCompare(const Hypothesis &compare) const;
 
   /*** Generates a key in m_compSignature that can be used
    *   for an arbitrary ordering of hypotheses.
