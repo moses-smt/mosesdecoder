@@ -135,7 +135,7 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
         }
     }
 
-	if(verboseLevel > 0) 
+	if(verboseLevel > 2) 
 	{		
       int total = 0;
       for(size_t row=0; row<size; row++)
