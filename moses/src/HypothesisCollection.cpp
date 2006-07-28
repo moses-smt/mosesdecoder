@@ -188,17 +188,17 @@ const Hypothesis *HypothesisCollection::GetBestHypothesis() const
 // sorting helper
 struct HypothesisSortDescending
 {
-	bool operator()(const Hypothesis*& hypo1, const Hypothesis*& hypo2)
+	const bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const
 	{
 		return hypo1->GetScore(ScoreType::Total) > hypo2->GetScore(ScoreType::Total);
 	}
 };
 
-list<const Hypothesis*> HypothesisCollection::GetSortedList() const
+vector<const Hypothesis*> HypothesisCollection::GetSortedList() const
 {
-	list<const Hypothesis*> ret;
+	vector<const Hypothesis*> ret; ret.reserve(m_hypos.size());
 	std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(ret, ret.end()));
-	ret.sort(HypothesisSortDescending());
+	sort(ret.begin(), ret.end(), HypothesisSortDescending());
 
 	return ret;
 }
