@@ -87,7 +87,7 @@ void ConfusionNet::String2Word(const std::string& s,Word& w,
 															 const std::vector<FactorType>& factorOrder) 
 {
 	std::vector<std::string> factorStrVector = Tokenize(s, "|");
-	for(size_t i=0;i<factorOrder.size();++i)
+	for(size_t i=0;i<factorOrder.size();++i) 
 		w.SetFactor(factorOrder[i],
 								m_factorCollection->AddFactor(Input,factorOrder[i],
 																							factorStrVector[i]));

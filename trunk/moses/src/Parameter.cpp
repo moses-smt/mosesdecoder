@@ -262,6 +262,12 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-drop-unknown", "drop-unknown", argc, argv);
 	OverwriteParam("-inputtype","inputtype",argc,argv);
 	OverwriteParam("-I","weight-i",argc,argv);
+	OverwriteParam("-ttable-limit","ttable-limit",argc,argv);
+	OverwriteParam("-lmodel-file","lmodel-file",argc,argv);
+	OverwriteParam("-beam-threshold","beam-threshold",argc,argv);
+	//	OverwriteParam("-","",argc,argv);
+
+
   // check if parameters make sense
 	return Validate();
 }
