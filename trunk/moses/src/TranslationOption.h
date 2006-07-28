@@ -134,6 +134,10 @@ public:
   { 	 
 		return m_ngramScore; 	 
 	}
+	inline float GetTotalScore() const
+	{
+		return m_scoreTrans + m_scoreGen + m_futureScore;
+	}
 	/***
 	 * return target phrase
 	 */
