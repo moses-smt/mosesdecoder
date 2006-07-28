@@ -131,6 +131,11 @@ public:
   { 	 
 		return m_ngramScore; 	 
 	}
+	inline float GetTotalScore() const 	 
+  { 	 
+		return m_scoreTrans + m_scoreGen + m_futureScore + m_ngramScore;
+	}
+
 	/***
 	 * return target phrase
 	 */
@@ -170,7 +175,7 @@ public:
 		return m_ngramComponent; 	 
 	}
 #endif
-
+	
 	TO_STRING;
 };
 

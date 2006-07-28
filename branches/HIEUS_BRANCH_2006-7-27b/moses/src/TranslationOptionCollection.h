@@ -47,9 +47,10 @@ protected:
 	InputType const													&m_source;
 	SquareMatrix														m_futureScore;
 	WordsBitmap															m_unknownWordPos;
-	std::list<const PhraseDictionaryBase*>			m_allPhraseDictionary;
+	std::list<const PhraseDictionaryBase*>	m_allPhraseDictionary;
 	std::list<const GenerationDictionary*>	m_allGenerationDictionary;
 	std::set<TargetPhrase> m_unknownTargetPhrase;
+	const size_t														m_maxNoTransOptPerCoverage;
 	// make sure phrase doesn't go out of memory while we're using it
 	const LMList *m_allLM;
 
@@ -89,7 +90,8 @@ protected:
 															, float weightWordPenalty);
 
 	void ComputeFutureScores(size_t verboseLevel);	
-
+	void Prune();
+	
 	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
 	{
 		return m_collection[startPos][endPos - startPos];

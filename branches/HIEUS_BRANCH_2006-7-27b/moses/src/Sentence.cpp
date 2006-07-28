@@ -45,8 +45,7 @@ CreateTargetPhraseCollection(PhraseDictionaryBase const& d,
 	return d.GetTargetPhraseCollection(src);
 }
 
-TranslationOptionCollection* 
-Sentence::CreateTranslationOptionCollection() const 
+TranslationOptionCollection *Sentence::CreateTranslationOptionCollection() const 
 {
 	return new TranslationOptionCollectionText(*this);
 }

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "TranslationOptionCollection.h"
 #include "Sentence.h"
 #include "DecodeStep.h"
@@ -13,6 +14,7 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& src)
 	: m_source(src)
 	,m_futureScore(src.GetSize())
 	,m_unknownWordPos(src.GetSize())
+	,m_maxNoTransOptPerCoverage(3)
 {
 	// create 2-d vector
 	size_t size = src.GetSize();
@@ -39,6 +41,46 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	}
 }
 
+// helper
+bool CompareTranslationOption(const TranslationOption *a, const TranslationOption *b)
+{
+	return a->GetTotalScore() > b->GetTotalScore();
+}
+
+void TranslationOptionCollection::Prune()
+{
+	if (m_maxNoTransOptPerCoverage == 0)
+		return;
+	
+	size_t size = m_source.GetSize();
+	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+		{
+			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
+			
+			// sort in vector
+			vector<const TranslationOption*> sortedVector;
+			copy(fullList.begin(), fullList.end(), back_inserter(sortedVector));
+			sort(sortedVector.begin(), sortedVector.end(), CompareTranslationOption);
+			
+			// put back into list
+			fullList.clear();
+			const size_t maxIndex = std::min(m_maxNoTransOptPerCoverage, sortedVector.size());
+			for (size_t i = 0 ; i < maxIndex ; ++i)
+			{
+				fullList.push_back(sortedVector[i]);
+			}
+			
+			// delete the rest
+			for (size_t i = maxIndex ; i < sortedVector.size() ; ++i)
+			{
+				delete sortedVector[i];
+			}
+		}
+	}
+}
+
 void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
 {
 	// create future score matrix in a dynamic programming fashion
@@ -47,15 +89,10 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
   size_t size = m_source.GetSize(); // the width of the matrix
 
   // counting options per span, for statistics
-  bool printCounts = (verboseLevel > 0);
-  int *counts = 0;
-  if (printCounts == true)
-    counts = (int*) malloc(sizeof(int) * size * size);
 
   for(size_t row=0; row<size; row++) {
     for(size_t col=row; col<size; col++) {
       m_futureScore.SetScore(row, col, -numeric_limits<float>::infinity());
-      if (printCounts == true) counts[row*size+col] = 0;
     }
   }
 
@@ -73,8 +110,6 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
 				float score = transOpt.GetFutureScore();
 				if (score > m_futureScore.GetScore(startPos, endPos))
 					m_futureScore.SetScore(startPos, endPos, score);
-
-				if (printCounts == true) counts[startPos*size + endPos] ++;
 			}
 		}
 	}
@@ -103,21 +138,22 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
         }
     }
 
-    if (printCounts == true) {
-      int total = 0;
-      for(size_t row=0; row<size; row++)
-        for(size_t col=row; col<size; col++)
-          if (counts[row*size+ col] > 0) {
-	        cout<<"translation options spanning from  "<< row <<" to "<< col <<" is "<< counts[row*size+ col] <<endl;
-            total += counts[row*size+ col];
-          }
-      cout << "translation options generated in total: "<< total << endl;
-      free(counts);
-	}
-
 	if(verboseLevel > 0) 
 	{		
-      for(size_t row=0; row<size; row++)
+    int total = 0;
+    size_t size = m_source.GetSize();
+    for (size_t startPos = 0 ; startPos < size; startPos++)
+    {
+      for (size_t endPos = startPos; endPos < size; endPos++)
+      {
+      	size_t count = GetTranslationOptionList(startPos, endPos).size();
+        cout<<"translation options spanning from  "<< startPos <<" to "<< endPos <<" is "<< count <<endl;
+        total += count;
+      }
+    }
+    cout << "translation options generated in total: "<< total << endl;
+		
+    for(size_t row=0; row<size; row++)
         for(size_t col=row; col<size; col++)
 		  cout<<"future cost from "<< row <<" to "<< col <<" is "<< m_futureScore.GetScore(row, col) <<endl;
     }
@@ -403,8 +439,12 @@ void TranslationOptionCollection::CreateTranslationOptions(
 			Add(new TranslationOption(transOpt));
 		}
 
+
+	// Prune
+	Prune();
+
 	// future score
-	CalcFutureScore(verboseLevel);
+	CalcFutureScore(verboseLevel);	
 }
 
 

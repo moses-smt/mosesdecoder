@@ -8,7 +8,7 @@
 #include "LMList.h"
 
 TranslationOptionCollectionConfusionNet::
-TranslationOptionCollectionConfusionNet(const ConfusionNet &input) 
+TranslationOptionCollectionConfusionNet(const ConfusionNet &input)
 	: TranslationOptionCollection(input) {}
 
 void TranslationOptionCollectionConfusionNet::
