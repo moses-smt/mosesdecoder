@@ -26,9 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <list>
 #include "TypeDef.h"
 #include "Phrase.h"
-#include "ScoreComponent.h"
 #include "ScoreComponentCollection.h"
-#include "ScoreColl.h"
 #include "DecodeStep.h"
 
 class Hypothesis;
@@ -48,25 +46,19 @@ protected:
 	Phrase					m_targetPhrase; //target phrase being created at the current decoding step
 
 #ifdef N_BEST
-	ScoreComponentCollection	m_transScoreComponent;
-	ScoreColl									m_generationScoreComponent 	// use ptr of dictionary as key
-														,m_lmScoreComponent;
+	ScoreComponentCollection2 m_scoreBreakdown;
 #endif
 
 public:
 	LatticeEdge(const LatticeEdge &copy); // not implemented
 	LatticeEdge(const float 												score[]
-						, const ScoreComponentCollection 	&transScoreComponent
-						, const ScoreColl					 						&lmScoreComponent
-						, const ScoreColl											&generationScoreComponent
 						, const Phrase 												&phrase
-						, const Hypothesis 										*prevHypo)
+						, const Hypothesis 										*prevHypo
+						,	const ScoreComponentCollection2	&scoreBreakdown)
 		:m_prevHypo(prevHypo)
 		,m_targetPhrase(phrase)
 #ifdef N_BEST
-		,m_transScoreComponent(transScoreComponent)
-		,m_generationScoreComponent(generationScoreComponent)
-		,m_lmScoreComponent		(lmScoreComponent)
+		,m_scoreBreakdown(scoreBreakdown)
 #endif
 	{
 		SetScore(score);
@@ -114,21 +106,14 @@ public:
 
 #ifdef N_BEST
 	virtual const std::vector<Arc*>* GetArcList() const = 0;
+	const ScoreComponentCollection2& GetScoreBreakdown() const
+	{
+		return m_scoreBreakdown;
+	}
 
-	inline const ScoreComponentCollection &GetTranslationScoreComponent() const
-	{
-		return m_transScoreComponent;
-	}
-	inline const ScoreColl &GetLMScoreComponent() const
-	{
-		return m_lmScoreComponent;
-	}
-	inline const ScoreColl &GetGenerationScoreComponent() const
-	{
-		return m_generationScoreComponent;
-	}
-	
+#if 0	
 	void ResizeComponentScore(const LMList &allLM, const std::list < DecodeStep > &decodeStepList);
+#endif
 #endif
 
 	TO_STRING;

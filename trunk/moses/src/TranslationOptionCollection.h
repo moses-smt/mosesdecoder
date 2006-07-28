@@ -41,6 +41,7 @@ typedef std::list<const TranslationOption*> TranslationOptionList;
 
 class TranslationOptionCollection
 {
+	friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);
 	TranslationOptionCollection(const TranslationOptionCollection&); // no copy constructor
 protected:
 	std::vector< std::vector< TranslationOptionList > >					m_collection;
@@ -130,6 +131,12 @@ public:
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
 {
+  std::vector< std::vector< TranslationOptionList > >::const_iterator i = coll.m_collection.begin();
+	size_t j = 0;
+	for (; i!=coll.m_collection.end(); ++i) {
+    out << "s[" << j++ << "].size=" << i->size() << std::endl;
+	}
+
 	/*
 	TranslationOptionCollection::const_iterator iter;
 	for (iter = coll.begin() ; iter != coll.end() ; ++iter)

@@ -11,7 +11,6 @@ libmoses_a_SOURCES = \
 	GenerationDictionary.cpp \
 	Hypothesis.cpp \
 	HypothesisCollection.cpp \
-	HypothesisCollectionIntermediate.cpp \
 	Input.cpp \
 	InputFileStream.cpp \
 	InputOutput.cpp \
@@ -28,8 +27,6 @@ libmoses_a_SOURCES = \
 	PhraseDictionary.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
-	ScoreColl.cpp \
-	ScoreComponent.cpp \
 	ScoreComponentCollection.cpp \
 	ScoreIndexManager.cpp \
 	ScoreProducer.cpp \

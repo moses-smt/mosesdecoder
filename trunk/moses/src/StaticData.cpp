@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <cassert>
 
+#include "PhraseDictionary.h"
+#include "GenerationDictionary.h"
 #include "StaticData.h"
 #include "Util.h"
 #include "FactorCollection.h"
@@ -178,7 +180,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			// for now, assume there is just one lexical reordering model
 			timer.check("Starting to load lexical reorder table...");
  			m_lexReorder = new LexicalReordering(lrFileVector[0], orientation, direction, condition);
-			m_scoreIndexManager.AddScoreProducer(m_lexReorder);
 			timer.check("Finished loading lexical reorder table.");
 		}
 		if (m_parameter.GetParam("lmodel-file").size() > 0)
@@ -227,7 +228,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			lm->Load(i, languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
 	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
 			m_languageModel[type].push_back(lm);
-			m_scoreIndexManager.AddScoreProducer(lm);
 
 			CompareHypothesisCollection::SetMaxNGramOrder(factorType, nGramMaxOrder);
 		}
@@ -265,7 +265,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 																		, filePath
 																		, weight[currDict]
 																		, Output);		 // always target, for now
-			m_scoreIndexManager.AddScoreProducer(m_generationDictionary.back());
 		}
 	}
 
@@ -490,7 +489,6 @@ void StaticData::LoadPhraseTables(bool filter
 									 ,	this->GetWeightWordPenalty()
 									 , *this);
 					m_phraseDictionary.push_back(pd);
-					m_scoreIndexManager.AddScoreProducer(pd);
 				}
 			else 
 				{
@@ -506,7 +504,6 @@ void StaticData::LoadPhraseTables(bool filter
 											 this->GetWeightWordPenalty(),
 											 m_weightInput);
 						m_phraseDictionary.push_back(pd);
-						m_scoreIndexManager.AddScoreProducer(pd);
 					#endif
 				}
 

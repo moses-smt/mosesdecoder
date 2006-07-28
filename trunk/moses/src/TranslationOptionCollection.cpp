@@ -162,10 +162,6 @@ void TranslationOptionCollection::ProcessGeneration(
 		{ // word deletion
 		
 			TranslationOption newTransOpt(inputPartialTranslOpt);
-#ifdef N_BEST
-			const GenerationDictionary &dictionary	= decodeStep.GetGenerationDictionary();
-			newTransOpt.AddGenScoreComponent(dictionary, 0.0f);
-#endif
 			outputPartialTranslOptColl.Add(newTransOpt);
 		
 			return;
@@ -262,12 +258,6 @@ void TranslationOptionCollection::ProcessTranslation(
 		{ // word deletion
 		
 			TranslationOption newTransOpt(inputPartialTranslOpt);
-#ifdef N_BEST
-			const PhraseDictionaryBase &phraseDictionary	= decodeStep.GetPhraseDictionary();
-			ScoreComponent transComp(&phraseDictionary);
-			transComp.Reset();
-			newTransOpt.AddTransScoreComponent(transComp);
-#endif
 			outputPartialTranslOptColl.Add(newTransOpt);
 		
 			return;

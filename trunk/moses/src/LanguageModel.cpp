@@ -31,14 +31,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
-#include "ScoreColl.h"
+#include "StaticData.h"
 
 using namespace std;
 
 // static variable init
 const LmId LanguageModel::UNKNOWN_LM_ID(-1);
 
-LanguageModel::LanguageModel() : m_unknownId(0) {}
+LanguageModel::LanguageModel() : m_unknownId(0) {
+	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+}
 LanguageModel::~LanguageModel() {}
 
 // don't inline virtual funcs...
