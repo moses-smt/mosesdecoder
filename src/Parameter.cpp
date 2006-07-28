@@ -67,6 +67,7 @@ Parameter::Parameter()
 	AddParam("report-all-factors");
 	AddParam("drop-unknown");
 	AddParam("inputtype");
+	AddParam("max-trans-opt-per-coverage");
 }
 
 // check if parameter settings make sense

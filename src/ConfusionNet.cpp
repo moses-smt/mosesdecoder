@@ -9,7 +9,8 @@
 #include "Util.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "TranslationOptionCollectionConfusionNet.h"
- 
+#include "StaticData.h"
+
 struct CNStats {
 	unsigned created,destr,read,colls,words;
 
@@ -195,7 +196,8 @@ CreateTargetPhraseCollection(PhraseDictionaryBase const& d,
 TranslationOptionCollection* 
 ConfusionNet::CreateTranslationOptionCollection() const 
 {
-	return new TranslationOptionCollectionConfusionNet(*this);
+	size_t maxNoTransOptPerCoverage = StaticData::Instance()->GetMaxNoTransOptPerCoverage();
+	return new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage);
 }
 
 #endif

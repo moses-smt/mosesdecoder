@@ -287,6 +287,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		TransformScore(Scan<float>(m_parameter.GetParam("beam-threshold")[0]))
 		: TransformScore(DEFAULT_BEAM_THRESHOLD);
 
+	m_maxNoTransOptPerCoverage = (m_parameter.GetParam("max-trans-opt-per-coverage").size() > 0)
+				? Scan<size_t>(m_parameter.GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
+	
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH
 	if (m_parameter.GetParam("drop-unknown").size() == 1)

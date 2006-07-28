@@ -9,10 +9,11 @@
 
 using namespace std;
 
-TranslationOptionCollection::TranslationOptionCollection(InputType const& src)
+TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage)
 	: m_source(src)
 	,m_futureScore(src.GetSize())
 	,m_unknownWordPos(src.GetSize())
+	,m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
 {
 	// create 2-d vector
 	size_t size = src.GetSize();
