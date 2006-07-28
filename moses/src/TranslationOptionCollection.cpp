@@ -195,7 +195,7 @@ void TranslationOptionCollection::ProcessGeneration(
 	if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
 		{ // word deletion
 		
-			TranslationOption newTransOpt(inputPartialTranslOpt);
+			TranslationOption *newTransOpt = new TranslationOption(inputPartialTranslOpt);
 			outputPartialTranslOptColl.Add(newTransOpt);
 		
 			return;
@@ -269,8 +269,7 @@ void TranslationOptionCollection::ProcessGeneration(
 			TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(genPhrase, &generationDictionary, generationScore, weight);
 			if (newTransOpt != NULL)
 				{
-					outputPartialTranslOptColl.Add( *newTransOpt );
-					delete newTransOpt;
+					outputPartialTranslOptColl.Add(newTransOpt);
 				}
 
 			// increment iterators
@@ -291,8 +290,7 @@ void TranslationOptionCollection::ProcessTranslation(
 	if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
 		{ // word deletion
 		
-			TranslationOption newTransOpt(inputPartialTranslOpt);
-			outputPartialTranslOptColl.Add(newTransOpt);
+			outputPartialTranslOptColl.Add(new TranslationOption(inputPartialTranslOpt));
 		
 			return;
 		}
@@ -313,8 +311,7 @@ void TranslationOptionCollection::ProcessTranslation(
 					TranslationOption *newTransOpt = inputPartialTranslOpt.MergeTranslation(targetPhrase);
 					if (newTransOpt != NULL)
 						{
-							outputPartialTranslOptColl.Add( *newTransOpt );
-							delete newTransOpt;
+							outputPartialTranslOptColl.Add( newTransOpt );
 						}
 				}
 		}
@@ -387,7 +384,7 @@ void TranslationOptionCollection::CreateTranslationOptions(
 						PartialTranslOptColl::const_iterator iterPartialTranslOpt;
 						for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
 							{
-								const TranslationOption &inputPartialTranslOpt = *iterPartialTranslOpt;
+								const TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 								ProcessTranslation(inputPartialTranslOpt
 																	 , decodeStep
 																	 , outputPartialTranslOptColl
@@ -403,7 +400,7 @@ void TranslationOptionCollection::CreateTranslationOptions(
 						PartialTranslOptColl::const_iterator iterPartialTranslOpt;
 						for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
 							{
-								const TranslationOption &inputPartialTranslOpt = *iterPartialTranslOpt;
+								const TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 								ProcessGeneration(inputPartialTranslOpt
 																	, decodeStep
 																	, outputPartialTranslOptColl
@@ -422,10 +419,12 @@ void TranslationOptionCollection::CreateTranslationOptions(
 	PartialTranslOptColl::iterator iterColl;
 	for (iterColl = lastPartialTranslOptColl.begin() ; iterColl != lastPartialTranslOptColl.end() ; iterColl++)
 		{
-			TranslationOption &transOpt = *iterColl;
-			transOpt.CalcScore(allLM, weightWordPenalty);
-			Add(new TranslationOption(transOpt));
+			TranslationOption *transOpt = *iterColl;
+			transOpt->CalcScore(allLM, weightWordPenalty);
+			Add(transOpt);
 		}
+	lastPartialTranslOptColl.DetachAll();
+		
 
 	// Prune
 	Prune();
@@ -535,9 +534,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 				for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != phraseColl->end() ; ++iterTargetPhrase)
 				{
 					const TargetPhrase	&targetPhrase = *iterTargetPhrase;
-							
-					TranslationOption transOpt(wordsRange, targetPhrase);
-					outputPartialTranslOptColl.push_back ( transOpt );
+					outputPartialTranslOptColl.push_back ( new TranslationOption(wordsRange, targetPhrase) );
 
 					if (verboseLevel >= 3) 
 					{
