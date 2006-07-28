@@ -197,10 +197,10 @@ void TranslationOptionCollection::ProcessGeneration(
 	if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
 		{ // word deletion
 		
-			TranslationOption newTransOpt(inputPartialTranslOpt);
+			TranslationOption *newTransOpt = new TranslationOption(inputPartialTranslOpt);
 #ifdef N_BEST
 			const GenerationDictionary &dictionary	= decodeStep.GetGenerationDictionary();
-			newTransOpt.AddGenScoreComponent(dictionary, 0.0f);
+			newTransOpt->AddGenScoreComponent(dictionary, 0.0f);
 #endif
 			outputPartialTranslOptColl.Add(newTransOpt);
 		
@@ -275,8 +275,7 @@ void TranslationOptionCollection::ProcessGeneration(
 			TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(genPhrase, &generationDictionary, generationScore, weight);
 			if (newTransOpt != NULL)
 				{
-					outputPartialTranslOptColl.Add( *newTransOpt );
-					delete newTransOpt;
+					outputPartialTranslOptColl.Add( newTransOpt );
 				}
 
 			// increment iterators
@@ -297,12 +296,12 @@ void TranslationOptionCollection::ProcessTranslation(
 	if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
 		{ // word deletion
 		
-			TranslationOption newTransOpt(inputPartialTranslOpt);
+			TranslationOption *newTransOpt = new TranslationOption(inputPartialTranslOpt);
 #ifdef N_BEST
 			const PhraseDictionaryBase &phraseDictionary	= decodeStep.GetPhraseDictionary();
 			ScoreComponent transComp(&phraseDictionary);
 			transComp.Reset();
-			newTransOpt.AddTransScoreComponent(transComp);
+			newTransOpt->AddTransScoreComponent(transComp);
 #endif
 			outputPartialTranslOptColl.Add(newTransOpt);
 		
@@ -325,8 +324,7 @@ void TranslationOptionCollection::ProcessTranslation(
 					TranslationOption *newTransOpt = inputPartialTranslOpt.MergeTranslation(targetPhrase);
 					if (newTransOpt != NULL)
 						{
-							outputPartialTranslOptColl.Add( *newTransOpt );
-							delete newTransOpt;
+							outputPartialTranslOptColl.Add( newTransOpt );
 						}
 				}
 		}
@@ -399,7 +397,7 @@ void TranslationOptionCollection::CreateTranslationOptions(
 						PartialTranslOptColl::const_iterator iterPartialTranslOpt;
 						for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
 							{
-								const TranslationOption &inputPartialTranslOpt = *iterPartialTranslOpt;
+								const TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 								ProcessTranslation(inputPartialTranslOpt
 																	 , decodeStep
 																	 , outputPartialTranslOptColl
@@ -415,7 +413,7 @@ void TranslationOptionCollection::CreateTranslationOptions(
 						PartialTranslOptColl::const_iterator iterPartialTranslOpt;
 						for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
 							{
-								const TranslationOption &inputPartialTranslOpt = *iterPartialTranslOpt;
+								const TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 								ProcessGeneration(inputPartialTranslOpt
 																	, decodeStep
 																	, outputPartialTranslOptColl
@@ -434,10 +432,12 @@ void TranslationOptionCollection::CreateTranslationOptions(
 	PartialTranslOptColl::iterator iterColl;
 	for (iterColl = lastPartialTranslOptColl.begin() ; iterColl != lastPartialTranslOptColl.end() ; iterColl++)
 		{
-			TranslationOption &transOpt = *iterColl;
-			transOpt.CalcScore(allLM, weightWordPenalty);
-			Add(new TranslationOption(transOpt));
+			TranslationOption *transOpt = *iterColl;
+			transOpt->CalcScore(allLM, weightWordPenalty);
+			Add(transOpt);
+
 		}
+	lastPartialTranslOptColl.DetachAll();
 
 
 	// Prune
@@ -549,7 +549,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 				{
 					const TargetPhrase	&targetPhrase = *iterTargetPhrase;
 							
-					TranslationOption transOpt(wordsRange, targetPhrase);
+					TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
 					outputPartialTranslOptColl.push_back ( transOpt );
 
 					if (verboseLevel >= 3) 
