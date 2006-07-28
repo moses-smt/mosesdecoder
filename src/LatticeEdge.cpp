@@ -48,50 +48,5 @@ void LatticeEdge::ResetScore()
   std::memset(m_score, 0, sizeof(float) * NUM_SCORES);
 }
 
-#ifdef N_BEST
-
-#if 0
-void LatticeEdge::ResizeComponentScore(const LMList &allLM, const list < DecodeStep > &decodeStepList)
-{
-	// LM
-	LMList::const_iterator iter;
-	for (iter = allLM.begin() ; iter != allLM.end() ; ++iter)
-	{
-		LanguageModel *lm = *iter;
-		m_lmScoreComponent[lm->GetId()] = 0.0f;
-	}
-
-	// trans & gen
-	list < DecodeStep >::const_iterator iterDecodeStep;
-	for (iterDecodeStep = decodeStepList.begin() ; iterDecodeStep != decodeStepList.end() ; ++iterDecodeStep)
-	{
-		const DecodeStep &step = *iterDecodeStep;
-		switch (step.GetDecodeType())
-		{
-		case Translate:
-		{
-			ScoreComponent &transScoreComponent = m_transScoreComponent.Add(&step.GetPhraseDictionary());
-			transScoreComponent.Reset();
-			break;
-		}
-		case Generate:
-		{
-			m_generationScoreComponent[step.GetGenerationDictionary().GetScoreBookkeepingID()] = 0.0f;
-			break;
-		}
-		}
-	}
-
-	// reset score
-	for (size_t i = 0 ; i < m_lmScoreComponent.size() ; i++)
-	{
-		m_lmScoreComponent[i] = 0;
-	}
-	m_scoreBreakdown.ZeroAll();
-}
-#endif
-
-#endif
-
 TO_STRING_BODY(LatticeEdge);
 
