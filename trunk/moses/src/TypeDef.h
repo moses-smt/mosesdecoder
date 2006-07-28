@@ -118,12 +118,17 @@ namespace ScoreType {
 		FutureScoreEnum,
 		LexicalReorderingForward,
 		LexicalReorderingBackward,
-		Total
+		Input,
+		Total,
+		NUM_SCORES
 	};
 }
+using ScoreType::NUM_SCORES;
+// NUM_SCORES as part of the enum avoids inconsistencies
+// (on the other hand, it also avoid dynamic modifications)
 
 // count of above
-const size_t NUM_SCORES = 9;
+//const size_t NUM_SCORES = 10;
 
 namespace LexReorderType
 {

@@ -36,7 +36,6 @@ class TargetPhrase: public Phrase
 protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 #ifdef N_BEST
-	float m_inputScore;
 	const ScoreProducer* m_sp;
 	ScoreComponentCollection2 m_scoreBreakdown;
 #endif
