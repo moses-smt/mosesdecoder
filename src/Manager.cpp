@@ -51,8 +51,10 @@ Manager::Manager(InputType const& source,
 
 Manager::~Manager() {}
 
-// this is the main loop when a sentence is translated
-// hypotheses are expanded stack by stack, until the end of the sentence
+/**
+ * this is the main loop when a sentence is translated
+ * hypotheses are expanded stack by stack, until the end of the sentence
+ */
 void Manager::ProcessSentence()
 {	
 	list < DecodeStep > &decodeStepList = m_staticData.GetDecodeStepList();
@@ -108,9 +110,11 @@ void Manager::ProcessSentence()
 	}
 }
 
-// find all translation options to expand one hypothesis, trigger expansion
-// this is mostly a check for overlap with already covered words, and for
-// violation of reordering limits.
+/** 
+ * find all translation options to expand one hypothesis, trigger expansion
+ * this is mostly a check for overlap with already covered words, and for
+ * violation of reordering limits.
+ */
 void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 {
 	// since we check for reordering limits, its good to have that limit handy
@@ -195,8 +199,10 @@ void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const Translation
 	}
 }
 
-// Expand one hypothesis with a translation option.
-// this involves initial creation, scoring and adding it to the proper stack
+/**
+ * Expand one hypothesis with a translation option.
+ * this involves initial creation, scoring and adding it to the proper stack
+ */
 void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
 	// create hypothesis and calculate all its scores
@@ -234,15 +240,19 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 		}	
 }
 
-// Find best hypothesis on the last steck
-// this is the end point of the best translation
+/**
+ * Find best hypothesis on the last steck
+ * this is the end point of the best translation
+ */
 const Hypothesis *Manager::GetBestHypothesis() const
 {
 	const HypothesisCollection &hypoColl = m_hypoStack.back();
 	return hypoColl.GetBestHypothesis();
 }
 
-// Logging of hypotheses stacks and their sizes
+/**
+ * Logging of hypotheses stacks and their sizes
+ */
 void Manager::OutputHypoStackSize()
 {
 	std::vector < HypothesisCollection >::const_iterator iterStack = m_hypoStack.begin();
@@ -272,10 +282,12 @@ void Manager::OutputHypoStack(int stack)
 	}
 }
 
-// After decoding, the hypotheses in the stacks and additional arcs
-// form a search graph that can be mined for n-best lists.
-// the heavy lifting is done in the LatticePath and LatticePathCollection
-// this function controls this for one sentence
+/**
+ * After decoding, the hypotheses in the stacks and additional arcs
+ * form a search graph that can be mined for n-best lists.
+ * the heavy lifting is done in the LatticePath and LatticePathCollection
+ * this function controls this for one sentence
+ */
 void Manager::CalcNBest(size_t count, LatticePathList &ret) const
 {
 #ifdef N_BEST
