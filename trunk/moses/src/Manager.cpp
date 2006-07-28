@@ -57,6 +57,7 @@ Manager::~Manager() {}
  */
 void Manager::ProcessSentence()
 {	
+	m_staticData.GetSentenceStats().ZeroAll();
 	list < DecodeStep > &decodeStepList = m_staticData.GetDecodeStepList();
 	// create list of all possible translations
 	// this is only valid if:
@@ -104,6 +105,7 @@ void Manager::ProcessSentence()
 
 	// some more logging
 	if (m_staticData.GetVerboseLevel() > 0) {
+	  cerr << m_staticData.GetSentenceStats();
     cerr << "Hypotheses created since startup: "<< Hypothesis::s_HypothesesCreated<<endl;
 		//OutputHypoStack();
 		//OutputHypoStackSize();
