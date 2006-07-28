@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "Input.h"
 #include "LMList.h"
-#include "md5.h"
+#include "hash.h"
 
 using namespace std;
 
@@ -53,6 +53,7 @@ Hypothesis::Hypothesis(InputType const& source)
 	, m_id(s_HypothesesCreated++)
 {	// used for initial seeding of trans process	
 	// initialize scores
+	_hash_computed = false;
 	ResetScore();	
 }
 
@@ -68,6 +69,7 @@ Hypothesis::Hypothesis(const Hypothesis &copy)
 #endif
 	, m_id										(s_HypothesesCreated++)
 {
+	_hash_computed = false;
 	m_targetPhrase.AddWords( copy.m_targetPhrase );
 
 	// initialize scores
@@ -95,6 +97,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 	assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));	
 
+	_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
 
 	// add new words from poss trans
@@ -209,6 +212,7 @@ bool Hypothesis::IsCompatible(const Phrase &phrase) const
 	return true;
 }
 
+#if 0
 void Hypothesis::GenerateNGramCompareKey(size_t contextSize)
 {
   struct MD5Context md5c;
@@ -237,6 +241,32 @@ void Hypothesis::GenerateNGramCompareKey(size_t contextSize)
 	  }
 	}
   MD5Final(m_compSignature, &md5c);
+}
+#endif
+
+void Hypothesis::GenerateNGramCompareHash() const
+{
+	_hash = 0xcafe5137;						// random
+	const size_t thisSize			= GetSize();
+
+	for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+	{
+		size_t ngramMax = StaticData::Instance()->GetMaxNGramOrderForFactorId(currFactor);
+		if (ngramMax < 2) continue;  // unigrams have no context
+
+		const size_t minSize		= std::min(ngramMax-1, thisSize);
+		_hash = quick_hash((const char*)&minSize, sizeof(size_t), _hash);
+
+		for (size_t currNGram = 1 ; currNGram <= minSize ; currNGram++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			const Factor *thisFactor 		= GetFactor(thisSize - currNGram, factorType);
+			_hash = quick_hash((const char*)&thisFactor, sizeof(const Factor*), _hash);
+		}
+	}
+	vector<size_t> wordCoverage = m_sourceCompleted.GetCompressedReprentation();
+	_hash = quick_hash((const char*)&wordCoverage[0], sizeof(size_t)*wordCoverage.size(), _hash);
+	_hash_computed = true;
 }
 
 int Hypothesis::NGramCompare(const Hypothesis &compare) const

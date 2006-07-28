@@ -77,6 +77,9 @@ protected:
 
   void CalcDeletionScore(const Sentence& sourceSentence, const WordsRange& sourceWordsRange, const WordDeletionTable& wordDeletionTable);
 
+	void GenerateNGramCompareHash() const;
+	mutable size_t _hash;
+	mutable bool _hash_computed;
 
 public:
 
@@ -208,6 +211,13 @@ public:
 	inline const WordsBitmap &GetWordsBitmap() const
 	{
 		return m_sourceCompleted;
+	}
+
+	inline size_t hash() const
+	{
+		if (_hash_computed) return _hash;
+		GenerateNGramCompareHash();
+		return _hash;
 	}
 
   /***

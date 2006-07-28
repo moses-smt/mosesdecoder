@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModel.h"
 #include "LanguageModelFactory.h"
 #include "LexicalReordering.h"
+#include "SentenceStats.h"
 
 #ifndef WIN32
 #include "PhraseDictionaryTreeAdaptor.h"
@@ -240,7 +241,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
 			m_languageModel[type].push_back(lm);
 
-			CompareHypothesisCollection::SetMaxNGramOrder(factorType, nGramMaxOrder);
+			HypothesisRecombinationOrderer::SetMaxNGramOrder(factorType, nGramMaxOrder);
 		}
 	}
   // flag indicating that language models were loaded,
