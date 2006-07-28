@@ -452,15 +452,19 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 	//LEXICAL REORDERING COST
 	LexicalReordering *m_lexReorder = staticData.GetLexReorder();
 	if(m_lexReorder == NULL)
-		{
-		//we're not scoring lexical reordering, so we add in a zero
-		m_score[ScoreType::LexicalReordering] = 0;
-		}
+	{
+		m_score[ScoreType::LexicalReorderingForward] = 0;
+		m_score[ScoreType::LexicalReorderingBackward] = 0;
+	}
 	else
-		{
-		//we're scoring lexical reordering, so we add in the score
-		m_score[ScoreType::LexicalReordering] =  m_lexReorder->CalcScore(this);
-		}
+	{
+		m_score[ScoreType::LexicalReorderingForward] = 0;
+		m_score[ScoreType::LexicalReorderingBackward] = 0;
+		//TODO: UPDATE TO INCLUDE the following appropriate behavior when Lexical Reordering
+		//CalcScore is changed. 
+//		m_score[ScoreType::LexicalReorderingForward] = m_lexReorder->CalcScore(this,LexReorderType::Forward);
+//		m_score[ScoreType::LexicalReorderingBackward] = m_lexReorder->CalcScore(this,LexReorderType::Backward);
+	}
 
 
 
@@ -473,7 +477,8 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 								+ m_score[ScoreType::Distortion]					* staticData.GetWeightDistortion()
 								+ m_score[ScoreType::WordPenalty]					* staticData.GetWeightWordPenalty()
 								+ m_score[ScoreType::FutureScoreEnum]
-								+ m_score[ScoreType::LexicalReordering];
+								+ m_score[ScoreType::LexicalReorderingBackward]
+								+ m_score[ScoreType::LexicalReorderingForward];
 }
 
 void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
