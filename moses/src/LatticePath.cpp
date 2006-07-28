@@ -45,7 +45,7 @@ LatticePath::LatticePath(const Hypothesis *hypo)
 	}
 }
 
-LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *arc)
+LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc)
 :m_prevEdgeChanged(edgeIndex)
 {
 	for (size_t currEdge = 0 ; currEdge < edgeIndex ; currEdge++)
@@ -67,7 +67,7 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *a
 	CalcScore(copy, edgeIndex, arc);
 }
 
-LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *arc, bool /*reserve*/)
+LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc, bool /*reserve*/)
 :m_path(copy.m_path)
 ,m_prevEdgeChanged(edgeIndex)
 {
@@ -77,7 +77,7 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *a
 	CalcScore(copy, edgeIndex, arc);
 }
 
-void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc *arc)
+void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc)
 {
 #ifdef N_BEST	
 	ScoreComponentCollection2 adj = arc->GetScoreBreakdown();
@@ -106,15 +106,15 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 		for (size_t currEdge = 0 ; currEdge < sizePath ; currEdge++)
 		{
 			const Hypothesis	*hypo		= static_cast<const Hypothesis*>(m_path[currEdge]);
-			const vector<Arc*>* pAL = hypo->GetArcList();
+			const ArcList *pAL = hypo->GetArcList();
       if (!pAL) continue;
-			const vector<Arc*> &arcList = *pAL;
+			const ArcList &arcList = *pAL;
 
 			// every possible Arc to replace this edge
-			vector<Arc*>::const_iterator iterArc;
+			ArcList::const_iterator iterArc;
 			for (iterArc = arcList.begin() ; iterArc != arcList.end() ; ++iterArc)
 			{
-				const Arc *arc = *iterArc;
+				const Hypothesis *arc = *iterArc;
 				LatticePath *deviantPath = new LatticePath(*this, currEdge, arc);
 				pathColl.insert(deviantPath);
 			}
@@ -126,15 +126,15 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 		{
 			if (currEdge != m_prevEdgeChanged)
 			{
-				const LatticeEdge *edgeOrig = m_path[currEdge];
-				const vector<Arc*>* pAL = m_path[currEdge]->GetArcList();
+				const Hypothesis *edgeOrig = m_path[currEdge];
+				const ArcList *pAL = m_path[currEdge]->GetArcList();
       	if (!pAL) continue;
-				const vector<Arc*> &arcList = *pAL;
-				vector<Arc*>::const_iterator iterArc;
+				const ArcList &arcList = *pAL;
+				ArcList::const_iterator iterArc;
 
 				for (iterArc = arcList.begin() ; iterArc != arcList.end() ; ++iterArc)
 				{	// copy this Path & change 1 edge
-					const Arc *arcReplace = *iterArc;
+					const Hypothesis *arcReplace = *iterArc;
 
 					if (arcReplace != edgeOrig && arcReplace->GetPrevHypo() == edgeOrig->GetPrevHypo())
 					{

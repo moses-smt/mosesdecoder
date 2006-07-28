@@ -24,11 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <vector>
 #include <limits>
-#include "LatticeEdge.h"
 #include "Hypothesis.h"
 #include "TypeDef.h"
 
-class Arc;
 class LatticePathCollection;
 
 class LatticePath
@@ -36,23 +34,23 @@ class LatticePath
 	friend std::ostream& operator<<(std::ostream&, const LatticePath&);
 
 protected:
-	std::vector<const LatticeEdge*> m_path;
+	std::vector<const Hypothesis *> m_path;
 	size_t		m_prevEdgeChanged;
 	float			m_score[NUM_SCORES];
 
 	ScoreComponentCollection2	m_scoreBreakdown;
  
-	void CalcScore(const LatticePath &copy, size_t edgeIndex, const Arc *arc);
+	void CalcScore(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc);
 
 public:
 	LatticePath(); // not implemented
 	
 	LatticePath(const Hypothesis *hypo);
 		// create path OF pure hypo
-	LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *arc);
+	LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc);
 		// create path FROM pure hypo
 		// deviate from edgeIndex backwards
-	LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *arc, bool reserve);
+	LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc, bool reserve);
 		// create path from ANY hypo
 		// reserve arg not used. to differential from other constructor
 		// deviate from edgeIndex. however, all other edges the same
@@ -61,7 +59,7 @@ public:
 	{
 		return m_score[scoreType];
 	}
-	inline const std::vector<const LatticeEdge*> &GetEdges() const
+	inline const std::vector<const Hypothesis *> &GetEdges() const
 	{
 		return m_path;
 	}
@@ -91,7 +89,7 @@ inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
 	const size_t sizePath = path.m_path.size();
 	for (int pos = (int) sizePath - 1 ; pos >= 0 ; pos--)
 	{
-		const LatticeEdge *edge = path.m_path[pos];
+		const Hypothesis *edge = path.m_path[pos];
 		out << *edge;
 	}
 	// scores

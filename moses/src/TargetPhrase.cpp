@@ -59,7 +59,6 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 {
 	assert(weightT.size() == scoreVector.size());
 	// calc average score if non-best
-	m_inputScore=inputScore;
 	m_transScore = 0;
 	for (size_t i = 0 ; i < scoreVector.size() ; i++)
 	{
@@ -68,6 +67,7 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 	}
 
   #ifdef N_BEST
+	m_inputScore=inputScore;
 	vector<float> transScores(scoreVector.size());
 	std::transform(scoreVector.begin(),scoreVector.end(),transScores.begin(),TransformScore);
 	m_scoreBreakdown.PlusEquals(m_sp, transScores);
