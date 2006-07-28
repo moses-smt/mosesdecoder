@@ -185,7 +185,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 			// for now, assume there is just one lexical reordering model
 			timer.check("Starting to load lexical reorder table...");
- 			m_lexReorder = new LexicalReordering(lrFileVector[0], orientation, direction, condition);
+ 			m_lexReorder = new LexicalReordering(lrFileVector[0], orientation, direction, condition, m_lexWeights);
 			timer.check("Finished loading lexical reorder table.");
 		}
 		if (m_parameter.GetParam("lmodel-file").size() > 0)
@@ -283,6 +283,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	// score weights
 	m_weightDistortion				= Scan<float>( m_parameter.GetParam("weight-d")[0] );
+	m_lexWeights					= Scan<float>( m_parameter.GetParam("weight-d"));
 	m_weightWordPenalty				= Scan<float>( m_parameter.GetParam("weight-w")[0] );
 
 	TRACE_ERR("weight-d: " << m_weightDistortion << endl);

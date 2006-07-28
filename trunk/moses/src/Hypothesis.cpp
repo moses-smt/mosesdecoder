@@ -409,14 +409,7 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 }
 
 
-//void Hypothesis::CalcScore(const LMList		&lmListInitial
-//													, const LMList	&lmListEnd
-//													, float weightDistortion
-//													, float weightWordPenalty
-//													, const SquareMatrix &futureScore
-//													, const Sentence &source
-//													, LexicalReordering *m_lexreorder) 
-//=======
+
 void Hypothesis::CalcDistortionScore()
 
 {
@@ -461,12 +454,8 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 	}
 	else
 	{
-		m_score[ScoreType::LexicalReorderingForward] = 0;
-		m_score[ScoreType::LexicalReorderingBackward] = 0;
-		//TODO: UPDATE TO INCLUDE the following appropriate behavior when Lexical Reordering
-		//CalcScore is changed. 
-//		m_score[ScoreType::LexicalReorderingForward] = m_lexReorder->CalcScore(this,LexReorderType::Forward);
-//		m_score[ScoreType::LexicalReorderingBackward] = m_lexReorder->CalcScore(this,LexReorderType::Backward);
+		m_score[ScoreType::LexicalReorderingForward] = m_lexReorder->CalcScore(this,LexReorderType::Forward);
+		m_score[ScoreType::LexicalReorderingBackward] = m_lexReorder->CalcScore(this,LexReorderType::Backward);
 	}
 
 
