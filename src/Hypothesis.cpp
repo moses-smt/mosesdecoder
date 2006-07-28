@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "Hypothesis.h"
 #include "Util.h"
-#include "Arc.h"
 #include "SquareMatrix.h"
 #include "LexicalReordering.h"
 #include "StaticData.h"
@@ -41,14 +40,15 @@ unsigned int Hypothesis::s_HypothesesCreated = 0;
 
 
 Hypothesis::Hypothesis(InputType const& source)
-	: LatticeEdge(Output)
+	: m_prevHypo(NULL)
+	, m_targetPhrase(Output)
 	, m_sourceCompleted(source.GetSize())
 	, m_sourceInput(source)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
 #ifdef N_BEST
-	, m_arcList(0)
+	, m_arcList(NULL)
 #endif
 	, m_id(s_HypothesesCreated++)
 {	// used for initial seeding of trans process	
@@ -57,41 +57,23 @@ Hypothesis::Hypothesis(InputType const& source)
 	ResetScore();	
 }
 
-Hypothesis::Hypothesis(const Hypothesis &copy)
-	: LatticeEdge							(Output, copy.m_prevHypo)
-	, m_sourceCompleted				(copy.m_sourceCompleted )
-	, m_sourceInput           (copy.m_sourceInput)
-	, m_currSourceWordsRange	(copy.m_currSourceWordsRange)
-	, m_currTargetWordsRange	(copy.m_currTargetWordsRange)
-	, m_wordDeleted						(false)
-#ifdef N_BEST
-	, m_arcList(0)
-#endif
-	, m_id										(s_HypothesesCreated++)
-{
-	_hash_computed = false;
-	m_targetPhrase.AddWords( copy.m_targetPhrase );
-
-	// initialize scores
-	SetScore(copy.GetScore());
-}
-
 /***
  * continue prevHypo by appending the phrases in transOpt
  */
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
-	: LatticeEdge							(Output, &prevHypo)
-
+	: m_prevHypo(&prevHypo)
+	, m_targetPhrase(Output)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
-	, m_sourceInput					(prevHypo.m_sourceInput)
+	, m_sourceInput						(prevHypo.m_sourceInput)
 	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
-	, m_currTargetWordsRange		( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
+	, m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
 														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetPhrase().GetSize())
 	, m_wordDeleted(false)
-#ifdef N_BEST
-	, m_arcList(0)
-#endif
 	, m_id(s_HypothesesCreated++)
+#ifdef N_BEST
+	, m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
+	, m_arcList(NULL)
+#endif
 {
 	const Phrase &possPhrase				= transOpt.GetTargetPhrase();
 
@@ -124,40 +106,36 @@ Hypothesis::~Hypothesis()
 {
 #ifdef N_BEST
 	if (m_arcList) {
-		RemoveAllInColl< vector<Arc*>::iterator >(*m_arcList);
+		RemoveAllInColl< ArcList::iterator >(*m_arcList);
 		delete m_arcList;
 	}
 #endif
 }
 
 #ifdef N_BEST
-void Hypothesis::AddArc(Hypothesis &loserHypo)
+void Hypothesis::AddArc(Hypothesis *loserHypo)
 {
 	if (!m_arcList) {
-		if (loserHypo.m_arcList)  // we don't have an arcList, but loser does
+		if (loserHypo->m_arcList)  // we don't have an arcList, but loser does
 		{
-			this->m_arcList = loserHypo.m_arcList;  // take ownership, we'll delete
-			loserHypo.m_arcList = 0;                // prevent a double deletion
+			this->m_arcList = loserHypo->m_arcList;  // take ownership, we'll delete
+			loserHypo->m_arcList = 0;                // prevent a double deletion
 		}
 		else
-			{ this->m_arcList = new std::vector<Arc*>(); }
+			{ this->m_arcList = new ArcList(); }
 	} else {
-		if (loserHypo.m_arcList) {  // both have an arc list: merge. delete loser
+		if (loserHypo->m_arcList) {  // both have an arc list: merge. delete loser
 			size_t my_size = m_arcList->size();
-			size_t add_size = loserHypo.m_arcList->size();
+			size_t add_size = loserHypo->m_arcList->size();
 			this->m_arcList->resize(my_size + add_size, 0);
-			std::memcpy(&(*m_arcList)[0] + my_size, &(*m_arcList)[0], add_size * sizeof(Arc *));
-			delete loserHypo.m_arcList;
-			loserHypo.m_arcList = 0;
+			std::memcpy(&(*m_arcList)[0] + my_size, &(*m_arcList)[0], add_size * sizeof(Hypothesis *));
+			delete loserHypo->m_arcList;
+			loserHypo->m_arcList = 0;
 		} else { // loserHypo doesn't have any arcs
 		  // DO NOTHING
 		}
 	}
-	Arc *arc = new Arc(loserHypo.m_score
-										, loserHypo.GetScoreBreakdown()
-                    , loserHypo.GetPhrase()
-                    , loserHypo.GetPrevHypo());
-	m_arcList->push_back(arc);
+	m_arcList->push_back(loserHypo);
 }
 #endif
 
@@ -438,8 +416,6 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 	}
 }
 
-
-
 void Hypothesis::CalcDistortionScore()
 
 {
@@ -455,6 +431,14 @@ void Hypothesis::CalcDistortionScore()
 		// distortions scores of all previous partial translations
 		m_score[ScoreType::Distortion]	-=  (float) currRange.CalcDistortion(prevRange) ;
 	}
+}
+
+void Hypothesis::ResetScore()
+{
+#ifdef N_BEST
+	m_scoreBreakdown.ZeroAll();
+#endif
+  std::memset(m_score, 0, sizeof(float) * NUM_SCORES);
 }
 
 /***

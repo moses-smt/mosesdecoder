@@ -31,8 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
 #include "LanguageModel.h"
-#include "Arc.h"
-#include "LatticeEdge.h"
 #include "ScoreComponentCollection.h"
 #include "LexicalReordering.h"
 #include "Input.h"
@@ -42,8 +40,11 @@ class StaticData;
 class TranslationOption;
 class WordsRange;
 class WordDeletionTable;
+class Hypothesis;
 
-class Hypothesis : public LatticeEdge
+typedef std::vector<Hypothesis*> ArcList;
+
+class Hypothesis
 {
 	friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
 private:
@@ -51,8 +52,10 @@ private:
   unsigned char m_compSignature[16];
 
 protected:
-		// phrase in target language. factors completed will be superset 
-		//				of those in dictionary
+	float						m_score[NUM_SCORES];
+
+	const Hypothesis* m_prevHypo;
+	Phrase					m_targetPhrase; //target phrase being created at the current decoding step
 	WordsBitmap				m_sourceCompleted;
 	//TODO: how to integrate this into confusion network framework; what if
 	//it's a confusion network in the end???
@@ -61,7 +64,9 @@ protected:
 	WordsRange				m_currSourceWordsRange, m_currTargetWordsRange;
   bool							m_wordDeleted;
 #ifdef N_BEST
-	std::vector<Arc*>*	m_arcList; //all arcs that end at the same lattice point as we do
+	const Hypothesis 	*m_mainHypo;
+	ArcList 					*m_arcList; //all arcs that end at the same lattice point as we do
+	ScoreComponentCollection2 m_scoreBreakdown;	
 #endif
 
 //	 * \return whether none of the factors clash
@@ -88,11 +93,6 @@ public:
 	static unsigned int s_numNodes; // Statistics: how many hypotheses were created in total
 	int m_id;
 	
-	/***
-	 * Deep copy
-	 */
-	Hypothesis(const Hypothesis &copy);
-	// used to create clone
 	Hypothesis(InputType const& source);
 		// used for initial seeding of trans process
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
@@ -126,7 +126,12 @@ public:
 	 * return NULL if we aren't compatible with the given option
 	 */
 
-	virtual void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
+	void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
+
+	const Phrase &GetTargetPhrase() const
+	{
+		return m_targetPhrase;
+	}
 
  // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
 	inline const WordsRange &GetCurrSourceWordsRange() const
@@ -140,22 +145,26 @@ public:
 	}
 	
 	// subsequent translation should only translate this sub-phrase
-	virtual size_t GetCurrTargetLength() const
-
+	size_t GetCurrTargetLength() const
 	{
 		return m_currTargetWordsRange.GetWordsCount();
 	}
 
+	inline const float *GetScore() const
+	{
+		return m_score;
+	}
+	inline float GetScore(ScoreType::ScoreType scoreType) const
+	{
+		return m_score[scoreType];
+	}
+	inline void SetScore(const float score[])
+	{
+		std::memcpy(m_score, score, NUM_SCORES * sizeof(float));
+	}
+	void ResetScore();
 
-//	void CalcScore(const LMList &lmListInitial
-//							, const LMList &lmListEnd
-//							, float weightDistortion
-//							, float weightWordPenalty
-//							, const SquareMatrix &futureScore
-//							, const Sentence &source
-//							, LexicalReordering *m_lexreorder=NULL);
-
-	virtual void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore);
+	void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore);
 
 	int GetId() const;
 
@@ -176,7 +185,7 @@ public:
 		return m_sourceInput;
 	}
 
-	// curr - pos is relative from CURRENT hypothesis's starting index
+	// curr - pos is relative from CURRENT hypothesis's starting ind ex
   // (ie, start of sentence would be some negative number, which is
   // not allowed- USE WITH CAUTION)
 	inline FactorArray &GetCurrFactorArray(size_t pos)
@@ -258,20 +267,28 @@ public:
 	TO_STRING;
 
 #ifdef N_BEST
-	void AddArc(Hypothesis &loserHypo);
+	inline void SetMainHypo(const Hypothesis *hypo)
+	{
+		m_mainHypo = hypo;
+	}
+	void AddArc(Hypothesis *loserHypo);
 	inline void InitializeArcs()
 	{
 		if (!m_arcList) return;
-		std::vector<Arc*>::iterator iter = m_arcList->begin();
+		ArcList::iterator iter = m_arcList->begin();
 		for (; iter != m_arcList->end() ; ++iter)
 		{
-			Arc *arc = *iter;
-			arc->SetMainHypo(*this);
+			Hypothesis *arc = *iter;
+			arc->SetMainHypo(this);
 		}
 	}
-	inline const std::vector<Arc*>* GetArcList() const
+	inline const ArcList* GetArcList() const
 	{
 		return m_arcList;
+	}
+	const ScoreComponentCollection2& GetScoreBreakdown() const
+	{
+		return m_scoreBreakdown;
 	}
 #endif
 };
