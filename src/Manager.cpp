@@ -216,7 +216,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 			// some additional logging
 			if(m_staticData.GetVerboseLevel() > 2) 
 				{
-					if(m_hypoStack[wordsTranslated].getBestScore() == newHypo->GetScore(ScoreType::Total))
+					if(m_hypoStack[wordsTranslated].GetBestScore() == newHypo->GetScore(ScoreType::Total))
 						{
 							cout << "new best estimate for this stack" << endl;
 						}
