@@ -77,8 +77,8 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 }
 
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase
-																		 , list<const PhraseDictionaryBase*>			&allPhraseDictionary
-																		 , list<const GenerationDictionary*>	&allGenerationDictionary)
+																		 , list<const PhraseDictionaryBase*>			&/*allPhraseDictionary*/
+																		 , list<const GenerationDictionary*>	&/*allGenerationDictionary*/)
 : m_phrase(targetPhrase)
 ,m_sourceWordsRange	(wordsRange)
 ,m_scoreTrans(0)

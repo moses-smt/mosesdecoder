@@ -67,7 +67,7 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *a
 	CalcScore(copy, edgeIndex, arc);
 }
 
-LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *arc, bool reserve)
+LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Arc *arc, bool /*reserve*/)
 :m_path(copy.m_path)
 ,m_prevEdgeChanged(edgeIndex)
 {

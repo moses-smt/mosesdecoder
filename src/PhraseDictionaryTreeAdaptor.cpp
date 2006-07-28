@@ -40,6 +40,8 @@ struct PDTAimp {
 	{
 		for(size_t j=0;j<m_input.size();++j)
 			{
+				assert(m_input[j]<NUM_FACTORS);
+				assert(w[m_input[j]]);
 				if(s.size()) s+="|";
 				s+=w[m_input[j]]->ToString();
 			}
@@ -115,19 +117,8 @@ struct PDTAimp {
 				tCands.push_back(targetPhrase);
 			}
 
-		// prune target candidates and sort according to score
-		std::vector<std::pair<float,size_t> >::iterator nth=costs.end();
-		if(m_obj->m_maxTargetPhrase>0 && costs.size()>m_obj->m_maxTargetPhrase) {
-			nth=costs.begin()+m_obj->m_maxTargetPhrase;
-			std::nth_element(costs.begin(),nth,costs.end(),std::greater<std::pair<float,size_t> >());
-		}
-		std::sort(costs.begin(),nth,std::greater<std::pair<float,size_t> >());
+		TargetPhraseCollection *rv=PruneTargetCandidates(tCands,costs);
 
-		// convert into TargerPhraseCollection
-		TargetPhraseCollection *rv=new TargetPhraseCollection;
-		for(std::vector<std::pair<float,size_t> >::iterator i=costs.begin();i!=nth;++i) 
-			rv->push_back(tCands[i->second]);
-	
 		if(rv->empty()) 
 			{
 				delete rv;
@@ -318,19 +309,8 @@ struct PDTAimp {
 						tCands.push_back(targetPhrase);
 					}
 
-				// prune target candidates and sort according to score
-				std::vector<std::pair<float,size_t> >::iterator nth=costs.end();
-				if(m_obj->m_maxTargetPhrase>0 && costs.size()>m_obj->m_maxTargetPhrase) {
-					nth=costs.begin()+m_obj->m_maxTargetPhrase;
-					std::nth_element(costs.begin(),nth,costs.end(),std::greater<std::pair<float,size_t> >());
-				}
-				std::sort(costs.begin(),nth,std::greater<std::pair<float,size_t> >());
+				TargetPhraseCollection *rv=PruneTargetCandidates(tCands,costs);
 
-				// convert into TargerPhraseCollection
-				TargetPhraseCollection *rv=new TargetPhraseCollection;
-				for(std::vector<std::pair<float,size_t> >::iterator it=costs.begin();it!=nth;++it) 
-					rv->push_back(tCands[it->second]);
-				
 				if(rv->empty()) 
 					delete rv;
 				else

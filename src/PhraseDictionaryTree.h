@@ -9,12 +9,11 @@
 #include "Dictionary.h"
 
 class Phrase;
-class FactorCollection;
 class Word;
 class ConfusionNet;
 
 // a FactorTgtCand is the Factor-phrase and the vector of scores
-typedef std::pair<std::vector<const Factor*>,std::vector<float> > FactorTgtCand;
+//typedef std::pair<std::vector<const Factor*>,std::vector<float> > FactorTgtCand;
 typedef std::pair<std::vector<std::string const*>,std::vector<float> > StringTgtCand;
 
 
@@ -23,23 +22,13 @@ class PPimp;
 
 class PhraseDictionaryTree : public Dictionary {
 	PDTimp *imp; //implementation
-	FactorType m_inFactorType,m_outFactorType;
 public:
-	PhraseDictionaryTree(size_t noScoreComponent,
-											 FactorCollection* factorCollection=0,
-											 FactorType inputFactorType=Surface,
-											 FactorType outputFactorType=Surface);
+	PhraseDictionaryTree(size_t noScoreComponent);
 
 	virtual ~PhraseDictionaryTree();
 
 	DecodeType GetDecodeType() const {return Translate;}
 	size_t GetSize() const {return 0;}
-	FactorType GetInputFactorType() const {return m_inFactorType;}
-	FactorType GetOutputFactorType() const {return m_outFactorType;}
-	
-	void SetInputFactorType(FactorType t) {m_inFactorType=t;}
-	void SetOutputFactorType(FactorType t) {m_outFactorType=t;}
-	void SetFactorCollection(FactorCollection*);
 
 	// convert from ascii phrase table format 
 	// note: only creates table, does not keep it in memory
@@ -55,14 +44,11 @@ public:
 	/**************************************
 	 *   access with full source phrase   *
 	 **************************************/
-	// get the target candidates for a given factor sequence/phrase
-	void GetTargetCandidates(const std::vector<const Factor*>& src,
-													 std::vector<FactorTgtCand>& rv) const;
-
 	// print target candidates for a given phrase, mainly for debugging
 	void PrintTargetCandidates(const std::vector<std::string>& src,
 														 std::ostream& out) const;
 
+	// get the target candidates for a given phrase
 	void GetTargetCandidates(const std::vector<std::string>& src,
 													 std::vector<StringTgtCand>& rv) const;
 
@@ -93,8 +79,6 @@ public:
 	// get the target candidates for a given prefix pointer
 	// requirement: the pointer has to evaluate to true
 	void GetTargetCandidates(PrefixPtr p,
-													 std::vector<FactorTgtCand>& rv) const;
-	void GetTargetCandidates(PrefixPtr p,
 													 std::vector<StringTgtCand>& rv) const;
 
 	// print target candidates for a given prefix pointer to a stream, mainly 
@@ -102,12 +86,5 @@ public:
 	void PrintTargetCandidates(PrefixPtr p,std::ostream& out) const;
 	const std::string GetScoreProducerDescription() const;
 };
-
-
-void GenerateCandidates(const ConfusionNet& src,
-												const std::vector<PhraseDictionaryTree const*>& pdicts,
-												const std::vector<std::vector<float> >& weights,
-												int verbose=0) ;
-
 
 #endif /*PHRASEDICTIONARYTREE_H_*/
