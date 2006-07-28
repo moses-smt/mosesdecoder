@@ -141,7 +141,7 @@ public:
 
 	// this function will recombine hypotheses silently!  There is no record
 	// (could affect n-best list generation...TODO)
-	bool AddPrune(Hypothesis *hypothesis);
+	void AddPrune(Hypothesis *hypothesis);
       // AddPrune adds the hypo, but only if within thresholds (beamThr+stackSize)
 
 	inline ~HypothesisCollection()

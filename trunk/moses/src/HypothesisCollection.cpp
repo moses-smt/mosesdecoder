@@ -59,13 +59,14 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 	}
 }
 
-bool HypothesisCollection::AddPrune(Hypothesis *hypo)
+void HypothesisCollection::AddPrune(Hypothesis *hypo)
 { // if returns false, hypothesis not used
 	// caller must take care to delete unused hypo to avoid leak
 
-	if (hypo->GetScore(ScoreType::Total) < m_worstScore) {
-		StaticData::Instance()->GetSentenceStats().numPruned++;
-		return false;
+	if (hypo->GetScore(ScoreType::Total) < m_worstScore)
+	{ // really bad score. don't bother adding hypo into collection
+		delete hypo;
+		return;
 	}
 
 	// over threshold		
@@ -74,7 +75,7 @@ bool HypothesisCollection::AddPrune(Hypothesis *hypo)
 	if (iter == m_hypos.end())
 	{ // nothing found. add to collection
 		Add(hypo);
-		return true;
+		return;
   }
 
 	StaticData::Instance()->GetSentenceStats().numRecombinations++;
@@ -83,20 +84,24 @@ bool HypothesisCollection::AddPrune(Hypothesis *hypo)
 	// keep the best 1
 	Hypothesis *hypoExisting = *iter;
 	if (hypo->GetScore(ScoreType::Total) > hypoExisting->GetScore(ScoreType::Total))
-	{
-#ifdef N_BEST
-		hypo->AddArc(**iter);
-#endif
-		Remove(iter);
-		Add(hypo);
-		return true;
+	{ // incoming hypo is better than the 1 we have
+		#ifdef N_BEST
+			hypo->AddArc(hypoExisting);
+			Detach(iter);
+		#else
+			Remove(iter);
+		#endif
+		Add(hypo);		
+		return;
 	}
 	else
 	{ // already storing the best hypo. discard current hypo 
-#ifdef N_BEST
-		(*iter)->AddArc(*hypo);
-#endif
-		return false;
+		#ifdef N_BEST
+			(*iter)->AddArc(hypo);
+		#else
+			delete hypo;
+		#endif
+		return;
 	}
 }
 

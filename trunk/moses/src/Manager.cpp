@@ -219,27 +219,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 
 	// add to hypothesis stack
 	size_t wordsTranslated = newHypo->GetWordsBitmap().GetWordsCount();	
-	if (m_hypoStack[wordsTranslated].AddPrune(newHypo))
-		{
-			// some additional logging
-			if(m_staticData.GetVerboseLevel() > 2) 
-				{
-					if(m_hypoStack[wordsTranslated].GetBestScore() == newHypo->GetScore(ScoreType::Total))
-						{
-							cout << "new best estimate for this stack" << endl;
-						}
-					cout << "added hypothesis on stack " << wordsTranslated 
-							 << " now size "<<m_hypoStack[wordsTranslated].size() << endl << endl;
-				}
-		}
-	else 
-		{
-			delete newHypo;
-			if(m_staticData.GetVerboseLevel() > 2) 
-				{
-					cout << "below threshold, discarded" << endl << endl;
-				}
-		}	
+	m_hypoStack[wordsTranslated].AddPrune(newHypo);
 }
 
 /**

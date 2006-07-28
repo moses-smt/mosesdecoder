@@ -110,7 +110,9 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bo
 	if (hypo != NULL)
 	{
 		TRACE_ERR("BEST HYPO: " << *hypo << endl);
-		TRACE_ERR(hypo->GetScoreBreakdown() << std::endl);
+		#ifdef NBEST
+			TRACE_ERR(hypo->GetScoreBreakdown() << std::endl);
+		#endif
 		Backtrack(hypo);
 
 		OutputSurface(cout, hypo, reportSourceSpan, reportAllFactors);
@@ -130,13 +132,13 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
 	{
 		const LatticePath &path = **iter;
-		const std::vector<const LatticeEdge*> &edges = path.GetEdges();
+		const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
 		// out the surface factor of the translation
 		m_nBestFile << translationId << " ||| ";
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
-			const LatticeEdge &edge = *edges[currEdge];
+			const Hypothesis &edge = *edges[currEdge];
 			OutputSurface(m_nBestFile, edge.GetTargetPhrase(), false); // false for not reporting all factors
 		}
 		m_nBestFile << " ||| ";
