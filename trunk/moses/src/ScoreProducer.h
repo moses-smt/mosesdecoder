@@ -1,6 +1,8 @@
 #ifndef _SCORE_PRODUCER_H_
 #define _SCORE_PRODUCER_H_
 
+#include <string>
+
 class ScoreIndexManager;
 
 // to keep track of the various things that can produce a score,
