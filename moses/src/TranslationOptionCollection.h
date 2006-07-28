@@ -91,6 +91,7 @@ protected:
 															, float weightWordPenalty);
 
 	void ComputeFutureScores(size_t verboseLevel);	
+	void Prune();
 
 	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
 	{
