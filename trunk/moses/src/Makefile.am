@@ -1,10 +1,10 @@
 lib_LIBRARIES = libmoses.a
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES 
 libmoses_a_SOURCES = \
-	Arc.cpp \
 	ConfusionNet.cpp \
 	Dictionary.cpp \
 	DistortionOrientation.cpp \
+	DummyScoreProducers.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
@@ -18,7 +18,6 @@ libmoses_a_SOURCES = \
 	LMList.cpp \
 	LanguageModel.cpp \
 	LanguageModelFactory.cpp \
-	LatticeEdge.cpp \
 	LatticePath.cpp \
 	LexicalReordering.cpp \
 	Manager.cpp \

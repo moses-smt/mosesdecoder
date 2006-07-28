@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <assert.h>
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
+#include "DummyScoreProducers.h"
 #include "Hypothesis.h"
 #include "Util.h"
 #include "SquareMatrix.h"
@@ -419,18 +420,15 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 void Hypothesis::CalcDistortionScore()
 
 {
-	const WordsRange &prevRange = m_prevHypo->GetCurrSourceWordsRange()
-								, &currRange	= GetCurrSourceWordsRange();
-				
-	if (prevRange.GetWordsCount() == 0)
-	{ // 1st hypothesis with translated phrase. NOT the seed hypo.
-		m_score[ScoreType::Distortion]	=  - (float) currRange.GetStartPos();
-	}
-	else
-	{ // add distortion score of current translated phrase to
-		// distortions scores of all previous partial translations
-		m_score[ScoreType::Distortion]	-=  (float) currRange.CalcDistortion(prevRange) ;
-	}
+	const DistortionScoreProducer *dsp = StaticData::Instance()->GetDistortionScoreProducer();
+	float distortionScore = dsp->CalculateDistortionScore(
+			m_prevHypo->GetCurrSourceWordsRange(),
+			this->GetCurrSourceWordsRange()
+     );
+	m_score[ScoreType::Distortion]	+= distortionScore;
+#ifdef N_BEST
+	m_scoreBreakdown.PlusEquals(dsp, distortionScore);
+#endif
 }
 
 void Hypothesis::ResetScore()
@@ -454,6 +452,9 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 
 	// WORD PENALTY
 	m_score[ScoreType::WordPenalty] = - (float) GetSize();
+#ifdef N_BEST
+	m_scoreBreakdown.PlusEquals(StaticData::Instance()->GetWordPenaltyProducer(), - (float) GetSize()); 
+#endif
 
 	// FUTURE COST
 	CalcFutureScore(futureScore);
