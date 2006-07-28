@@ -3,12 +3,22 @@
 
 #include <list>
 #include "TranslationOption.h"
+#include "Util.h"
 
-class PartialTranslOptColl : public std::list< TranslationOption >
+class PartialTranslOptColl : public std::list< TranslationOption* >
 {
 public:
-	void Add(const TranslationOption &partialTranslOpt)
+	~PartialTranslOptColl()
+	{
+		RemoveAllInColl<PartialTranslOptColl::iterator>(*this);
+	}
+	
+	void Add(TranslationOption *partialTranslOpt)
 	{
 		push_back(partialTranslOpt);
 	}
+	void DetachAll()
+	{
+		clear();
+	}	
 };
