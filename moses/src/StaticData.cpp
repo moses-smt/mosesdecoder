@@ -47,9 +47,9 @@ StaticData* StaticData::s_instance(0);
 
 StaticData::StaticData()
 :m_languageModel(2)
+,m_lexReorder(NULL)
 ,m_weightInput(0.0)
 ,m_inputOutput(NULL)
-,m_lexReorder(NULL)
 ,m_fLMsLoaded(false)
 ,m_inputType(0)
 {
@@ -112,7 +112,13 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	{
 		m_inputFactorOrder.push_back(Scan<FactorType>(inputFactorVector[i]));
 	}
-	
+	if(m_inputFactorOrder.empty())
+		{
+			std::cerr<<"ERROR: no input factor specified in config file"
+				" (param input-factors) -> abort!\n";
+			abort();
+		}
+
 	//source word deletion
 	if(m_parameter.GetParam("phrase-drop-allowed").size() > 0)
 	{
@@ -305,7 +311,8 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	if(m_parameter.GetParam("weight-i").size())
 		m_weightInput=Scan<float>(m_parameter.GetParam("weight-i")[0]);
-	TRACE_ERR("input weight is "<<m_weightInput<<"\n");
+	if(m_inputType)
+		TRACE_ERR("input weight is "<<m_weightInput<<"\n");
 	
 	return true;
   
@@ -427,6 +434,7 @@ void StaticData::LoadPhraseTables(bool filter
 
 		const vector<string> &translationVector = m_parameter.GetParam("ttable-file");
 		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter.GetParam("ttable-limit"));
+		cerr<<"ttable-limits: ";copy(maxTargetPhrase.begin(),maxTargetPhrase.end(),ostream_iterator<size_t>(cerr," "));cerr<<"\n";
 
 		size_t index = 0;
 		size_t totalPrevNoScoreComponent = 0;		

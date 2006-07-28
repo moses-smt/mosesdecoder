@@ -12,6 +12,9 @@
 #include "FactorCollection.h"
 #include "Phrase.h"
 #include "InputFileStream.h"
+#include "Timer.h"
+
+Timer timer;
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out,const std::vector<T>& x)
@@ -86,20 +89,20 @@ int main(int argc,char **argv) {
 			std::cerr<<"processing ptree for\n";
 
 			if(ftts.size()==1 && ftts[0].first=="-") {
-				PhraseDictionaryTree pdt(noScoreComponent,&factorCollection);
+				PhraseDictionaryTree pdt(noScoreComponent);
 				pdt.Create(std::cin,fto);}
 			else 
 				{
-
+#if 0
 					std::vector<PhraseDictionaryTree const*> pdicts;
 					std::vector<FactorType> factorOrder;
 					for(size_t i=0;i<ftts.size();++i) {
+
 						PhraseDictionaryTree *pdtptr=new PhraseDictionaryTree(noScoreComponent,
 																																	&factorCollection,
 																																	getFactorType(atoi(ftts[i].second.first)),
 																																	getFactorType(atoi(ftts[i].second.second))
 																																	);
-						
 						factorOrder.push_back(pdtptr->GetInputFactorType());
 						PhraseDictionaryTree &pdt=*pdtptr;
 						pdicts.push_back(pdtptr);
@@ -180,8 +183,11 @@ int main(int argc,char **argv) {
 						}
 
 					}
-
-				}		
+#else
+					std::cerr<<"ERROR: these functions are currently broken...\n";
+					exit(1);
+#endif
+				}
 	}
 	
 }

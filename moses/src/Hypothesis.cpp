@@ -504,7 +504,8 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 //		m_score[ScoreType::FutureScoreEnum] += futureScore[start][m_sourceCompleted.GetSize() - 1];
 		m_score[ScoreType::FutureScoreEnum] += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
 	}
-	
+
+	// add future costs for distortion model
 	//	m_score[ScoreType::FutureScoreEnum] += m_sourceCompleted.GetFutureCosts(m_currSourceWordsRange.GetEndPos()) * StaticData::Instance()->GetWeightDistortion();
 	
 }

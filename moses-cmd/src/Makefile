@@ -70,17 +70,17 @@ DIST_SOURCES = $(am__moses_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/ws06/cdyer/cvs-moses-tip/moses-cmd/missing --run aclocal-1.9
+ACLOCAL = ${SHELL} /home/ws06/rzens/workspace/Jul27/moses-cmd/missing --run aclocal-1.9
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /home/ws06/cdyer/cvs-moses-tip/moses-cmd/missing --run tar
-AUTOCONF = ${SHELL} /home/ws06/cdyer/cvs-moses-tip/moses-cmd/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/ws06/cdyer/cvs-moses-tip/moses-cmd/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/ws06/cdyer/cvs-moses-tip/moses-cmd/missing --run automake-1.9
+AMTAR = ${SHELL} /home/ws06/rzens/workspace/Jul27/moses-cmd/missing --run tar
+AUTOCONF = ${SHELL} /home/ws06/rzens/workspace/Jul27/moses-cmd/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/ws06/rzens/workspace/Jul27/moses-cmd/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/ws06/rzens/workspace/Jul27/moses-cmd/missing --run automake-1.9
 AWK = gawk
 BUILD_MYSQL_SUPPORT_FALSE = 
 BUILD_MYSQL_SUPPORT_TRUE = #
-CPPFLAGS =  -I/home/ws06/cdyer/boost-stage -I/home/ws06/cdyer/boost-stage/include -I/home/ws06/cdyer/cvs-moses-tip/moses-cmd/../moses/src -I/home/ws06/cdyer/srilm/include
+CPPFLAGS =  -I/home/ws06/cdyer/boost-stage -I/home/ws06/cdyer/boost-stage/include -I/home/ws06/rzens/workspace/Jul27/moses/src -I/home/ws06/cdyer/srilm/include
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
@@ -101,11 +101,11 @@ INTERNAL_LM_FALSE =
 INTERNAL_LM_TRUE = #
 IRST_LM_FALSE = 
 IRST_LM_TRUE = #
-LDFLAGS = -static -L/home/ws06/cdyer/boost-stage/lib -L/home/ws06/cdyer/boost-stage/stage/lib -L/home/ws06/cdyer/cvs-moses-tip/moses-cmd/../moses/src -L/home/ws06/cdyer/srilm/lib/i686
+LDFLAGS = -static -L/home/ws06/cdyer/boost-stage/lib -L/home/ws06/cdyer/boost-stage/stage/lib -L/home/ws06/rzens/workspace/Jul27/moses/src -L/home/ws06/cdyer/srilm/lib/i686
 LIBOBJS = 
 LIBS =  -lmoses -loolm -ldstruct -lmisc -lboost_iostreams-gcc-mt -lboost_filesystem-gcc-mt -lboost_thread-gcc-mt -lz
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/ws06/cdyer/cvs-moses-tip/moses-cmd/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/ws06/rzens/workspace/Jul27/moses-cmd/missing --run makeinfo
 MYSQLCLIENT_CPPFLAGS = 
 MYSQLCLIENT_LDFLAGS = 
 MYSQLCLIENT_LIBS = 
@@ -141,7 +141,7 @@ exec_prefix = ${prefix}
 host_alias = 
 includedir = ${prefix}/include
 infodir = ${prefix}/info
-install_sh = /home/ws06/cdyer/cvs-moses-tip/moses-cmd/install-sh
+install_sh = /home/ws06/rzens/workspace/Jul27/moses-cmd/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localstatedir = ${prefix}/var
@@ -171,9 +171,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  src/Makefile
+	  $(AUTOMAKE) --foreign  src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

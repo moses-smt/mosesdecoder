@@ -126,8 +126,10 @@ public:
 	{
 		size_t id = sp->GetScoreBookkeepingID();
 		const size_t begin = m_sim->GetBeginIndex(id);
+#ifndef NDEBUG
 		const size_t end = m_sim->GetEndIndex(id);
 		assert(end-begin == 1);
+#endif
 		return m_scores[begin];
 	}
 
