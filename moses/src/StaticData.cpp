@@ -310,7 +310,8 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	m_maxNoTransOptPerCoverage = (m_parameter.GetParam("max-trans-opt-per-coverage").size() > 0)
 				? Scan<size_t>(m_parameter.GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
-	
+	TRACE_ERR("max translation options per coverage span: "<<m_maxNoTransOptPerCoverage<<"\n");
+
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH
 	if (m_parameter.GetParam("drop-unknown").size() == 1)

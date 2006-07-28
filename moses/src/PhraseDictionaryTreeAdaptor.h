@@ -49,7 +49,6 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
 	// clean up temporary memory etc.
 	void CleanUp();
 
-
 	void InitializeForInput(InputType const& source);
 
 	// change model scaling factors
