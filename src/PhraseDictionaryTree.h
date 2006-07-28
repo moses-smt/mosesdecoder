@@ -12,10 +12,7 @@ class Phrase;
 class Word;
 class ConfusionNet;
 
-// a FactorTgtCand is the Factor-phrase and the vector of scores
-//typedef std::pair<std::vector<const Factor*>,std::vector<float> > FactorTgtCand;
 typedef std::pair<std::vector<std::string const*>,std::vector<float> > StringTgtCand;
-
 
 class PDTimp;
 class PPimp;

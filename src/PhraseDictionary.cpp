@@ -56,7 +56,7 @@ const std::string PhraseDictionaryBase::GetScoreProducerDescription() const
 
 unsigned int PhraseDictionaryBase::GetNumScoreComponents() const
 {
-	return this->GetNoScoreComponents();
+	return this->GetNoScoreComponents()+1;
 }
 
 void PhraseDictionary::Load(const std::vector<FactorType> &input

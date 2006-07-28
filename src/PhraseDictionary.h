@@ -52,7 +52,7 @@ class PhraseDictionaryBase : public Dictionary, public ScoreProducer {
 	
 	virtual void InitializeForInput(InputType const&) {}
 	const std::string GetScoreProducerDescription() const;
-  unsigned int GetNumScoreComponents() const;
+	unsigned int GetNumScoreComponents() const;
 
 	virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
 

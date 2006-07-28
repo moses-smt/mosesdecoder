@@ -33,7 +33,6 @@ using namespace std;
 TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionaryBase *phraseDictionary)
 :Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0)
 #ifdef N_BEST
-	,m_inputScore(0.0)
 	,m_sp(phraseDictionary)
 #endif
 {
@@ -42,7 +41,6 @@ TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionaryBase
 TargetPhrase::TargetPhrase(FactorDirection direction)
 	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0)
 #ifdef N_BEST
-	,m_inputScore(0.0)
 	,m_sp(0)
 #endif
 {
@@ -65,11 +63,12 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 		float score =  TransformScore(scoreVector[i]);
 		m_transScore += score * weightT[i];
 	}
+	m_transScore += inputScore * weightInput;
 
   #ifdef N_BEST
-	m_inputScore=inputScore;
 	vector<float> transScores(scoreVector.size());
 	std::transform(scoreVector.begin(),scoreVector.end(),transScores.begin(),TransformScore);
+	transScores.push_back(inputScore);
 	m_scoreBreakdown.PlusEquals(m_sp, transScores);
   #endif
 
@@ -101,7 +100,6 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 		}
 	}
   m_ngramScore = totalNgramScore;
-	m_transScore += inputScore * weightInput;
 
 	m_fullScore = m_transScore + totalFutureScore + totalFullScore
 							- (this->GetSize() * weightWP);	 // word penalty
@@ -110,6 +108,14 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 void TargetPhrase::SetWeights(const vector<float> &weightT)
 {
 #ifdef N_BEST
+	// calling this function in case of confusion net input is undefined
+	assert(StaticData::Instance()->GetInputType()==0); 
+	
+	/* one way to fix this, you have to make sure the weightT contains (in 
+     addition to the usual phrase translation scaling factors) the input 
+     weight factor as last element
+	*/
+
 	m_transScore = m_scoreBreakdown.PartialInnerProduct(m_sp, weightT);
 #endif
 }

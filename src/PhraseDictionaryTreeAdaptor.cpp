@@ -40,7 +40,7 @@ struct PDTAimp {
 	{
 		for(size_t j=0;j<m_input.size();++j)
 			{
-				assert(m_input[j]<NUM_FACTORS);
+				assert(static_cast<size_t>(m_input[j]) < static_cast<size_t>(NUM_FACTORS));
 				assert(w[m_input[j]]);
 				if(s.size()) s+="|";
 				s+=w[m_input[j]]->ToString();
