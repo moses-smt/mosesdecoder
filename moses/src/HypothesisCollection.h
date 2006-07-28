@@ -105,9 +105,6 @@ public:
 	const_iterator end() const { return m_hypos.end(); }
 	size_t size() const { return m_hypos.size(); }
 
-	//returns the score of the best hypothesis
-	float getBestScore() const;
-
 	inline HypothesisCollection()
 	{
 		m_bestScore = -std::numeric_limits<float>::infinity();
@@ -131,7 +128,11 @@ public:
 	{
 		m_beamThreshold = beamThreshold;
 	}
-
+	inline float GetBestScore() const
+	{
+		return m_bestScore;
+	}
+	
 	//void Prune();
 	void PruneToSize(size_t newSize);
 
