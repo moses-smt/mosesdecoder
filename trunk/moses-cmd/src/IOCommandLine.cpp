@@ -39,7 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Hypothesis.h"
 #include "WordsRange.h"
 #include "LatticePathList.h"
-#include "ScoreColl.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -110,6 +110,7 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bo
 	if (hypo != NULL)
 	{
 		TRACE_ERR("BEST HYPO: " << *hypo << endl);
+		TRACE_ERR(hypo->GetScoreBreakdown() << std::endl);
 		Backtrack(hypo);
 
 		OutputSurface(cout, hypo, reportSourceSpan, reportAllFactors);
@@ -145,25 +146,19 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		m_nBestFile << path.GetScore(ScoreType::Distortion) << " ";
 
 		// lm
-		ScoreColl::const_iterator iterScoreColl;
-
-		const ScoreColl &lmScoreComponent = path.GetLMScoreComponent();
-		for (iterScoreColl = lmScoreComponent.begin() ; iterScoreColl != lmScoreComponent.end() ; ++iterScoreColl)
-		{
-			m_nBestFile << iterScoreColl->second << " ";
+		const LMList& lml = StaticData::Instance()->GetAllLM();
+		LMList::const_iterator lmi = lml.begin();
+		for (; lmi != lml.end(); ++lmi) {
+			m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
 		}
 
 		// trans components
-		const ScoreComponentCollection 
-						&transScoreComponent = path.GetTranslationScoreComponent();
-
-		ScoreComponentCollection::const_iterator iterTrans;
-		for (iterTrans = transScoreComponent.begin() ; iterTrans != transScoreComponent.end() ; ++iterTrans)
-		{
-			const ScoreComponent &transScore	= iterTrans->second;
-			for (size_t i = 0 ; i < transScore.GetNumScoreComponents() ; i++)
-			{
-				m_nBestFile << transScore[i] << " ";
+		vector<PhraseDictionaryBase*> pds = StaticData::Instance()->GetPhraseDictionaries();
+		vector<PhraseDictionaryBase*>::reverse_iterator i = pds.rbegin();
+		for (; i != pds.rend(); ++i) {
+			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*i);
+			for (size_t j = 0; j<scores.size(); j++) {
+				m_nBestFile << scores[j] << " ";
 			}
 		}
 		
@@ -171,11 +166,13 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		m_nBestFile << path.GetScore(ScoreType::WordPenalty) << " ";
 		
 		// generation
-		const ScoreColl &generationScoreColl = path.GetGenerationScoreComponent();
-		for (iterScoreColl = generationScoreColl.begin() ; iterScoreColl != generationScoreColl.end() ; ++iterScoreColl)
-		{
-			float genScore	= iterScoreColl->second;
-			m_nBestFile << genScore << " ";
+		vector<GenerationDictionary*> gds = StaticData::Instance()->GetGenerationDictionaries();
+		vector<GenerationDictionary*>::reverse_iterator gi = gds.rbegin();
+		for (; gi != gds.rend(); ++gi) {
+			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*gi);
+			for (size_t j = 0; j<scores.size(); j++) {
+				m_nBestFile << scores[j] << " ";
+			}
 		}
 		
 		// total						
