@@ -15,8 +15,8 @@ using namespace std;
  */
 LexicalReordering::LexicalReordering(const std::string &filename, 
 																		 int orientation, int direction,
-																		 int condition) :
-	m_orientation(orientation), m_direction(direction), m_condition(condition),
+																		 int condition, const std::vector<float> weights) :
+	m_orientation(orientation), m_direction(direction), m_condition(condition), m_weights(weights),
 	m_filename(filename)
 {
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
@@ -93,12 +93,13 @@ void LexicalReordering::PrintTable()
 		}
 }
 
-float LexicalReordering::GetProbability(Hypothesis *hypothesis, int orientation)
+float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 {
 	vector<float> val;
 	//this phrase declaration is to get around const mumbo jumbo and let me call a
 	//"convert to a string" method 
 	Phrase myphrase = hypothesis->GetPhrase();
+	int orientation = DistortionOrientation::GetOrientation(hypothesis, direction);
 	if(m_condition==LexReorderType::Fe)
 	{
 	//this key string is be F+'|||'+E from the hypothesis	
@@ -115,7 +116,7 @@ float LexicalReordering::GetProbability(Hypothesis *hypothesis, int orientation)
 	int index = 0;
 	if(m_orientation==DistortionOrientationType::Msd)
 	{
-		if(m_direction==LexReorderType::Backward)
+		if(direction==LexReorderType::Backward)
 		{
 			if(orientation==DistortionOrientationType::MONO)
 			{
@@ -149,7 +150,7 @@ float LexicalReordering::GetProbability(Hypothesis *hypothesis, int orientation)
 	}
 	else
 	{
-		if(m_direction==LexReorderType::Backward)
+		if(direction==LexReorderType::Backward)
 		{
 			if(orientation==DistortionOrientationType::MONO)
 			{
@@ -175,18 +176,6 @@ float LexicalReordering::GetProbability(Hypothesis *hypothesis, int orientation)
 	return val[index];
 }
 
-/*
- * Compute the score for the current hypothesis.
- */
-float LexicalReordering::CalcScore(Hypothesis *curr_hypothesis)
-{
-
-	// First determine if this hypothesis is monotonic, non-monotonic,
-	// swap, or discontinuous. Make this determination using DistortionOrientation class
-	int orientation = DistortionOrientation::GetOrientation(curr_hypothesis, m_direction);
-	//now looking up in the table the appropriate score for these orientation		
-	return GetProbability(curr_hypothesis, orientation);		
-}
 
 unsigned int LexicalReordering::GetNumScoreComponents() const
 {

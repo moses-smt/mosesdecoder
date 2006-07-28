@@ -52,6 +52,7 @@ protected:
 	std::vector<FactorType>			m_inputFactorOrder;
 //	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
 	std::vector<LMList>			m_languageModel;
+	std::vector<float>			m_lexWeights;
 	ScoreIndexManager				m_scoreIndexManager;
 	LexicalReordering                   *m_lexReorder;
 		// Initial	= 0 = can be used when creating poss trans
