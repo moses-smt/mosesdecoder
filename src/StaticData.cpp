@@ -53,6 +53,7 @@ StaticData::StaticData()
 ,m_inputOutput(NULL)
 ,m_fLMsLoaded(false)
 ,m_inputType(0)
+,m_numInputScores(0)
 {
 	s_instance = this;
 }
@@ -488,15 +489,11 @@ void StaticData::LoadPhraseTables(bool filter
 
 			if(currDict==0 && m_inputType)
 				{
-					float wi=0.0,wrw=0.0;
-					if(m_parameter.GetParam("weight-i").size())
-						{
-							wi=Scan<float>(m_parameter.GetParam("weight-i")[0]);
-							if(m_parameter.GetParam("weight-i").size()>1)
-								wrw=Scan<float>(m_parameter.GetParam("weight-i")[1]);
-						}
-					noScoreComponent+=1;
-					weight.push_back(wi);
+					m_numInputScores=m_parameter.GetParam("weight-i").size();
+					for(unsigned k=0;k<m_numInputScores;++k)
+						weight.push_back(Scan<float>(m_parameter.GetParam("weight-i")[k]));
+
+					noScoreComponent+=m_numInputScores;
 				}
 
 			assert(noScoreComponent==weight.size());
@@ -559,7 +556,7 @@ void StaticData::LoadPhraseTables(bool filter
 						assert(false);
 					#else
 						TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
-						PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent,(m_inputType>0? 1:0));
+						PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent,(currDict==0 ? m_numInputScores : 0));
 						pd->Create(input,output,m_factorCollection,filePath,weight,
 											 maxTargetPhrase[index],
 											 this->GetLanguageModel(Initial),

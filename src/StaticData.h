@@ -90,7 +90,8 @@ protected:
 	bool m_wordDeletionEnabled;
 
 	int m_inputType;
-		
+	unsigned m_numInputScores;
+
 	size_t m_verboseLevel;
 	DistortionScoreProducer *m_distortionScoreProducer;
 	WordPenaltyProducer *m_wpProducer;
@@ -282,6 +283,7 @@ public:
 	void SetWeightLM(const std::vector<float> &weight);
 	void SetWeightGeneration(const std::vector<float> &weight);
 	int GetInputType() const {return m_inputType;}
+	unsigned GetNumInputScores() const {return m_numInputScores;}
 	void InitializeBeforeSentenceProcessing(InputType const&);
 	void CleanUpAfterSentenceProcessing();
 	SentenceStats& GetSentenceStats() const
