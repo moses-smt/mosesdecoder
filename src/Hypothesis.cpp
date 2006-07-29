@@ -63,7 +63,7 @@ Hypothesis::Hypothesis(InputType const& source)
  */
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: m_prevHypo(&prevHypo)
-	, m_targetPhrase(Output)
+	, m_targetPhrase(transOpt.GetTargetPhrase())
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_sourceInput						(prevHypo.m_sourceInput)
 	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
@@ -78,20 +78,16 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_arcList(NULL)
 #endif
 {
-	const Phrase &possPhrase				= transOpt.GetTargetPhrase();
-
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
 	assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));	
 
 	_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
-
-	// add new words from poss trans
-	//m_phrase.AddWords(prev.m_phrase);
-	m_targetPhrase.AddWords(possPhrase);
   m_wordDeleted = transOpt.IsDeletionOption();
+#ifdef N_BEST
 	m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
+#endif
 }
 
 Hypothesis::~Hypothesis()

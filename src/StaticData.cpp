@@ -352,6 +352,10 @@ StaticData::~StaticData()
 	{
 		delete *iterLM;
 	}
+
+	// small score producers
+	delete m_distortionScoreProducer;
+	delete m_wpProducer;
 }
 
 IOMethod StaticData::GetIOMethod()

@@ -48,13 +48,7 @@ public:
 	}
 	Phrase(const Phrase &copy);
 
-	inline Phrase(FactorDirection direction)
-		:m_direction(direction)
-		, m_phraseSize(0)
-		, m_arraySize(0)
-		, m_factorArray(NULL)
-	{
-	}
+	Phrase(FactorDirection direction);
 	Phrase(FactorDirection direction, const std::vector< const Word* > &mergeWords);
 
 	virtual ~Phrase();

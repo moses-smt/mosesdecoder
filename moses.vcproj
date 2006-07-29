@@ -279,10 +279,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\Arc.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ConfusionNet.cpp"
 				>
 			</File>
@@ -299,6 +295,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DummyScoreProducers.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Factor.cpp"
 				>
 			</File>
@@ -312,6 +312,10 @@
 			</File>
 			<File
 				RelativePath=".\src\GenerationDictionary.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\hash.cpp"
 				>
 			</File>
 			<File
@@ -348,10 +352,6 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelFactory.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LatticeEdge.cpp"
 				>
 			</File>
 			<File
@@ -493,10 +493,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\Arc.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ConfusionNet.h"
 				>
 			</File>
@@ -510,6 +506,10 @@
 			</File>
 			<File
 				RelativePath=".\src\DistortionOrientation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DummyScoreProducers.h"
 				>
 			</File>
 			<File
@@ -534,6 +534,10 @@
 			</File>
 			<File
 				RelativePath=".\src\GenerationDictionary.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\hash.h"
 				>
 			</File>
 			<File
@@ -574,10 +578,6 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelFactory.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LatticeEdge.h"
 				>
 			</File>
 			<File
