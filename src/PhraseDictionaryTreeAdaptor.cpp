@@ -255,12 +255,13 @@ struct PDTAimp {
 						Factors2String(w.GetFactorArray(),s);
 						bool isEpsilon=(s=="" || s==EPSILON);
 						PPtr nextP = (isEpsilon ? curr.ptr : m_dict->Extend(curr.ptr,s));
+						unsigned newRealWords=curr.realWords + (isEpsilon ? 0 : 1);
 						if(nextP) 
 							{
 								Range newRange(curr.begin(),curr.end()+1);
 								float newScore=curr.GetScore()+currCol[colidx].second;
 								if(newRange.second<src.GetSize())
-									stack.push_back(State(newRange,nextP,newScore,curr.realWords + (isEpsilon ? 0 : 1)));
+									stack.push_back(State(newRange,nextP,newScore,newRealWords));
 								
 								std::vector<StringTgtCand> tcands;
 								m_dict->GetTargetCandidates(nextP,tcands);
@@ -272,12 +273,12 @@ struct PDTAimp {
 										for(size_t i=0;i<tcands.size();++i)
 											{
 
-												std::vector<float> nscores(tcands[i].second.size()+m_numInputScores);
+												std::vector<float> nscores(tcands[i].second.size()+m_numInputScores,0.0);
 												std::transform(tcands[i].second.begin(),tcands[i].second.end(),nscores.begin(),TransformScore);
 												switch(m_numInputScores)
 													{
-													case 2: nscores[nscores.size()-1+m_numInputScores-2]=stack.back().realWords;
-													case 1: nscores[nscores.size()-1+m_numInputScores-1]=newScore;
+													case 2: nscores[nscores.size()-1-m_numInputScores+2]=-1.0*newRealWords; // do not use -newRealWords ! -- RZ
+													case 1: nscores[nscores.size()-1-m_numInputScores+1]=newScore;
 													case 0: break;
 													default:
 														std::cerr<<"ERROR: too many model scaling factors for input weights 'weight-i' : "<<m_numInputScores<<"\n";
@@ -285,6 +286,7 @@ struct PDTAimp {
 													}
 												assert(nscores.size()==m_weights.size());
 												float score=std::inner_product(nscores.begin(),nscores.end(),m_weights.begin(),0.0);
+
 												score-=tcands[i].first.size() * m_weightWP;
 												std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].first,TScores()));
 
