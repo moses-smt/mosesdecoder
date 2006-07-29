@@ -50,7 +50,6 @@ StaticData* StaticData::s_instance(0);
 StaticData::StaticData()
 :m_languageModel(2)
 ,m_lexReorder(NULL)
-,m_weightInput(0.0)
 ,m_inputOutput(NULL)
 ,m_fLMsLoaded(false)
 ,m_inputType(0)
@@ -62,6 +61,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 {
 	if (!m_parameter.LoadParam(argc, argv))
 		return false;
+
+	// input type has to specified BEFORE loading the phrase tables!
+	if(m_parameter.GetParam("inputtype").size()) 
+		m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
+	TRACE_ERR("input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
 
 	// mysql
 	m_mySQLParam = m_parameter.GetParam("mysql");
@@ -321,9 +325,19 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	TRACE_ERR("m_dropUnknown: " << m_dropUnknown << endl);
 
-	if(m_parameter.GetParam("inputtype").size()) 
-		m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
-	TRACE_ERR("input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
+
+
+#if 0
+	// weight for the posteriors for the confusion network
+	if(m_parameter.GetParam("weight-i").size())
+		{
+			m_weightInput=Scan<float>(m_parameter.GetParam("weight-i")[0]);
+			if(m_parameter.GetParam("weight-i").size()>1)
+				m_weightRealSourceWords=Scan<float>(m_parameter.GetParam("weight-i")[1]);
+		}
+	if(m_inputType)
+		TRACE_ERR("input weight is "<<m_weightInput<<" realWords: "<<m_weightRealSourceWords<<"\n");
+#endif
 
 	return true;
   
@@ -453,7 +467,6 @@ void StaticData::LoadPhraseTables(bool filter
 
 		size_t index = 0;
 		size_t totalPrevNoScoreComponent = 0;		
-		bool firstPTable = true;
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>			token		= Tokenize(translationVector[currDict]);
@@ -465,10 +478,31 @@ void StaticData::LoadPhraseTables(bool filter
 			// weights for this phrase dictionary
 			vector<float> weight(noScoreComponent);
 			for (size_t currScore = 0 ; currScore < noScoreComponent ; currScore++)
-			{
 				weight[currScore] = weightAll[totalPrevNoScoreComponent + currScore]; 
-				m_allWeights.push_back(weightAll[totalPrevNoScoreComponent+ currScore]);
-			}
+
+			if(weight.size()!=noScoreComponent) 
+				{
+					std::cerr<<"ERROR: your phrase table has "<<noScoreComponent<<" scores, but you specified "<<weight.size()<<" weights!\n";
+					abort();
+				}
+
+			if(currDict==0 && m_inputType)
+				{
+					float wi=0.0,wrw=0.0;
+					if(m_parameter.GetParam("weight-i").size())
+						{
+							wi=Scan<float>(m_parameter.GetParam("weight-i")[0]);
+							if(m_parameter.GetParam("weight-i").size()>1)
+								wrw=Scan<float>(m_parameter.GetParam("weight-i")[1]);
+						}
+					noScoreComponent+=1;
+					weight.push_back(wi);
+				}
+
+			assert(noScoreComponent==weight.size());
+
+			std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
+
 			totalPrevNoScoreComponent += noScoreComponent;
 			string phraseTableHash	= GetMD5Hash(filePath);
 			string hashFilePath			= GetCachePath() 
@@ -477,18 +511,6 @@ void StaticData::LoadPhraseTables(bool filter
 															+ inputFileHash + "--" 
 															+ phraseTableHash + ".txt";
 
-			// input type true indicates confusion network
-			if (firstPTable && m_inputType) {
-				// weight for the posteriors for the confusion network
-				if(m_parameter.GetParam("weight-i").size())
-					m_weightInput=Scan<float>(m_parameter.GetParam("weight-i")[0]);
-				TRACE_ERR("input weight is "<<m_weightInput<<"\n");
-				m_allWeights.push_back(m_weightInput);
-				firstPTable = false;
-			} else {
-				m_allWeights.push_back(0.0); // prior on confusion networks
-			}
-	
 			timer.check("Start loading PhraseTable");
 			using namespace boost::filesystem; 
 			if (!exists(path(filePath+".binphr.idx", native)))
@@ -537,12 +559,11 @@ void StaticData::LoadPhraseTables(bool filter
 						assert(false);
 					#else
 						TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
-						PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent);
+						PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent,(m_inputType>0? 1:0));
 						pd->Create(input,output,m_factorCollection,filePath,weight,
 											 maxTargetPhrase[index],
 											 this->GetLanguageModel(Initial),
-											 this->GetWeightWordPenalty(),
-											 m_weightInput);
+											 this->GetWeightWordPenalty());
 						m_phraseDictionary.push_back(pd);
 					#endif
 				}

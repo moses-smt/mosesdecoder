@@ -17,7 +17,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
 	PDTAimp *imp;
 	friend class PDTAimp;
  public:
-	PhraseDictionaryTreeAdaptor(size_t noScoreComponent);
+	PhraseDictionaryTreeAdaptor(size_t noScoreComponent,unsigned numInputScores);
 	virtual ~PhraseDictionaryTreeAdaptor();
 
 	// enable/disable caching
@@ -38,7 +38,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
 							, size_t maxTargetPhrase
 							, const LMList &languageModels
 							, float weightWP
-							, float weightInput
+
 							);
 
 	// get translation candidates for a given source phrase

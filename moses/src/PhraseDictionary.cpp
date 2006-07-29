@@ -56,7 +56,7 @@ const std::string PhraseDictionaryBase::GetScoreProducerDescription() const
 
 unsigned int PhraseDictionaryBase::GetNumScoreComponents() const
 {
-	return this->GetNoScoreComponents()+1;
+	return this->GetNoScoreComponents();
 }
 
 void PhraseDictionary::Load(const std::vector<FactorType> &input
@@ -145,7 +145,9 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			targetPhrase.CreateFromString( output, tokens[1], factorCollection);
 
 			// component score, for n-best output
-			targetPhrase.SetScore(scoreVector, weight, languageModels, weightWP);
+			std::vector<float> scv(scoreVector.size());
+			std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
+			targetPhrase.SetScore(scv, weight, languageModels, weightWP);
 
 			AddEquivPhrase(sourcePhrase, targetPhrase);
 

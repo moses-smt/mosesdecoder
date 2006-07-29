@@ -66,7 +66,7 @@ protected:
 		m_weightDistortion, 
 		m_weightWordPenalty, 
 		m_wordDeletionWeight, 
-		m_weightInput;
+		;
 									// PhraseTrans, Generation & LanguageModelScore has multiple weights.
 	int																	m_maxDistortion;
 									// do it differently from old pharaoh
