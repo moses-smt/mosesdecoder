@@ -118,12 +118,12 @@ void ThreadMySQL::SetTranslation(const Hypothesis *hypo, long translationId)
 		strme << "UPDATE translation"
 			<< " SET unparsed = ' " << unparsed << "'"
 			<< "		,completed_date = NOW()"
-			<< "		,cost_translation = " << hypo->GetScore(ScoreType::PhraseTrans)
-			<< "		,cost_LM = "					<< hypo->GetScore(ScoreType::LanguageModelScore)
-			<< "		,cost_distortion = "	<< hypo->GetScore(ScoreType::Distortion)
-			<< "		,cost_word_penalty = " << hypo->GetScore(ScoreType::WordPenalty)
-			<< "		,cost_future = "			<< hypo->GetScore(ScoreType::FutureScoreEnum)
-			<< "		,cost_total = "				<< hypo->GetScore(ScoreType::Total)
+			<< "		,cost_translation = " << "0"
+			<< "		,cost_LM = "					<< "0"
+			<< "		,cost_distortion = "	<< "0"
+			<< "		,cost_word_penalty = " << "0"
+			<< "		,cost_future = "			<< "0"
+			<< "		,cost_total = "				<< "0"
 			<< " WHERE translation_id = " << translationId;
 	}
 
