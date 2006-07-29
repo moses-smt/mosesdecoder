@@ -47,11 +47,11 @@ Phrase::Phrase(const Phrase &copy)
 }
 
 Phrase::Phrase(FactorDirection direction)
-:m_direction(direction)
-, m_phraseSize(0)
-, m_arraySize(0)
-, m_factorArray(NULL)
+	: m_direction(direction)
+	, m_phraseSize(0)
+	, m_arraySize(ARRAY_SIZE_INCR)
 {
+	m_factorArray = (FactorArray*) malloc(m_arraySize * sizeof(FactorArray));
 }
 
 Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)

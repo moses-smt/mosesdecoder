@@ -36,24 +36,18 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 	// set score
 	m_scoreGen		= 0;
 	m_scoreTrans	= targetPhrase.GetTranslationScore();
-#ifdef N_BEST
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
-#endif
 }
 
 TranslationOption::TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase)
 : m_phrase(targetPhrase)
 ,m_sourceWordsRange	(copy.m_sourceWordsRange)
-#ifdef N_BEST
 ,m_scoreBreakdown(copy.m_scoreBreakdown)
-#endif
 { // used in creating the next translation step
 	m_scoreGen		= copy.GetGenerationScore();
 	m_scoreTrans	= copy.GetTranslationScore() + targetPhrase.GetTranslationScore();
 	
-	#ifdef N_BEST
-		m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
-	#endif
+	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 }
 
 TranslationOption::TranslationOption(const TranslationOption &copy
@@ -63,17 +57,13 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 																		, float weight)
 : m_phrase						(inputPhrase)
 , m_sourceWordsRange	(copy.m_sourceWordsRange)
-#ifdef N_BEST
-,m_scoreBreakdown(copy.m_scoreBreakdown)
-#endif
+, m_scoreBreakdown(copy.m_scoreBreakdown)
 { // used in creating the next generation step
 
 	m_scoreTrans	= copy.GetTranslationScore();
 	m_scoreGen	= copy.GetGenerationScore() + generationScore * weight;
 
-	#ifdef N_BEST
-		m_scoreBreakdown.PlusEquals(generationDictionary, generationScore);
-	#endif
+	m_scoreBreakdown.PlusEquals(generationDictionary, generationScore);
 }
 
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase
@@ -131,11 +121,7 @@ void TranslationOption::CalcScore(const LMList &allLM, float weightWordPenalty)
 	m_ngramScore = 0;
 	float retFullScore = 0;
 
-	#ifdef N_BEST
-		allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, &m_scoreBreakdown);
-	#else
-		allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, NULL);
-	#endif
+	allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, &m_scoreBreakdown);
 	// future score
 	m_futureScore = retFullScore;
 
@@ -151,10 +137,8 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 	out << possibleTranslation.GetTargetPhrase() 
 			<< ", pC=" << possibleTranslation.GetTranslationScore()
 			<< ", c=" << possibleTranslation.GetFutureScore()
-			<< " [" << possibleTranslation.GetSourceWordsRange() << "]";
-#ifdef N_BEST
-	out << possibleTranslation.GetScoreBreakdown();
-#endif
+			<< " [" << possibleTranslation.GetSourceWordsRange() << "]"
+			<< possibleTranslation.GetScoreBreakdown();
 	return out;
 }
 

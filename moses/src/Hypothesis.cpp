@@ -85,9 +85,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
-#ifdef N_BEST
 	m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
-#endif
 }
 
 Hypothesis::~Hypothesis()
