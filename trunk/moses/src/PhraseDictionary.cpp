@@ -141,13 +141,13 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			Phrase sourcePhrase(Input);
 			sourcePhrase.CreateFromString( input, phraseVector, factorCollection);
 			//target
-			TargetPhrase targetPhrase(Output, this);
+			TargetPhrase targetPhrase(Output);
 			targetPhrase.CreateFromString( output, tokens[1], factorCollection);
 
 			// component score, for n-best output
 			std::vector<float> scv(scoreVector.size());
 			std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
-			targetPhrase.SetScore(scv, weight, languageModels, weightWP);
+			targetPhrase.SetScore(this, scv, weight, languageModels, weightWP);
 
 			AddEquivPhrase(sourcePhrase, targetPhrase);
 
@@ -246,7 +246,7 @@ void PhraseDictionary::SetWeightTransModel(const vector<float> &weightT)
 					targetPhraseIter != targetPhraseCollection.end();
 					++targetPhraseIter)
 		{
-			targetPhraseIter->SetWeights(weightT);
+			targetPhraseIter->SetWeights(this, weightT);
 		}
 	}
 }
