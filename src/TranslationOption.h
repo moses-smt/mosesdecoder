@@ -47,13 +47,12 @@ protected:
 	const Phrase 				m_phrase;
 	const WordsRange		m_sourceWordsRange;
 	float								m_scoreTrans, m_scoreGen, m_futureScore, m_ngramScore;
-#ifdef N_BEST
+
 	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
 	//! for example, know the full n-gram score since the length of the
 	//! TargetPhrase may be shorter than the n-gram order.  But, if it is
 	//! possible to estimate, it will be known
 	ScoreComponentCollection2	m_scoreBreakdown;
-#endif
 
 public:
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
@@ -155,12 +154,10 @@ public:
   }
 	void CalcScore(const LMList &allLM, float weightWordPenalty);
 
-#ifdef N_BEST
 	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}
-#endif
 
 	TO_STRING;
 };
