@@ -129,7 +129,6 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bo
 void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationId)
 {
 #ifdef N_BEST
-	bool printInputScore=(StaticData::Instance()->GetInputType()>0);
 	LatticePathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
 	{
@@ -163,9 +162,8 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		vector<PhraseDictionaryBase*>::reverse_iterator i = pds.rbegin();
 		for (; i != pds.rend(); ++i) {
 			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*i);
-			for (size_t j = 0; j<scores.size(); j++) 
-				if(j+1<scores.size() || printInputScore)
-					m_nBestFile <<scores[j] << " ";
+			for (size_t j = 0; j<scores.size(); ++j) 
+				m_nBestFile << scores[j] << " ";
 			
 		}
 		
