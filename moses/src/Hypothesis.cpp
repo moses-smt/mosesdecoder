@@ -514,7 +514,7 @@ void Hypothesis::PrintHypothesis(const InputType &source, float weightDistortion
 	//PrintLMScores();
 }
 
-
+TO_STRING_BODY(Hypothesis)
  
 // friend
 ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
