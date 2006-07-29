@@ -108,7 +108,7 @@ struct PDTAimp {
 		// convert into TargetPhrases
 		for(size_t i=0;i<cands.size();++i) 
 			{
-				TargetPhrase targetPhrase(Output, m_obj);
+				TargetPhrase targetPhrase(Output);
 
 				StringTgtCand::first_type const& factorStrings=cands[i].first;
 				StringTgtCand::second_type const& probVector=cands[i].second;
@@ -198,7 +198,7 @@ struct PDTAimp {
 				for(size_t l=0;l<m_output.size();++l)
 					fa[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
 			}
-		targetPhrase.SetScore(scoreVector, m_weights, *m_languageModels, m_weightWP);
+		targetPhrase.SetScore(m_obj, scoreVector, m_weights, *m_languageModels, m_weightWP);
 	}
 
 
@@ -317,7 +317,7 @@ struct PDTAimp {
 				for(E2Costs::const_iterator j=i->second.begin();j!=i->second.end();++j)
 					{
 						TScores const & scores=j->second;
-						TargetPhrase targetPhrase(Output, m_obj);
+						TargetPhrase targetPhrase(Output);
 						CreateTargetPhrase(targetPhrase,j->first,scores.trans);
 						costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
 						tCands.push_back(targetPhrase);
