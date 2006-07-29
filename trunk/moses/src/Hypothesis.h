@@ -284,4 +284,5 @@ public:
 	float GetFutureScore() const { return m_futureScore; }
 };
 
+
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);
