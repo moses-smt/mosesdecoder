@@ -7,7 +7,8 @@ class WordsRange;
 
 /** Calculates Distortion scores
  */
-struct DistortionScoreProducer : public ScoreProducer {
+class DistortionScoreProducer : public ScoreProducer {
+public:
 	DistortionScoreProducer();
 
 	float CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr) const;
@@ -19,7 +20,8 @@ struct DistortionScoreProducer : public ScoreProducer {
 /** Doesn't do anything but provide a key into the global
  * score array to store the word penalty in.
  */
-struct WordPenaltyProducer : public ScoreProducer {
+class WordPenaltyProducer : public ScoreProducer {
+public:
 	WordPenaltyProducer();
 
 	unsigned int GetNumScoreComponents() const;
