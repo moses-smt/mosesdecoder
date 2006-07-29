@@ -476,6 +476,7 @@ sub run_single_giza {
 	 nodumps => 1 ,
 	 onlyaldumps => 1 ,
 	 nsmooth => 4 , 
+         model1dumpfrequency => 1,
 	 model4smoothfactor => 0.4 ,
 	 t => $vcb_f,
          s => $vcb_e,
