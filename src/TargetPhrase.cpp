@@ -30,15 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionaryBase *phraseDictionary)
-:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0)
-	,m_sp(phraseDictionary)
-{
-}
-
 TargetPhrase::TargetPhrase(FactorDirection direction)
 	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0)
-	,m_sp(0)
 {
 }
 
@@ -48,14 +41,15 @@ void TargetPhrase::SetScore(float weightWP)
 	m_fullScore = - weightWP;	
 }
 
-void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float> &weightT,
+void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
+														const vector<float> &scoreVector, const vector<float> &weightT,
 														const LMList &languageModels, float weightWP)
 {
 	assert(weightT.size() == scoreVector.size());
 	// calc average score if non-best
 
 	m_transScore = std::inner_product(scoreVector.begin(),scoreVector.end(),weightT.begin(),0.0);
-	m_scoreBreakdown.PlusEquals(m_sp, scoreVector);
+	m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
 
   // Replicated from TranslationOptions.cpp
 	float totalFutureScore = 0;
@@ -88,7 +82,7 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 							- (this->GetSize() * weightWP);	 // word penalty
 }
 
-void TargetPhrase::SetWeights(const vector<float> &weightT)
+void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
 {
 	// calling this function in case of confusion net input is undefined
 	assert(StaticData::Instance()->GetInputType()==0); 
@@ -98,7 +92,7 @@ void TargetPhrase::SetWeights(const vector<float> &weightT)
      weight factor as last element
 	*/
 
-	m_transScore = m_scoreBreakdown.PartialInnerProduct(m_sp, weightT);
+	m_transScore = m_scoreBreakdown.PartialInnerProduct(translationScoreProducer, weightT);
 }
 
 void TargetPhrase::ResetScore()

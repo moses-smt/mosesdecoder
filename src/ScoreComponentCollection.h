@@ -26,6 +26,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreProducer.h"
 #include "ScoreIndexManager.h"
 
+/*** An unweighted collection of scores for a translation or step in a translation.
+ *
+ * In the factored phrase-based models that are implemented by moses, there are a set of
+ * scores that come from a variety of sources (translation probabilities, language model
+ * probablilities, distortion probabilities, generation probabilities).  Furthermore, while
+ * some of these scores may be 0, this number is fixed (and generally quite small, ie, less
+ * than 15), for a given model.
+ *
+ * The values contained in ScoreComponentCollection2 objects are unweighted scores (log-probs).
+ * 
+ * ScoreComponentCollection objects can be added and subtracted, which makes them appropriate
+ * to be the datatype used to return the result of a score computations (in this case they will
+ * have most values set to zero, except for the ones that are results of the indivudal computation
+ * this will then be added into the "running total" in the Hypothesis.  In fact, for a score
+ * to be tracked in the hypothesis (and thus to participate in the decoding process), a class
+ * representing that score must extend the ScoreProducer abstract base class.  For an example
+ * refer to the DistortionScoreProducer class.
+ */
 class ScoreComponentCollection2 {
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection2& rhs);
 private:
@@ -33,19 +51,23 @@ private:
 	const ScoreIndexManager* m_sim;
 
 public:
+  //! Create a new score collection with all values set to 0.0
 	ScoreComponentCollection2();
 
+  //! Clone a score collection
 	ScoreComponentCollection2(const ScoreComponentCollection2& rhs)
 	: m_scores(rhs.m_scores)
 	, m_sim(rhs.m_sim)
 	{}
 
+  //! Set all values to 0.0
 	void ZeroAll()
 	{
 		for (std::vector<float>::iterator i=m_scores.begin(); i!=m_scores.end(); ++i)
 			*i = 0.0f;
 	}
 
+  //! add the score in rhs
 	void PlusEquals(const ScoreComponentCollection2& rhs)
 	{
 		assert(m_scores.size() >= rhs.m_scores.size());
@@ -53,6 +75,7 @@ public:
 		for (size_t i=0; i<l; i++) { m_scores[i] += rhs.m_scores[i]; }  
 	}
 
+  //! subtract the score in rhs
 	void MinusEquals(const ScoreComponentCollection2& rhs)
 	{
 		assert(m_scores.size() >= rhs.m_scores.size());
@@ -97,6 +120,8 @@ public:
 		m_scores[i] = score;
 	}
 
+  //! Used to find the weighted total of scores.  rhs should contain a vector of weights
+  //! of the same length as the number of scores.
 	float InnerProduct(const std::vector<float>& rhs) const
 	{
 		return std::inner_product(m_scores.begin(), m_scores.end(), rhs.begin(), 0.0f);
