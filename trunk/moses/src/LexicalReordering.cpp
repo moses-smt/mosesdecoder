@@ -211,11 +211,11 @@ float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 
 unsigned int LexicalReordering::GetNumScoreComponents() const
 {
-	return 1;
+	return m_weights.size();
 }
 
 const std::string  LexicalReordering::GetScoreProducerDescription() const
 {
-	return "Lexicalized reordering score, file=";
+	return "Lexicalized reordering score, file=" + m_filename;
 }
 
