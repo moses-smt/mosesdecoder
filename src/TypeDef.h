@@ -107,29 +107,6 @@ enum DecodeType
   ,InsertNullFertilityWord //! an optional step that attempts to insert a few closed-class words to improve LM scores
 };
 
-namespace ScoreType {
-	enum ScoreType
-	{
-		PhraseTrans = 0,
-		Generation,
-		LanguageModelScore,
-		Distortion,
-		WordPenalty,
-		FutureScoreEnum,
-		LexicalReorderingForward,
-		LexicalReorderingBackward,
-		Input,
-		Total,
-		NUM_SCORES
-	};
-}
-using ScoreType::NUM_SCORES;
-// NUM_SCORES as part of the enum avoids inconsistencies
-// (on the other hand, it also avoid dynamic modifications)
-
-// count of above
-//const size_t NUM_SCORES = 10;
-
 namespace LexReorderType
 {
 	enum LexReorderType

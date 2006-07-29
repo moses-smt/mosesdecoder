@@ -32,17 +32,13 @@ using namespace std;
 
 TargetPhrase::TargetPhrase(FactorDirection direction, const PhraseDictionaryBase *phraseDictionary)
 :Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0)
-#ifdef N_BEST
 	,m_sp(phraseDictionary)
-#endif
 {
 }
 
 TargetPhrase::TargetPhrase(FactorDirection direction)
 	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0)
-#ifdef N_BEST
 	,m_sp(0)
-#endif
 {
 }
 
@@ -65,12 +61,10 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 	}
 	m_transScore += inputScore * weightInput;
 
-  #ifdef N_BEST
 	vector<float> transScores(scoreVector.size());
 	std::transform(scoreVector.begin(),scoreVector.end(),transScores.begin(),TransformScore);
 	transScores.push_back(inputScore);
 	m_scoreBreakdown.PlusEquals(m_sp, transScores);
-  #endif
 
   // Replicated from TranslationOptions.cpp
 	float totalFutureScore = 0;
@@ -89,9 +83,7 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 			float fullScore, nGramScore;
 
 			lm.CalcScore(*this, fullScore, nGramScore);
-			#ifdef N_BEST
-				m_scoreBreakdown.Assign(&lm, nGramScore);
-			#endif
+			m_scoreBreakdown.Assign(&lm, nGramScore);
 
 			// total LM score so far
 			totalNgramScore  += nGramScore * weightLM;
@@ -107,7 +99,6 @@ void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float
 
 void TargetPhrase::SetWeights(const vector<float> &weightT)
 {
-#ifdef N_BEST
 	// calling this function in case of confusion net input is undefined
 	assert(StaticData::Instance()->GetInputType()==0); 
 	
@@ -117,15 +108,12 @@ void TargetPhrase::SetWeights(const vector<float> &weightT)
 	*/
 
 	m_transScore = m_scoreBreakdown.PartialInnerProduct(m_sp, weightT);
-#endif
 }
 
 void TargetPhrase::ResetScore()
 {
 	m_transScore = m_fullScore = m_ngramScore = 0;
-#ifdef N_BEST
 	m_scoreBreakdown.ZeroAll();
-#endif
 }
 
 TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const

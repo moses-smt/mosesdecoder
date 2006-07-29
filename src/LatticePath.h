@@ -36,9 +36,9 @@ class LatticePath
 protected:
 	std::vector<const Hypothesis *> m_path;
 	size_t		m_prevEdgeChanged;
-	float			m_score[NUM_SCORES];
 
 	ScoreComponentCollection2	m_scoreBreakdown;
+	float m_totalScore;
  
 	void CalcScore(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc);
 
@@ -55,10 +55,8 @@ public:
 		// reserve arg not used. to differential from other constructor
 		// deviate from edgeIndex. however, all other edges the same
 
-	inline float GetScore(ScoreType::ScoreType scoreType) const
-	{
-		return m_score[scoreType];
-	}
+	inline float GetTotalScore() const { return m_totalScore; }
+
 	inline const std::vector<const Hypothesis *> &GetEdges() const
 	{
 		return m_path;
@@ -93,15 +91,7 @@ inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
 		out << *edge;
 	}
 	// scores
-	out << " [" << path.GetScore( static_cast<ScoreType::ScoreType>(0));
-	for (size_t i = 1 ; i < NUM_SCORES ; i++)
-	{
-		out << "," << path.GetScore( static_cast<ScoreType::ScoreType>(i));
-	}
-	out << "]";
-#ifdef N_BEST
-	out << " " << path.GetScoreBreakdown();
-#endif
+	out << " total=" << path.GetTotalScore() << " " << path.GetScoreBreakdown();
 
 	return out;
 }

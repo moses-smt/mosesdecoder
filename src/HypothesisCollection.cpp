@@ -45,9 +45,9 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 
 	AddNoPrune(hypo);
 
-	if (hypo->GetScore(ScoreType::Total) > m_bestScore)
+	if (hypo->GetTotalScore() > m_bestScore)
 	{
-		m_bestScore = hypo->GetScore(ScoreType::Total);
+		m_bestScore = hypo->GetTotalScore();
         if ( m_bestScore + m_beamThreshold > m_worstScore )
           m_worstScore = m_bestScore + m_beamThreshold;
 	}
@@ -63,7 +63,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 { // if returns false, hypothesis not used
 	// caller must take care to delete unused hypo to avoid leak
 
-	if (hypo->GetScore(ScoreType::Total) < m_worstScore)
+	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
 		delete hypo;
 		return;
@@ -83,7 +83,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	// found existing hypo with same target ending.
 	// keep the best 1
 	Hypothesis *hypoExisting = *iter;
-	if (hypo->GetScore(ScoreType::Total) > hypoExisting->GetScore(ScoreType::Total))
+	if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
 	{ // incoming hypo is better than the 1 we have
 		#ifdef N_BEST
 			hypo->AddArc(hypoExisting);
@@ -124,7 +124,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 		while (iter != m_hypos.end())
 		{
 			Hypothesis *hypo = *iter;
-			score = hypo->GetScore(ScoreType::Total);
+			score = hypo->GetTotalScore();
             // cerr << "H score: " << score << ", mbestscore: " << m_bestScore << " + m_beamThreshold "<< m_beamThreshold << " = " << m_bestScore+m_beamThreshold;
             if (score > m_bestScore+m_beamThreshold) {
 			  bestScores.push(score);
@@ -152,7 +152,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 		while (iter != m_hypos.end())
 		{
 			Hypothesis *hypo = *iter;
-			float score = hypo->GetScore(ScoreType::Total);
+			float score = hypo->GetTotalScore();
 			if (score < scoreThreshold)
 			{
 				iterator iterRemove = iter++;
@@ -180,7 +180,7 @@ const Hypothesis *HypothesisCollection::GetBestHypothesis() const
 		while (++iter != m_hypos.end())
 		{
 			Hypothesis *hypo = *iter;
-			if (hypo->GetScore(ScoreType::Total) > bestHypo->GetScore(ScoreType::Total))
+			if (hypo->GetTotalScore() > bestHypo->GetTotalScore())
 				bestHypo = hypo;
 		}
 		return bestHypo;
@@ -193,7 +193,7 @@ struct HypothesisSortDescending
 {
 	const bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const
 	{
-		return hypo1->GetScore(ScoreType::Total) > hypo2->GetScore(ScoreType::Total);
+		return hypo1->GetTotalScore() > hypo2->GetTotalScore();
 	}
 };
 

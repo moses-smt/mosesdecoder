@@ -52,7 +52,6 @@ private:
   unsigned char m_compSignature[16];
 
 protected:
-	float						m_score[NUM_SCORES];
 
 	const Hypothesis* m_prevHypo;
 	Phrase					m_targetPhrase; //target phrase being created at the current decoding step
@@ -63,10 +62,12 @@ protected:
 	InputType const&  m_sourceInput;
 	WordsRange				m_currSourceWordsRange, m_currTargetWordsRange;
   bool							m_wordDeleted;
+	float							m_totalScore;
+	float							m_futureScore;
+	ScoreComponentCollection2 m_scoreBreakdown;	
 #ifdef N_BEST
 	const Hypothesis 	*m_mainHypo;
 	ArcList 					*m_arcList; //all arcs that end at the same lattice point as we do
-	ScoreComponentCollection2 m_scoreBreakdown;	
 #endif
 
 //	 * \return whether none of the factors clash
@@ -150,18 +151,6 @@ public:
 		return m_currTargetWordsRange.GetWordsCount();
 	}
 
-	inline const float *GetScore() const
-	{
-		return m_score;
-	}
-	inline float GetScore(ScoreType::ScoreType scoreType) const
-	{
-		return m_score[scoreType];
-	}
-	inline void SetScore(const float score[])
-	{
-		std::memcpy(m_score, score, NUM_SCORES * sizeof(float));
-	}
 	void ResetScore();
 
 	void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore);
@@ -286,11 +275,13 @@ public:
 	{
 		return m_arcList;
 	}
+#endif
 	const ScoreComponentCollection2& GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}
-#endif
+	float GetTotalScore() const { return m_totalScore; }
+	float GetFutureScore() const { return m_futureScore; }
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

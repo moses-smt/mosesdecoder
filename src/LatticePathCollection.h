@@ -28,7 +28,7 @@ struct CompareLatticePathCollection
 {
 	bool operator()(const LatticePath* pathA, const LatticePath* pathB) const
 	{
-		return (pathA->GetScore(ScoreType::Total) > pathB->GetScore(ScoreType::Total));
+		return (pathA->GetTotalScore() > pathB->GetTotalScore());
 	}
 };
 
