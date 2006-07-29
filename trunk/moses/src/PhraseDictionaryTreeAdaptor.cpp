@@ -31,11 +31,11 @@ struct PDTAimp {
 
 	typedef std::vector<TargetPhraseCollection const*> vTPC;
 	std::vector<vTPC> m_rangeCache;
-	unsigned m_NumInputScores;
+	unsigned m_numInputScores;
 
 	PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis) 
 		: m_languageModels(0),m_weightWP(0.0),m_factorCollection(0),m_dict(0),
-			m_obj(p),useCache(1),m_NumInputScores(nis) {}
+			m_obj(p),useCache(1),m_numInputScores(nis) {}
 
 	void Factors2String(FactorArray const& w,std::string& s) const 
 	{
@@ -149,7 +149,7 @@ struct PDTAimp {
 
 		// set my members	
 		m_factorCollection=&factorCollection;
-		m_dict=new PhraseDictionaryTree(weight.size()-m_NumInputScores);
+		m_dict=new PhraseDictionaryTree(weight.size()-m_numInputScores);
 		m_input=input;
 		m_output=output;
 		m_languageModels=&languageModels;
@@ -272,13 +272,20 @@ struct PDTAimp {
 										for(size_t i=0;i<tcands.size();++i)
 											{
 
-												std::vector<float> nscores(tcands[i].second.size()+m_NumInputScores);
+												std::vector<float> nscores(tcands[i].second.size()+m_numInputScores);
 												std::transform(tcands[i].second.begin(),tcands[i].second.end(),nscores.begin(),TransformScore);
-												nscores.back()=newScore;
+												switch(m_numInputScores)
+													{
+													case 2: nscores[nscores.size()-1+m_numInputScores-2]=stack.back().realWords;
+													case 1: nscores[nscores.size()-1+m_numInputScores-1]=newScore;
+													case 0: break;
+													default:
+														std::cerr<<"ERROR: too many model scaling factors for input weights 'weight-i' : "<<m_numInputScores<<"\n";
+														abort();
+													}
 												assert(nscores.size()==m_weights.size());
 												float score=std::inner_product(nscores.begin(),nscores.end(),m_weights.begin(),0.0);
 												score-=tcands[i].first.size() * m_weightWP;
-												//												score-=stack.back().realWords * m_weightRealWords;
 												std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].first,TScores()));
 
 												TScores & scores=p.first->second;
