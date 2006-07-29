@@ -27,15 +27,8 @@ using namespace std;
 LatticePath::LatticePath(const Hypothesis *hypo)
 :	m_prevEdgeChanged(NOT_FOUND)
 { // create path OF pure hypo
-
-	// initial scores
-	for (size_t i = 0 ; i < NUM_SCORES ; i++)
-	{
-		m_score[i] = hypo->GetScore(static_cast<ScoreType::ScoreType>(i));
-	}
-#ifdef N_BEST
 	m_scoreBreakdown					= hypo->GetScoreBreakdown();
-#endif
+	m_totalScore = hypo->GetTotalScore();
 
 	// enumerate path using prevHypo
 	while (hypo != NULL)
@@ -85,14 +78,8 @@ void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Hyp
 	m_scoreBreakdown = copy.m_scoreBreakdown;
 	m_scoreBreakdown.PlusEquals(adj);	
 
-// calc score
-	for (size_t i = 0 ; i < NUM_SCORES ; i++)
-	{
-		ScoreType::ScoreType scoreType = static_cast<ScoreType::ScoreType>(i);
-		float adj = (arc->GetScore(scoreType) - copy.m_path[edgeIndex]->GetScore(scoreType));
-		m_score[i] = copy.GetScore(scoreType) + adj;
-	}
-
+	float fadj = arc->GetTotalScore() - copy.m_path[edgeIndex]->GetTotalScore();
+	m_totalScore = copy.GetTotalScore() + fadj;
 #endif
 }
 

@@ -151,7 +151,7 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 	out << possibleTranslation.GetTargetPhrase() 
 			<< ", pC=" << possibleTranslation.GetTranslationScore()
 			<< ", c=" << possibleTranslation.GetFutureScore()
-			<< " [" << possibleTranslation.GetSourceWordsRange() << "]";
+			<< " [" << possibleTranslation.GetSourceWordsRange() << "]" << possibleTranslation.GetScoreBreakdown();
 	return out;
 }
 

@@ -40,6 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "WordsRange.h"
 #include "LatticePathList.h"
 #include "StaticData.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 
@@ -146,7 +147,9 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 
 		// score
 		// rolled up scores
-		m_nBestFile << path.GetScore(ScoreType::Distortion) << " ";
+
+		// basic distortion
+		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetDistortionScoreProducer()) << " ";
 
 		// lm
 		const LMList& lml = StaticData::Instance()->GetAllLM();
@@ -167,7 +170,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		}
 		
 		// WP
-		m_nBestFile << path.GetScore(ScoreType::WordPenalty) << " ";
+		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetWordPenaltyProducer()) << " ";
 		
 		// generation
 		vector<GenerationDictionary*> gds = StaticData::Instance()->GetGenerationDictionaries();
@@ -180,7 +183,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		}
 		
 		// total						
-		m_nBestFile << "||| " << path.GetScore(ScoreType::Total) << "\n";
+		m_nBestFile << "||| " << path.GetTotalScore() << endl;
 	}
 
 	m_nBestFile<<std::flush;

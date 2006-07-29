@@ -325,12 +325,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
 	TRACE_ERR("input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
 
-	// weight for the posteriors for the confusion network
-	if(m_parameter.GetParam("weight-i").size())
-		m_weightInput=Scan<float>(m_parameter.GetParam("weight-i")[0]);
-	if(m_inputType)
-		TRACE_ERR("input weight is "<<m_weightInput<<"\n");
-	
 	return true;
   
 }
@@ -455,6 +449,7 @@ void StaticData::LoadPhraseTables(bool filter
 
 		size_t index = 0;
 		size_t totalPrevNoScoreComponent = 0;		
+		bool firstPTable = true;
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>			token		= Tokenize(translationVector[currDict]);
@@ -478,6 +473,18 @@ void StaticData::LoadPhraseTables(bool filter
 															+ inputFileHash + "--" 
 															+ phraseTableHash + ".txt";
 
+			// input type true indicates confusion network
+			if (firstPTable && m_inputType) {
+				// weight for the posteriors for the confusion network
+				if(m_parameter.GetParam("weight-i").size())
+					m_weightInput=Scan<float>(m_parameter.GetParam("weight-i")[0]);
+				TRACE_ERR("input weight is "<<m_weightInput<<"\n");
+				m_allWeights.push_back(m_weightInput);
+				firstPTable = false;
+			} else {
+				m_allWeights.push_back(0.0); // prior on confusion networks
+			}
+	
 			timer.check("Start loading PhraseTable");
 			using namespace boost::filesystem; 
 			if (!exists(path(filePath+".binphr.idx", native)))

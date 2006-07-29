@@ -35,10 +35,8 @@ class TargetPhrase: public Phrase
 	friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
 	float m_transScore, m_ngramScore, m_fullScore;
-#ifdef N_BEST
 	const ScoreProducer* m_sp;
 	ScoreComponentCollection2 m_scoreBreakdown;
-#endif
 
 public:
 
@@ -77,12 +75,10 @@ public:
    * TODO is this really the best name?
    */
 
-#ifdef N_BEST
 	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}
-#endif
 
 	TO_STRING;
 };

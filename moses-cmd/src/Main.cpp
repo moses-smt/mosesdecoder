@@ -113,6 +113,8 @@ int main(int argc, char* argv[])
 	std::cerr << weights[0];
 	for (size_t j=1; j<weights.size(); j++) { std::cerr << ", " << weights[j]; }
 	std::cerr << "\n";
+	// every score must have a weight!  check that here:
+	assert(weights.size() == staticData.GetScoreIndexManager().GetTotalNumberOfScores());
 
 	if (inputOutput == NULL)
 		return EXIT_FAILURE;
