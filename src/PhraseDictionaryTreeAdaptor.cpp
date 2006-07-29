@@ -8,6 +8,7 @@
 #include "InputFileStream.h"
 #include "Input.h"
 #include "ConfusionNet.h"
+#include "StaticData.h"
 
 inline bool existsFile(const char* filename) {
   struct stat mystat;
@@ -17,7 +18,7 @@ inline bool existsFile(const char* filename) {
 struct PDTAimp {
 	std::vector<float> m_weights;
 	LMList const* m_languageModels;
-	float m_weightWP,m_weightInput;
+	float m_weightWP;
 	std::vector<FactorType> m_input,m_output;
 	FactorCollection *m_factorCollection;
 	PhraseDictionaryTree *m_dict;
@@ -30,11 +31,11 @@ struct PDTAimp {
 
 	typedef std::vector<TargetPhraseCollection const*> vTPC;
 	std::vector<vTPC> m_rangeCache;
+	unsigned m_NumInputScores;
 
-
-	PDTAimp(PhraseDictionaryTreeAdaptor *p) 
-		: m_languageModels(0),m_weightWP(0.0),m_weightInput(0.0),m_factorCollection(0),m_dict(0),
-			m_obj(p),useCache(1) {}
+	PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis) 
+		: m_languageModels(0),m_weightWP(0.0),m_factorCollection(0),m_dict(0),
+			m_obj(p),useCache(1),m_NumInputScores(nis) {}
 
 	void Factors2String(FactorArray const& w,std::string& s) const 
 	{
@@ -110,9 +111,11 @@ struct PDTAimp {
 				TargetPhrase targetPhrase(Output, m_obj);
 
 				StringTgtCand::first_type const& factorStrings=cands[i].first;
-				StringTgtCand::second_type const& scoreVector=cands[i].second;
+				StringTgtCand::second_type const& probVector=cands[i].second;
 
-				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,0.0);
+				std::vector<float> scoreVector(probVector.size());
+				std::transform(probVector.begin(),probVector.end(),scoreVector.begin(),TransformScore);
+				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector);
 				costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
 				tCands.push_back(targetPhrase);
 			}
@@ -141,21 +144,19 @@ struct PDTAimp {
 							, const std::vector<float> &weight
 							, const LMList &languageModels
 							, float weightWP
-							, float weightInput
 							)
 	{
 
 		// set my members	
 		m_factorCollection=&factorCollection;
-		m_dict=new PhraseDictionaryTree(weight.size());
+		m_dict=new PhraseDictionaryTree(weight.size()-m_NumInputScores);
 		m_input=input;
 		m_output=output;
 		m_languageModels=&languageModels;
 		m_weightWP=weightWP;
 		m_weights=weight;
-		m_weightInput=weightInput;
 
-		std::cerr<<"input weight: "<<weightInput<<"\n";
+
 
 		std::string binFname=filePath+".binphr.idx";
 		if(!existsFile(binFname.c_str())) {
@@ -173,10 +174,11 @@ struct PDTAimp {
 		PPtr ptr;
 		Range range;
 		float score;
+		unsigned realWords;
 
-		State() : range(0,0),score(0.0) {}
-		State(size_t b,size_t e,const PPtr& v,float sc=0.0) : ptr(v),range(b,e),score(sc) {}
-		State(Range const& r,const PPtr& v,float sc=0.0) : ptr(v),range(r),score(sc) {}
+		State() : range(0,0),score(0.0),realWords(0) {}
+		State(size_t b,size_t e,const PPtr& v,float sc=0.0,unsigned rw=0) : ptr(v),range(b,e),score(sc),realWords(rw) {}
+		State(Range const& r,const PPtr& v,float sc=0.0,unsigned rw=0) : ptr(v),range(r),score(sc),realWords(rw) {}
 
 		size_t begin() const {return range.first;}
 		size_t end() const {return range.second;}
@@ -186,8 +188,7 @@ struct PDTAimp {
 
 	void CreateTargetPhrase(TargetPhrase& targetPhrase,
 													StringTgtCand::first_type const& factorStrings,
-													StringTgtCand::second_type const& scoreVector,
-													float inputScore) const
+													StringTgtCand::second_type const& scoreVector) const
 	{
 
 		for(size_t k=0;k<factorStrings.size();++k) 
@@ -197,12 +198,12 @@ struct PDTAimp {
 				for(size_t l=0;l<m_output.size();++l)
 					fa[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
 			}
-			
-		targetPhrase.SetScore(scoreVector, m_weights, *m_languageModels, m_weightWP, inputScore, m_weightInput);
+		targetPhrase.SetScore(scoreVector, m_weights, *m_languageModels, m_weightWP);
 	}
 
 
-	TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,std::vector<std::pair<float,size_t> >& costs) const 
+	TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,
+																								std::vector<std::pair<float,size_t> >& costs) const 
 	{
 		// prune target candidates and sort according to score
 		std::vector<std::pair<float,size_t> >::iterator nth=costs.end();
@@ -221,10 +222,10 @@ struct PDTAimp {
 
 	// POD for target phrase scores
 	struct TScores {
-		float total,input;
+		float total;
 		StringTgtCand::second_type trans;
 
-		TScores() : total(0.0),input(0.0) {}
+		TScores() : total(0.0) {}
 	};
 
 	void CacheSource(ConfusionNet const& src) 
@@ -252,14 +253,14 @@ struct PDTAimp {
 						const Word& w=currCol[colidx].first;
 						std::string s;
 						Factors2String(w.GetFactorArray(),s);
-						PPtr nextP=m_dict->Extend(curr.ptr,s);
-
+						bool isEpsilon=(s=="" || s==EPSILON);
+						PPtr nextP = (isEpsilon ? curr.ptr : m_dict->Extend(curr.ptr,s));
 						if(nextP) 
 							{
 								Range newRange(curr.begin(),curr.end()+1);
 								float newScore=curr.GetScore()+currCol[colidx].second;
 								if(newRange.second<src.GetSize())
-									stack.push_back(State(newRange,nextP,newScore));
+									stack.push_back(State(newRange,nextP,newScore,curr.realWords + (isEpsilon ? 0 : 1)));
 								
 								std::vector<StringTgtCand> tcands;
 								m_dict->GetTargetCandidates(nextP,tcands);
@@ -270,17 +271,21 @@ struct PDTAimp {
 
 										for(size_t i=0;i<tcands.size();++i)
 											{
-												float score=CalcTranslationScore(tcands[i].second,m_weights);
+
+												std::vector<float> nscores(tcands[i].second.size()+m_NumInputScores);
+												std::transform(tcands[i].second.begin(),tcands[i].second.end(),nscores.begin(),TransformScore);
+												nscores.back()=newScore;
+												assert(nscores.size()==m_weights.size());
+												float score=std::inner_product(nscores.begin(),nscores.end(),m_weights.begin(),0.0);
 												score-=tcands[i].first.size() * m_weightWP;
-												score+=newScore*m_weightInput;
+												//												score-=stack.back().realWords * m_weightRealWords;
 												std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].first,TScores()));
 
 												TScores & scores=p.first->second;
 												if(p.second || scores.total<score)
 													{
 														scores.total=score;
-														scores.input=newScore;
-														scores.trans=tcands[i].second;
+														scores.trans=nscores;
 													}
 											}
 									}
@@ -304,7 +309,7 @@ struct PDTAimp {
 					{
 						TScores const & scores=j->second;
 						TargetPhrase targetPhrase(Output, m_obj);
-						CreateTargetPhrase(targetPhrase,j->first,scores.trans,scores.input);
+						CreateTargetPhrase(targetPhrase,j->first,scores.trans);
 						costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
 						tCands.push_back(targetPhrase);
 					}
@@ -331,8 +336,8 @@ struct PDTAimp {
 *************************************************************/
 
 PhraseDictionaryTreeAdaptor::
-PhraseDictionaryTreeAdaptor(size_t noScoreComponent)
-	: MyBase(noScoreComponent),imp(new PDTAimp(this)) {}
+PhraseDictionaryTreeAdaptor(size_t noScoreComponent,unsigned numInputScores)
+	: MyBase(noScoreComponent),imp(new PDTAimp(this,numInputScores)) {}
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor() 
 {
@@ -360,7 +365,6 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 																				 , size_t maxTargetPhrase
 																				 , const LMList &languageModels
 																				 , float weightWP
-																				 , float weightInput
 																				 )
 {
 	if(m_noScoreComponent!=weight.size()) {
@@ -378,7 +382,7 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 	m_maxTargetPhrase=maxTargetPhrase;
 
 	imp->Create(input,output,factorCollection,filePath,
-							weight,languageModels,weightWP,weightInput);
+							weight,languageModels,weightWP);
 }
 
 TargetPhraseCollection const* 

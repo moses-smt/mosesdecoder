@@ -65,6 +65,9 @@ public:
 	//! produced by sp
 	void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores)
 	{
+
+		if(scores.size() != sp->GetNumScoreComponents()) std::cerr<<"ERROr: "<<scores.size()<<" "<<sp->GetNumScoreComponents()<<"\n";
+
 		assert(scores.size() == sp->GetNumScoreComponents());
 		size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
 		for (std::vector<float>::const_iterator vi = scores.begin();

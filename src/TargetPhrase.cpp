@@ -49,22 +49,13 @@ void TargetPhrase::SetScore(float weightWP)
 }
 
 void TargetPhrase::SetScore(const vector<float> &scoreVector, const vector<float> &weightT,
-														const LMList &languageModels, float weightWP,float inputScore, float weightInput)
+														const LMList &languageModels, float weightWP)
 {
 	assert(weightT.size() == scoreVector.size());
 	// calc average score if non-best
-	m_transScore = 0;
-	for (size_t i = 0 ; i < scoreVector.size() ; i++)
-	{
-		float score =  TransformScore(scoreVector[i]);
-		m_transScore += score * weightT[i];
-	}
-	m_transScore += inputScore * weightInput;
 
-	vector<float> transScores(scoreVector.size());
-	std::transform(scoreVector.begin(),scoreVector.end(),transScores.begin(),TransformScore);
-	transScores.push_back(inputScore);
-	m_scoreBreakdown.PlusEquals(m_sp, transScores);
+	m_transScore = std::inner_product(scoreVector.begin(),scoreVector.end(),weightT.begin(),0.0);
+	m_scoreBreakdown.PlusEquals(m_sp, scoreVector);
 
   // Replicated from TranslationOptions.cpp
 	float totalFutureScore = 0;
