@@ -46,6 +46,14 @@ Phrase::Phrase(const Phrase &copy)
 	}
 }
 
+Phrase::Phrase(FactorDirection direction)
+:m_direction(direction)
+, m_phraseSize(0)
+, m_arraySize(0)
+, m_factorArray(NULL)
+{
+}
+
 Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
 :m_direction(direction)
 ,m_phraseSize(mergeWords.size())

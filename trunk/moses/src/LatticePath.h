@@ -91,7 +91,10 @@ inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
 		out << *edge;
 	}
 	// scores
-	out << " total=" << path.GetTotalScore() << " " << path.GetScoreBreakdown();
+	out << " total=" << path.GetTotalScore();
+#ifdef N_BEST
+	out << " " << path.GetScoreBreakdown();
+#endif
 
 	return out;
 }
