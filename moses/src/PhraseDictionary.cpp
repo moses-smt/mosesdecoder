@@ -30,34 +30,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
-#include "Input.h"
 #include "WordsRange.h"
 
 using namespace std;
-
-PhraseDictionaryBase::PhraseDictionaryBase(size_t noScoreComponent)
-	: Dictionary(noScoreComponent),m_maxTargetPhrase(0)
-{
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
-}
-
-PhraseDictionaryBase::~PhraseDictionaryBase() {}
-	
-const TargetPhraseCollection *PhraseDictionaryBase::
-GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const 
-{
-	return GetTargetPhraseCollection(src.GetSubString(range));
-}
-
-const std::string PhraseDictionaryBase::GetScoreProducerDescription() const
-{
-	return "Translation score, file=" + m_filename;
-}
-
-unsigned int PhraseDictionaryBase::GetNumScoreComponents() const
-{
-	return this->GetNoScoreComponents();
-}
 
 void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
@@ -179,23 +154,35 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 		// change permission to let everyone use cached file
 		chmod(hashFilePath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
-		TRACE_ERR("Size " << count << " -> " << GetSize() << endl);
 	}
-	else
+}
+
+TargetPhraseCollection *PhraseDictionary::CreateTargetPhraseCollection(const Phrase &source)
+{
+	const size_t size = source.GetSize();
+	
+	PhraseDictionaryNode *currNode = &m_collection;
+	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
-		TRACE_ERR("Size " << GetSize() << endl);
+		Word word(source.GetFactorArray(pos));
+		currNode = currNode->GetOrCreateChild(word);
+		if (currNode == NULL)
+			return NULL;
 	}
+
+	return currNode->CreateTargetPhraseCollection();
 }
 
 void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
 {
+	TargetPhraseCollection &phraseColl = *CreateTargetPhraseCollection(source);
 	if (m_maxTargetPhrase == 0)
 	{	// don't need keep list sorted
-		m_collection[source].push_back(targetPhrase);
+		// create sub tree & put target phrase into collection
+		phraseColl.push_back(targetPhrase);
 	}
 	else
 	{	// must keep list in sorted order
-		TargetPhraseCollection &phraseColl = m_collection[source];
 		TargetPhraseCollection::iterator iter;
 		for (iter = phraseColl.begin() ; iter != phraseColl.end() ; ++iter)
 		{
@@ -216,14 +203,19 @@ void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &
 }
 
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const Phrase &source) const
-{
-	std::map<Phrase , TargetPhraseCollection >::const_iterator iter = m_collection.find(source);
-	if (iter == m_collection.end())
-	{ // can't find source phrase
-		return NULL;
-	}
+{ // exactly like CreateTargetPhraseCollection, but don't create
+	const size_t size = source.GetSize();
 	
-	return &iter->second;
+	const PhraseDictionaryNode *currNode = &m_collection;
+	for (size_t pos = 0 ; pos < size ; ++pos)
+	{
+		Word word(source.GetFactorArray(pos));
+		currNode = currNode->GetChild(word);
+		if (currNode == NULL)
+			return NULL;
+	}
+
+	return currNode->GetTargetPhraseCollection();
 }
 
 PhraseDictionary::~PhraseDictionary()
@@ -236,18 +228,12 @@ PhraseDictionary::~PhraseDictionary()
 
 void PhraseDictionary::SetWeightTransModel(const vector<float> &weightT)
 {
-	std::map<Phrase , TargetPhraseCollection >::iterator iterDict;
+	PhraseDictionaryNode::iterator iterDict;
 	for (iterDict = m_collection.begin() ; iterDict != m_collection.end() ; ++iterDict)
 	{
-		TargetPhraseCollection &targetPhraseCollection = iterDict->second;
-		
-		TargetPhraseCollection::iterator targetPhraseIter;
-		for (targetPhraseIter = targetPhraseCollection.begin();
-					targetPhraseIter != targetPhraseCollection.end();
-					++targetPhraseIter)
-		{
-			targetPhraseIter->SetWeights(this, weightT);
-		}
+		PhraseDictionaryNode &phraseDictionaryNode = iterDict->second;
+		// recursively set weights in nodes
+		phraseDictionaryNode.SetWeightTransModel(this, weightT);
 	}
 }
 
@@ -270,12 +256,12 @@ TO_STRING_BODY(PhraseDictionary);
 // friend
 ostream& operator<<(ostream& out, const PhraseDictionary& phraseDict)
 {
-	const map<Phrase , TargetPhraseCollection > &coll = phraseDict.m_collection;
-	map<Phrase , TargetPhraseCollection >::const_iterator iter;	
+	const PhraseDictionaryNode &coll = phraseDict.m_collection;
+	PhraseDictionaryNode::const_iterator iter;	
 	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
 	{
-		const Phrase &sourcePhrase = (*iter).first;
-		out << sourcePhrase;
+		const Word &word = (*iter).first;
+		out << word;
 	}
 	return out;
 }
