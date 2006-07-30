@@ -93,21 +93,18 @@ void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
 	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START, lmId);
 	lmId = GetLmID(SENTENCE_END);
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END, lmId);
-	
 }
 
 LmId LanguageModel_SRI::GetLmID( const std::string &str ) const
 {
-    LanguageModel_SRI *lm = const_cast<LanguageModel_SRI*>(this); // hack. not sure if supposed to cast this
     LmId res;
-    res.sri = lm->m_srilmVocab->getIndex( str.c_str(), m_unknownId.sri );
+    res.sri = m_srilmVocab->getIndex( str.c_str(), m_unknownId.sri );
     return res;
 }
 
 float LanguageModel_SRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 {
-	LanguageModel_SRI *lm = const_cast<LanguageModel_SRI*>(this); // hack. not sure if supposed to cast this
-	float p = lm->m_srilmModel->wordProb( wordId, context );
+	float p = m_srilmModel->wordProb( wordId, context );
 	return FloorSRIScore(TransformSRIScore(p));  // log10->log
 }
 
