@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+std::vector<mempool*> Phrase::s_memPool;
+
 Phrase::Phrase(const Phrase &copy)
 :m_direction(copy.m_direction)
 ,m_phraseSize(copy.m_phraseSize)
@@ -301,57 +303,29 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 	return true;
 
 }
-//
-//bool Phrase::Contains(const Phrase &subPhrase) const
-//{
-//	const size_t subSize = subPhrase.GetSize()
-//							,thisSize= GetSize();
-//	if (subSize > thisSize)
-//		return false;
-//
-//	// try to match word-for-word
-//	for (size_t currStartPos = 0 ; currStartPos < (thisSize - subSize + 1) ; currStartPos++)
-//	{
-//		bool match = true;
-//
-//		for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
-//		{
-//			FactorType factorType = static_cast<FactorType>(currFactor);
-//			// curr factor, 1st word
-//			const Factor *subFactor			= subPhrase.GetFactor(0, factorType)
-//										,*thisFactor	= GetFactor(currStartPos, factorType);
-//			if (subFactor != NULL && thisFactor != NULL)
-//			{
-//				if (subFactor != thisFactor)
-//				{
-//					match = false;
-//					break;
-//				}
-//				else
-//				{
-//					// subsequent words
-//					for (size_t currSubPos = 1 ; currSubPos < subSize ; currSubPos++)
-//					{
-//						size_t currThisPos = currSubPos + currStartPos;
-//						const Factor *subFactor			= subPhrase.GetFactor(currSubPos, factorType)
-//													,*thisFactor	= GetFactor(currThisPos, factorType);
-//						if (subFactor != thisFactor)
-//						{
-//							match = false;
-//							break;
-//						}
-//					}
-//					if (!match)
-//						break;
-//				}
-//			}
-//		}
-//
-//		if (match)
-//			return true;
-//	}
-//	return false;
-//}
+
+void Phrase::InitializeMemPool()
+{
+	s_memPool[0] = new mempool(20000, sizeof(FactorArray));
+	s_memPool[1] = new mempool(10000, sizeof(FactorArray));
+	s_memPool[2] = new mempool(1000, sizeof(FactorArray));
+	s_memPool[3] = new mempool(1000, sizeof(FactorArray));
+	s_memPool[4] = new mempool(1000, sizeof(FactorArray));
+	s_memPool[5] = new mempool(1000, sizeof(FactorArray));
+	s_memPool[6] = new mempool(100, sizeof(FactorArray));
+	s_memPool[7] = new mempool(100, sizeof(FactorArray));
+	s_memPool[8] = new mempool(100, sizeof(FactorArray));
+	s_memPool[9] = new mempool(100, sizeof(FactorArray));
+}
+
+void Phrase::FinalizeMemPool()
+{
+	std::vector<mempool*>::iterator iter;
+	for (iter = s_memPool.begin() ; iter != s_memPool.end() ; ++iter)
+	{
+		delete *iter;
+	}
+}
 
 TO_STRING_BODY(Phrase);
 
