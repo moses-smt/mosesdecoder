@@ -192,15 +192,17 @@ public:
 	// recursive - pos is relative from start of sentence
 	inline const FactorArray &GetFactorArray(size_t pos) const
 	{
-		if (pos < m_currTargetWordsRange.GetStartPos())
-			return m_prevHypo->GetFactorArray(pos);
-		return m_targetPhrase.GetFactorArray(pos - m_currTargetWordsRange.GetStartPos());
+		const Hypothesis *hypo = this;
+		while (pos < hypo->GetCurrTargetWordsRange().GetStartPos())
+		{
+			hypo = hypo->GetPrevHypo();
+		}
+		assert(hypo != NULL);
+		return hypo->GetCurrFactorArray(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
 	}
 	inline const Factor* GetFactor(size_t pos, FactorType factorType) const
 	{
-		if (pos < m_currTargetWordsRange.GetStartPos())
-			return m_prevHypo->GetFactor(pos, factorType);
-		return m_targetPhrase.GetFactor(pos - m_currTargetWordsRange.GetStartPos(), factorType);
+		return GetFactorArray(pos)[factorType];
 	}
 
 	/***
