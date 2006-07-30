@@ -9,6 +9,7 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.381079048" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
 <option id="gnu.cpp.compiler.option.include.paths.1241301640" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
@@ -73,6 +74,7 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1960479367" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
 <option id="gnu.cpp.compiler.option.include.paths.1986529351" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
@@ -135,6 +137,7 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.103376107" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
 <option id="gnu.cpp.compiler.option.include.paths.2145251726" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
@@ -200,6 +203,7 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1731051429" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
 <option id="gnu.cpp.compiler.option.include.paths.46087237" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/src"/>
+<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
