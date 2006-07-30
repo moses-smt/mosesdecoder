@@ -29,17 +29,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 #include "TypeDef.h"
 #include "Util.h"
+#include "mempool.h"
 
 class Phrase
 {
 	friend std::ostream& operator<<(std::ostream&, const Phrase&);
 protected:
+	static std::vector<mempool*> s_memPool;
+
 	FactorDirection				m_direction;
 	size_t								m_phraseSize, //number of words
 											m_arraySize;
 	FactorArray						*m_factorArray;
 
 public:
+	static void InitializeMemPool();
+	static void FinalizeMemPool();
+
 	inline Phrase()
 		: m_phraseSize(0)
 		, m_arraySize(0)
