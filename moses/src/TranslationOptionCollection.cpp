@@ -511,7 +511,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	// possible optimization- don't consider phrases longer than the longest
 	// phrase in the PhraseDictionary?
 	
-	PhraseDictionaryBase &phraseDictionary = decodeStep.GetPhraseDictionary();
+	const PhraseDictionaryBase &phraseDictionary = decodeStep.GetPhraseDictionary();
 	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
 	{
 		if (m_unknownWordPos.GetValue(startPos))
