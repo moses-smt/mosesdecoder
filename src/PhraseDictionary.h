@@ -21,46 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <iostream>
-#include <map>
-#include <list>
-#include <vector>
-#include <string>
-#include "Phrase.h"
-#include "TargetPhrase.h"
-#include "Dictionary.h"
-#include "TargetPhraseCollection.h"
-
-class StaticData;
-class InputType;
-class WordsRange;
-
-
-class PhraseDictionaryBase : public Dictionary, public ScoreProducer {
- protected:
-	size_t m_maxTargetPhrase;
-	std::string m_filename;    // just for debugging purposes
-
- public:
-	PhraseDictionaryBase(size_t noScoreComponent);
-	virtual ~PhraseDictionaryBase();
-		
-	DecodeType GetDecodeType() const
-	{
-		return Translate;
-	}
-	
-	virtual void InitializeForInput(InputType const&) {}
-	const std::string GetScoreProducerDescription() const;
-	unsigned int GetNumScoreComponents() const;
-
-	virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
-
-	virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
-	virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
-
-	virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
-};
+#include "PhraseDictionaryBase.h"
+#include "PhraseDictionaryNode.h"
 
 class PhraseDictionary : public PhraseDictionaryBase
 {
@@ -68,13 +30,14 @@ class PhraseDictionary : public PhraseDictionaryBase
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionary&);
 
 protected:
-	std::map<Phrase , TargetPhraseCollection > m_collection;
+	PhraseDictionaryNode m_collection;
 	// 1st = source
 	// 2nd = target
 
 	bool Contains(const std::vector< std::vector<std::string> >	&phraseVector
 							, const std::list<Phrase>					&inputPhraseList
 							, const std::vector<FactorType>		&inputFactorType);
+	TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
 public:
 	PhraseDictionary(size_t noScoreComponent)
 		: MyBase(noScoreComponent)
@@ -95,11 +58,6 @@ public:
 								, float weightWP
 								, const StaticData& staticData);
 	
-	size_t GetSize() const
-	{
-		return m_collection.size();
-	}
-
 	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
