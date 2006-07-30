@@ -479,12 +479,12 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 			
 			pair< set<TargetPhrase>::iterator, bool> inserted = m_unknownTargetPhrase.insert(targetPhraseOrig);
 			const TargetPhrase &targetPhrase = *inserted.first;
-			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, m_allPhraseDictionary, m_allGenerationDictionary);
+			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
 		}
 		else 
 		{ // drop source word. create blank trans opt
 			const TargetPhrase targetPhrase(Output);
-			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, m_allPhraseDictionary, m_allGenerationDictionary);						
+			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
 		}
 
 		transOpt->CalcScore(*m_allLM, weightWordPenalty);
