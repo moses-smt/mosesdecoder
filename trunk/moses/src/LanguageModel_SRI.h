@@ -39,10 +39,6 @@ class Ngram; // SRI forward decl
 
 class LanguageModel_SRI : public LanguageModel
 {
-private:
-  // not thread-safe, but not much is
-	mutable VocabIndex m_context[MAX_NGRAM_SIZE];	
-
 protected:
 	Vocab *m_srilmVocab;
 	Ngram *m_srilmModel;
