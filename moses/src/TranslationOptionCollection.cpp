@@ -417,7 +417,9 @@ void TranslationOptionCollection::CreateTranslationOptions(
 			transOpt->CalcScore(allLM, weightWordPenalty);
 			Add(transOpt);
 		}
+
 	lastPartialTranslOptColl.DetachAll();
+	delete outputPartialTranslOptCollVec[decodeStepList.size() - 1];
 
 	// Prune
 	Prune();
