@@ -66,9 +66,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 	m_scoreBreakdown.PlusEquals(generationDictionary, generationScore);
 }
 
-TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase
-																		 , list<const PhraseDictionaryBase*>			&/*allPhraseDictionary*/
-																		 , list<const GenerationDictionary*>	&/*allGenerationDictionary*/)
+TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/)
 : m_phrase(targetPhrase)
 ,m_sourceWordsRange	(wordsRange)
 ,m_scoreTrans(0)

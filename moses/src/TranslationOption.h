@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <list>
+#include <vector>
 #include "WordsBitmap.h"
 #include "WordsRange.h"
 #include "Phrase.h"
@@ -64,10 +64,7 @@ public:
 											, const GenerationDictionary *generationDictionary
 											, float generationScore
 											, float weight);
-	TranslationOption(const WordsRange &wordsRange
-												, const TargetPhrase &targetPhrase
-											 	, std::list<const PhraseDictionaryBase*>	&allPhraseDictionary
-											 	, std::list<const GenerationDictionary*>	 &allGenerationDictionary);
+	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/);
 	// used to create trans opt from unknown word
 	
 	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase) const;
