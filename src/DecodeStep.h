@@ -31,7 +31,7 @@ class  DecodeStep
 {
 protected:
 	const DecodeType m_decodeType;
-	Dictionary *m_ptr;
+	const Dictionary *m_ptr;
 		// 2nd = pointer to a phraseDictionary or generationDictionary
 public:
 	DecodeStep(DecodeType decodeType, Dictionary *ptr)
@@ -43,18 +43,18 @@ public:
 	{
 		return m_decodeType;
 	}
-	PhraseDictionaryBase &GetPhraseDictionary() const
+	const PhraseDictionaryBase &GetPhraseDictionary() const
 	{
 		assert (m_decodeType == Translate);
-	  assert (dynamic_cast<PhraseDictionaryBase*>(m_ptr));
-		return *dynamic_cast<PhraseDictionaryBase*>(m_ptr);
+	  assert (dynamic_cast<const PhraseDictionaryBase*>(m_ptr));
+		return *dynamic_cast<const PhraseDictionaryBase*>(m_ptr);
 	}
 	const GenerationDictionary &GetGenerationDictionary() const
 	{
 		assert (m_decodeType == Generate);
-	  assert (dynamic_cast<GenerationDictionary*>(m_ptr));
-	  return *dynamic_cast<GenerationDictionary*>(m_ptr);
+	  assert (dynamic_cast<const GenerationDictionary*>(m_ptr));
+	  return *dynamic_cast<const GenerationDictionary*>(m_ptr);
 	}
-	Dictionary* GetDictionaryPtr() const {return m_ptr;}
+	const Dictionary* GetDictionaryPtr() const {return m_ptr;}
 	
 };
