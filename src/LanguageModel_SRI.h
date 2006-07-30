@@ -39,17 +39,6 @@ class Ngram; // SRI forward decl
 
 class LanguageModel_SRI : public LanguageModel
 {
-public:
-	
-	LanguageModel_SRI();
-	~LanguageModel_SRI();
-	void Load(size_t id
-					, const std::string &fileName
-					, FactorCollection &factorCollection
-					, FactorType factorType
-					, float weight
-					, size_t nGramOrder);
-
 private:
   // not thread-safe, but not much is
 	mutable VocabIndex m_context[MAX_NGRAM_SIZE];	
@@ -62,6 +51,15 @@ protected:
 
 	void CreateFactors(FactorCollection &factorCollection);
 public:
+	LanguageModel_SRI();
+	~LanguageModel_SRI();
+	void Load(size_t id
+					, const std::string &fileName
+					, FactorCollection &factorCollection
+					, FactorType factorType
+					, float weight
+					, size_t nGramOrder);
+
 	LmId GetLmID( const std::string &str ) const;
 
   virtual float GetValue(const std::vector<const Factor*> &contextFactor) const;
