@@ -37,7 +37,6 @@
 <option id="gnu.cpp.compiler.option.include.paths.28728819" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
