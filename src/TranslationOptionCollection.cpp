@@ -339,32 +339,17 @@ void TranslationOptionCollection::CreateTranslationOptions(
 																													 , size_t verboseLevel)
 {
 	m_allLM = &allLM;
-	vector < PartialTranslOptColl > outputPartialTranslOptCollVec( decodeStepList.size() );
-
-	// fill list of dictionaries for unknown word handling
-	{
-		list<DecodeStep>::const_iterator iter;
-		for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
-			{
-				switch (iter->GetDecodeType())
-					{
-					case Translate:
-						m_allPhraseDictionary.push_back(&(iter->GetPhraseDictionary()));
-						break;
-					case Generate:
-						m_allGenerationDictionary.push_back(&(iter->GetGenerationDictionary()));
-						break;
-					}
-			}
-	}
-
+	// partial trans opt stored in here
+	vector < PartialTranslOptColl* > outputPartialTranslOptCollVec( decodeStepList.size() );
+	outputPartialTranslOptCollVec[0] = new PartialTranslOptColl();
+	
 	// initial translation step
 	list < DecodeStep >::const_iterator iterStep = decodeStepList.begin();
 	const DecodeStep &decodeStep = *iterStep;
 
 	ProcessInitialTranslation(decodeStep, factorCollection
 														, weightWordPenalty, dropUnknown
-														, verboseLevel, outputPartialTranslOptCollVec[0]);
+														, verboseLevel, *outputPartialTranslOptCollVec[0]);
 
 	// do rest of decode steps
 	
@@ -372,8 +357,10 @@ void TranslationOptionCollection::CreateTranslationOptions(
 	for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
 		{
 			const DecodeStep &decodeStep = *iterStep;
-			PartialTranslOptColl &inputPartialTranslOptColl		= outputPartialTranslOptCollVec[indexStep]
-				,&outputPartialTranslOptColl	= outputPartialTranslOptCollVec[indexStep + 1];
+			
+			outputPartialTranslOptCollVec[indexStep + 1]			= new PartialTranslOptColl();
+			PartialTranslOptColl &inputPartialTranslOptColl		= *outputPartialTranslOptCollVec[indexStep]
+													,&outputPartialTranslOptColl	= *outputPartialTranslOptCollVec[indexStep + 1];
 
 			// is it translation or generation
 			switch (decodeStep.GetDecodeType()) 
@@ -410,12 +397,19 @@ void TranslationOptionCollection::CreateTranslationOptions(
 							}
 						break;
 					}
+				case InsertNullFertilityWord:
+					{ // TODO ask chris or evan what should be done
+						assert(false);
+						break;
+					}
 				}
+			// last but 1 partial trans not required anymore
+			delete outputPartialTranslOptCollVec[indexStep];
 			indexStep++;
 		} // for (++iterStep 
 
 	// add to real trans opt list
-	PartialTranslOptColl &lastPartialTranslOptColl	= outputPartialTranslOptCollVec[decodeStepList.size() - 1];
+	PartialTranslOptColl &lastPartialTranslOptColl	= *outputPartialTranslOptCollVec[decodeStepList.size() - 1];
 	PartialTranslOptColl::iterator iterColl;
 	for (iterColl = lastPartialTranslOptColl.begin() ; iterColl != lastPartialTranslOptColl.end() ; iterColl++)
 		{
@@ -424,7 +418,6 @@ void TranslationOptionCollection::CreateTranslationOptions(
 			Add(transOpt);
 		}
 	lastPartialTranslOptColl.DetachAll();
-		
 
 	// Prune
 	Prune();
