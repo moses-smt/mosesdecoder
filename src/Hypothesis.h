@@ -77,7 +77,7 @@ protected:
 	
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
-	void CalcLMScore(const LMList		&languageModels);
+	void CalcLMScore(const LMList		&lmListInitial, const LMList	&lmListEnd);
 	void CalcDistortionScore();
 	//TODO: add appropriate arguments to score calculator
 
@@ -288,3 +288,4 @@ public:
 
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);
+
