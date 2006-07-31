@@ -9,7 +9,8 @@
 
 # Revision history
 
-# 31 Jul 2006 adding default paths
+# 31 Jl 1006 move gzip run*.out to avoid failure wit restartings
+#            adding default paths
 # 29 Jul 2006 run-filter, score-nbest and mert run on the queue (Nicola; Ondrej had to type it in again)
 # 28 Jul 2006 attempt at foolproof usage, strong checking of input validity, merged the parallel and nonparallel version (Ondrej Bojar)
 # 27 Jul 2006 adding the safesystem() function to handle with process failure
