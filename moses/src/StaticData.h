@@ -51,10 +51,10 @@ protected:
 	std::vector<PhraseDictionaryBase*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::list < DecodeStep >						m_decodeStepList;
-	LMList															m_languageModel;
 	Parameter			m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder;
 //	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
+	std::vector<LMList>			m_languageModel;
 	std::vector<float>			m_lexWeights;
 	ScoreIndexManager				m_scoreIndexManager;
 	std::vector<float>			m_allWeights;
@@ -169,7 +169,12 @@ public:
 	{
 		if (factorType >= m_maxNgramOrderForFactor.size()) return 0;
 		return m_maxNgramOrderForFactor[factorType];
-	}	
+	}
+	const LMList &GetLanguageModel(LMListType type) const
+	{
+		return m_languageModel[type];
+	}
+	
 	LexicalReordering *GetLexReorder() const
 	{
 		return m_lexReorder;
@@ -215,12 +220,9 @@ public:
 
 	size_t GetLMSize() const
 	{
-		return m_languageModel.size();
+		return m_languageModel[Initial].size() + m_languageModel[Other].size();
 	}
-	const LMList &GetAllLM() const
-	{
-		return m_languageModel;
-	}
+	const LMList GetAllLM() const;
 
 	size_t GetPhraseDictionarySize() const
 	{
