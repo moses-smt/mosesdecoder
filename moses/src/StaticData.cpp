@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelFactory.h"
 #include "LexicalReordering.h"
 #include "SentenceStats.h"
+#include "PhraseDictionaryTreeAdaptor.h"
 
 #ifndef WIN32
 #include "PhraseDictionaryTreeAdaptor.h"
@@ -48,8 +49,7 @@ extern Timer timer;
 StaticData* StaticData::s_instance(0);
 
 StaticData::StaticData()
-:m_languageModel(2)
-,m_lexReorder(NULL)
+:m_lexReorder(NULL)
 ,m_inputOutput(NULL)
 ,m_fLMsLoaded(false)
 ,m_inputType(0)
@@ -225,8 +225,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				return false;
 			}
 			// type = whether or not to use in future cost calcs
-			// (DEPRECATED, asked hieu)
-			LMListType type = static_cast<LMListType>(Scan<int>(token[0]));
+			// type is no longer used. can used token[0] for something else instead 
+			// eg. which LM implementation we want to use
+
 			// factorType = (see TypeDef.h)
 			//   0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
 			FactorType factorType = Scan<FactorType>(token[1]);
@@ -249,7 +250,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			// error handling here?
 			lm->Load(i, languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
 	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
-			m_languageModel[type].push_back(lm);
+			m_languageModel.push_back(lm);
 
 			HypothesisRecombinationOrderer::SetMaxNGramOrder(factorType, nGramMaxOrder);
 		}
@@ -359,14 +360,8 @@ StaticData::~StaticData()
 		delete m_generationDictionary[i];
 	}
 
-	LMList &lmList = m_languageModel[0];
 	LMList::const_iterator iterLM;
-	for (iterLM = lmList.begin() ; iterLM != lmList.end() ; ++iterLM)
-	{
-		delete *iterLM;
-	}
-	lmList = m_languageModel[1];
-	for (iterLM = lmList.begin() ; iterLM != lmList.end() ; ++iterLM)
+	for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
 	{
 		delete *iterLM;
 	}
@@ -406,20 +401,15 @@ void StaticData::SetWeightTransModel(const vector<float> &weight)
 
 void StaticData::SetWeightLM(const std::vector<float> &weight)
 {
-	assert(weight.size() == m_languageModel[Initial].size() + m_languageModel[Other].size());
+	assert(weight.size() == m_languageModel.size());
 	
 	size_t currIndex = 0;
 	LMList::iterator iter;
-	for (iter = m_languageModel[Initial].begin() ; iter != m_languageModel[Initial].end() ; ++iter)
+	for (iter = m_languageModel.begin() ; iter != m_languageModel.end() ; ++iter)
 	{
 		LanguageModel *languageModel = *iter;
 		languageModel->SetWeight(weight[currIndex++]);
 	}
-	for (iter = m_languageModel[Other].begin() ; iter != m_languageModel[Other].end() ; ++iter)
-	{
-		LanguageModel *languageModel = *iter;
-		languageModel->SetWeight(weight[currIndex++]);
-	}	
 }
 
 void StaticData::SetWeightGeneration(const std::vector<float> &weight)
@@ -433,17 +423,6 @@ void StaticData::SetWeightGeneration(const std::vector<float> &weight)
 		GenerationDictionary *dict = *iter;
 		dict->SetWeight(weight[currWeight++]);
 	}
-}
-
-const LMList StaticData::GetAllLM() const
-{
-	LMList allLM;
-	std::copy(m_languageModel[Initial].begin(), m_languageModel[Initial].end()
-						, std::inserter(allLM, allLM.end()));
-	std::copy(m_languageModel[Other].begin(), m_languageModel[Other].end()
-						, std::inserter(allLM, allLM.end()));
-	
-	return allLM;
 }
 
 void StaticData::LoadPhraseTables(bool filter
@@ -547,25 +526,20 @@ void StaticData::LoadPhraseTables(bool filter
 									 , maxTargetPhrase[index]
 									 , filterPhrase
 									 , inputPhraseList
-									 ,	this->GetLanguageModel(Initial)
+									 ,	GetAllLM()
 									 ,	this->GetWeightWordPenalty()
 									 , *this);
 					m_phraseDictionary.push_back(pd);
 				}
 			else 
 				{
-					#ifdef WIN32
-						TRACE_ERR("binary phrase tables not available under Windows\n");
-						assert(false);
-					#else
 						TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
 						PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent,(currDict==0 ? m_numInputScores : 0));
 						pd->Create(input,output,m_factorCollection,filePath,weight,
 											 maxTargetPhrase[index],
-											 this->GetLanguageModel(Initial),
+											 this->GetAllLM(),
 											 this->GetWeightWordPenalty());
 						m_phraseDictionary.push_back(pd);
-					#endif
 				}
 
 			index++;
