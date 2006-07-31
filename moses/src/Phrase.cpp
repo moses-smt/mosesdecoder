@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-std::vector<mempool*> Phrase::s_memPool;
+// std::vector<mempool*> Phrase::s_memPool;
 
 Phrase::Phrase(const Phrase &copy)
 :m_direction(copy.m_direction)
@@ -306,6 +306,7 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 
 void Phrase::InitializeMemPool()
 {
+#if 0
 	s_memPool[0] = new mempool(20000, sizeof(FactorArray));
 	s_memPool[1] = new mempool(10000, sizeof(FactorArray));
 	s_memPool[2] = new mempool(1000, sizeof(FactorArray));
@@ -316,15 +317,18 @@ void Phrase::InitializeMemPool()
 	s_memPool[7] = new mempool(100, sizeof(FactorArray));
 	s_memPool[8] = new mempool(100, sizeof(FactorArray));
 	s_memPool[9] = new mempool(100, sizeof(FactorArray));
+#endif
 }
 
 void Phrase::FinalizeMemPool()
 {
+#if 0
 	std::vector<mempool*>::iterator iter;
 	for (iter = s_memPool.begin() ; iter != s_memPool.end() ; ++iter)
 	{
 		delete *iter;
 	}
+#endif
 }
 
 TO_STRING_BODY(Phrase);
