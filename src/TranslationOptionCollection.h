@@ -37,7 +37,7 @@ class GenerationDictionary;
 class InputType;
 class LMList;
 
-typedef std::list<const TranslationOption*> TranslationOptionList;
+typedef std::vector<const TranslationOption*> TranslationOptionList;
 
 class TranslationOptionCollection
 {
