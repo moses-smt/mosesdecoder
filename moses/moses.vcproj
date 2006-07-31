@@ -427,6 +427,46 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryNode.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugNBest|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseNBest|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\src\ScoreComponentCollection.cpp"
 				>
 			</File>
@@ -613,19 +653,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Object.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ObjectPool.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\Parameter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\PartialTranslOpt.h"
 				>
 			</File>
 			<File
@@ -638,6 +670,14 @@
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionary.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryNode.h"
 				>
 			</File>
 			<File
@@ -698,14 +738,6 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionCollectionText.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\TransScoreComponent.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\TransScoreComponentCollection.h"
 				>
 			</File>
 			<File

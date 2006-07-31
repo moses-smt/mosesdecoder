@@ -1,3 +1,5 @@
+// $Id$
+
 #ifndef _DUMMY_SCORE_PRODUCERS_H_
 #define _DUMMY_SCORE_PRODUCERS_H_
 

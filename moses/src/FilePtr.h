@@ -1,8 +1,10 @@
+// $Id$
+
 /* ---------------------------------------------------------------- */
 /* Copyright 2005 (c) by RWTH Aachen - Lehrstuhl fuer Informatik VI */
 /* Richard Zens                                                     */
 /* ---------------------------------------------------------------- */
-// $Id$
+
 #ifndef FILEPTR_H_
 #define FILEPTR_H_
 #include "File.h"

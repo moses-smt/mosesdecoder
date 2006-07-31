@@ -1,3 +1,5 @@
+// $Id$
+
 #ifndef _SCORE_INDEX_MANAGER_H_
 #define _SCORE_INDEX_MANAGER_H_
 
