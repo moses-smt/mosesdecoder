@@ -4,7 +4,7 @@ This directory should contain all multi-purpose scripts for:
 
 - training    ... training moses (including BLEU evaluation needed for MERT)
 - analysis    ... analyzing MT output (for human analysis)
-
+- generic     ... script for handling generic issues (parallelization)
 - lib         ... perl modules used by various scripts
 
 
@@ -12,5 +12,4 @@ The Makefile then takes care of proper 'release' from your CVS directory to
 the shared directories.
 
 The released scripts should remain in the *same directory structure*.
-
 
