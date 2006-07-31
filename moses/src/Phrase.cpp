@@ -36,32 +36,28 @@ Phrase::Phrase(const Phrase &copy)
 :m_direction(copy.m_direction)
 ,m_phraseSize(copy.m_phraseSize)
 ,m_arraySize(copy.m_arraySize)
+,m_memPoolIndex(copy.m_memPoolIndex)
 {
-	if (m_phraseSize==0)
-	{
-		m_factorArray = NULL;
-	}
-	else
-	{
-		m_factorArray = (FactorArray*) malloc(m_arraySize * sizeof(FactorArray));
-		memcpy(m_factorArray, copy.m_factorArray, m_phraseSize * sizeof(FactorArray));
-	}
+	m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->alloc();
+	memcpy(m_factorArray, copy.m_factorArray, m_phraseSize * sizeof(FactorArray));
 }
 
 Phrase::Phrase(FactorDirection direction)
 	: m_direction(direction)
 	, m_phraseSize(0)
 	, m_arraySize(ARRAY_SIZE_INCR)
+	, m_memPoolIndex(0)
 {
-	m_factorArray = (FactorArray*) malloc(m_arraySize * sizeof(FactorArray));
+	m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->alloc();
 }
 
 Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
 :m_direction(direction)
 ,m_phraseSize(mergeWords.size())
-,m_arraySize(mergeWords.size())
 {
-	m_factorArray = (FactorArray*) malloc(m_arraySize * sizeof(FactorArray));
+	m_memPoolIndex	= (m_phraseSize + ARRAY_SIZE_INCR - 1) / ARRAY_SIZE_INCR  - 1;
+	m_arraySize 		= (m_memPoolIndex + 1) * ARRAY_SIZE_INCR;
+	m_factorArray 	= (FactorArray*) s_memPool[m_memPoolIndex]->alloc();
 	
 	for (size_t currPos = 0 ; currPos < m_phraseSize ; currPos++)
 	{
@@ -78,7 +74,7 @@ Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWord
 
 Phrase::~Phrase()
 {
-	free (m_factorArray);
+	s_memPool[m_memPoolIndex]->free((char*)m_factorArray);
 }
 
 void Phrase::MergeFactors(const Phrase &copy)
@@ -94,15 +90,6 @@ void Phrase::MergeFactors(const Phrase &copy)
 			if (factor != NULL)
 				SetFactor(currPos, factorType, factor);
 		}
-	}
-}
-
-void Phrase::AddWords(const Phrase &copy)
-{
-	for (size_t pos = 0 ; pos < copy.GetSize() ; pos++)
-	{
-		FactorArray &newWord = AddWord();
-		Word::Copy(newWord, copy.GetFactorArray(pos));
 	}
 }
 
@@ -129,16 +116,17 @@ std::string Phrase::GetStringRep(const WordsRange &wordsRange)
 	return phrase_string.str();
 }
 
-
-
-
-
 FactorArray &Phrase::AddWord()
 {
-	if (m_phraseSize % ARRAY_SIZE_INCR == 0)
+	if ((m_phraseSize+1) % ARRAY_SIZE_INCR == 0)
 	{ // need to expand array
+		FactorArray *newArray = (FactorArray*) s_memPool[m_memPoolIndex+1]->alloc();
+		memcpy(newArray, m_factorArray, m_phraseSize * sizeof(FactorArray));
+		s_memPool[m_memPoolIndex]->free((char*)m_factorArray);
+		
+		m_memPoolIndex++;
 		m_arraySize += ARRAY_SIZE_INCR;
-		m_factorArray = (FactorArray*) realloc(m_factorArray, m_arraySize * sizeof(FactorArray));			
+		m_factorArray = newArray;
 	}
 
 	FactorArray &factorArray = m_factorArray[m_phraseSize];
@@ -306,18 +294,16 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 
 void Phrase::InitializeMemPool()
 {
-#if 0
-	s_memPool[0] = new mempool(20000, sizeof(FactorArray));
-	s_memPool[1] = new mempool(10000, sizeof(FactorArray));
-	s_memPool[2] = new mempool(1000, sizeof(FactorArray));
-	s_memPool[3] = new mempool(1000, sizeof(FactorArray));
-	s_memPool[4] = new mempool(1000, sizeof(FactorArray));
-	s_memPool[5] = new mempool(1000, sizeof(FactorArray));
-	s_memPool[6] = new mempool(100, sizeof(FactorArray));
-	s_memPool[7] = new mempool(100, sizeof(FactorArray));
-	s_memPool[8] = new mempool(100, sizeof(FactorArray));
-	s_memPool[9] = new mempool(100, sizeof(FactorArray));
-#endif
+	s_memPool.push_back( new mempool(1 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 50000 ));
+	s_memPool.push_back( new mempool(2 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 1000 ));
+	s_memPool.push_back( new mempool(3 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 1000 ));
+	s_memPool.push_back( new mempool(4 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 100 ));
+	s_memPool.push_back( new mempool(5 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 10 ));
+	s_memPool.push_back( new mempool(6 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 10 ));
+	s_memPool.push_back( new mempool(7 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 10 ));
+	
+	for (size_t i = 8 ; i < 30 ; ++i)
+		s_memPool.push_back( new mempool(i * ARRAY_SIZE_INCR * sizeof(FactorArray) , 2 ));
 }
 
 void Phrase::FinalizeMemPool()
