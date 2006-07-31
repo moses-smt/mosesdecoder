@@ -99,6 +99,9 @@ protected:
 
 	mutable SentenceStats m_sentenceStats;
 
+  //! Sets the global score vector weights for a given ScoreProducer.
+	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
+
 public:
 	StaticData();
 	~StaticData();
@@ -222,8 +225,11 @@ public:
 	{
 		return m_languageModel[Initial].size() + m_languageModel[Other].size();
 	}
+	size_t GetNumLanguageModels() const
+	{
+		return GetLMSize();
+	}
 	const LMList GetAllLM() const;
-
 	size_t GetPhraseDictionarySize() const
 	{
 		return m_phraseDictionary.size();

@@ -618,3 +618,15 @@ void StaticData::InitializeBeforeSentenceProcessing(InputType const& in)
 	for(size_t i=0;i<m_phraseDictionary.size();++i)
 		m_phraseDictionary[i]->InitializeForInput(in);
 }
+
+void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)
+{
+  const size_t id = sp->GetScoreBookkeepingID();
+  const size_t begin = m_scoreIndexManager.GetBeginIndex(id);
+  const size_t end = m_scoreIndexManager.GetEndIndex(id);
+  assert(end - begin == weights.size());
+	std::vector<float>::const_iterator weightIter = weights.begin();
+  for (size_t i = begin; i < end; i++)
+    m_allWeights[i] = *weightIter++;
+}
+
