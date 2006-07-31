@@ -283,10 +283,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ConfusionNetWIN32.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Dictionary.cpp"
 				>
 			</File>
@@ -471,6 +467,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryTree.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryTreeAdaptor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ScoreComponentCollection.cpp"
 				>
 			</File>
@@ -487,6 +491,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SquareMatrix.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\StaticData.cpp"
 				>
 			</File>
@@ -500,6 +508,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionCollection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOptionCollectionConfusionNet.cpp"
 				>
 			</File>
 			<File
@@ -641,6 +653,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LMList.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Manager.h"
 				>
 			</File>
@@ -654,6 +670,10 @@
 			</File>
 			<File
 				RelativePath=".\src\NGramNode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Object.h"
 				>
 			</File>
 			<File
@@ -713,6 +733,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SentenceStats.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SquareMatrix.h"
 				>
 			</File>
@@ -738,6 +762,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOptionCollectionConfusionNet.h"
 				>
 			</File>
 			<File
