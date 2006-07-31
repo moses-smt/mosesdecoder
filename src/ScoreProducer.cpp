@@ -1,3 +1,5 @@
+// $Id$
+
 #include <iostream>
 #include <typeinfo>
 #include "ScoreProducer.h"

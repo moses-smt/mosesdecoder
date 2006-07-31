@@ -1,3 +1,5 @@
+// $Id$
+
 #ifndef _SCORE_PRODUCER_H_
 #define _SCORE_PRODUCER_H_
 

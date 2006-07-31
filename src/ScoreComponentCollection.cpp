@@ -1,3 +1,4 @@
+// $Id$
 
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
