@@ -427,6 +427,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryBase.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionaryNode.cpp"
 				>
 				<FileConfiguration
