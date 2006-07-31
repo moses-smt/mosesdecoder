@@ -247,12 +247,16 @@ sub prepare {
 
 sub reduce_factors {
     my ($full,$reduced,$factors) = @_;
+		if (-e $reduced) {
+				print STDERR "already $reduced in place, reusing\n";
+				return;
+		}
     # my %INCLUDE;
     # foreach my $factor (split(/,/,$factors)) {
 	# $INCLUDE{$factor} = 1;
     # }
     my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
-    open(IN,$full) or die "Can't read $full";
+    open(IN,$full) or die "Can't read $full";		
     open(OUT,">".$reduced) or die "Can't write $reduced";
     my $nr = 0;
     while(<IN>) {
@@ -810,50 +814,6 @@ sub count_aligned {
     return (\%FOREIGN_ALIGNED,\%ENGLISH_ALIGNED);
 }
 
-sub open_alignment {
-    open(E,"$___MODEL_DIR/aligned.$factor_e.$___E")
-      or die "Can't read $___MODEL_DIR/aligned.$factor_e.$___E";
-    open(F,"$___MODEL_DIR/aligned.$factor_f.$___F")
-      or die "Can't read $___MODEL_DIR/aligned.$factor_f.$___F";
-    open(A,"$___MODEL_DIR/aligned.$___ALIGNMENT")
-      or die "Can't read $___MODEL_DIR/aligned.$___ALIGNMENT";
-    $alignment_id=0;
-}
-
-sub read_alignment {
-    my ($ALIGNMENT,$FOREIGN,$ENGLISH) = @_;
-    if (($alignment_id++ % 1000) == 0) { print STDERR "!"; }
-    my $e = <E>;
-    return 0 unless $e;
-    chomp($e); 
-    @{$ENGLISH} = split(/ /,$e);
-    my $f = <F>;
-    die "Corpus too short!" if !defined $f;
-    chomp($f); 
-    @{$FOREIGN} = split(/ /,$f);
-    my $a = <A>;
-    chomp($a); 
-    die "Input too short!" if !defined $f;
-    return -1 if $e eq '';
-    for(my $fi=0;$fi<=$#$FOREIGN;$fi++) {
-	for(my $ei=0;$ei<=$#$ENGLISH;$ei++) {
-	    $$ALIGNMENT[$fi][$ei]=0;
-	}
-    }
-    foreach (split(/ /,$a)) {
-	my ($fi,$ei) = split(/\-/);
-	$$ALIGNMENT[$fi][$ei] = 2;
-    }
-    return 1;
-}
-
-sub close_alignment {
-    print STDERR "\n";
-    close(A);
-    close(F);
-    close(E);
-}
-
 ### (4) BUILDING LEXICAL TRANSLATION TABLE
 
 sub get_lexical_factored {
@@ -873,46 +833,68 @@ sub get_lexical_factored {
 
 sub get_lexical {
     print STDERR "(4) [$factor] generate lexical translation table @ ".`date`;
-    my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
-    &open_alignment();
-    while(1) {
-	my (@ALIGNMENT,@FOREIGN,@ENGLISH);
-	last unless &read_alignment(\@ALIGNMENT,\@FOREIGN,\@ENGLISH);
-	next if scalar(@ENGLISH) == 0;
-	&find_aligned_words(\@ALIGNMENT,\@ENGLISH,\@FOREIGN,
-			    \%WORD_TRANSLATION,\%TOTAL_FOREIGN,\%TOTAL_ENGLISH);
+		my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
+
+		&open_alignment();
+    while(my $e = <E>) {
+        if (($alignment_id++ % 1000) == 0) { print STDERR "!"; }
+        chomp($e);
+        my @ENGLISH = split(/ /,$e);
+        my $f = <F>; chomp($f);
+        my @FOREIGN = split(/ /,$f);
+        my $a = <A>; chomp($a);
+
+        my (%FOREIGN_ALIGNED,%ENGLISH_ALIGNED);
+        foreach (split(/ /,$a)) {
+            my ($fi,$ei) = split(/\-/);
+						if ($fi >= scalar(@FOREIGN) || $ei >= scalar(@ENGLISH)) {
+								print STDERR "alignment point ($fi,$ei) out of range (0-$#FOREIGN,0-$#ENGLISH) in line $alignment_id, ignoring\n";
+						}
+						else {
+								# local counts
+								$FOREIGN_ALIGNED{$fi}++;
+								$ENGLISH_ALIGNED{$ei}++;
+								
+								# global counts
+								$WORD_TRANSLATION{$FOREIGN[$fi]}{$ENGLISH[$ei]}++;
+								$TOTAL_FOREIGN{$FOREIGN[$fi]}++;
+								$TOTAL_ENGLISH{$ENGLISH[$ei]}++;
+						}
+        }
+
+        # unaligned words
+        for(my $ei=0;$ei<scalar(@ENGLISH);$ei++) {
+          next if defined($ENGLISH_ALIGNED{$ei});
+          $WORD_TRANSLATION{"NULL"}{$ENGLISH[$ei]}++;
+          $TOTAL_ENGLISH{$ENGLISH[$ei]}++;
+          $TOTAL_FOREIGN{"NULL"}++;
+        }
+        for(my $fi=0;$fi<scalar(@FOREIGN);$fi++) {
+          next if defined($FOREIGN_ALIGNED{$fi});
+          $WORD_TRANSLATION{$FOREIGN[$fi]}{"NULL"}++;
+          $TOTAL_FOREIGN{$FOREIGN[$fi]}++;
+          $TOTAL_ENGLISH{"NULL"}++;
+        }
     }
-    &close_alignment();
+		&close_alignment();
     &save_word_translation(\%WORD_TRANSLATION,\%TOTAL_FOREIGN,\%TOTAL_ENGLISH);
-    print STDERR "\n";
 }
 
-sub find_aligned_words {
-    my ($ALIGNMENT,$ENGLISH,$FOREIGN,
-	$WORD_TRANSLATION,$TOTAL_FOREIGN,$TOTAL_ENGLISH) = @_;
-    my ($FOREIGN_ALIGNED,$ENGLISH_ALIGNED) = &count_aligned($ALIGNMENT);
-    for(my $ei=0;$ei<=$#$ENGLISH;$ei++) {
-	next unless (!defined($$ENGLISH_ALIGNED{$ei}) 
-		     || $$ENGLISH_ALIGNED{$ei} == 0);
-	$$WORD_TRANSLATION{"NULL"}{$$ENGLISH[$ei]}++;
-	$$TOTAL_ENGLISH{$$ENGLISH[$ei]}++;
-	$$TOTAL_FOREIGN{"NULL"}++;
-    }
-    for(my $fi=0;$fi<=$#$FOREIGN;$fi++) {
-	if (!defined($$FOREIGN_ALIGNED{$fi}) || $$FOREIGN_ALIGNED{$fi} == 0) {
-	    $$WORD_TRANSLATION{$$FOREIGN[$fi]}{"NULL"}++;
-	    $$TOTAL_FOREIGN{$$FOREIGN[$fi]}++;
-	    $$TOTAL_ENGLISH{"NULL"}++;
-	}
-	else {
-	    for(my $ei=0;$ei<=$#$ENGLISH;$ei++) {
-		next unless $$ALIGNMENT[$fi][$ei] == 2;
-		$$WORD_TRANSLATION{$$FOREIGN[$fi]}{$$ENGLISH[$ei]}++;
-		$$TOTAL_FOREIGN{$$FOREIGN[$fi]}++;
-		$$TOTAL_ENGLISH{$$ENGLISH[$ei]}++;
-	    }
-	}
-    }
+sub open_alignment {
+    open(E,"$___MODEL_DIR/aligned.$factor_e.$___E")
+      or die "Can't read $___MODEL_DIR/aligned.$factor_e.$___E";
+    open(F,"$___MODEL_DIR/aligned.$factor_f.$___F")
+      or die "Can't read $___MODEL_DIR/aligned.$factor_f.$___F";
+    open(A,"$___MODEL_DIR/aligned.$___ALIGNMENT")
+      or die "Can't read $___MODEL_DIR/aligned.$___ALIGNMENT";
+    $alignment_id=0;
+}
+
+sub close_alignment {
+    print STDERR "\n";
+    close(A);
+    close(F);
+    close(E);
 }
 
 sub save_word_translation {
