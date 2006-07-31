@@ -39,7 +39,8 @@ protected:
 
 	FactorDirection				m_direction;
 	size_t								m_phraseSize, //number of words
-											m_arraySize;
+												m_arraySize,
+												m_memPoolIndex;
 	FactorArray						*m_factorArray;
 
 public:
@@ -104,7 +105,6 @@ public:
 							, const std::vector<FactorType> &inputFactor) const;
 
 	FactorArray &AddWord();
-	void AddWords(const Phrase &copy);
 
 	Phrase GetSubString(const WordsRange &wordsRange) const;
 	

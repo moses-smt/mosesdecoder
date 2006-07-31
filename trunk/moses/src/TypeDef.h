@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 50;
-const size_t ARRAY_SIZE_INCR					= 10; //amount by which a hypostack gets resized when necessary
+const size_t ARRAY_SIZE_INCR					= 10; //amount by which a phrase gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_THRESHOLD		= 0.00001f;
 const size_t DEFAULT_VERBOSE_LEVEL = 1;
