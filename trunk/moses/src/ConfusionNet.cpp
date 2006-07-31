@@ -1,7 +1,5 @@
 // $Id$
 
-#ifndef WIN32
-
 #include "ConfusionNet.h"
 #include <sstream>
 
@@ -169,11 +167,15 @@ void ConfusionNet::Print(std::ostream& out) const {
 Phrase ConfusionNet::GetSubString(const WordsRange&) const {
 	std::cerr<<"ERROR: call to ConfusionNet::GetSubString\n";
 	abort();
-	return Phrase();}
+	return Phrase();
+}
+
+#pragma warning(disable:4716)
 const FactorArray& ConfusionNet::GetFactorArray(size_t) const {
 	std::cerr<<"ERROR: call to ConfusionNet::GetFactorArray\n";
 	abort();
 }
+#pragma warning(default:4716)
 
 std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn) 
 {
@@ -199,6 +201,4 @@ ConfusionNet::CreateTranslationOptionCollection() const
 	size_t maxNoTransOptPerCoverage = StaticData::Instance()->GetMaxNoTransOptPerCoverage();
 	return new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage);
 }
-
-#endif
 
