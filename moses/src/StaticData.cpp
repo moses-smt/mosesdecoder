@@ -115,6 +115,10 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	else
         m_reportAllFactors = false;
 
+	//distortion weights
+	std::vector<float> distortionWeights = Scan<float>(m_parameter.GetParam("weight-d"));	
+
+
 
 	//input-factors
 	const vector<string> &inputFactorVector = m_parameter.GetParam("input-factors");
@@ -146,6 +150,16 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	if (lrFileVector.size() > 0)
 		{
+		//get the weights for the lex reorderer
+		TRACE_ERR("weights-lex")
+		for(int i=1; i<distortionWeights.size(); i++)
+		{
+			m_lexWeights.push_back(distortionWeights[i]);
+			TRACE_ERR(distortionWeights[i] << "\t");
+		}
+		TRACE_ERR(endl);
+		assert(m_lexWeights.size()>0);
+
 			// if there is a lexical reordering model, then parse the
 			// parameters associated with it, and create a new Lexical
 			// Reordering object (which will load the probability table)
@@ -294,8 +308,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	timer.check("Finished loading generation tables");
 
 	// score weights
-	m_weightDistortion				= Scan<float>( m_parameter.GetParam("weight-d")[0] );
-	m_lexWeights					= Scan<float>( m_parameter.GetParam("weight-d"));
+	m_weightDistortion				= distortionWeights[0];
 	m_weightWordPenalty				= Scan<float>( m_parameter.GetParam("weight-w")[0] );
 
 	TRACE_ERR("weight-d: " << m_weightDistortion << endl);

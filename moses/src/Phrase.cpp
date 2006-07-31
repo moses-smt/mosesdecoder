@@ -106,7 +106,7 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 	return retPhrase;
 }
 
-std::string Phrase::GetStringRep(const WordsRange &wordsRange)
+std::string Phrase::GetStringRep(const WordsRange &wordsRange) const
 {
 	std::stringstream phrase_string("");
 	for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++)

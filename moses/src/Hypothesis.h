@@ -58,7 +58,6 @@ protected:
 	WordsBitmap				m_sourceCompleted;
 	//TODO: how to integrate this into confusion network framework; what if
 	//it's a confusion network in the end???
-	//how to make a general InputType without getting abstract warnings.
 	InputType const&  m_sourceInput;
 	WordsRange				m_currSourceWordsRange, m_currTargetWordsRange;
   bool							m_wordDeleted;

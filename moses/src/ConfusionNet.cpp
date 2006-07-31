@@ -170,6 +170,11 @@ Phrase ConfusionNet::GetSubString(const WordsRange&) const {
 	return Phrase();
 }
 
+std::string ConfusionNet::GetStringRep(const WordsRange&) const{ //not well defined yet
+	std::cerr<<"ERROR: call to ConfusionNet::GeStringRep\n";
+	abort();
+	return "";
+}
 #pragma warning(disable:4716)
 const FactorArray& ConfusionNet::GetFactorArray(size_t) const {
 	std::cerr<<"ERROR: call to ConfusionNet::GetFactorArray\n";
