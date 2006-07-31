@@ -101,20 +101,19 @@ float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 		vector<float> val;
 		//this phrase declaration is to get around const mumbo jumbo and let me call a
 		//"convert to a string" method 
-		Phrase myphrase = hypothesis->GetPhrase();
 		int orientation = DistortionOrientation::GetOrientation(hypothesis, direction);
 		if(m_condition==LexReorderType::Fe)
 		{
-		//this key string is be F+'|||'+E from the hypothesis	
-		val=m_orientation_table[myphrase.GetStringRep(hypothesis->GetCurrSourceWordsRange())
+		//this key string is be F+'|||'+E from the hypothesis
+		val=m_orientation_table[hypothesis->GetSourcePhrase().GetStringRep(hypothesis->GetCurrSourceWordsRange())
 														+"|||"
-														+myphrase.GetStringRep(hypothesis->GetCurrTargetWordsRange())];
+														+hypothesis->GetTargetPhrase().GetStringRep(hypothesis->GetCurrTargetWordsRange())];
 	
 		}
 		else
 		{
 			//this key string is F from the hypothesis
-			val=m_orientation_table[ myphrase.GetStringRep(hypothesis->GetCurrTargetWordsRange())];
+			val=m_orientation_table[hypothesis->GetTargetPhrase().GetStringRep(hypothesis->GetCurrTargetWordsRange())];
 		}
 		//will tell us where to look in the table for the probability we need
 		int index = 0;
@@ -126,10 +125,10 @@ float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 		//by probing its size we can see if the LexicalReordering is bidirectional, 
 		//(meaning we need to access the forward weights midvector) and
 		//if it is Monotone or MSD (which changes where midvector is)
-		if(m_weights.size()==5){
+		if(m_weights.size()==4){
 			forward_offset = 2;
 		}
-		else if(m_weights.size()==7){
+		else if(m_weights.size()==6){
 			forward_offset = 3;
 		}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 		
@@ -140,17 +139,17 @@ float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 				if(orientation==DistortionOrientationType::MONO)
 				{
 					index=BACK_M;
-					weight=m_weights[1];
+					weight=m_weights[0];
 				}
 				else if(orientation==DistortionOrientationType::SWAP)
 				{
 					index=BACK_S;
-					weight=m_weights[2];
+					weight=m_weights[1];
 				}
 				else
 				{
 					index=BACK_D;
-					weight=m_weights[3];
+					weight=m_weights[2];
 				}
 			
 			}
@@ -159,17 +158,17 @@ float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 				if(orientation==DistortionOrientationType::MONO)
 				{
 					index=FOR_M;
-					weight=m_weights[1+forward_offset];					
+					weight=m_weights[0+forward_offset];					
 				}
 				else if(orientation==DistortionOrientationType::SWAP)
 				{
 					index=FOR_S;
-					weight=m_weights[2+forward_offset];					
+					weight=m_weights[1+forward_offset];					
 				}
 				else
 				{
 					index=FOR_D;
-					weight=m_weights[3+forward_offset];					
+					weight=m_weights[2+forward_offset];					
 				}
 			}
 		}
@@ -180,12 +179,12 @@ float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 				if(orientation==DistortionOrientationType::MONO)
 				{
 					index=BACK_MONO;
-					weight=m_weights[1];
+					weight=m_weights[0];
 				}
 				else
 				{
 					index=BACK_NONMONO;
-					weight=m_weights[2];					
+					weight=m_weights[1];					
 				}
 			}
 			else
@@ -193,12 +192,12 @@ float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 				if(orientation==DistortionOrientationType::MONO)
 				{
 					index=FOR_MONO;
-					weight=m_weights[1+forward_offset];					
+					weight=m_weights[0+forward_offset];					
 				}
 				else
 				{
 					index=FOR_NONMONO;
-					weight=m_weights[2+forward_offset];				
+					weight=m_weights[1+forward_offset];				
 				}
 			}
 		}

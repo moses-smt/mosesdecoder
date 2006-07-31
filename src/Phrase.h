@@ -108,7 +108,7 @@ public:
 
 	Phrase GetSubString(const WordsRange &wordsRange) const;
 	
-  std::string GetStringRep(const WordsRange &wordsRange); 
+  std::string GetStringRep(const WordsRange &wordsRange) const; 
   
 	TO_STRING;
 

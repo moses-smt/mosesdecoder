@@ -50,6 +50,10 @@ class Sentence : public Phrase, public InputType
 		{
 			return Phrase::GetSubString(r);
 		}
+	std::string GetStringRep(const WordsRange& r) const 
+		{
+			return Phrase::GetStringRep(r);
+		}
 	const FactorArray& GetFactorArray(size_t pos) const
 		{
 			return Phrase::GetFactorArray(pos);
