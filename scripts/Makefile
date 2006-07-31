@@ -9,11 +9,11 @@ DS?=$(shell date '+%Y%m%d')
 ## That is for each script (listed below in MAIN_SCRIPTS),
 ## we create a date-stamped version in MAIN_SCRIPTS_TARGET_DIR
 
-# MAIN_SCRIPTS_TARGET_DIR=/export/ws06osmt/bin
-MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)
+MAIN_SCRIPTS_TARGET_DIR=/export/ws06osmt/bin
+# MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)
 
-# RELEASEDIR=/export/ws06osmt/bin/scripts-$(TS)
-RELEASEDIR=$(shell echo `pwd`/temp)
+RELEASEDIR=/export/ws06osmt/bin/scripts-$(TS)
+# RELEASEDIR=$(shell echo `pwd`/temp)
 
 
 
