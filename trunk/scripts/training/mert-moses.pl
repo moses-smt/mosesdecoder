@@ -402,7 +402,7 @@ while(1) {
   # skip if restarted
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
-      print "LAMBDAS are @LAMBDA\n";
+      print "About to start decoder with LAMBDAS: @LAMBDA\n";
       run_decoder(\@LAMBDA);
       safesystem("gzip -f run*out") or die "Failed to gzip run*out";
   }
