@@ -45,8 +45,8 @@ public:
 		delete m_targetPhraseCollection;
 	}
 
-	PhraseDictionaryNode *GetOrCreateChild(const Word word);
-	const PhraseDictionaryNode *GetChild(const Word word) const;
+	PhraseDictionaryNode *GetOrCreateChild(const Word &word);
+	const PhraseDictionaryNode *GetChild(const Word &word) const;
 	const TargetPhraseCollection *GetTargetPhraseCollection() const
 	{
 		return m_targetPhraseCollection;
