@@ -625,7 +625,9 @@ void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::
   const size_t begin = m_scoreIndexManager.GetBeginIndex(id);
   const size_t end = m_scoreIndexManager.GetEndIndex(id);
   assert(end - begin == weights.size());
-	std::vector<float>::const_iterator weightIter = weights.begin();
+  if (m_allWeights.size() < end)
+    m_allWeights.resize(end);
+  std::vector<float>::const_iterator weightIter = weights.begin();
   for (size_t i = begin; i < end; i++)
     m_allWeights[i] = *weightIter++;
 }
