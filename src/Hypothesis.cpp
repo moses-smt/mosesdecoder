@@ -277,14 +277,14 @@ int Hypothesis::NGramCompare(const Hypothesis &compare) const
  * /param lmListInitial todo - describe this parameter 
  * /param lmListEnd todo - describe this parameter
  */
-void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEnd)
+void Hypothesis::CalcLMScore(const LMList &languageModels)
 {
 	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
 	LMList::const_iterator iterLM;
 
 	// for LM which are not in PossTran
 	// must go through each trigram in current phrase
-	for (iterLM = lmListEnd.begin() ; iterLM != lmListEnd.end() ; ++iterLM)
+	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM)
 	{
 		const LanguageModel &languageModel = **iterLM;
 		FactorType factorType	= languageModel.GetFactorType();
@@ -335,7 +335,7 @@ void Hypothesis::CalcLMScore(const LMList &lmListInitial, const LMList	&lmListEn
 	// for LM which are in possTran
 	// already have LM scores from previous and trigram score of poss trans.
 	// just need trigram score of the words of the start of current phrase	
-	for (iterLM = lmListInitial.begin() ; iterLM != lmListInitial.end() ; ++iterLM)
+	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM)
 	{
 		const LanguageModel &languageModel = **iterLM;
 		FactorType factorType = languageModel.GetFactorType();
@@ -422,7 +422,7 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 	CalcDistortionScore();
 	
 	// LANGUAGE MODEL COST
-	CalcLMScore(staticData.GetLanguageModel(Initial), staticData.GetLanguageModel(Other));
+	CalcLMScore(staticData.GetAllLM());
 
 	// WORD PENALTY
 	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetWordsCount()); 
