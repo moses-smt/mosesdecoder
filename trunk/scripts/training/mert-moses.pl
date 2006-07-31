@@ -9,6 +9,7 @@
 
 # Revision history
 
+# 29 Jul 2006 run-filter, score-nbest and mert run on the queue (Nicola; Ondrej had to type it in again)
 # 28 Jul 2006 attempt at foolproof usage, strong checking of input validity, merged the parallel and nonparallel version (Ondrej Bojar)
 # 27 Jul 2006 adding the safesystem() function to handle with process failure
 # 22 Jul 2006 fixed a bug about handling relative path of configuration file (Nicola Bertoldi) 
@@ -84,10 +85,11 @@ my $___START_STEP = undef;  # which iteration step to start with
 my $___AVERAGE = 0;
 
 my $bindir = undef; # path to all tools (overriden by specific options)
-my $CMERTDIR = undef; # path to cmert directory
+my $cmertdir = undef; # path to cmert directory
 my $pythoncmd = undef; # path to python executable
 my $filtercmd = undef; # path to filter-model-given-input.pl
 my $SCORENBESTCMD = undef;
+my $qsubwrapper = undef;
 
 
 use strict;
@@ -107,10 +109,11 @@ GetOptions(
   "average" => \$___AVERAGE,
   "help" => \$usage,
   "bindir=s" => \$bindir,
-  "cmertdir=s" => \$CMERTDIR,
+  "cmertdir=s" => \$cmertdir,
   "pythoncmd=s" => \$pythoncmd,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
   "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
+  "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
 );
 
 # the 4 required parameters can be supplied on the command line directly
@@ -154,19 +157,21 @@ $bindir = $ENV{"MOSESBIN"} if !defined $bindir;
 # path of script for filtering phrase tables and running the decoder
 $filtercmd="$bindir/filter-model-given-input.pl" if !defined $filtercmd;
 
+$qsubwrapper="$bindir/qsub-wrapper.pl" if !defined $qsubwrapper;
 
-$CMERTDIR = "$bindir/cmert-0.5" if !defined $CMERTDIR;
-my $CMERT="$CMERTDIR/mert";
 
-$SCORENBESTCMD = "$CMERTDIR/score-nbest.py" if ! defined $SCORENBESTCMD;
+$cmertdir = "$bindir/cmert-0.5" if !defined $cmertdir;
+my $cmertcmd="$cmertdir/mert";
 
-$pythoncmd = "$CMERTDIR/python" if !defined $pythoncmd;
+$SCORENBESTCMD = "$cmertdir/score-nbest.py" if ! defined $SCORENBESTCMD;
+
+$pythoncmd = "$cmertdir/python" if !defined $pythoncmd;
 
 $ENV{PYTHONPATH} = $pythoncmd; # other scripts need to know
 
 
 die "Not executable: $filtercmd" if ! -x $filtercmd;
-die "Not executable: $CMERT" if ! -x $CMERT;
+die "Not executable: $cmertcmd" if ! -x $cmertcmd;
 die "Not executable: $pythoncmd" if ! -x $pythoncmd;
 die "Not executable: $___DECODER" if ! -x $___DECODER;
 
@@ -334,7 +339,8 @@ close(RANGES);
 
 # filter the phrase tables, use --decoder-flags
 print "filtering the phrase tables... ".`date`;
-safesystem("$filtercmd ./filtered $___CONFIG $___DEV_F") or die "Failed to filter the tables";
+my $cmd = "$filtercmd ./filtered $___CONFIG $___DEV_F";
+safesystem("$qsubwrapper -command='$cmd'") or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
 
 
 # the decoder should now use the filtered model
@@ -359,30 +365,38 @@ while(1) {
   }
   close(WEIGHTS);
 
+  # In case something dies later, we might wish to have a copy
+  create_config($___CONFIG, "./run$run.moses.ini", \@LAMBDA, \@NAME, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
+
 
   # skip if restarted
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
       print "LAMBDAS are @LAMBDA\n";
       run_decoder(\@LAMBDA);
+      safesystem("gzip -f run*out") or die "Failed to gzip run*out";
   }
   else {
       print "skipped decoder run\n";
       $skip_decoder = 0;
   }
-  safesystem("gzip -f run*out") or die "Failed to gzip run*out";
 
   my $EFF_REF_LEN = "";
   if ($___AVERAGE) {
      $EFF_REF_LEN = "-a";
   }
 
+  # To be sure that scoring script produses these fresh:
+  safesystem("rm -f cands.opt feats.opt") or die;
+
   # convert n-best list into a numberized format with error scores
-  safesystem("gunzip run*.best*.out.gz") or die "Failed to gunzip run*.best*.out.gz";
-  print STDERR "Scoring the nbestlist or whatever.\n";
-  my $cmd = "sort -mn -t \"|\" -k 1,1 run*.best*.out | $SCORENBESTCMD $EFF_REF_LEN ".join(" ", @references)." ./";
-  safesystem("$cmd") or die "Failed to score-nbest list or whatever.";
-  safesystem("gzip -f run*.best*.out") or die;
+
+  print STDERR "Scoring the nbestlist.\n";
+  my $cmd = "export PYTHONPATH=$pythoncmd ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_REF_LEN ".join(" ", @references)." ./";
+  safesystem("$qsubwrapper -command='$cmd'") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
+
+
+  print STDERR "Hoping that scoring succeeded. Don't know how to check for it! XXX.\n";
 
 
   # keep a count of lines in nbests lists (alltogether)
@@ -406,15 +420,16 @@ while(1) {
 
   # run cmert
   safesystem("cat ranges.txt weights.txt > init.opt") or die;
-  safesystem("rm -f weights.txt") or die;
+  safesystem("mv weights.txt run$run.input_weights.txt") or die; # keep a copy of the weights
 
   #store actual values
   safesystem("cp init.opt run$run.init.opt") or die;
 
   my $DIM = scalar(@LAMBDA); # number of lambdas
-
-  print STDERR "Running cmert.\n";
-  safesystem("$CMERT -d $DIM 2> cmert.log") or die;
+  $cmd="$cmertcmd -d $DIM";
+ 
+  print STDERR "Starting cmert.\n";
+  safesystem("$qsubwrapper -command='$cmd' -stderr=cmert.log") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
 
   my $bestpoint = undef;
   my $devbleu = undef;
@@ -447,9 +462,9 @@ safesystem ("cp cmert.log run$run.cmert.log") or die;
 # This is fine, because the new attempt did not bring any improvement,
 # so we do not want to use it.
 # @NAME are the names of models the lambdas belong to
-create_config(@LAMBDA, @NAME);
+create_config($___CONFIG, "./moses.ini", \@LAMBDA, \@NAME, $run, $devbleu);
 
-#chdir back to the original directory
+#chdir back to the original directory # useless, just to remind we were not there
 chdir($cwd);
 
 sub run_decoder {
@@ -473,38 +488,58 @@ sub run_decoder {
 }
 
 sub create_config {
+    my $infn = shift; # source config
+    my $outfn = shift; # where to save the config
     my $lambdas = shift; # the lambdas we should write
-    my @lambdas = @$lambdas;
+    my @lambdas = @$lambdas; # my own copy of the array
     my $names = shift; # the names of the lambdas
-    my @names = @$names;
+    my @names = @$names; # my own copy of the array
+    my $run = shift;  # just for verbosity
+    my $devbleu = shift; # just for verbosity
 
-    my %P;
-    # parameters specified at the command line
-    {
-	my $parameter;
-	print "PARAM IS |$___DECODER_FLAGS|\n";
+    my %P; # the hash of all parameters we wish to override
+
+    # first convert the command line parameters to the hash
+    { # ensure local scope of vars
+	my $parameter=undef;
+	print "Parsing --decoder-flags: |$___DECODER_FLAGS|\n";
+        $___DECODER_FLAGS =~ s/^\s*|\s*$//;
+        $___DECODER_FLAGS =~ s/\s+/ /;
 	foreach (split(/ /,$___DECODER_FLAGS)) {
-	    print "$_ :::\n";
 	    if (/^\-([^\d].*)$/) {
 		$parameter = $1;
 		$parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
-		print "\tis parameter $parameter\n";
 	    }
 	    else {
+                die "Found value with no -paramname before it: $_"
+                  if !defined $parameter;
 		push @{$P{$parameter}},$_;
 	    }
 	}
     }
 
+    # Convert weights to elements in P
+    # First delete all weights params from the input
+    foreach my $abbr (@names) {
+      my $name = defined $ABBR2FULL{$abbr} ? $ABBR2FULL{$abbr} : $abbr;
+      delete($P{$name});
+    }
+    while (my $abbr = shift @names) {
+      my $w = shift @lambdas;
+      die "Lambdas and names do not have equal length!" if !defined $w;
+      my $name = defined $ABBR2FULL{$abbr} ? $ABBR2FULL{$abbr} : $abbr;
+      push @{$P{$name}}, $w;
+    }
 
-    # create new moses.ini decoder config file
-    open(INI,$P{"config"}[0]);
-    delete($P{"config"});
-    print "OUT: > moses.ini\n";
-    open(OUT,"> moses.ini");
+
+    # create new moses.ini decoder config file by cloning and overriding the original one
+    open(INI,$infn) or die "Can't read $infn";
+    delete($P{"config"}); # never output 
+    print "Saving new config to: $outfn";
+    open(OUT,"> $outfn") or die "Can't write $outfn";
     print OUT "# MERT optimized configuration\n";
     print OUT "# decoder $___DECODER\n";
-    print OUT "# $devbleu on dev $___DEV_F\n";
+    print OUT "# BLEU $devbleu on dev $___DEV_F\n";
     print OUT "# $run iterations\n";
     print OUT "# finished ".`date`;
     my $line = <INI>;
@@ -546,6 +581,7 @@ sub create_config {
 	}
     }
 
+    # write all additional parameters
     foreach my $parameter (keys %P) {
 	print OUT "\n[$parameter]\n";
 	foreach (@{$P{$parameter}}) {
@@ -555,6 +591,7 @@ sub create_config {
 
     close(INI);
     close(OUT);
+    print STDERR "Saved: $outfn\n";
 }
 
 sub safesystem {
@@ -632,6 +669,7 @@ sub scan_config {
       next;
     }
     if (defined $section && $section eq "mapping") {
+      # keep track of mapping steps used
       $defined_steps{$1}++ if /^([TG])/;
     }
     if (defined $section && defined $where_is_filename{$section}) {
