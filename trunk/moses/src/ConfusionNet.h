@@ -22,7 +22,7 @@ class ConfusionNet : public InputType {
 	~ConfusionNet();
 
 	void SetFactorCollection(FactorCollection*);
-
+	
 	const Column& GetColumn(size_t i) const {assert(i<data.size());return data[i];}
 	const Column& operator[](size_t i) const {return GetColumn(i);}
 
@@ -37,6 +37,7 @@ class ConfusionNet : public InputType {
 
 	
 	Phrase GetSubString(const WordsRange&) const;
+	std::string GetStringRep(const WordsRange&) const; //not well defined yet
 	const FactorArray& GetFactorArray(size_t pos) const;
 
 
