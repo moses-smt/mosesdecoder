@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-// std::vector<mempool*> Phrase::s_memPool;
+std::vector<mempool*> Phrase::s_memPool;
 
 Phrase::Phrase(const Phrase &copy)
 :m_direction(copy.m_direction)
