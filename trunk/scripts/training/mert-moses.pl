@@ -86,6 +86,9 @@ my $___START_STEP = undef;  # which iteration step to start with
 # Use "--average" to use average reference length
 my $___AVERAGE = 0;
 
+my $allow_unknown_lambdas = 0;
+
+
 my $SCRIPTS_ROOTDIR = undef; # path to all tools (overriden by specific options)
 my $cmertdir = undef; # path to cmert directory
 my $pythonpath = undef; # path to python libraries needed by cmert
@@ -111,6 +114,7 @@ GetOptions(
   "start-step=i" => \$___START_STEP,
   "average" => \$___AVERAGE,
   "help" => \$usage,
+  "allow-unknown-lambdas" => \$allow_unknown_lambdas,
   "verbose" => \$verbose,
   "roodir=s" => \$SCRIPTS_ROOTDIR,
   "cmertdir=s" => \$cmertdir,
@@ -141,6 +145,8 @@ Options:
   --decoder-flags=STRING ... extra parameters for the decoder
   --lambdas=STRING  ... default values and ranges for lambdas, a complex string
          such as 'd:1,0.5-1.5 lm:1,0.5-1.5 tm:0.3,0.25-0.75;0.2,0.25-0.75;0.2,0.25-0.75;0.3,0.25-0.75;0,-0.5-0.5 w:0,-0.5-0.5'
+  --allow-unknown-lambdas ... keep going even if someone supplies a new lambda
+         in the lambdas option (such as 'superbmodel:1,0-1'); optimize it, too
   --start-step=NUM  ... start at step X (that has been already achieved before)
   --average   ... Use either average or shortest (default) reference
                   length as effective reference length
@@ -294,8 +300,16 @@ foreach my $name (keys %$use_triples) {
   my $expected_lambdas = $lambdas_per_model->{$name};
   $expected_lambdas = 0 if !defined $expected_lambdas;
   my $got_lambdas = defined $use_triples->{$name} ? scalar @{$use_triples->{$name}}  : 0;
-  die "Wrong number of lambdas for $name. Expected (given the config file): $expected_lambdas, got: $got_lambdas"
-    if $got_lambdas != $expected_lambdas;
+  if ($got_lambdas != $expected_lambdas) {
+    if ($allow_unknown_lambdas && $expected_lambdas == 0) {
+      print STDERR "Allowing to optimize $name, although I have no idea what it is.\n";
+    } else {
+      print STDERR "Wrong number of lambdas for $name. Expected (given the config file): $expected_lambdas, got: $got_lambdas.
+Use --allow-unknown-lambdas to optimize lambdas that you are just introducing
+and I cannot validate against the models mentioned in moses.ini.";
+      exit 1;
+    }
+  }
   
   foreach my $feature (@{$use_triples->{$name}}) {
     my ($startval, $min, $max) = @$feature;
@@ -338,6 +352,8 @@ chdir($___WORKING_DIR) or die "Can't chdir to $___WORKING_DIR";
 
 
 
+# Debugging purposes, 
+create_config($___CONFIG, "./preliminary.moses.ini", \@LAMBDA, \@NAME, "--not-run--", "--not-estimated--");
 
 # create some initial files (esp. weights and their ranges for randomization)
 
