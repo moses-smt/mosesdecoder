@@ -86,7 +86,7 @@ my $___AVERAGE = 0;
 
 my $bindir = undef; # path to all tools (overriden by specific options)
 my $cmertdir = undef; # path to cmert directory
-my $pythoncmd = undef; # path to python executable
+my $pythonpath = undef; # path to python executable
 my $filtercmd = undef; # path to filter-model-given-input.pl
 my $SCORENBESTCMD = undef;
 my $qsubwrapper = undef;
@@ -110,7 +110,7 @@ GetOptions(
   "help" => \$usage,
   "bindir=s" => \$bindir,
   "cmertdir=s" => \$cmertdir,
-  "pythoncmd=s" => \$pythoncmd,
+  "pythonpath=s" => \$pythonpath,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
   "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
@@ -143,7 +143,7 @@ Options:
   --filtercmd=STRING  ... path to filter-model-given-input.pl
   --bindir=STRING  ... where do helpers reside (if not given explicitly)
   --cmertdir=STRING ... where is cmert installed
-  --pythoncmd=STRING  ... where is python executable
+  --pythonpath=STRING  ... where is python executable
   --scorenbestcmd=STRING  ... path to score-nbest.py
 ";
   exit 1;
@@ -165,14 +165,14 @@ my $cmertcmd="$cmertdir/mert";
 
 $SCORENBESTCMD = "$cmertdir/score-nbest.py" if ! defined $SCORENBESTCMD;
 
-$pythoncmd = "$cmertdir/python" if !defined $pythoncmd;
+$pythonpath = "$cmertdir/python" if !defined $pythonpath;
 
-$ENV{PYTHONPATH} = $pythoncmd; # other scripts need to know
+$ENV{PYTHONPATH} = $pythonpath; # other scripts need to know
 
 
 die "Not executable: $filtercmd" if ! -x $filtercmd;
 die "Not executable: $cmertcmd" if ! -x $cmertcmd;
-die "Not executable: $pythoncmd" if ! -x $pythoncmd;
+die "Not a dir: $pythonpath" if ! -d $pythonpath;
 die "Not executable: $___DECODER" if ! -x $___DECODER;
 
 my $input_abs = ensure_full_path($___DEV_F);
@@ -392,7 +392,7 @@ while(1) {
   # convert n-best list into a numberized format with error scores
 
   print STDERR "Scoring the nbestlist.\n";
-  my $cmd = "export PYTHONPATH=$pythoncmd ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_REF_LEN ".join(" ", @references)." ./";
+  my $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_REF_LEN ".join(" ", @references)." ./";
   safesystem("$qsubwrapper -command='$cmd'") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
 
 
