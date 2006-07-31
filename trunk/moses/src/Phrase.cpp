@@ -308,13 +308,11 @@ void Phrase::InitializeMemPool()
 
 void Phrase::FinalizeMemPool()
 {
-#if 0
 	std::vector<mempool*>::iterator iter;
 	for (iter = s_memPool.begin() ; iter != s_memPool.end() ; ++iter)
 	{
 		delete *iter;
 	}
-#endif
 }
 
 TO_STRING_BODY(Phrase);
