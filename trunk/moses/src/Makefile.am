@@ -25,6 +25,8 @@ libmoses_a_SOURCES = \
 	Parameter.cpp \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
+	PhraseDictionaryBase.cpp \
+	PhraseDictionaryNode.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
 	ScoreComponentCollection.cpp \
