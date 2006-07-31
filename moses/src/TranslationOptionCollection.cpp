@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Input.h"
 #include "Util.h"
 
+#include "StaticData.h"
+
 using namespace std;
 
 TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage)
@@ -71,33 +73,36 @@ void TranslationOptionCollection::Prune()
 {
 	if (m_maxNoTransOptPerCoverage == 0)
 		return;
-	
+
+	size_t total = 0;
+	size_t totalPruned = 0;
 	size_t size = m_source.GetSize();
 	for (size_t startPos = 0 ; startPos < size ; ++startPos)
 	{
 		for (size_t endPos = startPos ; endPos < size ; ++endPos)
 		{
 			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
+			total += fullList.size();
+			if (fullList.size() <= m_maxNoTransOptPerCoverage)
+				continue;
 			
 			// sort in vector
-			vector<const TranslationOption*> sortedVector;
-			copy(fullList.begin(), fullList.end(), back_inserter(sortedVector));
-			sort(sortedVector.begin(), sortedVector.end(), CompareTranslationOption);
-			
-			// put back into list
-			fullList.clear();
-			const size_t maxIndex = std::min(m_maxNoTransOptPerCoverage, sortedVector.size());
-			for (size_t i = 0 ; i < maxIndex ; ++i)
-			{
-				fullList.push_back(sortedVector[i]);
-			}
+			nth_element(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
+
+			totalPruned += fullList.size() - m_maxNoTransOptPerCoverage;
 			
 			// delete the rest
-			for (size_t i = maxIndex ; i < sortedVector.size() ; ++i)
+			for (size_t i = m_maxNoTransOptPerCoverage ; i < fullList.size() ; ++i)
 			{
-				delete sortedVector[i];
+				delete fullList[i];
 			}
+			fullList.resize(m_maxNoTransOptPerCoverage);
 		}
+	}
+	if (StaticData::Instance()->GetVerboseLevel() >= 1)
+	{
+		std::cerr << "       Total translation options: " << total << std::endl;
+		std::cerr << "Total translation options pruned: " << totalPruned << std::endl;
 	}
 }
 

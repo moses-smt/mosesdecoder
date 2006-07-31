@@ -54,6 +54,9 @@ StaticData::StaticData()
 ,m_fLMsLoaded(false)
 ,m_inputType(0)
 ,m_numInputScores(0)
+,m_distortionScoreProducer(0)
+,m_wpProducer(0)
+ 
 {
 	s_instance = this;
 }
