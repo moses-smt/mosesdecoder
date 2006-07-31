@@ -1,3 +1,5 @@
+// $Id$
+
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
 #include "WordsRange.h"

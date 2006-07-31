@@ -1,3 +1,5 @@
+// $Id$
+
 /* ---------------------------------------------------------------- */
 /* Copyright 2005 (c) by RWTH Aachen - Lehrstuhl fuer Informatik VI */
 /* Richard Zens                                                     */
