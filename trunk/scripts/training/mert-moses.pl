@@ -62,6 +62,7 @@ my $extra_lambdas_for_model = {
 
 
 
+my $verbose = 0;
 my $usage = 0; # request for --help
 my $___WORKING_DIR = "mert-work";
 my $___DEV_F = undef; # required, input text to decode
@@ -86,7 +87,7 @@ my $___AVERAGE = 0;
 
 my $bindir = undef; # path to all tools (overriden by specific options)
 my $cmertdir = undef; # path to cmert directory
-my $pythonpath = undef; # path to python executable
+my $pythonpath = undef; # path to python libraries needed by cmert
 my $filtercmd = undef; # path to filter-model-given-input.pl
 my $SCORENBESTCMD = undef;
 my $qsubwrapper = undef;
@@ -103,11 +104,13 @@ GetOptions(
   "nbest=i" => \$___N_BEST_LIST_SIZE,
   "parallelizer=s" => \$___PARALLELIZER,
   "parallelizer-flags=s" => \$___PARALLELIZER_FLAGS,
+  "jobs=i" => \$___JOBS,
   "decoder-flags=s" => \$___DECODER_FLAGS,
   "lambdas=s" => \$___LAMBDA,
   "start-step=i" => \$___START_STEP,
   "average" => \$___AVERAGE,
   "help" => \$usage,
+  "verbose" => \$verbose,
   "bindir=s" => \$bindir,
   "cmertdir=s" => \$cmertdir,
   "pythonpath=s" => \$pythonpath,
@@ -695,6 +698,7 @@ sub scan_config {
         # either specified explicitly, or the default, i.e. one
         my $needlambdas = defined $where_is_lambda_count{$section} ? $flds[$where_is_lambda_count{$section}] : 1;
 
+        print STDERR "Config needs $needlambdas lambdas for $section (i.e. $shortname)\n" if $verbose;
 	$lambda_counts->{$shortname}+=$needlambdas;
         if (!defined $___LAMBDA && (!defined $default_triples->{$shortname} || scalar(@{$default_triples->{$shortname}}) != $needlambdas)) {
           print STDERR "$inishortname:$nr:Your model $shortname needs $needlambdas weights but we define the default ranges for "
@@ -705,6 +709,7 @@ sub scan_config {
       }
     }
   }
+  die "$inishortname: File was empty!" if !$nr;
   close INI;
   for my $pair (qw/T=tm=translation G=g=generation/) {
     my ($tg, $shortname, $label) = split /=/, $pair;
