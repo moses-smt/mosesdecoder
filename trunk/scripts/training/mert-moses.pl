@@ -9,6 +9,7 @@
 
 # Revision history
 
+# 31 Jul 2006 adding default paths
 # 29 Jul 2006 run-filter, score-nbest and mert run on the queue (Nicola; Ondrej had to type it in again)
 # 28 Jul 2006 attempt at foolproof usage, strong checking of input validity, merged the parallel and nonparallel version (Ondrej Bojar)
 # 27 Jul 2006 adding the safesystem() function to handle with process failure
@@ -85,7 +86,7 @@ my $___START_STEP = undef;  # which iteration step to start with
 # Use "--average" to use average reference length
 my $___AVERAGE = 0;
 
-my $bindir = undef; # path to all tools (overriden by specific options)
+my $SCRIPTS_ROOTDIR = undef; # path to all tools (overriden by specific options)
 my $cmertdir = undef; # path to cmert directory
 my $pythonpath = undef; # path to python libraries needed by cmert
 my $filtercmd = undef; # path to filter-model-given-input.pl
@@ -111,7 +112,7 @@ GetOptions(
   "average" => \$___AVERAGE,
   "help" => \$usage,
   "verbose" => \$verbose,
-  "bindir=s" => \$bindir,
+  "roodir=s" => \$SCRIPTS_ROOTDIR,
   "cmertdir=s" => \$cmertdir,
   "pythonpath=s" => \$pythonpath,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
@@ -144,7 +145,7 @@ Options:
   --average   ... Use either average or shortest (default) reference
                   length as effective reference length
   --filtercmd=STRING  ... path to filter-model-given-input.pl
-  --bindir=STRING  ... where do helpers reside (if not given explicitly)
+  --roodir=STRING  ... where do helpers reside (if not given explicitly)
   --cmertdir=STRING ... where is cmert installed
   --pythonpath=STRING  ... where is python executable
   --scorenbestcmd=STRING  ... path to score-nbest.py
@@ -155,15 +156,25 @@ Options:
 # Check validity of input parameters
 
 
-$bindir = $ENV{"MOSESBIN"} if !defined $bindir;
+
+
+if (!defined $SCRIPTS_ROOTDIR) {
+  $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
+  die "Please set SCRIPTS_ROOTDIR or specify --rootdir" if !defined $SCRIPTS_ROOTDIR;
+}
+
+print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
+
+
+
 
 # path of script for filtering phrase tables and running the decoder
-$filtercmd="$bindir/filter-model-given-input.pl" if !defined $filtercmd;
+$filtercmd="$SCRIPTS_ROOTDIR/training/filter-model-given-input.pl" if !defined $filtercmd;
 
-$qsubwrapper="$bindir/qsub-wrapper.pl" if !defined $qsubwrapper;
+$qsubwrapper="$SCRIPTS_ROOTDIR/training/qsub-wrapper.pl" if !defined $qsubwrapper;
 
 
-$cmertdir = "$bindir/cmert-0.5" if !defined $cmertdir;
+$cmertdir = "$SCRIPTS_ROOTDIR/extra/cmert-0.5" if !defined $cmertdir;
 my $cmertcmd="$cmertdir/mert";
 
 $SCORENBESTCMD = "$cmertdir/score-nbest.py" if ! defined $SCORENBESTCMD;
