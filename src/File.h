@@ -50,6 +50,17 @@ template<typename C> inline void fReadVector(FILE* f, C& v) {
     std::cerr<<"ERROR: freadVec! "<<r<<" "<<s<<"\n";abort();}
 }
 
+#ifdef WIN32
+inline off_t fTell(FILE* f) {return ftell(f);}
+
+inline void fSeek(FILE* f,off_t o) {
+  if(fseek(f,o,SEEK_SET)<0) {
+    std::cerr<<"ERROR: could not fseeko position "<<o<<"\n";
+    if(o==InvalidOffT) std::cerr<<"You tried to seek for 'InvalidOffT'!\n";
+    abort();
+  }
+}
+#else
 inline off_t fTell(FILE* f) {return ftello(f);}
 
 inline void fSeek(FILE* f,off_t o) {
@@ -59,6 +70,7 @@ inline void fSeek(FILE* f,off_t o) {
     abort();
   }
 }
+#endif
 
 inline FILE* fOpen(const char* fn,const char* m) {
   if(FILE* f=fopen(fn,m)) return f; else {
