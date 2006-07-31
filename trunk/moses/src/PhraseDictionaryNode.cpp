@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "PhraseDictionary.h"
 
-PhraseDictionaryNode *PhraseDictionaryNode::GetOrCreateChild(const Word word)
+PhraseDictionaryNode *PhraseDictionaryNode::GetOrCreateChild(const Word &word)
 {
 	NodeMap::iterator iter = m_map.find(word);
 	if (iter != m_map.end())
@@ -33,7 +33,7 @@ PhraseDictionaryNode *PhraseDictionaryNode::GetOrCreateChild(const Word word)
 	return &(m_map[word] = PhraseDictionaryNode());
 }
 
-const PhraseDictionaryNode *PhraseDictionaryNode::GetChild(const Word word) const
+const PhraseDictionaryNode *PhraseDictionaryNode::GetChild(const Word &word) const
 {
 	NodeMap::const_iterator iter = m_map.find(word);
 	if (iter != m_map.end())
