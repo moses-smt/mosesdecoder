@@ -72,7 +72,10 @@ my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
 my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
-my $queue_flags = "-l ws06ossmt=true -l mem_free=0.5G -hard";  # extra parameters for parallelizer
+my $queue_flags = undef;
+  my $default_queue_flags = "-l ws06ossmt=true -l mem_free=0.5G -hard";  # extra parameters for parallelizer
+  # need to set queue_flags to undef, or GetOptions will refuse to
+  # understand --queue-flags="" and use the default instead of ""
 my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $___LAMBDA = undef; # string specifying the seed weights and boundaries of all lambdas
@@ -158,7 +161,9 @@ Options:
   exit 1;
 }
 
-# Check validity of input parameters
+# Check validity of input parameters and set defaults if needed
+
+$queue_flags = $default_queue_flags if !defined $queue_flags;
 
 
 
@@ -376,7 +381,7 @@ close(RANGES);
 print "filtering the phrase tables... ".`date`;
 my $cmd = "$filtercmd ./filtered $___CONFIG $___DEV_F";
 if (defined $___JOBS) {
-  safesystem("$qsubwrapper -command='$cmd'") or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
+  safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\"" ) or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
 } else {
   safesystem($cmd) or die "Failed to filter the tables.";
 }
@@ -434,7 +439,7 @@ while(1) {
   print STDERR "Scoring the nbestlist.\n";
   my $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_REF_LEN ".join(" ", @references)." ./";
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper -command='$cmd'") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
+    safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\"") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
   } else {
     safesystem($cmd) or die "Failed to score nbestlist";
   }
@@ -474,7 +479,7 @@ while(1) {
  
   print STDERR "Starting cmert.\n";
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper -command='$cmd' -stderr=cmert.log") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
+    safesystem("$qsubwrapper -command='$cmd' -stderr=cmert.log -queue-parameter=\"$queue_flags\"") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
   } else {
     safesystem("$cmd 2> cmert.log") or die "Failed to run cmert";
   }
