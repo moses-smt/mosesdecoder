@@ -38,7 +38,7 @@ using namespace std;
 
 unsigned int Hypothesis::s_numNodes = 0;
 unsigned int Hypothesis::s_HypothesesCreated = 0;
-
+ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 3000000);
 
 Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)
@@ -138,7 +138,8 @@ Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
  */
 Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 {
-	return new Hypothesis(prevHypo, transOpt);
+	Hypothesis *ptr = s_objectPool.getPtr();
+	return new(ptr) Hypothesis(prevHypo, transOpt);
 }
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase
@@ -146,7 +147,8 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 
 Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &emptyTarget)
 {
-	return new Hypothesis(m_source, emptyTarget);
+	Hypothesis *ptr = s_objectPool.getPtr();
+	return new(ptr) Hypothesis(m_source, emptyTarget);
 }
 
 bool Hypothesis::IsCompatible(const Phrase &phrase) const

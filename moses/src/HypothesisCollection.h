@@ -119,7 +119,8 @@ protected:
 	}
 	inline void Remove(const HypothesisCollection::iterator &iter)
 	{
-		delete *iter;
+		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
+		pool.freeObject(*iter);
 		Detach(iter);
 	}
 	inline void AddNoPrune(Hypothesis *hypothesis)

@@ -65,7 +65,8 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 
 	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
-		delete hypo;
+		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
+		pool.freeObject(hypo);		
 		return;
 	}
 
@@ -99,7 +100,8 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 		#ifdef N_BEST
 			(*iter)->AddArc(hypo);
 		#else
-			delete hypo;
+			ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
+			pool.freeObject(hypo);				
 		#endif
 		return;
 	}
