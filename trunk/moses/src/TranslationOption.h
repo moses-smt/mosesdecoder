@@ -134,14 +134,6 @@ public:
 	{
 		return m_scoreTrans + m_scoreGen + m_futureScore;
 	}
-	/***
-	 * return target phrase
-	 */
-	inline const Phrase& GetPhrase() const
-	{
-		return m_phrase;
-	}
-
   /***
    * returns true if the source phrase translates into nothing
    */
