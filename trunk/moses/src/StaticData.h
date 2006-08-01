@@ -101,8 +101,7 @@ protected:
 	
 	int m_useDistortionFutureCosts;
 
-  //! Sets the global score vector weights for a given ScoreProducer.
-	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
+  
 
 public:
 	StaticData();
@@ -278,6 +277,8 @@ public:
 	{
 		m_weightWordPenalty = weightWordPenalty;
 	}
+//! Sets the global score vector weights for a given ScoreProducer.
+	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	void SetWeightTransModel(const std::vector<float> &weight);
 	void SetWeightLM(const std::vector<float> &weight);
 	void SetWeightGeneration(const std::vector<float> &weight);

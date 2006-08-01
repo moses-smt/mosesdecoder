@@ -71,9 +71,9 @@ private:
 	static const int MONO_NUM_PROBS = 4;
 
 	int m_orientation; // msd or monotone
-	int m_direction;   // forward, backward, or bidirectional
+	std::vector<int> m_direction;   // contains forward, backward, or both (bidirectional)
 	int m_condition;   // fe or f
-	std::vector<float> m_weights; //weights to give the LR scores.
+	int m_numberscores; //2, 3, 4 or 6
 	std::string m_filename; // probability table location
 
 	ORIENTATION_TABLE m_orientation_table; // probability table
@@ -86,13 +86,13 @@ public:
 	// orientation probability table, orientation is one of {MSD, MONO},
 	// direction is one of {FOR,BACK,BI}, and condition is one of {F,FE}.
 	LexicalReordering(const std::string &filename, int orientation, int direction, 
-										int condition, const std::vector<float> weights);
+										int condition, const std::vector<float>& weights);
 	
 	// Descructor
 	~LexicalReordering(void) {}
 
 	// Compute and return a score for a hypothesis
-	float CalcScore(Hypothesis *curr_hypothesis, int direction);
+	std::vector<float> CalcScore(Hypothesis *curr_hypothesis);
 	
 	// Print the orientation probability table
 	void PrintTable(void);
