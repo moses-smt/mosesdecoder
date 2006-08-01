@@ -1461,6 +1461,9 @@ print INI "\n\n# translation model weights
 print INI "\n# word penalty
 [weight-w]
 -1
+
+[distortion-limit]
+6
 ";
 
 
