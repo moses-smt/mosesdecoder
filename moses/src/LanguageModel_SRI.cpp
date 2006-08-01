@@ -47,8 +47,7 @@ LanguageModel_SRI::~LanguageModel_SRI()
   delete m_srilmVocab;
 }
 
-void LanguageModel_SRI::Load(size_t id
-												, const std::string &fileName
+void LanguageModel_SRI::Load(const std::string &fileName
 												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
@@ -56,7 +55,6 @@ void LanguageModel_SRI::Load(size_t id
 {
 	m_srilmVocab  = new Vocab();
   m_srilmModel	= new Ngram(*m_srilmVocab, nGramOrder);
-	m_id					= id;
 	m_factorType 	= factorType;
 	m_weight			= weight;
 	m_nGramOrder	= nGramOrder;
