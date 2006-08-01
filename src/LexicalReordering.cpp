@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <assert.h>
+#include <vector>
 #include "LexicalReordering.h"
 #include "InputFileStream.h"
 #include "DistortionOrientation.h"
@@ -17,11 +18,22 @@ using namespace std;
  */
 LexicalReordering::LexicalReordering(const std::string &filename, 
 																		 int orientation, int direction,
-																		 int condition, const std::vector<float> weights) :
-	m_orientation(orientation), m_direction(direction), m_condition(condition), m_weights(weights),
-	m_filename(filename)
+																		 int condition, const std::vector<float>& weights) :
+	m_orientation(orientation), m_condition(condition), m_filename(filename), m_numberscores(weights.size())
 {
+	//add score producer
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	//manage the weights by SetWeightsForScoreProducer method of static data.
+	if(direction == LexReorderType::Bidirectional)
+	{
+		m_direction.push_back(LexReorderType::Forward);
+		m_direction.push_back(LexReorderType::Backward);
+	}
+	else
+	{
+		m_direction.push_back(direction);
+	}
+	const_cast<StaticData*>(StaticData::Instance())->SetWeightsForScoreProducer(this, weights);
 	// Load the file
 	LoadFile();
 	PrintTable();
@@ -95,12 +107,13 @@ void LexicalReordering::PrintTable()
 		}
 }
 
-float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
+std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 {
-	if(m_direction==LexReorderType::Bidirectional || m_direction==direction){
-		vector<float> val;
-		//this phrase declaration is to get around const mumbo jumbo and let me call a
-		//"convert to a string" method 
+	std::vector<float> score(m_numberscores, 0);
+	vector<float> val;
+	for(int i=0; i < m_direction.size(); i++)
+	{
+		int direction = m_direction[i];
 		int orientation = DistortionOrientation::GetOrientation(hypothesis, direction);
 		if(m_condition==LexReorderType::Fe)
 		{
@@ -115,41 +128,33 @@ float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 			//this key string is F from the hypothesis
 			val=m_orientation_table[hypothesis->GetTargetPhrase().GetStringRep(hypothesis->GetCurrTargetWordsRange())];
 		}
-		//will tell us where to look in the table for the probability we need
-		int index = 0;
-		//the weight will tell us what to multiply the probability we fetch by
-		float weight = 1;
+		//the forward_offset is only applicable if we have a bidirectional model
+		//as the forward weights/scores come after the backward in this model, we need to offset by this amount.
 		int forward_offset = 0;
-		//the weight vector will be longer if this LexicalReordering is bidirectional, 
-		//containing backward weights then forward weights. 
-		//by probing its size we can see if the LexicalReordering is bidirectional, 
-		//(meaning we need to access the forward weights midvector) and
-		//if it is Monotone or MSD (which changes where midvector is)
-		if(m_weights.size()==4){
-			forward_offset = 2;
+		//we know we have a bidirectional model if the number of scores is 4 or 6, not 2 or 3.
+		if(m_numberscores==4)
+		{
+			forward_offset=2;
 		}
-		else if(m_weights.size()==6){
-			forward_offset = 3;
-		}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
-		
+		else if(m_numberscores==6)
+		{
+			forward_offset=3;
+		}
 		if(m_orientation==DistortionOrientationType::Msd)
 		{
 			if(direction==LexReorderType::Backward)
 			{
 				if(orientation==DistortionOrientationType::MONO)
 				{
-					index=BACK_M;
-					weight=m_weights[0];
+					score[BACK_M] = val[BACK_M];
 				}
 				else if(orientation==DistortionOrientationType::SWAP)
 				{
-					index=BACK_S;
-					weight=m_weights[1];
+					score[BACK_S] = val[BACK_S];
 				}
 				else
 				{
-					index=BACK_D;
-					weight=m_weights[2];
+					score[BACK_D] = val[BACK_D];
 				}
 			
 			}
@@ -157,18 +162,15 @@ float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 			{
 				if(orientation==DistortionOrientationType::MONO)
 				{
-					index=FOR_M;
-					weight=m_weights[0+forward_offset];					
+					score[FOR_M+forward_offset] = val[FOR_M+forward_offset];
 				}
 				else if(orientation==DistortionOrientationType::SWAP)
 				{
-					index=FOR_S;
-					weight=m_weights[1+forward_offset];					
+					score[FOR_S+forward_offset] = val[FOR_S+forward_offset];
 				}
 				else
 				{
-					index=FOR_D;
-					weight=m_weights[2+forward_offset];					
+					score[FOR_D+forward_offset] = val[FOR_D+forward_offset];
 				}
 			}
 		}
@@ -178,41 +180,34 @@ float LexicalReordering::CalcScore(Hypothesis *hypothesis, int direction)
 			{
 				if(orientation==DistortionOrientationType::MONO)
 				{
-					index=BACK_MONO;
-					weight=m_weights[0];
+					score[BACK_MONO] = val[BACK_MONO];
 				}
 				else
 				{
-					index=BACK_NONMONO;
-					weight=m_weights[1];					
+					score[BACK_NONMONO] = val[BACK_NONMONO];
 				}
 			}
 			else
 			{
 				if(orientation==DistortionOrientationType::MONO)
 				{
-					index=FOR_MONO;
-					weight=m_weights[0+forward_offset];					
+					score[FOR_MONO+forward_offset] = val[FOR_MONO+forward_offset];					
 				}
 				else
 				{
-					index=FOR_NONMONO;
-					weight=m_weights[1+forward_offset];				
+					score[FOR_NONMONO+forward_offset] = val[FOR_NONMONO+forward_offset];					
 				}
 			}
 		}
-		return val[index] * weight;
+
 	}
-	else
-	{
-		return 0;
-	}
+	return score;
 }
 
 
 unsigned int LexicalReordering::GetNumScoreComponents() const
 {
-	return m_weights.size();
+	return m_numberscores;
 }
 
 const std::string  LexicalReordering::GetScoreProducerDescription() const
