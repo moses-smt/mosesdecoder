@@ -91,8 +91,15 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 Hypothesis::~Hypothesis()
 {
 #ifdef N_BEST
-	if (m_arcList) {
-		RemoveAllInColl< ArcList::iterator >(*m_arcList);
+	if (m_arcList) 
+	{
+		ArcList::iterator iter;
+		for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter)
+		{
+			s_objectPool.freeObject (*iter);
+		}
+		m_arcList->clear();
+
 		delete m_arcList;
 	}
 #endif
