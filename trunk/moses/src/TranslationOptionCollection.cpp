@@ -479,12 +479,11 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 		}
 		
 		TranslationOption *transOpt;
-		TargetPhrase *targetPhrase;
 		if (!dropUnknown || isDigit)
 		{
 			// add to dictionary
-			targetPhrase = new TargetPhrase(Output);
-			FactorArray &targetWord = targetPhrase->AddWord();
+			TargetPhrase targetPhraseOrig(Output);
+			FactorArray &targetWord = targetPhraseOrig.AddWord();
 						
 			for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 			{
@@ -497,13 +496,17 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
 			}
 	
-			targetPhrase->SetScore(weightWordPenalty);
+			targetPhraseOrig.SetScore(weightWordPenalty);
+			
+			pair< set<TargetPhrase>::iterator, bool> inserted = m_unknownTargetPhrase.insert(targetPhraseOrig);
+			const TargetPhrase &targetPhrase = *inserted.first;
+			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
 		}
 		else 
 		{ // drop source word. create blank trans opt
-			targetPhrase = new TargetPhrase(Output);
+			const TargetPhrase targetPhrase(Output);
+			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
 		}
-		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
 
 		transOpt->CalcScore(*m_allLM, weightWordPenalty);
 		Add(transOpt);
@@ -551,7 +554,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 				TargetPhraseCollection::const_iterator iterTargetPhrase;
 				for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != phraseColl->end() ; ++iterTargetPhrase)
 				{
-					const TargetPhrase *targetPhrase = new TargetPhrase(*iterTargetPhrase);
+					const TargetPhrase	&targetPhrase = *iterTargetPhrase;
 					outputPartialTranslOptColl.push_back ( new TranslationOption(wordsRange, targetPhrase) );
 
 					if (verboseLevel >= 3) 
