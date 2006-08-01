@@ -49,8 +49,7 @@ protected:
 public:
 	LanguageModel_SRI();
 	~LanguageModel_SRI();
-	void Load(size_t id
-					, const std::string &fileName
+	void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight

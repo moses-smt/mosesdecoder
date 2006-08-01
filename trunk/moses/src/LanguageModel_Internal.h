@@ -38,8 +38,7 @@ class LanguageModel_Internal : public LanguageModel
 public:
 	
 	LanguageModel_Internal();
-	void Load(size_t id
-					, const std::string &fileName
+	void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight

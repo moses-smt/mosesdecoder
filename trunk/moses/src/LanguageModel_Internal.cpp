@@ -40,14 +40,12 @@ LanguageModel_Internal::LanguageModel_Internal()
 {
 }
 
-void LanguageModel_Internal::Load(size_t id
-											, const std::string &fileName
+void LanguageModel_Internal::Load(const std::string &fileName
 											, FactorCollection &factorCollection
 											, FactorType factorType
 											, float weight
 											, size_t nGramOrder)
 {
-	m_id					= id;
 	m_factorType	= factorType;
 	m_weight			= weight;
 	m_nGramOrder	= nGramOrder;
