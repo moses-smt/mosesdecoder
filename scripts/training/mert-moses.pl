@@ -72,10 +72,8 @@ my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
 my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
-my $queue_flags = undef;
-  my $default_queue_flags = "-l ws06ossmt=true -l mem_free=0.5G -hard";  # extra parameters for parallelizer
-  # need to set queue_flags to undef, or GetOptions will refuse to
-  # understand --queue-flags="" and use the default instead of ""
+my $queue_flags = "-l ws06ossmt=true -l mem_free=0.5G -hard";  # extra parameters for parallelizer
+      # the -l ws0ssmt is relevant only to JHU workshop
 my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $___LAMBDA = undef; # string specifying the seed weights and boundaries of all lambdas
@@ -124,7 +122,7 @@ GetOptions(
   "filtercmd=s" => \$filtercmd, # allow to override the default location
   "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
-);
+) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
 # or using the --options
@@ -136,6 +134,9 @@ if (scalar @ARGV == 4) {
   $___CONFIG = shift;
 }
 
+
+print STDERR "After default: $queue_flags\n";
+
 if ($usage || !defined $___DEV_F || !defined$___DEV_E || !defined$___DECODER || !defined $___CONFIG) {
   print STDERR "usage: mert-moses.pl input-text references decoder-executable decoder.ini
 Options:
@@ -144,6 +145,10 @@ Options:
   --jobs=N  ... optional path to moses-parallel.perl
   --queue-flags=STRING  ... anything you with to pass to 
               qsub, eg. '-l ws06osssmt=true'
+              The default is to submit the jobs to the ws06ossmt queue, which
+              makes sense only at JHU. To reset the default JHU queue
+              parameters, please use \"--queue-flags=' '\" (i.e. a space between
+              the quotes).
   --decoder-flags=STRING ... extra parameters for the decoder
   --lambdas=STRING  ... default values and ranges for lambdas, a complex string
          such as 'd:1,0.5-1.5 lm:1,0.5-1.5 tm:0.3,0.25-0.75;0.2,0.25-0.75;0.2,0.25-0.75;0.3,0.25-0.75;0,-0.5-0.5 w:0,-0.5-0.5'
@@ -162,8 +167,6 @@ Options:
 }
 
 # Check validity of input parameters and set defaults if needed
-
-$queue_flags = $default_queue_flags if !defined $queue_flags;
 
 
 
