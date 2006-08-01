@@ -72,7 +72,7 @@ my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
 my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
-my $queue_flags = "";  # extra parameters for parallelizer
+my $queue_flags = "-l ws06ossmt=true -l mem_free=0.5G -hard";  # extra parameters for parallelizer
 my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $___LAMBDA = undef; # string specifying the seed weights and boundaries of all lambdas
