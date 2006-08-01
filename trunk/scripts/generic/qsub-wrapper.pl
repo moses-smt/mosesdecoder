@@ -36,7 +36,7 @@ sub init(){
              'stdout=s'=> \$cmdout,
              'stderr=s'=> \$cmderr,
              'queue-parameter=s'=> \$queueparameters
-            );
+            ) or exit(1);
   $parameters="@ARGV";
   
   version() if $version;

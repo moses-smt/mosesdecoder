@@ -59,7 +59,7 @@ sub init(){
 	     'queue-parameters=s'=> \$queueparameters,
 	     'inputtype=i'=> \$inputtype,
              'config=s'=>\$cfgfile
-	    );
+	    ) or exit(1);
 
   print STDERR "queueparameters: $queueparameters\n";
   
