@@ -44,7 +44,7 @@ class TranslationOption
 
 protected:
 
-	const Phrase 				m_phrase;
+	const Phrase 				*m_phrase;
 	const WordsRange		m_sourceWordsRange;
 	float								m_scoreTrans, m_scoreGen, m_futureScore, m_ngramScore;
 
@@ -55,27 +55,34 @@ protected:
 	ScoreComponentCollection2	m_scoreBreakdown;
 
 public:
-	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
+	TranslationOption(const WordsRange &wordsRange, const TargetPhrase *targetPhrase);
 	// used by initial translation step
-	TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase);
+	TranslationOption(const TranslationOption &copy, const TargetPhrase *targetPhrase);
 	// used by MergeTranslation 
 	TranslationOption(const TranslationOption &copy
-											, const Phrase &inputPhrase
+											, const Phrase *inputPhrase
 											, const GenerationDictionary *generationDictionary
 											, float generationScore
 											, float weight);
-	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/);
+	// used in creating the next generation step
+	TranslationOption(const WordsRange &wordsRange, const TargetPhrase *targetPhrase, int /*whatever*/);
 	// used to create trans opt from unknown word
-	
+	~TranslationOption()
+	{
+		delete m_phrase;
+	}
 	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase) const;
 	TranslationOption *MergeGeneration(const Phrase &inputPhrase
 																		, const GenerationDictionary *generationDictionary
 																		, float generationScore
 																		, float weight) const;
 
+	/***
+	 * return target phrase
+	 */
 	inline const Phrase &GetTargetPhrase() const
 	{
-		return m_phrase;
+		return *m_phrase;
 	}
 	inline const WordsRange &GetSourceWordsRange() const
 	{
@@ -134,20 +141,12 @@ public:
 	{
 		return m_scoreTrans + m_scoreGen + m_futureScore;
 	}
-	/***
-	 * return target phrase
-	 */
-	inline const Phrase& GetPhrase() const
-	{
-		return m_phrase;
-	}
-
   /***
    * returns true if the source phrase translates into nothing
    */
 	inline bool IsDeletionOption() const
   {
-    return m_phrase.GetSize() == 0;
+    return m_phrase->GetSize() == 0;
   }
 	void CalcScore(const LMList &allLM, float weightWordPenalty);
 
