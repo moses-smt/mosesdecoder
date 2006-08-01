@@ -407,6 +407,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\mempool.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\NGramCollection.cpp"
 				>
 			</File>
@@ -665,15 +669,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\mempool.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\NGramCollection.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\NGramNode.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Object.h"
 				>
 			</File>
 			<File
