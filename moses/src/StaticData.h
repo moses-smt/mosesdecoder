@@ -54,7 +54,7 @@ protected:
 	Parameter			m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder;
 //	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
-	std::vector<LMList>			m_languageModel;
+	LMList									m_languageModel;
 	std::vector<float>			m_lexWeights;
 	ScoreIndexManager				m_scoreIndexManager;
 	std::vector<float>			m_allWeights;
@@ -158,12 +158,6 @@ public:
 	{ 
 		return m_maxNoTransOptPerCoverage;
 	}
-/*	
-	boost::shared_ptr<UnknownWordHandler> GetUnknownWordHandler()
-	{
-		return m_unknownWordHandler;
-	}
-*/
 	FactorCollection &GetFactorCollection()
 	{
 		return m_factorCollection;
@@ -173,11 +167,6 @@ public:
 		if (factorType >= m_maxNgramOrderForFactor.size()) return 0;
 		return m_maxNgramOrderForFactor[factorType];
 	}
-	const LMList &GetLanguageModel(LMListType type) const
-	{
-		return m_languageModel[type];
-	}
-	
 	LexicalReordering *GetLexReorder() const
 	{
 		return m_lexReorder;
@@ -223,13 +212,12 @@ public:
 
 	size_t GetLMSize() const
 	{
-		return m_languageModel[Initial].size() + m_languageModel[Other].size();
+		return m_languageModel.size();
 	}
-	size_t GetNumLanguageModels() const
+	const LMList &GetAllLM() const
 	{
-		return GetLMSize();
+		return m_languageModel;
 	}
-	const LMList GetAllLM() const;
 	size_t GetPhraseDictionarySize() const
 	{
 		return m_phraseDictionary.size();

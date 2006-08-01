@@ -139,12 +139,6 @@ enum IOMethod
 	,IOMethodMySQL
 };
 
-enum LMListType
-{
-	Initial
-	,Other
-};
-
 // typedef
 class Factor;
 typedef const Factor * FactorArray[NUM_FACTORS];

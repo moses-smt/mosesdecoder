@@ -76,7 +76,7 @@ protected:
 	
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
-	void CalcLMScore(const LMList		&lmListInitial, const LMList	&lmListEnd);
+	void CalcLMScore(const LMList &languageModels);
 	void CalcDistortionScore();
 	//TODO: add appropriate arguments to score calculator
 
