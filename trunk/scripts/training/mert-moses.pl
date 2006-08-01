@@ -30,17 +30,17 @@ my $default_triples = {
   # for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
   # of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
   # but the translation model has currently 5 features
-  "d" => [ [ 0.2, 0.0, 1.0 ] ],
-  "lm" => [ [ 0.4, 0.0, 1.0 ] ],
+  "d" => [ [ 1.0, 0.0, 2.0 ] ],
+  "lm" => [ [ 1.0, 0.0, 2.0 ] ],
   "tm" => [
-            [ 0.1, 0.0, 1.0 ],
-            [ 0.1, 0.0, 1.0 ],
-            [ 0.1, 0.0, 1.0 ],
-            [ 0.1, 0.0, 1.0 ],
-            [ -1.0, -1.0, 1.0 ],
+            [ 0.3, 0.0, 0.5 ],
+            [ 0.2, 0.0, 0.5 ],
+            [ 0.3, 0.0, 0.5 ],
+            [ 0.2, 0.0, 0.5 ],
+            [ 0.0, -1.0, 1.0 ],
 	  ],
-  "g" => [ [ 0.5, 0.0, 1.0 ] ],
-  "w" => [ [ 0, -0.5, 0.5 ] ],
+  "g" => [ [ 1.0, 0.0, 2.0 ] ],
+  "w" => [ [ 0.0, -1.0, 1.0 ] ],
 };
 
 # moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
@@ -88,6 +88,7 @@ my $___START_STEP = undef;  # which iteration step to start with
 my $___AVERAGE = 0;
 
 my $allow_unknown_lambdas = 0;
+my $allow_skipping_lambdas = 0;
 
 
 my $SCRIPTS_ROOTDIR = undef; # path to all tools (overriden by specific options)
@@ -115,6 +116,7 @@ GetOptions(
   "average" => \$___AVERAGE,
   "help" => \$usage,
   "allow-unknown-lambdas" => \$allow_unknown_lambdas,
+  "allow-skipping-lambdas" => \$allow_skipping_lambdas,
   "verbose" => \$verbose,
   "roodir=s" => \$SCRIPTS_ROOTDIR,
   "cmertdir=s" => \$cmertdir,
@@ -305,7 +307,43 @@ my $decoder_config = "";
 
 # this loop actually does the conversion and also checks for
 # the match in lambda count
+
+# Beware: as of now, the decoder produces weights in a very specific order, we need
+# to stick with it
+
+my @order_of_types = ("d", "lm", "tm", "w", "g");
+my %well_known_type = map {($_,1)} @order_of_types;
+
+my @use_order = @order_of_types;
+# walk through all lambdas the user wishes to optimize and check
+# if there are any extra
 foreach my $name (keys %$use_triples) {
+  next if $well_known_type{$name}; # this will get printed anyway
+  if (!$allow_unknown_lambdas) {
+    print STDERR "You are trying to optimize '$name' but we do not know, where moses produces
+this particular score in its output. Use --allow-unknown-lambdas to run anyway,
+assuming that moses prints the score at the end of scores list\n";
+    exit 1;
+  }
+  print STDERR "Allowing additional lambda: $name";
+  push @use_order, $name;
+}
+
+foreach my $name (@use_order) {
+  if (!defined $use_triples->{$name}) {
+    if ($allow_skipping_lambdas || $name eq "g") {
+      # hardwired to allow no generation step
+      print STDERR "Allowing to not optimize '$name', although moses might still report this value back and everything gets screwed!!!\n";
+      next;
+    } else {
+      print STDERR "You are trying to optimize a set of lambdas that does not include '$name'. As
+moses now returns the lambdas back in fixed order and not labelled, it might
+report the score back to us and we cannot then match the scores with the
+lamdas.  Use --allow-skipping-lambdas, if you *know* that moses will not report
+this lambda.\n";
+      exit 1;
+    }
+  }
   $decoder_config .= "-$name ";
   my $expected_lambdas = $lambdas_per_model->{$name};
   $expected_lambdas = 0 if !defined $expected_lambdas;
@@ -316,7 +354,7 @@ foreach my $name (keys %$use_triples) {
     } else {
       print STDERR "Wrong number of lambdas for $name. Expected (given the config file): $expected_lambdas, got: $got_lambdas.
 Use --allow-unknown-lambdas to optimize lambdas that you are just introducing
-and I cannot validate against the models mentioned in moses.ini.";
+and I cannot validate against the models mentioned in moses.ini.\n";
       exit 1;
     }
   }
@@ -370,6 +408,13 @@ create_config($___CONFIG, "./preliminary.moses.ini", \@LAMBDA, \@NAME, "--not-ru
 
 # create some initial files (esp. weights and their ranges for randomization)
 
+# this is just for debugging. we should be sure that the order of lambdas in names.txt
+# matches the order of lambdas produced on nbestlist
+open(WEIGHTS,"> names.txt") or die "Can't write names.txt (WD now $___WORKING_DIR)";
+print WEIGHTS join(" ", @NAME)."\n";
+close(WEIGHTS);
+
+# weights and ranges.txt are used by cmert
 open(WEIGHTS,"> weights.txt") or die "Can't write weights.txt (WD now $___WORKING_DIR)";
 print WEIGHTS join(" ", @LAMBDA)."\n";
 close(WEIGHTS);
@@ -412,6 +457,7 @@ while(1) {
       @LAMBDA = split " ";
   }
   close(WEIGHTS);
+  print STDERR "Weights from last step: @LAMBDA\n";
 
   # In case something dies later, we might wish to have a copy
   create_config($___CONFIG, "./run$run.moses.ini", \@LAMBDA, \@NAME, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
