@@ -55,6 +55,7 @@ Parameter::Parameter()
 	AddParam("beam-threshold");
 	AddParam("distortion-limit");
 	AddParam("input-factors");
+	AddParam("output-factors");
 	AddParam("mysql");
 	AddParam("input-file");
 	AddParam("cache-path");

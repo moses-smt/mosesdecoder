@@ -462,13 +462,12 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 																														, FactorCollection &factorCollection
 																														, float weightWordPenalty)
 {
-	// unknown word, add to target, and add as poss trans
-	//				float	weightWP		= m_staticData.GetWeightWordPenalty();
+	// unknown word, add as trans opt
 
 		size_t isDigit = 0;
 		if (dropUnknown)
 		{
-			const Factor *f = sourceWord[Surface];
+			const Factor *f = sourceWord[0]; // ??? hack. shouldn't know which factor is surface
 			std::string s = f->ToString();
 			isDigit = s.find_first_of("0123456789");
 			if (isDigit == string::npos) 

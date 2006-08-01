@@ -52,7 +52,7 @@ protected:
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::list < DecodeStep >						m_decodeStepList;
 	Parameter			m_parameter;
-	std::vector<FactorType>			m_inputFactorOrder;
+	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 //	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
 	LMList									m_languageModel;
 	std::vector<float>			m_lexWeights;
@@ -145,6 +145,10 @@ public:
 	const std::vector<FactorType> &GetInputFactorOrder() const
 	{
 		return m_inputFactorOrder;
+	}
+	const std::vector<FactorType> &GetOutputFactorOrder() const
+	{
+		return m_outputFactorOrder;
 	}
 
 	std::list < DecodeStep > &GetDecodeStepList()
