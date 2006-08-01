@@ -70,6 +70,7 @@ InputType*IOCommandLine::GetInput(InputType* in)
 // help fn
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
+	assert(outputFactorOrder.size() > 0);
   if (reportAllFactors == true) 
 	{
 		out << phrase;
@@ -79,11 +80,15 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
 		size_t size = phrase.GetSize();
 		for (size_t pos = 0 ; pos < size ; pos++)
 		{
-			for (size_t i = 0 ; i < outputFactorOrder.size() ; i++)
+			const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+			out << *factor;
+			
+			for (size_t i = 1 ; i < outputFactorOrder.size() ; i++)
 			{
 				const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-				out << *factor << " ";
+				out << "|" << *factor;
 			}
+			out << " ";
 		}
 	}
 }
