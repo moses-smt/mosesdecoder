@@ -108,7 +108,7 @@ float LanguageModel_SRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 	return FloorSRIScore(TransformSRIScore(p));  // log10->log
 }
 
-float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor) const
+float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor, State* finalState) const
 {
 	// set up context
 	VocabIndex context[MAX_NGRAM_SIZE];
@@ -124,6 +124,15 @@ float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor) co
   LmId x = contextFactor[count-1]->GetLmId();
 	x.sri = x.sri==UNKNOWN_LM_ID.sri ? m_unknownId.sri : x.sri;
 	float ret = GetValue(x.sri, context);
+
+	if (finalState) {
+		for (int i = count - 2 ; i >= 0 ; i--)
+			context[i+1] = context[i];
+		context[0] = x.sri;
+		unsigned int len;
+		*finalState = m_srilmModel->contextID(context,len);
+	}
 	return ret;
 }
+
 

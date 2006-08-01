@@ -57,7 +57,7 @@ protected:
 	void CreateFactors(FactorCollection &factorCollection);
 public:
 	LmId GetLmID( const std::string &str ) const;
-  virtual float GetValue(const std::vector<const Factor*> &contextFactor) const;
+  virtual float GetValue(const std::vector<const Factor*> &contextFactor, State* finalState = 0) const;
 
 };
 
