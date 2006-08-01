@@ -54,7 +54,7 @@ private:
 protected:
 
 	const Hypothesis* m_prevHypo;
-	Phrase					m_targetPhrase; //target phrase being created at the current decoding step
+	const Phrase			&m_targetPhrase; //target phrase being created at the current decoding step
 	WordsBitmap				m_sourceCompleted;
 	//TODO: how to integrate this into confusion network framework; what if
 	//it's a confusion network in the end???
@@ -93,7 +93,7 @@ public:
 	static unsigned int s_numNodes; // Statistics: how many hypotheses were created in total
 	int m_id;
 	
-	Hypothesis(InputType const& source);
+	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
 		// used for initial seeding of trans process
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 		// create next
@@ -111,7 +111,7 @@ public:
 	/***
 	 * return the subclass of Hypothesis most appropriate to the given target phrase
 	 */
-	static Hypothesis* Create(InputType const& source);
+	static Hypothesis* Create(InputType const& source, const TargetPhrase &emptyTarget);
 
 
 	/***
@@ -176,10 +176,6 @@ public:
 	// curr - pos is relative from CURRENT hypothesis's starting ind ex
   // (ie, start of sentence would be some negative number, which is
   // not allowed- USE WITH CAUTION)
-	inline FactorArray &GetCurrFactorArray(size_t pos)
-	{
-		return m_targetPhrase.GetFactorArray(pos);
-	}
 	inline const FactorArray &GetCurrFactorArray(size_t pos) const
 	{
 		return m_targetPhrase.GetFactorArray(pos);
@@ -195,8 +191,8 @@ public:
 		while (pos < hypo->GetCurrTargetWordsRange().GetStartPos())
 		{
 			hypo = hypo->GetPrevHypo();
+			assert(hypo != NULL);
 		}
-		assert(hypo != NULL);
 		return hypo->GetCurrFactorArray(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
 	}
 	inline const Factor* GetFactor(size_t pos, FactorType factorType) const
