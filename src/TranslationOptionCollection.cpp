@@ -482,8 +482,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 		if (!dropUnknown || isDigit)
 		{
 			// add to dictionary
-			TargetPhrase targetPhraseOrig(Output);
-			FactorArray &targetWord = targetPhraseOrig.AddWord();
+			TargetPhrase targetPhrase(Output);
+			FactorArray &targetWord = targetPhrase.AddWord();
 						
 			for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 			{
@@ -496,10 +496,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
 			}
 	
-			targetPhraseOrig.SetScore(weightWordPenalty);
+			targetPhrase.SetScore(weightWordPenalty);
 			
-			pair< set<TargetPhrase>::iterator, bool> inserted = m_unknownTargetPhrase.insert(targetPhraseOrig);
-			const TargetPhrase &targetPhrase = *inserted.first;
 			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
 		}
 		else 
