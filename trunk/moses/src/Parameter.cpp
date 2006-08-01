@@ -116,6 +116,8 @@ bool Parameter::Validate()
 	// language model
 	if (ret)
 		ret = FilesExist("lmodel-file", 3);
+	if (ret)
+		ret = FilesExist("input-file", 0);
 
 	return ret;
 }
