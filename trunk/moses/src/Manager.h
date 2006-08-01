@@ -46,7 +46,8 @@ protected:
 		// no of elements = no of words in source + 1
 	StaticData &m_staticData;
 	TranslationOptionCollection &m_possibleTranslations;
-
+	TargetPhrase m_initialTargetPhrase; // used to seed 1st hypo
+	
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
 	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);

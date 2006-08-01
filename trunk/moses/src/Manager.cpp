@@ -39,6 +39,7 @@ Manager::Manager(InputType const& source,
 ,m_hypoStack(source.GetSize() + 1)
 ,m_staticData(staticData)
 ,m_possibleTranslations(toc)  //dynamic_cast<Sentence const&>(source))
+,m_initialTargetPhrase(Output)
 {
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
@@ -73,7 +74,7 @@ void Manager::ProcessSentence()
 
 	// initial seed hypothesis: nothing translated, no words produced
 	{
-		Hypothesis *hypo = Hypothesis::Create(m_source);
+		Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
 		m_hypoStack[0].AddPrune(hypo);
 	}
 	
