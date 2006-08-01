@@ -42,8 +42,7 @@ public:
 	
 	LanguageModel_IRST();
 	~LanguageModel_IRST();
-	void Load(size_t id
-					, const std::string &fileName
+	void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight

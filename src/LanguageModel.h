@@ -38,7 +38,7 @@ protected:
 	const Factor *m_sentenceStart, *m_sentenceEnd;
 	FactorType	m_factorType;
 	float				m_weight;
-	size_t			m_id, m_nGramOrder;
+	size_t			m_nGramOrder;
 	LmId				m_unknownId;
 	std::string	m_filename;
 public:
@@ -49,8 +49,7 @@ public:
 
 	LanguageModel();
 	virtual ~LanguageModel();
-	virtual void Load(size_t id
-					, const std::string &fileName
+	virtual void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
@@ -88,10 +87,6 @@ public:
 	void SetWeight(float weight)
 	{
 		m_weight = weight;
-	}
-	size_t GetId() const
-	{
-		return m_id;
 	}
 	virtual const std::string GetScoreProducerDescription() const;
 	virtual float GetValue(const std::vector<const Factor*> &contextFactor, State* finalState = 0) const = 0;

@@ -274,7 +274,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
       LanguageModel *lm = LanguageModelFactory::createLanguageModel();
 
 			// error handling here?
-			lm->Load(i, languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
+			lm->Load(languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
 	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
 			m_languageModel.push_back(lm);
 
