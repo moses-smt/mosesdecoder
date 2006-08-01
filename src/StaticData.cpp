@@ -55,9 +55,12 @@ StaticData::StaticData()
 ,m_numInputScores(0)
 ,m_distortionScoreProducer(0)
 ,m_wpProducer(0)
- 
 {
 	s_instance = this;
+
+	// mempory pools
+	Phrase::InitializeMemPool();
+
 }
 
 bool StaticData::LoadParameters(int argc, char* argv[])
@@ -378,6 +381,10 @@ StaticData::~StaticData()
 	// small score producers
 	delete m_distortionScoreProducer;
 	delete m_wpProducer;
+
+	// memory pools
+	Phrase::FinalizeMemPool();
+
 }
 
 IOMethod StaticData::GetIOMethod()
