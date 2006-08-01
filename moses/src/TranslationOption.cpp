@@ -28,30 +28,30 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 
-TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase *targetPhrase)
+TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase)
 : m_phrase(targetPhrase)
 ,m_sourceWordsRange	(wordsRange)
 {	// used by initial translation step
 
 	// set score
 	m_scoreGen		= 0;
-	m_scoreTrans	= targetPhrase->GetTranslationScore();
-	m_scoreBreakdown.PlusEquals(targetPhrase->GetScoreBreakdown());
+	m_scoreTrans	= targetPhrase.GetTranslationScore();
+	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 }
 
-TranslationOption::TranslationOption(const TranslationOption &copy, const TargetPhrase *targetPhrase)
+TranslationOption::TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase)
 : m_phrase(targetPhrase)
 ,m_sourceWordsRange	(copy.m_sourceWordsRange)
 ,m_scoreBreakdown(copy.m_scoreBreakdown)
 { // used in creating the next translation step
 	m_scoreGen		= copy.GetGenerationScore();
-	m_scoreTrans	= copy.GetTranslationScore() + targetPhrase->GetTranslationScore();
+	m_scoreTrans	= copy.GetTranslationScore() + targetPhrase.GetTranslationScore();
 	
-	m_scoreBreakdown.PlusEquals(targetPhrase->GetScoreBreakdown());
+	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 }
 
 TranslationOption::TranslationOption(const TranslationOption &copy
-																		, const Phrase *inputPhrase
+																		, const Phrase &inputPhrase
 																		, const GenerationDictionary *generationDictionary
 																		, float generationScore
 																		, float weight)
@@ -66,7 +66,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 	m_scoreBreakdown.PlusEquals(generationDictionary, generationScore);
 }
 
-TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase *targetPhrase, int /*whatever*/)
+TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/)
 : m_phrase(targetPhrase)
 ,m_sourceWordsRange	(wordsRange)
 ,m_scoreTrans(0)
@@ -78,10 +78,10 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 
 TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targetPhrase) const
 {
-	if (m_phrase->IsCompatible(targetPhrase))
+	if (m_phrase.IsCompatible(targetPhrase))
 	{
-		TargetPhrase *mergePhrase = new TargetPhrase(targetPhrase);
-		mergePhrase->MergeFactors(*m_phrase);
+		TargetPhrase mergePhrase(targetPhrase);
+		mergePhrase.MergeFactors(m_phrase);
 		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase);
 		return newTransOpt;
 	}
@@ -96,10 +96,10 @@ TranslationOption *TranslationOption::MergeGeneration(const Phrase &inputPhrase
 																	, float generationScore
 																	, float weight) const
 {
-	if (m_phrase->IsCompatible(inputPhrase))
+	if (m_phrase.IsCompatible(inputPhrase))
 	{
-		Phrase *mergePhrase = new Phrase(inputPhrase);
-		mergePhrase->MergeFactors(*m_phrase);
+		Phrase mergePhrase(inputPhrase);
+		mergePhrase.MergeFactors(m_phrase);
 		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase, generationDictionary, generationScore, weight);
 		return newTransOpt;
 	}

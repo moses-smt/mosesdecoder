@@ -68,7 +68,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_sourceInput						(prevHypo.m_sourceInput)
 	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
 	, m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
-														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
+														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetPhrase().GetSize())
 	,	m_totalScore(0.0f)
 	,	m_futureScore(0.0f)
 	, m_wordDeleted(false)
