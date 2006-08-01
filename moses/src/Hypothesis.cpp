@@ -38,7 +38,7 @@ using namespace std;
 
 unsigned int Hypothesis::s_numNodes = 0;
 unsigned int Hypothesis::s_HypothesesCreated = 0;
-ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 3000000);
+ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 
 Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)

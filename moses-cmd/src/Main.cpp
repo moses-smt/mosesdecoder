@@ -84,17 +84,16 @@ int main(int argc, char* argv[])
 		<<"\n"
 		<<"============================================================================\n";
 
-	Phrase::InitializeMemPool();
-	StaticData *staticData = new StaticData();
+	StaticData staticData;
 
-	if (!staticData->LoadParameters(argc, argv))
+	if (!staticData.LoadParameters(argc, argv))
 		return EXIT_FAILURE;
 
 	/*
 	 * boost::shared_ptr<UnknownWordHandler> unknownWordHandler(new UnknownWordHandler);
-	staticData->SetUnknownWordHandler(unknownWordHandler);
+	staticData.SetUnknownWordHandler(unknownWordHandler);
   */
-		if (staticData->GetVerboseLevel() > 0)
+		if (staticData.GetVerboseLevel() > 0)
 		{
 #if N_BEST
 		std::cerr << "N_BEST=enabled\n";
@@ -105,22 +104,22 @@ int main(int argc, char* argv[])
 
 
 	// set up read/writing class
-	InputOutput *inputOutput = GetInputOutput(*staticData);
+	InputOutput *inputOutput = GetInputOutput(staticData);
 
-  std::cerr << "The score component vector looks like this:\n" << staticData->GetScoreIndexManager();
+  std::cerr << "The score component vector looks like this:\n" << staticData.GetScoreIndexManager();
   std::cerr << "The global weight vector looks like this:\n";
-	vector<float> weights = staticData->GetAllWeights();
+	vector<float> weights = staticData.GetAllWeights();
 	std::cerr << weights[0];
 	for (size_t j=1; j<weights.size(); j++) { std::cerr << ", " << weights[j]; }
 	std::cerr << "\n";
 	// every score must have a weight!  check that here:
-	assert(weights.size() == staticData->GetScoreIndexManager().GetTotalNumberOfScores());
+	assert(weights.size() == staticData.GetScoreIndexManager().GetTotalNumberOfScores());
 
 	if (inputOutput == NULL)
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
-	while(InputType *source = inputOutput->GetInput((staticData->GetInputType() ? 
+	while(InputType *source = inputOutput->GetInput((staticData.GetInputType() ? 
 																									 static_cast<InputType*>(new ConfusionNet) : 
 																									 static_cast<InputType*>(new Sentence(Input)))))
 	{
@@ -129,19 +128,19 @@ int main(int argc, char* argv[])
 		TranslationOptionCollection *translationOptionCollection=source->CreateTranslationOptionCollection();
 		assert(translationOptionCollection);
 
-		staticData->InitializeBeforeSentenceProcessing(*source);
-		Manager manager(*source, *translationOptionCollection, *staticData);
+		staticData.InitializeBeforeSentenceProcessing(*source);
+		Manager manager(*source, *translationOptionCollection, staticData);
 		manager.ProcessSentence();
 		inputOutput->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId(),
-                        staticData->GetReportSourceSpan(),
-                        staticData->GetReportAllFactors()
+                        staticData.GetReportSourceSpan(),
+                        staticData.GetReportAllFactors()
                         );
 
 		// n-best
-		size_t nBestSize = staticData->GetNBestSize();
+		size_t nBestSize = staticData.GetNBestSize();
 		if (nBestSize > 0)
 		{
-			TRACE_ERR(nBestSize << " " << staticData->GetNBestFilePath() << endl);
+			TRACE_ERR(nBestSize << " " << staticData.GetNBestFilePath() << endl);
 			LatticePathList nBestList;
 			manager.CalcNBest(nBestSize, nBestList);
 			inputOutput->SetNBest(nBestList, source->GetTranslationId());
@@ -150,14 +149,12 @@ int main(int argc, char* argv[])
 
 		// delete source
 		//		inputOutput->Release(source);
-		staticData->CleanUpAfterSentenceProcessing();
+		staticData.CleanUpAfterSentenceProcessing();
 		delete translationOptionCollection;
 		delete source;
 	}
 	
 	delete inputOutput;
-	delete staticData;
-	Phrase::FinalizeMemPool();
 
 	timer.check("End.");
 	return EXIT_SUCCESS;
