@@ -53,9 +53,12 @@ class Factor
 	friend class FactorCollection;
 
 protected:
+	static size_t			s_id;
+
 	FactorDirection		m_direction;
 	FactorType				m_factorType;
 	const std::string	*m_ptrString;
+	const size_t			m_id;
 	LmId 							m_lmId;
 
 	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, LmId lmId);
@@ -85,6 +88,10 @@ public:
 	inline const std::string &GetString() const
 	{
 		return *m_ptrString;
+	}
+	inline size_t GetId() const
+	{
+		return m_id;
 	}
 	inline LmId GetLmId() const
 	{
