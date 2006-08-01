@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "LexicalReordering.h"
 #include "Input.h"
+#include "ObjectPool.h"
 
 class SquareMatrix;
 class StaticData;
@@ -52,7 +53,8 @@ private:
   unsigned char m_compSignature[16];
 
 protected:
-
+	static ObjectPool<Hypothesis> s_objectPool;
+	
 	const Hypothesis* m_prevHypo;
 	const Phrase			&m_targetPhrase; //target phrase being created at the current decoding step
 	WordsBitmap				m_sourceCompleted;
@@ -87,7 +89,10 @@ protected:
 	mutable bool _hash_computed;
 
 public:
-
+	static ObjectPool<Hypothesis> &GetObjectPool()
+	{
+		return s_objectPool;
+	}
 
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total
 	static unsigned int s_numNodes; // Statistics: how many hypotheses were created in total
