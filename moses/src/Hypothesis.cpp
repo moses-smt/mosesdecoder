@@ -359,10 +359,7 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 	//LEXICAL REORDERING COST
 	LexicalReordering *m_lexReorder = staticData.GetLexReorder();
 	if (m_lexReorder) {
-		std::vector<float> lroScores;
-		lroScores.push_back(m_lexReorder->CalcScore(this,LexReorderType::Forward));
-		lroScores.push_back(m_lexReorder->CalcScore(this,LexReorderType::Backward));
-		m_scoreBreakdown.PlusEquals(m_lexReorder, lroScores);
+		m_scoreBreakdown.PlusEquals(m_lexReorder, m_lexReorder->CalcScore(this));
 	}
 
 	// TOTAL
