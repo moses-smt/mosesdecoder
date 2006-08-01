@@ -45,12 +45,14 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 IOCommandLine::IOCommandLine(
-				const vector<FactorType>				&factorOrder
+				const vector<FactorType>				&inputFactorOrder
+				, const vector<FactorType>			&outputFactorOrder
 				, const FactorTypeSet						&inputFactorUsed
 				, FactorCollection							&factorCollection
 				, size_t												nBestSize
 				, const string									&nBestFilePath)
-:m_factorOrder(factorOrder)
+:m_inputFactorOrder(inputFactorOrder)
+,m_outputFactorOrder(outputFactorOrder)
 ,m_inputFactorUsed(inputFactorUsed)
 ,m_factorCollection(factorCollection)
 {
@@ -62,32 +64,37 @@ IOCommandLine::IOCommandLine(
 
 InputType*IOCommandLine::GetInput(InputType* in)
 {
-	return InputOutput::GetInput(in,std::cin,m_factorOrder, m_factorCollection);
+	return InputOutput::GetInput(in,std::cin,m_inputFactorOrder, m_factorCollection);
 }
 
 // help fn
-void OutputSurface(std::ostream &out, const Phrase &phrase, bool reportAllFactors)
+void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
-    if (reportAllFactors == true) {
-        out << phrase;
-    } else {
-	  size_t size = phrase.GetSize();
-	  for (size_t pos = 0 ; pos < size ; pos++)
-	  {
-		  const Factor *factor = phrase.GetFactor(pos, Surface);
-		  if (factor != NULL) {
-			  out << *factor << " ";
-          }
-        }
+  if (reportAllFactors == true) 
+	{
+		out << phrase;
+  } 
+	else 
+	{
+		size_t size = phrase.GetSize();
+		for (size_t pos = 0 ; pos < size ; pos++)
+		{
+			for (size_t i = 0 ; i < outputFactorOrder.size() ; i++)
+			{
+				const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
+				out << *factor << " ";
+			}
+		}
 	}
 }
 
-void OutputSurface(std::ostream &out, const Hypothesis *hypo, bool reportSourceSpan, bool reportAllFactors)
+void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder
+									 ,bool reportSourceSpan, bool reportAllFactors)
 {
 	if ( hypo != NULL)
 	{
-		OutputSurface(out, hypo->GetPrevHypo(), reportSourceSpan, reportAllFactors);
-		OutputSurface(out, hypo->GetPhrase(), reportAllFactors);
+		OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSourceSpan, reportAllFactors);
+		OutputSurface(out, hypo->GetPhrase(), outputFactorOrder, reportAllFactors);
 
         if (reportSourceSpan == true
           && hypo->GetPhrase().GetSize() > 0) {
@@ -116,7 +123,7 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bo
 		#endif
 		Backtrack(hypo);
 
-		OutputSurface(cout, hypo, reportSourceSpan, reportAllFactors);
+		OutputSurface(cout, hypo, m_outputFactorOrder, reportSourceSpan, reportAllFactors);
 	}
 	else
 	{
@@ -140,7 +147,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
 			const Hypothesis &edge = *edges[currEdge];
-			OutputSurface(m_nBestFile, edge.GetTargetPhrase(), false); // false for not reporting all factors
+			OutputSurface(m_nBestFile, edge.GetTargetPhrase(), m_outputFactorOrder, false); // false for not reporting all factors
 		}
 		m_nBestFile << " ||| ";
 

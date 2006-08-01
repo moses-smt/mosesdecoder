@@ -67,12 +67,6 @@ inline float Scan<float>(const std::string &input)
 	return (float) atof(input.c_str());
 }
 
-template<>
-inline FactorType Scan<FactorType>(const std::string &input)
-{
-	return static_cast<FactorType>(Scan<int>(input));
-}
-
 // convert vectors
 template<typename T>
 inline std::vector<T> Scan(const std::vector< std::string > &input)

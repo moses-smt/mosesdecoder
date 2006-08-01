@@ -173,6 +173,7 @@ void ThreadMySQL::SetTranslation(const Hypothesis *hypo, long translationId)
 
 Sentence *ThreadMySQL::ReadSentence(mysqlpp::Connection &conn)
 {
+	/*
 	stringstream strme;
 	strme << "SELECT Tin.translation_id idIn, Tout.translation_id idOut"
 				<< " FROM   translation Tin, translation Tout"
@@ -236,5 +237,6 @@ Sentence *ThreadMySQL::ReadSentence(mysqlpp::Connection &conn)
 	{ // no more sentences
 		return NULL;
 	}
+	*/
 }
 

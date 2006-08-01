@@ -36,13 +36,14 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Sentence.h"
 using namespace std;
 
-IOFile::IOFile(const std::vector<FactorType>	&factorOrder
+IOFile::IOFile(const std::vector<FactorType>	&inputFactorOrder
+						 , const std::vector<FactorType>	&outputFactorOrder
 							, const FactorTypeSet						&inputFactorUsed
 							, FactorCollection							&factorCollection
 							, size_t												nBestSize
 							, const std::string							&nBestFilePath
 							, const std::string							&inputFilePath)
-:IOCommandLine(factorOrder, inputFactorUsed, factorCollection, nBestSize, nBestFilePath)
+:IOCommandLine(inputFactorOrder, outputFactorOrder, inputFactorUsed, factorCollection, nBestSize, nBestFilePath)
 ,m_inputFilePath(inputFilePath)
 ,m_inputFile(inputFilePath)
 {
@@ -50,13 +51,13 @@ IOFile::IOFile(const std::vector<FactorType>	&factorOrder
 
 InputType* IOFile::GetInput(InputType* in)
 {
-	return InputOutput::GetInput(in,m_inputFile, m_factorOrder, m_factorCollection);
+	return InputOutput::GetInput(in,m_inputFile, m_inputFactorOrder, m_factorCollection);
 }
 
 void IOFile::GetInputPhrase(std::list<Phrase> &inputPhraseList)
 {
 	ifstream inputFile(m_inputFilePath.c_str());
-	while(Sentence *sentence=dynamic_cast<Sentence*>(InputOutput::GetInput(new Sentence(Input),inputFile, m_factorOrder, m_factorCollection)))
+	while(Sentence *sentence=dynamic_cast<Sentence*>(InputOutput::GetInput(new Sentence(Input),inputFile, m_inputFactorOrder, m_factorCollection)))
 		{
 			inputPhraseList.push_back(*sentence);
 			Release(sentence);
