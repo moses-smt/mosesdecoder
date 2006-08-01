@@ -3,6 +3,8 @@
 #######################
 # Revision history
 #
+# 01 Aug 2006 fix bug about inputfile parameter
+#             fix bug about suffix index generation
 # 31 Jul 2006 added parameter for reading queue parameters
 # 29 Jul 2006 added code to handling consfusion networks
 # 28 Jul 2006 added a better policy for removing jobs from the queue in case of killing signal (CTRL-C)
@@ -19,7 +21,7 @@
 $queueparameters="-l ws06ossmt=true -l mem_free=0.5G -hard";
 
 $workingdir=$ENV{PWD};
-$tmpdir="/tmp";
+$tmpdir="$workingdir/tmp$$";
 $splitpfx="split$$";
 
 $SIG{'INT'} = kill_all_and_quit; # catch exception for CTRL-C
@@ -51,8 +53,7 @@ sub init(){
 	     'debug'=>\$dbg,
 	     'jobs=i'=>\$jobs,
 	     'decoder=s'=> \$mosescmd,
-	     'inputfile=s'=> \$orifile,
-	     'input-file=s'=> \$orifile,
+	     'i|inputfile|input-file=s'=> \$orifile,
 	     'n-best-file=s'=> \$orinbestfile,
 	     'n-best-size=i'=> \$nbest,
 	     'qsub-prefix=s'=> \$qsubname,
@@ -83,7 +84,8 @@ sub version(){
 #   print STDERR "version 1.5 (27-07-2006)\n";
 #    print STDERR "version 1.6 (28-07-2006)\n";
 #    print STDERR "version 1.7 (29-07-2006)\n";
-    print STDERR "version 1.8 (31-07-2006)\n";
+#    print STDERR "version 1.8 (31-07-2006)\n";
+    print STDERR "version 1.9 (01-08-2006)\n";
     exit(1);
 }
 
@@ -95,18 +97,20 @@ sub usage(){
   print STDERR "-jobs <N> number of required jobs\n";
   print STDERR "-qsub-prefix <string> name for sumbitte jobs\n";
   print STDERR "-queue-parameters <string> specific requirements for queue\n";
-  print STDERR "-inputtype <0|1> 0 for text, 1 for confusion networks\n";
   print STDERR "-debug debug\n";
   print STDERR "-version print version of the script\n";
   print STDERR "-help this help\n";
   print STDERR "Moses options:\n";
+  print STDERR "-inputtype <0|1> 0 for text, 1 for confusion networks\n";
   print STDERR "-config <cfgfile> configuration file\n";
   print STDERR "any other options are passed to Moses apart from the inputfile (-input-file)\n";
+  print STDERR " which is parsed to manage with splits\n";
   exit(1);
 }
 
 #printparameters
 sub print_parameters(){
+  print STDERR "Inputfile: $orifile\n";
   print STDERR "Configuration file: $cfgfile\n";
   print STDERR "Decoder in use: $mosescmd\n";
   if ($nbestflag) {
@@ -149,7 +153,7 @@ sub preparing_script(){
     $scriptheader.="export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$ENV{BOOSTLIB}\n\n";
     $scriptheader.="cd $workingdir\n\n";
     
-    open (OUT, "> ${jobscript}.${idx}.bash");
+    open (OUT, "> ${jobscript}${idx}.bash");
     print OUT $scriptheader;
     if ($nbestflag){
       chomp($nbestfile=`basename $orinbestfile`);
@@ -241,7 +245,7 @@ if ($inputtype==0){ #text input
     print STDERR "There are at most $splitN sentences per job\n";
   }
 
-  $cmd="split $decimal -a 2 -l $splitN $orifile ${testfile}.$splitpfx";
+  $cmd="split $decimal -a 2 -l $splitN $orifile ${testfile}.$splitpfx-";
   safesystem("$cmd") or die;
 }
 else{ #confusion network input
@@ -269,16 +273,18 @@ else{ #confusion network input
  
   my @idxlist=();
   chomp(@idxlist=`ls $tmpfile-*`);
-  grep(s/$tmpfile\-//e,@idxlist);
+  grep(s/.+(\-\S+)$/$1/e,@idxlist);
 
   foreach $idx (@idxlist){
     $cmd="perl -pe 's/ _CNendline_ /\\n/g;s/ _CNendline_/\\n/g;'";
-    safesystem("cat $tmpfile-$idx | $cmd > ${testfile}.$splitpfx$idx ; rm $tmpfile-$idx;");
+    safesystem("cat $tmpfile$idx | $cmd > ${testfile}.$splitpfx$idx ; rm $tmpfile$idx;");
   }
 }
 
-chomp(@idxlist=`ls ${testfile}.$splitpfx*`);
-grep(s/${testfile}.$splitpfx//e,@idxlist);
+chomp(@idxlist=`ls ${testfile}.$splitpfx-*`);
+grep(s/.+(\-\S+)$/$1/e,@idxlist);
+
+safesystem("mkdir -p $tmpdir") or die;
 
 preparing_script();
 
@@ -287,14 +293,14 @@ my @sgepids =();
 
 $failure=0;
 foreach $idx (@idxlist){
-  print STDERR "qsub $queueparameters -b no -j yes -o $qsubout.$idx -e $qsuberr.$idx -N $qsubname.$idx ${jobscript}.${idx}.bash\n" if $dbg; 
+  print STDERR "qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash\n" if $dbg; 
 
-  $cmd="qsub $queueparameters -b no -j yes -o $qsubout.$idx -e $qsuberr.$idx -N $qsubname.$idx ${jobscript}.${idx}.bash >& ${jobscript}.${idx}.log";
+  $cmd="qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
 
 
   safesystem($cmd) or die;
 
-  open (IN,"${jobscript}.${idx}.log");
+  open (IN,"${jobscript}${idx}.log");
   chomp($res=<IN>);
   split(/\s+/,$res);
   $id=$_[2];
@@ -327,7 +333,7 @@ sub check_exit_status(){
   my $failure=0;
   foreach $idx (@idxlist){
     print STDERR "check_exit_status of job $idx\n";
-    open(IN,"$qsubout.$idx");
+    open(IN,"$qsubout$idx");
     while (<IN>){
       $failure=1 if (/exit status 1/);
     }
@@ -353,17 +359,20 @@ sub kill_all_and_quit(){
 
 sub check_translation(){
   #checking if all sentences were translated
-  if ($inputtype==0){#text input
-    foreach $idx (@idxlist){
+  foreach $idx (@idxlist){
+    if ($inputtype==0){#text input
       chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
-      chomp($outputN=`wc -l ${testfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
+    }
+    else{
+      chomp($inputN=`cat ${testfile}.$splitpfx$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l | cut -d' ' -f1 `);
+    }
+    chomp($outputN=`wc -l ${testfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
     
-      if ($inputN != $outputN){
-        print STDERR "Split ($idx) were not entirely translated\n";
-        print STDERR "outputN=$outputN inputN=$inputN\n";
-        print STDERR "outputfile=${testfile}.$splitpfx$idx.trans inputfile=${testfile}.$splitpfx$idx\n";
-        exit(1);
-      }
+    if ($inputN != $outputN){
+      print STDERR "Split ($idx) were not entirely translated\n";
+      print STDERR "outputN=$outputN inputN=$inputN\n";
+      print STDERR "outputfile=${testfile}.$splitpfx$idx.trans inputfile=${testfile}.$splitpfx$idx\n";
+      exit(1);
     }
   }
 }
@@ -374,11 +383,11 @@ sub remove_temporary_files(){
     unlink("${testfile}.${splitpfx}${idx}.trans");
     unlink("${testfile}.${splitpfx}${idx}");
     if ($nbestflag){      unlink("${nbestfile}.${splitpfx}${idx}");     }
-    unlink("${jobscript}.${idx}.bash");
-    unlink("${jobscript}.${idx}.log");
+    unlink("${jobscript}${idx}.bash");
+    unlink("${jobscript}${idx}.log");
     unlink("$qsubname.W.log");
-    unlink("$qsubout.$idx");
-    unlink("$qsuberr.$idx");
+    unlink("$qsubout$idx");
+    unlink("$qsuberr$idx");
   }
 }
 
