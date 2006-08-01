@@ -48,14 +48,12 @@ LanguageModel_IRST::~LanguageModel_IRST()
 }
 
 
-void LanguageModel_IRST::Load(size_t id
-												, const std::string &fileName
+void LanguageModel_IRST::Load(const std::string &fileName
 												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
 												, size_t nGramOrder)
 {
-	m_id					 = id;
 	m_factorType 	 = factorType;
 	m_weight			 = weight;
 	m_nGramOrder	 = nGramOrder;
