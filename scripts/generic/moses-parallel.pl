@@ -60,6 +60,8 @@ sub init(){
 	     'inputtype=i'=> \$inputtype,
              'config=s'=>\$cfgfile
 	    );
+
+  print STDERR "queueparameters: $queueparameters\n";
   
   $mosesparameters="@ARGV -config $cfgfile -inputtype $inputtype";
   getNbestParameters();

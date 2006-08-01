@@ -72,9 +72,8 @@ my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
 my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
-my $___PARALLELIZER = undef;  # pathname to script that runs moses in parallel (default: run normal serial moses)
-my $___PARALLELIZER_FLAGS = "";  # extra parameters for parallelizer
-my $___JOBS = 10; # if parallel, number of jobs to use
+my $queue_flags = "";  # extra parameters for parallelizer
+my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $___LAMBDA = undef; # string specifying the seed weights and boundaries of all lambdas
 my $___START_STEP = undef;  # which iteration step to start with
@@ -107,8 +106,7 @@ GetOptions(
   "decoder=s" => \$___DECODER,
   "config=s" => \$___CONFIG,
   "nbest=i" => \$___N_BEST_LIST_SIZE,
-  "parallelizer=s" => \$___PARALLELIZER,
-  "parallelizer-flags=s" => \$___PARALLELIZER_FLAGS,
+  "queue-flags=s" => \$queue_flags,
   "jobs=i" => \$___JOBS,
   "decoder-flags=s" => \$___DECODER_FLAGS,
   "lambdas=s" => \$___LAMBDA,
@@ -140,9 +138,9 @@ if ($usage || !defined $___DEV_F || !defined$___DEV_E || !defined$___DECODER || 
 Options:
   --working-dir=mert-dir ... where all the files are created
   --nbest=100 ... how big nbestlist to generate
-  --parallelizer=script  ... optional path to moses-parallel.perl
-  --parallelizer-flags=STRING  ... anything you with to pass to 
-              parallelizer, eg. '-qsub-prefix logname'
+  --jobs=N  ... optional path to moses-parallel.perl
+  --queue-flags=STRING  ... anything you with to pass to 
+              qsub, eg. '-l ws06osssmt=true'
   --decoder-flags=STRING ... extra parameters for the decoder
   --lambdas=STRING  ... default values and ranges for lambdas, a complex string
          such as 'd:1,0.5-1.5 lm:1,0.5-1.5 tm:0.3,0.25-0.75;0.2,0.25-0.75;0.2,0.25-0.75;0.3,0.25-0.75;0,-0.5-0.5 w:0,-0.5-0.5'
@@ -178,8 +176,9 @@ print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 # path of script for filtering phrase tables and running the decoder
 $filtercmd="$SCRIPTS_ROOTDIR/training/filter-model-given-input.pl" if !defined $filtercmd;
 
-$qsubwrapper="$SCRIPTS_ROOTDIR/training/qsub-wrapper.pl" if !defined $qsubwrapper;
+$qsubwrapper="$SCRIPTS_ROOTDIR/generic/qsub-wrapper.pl" if !defined $qsubwrapper;
 
+my $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl";
 
 $cmertdir = "$SCRIPTS_ROOTDIR/extra/cmert-0.5" if !defined $cmertdir;
 my $cmertcmd="$cmertdir/mert";
@@ -193,6 +192,8 @@ $ENV{PYTHONPATH} = $pythonpath; # other scripts need to know
 
 die "Not executable: $filtercmd" if ! -x $filtercmd;
 die "Not executable: $cmertcmd" if ! -x $cmertcmd;
+die "Not executable: $moses_parallel_cmd" if defined $___JOBS && ! -x $moses_parallel_cmd;
+die "Not executable: $qsubwrapper" if defined $___JOBS && ! -x $qsubwrapper;
 die "Not a dir: $pythonpath" if ! -d $pythonpath;
 die "Not executable: $___DECODER" if ! -x $___DECODER;
 
@@ -348,6 +349,9 @@ if (defined $___START_STEP) {
 my $cwd = `pwd`; chop($cwd);
 safesystem("mkdir -p $___WORKING_DIR") or die "Can't mkdir $___WORKING_DIR";
 
+{
+# open local scope
+
 #chdir to the working directory
 chdir($___WORKING_DIR) or die "Can't chdir to $___WORKING_DIR";
 
@@ -371,14 +375,19 @@ close(RANGES);
 # filter the phrase tables, use --decoder-flags
 print "filtering the phrase tables... ".`date`;
 my $cmd = "$filtercmd ./filtered $___CONFIG $___DEV_F";
-safesystem("$qsubwrapper -command='$cmd'") or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
+if (defined $___JOBS) {
+  safesystem("$qsubwrapper -command='$cmd'") or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
+} else {
+  safesystem($cmd) or die "Failed to filter the tables.";
+}
 
 
 # the decoder should now use the filtered model
 my $PARAMETERS;
 $PARAMETERS = $___DECODER_FLAGS . " -config filtered/moses.ini";
 
-my $devbleu;
+my $devbleu = undef;
+my $bestpoint = undef;
 my $run=$start_run-1;
 my $prev_size = -1;
 while(1) {
@@ -404,7 +413,7 @@ while(1) {
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
       print "About to start decoder with LAMBDAS: @LAMBDA\n";
-      run_decoder(\@LAMBDA);
+      run_decoder(\@LAMBDA, $PARAMETERS, $run);
       safesystem("gzip -f run*out") or die "Failed to gzip run*out";
   }
   else {
@@ -424,7 +433,11 @@ while(1) {
 
   print STDERR "Scoring the nbestlist.\n";
   my $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_REF_LEN ".join(" ", @references)." ./";
-  safesystem("$qsubwrapper -command='$cmd'") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
+  if (defined $___JOBS) {
+    safesystem("$qsubwrapper -command='$cmd'") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
+  } else {
+    safesystem($cmd) or die "Failed to score nbestlist";
+  }
 
 
   print STDERR "Hoping that scoring succeeded. Don't know how to check for it! XXX.\n";
@@ -460,10 +473,14 @@ while(1) {
   $cmd="$cmertcmd -d $DIM";
  
   print STDERR "Starting cmert.\n";
-  safesystem("$qsubwrapper -command='$cmd' -stderr=cmert.log") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
+  if (defined $___JOBS) {
+    safesystem("$qsubwrapper -command='$cmd' -stderr=cmert.log") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
+  } else {
+    safesystem("$cmd 2> cmert.log") or die "Failed to run cmert";
+  }
 
-  my $bestpoint = undef;
-  my $devbleu = undef;
+  $bestpoint = undef;
+  $devbleu = undef;
   open(IN,"cmert.log") or die "Can't open cmert.log";
   while (<IN>) {
     if (/(Best point: [\s\d\.\-]+ => )([\d\.]+)/) {
@@ -498,21 +515,23 @@ create_config($___CONFIG, "./moses.ini", \@LAMBDA, \@NAME, $run, $devbleu);
 #chdir back to the original directory # useless, just to remind we were not there
 chdir($cwd);
 
+} # end of local scope
+
 sub run_decoder {
-    my ($LAMBDA) = @_;
+    my ($lambdas, $parameters, $run) = @_;
     my $filename_template = "run%d.best$___N_BEST_LIST_SIZE.out";
     my $filename = sprintf($filename_template, $run);
     
-    print "params = $PARAMETERS\n";
-    my $decoder_config = sprintf($decoder_config,@{$LAMBDA});
+    print "params = $parameters\n";
+    my $decoder_config = sprintf($decoder_config,@$lambdas);
     print "decoder_config = $decoder_config\n";
 
     # run the decoder
     my $decoder_cmd;
-    if (defined $___PARALLELIZER) {
-      $decoder_cmd = "$___PARALLELIZER $___PARALLELIZER_FLAGS $PARAMETERS $decoder_config -n-best-file $filename -n-best-size $___N_BEST_LIST_SIZE -i $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+    if (defined $___JOBS) {
+      $decoder_cmd = "$moses_parallel_cmd -qsub-prefix mert$run -queue-parameters \"$queue_flags\" $parameters $decoder_config -n-best-file $filename -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      $decoder_cmd = "$___DECODER $PARAMETERS $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $parameters $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
     }
 
     safesystem($decoder_cmd) or die "The decoder died.";
@@ -525,8 +544,8 @@ sub create_config {
     my @lambdas = @$lambdas; # my own copy of the array
     my $names = shift; # the names of the lambdas
     my @names = @$names; # my own copy of the array
-    my $run = shift;  # just for verbosity
-    my $devbleu = shift; # just for verbosity
+    my $iteration = shift;  # just for verbosity
+    my $bleu_achieved = shift; # just for verbosity
 
     my %P; # the hash of all parameters we wish to override
 
@@ -566,12 +585,12 @@ sub create_config {
     # create new moses.ini decoder config file by cloning and overriding the original one
     open(INI,$infn) or die "Can't read $infn";
     delete($P{"config"}); # never output 
-    print "Saving new config to: $outfn";
+    print "Saving new config to: $outfn\n";
     open(OUT,"> $outfn") or die "Can't write $outfn";
     print OUT "# MERT optimized configuration\n";
     print OUT "# decoder $___DECODER\n";
-    print OUT "# BLEU $devbleu on dev $___DEV_F\n";
-    print OUT "# $run iterations\n";
+    print OUT "# BLEU $bleu_achieved on dev $___DEV_F\n";
+    print OUT "# $iteration iterations\n";
     print OUT "# finished ".`date`;
     my $line = <INI>;
     while(1) {
