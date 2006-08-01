@@ -107,7 +107,7 @@ void LanguageModel_Internal::Load(size_t id
 	}
 }
 
-float LanguageModel_Internal::GetValue(const std::vector<const Factor*> &contextFactor) const
+float LanguageModel_Internal::GetValue(const std::vector<const Factor*> &contextFactor, State* finalState) const
 {
 	float score;
 	size_t nGramOrder = contextFactor.size();
@@ -119,6 +119,10 @@ float LanguageModel_Internal::GetValue(const std::vector<const Factor*> &context
 		score = GetValue(contextFactor[0], contextFactor[1]);
 	else if (nGramOrder == 3)
 		score = GetValue(contextFactor[0], contextFactor[1], contextFactor[2]);
+
+	if (finalState) {
+		assert(!"LM state functionality needs to be implemented!");
+	}
 
 	return FloorSRIScore(score);
 }

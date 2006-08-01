@@ -42,6 +42,8 @@ protected:
 	LmId				m_unknownId;
 	std::string	m_filename;
 public:
+  typedef const void* State;
+  static State UnknownState;
 
 	static const LmId UNKNOWN_LM_ID;
 
@@ -92,7 +94,9 @@ public:
 		return m_id;
 	}
 	virtual const std::string GetScoreProducerDescription() const;
-	virtual float GetValue(const std::vector<const Factor*> &contextFactor) const = 0;
+	virtual float GetValue(const std::vector<const Factor*> &contextFactor, State* finalState = 0) const = 0;
+
+	LanguageModel::State GetState(const std::vector<const Factor*> &contextFactor) const;
 
   // one of the following should probably be made available
   // virtual LmId GetLmID( const Factor *factor )  const = 0;

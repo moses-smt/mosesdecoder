@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "TypeDef.h"
 #include "Util.h"
+#include "hash.h"
 
 class FactorCollection;
 
@@ -65,6 +66,14 @@ protected:
 	}
 
 public:
+	inline size_t hash() const
+	{
+		size_t h=quick_hash((const char*)&m_direction, sizeof(FactorDirection), 0xc7e7f2fd);
+		h=quick_hash((const char*)&m_factorType, sizeof(FactorType), h);
+		h=quick_hash((const char*)&m_ptrString, sizeof(const std::string *), h);
+		return h;
+	}
+
 	inline FactorDirection GetFactorDirection() const
 	{
 		return m_direction;
@@ -106,6 +115,11 @@ public:
 	inline bool operator<(const Factor &compare) const
 	{ 
 		return Compare(compare) < 0;
+	}
+
+	inline bool operator==(const Factor &compare) const
+	{ 
+		return Compare(compare) == 0;
 	}
 	
 	TO_STRING;
