@@ -40,9 +40,9 @@ unsigned int Hypothesis::s_numNodes = 0;
 unsigned int Hypothesis::s_HypothesesCreated = 0;
 
 
-Hypothesis::Hypothesis(InputType const& source)
+Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)
-	, m_targetPhrase(Output)
+	, m_targetPhrase(emptyTarget)
 	, m_sourceCompleted(source.GetSize())
 	, m_sourceInput(source)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
@@ -144,9 +144,9 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */
 
-Hypothesis* Hypothesis::Create(InputType const& m_source)
+Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &emptyTarget)
 {
-	return new Hypothesis(m_source);
+	return new Hypothesis(m_source, emptyTarget);
 }
 
 bool Hypothesis::IsCompatible(const Phrase &phrase) const
