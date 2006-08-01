@@ -40,7 +40,6 @@ protected:
 	std::map<Word , OutputWordCollection> m_collection;
 	// 1st = source
 	// 2nd = target
-	OutputWordCollection	m_unknownWord;
 	float									m_weight;
 	std::string						m_filename;
 

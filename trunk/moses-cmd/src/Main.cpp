@@ -163,8 +163,9 @@ int main(int argc, char* argv[])
 InputOutput *GetInputOutput(StaticData &staticData)
 {
 	InputOutput *inputOutput;
-	const std::vector<FactorType> &factorOrder = staticData.GetInputFactorOrder();
-	FactorTypeSet inputFactorUsed(factorOrder);
+	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
+																,&outputFactorOrder = staticData.GetOutputFactorOrder();
+	FactorTypeSet inputFactorUsed(inputFactorOrder);
 
 	// io
 	if (staticData.GetIOMethod() == IOMethodMySQL)
@@ -174,7 +175,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 		const PARAM_VEC &mySQLParam = staticData.GetParam("mysql");
 		inputOutput = new IOMySQL(mySQLParam[0], mySQLParam[1], mySQLParam[2], mySQLParam[3]
 														, Scan<long>(mySQLParam[4]), Scan<long>(mySQLParam[5])
-														, factorOrder, inputFactorUsed, staticData.GetFactorCollection());
+														, inputFactorOrder, inputFactorUsed, staticData.GetFactorCollection());
 		staticData.LoadPhraseTables();
 #else
 		TRACE_ERR( "moses was not built with mysql libraries, please configure\n"
@@ -190,7 +191,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 		string filePath = staticData.GetParam("input-file")[0];
 
 		TRACE_ERR("About to create ioFile" << endl);
-		IOFile *ioFile = new IOFile(factorOrder, inputFactorUsed
+		IOFile *ioFile = new IOFile(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath()
@@ -214,7 +215,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 	else
 	{
 		TRACE_ERR("IO from STDOUT/STDIN" << endl);
-		inputOutput = new IOCommandLine(factorOrder, inputFactorUsed
+		inputOutput = new IOCommandLine(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath());

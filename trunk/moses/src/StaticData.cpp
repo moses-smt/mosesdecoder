@@ -130,11 +130,22 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_inputFactorOrder.push_back(Scan<FactorType>(inputFactorVector[i]));
 	}
 	if(m_inputFactorOrder.empty())
-		{
-			std::cerr<<"ERROR: no input factor specified in config file"
-				" (param input-factors) -> abort!\n";
-			abort();
-		}
+	{
+		std::cerr<<"ERROR: no input factor specified in config file"
+			" (param input-factors) -> abort!\n";
+		abort();
+	}
+
+	//output-factors
+	const vector<string> &outputFactorVector = m_parameter.GetParam("output-factors");
+	for(size_t i=0; i<outputFactorVector.size(); i++) 
+	{
+		m_outputFactorOrder.push_back(Scan<FactorType>(outputFactorVector[i]));
+	}
+	if(m_outputFactorOrder.empty())
+	{ // default. output factor 0
+		m_outputFactorOrder.push_back(0);
+	}
 
 	//source word deletion
 	if(m_parameter.GetParam("phrase-drop-allowed").size() > 0)

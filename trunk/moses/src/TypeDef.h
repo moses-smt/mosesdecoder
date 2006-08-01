@@ -83,14 +83,6 @@ union LmId {
 // can only be 2 at the moment
 const int NUM_LANGUAGES = 2;
 
-enum FactorType
-{
-	Surface				= 0
-	,POS					= 1
-	,Stem					= 2
-	,Morphology		= 3
-};
-
 // count of above
 const size_t NUM_FACTORS = 4;
 
@@ -140,5 +132,7 @@ enum IOMethod
 };
 
 // typedef
+typedef size_t FactorType;
+
 class Factor;
 typedef const Factor * FactorArray[NUM_FACTORS];

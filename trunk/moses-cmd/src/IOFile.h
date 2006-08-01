@@ -46,7 +46,8 @@ protected:
 	std::string			m_inputFilePath;
 	InputFileStream	m_inputFile;
 public:
-	IOFile(const std::vector<FactorType>	&factorOrder
+	IOFile(const std::vector<FactorType>	&inputFactorOrder
+				, const std::vector<FactorType>	&outputFactorOrder
 				, const FactorTypeSet						&inputFactorUsed
 				, FactorCollection							&factorCollection
 				, size_t												nBestSize

@@ -86,21 +86,6 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 		m_collection[inputWord][outputWord] = score;					
 	}
 	inFile.Close();
-
-	// ??? temporary solution for unknown words
-	// always assume it POS tags
-	Word outputWord, word2, word3;
-	const Factor *factor = factorCollection.AddFactor( Output, POS, "NNP");
-	outputWord.SetFactor(POS, factor);
-	m_unknownWord[outputWord] = 0.25f;
-
-	factor = factorCollection.AddFactor( Output, POS, "NN");
-	word2.SetFactor(POS, factor);
-	m_unknownWord[word2] = 0.25f;
-
-	factor = factorCollection.AddFactor( Output, POS, UNKNOWN_FACTOR);
-	word3.SetFactor(POS, factor);
-	m_unknownWord[word3] = 0.5f;
 }
 
 GenerationDictionary::~GenerationDictionary()
