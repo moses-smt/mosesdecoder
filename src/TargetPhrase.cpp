@@ -64,6 +64,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 		
 		if (GetSize() > 0 && GetFactor(0, lmFactorType) != NULL)
 		{ // contains factors used by this LM
+			TRACE_ERR(*GetFactor(0, lmFactorType) << endl);
 			const float weightLM = lm.GetWeight();
 			float fullScore, nGramScore;
 
