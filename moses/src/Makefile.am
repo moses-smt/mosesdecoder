@@ -22,6 +22,7 @@ libmoses_a_SOURCES = \
 	LexicalReordering.cpp \
 	Manager.cpp \
 	md5.cpp \
+	mempool.cpp \
 	Parameter.cpp \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
