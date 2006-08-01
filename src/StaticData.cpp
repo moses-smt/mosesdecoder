@@ -55,6 +55,7 @@ StaticData::StaticData()
 ,m_numInputScores(0)
 ,m_distortionScoreProducer(0)
 ,m_wpProducer(0)
+,m_useDistortionFutureCosts(0) 
 {
 	s_instance = this;
 
@@ -326,6 +327,8 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	m_maxDistortion = (m_parameter.GetParam("distortion-limit").size() > 0) ?
 		Scan<int>(m_parameter.GetParam("distortion-limit")[0])
 		: -1;
+	m_useDistortionFutureCosts = (m_parameter.GetParam("use-distortion-future-costs").size() > 0) 
+		? Scan<int>(m_parameter.GetParam("use-distortion-future-costs")[0]) : 0;
 	m_beamThreshold = (m_parameter.GetParam("beam-threshold").size() > 0) ?
 		TransformScore(Scan<float>(m_parameter.GetParam("beam-threshold")[0]))
 		: TransformScore(DEFAULT_BEAM_THRESHOLD);
@@ -343,22 +346,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	TRACE_ERR("m_dropUnknown: " << m_dropUnknown << endl);
 
-
-
-#if 0
-	// weight for the posteriors for the confusion network
-	if(m_parameter.GetParam("weight-i").size())
-		{
-			m_weightInput=Scan<float>(m_parameter.GetParam("weight-i")[0]);
-			if(m_parameter.GetParam("weight-i").size()>1)
-				m_weightRealSourceWords=Scan<float>(m_parameter.GetParam("weight-i")[1]);
-		}
-	if(m_inputType)
-		TRACE_ERR("input weight is "<<m_weightInput<<" realWords: "<<m_weightRealSourceWords<<"\n");
-#endif
-
 	return true;
-  
 }
 
 StaticData::~StaticData()

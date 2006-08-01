@@ -98,6 +98,8 @@ protected:
 	bool m_reportAllFactors;
 
 	mutable SentenceStats m_sentenceStats;
+	
+	int m_useDistortionFutureCosts;
 
   //! Sets the global score vector weights for a given ScoreProducer.
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
@@ -289,5 +291,7 @@ public:
 	}
 	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
+
+	bool UseDistortionFutureCosts() const {return m_useDistortionFutureCosts;}
 };
 
