@@ -25,8 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <set>
 #include "Hypothesis.h"
 
-#if 0
-//#ifdef __GNUG__
+#ifdef __GNUG__
 #include <ext/hash_set>
 #endif
 
@@ -71,6 +70,7 @@ public:
 
 struct HypothesisRecombinationComparer
 {
+	//! returns true if hypoA can be recombined with hypoB
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
 	{
 		if (hypoA->NGramCompare(*hypoB) != 0) return false;

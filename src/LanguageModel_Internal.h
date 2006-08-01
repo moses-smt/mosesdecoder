@@ -47,7 +47,7 @@ public:
 	
 #define Vocab_None NULL;
 
-  virtual float GetValue(const std::vector<const Factor*> &contextFactor) const;
+  virtual float GetValue(const std::vector<const Factor*> &contextFactor, State* finalState = 0) const;
 
 protected:
 	NGramCollection m_map;

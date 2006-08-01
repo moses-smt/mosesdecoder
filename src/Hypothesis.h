@@ -40,7 +40,6 @@ class SquareMatrix;
 class StaticData;
 class TranslationOption;
 class WordsRange;
-class WordDeletionTable;
 class Hypothesis;
 
 typedef std::vector<Hypothesis*> ArcList;
@@ -65,7 +64,8 @@ protected:
   bool							m_wordDeleted;
 	float							m_totalScore;
 	float							m_futureScore;
-	ScoreComponentCollection2 m_scoreBreakdown;	
+	ScoreComponentCollection2 m_scoreBreakdown;
+	std::vector<LanguageModel::State> m_languageModelStates;
 #ifdef N_BEST
 	const Hypothesis 	*m_mainHypo;
 	ArcList 					*m_arcList; //all arcs that end at the same lattice point as we do
@@ -81,8 +81,6 @@ protected:
 	void CalcLMScore(const LMList &languageModels);
 	void CalcDistortionScore();
 	//TODO: add appropriate arguments to score calculator
-
-  void CalcDeletionScore(const Sentence& sourceSentence, const WordsRange& sourceWordsRange, const WordDeletionTable& wordDeletionTable);
 
 	void GenerateNGramCompareHash() const;
 	mutable size_t _hash;
@@ -213,38 +211,14 @@ public:
 		return m_sourceCompleted;
 	}
 
+	int Hypothesis::NGramCompare(const Hypothesis &compare) const;
+
 	inline size_t hash() const
 	{
 		if (_hash_computed) return _hash;
 		GenerateNGramCompareHash();
 		return _hash;
 	}
-
-  /***
-   * requires that GenerateNGramCompareKey was previously run
-   */
-	int	FastNGramCompare(const Hypothesis &compare) const
-	{
-#if 0
-		return memcmp(this->m_compSignature, compare.m_compSignature, sizeof(m_compSignature));
-#else
-		return NGramCompare(compare);
-#endif
-	}
-
-	int	 NGramCompare(const Hypothesis &compare) const;
-
-  /*** Generates a key in m_compSignature that can be used
-   *   for an arbitrary ordering of hypotheses.
-   *
-   * With this key, hypotheses that have identical target
-   * strings for the last n elements are considered equal.
-   *
-   * Currently not used since performance is approximately
-   * identical to the regular comparison engine.  This may
-   * be a better option with higher n-gram LMs.
-   */
-  void GenerateNGramCompareKey(size_t n);
 
 	void ToStream(std::ostream& out) const
 	{

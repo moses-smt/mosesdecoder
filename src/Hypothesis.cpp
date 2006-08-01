@@ -48,6 +48,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
+	, m_languageModelStates(StaticData::Instance()->GetLMSize(), LanguageModel::UnknownState)
 #ifdef N_BEST
 	, m_arcList(NULL)
 #endif
@@ -69,14 +70,15 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
 	, m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
 														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
+	, m_wordDeleted(false)
 	,	m_totalScore(0.0f)
 	,	m_futureScore(0.0f)
-	, m_wordDeleted(false)
-	, m_id(s_HypothesesCreated++)
 	, m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
+	, m_languageModelStates(prevHypo.m_languageModelStates)
 #ifdef N_BEST
 	, m_arcList(NULL)
 #endif
+	, m_id(s_HypothesesCreated++)
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -219,62 +221,18 @@ void Hypothesis::GenerateNGramCompareKey(size_t contextSize)
 
 void Hypothesis::GenerateNGramCompareHash() const
 {
-	_hash = 0xcafe5137;						// random
-	const size_t thisSize			= GetSize();
-
-	for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
-	{
-		size_t ngramMax = StaticData::Instance()->GetMaxNGramOrderForFactorId(currFactor);
-		if (ngramMax < 2) continue;  // unigrams have no context
-
-		const size_t minSize		= std::min(ngramMax-1, thisSize);
-		_hash = quick_hash((const char*)&minSize, sizeof(size_t), _hash);
-
-		for (size_t currNGram = 1 ; currNGram <= minSize ; currNGram++)
-		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-			const Factor *thisFactor 		= GetFactor(thisSize - currNGram, factorType);
-			_hash = quick_hash((const char*)&thisFactor, sizeof(const Factor*), _hash);
-		}
-	}
+	_hash = quick_hash((const char*)&m_languageModelStates[0], sizeof(LanguageModel::State) * m_languageModelStates.size(), 0xcafe5137);
+	_hash_computed = true;
 	vector<size_t> wordCoverage = m_sourceCompleted.GetCompressedReprentation();
 	_hash = quick_hash((const char*)&wordCoverage[0], sizeof(size_t)*wordCoverage.size(), _hash);
-	_hash_computed = true;
 }
 
 int Hypothesis::NGramCompare(const Hypothesis &compare) const
 { // -1 = this < compare
 	// +1 = this > compare
 	// 0	= this ==compare
-
-	const size_t thisSize			= GetSize();
-	const size_t compareSize	= compare.GetSize();
-
-	for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
-	{
-		size_t ngramMax = StaticData::Instance()->GetMaxNGramOrderForFactorId(currFactor);
-		if (ngramMax < 2) continue;  // unigrams have no context
-
-		const size_t minSize		= std::min(ngramMax-1, thisSize)
-					, minCompareSize	= std::min(ngramMax-1, compareSize);
-		if ( minSize != minCompareSize )
-		{ // quick decision
-			return (minSize < minCompareSize) ? -1 : 1;
-		}
-
-		for (size_t currNGram = 1 ; currNGram <= minSize ; currNGram++)
-		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-			const Factor *thisFactor 		= GetFactor(thisSize - currNGram, factorType)
-				,*compareFactor	= compare.GetFactor(compareSize - currNGram, factorType);
-			// just use address of factor
-			if (thisFactor < compareFactor)
-				return -1;
-			if (thisFactor > compareFactor)
-				return 1;
-		}
-	}
-	// identical
+	if (m_languageModelStates < compare.m_languageModelStates) return -1;
+	if (m_languageModelStates > compare.m_languageModelStates) return 1;
 	return 0;
 }
 /**
@@ -290,18 +248,21 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 {
 	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
 	LMList::const_iterator iterLM;
+	size_t lmIdx = 0;
 
 	// already have LM scores from previous and trigram score of poss trans.
 	// just need trigram score of the words of the start of current phrase	
-	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM)
+	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM,++lmIdx)
 	{
 		const LanguageModel &languageModel = **iterLM;
 		FactorType factorType = languageModel.GetFactorType();
 		size_t nGramOrder			= languageModel.GetNGramOrder();
+		size_t currEndPos			= m_currTargetWordsRange.GetEndPos();
 		float lmScore;
 
-		if(m_currTargetWordsRange.GetWordsCount() > 0) //non-empty target phrase
-		{
+		if(m_currTargetWordsRange.GetWordsCount() == 0) {
+			lmScore = 0; //the score associated with dropping source words is not part of the language model
+		} else { //non-empty target phrase
 			// 1st n-gram
 			vector<const Factor*> contextFactor(nGramOrder);
 			size_t index = 0;
@@ -317,7 +278,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 
 			// main loop
 			size_t endPos = std::min(startPos + nGramOrder - 2
-															, m_currTargetWordsRange.GetEndPos());
+															, currEndPos);
 			for (size_t currPos = startPos + 1 ; currPos <= endPos ; currPos++)
 			{
 				// shift all args down 1 place
@@ -326,7 +287,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 	
 				// add last factor
 				contextFactor.back() = GetFactor(currPos, factorType);
-	
+
 				lmScore	+= languageModel.GetValue(contextFactor);
 				//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;		
 			}
@@ -345,10 +306,16 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 					else
 						contextFactor[i] = GetFactor((size_t)currPos, factorType);
 				}
-				lmScore	+= languageModel.GetValue(contextFactor);
+				lmScore	+= languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx]);
+			} else {
+				for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
+					for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
+						contextFactor[i] = contextFactor[i + 1];
+					contextFactor.back() = GetFactor(currPos, factorType);
+				}
+				m_languageModelStates[lmIdx]=languageModel.GetState(contextFactor);
 			}
 		}
-		else lmScore = 0; //the score associated with dropping source words is not part of the language model
 		
 		m_scoreBreakdown.PlusEquals(&languageModel, lmScore);
 	}

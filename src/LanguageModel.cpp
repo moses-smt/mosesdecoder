@@ -37,6 +37,7 @@ using namespace std;
 
 // static variable init
 const LmId LanguageModel::UNKNOWN_LM_ID(-1);
+LanguageModel::State LanguageModel::UnknownState=0;
 
 LanguageModel::LanguageModel() : m_unknownId(0) {
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
@@ -114,3 +115,11 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	}
 	fullScore += ngramScore;	
 }
+
+LanguageModel::State LanguageModel::GetState(const std::vector<const Factor*> &contextFactor) const
+{
+  State state;
+  GetValue(contextFactor,&state);
+  return state;
+}
+

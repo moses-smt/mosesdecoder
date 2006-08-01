@@ -100,7 +100,7 @@ LmId LanguageModel_IRST::GetLmID( const std::string &str ) const
     return res;
 }
 
-float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor) const
+float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor, State* finalState) const
 {
 	// set up context
 	size_t count = contextFactor.size();
@@ -117,6 +117,9 @@ float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor) c
 #ifdef CDYER_DEBUG_LMSCORE
 	std::cout <<" (ng='" << ng << "')\n";
 #endif
+	if (finalState) {
+		assert("!LM State needs to be implemented!");
+	}
 	return TransformScore(m_lmtb->prob(ng));
 }
 

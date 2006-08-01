@@ -21,14 +21,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <set>
 #include <string>
 #include "Factor.h"
 
 class LanguageModel;
 
+#if 0
+#include <ext/hash_set>
+
+struct StringHasher {
+	__gnu_cxx::hash<const char*> hasher;
+  size_t operator()(const std::string& s) const { return hasher(s.c_str()); }
+};
+struct FactorHasher {
+  size_t operator()(const Factor& s) const { return s.hash(); }
+};
+
+typedef __gnu_cxx::hash_set<std::string, StringHasher> StringSet;
+typedef __gnu_cxx::hash_set<Factor, FactorHasher> FactorSet;
+#else
+#include <set>
 typedef std::set<Factor> FactorSet;
 typedef std::set<std::string> StringSet;
+#endif
 
 /** collects factors
  *
