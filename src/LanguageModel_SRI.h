@@ -25,27 +25,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Factor.h"
 #include "TypeDef.h"
-
+#include "Vocab.h"
 #include "LanguageModel.h"
 
 
 class FactorCollection;
 class Factor;
 class Phrase;
-
-#include "Vocab.h"
-class Vocab; // SRI forward decl
 class Ngram; // SRI forward decl
 
 class LanguageModel_SRI : public LanguageModel
 {
 protected:
+	std::map<const Factor*, VocabIndex> m_lmIdLookup;
 	Vocab *m_srilmVocab;
 	Ngram *m_srilmModel;
 
 	float GetValue(VocabIndex wordId, VocabIndex *context) const;
-
 	void CreateFactors(FactorCollection &factorCollection);
+	VocabIndex GetLmID( const std::string &str ) const;
+	VocabIndex GetLmID( const Factor *factor ) const;
+	
 public:
 	LanguageModel_SRI();
 	~LanguageModel_SRI();
@@ -54,8 +54,6 @@ public:
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder);
-
-	LmId GetLmID( const std::string &str ) const;
 
   virtual float GetValue(const std::vector<const Factor*> &contextFactor, State* finalState = 0) const;
 };
