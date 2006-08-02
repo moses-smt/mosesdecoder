@@ -38,8 +38,9 @@ class LanguageModel_SRI : public LanguageModel
 {
 protected:
 	std::map<const Factor*, VocabIndex> m_lmIdLookup;
-	Vocab *m_srilmVocab;
-	Ngram *m_srilmModel;
+	Vocab 			*m_srilmVocab;
+	Ngram 			*m_srilmModel;
+	VocabIndex	m_unknownId;
 
 	float GetValue(VocabIndex wordId, VocabIndex *context) const;
 	void CreateFactors(FactorCollection &factorCollection);

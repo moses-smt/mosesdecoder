@@ -39,7 +39,8 @@ using namespace std;
 const LmId LanguageModel::UNKNOWN_LM_ID(-1);
 LanguageModel::State LanguageModel::UnknownState=0;
 
-LanguageModel::LanguageModel() : m_unknownId(0) {
+LanguageModel::LanguageModel() 
+{
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
 }
 LanguageModel::~LanguageModel() {}
