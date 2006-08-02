@@ -36,10 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelFactory.h"
 #include "LexicalReordering.h"
 #include "SentenceStats.h"
-
-#ifndef WIN32
 #include "PhraseDictionaryTreeAdaptor.h"
-#endif
 
 using namespace std;
 
@@ -252,10 +249,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				TRACE_ERR("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filename'");
 				return false;
 			}
-			// type = whether or not to use in future cost calcs
-			
-			// factorType = (see TypeDef.h)
-			//   0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
+			// type = implementation, SRI, IRST etc
+			LMType lmType = static_cast<LMType>(Scan<int>(token[0]));
+			// factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
 			FactorType factorType = Scan<FactorType>(token[1]);
 			// nGramOrder = 2 = bigram, 3 = trigram, etc
 			size_t nGramOrder = Scan<int>(token[2]);
@@ -271,7 +267,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				m_maxNgramOrderForFactor[(size_t)factorType] = nGramOrder;
 			}
 			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
-      LanguageModel *lm = LanguageModelFactory::createLanguageModel();
+      LanguageModel *lm = LanguageModelFactory::createLanguageModel(lmType);
+      if (lm == NULL) // no LM created. we prob don't have it compiled
+      	return false;
 
 			// error handling here?
 			lm->Load(languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
