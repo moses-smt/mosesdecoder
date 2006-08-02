@@ -19,7 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "assert.h"
+#include <cassert>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -38,9 +38,33 @@ Phrase::Phrase(const Phrase &copy)
 ,m_arraySize(copy.m_arraySize)
 ,m_memPoolIndex(copy.m_memPoolIndex)
 {
+	assert(m_memPoolIndex<s_memPool.size() && s_memPool[m_memPoolIndex]);
 	m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->alloc();
 	memcpy(m_factorArray, copy.m_factorArray, m_phraseSize * sizeof(FactorArray));
 }
+
+Phrase& Phrase::operator=(const Phrase& x) 
+{
+	if(this!=&x)
+		{
+
+			if(m_factorArray)
+				{
+					assert(m_memPoolIndex<s_memPool.size());
+					s_memPool[m_memPoolIndex]->free((char*)m_factorArray);
+				}
+
+			m_direction=x.m_direction;
+			m_phraseSize=x.m_phraseSize;
+			m_arraySize=x.m_arraySize;
+			m_memPoolIndex=x.m_memPoolIndex;
+
+			m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->alloc();
+			memcpy(m_factorArray, x.m_factorArray, m_phraseSize * sizeof(FactorArray));
+		}
+	return *this;
+}
+
 
 Phrase::Phrase(FactorDirection direction)
 	: m_direction(direction)
@@ -48,6 +72,7 @@ Phrase::Phrase(FactorDirection direction)
 	, m_arraySize(ARRAY_SIZE_INCR)
 	, m_memPoolIndex(0)
 {
+	assert(m_memPoolIndex<s_memPool.size());
 	m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->alloc();
 }
 
@@ -74,7 +99,17 @@ Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWord
 
 Phrase::~Phrase()
 {
-	s_memPool[m_memPoolIndex]->free((char*)m_factorArray);
+	// RZ: 
+	// will segFault if Phrase was default constructed and AddWord was never called
+	// not sure if this is really the intended behaviour 
+	// assertion failure is better than segFault, but if(m_factorArray) might be more appropriate
+	//assert(m_factorArray); 
+	if(m_factorArray)
+		{
+			assert(m_memPoolIndex<s_memPool.size());
+			assert((char*)m_factorArray);
+			s_memPool[m_memPoolIndex]->free((char*)m_factorArray);
+		}
 }
 
 void Phrase::MergeFactors(const Phrase &copy)

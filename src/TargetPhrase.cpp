@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 TargetPhrase::TargetPhrase(FactorDirection direction)
-	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0)
+	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
 {
 }
 

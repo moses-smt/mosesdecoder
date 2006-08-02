@@ -40,9 +40,10 @@ protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 	ScoreComponentCollection2 m_scoreBreakdown;
 
+	// in case of confusion net, ptr to source phrase
+	Phrase const* m_sourcePhrase; 
 public:
-
-	TargetPhrase(FactorDirection direction);
+	TargetPhrase(FactorDirection direction=Output);
 
 	//! used by the unknown word handler- these targets
 	//! don't have a translation score, so wp is the only thing used
@@ -93,6 +94,15 @@ public:
 	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
+	}
+
+	void SetSourcePhrase(Phrase const* p) 
+	{
+		m_sourcePhrase=p;
+	}
+	Phrase const* GetSourcePhrase() const 
+	{
+		return m_sourcePhrase;
 	}
 
 	TO_STRING;
