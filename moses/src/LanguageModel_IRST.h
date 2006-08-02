@@ -38,8 +38,16 @@ class ngram;
 
 class LanguageModel_IRST : public LanguageModel
 {
+protected:
+	std::map<const Factor*, int> m_lmIdLookup;
+	lmtable* m_lmtb;
+
+//	float GetValue(LmId wordId, ngram *context) const;
+
+	void CreateFactors(FactorCollection &factorCollection);
+	int GetLmID( const std::string &str ) const;
+	int GetLmID( const Factor *factor ) const;
 public:
-	
 	LanguageModel_IRST();
 	~LanguageModel_IRST();
 	void Load(const std::string &fileName
@@ -48,14 +56,6 @@ public:
 					, float weight
 					, size_t nGramOrder);
 
-protected:
-	lmtable* m_lmtb;
-
-//	float GetValue(LmId wordId, ngram *context) const;
-
-	void CreateFactors(FactorCollection &factorCollection);
-public:
-	LmId GetLmID( const std::string &str ) const;
   virtual float GetValue(const std::vector<const Factor*> &contextFactor, State* finalState = 0) const;
 
 };
