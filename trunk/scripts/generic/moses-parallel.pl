@@ -92,17 +92,19 @@ sub version(){
 #usage
 sub usage(){
   print STDERR "moses-parallel.pl [parallel-options]  [moses-options]\n";
+  print STDERR "Options marked (*) are required.\n";
   print STDERR "Parallel options:\n";
-  print STDERR "-decoder <file> Moses decoder to use\n";
-  print STDERR "-jobs <N> number of required jobs\n";
-  print STDERR "-qsub-prefix <string> name for sumbitte jobs\n";
-  print STDERR "-queue-parameters <string> specific requirements for queue\n";
-  print STDERR "-debug debug\n";
-  print STDERR "-version print version of the script\n";
-  print STDERR "-help this help\n";
+  print STDERR "*  -decoder <file> Moses decoder to use\n";
+  print STDERR "   -inputfile <file>   the input text to translate\n";
+  print STDERR "*  -jobs <N> number of required jobs\n";
+  print STDERR "   -qsub-prefix <string> name for sumbitte jobs\n";
+  print STDERR "   -queue-parameters <string> specific requirements for queue\n";
+  print STDERR "   -debug debug\n";
+  print STDERR "   -version print version of the script\n";
+  print STDERR "   -help this help\n";
   print STDERR "Moses options:\n";
-  print STDERR "-inputtype <0|1> 0 for text, 1 for confusion networks\n";
-  print STDERR "-config <cfgfile> configuration file\n";
+  print STDERR "   -inputtype <0|1> 0 for text, 1 for confusion networks\n";
+  print STDERR "*  -config <cfgfile> configuration file\n";
   print STDERR "any other options are passed to Moses apart from the inputfile (-input-file)\n";
   print STDERR " which is parsed to manage with splits\n";
   exit(1);
@@ -204,6 +206,11 @@ sub concatenate_1best(){
 #Script starts here
 
 init();
+
+if (!defined $orifile || !defined $mosescmd || ! defined $cfgfile) {
+  print STDERR "Please specify -inputfile, -decoder and -config\n";
+  usage();
+}
 
 #checking if inputfile exists
 if (! -e ${orifile} ){
@@ -343,6 +350,7 @@ sub check_exit_status(){
 }
 
 sub kill_all_and_quit(){
+  print STDERR "Got interrupt or something failed.\n";
   print STDERR "kill_all_and_quit\n";
   foreach $id (@sgepids){
     print STDERR "qdel $id\n";
