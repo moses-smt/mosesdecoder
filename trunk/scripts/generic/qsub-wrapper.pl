@@ -9,7 +9,7 @@ use strict;
 my $queueparameters="-l ws06ossmt=true -l mem_free=0.5G";
 
 my $workingdir=$ENV{PWD};
-my $tmpdir="/tmp";
+my $tmpdir="$workingdir/tmp$$";
 my $jobscript="$workingdir/job$$";
 my $qsubout="$workingdir/out.job$$";
 my $qsuberr="$workingdir/err.job$$";
@@ -120,6 +120,8 @@ init();
 
 usage() if $cmd eq "";
 
+safesystem("mkdir -p $tmpdir") or die;
+
 preparing_script();
 
 my $qsubcmd="qsub $queueparameters -sync yes -o $qsubout -e $qsuberr -N $qsubname ${jobscript}.bash >& ${jobscript}.log";
@@ -174,6 +176,7 @@ sub remove_temporary_files(){
   unlink("${jobscript}.log");
   unlink("$qsubout");
   unlink("$qsuberr");
+  rmdir("$tmpdir");
 }
 
 sub safesystem {
