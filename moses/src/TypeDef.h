@@ -120,6 +120,12 @@ enum IOMethod
 	,IOMethodMySQL
 };
 
+enum LMType
+{	
+	SRI
+	,IRST
+};
+
 // typedef
 typedef size_t FactorType;
 
