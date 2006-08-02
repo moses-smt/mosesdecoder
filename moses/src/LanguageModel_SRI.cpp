@@ -79,25 +79,29 @@ void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
 { // add factors which have srilm id
 	
 	VocabString str;
-	LmId lmId;
 	VocabIter iter(*m_srilmVocab);
 	while ( (str = iter.next()) != NULL)
 	{
-		LmId lmId = GetLmID(str);
-		factorCollection.AddFactor(Output, m_factorType, str, lmId);
+		VocabIndex lmId = GetLmID(str);
+		const Factor *factor = factorCollection.AddFactor(Output, m_factorType, str);
+		m_lmIdLookup[factor] = lmId;
 	}
 	
+	LmId lmId;
 	lmId = GetLmID(SENTENCE_START);
 	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START, lmId);
 	lmId = GetLmID(SENTENCE_END);
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END, lmId);
 }
 
-LmId LanguageModel_SRI::GetLmID( const std::string &str ) const
+VocabIndex LanguageModel_SRI::GetLmID( const std::string &str ) const
 {
-    LmId res;
-    res.sri = m_srilmVocab->getIndex( str.c_str(), m_unknownId.sri );
-    return res;
+    return m_srilmVocab->getIndex( str.c_str(), m_unknownId.sri );
+}
+VocabIndex LanguageModel_SRI::GetLmID( const Factor *factor ) const
+{
+	std::map<const Factor*, VocabIndex>::const_iterator iter = m_lmIdLookup.find(factor);
+	return (iter == m_lmIdLookup.end()) ? m_unknownId.sri : iter->second;
 }
 
 float LanguageModel_SRI::GetValue(VocabIndex wordId, VocabIndex *context) const
@@ -113,20 +117,20 @@ float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor, St
 	size_t count = contextFactor.size();
 	for (size_t i = 0 ; i < count - 1 ; i++)
 	{
-    LmId x = contextFactor[count-2-i]->GetLmId();
-		context[i] = x.sri==UNKNOWN_LM_ID.sri ? m_unknownId.sri : x.sri;
+    VocabIndex lmId = GetLmID(contextFactor[count-2-i]);
+		context[i] = (lmId == UNKNOWN_LM_ID.sri) ? m_unknownId.sri : lmId;
 	}
 	context[count-1] = Vocab_None;
 	
 	// call sri lm fn
-  LmId x = contextFactor[count-1]->GetLmId();
-	x.sri = x.sri==UNKNOWN_LM_ID.sri ? m_unknownId.sri : x.sri;
-	float ret = GetValue(x.sri, context);
+  VocabIndex lmId = GetLmID(contextFactor[count-1]);
+	lmId= (lmId == UNKNOWN_LM_ID.sri) ? m_unknownId.sri : lmId;
+	float ret = GetValue(lmId, context);
 
 	if (finalState) {
 		for (int i = count - 2 ; i >= 0 ; i--)
 			context[i+1] = context[i];
-		context[0] = x.sri;
+		context[0] = lmId;
 		unsigned int len;
 		*finalState = m_srilmModel->contextID(context,len);
 	}
