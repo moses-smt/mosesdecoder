@@ -41,7 +41,8 @@ class LanguageModel_IRST : public LanguageModel
 protected:
 	std::map<const Factor*, int> m_lmIdLookup;
 	lmtable* m_lmtb;
-
+	int	m_unknownId;
+	
 //	float GetValue(LmId wordId, ngram *context) const;
 
 	void CreateFactors(FactorCollection &factorCollection);
