@@ -39,7 +39,7 @@ class ngram;
 class LanguageModel_IRST : public LanguageModel
 {
 protected:
-	std::map<const Factor*, int> m_lmIdLookup;
+	std::vector<int> m_lmIdLookup;
 	lmtable* m_lmtb;
 	int	m_unknownId;
 	
