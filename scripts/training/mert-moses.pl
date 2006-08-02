@@ -644,7 +644,7 @@ sub create_config {
     print OUT "# MERT optimized configuration\n";
     print OUT "# decoder $___DECODER\n";
     print OUT "# BLEU $bleu_achieved on dev $___DEV_F\n";
-    print OUT "# $iteration iterations\n";
+    print OUT "# We were before running iteration $iteration\n";
     print OUT "# finished ".`date`;
     my $line = <INI>;
     while(1) {
