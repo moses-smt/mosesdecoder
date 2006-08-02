@@ -9,6 +9,7 @@
 #include "Input.h"
 #include "ConfusionNet.h"
 #include "StaticData.h"
+#include "UniqueObject.h"
 
 inline bool existsFile(const char* filename) {
   struct stat mystat;
@@ -56,6 +57,7 @@ struct PDTAimp {
 		m_tgtColls.clear();
 		m_cache.clear();
 		m_rangeCache.clear();
+		Phrase dummy(Input); uniqueObject(dummy,1);
 	}
 
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
@@ -175,10 +177,11 @@ struct PDTAimp {
 		Range range;
 		float score;
 		unsigned realWords;
+		Phrase src;
 
-		State() : range(0,0),score(0.0),realWords(0) {}
-		State(size_t b,size_t e,const PPtr& v,float sc=0.0,unsigned rw=0) : ptr(v),range(b,e),score(sc),realWords(rw) {}
-		State(Range const& r,const PPtr& v,float sc=0.0,unsigned rw=0) : ptr(v),range(r),score(sc),realWords(rw) {}
+		State() : range(0,0),score(0.0),realWords(0),src(Input) {}
+		State(size_t b,size_t e,const PPtr& v,float sc=0.0,unsigned rw=0) : ptr(v),range(b,e),score(sc),realWords(rw),src(Input) {}
+		State(Range const& r,const PPtr& v,float sc=0.0,unsigned rw=0) : ptr(v),range(r),score(sc),realWords(rw),src(Input) {}
 
 		size_t begin() const {return range.first;}
 		size_t end() const {return range.second;}
@@ -188,7 +191,8 @@ struct PDTAimp {
 
 	void CreateTargetPhrase(TargetPhrase& targetPhrase,
 													StringTgtCand::first_type const& factorStrings,
-													StringTgtCand::second_type const& scoreVector) const
+													StringTgtCand::second_type const& scoreVector,
+													Phrase const* srcPtr=0) const
 	{
 
 		for(size_t k=0;k<factorStrings.size();++k) 
@@ -199,6 +203,7 @@ struct PDTAimp {
 					fa[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
 			}
 		targetPhrase.SetScore(m_obj, scoreVector, m_weights, *m_languageModels, m_weightWP);
+		targetPhrase.SetSourcePhrase(srcPtr);
 	}
 
 
@@ -213,7 +218,7 @@ struct PDTAimp {
 		}
 		std::sort(costs.begin(),nth,std::greater<std::pair<float,size_t> >());
 
-		// convert into TargerPhraseCollection
+		// convert into TargetPhraseCollection
 		TargetPhraseCollection *rv=new TargetPhraseCollection;
 		for(std::vector<std::pair<float,size_t> >::iterator it=costs.begin();it!=nth;++it) 
 			rv->push_back(tCands[it->second]);
@@ -224,8 +229,9 @@ struct PDTAimp {
 	struct TScores {
 		float total;
 		StringTgtCand::second_type trans;
+		Phrase const* src;
 
-		TScores() : total(0.0) {}
+		TScores() : total(0.0),src(0) {}
 	};
 
 	void CacheSource(ConfusionNet const& src) 
@@ -260,19 +266,23 @@ struct PDTAimp {
 							{
 								Range newRange(curr.begin(),curr.end()+1);
 								float newScore=curr.GetScore()+currCol[colidx].second;
+								Phrase newSrc(curr.src);
+								newSrc.push_back(w);
 								if(newRange.second<src.GetSize())
-									stack.push_back(State(newRange,nextP,newScore,newRealWords));
-								
+									{
+										stack.push_back(State(newRange,nextP,newScore,newRealWords));
+										stack.back().src=newSrc;
+									}
+
 								std::vector<StringTgtCand> tcands;
 								m_dict->GetTargetCandidates(nextP,tcands);
 
 								if(tcands.size()) 
 									{
 										E2Costs& e2costs=cov2cand[newRange];
-
+										Phrase const* srcPtr=uniqueObject(newSrc);
 										for(size_t i=0;i<tcands.size();++i)
 											{
-
 												std::vector<float> nscores(tcands[i].second.size()+m_numInputScores,0.0);
 												std::transform(tcands[i].second.begin(),tcands[i].second.end(),nscores.begin(),TransformScore);
 												switch(m_numInputScores)
@@ -295,6 +305,7 @@ struct PDTAimp {
 													{
 														scores.total=score;
 														scores.trans=nscores;
+														scores.src=srcPtr;
 													}
 											}
 									}
@@ -318,7 +329,7 @@ struct PDTAimp {
 					{
 						TScores const & scores=j->second;
 						TargetPhrase targetPhrase(Output);
-						CreateTargetPhrase(targetPhrase,j->first,scores.trans);
+						CreateTargetPhrase(targetPhrase,j->first,scores.trans,scores.src);
 						costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
 						tCands.push_back(targetPhrase);
 					}

@@ -94,15 +94,17 @@ char * mempool::alloc(){
       ptr = free_list = block_list->block;
 
       for (int i=0;i<block_size-1;i++) {
-	*(char **)ptr = ptr + item_size;
-	ptr = ptr + item_size;                 
+				*(char **)ptr = ptr + item_size;
+				ptr = ptr + item_size;                 
       } 
       
       *(char **)ptr=NULL;
       
       blocknum++;
     }
-  
+
+  assert(free_list);
+
   ptr = free_list;
 
   free_list=*(char **)ptr;

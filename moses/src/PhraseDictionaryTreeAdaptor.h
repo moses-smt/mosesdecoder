@@ -16,6 +16,9 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
 	typedef PhraseDictionaryBase MyBase;
 	PDTAimp *imp;
 	friend class PDTAimp;
+	PhraseDictionaryTreeAdaptor();
+	PhraseDictionaryTreeAdaptor(const PhraseDictionaryTreeAdaptor&);
+	void operator=(const PhraseDictionaryTreeAdaptor&);
  public:
 	PhraseDictionaryTreeAdaptor(size_t noScoreComponent,unsigned numInputScores);
 	virtual ~PhraseDictionaryTreeAdaptor();
