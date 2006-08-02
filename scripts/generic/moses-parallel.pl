@@ -3,6 +3,7 @@
 #######################
 # Revision history
 #
+# 02 Aug 2006 added strict requirement
 # 01 Aug 2006 fix bug about inputfile parameter
 #             fix bug about suffix index generation
 # 31 Jul 2006 added parameter for reading queue parameters
@@ -13,36 +14,44 @@
 #             added checks for existence of decoder and configuration file
 # 26 Jul 2006 fix a bug related to the use of absolute path for srcfile and nbestfile
 
+use strict;
+
 #######################
 #Customizable parameters 
 
 #parameters for submiiting processes through SGE
 #NOTE: group name is ws06ossmt (with 2 's') and not ws06osmt (with 1 's')
-$queueparameters="-l ws06ossmt=true -l mem_free=0.5G -hard";
+my $queueparameters="-l ws06ossmt=true -l mem_free=0.5G -hard";
 
-$workingdir=$ENV{PWD};
-$tmpdir="$workingdir/tmp$$";
-$splitpfx="split$$";
+my $workingdir=$ENV{PWD};
+my $tmpdir="$workingdir/tmp$$";
+my $splitpfx="split$$";
 
-$SIG{'INT'} = kill_all_and_quit; # catch exception for CTRL-C
+$SIG{'INT'} = \&kill_all_and_quit; # catch exception for CTRL-C
 
 #######################
 #Default parameters 
-$jobscript="$workingdir/job$$";
-$qsubout="$workingdir/out.job$$";
-$qsuberr="$workingdir/err.job$$";
+my $jobscript="$workingdir/job$$";
+my $qsubout="$workingdir/out.job$$";
+my $qsuberr="$workingdir/err.job$$";
 
-$mosescmd="$ENV{MOSESBIN}/moses"; #decoder in use
 
-$mosesparameters="";
-$cfgfile=""; #configuration file
-$jobs=4;
-$dbg="";
-$version="";
-$orinbestfile="";
-$nbestflag="";
-$qsubname="MOSES";
-$inputtype=0;
+my $mosesparameters="";
+my $cfgfile=""; #configuration file
+
+my $version="";
+my $help="";
+my $dbg="";
+my $jobs=4;
+my $mosescmd="$ENV{MOSESBIN}/moses"; #decoder in use
+my $orifile="";
+my $testfile="";
+my $nbestfile="";
+my $orinbestfile="";
+my $nbest="";
+my $nbestflag="";
+my $qsubname="MOSES";
+my $inputtype=0;
 
 #######################
 # Command line options processing
@@ -62,6 +71,9 @@ sub init(){
              'config=s'=>\$cfgfile
 	    ) or exit(1);
 
+  chomp($nbestfile=`basename $orinbestfile`);
+  chomp($testfile=`basename $orifile`);
+  
   $mosesparameters="@ARGV -config $cfgfile -inputtype $inputtype";
   getNbestParameters();
 }
@@ -79,7 +91,8 @@ sub version(){
 #    print STDERR "version 1.6 (28-07-2006)\n";
 #    print STDERR "version 1.7 (29-07-2006)\n";
 #    print STDERR "version 1.8 (31-07-2006)\n";
-    print STDERR "version 1.9 (01-08-2006)\n";
+#    print STDERR "version 1.9 (01-08-2006)\n";
+    print STDERR "version 1.10 (02-08-2006)\n";
     exit(1);
 }
 
@@ -89,6 +102,7 @@ sub usage(){
   print STDERR "Options marked (*) are required.\n";
   print STDERR "Parallel options:\n";
   print STDERR "*  -decoder <file> Moses decoder to use\n";
+  print STDERR "   -i|inputfile|input-file <string> input file\n";
   print STDERR "   -inputfile <file>   the input text to translate\n";
   print STDERR "*  -jobs <N> number of required jobs\n";
   print STDERR "   -qsub-prefix <string> name for sumbitte jobs\n";
@@ -99,8 +113,7 @@ sub usage(){
   print STDERR "Moses options:\n";
   print STDERR "   -inputtype <0|1> 0 for text, 1 for confusion networks\n";
   print STDERR "*  -config <cfgfile> configuration file\n";
-  print STDERR "any other options are passed to Moses apart from the inputfile (-input-file)\n";
-  print STDERR " which is parsed to manage with splits\n";
+  print STDERR "All other options are passed to Moses\n";
   exit(1);
 }
 
@@ -139,61 +152,6 @@ sub getNbestParameters(){
   }
 }
 
-#script creation
-sub preparing_script(){
-  foreach $idx (@idxlist){
-    $scriptheader="\#\! /bin/bash\n\n";
-    $scriptheader.="uname -a\n\n";
-    $scriptheader.="export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$ENV{BOOSTLIB}\n\n";
-    $scriptheader.="cd $workingdir\n\n";
-    
-    open (OUT, "> ${jobscript}${idx}.bash");
-    print OUT $scriptheader;
-    if ($nbestflag){
-      chomp($nbestfile=`basename $orinbestfile`);
-      print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest -i ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
-      print OUT "echo exit status \$\?\n\n";
-      print OUT "mv $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
-      print OUT "echo exit status \$\?\n\n";
-    }else{
-      print OUT "$mosescmd $mosesparameters -i ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
-    }
-    print OUT "mv $tmpdir/${testfile}.$splitpfx$idx.trans .\n\n";
-    print OUT "echo exit status \$\?\n\n";
-    close(OUT);
-  }
-}
-
-
-
-sub concatenate_nbest(){
-  $oldcode="";
-  $newcode=-1;
-  open (OUT, "> ${orinbestfile}");
-  foreach $idx (@idxlist){
-    open (IN, "${nbestfile}.${splitpfx}${idx}");
-    while (<IN>){
-      ($code,@extra)=split(/\|\|\|/,$_);
-      $newcode++ if $code ne $oldcode;
-      $oldcode=$code;
-      print OUT join("\|\|\|",($newcode,@extra)); 
-    }
-    close(IN);
-    $oldcode="";
-  }
-  close(OUT);
-}
-
-sub concatenate_1best(){
-  foreach $idx (@idxlist){
-    @in=();
-    open (IN, "${testfile}.${splitpfx}${idx}.trans");
-    @in=<IN>;
-    print STDOUT "@in";
-    close(IN);
-  }
-}
-
 #######################
 #Script starts here
 
@@ -216,7 +174,7 @@ if (! -e ${orifile} ){
 
 #checking if decoder exists
 if (! -e $mosescmd) {
-  print STDERR "Decoder ($decoder) does not exists\n";
+  print STDERR "Decoder ($mosescmd) does not exists\n";
   usage();
 }
 
@@ -233,10 +191,14 @@ exit(1) if $dbg; # debug mode: just print and do not run
 
 #splitting test file in several parts
 #$decimal="-d"; #split does not accept this options (on MAC OS)
-$decimal="";
-chomp($testfile=`basename $orifile`);
+my $decimal="";
 
 my $cmd;
+my $sentenceN;
+my $splitN;
+
+my @idxlist=();
+
 if ($inputtype==0){ #text input
 #getting the number of input sentences
   chomp($sentenceN=`wc -l ${orifile} | awk '{print \$1}' `);
@@ -283,7 +245,7 @@ else{ #confusion network input
   chomp(@idxlist=`ls $tmpfile-*`);
   grep(s/.+(\-\S+)$/$1/e,@idxlist);
 
-  foreach $idx (@idxlist){
+  foreach my $idx (@idxlist){
     $cmd="perl -pe 's/ _CNendline_ /\\n/g;s/ _CNendline_/\\n/g;'";
     safesystem("cat $tmpfile$idx | $cmd > ${testfile}.$splitpfx$idx ; rm $tmpfile$idx;");
   }
@@ -299,14 +261,15 @@ preparing_script();
 #launching process through the queue
 my @sgepids =();
 
-$failure=0;
-foreach $idx (@idxlist){
+my $failure=0;
+foreach my $idx (@idxlist){
   print STDERR "qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash\n" if $dbg; 
 
   $cmd="qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
 
-
   safesystem($cmd) or die;
+
+  my ($res,$id);
 
   open (IN,"${jobscript}${idx}.log");
   chomp($res=<IN>);
@@ -336,10 +299,63 @@ if ($nbestflag){  concatenate_nbest();  }
 remove_temporary_files();
 
 
+#script creation
+sub preparing_script(){
+  foreach my $idx (@idxlist){
+    my $scriptheader="\#\! /bin/bash\n\n";
+    $scriptheader.="uname -a\n\n";
+    $scriptheader.="cd $workingdir\n\n";
+
+    open (OUT, "> ${jobscript}${idx}.bash");
+    print OUT $scriptheader;
+    if ($nbestflag){
+      print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest -i ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
+      print OUT "echo exit status \$\?\n\n";
+      print OUT "mv $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
+      print OUT "echo exit status \$\?\n\n";
+    }else{
+      print OUT "$mosescmd $mosesparameters -i ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
+    }
+    print OUT "mv $tmpdir/${testfile}.$splitpfx$idx.trans .\n\n";
+    print OUT "echo exit status \$\?\n\n";
+    close(OUT);
+  }
+}
+
+
+
+sub concatenate_nbest(){
+  my $oldcode="";
+  my $newcode=-1;
+  open (OUT, "> ${orinbestfile}");
+  foreach my $idx (@idxlist){
+    open (IN, "${nbestfile}.${splitpfx}${idx}");
+    while (<IN>){
+      my ($code,@extra)=split(/\|\|\|/,$_);
+      $newcode++ if $code ne $oldcode;
+      $oldcode=$code;
+      print OUT join("\|\|\|",($newcode,@extra));
+    }
+    close(IN);
+    $oldcode="";
+  }
+  close(OUT);
+}
+
+sub concatenate_1best(){
+  foreach my $idx (@idxlist){
+    my @in=();
+    open (IN, "${testfile}.${splitpfx}${idx}.trans");
+    @in=<IN>;
+    print STDOUT "@in";
+    close(IN);
+  }
+}
+
 sub check_exit_status(){
   print STDERR "check_exit_status\n";
   my $failure=0;
-  foreach $idx (@idxlist){
+  foreach my $idx (@idxlist){
     print STDERR "check_exit_status of job $idx\n";
     open(IN,"$qsubout$idx");
     while (<IN>){
@@ -353,14 +369,14 @@ sub check_exit_status(){
 sub kill_all_and_quit(){
   print STDERR "Got interrupt or something failed.\n";
   print STDERR "kill_all_and_quit\n";
-  foreach $id (@sgepids){
+  foreach my $id (@sgepids){
     print STDERR "qdel $id\n";
     safesystem("qdel $id");
   }
 
   print STDERR "Translation was not performed correctly\n";
   print STDERR "Any of the submitted jobs died not correctly\n";
-  print STDERR "Send qdel signal to all submitted jobs\n";
+  print STDERR "qdel function was called for all submitted jobs\n";
 
   exit(1);
 }
@@ -368,7 +384,9 @@ sub kill_all_and_quit(){
 
 sub check_translation(){
   #checking if all sentences were translated
-  foreach $idx (@idxlist){
+  my $inputN;
+  my $outputN;
+  foreach my $idx (@idxlist){
     if ($inputtype==0){#text input
       chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
@@ -388,7 +406,7 @@ sub check_translation(){
 
 sub remove_temporary_files(){
   #removing temporary files
-  foreach $idx (@idxlist){
+  foreach my $idx (@idxlist){
     unlink("${testfile}.${splitpfx}${idx}.trans");
     unlink("${testfile}.${splitpfx}${idx}");
     if ($nbestflag){      unlink("${nbestfile}.${splitpfx}${idx}");     }
@@ -397,6 +415,7 @@ sub remove_temporary_files(){
     unlink("$qsubname.W.log");
     unlink("$qsubout$idx");
     unlink("$qsuberr$idx");
+    rmdir("$tmpdir");
   }
 }
 
