@@ -59,15 +59,9 @@ protected:
 	FactorType				m_factorType;
 	const std::string	*m_ptrString;
 	const size_t			m_id;
-	LmId 							m_lmId;
 
-	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, LmId lmId);
+	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString);
 	
-	inline void SetLmId(LmId lmId)
-	{
-		m_lmId = lmId;
-	}
-
 public:
 	inline size_t hash() const
 	{
@@ -93,11 +87,6 @@ public:
 	{
 		return m_id;
 	}
-	inline LmId GetLmId() const
-	{
-		return m_lmId;
-	}
-	
 	// do it properly. needed for insert & finding of words in dictionary
 	inline int Compare(const Factor &compare) const
 	{

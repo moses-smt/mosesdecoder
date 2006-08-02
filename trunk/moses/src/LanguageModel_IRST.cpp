@@ -75,19 +75,21 @@ void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
 { // add factors which have srilm id
 	
 	dict_entry *entry;
-	LmId lmId;
 	dictionary_iter iter(m_lmtb->dict);
 	while ( (entry = iter.next()) != NULL)
 	{
-		LmId lmId;
-    lmId.irst = entry->code;
-		factorCollection.AddFactor(Output, m_factorType, entry->word, lmId);
+		const Factor *factor = factorCollection.AddFactor(Output, m_factorType, entry->word);
+		m_lmIdLookup[factor] = entry->code;
 	}
 	
+	int lmId;
 	lmId = GetLmID(BOS_);
-	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START, lmId);
+	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START);
+	m_lmIdLookup[m_sentenceStart] = lmId;
+		
 	lmId = GetLmID(EOS_);
-	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END, lmId);
+	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END);
+	m_lmIdLookup[m_sentenceEnd] = lmId;
 }
 
 int LanguageModel_IRST::GetLmID( const std::string &str ) const
@@ -112,7 +114,7 @@ float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor, S
 		std::cout << i <<"="<<contextFactor[i]->GetLmId().irst <<"," << contextFactor[i]->GetString()<<" ";
 #endif
     int lmId = GetLmID(contextFactor[i]);
-		ng.pushc( (lmId == UNKNOWN_LM_ID.irst) ? m_unknownId : lmId);
+		ng.pushc(lmId);
 	}
 #ifdef CDYER_DEBUG_LMSCORE
 	std::cout <<" (ng='" << ng << "')\n";
