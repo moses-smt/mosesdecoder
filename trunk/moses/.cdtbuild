@@ -50,6 +50,7 @@
 <listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
 <listOptionValue builtIn="false" value="_LARGE_FILES"/>
 </option>
+<option id="gnu.cpp.compiler.option.debugging.gprof.1449614968" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.1731276863" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.release.693340097" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.release"/>

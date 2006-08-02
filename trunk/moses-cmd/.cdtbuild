@@ -87,6 +87,7 @@
 <listOptionValue builtIn="false" value="LM_SRI"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 </option>
+<option id="gnu.cpp.compiler.option.debugging.gprof.24360799" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.285054015" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1153317521" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
@@ -126,6 +127,7 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/row.o"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/fields.o"/>
 </option>
+<option id="gnu.cpp.link.option.flags.213483667" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.1402140367" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release"/>
 <macros/>
