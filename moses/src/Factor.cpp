@@ -25,11 +25,10 @@ using namespace std;
 
 size_t Factor::s_id = 0;
 
-Factor::Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, LmId lmId)
+Factor::Factor(FactorDirection direction, FactorType factorType, const std::string *factorString)
 :m_direction(direction)
 ,m_factorType(factorType)
 ,m_ptrString(factorString)
-,m_lmId(lmId)
 ,m_id(s_id++)
 {
 }
