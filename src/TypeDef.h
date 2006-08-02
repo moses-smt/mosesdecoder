@@ -66,17 +66,6 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #endif
 ///////////////////////////////////////////////// 
 
-class NGramNode;
-union LmId {
-  unsigned int			sri;
-  const NGramNode*	internal;
-  int								irst;
-  public:
-		LmId() {}
-    LmId(int i) { irst = i; };
-    LmId(const NGramNode *node) { internal = node; };
-};
-
 // enums. 
 // must be 0, 1, 2, ..., unless otherwise stated
 

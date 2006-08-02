@@ -65,8 +65,6 @@ public:
 
 	bool Exists(FactorDirection direction, FactorType factorType, const std::string &factorString);	
 	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);	
-	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString, LmId lmId);	
-	void SetFactorLmId(const Factor *factor, LmId lmId);
 
 	void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &fileName);
 	

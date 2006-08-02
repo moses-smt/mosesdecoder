@@ -44,8 +44,6 @@ public:
   typedef const void* State;
   static State UnknownState;
 
-	static const LmId UNKNOWN_LM_ID;
-
 	LanguageModel();
 	virtual ~LanguageModel();
 	virtual void Load(const std::string &fileName

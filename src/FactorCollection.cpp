@@ -53,7 +53,7 @@ bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, 
 	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
 
 	FactorSet::const_iterator iterFactor;
-	Factor search(direction, factorType, ptrString, LanguageModel::UNKNOWN_LM_ID);
+	Factor search(direction, factorType, ptrString);
 
 	iterFactor = m_collection.find(search);
 	return iterFactor != m_collection.end();
@@ -61,26 +61,11 @@ bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, 
 
 const Factor *FactorCollection::AddFactor(FactorDirection direction
 																				, FactorType 			factorType
-																				, const string 		&factorString
-																				, LmId						lmId)
+																				, const string 		&factorString)
 {
 	// find string id
 	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
-//	Factor findFactor(direction, factorType, ptr, lmId);
-	return &(*m_collection.insert(Factor(direction, factorType, ptrString, lmId)).first);
-}
-
-const Factor *FactorCollection::AddFactor(FactorDirection direction
-																				, FactorType 			factorType
-																				, const string 		&factorString)
-{
-	return AddFactor(direction, factorType, factorString, LanguageModel::UNKNOWN_LM_ID);
-}
-
-void FactorCollection::SetFactorLmId(const Factor *factor, LmId lmId)
-{ // only used by non-srilm code
-	Factor *changeFactor = const_cast<Factor *>(factor);
-	changeFactor->SetLmId(lmId);
+	return &(*m_collection.insert(Factor(direction, factorType, ptrString)).first);
 }
 
 FactorCollection::~FactorCollection()
