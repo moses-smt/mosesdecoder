@@ -67,8 +67,8 @@ void LanguageModel_IRST::Load(const std::string &fileName
 
 	// LM can be ok, just outputs warnings
 	CreateFactors(factorCollection);
-  m_unknownId.irst = m_lmtb->dict->oovcode();
-  std::cerr << "IRST: m_unknownId=" << m_unknownId.irst << std::endl;
+  m_unknownId = m_lmtb->dict->oovcode();
+  std::cerr << "IRST: m_unknownId=" << m_unknownId << std::endl;
 }
 
 void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
@@ -97,7 +97,7 @@ int LanguageModel_IRST::GetLmID( const std::string &str ) const
 int LanguageModel_IRST::GetLmID( const Factor *factor ) const
 {
 	std::map<const Factor*, int>::const_iterator iter = m_lmIdLookup.find(factor);
-	return (iter == m_lmIdLookup.end()) ? m_unknownId.irst : iter->second;
+	return (iter == m_lmIdLookup.end()) ? m_unknownId : iter->second;
 }
 
 float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor, State* finalState) const
@@ -112,7 +112,7 @@ float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor, S
 		std::cout << i <<"="<<contextFactor[i]->GetLmId().irst <<"," << contextFactor[i]->GetString()<<" ";
 #endif
     int lmId = GetLmID(contextFactor[i]);
-		ng.pushc( (lmId == UNKNOWN_LM_ID.irst) ? m_unknownId.irst : lmId);
+		ng.pushc( (lmId == UNKNOWN_LM_ID.irst) ? m_unknownId : lmId);
 	}
 #ifdef CDYER_DEBUG_LMSCORE
 	std::cout <<" (ng='" << ng << "')\n";

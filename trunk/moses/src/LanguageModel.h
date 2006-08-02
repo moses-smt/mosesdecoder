@@ -39,7 +39,6 @@ protected:
 	FactorType	m_factorType;
 	float				m_weight;
 	size_t			m_nGramOrder;
-	LmId				m_unknownId;
 	std::string	m_filename;
 public:
   typedef const void* State;

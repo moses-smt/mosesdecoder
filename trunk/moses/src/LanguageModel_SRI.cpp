@@ -72,7 +72,7 @@ void LanguageModel_SRI::Load(const std::string &fileName
 	}
 	// LM can be ok, just outputs warnings
 	CreateFactors(factorCollection);		
-  m_unknownId.sri = m_srilmVocab->unkIndex();
+  m_unknownId = m_srilmVocab->unkIndex();
 }
 
 void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
@@ -87,21 +87,24 @@ void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
 		m_lmIdLookup[factor] = lmId;
 	}
 	
-	LmId lmId;
+	VocabIndex lmId;
 	lmId = GetLmID(SENTENCE_START);
-	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START, lmId);
+	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START);
+	m_lmIdLookup[m_sentenceStart] = lmId;
+	
 	lmId = GetLmID(SENTENCE_END);
-	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END, lmId);
+	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END);
+	m_lmIdLookup[m_sentenceEnd] = lmId;
 }
 
 VocabIndex LanguageModel_SRI::GetLmID( const std::string &str ) const
 {
-    return m_srilmVocab->getIndex( str.c_str(), m_unknownId.sri );
+    return m_srilmVocab->getIndex( str.c_str(), m_unknownId );
 }
 VocabIndex LanguageModel_SRI::GetLmID( const Factor *factor ) const
 {
 	std::map<const Factor*, VocabIndex>::const_iterator iter = m_lmIdLookup.find(factor);
-	return (iter == m_lmIdLookup.end()) ? m_unknownId.sri : iter->second;
+	return (iter == m_lmIdLookup.end()) ? m_unknownId : iter->second;
 }
 
 float LanguageModel_SRI::GetValue(VocabIndex wordId, VocabIndex *context) const
@@ -118,13 +121,13 @@ float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor, St
 	for (size_t i = 0 ; i < count - 1 ; i++)
 	{
     VocabIndex lmId = GetLmID(contextFactor[count-2-i]);
-		context[i] = (lmId == UNKNOWN_LM_ID.sri) ? m_unknownId.sri : lmId;
+		context[i] = (lmId == UNKNOWN_LM_ID.sri) ? m_unknownId : lmId;
 	}
 	context[count-1] = Vocab_None;
 	
 	// call sri lm fn
   VocabIndex lmId = GetLmID(contextFactor[count-1]);
-	lmId= (lmId == UNKNOWN_LM_ID.sri) ? m_unknownId.sri : lmId;
+	lmId= (lmId == UNKNOWN_LM_ID.sri) ? m_unknownId : lmId;
 	float ret = GetValue(lmId, context);
 
 	if (finalState) {
