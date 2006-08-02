@@ -78,23 +78,41 @@ void LanguageModel_SRI::Load(const std::string &fileName
 void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
 { // add factors which have srilm id
 	
+	std::map<size_t, VocabIndex> lmIdMap;
+	size_t maxFactorId = 0; // to create lookup vector later on
+	
 	VocabString str;
 	VocabIter iter(*m_srilmVocab);
 	while ( (str = iter.next()) != NULL)
 	{
 		VocabIndex lmId = GetLmID(str);
-		const Factor *factor = factorCollection.AddFactor(Output, m_factorType, str);
-		m_lmIdLookup[factor] = lmId;
+		size_t factorId = factorCollection.AddFactor(Output, m_factorType, str)->GetId();
+		lmIdMap[factorId] = lmId;
+		maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	}
 	
-	VocabIndex lmId;
-	lmId = GetLmID(SENTENCE_START);
-	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START);
-	m_lmIdLookup[m_sentenceStart] = lmId;
+	size_t factorId;
 	
-	lmId = GetLmID(SENTENCE_END);
+	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START);
+	factorId = m_sentenceStart->GetId();
+	lmIdMap[factorId] = GetLmID(SENTENCE_START);
+	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
+	
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END);
-	m_lmIdLookup[m_sentenceEnd] = lmId;
+	factorId = m_sentenceEnd->GetId();
+	lmIdMap[factorId] = GetLmID(SENTENCE_END);
+	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
+	
+	// add to lookup vector in object
+	m_lmIdLookup.resize(maxFactorId+1);
+	
+	fill(m_lmIdLookup.begin(), m_lmIdLookup.end(), m_unknownId);
+
+	map<size_t, VocabIndex>::iterator iterMap;
+	for (iterMap = lmIdMap.begin() ; iterMap != lmIdMap.end() ; ++iterMap)
+	{
+		m_lmIdLookup[iterMap->first] = iterMap->second;
+	}
 }
 
 VocabIndex LanguageModel_SRI::GetLmID( const std::string &str ) const
@@ -103,8 +121,8 @@ VocabIndex LanguageModel_SRI::GetLmID( const std::string &str ) const
 }
 VocabIndex LanguageModel_SRI::GetLmID( const Factor *factor ) const
 {
-	std::map<const Factor*, VocabIndex>::const_iterator iter = m_lmIdLookup.find(factor);
-	return (iter == m_lmIdLookup.end()) ? m_unknownId : iter->second;
+	size_t factorId = factor->GetId();
+	return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];
 }
 
 float LanguageModel_SRI::GetValue(VocabIndex wordId, VocabIndex *context) const

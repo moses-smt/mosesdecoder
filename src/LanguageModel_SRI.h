@@ -37,7 +37,7 @@ class Ngram; // SRI forward decl
 class LanguageModel_SRI : public LanguageModel
 {
 protected:
-	std::map<const Factor*, VocabIndex> m_lmIdLookup;
+	std::vector<VocabIndex> m_lmIdLookup;
 	Vocab 			*m_srilmVocab;
 	Ngram 			*m_srilmModel;
 	VocabIndex	m_unknownId;
