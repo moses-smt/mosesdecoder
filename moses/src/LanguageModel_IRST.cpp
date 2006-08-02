@@ -73,23 +73,43 @@ void LanguageModel_IRST::Load(const std::string &fileName
 
 void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
 { // add factors which have srilm id
+	// code copied & paste from SRI LM class. should do template function
+	std::map<size_t, int> lmIdMap;
+	size_t maxFactorId = 0; // to create lookup vector later on
 	
 	dict_entry *entry;
 	dictionary_iter iter(m_lmtb->dict);
 	while ( (entry = iter.next()) != NULL)
 	{
-		const Factor *factor = factorCollection.AddFactor(Output, m_factorType, entry->word);
-		m_lmIdLookup[factor] = entry->code;
+		size_t factorId = factorCollection.AddFactor(Output, m_factorType, entry->word)->GetId();
+		lmIdMap[factorId] = entry->code;
+		maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	}
 	
 	int lmId;
+	size_t factorId;
+	
 	lmId = GetLmID(BOS_);
 	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START);
-	m_lmIdLookup[m_sentenceStart] = lmId;
+	factorId = m_sentenceStart->GetId();
+	lmIdMap[factorId] = lmId;
 		
 	lmId = GetLmID(EOS_);
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END);
-	m_lmIdLookup[m_sentenceEnd] = lmId;
+	factorId = m_sentenceEnd->GetId();
+	lmIdMap[factorId] = lmId;
+	
+	// add to lookup vector in object
+	m_lmIdLookup.resize(maxFactorId+1);
+	
+	fill(m_lmIdLookup.begin(), m_lmIdLookup.end(), m_unknownId);
+
+	map<size_t, int>::iterator iterMap;
+	for (iterMap = lmIdMap.begin() ; iterMap != lmIdMap.end() ; ++iterMap)
+	{
+		m_lmIdLookup[iterMap->first] = iterMap->second;
+	}
+	
 }
 
 int LanguageModel_IRST::GetLmID( const std::string &str ) const
@@ -98,8 +118,8 @@ int LanguageModel_IRST::GetLmID( const std::string &str ) const
 }
 int LanguageModel_IRST::GetLmID( const Factor *factor ) const
 {
-	std::map<const Factor*, int>::const_iterator iter = m_lmIdLookup.find(factor);
-	return (iter == m_lmIdLookup.end()) ? m_unknownId : iter->second;
+	size_t factorId = factor->GetId();
+	return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];
 }
 
 float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor, State* finalState) const
