@@ -62,14 +62,8 @@ sub init(){
              'config=s'=>\$cfgfile
 	    ) or exit(1);
 
-  print STDERR "queueparameters: $queueparameters\n";
-  
   $mosesparameters="@ARGV -config $cfgfile -inputtype $inputtype";
   getNbestParameters();
-  
-  version() if $version;
-  usage() if $help;
-  print_parameters() if $dbg;
 }
 
 
@@ -126,8 +120,6 @@ sub print_parameters(){
   print STDERR "Inputtype: confusion network\n" if $inputtype == 1;
   
   print STDERR "parameters directly passed to Moses: $mosesparameters\n";
-
-  exit(1);
 }
 
 #get parameters for nbest computation from configuration file
@@ -207,6 +199,10 @@ sub concatenate_1best(){
 
 init();
 
+version() if $version;
+usage() if $help;
+
+
 if (!defined $orifile || !defined $mosescmd || ! defined $cfgfile) {
   print STDERR "Please specify -inputfile, -decoder and -config\n";
   usage();
@@ -229,6 +225,11 @@ if (! -e $cfgfile) {
   print STDERR "Configuration file ($cfgfile) does not exists\n";
   usage();
 }
+
+
+print_parameters(); # so that people know
+exit(1) if $dbg; # debug mode: just print and do not run
+
 
 #splitting test file in several parts
 #$decimal="-d"; #split does not accept this options (on MAC OS)
