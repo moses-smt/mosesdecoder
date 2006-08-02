@@ -90,12 +90,14 @@ void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END, lmId);
 }
 
-LmId LanguageModel_IRST::GetLmID( const std::string &str ) const
+int LanguageModel_IRST::GetLmID( const std::string &str ) const
 {
-    LanguageModel_IRST *lm = const_cast<LanguageModel_IRST*>(this); // hack. not sure if supposed to cast this
-    LmId res;
-    res.sri = lm->m_lmtb->dict->encode( str.c_str() );
-    return res;
+    return m_lmtb->dict->encode( str.c_str() );
+}
+int LanguageModel_IRST::GetLmID( const Factor *factor ) const
+{
+	std::map<const Factor*, int>::const_iterator iter = m_lmIdLookup.find(factor);
+	return (iter == m_lmIdLookup.end()) ? m_unknownId.irst : iter->second;
 }
 
 float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor, State* finalState) const
@@ -109,8 +111,8 @@ float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor, S
 #ifdef CDYER_DEBUG_LMSCORE
 		std::cout << i <<"="<<contextFactor[i]->GetLmId().irst <<"," << contextFactor[i]->GetString()<<" ";
 #endif
-    LmId x = contextFactor[i]->GetLmId();
-		ng.pushc(x.irst==UNKNOWN_LM_ID.irst?m_unknownId.irst:x.irst);
+    int lmId = GetLmID(contextFactor[i]);
+		ng.pushc( (lmId == UNKNOWN_LM_ID.irst) ? m_unknownId.irst : lmId);
 	}
 #ifdef CDYER_DEBUG_LMSCORE
 	std::cout <<" (ng='" << ng << "')\n";
