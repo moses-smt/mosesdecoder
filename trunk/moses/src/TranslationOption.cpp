@@ -29,10 +29,10 @@ using namespace std;
 
 
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase)
-: m_phrase(targetPhrase)
-,m_sourceWordsRange	(wordsRange)
+	: m_targetPhrase(targetPhrase),m_sourcePhrase(targetPhrase.GetSourcePhrase())
+	,m_sourceWordsRange	(wordsRange)
 {	// used by initial translation step
-
+	
 	// set score
 	m_scoreGen		= 0;
 	m_scoreTrans	= targetPhrase.GetTranslationScore();
@@ -40,9 +40,10 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 }
 
 TranslationOption::TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase)
-: m_phrase(targetPhrase)
-,m_sourceWordsRange	(copy.m_sourceWordsRange)
-,m_scoreBreakdown(copy.m_scoreBreakdown)
+	: m_targetPhrase(targetPhrase)
+	,m_sourcePhrase(copy.m_sourcePhrase) // take source phrase pointer from initial translation option
+	,m_sourceWordsRange	(copy.m_sourceWordsRange)
+	,m_scoreBreakdown(copy.m_scoreBreakdown)
 { // used in creating the next translation step
 	m_scoreGen		= copy.GetGenerationScore();
 	m_scoreTrans	= copy.GetTranslationScore() + targetPhrase.GetTranslationScore();
@@ -55,7 +56,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 																		, const GenerationDictionary *generationDictionary
 																		, float generationScore
 																		, float weight)
-: m_phrase						(inputPhrase)
+	: m_targetPhrase						(inputPhrase),m_sourcePhrase(copy.m_sourcePhrase)
 , m_sourceWordsRange	(copy.m_sourceWordsRange)
 , m_scoreBreakdown(copy.m_scoreBreakdown)
 { // used in creating the next generation step
@@ -67,7 +68,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy
 }
 
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/)
-: m_phrase(targetPhrase)
+: m_targetPhrase(targetPhrase)
 ,m_sourceWordsRange	(wordsRange)
 ,m_scoreTrans(0)
 ,m_scoreGen(0)
@@ -78,10 +79,10 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 
 TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targetPhrase) const
 {
-	if (m_phrase.IsCompatible(targetPhrase))
+	if (m_targetPhrase.IsCompatible(targetPhrase))
 	{
 		TargetPhrase mergePhrase(targetPhrase);
-		mergePhrase.MergeFactors(m_phrase);
+		mergePhrase.MergeFactors(m_targetPhrase);
 		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase);
 		return newTransOpt;
 	}
@@ -96,10 +97,10 @@ TranslationOption *TranslationOption::MergeGeneration(const Phrase &inputPhrase
 																	, float generationScore
 																	, float weight) const
 {
-	if (m_phrase.IsCompatible(inputPhrase))
+	if (m_targetPhrase.IsCompatible(inputPhrase))
 	{
 		Phrase mergePhrase(inputPhrase);
-		mergePhrase.MergeFactors(m_phrase);
+		mergePhrase.MergeFactors(m_targetPhrase);
 		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase, generationDictionary, generationScore, weight);
 		return newTransOpt;
 	}

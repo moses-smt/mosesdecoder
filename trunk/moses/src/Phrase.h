@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class Phrase
 {
 	friend std::ostream& operator<<(std::ostream&, const Phrase&);
-protected:
+ private:
 	static std::vector<mempool*> s_memPool;
 
 	FactorDirection				m_direction;
@@ -50,10 +50,12 @@ public:
 	inline Phrase()
 		: m_phraseSize(0)
 		, m_arraySize(0)
+		, m_memPoolIndex(0)
 		, m_factorArray(NULL)
 	{	// shouldn't be used. only for map
 	}
 	Phrase(const Phrase &copy);
+	Phrase& operator=(const Phrase&);
 
 	Phrase(FactorDirection direction);
 	Phrase(FactorDirection direction, const std::vector< const Word* > &mergeWords);
@@ -110,6 +112,8 @@ public:
 	
   std::string GetStringRep(const WordsRange &wordsRange) const; 
   
+	void push_back(Word const& w) {Word::Copy(AddWord(),w.GetFactorArray());}
+
 	TO_STRING;
 
 	// used to insert & find phrase in dictionary

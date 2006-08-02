@@ -19,6 +19,10 @@ class PPimp;
 
 class PhraseDictionaryTree : public Dictionary {
 	PDTimp *imp; //implementation
+
+	PhraseDictionaryTree(); // not implemented
+	PhraseDictionaryTree(const PhraseDictionaryTree&); //not implemented
+	void operator=(const PhraseDictionaryTree&); //not implemented
 public:
 	PhraseDictionaryTree(size_t noScoreComponent);
 

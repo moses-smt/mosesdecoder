@@ -40,11 +40,12 @@ class GenerationDictionary;
  */
 class TranslationOption
 {
-		friend std::ostream& operator<<(std::ostream& out, const TranslationOption& possibleTranslation);
+	friend std::ostream& operator<<(std::ostream& out, const TranslationOption& possibleTranslation);
 
 protected:
 
-	const Phrase 				m_phrase;
+	const Phrase 				m_targetPhrase;
+	Phrase const*       m_sourcePhrase;
 	const WordsRange		m_sourceWordsRange;
 	float								m_scoreTrans, m_scoreGen, m_futureScore, m_ngramScore;
 
@@ -75,11 +76,15 @@ public:
 
 	inline const Phrase &GetTargetPhrase() const
 	{
-		return m_phrase;
+		return m_targetPhrase;
 	}
 	inline const WordsRange &GetSourceWordsRange() const
 	{
 		return m_sourceWordsRange;
+	}
+	Phrase const* GetSourcePhrase() const 
+	{
+	  return m_sourcePhrase;
 	}
 
 	bool Overlap(const Hypothesis &hypothesis) const;
@@ -139,7 +144,7 @@ public:
    */
 	inline bool IsDeletionOption() const
   {
-    return m_phrase.GetSize() == 0;
+    return m_targetPhrase.GetSize() == 0;
   }
 	void CalcScore(const LMList &allLM, float weightWordPenalty);
 

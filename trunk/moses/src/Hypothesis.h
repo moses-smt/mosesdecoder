@@ -56,6 +56,7 @@ protected:
 	
 	const Hypothesis* m_prevHypo;
 	const Phrase			&m_targetPhrase; //target phrase being created at the current decoding step
+	Phrase const*     m_sourcePhrase;
 	WordsBitmap				m_sourceCompleted;
 	//TODO: how to integrate this into confusion network framework; what if
 	//it's a confusion network in the end???
@@ -175,6 +176,9 @@ public:
 	{
 		return m_sourceInput;
 	}
+
+	std::string GetSourcePhraseStringRep() const;
+	std::string GetTargetPhraseStringRep() const;
 
 	// curr - pos is relative from CURRENT hypothesis's starting ind ex
   // (ie, start of sentence would be some negative number, which is

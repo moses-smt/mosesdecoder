@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cassert>
 #include <iostream>
 #include <limits>
-#include <assert.h>
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "DummyScoreProducers.h"
@@ -43,6 +42,7 @@ ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)
 	, m_targetPhrase(emptyTarget)
+	, m_sourcePhrase(0)
 	, m_sourceCompleted(source.GetSize())
 	, m_sourceInput(source)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
@@ -65,6 +65,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: m_prevHypo(&prevHypo)
 	, m_targetPhrase(transOpt.GetTargetPhrase())
+	, m_sourcePhrase(0)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_sourceInput						(prevHypo.m_sourceInput)
 	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
@@ -453,3 +454,17 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 }
 
 
+std::string Hypothesis::GetSourcePhraseStringRep() const 
+{
+	if(m_sourcePhrase) {
+		assert(m_sourcePhrase->ToString()==m_sourcePhrase->GetStringRep(WordsRange(0,m_sourcePhrase->GetSize()-1)));
+		return m_sourcePhrase->ToString();
+	}
+	else 
+		return m_sourceInput.GetStringRep(m_currSourceWordsRange);
+		
+}
+std::string Hypothesis::GetTargetPhraseStringRep() const 
+{
+	return m_targetPhrase.GetStringRep(m_currTargetWordsRange);
+}
