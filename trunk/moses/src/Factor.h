@@ -63,14 +63,6 @@ protected:
 	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString);
 	
 public:
-	inline size_t hash() const
-	{
-		size_t h=quick_hash((const char*)&m_direction, sizeof(FactorDirection), 0xc7e7f2fd);
-		h=quick_hash((const char*)&m_factorType, sizeof(FactorType), h);
-		h=quick_hash((const char*)&m_ptrString, sizeof(const std::string *), h);
-		return h;
-	}
-
 	inline FactorDirection GetFactorDirection() const
 	{
 		return m_direction;
@@ -87,6 +79,14 @@ public:
 	{
 		return m_id;
 	}
+	inline unsigned int GetHash() const
+	{
+		unsigned int h=quick_hash((const char*)&m_direction, sizeof(FactorDirection), 0xc7e7f2fd);
+		h=quick_hash((const char*)&m_factorType, sizeof(FactorType), h);
+		h=quick_hash((const char*)&m_ptrString, sizeof(const std::string *), h);
+		return h;
+	}
+
 	// do it properly. needed for insert & finding of words in dictionary
 	inline int Compare(const Factor &compare) const
 	{
