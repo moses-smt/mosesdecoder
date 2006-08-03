@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
 #include "LMList.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -32,10 +33,8 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 	: m_targetPhrase(targetPhrase),m_sourcePhrase(targetPhrase.GetSourcePhrase())
 	,m_sourceWordsRange	(wordsRange)
 {	// used by initial translation step
-	
+
 	// set score
-	m_scoreGen		= 0;
-	m_scoreTrans	= targetPhrase.GetTranslationScore();
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 }
 
@@ -45,35 +44,23 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const Target
 	,m_sourceWordsRange	(copy.m_sourceWordsRange)
 	,m_scoreBreakdown(copy.m_scoreBreakdown)
 { // used in creating the next translation step
-	m_scoreGen		= copy.GetGenerationScore();
-	m_scoreTrans	= copy.GetTranslationScore() + targetPhrase.GetTranslationScore();
-	
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 }
 
 TranslationOption::TranslationOption(const TranslationOption &copy
 																		, const Phrase &inputPhrase
-																		, const GenerationDictionary *generationDictionary
-																		, float generationScore
-																		, float weight)
+																		, const ScoreComponentCollection2 &additionalScore)
 	: m_targetPhrase						(inputPhrase),m_sourcePhrase(copy.m_sourcePhrase)
 , m_sourceWordsRange	(copy.m_sourceWordsRange)
 , m_scoreBreakdown(copy.m_scoreBreakdown)
 { // used in creating the next generation step
-
-	m_scoreTrans	= copy.GetTranslationScore();
-	m_scoreGen	= copy.GetGenerationScore() + generationScore * weight;
-
-	m_scoreBreakdown.PlusEquals(generationDictionary, generationScore);
+	m_scoreBreakdown.PlusEquals(additionalScore);
 }
 
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/)
 : m_targetPhrase(targetPhrase)
 ,m_sourceWordsRange	(wordsRange)
-,m_scoreTrans(0)
-,m_scoreGen(0)
 ,m_futureScore(0)
-,m_ngramScore(0)
 { // used to create trans opt from unknown word
 }
 
@@ -93,15 +80,13 @@ TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targe
 }
 
 TranslationOption *TranslationOption::MergeGeneration(const Phrase &inputPhrase
-																	, const GenerationDictionary *generationDictionary
-																	, float generationScore
-																	, float weight) const
+																	, const ScoreComponentCollection2& generationScore) const
 {
 	if (m_targetPhrase.IsCompatible(inputPhrase))
 	{
 		Phrase mergePhrase(inputPhrase);
 		mergePhrase.MergeFactors(m_targetPhrase);
-		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase, generationDictionary, generationScore, weight);
+		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase, generationScore);
 		return newTransOpt;
 	}
 	else
@@ -117,15 +102,15 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 void TranslationOption::CalcScore(const LMList &allLM, float weightWordPenalty)
 {
 	// LM scores
-	m_ngramScore = 0;
+	float m_ngramScore = 0;
 	float retFullScore = 0;
 
 	allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, &m_scoreBreakdown);
 	// future score
-	m_futureScore = retFullScore;
+	m_futureScore = retFullScore - m_ngramScore;
 
 	size_t phraseSize = GetTargetPhrase().GetSize();
-	m_futureScore += m_scoreTrans - phraseSize * weightWordPenalty;
+	m_futureScore += m_scoreBreakdown.InnerProduct(StaticData::Instance()->GetAllWeights()) - phraseSize * weightWordPenalty;
 }
 
 TO_STRING_BODY(TranslationOption);
@@ -134,8 +119,7 @@ TO_STRING_BODY(TranslationOption);
 ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 {
 	out << possibleTranslation.GetTargetPhrase() 
-			<< ", pC=" << possibleTranslation.GetTranslationScore()
-			<< ", c=" << possibleTranslation.GetFutureScore()
+			<< "c=" << possibleTranslation.GetFutureScore()
 			<< " [" << possibleTranslation.GetSourceWordsRange() << "]"
 			<< possibleTranslation.GetScoreBreakdown();
 	return out;

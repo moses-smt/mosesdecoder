@@ -296,23 +296,46 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				TRACE_ERR(weight[i] << "\t");
 		}
 		TRACE_ERR(endl);
+		size_t currWeightNum = 0;
 		
 		for(size_t currDict = 0 ; currDict < generationVector.size(); currDict++) 
 		{
 			vector<string>			token		= Tokenize(generationVector[currDict]);
+			bool oldFormat = (token.size() == 3);
 			vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
 													,output	= Tokenize<FactorType>(token[1], ",");
-			string							filePath= token[2];
+			string							filePath;
+			size_t							numFeatures = 1;
+			if (oldFormat)
+				filePath = token[2];
+			else {
+				numFeatures = Scan<size_t>(token[2]);
+				filePath = token[3];
+			}
 
-			m_allWeights.push_back(weight[currDict]);
 			TRACE_ERR(filePath << endl);
-			m_generationDictionary.push_back(new GenerationDictionary());
+			if (oldFormat) {
+				std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+				             "  [WARNING] config file contains old style generation config format.\n"
+				             "  Only the first feature value will be ready.  Please use the 4-format\n"
+				             "  form (similar to the phrase table spec) to specify the # of features.\n"
+				             "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+			}
+
+			m_generationDictionary.push_back(new GenerationDictionary(numFeatures));
 			m_generationDictionary.back()->Load(input
 																		, output
 																		, m_factorCollection
 																		, filePath
-																		, weight[currDict]
-																		, Output);		 // always target, for now
+																		, Output				// always target, should we allow source?
+																		, oldFormat);
+			for(size_t i = 0; i < numFeatures; i++) {
+				assert(currWeightNum < weight.size());
+				m_allWeights.push_back(weight[currWeightNum++]);
+			}
+		}
+		if (currWeightNum != weight.size()) {
+			std::cerr << "  [WARNING] config file has " << weight.size() << " generation weights listed, but the configuration for generation files indicates there should be " << currWeightNum << "!\n";
 		}
 	}
 
@@ -392,50 +415,6 @@ IOMethod StaticData::GetIOMethod()
 		return IOMethodFile;
 	else
 		return IOMethodCommandLine;
-}
-
-void StaticData::SetWeightTransModel(const vector<float> &weight)
-{
-	size_t currWeight = 0;
-	for(vector<PhraseDictionaryBase*>::iterator iter = m_phraseDictionary.begin();
-			iter != m_phraseDictionary.end(); ++iter) 
-	{
-		PhraseDictionaryBase *phraseDict = *iter;
-		const size_t noScoreComponent 						= phraseDict->GetNumScoreComponents();
-		// weights for this particular dictionary
-		vector<float> dictWeight(noScoreComponent);
-		for (size_t i = 0 ; i < noScoreComponent ; i++)
-			{
-				dictWeight[i] = weight[currWeight++];
-			}
-		phraseDict->SetWeightTransModel(dictWeight);
-	}
-}
-
-void StaticData::SetWeightLM(const std::vector<float> &weight)
-{
-	assert(weight.size() == m_languageModel.size());
-	
-	size_t currIndex = 0;
-	LMList::iterator iter;
-	for (iter = m_languageModel.begin() ; iter != m_languageModel.end() ; ++iter)
-	{
-		LanguageModel *languageModel = *iter;
-		languageModel->SetWeight(weight[currIndex++]);
-	}
-}
-
-void StaticData::SetWeightGeneration(const std::vector<float> &weight)
-{
-	assert(weight.size() == GetGenerationDictionarySize());
-
-	size_t currWeight = 0;
-	vector<GenerationDictionary*>::iterator iter;
-	for(iter = m_generationDictionary.begin() ; iter != m_generationDictionary.end(); ++iter) 
-	{
-		GenerationDictionary *dict = *iter;
-		dict->SetWeight(weight[currWeight++]);
-	}
 }
 
 void StaticData::LoadPhraseTables(bool filter

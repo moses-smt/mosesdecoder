@@ -110,6 +110,17 @@ public:
 		m_scores[i] += score;
 	}
 
+	void Assign(const ScoreProducer* sp, const std::vector<float>& scores)
+	{
+		assert(scores.size() == sp->GetNumScoreComponents());
+		size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
+		for (std::vector<float>::const_iterator vi = scores.begin();
+		     vi != scores.end(); ++vi)
+		{
+			m_scores[i++] = *vi;
+		}  
+	}
+
 	//! Special version PlusEquals(ScoreProducer, vector<float>)
 	//! to add the score from a single ScoreProducer that produces
 	//! a single value

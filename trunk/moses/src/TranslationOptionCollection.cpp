@@ -66,7 +66,7 @@ TranslationOptionCollection::~TranslationOptionCollection()
 // helper
 bool CompareTranslationOption(const TranslationOption *a, const TranslationOption *b)
 {
-	return a->GetTotalScore() > b->GetTotalScore();
+	return a->GetFutureScore() > b->GetFutureScore();
 }
 
 void TranslationOptionCollection::Prune()
@@ -185,7 +185,7 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
 
 
 // helpers
-typedef pair<Word, float> WordPair;
+typedef pair<Word, ScoreComponentCollection2> WordPair;
 typedef list< WordPair > WordList;	
 // 1st = word 
 // 2nd = score
@@ -230,7 +230,6 @@ void TranslationOptionCollection::ProcessGeneration(
 	// normal generation step
 	const GenerationDictionary &generationDictionary	= decodeStep.GetGenerationDictionary();
 	const WordsRange &sourceWordsRange								= inputPartialTranslOpt.GetSourceWordsRange();
-	const float weight																= generationDictionary.GetWeight();
 
 	const Phrase &targetPhrase	= inputPartialTranslOpt.GetTargetPhrase();
 	size_t targetLength					= targetPhrase.GetSize();
@@ -258,7 +257,7 @@ void TranslationOptionCollection::ProcessGeneration(
 					for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
 						{
 							const Word &outputWord = (*iterWordColl).first;
-							float score = (*iterWordColl).second;
+							const ScoreComponentCollection2& score = (*iterWordColl).second;
 							wordList.push_back(WordPair(outputWord, score));
 						}
 		
@@ -280,19 +279,19 @@ void TranslationOptionCollection::ProcessGeneration(
 	// go thru each possible factor for each word & create hypothesis
 	for (size_t currIter = 0 ; currIter < numIteration ; currIter++)
 		{
-			float generationScore = 0; // total score for this string of words
+			ScoreComponentCollection2 generationScore; // total score for this string of words
 
 			// create vector of words with new factors for last phrase
 			for (size_t currPos = 0 ; currPos < targetLength ; currPos++)
 				{
 					const WordPair &wordPair = *wordListIterVector[currPos];
 					mergeWords[currPos] = &(wordPair.first);
-					generationScore += wordPair.second;
+					generationScore.PlusEquals(wordPair.second);
 				}
 
 			// merge with existing trans opt
 			Phrase genPhrase(Output, mergeWords);
-			TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(genPhrase, &generationDictionary, generationScore, weight);
+			TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(genPhrase, generationScore);
 			if (newTransOpt != NULL)
 				{
 					outputPartialTranslOptColl.Add(newTransOpt);

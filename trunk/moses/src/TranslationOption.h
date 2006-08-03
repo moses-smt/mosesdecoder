@@ -47,7 +47,7 @@ protected:
 	const Phrase 				m_targetPhrase;
 	Phrase const*       m_sourcePhrase;
 	const WordsRange		m_sourceWordsRange;
-	float								m_scoreTrans, m_scoreGen, m_futureScore, m_ngramScore;
+	float								m_totalScore, m_futureScore;
 
 	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
 	//! for example, know the full n-gram score since the length of the
@@ -62,17 +62,13 @@ public:
 	// used by MergeTranslation 
 	TranslationOption(const TranslationOption &copy
 											, const Phrase &inputPhrase
-											, const GenerationDictionary *generationDictionary
-											, float generationScore
-											, float weight);
+											, const ScoreComponentCollection2& additionalScore);
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/);
 	// used to create trans opt from unknown word
 	
 	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase) const;
 	TranslationOption *MergeGeneration(const Phrase &inputPhrase
-																		, const GenerationDictionary *generationDictionary
-																		, float generationScore
-																		, float weight) const;
+																		, const ScoreComponentCollection2& generationScore) const;
 
 	inline const Phrase &GetTargetPhrase() const
 	{
@@ -116,28 +112,9 @@ public:
 	{
 		return m_sourceWordsRange;
 	}
-  /***
-   * returns true if the source phrase translates into nothing
-   */
-	inline float GetTranslationScore() const
-	{
-		return m_scoreTrans;
-	}
-	inline float GetGenerationScore() const
-	{
-		return m_scoreGen;
-	}
 	inline float GetFutureScore() const 	 
 	{ 	 
-				 return m_futureScore; 	 
-	}
-	inline float GetNgramScore() const 	 
-  { 	 
-		return m_ngramScore; 	 
-	}
-	inline float GetTotalScore() const
-	{
-		return m_scoreTrans + m_scoreGen + m_futureScore;
+		return m_futureScore; 	 
 	}
   /***
    * returns true if the source phrase translates into nothing
