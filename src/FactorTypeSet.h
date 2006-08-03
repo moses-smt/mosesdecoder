@@ -71,7 +71,7 @@ public:
 	inline bool Contains(FactorType factorType) const
 	{
 		unsigned int value = static_cast<unsigned int>(factorType);
-		return  Contains(value);
+		return  (m_bit & value) > 0;
 	}
 	TO_STRING;	
 };
