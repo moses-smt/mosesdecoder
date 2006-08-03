@@ -31,10 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class HypothesisRecombinationOrderer
 {
-protected:
-	// static
-	static size_t s_ngramMaxOrder[NUM_FACTORS];
-
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
     // this function defines less-than relation on hypotheses
@@ -57,14 +53,6 @@ public:
 		ret = bitmapA.Compare(bitmapB);
 
 		return (ret < 0);
-	}
-
-	// static 
-	static inline void SetMaxNGramOrder(FactorType factorType, size_t ngramMaxOrder)
-	{
-		assert((size_t)factorType < NUM_FACTORS);
-		if (s_ngramMaxOrder[factorType] < ngramMaxOrder)
-			s_ngramMaxOrder[factorType] = ngramMaxOrder;
 	}
 };
 
