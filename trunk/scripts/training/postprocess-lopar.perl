@@ -4,14 +4,16 @@ use strict;
 
 use utf8;
 
+my $out = shift @ARGV or die "Please specify the output file path (will be appended with .lemma .morph and .words and .factored";
+
 my $wc = 0;
 my $uc = 0;
-open OUT, ">joined.txt" or die "Couldn't open joined";
-open M, ">morph.txt" or die "Couldn't open morph";
-open L, ">lemma.txt" or die "Couldn't open lemma";
-open S, ">surface.txt" or die "Couldn't open surface";
+open OUT, ">$out.factored" or die "Couldn't open joined";
+open M, ">$out.morph" or die "Couldn't open morph";
+open L, ">$out.lemma" or die "Couldn't open lemma";
+open S, ">$out.words" or die "Couldn't open surface";
 my $lc = 0;
-while (my $l =<>) {
+while (my $l =<STDIN>) {
   chomp $l;
 	$lc++;
   if ($lc % 1000 == 0) {print "$lc\n";}
@@ -26,8 +28,6 @@ while (my $l =<>) {
 			$lemma = $surface;
 		}
 
-    $lemma =~ tr/A-Z/a-z/;
-    $lemma =~ tr/À-Þ/à-þ/;
     $surface =~ tr/A-Z/a-z/;
     $surface =~ tr/À-Þ/à-þ/;
 
