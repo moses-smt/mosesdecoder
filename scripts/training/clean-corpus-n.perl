@@ -3,14 +3,17 @@
 use strict;
 use Getopt::Long;
 my $help;
-my $lc;
+my $lc = 0; # lowercase the corpus?
+my $enc = "utf8"; # encoding of the input and output files
+    # set to anything else you wish, but I have not tested it yet
 
-GetOptions("help" => \$help,
-	   "lowercase|lc=s" => \$lc,
-	   );
+GetOptions(
+  "help" => \$help,
+  "lowercase|lc" => \$lc,
+  "encoding" => \$enc,
+) or exit(1);
 
-if (!scalar(@ARGV) || $help || ($lc && !-e $lc && !-x $lc)) {
-    print "ERROR: $lc doesn't exist!\n";
+if (scalar(@ARGV) != 6 || $help) {
     print "syntax: clean-corpus-n.perl corpus l1 l2 clean-corpus min max\n";
     exit;
 }
@@ -24,10 +27,22 @@ my $max = $ARGV[5];
 
 print STDERR "clean-corpus.perl: processing $corpus.$l1 & .$l2 to $out, cutoff $min-$max\n";
 
-open(F,"$lc < $corpus.$l1 |") or die "Can't read $corpus.$l1";
-open(E,"$lc < $corpus.$l2 |") or die "Can't read $corpus.$l2";
+open(F,"$corpus.$l1") or die "Can't read $corpus.$l1";
+open(E,"$corpus.$l2") or die "Can't read $corpus.$l2";
 open(FO,">$out.$l1") or die "Can't write $out.$l1";
 open(EO,">$out.$l2") or die "Can't write $out.$l2";
+
+# necessary for proper lowercasing
+my $binmode;
+if ($enc eq "utf8") {
+  $binmode = ":utf8";
+} else {
+  $binmode = ":encoding($enc)";
+}
+binmode(F, $binmode);
+binmode(E, $binmode);
+binmode(FO, $binmode);
+binmode(EO, $binmode);
 
 my $innr = 0;
 my $outnr = 0;
@@ -39,6 +54,13 @@ while(my $f = <F>) {
   die "$corpus.$l2 is too short!" if !defined $e;
   chomp($e);
   chomp($f);
+
+  #if lowercasing, lowercase
+  if ($lc) {
+    $e = lc($e);
+    $f = lc($f);
+  }
+  
   # $e =~ s/\|//g;  # kinda hurts in factored input
   $e =~ s/\s+/ /g;
   $e =~ s/^ //;
