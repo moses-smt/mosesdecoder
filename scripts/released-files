@@ -1,0 +1,12 @@
+generic/moses-parallel.pl
+training/clone_moses_model.pl
+training/clean-corpus-n.perl
+training/train-factored-phrase-model.perl
+training/mert-moses.pl
+training/filter-model-given-input.pl
+training/absolutize_moses_model.pl
+generic/qsub-wrapper.pl
+analysis/README
+README
+Makefile
+released-files
