@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 																									 static_cast<InputType*>(new ConfusionNet) : 
 																									 static_cast<InputType*>(new Sentence(Input)))))
 	{
-		TRACE_ERR(*source<<"\n");
+		TRACE_ERR("TRANSLATING: " << *source <<"\n");
 
 		TranslationOptionCollection *translationOptionCollection=source->CreateTranslationOptionCollection();
 		assert(translationOptionCollection);
