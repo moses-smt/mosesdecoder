@@ -99,7 +99,7 @@ protected:
 
 	mutable SentenceStats m_sentenceStats;
 	
-	int m_useDistortionFutureCosts;
+	bool m_useDistortionFutureCosts;
 
   
 
