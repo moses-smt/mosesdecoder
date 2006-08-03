@@ -20,7 +20,7 @@ my $BZCAT = "bzcat";
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
 
-my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS);
+my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL);
 
 
 $_HELP = 1
@@ -41,6 +41,7 @@ $_HELP = 1
 		       'first-step=i' => \$_FIRST_STEP,
 		       'last-step=i' => \$_LAST_STEP,
 		       'giza-option=s' => \$_GIZA_OPTION,
+		       'parallel' => \$_PARALLEL,
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
 		       'parts=i' => \$_PARTS,
@@ -145,6 +146,9 @@ $___PARTS = $_PARTS if $_PARTS;
 my $___DIRECTION = 0;
 $___DIRECTION = $_DIRECTION if $_DIRECTION;
 
+# don't fork
+my $___NOFORK = !defined $_PARALLEL;
+
 my $___ONLY_PRINT_GIZA = 0;
 $___ONLY_PRINT_GIZA = 1 if $_ONLY_PRINT_GIZA;
 
@@ -227,22 +231,61 @@ sub prepare {
     print STDERR "(1.0) selecting factors @ ".`date`;
     my ($factor_f,$factor_e) = split(/\-/,$___ALIGNMENT_FACTORS);
     my $corpus = $___CORPUS.".".$___ALIGNMENT_FACTORS;    
-    &reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
-    &reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
+    if ($___NOFORK) {
+	&reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
+	&reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
 
-    &make_classes($corpus.".".$___F,$___VCB_F.".classes");
-    &make_classes($corpus.".".$___E,$___VCB_E.".classes");
+	&make_classes($corpus.".".$___F,$___VCB_F.".classes");
+	&make_classes($corpus.".".$___E,$___VCB_E.".classes");
     
-    my $VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
-    my $VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
+	my $VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
+	my $VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
     
-    &numberize_txt_file($VCB_F,$corpus.".".$___F,
+	&numberize_txt_file($VCB_F,$corpus.".".$___F,
 			$VCB_E,$corpus.".".$___E,
 			$___CORPUS_DIR."/$___F-$___E-int-train.snt");
     
-    &numberize_txt_file($VCB_E,$corpus.".".$___E,
+	&numberize_txt_file($VCB_E,$corpus.".".$___E,
 			$VCB_F,$corpus.".".$___F,
 			$___CORPUS_DIR."/$___E-$___F-int-train.snt");
+    } else {
+	print "Forking...\n";
+	my $pid = fork();
+	die "couldn't fork" unless defined $pid;
+	if (!$pid) {
+	    &reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
+	    exit 0;
+	} else {
+	    &reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
+	    waitpid($pid, 0);
+	}
+	my $pid2 = 0;
+	$pid = fork();
+	die "couldn't fork" unless defined $pid;
+	if (!$pid) {
+	    &make_classes($corpus.".".$___F,$___VCB_F.".classes");
+	    exit 0;
+	} # parent
+	$pid2 = fork();
+	die "couldn't fork again" unless defined $pid2;
+	if (!$pid2) { #child
+	    &make_classes($corpus.".".$___E,$___VCB_E.".classes");
+	    exit 0;
+	}
+    
+	my $VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
+	my $VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
+    
+	&numberize_txt_file($VCB_F,$corpus.".".$___F,
+			$VCB_E,$corpus.".".$___E,
+			$___CORPUS_DIR."/$___F-$___E-int-train.snt");
+    
+	&numberize_txt_file($VCB_E,$corpus.".".$___E,
+			$VCB_F,$corpus.".".$___F,
+			$___CORPUS_DIR."/$___E-$___F-int-train.snt");
+	waitpid($pid2, 0);
+	waitpid($pid, 0);
+    }
 }
 
 sub reduce_factors {
@@ -370,14 +413,33 @@ sub run_giza {
     return &run_giza_on_parts if $___PARTS>1;
 
     print STDERR "(2) running giza @ ".`date`;
-    &run_single_giza($___GIZA_F2E,$___E,$___F,
+    if ($___DIRECTION == 1 || $___DIRECTION == 2 || $___NOFORK) {
+	&run_single_giza($___GIZA_F2E,$___E,$___F,
 		     $___VCB_E,$___VCB_F,
 		     $___CORPUS_DIR."/$___F-$___E-int-train.snt")
-	unless $___DIRECTION == 2;
-    &run_single_giza($___GIZA_E2F,$___F,$___E,
+	    unless $___DIRECTION == 2;
+	&run_single_giza($___GIZA_E2F,$___F,$___E,
 		     $___VCB_F,$___VCB_E,
 		     $___CORPUS_DIR."/$___E-$___F-int-train.snt")
-	unless $___DIRECTION == 1;
+	    unless $___DIRECTION == 1;
+    } else {
+	my $pid = fork();
+	if (!defined $pid) {
+	    die "Failed to fork";
+	}
+	if (!$pid) { # i'm the child
+	    &run_single_giza($___GIZA_F2E,$___E,$___F,
+                     $___VCB_E,$___VCB_F,
+                     $___CORPUS_DIR."/$___F-$___E-int-train.snt");
+	    exit 0; # child exits
+	} else { #i'm the parent
+	    &run_single_giza($___GIZA_E2F,$___F,$___E,
+                     $___VCB_F,$___VCB_E,
+                     $___CORPUS_DIR."/$___E-$___F-int-train.snt");
+	}
+	printf "Waiting on second GIZA process...\n";
+	waitpid($pid, 0);
+    }
 }
 
 sub run_giza_on_parts {
@@ -386,15 +448,34 @@ sub run_giza_on_parts {
     die "Failed to get number of lines in $___CORPUS_DIR/$___F-$___E-int-train.snt"
       if $size == 0;
     
-    &run_single_giza_on_parts($___GIZA_F2E,$___E,$___F,
+    if ($___DIRECTION == 1 || $___DIRECTION == 2 || $___NOFORK) {
+	&run_single_giza_on_parts($___GIZA_F2E,$___E,$___F,
 			      $___VCB_E,$___VCB_F,
 			      $___CORPUS_DIR."/$___F-$___E-int-train.snt",$size)
-   	unless $___DIRECTION == 2;
+   	    unless $___DIRECTION == 2;
  
-    &run_single_giza_on_parts($___GIZA_E2F,$___F,$___E,
+	&run_single_giza_on_parts($___GIZA_E2F,$___F,$___E,
 			      $___VCB_F,$___VCB_E,
 			      $___CORPUS_DIR."/$___E-$___F-int-train.snt",$size)
-   	unless $___DIRECTION == 1;
+   	    unless $___DIRECTION == 1;
+    } else {
+	my $pid = fork();
+	if (!defined $pid) {
+	    die "Failed to fork";
+	}
+	if (!$pid) { # i'm the child
+	    &run_single_giza_on_parts($___GIZA_F2E,$___E,$___F,
+			      $___VCB_E,$___VCB_F,
+			      $___CORPUS_DIR."/$___F-$___E-int-train.snt",$size);
+	    exit 0; # child exits
+	} else { #i'm the parent
+	    &run_single_giza_on_parts($___GIZA_E2F,$___F,$___E,
+			      $___VCB_F,$___VCB_E,
+			      $___CORPUS_DIR."/$___E-$___F-int-train.snt",$size);
+	}
+	printf "Waiting on second GIZA process...\n";
+	waitpid($pid, 0);
+    }
 }
 
 sub run_single_giza_on_parts {
