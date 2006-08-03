@@ -269,19 +269,8 @@ public:
   const bool IsNBestEnabled() const {
     return !m_nBestFilePath.empty();
   }
-	void SetWeightDistortion(float weightDistortion)
-	{
-		m_weightDistortion = weightDistortion;
-	}
-	void SetWeightWordPenalty(float weightWordPenalty)
-	{
-		m_weightWordPenalty = weightWordPenalty;
-	}
 //! Sets the global score vector weights for a given ScoreProducer.
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
-	void SetWeightTransModel(const std::vector<float> &weight);
-	void SetWeightLM(const std::vector<float> &weight);
-	void SetWeightGeneration(const std::vector<float> &weight);
 	int GetInputType() const {return m_inputType;}
 	unsigned GetNumInputScores() const {return m_numInputScores;}
 	void InitializeBeforeSentenceProcessing(InputType const&);

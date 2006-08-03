@@ -112,8 +112,8 @@ bool Parameter::Validate()
 			ret = FilesExist("ttable-file", 3,ext);
 		}
 	// generation tables
-	if (ret)
-		ret = FilesExist("generation-file", 2);
+//	if (ret)
+//		ret = FilesExist("generation-file", 2);
 	// language model
 	if (ret)
 		ret = FilesExist("lmodel-file", 3);

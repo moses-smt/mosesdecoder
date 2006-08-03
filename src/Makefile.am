@@ -42,7 +42,6 @@ libmoses_a_SOURCES = \
 	TranslationOptionCollectionConfusionNet.cpp \
 	UserMessage.cpp \
 	Util.cpp \
-	WeightOptimization.cpp \
 	Word.cpp \
 	WordsBitmap.cpp \
 	WordsRange.cpp
