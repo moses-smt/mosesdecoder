@@ -30,8 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-GenerationDictionary::GenerationDictionary()
-  : Dictionary(1)
+GenerationDictionary::GenerationDictionary(size_t numFeatures)
+  : Dictionary(numFeatures)
 {
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
 }
@@ -40,10 +40,15 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
 																			, FactorCollection &factorCollection
 																			, const std::string &filePath
-																			, float weight
-																			, FactorDirection direction)
+																			, FactorDirection direction
+																			, bool forceSingleFeatureValue)
 {	
-	m_weight = weight;
+	const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();
+
+  // old hack - originally, moses assumed single generation values
+	if (forceSingleFeatureValue) {
+		assert(numFeatureValuesInConfig == 1);
+	}
 
 	//factors	
 	m_factorsUsed[Input] = new FactorTypeSet(input);
@@ -51,11 +56,17 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 	
 	// data from file
 	InputFileStream inFile(filePath);
+	if (!inFile.good()) {
+		std::cerr << "Couldn't read " << filePath << std::endl;
+		exit(1);
+	}
 
   m_filename = filePath;
 	string line;
+	size_t lineNum = 0;
 	while(getline(inFile, line)) 
 	{
+		++lineNum;
 		vector<string> token = Tokenize( line );
 		
 		// add each line in generation file into class
@@ -81,9 +92,19 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 			outputWord.SetFactor(factorType, factor);
 		}
 
-		float score		= TransformScore(Scan<float>(token[2]));
+		size_t numFeaturesInFile = token.size() - 2;
+		if (forceSingleFeatureValue) numFeaturesInFile = 1;
+		if (numFeaturesInFile != numFeatureValuesInConfig) {
+			std::cerr << filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
+								<< " feature values, but found " << numFeaturesInFile << std::endl;
+			exit(1);
+		}
+		std::vector<float> scores(numFeaturesInFile, 0.0f);
+		for (size_t i = 0; i < numFeaturesInFile; i++)
+			scores[i] = TransformScore(Scan<float>(token[2+i]));
 		
-		m_collection[inputWord][outputWord] = score;					
+		m_collection[inputWord][outputWord].Assign(this, scores);
+//		std::cerr << "CD: " << m_collection[inputWord][outputWord] << std::endl;
 	}
 	inFile.Close();
 }
