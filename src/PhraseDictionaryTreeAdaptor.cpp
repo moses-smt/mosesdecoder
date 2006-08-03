@@ -267,7 +267,7 @@ struct PDTAimp {
 								Range newRange(curr.begin(),curr.end()+1);
 								float newScore=curr.GetScore()+currCol[colidx].second;
 								Phrase newSrc(curr.src);
-								newSrc.push_back(w);
+								if(!isEpsilon) newSrc.push_back(w);
 								if(newRange.second<src.GetSize())
 									{
 										stack.push_back(State(newRange,nextP,newScore,newRealWords));
