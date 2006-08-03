@@ -34,7 +34,16 @@ namespace LanguageModelFactory
 	  }
 	  if (lm == NULL)
 	  {
-	  	UserMessage::Add("Lnaguage model type unknown. Probably not compiled into library");
+	  	// fall back. pick what we have
+	  	#ifdef LM_SRI
+				lm = new LanguageModel_SRI();
+			#else
+				#ifdef LM_IRST
+					lm = new LanguageModel_IRST();
+				#else
+			  	UserMessage::Add("Lnaguage model type unknown. Probably not compiled into library");
+				#endif
+			#endif			  
 	  }
 	  return lm;
 	}
