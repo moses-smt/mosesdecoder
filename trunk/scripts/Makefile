@@ -21,7 +21,7 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 
 
 
-MAIN_TRAINING_SCRIPTS_NAMES=filter-model-given-input.pl  mert-moses.pl train-factored-phrase-model.perl
+MAIN_TRAINING_SCRIPTS_NAMES=filter-model-given-input.pl  mert-moses.pl train-factored-phrase-model.perl clean-corpus-n.perl
 # Make trick to add directory name to all of them:
 MAIN_TRAINING_SCRIPTS=$(MAIN_TRAINING_SCRIPTS_NAMES:%=training/%)
 
