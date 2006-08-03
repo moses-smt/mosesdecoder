@@ -29,9 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-size_t HypothesisRecombinationOrderer::s_ngramMaxOrder[NUM_FACTORS] = {0,0,0,0};
-	// need to change if we add more factors, or use a macro
-
 void HypothesisCollection::RemoveAll()
 {
 	while (m_hypos.begin() != m_hypos.end())
