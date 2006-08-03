@@ -69,6 +69,7 @@ Parameter::Parameter()
 	AddParam("drop-unknown");
 	AddParam("inputtype");
 	AddParam("max-trans-opt-per-coverage");
+	AddParam("use-distortion-future-costs");
 }
 
 // check if parameter settings make sense
@@ -268,6 +269,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-ttable-limit","ttable-limit",argc,argv);
 	OverwriteParam("-lmodel-file","lmodel-file",argc,argv);
 	OverwriteParam("-beam-threshold","beam-threshold",argc,argv);
+	OverwriteParam("-use-distortion-future-costs","use-distortion-future-costs",argc,argv);
 	//	OverwriteParam("-","",argc,argv);
 
 
