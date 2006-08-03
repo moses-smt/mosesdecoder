@@ -36,7 +36,7 @@ LexicalReordering::LexicalReordering(const std::string &filename,
 	const_cast<StaticData*>(StaticData::Instance())->SetWeightsForScoreProducer(this, weights);
 	// Load the file
 	LoadFile();
-	PrintTable();
+//	PrintTable();
 }
 
 
@@ -60,6 +60,8 @@ void LexicalReordering::LoadFile()
 					// if condition is "fe", then concatenate the first two tokens
 					// to make a single token
 					key = f + "|||" + e;
+
+					//TODO: debugging, remove
 					probs = Scan<float>(Tokenize(tokens[FE_PROBS]));
 				}
 			else
@@ -110,6 +112,7 @@ void LexicalReordering::PrintTable()
 std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 {
 	std::vector<float> score(m_numberscores, 0);
+
 	vector<float> val;
 	for(int i=0; i < m_direction.size(); i++)
 	{
@@ -118,88 +121,92 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 		if(m_condition==LexReorderType::Fe)
 		{
 		//this key string is be F+'|||'+E from the hypothesis
-		val=m_orientation_table[hypothesis->GetSourcePhrase().GetStringRep(hypothesis->GetCurrSourceWordsRange())
-														+"|||"
-														+hypothesis->GetTargetPhrase().GetStringRep(hypothesis->GetCurrTargetWordsRange())];
-	
+		//what does map return if not in phrase table? is this appropriate?
+		val=m_orientation_table[hypothesis->GetSourcePhraseStringRep()
+														+"||| "
+														+hypothesis->GetTargetPhraseStringRep()];
 		}
 		else
 		{
 			//this key string is F from the hypothesis
-			val=m_orientation_table[hypothesis->GetTargetPhrase().GetStringRep(hypothesis->GetCurrTargetWordsRange())];
+			val=m_orientation_table[hypothesis->GetTargetPhraseStringRep()];
 		}
-		//the forward_offset is only applicable if we have a bidirectional model
-		//as the forward weights/scores come after the backward in this model, we need to offset by this amount.
-		int forward_offset = 0;
-		//we know we have a bidirectional model if the number of scores is 4 or 6, not 2 or 3.
-		if(m_numberscores==4)
+		//TODO: the proper behavior in the case the FE or F is not in the table? right now just returns vector of zeros for the score
+		if(val.size()> 0)
 		{
-			forward_offset=2;
-		}
-		else if(m_numberscores==6)
-		{
-			forward_offset=3;
-		}
-		if(m_orientation==DistortionOrientationType::Msd)
-		{
-			if(direction==LexReorderType::Backward)
+			//the forward_offset is only applicable if we have a bidirectional model
+			//as the forward weights/scores come after the backward in this model, we need to offset by this amount.
+			int forward_offset = 0;
+			//we know we have a bidirectional model if the number of scores is 4 or 6, not 2 or 3.
+			if(m_numberscores==4)
 			{
-				if(orientation==DistortionOrientationType::MONO)
-				{
-					score[BACK_M] = val[BACK_M];
-				}
-				else if(orientation==DistortionOrientationType::SWAP)
-				{
-					score[BACK_S] = val[BACK_S];
-				}
-				else
-				{
-					score[BACK_D] = val[BACK_D];
-				}
-			
+				forward_offset=2;
 			}
-			else
+			else if(m_numberscores==6)
 			{
-				if(orientation==DistortionOrientationType::MONO)
-				{
-					score[FOR_M+forward_offset] = val[FOR_M+forward_offset];
-				}
-				else if(orientation==DistortionOrientationType::SWAP)
-				{
-					score[FOR_S+forward_offset] = val[FOR_S+forward_offset];
-				}
-				else
-				{
-					score[FOR_D+forward_offset] = val[FOR_D+forward_offset];
-				}
+				forward_offset=3;
 			}
-		}
-		else
-		{
-			if(direction==LexReorderType::Backward)
+			if(m_orientation==DistortionOrientationType::Msd)
 			{
-				if(orientation==DistortionOrientationType::MONO)
+				if(direction==LexReorderType::Backward)
 				{
-					score[BACK_MONO] = val[BACK_MONO];
+					if(orientation==DistortionOrientationType::MONO)
+					{
+						score[BACK_M] = val[BACK_M];
+					}
+					else if(orientation==DistortionOrientationType::SWAP)
+					{
+						score[BACK_S] = val[BACK_S];
+					}
+					else
+					{
+						score[BACK_D] = val[BACK_D];
+					}
+				
 				}
 				else
 				{
-					score[BACK_NONMONO] = val[BACK_NONMONO];
+					if(orientation==DistortionOrientationType::MONO)
+					{
+						score[FOR_M+forward_offset] = val[FOR_M+forward_offset];
+					}
+					else if(orientation==DistortionOrientationType::SWAP)
+					{
+						score[FOR_S+forward_offset] = val[FOR_S+forward_offset];
+					}
+					else
+					{
+						score[FOR_D+forward_offset] = val[FOR_D+forward_offset];
+					}
 				}
 			}
 			else
 			{
-				if(orientation==DistortionOrientationType::MONO)
+				if(direction==LexReorderType::Backward)
 				{
-					score[FOR_MONO+forward_offset] = val[FOR_MONO+forward_offset];					
+					if(orientation==DistortionOrientationType::MONO)
+					{
+						score[BACK_MONO] = val[BACK_MONO];
+					}
+					else
+					{
+						score[BACK_NONMONO] = val[BACK_NONMONO];
+					}
 				}
 				else
 				{
-					score[FOR_NONMONO+forward_offset] = val[FOR_NONMONO+forward_offset];					
+					if(orientation==DistortionOrientationType::MONO)
+					{
+						score[FOR_MONO+forward_offset] = val[FOR_MONO+forward_offset];					
+					}
+					else
+					{
+						score[FOR_NONMONO+forward_offset] = val[FOR_NONMONO+forward_offset];					
+					}
 				}
 			}
+	
 		}
-
 	}
 	return score;
 }

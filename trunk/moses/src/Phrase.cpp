@@ -143,12 +143,7 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 
 std::string Phrase::GetStringRep(const WordsRange &wordsRange) const
 {
-	std::stringstream phrase_string("");
-	for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++)
-	{
-		phrase_string << " " << Word::ToString(GetFactorArray(currPos));
-	}
-	return phrase_string.str();
+	return GetSubString(wordsRange).ToString();
 }
 
 FactorArray &Phrase::AddWord()
