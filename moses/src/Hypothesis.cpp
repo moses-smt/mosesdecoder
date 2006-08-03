@@ -466,5 +466,7 @@ std::string Hypothesis::GetSourcePhraseStringRep() const
 }
 std::string Hypothesis::GetTargetPhraseStringRep() const 
 {
+
+//	return m_targetPhrase.ToString(); //doesn't segFault
 	return m_targetPhrase.GetStringRep(m_currTargetWordsRange);
 }
