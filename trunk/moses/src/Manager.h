@@ -40,13 +40,13 @@ class Manager
 {
 protected:	
 	// data
-	InputType const& m_source;
+	InputType const& m_source; /**< source sentence to be translated */
 
-	std::vector < HypothesisCollection > m_hypoStack;
+	std::vector < HypothesisCollection > m_hypoStack; /**< stacks to store hypothesis (partial translations) */ 
 		// no of elements = no of words in source + 1
-	StaticData &m_staticData;
-	TranslationOptionCollection &m_possibleTranslations;
-	TargetPhrase m_initialTargetPhrase; // used to seed 1st hypo
+	StaticData &m_staticData; /**< holds various kinds of constants, counters, and global data structures */
+	TranslationOptionCollection &m_possibleTranslations; /**< pre-computed list of translation options for the phrases in this sentence */
+	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
