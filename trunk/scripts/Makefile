@@ -51,10 +51,6 @@ release:
 	if [ -e $(RELEASEDIR) ]; then echo "Targetdir exists! Not touching it! $(RELEASEDIR)"; exit 1; fi
 	mkdir -p $(RELEASEDIR)
 	rsync -r --files-from ./released-files . $(RELEASEDIR)/
-	## Now adding JHU-specific stuff
-	mkdir -p $(RELEASEDIR)/extra/
-	cp -r /export/ws06osmt/bin/cmert-0.5 $(RELEASEDIR)/extra/
-	## Back from JHU-specific
 	echo "####### Do not forget to:" >> $(RELEASEDIR)/README
 	echo "  export SCRIPTS_ROOTDIR=$(RELEASEDIR)" >> $(RELEASEDIR)/README
 	## Remember, only files listed in released-files are released!!
@@ -79,6 +75,24 @@ generate_wrappers:
 	done
 	
 
+MOSESRELEASE=$(TARGETDIR)/moses.$(DS)
+## This is a handy goal to release moses binary, too
+releasemoses:
+	if [ -z "$(TARGETDIR)" ]; then \
+	  echo "Please specify a TARGETDIR." ; \
+	  echo "  For custom releases issue: "; \
+	  echo "   TARGETDIR=$(HOME)/releases make releasemoses"; \
+	  echo "  For official releases: "; \
+	  echo "   TARGETDIR=/export/ws06osmt make releasemoses"; \
+	  exit 1; \
+	fi
+	if [ -e $(MOSESRELEASE) ]; then echo "Moses release exists! Not touching it! $(MOSESRELEASE)"; exit 1; fi
+	if [ ! -e ../moses-cmd/src/moses ]; then echo "Moses (../moses-cmd/src/moses) does not exist, nothing to release"; ecit 1; fi
+	if file ../moses-cmd/src/moses | grep -q 'dynamicall' ; then echo "Moses (../moses-cmd/src/moses) is dynamically linked, not releasing."; ecit 1; fi
+	cp ../moses-cmd/src/moses $(MOSESRELEASE)
+	## Your current version of moses:
+	@echo "   $(MOSESRELEASE)"
+
 
 ## This goal lists all files you might have wanted to release
 # but forgot to mention in released-files
@@ -86,6 +100,7 @@ missed:
 	### These might be intended for release
 	find . -type f \
 	| grep -v '/CVS/' \
+	| grep -v /tests/ \
 	| sed 's/^\.\///' \
 	| grep -F -x -v -f released-files
 

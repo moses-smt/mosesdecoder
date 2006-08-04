@@ -1354,10 +1354,14 @@ sub store_reordering_fe {
 my $factor_e_source;
 sub get_generation_factored {
     print STDERR "(8) learn generation model @ ".`date`;
-    foreach my $f (split(/\+/,$___GENERATION_FACTORS)) {
+    if (defined $___GENERATION_FACTORS) {
+      foreach my $f (split(/\+/,$___GENERATION_FACTORS)) {
 	$factor = $f;
 	($factor_e_source,$factor_e) = split(/\-/,$factor);
 	&get_generation();
+      }
+    } else {
+      print STDERR "  no generation model requested, skipping step\n";
     }
 }
 
