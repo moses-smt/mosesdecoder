@@ -53,8 +53,8 @@ Manager::Manager(InputType const& source,
 Manager::~Manager() {}
 
 /**
- * this is the main loop when a sentence is translated
- * hypotheses are expanded stack by stack, until the end of the sentence
+ * This is the main decoder loop that translates a sentence by expanding
+ * hypotheses stack by stack, until the end of the sentence.
  */
 void Manager::ProcessSentence()
 {	
@@ -99,7 +99,7 @@ void Manager::ProcessSentence()
 		// some logging
 		if (m_staticData.GetVerboseLevel() > 0) {
 			//OutputHypoStack();
-			OutputHypoStackSize();
+                        OutputHypoStackSize();
 		}
 
 	}
@@ -113,10 +113,10 @@ void Manager::ProcessSentence()
 	}
 }
 
-/** 
- * find all translation options to expand one hypothesis, trigger expansion
+/** Find all translation options to expand one hypothesis, trigger expansion
  * this is mostly a check for overlap with already covered words, and for
- * violation of reordering limits.
+ * violation of reordering limits. 
+ * \param hypothesis hypothesis to be expanded upon
  */
 void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 {
@@ -193,6 +193,12 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	}
 }
 
+/**
+ * Expand a hypothesis given a list of translation options
+ * \param hypothesis hypothesis to be expanded upon
+ * \param transOptList list of translation options to be applied
+ */
+
 void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList)
 {
 	TranslationOptionList::const_iterator iter;
@@ -205,6 +211,9 @@ void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const Translation
 /**
  * Expand one hypothesis with a translation option.
  * this involves initial creation, scoring and adding it to the proper stack
+ * \param hypothesis hypothesis to be expanded upon
+ * \param transOpt translation option (phrase translation) 
+ *        that is applied to create the new hypothesis
  */
 void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
@@ -224,8 +233,8 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 }
 
 /**
- * Find best hypothesis on the last steck
- * this is the end point of the best translation
+ * Find best hypothesis on the last stack.
+ * This is the end point of the best translation, which can be traced back from here
  */
 const Hypothesis *Manager::GetBestHypothesis() const
 {
@@ -234,7 +243,7 @@ const Hypothesis *Manager::GetBestHypothesis() const
 }
 
 /**
- * Logging of hypotheses stacks and their sizes
+ * Logging of hypotheses stack sizes
  */
 void Manager::OutputHypoStackSize()
 {
@@ -247,6 +256,10 @@ void Manager::OutputHypoStackSize()
 	TRACE_ERR (endl);
 }
 
+/**
+ * Logging of hypotheses stack contents
+ * \param stack number of stack to be reported, report all stacks if 0 
+ */
 void Manager::OutputHypoStack(int stack)
 {
 	if (stack >= 0)
@@ -268,8 +281,11 @@ void Manager::OutputHypoStack(int stack)
 /**
  * After decoding, the hypotheses in the stacks and additional arcs
  * form a search graph that can be mined for n-best lists.
- * the heavy lifting is done in the LatticePath and LatticePathCollection
- * this function controls this for one sentence
+ * The heavy lifting is done in the LatticePath and LatticePathCollection
+ * this function controls this for one sentence.
+ *
+ * \param count the number of n-best translations to produce
+ * \param ret holds the n-best list that was calculated
  */
 void Manager::CalcNBest(size_t count, LatticePathList &ret) const
 {
