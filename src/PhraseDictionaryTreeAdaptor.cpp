@@ -2,6 +2,7 @@
 
 #include "PhraseDictionaryTreeAdaptor.h"
 #include <sys/stat.h>
+#include <algorithm>
 #include "PhraseDictionaryTree.h"
 #include "Phrase.h"
 #include "FactorCollection.h"
@@ -20,6 +21,11 @@ inline bool existsFile(const char* filename) {
 double addLogScale(double x,double y) 
 {
 	if(x>y) return addLogScale(y,x); else return x+log(1.0+exp(y-x));
+}
+
+double Exp(double x)
+{
+	return exp(x);
 }
 
 struct PDTAimp {
@@ -76,7 +82,10 @@ struct PDTAimp {
 				if(pathCN.size())
 					{
 						std::cerr<<"CN (full):     ";
-						std::transform(pathCN.begin()+1,pathCN.end(),std::ostream_iterator<double>(std::cerr," \t"),exp); 
+						std::transform(pathCN.begin()+1
+													,pathCN.end()
+													,std::ostream_iterator<double>(std::cerr," \t")
+													,Exp); 
 						std::cerr<<"\n";
 					}
 				if(pathExplored.size())
@@ -321,7 +330,10 @@ struct PDTAimp {
 				std::cerr.setf(std::ios::scientific); 
 				std::cerr.precision(5);
 				std::cerr<<"CN (full):     ";
-				std::transform(exPathsD.begin()+1,exPathsD.end(),std::ostream_iterator<double>(std::cerr," "),exp); 
+				std::transform(exPathsD.begin()+1
+											,exPathsD.end()
+											,std::ostream_iterator<double>(std::cerr," ")
+											,Exp);
 				std::cerr<<"\n";
 			}
 
