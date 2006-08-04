@@ -70,7 +70,7 @@ public:
 	/***
 	 * ngramComponent should be an invalid pointer iff n-best ranking is turned off
 	 */
-	void CalcScore(const Phrase &phrase
+	virtual void CalcScore(const Phrase &phrase
 							, float &fullScore
 							, float &ngramScore) const;
 	FactorType GetFactorType() const

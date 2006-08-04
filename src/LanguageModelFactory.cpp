@@ -12,6 +12,7 @@
 #  include "LanguageModel_IRST.h"
 #endif
 
+#include "LanguageModel_Chunking.h"
 
 namespace LanguageModelFactory
 {
@@ -30,6 +31,9 @@ namespace LanguageModelFactory
 				#ifdef LM_IRST
 	     		lm = new LanguageModel_IRST();
 				#endif
+				break;
+			case Chunking:
+     		lm = new LanguageModel_Chunking();
 				break;
 	  }
 	  if (lm == NULL)

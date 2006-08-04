@@ -19,14 +19,14 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "LanguageModel_IRST.h"
+#include "LanguageModel_SRI.h"
 
-class LanguageModel_Chunking : public LanguageModel_IRST
+class LanguageModel_Chunking : public LanguageModel_SRI
 {
-	typedef LanguageModel_IRST MyBase;
+	typedef LanguageModel_SRI MyBase;
 	
 protected:
-	size_t m_maxNGramOrder;
+	size_t m_realNGramOrder;
 public:
 	LanguageModel_Chunking();
 	~LanguageModel_Chunking();
@@ -34,8 +34,7 @@ public:
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
-					, size_t nGramOrder
-					, size_t maxNGramOrder);
+					, size_t nGramOrder);
 	void CalcScore(const Phrase &phrase
 							, float &fullScore
 							, float &ngramScore) const;
