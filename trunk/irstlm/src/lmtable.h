@@ -40,7 +40,7 @@
 #ifndef MF_LMTABLE_H
 #define MF_LMTABLE_H
 
-#include "ngram.h"
+#include "n_gram.h"
 
 #define LMTMAXLEV  11
 
