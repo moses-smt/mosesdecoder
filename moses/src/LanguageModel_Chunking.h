@@ -19,11 +19,11 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "LanguageModel_SRI.h"
+#include "LanguageModel_IRST.h"
 
-class LanguageModel_Chunking : public LanguageModel_SRI
+class LanguageModel_Chunking : public LanguageModel_IRST
 {
-	typedef LanguageModel_SRI MyBase;
+	typedef LanguageModel_IRST MyBase;
 	
 protected:
 	size_t m_maxNGramOrder;
