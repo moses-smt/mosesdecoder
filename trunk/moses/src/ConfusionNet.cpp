@@ -8,6 +8,7 @@
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "StaticData.h"
+#include "Sentence.h"
 
 struct CNStats {
 	unsigned created,destr,read,colls,words;
@@ -49,6 +50,14 @@ CNStats stats;
 ConfusionNet::ConfusionNet(FactorCollection* p) 
 	: InputType(),m_factorCollection(p) {stats.createOne();}
 ConfusionNet::~ConfusionNet() {stats.destroyOne();}
+
+ConfusionNet::ConfusionNet(Sentence const& s)
+{
+	data.resize(s.GetSize());
+	for(size_t i=0;i<s.GetSize();++i)
+		data[i].push_back(std::make_pair(Word(s.GetFactorArray(i)),0.0));
+}
+
 
 void ConfusionNet::SetFactorCollection(FactorCollection *p) 
 {

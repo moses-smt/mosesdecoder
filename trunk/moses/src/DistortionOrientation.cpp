@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <limits>
-#include <assert.h>
+#include <cassert>
 #include "DistortionOrientation.h"
 #include "TypeDef.h"
 #include "Hypothesis.h"
@@ -21,8 +21,8 @@ int DistortionOrientation::GetOrientation(const Hypothesis *curr_hypothesis, int
 			       , &currSourceRange = curr_hypothesis->GetCurrSourceWordsRange();
 	const Hypothesis *prevHypo = curr_hypothesis->GetPrevHypo();
 	//don't look for attributes of the previous hypothesis if there is no previous hypothesis.
-	size_t prev_source_start = NULL;
-	size_t prev_source_end = NULL;
+	size_t prev_source_start = 0;
+	size_t prev_source_end = 0;
 	if(prevHypo!=NULL){
 		const WordsRange &prevSourceRange = prevHypo->GetCurrSourceWordsRange();
 		prev_source_start = prevSourceRange.GetStartPos();
@@ -34,7 +34,7 @@ int DistortionOrientation::GetOrientation(const Hypothesis *curr_hypothesis, int
 	size_t curr_target_end = currTargetRange.GetEndPos();
 	//TODO: what is appropriate behavior in this situation?
 	//first hypothesis has no previous source start; we judge it by default monotonic.
-	if(prev_source_start == NULL || prev_source_end == NULL) //redundant if one is null both should be
+	if(prev_source_start == 0 || prev_source_end == 0) //redundant if one is null both should be
 	{
 		return DistortionOrientationType::MONO;
 	}

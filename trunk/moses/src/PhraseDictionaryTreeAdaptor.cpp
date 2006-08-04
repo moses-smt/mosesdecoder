@@ -8,12 +8,18 @@
 #include "InputFileStream.h"
 #include "Input.h"
 #include "ConfusionNet.h"
+#include "Sentence.h"
 #include "StaticData.h"
 #include "UniqueObject.h"
 
 inline bool existsFile(const char* filename) {
   struct stat mystat;
   return  (stat(filename,&mystat)==0);
+}
+
+double addLogScale(double x,double y) 
+{
+	if(x>y) return addLogScale(y,x); else return x+log(1.0+exp(y-x));
 }
 
 struct PDTAimp {
@@ -34,9 +40,54 @@ struct PDTAimp {
 	std::vector<vTPC> m_rangeCache;
 	unsigned m_numInputScores;
 
+	UniqueObjectManager<Phrase> uniqSrcPhr;
+
+	size_t totalE,distinctE;
+	std::vector<size_t> path1Best,pathExplored;
+	std::vector<double> pathCN;
+
+
 	PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis) 
 		: m_languageModels(0),m_weightWP(0.0),m_factorCollection(0),m_dict(0),
-			m_obj(p),useCache(1),m_numInputScores(nis) {}
+			m_obj(p),useCache(1),m_numInputScores(nis),totalE(0),distinctE(0) {}
+
+	~PDTAimp() 
+	{
+		CleanUp();
+		delete m_dict;
+
+		if (StaticData::Instance()->GetVerboseLevel() >= 1)
+			{
+
+				std::cerr<<"tgt candidates stats:  total="<<totalE<<";  distinct="<<distinctE
+								 <<" ("<<distinctE/(0.01*totalE)<<");  duplicates="<<totalE-distinctE
+								 <<" ("<<(totalE-distinctE)/(0.01*totalE)<<")\n";
+
+				std::cerr<<"\npath statistics\n";
+				std::cerr.setf(std::ios::scientific); 
+				std::cerr.precision(5);
+
+				if(path1Best.size()) 
+					{
+						std::cerr<<"1-best:        ";
+						std::copy(path1Best.begin()+1,path1Best.end(),std::ostream_iterator<size_t>(std::cerr," \t")); 
+						std::cerr<<"\n";
+					}
+				if(pathCN.size())
+					{
+						std::cerr<<"CN (full):     ";
+						std::transform(pathCN.begin()+1,pathCN.end(),std::ostream_iterator<double>(std::cerr," \t"),exp); 
+						std::cerr<<"\n";
+					}
+				if(pathExplored.size())
+					{
+						std::cerr<<"CN (explored): ";
+						std::copy(pathExplored.begin()+1,pathExplored.end(),std::ostream_iterator<size_t>(std::cerr," \t")); 
+						std::cerr<<"\n";
+					}
+			}
+
+	}
 
 	void Factors2String(FactorArray const& w,std::string& s) const 
 	{
@@ -57,7 +108,7 @@ struct PDTAimp {
 		m_tgtColls.clear();
 		m_cache.clear();
 		m_rangeCache.clear();
-		Phrase dummy(Input); uniqueObject(dummy,1);
+		uniqSrcPhr.clear();
 	}
 
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
@@ -238,7 +289,41 @@ struct PDTAimp {
 	{
 		assert(m_dict);
 		std::vector<State> stack;
-		for(size_t i=0;i<src.GetSize();++i) stack.push_back(State(i,i,m_dict->GetRoot()));
+		size_t srcSize=src.GetSize();
+		for(size_t i=0;i<srcSize;++i) stack.push_back(State(i,i,m_dict->GetRoot()));
+
+		std::vector<size_t> exploredPaths(srcSize+1,0);
+		std::vector<double> exPathsD(srcSize+1,-1.0);
+
+		// collect some statistics
+		std::vector<size_t> cnDepths(srcSize,0);
+		for(size_t i=0;i<srcSize;++i) cnDepths[i]=src[i].size();
+
+		for(size_t len=1;len<=srcSize;++len)
+			for(size_t i=0;i<=srcSize-len;++i)
+				{
+					double pd=0.0; for(size_t k=i;k<i+len;++k)	pd+=log(1.0*cnDepths[k]);
+					exPathsD[len]=(exPathsD[len]>=0.0 ? addLogScale(pd,exPathsD[len]) : pd);
+				}
+
+		// update global statistics
+		if(pathCN.size()<=srcSize) pathCN.resize(srcSize+1,-1.0);
+		for(size_t len=1;len<=srcSize;++len) 
+			pathCN[len]=pathCN[len]>=0.0 ? addLogScale(pathCN[len],exPathsD[len]) : exPathsD[len];
+
+		if(path1Best.size()<=srcSize) path1Best.resize(srcSize+1,0);
+		for(size_t len=1;len<=srcSize;++len) path1Best[len]+=srcSize-len+1;
+
+		
+		if (StaticData::Instance()->GetVerboseLevel() >= 1 && exPathsD.size())
+			{
+				std::cerr<<"path stats for current CN: \n";
+				std::cerr.setf(std::ios::scientific); 
+				std::cerr.precision(5);
+				std::cerr<<"CN (full):     ";
+				std::transform(exPathsD.begin()+1,exPathsD.end(),std::ostream_iterator<double>(std::cerr," "),exp); 
+				std::cerr<<"\n";
+			}
 
 		typedef StringTgtCand::first_type sPhrase;
 		typedef std::map<StringTgtCand::first_type,TScores> E2Costs;
@@ -277,10 +362,14 @@ struct PDTAimp {
 								std::vector<StringTgtCand> tcands;
 								m_dict->GetTargetCandidates(nextP,tcands);
 
+								if(newRange.second-newRange.first>=exploredPaths.size()) exploredPaths.resize(newRange.second-newRange.first+1,0);
+								++exploredPaths[newRange.second-newRange.first];
+								totalE+=tcands.size();
+
 								if(tcands.size()) 
 									{
 										E2Costs& e2costs=cov2cand[newRange];
-										Phrase const* srcPtr=uniqueObject(newSrc);
+										Phrase const* srcPtr=uniqSrcPhr(newSrc);
 										for(size_t i=0;i<tcands.size();++i)
 											{
 												std::vector<float> nscores(tcands[i].second.size()+m_numInputScores,0.0);
@@ -300,6 +389,8 @@ struct PDTAimp {
 												score-=tcands[i].first.size() * m_weightWP;
 												std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].first,TScores()));
 
+												if(p.second) ++distinctE;
+
 												TScores & scores=p.first->second;
 												if(p.second || scores.total<score)
 													{
@@ -312,6 +403,19 @@ struct PDTAimp {
 							}
 					}
 			} // end while(!stack.empty()) 
+
+
+		if (StaticData::Instance()->GetVerboseLevel() >= 1 && exploredPaths.size())
+			{
+				std::cerr<<"CN (explored): ";
+				std::copy(exploredPaths.begin()+1,exploredPaths.end(),std::ostream_iterator<size_t>(std::cerr," ")); 
+				std::cerr<<"\n";
+			}
+
+		if(pathExplored.size()<exploredPaths.size()) pathExplored.resize(exploredPaths.size(),0);
+		for(size_t len=1;len<=srcSize;++len)
+			pathExplored[len]+=exploredPaths[len];
+
 
 		m_rangeCache.resize(src.GetSize(),vTPC(src.GetSize(),0));
 
@@ -362,6 +466,7 @@ PhraseDictionaryTreeAdaptor(size_t noScoreComponent,unsigned numInputScores)
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor() 
 {
 	imp->CleanUp();
+	delete imp;
 }
 
 void PhraseDictionaryTreeAdaptor::CleanUp() 
@@ -375,6 +480,8 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 	// only required for confusion net
 	if(ConfusionNet const* cn=dynamic_cast<ConfusionNet const*>(&source))
 		imp->CacheSource(*cn);
+	else if(Sentence const* s=dynamic_cast<Sentence const*>(&source))
+		imp->CacheSource(ConfusionNet(*s));
 }
 
 void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
