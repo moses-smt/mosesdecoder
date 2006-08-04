@@ -409,7 +409,7 @@ const Hypothesis* Hypothesis::GetPrevHypo()const{
 /**
  * print hypothesis information for pharaoh-style logging
  */
-void Hypothesis::PrintHypothesis(const InputType &source, float weightDistortion, float weightWordPenalty) const{
+void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistortion*/, float /*weightWordPenalty*/) const{
   cout<<"creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ";
   int end = m_prevHypo->m_targetPhrase.GetSize()-1;
   int start = end-1;

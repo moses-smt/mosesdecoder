@@ -9,6 +9,8 @@
 
 class FactorCollection;
 class TranslationOptionCollection;
+class Sentence;
+
 
 class ConfusionNet : public InputType {
  public: 
@@ -20,6 +22,8 @@ class ConfusionNet : public InputType {
  public:
 	ConfusionNet(FactorCollection* p=0);
 	~ConfusionNet();
+
+	ConfusionNet(Sentence const& s);
 
 	void SetFactorCollection(FactorCollection*);
 	
