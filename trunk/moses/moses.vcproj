@@ -339,7 +339,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\LanguageModel_Internal.cpp"
+				RelativePath=".\src\LanguageModel_Chunking.cpp"
 				>
 			</File>
 			<File
@@ -531,10 +531,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\WeightOptimization.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Word.cpp"
 				>
 			</File>
@@ -625,7 +621,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\LanguageModel_Internal.h"
+				RelativePath=".\src\LanguageModel_Chunking.h"
 				>
 			</File>
 			<File
@@ -786,10 +782,6 @@
 			</File>
 			<File
 				RelativePath=".\src\Util.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\WeightOptimization.h"
 				>
 			</File>
 			<File
