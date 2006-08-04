@@ -20,6 +20,13 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 
 
 
+all: compile
+
+compile:
+	cd training/cmert-0.5/ && make
+	## Compiled mert, nothing else needs compilation
+
+
 
 MAIN_TRAINING_SCRIPTS_NAMES=filter-model-given-input.pl  mert-moses.pl train-factored-phrase-model.perl clean-corpus-n.perl
 # Make trick to add directory name to all of them:
@@ -32,8 +39,15 @@ MAIN_GENERIC_SCRIPTS=$(MAIN_GENERIC_SCRIPTS_NAMES:%=generic/%)
 # the list of all scripts that should be released
 MAIN_SCRIPTS= $(MAIN_TRAINING_SCRIPTS) $(MAIN_GENERIC_SCRIPTS)
 
+
 release:
-	if [ -z "$(TARGETDIR)" ]; then echo "Specify TARGETDIR=/export/ws06osmt to do a real release" ; exit 1; fi
+	if [ -z "$(TARGETDIR)" ]; then \
+	  echo "Please specify a TARGETDIR." ; \
+	  echo "  For custom releases issue: "; \
+	  echo "   TARGETDIR=$(HOME)/releases make release"; \
+	  echo "  For official releases (that include generation of helper scripts directly in /bin issue: "; \
+	  echo "   TARGETDIR=/export/ws06osmt make jhu_release"; \
+	  exit 1; fi
 	if [ -e $(RELEASEDIR) ]; then echo "Targetdir exists! Not touching it! $(RELEASEDIR)"; exit 1; fi
 	mkdir -p $(RELEASEDIR)
 	rsync -r --files-from ./released-files . $(RELEASEDIR)/
@@ -77,7 +91,9 @@ missed:
 
 
 
-### Tests, applicable only at JHU environment
+### Tests, applicable only at JHU environment due to data dependencies
+export WORKSPACE=$(shell pwd)/../
+
 .PHONY: tests
 tests:
 	export SCRIPTS_ROOTDIR=`pwd`; \
@@ -92,3 +108,16 @@ tests:
 	done
 	## All tests passed
 
+## Run just one test
+tests/%.test.run: tests/%.test
+	export SCRIPTS_ROOTDIR=`pwd`; \
+	ts=`date '+%Y%m%d-%H%M%N'`; \
+	cd tests; \
+	  test=$*.test; \
+	  mkdir $$test.$$ts; \
+	  cd $$test.$$ts; \
+	  echo "Running $$test  in  tests/$$test.$$ts"; \
+	  ( nohup ../$$test > log 2>&1 & ) || exit 1; \
+	  echo "Observe tests/$$test.$$ts/log"; \
+	cd ..
+	

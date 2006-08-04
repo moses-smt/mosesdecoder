@@ -9,7 +9,7 @@ Venugopal's MER trainer. This entails calculating the BLEU component scores."""
    Run it like this: sort -mnk 1,1 *.nbest | score-nbest.py ...
 """
 
-import sys, itertools
+import sys, itertools, re
 import bleu
 #The default python version on DICE is currently 2.3, which does not contain sets as a built-in module.
 #Comment out this line when moving to python 2.4
@@ -59,6 +59,10 @@ if __name__ == "__main__":
 
     infile = sys.stdin
 
+    # function that recognizes floats
+    re_float=re.compile(r'^-?([0-9]*\.)?[0-9]+$')
+    is_float=lambda(x):re_float.match(x)
+
     for line in infile:
         try:
             ##Changed to add a further field - AA 29/11/05
@@ -68,7 +72,8 @@ if __name__ == "__main__":
             sys.stderr.write("ERROR: bad input line %s\n" % line)
         sentnum = int(sentnum)
         sent = " ".join(sent.split())
-        vector = tuple([-float(v) for v in vector.split()])
+	# filter out score labels (keep only floats) and convert numbers to floats
+        vector = tuple(map(lambda(s): -float(s), filter(is_float, vector.split())))
 
         if sentnum != cur_sentnum:
             if cur_sentnum is not None:

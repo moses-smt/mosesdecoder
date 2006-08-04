@@ -1,0 +1,23 @@
+#!/bin/bash
+
+[ -d $WORKSPACE ] || exit 1
+echo "Workspace: $WORKSPACE"
+
+export SCRIPTS_ROOTDIR=$WORKSPACE/scripts
+
+
+echo "fake" > lm0.3gr
+echo "fake" > lm0.4gr
+
+mkdir model || exit 1
+
+echo "Starting training script."
+
+$SCRIPTS_ROOTDIR/training/train-factored-phrase-model.perl \
+  --f src --e tgt \
+  --lm 0:3:lm0.3gr \
+  --lm 0:4:lm0.4gr \
+  --decoding-steps t0,g0,t1,g1,g2 \
+  --translation-factors 0-0+1-1 \
+  --generation-factors 0-0+0-1+0,1-2 \
+  --first-step 9

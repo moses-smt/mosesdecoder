@@ -77,9 +77,8 @@ my $queue_flags = "-l ws06ossmt=true -l mem_free=0.5G -hard";  # extra parameter
 my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $___LAMBDA = undef; # string specifying the seed weights and boundaries of all lambdas
-my $___START_STEP = undef;  # which iteration step to start with
-                  # <start-step> is what iteration to start at (default 1). If you add an 'a'
-                  #   suffix the decoding for that iteration will be skipped (only cmert is run)
+my $continue = 0; # should we try to continue from the last saved step?
+my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
 
 # Parameter for effective reference length when computing BLEU score
 # This is used by score-nbest-bleu.py
@@ -112,7 +111,8 @@ GetOptions(
   "jobs=i" => \$___JOBS,
   "decoder-flags=s" => \$___DECODER_FLAGS,
   "lambdas=s" => \$___LAMBDA,
-  "start-step=i" => \$___START_STEP,
+  "continue" => \$continue,
+  "skip-decoder" => \$skip_decoder,
   "average" => \$___AVERAGE,
   "help" => \$usage,
   "allow-unknown-lambdas" => \$allow_unknown_lambdas,
@@ -156,7 +156,9 @@ Options:
          such as 'd:1,0.5-1.5 lm:1,0.5-1.5 tm:0.3,0.25-0.75;0.2,0.25-0.75;0.2,0.25-0.75;0.3,0.25-0.75;0,-0.5-0.5 w:0,-0.5-0.5'
   --allow-unknown-lambdas ... keep going even if someone supplies a new lambda
          in the lambdas option (such as 'superbmodel:1,0-1'); optimize it, too
-  --start-step=NUM  ... start at step X (that has been already achieved before)
+  --continue  ... continue from the last achieved state
+  --skip-decoder ... skip the decoder run for the first time, assuming that
+                     we got interrupted during optimization
   --average   ... Use either average or shortest (default) reference
                   length as effective reference length
   --filtercmd=STRING  ... path to filter-model-given-input.pl
@@ -190,7 +192,7 @@ $qsubwrapper="$SCRIPTS_ROOTDIR/generic/qsub-wrapper.pl" if !defined $qsubwrapper
 
 my $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl";
 
-$cmertdir = "$SCRIPTS_ROOTDIR/extra/cmert-0.5" if !defined $cmertdir;
+$cmertdir = "$SCRIPTS_ROOTDIR/training/cmert-0.5" if !defined $cmertdir;
 my $cmertcmd="$cmertdir/mert";
 
 $SCORENBESTCMD = "$cmertdir/score-nbest.py" if ! defined $SCORENBESTCMD;
@@ -297,54 +299,9 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
   die "It is forbidden to supply any of -config, -ttable-file, -distortion-file, -generation-file or -lmodel-file in the --decoder-flags.\nPlease use only the --config option to give the config file that lists all the supplementary files.";
 }
 
-# convert the lambda triples to independent streams of default lambdas, minimums, maximums, names and a random seed generator
-my @LAMBDA = ();   # the starting values
-my @MIN = ();   # lower bounds
-my @MAX = ();   # upper bounds
-my @NAME = ();  # to which model does the lambda belong
-my $rand = "";
-my $decoder_config = "";
-
-# this loop actually does the conversion and also checks for
-# the match in lambda count
-
-# Beware: as of now, the decoder produces weights in a very specific order, we need
-# to stick with it
-
-my @order_of_types = ("d", "lm", "tm", "w", "g");
-my %well_known_type = map {($_,1)} @order_of_types;
-
-my @use_order = @order_of_types;
 # walk through all lambdas the user wishes to optimize and check
-# if there are any extra
+# if the number of lambdas matches
 foreach my $name (keys %$use_triples) {
-  next if $well_known_type{$name}; # this will get printed anyway
-  if (!$allow_unknown_lambdas) {
-    print STDERR "You are trying to optimize '$name' but we do not know, where moses produces
-this particular score in its output. Use --allow-unknown-lambdas to run anyway,
-assuming that moses prints the score at the end of scores list\n";
-    exit 1;
-  }
-  print STDERR "Allowing additional lambda: $name";
-  push @use_order, $name;
-}
-
-foreach my $name (@use_order) {
-  if (!defined $use_triples->{$name}) {
-    if ($allow_skipping_lambdas || $name eq "g") {
-      # hardwired to allow no generation step
-      print STDERR "Allowing to not optimize '$name', although moses might still report this value back and everything gets screwed!!!\n";
-      next;
-    } else {
-      print STDERR "You are trying to optimize a set of lambdas that does not include '$name'. As
-moses now returns the lambdas back in fixed order and not labelled, it might
-report the score back to us and we cannot then match the scores with the
-lamdas.  Use --allow-skipping-lambdas, if you *know* that moses will not report
-this lambda.\n";
-      exit 1;
-    }
-  }
-  $decoder_config .= "-$name ";
   my $expected_lambdas = $lambdas_per_model->{$name};
   $expected_lambdas = 0 if !defined $expected_lambdas;
   my $got_lambdas = defined $use_triples->{$name} ? scalar @{$use_triples->{$name}}  : 0;
@@ -358,37 +315,48 @@ and I cannot validate against the models mentioned in moses.ini.\n";
       exit 1;
     }
   }
-  
-  foreach my $feature (@{$use_triples->{$name}}) {
-    my ($startval, $min, $max) = @$feature;
-    push @LAMBDA, $startval;
-    push @MIN, $min;
-    push @MAX, $max;
-    push @NAME, $name;
-    $decoder_config .= "%.6f ";
-    $rand .= "$min+rand(".($max-$min)."), ";
-  }
 }
 
-# print the real config
-print STDERR "DECODER_CFG: $decoder_config\n";
-
 # as weights are normalized in the next steps (by cmert)
-
 # normalize initial LAMBDAs, too
-my $totlambda=0;
-grep($totlambda+=abs($_),@LAMBDA);
-grep($_/=$totlambda,@LAMBDA);
+my $need_to_normalize = 1;
+
+
+
+my @order_of_lambdas_from_decoder = ();
+# this will store the labels of scores coming out of the decoder (and hence the order of lambdas coming out of mert)
+# we will use the array to interpret the lambdas
+# the array gets filled with labels only after first nbestlist was generated
 
 
 
 
-# set start run, if specified (allow the user to skip some of the iterations using --start-step)
+# set start run
 my $start_run = 1;
-my $skip_decoder = 0; # skip the decoder run for the first time
-if (defined $___START_STEP) {
-  $start_run = $___START_STEP;
-  $skip_decoder = 1;
+
+if ($continue) {
+  # need to load last best values
+  print STDERR "Trying to continue an interrupted optimization.\n";
+  open IN, "finished_step.txt" or die "Failed to find the step number, failed to read finished_step.txt";
+  my $step = <IN>;
+  chomp $step;
+  $step++;
+  close IN;
+  $start_run = $step +1;
+
+  die "Can't start from step $step, because run$step.best$___N_BEST_LIST_SIZE.out.gz was not found!"
+    if ! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz";
+
+  print STDERR "Reading last cached lambda values (result from step $step)\n";
+  @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
+
+  open IN, "weights.txt" or die "Can't read weights.txt";
+  my $newweights = <IN>;
+  chomp $newweights;
+  close IN;
+  my @newweights = split /\s+/, $newweights;
+
+  $use_triples = store_new_lambda_values($use_triples, \@order_of_lambdas_from_decoder, \@newweights);
 }
 
 #store current directory and create the working directory (if needed)
@@ -402,27 +370,6 @@ safesystem("mkdir -p $___WORKING_DIR") or die "Can't mkdir $___WORKING_DIR";
 chdir($___WORKING_DIR) or die "Can't chdir to $___WORKING_DIR";
 
 
-
-# Debugging purposes, 
-create_config($___CONFIG, "./preliminary.moses.ini", \@LAMBDA, \@NAME, "--not-run--", "--not-estimated--");
-
-# create some initial files (esp. weights and their ranges for randomization)
-
-# this is just for debugging. we should be sure that the order of lambdas in names.txt
-# matches the order of lambdas produced on nbestlist
-open(WEIGHTS,"> names.txt") or die "Can't write names.txt (WD now $___WORKING_DIR)";
-print WEIGHTS join(" ", @NAME)."\n";
-close(WEIGHTS);
-
-# weights and ranges.txt are used by cmert
-open(WEIGHTS,"> weights.txt") or die "Can't write weights.txt (WD now $___WORKING_DIR)";
-print WEIGHTS join(" ", @LAMBDA)."\n";
-close(WEIGHTS);
-
-open(RANGES,"> ranges.txt") or die "Can't write weights.txt (WD now $___WORKING_DIR)";
-print RANGES join(" ", @MIN)."\n";
-print RANGES join(" ", @MAX)."\n";
-close(RANGES);
 
 
 # filter the phrase tables, use --decoder-flags
@@ -450,29 +397,24 @@ while(1) {
 
   print "run $run start at ".`date`;
 
-  # get most recent set of weights
-  open(WEIGHTS,"< weights.txt") or die "Can't read weights";
-  while(<WEIGHTS>) {
-      chomp;
-      @LAMBDA = split " ";
-  }
-  close(WEIGHTS);
-  print STDERR "Weights from last step: @LAMBDA\n";
-
   # In case something dies later, we might wish to have a copy
-  create_config($___CONFIG, "./run$run.moses.ini", \@LAMBDA, \@NAME, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
+  create_config($___CONFIG, "./run$run.moses.ini", $use_triples, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
 
 
-  # skip if restarted
+  # skip if the user wanted
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
-      print "About to start decoder with LAMBDAS: @LAMBDA\n";
-      run_decoder(\@LAMBDA, $PARAMETERS, $run);
+      @order_of_lambdas_from_decoder = run_decoder($use_triples, $PARAMETERS, $run, \@order_of_lambdas_from_decoder, $need_to_normalize);
+      $need_to_normalize = 0;
       safesystem("gzip -f run*out") or die "Failed to gzip run*out";
   }
   else {
       print "skipped decoder run\n";
+      if (0 == scalar @order_of_lambdas_from_decoder) {
+        @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -dc run*.best*.out.gz | head -1 |");
+      }
       $skip_decoder = 0;
+      $need_to_normalize = 0;
   }
 
   my $EFF_REF_LEN = "";
@@ -482,7 +424,7 @@ while(1) {
 
   # To be sure that scoring script produses these fresh:
   safesystem("rm -f cands.opt feats.opt") or die;
-
+  
   # convert n-best list into a numberized format with error scores
 
   print STDERR "Scoring the nbestlist.\n";
@@ -494,7 +436,7 @@ while(1) {
   }
 
 
-  print STDERR "Hoping that scoring succeeded. Don't know how to check for it! XXX.\n";
+  print STDERR "Hoping that scoring succeeded. We'll see if we can read the output files now.\n";
 
 
   # keep a count of lines in nbests lists (alltogether)
@@ -517,13 +459,49 @@ while(1) {
 
 
   # run cmert
-  safesystem("cat ranges.txt weights.txt > init.opt") or die;
-  safesystem("mv weights.txt run$run.input_weights.txt") or die; # keep a copy of the weights
+  # cmert reads in the file init.opt containing three lines:
+  #  minimum values
+  #  maximum values
+  #  current values
+  # We need to prepare the files and **the order of the lambdas must
+  # correspond to the order @order_of_lambdas_from_decoder
 
-  #store actual values
+  my @MIN = ();   # lower bounds
+  my @MAX = ();   # upper bounds
+  my @CURR = ();   # the starting values
+  my @NAME = ();  # to which model does the lambda belong
+  
+  # walk in order of @order_of_lambdas_from_decoder and collect the min,max,val
+  my %visited = ();
+  foreach my $name (@order_of_lambdas_from_decoder) {
+    next if $visited{$name};
+    $visited{$name} = 1;
+    die "The decoder produced also some '$name' scores, but we do not know the ranges for them, no way to optimize them\n"
+      if !defined $use_triples->{$name};
+    foreach my $feature (@{$use_triples->{$name}}) {
+      my ($val, $min, $max) = @$feature;
+      push @CURR, $val;
+      push @MIN, $min;
+      push @MAX, $max;
+      push @NAME, $name;
+    }
+  }
+
+  open(OUT,"> init.opt") or die "Can't write init.opt (WD now $___WORKING_DIR)";
+  print OUT join(" ", @MIN)."\n";
+  print OUT join(" ", @MAX)."\n";
+  print OUT join(" ", @CURR)."\n";
+  close(OUT);
+
+  #just for brevity
+  open(OUT,"> names.txt") or die "Can't write names.txt (WD now $___WORKING_DIR)";
+  print OUT join(" ", @NAME)."\n";
+  close(OUT);
+
+  # make a backup copy labelled with this run number
   safesystem("cp init.opt run$run.init.opt") or die;
 
-  my $DIM = scalar(@LAMBDA); # number of lambdas
+  my $DIM = scalar(@CURR); # number of lambdas
   $cmd="$cmertcmd -d $DIM";
  
   print STDERR "Starting cmert.\n";
@@ -532,12 +510,18 @@ while(1) {
   } else {
     safesystem("$cmd 2> cmert.log") or die "Failed to run cmert";
   }
+  die "Optimization failed, file weights.txt does not exist or is empty"
+    if ! -s "weights.txt";
+  # backup copies
+  safesystem ("cp cmert.log run$run.cmert.log") or die;
+  safesystem ("cp weights.txt run$run.weights.txt") or die; # this one is needed for restarts, too
+  print "run $run end at ".`date`;
 
   $bestpoint = undef;
   $devbleu = undef;
   open(IN,"cmert.log") or die "Can't open cmert.log";
   while (<IN>) {
-    if (/(Best point: [\s\d\.\-]+ => )([\d\.]+)/) {
+    if (/Best point:\s*([\s\d\.\-]+?)\s*=> ([\d\.]+)/) {
       $bestpoint = $1;
       $devbleu = $2;
       last;
@@ -546,38 +530,79 @@ while(1) {
   close IN;
   die "Failed to parse cmert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
-  print "($run) BEST at $run: $bestpoint$devbleu at ".`date`;
-  
-  safesystem ("cp cmert.log run$run.cmert.log") or die;
+  print "($run) BEST at $run: $bestpoint => $devbleu at ".`date`;
 
-  print "run $run end at ".`date`;
+  my @newweights = split /\s+/, $bestpoint;
 
-  if (! -s "weights.txt"){
-      die "Optimization failed, file weights.txt does not exist or is empty";
-  }
+  # update my cache of lambda values
+  $use_triples = store_new_lambda_values($use_triples, \@order_of_lambdas_from_decoder, \@newweights);
+
 }
 safesystem("cp init.opt run$run.init.opt") or die;
 safesystem ("cp cmert.log run$run.cmert.log") or die;
 
-# the current weights are read at the beginning of each loop, so
-# @LAMBDA contain the weights before the last run of the decoder.
-# This is fine, because the new attempt did not bring any improvement,
-# so we do not want to use it.
-# @NAME are the names of models the lambdas belong to
-create_config($___CONFIG, "./moses.ini", \@LAMBDA, \@NAME, $run, $devbleu);
+create_config($___CONFIG, "./moses.ini", $use_triples, $run, $devbleu);
 
 #chdir back to the original directory # useless, just to remind we were not there
 chdir($cwd);
 
 } # end of local scope
 
+
+sub store_new_lambda_values {
+  # given new lambda values (in given order), replace the 'val' element in our triples
+  my $triples = shift;
+  my $names = shift;
+  my $values = shift;
+
+  my %idx = ();
+  foreach my $i (0..scalar(@$values)-1) {
+    my $name = $names->[$i];
+    die "Missed name for lambda $values->[$i] (in @$values; names: @$names)"
+      if !defined $name;
+    if (!defined $idx{$name}) {
+      $idx{$name} = 0;
+    } else {
+      $idx{$name}++;
+    }
+    die "We did not optimize '$name', but moses returned it back to us"
+      if !defined $triples->{$name};
+    die "Moses gave us too many lambdas for '$name', we had ".scalar(@{$triples->{$name}})
+      ." but we got at least ".$idx{$name}+1
+      if !defined $triples->{$name}->[$idx{$name}];
+
+    # set the corresponding field in triples
+    $triples->{$name}->[$idx{$name}]->[0] = $values->[$i];
+  }
+  return $triples;
+}
+
+
 sub run_decoder {
-    my ($lambdas, $parameters, $run) = @_;
+    my ($triples, $parameters, $run, $output_order_of_lambdas, $need_to_normalize) = @_;
     my $filename_template = "run%d.best$___N_BEST_LIST_SIZE.out";
     my $filename = sprintf($filename_template, $run);
     
     print "params = $parameters\n";
-    my $decoder_config = sprintf($decoder_config,@$lambdas);
+    # prepare the decoder config:
+    my $decoder_config = "";
+    my @vals = ();
+    foreach my $name (keys %$triples) {
+      $decoder_config .= "-$name ";
+      foreach my $triple (@{$triples->{$name}}) {
+        my ($val, $min, $max) = @$triple;
+        $decoder_config .= "%.6f ";
+        push @vals, $val;
+      }
+    }
+    if ($need_to_normalize) {
+      print STDERR "Normalizing lambdas: @vals\n";
+      my $totlambda=0;
+      grep($totlambda+=abs($_),@vals);
+      grep($_/=$totlambda,@vals);
+    }
+    print STDERR "DECODER_CFG = $decoder_config\n";
+    $decoder_config = sprintf($decoder_config, @vals);
     print "decoder_config = $decoder_config\n";
 
     # run the decoder
@@ -589,15 +614,51 @@ sub run_decoder {
     }
 
     safesystem($decoder_cmd) or die "The decoder died.";
+
+    if (0 == scalar @$output_order_of_lambdas) {
+      # we have to peek at the nbestlist
+      return get_order_of_scores_from_nbestlist($filename);
+    } else {
+      # we have checked the nbestlist already, we trust the order of output scores does not change
+      return @$output_order_of_lambdas;
+    }
+}
+
+sub get_order_of_scores_from_nbestlist {
+  # read the first line and interpret the ||| label: num num num label2: num ||| column in nbestlist
+  # return the score labels in order
+  my $fname_or_source = shift;
+  print STDERR "Peeking at the beginning of nbestlist to get order of scores: $fname_or_source\n";
+  open IN, $fname_or_source or die "Failed to get order of scores from nbestlist '$fname_or_source'";
+  my $line = <IN>;
+  close IN;
+  die "Line empty in nbestlist '$fname_or_source'" if !defined $line;
+  my ($sent, $hypo, $scores, $total) = split /\|\|\|/, $line;
+  $scores =~ s/^\s*|\s*$//g;
+  die "No scores in line: $line" if $scores eq "";
+
+  my @order = ();
+  my $label = undef;
+  foreach my $tok (split /\s+/, $scores) {
+    if ($tok =~ /^([a-z][0-9a-z]*):/i) {
+      $label = $1;
+    } elsif ($tok =~ /^-?([0-9]*\.)?[0-9]+$/) {
+      # a score found, remember it
+      die "Found a score but no label before it! Bad nbestlist '$fname_or_source'!"
+        if !defined $label;
+      push @order, $label;
+    } else {
+      die "Not a label, not a score '$tok'. Failed to parse the scores string: '$scores' of nbestlist '$fname_or_source'";
+    }
+  }
+  print STDERR "The decoder returns the scores in this order: @order\n";
+  return @order;
 }
 
 sub create_config {
     my $infn = shift; # source config
     my $outfn = shift; # where to save the config
-    my $lambdas = shift; # the lambdas we should write
-    my @lambdas = @$lambdas; # my own copy of the array
-    my $names = shift; # the names of the lambdas
-    my @names = @$names; # my own copy of the array
+    my $triples = shift; # the lambdas we should write
     my $iteration = shift;  # just for verbosity
     my $bleu_achieved = shift; # just for verbosity
 
@@ -623,18 +684,17 @@ sub create_config {
     }
 
     # Convert weights to elements in P
-    # First delete all weights params from the input
-    foreach my $abbr (@names) {
-      my $name = defined $ABBR2FULL{$abbr} ? $ABBR2FULL{$abbr} : $abbr;
-      delete($P{$name});
+    foreach my $abbr (keys %$triples) {
+      # First delete all weights params from the input, in short or long-named version
+      delete($P{$abbr});
+      delete($P{$ABBR2FULL{$abbr}});
+      # Then feed P with the current values
+      foreach my $feature (@{$use_triples->{$abbr}}) {
+        my ($val, $min, $max) = @$feature;
+        my $name = defined $ABBR2FULL{$abbr} ? $ABBR2FULL{$abbr} : $abbr;
+        push @{$P{$name}}, $val;
+      }
     }
-    while (my $abbr = shift @names) {
-      my $w = shift @lambdas;
-      die "Lambdas and names do not have equal length!" if !defined $w;
-      my $name = defined $ABBR2FULL{$abbr} ? $ABBR2FULL{$abbr} : $abbr;
-      push @{$P{$name}}, $w;
-    }
-
 
     # create new moses.ini decoder config file by cloning and overriding the original one
     open(INI,$infn) or die "Can't read $infn";
@@ -747,7 +807,7 @@ sub scan_config {
   # in which field (counting from zero) is the filename to check?
   my %where_is_filename = (
     "ttable-file" => 3,
-    "generation-file" => 2,
+    "generation-file" => 3,
     "lmodel-file" => 3,
     "distortion-file" => 0,
   );
@@ -755,6 +815,7 @@ sub scan_config {
   # explicitly state a custom number of lambdas
   my %where_is_lambda_count = (
     "ttable-file" => 2,
+    "generation-file" => 2,
   );
   
   open INI, $ini or die "Can't read $ini";

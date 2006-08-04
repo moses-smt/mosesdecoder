@@ -26,12 +26,12 @@ while (<INI>) {
     }
     if ($section eq "generation-file") {
       chomp;
-      my ($a, $b, $fn) = split / /;
+      my ($a, $b, $c, $fn) = split / /;
       $cnt{$section}++;
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       $fn = ensure_relative_to_origin($fn, $ini);
       safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
-      $_ = "$a $b ./$section.$cnt{$section}$suffix\n";
+      $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
     }
     if ($section eq "distortion-file") {
       chomp;

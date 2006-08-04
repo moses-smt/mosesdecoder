@@ -1,14 +1,21 @@
 #!/bin/bash
 
-MOSESCMD=/export/ws06osmt/bin/moses.2006-07-29
+
+[ -d $WORKSPACE ] || exit 1
+echo "Workspace: $WORKSPACE"
+
+MOSESCMD=$WORKSPACE/moses-cmd/src/moses
 DATADIR=/export/ws06osmt/example/met-parallel
+export SCRIPTS_ROOTDIR=$WORKSPACE/scripts
 
 [ -e $MOSESCMD ] || exit 1
+echo "Moses: $MOSESCMD"
+
 
 cp $DATADIR/moses.ini ./ || exit 1
 cp $DATADIR/dev.input ./ || exit 1
 cp $DATADIR/dev.ref ./ || exit 1
 
-echo "Starting moses-perl"
+echo "Starting mert-moses"
 
 $SCRIPTS_ROOTDIR/training/mert-moses.pl --jobs=10 dev.input dev.ref $MOSESCMD ./moses.ini

@@ -93,10 +93,12 @@ bool Parameter::Validate()
 	if (m_setting["lmodel-file"].size() != m_setting["weight-l"].size()) 
 	{
 		stringstream errorMsg("");
-		errorMsg <<  static_cast<int>(m_setting["lmodel-file"].size()) 
-						<< " language model files given (lmodel-file), but " 
+		errorMsg << "Config and parameters specify "
+            << static_cast<int>(m_setting["lmodel-file"].size()) 
+						<< " language model files (lmodel-file), but " 
 						<< static_cast<int>(m_setting["weight-l"].size())
 						<< " weights (weight-l)";
+    errorMsg << endl << "You might be giving '-lmodel-file TYPE FACTOR ORDER FILENAME' but you should be giving these four as a single argument, i.e. '-lmodel-file \"TYPE FACTOR ORDER FILENAME\"'";
 		UserMessage::Add(errorMsg.str());
 		ret = false;
 	}
@@ -160,7 +162,7 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 		if(!fileFound)
 			{
 				stringstream errorMsg("");
-				errorMsg << "File " << pathStr << " does not exists";
+				errorMsg << "File " << pathStr << " does not exist";
 				UserMessage::Add(errorMsg.str());
 				return false;
 			}
