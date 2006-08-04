@@ -53,17 +53,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
 #include "config.h"
-#  ifdef HAVE_MYSQLPP
-#    define USE_MYSQL 1
-#  endif
 #else
 // those not using autoconf have to build MySQL support for now
 #  define USE_MYSQL 1
-#endif
-
-#undef USE_MYSQL
-#ifdef USE_MYSQL
-#include "IOMySQL.h"
 #endif
 
 using namespace std;
@@ -168,22 +160,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 	FactorTypeSet inputFactorUsed(inputFactorOrder);
 
 	// io
-	if (staticData.GetIOMethod() == IOMethodMySQL)
-	{
-		TRACE_ERR("IO from MySQL" << endl);
-#if USE_MYSQL
-		const PARAM_VEC &mySQLParam = staticData.GetParam("mysql");
-		inputOutput = new IOMySQL(mySQLParam[0], mySQLParam[1], mySQLParam[2], mySQLParam[3]
-														, Scan<long>(mySQLParam[4]), Scan<long>(mySQLParam[5])
-														, inputFactorOrder, inputFactorUsed, staticData.GetFactorCollection());
-		staticData.LoadPhraseTables();
-#else
-		TRACE_ERR( "moses was not built with mysql libraries, please configure\n"
-							<< "  to use another input method.\n");
-		inputOutput = NULL;
-#endif
-	}
-	else if (staticData.GetIOMethod() == IOMethodFile)
+	if (staticData.GetIOMethod() == IOMethodFile)
 	{
 		TRACE_ERR("IO from File" << endl);
 		string					inputFileHash;
