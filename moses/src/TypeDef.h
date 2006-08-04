@@ -124,6 +124,7 @@ enum LMType
 {	
 	SRI
 	,IRST
+	,Chunking
 };
 
 // typedef
