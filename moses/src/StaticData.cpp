@@ -487,6 +487,7 @@ void StaticData::LoadPhraseTables(bool filter
 			if (!exists(path(filePath+".binphr.idx", native)))
 				{
 					bool filterPhrase;
+					/*
 					if (filter)
 						{
 							boost::filesystem::path tempFile(hashFilePath, boost::filesystem::native);
@@ -496,7 +497,7 @@ void StaticData::LoadPhraseTables(bool filter
 									filePath = hashFilePath;
 								}
 							else
-								{ // load original file & create has file
+								{ // load original file & create hash file
 									filterPhrase = true;
 								}
 						}
@@ -504,6 +505,10 @@ void StaticData::LoadPhraseTables(bool filter
 						{ // load original file
 							filterPhrase = false;
 						}
+					*/
+					// don't do filtering
+					filterPhrase = false;
+					
 					TRACE_ERR(filePath << endl);
 
 
@@ -525,18 +530,13 @@ void StaticData::LoadPhraseTables(bool filter
 				}
 			else 
 				{
-					#ifdef WIN32
-						TRACE_ERR("binary phrase tables not available under Windows\n");
-						assert(false);
-					#else
-						TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
-						PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent,(currDict==0 ? m_numInputScores : 0));
-						pd->Create(input,output,m_factorCollection,filePath,weight,
-											 maxTargetPhrase[index],
-											 GetAllLM(),
-											 GetWeightWordPenalty());
-						m_phraseDictionary.push_back(pd);
-					#endif
+					TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
+					PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent,(currDict==0 ? m_numInputScores : 0));
+					pd->Create(input,output,m_factorCollection,filePath,weight,
+										 maxTargetPhrase[index],
+										 GetAllLM(),
+										 GetWeightWordPenalty());
+					m_phraseDictionary.push_back(pd);
 				}
 
 			index++;
