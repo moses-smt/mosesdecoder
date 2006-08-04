@@ -147,7 +147,7 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		const LatticePath &path = **iter;
 		const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
-		// out the surface factor of the translation
+		// print the surface factor of the translation
 		m_nBestFile << translationId << " ||| ";
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
@@ -156,41 +156,53 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		}
 		m_nBestFile << " ||| ";
 
-		// score
-		// rolled up scores
+		// print the scores in a hardwired order
+    // before each model type, the corresponding command-line-like name must be emitted
+    // MERT script relies on this
 
 		// basic distortion
+    m_nBestFile << "d: ";
 		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetDistortionScoreProducer()) << " ";
 
 		// lm
 		const LMList& lml = StaticData::Instance()->GetAllLM();
-		LMList::const_iterator lmi = lml.begin();
-		for (; lmi != lml.end(); ++lmi) {
-			m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
-		}
+    if (lml.size() > 0) {
+      m_nBestFile << "lm: ";
+		  LMList::const_iterator lmi = lml.begin();
+		  for (; lmi != lml.end(); ++lmi) {
+			  m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
+		  }
+    }
 
-		// trans components
+		// translation components
 		vector<PhraseDictionaryBase*> pds = StaticData::Instance()->GetPhraseDictionaries();
-		vector<PhraseDictionaryBase*>::reverse_iterator i = pds.rbegin();
-		for (; i != pds.rend(); ++i) {
-			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*i);
-			for (size_t j = 0; j<scores.size(); ++j) 
-				m_nBestFile << scores[j] << " ";
-			
-		}
+    if (pds.size() > 0) {
+      m_nBestFile << "tm: ";
+		  vector<PhraseDictionaryBase*>::reverse_iterator i = pds.rbegin();
+		  for (; i != pds.rend(); ++i) {
+			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*i);
+			  for (size_t j = 0; j<scores.size(); ++j) 
+				  m_nBestFile << scores[j] << " ";
+			  
+		  }
+    }
 		
-		// WP
+		// word penalty
+    m_nBestFile << "w: ";
 		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetWordPenaltyProducer()) << " ";
 		
 		// generation
 		vector<GenerationDictionary*> gds = StaticData::Instance()->GetGenerationDictionaries();
-		vector<GenerationDictionary*>::reverse_iterator gi = gds.rbegin();
-		for (; gi != gds.rend(); ++gi) {
-			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*gi);
-			for (size_t j = 0; j<scores.size(); j++) {
-				m_nBestFile << scores[j] << " ";
-			}
-		}
+    if (gds.size() > 0) {
+      m_nBestFile << "g: ";
+		  vector<GenerationDictionary*>::reverse_iterator gi = gds.rbegin();
+		  for (; gi != gds.rend(); ++gi) {
+			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*gi);
+			  for (size_t j = 0; j<scores.size(); j++) {
+				  m_nBestFile << scores[j] << " ";
+			  }
+		  }
+    }
 		
 		// total						
 		m_nBestFile << "||| " << path.GetTotalScore() << endl;

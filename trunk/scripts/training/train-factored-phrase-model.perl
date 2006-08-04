@@ -188,23 +188,25 @@ my $___ALIGNMENT_FACTORS = "0-0";
 $___ALIGNMENT_FACTORS = $_ALIGNMENT_FACTORS if defined($_ALIGNMENT_FACTORS);
 die("format for alignment factors is \"0-0\" or \"0,1,2-0,1\", you provided $___ALIGNMENT_FACTORS\n") if $___ALIGNMENT_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*$/;
 
-my $___TRANSLATION_FACTORS = "0-0";
+my $___TRANSLATION_FACTORS = undef;
 $___TRANSLATION_FACTORS = $_TRANSLATION_FACTORS if defined($_TRANSLATION_FACTORS);
 die("format for translation factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___TRANSLATION_FACTORS\n") 
-  if $___TRANSLATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
+  if defined $___TRANSLATION_FACTORS && $___TRANSLATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
 
-my $___REORDERING_FACTORS = "0-0";
+my $___REORDERING_FACTORS = undef;
 $___REORDERING_FACTORS = $_REORDERING_FACTORS if defined($_REORDERING_FACTORS);
 die("format for reordering factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___REORDERING_FACTORS\n") 
-  if $___REORDERING_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
+  if defined $___REORDERING_FACTORS && $___REORDERING_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
 
-my $___GENERATION_FACTORS = "0-0";
+my $___GENERATION_FACTORS = undef;
 $___GENERATION_FACTORS = $_GENERATION_FACTORS if defined($_GENERATION_FACTORS);
 die("format for generation factors is \"0-1\" or \"0-1+0-2\" or \"0-1+0,1-1,2\", you provided $___GENERATION_FACTORS\n") 
-  if $___GENERATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
+  if defined $___GENERATION_FACTORS && $___GENERATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
 
 my $___DECODING_STEPS = $_DECODING_STEPS;
 die("use --decoding-steps to specify decoding steps") if ( !defined $_DECODING_STEPS && $___LAST_STEP>=9 && $___FIRST_STEP<=9);
+die("format for decoding steps is \"t0,g0,t1,g1\", you provided $___DECODING_STEPS\n") 
+  if defined $___DECODING_STEPS && $___DECODING_STEPS !~ /^[tg]\d+(,[tg]\d+)*$/;
 
 my ($factor,$factor_e,$factor_f);
 
@@ -1427,24 +1429,32 @@ sub create_ini {
     print INI "#########################
 ### MOSES CONFIG FILE ###
 #########################
+\n";
 
-# input factors
-[input-factors]\n";
-    my %ttable_defined_for_target_factors = ();
-    my $INPUT_FACTOR_MAX = 0;
-    foreach my $table (split /\+/, $___TRANSLATION_FACTORS) {
-	    my ($factor_list, $output) = split /-+/, $table;
-      $ttable_defined_for_target_factors{$output} = 1;
-      foreach (split(/,/,$factor_list)) {
-        $INPUT_FACTOR_MAX = $_ if $_>$INPUT_FACTOR_MAX;
-      }  
+    if (defined $___TRANSLATION_FACTORS) {
+      print INI "# input factors\n";
+      print INI "[input-factors]\n";
+      my $INPUT_FACTOR_MAX = 0;
+      foreach my $table (split /\+/, $___TRANSLATION_FACTORS) {
+	      my ($factor_list, $output) = split /-+/, $table;
+        foreach (split(/,/,$factor_list)) {
+          $INPUT_FACTOR_MAX = $_ if $_>$INPUT_FACTOR_MAX;
+        }  
+      }
+      for (my $c = 0; $c <= $INPUT_FACTOR_MAX; $c++) { print INI "$c\n"; }
+    } else {
+      die "No translation steps defined, cannot prepare [input-factors] section\n";
     }
-    for (my $c = 0; $c <= $INPUT_FACTOR_MAX; $c++) { print INI "$c\n"; }
+
+
+    my %stepsused;
     print INI "\n# mapping steps
 [mapping]\n";
    foreach (split(/,/,$___DECODING_STEPS)) {
      s/t/T /g; 
      s/g/G /g;
+     my ($type, $num) = split /\s+/;
+     $stepsused{$type} = $num+1 if !defined $stepsused{$type} || $stepsused{$type} < $num+1;
      print INI $_."\n";
    }
    print INI "\n# translation tables: source-factors, target-factors, number of scores, file 
@@ -1456,22 +1466,36 @@ sub create_ini {
      $ff =~ s/\-/ /;
      print INI "$ff 5 $___MODEL_DIR/phrase-table.$f.gz\n";
    }
-print INI "\n# generation models: source-factors, target-factors
-[generation-file]\n";
-   foreach my $f (split(/\+/,$___GENERATION_FACTORS)) {
-     my $ff = $f;
-     $ff =~ s/\-/ /;
-     print INI "$ff $___MODEL_DIR/generation.$f.gz\n";
+   if ($num_of_ttables != $stepsused{"T"}) {
+     print STDERR "WARNING: Your [mapping-steps] require translation steps up to id $stepsused{T} but you defined translation steps 0..$num_of_ttables\n";
+     exit 1 if $num_of_ttables < $stepsused{"T"}; # fatal to define less
    }
-print INI "\n# language models: type, factors, order, file
+
+    my $weights_per_generation_model = 2;
+
+    if (defined $___GENERATION_FACTORS) {
+      print INI "\n# generation models: source-factors, target-factors, number-of-weights, filename\n";
+      print INI "[generation-file]\n";
+      my $cnt = 0;
+      foreach my $f (split(/\+/,$___GENERATION_FACTORS)) {
+        $cnt++;
+        my $ff = $f;
+        $ff =~ s/\-/ /;
+        print INI "$ff $weights_per_generation_model $___MODEL_DIR/generation.$f.gz\n";
+      }
+      if ($cnt != $stepsused{"G"}) {
+        print STDERR "WARNING: Your [mapping-steps] require generation steps up to id $stepsused{G} but you defined generation steps 0..$cnt\n";
+        exit 1 if $cnt < $stepsused{"G"}; # fatal to define less
+      }
+    } else {
+      print INI "\n# no generation models, no generation-file section\n";
+    }
+
+print INI "\n# language models: type(srilm/irstlm), factors, order, file
 [lmodel-file]\n";
   foreach my $lm (@___LM) {
     my ($f, $o, $fn) = @$lm;
-    # need to determine the type: for all LMs that are based on factors that
-    # have some phrase tables translating *to*, we set type to 0
-    # (0 means: use the LM to estimate future cost)
-    # for others, we set the type to 1 (do not use for future cost estimation)
-    my $type = ($ttable_defined_for_target_factors{$f} ? 0 : 1);
+    my $type = 0; # default to srilm
     print INI "$type $f $o $fn\n";
   }
 
@@ -1532,12 +1556,15 @@ print INI "\n\n# translation model weights
      print INI "0.2\n0.2\n0.2\n0.2\n0.2\n";
    }
 
-   print INI "
-# generation model weights
-[weight-generation]\n";
-   foreach my $f (split(/\+/,$___GENERATION_FACTORS)) {
-     print INI "0.3\n0\n";
-   }
+    if (defined $___GENERATION_FACTORS) {
+      print INI "\n# generation model weights, for each model $weights_per_generation_model weights\n";
+      print INI "[weight-generation]\n";
+      foreach my $f (split(/\+/,$___GENERATION_FACTORS)) {
+        print INI "0.3\n0\n";
+      }
+    } else {
+      print INI "\n# no generation models, no weight-generation section\n";
+    }
 
 print INI "\n# word penalty
 [weight-w]
