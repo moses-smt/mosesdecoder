@@ -133,9 +133,15 @@ float LanguageModel_SRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 
 float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor, State* finalState) const
 {
+	size_t count = contextFactor.size();
+	if (count <= 0)
+	{
+		finalState = NULL;
+		return 0;
+	}
+		
 	// set up context
 	VocabIndex context[MAX_NGRAM_SIZE];
-	size_t count = contextFactor.size();
 	for (size_t i = 0 ; i < count - 1 ; i++)
 	{
 		context[i] =  GetLmID(contextFactor[count-2-i]);
