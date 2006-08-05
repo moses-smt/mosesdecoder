@@ -35,10 +35,12 @@ namespace LanguageModelFactory
 			case Chunking:
 				#ifdef LM_SRI
 	     		lm = new LanguageModel_Chunking<LanguageModel_SRI>();
-     		#endif
-				#ifdef LM_IRST
-	     		lm = new LanguageModel_Chunking<LanguageModel_IRST>();
-     		#endif
+				#else
+     			#ifdef LM_IRST
+	     			lm = new LanguageModel_Chunking<LanguageModel_IRST>();
+     			#endif
+				#endif
+				
      		if (lm == NULL)
      		{
      			UserMessage::Add("No valid LM found to create chunking LM");
