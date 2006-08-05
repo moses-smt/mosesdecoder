@@ -61,8 +61,6 @@ void LanguageModel_IRST::Load(const std::string &fileName
 
 	InputFileStream inp(fileName);
 
-
-
 	m_lmtb         = new lmtable(inp);
 
 	// LM can be ok, just outputs warnings
@@ -86,18 +84,17 @@ void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
 		maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	}
 	
-	int lmId;
 	size_t factorId;
 	
-	lmId = GetLmID(BOS_);
-	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START);
+	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
 	factorId = m_sentenceStart->GetId();
-	lmIdMap[factorId] = lmId;
-		
-	lmId = GetLmID(EOS_);
-	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END);
+	lmIdMap[factorId] = GetLmID(BOS_);
+	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
+
+	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
 	factorId = m_sentenceEnd->GetId();
-	lmIdMap[factorId] = lmId;
+	lmIdMap[factorId] = GetLmID(EOS_);;
+	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	
 	// add to lookup vector in object
 	m_lmIdLookup.resize(maxFactorId+1);
