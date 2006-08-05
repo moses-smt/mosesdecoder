@@ -8,6 +8,7 @@
 #define FILE_H_
 #include <cstdio>
 #include <vector>
+#include "UserMessage.h"
 
 static const off_t InvalidOffT=-1;
 
@@ -73,9 +74,13 @@ inline void fSeek(FILE* f,off_t o) {
 #endif
 
 inline FILE* fOpen(const char* fn,const char* m) {
-  if(FILE* f=fopen(fn,m)) return f; else {
-    std::cerr<<"ERROR: could not open file "<<fn<<" with mode "<<m<<"\n";
-    abort();}
+  if(FILE* f=fopen(fn,m)) 
+		return f; 
+	else {
+		assert(false);
+		UserMessage::Add(std::string("ERROR: could not open file ") + fn + " with mode " + m + "\n");
+		return NULL;
+	}
 }
 inline void fClose(FILE* f) {fclose(f);} // for consistent function names only
 
