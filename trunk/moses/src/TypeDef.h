@@ -26,8 +26,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define PROJECT_NAME		"moses"
 
-#define SENTENCE_START	"<s>"
-#define SENTENCE_END		"</s>"
+#ifndef BOS_
+#define BOS_ "<s>" //Beginning of sentence symbol
+#endif
+#ifndef EOS_ 
+#define EOS_ "</s>" //End of sentence symbol
+#endif
+
 #define UNKNOWN_FACTOR	"UNK"
 #define EPSILON         "*EPS*"
 
