@@ -33,7 +33,16 @@ namespace LanguageModelFactory
 				#endif
 				break;
 			case Chunking:
-     		lm = new LanguageModel_Chunking();
+				#ifdef LM_SRI
+	     		lm = new LanguageModel_Chunking<LanguageModel_SRI>();
+     		#endif
+				#ifdef LM_IRST
+	     		lm = new LanguageModel_Chunking<LanguageModel_IRST>();
+     		#endif
+     		if (lm == NULL)
+     		{
+     			UserMessage::Add("No valid LM found to create chunking LM");
+     		}
 				break;
 	  }
 	  if (lm == NULL)
@@ -45,7 +54,7 @@ namespace LanguageModelFactory
 				#ifdef LM_IRST
 					lm = new LanguageModel_IRST();
 				#else
-			  	UserMessage::Add("Lnaguage model type unknown. Probably not compiled into library");
+			  	UserMessage::Add("Language model type unknown. Probably not compiled into library");
 				#endif
 			#endif			  
 	  }
