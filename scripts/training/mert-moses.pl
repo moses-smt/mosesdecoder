@@ -39,7 +39,10 @@ my $default_triples = {
             [ 0.2, 0.0, 0.5 ],
             [ 0.0, -1.0, 1.0 ],
 	  ],
-  "g" => [ [ 1.0, 0.0, 2.0 ] ],
+  "g" => [
+           [ 1.0, 0.0, 2.0 ],
+           [ 1.0, 0.0, 2.0 ],
+         ],
   "w" => [ [ 0.0, -1.0, 1.0 ] ],
 };
 
@@ -63,6 +66,9 @@ my $extra_lambdas_for_model = {
 
 
 
+
+my $minimum_required_change_in_weights = 0.00001;
+    # stop if no lambda changes more than this
 
 my $verbose = 0;
 my $usage = 0; # request for --help
@@ -452,7 +458,7 @@ while(1) {
   print "$size accumulated translations\n";
   print "prev accumulated translations was : $prev_size\n";
   if ($size <= $prev_size){
-     print "Training finished at ".`date`;
+     print STDERR "No new hypotheses in nbest list. Stopping.\n";
      last;
   }
   $prev_size = $size;
@@ -537,7 +543,25 @@ while(1) {
   # update my cache of lambda values
   $use_triples = store_new_lambda_values($use_triples, \@order_of_lambdas_from_decoder, \@newweights);
 
+  ## additional stopping criterion: weights have not changed
+  my $shouldstop = 1;
+  for(my $i=0; $i<@CURR; $i++) {
+    die "Lost weight! cmert reported fewer weights (@newweights) than we gave it (@CURR)"
+      if !defined $newweights[$i];
+    if (abs($CURR[$i] - $newweights[$i]) >= $minimum_required_change_in_weights) {
+      $shouldstop = 0;
+      last;
+    }
+  }
+
+  if ($shouldstop) {
+    print STDERR "None of the weights changed more than $minimum_required_change_in_weights. Stopping.\n";
+    last;
+  }
+
 }
+print "Training finished at ".`date`;
+
 safesystem("cp init.opt run$run.init.opt") or die;
 safesystem ("cp cmert.log run$run.cmert.log") or die;
 
@@ -642,7 +666,7 @@ sub get_order_of_scores_from_nbestlist {
   foreach my $tok (split /\s+/, $scores) {
     if ($tok =~ /^([a-z][0-9a-z]*):/i) {
       $label = $1;
-    } elsif ($tok =~ /^-?([0-9]*\.)?[0-9]+$/) {
+    } elsif ($tok =~ /^-?[-0-9.e]+$/) {
       # a score found, remember it
       die "Found a score but no label before it! Bad nbestlist '$fname_or_source'!"
         if !defined $label;
