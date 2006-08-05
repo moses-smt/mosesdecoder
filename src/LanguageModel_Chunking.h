@@ -33,7 +33,6 @@ protected:
 	size_t m_realNGramOrder;
 public:
 	LanguageModel_Chunking() {}
-	~LanguageModel_Chunking() {}
 	
 	void Load(const std::string &fileName
 					, FactorCollection &factorCollection
