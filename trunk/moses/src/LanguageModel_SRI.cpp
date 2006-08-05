@@ -93,14 +93,14 @@ void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
 	
 	size_t factorId;
 	
-	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, SENTENCE_START);
+	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
 	factorId = m_sentenceStart->GetId();
-	lmIdMap[factorId] = GetLmID(SENTENCE_START);
+	lmIdMap[factorId] = GetLmID(BOS_);
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	
-	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, SENTENCE_END);
+	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
 	factorId = m_sentenceEnd->GetId();
-	lmIdMap[factorId] = GetLmID(SENTENCE_END);
+	lmIdMap[factorId] = GetLmID(EOS_);
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	
 	// add to lookup vector in object
