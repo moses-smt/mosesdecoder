@@ -9,6 +9,7 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1022475428" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
 <option id="gnu.cpp.compiler.option.preprocessor.def.2071633498" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="LM_IRST"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
 <listOptionValue builtIn="false" value="_LARGE_FILES"/>
@@ -46,6 +47,7 @@
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.444585015" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="LM_IRST"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
 <listOptionValue builtIn="false" value="_LARGE_FILES"/>
@@ -63,6 +65,7 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.57605597" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
 <option id="gnu.cpp.compiler.option.preprocessor.def.547610699" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="LM_IRST"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="N_BEST"/>
 <listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
@@ -101,6 +104,7 @@
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.1390867069" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="LM_IRST"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="N_BEST"/>
 <listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
