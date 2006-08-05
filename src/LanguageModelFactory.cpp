@@ -44,6 +44,7 @@ namespace LanguageModelFactory
      		if (lm == NULL)
      		{
      			UserMessage::Add("No valid LM found to create chunking LM");
+					return NULL;
      		}
 				break;
 	  }
