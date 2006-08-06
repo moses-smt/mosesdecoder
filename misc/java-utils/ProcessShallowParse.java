@@ -1,3 +1,4 @@
+// $Id$
 
 
 import java.io.*;
@@ -11,16 +12,19 @@ public class ProcessShallowParse
 
 		String inputPath = args[0]
 		       ,outputPath = args[1];
-		new ProcessShallowParse(inputPath, outputPath);
+		InputStreamReader inStream = args.length > 0 ? new FileReader(inputPath) : new InputStreamReader(System.in); 
+		OutputStreamWriter outStream = args.length > 1 ?  new FileWriter(outputPath) : new OutputStreamWriter(System.out); 
+		
+		new TagHierarchy(inStream, outStream);
 		
 		System.err.println("End...");
 	}
 
-	public ProcessShallowParse(String inputPath, String outputPath) throws Exception
+	public ProcessShallowParse(Reader inStream, Writer outStream) throws Exception
 	{
-		BufferedReader inFile = new BufferedReader(new FileReader(inputPath)); 
-		BufferedWriter outFile = new BufferedWriter(new FileWriter(outputPath)); 
-
+		BufferedReader inFile = new BufferedReader(inStream); 
+		BufferedWriter outFile = new BufferedWriter(outStream); 
+		
 		// tokenise
 		String inLine;
 		while ((inLine = inFile.readLine()) != null)
