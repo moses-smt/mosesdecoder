@@ -106,31 +106,24 @@ public:
 	static unsigned int s_numNodes; /**< statistics: how many hypotheses were created in total */
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	
-	/** initial seeding of the translation process **/
+	/** used by initial seeding of the translation process */
 	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
-	/** create a new hypothesis using a translation option (phrase translation) */
+	/** used when creating a new hypothesis using a translation option (phrase translation) */
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 	~Hypothesis();
 	
-	/***
-	 * return the subclass of Hypothesis most appropriate to the given translation option
-	 */
+	/** return the subclass of Hypothesis most appropriate to the given translation option */
 	static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
-	/***
-	 * return the subclass of Hypothesis most appropriate to the given target phrase
-	 */
 
+	/** return the subclass of Hypothesis most appropriate to the given target phrase */
 	static Hypothesis* Create(const WordsBitmap &initialCoverage);
-	/***
-	 * return the subclass of Hypothesis most appropriate to the given target phrase
-	 */
+
+	/** return the subclass of Hypothesis most appropriate to the given target phrase */
 	static Hypothesis* Create(InputType const& source, const TargetPhrase &emptyTarget);
-
-
-	/***
-	 * return the subclass of Hypothesis most appropriate to the given translation option
-	 */
+	
+	/** return the subclass of Hypothesis most appropriate to the given translation option */
 	Hypothesis* CreateNext(const TranslationOption &transOpt) const;
+
 	/***
 	 * if any factors aren't set in our target phrase but are present in transOpt, copy them over
 	 * (unless the factors that we do have fail to match the corresponding ones in transOpt,
@@ -141,23 +134,26 @@ public:
 
 	void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
 
+	/** returns target phrase used to create this hypothesis */
 	const Phrase &GetTargetPhrase() const
 	{
 		return m_targetPhrase;
 	}
 
  // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
+	/** returns input positions covered by the translation option (phrasal translation) used to create this hypothesis */
 	inline const WordsRange &GetCurrSourceWordsRange() const
 	{
 		return m_currSourceWordsRange;
 	}
 	
+	/** returns ouput word positions of the translation option (phrasal translation) used to create this hypothesis */
 	inline const WordsRange &GetCurrTargetWordsRange() const
 	{
 		return m_currTargetWordsRange;
 	}
 	
-	// subsequent translation should only translate this sub-phrase
+	/** output length of the translation option used to create this hypothesis */
 	size_t GetCurrTargetLength() const
 	{
 		return m_currTargetWordsRange.GetWordsCount();
@@ -172,11 +168,12 @@ public:
 
 	const Hypothesis* GetPrevHypo() const;
 
-	// same as for phrase
+	/** length of the partial translation (from the start of the sentence) */
 	inline size_t GetSize() const
 	{
 		return m_currTargetWordsRange.GetEndPos() + 1;
 	}
+	/** same as GetTargetPhrase() */
 	inline const Phrase &GetPhrase() const
 	{
 		return m_targetPhrase;
