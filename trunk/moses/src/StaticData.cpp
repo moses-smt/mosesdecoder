@@ -237,8 +237,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		TRACE_ERR(endl);
 		
 
-		size_t nGramMaxOrder = 0;
 	  timer.check("Start loading LanguageModels");
+	  // initialize n-gram order for each factor. populated only by factored lm
+	  for(size_t i=0; i < NUM_FACTORS ; i++)
+	  	m_maxNgramOrderForFactor[i] = 0;
+	  
 		const vector<string> &lmVector = m_parameter.GetParam("lmodel-file");
 
 		for(size_t i=0; i<lmVector.size(); i++) 
@@ -257,15 +260,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			size_t nGramOrder = Scan<int>(token[2]);
 			// keep track of the largest n-gram length
 			// (used by CompareHypothesisCollection)
-			if (nGramOrder > nGramMaxOrder) // remove
-				nGramMaxOrder = nGramOrder;  // remove
 			string &languageModelFile = token[3];
-			if ((size_t)factorType >= m_maxNgramOrderForFactor.size()) {
-				m_maxNgramOrderForFactor.resize((size_t)factorType+1, 0);
-			}
-			if (nGramOrder > m_maxNgramOrderForFactor[(size_t)factorType]) {
-				m_maxNgramOrderForFactor[(size_t)factorType] = nGramOrder;
-			}
 			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
       LanguageModel *lm = LanguageModelFactory::createLanguageModel(lmType);
       if (lm == NULL) // no LM created. we prob don't have it compiled
