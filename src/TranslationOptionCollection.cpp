@@ -234,39 +234,43 @@ void TranslationOptionCollection::ProcessGeneration(
 	const Phrase &targetPhrase	= inputPartialTranslOpt.GetTargetPhrase();
 	size_t targetLength					= targetPhrase.GetSize();
 
-	// generation list for each word in hypothesis
+	// generation list for each word in phrase
 	vector< WordList > wordListVector(targetLength);
 
 	// create generation list
 	int wordListVectorPos = 0;
-	for (size_t currPos = 0 ; currPos < targetLength ; currPos++)
+	for (size_t currPos = 0 ; currPos < targetLength ; currPos++) // going thorugh all words
 		{
+			// generatable factors for this word to be put in wordList
 			WordList &wordList = wordListVector[wordListVectorPos];
 			const FactorArray &factorArray = targetPhrase.GetFactorArray(currPos);
 
+			// consult dictionary for possible generations for this word
 			const OutputWordCollection *wordColl = generationDictionary.FindWord(factorArray);
 
 			if (wordColl == NULL)
 				{	// word not found in generation dictionary
 					ProcessUnknownWord(sourceWordsRange.GetStartPos(), dropUnknown, factorCollection, weightWordPenalty);
-					return;
+					return; // can't be part of a phrase, special handling
 				}
 			else
 				{
+					// sort(*wordColl, CompareWordCollScore);
 					OutputWordCollection::const_iterator iterWordColl;
 					for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
 						{
 							const Word &outputWord = (*iterWordColl).first;
 							const ScoreComponentCollection2& score = (*iterWordColl).second;
+							// enter into word list generated factor(s) and its(their) score(s)
 							wordList.push_back(WordPair(outputWord, score));
 						}
 		
-					wordListVectorPos++;
+					wordListVectorPos++; // done, next word
 				}
 		}
 
 	// use generation list (wordList)
-	// set up iterators
+	// set up iterators (total number of expansions)
 	size_t numIteration = 1;
 	vector< WordListIterator >	wordListIterVector(targetLength);
 	vector< const Word* >				mergeWords(targetLength);
