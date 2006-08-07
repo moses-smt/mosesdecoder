@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include "StaticData.h"
 #include "Hypothesis.h"
 #include "TranslationAnalysis.h"
 
@@ -10,6 +11,7 @@ namespace TranslationAnalysis {
 
 void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 {
+	os << std::endl << "TRANSLATION HYPOTHESIS DETAILS:" << std::endl;
   std::vector<const Hypothesis*> translationPath;
   while (hypo) {
     translationPath.push_back(hypo);
@@ -35,8 +37,8 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 			epsilon = true;
       droppedWords.push_back(source);
     }
-    os << "       SOURCE: " << swr << " " << source << std::endl
-       << "TRANSLATED AS: "               << target << std::endl;
+    os << "         SOURCE: " << swr << " " << source << std::endl
+       << "  TRANSLATED AS: "               << target << std::endl;
 		size_t twr_i = twr.GetStartPos();
 		size_t swr_i = swr.GetStartPos();
 		if (!epsilon) { sms << twr_i; }
@@ -53,11 +55,12 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
   }
 	std::vector<std::string>::iterator si = sourceMap.begin();
 	std::vector<std::string>::iterator ti = targetMap.begin();
-	os << "SOURCE:";
+	os << std::endl << "SOURCE/TARGET SPANS:";
+	os << std::endl << "  SOURCE:";
 	for (; si != sourceMap.end(); ++si) {
 		os << " " << *si;
 	}
-	os << std::endl << "TARGET:";
+	os << std::endl << "  TARGET:";
 	for (; ti != targetMap.end(); ++ti) {
 		os << " " << *ti;
 	}
@@ -65,11 +68,14 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 
   if (droppedWords.size() > 0) {
     std::vector<std::string>::iterator dwi = droppedWords.begin();
-    os << "WORDS/PHRASES DROPPED:" << std::endl;
+    os << std::endl << "WORDS/PHRASES DROPPED:" << std::endl;
     for (; dwi != droppedWords.end(); ++dwi) {
       os << "\t" << *dwi << std::endl;
     }
   }
+	os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED):" << std::endl;
+  StaticData::Instance()->GetScoreIndexManager().Debug_PrintLabeledWeightedScores(os, translationPath.back()->GetScoreBreakdown(), StaticData::Instance()->GetAllWeights());
+	os << std::endl;
 }
 
 }
