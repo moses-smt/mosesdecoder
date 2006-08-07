@@ -37,10 +37,6 @@ class TranslationOptionCollection;
  */
 class Sentence : public Phrase, public InputType
 {
- protected:
-	Sentence()
-		{
-		}
  public:
 	Sentence(FactorDirection direction)	: Phrase(direction), InputType()
 		{
