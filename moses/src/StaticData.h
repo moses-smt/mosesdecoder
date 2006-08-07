@@ -100,6 +100,7 @@ protected:
 	mutable SentenceStats m_sentenceStats;
 	
 	bool m_useDistortionFutureCosts;
+	bool m_isDetailedTranslationReportingEnabled;
 
   
 
@@ -249,6 +250,10 @@ public:
 	bool GetReportAllFactors() const
 	{
 		return m_reportAllFactors;
+	}
+	bool IsDetailedTranslationReportingEnabled() const
+	{
+		return m_isDetailedTranslationReportingEnabled;
 	}
 
 	// for mert

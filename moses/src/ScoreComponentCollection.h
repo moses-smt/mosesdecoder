@@ -46,6 +46,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 class ScoreComponentCollection2 {
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection2& rhs);
+	friend class ScoreIndexManager;
 private:
 	std::vector<float> m_scores;
 	const ScoreIndexManager* m_sim;
