@@ -10,12 +10,10 @@ public class ProcessShallowParse
 	{
 		System.err.println("Starting...");
 
-		String inputPath = args[0]
-		       ,outputPath = args[1];
-		InputStreamReader inStream = args.length > 0 ? new FileReader(inputPath) : new InputStreamReader(System.in); 
-		OutputStreamWriter outStream = args.length > 1 ?  new FileWriter(outputPath) : new OutputStreamWriter(System.out); 
+		InputStreamReader inStream = args.length > 0 ? new FileReader(args[0]) : new InputStreamReader(System.in); 
+		OutputStreamWriter outStream = args.length > 1 ?  new FileWriter(args[1]) : new OutputStreamWriter(System.out); 
 		
-		new TagHierarchy(inStream, outStream);
+		new ProcessShallowParse(inStream, outStream);
 		
 		System.err.println("End...");
 	}
