@@ -4,12 +4,28 @@
 
 # relies on wiseln, a wise variant of linking. You might just use ln -s instead.
 
+use strict;
+use Getopt::Long;
+
+my @fixpath = ();
+  # specify search-replace pattern to fix paths.
+  # use a space to delimit source and target pathnames
+GetOptions(
+  "fixpath=s" => \@fixpath,
+);
+my @fixrepls = map {
+    my ($fixsrc, $fixtgt) = split / /, $_;
+    print STDERR "Will replace >$fixsrc< with >$fixtgt<\n";
+    [ $fixsrc, $fixtgt ];
+  } @fixpath;
+
 my $ini = shift;
 die "usage!" if !defined $ini;
 
 my %cnt; # count files per section
 open INI, $ini or die "Can't read $ini";
 open OUT, ">moses.ini" or die "Can't write ./moses.ini";
+my $section = undef;
 while (<INI>) {
   if (/^\[([^\]]*)\]\s*$/) {
     $section = $1;
@@ -20,6 +36,7 @@ while (<INI>) {
       my ($a, $b, $c, $fn) = split / /;
       $cnt{$section}++;
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
+      $fn = fixpath($fn);
       $fn = ensure_relative_to_origin($fn, $ini);
       safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
       $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
@@ -29,7 +46,7 @@ while (<INI>) {
       my ($a, $b, $c, $fn) = split / /;
       $cnt{$section}++;
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
-      $fn = ensure_relative_to_origin($fn, $ini);
+      $fn = fixpath($fn);
       safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
       $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
     }
@@ -38,6 +55,7 @@ while (<INI>) {
       my $fn = $_;
       $cnt{$section}++;
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
+      $fn = fixpath($fn);
       $fn = ensure_relative_to_origin($fn, $ini);
       safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
       $_ = "./$section.$cnt{$section}$suffix\n";
@@ -47,6 +65,15 @@ while (<INI>) {
 }
 close INI;
 close OUT;
+
+
+sub fixpath {
+  my $fn = shift;
+  foreach my $pair (@fixrepls) {
+    $fn =~ s/$pair->[0]/$pair->[1]/g;
+  }
+  return $fn;
+}
 
 sub safesystem {
   print STDERR "Executing: @_\n";
