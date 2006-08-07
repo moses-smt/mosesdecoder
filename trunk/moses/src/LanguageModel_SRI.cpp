@@ -97,11 +97,13 @@ void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
 	factorId = m_sentenceStart->GetId();
 	lmIdMap[factorId] = GetLmID(BOS_);
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
+	m_sentenceStartArray[m_factorType] = m_sentenceStart;
 	
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
 	factorId = m_sentenceEnd->GetId();
 	lmIdMap[factorId] = GetLmID(EOS_);
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
+	m_sentenceEndArray[m_factorType] = m_sentenceEnd;
 	
 	// add to lookup vector in object
 	m_lmIdLookup.resize(maxFactorId+1);
@@ -131,8 +133,9 @@ float LanguageModel_SRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 	return FloorSRIScore(TransformSRIScore(p));  // log10->log
 }
 
-float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor, State* finalState) const
+float LanguageModel_SRI::GetValue(const vector<const FactorArray*> &contextFactor, State* finalState) const
 {
+	FactorType	factorType = GetFactorType();
 	size_t count = contextFactor.size();
 	if (count <= 0)
 	{
@@ -144,12 +147,13 @@ float LanguageModel_SRI::GetValue(const vector<const Factor*> &contextFactor, St
 	VocabIndex context[MAX_NGRAM_SIZE];
 	for (size_t i = 0 ; i < count - 1 ; i++)
 	{
-		context[i] =  GetLmID(contextFactor[count-2-i]);
+		context[i] =  GetLmID((*contextFactor[count-2-i])[factorType]);
 	}
 	context[count-1] = Vocab_None;
 	
+	assert((*contextFactor[count-1])[factorType] != NULL);
 	// call sri lm fn
-	VocabIndex lmId= GetLmID(contextFactor[count-1]);
+	VocabIndex lmId= GetLmID((*contextFactor[count-1])[factorType]);
 	float ret = GetValue(lmId, context);
 
 	if (finalState) {

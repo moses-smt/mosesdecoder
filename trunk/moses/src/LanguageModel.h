@@ -39,6 +39,8 @@ protected:
 	std::string	m_filename;
 	size_t			m_nGramOrder;
 public:
+  typedef const void* State;
+
 	LanguageModel();
 	virtual ~LanguageModel();
 	virtual void Load(const std::string &fileName
@@ -50,9 +52,12 @@ public:
 	// see ScoreProducer.h
 	unsigned int GetNumScoreComponents() const;
 
-	virtual void CalcScore(const Phrase &phrase
+	void CalcScore(const Phrase &phrase
 							, float &fullScore
-							, float &ngramScore) const = 0;
+							, float &ngramScore) const;
+	virtual float GetValue(const std::vector<const FactorArray*> &contextFactor, State* finalState = NULL) const = 0;
+	State GetState(const std::vector<const FactorArray*> &contextFactor) const;
+
 	size_t GetNGramOrder() const
 	{
 		return m_nGramOrder;

@@ -90,11 +90,13 @@ void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
 	factorId = m_sentenceStart->GetId();
 	lmIdMap[factorId] = GetLmID(BOS_);
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
+	m_sentenceStartArray[m_factorType] = m_sentenceStart;
 
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
 	factorId = m_sentenceEnd->GetId();
 	lmIdMap[factorId] = GetLmID(EOS_);;
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
+	m_sentenceEndArray[m_factorType] = m_sentenceEnd;
 	
 	// add to lookup vector in object
 	m_lmIdLookup.resize(maxFactorId+1);
@@ -119,8 +121,10 @@ int LanguageModel_IRST::GetLmID( const Factor *factor ) const
 	return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];
 }
 
-float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor, State* finalState) const
+float LanguageModel_IRST::GetValue(const vector<const FactorArray*> &contextFactor, State* finalState) const
 {
+	FactorType factorType = GetFactorType();
+	
 	// set up context
 	size_t count = contextFactor.size();
   ngram ng(m_lmtb->dict);
@@ -130,7 +134,7 @@ float LanguageModel_IRST::GetValue(const vector<const Factor*> &contextFactor, S
 #ifdef CDYER_DEBUG_LMSCORE
 		std::cout << i <<"="<<contextFactor[i]->GetLmId().irst <<"," << contextFactor[i]->GetString()<<" ";
 #endif
-    int lmId = GetLmID(contextFactor[i]);
+    int lmId = GetLmID((*contextFactor[i])[factorType]);
 		ng.pushc(lmId);
 	}
 #ifdef CDYER_DEBUG_LMSCORE
