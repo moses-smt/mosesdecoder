@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cassert>
 #include <iostream>
 #include <limits>
+#include <vector>
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "DummyScoreProducers.h"
@@ -358,9 +359,10 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 
 	
 	//LEXICAL REORDERING COST
-	LexicalReordering *m_lexReorder = staticData.GetLexReorder();
-	if (m_lexReorder) {
-		m_scoreBreakdown.PlusEquals(m_lexReorder, m_lexReorder->CalcScore(this));
+	std::vector<LexicalReordering*> m_reorderModels = staticData.GetReorderModels();
+	for(int i = 0; i < m_reorderModels.size(); i++)
+	{
+		m_scoreBreakdown.PlusEquals(m_reorderModels[i], m_reorderModels[i]->CalcScore(this));
 	}
 
 	// TOTAL
