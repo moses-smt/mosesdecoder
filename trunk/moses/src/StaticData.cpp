@@ -51,7 +51,8 @@ StaticData::StaticData()
 ,m_numInputScores(0)
 ,m_distortionScoreProducer(0)
 ,m_wpProducer(0)
-,m_useDistortionFutureCosts(0) 
+,m_useDistortionFutureCosts(false)
+,m_isDetailedTranslationReportingEnabled(false) 
 {
 	s_instance = this;
 
@@ -151,6 +152,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	else
 	{
 		m_wordDeletionEnabled = false;
+	}
+	if(m_parameter.GetParam("translation-details").size() > 0) {
+	  m_isDetailedTranslationReportingEnabled = Scan<bool>( m_parameter.GetParam("translation-details")[0]);
 	}
 	// load Lexical Reordering model
 	// check to see if the lexical reordering parameter exists
