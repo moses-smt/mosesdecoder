@@ -61,6 +61,17 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 Timer timer;
 
+
+bool readInput(InputOutput *inputOutput, int inputType, InputType*& source) 
+{
+	delete source;
+	source=inputOutput->GetInput((inputType ? 
+																static_cast<InputType*>(new ConfusionNet) : 
+																static_cast<InputType*>(new Sentence(Input))));
+	return (source ? true : false);
+}
+
+
 int main(int argc, char* argv[])
 {
 	timer.start("Starting...");
@@ -111,36 +122,34 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
-	while(InputType *source = inputOutput->GetInput((staticData.GetInputType() ? 
-																									 static_cast<InputType*>(new ConfusionNet) : 
-																									 static_cast<InputType*>(new Sentence(Input)))))
-	{
-		TRACE_ERR("TRANSLATING: " << *source <<"\n");
-
-		staticData.InitializeBeforeSentenceProcessing(*source);
-		Manager manager(*source, staticData);
-		manager.ProcessSentence();
-		inputOutput->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId(),
-                        staticData.GetReportSourceSpan(),
-                        staticData.GetReportAllFactors()
-                        );
-
-		// n-best
-		size_t nBestSize = staticData.GetNBestSize();
-		if (nBestSize > 0)
+	InputType *source=0;
+	while(readInput(inputOutput,staticData.GetInputType(),source))
 		{
-			TRACE_ERR(nBestSize << " " << staticData.GetNBestFilePath() << endl);
-			LatticePathList nBestList;
-			manager.CalcNBest(nBestSize, nBestList);
-			inputOutput->SetNBest(nBestList, source->GetTranslationId());
-			RemoveAllInColl< LatticePathList::iterator > (nBestList);
-		}
+			// note: source is only valid within this while loop!
 
-		// delete source
-		//		inputOutput->Release(source);
-		staticData.CleanUpAfterSentenceProcessing();
-		delete source;
-	}
+			TRACE_ERR("TRANSLATING: " << *source <<"\n");
+
+			staticData.InitializeBeforeSentenceProcessing(*source);
+			Manager manager(*source, staticData);
+			manager.ProcessSentence();
+			inputOutput->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId(),
+														 staticData.GetReportSourceSpan(),
+														 staticData.GetReportAllFactors()
+														 );
+
+			// n-best
+			size_t nBestSize = staticData.GetNBestSize();
+			if (nBestSize > 0)
+				{
+					TRACE_ERR(nBestSize << " " << staticData.GetNBestFilePath() << endl);
+					LatticePathList nBestList;
+					manager.CalcNBest(nBestSize, nBestList);
+					inputOutput->SetNBest(nBestList, source->GetTranslationId());
+					RemoveAllInColl< LatticePathList::iterator > (nBestList);
+				}
+
+			staticData.CleanUpAfterSentenceProcessing();
+		}
 	
 	delete inputOutput;
 

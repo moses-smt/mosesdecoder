@@ -51,11 +51,12 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am__moses_SOURCES_DIST = Main.cpp IOCommandLine.cpp IOFile.cpp \
-	IOMySQL.cpp ThreadMySQL.cpp
+	TranslationAnalysis.cpp IOMySQL.cpp ThreadMySQL.cpp
 #am__objects_1 = IOMySQL.$(OBJEXT) \
 #	ThreadMySQL.$(OBJEXT)
 am_moses_OBJECTS = Main.$(OBJEXT) IOCommandLine.$(OBJEXT) \
-	IOFile.$(OBJEXT) $(am__objects_1)
+	IOFile.$(OBJEXT) TranslationAnalysis.$(OBJEXT) \
+	$(am__objects_1)
 moses_OBJECTS = $(am_moses_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -70,21 +71,21 @@ DIST_SOURCES = $(am__moses_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/ws06/rzens/workspace/Aug03/moses-cmd/missing --run aclocal-1.9
+ACLOCAL = ${SHELL} /home/ws06/rzens/workspace/Aug07/moses-cmd/missing --run aclocal-1.9
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /home/ws06/rzens/workspace/Aug03/moses-cmd/missing --run tar
-AUTOCONF = ${SHELL} /home/ws06/rzens/workspace/Aug03/moses-cmd/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/ws06/rzens/workspace/Aug03/moses-cmd/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/ws06/rzens/workspace/Aug03/moses-cmd/missing --run automake-1.9
+AMTAR = ${SHELL} /home/ws06/rzens/workspace/Aug07/moses-cmd/missing --run tar
+AUTOCONF = ${SHELL} /home/ws06/rzens/workspace/Aug07/moses-cmd/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/ws06/rzens/workspace/Aug07/moses-cmd/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/ws06/rzens/workspace/Aug07/moses-cmd/missing --run automake-1.9
 AWK = gawk
 BUILD_MYSQL_SUPPORT_FALSE = 
 BUILD_MYSQL_SUPPORT_TRUE = #
-CPPFLAGS =  -I/home/ws06/cdyer/boost-stage -I/home/ws06/cdyer/boost-stage/include -I/home/ws06/rzens/workspace/Aug03/moses/src -I/home/ws06/cdyer/srilm/include
+CPPFLAGS =  -I/home/ws06/cdyer/boost-stage -I/home/ws06/cdyer/boost-stage/include -I/home/ws06/rzens/workspace/Aug07/moses/src -I/home/ws06/cdyer/srilm/include
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2
+CXXFLAGS = -O3 -DNDEBUG
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -101,11 +102,11 @@ INTERNAL_LM_FALSE =
 INTERNAL_LM_TRUE = #
 IRST_LM_FALSE = 
 IRST_LM_TRUE = #
-LDFLAGS = -static -L/home/ws06/cdyer/boost-stage/lib -L/home/ws06/cdyer/boost-stage/stage/lib -L/home/ws06/rzens/workspace/Aug03/moses/src -L/home/ws06/cdyer/srilm/lib/i686
+LDFLAGS = -static -L/home/ws06/cdyer/boost-stage/lib -L/home/ws06/cdyer/boost-stage/stage/lib -L/home/ws06/rzens/workspace/Aug07/moses/src -L/home/ws06/cdyer/srilm/lib/i686
 LIBOBJS = 
 LIBS =  -lmoses -loolm -ldstruct -lmisc -lboost_iostreams-gcc-mt -lboost_filesystem-gcc-mt -lboost_thread-gcc-mt -lz
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/ws06/rzens/workspace/Aug03/moses-cmd/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/ws06/rzens/workspace/Aug07/moses-cmd/missing --run makeinfo
 MYSQLCLIENT_CPPFLAGS = 
 MYSQLCLIENT_LDFLAGS = 
 MYSQLCLIENT_LIBS = 
@@ -141,7 +142,7 @@ exec_prefix = ${prefix}
 host_alias = 
 includedir = ${prefix}/include
 infodir = ${prefix}/info
-install_sh = /home/ws06/rzens/workspace/Aug03/moses-cmd/install-sh
+install_sh = /home/ws06/rzens/workspace/Aug07/moses-cmd/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localstatedir = ${prefix}/var
@@ -154,7 +155,8 @@ sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 sysconfdir = ${prefix}/etc
 target_alias = 
-moses_SOURCES = Main.cpp IOCommandLine.cpp IOFile.cpp $(am__append_1)
+moses_SOURCES = Main.cpp IOCommandLine.cpp IOFile.cpp \
+	TranslationAnalysis.cpp $(am__append_1)
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 moses_LDADD = -lmoses
 moses_DEPENDENCIES = $(top_srcdir)/../moses/src/libmoses.a
@@ -229,6 +231,7 @@ include ./$(DEPDIR)/IOFile.Po
 include ./$(DEPDIR)/IOMySQL.Po
 include ./$(DEPDIR)/Main.Po
 include ./$(DEPDIR)/ThreadMySQL.Po
+include ./$(DEPDIR)/TranslationAnalysis.Po
 
 .cpp.o:
 	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
