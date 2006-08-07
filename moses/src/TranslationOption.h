@@ -34,8 +34,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class PhraseDictionaryBase;
 class GenerationDictionary;
 
-/***
- * Specify source and target words for a possible translation. m_targetPhrase points to a phrase-table entry.
+/** Available phrase translation for a particular sentence pair.
+ * In a multi-factor model, this is expanded from the entries in the 
+ * translation tables and generation tables (and pruned to the maximum
+ * number allowed). By pre-computing the allowable phrase translations,
+ * efficient beam search in Manager is possible when expanding instances
+ * of the class Hypothesis - the states in the search.
+ * 
+ * A translation option contains source and target phrase, aggregate
+ * and details scores (in m_scoreBreakdown), including an estimate 
+ * how expensive this option will be in search (used to build the 
+ * future cost matrix.)
+ *
+ * m_targetPhrase points to a phrase-table entry.
  * The source word range is zero-indexed, so it can't refer to an empty range. The target phrase may be empty.
  */
 class TranslationOption
@@ -53,13 +64,15 @@ protected:
 	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
 	//! for example, know the full n-gram score since the length of the
 	//! TargetPhrase may be shorter than the n-gram order.  But, if it is
-	//! possible to estimate, it will be known
+	//! possible to estimate, it is included here.
 	ScoreComponentCollection2	m_scoreBreakdown;
 
 public:
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
+
 	/** used by initial translation step */
 	TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase);
+
 	/** used by MergeTranslation */
 	TranslationOption(const TranslationOption &copy
 											, const Phrase &inputPhrase
@@ -69,65 +82,68 @@ public:
 	
 	/** add factors from a translation step */
 	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase) const;
+
 	/** add factors from a generation step */
 	TranslationOption *MergeGeneration(const Phrase &inputPhrase
 																		, const ScoreComponentCollection2& generationScore) const;
 
+	/** returns target phrase */
 	inline const Phrase &GetTargetPhrase() const
 	{
 		return m_targetPhrase;
 	}
+
+	/** returns source word range */
 	inline const WordsRange &GetSourceWordsRange() const
 	{
 		return m_sourceWordsRange;
 	}
+
+	/** returns source phrase */
 	Phrase const* GetSourcePhrase() const 
 	{
 	  return m_sourcePhrase;
 	}
 
 	bool Overlap(const Hypothesis &hypothesis) const;
-	/***
-	 * return start index of source phrase
-	 */
+
+	/** return start index of source phrase */
 	inline size_t GetStartPos() const
 	{
 		return m_sourceWordsRange.GetStartPos();
 	}
-	/***
-	 * return end index of source phrase
-	 */
+
+	/** return end index of source phrase */
 	inline size_t GetEndPos() const
 	{
 		return m_sourceWordsRange.GetEndPos();
 	}
-	/***
-	 * return length of source phrase
-	 */
+
+	/** return length of source phrase */
 	inline size_t GetSize() const
 	{
 		return m_sourceWordsRange.GetEndPos() - m_sourceWordsRange.GetStartPos() + 1;
 	}
-	/***
-	 * return source words range
-	 */
+	/** return source words range */
 	inline const WordsRange &GetWordsRange() const
 	{
 		return m_sourceWordsRange;
 	}
+
+	/** return estimate of total cost of this option */
 	inline float GetFutureScore() const 	 
 	{ 	 
 		return m_futureScore; 	 
 	}
-  /***
-   * returns true if the source phrase translates into nothing
-   */
+
+  /** return true if the source phrase translates into nothing */
 	inline bool IsDeletionOption() const
   {
     return m_targetPhrase.GetSize() == 0;
   }
 	void CalcScore(const LMList &allLM, float weightWordPenalty);
 
+	/** returns detailed component scores */
 	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
