@@ -102,6 +102,7 @@ my $pythonpath = undef; # path to python libraries needed by cmert
 my $filtercmd = undef; # path to filter-model-given-input.pl
 my $SCORENBESTCMD = undef;
 my $qsubwrapper = undef;
+my $moses_parallel_cmd = undef;
 
 
 use strict;
@@ -130,6 +131,7 @@ GetOptions(
   "filtercmd=s" => \$filtercmd, # allow to override the default location
   "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
+  "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -150,7 +152,8 @@ if ($usage || !defined $___DEV_F || !defined$___DEV_E || !defined$___DECODER || 
 Options:
   --working-dir=mert-dir ... where all the files are created
   --nbest=100 ... how big nbestlist to generate
-  --jobs=N  ... optional path to moses-parallel.perl
+  --jobs=N  ... set this to anything to run moses in parallel
+  --mosesparallelcmd=STRING ... use a different script instead of moses-parallel
   --queue-flags=STRING  ... anything you with to pass to 
               qsub, eg. '-l ws06osssmt=true'
               The default is to submit the jobs to the ws06ossmt queue, which
@@ -196,7 +199,8 @@ $filtercmd="$SCRIPTS_ROOTDIR/training/filter-model-given-input.pl" if !defined $
 
 $qsubwrapper="$SCRIPTS_ROOTDIR/generic/qsub-wrapper.pl" if !defined $qsubwrapper;
 
-my $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl";
+$moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
+  if !defined $moses_parallel_cmd;
 
 $cmertdir = "$SCRIPTS_ROOTDIR/training/cmert-0.5" if !defined $cmertdir;
 my $cmertcmd="$cmertdir/mert";
