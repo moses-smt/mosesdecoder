@@ -50,7 +50,9 @@ TranslationOptionCollection*
 Sentence::CreateTranslationOptionCollection() const 
 {
 	size_t maxNoTransOptPerCoverage = StaticData::Instance()->GetMaxNoTransOptPerCoverage();
-	return new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage);
+	TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage);
+	assert(rv);
+	return rv;
 }
 void Sentence::Print(std::ostream& out) const
 {

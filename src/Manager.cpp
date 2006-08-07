@@ -29,16 +29,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LatticePathCollection.h"
 #include "TranslationOption.h"
 #include "LMList.h"
+#include "TranslationOptionCollection.h"
 
 using namespace std;
 
-Manager::Manager(InputType const& source, 
-								 TranslationOptionCollection& toc,
-								 StaticData &staticData)
+Manager::Manager(InputType const& source, StaticData &staticData)
 :m_source(source)
 ,m_hypoStack(source.GetSize() + 1)
 ,m_staticData(staticData)
-,m_possibleTranslations(toc)  //dynamic_cast<Sentence const&>(source))
+,m_possibleTranslations(*source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 {
 	std::vector < HypothesisCollection >::iterator iterStack;
@@ -50,7 +49,10 @@ Manager::Manager(InputType const& source,
 	}
 }
 
-Manager::~Manager() {}
+Manager::~Manager() 
+{
+  delete &m_possibleTranslations;
+}
 
 /**
  * This is the main decoder loop that translates a sentence by expanding

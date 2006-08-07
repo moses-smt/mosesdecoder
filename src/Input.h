@@ -37,7 +37,7 @@ protected:
 
 	virtual void Print(std::ostream&) const=0;
 
-	virtual TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const=0;
+	//virtual TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const=0;
 	virtual TranslationOptionCollection* CreateTranslationOptionCollection() const=0;
 
 	virtual Phrase GetSubString(const WordsRange&) const =0;
