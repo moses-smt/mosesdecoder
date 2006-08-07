@@ -6,6 +6,7 @@
 #include "DistortionOrientation.h"
 #include "TypeDef.h"
 #include "Hypothesis.h"
+using namespace std;
 /*
  * Load the file pointed to by filename; set up the table according to
  * the orientation and condition parameters. Direction will be used
@@ -20,51 +21,38 @@ int DistortionOrientation::GetOrientation(const Hypothesis *curr_hypothesis, int
 	const WordsRange &currTargetRange = curr_hypothesis->GetCurrTargetWordsRange()
 			       , &currSourceRange = curr_hypothesis->GetCurrSourceWordsRange();
 	const Hypothesis *prevHypo = curr_hypothesis->GetPrevHypo();
-	//don't look for attributes of the previous hypothesis if there is no previous hypothesis.
-	size_t prev_source_start = 0;
-	size_t prev_source_end = 0;
-	if(prevHypo!=NULL){
-		const WordsRange &prevSourceRange = prevHypo->GetCurrSourceWordsRange();
-		prev_source_start = prevSourceRange.GetStartPos();
-		prev_source_end = prevSourceRange.GetEndPos();
-	}
 	size_t curr_source_start = currSourceRange.GetStartPos();
 	size_t curr_source_end = currSourceRange.GetEndPos();
-	size_t curr_target_start = currTargetRange.GetStartPos();
 	size_t curr_target_end = currTargetRange.GetEndPos();
-	//TODO: what is appropriate behavior in this situation?
-	//first hypothesis has no previous source start; we judge it by default monotonic.
-	if(prev_source_start == 0 || prev_source_end == 0) //redundant if one is null both should be
+	size_t prev_source_start = NULL;
+	size_t prev_source_end = NULL;
+	if(prevHypo!=NULL){
+		//don't look for attributes of the previous hypothesis if there is no previous hypothesis.
+		const WordsRange &prevSourceRange = prevHypo->GetCurrSourceWordsRange();
+		prev_source_start = prevSourceRange.GetStartPos();
+		prev_source_end = prevSourceRange.GetEndPos();		
+	}
+	else{
+		return DistortionOrientationType::MONO;		
+	}
+	if((curr_target_end==numSourceWords && type==LexReorderType::Forward) || prev_source_end==curr_source_start-1)
 	{
 		return DistortionOrientationType::MONO;
 	}
-	else if(direction==LexReorderType::Backward)
+	else if(type==DistortionOrientationType::Msd) //distinguish between monotone, swap, discontinuous
 	{
-		//first two conditionals are edge cases which judge first and last phrases as monotonic
-		//last conditional is the actual test for monotonicity
-		if(curr_target_start==0 || curr_target_end==numSourceWords || prev_source_end==curr_source_start)
+		if(prev_source_start==curr_source_end+1)
 		{
-			return DistortionOrientationType::MONO;
+			return DistortionOrientationType::SWAP;
 		}
-		else if(type==DistortionOrientationType::Msd) //distinguish between monotone, swap, discontinuous
+		else
 		{
-			if(prev_source_start==curr_source_end)
-				return DistortionOrientationType::SWAP;
-			else
-				return DistortionOrientationType::DISC;
+			return DistortionOrientationType::DISC;
 		}
-		else //only distinguish between Monotone, non monotone
-		{
-			return DistortionOrientationType::NON_MONO;
-		}
-		
 	}
-	else //assume direction is forward, do same computation but on PREVIOUS hypothesis
+	else //only distinguish between Monotone, non monotone
 	{
-		//in the base case there is no previous hypothesis
-		return DistortionOrientation::GetOrientation(curr_hypothesis->GetPrevHypo()
-													 ,LexReorderType::Forward
-													 ,type);
+		return DistortionOrientationType::NON_MONO;
 	}
 }
 
