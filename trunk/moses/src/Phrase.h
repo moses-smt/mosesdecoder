@@ -47,13 +47,6 @@ public:
 	static void InitializeMemPool();
 	static void FinalizeMemPool();
 
-	inline Phrase()
-		: m_phraseSize(0)
-		, m_arraySize(0)
-		, m_memPoolIndex(0)
-		, m_factorArray(NULL)
-	{	// shouldn't be used. only for map
-	}
 	Phrase(const Phrase &copy);
 	Phrase& operator=(const Phrase&);
 
