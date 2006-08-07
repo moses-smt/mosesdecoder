@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream& out,const std::vector<T>& x)
 		out<<*i<<' ';
 	return out;
 }
-
+#if 0
 FactorType getFactorType(int i) {
 	switch(i) {
 	case 0: return Surface;
@@ -35,7 +35,7 @@ FactorType getFactorType(int i) {
 	}
 	return Surface;
 }
-
+#endif
 
 FactorCollection factorCollection;
 
