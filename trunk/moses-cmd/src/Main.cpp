@@ -50,6 +50,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "IOFile.h"
 #include "Sentence.h"
 #include "ConfusionNet.h"
+#include "TranslationAnalysis.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -148,6 +149,9 @@ int main(int argc, char* argv[])
 					RemoveAllInColl< LatticePathList::iterator > (nBestList);
 				}
 
+			if (staticData.IsDetailedTranslationReportingEnabled()) {
+				TranslationAnalysis::PrintTranslationAnalysis(std::cout, manager.GetBestHypothesis());
+			}
 			staticData.CleanUpAfterSentenceProcessing();
 		}
 	
