@@ -24,11 +24,11 @@ while (<INI>) {
     }
     if ($section eq "generation-file") {
       chomp;
-      my ($a, $b, $fn) = split / /;
+      my ($a, $b, $c, $fn) = split / /;
       $abs = ensure_absolute($fn, $ini);
       die "File not found or empty: $fn (interpreted as $abs)"
         if ! -s $abs;
-      $_ = "$a $b $abs\n";
+      $_ = "$a $b $c $abs\n";
     }
     if ($section eq "distortion-file") {
       chomp;
