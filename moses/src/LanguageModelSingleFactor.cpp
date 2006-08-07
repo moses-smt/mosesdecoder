@@ -40,6 +40,8 @@ LanguageModelSingleFactor::State LanguageModelSingleFactor::UnknownState=0;
 
 LanguageModelSingleFactor::LanguageModelSingleFactor() 
 {
+	Word::Initialize(m_sentenceStartArray);
+	Word::Initialize(m_sentenceEndArray);
 }
 LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
 
@@ -52,49 +54,5 @@ const std::string LanguageModelSingleFactor::GetScoreProducerDescription() const
 	return oss.str();
 } 
 
-void LanguageModelSingleFactor::CalcScore(const Phrase &phrase
-														, float &fullScore
-														, float &ngramScore) const
-{
-	fullScore	= 0;
-	ngramScore	= 0;
-	FactorType factorType = GetFactorType();
 
-	size_t phraseSize = phrase.GetSize();
-	vector<const Factor*> contextFactor;
-	contextFactor.reserve(m_nGramOrder);
-
-	// start of sentence
-	for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
-	{
-		contextFactor.push_back(phrase.GetFactor(currPos, factorType));		
-		fullScore += GetValue(contextFactor);
-	}
-	
-	if (phraseSize >= m_nGramOrder)
-	{
-		contextFactor.push_back(phrase.GetFactor(m_nGramOrder - 1, factorType));
-		ngramScore = GetValue(contextFactor);
-	}
-	
-	// main loop
-	for (size_t currPos = m_nGramOrder; currPos < phraseSize ; currPos++)
-	{ // used by hypo to speed up lm score calc
-		for (size_t currNGramOrder = 0 ; currNGramOrder < m_nGramOrder - 1 ; currNGramOrder++)
-		{
-			contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
-		}
-		contextFactor[m_nGramOrder - 1] = phrase.GetFactor(currPos, factorType);
-		float partScore = GetValue(contextFactor);		
-		ngramScore += partScore;		
-	}
-	fullScore += ngramScore;	
-}
-
-LanguageModelSingleFactor::State LanguageModelSingleFactor::GetState(const std::vector<const Factor*> &contextFactor) const
-{
-  State state;
-  GetValue(contextFactor,&state);
-  return state;
-}
 

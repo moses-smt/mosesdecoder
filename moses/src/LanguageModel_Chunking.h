@@ -46,45 +46,7 @@ public:
 		m_realNGramOrder = 3; // fixed for now
 	}
 		
-	void CalcScore(const Phrase &phrase
-							, float &fullScore
-							, float &ngramScore) const
-	{
-		fullScore	= 0;
-		ngramScore	= 0;
-	
-		size_t phraseSize = phrase.GetSize();
-		std::vector<const FactorArray*> contextFactor;
-		contextFactor.reserve(m_nGramOrder);
-				
-		// start of sentence
-		for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
-		{
-			contextFactor.push_back(&phrase.GetFactorArray(currPos));
-			fullScore += GetValue(contextFactor);
-		}
-		
-		if (phraseSize >= m_nGramOrder)
-		{
-			contextFactor.push_back(&phrase.GetFactorArray(m_nGramOrder - 1));
-			ngramScore = GetValue(contextFactor);
-		}
-		
-		// main loop
-		for (size_t currPos = m_nGramOrder; currPos < phraseSize ; currPos++)
-		{ // used by hypo to speed up lm score calc
-			for (size_t currNGramOrder = 0 ; currNGramOrder < m_nGramOrder - 1 ; currNGramOrder++)
-			{
-				contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
-			}
-			contextFactor[m_nGramOrder - 1] = &phrase.GetFactorArray(currPos);
-			float partScore = GetValue(contextFactor);			
-			ngramScore += partScore;		
-		}
-		fullScore += ngramScore;	
-	}
-	
-	float GetValue(const std::vector<const FactorArray*> &contextFactor) const
+	float GetValue(const std::vector<const FactorArray*> &contextFactor, State* finalState = NULL) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -98,13 +60,13 @@ public:
 	
 		// create vector of just B-factors, in reverse order
 		size_t currOrder = 0;
-		std::vector<const Factor*> chunkContext;
+		std::vector<const FactorArray*> chunkContext;
 		for (int currPos = (int)contextFactor.size() - 1 ; currPos >= 0 ; --currPos )
 		{
 			const Factor *factor = *contextFactor[currPos][m_factorType];
 			if (factor->GetString().substr(0, 2) != "I-")
 			{
-				chunkContext.push_back(factor);
+				chunkContext.push_back(contextFactor[currPos]);
 				if (++currOrder >= m_realNGramOrder)
 					break;
 			}
@@ -113,7 +75,6 @@ public:
 		// create context factor the right way round
 		std::reverse(chunkContext.begin(), chunkContext.end());
 		// calc score on that phrase
-		LanguageModelSingleFactor::State *finalState; // what shall we do with this ???
 		return m_lmImpl.GetValue(chunkContext, finalState);
 	}
 	

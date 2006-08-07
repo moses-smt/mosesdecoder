@@ -31,9 +31,9 @@ class LanguageModelSingleFactor : public LanguageModel
 {
 protected:	
 	const Factor *m_sentenceStart, *m_sentenceEnd;
+	FactorArray m_sentenceStartArray, m_sentenceEndArray;
 	FactorType	m_factorType;
 public:
-  typedef const void* State;
   static State UnknownState;
 
 	LanguageModelSingleFactor();
@@ -52,9 +52,14 @@ public:
 	{
 		return m_sentenceEnd;
 	}
-	virtual void CalcScore(const Phrase &phrase
-											, float &fullScore
-											, float &ngramScore) const;
+	const FactorArray &GetSentenceStartArray() const
+	{
+		return m_sentenceStartArray;
+	}
+	const FactorArray &GetSentenceEndArray() const
+	{
+		return m_sentenceEndArray;
+	}
 	FactorType GetFactorType() const
 	{
 		return m_factorType;
@@ -68,12 +73,5 @@ public:
 		m_weight = weight;
 	}
 	const std::string GetScoreProducerDescription() const;
-	virtual float GetValue(const std::vector<const Factor*> &contextFactor, State* finalState = 0) const = 0;
-
-	LanguageModelSingleFactor::State GetState(const std::vector<const Factor*> &contextFactor) const;
-
-  // one of the following should probably be made available
-  // virtual LmId GetLmID( const Factor *factor )  const = 0;
-  // virtual LmId GetLmID( const std::string &factor )  const = 0;
 };
 

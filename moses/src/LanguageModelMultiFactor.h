@@ -30,8 +30,5 @@ protected:
 	FactorType	m_factorType; // tempoary
 	
 public:
-	const std::string GetScoreProducerDescription() const;
-	
-	virtual float GetValue(const std::vector<const FactorArray*> &contextFactor0) const = 0;
-	
+	const std::string GetScoreProducerDescription() const;	
 };
