@@ -73,6 +73,7 @@ struct HypothesisRecombinationHasher
   }
 };
 
+/** Stack for instances of Hypothesis, includes functions for pruning. */ 
 class HypothesisCollection 
 {
 private:
@@ -88,11 +89,11 @@ public:
 	friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
 
 protected:
-	float m_bestScore;
-    float m_worstScore;
-    float m_beamThreshold;
-	size_t m_maxHypoStackSize;
-  _HCType m_hypos;
+	float m_bestScore; /**< score of the best hypothesis in collection */
+	float m_worstScore; /**< score of the worse hypthesis in collection */
+	float m_beamThreshold; /**< minimum score due to threashold pruning */
+	size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
+  _HCType m_hypos; /**< contains hypotheses */
 
 
 	void Add(Hypothesis *hypothesis);
@@ -101,16 +102,19 @@ protected:
 		// used by Add(Hypothesis *hypothesis, float beamThreshold);
 	void RemoveAll();
 
+	/** destroy all instances of Hypothesis in this collection */
 	inline void Detach(const HypothesisCollection::iterator &iter)
 	{
 		m_hypos.erase(iter);
 	}
+	/** destroy all instances of Hypothesis in this collection (object pool version) */
 	inline void Remove(const HypothesisCollection::iterator &iter)
 	{
 		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
 		pool.freeObject(*iter);
 		Detach(iter);
 	}
+	/** add Hypothesis to the collection, without pruning */
 	inline void AddNoPrune(Hypothesis *hypothesis)
 	{
 		if (!m_hypos.insert(hypothesis).second) {
@@ -137,14 +141,20 @@ public:
 	{
 		RemoveAll();
 	}
+	/** set maximum number of hypotheses in the collection
+   *  /param maxHypoStackSize maximum number (typical number: 100) */
 	inline void SetMaxHypoStackSize(size_t maxHypoStackSize)
 	{
 		m_maxHypoStackSize = maxHypoStackSize;
 	}
+	/** set beam threshold, hypotheses in the stack must not be worse than 
+   *  this factor times the best score to be allowed in the stack
+	 *  /param beamThreshold minimum factor (typical number: 0.03) */
 	inline void SetBeamThreshold(float beamThreshold)
 	{
 		m_beamThreshold = beamThreshold;
 	}
+	/** returns score of the best hypothesis in the stack */
 	inline float GetBestScore() const
 	{
 		return m_bestScore;
