@@ -458,6 +458,7 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 
 std::string Hypothesis::GetSourcePhraseStringRep() const 
 {
+	if (!m_prevHypo) { return ""; }
 	if(m_sourcePhrase) {
 		assert(m_sourcePhrase->ToString()==m_sourcePhrase->GetStringRep(WordsRange(0,m_sourcePhrase->GetSize()-1)));
 		return m_sourcePhrase->ToString();
@@ -468,5 +469,6 @@ std::string Hypothesis::GetSourcePhraseStringRep() const
 }
 std::string Hypothesis::GetTargetPhraseStringRep() const 
 {
+	if (!m_prevHypo) { return ""; }
 	return m_targetPhrase.ToString();
 }

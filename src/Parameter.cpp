@@ -68,6 +68,7 @@ Parameter::Parameter()
 	AddParam("report-all-factors");
 	AddParam("drop-unknown");
 	AddParam("inputtype");
+	AddParam("translation-details");
 	AddParam("max-trans-opt-per-coverage");
 	AddParam("use-distortion-future-costs");
 }
@@ -258,6 +259,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	OverwriteParam("-lm", "weight-l", argc, argv);
 	OverwriteParam("-tm", "weight-t", argc, argv);
 	OverwriteParam("-w", "weight-w", argc, argv);
+	OverwriteParam("-T", "translation-details", argc, argv);
 	OverwriteParam("-e", "weight-e", argc, argv);
 	OverwriteParam("-g", "weight-generation", argc, argv);
 	OverwriteParam("-n-best-list", "n-best-list", argc, argv);
