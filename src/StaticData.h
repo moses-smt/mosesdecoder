@@ -58,7 +58,7 @@ protected:
 	std::vector<float>			m_lexWeights;
 	ScoreIndexManager				m_scoreIndexManager;
 	std::vector<float>			m_allWeights;
-	LexicalReordering                   *m_lexReorder;
+	std::vector<LexicalReordering*>                   m_reorderModels;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float
@@ -167,9 +167,9 @@ public:
 	{
 		return m_factorCollection;
 	}
-	LexicalReordering *GetLexReorder() const
+	std::vector<LexicalReordering*> GetReorderModels() const
 	{
-		return m_lexReorder;
+		return m_reorderModels;
 	}
 	float GetWeightDistortion() const
 	{

@@ -60,8 +60,6 @@ void LexicalReordering::LoadFile()
 					// if condition is "fe", then concatenate the first two tokens
 					// to make a single token
 					key = f + "|||" + e;
-
-					//TODO: debugging, remove
 					probs = Scan<float>(Tokenize(tokens[FE_PROBS]));
 				}
 			else
@@ -120,8 +118,7 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 		int orientation = DistortionOrientation::GetOrientation(hypothesis, direction);
 		if(m_condition==LexReorderType::Fe)
 		{
-		//this key string is be F+'|||'+E from the hypothesis
-		//what does map return if not in phrase table? is this appropriate?
+		//this key string is F+'|||'+E from the hypothesis
 		val=m_orientation_table[hypothesis->GetSourcePhraseStringRep()
 														+"||| "
 														+hypothesis->GetTargetPhraseStringRep()];
