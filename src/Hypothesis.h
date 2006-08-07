@@ -44,9 +44,9 @@ class Hypothesis;
 
 typedef std::vector<Hypothesis*> ArcList;
 
-/** The hypothesis class is used to store a state in the beam search
+/** Used to store a state in the beam search
     for the best translation. With its link back to the previous hypothesis
-    m_mainHypo, we can trace back to the sentence start to read of the
+    m_prevHypo, we can trace back to the sentence start to read of the
     (partial) translation to this point.
     
 		The expansion of hypotheses is handled in the class Manager, which
@@ -62,21 +62,22 @@ private:
 protected:
 	static ObjectPool<Hypothesis> s_objectPool;
 	
-	const Hypothesis* m_prevHypo;
+	const Hypothesis* m_prevHypo; /**< backpointer to previous hypothesis (from which this one was created) */
 	const Phrase			&m_targetPhrase; /**< target phrase being created at the current decoding step */
 	Phrase const*     m_sourcePhrase; /**< input sentence */
 	WordsBitmap				m_sourceCompleted; /**< keeps track of which words have been translated so far */
 	//TODO: how to integrate this into confusion network framework; what if
 	//it's a confusion network in the end???
 	InputType const&  m_sourceInput;
-	WordsRange				m_currSourceWordsRange, m_currTargetWordsRange; /**< word positions of the last phrase that was used to create this hypothesis */
+	WordsRange				m_currSourceWordsRange; /**< source word positions of the last phrase that was used to create this hypothesis */
+	WordsRange        m_currTargetWordsRange; /**< target word positions of the last phrase that was used to create this hypothesis */
   bool							m_wordDeleted;
 	float							m_totalScore;  /**< score so far */
 	float							m_futureScore; /**< estimated future cost to translate rest of sentence */
-	ScoreComponentCollection2 m_scoreBreakdown; /**< detailed score break-down by components (e.g. language model, word penalty, etc.) */
+	ScoreComponentCollection2 m_scoreBreakdown; /**< detailed score break-down by components (for instance language model, word penalty, etc) */
 	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /**< relevant history for language model scoring -- used for recombination */
 #ifdef N_BEST
-	const Hypothesis 	*m_mainHypo; /**< traceback to previous hypothesis */
+	const Hypothesis 	*m_mainHypo;
 	ArcList 					*m_arcList; /**< all arcs that end at the same lattice point as this hypothesis */
 #endif
 
@@ -107,7 +108,7 @@ public:
 	
 	/** initial seeding of the translation process **/
 	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
-	/** create a new hypothesis using a translation option (phrase translation */
+	/** create a new hypothesis using a translation option (phrase translation) */
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 	~Hypothesis();
 	
