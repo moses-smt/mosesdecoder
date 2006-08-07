@@ -44,10 +44,11 @@ class TranslationOption
 
 protected:
 
-	const Phrase 				m_targetPhrase;
-	Phrase const*       m_sourcePhrase;
-	const WordsRange		m_sourceWordsRange;
-	float								m_totalScore, m_futureScore;
+	const Phrase 				m_targetPhrase; /*< output phrase when using this translation option */
+	Phrase const*       m_sourcePhrase; /*< input phrase translated by this */
+	const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
+	float								m_totalScore; /*< weighted translation costs of this translation option */
+	float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
 	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
 	//! for example, know the full n-gram score since the length of the
@@ -57,16 +58,18 @@ protected:
 
 public:
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
-	// used by initial translation step
+	/** used by initial translation step */
 	TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase);
-	// used by MergeTranslation 
+	/** used by MergeTranslation */
 	TranslationOption(const TranslationOption &copy
 											, const Phrase &inputPhrase
 											, const ScoreComponentCollection2& additionalScore);
+	/** used to create trans opt from unknown word */
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/);
-	// used to create trans opt from unknown word
 	
+	/** add factors from a translation step */
 	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase) const;
+	/** add factors from a generation step */
 	TranslationOption *MergeGeneration(const Phrase &inputPhrase
 																		, const ScoreComponentCollection2& generationScore) const;
 
