@@ -7,7 +7,6 @@
 <extension id="org.eclipse.cdt.core.nullindexer" point="org.eclipse.cdt.core.CIndexer"/>
 <data>
 <item id="org.eclipse.cdt.core.pathentry">
-<pathentry kind="src" path=""/>
 <pathentry kind="out" path=""/>
 <pathentry kind="con" path="org.eclipse.cdt.managedbuilder.MANAGED_CONTAINER"/>
 </item>
