@@ -282,7 +282,13 @@ if (defined $___LAMBDA) {
     foreach (1..$extra_lambdas_for_model->{$name}) {
       die "No default weights defined for -$name"
         if !defined $default_triples->{$name};
-      push @{$use_triples->{$name}}, @{$default_triples->{$name}};
+      # XXX here was a deadly bug: we need a deep copy of the default values
+      my @copy = ();
+      foreach my $triple (@{$default_triples->{$name}}) {
+        my @copy_triple = @$triple;
+        push @copy, [ @copy_triple ];
+      }
+      push @{$use_triples->{$name}}, @copy;
     }
   }
   # and then for all models used
@@ -290,7 +296,13 @@ if (defined $___LAMBDA) {
     foreach (1..$models_used->{$name}) {
       die "No default weights defined for -$name"
         if !defined $default_triples->{$name};
-      push @{$use_triples->{$name}}, @{$default_triples->{$name}};
+      # XXX here was a deadly bug: we need a deep copy of the default values
+      my @copy = ();
+      foreach my $triple (@{$default_triples->{$name}}) {
+        my @copy_triple = @$triple;
+        push @copy, [ @copy_triple ];
+      }
+      push @{$use_triples->{$name}}, @copy;
     }
   }
 }
@@ -337,6 +349,19 @@ my @order_of_lambdas_from_decoder = ();
 
 
 
+#store current directory and create the working directory (if needed)
+my $cwd = `pwd`; chop($cwd);
+safesystem("mkdir -p $___WORKING_DIR") or die "Can't mkdir $___WORKING_DIR";
+
+{
+# open local scope
+
+#chdir to the working directory
+chdir($___WORKING_DIR) or die "Can't chdir to $___WORKING_DIR";
+
+
+
+
 # set start run
 my $start_run = 1;
 
@@ -362,19 +387,10 @@ if ($continue) {
   close IN;
   my @newweights = split /\s+/, $newweights;
 
+  # dump_triples($use_triples);
   $use_triples = store_new_lambda_values($use_triples, \@order_of_lambdas_from_decoder, \@newweights);
+  # dump_triples($use_triples);
 }
-
-#store current directory and create the working directory (if needed)
-my $cwd = `pwd`; chop($cwd);
-safesystem("mkdir -p $___WORKING_DIR") or die "Can't mkdir $___WORKING_DIR";
-
-{
-# open local scope
-
-#chdir to the working directory
-chdir($___WORKING_DIR) or die "Can't chdir to $___WORKING_DIR";
-
 
 
 
@@ -559,6 +575,10 @@ while(1) {
     last;
   }
 
+  open F, "> finished_step.txt" or die "Can't mark finished step";
+  print F $run."\n";
+  close F;
+
 }
 print "Training finished at ".`date`;
 
@@ -596,9 +616,21 @@ sub store_new_lambda_values {
       if !defined $triples->{$name}->[$idx{$name}];
 
     # set the corresponding field in triples
+    # print STDERR "Storing $i-th score as $name: $idx{$name}: $values->[$i]\n";
     $triples->{$name}->[$idx{$name}]->[0] = $values->[$i];
   }
   return $triples;
+}
+
+sub dump_triples {
+  my $triples = shift;
+
+  foreach my $name (keys %$triples) {
+    foreach my $triple (@{$triples->{$name}}) {
+      my ($val, $min, $max) = @$triple;
+      print STDERR "Triples:  $name\t$val\t$min\t$max    ($triple)\n";
+    }
+  }
 }
 
 
@@ -626,6 +658,7 @@ sub run_decoder {
       grep($_/=$totlambda,@vals);
     }
     print STDERR "DECODER_CFG = $decoder_config\n";
+    print STDERR "     values = @vals\n";
     $decoder_config = sprintf($decoder_config, @vals);
     print "decoder_config = $decoder_config\n";
 
