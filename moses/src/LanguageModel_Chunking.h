@@ -23,11 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include <algorithm>
-#include "LanguageModel.h"
+#include "LanguageModelSingleFactor.h"
 #include "Phrase.h"
 
 template<typename LMImpl>
-class LanguageModel_Chunking : public LanguageModel
+class LanguageModel_Chunking : public LanguageModelSingleFactor
 {	
 protected:
 	size_t m_realNGramOrder;
@@ -84,7 +84,7 @@ public:
 		fullScore += ngramScore;	
 	}
 	
-	float GetValue(const std::vector<const Factor*> &contextFactor, LanguageModel::State* finalState = 0) const
+	float GetValue(const std::vector<const Factor*> &contextFactor, LanguageModelSingleFactor::State* finalState = 0) const
 	{
 		if (contextFactor.size() == 0)
 		{

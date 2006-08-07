@@ -35,9 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-// static variable init
-LanguageModel::State LanguageModel::UnknownState=0;
-
 LanguageModel::LanguageModel() 
 {
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
@@ -49,77 +46,3 @@ unsigned int LanguageModel::GetNumScoreComponents() const
 {
 	return 1;
 }
-
-const std::string LanguageModel::GetScoreProducerDescription() const
-{
-	std::ostringstream oss;
-	// what about LMs that are over multiple factors at once, POS + stem, for example?
-	oss << m_nGramOrder << "-gram LM score, factor-type=" << GetFactorType() << ", file=" << m_filename;
-	return oss.str();
-} 
-
-/***
- * ngramComponent should be an invalid pointer iff n-best ranking is turned off
- */
-void LanguageModel::CalcScore(const Phrase &phrase
-														, float &fullScore
-														, float &ngramScore) const
-{
-	fullScore	= 0;
-	ngramScore	= 0;
-	FactorType factorType = GetFactorType();
-
-	size_t phraseSize = phrase.GetSize();
-	vector<const Factor*> contextFactor;
-	contextFactor.reserve(m_nGramOrder);
-
-#undef CDYER_DEBUG_LMSCORE
-#ifdef CDYER_DEBUG_LMSCORE
-	std::cout<<"LM::CalcScore(" << phrase << "):\n";
-#endif
-		
-	// start of sentence
-	for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
-	{
-		contextFactor.push_back(phrase.GetFactor(currPos, factorType));		
-#ifdef CDYER_DEBUG_LMSCORE
-    float score = GetValue(contextFactor);
-		std::cout << "\t" << currPos << ": " << score << std::endl;
-#endif
-		fullScore += GetValue(contextFactor);
-	}
-	
-	if (phraseSize >= m_nGramOrder)
-	{
-		contextFactor.push_back(phrase.GetFactor(m_nGramOrder - 1, factorType));
-		ngramScore = GetValue(contextFactor);
-#ifdef CDYER_DEBUG_LMSCORE
-		std::cout << "\t" << m_nGramOrder-1 << " " << ngramScore << " (first full ngram)" << std::endl;
-#endif
-	}
-	
-	// main loop
-	for (size_t currPos = m_nGramOrder; currPos < phraseSize ; currPos++)
-	{ // used by hypo to speed up lm score calc
-		for (size_t currNGramOrder = 0 ; currNGramOrder < m_nGramOrder - 1 ; currNGramOrder++)
-		{
-			contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
-		}
-		contextFactor[m_nGramOrder - 1] = phrase.GetFactor(currPos, factorType);
-		float partScore = GetValue(contextFactor);
-#ifdef CDYER_DEBUG_LMSCORE
-		std::cout << "\t" << currPos << " " << partScore << " (full ngram)" << std::endl;
-#endif
-		
-		ngramScore += partScore;		
-	}
-	fullScore += ngramScore;	
-}
-
-LanguageModel::State LanguageModel::GetState(const std::vector<const Factor*> &contextFactor) const
-{
-  State state;
-  GetValue(contextFactor,&state);
-  return state;
-}
-

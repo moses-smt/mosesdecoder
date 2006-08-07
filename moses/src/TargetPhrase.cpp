@@ -59,7 +59,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 	LMList::const_iterator lmIter;
 	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
 	{
-		const LanguageModel &lm = **lmIter;
+		const LanguageModelSingleFactor &lm = **lmIter;
 		FactorType lmFactorType = lm.GetFactorType();
 		
 		if (GetSize() > 0 && GetFactor(0, lmFactorType) != NULL)
