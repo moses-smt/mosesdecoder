@@ -32,6 +32,6 @@ protected:
 public:
 	const std::string GetScoreProducerDescription() const;
 	
-	virtual float GetValue(const std::vector<Word> &contextFactor0) const = 0;
+	virtual float GetValue(const std::vector<const FactorArray*> &contextFactor0) const = 0;
 	
 };
