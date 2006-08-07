@@ -51,11 +51,12 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am__moses_SOURCES_DIST = Main.cpp IOCommandLine.cpp IOFile.cpp \
-	IOMySQL.cpp ThreadMySQL.cpp
+	TranslationAnalysis.cpp IOMySQL.cpp ThreadMySQL.cpp
 @BUILD_MYSQL_SUPPORT_TRUE@am__objects_1 = IOMySQL.$(OBJEXT) \
 @BUILD_MYSQL_SUPPORT_TRUE@	ThreadMySQL.$(OBJEXT)
 am_moses_OBJECTS = Main.$(OBJEXT) IOCommandLine.$(OBJEXT) \
-	IOFile.$(OBJEXT) $(am__objects_1)
+	IOFile.$(OBJEXT) TranslationAnalysis.$(OBJEXT) \
+	$(am__objects_1)
 moses_OBJECTS = $(am_moses_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -154,7 +155,8 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-moses_SOURCES = Main.cpp IOCommandLine.cpp IOFile.cpp $(am__append_1)
+moses_SOURCES = Main.cpp IOCommandLine.cpp IOFile.cpp \
+	TranslationAnalysis.cpp $(am__append_1)
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 moses_LDADD = -lmoses
 moses_DEPENDENCIES = $(top_srcdir)/../moses/src/libmoses.a
@@ -229,6 +231,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IOMySQL.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ThreadMySQL.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TranslationAnalysis.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
