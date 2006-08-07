@@ -18,6 +18,9 @@ libmoses_a_SOURCES = \
 	LMList.cpp \
 	LanguageModel.cpp \
 	LanguageModelFactory.cpp \
+	LanguageModelMultiFactor.cpp \
+	LanguageModelSingleFactor.cpp \
+	LanguageModel_Chunking.cpp \
 	LatticePath.cpp \
 	LexicalReordering.cpp \
 	Manager.cpp \
