@@ -17,9 +17,9 @@
 namespace LanguageModelFactory
 {
 
-	LanguageModel* createLanguageModel(LMType lmType)
+	LanguageModelSingleFactor* createLanguageModel(LMType lmType)
 	{
-	  LanguageModel *lm = NULL;
+	  LanguageModelSingleFactor *lm = NULL;
 	  switch (lmType)
 	  {
 	  	case SRI:

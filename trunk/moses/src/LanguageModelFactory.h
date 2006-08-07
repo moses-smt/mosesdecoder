@@ -5,7 +5,7 @@
 
 #include "TypeDef.h"
 
-class LanguageModel;
+class LanguageModelSingleFactor;
 
 namespace LanguageModelFactory {
 
@@ -13,7 +13,7 @@ namespace LanguageModelFactory {
 	 * creates a language model that will use the appropriate
    * language model toolkit as its underlying implementation
 	 */
-	LanguageModel* createLanguageModel(LMType lmType);
+	LanguageModelSingleFactor* createLanguageModel(LMType lmType);
 
 };
 

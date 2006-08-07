@@ -26,8 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Factor.h"
 #include "TypeDef.h"
 #include "Util.h"
-
-#include "LanguageModel.h"
+#include "LanguageModelSingleFactor.h"
 
 class FactorCollection;
 class Factor;
@@ -36,7 +35,7 @@ class Phrase;
 class lmtable;  // irst lm table
 class ngram;
 
-class LanguageModel_IRST : public LanguageModel
+class LanguageModel_IRST : public LanguageModelSingleFactor
 {
 protected:
 	std::vector<int> m_lmIdLookup;

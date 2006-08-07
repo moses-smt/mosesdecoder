@@ -48,7 +48,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
-	, m_languageModelStates(StaticData::Instance()->GetLMSize(), LanguageModel::UnknownState)
+	, m_languageModelStates(StaticData::Instance()->GetLMSize(), LanguageModelSingleFactor::UnknownState)
 #ifdef N_BEST
 	, m_arcList(NULL)
 #endif
@@ -222,7 +222,7 @@ void Hypothesis::GenerateNGramCompareKey(size_t contextSize)
 
 void Hypothesis::GenerateNGramCompareHash() const
 {
-	_hash = quick_hash((const char*)&m_languageModelStates[0], sizeof(LanguageModel::State) * m_languageModelStates.size(), 0xcafe5137);
+	_hash = quick_hash((const char*)&m_languageModelStates[0], sizeof(LanguageModelSingleFactor::State) * m_languageModelStates.size(), 0xcafe5137);
 	_hash_computed = true;
 	vector<size_t> wordCoverage = m_sourceCompleted.GetCompressedReprentation();
 	_hash = quick_hash((const char*)&wordCoverage[0], sizeof(size_t)*wordCoverage.size(), _hash);
@@ -255,7 +255,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 	// just need trigram score of the words of the start of current phrase	
 	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM,++lmIdx)
 	{
-		const LanguageModel &languageModel = **iterLM;
+		const LanguageModelSingleFactor &languageModel = **iterLM;
 		FactorType factorType = languageModel.GetFactorType();
 		size_t nGramOrder			= languageModel.GetNGramOrder();
 		size_t currEndPos			= m_currTargetWordsRange.GetEndPos();
