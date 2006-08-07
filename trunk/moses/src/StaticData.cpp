@@ -193,7 +193,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 						{
 							val = lrTypeVector[i];
 							boost::algorithm::to_lower(val);
-							//TODO:Lowercase val!
 							//orientation 
 							if(val == "monotone")
 								orientation = DistortionOrientationType::Monotone;
@@ -215,7 +214,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				}
 			else // inform the user that the defaults are being employed
 				{
-					//cout << "Lexical reordering is using defaults: Msd, Bidirectional, Fe Parameters" << endl;
+					TRACE_ERR("Lexical reordering is using defaults: Msd, Bidirectional, Fe Parameters" << endl);
 				}
 
 			// for now, assume there is just one lexical reordering model

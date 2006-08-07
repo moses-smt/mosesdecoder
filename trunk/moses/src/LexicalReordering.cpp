@@ -131,21 +131,8 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 			//this key string is F from the hypothesis
 			val=m_orientation_table[hypothesis->GetTargetPhraseStringRep()];
 		}
-		//TODO: the proper behavior in the case the FE or F is not in the table? right now just returns vector of zeros for the score
 		if(val.size()> 0)
 		{
-			//the forward_offset is only applicable if we have a bidirectional model
-			//as the forward weights/scores come after the backward in this model, we need to offset by this amount.
-			int forward_offset = 0;
-			//we know we have a bidirectional model if the number of scores is 4 or 6, not 2 or 3.
-			if(m_numberscores==4)
-			{
-				forward_offset=2;
-			}
-			else if(m_numberscores==6)
-			{
-				forward_offset=3;
-			}
 			if(m_orientation==DistortionOrientationType::Msd)
 			{
 				if(direction==LexReorderType::Backward)
@@ -166,17 +153,40 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 				}
 				else
 				{
+					//if we only have forward scores (no backward scores) in the table, 
+					//then forward scores have no offset so we can use the indices of the backwards scores
 					if(orientation==DistortionOrientationType::MONO)
 					{
-						score[FOR_M+forward_offset] = val[FOR_M+forward_offset];
+						if(m_numberscores>3)
+						{
+							score[FOR_M] = val[FOR_M];
+						}
+						else
+						{
+							score[BACK_M] = val[BACK_M];
+						}
 					}
 					else if(orientation==DistortionOrientationType::SWAP)
 					{
-						score[FOR_S+forward_offset] = val[FOR_S+forward_offset];
+						if(m_numberscores>3)
+						{
+							score[FOR_S] = val[FOR_S];
+						}
+						else
+						{
+							score[BACK_S] = val[BACK_S];
+						}
 					}
 					else
 					{
-						score[FOR_D+forward_offset] = val[FOR_D+forward_offset];
+						if(m_numberscores>3)
+						{
+							score[FOR_D] = val[FOR_D];
+						}
+						else
+						{
+							score[BACK_D] = val[BACK_D];
+						}
 					}
 				}
 			}
@@ -195,13 +205,29 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 				}
 				else
 				{
+					//if we only have forward scores (no backward scores) in the table, 
+					//then forward scores have no offset so we can use the indices of the backwards scores
 					if(orientation==DistortionOrientationType::MONO)
 					{
-						score[FOR_MONO+forward_offset] = val[FOR_MONO+forward_offset];					
+						if(m_numberscores>3)
+						{
+							score[FOR_MONO] = val[FOR_MONO];					
+						}
+						else
+						{
+							score[BACK_MONO] = val[BACK_MONO];
+						}
 					}
 					else
 					{
-						score[FOR_NONMONO+forward_offset] = val[FOR_NONMONO+forward_offset];					
+						if(m_numberscores>3)
+						{
+							score[FOR_NONMONO] = val[FOR_NONMONO];
+						}
+						else
+						{
+							score[BACK_NONMONO] = val[BACK_NONMONO];
+						}					
 					}
 				}
 			}
