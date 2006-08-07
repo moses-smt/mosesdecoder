@@ -26,11 +26,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModel.h"
 #include "Phrase.h"
 
-template<typename MyBase>
-class LanguageModel_Chunking : public MyBase
+template<typename LMImpl>
+class LanguageModel_Chunking : public LanguageModel
 {	
 protected:
 	size_t m_realNGramOrder;
+	LMImpl m_lmImpl;
 public:
 	LanguageModel_Chunking() {}
 	
@@ -40,8 +41,47 @@ public:
 					, float weight
 					, size_t nGramOrder)
 	{
-		MyBase::Load(fileName, factorCollection, factorType, weight, nGramOrder);
+		m_lmImpl.Load(fileName, factorCollection, factorType, weight, nGramOrder);
 		m_realNGramOrder = 3; // fixed for now
+	}
+		
+	void CalcScore(const Phrase &phrase
+							, float &fullScore
+							, float &ngramScore) const
+	{
+		fullScore	= 0;
+		ngramScore	= 0;
+		FactorType factorType = GetFactorType();
+	
+		size_t phraseSize = phrase.GetSize();
+		std::vector<const Factor*> contextFactor;
+		contextFactor.reserve(m_nGramOrder);
+				
+		// start of sentence
+		for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
+		{
+			contextFactor.push_back(phrase.GetFactor(currPos, factorType));		
+			fullScore += GetValue(contextFactor);
+		}
+		
+		if (phraseSize >= m_nGramOrder)
+		{
+			contextFactor.push_back(phrase.GetFactor(m_nGramOrder - 1, factorType));
+			ngramScore = GetValue(contextFactor);
+		}
+		
+		// main loop
+		for (size_t currPos = m_nGramOrder; currPos < phraseSize ; currPos++)
+		{ // used by hypo to speed up lm score calc
+			for (size_t currNGramOrder = 0 ; currNGramOrder < m_nGramOrder - 1 ; currNGramOrder++)
+			{
+				contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
+			}
+			contextFactor[m_nGramOrder - 1] = phrase.GetFactor(currPos, factorType);
+			float partScore = GetValue(contextFactor);			
+			ngramScore += partScore;		
+		}
+		fullScore += ngramScore;	
 	}
 	
 	float GetValue(const std::vector<const Factor*> &contextFactor, LanguageModel::State* finalState = 0) const
@@ -73,7 +113,7 @@ public:
 		// create context factor the right way round
 		std::reverse(chunkContext.begin(), chunkContext.end());
 		// calc score on that phrase
-		return MyBase::GetValue(chunkContext, finalState);
+		return m_lmImpl.GetValue(chunkContext, finalState);
 	}
 	
 };
