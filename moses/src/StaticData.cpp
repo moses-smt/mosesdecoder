@@ -45,8 +45,7 @@ extern Timer timer;
 StaticData* StaticData::s_instance(0);
 
 StaticData::StaticData()
-:m_lexReorder(NULL)
-,m_inputOutput(NULL)
+:m_inputOutput(NULL)
 ,m_fLMsLoaded(false)
 ,m_inputType(0)
 ,m_numInputScores(0)
@@ -219,7 +218,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 			// for now, assume there is just one lexical reordering model
 			timer.check("Starting to load lexical reorder table...");
- 			m_lexReorder = new LexicalReordering(lrFileVector[0], orientation, direction, condition, m_lexWeights);
+ 			m_reorderModels.push_back(new LexicalReordering(lrFileVector[0], orientation, direction, condition, m_lexWeights));
 			timer.check("Finished loading lexical reorder table.");
 		}
 		if (m_parameter.GetParam("lmodel-file").size() > 0)
