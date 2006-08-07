@@ -76,13 +76,13 @@ protected:
 			, m_nBestSize
 			, m_maxNoTransOptPerCoverage;
 	
-	std::string													m_nBestFilePath, m_cachePath;
-	std::vector<std::string>						m_mySQLParam;
-	InputOutput													*m_inputOutput;
-	bool                                m_fLMsLoaded;
-	std::vector<size_t>									m_maxNgramOrderForFactor;
+	std::string									m_nBestFilePath, m_cachePath;
+	std::vector<std::string>		m_mySQLParam;
+	InputOutput									*m_inputOutput;
+	bool                        m_fLMsLoaded;
+	size_t											m_maxNgramOrderForFactor[NUM_FACTORS];
 	/***
-	 * false = treat unknown words as proper nouns, and translate them as themselves;
+	 * false = treat unknown words as unknowns, and translate them as themselves;
 	 * true = drop (ignore) them
 	 */
 	bool m_dropUnknown;
@@ -166,11 +166,6 @@ public:
 	FactorCollection &GetFactorCollection()
 	{
 		return m_factorCollection;
-	}
-	size_t GetMaxNGramOrderForFactorId(size_t factorType) const
-	{
-		if (factorType >= m_maxNgramOrderForFactor.size()) return 0;
-		return m_maxNgramOrderForFactor[factorType];
 	}
 	LexicalReordering *GetLexReorder() const
 	{
