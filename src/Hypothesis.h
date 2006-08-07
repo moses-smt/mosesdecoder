@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
-#include "LanguageModel.h"
+#include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
 #include "LexicalReordering.h"
 #include "Input.h"
@@ -66,7 +66,7 @@ protected:
 	float							m_totalScore;
 	float							m_futureScore;
 	ScoreComponentCollection2 m_scoreBreakdown;
-	std::vector<LanguageModel::State> m_languageModelStates;
+	std::vector<LanguageModelSingleFactor::State> m_languageModelStates;
 #ifdef N_BEST
 	const Hypothesis 	*m_mainHypo;
 	ArcList 					*m_arcList; //all arcs that end at the same lattice point as we do

@@ -21,37 +21,49 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include "Factor.h"
-#include "TypeDef.h"
-#include "Util.h"
-#include "ScoreProducer.h"
+#include "LanguageModel.h"
 
 class FactorCollection;
 class Factor;
 class Phrase;
 
-class LanguageModel : public ScoreProducer
+class LanguageModelSingleFactor : public LanguageModel
 {
 protected:	
-	float				m_weight;
-	std::string	m_filename;
+	const Factor *m_sentenceStart, *m_sentenceEnd;
+	FactorType	m_factorType;
+	size_t			m_nGramOrder;
 public:
-	LanguageModel();
-	virtual ~LanguageModel();
+  typedef const void* State;
+  static State UnknownState;
+
+	LanguageModelSingleFactor();
+	virtual ~LanguageModelSingleFactor();
 	virtual void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder) = 0;
 
-	// see ScoreProducer.h
-	unsigned int GetNumScoreComponents() const;
-
+	size_t GetNGramOrder() const
+	{
+		return m_nGramOrder;
+	}
+	const Factor *GetSentenceStart() const
+	{
+		return m_sentenceStart;
+	}
+	const Factor *GetSentenceEnd() const
+	{
+		return m_sentenceEnd;
+	}
 	virtual void CalcScore(const Phrase &phrase
 							, float &fullScore
-							, float &ngramScore) const = 0;
+							, float &ngramScore) const;
+	FactorType GetFactorType() const
+	{
+		return m_factorType;
+	}
 	float GetWeight() const
 	{
 		return m_weight;
@@ -60,6 +72,13 @@ public:
 	{
 		m_weight = weight;
 	}
-	virtual const std::string GetScoreProducerDescription() const = 0;
+	const std::string GetScoreProducerDescription() const;
+	virtual float GetValue(const std::vector<const Factor*> &contextFactor, State* finalState = 0) const = 0;
+
+	LanguageModelSingleFactor::State GetState(const std::vector<const Factor*> &contextFactor) const;
+
+  // one of the following should probably be made available
+  // virtual LmId GetLmID( const Factor *factor )  const = 0;
+  // virtual LmId GetLmID( const std::string &factor )  const = 0;
 };
 

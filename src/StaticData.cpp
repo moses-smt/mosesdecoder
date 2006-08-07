@@ -262,7 +262,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			// (used by CompareHypothesisCollection)
 			string &languageModelFile = token[3];
 			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
-      LanguageModel *lm = LanguageModelFactory::createLanguageModel(lmType);
+      LanguageModelSingleFactor *lm = LanguageModelFactory::createLanguageModel(lmType);
       if (lm == NULL) // no LM created. we prob don't have it compiled
       	return false;
 
