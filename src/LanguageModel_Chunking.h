@@ -54,19 +54,19 @@ public:
 		ngramScore	= 0;
 	
 		size_t phraseSize = phrase.GetSize();
-		std::vector<Word> contextFactor;
+		std::vector<const FactorArray*> contextFactor;
 		contextFactor.reserve(m_nGramOrder);
 				
 		// start of sentence
 		for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
 		{
-			contextFactor.push_back(phrase.GetFactorArray(currPos));
+			contextFactor.push_back(&phrase.GetFactorArray(currPos));
 			fullScore += GetValue(contextFactor);
 		}
 		
 		if (phraseSize >= m_nGramOrder)
 		{
-			contextFactor.push_back(phrase.GetFactorArray(m_nGramOrder - 1));
+			contextFactor.push_back(&phrase.GetFactorArray(m_nGramOrder - 1));
 			ngramScore = GetValue(contextFactor);
 		}
 		
@@ -77,20 +77,20 @@ public:
 			{
 				contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
 			}
-			contextFactor[m_nGramOrder - 1] = phrase.GetFactorArray(currPos);
+			contextFactor[m_nGramOrder - 1] = &phrase.GetFactorArray(currPos);
 			float partScore = GetValue(contextFactor);			
 			ngramScore += partScore;		
 		}
 		fullScore += ngramScore;	
 	}
 	
-	float GetValue(const std::vector<Word> &contextFactor) const
+	float GetValue(const std::vector<const FactorArray*> &contextFactor) const
 	{
 		if (contextFactor.size() == 0)
 		{
 			return 0;
 		}
-		const Factor *factor = contextFactor[contextFactor.size() - 1].GetFactor(m_factorType);
+		const Factor *factor = *contextFactor[contextFactor.size() - 1][m_factorType];
 		if (factor->GetString().substr(0, 2) != "I-") // don't double-count chunking tags
 		{
 			return 0;
@@ -101,7 +101,7 @@ public:
 		std::vector<const Factor*> chunkContext;
 		for (int currPos = (int)contextFactor.size() - 1 ; currPos >= 0 ; --currPos )
 		{
-			const Factor *factor = contextFactor[currPos].GetFactor(m_factorType);
+			const Factor *factor = *contextFactor[currPos][m_factorType];
 			if (factor->GetString().substr(0, 2) != "I-")
 			{
 				chunkContext.push_back(factor);
@@ -113,7 +113,7 @@ public:
 		// create context factor the right way round
 		std::reverse(chunkContext.begin(), chunkContext.end());
 		// calc score on that phrase
-		LanguageModelSingleFactor::State *finalState;
+		LanguageModelSingleFactor::State *finalState; // what shall we do with this ???
 		return m_lmImpl.GetValue(chunkContext, finalState);
 	}
 	
