@@ -32,7 +32,6 @@ class LanguageModelSingleFactor : public LanguageModel
 protected:	
 	const Factor *m_sentenceStart, *m_sentenceEnd;
 	FactorType	m_factorType;
-	size_t			m_nGramOrder;
 public:
   typedef const void* State;
   static State UnknownState;
@@ -45,10 +44,6 @@ public:
 					, float weight
 					, size_t nGramOrder) = 0;
 
-	size_t GetNGramOrder() const
-	{
-		return m_nGramOrder;
-	}
 	const Factor *GetSentenceStart() const
 	{
 		return m_sentenceStart;
@@ -58,8 +53,8 @@ public:
 		return m_sentenceEnd;
 	}
 	virtual void CalcScore(const Phrase &phrase
-							, float &fullScore
-							, float &ngramScore) const;
+											, float &fullScore
+											, float &ngramScore) const;
 	FactorType GetFactorType() const
 	{
 		return m_factorType;

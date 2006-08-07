@@ -19,52 +19,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
+#include "LanguageModelMultiFactor.h"
 
-#include <string>
-#include <vector>
-#include "Factor.h"
-#include "TypeDef.h"
-#include "Util.h"
-#include "ScoreProducer.h"
-
-class FactorCollection;
-class Factor;
-class Phrase;
-
-class LanguageModel : public ScoreProducer
+const std::string LanguageModelMultiFactor::GetScoreProducerDescription() const
 {
-protected:	
-	float				m_weight;
-	std::string	m_filename;
-	size_t			m_nGramOrder;
-public:
-	LanguageModel();
-	virtual ~LanguageModel();
-	virtual void Load(const std::string &fileName
-					, FactorCollection &factorCollection
-					, FactorType factorType
-					, float weight
-					, size_t nGramOrder) = 0;
-
-	// see ScoreProducer.h
-	unsigned int GetNumScoreComponents() const;
-
-	virtual void CalcScore(const Phrase &phrase
-							, float &fullScore
-							, float &ngramScore) const = 0;
-	size_t GetNGramOrder() const
-	{
-		return m_nGramOrder;
-	}
-	float GetWeight() const
-	{
-		return m_weight;
-	}
-	void SetWeight(float weight)
-	{
-		m_weight = weight;
-	}
-	virtual const std::string GetScoreProducerDescription() const = 0;
-};
-
+	std::ostringstream oss;
+	// what about LMs that are over multiple factors at once, POS + stem, for example?
+	oss << GetNGramOrder() << "-gram LM score, factor-type= ??? " << ", file=" << m_filename;
+	return oss.str();
+} 

@@ -23,11 +23,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include <algorithm>
+#include "LanguageModelMultiFactor.h"
 #include "LanguageModelSingleFactor.h"
 #include "Phrase.h"
 
 template<typename LMImpl>
-class LanguageModel_Chunking : public LanguageModelSingleFactor
+class LanguageModel_Chunking : public LanguageModelMultiFactor
 {	
 protected:
 	size_t m_realNGramOrder;
@@ -51,22 +52,21 @@ public:
 	{
 		fullScore	= 0;
 		ngramScore	= 0;
-		FactorType factorType = GetFactorType();
 	
 		size_t phraseSize = phrase.GetSize();
-		std::vector<const Factor*> contextFactor;
+		std::vector<Word> contextFactor;
 		contextFactor.reserve(m_nGramOrder);
 				
 		// start of sentence
 		for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
 		{
-			contextFactor.push_back(phrase.GetFactor(currPos, factorType));		
+			contextFactor.push_back(phrase.GetFactorArray(currPos));
 			fullScore += GetValue(contextFactor);
 		}
 		
 		if (phraseSize >= m_nGramOrder)
 		{
-			contextFactor.push_back(phrase.GetFactor(m_nGramOrder - 1, factorType));
+			contextFactor.push_back(phrase.GetFactorArray(m_nGramOrder - 1));
 			ngramScore = GetValue(contextFactor);
 		}
 		
@@ -77,20 +77,20 @@ public:
 			{
 				contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
 			}
-			contextFactor[m_nGramOrder - 1] = phrase.GetFactor(currPos, factorType);
+			contextFactor[m_nGramOrder - 1] = phrase.GetFactorArray(currPos);
 			float partScore = GetValue(contextFactor);			
 			ngramScore += partScore;		
 		}
 		fullScore += ngramScore;	
 	}
 	
-	float GetValue(const std::vector<const Factor*> &contextFactor, LanguageModelSingleFactor::State* finalState = 0) const
+	float GetValue(const std::vector<Word> &contextFactor) const
 	{
 		if (contextFactor.size() == 0)
 		{
 			return 0;
 		}
-		const Factor *factor = contextFactor[contextFactor.size() - 1];
+		const Factor *factor = contextFactor[contextFactor.size() - 1].GetFactor(m_factorType);
 		if (factor->GetString().substr(0, 2) != "I-") // don't double-count chunking tags
 		{
 			return 0;
@@ -101,7 +101,7 @@ public:
 		std::vector<const Factor*> chunkContext;
 		for (int currPos = (int)contextFactor.size() - 1 ; currPos >= 0 ; --currPos )
 		{
-			const Factor *factor = contextFactor[currPos];
+			const Factor *factor = contextFactor[currPos].GetFactor(m_factorType);
 			if (factor->GetString().substr(0, 2) != "I-")
 			{
 				chunkContext.push_back(factor);
@@ -113,6 +113,7 @@ public:
 		// create context factor the right way round
 		std::reverse(chunkContext.begin(), chunkContext.end());
 		// calc score on that phrase
+		LanguageModelSingleFactor::State *finalState;
 		return m_lmImpl.GetValue(chunkContext, finalState);
 	}
 	
