@@ -97,8 +97,8 @@ namespace LexReorderType
 {
 	enum LexReorderType
 		{
-			Forward
-			,Backward
+			Backward
+			,Forward
 			,Bidirectional
 			,Fe
 			,F
