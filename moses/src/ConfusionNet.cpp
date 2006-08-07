@@ -213,6 +213,8 @@ TranslationOptionCollection*
 ConfusionNet::CreateTranslationOptionCollection() const 
 {
 	size_t maxNoTransOptPerCoverage = StaticData::Instance()->GetMaxNoTransOptPerCoverage();
-	return new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage);
+	TranslationOptionCollection *rv= new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage);
+	assert(rv);
+	return rv;
 }
 

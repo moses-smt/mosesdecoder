@@ -117,11 +117,8 @@ int main(int argc, char* argv[])
 	{
 		TRACE_ERR("TRANSLATING: " << *source <<"\n");
 
-		TranslationOptionCollection *translationOptionCollection=source->CreateTranslationOptionCollection();
-		assert(translationOptionCollection);
-
 		staticData.InitializeBeforeSentenceProcessing(*source);
-		Manager manager(*source, *translationOptionCollection, staticData);
+		Manager manager(*source, staticData);
 		manager.ProcessSentence();
 		inputOutput->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId(),
                         staticData.GetReportSourceSpan(),
@@ -142,7 +139,6 @@ int main(int argc, char* argv[])
 		// delete source
 		//		inputOutput->Release(source);
 		staticData.CleanUpAfterSentenceProcessing();
-		delete translationOptionCollection;
 		delete source;
 	}
 	

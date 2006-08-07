@@ -28,13 +28,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "TranslationOption.h"
 #include "HypothesisCollection.h"
-#include "TranslationOptionCollectionText.h"
+#include "TranslationOptionCollection.h"
 #include "LatticePathList.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
 //#include "UnknownWordHandler.h"
 
 class LatticePath;
+class TranslationOptionCollection;
 
 /** The Manager class implements a stack decoding algorithm.
   * Hypotheses are organized in stacks. One stack contains all hypothesis that have 
@@ -67,6 +68,9 @@ class LatticePath;
 
 class Manager
 {
+  Manager();
+  Manager(Manager const&);
+  void operator=(Manager const&);
 protected:	
 	// data
 	InputType const& m_source; /**< source sentence to be translated */
@@ -86,7 +90,7 @@ protected:
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
 public:
-	Manager(InputType const& source, TranslationOptionCollection&, StaticData &staticData);
+	Manager(InputType const& source, StaticData &staticData);
 	~Manager();
 
 	void ProcessSentence();
