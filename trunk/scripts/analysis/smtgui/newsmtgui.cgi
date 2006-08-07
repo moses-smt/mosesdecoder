@@ -22,7 +22,7 @@ my $FOREIGN = 'f';
 
 #FILEDESC: textual descriptions associated with specific filenames; to be displayed on the single-corpus view
 my %FILEDESC = (); &load_descriptions();
-my %factorIndices = loadFactorIndices('file-factors');
+my %factorData = loadFactorData('file-factors'); 
 my %MEMORY;        &load_memory();
 my (@mBLEU,@NIST);
 @mBLEU=`cat mbleu-memory.dat` if -e "mbleu-memory.dat"; chop(@mBLEU);
@@ -61,7 +61,7 @@ sub show_corpora {
   my %CORPUS = ();
   
   # find corpora in evaluation directory: see the factor-index file, which was already read in
-  foreach my $corpusName (keys %factorIndices)
+  foreach my $corpusName (keys %factorData)
   {
   	$CORPUS{$corpusName} = 1;
   }
@@ -82,7 +82,7 @@ sub view_corpus {
   &htmlhead("View Corpus $in{CORPUS}");
   
   # find corpora in evaluation directory
-  my $corpus = new Corpus('-name' => "$in{CORPUS}", '-descriptions' => \%FILEDESC, '-indices' => $factorIndices{$in{CORPUS}});
+  my $corpus = new Corpus('-name' => "$in{CORPUS}", '-descriptions' => \%FILEDESC, '-info_line' => $factorData{$in{CORPUS}});
   
   my ($sentence_count, $lineInfo);
   if(-e "$in{CORPUS}.f")
@@ -105,8 +105,8 @@ sub view_corpus {
   print "<INPUT TYPE=HIDDEN NAME=ACTION VALUE=COMPARE>\n";
   print "<INPUT TYPE=HIDDEN NAME=CORPUS VALUE=\"$in{CORPUS}\">\n";
   print "<TABLE BORDER=1 CELLSPACING=0><TR>
-<TD>Filename (<A HREF=?ACTION=VIEW_CORPUS&CORPUS=" . CGI::escape($in{CORPUS}).">sort</A>)</TD>
-<TD>Date     (<A HREF=?ACTION=VIEW_CORPUS&CORPUS=" . CGI::escape($in{CORPUS})."&SORT=TIME>sort</A>)</TD>";
+<TD>File (<A HREF=?ACTION=VIEW_CORPUS&CORPUS=" . CGI::escape($in{CORPUS}).">sort</A>)</TD>
+<TD>Date (<A HREF=?ACTION=VIEW_CORPUS&CORPUS=" . CGI::escape($in{CORPUS})."&SORT=TIME>sort</A>)</TD>";
   if (-e "$in{CORPUS}.e") {
     print "<TD>IBM BLEU (<A HREF=?ACTION=VIEW_CORPUS&CORPUS=" . CGI::escape($in{CORPUS})."&SORT=IBM>sort</A>)</TD>";
   }
@@ -120,9 +120,11 @@ sub view_corpus {
     print "<TD>mBLEU (<A HREF=?ACTION=VIEW_CORPUS&CORPUS=" . CGI::escape($in{CORPUS})."&SORT=mBLEU>sort</A>)</TD>";
   }
   print "<TD>Unknown Words</TD>"; #can't sort on; only applies to the input
+  print "<TD>Perplexity</TD>"; #applies to truth and system outputs
+  print "<TD>WER (<A HREF=?ACTION=VIEW_CORPUS&CORPUS=" . CGI::escape($in{CORPUS})."&SORT=WER>sort</A>)</TD>";
   print "<TD>Noun & adj WER-PWER</TD>"; #can't sort on; only applies to sysoutputs
   print "<TD>Surface vs. lemma PWER</TD>"; #can't sort on; only applies to sysoutputs
-  print "<TD>Score (<A HREF=?ACTION=VIEW_CORPUS&CORPUS=" . CGI::escape($in{CORPUS})."&SORT=SCORE>sort</A>)</TD><TD>Actions</TD></TR>";
+	print "<TD>Statistical Measures</TD>";
 
   open(DIR,"ls $in{CORPUS}.*|");
   while(<DIR>) {
@@ -143,7 +145,7 @@ sub view_corpus {
     /^$in{CORPUS}.([^\/]+)$/;
     my $file = $1;
     # checkbox for compare
-    my $row = "<TR><TD><INPUT TYPE=CHECKBOX NAME=FILE_$file VALUE=1>";
+    my $row = "<TR><TD style=\"font-size: small\"><INPUT TYPE=CHECKBOX NAME=FILE_$file VALUE=1>";
     # README
     if (-e "$in{CORPUS}.$file.README") {
       my $readme = `cat $in{CORPUS}.$file.README`;
@@ -153,7 +155,7 @@ sub view_corpus {
       $row .= "<A HREF='javascript:FieldInfo(\"$in{CORPUS}.$file\",\"$readme\")'>";
     }
     # filename
-    $row .= "$in{CORPUS}.$file</A>";
+    $row .= "$file</A>";
     # description (hard-coded)
     my @TRANSLATION_SENTENCE = `cat $in{CORPUS}.$file`; 
     chop(@TRANSLATION_SENTENCE);
@@ -223,7 +225,8 @@ sub view_corpus {
       $row .= "</TD>\n";
     }
 	 
-	 # misc stats
+	 my $isSystemOutput = ($file ne 'e' && $file ne 'f' && $file !~ /^pt/);
+	 # misc stats (note the unknown words should come first so the total word count is available for WER)
 	 $row .= "<TD align=\"center\">";
 	 if($file eq 'f') #input
 	 {
@@ -235,18 +238,38 @@ sub view_corpus {
 		catch Error::Simple with {$row .= "[system error]";};
 	 }
 	 $row .= "</TD>\n<TD align=\"center\">";
+	 if($file eq 'e' || $file eq 'f' || $isSystemOutput)
+	 {
+	 	try
+		{
+			my $perplexity = $corpus->calcPerplexity(($file eq 'e') ? 'truth' : (($file eq 'f') ? 'input' : $file), 'surf');
+			$row .= sprintf("%.2lf", $perplexity);
+		}
+		catch Error::Simple with {$row .= "[system error]";}
+	 }
+	 $row .= "</TD>\n<TD align=\"center\">";
+	 if($isSystemOutput)
+	 {
+	 	try
+		{
+			my $surfaceWER = $corpus->calcOverallWER($file);
+			$row .= sprintf("%.4lf", $surfaceWER);
+		}
+		catch Error::Simple with {$row .= "[system error]";};
+	 }
+	 $row .= "</TD>\n<TD align=\"center\">";
 	 my ($nnAdjWER, $nnAdjPWER, $surfPWER, $lemmaPWER);
-	 if($file ne 'e' && $file ne 'f' && $file !~ /^pt/) #system output
+	 if($isSystemOutput)
 	 {
 		try
 		{
 			($nnAdjWER, $nnAdjPWER, $surfPWER, $lemmaPWER) = calc_misc_stats($corpus, $file);
-			$row .= "WER = $nnAdjWER<br>PWER = $nnAdjPWER<br><b>diff = " . ($nnAdjWER - $nnAdjPWER) . "</b>";
+			$row .= sprintf("WER = %.4lg<br>PWER = %.4lg<br><b>ratio = %.3lf</b>", $nnAdjWER, $nnAdjPWER, $nnAdjPWER / $nnAdjWER);
 		}
 		catch Error::Simple with {$row .= "[system error]";};
 	}
 	$row .= "</TD>\n<TD align=\"center\">";
-	if($file ne 'e' && $file ne 'f' && $file !~ /^pt/) #system output
+	if($isSystemOutput)
 	{
 		if($surfPWER == -1)
 		{
@@ -255,9 +278,24 @@ sub view_corpus {
 		else
 		{
 			my ($lemmaBLEU, $p1, $p2, $p3, $p4, $brevity) = $corpus->calcBLEU($file, 'lemma');
-			$row .= sprintf("surface = %d<br>lemma = %d<br><b>lemma BLEU = %.04f</b> %.01f/%.01f/%.01f/%.01f *%.03f", 
+			$row .= sprintf("surface = %.3lf<br>lemma = %.3lf<br><b>lemma BLEU = %.04f</b> %.01f/%.01f/%.01f/%.01f *%.03f", 
 									$surfPWER, $lemmaPWER, $lemmaBLEU, $p1, $p2, $p3, $p4, $brevity);
 		}
+	}
+	$row .= "</TD>\n<TD align=\"center\">";
+	if($isSystemOutput)
+	{
+		try
+		{
+			my $testInfo = $corpus->statisticallyTestBLEUResults($file, 'surf');
+			my @tTestPValues = @{$testInfo->[0]};
+			my @confidenceIntervals = @{$testInfo->[1]};
+			$row .= "n-gram precision p-values (high p <=> consistent score):<br>t test " . join("/", map {sprintf("%.4lf", $_)} @tTestPValues);
+			$row .= "<p>n-gram precision 95% intervals:<br>" . join(",<br>", map {sprintf("[%.4lf - %.4lf]", $_->[0], $_->[1])} @confidenceIntervals);
+			my @bleuInterval = (approxBLEUFromNgramScores(map {$_->[0]} @confidenceIntervals), approxBLEUFromNgramScores(map {$_->[1]} @confidenceIntervals));
+			$row .= sprintf("<br><b>(BLEU: ~[%.4lf - %.4lf])</b>", $bleuInterval[0], $bleuInterval[1]);
+		}
+		catch Error::Simple with {$row .= "[system error]";}
 	}
 	$row .= "</TD>\n";
 
@@ -265,8 +303,7 @@ sub view_corpus {
     my($correct,$wrong,$unknown);
     $row .= "<TD>";
     if (!defined($DONTSCORE{$file}) && (scalar keys %MEMORY)) {
-      my ($correct,$just_syn,$just_sem,$wrong,$unknown) = 
-	&get_score_from_memory("$in{CORPUS}.$FOREIGN",
+      my ($correct,$just_syn,$just_sem,$wrong,$unknown) = &get_score_from_memory("$in{CORPUS}.$FOREIGN",
 			       "$in{CORPUS}.$file");
       $row .= "<B><FONT COLOR=GREEN>$correct</FONT></B>";
       $row .= "/<FONT COLOR=ORANGE>$just_syn</FONT>";
@@ -281,12 +318,7 @@ sub view_corpus {
 	 	$row .= "</TD>\n";
 	}
 
-    # score / review links
-    $row .= "<TD>";
-    $row .= "<A HREF=\"?ACTION=SCORE_FILE&VIEW=1&CORPUS=".CGI::escape($in{CORPUS})."&FILE=".CGI::escape($file)."\">view</A>" if (!defined($DONTSCORE{$file}));
-    $row .= " <A HREF=\"?ACTION=SCORE_FILE&CORPUS=".CGI::escape($in{CORPUS})."&FILE=".CGI::escape($file)."\">score</A>" if (!defined($DONTSCORE{$file}) && ($unknown || scalar keys %MEMORY == 0));
-    $row .= " <A HREF=\"?ACTION=RESCORE_FILE&CORPUS=".CGI::escape($in{CORPUS})."&FILE=".CGI::escape($file)."\">review</A>" if (!defined($DONTSCORE{$file}) && scalar keys %MEMORY);
-    $row .= "</TD></TR>\n"; 
+    $row .= "</TR>\n"; 
     push @TABLE, "<!-- $sort -->\n$row";
   }
   close(DIR);
@@ -295,7 +327,31 @@ sub view_corpus {
   print "<INPUT TYPE=SUBMIT VALUE=\"Compare\">\n";
   print "<INPUT TYPE=CHECKBOX NAME=SURFACE VALUE=1 CHECKED> Compare all different sentences (instead of just differently <I>evaluated</I> sentences) <INPUT TYPE=CHECKBOX NAME=WITH_EVAL VALUE=1 CHECKED> with evaluation</FORM><P>\n";
   print "<P>The score is to be read as: <FONT COLOR=GREEN>correct</FONT>/<FONT COLOR=ORANGE>just-syn-correct</FONT>/<FONT COLOR=ORANGE>just-sem-correct</FONT>/<FONT COLOR=RED>wrong</FONT> (unscored)\n";
-  print "<BR>IBM BLEU is to be read as: <B>metric</B> unigram/bigram/trigram/quadgram *brevity-penalty\n"; 
+  print "<BR>IBM BLEU is to be read as: <B>metric</B> unigram/bigram/trigram/quadgram *brevity-penalty<P>";
+  print "<DIV STYLE=\"border: 1px solid #006600\">";
+  print "<H2>Comparison of System Translations (p-values)</H2>";
+  my @sysnames = $corpus->getSystemNames();
+  for(my $i = 0; $i < scalar(@sysnames); $i++)
+  {
+  	for(my $j = $i + 1; $j < scalar(@sysnames); $j++)
+	{
+		my $comparison = $corpus->statisticallyCompareSystemResults($sysnames[$i], $sysnames[$j], 'surf');
+		print "<P><FONT COLOR=#00aa22>" . $sysnames[$i] . " vs. " . $sysnames[$j] . "</FONT>: [<I>t</I> test] ";
+		for(my $k = 0; $k < scalar(@{$comparison->[0]}); $k++)
+		{
+			print sprintf(($k == 0) ? "%.4lg" : "; %.4lg ", $comparison->[0]->[$k]);
+			if($comparison->[1]->[$k] == 0) {print "(&larr;)";} else {print "(&rarr;)";}
+		}
+		print "&nbsp;&nbsp;---&nbsp;&nbsp;[sign test] ";
+		for(my $k = 0; $k < scalar(@{$comparison->[2]}); $k++)
+		{
+			print sprintf(($k == 0) ? "%.4lg " : "; %.4lg ", $comparison->[2]->[$k]);
+			if($comparison->[3]->[$k] == 0) {print "(&larr;)";} else {print "(&rarr;)";}
+		}
+		print "\n";
+	}
+  }
+  print "</DIV\n";
   print "<P><A HREF=\"newsmtgui.cgi?action=\">All corpora</A>\n";
 }
 
@@ -496,6 +552,16 @@ sub calc_misc_stats
 	};
 }
 
+#approximate BLEU score from n-gram precisions (currently assume no length penalty)
+#arguments: n-gram precisions as an array
+#return: BLEU score
+sub approxBLEUFromNgramScores
+{
+	my $logsum = 0;
+	foreach my $p (@_) {$logsum += log($p);}
+	return exp($logsum / scalar(@_));
+}
+
 ###### NIST SCORE
 
 sub get_nist_score {
@@ -669,7 +735,7 @@ sub compare2
 	print "<FORM ACTION=\"\" METHOD=POST>\n";
 	print "<INPUT TYPE=HIDDEN NAME=ACTION VALUE=$in{ACTION}>\n";
 	print "<INPUT TYPE=HIDDEN NAME=CORPUS VALUE=\"$in{CORPUS}\">\n";
-	my $corpus = new Corpus('-name' => "$in{CORPUS}", '-descriptions' => \%FILEDESC, '-indices' => \%factorIndices);
+	my $corpus = new Corpus('-name' => "$in{CORPUS}", '-descriptions' => \%FILEDESC, '-info_line' => $factorData{$in{CORPUS}});
 	$corpus->writeComparisonPage(\*STDOUT, /^.*$/);
 	print "</FORM>\n";
 }
@@ -826,7 +892,6 @@ sub trim {
   $$translation =~ s/ +/ /g;
   $$translation =~ s/^ +//;
   $$translation =~ s/ +$//;
-#  $$translation =~ s/ +[\.]$//;
 }
 
 sub load_descriptions {
@@ -838,24 +903,20 @@ sub load_descriptions {
   close(FD);
 }
 
-#read config file giving names of corpi and fill factor-index map
+#read config file giving various corpus config info
 #arguments: filename to read
-#return: hash of corpus names to hashrefs of factor names to indices
-sub loadFactorIndices
+#return: hash of corpus names to strings containing formatted info
+sub loadFactorData
 {
 	my $filename = shift;
 	my %data = ();
-	open(INFILE, "<$filename") or die "loadFactorIndices(): couldn't open '$filename' for read\n";
+	open(INFILE, "<$filename") or die "loadFactorData(): couldn't open '$filename' for read\n";
 	while(my $line = <INFILE>)
 	{
 		if($line =~ /^\#/) {next;} #skip comment lines
-		my @tokens = split(/\s+/, $line);
-		my $corpusName = shift @tokens;
-		$data{$corpusName} = {};
-		for(my $i = 0; $i < scalar(@tokens); $i++)
-		{
-			$data{$corpusName}->{$tokens[$i]} = $i;
-		}
+		$line =~ /^\s*(\S+)\s*:\s*(\S.*\S)\s*$/;
+		my $corpusName = $1;
+		$data{$corpusName} = $2;
 	}
 	close(INFILE);
 	return %data;
