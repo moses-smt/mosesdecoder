@@ -12,33 +12,55 @@ return 1;
 
 ###########################################################################################################################
 
-#'our' variables are available outside the package
+##### 'our' variables are available outside the package #####
+#all factor names used should be in this list, just in case
 our @FACTORNAMES = ('surf', 'pos', 'lemma', 'stem', 'morph');
 
 #constructor
-#arguments: short corpus name (-name), hashref of filenames to descriptions (-descriptions), hashref of factor names to indices in this corpus (-indices)
+#arguments: short corpus name (-name), hashref of filenames to descriptions (-descriptions), formatted string with various config info (-info_line)
 sub new
 {
 	my $class = shift;
 	my %args = @_; #turn the remainder of @_ into a hash
-	my ($corpusName, $refFileDescs, $factorIndices) = ($args{'-name'}, $args{'-descriptions'}, $args{'-indices'});
+	my ($corpusName, $refFileDescs, $infoLine) = ($args{'-name'}, $args{'-descriptions'}, $args{'-info_line'});
+	my ($factorList, $inputLingmodels, $outputLingmodels) = split(/\s*:\s*/, $infoLine);
 	my $self = {};
 	$self->{'corpusName'} = $corpusName;
 	$self->{'truth'} = []; #arrayref of arrayrefs of factors
 	$self->{'input'} = []; #same; also same for any system outputs that get loaded
+	$self->{'tokenCount'} = {}; #sysname => number of tokens in file
 	$self->{'truthFilename'} = "";
 	$self->{'inputFilename'} = "";
 	$self->{'sysoutFilenames'} = {}; #hashref of (string => string) for (system name, filename)
-	$self->{'phraseTableFilenames'} = {}; #factor name (from @FACTORNAMES) => filename
-	$self->{'factorIndices'} = {}; #factor name => index; names ought to be strings from the standard list in @FACTORNAMES
-	%{$self->{'factorIndices'}} = %$factorIndices;
+	$self->{'phraseTableFilenames'} = {}; #factor name => filename
+	$self->{'fileCtimes'} = {}; #file ID of some kind => changetime in seconds
+	$self->{'factorIndices'} = {}; #factor name => index
+	my @factors = split(/\s+/, $factorList);
+	for(my $i = 0; $i < scalar(@factors); $i++)
+	{
+		$self->{'factorIndices'}->{$factors[$i]} = $i;
+	}
+	$self->{'inputLMs'} = {}; #factor name => lingmodel filename
+	$self->{'outputLMs'} = {};
+	foreach my $lmInfo (split(/\s*,\s*/, $inputLingmodels))
+	{
+		my @tokens = split(/\s+/, $lmInfo);
+		$self->{'inputLMs'}->{$tokens[0]} = $tokens[1];
+	}
+	foreach my $lmInfo (split(/\s*,\s*/, $outputLingmodels))
+	{
+		my @tokens = split(/\s+/, $lmInfo);
+		$self->{'outputLMs'}->{$tokens[0]} = $tokens[1];
+	}
 	$self->{'phraseTables'} = {}; #factor name (from @FACTORNAMES) => hashref of source phrases to anything; used for unknown-word counting
 	$self->{'unknownCount'} = {}; #factor name => count of unknown tokens in input
-	$self->{'totalTokens'} = 0; #useful with counts of unknown tokens
 	$self->{'sysoutWER'} = {}; #system name => (factor name => arrayref with system output total WER and arrayref of WER scores for individual sysout sentences wrt truth)
 	$self->{'sysoutPWER'} = {}; #similarly
 	$self->{'fileDescriptions'} = {}; #filename associated with us => string description of file
 	$self->{'bleuScores'} = {}; #system name => (factor name => arrayref of (overall score, arrayref of per-sentence scores) )
+	$self->{'bleuConfidence'} = {}; #system name => (factor name => arrayrefs holding statistical test data on BLEU scores)
+	$self->{'subsetBLEUstats'} = {}; #system name => (factor name => n-gram precisions and lengths for independent corpus subsets)
+	$self->{'comparisonStats'} = {}; #system name 1 => (system name 2 => (factor name => p-values, and indices of better system, for all tests used))
 	$self->{'cacheFilename'} = "cache/$corpusName.cache"; #all memory of various scores is stored here
 	bless $self, $class;
 	$self->locateFiles($refFileDescs); #find all relevant files in the current directory; set filenames and descriptions
@@ -59,12 +81,12 @@ sub getFileDescription
 	return $self->{'fileDescriptions'}->{$filename};
 }
 
-#arguments: hashref of factor names to indices (not all factors in @FACTORNAMES must be included, but no strings not from the list should be)
-#return: none
-sub setFactorIndices
+#arguments: none
+#return: list of system names (NOT including 'input', 'truth' and other special cases)
+sub getSystemNames
 {
-	my ($self, $refIndices) = @_;
-	%{$self->{'factorIndices'}} = %{$refIndices};
+	my $self = shift;
+	return keys %{$self->{'sysoutFilenames'}};
 }
 
 #calculate the number of unknown factor values for the given factor in the input file
@@ -77,7 +99,7 @@ sub calcUnknownTokens
 	#check in-memory cache first
 	if(defined($self->{'unknownCount'}->{$factorName}))
 	{
-		return ($self->{'unknownCount'}->{$factorName}, $self->{'totalTokens'});
+		return ($self->{'unknownCount'}->{$factorName}, $self->{'tokenCount'}->{'input'});
 	}
 	
 	$self->ensureFilenameDefined('input');
@@ -101,7 +123,7 @@ sub calcUnknownTokens
 		}
 	}
 	$self->{'unknownCount'}->{$factorName} = $unknownTokens;
-	$self->{'totalTokens'} = $totalTokens;
+	$self->{'tokenCount'}->{'input'} = $totalTokens;
 	
 	return ($unknownTokens, $totalTokens);
 }
@@ -123,12 +145,8 @@ sub calcNounAdjWER_PWERDiff
 	my $nnNadjTags = $self->getPOSTagList('nounAndAdj');
 	for(my $i = 0; $i < scalar(@{$self->{'truth'}}); $i++)
 	{
-#		warn "truth " . join(', ', map {join('|', @$_)} @{$self->{'truth'}->[$i]}) . "\n";
-#		warn "sysout " . join(', ', map {join('|', @$_)} @{$self->{$sysname}->[$i]}) . "\n";
 		my @nnAdjEWords = $self->filterFactors($self->{'truth'}->[$i], $self->{'factorIndices'}->{'pos'}, $nnNadjTags);
 		my @nnAdjSWords = $self->filterFactors($self->{$sysname}->[$i], $self->{'factorIndices'}->{'pos'}, $nnNadjTags);
-#		warn "filtered truth: " . join(' ', map {join('|', @$_)} @nnAdjEWords) . "\n";
-#		warn "filtered sysout: " . join(' ', map {join('|', @$_)} @nnAdjSWords) . "\n\n\n";
 		my ($sentWer, $tmp) = $self->sentenceWER(\@nnAdjSWords, \@nnAdjEWords, $self->{'factorIndices'}->{'surf'});
 		$werScore += $sentWer;
 		($sentWer, $tmp) = $self->sentencePWER(\@nnAdjSWords, \@nnAdjEWords, $self->{'factorIndices'}->{'surf'});
@@ -138,7 +156,7 @@ sub calcNounAdjWER_PWERDiff
 	#unhog memory
 	$self->releaseSentences('truth');
 	$self->releaseSentences($sysname);
-	return ($werScore, $pwerScore);
+	return ($werScore / $self->{'tokenCount'}->{'truth'}, $pwerScore / $self->{'tokenCount'}->{'truth'});
 }
 
 #calculate detailed WER statistics and put them into $self
@@ -167,7 +185,7 @@ sub calcOverallWER
 	#unhog memory
 	$self->releaseSentences('truth');
 	$self->releaseSentences($sysname);
-	return $self->{'sysoutWER'}->{$sysname}->{$factorName}->[0];
+	return $self->{'sysoutWER'}->{$sysname}->{$factorName}->[0] / $self->{'tokenCount'}->{'truth'};
 }
 
 #calculate detailed PWER statistics and put them into $self
@@ -196,7 +214,7 @@ sub calcOverallPWER
 	#unhog memory
 	$self->releaseSentences('truth');
 	$self->releaseSentences($sysname);
-	return $self->{'sysoutPWER'}->{$sysname}->{$factorName}->[0];
+	return $self->{'sysoutPWER'}->{$sysname}->{$factorName}->[0] / $self->{'tokenCount'}->{'truth'};
 }
 
 #arguments: system name, factor name to consider (default 'surf')
@@ -206,7 +224,7 @@ sub calcBLEU
 	my ($self, $sysname, $factorName) = (shift, shift, 'surf');
 	if(scalar(@_) > 0) {$factorName = shift;}
 	#check in-memory cache first
-	if(defined($self->{'bleuScores'}->{$sysname}->{$factorName}))
+	if(exists $self->{'bleuScores'}->{$sysname} && exists $self->{'bleuScores'}->{$sysname}->{$factorName})
 	{
 		return $self->{'bleuScores'}->{$sysname}->{$factorName};
 	}
@@ -218,8 +236,8 @@ sub calcBLEU
 	$self->loadSentences($sysname, $self->{'sysoutFilenames'}->{$sysname});
 	
 	#score structure: various total scores, arrayref of by-sentence score arrays
-	if(!defined($self->{'bleuScores'}->{$sysname})) {$self->{'bleuScores'}->{$sysname} = {};}
-	if(!defined($self->{'bleuScores'}->{$sysname}->{$factorName})) {$self->{'bleuScores'}->{$sysname}->{$factorName} = [[], []];}
+	if(!exists $self->{'bleuScores'}->{$sysname}) {$self->{'bleuScores'}->{$sysname} = {};}
+	if(!exists $self->{'bleuScores'}->{$sysname}->{$factorName}) {$self->{'bleuScores'}->{$sysname}->{$factorName} = [[], []];}
 	
 	my ($good1, $tot1, $good2, $tot2, $good3, $tot3, $good4, $tot4, $totCLength, $totRLength) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	my $factorIndex = $self->{'factorIndices'}->{$factorName};
@@ -237,12 +255,14 @@ sub calcBLEU
 		$totRLength += $rLength;
 	}
 	my $brevity = ($totCLength > $totRLength || $totCLength == 0) ? 1 : exp(1 - $totRLength / $totCLength);
-	my ($pct1, $pct2, $pct3, $pct4) = ($good1 / $tot1, $good2 / $tot2, $good3 / $tot3, $good4 / $tot4);
-#	warn sprintf("n-gram prec: %d/%d = %.3lf, %d/%d = %.3lf, %d/%d = %.3lf, %d/%d = %.3lf\n", 
-#						$good1, $tot1, $pct1, $good2, $tot2, $pct2, $good3, $tot3, $pct3, $good4, $tot4, $pct4);
-	my $bleu = $brevity * exp((my_log($pct1) + my_log($pct2) + my_log($pct3) + my_log($pct4)) / 4);
-#	warn sprintf("brevity: %.3lf (%d ref, %d sys)\n", $brevity, $totRLength, $totCLength);
-	sleep 8;
+	my ($pct1, $pct2, $pct3, $pct4) = ($tot1 == 0 ? -1 : $good1 / $tot1, $tot2 == 0 ? -1 : $good2 / $tot2, 
+													$tot3 == 0 ? -1 : $good3 / $tot3, $tot4 == 0 ? -1 : $good4 / $tot4);
+	my ($logsum, $logcount) = (0, 0);
+	if($tot1 > 0) {$logsum += my_log($pct1); $logcount++;}
+	if($tot2 > 0) {$logsum += my_log($pct2); $logcount++;}
+	if($tot3 > 0) {$logsum += my_log($pct3); $logcount++;}
+	if($tot4 > 0) {$logsum += my_log($pct4); $logcount++;}
+	my $bleu = $brevity * exp($logsum / $logcount);
 	$self->{'bleuScores'}->{$sysname}->{$factorName}->[0] = [$bleu, 100 * $pct1, 100 * $pct2, 100 * $pct3, 100 * $pct4, $brevity];
   
 	#unhog memory
@@ -251,8 +271,161 @@ sub calcBLEU
 	return @{$self->{'bleuScores'}->{$sysname}->{$factorName}->[0]};
 }
 
+#do t-tests on the whole-corpus n-gram precisions vs. the average precisions over a set number of disjoint subsets
+#arguments: system name, factor name BLEU was run on (default 'surf')
+#return: arrayref of [arrayref of p-values for overall precision vs. subset average, arrayrefs of [(lower, upper) 95% credible intervals for true overall n-gram precisions]]
+#
+#written to try to save memory
+sub statisticallyTestBLEUResults
+{
+	my ($self, $sysname, $factorName) = (shift, shift, 'surf');
+	if(scalar(@_) > 0) {$factorName = shift;}
+	my $k = 30; #HARDCODED NUMBER OF SUBSETS (WE DO k-FOLD CROSS-VALIDATION); IF YOU CHANGE THIS YOU MUST ALSO CHANGE getApproxPValue() and $criticalTStat
+	my $criticalTStat = 2.045; #hardcoded value given alpha (.025 here) and degrees of freedom (= $k - 1) ########################################
+	$self->ensureFilenameDefined('truth');
+	$self->ensureFilenameDefined($sysname);
+	$self->ensureFactorPosDefined($factorName);
+	
+	#ensure we have full-corpus BLEU results
+	if(!exists $self->{'bleuScores'}->{$sysname}->{$factorName})
+	{
+		$self->calcBLEU($sysname, $factorName);
+	}
+	if(!exists $self->{'subsetBLEUstats'}->{$sysname}) {$self->{'subsetBLEUstats'}->{$sysname} = {};}
+	if(!exists $self->{'subsetBLEUstats'}->{$sysname}->{$factorName}) {$self->{'subsetBLEUstats'}->{$sysname}->{$factorName} = [];}
+	
+	#calculate n-gram precisions for each small subset
+	my @sentenceStats = @{$self->{'bleuScores'}->{$sysname}->{$factorName}->[1]};
+	for(my $i = 0; $i < $k; $i++)
+	{
+		my ($good1, $tot1, $good2, $tot2, $good3, $tot3, $good4, $tot4, $sysoutLength, $truthLength) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		for(my $j = $i; $j < scalar(@sentenceStats); $j += $k) #subset #K consists of every Kth sentence
+		{
+			$good1 += $sentenceStats[$j]->[0]; $tot1 += $sentenceStats[$j]->[1];
+			$good2 += $sentenceStats[$j]->[2]; $tot2 += $sentenceStats[$j]->[3];
+			$good3 += $sentenceStats[$j]->[4]; $tot3 += $sentenceStats[$j]->[5];
+			$good4 += $sentenceStats[$j]->[6]; $tot4 += $sentenceStats[$j]->[7];
+			$sysoutLength += $sentenceStats[$j]->[8];
+			$truthLength += $sentenceStats[$j]->[9];
+		}
+		push @{$self->{'subsetBLEUstats'}->{$sysname}->{$factorName}}, [$good1, $tot1, $good2, $tot2, $good3, $tot3, $good4, $tot4, $sysoutLength, $truthLength];
+	}
+	my $subsetStats = $self->{'subsetBLEUstats'}->{$sysname}->{$factorName};
+	#calculate first two moments for subset scores for each n-gram precision, and t statistic
+	my $fullCorpusBLEU = $self->{'bleuScores'}->{$sysname}->{$factorName}->[0]; #an arrayref
+	my @means = (0) x 4;
+	my @devs = (0) x 4;
+	my $t = []; #t statistics for all n-gram orders
+	if(!exists $self->{'bleuConfidence'}->{$sysname}) {$self->{'bleuConfidence'}->{$sysname} = {};}
+	$self->{'bleuConfidence'}->{$sysname}->{$factorName} = [[], []]; #lower-bound p-values for whole corpus vs. subset average; confidence intervals for all n-gram orders
+	for(my $i = 0; $i < 4; $i++) #run through n-gram orders
+	{
+		for(my $j = 0; $j < $k; $j++) #run through subsets
+		{
+			$means[$i] += $subsetStats->[$j]->[2 * $i] / $subsetStats->[$j]->[2 * $i + 1]; #matching / total n-grams
+		}
+		$means[$i] /= $k;
+		for(my $j = 0; $j < $k; $j++) #run through subsets
+		{
+			$devs[$i] += ($subsetStats->[$j]->[2 * $i] / $subsetStats->[$j]->[2 * $i + 1] - $means[$i]) ** 2;
+		}
+		$devs[$i] = sqrt($devs[$i] / ($k - 1));
+		$t->[$i] = ($fullCorpusBLEU->[$i + 1] / 100 - $means[$i]) / $devs[$i];
+		push @{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[0]}, getLowerBoundPValue($t->[$i]); #p-value for overall score vs. subset average
+#		warn "$i: mean " . $means[$i] . ", dev " . $devs[$i] . ", t " . $t->[$i] . ", conf " . getLowerBoundPValue($t->[$i]) . "\n";
+		push @{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[1]}, 
+							[$means[$i] - $criticalTStat * $devs[$i] / sqrt($k), $means[$i] + $criticalTStat * $devs[$i] / sqrt($k)]; #the confidence interval
+	}
+	
+	return $self->{'bleuConfidence'}->{$sysname}->{$factorName};
+}
+
+#arguments: system name, factor name
+#return: perplexity of language model (specified in a config file) wrt given system output
+sub calcPerplexity
+{
+	my ($self, $sysname, $factorName) = @_;
+	$self->ensureFilenameDefined($sysname);
+	my $sysoutFilename;
+	if($sysname eq 'truth' || $sysname eq 'input') {$sysoutFilename = $self->{"${sysname}Filename"};}
+	else {$sysoutFilename = $self->{'sysoutFilenames'}->{$sysname};}
+	my $lmFilename;
+	if($sysname eq 'input') {$lmFilename = $self->{'inputLMs'}->{$factorName};}
+	else {$lmFilename = $self->{'outputLMs'}->{$factorName};}
+	my $tmpfile = ".tmp" . time;
+	my $cmd = "perl ./extract-factors.pl $sysoutFilename " . $self->{'factorIndices'}->{$factorName} . " > $tmpfile";
+	`$cmd`; #extract just the factor we're interested in; ngram doesn't understand factored notation
+	my @output = `./ngram -lm $lmFilename -ppl $tmpfile`; #run the SRI n-gram tool
+	`rm $tmpfile`;
+	$output[1] =~ /ppl1=\s*([0-9\.]+)/;
+	return $1;
+}
+
+#run a paired t test and a sign test on BLEU statistics for subsets of both systems' outputs
+#arguments: system name 1, system name 2, factor name
+#return: arrayref of [arrayref of confidence levels for t test at which results differ, arrayref of index (0/1) of better system by t test,
+#                     arrayref of confidence levels for sign test at which results differ, arrayref of index (0/1) of better system by sign test], 
+#     where each inner arrayref has one element per n-gram order considered
+sub statisticallyCompareSystemResults
+{
+	my ($self, $sysname1, $sysname2, $factorName) = @_;
+	$self->ensureFilenameDefined($sysname1);
+	$self->ensureFilenameDefined($sysname2);
+	$self->ensureFactorPosDefined($factorName);
+	#make sure we have tallied results for both systems
+	if(!exists $self->{'subsetBLEUstats'}->{$sysname1}->{$factorName}) {$self->statisticallyTestBLEUResults($sysname1, $factorName);}
+	if(!exists $self->{'subsetBLEUstats'}->{$sysname2}->{$factorName}) {$self->statisticallyTestBLEUResults($sysname2, $factorName);}
+	
+	if(!exists $self->{'comparisonStats'}->{$sysname1}) {$self->{'comparisonStats'}->{$sysname1} = {};}
+	if(!exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}) {$self->{'comparisonStats'}->{$sysname1}->{$sysname2} = {};}
+	if(!exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName}) {$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName} = [];}
+	my ($tConfidences, $tWinningIndices, $signConfidences, $signWinningIndices) = ([], [], [], []);
+	for(my $i = 0; $i < 4; $i++) #loop over n-gram order
+	{
+		#t-test stats
+		my ($mean, $dev) = (0, 0); #of the difference between the first and second systems' precisions
+		#sign-test stats
+		my ($nPlus, $nMinus) = (0, 0);
+		my $j;
+		for($j = 0; $j < scalar(@{$self->{'subsetBLEUstats'}->{$sysname1}->{$factorName}}); $j++)
+		{
+			my ($stats1, $stats2) = ($self->{'subsetBLEUstats'}->{$sysname1}->{$factorName}->[$j], $self->{'subsetBLEUstats'}->{$sysname2}->{$factorName}->[$j]);
+			my ($prec1, $prec2) = ($stats1->[2 * $i] / $stats1->[2 * $i + 1], $stats2->[2 * $i] / $stats2->[2 * $i + 1]); #n-gram precisions
+			$mean += $prec1 - $prec2;
+			if($prec1 > $prec2) {$nPlus++;} else {$nMinus++;}
+		}
+		$mean /= $j;
+		for($j = 0; $j < scalar(@{$self->{'subsetBLEUstats'}->{$sysname1}->{$factorName}}); $j++)
+		{
+			my ($stats1, $stats2) = ($self->{'subsetBLEUstats'}->{$sysname1}->{$factorName}->[$j], $self->{'subsetBLEUstats'}->{$sysname2}->{$factorName}->[$j]);
+			my ($prec1, $prec2) = ($stats1->[2 * $i] / $stats1->[2 * $i + 1], $stats2->[2 * $i] / $stats2->[2 * $i + 1]); #n-gram precisions
+			$dev += ($prec1 - $prec2 - $mean) ** 2;
+		}
+		$dev = sqrt($dev / (($j - 1) * $j)); #need the extra j because the variance of Xbar is 1/n the variance of X
+		#t test
+		my $t = $mean / $dev; #this isn't the standard form; remember the difference of the means is equal to the mean of the differences
+		push @$tConfidences, getUpperBoundPValue($t);
+		push @$tWinningIndices, ($mean > 0) ? 0 : 1;
+		#sign test
+		my %binomialCoefficients; #map (n+ - n-) to a coefficient; compute on the fly!
+		for(my $k = 0; $k <= $nPlus + $nMinus; $k++)
+		{
+			$binomialCoefficients{$k} = binCoeff($nPlus + $nMinus, $k);
+		}
+		my $sumCoeffs = 0;
+		foreach my $coeff (values %binomialCoefficients) #get a lower bound on the probability mass inside (n+ - n-)
+		{
+			if($coeff > $binomialCoefficients{$nPlus}) {$sumCoeffs += $coeff;}
+		}
+		push @$signConfidences, $sumCoeffs;
+		push @$signWinningIndices, ($nPlus > $nMinus) ? 0 : 1;
+	}
+	$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName} = [$tConfidences, $tWinningIndices, $signConfidences, $signWinningIndices];
+	return $self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName};
+}
+
 #write HTML to be displayed to compare the various versions we have of each sentence in the corpus;
-#allow filtering of which versions will be displayed
+#allow to filter which versions will be displayed
 #(we don't write the whole page, just the contents of the body)
 #arguments: filehandleref to which to write, regex to filter filename extensions to be included
 #return: none
@@ -297,6 +470,15 @@ sub writeCacheFile
 
 	#store file changetimes to disk
 	print CACHEFILE "File changetimes\n";
+	my $writeCtime = sub
+	{
+		my $ext = shift;
+		print CACHEFILE $self->{'corpusName'} . ".$ext " . time . "\n";
+	};
+	if(exists $self->{'truthFilename'}) {&$writeCtime('e');}
+	if(exists $self->{'inputFilename'}) {&$writeCtime('f');}
+	foreach my $factorName (keys %{$self->{'phraseTableFilenames'}}) {&$writeCtime("pt_$factorName");}
+	foreach my $sysname (keys %{$self->{'sysoutFilenames'}}) {&$writeCtime($sysname);}
 	#store bleu scores to disk
 	print CACHEFILE "\nBLEU scores\n";
 	foreach my $sysname (keys %{$self->{'bleuScores'}})
@@ -311,11 +493,37 @@ sub writeCacheFile
 			print CACHEFILE "\n";
 		}
 	}
+	#store t statistics for overall BLEU score and subsets in k-fold cross-validation
+	print CACHEFILE "\nBLEU statistics\n";
+	foreach my $sysname (keys %{$self->{'bleuConfidence'}})
+	{
+		foreach my $factorName (keys %{$self->{'bleuConfidence'}->{$sysname}})
+		{
+			print CACHEFILE "$sysname $factorName " . join(' ', @{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[0]});
+			foreach my $subsetConfidence (@{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[1]})
+			{
+				print CACHEFILE "; " . join(' ', @$subsetConfidence);
+			}
+			print CACHEFILE "\n";
+		}
+	}
+	#store statistics comparing system outputs
+	print CACHEFILE "\nStatistical comparisons\n";
+	foreach my $sysname1 (keys %{$self->{'comparisonStats'}})
+	{
+		foreach my $sysname2 (keys %{$self->{'comparisonStats'}->{$sysname1}})
+		{
+			foreach my $factorName (keys %{$self->{'comparisonStats'}->{$sysname1}->{$sysname2}})
+			{
+				print CACHEFILE "$sysname1 $sysname2 $factorName " . join('; ', @{$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName}}) . "\n";
+			}
+		}
+	}
 	#store unknown-token counts to disk
 	print CACHEFILE "\nUnknown-token counts\n";
 	foreach my $factorName (keys %{$self->{'unknownCount'}})
 	{
-		print CACHEFILE $factorName . " " . $self->{'phraseTableFilenames'}->{$factorName} . " " . $self->{'unknownCount'}->{$factorName} . " " . $self->{'totalTokens'} . "\n";
+		print CACHEFILE $factorName . " " . $self->{'phraseTableFilenames'}->{$factorName} . " " . $self->{'unknownCount'}->{$factorName} . " " . $self->{'tokenCount'}->{'input'} . "\n";
 	}
 	#store WER, PWER to disk
 	print CACHEFILE "\nWER scores\n";
@@ -340,7 +548,7 @@ sub writeCacheFile
 	&$printWERFunc('sysoutWER');
 	&$printWERFunc('sysoutPWER');
 	#store misc scores to disk
-	print CACHEFILE "\nMisc scores\n";
+	print CACHEFILE "\n";
 	close(CACHEFILE);
 }
 
@@ -363,25 +571,50 @@ sub loadCacheFile
 		#check for start of section
 		if($line eq "File changetimes\n") {$mode = 'ctime';}
 		elsif($line eq "BLEU scores\n") {$mode = 'bleu';}
+		elsif($line eq "BLEU statistics\n") {$mode = 'bstats';}
+		elsif($line eq "Statistical comparisons\n") {$mode = 'cmp';}
 		elsif($line eq "Unknown-token counts\n") {$mode = 'unk';}
 		elsif($line eq "WER scores") {$mode = 'wer';}
-		elsif($line eq "Misc scores") {$mode = 'misc';}
 		#get data when in a mode already
 		elsif($mode eq 'ctime')
 		{
+			local ($fileExtension, $ctime) = split(/\s+/, $line);
+			$self->{'fileCtimes'}->{$fileExtension} = $ctime;
 		}
 		elsif($mode eq 'bleu')
 		{
 			local ($sysname, $factorName, $rest) = split(/\s+/, $line, 3);
-			if(!defined($self->{'bleuScores'}->{$sysname})) {$self->{'bleuScores'}->{$sysname} = {};}
-			if(!defined($self->{'bleuScores'}->{$sysname}->{$factorName})) {$self->{'bleuScores'}->{$sysname}->{$factorName} = [[], []];}
+			if(!$self->cacheIsCurrentForFile($sysname) || !$self->cacheIsCurrentForFile('e')) {next;}
+			if(!exists $self->{'bleuScores'}->{$sysname}) {$self->{'bleuScores'}->{$sysname} = {};}
+			if(!exists $self->{'bleuScores'}->{$sysname}->{$factorName}) {$self->{'bleuScores'}->{$sysname}->{$factorName} = [[], []];}
 			my @stats = map {my @tmp = split(/\s+/, $_); \@tmp;} split(/;/, $rest);
 			$self->{'bleuScores'}->{$sysname}->{$factorName}->[0] = shift @stats;
 			$self->{'bleuScores'}->{$sysname}->{$factorName}->[1] = \@stats;
 		}
+		elsif($mode eq 'bstats')
+		{
+			local ($sysname, $factorName, $rest) = split(/\s+/, $line, 3);
+			if(!$self->cacheIsCurrentForFile($sysname) || !$self->cacheIsCurrentForFile('e')) {next;}
+			if(!exists $self->{'bleuConfidence'}->{$sysname}) {$self->{'bleuConfidence'}->{$sysname} = {};}
+			if(!exists $self->{'bleuConfidence'}->{$sysname}->{$factorName}) {$self->{'bleuConfidence'}->{$sysname}->{$factorName} = [[], []];}
+			my @stats = map {my @tmp = split(/\s+/, $_); \@tmp;} split(/;/, $rest);
+			$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[0] = shift @stats;
+			$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[1] = \@stats;
+		}
+		elsif($mode eq 'cmp')
+		{
+			local ($sysname1, $sysname2, $factorName, $rest) = split(/\s+/, $line, 4);
+			if(!$self->cacheIsCurrentForFile($sysname1) || !$self->cacheIsCurrentForFile($sysname2) || !$self->cacheIsCurrentForFile('e')) {next;}
+			if(!exists $self->{'comparisonStats'}->{$sysname1}) {$self->{'comparisonStats'}->{$sysname1} = {};}
+			if(!exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}) {$self->{'comparisonStats'}->{$sysname1}->{$sysname2} = {};}
+			if(!exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName}) {$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName} = [];}
+			my @stats = split(/;/, $rest);
+			$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName} = \@stats;
+		}
 		elsif($mode eq 'unk')
 		{
 			local ($factorName, $phraseTableFilename, $unknownCount, $totalCount) = split(' ', $line);
+			if(!$self->cacheIsCurrentForFile('f') || !$self->cacheIsCurrentForFile("pt_$factorName")) {next;}
 			if(defined($self->{'phraseTableFilenames'}->{$factorName}) && $self->{'phraseTableFilenames'}->{$factorName} eq $phraseTableFilename)
 			{
 				$self->{'unknownCount'}->{$factorName} = $unknownCount;
@@ -391,23 +624,44 @@ sub loadCacheFile
 		elsif($mode eq 'wer')
 		{
 			local ($werType, $sysname, $factorName, $totalWER, $details) = split(/\s+/, $line, 5); #werType is 'sysoutWER' or 'sysoutPWER'
+			if(!$self->cacheIsCurrentForFile($sysname) || !$self->cacheIsCurrentForFile('e')) {next;}
 			$details =~ /^([^;]*);(.*)/;
 			my @sentenceWERs = split(/\s+/, $1);
-			if(!defined($self->{$werType}->{$sysname})) {$self->{$werType}->{$sysname} = {};}
+			if(!exists $self->{$werType}->{$sysname}) {$self->{$werType}->{$sysname} = {};}
 			$self->{$werType}->{$sysname}->{$factorName} = [$totalWER, \@sentenceWERs, []];
 			my @indexLists = split(/;/, $2);
-			sleep 6;
 			for(my $i = 0; $i < scalar(@sentenceWERs); $i++)
 			{
-				my @indices = split(/\s+/, $indexLists[$i]);
+				my @indices = grep(/\S/, split(/\s+/, $indexLists[$i])); #find all nonempty tokens
 				$self->{$werType}->{$sysname}->{$factorName}->[2] = \@indices;
 			}
 		}
-		elsif($mode eq 'misc')
-		{
-		}
 	}
 	close(CACHEFILE);
+}
+
+#arguments: cache type ('bleu' | ...), system name, factor name
+#return: none
+sub flushCache
+{
+	my ($self, $cacheType, $sysname, $factorName) = @_;
+	if($cacheType eq 'bleu')
+	{
+		if(defined($self->{'bleuScores'}->{$sysname}) && defined($self->{'bleuScores'}->{$sysname}->{$factorName}))
+		{
+			delete $self->{'bleuScores'}->{$sysname}->{$factorName};
+		}
+	}
+}
+
+#arguments: file extension
+#return: whether (0/1) our cache for the given file is at least as recent as the file
+sub cacheIsCurrentForFile
+{
+	my ($self, $ext) = @_;
+	return 0 if(!exists $self->{'fileCtimes'}->{$ext});
+	my @liveStats = stat($self->{'corpusName'} . ".$ext");
+	return ($liveStats[9] <= $self->{'fileCtimes'}->{$ext}) ? 1 : 0;
 }
 
 ##### utils #####
@@ -428,6 +682,81 @@ sub my_log
 {
   return -9999999999 unless $_[0];
   return log($_[0]);
+}
+#arguments: x
+sub round
+{
+	my $x = shift;
+	if($x - int($x) < .5) {return int($x);}
+	return int($x) + 1;
+}
+
+#return an approximation of the p-value for a given t FOR A HARDCODED NUMBER OF DEGREES OF FREEDOM
+# (IF YOU CHANGE THIS HARDCODED NUMBER YOU MUST ALSO CHANGE statisticallyTestBLEUResults() and getLowerBoundPValue() )
+#arguments: the t statistic, $t
+#return: a lower bound on the probability mass outside (beyond) +/-$t in the t distribution
+#
+#for a wonderful t-distribution calculator, see <http://math.uc.edu/~brycw/classes/148/tables.htm#t>. UC.edu is Cincinnati.
+sub getLowerBoundPValue
+{
+	my $t = abs(shift);
+	#encode various known p-values for ###### DOF = 29 ######
+	my %t2p = #since we're comparing (hopefully) very similar values, this chart is weighted toward the low end of the t-stat
+	(
+		0.0063 => .995,
+		0.0126 => .99,
+		0.0253 => .98,
+		0.0380 => .97,
+		0.0506 => .96,
+		0.0633 => .95,
+		0.0950 => .925,
+		0.127  => .9,
+		0.191  => .85,
+		0.256  => .8,
+		0.389  => .7,
+		0.530  => .6,
+		0.683  => .5,
+		0.854  => .4,
+		1.055  => .3,
+		1.311  => .2, 
+		1.699  => .1
+	);
+	foreach my $tCmp (sort keys %t2p) {return $t2p{$tCmp} if $t <= $tCmp;}
+	return 0; #loosest bound ever! groovy, man
+}
+#arguments: the t statistic, $t
+#return: an upper bound on the probability mass outside (beyond) +/-$t in the t distribution
+sub getUpperBoundPValue
+{
+	my $t = abs(shift);
+	#encode various known p-values for ###### DOF = 29 ######
+	my %t2p = 
+	(
+		4.506 => .0001,
+		4.254 => .0002,
+		3.918 => .0005,
+		3.659 => .001,
+		3.396 => .002,
+		3.038 => .005,
+		2.756 => .01,
+		2.462 => .02,
+		2.045 => .05,
+		1.699 => .1,
+		1.311 => .2,
+		0.683 => .5
+	);
+	foreach my $tCmp (reverse sort keys %t2p) {return $t2p{$tCmp} if $t >= $tCmp;}
+	return 1; #loosest bound ever!
+}
+
+#arguments: n, r
+#return: binomial coefficient for p = .5 (ie nCr * (1/2)^n)
+sub binCoeff
+{
+	my ($n, $r) = @_;
+	my $coeff = 1;
+	for(my $i = $r + 1; $i <= $n; $i++) {$coeff *= $i; $coeff /= ($i - $r);}
+	return $coeff * (.5 ** $n);
 }
 
 #throw if the given factor doesn't have an index defined
@@ -501,10 +830,6 @@ sub locateFiles
 		}
 	}
 	close(DIR);
-#	warn "truth is set to '" . $self->{'truthFilename'} . "'\n";
-#	warn "input is set to '" . $self->{'inputFilename'} . "'\n";
-#	warn "sysouts set are '" . join("', '", keys %{$self->{'sysoutFilenames'}}) . "'\n";
-#	warn "phrase tables set are '" . join("', '", keys %{$self->{'phraseTableFilenames'}}) . "'\n";
 }
 
 #arguments: type ('truth' | 'input' | a string to represent a system output), filename
@@ -513,11 +838,16 @@ sub locateFiles
 sub loadSentences
 {
 	my ($self, $sysname, $filename) = @_;
+	#if the sentences are already loaded, leave them be
+	if(exists $self->{$sysname} && scalar(@{$self->{$sysname}}) > 0) {return;}
+	
 	$self->{$sysname} = [];
+	$self->{'tokenCount'}->{$sysname} = 0;
 	open(INFILE, "<$filename") or die "Corpus::load(): couldn't open '$filename' for read\n";
 	while(my $line = <INFILE>)
 	{
 		my @words = split(/\s+/, $line);
+		$self->{'tokenCount'}->{$sysname} += scalar(@words);
 		my $refFactors = [];
 		foreach my $word (@words)
 		{
@@ -526,7 +856,7 @@ sub loadSentences
 		}
 		push @{$self->{$sysname}}, $refFactors;
 	}
-	close(INFILE);
+	close(INFILE);	
 }
 
 #free the memory used for the given corpus (but NOT any associated calculations, eg WER)
@@ -534,8 +864,8 @@ sub loadSentences
 #return: none
 sub releaseSentences
 {
-	my ($self, $sysname) = @_;
-	$self->{$sysname} = [];
+#	my ($self, $sysname) = @_;
+#	$self->{$sysname} = [];
 }
 
 #arguments: factor name
@@ -613,19 +943,80 @@ sub corpusWER
 #return: wer score, arrayref of arrayrefs of indices of errorful words
 sub sentenceWER
 {
+	#constants: direction we came through the table
+	my ($DIR_NONE, $DIR_SKIPTRUTH, $DIR_SKIPOUT, $DIR_SKIPBOTH) = (-1, 0, 1, 2); #values don't matter but must be unique
 	my ($self, $refSysOutput, $refTruth, $index) = @_;
 	my ($totWER, $indices) = (0, []);
 	my ($sLength, $eLength) = (scalar(@$refSysOutput), scalar(@$refTruth));
-	for(my $j = 0; $j < min($sLength, $eLength); $j++)
+	if($sLength == 0 || $eLength == 0) {return ($totWER, $indices);} #special case
+	
+	my @refWordsMatchIndices = (-1) x $eLength; #at what sysout-word index this truth word is first matched
+	my @sysoutWordsMatchIndices = (-1) x $sLength; #at what truth-word index this sysout word is first matched
+	my $table = []; #index by sysout word index, then truth word index; a cell holds max count of matching words and direction we came to get it
+	#dynamic-programming time: find the path through the table with the maximum number of matching words
+	for(my $i = 0; $i < $sLength; $i++)
 	{
-		if(lc $refSysOutput->[$j]->[$index] ne lc $refTruth->[$j]->[$index]) #check output word against truth word in same position
+		push @$table, [];
+		for(my $j = 0; $j < $eLength; $j++)
 		{
-			$totWER++;
-			push @$indices, $j;
+			my ($maxPrev, $prevDir) = (0, $DIR_NONE);
+			if($i > 0 && $table->[$i - 1]->[$j]->[0] >= $maxPrev) {$maxPrev = $table->[$i - 1]->[$j]->[0]; $prevDir = $DIR_SKIPOUT;}
+			if($j > 0 && $table->[$i]->[$j - 1]->[0] >= $maxPrev) {$maxPrev = $table->[$i]->[$j - 1]->[0]; $prevDir = $DIR_SKIPTRUTH;}
+			if($i > 0 && $j > 0 && $table->[$i - 1]->[$j - 1]->[0] >= $maxPrev) {$maxPrev = $table->[$i - 1]->[$j - 1]->[0]; $prevDir = $DIR_SKIPBOTH;}
+			my $match = ($refSysOutput->[$i]->[$index] eq $refTruth->[$j]->[$index] && $refWordsMatchIndices[$j] == -1 && $sysoutWordsMatchIndices[$i] == -1) ? 1 : 0;
+			if($match == 1) {$refWordsMatchIndices[$j] = $i; $sysoutWordsMatchIndices[$i] = $j;}
+			push @{$table->[$i]}, [($match ? $maxPrev + 1 : $maxPrev), $prevDir];
 		}
 	}
-	$totWER += max(0, $sLength - $eLength);
-	return ($totWER, $indices);
+	
+	#look back along the path and get indices of non-matching words
+	my @unusedSysout = (0) x $sLength; #whether each sysout word was matched--used for outputting html table
+	my ($i, $j) = ($sLength - 1, $eLength - 1);
+	while($i > 0) #work our way back to the first sysout word
+	{
+		push @{$table->[$i]->[$j]}, 0; #length is flag to highlight cell
+		if($table->[$i]->[$j]->[1] == $DIR_SKIPTRUTH)
+		{
+			$j--;
+		}
+		elsif($table->[$i]->[$j]->[1] == $DIR_SKIPOUT)
+		{
+			if($table->[$i - 1]->[$j]->[0] == $table->[$i]->[$j]->[0]) {unshift @$indices, $i; $unusedSysout[$i] = 1;}
+			$i--;
+		}
+		elsif($table->[$i]->[$j]->[1] == $DIR_SKIPBOTH)
+		{
+			if($table->[$i - 1]->[$j - 1]->[0] == $table->[$i]->[$j]->[0]) {unshift @$indices, $i; $unusedSysout[$i] = 1;}
+			$i--; $j--;
+		}
+	}
+	#we're at the first sysout word; finish up checking for matches
+	while($j > 0 && $refWordsMatchIndices[$j] != 0) {push @{$table->[0]->[$j]}, 0; $j--;}
+	if($j == 0 && $refWordsMatchIndices[0] != 0) {unshift @$indices, 0; $unusedSysout[0] = 1;} #no truth word was matched to the first sysout word
+	
+	#print some HTML to debug the WER algorithm
+#	print "<table border=1><tr><td></td><td>" . join("</td><td>", map {() . $_->[$index]} @$refTruth) . "</td></tr>";
+#	for(my $i = 0; $i < $sLength; $i++)
+#	{
+#		print "<tr><td" . (($unusedSysout[$i] == 1) ? " style=\"background-color: #ffdd88\">" : ">") . $refSysOutput->[$i]->[$index] . "</td>";
+#		for(my $j = 0; $j < $eLength; $j++)
+#		{
+#			print "<td";
+#			if(scalar(@{$table->[$i]->[$j]}) > 2) {print " style=\"color: yellow; background-color: #000080\"";}
+#			my $arrow;
+#			if($table->[$i]->[$j]->[1] == $DIR_NONE) {$arrow = "&times;";}
+#			elsif($table->[$i]->[$j]->[1] == $DIR_SKIPTRUTH) {$arrow = "&larr;";}
+#			elsif($table->[$i]->[$j]->[1] == $DIR_SKIPOUT) {$arrow = "&uarr;";}
+#			elsif($table->[$i]->[$j]->[1] == $DIR_SKIPBOTH) {$arrow = "&loz;";}
+#			print ">" . $table->[$i]->[$j]->[0] . "  " . $arrow . "</td>";
+#		}
+#		print "</tr>";
+#	}
+#	print "</table>";
+	
+	my $matchCount = 0;
+	if($sLength > 0) {$matchCount = $table->[$sLength - 1]->[$eLength - 1]->[0];}
+	return ($sLength - $matchCount, $indices);
 }
 
 #arguments: system output (arrayref of arrayrefs of arrayrefs of factor strings), truth (same), factor index to use
