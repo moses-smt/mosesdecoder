@@ -36,6 +36,7 @@ HypothesisCollection::HypothesisCollection()
 	m_worstScore = -std::numeric_limits<float>::infinity();
 }
 
+/** remove all hypotheses from the collection */
 void HypothesisCollection::RemoveAll()
 {
 	while (m_hypos.begin() != m_hypos.end())
@@ -43,7 +44,8 @@ void HypothesisCollection::RemoveAll()
 		Remove(m_hypos.begin());
 	}
 }
- 
+
+/** add a hypothesis to the collection, prune if necessary */
 void HypothesisCollection::Add(Hypothesis *hypo)
 {
 
@@ -56,13 +58,14 @@ void HypothesisCollection::Add(Hypothesis *hypo)
           m_worstScore = m_bestScore + m_beamThreshold;
 	}
 
-    // Prune only of stack is twice as big as needed
+    // Prune only of stack is twice as big as needed (lazy pruning)
 	if (m_hypos.size() > 2*m_maxHypoStackSize-10)
 	{
 		PruneToSize(m_maxHypoStackSize);
 	}
 }
 
+/** add hypothesis to stack (unless worse than minimum score) */
 void HypothesisCollection::AddPrune(Hypothesis *hypo)
 { // if returns false, hypothesis not used
 	// caller must take care to delete unused hypo to avoid leak
@@ -111,70 +114,72 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	}
 }
 
+/** pruning, if too large.
+ * Pruning algorithm: find a threshold and delete all hypothesis below it.
+ * The threshold is chosen so that exactly newSize top items remain on the 
+ * stack in fact, in situations where some of the hypothesis fell below 
+ * m_beamThreshold, the stack will contain less items.
+ * \param newSize maximum size */
+
 void HypothesisCollection::PruneToSize(size_t newSize)
 {
-	if (m_hypos.size() > newSize)
-	{
-        // Pruning alg: find a threshold and delete all hypothesis below it
-        //   the threshold is chosen so that exactly newSize top items remain on the stack
-        //   in fact, in situations where some of the hypothesis fell below m_beamThreshold,
-        //   the stack will contain less items
-
-		priority_queue<float> bestScores;
-
-        // cerr << "About to prune from " << size() << " to " << newSize << endl;
-        // push all scores to a heap
-        //   (but never push scores below m_bestScore+m_beamThreshold)
-		iterator iter = m_hypos.begin();
-		float score = 0;
-		while (iter != m_hypos.end())
+	if (m_hypos.size() > newSize) // ok, if not over the limit
 		{
-			Hypothesis *hypo = *iter;
-			score = hypo->GetTotalScore();
-            // cerr << "H score: " << score << ", mbestscore: " << m_bestScore << " + m_beamThreshold "<< m_beamThreshold << " = " << m_bestScore+m_beamThreshold;
-            if (score > m_bestScore+m_beamThreshold) {
-			  bestScores.push(score);
-              // cerr << " pushed.";
-            }
-            // cerr << endl;
-            ++iter;
+			priority_queue<float> bestScores;
+			
+			// cerr << "About to prune from " << size() << " to " << newSize << endl;
+			// push all scores to a heap
+			//   (but never push scores below m_bestScore+m_beamThreshold)
+			iterator iter = m_hypos.begin();
+			float score = 0;
+			while (iter != m_hypos.end())
+				{
+					Hypothesis *hypo = *iter;
+					score = hypo->GetTotalScore();
+					// cerr << "H score: " << score << ", mbestscore: " << m_bestScore << " + m_beamThreshold "<< m_beamThreshold << " = " << m_bestScore+m_beamThreshold;
+					if (score > m_bestScore+m_beamThreshold) {
+						bestScores.push(score);
+						// cerr << " pushed.";
+					}
+					// cerr << endl;
+					++iter;
         }
-        // cerr << "Heap contains " << bestScores.size() << " items" << endl;
-        
-        // pop the top newSize scores (and ignore them, these are the scores of hyps that will remain)
-        //  ensure to never pop beyond heap size
-        size_t minNewSizeHeapSize = newSize > bestScores.size() ? bestScores.size() : newSize;
-		for (size_t i = 1 ; i < minNewSizeHeapSize ; i++)
-          bestScores.pop();
-
-        // cerr << "Popped "<< newSize << ", heap now contains " << bestScores.size() << " items" << endl;
-
-        // and remember the threshold
-        float scoreThreshold = bestScores.top();
-        // cerr << "threshold: " << scoreThreshold << endl;
-
-		// delete all hypos under score threshold
-		iter = m_hypos.begin();
-		while (iter != m_hypos.end())
-		{
-			Hypothesis *hypo = *iter;
-			float score = hypo->GetTotalScore();
-			if (score < scoreThreshold)
-			{
-				iterator iterRemove = iter++;
-				Remove(iterRemove);
-				StaticData::Instance()->GetSentenceStats().numPruned++;
-			}
-			else
-			{
-				++iter;
-			}
+			// cerr << "Heap contains " << bestScores.size() << " items" << endl;
+			
+			// pop the top newSize scores (and ignore them, these are the scores of hyps that will remain)
+			//  ensure to never pop beyond heap size
+			size_t minNewSizeHeapSize = newSize > bestScores.size() ? bestScores.size() : newSize;
+			for (size_t i = 1 ; i < minNewSizeHeapSize ; i++)
+				bestScores.pop();
+			
+			// cerr << "Popped "<< newSize << ", heap now contains " << bestScores.size() << " items" << endl;
+			
+			// and remember the threshold
+			float scoreThreshold = bestScores.top();
+			// cerr << "threshold: " << scoreThreshold << endl;
+			
+			// delete all hypos under score threshold
+			iter = m_hypos.begin();
+			while (iter != m_hypos.end())
+				{
+					Hypothesis *hypo = *iter;
+					float score = hypo->GetTotalScore();
+					if (score < scoreThreshold)
+						{
+							iterator iterRemove = iter++;
+							Remove(iterRemove);
+							StaticData::Instance()->GetSentenceStats().numPruned++;
+						}
+					else
+						{
+							++iter;
+						}
+				}
+			// cerr << "Stack size after pruning: " << size() << endl;
+			
+			// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack
+			m_worstScore = scoreThreshold;
 		}
-        // cerr << "Stack size after pruning: " << size() << endl;
-
-        // set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack
-        m_worstScore = scoreThreshold;
-	}
 }
 
 const Hypothesis *HypothesisCollection::GetBestHypothesis() const
