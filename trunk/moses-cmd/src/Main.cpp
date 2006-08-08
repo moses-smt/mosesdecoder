@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 		{
 			// note: source is only valid within this while loop!
 
-			TRACE_ERR("TRANSLATING: " << *source <<"\n");
+			TRACE_ERR("\nTRANSLATING: " << *source <<endl);
 
 			staticData.InitializeBeforeSentenceProcessing(*source);
 			Manager manager(*source, staticData);
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 			size_t nBestSize = staticData.GetNBestSize();
 			if (nBestSize > 0)
 				{
-					TRACE_ERR(nBestSize << " " << staticData.GetNBestFilePath() << endl);
+					TRACE_ERR("WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					LatticePathList nBestList;
 					manager.CalcNBest(nBestSize, nBestList);
 					inputOutput->SetNBest(nBestList, source->GetTranslationId());
