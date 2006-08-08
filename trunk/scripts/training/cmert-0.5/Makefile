@@ -1,7 +1,7 @@
 CC=gcc
 OBJS=mert.o data.o point.o score.o
-CFLAGS=-O3 -pg
-LDFLAGS=-pg
+CFLAGS=-O3
+LDFLAGS=
 LDLIBS=-lm 
 
 mert: $(OBJS)
