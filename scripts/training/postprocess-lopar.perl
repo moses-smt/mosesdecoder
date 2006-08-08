@@ -12,16 +12,25 @@ open OUT, ">$out.factored" or die "Couldn't open joined";
 open M, ">$out.morph" or die "Couldn't open morph";
 open L, ">$out.lemma" or die "Couldn't open lemma";
 open S, ">$out.words" or die "Couldn't open surface";
+open P, ">$out.pos" or die "Couldn't open surface";
 my $lc = 0;
 while (my $l =<STDIN>) {
   chomp $l;
 	$lc++;
   if ($lc % 1000 == 0) {print "$lc\n";}
-	my @ls = (); my @ms = ();  my @ss = (); my @js = ();
+	my @ls = (); my @ms = ();  my @ss = (); my @js = (); my @ps = ();
   my @ws = split /\s+/, $l;
   foreach my $w (@ws) {
 		$wc++;
-    my ($surface, $morph, $lemma) = split /_/, $w;
+    my ($surface, $morph, $lemma);
+		
+		if ($w =~ /^(.+)_([^_]+)_(.+)$/o) {
+      ($surface, $morph, $lemma) = ($1, $2, $3);
+		} else {
+ 			print "can't parse: $w\n";
+			next;
+		}
+		#next unless (defined $surface && !($surface eq ''));
 		if (!defined $lemma) { $lemma=$surface; }
 		if (!defined $morph) { $morph = 'NN.Neut.Cas.Sg'; }
 		if ($lemma eq '<NUM>' || $lemma eq '<ORD>') {
@@ -52,27 +61,30 @@ while (my $l =<STDIN>) {
 			} elsif ($surface =~ /ismus$/o) {
 				$morph =~ 'NN.Masc.Cas.Sg';
 			}
-    }
+    } else {
+			if ($lemma =~ /\|/o) {
+				my ($l, @rest) = split /\|/o, $lemma;
+				$lemma = $l;
+			}
+		}
 		my ($pos, @xs) = split /\./, $morph;
 		$morph = join '.', @xs;
     if (!defined $morph || $morph eq '') {
 			$morph = '-';
 		} 
-		if ($lemma =~ /\|/o) {
-			my ($l, @rest) = split /\|/o, $lemma;
-			$lemma = $l;
-		}
-    if ($lemma && $morph && $surface) {
+#    if (defined($lemma) && defined($morph) && defined($surface)) {
 			push @js, "$surface|$morph|$lemma";
 			push @ls, $lemma;
 			push @ms, $morph;
 			push @ss, $surface;
-		}
+			push @ps, $pos;
+#		}
   }
 	print OUT join(' ', @js) . "\n";
 	print M join(' ', @ms) . "\n";
 	print L join(' ', @ls) . "\n";
 	print S join(' ', @ss) . "\n";
+	print P join(' ', @ps) . "\n";
 }
 close OUT;
 
