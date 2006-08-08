@@ -366,6 +366,10 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				? Scan<size_t>(m_parameter.GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
 	TRACE_ERR("max translation options per coverage span: "<<m_maxNoTransOptPerCoverage<<"\n");
 
+	m_maxNoPartTransOpt = (m_parameter.GetParam("max-partial-trans-opt").size() > 0)
+				? Scan<size_t>(m_parameter.GetParam("max-partial-trans-opt")[0]) : DEFAULT_MAX_PART_TRANS_OPT_SIZE;
+	TRACE_ERR("max partial translation options: "<<m_maxNoPartTransOpt<<"\n");
+
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH
 	if (m_parameter.GetParam("drop-unknown").size() == 1)
