@@ -13,8 +13,8 @@ while (<>) {
   }
   next unless /^BEST HYPO:/;
   my $pscore = "FORMAT ERROR";
-  # BEST HYPO: only then will the european institutions to your task . [11111111111]  [-3.65,0.00,-12.34,-8.00,-10.00,0.00,-14.39]
-  if (/\[1+\]\s*\[[^\]]*,\s*(-?\d+\.\d+)\]/) {
+  # BEST HYPO: only then will the european institutions to your task . [11111111111]  [total score=-14.39] <<...>>
+  if (/\[1+\]\s*\[[^\]]*=(-?\d+\.\d+)\]/) {
     $pscore = $1;
   }
   $x++;
