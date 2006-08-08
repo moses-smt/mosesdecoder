@@ -42,6 +42,7 @@ class GenerationDictionary;
 class DistortionScoreProducer;
 class WordPenaltyProducer;
 
+/** Contains global variables and contants */
 class StaticData
 {
 private:
@@ -74,7 +75,8 @@ protected:
 	size_t                              
 			m_maxHypoStackSize //hypothesis-stack size that triggers pruning
 			, m_nBestSize
-			, m_maxNoTransOptPerCoverage;
+			, m_maxNoTransOptPerCoverage
+		  , m_maxNoPartTransOpt;
 	
 	std::string									m_nBestFilePath, m_cachePath;
 	std::vector<std::string>		m_mySQLParam;
@@ -163,6 +165,10 @@ public:
 	inline size_t GetMaxNoTransOptPerCoverage() const 
 	{ 
 		return m_maxNoTransOptPerCoverage;
+	}
+	inline size_t GetMaxNoPartTransOpt() const 
+	{ 
+		return m_maxNoPartTransOpt;
 	}
 	FactorCollection &GetFactorCollection()
 	{
