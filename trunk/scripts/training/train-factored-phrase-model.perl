@@ -270,8 +270,8 @@ sub prepare {
 	    exit 0;
 	} else {
 	    &reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
-	    waitpid($pid, 0);
 	}
+	waitpid($pid, 0);
 	my $pid2 = 0;
 	$pid = fork();
 	die "couldn't fork" unless defined $pid;
