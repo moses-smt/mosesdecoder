@@ -25,6 +25,8 @@
 #include <iostream>
 #include <assert.h>
 #include "mempool.h"
+#include "TypeDef.h"
+#include "Util.h"
 
 using namespace std;
 
@@ -192,10 +194,10 @@ void mempool::map (ostream& co){
 
 void mempool::stat(){
 
-  cout << "mempool class statistics\n"
-       << "entries " << entries
-       << " blocks " << blocknum
-       << " used memory " << (blocknum * true_size)/1024 << " Kb\n";
+  TRACE_ERR("mempool class statistics\n"
+		       << "entries " << entries
+		       << " blocks " << blocknum
+		       << " used memory " << (blocknum * true_size)/1024 << " Kb\n");
 }
 
 
@@ -222,10 +224,10 @@ strstack::strstack(int bs){
 
 void strstack::stat(){
 
-  cout << "strstack class statistics\n"
+  TRACE_ERR("strstack class statistics\n"
        << "entries " << entries
        << " blocks " << blocknum
-       << " used memory " << memory/1024 << " Kb\n";
+       << " used memory " << memory/1024 << " Kb\n");
 }
 
 
@@ -482,37 +484,11 @@ void storage::stat(){
       waste+=poolset[i]->wasted();
     }
 
-  cout << "storage class statistics\n";
-  cout << "alloc entries " << newcalls 
-       << " used memory " << newmemory/1024 << "Kb\n";
-  cout << "mpools " << setsize
-       << " active  " << used 
-       << " used memory " << memory/1024 << "Kb"
-       << " wasted " << waste/1024 << "Kb\n";
+  TRACE_ERR("storage class statistics\n"
+	  			<< "alloc entries " << newcalls 
+		      << " used memory " << newmemory/1024 << "Kb\n"
+  				<< "mpools " << setsize
+       		<< " active  " << used 
+		      << " used memory " << memory/1024 << "Kb"
+       		<< " wasted " << waste/1024 << "Kb\n");
 }
-
-/*
-main(){
-
-  mempool* mp=new mempool(sizeof(int),80);
-
-  int** ar= new (int*) [ 1000 ];
-
-  for (int i=0;i<1000;i++){
-    ar[i]= (int *)mp->alloc();
-  }
-
-  mp->map(cout);
-
-  for (int i=0;i<500;i++){
-    mp->free(ar[i]);
-  }
-
-  mp->map(cout);
-  
-}
-
-*/
-
-
-

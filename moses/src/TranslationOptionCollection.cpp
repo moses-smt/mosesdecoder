@@ -175,11 +175,11 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
        		total += count;
         }
       }
-      cout << "translation options generated in total: "<< total << endl;
+      TRACE_ERR("translation options generated in total: "<< total << endl);
 
       for(size_t row=0; row<size; row++)
         for(size_t col=row; col<size; col++)
-		  cout<<"future cost from "<< row <<" to "<< col <<" is "<< m_futureScore.GetScore(row, col) <<endl;
+		  TRACE_ERR("future cost from "<< row <<" to "<< col <<" is "<< m_futureScore.GetScore(row, col) <<endl);
     }
 }
 
@@ -573,7 +573,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	{
 		if (verboseLevel >= 3) 
 		{
-			cout << "[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n";
+			TRACE_ERR("[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
 		}
 			
 		TargetPhraseCollection::const_iterator iterTargetPhrase;
@@ -584,12 +584,12 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			
 			if (verboseLevel >= 3) 
 			{
-				cout << "\t" << targetPhrase << "\n";
+				TRACE_ERR("\t" << targetPhrase << "\n");
 			}
 		}
 		if (verboseLevel >= 3) 
 		{ 
-			cout << endl; 
+			TRACE_ERR(endl);
 		}
 	}
 	// handling unknown words
