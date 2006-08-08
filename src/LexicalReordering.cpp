@@ -93,16 +93,16 @@ void LexicalReordering::PrintTable()
 	while (table_iter != m_orientation_table.end())
 			{
 				// print key
-				cout << table_iter->first << " ||| ";
+				TRACE_ERR(table_iter->first << " ||| ");
 				// print values
 				vector<float> val = table_iter->second;
 				int i=0, num_probs = val.size();
 				while (i<num_probs-1)
 					{
-						cout << val[i] << " ";
+						TRACE_ERR(val[i] << " ");
 						i++;
 					}
-				cout << val[i] << endl;
+				TRACE_ERR(val[i] << endl);
 				table_iter++;
 		}
 }
