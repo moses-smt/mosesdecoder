@@ -39,17 +39,17 @@ my $qsuberr="$workingdir/err.job$$";
 my $mosesparameters="";
 my $cfgfile=""; #configuration file
 
-my $version="";
-my $help="";
-my $dbg="";
+my $version=undef;
+my $help=0;
+my $dbg=0;
 my $jobs=4;
 my $mosescmd="$ENV{MOSESBIN}/moses"; #decoder in use
-my $orifile="";
-my $testfile="";
-my $nbestfile="";
-my $orinbestfile="";
-my $nbest="";
-my $nbestflag="";
+my $orifile=undef;
+my $testfile=undef;
+my $nbestfile=undef;
+my $orinbestfile=undef;
+my $nbest=undef;
+my $nbestflag=0;
 my $qsubname="MOSES";
 my $inputtype=0;
 
@@ -71,8 +71,8 @@ sub init(){
              'config=s'=>\$cfgfile
 	    ) or exit(1);
 
-  chomp($nbestfile=`basename $orinbestfile`);
-  chomp($testfile=`basename $orifile`);
+  chomp($nbestfile=`basename $orinbestfile`) if defined $orinbestfile;
+  chomp($testfile=`basename $orifile`) if defined $orifile;
   
   $mosesparameters="@ARGV -config $cfgfile -inputtype $inputtype";
   getNbestParameters();
@@ -103,7 +103,7 @@ sub usage(){
   print STDERR "Parallel options:\n";
   print STDERR "*  -decoder <file> Moses decoder to use\n";
   print STDERR "   -i|inputfile|input-file <string> input file\n";
-  print STDERR "   -inputfile <file>   the input text to translate\n";
+  print STDERR "*  -inputfile <file>   the input text to translate\n";
   print STDERR "*  -jobs <N> number of required jobs\n";
   print STDERR "   -qsub-prefix <string> name for sumbitte jobs\n";
   print STDERR "   -queue-parameters <string> specific requirements for queue\n";
