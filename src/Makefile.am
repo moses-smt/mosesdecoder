@@ -27,6 +27,7 @@ libmoses_a_SOURCES = \
 	md5.cpp \
 	mempool.cpp \
 	Parameter.cpp \
+	PartialTranslOptColl.cpp \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
 	PhraseDictionaryBase.cpp \
