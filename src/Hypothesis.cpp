@@ -50,9 +50,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
 	, m_languageModelStates(StaticData::Instance()->GetLMSize(), LanguageModelSingleFactor::UnknownState)
-#ifdef N_BEST
 	, m_arcList(NULL)
-#endif
 	, m_id(s_HypothesesCreated++)
 {	// used for initial seeding of trans process	
 	// initialize scores
@@ -77,9 +75,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	,	m_futureScore(0.0f)
 	, m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
 	, m_languageModelStates(prevHypo.m_languageModelStates)
-#ifdef N_BEST
 	, m_arcList(NULL)
-#endif
 	, m_id(s_HypothesesCreated++)
 {
 	// assert that we are not extending our hypothesis by retranslating something
@@ -94,7 +90,6 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 Hypothesis::~Hypothesis()
 {
-#ifdef N_BEST
 	if (m_arcList) 
 	{
 		ArcList::iterator iter;
@@ -105,11 +100,10 @@ Hypothesis::~Hypothesis()
 		m_arcList->clear();
 
 		delete m_arcList;
+		m_arcList = 0;
 	}
-#endif
 }
 
-#ifdef N_BEST
 void Hypothesis::AddArc(Hypothesis *loserHypo)
 {
 	if (!m_arcList) {
@@ -134,7 +128,6 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 	}
 	m_arcList->push_back(loserHypo);
 }
-#endif
 
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option

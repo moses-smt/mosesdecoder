@@ -93,7 +93,8 @@ protected:
 	float m_worstScore; /**< score of the worse hypthesis in collection */
 	float m_beamThreshold; /**< minimum score due to threashold pruning */
 	size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
-  _HCType m_hypos; /**< contains hypotheses */
+	_HCType m_hypos; /**< contains hypotheses */
+	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
 
 	void Add(Hypothesis *hypothesis);
@@ -126,11 +127,7 @@ public:
 	const_iterator end() const { return m_hypos.end(); }
 	size_t size() const { return m_hypos.size(); }
 
-	inline HypothesisCollection()
-	{
-		m_bestScore = -std::numeric_limits<float>::infinity();
-		m_worstScore = -std::numeric_limits<float>::infinity();
-	}
+	HypothesisCollection();
 
 	// this function will recombine hypotheses silently!  There is no record
 	// (could affect n-best list generation...TODO)

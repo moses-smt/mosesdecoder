@@ -291,7 +291,6 @@ void Manager::OutputHypoStack(int stack)
  */
 void Manager::CalcNBest(size_t count, LatticePathList &ret) const
 {
-#ifdef N_BEST
 	if (count <= 0)
 		return;
 
@@ -325,5 +324,4 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret) const
 			++iterBestHypo;
 		}
 	}
-#endif
 }
