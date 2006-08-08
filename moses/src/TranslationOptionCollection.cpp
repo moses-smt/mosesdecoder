@@ -351,7 +351,7 @@ void TranslationOptionCollection::ProcessTranslation(
 }
 
 
-/***
+/**
  * Add to m_possibleTranslations all possible translations the phrase table gives us for
  * the given phrase
  * 
@@ -367,6 +367,31 @@ void TranslationOptionCollection::CreateTranslationOptions(
 																													 , bool dropUnknown
 																													 , size_t verboseLevel)
 {
+	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
+		{
+		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
+		{
+			CreateTranslationOptionsForRange( decodeStepList, allLM, factorCollection, weightWordPenalty, dropUnknown, startPos, endPos, verboseLevel );
+		}
+	}
+
+	// Prune
+	Prune();
+
+	// future score matrix
+	CalcFutureScore(verboseLevel);
+}
+
+void TranslationOptionCollection::CreateTranslationOptionsForRange(
+																													 const list < DecodeStep > &decodeStepList
+																													 , const LMList &allLM
+																													 , FactorCollection &factorCollection
+																													 , float weightWordPenalty
+																													 , bool dropUnknown
+																													 , size_t startPos
+																													 , size_t endPos
+																													 , size_t verboseLevel)
+{
 	m_allLM = &allLM;
 	// partial trans opt stored in here
 	vector < PartialTranslOptColl* > outputPartialTranslOptCollVec( decodeStepList.size() );
@@ -378,10 +403,11 @@ void TranslationOptionCollection::CreateTranslationOptions(
 
 	ProcessInitialTranslation(decodeStep, factorCollection
 														, weightWordPenalty, dropUnknown
-														, verboseLevel, *outputPartialTranslOptCollVec[0]);
+														, verboseLevel, *outputPartialTranslOptCollVec[0]
+														, startPos, endPos );
 
 	// do rest of decode steps
-	
+	size_t totalEarlyPruned = 0;
 	int indexStep = 0;
 	for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
 		{
@@ -397,10 +423,11 @@ void TranslationOptionCollection::CreateTranslationOptions(
 				case Translate:
 					{
 						// go thru each intermediate trans opt just created
-						PartialTranslOptColl::const_iterator iterPartialTranslOpt;
-						for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
+						vector<TranslationOption*> partTransOptList = inputPartialTranslOptColl.GetList();
+						vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
+						for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
 							{
-								const TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
+								TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 								ProcessTranslation(inputPartialTranslOpt
 																	 , decodeStep
 																	 , outputPartialTranslOptColl
@@ -413,10 +440,11 @@ void TranslationOptionCollection::CreateTranslationOptions(
 				case Generate:
 					{
 						// go thru each hypothesis just created
-						PartialTranslOptColl::const_iterator iterPartialTranslOpt;
-						for (iterPartialTranslOpt = inputPartialTranslOptColl.begin() ; iterPartialTranslOpt != inputPartialTranslOptColl.end() ; ++iterPartialTranslOpt)
+						vector<TranslationOption*> partTransOptList = inputPartialTranslOptColl.GetList();
+						vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
+						for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
 							{
-								const TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
+								TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 								ProcessGeneration(inputPartialTranslOpt
 																	, decodeStep
 																	, outputPartialTranslOptColl
@@ -433,28 +461,26 @@ void TranslationOptionCollection::CreateTranslationOptions(
 					}
 				}
 			// last but 1 partial trans not required anymore
+			totalEarlyPruned += outputPartialTranslOptCollVec[indexStep]->GetPrunedCount();
 			delete outputPartialTranslOptCollVec[indexStep];
 			indexStep++;
 		} // for (++iterStep 
 
-	// add to real trans opt list
+	// add to fully formed translation option list
 	PartialTranslOptColl &lastPartialTranslOptColl	= *outputPartialTranslOptCollVec[decodeStepList.size() - 1];
-	PartialTranslOptColl::iterator iterColl;
-	for (iterColl = lastPartialTranslOptColl.begin() ; iterColl != lastPartialTranslOptColl.end() ; iterColl++)
+	vector<TranslationOption*> partTransOptList = lastPartialTranslOptColl.GetList();
+	vector<TranslationOption*>::iterator iterColl;
+	for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl)
 		{
 			TranslationOption *transOpt = *iterColl;
-			transOpt->CalcScore(allLM, weightWordPenalty);
+			transOpt->CalcScore();
 			Add(transOpt);
 		}
 
 	lastPartialTranslOptColl.DetachAll();
+	totalEarlyPruned += outputPartialTranslOptCollVec[decodeStepList.size() - 1]->GetPrunedCount();
 	delete outputPartialTranslOptCollVec[decodeStepList.size() - 1];
-
-	// Prune
-	Prune();
-
-	// future score
-	CalcFutureScore(verboseLevel);
+	// cerr << "Early translation options pruned: " << totalEarlyPruned << endl;
 }
 
 
@@ -508,7 +534,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
 		}
 
-		transOpt->CalcScore(*m_allLM, weightWordPenalty);
+		transOpt->CalcScore();
 		Add(transOpt);
 
 		m_unknownWordPos.SetValue(sourcePos, true); 
@@ -522,7 +548,9 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 															, float weightWordPenalty
 															, int dropUnknown
 															, size_t verboseLevel
-															, PartialTranslOptColl &outputPartialTranslOptColl)
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, size_t startPos
+															, size_t endPos)
 {
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
@@ -533,46 +561,41 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	// phrase in the PhraseDictionary?
 	
 	const PhraseDictionaryBase &phraseDictionary = decodeStep.GetPhraseDictionary();
-	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
+
+	if (m_unknownWordPos.GetValue(startPos))
+	{ // unknown word but already processed. skip 
+		return;
+	}
+
+	const WordsRange wordsRange(startPos, endPos);
+	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(m_source,wordsRange); 
+	if (phraseColl != NULL)
 	{
-		if (m_unknownWordPos.GetValue(startPos))
-		{ // unknown word but already processed. skip 
-			continue;
-		}
-
-		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
+		if (verboseLevel >= 3) 
 		{
-			const WordsRange wordsRange(startPos, endPos);
-			const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(m_source,wordsRange); 
-			if (phraseColl != NULL)
+			cout << "[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n";
+		}
+			
+		TargetPhraseCollection::const_iterator iterTargetPhrase;
+		for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != phraseColl->end() ; ++iterTargetPhrase)
+		{
+			const TargetPhrase	&targetPhrase = *iterTargetPhrase;
+			outputPartialTranslOptColl.Add ( new TranslationOption(wordsRange, targetPhrase) );
+			
+			if (verboseLevel >= 3) 
 			{
-				if (verboseLevel >= 3) 
-				{
-					cout << "[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n";
-				}
-				
-				TargetPhraseCollection::const_iterator iterTargetPhrase;
-				for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != phraseColl->end() ; ++iterTargetPhrase)
-				{
-					const TargetPhrase	&targetPhrase = *iterTargetPhrase;
-					outputPartialTranslOptColl.push_back ( new TranslationOption(wordsRange, targetPhrase) );
-
-					if (verboseLevel >= 3) 
-					{
-						cout << "\t" << targetPhrase << "\n";
-					}
-				}
-				if (verboseLevel >= 3) 
-				{ 
-					cout << endl; 
-				}
-			}
-			else if (wordsRange.GetWordsCount() == 1)
-			{
-				ProcessUnknownWord(startPos, dropUnknown, factorCollection, weightWordPenalty);
-				continue;
+				cout << "\t" << targetPhrase << "\n";
 			}
 		}
+		if (verboseLevel >= 3) 
+		{ 
+			cout << endl; 
+		}
+	}
+	// handling unknown words
+	else if (wordsRange.GetWordsCount() == 1)
+	{
+		ProcessUnknownWord(startPos, dropUnknown, factorCollection, weightWordPenalty);
 	}
 }
 
