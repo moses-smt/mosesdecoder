@@ -4,7 +4,7 @@
 package Corpus;
 BEGIN
 {
-	push @INC, ".";
+	push @INC, "../perllib"; #for Error.pm
 }
 use Error;
 
