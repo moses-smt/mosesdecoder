@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "LMList.h"
 #include "Phrase.h"
+#include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
 
 using namespace std;
@@ -34,6 +35,11 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 		const float weightLM = lm.GetWeight();
 
 		float fullScore, nGramScore;
+
+		// do not process, if factors not defined yet (happens in partial translation options)
+		const LanguageModelSingleFactor &lmsf = static_cast<const LanguageModelSingleFactor&> (lm);
+		if (phrase.GetSize()>0 && phrase.GetFactor(0, lmsf.GetFactorType()) == NULL)
+			continue;
 
 		lm.CalcScore(phrase, fullScore, nGramScore);
 
