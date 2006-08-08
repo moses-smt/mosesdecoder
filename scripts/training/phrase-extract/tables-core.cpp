@@ -6,6 +6,7 @@
 
 #define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) {_IS.getline(_LINE, _SIZE, _DELIM); if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear();}
 
+// as in beamdecoder/tables.cpp
 vector<string> tokenize( char input[] ) {
   vector< string > token;
   bool betweenWords = true;

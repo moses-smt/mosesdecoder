@@ -10,6 +10,7 @@ using namespace std;
 #include <string>
 #include <queue>
 #include <map>
+#include <cmath>
 
 vector<string> tokenize( char[] );
 
