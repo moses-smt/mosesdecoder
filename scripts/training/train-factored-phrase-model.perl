@@ -8,19 +8,10 @@ use Getopt::Long "GetOptions";
 # with contributions from other JHU WS participants
 # Train a phrase model from a parallel corpus
 
-# these variables may have to be adapted to local paths
-my $BINDIR = "/export/ws06osmt/bin";
-my $GIZA = "$BINDIR/GIZA++";
-my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
-my $PHRASE_EXTRACT = "$BINDIR/phrase-extract";
-my $PHRASE_SCORE = "$BINDIR/phrase-score.2005-05-19";
-my $MKCLS = "$BINDIR/mkcls";
-my $ZCAT = "zcat";
-my $BZCAT = "bzcat";
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
 
-my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL);
+my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR);
 
 
 $_HELP = 1
@@ -53,7 +44,9 @@ $_HELP = 1
 		       'translation-factors=s' => \$_TRANSLATION_FACTORS,
 		       'reordering-factors=s' => \$_REORDERING_FACTORS,
 		       'generation-factors=s' => \$_GENERATION_FACTORS,
-		       'decoding-steps=s' => \$_DECODING_STEPS);
+		       'decoding-steps=s' => \$_DECODING_STEPS,
+		       'scripts-root-dir=s' => \$SCRIPTS_ROOTDIR,
+                      );
 
 if ($_HELP) {
     print "Train Phrase Model
@@ -72,6 +65,24 @@ Steps: (--first-step to --last-step)
 For more, please check manual or contact koehn\@inf.ed.ac.uk\n";
   exit(1);
 }
+
+if (!defined $SCRIPTS_ROOTDIR) {
+  $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
+  die "Please set SCRIPTS_ROOTDIR or specify --rootdir" if !defined $SCRIPTS_ROOTDIR;
+}
+print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
+
+
+# these variables may have to be adapted to local paths
+my $BINDIR = "/export/ws06osmt/bin";
+my $GIZA = "$BINDIR/GIZA++";
+my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
+my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
+my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/training/phrase-extract/score";
+my $MKCLS = "$BINDIR/mkcls";
+my $ZCAT = "zcat";
+my $BZCAT = "bzcat";
+
 
 # set varibles to defaults or from options
 my $___ROOT_DIR = ".";

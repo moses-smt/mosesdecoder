@@ -5,10 +5,6 @@
 TS?=$(shell date '+%Y%m%d-%H%M')
 DS?=$(shell date '+%Y%m%d')
 
-### "MAIN" scripts are scripts that have a Philipp-like name, too
-## That is for each script (listed below in MAIN_SCRIPTS),
-## we create a date-stamped version in MAIN_SCRIPTS_TARGET_DIR
-
 # to simplify redirect to custom releases
 DEFAULTTARGETDIR?=/export/ws06osmt/bin
 
@@ -20,13 +16,23 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 
 
 
+## Rules to compile parts that need compilation
+
+
 all: compile
 
 compile:
 	cd training/cmert-0.5/ && make
-	## Compiled mert, nothing else needs compilation
+	## Compiled mert
+	cd training/phrase-extract/ && make
+	## Compiled phrase_extract
+	## All files that need compilation were compiled
 
 
+
+### "MAIN" scripts are scripts that have a Philipp-like name, too
+## That is for each script (listed below in MAIN_SCRIPTS),
+## we create a date-stamped version in MAIN_SCRIPTS_TARGET_DIR
 
 MAIN_TRAINING_SCRIPTS_NAMES=filter-model-given-input.pl  mert-moses.pl train-factored-phrase-model.perl clean-corpus-n.perl
 # Make trick to add directory name to all of them:
@@ -41,6 +47,8 @@ MAIN_SCRIPTS= $(MAIN_TRAINING_SCRIPTS) $(MAIN_GENERIC_SCRIPTS)
 
 
 release:
+	# Compile the parts
+	make all
 	if [ -z "$(TARGETDIR)" ]; then \
 	  echo "Please specify a TARGETDIR." ; \
 	  echo "  For custom releases issue: "; \
