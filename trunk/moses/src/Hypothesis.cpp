@@ -250,7 +250,6 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM,++lmIdx)
 	{
 		const LanguageModelSingleFactor &languageModel = **iterLM;
-		FactorType factorType = languageModel.GetFactorType();
 		size_t nGramOrder			= languageModel.GetNGramOrder();
 		size_t currEndPos			= m_currTargetWordsRange.GetEndPos();
 		float lmScore;
