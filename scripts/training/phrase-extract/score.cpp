@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 
   if (argc != 4 && argc != 5) {
     cerr << "syntax: phrase-score extract lex phrase-table [inverse]\n";
-    exit(0);
+    exit(1);
   }
   char* &fileNameExtract = argv[1];
   char* &fileNameLex = argv[2];
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
   extractFile.open(fileNameExtract);
   if (extractFile.fail()) {
     cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
-    exit(0);
+    exit(1);
   }
   istream *extractFileP = &extractFile;
 
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
   if (phraseTableFile.fail()) {
     cerr << "ERROR: could not open file phrase table file " 
 	 << fileNamePhraseTable << endl;
-    exit(0);
+    exit(1);
   }
   
   // loop through all extracted phrase translations
@@ -294,7 +294,7 @@ void LexicalTable::load( char *fileName ) {
   inFile.open(fileName);
   if (inFile.fail()) {
     cerr << " - ERROR: could not open file\n";
-    exit(0);
+    exit(1);
   }
   istream *inFileP = &inFile;
 

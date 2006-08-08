@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
   if (argc != 6 && argc != 7) {
     cerr << "syntax: phrase-extract en de align extract max-length [orientation]\n";
-    exit(0);
+    exit(1);
   }
   char* &fileNameE = argv[1];
   char* &fileNameF = argv[2];
