@@ -123,9 +123,7 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bo
 	if (hypo != NULL)
 	{
 		TRACE_ERR("BEST HYPO: " << *hypo << endl);
-		#ifdef NBEST
-			TRACE_ERR(hypo->GetScoreBreakdown() << std::endl);
-		#endif
+		TRACE_ERR(hypo->GetScoreBreakdown() << std::endl);
 		Backtrack(hypo);
 
 		OutputSurface(cout, hypo, m_outputFactorOrder, reportSourceSpan, reportAllFactors);
@@ -140,7 +138,6 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bo
 
 void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationId)
 {
-#ifdef N_BEST
 	LatticePathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
 	{
@@ -209,6 +206,5 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 	}
 
 	m_nBestFile<<std::flush;
-#endif
 }
 
