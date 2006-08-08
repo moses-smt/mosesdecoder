@@ -443,7 +443,7 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 	out << "[" << hypothesis.m_sourceCompleted << "] ";
 	
 	// scores
-	out << " [0.12, " << hypothesis.GetTotalScore() << "]";
+	out << " [total=" << hypothesis.GetTotalScore() << "]";
 	out << " " << hypothesis.GetScoreBreakdown();
 	return out;
 }
