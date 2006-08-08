@@ -1052,6 +1052,7 @@ sub sentencePWER
 			{
 				$truthWordUsed[$k] = 1;
 				$found = 1;
+				last;
 			}
 		}
 		if($found == 0)
@@ -1092,45 +1093,32 @@ sub sentenceBLEU
       $gram = $refSysOutput->[$i]->[$factorIndex];
       if (defined($REF_GRAM{$gram}) && $REF_GRAM{$gram} > 0) {
 			$REF_GRAM{$gram}--;
-			if($debug != 0) {warn "'$gram' ";}
-			$correct1 += 1;
+			$correct1++;
       }
       next if $i<1;
       $gram = $refSysOutput->[$i - 1]->[$factorIndex] ." ".$gram;
       if (defined($REF_GRAM{$gram}) && $REF_GRAM{$gram} > 0) {
 			$REF_GRAM{$gram}--;
-			if($debug != 0) {warn "'$gram' ";}
-			$correct2 += 1;
+			$correct2++;
       }
       next if $i<2;
       $gram = $refSysOutput->[$i - 2]->[$factorIndex] ." ".$gram;
       if (defined($REF_GRAM{$gram}) && $REF_GRAM{$gram} > 0) {
 			$REF_GRAM{$gram}--;
-			if($debug != 0) {warn "'$gram' ";}
-			$correct3 += 1;
+			$correct3++;
       }
       next if $i<3;
       $gram = $refSysOutput->[$i - 3]->[$factorIndex] ." ".$gram;
       if (defined($REF_GRAM{$gram}) && $REF_GRAM{$gram} > 0) {
 			$REF_GRAM{$gram}--;
-			if($debug != 0) {warn "'$gram' ";}
-			$correct4 += 1;
+			$correct4++;
       }
 	}
-	if($debug != 0) {warn "\n";}
 	my $total = $length_translation;
 	$total1 = max(1, $total);
 	$total2 = max(1, $total - 1);
 	$total3 = max(1, $total - 2);
 	$total4 = max(1, $total - 3);
-	if($debug != 0)
-	{
-	warn "BLEU($factorIndex)\n";
-	warn "truth: " . join(' ', map {join('|', @$_)} @{$refTruth}) . "\n";
-	warn "sysop: " . join(' ', map {join('|', @$_)} @{$refSysOutput}) . "\n";
-	warn "stats: $correct1 / $total1, $correct2 / $total2, $correct3 / $total3, $correct4 / $total4\n";
-	sleep 8;
-	}
 	
 	return ($correct1, $total1, $correct2, $total2, $correct3, $total3, $correct4, $total4, $length_translation, $length_reference);
 }
