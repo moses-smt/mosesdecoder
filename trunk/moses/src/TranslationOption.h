@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "TypeDef.h"
 #include "ScoreComponentCollection.h"
+#include "StaticData.h"
 
 class PhraseDictionaryBase;
 class GenerationDictionary;
@@ -60,6 +61,7 @@ protected:
 	const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
 	float								m_totalScore; /*< weighted translation costs of this translation option */
 	float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
+	float               m_partialScore; /*< estimate of the partial cost of a preliminary translation option */
 
 	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
 	//! for example, know the full n-gram score since the length of the
@@ -141,13 +143,14 @@ public:
   {
     return m_targetPhrase.GetSize() == 0;
   }
-	void CalcScore(const LMList &allLM, float weightWordPenalty);
 
 	/** returns detailed component scores */
 	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}
+
+	void CalcScore();
 
 	TO_STRING;
 };
