@@ -221,7 +221,7 @@ public:
 		return m_sourceCompleted;
 	}
 
-	int Hypothesis::NGramCompare(const Hypothesis &compare) const;
+	int NGramCompare(const Hypothesis &compare) const;
 
 	inline size_t hash() const
 	{
