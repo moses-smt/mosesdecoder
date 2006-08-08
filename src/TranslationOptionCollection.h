@@ -60,7 +60,8 @@ protected:
 															, float weightWordPenalty
 															, int dropUnknown
 															, size_t verboseLevel
-															, PartialTranslOptColl &outputPartialTranslOptColl);
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, size_t startPos, size_t endPos );
 
 	virtual void ProcessUnknownWord(size_t sourcePos
 																	, int dropUnknown
@@ -110,6 +111,15 @@ public:
 																			, FactorCollection &factorCollection
 																			, float weightWordPenalty
 																			, bool dropUnknown
+																			, size_t verboseLevel);
+
+	virtual void CreateTranslationOptionsForRange(const std::list < DecodeStep > &decodeStepList
+																			, const LMList &allLM
+																			, FactorCollection &factorCollection
+																			, float weightWordPenalty
+																			, bool dropUnknown
+																			, size_t startPosition
+																			, size_t endPosition				
 																			, size_t verboseLevel);
 
 	inline virtual const SquareMatrix &GetFutureScore() const
