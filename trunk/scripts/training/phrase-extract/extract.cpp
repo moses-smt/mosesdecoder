@@ -237,28 +237,6 @@ bool isAligned ( SentenceAlignment &sentence, int fi, int ei ) {
   return false;
 }
 
-// as in beamdecoder/tables.cpp
-vector<string> tokenize( char input[] ) {
-  vector< string > token;
-  bool betweenWords = true;
-  int start;
-  int i=0;
-  for(; input[i] != '\0'; i++) {
-    bool isSpace = (input[i] == ' ' || input[i] == '\t');
-
-    if (!isSpace && betweenWords) {
-      start = i;
-      betweenWords = false;
-    }
-    else if (isSpace && !betweenWords) {
-      token.push_back( string( input+start, i-start ) );
-      betweenWords = true;
-    }
-  }
-  if (!betweenWords)
-    token.push_back( string( input+start, i-start ) );
-  return token;
-}
 
 int SentenceAlignment::create( char englishString[], char foreignString[], char alignmentString[], int sentenceID ) {
   english = tokenize( englishString );
