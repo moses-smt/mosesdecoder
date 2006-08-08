@@ -59,63 +59,6 @@
 <macros/>
 </toolChain>
 </configuration>
-<configuration artifactExtension="a" artifactName="moses" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.debug.837708408" name="DebugNBest" parent="cdt.managedbuild.config.gnu.lib.debug">
-<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.1361461230" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.489823169" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.57605597" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
-<option id="gnu.cpp.compiler.option.preprocessor.def.547610699" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-<listOptionValue builtIn="false" value="LM_SRI"/>
-<listOptionValue builtIn="false" value="LM_IRST"/>
-<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
-<listOptionValue builtIn="false" value="N_BEST"/>
-<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
-<listOptionValue builtIn="false" value="_LARGE_FILES"/>
-</option>
-<option id="gnu.cpp.compiler.option.include.paths.2084651176" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
-</option>
-<option id="gnu.cpp.compiler.option.debugging.gprof.1182039672" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
-</tool>
-<tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.1451721331" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1914532442" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
-<macros/>
-</toolChain>
-</configuration>
-<configuration artifactExtension="a" artifactName="moses" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.release.1054653020" name="ReleaseNBest" parent="cdt.managedbuild.config.gnu.lib.release">
-<toolChain id="cdt.managedbuild.toolchain.gnu.lib.release.1271789636" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.release">
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.release.1895488585" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.release"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.322987396" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release">
-<option id="gnu.cpp.compiler.option.include.paths.1663320352" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
-</option>
-<option id="gnu.cpp.compiler.option.preprocessor.def.1390867069" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-<listOptionValue builtIn="false" value="LM_SRI"/>
-<listOptionValue builtIn="false" value="LM_IRST"/>
-<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
-<listOptionValue builtIn="false" value="N_BEST"/>
-<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
-<listOptionValue builtIn="false" value="_LARGE_FILES"/>
-</option>
-</tool>
-<tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.22025776" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>
-<tool id="cdt.managedbuild.tool.gnu.assembler.lib.release.676430715" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.release"/>
-<macros/>
-</toolChain>
-</configuration>
 <macros/>
 </project>
 </ManagedProjectBuildInfo>
