@@ -130,16 +130,9 @@ float LanguageModel_IRST::GetValue(const vector<const FactorArray*> &contextFact
   ngram ng(m_lmtb->dict);
 	for (size_t i = 0 ; i < count ; i++)
 	{
-#undef CDYER_DEBUG_LMSCORE
-#ifdef CDYER_DEBUG_LMSCORE
-		std::cout << i <<"="<<contextFactor[i]->GetLmId().irst <<"," << contextFactor[i]->GetString()<<" ";
-#endif
     int lmId = GetLmID((*contextFactor[i])[factorType]);
 		ng.pushc(lmId);
 	}
-#ifdef CDYER_DEBUG_LMSCORE
-	std::cout <<" (ng='" << ng << "')\n";
-#endif
 	if (finalState) {
 		assert("!LM State needs to be implemented!");
 	}
