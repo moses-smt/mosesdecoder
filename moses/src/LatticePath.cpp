@@ -72,7 +72,6 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypoth
 
 void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc)
 {
-#ifdef N_BEST	
 	ScoreComponentCollection2 adj = arc->GetScoreBreakdown();
 	adj.MinusEquals(copy.m_path[edgeIndex]->GetScoreBreakdown());
 	m_scoreBreakdown = copy.m_scoreBreakdown;
@@ -80,10 +79,8 @@ void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Hyp
 
 	float fadj = arc->GetTotalScore() - copy.m_path[edgeIndex]->GetTotalScore();
 	m_totalScore = copy.GetTotalScore() + fadj;
-#endif
 }
 
-#ifdef N_BEST
 void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 {
 	const size_t sizePath = m_path.size();
@@ -133,7 +130,6 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 		}
 	}
 }
-#endif
 
 TO_STRING_BODY(LatticePath);
 

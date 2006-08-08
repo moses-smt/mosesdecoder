@@ -29,6 +29,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+HypothesisCollection::HypothesisCollection()
+{
+	m_nBestIsEnabled = StaticData::Instance()->IsNBestEnabled();
+	m_bestScore = -std::numeric_limits<float>::infinity();
+	m_worstScore = -std::numeric_limits<float>::infinity();
+}
+
 void HypothesisCollection::RemoveAll()
 {
 	while (m_hypos.begin() != m_hypos.end())
@@ -83,23 +90,23 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	Hypothesis *hypoExisting = *iter;
 	if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
 	{ // incoming hypo is better than the 1 we have
-		#ifdef N_BEST
+		if (m_nBestIsEnabled) {
 			hypo->AddArc(hypoExisting);
 			Detach(iter);
-		#else
+		} else {
 			Remove(iter);
-		#endif
+		}
 		Add(hypo);		
 		return;
 	}
 	else
 	{ // already storing the best hypo. discard current hypo 
-		#ifdef N_BEST
+		if (m_nBestIsEnabled) {
 			(*iter)->AddArc(hypo);
-		#else
+		} else {
 			ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
 			pool.freeObject(hypo);				
-		#endif
+		}
 		return;
 	}
 }
@@ -119,7 +126,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
         // push all scores to a heap
         //   (but never push scores below m_bestScore+m_beamThreshold)
 		iterator iter = m_hypos.begin();
-        float score = 0;
+		float score = 0;
 		while (iter != m_hypos.end())
 		{
 			Hypothesis *hypo = *iter;
@@ -208,14 +215,15 @@ vector<const Hypothesis*> HypothesisCollection::GetSortedList() const
 
 void HypothesisCollection::InitializeArcs()
 {
-#ifdef N_BEST
+	// only necessary if n-best calculations are enabled
+	if (!m_nBestIsEnabled) return;
+
 	iterator iter;
 	for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter)
 	{
 		Hypothesis *mainHypo = *iter;
 		mainHypo->InitializeArcs();
 	}
-#endif
 }
 
 TO_STRING_BODY(HypothesisCollection);

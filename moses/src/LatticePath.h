@@ -67,15 +67,12 @@ public:
 		return m_prevEdgeChanged == NOT_FOUND;
 	}
 
-#ifdef N_BEST
 	void CreateDeviantPaths(LatticePathCollection &pathColl) const;
 
 	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}
-
-#endif
 
 	TO_STRING;
 
@@ -92,9 +89,7 @@ inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
 	}
 	// scores
 	out << " total=" << path.GetTotalScore();
-#ifdef N_BEST
 	out << " " << path.GetScoreBreakdown();
-#endif
 
 	return out;
 }

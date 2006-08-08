@@ -37,10 +37,7 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 
 		lm.CalcScore(phrase, fullScore, nGramScore);
 
-		#ifdef N_BEST
-			breakdown->Assign(&lm, nGramScore);  // I'm not sure why += doesn't work here- it should be 0.0 right?
-		#endif
-
+		breakdown->Assign(&lm, nGramScore);  // I'm not sure why += doesn't work here- it should be 0.0 right?
 		retFullScore   += fullScore * weightLM;
 		retNGramScore	+= nGramScore * weightLM;
 	}	
