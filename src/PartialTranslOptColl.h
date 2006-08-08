@@ -22,23 +22,57 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <list>
+#include <iostream>
 #include "TranslationOption.h"
 #include "Util.h"
+#include "StaticData.h"
 
-class PartialTranslOptColl : public std::list< TranslationOption* >
+/** Contains partial translation options, while these are constructed in the class TranslationOption.
+ *  The factored translation model allows for multiple translation and 
+ *  generation steps during a single Hypothesis expansion. For efficiency, 
+ *  all these expansions are precomputed and stored as TranslationOption.
+ *  The expansion process itself may be still explode, so efficient handling
+ *  of partial translation options during expansion is required. 
+ *  This class assists in this tasks by implementing pruning. 
+ *  This implementation is similar to the one in HypothesisCollection. */
+
+class PartialTranslOptColl
 {
+ protected:
+	std::vector<TranslationOption*> m_list;
+	float m_bestScore; /**< score of the best translation option */
+	float m_worstScore; /**< score of the worse translation option */
+	size_t m_maxSize; /**< maximum number of translation options allowed */
+	size_t m_totalPruned; /**< number of options pruned */
+
 public:
+  PartialTranslOptColl();
+
+	/** destructor, cleans out list */
 	~PartialTranslOptColl()
 	{
-		RemoveAllInColl<PartialTranslOptColl::iterator>(*this);
+		RemoveAllInColl<std::vector<TranslationOption*>::iterator>( m_list );
 	}
 	
-	void Add(TranslationOption *partialTranslOpt)
-	{
-		push_back(partialTranslOpt);
+	void AddNoPrune(TranslationOption *partialTranslOpt);
+	void Add(TranslationOption *partialTranslOpt);
+	void Prune();
+
+	/** returns list of translation options */
+	std::vector<TranslationOption*> GetList() {
+		return m_list;
 	}
+
+	/** clear out the list */
 	void DetachAll()
 	{
-		clear();
-	}	
+		m_list.clear();
+		//		std::cerr << "clearing out list of " << m_list.size() << " partial translation options\n";
+	}
+
+	/** return number of pruned partial hypotheses */
+	size_t GetPrunedCount() {
+		return m_totalPruned;
+	}
+	
 };
