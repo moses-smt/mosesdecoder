@@ -80,6 +80,6 @@ sub ensure_relative_to_origin {
   $originfile =~ s/[^\/]*$//; # where does the origin reside
   my $out = $originfile."/".$target;
   $out =~ s/\/+/\//g;
-  $out =~ s/\/(.\/)+/\//g;
+  $out =~ s/\/(\.\/)+/\//g;
   return $out;
 }
