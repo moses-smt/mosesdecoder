@@ -7,12 +7,13 @@
 
 class ScoreIndexManager;
 
-// to keep track of the various things that can produce a score,
-// we use this evil implementation-inheritance to give them each
-// a unique, sequential (read: good for vector indices) ID
-//
-// NOTE- do not confuse this with a producer/consumer pattern.
-// this is not a producer in that sense.
+/** to keep track of the various things that can produce a score,
+ * we use this evil implementation-inheritance to give them each
+ * a unique, sequential (read: good for vector indices) ID
+ *
+ * @note do not confuse this with a producer/consumer pattern.
+ * this is not a producer in that sense.
+ */
 class ScoreProducer
 {
 private:
@@ -30,7 +31,7 @@ public:
 	unsigned int GetScoreBookkeepingID() const { return m_scoreBookkeepingId; }
 
 	//! returns the number of scores that a subclass produces.
-	// For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
+	//! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
 	virtual unsigned int GetNumScoreComponents() const = 0;
 
 	//! returns a string description of this producer
