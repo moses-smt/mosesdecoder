@@ -13,6 +13,7 @@ $ENV{"LC_ALL"} = "C";
 
 my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR);
 
+my $debug = 0; # debug this script, do not delete any files in debug mode
 
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
@@ -35,6 +36,7 @@ $_HELP = 1
 		       'parallel' => \$_PARALLEL,
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
+		       'debug' => \$debug,
 		       'parts=i' => \$_PARTS,
 		       'direction=i' => \$_DIRECTION,
 		       'only-print-giza' => \$_ONLY_PRINT_GIZA,
@@ -691,9 +693,9 @@ sub get_alignment {
     my $ALIGNMENT;
     
     # read alignments
-    my ($ok, $F2E,$ENGLISH, $FOREIGN,$debug)  = &load_alignment_giza($AFILE,0);
+    my ($ok, $F2E,$ENGLISH, $FOREIGN,undef)  = &load_alignment_giza($AFILE,0);
     return -1 unless $ok; # signal end of file
-    my ($ok2,$E2F,$FOREIGN2,$ENGLISH2,$debug2) = &load_alignment_giza($AFILE_INV,1);
+    my ($ok2,$E2F,$FOREIGN2,$ENGLISH2,undef) = &load_alignment_giza($AFILE_INV,1);
     die "Inverted alignment file was shorter than the forward one!" unless $ok2;
     
     # sanity checks
@@ -1033,11 +1035,11 @@ sub extract_phrase {
     safesystem("cat $___EXTRACT_FILE.$factor.o.part* > $___EXTRACT_FILE.$factor.o") or die;
     safesystem("rm -f $___EXTRACT_FILE.$factor.o.gz") or die;
     safesystem("gzip $___EXTRACT_FILE.$factor.o") or die;
-    safesystem("rm -f $___EXTRACT_FILE.$factor.o.part*") or die;
+    if (! $debug) { safesystem("rm -f $___EXTRACT_FILE.$factor.o.part*") or die;}
     safesystem("cat $___EXTRACT_FILE.$factor.part* > $___EXTRACT_FILE.$factor") or die;
-    safesystem("rm -f $___EXTRACT_FILE.$factor.part*") or die;
+    if (! $debug) { safesystem("rm -f $___EXTRACT_FILE.$factor.part*") or die;}
     safesystem("cat $___EXTRACT_FILE.$factor.inv.part* > $___EXTRACT_FILE.$factor.inv") or die;
-    safesystem("rm -f $___EXTRACT_FILE.$factor.inv.part*") or die;
+    if (! $debug) { safesystem("rm -f $___EXTRACT_FILE.$factor.inv.part*") or die;}
 }
 
 ### (6) PHRASE SCORING
@@ -1082,7 +1084,7 @@ sub score_phrase {
 	    print "$PHRASE_SCORE $extract.part$part $___LEXICAL_DIR/lex.$factor.$direction $___MODEL_DIR/phrase-table-half.$factor.$direction.part$part $inverse\n";
 	    safesystem("$PHRASE_SCORE $extract.part$part $___LEXICAL_DIR/lex.$factor.$direction $___MODEL_DIR/phrase-table-half.$factor.$direction.part$part $inverse")
               or die "Scoring of phrases failed";
-	    safesystem("rm $extract.part$part") or die;
+	    if (! $debug) { safesystem("rm $extract.part$part") or die;}
 	}
 	safesystem("cat $___MODEL_DIR/phrase-table-half.$factor.$direction.part* >$___MODEL_DIR/phrase-table-half.$factor.$direction") or die;
     }
@@ -1110,8 +1112,8 @@ sub score_phrase {
     }
     close(N2F);
     close(F2N);
-    safesystem("rm -f $___MODEL_DIR/phrase-table-half.$factor.*") or die;
-    safesystem("rm -f $___MODEL_DIR/extract*sorted*") or die;
+    if (! $debug) { safesystem("rm -f $___MODEL_DIR/phrase-table-half.$factor.*") or die;}
+    if (! $debug) { safesystem("rm -f $___MODEL_DIR/extract*sorted*") or die;}
     safesystem("rm -f $___MODEL_DIR/phrase-table.$factor.gz") or die;
     safesystem("gzip $___MODEL_DIR/phrase-table.$factor") or die;
 }
@@ -1284,7 +1286,7 @@ sub get_reordering {
     if (defined($REORDERING_MODEL{"fe"})) {
 	&store_reordering_fe();
     }
-    safesystem("rm $___EXTRACT_FILE.$factor.o.sorted") or die;
+    if (! $debug) { safesystem("rm $___EXTRACT_FILE.$factor.o.sorted") or die;}
 }
 
 sub store_reordering_f {
