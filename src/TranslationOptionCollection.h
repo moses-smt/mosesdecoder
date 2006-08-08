@@ -93,7 +93,12 @@ protected:
 	{
 		return m_collection[startPos][endPos - startPos];
 	}
-
+	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const
+	{
+	  return m_collection[startPos][endPos - startPos];
+	}
+	void Add(const TranslationOption *translationOption);
+	
 public:
   virtual ~TranslationOptionCollection();
 
@@ -107,18 +112,11 @@ public:
 																			, bool dropUnknown
 																			, size_t verboseLevel);
 
-
-	void Add(const TranslationOption *translationOption);
-
 	inline virtual const SquareMatrix &GetFutureScore() const
 	{
 		return m_futureScore;
 	}
 
-	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const
-	{
-		return m_collection[startPos][endPos - startPos];
-	}
 	const TranslationOptionList &GetTranslationOptionList(const WordsRange &coverage) const
 	{
 		return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
