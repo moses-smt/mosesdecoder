@@ -13,6 +13,9 @@
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1884793796" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
 <macros/>
 </toolChain>
+<resourceConfiguration exclude="true" id="cdt.managedbuild.config.gnu.lib.debug.8750958.1685056682" name="compile-lm.cpp" rcbsApplicability="disable" resourcePath="/irstlm/src/compile-lm.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185./irstlm/src/compile-lm.cpp">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185./irstlm/src/compile-lm.cpp" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185"/>
+</resourceConfiguration>
 </configuration>
 <configuration artifactExtension="a" artifactName="irstlm" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.release.1538178030" name="Release" parent="cdt.managedbuild.config.gnu.lib.release">
 <toolChain id="cdt.managedbuild.toolchain.gnu.lib.release.508823597" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.release">
@@ -22,26 +25,9 @@
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.release.1672118671" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.release"/>
 <macros/>
 </toolChain>
-</configuration>
-<configuration artifactExtension="a" artifactName="irstlm" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.debug.1333974501" name="DebugNBest" parent="cdt.managedbuild.config.gnu.lib.debug">
-<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.365917155" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.100325283" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.955425850" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
-<option id="gnu.cpp.compiler.option.debugging.gprof.2034209861" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
-</tool>
-<tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.370966026" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.720742733" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
-<macros/>
-</toolChain>
-</configuration>
-<configuration artifactExtension="a" artifactName="irstlm" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.release.32089835" name="ReleaseNBest" parent="cdt.managedbuild.config.gnu.lib.release">
-<toolChain id="cdt.managedbuild.toolchain.gnu.lib.release.158080822" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.release">
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.release.1803995257" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.release"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.152646939" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release"/>
-<tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.58978613" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>
-<tool id="cdt.managedbuild.tool.gnu.assembler.lib.release.2018125558" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.release"/>
-<macros/>
-</toolChain>
+<resourceConfiguration exclude="true" id="cdt.managedbuild.config.gnu.lib.release.1538178030.1055903794" name="compile-lm.cpp" rcbsApplicability="disable" resourcePath="/irstlm/src/compile-lm.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1586280207./irstlm/src/compile-lm.cpp">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1586280207./irstlm/src/compile-lm.cpp" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1586280207"/>
+</resourceConfiguration>
 </configuration>
 </project>
 </ManagedProjectBuildInfo>
