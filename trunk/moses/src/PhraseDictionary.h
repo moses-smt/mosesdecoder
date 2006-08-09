@@ -55,7 +55,7 @@ public:
 								, bool filter
 								, const std::list< Phrase > &inputPhraseList
 								, const LMList &languageModels
-								, float weightWP
+						    , float weightWP
 								, const StaticData& staticData);
 	
 	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;

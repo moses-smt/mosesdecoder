@@ -39,55 +39,53 @@ class LMList;
 
 typedef std::vector<const TranslationOption*> TranslationOptionList;
 
+/** Contains all phrase translations applicable to current sentence.
+ * A key insight into efficient decoding is that various input
+ * conditions (lattices, factored input, normal text, xml markup)
+ * all lead to the same decoding algorithm: hypotheses are expanded
+ * by applying phrase translations, which can be precomputed.
+ *
+ * The precomputation of a collection of instances of such TranslationOption 
+ * depends on the input condition, but they all are presented to
+ * decoding algorithm in the same form, using this class. **/
+
 class TranslationOptionCollection
 {
 	friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);
-	TranslationOptionCollection(const TranslationOptionCollection&); // no copy constructor
+	TranslationOptionCollection(const TranslationOptionCollection&); /*< no copy constructor */
 protected:
-	std::vector< std::vector< TranslationOptionList > >					m_collection;
-	InputType const													&m_source;
-	SquareMatrix														m_futureScore;
-	WordsBitmap															m_unknownWordPos;
-	const size_t														m_maxNoTransOptPerCoverage;
-	const LMList *m_allLM;
+	std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
+	InputType const			&m_source;
+	SquareMatrix				m_futureScore; /*< matrix of future costs for parts of the sentence */
+	WordsBitmap					m_unknownWordPos; /*< marks up unknown words in the input */
+	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase) */
 
 	TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage);
 	
-	void CalcFutureScore(size_t verboseLevel);
+	void CalcFutureScore();
 
 	virtual void ProcessInitialTranslation(const DecodeStep &decodeStep
 															, FactorCollection &factorCollection
-															, float weightWordPenalty
-															, int dropUnknown
-															, size_t verboseLevel
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos );
 
 	virtual void ProcessUnknownWord(size_t sourcePos
-																	, int dropUnknown
-																	, FactorCollection &factorCollection
-																	, float weightWordPenalty)=0;
+																	, FactorCollection &factorCollection)=0;
 
 	virtual void ProcessOneUnknownWord(const FactorArray &sourceWord
 																		 , size_t sourcePos
-																		 , int dropUnknown
-																		 , FactorCollection &factorCollection
-																		 , float weightWordPenalty);
+																		 , FactorCollection &factorCollection);
 
 	void ProcessGeneration(			const TranslationOption &inputPartialTranslOpt
 															, const DecodeStep &decodeStep
 															, PartialTranslOptColl &outputPartialTranslOptColl
-															, int dropUnknown
-															, FactorCollection &factorCollection
-															, float weightWordPenalty);
+															, FactorCollection &factorCollection);
 	void ProcessTranslation(		const TranslationOption &inputPartialTranslOpt
 															, const DecodeStep &decodeStep
 															, PartialTranslOptColl &outputPartialTranslOptColl
-															, int dropUnknown
-															, FactorCollection &factorCollection
-															, float weightWordPenalty);
+															, FactorCollection &factorCollection);
 
-	void ComputeFutureScores(size_t verboseLevel);	
+	void ComputeFutureScores();	
 	void Prune();
 
 	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
@@ -107,20 +105,12 @@ public:
 	size_t GetSize() const;
 
 	virtual void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
-																			, const LMList &allLM
-																			, FactorCollection &factorCollection
-																			, float weightWordPenalty
-																			, bool dropUnknown
-																			, size_t verboseLevel);
+																			, FactorCollection &factorCollection);
 
 	virtual void CreateTranslationOptionsForRange(const std::list < DecodeStep > &decodeStepList
-																			, const LMList &allLM
 																			, FactorCollection &factorCollection
-																			, float weightWordPenalty
-																			, bool dropUnknown
 																			, size_t startPosition
-																			, size_t endPosition				
-																			, size_t verboseLevel);
+																			, size_t endPosition);
 
 	inline virtual const SquareMatrix &GetFutureScore() const
 	{
