@@ -23,12 +23,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "LanguageModel.h"
 #include "Word.h"
+#include "FactorTypeSet.h"
+
+class Phrase;
 
 class LanguageModelMultiFactor : public LanguageModel
 {
 protected:
-	FactorType	m_factorType; // tempoary
+	FactorTypeSet	m_factorTypes;
 	
 public:
+	virtual void Load(const std::string &fileName
+					, FactorCollection &factorCollection
+					, const std::vector<FactorType> &factorTypes
+					, float weight
+					, size_t nGramOrder) = 0;
+
 	const std::string GetScoreProducerDescription() const;	
+	bool Useable(const Phrase &phrase) const;	
 };

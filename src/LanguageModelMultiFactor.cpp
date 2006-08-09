@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "LanguageModelMultiFactor.h"
+#include "Phrase.h"
 
 const std::string LanguageModelMultiFactor::GetScoreProducerDescription() const
 {
@@ -28,3 +29,19 @@ const std::string LanguageModelMultiFactor::GetScoreProducerDescription() const
 	oss << GetNGramOrder() << "-gram LM score, factor-type= ??? " << ", file=" << m_filename;
 	return oss.str();
 } 
+
+bool LanguageModelMultiFactor::Useable(const Phrase &phrase) const
+{
+	if (phrase.GetSize()==0)
+		return false;
+	
+	// whether phrase contains all factors in this LM
+	const FactorArray &factorArray = phrase.GetFactorArray(0);
+	for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; ++currFactor)
+	{
+		if (m_factorTypes.Contains(currFactor) && factorArray[currFactor] == NULL)
+			return false;
+	}
+	return  true;
+
+}

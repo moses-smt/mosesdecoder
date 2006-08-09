@@ -90,3 +90,26 @@ public:
 
 };
 
+class FactorArrayWrapper
+{
+protected:
+	const FactorArray *m_factorArray;
+public:
+	FactorArrayWrapper() {}
+	FactorArrayWrapper(const FactorArray &factorArray)
+		:m_factorArray(&factorArray) {}
+	const Factor *operator[](size_t index) const
+	{
+		return (*m_factorArray)[index];
+	}
+
+	FactorArrayWrapper& operator=(const FactorArrayWrapper &other)
+	{
+		if(this != &other)
+		{
+			m_factorArray = other.m_factorArray;
+		}
+		return *this;
+	}
+};
+

@@ -258,14 +258,14 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 			lmScore = 0; //the score associated with dropping source words is not part of the language model
 		} else { //non-empty target phrase
 			// 1st n-gram
-			vector<const FactorArray*> contextFactor(nGramOrder);
+			vector<FactorArrayWrapper> contextFactor(nGramOrder);
 			size_t index = 0;
 			for (int currPos = (int) startPos - (int) nGramOrder + 1 ; currPos <= (int) startPos ; currPos++)
 			{
 				if (currPos >= 0)
-					contextFactor[index++] = &GetFactorArray(currPos);
+					contextFactor[index++] = GetFactorArray(currPos);
 				else			
-					contextFactor[index++] = &languageModel.GetSentenceStartArray();
+					contextFactor[index++] = languageModel.GetSentenceStartArray();
 			}
 			lmScore	= languageModel.GetValue(contextFactor);
 			//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;
@@ -280,7 +280,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 					contextFactor[i] = contextFactor[i + 1];
 	
 				// add last factor
-				contextFactor.back() = &GetFactorArray(currPos);
+				contextFactor.back() = GetFactorArray(currPos);
 
 				lmScore	+= languageModel.GetValue(contextFactor);
 				//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;		
@@ -290,22 +290,22 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 			if (m_sourceCompleted.IsComplete())
 			{
 				const size_t size = GetSize();
-				contextFactor.back() = &languageModel.GetSentenceEndArray();
+				contextFactor.back() = languageModel.GetSentenceEndArray();
 	
 				for (size_t i = 0 ; i < nGramOrder - 1 ; i ++)
 				{
 					int currPos = size - nGramOrder + i + 1;
 					if (currPos < 0)
-						contextFactor[i] = &languageModel.GetSentenceStartArray();
+						contextFactor[i] = languageModel.GetSentenceStartArray();
 					else
-						contextFactor[i] = &GetFactorArray((size_t)currPos);
+						contextFactor[i] = GetFactorArray((size_t)currPos);
 				}
 				lmScore	+= languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx]);
 			} else {
 				for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
 					for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
 						contextFactor[i] = contextFactor[i + 1];
-					contextFactor.back() = &GetFactorArray(currPos);
+					contextFactor.back() = GetFactorArray(currPos);
 				}
 				m_languageModelStates[lmIdx]=languageModel.GetState(contextFactor);
 			}
