@@ -264,28 +264,27 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			string &languageModelFile = token[3];
 
 			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
+			
+			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmType);
+      if (lm == NULL) // no LM created. we prob don't have it compiled
+      	return false;
+
 			if (lmType == Chunking)
 			{
-				/*
 				vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
-	      LanguageModelMultiFactor *lm = LanguageModelFactory::createLanguageModelMultiFactor(lmType);
-	      if (lm == NULL) // no LM created. we prob don't have it compiled
-	      	return false;
-	
-				lm->Load(languageModelFile, m_factorCollection, factorTypes, weightAll[i], nGramOrder);
-				m_languageModel.push_back(lm);
-				*/
+				
+	      LanguageModelMultiFactor *lmMF = static_cast<LanguageModelMultiFactor*>(lm);
+				lmMF->Load(languageModelFile, m_factorCollection, factorTypes, weightAll[i], nGramOrder);
 			}
 			else
 			{
 				FactorType factorType = Scan<FactorType>(token[1]);
-	      LanguageModelSingleFactor *lm = LanguageModelFactory::createLanguageModelSingleFactor(lmType);
-	      if (lm == NULL) // no LM created. we prob don't have it compiled
-	      	return false;
-	
-				lm->Load(languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
-				m_languageModel.push_back(lm);
+				
+	      LanguageModelSingleFactor *lmSF = static_cast<LanguageModelSingleFactor*>(lm);	
+				lmSF->Load(languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
 			}
+
+			m_languageModel.push_back(lm);
 	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
 		}
 	}

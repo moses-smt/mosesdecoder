@@ -40,8 +40,6 @@ LanguageModelSingleFactor::State LanguageModelSingleFactor::UnknownState=0;
 
 LanguageModelSingleFactor::LanguageModelSingleFactor() 
 {
-	Word::Initialize(m_sentenceStartArray);
-	Word::Initialize(m_sentenceEndArray);
 }
 LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
 

@@ -31,7 +31,6 @@ class LanguageModelSingleFactor : public LanguageModel
 {
 protected:	
 	const Factor *m_sentenceStart, *m_sentenceEnd;
-	FactorArray m_sentenceStartArray, m_sentenceEndArray;
 	FactorType	m_factorType;
 public:
   static State UnknownState;
@@ -56,14 +55,6 @@ public:
 	const Factor *GetSentenceEnd() const
 	{
 		return m_sentenceEnd;
-	}
-	const FactorArray &GetSentenceStartArray() const
-	{
-		return m_sentenceStartArray;
-	}
-	const FactorArray &GetSentenceEndArray() const
-	{
-		return m_sentenceEndArray;
 	}
 	FactorType GetFactorType() const
 	{

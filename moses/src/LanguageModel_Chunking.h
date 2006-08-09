@@ -63,6 +63,13 @@ public:
 		m_posType = 1;
 		m_morphType = 2;
 		m_jointType = 3;
+
+		m_sentenceStartArray[m_posType] = factorCollection.AddFactor(Output, m_posType, "BOS_");
+		m_sentenceStartArray[m_morphType] = factorCollection.AddFactor(Output, m_morphType, "BOS_");
+
+		m_sentenceEndArray[m_posType] = factorCollection.AddFactor(Output, m_posType, "EOS_");
+		m_sentenceEndArray[m_morphType] = factorCollection.AddFactor(Output, m_morphType, "EOS_");
+
 		m_lmImpl.Load(fileName, factorCollection, m_jointType, weight, nGramOrder);
 	}
 		
@@ -88,14 +95,13 @@ public:
 			return 0;
 		}
 		
-		/*
 		// only process context where last word is a verb, article, pronoun or comma or period
 		if (!Process(contextFactor[0]))
 			return 0;
 
 		// create context in reverse 'cos we skip words we don't want
 		std::vector<FactorArrayWrapper> chunkContext;
-		for (int currPos = (int)contextFactor.size() - 1 ; currPos >= 0 ; --currPos )
+		for (int currPos = (int)contextFactor.size() - 1 ; currPos >= 0 && chunkContext.size() <= m_nGramOrder ; --currPos )
 		{
 			const FactorArrayWrapper &factorArray = contextFactor[currPos];
 			if (Process(factorArray))
@@ -105,7 +111,10 @@ public:
 			std::string strConcate = factorArray[m_posType]->GetString() + "|" + factorArray[m_morphType]->GetString();
 
 			const Factor *factor = m_factorCollection->AddFactor(Output, m_jointType, strConcate);
-			FactorArrayWrapper chunkFactorArray();
+			FactorArray chunkFactorArray;
+			Word::Initialize(chunkFactorArray);
+			chunkFactorArray[m_jointType] = factor;
+
 			chunkContext.push_back(chunkFactorArray);
 		}
 	
@@ -113,7 +122,6 @@ public:
 		std::reverse(chunkContext.begin(), chunkContext.end());
 		// calc score on chunked phrase
 		return m_lmImpl.GetValue(chunkContext, finalState);
-		*/
 	}
 };
 
