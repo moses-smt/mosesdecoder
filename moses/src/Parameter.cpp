@@ -70,6 +70,7 @@ Parameter::Parameter()
 	AddParam("inputtype");
 	AddParam("translation-details");
 	AddParam("max-trans-opt-per-coverage");
+	AddParam("max-partial-trans-opt");
 	AddParam("use-distortion-future-costs");
 }
 
