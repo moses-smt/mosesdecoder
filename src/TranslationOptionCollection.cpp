@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+/** constructor; since translation options are indexed by coverage span, the corresponding data structure is initialized here */
 TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage)
 	: m_source(src)
 	,m_futureScore(src.GetSize())
@@ -50,6 +51,7 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& src, s
 	}
 }
 
+/** destructor, clears out data structures */
 TranslationOptionCollection::~TranslationOptionCollection()
 {
 	// delete all trans opt
@@ -63,12 +65,13 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	}
 }
 
-// helper
+/** helper for pruning */
 bool CompareTranslationOption(const TranslationOption *a, const TranslationOption *b)
 {
 	return a->GetFutureScore() > b->GetFutureScore();
 }
 
+/** pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 void TranslationOptionCollection::Prune()
 {
 	if (m_maxNoTransOptPerCoverage == 0)
@@ -106,6 +109,7 @@ void TranslationOptionCollection::Prune()
 	}
 }
 
+/** compute the future score matrix used in search */
 void TranslationOptionCollection::CalcFutureScore()
 {
 	// create future score matrix in a dynamic programming fashion
@@ -191,6 +195,7 @@ typedef list< WordPair > WordList;
 // 2nd = score
 typedef list< WordPair >::const_iterator WordListIterator;
 
+/** used in generation: increases iterators when looping through the exponential number of generation expansions */
 inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 															 , const vector< WordList > &wordListVector)
 {
@@ -209,6 +214,7 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 		}
 }
 
+/** apply generation decoding step to a list of partial translation options */
 void TranslationOptionCollection::ProcessGeneration(			
 																										const TranslationOption &inputPartialTranslOpt
 																										, const DecodeStep &decodeStep
@@ -304,7 +310,7 @@ void TranslationOptionCollection::ProcessGeneration(
 		}
 }
 
-
+/** apply translation step to list of partial translation options */
 void TranslationOptionCollection::ProcessTranslation(
 																										 const TranslationOption &inputPartialTranslOpt
 																										 , const DecodeStep		 &decodeStep
@@ -347,13 +353,11 @@ void TranslationOptionCollection::ProcessTranslation(
 }
 
 
-/**
- * Add to m_possibleTranslations all possible translations the phrase table gives us for
- * the given phrase
- * 
- * \param phrase The source phrase to translate
- * \param phraseDictionary The phrase table
- * \param lmListInitial A list of language models
+/** Collect all possible translations from the phrase tables
+ * for a particular input sentence. This implies applying all
+ * translation and generation steps. Also computes future cost matrix.
+ * \param decodeStepList list of decoding steps
+ * \param factorCollection input sentence with all factors
  */
 void TranslationOptionCollection::CreateTranslationOptions(
 																													 const list < DecodeStep > &decodeStepList
@@ -374,6 +378,13 @@ void TranslationOptionCollection::CreateTranslationOptions(
 	CalcFutureScore();
 }
 
+/** subroutine for CreateTranslationOptions: collect translation options
+ * that exactly cover a specific input span
+ * \param decodeStepList list of decoding steps
+ * \param factorCollection input sentence with all factors
+ * \param startPos first position in input sentence
+ * \param lastPos last position in input sentence 
+ */
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 const list < DecodeStep > &decodeStepList
 																													 , FactorCollection &factorCollection
@@ -466,7 +477,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 }
 
 
-
+/** special handling of unknown words: add special translation (or drop) */
 void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourceWord,
 																														size_t sourcePos
 																												, FactorCollection &factorCollection)
@@ -521,7 +532,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 }
 
 
-
+/** initialize list of partial translation options by applying the first translation step */
 void TranslationOptionCollection::ProcessInitialTranslation(
 															const DecodeStep &decodeStep
 															, FactorCollection &factorCollection
@@ -576,6 +587,8 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	}
 }
 
+/** add translation option to the list
+ * \param translationOption translation option to be added */
 void TranslationOptionCollection::Add(const TranslationOption *translationOption)
 {
 	const WordsRange &coverage = translationOption->GetSourceWordsRange();
