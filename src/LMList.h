@@ -2,13 +2,13 @@
 #pragma once
 
 #include <list>
-#include "LanguageModelSingleFactor.h"
+#include "LanguageModel.h"
 
 class Phrase;
 class ScoreColl;
 class ScoreComponentCollection2;
 
-class LMList : public std::list < LanguageModelSingleFactor* >	
+class LMList : public std::list < LanguageModel* >	
 {
 public:
 	void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreComponentCollection2* breakdown) const;

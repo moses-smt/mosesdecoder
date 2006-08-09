@@ -59,10 +59,9 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 	LMList::const_iterator lmIter;
 	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
 	{
-		const LanguageModelSingleFactor &lm = **lmIter;
-		FactorType lmFactorType = lm.GetFactorType();
+		const LanguageModel &lm = **lmIter;
 		
-		if (GetSize() > 0 && GetFactor(0, lmFactorType) != NULL)
+		if (lm.Useable(*this))
 		{ // contains factors used by this LM
 			const float weightLM = lm.GetWeight();
 			float fullScore, nGramScore;

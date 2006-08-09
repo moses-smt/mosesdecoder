@@ -17,9 +17,9 @@
 namespace LanguageModelFactory
 {
 
-	LanguageModelSingleFactor* createLanguageModelSingleFactor(LMType lmType)
+	LanguageModel* CreateLanguageModel(LMType lmType)
 	{
-	  LanguageModelSingleFactor *lm = NULL;
+	  LanguageModel *lm = NULL;
 	  switch (lmType)
 	  {
 	  	case SRI:
@@ -32,10 +32,20 @@ namespace LanguageModelFactory
 	     		lm = new LanguageModel_IRST();
 				#endif
 				break;
+			case Chunking:
+				#ifdef LM_SRI
+	     		lm = new LanguageModel_Chunking<LanguageModel_SRI>();
+				#else
+     			#ifdef LM_IRST
+	     			lm = new LanguageModel_Chunking<LanguageModel_IRST>();
+     			#endif
+				#endif
 	  }
+	  
+  	// fall back. pick what we have. assume it single factor
+	  // we should be taking this out soon
 	  if (lm == NULL)
 	  {
-	  	// fall back. pick what we have
 	  	#ifdef LM_SRI
 				lm = new LanguageModel_SRI();
 			#else
@@ -48,30 +58,4 @@ namespace LanguageModelFactory
 	  }
 	  return lm;
 	}
-
-	LanguageModelMultiFactor* createLanguageModelMultiFactor(LMType lmType)
-	{
-	  LanguageModelMultiFactor *lm = NULL;
-	  switch (lmType)
-	  {
-			case Chunking:
-				#ifdef LM_SRI
-	     		lm = new LanguageModel_Chunking<LanguageModel_SRI>();
-				#else
-     			#ifdef LM_IRST
-	     			lm = new LanguageModel_Chunking<LanguageModel_IRST>();
-     			#endif
-				#endif
-				
-				break;
-	  }
-
- 		if (lm == NULL)
- 		{
- 			UserMessage::Add("No valid LM found to create chunking LM");
-			return NULL;
- 		}
-	  return lm;
-	}
-
 }

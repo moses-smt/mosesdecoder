@@ -38,6 +38,8 @@ using namespace std;
 LanguageModel::LanguageModel() 
 {
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	Word::Initialize(m_sentenceStartArray);
+	Word::Initialize(m_sentenceEndArray);
 }
 LanguageModel::~LanguageModel() {}
 

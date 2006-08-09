@@ -39,6 +39,7 @@ protected:
 	float				m_weight;
 	std::string	m_filename;
 	size_t			m_nGramOrder;
+	FactorArray m_sentenceStartArray, m_sentenceEndArray;
 public:
   typedef const void* State;
 
@@ -61,6 +62,15 @@ public:
 	{
 		return m_nGramOrder;
 	}
+	const FactorArray &GetSentenceStartArray() const
+	{
+		return m_sentenceStartArray;
+	}
+	const FactorArray &GetSentenceEndArray() const
+	{
+		return m_sentenceEndArray;
+	}
+	
 	float GetWeight() const
 	{
 		return m_weight;
