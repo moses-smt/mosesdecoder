@@ -40,13 +40,24 @@ class LanguageModel_IRST : public LanguageModelSingleFactor
 protected:
 	std::vector<int> m_lmIdLookup;
 	lmtable* m_lmtb;
+  ngram* m_lmtb_ng;
+  
 	int	m_unknownId;
-	
+  int m_lmtb_sentenceStart; //lmtb symbols to initialize ngram with
+  int m_lmtb_sentenceEnd;   //lmt symbol to initialize ngram with 
+	int m_lmtb_size;          //max ngram stored in the table
+
+  
 //	float GetValue(LmId wordId, ngram *context) const;
 
 	void CreateFactors(FactorCollection &factorCollection);
 	int GetLmID( const std::string &str ) const;
-	int GetLmID( const Factor *factor ) const;
+
+	int GetLmID( const Factor *factor ) const{
+    size_t factorId = factor->GetId();
+    return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];        
+  };
+  
 public:
 	LanguageModel_IRST();
 	~LanguageModel_IRST();
