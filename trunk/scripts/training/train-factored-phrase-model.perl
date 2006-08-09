@@ -70,7 +70,7 @@ For more, please check manual or contact koehn\@inf.ed.ac.uk\n";
 
 if (!defined $SCRIPTS_ROOTDIR) {
   $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
-  die "Please set SCRIPTS_ROOTDIR or specify --rootdir" if !defined $SCRIPTS_ROOTDIR;
+  die "Please set SCRIPTS_ROOTDIR or specify --scripts-root-dir" if !defined $SCRIPTS_ROOTDIR;
 }
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 
