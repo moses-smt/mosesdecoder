@@ -37,8 +37,7 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 		float fullScore, nGramScore;
 
 		// do not process, if factors not defined yet (happens in partial translation options)
-		const LanguageModelSingleFactor &lmsf = static_cast<const LanguageModelSingleFactor&> (lm);
-		if (phrase.GetSize()>0 && phrase.GetFactor(0, lmsf.GetFactorType()) == NULL)
+		if (!lm.Useable(phrase))
 			continue;
 
 		lm.CalcScore(phrase, fullScore, nGramScore);

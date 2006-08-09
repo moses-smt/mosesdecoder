@@ -21,7 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <cassert>
-
+#include <boost/filesystem/operations.hpp> // boost::filesystem::exists
+#include <boost/algorithm/string/case_conv.hpp> //boost::algorithm::to_lower
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
 #include "DummyScoreProducers.h"
@@ -30,9 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "HypothesisCollection.h"
 #include "Timer.h"
-#include "boost/filesystem/operations.hpp" // boost::filesystem::exists
-#include "boost/algorithm/string/case_conv.hpp" //boost::algorithm::to_lower
-#include "LanguageModel.h"
+#include "LanguageModelSingleFactor.h"
+#include "LanguageModelMultiFactor.h"
 #include "LanguageModelFactory.h"
 #include "LexicalReordering.h"
 #include "SentenceStats.h"
@@ -257,21 +257,36 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			// type = implementation, SRI, IRST etc
 			LMType lmType = static_cast<LMType>(Scan<int>(token[0]));
 			// factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
-			FactorType factorType = Scan<FactorType>(token[1]);
 			// nGramOrder = 2 = bigram, 3 = trigram, etc
 			size_t nGramOrder = Scan<int>(token[2]);
 			// keep track of the largest n-gram length
 			// (used by CompareHypothesisCollection)
 			string &languageModelFile = token[3];
-			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
-      LanguageModelSingleFactor *lm = LanguageModelFactory::createLanguageModelSingleFactor(lmType);
-      if (lm == NULL) // no LM created. we prob don't have it compiled
-      	return false;
 
-			// error handling here?
-			lm->Load(languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
+			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
+			if (lmType == Chunking)
+			{
+				/*
+				vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
+	      LanguageModelMultiFactor *lm = LanguageModelFactory::createLanguageModelMultiFactor(lmType);
+	      if (lm == NULL) // no LM created. we prob don't have it compiled
+	      	return false;
+	
+				lm->Load(languageModelFile, m_factorCollection, factorTypes, weightAll[i], nGramOrder);
+				m_languageModel.push_back(lm);
+				*/
+			}
+			else
+			{
+				FactorType factorType = Scan<FactorType>(token[1]);
+	      LanguageModelSingleFactor *lm = LanguageModelFactory::createLanguageModelSingleFactor(lmType);
+	      if (lm == NULL) // no LM created. we prob don't have it compiled
+	      	return false;
+	
+				lm->Load(languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
+				m_languageModel.push_back(lm);
+			}
 	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
-			m_languageModel.push_back(lm);
 		}
 	}
   // flag indicating that language models were loaded,
