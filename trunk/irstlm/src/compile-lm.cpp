@@ -18,6 +18,7 @@
 
 ******************************************************************************/
 
+using namespace std;
 
 #include <iostream>
 #include <fstream>
@@ -25,13 +26,19 @@
 #include <string>
 #include <stdlib.h>
 
+#include "math.h"
+#include "mempool.h"
+#include "htable.h"
+#include "dictionary.h"
+#include "n_gram.h"
 #include "lmtable.h"
 
 
 /* GLOBAL OPTIONS ***************/
-std::string sn = "0";
-std::string sres = "0";
-std::string sdecay = "0.95";
+
+std::string stxt = "no";
+std::string seval = "";
+
 /********************************/
 
 void usage(const char *msg = 0) {
@@ -41,7 +48,7 @@ void usage(const char *msg = 0) {
             << "  compile-lm reads a standard LM file in ARPA format and produces" << std::endl
             << "  a compiled representation that the IRST LM toolkit can quickly" << std::endl
             << "  read and process." << std::endl << std::endl;
-  std::cerr << "Options:\n  -r=RESOLUTION\n  -d=DECAY\n  -n=NGRAM SIZE <required>\n\n";
+  std::cerr << "Options:\n  -t=[yes|no]\n";
 }
 
 bool starts_with(const std::string &s, const std::string &pre) {
@@ -72,12 +79,11 @@ std::string get_param(const std::string& opt, int argc, const char **argv, int& 
 void handle_option(const std::string& opt, int argc, const char **argv, int& argi)
 {
   if (opt == "--help" || opt == "-h") { usage(); exit(1); }
-  if (starts_with(opt, "--resolution") || starts_with(opt, "-r"))
-    sres = get_param(opt, argc, argv, argi);
-  else if (starts_with(opt, "--decay") || starts_with(opt, "-d"))
-    sdecay = get_param(opt, argc, argv, argi);
-  else if (starts_with(opt, "--ngram-size") || starts_with(opt, "-n"))
-    sn = get_param(opt, argc, argv, argi);
+   if (starts_with(opt, "--text") || starts_with(opt, "-t"))
+    stxt = get_param(opt, argc, argv, argi);
+   else
+      if (starts_with(opt, "--eval") || starts_with(opt, "-e"))
+       seval = get_param(opt, argc, argv, argi);
   else {
     usage(("Don't understand option " + opt).c_str());
     exit(1);
@@ -86,6 +92,8 @@ void handle_option(const std::string& opt, int argc, const char **argv, int& arg
 
 int main(int argc, const char **argv)
 {
+  cout << "hello\n";
+  
   if (argc < 2) { usage(); exit(1); }
   std::vector<std::string> files;
   for (int i=1; i < argc; i++) {
@@ -95,30 +103,73 @@ int main(int argc, const char **argv)
   }
   if (files.size() > 2) { usage("Too many arguments"); exit(1); }
   if (files.size() < 1) { usage("Please specify a LM file to read from"); exit(1); }
-  double decay = strtod(sdecay.c_str(),0);
-  int resolution = strtol(sres.c_str(),0,10);
-  int ngram_size = strtol(sn.c_str(),0,10);
-  if (ngram_size < 1) { usage("Please specify an ngram size greater than or equal 1 with -n"); exit(1); }
+
+  bool textoutput = (stxt == "yes"? true : false);
+ 
   std::string infile = files[0];
   if (files.size() == 1) {
     std::string::size_type p = infile.rfind('/');
     if (p != std::string::npos && ((p+1) < infile.size())) {
-      files.push_back(infile.substr(p+1) + ".blm");
+      files.push_back(infile.substr(p+1) + (textoutput?".lm":".blm"));
     } else {
-      files.push_back(infile + ".blm");
+      files.push_back(infile + (textoutput?".lm":".blm"));
     }
   }
+  
   std::string outfile = files[1];
-  std::cout << "Using decay=" << decay << ", resolution=" << resolution << std::endl;
   std::cout << "Reading " << infile << "..." << std::endl;
-  std::ifstream inp(infile.c_str());
+   
+  std::fstream inp(infile.c_str());
   if (!inp.good()) {
     std::cerr << "Failed to open " << infile << "!\n";
     exit(1);
   }
-  lmtable lmt(inp);
+  lmtable lmt; 
+  lmt.load(inp);
+  
+  
+  if (seval != ""){
+    ngram ng(lmt.dict);    
+    std::cout.setf(ios::fixed);
+    std::cout.precision(2);
+    
+    std::fstream inptxt(seval.c_str(),std::ios::in);
+    
+    int Nbo=0,Nw=0,Noov=0;
+    double logPr=0,PP=0,PPwp=0,Pr;
+    
+    int bos=ng.dict->encode(ng.dict->BoS());
+    
+    while(inptxt >> ng){
+      
+      // reset ngram at begin of sentence
+      if (*ng.wordp(1)==bos) continue;
+      
+      lmt.bo_state(0);
+      if (ng.size>=1){ 
+        logPr+=(Pr=lmt.lprob(ng));
+        if (*ng.wordp(1) == lmt.dict->oovcode()) Noov++;        
+        Nw++; if (lmt.bo_state()) Nbo++;                   
+      }
+    
+    }
+    
+    PP=exp((-logPr * log(10.0)) /Nw);
+    PPwp= PP * exp(Noov * log(10000000.0-lmt.dict->size())/Nw);
+    
+    std::cout << "%% Nw=" << Nw << " PP=" << PP << " PPwp=" << PPwp
+      << " Nbo=" << Nbo << " Noov=" << Noov 
+      << " OOV=" << (float)Noov/Nw * 100.0 << "%\n";
+    
+    return 0;    
+  };
+  
   std::cout << "Saving to " << outfile << std::endl;
-  lmt.savebin(outfile.c_str());
+  if (textoutput) 
+    lmt.savetxt(outfile.c_str());    
+  else 
+    lmt.savebin(outfile.c_str());
+  
   return 0;
 }
 
