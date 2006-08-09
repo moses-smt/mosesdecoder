@@ -112,6 +112,7 @@ public:
 																			, size_t startPosition
 																			, size_t endPosition);
 
+	/** returns future cost matrix for sentence */
 	inline virtual const SquareMatrix &GetFutureScore() const
 	{
 		return m_futureScore;
