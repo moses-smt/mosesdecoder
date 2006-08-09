@@ -27,6 +27,11 @@ using namespace std;
 
 htable::htable(int n,int kl,HTYPE ht,size_t (*klf)(const char* )){
   
+  if (ht!=STRPTR && ht!=STR && kl==0){
+    cerr << "htable: key length must be specified for non-string entries!";
+    exit(1);
+  } 
+  
   memory=new mempool( sizeof(entry) , BlockSize );
 
   table = new entry* [ size=n ];
@@ -39,8 +44,8 @@ htable::htable(int n,int kl,HTYPE ht,size_t (*klf)(const char* )){
   
   keys = accesses = collisions = 0;
 
-  keylenfunc=(klf?klf:&strlen);
-  
+  keylenfunc=(klf?klf:&strlen);    
+   
 }
 
 
@@ -124,33 +129,33 @@ char *htable::scan(HT_ACTION action){
 
 
 void htable::map(ostream& co,int cols){
-
+  
   entry *p;
   char* img=new char[cols+1];
-
+  
   img[cols]='\0';
   memset(img,'.',cols);
-
+  
   co << "htable memory map: . (0 items), - (<5), # (>5)\n";
   
   for (int i=0; i<size;i++)
-    {
-      int n=0;p=table[i];
-      
-      while(p!=NULL){
-	n++;
-	p=(entry *)p->next;
-      };
-
-      if (i && (i % cols)==0){
-	co << img << "\n";
-	memset(img,'.',cols);
-      }
-
-      if (n>0)
-	img[i % cols]=n<=5?'-':'#';
-
+  {
+    int n=0;p=table[i];
+    
+    while(p!=NULL){
+      n++;
+      p=(entry *)p->next;
+    };
+    
+    if (i && (i % cols)==0){
+      co << img << "\n";
+      memset(img,'.',cols);
     }
+    
+    if (n>0)
+      img[i % cols]=n<=5?'-':'#';
+    
+  }
   
   img[size % cols]='\0';
   co << img << "\n";
@@ -174,7 +179,8 @@ htable::~htable()
   delete memory;
 }
 
-address htable::Hash(char *key)
+
+address htable::HashStr(char *key)
 {
   char *Key=(htype==STRPTR? *(char **)key:key);
   int  length=(keylen?keylen:keylenfunc(Key));
@@ -191,8 +197,36 @@ address htable::Hash(char *key)
   return h;
 }
 
+address htable::HashInt(char *key)
+{
+  int *Key=(htype==INTPTR? *(int **)key:(int *)key);
+  static int  length=keylen/sizeof(int); 
+  
+  //cerr << "hash: " << Key << " length:" << length << "\n";
+  
+  register int  h=0;
+  register int i;
+  
+  
+  for (i=0,h=0;i<length;i++){
+    /*Thomas Wang's 32 bit Mix Function
+    h+=Key[i];
+    h += ~(h << 15);
+    h ^=  (h >> 10);
+    h +=  (h << 3);
+    h ^=  (h >> 6);
+    h += ~(h << 11);
+    h ^=  (h >> 16);
+    */
+     h = h * Prime1 ^ Key[i];
+  };
+    
+  h %= Prime2;  
+  
+  return h;
+}
 
-int htable::Comp(char *key1, char *key2)
+int htable::CompStr(char *key1, char *key2)
 {
   assert(key1 && key2);
  
@@ -213,6 +247,23 @@ int htable::Comp(char *key1, char *key2)
     return 0;
 }
 
+int htable::CompInt(char *key1, char *key2)
+{
+  assert(key1 && key2);
+  
+  int *Key1=(htype==INTPTR?*(int **)key1:(int*)key1);
+  int *Key2=(htype==INTPTR?*(int **)key2:(int*)key2);
+  
+  assert(Key1 && Key2);
+  
+  static int length=keylen/sizeof(int);
+    
+  register int i;
+  
+  for (i=0;i<length;i++)
+    if (Key1[i]!=Key2[i]) return 1;
+  return 0;
+}
 
 
 /*
