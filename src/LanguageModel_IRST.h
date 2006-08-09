@@ -59,7 +59,7 @@ protected:
   };
   
 public:
-	LanguageModel_IRST();
+	LanguageModel_IRST(bool registerScore);
 	~LanguageModel_IRST();
 	void Load(const std::string &fileName
 					, FactorCollection &factorCollection

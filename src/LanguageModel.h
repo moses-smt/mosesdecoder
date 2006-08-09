@@ -43,7 +43,7 @@ protected:
 public:
   typedef const void* State;
 
-	LanguageModel();
+	LanguageModel(bool registerScore);
 	virtual ~LanguageModel();
 
 	// see ScoreProducer.h
