@@ -249,7 +249,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 	// just need trigram score of the words of the start of current phrase	
 	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM,++lmIdx)
 	{
-		const LanguageModelSingleFactor &languageModel = **iterLM;
+		const LanguageModel &languageModel = **iterLM;
 		size_t nGramOrder			= languageModel.GetNGramOrder();
 		size_t currEndPos			= m_currTargetWordsRange.GetEndPos();
 		float lmScore;
