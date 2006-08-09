@@ -148,6 +148,23 @@ inline float UntransformScore(float score)
 	return exp(score);
 }
 
+inline float TransformIRSTScore(float irstScore)
+{ // irst number are in log 10
+	// transform to natural log
+	return irstScore * 2.30258509299405f;
+}
+
+inline float UntransformIRSTScore(float logNScore)
+{ // opposite of above
+	return logNScore / 2.30258509299405f;
+}
+
+inline float FloorIRSTScore(float irstScore)
+{
+	return (std::max)(irstScore , LOWEST_SCORE);
+}
+
+
 inline float TransformSRIScore(float sriScore)
 { // sri number are in log 10
 	// transform to natural log
