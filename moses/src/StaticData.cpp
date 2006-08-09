@@ -166,7 +166,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		{
 		//get the weights for the lex reorderer
 		TRACE_ERR("weights-lex")
-		for(int i=1; i<distortionWeights.size(); i++)
+		for(size_t i=1; i<distortionWeights.size(); i++)
 		{
 			m_lexWeights.push_back(distortionWeights[i]);
 			TRACE_ERR(distortionWeights[i] << "\t");
@@ -538,8 +538,8 @@ void StaticData::LoadPhraseTables(bool filter
 									 , maxTargetPhrase[index]
 									 , filterPhrase
 									 , inputPhraseList
-									 ,	GetAllLM()
-									 ,	GetWeightWordPenalty()
+									 , GetAllLM()
+									 , GetWeightWordPenalty()
 									 , *this);
 					m_phraseDictionary.push_back(pd);
 				}
