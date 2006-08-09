@@ -10,8 +10,6 @@ class TranslationOptionCollectionConfusionNet : public TranslationOptionCollecti
 	TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage);
 
 	void ProcessUnknownWord(		size_t sourcePos
-															, int dropUnknown
-															, FactorCollection &factorCollection
-															, float weightWordPenalty);
+															, FactorCollection &factorCollection);
 
 };

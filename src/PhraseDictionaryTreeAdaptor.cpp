@@ -277,7 +277,7 @@ struct PDTAimp {
 				for(size_t l=0;l<m_output.size();++l)
 					fa[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
 			}
-		targetPhrase.SetScore(m_obj, scoreVector, m_weights, *m_languageModels, m_weightWP);
+		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
 	}
 

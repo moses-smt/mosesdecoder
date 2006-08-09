@@ -34,10 +34,8 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
 	: TranslationOptionCollection(inputSentence, maxNoTransOptPerCoverage) {}
 
 void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos
-												, int dropUnknown
-												, FactorCollection &factorCollection
-												, float weightWordPenalty)
+												, FactorCollection &factorCollection)
 {
 	const FactorArray &sourceWord = m_source.GetFactorArray(sourcePos);
-	ProcessOneUnknownWord(sourceWord,sourcePos,dropUnknown,factorCollection,weightWordPenalty);
+	ProcessOneUnknownWord(sourceWord,sourcePos,factorCollection);
 }

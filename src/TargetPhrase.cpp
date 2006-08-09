@@ -35,15 +35,15 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
 {
 }
 
-void TargetPhrase::SetScore(float weightWP)
+void TargetPhrase::SetScore()
 { // used when creating translations of unknown words:
 	m_transScore = m_ngramScore = 0;	
-	m_fullScore = - weightWP;	
+	m_fullScore = - StaticData::Instance()->GetWeightWordPenalty();	
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 														const vector<float> &scoreVector, const vector<float> &weightT,
-														const LMList &languageModels, float weightWP)
+														float weightWP, const LMList &languageModels)
 {
 	assert(weightT.size() == scoreVector.size());
 	// calc average score if non-best

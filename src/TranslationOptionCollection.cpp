@@ -106,7 +106,7 @@ void TranslationOptionCollection::Prune()
 	}
 }
 
-void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
+void TranslationOptionCollection::CalcFutureScore()
 {
 	// create future score matrix in a dynamic programming fashion
 
@@ -161,7 +161,7 @@ void TranslationOptionCollection::CalcFutureScore(size_t verboseLevel)
         }
     }
 
-	if(verboseLevel > 2) 
+	if(StaticData::Instance()->GetVerboseLevel() >= 3)
 	{		
       int total = 0;
       for(size_t row=0; row<size; row++)
@@ -213,9 +213,7 @@ void TranslationOptionCollection::ProcessGeneration(
 																										const TranslationOption &inputPartialTranslOpt
 																										, const DecodeStep &decodeStep
 																										, PartialTranslOptColl &outputPartialTranslOptColl
-																										, int dropUnknown
-																										, FactorCollection &factorCollection
-																										, float weightWordPenalty)
+																										, FactorCollection &factorCollection)
 {
 	//TRACE_ERR(inputPartialTranslOpt << endl);
 	if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
@@ -250,7 +248,7 @@ void TranslationOptionCollection::ProcessGeneration(
 
 			if (wordColl == NULL)
 				{	// word not found in generation dictionary
-					ProcessUnknownWord(sourceWordsRange.GetStartPos(), dropUnknown, factorCollection, weightWordPenalty);
+					ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
 					return; // can't be part of a phrase, special handling
 				}
 			else
@@ -311,9 +309,7 @@ void TranslationOptionCollection::ProcessTranslation(
 																										 const TranslationOption &inputPartialTranslOpt
 																										 , const DecodeStep		 &decodeStep
 																										 , PartialTranslOptColl &outputPartialTranslOptColl
-																										 , int dropUnknown
-																										 , FactorCollection &factorCollection
-																										 , float weightWordPenalty)
+																										 , FactorCollection &factorCollection)
 {
 	//TRACE_ERR(inputPartialTranslOpt << endl);
 	if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
@@ -346,7 +342,7 @@ void TranslationOptionCollection::ProcessTranslation(
 		}
 	else if (sourceWordsRange.GetWordsCount() == 1)
 		{ // unknown handler
-			ProcessUnknownWord(sourceWordsRange.GetStartPos(), dropUnknown, factorCollection, weightWordPenalty);
+			ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
 		}
 }
 
@@ -361,17 +357,13 @@ void TranslationOptionCollection::ProcessTranslation(
  */
 void TranslationOptionCollection::CreateTranslationOptions(
 																													 const list < DecodeStep > &decodeStepList
-																													 , const LMList &allLM
-																													 , FactorCollection &factorCollection
-																													 , float weightWordPenalty
-																													 , bool dropUnknown
-																													 , size_t verboseLevel)
+																													 , FactorCollection &factorCollection)
 {
 	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
 		{
 		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
 		{
-			CreateTranslationOptionsForRange( decodeStepList, allLM, factorCollection, weightWordPenalty, dropUnknown, startPos, endPos, verboseLevel );
+			CreateTranslationOptionsForRange( decodeStepList, factorCollection, startPos, endPos);
 		}
 	}
 
@@ -379,20 +371,15 @@ void TranslationOptionCollection::CreateTranslationOptions(
 	Prune();
 
 	// future score matrix
-	CalcFutureScore(verboseLevel);
+	CalcFutureScore();
 }
 
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 const list < DecodeStep > &decodeStepList
-																													 , const LMList &allLM
 																													 , FactorCollection &factorCollection
-																													 , float weightWordPenalty
-																													 , bool dropUnknown
 																													 , size_t startPos
-																													 , size_t endPos
-																													 , size_t verboseLevel)
+																													 , size_t endPos)
 {
-	m_allLM = &allLM;
 	// partial trans opt stored in here
 	vector < PartialTranslOptColl* > outputPartialTranslOptCollVec( decodeStepList.size() );
 	outputPartialTranslOptCollVec[0] = new PartialTranslOptColl();
@@ -402,8 +389,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	const DecodeStep &decodeStep = *iterStep;
 
 	ProcessInitialTranslation(decodeStep, factorCollection
-														, weightWordPenalty, dropUnknown
-														, verboseLevel, *outputPartialTranslOptCollVec[0]
+														, *outputPartialTranslOptCollVec[0]
 														, startPos, endPos );
 
 	// do rest of decode steps
@@ -431,9 +417,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 								ProcessTranslation(inputPartialTranslOpt
 																	 , decodeStep
 																	 , outputPartialTranslOptColl
-																	 , dropUnknown
-																	 , factorCollection
-																	 , weightWordPenalty);
+																	 , factorCollection);
 							}
 						break;
 					}
@@ -448,9 +432,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 								ProcessGeneration(inputPartialTranslOpt
 																	, decodeStep
 																	, outputPartialTranslOptColl
-																	, dropUnknown
-																	, factorCollection
-																	, weightWordPenalty);
+																	, factorCollection);
 							}
 						break;
 					}
@@ -487,14 +469,12 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
 void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourceWord,
 																														size_t sourcePos
-																														, int dropUnknown
-																														, FactorCollection &factorCollection
-																														, float weightWordPenalty)
+																												, FactorCollection &factorCollection)
 {
 	// unknown word, add as trans opt
 
 		size_t isDigit = 0;
-		if (dropUnknown)
+		if (StaticData::Instance()->GetDropUnknown())
 		{
 			const Factor *f = sourceWord[0]; // ??? hack. shouldn't know which factor is surface
 			std::string s = f->ToString();
@@ -507,7 +487,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 		}
 		
 		TranslationOption *transOpt;
-		if (!dropUnknown || isDigit)
+		if (! StaticData::Instance()->GetDropUnknown() || isDigit)
 		{
 			// add to dictionary
 			TargetPhrase targetPhrase(Output);
@@ -524,7 +504,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
 			}
 	
-			targetPhrase.SetScore(weightWordPenalty);
+			targetPhrase.SetScore();
 			
 			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
 		}
@@ -545,9 +525,6 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 void TranslationOptionCollection::ProcessInitialTranslation(
 															const DecodeStep &decodeStep
 															, FactorCollection &factorCollection
-															, float weightWordPenalty
-															, int dropUnknown
-															, size_t verboseLevel
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos
 															, size_t endPos)
@@ -571,7 +548,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(m_source,wordsRange); 
 	if (phraseColl != NULL)
 	{
-		if (verboseLevel >= 3) 
+		if (StaticData::Instance()->GetVerboseLevel() >= 3)
 		{
 			TRACE_ERR("[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
 		}
@@ -582,12 +559,12 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			const TargetPhrase	&targetPhrase = *iterTargetPhrase;
 			outputPartialTranslOptColl.Add ( new TranslationOption(wordsRange, targetPhrase) );
 			
-			if (verboseLevel >= 3) 
+			if (StaticData::Instance()->GetVerboseLevel() >= 3)
 			{
 				TRACE_ERR("\t" << targetPhrase << "\n");
 			}
 		}
-		if (verboseLevel >= 3) 
+		if (StaticData::Instance()->GetVerboseLevel() >= 3)
 		{ 
 			TRACE_ERR(endl);
 		}
@@ -595,7 +572,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	// handling unknown words
 	else if (wordsRange.GetWordsCount() == 1)
 	{
-		ProcessUnknownWord(startPos, dropUnknown, factorCollection, weightWordPenalty);
+		ProcessUnknownWord(startPos, factorCollection);
 	}
 }
 

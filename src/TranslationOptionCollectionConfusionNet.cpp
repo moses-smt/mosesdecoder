@@ -13,15 +13,13 @@ TranslationOptionCollectionConfusionNet(const ConfusionNet &input, size_t maxNoT
 
 void TranslationOptionCollectionConfusionNet::
 ProcessUnknownWord(		size_t sourcePos
-											, int dropUnknown
-											, FactorCollection &factorCollection
-											, float weightWordPenalty) 
+											, FactorCollection &factorCollection) 
 {
 	ConfusionNet const& source=dynamic_cast<ConfusionNet const&>(m_source);
 
 	ConfusionNet::Column const& coll=source.GetColumn(sourcePos);
 	for(ConfusionNet::Column::const_iterator i=coll.begin();i!=coll.end();++i)
-		ProcessOneUnknownWord(i->first.GetFactorArray(),sourcePos,dropUnknown,factorCollection,weightWordPenalty);
+		ProcessOneUnknownWord(i->first.GetFactorArray(),sourcePos,factorCollection);
 		
 }
 
