@@ -44,8 +44,8 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, bool filter
 																			, const list< Phrase > &inputPhraseList
 																			, const LMList &languageModels
-																			, float weightWP
-																			, const StaticData& staticData)
+														          , float weightWP
+														          , const StaticData& staticData)
 {
 	m_maxTargetPhrase = maxTargetPhrase;
 	m_filename = filePath;
@@ -122,7 +122,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			// component score, for n-best output
 			std::vector<float> scv(scoreVector.size());
 			std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
-			targetPhrase.SetScore(this, scv, weight, languageModels, weightWP);
+			targetPhrase.SetScore(this, scv, weight, weightWP, languageModels);
 
 			AddEquivPhrase(sourcePhrase, targetPhrase);
 

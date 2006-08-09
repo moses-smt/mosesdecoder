@@ -47,7 +47,7 @@ public:
 
 	//! used by the unknown word handler- these targets
 	//! don't have a translation score, so wp is the only thing used
-	void SetScore(float weightWP);
+	void SetScore();
 
 	/*** Called immediately after creation to initialize scores.
    *
@@ -63,8 +63,8 @@ public:
 	void SetScore(const ScoreProducer* translationScoreProducer,
 								const std::vector<float> &scoreVector,
 								const std::vector<float> &weightT,
-								const LMList &languageModels,
-								float weightWP);
+								float weightWP,
+								const LMList &languageModels);
 
 	// used when creating translations of unknown words:
 	void ResetScore();

@@ -30,9 +30,7 @@ class TranslationOptionCollectionText : public TranslationOptionCollection {
 protected:
 	
 	void ProcessUnknownWord(		size_t sourcePos
-															, int dropUnknown
-															, FactorCollection &factorCollection
-															, float weightWordPenalty);
+															, FactorCollection &factorCollection);
 	
  public:
 	TranslationOptionCollectionText(Sentence const& inputSentence, size_t maxNoTransOptPerCoverage);

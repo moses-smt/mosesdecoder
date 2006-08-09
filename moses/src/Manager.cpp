@@ -68,11 +68,7 @@ void Manager::ProcessSentence()
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
 	m_possibleTranslations.CreateTranslationOptions(decodeStepList
-  														, m_staticData.GetAllLM()
-  														, m_staticData.GetFactorCollection()
-  														, m_staticData.GetWeightWordPenalty()
-  														, m_staticData.GetDropUnknown()
-  														, m_staticData.GetVerboseLevel());
+  														, m_staticData.GetFactorCollection());
 
 	// initial seed hypothesis: nothing translated, no words produced
 	{
