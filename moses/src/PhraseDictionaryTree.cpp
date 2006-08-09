@@ -112,9 +112,9 @@ public:
 
 
 struct PPimp {
-	PTF const*p;size_t idx;bool root;
+	PTF const*p;unsigned idx;bool root;
 	
-	PPimp(PTF const* x,size_t i,bool b) : p(x),idx(i),root(b) {}
+	PPimp(PTF const* x,unsigned i,bool b) : p(x),idx(i),root(b) {}
 	bool isValid() const {return root || (p && idx<p->size());}
 
 	bool isRoot() const {return root;}
