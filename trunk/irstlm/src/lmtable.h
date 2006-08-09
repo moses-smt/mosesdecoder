@@ -65,7 +65,7 @@ public:
     bigramcache(int maxentries){
     maxn=maxentries;
     entries=0;
-    ht=new htable(maxentries, 2 * sizeof(int),STR,NULL); //load factor   
+    ht=new htable(maxentries, 2 * sizeof(int),INT,NULL); //load factor   
     mp=new mempool(2 * sizeof(int)+sizeof(char*),maxn/10);
   };
   

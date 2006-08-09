@@ -63,8 +63,11 @@ typedef enum {HT_FIND,    //!< search: find an entry
 	      HT_CONT     //!< scan: continue scan
 } HT_ACTION;
 
-typedef enum {STR,     //!< string 
-	      STRPTR   //!< pointer to string
+typedef enum {
+        STR,     //!< string 
+	      STRPTR,   //!< pointer to string
+        INT,     //!< pointer to int
+        INTPTR,  //!< pointer to pointer to int
 }HTYPE;
 
 //! Hash Table for strings
@@ -84,7 +87,9 @@ class htable {
   mempool  *memory;           //!<  memory pool
 
   size_t (*keylenfunc)(const char*);          //!< function computing key length              
-
+  address (*hashfunc)(const char*);               //!< hash function 
+  int (*compfunc)(const char*, const char*);   //!< comparison function 
+  
  public:
 
   //! Creates an hash table
@@ -94,11 +99,28 @@ class htable {
   ~htable();
 
   //! Computes the hash function
-  address Hash(char *key);
-
+  address Hash(char *key){
+    switch (htype){
+      case INT:case INTPTR: return HashInt(key);
+        break;
+      case STR:case STRPTR: return HashStr(key);
+    }
+  };
+  address HashInt(char *key);
+  address HashStr(char *key);  
+  
   //! Compares the keys of two entries
-  int Comp(char *Key1,char *Key2);
+  int Comp(char *Key1,char *Key2){
+    switch (htype){
+      case INT:case INTPTR: return CompInt(Key1,Key2);
+        break;
+      case STR:case STRPTR: return CompStr(Key1,Key2);
+    };    
+  }
 
+  int CompInt(char *Key1,char *Key2);
+  int CompStr(char *Key1,char *Key2);
+  
   //! Searches for an item
   char *search(char *item, HT_ACTION action);
 
