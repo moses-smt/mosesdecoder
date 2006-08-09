@@ -19,12 +19,13 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+
 #include <assert.h>
 #include <limits>
 #include <iostream>
 #include <fstream>
 
-#include "ngram.h"
+#include "n_gram.h"
 #include "lmtable.h"
 #include "dictionary.h"
 
@@ -45,6 +46,7 @@ LanguageModel_IRST::LanguageModel_IRST()
 LanguageModel_IRST::~LanguageModel_IRST()
 {
   delete m_lmtb;
+  delete m_lmtb_ng;
 }
 
 
@@ -59,10 +61,15 @@ void LanguageModel_IRST::Load(const std::string &fileName
 	m_nGramOrder	 = nGramOrder;
 	m_filename		 = fileName;
 
-	InputFileStream inp(fileName);
-
-	m_lmtb         = new lmtable(inp);
-
+  //Marcello: modification to fit new version of lmtable.cpp
+	//temporary replacement for: InputFileStream inp(fileName);
+  std::fstream inp(fileName.c_str(),std::ios::in);  
+	m_lmtb  = new lmtable;
+  m_lmtb->load(inp);
+  
+  m_lmtb_ng=new ngram(m_lmtb->dict);
+  m_lmtb_size=m_lmtb->maxlevel();
+  
 	// LM can be ok, just outputs warnings
 	CreateFactors(factorCollection);
   m_unknownId = m_lmtb->dict->oovcode();
@@ -88,13 +95,13 @@ void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
 	
 	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
 	factorId = m_sentenceStart->GetId();
-	lmIdMap[factorId] = GetLmID(BOS_);
+	m_lmtb_sentenceStart=lmIdMap[factorId] = GetLmID(BOS_);
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	m_sentenceStartArray[m_factorType] = m_sentenceStart;
 
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
 	factorId = m_sentenceEnd->GetId();
-	lmIdMap[factorId] = GetLmID(EOS_);;
+	m_lmtb_sentenceEnd=lmIdMap[factorId] = GetLmID(EOS_);
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	m_sentenceEndArray[m_factorType] = m_sentenceEnd;
 	
@@ -115,11 +122,6 @@ int LanguageModel_IRST::GetLmID( const std::string &str ) const
 {
     return m_lmtb->dict->encode( str.c_str() );
 }
-int LanguageModel_IRST::GetLmID( const Factor *factor ) const
-{
-	size_t factorId = factor->GetId();
-	return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];
-}
 
 float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFactor, State* finalState) const
 {
@@ -127,15 +129,24 @@ float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFact
 	
 	// set up context
 	size_t count = contextFactor.size();
-  ngram ng(m_lmtb->dict);
+    
+  m_lmtb_ng->size=0;
+  if (count< (m_lmtb_size-1)) m_lmtb_ng->pushc(m_lmtb_sentenceEnd);
+  if (count< m_lmtb_size) m_lmtb_ng->pushc(m_lmtb_sentenceStart);  
+  
 	for (size_t i = 0 ; i < count ; i++)
 	{
+
     int lmId = GetLmID(contextFactor[i][factorType]);
-		ng.pushc(lmId);
+    m_lmtb_ng->pushc(lmId);
 	}
-	if (finalState) {
-		assert("!LM State needs to be implemented!");
+  
+	if (finalState){        
+    *finalState=(State *)m_lmtb->maxsuffptr(*m_lmtb_ng);		
+
 	}
-	return TransformScore(m_lmtb->prob(ng));
+  
+	return TransformIRSTScore(m_lmtb->lprob(*m_lmtb_ng));
+
 }
 
