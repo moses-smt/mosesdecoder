@@ -22,8 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #ifndef MF_LMTABLE_H
 #define MF_LMTABLE_H
 
-using namespace std;
-
 #define LMTMAXLEV  11
 
 #ifndef  LMTCODESIZE
@@ -119,7 +117,7 @@ private:
   long  start_position;  /* */  
 public:
     
-  disktable(fstream& inp, int buffersize, int entrysize,long max_entries){
+	disktable(std::fstream& inp, int buffersize, int entrysize,long max_entries){
        buffer_size=buffersize;
       entry_size=entrysize;
       buffer=new char[(buffer_size+1) * entry_size];
@@ -130,7 +128,7 @@ public:
   
   ~disktable() {delete [] buffer;};
   
-  char* get(fstream& inp,int position){    
+  char* get(std::fstream& inp,int position){    
     assert(position < file_border);
     
     //you can look back at maximum one position before the first in the buffer!
@@ -153,7 +151,7 @@ public:
     else return NULL;
   };
   
-  void rewind(fstream& inp){
+  void rewind(std::fstream& inp){
     inp.seekp(start_position);
     current_border=0;      
   }  
@@ -223,19 +221,19 @@ public:
   
   void savetxt(const char *filename);
   void savebin(const char *filename);
-  void dumplm(fstream& out,ngram ng, int ilev, int elev, int ipos,int epos);
+  void dumplm(std::fstream& out,ngram ng, int ilev, int elev, int ipos,int epos);
   
-  void load(fstream& inp);
-  void loadtxt(fstream& inp,const char* header);
-  void loadbin(fstream& inp,const char* header);
+  void load(std::fstream& inp);
+  void loadtxt(std::fstream& inp,const char* header);
+  void loadbin(std::fstream& inp,const char* header);
   
-  void loadbinheader(fstream& inp, const char* header);
-  void loadbincodebook(fstream& inp,int l);
+  void loadbinheader(std::fstream& inp, const char* header);
+  void loadbincodebook(std::fstream& inp,int l);
   
   void lmtable::filter(const char* lmfile);
   void lmtable::filter2(const char* lmfile,int buffMb=512);
   
-  void loadcenters(fstream& inp,int Order);
+  void loadcenters(std::fstream& inp,int Order);
 	
   double prob(ngram ng); 
   double lprob(ngram ng); 
