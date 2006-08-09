@@ -35,9 +35,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-LanguageModel::LanguageModel() 
+LanguageModel::LanguageModel(bool registerScore) 
 {
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	if (registerScore)
+		const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+		
 	Word::Initialize(m_sentenceStartArray);
 	Word::Initialize(m_sentenceEndArray);
 }

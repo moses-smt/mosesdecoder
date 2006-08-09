@@ -12,7 +12,9 @@
 void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 {
 	// Producers must be inserted in the order they are created
+	const_cast<ScoreProducer*>(sp)->CreateScoreBookkeepingID();
   assert(m_begins.size() == (sp->GetScoreBookkeepingID()));
+  
 	m_producers.push_back(sp);
   m_begins.push_back(m_last);
 	size_t numScoreCompsProduced = sp->GetNumScoreComponents();

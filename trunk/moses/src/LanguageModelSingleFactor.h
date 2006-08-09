@@ -35,7 +35,7 @@ protected:
 public:
   static State UnknownState;
 
-	LanguageModelSingleFactor();
+	LanguageModelSingleFactor(bool registerScore);
 	virtual ~LanguageModelSingleFactor();
 	virtual void Load(const std::string &fileName
 					, FactorCollection &factorCollection

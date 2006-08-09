@@ -38,8 +38,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-LanguageModel_IRST::LanguageModel_IRST()
-:m_lmtb(0)
+LanguageModel_IRST::LanguageModel_IRST(bool registerScore)
+:LanguageModelSingleFactor(registerScore)
+,m_lmtb(0)
 {
 }
 

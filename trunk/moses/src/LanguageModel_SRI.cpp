@@ -35,9 +35,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-LanguageModel_SRI::LanguageModel_SRI()
-:m_srilmVocab(0)
-,m_srilmModel(0)
+LanguageModel_SRI::LanguageModel_SRI(bool registerScore)
+:LanguageModelSingleFactor(registerScore)
+, m_srilmVocab(0)
+, m_srilmModel(0)
 {
 }
 
