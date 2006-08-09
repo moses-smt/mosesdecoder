@@ -90,6 +90,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
 LanguageModel::State LanguageModel::GetState(const std::vector<FactorArrayWrapper> &contextFactor) const
 {
   State state;
+  
   GetValue(contextFactor,&state);
   return state;
 }
