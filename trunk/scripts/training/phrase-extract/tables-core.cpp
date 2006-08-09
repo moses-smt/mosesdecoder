@@ -10,7 +10,7 @@
 vector<string> tokenize( char input[] ) {
   vector< string > token;
   bool betweenWords = true;
-  int start;
+  int start=0;
   int i=0;
   for(; input[i] != '\0'; i++) {
     bool isSpace = (input[i] == ' ' || input[i] == '\t');
@@ -25,7 +25,7 @@ vector<string> tokenize( char input[] ) {
     }
   }
   if (!betweenWords)
-    token.push_back( string( input+start, i-start+1 ) );
+    token.push_back( string( input+start, i-start ) );
   return token;
 }
 
