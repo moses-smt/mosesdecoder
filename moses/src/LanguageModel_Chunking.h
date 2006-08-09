@@ -38,7 +38,9 @@ protected:
 	mutable FactorCollection *m_factorCollection;
 	
 public:
-	LanguageModel_Chunking()
+	LanguageModel_Chunking(bool registerScore)
+	: LanguageModelMultiFactor(registerScore)
+	, m_lmImpl(false)
 	{
 		m_posPrefix.push_back("ART");
 		m_posPrefix.push_back("P");

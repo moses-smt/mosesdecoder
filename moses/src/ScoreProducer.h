@@ -4,6 +4,7 @@
 #define _SCORE_PRODUCER_H_
 
 #include <string>
+#include <limits>
 
 class ScoreIndexManager;
 
@@ -21,6 +22,9 @@ private:
 	unsigned int m_scoreBookkeepingId;
 
 	ScoreProducer(const ScoreProducer&);  // don't implement
+	
+	 #define UNASSIGNED std::numeric_limits<unsigned int>::max()
+	
 protected:
 	// it would be nice to force registration here, but some Producer objects
 	// are constructed before they know how many scores they have
@@ -29,7 +33,7 @@ protected:
 
 public:
 	unsigned int GetScoreBookkeepingID() const { return m_scoreBookkeepingId; }
-
+	void CreateScoreBookkeepingID()	{	m_scoreBookkeepingId = s_globalScoreBookkeepingIdCounter++;}
 	//! returns the number of scores that a subclass produces.
 	//! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
 	virtual unsigned int GetNumScoreComponents() const = 0;

@@ -38,7 +38,8 @@ using namespace std;
 // static variable init
 LanguageModelSingleFactor::State LanguageModelSingleFactor::UnknownState=0;
 
-LanguageModelSingleFactor::LanguageModelSingleFactor() 
+LanguageModelSingleFactor::LanguageModelSingleFactor(bool registerScore)
+:LanguageModel(registerScore)
 {
 }
 LanguageModelSingleFactor::~LanguageModelSingleFactor() {}

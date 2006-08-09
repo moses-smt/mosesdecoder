@@ -24,20 +24,20 @@ namespace LanguageModelFactory
 	  {
 	  	case SRI:
 				#ifdef LM_SRI
-				  lm = new LanguageModel_SRI();
+				  lm = new LanguageModel_SRI(true);
 			  #endif
 			  break;
 			case IRST:
 				#ifdef LM_IRST
-	     		lm = new LanguageModel_IRST();
+	     		lm = new LanguageModel_IRST(true);
 				#endif
 				break;
 			case Chunking:
 				#ifdef LM_SRI
-	     		lm = new LanguageModel_Chunking<LanguageModel_SRI>();
+	     		lm = new LanguageModel_Chunking<LanguageModel_SRI>(true);
 				#else
      			#ifdef LM_IRST
-	     			lm = new LanguageModel_Chunking<LanguageModel_IRST>();
+	     			lm = new LanguageModel_Chunking<LanguageModel_IRST>(true);
      			#endif
 				#endif
 	  }
@@ -47,10 +47,10 @@ namespace LanguageModelFactory
 	  if (lm == NULL)
 	  {
 	  	#ifdef LM_SRI
-				lm = new LanguageModel_SRI();
+				lm = new LanguageModel_SRI(true);
 			#else
 				#ifdef LM_IRST
-					lm = new LanguageModel_IRST();
+					lm = new LanguageModel_IRST(true);
 				#else
 			  	UserMessage::Add("Language model type unknown. Probably not compiled into library");
 				#endif

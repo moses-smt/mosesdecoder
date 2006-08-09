@@ -33,6 +33,7 @@ protected:
 	FactorTypeSet	m_factorTypes;
 	
 public:
+	LanguageModelMultiFactor(bool registerScore);
 	virtual void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, const std::vector<FactorType> &factorTypes

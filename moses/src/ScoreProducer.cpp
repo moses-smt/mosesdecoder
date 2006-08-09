@@ -12,7 +12,7 @@ ScoreProducer::~ScoreProducer() {}
 
 ScoreProducer::ScoreProducer()
 {
-  m_scoreBookkeepingId = s_globalScoreBookkeepingIdCounter++;
+  m_scoreBookkeepingId = UNASSIGNED;
   std::cerr << "ScoreProducer created (id=" << m_scoreBookkeepingId << ", this=" << this << ")\n";
 }
  

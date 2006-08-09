@@ -22,6 +22,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelMultiFactor.h"
 #include "Phrase.h"
 
+LanguageModelMultiFactor::LanguageModelMultiFactor(bool registerScore)
+:LanguageModel(registerScore)
+{}
+
 const std::string LanguageModelMultiFactor::GetScoreProducerDescription() const
 {
 	std::ostringstream oss;
