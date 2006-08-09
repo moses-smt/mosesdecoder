@@ -121,7 +121,7 @@ int LanguageModel_IRST::GetLmID( const Factor *factor ) const
 	return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];
 }
 
-float LanguageModel_IRST::GetValue(const vector<const FactorArray*> &contextFactor, State* finalState) const
+float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFactor, State* finalState) const
 {
 	FactorType factorType = GetFactorType();
 	
@@ -130,7 +130,7 @@ float LanguageModel_IRST::GetValue(const vector<const FactorArray*> &contextFact
   ngram ng(m_lmtb->dict);
 	for (size_t i = 0 ; i < count ; i++)
 	{
-    int lmId = GetLmID((*contextFactor[i])[factorType]);
+    int lmId = GetLmID(contextFactor[i][factorType]);
 		ng.pushc(lmId);
 	}
 	if (finalState) {

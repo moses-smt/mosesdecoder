@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "ScoreProducer.h"
+#include "Word.h"
 
 class FactorCollection;
 class Factor;
@@ -43,20 +44,18 @@ public:
 
 	LanguageModel();
 	virtual ~LanguageModel();
-	virtual void Load(const std::string &fileName
-					, FactorCollection &factorCollection
-					, FactorType factorType
-					, float weight
-					, size_t nGramOrder) = 0;
 
 	// see ScoreProducer.h
 	unsigned int GetNumScoreComponents() const;
 
+	// whether this LM can be used on a particular phrase
+	virtual bool Useable(const Phrase &phrase) const = 0;
+
 	void CalcScore(const Phrase &phrase
 							, float &fullScore
 							, float &ngramScore) const;
-	virtual float GetValue(const std::vector<const FactorArray*> &contextFactor, State* finalState = NULL) const = 0;
-	State GetState(const std::vector<const FactorArray*> &contextFactor) const;
+	virtual float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL) const = 0;
+	State GetState(const std::vector<FactorArrayWrapper> &contextFactor) const;
 
 	size_t GetNGramOrder() const
 	{

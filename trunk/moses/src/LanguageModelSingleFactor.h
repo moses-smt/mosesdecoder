@@ -22,10 +22,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include "LanguageModel.h"
+#include "Phrase.h"
 
 class FactorCollection;
 class Factor;
-class Phrase;
 
 class LanguageModelSingleFactor : public LanguageModel
 {
@@ -44,6 +44,11 @@ public:
 					, float weight
 					, size_t nGramOrder) = 0;
 
+	bool Useable(const Phrase &phrase) const
+	{
+		return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);		
+	}
+	
 	const Factor *GetSentenceStart() const
 	{
 		return m_sentenceStart;

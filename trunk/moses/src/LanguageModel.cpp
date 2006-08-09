@@ -55,19 +55,19 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	ngramScore	= 0;
 
 	size_t phraseSize = phrase.GetSize();
-	vector<const FactorArray*> contextFactor;
+	vector<FactorArrayWrapper> contextFactor;
 	contextFactor.reserve(m_nGramOrder);
 
 	// start of sentence
 	for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
 	{
-		contextFactor.push_back(&phrase.GetFactorArray(currPos));		
+		contextFactor.push_back(phrase.GetFactorArray(currPos));		
 		fullScore += GetValue(contextFactor);
 	}
 	
 	if (phraseSize >= m_nGramOrder)
 	{
-		contextFactor.push_back(&phrase.GetFactorArray(m_nGramOrder - 1));
+		contextFactor.push_back(phrase.GetFactorArray(m_nGramOrder - 1));
 		ngramScore = GetValue(contextFactor);
 	}
 	
@@ -78,14 +78,14 @@ void LanguageModel::CalcScore(const Phrase &phrase
 		{
 			contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
 		}
-		contextFactor[m_nGramOrder - 1] = &phrase.GetFactorArray(currPos);
+		contextFactor[m_nGramOrder - 1] = phrase.GetFactorArray(currPos);
 		float partScore = GetValue(contextFactor);		
 		ngramScore += partScore;		
 	}
 	fullScore += ngramScore;	
 }
 
-LanguageModel::State LanguageModel::GetState(const std::vector<const FactorArray*> &contextFactor) const
+LanguageModel::State LanguageModel::GetState(const std::vector<FactorArrayWrapper> &contextFactor) const
 {
   State state;
   GetValue(contextFactor,&state);
