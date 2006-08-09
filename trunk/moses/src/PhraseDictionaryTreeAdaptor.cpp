@@ -35,14 +35,14 @@ struct PDTAimp {
 	std::vector<FactorType> m_input,m_output;
 	FactorCollection *m_factorCollection;
 	PhraseDictionaryTree *m_dict;
-	mutable std::vector<TargetPhraseCollection const*> m_tgtColls;
+	typedef std::vector<TargetPhraseCollection const*> vTPC;
+	mutable vTPC m_tgtColls;
 
 	typedef std::map<Phrase,TargetPhraseCollection const*> MapSrc2Tgt;
 	mutable MapSrc2Tgt m_cache;
 	PhraseDictionaryTreeAdaptor *m_obj;
 	int useCache;
 
-	typedef std::vector<TargetPhraseCollection const*> vTPC;
 	std::vector<vTPC> m_rangeCache;
 	unsigned m_numInputScores;
 
@@ -65,9 +65,10 @@ struct PDTAimp {
 		if (StaticData::Instance()->GetVerboseLevel() >= 1)
 			{
 
-				std::cerr<<"tgt candidates stats:  total="<<totalE<<";  distinct="<<distinctE
-								 <<" ("<<distinctE/(0.01*totalE)<<");  duplicates="<<totalE-distinctE
-								 <<" ("<<(totalE-distinctE)/(0.01*totalE)<<")\n";
+				std::cerr<<"tgt candidates stats:  total="<<totalE<<";  distinct="
+								 <<distinctE<<" ("<<distinctE/(0.01*totalE)<<");  duplicates="
+								 <<totalE-distinctE<<" ("<<(totalE-distinctE)/(0.01*totalE)
+								 <<")\n";
 
 				std::cerr<<"\npath statistics\n";
 				std::cerr.setf(std::ios::scientific); 
@@ -76,7 +77,8 @@ struct PDTAimp {
 				if(path1Best.size()) 
 					{
 						std::cerr<<"1-best:        ";
-						std::copy(path1Best.begin()+1,path1Best.end(),std::ostream_iterator<size_t>(std::cerr," \t")); 
+						std::copy(path1Best.begin()+1,path1Best.end(),
+											std::ostream_iterator<size_t>(std::cerr," \t")); 
 						std::cerr<<"\n";
 					}
 				if(pathCN.size())
@@ -91,7 +93,8 @@ struct PDTAimp {
 				if(pathExplored.size())
 					{
 						std::cerr<<"CN (explored): ";
-						std::copy(pathExplored.begin()+1,pathExplored.end(),std::ostream_iterator<size_t>(std::cerr," \t")); 
+						std::copy(pathExplored.begin()+1,pathExplored.end(),
+											std::ostream_iterator<size_t>(std::cerr," \t")); 
 						std::cerr<<"\n";
 					}
 			}
@@ -102,7 +105,7 @@ struct PDTAimp {
 	{
 		for(size_t j=0;j<m_input.size();++j)
 			{
-				assert(static_cast<size_t>(m_input[j]) < static_cast<size_t>(NUM_FACTORS));
+				assert(static_cast<size_t>(m_input[j])<static_cast<size_t>(NUM_FACTORS));
 				assert(w[m_input[j]]);
 				if(s.size()) s+="|";
 				s+=w[m_input[j]]->ToString();
@@ -176,9 +179,11 @@ struct PDTAimp {
 				StringTgtCand::second_type const& probVector=cands[i].second;
 
 				std::vector<float> scoreVector(probVector.size());
-				std::transform(probVector.begin(),probVector.end(),scoreVector.begin(),TransformScore);
+				std::transform(probVector.begin(),probVector.end(),scoreVector.begin(),
+											 TransformScore);
 				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector);
-				costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
+				costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),
+																			 tCands.size()));
 				tCands.push_back(targetPhrase);
 			}
 
@@ -231,23 +236,33 @@ struct PDTAimp {
 	}
 
 	typedef PhraseDictionaryTree::PrefixPtr PPtr;
-	typedef std::pair<size_t,size_t> Range;
+	typedef unsigned short Position;
+	typedef std::pair<Position,Position> Range;
 	struct State {
 		PPtr ptr;
 		Range range;
 		float score;
-		unsigned realWords;
+		Position realWords;
 		Phrase src;
 
 		State() : range(0,0),score(0.0),realWords(0),src(Input) {}
-		State(size_t b,size_t e,const PPtr& v,float sc=0.0,unsigned rw=0) : ptr(v),range(b,e),score(sc),realWords(rw),src(Input) {}
-		State(Range const& r,const PPtr& v,float sc=0.0,unsigned rw=0) : ptr(v),range(r),score(sc),realWords(rw),src(Input) {}
+		State(Position b,Position e,const PPtr& v,float sc=0.0,Position rw=0) 
+			: ptr(v),range(b,e),score(sc),realWords(rw),src(Input) {}
+		State(Range const& r,const PPtr& v,float sc=0.0,Position rw=0) 
+			: ptr(v),range(r),score(sc),realWords(rw),src(Input) {}
 
-		size_t begin() const {return range.first;}
-		size_t end() const {return range.second;}
+		Position begin() const {return range.first;}
+		Position end() const {return range.second;}
 		float GetScore() const {return score;}
 
+		friend std::ostream& operator<<(std::ostream& out,State const& s) {
+			out<<" R=("<<s.begin()<<","<<s.end()<<"),SC=("<<s.GetScore()<<","<<s.realWords<<")";
+			return out;
+		}
+
 	};
+
+
 
 	void CreateTargetPhrase(TargetPhrase& targetPhrase,
 													StringTgtCand::first_type const& factorStrings,
@@ -274,13 +289,14 @@ struct PDTAimp {
 		std::vector<std::pair<float,size_t> >::iterator nth=costs.end();
 		if(m_obj->m_maxTargetPhrase>0 && costs.size()>m_obj->m_maxTargetPhrase) {
 			nth=costs.begin()+m_obj->m_maxTargetPhrase;
-			std::nth_element(costs.begin(),nth,costs.end(),std::greater<std::pair<float,size_t> >());
+			std::nth_element(costs.begin(),nth,costs.end(),
+											 std::greater<std::pair<float,size_t> >());
 		}
 		std::sort(costs.begin(),nth,std::greater<std::pair<float,size_t> >());
 
 		// convert into TargetPhraseCollection
 		TargetPhraseCollection *rv=new TargetPhraseCollection;
-		for(std::vector<std::pair<float,size_t> >::iterator it=costs.begin();it!=nth;++it) 
+		for(std::vector<std::pair<float,size_t> >::iterator it=costs.begin();it!=nth;++it)
 			rv->push_back(tCands[it->second]);
 		return rv;
 	}
@@ -299,7 +315,8 @@ struct PDTAimp {
 		assert(m_dict);
 		std::vector<State> stack;
 		size_t srcSize=src.GetSize();
-		for(size_t i=0;i<srcSize;++i) stack.push_back(State(i,i,m_dict->GetRoot()));
+		for(size_t i=0;i<srcSize;++i) 
+			stack.push_back(State(i,i,m_dict->GetRoot()));
 
 		std::vector<size_t> exploredPaths(srcSize+1,0);
 		std::vector<double> exPathsD(srcSize+1,-1.0);
@@ -357,6 +374,10 @@ struct PDTAimp {
 						std::string s;
 						Factors2String(w.GetFactorArray(),s);
 						bool isEpsilon=(s=="" || s==EPSILON);
+
+						// do not start with epsilon
+						if(isEpsilon && curr.begin()==curr.end()) continue; 
+
 						PPtr nextP = (isEpsilon ? curr.ptr : m_dict->Extend(curr.ptr,s));
 						unsigned newRealWords=curr.realWords + (isEpsilon ? 0 : 1);
 						if(nextP) 
@@ -365,7 +386,7 @@ struct PDTAimp {
 								float newScore=curr.GetScore()+currCol[colidx].second;
 								Phrase newSrc(curr.src);
 								if(!isEpsilon) newSrc.push_back(w);
-								if(newRange.second<src.GetSize())
+								if(newRange.second<src.GetSize() && newScore>LOWEST_SCORE)
 									{
 										stack.push_back(State(newRange,nextP,newScore,newRealWords));
 										stack.back().src=newSrc;
@@ -374,7 +395,8 @@ struct PDTAimp {
 								std::vector<StringTgtCand> tcands;
 								m_dict->GetTargetCandidates(nextP,tcands);
 
-								if(newRange.second-newRange.first>=exploredPaths.size()) exploredPaths.resize(newRange.second-newRange.first+1,0);
+								if(newRange.second>=exploredPaths.size()+newRange.first) 
+									exploredPaths.resize(newRange.second-newRange.first+1,0);
 								++exploredPaths[newRange.second-newRange.first];
 								totalE+=tcands.size();
 
@@ -420,11 +442,13 @@ struct PDTAimp {
 		if (StaticData::Instance()->GetVerboseLevel() >= 1 && exploredPaths.size())
 			{
 				std::cerr<<"CN (explored): ";
-				std::copy(exploredPaths.begin()+1,exploredPaths.end(),std::ostream_iterator<size_t>(std::cerr," ")); 
+				std::copy(exploredPaths.begin()+1,exploredPaths.end(),
+									std::ostream_iterator<size_t>(std::cerr," ")); 
 				std::cerr<<"\n";
 			}
 
-		if(pathExplored.size()<exploredPaths.size()) pathExplored.resize(exploredPaths.size(),0);
+		if(pathExplored.size()<exploredPaths.size()) 
+			pathExplored.resize(exploredPaths.size(),0);
 		for(size_t len=1;len<=srcSize;++len)
 			pathExplored[len]+=exploredPaths[len];
 
@@ -460,6 +484,8 @@ struct PDTAimp {
 						m_tgtColls.push_back(rv);
 					}
 			}
+		// free memory
+		m_dict->FreeMemory();
 	}
 };
 
