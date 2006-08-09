@@ -27,32 +27,47 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 
 class Dictionary;
-class  DecodeStep 
+
+/** Specification for a decoding step.
+ * The factored translation model consists of Translation and Generation
+ * steps, which consult a Dictionary of phrase translations or word
+ * generations. This class implements the specification for one of these
+ * steps, both the DecodeType and a pointer to the Dictionary
+ **/
+ 
+class DecodeStep 
 {
 protected:
-	const DecodeType m_decodeType;
-	const Dictionary *m_ptr;
-		// 2nd = pointer to a phraseDictionary or generationDictionary
+	const DecodeType m_decodeType; /*< either Translate or Generate */
+	const Dictionary *m_ptr; /*< pointer to translation/generation table */
+
 public:
 	DecodeStep(DecodeType decodeType, Dictionary *ptr)
 	:m_decodeType(decodeType)
 	,m_ptr(ptr)
 	{
 	}
+	/** returns decoding type, either Translate or Generate */
 	DecodeType GetDecodeType() const
 	{
 		return m_decodeType;
 	}
+
+	/** returns phrase table (dictionary) for translation step */
 	const PhraseDictionaryBase &GetPhraseDictionary() const
 	{
 		assert (m_decodeType == Translate);
 		return *static_cast<const PhraseDictionaryBase*>(m_ptr);
 	}
+
+	/** returns generation table (dictionary) for generation step */
 	const GenerationDictionary &GetGenerationDictionary() const
 	{
 		assert (m_decodeType == Generate);
 	  return *static_cast<const GenerationDictionary*>(m_ptr);
 	}
+
+	/** returns dictionary in abstract class */
 	const Dictionary* GetDictionaryPtr() const {return m_ptr;}
 	
 };
