@@ -313,10 +313,7 @@ struct PDTAimp {
 	void CacheSource(ConfusionNet const& src) 
 	{
 		assert(m_dict);
-		std::vector<State> stack;
 		size_t srcSize=src.GetSize();
-		for(size_t i=0;i<srcSize;++i) 
-			stack.push_back(State(i,i,m_dict->GetRoot()));
 
 		std::vector<size_t> exploredPaths(srcSize+1,0);
 		std::vector<double> exPathsD(srcSize+1,-1.0);
@@ -358,6 +355,9 @@ struct PDTAimp {
 		typedef std::map<StringTgtCand::first_type,TScores> E2Costs;
 
 		std::map<Range,E2Costs> cov2cand;
+		std::vector<State> stack;
+		for(size_t i=0;i<srcSize;++i) 
+			stack.push_back(State(i,i,m_dict->GetRoot()));
 
 		while(!stack.empty()) 
 			{
@@ -375,8 +375,8 @@ struct PDTAimp {
 						Factors2String(w.GetFactorArray(),s);
 						bool isEpsilon=(s=="" || s==EPSILON);
 
-						// do not start with epsilon
-						if(isEpsilon && curr.begin()==curr.end()) continue; 
+						// do not start with epsilon (except at first position)
+						if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue; 
 
 						PPtr nextP = (isEpsilon ? curr.ptr : m_dict->Extend(curr.ptr,s));
 						unsigned newRealWords=curr.realWords + (isEpsilon ? 0 : 1);
