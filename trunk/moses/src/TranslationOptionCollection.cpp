@@ -199,8 +199,8 @@ TranslationOption *MergeTranslation(const TranslationOption& oldTO, TargetPhrase
 {
   if (oldTO.GetTargetPhrase().IsCompatible(targetPhrase))
   {
-    targetPhrase.MergeFactors(oldTO.GetTargetPhrase());
-    TranslationOption *newTransOpt = new TranslationOption(oldTO, targetPhrase);
+    TranslationOption *newTransOpt = new TranslationOption(oldTO);
+		newTransOpt->MergeFeaturesFromNewPhrase(targetPhrase);
     return newTransOpt;
   }
   else
@@ -212,8 +212,8 @@ TranslationOption *MergeGeneration(const TranslationOption& oldTO, Phrase &merge
 {
   if (oldTO.GetTargetPhrase().IsCompatible(mergePhrase))
   {
-    mergePhrase.MergeFactors(oldTO.GetTargetPhrase());
-    TranslationOption *newTransOpt = new TranslationOption(oldTO, mergePhrase, generationScore);
+    TranslationOption *newTransOpt = new TranslationOption(oldTO);
+		newTransOpt->MergeFeaturesFromNewPhrase(mergePhrase, generationScore);
     return newTransOpt;
   }
   else
