@@ -38,31 +38,25 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 }
 
-TranslationOption::TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase)
-	: m_targetPhrase(targetPhrase)
-	,m_sourcePhrase(copy.m_sourcePhrase) // take source phrase pointer from initial translation option
-	,m_sourceWordsRange	(copy.m_sourceWordsRange)
-	,m_scoreBreakdown(copy.m_scoreBreakdown)
-{ // used in creating the next translation step
-	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
-}
-
-TranslationOption::TranslationOption(const TranslationOption &copy
-																		, const Phrase &inputPhrase
-																		, const ScoreComponentCollection2 &additionalScore)
-	: m_targetPhrase						(inputPhrase),m_sourcePhrase(copy.m_sourcePhrase)
-, m_sourceWordsRange	(copy.m_sourceWordsRange)
-, m_scoreBreakdown(copy.m_scoreBreakdown)
-{ // used in creating the next generation step
-	m_scoreBreakdown.PlusEquals(additionalScore);
-}
-
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/)
 : m_targetPhrase(targetPhrase)
 ,m_sourceWordsRange	(wordsRange)
 ,m_futureScore(0)
 { // used to create trans opt from unknown word
 }
+
+void TranslationOption::MergeFeaturesFromNewPhrase(const TargetPhrase& phrase)
+{
+  m_targetPhrase.MergeFactors(phrase);
+	m_scoreBreakdown.PlusEquals(phrase.GetScoreBreakdown());
+}
+
+void TranslationOption::MergeFeaturesFromNewPhrase(const Phrase& phrase, const ScoreComponentCollection2& additionalScore)
+{
+  m_targetPhrase.MergeFactors(phrase);
+	m_scoreBreakdown.PlusEquals(additionalScore);
+}
+
 
 bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 {
