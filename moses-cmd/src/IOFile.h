@@ -48,7 +48,7 @@ protected:
 public:
 	IOFile(const std::vector<FactorType>	&inputFactorOrder
 				, const std::vector<FactorType>	&outputFactorOrder
-				, const FactorTypeSet						&inputFactorUsed
+				, const FactorMask							&inputFactorUsed
 				, FactorCollection							&factorCollection
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath
