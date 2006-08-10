@@ -3,6 +3,7 @@
 #include "LanguageModelFactory.h"
 #include "UserMessage.h"
 #include "TypeDef.h"
+#include "FactorCollection.h"
 
 // include appropriate header
 #ifdef LM_SRI
@@ -17,7 +18,8 @@
 namespace LanguageModelFactory
 {
 
-	LanguageModel* CreateLanguageModel(LMImplementation lmImplementation)
+	LanguageModel* CreateLanguageModel(LMImplementation lmImplementation, const std::vector<FactorType> &factorTypes     
+                                   , size_t nGramOrder, const std::string &languageModelFile, float weight, FactorCollection &factorCollection)
 	{
 	  LanguageModel *lm = NULL;
 	  switch (lmImplementation)
@@ -25,11 +27,15 @@ namespace LanguageModelFactory
 	  	case SRI:
 				#ifdef LM_SRI
 				  lm = new LanguageModel_SRI(true);
+			  #else
+	     		lm = new LanguageModel_IRST(true);
 			  #endif
 			  break;
 			case IRST:
 				#ifdef LM_IRST
 	     		lm = new LanguageModel_IRST(true);
+			  #else
+				  lm = new LanguageModel_SRI(true);
 				#endif
 				break;
 			case Chunking:
@@ -42,20 +48,23 @@ namespace LanguageModelFactory
 				#endif
 	  }
 	  
-  	// fall back. pick what we have. assume it single factor
-	  // we should be taking this out soon
 	  if (lm == NULL)
 	  {
-	  	#ifdef LM_SRI
-				lm = new LanguageModel_SRI(true);
-			#else
-				#ifdef LM_IRST
-					lm = new LanguageModel_IRST(true);
-				#else
-			  	UserMessage::Add("Language model type unknown. Probably not compiled into library");
-				#endif
-			#endif			  
+	  	UserMessage::Add("Language model type unknown. Probably not compiled into library");
 	  }
+	  else
+	  {
+	  	switch (lm->GetLMType())
+	  	{
+	  	case SingleFactor:
+	  		static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorCollection, factorTypes[0], weight, nGramOrder);
+	  		break;	  	
+	  	case MultiFactor:
+	  		 static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorCollection, factorTypes, weight, nGramOrder);
+	  			break;
+	  	}
+	  }
+	  
 	  return lm;
 	}
 }
