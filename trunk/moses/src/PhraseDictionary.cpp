@@ -90,14 +90,14 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 		if (!filter)
 		{
 			if (tokens[0] != prevSourcePhrase)
-				phraseVector = Phrase::Parse(tokens[0]);
+				phraseVector = Phrase::Parse(tokens[0], input);
 		}
 		else if (tokens[0] == prevSourcePhrase)
 		{ // same source phrase as prev line.
 		}
 		else
 		{
-			phraseVector = Phrase::Parse(tokens[0]);
+			phraseVector = Phrase::Parse(tokens[0], input);
 			prevSourcePhrase = tokens[0];
 
 			addPhrase = Contains(phraseVector, inputPhraseList, input);

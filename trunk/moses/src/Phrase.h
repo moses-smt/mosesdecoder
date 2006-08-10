@@ -55,7 +55,7 @@ public:
 
 	virtual ~Phrase();
 
-	static std::vector< std::vector<std::string> > Parse(const std::string &phraseString);
+	static std::vector< std::vector<std::string> > Parse(const std::string &phraseString, const std::vector<FactorType> &factorOrder);
 	void CreateFromString(const std::vector<FactorType> &factorOrder
 											, const std::string &phraseString
 											, FactorCollection &factorCollection);
