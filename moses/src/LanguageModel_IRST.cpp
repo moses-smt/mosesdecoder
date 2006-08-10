@@ -25,9 +25,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <fstream>
 
+#include "dictionary.h"
 #include "n_gram.h"
 #include "lmtable.h"
-#include "dictionary.h"
+
 
 #include "LanguageModel_IRST.h"
 #include "TypeDef.h"
@@ -117,6 +118,8 @@ void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
 		m_lmIdLookup[iterMap->first] = iterMap->second;
 	}
 	
+  //initialize cache memory
+  m_lmtb->init_prcache();
 }
 
 int LanguageModel_IRST::GetLmID( const std::string &str ) const
@@ -143,11 +146,10 @@ float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFact
 	}
   
 	if (finalState){        
-    *finalState=(State *)m_lmtb->maxsuffptr(*m_lmtb_ng);		
-
+    *finalState=(State *)m_lmtb->cmaxsuffptr(*m_lmtb_ng);		
 	}
-  
-	return TransformIRSTScore(m_lmtb->lprob(*m_lmtb_ng));
 
+	//return TransformIRSTScore(m_lmtb->clprob(*m_lmtb_ng));
+  return TransformIRSTScore(m_lmtb->clprob(*m_lmtb_ng));
 }
 

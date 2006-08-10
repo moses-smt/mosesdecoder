@@ -27,10 +27,6 @@ using namespace std;
 #include <stdlib.h>
 
 #include "math.h"
-#include "mempool.h"
-#include "htable.h"
-#include "dictionary.h"
-#include "n_gram.h"
 #include "lmtable.h"
 
 
@@ -139,15 +135,15 @@ int main(int argc, const char **argv)
     double logPr=0,PP=0,PPwp=0,Pr;
     
     int bos=ng.dict->encode(ng.dict->BoS());
-    
+    lmt.init_prcache();
     while(inptxt >> ng){
       
       // reset ngram at begin of sentence
       if (*ng.wordp(1)==bos) continue;
-      
+     
       lmt.bo_state(0);
       if (ng.size>=1){ 
-        logPr+=(Pr=lmt.lprob(ng));
+        logPr+=(Pr=lmt.clprob(ng));
         if (*ng.wordp(1) == lmt.dict->oovcode()) Noov++;        
         Nw++; if (lmt.bo_state()) Nbo++;                   
       }

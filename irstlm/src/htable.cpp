@@ -31,14 +31,14 @@ htable::htable(int n,int kl,HTYPE ht,size_t (*klf)(const char* )){
     cerr << "htable: key length must be specified for non-string entries!";
     exit(1);
   } 
-  
+    
   memory=new mempool( sizeof(entry) , BlockSize );
 
   table = new entry* [ size=n ];
 
   memset(table,0,sizeof(entry *) * n );
   
-  keylen=kl;
+  keylen=(ht==INT || ht==INTPTR?kl/sizeof(int):kl);
 
   htype=ht;
   
@@ -62,6 +62,8 @@ char *htable::search(char *item, HT_ACTION action)
   h = Hash(item);
   
   i=(h % size);
+  
+  //cout << "htable::search() hash i=" << i << "\n";
   
   p = &table[h % size];
 
@@ -200,28 +202,25 @@ address htable::HashStr(char *key)
 address htable::HashInt(char *key)
 {
   int *Key=(htype==INTPTR? *(int **)key:(int *)key);
-  static int  length=keylen/sizeof(int); 
-  
+   
   //cerr << "hash: " << Key << " length:" << length << "\n";
   
-  register int  h=0;
+  register int  h;
   register int i;
   
-  
-  for (i=0,h=0;i<length;i++){
-    /*Thomas Wang's 32 bit Mix Function
+  /*Thomas Wang's 32 bit Mix Function*/
+  for (i=0,h=0;i<keylen;i++){    
     h+=Key[i];
     h += ~(h << 15);
     h ^=  (h >> 10);
     h +=  (h << 3);
     h ^=  (h >> 6);
     h += ~(h << 11);
-    h ^=  (h >> 16);
-    */
-     h = h * Prime1 ^ Key[i];
+    h ^=  (h >> 16);    
   };
     
-  h %= Prime2;  
+  //for (i=0,h=0;i<length;i++) h = h * Prime1 ^ Key[i];
+  //h %= Prime2;  
   
   return h;
 }
@@ -255,12 +254,10 @@ int htable::CompInt(char *key1, char *key2)
   int *Key2=(htype==INTPTR?*(int **)key2:(int*)key2);
   
   assert(Key1 && Key2);
-  
-  static int length=keylen/sizeof(int);
-    
+      
   register int i;
   
-  for (i=0;i<length;i++)
+  for (i=0;i<keylen;i++)
     if (Key1[i]!=Key2[i]) return 1;
   return 0;
 }
