@@ -167,7 +167,7 @@ FactorArray &Phrase::AddWord()
 	return factorArray;
 }
 
-vector< vector<string> > Phrase::Parse(const std::string &phraseString)
+vector< vector<string> > Phrase::Parse(const std::string &phraseString, const std::vector<FactorType> &factorOrder)
 {
 		// parse
 	vector< vector<string> > phraseVector;
@@ -183,6 +183,12 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString)
 		// KOMMA|none
 		//    to
 		// "KOMMA" "none"
+		if (factorStrVector.size() != factorOrder.size()) {
+			std::cerr << "[ERROR] Malformed input at " << /*StaticData::Instance()->GetCurrentInputPosition() <<*/ std::endl
+			          << "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
+								<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n";
+			abort();
+		}
 		phraseVector.push_back(factorStrVector);
 	}
 	return phraseVector;
@@ -210,7 +216,7 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const string &phraseString
 															, FactorCollection &factorCollection)
 {
-	vector< vector<string> > phraseVector = Parse(phraseString);
+	vector< vector<string> > phraseVector = Parse(phraseString, factorOrder);
 	CreateFromString(factorOrder, phraseVector, factorCollection);
 }
 
