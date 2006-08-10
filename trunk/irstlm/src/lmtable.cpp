@@ -17,6 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 ******************************************************************************/
+using namespace std;
 
 #include <iostream>
 #include <fstream>
@@ -28,11 +29,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #include "math.h"
 #include "mempool.h"
 #include "htable.h"
+#include "ngramcache.h"
 #include "dictionary.h"
 #include "n_gram.h"
 #include "lmtable.h"
 
-using namespace std;
 
 inline void error(char* message){
   cerr << message << "\n";
@@ -53,10 +54,10 @@ lmtable::lmtable(){
 	memset(info, 0, sizeof(info));
 	memset(NumCenters, 0, sizeof(NumCenters));
  
-  bicache=new bigramcache(1000000);
+  bicache=new ngramcache(2,sizeof(char*),1000000);
+  prcache=NULL;
   
 };
-
 
 
 //loadstd::istream& inp a lmtable from a lm file
@@ -567,18 +568,19 @@ int lmtable::get(ngram& ng,int n,int lev){
   int offset=0,limit=cursize[1];
 	
   //information of table entries
-  char* addr; char* found; LMT_TYPE ndt;
+  int hit;char* found; LMT_TYPE ndt;
   ng.link=NULL;
   ng.lev=0;            
 
   for (int l=1;l<=lev;l++){
 		
     //initialize entry information 
-    found = NULL; ndt=tbltype[l];
- 
-    if (l==2 && (addr=bicache->get(ng.wordp(n)))){
-      found=*((char **)(addr + 2 * sizeof(int))); // get the information
-    }
+    hit = 0 ; found = NULL; ndt=tbltype[l];
+    
+    //if (l==2) cout <<"bicache: searching:" << ng <<"\n";
+    
+    if (l==2 && bicache->get(ng.wordp(n),(char *)&found))
+      hit=1;
     else
       search(table[l] + (offset * nodesize(ndt)),
              ndt,
@@ -589,14 +591,11 @@ int lmtable::get(ngram& ng,int n,int lev){
              LMT_FIND,
              &found);
  
-    if (l==2 && !addr){
-      if (bicache->isfull()){
-        bicache->reset();
-        cerr << "resetting the cache\n";
-      } 
-      bicache->add(ng.wordp(n),found);      
+    if (l==2 && hit==0){
+      if (bicache->isfull()) bicache->reset();
+      //cout << "bicache :" << ng <<"\n";
+       bicache->add(ng.wordp(n),(char *)&found);      
     }    
-
       
     if (!found) return 0;
     
@@ -721,8 +720,9 @@ const char *lmtable::maxsuffptr(ngram ong){
   if (ong.size==0) return (char*) NULL;
   if (ong.size>=maxlev) ong.size=maxlev-1;
   
-  ngram ng(dict); //eventually use the <unk> word
-  ng.trans(ong);
+  ngram ng=ong;
+  //ngram ng(dict); //eventually use the <unk> word
+  //ng.trans(ong);
   
   if (get(ng,ng.size,ng.size))
     return ng.link;
@@ -730,6 +730,29 @@ const char *lmtable::maxsuffptr(ngram ong){
     ong.size--;
     return maxsuffptr(ong);
   }
+}
+
+
+const char *lmtable::cmaxsuffptr(ngram ong){  
+  
+  if (ong.size==0) return (char*) NULL;
+  if (ong.size>=maxlev) ong.size=maxlev-1;
+  
+  char* found;
+  
+  if ((ong.size==maxlev-1) && statecache->get(ong.wordp(maxlev-1),(char *)&found))
+    return found;
+  
+  found=(char *)maxsuffptr(ong);
+  
+  if (ong.size==maxlev-1){
+    if (statecache->isfull()) statecache->reset();
+    // cout << "clprob: adding: " << ong <<"\n";
+    statecache->add(ong.wordp(maxlev-1),(char *)&found);    
+  }; 
+  
+  return found;
+  
 }
 
 
@@ -776,8 +799,9 @@ double lmtable::lprob(ngram ong){
   if (ong.size==0) return 0.0;
   if (ong.size>maxlev) ong.size=maxlev;
   
-  ngram ng(dict);
-  ng.trans(ong);
+  ngram ng=ong;
+  //ngram ng(dict); //avoid dictionary transfer
+  //ng.trans(ong);
 	
   double rbow;
   int ibow,iprob;
@@ -805,6 +829,35 @@ double lmtable::lprob(ngram ong){
   }
 }
 
+//return log10 probsL use cache memory
+
+double lmtable::clprob(ngram ong){
+	
+  
+  if (ong.size==0) {
+    return 0.0;
+  }
+  
+  if (ong.size>maxlev) ong.size=maxlev;
+
+  double pr; 
+  if (ong.size==maxlev && prcache->get(ong.wordp(maxlev),(char *)&pr)){
+    //assert(pr==lprob(ong));
+    return pr;    
+  };   
+
+ 
+  pr=lprob(ong);
+  
+  if (ong.size==maxlev){
+    if (prcache->isfull()) prcache->reset();
+    // cout << "clprob: adding: " << ong <<"\n";
+     prcache->add(ong.wordp(maxlev),(char *)&pr);    
+  }; 
+  
+  return pr;
+
+};
 
 
 

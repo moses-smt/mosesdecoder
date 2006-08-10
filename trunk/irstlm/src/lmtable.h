@@ -22,6 +22,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #ifndef MF_LMTABLE_H
 #define MF_LMTABLE_H
 
+#include "ngramcache.h"
+#include "dictionary.h"
+#include "n_gram.h"
+
 #define LMTMAXLEV  11
 
 #ifndef  LMTCODESIZE
@@ -49,59 +53,6 @@ typedef enum {LMT_FIND,    //!< search: find an entry
 } LMT_ACTION;
 
 
-
-//cache memory to store links to bigrams store in the tree
-#include "mempool.h"
-#include "htable.h"
-
-class bigramcache{
-private:
-  htable* ht;  
-  mempool *mp;
-  int maxn;
-  int entries;
-public:
-
-    bigramcache(int maxentries){
-    maxn=maxentries;
-    entries=0;
-    ht=new htable(maxentries, 2 * sizeof(int),INT,NULL); //load factor   
-    mp=new mempool(2 * sizeof(int)+sizeof(char*),maxn/10);
-  };
-  
-  ~bigramcache(){
-    ht->stat();//ht->map();
-    mp->stat();
-    delete ht;delete mp;   
-  };
-  
-  void reset(){
-    ht->stat();
-    delete ht;delete mp;    
-    ht=new htable(maxn/5, 2 * sizeof(int),STR,NULL); //load factor   
-    mp=new mempool(2*sizeof(int)+sizeof(char*),maxn/10);
-    entries=0;
-  }
-  
-  char* get(int* ngp){       
-    char *found=ht->search((char *)ngp,HT_FIND);    
-    return found;    
-  };
-  
-  int add(int* ngp,char* link){
-   
-    char* entry=mp->alloc();
-    memcpy(entry,(char*)ngp,sizeof(int) * 2);    
-    memcpy(entry + 2 * sizeof(int),(char *)&link,sizeof(char *));
-    char *found=ht->search((char *)entry,HT_ENTER);
-    assert(found==(char *)entry); //false if key is already insided
-    entries++;
-    return 1;
-  }
-
-  int isfull(){ return (entries >= maxn);};  
-
-};
 
 
 
@@ -183,9 +134,12 @@ class lmtable{
   int     lmt_oov_code;
   int     lmt_oov_size;
   int    backoff_state; 
+  
   //improve access speed
-  bigramcache* bicache;
-		
+  ngramcache* bicache;
+	ngramcache* prcache;
+  ngramcache* statecache;
+	
 public:
     
   dictionary     *dict; // dictionary
@@ -193,7 +147,20 @@ public:
   lmtable();
   
   ~lmtable(){
-    delete bicache;
+    if (bicache){
+      std::cerr << "Bigram Cache: "; bicache->stat();
+      delete bicache; 
+    }
+    if (prcache){
+      std::cerr << "Prob Cache: "; prcache->stat();
+      delete prcache;
+    } 
+    if (statecache){
+      std::cerr << "State Cache: "; statecache->stat();
+      delete statecache;
+    } 
+    
+    
     for (int i=1;i<=maxlev;i++){
       if (table[i]) delete [] table[i];
       if (isQtable){
@@ -203,7 +170,12 @@ public:
       }
     }
   }
-  
+    
+  void init_prcache(){
+    assert(prcache==NULL);
+    prcache=new ngramcache(maxlev,sizeof(double),1000000);
+    statecache=new ngramcache(maxlev-1,sizeof(char *),1000000);
+  }
   
 	void configure(int n,bool quantized){
 		maxlev=n;
@@ -237,6 +209,8 @@ public:
 	
   double prob(ngram ng); 
   double lprob(ngram ng); 
+  double clprob(ngram ng); 
+
   
   void *search(char *tb,LMT_TYPE ndt,int lev,int n,int sz,int *w,
                LMT_ACTION action,char **found=(char **)NULL);
@@ -252,6 +226,7 @@ public:
   int succscan(ngram& h,ngram& ng,LMT_ACTION action,int lev);
   
   const char *maxsuffptr(ngram ong);
+  const char *cmaxsuffptr(ngram ong);
   
   inline int putmem(char* ptr,int value,int offs,int size){
     assert(ptr!=NULL);
