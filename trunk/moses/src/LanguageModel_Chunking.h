@@ -122,11 +122,10 @@ public:
 			std::string strConcate = factorArray[m_posType]->GetString() + "|" + factorArray[m_morphType]->GetString();
 			
 			const Factor *factor = m_factorCollection->AddFactor(Output, m_jointType, strConcate);
-			FactorArray *chunkFactorArray = (FactorArray*) malloc(sizeof(FactorArray));
-			Word::Initialize(*chunkFactorArray);
-			(*chunkFactorArray)[m_jointType] = factor;
+			Word chunkWord;
+			chunkWord.SetFactor(m_jointType, factor);
 
-			chunkContext.push_back(*chunkFactorArray);
+			chunkContext.push_back(chunkWord);
 		}
 	
 		// create context factor the right way round
@@ -140,10 +139,6 @@ public:
 		*/
 		// calc score
 		float ret = m_lmImpl.GetValue(chunkContext, finalState);
-
-		// delete temporary factor arrays
-		for (size_t i = 0 ; i < chunkContext.size() ; ++i)
-			delete &chunkContext[i].GetFactorArray();
 		
 		return ret;
 	}
