@@ -41,7 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "InputOutput.h"
 #include "Sentence.h"
 
-class FactorTypeSet;
+class FactorMask;
 class FactorCollection;
 
 class IOCommandLine : public InputOutput
@@ -49,13 +49,13 @@ class IOCommandLine : public InputOutput
 protected:
 	const std::vector<FactorType>	&m_inputFactorOrder;
 	const std::vector<FactorType>	&m_outputFactorOrder;
-	const FactorTypeSet						&m_inputFactorUsed;
+	const FactorMask							&m_inputFactorUsed;
 	FactorCollection							&m_factorCollection;
 	std::ofstream 								m_nBestFile;
 public:
 	IOCommandLine(const std::vector<FactorType>	&inputFactorOrder
 		, const std::vector<FactorType>			&outputFactorOrder
-				, const FactorTypeSet						&inputFactorUsed
+				, const FactorMask							&inputFactorUsed
 				, FactorCollection							&factorCollection
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath);

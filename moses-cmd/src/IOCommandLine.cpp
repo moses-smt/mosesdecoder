@@ -47,7 +47,7 @@ using namespace std;
 IOCommandLine::IOCommandLine(
 				const vector<FactorType>				&inputFactorOrder
 				, const vector<FactorType>			&outputFactorOrder
-				, const FactorTypeSet						&inputFactorUsed
+				, const FactorMask							&inputFactorUsed
 				, FactorCollection							&factorCollection
 				, size_t												nBestSize
 				, const string									&nBestFilePath)

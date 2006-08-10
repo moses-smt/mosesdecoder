@@ -151,7 +151,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 	InputOutput *inputOutput;
 	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
 																,&outputFactorOrder = staticData.GetOutputFactorOrder();
-	FactorTypeSet inputFactorUsed(inputFactorOrder);
+	FactorMask inputFactorUsed(inputFactorOrder);
 
 	// io
 	if (staticData.GetIOMethod() == IOMethodFile)
