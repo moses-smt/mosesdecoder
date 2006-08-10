@@ -20,9 +20,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "DecodeStep.h"
-DecodeStep::DecodeStep(DecodeType decodeType, Dictionary *ptr)
+#include "PhraseDictionary.h"
+#include "GenerationDictionary.h"
+
+DecodeStep::DecodeStep(DecodeType decodeType, Dictionary *ptr, const DecodeStep* prev)
 :m_decodeType(decodeType)
 ,m_ptr(ptr)
 {
+	if (prev) m_outputFactors = prev->m_outputFactors;
+	m_conflictMask = (m_outputFactors & ptr->GetOutputFactorMask());
+	m_outputFactors |= ptr->GetOutputFactorMask();
+}
+
+/** returns phrase table (dictionary) for translation step */
+const PhraseDictionaryBase &DecodeStep::GetPhraseDictionary() const
+{
+  assert (m_decodeType == Translate);
+  return *static_cast<const PhraseDictionaryBase*>(m_ptr);
+}
+
+/** returns generation table (dictionary) for generation step */
+const GenerationDictionary &DecodeStep::GetGenerationDictionary() const
+{
+  assert (m_decodeType == Generate);
+  return *static_cast<const GenerationDictionary*>(m_ptr);
 }
 

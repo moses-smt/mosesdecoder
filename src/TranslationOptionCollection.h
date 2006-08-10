@@ -36,6 +36,7 @@ class PhraseDictionary;
 class GenerationDictionary;
 class InputType;
 class LMList;
+class FactorMask;
 
 typedef std::vector<const TranslationOption*> TranslationOptionList;
 
