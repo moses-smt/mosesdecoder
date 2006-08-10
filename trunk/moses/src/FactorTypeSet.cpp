@@ -35,7 +35,6 @@ FactorMask::FactorMask(const vector<FactorType> &factors)
 TO_STRING_BODY(FactorMask);
 
 // friend
-inline
 std::ostream& operator<<(std::ostream& out, const FactorMask& fm)
 {
   out << "FactorMask<";

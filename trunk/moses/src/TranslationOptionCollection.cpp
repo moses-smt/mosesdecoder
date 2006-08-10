@@ -392,15 +392,17 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 , size_t endPos)
 {
 	// partial trans opt stored in here
-	vector < PartialTranslOptColl* > outputPartialTranslOptCollVec( decodeStepList.size() );
-	outputPartialTranslOptCollVec[0] = new PartialTranslOptColl();
+	PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
 	
 	// initial translation step
 	list < DecodeStep >::const_iterator iterStep = decodeStepList.begin();
 	const DecodeStep &decodeStep = *iterStep;
 
+	if (StaticData::Instance()->GetVerboseLevel() > 0) {
+		std::cerr << "decode step(initial): output factors=" << decodeStep.GetOutputFactorMask() << std::endl;
+	}
 	ProcessInitialTranslation(decodeStep, factorCollection
-														, *outputPartialTranslOptCollVec[0]
+														, *oldPtoc
 														, startPos, endPos );
 
 	// do rest of decode steps
@@ -409,25 +411,25 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
 		{
 			const DecodeStep &decodeStep = *iterStep;
+			if (StaticData::Instance()->GetVerboseLevel() > 0) {
+				std::cerr << "decode step("<< indexStep<<"): output factors=" << decodeStep.GetOutputFactorMask() << "  conflict factors=" << decodeStep.GetConflictFactorMask() << std::endl;
+			}
+			PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 			
-			outputPartialTranslOptCollVec[indexStep + 1]			= new PartialTranslOptColl();
-			PartialTranslOptColl &inputPartialTranslOptColl		= *outputPartialTranslOptCollVec[indexStep]
-													,&outputPartialTranslOptColl	= *outputPartialTranslOptCollVec[indexStep + 1];
-
 			// is it translation or generation
 			switch (decodeStep.GetDecodeType()) 
 				{
 				case Translate:
 					{
 						// go thru each intermediate trans opt just created
-						vector<TranslationOption*> partTransOptList = inputPartialTranslOptColl.GetList();
+						const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
 						vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
 						for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
 							{
 								TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 								ProcessTranslation(inputPartialTranslOpt
 																	 , decodeStep
-																	 , outputPartialTranslOptColl
+																	 , *newPtoc
 																	 , factorCollection);
 							}
 						break;
@@ -435,14 +437,14 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 				case Generate:
 					{
 						// go thru each hypothesis just created
-						vector<TranslationOption*> partTransOptList = inputPartialTranslOptColl.GetList();
+						const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
 						vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
 						for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
 							{
 								TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 								ProcessGeneration(inputPartialTranslOpt
 																	, decodeStep
-																	, outputPartialTranslOptColl
+																	, *newPtoc
 																	, factorCollection);
 							}
 						break;
@@ -454,15 +456,16 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 					}
 				}
 			// last but 1 partial trans not required anymore
-			totalEarlyPruned += outputPartialTranslOptCollVec[indexStep]->GetPrunedCount();
-			delete outputPartialTranslOptCollVec[indexStep];
+			totalEarlyPruned += newPtoc->GetPrunedCount();
+			delete oldPtoc;
+			oldPtoc = newPtoc;
 			indexStep++;
 		} // for (++iterStep 
 
 	// add to fully formed translation option list
-	PartialTranslOptColl &lastPartialTranslOptColl	= *outputPartialTranslOptCollVec[decodeStepList.size() - 1];
-	vector<TranslationOption*> partTransOptList = lastPartialTranslOptColl.GetList();
-	vector<TranslationOption*>::iterator iterColl;
+	PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
+	const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
+	vector<TranslationOption*>::const_iterator iterColl;
 	for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl)
 		{
 			TranslationOption *transOpt = *iterColl;
@@ -471,8 +474,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		}
 
 	lastPartialTranslOptColl.DetachAll();
-	totalEarlyPruned += outputPartialTranslOptCollVec[decodeStepList.size() - 1]->GetPrunedCount();
-	delete outputPartialTranslOptCollVec[decodeStepList.size() - 1];
+	totalEarlyPruned += oldPtoc->GetPrunedCount();
+	delete oldPtoc;
 	// cerr << "Early translation options pruned: " << totalEarlyPruned << endl;
 }
 

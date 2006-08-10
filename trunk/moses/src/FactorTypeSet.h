@@ -34,6 +34,8 @@ class FactorMask : public std::bitset<MAX_NUM_FACTORS>
 public:
 	explicit FactorMask(const std::vector<FactorType> &factors);
 	inline FactorMask() {}
+	FactorMask(const std::bitset<MAX_NUM_FACTORS>& rhs) : std::bitset<MAX_NUM_FACTORS>(rhs) { }
+//	const FactorMask& operator=(const std::bitset<MAX_NUM_FACTORS>& rhs) { return *this = rhs; }
 
 	TO_STRING;	
 };

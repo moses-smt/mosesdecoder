@@ -422,6 +422,11 @@ IOMethod StaticData::GetIOMethod()
 		return IOMethodCommandLine;
 }
 
+void StaticData::LoadPhraseTables()
+{
+  LoadPhraseTables(false, "", std::list< Phrase >());
+}
+
 void StaticData::LoadPhraseTables(bool filter
 																	, const string &inputFileHash
 																	, const list< Phrase > &inputPhraseList)
@@ -555,6 +560,7 @@ void StaticData::LoadMapping()
 {
 	// mapping
 	const vector<string> &mappingVector = m_parameter.GetParam("mapping");
+	DecodeStep *prev = 0;
 	for(size_t i=0; i<mappingVector.size(); i++) 
 	{
 		vector<string>	token		= Tokenize(mappingVector[i]);
@@ -563,8 +569,13 @@ void StaticData::LoadMapping()
 			DecodeType decodeType = token[0] == "T" ? Translate : Generate;
 			size_t index = Scan<size_t>(token[1]);
 			DecodeStep decodeStep (decodeType
-														,decodeType == Translate ? (Dictionary*) m_phraseDictionary[index] : (Dictionary*) m_generationDictionary[index]);
+														,decodeType == Translate ? (Dictionary*) m_phraseDictionary[index] : (Dictionary*) m_generationDictionary[index]
+														,prev);
 			m_decodeStepList.push_back(decodeStep);
+			prev = &m_decodeStepList.back();
+		} else {
+			std::cerr << "Malformed mapping!\n";
+			abort();
 		}
 	}
 }
