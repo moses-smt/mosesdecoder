@@ -92,16 +92,14 @@ public:
 
 class FactorArrayWrapper
 {
+	friend std::ostream& operator<<(std::ostream&, const FactorArrayWrapper&);
+	
 protected:
 	const FactorArray *m_factorArray;
 public:
 	FactorArrayWrapper() {}
 	FactorArrayWrapper(const FactorArray &factorArray)
 		:m_factorArray(&factorArray) {}
-	const Factor *operator[](size_t index) const
-	{
-		return (*m_factorArray)[index];
-	}
 
 	FactorArrayWrapper& operator=(const FactorArrayWrapper &other)
 	{
@@ -111,5 +109,17 @@ public:
 		}
 		return *this;
 	}
+
+	const Factor *operator[](size_t index) const
+	{
+		return (*m_factorArray)[index];
+	}
+
+	inline const FactorArray &GetFactorArray() const
+	{
+		return *m_factorArray;
+	}
+
+	TO_STRING;
 };
 

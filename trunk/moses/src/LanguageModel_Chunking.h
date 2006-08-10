@@ -33,6 +33,7 @@ class LanguageModel_Chunking : public LanguageModelMultiFactor
 {	
 protected:
 	FactorType m_posType, m_morphType, m_jointType;
+	size_t m_realNGramOrder;
 	LMImpl m_lmImpl;
 	std::vector<std::string> m_posPrefix; // only process words with these tags
 	mutable FactorCollection *m_factorCollection;
@@ -47,6 +48,8 @@ public:
 		m_posPrefix.push_back("V");
 		m_posPrefix.push_back("$,");
 		m_posPrefix.push_back("$.");
+		m_posPrefix.push_back(BOS_);
+		m_posPrefix.push_back(EOS_);
 	}
 	
 	void Load(const std::string &fileName
@@ -55,22 +58,23 @@ public:
 					, float weight
 					, size_t nGramOrder)
 	{
-		m_factorTypes = factorTypes;
-		m_weight = weight;
-		m_filename = fileName;
-		m_nGramOrder = nGramOrder;
-		m_factorCollection = &factorCollection;
+		m_factorTypes 			= factorTypes;
+		m_weight 						= weight;
+		m_filename 					= fileName;
+		m_nGramOrder 				= nGramOrder;
+		m_factorCollection 	= &factorCollection;
 		
 		// hack. this LM is a joint factor of morph and POS tag
-		m_posType = 1;
-		m_morphType = 2;
-		m_jointType = 3;
+		m_posType						= 1;
+		m_morphType					= 2;
+		m_jointType 				= 3;
+		m_realNGramOrder 		= 3;
 
-		m_sentenceStartArray[m_posType] = factorCollection.AddFactor(Output, m_posType, "BOS_");
-		m_sentenceStartArray[m_morphType] = factorCollection.AddFactor(Output, m_morphType, "BOS_");
+		m_sentenceStartArray[m_posType] = factorCollection.AddFactor(Output, m_posType, BOS_);
+		m_sentenceStartArray[m_morphType] = factorCollection.AddFactor(Output, m_morphType, BOS_);
 
-		m_sentenceEndArray[m_posType] = factorCollection.AddFactor(Output, m_posType, "EOS_");
-		m_sentenceEndArray[m_morphType] = factorCollection.AddFactor(Output, m_morphType, "EOS_");
+		m_sentenceEndArray[m_posType] = factorCollection.AddFactor(Output, m_posType, EOS_);
+		m_sentenceEndArray[m_morphType] = factorCollection.AddFactor(Output, m_morphType, EOS_);
 
 		m_lmImpl.Load(fileName, factorCollection, m_jointType, weight, nGramOrder);
 	}
@@ -96,34 +100,52 @@ public:
 		{
 			return 0;
 		}
-		
+		/*
+		for (size_t i = 0 ; i < contextFactor.size() ; ++i)
+			TRACE_ERR(contextFactor[i] << " ");
+		TRACE_ERR(std::endl);
+		*/
 		// only process context where last word is a verb, article, pronoun or comma or period
-		if (!Process(contextFactor[0]))
+		if (!Process(contextFactor.back()))
 			return 0;
 
 		// create context in reverse 'cos we skip words we don't want
 		std::vector<FactorArrayWrapper> chunkContext;
-		for (int currPos = (int)contextFactor.size() - 1 ; currPos >= 0 && chunkContext.size() <= m_nGramOrder ; --currPos )
+		for (int currPos = (int)contextFactor.size() - 1 ; currPos >= 0 && chunkContext.size() < m_realNGramOrder ; --currPos )
 		{
 			const FactorArrayWrapper &factorArray = contextFactor[currPos];
-			if (Process(factorArray))
+			bool process = Process(factorArray);
+			if (!process)
 				continue;
 
 		// concatenate pos & morph factors and use normal LM to find prob
 			std::string strConcate = factorArray[m_posType]->GetString() + "|" + factorArray[m_morphType]->GetString();
-
+			
 			const Factor *factor = m_factorCollection->AddFactor(Output, m_jointType, strConcate);
-			FactorArray chunkFactorArray;
-			Word::Initialize(chunkFactorArray);
-			chunkFactorArray[m_jointType] = factor;
+			FactorArray *chunkFactorArray = (FactorArray*) malloc(sizeof(FactorArray));
+			Word::Initialize(*chunkFactorArray);
+			(*chunkFactorArray)[m_jointType] = factor;
 
-			chunkContext.push_back(chunkFactorArray);
+			chunkContext.push_back(*chunkFactorArray);
 		}
 	
 		// create context factor the right way round
 		std::reverse(chunkContext.begin(), chunkContext.end());
 		// calc score on chunked phrase
-		return m_lmImpl.GetValue(chunkContext, finalState);
+
+		/*
+		for (size_t i = 0 ; i < chunkContext.size() ; ++i)
+			TRACE_ERR(chunkContext[i] << " ");
+		TRACE_ERR(std::endl);
+		*/
+		// calc score
+		float ret = m_lmImpl.GetValue(chunkContext, finalState);
+
+		// delete temporary factor arrays
+		for (size_t i = 0 ; i < chunkContext.size() ; ++i)
+			delete &chunkContext[i].GetFactorArray();
+		
+		return ret;
 	}
 };
 
