@@ -127,6 +127,11 @@ enum IOMethod
 
 enum LMType
 {	
+	SingleFactor
+	,MultiFactor
+};
+enum LMImplementation
+{	
 	SRI
 	,IRST
 	,Chunking

@@ -257,7 +257,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				return false;
 			}
 			// type = implementation, SRI, IRST etc
-			LMType lmType = static_cast<LMType>(Scan<int>(token[0]));
+			LMImplementation lmImplementation = static_cast<LMImplementation>(Scan<int>(token[0]));
 			// factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
 			// nGramOrder = 2 = bigram, 3 = trigram, etc
 			size_t nGramOrder = Scan<int>(token[2]);
@@ -267,11 +267,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
 			
-			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmType);
+			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmImplementation);
       if (lm == NULL) // no LM created. we prob don't have it compiled
       	return false;
 
-			if (lmType == Chunking)
+			if (lmImplementation == Chunking)
 			{
 				vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
 				
