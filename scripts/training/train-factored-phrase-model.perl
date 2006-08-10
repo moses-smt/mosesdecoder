@@ -1621,6 +1621,7 @@ sub safesystem {
   elsif ($? & 127) {
       printf STDERR "Execution of: @_\n  died with signal %d, %s coredump\n",
           ($? & 127),  ($? & 128) ? 'with' : 'without';
+      exit(1);
   }
   else {
     my $exitcode = $? >> 8;
