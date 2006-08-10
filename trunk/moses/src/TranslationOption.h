@@ -82,13 +82,6 @@ public:
 	/** used to create trans opt from unknown word */
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/);
 	
-	/** add factors from a translation step */
-	TranslationOption *MergeTranslation(const TargetPhrase &targetPhrase) const;
-
-	/** add factors from a generation step */
-	TranslationOption *MergeGeneration(const Phrase &inputPhrase
-																		, const ScoreComponentCollection2& generationScore) const;
-
 	/** returns target phrase */
 	inline const Phrase &GetTargetPhrase() const
 	{
