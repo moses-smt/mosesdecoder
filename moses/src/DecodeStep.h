@@ -23,10 +23,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <cassert>
 #include "TypeDef.h"
-#include "PhraseDictionary.h"
-#include "GenerationDictionary.h"
+#include "Dictionary.h"
 
-class Dictionary;
+class PhraseDictionaryBase;
+class GenerationDictionary;
 
 /** Specification for a decoding step.
  * The factored translation model consists of Translation and Generation
@@ -40,10 +40,11 @@ class DecodeStep
 protected:
 	const DecodeType m_decodeType; /*< either Translate or Generate */
 	const Dictionary *m_ptr; /*< pointer to translation/generation table */
-	std::vector<bool> m_outputFactorsCovered; /**< mask of the output factors that are covered */
+	FactorMask m_outputFactors; /** mask of what factors exist on the output side after this decode step */
+	FactorMask m_conflictMask; /** mask of what factors might conflict during this step */
 
 public:
-	DecodeStep(DecodeType decodeType, Dictionary *ptr);
+	DecodeStep(DecodeType decodeType, Dictionary *ptr, const DecodeStep* prevDecodeStep);
 
 	/** returns decoding type, either Translate or Generate */
 	DecodeType GetDecodeType() const
@@ -51,19 +52,23 @@ public:
 		return m_decodeType;
 	}
 
-	/** returns phrase table (dictionary) for translation step */
-	const PhraseDictionaryBase &GetPhraseDictionary() const
+	/** mask of factors that may conflict during this decode step */
+	const FactorMask& GetConflictFactorMask() const
 	{
-		assert (m_decodeType == Translate);
-		return *static_cast<const PhraseDictionaryBase*>(m_ptr);
+		return m_conflictMask;
 	}
 
-	/** returns generation table (dictionary) for generation step */
-	const GenerationDictionary &GetGenerationDictionary() const
+	/** mask of factors that are present after this decode step */
+	const FactorMask& GetOutputFactorMask() const
 	{
-		assert (m_decodeType == Generate);
-	  return *static_cast<const GenerationDictionary*>(m_ptr);
+		return m_outputFactors;
 	}
+
+	/** returns phrase table (dictionary) for translation step */
+	const PhraseDictionaryBase &GetPhraseDictionary() const;
+
+	/** returns generation table (dictionary) for generation step */
+	const GenerationDictionary &GetGenerationDictionary() const;
 
 	/** returns dictionary in abstract class */
 	const Dictionary* GetDictionaryPtr() const {return m_ptr;}

@@ -53,6 +53,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 	//factors	
 	m_inputFactors = FactorMask(input);
 	m_outputFactors = FactorMask(output);
+	std::cerr << "GenerationDictionary: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl;
 	
 	// data from file
 	InputFileStream inFile(filePath);

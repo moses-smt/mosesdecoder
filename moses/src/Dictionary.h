@@ -45,11 +45,11 @@ public:
 	}
 	const FactorMask& GetOutputFactorMask() const
 	{
-		return m_inputFactors;
+		return m_outputFactors;
 	}
 	const FactorMask& GetInputFactorMask() const
 	{
-		return m_outputFactors;
+		return m_inputFactors;
 	}
 	virtual ~Dictionary();
 

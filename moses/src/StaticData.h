@@ -124,10 +124,8 @@ public:
 	void LoadPhraseTables(bool filter
 											, const std::string &inputFileHash
 											, const std::list< Phrase > &inputPhraseList);
-	void LoadPhraseTables()
-	{
-		LoadPhraseTables(false, "", std::list< Phrase >());
-	}
+	// what the hell?
+	void LoadPhraseTables();
 	void LoadMapping();
 /*	void SetUnknownWordHandler(boost::shared_ptr<UnknownWordHandler> unknownWordHandler)
 	{
