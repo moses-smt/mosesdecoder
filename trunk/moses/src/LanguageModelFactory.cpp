@@ -17,10 +17,10 @@
 namespace LanguageModelFactory
 {
 
-	LanguageModel* CreateLanguageModel(LMType lmType)
+	LanguageModel* CreateLanguageModel(LMImplementation lmImplementation)
 	{
 	  LanguageModel *lm = NULL;
-	  switch (lmType)
+	  switch (lmImplementation)
 	  {
 	  	case SRI:
 				#ifdef LM_SRI

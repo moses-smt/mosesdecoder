@@ -13,7 +13,7 @@ namespace LanguageModelFactory {
 	 * creates a language model that will use the appropriate
    * language model toolkit as its underlying implementation
 	 */
-	LanguageModel* CreateLanguageModel(LMType lmType);
+	LanguageModel* CreateLanguageModel(LMImplementation lmImplementation);
 };
 
 #endif
