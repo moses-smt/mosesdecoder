@@ -31,7 +31,7 @@ if __name__ == "__main__":
     psyco.full()
 
     import getopt
-    (opts,args) = getopt.getopt(sys.argv[1:], "cas", [])
+    (opts,args) = getopt.getopt(sys.argv[1:], "casn", [])
 
     for (opt,parm) in opts:
         if opt == "-c":
@@ -40,6 +40,8 @@ if __name__ == "__main__":
             bleu.eff_ref_len = "average"
         if opt == "-s":
             bleu.eff_ref_len = "shortest"
+        if opt == "-n":
+            bleu.nonorm = 1
 
     print args    
     cookedrefs = []

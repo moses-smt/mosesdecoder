@@ -17,6 +17,9 @@ sys.path.append('/fs/clip-mteval/Programs/hiero')
 import dataset
 import log
 
+# Added to bypass NIST-style pre-processing of hyp and ref files -- wade
+nonorm = 0
+
 preserve_case = False
 eff_ref_len = "shortest"
 
@@ -38,6 +41,9 @@ normalize2 = [(re.compile(pattern), replace) for (pattern, replace) in normalize
 
 def normalize(s):
     '''Normalize and tokenize text. This is lifted from NIST mteval-v11a.pl.'''
+    # Added to bypass NIST-style pre-processing of hyp and ref files -- wade
+    if (nonorm):
+        return s.split()
     if type(s) is not str:
         s = " ".join(s)
     # language-independent part:
