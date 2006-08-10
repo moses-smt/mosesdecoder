@@ -110,6 +110,7 @@ std::string Word::ToString(const FactorArray &factorArray)
 }
 
 TO_STRING_BODY(Word);
+TO_STRING_BODY(FactorArrayWrapper);
 
 // friend
 ostream& operator<<(ostream& out, const Word& word)
@@ -129,6 +130,13 @@ ostream& operator<<(ostream& out, const Word& word)
 	string str = strme.str();
 	str = str.substr(0, str.size() - 1);
 	out << str << " ";
+	return out;
+}
+
+// friend
+ostream& operator<<(ostream& out, const FactorArrayWrapper& wrapper)
+{	
+	out << Word::ToString(*wrapper.m_factorArray);
 	return out;
 }
 
