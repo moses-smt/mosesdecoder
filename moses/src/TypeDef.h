@@ -77,8 +77,8 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 // can only be 2 at the moment
 const int NUM_LANGUAGES = 2;
 
-// count of above
-const size_t NUM_FACTORS = 4;
+#define MAX_NUM_FACTORS 4
+const size_t NUM_FACTORS = MAX_NUM_FACTORS;
 
 enum FactorDirection
 {	

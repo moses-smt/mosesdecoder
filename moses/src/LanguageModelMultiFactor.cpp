@@ -43,7 +43,7 @@ bool LanguageModelMultiFactor::Useable(const Phrase &phrase) const
 	const FactorArray &factorArray = phrase.GetFactorArray(0);
 	for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; ++currFactor)
 	{
-		if (m_factorTypes.Contains(currFactor) && factorArray[currFactor] == NULL)
+		if (m_factorTypes[currFactor] && factorArray[currFactor] == NULL)
 			return false;
 	}
 	return  true;

@@ -23,16 +23,33 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-FactorTypeSet::FactorTypeSet(const vector<FactorType> &factors)
+FactorMask::FactorMask(const vector<FactorType> &factors)
 {
-	m_bit = 0;
 	vector<FactorType>::const_iterator iter;
 	for (iter = factors.begin() ; iter != factors.end() ; ++iter)
 	{
-		Add(*iter);
+		this->set(*iter);
 	}
 }
 
-TO_STRING_BODY(FactorTypeSet);
+TO_STRING_BODY(FactorMask);
 
+// friend
+inline
+std::ostream& operator<<(std::ostream& out, const FactorMask& fm)
+{
+  out << "FactorMask<";
+	bool first = true;
+  for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+  {
+    if (fm[currFactor])
+    {
+			if (first) { first = false; } else { out << ","; }
+			out << currFactor;
+    }
+  }
+  out << ">";
+
+  return out;
+}
 

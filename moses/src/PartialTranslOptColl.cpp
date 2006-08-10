@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 /** constructor, intializes counters and thresholds */
 PartialTranslOptColl::PartialTranslOptColl()
+: m_outputFactorsCovered(NUM_FACTORS, false) 
 {
 	m_bestScore = -std::numeric_limits<float>::infinity();
 	m_worstScore = -std::numeric_limits<float>::infinity();

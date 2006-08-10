@@ -22,74 +22,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <iostream>
-#include <set>
+#include <bitset>
 #include <vector>
-#include <algorithm>
-#include <iterator>
 #include "TypeDef.h"
 #include "Util.h"
 
-class FactorTypeSet
+class FactorMask : public std::bitset<MAX_NUM_FACTORS>
 {
-	friend std::ostream& operator<<(std::ostream&, const FactorTypeSet&);
+	friend std::ostream& operator<<(std::ostream&, const FactorMask&);
 
-protected:
-	unsigned int m_bit;
-
-	inline FactorTypeSet(unsigned int bit)
-	{
-		m_bit = bit;
-	}
 public:
-	inline FactorTypeSet()
-	:m_bit(0)
-	{
-	}
-	FactorTypeSet (const std::vector<FactorType> &factors);
+	explicit FactorMask(const std::vector<FactorType> &factors);
+	inline FactorMask() {}
 
-	inline void Add(const FactorType &factorType)
-	{
-		unsigned int value = static_cast<unsigned int>(factorType);
-		m_bit |= (1 << value);
-	}
-
-	inline FactorTypeSet Intersect(const FactorTypeSet &other) const
-	{
-		unsigned int bit = m_bit & other.m_bit;
-		return FactorTypeSet(bit);;
-	}
-
-	inline void Merge(const FactorTypeSet &other)
-	{
-		m_bit |= other.m_bit;
-	}
-	void Set(const FactorTypeSet &other)
-	{
-		m_bit = 0;
-		Merge(other);
-	}
-	inline bool Contains(FactorType factorType) const
-	{
-		unsigned int value = static_cast<unsigned int>(factorType);
-		return  (m_bit & value) > 0;
-	}
 	TO_STRING;	
 };
 
-// friend
-inline
-std::ostream& operator<<(std::ostream& out, const FactorTypeSet& factorTypeSet)
-{
-	out << "(";
-	
-	for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
-	{
-		if (factorTypeSet.Contains(currFactor))
-		{
-			out << "," << currFactor;
-		}
-	}
-	out << ") ";
-	
-	return out;
-}

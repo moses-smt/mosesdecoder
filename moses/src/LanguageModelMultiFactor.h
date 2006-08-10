@@ -30,7 +30,7 @@ class Phrase;
 class LanguageModelMultiFactor : public LanguageModel
 {
 protected:
-	FactorTypeSet	m_factorTypes;
+	FactorMask m_factorTypes;
 	
 public:
 	LanguageModelMultiFactor(bool registerScore);
