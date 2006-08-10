@@ -172,6 +172,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FactorArrayWrapper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FactorCollection.cpp"
 				>
 			</File>
@@ -279,6 +283,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Parameter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PartialTranslOptColl.cpp"
 				>
 			</File>
 			<File
@@ -415,6 +423,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Factor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FactorArrayWrapper.h"
 				>
 			</File>
 			<File
