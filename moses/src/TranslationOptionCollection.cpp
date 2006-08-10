@@ -195,6 +195,32 @@ typedef list< WordPair > WordList;
 // 2nd = score
 typedef list< WordPair >::const_iterator WordListIterator;
 
+TranslationOption *MergeTranslation(const TranslationOption& oldTO, TargetPhrase &targetPhrase)
+{
+  if (oldTO.GetTargetPhrase().IsCompatible(targetPhrase))
+  {
+    targetPhrase.MergeFactors(oldTO.GetTargetPhrase());
+    TranslationOption *newTransOpt = new TranslationOption(oldTO, targetPhrase);
+    return newTransOpt;
+  }
+  else
+    return NULL;
+}
+
+TranslationOption *MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
+                                  , const ScoreComponentCollection2& generationScore)
+{
+  if (oldTO.GetTargetPhrase().IsCompatible(mergePhrase))
+  {
+    mergePhrase.MergeFactors(oldTO.GetTargetPhrase());
+    TranslationOption *newTransOpt = new TranslationOption(oldTO, mergePhrase, generationScore);
+    return newTransOpt;
+  }
+  else
+    return NULL;
+}
+
+
 /** used in generation: increases iterators when looping through the exponential number of generation expansions */
 inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 															 , const vector< WordList > &wordListVector)
@@ -299,7 +325,7 @@ void TranslationOptionCollection::ProcessGeneration(
 
 			// merge with existing trans opt
 			Phrase genPhrase(Output, mergeWords);
-			TranslationOption *newTransOpt = inputPartialTranslOpt.MergeGeneration(genPhrase, generationScore);
+			TranslationOption *newTransOpt = MergeGeneration(inputPartialTranslOpt, genPhrase, generationScore);
 			if (newTransOpt != NULL)
 				{
 					outputPartialTranslOptColl.Add(newTransOpt);
@@ -337,9 +363,9 @@ void TranslationOptionCollection::ProcessTranslation(
 
 			for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != phraseColl->end(); ++iterTargetPhrase)
 				{
-					const TargetPhrase& targetPhrase	= *iterTargetPhrase;
+					TargetPhrase targetPhrase	= *iterTargetPhrase;
 			
-					TranslationOption *newTransOpt = inputPartialTranslOpt.MergeTranslation(targetPhrase);
+					TranslationOption *newTransOpt = MergeTranslation(inputPartialTranslOpt, targetPhrase);
 					if (newTransOpt != NULL)
 						{
 							outputPartialTranslOptColl.Add( newTransOpt );
@@ -411,6 +437,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
 		{
 			const DecodeStep &decodeStep = *iterStep;
+			FactorMask conflictMask = decodeStep.GetConflictFactorMask();
 			if (StaticData::Instance()->GetVerboseLevel() > 0) {
 				std::cerr << "decode step("<< indexStep<<"): output factors=" << decodeStep.GetOutputFactorMask() << "  conflict factors=" << decodeStep.GetConflictFactorMask() << std::endl;
 			}
