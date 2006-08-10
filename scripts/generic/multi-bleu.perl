@@ -17,6 +17,8 @@ while(-e "$stem$ref") {
 }
 &add_to_ref($stem,\@REF) if -e $stem;
 
+die "No reference sentences found!" if 0 == scalar @REF;
+
 sub add_to_ref {
     my ($file,$REF) = @_;
     my $s=0;
@@ -102,14 +104,16 @@ my $bleu = $brevity_penalty * exp((my_log( $CORRECT[1]/$TOTAL[1] ) +
 				   my_log( $CORRECT[3]/$TOTAL[3] ) +
 				   my_log( $CORRECT[4]/$TOTAL[4] ) ) / 4);
 
-printf "BLEU = %.2f, %.1f/%.1f/%.1f/%.1f (BP=%.3f, ration=%.3f)\n",
+printf "BLEU = %.2f, %.1f/%.1f/%.1f/%.1f (BP=%.3f, ration=%.3fi, %i sents, %i refs)\n",
     100*$bleu,
     100*$CORRECT[1]/$TOTAL[1],
     100*$CORRECT[2]/$TOTAL[2],
     100*$CORRECT[3]/$TOTAL[3],
     100*$CORRECT[4]/$TOTAL[4],
     $brevity_penalty,
-    $length_translation / $length_reference;
+    $length_translation / $length_reference,
+    scalar @REF,
+    scalar @{$REF[0]};
 
 sub my_log {
   return -9999999999 unless $_[0];
