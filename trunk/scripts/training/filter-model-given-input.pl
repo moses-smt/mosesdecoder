@@ -158,6 +158,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     }
     close(FILE);
     close(FILE_OUT);
+    die "No phrases found in $file!" if $total == 0;
     printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
 }
 
