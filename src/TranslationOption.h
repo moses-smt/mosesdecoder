@@ -56,7 +56,7 @@ class TranslationOption
 
 protected:
 
-	const Phrase 				m_targetPhrase; /*< output phrase when using this translation option */
+	Phrase 							m_targetPhrase; /*< output phrase when using this translation option */
 	Phrase const*       m_sourcePhrase; /*< input phrase translated by this */
 	const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
 	float								m_totalScore; /*< weighted translation costs of this translation option */
@@ -71,16 +71,13 @@ protected:
 
 public:
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
+	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int);
 
 	/** used by initial translation step */
 	TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase);
 
-	/** used by MergeTranslation */
-	TranslationOption(const TranslationOption &copy
-											, const Phrase &inputPhrase
-											, const ScoreComponentCollection2& additionalScore);
-	/** used to create trans opt from unknown word */
-	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/);
+	void MergeFeaturesFromNewPhrase(const TargetPhrase& phrase);
+	void MergeFeaturesFromNewPhrase(const Phrase& phrase, const ScoreComponentCollection2& additionalScore);
 	
 	/** returns target phrase */
 	inline const Phrase &GetTargetPhrase() const
