@@ -35,7 +35,7 @@ using namespace std;
 /** defines allowed parameters */
 Parameter::Parameter() 
 {
-	AddParam("config-file", "f", "location of the configuration file");
+	AddParam("config", "f", "location of the configuration file");
 	AddParam("ttable-file", "location and properties of the translation tables");
 	AddParam("lmodel-file", "location and properties of the language models");
 	AddParam("ttable-limit", "maximum number of translation table entries per input phrase");
@@ -64,7 +64,7 @@ Parameter::Parameter()
 	AddParam("report-all-factors", "?");
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
 	AddParam("inputtype", "text (0) or confusion network (1)");
-	AddParam("translation-details", "T", "?");
+	AddParam("translation-details", "T", "for each best translation hypothesis, print out details about what sourcce spans were used, dropped");
 	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
 	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
 	AddParam("use-distortion-future-costs", "consider expected distortion cost in future cost estimation");
