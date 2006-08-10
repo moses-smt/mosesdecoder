@@ -4,10 +4,32 @@
 #usage: sentence-by-sentence SYSOUT REFERENCE > sentences.html
 
 use strict;
+use Getopt::Long;
+
+my $sourcefile = undef; # source text
+GetOptions(
+  "source=s" => \$sourcefile,
+) or exit(1);
 
 my ($sysoutfile, $truthfile) = @ARGV;
+
+if (!defined $sysoutfile || !defined $truthfile) {
+  print STDERR "usage: $0 hypothesis reference > sentence-by-sentence.html
+Options:
+  --source=STRING  ... source sentences
+";
+  exit 1;
+}
+
 open(SYSOUT, "<$sysoutfile") or die "couldn't open '$sysoutfile' for read\n";
 open(TRUTH, "<$truthfile") or die "couldn't open '$truthfile' for read\n";
+binmode(SYSOUT, ":utf8");
+binmode(TRUTH, ":utf8");
+binmode(STDOUT, ":utf8");
+if (defined $sourcefile) {
+        open(SOURCE, "<$sourcefile") or die "couldn't open '$sourcefile' for read\n";
+        binmode(SOURCE, ":utf8");
+}
 my @bleuScores;
 my @htmlSentences;
 my @htmlColors = ('#99ff99', '#aaaaff', '#ffff99', '#ff9933', '#ff9999'); #color sentences by rank (split in n tiers)
@@ -16,16 +38,30 @@ my $i = 0;
 while(my $sLine = <SYSOUT>)
 {
 	my $eLine = <TRUTH>;
-	chop $sLine; chop $eLine;
+        die "$truthfile shorter than $sysoutfile!" if !defined $eLine;
+	chomp $sLine; chomp $eLine;
+        $sLine =~ s/^\s*|\s*$//g;
+        $eLine =~ s/^\s*|\s*$//g;
 	my @sWords = split(/\s+/, $sLine);
 	my @eWords = split(/\s+/, $eLine);
 	my @sFactors = map {my @f = split(/\|/, $_); \@f;} @sWords;
 	my @eFactors = map {my @f = split(/\|/, $_); \@f;} @eWords;
+        my @sourceFactors;
+        if (defined $sourcefile) {
+	        my $sourceLine = <SOURCE>;
+                die "$sourcefile shorter than $sysoutfile!" if !defined $sourceLine;
+        	chomp $sourceLine;
+                $sourceLine =~ s/^\s*|\s*$//g;
+        	my @sourceWords = split(/\s+/, $sourceLine);
+        	@sourceFactors = map {my @f = split(/\|/, $_); \@f;} @sourceWords;
+        }
+        
 	my $bleuData = getBLEUSentenceDetails(\@sFactors, \@eFactors, 0);
 	push @bleuScores, [$i, $bleuData->[0]->[0], 0]; #the last number will be the rank
 	my $pwerData = getPWERSentenceDetails(\@sFactors, \@eFactors, 0);
 	my $html = "<div class=\"sentence\" style=\"background-color: %%%%\">"; #the %%%% is a flag to be replaced
-	$html .= "<div class=\"bleu_report\"><b>BLEU:</b> " . sprintf("%.4lg", $bleuData->[0]->[0]) . " (" . join('/', map {sprintf("%.4lg", $_)} @{$bleuData->[0]}[1 .. 4]) . ")</div>\n";
+	$html .= "<div class=\"bleu_report\"><b>Sentence $i) BLEU:</b> " . sprintf("%.4lg", $bleuData->[0]->[0]) . " (" . join('/', map {sprintf("%.4lg", $_)} @{$bleuData->[0]}[1 .. 4]) . ")</div>\n";
+	$html .= "<h2>Source</h2><div class=\"source_sentence\" id=\"source$i\">" . getFactoredSentenceHTML(\@sourceFactors) . "</div>\n" if defined $sourcefile;
 	$html .= "<h2>Reference</h2><div class=\"truth_sentence\" id=\"truth$i\">" . getFactoredSentenceHTML(\@eFactors) . "</div>\n";
 	my $j = 0;
 	$html .= "<h2>System Output</h2><h4>(PWER errors marked)</h4><div class=\"sysout_sentence\" id=\"sysout$i\">" . getFactoredSentenceHTML(\@sFactors, $pwerData) . "</div>\n";
@@ -47,6 +83,7 @@ h4 {font-weight: bold; font-size: small}
 #legend_title {font-weight: bold; font-size: medium; text-decoration: underline}
 div.sentence {background-color: #ffffee; border: 1px solid #000088; padding: 0px 8px 0px 8px} //entire composition
 div.bleu_report {margin-bottom: 5px}
+div.source_sentence {background-color: #ffcccc; border: 1px solid #bbb; margin: 8px 0px 8px 0px}
 div.truth_sentence {background-color: #ccffcc; border: 1px solid #bbb; margin: 8px 0px 8px 0px}
 div.sysout_sentence {background-color: #ccccff; border: 1px solid #bbb; margin: 8px 0px 8px 0px}
 table.sentence_table {border: none}
@@ -55,7 +92,9 @@ table.ngram_table {}
 td.ngram_cell {padding: 1px}
 </style>
 EOHTML
-print "<html><head><title>$sysoutfile vs. $truthfile: Sentence-by-sentence Comparison</title>$stylesheet</head><body>\n";
+print "<html><head>\n";
+print "<meta http-equiv=\"Content-type: text/html; charset=utf-8\">\n";
+print "<title>$sysoutfile vs. $truthfile: Sentence-by-sentence Comparison</title>$stylesheet</head><body>\n";
 
 #legend for background colors
 my @minBLEU = (1e9) x scalar(@htmlColors);
