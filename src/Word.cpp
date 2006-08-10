@@ -27,26 +27,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 Word::Word(const Word &copy)
-{ // automatically points to orig's factors
+:FactorArrayWrapper()
+{ // deep copy
+	m_factorArrayPtr = &m_factorArray;
 	Word::Copy(m_factorArray, copy.m_factorArray);
 }
 
 Word::Word()
 {
+	m_factorArrayPtr = &m_factorArray;
 	Word::Initialize(m_factorArray);
 }
 
 Word::Word(const FactorArray &factorArray)
 {
+	m_factorArrayPtr = &m_factorArray;
 	for (size_t factor = 0 ; factor < NUM_FACTORS ; factor++)
 	{
 		m_factorArray[factor] = factorArray[factor];
 	}
 }
 
-int Word::Compare(const Word &compare) const
+Word::~Word()
 {
-	return Compare(GetFactorArray(), compare.GetFactorArray());
 }
 
 // static
@@ -110,7 +113,6 @@ std::string Word::ToString(const FactorArray &factorArray)
 }
 
 TO_STRING_BODY(Word);
-TO_STRING_BODY(FactorArrayWrapper);
 
 // friend
 ostream& operator<<(ostream& out, const Word& word)
@@ -132,11 +134,3 @@ ostream& operator<<(ostream& out, const Word& word)
 	out << str << " ";
 	return out;
 }
-
-// friend
-ostream& operator<<(ostream& out, const FactorArrayWrapper& wrapper)
-{	
-	out << Word::ToString(*wrapper.m_factorArray);
-	return out;
-}
-
