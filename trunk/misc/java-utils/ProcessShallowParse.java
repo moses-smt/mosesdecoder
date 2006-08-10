@@ -41,6 +41,8 @@ public class ProcessShallowParse
 
 class ProcessShallowParse2
 { // factored sentence
+	boolean m_prevART = false;
+	
 	public ProcessShallowParse2(Reader inStream, Writer outStream) throws Exception
 	{		
 		BufferedReader inFile = new BufferedReader(inStream); 
@@ -48,35 +50,56 @@ class ProcessShallowParse2
 		
 		// tokenise
 		String inLine;
+		int i = 1;
 		while ((inLine = inFile.readLine()) != null)
 		{
+			m_prevART = false;
 			StringTokenizer st = new StringTokenizer(inLine);
-		     while (st.hasMoreTokens()) 
-		     {
-		    	 String factoredWord = st.nextToken();
-		    	 Output(factoredWord, outFile);
-		     }
-		     outFile.write("\n");
-		}		
+			String ret = "";
+			while (st.hasMoreTokens()) 
+		    {
+				String factoredWord = st.nextToken();
+		    	ret += Output(factoredWord);
+		    }
+			outFile.write(i++ + " " + ret);
+			if (ret.length() > 0)
+				outFile.write("\n");
+		}
 	}
 	
-	protected void Output(String factoredWord, BufferedWriter outStream) throws Exception
+	protected String Output(String factoredWord) throws Exception
 	{
 		StringTokenizer st = new StringTokenizer(factoredWord, "|");
-    	st.nextToken();
+    	String surface = st.nextToken();
     	String pos = st.nextToken();
     	String morph = st.nextToken();
+    	String ret = "";
 
     	int lastPos = pos.lastIndexOf('-');
-    	
-    	if (pos.indexOf("ART") == 0
-    		|| pos.indexOf("P") == 0
-    		|| pos.indexOf("V") == 0
-    		|| pos.indexOf("$,") == 0
-    		|| pos.indexOf("$.") == 0
-    		)
+    	if (pos.indexOf("ART-SB") == 0)
     	{
-    		outStream.write(pos + "|" + morph + " ");
+    		ret = pos + "|" + morph + " ";
+    		m_prevART = true;
     	}
+    	else if (pos.indexOf("NN-NK") == 0 && m_prevART)
+    	{
+    		ret = pos + "|" + morph + " ";
+    		m_prevART = false;
+    	}
+    	else if (pos.indexOf("VAFIN-HD") == 0
+    			|| pos.indexOf("VVFIN-HD") == 0
+    			|| pos.indexOf("VMFIN-HD") == 0
+        		|| pos.indexOf("PPER-SB") == 0
+        		|| pos.indexOf("PRELS-SB") == 0
+        		|| pos.indexOf("PDS-SB") == 0
+        		|| pos.indexOf("PPER-PH") == 0
+        		|| pos.indexOf("PPER-EP") == 0
+        	)
+    	{
+    		ret = pos + "|" + surface + " ";
+    		m_prevART = false;
+    	}
+    	
+    	return ret;
 	}
 }
