@@ -6,6 +6,7 @@ libmoses_a_SOURCES = \
 	DistortionOrientation.cpp \
 	DummyScoreProducers.cpp \
 	Factor.cpp \
+	FactorArrayWrapper.cpp \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
 	GenerationDictionary.cpp \
