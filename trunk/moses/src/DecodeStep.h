@@ -40,13 +40,11 @@ class DecodeStep
 protected:
 	const DecodeType m_decodeType; /*< either Translate or Generate */
 	const Dictionary *m_ptr; /*< pointer to translation/generation table */
+	std::vector<bool> m_outputFactorsCovered; /**< mask of the output factors that are covered */
 
 public:
-	DecodeStep(DecodeType decodeType, Dictionary *ptr)
-	:m_decodeType(decodeType)
-	,m_ptr(ptr)
-	{
-	}
+	DecodeStep(DecodeType decodeType, Dictionary *ptr);
+
 	/** returns decoding type, either Translate or Generate */
 	DecodeType GetDecodeType() const
 	{

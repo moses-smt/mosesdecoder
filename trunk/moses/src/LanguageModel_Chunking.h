@@ -58,7 +58,7 @@ public:
 					, float weight
 					, size_t nGramOrder)
 	{
-		m_factorTypes 			= factorTypes;
+		m_factorTypes 			= FactorMask(factorTypes);
 		m_weight 						= weight;
 		m_filename 					= fileName;
 		m_nGramOrder 				= nGramOrder;

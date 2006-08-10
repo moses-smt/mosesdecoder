@@ -155,33 +155,6 @@ Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &em
 	return new(ptr) Hypothesis(m_source, emptyTarget);
 }
 
-bool Hypothesis::IsCompatible(const Phrase &phrase) const
-{
-	// make sure factors don't contradict each other
-	// similar to phrase comparison
-
-	if (m_currTargetWordsRange.GetWordsCount() != phrase.GetSize())
-	{
-		return false;
-	}
-	size_t hypoSize = GetSize();
-
-	size_t transOptPos = 0;
-	for (size_t hypoPos = hypoSize - m_currTargetWordsRange.GetWordsCount() ; hypoPos < hypoSize ; hypoPos++)
-	{
-		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
-		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-			const Factor *thisFactor 		= GetFactor(hypoPos, factorType)
-									,*compareFactor	= phrase.GetFactor(transOptPos, factorType);
-			if (thisFactor != NULL && compareFactor != NULL && thisFactor != compareFactor)
-				return false;
-		}
-		transOptPos++;
-	}
-	return true;
-}
-
 #if 0
 void Hypothesis::GenerateNGramCompareKey(size_t contextSize)
 {

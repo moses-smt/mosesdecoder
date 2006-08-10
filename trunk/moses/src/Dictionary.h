@@ -31,16 +31,25 @@ protected:
 	static size_t s_index;
 	
 	const size_t m_noScoreComponent, m_index;
-	std::vector< FactorTypeSet* > m_factorsUsed;
+	FactorMask m_inputFactors;
+	FactorMask m_outputFactors;
 
 public:
 	Dictionary(size_t noScoreComponent);
 
-	const FactorTypeSet &GetFactorsUsed(FactorDirection direction) const
+	const FactorMask &GetFactorMask(FactorDirection direction) const
 	{
-		assert(static_cast<size_t>(direction)<m_factorsUsed.size());
-		assert(m_factorsUsed[direction]);
-		return *m_factorsUsed[direction];
+		if (direction == Input) return m_inputFactors;
+		if (direction == Output) return m_outputFactors;
+		assert(!"Impossible");
+	}
+	const FactorMask& GetOutputFactorMask() const
+	{
+		return m_inputFactors;
+	}
+	const FactorMask& GetInputFactorMask() const
+	{
+		return m_outputFactors;
 	}
 	virtual ~Dictionary();
 
