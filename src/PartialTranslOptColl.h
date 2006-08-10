@@ -44,6 +44,7 @@ class PartialTranslOptColl
 	float m_worstScore; /**< score of the worse translation option */
 	size_t m_maxSize; /**< maximum number of translation options allowed */
 	size_t m_totalPruned; /**< number of options pruned */
+	std::vector<bool> m_outputFactorsCovered; /**< element is true if the factor type is handled by the translation options in this set */
 
 public:
   PartialTranslOptColl();

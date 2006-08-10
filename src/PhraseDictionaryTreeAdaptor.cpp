@@ -540,8 +540,8 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 	m_filename = filePath;
 
 	// set Dictionary members
-	m_factorsUsed[Input]	= new FactorTypeSet(input);
-	m_factorsUsed[Output]	= new FactorTypeSet(output);
+	m_inputFactors = FactorMask(input);
+	m_outputFactors = FactorMask(output);
 
 	// set PhraseDictionaryBase members
 	m_maxTargetPhrase=maxTargetPhrase;

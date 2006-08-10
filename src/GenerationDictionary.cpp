@@ -51,8 +51,8 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 	}
 
 	//factors	
-	m_factorsUsed[Input] = new FactorTypeSet(input);
-	m_factorsUsed[Output] = new FactorTypeSet(output);
+	m_inputFactors = FactorMask(input);
+	m_outputFactors = FactorMask(output);
 	
 	// data from file
 	InputFileStream inFile(filePath);
@@ -111,10 +111,6 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 
 GenerationDictionary::~GenerationDictionary()
 {
-	for (size_t i = 0 ; i < m_factorsUsed.size() ; i++)
-	{
-		delete m_factorsUsed[i];
-	}	
 }
 
 unsigned int GenerationDictionary::GetNumScoreComponents() const

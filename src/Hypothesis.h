@@ -79,11 +79,6 @@ protected:
 	const Hypothesis 	*m_mainHypo;
 	ArcList 					*m_arcList; /**< all arcs that end at the same lattice point as this hypothesis */
 
-//	 * \return whether none of the factors clash
-//	 * \param phrase TODO ???
-//	 */
-	bool IsCompatible(const Phrase &phrase) const;
-	
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
 	void CalcLMScore(const LMList &languageModels);

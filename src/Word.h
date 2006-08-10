@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <list>
 #include "TypeDef.h"
 #include "Factor.h"
-#include "FactorTypeSet.h"
 #include "Util.h"
 #include "FactorArrayWrapper.h"
 
