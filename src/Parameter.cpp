@@ -32,64 +32,175 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-PARAM_VEC &Parameter::AddParam(const string &paramName)
+/** defines allowed parameters */
+Parameter::Parameter() 
 {
+	AddParam("config-file", "f", "location of the configuration file");
+	AddParam("ttable-file", "location and properties of the translation tables");
+	AddParam("lmodel-file", "location and properties of the language models");
+	AddParam("ttable-limit", "maximum number of translation table entries per input phrase");
+	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
+	AddParam("weight-l", "lm", "weight(s) for language models");
+	AddParam("weight-t", "tm", "weights for translation model components");
+	AddParam("weight-w", "w", "weight for word penalty");
+	AddParam("weight-e", "e", "weight for word deletion"); //source word deletion overall weight
+	AddParam("weight-generation", "g", "weight(s) for generation components");
+	AddParam("weight-i", "I", "weight for word insertion");
+	AddParam("mapping", "description of decoding steps");
+	AddParam("n-best-list", "file and size of n-best-list to be generated");
+	AddParam("beam-threshold", "threshold for threshold pruning");
+	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");
+	AddParam("input-factors", "list of factors in the input");
+	AddParam("output-factors", "list if factors in the output");
+	AddParam("mysql", "(deprecated)");
+	AddParam("input-file", "i", "location of the input file to be translated");
+	AddParam("cache-path", "?");
+ 	AddParam("distortion-file", "location and properties of the factorized/lexicalized reordering table");
+ 	AddParam("distortion", "?");
+	AddParam("generation-file", "location and properties of the generation table");
+	AddParam("stack", "s", "maximum stack size for histogram pruning");
+	AddParam("verbose", "v", "verbosity level of the logging");
+	AddParam("report-source-span", "?");
+	AddParam("report-all-factors", "?");
+	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
+	AddParam("inputtype", "text (0) or confusion network (1)");
+	AddParam("translation-details", "T", "?");
+	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
+	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
+	AddParam("use-distortion-future-costs", "consider expected distortion cost in future cost estimation");
+}
+
+/** initializes a parameter, sub of constructor */
+PARAM_VEC &Parameter::AddParam(const string &paramName, const string &description)
+{
+	m_valid[paramName] = true;
+	m_description[paramName] = description;
 	return m_setting[paramName];
 }
 
-// default parameter values
-Parameter::Parameter() 
+/** initializes a parameter (including abbreviation), sub of constructor */
+PARAM_VEC &Parameter::AddParam(const string &paramName, const string &abbrevName, const string &description)
 {
-	AddParam("ttable-file");
-	AddParam("lmodel-file");
-	AddParam("ttable-limit");
-	AddParam("weight-d");
-	AddParam("weight-l");
-	AddParam("weight-t");
-	AddParam("weight-w");
-	AddParam("weight-e"); //source word deletion overall weight
-	AddParam("weight-generation");
-	AddParam("weight-i");
-	AddParam("mapping");
-	AddParam("n-best-list");
-	AddParam("beam-threshold");
-	AddParam("distortion-limit");
-	AddParam("input-factors");
-	AddParam("output-factors");
-	AddParam("mysql");
-	AddParam("input-file");
-	AddParam("cache-path");
-	AddParam("input-file");
- 	AddParam("distortion-file");
- 	AddParam("distortion");
-	AddParam("stack");
-	AddParam("verbose");
-	AddParam("report-source-span");
-	AddParam("report-all-factors");
-	AddParam("drop-unknown");
-	AddParam("inputtype");
-	AddParam("translation-details");
-	AddParam("max-trans-opt-per-coverage");
-	AddParam("max-partial-trans-opt");
-	AddParam("use-distortion-future-costs");
+	m_valid[paramName] = true;
+	m_valid[abbrevName] = true;
+	m_abbreviation[paramName] = abbrevName;
+	m_description[paramName] = description;
+	return m_setting[paramName];
 }
 
-// check if parameter settings make sense
+/** prints descriptions of all parameters */
+void Parameter::Explain() {
+	cerr << "Usage:" << endl;
+	for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++) 
+		{
+			const string paramName = iterParam->first;
+			const string paramDescription = iterParam->second;
+			cerr << "\t-" << paramName;
+			PARAM_STRING::const_iterator iterAbbr = m_abbreviation.find( paramName );
+			if ( iterAbbr != m_abbreviation.end() )
+				cerr << " (" << iterAbbr->second << ")";			
+			cerr << ": " << paramDescription << endl;
+		}
+}
+
+/** checks if an item on the command line is a switch or a value 
+ * \param token token on the command line to checked **/
+
+bool Parameter::isOption(const char* token) {
+  if (! token) return false;
+  std::string tokenString(token);
+  size_t length = tokenString.size();
+  if (length > 0 && tokenString.substr(0,1) != "-") return false;
+  if (length > 1 && tokenString.substr(1,1).find_first_not_of("0123456789") == 0) return true;
+  return false;
+}
+
+/** load all parameters from the configuration file and the command line switches */
+bool Parameter::LoadParam(int argc, char* argv[]) 
+{
+	// config file (-f) arg mandatory
+	string configPath;
+	if ( (configPath = FindParam("-f", argc, argv)) == "" 
+		&& (configPath = FindParam("-config", argc, argv)) == "")
+	{
+		UserMessage::Add("No configuration file was specified.  Use -config or -f");
+		return false;
+	}
+	else
+	{
+		if (!ReadConfigFile(configPath))
+		{
+			UserMessage::Add("Could not read "+configPath);
+			return false;
+		}
+	}
+
+	// overwrite parameters with values from switches
+	for(PARAM_MAP::const_iterator iterParam = m_setting.begin(); iterParam != m_setting.end(); iterParam++) 
+		{
+			const string paramName = iterParam->first;
+			OverwriteParam("-" + paramName, paramName, argc, argv);
+		}
+
+	// ... also shortcuts
+	for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin(); iterParam != m_abbreviation.end(); iterParam++) 
+		{
+			const string paramName = iterParam->first;
+			const string paramShortName = iterParam->second;
+			OverwriteParam("-" + paramShortName, paramName, argc, argv);
+		}
+
+	// logging of parameters that were set in either config or switch
+	//int verbose = 0;
+	//if (m_setting["verbose"].size() > 0)
+	//  verbose = Scan<int>(m_setting["verbose"][0]);
+	//  if (verbose >= 1) { // only if verbose
+	cerr << "Defined parameters (per moses.ini or switch):" << endl;
+	for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ; iterParam != m_setting.end(); iterParam++) {
+		if (iterParam->second.size() > 0) {
+			cerr << "\t" << iterParam->first << ": ";
+			for ( size_t i = 0; i < iterParam->second.size(); i++ )
+				cerr << iterParam->second[i] << " ";
+			cerr << endl;
+		}
+		//}
+	}
+
+	// check for illegal parameters
+	bool noErrorFlag = true;
+	for (int i = 0 ; i < argc ; i++)
+		{
+			if (isOption(argv[i]))
+				{
+					string paramSwitch = (string) argv[i];				
+					string paramName = paramSwitch.substr(1);
+					if (m_valid.find(paramName) == m_valid.end()) 
+						{
+							UserMessage::Add("illegal switch: " + paramSwitch);
+							noErrorFlag = false;
+						}
+				}
+		}
+  // check if parameters make sense
+	return Validate() && noErrorFlag;
+}
+
+/** check if parameter settings make sense */
 bool Parameter::Validate() 
 {
-	bool ret = true;
+	bool noErrorFlag = true;
 
   // required parameters
 	if (m_setting["ttable-file"].size() == 0)
 	{
 		UserMessage::Add("No phrase translation table (ttable-file)");
-		ret = false;
+		noErrorFlag = false;
 	}
 
 	if (m_setting["lmodel-file"].size() == 0)
 	{
 		UserMessage::Add("No language model (lmodel-file)");
-		ret = false;
+		noErrorFlag = false;
 	}
 
 	if (m_setting["lmodel-file"].size() != m_setting["weight-l"].size()) 
@@ -102,32 +213,34 @@ bool Parameter::Validate()
 						<< " weights (weight-l)";
     errorMsg << endl << "You might be giving '-lmodel-file TYPE FACTOR ORDER FILENAME' but you should be giving these four as a single argument, i.e. '-lmodel-file \"TYPE FACTOR ORDER FILENAME\"'";
 		UserMessage::Add(errorMsg.str());
-		ret = false;
+		noErrorFlag = false;
 	}
 
   // do files exist?
 	// phrase tables
-	if (ret) 
+	if (noErrorFlag) 
 		{
 			std::vector<std::string> ext;
 			// standard phrase table extension (i.e. full name has to be specified)
 			ext.push_back("");
 			// alternative file extension for binary phrase table format:
 			ext.push_back(".binphr.idx");
-			ret = FilesExist("ttable-file", 3,ext);
+			noErrorFlag = FilesExist("ttable-file", 3,ext);
 		}
 	// generation tables
-//	if (ret)
-//		ret = FilesExist("generation-file", 2);
+	//	if (noErrorFlag)
+	//		noErrorFlag = FilesExist("generation-file", 2);
 	// language model
-	if (ret)
-		ret = FilesExist("lmodel-file", 3);
-	if (ret)
-		ret = FilesExist("input-file", 0);
+	if (noErrorFlag)
+		noErrorFlag = FilesExist("lmodel-file", 3);
+	// input file
+	if (noErrorFlag)
+		noErrorFlag = FilesExist("input-file", 0);
 
-	return ret;
+	return noErrorFlag;
 }
 
+/** checks if a file exist */
 bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::vector<std::string> const& extensions)
 {
 	using namespace boost::filesystem;
@@ -173,6 +286,7 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 	return true;
 }
 
+/** looks for a switch in arg, updates parameter */
 // TODO arg parsing like this does not belong in the library, it belongs
 // in moses-cmd
 string Parameter::FindParam(const string &paramSwitch, int argc, char* argv[])
@@ -195,15 +309,11 @@ string Parameter::FindParam(const string &paramSwitch, int argc, char* argv[])
 	return "";
 }
 
-bool isOption(const char* x) {
-  if (!x) return false;
-  std::string s(x);
-  size_t len = s.size();
-  if (len > 0 && s.substr(0,1) != "-") return false;
-  if (len > 1 && s.substr(1,1).find_first_not_of("0123456789") == 0) return true;
-  return false;
-}
-
+/** update parameter settings with command line switches
+ * \param paramSwitch (potentially short) name of switch
+ * \param paramName full name of parameter
+ * \param argc number of arguments on command line
+ * \param argv values of paramters on command line */
 void Parameter::OverwriteParam(const string &paramSwitch, const string &paramName, int argc, char* argv[])
 {
 	int startPos = -1;
@@ -230,59 +340,8 @@ void Parameter::OverwriteParam(const string &paramSwitch, const string &paramNam
 	}
 }
 
-// TODO this should be renamed to have at least a plural name
-bool Parameter::LoadParam(int argc, char* argv[]) 
-{
-	// config file (-f) arg mandatory
-	string configPath;
-	if ( (configPath = FindParam("-f", argc, argv)) == "" 
-		&& (configPath = FindParam("-config", argc, argv)) == "")
-	{
-		UserMessage::Add("No configuration file was specified.  Use -config or -f");
-		return false;
-	}
-	else
-	{
-		if (!ReadConfigFile(configPath))
-		{
-			UserMessage::Add("Could not read "+configPath);
-			return false;
-		}
-	}
 
-	string inFile = FindParam("-i", argc, argv);
-	if (inFile != "")
-		m_setting["input-file"].push_back(inFile);
-
-	// overwrite weights
-	OverwriteParam("-dl", "distortion-limit", argc, argv);
-	OverwriteParam("-d", "weight-d", argc, argv);
-	OverwriteParam("-lm", "weight-l", argc, argv);
-	OverwriteParam("-tm", "weight-t", argc, argv);
-	OverwriteParam("-w", "weight-w", argc, argv);
-	OverwriteParam("-T", "translation-details", argc, argv);
-	OverwriteParam("-e", "weight-e", argc, argv);
-	OverwriteParam("-g", "weight-generation", argc, argv);
-	OverwriteParam("-n-best-list", "n-best-list", argc, argv);
-	OverwriteParam("-s", "stack", argc, argv);
-	OverwriteParam("-v", "verbose", argc, argv);
-	OverwriteParam("-report-source-span", "report-source-span", argc, argv);
-	OverwriteParam("-report-all-factors", "report-all-factors", argc, argv);
-	OverwriteParam("-drop-unknown", "drop-unknown", argc, argv);
-	OverwriteParam("-inputtype","inputtype",argc,argv);
-	OverwriteParam("-I","weight-i",argc,argv);
-	OverwriteParam("-ttable-limit","ttable-limit",argc,argv);
-	OverwriteParam("-lmodel-file","lmodel-file",argc,argv);
-	OverwriteParam("-beam-threshold","beam-threshold",argc,argv);
-	OverwriteParam("-use-distortion-future-costs","use-distortion-future-costs",argc,argv);
-	//	OverwriteParam("-","",argc,argv);
-
-
-  // check if parameters make sense
-	return Validate();
-}
-
-// read parameters from a configuration file
+/** read parameters from a configuration file */
 bool Parameter::ReadConfigFile( string filePath ) 
 {
 	InputFileStream inFile(filePath);

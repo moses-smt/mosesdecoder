@@ -28,33 +28,36 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 typedef std::vector<std::string>						PARAM_VEC;
 typedef std::map<std::string, PARAM_VEC > 	PARAM_MAP;
+typedef std::map<std::string, bool>         PARAM_BOOL;
+typedef std::map<std::string, std::string > PARAM_STRING;
 
-/***
- * store raw parameter data (names and values as strings) for StaticData to parse;
- * to get useful values, see StaticData
- */
+/** Handles parameter values set in config file or on command line.
+ * Process raw parameter data (names and values as strings) for StaticData 
+ * to parse; to get useful values, see StaticData. */
 class Parameter
 {
 protected:
 	PARAM_MAP m_setting;
+	PARAM_BOOL m_valid;
+	PARAM_STRING m_abbreviation;
+	PARAM_STRING m_description;
 
 	std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
 	void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
 	bool ReadConfigFile( std::string filePath );
 	bool FilesExist(const std::string &paramName, size_t tokenizeIndex,std::vector<std::string> const& fileExtension=std::vector<std::string>(1,""));
-
+	bool isOption(const char* token);
 	bool Validate();
 
-	PARAM_VEC &AddParam(const std::string &paramName);
+	PARAM_VEC &AddParam(const std::string &paramName, const std::string &description);
+	PARAM_VEC &AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
 	
 public:
 	Parameter();
 	bool LoadParam(int argc, char* argv[]);
+	void Explain();
 
-	/***
-	 * return a vector of strings holding the whitespace-delimited values on the ini-file line 
-	 * corresponding to the given parameter name
-	 */
+	/** return a vector of strings holding the whitespace-delimited values on the ini-file line corresponding to the given parameter name */
 	const PARAM_VEC &GetParam(const std::string &paramName)
 	{
 		return m_setting[paramName];
