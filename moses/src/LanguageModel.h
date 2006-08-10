@@ -49,6 +49,8 @@ public:
 	// see ScoreProducer.h
 	unsigned int GetNumScoreComponents() const;
 
+	virtual LMType GetLMType() const = 0;
+
 	// whether this LM can be used on a particular phrase
 	virtual bool Useable(const Phrase &phrase) const = 0;
 

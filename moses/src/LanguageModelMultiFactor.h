@@ -40,6 +40,11 @@ public:
 					, float weight
 					, size_t nGramOrder) = 0;
 
+	LMType GetLMType() const
+	{
+		return MultiFactor;
+	}
+
 	const std::string GetScoreProducerDescription() const;	
 	bool Useable(const Phrase &phrase) const;	
 };
