@@ -63,8 +63,10 @@ StaticData::StaticData()
 
 bool StaticData::LoadParameters(int argc, char* argv[])
 {
-	if (!m_parameter.LoadParam(argc, argv))
+	if (!m_parameter.LoadParam(argc, argv)) {
+		m_parameter.Explain();
 		return false;
+	}
 
 	// input type has to specified BEFORE loading the phrase tables!
 	if(m_parameter.GetParam("inputtype").size()) 

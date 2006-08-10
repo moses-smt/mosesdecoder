@@ -75,21 +75,20 @@ bool readInput(InputOutput *inputOutput, int inputType, InputType*& source)
 
 int main(int argc, char* argv[])
 {
+	// Welcome message
+	TRACE_ERR( "Moses (built on " << __DATE__ << ")" << endl );
+	TRACE_ERR( "a beam search decoder for phrase-based statistical machine translation models" << endl );
+	TRACE_ERR( "written by Hieu Hoang, with contributions by Nicola Bertoldi, Ondrej Bojar," << endl << 
+						 "Chris Callison-Burch, Alexandra Constantin, Brooke Cowan, Chris Dyer, Marcello Federico," << endl <<
+						 "Evan Herbst, Philipp Koehn, Christine Moran, Wade Shen, and Richard Zens." << endl);
+	TRACE_ERR( "(c) 2006 University of Edinburgh, Scotland" << endl );
+	TRACE_ERR( "command: " );
+	for(int i=0;i<argc;++i) TRACE_ERR( argv[i]<<" " );
+	TRACE_ERR(endl);
+
+	// load data structures
 	timer.start("Starting...");
-
-	std::cerr
-		<<"============================================================================\n"
-		<<"starting "<<argv[0]<<"  (build on "<<__DATE__<<")\n"
-		<<"============================================================================\n"
-		<<"\n"
-    <<"the command line was: \n";
-	for(int i=0;i<argc;++i) std::cerr<<argv[i]<<" ";
-  std::cerr
-		<<"\n"
-		<<"============================================================================\n";
-
 	StaticData staticData;
-
 	if (!staticData.LoadParameters(argc, argv))
 		return EXIT_FAILURE;
 
