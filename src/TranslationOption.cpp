@@ -64,35 +64,6 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 { // used to create trans opt from unknown word
 }
 
-TranslationOption *TranslationOption::MergeTranslation(const TargetPhrase &targetPhrase) const
-{
-	if (m_targetPhrase.IsCompatible(targetPhrase))
-	{
-		TargetPhrase mergePhrase(targetPhrase);
-		mergePhrase.MergeFactors(m_targetPhrase);
-		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase);
-		return newTransOpt;
-	}
-	else
-	{
-		return NULL;
-	}
-}
-
-TranslationOption *TranslationOption::MergeGeneration(const Phrase &inputPhrase
-																	, const ScoreComponentCollection2& generationScore) const
-{
-	if (m_targetPhrase.IsCompatible(inputPhrase))
-	{
-		Phrase mergePhrase(inputPhrase);
-		mergePhrase.MergeFactors(m_targetPhrase);
-		TranslationOption *newTransOpt = new TranslationOption(*this, mergePhrase, generationScore);
-		return newTransOpt;
-	}
-	else
-		return NULL;
-}
-
 bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 {
 	const WordsBitmap &bitmap = hypothesis.GetWordsBitmap();
