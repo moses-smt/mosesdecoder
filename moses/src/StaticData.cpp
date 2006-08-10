@@ -258,33 +258,21 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			}
 			// type = implementation, SRI, IRST etc
 			LMImplementation lmImplementation = static_cast<LMImplementation>(Scan<int>(token[0]));
+			
 			// factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
+			vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
+			
 			// nGramOrder = 2 = bigram, 3 = trigram, etc
 			size_t nGramOrder = Scan<int>(token[2]);
-			// keep track of the largest n-gram length
-			// (used by CompareHypothesisCollection)
+			
 			string &languageModelFile = token[3];
 
 			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
 			
-			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmImplementation);
+			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmImplementation, factorTypes     
+                                   									, nGramOrder, languageModelFile, weightAll[i], m_factorCollection);
       if (lm == NULL) // no LM created. we prob don't have it compiled
       	return false;
-
-			if (lmImplementation == Chunking)
-			{
-				vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
-				
-	      LanguageModelMultiFactor *lmMF = static_cast<LanguageModelMultiFactor*>(lm);
-				lmMF->Load(languageModelFile, m_factorCollection, factorTypes, weightAll[i], nGramOrder);
-			}
-			else
-			{
-				FactorType factorType = Scan<FactorType>(token[1]);
-				
-	      LanguageModelSingleFactor *lmSF = static_cast<LanguageModelSingleFactor*>(lm);	
-				lmSF->Load(languageModelFile, m_factorCollection, factorType, weightAll[i], nGramOrder);
-			}
 
 			m_languageModel.push_back(lm);
 	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
