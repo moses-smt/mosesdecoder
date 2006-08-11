@@ -136,9 +136,10 @@ class lmtable{
   int    backoff_state; 
   
   //improve access speed
-  ngramcache* bicache;
+  ngramcache* lmtcache[LMTMAXLEV+1];
 	ngramcache* probcache;
   ngramcache* statecache;
+  int max_cache_lev;
 	
 public:
     
@@ -147,10 +148,12 @@ public:
   lmtable();
   
   ~lmtable(){
-    if (bicache){
-      std::cerr << "Bigram Cache: "; bicache->stat();
-      delete bicache; 
+    for (int i=2;i<=max_cache_lev;i++)        
+    if (lmtcache[i]){
+      std::cerr << i <<"-gram cache: "; lmtcache[i]->stat();
+      delete lmtcache[i]; 
     }
+    
     if (probcache){
       std::cerr << "Prob Cache: "; probcache->stat();
       delete probcache;
@@ -181,22 +184,24 @@ public:
     statecache=new ngramcache(maxlev-1,sizeof(char *),200000);
   }
   
-  void init_bicache(){
-    assert(bicache==NULL);
-    bicache=new ngramcache(2,sizeof(char *),200000);
+  void init_lmtcaches(int uptolev){
+    max_cache_lev=uptolev;
+    for (int i=2;i<=max_cache_lev;i++){
+    assert(lmtcache[i]==NULL);
+    lmtcache[i]=new ngramcache(i,sizeof(char *),2000000);
+    }
   }
-  
   
   void check_cache_levels(){
     if (probcache && probcache->isfull()) probcache->reset();
     if (statecache && statecache->isfull()) statecache->reset();
-    if (bicache && bicache->isfull()) bicache->reset();
+    for (int i=2;i<=max_cache_lev;i++)
+      if (lmtcache[i]->isfull()) lmtcache[i]->reset();
   }
   
   bool is_probcache_active(){return probcache!=NULL;}
   bool is_statecache_active(){return statecache!=NULL;}
-  bool is_bicache_active(){return bicache!=NULL;}
-  
+  bool are_lmtcaches_active(){return lmtcache[2]!=NULL;}  
   
 	void configure(int n,bool quantized){
 		maxlev=n;
