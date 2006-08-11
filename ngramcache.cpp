@@ -37,40 +37,37 @@ ngramcache::ngramcache(int n,int size,int maxentries){
       infosize=size;
       maxn=maxentries;
       entries=0;
-      ht=new htable(maxn * 2, ngsize * sizeof(int),INT,NULL); //load factor 2   
+      ht=new htable(maxn * 2, ngsize * sizeof(int),INT,NULL); //larger table reduces collisions  
       mp=new mempool(ngsize * sizeof(int)+infosize,maxn/10); 
       accesses=0;
       hits=0;
     };
   
 ngramcache::~ngramcache(){
-    ht->stat();//ht->map();
-    mp->stat();
+    ht->stat(); mp->stat();
     delete ht;delete mp;
-};
+}
 
 
 void ngramcache::reset(){
-    ht->stat();
+    //ht->stat();
     delete ht;delete mp;    
-    ht=new htable(maxn * 2, ngsize * sizeof(int),INT,NULL); //load factor 2   
-    mp=new mempool(ngsize * sizeof(int)+infosize,maxn/10); 
+    ht=new htable(maxn * 2, ngsize * sizeof(int),INT,NULL); 
+    mp=new mempool(ngsize * sizeof(int)+infosize,maxn/2); 
     entries=0;
   }
 
 
 char* ngramcache::get(const int* ngp,char* info){       
-    char *found;
-   // cout << "ngramcache::get() ";
-    //for (int i=0;i<ngsize;i++) cout << ngp[i] << " "; cout <<"\n"; 
+  char *found;
   accesses++;
   if (found=ht->search((char *)ngp,HT_FIND)){
     if (info) memcpy(info,found+ngsize*sizeof(int),infosize);
     hits++;
   }; 
-    return found;
-  };
-  
+  return found;
+}
+
 
 int ngramcache::add(const int* ngp,const char* info){
     
@@ -85,5 +82,5 @@ int ngramcache::add(const int* ngp,const char* info){
   
 void ngramcache::stat(){
    cerr << "ngramcache stats: entries=" << entries << " acc=" << accesses << " hits=" << hits << "\n";
-};
+}
 

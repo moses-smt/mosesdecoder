@@ -137,7 +137,7 @@ class lmtable{
   
   //improve access speed
   ngramcache* bicache;
-	ngramcache* prcache;
+	ngramcache* probcache;
   ngramcache* statecache;
 	
 public:
@@ -151,9 +151,9 @@ public:
       std::cerr << "Bigram Cache: "; bicache->stat();
       delete bicache; 
     }
-    if (prcache){
-      std::cerr << "Prob Cache: "; prcache->stat();
-      delete prcache;
+    if (probcache){
+      std::cerr << "Prob Cache: "; probcache->stat();
+      delete probcache;
     } 
     if (statecache){
       std::cerr << "State Cache: "; statecache->stat();
@@ -171,11 +171,19 @@ public:
     }
   }
     
-  void init_prcache(){
-    assert(prcache==NULL);
-    prcache=new ngramcache(maxlev,sizeof(double),1000000);
-    statecache=new ngramcache(maxlev-1,sizeof(char *),1000000);
+  void init_prob_and_state_caches(){
+    assert(probcache==NULL && statecache==NULL);
+    probcache=new ngramcache(maxlev,sizeof(double),2000000);
+    statecache=new ngramcache(maxlev-1,sizeof(char *),2000000);
   }
+  
+  void reset_prob_and_state_caches(){
+    probcache->reset();
+    statecache->reset();
+  }
+  
+  bool is_prob_cache_active(){return probcache!=NULL;}
+  
   
 	void configure(int n,bool quantized){
 		maxlev=n;

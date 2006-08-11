@@ -54,11 +54,12 @@ lmtable::lmtable(){
 	memset(NumCenters, 0, sizeof(NumCenters));
  
   bicache=new ngramcache(2,sizeof(char*),1000000);
-  prcache=NULL;
+  probcache=NULL;
+  statecache=NULL;
   
 };
 
-
+ 
 //loadstd::istream& inp a lmtable from a lm file
 
 void lmtable::load(fstream& inp){
@@ -739,14 +740,13 @@ const char *lmtable::cmaxsuffptr(ngram ong){
   
   char* found;
   
-  if ((ong.size==maxlev-1) && statecache->get(ong.wordp(maxlev-1),(char *)&found))
+  if (statecache && (ong.size==maxlev-1) && statecache->get(ong.wordp(maxlev-1),(char *)&found))
     return found;
   
   found=(char *)maxsuffptr(ong);
   
-  if (ong.size==maxlev-1){
+  if (statecache && ong.size==maxlev-1){
     if (statecache->isfull()) statecache->reset();
-    // cout << "clprob: adding: " << ong <<"\n";
     statecache->add(ong.wordp(maxlev-1),(char *)&found);    
   }; 
   
@@ -833,28 +833,23 @@ double lmtable::lprob(ngram ong){
 double lmtable::clprob(ngram ong){
 	
   
-  if (ong.size==0) {
-    return 0.0;
-  }
+  if (ong.size==0) return 0.0;
   
   if (ong.size>maxlev) ong.size=maxlev;
 
-  double pr; 
-  if (ong.size==maxlev && prcache->get(ong.wordp(maxlev),(char *)&pr)){
-    //assert(pr==lprob(ong));
-    return pr;    
-  };   
+  double logpr; 
+  if (probcache && ong.size==maxlev && probcache->get(ong.wordp(maxlev),(char *)&logpr))
+    return logpr;   
 
  
-  pr=lprob(ong);
+  logpr=lprob(ong);
   
-  if (ong.size==maxlev){
-    if (prcache->isfull()) prcache->reset();
-    // cout << "clprob: adding: " << ong <<"\n";
-     prcache->add(ong.wordp(maxlev),(char *)&pr);    
+  if (probcache && ong.size==maxlev){
+    if (probcache->isfull()) probcache->reset();
+     probcache->add(ong.wordp(maxlev),(char *)&logpr);    
   }; 
   
-  return pr;
+  return logpr;
 
 };
 
