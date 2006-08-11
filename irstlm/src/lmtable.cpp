@@ -17,8 +17,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 ******************************************************************************/
-using namespace std;
-
 #include <iostream>
 #include <fstream>
 
@@ -34,6 +32,7 @@ using namespace std;
 #include "n_gram.h"
 #include "lmtable.h"
 
+using namespace std;
 
 inline void error(char* message){
   cerr << message << "\n";

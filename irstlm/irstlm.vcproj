@@ -197,7 +197,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ngram.cpp"
+				RelativePath=".\src\n_gram.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ngramcache.cpp"
 				>
 			</File>
 		</Filter>
@@ -231,7 +235,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ngram.h"
+				RelativePath=".\src\n_gram.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ngramcache.h"
 				>
 			</File>
 		</Filter>

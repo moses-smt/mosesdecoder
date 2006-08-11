@@ -156,6 +156,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DecodeStep.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Dictionary.cpp"
 				>
 			</File>
