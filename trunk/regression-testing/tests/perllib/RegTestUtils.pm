@@ -16,7 +16,7 @@ sub readHypoScore
 	my $line = shift;
 	#the 0.12 is hardcoded in Hypothesis.cpp because some parsing scripts still
 	#expect a comma-separated list of scores -- EVH
-	if($line =~ /\[0.12, (-?\d+\.\d+)\]/) {return $1;}
+	if($line =~ /\[total=\s*(-?\d+\.\d+)\]/) {return $1;}
 	return "FORMAT ERROR";
 }
 
