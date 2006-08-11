@@ -57,28 +57,25 @@ class CombineTags
  			}
 	 		
 	 		// combine
-	 		for (int i = 1 ; i < phrases.size() ; i++)
-	 		{
-	 			phrase = (Vector) phrases.get(0);
-	 			
-	 			for (int pos = 0 ; pos < phrase.size() ; pos++)
-	 			{
-	 				String outLine = (String) phrase.get(pos) + "|";
-	 				
-	 				for (int stream = 1 ; stream < phrases.size() ; stream++)
-	 				{
-	 					Vector otherPhrase = (Vector) phrases.get(stream);
-	 					String otherTag;
-	 					if (otherPhrase.size() <= pos)
-	 						otherTag = (String) otherPhrase.get(0);
-	 					else
-	 						otherTag = (String) otherPhrase.get(pos);
-	 					outLine += otherTag + "|";
-	 				}
-	 				outLine = outLine.substring(0, outLine.length() - 1) + " ";
-	 				outStream.print(outLine);
-	 			}
-	 		}
+ 			phrase = (Vector) phrases.get(0);
+ 			
+ 			for (int pos = 0 ; pos < phrase.size() ; pos++)
+ 			{
+ 				String outLine = (String) phrase.get(pos) + "|";
+ 				
+ 				for (int stream = 1 ; stream < phrases.size() ; stream++)
+ 				{
+ 					Vector otherPhrase = (Vector) phrases.get(stream);
+ 					String otherTag;
+ 					if (otherPhrase.size() <= pos)
+ 						otherTag = (String) otherPhrase.get(0);
+ 					else
+ 						otherTag = (String) otherPhrase.get(pos);
+ 					outLine += otherTag + "|";
+ 				}
+ 				outLine = outLine.substring(0, outLine.length() - 1) + " ";
+ 				outStream.print(outLine);
+ 			}
 	 		outStream.println();
 		}
 	}
