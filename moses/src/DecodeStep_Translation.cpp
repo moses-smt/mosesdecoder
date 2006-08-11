@@ -18,7 +18,7 @@ const PhraseDictionaryBase &TranslationDecodeStep::GetPhraseDictionary() const
 TranslationOption *TranslationDecodeStep::MergeTranslation(const TranslationOption& oldTO, TargetPhrase &targetPhrase) const
 {
   if (IsFilteringStep()) {
-    if (!oldTO.GetTargetPhrase().IsCompatible(targetPhrase)) return 0;
+    if (!oldTO.IsCompatible(targetPhrase, m_conflictFactors)) return 0;
   }
 
   TranslationOption *newTransOpt = new TranslationOption(oldTO);
