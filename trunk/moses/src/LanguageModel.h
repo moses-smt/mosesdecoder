@@ -82,5 +82,10 @@ public:
 		m_weight = weight;
 	}
 	virtual const std::string GetScoreProducerDescription() const = 0;
+  
+  virtual const void CleanUpAfterSentenceProcessing() {};
+
+  virtual const void InitializeBeforeSentenceProcessing(){};
+  
 };
 

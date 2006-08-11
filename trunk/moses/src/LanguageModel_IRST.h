@@ -69,5 +69,7 @@ public:
 
   virtual float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL) const;
 
-};
+  const void CleanUpAfterSentenceProcessing();
+  const void InitializeBeforeSentenceProcessing();
 
+};
