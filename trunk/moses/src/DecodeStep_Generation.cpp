@@ -19,7 +19,7 @@ TranslationOption *GenerationDecodeStep::MergeGeneration(const TranslationOption
                                   , const ScoreComponentCollection2& generationScore) const
 {
 	if (IsFilteringStep()) {
-  	if (!oldTO.GetTargetPhrase().IsCompatible(mergePhrase)) return 0;
+  	if (!oldTO.IsCompatible(mergePhrase, m_conflictFactors)) return 0;
 	}
 
   TranslationOption *newTransOpt = new TranslationOption(oldTO);
