@@ -109,11 +109,12 @@ int main(int argc, char* argv[])
 
 	// read each sentence & decode
 	InputType *source=0;
+	size_t lineCount = 0;
 	while(readInput(inputOutput,staticData.GetInputType(),source))
 		{
 			// note: source is only valid within this while loop!
 
-			TRACE_ERR("\nTRANSLATING: " << *source <<endl);
+			TRACE_ERR("\nTRANSLATING(" << ++lineCount << "): " << *source <<endl);
 
 			staticData.InitializeBeforeSentenceProcessing(*source);
 			Manager manager(*source, staticData);
@@ -135,7 +136,7 @@ int main(int argc, char* argv[])
 				}
 
 			if (staticData.IsDetailedTranslationReportingEnabled()) {
-				TranslationAnalysis::PrintTranslationAnalysis(std::cout, manager.GetBestHypothesis());
+				TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
 			}
 			staticData.CleanUpAfterSentenceProcessing();
 		}
