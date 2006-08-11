@@ -10,25 +10,33 @@ class TagHierarchy
 		System.err.println("Starting...");
 
 		InputStreamReader inStream = args.length > 0 ? new FileReader(args[0]) : new InputStreamReader(System.in); 
-		OutputStreamWriter outStream = args.length > 1 ?  new FileWriter(args[1]) : new OutputStreamWriter(System.out); 
+		PrintStream outStream = args.length > 1 ? new PrintStream(new File(args[1])) : System.out; 
 		
 		new TagHierarchy(inStream, outStream);
 		
 		System.err.println("End...");
 	}
 
-	public TagHierarchy(Reader inStream, Writer outStream) throws Exception
+	public TagHierarchy(Reader inStream, PrintStream outStream) throws Exception
 	{
 		BufferedReader inFile = new BufferedReader(inStream); 
-		BufferedWriter outFile = new BufferedWriter(outStream); 
 		
 		// tokenise
 		String inLine;
+		int nullLines = 0;
 		while ((inLine = inFile.readLine()) != null)
 		{
-			if (inLine.compareTo("null") != 0)
-				OutputHierarchy2(inLine, outFile);
+			if (inLine.equals("null"))
+			{
+				nullLines++;
+				outStream.println("null");
+			}
+			else
+			{
+				OutputHierarchy2(inLine, outStream);
+			}
 		}
+		System.err.println(nullLines + " null lines\n");
 	}
 
 	public void OutputHierarchy(String inLine, BufferedWriter outFile) throws Exception
@@ -61,7 +69,7 @@ class TagHierarchy
 	     outFile.write('\n');
 	}
 
-	public void OutputHierarchy2(String inLine, BufferedWriter outFile) throws Exception
+	public void OutputHierarchy2(String inLine, PrintStream outFile) throws Exception
 	{
 		int level = 0;
 		Stack prevTags = new Stack();
@@ -73,13 +81,7 @@ class TagHierarchy
 	    	String parsed = st.nextToken();
 	    	if (parsed.substring(0, 1).compareTo("(") == 0)
 	    	{ // start of new node
-	    		outFile.write('\n');
-	    		for (int currLevel = 0 ; currLevel < level ; currLevel++)
-	    		{
-	    			outFile.write(' ');
-	    		}
 	    		String tag = parsed.substring(1, parsed.length());
-	    		outFile.write(tag);
 	    		prevTags.push(tag);
 	    		level++;
 	    	}
@@ -89,15 +91,14 @@ class TagHierarchy
 	    		String parentTag = (String) prevTags.get(prevTags.size() - 2)
 	    				, currTag = (String) prevTags.get(prevTags.size() - 1);
 	    		if (currTag.equals("NN-NK") && parentTag.equals("NP-SB"))
-	    			outFile.write("_" + parentTag);
+	    			currTag += "_" + parentTag;
 
 	    		int firstBracket = parsed.indexOf(')');
 	    		int noBracket = parsed.length() - firstBracket;
 	    		String word = parsed.substring(0, firstBracket);
-	    		outFile.write(" == " + word);
+	    		outFile.print(currTag + " ");
 	    		
 	    		level -= noBracket;
-	    		
 	    		
 	    		// pop the rest
 	    		for (int i = 0 ; i < noBracket ; ++i)
