@@ -1,6 +1,6 @@
 // $Id$
 #include "InputOutput.h"
-#include "Input.h"
+#include "InputType.h"
 
 InputOutput::InputOutput() : sentenceId(0) {}
 

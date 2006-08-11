@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include <list>
-#include "Input.h"
+#include "InputType.h"
 #include "Hypothesis.h"
 #include "StaticData.h"
 #include "TranslationOption.h"
@@ -76,7 +76,7 @@ protected:
 	InputType const& m_source; /**< source sentence to be translated */
 
 	std::vector < HypothesisCollection > m_hypoStack; /**< stacks to store hypothesis (partial translations) */ 
-		// no of elements = no of words in source + 1
+	// no of elements = no of words in source + 1
 	StaticData &m_staticData; /**< holds various kinds of constants, counters, and global data structures */
 	TranslationOptionCollection &m_possibleTranslations; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
@@ -96,5 +96,9 @@ public:
 	void ProcessSentence();
 	const Hypothesis *GetBestHypothesis() const;
 	void CalcNBest(size_t count, LatticePathList &ret) const;
+	
+	/***
+	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
+	 */
+	void CalcDecoderStatistics(const StaticData& staticData) const;
 };
-

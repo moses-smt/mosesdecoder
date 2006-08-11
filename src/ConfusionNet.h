@@ -5,12 +5,11 @@
 #include <vector>
 #include <iostream>
 #include "Word.h"
-#include "Input.h"
+#include "InputType.h"
 
 class FactorCollection;
 class TranslationOptionCollection;
 class Sentence;
-
 
 class ConfusionNet : public InputType {
  public: 
@@ -40,8 +39,8 @@ class ConfusionNet : public InputType {
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection);
 
 	
-	Phrase GetSubString(const WordsRange&) const;
-	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //not well defined yet
+	Phrase GetSubString(const WordsRange&) const; //TODO not defined
+	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //TODO not defined
 	const FactorArray& GetFactorArray(size_t pos) const;
 
 

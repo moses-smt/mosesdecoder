@@ -55,12 +55,12 @@ Manager::~Manager()
 }
 
 /**
- * This is the main decoder loop that translates a sentence by expanding
+ * Main decoder loop that translates a sentence by expanding
  * hypotheses stack by stack, until the end of the sentence.
  */
 void Manager::ProcessSentence()
 {	
-	m_staticData.GetSentenceStats().ZeroAll();
+	m_staticData.ResetSentenceStats(m_source);
 	list < DecodeStep* > &decodeStepList = m_staticData.GetDecodeStepList();
 	// create list of all possible translations
 	// this is only valid if:
@@ -97,7 +97,7 @@ void Manager::ProcessSentence()
 		// some logging
 		if (m_staticData.GetVerboseLevel() > 0) {
 			//OutputHypoStack();
-                        OutputHypoStackSize();
+			OutputHypoStackSize();
 		}
 
 	}
@@ -146,7 +146,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	// if there are reordering limits, make sure it is not violated
 	// the coverage bitmap is handy here (and the position of the first gap)
 	const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
-	const size_t hypoWordCount		= hypoBitmap.GetWordsCount()
+	const size_t hypoWordCount		= hypoBitmap.GetNumWordsCovered()
 							, hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
 							, sourceSize			= m_source.GetSize();
 	
@@ -226,7 +226,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 		}
 
 	// add to hypothesis stack
-	size_t wordsTranslated = newHypo->GetWordsBitmap().GetWordsCount();	
+	size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
 	m_hypoStack[wordsTranslated].AddPrune(newHypo);
 }
 
@@ -241,7 +241,7 @@ const Hypothesis *Manager::GetBestHypothesis() const
 }
 
 /**
- * Logging of hypotheses stack sizes
+ * Logging of hypothesis stack sizes
  */
 void Manager::OutputHypoStackSize()
 {
@@ -255,7 +255,7 @@ void Manager::OutputHypoStackSize()
 }
 
 /**
- * Logging of hypotheses stack contents
+ * Logging of hypothesis stack contents
  * \param stack number of stack to be reported, report all stacks if 0 
  */
 void Manager::OutputHypoStack(int stack)
@@ -320,4 +320,9 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret) const
 			++iterBestHypo;
 		}
 	}
+}
+
+void Manager::CalcDecoderStatistics(const StaticData& staticData) const
+{
+	staticData.GetSentenceStats().CalcFinalStats(*GetBestHypothesis());
 }

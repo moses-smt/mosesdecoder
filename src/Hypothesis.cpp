@@ -18,6 +18,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
+
 #include <cassert>
 #include <iostream>
 #include <limits>
@@ -30,13 +31,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SquareMatrix.h"
 #include "LexicalReordering.h"
 #include "StaticData.h"
-#include "Input.h"
+#include "InputType.h"
 #include "LMList.h"
 #include "hash.h"
 
 using namespace std;
 
-unsigned int Hypothesis::s_numNodes = 0;
 unsigned int Hypothesis::s_HypothesesCreated = 0;
 ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 
@@ -100,7 +100,7 @@ Hypothesis::~Hypothesis()
 		m_arcList->clear();
 
 		delete m_arcList;
-		m_arcList = 0;
+		m_arcList = NULL;
 	}
 }
 
@@ -325,7 +325,7 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 	
 	//LEXICAL REORDERING COST
 	std::vector<LexicalReordering*> m_reorderModels = staticData.GetReorderModels();
-	for(int i = 0; i < m_reorderModels.size(); i++)
+	for(unsigned int i = 0; i < m_reorderModels.size(); i++)
 	{
 		m_scoreBreakdown.PlusEquals(m_reorderModels[i], m_reorderModels[i]->CalcScore(this));
 	}
@@ -405,7 +405,6 @@ void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistorti
 	TRACE_ERR("\tscore "<<m_totalScore - m_futureScore<<" + future cost "<<m_futureScore<<" = "<<m_totalScore<<endl);
   TRACE_ERR( "\tunweighted feature scores: " << m_scoreBreakdown << endl);
 	//PrintLMScores();
-	 
 }
 
 TO_STRING_BODY(Hypothesis)

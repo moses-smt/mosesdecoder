@@ -27,7 +27,6 @@
 
 #ifndef NULL
 const int NULL=0;
-//#define NULL=0;
 #endif
 
 #include <iostream>  // std::ostream
@@ -49,7 +48,7 @@ class memnode{
 //! Memory pool
 
 /*! A memory pool is composed of:
-   - a linked list of block_num memory blocks
+   - a linked list of blocknum memory blocks
    - each block might contain up to block_size items
    - each item is made of exactly item_size bytes
 */
@@ -74,7 +73,7 @@ class mempool{
   void map(std::ostream& co);
 
   //! Allocates a single memory entry
-  char *alloc();
+  char *allocate();
 
   //! Frees a single memory entry
   int free(char* addr);
@@ -123,14 +122,12 @@ class strstack{
   
   void stat();
   
-  int used(){return memory;};
+  int used(){return memory;}
   
-  int wasted(){return waste;};
-
+  int wasted(){return waste;}
 };
 
-
-//! Manages multiple memory pools 
+//! Manage multiple memory pools 
 
 /*!
   This class permits to manage memory pools 
@@ -138,7 +135,6 @@ class strstack{
   - items within the allowed range are stored in memory pools
   - items larger than the limit are allocated with new
 */
-
 
 class storage{
   mempool **poolset;  //!< array of memory pools
@@ -155,10 +151,10 @@ class storage{
   ~storage();
 
   //! Allocates memory 
-  char *alloc(int size);
+  char *allocate(int size);
 
   //! Realloc memory
-  char *realloc(char *oldptr,int oldsize,int newsize);
+  char *reallocate(char *oldptr,int oldsize,int newsize);
 
   //! Frees memory of an entry   
   int free(char *addr,int size=0);
@@ -167,15 +163,4 @@ class storage{
   void stat();
 };
 
-
 #endif
-
-
-
-
-
-
-
-
-
-

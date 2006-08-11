@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "memory.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
-#include "Util.h"
+#include "Util.h" //malloc() replacement
 
 using namespace std;
 
@@ -39,7 +39,7 @@ Phrase::Phrase(const Phrase &copy)
 ,m_memPoolIndex(copy.m_memPoolIndex)
 {
 	assert(m_memPoolIndex<s_memPool.size() && s_memPool[m_memPoolIndex]);
-	m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->alloc();
+	m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->allocate();
 	memcpy(m_factorArray, copy.m_factorArray, m_phraseSize * sizeof(FactorArray));
 }
 
@@ -59,7 +59,7 @@ Phrase& Phrase::operator=(const Phrase& x)
 			m_arraySize=x.m_arraySize;
 			m_memPoolIndex=x.m_memPoolIndex;
 
-			m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->alloc();
+			m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->allocate();
 			memcpy(m_factorArray, x.m_factorArray, m_phraseSize * sizeof(FactorArray));
 		}
 	return *this;
@@ -73,7 +73,7 @@ Phrase::Phrase(FactorDirection direction)
 	, m_memPoolIndex(0)
 {
 	assert(m_memPoolIndex<s_memPool.size());
-	m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->alloc();
+	m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->allocate();
 }
 
 Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
@@ -82,7 +82,7 @@ Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWord
 {
 	m_memPoolIndex	= (m_phraseSize + ARRAY_SIZE_INCR - 1) / ARRAY_SIZE_INCR  - 1;
 	m_arraySize 		= (m_memPoolIndex + 1) * ARRAY_SIZE_INCR;
-	m_factorArray 	= (FactorArray*) s_memPool[m_memPoolIndex]->alloc();
+	m_factorArray 	= (FactorArray*) s_memPool[m_memPoolIndex]->allocate();
 	
 	for (size_t currPos = 0 ; currPos < m_phraseSize ; currPos++)
 	{
@@ -101,7 +101,7 @@ Phrase::~Phrase()
 {
 	// RZ: 
 	// will segFault if Phrase was default constructed and AddWord was never called
-	// not sure if this is really the intended behaviour 
+	// TODO not sure if this is really the intended behaviour 
 	// assertion failure is better than segFault, but if(m_factorArray) might be more appropriate
 	//assert(m_factorArray); 
 	if(m_factorArray)
@@ -176,7 +176,7 @@ FactorArray &Phrase::AddWord()
 {
 	if ((m_phraseSize+1) % ARRAY_SIZE_INCR == 0)
 	{ // need to expand array
-		FactorArray *newArray = (FactorArray*) s_memPool[m_memPoolIndex+1]->alloc();
+		FactorArray *newArray = (FactorArray*) s_memPool[m_memPoolIndex+1]->allocate();
 		memcpy(newArray, m_factorArray, m_phraseSize * sizeof(FactorArray));
 		s_memPool[m_memPoolIndex]->free((char*)m_factorArray);
 		

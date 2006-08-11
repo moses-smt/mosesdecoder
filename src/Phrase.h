@@ -40,7 +40,7 @@ class Phrase
 	FactorDirection				m_direction;
 	size_t								m_phraseSize, //number of words
 												m_arraySize,
-												m_memPoolIndex;
+												m_memPoolIndex; //TODO is this supposed to be the number of mempools allocated?
 	FactorArray						*m_factorArray;
 
 public:
@@ -109,7 +109,7 @@ public:
 
 	Phrase GetSubString(const WordsRange &wordsRange) const;
 	
-  std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 
+	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 
   
 	void push_back(Word const& w) {Word::Copy(AddWord(),w.GetFactorArray());}
 

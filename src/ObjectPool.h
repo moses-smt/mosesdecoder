@@ -11,6 +11,7 @@
 #include <string>
 #include <iostream>
 #include <iterator>
+#include "Util.h" //malloc() replacement
 
 // template class for pool of objects
 //  - usefull if many small objects are frequently created and destroyed

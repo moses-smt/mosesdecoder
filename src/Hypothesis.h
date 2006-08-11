@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
 #include "LexicalReordering.h"
-#include "Input.h"
+#include "InputType.h"
 #include "ObjectPool.h"
 
 class SquareMatrix;
@@ -95,8 +95,8 @@ public:
 		return s_objectPool;
 	}
 
-	static unsigned int s_HypothesesCreated; /**< statistics: how many hypotheses were created in total */
-	static unsigned int s_numNodes; /**< statistics: how many hypotheses were created in total */
+
+	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	
 	/** used by initial seeding of the translation process */
@@ -108,7 +108,6 @@ public:
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
 	static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
-	/** return the subclass of Hypothesis most appropriate to the given target phrase */
 	static Hypothesis* Create(const WordsBitmap &initialCoverage);
 
 	/** return the subclass of Hypothesis most appropriate to the given target phrase */
@@ -127,20 +126,19 @@ public:
 
 	void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
 
-	/** returns target phrase used to create this hypothesis */
+	/** return target phrase used to create this hypothesis */
 	const Phrase &GetTargetPhrase() const
 	{
 		return m_targetPhrase;
 	}
 
  // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
-	/** returns input positions covered by the translation option (phrasal translation) used to create this hypothesis */
+	/** return input positions covered by the translation option (phrasal translation) used to create this hypothesis */
 	inline const WordsRange &GetCurrSourceWordsRange() const
 	{
 		return m_currSourceWordsRange;
 	}
 	
-	/** returns ouput word positions of the translation option (phrasal translation) used to create this hypothesis */
 	inline const WordsRange &GetCurrTargetWordsRange() const
 	{
 		return m_currTargetWordsRange;
@@ -166,11 +164,7 @@ public:
 	{
 		return m_currTargetWordsRange.GetEndPos() + 1;
 	}
-	/** same as GetTargetPhrase() */
-	inline const Phrase &GetPhrase() const
-	{
-		return m_targetPhrase;
-	}
+
 	inline const InputType &GetSourcePhrase() const
 	{
 		return m_sourceInput;
@@ -231,7 +225,7 @@ public:
 		{
 			m_prevHypo->ToStream(out);
 		}
-		out << GetPhrase();
+		out << GetTargetPhrase();
 	}
 
 	TO_STRING;

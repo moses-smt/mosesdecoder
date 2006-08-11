@@ -67,8 +67,8 @@ private:
 
 	// different numbers of probabilities for different ranges of
 	// orientation variable
-	static const int MSD_NUM_PROBS = 6;
-	static const int MONO_NUM_PROBS = 4;
+	static const unsigned int MSD_NUM_PROBS = 6;
+	static const unsigned int MONO_NUM_PROBS = 4;
 
 	int m_orientation; // msd or monotone
 	std::vector<int> m_direction;   // contains forward, backward, or both (bidirectional)

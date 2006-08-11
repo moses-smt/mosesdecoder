@@ -19,16 +19,13 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-
-#include <assert.h>
+#include <cassert>
 #include <limits>
 #include <iostream>
 #include <fstream>
-
 #include "dictionary.h"
 #include "n_gram.h"
 #include "lmtable.h"
-
 
 #include "LanguageModel_IRST.h"
 #include "TypeDef.h"
@@ -139,8 +136,8 @@ float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFact
 	size_t count = contextFactor.size();
     
   m_lmtb_ng->size=0;
-  if (count< (m_lmtb_size-1)) m_lmtb_ng->pushc(m_lmtb_sentenceEnd);
-  if (count< m_lmtb_size) m_lmtb_ng->pushc(m_lmtb_sentenceStart);  
+  if (count< (size_t)(m_lmtb_size-1)) m_lmtb_ng->pushc(m_lmtb_sentenceEnd);
+  if (count< (size_t)m_lmtb_size) m_lmtb_ng->pushc(m_lmtb_sentenceStart);  
   
 	for (size_t i = 0 ; i < count ; i++)
 	{

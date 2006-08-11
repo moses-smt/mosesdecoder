@@ -23,7 +23,7 @@
 // Copyright Marcello Federico, ITC-irst, 1998
 
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include "mempool.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -75,7 +75,7 @@ mempool::mempool(int is, int bs){
 }
 
 
-char * mempool::alloc(){
+char * mempool::allocate(){
 
   char *ptr;
 
@@ -392,14 +392,13 @@ storage::~storage(){
   delete [] poolset;
 }
 
-
-char *storage::alloc(int size){
+char *storage::allocate(int size){
 
   if (size<=setsize){
     if (!poolset[size]){
       poolset[size]=new mempool(size,poolsize/size);
     }
-    return poolset[size]->alloc();
+    return poolset[size]->allocate();
   }
   else{
     
@@ -414,9 +413,7 @@ char *storage::alloc(int size){
   }
 }
 
-
-
-char *storage::realloc(char *oldptr,int oldsize,int newsize){
+char *storage::reallocate(char *oldptr,int oldsize,int newsize){
 
   char *newptr;
   
@@ -426,7 +423,7 @@ char *storage::realloc(char *oldptr,int oldsize,int newsize){
     if (newsize<=setsize){
       if (!poolset[newsize])
 	poolset[newsize]=new mempool(newsize,poolsize/newsize);
-      newptr=poolset[newsize]->alloc();
+      newptr=poolset[newsize]->allocate();
       memset((char*)newptr,0,newsize);
     }
     else
@@ -438,7 +435,7 @@ char *storage::realloc(char *oldptr,int oldsize,int newsize){
     }
   }
   else{
-    newptr=(char *)std::realloc(oldptr,newsize);
+    newptr=(char *)realloc(oldptr,newsize);
     if (newptr==oldptr) 
       cerr << "r\b";
     else
@@ -450,9 +447,7 @@ char *storage::realloc(char *oldptr,int oldsize,int newsize){
   }
   
   return newptr;
-
 }
-
 
 int storage::free(char *addr,int size){
   

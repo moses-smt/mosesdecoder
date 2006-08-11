@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 #include <cmath>
-#include <assert.h>
 
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }
@@ -134,7 +133,19 @@ inline std::vector<std::string> TokenizeMultiCharSeparator(
 		tokens.push_back(str.substr(pos, nextPos - pos));
 
 		return tokens;
+}
 
+/***
+ * pre: T can be inserted into an ostream
+ */
+template <typename T>
+std::string Join(const std::string& delimiter, const std::vector<T>& items)
+{
+	std::ostringstream outstr;
+	if(items.size() == 0) return "";
+	outstr << items[0];
+	for(unsigned int i = 1; i < items.size(); i++) outstr << " " << items[i];
+	return outstr.str();
 }
 
 // transform prob to natural log score
@@ -180,7 +191,7 @@ inline float UntransformSRIScore(float logNScore)
 
 inline float FloorSRIScore(float sriScore)
 {
-	return (std::max)(sriScore , LOWEST_SCORE);
+	return std::max(sriScore, LOWEST_SCORE);
 }
 
 inline float CalcTranslationScore(const std::vector<float> &scoreVector, 
@@ -223,5 +234,10 @@ std::string GetMD5Hash(const std::string &filePath);
 template<typename T> inline void ShrinkToFit(T& v) {
   if(v.capacity()>v.size()) T(v).swap(v);assert(v.capacity()==v.size());}
 
-
-
+/***
+ * include checks for null return value, and helpful print statements
+ */
+void* xmalloc(unsigned int numBytes);
+void* xrealloc(void* ptr, unsigned int numBytes);
+#define malloc(x) xmalloc(x)
+#define realloc(x, n) xrealloc(x, n)

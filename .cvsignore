@@ -1,3 +1,12 @@
+.cdtproject
+.cvsignore
+autom4te.cache
+stamp-h1
+Makefile.in
+config.h
+config.status
+Makefile
 Debug*
 Release*
-.deps*
+.deps
+configure
