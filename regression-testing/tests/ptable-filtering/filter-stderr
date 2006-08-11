@@ -3,7 +3,7 @@ $x=0;
 while (<>) {
   chomp;
 
-  if (/^\[.* ; 2-2\]$/o) {
+	if (/^\[.* ; 2-2\]$/o) {
     my @lines;
     my $done = 0;
     while (!$done) {
@@ -26,6 +26,4 @@ while (<>) {
   s/\s*\[111+.*$//;
   $x++;
   print "TRANSLATION_$x = $_\n";
-
 }
-
