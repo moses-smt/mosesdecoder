@@ -29,9 +29,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorArrayWrapper.h"
 
-
 class Phrase;
 
+/***
+ * hold a set of factors for a single word
+ * 
+ * TODO either replace all uses of FactorArray with Word or vice versa; don't only use the wrapper in half of cases!
+ */
 class Word : public FactorArrayWrapper
 {
 	friend std::ostream& operator<<(std::ostream&, const Word&);
@@ -40,7 +44,9 @@ protected:
 	FactorArray					m_factorArray;
 
 public:
-	// deep copy
+	/**
+	 * deep copy
+	 */
 	Word(const Word &copy);
 	Word(const FactorArray &factorArray);
 	Word();
@@ -63,7 +69,8 @@ public:
 
 	TO_STRING;
 
-	// static functions
+	/* static functions */
+	
 	// FactorArray
 	static void Copy(FactorArray &target, const FactorArray &source);
 	static void Initialize(FactorArray &factorArray);

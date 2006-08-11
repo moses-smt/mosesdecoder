@@ -19,11 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 ******************************************************************************/
 #include <iostream>
 #include <fstream>
-
-
 #include <stdexcept>
-#include <assert.h>
-
+#include <cassert>
 #include "math.h"
 #include "mempool.h"
 #include "htable.h"
@@ -31,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #include "dictionary.h"
 #include "n_gram.h"
 #include "lmtable.h"
-
 using namespace std;
 
 inline void error(char* message){

@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <iostream>
 #include "TypeDef.h"
-#include "Util.h"
+#include "Util.h" //malloc() replacement
 
 class SquareMatrix
 {

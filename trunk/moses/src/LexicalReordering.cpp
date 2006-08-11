@@ -2,13 +2,12 @@
 
 #include <iostream>
 #include <limits>
-#include <assert.h>
+#include <cassert>
 #include <vector>
 #include "LexicalReordering.h"
 #include "InputFileStream.h"
 #include "DistortionOrientation.h"
 #include "StaticData.h"
-
 
 using namespace std;
 
@@ -21,7 +20,7 @@ LexicalReordering::LexicalReordering(const std::string &filename,
 																		 int orientation, int direction,
 																		 int condition, const std::vector<float>& weights,
 																		 vector<FactorType> input, vector<FactorType> output) :
-	m_orientation(orientation), m_condition(condition), m_filename(filename), m_numberscores(weights.size()), m_sourceFactors(input), m_targetFactors(output)
+	m_orientation(orientation), m_condition(condition), m_numberscores(weights.size()), m_filename(filename), m_sourceFactors(input), m_targetFactors(output)
 {
 	//add score producer
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
@@ -113,7 +112,7 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 {
 	std::vector<float> score(m_numberscores, 0);
 	vector<float> val;
-	for(int i=0; i < m_direction.size(); i++)
+	for(unsigned int i=0; i < m_direction.size(); i++)
 	{
 		int direction = m_direction[i];
 		int orientation = DistortionOrientation::GetOrientation(hypothesis, direction);

@@ -71,5 +71,4 @@ public:
 
   const void CleanUpAfterSentenceProcessing();
   const void InitializeBeforeSentenceProcessing();
-
 };

@@ -19,11 +19,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <assert.h>
+#include <cassert>
 #include <limits>
 #include <iostream>
 #include <fstream>
-
 #include "Ngram.h"
 #include "Vocab.h"
 
@@ -32,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
-
 using namespace std;
 
 LanguageModel_SRI::LanguageModel_SRI(bool registerScore)

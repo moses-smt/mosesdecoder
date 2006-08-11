@@ -1,5 +1,4 @@
-#include "Input.h"
-
+#include "InputType.h"
 
 InputType::InputType(long translationId) : m_translationId(translationId) {}
 InputType::~InputType() {}

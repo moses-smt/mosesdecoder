@@ -28,12 +28,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cmath>
 #include "TypeDef.h"
 #include "WordsRange.h"
+#include "Util.h" //malloc() replacement
 
 class WordsBitmap 
 {
 	friend std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap);
 protected:
-	const size_t m_size;
+	const size_t m_size; //number of words in sentence
 	bool	*m_bitmap;
 	// ticks of words that have been done;
 
@@ -69,7 +70,7 @@ public:
 		free(m_bitmap);
 	}
 
-	size_t GetWordsCount() const
+	size_t GetNumWordsCovered() const
 	{
 		size_t count = 0;
 		for (size_t pos = 0 ; pos < m_size ; pos++)
@@ -121,7 +122,7 @@ public:
 	} 
 	bool IsComplete() const
 	{
-		return GetSize() == GetWordsCount();
+		return GetSize() == GetNumWordsCovered();
 	}
 
 	bool Overlap(const WordsRange &compare) const
@@ -158,12 +159,10 @@ public:
     return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
 	}
 
-
 	int GetFutureCosts(int lastPos) const ;
 
 	TO_STRING;
 };
-
 
 // friend 
 inline std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap)
@@ -174,4 +173,3 @@ inline std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitma
 	}
 	return out;
 }
-

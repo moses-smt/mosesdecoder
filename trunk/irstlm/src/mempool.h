@@ -74,10 +74,10 @@ class mempool{
   void map(std::ostream& co);
 
   //! Allocates a single memory entry
-  char *alloc();
+  char *allocate();
 
   //! Frees a single memory entry
-  int free(char* addr);
+  int freemem(char* addr);
 
   //! Prints statistics about this mempool 
   void stat();
@@ -153,29 +153,20 @@ class storage{
 
   //! Destroys storage
   ~storage();
+  
+  /* names of below functions have been changed so as not to interfere with macros for malloc/realloc/etc -- EVH */
 
   //! Allocates memory 
-  char *alloc(int size);
+  char *allocate(int size);
 
   //! Realloc memory
-  char *realloc(char *oldptr,int oldsize,int newsize);
+  char *reallocate(char *oldptr,int oldsize,int newsize);
 
   //! Frees memory of an entry   
-  int free(char *addr,int size=0);
+  int freemem(char *addr,int size=0);
 
   //! Prints statistics about storage
   void stat();
 };
 
-
 #endif
-
-
-
-
-
-
-
-
-
-

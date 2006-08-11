@@ -7,7 +7,7 @@
 #include "Phrase.h"
 #include "FactorCollection.h"
 #include "InputFileStream.h"
-#include "Input.h"
+#include "InputType.h"
 #include "ConfusionNet.h"
 #include "Sentence.h"
 #include "StaticData.h"

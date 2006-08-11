@@ -67,7 +67,9 @@ InputType*IOCommandLine::GetInput(InputType* in)
 	return InputOutput::GetInput(in,std::cin,m_inputFactorOrder, m_factorCollection);
 }
 
-// help fn
+/***
+ * print surface factor only for the given phrase
+ */
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
 	assert(outputFactorOrder.size() > 0);
@@ -99,16 +101,15 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 	if ( hypo != NULL)
 	{
 		OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSourceSpan, reportAllFactors);
-		OutputSurface(out, hypo->GetPhrase(), outputFactorOrder, reportAllFactors);
+		OutputSurface(out, hypo->GetTargetPhrase(), outputFactorOrder, reportAllFactors);
 
         if (reportSourceSpan == true
-          && hypo->GetPhrase().GetSize() > 0) {
+          && hypo->GetTargetPhrase().GetSize() > 0) {
           out << "|" << hypo->GetCurrSourceWordsRange().GetStartPos()
               << "-" << hypo->GetCurrSourceWordsRange().GetEndPos() << "| ";
         }
 	}
 }
-
 
 void IOCommandLine::Backtrack(const Hypothesis *hypo){
 
@@ -207,4 +208,3 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 
 	m_nBestFile<<std::flush;
 }
-

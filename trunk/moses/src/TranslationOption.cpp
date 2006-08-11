@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-
+//TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase)
 	: m_targetPhrase(targetPhrase),m_sourcePhrase(targetPhrase.GetSourcePhrase())
 	,m_sourceWordsRange	(wordsRange)
@@ -38,11 +38,13 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 }
 
+// used to create trans opt from unknown word
+//TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/)
 : m_targetPhrase(targetPhrase)
 ,m_sourceWordsRange	(wordsRange)
 ,m_futureScore(0)
-{ // used to create trans opt from unknown word
+{
 }
 
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection2& score, const std::vector<FactorType>& featuresToAdd)
@@ -68,8 +70,6 @@ bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<Fac
     return m_targetPhrase.IsCompatible(phrase, featuresToCheck);
   }
 }
-
-
 
 bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 {
@@ -104,4 +104,3 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 			<< possibleTranslation.GetScoreBreakdown();
 	return out;
 }
-

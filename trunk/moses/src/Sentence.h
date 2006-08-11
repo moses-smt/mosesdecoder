@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "Word.h"
 #include "Phrase.h"
-#include "Input.h"
+#include "InputType.h"
 
 class WordsRangs;
 class PhraseDictionaryBase;

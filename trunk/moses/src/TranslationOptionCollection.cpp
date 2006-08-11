@@ -25,9 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModel.h"
 #include "PhraseDictionary.h"
 #include "FactorCollection.h"
-#include "Input.h"
+#include "InputType.h"
 #include "Util.h"
-
 #include "StaticData.h"
 
 using namespace std;
@@ -307,7 +306,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 		size_t isDigit = 0;
 		if (StaticData::Instance()->GetDropUnknown())
 		{
-			const Factor *f = sourceWord[0]; // ??? hack. shouldn't know which factor is surface
+			const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
 			std::string s = f->ToString();
 			isDigit = s.find_first_of("0123456789");
 			if (isDigit == string::npos) 
