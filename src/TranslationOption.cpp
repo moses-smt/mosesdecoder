@@ -45,17 +45,30 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 { // used to create trans opt from unknown word
 }
 
-void TranslationOption::MergeFeaturesFromNewPhrase(const TargetPhrase& phrase)
+void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection2& score, const std::vector<FactorType>& featuresToAdd)
 {
-  m_targetPhrase.MergeFactors(phrase);
-	m_scoreBreakdown.PlusEquals(phrase.GetScoreBreakdown());
+	if (featuresToAdd.size() == 1) {
+		m_targetPhrase.MergeFactors(phrase, featuresToAdd[0]);
+	} else if (featuresToAdd.empty()) {
+		/* features already there, just update score */ 
+  } else {
+		m_targetPhrase.MergeFactors(phrase, featuresToAdd);
+	}
+	m_scoreBreakdown.PlusEquals(score);
 }
 
-void TranslationOption::MergeFeaturesFromNewPhrase(const Phrase& phrase, const ScoreComponentCollection2& additionalScore)
+bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const
 {
-  m_targetPhrase.MergeFactors(phrase);
-	m_scoreBreakdown.PlusEquals(additionalScore);
+	if (featuresToCheck.size() == 1) {
+    return m_targetPhrase.IsCompatible(phrase, featuresToCheck[0]);
+  } else if (featuresToCheck.empty()) {
+		return true;
+    /* features already there, just update score */
+  } else {
+    return m_targetPhrase.IsCompatible(phrase, featuresToCheck);
+  }
 }
+
 
 
 bool TranslationOption::Overlap(const Hypothesis &hypothesis) const

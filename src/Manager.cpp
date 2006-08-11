@@ -61,7 +61,7 @@ Manager::~Manager()
 void Manager::ProcessSentence()
 {	
 	m_staticData.GetSentenceStats().ZeroAll();
-	list < DecodeStep > &decodeStepList = m_staticData.GetDecodeStepList();
+	list < DecodeStep* > &decodeStepList = m_staticData.GetDecodeStepList();
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st

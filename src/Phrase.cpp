@@ -128,6 +128,25 @@ void Phrase::MergeFactors(const Phrase &copy)
 	}
 }
 
+void Phrase::MergeFactors(const Phrase &copy, FactorType factorType)
+{
+	assert(GetSize() == copy.GetSize());
+	for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
+			SetFactor(currPos, factorType, copy.GetFactor(currPos, factorType));
+}
+
+void Phrase::MergeFactors(const Phrase &copy, const std::vector<FactorType>& factorVec)
+{
+	assert(GetSize() == copy.GetSize());
+	for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
+		for (std::vector<FactorType>::const_iterator i = factorVec.begin();
+		     i != factorVec.end(); ++i)
+		{
+			SetFactor(currPos, *i, copy.GetFactor(currPos, *i));
+		}
+}
+
+
 Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 {
 	Phrase retPhrase(m_direction);
@@ -147,7 +166,6 @@ std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 	stringstream strme;
 	for (size_t pos = 0 ; pos < GetSize() ; pos++)
 	{
-		FactorArray &newWord = retPhrase.AddWord();
 		strme << Word::ToString(factorsToPrint, GetFactorArray(pos));
 	}
 
@@ -334,6 +352,32 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 	}
 	return true;
 
+}
+
+bool Phrase::IsCompatible(const Phrase &inputPhrase, FactorType factorType) const
+{
+	if (inputPhrase.GetSize() != GetSize())	{ return false;	}
+	for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
+	{
+		if (GetFactor(currPos, factorType) != inputPhrase.GetFactor(currPos, factorType))
+			return false;
+	}
+	return true;
+}
+
+bool Phrase::IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const
+{
+	if (inputPhrase.GetSize() != GetSize())	{ return false;	}
+	for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
+	{
+		for (std::vector<FactorType>::const_iterator i = factorVec.begin();
+		     i != factorVec.end(); ++i)
+		{
+			if (GetFactor(currPos, *i) != inputPhrase.GetFactor(currPos, *i))
+				return false;
+		}
+	}
+	return true;
 }
 
 void Phrase::InitializeMemPool()

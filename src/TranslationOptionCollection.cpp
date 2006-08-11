@@ -188,196 +188,6 @@ void TranslationOptionCollection::CalcFutureScore()
 }
 
 
-// helpers
-typedef pair<Word, ScoreComponentCollection2> WordPair;
-typedef list< WordPair > WordList;	
-// 1st = word 
-// 2nd = score
-typedef list< WordPair >::const_iterator WordListIterator;
-
-TranslationOption *MergeTranslation(const TranslationOption& oldTO, TargetPhrase &targetPhrase)
-{
-  if (oldTO.GetTargetPhrase().IsCompatible(targetPhrase))
-  {
-    TranslationOption *newTransOpt = new TranslationOption(oldTO);
-		newTransOpt->MergeFeaturesFromNewPhrase(targetPhrase);
-    return newTransOpt;
-  }
-  else
-    return NULL;
-}
-
-TranslationOption *MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
-                                  , const ScoreComponentCollection2& generationScore)
-{
-  if (oldTO.GetTargetPhrase().IsCompatible(mergePhrase))
-  {
-    TranslationOption *newTransOpt = new TranslationOption(oldTO);
-		newTransOpt->MergeFeaturesFromNewPhrase(mergePhrase, generationScore);
-    return newTransOpt;
-  }
-  else
-    return NULL;
-}
-
-
-/** used in generation: increases iterators when looping through the exponential number of generation expansions */
-inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
-															 , const vector< WordList > &wordListVector)
-{
-	for (size_t currPos = 0 ; currPos < wordListVector.size() ; currPos++)
-		{
-			WordListIterator &iter = wordListIterVector[currPos];
-			iter++;
-			if (iter != wordListVector[currPos].end())
-				{ // eg. 4 -> 5
-					return;
-				}
-			else
-				{ //  eg 9 -> 10
-					iter = wordListVector[currPos].begin();
-				}
-		}
-}
-
-/** apply generation decoding step to a list of partial translation options */
-void TranslationOptionCollection::ProcessGeneration(			
-																										const TranslationOption &inputPartialTranslOpt
-																										, const DecodeStep &decodeStep
-																										, PartialTranslOptColl &outputPartialTranslOptColl
-																										, FactorCollection &factorCollection)
-{
-	//TRACE_ERR(inputPartialTranslOpt << endl);
-	if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
-		{ // word deletion
-		
-			TranslationOption *newTransOpt = new TranslationOption(inputPartialTranslOpt);
-			outputPartialTranslOptColl.Add(newTransOpt);
-		
-			return;
-		}
-	
-	// normal generation step
-	const GenerationDictionary &generationDictionary	= decodeStep.GetGenerationDictionary();
-	const WordsRange &sourceWordsRange								= inputPartialTranslOpt.GetSourceWordsRange();
-
-	const Phrase &targetPhrase	= inputPartialTranslOpt.GetTargetPhrase();
-	size_t targetLength					= targetPhrase.GetSize();
-
-	// generation list for each word in phrase
-	vector< WordList > wordListVector(targetLength);
-
-	// create generation list
-	int wordListVectorPos = 0;
-	for (size_t currPos = 0 ; currPos < targetLength ; currPos++) // going thorugh all words
-		{
-			// generatable factors for this word to be put in wordList
-			WordList &wordList = wordListVector[wordListVectorPos];
-			const FactorArray &factorArray = targetPhrase.GetFactorArray(currPos);
-
-			// consult dictionary for possible generations for this word
-			const OutputWordCollection *wordColl = generationDictionary.FindWord(factorArray);
-
-			if (wordColl == NULL)
-				{	// word not found in generation dictionary
-					ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
-					return; // can't be part of a phrase, special handling
-				}
-			else
-				{
-					// sort(*wordColl, CompareWordCollScore);
-					OutputWordCollection::const_iterator iterWordColl;
-					for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
-						{
-							const Word &outputWord = (*iterWordColl).first;
-							const ScoreComponentCollection2& score = (*iterWordColl).second;
-							// enter into word list generated factor(s) and its(their) score(s)
-							wordList.push_back(WordPair(outputWord, score));
-						}
-		
-					wordListVectorPos++; // done, next word
-				}
-		}
-
-	// use generation list (wordList)
-	// set up iterators (total number of expansions)
-	size_t numIteration = 1;
-	vector< WordListIterator >	wordListIterVector(targetLength);
-	vector< const Word* >				mergeWords(targetLength);
-	for (size_t currPos = 0 ; currPos < targetLength ; currPos++)
-		{
-			wordListIterVector[currPos] = wordListVector[currPos].begin();
-			numIteration *= wordListVector[currPos].size();
-		}
-
-	// go thru each possible factor for each word & create hypothesis
-	for (size_t currIter = 0 ; currIter < numIteration ; currIter++)
-		{
-			ScoreComponentCollection2 generationScore; // total score for this string of words
-
-			// create vector of words with new factors for last phrase
-			for (size_t currPos = 0 ; currPos < targetLength ; currPos++)
-				{
-					const WordPair &wordPair = *wordListIterVector[currPos];
-					mergeWords[currPos] = &(wordPair.first);
-					generationScore.PlusEquals(wordPair.second);
-				}
-
-			// merge with existing trans opt
-			Phrase genPhrase(Output, mergeWords);
-			TranslationOption *newTransOpt = MergeGeneration(inputPartialTranslOpt, genPhrase, generationScore);
-			if (newTransOpt != NULL)
-				{
-					outputPartialTranslOptColl.Add(newTransOpt);
-				}
-
-			// increment iterators
-			IncrementIterators(wordListIterVector, wordListVector);
-		}
-}
-
-/** apply translation step to list of partial translation options */
-void TranslationOptionCollection::ProcessTranslation(
-																										 const TranslationOption &inputPartialTranslOpt
-																										 , const DecodeStep		 &decodeStep
-																										 , PartialTranslOptColl &outputPartialTranslOptColl
-																										 , FactorCollection &factorCollection)
-{
-	//TRACE_ERR(inputPartialTranslOpt << endl);
-	if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
-		{ // word deletion
-		
-			outputPartialTranslOptColl.Add(new TranslationOption(inputPartialTranslOpt));
-		
-			return;
-		}
-	
-	// normal trans step
-	const WordsRange &sourceWordsRange				= inputPartialTranslOpt.GetSourceWordsRange();
-	const PhraseDictionaryBase &phraseDictionary	= decodeStep.GetPhraseDictionary();
-	const TargetPhraseCollection *phraseColl	=	phraseDictionary.GetTargetPhraseCollection(m_source,sourceWordsRange); 
-	
-	if (phraseColl != NULL)
-		{
-			TargetPhraseCollection::const_iterator iterTargetPhrase;
-
-			for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != phraseColl->end(); ++iterTargetPhrase)
-				{
-					TargetPhrase targetPhrase	= *iterTargetPhrase;
-			
-					TranslationOption *newTransOpt = MergeTranslation(inputPartialTranslOpt, targetPhrase);
-					if (newTransOpt != NULL)
-						{
-							outputPartialTranslOptColl.Add( newTransOpt );
-						}
-				}
-		}
-	else if (sourceWordsRange.GetWordsCount() == 1)
-		{ // unknown handler
-			ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
-		}
-}
-
 
 /** Collect all possible translations from the phrase tables
  * for a particular input sentence. This implies applying all
@@ -386,7 +196,7 @@ void TranslationOptionCollection::ProcessTranslation(
  * \param factorCollection input sentence with all factors
  */
 void TranslationOptionCollection::CreateTranslationOptions(
-																													 const list < DecodeStep > &decodeStepList
+																													 const list < DecodeStep* > &decodeStepList
 																													 , FactorCollection &factorCollection)
 {
 	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
@@ -412,7 +222,7 @@ void TranslationOptionCollection::CreateTranslationOptions(
  * \param lastPos last position in input sentence 
  */
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
-																													 const list < DecodeStep > &decodeStepList
+																													 const list < DecodeStep* > &decodeStepList
 																													 , FactorCollection &factorCollection
 																													 , size_t startPos
 																													 , size_t endPos)
@@ -421,12 +231,9 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
 	
 	// initial translation step
-	list < DecodeStep >::const_iterator iterStep = decodeStepList.begin();
-	const DecodeStep &decodeStep = *iterStep;
+	list < DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
+	const DecodeStep &decodeStep = **iterStep;
 
-	if (StaticData::Instance()->GetVerboseLevel() > 0) {
-		std::cerr << "decode step(initial): output factors=" << decodeStep.GetOutputFactorMask() << std::endl;
-	}
 	ProcessInitialTranslation(decodeStep, factorCollection
 														, *oldPtoc
 														, startPos, endPos );
@@ -436,52 +243,21 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	int indexStep = 0;
 	for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
 		{
-			const DecodeStep &decodeStep = *iterStep;
-			FactorMask conflictMask = decodeStep.GetConflictFactorMask();
-			if (StaticData::Instance()->GetVerboseLevel() > 0) {
-				std::cerr << "decode step("<< indexStep<<"): output factors=" << decodeStep.GetOutputFactorMask() << "  conflict factors=" << decodeStep.GetConflictFactorMask() << std::endl;
-			}
+			const DecodeStep &decodeStep = **iterStep;
 			PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
-			
-			// is it translation or generation
-			switch (decodeStep.GetDecodeType()) 
-				{
-				case Translate:
-					{
-						// go thru each intermediate trans opt just created
-						const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
-						vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
-						for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
-							{
-								TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
-								ProcessTranslation(inputPartialTranslOpt
+
+			// go thru each intermediate trans opt just created
+			const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
+			vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
+			for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
+			{
+				TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
+				decodeStep.Process(inputPartialTranslOpt
 																	 , decodeStep
 																	 , *newPtoc
-																	 , factorCollection);
-							}
-						break;
-					}
-				case Generate:
-					{
-						// go thru each hypothesis just created
-						const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
-						vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
-						for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
-							{
-								TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
-								ProcessGeneration(inputPartialTranslOpt
-																	, decodeStep
-																	, *newPtoc
-																	, factorCollection);
-							}
-						break;
-					}
-				case InsertNullFertilityWord:
-					{ // TODO ask chris or evan what should be done
-						assert(false);
-						break;
-					}
-				}
+																	 , factorCollection
+																	 , this);
+			}
 			// last but 1 partial trans not required anymore
 			totalEarlyPruned += newPtoc->GetPrunedCount();
 			delete oldPtoc;

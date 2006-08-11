@@ -76,9 +76,12 @@ public:
 	/** used by initial translation step */
 	TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase);
 
-	void MergeFeaturesFromNewPhrase(const TargetPhrase& phrase);
-	void MergeFeaturesFromNewPhrase(const Phrase& phrase, const ScoreComponentCollection2& additionalScore);
-	
+	/** returns true if all feature types in featuresToCheck are compatible between the two phrases */
+	bool IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const;
+
+	/** used when precomputing (composing) translation options */
+	void MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection2& score, const std::vector<FactorType>& featuresToMerge);
+
 	/** returns target phrase */
 	inline const Phrase &GetTargetPhrase() const
 	{

@@ -31,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class LanguageModel;
 class FactorCollection;
-class InputType;
 class PhraseDictionary;
 class GenerationDictionary;
 class InputType;
@@ -70,21 +69,9 @@ protected:
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos );
 
-	virtual void ProcessUnknownWord(size_t sourcePos
-																	, FactorCollection &factorCollection)=0;
-
 	virtual void ProcessOneUnknownWord(const FactorArray &sourceWord
 																		 , size_t sourcePos
 																		 , FactorCollection &factorCollection);
-
-	void ProcessGeneration(			const TranslationOption &inputPartialTranslOpt
-															, const DecodeStep &decodeStep
-															, PartialTranslOptColl &outputPartialTranslOptColl
-															, FactorCollection &factorCollection);
-	void ProcessTranslation(		const TranslationOption &inputPartialTranslOpt
-															, const DecodeStep &decodeStep
-															, PartialTranslOptColl &outputPartialTranslOptColl
-															, FactorCollection &factorCollection);
 
 	void ComputeFutureScores();	
 	void Prune();
@@ -101,14 +88,18 @@ protected:
 	
 public:
   virtual ~TranslationOptionCollection();
+	const InputType& GetSource() const { return m_source; }
 
 	// get length/size of source input
 	size_t GetSize() const;
 
-	virtual void CreateTranslationOptions(const std::list < DecodeStep > &decodeStepList
+	virtual void ProcessUnknownWord(size_t sourcePos
+																	, FactorCollection &factorCollection)=0;
+
+	virtual void CreateTranslationOptions(const std::list < DecodeStep* > &decodeStepList
 																			, FactorCollection &factorCollection);
 
-	virtual void CreateTranslationOptionsForRange(const std::list < DecodeStep > &decodeStepList
+	virtual void CreateTranslationOptionsForRange(const std::list < DecodeStep* > &decodeStepList
 																			, FactorCollection &factorCollection
 																			, size_t startPosition
 																			, size_t endPosition);

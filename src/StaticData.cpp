@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/filesystem/operations.hpp> // boost::filesystem::exists
 #include <boost/algorithm/string/case_conv.hpp> //boost::algorithm::to_lower
 #include "PhraseDictionary.h"
+#include "DecodeStep_Translation.h"
+#include "DecodeStep_Generation.h"
 #include "GenerationDictionary.h"
 #include "DummyScoreProducers.h"
 #include "StaticData.h"
@@ -582,11 +584,21 @@ void StaticData::LoadMapping()
 		{
 			DecodeType decodeType = token[0] == "T" ? Translate : Generate;
 			size_t index = Scan<size_t>(token[1]);
-			DecodeStep decodeStep (decodeType
-														,decodeType == Translate ? (Dictionary*) m_phraseDictionary[index] : (Dictionary*) m_generationDictionary[index]
-														,prev);
+			DecodeStep* decodeStep = 0;
+			switch (decodeType) {
+				case Translate:
+					decodeStep = new TranslationDecodeStep(m_phraseDictionary[index], prev);
+				break;
+				case Generate:
+					decodeStep = new GenerationDecodeStep(m_generationDictionary[index], prev);
+				break;
+				case InsertNullFertilityWord:
+					assert(!"Please implement NullFertilityInsertion.");
+				break;
+			}
+			assert(decodeStep);
 			m_decodeStepList.push_back(decodeStep);
-			prev = &m_decodeStepList.back();
+			prev = decodeStep;
 		} else {
 			std::cerr << "Malformed mapping!\n";
 			abort();
