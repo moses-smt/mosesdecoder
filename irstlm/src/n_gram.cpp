@@ -19,7 +19,7 @@
 ******************************************************************************/
 
 #include <iomanip>
-#include <assert.h>
+#include <cassert>
 #include "mempool.h"
 #include "htable.h"
 #include "dictionary.h"

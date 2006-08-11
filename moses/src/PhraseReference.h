@@ -1,5 +1,3 @@
-// $Id$
-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -19,4 +17,32 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#ifndef MOSES_PHRASE_REFERENCE_H
+#define MOSES_PHRASE_REFERENCE_H
 
+#include <iostream>
+#include "InputType.h"
+#include "WordsRange.h"
+
+/***
+ * hold a reference to a subphrase, the parent Phrase of which may be separately memory-managed
+ */
+class PhraseReference
+{
+	public:
+	
+		PhraseReference() : fullPhrase(NULL), range(0, 0) {}
+		PhraseReference(const InputType& phrase, const WordsRange& r) : fullPhrase(&phrase), range(r) {}
+		
+		const InputType& GetFullPhrase() const {return *fullPhrase;}
+		Phrase GetSubphrase() const {return fullPhrase->GetSubString(range);}
+	
+	protected:
+	
+		const InputType* fullPhrase;
+		WordsRange range;
+};
+
+std::ostream& operator << (std::ostream& out, const PhraseReference& phrase);
+
+#endif //MOSES_PHRASE_REFERENCE_H

@@ -1,6 +1,6 @@
 #include "PhraseDictionaryBase.h"
 #include "StaticData.h"
-#include "Input.h"
+//#include "InputType.h"
 
 PhraseDictionaryBase::PhraseDictionaryBase(size_t noScoreComponent)
 	: Dictionary(noScoreComponent),m_maxTargetPhrase(0)
@@ -25,4 +25,3 @@ unsigned int PhraseDictionaryBase::GetNumScoreComponents() const
 {
 	return this->GetNoScoreComponents();
 }
-

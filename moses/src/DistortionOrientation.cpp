@@ -13,7 +13,7 @@ using namespace std;
  * later for computing the score.
  * 
  * default type is Msd, meaning will distinguish between monotone, swap, discontinuous rather than
- * just monotone/non monotone.
+ * just monotone/non-monotone.
  */
 int DistortionOrientation::GetOrientation(const Hypothesis *curr_hypothesis, int direction, int type) 
 {
@@ -24,8 +24,8 @@ int DistortionOrientation::GetOrientation(const Hypothesis *curr_hypothesis, int
 	size_t curr_source_start = currSourceRange.GetStartPos();
 	size_t curr_source_end = currSourceRange.GetEndPos();
 	size_t curr_target_end = currTargetRange.GetEndPos();
-	size_t prev_source_start = NULL;
-	size_t prev_source_end = NULL;
+	size_t prev_source_start = 0;
+	size_t prev_source_end = 0;
 	if(prevHypo!=NULL){
 		//don't look for attributes of the previous hypothesis if there is no previous hypothesis.
 		const WordsRange &prevSourceRange = prevHypo->GetCurrSourceWordsRange();

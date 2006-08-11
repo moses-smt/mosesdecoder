@@ -135,7 +135,7 @@ int main(int argc, const char **argv)
     double logPr=0,PP=0,PPwp=0,Pr;
     
     int bos=ng.dict->encode(ng.dict->BoS());
-    lmt.init_prcache();
+    lmt.init_probcache();
     while(inptxt >> ng){
       
       // reset ngram at begin of sentence

@@ -23,7 +23,7 @@
 // Copyright Marcello Federico, ITC-irst, 1998
 
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include "mempool.h"
 
 using namespace std;
@@ -73,7 +73,7 @@ mempool::mempool(int is, int bs){
 }
 
 
-char * mempool::alloc(){
+char * mempool::allocate(){
 
   char *ptr;
 
@@ -116,7 +116,7 @@ char * mempool::alloc(){
 }
 
 
-int mempool::free(char* addr){
+int mempool::freemem(char* addr){
 
   // do not check if it belongs to this pool !!
   /*
@@ -389,13 +389,13 @@ storage::~storage(){
 }
 
 
-char *storage::alloc(int size){
+char *storage::allocate(int size){
 
   if (size<=setsize){
     if (!poolset[size]){
       poolset[size]=new mempool(size,poolsize/size);
     }
-    return poolset[size]->alloc();
+    return poolset[size]->allocate();
   }
   else{
     
@@ -412,7 +412,7 @@ char *storage::alloc(int size){
 
 
 
-char *storage::realloc(char *oldptr,int oldsize,int newsize){
+char *storage::reallocate(char *oldptr,int oldsize,int newsize){
 
   char *newptr;
   
@@ -422,7 +422,7 @@ char *storage::realloc(char *oldptr,int oldsize,int newsize){
     if (newsize<=setsize){
       if (!poolset[newsize])
 	poolset[newsize]=new mempool(newsize,poolsize/newsize);
-      newptr=poolset[newsize]->alloc();
+      newptr=poolset[newsize]->allocate();
       memset((char*)newptr,0,newsize);
     }
     else
@@ -430,11 +430,11 @@ char *storage::realloc(char *oldptr,int oldsize,int newsize){
     
     if (oldptr && oldsize){
       memcpy(newptr,oldptr,oldsize);
-      poolset[oldsize]->free(oldptr);
+      poolset[oldsize]->freemem(oldptr);
     }
   }
   else{
-    newptr=(char *)std::realloc(oldptr,newsize);
+    newptr=(char *)realloc(oldptr,newsize);
     if (newptr==oldptr) 
       cerr << "r\b";
     else
@@ -450,7 +450,7 @@ char *storage::realloc(char *oldptr,int oldsize,int newsize){
 }
 
 
-int storage::free(char *addr,int size){
+int storage::freemem(char *addr,int size){
   
   /*
     while(size<=setsize){
@@ -463,7 +463,7 @@ int storage::free(char *addr,int size){
   if (size>setsize)
     return free(addr),1;
   else{
-    poolset[size] && poolset[size]->free(addr);
+    poolset[size] && poolset[size]->freemem(addr);
   }
   return 1;
 }

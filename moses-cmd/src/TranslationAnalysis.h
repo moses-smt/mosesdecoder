@@ -1,5 +1,9 @@
 // $Id$
 
+/*
+ * also see moses/SentenceStats
+ */
+
 #ifndef _TRANSLATION_ANALYSIS_H_
 #define _TRANSLATION_ANALYSIS_H_
 

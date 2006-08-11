@@ -19,7 +19,7 @@
 ******************************************************************************/
 
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include "mempool.h"
 #include "htable.h"
 
@@ -91,7 +91,7 @@ char *htable::search(char *item, HT_ACTION action)
       ||
       action == HT_FIND            /* not found, search only       */
       ||
-      (q = (entry *)memory->alloc())
+      (q = (entry *)memory->allocate())
       ==
       NULL                      /* not found, no room   */
       )
@@ -136,13 +136,13 @@ char *htable::scan(HT_ACTION action){
 
 
 void htable::map(ostream& co,int cols){
-  
+
   entry *p;
   char* img=new char[cols+1];
-  
+
   img[cols]='\0';
   memset(img,'.',cols);
-  
+
   co << "htable memory map: . (0 items), - (<5), # (>5)\n";
   
   for (int i=0; i<size;i++)
@@ -185,7 +185,6 @@ htable::~htable()
   delete [] table;
   delete memory;
 }
-
 
 address htable::HashStr(char *key)
 {
@@ -252,7 +251,6 @@ address htable::HashInt(char *key)
     
   return h;
 }
-
 
 int htable::CompStr(char *key1, char *key2)
 {
@@ -329,10 +327,3 @@ htable *ht=new htable(1000/5);
   ht2->map();
 }
 */
-
-
-
-
-
-
-

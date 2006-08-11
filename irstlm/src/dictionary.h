@@ -18,29 +18,10 @@
 
 ******************************************************************************/
 
-/*
- IrstLM: IRST Language Model Toolkit 
- Copyright (C) 2006 Marcello Federico, ITC-irst Trento, Italy
- 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
- 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
- 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 #ifndef MF_DICTIONARY_H
 #define MF_DICTIONARY_H
 
-#include <string.h>
+#include <cstring>
 #include <iostream>
 
 #define MAX_WORD 100
@@ -54,7 +35,6 @@
 #define DICT_INITSIZE 100000
 #endif
 
-
 //Begin of sentence symbol
 #ifndef BOS_
 #define BOS_ "<s>"
@@ -66,11 +46,10 @@
 #define EOS_ "</s>"
 #endif
 
-//End of sentence symbol
+//Out-Of-Vocabulary symbol
 #ifndef OOV_ 
 #define OOV_ "_unk_"
 #endif
-
 
 typedef struct{
   char *word;
@@ -93,7 +72,7 @@ class dictionary{
   char       ifl;  //!< increment flag
   int        dubv; //!< dictionary size upper bound
   int in_oov_lex;  //!< flag
-  int oov_lex_code; //< dictionary
+  int oov_lex_code; //!< dictionary
   char* oov_str;   //!< oov string
 
  public:
@@ -150,8 +129,6 @@ class dictionary{
     int oovfreq=(int)(oovrate * totfreq());
     std::cerr << "setting OOV rate to: " << oovrate << " -- freq= " << oovfreq << std::endl;
     return freq(oovcode(),oovfreq);
-   
-    return 1;
   }
 
 

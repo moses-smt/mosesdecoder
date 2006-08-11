@@ -19,11 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 ******************************************************************************/
 #include <iostream>
 #include <fstream>
-
-
 #include <stdexcept>
-#include <assert.h>
-
+#include <cassert>
 #include "math.h"
 #include "mempool.h"
 #include "htable.h"
@@ -74,7 +71,7 @@ char* ngramcache::get(const int* ngp,char* info){
 
 int ngramcache::add(const int* ngp,const char* info){
     
-    char* entry=mp->alloc();
+    char* entry=mp->allocate();
     memcpy(entry,(char*) ngp,sizeof(int) * ngsize);    
     memcpy(entry + ngsize * sizeof(int),(char *)info,infosize);
     char *found=ht->search((char *)entry,HT_ENTER);

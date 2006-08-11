@@ -58,7 +58,7 @@ void HypothesisCollection::Add(Hypothesis *hypo)
           m_worstScore = m_bestScore + m_beamThreshold;
 	}
 
-    // Prune only of stack is twice as big as needed (lazy pruning)
+    // Prune only if stack is twice as big as needed (lazy pruning)
 	if (m_hypos.size() > 2*m_maxHypoStackSize-10)
 	{
 		PruneToSize(m_maxHypoStackSize);
@@ -86,7 +86,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 		return;
   }
 
-	StaticData::Instance()->GetSentenceStats().numRecombinations++;
+	StaticData::Instance()->GetSentenceStats().AddRecombination(*hypo, **iter);
 	
 	// found existing hypo with same target ending.
 	// keep the best 1
@@ -144,7 +144,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 					// cerr << endl;
 					++iter;
         }
-			// cerr << "Heap contains " << bestScores.size() << " items" << endl;
+        // cerr << "Heap contains " << bestScores.size() << " items" << endl;
 			
 			// pop the top newSize scores (and ignore them, these are the scores of hyps that will remain)
 			//  ensure to never pop beyond heap size
@@ -168,7 +168,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 						{
 							iterator iterRemove = iter++;
 							Remove(iterRemove);
-							StaticData::Instance()->GetSentenceStats().numPruned++;
+							StaticData::Instance()->GetSentenceStats().AddPruning();
 						}
 					else
 						{
@@ -179,6 +179,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 			
 			// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack
 			m_worstScore = scoreThreshold;
+			// cerr << "Heap contains " << bestScores.size() << " items" << endl;
 		}
 }
 

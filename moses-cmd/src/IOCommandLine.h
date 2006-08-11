@@ -52,6 +52,11 @@ protected:
 	const FactorMask							&m_inputFactorUsed;
 	FactorCollection							&m_factorCollection;
 	std::ofstream 								m_nBestFile;
+	/***
+	 * if false, print all factors for best hypotheses (useful for error analysis)
+	 */
+	bool                                m_printSurfaceOnly;
+	
 public:
 	IOCommandLine(const std::vector<FactorType>	&inputFactorOrder
 		, const std::vector<FactorType>			&outputFactorOrder
@@ -81,6 +86,5 @@ inline Sentence *GetInput(std::istream &inputStream
 	else {delete rv; return 0;}
 #endif
 }
-
 
 #endif

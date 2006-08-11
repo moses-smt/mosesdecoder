@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-/** defines allowed parameters */
+/** define allowed parameters */
 Parameter::Parameter() 
 {
 	AddParam("config", "f", "location of the configuration file");
@@ -78,7 +78,7 @@ PARAM_VEC &Parameter::AddParam(const string &paramName, const string &descriptio
 	return m_setting[paramName];
 }
 
-/** initializes a parameter (including abbreviation), sub of constructor */
+/** initialize a parameter (including abbreviation), sub of constructor */
 PARAM_VEC &Parameter::AddParam(const string &paramName, const string &abbrevName, const string &description)
 {
 	m_valid[paramName] = true;
@@ -88,7 +88,7 @@ PARAM_VEC &Parameter::AddParam(const string &paramName, const string &abbrevName
 	return m_setting[paramName];
 }
 
-/** prints descriptions of all parameters */
+/** print descriptions of all parameters */
 void Parameter::Explain() {
 	cerr << "Usage:" << endl;
 	for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++) 
@@ -103,7 +103,7 @@ void Parameter::Explain() {
 		}
 }
 
-/** checks if an item on the command line is a switch or a value 
+/** check whether an item on the command line is a switch or a value 
  * \param token token on the command line to checked **/
 
 bool Parameter::isOption(const char* token) {
@@ -185,7 +185,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	return Validate() && noErrorFlag;
 }
 
-/** check if parameter settings make sense */
+/** check that parameter settings make sense */
 bool Parameter::Validate() 
 {
 	bool noErrorFlag = true;
@@ -240,7 +240,7 @@ bool Parameter::Validate()
 	return noErrorFlag;
 }
 
-/** checks if a file exist */
+/** check whether a file exists */
 bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::vector<std::string> const& extensions)
 {
 	using namespace boost::filesystem;
@@ -280,13 +280,12 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 				errorMsg << "File " << pathStr << " does not exist";
 				UserMessage::Add(errorMsg.str());
 				return false;
-			}
-			
+			}		
 	}
 	return true;
 }
 
-/** looks for a switch in arg, updates parameter */
+/** look for a switch in arg, update parameter */
 // TODO arg parsing like this does not belong in the library, it belongs
 // in moses-cmd
 string Parameter::FindParam(const string &paramSwitch, int argc, char* argv[])

@@ -54,7 +54,6 @@ protected:
 	std::list < DecodeStep* >						m_decodeStepList;
 	Parameter			m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
-//	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
 	LMList									m_languageModel;
 	std::vector<float>			m_lexWeights;
 	ScoreIndexManager				m_scoreIndexManager;
@@ -98,13 +97,10 @@ protected:
 	WordPenaltyProducer *m_wpProducer;
 	bool m_reportSourceSpan;
 	bool m_reportAllFactors;
-
-	mutable SentenceStats m_sentenceStats;
-	
 	bool m_useDistortionFutureCosts;
 	bool m_isDetailedTranslationReportingEnabled;
 
-  
+	mutable boost::shared_ptr<SentenceStats> m_sentenceStats;
 
 public:
 	StaticData();
@@ -127,11 +123,6 @@ public:
 	// what the hell?
 	void LoadPhraseTables();
 	void LoadMapping();
-/*	void SetUnknownWordHandler(boost::shared_ptr<UnknownWordHandler> unknownWordHandler)
-	{
-		m_unknownWordHandler = unknownWordHandler;
-	}
-*/
 	const PARAM_VEC &GetParam(const std::string &paramName)
 	{
 		return m_parameter.GetParam(paramName);
@@ -259,6 +250,10 @@ public:
 	{
 		return m_isDetailedTranslationReportingEnabled;
 	}
+	void ResetSentenceStats(const InputType& source) const
+	{
+		m_sentenceStats = boost::shared_ptr<SentenceStats>(new SentenceStats(source));
+	}
 
 	// for mert
 	size_t GetNBestSize() const
@@ -281,7 +276,7 @@ public:
 	void CleanUpAfterSentenceProcessing();
 	SentenceStats& GetSentenceStats() const
 	{
-		return m_sentenceStats;
+		return *m_sentenceStats;
 	}
 	const std::vector<float>& GetAllWeights() const
 	{
@@ -292,4 +287,3 @@ public:
 
 	bool UseDistortionFutureCosts() const {return m_useDistortionFutureCosts;}
 };
-

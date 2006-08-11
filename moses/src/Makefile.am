@@ -16,7 +16,7 @@ libmoses_a_SOURCES = \
 	hash.cpp \
 	Hypothesis.cpp \
 	HypothesisCollection.cpp \
-	Input.cpp \
+	InputType.cpp \
 	InputFileStream.cpp \
 	InputOutput.cpp \
 	LMList.cpp \

@@ -58,7 +58,7 @@ StaticData::StaticData()
 {
 	s_instance = this;
 
-	// mempory pools
+	// memory pools
 	Phrase::InitializeMemPool();
 
 }
@@ -70,7 +70,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		return false;
 	}
 
-	// input type has to specified BEFORE loading the phrase tables!
+	// input type has to be specified BEFORE loading the phrase tables!
 	if(m_parameter.GetParam("inputtype").size()) 
 		m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
 	TRACE_ERR("input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
@@ -105,13 +105,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_verboseLevel = 0;
 	}
 
-
 	// printing source phrase spans
 	if (m_parameter.GetParam("report-source-span").size() > 0)
 		m_reportSourceSpan = Scan<bool>(m_parameter.GetParam("report-source-span")[0]);
 	else
         m_reportSourceSpan = false;
-
 
 	// print all factors of output translations
 	if (m_parameter.GetParam("report-all-factors").size() > 0)
@@ -123,9 +121,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	//TODO: CHANGE
 	 std::vector<float> distortionWeights = Scan<float>(m_parameter.GetParam("weight-d"));	
 
-
-
-	//input-factors
+	//input factors
 	const vector<string> &inputFactorVector = m_parameter.GetParam("input-factors");
 	for(size_t i=0; i<inputFactorVector.size(); i++) 
 	{
@@ -138,7 +134,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		abort();
 	}
 
-	//output-factors
+	//output factors
 	const vector<string> &outputFactorVector = m_parameter.GetParam("output-factors");
 	for(size_t i=0; i<outputFactorVector.size(); i++) 
 	{
@@ -170,7 +166,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	if (lrFileVector.size() > 0)
 		{
 		//TODO: starting to be set up for more than one distortion model; not quite
-		for(int i=0; i< lrFileVector.size(); i++ )
+		for(unsigned int i=0; i< lrFileVector.size(); i++ )
 		{
 			vector<string>	token		= Tokenize(lrFileVector[i]);
 			//characteristics of the phrase table
@@ -179,7 +175,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			std::string							filePath= token[2];
 		//get the weights for the lex reorderer
 		TRACE_ERR("weights-lex")
-
+		
 		//TODO: THIS WEIGHT GETTING IS WHAT STILL NEEDS TO CHANGE TO SUPPORT MULTIPLE LEXICAL REORDERERS
 
 		for(size_t i=1; i<distortionWeights.size(); i++)
@@ -331,7 +327,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			if (oldFormat) {
 				std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
 				             "  [WARNING] config file contains old style generation config format.\n"
-				             "  Only the first feature value will be ready.  Please use the 4-format\n"
+				             "  Only the first feature value will be read.  Please use the 4-format\n"
 				             "  form (similar to the phrase table spec) to specify the # of features.\n"
 				             "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
 			}
@@ -620,8 +616,6 @@ void StaticData::CleanUpAfterSentenceProcessing()
 		LanguageModel &languageModel = **iterLM;
     languageModel.CleanUpAfterSentenceProcessing();
 	}
-  
-  
 }
 
 void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) 
