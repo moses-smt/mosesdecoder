@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorArrayWrapper.h"
 
+
 class Phrase;
 
 class Word : public FactorArrayWrapper
@@ -72,5 +73,6 @@ public:
 	 */
 	static void Merge(FactorArray &targetWord, const FactorArray &sourceWord);
 	static std::string ToString(const FactorArray &factorArray);
+	static std::string ToString(const std::vector<FactorType> factorType, const FactorArray &factorArray);
 	static int Compare(const FactorArray &targetWord, const FactorArray &sourceWord);
 };

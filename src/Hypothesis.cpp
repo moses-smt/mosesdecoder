@@ -424,19 +424,41 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 }
 
 
-std::string Hypothesis::GetSourcePhraseStringRep() const 
+std::string Hypothesis::GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const 
 {
 	if (!m_prevHypo) { return ""; }
-	if(m_sourcePhrase) {
-		assert(m_sourcePhrase->ToString()==m_sourcePhrase->GetStringRep(WordsRange(0,m_sourcePhrase->GetSize()-1)));
-		return m_sourcePhrase->ToString();
+	if(m_sourcePhrase) 
+	{
+//				return m_sourcePhrase->GetSubString(m_currSourceWordsRange).ToString();
+				return m_sourcePhrase->GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
 	}
-	else 
-		return m_sourceInput.GetStringRep(m_currSourceWordsRange);
-		
+	else
+	{ 
+//			return m_sourceInput.GetSubString(m_currSourceWordsRange).ToString();	
+			return m_sourceInput.GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
+	}	
+}
+std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const 
+{
+	if (!m_prevHypo) { return ""; }
+	return m_targetPhrase.GetStringRep(factorsToPrint);
+}
+
+std::string Hypothesis::GetSourcePhraseStringRep() const 
+{
+	vector<FactorType> allFactors;
+	for(size_t i=0; i < NUM_FACTORS; i++)
+	{
+		allFactors.push_back(i);
+	}
+	return GetSourcePhraseStringRep(allFactors);		
 }
 std::string Hypothesis::GetTargetPhraseStringRep() const 
 {
-	if (!m_prevHypo) { return ""; }
-	return m_targetPhrase.ToString();
+	vector<FactorType> allFactors;
+	for(size_t i=0; i < NUM_FACTORS; i++)
+	{
+		allFactors.push_back(i);
+	}
+	return GetTargetPhraseStringRep(allFactors);
 }

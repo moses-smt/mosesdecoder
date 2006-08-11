@@ -179,7 +179,7 @@ Phrase ConfusionNet::GetSubString(const WordsRange&) const {
 	return Phrase(Input);
 }
 
-std::string ConfusionNet::GetStringRep(const WordsRange&) const{ //not well defined yet
+std::string ConfusionNet::GetStringRep(const vector<FactorType> factorsToPrint) const{ //not well defined yet
 	std::cerr<<"ERROR: call to ConfusionNet::GeStringRep\n";
 	abort();
 	return "";

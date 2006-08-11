@@ -176,6 +176,8 @@ public:
 		return m_sourceInput;
 	}
 
+	std::string GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const;
+	std::string GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const;
 	std::string GetSourcePhraseStringRep() const;
 	std::string GetTargetPhraseStringRep() const;
 
