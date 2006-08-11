@@ -74,12 +74,24 @@ bool CompareTranslationOption(const TranslationOption *a, const TranslationOptio
 /** pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 void TranslationOptionCollection::Prune()
 {
+	size_t size = m_source.GetSize();
+
+	// create unknown words for 1 word coverage where we don't have any trans options
+	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	{
+		TranslationOptionList &fullList = GetTranslationOptionList(startPos, startPos);
+		if (fullList.size() == 0)
+		{
+			ProcessUnknownWord(startPos, *m_factorCollection);
+		}
+	}
+	
+	// prune to max no. of trans opt
 	if (m_maxNoTransOptPerCoverage == 0)
 		return;
 
 	size_t total = 0;
 	size_t totalPruned = 0;
-	size_t size = m_source.GetSize();
 	for (size_t startPos = 0 ; startPos < size ; ++startPos)
 	{
 		for (size_t endPos = startPos ; endPos < size ; ++endPos)
@@ -199,6 +211,8 @@ void TranslationOptionCollection::CreateTranslationOptions(
 																													 const list < DecodeStep* > &decodeStepList
 																													 , FactorCollection &factorCollection)
 {
+	m_factorCollection = &factorCollection;
+	
 	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
 		{
 		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)

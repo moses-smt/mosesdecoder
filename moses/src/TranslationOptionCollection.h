@@ -59,7 +59,8 @@ protected:
 	SquareMatrix				m_futureScore; /*< matrix of future costs for parts of the sentence */
 	WordsBitmap					m_unknownWordPos; /*< marks up unknown words in the input */
 	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase) */
-
+	FactorCollection		*m_factorCollection;
+	
 	TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage);
 	
 	void CalcFutureScore();
