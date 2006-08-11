@@ -103,7 +103,7 @@ public:
 
 	Phrase GetSubString(const WordsRange &wordsRange) const;
 	
-  std::string GetStringRep(const WordsRange &wordsRange) const; 
+  std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 
   
 	void push_back(Word const& w) {Word::Copy(AddWord(),w.GetFactorArray());}
 

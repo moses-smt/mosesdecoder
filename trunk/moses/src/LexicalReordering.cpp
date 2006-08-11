@@ -9,6 +9,7 @@
 #include "DistortionOrientation.h"
 #include "StaticData.h"
 
+
 using namespace std;
 
 /*
@@ -18,8 +19,9 @@ using namespace std;
  */
 LexicalReordering::LexicalReordering(const std::string &filename, 
 																		 int orientation, int direction,
-																		 int condition, const std::vector<float>& weights) :
-	m_orientation(orientation), m_condition(condition), m_filename(filename), m_numberscores(weights.size())
+																		 int condition, const std::vector<float>& weights,
+																		 vector<FactorType> input, vector<FactorType> output) :
+	m_orientation(orientation), m_condition(condition), m_filename(filename), m_numberscores(weights.size()), m_sourceFactors(input), m_targetFactors(output)
 {
 	//add score producer
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
@@ -93,16 +95,16 @@ void LexicalReordering::PrintTable()
 	while (table_iter != m_orientation_table.end())
 			{
 				// print key
-				TRACE_ERR(table_iter->first << " ||| ");
+				cout << table_iter->first << " ||| ";
 				// print values
 				vector<float> val = table_iter->second;
 				int i=0, num_probs = val.size();
 				while (i<num_probs-1)
 					{
-						TRACE_ERR(val[i] << " ");
+						cout << val[i] << " ";
 						i++;
 					}
-				TRACE_ERR(val[i] << endl);
+				cout << val[i] << endl;
 				table_iter++;
 		}
 }
@@ -110,7 +112,6 @@ void LexicalReordering::PrintTable()
 std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 {
 	std::vector<float> score(m_numberscores, 0);
-
 	vector<float> val;
 	for(int i=0; i < m_direction.size(); i++)
 	{
@@ -119,14 +120,18 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 		if(m_condition==LexReorderType::Fe)
 		{
 		//this key string is F+'|||'+E from the hypothesis
-		val=m_orientation_table[hypothesis->GetSourcePhraseStringRep()
+		//TODO: following traces are for debugging, remove.
+//		TRACE_ERR("full source: " << hypothesis->GetSourcePhraseStringRep() << endl);
+//		TRACE_ERR("source: " << hypothesis->GetSourcePhraseStringRep(m_sourceFactors) << endl);
+//		TRACE_ERR("target: " << hypothesis->GetTargetPhraseStringRep(m_targetFactors) << endl);
+		val=m_orientation_table[hypothesis->GetSourcePhraseStringRep(m_sourceFactors)
 														+"||| "
-														+hypothesis->GetTargetPhraseStringRep()];
+														+hypothesis->GetTargetPhraseStringRep(m_targetFactors)];
 		}
 		else
 		{
 			//this key string is F from the hypothesis
-			val=m_orientation_table[hypothesis->GetTargetPhraseStringRep()];
+			val=m_orientation_table[hypothesis->GetTargetPhraseStringRep(m_sourceFactors)];
 		}
 		if(val.size()> 0)
 		{
@@ -231,6 +236,14 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 	
 		}
 	}
+	//TODO: for loop for debugging, remove.
+//	for(int i=0; i < score.size(); i++)
+//	{
+//		if(score[i]!=0)
+//		{
+//			TRACE_ERR("dist_score: " << score[i] << endl);
+//		}
+//	}
 	return score;
 }
 

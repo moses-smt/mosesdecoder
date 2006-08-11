@@ -141,9 +141,17 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 	return retPhrase;
 }
 
-std::string Phrase::GetStringRep(const WordsRange &wordsRange) const
+std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 {
-	return GetSubString(wordsRange).ToString();
+	Phrase retPhrase(m_direction);
+	stringstream strme;
+	for (size_t pos = 0 ; pos < GetSize() ; pos++)
+	{
+		FactorArray &newWord = retPhrase.AddWord();
+		strme << Word::ToString(factorsToPrint, GetFactorArray(pos));
+	}
+
+	return strme.str();
 }
 
 FactorArray &Phrase::AddWord()

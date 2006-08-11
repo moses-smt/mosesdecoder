@@ -46,9 +46,9 @@ class Sentence : public Phrase, public InputType
 		{
 			return Phrase::GetSubString(r);
 		}
-	std::string GetStringRep(const WordsRange& r) const 
+	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const 
 		{
-			return Phrase::GetStringRep(r);
+			return Phrase::GetStringRep(factorsToPrint);
 		}
 	const FactorArray& GetFactorArray(size_t pos) const
 		{

@@ -35,7 +35,7 @@ class FactorCollection;
 class Factor;
 class Phrase;
 class Hypothesis;
-
+using namespace std;
 
 /***
  * The LexicalReordering class handles everything involved with
@@ -75,6 +75,9 @@ private:
 	int m_condition;   // fe or f
 	int m_numberscores; //2, 3, 4 or 6
 	std::string m_filename; // probability table location
+	vector<FactorType> m_sourceFactors;
+	vector<FactorType> m_targetFactors;
+
 
 	ORIENTATION_TABLE m_orientation_table; // probability table
 
@@ -86,7 +89,8 @@ public:
 	// orientation probability table, orientation is one of {MSD, MONO},
 	// direction is one of {FOR,BACK,BI}, and condition is one of {F,FE}.
 	LexicalReordering(const std::string &filename, int orientation, int direction, 
-										int condition, const std::vector<float>& weights);
+										int condition, const std::vector<float>& weights,
+										vector<FactorType> input, vector<FactorType> output);
 	
 	// Descructor
 	~LexicalReordering(void) {}

@@ -112,6 +112,23 @@ std::string Word::ToString(const FactorArray &factorArray)
 	return str;
 }
 
+	std::string Word::ToString(const vector<FactorType> factorType, const FactorArray &factorArray)
+	{
+		stringstream strme;
+		assert(factorType.size() <= NUM_FACTORS);
+		for (unsigned int i = 0 ; i < factorType.size() ; i++)
+		{
+			const Factor *factor = factorArray[factorType[i]];
+			if (factor != NULL)
+			{
+					strme << *factor << "|";
+			}
+		}
+		string str = strme.str();
+		str = str.substr(0, str.size() - 1) + " ";
+		return str;
+	}
+
 TO_STRING_BODY(Word);
 
 // friend
