@@ -237,7 +237,9 @@ template<typename T> inline void ShrinkToFit(T& v) {
 /***
  * include checks for null return value, and helpful print statements
  */
+ /*
 void* xmalloc(unsigned int numBytes);
 void* xrealloc(void* ptr, unsigned int numBytes);
 #define malloc(x) xmalloc(x)
 #define realloc(x, n) xrealloc(x, n)
+*/
