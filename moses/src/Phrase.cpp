@@ -348,8 +348,11 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 									,*inputFactor	= inputPhrase.GetFactor(currPos, factorType);
 			if (thisFactor != NULL && inputFactor != NULL && thisFactor != inputFactor)
 				return false;
+			cerr << "\t* " << thisFactor << " is compatible with " << inputFactor << "\n";
 		}
 	}
+
+	cerr << inputPhrase << " is compatible with " << *this << "\n";
 	return true;
 
 }

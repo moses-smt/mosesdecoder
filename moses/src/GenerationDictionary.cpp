@@ -133,10 +133,12 @@ const OutputWordCollection *GenerationDictionary::FindWord(const FactorArray &fa
 	std::map<Word , OutputWordCollection>::const_iterator iter = m_collection.find(word);
 	if (iter == m_collection.end())
 	{ // can't find source phrase
+	  cerr << "Can't find: " << word << "\n";
 		ret = NULL;
 	}
 	else
 	{
+	  cerr << "FOUND: " << word << "\n";
 		ret = &iter->second;
 	}
 	return ret;
