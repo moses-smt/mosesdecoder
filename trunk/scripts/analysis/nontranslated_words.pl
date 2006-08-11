@@ -8,9 +8,11 @@ use Getopt::Long;
 my $ignore_numbers = 0;
 my $ignore_punct = 0;
 my $usage = 0;
+my $top = 10;
 
 GetOptions(
   "help" => \$usage,
+  "top=i" => \$top,
   "ignore-numbers" => \$ignore_numbers,
   "ignore-punct" => \$ignore_punct,
 ) or exit 1;
@@ -22,6 +24,7 @@ if ($usage || !defined $src || !defined $tgt) {
 ...counts the number of words that are equal in src and hyp. These are
 typically unknown words.
 Options:
+  --top=N  ... list N top copied tokens
   --ignore-numbers  ... numbers usually do not get translated, but do
      not count them (it is not an error)
   --ignore-punct ... same for punct, do not include it in the count
@@ -38,6 +41,7 @@ my $nr=0;
 my $outtoks = 0;
 my $intoks = 0;
 my $copiedtoks = 0;
+my %copiedtok;
 while (<SRC>) {
   $nr++;
   chomp;
@@ -54,8 +58,11 @@ while (<SRC>) {
     next if $ignore_numbers && $outtok =~ /^-?[0-9]*([.,][0-9]+)?$/;
     next if $ignore_punct && $outtok =~ /^[[:punct:]]+$/;
     $copiedtoks++;
+    $copiedtok{$outtok}++;
   }
 }
+my $t = <TGT>;
+die "$tgt too long!" if defined $t;
 close SRC;
 close TGT;
 
@@ -67,3 +74,13 @@ Output tokens appearing also in input sent:\t$copiedtoks\t"
   ."\t".($ignore_punct?"ignoring":"including")." punctuation"
   ."\t".($ignore_numbers?"ignoring":"including")." numbers"
   ."\n";
+
+if ($top) {
+  my $cnt = 0;
+  print "Top $top copied tokens:\n";
+  foreach my $t (sort {$copiedtok{$b}<=>$copiedtok{$a} || $a cmp $b} keys %copiedtok) {
+    print "$copiedtok{$t}\t$t\n";
+    last if $cnt > $top;
+    $cnt++;
+  }
+}
