@@ -104,7 +104,7 @@ my $bleu = $brevity_penalty * exp((my_log( $CORRECT[1]/$TOTAL[1] ) +
 				   my_log( $CORRECT[3]/$TOTAL[3] ) +
 				   my_log( $CORRECT[4]/$TOTAL[4] ) ) / 4);
 
-printf "BLEU = %.2f, %.1f/%.1f/%.1f/%.1f (BP=%.3f, ration=%.3fi, %i sents, %i refs)\n",
+printf "BLEU = %.2f, %.1f/%.1f/%.1f/%.1f (BP=%.3f, ration=%.3f, %i sents, %i refs)\n",
     100*$bleu,
     100*$CORRECT[1]/$TOTAL[1],
     100*$CORRECT[2]/$TOTAL[2],
