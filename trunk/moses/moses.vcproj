@@ -160,6 +160,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DecodeStep_Generation.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DecodeStep_Translation.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Dictionary.cpp"
 				>
 			</File>
@@ -411,6 +419,14 @@
 			</File>
 			<File
 				RelativePath=".\src\DecodeStep.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DecodeStep_Generation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DecodeStep_Translation.h"
 				>
 			</File>
 			<File
