@@ -118,7 +118,8 @@ bool StaticData::LoadParameters(int argc, char* argv[])
         m_reportAllFactors = false;
 
 	//distortion weights
-	std::vector<float> distortionWeights = Scan<float>(m_parameter.GetParam("weight-d"));	
+	//TODO: CHANGE
+	 std::vector<float> distortionWeights = Scan<float>(m_parameter.GetParam("weight-d"));	
 
 
 
@@ -160,14 +161,25 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	}
 	// load Lexical Reordering model
 	// check to see if the lexical reordering parameter exists
-	//TODO: doesn't work for bidirectional: yet.
+	//TODO: CHANGE
 	const vector<string> &lrFileVector = 
 		m_parameter.GetParam("distortion-file");	
 
 	if (lrFileVector.size() > 0)
 		{
+		//TODO: starting to be set up for more than one distortion model; not quite
+		for(int i=0; i< lrFileVector.size(); i++ )
+		{
+			vector<string>	token		= Tokenize(lrFileVector[i]);
+			//characteristics of the phrase table
+			vector<FactorType> 	input		= Tokenize<FactorType>(token[0],",")
+								,output	= Tokenize<FactorType>(token[1],",");
+			std::string							filePath= token[2];
 		//get the weights for the lex reorderer
 		TRACE_ERR("weights-lex")
+
+		//TODO: THIS WEIGHT GETTING IS WHAT STILL NEEDS TO CHANGE TO SUPPORT MULTIPLE LEXICAL REORDERERS
+
 		for(size_t i=1; i<distortionWeights.size(); i++)
 		{
 			m_lexWeights.push_back(distortionWeights[i]);
@@ -224,8 +236,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 			// for now, assume there is just one lexical reordering model
 			timer.check("Starting to load lexical reorder table...");
- 			m_reorderModels.push_back(new LexicalReordering(lrFileVector[0], orientation, direction, condition, m_lexWeights));
+ 			m_reorderModels.push_back(new LexicalReordering(filePath, orientation, direction, condition, m_lexWeights, input, output));
 			timer.check("Finished loading lexical reorder table.");
+		}
 		}
 		if (m_parameter.GetParam("lmodel-file").size() > 0)
 	{
@@ -341,6 +354,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	timer.check("Finished loading generation tables");
 
 	// score weights
+	//TODO: CHANGE
 	m_weightDistortion				= distortionWeights[0];
 	m_weightWordPenalty				= Scan<float>( m_parameter.GetParam("weight-w")[0] );
 

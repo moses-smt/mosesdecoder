@@ -41,7 +41,7 @@ class ConfusionNet : public InputType {
 
 	
 	Phrase GetSubString(const WordsRange&) const;
-	std::string GetStringRep(const WordsRange&) const; //not well defined yet
+	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //not well defined yet
 	const FactorArray& GetFactorArray(size_t pos) const;
 
 
