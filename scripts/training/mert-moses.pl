@@ -574,14 +574,15 @@ while(1) {
     }
   }
 
+  open F, "> finished_step.txt" or die "Can't mark finished step";
+  print F $run."\n";
+  close F;
+
+
   if ($shouldstop) {
     print STDERR "None of the weights changed more than $minimum_required_change_in_weights. Stopping.\n";
     last;
   }
-
-  open F, "> finished_step.txt" or die "Can't mark finished step";
-  print F $run."\n";
-  close F;
 
 }
 print "Training finished at ".`date`;
@@ -590,6 +591,12 @@ safesystem("cp init.opt run$run.init.opt") or die;
 safesystem ("cp cmert.log run$run.cmert.log") or die;
 
 create_config($___CONFIG, "./moses.ini", $use_triples, $run, $devbleu);
+
+# just to be sure that we have the really last finished step marked
+open F, "> finished_step.txt" or die "Can't mark finished step";
+print F $run."\n";
+close F;
+
 
 #chdir back to the original directory # useless, just to remind we were not there
 chdir($cwd);
