@@ -117,9 +117,6 @@ void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
 	{
 		m_lmIdLookup[iterMap->first] = iterMap->second;
 	}
-	
-  //initialize cache memory
-  m_lmtb->init_prcache();
 }
 
 int LanguageModel_IRST::GetLmID( const std::string &str ) const
@@ -153,3 +150,11 @@ float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFact
   return TransformIRSTScore(m_lmtb->clprob(*m_lmtb_ng));
 }
 
+
+const void LanguageModel_IRST::CleanUpAfterSentenceProcessing(){
+   m_lmtb->reset_prob_and_state_caches();
+}
+
+const void LanguageModel_IRST::InitializeBeforeSentenceProcessing(){
+  if (!m_lmtb->is_prob_cache_active()) m_lmtb->init_prob_and_state_caches();
+}

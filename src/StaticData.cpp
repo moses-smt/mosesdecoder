@@ -612,12 +612,31 @@ void StaticData::CleanUpAfterSentenceProcessing()
 		m_phraseDictionary[i]->CleanUp();
 	for(size_t i=0;i<m_generationDictionary.size();++i)
 		m_generationDictionary[i]->CleanUp();
+  
+  //something LMs could do after each sentence 
+  LMList::const_iterator iterLM;
+	for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
+	{
+		LanguageModel &languageModel = **iterLM;
+    languageModel.CleanUpAfterSentenceProcessing();
+	}
+  
+  
 }
 
 void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) 
 {
 	for(size_t i=0;i<m_phraseDictionary.size();++i)
-		m_phraseDictionary[i]->InitializeForInput(in);
+  m_phraseDictionary[i]->InitializeForInput(in);
+  
+  //something LMs could do before translating a sentence
+  LMList::const_iterator iterLM;
+	for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
+	{
+		LanguageModel &languageModel = **iterLM;
+    languageModel.InitializeBeforeSentenceProcessing();
+	}
+  
 }
 
 void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)
