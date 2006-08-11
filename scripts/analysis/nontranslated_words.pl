@@ -1,0 +1,69 @@
+#!/usr/bin/perl
+#
+
+use strict;
+use warnings;
+use Getopt::Long;
+
+my $ignore_numbers = 0;
+my $ignore_punct = 0;
+my $usage = 0;
+
+GetOptions(
+  "help" => \$usage,
+  "ignore-numbers" => \$ignore_numbers,
+  "ignore-punct" => \$ignore_punct,
+) or exit 1;
+my $src = shift;
+my $tgt = shift;
+
+if ($usage || !defined $src || !defined $tgt) {
+  print STDERR "nontranslated_words.pl srcfile hypothesisfile
+...counts the number of words that are equal in src and hyp. These are
+typically unknown words.
+Options:
+  --ignore-numbers  ... numbers usually do not get translated, but do
+     not count them (it is not an error)
+  --ignore-punct ... same for punct, do not include it in the count
+";
+  exit 1;
+}
+
+open SRC, $src or die "Can't read $src";
+open TGT, $tgt or die "Can't read $tgt";
+binmode(SRC, ":utf8");
+binmode(TGT, ":utf8");
+
+my $nr=0;
+my $outtoks = 0;
+my $intoks = 0;
+my $copiedtoks = 0;
+while (<SRC>) {
+  $nr++;
+  chomp;
+  s/^\s+|\s+$//g;
+  my @src = split /\s+/;
+  my %src = map {($_,1)} @src;
+  $intoks += scalar @src;
+  my $t = <TGT>;
+  die "$tgt too short!" if !defined $t;
+  $t =~ s/^\s+|\s+$//g;
+  foreach my $outtok (split /\s+/, $t) {
+    $outtoks++;
+    next if !defined $src{$outtok}; # this word did not appear in input, we generated it
+    next if $ignore_numbers && $outtok =~ /^-?[0-9]*([.,][0-9]+)?$/;
+    next if $ignore_punct && $outtok =~ /^[[:punct:]]+$/;
+    $copiedtoks++;
+  }
+}
+close SRC;
+close TGT;
+
+print "Sentences:\t$nr
+Source tokens:\t$intoks
+Output tokens:\t$outtoks
+Output tokens appearing also in input sent:\t$copiedtoks\t"
+  .sprintf("%.2f %%", $copiedtoks/$outtoks*100)
+  ."\t".($ignore_punct?"ignoring":"including")." punctuation"
+  ."\t".($ignore_numbers?"ignoring":"including")." numbers"
+  ."\n";
