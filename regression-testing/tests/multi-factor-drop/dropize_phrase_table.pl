@@ -3,6 +3,7 @@
 #add_empties_to_phrase_table: go through an old-style pharaoh phrase table (no empty target sources) and add one such line for each single-word source phrase in the table,
 #complete with factors (note the number and type of factors are hardcoded here);
 #also add deletion-cost factors as necessary to all lines
+#Evan Herbst 7 / 11 / 06
 
 #usage: aetpt INPUT_PTABLE OUTPUT_PTABLE
 
