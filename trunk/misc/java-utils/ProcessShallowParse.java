@@ -41,7 +41,6 @@ public class ProcessShallowParse
 
 class ProcessShallowParse2
 { // factored sentence
-	boolean m_prevART = false;
 	
 	public ProcessShallowParse2(Reader inStream, Writer outStream) throws Exception
 	{		
@@ -53,7 +52,6 @@ class ProcessShallowParse2
 		int i = 1;
 		while ((inLine = inFile.readLine()) != null)
 		{
-			m_prevART = false;
 			StringTokenizer st = new StringTokenizer(inLine);
 			String ret = "";
 			while (st.hasMoreTokens()) 
@@ -70,34 +68,29 @@ class ProcessShallowParse2
 	protected String Output(String factoredWord) throws Exception
 	{
 		StringTokenizer st = new StringTokenizer(factoredWord, "|");
+		
     	String surface = st.nextToken();
-    	String pos = st.nextToken();
+    	String posNormal = st.nextToken();
     	String morph = st.nextToken();
+    	String posImproved = st.nextToken();
     	String ret = "";
 
-    	int lastPos = pos.lastIndexOf('-');
-    	if (pos.indexOf("ART-SB") == 0)
+    	if (posImproved.indexOf("ART-SB") == 0
+    		|| posImproved.indexOf("NN-NK_NP-SB") == 0)
     	{
-    		ret = pos + "|" + morph + " ";
-    		m_prevART = true;
+    		ret = posImproved + "|" + morph + " ";
     	}
-    	else if (pos.indexOf("NN-NK") == 0 && m_prevART)
-    	{
-    		ret = pos + "|" + morph + " ";
-    		m_prevART = false;
-    	}
-    	else if (pos.indexOf("VAFIN-HD") == 0
-    			|| pos.indexOf("VVFIN-HD") == 0
-    			|| pos.indexOf("VMFIN-HD") == 0
-        		|| pos.indexOf("PPER-SB") == 0
-        		|| pos.indexOf("PRELS-SB") == 0
-        		|| pos.indexOf("PDS-SB") == 0
-        		|| pos.indexOf("PPER-PH") == 0
-        		|| pos.indexOf("PPER-EP") == 0
+    	else if (posImproved.indexOf("VAFIN-HD") == 0
+    			|| posImproved.indexOf("VVFIN-HD") == 0
+    			|| posImproved.indexOf("VMFIN-HD") == 0
+        		|| posImproved.indexOf("PPER-SB") == 0
+        		|| posImproved.indexOf("PRELS-SB") == 0
+        		|| posImproved.indexOf("PDS-SB") == 0
+        		|| posImproved.indexOf("PPER-PH") == 0
+        		|| posImproved.indexOf("PPER-EP") == 0
         	)
     	{
-    		ret = pos + "|" + surface + " ";
-    		m_prevART = false;
+    		ret = posImproved + "|" + surface + " ";
     	}
     	
     	return ret;
