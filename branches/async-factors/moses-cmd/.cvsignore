@@ -1,0 +1,10 @@
+Makefile
+stamp-h1
+config.status
+.cvsignore
+config.h
+autom4te.cache
+.cdtproject
+gmon.out
+Debug*
+Release*

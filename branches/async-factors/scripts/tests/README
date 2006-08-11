@@ -1,0 +1,4 @@
+All *.test files here are run by ../Makefile.
+The tests should assume, that they are launched in a fresh directory:
+
+tests/TESTNAME.test.TIMESTAMP/

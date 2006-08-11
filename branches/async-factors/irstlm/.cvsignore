@@ -1,0 +1,6 @@
+configure
+.cvsignore
+autom4te.cache
+aclocal.m4
+Debug*
+Release*
