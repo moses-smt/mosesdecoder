@@ -76,8 +76,8 @@ void LanguageModel_IRST::Load(const std::string &fileName
   
   //install caches
   m_lmtb->init_probcache();
-  m_lmtb->init_bicache();
   m_lmtb->init_statecache();
+  m_lmtb->init_lmtcaches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
 }
 
 void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)

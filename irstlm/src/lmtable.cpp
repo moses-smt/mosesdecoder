@@ -49,7 +49,8 @@ lmtable::lmtable(){
 	memset(info, 0, sizeof(info));
 	memset(NumCenters, 0, sizeof(NumCenters));
  
-  bicache=NULL;
+  max_cache_lev=0;
+  for (int i=0;i<=maxlev;i++) lmtcache[i]=NULL;
   probcache=NULL;
   statecache=NULL;
   
@@ -575,7 +576,7 @@ int lmtable::get(ngram& ng,int n,int lev){
     
     //if (l==2) cout <<"bicache: searching:" << ng <<"\n";
     
-    if (bicache && l==2 && bicache->get(ng.wordp(n),(char *)&found))
+    if (lmtcache[l] && lmtcache[l]->get(ng.wordp(n),(char *)&found))
       hit=1;
     else
       search(table[l] + (offset * nodesize(ndt)),
@@ -587,13 +588,11 @@ int lmtable::get(ngram& ng,int n,int lev){
              LMT_FIND,
              &found);
  
-    if (bicache && l==2 && hit==0){
-      //if (bicache->isfull()) bicache->reset();
-      //cout << "bicache :" << ng <<"\n";
-       bicache->add(ng.wordp(n),(char *)&found);      
-    }    
-      
-    if (!found) return 0;
+    //insert both found and not found items!!!
+    if (lmtcache[l] && hit==0)
+      lmtcache[l]->add(ng.wordp(n),(char *)&found);   
+    
+    if (!found) return 0;      
     
     ng.link=found;
     ng.info=ndt;
