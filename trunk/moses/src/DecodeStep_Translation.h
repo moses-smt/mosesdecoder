@@ -20,7 +20,7 @@ public:
                               , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc) const;
 private:
-	TranslationOption *MergeTranslation(const TranslationOption& oldTO, TargetPhrase &targetPhrase) const;
+	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;
 };
 
 #endif
