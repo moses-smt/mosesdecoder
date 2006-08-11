@@ -27,12 +27,10 @@ class Sentence;
 class LMList;
 
 class TranslationOptionCollectionText : public TranslationOptionCollection {
-protected:
-	
+ public:
 	void ProcessUnknownWord(		size_t sourcePos
 															, FactorCollection &factorCollection);
 	
- public:
 	TranslationOptionCollectionText(Sentence const& inputSentence, size_t maxNoTransOptPerCoverage);
 	
 };

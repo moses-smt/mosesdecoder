@@ -23,26 +23,38 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
 
-DecodeStep::DecodeStep(DecodeType decodeType, Dictionary *ptr, const DecodeStep* prev)
-:m_decodeType(decodeType)
-,m_ptr(ptr)
+DecodeStep::DecodeStep(Dictionary *ptr, const DecodeStep* prev)
+:m_ptr(ptr)
 {
-	if (prev) m_outputFactors = prev->m_outputFactors;
-	m_conflictMask = (m_outputFactors & ptr->GetOutputFactorMask());
+	FactorMask prevOutputFactors;
+	if (prev) prevOutputFactors = prev->m_outputFactors;
+	m_outputFactors = prevOutputFactors;
+	FactorMask conflictMask = (m_outputFactors & ptr->GetOutputFactorMask());
 	m_outputFactors |= ptr->GetOutputFactorMask();
+	FactorMask newOutputFactorMask = m_outputFactors ^ prevOutputFactors;  //xor
+  m_newOutputFactors.resize(newOutputFactorMask.count());
+	m_conflictFactors.resize(conflictMask.count());
+	size_t j=0, k=0;
+  for (size_t i = 0; i < NUM_FACTORS; i++) {
+    if (newOutputFactorMask[i]) m_newOutputFactors[j++] = i;
+		if (conflictMask[i]) m_conflictFactors[k++] = i;
+	}
+	std::cerr << "DecodeStep():\n\toutputFactors=" << m_outputFactors
+		<< "\n\tconflictFactors=" << conflictMask
+		<< "\n\tnewOutputFactors=" << newOutputFactorMask << std::endl;
 }
+
+DecodeStep::~DecodeStep() {}
 
 /** returns phrase table (dictionary) for translation step */
 const PhraseDictionaryBase &DecodeStep::GetPhraseDictionary() const
 {
-  assert (m_decodeType == Translate);
   return *static_cast<const PhraseDictionaryBase*>(m_ptr);
 }
 
 /** returns generation table (dictionary) for generation step */
 const GenerationDictionary &DecodeStep::GetGenerationDictionary() const
 {
-  assert (m_decodeType == Generate);
   return *static_cast<const GenerationDictionary*>(m_ptr);
 }
 

@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Parameter.h"
 #include "LanguageModel.h"
 #include "InputOutput.h"
-#include "DecodeStep.h"
 #include "LMList.h"
 #include "SentenceStats.h"
 //#include "UnknownWordHandler.h"
@@ -41,6 +40,7 @@ class PhraseDictionaryBase;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class WordPenaltyProducer;
+class DecodeStep;
 
 /** Contains global variables and contants */
 class StaticData
@@ -51,7 +51,7 @@ protected:
 	FactorCollection										m_factorCollection;
 	std::vector<PhraseDictionaryBase*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
-	std::list < DecodeStep >						m_decodeStepList;
+	std::list < DecodeStep* >						m_decodeStepList;
 	Parameter			m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 //	boost::shared_ptr<UnknownWordHandler>      m_unknownWordHandler; //defaults to NULL; pointer allows polymorphism
@@ -151,7 +151,7 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	std::list < DecodeStep > &GetDecodeStepList()
+	std::list < DecodeStep* > &GetDecodeStepList()
 	{
 		return m_decodeStepList;
 	}
