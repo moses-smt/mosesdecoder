@@ -173,17 +173,17 @@ public:
     
   void init_probcache(){
     assert(probcache==NULL);
-    probcache=new ngramcache(maxlev,sizeof(double),2000000);
+    probcache=new ngramcache(maxlev,sizeof(double),1000000);
   }
   
   void init_statecache(){
     assert(statecache==NULL);
-    statecache=new ngramcache(maxlev-1,sizeof(char *),2000000);
+    statecache=new ngramcache(maxlev-1,sizeof(char *),200000);
   }
   
   void init_bicache(){
     assert(bicache==NULL);
-    bicache=new ngramcache(2,sizeof(char *),2000000);
+    bicache=new ngramcache(2,sizeof(char *),200000);
   }
   
   

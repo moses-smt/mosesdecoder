@@ -23,6 +23,11 @@
 #include "mempool.h"
 #include "htable.h"
 
+//bitwise rotation of unsigned integers
+
+#define rot_right(a,k) (((a) >> k ) | ((a) << (32-(k))))
+#define rot_left(a,k) (((a) << k ) | ((a) >> (32-(k))))
+
 using namespace std;
 
 htable::htable(int n,int kl,HTYPE ht,size_t (*klf)(const char* )){
@@ -199,16 +204,42 @@ address htable::HashStr(char *key)
   return h;
 }
 
+//Herbert Glarner's "HSH 11/13" hash function.
+/*
+address htable::HashInt(char *key){
+  
+int *Key=(htype==INTPTR? *(int **)key:(int *)key);
+  
+address state=12345,h=0;
+register int i,j;
+
+int p=7;  //precision=8 * sizeof(int)-1, in general must be >=7
+  
+ for (i=0,h=0;i<keylen;i++){    
+   h = h ^ ((address) Key[i]);
+   for (j=0;j<p;j++){
+     state = rot_left(state,11);   //state = state left-rotate 11 bits
+     h = rot_left(h,13);           //h = h left-rotate 13 bits
+     h ^= state ;                 //h = h xor state
+     h = rot_left(h,(state & (address)31)); //h = h left-rotate (state mod 32) bits
+     h = rot_left(h, (h & (address)31));    //h = h left-rotate (h mod 32) bits
+   }
+ }
+
+ return h;
+}
+
+*/
+
 address htable::HashInt(char *key)
 {
   int *Key=(htype==INTPTR? *(int **)key:(int *)key);
    
-  //cerr << "hash: " << Key << " length:" << length << "\n";
   
-  register int  h;
+  address  h;
   register int i;
   
-  /*Thomas Wang's 32 bit Mix Function*/
+  //Thomas Wang's 32 bit Mix Function
   for (i=0,h=0;i<keylen;i++){    
     h+=Key[i];
     h += ~(h << 15);
@@ -219,11 +250,9 @@ address htable::HashInt(char *key)
     h ^=  (h >> 16);    
   };
     
-  //for (i=0,h=0;i<length;i++) h = h * Prime1 ^ Key[i];
-  //h %= Prime2;  
-  
   return h;
 }
+
 
 int htable::CompStr(char *key1, char *key2)
 {
