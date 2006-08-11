@@ -44,10 +44,10 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 		if (!epsilon) { sms << twr_i; }
 		if (epsilon) { tms << "del(" << swr_i << ")"; } else { tms << swr_i; }
 		swr_i++; twr_i++;
-		for (; twr_i <= twr.GetEndPos(); twr_i++) {
-			sms << '-' << twr_i;
-		}
-		for (; swr_i <= swr.GetEndPos(); swr_i++) {
+		for (; twr_i <= twr.GetEndPos() && twr.GetEndPos() != NOT_FOUND; twr_i++) {
+				sms << '-' << twr_i;
+			}
+		for (; swr_i <= swr.GetEndPos() && swr.GetEndPos() != NOT_FOUND; swr_i++) {
 			tms << '-' << swr_i;
 		}
 		if (!epsilon) targetMap.push_back(sms.str());
@@ -70,7 +70,7 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
     std::vector<std::string>::iterator dwi = droppedWords.begin();
     os << std::endl << "WORDS/PHRASES DROPPED:" << std::endl;
     for (; dwi != droppedWords.end(); ++dwi) {
-      os << "\t" << *dwi << std::endl;
+      os << "\tdropped=" << *dwi << std::endl;
     }
   }
 	os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED):" << std::endl;
