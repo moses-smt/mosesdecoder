@@ -1,22 +1,31 @@
 #!/usr/bin/perl
-
-BEGIN {push @INC, "tests/perllib";} #expect we'll be called from regression-testing/
-use RegTestUtils;
-
 $x=0;
 while (<>) {
   chomp;
 
   if (/^Finished loading LanguageModels/) {
-    my $time = RegTestUtils::readTime($_);
+    my $time = get_time($_);
     print "LMLOAD_TIME ~ $time\n";
   }
   if (/^Finished loading phrase tables/) {
-    my $time = RegTestUtils::readTime($_);
+    my $time = get_time($_);
     print "PTLOAD_TIME ~ $time\n";
   }
   next unless /^BEST HYPO:/;
-  my $pscore = RegTestUtils::readHypoScore($_);
+  my $pscore = "FORMAT ERROR";
+  # BEST HYPO: only then will the european institutions to your task . [11111111111]  [total score=-14.39] <<...>>
+  if (/\[1+\]\s*\[[^\]]*=(-?\d+\.\d+)\]/) {
+    $pscore = $1;
+  }
   $x++;
   print "SCORE_$x = $pscore\n";
+}
+
+sub get_time {
+  my $time = shift;
+  my $res = "FORMAT ERROR";
+  if ($time =~ /\[(\d+\.\d+)\]\s*seconds*/) {
+    $res = $1;
+  }
+  return $res;
 }
