@@ -192,6 +192,10 @@
 				RelativePath=".\src\Main.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\TranslationAnalysis.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -208,6 +212,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Main.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationAnalysis.h"
 				>
 			</File>
 		</Filter>
