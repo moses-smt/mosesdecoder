@@ -15,7 +15,7 @@ const PhraseDictionaryBase &TranslationDecodeStep::GetPhraseDictionary() const
   return *static_cast<const PhraseDictionaryBase*>(m_ptr);
 }
 
-TranslationOption *TranslationDecodeStep::MergeTranslation(const TranslationOption& oldTO, TargetPhrase &targetPhrase) const
+TranslationOption *TranslationDecodeStep::MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const
 {
   if (IsFilteringStep()) {
     if (!oldTO.IsCompatible(targetPhrase, m_conflictFactors)) return 0;
@@ -46,6 +46,7 @@ void TranslationDecodeStep::Process(const TranslationOption &inputPartialTranslO
   const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
   const PhraseDictionaryBase &phraseDictionary  = decodeStep.GetPhraseDictionary();
   const TargetPhraseCollection *phraseColl= phraseDictionary.GetTargetPhraseCollection(toc->GetSource(),sourceWordsRange);
+	const size_t currSize = inputPartialTranslOpt.GetTargetPhrase().GetSize();
 
   if (phraseColl != NULL)
     {
@@ -53,7 +54,9 @@ void TranslationDecodeStep::Process(const TranslationOption &inputPartialTranslO
 
       for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != phraseColl->end(); ++iterTargetPhrase)
         {
-          TargetPhrase targetPhrase = *iterTargetPhrase;
+          const TargetPhrase& targetPhrase = *iterTargetPhrase;
+					// skip if the 
+					if (targetPhrase.GetSize() != currSize) continue;
 
           TranslationOption *newTransOpt = MergeTranslation(inputPartialTranslOpt, targetPhrase);
           if (newTransOpt != NULL)
