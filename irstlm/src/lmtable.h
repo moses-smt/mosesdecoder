@@ -171,18 +171,31 @@ public:
     }
   }
     
-  void init_prob_and_state_caches(){
-    assert(probcache==NULL && statecache==NULL);
+  void init_probcache(){
+    assert(probcache==NULL);
     probcache=new ngramcache(maxlev,sizeof(double),2000000);
+  }
+  
+  void init_statecache(){
+    assert(statecache==NULL);
     statecache=new ngramcache(maxlev-1,sizeof(char *),2000000);
   }
   
-  void reset_prob_and_state_caches(){
-    probcache->reset();
-    statecache->reset();
+  void init_bicache(){
+    assert(bicache==NULL);
+    bicache=new ngramcache(2,sizeof(char *),2000000);
   }
   
-  bool is_prob_cache_active(){return probcache!=NULL;}
+  
+  void check_cache_levels(){
+    if (probcache && probcache->isfull()) probcache->reset();
+    if (statecache && statecache->isfull()) statecache->reset();
+    if (bicache && bicache->isfull()) bicache->reset();
+  }
+  
+  bool is_probcache_active(){return probcache!=NULL;}
+  bool is_statecache_active(){return statecache!=NULL;}
+  bool is_bicache_active(){return bicache!=NULL;}
   
   
 	void configure(int n,bool quantized){

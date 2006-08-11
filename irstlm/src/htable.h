@@ -85,6 +85,7 @@ class htable {
       case INT:case INTPTR: return HashInt(key);
         break;
       case STR:case STRPTR: return HashStr(key);
+      default: exit(1);
     }
   };
   address HashInt(char *key);
@@ -96,6 +97,7 @@ class htable {
       case INT:case INTPTR: return CompInt(Key1,Key2);
         break;
       case STR:case STRPTR: return CompStr(Key1,Key2);
+      default: exit(1);
     };    
   }
 

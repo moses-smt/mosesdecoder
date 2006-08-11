@@ -53,7 +53,7 @@ lmtable::lmtable(){
 	memset(info, 0, sizeof(info));
 	memset(NumCenters, 0, sizeof(NumCenters));
  
-  bicache=new ngramcache(2,sizeof(char*),1000000);
+  bicache=NULL;
   probcache=NULL;
   statecache=NULL;
   
@@ -579,7 +579,7 @@ int lmtable::get(ngram& ng,int n,int lev){
     
     //if (l==2) cout <<"bicache: searching:" << ng <<"\n";
     
-    if (l==2 && bicache->get(ng.wordp(n),(char *)&found))
+    if (bicache && l==2 && bicache->get(ng.wordp(n),(char *)&found))
       hit=1;
     else
       search(table[l] + (offset * nodesize(ndt)),
@@ -591,8 +591,8 @@ int lmtable::get(ngram& ng,int n,int lev){
              LMT_FIND,
              &found);
  
-    if (l==2 && hit==0){
-      if (bicache->isfull()) bicache->reset();
+    if (bicache && l==2 && hit==0){
+      //if (bicache->isfull()) bicache->reset();
       //cout << "bicache :" << ng <<"\n";
        bicache->add(ng.wordp(n),(char *)&found);      
     }    
@@ -746,7 +746,7 @@ const char *lmtable::cmaxsuffptr(ngram ong){
   found=(char *)maxsuffptr(ong);
   
   if (statecache && ong.size==maxlev-1){
-    if (statecache->isfull()) statecache->reset();
+    //if (statecache->isfull()) statecache->reset();
     statecache->add(ong.wordp(maxlev-1),(char *)&found);    
   }; 
   
@@ -845,7 +845,7 @@ double lmtable::clprob(ngram ong){
   logpr=lprob(ong);
   
   if (probcache && ong.size==maxlev){
-    if (probcache->isfull()) probcache->reset();
+    //if (probcache->isfull()) probcache->reset();
      probcache->add(ong.wordp(maxlev),(char *)&logpr);    
   }; 
   

@@ -76,6 +76,11 @@ void LanguageModel_IRST::Load(const std::string &fileName
 	CreateFactors(factorCollection);
   m_unknownId = m_lmtb->dict->oovcode();
   std::cerr << "IRST: m_unknownId=" << m_unknownId << std::endl;
+  
+  //install caches
+  m_lmtb->init_probcache();
+  m_lmtb->init_bicache();
+  m_lmtb->init_statecache();
 }
 
 void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
@@ -117,6 +122,8 @@ void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
 	{
 		m_lmIdLookup[iterMap->first] = iterMap->second;
 	}
+  
+  
 }
 
 int LanguageModel_IRST::GetLmID( const std::string &str ) const
@@ -152,9 +159,9 @@ float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFact
 
 
 const void LanguageModel_IRST::CleanUpAfterSentenceProcessing(){
-   m_lmtb->reset_prob_and_state_caches();
+   m_lmtb->check_cache_levels();
 }
 
 const void LanguageModel_IRST::InitializeBeforeSentenceProcessing(){
-  if (!m_lmtb->is_prob_cache_active()) m_lmtb->init_prob_and_state_caches();
+  //nothing to do;
 }
