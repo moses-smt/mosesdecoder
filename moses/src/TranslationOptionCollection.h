@@ -70,6 +70,7 @@ protected:
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos );
 
+	void ProcessUnknownWord();
 	virtual void ProcessOneUnknownWord(const FactorArray &sourceWord
 																		 , size_t sourcePos
 																		 , FactorCollection &factorCollection);
