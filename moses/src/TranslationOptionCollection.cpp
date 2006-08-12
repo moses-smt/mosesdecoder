@@ -406,7 +406,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 		TargetPhraseCollection::const_iterator iterTargetPhrase;
 		for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != phraseColl->end() ; ++iterTargetPhrase)
 		{
-			const TargetPhrase	&targetPhrase = *iterTargetPhrase;
+			const TargetPhrase	&targetPhrase = **iterTargetPhrase;
 			outputPartialTranslOptColl.Add ( new TranslationOption(wordsRange, targetPhrase) );
 			
 			if (StaticData::Instance()->GetVerboseLevel() >= 3)
