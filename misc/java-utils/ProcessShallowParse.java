@@ -4,14 +4,18 @@
 import java.io.*;
 import java.util.*;
 
+//input is the sentences with all features combined 
+//output shrunked sentences with only those words we are interested in
 public class ProcessShallowParse
 {
 	public static void main(String[] args) throws Exception
 	{
 		System.err.println("Starting...");
 
-		InputStreamReader inStream = args.length > 0 ? new FileReader(args[0]) : new InputStreamReader(System.in); 
-		OutputStreamWriter outStream = args.length > 1 ?  new FileWriter(args[1]) : new OutputStreamWriter(System.out); 
+		InputStreamReader inStream = new InputStreamReader(args.length > 0 ? new FileInputStream(args[0]) : System.in
+														, "Latin1"); 
+		OutputStreamWriter outStream = new OutputStreamWriter(args.length > 1 ? new FileOutputStream(args[1]) : (OutputStream) System.out
+														, "Latin1"); 
 		
 		new ProcessShallowParse2(inStream, outStream);
 		
@@ -59,7 +63,7 @@ class ProcessShallowParse2
 				String factoredWord = st.nextToken();
 		    	ret += Output(factoredWord);
 		    }
-			outFile.write(i++ + " " + ret);
+			outFile.write(ret);
 			if (ret.length() > 0)
 				outFile.write("\n");
 		}
@@ -78,7 +82,7 @@ class ProcessShallowParse2
     	if (posImproved.indexOf("ART-SB") == 0
     		|| posImproved.indexOf("NN-NK_NP-SB") == 0)
     	{
-    		ret = posImproved + "|" + morph + " ";
+    		ret = posImproved + "_" + morph + " ";
     	}
     	else if (posImproved.indexOf("VAFIN-HD") == 0
     			|| posImproved.indexOf("VVFIN-HD") == 0
@@ -90,7 +94,7 @@ class ProcessShallowParse2
         		|| posImproved.indexOf("PPER-EP") == 0
         	)
     	{
-    		ret = posImproved + "|" + surface + " ";
+    		ret = surface + " ";
     	}
     	
     	return ret;

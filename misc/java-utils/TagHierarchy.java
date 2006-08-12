@@ -3,23 +3,28 @@
 import java.io.*;
 import java.util.*;
 
+// create pos-tag sentences from LISP-like input tree.
+// NN-NK tag augmented with NP-SP if parent is NP-SB
 class TagHierarchy
 {
 	public static void main(String[] args) throws Exception
 	{
 		System.err.println("Starting...");
 
-		InputStreamReader inStream = args.length > 0 ? new FileReader(args[0]) : new InputStreamReader(System.in); 
-		PrintStream outStream = args.length > 1 ? new PrintStream(new File(args[1])) : System.out; 
+		InputStreamReader inStream = new InputStreamReader(args.length > 0 ? new FileInputStream(args[0]) : System.in
+														, "Latin1"); 
+		OutputStreamWriter outStream = new OutputStreamWriter(args.length > 1 ? new FileOutputStream(args[1]) : (OutputStream) System.out
+														, "Latin1"); 
 		
 		new TagHierarchy(inStream, outStream);
 		
 		System.err.println("End...");
 	}
 
-	public TagHierarchy(Reader inStream, PrintStream outStream) throws Exception
+	public TagHierarchy(Reader inStream, OutputStreamWriter outStream) throws Exception
 	{
-		BufferedReader inFile = new BufferedReader(inStream); 
+		BufferedReader inFile = new BufferedReader(inStream);
+		BufferedWriter outFile = new BufferedWriter(outStream);
 		
 		// tokenise
 		String inLine;
@@ -29,13 +34,16 @@ class TagHierarchy
 			if (inLine.equals("null"))
 			{
 				nullLines++;
-				outStream.println("null");
+				outFile.write("null\n");
 			}
 			else
 			{
-				OutputHierarchy2(inLine, outStream);
+				OutputHierarchy2(inLine, outFile);
 			}
 		}
+		outFile.flush();
+		outFile.close();
+		outFile = null;
 		System.err.println(nullLines + " null lines\n");
 	}
 
@@ -69,7 +77,7 @@ class TagHierarchy
 	     outFile.write('\n');
 	}
 
-	public void OutputHierarchy2(String inLine, PrintStream outFile) throws Exception
+	public void OutputHierarchy2(String inLine, BufferedWriter outFile) throws Exception
 	{
 		int level = 0;
 		Stack prevTags = new Stack();
@@ -96,7 +104,7 @@ class TagHierarchy
 	    		int firstBracket = parsed.indexOf(')');
 	    		int noBracket = parsed.length() - firstBracket;
 	    		String word = parsed.substring(0, firstBracket);
-	    		outFile.print(currTag + " ");
+	    		outFile.write(currTag + " ");
 	    		
 	    		level -= noBracket;
 	    		
