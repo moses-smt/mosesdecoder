@@ -3,6 +3,7 @@
 import java.io.*;
 import java.util.*;
 
+// create sentences with all features combined from files with individual tags 
 class CombineTags
 {
 	public static void main(String[] args) throws Exception
@@ -12,17 +13,18 @@ class CombineTags
 		Vector vecInstream = new Vector();
 		for (int i = 0 ; i < args.length ; i++)
 		{
-			BufferedReader inStream = new BufferedReader(new FileReader(args[i]));
+			InputStreamReader temp = new InputStreamReader(new FileInputStream(args[i]), "Latin1");
+			BufferedReader inStream = new BufferedReader(temp);
 			vecInstream.add(inStream);
 		}
-		PrintStream outStream = System.out; 
+		OutputStreamWriter outStream = new OutputStreamWriter((OutputStream)System.out, "Latin1"); 
 		
 		new CombineTags(vecInstream, outStream);
 		
 		System.err.println("End...");
 	}
 
-	public CombineTags(Vector vecInstream , PrintStream outStream) throws Exception
+	public CombineTags(Vector vecInstream , OutputStreamWriter outStream) throws Exception
 	{
 		BufferedReader inFile = (BufferedReader) vecInstream.get(0);
 		String inLine;
@@ -74,10 +76,14 @@ class CombineTags
  					outLine += otherTag + "|";
  				}
  				outLine = outLine.substring(0, outLine.length() - 1) + " ";
- 				outStream.print(outLine);
+ 				outStream.write(outLine);
  			}
-	 		outStream.println();
+	 		outStream.write("\n");
 		}
+		// close stream
+		outStream.flush();
+		outStream.close();
+		outStream = null;
 	}
 }
 
