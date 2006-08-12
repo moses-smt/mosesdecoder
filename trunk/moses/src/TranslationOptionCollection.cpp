@@ -19,6 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <algorithm>
 #include "TranslationOptionCollection.h"
 #include "Sentence.h"
 #include "DecodeStep.h"
@@ -59,7 +60,7 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	{
 		for (size_t endPos = startPos ; endPos < size ; ++endPos)
 		{
-			RemoveAllInColl(GetTranslationOptionList(startPos, endPos));
+		 RemoveAllInColl(GetTranslationOptionList(startPos, endPos));
 		}
 	}
 }
@@ -70,9 +71,38 @@ bool CompareTranslationOption(const TranslationOption *a, const TranslationOptio
 	return a->GetFutureScore() > b->GetFutureScore();
 }
 
+void TranslationOptionCollection::ProcessUnknownWord()
+{
+	// create unknown words for 1 word coverage where we don't have any trans options
+	size_t size = m_source.GetSize();
+	vector<bool> process(size);
+	fill(process.begin(), process.end(), true);
+	
+	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+		{
+			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
+			size_t s = fullList.size();
+			if (s > 0)
+			{
+				fill(process.begin() + startPos, process.begin() + endPos + 1, false);
+			}
+		}	
+	}
+			
+	for (size_t currPos = 0 ; currPos < size ; ++currPos)
+	{
+		if (process[currPos])
+			ProcessUnknownWord(currPos, *m_factorCollection);
+	}
+}
+
 /** pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 void TranslationOptionCollection::Prune()
 {
+	ProcessUnknownWord();
+	
 	size_t size = m_source.GetSize();
 	
 	// prune to max no. of trans opt
@@ -293,51 +323,51 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 {
 	// unknown word, add as trans opt
 
-	size_t isDigit = 0;
-	if (StaticData::Instance()->GetDropUnknown())
-	{
-		const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-		std::string s = f->ToString();
-		isDigit = s.find_first_of("0123456789");
-		if (isDigit == string::npos) 
-			isDigit = 0;
-		else 
-			isDigit = 1;
-		// modify the starting bitmap
-	}
-	
-	TranslationOption *transOpt;
-	if (! StaticData::Instance()->GetDropUnknown() || isDigit)
-	{
-		// add to dictionary
-		TargetPhrase targetPhrase(Output);
-		FactorArray &targetWord = targetPhrase.AddWord();
-					
-		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		size_t isDigit = 0;
+		if (StaticData::Instance()->GetDropUnknown())
 		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
+			const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
+			std::string s = f->ToString();
+			isDigit = s.find_first_of("0123456789");
+			if (isDigit == string::npos) 
+				isDigit = 0;
+			else 
+				isDigit = 1;
+			// modify the starting bitmap
+		}
+		
+		TranslationOption *transOpt;
+		if (! StaticData::Instance()->GetDropUnknown() || isDigit)
+		{
+			// add to dictionary
+			TargetPhrase targetPhrase(Output);
+			FactorArray &targetWord = targetPhrase.AddWord();
+						
+			for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+			{
+				FactorType factorType = static_cast<FactorType>(currFactor);
+				
+				const Factor *sourceFactor = sourceWord[currFactor];
+				if (sourceFactor == NULL)
+					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
+				else
+					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
+			}
+	
+			targetPhrase.SetScore();
 			
-			const Factor *sourceFactor = sourceWord[currFactor];
-			if (sourceFactor == NULL)
-				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
-			else
-				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
+			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
+		}
+		else 
+		{ // drop source word. create blank trans opt
+			const TargetPhrase targetPhrase(Output);
+			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
 		}
 
-		targetPhrase.SetScore();
-		
-		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
-	}
-	else 
-	{ // drop source word. create blank trans opt
-		const TargetPhrase targetPhrase(Output);
-		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
-	}
+		transOpt->CalcScore();
+		Add(transOpt);
 
-	transOpt->CalcScore();
-	Add(transOpt);
-
-	m_unknownWordPos.SetValue(sourcePos, true); 
+		m_unknownWordPos.SetValue(sourcePos, true); 
 }
 
 
