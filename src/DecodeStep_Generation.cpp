@@ -113,7 +113,7 @@ void GenerationDecodeStep::Process(const TranslationOption &inputPartialTranslOp
 
       if (wordColl == NULL)
         { // word not found in generation dictionary
-          toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
+          //toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
           return; // can't be part of a phrase, special handling
         }
       else
