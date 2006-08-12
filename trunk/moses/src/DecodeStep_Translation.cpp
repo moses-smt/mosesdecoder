@@ -75,7 +75,7 @@ void TranslationDecodeStep::Process(const TranslationOption &inputPartialTranslO
 
       for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != phraseColl->end(); ++iterTargetPhrase)
         {
-          const TargetPhrase& targetPhrase = *iterTargetPhrase;
+          const TargetPhrase& targetPhrase = **iterTargetPhrase;
 					// skip if the 
 					if (targetPhrase.GetSize() != currSize) continue;
 

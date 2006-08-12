@@ -218,7 +218,7 @@ inline float CalcTranslationScore(const std::vector<float> &scoreVector,
 template<class COLL>
 void RemoveAllInColl(COLL &coll)
 {
-	for (typename COLL::iterator iter = coll.begin() ; iter != coll.end() ; ++iter)
+	for (typename COLL::const_iterator iter = coll.begin() ; iter != coll.end() ; ++iter)
 	{
 		delete (*iter);
 	}

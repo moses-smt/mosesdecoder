@@ -23,5 +23,50 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <list>
 #include "TargetPhrase.h"
-typedef std::list<TargetPhrase> TargetPhraseCollection;
+#include "Util.h"
+
+class TargetPhraseCollection
+{
+protected:
+	std::list<TargetPhrase*> m_collection;
+	
+public:	
+	// iters
+	typedef std::list<TargetPhrase*>::iterator iterator;
+	typedef std::list<TargetPhrase*>::const_iterator const_iterator;
+	
+	iterator begin() { return m_collection.begin(); }
+	iterator end() { return m_collection.end(); }
+	const_iterator begin() const { return m_collection.begin(); }
+	const_iterator end() const { return m_collection.end(); }
+	
+	// functions
+	~TargetPhraseCollection()
+	{
+			RemoveAllInColl(m_collection);
+	}
+	size_t GetSize() const
+	{
+		return m_collection.size();
+	}
+	bool IsEmpty() const
+	{ 
+		return m_collection.empty();
+	}	
+	void Add(TargetPhrase *targetPhrase)
+	{
+		m_collection.push_back(targetPhrase);
+	}
+	
+	// legacy
+	void insert(iterator iter, TargetPhrase *targetPhrase)
+	{
+		m_collection.insert(iter, targetPhrase);
+	}
+	void erase(iterator iter)
+	{
+		m_collection.erase(iter);
+	}
+};
+
 

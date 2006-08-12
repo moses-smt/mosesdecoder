@@ -23,6 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "PhraseDictionary.h"
 
+PhraseDictionaryNode::~PhraseDictionaryNode()
+	{
+		delete m_targetPhraseCollection;
+	}
+
 PhraseDictionaryNode *PhraseDictionaryNode::GetOrCreateChild(const Word &word)
 {
 	NodeMap::iterator iter = m_map.find(word);
@@ -62,7 +67,7 @@ void PhraseDictionaryNode::SetWeightTransModel(const PhraseDictionary *phraseDic
 				iterTargetPhrase != m_targetPhraseCollection->end();
 				++iterTargetPhrase)
 	{
-		TargetPhrase &targetPhrase = *iterTargetPhrase;
+		TargetPhrase &targetPhrase = **iterTargetPhrase;
 		targetPhrase.SetWeights(phraseDictionary, weightT);
 	}
 

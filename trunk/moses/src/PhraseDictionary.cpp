@@ -180,23 +180,23 @@ void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &
 	if (m_maxTargetPhrase == 0)
 	{	// don't need keep list sorted
 		// create sub tree & put target phrase into collection
-		phraseColl.push_back(targetPhrase);
+		phraseColl.Add(new TargetPhrase(targetPhrase));
 	}
 	else
 	{	// must keep list in sorted order
 		TargetPhraseCollection::iterator iter;
 		for (iter = phraseColl.begin() ; iter != phraseColl.end() ; ++iter)
 		{
-			TargetPhrase &insertPhrase = *iter;
+			TargetPhrase &insertPhrase = **iter;
 			if (targetPhrase.GetFutureScore() < insertPhrase.GetFutureScore())
 			{
 				break;
 			}
 		}
-		phraseColl.insert(iter, targetPhrase);
+		phraseColl.insert(iter, new TargetPhrase(targetPhrase));
 
 		// get rid of least probable phrase if we have enough
-		if (phraseColl.size() > m_maxTargetPhrase)
+		if (phraseColl.GetSize() > m_maxTargetPhrase)
 		{
 			phraseColl.erase(phraseColl.begin());
 		}
