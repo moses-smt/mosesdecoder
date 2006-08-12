@@ -109,7 +109,7 @@ void GenerationDecodeStep::Process(const TranslationOption &inputPartialTranslOp
       const FactorArray &factorArray = targetPhrase.GetFactorArray(currPos);
 
       // consult dictionary for possible generations for this word
-      const OutputWordCollection *wordColl = generationDictionary.FindWord(factorArray);
+      const OutputWordCollection *wordColl = generationDictionary.FindWord(FactorArrayWrapper(factorArray));
 
       if (wordColl == NULL)
         { // word not found in generation dictionary
