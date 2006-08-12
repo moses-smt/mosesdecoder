@@ -40,10 +40,7 @@ public:
 	PhraseDictionaryNode()
 		:m_targetPhraseCollection(NULL)
 	{}
-	~PhraseDictionaryNode()
-	{
-		delete m_targetPhraseCollection;
-	}
+	~PhraseDictionaryNode();
 
 	PhraseDictionaryNode *GetOrCreateChild(const Word &word);
 	const PhraseDictionaryNode *GetChild(const Word &word) const;
