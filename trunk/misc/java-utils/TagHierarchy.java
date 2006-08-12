@@ -47,6 +47,7 @@ class TagHierarchy
 		System.err.println(nullLines + " null lines\n");
 	}
 
+	// indent parsed tree to make it easier to look at
 	public void OutputHierarchy(String inLine, BufferedWriter outFile) throws Exception
 	{
 		int level = 0;
@@ -104,7 +105,21 @@ class TagHierarchy
 	    		int firstBracket = parsed.indexOf(')');
 	    		int noBracket = parsed.length() - firstBracket;
 	    		String word = parsed.substring(0, firstBracket);
-	    		outFile.write(currTag + " ");
+
+	    		if (currTag.equals("ART-SB")
+		    			|| currTag.equals("NN-NK_NP-SB")
+		    			|| currTag.equals("VAFIN-HD")
+		    			|| currTag.equals("VVFIN-HD")
+		    			|| currTag.equals("VMFIN-HD")
+		    			|| currTag.equals("PPER-SB")
+		    			|| currTag.equals("PRELS-SB")
+		    			|| currTag.equals("PDS-SB")
+		    			|| currTag.equals("PPER-PH")
+		    			|| currTag.equals("PPER-EP")
+		    			)
+	    			outFile.write(currTag + " ");
+	    		else
+	    			outFile.write("??? ");
 	    		
 	    		level -= noBracket;
 	    		

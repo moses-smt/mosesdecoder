@@ -5,7 +5,8 @@ import java.io.*;
 import java.util.*;
 
 //input is the sentences with all features combined 
-//output shrunked sentences with only those words we are interested in
+//output sentences combination of morphology, lopar tags and parsed tags
+// used to create generation table
 public class ProcessShallowParse
 {
 	public static void main(String[] args) throws Exception
@@ -20,26 +21,6 @@ public class ProcessShallowParse
 		new ProcessShallowParse2(inStream, outStream);
 		
 		System.err.println("End...");
-	}
-
-	public ProcessShallowParse(Reader inStream, Writer outStream) throws Exception
-	{
-		BufferedReader inFile = new BufferedReader(inStream); 
-		BufferedWriter outFile = new BufferedWriter(outStream); 
-		
-		// tokenise
-		String inLine;
-		while ((inLine = inFile.readLine()) != null)
-		{
-			StringTokenizer st = new StringTokenizer(inLine);
-		     while (st.hasMoreTokens()) 
-		     {
-		    	 String token = st.nextToken();
-		    	 if (token.substring(0, 2).compareTo("I-") != 0)
-		    		 outFile.write(token + " ");
-		     }
-		     outFile.write("\n");
-		}		
 	}
 }
 
@@ -63,10 +44,13 @@ class ProcessShallowParse2
 				String factoredWord = st.nextToken();
 		    	ret += Output(factoredWord);
 		    }
-			outFile.write(ret);
-			if (ret.length() > 0)
-				outFile.write("\n");
+			outFile.write(ret + "\n");
+			i++;
 		}
+		outFile.flush();
+		outFile.close();
+		outFile = null;
+		System.err.print("no of lines = " + i);
 	}
 	
 	protected String Output(String factoredWord) throws Exception
@@ -79,20 +63,16 @@ class ProcessShallowParse2
     	String posImproved = st.nextToken();
     	String ret = "";
 
-    	if (posImproved.indexOf("ART-SB") == 0
-    		|| posImproved.indexOf("NN-NK_NP-SB") == 0)
+    	if (posImproved.equals("ART-SB")
+    		|| posImproved.equals("NN-NK_NP-SB"))
     	{
     		ret = posImproved + "_" + morph + " ";
     	}
-    	else if (posImproved.indexOf("VAFIN-HD") == 0
-    			|| posImproved.indexOf("VVFIN-HD") == 0
-    			|| posImproved.indexOf("VMFIN-HD") == 0
-        		|| posImproved.indexOf("PPER-SB") == 0
-        		|| posImproved.indexOf("PRELS-SB") == 0
-        		|| posImproved.indexOf("PDS-SB") == 0
-        		|| posImproved.indexOf("PPER-PH") == 0
-        		|| posImproved.indexOf("PPER-EP") == 0
-        	)
+    	else if (posImproved.equals("???"))
+    	{
+    		ret = "??? ";
+    	}
+    	else
     	{
     		ret = surface + " ";
     	}
