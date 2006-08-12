@@ -59,7 +59,7 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	{
 		for (size_t endPos = startPos ; endPos < size ; ++endPos)
 		{
-			RemoveAllInColl<TranslationOptionList::iterator>(GetTranslationOptionList(startPos, endPos));
+			RemoveAllInColl(GetTranslationOptionList(startPos, endPos));
 		}
 	}
 }

@@ -55,6 +55,7 @@ StaticData::StaticData()
 ,m_wpProducer(0)
 ,m_useDistortionFutureCosts(false)
 ,m_isDetailedTranslationReportingEnabled(false) 
+,m_onlyDistinctNBest(false)
 {
 	s_instance = this;
 
@@ -84,10 +85,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_cachePath = GetTempFolder();
 
 	// n-best
-	if (m_parameter.GetParam("n-best-list").size() == 2)
+	if (m_parameter.GetParam("n-best-list").size() >= 2)
 	{
 		m_nBestFilePath = m_parameter.GetParam("n-best-list")[0];
 		m_nBestSize = Scan<size_t>( m_parameter.GetParam("n-best-list")[1] );
+		m_onlyDistinctNBest=(m_parameter.GetParam("n-best-list").size()>2 && m_parameter.GetParam("n-best-list")[2]=="distinct");
 	}
 	else
 	{
@@ -322,6 +324,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				numFeatures = Scan<size_t>(token[2]);
 				filePath = token[3];
 			}
+			if (!boost::filesystem::exists(boost::filesystem::path(filePath, boost::filesystem::native)))
+				{
+					std::cerr<<"ERROR: generation dictionary '"<<filePath<<"' does not exist!\n";
+					abort();
+				}
 
 			TRACE_ERR(filePath << endl);
 			if (oldFormat) {
@@ -333,6 +340,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			}
 
 			m_generationDictionary.push_back(new GenerationDictionary(numFeatures));
+			assert(m_generationDictionary.back() && "could not create GenerationDictionary");
 			m_generationDictionary.back()->Load(input
 																		, output
 																		, m_factorCollection
@@ -583,9 +591,19 @@ void StaticData::LoadMapping()
 			DecodeStep* decodeStep = 0;
 			switch (decodeType) {
 				case Translate:
+					if(index>=m_phraseDictionary.size())
+						{
+							std::cerr<<"ERROR: no phrase dictionary with index "<<index<<" available!\n";
+							abort();
+						}
 					decodeStep = new TranslationDecodeStep(m_phraseDictionary[index], prev);
 				break;
 				case Generate:
+					if(index>=m_generationDictionary.size())
+						{
+							std::cerr<<"ERROR: no generation dictionary with index "<<index<<" available!\n";
+							abort();
+						}
 					decodeStep = new GenerationDecodeStep(m_generationDictionary[index], prev);
 				break;
 				case InsertNullFertilityWord:
