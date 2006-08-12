@@ -42,6 +42,7 @@ public:
 	{}
 	~PhraseDictionaryNode();
 
+	void Sort();
 	PhraseDictionaryNode *GetOrCreateChild(const Word &word);
 	const PhraseDictionaryNode *GetChild(const Word &word) const;
 	const TargetPhraseCollection *GetTargetPhraseCollection() const
