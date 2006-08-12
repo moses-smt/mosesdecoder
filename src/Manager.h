@@ -95,7 +95,7 @@ public:
 
 	void ProcessSentence();
 	const Hypothesis *GetBestHypothesis() const;
-	void CalcNBest(size_t count, LatticePathList &ret) const;
+	void CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct=0) const;
 	
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )

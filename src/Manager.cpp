@@ -21,6 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <limits>
 #include <cmath>
+#include <ext/hash_set>
+#include <boost/functional/hash.hpp>
 #include "Manager.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -275,6 +277,21 @@ void Manager::OutputHypoStack(int stack)
 		}
 	}
 }
+void getSurfacePhrase(std::vector<size_t>& tphrase,LatticePath const& path)
+{
+	tphrase.clear();
+	const std::vector<const Hypothesis *> &edges = path.GetEdges();
+	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+		{
+			const Phrase &phrase = edges[currEdge]->GetTargetPhrase();
+			for (size_t pos=0,size=phrase.GetSize() ; pos < size ; ++pos)
+				{
+					const Factor *factor = phrase.GetFactor(pos,0);
+					assert(factor);
+					tphrase.push_back(factor->GetId());
+				}
+		}
+}
 
 /**
  * After decoding, the hypotheses in the stacks and additional arcs
@@ -285,7 +302,7 @@ void Manager::OutputHypoStack(int stack)
  * \param count the number of n-best translations to produce
  * \param ret holds the n-best list that was calculated
  */
-void Manager::CalcNBest(size_t count, LatticePathList &ret) const
+void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) const
 {
 	if (count <= 0)
 		return;
@@ -297,17 +314,27 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret) const
 
 	LatticePathCollection contenders;
 
+	__gnu_cxx::hash_set<std::vector<size_t>, boost::hash<std::vector<size_t> > > distinctHyps;
+
 	// path of the best
 	contenders.insert(new LatticePath(*sortedPureHypo.begin()));
 	
 	// used to add next pure hypo path
 	vector<const Hypothesis*>::const_iterator iterBestHypo = ++sortedPureHypo.begin();
 
-	for (size_t currBest = 0 ; currBest <= count && contenders.size() > 0 ; currBest++)
+	for (size_t currBest = 0 ; (onlyDistinct ? distinctHyps.size() : currBest) <= count && contenders.size() > 0 && (currBest < count * 20) ; currBest++)
 	{
 		// get next best from list of contenders
 		LatticePath *path = *contenders.begin();
-		ret.push_back(path);
+		assert(path);
+		bool addPath=1;
+		if(onlyDistinct)
+			{
+				std::vector<size_t> tgtPhrase;getSurfacePhrase(tgtPhrase,*path);
+				addPath=distinctHyps.insert(tgtPhrase).second;
+			}
+		
+		if(addPath) ret.push_back(path);
 		contenders.erase(contenders.begin());
 
 		// create deviations from current best

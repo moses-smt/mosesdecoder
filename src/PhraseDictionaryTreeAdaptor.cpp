@@ -459,7 +459,7 @@ struct PDTAimp {
 			{
 				assert(i->first.first<m_rangeCache.size());
 				assert(i->first.second>0);
-				assert(i->first.second-1<m_rangeCache[i->first.first].size());
+				assert(static_cast<size_t>(i->first.second-1)<m_rangeCache[i->first.first].size());
 				assert(m_rangeCache[i->first.first][i->first.second-1]==0);
 
 				std::vector<TargetPhrase> tCands;tCands.reserve(i->second.size());
