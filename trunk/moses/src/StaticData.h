@@ -99,6 +99,7 @@ protected:
 	bool m_reportAllFactors;
 	bool m_useDistortionFutureCosts;
 	bool m_isDetailedTranslationReportingEnabled;
+	bool m_onlyDistinctNBest;
 
 	mutable boost::shared_ptr<SentenceStats> m_sentenceStats;
 
@@ -286,4 +287,5 @@ public:
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
 
 	bool UseDistortionFutureCosts() const {return m_useDistortionFutureCosts;}
+	bool OnlyDistinctNBest() const {return m_onlyDistinctNBest;}
 };

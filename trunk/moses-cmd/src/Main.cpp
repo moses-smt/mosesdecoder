@@ -130,9 +130,9 @@ int main(int argc, char* argv[])
 				{
 					TRACE_ERR("WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					LatticePathList nBestList;
-					manager.CalcNBest(nBestSize, nBestList);
+					manager.CalcNBest(nBestSize, nBestList,staticData.OnlyDistinctNBest());
 					inputOutput->SetNBest(nBestList, source->GetTranslationId());
-					RemoveAllInColl< LatticePathList::iterator > (nBestList);
+					RemoveAllInColl(nBestList);
 				}
 
 			if (staticData.IsDetailedTranslationReportingEnabled()) {

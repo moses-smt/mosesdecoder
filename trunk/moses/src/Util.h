@@ -215,11 +215,10 @@ inline float CalcTranslationScore(const std::vector<float> &scoreVector,
 		return out.str();						\
 	}															\
 
-template<class ITER, class COLL>
+template<class COLL>
 void RemoveAllInColl(COLL &coll)
 {
-	ITER iter;
-	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
+	for (typename COLL::iterator iter = coll.begin() ; iter != coll.end() ; ++iter)
 	{
 		delete (*iter);
 	}
