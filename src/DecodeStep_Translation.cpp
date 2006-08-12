@@ -88,7 +88,7 @@ void TranslationDecodeStep::Process(const TranslationOption &inputPartialTranslO
     }
   else if (sourceWordsRange.GetWordsCount() == 1)
     { // unknown handler
-      //toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
+      toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
     }
 }
 
