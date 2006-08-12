@@ -156,6 +156,9 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 		chmod(hashFilePath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
 	}
+	
+	// sort each target phrase collection
+	m_collection.Sort();
 }
 
 TargetPhraseCollection *PhraseDictionary::CreateTargetPhraseCollection(const Phrase &source)

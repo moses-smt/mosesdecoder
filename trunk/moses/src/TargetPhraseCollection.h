@@ -21,19 +21,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <list>
+#include <vector>
 #include "TargetPhrase.h"
 #include "Util.h"
 
 class TargetPhraseCollection
 {
 protected:
-	std::list<TargetPhrase*> m_collection;
+	std::vector<TargetPhrase*> m_collection;
 	
 public:	
 	// iters
-	typedef std::list<TargetPhrase*>::iterator iterator;
-	typedef std::list<TargetPhrase*>::const_iterator const_iterator;
+	typedef std::vector<TargetPhrase*>::iterator iterator;
+	typedef std::vector<TargetPhrase*>::const_iterator const_iterator;
 	
 	iterator begin() { return m_collection.begin(); }
 	iterator end() { return m_collection.end(); }
@@ -44,6 +44,9 @@ public:
 	~TargetPhraseCollection()
 	{
 			RemoveAllInColl(m_collection);
+	}
+	void Sort()
+	{
 	}
 	size_t GetSize() const
 	{

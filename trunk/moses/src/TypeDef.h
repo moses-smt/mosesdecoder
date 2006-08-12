@@ -135,6 +135,12 @@ enum LMImplementation
 	,Chunking
 };
 
+enum DictionaryFind
+{	
+	Best
+	,All
+};
+
 // typedef
 typedef size_t FactorType;
 
