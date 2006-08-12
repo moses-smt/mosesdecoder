@@ -29,71 +29,39 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 
 template<typename LMImpl>
-class LanguageModel_Chunking : public LanguageModelMultiFactor
+class LanguageModel_Chunking : public LanguageModelSingleFactor
 {	
 protected:
-	FactorType m_posType, m_morphType, m_jointType;
 	size_t m_realNGramOrder;
 	LMImpl m_lmImpl;
-	std::vector<std::string> m_posPrefix; // only process words with these tags
-	mutable FactorCollection *m_factorCollection;
 	
 public:
 	LanguageModel_Chunking(bool registerScore)
-	: LanguageModelMultiFactor(registerScore)
+	: LanguageModelSingleFactor(registerScore)
 	, m_lmImpl(false)
 	{
-		m_posPrefix.push_back("ART");
-		m_posPrefix.push_back("P");
-		m_posPrefix.push_back("V");
-		m_posPrefix.push_back("$,");
-		m_posPrefix.push_back("$.");
-		m_posPrefix.push_back(BOS_);
-		m_posPrefix.push_back(EOS_);
 	}
 	
 	void Load(const std::string &fileName
 					, FactorCollection &factorCollection
-					, const std::vector<FactorType> &factorTypes
+					, FactorType factorType
 					, float weight
 					, size_t nGramOrder)
 	{
-		m_factorTypes 			= FactorMask(factorTypes);
+		m_factorType 				= factorType;
 		m_weight 						= weight;
 		m_filename 					= fileName;
 		m_nGramOrder 				= nGramOrder;
-		m_factorCollection 	= &factorCollection;
 		
-		// hack. this LM is a joint factor of morph and POS tag
-		m_posType						= 1;
-		m_morphType					= 2;
-		m_jointType 				= 3;
+		// hack. this LM is a joint factor of morph and low POS tag & hacked-up TIGER tag 
 		m_realNGramOrder 		= 3;
 
-		m_sentenceStartArray[m_posType] = factorCollection.AddFactor(Output, m_posType, BOS_);
-		m_sentenceStartArray[m_morphType] = factorCollection.AddFactor(Output, m_morphType, BOS_);
+		m_sentenceStartArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, BOS_);
+		m_sentenceEndArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, EOS_);
 
-		m_sentenceEndArray[m_posType] = factorCollection.AddFactor(Output, m_posType, EOS_);
-		m_sentenceEndArray[m_morphType] = factorCollection.AddFactor(Output, m_morphType, EOS_);
-
-		m_lmImpl.Load(fileName, factorCollection, m_jointType, weight, nGramOrder);
+		m_lmImpl.Load(fileName, factorCollection, m_factorType, weight, nGramOrder);
 	}
-		
-	bool Process(const FactorArrayWrapper &factorArray) const
-	{
-		std::string str1stWord = factorArray[m_posType]->GetString();
-		bool process = false;
-		for (size_t i = 0 ; i < m_posPrefix.size() ; ++i)
-		{
-			if (str1stWord.find(m_posPrefix[i]) == 0)
-			{
-				process = true;
-				break;
-			}
-		}
-		return process;
-	}
-	
+			
 	float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL) const
 	{
 		if (contextFactor.size() == 0)
@@ -105,39 +73,42 @@ public:
 			TRACE_ERR(contextFactor[i] << " ");
 		TRACE_ERR(std::endl);
 		*/
-		// only process context where last word is a verb, article, pronoun or comma or period
-		if (!Process(contextFactor.back()))
+		// only process context where last word is a word we want
+		const Factor *factor = contextFactor.back()[m_factorType];
+		std::string strWord = factor->GetString();
+		if (strWord.find("???") == 0)
 			return 0;
-
-		// create context in reverse 'cos we skip words we don't want
+		
+		// add last word
 		std::vector<FactorArrayWrapper> chunkContext;
-		for (int currPos = (int)contextFactor.size() - 1 ; currPos >= 0 && chunkContext.size() < m_realNGramOrder ; --currPos )
+		Word chunkWord;
+		chunkWord.SetFactor(m_factorType, factor);
+		chunkContext.push_back(chunkWord);
+		
+		// create context in reverse 'cos we skip words we don't want
+		for (int currPos = (int)contextFactor.size() - 2 ; currPos >= 0 && chunkContext.size() < m_realNGramOrder ; --currPos )
 		{
 			const FactorArrayWrapper &factorArray = contextFactor[currPos];
-			bool process = Process(factorArray);
-			if (!process)
+			factor = factorArray[m_factorType];
+			std::string strWord = factor->GetString();
+			bool skip = strWord.find("???") == 0;
+			if (skip)
 				continue;
 
-		// concatenate pos & morph factors and use normal LM to find prob
-			std::string strConcate = factorArray[m_posType]->GetString() + "|" + factorArray[m_morphType]->GetString();
-			
-			const Factor *factor = m_factorCollection->AddFactor(Output, m_jointType, strConcate);
+			// add word to chunked context
 			Word chunkWord;
-			chunkWord.SetFactor(m_jointType, factor);
-
+			chunkWord.SetFactor(m_factorType, factor);
 			chunkContext.push_back(chunkWord);
 		}
 	
 		// create context factor the right way round
 		std::reverse(chunkContext.begin(), chunkContext.end());
-		// calc score on chunked phrase
-
 		/*
 		for (size_t i = 0 ; i < chunkContext.size() ; ++i)
 			TRACE_ERR(chunkContext[i] << " ");
 		TRACE_ERR(std::endl);
 		*/
-		// calc score
+		// calc score on chunked phrase
 		float ret = m_lmImpl.GetValue(chunkContext, finalState);
 		
 		return ret;
