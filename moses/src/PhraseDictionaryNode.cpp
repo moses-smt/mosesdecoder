@@ -24,9 +24,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 
 PhraseDictionaryNode::~PhraseDictionaryNode()
+{
+	delete m_targetPhraseCollection;
+}
+
+void PhraseDictionaryNode::Sort()
+{
+	// recusively sort
+	NodeMap::iterator iter;
+	for (iter = m_map.begin() ; iter != m_map.end() ; ++iter)
 	{
-		delete m_targetPhraseCollection;
+		iter->second.Sort();
 	}
+	
+	// sort TargetPhraseCollection in this node
+	if (m_targetPhraseCollection != NULL)
+		m_targetPhraseCollection->Sort();
+}
 
 PhraseDictionaryNode *PhraseDictionaryNode::GetOrCreateChild(const Word &word)
 {
