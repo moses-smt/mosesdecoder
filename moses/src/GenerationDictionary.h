@@ -75,6 +75,6 @@ public:
 	{
 		return m_collection.size();
 	}
-	const OutputWordCollection *FindWord(const FactorArrayWrapper &factorArray) const;
+	const OutputWordCollection *FindWord(const FactorArray &factorArray) const;
 };
 

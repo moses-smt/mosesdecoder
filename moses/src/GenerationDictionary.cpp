@@ -130,11 +130,12 @@ const std::string GenerationDictionary::GetScoreProducerDescription() const
   return "Generation score, file=" + m_filename;
 }
 
-const OutputWordCollection *GenerationDictionary::FindWord(const FactorArrayWrapper &factorArray) const
+const OutputWordCollection *GenerationDictionary::FindWord(const FactorArray &factorArray) const
 {
 	const OutputWordCollection *ret;
 	
-	std::map<const FactorArrayWrapper* , OutputWordCollection>::const_iterator iter = m_collection.find(&factorArray);
+	FactorArrayWrapper wrapper(factorArray);
+	std::map<const FactorArrayWrapper* , OutputWordCollection>::const_iterator iter = m_collection.find(&wrapper);
 	if (iter == m_collection.end())
 	{ // can't find source phrase
 		ret = NULL;
