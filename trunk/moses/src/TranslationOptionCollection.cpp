@@ -71,38 +71,9 @@ bool CompareTranslationOption(const TranslationOption *a, const TranslationOptio
 	return a->GetFutureScore() > b->GetFutureScore();
 }
 
-void TranslationOptionCollection::ProcessUnknownWord()
-{
-	// create unknown words for 1 word coverage where we don't have any trans options
-	size_t size = m_source.GetSize();
-	vector<bool> process(size);
-	fill(process.begin(), process.end(), true);
-	
-	for (size_t startPos = 0 ; startPos < size ; ++startPos)
-	{
-		for (size_t endPos = startPos ; endPos < size ; ++endPos)
-		{
-			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
-			size_t s = fullList.size();
-			if (s > 0)
-			{
-				fill(process.begin() + startPos, process.begin() + endPos + 1, false);
-			}
-		}	
-	}
-			
-	for (size_t currPos = 0 ; currPos < size ; ++currPos)
-	{
-		if (process[currPos])
-			ProcessUnknownWord(currPos, *m_factorCollection);
-	}
-}
-
 /** pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 void TranslationOptionCollection::Prune()
-{
-	ProcessUnknownWord();
-	
+{	
 	size_t size = m_source.GetSize();
 	
 	// prune to max no. of trans opt
@@ -137,6 +108,33 @@ void TranslationOptionCollection::Prune()
 	{
 		std::cerr << "       Total translation options: " << total << std::endl;
 		std::cerr << "Total translation options pruned: " << totalPruned << std::endl;
+	}
+}
+
+void TranslationOptionCollection::ProcessUnknownWord()
+{
+	// create unknown words for 1 word coverage where we don't have any trans options
+	size_t size = m_source.GetSize();
+	vector<bool> process(size);
+	fill(process.begin(), process.end(), true);
+	
+	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+		{
+			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
+			size_t s = fullList.size();
+			if (s > 0)
+			{
+				fill(process.begin() + startPos, process.begin() + endPos + 1, false);
+			}
+		}	
+	}
+			
+	for (size_t currPos = 0 ; currPos < size ; ++currPos)
+	{
+		if (process[currPos])
+			ProcessUnknownWord(currPos, *m_factorCollection);
 	}
 }
 
@@ -236,10 +234,12 @@ void TranslationOptionCollection::CreateTranslationOptions(
 		{
 		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
 		{
-			CreateTranslationOptionsForRange( decodeStepList, factorCollection, startPos, endPos);
+			CreateTranslationOptionsForRange( decodeStepList, factorCollection, startPos, endPos, true);
 		}
 	}
 
+	ProcessUnknownWord();
+	
 	// Prune
 	Prune();
 
@@ -258,7 +258,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 const list < DecodeStep* > &decodeStepList
 																													 , FactorCollection &factorCollection
 																													 , size_t startPos
-																													 , size_t endPos)
+																													 , size_t endPos
+																													 , bool observeTableLimit)
 {
 	// partial trans opt stored in here
 	PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
@@ -289,7 +290,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																	 , decodeStep
 																	 , *newPtoc
 																	 , factorCollection
-																	 , this);
+																	 , this
+																	 , observeTableLimit);
 			}
 			// last but 1 partial trans not required anymore
 			totalEarlyPruned += newPtoc->GetPrunedCount();

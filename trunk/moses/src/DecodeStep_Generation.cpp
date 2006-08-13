@@ -78,7 +78,8 @@ void GenerationDecodeStep::Process(const TranslationOption &inputPartialTranslOp
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
-                              , TranslationOptionCollection *toc) const
+                              , TranslationOptionCollection *toc
+                              , bool observeTableLimit) const
 {
   //TRACE_ERR(inputPartialTranslOpt << endl);
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
