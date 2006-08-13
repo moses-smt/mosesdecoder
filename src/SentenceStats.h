@@ -64,11 +64,11 @@ class SentenceStats
 		void CalcFinalStats(const Hypothesis& bestHypo);
 		
 		unsigned int GetTotalHypos() const {return Hypothesis::s_HypothesesCreated;}
-		unsigned int GetNumHyposRecombined() const {return m_recombinationInfos.size();}
+		size_t GetNumHyposRecombined() const {return m_recombinationInfos.size();}
 		unsigned int GetNumHyposPruned() const {return m_numHyposPruned;}
-		unsigned int GetTotalSourceWords() const {return m_totalSourceWords;}
-		unsigned int GetNumWordsDeleted() const {return m_deletedWords.size();}
-		unsigned int GetNumWordsInserted() const {return m_insertedWords.size();}
+		size_t GetTotalSourceWords() const {return m_totalSourceWords;}
+		size_t GetNumWordsDeleted() const {return m_deletedWords.size();}
+		size_t GetNumWordsInserted() const {return m_insertedWords.size();}
 		const std::vector<PhraseReference>& GetDeletedWords() const {return m_deletedWords;}
 		const std::vector<std::string>& GetInsertedWords() const {return m_insertedWords;}
 		
