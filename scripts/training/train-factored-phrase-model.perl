@@ -1099,6 +1099,7 @@ sub score_phrase {
     open(TABLE,">$___MODEL_DIR/phrase-table.$factor")
       or die "Can't write $___MODEL_DIR/phrase-table.$factor";
     my $i=0;
+    my $mismatch = 0;
     while(my $f2n = <F2N>) {
 	$i++;
 	my $n2f = <N2F>;
@@ -1106,12 +1107,15 @@ sub score_phrase {
 	my ($english2,$foreign2,$p2) = split(/ \|\|\| /,$f2n); chop($p2);
 	if ($english ne $english2 || $foreign ne $foreign2) {
 	    print STDERR "mismatch line $i: ($english ne $english2 || $foreign ne $foreign2)\n";
+            $mismatch++;
+            last if $mismatch > 10;
 	    next;
 	}
 	print TABLE "$english ||| $foreign ||| $p $p2 2.718\n";
     }
     close(N2F);
     close(F2N);
+    die "There were mismatches! (printed only first 10)" if $mismatch;
     if (! $debug) { safesystem("rm -f $___MODEL_DIR/phrase-table-half.$factor.*") or die;}
     if (! $debug) { safesystem("rm -f $___MODEL_DIR/extract*sorted*") or die;}
     safesystem("rm -f $___MODEL_DIR/phrase-table.$factor.gz") or die;
