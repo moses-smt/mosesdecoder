@@ -95,6 +95,16 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	{
 		m_nBestSize = 0;
 	}
+	
+	TRACE_ERR(m_parameter.GetParam("labeled-n-best-list").size() << endl);
+	if (m_parameter.GetParam("labeled-n-best-list").size() == 1)
+	{
+		m_labeledNBestList = Scan<bool>( m_parameter.GetParam("labeled-n-best-list")[0]);
+	}
+	else
+	{
+		m_labeledNBestList = true;
+	}
 
 	// verbose level
 	if (m_parameter.GetParam("verbose").size() == 1)

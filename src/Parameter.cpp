@@ -68,6 +68,7 @@ Parameter::Parameter()
 	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
 	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
 	AddParam("use-distortion-future-costs", "consider expected distortion cost in future cost estimation");
+	AddParam("labeled-n-best-list", "labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
 }
 
 /** initializes a parameter, sub of constructor */
