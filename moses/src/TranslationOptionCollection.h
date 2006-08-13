@@ -104,7 +104,8 @@ public:
 	virtual void CreateTranslationOptionsForRange(const std::list < DecodeStep* > &decodeStepList
 																			, FactorCollection &factorCollection
 																			, size_t startPosition
-																			, size_t endPosition);
+																			, size_t endPosition
+																			, bool observeTableLimit);
 
 	/** returns future cost matrix for sentence */
 	inline virtual const SquareMatrix &GetFutureScore() const
