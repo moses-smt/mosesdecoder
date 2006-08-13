@@ -80,7 +80,7 @@ protected:
 	std::string									m_nBestFilePath, m_cachePath;
 	std::vector<std::string>		m_mySQLParam;
 	InputOutput									*m_inputOutput;
-	bool                        m_fLMsLoaded;
+	bool                        m_fLMsLoaded, m_labeledNBestList;
 	size_t											m_maxNgramOrderForFactor[NUM_FACTORS];
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
@@ -254,6 +254,10 @@ public:
 	void ResetSentenceStats(const InputType& source) const
 	{
 		m_sentenceStats = boost::shared_ptr<SentenceStats>(new SentenceStats(source));
+	}
+	bool IsLabeledNBestList() const
+	{
+		return m_labeledNBestList;
 	}
 
 	// for mert
