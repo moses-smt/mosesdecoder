@@ -101,6 +101,7 @@ public:
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
-															, TranslationOptionCollection *toc) const = 0;
+															, TranslationOptionCollection *toc
+															, bool observeTableLimit) const = 0;
 
 };

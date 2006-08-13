@@ -39,7 +39,8 @@ public:
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
-                              , TranslationOptionCollection *toc) const;
+                              , TranslationOptionCollection *toc
+                              , bool observeTableLimit) const;
 private:
 	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;
 };

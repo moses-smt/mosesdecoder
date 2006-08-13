@@ -40,7 +40,8 @@ public:
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
-                              , TranslationOptionCollection *toc) const;
+                              , TranslationOptionCollection *toc
+                              , bool observeTableLimit) const;
 
 private:
   TranslationOption *MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
