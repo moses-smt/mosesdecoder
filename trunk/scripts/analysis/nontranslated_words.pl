@@ -32,6 +32,9 @@ Options:
   exit 1;
 }
 
+binmode(STDOUT, ":utf8");
+binmode(STDERR, ":utf8");
+
 open SRC, $src or die "Can't read $src";
 open TGT, $tgt or die "Can't read $tgt";
 binmode(SRC, ":utf8");
