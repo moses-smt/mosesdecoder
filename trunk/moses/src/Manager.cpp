@@ -18,10 +18,14 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
+#ifdef WIN32
+#include <hash_set>
+#else
+#include <ext/hash_set>
+#endif
 
 #include <limits>
 #include <cmath>
-#include <ext/hash_set>
 #include <boost/functional/hash.hpp>
 #include "Manager.h"
 #include "TypeDef.h"
@@ -314,7 +318,11 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 
 	LatticePathCollection contenders;
 
-	__gnu_cxx::hash_set<std::vector<size_t>, boost::hash<std::vector<size_t> > > distinctHyps;
+	#ifdef WIN32
+		set<std::vector<size_t> > distinctHyps;
+	#else
+		__gnu_cxx::hash_set<std::vector<size_t>, boost::hash<std::vector<size_t> > > distinctHyps;
+	#endif
 
 	// path of the best
 	contenders.insert(new LatticePath(*sortedPureHypo.begin()));
@@ -327,10 +335,14 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 		// get next best from list of contenders
 		LatticePath *path = *contenders.begin();
 		assert(path);
-		bool addPath=1;
+		bool addPath = true;
 		if(onlyDistinct)
 			{
-				std::vector<size_t> tgtPhrase;getSurfacePhrase(tgtPhrase,*path);
+				// not entirely correct.
+				// output phrase can't be assumed to only contain factor 0.
+				// have to look in StaticData.GetOutputFactorOrder() to find out what output factors should be
+				std::vector<size_t> tgtPhrase;
+				getSurfacePhrase(tgtPhrase,*path);
 				addPath=distinctHyps.insert(tgtPhrase).second;
 			}
 		
