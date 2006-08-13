@@ -212,15 +212,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Input.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\InputFileStream.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\InputOutput.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\InputType.cpp"
 				>
 			</File>
 			<File
@@ -482,15 +482,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Input.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\InputFileStream.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\InputOutput.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\InputType.h"
 				>
 			</File>
 			<File
