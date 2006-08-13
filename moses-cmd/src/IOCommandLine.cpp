@@ -176,9 +176,9 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		vector<PhraseDictionaryBase*> pds = StaticData::Instance()->GetPhraseDictionaries();
     if (pds.size() > 0) {
       m_nBestFile << "tm: ";
-		  vector<PhraseDictionaryBase*>::reverse_iterator i = pds.rbegin();
-		  for (; i != pds.rend(); ++i) {
-			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*i);
+		  vector<PhraseDictionaryBase*>::iterator iter;
+		  for (iter = pds.begin(); iter != pds.end(); ++iter) {
+			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 			  for (size_t j = 0; j<scores.size(); ++j) 
 				  m_nBestFile << scores[j] << " ";
 			  
@@ -193,9 +193,9 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		vector<GenerationDictionary*> gds = StaticData::Instance()->GetGenerationDictionaries();
     if (gds.size() > 0) {
       m_nBestFile << "g: ";
-		  vector<GenerationDictionary*>::reverse_iterator gi = gds.rbegin();
-		  for (; gi != gds.rend(); ++gi) {
-			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*gi);
+		  vector<GenerationDictionary*>::iterator iter;
+		  for (iter = gds.begin(); iter != gds.end(); ++iter) {
+			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 			  for (size_t j = 0; j<scores.size(); j++) {
 				  m_nBestFile << scores[j] << " ";
 			  }
