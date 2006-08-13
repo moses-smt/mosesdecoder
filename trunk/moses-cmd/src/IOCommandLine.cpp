@@ -165,14 +165,18 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 	    m_nBestFile << "d: ";
 		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetDistortionScoreProducer()) << " ";
 
-		//reordering
+//		reordering
 		vector<LexicalReordering*> rms = StaticData::Instance()->GetReorderModels();
 		if(rms.size() > 0)
 		{
 				vector<LexicalReordering*>::iterator iter;
 				for(iter = rms.begin(); iter != rms.end(); ++iter)
 				{
-					m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(*iter) << " ";
+					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+					for (size_t j = 0; j<scores.size(); ++j) 
+					{
+				  		m_nBestFile << scores[j] << " ";
+					}
 				}
 		}
 			
