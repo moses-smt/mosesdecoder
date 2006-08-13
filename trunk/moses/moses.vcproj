@@ -344,6 +344,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseReference.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ScoreComponentCollection.cpp"
 				>
 			</File>
@@ -357,6 +361,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Sentence.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SentenceStats.cpp"
 				>
 			</File>
 			<File
