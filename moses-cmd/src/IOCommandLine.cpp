@@ -139,6 +139,8 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bo
 
 void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationId)
 {
+	bool labeledOutput = StaticData::Instance()->IsLabeledNBestList();
+	
 	LatticePathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
 	{
@@ -159,7 +161,8 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
     // MERT script relies on this
 
 		// basic distortion
-    m_nBestFile << "d: ";
+		if (labeledOutput)
+	    m_nBestFile << "d: ";
 		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetDistortionScoreProducer()) << " ";
 
 		//reordering
@@ -176,7 +179,8 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		// lm
 		const LMList& lml = StaticData::Instance()->GetAllLM();
     if (lml.size() > 0) {
-      m_nBestFile << "lm: ";
+			if (labeledOutput)
+	      m_nBestFile << "lm: ";
 		  LMList::const_iterator lmi = lml.begin();
 		  for (; lmi != lml.end(); ++lmi) {
 			  m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
@@ -186,7 +190,8 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
 		// translation components
 		vector<PhraseDictionaryBase*> pds = StaticData::Instance()->GetPhraseDictionaries();
     if (pds.size() > 0) {
-      m_nBestFile << "tm: ";
+			if (labeledOutput)
+	      m_nBestFile << "tm: ";
 		  vector<PhraseDictionaryBase*>::iterator iter;
 		  for (iter = pds.begin(); iter != pds.end(); ++iter) {
 			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
@@ -197,13 +202,15 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
     }
 		
 		// word penalty
-    m_nBestFile << "w: ";
+		if (labeledOutput)
+	    m_nBestFile << "w: ";
 		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetWordPenaltyProducer()) << " ";
 		
 		// generation
 		vector<GenerationDictionary*> gds = StaticData::Instance()->GetGenerationDictionaries();
     if (gds.size() > 0) {
-      m_nBestFile << "g: ";
+			if (labeledOutput)
+	      m_nBestFile << "g: ";
 		  vector<GenerationDictionary*>::iterator iter;
 		  for (iter = gds.begin(); iter != gds.end(); ++iter) {
 			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
