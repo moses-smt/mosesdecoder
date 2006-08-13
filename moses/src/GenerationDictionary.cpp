@@ -113,7 +113,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 
 GenerationDictionary::~GenerationDictionary()
 {
-	std::map<const FactorArrayWrapper* , OutputWordCollection>::const_iterator iter;
+	std::map<const FactorArrayWrapper* , OutputWordCollection, FactorArrayWrapperComparer>::const_iterator iter;
 	for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter)
 	{
 		delete iter->first;
@@ -135,7 +135,8 @@ const OutputWordCollection *GenerationDictionary::FindWord(const FactorArray &fa
 	const OutputWordCollection *ret;
 	
 	FactorArrayWrapper wrapper(factorArray);
-	std::map<const FactorArrayWrapper* , OutputWordCollection>::const_iterator iter = m_collection.find(&wrapper);
+	std::map<const FactorArrayWrapper* , OutputWordCollection, FactorArrayWrapperComparer>::const_iterator 
+				iter = m_collection.find(&wrapper);
 	if (iter == m_collection.end())
 	{ // can't find source phrase
 		ret = NULL;
