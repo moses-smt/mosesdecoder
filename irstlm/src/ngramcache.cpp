@@ -34,7 +34,7 @@ ngramcache::ngramcache(int n,int size,int maxentries){
       infosize=size;
       maxn=maxentries;
       entries=0;
-      ht=new htable(maxn * 5, ngsize * sizeof(int),INT,NULL); //lower load factor to reduce collisions 
+      ht=new htable(maxn * 2, ngsize * sizeof(int),INT,NULL); //lower load factor to reduce collisions 
       mp=new mempool(ngsize * sizeof(int)+infosize,maxn/5); 
       accesses=0;
       hits=0;
@@ -50,7 +50,7 @@ ngramcache::~ngramcache(){
 void ngramcache::reset(){
     ht->stat();
     delete ht;delete mp;    
-    ht=new htable(maxn * 5, ngsize * sizeof(int),INT,NULL); //load factor 2   
+    ht=new htable(maxn * 2, ngsize * sizeof(int),INT,NULL); //load factor 2   
     mp=new mempool(ngsize * sizeof(int)+infosize,maxn/5); 
     entries=0;
   }
