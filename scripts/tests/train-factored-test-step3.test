@@ -5,6 +5,9 @@ echo "Workspace: $WORKSPACE"
 
 export SCRIPTS_ROOTDIR=$WORKSPACE/scripts
 
+cp -r ../epps-sample ./corpus || exit 1
+echo "Copied epps-sample files"
+
 echo "Starting training script."
 
 $SCRIPTS_ROOTDIR/training/train-factored-phrase-model.perl \
@@ -14,5 +17,7 @@ $SCRIPTS_ROOTDIR/training/train-factored-phrase-model.perl \
   --first-step 3 \
   --last-step 3 \
   --corpus corpus \
-  --root   corpus
+  --root   corpus \
+  || exit 1
 
+echo "Success."

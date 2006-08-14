@@ -20,4 +20,7 @@ $SCRIPTS_ROOTDIR/training/train-factored-phrase-model.perl \
   --decoding-steps t0,g0,t1,g1,g2 \
   --translation-factors 0-0+1-1 \
   --generation-factors 0-0+0-1+0,1-2 \
-  --first-step 9
+  --first-step 9 \
+  || exit 1
+
+echo "Success"
