@@ -266,7 +266,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	  timer.check("Start loading LanguageModels");
 	  // initialize n-gram order for each factor. populated only by factored lm
-	  for(size_t i=0; i < NUM_FACTORS ; i++)
+	  for(size_t i=0; i < MAX_NUM_FACTORS ; i++)
 	  	m_maxNgramOrderForFactor[i] = 0;
 	  
 		const vector<string> &lmVector = m_parameter.GetParam("lmodel-file");

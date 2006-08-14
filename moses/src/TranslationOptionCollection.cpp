@@ -355,7 +355,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 			TargetPhrase targetPhrase(Output);
 			FactorArray &targetWord = targetPhrase.AddWord();
 						
-			for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+			for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 			{
 				FactorType factorType = static_cast<FactorType>(currFactor);
 				
