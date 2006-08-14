@@ -49,7 +49,7 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 																				 , FactorCollection &factorCollection
 																				 , const std::string &filePath
 																				 , const std::vector<float> &weight
-																				 , size_t maxTargetPhrase
+																				 , size_t tableLimit
 																				 , const LMList &languageModels
 																				 , float weightWP
 																				 )
@@ -67,7 +67,7 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
   std::cerr << "PhraseDictionaryTreeAdaptor: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl;
 
 	// set PhraseDictionaryBase members
-	m_maxTargetPhrase=maxTargetPhrase;
+	m_tableLimit=tableLimit;
 
 	imp->Create(input,output,factorCollection,filePath,
 							weight,languageModels,weightWP);

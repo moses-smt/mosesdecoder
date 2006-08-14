@@ -38,7 +38,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
 							, FactorCollection &factorCollection
 							, const std::string &filePath
 							, const std::vector<float> &weight
-							, size_t maxTargetPhrase
+							, size_t tableLimit
 							, const LMList &languageModels
 							, float weightWP
 
