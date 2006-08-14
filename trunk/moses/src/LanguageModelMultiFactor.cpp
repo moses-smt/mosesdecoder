@@ -41,7 +41,7 @@ bool LanguageModelMultiFactor::Useable(const Phrase &phrase) const
 	
 	// whether phrase contains all factors in this LM
 	const FactorArray &factorArray = phrase.GetFactorArray(0);
-	for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; ++currFactor)
+	for (size_t currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; ++currFactor)
 	{
 		if (m_factorTypes[currFactor] && factorArray[currFactor] == NULL)
 			return false;

@@ -446,7 +446,7 @@ std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factor
 std::string Hypothesis::GetSourcePhraseStringRep() const 
 {
 	vector<FactorType> allFactors;
-	for(size_t i=0; i < NUM_FACTORS; i++)
+	for(size_t i=0; i < MAX_NUM_FACTORS; i++)
 	{
 		allFactors.push_back(i);
 	}
@@ -455,7 +455,7 @@ std::string Hypothesis::GetSourcePhraseStringRep() const
 std::string Hypothesis::GetTargetPhraseStringRep() const 
 {
 	vector<FactorType> allFactors;
-	for(size_t i=0; i < NUM_FACTORS; i++)
+	for(size_t i=0; i < MAX_NUM_FACTORS; i++)
 	{
 		allFactors.push_back(i);
 	}

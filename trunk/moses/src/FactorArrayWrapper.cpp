@@ -35,7 +35,7 @@ int FactorArrayWrapper::Compare(const FactorArrayWrapper &compare) const
 // static functions
 int FactorArrayWrapper::Compare(const FactorArray &targetWord, const FactorArray &sourceWord)
 {
-	for (size_t factorType = 0 ; factorType < NUM_FACTORS ; factorType++)
+	for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++)
 	{
 		const Factor *targetFactor		= targetWord[factorType]
 								,*sourceFactor	= sourceWord[factorType];

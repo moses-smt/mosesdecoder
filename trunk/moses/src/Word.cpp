@@ -42,7 +42,7 @@ Word::Word()
 Word::Word(const FactorArray &factorArray)
 {
 	m_factorArrayPtr = &m_factorArray;
-	for (size_t factor = 0 ; factor < NUM_FACTORS ; factor++)
+	for (size_t factor = 0 ; factor < MAX_NUM_FACTORS ; factor++)
 	{
 		m_factorArray[factor] = factorArray[factor];
 	}
@@ -55,7 +55,7 @@ Word::~Word()
 // static
 int Word::Compare(const FactorArray &targetWord, const FactorArray &sourceWord)
 {
-	for (size_t factorType = 0 ; factorType < NUM_FACTORS ; factorType++)
+	for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++)
 	{
 		const Factor *targetFactor		= targetWord[factorType]
 								,*sourceFactor	= sourceWord[factorType];
@@ -84,7 +84,7 @@ void Word::Initialize(FactorArray &factorArray)
 
 void Word::Merge(FactorArray &targetWord, const FactorArray &sourceWord)
 {
-	for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 	{
 		const Factor *sourcefactor		= sourceWord[currFactor]
 								,*targetFactor			= targetWord[currFactor];
@@ -99,7 +99,7 @@ std::string Word::ToString(const FactorArray &factorArray)
 {
 	stringstream strme;
 
-	for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 	{
 			const Factor *factor = factorArray[currFactor];
 		if (factor != NULL)
@@ -115,7 +115,7 @@ std::string Word::ToString(const FactorArray &factorArray)
 	std::string Word::ToString(const vector<FactorType> factorType, const FactorArray &factorArray)
 	{
 		stringstream strme;
-		assert(factorType.size() <= NUM_FACTORS);
+		assert(factorType.size() <= MAX_NUM_FACTORS);
 		for (unsigned int i = 0 ; i < factorType.size() ; i++)
 		{
 			const Factor *factor = factorArray[factorType[i]];
@@ -137,7 +137,7 @@ ostream& operator<<(ostream& out, const Word& word)
 	stringstream strme;
 
 //	strme << "(";
-	for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 	{
 		FactorType factorType = static_cast<FactorType>(currFactor);
 		const Factor *factor = word.GetFactor(factorType);
