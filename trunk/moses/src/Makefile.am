@@ -46,6 +46,7 @@ libmoses_a_SOURCES = \
 	SentenceStats.cpp \
 	StaticData.cpp \
 	TargetPhrase.cpp \
+	TargetPhraseCollection.cpp \
 	TranslationOption.cpp \
 	TranslationOptionCollection.cpp \
 	TranslationOptionCollectionText.cpp \
