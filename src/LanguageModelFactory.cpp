@@ -41,18 +41,18 @@ namespace LanguageModelFactory
 				break;
 			case Chunking:
 				#ifdef LM_SRI
-	     		lm = new LanguageModel_Chunking<LanguageModel_SRI>(true);
+	     		lm = new LanguageModel_Chunking(new LanguageModel_SRI(false), true);
 				#else
      			#ifdef LM_IRST
-	     			lm = new LanguageModel_Chunking<LanguageModel_IRST>(true);
+	     			lm = new LanguageModel_Chunking(new LanguageModel_IRST(false), true);
      			#endif
 				#endif
 			case Joint:
 				#ifdef LM_SRI
-	     		lm = new LanguageModelJoint(new LanguageModel_SRI(true), true);
+	     		lm = new LanguageModelJoint(new LanguageModel_SRI(false), true);
 				#else
      			#ifdef LM_IRST
-		     		lm = new LanguageModelJoint(new LanguageModel_IRST(true), true);
+		     		lm = new LanguageModelJoint(new LanguageModel_IRST(false), true);
      			#endif
 				#endif
 	  }
