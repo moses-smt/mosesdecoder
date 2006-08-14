@@ -18,4 +18,7 @@ cp $DATADIR/dev.ref ./ || exit 1
 
 echo "Starting mert-moses"
 
-$SCRIPTS_ROOTDIR/training/mert-moses.pl --jobs=10 dev.input dev.ref $MOSESCMD ./moses.ini
+$SCRIPTS_ROOTDIR/training/mert-moses.pl --jobs=10 dev.input dev.ref $MOSESCMD ./moses.ini \
+|| exit 1
+
+echo "Success"
