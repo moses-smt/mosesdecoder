@@ -182,30 +182,7 @@ TargetPhraseCollection *PhraseDictionary::CreateTargetPhraseCollection(const Phr
 void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
 {
 	TargetPhraseCollection &phraseColl = *CreateTargetPhraseCollection(source);
-	if (m_tableLimit == 0)
-	{	// don't need keep list sorted
-		// create sub tree & put target phrase into collection
-		phraseColl.Add(new TargetPhrase(targetPhrase));
-	}
-	else
-	{	// must keep list in sorted order
-		TargetPhraseCollection::iterator iter;
-		for (iter = phraseColl.begin() ; iter != phraseColl.end() ; ++iter)
-		{
-			TargetPhrase &insertPhrase = **iter;
-			if (targetPhrase.GetFutureScore() < insertPhrase.GetFutureScore())
-			{
-				break;
-			}
-		}
-		phraseColl.insert(iter, new TargetPhrase(targetPhrase));
-
-		// get rid of least probable phrase if we have enough
-		if (phraseColl.GetSize() > m_tableLimit)
-		{
-			phraseColl.erase(phraseColl.begin());
-		}
-	}
+	phraseColl.Add(new TargetPhrase(targetPhrase));
 }
 
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const Phrase &source) const
@@ -255,7 +232,7 @@ bool PhraseDictionary::Contains(const vector< vector<string> > &phraseVector
 
 void PhraseDictionary::SortTargetPhraseCollection()
 {
-	//m_collection.Sort();
+	m_collection.Sort();
 }
 
 TO_STRING_BODY(PhraseDictionary);
