@@ -80,9 +80,9 @@ my $BINDIR = "/export/ws06osmt/bin";
 my $GIZA = "$BINDIR/GIZA++";
 my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
-my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/training/phrase-extract/score";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
+my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/training/phrase-extract/score";
 my $MKCLS = "$BINDIR/mkcls";
 my $ZCAT = "zcat";
 my $BZCAT = "bzcat";
@@ -622,295 +622,60 @@ sub run_single_snt2cooc {
 ### (3) CREATE WORD ALIGNMENT FROM GIZA ALIGNMENTS
 
 sub word_align {
+
     print STDERR "(3) generate word alignment @ ".`date`;
     my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
     print STDERR "Combining forward and inverted alignment from files:\n";
     print STDERR "  $___GIZA_F2E/$___F-$___E.A3.final.{bz2,gz}\n";
     print STDERR "  $___GIZA_E2F/$___F-$___E.A3.final.{bz2,gz}\n";
-    if (-e "$___GIZA_F2E/$___F-$___E.A3.final.bz2") {
-	open(ALIGNMENT,    "$BZCAT $___GIZA_F2E/$___F-$___E.A3.final.bz2|")
-          or die "Can't $BZCAT $___GIZA_F2E/$___F-$___E.A3.final.bz2";
-	open(ALIGNMENT_INV,"$BZCAT $___GIZA_E2F/$___E-$___F.A3.final.bz2|")
-          or die "Can't $BZCAT $___GIZA_E2F/$___E-$___F.A3.final.bz2";
-    }
-    else {
-        die "Can't find $___GIZA_F2E/$___F-$___E.A3.final.gz"
-          if ! -e "$___GIZA_F2E/$___F-$___E.A3.final.gz";
-	open(ALIGNMENT,    "$ZCAT $___GIZA_F2E/$___F-$___E.A3.final.gz|")
-          or die "Can't $ZCAT $___GIZA_F2E/$___F-$___E.A3.final.gz";
-        die "Can't find $___GIZA_E2F/$___E-$___F.A3.final.gz"
-          if ! -e "$___GIZA_E2F/$___E-$___F.A3.final.gz";
-	open(ALIGNMENT_INV,"$ZCAT $___GIZA_E2F/$___E-$___F.A3.final.gz|")
-          or die "Can't $ZCAT $___GIZA_E2F/$___E-$___F.A3.final.gz";
-    }
-    safesystem("mkdir -p $___MODEL_DIR") or die;
-    open(E,">$___MODEL_DIR/aligned.$___E")
-      or die "Can't write $___MODEL_DIR/aligned.$___E";
-    open(F,">$___MODEL_DIR/aligned.$___F")
-      or die "Can't write $___MODEL_DIR/aligned.$___F";
-    open(A,">$___MODEL_DIR/aligned.$___ALIGNMENT")
-      or die "Cant' write $___MODEL_DIR/aligned.$___ALIGNMENT";
-    for(my $id=0;;$id++) {    
-	if (($id % 100) == 0) { print STDERR "."; }
-	my ($status,$ALIGNMENT,$ENGLISH,$FOREIGN) 
-	    = &get_alignment($id,\*ALIGNMENT,\*ALIGNMENT_INV);
-        last if $status == -1;
-	if ($status == 0 && $___NOTE_ALIGNMENT_DROPS) {
-	    print E "\n";
-	    print F "\n";
-	    print A "\n";
-	}
-	next if $status == 0;
-	
-	for(my $fi=0;$fi<=$#$FOREIGN;$fi++) {
-	    print F " " if $fi;
-	    print F $$FOREIGN[$fi];
-	}
-	print F "\n";
-	
-	for(my $ei=0;$ei<=$#$ENGLISH;$ei++) {
-	    print E " " if $ei;
-	    print E $$ENGLISH[$ei];
-	}
-	print E "\n";
-	
-	my $count=0;
-	for(my $fi=0;$fi<=$#$FOREIGN;$fi++) {     
-	    next if !defined($$ALIGNMENT[$fi]);
-	    for(my $ei=0;$ei<=$#$ENGLISH;$ei++) {
-		next unless $$ALIGNMENT[$fi][$ei] == 2;
-		print A " " if $count++;
-		print A "$fi-$ei";
-	    }
-	}
-	print A "\n";
-    }
-    close(ALIGNMENT_INV);
-    close(ALIGNMENT);
-    print STDERR "\n";
-}
 
-sub get_alignment {
-    my ($id,$AFILE,$AFILE_INV) = @_;
-    my $ALIGNMENT;
+    ### build arguments for giza2bal.pl
+    my($__ALIGNMENT_CMD,$__ALIGNMENT_INV_CMD);
     
-    # read alignments
-    my ($ok, $F2E,$ENGLISH, $FOREIGN,undef)  = &load_alignment_giza($AFILE,0);
-    return -1 unless $ok; # signal end of file
-    my ($ok2,$E2F,$FOREIGN2,$ENGLISH2,undef) = &load_alignment_giza($AFILE_INV,1);
-    die "Inverted alignment file was shorter than the forward one!" unless $ok2;
-    
-    # sanity checks
-    if ($#$ENGLISH != $#$ENGLISH2 || $#$FOREIGN != $#$FOREIGN2) {
-	die "line $id: different number of words when combining the two directions of alignments ($#$ENGLISH != $#$ENGLISH2 || $#$FOREIGN != $#$FOREIGN2)\nThe reason is typically sentences over 100 words or whatever you said using gizaoption words in corpus (GIZA chops such sentences.).";
+    if (-e "$___GIZA_F2E/$___F-$___E.A3.final.bz2"){
+      $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.A3.final.bz2\"";
+    } elsif (-e "$___GIZA_F2E/$___F-$___E.A3.final.gz") {
+      $__ALIGNMENT_CMD="\"$ZCAT $___GIZA_F2E/$___F-$___E.A3.final.gz\"";
+    } else {
+      die "Can't read $___GIZA_F2E/$___F-$___E.A3.final.{bz2,gz}\n";
+    }
+  
+    if ( -e "$___GIZA_F2E/$___F-$___E.A3.final.bz2"){
+      $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.A3.final.bz2\"";
+    }elsif (-e "$___GIZA_F2E/$___F-$___E.A3.final.gz"){
+      $__ALIGNMENT_INV_CMD="\"$ZCAT $___GIZA_E2F/$___E-$___F.A3.final.gz\"";
+    }else{
+      die "Can't read $___GIZA_E2F/$___F-$___E.A3.final.{bz2,gz}\n\n";
     }
     
-    if ($___ALIGNMENT eq 'union') {
-	$ALIGNMENT = &union($F2E,$E2F);
-	print "UNION:\n" if $___VERBOSE >= 2;
-	&print_alignment($ALIGNMENT) if $___VERBOSE >= 2;
-    }
-    else {
-	print "INTERSECT:\n" if $___VERBOSE >= 2;
-	$ALIGNMENT = &intersect($F2E,$E2F);
-	&print_alignment($ALIGNMENT) if $___VERBOSE >= 2;
-	if ($___ALIGNMENT eq 'e2f' || $___ALIGNMENT eq 'f2e') {
-	    print "RELY ON MONO:\n" if $___VERBOSE >= 2;
-	    my $one = 1.1;
-	    $one = 1.2 if $___ALIGNMENT eq 'e2f';
-	    for(my $ei=0;$ei<=$#{$$E2F[0]};$ei++) {
-		for(my $fi=0;$fi<=$#$E2F;$fi++) {
-		    $$ALIGNMENT[$fi][$ei] = 2 if $$ALIGNMENT[$fi][$ei] == $one;
-		}
-	    }
-	    &print_alignment($ALIGNMENT) if $___VERBOSE >= 2;
-	}
-	elsif ($___ALIGNMENT =~ /grow/) {
-	    print "GROW:\n" if $___VERBOSE >= 2;
-	    if ($___ALIGNMENT =~ /grow12/) {
-		while(&grow($ALIGNMENT,1.1,$___ALIGNMENT =~ /diag/)) {};
-		while(&grow($ALIGNMENT,1.2,$___ALIGNMENT =~ /diag/)) {};
-	    }
-	    elsif ($___ALIGNMENT =~ /grow21/) {
-		while(&grow($ALIGNMENT,1.2,$___ALIGNMENT =~ /diag/)) {};
-		while(&grow($ALIGNMENT,1.1,$___ALIGNMENT =~ /diag/)) {};
-	    }
-	    else {
-		while(&grow($ALIGNMENT,1,  $___ALIGNMENT =~ /diag/)) {};
-	    }
-	    &print_alignment($ALIGNMENT) if $___VERBOSE >= 2;
-	    if ($___ALIGNMENT =~ /final/) {
-		print "FINAL:\n" if $___VERBOSE >= 2;
-		&grow_final($ALIGNMENT,1.1,$___ALIGNMENT =~ /final-and/) 
-		    if $___ALIGNMENT =~ /12/;
-		&grow_final($ALIGNMENT,1.2,$___ALIGNMENT =~ /final-and/);
-		&grow_final($ALIGNMENT,1.1,$___ALIGNMENT =~ /final-and/) 
-		    unless $___ALIGNMENT =~ /12/;
-		&print_alignment($ALIGNMENT) if $___VERBOSE >= 2;
-	    }
-	}
-    }
-    return (1,$ALIGNMENT,$ENGLISH,$FOREIGN);
-}
-
-sub load_alignment_giza {
-    my($FP,$inv_flag) = @_;
+   safesystem("mkdir -p $___MODEL_DIR") or die;
+   
+   #build argumens for symal
+    my($__symal_a)="";
+    $__symal_a="union" if $___ALIGNMENT eq 'union';
+    $__symal_a="intersect" if $___ALIGNMENT=~ /intersect/;
+    $__symal_a="grow" if $___ALIGNMENT=~ /grow/;
     
-    # comment line
-    my $dummy   = <$FP>;
-    return 0 unless $dummy;  # end of file
+    my($__symal_d,$__symal_f,$__symal_b);
+    ($__symal_d,$__symal_f,$__symal_b)=("no","no","no");
+
+    $__symal_d="yes" if $___ALIGNMENT=~ /diag/;
+    $__symal_f="yes" if $___ALIGNMENT=~ /final/;
+    $__symal_b="yes" if $___ALIGNMENT=~ /final-and/;
     
-    # foreign line
-    my $foreign = <$FP>;
-    chop($foreign);
-    my @F = split(/ /,$foreign);
-    
-    # english line
-    my $english_with_alignment = <$FP>;
-    print $english_with_alignment if $___VERBOSE >= 2;
-    my @ETOK = split(/\}\)/,$english_with_alignment);
-    
-    # extract alignment
-    my @A = ();
-    my @E = ();
-    for(my $e=1;$e<$#ETOK;$e++) {
-	my @ALIGN = split(/ /,$ETOK[$e]);
-	push @E,$ALIGN[1];
-	# init with 0
-	for(my $f=0;$f<=$#F;$f++) {
-	    $A[$f][$e-1] = 0 if !$inv_flag;
-	    $A[$e-1][$f] = 0 if  $inv_flag;      
-	}
-	# scanning through 'the ({ 1 12'
-	for(my $a=3; $a<=$#ALIGN; $a++) {
-	    $A[$ALIGN[$a]-1][$e-1] = 1 if !$inv_flag;
-	    $A[$e-1][$ALIGN[$a]-1] = 1 if  $inv_flag;
-	}
-    }
-    
-    return (1,\@A,\@E,\@F,$english_with_alignment.$foreign."/n");
-}
+    print STDERR "$GIZA2BAL -i $__ALIGNMENT_INV_CMD -d $__ALIGNMENT_CMD |".
+	   "$SYMAL -alignment=\"$__symal_a\" -diagonal=\"$__symal_d\" ".
+	   "-final=\"$__symal_f\" -both=\"$__symal_b\" > ".
+	   "$___MODEL_DIR/aligned.$___ALIGNMENT";
 
-sub intersect {
-    my($F2E,$E2F) = @_;
-    my @A = ();
-    for(my $ei=0;$ei<=$#{$$E2F[0]};$ei++) {
-	for(my $fi=0;$fi<=$#$E2F;$fi++) {
-	    if ($$F2E[$fi][$ei] && $$E2F[$fi][$ei]) {
-		$A[$fi][$ei] = 2;
-	    }
-	    elsif ($$F2E[$fi][$ei]) {
-		$A[$fi][$ei] = 1.1;
-	    }
-	    elsif ($$E2F[$fi][$ei]) {
-		$A[$fi][$ei] = 1.2;
-	    }
-	    else {
-		$A[$fi][$ei] = 0;
-	    }
-	}
-    }
-    return \@A;
-}
+    system("$GIZA2BAL -d $__ALIGNMENT_INV_CMD -i $__ALIGNMENT_CMD |".
+	   "$SYMAL -alignment=\"$__symal_a\" -diagonal=\"$__symal_d\" ".
+	   "-final=\"$__symal_f\" -both=\"$__symal_b\" > ".
+	   "$___MODEL_DIR/aligned.$___ALIGNMENT") 
+      ||
+	die "Can't generate symmetrized alignment file\n"
 
-sub union {
-    my($F2E,$E2F) = @_;
-    my @A = ();
-    for(my $ei=0;$ei<=$#{$$E2F[0]};$ei++) {
-	for(my $fi=0;$fi<=$#$E2F;$fi++) {
-	    $A[$fi][$ei] = ($$F2E[$fi][$ei] || $$E2F[$fi][$ei]) ? 2 : 0;
-	}
-    }
-    return \@A;
-}
-
-sub grow {
-    my($A,$one,$diagonal) = @_;
-    my @OFFSET;
-    { my @P = (-1, 0); push @OFFSET,\@P; }
-    { my @P = ( 0,-1); push @OFFSET,\@P; }
-    { my @P = ( 1, 0); push @OFFSET,\@P; }
-    { my @P = ( 0, 1); push @OFFSET,\@P; }
-    if ($diagonal) {
-	{ my @P = (-1,-1); push @OFFSET,\@P; }
-	{ my @P = (-1, 1); push @OFFSET,\@P; }
-	{ my @P = ( 1,-1); push @OFFSET,\@P; }
-	{ my @P = ( 1, 1); push @OFFSET,\@P; }
-    }
-    my $added=0;
-    $one = 1 unless $one;
-    my ($FOREIGN_ALIGNED,$ENGLISH_ALIGNED) = &count_aligned($A);
-    for(my $ei=0;$ei<=$#{$$A[0]};$ei++) {
-	for(my $fi=0;$fi<=$#$A;$fi++) {
-	    next unless $$A[$fi][$ei] == 2;
-	    foreach my $P (@OFFSET) {
-		my ($offset_e,$offset_f) = @{$P};
-		next if $fi+$offset_f<0 || $fi+$offset_f>$#$A;
-		next if $ei+$offset_e<0 || $ei+$offset_e>$#{$$A[0]};
-		next unless (($one==1 && int($$A[$fi+$offset_f][$ei+$offset_e]) == 1)
-			     || $$A[$fi+$offset_f][$ei+$offset_e] == $one);
-		next if ($$FOREIGN_ALIGNED{$fi+$offset_f} && 
-			 $$ENGLISH_ALIGNED{$ei+$offset_e});
-		$$A[$fi+$offset_f][$ei+$offset_e] = 2;
-		$$FOREIGN_ALIGNED{$fi+$offset_f}++;
-		$$ENGLISH_ALIGNED{$ei+$offset_e}++;
-		$added++;
-	    }
-	}
-    }
-    return $added;
-}
-
-sub grow_final {
-    my($A,$one,$and) = @_;
-    my $added = 0;
-    my ($FOREIGN_ALIGNED,$ENGLISH_ALIGNED) = &count_aligned($A);
-    for(my $ei=0;$ei<=$#{$$A[0]};$ei++) {
-	for(my $fi=0;$fi<=$#$A;$fi++) {
-	    next unless $$A[$fi][$ei] == $one;
-	    next if (!$and && $$FOREIGN_ALIGNED{$fi} && $$ENGLISH_ALIGNED{$ei});
-	    next if ($and && ($$FOREIGN_ALIGNED{$fi} || $$ENGLISH_ALIGNED{$ei}));
-	    $$A[$fi][$ei] = 2;
-	    $$FOREIGN_ALIGNED{$fi}++;
-	    $$ENGLISH_ALIGNED{$ei}++;
-	}
-    }
-    return $added;
-}
-
-sub print_alignment {
-    my($A) = @_;
-    for(my $ei=0;$ei<=$#{$$A[0]};$ei++) {
-	for(my $fi=0;$fi<=$#$A;$fi++) {
-	    if($$A[$fi][$ei] == 2) {
-		print "#";
-	    }
-	    elsif ($$A[$fi][$ei] == 1.1) {
-		print "-";
-	    }
-	    elsif ($$A[$fi][$ei] == 1.2) {
-		print "|";
-	    }
-	    else {
-		print ".";
-	    }
-	}
-	print "\n";
-    }
-}
-
-sub count_aligned {
-    my ($A) = @_;
-    my (%FOREIGN_ALIGNED,%ENGLISH_ALIGNED);
-    for(my $ei=0;$ei<=$#{$$A[0]};$ei++) {
-	for(my $fi=0;$fi<=$#$A;$fi++) {
-	    next unless $$A[$fi][$ei] == 2;
-	    $FOREIGN_ALIGNED{$fi}++;
-	    $ENGLISH_ALIGNED{$ei}++;
-	}
-    }
-    return (\%FOREIGN_ALIGNED,\%ENGLISH_ALIGNED);
-}
+      }
 
 ### (4) BUILDING LEXICAL TRANSLATION TABLE
 
