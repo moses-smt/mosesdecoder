@@ -24,6 +24,11 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
   ++tpi;  // skip initial translation state
 	std::vector<std::string> sourceMap;
 	std::vector<std::string> targetMap;
+	std::vector<unsigned int> lmAcc(0);
+	size_t lmCalls = 0;
+	bool doLMStats = ((*tpi)->_lmstats != 0);
+	if (doLMStats)
+		lmAcc.resize((*tpi)->_lmstats->size(), 0);
   for (; tpi != translationPath.end(); ++tpi) {
 		std::ostringstream sms;
 		std::ostringstream tms;
@@ -31,6 +36,25 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
     std::string source = (*tpi)->GetSourcePhraseStringRep();
 		WordsRange twr = (*tpi)->GetCurrTargetWordsRange();
 		WordsRange swr = (*tpi)->GetCurrSourceWordsRange();
+
+		// language model backoff stats,
+		if (doLMStats) {
+			std::vector<std::vector<unsigned int> >& lmstats = *(*tpi)->_lmstats;
+			std::vector<std::vector<unsigned int> >::iterator i = lmstats.begin();
+			std::vector<unsigned int>::iterator acc = lmAcc.begin();
+			  // std::cerr << "\n";
+			for (; i != lmstats.end(); ++i, ++acc) {
+				std::vector<unsigned int>::iterator j = i->begin();
+				lmCalls += i->size();
+				// std::cerr << "lm: ";
+				for (; j != i->end(); ++j) {
+				//	std::cerr << *j << " ";
+					(*acc) += *j;
+				}
+        // std::cerr << " (total=" << *acc << ", lmcalls=" << lmCalls << ")" << std::endl;
+			}
+		}
+		
 		bool epsilon = false;
     if (target == "") {
       target="<EPSILON>";
@@ -64,7 +88,17 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 	for (; ti != targetMap.end(); ++ti) {
 		os << " " << *ti;
 	}
-	os << std::endl;
+	os << std::endl << std::endl;
+	if (doLMStats && lmCalls > 0) {
+		std::vector<unsigned int>::iterator acc = lmAcc.begin();
+		const LMList& lmlist = StaticData::Instance()->GetAllLM();
+		LMList::const_iterator i = lmlist.begin();
+		for (; acc != lmAcc.end(); ++acc, ++i) {
+			char buf[256];
+			sprintf(buf, "%.4f", (double)(*acc)/(double)lmCalls);
+			os << (*i)->GetScoreProducerDescription() <<", AVG N-GRAM LENGTH: " << buf << std::endl;
+		}
+	}
 
   if (droppedWords.size() > 0) {
     std::vector<std::string>::iterator dwi = droppedWords.begin();
