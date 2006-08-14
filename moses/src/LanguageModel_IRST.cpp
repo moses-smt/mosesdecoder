@@ -161,4 +161,7 @@ const void LanguageModel_IRST::CleanUpAfterSentenceProcessing(){
 
 const void LanguageModel_IRST::InitializeBeforeSentenceProcessing(){
   //nothing to do;
+#ifdef TRACE_CACHE
+ m_lmtb->sentence_id++;
+#endif
 }
