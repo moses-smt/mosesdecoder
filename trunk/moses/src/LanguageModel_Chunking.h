@@ -28,20 +28,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "FactorCollection.h"
 
-template<typename LMImpl>
 class LanguageModel_Chunking : public LanguageModelSingleFactor
 {	
 protected:
 	size_t m_realNGramOrder;
-	LMImpl m_lmImpl;
+	LanguageModelSingleFactor *m_lmImpl;
 	
 public:
-	LanguageModel_Chunking(bool registerScore)
+	LanguageModel_Chunking(LanguageModelSingleFactor *lmImpl, bool registerScore)
 	: LanguageModelSingleFactor(registerScore)
-	, m_lmImpl(false)
 	{
+		m_lmImpl = lmImpl;		
 	}
-	
+	~LanguageModel_Chunking()
+	{
+		delete m_lmImpl;
+	}
 	void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, FactorType factorType
@@ -59,7 +61,7 @@ public:
 		m_sentenceStartArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, BOS_);
 		m_sentenceEndArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, EOS_);
 
-		m_lmImpl.Load(fileName, factorCollection, m_factorType, weight, nGramOrder);
+		m_lmImpl->Load(fileName, factorCollection, m_factorType, weight, nGramOrder);
 	}
 			
 	float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL) const
@@ -109,7 +111,7 @@ public:
 		TRACE_ERR(std::endl);
 		*/
 		// calc score on chunked phrase
-		float ret = m_lmImpl.GetValue(chunkContext, finalState);
+		float ret = m_lmImpl->GetValue(chunkContext, finalState);
 		
 		return ret;
 	}
