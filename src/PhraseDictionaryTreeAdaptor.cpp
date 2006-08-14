@@ -107,4 +107,3 @@ void PhraseDictionaryTreeAdaptor::DisableCache()
 {
 	imp->useCache=0;
 }
-
