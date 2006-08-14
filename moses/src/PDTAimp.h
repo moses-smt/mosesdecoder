@@ -99,7 +99,7 @@ public:
 	{
 		for(size_t j=0;j<m_input.size();++j)
 			{
-				assert(static_cast<size_t>(m_input[j])<static_cast<size_t>(NUM_FACTORS));
+				assert(static_cast<size_t>(m_input[j])<static_cast<size_t>(MAX_NUM_FACTORS));
 				assert(w[m_input[j]]);
 				if(s.size()) s+="|";
 				s+=w[m_input[j]]->ToString();
