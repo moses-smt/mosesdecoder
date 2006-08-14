@@ -278,8 +278,8 @@ public:
 	{
 		// prune target candidates and sort according to score
 		std::vector<std::pair<float,size_t> >::iterator nth=costs.end();
-		if(m_obj->m_maxTargetPhrase>0 && costs.size()>m_obj->m_maxTargetPhrase) {
-			nth=costs.begin()+m_obj->m_maxTargetPhrase;
+		if(m_obj->m_tableLimit>0 && costs.size()>m_obj->m_tableLimit) {
+			nth=costs.begin()+m_obj->m_tableLimit;
 			std::nth_element(costs.begin(),nth,costs.end(),
 											 std::greater<std::pair<float,size_t> >());
 		}

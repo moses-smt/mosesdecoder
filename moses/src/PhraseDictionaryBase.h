@@ -38,17 +38,15 @@ class WordsRange;
 class PhraseDictionaryBase : public Dictionary, public ScoreProducer
 {
  protected:
-	size_t m_maxTargetPhrase;
+	size_t m_tableLimit;
 	std::string m_filename;    // just for debugging purposes
 
  public:
 	PhraseDictionaryBase(size_t noScoreComponent);
 	virtual ~PhraseDictionaryBase();
 		
-	DecodeType GetDecodeType() const
-	{
-		return Translate;
-	}
+	DecodeType GetDecodeType() const	{	return Translate;	}
+	size_t GetTableLimit() const { return m_tableLimit; }
 	
 	virtual void InitializeForInput(InputType const&) {}
 	const std::string GetScoreProducerDescription() const;
