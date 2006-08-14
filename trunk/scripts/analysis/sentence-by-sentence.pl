@@ -1,100 +1,136 @@
 #!/usr/bin/perl -w
 
 #sentence-by-sentence: take in a system output, with any number of factors, and a reference translation, also maybe with factors, and show each sentence and its errors
-#usage: sentence-by-sentence SYSOUT REFERENCE > sentences.html
+#usage: sentence-by-sentence SYSOUT [REFERENCE]+ > sentences.html
 
 use strict;
 use Getopt::Long;
 
-my $sourcefile = undef; # source text
+my $sourcefile = undef;
 GetOptions(
-  "source=s" => \$sourcefile,
+	"source=s" => \$sourcefile,
 ) or exit(1);
 
-my ($sysoutfile, $truthfile) = @ARGV;
+my ($sysoutfile, @truthfiles) = @ARGV;
 
-if (!defined $sysoutfile || !defined $truthfile) {
-  print STDERR "usage: $0 hypothesis reference > sentence-by-sentence.html
+if (!defined $sysoutfile || scalar(@truthfiles) == 0) {
+	print STDERR "
+usage: $0 system_output reference(s...) > sentence-by-sentence.html
 Options:
-  --source=STRING  ... source sentences
+  --source STRING  ... foreign original
+
+N-grams are colored by the number of supporting references:
+ red for fewest, green for most, mediate shades otherwise.
 ";
-  exit 1;
+  exit(1);
 }
 
-open(SYSOUT, "<$sysoutfile") or die "couldn't open '$sysoutfile' for read\n";
-open(TRUTH, "<$truthfile") or die "couldn't open '$truthfile' for read\n";
+my @TRUTHS = () x scalar(@truthfiles);
+for(my $i = 0; $i < scalar(@truthfiles); $i++)
+{
+	open($TRUTHS[$i], "<$truthfiles[$i]") or die "couldn't open '$truthfiles[$i]' for read: $!\n";
+	binmode($TRUTHS[$i], ":utf8");
+}
+open(SYSOUT, "<$sysoutfile") or die "couldn't open '$sysoutfile' for read: $!\n";
 binmode(SYSOUT, ":utf8");
-binmode(TRUTH, ":utf8");
 binmode(STDOUT, ":utf8");
-if (defined $sourcefile) {
-        open(SOURCE, "<$sourcefile") or die "couldn't open '$sourcefile' for read\n";
-        binmode(SOURCE, ":utf8");
+if (defined $sourcefile)
+{
+	open(SOURCE, "<$sourcefile") or die "couldn't open '$sourcefile' for read: $!\n";
+	binmode(SOURCE, ":utf8");
 }
 my @bleuScores;
 my @htmlSentences;
 my @htmlColors = ('#99ff99', '#aaaaff', '#ffff99', '#ff9933', '#ff9999'); #color sentences by rank (split in n tiers)
-my @ngramColors = ('#ffff99', '#ff9933', '#99ff99', '#aaaaff', '#ff99ff'); #to be colorful and tell consecutive n-grams apart on the display
+my $ngramSingleRefColor = '#aaffaa';
+my @ngramMultirefColors = ('ff9999', 'ff9933', 'ffff99', 'a0a0ff', '99ff99'); #arbitrary-length list; first entry is used for worst n-grams
 my $i = 0;
 while(my $sLine = <SYSOUT>)
 {
-	my $eLine = <TRUTH>;
-        die "$truthfile shorter than $sysoutfile!" if !defined $eLine;
-	chomp $sLine; chomp $eLine;
-        $sLine =~ s/^\s*|\s*$//g;
-        $eLine =~ s/^\s*|\s*$//g;
-	my @sWords = split(/\s+/, $sLine);
-	my @eWords = split(/\s+/, $eLine);
-	my @sFactors = map {my @f = split(/\|/, $_); \@f;} @sWords;
-	my @eFactors = map {my @f = split(/\|/, $_); \@f;} @eWords;
-        my @sourceFactors;
-        if (defined $sourcefile) {
-	        my $sourceLine = <SOURCE>;
-                die "$sourcefile shorter than $sysoutfile!" if !defined $sourceLine;
-        	chomp $sourceLine;
-                $sourceLine =~ s/^\s*|\s*$//g;
-        	my @sourceWords = split(/\s+/, $sourceLine);
-        	@sourceFactors = map {my @f = split(/\|/, $_); \@f;} @sourceWords;
-        }
-        
+	my @sFactors = @{extractFactorArrays($sLine)};
+	my @eLines = () x scalar(@truthfiles);
+	my @eFactors;
+	for(my $j = 0; $j < scalar(@truthfiles); $j++)
+	{
+		my $fh = $TRUTHS[$j];
+		$eLines[$j] = <$fh>;
+		push @eFactors, extractFactorArrays($eLines[$j], "$truthfiles[$j] shorter than $sysoutfile");
+	}
+	my $sourceFactors;
+	if (defined $sourcefile)
+	{
+		my $sourceLine = <SOURCE>;
+		$sourceFactors = extractFactorArrays($sourceLine, "$sourcefile shorter than $sysoutfile");
+	}
+		  
 	my $bleuData = getBLEUSentenceDetails(\@sFactors, \@eFactors, 0);
 	push @bleuScores, [$i, $bleuData->[0]->[0], 0]; #the last number will be the rank
 	my $pwerData = getPWERSentenceDetails(\@sFactors, \@eFactors, 0);
-	my $html = "<div class=\"sentence\" style=\"background-color: %%%%\">"; #the %%%% is a flag to be replaced
-	$html .= "<div class=\"bleu_report\"><b>Sentence $i) BLEU:</b> " . sprintf("%.4lg", $bleuData->[0]->[0]) . " (" . join('/', map {sprintf("%.4lg", $_)} @{$bleuData->[0]}[1 .. 4]) . ")</div>\n";
-	$html .= "<h2>Source</h2><div class=\"source_sentence\" id=\"source$i\">" . getFactoredSentenceHTML(\@sourceFactors) . "</div>\n" if defined $sourcefile;
-	$html .= "<h2>Reference</h2><div class=\"truth_sentence\" id=\"truth$i\">" . getFactoredSentenceHTML(\@eFactors) . "</div>\n";
+	my $html = "<div class=\"sentence\" style=\"background-color: %%%%\" id=\"sentence$i\">"; #the %%%% and other tokens like it are flags to be replaced
+	$html .= "<div class=\"bleu_report\"><b>Sentence $i)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BLEU:</b> " . sprintf("%.4lg", $bleuData->[0]->[0]) . " (" . join('/', map {sprintf("%.4lg", $_)} @{$bleuData->[0]}[1 .. 4]) . ")</div><table>\n";
+	if(defined $sourcefile)
+	{
+		$html .= "<tr><td class=\"sent_title\">Source</td><td class=\"source_sentence\" id=\"source$i\">" . getFactoredSentenceHTML($sourceFactors) . "</td></tr>\n";
+	}
+	for(my $j = 0; $j < scalar(@truthfiles); $j++)
+	{
+		$html .= "<tr><td class=\"sent_title\">Ref $j</td><td class=\"truth_sentence\" id=\"truth${i}_$j\">" . getFactoredSentenceHTML($eFactors[$j]) . "</td></tr>\n";
+	}
 	my $j = 0;
-	$html .= "<h2>System Output</h2><h4>(PWER errors marked)</h4><div class=\"sysout_sentence\" id=\"sysout$i\">" . getFactoredSentenceHTML(\@sFactors, $pwerData) . "</div>\n";
+	$html .= "<tr><td class=\"sent_title\">Output</td><td class=\"sysout_sentence\" id=\"sysout$i\">" . getFactoredSentenceHTML(\@sFactors, $pwerData) . "</td></tr>\n";
 	$j = 0;
-	$html .= "<h2>N-grams</h2><div class=\"sysout_ngrams\" id=\"ngrams$i\">" . getAllNgramsHTML(\@sFactors, $bleuData->[1]) . "</div>\n";
-	$html .= "</div>\n";
+	$html .= "<tr><td class=\"sent_title\">N-grams</td><td class=\"sysout_ngrams\" id=\"ngrams$i\">" . getAllNgramsHTML(\@sFactors, $bleuData->[1], scalar(@truthfiles)) . "</td></tr>\n";
+	$html .= "</table></div>\n";
 	push @htmlSentences, $html;
 	$i++;
 }
 close(SYSOUT);
-close(TRUTH);
+foreach my $truthfh (@TRUTHS) {close($truthfh);}
 
 rankSentencesByBLEU(\@bleuScores);
 my $stylesheet = <<EOHTML;
 <style type="text/css">
-h2 {font-weight: bold; font-size: large; margin-bottom: 12px}
-h4 {font-weight: bold; font-size: small}
-#legend {background-color: #fff; border: 1px solid #000; padding: 2px; margin-bottom: 15px}
-#legend_title {font-weight: bold; font-size: medium; text-decoration: underline}
-div.sentence {background-color: #ffffee; border: 1px solid #000088; padding: 0px 8px 0px 8px} //entire composition
+.legend {background-color: #fff; border: 1px solid #000; padding: 2px; margin-bottom: 10px; margin-right: 15px}
+.legend_title {font-weight: bold; font-size: medium; text-decoration: underline}
+div.sentence {background-color: #ffffee; border: 1px solid #000088; padding: 0px 8px 0px 8px} //entire composition for a given sentence
+div.sentence td {margin: 8px 0px 8px 0px}
 div.bleu_report {margin-bottom: 5px}
-div.source_sentence {background-color: #ffcccc; border: 1px solid #bbb; margin: 8px 0px 8px 0px}
-div.truth_sentence {background-color: #ccffcc; border: 1px solid #bbb; margin: 8px 0px 8px 0px}
-div.sysout_sentence {background-color: #ccccff; border: 1px solid #bbb; margin: 8px 0px 8px 0px}
+td.sent_title {font-weight: bold; font-size: medium; margin-bottom: 12px}
+.source_sentence {background-color: #ffcccc; border: 1px solid #bbb}
+.truth_sentence {background-color: #ccffcc; border: 1px solid #bbb}
+.sysout_sentence {background-color: #ccccff; border: 1px solid #bbb}
 table.sentence_table {border: none}
-div.sysout_ngrams {background-color: #fff; border: 1px solid #bbb; margin-top: 8px; margin-bottom: 8px}
+.sysout_ngrams {background-color: #fff; border: 1px solid #bbb}
 table.ngram_table {}
 td.ngram_cell {padding: 1px}
 </style>
 EOHTML
 print "<html><head>\n";
 print "<meta http-equiv=\"Content-type: text/html; charset=utf-8\">\n";
-print "<title>$sysoutfile vs. $truthfile: Sentence-by-sentence Comparison</title>$stylesheet</head><body>\n";
+print "<title>$sysoutfile vs. [" . join(' ', @truthfiles) . "]: Sentence-by-sentence Comparison</title>$stylesheet</head><body>\n";
+
+#javascript to sort by BLEU, by order in corpus, ...
+my %rank2index = map {$bleuScores[$_]->[2] => $_} (0 .. scalar(@htmlSentences) - 1);
+print "<script type=\"text/javascript\">
+function sortByBLEU()
+{
+	var body = document.getElementById('all_sentences'); var row;\n";
+foreach my $rank (sort {$a <=> $b} keys %rank2index)
+{
+	print "\trow = body.getElementById('everything" . $rank2index{$rank} . "');\n";
+	print "\tbody.removeChild(row); body.appendChild(row);\n";
+}
+print "}
+function sortByCorpusOrder()
+{
+	var body = document.getElementById('all_sentences'); var row;\n";
+for(my $j = 0; $j < scalar(@htmlSentences); $j++)
+{
+	print "\trow = body.getElementById('everything$j');\n";
+	print "\tbody.removeChild(row); body.appendChild(row);\n";
+}
+print "}
+</script>\n";
 
 #legend for background colors
 my @minBLEU = (1e9) x scalar(@htmlColors);
@@ -105,25 +141,35 @@ for(my $k = 0; $k < scalar(@htmlSentences); $k++)
 	if($bleuScores[$k]->[1] < $minBLEU[$tier]) {$minBLEU[$tier] = $bleuScores[$k]->[1];}
 	elsif($bleuScores[$k]->[1] > $maxBLEU[$tier]) {$maxBLEU[$tier] = $bleuScores[$k]->[1];}
 }
-print "<div id=legend><span id=legend_title>BLEU Ranges</span><table border=0>";
+print "<table border=0><tr><td><div class=\"legend\"><span class=\"legend_title\">BLEU Ranges</span> (sentence backgrounds)<table border=0>";
 for(my $k = 0; $k < scalar(@htmlColors); $k++)
 {
 	print "<tr><td style=\"width: 15px; height: 15px; background-color: " . $htmlColors[$k] . "\"></td><td align=left style=\"padding-left: 12px\">" 
 							. sprintf("%.4lg", $minBLEU[$k]) . " - " . sprintf("%.4lg", $maxBLEU[$k]) . "</td>";
 }
-print "</table></div>\n";
+print "</table></div></td>\n";
+print "<td><div class=\"legend\"><span class=\"legend_title\">N-gram Colors => Number of Matching Reference Translations</span><table border=0>";
+for(my $k = 1; $k <= scalar(@truthfiles); $k++)
+{
+	print "<tr><td style=\"width: 15px; height: 15px; background-color: " . getNgramColorHTML($k, scalar(@truthfiles)) . "\"></td><td align=left style=\"padding-left: 12px\">$k</td>";
+}
+print "</table></div></td></tr></table><div style=\"font-weight: bold; margin-bottom: 15px\">
+PWER errors are marked in red on output sentence displays.</div>
+<div style=\"margin-bottom: 8px\">Sort by <a href=\"javascript:sortByBLEU();\">BLEU score</a> | <a href=\"javascript:sortByCorpusOrder();\">corpus order</a> (default)</div>\n";
 
 #sentence boxes
+print "<div id=\"all_sentences\">";
 my $j = 0;
 foreach my $sentenceHTML (@htmlSentences)
 {
-	if($j > 0) {print "<hr width=98%>";}
+	print "<div id=\"everything$j\" style=\"margin: 0px; padding: 0px\">";
+	print "<hr width=98%>";
 	my $bgcolor = getSentenceBGColorHTML($bleuScores[$j], $i); #i is now # of sentences
 	$sentenceHTML =~ s/%%%%/$bgcolor/;
-	print "$sentenceHTML\n";
+	print "$sentenceHTML</div>\n";
 	$j++;
 }
-print "</body></html>";
+print "</div></body></html>";
 
 ##################### utils #####################
 
@@ -139,111 +185,153 @@ sub max
 	my ($a, $b) = @_;
 	return ($a > $b) ? $a : $b;
 }
+#arguments: a list of elements
+#return undef for an empty list, the max element otherwise
+sub maxN
+{
+	if(scalar @_ == 0) {return undef;}
+	my $val = shift @_;
+	foreach my $e (@_) {if($e > $val) {$val = $e;}}
+	return $val;
+}
 #arguments: x
 sub my_log
 {
   return -9999999999 unless $_[0];
   return log($_[0]);
 }
+#arguments: x
+sub round
+{
+	my $x = shift;
+	return ($x - int($x) < .5) ? int($x) : int($x) + 1;
+}
 
 ###############################################################################################################################################################
 
-#arguments: sysout sentence (arrayref of arrayrefs of factor strings), truth sentence (same), factor index to use
-#return: arrayref of [arrayref of [overall BLEU score, n-gram precisions], arrayref of matching n-gram [start index, length]]
+#arguments: line read from corpus file, (optionally) string to die with if line isn't defined (default die-msg is empty)
+#return: sentence (arrayref of arrayrefs of factor strings) taken from line
+sub extractFactorArrays
+{
+	my ($line, $msg) = (shift, '');
+	$msg = shift if scalar(@_);
+	die $msg if !defined $line;
+	chomp $line;
+	$line =~ s/^\s*|\s*$//g; #added by Ondrej to handle moses-mert-parallel output
+	my @words = split(/\s+/, $line);
+	my @factors = map {my @f = split(/\|/, $_); \@f;} @words;
+	return \@factors;
+}
+
+#can handle multiple reference translations; assume at least one
+#arguments: sysout sentence (arrayref of arrayrefs of factor strings), truth sentences (arrayref of same), factor index to use
+#return: arrayref of [arrayref of [overall BLEU score, n-gram precisions], arrayref of matching n-gram [start index, length, arrayref of indices of matching references]]
 sub getBLEUSentenceDetails
 {
-	my ($refSysOutput, $refTruth, $factorIndex) = @_;
-	my ($length_reference, $length_translation) = (scalar(@$refTruth), scalar(@$refSysOutput));
-	my ($correct1, $correct2, $correct3, $correct4, $total1, $total2, $total3, $total4) = (0, 0, 0, 0, 0, 0, 0, 0);
+	my $maxNgramOrder = 4;
+	my ($refSysOutput, $refTruths, $factorIndex) = @_;
+	my $length_translation = scalar(@$refSysOutput); #length of sysout sentence
+	my @length_references = map {scalar(@$_)} @$refTruths;
+	my $closestTruthLength = (sort(map {abs($_ - $length_translation)} @length_references))[0];
+	my @correct = (0) x $maxNgramOrder; #n-gram counts
+	my @total = (0) x $maxNgramOrder; #n-gram counts
 	my $returnData = [[], []];
-	my %REF_GRAM = ();
+	my %REF_GRAM; #hash from n-gram to arrayref with # of times found in each reference
 	my $ngramMatches = []; #arrayref of n-gram [start index, length]
-	my ($i, $gram);
-	for($i = 0; $i < $length_reference; $i++)
+	for(my $j = 0; $j < scalar(@$refTruths); $j++)
 	{
-		$gram = $refTruth->[$i]->[$factorIndex];
-		$REF_GRAM{$gram}++;
-		next if $i<1;
-		$gram = $refTruth->[$i - 1]->[$factorIndex] ." ".$gram;
-		$REF_GRAM{$gram}++;
-      next if $i<2;
-      $gram = $refTruth->[$i - 2]->[$factorIndex] ." ".$gram;
-      $REF_GRAM{$gram}++;
-      next if $i<3;
-      $gram = $refTruth->[$i - 3]->[$factorIndex] ." ".$gram;
-      $REF_GRAM{$gram}++;
+		for(my $i = 0; $i < $length_references[$j]; $i++)
+		{
+			my $gram = '';
+			for(my $k = 0; $k < min($i + 1, $maxNgramOrder); $k++) #run over n-gram orders
+			{
+				$gram = $refTruths->[$j]->[$i - $k]->[$factorIndex] . " " . $gram;
+				#increment the count for the given n-gram and given reference number
+				if(!exists $REF_GRAM{$gram})
+				{
+					my @tmp = (0) x scalar @$refTruths;
+					$tmp[$j] = 1;
+					$REF_GRAM{$gram} = \@tmp;
+				}
+				else
+				{
+					$REF_GRAM{$gram}->[$j]++;
+				}
+			}
+		}
 	}
-	for($i = 0; $i < $length_translation; $i++)
+	for(my $i = 0; $i < $length_translation; $i++)
 	{
-      $gram = $refSysOutput->[$i]->[$factorIndex];
-      if (defined($REF_GRAM{$gram}) && $REF_GRAM{$gram} > 0) {
-			$REF_GRAM{$gram}--;
-			$correct1++;
-			push @$ngramMatches, [$i, 1];
-      }
-      next if $i<1;
-      $gram = $refSysOutput->[$i - 1]->[$factorIndex] ." ".$gram;
-      if (defined($REF_GRAM{$gram}) && $REF_GRAM{$gram} > 0) {
-			$REF_GRAM{$gram}--;
-			$correct2++;
-			push @$ngramMatches, [$i - 1, 2];
-      }
-      next if $i<2;
-      $gram = $refSysOutput->[$i - 2]->[$factorIndex] ." ".$gram;
-      if (defined($REF_GRAM{$gram}) && $REF_GRAM{$gram} > 0) {
-			$REF_GRAM{$gram}--;
-			$correct3++;
-			push @$ngramMatches, [$i - 2, 3];
-      }
-      next if $i<3;
-      $gram = $refSysOutput->[$i - 3]->[$factorIndex] ." ".$gram;
-      if (defined($REF_GRAM{$gram}) && $REF_GRAM{$gram} > 0) {
-			$REF_GRAM{$gram}--;
-			$correct4++;
-			push @$ngramMatches, [$i - 3, 4];
-      }
+		my $gram = '';
+		for(my $k = 0; $k < min($i + 1, $maxNgramOrder); $k++) #run over n-gram orders
+		{
+			$gram = $refSysOutput->[$i - $k]->[$factorIndex] . " " . $gram;
+			if(exists $REF_GRAM{$gram}) #this n-gram was found in at least one reference
+			{
+				$correct[$k]++;
+				my @indices = ();
+				for(my $m = 0; $m < scalar(@{$REF_GRAM{$gram}}); $m++)
+				{
+					if($REF_GRAM{$gram}->[$m] > 0)
+					{
+						push @indices, $m;
+						$REF_GRAM{$gram}->[$m]--;
+					}
+				}
+				push @$ngramMatches, [$i - $k, $k + 1, \@indices];
+			}
+		}
 	}
-	my $total = $length_translation;
-	$total1 = max(1, $total);
-	$total2 = max(1, $total - 1);
-	$total3 = max(1, $total - 2);
-	$total4 = max(1, $total - 3);
-	my $brevity = ($length_translation > $length_reference || $length_translation == 0) ? 1 : exp(1 - $length_reference / $length_translation);
-	my ($pct1, $pct2, $pct3, $pct4) = ($total1 == 0 ? -1 : $correct1 / $total1, $total2 == 0 ? -1 : $correct2 / $total2, 
-													$total3 == 0 ? -1 : $correct3 / $total3, $total4 == 0 ? -1 : $correct4 / $total4);
+	my $brevity = ($length_translation > $closestTruthLength || $length_translation == 0) ? 1 : exp(1 - $closestTruthLength / $length_translation);
+	my @pct;
 	my ($logsum, $logcount) = (0, 0);
-	if($total1 > 0) {$logsum += my_log($pct1); $logcount++;}
-	if($total2 > 0) {$logsum += my_log($pct2); $logcount++;}
-	if($total3 > 0) {$logsum += my_log($pct3); $logcount++;}
-	if($total4 > 0) {$logsum += my_log($pct4); $logcount++;}
+	for(my $i = 0; $i < $maxNgramOrder; $i++)
+	{
+		$total[$i] = max(1, $length_translation - $i);
+		push @pct, ($total[$i] == 0) ? -1 : $correct[$i] / $total[$i];
+		if($total[$i] > 0)
+		{
+			$logsum += my_log($pct[$i]);
+			$logcount++;
+		}
+	}
 	my $bleu = $brevity * exp($logsum / $logcount);
-	$returnData->[0] = [$bleu, $pct1, $pct2, $pct3, $pct4];
+	$returnData->[0] = [$bleu, @pct];
 	$returnData->[1] = $ngramMatches;
 	return $returnData;
 }
 
-#arguments: sysout sentence (arrayref of arrayrefs of factor strings), truth sentence (same), factor index to use
+#can handle multiple sentence translations; assume at least one
+#arguments: sysout sentence (arrayref of arrayrefs of factor strings), truth sentences (arrayref of same), factor index to use
 #return: hashref of sysout word index => whether word matches
 sub getPWERSentenceDetails
 {
-	my ($refSysOutput, $refTruth, $factorIndex) = @_;
-	my $indices = {};
-	my ($sLength, $eLength) = (scalar(@$refSysOutput), scalar(@$refTruth));
-	my @truthWordUsed = (0) x $eLength; #array of 0/1; can only match a given truth word once
-	for(my $j = 0; $j < $sLength; $j++)
+	my ($refSysOutput, $refTruths, $factorIndex) = @_;
+	my $matches = {};
+	my %truthWords; #hash from word to arrayref with number of times seen in each reference (but later holds only the max)
+	for(my $i = 0; $i < scalar(@$refTruths); $i++)
 	{
-		$indices->{$j} = 0;
-		for(my $k = 0; $k < $eLength; $k++) #check output word against entire truth sentence
+		foreach my $eWord (@{$refTruths->[$i]})
 		{
-			if(lc $refSysOutput->[$j]->[$factorIndex] eq lc $refTruth->[$k]->[$factorIndex] && $truthWordUsed[$k] == 0)
-			{
-				$truthWordUsed[$k] = 1;
-				$indices->{$j} = 1;
-				last;
-			}
+			my $factor = $eWord->[$factorIndex];
+			if(exists $truthWords{$factor}) {$truthWords{$factor}->[$i]++;}
+			else {my @tmp = (0) x scalar(@$refTruths); $tmp[$i] = 1; $truthWords{$factor} = \@tmp;}
 		}
 	}
-	return $indices;
+	%truthWords = map {$_ => maxN(@{$truthWords{$_}})} (keys %truthWords); #save only the max times each word is seen in a reference
+	for(my $j = 0; $j < scalar(@$refSysOutput); $j++)
+	{
+		if(exists $truthWords{$refSysOutput->[$j]->[$factorIndex]} && $truthWords{$refSysOutput->[$j]->[$factorIndex]} > 0)
+		{
+			$truthWords{$refSysOutput->[$j]->[$factorIndex]}--;
+			$matches->{$j} = 1;
+		}
+		else
+		{
+			$matches->{$j} = 0;
+		}
+	}
+	return $matches;
 }
 
 #assign ranks to sentences by BLEU score
@@ -287,11 +375,12 @@ sub getSentenceBGColorHTML
 
 #display all matching n-grams in the given sentence, with all 1-grams on one line, then arranged by picking, for each, the first line on which it fits,
 # where a given word position can only be filled by one n-gram per line, so that all n-grams can be shown
-#arguments: sentence (arrayref of arrayrefs of factor strings), arrayref of arrayrefs of matching n-gram [start, length]
+#arguments: sentence (arrayref of arrayrefs of factor strings), arrayref of arrayrefs of matching n-gram [start, length, arrayref of matching reference indices], 
+# number of reference translations
 #return: HTML string
 sub getAllNgramsHTML
 {
-	my ($sentence, $ngrams) = @_;
+	my ($sentence, $ngrams, $numTruths) = @_;
 	my $factorIndex = 0;
 	my @table = (); #array or arrayrefs each of which represents a line; each position has the index of the occupying n-gram, or -1 if none
 	my $n = 0; #n-gram index
@@ -325,14 +414,12 @@ sub getAllNgramsHTML
 	my $html = "<table class=\"ngram_table\"><tr><td align=center>" . join("</td><td align=center>", map {$_->[$factorIndex]} @$sentence) . "</td></tr>";
 	
 	my $numWords = scalar(@$sentence);
-	my ($curRow, $curCol) = (0, 0);
-	my $colorIndex = 0;
+	my ($curRow, $curCol) = (0, 0); #address in table
 	$html .= "<tr>";
-	foreach my $ngram (sort {my $c = $a->[2] <=> $b->[2]; if($c == 0) {$a->[0] <=> $b->[0]} else {$c}} @$ngrams) #sort by row, then word num
+	foreach my $ngram (sort {my $c = $a->[3] <=> $b->[3]; if($c == 0) {$a->[0] <=> $b->[0]} else {$c}} @$ngrams) #sort by row, then word num
 	{
-		while($ngram->[0] > $curCol || $ngram->[2] > $curRow) {$html .= "<td></td>"; $curCol = ($curCol + 1) % $numWords; if($curCol == 0) {$html .= "</tr><tr>"; $curRow++;}}
-		$html .= "<td colspan=" . $ngram->[1] . " align=center class=\"ngram_cell\" style=\"background-color: " . $ngramColors[$colorIndex] . "\">" . join(' ', map {$_->[$factorIndex]} @{$sentence}[$ngram->[0] .. $ngram->[0] + $ngram->[1] - 1]) . "</td>";
-		$colorIndex = ($colorIndex + 1) % scalar(@ngramColors);
+		while($ngram->[0] > $curCol || $ngram->[3] > $curRow) {$html .= "<td></td>"; $curCol = ($curCol + 1) % $numWords; if($curCol == 0) {$html .= "</tr><tr>"; $curRow++;}}
+		$html .= "<td colspan=" . $ngram->[1] . " align=center class=\"ngram_cell\" style=\"background-color: " . getNgramColorHTML(scalar(@{$ngram->[2]}), $numTruths) . "\">" . join(' ', map {$_->[$factorIndex]} @{$sentence}[$ngram->[0] .. $ngram->[0] + $ngram->[1] - 1]) . "</td>";
 		$curCol = ($curCol + $ngram->[1]) % $numWords; if($curCol == 0) {$html .= "</tr><tr>"; $curRow++;}
 	}
 	$html .= "</tr>";
@@ -349,15 +436,12 @@ sub rowIsClear
 	return (maxN(@{$row}[$ngram->[0] .. $ngram->[0] + $ngram->[1] - 1]) == -1) ? 1 : 0;
 }
 
-#arguments: array of numeric values
-#return: max value, or empty list if input list is empty
-sub maxN
+#auxiliary to getAllNgramsHTML()
+#arguments: number of reference translations matching the n-gram, total number of references
+#return: HTML color string
+sub getNgramColorHTML
 {
-	if(scalar(@_) == 0) {return ();}
-	my $max = $_[0];
-	for(my $i = 1; $i < scalar(@_); $i++)
-	{
-		if($_[$i] > $max) {$max = $_[$i];}
-	}
-	return $max;
+	my ($matches, $total) = @_;
+	if($total == 1) {return $ngramSingleRefColor;}
+	return $ngramMultirefColors[round($matches / $total * (scalar(@ngramMultirefColors) - 1))];
 }
