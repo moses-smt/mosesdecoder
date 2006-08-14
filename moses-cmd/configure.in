@@ -103,7 +103,7 @@ then
   SAVE_CPPFLAGS="$CPPFLAGS"
   CPPFLAGS="$CPPFLAGS -I${with_irstlm}/include"
 
-  AC_CHECK_HEADER(ngram.h,
+  AC_CHECK_HEADER(n_gram.h,
                  [AC_DEFINE([HAVE_IRSTLM], [], [flag for IRSTLM])],
                  [AC_MSG_ERROR([Cannot find IRST-LM!])])
 
