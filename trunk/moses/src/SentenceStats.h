@@ -32,9 +32,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 struct recombinationInfo
 {
 	recombinationInfo() {} //for std::vector
-	recombinationInfo(unsigned int srcWords, float gProb, float bProb) : numSourceWords(srcWords), betterProb(gProb), worseProb(bProb) {}
+	recombinationInfo(size_t srcWords, float gProb, float bProb) 
+		: numSourceWords(srcWords), betterProb(gProb), worseProb(bProb) {}
 	
-	unsigned int numSourceWords;
+	size_t numSourceWords;
 	float betterProb, worseProb;
 };
 
@@ -91,7 +92,7 @@ class SentenceStats
 		unsigned int m_numHyposPruned;
 	
 		//words
-		unsigned int m_totalSourceWords;
+		size_t m_totalSourceWords;
 		std::vector<PhraseReference> m_deletedWords; //count deleted words/phrases in the final hypothesis
 		std::vector<std::string> m_insertedWords; //count inserted words in the final hypothesis
 };
