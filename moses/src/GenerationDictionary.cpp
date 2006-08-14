@@ -96,13 +96,13 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 
 		size_t numFeaturesInFile = token.size() - 2;
 		if (forceSingleFeatureValue) numFeaturesInFile = 1;
-		if (numFeaturesInFile != numFeatureValuesInConfig) {
+		if (numFeaturesInFile < numFeatureValuesInConfig) {
 			std::cerr << filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
 								<< " feature values, but found " << numFeaturesInFile << std::endl;
 			exit(1);
 		}
-		std::vector<float> scores(numFeaturesInFile, 0.0f);
-		for (size_t i = 0; i < numFeaturesInFile; i++)
+		std::vector<float> scores(numFeatureValuesInConfig, 0.0f);
+		for (size_t i = 0; i < numFeatureValuesInConfig; i++)
 			scores[i] = TransformScore(Scan<float>(token[2+i]));
 		
 		m_collection[inputWord][outputWord].Assign(this, scores);
