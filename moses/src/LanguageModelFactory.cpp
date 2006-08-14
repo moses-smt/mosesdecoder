@@ -14,6 +14,7 @@
 #endif
 
 #include "LanguageModel_Chunking.h"
+#include "LanguageModelJoint.h"
 
 namespace LanguageModelFactory
 {
@@ -44,6 +45,14 @@ namespace LanguageModelFactory
 				#else
      			#ifdef LM_IRST
 	     			lm = new LanguageModel_Chunking<LanguageModel_IRST>(true);
+     			#endif
+				#endif
+			case Joint:
+				#ifdef LM_SRI
+	     		lm = new LanguageModelJoint(new LanguageModel_SRI(true), true);
+				#else
+     			#ifdef LM_IRST
+		     		lm = new LanguageModelJoint(new LanguageModel_IRST(true), true);
      			#endif
 				#endif
 	  }

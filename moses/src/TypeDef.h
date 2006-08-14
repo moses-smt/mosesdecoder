@@ -133,6 +133,7 @@ enum LMImplementation
 	SRI
 	,IRST
 	,Chunking
+	,Joint
 };
 
 enum DictionaryFind
