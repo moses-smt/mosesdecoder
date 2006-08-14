@@ -29,3 +29,14 @@ $ $DATA/test/combine-features.perl CORPUS lc+pos lemma > CORPUS.lc+pos+lemma
 $ rm CORPUS.pos-tmp                                                             (cleanup)
 
 where $BIN=/export/ws06osmt/bin, $DATA=/export/ws06osmt/data.
+
+To get German POS tags and lemmas from a words-only corpus (the first step must be run on linux):
+
+$ $BIN/recase.perl --in CORPUS.lc --model $MODELS/en-de/recaser/pharaoh.ini > CORPUS.recased              (call pharaoh with a lowercase->uppercase model)
+$ $BIN/run-lopar-tagger-lowercase.perl CORPUS.recased CORPUS.recased.lopar                                (call LOPAR)
+$ $DATA/test/factor-stem.de.perl < CORPUS.recased.lopar > CORPUS.stem
+$ $BIN/lowercase.latin1.perl < CORPUS.stem > CORPUS.lcstem                                                (as you might guess, assumes latin-1 encoding)
+$ $DATA/test/factor-pos.de.perl < CORPUS.recased.lopar > CORPUS.pos
+$ $DATA/test/combine-features.perl CORPUS lc pos lcstem > CORPUS.lc+pos+lcstem
+
+where $MODELS=/export/ws06osmt/models.
