@@ -55,9 +55,6 @@ typedef enum {LMT_FIND,    //!< search: find an entry
 } LMT_ACTION;
 
 
-
-
-
 //disktable or accessing tables stored on disk
 
 class disktable{  
