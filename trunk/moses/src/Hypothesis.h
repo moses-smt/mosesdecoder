@@ -52,7 +52,6 @@ typedef std::vector<Hypothesis*> ArcList;
 		The expansion of hypotheses is handled in the class Manager, which
     stores active hypothesis in the search in hypothesis stacks.
 ***/
-
 class Hypothesis
 {
 	friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
@@ -117,14 +116,6 @@ public:
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
 	Hypothesis* CreateNext(const TranslationOption &transOpt) const;
 
-	/***
-	 * if any factors aren't set in our target phrase but are present in transOpt, copy them over
-	 * (unless the factors that we do have fail to match the corresponding ones in transOpt,
-	 *  in which case presumably there's a programmer's error)
-	 * 
-	 * return NULL if we aren't compatible with the given option
-	 */
-
 	void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
 
 	/** return target phrase used to create this hypothesis */
@@ -134,6 +125,7 @@ public:
 	}
 
  // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
+ 
 	/** return input positions covered by the translation option (phrasal translation) used to create this hypothesis */
 	inline const WordsRange &GetCurrSourceWordsRange() const
 	{
@@ -156,7 +148,6 @@ public:
 	void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore);
 
 	int GetId() const;
-
 
 	const Hypothesis* GetPrevHypo() const;
 
@@ -261,6 +252,4 @@ public:
 	float GetFutureScore() const { return m_futureScore; }
 };
 
-
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);
-
