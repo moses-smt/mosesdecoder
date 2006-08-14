@@ -134,6 +134,8 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 		count++;
 	}
 
+	SortTargetPhraseCollection();
+	
 	// move temp file to hash file
 	if (filter)
 	{
@@ -249,6 +251,11 @@ bool PhraseDictionary::Contains(const vector< vector<string> > &phraseVector
 			return true;
 	}
 	return false;
+}
+
+void PhraseDictionary::SortTargetPhraseCollection()
+{
+	//m_collection.Sort();
 }
 
 TO_STRING_BODY(PhraseDictionary);
