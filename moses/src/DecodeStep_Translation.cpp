@@ -75,8 +75,9 @@ void TranslationDecodeStep::Process(const TranslationOption &inputPartialTranslO
   if (phraseColl != NULL)
     {
       TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
-		 	iterEnd = (observeTableLimit && phraseColl->GetSize() > tableLimit) ? phraseColl->begin() + tableLimit + 1 : phraseColl->end();
-
+		 	//iterEnd = (observeTableLimit && phraseColl->GetSize() > tableLimit) ? phraseColl->begin() + tableLimit + 1 : phraseColl->end();
+			iterEnd = phraseColl->end();
+			
       for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase)
         {
           const TargetPhrase& targetPhrase = **iterTargetPhrase;
