@@ -172,8 +172,8 @@ void htable::map(ostream& co,int cols){
 
 
 void htable::stat(){
-  cout << "htable class statistics\n";
-  cout << "size " << size 
+  cerr << "htable class statistics\n";
+  cerr << "size " << size 
        << " keys " << keys
        << " acc " << accesses 
        << " coll " << collisions 
