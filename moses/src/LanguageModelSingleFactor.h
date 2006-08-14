@@ -32,10 +32,12 @@ class LanguageModelSingleFactor : public LanguageModel
 protected:	
 	const Factor *m_sentenceStart, *m_sentenceEnd;
 	FactorType	m_factorType;
+
+	LanguageModelSingleFactor(bool registerScore);
+
 public:
   static State UnknownState;
 
-	LanguageModelSingleFactor(bool registerScore);
 	virtual ~LanguageModelSingleFactor();
 	virtual void Load(const std::string &fileName
 					, FactorCollection &factorCollection

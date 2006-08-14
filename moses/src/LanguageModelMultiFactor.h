@@ -33,9 +33,10 @@ class LanguageModelMultiFactor : public LanguageModel
 {
 protected:
 	FactorMask m_factorTypes;
+
+	LanguageModelMultiFactor(bool registerScore);
 	
 public:
-	LanguageModelMultiFactor(bool registerScore);
 	virtual void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, const std::vector<FactorType> &factorTypes

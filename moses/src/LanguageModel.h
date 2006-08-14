@@ -40,10 +40,12 @@ protected:
 	std::string	m_filename;
 	size_t			m_nGramOrder;
 	FactorArray m_sentenceStartArray, m_sentenceEndArray;
+
+	LanguageModel(bool registerScore);
+
 public:
   typedef const void* State;
 
-	LanguageModel(bool registerScore);
 	virtual ~LanguageModel();
 
 	// see ScoreProducer.h
