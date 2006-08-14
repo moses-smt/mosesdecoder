@@ -124,9 +124,6 @@ private:
   off_t startPos;
   FILE* f;
 public:
-#ifdef DEBUG
-  DECLAREMEMSTAT(Self);
-#endif
 
   PrefixTreeF(FILE* f_=0) : f(f_) {if(f) read();}
 
@@ -271,7 +268,4 @@ public:
 
 };
 template<typename T,typename D> D PrefixTreeF<T,D>::def;
-#ifdef DEBUG
-template<typename T,typename D> MemoryStatsPrinter< PrefixTreeF<T,D> > PrefixTreeF<T,D>::memStat("PrefixTreeF<T,D>",0);
-#endif
 #endif
