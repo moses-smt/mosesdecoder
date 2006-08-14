@@ -19,6 +19,14 @@ double Exp(double x)
 
 class PDTAimp 
 {
+	// only these classes are allowed to instantiate this class
+	friend class PhraseDictionaryTreeAdaptor;
+	
+protected:
+	PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis) 
+		: m_languageModels(0),m_weightWP(0.0),m_factorCollection(0),m_dict(0),
+			m_obj(p),useCache(1),m_numInputScores(nis),totalE(0),distinctE(0) {}
+	
 public:
 	std::vector<float> m_weights;
 	LMList const* m_languageModels;
@@ -42,11 +50,6 @@ public:
 	size_t totalE,distinctE;
 	std::vector<size_t> path1Best,pathExplored;
 	std::vector<double> pathCN;
-
-
-	PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis) 
-		: m_languageModels(0),m_weightWP(0.0),m_factorCollection(0),m_dict(0),
-			m_obj(p),useCache(1),m_numInputScores(nis),totalE(0),distinctE(0) {}
 
 	~PDTAimp() 
 	{
