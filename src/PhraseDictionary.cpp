@@ -40,14 +40,14 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, const string &filePath
 																			, const string &hashFilePath
 																			, const vector<float> &weight
-																			, size_t maxTargetPhrase
+																			, size_t tableLimit
 																			, bool filter
 																			, const list< Phrase > &inputPhraseList
 																			, const LMList &languageModels
 														          , float weightWP
 														          , const StaticData& staticData)
 {
-	m_maxTargetPhrase = maxTargetPhrase;
+	m_tableLimit = tableLimit;
 	m_filename = filePath;
 
 	//factors	
@@ -180,7 +180,7 @@ TargetPhraseCollection *PhraseDictionary::CreateTargetPhraseCollection(const Phr
 void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
 {
 	TargetPhraseCollection &phraseColl = *CreateTargetPhraseCollection(source);
-	if (m_maxTargetPhrase == 0)
+	if (m_tableLimit == 0)
 	{	// don't need keep list sorted
 		// create sub tree & put target phrase into collection
 		phraseColl.Add(new TargetPhrase(targetPhrase));
@@ -199,7 +199,7 @@ void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &
 		phraseColl.insert(iter, new TargetPhrase(targetPhrase));
 
 		// get rid of least probable phrase if we have enough
-		if (phraseColl.GetSize() > m_maxTargetPhrase)
+		if (phraseColl.GetSize() > m_tableLimit)
 		{
 			phraseColl.erase(phraseColl.begin());
 		}

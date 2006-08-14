@@ -67,14 +67,17 @@ void TranslationDecodeStep::Process(const TranslationOption &inputPartialTranslO
   // normal trans step
   const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
   const PhraseDictionaryBase &phraseDictionary  = decodeStep.GetPhraseDictionary();
-  const TargetPhraseCollection *phraseColl= phraseDictionary.GetTargetPhraseCollection(toc->GetSource(),sourceWordsRange);
 	const size_t currSize = inputPartialTranslOpt.GetTargetPhrase().GetSize();
+	const size_t tableLimit = phraseDictionary.GetTableLimit();
+	
+  const TargetPhraseCollection *phraseColl= phraseDictionary.GetTargetPhraseCollection(toc->GetSource(),sourceWordsRange);
 
   if (phraseColl != NULL)
     {
-      TargetPhraseCollection::const_iterator iterTargetPhrase;
+      TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
+		 	iterEnd = (observeTableLimit && phraseColl->GetSize() > tableLimit) ? phraseColl->begin() + tableLimit + 1 : phraseColl->end();
 
-      for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != phraseColl->end(); ++iterTargetPhrase)
+      for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase)
         {
           const TargetPhrase& targetPhrase = **iterTargetPhrase;
 					// skip if the 

@@ -3,7 +3,7 @@
 //#include "InputType.h"
 
 PhraseDictionaryBase::PhraseDictionaryBase(size_t noScoreComponent)
-	: Dictionary(noScoreComponent),m_maxTargetPhrase(0)
+	: Dictionary(noScoreComponent),m_tableLimit(0)
 {
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
 }

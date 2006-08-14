@@ -51,7 +51,7 @@ public:
 								, const std::string &filePath
 								, const std::string &hashFilePath
 								, const std::vector<float> &weight
-								, size_t maxTargetPhrase
+								, size_t tableLimit
 								, bool filter
 								, const std::list< Phrase > &inputPhraseList
 								, const LMList &languageModels
