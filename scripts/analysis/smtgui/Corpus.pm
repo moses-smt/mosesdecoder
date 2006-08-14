@@ -56,6 +56,8 @@ sub new
 	$self->{'unknownCount'} = {}; #factor name => count of unknown tokens in input
 	$self->{'sysoutWER'} = {}; #system name => (factor name => arrayref with system output total WER and arrayref of WER scores for individual sysout sentences wrt truth)
 	$self->{'sysoutPWER'} = {}; #similarly
+	$self->{'nnAdjWERPWER'} = {}; #system name => arrayref of [normalized WER, normalized PWER]
+	$self->{'perplexity'} = {}; #system name => (factor name => perplexity raw score)
 	$self->{'fileDescriptions'} = {}; #filename associated with us => string description of file
 	$self->{'bleuScores'} = {}; #system name => (factor name => arrayref of (overall score, arrayref of per-sentence scores) )
 	$self->{'bleuConfidence'} = {}; #system name => (factor name => arrayrefs holding statistical test data on BLEU scores)
@@ -101,6 +103,7 @@ sub calcUnknownTokens
 	{
 		return ($self->{'unknownCount'}->{$factorName}, $self->{'tokenCount'}->{'input'});
 	}
+	warn "calcing unknown tokens\n";
 	
 	$self->ensureFilenameDefined('input');
 	$self->ensurePhraseTableDefined($factorName);
@@ -134,6 +137,13 @@ sub calcUnknownTokens
 sub calcNounAdjWER_PWERDiff
 {
 	my ($self, $sysname) = @_;
+	#check in-memory cache first
+	if(exists $self->{'nnAdjWERPWER'}->{$sysname})
+	{
+		return @{$self->{'nnAdjWERPWER'}->{$sysname}};
+	}
+	warn "calcing NN/JJ PWER/WER\n";
+	
 	$self->ensureFilenameDefined('truth');
 	$self->ensureFilenameDefined($sysname);
 	$self->ensureFactorPosDefined('surf');
@@ -156,7 +166,8 @@ sub calcNounAdjWER_PWERDiff
 	#unhog memory
 	$self->releaseSentences('truth');
 	$self->releaseSentences($sysname);
-	return ($werScore / $self->{'tokenCount'}->{'truth'}, $pwerScore / $self->{'tokenCount'}->{'truth'});
+	$self->{'nnAdjWERPWER'}->{$sysname} = [$werScore / $self->{'tokenCount'}->{'truth'}, $pwerScore / $self->{'tokenCount'}->{'truth'}];
+	return @{$self->{'nnAdjWERPWER'}->{$sysname}};
 }
 
 #calculate detailed WER statistics and put them into $self
@@ -172,6 +183,7 @@ sub calcOverallWER
 	{
 		return $self->{'sysoutWER'}->{$sysname}->{$factorName}->[0];
 	}
+	warn "calcing WER\n";
 	
 	$self->ensureFilenameDefined('truth');
 	$self->ensureFilenameDefined($sysname);
@@ -201,6 +213,7 @@ sub calcOverallPWER
 	{
 		return $self->{'sysoutPWER'}->{$sysname}->{$factorName}->[0];
 	}
+	warn "calcing PWER\n";
 	
 	$self->ensureFilenameDefined('truth');
 	$self->ensureFilenameDefined($sysname);
@@ -228,6 +241,7 @@ sub calcBLEU
 	{
 		return $self->{'bleuScores'}->{$sysname}->{$factorName};
 	}
+	warn "calcing BLEU\n";
 	
 	$self->ensureFilenameDefined('truth');
 	$self->ensureFilenameDefined($sysname);
@@ -280,6 +294,13 @@ sub statisticallyTestBLEUResults
 {
 	my ($self, $sysname, $factorName) = (shift, shift, 'surf');
 	if(scalar(@_) > 0) {$factorName = shift;}
+	#check in-memory cache first
+	if(exists $self->{'bleuConfidence'}->{$sysname} && exists $self->{'bleuConfidence'}->{$sysname}->{$factorName})
+	{
+		return $self->{'bleuConfidence'}->{$sysname}->{$factorName};
+	}
+	warn "performing consistency tests\n";
+	
 	my $k = 30; #HARDCODED NUMBER OF SUBSETS (WE DO k-FOLD CROSS-VALIDATION); IF YOU CHANGE THIS YOU MUST ALSO CHANGE getApproxPValue() and $criticalTStat
 	my $criticalTStat = 2.045; #hardcoded value given alpha (.025 here) and degrees of freedom (= $k - 1) ########################################
 	$self->ensureFilenameDefined('truth');
@@ -345,6 +366,13 @@ sub statisticallyTestBLEUResults
 sub calcPerplexity
 {
 	my ($self, $sysname, $factorName) = @_;
+	#check in-memory cache first
+	if(exists $self->{'perplexity'}->{$sysname} && exists $self->{'perplexity'}->{$sysname}->{$factorName})
+	{
+		return $self->{'perplexity'}->{$sysname}->{$factorName};
+	}
+	warn "calcing perplexity\n";
+	
 	$self->ensureFilenameDefined($sysname);
 	my $sysoutFilename;
 	if($sysname eq 'truth' || $sysname eq 'input') {$sysoutFilename = $self->{"${sysname}Filename"};}
@@ -358,7 +386,8 @@ sub calcPerplexity
 	my @output = `./ngram -lm $lmFilename -ppl $tmpfile`; #run the SRI n-gram tool
 	`rm $tmpfile`;
 	$output[1] =~ /ppl1=\s*([0-9\.]+)/;
-	return $1;
+	$self->{'perplexity'}->{$sysname} = $1;
+	return $self->{'perplexity'}->{$sysname}->{$factorName};
 }
 
 #run a paired t test and a sign test on BLEU statistics for subsets of both systems' outputs
@@ -369,6 +398,14 @@ sub calcPerplexity
 sub statisticallyCompareSystemResults
 {
 	my ($self, $sysname1, $sysname2, $factorName) = @_;
+	#check in-memory cache first
+	if(exists $self->{'comparisonStats'}->{$sysname1} && exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2} 
+		&& exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName})
+	{
+		return $self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName};
+	}
+	warn "comparing sysoutputs\n";
+	
 	$self->ensureFilenameDefined($sysname1);
 	$self->ensureFilenameDefined($sysname2);
 	$self->ensureFactorPosDefined($factorName);
@@ -470,15 +507,17 @@ sub writeCacheFile
 
 	#store file changetimes to disk
 	print CACHEFILE "File changetimes\n";
-	my $writeCtime = sub
+	my $ensureCtimeIsOutput = sub
 	{
 		my $ext = shift;
-		print CACHEFILE $self->{'corpusName'} . ".$ext " . time . "\n";
+		#check for a previously read value
+		if(exists $self->{'fileCtimes'}->{$ext}) {print CACHEFILE $self->{'corpusName'} . ".$ext " . $self->{'fileCtimes'}->{$ext} . "\n";}
+		else {print CACHEFILE $self->{'corpusName'} . ".$ext " . time . "\n";}
 	};
-	if(exists $self->{'truthFilename'}) {&$writeCtime('e');}
-	if(exists $self->{'inputFilename'}) {&$writeCtime('f');}
-	foreach my $factorName (keys %{$self->{'phraseTableFilenames'}}) {&$writeCtime("pt_$factorName");}
-	foreach my $sysname (keys %{$self->{'sysoutFilenames'}}) {&$writeCtime($sysname);}
+	if(exists $self->{'truthFilename'}) {&$ensureCtimeIsOutput('e');}
+	if(exists $self->{'inputFilename'}) {&$ensureCtimeIsOutput('f');}
+	foreach my $factorName (keys %{$self->{'phraseTableFilenames'}}) {&$ensureCtimeIsOutput("pt_$factorName");}
+	foreach my $sysname (keys %{$self->{'sysoutFilenames'}}) {&$ensureCtimeIsOutput($sysname);}
 	#store bleu scores to disk
 	print CACHEFILE "\nBLEU scores\n";
 	foreach my $sysname (keys %{$self->{'bleuScores'}})
@@ -515,7 +554,7 @@ sub writeCacheFile
 		{
 			foreach my $factorName (keys %{$self->{'comparisonStats'}->{$sysname1}->{$sysname2}})
 			{
-				print CACHEFILE "$sysname1 $sysname2 $factorName " . join('; ', @{$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName}}) . "\n";
+				print CACHEFILE "$sysname1 $sysname2 $factorName " . join('; ', map {join(' ', @$_)} @{$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName}}) . "\n";
 			}
 		}
 	}
@@ -547,8 +586,21 @@ sub writeCacheFile
 	};
 	&$printWERFunc('sysoutWER');
 	&$printWERFunc('sysoutPWER');
-	#store misc scores to disk
-	print CACHEFILE "\n";
+	#store corpus perplexities to disk
+	print CACHEFILE "\nPerplexity\n";
+	foreach my $sysname (keys %{$self->{'perplexity'}})
+	{
+		foreach my $factorName (keys %{$self->{'perplexity'}->{$sysname}})
+		{
+			print CACHEFILE "$sysname $factorName " . $self->{'perplexity'}->{$sysname}->{$factorName} . "\n";
+		}
+	}
+	print "\nNN/ADJ WER/PWER\n";
+	foreach my $sysname (keys %{$self->{'nnAdjWERPWER'}})
+	{
+		print CACHEFILE "$sysname " . join(' ', @{$self->{'nnAdjWERPWER'}->{$sysname}}) . "\n";
+	}
+	print "\n";
 	close(CACHEFILE);
 }
 
@@ -575,6 +627,8 @@ sub loadCacheFile
 		elsif($line eq "Statistical comparisons\n") {$mode = 'cmp';}
 		elsif($line eq "Unknown-token counts\n") {$mode = 'unk';}
 		elsif($line eq "WER scores") {$mode = 'wer';}
+		elsif($line eq "Perplexity") {$mode = 'ppl';}
+		elsif($line eq "NN/ADJ WER/PWER") {$mode = 'nawp';}
 		#get data when in a mode already
 		elsif($mode eq 'ctime')
 		{
@@ -608,7 +662,7 @@ sub loadCacheFile
 			if(!exists $self->{'comparisonStats'}->{$sysname1}) {$self->{'comparisonStats'}->{$sysname1} = {};}
 			if(!exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}) {$self->{'comparisonStats'}->{$sysname1}->{$sysname2} = {};}
 			if(!exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName}) {$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName} = [];}
-			my @stats = split(/;/, $rest);
+			my @stats = map {my @x = split(' ', $_); \@x} split(/;/, $rest);
 			$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName} = \@stats;
 		}
 		elsif($mode eq 'unk')
@@ -635,6 +689,17 @@ sub loadCacheFile
 				my @indices = grep(/\S/, split(/\s+/, $indexLists[$i])); #find all nonempty tokens
 				$self->{$werType}->{$sysname}->{$factorName}->[2] = \@indices;
 			}
+		}
+		elsif($mode eq 'ppl')
+		{
+			local ($sysname, $factorName, $perplexity) = split(/\s+/, $line);
+			if(!exists $self->{'perplexity'}->{$sysname}) {$self->{'perplexity'}->{$sysname} = {};}
+			$self->{'perplexity'}->{$sysname}->{$factorName} = $perplexity;
+		}
+		elsif($mode eq 'nawp')
+		{
+			local ($sysname, @scores) = split(/\s+/, $line);
+			$self->{'nnAdjWERPWER'}->{$sysname} = \@scores;
 		}
 	}
 	close(CACHEFILE);
