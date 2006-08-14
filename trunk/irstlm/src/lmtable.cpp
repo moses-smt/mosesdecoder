@@ -50,7 +50,7 @@ lmtable::lmtable(){
 	memset(NumCenters, 0, sizeof(NumCenters));
  
   max_cache_lev=0;
-  for (int i=0;i<=maxlev;i++) lmtcache[i]=NULL;
+  for (int i=0;i<=LMTMAXLEV+1;i++) lmtcache[i]=NULL;
   probcache=NULL;
   statecache=NULL;
   
@@ -825,17 +825,23 @@ double lmtable::lprob(ngram ong){
 
 //return log10 probsL use cache memory
 
-double lmtable::clprob(ngram ong){
-	
+double lmtable::clprob(ngram ong){	
   
   if (ong.size==0) return 0.0;
   
   if (ong.size>maxlev) ong.size=maxlev;
 
   double logpr; 
-  if (probcache && ong.size==maxlev && probcache->get(ong.wordp(maxlev),(char *)&logpr))
-    return logpr;   
 
+#ifdef TRACE_CACHE
+  if (probcache && ong.size==maxlev && sentence_id>0lo){
+   *cacheout << sentence_id << " " << ong << "\n";  
+  }
+#endif  
+  
+  if (probcache && ong.size==maxlev && probcache->get(ong.wordp(maxlev),(char *)&logpr)){
+    return logpr;   
+  }
  
   logpr=lprob(ong);
   
