@@ -26,8 +26,9 @@ compile:
 	## Compiled mert
 	cd training/phrase-extract/ && make
 	## Compiled phrase_extract
+	cd training/symal/ && make
+	## Compiled symal
 	## All files that need compilation were compiled
-
 
 
 ### "MAIN" scripts are scripts that have a Philipp-like name, too
