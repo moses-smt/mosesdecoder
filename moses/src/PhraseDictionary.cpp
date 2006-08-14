@@ -160,7 +160,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 	}
 	
 	// sort each target phrase collection
-	m_collection.Sort();
+	m_collection.Sort(m_tableLimit);
 }
 
 TargetPhraseCollection *PhraseDictionary::CreateTargetPhraseCollection(const Phrase &source)
@@ -232,7 +232,7 @@ bool PhraseDictionary::Contains(const vector< vector<string> > &phraseVector
 
 void PhraseDictionary::SortTargetPhraseCollection()
 {
-	m_collection.Sort();
+	m_collection.Sort(m_tableLimit);
 }
 
 TO_STRING_BODY(PhraseDictionary);

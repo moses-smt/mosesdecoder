@@ -28,18 +28,18 @@ PhraseDictionaryNode::~PhraseDictionaryNode()
 	delete m_targetPhraseCollection;
 }
 
-void PhraseDictionaryNode::Sort()
+void PhraseDictionaryNode::Sort(size_t tableLimit)
 {
 	// recusively sort
 	NodeMap::iterator iter;
 	for (iter = m_map.begin() ; iter != m_map.end() ; ++iter)
 	{
-		iter->second.Sort();
+		iter->second.Sort(tableLimit);
 	}
 	
 	// sort TargetPhraseCollection in this node
 	if (m_targetPhraseCollection != NULL)
-		m_targetPhraseCollection->Sort();
+		m_targetPhraseCollection->Sort(tableLimit);
 }
 
 PhraseDictionaryNode *PhraseDictionaryNode::GetOrCreateChild(const Word &word)

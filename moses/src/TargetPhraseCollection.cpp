@@ -33,7 +33,7 @@ struct CompareTargetPhrase
  	}
 };
 
-void TargetPhraseCollection::Sort()
+void TargetPhraseCollection::Sort(size_t tableLimit)
 {
   // sort in descending order
 	sort(m_collection.begin(), m_collection.end(), CompareTargetPhrase());  
