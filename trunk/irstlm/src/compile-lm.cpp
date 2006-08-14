@@ -34,6 +34,7 @@ using namespace std;
 
 std::string stxt = "no";
 std::string seval = "";
+std::string sdebug = "0";
 
 /********************************/
 
@@ -44,7 +45,10 @@ void usage(const char *msg = 0) {
             << "  compile-lm reads a standard LM file in ARPA format and produces" << std::endl
             << "  a compiled representation that the IRST LM toolkit can quickly" << std::endl
             << "  read and process." << std::endl << std::endl;
-  std::cerr << "Options:\n  -t=[yes|no]\n";
+  std::cerr << "Options:\n"
+            << "--text=[yes|no] -t=[yes|no] (output is again in text format)\n"
+            << "--eval=text-file -e=text-file (computes perplexity of text-file and returns)\n"
+            << "--debug=1 -d=1 (verbose output for --eval option)\n";
 }
 
 bool starts_with(const std::string &s, const std::string &pre) {
@@ -80,6 +84,10 @@ void handle_option(const std::string& opt, int argc, const char **argv, int& arg
    else
       if (starts_with(opt, "--eval") || starts_with(opt, "-e"))
        seval = get_param(opt, argc, argv, argi);
+  else
+    if (starts_with(opt, "--debug") || starts_with(opt, "-d"))
+      sdebug = get_param(opt, argc, argv, argi);
+  
   else {
     usage(("Don't understand option " + opt).c_str());
     exit(1);
@@ -101,6 +109,7 @@ int main(int argc, const char **argv)
   if (files.size() < 1) { usage("Please specify a LM file to read from"); exit(1); }
 
   bool textoutput = (stxt == "yes"? true : false);
+  int debug = atoi(sdebug.c_str()); 
  
   std::string infile = files[0];
   if (files.size() == 1) {
@@ -128,15 +137,21 @@ int main(int argc, const char **argv)
     ngram ng(lmt.dict);    
     std::cout.setf(ios::fixed);
     std::cout.precision(2);
-    
+    if (debug>1) std::cout.precision(8);
     std::fstream inptxt(seval.c_str(),std::ios::in);
     
     int Nbo=0,Nw=0,Noov=0;
     double logPr=0,PP=0,PPwp=0,Pr;
     
     int bos=ng.dict->encode(ng.dict->BoS());
+
+#ifdef TRACE_CACHE
     lmt.init_probcache();
+#endif
+    
     while(inptxt >> ng){
+      
+      if (ng.size>lmt.maxlevel()) ng.size=lmt.maxlevel();
       
       // reset ngram at begin of sentence
       if (*ng.wordp(1)==bos) continue;
@@ -144,6 +159,9 @@ int main(int argc, const char **argv)
       lmt.bo_state(0);
       if (ng.size>=1){ 
         logPr+=(Pr=lmt.clprob(ng));
+        if (debug>1)
+          std::cout << ng << "[" << ng.size << "-gram]" << " " << Pr << "\n"; 
+        
         if (*ng.wordp(1) == lmt.dict->oovcode()) Noov++;        
         Nw++; if (lmt.bo_state()) Nbo++;                   
       }
