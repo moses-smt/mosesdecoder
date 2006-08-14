@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #include "dictionary.h"
 #include "n_gram.h"
 
+#undef TRACE_CACHE
+
 #define LMTMAXLEV  11
 
 #ifndef  LMTCODESIZE
@@ -140,15 +142,20 @@ class lmtable{
 	ngramcache* probcache;
   ngramcache* statecache;
   int max_cache_lev;
-	
+
 public:
     
+#ifdef TRACE_CACHE
+    std::fstream* cacheout;
+  int sentence_id;
+#endif
+  
   dictionary     *dict; // dictionary
   
   lmtable();
   
   ~lmtable(){
-    for (int i=2;i<=max_cache_lev;i++)        
+    for (int i=2;i<=LMTMAXLEV;i++)        
     if (lmtcache[i]){
       std::cerr << i <<"-gram cache: "; lmtcache[i]->stat();
       delete lmtcache[i]; 
@@ -157,6 +164,11 @@ public:
     if (probcache){
       std::cerr << "Prob Cache: "; probcache->stat();
       delete probcache;
+#if TRACE_CACHE
+      cacheout->close();
+      delete cacheout;
+#endif
+      
     } 
     if (statecache){
       std::cerr << "State Cache: "; statecache->stat();
@@ -176,19 +188,23 @@ public:
     
   void init_probcache(){
     assert(probcache==NULL);
-    probcache=new ngramcache(maxlev,sizeof(double),1000000);
+    probcache=new ngramcache(maxlev,sizeof(double),200000);
+#ifdef TRACE_CACHE
+    cacheout=new std::fstream("/tmp/tracecache",std::ios::out);
+    sentence_id=0;
+#endif 
   }
   
   void init_statecache(){
     assert(statecache==NULL);
-    statecache=new ngramcache(maxlev-1,sizeof(char *),200000);
+    statecache=new ngramcache(maxlev-1,sizeof(char *),100000);
   }
   
   void init_lmtcaches(int uptolev){
     max_cache_lev=uptolev;
     for (int i=2;i<=max_cache_lev;i++){
     assert(lmtcache[i]==NULL);
-    lmtcache[i]=new ngramcache(i,sizeof(char *),2000000);
+    lmtcache[i]=new ngramcache(i,sizeof(char *),200000);
     }
   }
   
