@@ -380,6 +380,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TargetPhraseCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TranslationOption.cpp"
 				>
 			</File>

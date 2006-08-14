@@ -89,7 +89,7 @@ Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWord
 		FactorArray &thisWord				= m_factorArray[currPos];
 		const Word &mergeWord				= *mergeWords[currPos];
 
-		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
 			thisWord[currFactor] = mergeWord.GetFactor(factorType);
@@ -118,7 +118,7 @@ void Phrase::MergeFactors(const Phrase &copy)
 	size_t size = GetSize();
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
-		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
 			const Factor *factor = copy.GetFactor(currPos, factorType);
@@ -264,7 +264,7 @@ bool Phrase::operator < (const Phrase &compare) const
 		size_t minSize = std::min( thisSize , compareSize );
 
 		// taken from word.Compare()
-		for (size_t i = 0 ; i < NUM_FACTORS ; i++)
+		for (size_t i = 0 ; i < MAX_NUM_FACTORS ; i++)
 		{
 			FactorType factorType = static_cast<FactorType>(i);
 
@@ -341,7 +341,7 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
-		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
 			const Factor *thisFactor 		= GetFactor(currPos, factorType)

@@ -77,8 +77,7 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 // can only be 2 at the moment
 const int NUM_LANGUAGES = 2;
 
-#define MAX_NUM_FACTORS 4
-const size_t NUM_FACTORS = MAX_NUM_FACTORS;
+const size_t MAX_NUM_FACTORS = 4;
 
 enum FactorDirection
 {	
@@ -146,4 +145,4 @@ enum DictionaryFind
 typedef size_t FactorType;
 
 class Factor;
-typedef const Factor * FactorArray[NUM_FACTORS];
+typedef const Factor * FactorArray[MAX_NUM_FACTORS];

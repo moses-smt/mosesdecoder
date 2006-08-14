@@ -81,7 +81,7 @@ protected:
 	std::vector<std::string>		m_mySQLParam;
 	InputOutput									*m_inputOutput;
 	bool                        m_fLMsLoaded, m_labeledNBestList;
-	size_t											m_maxNgramOrderForFactor[NUM_FACTORS];
+	size_t											m_maxNgramOrderForFactor[MAX_NUM_FACTORS];
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
 	 * true = drop (ignore) them

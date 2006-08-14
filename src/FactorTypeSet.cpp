@@ -39,7 +39,7 @@ std::ostream& operator<<(std::ostream& out, const FactorMask& fm)
 {
   out << "FactorMask<";
 	bool first = true;
-  for (size_t currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+  for (size_t currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
   {
     if (fm[currFactor])
     {

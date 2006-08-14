@@ -35,7 +35,7 @@ DecodeStep::DecodeStep(Dictionary *ptr, const DecodeStep* prev)
   m_newOutputFactors.resize(newOutputFactorMask.count());
 	m_conflictFactors.resize(conflictMask.count());
 	size_t j=0, k=0;
-  for (size_t i = 0; i < NUM_FACTORS; i++) {
+  for (size_t i = 0; i < MAX_NUM_FACTORS; i++) {
     if (newOutputFactorMask[i]) m_newOutputFactors[j++] = i;
 		if (conflictMask[i]) m_conflictFactors[k++] = i;
 	}
