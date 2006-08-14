@@ -36,7 +36,6 @@ using namespace std;
 TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage)
 	: m_source(src)
 	,m_futureScore(src.GetSize())
-	,m_unknownWordPos(src.GetSize())
 	,m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
 {
 	// create 2-d vector
@@ -113,8 +112,19 @@ void TranslationOptionCollection::Prune()
 
 void TranslationOptionCollection::ProcessUnknownWord()
 {
-	// create unknown words for 1 word coverage where we don't have any trans options
 	size_t size = m_source.GetSize();
+	// try to translation for coverage with no trans by expanding table limit
+	for (size_t pos = 0 ; pos < size ; ++pos)
+	{
+			TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
+			size_t numTransOpt = fullList.size();
+			if (numTransOpt == 0)
+			{
+				//CreateTranslationOptionsForRange(pos, pos)
+			}
+	}
+		
+	// create unknown words for 1 word coverage where we don't have any trans options
 	vector<bool> process(size);
 	fill(process.begin(), process.end(), true);
 	
@@ -123,8 +133,8 @@ void TranslationOptionCollection::ProcessUnknownWord()
 		for (size_t endPos = startPos ; endPos < size ; ++endPos)
 		{
 			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
-			size_t s = fullList.size();
-			if (s > 0)
+			size_t numTransOpt = fullList.size();
+			if (numTransOpt > 0)
 			{
 				fill(process.begin() + startPos, process.begin() + endPos + 1, false);
 			}
@@ -368,8 +378,6 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 
 		transOpt->CalcScore();
 		Add(transOpt);
-
-		m_unknownWordPos.SetValue(sourcePos, true); 
 }
 
 
@@ -392,11 +400,6 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	
 	const PhraseDictionaryBase &phraseDictionary = decodeStep.GetPhraseDictionary();
 	const size_t tableLimit = phraseDictionary.GetTableLimit();
-
-	if (m_unknownWordPos.GetValue(startPos))
-	{ // unknown word but already processed. skip 
-		return;
-	}
 
 	const WordsRange wordsRange(startPos, endPos);
 	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(m_source,wordsRange); 
