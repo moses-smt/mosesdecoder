@@ -338,7 +338,7 @@ int bothuncovered=false;
       cerr << "usage: symal [-i=<inputfile>] [-o=<outputfile>] -a=[u|i|g] -d=[yes|no] -b=[yes|no] -f=[yes|no] \n"
       << "Input file or std must be in .bal format (see script giza2bal.pl).\n";
          
-      exit(0);
+      exit(1);
         
    }
 
@@ -347,12 +347,12 @@ int bothuncovered=false;
 
 	if (!inp.is_open()){
 		cerr << "cannot open " << input << "\n";
-		exit(0);
+		exit(1);
 	}
    
    if (!out.is_open()){
 		cerr << "cannot open " << output << "\n";
-		exit(0);
+		exit(1);
 	}
    
 
@@ -383,12 +383,12 @@ int bothuncovered=false;
          
          break;
 		default:
-			exit(0);
+			exit(1);
 	}
    
    delete [] fa; delete [] ea; 
    for (int i=1;i<=MAX_N;i++) delete [] A[i];
    delete [] A;
    
-   exit(1);
+   exit(0);
 }

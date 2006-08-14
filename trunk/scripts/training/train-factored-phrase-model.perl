@@ -663,19 +663,14 @@ sub word_align {
     $__symal_f="yes" if $___ALIGNMENT=~ /final/;
     $__symal_b="yes" if $___ALIGNMENT=~ /final-and/;
     
-    print STDERR "$GIZA2BAL -i $__ALIGNMENT_INV_CMD -d $__ALIGNMENT_CMD |".
-	   "$SYMAL -alignment=\"$__symal_a\" -diagonal=\"$__symal_d\" ".
-	   "-final=\"$__symal_f\" -both=\"$__symal_b\" > ".
-	   "$___MODEL_DIR/aligned.$___ALIGNMENT";
-
-    system("$GIZA2BAL -d $__ALIGNMENT_INV_CMD -i $__ALIGNMENT_CMD |".
+    safesystem("$GIZA2BAL -d $__ALIGNMENT_INV_CMD -i $__ALIGNMENT_CMD |".
 	   "$SYMAL -alignment=\"$__symal_a\" -diagonal=\"$__symal_d\" ".
 	   "-final=\"$__symal_f\" -both=\"$__symal_b\" > ".
 	   "$___MODEL_DIR/aligned.$___ALIGNMENT") 
       ||
 	die "Can't generate symmetrized alignment file\n"
 
-      }
+}
 
 ### (4) BUILDING LEXICAL TRANSLATION TABLE
 
