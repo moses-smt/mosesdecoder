@@ -111,3 +111,4 @@ void PhraseDictionaryTreeAdaptor::DisableCache()
 void PhraseDictionaryTreeAdaptor::SortTargetPhraseCollection()
 {
 }
+

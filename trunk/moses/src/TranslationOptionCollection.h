@@ -69,7 +69,7 @@ protected:
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos, bool observeTableLimit );
 
-	void ProcessUnknownWord();
+	void ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection);
 	virtual void ProcessOneUnknownWord(const FactorArray &sourceWord
 																		 , size_t sourcePos
 																		 , FactorCollection &factorCollection);

@@ -110,7 +110,7 @@ void TranslationOptionCollection::Prune()
 	}
 }
 
-void TranslationOptionCollection::ProcessUnknownWord()
+void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection)
 {
 	size_t size = m_source.GetSize();
 	// try to translation for coverage with no trans by expanding table limit
@@ -120,7 +120,8 @@ void TranslationOptionCollection::ProcessUnknownWord()
 			size_t numTransOpt = fullList.size();
 			if (numTransOpt == 0)
 			{
-				//CreateTranslationOptionsForRange(pos, pos)
+				CreateTranslationOptionsForRange(decodeStepList, factorCollection
+																			, pos, pos, false);
 			}
 	}
 		
@@ -234,8 +235,7 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::CreateTranslationOptions(
-																													 const list < DecodeStep* > &decodeStepList
+void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeStep* > &decodeStepList
 																													 , FactorCollection &factorCollection)
 {
 	m_factorCollection = &factorCollection;
@@ -248,7 +248,7 @@ void TranslationOptionCollection::CreateTranslationOptions(
 		}
 	}
 
-	ProcessUnknownWord();
+	ProcessUnknownWord(decodeStepList, factorCollection);
 	
 	// Prune
 	Prune();
