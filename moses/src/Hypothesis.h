@@ -56,8 +56,6 @@ typedef std::vector<Hypothesis*> ArcList;
 class Hypothesis
 {
 	friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
-private:
-  unsigned char m_compSignature[16]; /**< MD5 checksum for fast comparison */
 
 protected:
 	static ObjectPool<Hypothesis> s_objectPool;
@@ -90,15 +88,18 @@ protected:
 	mutable bool _hash_computed;
 
 public:
+	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total
+	int m_id; /**< numeric ID of this hypothesis, used for logging */
+
+	std::vector<std::vector<unsigned int> >* _lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
+	
+
+public:
 	static ObjectPool<Hypothesis> &GetObjectPool()
 	{
 		return s_objectPool;
 	}
 
-
-	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total
-	int m_id; /**< numeric ID of this hypothesis, used for logging */
-	
 	/** used by initial seeding of the translation process */
 	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
 	/** used when creating a new hypothesis using a translation option (phrase translation) */

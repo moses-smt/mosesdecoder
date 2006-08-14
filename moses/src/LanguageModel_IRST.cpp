@@ -128,8 +128,10 @@ int LanguageModel_IRST::GetLmID( const std::string &str ) const
     return m_lmtb->dict->encode( str.c_str() );
 }
 
-float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFactor, State* finalState) const
+float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFactor, State* finalState, unsigned int* len) const
 {
+	unsigned int dummy;
+	if (!len) { len = &dummy; }
 	FactorType factorType = GetFactorType();
 	
 	// set up context
@@ -147,7 +149,9 @@ float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFact
 	}
   
 	if (finalState){        
-    *finalState=(State *)m_lmtb->cmaxsuffptr(*m_lmtb_ng);		
+    *finalState=(State *)m_lmtb->cmaxsuffptr(*m_lmtb_ng);	
+		// back off stats not currently available
+		*len = 0;	
 	}
 
 	//return TransformIRSTScore(m_lmtb->clprob(*m_lmtb_ng));
