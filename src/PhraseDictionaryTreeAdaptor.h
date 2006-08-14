@@ -19,6 +19,9 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
 	PhraseDictionaryTreeAdaptor();
 	PhraseDictionaryTreeAdaptor(const PhraseDictionaryTreeAdaptor&);
 	void operator=(const PhraseDictionaryTreeAdaptor&);
+	
+	void SortTargetPhraseCollection();
+	
  public:
 	PhraseDictionaryTreeAdaptor(size_t noScoreComponent,unsigned numInputScores);
 	virtual ~PhraseDictionaryTreeAdaptor();
