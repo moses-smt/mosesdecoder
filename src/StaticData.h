@@ -100,6 +100,7 @@ protected:
 	bool m_useDistortionFutureCosts;
 	bool m_isDetailedTranslationReportingEnabled;
 	bool m_onlyDistinctNBest;
+	bool m_computeLMBackoffStats;
 
 	mutable boost::shared_ptr<SentenceStats> m_sentenceStats;
 
@@ -134,6 +135,10 @@ public:
 		return *m_inputOutput;
 	}
 
+	const bool IsComputeLMBackoffStats() const
+	{
+		return m_computeLMBackoffStats;
+	}
 	const std::vector<FactorType> &GetInputFactorOrder() const
 	{
 		return m_inputFactorOrder;

@@ -59,8 +59,9 @@ public:
 	void CalcScore(const Phrase &phrase
 							, float &fullScore
 							, float &ngramScore) const;
-	virtual float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL) const = 0;
-	State GetState(const std::vector<FactorArrayWrapper> &contextFactor) const;
+	virtual float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = 0, unsigned int* len = 0) const = 0;
+
+	State GetState(const std::vector<FactorArrayWrapper> &contextFactor, unsigned int* len = 0) const;
 
 	size_t GetNGramOrder() const
 	{

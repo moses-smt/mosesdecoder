@@ -56,12 +56,12 @@ StaticData::StaticData()
 ,m_useDistortionFutureCosts(false)
 ,m_isDetailedTranslationReportingEnabled(false) 
 ,m_onlyDistinctNBest(false)
+,m_computeLMBackoffStats(false)
 {
 	s_instance = this;
 
 	// memory pools
 	Phrase::InitializeMemPool();
-
 }
 
 bool StaticData::LoadParameters(int argc, char* argv[])
@@ -168,6 +168,13 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	}
 	if(m_parameter.GetParam("translation-details").size() > 0) {
 	  m_isDetailedTranslationReportingEnabled = Scan<bool>( m_parameter.GetParam("translation-details")[0]);
+	}
+	if(m_parameter.GetParam("lmstats").size() > 0) {
+	  m_computeLMBackoffStats = Scan<bool>( m_parameter.GetParam("lmstats")[0]);
+		if (!m_isDetailedTranslationReportingEnabled) {
+			std::cerr << "-lmstats implies -translation-details, enabling" << std::endl;
+			m_isDetailedTranslationReportingEnabled = true;
+		}
 	}
 	// load Lexical Reordering model
 	// check to see if the lexical reordering parameter exists

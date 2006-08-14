@@ -64,7 +64,7 @@ public:
 		m_lmImpl->Load(fileName, factorCollection, m_factorType, weight, nGramOrder);
 	}
 			
-	float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL) const
+	float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL, unsigned int* len) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -111,7 +111,7 @@ public:
 		TRACE_ERR(std::endl);
 		*/
 		// calc score on chunked phrase
-		float ret = m_lmImpl->GetValue(chunkContext, finalState);
+		float ret = m_lmImpl->GetValue(chunkContext, finalState, len);
 		
 		return ret;
 	}
