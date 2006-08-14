@@ -480,10 +480,10 @@ void storage::stat(){
       waste+=poolset[i]->wasted();
     }
 
-  cout << "storage class statistics\n";
-  cout << "alloc entries " << newcalls 
+  cerr << "storage class statistics\n";
+  cerr << "alloc entries " << newcalls 
        << " used memory " << newmemory/1024 << "Kb\n";
-  cout << "mpools " << setsize
+  cerr << "mpools " << setsize
        << " active  " << used 
        << " used memory " << memory/1024 << "Kb"
        << " wasted " << waste/1024 << "Kb\n";
