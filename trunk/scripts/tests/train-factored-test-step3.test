@@ -1,0 +1,18 @@
+#!/bin/bash
+
+[ -d $WORKSPACE ] || exit 1
+echo "Workspace: $WORKSPACE"
+
+export SCRIPTS_ROOTDIR=$WORKSPACE/scripts
+
+echo "Starting training script."
+
+$SCRIPTS_ROOTDIR/training/train-factored-phrase-model.perl \
+  --f es --e en \
+  --translation-factors 0-0 \
+  --decoding-steps t0 \
+  --first-step 3 \
+  --last-step 3 \
+  --corpus corpus \
+  --root   corpus
+
