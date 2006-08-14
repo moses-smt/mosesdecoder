@@ -93,7 +93,7 @@ void GenerationDecodeStep::Process(const TranslationOption &inputPartialTranslOp
 
   // normal generation step
   const GenerationDictionary &generationDictionary  = decodeStep.GetGenerationDictionary();
-  //const WordsRange &sourceWordsRange                = inputPartialTranslOpt.GetSourceWordsRange();
+//  const WordsRange &sourceWordsRange                = inputPartialTranslOpt.GetSourceWordsRange();
 
   const Phrase &targetPhrase  = inputPartialTranslOpt.GetTargetPhrase();
   size_t targetLength         = targetPhrase.GetSize();

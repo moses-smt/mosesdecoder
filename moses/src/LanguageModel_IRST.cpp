@@ -154,7 +154,6 @@ float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFact
 		*len = 0;	
 	}
 
-	//return TransformIRSTScore(m_lmtb->clprob(*m_lmtb_ng));
   return TransformIRSTScore(m_lmtb->clprob(*m_lmtb_ng));
 }
 
@@ -164,7 +163,7 @@ const void LanguageModel_IRST::CleanUpAfterSentenceProcessing(){
 }
 
 const void LanguageModel_IRST::InitializeBeforeSentenceProcessing(){
-  //nothing to do;
+  //nothing to do
 #ifdef TRACE_CACHE
  m_lmtb->sentence_id++;
 #endif
