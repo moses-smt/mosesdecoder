@@ -4,21 +4,24 @@
 /* Copyright 2005 (c) by RWTH Aachen - Lehrstuhl fuer Informatik VI */
 /* Richard Zens                                                     */
 /* ---------------------------------------------------------------- */
+
 #ifndef OBJECTPOOL_H_
 #define OBJECTPOOL_H_
+
 #include <vector>
 #include <deque>
 #include <string>
 #include <iostream>
 #include <iterator>
-#include "Util.h" //malloc() replacement
+#include "Util.h"
 
-// template class for pool of objects
-//  - usefull if many small objects are frequently created and destroyed
-//  - allocates memory for N objects at a time
-//  - separates memory allocation from constructor/destructor calls
-//  - prevents memory leak
-
+/***
+ * template class for pool of objects
+ * - useful if many small objects are frequently created and destroyed
+ * - allocates memory for N objects at a time
+ * - separates memory allocation from constructor/destructor calls
+ * - prevents memory leaks
+ */
 template<typename T> class ObjectPool {
  public:
   typedef T Object;
@@ -51,7 +54,7 @@ template<typename T> class ObjectPool {
   
 		// get pointer to uninitialized memory, 
 		// WARNING: use only if you know what you are doing !
-		// usefull for non-default constructors, you have to use placement new
+		// useful for non-default constructors, you have to use placement new
 		Object* getPtr() {
 			if(freeObj.size()) {
 				Object* rv=freeObj.back();freeObj.pop_back();rv->~Object();return rv;}
@@ -122,4 +125,5 @@ template<typename T> class ObjectPool {
 			}
 		}
 };
-#endif
+
+#endif //OBJECTPOOL_H_

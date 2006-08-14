@@ -1,6 +1,6 @@
 #include "PhraseDictionaryBase.h"
 #include "StaticData.h"
-//#include "InputType.h"
+#include "InputType.h"
 
 PhraseDictionaryBase::PhraseDictionaryBase(size_t noScoreComponent)
 	: Dictionary(noScoreComponent),m_tableLimit(0)
