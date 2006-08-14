@@ -8,3 +8,4 @@ autom4te.cache
 gmon.out
 Debug*
 Release*
+out.dat
