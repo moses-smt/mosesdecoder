@@ -35,44 +35,44 @@ using namespace std;
 /** define allowed parameters */
 Parameter::Parameter() 
 {
+	AddParam("beam-threshold", "threshold for threshold pruning");
+	AddParam("cache-path", "?"); //TODO description, please
 	AddParam("config", "f", "location of the configuration file");
-	AddParam("ttable-file", "location and properties of the translation tables");
+	AddParam("distortion", "?"); //TODO description, please
+	AddParam("distortion-file", "location and properties of the factorized/lexicalized reordering table");
+	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");
+	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
+	AddParam("generation-file", "location and properties of the generation table");
+	AddParam("input-factors", "list of factors in the input");
+	AddParam("input-file", "i", "location of the input file to be translated");
+	AddParam("inputtype", "text (0) or confusion network (1)");
+	AddParam("labeled-n-best-list", "labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
 	AddParam("lmodel-file", "location and properties of the language models");
+	AddParam("lmstats", "L", "(1/0) compute LM backoff statistics for each translation hypothesis");
+	AddParam("mapping", "description of decoding steps");
+	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
+	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
+	AddParam("mysql", "(deprecated)");
+	AddParam("n-best-list", "file and size of n-best-list to be generated");
+	AddParam("output-factors", "list of factors in the output");
+	AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
+	AddParam("report-all-factors", "?"); //TODO description, please
+	AddParam("report-source-span", "?"); //TODO description, please
+	AddParam("stack", "s", "maximum stack size for histogram pruning");
+	AddParam("translation-details", "T", "for each best translation hypothesis, print out details about what sourcce spans were used, dropped");
+	AddParam("ttable-file", "location and properties of the translation tables");
 	AddParam("ttable-limit", "maximum number of translation table entries per input phrase");
+	AddParam("use-distortion-future-costs", "consider expected distortion cost in future cost estimation");
+	AddParam("verbose", "v", "verbosity level of the logging");
 	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
+	AddParam("weight-generation", "g", "weight(s) for generation components");
+	AddParam("weight-i", "I", "weight for word insertion");
 	AddParam("weight-l", "lm", "weight(s) for language models");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
-	AddParam("weight-e", "e", "weight for word deletion"); //source word deletion overall weight
-	AddParam("weight-generation", "g", "weight(s) for generation components");
-	AddParam("weight-i", "I", "weight for word insertion");
-	AddParam("mapping", "description of decoding steps");
-	AddParam("n-best-list", "file and size of n-best-list to be generated");
-	AddParam("beam-threshold", "threshold for threshold pruning");
-	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");
-	AddParam("input-factors", "list of factors in the input");
-	AddParam("output-factors", "list if factors in the output");
-	AddParam("mysql", "(deprecated)");
-	AddParam("input-file", "i", "location of the input file to be translated");
-	AddParam("cache-path", "?");
- 	AddParam("distortion-file", "location and properties of the factorized/lexicalized reordering table");
- 	AddParam("distortion", "?");
-	AddParam("generation-file", "location and properties of the generation table");
-	AddParam("stack", "s", "maximum stack size for histogram pruning");
-	AddParam("verbose", "v", "verbosity level of the logging");
-	AddParam("report-source-span", "?");
-	AddParam("report-all-factors", "?");
-	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
-	AddParam("inputtype", "text (0) or confusion network (1)");
-	AddParam("translation-details", "T", "(1/0) for each best translation hypothesis, print out details about what sourcce spans were used, dropped");
-	AddParam("lmstats", "L", "(1/0) compute LM backoff statistics for each translation hypothesis");
-	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
-	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
-	AddParam("use-distortion-future-costs", "consider expected distortion cost in future cost estimation");
-	AddParam("labeled-n-best-list", "labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
 }
 
-/** initializes a parameter, sub of constructor */
+/** initialize a parameter, sub of constructor */
 PARAM_VEC &Parameter::AddParam(const string &paramName, const string &description)
 {
 	m_valid[paramName] = true;
