@@ -276,19 +276,11 @@ public:
 	TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,
 																								std::vector<std::pair<float,size_t> >& costs) const 
 	{
-		// prune target candidates and sort according to score
-		std::vector<std::pair<float,size_t> >::iterator nth=costs.end();
-		if(m_obj->m_tableLimit>0 && costs.size()>m_obj->m_tableLimit) {
-			nth=costs.begin()+m_obj->m_tableLimit;
-			std::nth_element(costs.begin(),nth,costs.end(),
-											 std::greater<std::pair<float,size_t> >());
-		}
-		std::sort(costs.begin(),nth,std::greater<std::pair<float,size_t> >());
-
 		// convert into TargetPhraseCollection
 		TargetPhraseCollection *rv=new TargetPhraseCollection;
-		for(std::vector<std::pair<float,size_t> >::iterator it=costs.begin();it!=nth;++it)
+		for(std::vector<std::pair<float,size_t> >::iterator it=costs.begin();it!=costs.end();++it)
 			rv->Add(new TargetPhrase(tCands[it->second]));
+		rv->Sort(m_obj->m_tableLimit);
 		return rv;
 	}
 

@@ -110,5 +110,6 @@ void PhraseDictionaryTreeAdaptor::DisableCache()
 
 void PhraseDictionaryTreeAdaptor::SortTargetPhraseCollection()
 {
+	// TODO: sort targt phrase collection in descending order
 }
 
