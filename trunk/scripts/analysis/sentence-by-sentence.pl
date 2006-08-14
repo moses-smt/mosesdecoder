@@ -64,7 +64,7 @@ while(my $sLine = <SYSOUT>)
 	}
 		  
 	my $bleuData = getBLEUSentenceDetails(\@sFactors, \@eFactors, 0);
-	push @bleuScores, [$i, $bleuData->[0]->[0], 0]; #the last number will be the rank
+	push @bleuScores, [$i, $bleuData->[0], 0]; #the last number will be the rank
 	my $pwerData = getPWERSentenceDetails(\@sFactors, \@eFactors, 0);
 	my $html = "<div class=\"sentence\" style=\"background-color: %%%%\" id=\"sentence$i\">"; #the %%%% and other tokens like it are flags to be replaced
 	$html .= "<div class=\"bleu_report\"><b>Sentence $i)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BLEU:</b> " . sprintf("%.4lg", $bleuData->[0]->[0]) . " (" . join('/', map {sprintf("%.4lg", $_)} @{$bleuData->[0]}[1 .. 4]) . ")</div><table>\n";
@@ -90,17 +90,17 @@ foreach my $truthfh (@TRUTHS) {close($truthfh);}
 rankSentencesByBLEU(\@bleuScores);
 my $stylesheet = <<EOHTML;
 <style type="text/css">
-.legend {background-color: #fff; border: 1px solid #000; padding: 2px; margin-bottom: 10px; margin-right: 15px}
+.legend {background: #fff; border: 1px solid #000; padding: 2px; margin-bottom: 10px; margin-right: 15px}
 .legend_title {font-weight: bold; font-size: medium; text-decoration: underline}
-div.sentence {background-color: #ffffee; border: 1px solid #000088; padding: 0px 8px 0px 8px} //entire composition for a given sentence
+div.sentence {background: #ffffee; border: 1px solid #000088; padding: 0px 8px 0px 8px} //entire composition for a given sentence
 div.sentence td {margin: 8px 0px 8px 0px}
 div.bleu_report {margin-bottom: 5px}
 td.sent_title {font-weight: bold; font-size: medium; margin-bottom: 12px}
-.source_sentence {background-color: #ffcccc; border: 1px solid #bbb}
-.truth_sentence {background-color: #ccffcc; border: 1px solid #bbb}
-.sysout_sentence {background-color: #ccccff; border: 1px solid #bbb}
+.source_sentence {background: #ffcccc; border: 1px solid #bbb}
+.truth_sentence {background: #ccffcc; border: 1px solid #bbb}
+.sysout_sentence {background: #ccccff; border: 1px solid #bbb}
 table.sentence_table {border: none}
-.sysout_ngrams {background-color: #fff; border: 1px solid #bbb}
+.sysout_ngrams {background: #fff; border: 1px solid #bbb}
 table.ngram_table {}
 td.ngram_cell {padding: 1px}
 </style>
@@ -117,7 +117,7 @@ function sortByBLEU()
 	var body = document.getElementById('all_sentences'); var row;\n";
 foreach my $rank (sort {$a <=> $b} keys %rank2index)
 {
-	print "\trow = body.getElementById('everything" . $rank2index{$rank} . "');\n";
+	print "\trow = document.getElementById('everything" . $rank2index{$rank} . "');\n";
 	print "\tbody.removeChild(row); body.appendChild(row);\n";
 }
 print "}
@@ -126,7 +126,7 @@ function sortByCorpusOrder()
 	var body = document.getElementById('all_sentences'); var row;\n";
 for(my $j = 0; $j < scalar(@htmlSentences); $j++)
 {
-	print "\trow = body.getElementById('everything$j');\n";
+	print "\trow = document.getElementById('everything$j');\n";
 	print "\tbody.removeChild(row); body.appendChild(row);\n";
 }
 print "}
@@ -138,20 +138,20 @@ my @maxBLEU = (-1e9) x scalar(@htmlColors);
 for(my $k = 0; $k < scalar(@htmlSentences); $k++)
 {
 	my $tier = int($bleuScores[$k]->[2] / (scalar(@htmlSentences) / scalar(@htmlColors)));
-	if($bleuScores[$k]->[1] < $minBLEU[$tier]) {$minBLEU[$tier] = $bleuScores[$k]->[1];}
-	elsif($bleuScores[$k]->[1] > $maxBLEU[$tier]) {$maxBLEU[$tier] = $bleuScores[$k]->[1];}
+	if($bleuScores[$k]->[1]->[0] < $minBLEU[$tier]) {$minBLEU[$tier] = $bleuScores[$k]->[1]->[0];}
+	elsif($bleuScores[$k]->[1]->[0] > $maxBLEU[$tier]) {$maxBLEU[$tier] = $bleuScores[$k]->[1]->[0];}
 }
-print "<table border=0><tr><td><div class=\"legend\"><span class=\"legend_title\">BLEU Ranges</span> (sentence backgrounds)<table border=0>";
+print "<table border=0><tr><td><div class=\"legend\"><span class=\"legend_title\">Sentence Background Colors => BLEU Ranges</span><table border=0>";
 for(my $k = 0; $k < scalar(@htmlColors); $k++)
 {
-	print "<tr><td style=\"width: 15px; height: 15px; background-color: " . $htmlColors[$k] . "\"></td><td align=left style=\"padding-left: 12px\">" 
+	print "<tr><td style=\"width: 15px; height: 15px; background: " . $htmlColors[$k] . "\"></td><td align=left style=\"padding-left: 12px\">" 
 							. sprintf("%.4lg", $minBLEU[$k]) . " - " . sprintf("%.4lg", $maxBLEU[$k]) . "</td>";
 }
 print "</table></div></td>\n";
 print "<td><div class=\"legend\"><span class=\"legend_title\">N-gram Colors => Number of Matching Reference Translations</span><table border=0>";
 for(my $k = 1; $k <= scalar(@truthfiles); $k++)
 {
-	print "<tr><td style=\"width: 15px; height: 15px; background-color: " . getNgramColorHTML($k, scalar(@truthfiles)) . "\"></td><td align=left style=\"padding-left: 12px\">$k</td>";
+	print "<tr><td style=\"width: 15px; height: 15px; background: " . getNgramColorHTML($k, scalar(@truthfiles)) . "\"></td><td align=left style=\"padding-left: 12px\">$k</td>";
 }
 print "</table></div></td></tr></table><div style=\"font-weight: bold; margin-bottom: 15px\">
 PWER errors are marked in red on output sentence displays.</div>
@@ -335,14 +335,14 @@ sub getPWERSentenceDetails
 }
 
 #assign ranks to sentences by BLEU score
-#arguments: arrayref of arrayrefs of [sentence index, bleu score, rank to be assigned]
+#arguments: arrayref of arrayrefs of [sentence index, arrayref of [bleu score, n-gram precisions], rank to be assigned]
 #return: none
 sub rankSentencesByBLEU
 {
 	my $bleuData = shift;
 	my $i = 0;
-	#sort first on score, secondarily on sentence index
-	foreach my $sentenceData (reverse sort {my $c = $a->[1] <=> $b->[1]; if($c == 0) {$a->[0] cmp $b->[0];} else {$c;}} @$bleuData) {$sentenceData->[2] = $i++;}
+	#sort first on score, then on 1-gram accuracy, then on sentence index
+	foreach my $sentenceData (reverse sort {my $c = $a->[1]->[0] <=> $b->[1]->[0]; if($c == 0) {my $d = $a->[1]->[1] <=> $b->[1]->[1]; if($d == 0) {$a->[0] cmp $b->[0];} else {$d;}} else {$c;}} @$bleuData) {$sentenceData->[2] = $i++;}
 }
 
 ###############################################################################################################################################################
@@ -364,7 +364,7 @@ sub getFactoredSentenceHTML
 	return $html . "</tr></table>";
 }
 
-#arguments: arrayref of [sentence index, bleu score, rank], number of sentences
+#arguments: arrayref of [sentence index, arrayref of [bleu score, n-gram precisions], rank], number of sentences
 #return: HTML color string
 sub getSentenceBGColorHTML
 {
@@ -419,7 +419,7 @@ sub getAllNgramsHTML
 	foreach my $ngram (sort {my $c = $a->[3] <=> $b->[3]; if($c == 0) {$a->[0] <=> $b->[0]} else {$c}} @$ngrams) #sort by row, then word num
 	{
 		while($ngram->[0] > $curCol || $ngram->[3] > $curRow) {$html .= "<td></td>"; $curCol = ($curCol + 1) % $numWords; if($curCol == 0) {$html .= "</tr><tr>"; $curRow++;}}
-		$html .= "<td colspan=" . $ngram->[1] . " align=center class=\"ngram_cell\" style=\"background-color: " . getNgramColorHTML(scalar(@{$ngram->[2]}), $numTruths) . "\">" . join(' ', map {$_->[$factorIndex]} @{$sentence}[$ngram->[0] .. $ngram->[0] + $ngram->[1] - 1]) . "</td>";
+		$html .= "<td colspan=" . $ngram->[1] . " align=center class=\"ngram_cell\" style=\"background: " . getNgramColorHTML(scalar(@{$ngram->[2]}), $numTruths) . "\">" . join(' ', map {$_->[$factorIndex]} @{$sentence}[$ngram->[0] .. $ngram->[0] + $ngram->[1] - 1]) . "</td>";
 		$curCol = ($curCol + $ngram->[1]) % $numWords; if($curCol == 0) {$html .= "</tr><tr>"; $curRow++;}
 	}
 	$html .= "</tr>";
