@@ -89,11 +89,12 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	fullScore += ngramScore;	
 }
 
-LanguageModel::State LanguageModel::GetState(const std::vector<FactorArrayWrapper> &contextFactor) const
+LanguageModel::State LanguageModel::GetState(const std::vector<FactorArrayWrapper> &contextFactor, unsigned int* len) const
 {
   State state;
-  
-  GetValue(contextFactor,&state);
+	unsigned int dummy;
+  if (!len) len = &dummy;
+  GetValue(contextFactor,&state,len);
   return state;
 }
 

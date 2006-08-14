@@ -56,6 +56,6 @@ public:
 					, float weight
 					, size_t nGramOrder);
 
-  virtual float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL) const;
+  virtual float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = 0, unsigned int* len = 0) const;
 };
 
