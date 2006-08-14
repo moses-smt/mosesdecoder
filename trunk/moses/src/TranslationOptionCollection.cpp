@@ -270,7 +270,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
 	ProcessInitialTranslation(decodeStep, factorCollection
 														, *oldPtoc
-														, startPos, endPos );
+														, startPos, endPos, observeTableLimit );
 
 	// do rest of decode steps
 	size_t totalEarlyPruned = 0;
@@ -379,7 +379,8 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos
-															, size_t endPos)
+															, size_t endPos
+															, bool observeTableLimit)
 {
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
@@ -390,6 +391,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	// phrase in the PhraseDictionary?
 	
 	const PhraseDictionaryBase &phraseDictionary = decodeStep.GetPhraseDictionary();
+	const size_t tableLimit = phraseDictionary.GetTableLimit();
 
 	if (m_unknownWordPos.GetValue(startPos))
 	{ // unknown word but already processed. skip 
@@ -405,8 +407,10 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			TRACE_ERR("[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
 		}
 			
-		TargetPhraseCollection::const_iterator iterTargetPhrase;
-		for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != phraseColl->end() ; ++iterTargetPhrase)
+		TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
+		iterEnd = (!observeTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
+		
+		for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase)
 		{
 			const TargetPhrase	&targetPhrase = **iterTargetPhrase;
 			outputPartialTranslOptColl.Add ( new TranslationOption(wordsRange, targetPhrase) );

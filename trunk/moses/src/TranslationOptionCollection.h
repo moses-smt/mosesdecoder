@@ -68,7 +68,7 @@ protected:
 	virtual void ProcessInitialTranslation(const DecodeStep &decodeStep
 															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
-															, size_t startPos, size_t endPos );
+															, size_t startPos, size_t endPos, bool observeTableLimit );
 
 	void ProcessUnknownWord();
 	virtual void ProcessOneUnknownWord(const FactorArray &sourceWord

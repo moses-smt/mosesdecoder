@@ -45,9 +45,7 @@ public:
 	{
 			RemoveAllInColl(m_collection);
 	}
-	void Sort()
-	{
-	}
+	void Sort();
 	size_t GetSize() const
 	{
 		return m_collection.size();

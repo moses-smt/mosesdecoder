@@ -107,3 +107,7 @@ void PhraseDictionaryTreeAdaptor::DisableCache()
 {
 	imp->useCache=0;
 }
+
+void PhraseDictionaryTreeAdaptor::SortTargetPhraseCollection()
+{
+}

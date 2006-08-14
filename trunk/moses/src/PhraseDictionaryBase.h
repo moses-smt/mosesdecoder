@@ -41,6 +41,7 @@ class PhraseDictionaryBase : public Dictionary, public ScoreProducer
 	size_t m_tableLimit;
 	std::string m_filename;    // just for debugging purposes
 
+	virtual void SortTargetPhraseCollection() = 0;
  public:
 	PhraseDictionaryBase(size_t noScoreComponent);
 	virtual ~PhraseDictionaryBase();
