@@ -24,6 +24,7 @@
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 </option>
 <option id="gnu.cpp.compiler.option.debugging.gprof.514527174" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
+<option id="gnu.cpp.compiler.option.warnings.allwarn.169517888" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1905266391" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.888044188" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
@@ -90,6 +91,7 @@
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 </option>
 <option id="gnu.cpp.compiler.option.debugging.gprof.24360799" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
+<option id="gnu.cpp.compiler.option.warnings.allwarn.2108427488" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.285054015" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1153317521" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">

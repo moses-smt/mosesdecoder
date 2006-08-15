@@ -8,6 +8,7 @@
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.208381076" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
 <option id="gnu.cpp.compiler.option.debugging.gprof.1713594612" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
+<option id="gnu.cpp.compiler.option.warnings.allwarn.345913036" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.1727542516" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1884793796" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
@@ -20,7 +21,9 @@
 <configuration artifactExtension="a" artifactName="irstlm" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.release.1538178030" name="Release" parent="cdt.managedbuild.config.gnu.lib.release">
 <toolChain id="cdt.managedbuild.toolchain.gnu.lib.release.508823597" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.release">
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.release.723647841" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.release"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1586280207" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1586280207" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release">
+<option id="gnu.cpp.compiler.option.warnings.allwarn.1119345025" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
+</tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.1518934657" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.release.1672118671" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.release"/>
 <macros/>
