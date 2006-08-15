@@ -130,8 +130,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
         m_reportAllFactors = false;
 
 	//distortion weights
-	//TODO: CHANGE
-	 std::vector<float> distortionWeights = Scan<float>(m_parameter.GetParam("weight-d"));	
+	 const vector<string> distortionWeights = m_parameter.GetParam("weight-d");	
 
 	//input factors
 	const vector<string> &inputFactorVector = m_parameter.GetParam("input-factors");
@@ -169,6 +168,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	if(m_parameter.GetParam("translation-details").size() > 0) {
 	  m_isDetailedTranslationReportingEnabled = Scan<bool>( m_parameter.GetParam("translation-details")[0]);
 	}
+
 	if(m_parameter.GetParam("lmstats").size() > 0) {
 	  m_computeLMBackoffStats = Scan<bool>( m_parameter.GetParam("lmstats")[0]);
 		if (!m_isDetailedTranslationReportingEnabled) {
@@ -177,98 +177,100 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		}
 	}
 	// load Lexical Reordering model
-	// check to see if the lexical reordering parameter exists
-	//TODO: CHANGE
 	const vector<string> &lrFileVector = 
 		m_parameter.GetParam("distortion-file");	
-
-	if (lrFileVector.size() > 0)
+		for(unsigned int i=0; i< lrFileVector.size(); i++ ) //loops for each distortion model
 		{
-		//TODO: starting to be set up for more than one distortion model; not quite
-		for(unsigned int i=0; i< lrFileVector.size(); i++ )
-		{
-			vector<string>	token		= Tokenize(lrFileVector[i]);
+			vector<string>	token	= Tokenize(lrFileVector[i]);
 			//characteristics of the phrase table
-			vector<FactorType> 	input		= Tokenize<FactorType>(token[0],",")
-								,output	= Tokenize<FactorType>(token[1],",");
-			std::string							filePath= token[2];
-		//get the weights for the lex reorderer
-		TRACE_ERR("weights-lex")
-		
-		//TODO: THIS WEIGHT GETTING IS WHAT STILL NEEDS TO CHANGE TO SUPPORT MULTIPLE LEXICAL REORDERERS
-
-		for(size_t i=1; i<distortionWeights.size(); i++)
-		{
-			m_lexWeights.push_back(distortionWeights[i]);
-			TRACE_ERR(distortionWeights[i] << "\t");
-		}
-		TRACE_ERR(endl);
-		assert(m_lexWeights.size()>0);
-
-			// if there is a lexical reordering model, then parse the
-			// parameters associated with it, and create a new Lexical
-			// Reordering object (which will load the probability table)
-			const vector<string> &lrTypeVector = 
-				m_parameter.GetParam("distortion");	
-			// if type values have been set in the .ini file, then use them;
-			// first initialize to the defaults (msd, bidirectional, fe).
+			//TODO: need to change in the case that the phrase table not dependent on the source, don't need to configure the input format in that case.
+			vector<string> inputfactors = Tokenize(token[0],"-");
+			vector<FactorType> 	input,output;
+			if(inputfactors.size() > 1)
+			{
+								input	= Tokenize<FactorType>(inputfactors[0],",");
+								output= Tokenize<FactorType>(inputfactors[1],",");
+			}
+			else
+			{
+				input.push_back(0); // default, just in case the user is actually using a bidirectional model
+				output = Tokenize<FactorType>(inputfactors[0],",");
+			}
+			for(size_t j = 0; j < input.size(); j++)
+			{
+				TRACE_ERR("input factor:" << input[j]);
+			}
+			for(size_t j = 0; j < output.size(); j++)
+			{
+				TRACE_ERR("output factor:" << output[j]);
+			}
+			std::string							filePath= token[1];
+			//get the weights for the lex reorderer
+			TRACE_ERR("weights-lex")
+			if(distortionWeights.size() < i + 1)			
+			{
+				std::cerr<<"ERROR: please specify one line of space separated weights \
+									per additional distortion after the mandatory distance-distortion weight in the moses configuration file\n";
+				abort();
+			}
+			std::vector<float> m_lexWeights = Scan<float>(Tokenize(distortionWeights[i+1])); //plus one as the first weight should always be distance-distortion
+			TRACE_ERR(distortionWeights[i+1] << "\t");
+			TRACE_ERR(endl);
+			assert(m_lexWeights.size()>0); //if this went wrong, something went wrong in the parsing.
+			const vector<string> &lrTypeVector = 	m_parameter.GetParam("distortion");	
+			//defaults, but at least one of these per model should be explicitly specified in the .ini file
 			int orientation = DistortionOrientationType::Msd, 
-				direction = LexReorderType::Bidirectional, 
-				condition = LexReorderType::Fe;
-			if (lrTypeVector.size() > 0)
-				{
-					// loop through type vector and set the orientation,
-					// direction, and condition to override the defaults
-					int size = lrTypeVector.size();
-					string val;
-					//if multiple parameters of the same type (direction, orientation, condition)
-					//are seen, default behavior is to set the type to the last seen
-					for (int i=0; i<size; i++)
-						{
-							val = lrTypeVector[i];
-							boost::algorithm::to_lower(val);
-							//orientation 
-							if(val == "monotone")
-								orientation = DistortionOrientationType::Monotone;
-							else if(val == "msd")
-								orientation = DistortionOrientationType::Msd;
-							//direction
-							else if(val == "forward")
-								direction = LexReorderType::Forward;
-							else if(val == "backward")
-								direction = LexReorderType::Backward;
-							else if(val == "bidirectional")
-								direction = LexReorderType::Bidirectional;
-							//condition
-							else if(val == "f")
-								condition = LexReorderType::F;
-							else if(val == "fe")
-								condition = LexReorderType::Fe;
-						} 
-				}
-			else // inform the user that the defaults are being employed
-				{
-					TRACE_ERR("Lexical reordering is using defaults: Msd, Bidirectional, Fe Parameters" << endl);
-				}
+					direction = LexReorderType::Bidirectional, 
+					condition = LexReorderType::Fe;
 
-			// for now, assume there is just one lexical reordering model
+			if(lrTypeVector.size() < i)			
+			{
+				std::cerr<<"ERROR: please specify one line of configuration under [distortion] per distortion model in the moses configuration file\n";
+				abort();
+			}
+
+			//Loop through, overriding defaults with specifications
+			vector<string> parameters = Tokenize<string>(lrTypeVector[i],"-");
+			for (size_t param=0; param<parameters.size(); param++)
+			{
+				string val = parameters[param];
+				boost::algorithm::to_lower(val);
+				//orientation 
+				if(val == "monotone")
+					{orientation = DistortionOrientationType::Monotone; TRACE_ERR("monotone\n");}
+				else if(val == "msd")
+					{orientation = DistortionOrientationType::Msd;  TRACE_ERR("msd\n");}
+				//direction
+				else if(val == "forward")
+					{direction = LexReorderType::Forward;  TRACE_ERR("forward\n");}
+				else if(val == "backward")
+					{direction = LexReorderType::Backward;  TRACE_ERR("backward\n");}
+				else if(val == "bidirectional")
+					{direction = LexReorderType::Bidirectional;  TRACE_ERR("bidirectional\n");}
+				//condition
+				else if(val == "f")
+					{condition = LexReorderType::F;  TRACE_ERR("f\n");}
+				else if(val == "fe")
+					{condition = LexReorderType::Fe;  TRACE_ERR("fe\n");}
+			}
 			timer.check("Starting to load lexical reorder table...");
+			TRACE_ERR(filePath << "...");
  			m_reorderModels.push_back(new LexicalReordering(filePath, orientation, direction, condition, m_lexWeights, input, output));
 			timer.check("Finished loading lexical reorder table.");
 		}
-		}
 		if (m_parameter.GetParam("lmodel-file").size() > 0)
-	{
-		// weights
-		vector<float> weightAll = Scan<float>(m_parameter.GetParam("weight-l"));
-		
-		TRACE_ERR("weight-l: ");
-		for (size_t i = 0 ; i < weightAll.size() ; i++)
 		{
+			// weights
+			vector<float> weightAll = Scan<float>(m_parameter.GetParam("weight-l"));
+			
+			TRACE_ERR("weight-l: ");
+	
+			for (size_t i = 0 ; i < weightAll.size() ; i++)
+			{
 				TRACE_ERR(weightAll[i] << "\t");
 				m_allWeights.push_back(weightAll[i]);
-		}
-		TRACE_ERR(endl);
+			}
+			TRACE_ERR(endl);
 		
 
 	  timer.check("Start loading LanguageModels");
@@ -280,33 +282,33 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 		for(size_t i=0; i<lmVector.size(); i++) 
 		{
-			vector<string>	token		= Tokenize(lmVector[i]);
-			if (token.size() != 4 )
-			{
-				TRACE_ERR("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filename'");
-				return false;
+				vector<string>	token		= Tokenize(lmVector[i]);
+				if (token.size() != 4 )
+				{
+					TRACE_ERR("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filename'");
+					return false;
+				}
+				// type = implementation, SRI, IRST etc
+				LMImplementation lmImplementation = static_cast<LMImplementation>(Scan<int>(token[0]));
+				
+				// factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
+				vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
+				
+				// nGramOrder = 2 = bigram, 3 = trigram, etc
+				size_t nGramOrder = Scan<int>(token[2]);
+				
+				string &languageModelFile = token[3];
+	
+				timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
+				
+				LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmImplementation, factorTypes     
+	                                   									, nGramOrder, languageModelFile, weightAll[i], m_factorCollection);
+	      if (lm == NULL) // no LM created. we prob don't have it compiled
+	      	return false;
+	
+				m_languageModel.push_back(lm);
+		  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
 			}
-			// type = implementation, SRI, IRST etc
-			LMImplementation lmImplementation = static_cast<LMImplementation>(Scan<int>(token[0]));
-			
-			// factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
-			vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
-			
-			// nGramOrder = 2 = bigram, 3 = trigram, etc
-			size_t nGramOrder = Scan<int>(token[2]);
-			
-			string &languageModelFile = token[3];
-
-			timer.check(("Start loading LanguageModel " + languageModelFile).c_str());
-			
-			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmImplementation, factorTypes     
-                                   									, nGramOrder, languageModelFile, weightAll[i], m_factorCollection);
-      if (lm == NULL) // no LM created. we prob don't have it compiled
-      	return false;
-
-			m_languageModel.push_back(lm);
-	  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
-		}
 	}
   // flag indicating that language models were loaded,
   // since phrase table loading requires their presence
@@ -377,8 +379,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	timer.check("Finished loading generation tables");
 
 	// score weights
-	//TODO: CHANGE
-	m_weightDistortion				= distortionWeights[0];
+	m_weightDistortion				= Scan<float>(distortionWeights[0]);
 	m_weightWordPenalty				= Scan<float>( m_parameter.GetParam("weight-w")[0] );
 
 	TRACE_ERR("weight-d: " << m_weightDistortion << endl);

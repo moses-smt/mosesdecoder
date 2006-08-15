@@ -70,6 +70,32 @@ Parameter::Parameter()
 	AddParam("weight-l", "lm", "weight(s) for language models");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
+	AddParam("weight-e", "e", "weight for word deletion"); //source word deletion overall weight
+	AddParam("weight-generation", "g", "weight(s) for generation components");
+	AddParam("weight-i", "I", "weight for word insertion");
+	AddParam("mapping", "description of decoding steps");
+	AddParam("n-best-list", "file and size of n-best-list to be generated");
+	AddParam("beam-threshold", "threshold for threshold pruning");
+	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");
+	AddParam("input-factors", "list of factors in the input");
+	AddParam("output-factors", "list if factors in the output");
+	AddParam("mysql", "(deprecated)");
+	AddParam("input-file", "i", "location of the input file to be translated");
+	AddParam("cache-path", "?");
+ 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
+ 	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
+	AddParam("generation-file", "location and properties of the generation table");
+	AddParam("stack", "s", "maximum stack size for histogram pruning");
+	AddParam("verbose", "v", "verbosity level of the logging");
+	AddParam("report-source-span", "?");
+	AddParam("report-all-factors", "?");
+	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
+	AddParam("inputtype", "text (0) or confusion network (1)");
+	AddParam("translation-details", "T", "for each best translation hypothesis, print out details about what sourcce spans were used, dropped");
+	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
+	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
+	AddParam("use-distortion-future-costs", "consider expected distortion cost in future cost estimation");
+	AddParam("labeled-n-best-list", "labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
 }
 
 /** initialize a parameter, sub of constructor */
