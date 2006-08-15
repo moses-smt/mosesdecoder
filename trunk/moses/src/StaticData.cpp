@@ -196,15 +196,8 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				input.push_back(0); // default, just in case the user is actually using a bidirectional model
 				output = Tokenize<FactorType>(inputfactors[0],",");
 			}
-			for(size_t j = 0; j < input.size(); j++)
-			{
-				TRACE_ERR("input factor:" << input[j]);
-			}
-			for(size_t j = 0; j < output.size(); j++)
-			{
-				TRACE_ERR("output factor:" << output[j]);
-			}
-			std::string							filePath= token[1];
+			size_t numberWeights = Scan<size_t>(token[1]);
+			std::string							filePath= token[2];
 			//get the weights for the lex reorderer
 			TRACE_ERR("weights-lex")
 			if(distortionWeights.size() < i + 1)			
@@ -216,7 +209,23 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			std::vector<float> m_lexWeights = Scan<float>(Tokenize(distortionWeights[i+1])); //plus one as the first weight should always be distance-distortion
 			TRACE_ERR(distortionWeights[i+1] << "\t");
 			TRACE_ERR(endl);
-			assert(m_lexWeights.size()>0); //if this went wrong, something went wrong in the parsing.
+			if(m_lexWeights.size() == 1) // if we only want to tune ONE weight for the whole distortion model
+			{
+				assert(numberWeights > 0); //if this fails it means the number of weights was not specified in the configuration file
+				float wgt = m_lexWeights[0];
+				for(size_t w=0; w < numberWeights - 1; w++)
+				{
+					m_lexWeights.push_back(wgt);
+				}
+			}
+			else
+			{
+				if(m_lexWeights.size()!=numberWeights)
+				{
+					std::cerr<<"ERROR: number of weights the distortion was specified to contain must match the number of distortion weights specified on the weight-d line corresponding to that file.\n";
+					abort();
+				}
+			} //if this went wrong, something went wrong in the parsing.
 			const vector<string> &lrTypeVector = 	m_parameter.GetParam("distortion");	
 			//defaults, but at least one of these per model should be explicitly specified in the .ini file
 			int orientation = DistortionOrientationType::Msd, 
