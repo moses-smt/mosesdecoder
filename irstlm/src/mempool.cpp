@@ -22,22 +22,29 @@
 // by M. Federico 
 // Copyright Marcello Federico, ITC-irst, 1998
 
+using namespace std;
+
 #include <iostream>
 #include <cassert>
 #include "mempool.h"
 
-using namespace std;
+#ifdef TRACE_ENABLE
+#define TRACE_ERR(str) { std::cerr << str; }
+#else
+#define TRACE_ERR(str) { }
+#endif
 
 /*! The pool contains:
    - entries of size is
    - tables for bs entries
 */
 
+
 mempool::mempool(int is, int bs){
   
   // item size must be multiple of memory alignment step (4 bytes)
   // example: is is=9  becomes i=12 (9 + 4 - 9 %4 )
-
+  
   is=(is>(int)sizeof(char *)?is:0);   
   
   is=is + sizeof(char *) - (is % sizeof(char *));  
@@ -61,9 +68,9 @@ mempool::mempool(int is, int bs){
   entries  = 0;
   
   // build free list
-
+  
   char *ptr = free_list = block_list->block;
-
+  
   for (int i=0;i<block_size-1;i++) {
     *(char **)ptr= ptr + item_size;
     ptr+=item_size;                     
@@ -74,92 +81,94 @@ mempool::mempool(int is, int bs){
 
 
 char * mempool::allocate(){
-
+  
   char *ptr;
-
+  
   if (free_list==NULL)
-    {
-      memnode *new_block = new memnode;
-
-      new_block->block = new char[true_size];
-
-      memset(new_block->block,'0',true_size);
-
-      new_block->next  = block_list;
-
-      block_list=new_block; // update block list
-
-      /* update  free list */
-
-      ptr = free_list = block_list->block;
-
-      for (int i=0;i<block_size-1;i++) {
-	*(char **)ptr = ptr + item_size;
-	ptr = ptr + item_size;                 
-      } 
-      
-      *(char **)ptr=NULL;
-      
-      blocknum++;
-    }
+  {
+    memnode *new_block = new memnode;
+    
+    new_block->block = new char[true_size];
+    
+    //memset(new_block->block,'0',true_size);
+    
+    new_block->next  = block_list;
+    
+    block_list=new_block; // update block list
+    
+    /* update  free list */
+    
+    ptr = free_list = block_list->block;
+    
+    for (int i=0;i<block_size-1;i++) {
+      *(char **)ptr = ptr + item_size;
+      ptr = ptr + item_size;                 
+    } 
+    
+    *(char **)ptr=NULL;
+    
+    blocknum++;
+  }
+  
+  assert(free_list);
   
   ptr = free_list;
-
+  
   free_list=*(char **)ptr;
-
+  
   *(char **)ptr=NULL; // reset the released item
   
   entries++;
-
+  
   return ptr;
-   
+  
 }
 
 
-int mempool::freemem(char* addr){
-
+int mempool::free(char* addr){
+  
   // do not check if it belongs to this pool !!
   /*
-    memnode  *list=block_list;
-    while ((list != NULL) &&
-    ((addr < list->block) ||
-    (addr >= (list->block + true_size))))
-    list=list->next;
+   memnode  *list=block_list;
+   while ((list != NULL) &&
+          ((addr < list->block) ||
+           (addr >= (list->block + true_size))))
+   list=list->next;
    
-    if ((list==NULL) || (((addr - list->block) % item_size)!=0))
-    {
-    //cerr << "mempool::free-> addr does not belong to this pool\n";
-    return 0;
-    }
-  */
+   if ((list==NULL) || (((addr - list->block) % item_size)!=0))
+   {
+     //cerr << "mempool::free-> addr does not belong to this pool\n";
+     return 0;
+   }
+   */
   
   *(char **)addr=free_list;
   free_list=addr;
   
   entries--;
-
+  
   return 1;
 }
 
-     
+
 mempool::~mempool()
 {
   memnode *ptr;
-
+  
   while (block_list !=NULL){
     ptr=block_list->next;    
     delete [] block_list->block;
     delete block_list;
     block_list=ptr;
   } 
-
+  
 }
 
 void mempool::map (ostream& co){
   
   co << "mempool memory map:\n";
   //percorri piu` volte la lista libera
-
+  
   memnode *bl=block_list;
   char *fl=free_list;
   
@@ -173,15 +182,15 @@ void mempool::map (ostream& co){
     fl=free_list;
     while (fl != NULL){
       if ((fl >= bl->block) 
-	  && 
-	  (fl < bl->block + true_size))
-	{
-	  img[(fl-bl->block)/item_size]='-';
-	}
+          && 
+          (fl < bl->block + true_size))
+      {
+        img[(fl-bl->block)/item_size]='-';
+      }
       
       fl=*(char **)fl;                     
     }  
-
+    
     co << img << "\n";
     bl=bl->next;    
   } 
@@ -189,11 +198,11 @@ void mempool::map (ostream& co){
 }
 
 void mempool::stat(){
-
-  cout << "mempool class statistics\n"
-       << "entries " << entries
-       << " blocks " << blocknum
-       << " used memory " << (blocknum * true_size)/1024 << " Kb\n";
+  
+  TRACE_ERR("mempool class statistics\n"
+            << "entries " << entries
+            << " blocks " << blocknum
+            << " used memory " << (blocknum * true_size)/1024 << " Kb\n");
 }
 
 
@@ -214,16 +223,16 @@ strstack::strstack(int bs){
   memory=size;
   entries=0;
   blocknum=1;
-
+  
 }
 
 
 void strstack::stat(){
-
-  cout << "strstack class statistics\n"
-       << "entries " << entries
-       << " blocks " << blocknum
-       << " used memory " << memory/1024 << " Kb\n";
+  
+  TRACE_ERR("strstack class statistics\n"
+            << "entries " << entries
+            << " blocks " << blocknum
+            << " used memory " << memory/1024 << " Kb\n");
 }
 
 
@@ -240,11 +249,11 @@ char *strstack::push(char *s){
     //there must be space to 
     //put the index after 
     //the word
-
+    
     waste+=size-idx;
     blocknum++;
     memory+=size;
-
+    
     memnode* nd=new memnode;
     nd->block=new char[size];
     nd->next=list;
@@ -252,19 +261,19 @@ char *strstack::push(char *s){
     list=nd;
     
     memset(list->block,'\0',size);
-
+    
     idx=0;
-  
+    
   }
-
+  
   // append in current block
-
+  
   strcpy(&list->block[idx],s);
   
   idx+=len+1;
-
+  
   entries++;
-    
+  
   return &list->block[idx-len-1];
   
 }
@@ -273,13 +282,13 @@ char *strstack::push(char *s){
 char *strstack::pop(){
   
   if (list==0) return 0;
-
+  
   if (idx==0){
     
     // free this block and go to next
     
     memnode *ptr=list->next;
-
+    
     delete [] list->block;
     delete list;
     
@@ -295,20 +304,20 @@ char *strstack::pop(){
   while (idx>0) 
     if (list->block[idx--]!='\0')
       break;
-
+  
   //go back to first \0
   while (idx>0) 
     if (list->block[idx--]=='\0')
       break;
-
+  
   entries--;
-
+  
   if (list->block[idx+1]=='\0')
-    {
-      idx+=2;
-      memset(&list->block[idx],'\0',size-idx);
-      return &list->block[idx];
-    }
+  {
+    idx+=2;
+    memset(&list->block[idx],'\0',size-idx);
+    return &list->block[idx];
+  }
   else{
     idx=0;
     memset(&list->block[idx],'\0',size);
@@ -321,13 +330,13 @@ char *strstack::top(){
   
   int tidx=idx;
   memnode *tlist=list;
-
+  
   if (tlist==0) return 0;
-
+  
   if (idx==0){
     
     tlist=tlist->next;
-
+    
     if (tlist==0) return 0;
     
     tidx=size-1;
@@ -337,24 +346,24 @@ char *strstack::top(){
   while (tidx>0) 
     if (tlist->block[tidx--]!='\0')
       break;
-
+  
   //aaa\0bbb\0\0\0\0
-
+  
   //go back to first \0
   while (tidx>0) 
     if (tlist->block[tidx--]=='\0')
       break;
-
+  
   if (tlist->block[tidx+1]=='\0')
-    {
-      tidx+=2;
-      return &tlist->block[tidx];
-    }
+  {
+    tidx+=2;
+    return &tlist->block[tidx];
+  }
   else{
     tidx=0;
     return &tlist->block[0];
   }
-
+  
 }
 
 
@@ -388,9 +397,8 @@ storage::~storage(){
   delete [] poolset;
 }
 
-
 char *storage::allocate(int size){
-
+  
   if (size<=setsize){
     if (!poolset[size]){
       poolset[size]=new mempool(size,poolsize/size);
@@ -410,18 +418,16 @@ char *storage::allocate(int size){
   }
 }
 
-
-
 char *storage::reallocate(char *oldptr,int oldsize,int newsize){
-
+  
   char *newptr;
   
   assert(newsize>oldsize);
-
+  
   if (oldsize<=setsize){
     if (newsize<=setsize){
       if (!poolset[newsize])
-	poolset[newsize]=new mempool(newsize,poolsize/newsize);
+        poolset[newsize]=new mempool(newsize,poolsize/newsize);
       newptr=poolset[newsize]->allocate();
       memset((char*)newptr,0,newsize);
     }
@@ -430,7 +436,7 @@ char *storage::reallocate(char *oldptr,int oldsize,int newsize){
     
     if (oldptr && oldsize){
       memcpy(newptr,oldptr,oldsize);
-      poolset[oldsize]->freemem(oldptr);
+      poolset[oldsize]->free(oldptr);
     }
   }
   else{
@@ -446,27 +452,26 @@ char *storage::reallocate(char *oldptr,int oldsize,int newsize){
   }
   
   return newptr;
-
 }
 
-
-int storage::freemem(char *addr,int size){
+int storage::free(char *addr,int size){
   
   /*
-    while(size<=setsize){
-    if (poolset[size] && poolset[size]->free(addr))
-    break;
-    size++;
-    }
-  */
-
+   while(size<=setsize){
+     if (poolset[size] && poolset[size]->free(addr))
+       break;
+     size++;
+   }
+   */
+  
   if (size>setsize)
     return free(addr),1;
   else{
-    poolset[size] && poolset[size]->freemem(addr);
+    poolset[size] && poolset[size]->free(addr);
   }
   return 1;
 }
+
 
 void storage::stat(){
   int used=0;
@@ -479,38 +484,13 @@ void storage::stat(){
       memory+=poolset[i]->used();
       waste+=poolset[i]->wasted();
     }
-
-  cerr << "storage class statistics\n";
-  cerr << "alloc entries " << newcalls 
-       << " used memory " << newmemory/1024 << "Kb\n";
-  cerr << "mpools " << setsize
-       << " active  " << used 
-       << " used memory " << memory/1024 << "Kb"
-       << " wasted " << waste/1024 << "Kb\n";
+      
+      TRACE_ERR("storage class statistics\n"
+                << "alloc entries " << newcalls 
+                << " used memory " << newmemory/1024 << "Kb\n"
+                << "mpools " << setsize
+                << " active  " << used 
+                << " used memory " << memory/1024 << "Kb"
+                << " wasted " << waste/1024 << "Kb\n");
 }
-
-/*
-main(){
-
-  mempool* mp=new mempool(sizeof(int),80);
-
-  int** ar= new (int*) [ 1000 ];
-
-  for (int i=0;i<1000;i++){
-    ar[i]= (int *)mp->alloc();
-  }
-
-  mp->map(cout);
-
-  for (int i=0;i<500;i++){
-    mp->free(ar[i]);
-  }
-
-  mp->map(cout);
-  
-}
-
-*/
-
-
 

@@ -77,7 +77,7 @@ class mempool{
   char *allocate();
 
   //! Frees a single memory entry
-  int freemem(char* addr);
+  int free(char* addr);
 
   //! Prints statistics about this mempool 
   void stat();
@@ -163,7 +163,7 @@ class storage{
   char *reallocate(char *oldptr,int oldsize,int newsize);
 
   //! Frees memory of an entry   
-  int freemem(char *addr,int size=0);
+  int free(char *addr,int size=0);
 
   //! Prints statistics about storage
   void stat();
