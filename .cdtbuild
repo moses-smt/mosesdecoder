@@ -25,6 +25,7 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
 </option>
 <option id="gnu.cpp.compiler.option.debugging.gprof.1598624147" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
+<option id="gnu.cpp.compiler.option.warnings.allwarn.1855070516" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.187676627" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1660142337" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
@@ -53,6 +54,7 @@
 <listOptionValue builtIn="false" value="_LARGE_FILES"/>
 </option>
 <option id="gnu.cpp.compiler.option.debugging.gprof.1449614968" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
+<option id="gnu.cpp.compiler.option.warnings.allwarn.1037990342" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.1731276863" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.release.693340097" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.release"/>

@@ -168,3 +168,4 @@ const void LanguageModel_IRST::InitializeBeforeSentenceProcessing(){
  m_lmtb->sentence_id++;
 #endif
 }
+
