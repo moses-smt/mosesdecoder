@@ -21,10 +21,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef WIN32
 #include <windows.h>
-#endif
-
+#else
 #include <sys/times.h>
 #include <sys/resource.h>
+#endif
+
 #include <cctype>
 #include <algorithm>
 #include <stdio.h>
@@ -123,7 +124,9 @@ void* xrealloc(void* ptr, unsigned int numBytes)
 	return rptr;
 }
 
-void ResetUserTime(){
+#ifndef WIN32
+void ResetUserTime()
+{
   struct rusage ru;  
   if (getrusage(RUSAGE_SELF, &ru)!=-1)      
     _util_usertime_sec=(unsigned long) ru.ru_utime.tv_sec;
@@ -141,5 +144,5 @@ void PrintUserTime(std::ostream &out, std::string message){
     out << "PrintUserTime: failure in getrusage!\n";    
   }
 }
-
+#endif
 

@@ -526,6 +526,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LanguageModelJoint.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LanguageModelMultiFactor.h"
 				>
 			</File>
@@ -583,6 +587,10 @@
 			</File>
 			<File
 				RelativePath=".\src\PartialTranslOptColl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PDTAimp.h"
 				>
 			</File>
 			<File
