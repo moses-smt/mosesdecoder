@@ -270,8 +270,8 @@ if (defined $___LAMBDA) {
       foreach my $startminmax (split/;/,$values) {
 	  if ($startminmax =~ /^(-?[\.\d]+),(-?[\.\d]+)-(-?[\.\d]+)$/) {
 	      my $start = $1;
-	      my $min = $1;
-	      my $max = $1;
+	      my $min = $2;
+	      my $max = $3;
               push @{$use_triples->{$name}}, [$start, $min, $max];
 	  }
 	  else {
