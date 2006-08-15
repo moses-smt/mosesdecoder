@@ -47,6 +47,7 @@ my @ngramMultirefColors = ('#ff9999', '#ff9933', '#ffff99', '#a0a0ff', '#99ff99'
 my $i = 0;
 while(my $sLine = <SYSOUT>)
 {
+	escapeMetachars($sLine); #remove inconsistencies in encoding
 	my @sFactors = @{extractFactorArrays($sLine)};
 	my @eLines = () x scalar(@truthfiles);
 	my @eFactors;
@@ -54,12 +55,14 @@ while(my $sLine = <SYSOUT>)
 	{
 		my $fh = $TRUTHS[$j];
 		$eLines[$j] = <$fh>;
+		escapeMetachars($eLines[$j]); #remove inconsistencies in encoding
 		push @eFactors, extractFactorArrays($eLines[$j], "$truthfiles[$j] shorter than $sysoutfile");
 	}
 	my $sourceFactors;
 	if (defined $sourcefile)
 	{
 		my $sourceLine = <SOURCE>;
+		escapeMetachars($sourceLine); #remove inconsistencies in encoding
 		$sourceFactors = extractFactorArrays($sourceLine, "$sourcefile shorter than $sysoutfile");
 	}
 		  
@@ -205,6 +208,17 @@ sub round
 {
 	my $x = shift;
 	return ($x - int($x) < .5) ? int($x) : int($x) + 1;
+}
+
+#escape HTML metacharacters for display purposes and to allow for consistent string comparison
+#arguments: string to be formatted
+#return: none
+sub escapeMetachars
+{
+	my $str = shift;
+	$str =~ s/&\s+/&amp; /;
+	$str =~ s/<\s+/&lt; /;
+	$str =~ s/>\s+/&gt; /;
 }
 
 ###############################################################################################################################################################
