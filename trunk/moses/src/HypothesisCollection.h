@@ -96,11 +96,13 @@ protected:
 	_HCType m_hypos; /**< contains hypotheses */
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
-
 	void Add(Hypothesis *hypothesis);
-		// if returns false, hypothesis not used
-		// caller must take care to delete unused hypo to avoid leak
-		// used by Add(Hypothesis *hypothesis, float beamThreshold);
+	
+	//TODO where does this comment belong?
+	// if returns false, hypothesis not used
+	// caller must take care to delete unused hypo to avoid leak
+	// used by Add(Hypothesis *hypothesis, float beamThreshold);
+	
 	void RemoveAll();
 
 	/** destroy all instances of Hypothesis in this collection */
@@ -131,27 +133,29 @@ public:
 
 	// this function will recombine hypotheses silently!  There is no record
 	// (could affect n-best list generation...TODO)
+	// AddPrune adds the hypo, but only if within thresholds (beamThr, stackSize)
 	void AddPrune(Hypothesis *hypothesis);
-      // AddPrune adds the hypo, but only if within thresholds (beamThr+stackSize)
 
 	inline ~HypothesisCollection()
 	{
 		RemoveAll();
 	}
 	/** set maximum number of hypotheses in the collection
-   *  /param maxHypoStackSize maximum number (typical number: 100) */
+   * \param maxHypoStackSize maximum number (typical number: 100)
+   */
 	inline void SetMaxHypoStackSize(size_t maxHypoStackSize)
 	{
 		m_maxHypoStackSize = maxHypoStackSize;
 	}
 	/** set beam threshold, hypotheses in the stack must not be worse than 
-   *  this factor times the best score to be allowed in the stack
-	 *  /param beamThreshold minimum factor (typical number: 0.03) */
+    * this factor times the best score to be allowed in the stack
+	 * \param beamThreshold minimum factor (typical number: 0.03)
+	 */
 	inline void SetBeamThreshold(float beamThreshold)
 	{
 		m_beamThreshold = beamThreshold;
 	}
-	/** returns score of the best hypothesis in the stack */
+	/** return score of the best hypothesis in the stack */
 	inline float GetBestScore() const
 	{
 		return m_bestScore;
@@ -165,5 +169,4 @@ public:
 	void InitializeArcs();
 	
 	TO_STRING;
-	
 };
