@@ -377,10 +377,15 @@ if ($continue) {
   chomp $step;
   $step++;
   close IN;
-  $start_run = $step +1;
 
-  die "Can't start from step $step, because run$step.best$___N_BEST_LIST_SIZE.out.gz was not found!"
-    if ! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz";
+  if (! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz") {
+    # allow stepping one extra iteration back
+    $step--;
+    die "Can't start from step $step, because run$step.best$___N_BEST_LIST_SIZE.out.gz was not found!"
+      if ! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz";
+  }
+
+  $start_run = $step +1;
 
   print STDERR "Reading last cached lambda values (result from step $step)\n";
   @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
