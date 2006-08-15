@@ -131,6 +131,13 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	//distortion weights
 	 const vector<string> distortionWeights = m_parameter.GetParam("weight-d");	
+	 //distortional model weights (first weight is distance distortion)
+	 std::vector<float> distortionModelWeights;
+	 	for(size_t dist=1; dist < distortionWeights.size(); dist++)
+	 	{
+	 			distortionModelWeights.push_back(Scan<float>(distortionWeights[dist]));
+	 	}
+
 
 	//input factors
 	const vector<string> &inputFactorVector = m_parameter.GetParam("input-factors");
@@ -196,36 +203,52 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				input.push_back(0); // default, just in case the user is actually using a bidirectional model
 				output = Tokenize<FactorType>(inputfactors[0],",");
 			}
-			size_t numberWeights = Scan<size_t>(token[1]);
-			std::string							filePath= token[2];
-			//get the weights for the lex reorderer
-			TRACE_ERR("weights-lex")
-			if(distortionWeights.size() < i + 1)			
+			size_t mertOneWeight = Scan<size_t>(token[1]);
+			size_t numberWeights = Scan<size_t>(token[2]);
+			std::string	filePath= token[3];
+
+			std::vector<float> m_lexWeights; 			//get the weights for this particular distortion reorderer
+			std::vector<float> newLexWeights;     //will remove the weights used by this distortion reorder, leaving the weights yet to be used
+			if(mertOneWeight == 1) // this is useful if the user just wants to train one weight for the model
 			{
-				std::cerr<<"ERROR: please specify one line of space separated weights \
-									per additional distortion after the mandatory distance-distortion weight in the moses configuration file\n";
-				abort();
-			}
-			std::vector<float> m_lexWeights = Scan<float>(Tokenize(distortionWeights[i+1])); //plus one as the first weight should always be distance-distortion
-			TRACE_ERR(distortionWeights[i+1] << "\t");
-			TRACE_ERR(endl);
-			if(m_lexWeights.size() == 1) // if we only want to tune ONE weight for the whole distortion model
-			{
-				assert(numberWeights > 0); //if this fails it means the number of weights was not specified in the configuration file
-				float wgt = m_lexWeights[0];
-				for(size_t w=0; w < numberWeights - 1; w++)
+				//add appropriate weight to weight vector
+				assert(distortionModelWeights.size()> 0); //if this fails the user has not specified enough weights
+				float wgt = distortionModelWeights[0];
+				for(size_t i=0; i<numberWeights; i++)
 				{
 					m_lexWeights.push_back(wgt);
 				}
+				//update the distortionModelWeight vector to remove these weights
+				std::vector<float> newLexWeights; //plus one as the first weight should always be distance-distortion
+				for(size_t i=1; i<distortionModelWeights.size(); i++)
+				{
+					newLexWeights.push_back(distortionModelWeights[i]);
+				}
+				distortionModelWeights = newLexWeights;
 			}
 			else
 			{
-				if(m_lexWeights.size()!=numberWeights)
+				//add appropriate weights to weight vector
+				for(size_t i=0; i< numberWeights; i++)
 				{
-					std::cerr<<"ERROR: number of weights the distortion was specified to contain must match the number of distortion weights specified on the weight-d line corresponding to that file.\n";
-					abort();
+					assert(i < distortionModelWeights.size()); //if this fails the user has not specified enough weights
+					m_lexWeights.push_back(distortionModelWeights[i]);
 				}
-			} //if this went wrong, something went wrong in the parsing.
+				//update the distortionModelWeight vector to remove these weights
+				for(size_t i=numberWeights; i<distortionModelWeights.size(); i++)
+				{
+					newLexWeights.push_back(distortionModelWeights[i]);
+				}
+				distortionModelWeights = newLexWeights;
+				
+			}
+			TRACE_ERR("distortion-weights: ");
+			for(size_t weight=0; weight<m_lexWeights.size(); weight++)
+			{
+					TRACE_ERR(m_lexWeights[weight] << "\t");
+			}
+			TRACE_ERR(endl);
+			//if this went wrong, something went wrong in the parsing.
 			const vector<string> &lrTypeVector = 	m_parameter.GetParam("distortion");	
 			//defaults, but at least one of these per model should be explicitly specified in the .ini file
 			int orientation = DistortionOrientationType::Msd, 

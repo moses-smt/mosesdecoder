@@ -8,6 +8,7 @@
 #include "InputFileStream.h"
 #include "DistortionOrientation.h"
 #include "StaticData.h"
+#include "Util.h"
 
 using namespace std;
 
@@ -62,6 +63,8 @@ void LexicalReordering::LoadFile()
 					// to make a single token
 					key = f + "|||" + e;
 					probs = Scan<float>(Tokenize(tokens[FE_PROBS]));
+					std::vector<float> scv(probs.size());
+					std::transform(probs.begin(),probs.end(),probs.begin(),TransformScore);
 				}
 			else
 				{
@@ -69,6 +72,8 @@ void LexicalReordering::LoadFile()
 					f = tokens[F_FOREIGN];
 					key = f;
 					probs = Scan<float>(Tokenize(tokens[F_PROBS]));
+					std::vector<float> scv(probs.size());
+					std::transform(probs.begin(),probs.end(),probs.begin(),TransformScore);
 				}
 			if (m_orientation == DistortionOrientationType::Monotone)
 				{
