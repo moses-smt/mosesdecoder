@@ -47,6 +47,7 @@ namespace LanguageModelFactory
 	     			lm = new LanguageModel_Chunking(new LanguageModel_IRST(false), true);
      			#endif
 				#endif
+				break;
 			case Joint:
 				#ifdef LM_SRI
 	     		lm = new LanguageModelJoint(new LanguageModel_SRI(false), true);
@@ -55,6 +56,7 @@ namespace LanguageModelFactory
 		     		lm = new LanguageModelJoint(new LanguageModel_IRST(false), true);
      			#endif
 				#endif
+				break;
 	  }
 	  
 	  if (lm == NULL)
