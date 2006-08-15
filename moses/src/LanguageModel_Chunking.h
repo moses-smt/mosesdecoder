@@ -64,7 +64,7 @@ public:
 		m_lmImpl->Load(fileName, factorCollection, m_factorType, weight, nGramOrder);
 	}
 			
-	float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL, unsigned int* len) const
+	float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
 	{
 		if (contextFactor.size() == 0)
 		{
