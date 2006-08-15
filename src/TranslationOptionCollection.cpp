@@ -428,11 +428,6 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			TRACE_ERR(endl);
 		}
 	}
-	// handling unknown words
-	else if (wordsRange.GetWordsCount() == 1)
-	{
-		ProcessUnknownWord(startPos, factorCollection);
-	}
 }
 
 /** add translation option to the list
