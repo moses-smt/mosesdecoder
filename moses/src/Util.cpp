@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <windows.h>
 #endif
 
+#include <sys/times.h>
+#include <sys/resource.h>
 #include <cctype>
 #include <algorithm>
 #include <stdio.h>
@@ -33,6 +35,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "md5.h"
 
 using namespace std;
+
+//global variable
+unsigned long _util_usertime_sec=0;
 
 string GetTempFolder()
 {	
@@ -117,3 +122,24 @@ void* xrealloc(void* ptr, unsigned int numBytes)
 	if(rptr == NULL) std::cout << "[FYI] xrealloc(): realloc returns null on request for " << numBytes << " bytes" << endl;
 	return rptr;
 }
+
+void ResetUserTime(){
+  struct rusage ru;  
+  if (getrusage(RUSAGE_SELF, &ru)!=-1)      
+    _util_usertime_sec=(unsigned long) ru.ru_utime.tv_sec;
+  else
+    std::cerr << "ResetUserTime: failure in getrusage!\n";        
+};
+
+void PrintUserTime(std::ostream &out, std::string message){ 
+  struct rusage ru;
+  if (getrusage(RUSAGE_SELF, &ru)!=-1)        
+    out << message.c_str() << " part(sec)=" <<  (unsigned long)ru.ru_utime.tv_sec - _util_usertime_sec 
+        << " cum(sec)=" << (unsigned long)ru.ru_utime.tv_sec << "\n";    
+  else{    
+    std::cerr << "PrintUserTime: failure in getrusage!\n";    
+    out << "PrintUserTime: failure in getrusage!\n";    
+  }
+}
+
+
