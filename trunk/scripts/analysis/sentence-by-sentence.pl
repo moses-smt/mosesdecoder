@@ -43,7 +43,7 @@ my @bleuScores;
 my @htmlSentences;
 my @htmlColors = ('#99ff99', '#aaaaff', '#ffff99', '#ff9933', '#ff9999'); #color sentences by rank (split in n tiers)
 my $ngramSingleRefColor = '#aaffaa';
-my @ngramMultirefColors = ('ff9999', 'ff9933', 'ffff99', 'a0a0ff', '99ff99'); #arbitrary-length list; first entry is used for worst n-grams
+my @ngramMultirefColors = ('#ff9999', '#ff9933', '#ffff99', '#a0a0ff', '#99ff99'); #arbitrary-length list; first entry is used for worst n-grams
 my $i = 0;
 while(my $sLine = <SYSOUT>)
 {
