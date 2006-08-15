@@ -234,6 +234,12 @@ std::string GetMD5Hash(const std::string &filePath);
 template<typename T> inline void ShrinkToFit(T& v) {
   if(v.capacity()>v.size()) T(v).swap(v);assert(v.capacity()==v.size());}
 
+
+//A couple of utilities to measure decoding time
+
+void ResetUserTime();
+void PrintUserTime(std::ostream &out,std::string message="");
+
 /***
  * include checks for null return value, and helpful print statements
  */
