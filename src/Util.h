@@ -236,9 +236,12 @@ template<typename T> inline void ShrinkToFit(T& v) {
 
 
 //A couple of utilities to measure decoding time
+#ifndef WIN32
 
 void ResetUserTime();
 void PrintUserTime(std::ostream &out,std::string message="");
+
+#endif
 
 /***
  * include checks for null return value, and helpful print statements
