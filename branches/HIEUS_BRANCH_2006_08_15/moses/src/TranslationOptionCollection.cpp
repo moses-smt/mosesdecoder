@@ -128,7 +128,7 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeSte
 	// create unknown words for 1 word coverage where we don't have any trans options
 	vector<bool> process(size);
 	fill(process.begin(), process.end(), true);
-	
+	/*
 	for (size_t startPos = 0 ; startPos < size ; ++startPos)
 	{
 		for (size_t endPos = startPos ; endPos < size ; ++endPos)
@@ -141,7 +141,18 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeSte
 			}
 		}	
 	}
-			
+	*/
+
+	for (size_t pos = 0 ; pos < size ; ++pos)
+	{
+		TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
+		size_t numTransOpt = fullList.size();
+		if (numTransOpt > 0)
+		{
+			process[pos] = false;
+		}
+	}	
+		
 	for (size_t currPos = 0 ; currPos < size ; ++currPos)
 	{
 		if (process[currPos])
@@ -427,11 +438,6 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 		{ 
 			TRACE_ERR(endl);
 		}
-	}
-	// handling unknown words
-	else if (wordsRange.GetWordsCount() == 1)
-	{
-		ProcessUnknownWord(startPos, factorCollection);
 	}
 }
 

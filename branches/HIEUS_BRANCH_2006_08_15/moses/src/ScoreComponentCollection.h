@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cassert>
 #include "ScoreProducer.h"
 #include "ScoreIndexManager.h"
+#include "TypeDef.h"
 
 /*** An unweighted collection of scores for a translation or step in a translation.
  *
@@ -67,7 +68,15 @@ public:
 		for (std::vector<float>::iterator i=m_scores.begin(); i!=m_scores.end(); ++i)
 			*i = 0.0f;
 	}
-
+	
+	//! Set akk values to the LOWEST_SCORE
+	// Hack for unknown words. Ideally, we should have an unknown word model/penalty
+	void FloorAll()
+	{
+		for (std::vector<float>::iterator i=m_scores.begin(); i!=m_scores.end(); ++i)
+			*i = LOWEST_SCORE;
+	}
+	
   //! add the score in rhs
 	void PlusEquals(const ScoreComponentCollection2& rhs)
 	{

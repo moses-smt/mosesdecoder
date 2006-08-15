@@ -45,6 +45,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 ,m_sourceWordsRange	(wordsRange)
 ,m_futureScore(0)
 {
+	m_scoreBreakdown.FloorAll();
 }
 
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection2& score, const std::vector<FactorType>& featuresToAdd)
