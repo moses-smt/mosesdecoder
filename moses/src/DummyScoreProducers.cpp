@@ -47,3 +47,14 @@ const std::string WordPenaltyProducer::GetScoreProducerDescription() const
 	return "word penalty";
 }
 
+
+unsigned int UnknownWordPenaltyProducer::GetNumScoreComponents() const
+{
+	return 1;
+}
+
+const std::string UnknownWordPenaltyProducer::GetScoreProducerDescription() const
+{
+	return "unknown word penalty";
+}
+
