@@ -185,7 +185,7 @@ public:
     
   void init_probcache(){
     assert(probcache==NULL);
-    probcache=new ngramcache(maxlev,sizeof(double),200000);
+    probcache=new ngramcache(maxlev,sizeof(double),400000);
 #ifdef TRACE_CACHE
     cacheout=new std::fstream("/tmp/tracecache",std::ios::out);
     sentence_id=0;
@@ -194,7 +194,7 @@ public:
   
   void init_statecache(){
     assert(statecache==NULL);
-    statecache=new ngramcache(maxlev-1,sizeof(char *),100000);
+    statecache=new ngramcache(maxlev-1,sizeof(char *),200000);
   }
   
   void init_lmtcaches(int uptolev){
@@ -206,10 +206,10 @@ public:
   }
   
   void check_cache_levels(){
-    if (probcache && probcache->isfull()) probcache->reset();
-    if (statecache && statecache->isfull()) statecache->reset();
+    if (probcache && probcache->isfull()) probcache->reset(probcache->cursize());
+    if (statecache && statecache->isfull()) statecache->reset(statecache->cursize());
     for (int i=2;i<=max_cache_lev;i++)
-      if (lmtcache[i]->isfull()) lmtcache[i]->reset();
+      if (lmtcache[i]->isfull()) lmtcache[i]->reset(lmtcache[i]->cursize());
   }
   
   bool is_probcache_active(){return probcache!=NULL;}
