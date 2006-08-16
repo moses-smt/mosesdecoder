@@ -30,4 +30,13 @@ public:
 	const std::string GetScoreProducerDescription() const;
 };
 
+/** unknown word penalty */
+class UnknownWordPenaltyProducer : public ScoreProducer {
+public:
+	UnknownWordPenaltyProducer();
+
+	unsigned int GetNumScoreComponents() const;
+	const std::string GetScoreProducerDescription() const;
+};
+
 #endif
