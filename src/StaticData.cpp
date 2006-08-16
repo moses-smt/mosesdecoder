@@ -188,66 +188,8 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_parameter.GetParam("distortion-file");	
 		for(unsigned int i=0; i< lrFileVector.size(); i++ ) //loops for each distortion model
 		{
-			vector<string>	token	= Tokenize(lrFileVector[i]);
-			//characteristics of the phrase table
-			vector<string> inputfactors = Tokenize(token[0],"-");
-			vector<FactorType> 	input,output;
-			if(inputfactors.size() > 1)
-			{
-								input	= Tokenize<FactorType>(inputfactors[0],",");
-								output= Tokenize<FactorType>(inputfactors[1],",");
-			}
-			else
-			{
-				input.push_back(0); // default, just in case the user is actually using a bidirectional model
-				output = Tokenize<FactorType>(inputfactors[0],",");
-			}
-			size_t mertOneWeight = Scan<size_t>(token[1]);
-			size_t numberWeights = Scan<size_t>(token[2]);
-			std::string	filePath= token[3];
-
-			std::vector<float> m_lexWeights; 			//get the weights for this particular distortion reorderer
-			std::vector<float> newLexWeights;     //will remove the weights used by this distortion reorder, leaving the weights yet to be used
-			if(mertOneWeight == 1) // this is useful if the user just wants to train one weight for the model
-			{
-				//add appropriate weight to weight vector
-				assert(distortionModelWeights.size()> 0); //if this fails the user has not specified enough weights
-				float wgt = distortionModelWeights[0];
-				for(size_t i=0; i<numberWeights; i++)
-				{
-					m_lexWeights.push_back(wgt);
-				}
-				//update the distortionModelWeight vector to remove these weights
-				std::vector<float> newLexWeights; //plus one as the first weight should always be distance-distortion
-				for(size_t i=1; i<distortionModelWeights.size(); i++)
-				{
-					newLexWeights.push_back(distortionModelWeights[i]);
-				}
-				distortionModelWeights = newLexWeights;
-			}
-			else
-			{
-				//add appropriate weights to weight vector
-				for(size_t i=0; i< numberWeights; i++)
-				{
-					assert(i < distortionModelWeights.size()); //if this fails the user has not specified enough weights
-					m_lexWeights.push_back(distortionModelWeights[i]);
-				}
-				//update the distortionModelWeight vector to remove these weights
-				for(size_t i=numberWeights; i<distortionModelWeights.size(); i++)
-				{
-					newLexWeights.push_back(distortionModelWeights[i]);
-				}
-				distortionModelWeights = newLexWeights;
-				
-			}
-			TRACE_ERR("distortion-weights: ");
-			for(size_t weight=0; weight<m_lexWeights.size(); weight++)
-			{
-					TRACE_ERR(m_lexWeights[weight] << "\t");
-			}
-			TRACE_ERR(endl);
-			//if this went wrong, something went wrong in the parsing.
+			
+				//if this went wrong, something went wrong in the parsing.
 			const vector<string> &lrTypeVector = 	m_parameter.GetParam("distortion");	
 			//defaults, but at least one of these per model should be explicitly specified in the .ini file
 			int orientation = DistortionOrientationType::Msd, 
@@ -284,11 +226,85 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				else if(val == "fe")
 					condition = LexReorderType::Fe; 
 			}
+			//compute the number of weights that ought to be in the table from this
+			size_t numWeightsInTable = 0;
+			if(orientation == DistortionOrientationType::Monotone)
+			{
+				numWeightsInTable = 2;
+			}
+			else
+			{
+				numWeightsInTable = 3;
+			}
+			if(direction == LexReorderType::Bidirectional)
+			{
+				numWeightsInTable *= 2;
+			}
+			
+			vector<string>	token	= Tokenize(lrFileVector[i]);
+			//characteristics of the phrase table
+			vector<string> inputfactors = Tokenize(token[0],"-");
+			vector<FactorType> 	input,output;
+			if(inputfactors.size() > 1)
+			{
+								input	= Tokenize<FactorType>(inputfactors[0],",");
+								output= Tokenize<FactorType>(inputfactors[1],",");
+			}
+			else
+			{
+				input.push_back(0); // default, just in case the user is actually using a bidirectional model
+				output = Tokenize<FactorType>(inputfactors[0],",");
+			}
+			size_t numWeights = Scan<size_t>(token[1]);
+			std::string	filePath= token[2];
+			std::vector<float> m_lexWeights; 			//will store the weights for this particular distortion reorderer
+			std::vector<float> newLexWeights;     //we'll remove the weights used by this distortion reorder, leaving the weights yet to be used
+			if(numWeights == 1) // this is useful if the user just wants to train one weight for the model
+			{
+				//add appropriate weight to weight vector
+				assert(distortionModelWeights.size()> 0); //if this fails the user has not specified enough weights
+				float wgt = distortionModelWeights[0];
+				for(size_t i=0; i<numWeightsInTable; i++)
+				{
+					m_lexWeights.push_back(wgt);
+				}
+				//update the distortionModelWeight vector to remove these weights
+				std::vector<float> newLexWeights; //plus one as the first weight should always be distance-distortion
+				for(size_t i=1; i<distortionModelWeights.size(); i++)
+				{
+					newLexWeights.push_back(distortionModelWeights[i]);
+				}
+				distortionModelWeights = newLexWeights;
+			}
+			else
+			{
+				//add appropriate weights to weight vector
+				for(size_t i=0; i< numWeightsInTable; i++)
+				{
+					assert(i < distortionModelWeights.size()); //if this fails the user has not specified enough weights
+					m_lexWeights.push_back(distortionModelWeights[i]);
+				}
+				//update the distortionModelWeight vector to remove these weights
+				for(size_t i=numWeightsInTable; i<distortionModelWeights.size(); i++)
+				{
+					newLexWeights.push_back(distortionModelWeights[i]);
+				}
+				distortionModelWeights = newLexWeights;
+				
+			}
+			assert(m_lexWeights.size() == numWeightsInTable);		//the end result should be a weight vector of the same size as the user configured model
+			TRACE_ERR("distortion-weights: ");
+			for(size_t weight=0; weight<m_lexWeights.size(); weight++)
+			{
+					TRACE_ERR(m_lexWeights[weight] << "\t");
+			}
+			TRACE_ERR(endl);
 			timer.check("Starting to load lexical reorder table...");
 			TRACE_ERR(filePath << "...");
  			m_reorderModels.push_back(new LexicalReordering(filePath, orientation, direction, condition, m_lexWeights, input, output));
 			timer.check("Finished loading lexical reorder table.");
 		}
+		
 		if (m_parameter.GetParam("lmodel-file").size() > 0)
 		{
 			// weights
