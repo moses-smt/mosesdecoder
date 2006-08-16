@@ -1,6 +1,5 @@
 Put any scripts useful for human analysis of MT output here.
 
-[EVH]
-sentence-by-sentence.pl: show comparison of sentences in reference translation(s)/system otuput/(truth) in colorful format
+sentence-by-sentence.pl [EVH]: show comparison of sentences in reference translation(s)/system output(s)/(truth) in colorful format
 -- shows all sentences given, with non-matching words in the system output marked, BLEU scores given by sentence, and matching n-grams shown in a table
 -- requires all input files be utf8-encoded (you can convert a file with `cat FILE | perl -n -e 'binmode(STDOUT, ":utf8"); print;' > FILE.utf8`)

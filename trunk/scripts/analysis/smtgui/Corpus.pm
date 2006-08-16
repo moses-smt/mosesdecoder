@@ -99,7 +99,7 @@ sub calcUnknownTokens
 {
 	my ($self, $factorName) = @_;
 	#check in-memory cache first
-	if(defined($self->{'unknownCount'}->{$factorName}))
+	if(exists $self->{'unknownCount'}->{$factorName} && exists $self->{'tokenCount'}->{'input'})
 	{
 		return ($self->{'unknownCount'}->{$factorName}, $self->{'tokenCount'}->{'input'});
 	}
@@ -179,7 +179,7 @@ sub calcOverallWER
 	my ($self, $sysname, $factorName) = (shift, shift, 'surf');
 	if(scalar(@_) > 0) {$factorName = shift;}
 	#check in-memory cache first
-	if(defined($self->{'sysoutWER'}->{$sysname}->{$factorName}))
+	if(exists $self->{'sysoutWER'}->{$sysname}->{$factorName})
 	{
 		return $self->{'sysoutWER'}->{$sysname}->{$factorName}->[0];
 	}
@@ -209,7 +209,7 @@ sub calcOverallPWER
 	my ($self, $sysname, $factorName) = (shift, shift, 'surf');
 	if(scalar(@_) > 0) {$factorName = shift;}
 	#check in-memory cache first
-	if(defined($self->{'sysoutPWER'}->{$sysname}->{$factorName}))
+	if(exists $self->{'sysoutPWER'}->{$sysname}->{$factorName})
 	{
 		return $self->{'sysoutPWER'}->{$sysname}->{$factorName}->[0];
 	}
@@ -353,7 +353,6 @@ sub statisticallyTestBLEUResults
 		$devs[$i] = sqrt($devs[$i] / ($k - 1));
 		$t->[$i] = ($fullCorpusBLEU->[$i + 1] / 100 - $means[$i]) / $devs[$i];
 		push @{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[0]}, getLowerBoundPValue($t->[$i]); #p-value for overall score vs. subset average
-#		warn "$i: mean " . $means[$i] . ", dev " . $devs[$i] . ", t " . $t->[$i] . ", conf " . getLowerBoundPValue($t->[$i]) . "\n";
 		push @{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[1]}, 
 							[$means[$i] - $criticalTStat * $devs[$i] / sqrt($k), $means[$i] + $criticalTStat * $devs[$i] / sqrt($k)]; #the confidence interval
 	}
@@ -384,9 +383,9 @@ sub calcPerplexity
 	my $cmd = "perl ./extract-factors.pl $sysoutFilename " . $self->{'factorIndices'}->{$factorName} . " > $tmpfile";
 	`$cmd`; #extract just the factor we're interested in; ngram doesn't understand factored notation
 	my @output = `./ngram -lm $lmFilename -ppl $tmpfile`; #run the SRI n-gram tool
-	`rm $tmpfile`;
+	`rm -f $tmpfile`;
 	$output[1] =~ /ppl1=\s*([0-9\.]+)/;
-	$self->{'perplexity'}->{$sysname} = $1;
+	$self->{'perplexity'}->{$sysname}->{$factorName} = $1;
 	return $self->{'perplexity'}->{$sysname}->{$factorName};
 }
 
@@ -511,8 +510,8 @@ sub writeCacheFile
 	{
 		my $ext = shift;
 		#check for a previously read value
-		if(exists $self->{'fileCtimes'}->{$ext}) {print CACHEFILE $self->{'corpusName'} . ".$ext " . $self->{'fileCtimes'}->{$ext} . "\n";}
-		else {print CACHEFILE $self->{'corpusName'} . ".$ext " . time . "\n";}
+		if(exists $self->{'fileCtimes'}->{$ext} && $self->cacheIsCurrentForFile($ext)) {print CACHEFILE "$ext " . $self->{'fileCtimes'}->{$ext} . "\n";}
+		else {print CACHEFILE "$ext " . time . "\n";} #our info must just have been calculated
 	};
 	if(exists $self->{'truthFilename'}) {&$ensureCtimeIsOutput('e');}
 	if(exists $self->{'inputFilename'}) {&$ensureCtimeIsOutput('f');}
@@ -619,16 +618,16 @@ sub loadCacheFile
 	while(my $line = <CACHEFILE>)
 	{
 		next if $line =~ /^[ \t\n\r\x0a]*$/; #anyone know why char 10 (0x0a) shows up on empty lines, at least on solaris?
-		chop $line;
+		chomp $line;
 		#check for start of section
-		if($line eq "File changetimes\n") {$mode = 'ctime';}
-		elsif($line eq "BLEU scores\n") {$mode = 'bleu';}
-		elsif($line eq "BLEU statistics\n") {$mode = 'bstats';}
-		elsif($line eq "Statistical comparisons\n") {$mode = 'cmp';}
-		elsif($line eq "Unknown-token counts\n") {$mode = 'unk';}
-		elsif($line eq "WER scores") {$mode = 'wer';}
-		elsif($line eq "Perplexity") {$mode = 'ppl';}
-		elsif($line eq "NN/ADJ WER/PWER") {$mode = 'nawp';}
+		if($line =~ /File changetimes/) {$mode = 'ctime';}
+		elsif($line =~ /BLEU scores/) {$mode = 'bleu';}
+		elsif($line =~ /BLEU statistics/) {$mode = 'bstats';}
+		elsif($line =~ /Statistical comparisons/) {$mode = 'cmp';}
+		elsif($line =~ /Unknown-token counts/) {$mode = 'unk';}
+		elsif($line =~ /WER scores/) {$mode = 'wer';}
+		elsif($line =~ /Perplexity/) {$mode = 'ppl';}
+		elsif($line =~ /NN\/ADJ WER\/PWER/) {$mode = 'nawp';}
 		#get data when in a mode already
 		elsif($mode eq 'ctime')
 		{
@@ -638,7 +637,7 @@ sub loadCacheFile
 		elsif($mode eq 'bleu')
 		{
 			local ($sysname, $factorName, $rest) = split(/\s+/, $line, 3);
-			if(!$self->cacheIsCurrentForFile($sysname) || !$self->cacheIsCurrentForFile('e')) {next;}
+			next if !$self->cacheIsCurrentForFile($sysname) || !$self->cacheIsCurrentForFile('e');
 			if(!exists $self->{'bleuScores'}->{$sysname}) {$self->{'bleuScores'}->{$sysname} = {};}
 			if(!exists $self->{'bleuScores'}->{$sysname}->{$factorName}) {$self->{'bleuScores'}->{$sysname}->{$factorName} = [[], []];}
 			my @stats = map {my @tmp = split(/\s+/, $_); \@tmp;} split(/;/, $rest);
@@ -648,7 +647,7 @@ sub loadCacheFile
 		elsif($mode eq 'bstats')
 		{
 			local ($sysname, $factorName, $rest) = split(/\s+/, $line, 3);
-			if(!$self->cacheIsCurrentForFile($sysname) || !$self->cacheIsCurrentForFile('e')) {next;}
+			next if !$self->cacheIsCurrentForFile($sysname) || !$self->cacheIsCurrentForFile('e');
 			if(!exists $self->{'bleuConfidence'}->{$sysname}) {$self->{'bleuConfidence'}->{$sysname} = {};}
 			if(!exists $self->{'bleuConfidence'}->{$sysname}->{$factorName}) {$self->{'bleuConfidence'}->{$sysname}->{$factorName} = [[], []];}
 			my @stats = map {my @tmp = split(/\s+/, $_); \@tmp;} split(/;/, $rest);
@@ -658,7 +657,7 @@ sub loadCacheFile
 		elsif($mode eq 'cmp')
 		{
 			local ($sysname1, $sysname2, $factorName, $rest) = split(/\s+/, $line, 4);
-			if(!$self->cacheIsCurrentForFile($sysname1) || !$self->cacheIsCurrentForFile($sysname2) || !$self->cacheIsCurrentForFile('e')) {next;}
+			next if !$self->cacheIsCurrentForFile($sysname1) || !$self->cacheIsCurrentForFile($sysname2) || !$self->cacheIsCurrentForFile('e');
 			if(!exists $self->{'comparisonStats'}->{$sysname1}) {$self->{'comparisonStats'}->{$sysname1} = {};}
 			if(!exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}) {$self->{'comparisonStats'}->{$sysname1}->{$sysname2} = {};}
 			if(!exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName}) {$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName} = [];}
@@ -668,7 +667,7 @@ sub loadCacheFile
 		elsif($mode eq 'unk')
 		{
 			local ($factorName, $phraseTableFilename, $unknownCount, $totalCount) = split(' ', $line);
-			if(!$self->cacheIsCurrentForFile('f') || !$self->cacheIsCurrentForFile("pt_$factorName")) {next;}
+			next if !$self->cacheIsCurrentForFile('f') || !$self->cacheIsCurrentForFile("pt_$factorName");
 			if(defined($self->{'phraseTableFilenames'}->{$factorName}) && $self->{'phraseTableFilenames'}->{$factorName} eq $phraseTableFilename)
 			{
 				$self->{'unknownCount'}->{$factorName} = $unknownCount;
@@ -678,7 +677,7 @@ sub loadCacheFile
 		elsif($mode eq 'wer')
 		{
 			local ($werType, $sysname, $factorName, $totalWER, $details) = split(/\s+/, $line, 5); #werType is 'sysoutWER' or 'sysoutPWER'
-			if(!$self->cacheIsCurrentForFile($sysname) || !$self->cacheIsCurrentForFile('e')) {next;}
+			next if !$self->cacheIsCurrentForFile($sysname) || !$self->cacheIsCurrentForFile('e');
 			$details =~ /^([^;]*);(.*)/;
 			my @sentenceWERs = split(/\s+/, $1);
 			if(!exists $self->{$werType}->{$sysname}) {$self->{$werType}->{$sysname} = {};}
@@ -693,16 +692,20 @@ sub loadCacheFile
 		elsif($mode eq 'ppl')
 		{
 			local ($sysname, $factorName, $perplexity) = split(/\s+/, $line);
+			next if !$self->cacheIsCurrentForFile($sysname);
 			if(!exists $self->{'perplexity'}->{$sysname}) {$self->{'perplexity'}->{$sysname} = {};}
 			$self->{'perplexity'}->{$sysname}->{$factorName} = $perplexity;
 		}
 		elsif($mode eq 'nawp')
 		{
 			local ($sysname, @scores) = split(/\s+/, $line);
+			next if !$self->cacheIsCurrentForFile($sysname);
 			$self->{'nnAdjWERPWER'}->{$sysname} = \@scores;
 		}
 	}
 	close(CACHEFILE);
+#	print STDERR "\nafter load cache:\n";
+#	$self->printDetails();
 }
 
 #arguments: cache type ('bleu' | ...), system name, factor name
@@ -724,8 +727,11 @@ sub flushCache
 sub cacheIsCurrentForFile
 {
 	my ($self, $ext) = @_;
-	return 0 if(!exists $self->{'fileCtimes'}->{$ext});
+	print STDERR "cicff($self, $ext)\n";
+	return 0 if !exists $self->{'fileCtimes'}->{$ext} ;
+	print STDERR "  $ext exists in ctimes\n";
 	my @liveStats = stat($self->{'corpusName'} . ".$ext");
+	print STDERR "  time stat: " . $liveStats[9] . "\n";
 	return ($liveStats[9] <= $self->{'fileCtimes'}->{$ext}) ? 1 : 0;
 }
 
@@ -1308,4 +1314,27 @@ sub printSingleSentenceComparison
 	print "</table>";
 	print "</div>\n";
 	select $curFH;
+}
+
+#print contents of all fields of this object, with useful formatting for arrayrefs and hashrefs
+#arguments: none
+#return: none
+sub printDetails
+{
+	my $self = shift;
+	foreach my $key (keys %$self)
+	{
+		if(ref($self->{$key}) eq 'HASH')
+		{
+			print STDERR "obj: $key => {" . join(', ', map {"$_ => " . $self->{$key}->{$_}} (keys %{$self->{$key}})) . "}\n";
+		}
+		elsif(ref($self->{$key}) eq 'ARRAY')
+		{
+			print STDERR "obj: $key => (" . join(', ', @{$self->{$key}}) . ")\n";
+		}
+		elsif(ref($self->{$key}) eq '') #not a reference
+		{
+			print STDERR "obj: $key => " . $self->{$key} . "\n";
+		}
+	}
 }
