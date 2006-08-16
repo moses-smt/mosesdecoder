@@ -63,8 +63,6 @@ void LexicalReordering::LoadFile()
 					// to make a single token
 					key = f + "|||" + e;
 					probs = Scan<float>(Tokenize(tokens[FE_PROBS]));
-					std::vector<float> scv(probs.size());
-					std::transform(probs.begin(),probs.end(),probs.begin(),TransformScore);
 				}
 			else
 				{
@@ -72,8 +70,7 @@ void LexicalReordering::LoadFile()
 					f = tokens[F_FOREIGN];
 					key = f;
 					probs = Scan<float>(Tokenize(tokens[F_PROBS]));
-					std::vector<float> scv(probs.size());
-					std::transform(probs.begin(),probs.end(),probs.begin(),TransformScore);
+	
 				}
 			if (m_orientation == DistortionOrientationType::Monotone)
 				{
@@ -83,6 +80,8 @@ void LexicalReordering::LoadFile()
 				{
 					assert(probs.size() == MSD_NUM_PROBS); // 3 backward, 3 forward
 				}
+			std::vector<float> scv(probs.size());
+			std::transform(probs.begin(),probs.end(),probs.begin(),TransformScore);
 			m_orientation_table[key] = probs;
 		}
 	inFile.Close();
@@ -124,10 +123,6 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 		if(m_condition==LexReorderType::Fe)
 		{
 		//this key string is F+'|||'+E from the hypothesis
-		//TODO: following traces are for debugging, remove.
-//		TRACE_ERR("full source: " << hypothesis->GetSourcePhraseStringRep() << endl);
-//		TRACE_ERR("source: " << hypothesis->GetSourcePhraseStringRep(m_sourceFactors) << endl);
-//		TRACE_ERR("target: " << hypothesis->GetTargetPhraseStringRep(m_targetFactors) << endl);
 		val=m_orientation_table[hypothesis->GetSourcePhraseStringRep(m_sourceFactors)
 														+"||| "
 														+hypothesis->GetTargetPhraseStringRep(m_targetFactors)];
@@ -240,14 +235,6 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 	
 		}
 	}
-	//TODO: for loop for debugging, remove.
-//	for(int i=0; i < score.size(); i++)
-//	{
-//		if(score[i]!=0)
-//		{
-//			TRACE_ERR("dist_score: " << score[i] << endl);
-//		}
-//	}
 	return score;
 }
 

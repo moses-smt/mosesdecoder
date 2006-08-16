@@ -17,25 +17,19 @@ using namespace std;
  */
 int DistortionOrientation::GetOrientation(const Hypothesis *curr_hypothesis, int direction, int type) 
 {
-	size_t numSourceWords = curr_hypothesis->GetWordsBitmap().GetSize();
-	const WordsRange &currTargetRange = curr_hypothesis->GetCurrTargetWordsRange()
-			       , &currSourceRange = curr_hypothesis->GetCurrSourceWordsRange();
 	const Hypothesis *prevHypo = curr_hypothesis->GetPrevHypo();
-	size_t curr_source_start = currSourceRange.GetStartPos();
-	size_t curr_source_end = currSourceRange.GetEndPos();
-	size_t curr_target_end = currTargetRange.GetEndPos();
-	size_t prev_source_start = 0;
-	size_t prev_source_end = 0;
-	if(prevHypo!=NULL){
-		//don't look for attributes of the previous hypothesis if there is no previous hypothesis.
-		const WordsRange &prevSourceRange = prevHypo->GetCurrSourceWordsRange();
-		prev_source_start = prevSourceRange.GetStartPos();
-		prev_source_end = prevSourceRange.GetEndPos();		
-	}
-	else{
+	if(prevHypo==NULL){
+		//if there's no previous source we judge the first hypothesis as monotone.
 		return DistortionOrientationType::MONO;		
 	}
-	if((curr_target_end==numSourceWords && type==LexReorderType::Forward) || prev_source_end==curr_source_start-1)
+	const WordsRange &currTargetRange = curr_hypothesis->GetCurrTargetWordsRange()
+			       , &currSourceRange = curr_hypothesis->GetCurrSourceWordsRange();
+	size_t curr_source_start = currSourceRange.GetStartPos();
+	size_t curr_source_end = currSourceRange.GetEndPos();
+	const WordsRange &prevSourceRange = prevHypo->GetCurrSourceWordsRange();
+	size_t  prev_source_start = prevSourceRange.GetStartPos();
+	size_t prev_source_end = prevSourceRange.GetEndPos();		
+	if(prev_source_end==curr_source_start-1)
 	{
 		return DistortionOrientationType::MONO;
 	}
