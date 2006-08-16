@@ -190,7 +190,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		{
 			vector<string>	token	= Tokenize(lrFileVector[i]);
 			//characteristics of the phrase table
-			//TODO: need to change in the case that the phrase table not dependent on the source, don't need to configure the input format in that case.
 			vector<string> inputfactors = Tokenize(token[0],"-");
 			vector<FactorType> 	input,output;
 			if(inputfactors.size() > 1)
@@ -269,21 +268,21 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				boost::algorithm::to_lower(val);
 				//orientation 
 				if(val == "monotone")
-					{orientation = DistortionOrientationType::Monotone; TRACE_ERR("monotone\n");}
+					orientation = DistortionOrientationType::Monotone; 
 				else if(val == "msd")
-					{orientation = DistortionOrientationType::Msd;  TRACE_ERR("msd\n");}
+					orientation = DistortionOrientationType::Msd;
 				//direction
 				else if(val == "forward")
-					{direction = LexReorderType::Forward;  TRACE_ERR("forward\n");}
+					direction = LexReorderType::Forward;
 				else if(val == "backward")
-					{direction = LexReorderType::Backward;  TRACE_ERR("backward\n");}
+					direction = LexReorderType::Backward; 
 				else if(val == "bidirectional")
-					{direction = LexReorderType::Bidirectional;  TRACE_ERR("bidirectional\n");}
+					direction = LexReorderType::Bidirectional;
 				//condition
 				else if(val == "f")
-					{condition = LexReorderType::F;  TRACE_ERR("f\n");}
+					condition = LexReorderType::F; 
 				else if(val == "fe")
-					{condition = LexReorderType::Fe;  TRACE_ERR("fe\n");}
+					condition = LexReorderType::Fe; 
 			}
 			timer.check("Starting to load lexical reorder table...");
 			TRACE_ERR(filePath << "...");
