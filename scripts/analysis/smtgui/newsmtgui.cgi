@@ -83,6 +83,7 @@ sub view_corpus {
   
   # find corpora in evaluation directory
   my $corpus = new Corpus('-name' => "$in{CORPUS}", '-descriptions' => \%FILEDESC, '-info_line' => $factorData{$in{CORPUS}});
+  $corpus->printDetails();
   
   my ($sentence_count, $lineInfo);
   if(-e "$in{CORPUS}.f")
@@ -126,10 +127,13 @@ sub view_corpus {
   print "<TD>Surface vs. lemma PWER</TD>"; #can't sort on; only applies to sysoutputs
 	print "<TD>Statistical Measures</TD>";
 
-  open(DIR,"ls $in{CORPUS}.*|");
-  while(<DIR>) {
-    my $sort = "";
-    chop;
+  opendir(DIR, ".") or die "couldn't open '.' for read";
+  my @filenames = readdir(DIR); #includes . and ..
+  closedir(DIR);
+  foreach $_ (@filenames)
+  {
+  	next if -d $_; #if is a directory
+	print STDERR "file: $_\n";
     my $sgm = 0;
     if (/.sgm$/)
 	 {
@@ -142,8 +146,9 @@ sub view_corpus {
 	 	`wc -l $_` =~ /^\s*(\d+)\s+/;
 		next unless $1 == $sentence_count;
     }
-    /^$in{CORPUS}.([^\/]+)$/;
+	 next unless /^$in{CORPUS}\.([^\/]+)$/;
     my $file = $1;
+	 my $sort = "";
     # checkbox for compare
     my $row = "<TR><TD style=\"font-size: small\"><INPUT TYPE=CHECKBOX NAME=FILE_$file VALUE=1>";
     # README
@@ -185,6 +190,7 @@ sub view_corpus {
       $row .= "<TD>";
       if (!defined($DONTSCORE{$file}) && $file !~ /^f$/ && $file ne "e" && $file !~ /^pt/) {
 	my ($score,$p1,$p2,$p3,$p4,$bp) = $corpus->calcBLEU($file, 'surf');
+	print STDERR "193: `$score `$p1 `$p2 `$p3 `$p4 `$bp\n";
 	$row .= sprintf("<B>%.04f</B> %.01f/%.01f/%.01f/%.01f *%.03f", $score, $p1, $p2, $p3, $p4, $bp);
 	if (defined($in{SORT}) && $in{SORT} eq 'IBM') { $sort = $score; }
       }
@@ -200,7 +206,7 @@ sub view_corpus {
       print "$DONTSCORE{$file}+";
       my ($nist,$nist_bleu);
       if ($file =~ /sgm$/) {
-	($nist,$nist_bleu) = &get_nist_score("$in{CORPUS}.ref.sgm","$in{CORPUS}.src.sgm","$in{CORPUS}.$file");
+	($nist,$nist_bleu) = get_nist_score("$in{CORPUS}.ref.sgm","$in{CORPUS}.src.sgm","$in{CORPUS}.$file");
 	$row .= sprintf("<B>%.04f</B>",$nist);
 	if ($in{SORT} eq 'NIST') { $sort = $nist; }
       }
@@ -218,7 +224,7 @@ sub view_corpus {
     if ($in{mBLEU} && (scalar keys %MEMORY) && -e "$in{CORPUS}.e") {
       $row .= "<TD>";
       if (!defined($DONTSCORE{$file}) && $file !~ /^f$/ && $file ne "e") {
-	my ($score,$p1,$p2,$p3,$p4,$bp) = &get_multi_bleu_score("$in{CORPUS}.f","$in{CORPUS}.e","$in{CORPUS}.$file");
+	my ($score,$p1,$p2,$p3,$p4,$bp) = get_multi_bleu_score("$in{CORPUS}.f","$in{CORPUS}.e","$in{CORPUS}.$file");
 	$row .= sprintf("<B>%.04f</B> %.01f/%.01f/%.01f/%.01f *%.03f",$score,$p1,$p2,$p3,$p4,$bp);
 	if ($in{SORT} eq 'mBLEU') { $sort = $score; }
       }
@@ -303,7 +309,7 @@ sub view_corpus {
     my($correct,$wrong,$unknown);
     $row .= "<TD>";
     if (!defined($DONTSCORE{$file}) && (scalar keys %MEMORY)) {
-      my ($correct,$just_syn,$just_sem,$wrong,$unknown) = &get_score_from_memory("$in{CORPUS}.$FOREIGN",
+      my ($correct,$just_syn,$just_sem,$wrong,$unknown) = get_score_from_memory("$in{CORPUS}.$FOREIGN",
 			       "$in{CORPUS}.$file");
       $row .= "<B><FONT COLOR=GREEN>$correct</FONT></B>";
       $row .= "/<FONT COLOR=ORANGE>$just_syn</FONT>";
@@ -897,6 +903,7 @@ sub trim {
 sub load_descriptions {
   open(FD,"file-descriptions") or die "load_descriptions(): couldn't open 'file-descriptions' for read\n";
   while(<FD>) {
+  	chomp;
     my($file,$description) = split(/\s+/,$_,2);
     $FILEDESC{$file} = $description;
   }
