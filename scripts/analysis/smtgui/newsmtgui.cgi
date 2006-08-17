@@ -83,7 +83,7 @@ sub view_corpus {
   
   # find corpora in evaluation directory
   my $corpus = new Corpus('-name' => "$in{CORPUS}", '-descriptions' => \%FILEDESC, '-info_line' => $factorData{$in{CORPUS}});
-  $corpus->printDetails();
+#  $corpus->printDetails(); #debugging info
   
   my ($sentence_count, $lineInfo);
   if(-e "$in{CORPUS}.f")
@@ -133,7 +133,6 @@ sub view_corpus {
   foreach $_ (@filenames)
   {
   	next if -d $_; #if is a directory
-	print STDERR "file: $_\n";
     my $sgm = 0;
     if (/.sgm$/)
 	 {

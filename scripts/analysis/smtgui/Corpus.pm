@@ -67,6 +67,8 @@ sub new
 	bless $self, $class;
 	$self->locateFiles($refFileDescs); #find all relevant files in the current directory; set filenames and descriptions
 	$self->loadCacheFile();
+	print STDERR "on load:\n";
+	$self->printDetails();
 	return $self;
 }
 
@@ -231,7 +233,7 @@ sub calcOverallPWER
 }
 
 #arguments: system name, factor name to consider (default 'surf')
-#return: BLEU score, n-gram precisions, brevity penalty
+#return: array of (BLEU score, n-gram precisions, brevity penalty)
 sub calcBLEU
 {
 	my ($self, $sysname, $factorName) = (shift, shift, 'surf');
@@ -365,6 +367,7 @@ sub statisticallyTestBLEUResults
 sub calcPerplexity
 {
 	my ($self, $sysname, $factorName) = @_;
+	print STDERR "ppl $sysname $factorName\n";
 	#check in-memory cache first
 	if(exists $self->{'perplexity'}->{$sysname} && exists $self->{'perplexity'}->{$sysname}->{$factorName})
 	{
@@ -440,7 +443,9 @@ sub statisticallyCompareSystemResults
 		$dev = sqrt($dev / (($j - 1) * $j)); #need the extra j because the variance of Xbar is 1/n the variance of X
 		#t test
 		my $t = $mean / $dev; #this isn't the standard form; remember the difference of the means is equal to the mean of the differences
-		push @$tConfidences, getUpperBoundPValue($t);
+		my $cc = getUpperBoundPValue($t);
+		print STDERR "comparing at n=$i: mu $mean, sigma $dev, t $t -> conf >= " . (1 - $cc) . "\n";
+		push @$tConfidences, $cc;
 		push @$tWinningIndices, ($mean > 0) ? 0 : 1;
 		#sign test
 		my %binomialCoefficients; #map (n+ - n-) to a coefficient; compute on the fly!
@@ -526,7 +531,7 @@ sub writeCacheFile
 			print CACHEFILE "$sysname $factorName " . join(' ', @{$self->{'bleuScores'}->{$sysname}->{$factorName}->[0]});
 			foreach my $sentenceBLEU (@{$self->{'bleuScores'}->{$sysname}->{$factorName}->[1]})
 			{
-				print CACHEFILE "; " . join(' ', @$sentenceBLEU);
+				print CACHEFILE ";" . join(' ', @$sentenceBLEU);
 			}
 			print CACHEFILE "\n";
 		}
@@ -540,7 +545,7 @@ sub writeCacheFile
 			print CACHEFILE "$sysname $factorName " . join(' ', @{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[0]});
 			foreach my $subsetConfidence (@{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[1]})
 			{
-				print CACHEFILE "; " . join(' ', @$subsetConfidence);
+				print CACHEFILE ";" . join(' ', @$subsetConfidence);
 			}
 			print CACHEFILE "\n";
 		}
@@ -553,7 +558,7 @@ sub writeCacheFile
 		{
 			foreach my $factorName (keys %{$self->{'comparisonStats'}->{$sysname1}->{$sysname2}})
 			{
-				print CACHEFILE "$sysname1 $sysname2 $factorName " . join('; ', map {join(' ', @$_)} @{$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName}}) . "\n";
+				print CACHEFILE "$sysname1 $sysname2 $factorName " . join(';', map {join(' ', @$_)} @{$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName}}) . "\n";
 			}
 		}
 	}
@@ -641,8 +646,10 @@ sub loadCacheFile
 			if(!exists $self->{'bleuScores'}->{$sysname}) {$self->{'bleuScores'}->{$sysname} = {};}
 			if(!exists $self->{'bleuScores'}->{$sysname}->{$factorName}) {$self->{'bleuScores'}->{$sysname}->{$factorName} = [[], []];}
 			my @stats = map {my @tmp = split(/\s+/, $_); \@tmp;} split(/;/, $rest);
-			$self->{'bleuScores'}->{$sysname}->{$factorName}->[0] = shift @stats;
-			$self->{'bleuScores'}->{$sysname}->{$factorName}->[1] = \@stats;
+			print STDERR "bleu 1: " . join(', ', @{shift @stats}) . "\n";
+			print STDERR "bleu 2: " . join(' ', map {"{" . join(', ', @$_) . "}"} @stats) . "\n";
+		#	$self->{'bleuScores'}->{$sysname}->{$factorName}->[0] = shift @stats;
+		#	$self->{'bleuScores'}->{$sysname}->{$factorName}->[1] = \@stats;
 		}
 		elsif($mode eq 'bstats')
 		{
@@ -704,8 +711,6 @@ sub loadCacheFile
 		}
 	}
 	close(CACHEFILE);
-#	print STDERR "\nafter load cache:\n";
-#	$self->printDetails();
 }
 
 #arguments: cache type ('bleu' | ...), system name, factor name
@@ -727,11 +732,8 @@ sub flushCache
 sub cacheIsCurrentForFile
 {
 	my ($self, $ext) = @_;
-	print STDERR "cicff($self, $ext)\n";
 	return 0 if !exists $self->{'fileCtimes'}->{$ext} ;
-	print STDERR "  $ext exists in ctimes\n";
 	my @liveStats = stat($self->{'corpusName'} . ".$ext");
-	print STDERR "  time stat: " . $liveStats[9] . "\n";
 	return ($liveStats[9] <= $self->{'fileCtimes'}->{$ext}) ? 1 : 0;
 }
 
