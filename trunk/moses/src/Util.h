@@ -236,19 +236,10 @@ template<typename T> inline void ShrinkToFit(T& v) {
 
 
 //A couple of utilities to measure decoding time
-#ifndef WIN32
-
+#ifdef WIN32
+inline void ResetUserTime() {}
+inline void PrintUserTime(std::ostream &out, const std::string &message="") {}
+#else
 void ResetUserTime();
-void PrintUserTime(std::ostream &out,std::string message="");
-
+void PrintUserTime(std::ostream &out, const std::string &message="");
 #endif
-
-/***
- * include checks for null return value, and helpful print statements
- */
- /*
-void* xmalloc(unsigned int numBytes);
-void* xrealloc(void* ptr, unsigned int numBytes);
-#define malloc(x) xmalloc(x)
-#define realloc(x, n) xrealloc(x, n)
-*/
