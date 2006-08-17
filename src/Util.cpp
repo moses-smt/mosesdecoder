@@ -107,23 +107,6 @@ bool Scan<bool>(const std::string &input)
   return (lc == "yes" || lc == "y" || lc == "true" || lc == "1");
 }
 
-#undef malloc
-#undef realloc
-
-void* xmalloc(unsigned int numBytes)
-{
-	char* ptr = (char*)malloc(numBytes);
-	if(ptr == NULL) std::cout << "[FYI] xmalloc(): malloc returns null on request for " << numBytes << " bytes" << endl;
-	return ptr;
-}
-
-void* xrealloc(void* ptr, unsigned int numBytes)
-{
-	char* rptr = (char*)realloc(ptr, numBytes);
-	if(rptr == NULL) std::cout << "[FYI] xrealloc(): realloc returns null on request for " << numBytes << " bytes" << endl;
-	return rptr;
-}
-
 #ifndef WIN32
 void ResetUserTime()
 {
@@ -134,7 +117,7 @@ void ResetUserTime()
     std::cerr << "ResetUserTime: failure in getrusage!\n";        
 };
 
-void PrintUserTime(std::ostream &out, std::string message){ 
+void PrintUserTime(std::ostream &out, const std::string &message){ 
   struct rusage ru;
   if (getrusage(RUSAGE_SELF, &ru)!=-1)        
     out << message.c_str() << " part(sec)=" <<  (unsigned long)ru.ru_utime.tv_sec - _util_usertime_sec 
