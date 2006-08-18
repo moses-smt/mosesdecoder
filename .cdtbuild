@@ -21,8 +21,6 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
 </option>
 <option id="gnu.cpp.compiler.option.debugging.gprof.1598624147" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
 <option id="gnu.cpp.compiler.option.warnings.allwarn.1855070516" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
@@ -43,8 +41,6 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.444585015" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
