@@ -15,8 +15,6 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.1028025969" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
@@ -30,7 +28,6 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.888044188" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 <option id="gnu.cpp.link.option.libs.427302130" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="pthread"/>
-<listOptionValue builtIn="false" value="mysqlclient"/>
 <listOptionValue builtIn="false" value="z"/>
 <listOptionValue builtIn="false" value="lattice"/>
 <listOptionValue builtIn="false" value="misc"/>
@@ -38,7 +35,6 @@
 <listOptionValue builtIn="false" value="oolm"/>
 </option>
 <option id="gnu.cpp.link.option.paths.1718276622" superClass="gnu.cpp.link.option.paths" valueType="stringList">
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/lib"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lib/i686"/>
 </option>
 <option id="gnu.cpp.link.option.userobjs.551693347" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
@@ -47,22 +43,6 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/manip.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/myset.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/qparms.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/sql_string.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/string_util.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/type_info.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/vallist.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/coldata.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/datetime.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_names.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_types.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/result.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/query.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/connection.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/row.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/fields.o"/>
 </option>
 <option id="gnu.cpp.link.option.flags.1995182231" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 </tool>
@@ -82,8 +62,6 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/include"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.542441515" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
@@ -97,7 +75,6 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1153317521" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
 <option id="gnu.cpp.link.option.libs.1100640875" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="pthread"/>
-<listOptionValue builtIn="false" value="mysqlclient"/>
 <listOptionValue builtIn="false" value="z"/>
 <listOptionValue builtIn="false" value="lattice"/>
 <listOptionValue builtIn="false" value="misc"/>
@@ -105,7 +82,6 @@
 <listOptionValue builtIn="false" value="oolm"/>
 </option>
 <option id="gnu.cpp.link.option.paths.724264639" superClass="gnu.cpp.link.option.paths" valueType="stringList">
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysql/lib"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lib/i686"/>
 </option>
 <option id="gnu.cpp.link.option.userobjs.1365891611" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
@@ -114,22 +90,6 @@
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/manip.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/myset.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/qparms.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/sql_string.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/string_util.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/type_info.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/vallist.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/coldata.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/datetime.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_names.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/field_types.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/result.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/query.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/connection.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/row.o"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../mysqlpp/lib/fields.o"/>
 </option>
 <option id="gnu.cpp.link.option.flags.213483667" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 </tool>
