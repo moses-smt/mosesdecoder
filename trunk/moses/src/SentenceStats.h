@@ -85,7 +85,7 @@ class SentenceStats
 		/***
 		 * auxiliary to CalcFinalStats()
 		 */
-		void SentenceStats::AddDeletedWords(const Hypothesis& hypo);
+		void AddDeletedWords(const Hypothesis& hypo);
 	
 		//hypotheses
 		std::vector<recombinationInfo> m_recombinationInfos;

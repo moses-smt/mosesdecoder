@@ -22,9 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "boost/filesystem/operations.hpp" // includes boost/filesystem/path.hpp
-#include "boost/filesystem/fstream.hpp"    // ditto
-#include <boost/algorithm/string.hpp>
 #include "Parameter.h"
 #include "Util.h"
 #include "InputFileStream.h"
@@ -271,8 +268,6 @@ bool Parameter::Validate()
 /** check whether a file exists */
 bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::vector<std::string> const& extensions)
 {
-	using namespace boost::filesystem;
-	
 	typedef std::vector<std::string> StringVec;
 	StringVec::const_iterator iter;
 
@@ -299,8 +294,7 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 		bool fileFound=0;
 		for(size_t i=0;i<extensions.size() && !fileFound;++i)
 			{
-				path filePath(pathStr+extensions[i], native);
-				fileFound|=exists(filePath);
+				fileFound|=FileExists(pathStr + extensions[i]);
 			}
 		if(!fileFound)
 			{
@@ -380,7 +374,7 @@ bool Parameter::ReadConfigFile( string filePath )
 		if (comPos != string::npos)
 			line = line.substr(0, comPos);
 		// trim leading and trailing spaces/tabs
-		boost::trim(line);
+		line = Trim(line);
 
 		if (line[0]=='[') 
 		{ // new parameter

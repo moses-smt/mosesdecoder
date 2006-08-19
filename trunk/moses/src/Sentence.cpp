@@ -19,10 +19,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include "Sentence.h"
-#include <boost/algorithm/string.hpp>
 #include "PhraseDictionary.h"
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
+#include "Util.h"
 
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
 									 FactorCollection &factorCollection) 
@@ -31,7 +31,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
 	do 
 		{
 			if (getline(in, line, '\n').eof())	return 0;
-			boost::trim(line);
+			line = Trim(line);
 		} while (line == "");
 	
 	CreateFromString(factorOrder, line, factorCollection);

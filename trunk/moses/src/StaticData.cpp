@@ -21,8 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <cassert>
-#include <boost/filesystem/operations.hpp> // boost::filesystem::exists
-#include <boost/algorithm/string/case_conv.hpp> //boost::algorithm::to_lower
 #include "PhraseDictionary.h"
 #include "DecodeStep_Translation.h"
 #include "DecodeStep_Generation.h"
@@ -206,8 +204,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			vector<string> parameters = Tokenize<string>(lrTypeVector[i],"-");
 			for (size_t param=0; param<parameters.size(); param++)
 			{
-				string val = parameters[param];
-				boost::algorithm::to_lower(val);
+				string val = ToLower(parameters[param]);
 				//orientation 
 				if(val == "monotone")
 					orientation = DistortionOrientationType::Monotone; 
@@ -390,7 +387,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				numFeatures = Scan<size_t>(token[2]);
 				filePath = token[3];
 			}
-			if (!boost::filesystem::exists(boost::filesystem::path(filePath, boost::filesystem::native)))
+			if (!FileExists(filePath))
 				{
 					std::cerr<<"ERROR: generation dictionary '"<<filePath<<"' does not exist!\n";
 					abort();
@@ -578,8 +575,7 @@ void StaticData::LoadPhraseTables(bool filter
 															+ phraseTableHash + ".txt";
 
 			timer.check("Start loading PhraseTable");
-			using namespace boost::filesystem; 
-			if (!exists(path(filePath+".binphr.idx", native)))
+			if (!FileExists(filePath+".binphr.idx"))
 				{
 					bool filterPhrase;
 					/*

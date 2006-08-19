@@ -99,12 +99,36 @@ string GetMD5Hash(const string &filePath)
 	return stream.str();
 }
 
+const std::string ToLower(const std::string& str)
+{
+	std::string lc(str);
+	std::transform(lc.begin(), lc.end(), lc.begin(), (int(*)(int))std::tolower);
+	return lc;
+}
+
 template<>
 bool Scan<bool>(const std::string &input)
 {
-  std::string lc(input);
-  std::transform(lc.begin(), lc.end(), lc.begin(), (int(*)(int))std::tolower);
-  return (lc == "yes" || lc == "y" || lc == "true" || lc == "1");
+	std::string lc = ToLower(input);
+	if (lc == "yes" || lc == "y" || lc == "true" || lc == "1")
+		return true;
+	if (lc == "no" || lc == "n" || lc =="false" || lc == "0")
+		return false;
+	std::cerr << "Scan<bool>: didn't understand '" << lc << "', returning false" << std::endl;
+	return false;
+}
+
+bool FileExists(const std::string& fileName)
+{
+        std::ifstream ifs(fileName.c_str());
+        return !ifs.fail();
+}
+
+const std::string Trim(const std::string& str, const std::string dropChars)
+{
+	std::string res = str;
+	res.erase(str.find_last_not_of(dropChars)+1);
+	return res.erase(0, res.find_first_not_of(dropChars));
 }
 
 #ifndef WIN32
