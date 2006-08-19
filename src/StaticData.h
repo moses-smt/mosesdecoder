@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <list>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "TypeDef.h"
 #include "ScoreIndexManager.h"
 #include "FactorCollection.h"
@@ -101,7 +101,7 @@ protected:
 	bool m_onlyDistinctNBest;
 	bool m_computeLMBackoffStats;
 
-	mutable boost::shared_ptr<SentenceStats> m_sentenceStats;
+	mutable std::auto_ptr<SentenceStats> m_sentenceStats;
 
 public:
 	StaticData();
@@ -257,7 +257,7 @@ public:
 	}
 	void ResetSentenceStats(const InputType& source) const
 	{
-		m_sentenceStats = boost::shared_ptr<SentenceStats>(new SentenceStats(source));
+		m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
 	}
 	bool IsLabeledNBestList() const
 	{

@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <iterator>
 #include <sys/stat.h>
-#include "boost/filesystem/operations.hpp" // includes boost/filesystem/path.hpp
 #include "PhraseDictionary.h"
 #include "FactorCollection.h"
 #include "Word.h"
@@ -41,7 +40,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 																			, const string &hashFilePath
 																			, const vector<float> &weight
 																			, size_t tableLimit
-																			, bool filter
+																			, bool filter_REMOVE
 																			, const list< Phrase > &inputPhraseList
 																			, const LMList &languageModels
 														          , float weightWP
@@ -61,20 +60,14 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 	// create hash file if necessary
 	ofstream tempFile;
 	string tempFilePath;
-	if (filter)
-	{
-		CreateTempFile(tempFile, tempFilePath);
-		TRACE_ERR(filePath << " -> " << tempFilePath << " -> " << hashFilePath << endl);
-	}
 
 	vector< vector<string> >	phraseVector;
 	string line, prevSourcePhrase = "";
-	bool addPhrase = !filter;
 	size_t count = 0;
   size_t line_num = 0;
 	while(getline(inFile, line)) 
 	{
-    ++line_num;
+		++line_num;
 		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
 		if (tokens.size() != 3)
 		{
@@ -82,83 +75,40 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			abort(); // TODO- error handling
 		}
 
-    bool isLHSEmpty = (tokens[1].find_first_not_of(" \t", 0) == string::npos);
-    if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
-      TRACE_ERR(filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
+		bool isLHSEmpty = (tokens[1].find_first_not_of(" \t", 0) == string::npos);
+		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+			TRACE_ERR(filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
 			continue;
-    }
+		}
 
-		if (!filter)
-		{
-			if (tokens[0] != prevSourcePhrase)
-				phraseVector = Phrase::Parse(tokens[0], input);
-		}
-		else if (tokens[0] == prevSourcePhrase)
-		{ // same source phrase as prev line.
-		}
-		else
-		{
+		if (tokens[0] != prevSourcePhrase)
 			phraseVector = Phrase::Parse(tokens[0], input);
-			prevSourcePhrase = tokens[0];
 
-			addPhrase = Contains(phraseVector, inputPhraseList, input);
+		vector<float> scoreVector = Tokenize<float>(tokens[2]);
+		if (scoreVector.size() != m_noScoreComponent) {
+			TRACE_ERR("Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_noScoreComponent<<") of score components on line " << line_num);
+			abort();
 		}
-
-		if (addPhrase)
-		{
-			vector<float> scoreVector = Tokenize<float>(tokens[2]);
-			if (scoreVector.size() != m_noScoreComponent) {
-				TRACE_ERR("Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_noScoreComponent<<") of score components on line " << line_num);
-        abort();
-			}
-//			assert(scoreVector.size() == m_noScoreComponent);
+//		assert(scoreVector.size() == m_noScoreComponent);
 			
-			// source
-			Phrase sourcePhrase(Input);
-			sourcePhrase.CreateFromString( input, phraseVector, factorCollection);
-			//target
-			TargetPhrase targetPhrase(Output);
-			targetPhrase.CreateFromString( output, tokens[1], factorCollection);
+		// source
+		Phrase sourcePhrase(Input);
+		sourcePhrase.CreateFromString( input, phraseVector, factorCollection);
+		//target
+		TargetPhrase targetPhrase(Output);
+		targetPhrase.CreateFromString( output, tokens[1], factorCollection);
 
-			// component score, for n-best output
-			std::vector<float> scv(scoreVector.size());
-			std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
-			targetPhrase.SetScore(this, scv, weight, weightWP, languageModels);
+		// component score, for n-best output
+		std::vector<float> scv(scoreVector.size());
+		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
+		targetPhrase.SetScore(this, scv, weight, weightWP, languageModels);
 
-			AddEquivPhrase(sourcePhrase, targetPhrase);
+		AddEquivPhrase(sourcePhrase, targetPhrase);
 
-			// add to hash file
-			if (filter)
-				tempFile << line << endl;
-		}
 		count++;
 	}
 
 	SortTargetPhraseCollection();
-	
-	// move temp file to hash file
-	if (filter)
-	{
-		tempFile.close();
-		using namespace boost::filesystem;
-		if (!exists(path(hashFilePath, native)))
-		{
-			try 
-			{
-				rename( path(tempFilePath, native) , path(hashFilePath, native) );
-			}
-			catch (...)
-			{ // copy instead
-				copy_file(path(tempFilePath, native) , path(hashFilePath, native) );
-				remove(tempFilePath);
-			}
-		}
-#ifndef _WIN32
-		// change permission to let everyone use cached file
-		chmod(hashFilePath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
-#endif
-	}
-	
 	// sort each target phrase collection
 	m_collection.Sort(m_tableLimit);
 }

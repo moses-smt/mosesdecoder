@@ -145,7 +145,7 @@ std::string Join(const std::string& delimiter, const std::vector<T>& items)
 	std::ostringstream outstr;
 	if(items.size() == 0) return "";
 	outstr << items[0];
-	for(unsigned int i = 1; i < items.size(); i++) outstr << " " << items[i];
+	for(unsigned int i = 1; i < items.size(); i++) outstr << delimiter << items[i];
 	return outstr.str();
 }
 
@@ -234,6 +234,9 @@ std::string GetMD5Hash(const std::string &filePath);
 template<typename T> inline void ShrinkToFit(T& v) {
   if(v.capacity()>v.size()) T(v).swap(v);assert(v.capacity()==v.size());}
 
+bool FileExists(const std::string& fileName);
+const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
+const std::string ToLower(const std::string& str);
 
 //A couple of utilities to measure decoding time
 #ifdef WIN32
