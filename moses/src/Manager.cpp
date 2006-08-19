@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <limits>
 #include <cmath>
-#include <boost/functional/hash.hpp>
 #include "Manager.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -318,11 +317,11 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 
 	LatticePathCollection contenders;
 
-	#ifdef WIN32
+	// #ifdef WIN32
 		set<std::vector<size_t> > distinctHyps;
-	#else
-		__gnu_cxx::hash_set<std::vector<size_t>, boost::hash<std::vector<size_t> > > distinctHyps;
-	#endif
+	//#else
+	//	__gnu_cxx::hash_set<std::vector<size_t>, boost::hash<std::vector<size_t> > > distinctHyps;
+	//#endif
 
 	// path of the best
 	contenders.insert(new LatticePath(*sortedPureHypo.begin()));

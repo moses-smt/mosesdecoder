@@ -23,15 +23,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <fstream>
 #include <string>
-#include <boost/iostreams/filtering_stream.hpp>
 
-class InputFileStream : public boost::iostreams::filtering_stream<boost::iostreams::input>
+class InputFileStream : public std::istream
 {
 protected:
-	std::ifstream m_file;
+	std::streambuf *m_streambuf;
 public:
 
 	InputFileStream(const std::string &filePath);
+	~InputFileStream();
 
 	void Close();
 };

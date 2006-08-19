@@ -19,41 +19,30 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <boost/iostreams/filter/gzip.hpp>
-
-#if HAVE_BZIP2
-#include <boost/iostreams/filter/bzip2.hpp>
-#endif
-
 #include "InputFileStream.h"
+#include <gzfilebuf.h>
 
 InputFileStream::InputFileStream(const std::string &filePath)
+: m_streambuf(0)
 {
-  using namespace boost::iostreams;
-
   if (filePath.size() > 3 &&
       filePath.substr(filePath.size() - 3, 3) == ".gz")
   {
-    m_file.open(filePath.c_str(), ios_base::in | ios_base::binary);
-    push(gzip_decompressor());
+    m_streambuf = new gzfilebuf(filePath.c_str());
+  } else {
+    std::filebuf* fb = new std::filebuf();
+    fb->open(filePath.c_str(), std::ios::in);
+    m_streambuf = fb;
   }
-#if HAVE_BZIP2
-  else if (filePath.size() > 4 &&
-      filePath.substr(filePath.size() - 4, 4) == ".bz2")
-  {
-    m_file.open(filePath.c_str(), ios_base::in | ios_base::binary);
-    push(bzip2_decompressor());
-  }
-#endif
-  else
-  {
-    m_file.open(filePath.c_str());
-  }
-  push(m_file);
+  this->init(m_streambuf);
+}
+
+InputFileStream::~InputFileStream()
+{
+  delete m_streambuf; m_streambuf = 0;
 }
 
 void InputFileStream::Close()
 {
-  pop();
 }
 
