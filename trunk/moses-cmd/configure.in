@@ -2,6 +2,7 @@ AC_INIT(src)
 
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE(moses, 0.1)
+AM_MAINTAINER_MODE
 
 AC_PROG_CXX
 AC_LANG_CPLUSPLUS
@@ -44,7 +45,7 @@ then
   CPPFLAGS="$CPPFLAGS -I${with_moses}/src"
   LDFLAGS="$LDFLAGS -L${with_moses}/src"
 fi
-LIBS="$LIBS -lmoses -lz"
+LIBS="$LIBS -lmoses"
 
 AC_CHECK_HEADER([Manager.h], [], [AC_MSG_ERROR([Cannot find moses headers!  Use --with-moses=PATH])])
 
@@ -92,7 +93,6 @@ else
 fi
 fi
 
-
-
+LIBS="$LIBS -lz"
 
 AC_OUTPUT(Makefile src/Makefile)
