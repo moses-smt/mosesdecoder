@@ -15,11 +15,10 @@ rm -rf release
 mkdir -p release
 cd release
 
+svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk mosesdecoder
+
+cd mosesdecoder
 base=`pwd`
-svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/moses
-svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/moses-cmd
-svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/irstlm
-svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/BUILD-INSTRUCTIONS
 
 for dir in moses moses-cmd irstlm; do
   cd $base
@@ -47,7 +46,7 @@ for dir in moses moses-cmd irstlm; do
 done
 
 cd $base
-tar cf moses-release.tar moses/ moses-cmd/ irstlm/
+tar cf moses-release.tar moses/ moses-cmd/ irstlm/ BUILD-INSTRUCTIONS
 gzip moses-release.tar
 
 echo tar-ball: $base/moses-release.tar

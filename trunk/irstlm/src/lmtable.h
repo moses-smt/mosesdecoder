@@ -241,8 +241,8 @@ public:
   void loadbinheader(std::fstream& inp, const char* header);
   void loadbincodebook(std::fstream& inp,int l);
   
-  void lmtable::filter(const char* lmfile);
-  void lmtable::filter2(const char* lmfile,int buffMb=512);
+  void filter(const char* lmfile);
+  void filter2(const char* lmfile,int buffMb=512);
   
   void loadcenters(std::fstream& inp,int Order);
 	

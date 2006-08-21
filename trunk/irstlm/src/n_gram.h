@@ -26,6 +26,7 @@
 #define MF_NGRAM_H
 
 #include <fstream>
+#include <cassert>
 #include "dictionary.h"
 
 #ifdef MYMAXNGRAM

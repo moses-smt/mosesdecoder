@@ -5,10 +5,11 @@ libirstlm_a_SOURCES = \
 	htable.cpp \
 	lmtable.cpp \
 	mempool.cpp \
-	ngram.cpp
+	n_gram.cpp \
+	ngramcache.cpp
 
 library_includedir=$(includedir)
-library_include_HEADERS = dictionary.h lmtable.h ngram.h
+library_include_HEADERS = dictionary.h lmtable.h n_gram.h
 
 bin_PROGRAMS = compile-lm quantize-lm
 
