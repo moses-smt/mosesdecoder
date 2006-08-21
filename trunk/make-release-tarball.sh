@@ -16,7 +16,11 @@ mkdir -p release
 cd release
 
 base=`pwd`
-cvs -z3 -d:pserver:anonymous@mosesdecoder.cvs.sourceforge.net:/cvsroot/mosesdecoder co .
+svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/moses
+svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/moses-cmd
+svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/irstlm
+
+cd mosesdecoder
 
 for dir in moses moses-cmd irstlm; do
   cd $base
@@ -38,6 +42,12 @@ for dir in moses moses-cmd irstlm; do
   rm -rf ReleaseNBest/
   rm -f regenerate-makefiles.sh
   rm -rf config
-  find . -type d | grep CVS | xargs rm -rf
+  find . -type d | grep .svn | xargs rm -rf
+  rm -rf .*
+  rm -f acsite*
 done
+
+cd $base
+tar cf moses-release.tar moses/ moses-cmd/ irstlm/
+gzip moses-release.tar
 
