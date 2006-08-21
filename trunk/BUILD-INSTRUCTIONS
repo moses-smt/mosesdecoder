@@ -41,13 +41,13 @@ you do so, as this can lead to problems locating the library.
  Build the moses library:
 
    cd moses
-   ./configure --with-srilm=/path/to/srilm
+   ./configure --with-irstlm=/path/to/irstlm
    make
 
  Build the moses binary:
 
    cd ../moses-cmd
-   ./configure --with-moses=`pwd`/../moses --with-srilm=/path/to/srilm
+   ./configure --with-moses=`pwd`/../moses --with-irstlm=/path/to/irstlm
    make
 
  The resulting decoder binary will be moses-cmd/src/moses .
