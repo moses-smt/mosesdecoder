@@ -19,6 +19,7 @@ base=`pwd`
 svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/moses
 svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/moses-cmd
 svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/irstlm
+svn co https://svn.sourceforge.net/svnroot/mosesdecoder/trunk/BUILD-INSTRUCTIONS
 
 for dir in moses moses-cmd irstlm; do
   cd $base
