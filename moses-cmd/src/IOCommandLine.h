@@ -36,7 +36,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <fstream>
 #include <vector>
-#include <boost/algorithm/string.hpp>
 #include "TypeDef.h"
 #include "InputOutput.h"
 #include "Sentence.h"

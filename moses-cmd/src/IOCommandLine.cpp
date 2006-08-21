@@ -73,10 +73,10 @@ InputType*IOCommandLine::GetInput(InputType* in)
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
 	assert(outputFactorOrder.size() > 0);
-  if (reportAllFactors == true) 
+	if (reportAllFactors == true) 
 	{
 		out << phrase;
-  } 
+	} 
 	else 
 	{
 		size_t size = phrase.GetSize();
@@ -103,11 +103,11 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 		OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSourceSpan, reportAllFactors);
 		OutputSurface(out, hypo->GetTargetPhrase(), outputFactorOrder, reportAllFactors);
 
-        if (reportSourceSpan == true
-          && hypo->GetTargetPhrase().GetSize() > 0) {
-          out << "|" << hypo->GetCurrSourceWordsRange().GetStartPos()
-              << "-" << hypo->GetCurrSourceWordsRange().GetEndPos() << "| ";
-        }
+		if (reportSourceSpan == true
+		    && hypo->GetTargetPhrase().GetSize() > 0) {
+			out << "|" << hypo->GetCurrSourceWordsRange().GetStartPos()
+			    << "-" << hypo->GetCurrSourceWordsRange().GetEndPos() << "| ";
+		}
 	}
 }
 
