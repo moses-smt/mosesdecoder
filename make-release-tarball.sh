@@ -6,10 +6,12 @@ if [ -z $1 ]; then
 fi
 
 cd $1
+topdir=`pwd`
 if [ $? -gt 0 ]; then
   echo could not chdir to $1
   exit 1
 fi
+
 
 rm -rf release
 mkdir -p release
@@ -48,5 +50,9 @@ done
 cd $base
 tar cf moses-release.tar moses/ moses-cmd/ irstlm/ BUILD-INSTRUCTIONS
 gzip moses-release.tar
+mv moses-release.tar.gz $topdir/moses-release.tar.gz
+cd $topdir
 
-echo tar-ball: $base/moses-release.tar
+echo tar-ball: $topdir/moses-release.tar.gz
+echo Don\'t forget to remove $topdir/release
+
