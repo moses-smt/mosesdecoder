@@ -22,11 +22,12 @@
 // by M. Federico 
 // Copyright Marcello Federico, ITC-irst, 1998
 
-using namespace std;
-
 #include <iostream>
+#include <ostream>
 #include <cassert>
 #include "mempool.h"
+
+using namespace std;
 
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }

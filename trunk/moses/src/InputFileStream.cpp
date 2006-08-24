@@ -20,10 +20,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "InputFileStream.h"
-#include <gzfilebuf.h>
+#include "gzfilebuf.h"
 
 InputFileStream::InputFileStream(const std::string &filePath)
-: m_streambuf(0)
+: std::istream(0),
+m_streambuf(0)
 {
   if (filePath.size() > 3 &&
       filePath.substr(filePath.size() - 3, 3) == ".gz")

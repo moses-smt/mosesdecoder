@@ -4,6 +4,7 @@
 #include <limits>
 #include <cassert>
 #include <vector>
+#include <algorithm>
 #include "LexicalReordering.h"
 #include "InputFileStream.h"
 #include "DistortionOrientation.h"
