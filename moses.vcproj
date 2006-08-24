@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\zlib-win32\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;LM_IRST;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -479,6 +479,10 @@
 			</File>
 			<File
 				RelativePath=".\src\GenerationDictionary.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\gzfilebuf.h"
 				>
 			</File>
 			<File
