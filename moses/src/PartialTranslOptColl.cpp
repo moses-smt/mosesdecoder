@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "PartialTranslOptColl.h"
+#include <algorithm>
 
 /** constructor, intializes counters and thresholds */
 PartialTranslOptColl::PartialTranslOptColl()

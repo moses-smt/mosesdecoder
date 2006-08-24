@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)\$(ConfigurationName)\irstlm.lib&quot; mysqlpp.lib libmysql.lib libboost_thread-vc80-mt-gd.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)\$(ConfigurationName)\irstlm.lib&quot; &quot;$(SolutionDir)\..\zlib-win32\lib\zlib.lib&quot;"
 				OutputFile="$(ProjectDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"

@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <fstream>
 #include <string>
 #include <iterator>
+#include <algorithm>
 #include <sys/stat.h>
 #include "PhraseDictionary.h"
 #include "FactorCollection.h"
