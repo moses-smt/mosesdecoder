@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <cmath>
 #include <limits>
+#include "TypeDef.h"
 
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }
@@ -36,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #define VERBOSE(level,str) { if (StaticData::Instance()->GetVerboseLevel() >= level) { std::cerr << str; } }
+#define IFVERBOSE(level) if (StaticData::Instance()->GetVerboseLevel() >= level)
 
 template<typename T>
 inline std::string SPrint(const T &input)
