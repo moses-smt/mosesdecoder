@@ -48,20 +48,27 @@ void HypothesisCollection::RemoveAll()
 /** add a hypothesis to the collection, prune if necessary */
 void HypothesisCollection::Add(Hypothesis *hypo)
 {
-
 	AddNoPrune(hypo);
+	VERBOSE(3,"added hyp to stack");
 
+	// Update best score, if this hypothesis is new best
 	if (hypo->GetTotalScore() > m_bestScore)
 	{
+		VERBOSE(3,", best on stack");
 		m_bestScore = hypo->GetTotalScore();
+		// this may also affect the worst score
         if ( m_bestScore + m_beamThreshold > m_worstScore )
           m_worstScore = m_bestScore + m_beamThreshold;
 	}
 
     // Prune only if stack is twice as big as needed (lazy pruning)
-	if (m_hypos.size() > 2*m_maxHypoStackSize-10)
+	VERBOSE(3,", now size " << m_hypos.size());
+	if (m_hypos.size() > 2*m_maxHypoStackSize-1)
 	{
 		PruneToSize(m_maxHypoStackSize);
+	}
+	else {
+	  VERBOSE(3,std::endl);
 	}
 }
 
@@ -72,6 +79,8 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 
 	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
+	  StaticData::Instance()->GetSentenceStats().AddDiscarded();
+	  VERBOSE(3,"discarded, too bad for stack" << std::endl);
 		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
 		pool.freeObject(hypo);		
 		return;
@@ -92,7 +101,8 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	// keep the best 1
 	Hypothesis *hypoExisting = *iter;
 	if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
-	{ // incoming hypo is better than the 1 we have
+	{ // incoming hypo is better than the one we have
+		VERBOSE(3,"better than matching hyp, recombining, ");
 		if (m_nBestIsEnabled) {
 			hypo->AddArc(hypoExisting);
 			Detach(iter);
@@ -104,6 +114,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	}
 	else
 	{ // already storing the best hypo. discard current hypo 
+	  VERBOSE(3,"worse than matching hyp, recombining" << std::endl)
 		if (m_nBestIsEnabled) {
 			(*iter)->AddArc(hypo);
 		} else {
@@ -127,24 +138,19 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 		{
 			priority_queue<float> bestScores;
 			
-			// cerr << "About to prune from " << size() << " to " << newSize << endl;
 			// push all scores to a heap
-			//   (but never push scores below m_bestScore+m_beamThreshold)
+			// (but never push scores below m_bestScore+m_beamThreshold)
 			iterator iter = m_hypos.begin();
 			float score = 0;
 			while (iter != m_hypos.end())
 				{
 					Hypothesis *hypo = *iter;
 					score = hypo->GetTotalScore();
-					// cerr << "H score: " << score << ", mbestscore: " << m_bestScore << " + m_beamThreshold "<< m_beamThreshold << " = " << m_bestScore+m_beamThreshold;
 					if (score > m_bestScore+m_beamThreshold) {
 						bestScores.push(score);
-						// cerr << " pushed.";
 					}
-					// cerr << endl;
 					++iter;
         }
-        // cerr << "Heap contains " << bestScores.size() << " items" << endl;
 			
 			// pop the top newSize scores (and ignore them, these are the scores of hyps that will remain)
 			//  ensure to never pop beyond heap size
@@ -175,7 +181,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 							++iter;
 						}
 				}
-			// cerr << "Stack size after pruning: " << size() << endl;
+			VERBOSE(3,", pruned to size " << size() << endl);
 			
 			// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack
 			m_worstScore = scoreThreshold;
