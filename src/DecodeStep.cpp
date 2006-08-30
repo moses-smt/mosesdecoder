@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStep.h"
 #include "PhraseDictionary.h"
 #include "GenerationDictionary.h"
+#include "StaticData.h"
 
 DecodeStep::DecodeStep(Dictionary *ptr, const DecodeStep* prev)
 :m_ptr(ptr)
@@ -39,9 +40,9 @@ DecodeStep::DecodeStep(Dictionary *ptr, const DecodeStep* prev)
     if (newOutputFactorMask[i]) m_newOutputFactors[j++] = i;
 		if (conflictMask[i]) m_conflictFactors[k++] = i;
 	}
-	std::cerr << "DecodeStep():\n\toutputFactors=" << m_outputFactors
-		<< "\n\tconflictFactors=" << conflictMask
-		<< "\n\tnewOutputFactors=" << newOutputFactorMask << std::endl;
+  VERBOSE(2,"DecodeStep():\n\toutputFactors=" << m_outputFactors
+	  << "\n\tconflictFactors=" << conflictMask
+	  << "\n\tnewOutputFactors=" << newOutputFactorMask << std::endl);
 }
 
 DecodeStep::~DecodeStep() {}
