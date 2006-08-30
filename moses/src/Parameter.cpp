@@ -176,19 +176,19 @@ bool Parameter::LoadParam(int argc, char* argv[])
 		}
 
 	// logging of parameters that were set in either config or switch
-	//int verbose = 0;
-	//if (m_setting["verbose"].size() > 0)
-	//  verbose = Scan<int>(m_setting["verbose"][0]);
-	//  if (verbose >= 1) { // only if verbose
-	cerr << "Defined parameters (per moses.ini or switch):" << endl;
-	for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ; iterParam != m_setting.end(); iterParam++) {
+	int verbose = 1;
+	if (m_setting["verbose"].size() > 0)
+	  verbose = Scan<int>(m_setting["verbose"][0]);
+	if (verbose >= 1) { // only if verbose
+	  cerr << "Defined parameters (per moses.ini or switch):" << endl;
+	  for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ; iterParam != m_setting.end(); iterParam++) {
 		if (iterParam->second.size() > 0) {
 			cerr << "\t" << iterParam->first << ": ";
 			for ( size_t i = 0; i < iterParam->second.size(); i++ )
 				cerr << iterParam->second[i] << " ";
 			cerr << endl;
 		}
-		//}
+	  }
 	}
 
 	// check for illegal parameters

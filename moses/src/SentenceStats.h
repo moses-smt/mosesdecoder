@@ -53,6 +53,7 @@ class SentenceStats
 		void Initialize(const InputType& source)
 		{
 			m_numHyposPruned = 0;
+			m_numHyposDiscarded = 0;
 			m_totalSourceWords = source.GetSize();
 			m_recombinationInfos.clear();
 			m_deletedWords.clear();
@@ -67,6 +68,7 @@ class SentenceStats
 		unsigned int GetTotalHypos() const {return Hypothesis::s_HypothesesCreated;}
 		size_t GetNumHyposRecombined() const {return m_recombinationInfos.size();}
 		unsigned int GetNumHyposPruned() const {return m_numHyposPruned;}
+		unsigned int GetNumHyposDiscarded() const {return m_numHyposDiscarded;}
 		size_t GetTotalSourceWords() const {return m_totalSourceWords;}
 		size_t GetNumWordsDeleted() const {return m_deletedWords.size();}
 		size_t GetNumWordsInserted() const {return m_insertedWords.size();}
@@ -79,6 +81,7 @@ class SentenceStats
 													betterHypo.GetTotalScore(), worseHypo.GetTotalScore()));
 		}
 		void AddPruning() {m_numHyposPruned++;}
+		void AddDiscarded() {m_numHyposDiscarded++;}
 		
 	protected:
 	
@@ -90,6 +93,7 @@ class SentenceStats
 		//hypotheses
 		std::vector<recombinationInfo> m_recombinationInfos;
 		unsigned int m_numHyposPruned;
+		unsigned int m_numHyposDiscarded;
 	
 		//words
 		size_t m_totalSourceWords;
@@ -102,7 +106,8 @@ inline std::ostream& operator<<(std::ostream& os, const SentenceStats& ss)
   return os << "total hypotheses generated = " << ss.GetTotalHypos() << std::endl
             << "         number recombined = " << ss.GetNumHyposRecombined() << std::endl
             << "             number pruned = " << ss.GetNumHyposPruned() << std::endl
-            << "        total source words = " << ss.GetTotalSourceWords() << std::endl
-            << "             words deleted = " << ss.GetNumWordsDeleted() << " (" << Join(" ", ss.GetDeletedWords()) << ")" << std::endl
-            << "            words inserted = " << ss.GetNumWordsInserted() << " (" << Join(" ", ss.GetInsertedWords()) << ")" << std::endl;
+            << "    number discarded early = " << ss.GetNumHyposDiscarded() << std::endl
+            << "total source words = " << ss.GetTotalSourceWords() << std::endl
+            << "     words deleted = " << ss.GetNumWordsDeleted() << " (" << Join(" ", ss.GetDeletedWords()) << ")" << std::endl
+            << "    words inserted = " << ss.GetNumWordsInserted() << " (" << Join(" ", ss.GetInsertedWords()) << ")" << std::endl;
 }

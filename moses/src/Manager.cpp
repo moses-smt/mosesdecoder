@@ -88,8 +88,9 @@ void Manager::ProcessSentence()
 		HypothesisCollection &sourceHypoColl = *iterStack;
 
 		// the stack is pruned before processing (lazy pruning):
+		VERBOSE(3,"processing hypothesis from next stack");
 		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize());
-
+		VERBOSE(3,std::endl);
 		sourceHypoColl.InitializeArcs();
 
 		// go through each hypothesis on the stack and try to expand it
@@ -100,20 +101,11 @@ void Manager::ProcessSentence()
 				ProcessOneHypothesis(hypothesis); // expand the hypothesis
 			}
 		// some logging
-		if (m_staticData.GetVerboseLevel() > 0) {
-			//OutputHypoStack();
-			OutputHypoStackSize();
-		}
-
+		IFVERBOSE(2) { OutputHypoStackSize(); }
 	}
 
 	// some more logging
-	if (m_staticData.GetVerboseLevel() > 0) {
-	  cerr << m_staticData.GetSentenceStats();
-    cerr << "Hypotheses created since startup: "<< Hypothesis::s_HypothesesCreated<<endl;
-		//OutputHypoStack();
-		//OutputHypoStackSize();
-	}
+	VERBOSE(2,m_staticData.GetSentenceStats());
 }
 
 /** Find all translation options to expand one hypothesis, trigger expansion
@@ -225,10 +217,9 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	newHypo->CalcScore(m_staticData, m_possibleTranslations.GetFutureScore());
 	
 	// logging for the curious
-	if(m_staticData.GetVerboseLevel() > 2) 
-		{			
-			newHypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
-		}
+	IFVERBOSE(3) {
+	  newHypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+	}
 
 	// add to hypothesis stack
 	size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
@@ -251,7 +242,7 @@ const Hypothesis *Manager::GetBestHypothesis() const
 void Manager::OutputHypoStackSize()
 {
 	std::vector < HypothesisCollection >::const_iterator iterStack = m_hypoStack.begin();
-	TRACE_ERR ((int)iterStack->size());
+	TRACE_ERR("Stack sizes: " << (int)iterStack->size());
 	for (++iterStack; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
 		TRACE_ERR ( ", " << (int)iterStack->size());
