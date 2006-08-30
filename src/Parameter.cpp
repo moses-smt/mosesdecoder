@@ -53,8 +53,8 @@ Parameter::Parameter()
 	AddParam("n-best-list", "file and size of n-best-list to be generated");
 	AddParam("output-factors", "list of factors in the output");
 	AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
-	AddParam("report-all-factors", "?"); //TODO description, please
-	AddParam("report-source-span", "?"); //TODO description, please
+	AddParam("report-all-factors", "report all factors in output, not just first");
+	AddParam("report-segmentation", "t", "report phrase segmentation in the output");
 	AddParam("stack", "s", "maximum stack size for histogram pruning");
 	AddParam("translation-details", "T", "for each best translation hypothesis, print out details about what sourcce spans were used, dropped");
 	AddParam("ttable-file", "location and properties of the translation tables");
@@ -67,50 +67,27 @@ Parameter::Parameter()
 	AddParam("weight-l", "lm", "weight(s) for language models");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
-	AddParam("weight-e", "e", "weight for word deletion"); //source word deletion overall weight
-	AddParam("weight-generation", "g", "weight(s) for generation components");
-	AddParam("weight-i", "I", "weight for word insertion");
-	AddParam("mapping", "description of decoding steps");
-	AddParam("n-best-list", "file and size of n-best-list to be generated");
-	AddParam("beam-threshold", "threshold for threshold pruning");
-	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");
-	AddParam("input-factors", "list of factors in the input");
+	AddParam("weight-e", "e", "weight for word deletion"); 
 	AddParam("output-factors", "list if factors in the output");
-	AddParam("mysql", "(deprecated)");
-	AddParam("input-file", "i", "location of the input file to be translated");
 	AddParam("cache-path", "?");
  	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
-	AddParam("generation-file", "location and properties of the generation table");
-	AddParam("stack", "s", "maximum stack size for histogram pruning");
-	AddParam("verbose", "v", "verbosity level of the logging");
-	AddParam("report-source-span", "?");
-	AddParam("report-all-factors", "?");
-	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
-	AddParam("inputtype", "text (0) or confusion network (1)");
-	AddParam("translation-details", "T", "for each best translation hypothesis, print out details about what sourcce spans were used, dropped");
-	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
-	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
-	AddParam("use-distortion-future-costs", "consider expected distortion cost in future cost estimation");
-	AddParam("labeled-n-best-list", "labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
 }
 
 /** initialize a parameter, sub of constructor */
-PARAM_VEC &Parameter::AddParam(const string &paramName, const string &description)
+void Parameter::AddParam(const string &paramName, const string &description)
 {
 	m_valid[paramName] = true;
 	m_description[paramName] = description;
-	return m_setting[paramName];
 }
 
 /** initialize a parameter (including abbreviation), sub of constructor */
-PARAM_VEC &Parameter::AddParam(const string &paramName, const string &abbrevName, const string &description)
+void Parameter::AddParam(const string &paramName, const string &abbrevName, const string &description)
 {
 	m_valid[paramName] = true;
 	m_valid[abbrevName] = true;
 	m_abbreviation[paramName] = abbrevName;
 	m_description[paramName] = description;
-	return m_setting[paramName];
 }
 
 /** print descriptions of all parameters */
@@ -177,17 +154,16 @@ bool Parameter::LoadParam(int argc, char* argv[])
 
 	// logging of parameters that were set in either config or switch
 	int verbose = 1;
-	if (m_setting["verbose"].size() > 0)
+	if (m_setting.find("verbose") != m_setting.end() &&
+	    m_setting["verbose"].size() > 0)
 	  verbose = Scan<int>(m_setting["verbose"][0]);
 	if (verbose >= 1) { // only if verbose
 	  cerr << "Defined parameters (per moses.ini or switch):" << endl;
 	  for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ; iterParam != m_setting.end(); iterParam++) {
-		if (iterParam->second.size() > 0) {
-			cerr << "\t" << iterParam->first << ": ";
-			for ( size_t i = 0; i < iterParam->second.size(); i++ )
-				cerr << iterParam->second[i] << " ";
-			cerr << endl;
-		}
+	    cerr << "\t" << iterParam->first << ": ";
+	    for ( size_t i = 0; i < iterParam->second.size(); i++ )
+	      cerr << iterParam->second[i] << " ";
+	    cerr << endl;
 	  }
 	}
 
@@ -350,6 +326,7 @@ void Parameter::OverwriteParam(const string &paramSwitch, const string &paramNam
 		return;
 
 	int index = 0;
+	m_setting[paramName]; // defines the parameter, important for boolean switches
 	while (startPos < argc && (!isOption(argv[startPos])))
 	{
 		if (m_setting[paramName].size() > (size_t)index)

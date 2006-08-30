@@ -94,7 +94,7 @@ protected:
 	size_t m_verboseLevel;
 	DistortionScoreProducer *m_distortionScoreProducer;
 	WordPenaltyProducer *m_wpProducer;
-	bool m_reportSourceSpan;
+	bool m_reportSegmentation;
 	bool m_reportAllFactors;
 	bool m_useDistortionFutureCosts;
 	bool m_isDetailedTranslationReportingEnabled;
@@ -113,6 +113,7 @@ public:
 	 * also initialize the Parameter object
 	 */
 	bool LoadParameters(int argc, char* argv[]);
+	void SetBooleanParameter(bool *paramter, string parameterName, bool defaultValue);
 
 	/***
 	 * load not only the main phrase table but also any auxiliary tables that depend on which features are being used
@@ -243,9 +244,9 @@ public:
 	{
 		return m_verboseLevel;
 	}
-	bool GetReportSourceSpan() const
+	bool GetReportSegmentation() const
 	{
-		return m_reportSourceSpan;
+		return m_reportSegmentation;
 	}
 	bool GetReportAllFactors() const
 	{

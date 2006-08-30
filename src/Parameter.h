@@ -49,8 +49,8 @@ protected:
 	bool isOption(const char* token);
 	bool Validate();
 
-	PARAM_VEC &AddParam(const std::string &paramName, const std::string &description);
-	PARAM_VEC &AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
+	void AddParam(const std::string &paramName, const std::string &description);
+	void AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
 	
 public:
 	Parameter();
@@ -61,6 +61,11 @@ public:
 	const PARAM_VEC &GetParam(const std::string &paramName)
 	{
 		return m_setting[paramName];
+	}
+	/** check if parameter is defined (either in moses.ini or as switch) */
+	bool isParamSpecified(const std::string &paramName)
+	{
+	  return  m_setting.find( paramName ) != m_setting.end();
 	}
 
 };
