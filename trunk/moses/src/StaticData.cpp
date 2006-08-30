@@ -69,10 +69,17 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		return false;
 	}
 
+	// verbose level
+	m_verboseLevel = 1;
+	if (m_parameter.GetParam("verbose").size() == 1)
+	  {
+		m_verboseLevel = Scan<size_t>( m_parameter.GetParam("verbose")[0]);
+	  }
+
 	// input type has to be specified BEFORE loading the phrase tables!
 	if(m_parameter.GetParam("inputtype").size()) 
 		m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
-	TRACE_ERR("input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
+	VERBOSE(2,"input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
 
 	// mysql
 	m_mySQLParam = m_parameter.GetParam("mysql");
@@ -94,7 +101,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_nBestSize = 0;
 	}
 	
-	TRACE_ERR(m_parameter.GetParam("labeled-n-best-list").size() << endl);
 	if (m_parameter.GetParam("labeled-n-best-list").size() == 1)
 	{
 		m_labeledNBestList = Scan<bool>( m_parameter.GetParam("labeled-n-best-list")[0]);
@@ -104,16 +110,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_labeledNBestList = true;
 	}
 
-	// verbose level
-	if (m_parameter.GetParam("verbose").size() == 1)
-	{
-		m_verboseLevel = 1;
-		m_verboseLevel = Scan<size_t>( m_parameter.GetParam("verbose")[0]);
-	}
-	else
-	{
-		m_verboseLevel = 0;
-	}
 
 	// printing source phrase spans
 	if (m_parameter.GetParam("report-source-span").size() > 0)
@@ -290,16 +286,16 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				
 			}
 			assert(m_lexWeights.size() == numWeightsInTable);		//the end result should be a weight vector of the same size as the user configured model
-			TRACE_ERR("distortion-weights: ");
-			for(size_t weight=0; weight<m_lexWeights.size(); weight++)
-			{
-					TRACE_ERR(m_lexWeights[weight] << "\t");
-			}
-			TRACE_ERR(endl);
+			//			TRACE_ERR("distortion-weights: ");
+			//for(size_t weight=0; weight<m_lexWeights.size(); weight++)
+			//{
+			//	TRACE_ERR(m_lexWeights[weight] << "\t");
+			//}
+			//TRACE_ERR(endl);
 			timer.check("Starting to load lexical reorder table...");
 			TRACE_ERR(filePath << "...");
  			m_reorderModels.push_back(new LexicalReordering(filePath, orientation, direction, condition, m_lexWeights, input, output));
-			timer.check("Finished loading lexical reorder table.");
+			//			timer.check("Finished loading lexical reorder table.");
 		}
 		
 		if (m_parameter.GetParam("lmodel-file").size() > 0)
@@ -307,17 +303,16 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			// weights
 			vector<float> weightAll = Scan<float>(m_parameter.GetParam("weight-l"));
 			
-			TRACE_ERR("weight-l: ");
-	
+			//TRACE_ERR("weight-l: ");
+			//
 			for (size_t i = 0 ; i < weightAll.size() ; i++)
 			{
-				TRACE_ERR(weightAll[i] << "\t");
+			//	TRACE_ERR(weightAll[i] << "\t");
 				m_allWeights.push_back(weightAll[i]);
 			}
-			TRACE_ERR(endl);
+			//TRACE_ERR(endl);
 		
 
-	  timer.check("Start loading LanguageModels");
 	  // initialize n-gram order for each factor. populated only by factored lm
 	  for(size_t i=0; i < MAX_NUM_FACTORS ; i++)
 	  	m_maxNgramOrderForFactor[i] = 0;
@@ -351,13 +346,13 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	      	return false;
 	
 				m_languageModel.push_back(lm);
-		  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
+				//		  	timer.check(("Finished loading LanguageModel " + languageModelFile).c_str());
 			}
 	}
   // flag indicating that language models were loaded,
   // since phrase table loading requires their presence
   m_fLMsLoaded = true;
-	timer.check("Finished loading LanguageModels");
+  timer.check("Finished loading LanguageModels");
 
 	// generation tables
 	if (m_parameter.GetParam("generation-file").size() > 0) 
@@ -420,17 +415,15 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		}
 	}
 
-	timer.check("Finished loading generation tables");
+	//	timer.check("Finished loading generation tables");
 
 	// score weights
 	m_weightDistortion				= Scan<float>(distortionWeights[0]);
 	m_weightWordPenalty				= Scan<float>( m_parameter.GetParam("weight-w")[0] );
 
-	TRACE_ERR("weight-d: " << m_weightDistortion << endl);
 	m_distortionScoreProducer = new DistortionScoreProducer;
 	m_allWeights.push_back(m_weightDistortion);
 
-	TRACE_ERR("weight-w: " << m_weightWordPenalty << endl);
 	m_wpProducer = new WordPenaltyProducer;
 	m_allWeights.push_back(m_weightWordPenalty);
 
@@ -442,7 +435,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		: -1;
 	m_useDistortionFutureCosts = (m_parameter.GetParam("use-distortion-future-costs").size() > 0) 
 		? Scan<int>(m_parameter.GetParam("use-distortion-future-costs")[0]) : 0;
-	TRACE_ERR("using distortion future costs? "<<UseDistortionFutureCosts()<<"\n");
+	//TRACE_ERR("using distortion future costs? "<<UseDistortionFutureCosts()<<"\n");
 	
 	m_beamThreshold = (m_parameter.GetParam("beam-threshold").size() > 0) ?
 		TransformScore(Scan<float>(m_parameter.GetParam("beam-threshold")[0]))
@@ -450,11 +443,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	m_maxNoTransOptPerCoverage = (m_parameter.GetParam("max-trans-opt-per-coverage").size() > 0)
 				? Scan<size_t>(m_parameter.GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
-	TRACE_ERR("max translation options per coverage span: "<<m_maxNoTransOptPerCoverage<<"\n");
+	//TRACE_ERR("max translation options per coverage span: "<<m_maxNoTransOptPerCoverage<<"\n");
 
 	m_maxNoPartTransOpt = (m_parameter.GetParam("max-partial-trans-opt").size() > 0)
 				? Scan<size_t>(m_parameter.GetParam("max-partial-trans-opt")[0]) : DEFAULT_MAX_PART_TRANS_OPT_SIZE;
-	TRACE_ERR("max partial translation options: "<<m_maxNoPartTransOpt<<"\n");
+	//TRACE_ERR("max partial translation options: "<<m_maxNoPartTransOpt<<"\n");
 
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH
@@ -463,7 +456,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	else
 	  { m_dropUnknown = 0; }
 
-	TRACE_ERR("m_dropUnknown: " << m_dropUnknown << endl);
+	//TRACE_ERR("m_dropUnknown: " << m_dropUnknown << endl);
 
 	return true;
 }
@@ -521,16 +514,16 @@ void StaticData::LoadPhraseTables(bool filter
 		// weights
 		vector<float> weightAll									= Scan<float>(m_parameter.GetParam("weight-t"));
 		
-		TRACE_ERR("weight-t: ");
-		for (size_t i = 0 ; i < weightAll.size() ; i++)
-		{
-				TRACE_ERR(weightAll[i] << "\t");
-		}
-		TRACE_ERR(endl);
+		//TRACE_ERR("weight-t: ");
+		//for (size_t i = 0 ; i < weightAll.size() ; i++)
+		//{
+		//		TRACE_ERR(weightAll[i] << "\t");
+		//}
+		//TRACE_ERR(endl);
 
 		const vector<string> &translationVector = m_parameter.GetParam("ttable-file");
 		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter.GetParam("ttable-limit"));
-		cerr<<"ttable-limits: ";copy(maxTargetPhrase.begin(),maxTargetPhrase.end(),ostream_iterator<size_t>(cerr," "));cerr<<"\n";
+		//cerr<<"ttable-limits: ";copy(maxTargetPhrase.begin(),maxTargetPhrase.end(),ostream_iterator<size_t>(cerr," "));cerr<<"\n";
 
 		size_t index = 0;
 		size_t totalPrevNoScoreComponent = 0;		
@@ -574,7 +567,7 @@ void StaticData::LoadPhraseTables(bool filter
 															+ inputFileHash + "--" 
 															+ phraseTableHash + ".txt";
 
-			timer.check("Start loading PhraseTable");
+			timer.check(("Start loading PhraseTable " + filePath).c_str());
 			if (!FileExists(filePath+".binphr.idx"))
 				{
 					bool filterPhrase;
@@ -600,10 +593,7 @@ void StaticData::LoadPhraseTables(bool filter
 					// don't do filtering
 					filterPhrase = false;
 					
-					TRACE_ERR(filePath << endl);
-
-
-					TRACE_ERR("using standard phrase tables");
+					VERBOSE(2,"using standard phrase tables");
 					PhraseDictionary *pd=new PhraseDictionary(noScoreComponent);
 					pd->Load(input
 									 , output
@@ -631,10 +621,10 @@ void StaticData::LoadPhraseTables(bool filter
 				}
 
 			index++;
-			timer.check("Finished loading PhraseTable");
+			//			timer.check("Finished loading PhraseTable");
 		}
 	}
-	timer.check("Finished loading phrase tables");
+  	timer.check("Finished loading phrase tables");
 }
 
 void StaticData::LoadMapping()

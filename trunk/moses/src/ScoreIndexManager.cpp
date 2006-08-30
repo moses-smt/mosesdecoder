@@ -5,6 +5,8 @@
 #include <string>
 #include <cstdio>
 #include <cassert>
+#include "Util.h"
+#include "StaticData.h"
 #include "ScoreIndexManager.h"
 #include "ScoreProducer.h"
 #include "ScoreComponentCollection.h" // debugging
@@ -21,7 +23,7 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	assert(numScoreCompsProduced > 0);
 	m_last += numScoreCompsProduced;
 	m_ends.push_back(m_last);
-	std::cerr << "AddScoreProducer(" << sp << "): id=" << sp->GetScoreBookkeepingID() << ", new last=" << m_last << std::endl;
+	VERBOSE(2,"Added ScoreProducer(" << sp << "): id=" << sp->GetScoreBookkeepingID() << std::endl);
 }
 
 void ScoreIndexManager::Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection2& scc) const

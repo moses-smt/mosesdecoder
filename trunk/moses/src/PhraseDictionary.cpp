@@ -53,7 +53,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 	//factors	
 	m_inputFactors = FactorMask(input);
 	m_outputFactors = FactorMask(output);
-	std::cerr << "PhraseDictionary: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl;
+	VERBOSE(2,"PhraseDictionary: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
 
 	// data from file
 	InputFileStream inFile(filePath);

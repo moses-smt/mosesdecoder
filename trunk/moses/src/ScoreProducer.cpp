@@ -13,6 +13,5 @@ ScoreProducer::~ScoreProducer() {}
 ScoreProducer::ScoreProducer()
 {
   m_scoreBookkeepingId = UNASSIGNED;
-  std::cerr << "ScoreProducer created (id=" << m_scoreBookkeepingId << ", this=" << this << ")\n";
 }
  
