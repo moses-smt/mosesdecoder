@@ -114,7 +114,7 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 void IOCommandLine::Backtrack(const Hypothesis *hypo){
 
 	if (hypo->GetPrevHypo() != NULL) {
-		TRACE_ERR("["<< hypo ->m_id<<" => "<<hypo->GetPrevHypo()->m_id<<"]" <<endl);
+		VERBOSE(2,hypo->m_id << " <= ");
 		Backtrack(hypo->GetPrevHypo());
 	}
 }
@@ -123,15 +123,16 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bo
 {
 	if (hypo != NULL)
 	{
-		TRACE_ERR("BEST HYPO: " << *hypo << endl);
-		TRACE_ERR(hypo->GetScoreBreakdown() << std::endl);
+		VERBOSE(2,"BEST TRANSLATION: " << *hypo << endl);
+		VERBOSE(2,"Best path: ");
 		Backtrack(hypo);
+		VERBOSE(2,"0" << std::endl);
 
 		OutputSurface(cout, hypo, m_outputFactorOrder, reportSourceSpan, reportAllFactors);
 	}
 	else
 	{
-		TRACE_ERR("NO BEST HYPO" << endl);
+		TRACE_ERR("NO BEST TRANSLATION" << endl);
 	}
 	
 	cout << endl;

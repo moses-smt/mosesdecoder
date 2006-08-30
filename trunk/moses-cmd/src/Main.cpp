@@ -79,15 +79,15 @@ int main(int argc, char* argv[])
 	TRACE_ERR( "Moses (built on " << __DATE__ << ")" << endl );
 	TRACE_ERR( "a beam search decoder for phrase-based statistical machine translation models" << endl );
 	TRACE_ERR( "written by Hieu Hoang, with contributions by Nicola Bertoldi, Ondrej Bojar," << endl << 
-						 "Chris Callison-Burch, Alexandra Constantin, Brooke Cowan, Chris Dyer, Marcello Federico," << endl <<
-						 "Evan Herbst, Philipp Koehn, Christine Moran, Wade Shen, and Richard Zens." << endl);
+						 "Chris Callison-Burch, Alexandra Constantin, Brooke Cowan, Chris Dyer, Marcello" << endl <<
+						 "Federico, Evan Herbst, Philipp Koehn, Christine Moran, Wade Shen, Richard Zens." << endl);
 	TRACE_ERR( "(c) 2006 University of Edinburgh, Scotland" << endl );
 	TRACE_ERR( "command: " );
 	for(int i=0;i<argc;++i) TRACE_ERR( argv[i]<<" " );
 	TRACE_ERR(endl);
 
 	// load data structures
-	timer.start("Starting...");
+	timer.start();
 	StaticData staticData;
 	if (!staticData.LoadParameters(argc, argv))
 		return EXIT_FAILURE;
@@ -95,14 +95,19 @@ int main(int argc, char* argv[])
 	// set up read/writing class
 	InputOutput *inputOutput = GetInputOutput(staticData);
 
-  std::cerr << "The score component vector looks like this:\n" << staticData.GetScoreIndexManager();
-  std::cerr << "The global weight vector looks like this:\n";
+	// check on weights
 	vector<float> weights = staticData.GetAllWeights();
-	std::cerr << weights[0];
-	for (size_t j=1; j<weights.size(); j++) { std::cerr << ", " << weights[j]; }
-	std::cerr << "\n";
+	IFVERBOSE(2) {
+	  std::cerr << "The score component vector looks like this:\n" << staticData.GetScoreIndexManager();
+	  std::cerr << "The global weight vector looks like this:";
+	  for (size_t j=0; j<weights.size(); j++) { std::cerr << " " << weights[j]; }
+	  std::cerr << "\n";
+	}
 	// every score must have a weight!  check that here:
-	assert(weights.size() == staticData.GetScoreIndexManager().GetTotalNumberOfScores());
+	if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
+	  std::cerr << "ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl;
+	  return EXIT_FAILURE;
+	}
 
 	if (inputOutput == NULL)
 		return EXIT_FAILURE;
@@ -115,7 +120,7 @@ int main(int argc, char* argv[])
 			// note: source is only valid within this while loop!
     ResetUserTime();
 			
-    TRACE_ERR("\nTRANSLATING(" << ++lineCount << "): " << *source <<endl);
+    VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 
 			staticData.InitializeBeforeSentenceProcessing(*source);
 			Manager manager(*source, staticData);
@@ -129,7 +134,7 @@ int main(int argc, char* argv[])
 			size_t nBestSize = staticData.GetNBestSize();
 			if (nBestSize > 0)
 				{
-					TRACE_ERR("WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+				  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					LatticePathList nBestList;
 					manager.CalcNBest(nBestSize, nBestList,staticData.OnlyDistinctNBest());
 					inputOutput->SetNBest(nBestList, source->GetTranslationId());
@@ -140,7 +145,7 @@ int main(int argc, char* argv[])
 				TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
 			}
 
-      PrintUserTime(std::cerr, "Sentence Decoding Time:");
+			IFVERBOSE(2) { PrintUserTime(std::cerr, "Sentence Decoding Time:"); }
       
 			manager.CalcDecoderStatistics(staticData);
 			staticData.CleanUpAfterSentenceProcessing();      
@@ -163,12 +168,12 @@ InputOutput *GetInputOutput(StaticData &staticData)
 	// io
 	if (staticData.GetIOMethod() == IOMethodFile)
 	{
-		TRACE_ERR("IO from File" << endl);
+	  VERBOSE(2,"IO from File" << endl);
 		string					inputFileHash;
 		list< Phrase >	inputPhraseList;
 		string filePath = staticData.GetParam("input-file")[0];
 
-		TRACE_ERR("About to create ioFile" << endl);
+		VERBOSE(2,"About to create ioFile" << endl);
 		IOFile *ioFile = new IOFile(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
@@ -180,19 +185,19 @@ InputOutput *GetInputOutput(StaticData &staticData)
 			}
 		else
 			{
-				TRACE_ERR("About to GetInputPhrase\n");
+			  VERBOSE(2,"About to GetInputPhrase\n");
 				ioFile->GetInputPhrase(inputPhraseList);
 			}
-		TRACE_ERR("After GetInputPhrase" << endl);
+		VERBOSE(2,"After GetInputPhrase" << endl);
 		inputOutput = ioFile;
 		inputFileHash = GetMD5Hash(filePath);
-		TRACE_ERR("About to LoadPhraseTables" << endl);
+		VERBOSE(2,"About to LoadPhraseTables" << endl);
 		staticData.LoadPhraseTables(true, inputFileHash, inputPhraseList);
 		ioFile->ResetSentenceId();
 	}
 	else
 	{
-		TRACE_ERR("IO from STDOUT/STDIN" << endl);
+	  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
 		inputOutput = new IOCommandLine(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
