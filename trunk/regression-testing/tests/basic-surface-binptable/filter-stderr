@@ -15,7 +15,7 @@ while (<>) {
     my $time = RegTestUtils::readTime($_);
     print "PTLOAD_TIME ~ $time\n";
   }
-  next unless /^BEST HYPO:/;
+  next unless /^BEST TRANSLATION:/;
   my $pscore = RegTestUtils::readHypoScore($_);
   $x++;
   print "SCORE_$x = $pscore\n";
