@@ -21,8 +21,8 @@ while (<>) {
     }
   }
 
-  next unless /^BEST HYPO:/;
-  s/^BEST HYPO:\s*//;
+  next unless /^BEST TRANSLATION:/;
+  s/^BEST TRANSLATION:\s*//;
   s/\s*\[111+.*$//;
   $x++;
   print "TRANSLATION_$x = $_\n";
