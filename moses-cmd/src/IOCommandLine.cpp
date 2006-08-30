@@ -96,14 +96,14 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
 }
 
 void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder
-									 ,bool reportSourceSpan, bool reportAllFactors)
+									 ,bool reportSegmentation, bool reportAllFactors)
 {
 	if ( hypo != NULL)
 	{
-		OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSourceSpan, reportAllFactors);
+		OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors);
 		OutputSurface(out, hypo->GetTargetPhrase(), outputFactorOrder, reportAllFactors);
 
-		if (reportSourceSpan == true
+		if (reportSegmentation == true
 		    && hypo->GetTargetPhrase().GetSize() > 0) {
 			out << "|" << hypo->GetCurrSourceWordsRange().GetStartPos()
 			    << "-" << hypo->GetCurrSourceWordsRange().GetEndPos() << "| ";
@@ -114,21 +114,21 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 void IOCommandLine::Backtrack(const Hypothesis *hypo){
 
 	if (hypo->GetPrevHypo() != NULL) {
-		VERBOSE(2,hypo->m_id << " <= ");
+		VERBOSE(3,hypo->m_id << " <= ");
 		Backtrack(hypo->GetPrevHypo());
 	}
 }
 
-void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bool reportSourceSpan, bool reportAllFactors)
+void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
 {
 	if (hypo != NULL)
 	{
 		VERBOSE(2,"BEST TRANSLATION: " << *hypo << endl);
-		VERBOSE(2,"Best path: ");
+		VERBOSE(3,"Best path: ");
 		Backtrack(hypo);
-		VERBOSE(2,"0" << std::endl);
+		VERBOSE(3,"0" << std::endl);
 
-		OutputSurface(cout, hypo, m_outputFactorOrder, reportSourceSpan, reportAllFactors);
+		OutputSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors);
 	}
 	else
 	{
