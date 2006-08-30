@@ -101,27 +101,14 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		m_nBestSize = 0;
 	}
 	
-	if (m_parameter.GetParam("labeled-n-best-list").size() == 1)
-	{
-		m_labeledNBestList = Scan<bool>( m_parameter.GetParam("labeled-n-best-list")[0]);
-	}
-	else
-	{
-		m_labeledNBestList = true;
-	}
-
+	// include feature names in the n-best list
+	SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
 
 	// printing source phrase spans
-	if (m_parameter.GetParam("report-source-span").size() > 0)
-		m_reportSourceSpan = Scan<bool>(m_parameter.GetParam("report-source-span")[0]);
-	else
-        m_reportSourceSpan = false;
+	SetBooleanParameter( &m_reportSegmentation, "report-segmentation", false );
 
 	// print all factors of output translations
-	if (m_parameter.GetParam("report-all-factors").size() > 0)
-		m_reportAllFactors = Scan<bool>(m_parameter.GetParam("report-all-factors")[0]);
-	else
-        m_reportAllFactors = false;
+	SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
 
 	//distortion weights
 	 const vector<string> distortionWeights = m_parameter.GetParam("weight-d");	
@@ -158,25 +145,19 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	}
 
 	//source word deletion
-	if(m_parameter.GetParam("phrase-drop-allowed").size() > 0)
-	{
-		m_wordDeletionEnabled = Scan<bool>(m_parameter.GetParam("phrase-drop-allowed")[0]);
-	}
-	else
-	{
-		m_wordDeletionEnabled = false;
-	}
-	if(m_parameter.GetParam("translation-details").size() > 0) {
-	  m_isDetailedTranslationReportingEnabled = Scan<bool>( m_parameter.GetParam("translation-details")[0]);
+	SetBooleanParameter( &m_wordDeletionEnabled, "phrase-drop-allowed", false );
+
+	// additional output
+	SetBooleanParameter( &m_isDetailedTranslationReportingEnabled, 
+			     "translation-details", false );
+
+	SetBooleanParameter( &m_computeLMBackoffStats, "lmstats", false );
+	if (m_computeLMBackoffStats && 
+	    ! m_isDetailedTranslationReportingEnabled) {
+	  std::cerr << "-lmstats implies -translation-details, enabling" << std::endl;
+	  m_isDetailedTranslationReportingEnabled = true;
 	}
 
-	if(m_parameter.GetParam("lmstats").size() > 0) {
-	  m_computeLMBackoffStats = Scan<bool>( m_parameter.GetParam("lmstats")[0]);
-		if (!m_isDetailedTranslationReportingEnabled) {
-			std::cerr << "-lmstats implies -translation-details, enabling" << std::endl;
-			m_isDetailedTranslationReportingEnabled = true;
-		}
-	}
 	// load Lexical Reordering model
 	const vector<string> &lrFileVector = 
 		m_parameter.GetParam("distortion-file");	
@@ -451,14 +432,31 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH
-	if (m_parameter.GetParam("drop-unknown").size() == 1)
-	  { m_dropUnknown = Scan<bool>( m_parameter.GetParam("drop-unknown")[0]); }
-	else
-	  { m_dropUnknown = 0; }
-
-	//TRACE_ERR("m_dropUnknown: " << m_dropUnknown << endl);
+	SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 
 	return true;
+}
+
+void StaticData::SetBooleanParameter( bool *parameter, string parameterName, bool defaultValue ) {
+
+  // default value if nothing is specified
+  *parameter = defaultValue;
+  if (! m_parameter.isParamSpecified( parameterName ) )
+  {
+    return;
+  }
+
+  // if parameter is just specified as, e.g. "-parameter" set it true
+  if (m_parameter.GetParam( parameterName ).size() == 0) 
+  {
+    *parameter = true;
+  }
+
+  // if paramter is specified "-parameter true" or "-parameter false"
+  else if (m_parameter.GetParam( parameterName ).size() == 1) 
+  {
+    *parameter = Scan<bool>( m_parameter.GetParam( parameterName )[0]);
+  }
 }
 
 StaticData::~StaticData()

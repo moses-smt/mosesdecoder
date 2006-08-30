@@ -56,7 +56,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	_hash_computed = false;
-	s_HypothesesCreated = 0;
+	s_HypothesesCreated = 1;
 	ResetScore();	
 }
 
