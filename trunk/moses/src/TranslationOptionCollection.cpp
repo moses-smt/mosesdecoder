@@ -103,11 +103,8 @@ void TranslationOptionCollection::Prune()
 			fullList.resize(m_maxNoTransOptPerCoverage);
 		}
 	}
-	if (StaticData::Instance()->GetVerboseLevel() >= 1)
-	{
-		std::cerr << "       Total translation options: " << total << std::endl;
-		std::cerr << "Total translation options pruned: " << totalPruned << std::endl;
-	}
+	VERBOSE(2,"       Total translation options: " << total << std::endl
+		<< "Total translation options pruned: " << totalPruned << std::endl);
 }
 
 void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection)
@@ -205,7 +202,7 @@ void TranslationOptionCollection::CalcFutureScore()
         }
     }
 
-	if(StaticData::Instance()->GetVerboseLevel() >= 3)
+	IFVERBOSE(3)
 	{		
       int total = 0;
       for(size_t row=0; row<size; row++)
@@ -405,10 +402,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(m_source,wordsRange); 
 	if (phraseColl != NULL)
 	{
-		if (StaticData::Instance()->GetVerboseLevel() >= 3)
-		{
-			TRACE_ERR("[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
-		}
+	        VERBOSE(3,"[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
 			
 		TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
 		iterEnd = (!observeTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
@@ -418,15 +412,9 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			const TargetPhrase	&targetPhrase = **iterTargetPhrase;
 			outputPartialTranslOptColl.Add ( new TranslationOption(wordsRange, targetPhrase) );
 			
-			if (StaticData::Instance()->GetVerboseLevel() >= 3)
-			{
-				TRACE_ERR("\t" << targetPhrase << "\n");
-			}
+			VERBOSE(3,"\t" << targetPhrase << "\n");
 		}
-		if (StaticData::Instance()->GetVerboseLevel() >= 3)
-		{ 
-			TRACE_ERR(endl);
-		}
+		VERBOSE(3,endl);
 	}
 }
 
