@@ -51,11 +51,12 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_wordDeleted(false)
 	, m_languageModelStates(StaticData::Instance()->GetLMSize(), LanguageModelSingleFactor::UnknownState)
 	, m_arcList(NULL)
-	, m_id(s_HypothesesCreated++)
+	, m_id(0)
 	, _lmstats(0)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	_hash_computed = false;
+	s_HypothesesCreated = 0;
 	ResetScore();	
 }
 
@@ -387,12 +388,11 @@ void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistorti
   TRACE_ERR(")"<<endl);
 	TRACE_ERR("\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
 	TRACE_ERR("\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "<< source.GetSubString(m_currSourceWordsRange)  <<endl);
-	TRACE_ERR("\ttranslated as: "<<m_targetPhrase); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
-  if (m_wordDeleted) TRACE_ERR("   word_deleted"); 
-  TRACE_ERR(endl);
-	TRACE_ERR("\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
-	TRACE_ERR("\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
-	TRACE_ERR("\tword penalty "); // <<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
+	TRACE_ERR("\ttranslated as: "<<m_targetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
+	if (m_wordDeleted) TRACE_ERR("\tword deleted"<<endl); 
+  //	TRACE_ERR("\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
+  //	TRACE_ERR("\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
+  //	TRACE_ERR("\tword penalty "); // <<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
 	TRACE_ERR("\tscore "<<m_totalScore - m_futureScore<<" + future cost "<<m_futureScore<<" = "<<m_totalScore<<endl);
   TRACE_ERR( "\tunweighted feature scores: " << m_scoreBreakdown << endl);
 	//PrintLMScores();
