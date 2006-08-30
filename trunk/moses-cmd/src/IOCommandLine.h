@@ -65,7 +65,7 @@ public:
 				, const std::string							&nBestFilePath);
 
 	InputType* GetInput(InputType*);
-	void SetOutput(const Hypothesis *hypo, long translationId, bool reportSourceSpan, bool reportAllFactors);
+	void SetOutput(const Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
 	void SetNBest(const LatticePathList &nBestList, long translationId);
 	void Backtrack(const Hypothesis *hypo);
 };

@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 			Manager manager(*source, staticData);
 			manager.ProcessSentence();
 			inputOutput->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId(),
-														 staticData.GetReportSourceSpan(),
+														 staticData.GetReportSegmentation(),
 														 staticData.GetReportAllFactors()
 														 );
 
