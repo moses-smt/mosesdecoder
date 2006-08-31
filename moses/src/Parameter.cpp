@@ -32,7 +32,7 @@ using namespace std;
 /** define allowed parameters */
 Parameter::Parameter() 
 {
-	AddParam("beam-threshold", "threshold for threshold pruning");
+	AddParam("beam-threshold", "b", "threshold for threshold pruning");
 	AddParam("cache-path", "?"); //TODO description, please
 	AddParam("config", "f", "location of the configuration file");
 	AddParam("distortion", "?"); //TODO description, please
@@ -138,7 +138,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	}
 
 	// overwrite parameters with values from switches
-	for(PARAM_MAP::const_iterator iterParam = m_setting.begin(); iterParam != m_setting.end(); iterParam++) 
+	for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++) 
 		{
 			const string paramName = iterParam->first;
 			OverwriteParam("-" + paramName, paramName, argc, argv);
