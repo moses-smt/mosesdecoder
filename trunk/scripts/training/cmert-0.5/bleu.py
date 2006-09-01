@@ -93,15 +93,14 @@ def cook_test(test, (reflens, refmaxcounts), n=4):
         result["reflen"] = min(reflens)
     elif eff_ref_len == "average":
         result["reflen"] = float(sum(reflens))/len(reflens)
-    
-    # Original:
-    '''min_diff = None
-    for reflen in reflens:
-        if min_diff is None or abs(reflen-len(test)) < min_diff:
-            min_diff = abs(reflen-len(test))
-            result['reflen'] = reflen'''
+    elif eff_ref_len == "closest":
+        min_diff = None
+        for reflen in reflens:
+            if min_diff is None or abs(reflen-len(test)) < min_diff:
+                min_diff = abs(reflen-len(test))
+                result['reflen'] = reflen
 
-    result["guess"] = [len(test)-k+1 for k in xrange(1,n+1)]
+    result["guess"] = [max(len(test)-k+1,0) for k in xrange(1,n+1)]
 
     result['correct'] = [0]*n
     counts = count_ngrams(test, n)

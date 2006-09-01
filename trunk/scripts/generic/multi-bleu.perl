@@ -17,8 +17,6 @@ while(-e "$stem$ref") {
 }
 &add_to_ref($stem,\@REF) if -e $stem;
 
-die "No reference sentences found!" if 0 == scalar @REF;
-
 sub add_to_ref {
     my ($file,$REF) = @_;
     my $s=0;
@@ -45,7 +43,7 @@ while(<STDIN>) {
 	if (abs($length_translation_this_sentence-$length) < $closest_diff) {
 	    $closest_diff = abs($length_translation_this_sentence-$length);
 	    $closest_length = $length;
-#	print "$i: closest diff = abs($length_translation_this_sentence-$length)<BR>\n";
+#	    print "$s: closest diff = abs($length_translation_this_sentence-$length)<BR>\n";
 	}
 	for(my $n=1;$n<=4;$n++) {
 	    my %REF_NGRAM_N = ();
@@ -96,24 +94,41 @@ while(<STDIN>) {
     $s++;
 }
 my $brevity_penalty = 1;
-if ($length_translation<$length_reference) {
-    $brevity_penalty = exp(1-$length_reference/$length_translation);
-}
-my $bleu = $brevity_penalty * exp((my_log( $CORRECT[1]/$TOTAL[1] ) +
-				   my_log( $CORRECT[2]/$TOTAL[2] ) +
-				   my_log( $CORRECT[3]/$TOTAL[3] ) +
-				   my_log( $CORRECT[4]/$TOTAL[4] ) ) / 4);
+my $bleu = 0;
 
-printf "BLEU = %.2f, %.1f/%.1f/%.1f/%.1f (BP=%.3f, ration=%.3f, %i sents, %i refs)\n",
+my @bleu=();
+
+for(my $n=1;$n<=4;$n++) {
+  if (defined ($TOTAL[$n])){
+    $bleu[$n]=($TOTAL[$n])?$CORRECT[$n]/$TOTAL[$n]:0;
+#    print STDERR "CORRECT[$n]:$CORRECT[$n] TOTAL[$n]:$TOTAL[$n]\n";
+  }else{
+    $bleu[$n]=0;
+  }
+}
+
+if ($length_reference==0){
+  printf "BLEU = 0, 0/0/0/0 (BP=0, ration=0, hyp_len=0, ref_len=0)\n";
+  exit(1);
+}
+
+if ($length_translation<$length_reference) {
+  $brevity_penalty = exp(1-$length_reference/$length_translation);
+}
+$bleu = $brevity_penalty * exp((my_log( $bleu[1] ) +
+				my_log( $bleu[2] ) +
+				my_log( $bleu[3] ) +
+				my_log( $bleu[4] ) ) / 4) ;
+printf "BLEU = %.2f, %.1f/%.1f/%.1f/%.1f (BP=%.3f, ration=%.3f, hyp_len=%d, ref_len=%d)\n",
     100*$bleu,
-    100*$CORRECT[1]/$TOTAL[1],
-    100*$CORRECT[2]/$TOTAL[2],
-    100*$CORRECT[3]/$TOTAL[3],
-    100*$CORRECT[4]/$TOTAL[4],
+    100*$bleu[1],
+    100*$bleu[2],
+    100*$bleu[3],
+    100*$bleu[4],
     $brevity_penalty,
     $length_translation / $length_reference,
-    scalar @REF,
-    scalar @{$REF[0]};
+    $length_translation,
+    $length_reference;
 
 sub my_log {
   return -9999999999 unless $_[0];

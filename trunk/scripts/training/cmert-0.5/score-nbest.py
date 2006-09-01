@@ -19,19 +19,19 @@ def process(sentnum, testsents):
     candsfile.write("%d %d\n" % (cur_sentnum, len(testsents)))
     for (sent,vector) in testsents:
         comps = bleu.cook_test(sent, cookedrefs[sentnum])
+
         if comps['testlen'] != comps['guess'][0]:
             sys.stderr.write("ERROR: test length != guessed 1-grams\n")
-        featsfile.write("%s %s %d\n" % (" ".join([str(v) for v in vector]),
-                                        " ".join(["%d %d" % (c,g) for (c,g) in zip(comps['correct'], comps['guess'])]),
-                                        comps['reflen']))
-    
+	featsfile.write("%s %s %d\n" % (" ".join([str(v) for v in vector]),
+					    " ".join(["%d %d" % (c,g) for (c,g) in zip(comps['correct'], comps['guess'])]),
+					    comps['reflen']))
 
 if __name__ == "__main__":
     import psyco
     psyco.full()
 
     import getopt
-    (opts,args) = getopt.getopt(sys.argv[1:], "casn", [])
+    (opts,args) = getopt.getopt(sys.argv[1:], "casen", [])
 
     for (opt,parm) in opts:
         if opt == "-c":
@@ -40,6 +40,8 @@ if __name__ == "__main__":
             bleu.eff_ref_len = "average"
         if opt == "-s":
             bleu.eff_ref_len = "shortest"
+        if opt == "-e":
+            bleu.eff_ref_len = "closest"
         if opt == "-n":
             bleu.nonorm = 1
 
