@@ -9,11 +9,17 @@ libirstlm_a_SOURCES = \
 	ngramcache.cpp
 
 library_includedir=$(includedir)
-library_include_HEADERS = dictionary.h lmtable.h n_gram.h
+library_include_HEADERS = \
+        dictionary.h \
+        htable.h \
+        lmtable.h \
+        mempool.h \
+        n_gram.h \
+        ngramcache.h
 
 bin_PROGRAMS = compile-lm quantize-lm
 
-AM_LDFLAGS=-L .
+AM_LDFLAGS=-L.
 LIBS=-lirstlm
 
 compile_lm_SOURCES = compile-lm.cpp

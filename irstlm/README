@@ -1,10 +1,7 @@
 To build:
 
-  aclocal
-  autoconf
-  automake
-
-  ./configure --with-prefix=PATH TO INSTALL    (probably `pwd`)
+  ./regenerate-makefiles.sh
+  ./configure --with-prefix=PATH-TO-INSTALL    (probably `pwd`)
   make
   make install
 
