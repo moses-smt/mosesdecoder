@@ -1,6 +1,6 @@
 lib_LIBRARIES = libmoses.a
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES 
-libmoses_a_SOURCES = \
+libmoses_a_SOURCES_TMP = \
 	ConfusionNet.cpp \
 	DecodeStep.cpp \
 	DecodeStep_Generation.cpp \
@@ -59,14 +59,14 @@ libmoses_a_SOURCES = \
 
 
 if INTERNAL_LM
-libmoses_a_SOURCES += NGramCollection.cpp LanguageModel_Internal.cpp
+libmoses_a_SOURCES = $(libmoses_a_SOURCES_TMP) NGramCollection.cpp LanguageModel_Internal.cpp
 endif
 
 if SRI_LM
-libmoses_a_SOURCES += LanguageModel_SRI.cpp
+libmoses_a_SOURCES = $(libmoses_a_SOURCES_TMP) LanguageModel_SRI.cpp
 endif
 
 if IRST_LM
-libmoses_a_SOURCES += LanguageModel_IRST.cpp
+libmoses_a_SOURCES = $(libmoses_a_SOURCES_TMP) LanguageModel_IRST.cpp
 endif
 
