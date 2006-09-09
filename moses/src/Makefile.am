@@ -3,8 +3,8 @@ AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 libmoses_a_SOURCES_TMP = \
 	ConfusionNet.cpp \
 	DecodeStep.cpp \
-	DecodeStep_Generation.cpp \
-	DecodeStep_Translation.cpp \
+	DecodeStepGeneration.cpp \
+	DecodeStepTranslation.cpp \
 	Dictionary.cpp \
 	DistortionOrientation.cpp \
 	DummyScoreProducers.cpp \

@@ -19,24 +19,24 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "DecodeStep_Generation.h"
+#include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "PartialTranslOptColl.h"
 #include "FactorCollection.h"
 
-GenerationDecodeStep::GenerationDecodeStep(GenerationDictionary* dict, const DecodeStep* prev)
+DecodeStepGeneration::DecodeStepGeneration(GenerationDictionary* dict, const DecodeStep* prev)
 : DecodeStep(dict, prev)
 {
 }
 
-const GenerationDictionary &GenerationDecodeStep::GetGenerationDictionary() const
+const GenerationDictionary &DecodeStepGeneration::GetGenerationDictionary() const
 {
   return *static_cast<const GenerationDictionary*>(m_ptr);
 }
 
-TranslationOption *GenerationDecodeStep::MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
+TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
                                   , const ScoreComponentCollection2& generationScore) const
 {
 	if (IsFilteringStep()) {
@@ -74,7 +74,7 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
     }
 }
 
-void GenerationDecodeStep::Process(const TranslationOption &inputPartialTranslOpt
+void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection

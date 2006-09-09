@@ -19,22 +19,20 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef _Generation_DECODE_STEP_H_
-#define _Generation_DECODE_STEP_H_
+#pragma once
 
 #include "DecodeStep.h"
 
-class GenerationDictionary;
-class Phrase;
-class ScoreComponentCollection2;
+class PhraseDictionaryBase;
+class TargetPhrase;
 
-class GenerationDecodeStep : public DecodeStep
+class DecodeStepTranslation : public DecodeStep
 {
 public:
-	GenerationDecodeStep(GenerationDictionary* dict, const DecodeStep* prev);
+	DecodeStepTranslation(PhraseDictionaryBase* dict, const DecodeStep* prev);
 
   /** returns phrase table (dictionary) for translation step */
-  const GenerationDictionary &GetGenerationDictionary() const;
+  const PhraseDictionaryBase &GetPhraseDictionary() const;
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
@@ -42,11 +40,7 @@ public:
                               , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
                               , bool observeTableLimit) const;
-
 private:
-  TranslationOption *MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
-                                  , const ScoreComponentCollection2& generationScore) const;
-
+	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;
 };
 
-#endif
