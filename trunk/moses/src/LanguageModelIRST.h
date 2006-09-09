@@ -35,7 +35,7 @@ class Phrase;
 class lmtable;  // irst lm table
 class ngram;
 
-class LanguageModel_IRST : public LanguageModelSingleFactor
+class LanguageModelIRST : public LanguageModelSingleFactor
 {
 protected:
 	std::vector<int> m_lmIdLookup;
@@ -59,8 +59,8 @@ protected:
   };
   
 public:
-	LanguageModel_IRST(bool registerScore);
-	~LanguageModel_IRST();
+	LanguageModelIRST(bool registerScore);
+	~LanguageModelIRST();
 	void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, FactorType factorType

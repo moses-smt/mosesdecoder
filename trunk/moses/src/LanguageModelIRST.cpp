@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "n_gram.h"
 #include "lmtable.h"
 
-#include "LanguageModel_IRST.h"
+#include "LanguageModelIRST.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "FactorCollection.h"
@@ -36,20 +36,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-LanguageModel_IRST::LanguageModel_IRST(bool registerScore)
+LanguageModelIRST::LanguageModelIRST(bool registerScore)
 :LanguageModelSingleFactor(registerScore)
 ,m_lmtb(0)
 {
 }
 
-LanguageModel_IRST::~LanguageModel_IRST()
+LanguageModelIRST::~LanguageModelIRST()
 {
   delete m_lmtb;
   delete m_lmtb_ng;
 }
 
 
-void LanguageModel_IRST::Load(const std::string &fileName
+void LanguageModelIRST::Load(const std::string &fileName
 												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
@@ -80,7 +80,7 @@ void LanguageModel_IRST::Load(const std::string &fileName
   m_lmtb->init_lmtcaches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
 }
 
-void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
+void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 { // add factors which have srilm id
 	// code copied & paste from SRI LM class. should do template function
 	std::map<size_t, int> lmIdMap;
@@ -123,12 +123,12 @@ void LanguageModel_IRST::CreateFactors(FactorCollection &factorCollection)
   
 }
 
-int LanguageModel_IRST::GetLmID( const std::string &str ) const
+int LanguageModelIRST::GetLmID( const std::string &str ) const
 {
     return m_lmtb->dict->encode( str.c_str() );
 }
 
-float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFactor, State* finalState, unsigned int* len) const
+float LanguageModelIRST::GetValue(const vector<FactorArrayWrapper> &contextFactor, State* finalState, unsigned int* len) const
 {
 	unsigned int dummy;
 	if (!len) { len = &dummy; }
@@ -158,11 +158,11 @@ float LanguageModel_IRST::GetValue(const vector<FactorArrayWrapper> &contextFact
 }
 
 
-const void LanguageModel_IRST::CleanUpAfterSentenceProcessing(){
+const void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
    m_lmtb->check_cache_levels();
 }
 
-const void LanguageModel_IRST::InitializeBeforeSentenceProcessing(){
+const void LanguageModelIRST::InitializeBeforeSentenceProcessing(){
   //nothing to do
 #ifdef TRACE_CACHE
  m_lmtb->sentence_id++;

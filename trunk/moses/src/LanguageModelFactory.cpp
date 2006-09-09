@@ -7,13 +7,13 @@
 
 // include appropriate header
 #ifdef LM_SRI
-#  include "LanguageModel_SRI.h"
+#  include "LanguageModelSRI.h"
 #endif
 #ifdef LM_IRST
-#  include "LanguageModel_IRST.h"
+#  include "LanguageModelIRST.h"
 #endif
 
-#include "LanguageModel_Chunking.h"
+#include "LanguageModelChunking.h"
 #include "LanguageModelJoint.h"
 
 namespace LanguageModelFactory
@@ -27,33 +27,33 @@ namespace LanguageModelFactory
 	  {
 	  	case SRI:
 				#ifdef LM_SRI
-				  lm = new LanguageModel_SRI(true);
+				  lm = new LanguageModelSRI(true);
 			  #else
-	     		lm = new LanguageModel_IRST(true);
+	     		lm = new LanguageModelIRST(true);
 			  #endif
 			  break;
 			case IRST:
 				#ifdef LM_IRST
-	     		lm = new LanguageModel_IRST(true);
+	     		lm = new LanguageModelIRST(true);
 			  #else
-				  lm = new LanguageModel_SRI(true);
+				  lm = new LanguageModelSRI(true);
 				#endif
 				break;
 			case Chunking:
 				#ifdef LM_SRI
-	     		lm = new LanguageModel_Chunking(new LanguageModel_SRI(false), true);
+	     		lm = new LanguageModelChunking(new LanguageModelSRI(false), true);
 				#else
      			#ifdef LM_IRST
-	     			lm = new LanguageModel_Chunking(new LanguageModel_IRST(false), true);
+	     			lm = new LanguageModelChunking(new LanguageModelIRST(false), true);
      			#endif
 				#endif
 				break;
 			case Joint:
 				#ifdef LM_SRI
-	     		lm = new LanguageModelJoint(new LanguageModel_SRI(false), true);
+	     		lm = new LanguageModelJoint(new LanguageModelSRI(false), true);
 				#else
      			#ifdef LM_IRST
-		     		lm = new LanguageModelJoint(new LanguageModel_IRST(false), true);
+		     		lm = new LanguageModelJoint(new LanguageModelIRST(false), true);
      			#endif
 				#endif
 				break;
