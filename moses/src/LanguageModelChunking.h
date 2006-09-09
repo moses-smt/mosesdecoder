@@ -28,19 +28,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "FactorCollection.h"
 
-class LanguageModel_Chunking : public LanguageModelSingleFactor
+class LanguageModelChunking : public LanguageModelSingleFactor
 {	
 protected:
 	size_t m_realNGramOrder;
 	LanguageModelSingleFactor *m_lmImpl;
 	
 public:
-	LanguageModel_Chunking(LanguageModelSingleFactor *lmImpl, bool registerScore)
+	LanguageModelChunking(LanguageModelSingleFactor *lmImpl, bool registerScore)
 	: LanguageModelSingleFactor(registerScore)
 	{
 		m_lmImpl = lmImpl;		
 	}
-	~LanguageModel_Chunking()
+	~LanguageModelChunking()
 	{
 		delete m_lmImpl;
 	}
