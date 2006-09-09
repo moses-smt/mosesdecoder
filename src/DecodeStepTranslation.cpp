@@ -19,24 +19,24 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "DecodeStep_Translation.h"
+#include "DecodeStepTranslation.h"
 #include "PhraseDictionary.h"
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "PartialTranslOptColl.h"
 #include "FactorCollection.h"
 
-TranslationDecodeStep::TranslationDecodeStep(PhraseDictionaryBase* dict, const DecodeStep* prev)
+DecodeStepTranslation::DecodeStepTranslation(PhraseDictionaryBase* dict, const DecodeStep* prev)
 : DecodeStep(dict, prev)
 {
 }
 
-const PhraseDictionaryBase &TranslationDecodeStep::GetPhraseDictionary() const
+const PhraseDictionaryBase &DecodeStepTranslation::GetPhraseDictionary() const
 {
   return *static_cast<const PhraseDictionaryBase*>(m_ptr);
 }
 
-TranslationOption *TranslationDecodeStep::MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const
+TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const
 {
   if (IsFilteringStep()) {
     if (!oldTO.IsCompatible(targetPhrase, m_conflictFactors)) return 0;
@@ -48,7 +48,7 @@ TranslationOption *TranslationDecodeStep::MergeTranslation(const TranslationOpti
 }
 
 
-void TranslationDecodeStep::Process(const TranslationOption &inputPartialTranslOpt
+void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection

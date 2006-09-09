@@ -22,8 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <cassert>
 #include "PhraseDictionary.h"
-#include "DecodeStep_Translation.h"
-#include "DecodeStep_Generation.h"
+#include "DecodeStepTranslation.h"
+#include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
 #include "DummyScoreProducers.h"
 #include "StaticData.h"
@@ -645,7 +645,7 @@ void StaticData::LoadMapping()
 							std::cerr<<"ERROR: no phrase dictionary with index "<<index<<" available!\n";
 							abort();
 						}
-					decodeStep = new TranslationDecodeStep(m_phraseDictionary[index], prev);
+					decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev);
 				break;
 				case Generate:
 					if(index>=m_generationDictionary.size())
@@ -653,7 +653,7 @@ void StaticData::LoadMapping()
 							std::cerr<<"ERROR: no generation dictionary with index "<<index<<" available!\n";
 							abort();
 						}
-					decodeStep = new GenerationDecodeStep(m_generationDictionary[index], prev);
+					decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev);
 				break;
 				case InsertNullFertilityWord:
 					assert(!"Please implement NullFertilityInsertion.");
