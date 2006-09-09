@@ -34,7 +34,7 @@ class Factor;
 class Phrase;
 class Ngram; // SRI forward decl
 
-class LanguageModel_SRI : public LanguageModelSingleFactor
+class LanguageModelSRI : public LanguageModelSingleFactor
 {
 protected:
 	std::vector<VocabIndex> m_lmIdLookup;
@@ -48,8 +48,8 @@ protected:
 	VocabIndex GetLmID( const Factor *factor ) const;
 	
 public:
-	LanguageModel_SRI(bool registerScore);
-	~LanguageModel_SRI();
+	LanguageModelSRI(bool registerScore);
+	~LanguageModelSRI();
 	void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, FactorType factorType

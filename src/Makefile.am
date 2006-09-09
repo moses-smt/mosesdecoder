@@ -24,7 +24,7 @@ libmoses_a_SOURCES_TMP = \
 	LanguageModelFactory.cpp \
 	LanguageModelMultiFactor.cpp \
 	LanguageModelSingleFactor.cpp \
-	LanguageModel_Chunking.cpp \
+	LanguageModelChunking.cpp \
 	LatticePath.cpp \
 	LexicalReordering.cpp \
 	Manager.cpp \
@@ -58,15 +58,11 @@ libmoses_a_SOURCES_TMP = \
 	WordsRange.cpp
 
 
-if INTERNAL_LM
-libmoses_a_SOURCES = $(libmoses_a_SOURCES_TMP) NGramCollection.cpp LanguageModel_Internal.cpp
-endif
-
 if SRI_LM
-libmoses_a_SOURCES = $(libmoses_a_SOURCES_TMP) LanguageModel_SRI.cpp
+libmoses_a_SOURCES = $(libmoses_a_SOURCES_TMP) LanguageModelSRI.cpp
 endif
 
 if IRST_LM
-libmoses_a_SOURCES = $(libmoses_a_SOURCES_TMP) LanguageModel_IRST.cpp
+libmoses_a_SOURCES = $(libmoses_a_SOURCES_TMP) LanguageModelIRST.cpp
 endif
 

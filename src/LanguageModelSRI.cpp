@@ -26,27 +26,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Ngram.h"
 #include "Vocab.h"
 
-#include "LanguageModel_SRI.h"
+#include "LanguageModelSRI.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
 using namespace std;
 
-LanguageModel_SRI::LanguageModel_SRI(bool registerScore)
+LanguageModelSRI::LanguageModelSRI(bool registerScore)
 :LanguageModelSingleFactor(registerScore)
 , m_srilmVocab(0)
 , m_srilmModel(0)
 {
 }
 
-LanguageModel_SRI::~LanguageModel_SRI()
+LanguageModelSRI::~LanguageModelSRI()
 {
   delete m_srilmModel;
   delete m_srilmVocab;
 }
 
-void LanguageModel_SRI::Load(const std::string &fileName
+void LanguageModelSRI::Load(const std::string &fileName
 												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
@@ -74,7 +74,7 @@ void LanguageModel_SRI::Load(const std::string &fileName
   m_unknownId = m_srilmVocab->unkIndex();
 }
 
-void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
+void LanguageModelSRI::CreateFactors(FactorCollection &factorCollection)
 { // add factors which have srilm id
 	
 	std::map<size_t, VocabIndex> lmIdMap;
@@ -116,23 +116,23 @@ void LanguageModel_SRI::CreateFactors(FactorCollection &factorCollection)
 	}
 }
 
-VocabIndex LanguageModel_SRI::GetLmID( const std::string &str ) const
+VocabIndex LanguageModelSRI::GetLmID( const std::string &str ) const
 {
     return m_srilmVocab->getIndex( str.c_str(), m_unknownId );
 }
-VocabIndex LanguageModel_SRI::GetLmID( const Factor *factor ) const
+VocabIndex LanguageModelSRI::GetLmID( const Factor *factor ) const
 {
 	size_t factorId = factor->GetId();
 	return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];
 }
 
-float LanguageModel_SRI::GetValue(VocabIndex wordId, VocabIndex *context) const
+float LanguageModelSRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 {
 	float p = m_srilmModel->wordProb( wordId, context );
 	return FloorSRIScore(TransformSRIScore(p));  // log10->log
 }
 
-float LanguageModel_SRI::GetValue(const vector<FactorArrayWrapper> &contextFactor, State* finalState, unsigned int *len) const
+float LanguageModelSRI::GetValue(const vector<FactorArrayWrapper> &contextFactor, State* finalState, unsigned int *len) const
 {
 	FactorType	factorType = GetFactorType();
 	size_t count = contextFactor.size();
