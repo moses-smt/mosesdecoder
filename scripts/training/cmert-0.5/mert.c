@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <unistd.h>
+#include <math.h>
 
 #include "data.h"
 #include "point.h"
@@ -215,7 +216,7 @@ point_t *line_optimize(data_t *data, point_t *origin, point_t *dir) {
   if (intersection_n == 0)
     best_x = 0.0;
   else {
-    qsort(intersections, intersection_n, sizeof(intersection_t *), compare_intersections);
+    qsort(intersections, intersection_n, sizeof(intersection_t *), (int(*)(const void *, const void *))compare_intersections);
     best_x = intersections[0]->x - 1000.0; // whatever
   }
   for (intersection_i = 0; intersection_i < intersection_n; intersection_i++) {
@@ -304,8 +305,8 @@ point_t *optimize_powell(data_t *data, point_t *point) {
     
     if (extrapolatedwin > 0 && 
 	2*(2*totalwin - extrapolatedwin) * 
-	powf(totalwin - biggestwin, 2.0) <
-	powf(extrapolatedwin, 2.0)*biggestwin) {
+	powf(totalwin - biggestwin, 2.0f) <
+	powf(extrapolatedwin, 2.0f)*biggestwin) {
       // replace dominant direction vector with sum vector
       point_delete(u[biggestwin_i]);
       point_normalize(point);
