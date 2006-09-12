@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "memory.h"
 #include "Word.h"
 #include "TypeDef.h"
+#include "StaticData.h"  // needed to determine the FactorDelimiter
 
 using namespace std;
 
@@ -99,35 +100,41 @@ std::string Word::ToString(const FactorArray &factorArray)
 {
 	stringstream strme;
 
+	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
+	bool firstPass = true;
+	// TODO- don't loop over MAX_NUM_FACTORS here, just use the ones that
+	// actually participate in the xltn process.
 	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 	{
-			const Factor *factor = factorArray[currFactor];
+		const Factor *factor = factorArray[currFactor];
 		if (factor != NULL)
 		{
-			strme << *factor << "|";
+			if (firstPass) { firstPass = false; } else { strme << factorDelimiter; }
+			strme << *factor;
 		}
 	}
-	string str = strme.str();
-	str = str.substr(0, str.size() - 1) + " ";
-	return str;
+	strme << " ";
+	return strme.str();
 }
 
-	std::string Word::ToString(const vector<FactorType> factorType, const FactorArray &factorArray)
+std::string Word::ToString(const vector<FactorType> factorType, const FactorArray &factorArray)
+{
+	stringstream strme;
+	assert(factorType.size() <= MAX_NUM_FACTORS);
+	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
+	bool firstPass = true;
+	for (unsigned int i = 0 ; i < factorType.size() ; i++)
 	{
-		stringstream strme;
-		assert(factorType.size() <= MAX_NUM_FACTORS);
-		for (unsigned int i = 0 ; i < factorType.size() ; i++)
+		const Factor *factor = factorArray[factorType[i]];
+		if (factor != NULL)
 		{
-			const Factor *factor = factorArray[factorType[i]];
-			if (factor != NULL)
-			{
-					strme << *factor << "|";
-			}
+			if (firstPass) { firstPass = false; } else { strme << factorDelimiter; }
+			strme << *factor;
 		}
-		string str = strme.str();
-		str = str.substr(0, str.size() - 1) + " ";
-		return str;
 	}
+	strme << " ";
+	return strme.str();
+}
 
 TO_STRING_BODY(Word);
 
@@ -137,17 +144,18 @@ ostream& operator<<(ostream& out, const Word& word)
 	stringstream strme;
 
 //	strme << "(";
+	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
+	bool firstPass = true;
 	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 	{
 		FactorType factorType = static_cast<FactorType>(currFactor);
 		const Factor *factor = word.GetFactor(factorType);
 		if (factor != NULL)
 		{
-			strme << *factor << "|";
+			if (firstPass) { firstPass = false; } else { strme << factorDelimiter; }
+			strme << *factor;
 		}
 	}
-	string str = strme.str();
-	str = str.substr(0, str.size() - 1);
-	out << str << " ";
+	out << strme.str() << " ";
 	return out;
 }

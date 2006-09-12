@@ -82,8 +82,9 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 			continue;
 		}
 
+		const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
 		if (tokens[0] != prevSourcePhrase)
-			phraseVector = Phrase::Parse(tokens[0], input);
+			phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
 
 		vector<float> scoreVector = Tokenize<float>(tokens[2]);
 		if (scoreVector.size() != m_noScoreComponent) {
@@ -97,7 +98,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 		sourcePhrase.CreateFromString( input, phraseVector, factorCollection);
 		//target
 		TargetPhrase targetPhrase(Output);
-		targetPhrase.CreateFromString( output, tokens[1], factorCollection);
+		targetPhrase.CreateFromString( output, tokens[1], factorCollection, factorDelimiter);
 
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());

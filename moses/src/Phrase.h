@@ -55,13 +55,14 @@ public:
 
 	virtual ~Phrase();
 
-	static std::vector< std::vector<std::string> > Parse(const std::string &phraseString, const std::vector<FactorType> &factorOrder);
+	static std::vector< std::vector<std::string> > Parse(const std::string &phraseString, const std::vector<FactorType> &factorOrder, const std::string& factorDelimiter);
+	void CreateFromString(const std::vector<FactorType> &factorOrder
+              , const std::vector< std::vector<std::string> > &phraseVector
+              , FactorCollection &factorCollection);
 	void CreateFromString(const std::vector<FactorType> &factorOrder
 											, const std::string &phraseString
-											, FactorCollection &factorCollection);
-	void CreateFromString(const std::vector<FactorType> &factorOrder
-											, const std::vector< std::vector<std::string> > &phraseVector
-											, FactorCollection &factorCollection);
+											, FactorCollection &factorCollection
+											, const std::string &factorDelimiter);
 
 	void MergeFactors(const Phrase &copy);
 	//! copy a single factor (specified by factorType)

@@ -11,7 +11,7 @@ use Getopt::Long "GetOptions";
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
 
-my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR);
+my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
@@ -48,6 +48,7 @@ $_HELP = 1
 		       'generation-factors=s' => \$_GENERATION_FACTORS,
 		       'decoding-steps=s' => \$_DECODING_STEPS,
 		       'scripts-root-dir=s' => \$SCRIPTS_ROOTDIR,
+                       'factor-delimiter=s' => \$_FACTOR_DELIMITER,
                       );
 
 if ($_HELP) {
@@ -68,25 +69,36 @@ For more, please check manual or contact koehn\@inf.ed.ac.uk\n";
   exit(1);
 }
 
+my $___FACTOR_DELIMITER = $_FACTOR_DELIMITER;
+$___FACTOR_DELIMITER = '|' unless ($_FACTOR_DELIMITER);
+
 if (!defined $SCRIPTS_ROOTDIR) {
   $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
   die "Please set SCRIPTS_ROOTDIR or specify --scripts-root-dir" if !defined $SCRIPTS_ROOTDIR;
 }
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 
+# the following line is set installation time by 'make release'.  BEWARE!
+my $BINDIR = "/THIS/PATH/IS/REPLACED/BY/MAKE/RELEASE";
 
-# these variables may have to be adapted to local paths
-my $BINDIR = "/export/ws06osmt/bin";
+# supporting binaries from other packages
 my $GIZA = "$BINDIR/GIZA++";
 my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
+my $MKCLS = "$BINDIR/mkcls";
+
+# supporting scripts/binaries from this package
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
 my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/training/phrase-extract/score";
-my $MKCLS = "$BINDIR/mkcls";
+
+# utilities
 my $ZCAT = "zcat";
 my $BZCAT = "bzcat";
 
+# do a sanity check to make sure we can find the necessary binaries since
+# these are not installed by default
+die("Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless (-x $GIZA && -x $SNT2COOC && -x $MKCLS);
 
 # set varibles to defaults or from options
 my $___ROOT_DIR = ".";
@@ -326,7 +338,7 @@ sub reduce_factors {
 	chomp; s/ +/ /g; s/^ //; s/ $//;
 	my $first = 1;
 	foreach (split) {
-	    my @FACTOR = split(/\|/);
+	    my @FACTOR = string_split($___FACTOR_DELIMITER, $_);
 	    print OUT " " unless $first;
 	    $first = 0;
 	    my $first_factor = 1;
@@ -349,6 +361,34 @@ sub reduce_factors {
     print STDERR "\n";
     close(OUT);
     close(IN);
+}
+
+# this acts just like split, only it matches EXACTLY against $delimiter
+# rather than treating it as a regular expression as split /$var/, $x
+# would.
+#
+# there may be a perl function that can either escape a string such that
+# it can be used in a RE as a literal (ie, not as a pattern), or some
+# way of constraining the RE Engine, but I don't know what it is.
+sub string_split {
+  my ($delimiter, $x) = @_;
+  my @res;
+  my $ld = length $delimiter;
+  my $lx = length $x;
+  return ($x) if ($lx < $ld);
+  if ($lx == 0) { return split //, $x; }
+
+  my $end = $lx - $ld + 1;
+  my $last = 0;
+  for (my $i = 0; $i < $end; $i++) {
+    if (substr($x, $i, $ld) eq $delimiter) {
+      push @res, substr($x, $last, $i - $last);
+      $last = $i + $ld;
+      $i = $last - 1;  # incremented again by for
+    }
+  }
+  push @res, substr($x, $last) if ($last < $end);
+  return @res;  
 }
 
 sub make_classes {
@@ -1357,6 +1397,10 @@ print INI "\n# word penalty
 6
 ";
 
+  # only set the factor delimiter if it is non-standard
+  unless ($___FACTOR_DELIMITER eq '|') {
+    print INI "\n# delimiter between factors in input\n[factor-delimiter]\n$___FACTOR_DELIMITER\n\n"
+  }
 
   close(INI);
 }

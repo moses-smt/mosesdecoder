@@ -39,6 +39,7 @@ Parameter::Parameter()
 	AddParam("distortion-file", "location and properties of the factorized/lexicalized reordering table");
 	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
+	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
 	AddParam("generation-file", "location and properties of the generation table");
 	AddParam("input-factors", "list of factors in the input");
 	AddParam("input-file", "i", "location of the input file to be translated");
