@@ -102,6 +102,7 @@ protected:
 	bool m_computeLMBackoffStats;
 
 	mutable std::auto_ptr<SentenceStats> m_sentenceStats;
+	std::string m_factorDelimiter;
 
 public:
 	StaticData();
@@ -297,4 +298,5 @@ public:
 
 	bool UseDistortionFutureCosts() const {return m_useDistortionFutureCosts;}
 	bool OnlyDistinctNBest() const {return m_onlyDistinctNBest;}
+	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
 };

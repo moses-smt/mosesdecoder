@@ -193,9 +193,10 @@ FactorArray &Phrase::AddWord()
 	return factorArray;
 }
 
-vector< vector<string> > Phrase::Parse(const std::string &phraseString, const std::vector<FactorType> &factorOrder)
+vector< vector<string> > Phrase::Parse(const std::string &phraseString, const std::vector<FactorType> &factorOrder, const std::string& factorDelimiter)
 {
-		// parse
+	bool isMultiCharDelimiter = factorDelimiter.size() > 1;
+	// parse
 	vector< vector<string> > phraseVector;
 	vector<string> annotatedWordVector = Tokenize(phraseString);
 	// KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none 
@@ -205,7 +206,12 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString, const st
 	for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() ; phrasePos++)
 	{
 		string &annotatedWord = annotatedWordVector[phrasePos];
-		vector<string> factorStrVector = Tokenize(annotatedWord, "|");
+		vector<string> factorStrVector;
+		if (isMultiCharDelimiter) {
+			factorStrVector = TokenizeMultiCharSeparator(annotatedWord, factorDelimiter);
+		} else {
+			factorStrVector = Tokenize(annotatedWord, factorDelimiter);
+		}
 		// KOMMA|none
 		//    to
 		// "KOMMA" "none"
@@ -240,9 +246,10 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const string &phraseString
-															, FactorCollection &factorCollection)
+															, FactorCollection &factorCollection
+		, const string &factorDelimiter)
 {
-	vector< vector<string> > phraseVector = Parse(phraseString, factorOrder);
+	vector< vector<string> > phraseVector = Parse(phraseString, factorOrder, factorDelimiter);
 	CreateFromString(factorOrder, phraseVector, factorCollection);
 }
 

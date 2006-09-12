@@ -55,6 +55,7 @@ StaticData::StaticData()
 ,m_isDetailedTranslationReportingEnabled(false) 
 ,m_onlyDistinctNBest(false)
 ,m_computeLMBackoffStats(false)
+,m_factorDelimiter("|") // default delimiter between factors
 {
 	s_instance = this;
 
@@ -79,11 +80,15 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	// input type has to be specified BEFORE loading the phrase tables!
 	if(m_parameter.GetParam("inputtype").size()) 
 		m_inputType=Scan<int>(m_parameter.GetParam("inputtype")[0]);
-	VERBOSE(2,"input type is: "<<m_inputType<<"  (0==default: text input, else confusion net format)\n");
+	VERBOSE(2,"input type is: "<<(m_inputType?"confusion net":"text input")<<"\n");
 
-	// mysql
-	m_mySQLParam = m_parameter.GetParam("mysql");
+	// factor delimiter
+	if (m_parameter.GetParam("factor-delimiter").size() > 0) {
+		m_factorDelimiter = m_parameter.GetParam("factor-delimiter")[0];
+	}
 
+	// TODO cache-path- this can go away, caching was broken and
+	// the binary phrase table is a far better solution
 	if (m_parameter.GetParam("cache-path").size() == 1)
 		m_cachePath = m_parameter.GetParam("cache-path")[0];
 	else

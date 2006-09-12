@@ -49,34 +49,21 @@ MAIN_SCRIPTS= $(MAIN_TRAINING_SCRIPTS) $(MAIN_GENERIC_SCRIPTS)
 
 release:
 	# Compile the parts
-	make all
-	if [ -z "$(TARGETDIR)" ]; then \
-	  echo "Please specify a TARGETDIR." ; \
-	  echo "  For custom releases issue: "; \
-	  echo "   TARGETDIR=$(HOME)/releases make release"; \
-	  echo "  For official releases (that include generation of helper scripts directly in /bin issue: "; \
-	  echo "   TARGETDIR=/export/ws06osmt make jhu_release"; \
-	  exit 1; fi
-	if [ -e $(RELEASEDIR) ]; then echo "Targetdir exists! Not touching it! $(RELEASEDIR)"; exit 1; fi
+	$(MAKE) all
+	@./check-dependencies.pl "$(HOME)" "$(TARGETDIR)" "$(RELEASEDIR)" "$(BINDIR)"
 	mkdir -p $(RELEASEDIR)
 	rsync -r --files-from ./released-files . $(RELEASEDIR)/
-	echo "####### Do not forget to:" >> $(RELEASEDIR)/README
-	echo "  export SCRIPTS_ROOTDIR=$(RELEASEDIR)" >> $(RELEASEDIR)/README
+	sed 's#^my \$$BINDIR\s*=.*#my \$$BINDIR="$(BINDIR)";#' training/train-factored-phrase-model.perl > $(RELEASEDIR)/training/train-factored-phrase-model.perl
+	@echo "####### Do not forget to:" >> $(RELEASEDIR)/README
+	@echo "  export SCRIPTS_ROOTDIR=$(RELEASEDIR)" >> $(RELEASEDIR)/README
 	## Remember, only files listed in released-files are released!!
-	## URGE yourself to:
+	## Don't forget to set your SCRIPTS_ROOTDIR with:
 	@echo "   export SCRIPTS_ROOTDIR=$(RELEASEDIR)"
-
-jhu_release:
-	TS=$(TS) DS=$(DS) TARGETDIR=$(DEFAULTTARGETDIR) make release
-	TS=$(TS) DS=$(DS) TARGETDIR=$(DEFAULTTARGETDIR) make generate_wrappers
-	## Remember, only files listed in released-files are released!!
-	### Release succeeded, tagging the CVS
-	cvs tag SCRIPTS-RELEASE-$(TS)
 
 generate_wrappers:
 	## And for each script, create/rewrite the daily release
 	export TARGET
-	for s in $(MAIN_SCRIPTS); do \
+	@for s in $(MAIN_SCRIPTS); do \
 	  bn=`basename $$s`; \
 	  echo '#!/bin/bash' > $(MAIN_SCRIPTS_TARGET_DIR)/$$bn-$(DS) || exit 1; \
 	  echo "export SCRIPTS_ROOTDIR=$(RELEASEDIR); $(RELEASEDIR)/$$s "'"$$@"; exit $$?' >> $(MAIN_SCRIPTS_TARGET_DIR)/$$bn-$(DS) || exit 1; \
@@ -112,7 +99,6 @@ missed:
 	| grep -v /tests/ \
 	| sed 's/^\.\///' \
 	| grep -F -x -v -f released-files
-
 
 
 ### Tests, applicable only at JHU environment due to data dependencies
