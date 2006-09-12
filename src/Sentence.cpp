@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
 									 FactorCollection &factorCollection) 
 {
+	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
 	std::string line;
 	do 
 		{
@@ -34,7 +35,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
 			line = Trim(line);
 		} while (line == "");
 	
-	CreateFromString(factorOrder, line, factorCollection);
+	CreateFromString(factorOrder, line, factorCollection, factorDelimiter);
 	return 1;
 }
 
