@@ -3,4 +3,4 @@
 AUTOMAKE_OPTIONS = foreign
 
 # order is important here: build moses before moses-cmd
-SUBDIRS = moses/src moses-cmd/src
+SUBDIRS = moses/src moses-cmd/src misc

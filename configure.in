@@ -76,4 +76,4 @@ fi
 
 LIBS="$LIBS -lz"
 
-AC_OUTPUT(Makefile moses/src/Makefile moses-cmd/src/Makefile)
+AC_OUTPUT(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile)
