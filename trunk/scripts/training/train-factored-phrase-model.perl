@@ -11,7 +11,7 @@ use Getopt::Long "GetOptions";
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
 
-my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER);
+my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
@@ -19,6 +19,7 @@ $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
 		       'corpus-dir=s' => \$_CORPUS_DIR,
 		       'corpus=s' => \$_CORPUS,
+                       'corpus-compression=s' => \$_CORPUS_COMPRESSION,
 		       'f=s' => \$_F,
 		       'e=s' => \$_E,
 		       'giza-e2f=s' => \$_GIZA_E2F,
@@ -107,6 +108,11 @@ my $___CORPUS_DIR  = $___ROOT_DIR."/corpus";
 $___CORPUS_DIR = $_CORPUS_DIR if $_CORPUS_DIR;
 die("use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1);
 my $___CORPUS      = $_CORPUS;
+
+my $___CORPUS_COMPRESSION = '';
+if ($_CORPUS_COMPRESSION) {
+  $___CORPUS_COMPRESSION = ".$_CORPUS_COMPRESSION";
+}
 
 # foreign/English language extension
 die("use --f to specify foreign language") unless $_F;
@@ -261,8 +267,8 @@ sub prepare {
     my ($factor_f,$factor_e) = split(/\-/,$___ALIGNMENT_FACTORS);
     my $corpus = $___CORPUS.".".$___ALIGNMENT_FACTORS;    
     if ($___NOFORK) {
-	&reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
-	&reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
+	&reduce_factors($___CORPUS.".".$___F.$___CORPUS_COMPRESSION,$corpus.".".$___F,$factor_f);
+	&reduce_factors($___CORPUS.".".$___E.$___CORPUS_COMPRESSION,$corpus.".".$___E,$factor_e);
 
 	&make_classes($corpus.".".$___F,$___VCB_F.".classes");
 	&make_classes($corpus.".".$___E,$___VCB_E.".classes");
@@ -282,10 +288,10 @@ sub prepare {
 	my $pid = fork();
 	die "couldn't fork" unless defined $pid;
 	if (!$pid) {
-	    &reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
+	    &reduce_factors($___CORPUS.".".$___F.$___CORPUS_COMPRESSION,$corpus.".".$___F,$factor_f);
 	    exit 0;
 	} else {
-	    &reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
+	    &reduce_factors($___CORPUS.".".$___E.$___CORPUS_COMPRESSION,$corpus.".".$___E,$factor_e);
 	}
 	waitpid($pid, 0);
 	my $pid2 = 0;
@@ -319,16 +325,24 @@ sub prepare {
 
 sub reduce_factors {
     my ($full,$reduced,$factors) = @_;
-		if (-e $reduced) {
-				print STDERR "already $reduced in place, reusing\n";
-				return;
-		}
+    if (-e $reduced) {
+        print STDERR "already $reduced in place, reusing\n";
+        return;
+    }
     # my %INCLUDE;
     # foreach my $factor (split(/,/,$factors)) {
 	# $INCLUDE{$factor} = 1;
     # }
     my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
-    open(IN,$full) or die "Can't read $full";		
+
+    my $read = $full;
+    if ($full =~ /\.bz2$/) {
+        $read = "$BZCAT $full|";
+    } elsif ($full =~ /\.gz$/) {
+        $read = "$ZCAT $full|";
+    }
+    open(IN,$read) or die "Can't read $full ($read)";
+
     open(OUT,">".$reduced) or die "Can't write $reduced";
     my $nr = 0;
     while(<IN>) {
@@ -719,10 +733,10 @@ sub get_lexical_factored {
     foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
 	$factor = $f;
 	($factor_f,$factor_e) = split(/\-/,$factor);
-	&reduce_factors($___CORPUS.".".$___F,
+	&reduce_factors($___CORPUS.".".$___F.$___CORPUS_COMPRESSION,
 			$___MODEL_DIR."/aligned.".$factor_f.".".$___F,
 			$factor_f);
-	&reduce_factors($___CORPUS.".".$___E,
+	&reduce_factors($___CORPUS.".".$___E.$___CORPUS_COMPRESSION,
 			$___MODEL_DIR."/aligned.".$factor_e.".".$___E,
 			$factor_e);
 	&get_lexical();
