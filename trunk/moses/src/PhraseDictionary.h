@@ -39,7 +39,6 @@ protected:
 							, const std::vector<FactorType>		&inputFactorType);
 	TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
 	
-	void SortTargetPhraseCollection();
 public:
 	PhraseDictionary(size_t noScoreComponent)
 		: MyBase(noScoreComponent)
