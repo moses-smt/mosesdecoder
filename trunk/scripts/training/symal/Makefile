@@ -7,7 +7,7 @@ clean:
 	rm -f *.o
 
 cmd.o: cmd.c cmd.h
-	$(CC) -c -o cmd.o cmd.c
+	$(CC) -O3 -c -o cmd.o cmd.c
 
 symal: symal.cpp cmd.o
-	$(CPP) -o $@ $(@).cpp cmd.o
+	$(CPP) -O3 -o $@ $(@).cpp cmd.o
