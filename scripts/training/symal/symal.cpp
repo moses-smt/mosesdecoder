@@ -12,7 +12,7 @@ using namespace std;
 #include <algorithm>
 #include "cmd.h"
 
-#define MAX_WORD 100  //maximum lengthsource/target strings 
+#define MAX_WORD 500  //maximum lengthsource/target strings 
 #define MAX_M 200     //maximum length of source strings
 #define MAX_N 200     //maximum length of target strings 
 
@@ -57,17 +57,23 @@ int verbose=0;
 
 //read an alignment pair from the input stream. 
 
+int lc = 0;
+
 int getals(fstream& inp,int& m, int *a,int& n, int *b)
 {
   char w[MAX_WORD], dummy[10];
   int i,j,freq;
-
   if (inp >> freq){
+    ++lc;
     //target sentence
     inp >> n; assert(n<MAX_N);
     for (i=1;i<=n;i++){ 
-      inp >> setw(MAX_WORD) >> w; 
-      assert(strlen(w)<MAX_WORD-1);
+      inp >> setw(MAX_WORD) >> w;
+      if (strlen(w)>=MAX_WORD-1) {
+        cerr << lc << ": target len=" << strlen(w) << " is not less than MAX_WORD-1=" 
+             << MAX_WORD-1 << endl;
+        assert(strlen(w)<MAX_WORD-1);
+      }
     }
     
     inp >> dummy; //# separator
@@ -78,7 +84,11 @@ int getals(fstream& inp,int& m, int *a,int& n, int *b)
     inp >> m; assert(m<MAX_M);
     for (j=1;j<=m;j++){
       inp >> setw(MAX_WORD) >> w;
-      assert(strlen(w)<MAX_WORD-1);
+      if (strlen(w)>=MAX_WORD-1) {
+        cerr << lc << ": source len=" << strlen(w) << " is not less than MAX_WORD-1=" 
+             << MAX_WORD-1 << endl;
+        assert(strlen(w)<MAX_WORD-1);
+      }
     }
     
     inp >> dummy; //# separator
