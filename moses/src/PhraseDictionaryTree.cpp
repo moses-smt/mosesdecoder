@@ -379,7 +379,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 					if(d==InvalidOffT) d=fTell(ot);
 					else 
 						{
-							std::cerr<<"ERROR: source phrase already inserted (A)!\nline: '"
+							std::cerr<<"ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '"
 											 <<line<<"'\nf: "<<f<<"\n";
 							abort();
 						}
@@ -417,7 +417,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 					if(d==InvalidOffT) d=fTell(ot);
 					else 
 						{
-							std::cerr<<"ERROR: source phrase already inserted (B)!\nline: '"
+							std::cerr<<"ERROR: xsource phrase already inserted (B)!\nline(" << lnc << "): '"
 											 <<line<<"'\nf: "<<f<<"\n";
 							abort();
 						}
