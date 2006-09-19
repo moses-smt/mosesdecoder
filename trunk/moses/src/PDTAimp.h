@@ -56,7 +56,7 @@ public:
 		CleanUp();
 		delete m_dict;
 
-		if (StaticData::Instance()->GetVerboseLevel() >= 1)
+		if (StaticData::Instance()->GetVerboseLevel() >= 2)
 			{
 
 				std::cerr<<"tgt candidates stats:  total="<<totalE<<";  distinct="
@@ -324,7 +324,7 @@ public:
 		for(size_t len=1;len<=srcSize;++len) path1Best[len]+=srcSize-len+1;
 
 		
-		if (StaticData::Instance()->GetVerboseLevel() >= 1 && exPathsD.size())
+		if (StaticData::Instance()->GetVerboseLevel() >= 2 && exPathsD.size())
 			{
 				std::cerr<<"path stats for current CN: \n";
 				std::cerr.setf(std::ios::scientific); 
@@ -425,7 +425,7 @@ public:
 			} // end while(!stack.empty()) 
 
 
-		if (StaticData::Instance()->GetVerboseLevel() >= 1 && exploredPaths.size())
+		if (StaticData::Instance()->GetVerboseLevel() >= 2 && exploredPaths.size())
 			{
 				std::cerr<<"CN (explored): ";
 				std::copy(exploredPaths.begin()+1,exploredPaths.end(),
