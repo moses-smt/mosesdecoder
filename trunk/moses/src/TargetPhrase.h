@@ -73,10 +73,10 @@ public:
 	TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
 		// used for translation step
 	
-  inline float GetTranslationScore() const
+/*  inline float GetTranslationScore() const
   {
     return m_transScore;
-  }
+  }*/
   /***
    * return the estimated score resulting from our being added to a sentence
    * (it's an estimate because we don't have full n-gram info for the language model
@@ -86,10 +86,6 @@ public:
   inline float GetFutureScore() const
   {
     return m_fullScore;
-  }
-  inline float GetNgramScore() const
-  {
-    return m_ngramScore;
   }
 	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
 	{
