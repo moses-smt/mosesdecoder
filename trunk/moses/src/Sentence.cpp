@@ -1,4 +1,5 @@
 // $Id$
+// vim:tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -35,7 +36,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
 			line = Trim(line);
 		} while (line == "");
 	
-	CreateFromString(factorOrder, line, factorCollection, factorDelimiter);
+	Phrase::CreateFromString(factorOrder, line, factorCollection, factorDelimiter);
 	return 1;
 }
 

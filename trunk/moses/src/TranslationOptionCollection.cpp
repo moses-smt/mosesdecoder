@@ -1,4 +1,5 @@
 // $Id$
+// vim:tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -237,8 +238,13 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
 {
 	m_factorCollection = &factorCollection;
 	
+	// loop over all substrings of the source sentence, look them up
+	// in the phraseDictionary (which is the- possibly filtered-- phrase
+	// table loaded on initialization), generate TranslationOption objects
+	// for all phrases
+	
 	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
-		{
+	{
 		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
 		{
 			CreateTranslationOptionsForRange( decodeStepList, factorCollection, startPos, endPos, true);
@@ -387,14 +393,6 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 															, size_t endPos
 															, bool observeTableLimit)
 {
-	// loop over all substrings of the source sentence, look them up
-	// in the phraseDictionary (which is the- possibly filtered-- phrase
-	// table loaded on initialization), generate TranslationOption objects
-	// for all phrases
-	//
-	// possible optimization- don't consider phrases longer than the longest
-	// phrase in the PhraseDictionary?
-	
 	const PhraseDictionaryBase &phraseDictionary = decodeStep.GetPhraseDictionary();
 	const size_t tableLimit = phraseDictionary.GetTableLimit();
 
@@ -402,7 +400,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(m_source,wordsRange); 
 	if (phraseColl != NULL)
 	{
-	        VERBOSE(3,"[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
+		VERBOSE(3,"[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
 			
 		TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
 		iterEnd = (!observeTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
