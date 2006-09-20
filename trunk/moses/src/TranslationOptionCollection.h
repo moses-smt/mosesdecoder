@@ -74,7 +74,6 @@ protected:
 																		 , size_t sourcePos
 																		 , FactorCollection &factorCollection);
 
-	void ComputeFutureScores();	
 	void Prune();
 
 	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
