@@ -1,4 +1,5 @@
 // $Id$
+// vim:tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -24,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryBase.h"
 #include "PhraseDictionaryNode.h"
 
+/*** Implementation of a phrase table in a trie.  Looking up a phrase of
+ * length n words requires n look-ups to find the TargetPhraseCollection.
+ */
 class PhraseDictionary : public PhraseDictionaryBase
 {
 	typedef PhraseDictionaryBase MyBase;

@@ -1,4 +1,5 @@
 // $Id$
+// vim:tabstop=2
 
 #pragma once
 
@@ -299,7 +300,7 @@ public:
 	void CacheSource(ConfusionNet const& src) 
 	{
 		assert(m_dict);
-		size_t srcSize=src.GetSize();
+		const size_t srcSize=src.GetSize();
 
 		std::vector<size_t> exploredPaths(srcSize+1,0);
 		std::vector<double> exPathsD(srcSize+1,-1.0);
@@ -352,11 +353,12 @@ public:
 		
 				//std::cerr<<"processing state "<<curr<<" stack size: "<<stack.size()<<"\n";
 
-				assert(curr.end()<src.GetSize());
+				assert(curr.end()<srcSize);
 				const ConfusionNet::Column &currCol=src[curr.end()];
-				for(size_t colidx=0;colidx<currCol.size();++colidx) 
+				// in a given column, loop over all possibilities
+				for(size_t colidx=0;colidx<currCol.size();++colidx)
 					{
-						const Word& w=currCol[colidx].first;
+						const Word& w=currCol[colidx].first; // w=the i^th possibility in column colidx
 						std::string s;
 						Factors2String(w.GetFactorArray(),s);
 						bool isEpsilon=(s=="" || s==EPSILON);
@@ -364,21 +366,27 @@ public:
 						// do not start with epsilon (except at first position)
 						if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue; 
 
+						// At a given node in the prefix tree, look to see if w defines an edge to
+						// another node (Extend).  Stay at the same node if w==EPSILON
 						PPtr nextP = (isEpsilon ? curr.ptr : m_dict->Extend(curr.ptr,s));
 						unsigned newRealWords=curr.realWords + (isEpsilon ? 0 : 1);
-						if(nextP) 
+						if(nextP) // w is a word that should be considered
 							{
 								Range newRange(curr.begin(),curr.end()+1);
-								float newScore=curr.GetScore()+currCol[colidx].second;
+								float newScore=curr.GetScore()+currCol[colidx].second;  // CN score
 								Phrase newSrc(curr.src);
 								if(!isEpsilon) newSrc.push_back(w);
-								if(newRange.second<src.GetSize() && newScore>LOWEST_SCORE)
+								if(newRange.second<srcSize && newScore>LOWEST_SCORE)
 									{
+									  // if there is more room to grow, add a new state onto the queue
+										// to be explored that represents [begin, curEnd+1)
 										stack.push_back(State(newRange,nextP,newScore,newRealWords));
 										stack.back().src=newSrc;
 									}
 
 								std::vector<StringTgtCand> tcands;
+								// now, look up the target candidates (aprx. TargetPhraseCollection) for
+								// the current path through the CN
 								m_dict->GetTargetCandidates(nextP,tcands);
 
 								if(newRange.second>=exploredPaths.size()+newRange.first) 

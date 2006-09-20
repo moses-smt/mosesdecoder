@@ -1,4 +1,5 @@
 // $Id$
+// vim:tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

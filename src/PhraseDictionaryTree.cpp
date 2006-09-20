@@ -1,4 +1,5 @@
 // $Id$
+// vim:tabstop=2
 #include "PhraseDictionaryTree.h"
 #include <map>
 #include <cassert>
@@ -28,6 +29,8 @@ typedef std::vector<LabelId> IPhrase;
 typedef std::vector<float> Scores;
 typedef PrefixTreeF<LabelId,off_t> PTF;
 
+// A = type of things to numberize, ie, std::string
+// B = map type to use, might consider using hash_map for better performance
 template<typename A,typename B=std::map<A,LabelId> >
 class LVoc {
   typedef A Key;
@@ -203,7 +206,7 @@ struct PDTimp {
 		assert(p);
 		if(w.empty() || w==EPSILON) return p;
 		LabelId wi=sv.index(w);
-		if(wi==InvalidLabelId) return PPtr();
+		if(wi==InvalidLabelId) return PPtr(); // unknown word
 		else if(p.imp->isRoot()) 
 			{
 				if(wi<data.size() && data[wi])
