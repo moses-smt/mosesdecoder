@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 # given a moses.ini file, checks the translation and generation tables and reports
 # statistics on ambiguity
+# Ondrej Bojar
 
 use warnings;
 use strict;
