@@ -17,8 +17,9 @@ my $results_dir;
 GetOptions("decoder=s" => \$decoder,
            "test=s"    => \$test_name,
            "data-dir=s"=> \$data_dir,
+           "test-dir=s"=> \$test_dir,
            "results-dir=s"=> \$results_dir,
-          );
+          ) or exit 1;
 
 die "Please specify a decoder with --decoder\n" unless $decoder;
 die "Please specify a test to run with --test\n" unless $test_name;
