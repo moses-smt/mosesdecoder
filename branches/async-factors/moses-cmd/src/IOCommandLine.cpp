@@ -100,7 +100,7 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 {
 	if ( hypo != NULL)
 	{
-		OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSourceSpan, reportAllFactors);
+		if (hypo->GetPTID() == -1) OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSourceSpan, reportAllFactors);
 		OutputSurface(out, hypo->GetTargetPhrase(), outputFactorOrder, reportAllFactors);
 
         if (reportSourceSpan == true

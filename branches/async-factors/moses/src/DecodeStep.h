@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cassert>
 #include "TypeDef.h"
 #include "Dictionary.h"
+#include "Word.h"
+#include "ScoreComponentCollection.h"
 
 class PhraseDictionaryBase;
 class GenerationDictionary;
@@ -32,6 +34,13 @@ class TranslationOptionCollection;
 class PartialTranslOptColl;
 class FactorCollection;
 class InputType;
+class Phrase;
+
+typedef std::pair<Word, ScoreComponentCollection2> WordPair;
+typedef std::list< WordPair > WordList;
+// 1st = word
+// 2nd = score
+typedef std::list< WordPair >::const_iterator WordListIterator;
 
 /** Specification for a decoding step.
  * The factored translation model consists of Translation and Generation
@@ -51,6 +60,10 @@ protected:
 public:
 	DecodeStep(Dictionary *ptr, const DecodeStep* prevDecodeStep);
 	virtual ~DecodeStep();
+
+	// This sucks!
+	virtual const int GetType() const =0;
+	virtual int GenerateOptions(std::vector<WordList>& wordListVector, const Phrase& targetPhrase) { return 0; };
 
 	/** mask of factors that are present after this decode step */
 	const FactorMask& GetOutputFactorMask() const

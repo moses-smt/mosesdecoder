@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 					LatticePathList nBestList;
 					manager.CalcNBest(nBestSize, nBestList);
 					inputOutput->SetNBest(nBestList, source->GetTranslationId());
-					RemoveAllInColl< LatticePathList::iterator > (nBestList);
+					RemoveAllInColl(nBestList);
 				}
 
 			if (staticData.IsDetailedTranslationReportingEnabled()) {

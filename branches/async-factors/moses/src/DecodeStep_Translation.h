@@ -32,6 +32,9 @@ class TranslationDecodeStep : public DecodeStep
 public:
 	TranslationDecodeStep(PhraseDictionaryBase* dict, const DecodeStep* prev);
 
+	// still sucks
+	const int GetType() const { return 0; };
+
   /** returns phrase table (dictionary) for translation step */
   const PhraseDictionaryBase &GetPhraseDictionary() const;
 

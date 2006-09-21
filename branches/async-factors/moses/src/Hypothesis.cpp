@@ -39,8 +39,10 @@ using namespace std;
 
 unsigned int Hypothesis::s_HypothesesCreated = 0;
 ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
+unsigned long Hypothesis::scoredLMs;
+unsigned long Hypothesis::maskedLMs;
 
-Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
+Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget, int ptid)
 	: m_prevHypo(NULL)
 	, m_targetPhrase(emptyTarget)
 	, m_sourcePhrase(0)
@@ -55,37 +57,127 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	_hash_computed = false;
+	m_ptid = ptid;
+	m_targetLen = 0;
+	maskedLMs = scoredLMs = 0x0;
 	ResetScore();	
 }
 
 /***
  * continue prevHypo by appending the phrases in transOpt
  */
-Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
+Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, int ptid)
 	: m_prevHypo(&prevHypo)
-	, m_targetPhrase(transOpt.GetTargetPhrase())
-	, m_sourcePhrase(0)
-	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
-	, m_sourceInput						(prevHypo.m_sourceInput)
-	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
-	, m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
-														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
-	, m_wordDeleted(false)
-	,	m_totalScore(0.0f)
-	,	m_futureScore(0.0f)
-	, m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
-	, m_languageModelStates(prevHypo.m_languageModelStates)
-	, m_arcList(NULL)
-	, m_id(s_HypothesesCreated++)
+		, m_targetPhrase(ptid == -1 ? transOpt.GetTargetPhrase() : (*(new Phrase(prevHypo.m_targetPhrase))))
+		, m_sourcePhrase(0)
+		, m_sourceCompleted				(prevHypo.m_sourceCompleted )
+		, m_sourceInput						(prevHypo.m_sourceInput)
+		, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
+		, m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
+																,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
+		, m_wordDeleted(false)
+		,	m_totalScore(0.0f)
+		,	m_futureScore(0.0f)
+		, m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
+		, m_languageModelStates(prevHypo.m_languageModelStates)
+		, m_arcList(NULL)
+		, m_id(s_HypothesesCreated++)
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
 	assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));	
 
+	m_ptid = ptid;
+	//m_targetLen = 0;
+	if (m_ptid > -1)
+		{ // merge with existing factors: target phrase must already be full length
+			// assumes that phrases have already been checked for compatibility
+			(const_cast<Phrase &>(m_targetPhrase)).MergeFactorsPartial(transOpt.GetTargetPhrase(), prevHypo.m_targetLen);
+			m_targetLen = prevHypo.GetTargetLen() + transOpt.GetTargetPhrase().GetSize();
+			cerr << "\t* " << "secondary hyp: " << m_targetLen << " " << m_currSourceWordsRange << "\n";
+		}
+
 	_hash_computed = false;
+	//maskedLMs = scoredLMs = 0x0;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
 	m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
+}
+
+// Transfer hypothesis
+Hypothesis::Hypothesis(const Hypothesis &orig, int ptid)
+	: m_prevHypo(&orig)
+		, m_targetPhrase(ptid == 1 ? *(new Phrase(Output)) : *(new Phrase(orig.m_targetPhrase)))
+		, m_sourcePhrase(0)
+		, m_sourceCompleted				(orig.m_sourceCompleted.GetSize())
+		, m_sourceInput						(orig.m_sourceInput)
+		, m_currSourceWordsRange	(NOT_FOUND, NOT_FOUND)
+		, m_currTargetWordsRange	(NOT_FOUND, NOT_FOUND)
+		, m_wordDeleted(false)
+		,	m_totalScore(orig.m_totalScore)
+		,	m_futureScore(orig.m_futureScore)
+		, m_scoreBreakdown				(orig.m_scoreBreakdown)
+		, m_languageModelStates(orig.m_languageModelStates)
+		, m_arcList(NULL)
+		, m_id(s_HypothesesCreated++)
+{
+	m_ptid = ptid;
+	m_targetLen = 0;
+	//maskedLMs = scoredLMs = 0x0;
+	// IF ptid == 0 then we need to construct a new targetPhrase with the entire sentence so far
+	if (ptid == 1)
+		{
+			list<const Hypothesis *> tmp;
+			for (const Hypothesis *x = &orig; x != NULL; x = x->m_prevHypo)
+				tmp.push_front(x);
+			list<const Hypothesis *>::const_iterator i;
+			for (i = tmp.begin(); i != tmp.end(); i++)
+				for (unsigned int j = 0; j < (*i)->GetSize(); j++)
+					{
+						(const_cast<Phrase &>(m_targetPhrase)).push_back((*i)->m_targetPhrase.GetFactorArray(j));
+					}
+			cerr << "INFO: Doing Transfer... Current Target String: **[" 
+					 << orig.m_targetPhrase << ", " << m_targetPhrase << "]**" << std::endl;
+		}
+	_hash_computed = false;
+}
+
+Hypothesis::Hypothesis(const Hypothesis &orig, Phrase& genph, ScoreComponentCollection2& generationScore, int ptid)
+	: m_prevHypo(&orig)
+		, m_targetPhrase(*(new Phrase(Output)))
+		, m_sourcePhrase(orig.m_sourcePhrase)
+		, m_sourceCompleted				(orig.m_sourceCompleted.GetSize())
+		, m_sourceInput						(orig.m_sourceInput)
+		, m_currSourceWordsRange	(orig.m_currSourceWordsRange)
+		, m_currTargetWordsRange	(orig.m_currTargetWordsRange)
+		, m_wordDeleted(false)
+		,	m_totalScore(orig.m_totalScore)
+		,	m_futureScore(orig.m_futureScore)
+		, m_scoreBreakdown				(orig.m_scoreBreakdown)
+		, m_languageModelStates(orig.m_languageModelStates)
+		, m_arcList(NULL)
+		, m_id(s_HypothesesCreated++)
+{
+	m_ptid = ptid;
+	m_targetLen = orig.m_targetLen;
+	if (ptid == 1)
+		{
+			list<const Hypothesis *> tmp;
+			for (const Hypothesis *x = &orig; x != NULL; x = x->m_prevHypo)
+				tmp.push_front(x);
+			list<const Hypothesis *>::const_iterator i;
+			for (i = tmp.begin(); i != tmp.end(); i++)
+				for (unsigned int j = 0; j < (*i)->GetSize(); j++)
+					(const_cast<Phrase &>(m_targetPhrase)).push_back((*i)->m_targetPhrase.GetFactorArray(j));
+		}
+	if (m_ptid > -1)
+		{ // merge with existing factors: target phrase must already be full length
+			// assumes that phrases have already been checked for compatibility
+			(const_cast<Phrase &>(m_targetPhrase)).MergeFactorsPartial(genph, 0);
+			cerr << "\t* " << "generated hyp: " << m_targetPhrase << " by adding " << genph << " " << m_currSourceWordsRange << "\n";
+		}
+	m_scoreBreakdown.PlusEquals(generationScore);
+	_hash_computed = false;
 }
 
 Hypothesis::~Hypothesis()
@@ -134,25 +226,25 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
  */
 Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
 {
-	return Create(*this, transOpt);
+	return Create(*this, transOpt, m_ptid);
 }
 
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
-Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
+Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, int ptid)
 {
 	Hypothesis *ptr = s_objectPool.getPtr();
-	return new(ptr) Hypothesis(prevHypo, transOpt);
+	return new(ptr) Hypothesis(prevHypo, transOpt, ptid);
 }
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */
 
-Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &emptyTarget)
+Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &emptyTarget, int ptid)
 {
 	Hypothesis *ptr = s_objectPool.getPtr();
-	return new(ptr) Hypothesis(m_source, emptyTarget);
+	return new(ptr) Hypothesis(m_source, emptyTarget, ptid);
 }
 
 #if 0
@@ -216,13 +308,19 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 {
 	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
 	LMList::const_iterator iterLM;
+	unsigned long index = 0x1;
 	size_t lmIdx = 0;
 
 	// already have LM scores from previous and trigram score of poss trans.
 	// just need trigram score of the words of the start of current phrase	
-	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM,++lmIdx)
+	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM,++lmIdx, index <<= 0x1)
 	{
 		const LanguageModel &languageModel = **iterLM;
+		
+		if (index & maskedLMs || !languageModel.Useable(m_targetPhrase))
+			continue;
+
+		scoredLMs |= index;
 		size_t nGramOrder			= languageModel.GetNGramOrder();
 		size_t currEndPos			= m_currTargetWordsRange.GetEndPos();
 		float lmScore;
@@ -317,7 +415,8 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 	CalcLMScore(staticData.GetAllLM());
 
 	// WORD PENALTY
-	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetWordsCount()); 
+	if (m_ptid != -1)
+		m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetWordsCount()); 
 
 	// FUTURE COST
 	CalcFutureScore(futureScore);
@@ -415,7 +514,8 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 	hypothesis.ToStream(out);
 	// words bitmap
 	out << "[" << hypothesis.m_sourceCompleted << "] ";
-	
+	out << "tlen: " << hypothesis.m_targetLen << " ";
+
 	// scores
 	out << " [total=" << hypothesis.GetTotalScore() << "]";
 	out << " " << hypothesis.GetScoreBreakdown();

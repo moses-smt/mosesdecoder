@@ -64,12 +64,14 @@ public:
 											, FactorCollection &factorCollection);
 
 	void MergeFactors(const Phrase &copy);
+	void MergeFactorsPartial(const Phrase &copy, int start = 0);
 	//! copy a single factor (specified by factorType)
 	void MergeFactors(const Phrase &copy, FactorType factorType);
 	//! copy all factors specified in factorVec and none others
 	void MergeFactors(const Phrase &copy, const std::vector<FactorType>& factorVec);
 
 	// must run IsCompatible() to ensure incompatible factors aren't being overwritten
+	bool IsCompatiblePartial(const Phrase &inputPhrase, int start) const;
 	bool IsCompatible(const Phrase &inputPhrase) const;
 	bool IsCompatible(const Phrase &inputPhrase, FactorType factorType) const;
 	bool IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const;

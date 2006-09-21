@@ -31,6 +31,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class FactorCollection;
 
+struct FactorArrayWrapperComparer
+{
+	//! returns true if hypoA can be recombined with hypoB
+	bool operator()(const FactorArrayWrapper *a, const FactorArrayWrapper *b) const
+	{
+		return *a < *b;
+	}
+};
+
 typedef std::map < Word , ScoreComponentCollection2 > OutputWordCollection;
 		// 1st = output phrase
 		// 2nd = log probability (score)
@@ -38,7 +47,7 @@ typedef std::map < Word , ScoreComponentCollection2 > OutputWordCollection;
 class GenerationDictionary : public Dictionary, public ScoreProducer
 {
 protected:
-	std::map<Word , OutputWordCollection> m_collection;
+	std::map<const FactorArrayWrapper* , OutputWordCollection, FactorArrayWrapperComparer> m_collection;
 	// 1st = source
 	// 2nd = target
 	std::string						m_filename;

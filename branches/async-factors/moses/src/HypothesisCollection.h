@@ -101,7 +101,6 @@ protected:
 		// if returns false, hypothesis not used
 		// caller must take care to delete unused hypo to avoid leak
 		// used by Add(Hypothesis *hypothesis, float beamThreshold);
-	void RemoveAll();
 
 	/** destroy all instances of Hypothesis in this collection */
 	inline void Detach(const HypothesisCollection::iterator &iter)
@@ -115,6 +114,8 @@ protected:
 		pool.freeObject(*iter);
 		Detach(iter);
 	}
+	void RemoveAll();
+
 	/** add Hypothesis to the collection, without pruning */
 	inline void AddNoPrune(Hypothesis *hypothesis)
 	{
@@ -129,6 +130,39 @@ public:
 
 	HypothesisCollection();
 
+	void Reset()
+	{
+		m_hypos.clear();
+		m_bestScore = -std::numeric_limits<float>::infinity();
+		m_worstScore = -std::numeric_limits<float>::infinity();
+	}
+
+	/** destroy all instances of Hypothesis in this collection */
+	inline void erase(const HypothesisCollection::iterator &iter)
+	{
+		m_hypos.erase(iter);
+	}
+
+	inline void insert(const HypothesisCollection::iterator &iter, Hypothesis& h)
+	{
+		if (!m_hypos.insert(&h).second) {
+    }
+	}
+
+	inline void insertset(HypothesisCollection &other)
+	{
+		HypothesisCollection::const_iterator iterHypo;
+
+		for (iterHypo = other.begin(); iterHypo != other.end(); ++iterHypo)
+			Add(*iterHypo);
+	}
+
+	void FreeHypPool() 
+	{ 
+		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
+		pool.reset();
+	}
+
 	// this function will recombine hypotheses silently!  There is no record
 	// (could affect n-best list generation...TODO)
 	void AddPrune(Hypothesis *hypothesis);
@@ -136,7 +170,8 @@ public:
 
 	inline ~HypothesisCollection()
 	{
-		RemoveAll();
+		// Don't do this any more
+		// RemoveAll();
 	}
 	/** set maximum number of hypotheses in the collection
    *  /param maxHypoStackSize maximum number (typical number: 100) */
