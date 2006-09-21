@@ -27,7 +27,7 @@ my $data_dir;
 
 GetOptions("decoder=s" => \$decoder,
            "data-dir=s" => \$data_dir,
-          );
+          ) or exit 1;
 
 $data_dir = MosesRegressionTesting::find_data_directory($BIN_TEST, $data_dir);
 
