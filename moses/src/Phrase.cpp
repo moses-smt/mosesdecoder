@@ -128,6 +128,21 @@ void Phrase::MergeFactors(const Phrase &copy)
 	}
 }
 
+void Phrase::MergeFactorsPartial(const Phrase &copy, int start)
+{
+	size_t size = copy.GetSize();
+	for (size_t currPos = start; currPos < start + size; currPos++)
+	{
+		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			const Factor *factor = copy.GetFactor(currPos - start, factorType);
+			if (factor != NULL)
+				SetFactor(currPos, factorType, factor);
+		}
+	}
+}
+
 void Phrase::MergeFactors(const Phrase &copy, FactorType factorType)
 {
 	assert(GetSize() == copy.GetSize());
@@ -353,6 +368,28 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 	}
 
 	cerr << inputPhrase << " is compatible with " << *this << "\n";
+	return true;
+
+}
+
+bool Phrase::IsCompatiblePartial(const Phrase &inputPhrase, int start) const
+{
+	const size_t size = inputPhrase.GetSize();
+
+	for (size_t currPos = start; currPos < start + size; currPos++)
+	{
+		for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			const Factor *thisFactor 		= GetFactor(currPos, factorType)
+									,*inputFactor	= inputPhrase.GetFactor(currPos - start, factorType);
+			if (thisFactor != NULL && inputFactor != NULL && thisFactor != inputFactor)
+				return false;
+			//cerr << "\t* " << thisFactor << " is compatible with " << inputFactor << "\n";
+		}
+	}
+
+	//cerr << inputPhrase << " is compatible with " << *this << "\n";
 	return true;
 
 }

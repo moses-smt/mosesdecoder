@@ -66,6 +66,8 @@ protected:
 	const Phrase			&m_targetPhrase; /**< target phrase being created at the current decoding step */
 	Phrase const*     m_sourcePhrase; /**< input sentence */
 	WordsBitmap				m_sourceCompleted; /**< keeps track of which words have been translated so far */
+	int m_ptid;
+	int m_targetLen;
 	//TODO: how to integrate this into confusion network framework; what if
 	//it's a confusion network in the end???
 	InputType const&  m_sourceInput;
@@ -78,6 +80,8 @@ protected:
 	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /**< relevant history for language model scoring -- used for recombination */
 	const Hypothesis 	*m_mainHypo;
 	ArcList 					*m_arcList; /**< all arcs that end at the same lattice point as this hypothesis */
+	static unsigned long maskedLMs;
+	static unsigned long scoredLMs;
 
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
@@ -95,23 +99,31 @@ public:
 		return s_objectPool;
 	}
 
-
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
-	
+
+	// for masking lms
+	inline unsigned long &GetMaskedLMs() { return maskedLMs; }
+	inline unsigned long &GetScoredLMs() { return scoredLMs; }
+	inline int GetTargetLen() const { return m_targetLen; }
+	inline int GetPTID() const { return m_ptid; }
 	/** used by initial seeding of the translation process */
-	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
+	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget, int ptid = -1);
 	/** used when creating a new hypothesis using a translation option (phrase translation) */
-	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
+	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, int ptid = -1);
+	/** copy constructor for new pt restart*/
+	Hypothesis(const Hypothesis &orig, int ptid);
+	/** copy constructor for generation options */
+	Hypothesis(const Hypothesis &orig, Phrase& genph, ScoreComponentCollection2& generationScore, int ptid);
 	~Hypothesis();
 	
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
-	static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
+	static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, int ptid = -1);
 
-	static Hypothesis* Create(const WordsBitmap &initialCoverage);
+	static Hypothesis* Create(const WordsBitmap &initialCoverage, int ptid = -1);
 
 	/** return the subclass of Hypothesis most appropriate to the given target phrase */
-	static Hypothesis* Create(InputType const& source, const TargetPhrase &emptyTarget);
+	static Hypothesis* Create(InputType const& source, const TargetPhrase &emptyTarget, int ptid = -1);
 	
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
 	Hypothesis* CreateNext(const TranslationOption &transOpt) const;
@@ -221,7 +233,8 @@ public:
 
 	void ToStream(std::ostream& out) const
 	{
-		if (m_prevHypo != NULL)
+		if (m_ptid >= 0) { out << " ::: "; }
+		else if (m_prevHypo != NULL)
 		{
 			m_prevHypo->ToStream(out);
 		}

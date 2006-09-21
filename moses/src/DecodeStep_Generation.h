@@ -23,9 +23,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define _Generation_DECODE_STEP_H_
 
 #include "DecodeStep.h"
+#include "Word.h"
+#include "ScoreComponentCollection.h"
 
 class GenerationDictionary;
 class Phrase;
+class WordsRange;
 class ScoreComponentCollection2;
 
 class GenerationDecodeStep : public DecodeStep
@@ -33,9 +36,12 @@ class GenerationDecodeStep : public DecodeStep
 public:
 	GenerationDecodeStep(GenerationDictionary* dict, const DecodeStep* prev);
 
+	const int GetType() const { return 1; };
+
   /** returns phrase table (dictionary) for translation step */
   const GenerationDictionary &GetGenerationDictionary() const;
 
+	int GenerateOptions(std::vector<WordList>& wordListVector, const Phrase& targetPhrase);
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl

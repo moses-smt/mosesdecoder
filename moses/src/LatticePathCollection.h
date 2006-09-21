@@ -38,7 +38,7 @@ public:
 	~LatticePathCollection()
 	{
 		// clean up
-		RemoveAllInColl<LatticePathCollection::iterator> (*this);
+		RemoveAllInColl(*this);
 	}
 };
 

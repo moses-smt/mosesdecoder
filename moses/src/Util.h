@@ -144,7 +144,7 @@ std::string Join(const std::string& delimiter, const std::vector<T>& items)
 	std::ostringstream outstr;
 	if(items.size() == 0) return "";
 	outstr << items[0];
-	for(unsigned int i = 1; i < items.size(); i++) outstr << " " << items[i];
+	for(unsigned int i = 1; i < items.size(); i++) outstr << delimiter << items[i];
 	return outstr.str();
 }
 
@@ -215,11 +215,10 @@ inline float CalcTranslationScore(const std::vector<float> &scoreVector,
 		return out.str();						\
 	}															\
 
-template<class ITER, class COLL>
+template<class COLL>
 void RemoveAllInColl(COLL &coll)
 {
-	ITER iter;
-	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
+	for (typename COLL::iterator iter = coll.begin() ; iter != coll.end() ; ++iter)
 	{
 		delete (*iter);
 	}
@@ -237,7 +236,9 @@ template<typename T> inline void ShrinkToFit(T& v) {
 /***
  * include checks for null return value, and helpful print statements
  */
+ /*
 void* xmalloc(unsigned int numBytes);
 void* xrealloc(void* ptr, unsigned int numBytes);
 #define malloc(x) xmalloc(x)
 #define realloc(x, n) xrealloc(x, n)
+*/

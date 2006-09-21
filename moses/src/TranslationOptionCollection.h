@@ -54,6 +54,7 @@ class TranslationOptionCollection
 	friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);
 	TranslationOptionCollection(const TranslationOptionCollection&); /*< no copy constructor */
 protected:
+	DecodeStep *m_dstep;
 	std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
 	InputType const			&m_source;
 	SquareMatrix				m_futureScore; /*< matrix of future costs for parts of the sentence */
@@ -70,6 +71,7 @@ protected:
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos );
 
+	void ProcessUnknownWord();
 	virtual void ProcessOneUnknownWord(const FactorArray &sourceWord
 																		 , size_t sourcePos
 																		 , FactorCollection &factorCollection);

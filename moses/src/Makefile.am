@@ -38,10 +38,12 @@ libmoses_a_SOURCES = \
 	PhraseDictionaryNode.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
+	PhraseReference.cpp \
 	ScoreComponentCollection.cpp \
 	ScoreIndexManager.cpp \
 	ScoreProducer.cpp \
 	Sentence.cpp \
+	SentenceStats.cpp \
 	StaticData.cpp \
 	TargetPhrase.cpp \
 	TranslationOption.cpp \

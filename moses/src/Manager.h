@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LatticePathList.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
+#include "DecodeStep_Generation.h"
 //#include "UnknownWordHandler.h"
 
 class LatticePath;
@@ -79,12 +80,16 @@ protected:
 	// no of elements = no of words in source + 1
 	StaticData &m_staticData; /**< holds various kinds of constants, counters, and global data structures */
 	TranslationOptionCollection &m_possibleTranslations; /**< pre-computed list of translation options for the phrases in this sentence */
+	TranslationOptionCollection **m_secondaryOptions; /**< Lists per factor */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	
+	// vector of scored lms
+	unsigned long m_scoredLMs;
+
 	// functions for creating hypotheses
-	void ProcessOneHypothesis(const Hypothesis &hypothesis);
-	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);
-	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
+	void ProcessOneHypothesis(const Hypothesis &hypothesis, TranslationOptionCollection *options = NULL, int index = 0);
+	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList, int index = 0);
+	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt, int index = 0);
 
 	// logging
 	void OutputHypoStack(int stack = -1);

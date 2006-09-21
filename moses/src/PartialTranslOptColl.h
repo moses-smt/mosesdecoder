@@ -52,7 +52,7 @@ public:
 	/** destructor, cleans out list */
 	~PartialTranslOptColl()
 	{
-		RemoveAllInColl<std::vector<TranslationOption*>::iterator>( m_list );
+		RemoveAllInColl( m_list );
 	}
 	
 	void AddNoPrune(TranslationOption *partialTranslOpt);

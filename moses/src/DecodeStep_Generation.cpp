@@ -74,6 +74,47 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
     }
 }
 
+int GenerationDecodeStep::GenerateOptions(vector<WordList>& wordListVector, const Phrase& targetPhrase)
+{
+	size_t targetLength = targetPhrase.GetSize();
+	const GenerationDictionary& generationDictionary = GetGenerationDictionary();
+  // create generation list
+  int wordListVectorPos = 0;
+  for (size_t currPos = 0 ; currPos < targetLength ; currPos++) // going thorugh all words
+    {
+      // generatable factors for this word to be put in wordList
+      WordList &wordList = wordListVector[wordListVectorPos];
+      const FactorArray &factorArray = targetPhrase.GetFactorArray(currPos);
+
+      // consult dictionary for possible generations for this word
+      const OutputWordCollection *wordColl = generationDictionary.FindWord(factorArray);
+
+      if (wordColl == NULL)
+        { // word not found in generation dictionary
+          
+					// NOTE: Do nothing right now, fix later
+					//toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
+          return 0; // can't be part of a phrase, special handling
+        }
+      else
+        {
+          // sort(*wordColl, CompareWordCollScore);
+          OutputWordCollection::const_iterator iterWordColl;
+          for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
+            {
+              const Word &outputWord = (*iterWordColl).first;
+              const ScoreComponentCollection2& score = (*iterWordColl).second;
+              // enter into word list generated factor(s) and its(their) score(s)
+              wordList.push_back(WordPair(outputWord, score));
+            }
+
+          wordListVectorPos++; // done, next word
+        }
+    }
+	return wordListVectorPos;
+}
+
+
 void GenerationDecodeStep::Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
@@ -113,7 +154,7 @@ void GenerationDecodeStep::Process(const TranslationOption &inputPartialTranslOp
 
       if (wordColl == NULL)
         { // word not found in generation dictionary
-          //toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
+          toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
           return; // can't be part of a phrase, special handling
         }
       else

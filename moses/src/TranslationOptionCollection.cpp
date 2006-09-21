@@ -19,6 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <algorithm>
 #include "TranslationOptionCollection.h"
 #include "Sentence.h"
 #include "DecodeStep.h"
@@ -59,7 +60,7 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	{
 		for (size_t endPos = startPos ; endPos < size ; ++endPos)
 		{
-			RemoveAllInColl<TranslationOptionList::iterator>(GetTranslationOptionList(startPos, endPos));
+		 RemoveAllInColl(GetTranslationOptionList(startPos, endPos));
 		}
 	}
 }
@@ -70,20 +71,39 @@ bool CompareTranslationOption(const TranslationOption *a, const TranslationOptio
 	return a->GetFutureScore() > b->GetFutureScore();
 }
 
+void TranslationOptionCollection::ProcessUnknownWord()
+{
+	// create unknown words for 1 word coverage where we don't have any trans options
+	size_t size = m_source.GetSize();
+	vector<bool> process(size);
+	fill(process.begin(), process.end(), true);
+	
+	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+		{
+			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
+			size_t s = fullList.size();
+			if (s > 0)
+			{
+				fill(process.begin() + startPos, process.begin() + endPos + 1, false);
+			}
+		}	
+	}
+			
+	for (size_t currPos = 0 ; currPos < size ; ++currPos)
+	{
+		if (process[currPos])
+			ProcessUnknownWord(currPos, *m_factorCollection);
+	}
+}
+
 /** pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 void TranslationOptionCollection::Prune()
 {
+	ProcessUnknownWord();
+	
 	size_t size = m_source.GetSize();
-
-	// create unknown words for 1 word coverage where we don't have any trans options
-	for (size_t startPos = 0 ; startPos < size ; ++startPos)
-	{
-		TranslationOptionList &fullList = GetTranslationOptionList(startPos, startPos);
-		if (fullList.size() == 0)
-		{
-			ProcessUnknownWord(startPos, *m_factorCollection);
-		}
-	}
 	
 	// prune to max no. of trans opt
 	if (m_maxNoTransOptPerCoverage == 0)
@@ -210,6 +230,7 @@ void TranslationOptionCollection::CreateTranslationOptions(
 																													 const list < DecodeStep* > &decodeStepList
 																													 , FactorCollection &factorCollection)
 {
+	m_dstep = (DecodeStep *) &decodeStepList.front();
 	m_factorCollection = &factorCollection;
 	
 	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
@@ -325,13 +346,17 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 						
 			for (unsigned int currFactor = 0 ; currFactor < NUM_FACTORS ; currFactor++)
 			{
-				FactorType factorType = static_cast<FactorType>(currFactor);
-				
-				const Factor *sourceFactor = sourceWord[currFactor];
-				if (sourceFactor == NULL)
-					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
-				else
-					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
+				if (m_dstep->GetDictionaryPtr()->GetOutputFactorMask().test(currFactor)) // only set bits for this pt
+					{
+
+						FactorType factorType = static_cast<FactorType>(currFactor);
+						
+						const Factor *sourceFactor = sourceWord[currFactor];
+						if (sourceFactor == NULL)
+							targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
+						else
+							targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
+					}
 			}
 	
 			targetPhrase.SetScore();
@@ -399,11 +424,13 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 			TRACE_ERR(endl);
 		}
 	}
+#if 0 // do this elsewhere now
 	// handling unknown words
 	else if (wordsRange.GetWordsCount() == 1)
-	{
+
 		ProcessUnknownWord(startPos, factorCollection);
 	}
+#endif 
 }
 
 /** add translation option to the list
