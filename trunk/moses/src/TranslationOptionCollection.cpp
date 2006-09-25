@@ -332,7 +332,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
 
 /** special handling of unknown words: add special translation (or drop) */
-void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourceWord,
+void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 																														size_t sourcePos
 																												, FactorCollection &factorCollection)
 {
@@ -356,7 +356,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const FactorArray &sourc
 		{
 			// add to dictionary
 			TargetPhrase targetPhrase(Output);
-			FactorArray &targetWord = targetPhrase.AddWord();
+			Word &targetWord = targetPhrase.AddWord();
 						
 			for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 			{

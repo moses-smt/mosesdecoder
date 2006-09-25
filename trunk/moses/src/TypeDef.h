@@ -81,8 +81,8 @@ const size_t MAX_NUM_FACTORS = 4;
 
 enum FactorDirection
 {	
-	Input,
-	Output
+	Input,			//! Source factors
+	Output			//! Target factors
 };
 
 enum DecodeType
@@ -144,5 +144,3 @@ enum DictionaryFind
 // typedef
 typedef size_t FactorType;
 
-class Factor;
-typedef const Factor * FactorArray[MAX_NUM_FACTORS];

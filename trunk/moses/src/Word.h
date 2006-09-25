@@ -27,59 +27,68 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Factor.h"
 #include "Util.h"
-#include "FactorArrayWrapper.h"
+
+#undef DYNAMIC_FACTOR_ARRAY
 
 class Phrase;
 
 /***
  * hold a set of factors for a single word
- * 
- * TODO either replace all uses of FactorArray with Word or vice versa; don't only use the wrapper in half of cases!
  */
-class Word : public FactorArrayWrapper
+class Word
 {
 	friend std::ostream& operator<<(std::ostream&, const Word&);
 
 protected:
-	FactorArray					m_factorArray;
+
+#ifndef DYNAMIC_FACTOR_ARRAY
+	typedef const Factor * FactorArray[MAX_NUM_FACTORS];
+#else
+	typedef std::vector<const Factor*> FactorArray;
+#endif
+
+	FactorArray m_factorArray;
 
 public:
 	/**
 	 * deep copy
 	 */
 	Word(const Word &copy);
-	Word(const FactorArray &factorArray);
 	Word();
 
 	~Word();
-
-	// why is this needed ? it should be inherited
-	const FactorArray &GetFactorArray() const
-	{
-		return m_factorArray;
+	const Factor*& operator[](FactorType index) {
+		return m_factorArray[index];
 	}
-	inline FactorArray &GetFactorArray()
-	{
-		return m_factorArray;
+
+	const Factor * const & operator[](FactorType index) const {
+		return m_factorArray[index];
+	}
+	inline const Factor* GetFactor(FactorType factorType) const {
+		return m_factorArray[factorType];
 	}
 	inline void SetFactor(FactorType factorType, const Factor *factor)
 	{
 		m_factorArray[factorType] = factor;
 	}
 
+	void Merge(const Word &sourceWord);
+
+	std::string ToString(const std::vector<FactorType> factorType) const;
 	TO_STRING;
 
 	/* static functions */
 	
-	// FactorArray
-	static void Copy(FactorArray &target, const FactorArray &source);
-	static void Initialize(FactorArray &factorArray);
-
 	/***
 	 * wherever the source word has a given factor that the target word is missing, add it to the target word
 	 */
-	static void Merge(FactorArray &targetWord, const FactorArray &sourceWord);
-	static std::string ToString(const FactorArray &factorArray);
-	static std::string ToString(const std::vector<FactorType> factorType, const FactorArray &factorArray);
-	static int Compare(const FactorArray &targetWord, const FactorArray &sourceWord);
+	static int Compare(const Word &targetWord, const Word &sourceWord);
+
+        inline bool operator< (const Word &compare) const
+        { // needed to store word in GenerationDictionary map
+                // uses comparison of FactorKey
+                // 'proper' comparison, not address/id comparison
+                return Compare(*this, compare) < 0;
+        }
+
 };

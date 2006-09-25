@@ -40,10 +40,10 @@ bool LanguageModelMultiFactor::Useable(const Phrase &phrase) const
 		return false;
 	
 	// whether phrase contains all factors in this LM
-	const FactorArray &factorArray = phrase.GetFactorArray(0);
+	const Word &word = phrase.GetWord(0);
 	for (size_t currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; ++currFactor)
 	{
-		if (m_factorTypes[currFactor] && factorArray[currFactor] == NULL)
+		if (m_factorTypes[currFactor] && word[currFactor] == NULL)
 			return false;
 	}
 	return  true;

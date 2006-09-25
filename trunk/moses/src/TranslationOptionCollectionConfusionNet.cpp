@@ -19,7 +19,7 @@ ProcessUnknownWord(		size_t sourcePos
 
 	ConfusionNet::Column const& coll=source.GetColumn(sourcePos);
 	for(ConfusionNet::Column::const_iterator i=coll.begin();i!=coll.end();++i)
-		ProcessOneUnknownWord(i->first.GetFactorArray(),sourcePos,factorCollection);
+		ProcessOneUnknownWord(i->first,sourcePos,factorCollection);
 		
 }
 

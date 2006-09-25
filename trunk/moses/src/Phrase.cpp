@@ -1,4 +1,5 @@
 // $Id$
+// vim:tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -27,20 +28,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "Phrase.h"
 #include "Util.h" //malloc() replacement
+#include "StaticData.h"  // GetMaxNumFactors
 
 using namespace std;
 
-std::vector<mempool*> Phrase::s_memPool;
+// std::vector<mempool*> Phrase::s_memPool;
 
 Phrase::Phrase(const Phrase &copy)
 :m_direction(copy.m_direction)
 ,m_phraseSize(copy.m_phraseSize)
 ,m_arraySize(copy.m_arraySize)
-,m_memPoolIndex(copy.m_memPoolIndex)
+//,m_memPoolIndex(copy.m_memPoolIndex)
+,m_words(copy.m_words)
 {
-	assert(m_memPoolIndex<s_memPool.size() && s_memPool[m_memPoolIndex]);
-	m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->allocate();
-	memcpy(m_factorArray, copy.m_factorArray, m_phraseSize * sizeof(FactorArray));
 }
 
 Phrase& Phrase::operator=(const Phrase& x) 
@@ -48,19 +48,12 @@ Phrase& Phrase::operator=(const Phrase& x)
 	if(this!=&x)
 		{
 
-			if(m_factorArray)
-				{
-					assert(m_memPoolIndex<s_memPool.size());
-					s_memPool[m_memPoolIndex]->free((char*)m_factorArray);
-				}
-
 			m_direction=x.m_direction;
 			m_phraseSize=x.m_phraseSize;
 			m_arraySize=x.m_arraySize;
-			m_memPoolIndex=x.m_memPoolIndex;
+//			m_memPoolIndex=x.m_memPoolIndex;
 
-			m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->allocate();
-			memcpy(m_factorArray, x.m_factorArray, m_phraseSize * sizeof(FactorArray));
+			m_words = x.m_words;
 		}
 	return *this;
 }
@@ -70,55 +63,34 @@ Phrase::Phrase(FactorDirection direction)
 	: m_direction(direction)
 	, m_phraseSize(0)
 	, m_arraySize(ARRAY_SIZE_INCR)
-	, m_memPoolIndex(0)
+//	, m_memPoolIndex(0)
+	, m_words(ARRAY_SIZE_INCR)
 {
-	assert(m_memPoolIndex<s_memPool.size());
-	m_factorArray = (FactorArray*) s_memPool[m_memPoolIndex]->allocate();
 }
 
 Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
 :m_direction(direction)
 ,m_phraseSize(mergeWords.size())
+,m_words(mergeWords.size())
 {
-	m_memPoolIndex	= (m_phraseSize + ARRAY_SIZE_INCR - 1) / ARRAY_SIZE_INCR  - 1;
-	m_arraySize 		= (m_memPoolIndex + 1) * ARRAY_SIZE_INCR;
-	m_factorArray 	= (FactorArray*) s_memPool[m_memPoolIndex]->allocate();
-	
 	for (size_t currPos = 0 ; currPos < m_phraseSize ; currPos++)
 	{
-		FactorArray &thisWord				= m_factorArray[currPos];
-		const Word &mergeWord				= *mergeWords[currPos];
-
-		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
-		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-			thisWord[currFactor] = mergeWord.GetFactor(factorType);
-		}
+		m_words[currPos] = *mergeWords[currPos];
 	}
 }
 
 Phrase::~Phrase()
 {
-	// RZ: 
-	// will segFault if Phrase was default constructed and AddWord was never called
-	// TODO not sure if this is really the intended behaviour 
-	// assertion failure is better than segFault, but if(m_factorArray) might be more appropriate
-	//assert(m_factorArray); 
-	if(m_factorArray)
-		{
-			assert(m_memPoolIndex<s_memPool.size());
-			assert((char*)m_factorArray);
-			s_memPool[m_memPoolIndex]->free((char*)m_factorArray);
-		}
 }
 
 void Phrase::MergeFactors(const Phrase &copy)
 {
 	assert(GetSize() == copy.GetSize());
 	size_t size = GetSize();
+	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
-		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+		for (unsigned int currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
 			const Factor *factor = copy.GetFactor(currPos, factorType);
@@ -153,8 +125,8 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 
 	for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++)
 	{
-		FactorArray &newWord = retPhrase.AddWord();
-		Word::Copy(newWord, GetFactorArray(currPos));
+		Word &word = retPhrase.AddWord();
+		word = GetWord(currPos);
 	}
 
 	return retPhrase;
@@ -166,31 +138,21 @@ std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 	stringstream strme;
 	for (size_t pos = 0 ; pos < GetSize() ; pos++)
 	{
-		strme << Word::ToString(factorsToPrint, GetFactorArray(pos));
+		strme << GetWord(pos).ToString(factorsToPrint);
 	}
 
 	return strme.str();
 }
 
-FactorArray &Phrase::AddWord()
+Word &Phrase::AddWord()
 {
 	if ((m_phraseSize+1) % ARRAY_SIZE_INCR == 0)
 	{ // need to expand array
-		FactorArray *newArray = (FactorArray*) s_memPool[m_memPoolIndex+1]->allocate();
-		memcpy(newArray, m_factorArray, m_phraseSize * sizeof(FactorArray));
-		s_memPool[m_memPoolIndex]->free((char*)m_factorArray);
-		
-		m_memPoolIndex++;
 		m_arraySize += ARRAY_SIZE_INCR;
-		m_factorArray = newArray;
+		m_words.resize(m_arraySize);
 	}
 
-	FactorArray &factorArray = m_factorArray[m_phraseSize];
-	Word::Initialize(factorArray);
-
-	m_phraseSize++;
-
-	return factorArray;
+	return m_words[m_phraseSize++];
 }
 
 vector< vector<string> > Phrase::Parse(const std::string &phraseString, const std::vector<FactorType> &factorOrder, const std::string& factorDelimiter)
@@ -233,13 +195,13 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
 	{
 		// add word this phrase
-		FactorArray &factorArray = AddWord();
+		Word &word = AddWord();
 		for (size_t currFactorIndex= 0 ; currFactorIndex < factorOrder.size() ; currFactorIndex++)
 		{
 			FactorType factorType = factorOrder[currFactorIndex];
 			const string &factorStr = phraseVector[phrasePos][currFactorIndex];
 			const Factor *factor = factorCollection.AddFactor(m_direction, factorType, factorStr); 
-			factorArray[factorType] = factor;
+			word[factorType] = factor;
 		}
 	}
 }
@@ -270,8 +232,9 @@ bool Phrase::operator < (const Phrase &compare) const
 	{
 		size_t minSize = std::min( thisSize , compareSize );
 
+		const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
 		// taken from word.Compare()
-		for (size_t i = 0 ; i < MAX_NUM_FACTORS ; i++)
+		for (size_t i = 0 ; i < maxNumFactors ; i++)
 		{
 			FactorType factorType = static_cast<FactorType>(i);
 
@@ -346,9 +309,10 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 
 	const size_t size = GetSize();
 
+	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
-		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+		for (unsigned int currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
 			const Factor *thisFactor 		= GetFactor(currPos, factorType)
@@ -389,6 +353,7 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase, const std::vector<FactorTyp
 
 void Phrase::InitializeMemPool()
 {
+#if 0
 	s_memPool.push_back( new mempool(1 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 50000 ));
 	s_memPool.push_back( new mempool(2 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 1000 ));
 	s_memPool.push_back( new mempool(3 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 1000 ));
@@ -399,15 +364,18 @@ void Phrase::InitializeMemPool()
 	
 	for (size_t i = 8 ; i < 30 ; ++i)
 		s_memPool.push_back( new mempool(i * ARRAY_SIZE_INCR * sizeof(FactorArray) , 2 ));
+#endif
 }
 
 void Phrase::FinalizeMemPool()
 {
+#if 0
 	std::vector<mempool*>::iterator iter;
 	for (iter = s_memPool.begin() ; iter != s_memPool.end() ; ++iter)
 	{
 		delete *iter;
 	}
+#endif
 }
 
 TO_STRING_BODY(Phrase);
@@ -418,8 +386,8 @@ ostream& operator<<(ostream& out, const Phrase& phrase)
 //	out << "(size " << phrase.GetSize() << ") ";
 	for (size_t pos = 0 ; pos < phrase.GetSize() ; pos++)
 	{
-		const FactorArray &factorArray = phrase.GetFactorArray(pos);
-		out << Word::ToString(factorArray);
+		const Word &word = phrase.GetWord(pos);
+		out << word;
 	}
 	return out;
 }
