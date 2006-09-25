@@ -214,14 +214,14 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 				(*_lmstats)[lmIdx].resize(m_currTargetWordsRange.GetWordsCount(), 0);
 
 			// 1st n-gram
-			vector<FactorArrayWrapper> contextFactor(nGramOrder);
+			vector<const Word*> contextFactor(nGramOrder);
 			size_t index = 0;
 			for (int currPos = (int) startPos - (int) nGramOrder + 1 ; currPos <= (int) startPos ; currPos++)
 			{
 				if (currPos >= 0)
-					contextFactor[index++] = GetFactorArray(currPos);
+					contextFactor[index++] = &GetWord(currPos);
 				else			
-					contextFactor[index++] = languageModel.GetSentenceStartArray();
+					contextFactor[index++] = &languageModel.GetSentenceStartArray();
 			}
 			lmScore	= languageModel.GetValue(contextFactor);
 			if (_lmstats) { languageModel.GetState(contextFactor, &(*_lmstats)[lmIdx][nLmCallCount++]); }
@@ -237,7 +237,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 					contextFactor[i] = contextFactor[i + 1];
 	
 				// add last factor
-				contextFactor.back() = GetFactorArray(currPos);
+				contextFactor.back() = &GetWord(currPos);
 
 				lmScore	+= languageModel.GetValue(contextFactor);
 				if (_lmstats) 
@@ -249,15 +249,15 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 			if (m_sourceCompleted.IsComplete())
 			{
 				const size_t size = GetSize();
-				contextFactor.back() = languageModel.GetSentenceEndArray();
+				contextFactor.back() = &languageModel.GetSentenceEndArray();
 	
 				for (size_t i = 0 ; i < nGramOrder - 1 ; i ++)
 				{
 					int currPos = size - nGramOrder + i + 1;
 					if (currPos < 0)
-						contextFactor[i] = languageModel.GetSentenceStartArray();
+						contextFactor[i] = &languageModel.GetSentenceStartArray();
 					else
-						contextFactor[i] = GetFactorArray((size_t)currPos);
+						contextFactor[i] = &GetWord((size_t)currPos);
 				}
 				if (_lmstats) {
 					(*_lmstats)[lmIdx].resize((*_lmstats)[lmIdx].size() + 1); // extra space for the last call
@@ -268,7 +268,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 				for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
 					for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
 						contextFactor[i] = contextFactor[i + 1];
-					contextFactor.back() = GetFactorArray(currPos);
+					contextFactor.back() = &GetWord(currPos);
 					if (_lmstats)
 						languageModel.GetState(contextFactor, &(*_lmstats)[lmIdx][nLmCallCount++]);
 				}
@@ -437,7 +437,8 @@ std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factor
 std::string Hypothesis::GetSourcePhraseStringRep() const 
 {
 	vector<FactorType> allFactors;
-	for(size_t i=0; i < MAX_NUM_FACTORS; i++)
+	const size_t maxSourceFactors = StaticData::Instance()->GetMaxNumFactors(Input);
+	for(size_t i=0; i < maxSourceFactors; i++)
 	{
 		allFactors.push_back(i);
 	}
@@ -446,7 +447,8 @@ std::string Hypothesis::GetSourcePhraseStringRep() const
 std::string Hypothesis::GetTargetPhraseStringRep() const 
 {
 	vector<FactorType> allFactors;
-	for(size_t i=0; i < MAX_NUM_FACTORS; i++)
+	const size_t maxTargetFactors = StaticData::Instance()->GetMaxNumFactors(Output);
+	for(size_t i=0; i < maxTargetFactors; i++)
 	{
 		allFactors.push_back(i);
 	}

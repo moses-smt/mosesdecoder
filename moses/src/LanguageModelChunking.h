@@ -64,7 +64,7 @@ public:
 		m_lmImpl->Load(fileName, factorCollection, m_factorType, weight, nGramOrder);
 	}
 			
-	float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
+	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -76,30 +76,30 @@ public:
 		TRACE_ERR(std::endl);
 		*/
 		// only process context where last word is a word we want
-		const Factor *factor = contextFactor.back()[m_factorType];
+		const Factor *factor = (*contextFactor.back())[m_factorType];
 		std::string strWord = factor->GetString();
 		if (strWord.find("???") == 0)
 			return 0;
 		
 		// add last word
-		std::vector<FactorArrayWrapper> chunkContext;
-		Word chunkWord;
-		chunkWord.SetFactor(m_factorType, factor);
+		std::vector<const Word*> chunkContext;
+		Word* chunkWord = new Word;
+		chunkWord->SetFactor(m_factorType, factor);
 		chunkContext.push_back(chunkWord);
 		
 		// create context in reverse 'cos we skip words we don't want
 		for (int currPos = (int)contextFactor.size() - 2 ; currPos >= 0 && chunkContext.size() < m_realNGramOrder ; --currPos )
 		{
-			const FactorArrayWrapper &factorArray = contextFactor[currPos];
-			factor = factorArray[m_factorType];
+			const Word &word = *contextFactor[currPos];
+			factor = word[m_factorType];
 			std::string strWord = factor->GetString();
 			bool skip = strWord.find("???") == 0;
 			if (skip)
 				continue;
 
 			// add word to chunked context
-			Word chunkWord;
-			chunkWord.SetFactor(m_factorType, factor);
+			Word* chunkWord = new Word;
+			chunkWord->SetFactor(m_factorType, factor);
 			chunkContext.push_back(chunkWord);
 		}
 	
@@ -112,7 +112,9 @@ public:
 		*/
 		// calc score on chunked phrase
 		float ret = m_lmImpl->GetValue(chunkContext, finalState, len);
-		
+
+		RemoveAllInColl(chunkContext);
+
 		return ret;
 	}
 };

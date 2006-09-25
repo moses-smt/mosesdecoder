@@ -62,7 +62,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 		exit(1);
 	}
 
-  m_filename = filePath;
+	m_filename = filePath;
 	string line;
 	size_t lineNum = 0;
 	while(getline(inFile, line)) 
@@ -71,7 +71,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 		vector<string> token = Tokenize( line );
 		
 		// add each line in generation file into class
-		Word *inputWord = new Word();
+		Word *inputWord = new Word();  // deleted in destructor
 		Word outputWord;
 
 		// create word with certain factors filled out
@@ -113,7 +113,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 
 GenerationDictionary::~GenerationDictionary()
 {
-	std::map<const FactorArrayWrapper* , OutputWordCollection, FactorArrayWrapperComparer>::const_iterator iter;
+	std::map<const Word* , OutputWordCollection, WordComparer>::const_iterator iter;
 	for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter)
 	{
 		delete iter->first;
@@ -130,13 +130,12 @@ const std::string GenerationDictionary::GetScoreProducerDescription() const
   return "Generation score, file=" + m_filename;
 }
 
-const OutputWordCollection *GenerationDictionary::FindWord(const FactorArray &factorArray) const
+const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) const
 {
 	const OutputWordCollection *ret;
 	
-	FactorArrayWrapper wrapper(factorArray);
-	std::map<const FactorArrayWrapper* , OutputWordCollection, FactorArrayWrapperComparer>::const_iterator 
-				iter = m_collection.find(&wrapper);
+	std::map<const Word* , OutputWordCollection, WordComparer>::const_iterator 
+				iter = m_collection.find(&word);
 	if (iter == m_collection.end())
 	{ // can't find source phrase
 		ret = NULL;

@@ -39,7 +39,7 @@ protected:
 	float				m_weight;
 	std::string	m_filename;
 	size_t			m_nGramOrder;
-	FactorArray m_sentenceStartArray, m_sentenceEndArray;
+	Word m_sentenceStartArray, m_sentenceEndArray;
 
 	LanguageModel(bool registerScore);
 
@@ -59,19 +59,19 @@ public:
 	void CalcScore(const Phrase &phrase
 							, float &fullScore
 							, float &ngramScore) const;
-	virtual float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = 0, unsigned int* len = 0) const = 0;
+	virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0, unsigned int* len = 0) const = 0;
 
-	State GetState(const std::vector<FactorArrayWrapper> &contextFactor, unsigned int* len = 0) const;
+	State GetState(const std::vector<const Word*> &contextFactor, unsigned int* len = 0) const;
 
 	size_t GetNGramOrder() const
 	{
 		return m_nGramOrder;
 	}
-	const FactorArray &GetSentenceStartArray() const
+	const Word &GetSentenceStartArray() const
 	{
 		return m_sentenceStartArray;
 	}
-	const FactorArray &GetSentenceEndArray() const
+	const Word &GetSentenceEndArray() const
 	{
 		return m_sentenceEndArray;
 	}

@@ -42,7 +42,7 @@ protected:
 
 	virtual Phrase GetSubString(const WordsRange&) const =0;
 //	virtual std::string GetStringRep(const WordsRange&) const=0;
-	virtual const FactorArray& GetFactorArray(size_t pos) const=0;
+	virtual const Word& GetWord(size_t pos) const=0;
 	
 	TO_STRING;
 	

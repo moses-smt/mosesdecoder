@@ -39,9 +39,6 @@ LanguageModel::LanguageModel(bool registerScore)
 {
 	if (registerScore)
 		const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
-		
-	Word::Initialize(m_sentenceStartArray);
-	Word::Initialize(m_sentenceEndArray);
 }
 LanguageModel::~LanguageModel() {}
 
@@ -59,19 +56,19 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	ngramScore	= 0;
 
 	size_t phraseSize = phrase.GetSize();
-	vector<FactorArrayWrapper> contextFactor;
+	vector<const Word*> contextFactor;
 	contextFactor.reserve(m_nGramOrder);
 
 	// start of sentence
 	for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
 	{
-		contextFactor.push_back(phrase.GetFactorArray(currPos));		
+		contextFactor.push_back(&phrase.GetWord(currPos));		
 		fullScore += GetValue(contextFactor);
 	}
 	
 	if (phraseSize >= m_nGramOrder)
 	{
-		contextFactor.push_back(phrase.GetFactorArray(m_nGramOrder - 1));
+		contextFactor.push_back(&phrase.GetWord(m_nGramOrder - 1));
 		ngramScore = GetValue(contextFactor);
 	}
 	
@@ -82,14 +79,14 @@ void LanguageModel::CalcScore(const Phrase &phrase
 		{
 			contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
 		}
-		contextFactor[m_nGramOrder - 1] = phrase.GetFactorArray(currPos);
+		contextFactor[m_nGramOrder - 1] = &phrase.GetWord(currPos);
 		float partScore = GetValue(contextFactor);		
 		ngramScore += partScore;		
 	}
 	fullScore += ngramScore;	
 }
 
-LanguageModel::State LanguageModel::GetState(const std::vector<FactorArrayWrapper> &contextFactor, unsigned int* len) const
+LanguageModel::State LanguageModel::GetState(const std::vector<const Word*> &contextFactor, unsigned int* len) const
 {
   State state;
 	unsigned int dummy;

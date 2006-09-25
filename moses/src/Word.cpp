@@ -1,4 +1,5 @@
 // $Id$
+// vim::tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -28,25 +29,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 Word::Word(const Word &copy)
-:FactorArrayWrapper()
+#ifdef DYNAMIC_FACTOR_ARRAY
+: m_factorArray(copy.m_factorArray)
+#endif
 { // deep copy
-	m_factorArrayPtr = &m_factorArray;
-	Word::Copy(m_factorArray, copy.m_factorArray);
+#ifndef DYNAMIC_FACTOR_ARRAY
+	memcpy(m_factorArray, copy.m_factorArray, sizeof(FactorArray));
+#endif
 }
 
 Word::Word()
+#ifdef DYNAMIC_FACTOR_ARRAY
+: m_factorArray(MAX_NUM_FACTORS, 0)
+#endif
 {
-	m_factorArrayPtr = &m_factorArray;
-	Word::Initialize(m_factorArray);
-}
-
-Word::Word(const FactorArray &factorArray)
-{
-	m_factorArrayPtr = &m_factorArray;
-	for (size_t factor = 0 ; factor < MAX_NUM_FACTORS ; factor++)
-	{
-		m_factorArray[factor] = factorArray[factor];
-	}
+#ifndef DYNAMIC_FACTOR_ARRAY
+	memset(m_factorArray, 0, sizeof(FactorArray));
+#endif
 }
 
 Word::~Word()
@@ -54,7 +53,7 @@ Word::~Word()
 }
 
 // static
-int Word::Compare(const FactorArray &targetWord, const FactorArray &sourceWord)
+int Word::Compare(const Word &targetWord, const Word &sourceWord)
 {
 	for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++)
 	{
@@ -73,51 +72,20 @@ int Word::Compare(const FactorArray &targetWord, const FactorArray &sourceWord)
 
 }
 
-void Word::Copy(FactorArray &target, const FactorArray &source)
-{
-	memcpy(target, source, sizeof(FactorArray));
-}
-
-void Word::Initialize(FactorArray &factorArray)
-{
-	memset(factorArray, 0, sizeof(FactorArray));
-}
-
-void Word::Merge(FactorArray &targetWord, const FactorArray &sourceWord)
+void Word::Merge(const Word &sourceWord)
 {
 	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 	{
-		const Factor *sourcefactor		= sourceWord[currFactor]
-								,*targetFactor			= targetWord[currFactor];
+		const Factor *sourcefactor		= sourceWord.m_factorArray[currFactor]
+								,*targetFactor		= this     ->m_factorArray[currFactor];
 		if (targetFactor == NULL && sourcefactor != NULL)
 		{
-			targetWord[currFactor] = sourcefactor;
+			m_factorArray[currFactor] = sourcefactor;
 		}
 	}
 }
 
-std::string Word::ToString(const FactorArray &factorArray)
-{
-	stringstream strme;
-
-	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
-	bool firstPass = true;
-	// TODO- don't loop over MAX_NUM_FACTORS here, just use the ones that
-	// actually participate in the xltn process.
-	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
-	{
-		const Factor *factor = factorArray[currFactor];
-		if (factor != NULL)
-		{
-			if (firstPass) { firstPass = false; } else { strme << factorDelimiter; }
-			strme << *factor;
-		}
-	}
-	strme << " ";
-	return strme.str();
-}
-
-std::string Word::ToString(const vector<FactorType> factorType, const FactorArray &factorArray)
+std::string Word::ToString(const vector<FactorType> factorType) const
 {
 	stringstream strme;
 	assert(factorType.size() <= MAX_NUM_FACTORS);
@@ -125,7 +93,7 @@ std::string Word::ToString(const vector<FactorType> factorType, const FactorArra
 	bool firstPass = true;
 	for (unsigned int i = 0 ; i < factorType.size() ; i++)
 	{
-		const Factor *factor = factorArray[factorType[i]];
+		const Factor *factor = m_factorArray[factorType[i]];
 		if (factor != NULL)
 		{
 			if (firstPass) { firstPass = false; } else { strme << factorDelimiter; }

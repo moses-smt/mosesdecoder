@@ -31,10 +31,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class FactorCollection;
 
-struct FactorArrayWrapperComparer
+struct WordComparer
 {
 	//! returns true if hypoA can be recombined with hypoB
-	bool operator()(const FactorArrayWrapper *a, const FactorArrayWrapper *b) const
+	bool operator()(const Word *a, const Word *b) const
 	{
 		return *a < *b;
 	}
@@ -47,7 +47,7 @@ typedef std::map < Word , ScoreComponentCollection2 > OutputWordCollection;
 class GenerationDictionary : public Dictionary, public ScoreProducer
 {
 protected:
-	std::map<const FactorArrayWrapper* , OutputWordCollection, FactorArrayWrapperComparer> m_collection;
+	std::map<const Word* , OutputWordCollection, WordComparer> m_collection;
 	// 1st = source
 	// 2nd = target
 	std::string						m_filename;
@@ -75,6 +75,6 @@ public:
 	{
 		return m_collection.size();
 	}
-	const OutputWordCollection *FindWord(const FactorArray &factorArray) const;
+	const OutputWordCollection *FindWord(const Word &word) const;
 };
 
