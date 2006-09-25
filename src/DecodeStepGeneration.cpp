@@ -107,10 +107,10 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
     {
       // generatable factors for this word to be put in wordList
       WordList &wordList = wordListVector[wordListVectorPos];
-      const FactorArray &factorArray = targetPhrase.GetFactorArray(currPos);
+      const Word &word = targetPhrase.GetWord(currPos);
 
       // consult dictionary for possible generations for this word
-      const OutputWordCollection *wordColl = generationDictionary.FindWord(factorArray);
+      const OutputWordCollection *wordColl = generationDictionary.FindWord(word);
 
       if (wordColl == NULL)
         { // word not found in generation dictionary

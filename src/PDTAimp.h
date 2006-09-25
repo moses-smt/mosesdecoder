@@ -96,7 +96,7 @@ public:
 
 	}
 
-	void Factors2String(FactorArray const& w,std::string& s) const 
+	void Factors2String(Word const& w,std::string& s) const 
 	{
 		for(size_t j=0;j<m_input.size();++j)
 			{
@@ -155,7 +155,7 @@ public:
 		std::vector<std::string> srcString(src.GetSize());
 		// convert source Phrase into vector of strings
 		for(size_t i=0;i<srcString.size();++i)
-			Factors2String(src.GetFactorArray(i),srcString[i]);
+			Factors2String(src.GetWord(i),srcString[i]);
 
 		// get target phrases in string representation
 		std::vector<StringTgtCand> cands;
@@ -268,9 +268,9 @@ public:
 		for(size_t k=0;k<factorStrings.size();++k) 
 			{
 				std::vector<std::string> factors=Tokenize(*factorStrings[k],"|");
-				FactorArray& fa=targetPhrase.AddWord();
+				Word& w=targetPhrase.AddWord();
 				for(size_t l=0;l<m_output.size();++l)
-					fa[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
+					w[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
 			}
 		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
@@ -360,7 +360,7 @@ public:
 					{
 						const Word& w=currCol[colidx].first; // w=the i^th possibility in column colidx
 						std::string s;
-						Factors2String(w.GetFactorArray(),s);
+						Factors2String(w,s);
 						bool isEpsilon=(s=="" || s==EPSILON);
 
 						// do not start with epsilon (except at first position)

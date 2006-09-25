@@ -9,7 +9,6 @@ libmoses_a_SOURCES_TMP = \
 	DistortionOrientation.cpp \
 	DummyScoreProducers.cpp \
 	Factor.cpp \
-	FactorArrayWrapper.cpp \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
 	GenerationDictionary.cpp \

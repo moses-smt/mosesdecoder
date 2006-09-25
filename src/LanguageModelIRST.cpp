@@ -128,7 +128,7 @@ int LanguageModelIRST::GetLmID( const std::string &str ) const
     return m_lmtb->dict->encode( str.c_str() );
 }
 
-float LanguageModelIRST::GetValue(const vector<FactorArrayWrapper> &contextFactor, State* finalState, unsigned int* len) const
+float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const
 {
 	unsigned int dummy;
 	if (!len) { len = &dummy; }
@@ -137,24 +137,24 @@ float LanguageModelIRST::GetValue(const vector<FactorArrayWrapper> &contextFacto
 	// set up context
 	size_t count = contextFactor.size();
     
-  m_lmtb_ng->size=0;
-  if (count< (size_t)(m_lmtb_size-1)) m_lmtb_ng->pushc(m_lmtb_sentenceEnd);
-  if (count< (size_t)m_lmtb_size) m_lmtb_ng->pushc(m_lmtb_sentenceStart);  
+	m_lmtb_ng->size=0;
+	if (count< (size_t)(m_lmtb_size-1)) m_lmtb_ng->pushc(m_lmtb_sentenceEnd);
+	if (count< (size_t)m_lmtb_size) m_lmtb_ng->pushc(m_lmtb_sentenceStart);  
   
 	for (size_t i = 0 ; i < count ; i++)
 	{
 
-    int lmId = GetLmID(contextFactor[i][factorType]);
-    m_lmtb_ng->pushc(lmId);
+		int lmId = GetLmID((*contextFactor[i])[factorType]);
+		m_lmtb_ng->pushc(lmId);
 	}
   
 	if (finalState){        
-    *finalState=(State *)m_lmtb->cmaxsuffptr(*m_lmtb_ng);	
+		*finalState=(State *)m_lmtb->cmaxsuffptr(*m_lmtb_ng);	
 		// back off stats not currently available
 		*len = 0;	
 	}
 
-  return TransformIRSTScore(m_lmtb->clprob(*m_lmtb_ng));
+	return TransformIRSTScore(m_lmtb->clprob(*m_lmtb_ng));
 }
 
 

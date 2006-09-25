@@ -36,6 +36,6 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
 void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos
 												, FactorCollection &factorCollection)
 {
-	const FactorArray &sourceWord = m_source.GetFactorArray(sourcePos);
+	const Word &sourceWord = m_source.GetWord(sourcePos);
 	ProcessOneUnknownWord(sourceWord,sourcePos,factorCollection);
 }

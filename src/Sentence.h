@@ -50,9 +50,9 @@ class Sentence : public Phrase, public InputType
 		{
 			return Phrase::GetStringRep(factorsToPrint);
 		}
-	const FactorArray& GetFactorArray(size_t pos) const
+	const Word& GetWord(size_t pos) const
 		{
-			return Phrase::GetFactorArray(pos);
+			return Phrase::GetWord(pos);
 		}
 	size_t GetSize() const 
 		{

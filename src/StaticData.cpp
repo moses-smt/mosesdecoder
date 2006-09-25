@@ -1,4 +1,5 @@
 // $Id$
+// vim:tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -42,6 +43,22 @@ using namespace std;
 
 extern Timer timer;
 
+static size_t CalcMax(size_t x, const vector<size_t>& y) {
+  size_t max = x;
+  for (vector<size_t>::const_iterator i=y.begin(); i != y.end(); ++i)
+    if (*i > max) max = *i;
+  return max;
+}
+
+static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z) {
+  size_t max = x;
+  for (vector<size_t>::const_iterator i=y.begin(); i != y.end(); ++i)
+    if (*i > max) max = *i;
+  for (vector<size_t>::const_iterator i=z.begin(); i != z.end(); ++i)
+    if (*i > max) max = *i;
+  return max;
+}
+
 StaticData* StaticData::s_instance(0);
 
 StaticData::StaticData()
@@ -57,6 +74,9 @@ StaticData::StaticData()
 ,m_computeLMBackoffStats(false)
 ,m_factorDelimiter("|") // default delimiter between factors
 {
+  m_maxFactorIdx[0] = 0;  // source side
+  m_maxFactorIdx[1] = 0;  // target side
+
 	s_instance = this;
 
 	// memory pools
@@ -300,9 +320,6 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		
 
 	  // initialize n-gram order for each factor. populated only by factored lm
-	  for(size_t i=0; i < MAX_NUM_FACTORS ; i++)
-	  	m_maxNgramOrderForFactor[i] = 0;
-	  
 		const vector<string> &lmVector = m_parameter.GetParam("lmodel-file");
 
 		for(size_t i=0; i<lmVector.size(); i++) 
@@ -360,6 +377,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			bool oldFormat = (token.size() == 3);
 			vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
 													,output	= Tokenize<FactorType>(token[1], ",");
+      m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], input, output);
 			string							filePath;
 			size_t							numFeatures = 1;
 			if (oldFormat)
@@ -536,6 +554,9 @@ void StaticData::LoadPhraseTables(bool filter
 			//characteristics of the phrase table
 			vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
 													,output	= Tokenize<FactorType>(token[1], ",");
+			m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
+			m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
+      m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
 			string							filePath= token[3];
 			size_t							noScoreComponent	= Scan<size_t>(token[2]);
 			// weights for this phrase dictionary

@@ -1,4 +1,5 @@
 // $Id$
+// vim:tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -167,19 +168,19 @@ public:
 	std::string GetSourcePhraseStringRep() const;
 	std::string GetTargetPhraseStringRep() const;
 
-	// curr - pos is relative from CURRENT hypothesis's starting ind ex
-  // (ie, start of sentence would be some negative number, which is
-  // not allowed- USE WITH CAUTION)
-	inline const FactorArray &GetCurrFactorArray(size_t pos) const
+	/** curr - pos is relative from CURRENT hypothesis's starting index
+	 * (ie, start of sentence would be some negative number, which is
+	 * not allowed- USE WITH CAUTION) */
+	inline const Word &GetCurrWord(size_t pos) const
 	{
-		return m_targetPhrase.GetFactorArray(pos);
+		return m_targetPhrase.GetWord(pos);
 	}
 	inline const Factor *GetCurrFactor(size_t pos, FactorType factorType) const
 	{
 		return m_targetPhrase.GetFactor(pos, factorType);
 	}
-	// recursive - pos is relative from start of sentence
-	inline const FactorArray &GetFactorArray(size_t pos) const
+	/** recursive - pos is relative from start of sentence */
+	inline const Word &GetWord(size_t pos) const
 	{
 		const Hypothesis *hypo = this;
 		while (pos < hypo->GetCurrTargetWordsRange().GetStartPos())
@@ -187,11 +188,11 @@ public:
 			hypo = hypo->GetPrevHypo();
 			assert(hypo != NULL);
 		}
-		return hypo->GetCurrFactorArray(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
+		return hypo->GetCurrWord(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
 	}
 	inline const Factor* GetFactor(size_t pos, FactorType factorType) const
 	{
-		return GetFactorArray(pos)[factorType];
+		return GetWord(pos)[factorType];
 	}
 
 	/***

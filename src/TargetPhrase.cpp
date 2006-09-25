@@ -114,9 +114,9 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 	const size_t len = GetSize();
 	for (size_t currPos = 0 ; currPos < len ; currPos++)
 	{
-		const FactorArray &inputWord	= inputPhrase.GetFactorArray(currPos);
-		FactorArray &cloneWord = clone->GetFactorArray(currPos);
-		Word::Merge(cloneWord, inputWord);
+		const Word &inputWord	= inputPhrase.GetWord(currPos);
+		Word &cloneWord = clone->GetWord(currPos);
+		cloneWord.Merge(inputWord);
 		
 		currWord++;
 	}

@@ -41,7 +41,7 @@ class ConfusionNet : public InputType {
 	
 	Phrase GetSubString(const WordsRange&) const; //TODO not defined
 	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //TODO not defined
-	const FactorArray& GetFactorArray(size_t pos) const;
+	const Word& GetWord(size_t pos) const;
 
 
 	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const;

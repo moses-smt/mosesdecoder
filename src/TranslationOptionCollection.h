@@ -36,6 +36,7 @@ class GenerationDictionary;
 class InputType;
 class LMList;
 class FactorMask;
+class Word;
 
 typedef std::vector<const TranslationOption*> TranslationOptionList;
 
@@ -70,7 +71,7 @@ protected:
 															, size_t startPos, size_t endPos, bool observeTableLimit );
 
 	void ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection);
-	virtual void ProcessOneUnknownWord(const FactorArray &sourceWord
+	virtual void ProcessOneUnknownWord(const Word &sourceWord
 																		 , size_t sourcePos
 																		 , FactorCollection &factorCollection);
 
