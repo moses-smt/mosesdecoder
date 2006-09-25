@@ -55,7 +55,7 @@ ConfusionNet::ConfusionNet(Sentence const& s)
 {
 	data.resize(s.GetSize());
 	for(size_t i=0;i<s.GetSize();++i)
-		data[i].push_back(std::make_pair(Word(s.GetFactorArray(i)),0.0));
+		data[i].push_back(std::make_pair(s.GetWord(i),0.0));
 }
 
 
@@ -185,7 +185,7 @@ std::string ConfusionNet::GetStringRep(const vector<FactorType> factorsToPrint) 
 	return "";
 }
 #pragma warning(disable:4716)
-const FactorArray& ConfusionNet::GetFactorArray(size_t) const {
+const Word& ConfusionNet::GetWord(size_t) const {
 	std::cerr<<"ERROR: call to ConfusionNet::GetFactorArray\n";
 	abort();
 }

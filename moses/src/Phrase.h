@@ -1,4 +1,5 @@
 // $Id$
+// vim:tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -35,13 +36,13 @@ class Phrase
 {
 	friend std::ostream& operator<<(std::ostream&, const Phrase&);
  private:
-	static std::vector<mempool*> s_memPool;
+//	static std::vector<mempool*> s_memPool;
 
 	FactorDirection				m_direction;
-	size_t								m_phraseSize, //number of words
-												m_arraySize,
-												m_memPoolIndex; //TODO is this supposed to be the number of mempools allocated?
-	FactorArray						*m_factorArray;
+	size_t								m_phraseSize; //number of words
+	size_t								m_arraySize;
+//	size_t										m_memPoolIndex; //TODO is this supposed to be the number of mempools allocated?
+	std::vector<Word>			m_words;
 
 public:
 	static void InitializeMemPool();
@@ -84,35 +85,37 @@ public:
 	{
 		return m_phraseSize;
 	}
-	inline const FactorArray &GetFactorArray(size_t pos) const
+	inline const Word &GetWord(size_t pos) const
 	{
-		return m_factorArray[pos];
+		return m_words[pos];
 	}
-	inline FactorArray &GetFactorArray(size_t pos)
+	inline Word &GetWord(size_t pos)
 	{
-		return m_factorArray[pos];
+		return m_words[pos];
 	}
 	inline const Factor *GetFactor(size_t pos, FactorType factorType) const
 	{
-		FactorArray &ptr = m_factorArray[pos];
+		const Word &ptr = m_words[pos];
 		return ptr[factorType];
 	}
 	inline void SetFactor(size_t pos, FactorType factorType, const Factor *factor)
 	{
-		FactorArray &ptr = m_factorArray[pos];
+		Word &ptr = m_words[pos];
 		ptr[factorType] = factor;
 	}
 
 	bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector
 							, const std::vector<FactorType> &inputFactor) const;
 
-	FactorArray &AddWord();
+	Word &AddWord();
 
 	Phrase GetSubString(const WordsRange &wordsRange) const;
 	
 	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 
   
-	void push_back(Word const& w) {Word::Copy(AddWord(),w.GetFactorArray());}
+	void push_back(Word const& w) {
+    AddWord() = w;
+  }
 
 	TO_STRING;
 

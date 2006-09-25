@@ -79,7 +79,7 @@ public:
 		m_lmImpl->Load(fileName, factorCollection, m_implFactor, weight, nGramOrder);
 	}
 	
-	float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
+	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -92,29 +92,29 @@ public:
 		*/
 
 		// joint context for internal LM
-		std::vector<FactorArrayWrapper> jointContext;
+		std::vector<const Word*> jointContext;
 		
 		for (size_t currPos = 0 ; currPos < m_nGramOrder ; ++currPos )
 		{
-			const FactorArrayWrapper &factorArray = contextFactor[currPos];
+			const Word &word = *contextFactor[currPos];
 
 			// add word to chunked context
 			std::stringstream stream("");
 
-			const Factor *factor = factorArray[ m_factorTypesOrdered[0] ];
+			const Factor *factor = word[ m_factorTypesOrdered[0] ];
 			stream << factor->GetString();
 
 			for (size_t index = 1 ; index < m_factorTypesOrdered.size() ; ++index)
 			{
 				FactorType factorType = m_factorTypesOrdered[index];
-				const Factor *factor = factorArray[factorType];
+				const Factor *factor = word[factorType];
 				stream << "|" << factor->GetString();
 			}
 			
 			factor = m_factorCollection->AddFactor(Output, m_implFactor, stream.str());
 
-			Word jointWord;
-			jointWord.SetFactor(m_implFactor, factor);
+			Word* jointWord = new Word;
+			jointWord->SetFactor(m_implFactor, factor);
 			jointContext.push_back(jointWord);
 		}
 	
@@ -125,6 +125,8 @@ public:
 		*/
 		// calc score on chunked phrase
 		float ret = m_lmImpl->GetValue(jointContext, finalState, len);
+
+		RemoveAllInColl(jointContext);
 		
 		return ret;
 	}

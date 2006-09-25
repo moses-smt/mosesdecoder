@@ -67,7 +67,7 @@ public:
 					, float weight
 					, size_t nGramOrder);
 
-  virtual float GetValue(const std::vector<FactorArrayWrapper> &contextFactor, State* finalState = NULL, unsigned int* len=0) const;
+  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const;
 
   const void CleanUpAfterSentenceProcessing();
   const void InitializeBeforeSentenceProcessing();

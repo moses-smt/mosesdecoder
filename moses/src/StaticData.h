@@ -80,13 +80,13 @@ protected:
 	std::vector<std::string>		m_mySQLParam;
 	InputOutput									*m_inputOutput;
 	bool                        m_fLMsLoaded, m_labeledNBestList;
-	size_t											m_maxNgramOrderForFactor[MAX_NUM_FACTORS];
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
 	 * true = drop (ignore) them
 	 */
 	bool m_dropUnknown;
 	bool m_wordDeletionEnabled;
+
 
 	int m_inputType;
 	unsigned m_numInputScores;
@@ -102,7 +102,9 @@ protected:
 	bool m_computeLMBackoffStats;
 
 	mutable std::auto_ptr<SentenceStats> m_sentenceStats;
-	std::string m_factorDelimiter;
+	std::string m_factorDelimiter; //! by default, |, but it can be changed
+	size_t m_maxFactorIdx[2];  //! number of factors on source and target side
+	size_t m_maxNumFactors;  //! max number of factors on both source and target sides
 
 public:
 	StaticData();
@@ -299,4 +301,6 @@ public:
 	bool UseDistortionFutureCosts() const {return m_useDistortionFutureCosts;}
 	bool OnlyDistinctNBest() const {return m_onlyDistinctNBest;}
 	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
+	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
+	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
 };
