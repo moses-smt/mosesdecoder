@@ -7,45 +7,56 @@
 #include <algorithm>
 #include "LexicalReordering.h"
 #include "InputFileStream.h"
-#include "DistortionOrientation.h"
 #include "StaticData.h"
 #include "Util.h"
 
 using namespace std;
 
-/*
- * Load the file pointed to by filename; set up the table according to
- * the orientation and condition parameters. Direction will be used
- * later for computing the score.
- */
+/** Load the file pointed to by filename; set up the table according to
+  * the orientation and condition parameters. Direction will be used
+  * later for computing the score.
+  * \param filename file that contains the table
+  * \param orientation orientation as defined in DistortionOrientationType (monotone/msd)
+  * \param direction direction as defined in LexReorderType (forward/backward/bidirectional)
+  * \param condition either conditioned on foreign or foreign+english
+  * \param weights weight setting for this model
+  * \param input input factors
+  * \param output output factors
+  */
 LexicalReordering::LexicalReordering(const std::string &filename, 
 																		 int orientation, int direction,
 																		 int condition, const std::vector<float>& weights,
 																		 vector<FactorType> input, vector<FactorType> output) :
-	m_orientation(orientation), m_condition(condition), m_numberscores(weights.size()), m_filename(filename), m_sourceFactors(input), m_targetFactors(output)
+	m_orientation(orientation), m_condition(condition), m_numScores(weights.size()), m_filename(filename), m_sourceFactors(input), m_targetFactors(output)
 {
 	//add score producer
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
 	//manage the weights by SetWeightsForScoreProducer method of static data.
 	if(direction == LexReorderType::Bidirectional)
 	{
+		m_direction.push_back(LexReorderType::Backward); // this order is important
 		m_direction.push_back(LexReorderType::Forward);
-		m_direction.push_back(LexReorderType::Backward);
 	}
 	else
 	{
 		m_direction.push_back(direction);
 	}
+	// set number of orientations
+	if( orientation == DistortionOrientationType::Monotone) {
+		m_numOrientationTypes = 2;
+	}
+	else if ( orientation == DistortionOrientationType::Msd) {
+		m_numOrientationTypes = 3;
+	}
 	const_cast<StaticData*>(StaticData::Instance())->SetWeightsForScoreProducer(this, weights);
 	// Load the file
 	LoadFile();
-//	PrintTable();
+	//	PrintTable();
 }
 
 
-/*
- * Loads the file into a map.
- */
+/** Loads the orientation file into a map 
+  */
 void LexicalReordering::LoadFile()
 {
 	InputFileStream inFile(m_filename);
@@ -73,14 +84,11 @@ void LexicalReordering::LoadFile()
 					probs = Scan<float>(Tokenize(tokens[F_PROBS]));
 	
 				}
-			if (m_orientation == DistortionOrientationType::Monotone)
-				{
-					assert(probs.size() == MONO_NUM_PROBS); // 2 backward, 2 forward
-				}
-			else
-				{
-					assert(probs.size() == MSD_NUM_PROBS); // 3 backward, 3 forward
-				}
+			if (probs.size() != m_direction.size() * m_numOrientationTypes) {
+				TRACE_ERR("found " << probs.size() << " probabilities, expected " 
+									<< m_direction.size() * m_numOrientationTypes << endl);
+				exit(0);
+			}
 			std::vector<float> scv(probs.size());
 			std::transform(probs.begin(),probs.end(),probs.begin(),TransformScore);
 			m_orientation_table[key] = probs;
@@ -88,9 +96,8 @@ void LexicalReordering::LoadFile()
 	inFile.Close();
 }
 
-/*
- * Print the table in a readable format.
- */
+/** print the table in a readable format (not used at this point)
+  */
 void LexicalReordering::PrintTable()
 {
 	// iterate over map
@@ -113,140 +120,141 @@ void LexicalReordering::PrintTable()
 		}
 }
 
-std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
+/** compute the orientation given a hypothesis 
+  */
+int LexicalReordering::GetOrientation(const Hypothesis *curr_hypothesis) 
 {
-	std::vector<float> score(m_numberscores, 0);
-	vector<float> val;
-	for(unsigned int i=0; i < m_direction.size(); i++)
-	{
-		int direction = m_direction[i];
-		int orientation = DistortionOrientation::GetOrientation(hypothesis, direction);
-		if(m_condition==LexReorderType::Fe)
+	const Hypothesis *prevHypo = curr_hypothesis->GetPrevHypo();
+
+	const WordsRange &currSourceRange = curr_hypothesis->GetCurrSourceWordsRange();
+	size_t curr_source_start = currSourceRange.GetStartPos();
+	size_t curr_source_end = currSourceRange.GetEndPos();
+
+	//if there's no previous source...
+	if(prevHypo->GetId() == 0){
+		if (curr_source_start == 0) 
 		{
-		//this key string is F+'|||'+E from the hypothesis
-		val=m_orientation_table[hypothesis->GetSourcePhraseStringRep(m_sourceFactors)
-														+"||| "
-														+hypothesis->GetTargetPhraseStringRep(m_targetFactors)];
+			return ORIENTATION_MONOTONE;
+		}
+		else {
+			return ORIENTATION_DISCONTINUOUS;
+		}
+	}
+
+
+	const WordsRange &prevSourceRange = prevHypo->GetCurrSourceWordsRange();
+	size_t prev_source_start = prevSourceRange.GetStartPos();
+	size_t prev_source_end = prevSourceRange.GetEndPos();		
+	if(prev_source_end==curr_source_start-1)
+	{
+		return ORIENTATION_MONOTONE;
+	}
+	// distinguish between monotone, swap, discontinuous
+	else if(m_orientation==DistortionOrientationType::Msd) 
+	{
+		if(prev_source_start==curr_source_end+1)
+		{
+			return ORIENTATION_SWAP;
 		}
 		else
 		{
-			//this key string is F from the hypothesis
-			val=m_orientation_table[hypothesis->GetTargetPhraseStringRep(m_sourceFactors)];
+			return ORIENTATION_DISCONTINUOUS;
 		}
-		if(val.size()> 0)
+	}
+	// only distinguish between monotone, non monotone
+	else
+	{
+		return ORIENTATION_NON_MONOTONE;
+	}
+}
+
+/** calculate the score(s) for a hypothesis 
+  */
+std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
+{
+	std::vector<float> score(m_numScores, 0);
+	for(unsigned int i=0; i < m_direction.size(); i++) // backward, forward, or both 
+	{
+	  vector<float> val; // we will score the matching probability here
+		
+		// FIRST, get probability distribution
+
+	  int direction = m_direction[i]; // either backward or forward
+
+		// no score, if we would have to compute the forward score from the initial hypothesis
+	  if (direction == LexReorderType::Backward || hypothesis->GetPrevHypo()->GetId() != 0) {
+
+			if (direction == LexReorderType::Backward) { 
+				// conditioned on both foreign and English
+				if(m_condition==LexReorderType::Fe)
+					{
+						//this key string is F+'|||'+E from the hypothesis
+						val=m_orientation_table[hypothesis->GetSourcePhraseStringRep(m_sourceFactors)
+																		+"||| "
+																		+hypothesis->GetTargetPhraseStringRep(m_targetFactors)];
+					}
+				// only conditioned on foreign
+				else 
+					{
+						//this key string is F from the hypothesis
+						val=m_orientation_table[hypothesis->GetTargetPhraseStringRep(m_sourceFactors)];
+					}
+			}
+
+			// if forward looking, condition on previous phrase
+			else {
+				// conditioned on both foreign and English
+				if(m_condition==LexReorderType::Fe)
+					{
+						//this key string is F+'|||'+E from the hypothesis
+						val=m_orientation_table[hypothesis->GetPrevHypo()->GetSourcePhraseStringRep(m_sourceFactors)
+																		+"||| "
+																		+hypothesis->GetPrevHypo()->GetTargetPhraseStringRep(m_targetFactors)];
+					}
+				// only conditioned on foreign
+				else 
+					{
+						//this key string is F from the hypothesis
+						val=m_orientation_table[hypothesis->GetPrevHypo()->GetTargetPhraseStringRep(m_sourceFactors)];
+					}
+			}
+	  }
+
+		// SECOND, look up score
+
+	  if(val.size()> 0) // valid entry
 		{
-			if(m_orientation==DistortionOrientationType::Msd)
-			{
-				if(direction==LexReorderType::Backward)
-				{
-					if(orientation==DistortionOrientationType::MONO)
-					{
-						score[BACK_M] = val[BACK_M];
-					}
-					else if(orientation==DistortionOrientationType::SWAP)
-					{
-						score[BACK_S] = val[BACK_S];
-					}
-					else
-					{
-						score[BACK_D] = val[BACK_D];
-					}
-				
-				}
-				else
-				{
-					//if we only have forward scores (no backward scores) in the table, 
-					//then forward scores have no offset so we can use the indices of the backwards scores
-					if(orientation==DistortionOrientationType::MONO)
-					{
-						if(m_numberscores>3)
-						{
-							score[FOR_M] = val[FOR_M];
-						}
-						else
-						{
-							score[BACK_M] = val[BACK_M];
-						}
-					}
-					else if(orientation==DistortionOrientationType::SWAP)
-					{
-						if(m_numberscores>3)
-						{
-							score[FOR_S] = val[FOR_S];
-						}
-						else
-						{
-							score[BACK_S] = val[BACK_S];
-						}
-					}
-					else
-					{
-						if(m_numberscores>3)
-						{
-							score[FOR_D] = val[FOR_D];
-						}
-						else
-						{
-							score[BACK_D] = val[BACK_D];
-						}
-					}
-				}
+			int orientation = GetOrientation(hypothesis);
+			float value = val[ orientation + i * m_numOrientationTypes ];
+			// one weight per direction
+			if ( m_numScores < m_numOrientationTypes ) { 
+				score[i] = value;
 			}
-			else
-			{
-				if(direction==LexReorderType::Backward)
-				{
-					if(orientation==DistortionOrientationType::MONO)
-					{
-						score[BACK_MONO] = val[BACK_MONO];
-					}
-					else
-					{
-						score[BACK_NONMONO] = val[BACK_NONMONO];
-					}
-				}
-				else
-				{
-					//if we only have forward scores (no backward scores) in the table, 
-					//then forward scores have no offset so we can use the indices of the backwards scores
-					if(orientation==DistortionOrientationType::MONO)
-					{
-						if(m_numberscores>3)
-						{
-							score[FOR_MONO] = val[FOR_MONO];					
-						}
-						else
-						{
-							score[BACK_MONO] = val[BACK_MONO];
-						}
-					}
-					else
-					{
-						if(m_numberscores>3)
-						{
-							score[FOR_NONMONO] = val[FOR_NONMONO];
-						}
-						else
-						{
-							score[BACK_NONMONO] = val[BACK_NONMONO];
-						}					
-					}
-				}
+			// one weight per direction and type
+			else {
+				score[ orientation + i * m_numOrientationTypes ] = value;
 			}
-	
+
+			//			IFVERBOSE(3) {
+			//				cerr << "\tdistortion type " << orientation << " =>";
+			//				for(unsigned int j=0;j<score.size();j++) {
+			//					cerr << " " << score[j];
+			//				}
+			//				cerr << endl;
+			//			}
 		}
 	}
 	return score;
 }
 
-
+/** return the number of scores produced by this model */
 unsigned int LexicalReordering::GetNumScoreComponents() const
 {
-	return m_numberscores;
+	return m_numScores;
 }
 
+/** returns description of the model */
 const std::string  LexicalReordering::GetScoreProducerDescription() const
 {
 	return "Lexicalized reordering score, file=" + m_filename;
 }
-

@@ -66,12 +66,12 @@ struct HypothesisRecombinationComparer
 	}
 };
 
-struct HypothesisRecombinationHasher
-{
-  size_t operator()(const Hypothesis* hypo) const {
-    return hypo->hash();
-  }
-};
+//struct HypothesisRecombinationHasher
+//{
+//  size_t operator()(const Hypothesis* hypo) const {
+//    return hypo->hash();
+//  }
+//};
 
 /** Stack for instances of Hypothesis, includes functions for pruning. */ 
 class HypothesisCollection 
