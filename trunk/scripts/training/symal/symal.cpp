@@ -12,7 +12,7 @@ using namespace std;
 #include <algorithm>
 #include "cmd.h"
 
-#define MAX_WORD 500  //maximum lengthsource/target strings 
+#define MAX_WORD 1000  //maximum lengthsource/target strings 
 #define MAX_M 200     //maximum length of source strings
 #define MAX_N 200     //maximum length of target strings 
 
