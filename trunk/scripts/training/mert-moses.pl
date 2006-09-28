@@ -125,7 +125,7 @@ GetOptions(
   "allow-unknown-lambdas" => \$allow_unknown_lambdas,
   "allow-skipping-lambdas" => \$allow_skipping_lambdas,
   "verbose" => \$verbose,
-  "roodir=s" => \$SCRIPTS_ROOTDIR,
+  "rootdir=s" => \$SCRIPTS_ROOTDIR,
   "cmertdir=s" => \$cmertdir,
   "pythonpath=s" => \$pythonpath,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
