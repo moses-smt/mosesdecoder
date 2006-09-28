@@ -111,8 +111,6 @@ namespace DistortionOrientationType
 			Monotone, //distinguish only between monotone and non-monotone as possible orientations
 			Msd //further separate non-monotone into swapped and discontinuous
 		};	
-    // Possible values for orientation.
-	enum ORIENTATIONS { MONO, NON_MONO, SWAP, DISC }; //TODO explain values
 }
 
 enum IOMethod

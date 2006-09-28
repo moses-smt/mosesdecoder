@@ -87,6 +87,7 @@ protected:
 	bool m_dropUnknown;
 	bool m_wordDeletionEnabled;
 
+	bool m_sourceStartPosMattersForRecombination;
 
 	int m_inputType;
 	unsigned m_numInputScores;
@@ -156,6 +157,10 @@ public:
 		return m_decodeStepList;
 	}
 	
+	inline bool GetSourceStartPosMattersForRecombination() const
+	{ 
+		return m_sourceStartPosMattersForRecombination; 
+	}
 	inline bool GetDropUnknown() const 
 	{ 
 		return m_dropUnknown; 

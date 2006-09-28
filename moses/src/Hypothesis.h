@@ -83,9 +83,9 @@ protected:
 	void CalcDistortionScore();
 	//TODO: add appropriate arguments to score calculator
 
-	void GenerateNGramCompareHash() const;
-	mutable size_t _hash;
-	mutable bool _hash_computed;
+	//	void GenerateNGramCompareHash() const;
+	// mutable size_t _hash;
+	// mutable bool _hash_computed;
 
 public:
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total
@@ -205,12 +205,12 @@ public:
 
 	int NGramCompare(const Hypothesis &compare) const;
 
-	inline size_t hash() const
-	{
-		if (_hash_computed) return _hash;
-		GenerateNGramCompareHash();
-		return _hash;
-	}
+	//	inline size_t hash() const
+	//	{
+	//		if (_hash_computed) return _hash;
+	//		GenerateNGramCompareHash();
+	//		return _hash;
+	//	}
 
 	void ToStream(std::ostream& out) const
 	{

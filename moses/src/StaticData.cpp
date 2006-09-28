@@ -186,36 +186,35 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	// load Lexical Reordering model
 	const vector<string> &lrFileVector = 
 		m_parameter.GetParam("distortion-file");	
+
 		for(unsigned int i=0; i< lrFileVector.size(); i++ ) //loops for each distortion model
 		{
-			
-				//if this went wrong, something went wrong in the parsing.
-			const vector<string> &lrTypeVector = 	m_parameter.GetParam("distortion");	
+			vector<string> specification = Tokenize<string>(lrFileVector[i]," ");
+				if (specification.size() != 4 )
+				{
+				  TRACE_ERR("ERROR: Expected format 'factors type weight-count filename' in specification of distortion file " << i << std::endl << lrFileVector[i] << std::endl);
+				  return false;
+				}
+		  
 			//defaults, but at least one of these per model should be explicitly specified in the .ini file
 			int orientation = DistortionOrientationType::Msd, 
 					direction = LexReorderType::Bidirectional, 
 					condition = LexReorderType::Fe;
 
-			if(lrTypeVector.size() < i)			
-			{
-				std::cerr<<"ERROR: please specify one line of configuration under [distortion] per distortion model in the moses configuration file\n";
-				abort();
-			}
-
 			//Loop through, overriding defaults with specifications
-			vector<string> parameters = Tokenize<string>(lrTypeVector[i],"-");
+			vector<string> parameters = Tokenize<string>(specification[1],"-");
 			for (size_t param=0; param<parameters.size(); param++)
 			{
 				string val = ToLower(parameters[param]);
 				//orientation 
-				if(val == "monotone")
+				if(val == "monotone" || val == "monotonicity")
 					orientation = DistortionOrientationType::Monotone; 
-				else if(val == "msd")
+				else if(val == "msd" || val == "orientation")
 					orientation = DistortionOrientationType::Msd;
 				//direction
 				else if(val == "forward")
 					direction = LexReorderType::Forward;
-				else if(val == "backward")
+				else if(val == "backward" || val == "unidirectional")
 					direction = LexReorderType::Backward; 
 				else if(val == "bidirectional")
 					direction = LexReorderType::Bidirectional;
@@ -224,7 +223,10 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 					condition = LexReorderType::F; 
 				else if(val == "fe")
 					condition = LexReorderType::Fe; 
+				if (orientation == DistortionOrientationType::Msd) 
+					m_sourceStartPosMattersForRecombination = true;
 			}
+
 			//compute the number of weights that ought to be in the table from this
 			size_t numWeightsInTable = 0;
 			if(orientation == DistortionOrientationType::Monotone)
@@ -239,10 +241,17 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			{
 				numWeightsInTable *= 2;
 			}
-			
-			vector<string>	token	= Tokenize(lrFileVector[i]);
-			//characteristics of the phrase table
-			vector<string> inputfactors = Tokenize(token[0],"-");
+			size_t specifiedNumWeights = Scan<size_t>(specification[2]);
+			if (specifiedNumWeights != numWeightsInTable) {
+			  std::cerr << "specified number of weights (" 
+				    << specifiedNumWeights 
+				    << ") does not match correct number of weights for this type (" 
+				    << numWeightsInTable << std::endl;
+			  abort();
+                        }
+
+			//factors involved in this table
+			vector<string> inputfactors = Tokenize(specification[0],"-");
 			vector<FactorType> 	input,output;
 			if(inputfactors.size() > 1)
 			{
@@ -254,11 +263,9 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				input.push_back(0); // default, just in case the user is actually using a bidirectional model
 				output = Tokenize<FactorType>(inputfactors[0],",");
 			}
-			size_t numWeights = Scan<size_t>(token[1]);
-			std::string	filePath= token[2];
 			std::vector<float> m_lexWeights; 			//will store the weights for this particular distortion reorderer
 			std::vector<float> newLexWeights;     //we'll remove the weights used by this distortion reorder, leaving the weights yet to be used
-			if(numWeights == 1) // this is useful if the user just wants to train one weight for the model
+			if(specifiedNumWeights == 1) // this is useful if the user just wants to train one weight for the model
 			{
 				//add appropriate weight to weight vector
 				assert(distortionModelWeights.size()> 0); //if this fails the user has not specified enough weights
@@ -298,10 +305,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			//	TRACE_ERR(m_lexWeights[weight] << "\t");
 			//}
 			//TRACE_ERR(endl);
-			timer.check("Starting to load lexical reorder table...");
-			TRACE_ERR(filePath << "...");
+
+			// loading the file
+			std::string	filePath= specification[3];
+			timer.check(("Start loading distortion table " + filePath).c_str());
  			m_reorderModels.push_back(new LexicalReordering(filePath, orientation, direction, condition, m_lexWeights, input, output));
-			//			timer.check("Finished loading lexical reorder table.");
 		}
 		
 		if (m_parameter.GetParam("lmodel-file").size() > 0)

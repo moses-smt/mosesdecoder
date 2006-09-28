@@ -55,7 +55,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, _lmstats(0)
 {	// used for initial seeding of trans process	
 	// initialize scores
-	_hash_computed = false;
+	//_hash_computed = false;
 	s_HypothesesCreated = 1;
 	ResetScore();	
 }
@@ -85,7 +85,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	// that this hypothesis has already translated!
 	assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));	
 
-	_hash_computed = false;
+	//_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
 	m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
@@ -160,24 +160,36 @@ Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &em
 	return new(ptr) Hypothesis(m_source, emptyTarget);
 }
 
-void Hypothesis::GenerateNGramCompareHash() const
-{
-	_hash = quick_hash((const char*)&m_languageModelStates[0], sizeof(LanguageModelSingleFactor::State) * m_languageModelStates.size(), 0xcafe5137);
-	_hash_computed = true;
-	vector<size_t> wordCoverage = m_sourceCompleted.GetCompressedReprentation();
-	_hash = quick_hash((const char*)&wordCoverage[0], sizeof(size_t)*wordCoverage.size(), _hash);
-}
+//void Hypothesis::GenerateNGramCompareHash() const
+//{
+//	_hash = quick_hash((const char*)&m_languageModelStates[0], sizeof(LanguageModelSingleFactor::State) * m_languageModelStates.size(), 0xcafe5137);
+//	_hash_computed = true;
+//	vector<size_t> wordCoverage = m_sourceCompleted.GetCompressedRepresentation();
+//	_hash = quick_hash((const char*)&wordCoverage[0], sizeof(size_t)*wordCoverage.size(), _hash);
+//}
 
+/** check, if two hypothesis can be recombined.
+    this is actually a sorting function that allows us to
+    keep an ordered list of hypotheses. This makes recombination
+    much quicker. 
+*/
 int Hypothesis::NGramCompare(const Hypothesis &compare) const
 { // -1 = this < compare
 	// +1 = this > compare
 	// 0	= this ==compare
 	if (m_languageModelStates < compare.m_languageModelStates) return -1;
 	if (m_languageModelStates > compare.m_languageModelStates) return 1;
+	if (m_sourceCompleted.GetCompressedRepresentation() < compare.m_sourceCompleted.GetCompressedRepresentation()) return -1;
+	if (m_sourceCompleted.GetCompressedRepresentation() > compare.m_sourceCompleted.GetCompressedRepresentation()) return 1;
+	if (m_currSourceWordsRange.GetEndPos() < compare.m_currSourceWordsRange.GetEndPos()) return -1;
+	if (m_currSourceWordsRange.GetEndPos() > compare.m_currSourceWordsRange.GetEndPos()) return 1;
+	if (! StaticData::Instance()->GetSourceStartPosMattersForRecombination()) return 0;
+	if (m_currSourceWordsRange.GetStartPos() < compare.m_currSourceWordsRange.GetStartPos()) return -1;
+	if (m_currSourceWordsRange.GetStartPos() > compare.m_currSourceWordsRange.GetStartPos()) return 1;
 	return 0;
 }
-/**
- * Calculates the overall language model score by combining the scores
+
+/** Calculates the overall language model score by combining the scores
  * of language models generated for each of the factors.  Because the factors
  * represent a variety of tag sets, and because factors with smaller tag sets 
  * (such as POS instead of words) allow us to calculate richer statistics, we

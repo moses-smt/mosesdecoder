@@ -140,7 +140,7 @@ public:
 		return m_size;
 	}
 
-	std::vector<size_t> GetCompressedReprentation() const;
+	std::vector<size_t> GetCompressedRepresentation() const;
 	
 	inline int Compare (const WordsBitmap &compare) const
 	{

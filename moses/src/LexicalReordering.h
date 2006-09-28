@@ -37,11 +37,11 @@ class Phrase;
 class Hypothesis;
 using namespace std;
 
-/***
- * The LexicalReordering class handles everything involved with
+/** The LexicalReordering class handles everything involved with
  * lexical reordering. It loads a probability table P(orientation|f,e)
  * and computes scores in either forward, backward, or bidirectional
  * direction. 
+ * This model is described in Koehn et al. [IWSLT 2005]
  */
 
 class LexicalReordering : public ScoreProducer
@@ -49,13 +49,8 @@ class LexicalReordering : public ScoreProducer
 
 private: 
 
-	// Members
+	// This stores the model table
 	typedef std::map<std::string, std::vector<float> > ORIENTATION_TABLE;
-
-	// This is the order in which the different forward/backward
-	// probabilities are stored in the table.
-	enum TableLookupMsd { BACK_M, BACK_S, BACK_D, FOR_M,FOR_S, FOR_D };
-	enum TableLookupMonotone { BACK_MONO, BACK_NONMONO, FOR_MONO, FOR_NONMONO};
 
 	// This is the order in which pieces appear in the orientation table
 	// when conditioning on f and e.
@@ -67,19 +62,25 @@ private:
 
 	// different numbers of probabilities for different ranges of
 	// orientation variable
-	static const unsigned int MSD_NUM_PROBS = 6;
-	static const unsigned int MONO_NUM_PROBS = 4;
+	static const unsigned int MSD_NUM_PROBS = 3;
+	static const unsigned int MONO_NUM_PROBS = 2;
 
-	int m_orientation; // msd or monotone
-	std::vector<int> m_direction;   // contains forward, backward, or both (bidirectional)
-	int m_condition;   // fe or f
-	int m_numberscores; //2, 3, 4 or 6
-	std::string m_filename; // probability table location
-	vector<FactorType> m_sourceFactors;
-	vector<FactorType> m_targetFactors;
+	static const unsigned int ORIENTATION_MONOTONE = 0;
+	static const unsigned int ORIENTATION_NON_MONOTONE = 1;
+	static const unsigned int ORIENTATION_SWAP = 1;
+	static const unsigned int ORIENTATION_DISCONTINUOUS = 2;
+
+	int m_orientation; /**< msd or monotone */
+	std::vector<int> m_direction;   /**< contains forward, backward, or both (bidirectional) */
+	int m_condition;   /**< fe or f */
+	int m_numScores;   /**< 1, 2, 3, or 6 */
+	int m_numOrientationTypes; /**< 2(mono) or 3(msd) */
+	std::string m_filename; /**< probability table location */
+	vector<FactorType> m_sourceFactors; /**< source factors to condition on */
+	vector<FactorType> m_targetFactors; /**< target factors to condition on */
 
 
-	ORIENTATION_TABLE m_orientation_table; // probability table
+	ORIENTATION_TABLE m_orientation_table; /**< probability table */
 
 	// Functions
 	void LoadFile(void);
@@ -94,6 +95,9 @@ public:
 	
 	// Descructor
 	~LexicalReordering(void) {}
+
+	// Compute Orientation
+	int GetOrientation(const Hypothesis *curr_hypothesis);
 
 	// Compute and return a score for a hypothesis
 	std::vector<float> CalcScore(Hypothesis *curr_hypothesis);

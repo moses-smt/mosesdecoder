@@ -102,7 +102,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	Hypothesis *hypoExisting = *iter;
 	if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
 	{ // incoming hypo is better than the one we have
-		VERBOSE(3,"better than matching hyp, recombining, ");
+		VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
 		if (m_nBestIsEnabled) {
 			hypo->AddArc(hypoExisting);
 			Detach(iter);
@@ -114,7 +114,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	}
 	else
 	{ // already storing the best hypo. discard current hypo 
-	  VERBOSE(3,"worse than matching hyp, recombining" << std::endl)
+	  VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
 		if (m_nBestIsEnabled) {
 			(*iter)->AddArc(hypo);
 		} else {
@@ -183,6 +183,16 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 				}
 			VERBOSE(3,", pruned to size " << size() << endl);
 			
+			IFVERBOSE(3) {
+				cerr << "stack now contains: ";
+				for(iter = m_hypos.begin(); iter != m_hypos.end(); iter++) 
+					{
+						Hypothesis *hypo = *iter;
+						cerr << hypo->GetId() << " (" << hypo->GetTotalScore() << ") ";
+					}
+				cerr << endl;
+			}
+
 			// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack
 			m_worstScore = scoreThreshold;
 			// cerr << "Heap contains " << bestScores.size() << " items" << endl;
