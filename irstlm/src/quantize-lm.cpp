@@ -27,7 +27,7 @@ using namespace std;
 #include <stdlib.h>
 
 #include "math.h"
-#include "lmtable.h"
+//#include "lmtable.h"
 
 //----------------------------------------------------------------------
 //  Special type and global variable for the BIN CLUSTERING algorithm
@@ -199,7 +199,7 @@ int main(int argc, const char **argv)
           if (howmany==Order+2) //backoff is written
             sscanf(words[Order+1],"%f",&logbow);
           else
-            logbow=0; // backoff is implicit
+            logbow=0; // backoff is implicit                    
           dataPts[nPts]=exp(logbow * logten);
         }
         
@@ -343,9 +343,14 @@ int ComputeCluster(int centers,double* ctrs,int N,double* dataPts){
     
     
     for (int i=0;i<centers;i++){
-      if (population[i]>0)
+      if (population[i]>0){
         ctrs[i]/=(float)population[i];
-      //cout << i << " population " << population[i] << " species " << species[i] <<"\n";
+        if (ctrs[i]<1e-99){
+            cerr << "Warning: adjusting center with too small prob " << ctrs[i] << "\n";
+            ctrs[i]=1e-99;
+        }
+      }
+      //cout << i << " ctr " << ctrs[i] << " population " << population[i] << " species " << species[i] <<"\n";
     }
     
     cout.flush();
