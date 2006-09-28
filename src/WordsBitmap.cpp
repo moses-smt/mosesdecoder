@@ -58,7 +58,7 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
 }
 
 
-std::vector<size_t> WordsBitmap::GetCompressedReprentation() const
+std::vector<size_t> WordsBitmap::GetCompressedRepresentation() const
 {
   std::vector<size_t> res(1 + (m_size >> (sizeof(int) + 3)), 0);
   size_t c=0; size_t x=0; size_t ci=0;
