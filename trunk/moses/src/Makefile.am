@@ -6,7 +6,6 @@ libmoses_a_SOURCES_TMP = \
 	DecodeStepGeneration.cpp \
 	DecodeStepTranslation.cpp \
 	Dictionary.cpp \
-	DistortionOrientation.cpp \
 	DummyScoreProducers.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
