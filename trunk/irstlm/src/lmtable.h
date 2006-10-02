@@ -234,17 +234,17 @@ public:
   void savebin(const char *filename);
   void dumplm(std::fstream& out,ngram ng, int ilev, int elev, int ipos,int epos);
   
-  void load(std::fstream& inp);
-  void loadtxt(std::fstream& inp,const char* header);
-  void loadbin(std::fstream& inp,const char* header);
+  void load(std::istream& inp);
+  void loadtxt(std::istream& inp,const char* header);
+  void loadbin(std::istream& inp,const char* header);
   
-  void loadbinheader(std::fstream& inp, const char* header);
-  void loadbincodebook(std::fstream& inp,int l);
+  void loadbinheader(std::istream& inp, const char* header);
+  void loadbincodebook(std::istream& inp,int l);
   
   void filter(const char* lmfile);
   void filter2(const char* lmfile,int buffMb=512);
   
-  void loadcenters(std::fstream& inp,int Order);
+  void loadcenters(std::istream& inp,int Order);
 	
   double prob(ngram ng); 
   double lprob(ngram ng); 
