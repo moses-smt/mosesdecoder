@@ -59,7 +59,7 @@ lmtable::lmtable(){
  
 //loadstd::istream& inp a lmtable from a lm file
 
-void lmtable::load(fstream& inp){
+void lmtable::load(istream& inp){
   
   //give a look at the header to select loading method
   char header[1024];
@@ -108,7 +108,7 @@ int parseWords(char *sentence, char **words, int max)
 //This method also loads files processed with the quantization 
 //tool: qlm
 
-int parseline(fstream& inp, int Order,ngram& ng,float& prob,float& bow){
+int parseline(istream& inp, int Order,ngram& ng,float& prob,float& bow){
 	
   char* words[1+ LMTMAXLEV + 1 + 1];
   int howmany;		
@@ -135,7 +135,7 @@ int parseline(fstream& inp, int Order,ngram& ng,float& prob,float& bow){
 }
 
 
-void lmtable::loadcenters(fstream& inp,int Order){
+void lmtable::loadcenters(istream& inp,int Order){
   char line[11];
   
   //first read the coodebook
@@ -154,7 +154,7 @@ void lmtable::loadcenters(fstream& inp,int Order){
 }
 
 
-void lmtable::loadtxt(fstream& inp,const char* header){
+void lmtable::loadtxt(istream& inp,const char* header){
   
   
   //open input stream and prepare an input string
@@ -492,7 +492,7 @@ void lmtable::savebin(const char *filename){
 
 //manages the long header of a bin file
 
-void lmtable::loadbinheader(fstream& inp,const char* header){
+void lmtable::loadbinheader(istream& inp,const char* header){
   
   // read rest of header
   inp >> maxlev;
@@ -523,7 +523,7 @@ void lmtable::loadbinheader(fstream& inp,const char* header){
 
 //load codebook of level l
 
-void lmtable::loadbincodebook(fstream& inp,int l){
+void lmtable::loadbincodebook(istream& inp,int l){
   
   Pcenters[l]=new float [NumCenters[l]];   
   inp.read((char*)Pcenters[l],NumCenters[l] * sizeof(float));
@@ -536,7 +536,7 @@ void lmtable::loadbincodebook(fstream& inp,int l){
 
 //load a binary lmfile
 
-void lmtable::loadbin(fstream& inp, const char* header){
+void lmtable::loadbin(istream& inp, const char* header){
     
   cerr << "loadbin()\n";
   
