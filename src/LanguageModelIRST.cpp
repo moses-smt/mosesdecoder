@@ -60,9 +60,8 @@ void LanguageModelIRST::Load(const std::string &fileName
 	m_nGramOrder	 = nGramOrder;
 	m_filename		 = fileName;
 
-  //Marcello: modification to fit new version of lmtable.cpp
-	//temporary replacement for: InputFileStream inp(fileName);
-  std::fstream inp(fileName.c_str(),std::ios::in);  
+  // Open the input file (possibly gzipped) and load the (possibly binary) model
+	InputFileStream inp(fileName);
 	m_lmtb  = new lmtable;
   m_lmtb->load(inp);
   
