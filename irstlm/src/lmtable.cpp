@@ -231,9 +231,7 @@ void lmtable::loadtxt(fstream& inp,const char* header){
 }
 
 
-
-//set all bounds of entries with no successors to the bound 
-//of the previous entry.
+//Checkbound with sorting of n-gram table on disk
 
 void lmtable::checkbounds(int level){
   
@@ -243,11 +241,15 @@ void lmtable::checkbounds(int level){
   LMT_TYPE ndt=tbltype[level], succndt=tbltype[level+1];
   int ndsz=nodesize(ndt), succndsz=nodesize(succndt);
 	
-  //re-order table at level+1
-  char* newtbl=new char[succndsz * cursize[level+1]];
+  //re-order table at level+1 on disk
+  //generate random filename to avoid collisions
+  char filebuff[100];char cmd[100];
+  sprintf(filebuff,"/tmp/dskbuff%d_d",clock());
+  fstream out(filebuff,ios::out);
+  
   int start,end,newstart;
 	
-  //re-order table at
+  //re-order table at level l+1
   newstart=0;
   for (int c=0;c<cursize[level];c++){
     start=startpos[level][c]; end=bound(tbl+c*ndsz,ndt);
@@ -258,16 +260,17 @@ void lmtable::checkbounds(int level){
     assert(end<=cursize[level+1]);
 		
     if (start<end)
-      memcpy((void*)(newtbl + newstart * succndsz),
-             (void*)(succtbl + start * succndsz), 
-             (end-start) * succndsz);
-		
+      out.write((char*)(succtbl + start * succndsz),(end-start) * succndsz);  
+    
     bound(tbl+c*ndsz,ndt,newstart+(end-start));
     newstart+=(end-start);
   }
-  delete [] table[level+1];
-  table[level+1]=newtbl;
-  newtbl=NULL;
+  out.close();
+  fstream inp(filebuff,ios::in);
+  inp.read(succtbl,cursize[level+1]*succndsz);
+  inp.close();  
+  sprintf(cmd,"rm %s",filebuff);
+  system(cmd);
 }
 
 //Add method inserts n-grams in the table structure. It is ONLY used during 
