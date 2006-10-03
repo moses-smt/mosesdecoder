@@ -10,7 +10,6 @@
 <option id="gnu.cpp.compiler.option.include.paths.1241301640" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
@@ -40,9 +39,6 @@
 <option id="gnu.cpp.link.option.userobjs.551693347" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/${ConfigName}/libmoses.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/${ConfigName}/libirstlm.a"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
 </option>
 <option id="gnu.cpp.link.option.flags.1995182231" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 </tool>
@@ -57,7 +53,6 @@
 <option id="gnu.cpp.compiler.option.include.paths.1986529351" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/include/boost-1_33_1"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
@@ -87,9 +82,6 @@
 <option id="gnu.cpp.link.option.userobjs.1365891611" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="${ProjDirPath}/../moses/${ConfigName}/libmoses.a"/>
 <listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/${ConfigName}/libirstlm.a"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_filesystem-gcc.a"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_iostreams-gcc.a"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../boost/lib/libboost_thread-gcc-mt.a"/>
 </option>
 <option id="gnu.cpp.link.option.flags.213483667" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 </tool>
