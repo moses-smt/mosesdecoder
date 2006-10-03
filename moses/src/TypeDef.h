@@ -56,15 +56,12 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
 #  ifdef HAVE_SRILM
 #    define LM_SRI 1
-#    undef LM_INTERNAL
 #  else
 #    undef LM_SRI
-#    define LM_INTERNAL 1
 #  endif
 
 #  ifdef HAVE_IRSTLM
 #    define LM_IRST 1
-#    undef LM_INTERNAL
 #    undef LM_SRI
 #  endif
 
