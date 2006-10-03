@@ -25,6 +25,7 @@ using namespace std;
 #include <vector>
 #include <string>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "math.h"
 //#include "lmtable.h"
