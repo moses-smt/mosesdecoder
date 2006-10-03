@@ -28,30 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-Word::Word(const Word &copy)
-#ifdef DYNAMIC_FACTOR_ARRAY
-: m_factorArray(copy.m_factorArray)
-#endif
-{ // deep copy
-#ifndef DYNAMIC_FACTOR_ARRAY
-	memcpy(m_factorArray, copy.m_factorArray, sizeof(FactorArray));
-#endif
-}
-
-Word::Word()
-#ifdef DYNAMIC_FACTOR_ARRAY
-: m_factorArray(MAX_NUM_FACTORS, 0)
-#endif
-{
-#ifndef DYNAMIC_FACTOR_ARRAY
-	memset(m_factorArray, 0, sizeof(FactorArray));
-#endif
-}
-
-Word::~Word()
-{
-}
-
 // static
 int Word::Compare(const Word &targetWord, const Word &sourceWord)
 {

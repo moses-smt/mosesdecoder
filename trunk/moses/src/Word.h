@@ -28,8 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Factor.h"
 #include "Util.h"
 
-#undef DYNAMIC_FACTOR_ARRAY
-
 class Phrase;
 
 /***
@@ -41,22 +39,23 @@ class Word
 
 protected:
 
-#ifndef DYNAMIC_FACTOR_ARRAY
 	typedef const Factor * FactorArray[MAX_NUM_FACTORS];
-#else
-	typedef std::vector<const Factor*> FactorArray;
-#endif
 
 	FactorArray m_factorArray;
 
 public:
-	/**
-	 * deep copy
-	 */
-	Word(const Word &copy);
-	Word();
+	/** deep copy */
+	Word(const Word &copy) {
+		std::memcpy(m_factorArray, copy.m_factorArray, sizeof(FactorArray));
+	}
 
-	~Word();
+	/** empty word */
+	Word() {
+		std::memset(m_factorArray, 0, sizeof(FactorArray));
+	}
+
+	~Word() {}
+
 	const Factor*& operator[](FactorType index) {
 		return m_factorArray[index];
 	}
@@ -72,6 +71,8 @@ public:
 		m_factorArray[factorType] = factor;
 	}
 
+	/** add the factors from sourceWord into this representation,
+	 * NULL elements in sourceWord will be skipped */
 	void Merge(const Word &sourceWord);
 
 	std::string ToString(const std::vector<FactorType> factorType) const;
