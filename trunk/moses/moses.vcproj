@@ -160,11 +160,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\DecodeStep_Generation.cpp"
+				RelativePath=".\src\DecodeStepGeneration.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\DecodeStep_Translation.cpp"
+				RelativePath=".\src\DecodeStepTranslation.cpp"
 				>
 			</File>
 			<File
@@ -228,15 +228,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\LanguageModel_Chunking.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LanguageModel_IRST.cpp"
+				RelativePath=".\src\LanguageModelChunking.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelIRST.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelJoint.cpp"
 				>
 			</File>
 			<File
@@ -434,11 +438,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\DecodeStep_Generation.h"
+				RelativePath=".\src\DecodeStepGeneration.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\DecodeStep_Translation.h"
+				RelativePath=".\src\DecodeStepTranslation.h"
 				>
 			</File>
 			<File
@@ -514,19 +518,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\LanguageModel_Chunking.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LanguageModel_IRST.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LanguageModel_SRI.h"
+				RelativePath=".\src\LanguageModelChunking.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelIRST.h"
 				>
 			</File>
 			<File
