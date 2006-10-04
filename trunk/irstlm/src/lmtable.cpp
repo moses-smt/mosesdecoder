@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #include "dictionary.h"
 #include "n_gram.h"
 #include "lmtable.h"
+#include "util.h"
+
 using namespace std;
 
 inline void error(char* message){
@@ -112,9 +114,14 @@ int parseline(istream& inp, int Order,ngram& ng,float& prob,float& bow){
 	
   char* words[1+ LMTMAXLEV + 1 + 1];
   int howmany;		
-  char line[1024];
+  char line[MAX_LINE];
   
-  inp.getline(line,1024);
+  inp.getline(line,MAX_LINE);  
+  if (strlen(line)==MAX_LINE-1){
+      cerr << "parseline: input line exceed MAXLINE (" 
+      << MAX_LINE << ") chars " << line << "\n";
+    exit(1);
+  }
   
   howmany = parseWords(line, words, Order + 3);
   assert(howmany == (Order+ 1) || howmany == (Order + 2));
@@ -136,7 +143,7 @@ int parseline(istream& inp, int Order,ngram& ng,float& prob,float& bow){
 
 
 void lmtable::loadcenters(istream& inp,int Order){
-  char line[11];
+  char line[MAX_LINE];
   
   //first read the coodebook
   cerr << Order << " read code book ";
@@ -149,7 +156,7 @@ void lmtable::loadcenters(istream& inp,int Order){
     if (Order<maxlev) inp >> Bcenters[Order][c];
   };  
   //empty the last line  
-  inp.getline((char*)line,10);
+  inp.getline((char*)line,MAX_LINE);
   
 }
 
@@ -158,7 +165,7 @@ void lmtable::loadtxt(istream& inp,const char* header){
   
   
   //open input stream and prepare an input string
-  char line[1024];
+  char line[MAX_LINE];
   
   //prepare word dictionary
   //dict=(dictionary*) new dictionary(NULL,1000000,NULL,NULL); 
@@ -179,8 +186,15 @@ void lmtable::loadtxt(istream& inp,const char* header){
   // READ ARPA Header
   int Order,n;
   
-  while (inp.getline(line,1024)){
+  while (inp.getline(line,MAX_LINE)){
 		
+    if (strlen(line)==MAX_LINE-1){
+      cerr << "lmtable::loadtxt: input line exceed MAXLINE (" 
+      << MAX_LINE << ") chars " << line << "\n";
+      exit(1);
+    }
+
+    
     bool backslash = (line[0] == '\\');
     
     if (sscanf(line, "ngram %d=%d", &Order, &n) == 2) {
@@ -243,16 +257,19 @@ void lmtable::checkbounds(int level){
   LMT_TYPE ndt=tbltype[level], succndt=tbltype[level+1];
   int ndsz=nodesize(ndt), succndsz=nodesize(succndt);
 	
-  //re-order table at level+1 on disk
+   //re-order table at level+1 on disk
   //generate random filename to avoid collisions
-  //char filebuff[100];char cmd[100];
-  //sprintf(filebuff,"/tmp/dskbuff%d_d",clock());
-  //fstream out(filebuff,ios::out);
 
-	string filePath;
-	ofstream out;
-	createtempfile(out, filePath, ios::out);
+  char filebuff[100];char cmd[100];
+  sprintf(filebuff,"/tmp/dskbuff%d_d",clock());
+  sprintf(cmd,"rm %s",filebuff);
+  fstream out(filebuff,ios::out);
   
+
+	//string filePath;
+	//ofstream out;
+	//createtempfile(out, filePath, ios::out);
+
   int start,end,newstart;
 	
   //re-order table at level l+1
@@ -272,10 +289,15 @@ void lmtable::checkbounds(int level){
     newstart+=(end-start);
   }
   out.close();
-	fstream inp(filePath.c_str(),ios::in);
+
+	//fstream inp(filePath.c_str(),ios::in);
+  fstream inp(filebuff,ios::in);
+
   inp.read(succtbl,cursize[level+1]*succndsz);
   inp.close();  
-	removefile(filePath);
+  system(cmd);
+	//removefile(filePath);
+
 }
 
 //Add method inserts n-grams in the table structure. It is ONLY used during 
@@ -875,7 +897,7 @@ void lmtable::filter2(const char* binlmfile, int buffMb){
   fstream inp(binlmfile,ios::in);
   
   // read header
-  char header[1024]; 
+  char header[MAX_LINE]; 
   inp >> header;
   
   dsklmt->loadbinheader(inp, header);
@@ -1039,7 +1061,7 @@ void lmtable::filter(const char* binlmfile){
   fstream inp(binlmfile,ios::in);  
   
   // read header
-  char header[1024]; 
+  char header[MAX_LINE]; 
   inp >> header;
   
   dsklmt->loadbinheader(inp, header);
