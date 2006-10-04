@@ -21,7 +21,7 @@ string gettempfolder()
 }
 
 
-void createtempfile(ofstream  &fileStream, string &filePath, std::ios_base::open_mode flags)
+void createtempfile(ofstream  &fileStream, string &filePath, std::ios_base::openmode flags)
 {	
 #ifdef _WIN32
 	char buffer[BUFSIZ];
@@ -42,7 +42,9 @@ void removefile(const std::string &filePath)
 #ifdef _WIN32
 	::DeleteFileA(filePath.c_str());
 #else
+  char cmd[100];
   sprintf(cmd,"rm %s",filePath.c_str());
   system(cmd);
 #endif
 }
+
