@@ -154,6 +154,7 @@ void dictionary::load(char* filename){
     if (strlen(buffer)==(MAX_WORD-1)){
       cerr << "\ndictionary: a too long word was read (" 
 	   << buffer << ")\n";
+      exit(1); 
     };
     
     tb[n].word=st->push(buffer);
@@ -166,9 +167,9 @@ void dictionary::load(char* filename){
 
     if ((addr=htb->search((char  *)&tb[n].word,HT_ENTER)))
       if (addr!=(char *)&tb[n].word){
-	cerr << "dictionary::loadtxt wrong entry was found (" 
-	     <<  buffer << ") in position " << n << "\n";
-	exit(1);
+        cerr << "dictionary::loadtxt wrong entry was found (" 
+        <<  buffer << ") in position " << n << "\n";
+        exit(1);
       }
 
     N+=tb[n].freq;
@@ -193,8 +194,14 @@ void dictionary::load(std::istream& inp){
 
   for (int i=0;i<size;i++){
     
-    inp >> buffer;
-    
+    inp >> setw(MAX_WORD) >> buffer;
+
+    if (strlen(buffer)==MAX_WORD-1){
+      cerr << "\ndictionary::load found word exceeding max length (" 
+      << MAX_WORD << ")" << buffer << "\n";
+      exit(1);
+    };
+        
     tb[n].word=st->push(buffer);
     tb[n].code=n;
     inp >> tb[n].freq;
@@ -202,9 +209,9 @@ void dictionary::load(std::istream& inp){
 
     if ((addr=htb->search((char  *)&tb[n].word,HT_ENTER)))
       if (addr!=(char *)&tb[n].word){
-	cerr << "dictionary::loadtxt wrong entry was found (" 
-	     <<  buffer << ") in position " << n << "\n";
-	exit(1);
+	      cerr << "dictionary::loadtxt wrong entry was found (" 
+	           <<  buffer << ") in position " << n << "\n";
+        exit(1);
       }
     
     if (strcmp(tb[n].word,OOV())==0)
