@@ -96,7 +96,6 @@ void handle_option(const std::string& opt, int argc, const char **argv, int& arg
 
 int main(int argc, const char **argv)
 {
-  cout << "hello\n";
   
   if (argc < 2) { usage(); exit(1); }
   std::vector<std::string> files;
