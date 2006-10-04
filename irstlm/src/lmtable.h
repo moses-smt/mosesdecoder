@@ -28,7 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 #undef TRACE_CACHE
 
-#define LMTMAXLEV  11
+#define LMTMAXLEV  20
+#define MAX_LINE  1024
 
 #ifndef  LMTCODESIZE
 #define  LMTCODESIZE  (int)3
