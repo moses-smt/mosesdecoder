@@ -172,19 +172,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\DistortionOrientation.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\DummyScoreProducers.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\Factor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\FactorArrayWrapper.cpp"
 				>
 			</File>
 			<File
@@ -447,10 +439,6 @@
 			</File>
 			<File
 				RelativePath=".\src\Dictionary.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\DistortionOrientation.h"
 				>
 			</File>
 			<File

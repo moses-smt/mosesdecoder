@@ -233,6 +233,8 @@ void lmtable::loadtxt(istream& inp,const char* header){
 
 //Checkbound with sorting of n-gram table on disk
 
+#include "util.h"
+
 void lmtable::checkbounds(int level){
   
   char*  tbl=table[level];
@@ -243,9 +245,13 @@ void lmtable::checkbounds(int level){
 	
   //re-order table at level+1 on disk
   //generate random filename to avoid collisions
-  char filebuff[100];char cmd[100];
-  sprintf(filebuff,"/tmp/dskbuff%d_d",clock());
-  fstream out(filebuff,ios::out);
+  //char filebuff[100];char cmd[100];
+  //sprintf(filebuff,"/tmp/dskbuff%d_d",clock());
+  //fstream out(filebuff,ios::out);
+
+	string filePath;
+	ofstream out;
+	createtempfile(out, filePath, ios::out);
   
   int start,end,newstart;
 	
@@ -266,11 +272,10 @@ void lmtable::checkbounds(int level){
     newstart+=(end-start);
   }
   out.close();
-  fstream inp(filebuff,ios::in);
+	fstream inp(filePath.c_str(),ios::in);
   inp.read(succtbl,cursize[level+1]*succndsz);
   inp.close();  
-  sprintf(cmd,"rm %s",filebuff);
-  system(cmd);
+	removefile(filePath);
 }
 
 //Add method inserts n-grams in the table structure. It is ONLY used during 

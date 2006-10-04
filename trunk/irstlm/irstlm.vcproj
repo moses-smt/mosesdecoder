@@ -204,6 +204,10 @@
 				RelativePath=".\src\ngramcache.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\util.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -240,6 +244,10 @@
 			</File>
 			<File
 				RelativePath=".\src\ngramcache.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\util.h"
 				>
 			</File>
 		</Filter>
