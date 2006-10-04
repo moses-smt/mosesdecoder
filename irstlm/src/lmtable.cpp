@@ -258,17 +258,11 @@ void lmtable::checkbounds(int level){
   int ndsz=nodesize(ndt), succndsz=nodesize(succndt);
 	
    //re-order table at level+1 on disk
-  //generate random filename to avoid collisions
+  //generate random filename to avoid collisions 
 
-  char filebuff[100];char cmd[100];
-  sprintf(filebuff,"/tmp/dskbuff%d_d",clock());
-  sprintf(cmd,"rm %s",filebuff);
-  fstream out(filebuff,ios::out);
-  
-
-	//string filePath;
-	//ofstream out;
-	//createtempfile(out, filePath, ios::out);
+  string filePath;
+  ofstream out;
+  createtempfile(out, filePath, ios::out);
 
   int start,end,newstart;
 	
@@ -290,13 +284,11 @@ void lmtable::checkbounds(int level){
   }
   out.close();
 
-	//fstream inp(filePath.c_str(),ios::in);
-  fstream inp(filebuff,ios::in);
-
+	fstream inp(filePath.c_str(),ios::in);
+  
   inp.read(succtbl,cursize[level+1]*succndsz);
   inp.close();  
-  system(cmd);
-	//removefile(filePath);
+  removefile(filePath);
 
 }
 
