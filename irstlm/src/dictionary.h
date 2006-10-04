@@ -24,7 +24,7 @@
 #include <cstring>
 #include <iostream>
 
-#define MAX_WORD 100
+#define MAX_WORD 1000
 #define LOAD_FACTOR  5
 
 #ifndef GROWTH_STEP 
