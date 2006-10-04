@@ -6,7 +6,8 @@ libirstlm_a_SOURCES = \
 	lmtable.cpp \
 	mempool.cpp \
 	n_gram.cpp \
-	ngramcache.cpp
+	ngramcache.cpp \
+	util.cpp
 
 library_includedir=$(includedir)
 library_include_HEADERS = \
@@ -15,7 +16,8 @@ library_include_HEADERS = \
         lmtable.h \
         mempool.h \
         n_gram.h \
-        ngramcache.h
+        ngramcache.h \
+	util.h
 
 bin_PROGRAMS = compile-lm quantize-lm
 
