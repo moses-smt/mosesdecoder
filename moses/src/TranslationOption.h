@@ -70,7 +70,9 @@ protected:
 	ScoreComponentCollection2	m_scoreBreakdown;
 
 public:
+	/** constructor. Used by initial translation step */
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
+	/** constructor. Used to create trans opt from unknown word */
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int);
 
 	/** used by initial translation step */
@@ -100,6 +102,7 @@ public:
 	  return m_sourcePhrase;
 	}
 
+	/** whether source span overlaps with those of a hypothesis */
 	bool Overlap(const Hypothesis &hypothesis) const;
 
 	/** return start index of source phrase */
@@ -143,6 +146,7 @@ public:
 		return m_scoreBreakdown;
 	}
 
+	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
 	void CalcScore();
 
 	TO_STRING;

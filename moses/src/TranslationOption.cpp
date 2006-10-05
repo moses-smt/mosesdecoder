@@ -33,13 +33,11 @@ using namespace std;
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase)
 	: m_targetPhrase(targetPhrase),m_sourcePhrase(targetPhrase.GetSourcePhrase())
 	,m_sourceWordsRange	(wordsRange)
-{	// used by initial translation step
-
+{
 	// set score
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 }
 
-// used to create trans opt from unknown word
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/)
 : m_targetPhrase(targetPhrase)
