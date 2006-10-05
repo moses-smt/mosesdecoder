@@ -25,7 +25,7 @@ using namespace std;
 #include <vector>
 #include <string>
 #include <stdlib.h>
-
+#include "util.h"
 #include "math.h"
 #include "lmtable.h"
 
@@ -44,7 +44,7 @@ void usage(const char *msg = 0) {
   if (!msg) std::cerr << std::endl
             << "  compile-lm reads a standard LM file in ARPA format and produces" << std::endl
             << "  a compiled representation that the IRST LM toolkit can quickly" << std::endl
-            << "  read and process." << std::endl << std::endl;
+            << "  read and process. LM file can be compressed with gzip." << std::endl << std::endl;
   std::cerr << "Options:\n"
             << "--text=[yes|no] -t=[yes|no] (output is again in text format)\n"
             << "--eval=text-file -e=text-file (computes perplexity of text-file and returns)\n"
@@ -111,19 +111,31 @@ int main(int argc, const char **argv)
   int debug = atoi(sdebug.c_str()); 
  
   std::string infile = files[0];
-  if (files.size() == 1) {
-    std::string::size_type p = infile.rfind('/');
-    if (p != std::string::npos && ((p+1) < infile.size())) {
-      files.push_back(infile.substr(p+1) + (textoutput?".lm":".blm"));
-    } else {
-      files.push_back(infile + (textoutput?".lm":".blm"));
-    }
-  }
+  std::string outfile="";
   
-  std::string outfile = files[1];
+  if (files.size() == 1) {  
+    outfile=infile;
+    
+    //remove path information
+    std::string::size_type p = outfile.rfind('/');
+    if (p != std::string::npos && ((p+1) < outfile.size()))           
+      outfile.erase(0,p+1);
+          
+    //eventually strip .gz 
+    if (outfile.compare(outfile.size()-3,3,".gz")==0)
+       outfile.erase(outfile.size()-3,3);
+   
+    outfile+=(textoutput?".lm":".blm");
+  }
+  else
+     outfile = files[1];
+ 
+  cerr << "outfile: " << outfile << std::endl;
+ 
   std::cout << "Reading " << infile << "..." << std::endl;
    
-  std::fstream inp(infile.c_str());
+  inputfilestream inp(infile.c_str());
+  //std::fstream inp(infile.c_str());
   if (!inp.good()) {
     std::cerr << "Failed to open " << infile << "!\n";
     exit(1);
