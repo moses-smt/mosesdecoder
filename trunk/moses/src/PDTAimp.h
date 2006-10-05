@@ -375,7 +375,7 @@ public:
 								Range newRange(curr.begin(),curr.end()+1);
 								float newScore=curr.GetScore()+currCol[colidx].second;  // CN score
 								Phrase newSrc(curr.src);
-								if(!isEpsilon) newSrc.push_back(w);
+								if(!isEpsilon) newSrc.AddWord(w);
 								if(newRange.second<srcSize && newScore>LOWEST_SCORE)
 									{
 									  // if there is more room to grow, add a new state onto the queue
