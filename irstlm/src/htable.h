@@ -48,7 +48,7 @@ typedef enum {
         STR,     //!< string 
 	      STRPTR,   //!< pointer to string
         INT,     //!< pointer to int
-        INTPTR,  //!< pointer to pointer to int
+        INTPTR  //!< pointer to pointer to int
 }HTYPE;
 
 //! Hash Table for strings
