@@ -90,7 +90,7 @@ protected:
 	bool m_sourceStartPosMattersForRecombination;
 
 	int m_inputType;
-	unsigned m_numInputScores;
+	size_t m_numInputScores;
 
 	size_t m_verboseLevel;
 	DistortionScoreProducer *m_distortionScoreProducer;

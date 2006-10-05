@@ -343,8 +343,8 @@ public:
 
 		std::map<Range,E2Costs> cov2cand;
 		std::vector<State> stack;
-		for(size_t i=0;i<srcSize;++i) 
-			stack.push_back(State(i,i,m_dict->GetRoot()));
+		for(Position i=0 ; i < srcSize ; ++i) 
+			stack.push_back(State(i, i, m_dict->GetRoot()));
 
 		while(!stack.empty()) 
 			{
@@ -404,15 +404,15 @@ public:
 												std::transform(tcands[i].second.begin(),tcands[i].second.end(),nscores.begin(),TransformScore);
 												switch(m_numInputScores)
 													{
-													case 2: nscores[nscores.size()-1-m_numInputScores+2]=-1.0*newRealWords; // do not use -newRealWords ! -- RZ
-													case 1: nscores[nscores.size()-1-m_numInputScores+1]=newScore;
+													case 2: nscores[nscores.size()-1-m_numInputScores+2]= -1.0f * newRealWords; // do not use -newRealWords ! -- RZ
+													case 1: nscores[nscores.size()-1-m_numInputScores+1]= newScore;
 													case 0: break;
 													default:
 														std::cerr<<"ERROR: too many model scaling factors for input weights 'weight-i' : "<<m_numInputScores<<"\n";
 														abort();
 													}
 												assert(nscores.size()==m_weights.size());
-												float score=std::inner_product(nscores.begin(),nscores.end(),m_weights.begin(),0.0);
+												float score=std::inner_product(nscores.begin(), nscores.end(), m_weights.begin(), 0.0f);
 
 												score-=tcands[i].first.size() * m_weightWP;
 												std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].first,TScores()));
