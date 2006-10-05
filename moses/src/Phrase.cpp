@@ -27,18 +27,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "memory.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
-#include "Util.h" //malloc() replacement
 #include "StaticData.h"  // GetMaxNumFactors
 
 using namespace std;
-
-// std::vector<mempool*> Phrase::s_memPool;
 
 Phrase::Phrase(const Phrase &copy)
 :m_direction(copy.m_direction)
 ,m_phraseSize(copy.m_phraseSize)
 ,m_arraySize(copy.m_arraySize)
-//,m_memPoolIndex(copy.m_memPoolIndex)
 ,m_words(copy.m_words)
 {
 }
@@ -51,7 +47,6 @@ Phrase& Phrase::operator=(const Phrase& x)
 			m_direction=x.m_direction;
 			m_phraseSize=x.m_phraseSize;
 			m_arraySize=x.m_arraySize;
-//			m_memPoolIndex=x.m_memPoolIndex;
 
 			m_words = x.m_words;
 		}
@@ -63,19 +58,19 @@ Phrase::Phrase(FactorDirection direction)
 	: m_direction(direction)
 	, m_phraseSize(0)
 	, m_arraySize(ARRAY_SIZE_INCR)
-//	, m_memPoolIndex(0)
 	, m_words(ARRAY_SIZE_INCR)
 {
 }
 
 Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
 :m_direction(direction)
-,m_phraseSize(mergeWords.size())
-,m_words(mergeWords.size())
+,m_phraseSize(0)
+,m_arraySize(ARRAY_SIZE_INCR)
+,m_words(ARRAY_SIZE_INCR)
 {
-	for (size_t currPos = 0 ; currPos < m_phraseSize ; currPos++)
+	for (size_t currPos = 0 ; currPos < mergeWords.size() ; currPos++)
 	{
-		m_words[currPos] = *mergeWords[currPos];
+		AddWord(*mergeWords[currPos]);
 	}
 }
 
@@ -353,29 +348,10 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase, const std::vector<FactorTyp
 
 void Phrase::InitializeMemPool()
 {
-#if 0
-	s_memPool.push_back( new mempool(1 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 50000 ));
-	s_memPool.push_back( new mempool(2 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 1000 ));
-	s_memPool.push_back( new mempool(3 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 1000 ));
-	s_memPool.push_back( new mempool(4 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 100 ));
-	s_memPool.push_back( new mempool(5 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 10 ));
-	s_memPool.push_back( new mempool(6 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 10 ));
-	s_memPool.push_back( new mempool(7 * ARRAY_SIZE_INCR * sizeof(FactorArray) , 10 ));
-	
-	for (size_t i = 8 ; i < 30 ; ++i)
-		s_memPool.push_back( new mempool(i * ARRAY_SIZE_INCR * sizeof(FactorArray) , 2 ));
-#endif
 }
 
 void Phrase::FinalizeMemPool()
 {
-#if 0
-	std::vector<mempool*>::iterator iter;
-	for (iter = s_memPool.begin() ; iter != s_memPool.end() ; ++iter)
-	{
-		delete *iter;
-	}
-#endif
 }
 
 TO_STRING_BODY(Phrase);
