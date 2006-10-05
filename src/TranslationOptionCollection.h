@@ -40,7 +40,7 @@ class Word;
 
 typedef std::vector<const TranslationOption*> TranslationOptionList;
 
-/** Contains all phrase translations applicable to current sentence.
+/** Contains all phrase translations applicable to current input type (a sentence or confusion network).
  * A key insight into efficient decoding is that various input
  * conditions (lattices, factored input, normal text, xml markup)
  * all lead to the same decoding algorithm: hypotheses are expanded
@@ -48,7 +48,11 @@ typedef std::vector<const TranslationOption*> TranslationOptionList;
  *
  * The precomputation of a collection of instances of such TranslationOption 
  * depends on the input condition, but they all are presented to
- * decoding algorithm in the same form, using this class. **/
+ * decoding algorithm in the same form, using this class.
+ *
+ * This class cannot, and should not be instantiated directly. Instantiate 1 of the inherited
+ * classes instead, for a particular input type
+ **/
 
 class TranslationOptionCollection
 {
@@ -56,9 +60,9 @@ class TranslationOptionCollection
 	TranslationOptionCollection(const TranslationOptionCollection&); /*< no copy constructor */
 protected:
 	std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
-	InputType const			&m_source;
-	SquareMatrix				m_futureScore; /*< matrix of future costs for parts of the sentence */
-	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase) */
+	InputType const			&m_source; /*< reference to the input */
+	SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
+	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase???) */
 	FactorCollection		*m_factorCollection;
 	
 	TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage);
@@ -68,7 +72,7 @@ protected:
 	virtual void ProcessInitialTranslation(const DecodeStep &decodeStep
 															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
-															, size_t startPos, size_t endPos, bool observeTableLimit );
+															, size_t startPos, size_t endPos, bool adhereTableLimit );
 
 	void ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection);
 	virtual void ProcessOneUnknownWord(const Word &sourceWord
@@ -86,16 +90,16 @@ protected:
 	  return m_collection[startPos][endPos - startPos];
 	}
 	void Add(const TranslationOption *translationOption);
-	
+
+	virtual void ProcessUnknownWord(size_t sourcePos
+																	, FactorCollection &factorCollection)=0;
+
 public:
   virtual ~TranslationOptionCollection();
 	const InputType& GetSource() const { return m_source; }
 
 	// get length/size of source input
 	size_t GetSize() const;
-
-	virtual void ProcessUnknownWord(size_t sourcePos
-																	, FactorCollection &factorCollection)=0;
 
 	virtual void CreateTranslationOptions(const std::list < DecodeStep* > &decodeStepList
 																			, FactorCollection &factorCollection);
@@ -104,7 +108,7 @@ public:
 																			, FactorCollection &factorCollection
 																			, size_t startPosition
 																			, size_t endPosition
-																			, bool observeTableLimit);
+																			, bool adhereTableLimit);
 
 	/** returns future cost matrix for sentence */
 	inline virtual const SquareMatrix &GetFutureScore() const

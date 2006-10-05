@@ -53,7 +53,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
-                              , bool observeTableLimit) const
+                              , bool adhereTableLimit) const
 {
   //TRACE_ERR(inputPartialTranslOpt << endl);
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
@@ -75,7 +75,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
   if (phraseColl != NULL)
     {
       TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
-		 	iterEnd = (!observeTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
+		 	iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
 			
       for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase)
         {

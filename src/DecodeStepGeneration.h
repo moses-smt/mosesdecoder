@@ -40,7 +40,7 @@ public:
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
-                              , bool observeTableLimit) const;
+                              , bool adhereTableLimit) const;
 
 private:
   TranslationOption *MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase

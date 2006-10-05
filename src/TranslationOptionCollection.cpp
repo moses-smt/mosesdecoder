@@ -33,7 +33,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-/** constructor; since translation options are indexed by coverage span, the corresponding data structure is initialized here */
+/** constructor; since translation options are indexed by coverage span, the corresponding data structure is initialized here 
+	* This fn should be called by inherited classes
+*/
 TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage)
 	: m_source(src)
 	,m_futureScore(src.GetSize())
@@ -108,6 +110,22 @@ void TranslationOptionCollection::Prune()
 		<< "Total translation options pruned: " << totalPruned << std::endl);
 }
 
+/** Force a creation of a translation option where there are none for a particular source position.
+* ie. where a source word has not been translated, create a translation option by
+*				1. not observing the table limits on phrase/generation tables
+*				2. using the handler ProcessUnknownWord()
+* Call this function once translation option collection has been filled with translation options
+*
+* This function calls for unknown words is complicated by the fact it must handle different input types. 
+* The call stack is
+*		Base::ProcessUnknownWord()
+*			Inherited::ProcessUnknownWord()
+*				Base::ProcessOneUnknownWord()
+*
+* \param decodeStepList list of decoding steps
+* \param factorCollection input sentence with all factors
+*/
+
 void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection)
 {
 	size_t size = m_source.GetSize();
@@ -147,11 +165,75 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeSte
 	}
 }
 
-/** compute the future score matrix used in search */
+/** special handling of ONE unknown words. Either add temporarily add word to translation table,
+	* or drop the translation.
+	* This function should be called by the ProcessOneUnknownWord() in the inherited class
+	* At the moment, this unknown word handler is a bit of a hack, if copies over each factor from source
+	* to target word, or uses the 'UNK' factor.
+	* Ideally, this function should be in a class which can be expanded upon, for example, 
+	* to create a morphologically aware handler. 
+	*
+	* \param sourceWord the unknown word
+	* \param sourcePos
+	* \param factorCollection input sentence with all factors
+ */
+void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
+																														size_t sourcePos
+																												, FactorCollection &factorCollection)
+{
+	// unknown word, add as trans opt
+
+		size_t isDigit = 0;
+		if (StaticData::Instance()->GetDropUnknown())
+		{
+			const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
+			std::string s = f->ToString();
+			isDigit = s.find_first_of("0123456789");
+			if (isDigit == string::npos) 
+				isDigit = 0;
+			else 
+				isDigit = 1;
+			// modify the starting bitmap
+		}
+		
+		TranslationOption *transOpt;
+		if (! StaticData::Instance()->GetDropUnknown() || isDigit)
+		{
+			// add to dictionary
+			TargetPhrase targetPhrase(Output);
+			Word &targetWord = targetPhrase.AddWord();
+						
+			for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+			{
+				FactorType factorType = static_cast<FactorType>(currFactor);
+				
+				const Factor *sourceFactor = sourceWord[currFactor];
+				if (sourceFactor == NULL)
+					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
+				else
+					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
+			}
+	
+			targetPhrase.SetScore();
+			
+			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
+		}
+		else 
+		{ // drop source word. create blank trans opt
+			const TargetPhrase targetPhrase(Output);
+			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
+		}
+
+		transOpt->CalcScore();
+		Add(transOpt);
+}
+
+/** compute future score matrix in a dynamic programming fashion.
+	* This matrix used in search.
+	* Call this function once translation option collection has been filled with translation options
+*/
 void TranslationOptionCollection::CalcFutureScore()
 {
-	// create future score matrix in a dynamic programming fashion
-
   // setup the matrix (ignore lower triangle, set upper triangle to -inf
   size_t size = m_source.GetSize(); // the width of the matrix
 
@@ -260,19 +342,20 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
 	CalcFutureScore();
 }
 
-/** subroutine for CreateTranslationOptions: collect translation options
- * that exactly cover a specific input span
+/** collect translation options that exactly cover a specific input span. 
+ * Called by CreateTranslationOptions() and ProcessUnknownWord()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  * \param startPos first position in input sentence
  * \param lastPos last position in input sentence 
+ * \param adhereTableLimit whether phrase & generation table limits are adhered to
  */
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 const list < DecodeStep* > &decodeStepList
 																													 , FactorCollection &factorCollection
 																													 , size_t startPos
 																													 , size_t endPos
-																													 , bool observeTableLimit)
+																													 , bool adhereTableLimit)
 {
 	// partial trans opt stored in here
 	PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
@@ -283,7 +366,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
 	ProcessInitialTranslation(decodeStep, factorCollection
 														, *oldPtoc
-														, startPos, endPos, observeTableLimit );
+														, startPos, endPos, adhereTableLimit );
 
 	// do rest of decode steps
 	size_t totalEarlyPruned = 0;
@@ -304,7 +387,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																	 , *newPtoc
 																	 , factorCollection
 																	 , this
-																	 , observeTableLimit);
+																	 , adhereTableLimit);
 			}
 			// last but 1 partial trans not required anymore
 			totalEarlyPruned += newPtoc->GetPrunedCount();
@@ -330,68 +413,16 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	// cerr << "Early translation options pruned: " << totalEarlyPruned << endl;
 }
 
-
-/** special handling of unknown words: add special translation (or drop) */
-void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
-																														size_t sourcePos
-																												, FactorCollection &factorCollection)
-{
-	// unknown word, add as trans opt
-
-		size_t isDigit = 0;
-		if (StaticData::Instance()->GetDropUnknown())
-		{
-			const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-			std::string s = f->ToString();
-			isDigit = s.find_first_of("0123456789");
-			if (isDigit == string::npos) 
-				isDigit = 0;
-			else 
-				isDigit = 1;
-			// modify the starting bitmap
-		}
-		
-		TranslationOption *transOpt;
-		if (! StaticData::Instance()->GetDropUnknown() || isDigit)
-		{
-			// add to dictionary
-			TargetPhrase targetPhrase(Output);
-			Word &targetWord = targetPhrase.AddWord();
-						
-			for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
-			{
-				FactorType factorType = static_cast<FactorType>(currFactor);
-				
-				const Factor *sourceFactor = sourceWord[currFactor];
-				if (sourceFactor == NULL)
-					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
-				else
-					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
-			}
-	
-			targetPhrase.SetScore();
-			
-			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
-		}
-		else 
-		{ // drop source word. create blank trans opt
-			const TargetPhrase targetPhrase(Output);
-			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
-		}
-
-		transOpt->CalcScore();
-		Add(transOpt);
-}
-
-
-/** initialize list of partial translation options by applying the first translation step */
+/** initialize list of partial translation options by applying the first translation step 
+	* Ideally, this function should be in DecodeStepTranslation class
+	*/
 void TranslationOptionCollection::ProcessInitialTranslation(
 															const DecodeStep &decodeStep
 															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos
 															, size_t endPos
-															, bool observeTableLimit)
+															, bool adhereTableLimit)
 {
 	const PhraseDictionaryBase &phraseDictionary = decodeStep.GetPhraseDictionary();
 	const size_t tableLimit = phraseDictionary.GetTableLimit();
@@ -403,7 +434,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 		VERBOSE(3,"[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
 			
 		TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
-		iterEnd = (!observeTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
+		iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
 		
 		for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase)
 		{
