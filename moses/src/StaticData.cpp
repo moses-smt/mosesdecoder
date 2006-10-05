@@ -446,7 +446,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		Scan<int>(m_parameter.GetParam("distortion-limit")[0])
 		: -1;
 	m_useDistortionFutureCosts = (m_parameter.GetParam("use-distortion-future-costs").size() > 0) 
-		? Scan<int>(m_parameter.GetParam("use-distortion-future-costs")[0]) : 0;
+		? Scan<bool>(m_parameter.GetParam("use-distortion-future-costs")[0]) : false;
 	//TRACE_ERR("using distortion future costs? "<<UseDistortionFutureCosts()<<"\n");
 	
 	m_beamThreshold = (m_parameter.GetParam("beam-threshold").size() > 0) ?

@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-const int MAX_MSG_QUEUE = 5;
+const size_t MAX_MSG_QUEUE = 5;
 
 bool UserMessage::m_toStderr	= true;
 bool UserMessage::m_toQueue		= false;

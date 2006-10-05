@@ -45,7 +45,8 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
 			//      sum+=getJumpCosts(lastPos,i,maxJumpWidth);
 		}
 		//    if(sum>1e5) return sum;
-		if(i>0 && ai==0 && (i+1==m_size||aip1) ) lastPos=i+1;
+		if(i>0 && ai==0 && (i+1==m_size||aip1) ) 
+			lastPos = (int) (i+1);
 	}
 
 	//  sum+=getJumpCosts(lastPos,as,maxJumpWidth);

@@ -48,7 +48,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 	assert(weightT.size() == scoreVector.size());
 	// calc average score if non-best
 
-	m_transScore = std::inner_product(scoreVector.begin(),scoreVector.end(),weightT.begin(),0.0);
+	m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
 	m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
 
   // Replicated from TranslationOptions.cpp
