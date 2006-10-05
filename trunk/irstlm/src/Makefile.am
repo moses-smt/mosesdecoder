@@ -17,12 +17,13 @@ library_include_HEADERS = \
         mempool.h \
         n_gram.h \
         ngramcache.h \
-	util.h
+	util.h \
+	gzfilebuf.h 
 
 bin_PROGRAMS = compile-lm quantize-lm
 
 AM_LDFLAGS=-L.
-LIBS=-lirstlm
+LIBS=-lirstlm -lz
 
 compile_lm_SOURCES = compile-lm.cpp
 quantize_lm_SOURCES = quantize-lm.cpp

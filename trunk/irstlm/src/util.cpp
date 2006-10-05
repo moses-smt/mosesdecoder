@@ -48,3 +48,30 @@ void removefile(const std::string &filePath)
 #endif
 }
 
+
+
+inputfilestream::inputfilestream(const std::string &filePath)
+: std::istream(0),
+m_streambuf(0)
+{
+  if (filePath.size() > 3 &&
+      filePath.substr(filePath.size() - 3, 3) == ".gz")
+  {
+    m_streambuf = new gzfilebuf(filePath.c_str());
+  } else {
+    std::filebuf* fb = new std::filebuf();
+    fb->open(filePath.c_str(), std::ios::in);
+    m_streambuf = fb;
+  }
+  this->init(m_streambuf);
+}
+
+inputfilestream::~inputfilestream()
+{
+  delete m_streambuf; m_streambuf = 0;
+}
+
+void inputfilestream::close()
+{
+}
+
