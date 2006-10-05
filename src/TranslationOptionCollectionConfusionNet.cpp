@@ -7,12 +7,18 @@
 #include "FactorCollection.h"
 #include "LMList.h"
 
-TranslationOptionCollectionConfusionNet::
-TranslationOptionCollectionConfusionNet(const ConfusionNet &input, size_t maxNoTransOptPerCoverage) 
-	: TranslationOptionCollection(input, maxNoTransOptPerCoverage) {}
+/** constructor; just initialize the base class */
+TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet(
+											const ConfusionNet &input
+											, size_t maxNoTransOptPerCoverage) 
+: TranslationOptionCollection(input, maxNoTransOptPerCoverage) {}
 
-void TranslationOptionCollectionConfusionNet::
-ProcessUnknownWord(		size_t sourcePos
+/* forcibly create translation option for a particular source word.
+	* call the base class' ProcessOneUnknownWord() for each possible word in the confusion network 
+	* at a particular source position
+*/
+void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(		
+											size_t sourcePos
 											, FactorCollection &factorCollection) 
 {
 	ConfusionNet const& source=dynamic_cast<ConfusionNet const&>(m_source);
