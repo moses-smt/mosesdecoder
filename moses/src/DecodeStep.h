@@ -102,6 +102,6 @@ public:
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
 															, TranslationOptionCollection *toc
-															, bool observeTableLimit) const = 0;
+															, bool adhereTableLimit) const = 0;
 
 };
