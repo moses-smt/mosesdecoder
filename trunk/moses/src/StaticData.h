@@ -289,7 +289,7 @@ public:
 //! Sets the global score vector weights for a given ScoreProducer.
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	int GetInputType() const {return m_inputType;}
-	unsigned GetNumInputScores() const {return m_numInputScores;}
+	size_t GetNumInputScores() const {return m_numInputScores;}
 	void InitializeBeforeSentenceProcessing(InputType const&);
 	void CleanUpAfterSentenceProcessing();
 	SentenceStats& GetSentenceStats() const
