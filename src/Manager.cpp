@@ -352,12 +352,39 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 	}
 }
 
-void Manager::CalcDecoderStatistics(const StaticData& staticData) const
+void Manager::CalcDecoderStatistics(const StaticData& staticData) const 
 {
-	const Hypothesis *hypo = GetBestHypothesis();
+  const Hypothesis *hypo = GetBestHypothesis();
 	if (hypo != NULL)
-		staticData.GetSentenceStats().CalcFinalStats(*hypo);
-	else
-	{
-	}
+  {
+  	staticData.GetSentenceStats().CalcFinalStats(*hypo);
+    IFVERBOSE(2) {
+		 	if (hypo != NULL) {
+		   	string buff;
+		  	string buff2;
+		   	TRACE_ERR ("Source and Target Units:");
+		 		TRACE_ERR ((hypo->GetSourcePhrase()).ToString());
+				buff2.insert(0,"] ");
+				buff2.insert(0,(hypo->GetTargetPhrase()).ToString());
+				buff2.insert(0,":");
+				buff2.insert(0,(hypo->GetCurrSourceWordsRange()).ToString());
+				buff2.insert(0,"[");
+				
+				hypo = hypo->GetPrevHypo();
+				while (hypo != NULL) {
+					//dont print out the empty final hypo
+				  buff.insert(0,buff2);
+				  buff2.clear();
+				  buff2.insert(0,"] ");
+				  buff2.insert(0,(hypo->GetTargetPhrase()).ToString());
+				  buff2.insert(0,":");
+				  buff2.insert(0,(hypo->GetCurrSourceWordsRange()).ToString());
+				  buff2.insert(0,"[");
+				  hypo = hypo->GetPrevHypo();
+				}
+				TRACE_ERR (buff);
+				TRACE_ERR ("\n");
+      }
+    }
+  }
 }
