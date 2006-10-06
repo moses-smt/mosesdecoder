@@ -83,7 +83,7 @@ while(my $f = <F>) {
   # An extra check: none of the factors can be blank!
   die "There is a blank factor in $corpus.$l1 on line $innr: $f"
     if $f =~ /[ \|]\|/;
-  die "There is a blank factor in $corpus.$l2 on line $innr: $f"
+  die "There is a blank factor in $corpus.$l2 on line $innr: $e"
     if $e =~ /[ \|]\|/;
     
   
