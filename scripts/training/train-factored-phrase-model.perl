@@ -293,6 +293,7 @@ sub prepare {
 	} else {
 	    &reduce_factors($___CORPUS.".".$___E.$___CORPUS_COMPRESSION,$corpus.".".$___E,$factor_e);
 	}
+	printf "Waiting for second reduce_factors process...\n";
 	waitpid($pid, 0);
 	my $pid2 = 0;
 	$pid = fork();
@@ -318,6 +319,7 @@ sub prepare {
 	&numberize_txt_file($VCB_E,$corpus.".".$___E,
 			$VCB_F,$corpus.".".$___F,
 			$___CORPUS_DIR."/$___E-$___F-int-train.snt");
+	printf "Waiting for mkcls processes to finish...\n";
 	waitpid($pid2, 0);
 	waitpid($pid, 0);
     }
@@ -325,8 +327,9 @@ sub prepare {
 
 sub reduce_factors {
     my ($full,$reduced,$factors) = @_;
+    print STDERR "(1.0.5) reducing factors to produce $reduced  @ ".`date`;
     if (-e $reduced) {
-        print STDERR "already $reduced in place, reusing\n";
+        print STDERR "  $reduced in place, reusing\n";
         return;
     }
     # my %INCLUDE;
@@ -352,7 +355,8 @@ sub reduce_factors {
 	chomp; s/ +/ /g; s/^ //; s/ $//;
 	my $first = 1;
 	foreach (split) {
-	    my @FACTOR = string_split($___FACTOR_DELIMITER, $_);
+	    my @FACTOR = split /\Q$___FACTOR_DELIMITER/;
+              # \Q causes to disable metacharacters in regex
 	    print OUT " " unless $first;
 	    $first = 0;
 	    my $first_factor = 1;
@@ -377,38 +381,14 @@ sub reduce_factors {
     close(IN);
 }
 
-# this acts just like split, only it matches EXACTLY against $delimiter
-# rather than treating it as a regular expression as split /$var/, $x
-# would.
-#
-# there may be a perl function that can either escape a string such that
-# it can be used in a RE as a literal (ie, not as a pattern), or some
-# way of constraining the RE Engine, but I don't know what it is.
-sub string_split {
-  my ($delimiter, $x) = @_;
-  my @res;
-  my $ld = length $delimiter;
-  my $lx = length $x;
-  return ($x) if ($lx < $ld);
-  if ($lx == 0) { return split //, $x; }
-
-  my $end = $lx - $ld + 1;
-  my $last = 0;
-  for (my $i = 0; $i < $end; $i++) {
-    if (substr($x, $i, $ld) eq $delimiter) {
-      push @res, substr($x, $last, $i - $last);
-      $last = $i + $ld;
-      $i = $last - 1;  # incremented again by for
-    }
-  }
-  push @res, substr($x, $last) if ($last < $end);
-  return @res;  
-}
-
 sub make_classes {
     my ($corpus,$classes) = @_;
     my $cmd = "$MKCLS -c50 -n2 -p$corpus -V$classes opt";
     print STDERR "(1.1) running mkcls  @ ".`date`."$cmd\n";
+    if (-e $classes) {
+        print STDERR "  $classes already in place, reusing\n";
+        return;
+    }
     safesystem("$cmd"); # ignoring the wrong exit code from mkcls (not dying)
 }
 
@@ -450,6 +430,10 @@ sub numberize_txt_file {
     my ($VCB_DE,$in_de,$VCB_EN,$in_en,$out) = @_;
     my %OUT;
     print STDERR "(1.3) numberizing corpus $out @ ".`date`;
+    if (-e $out) {
+        print STDERR "  $out already in place, reusing\n";
+        return;
+    }
     open(IN_DE,$in_de) or die "Can't read $in_de";
     open(IN_EN,$in_en) or die "Can't read $in_en";
     open(OUT,">$out") or die "Can't write $out";
@@ -508,7 +492,7 @@ sub run_giza {
                      $___VCB_F,$___VCB_E,
                      $___CORPUS_DIR."/$___E-$___F-int-train.snt");
 	}
-	printf "Waiting on second GIZA process...\n";
+	printf "Waiting for second GIZA process...\n";
 	waitpid($pid, 0);
     }
 }
@@ -544,7 +528,7 @@ sub run_giza_on_parts {
 			      $___VCB_F,$___VCB_E,
 			      $___CORPUS_DIR."/$___E-$___F-int-train.snt",$size);
 	}
-	printf "Waiting on second GIZA process...\n";
+	printf "Waiting for second GIZA process...\n";
 	waitpid($pid, 0);
     }
 }
