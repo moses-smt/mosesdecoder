@@ -259,11 +259,9 @@ void lmtable::checkbounds(int level){
 	
    //re-order table at level+1 on disk
   //generate random filename to avoid collisions 
-
-  string filePath;
-  ofstream out;
-  createtempfile(out, filePath, ios::out);
-
+  ofstream out;string filePath;
+  createtempfile(out,filePath,ios::out);
+ 
   int start,end,newstart;
 	
   //re-order table at level l+1
