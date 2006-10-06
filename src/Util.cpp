@@ -118,9 +118,9 @@ bool Scan<bool>(const std::string &input)
 	return false;
 }
 
-bool FileExists(const std::string& fileName)
+bool FileExists(const std::string& filePath)
 {
-        std::ifstream ifs(fileName.c_str());
+        std::ifstream ifs(filePath.c_str());
         return !ifs.fail();
 }
 
