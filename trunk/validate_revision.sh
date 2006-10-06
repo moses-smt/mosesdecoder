@@ -23,6 +23,10 @@ function die() {
   exit 1
 }
 
+if svn status | grep '^[^\?]'; then
+  die "Will not go to a different revision, please synchronize with a revision in repository first"
+fi
+
 svn up -r $rev || die "Failed to update to rev. $rev"
 # dump the information
 svn info
