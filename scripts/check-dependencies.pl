@@ -23,12 +23,13 @@ if (-e $release_dir) {
   exit 1;
 }
 
-unless (-x "$bin_dir/GIZA++" && -x "$bin_dir/snt2cooc.out") {
+unless (-x "$bin_dir/GIZA++" && -x "$bin_dir/snt2cooc.out" && -x "$bin_dir/mkcls" ) {
   print <<EOT;
 Please specify a BINDIR.
 
-  This directory must contain GIZA++ and snt2cooc.out, which
-  are available from http://www.fjoch.com/GIZA++.html .
+  The BINDIR directory must contain GIZA++, snt2cooc.out and mkcls executables.
+  These are available from http://www.fjoch.com/GIZA++.html and
+  http://www-i6.informatik.rwth-aachen.de/Colleagues/och/software/mkcls.html .
 EOT
   exit 1;
 }

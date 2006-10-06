@@ -24,7 +24,7 @@ all: compile
 compile:
 	cd training/cmert-0.5/ && make clean && make
 	## Compiled mert
-	cd training/phrase-extract/ && make clean && nake
+	cd training/phrase-extract/ && make clean && make
 	## Compiled phrase_extract
 	cd training/symal/ && make clean && make
 	## Compiled symal
