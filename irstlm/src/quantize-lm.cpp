@@ -26,9 +26,10 @@ using namespace std;
 #include <string>
 #include <stdlib.h>
 #include <assert.h>
-
 #include "math.h"
-//#include "lmtable.h"
+#include "util.h"
+
+#define MAX_LINE 1024
 
 //----------------------------------------------------------------------
 //  Special type and global variable for the BIN CLUSTERING algorithm
@@ -79,7 +80,7 @@ void usage(const char *msg = 0) {
   if (!msg) std::cerr << std::endl
     << "  quantize-lm reads a standard LM file in ARPA format and produces" << std::endl
     << "  a version of it with quantized probabilities and back-off weights"<< std::endl
-    << "  that the IRST LMtoolkit can compile." << std::endl;
+    << "  that the IRST LMtoolkit can compile. Accepts LMs with .gz suffix." << std::endl;
   }
 
 
@@ -99,28 +100,49 @@ int main(int argc, const char **argv)
   
   
   std::string infile = files[0];
-  if (files.size() == 1) {
-    std::string::size_type p = infile.rfind('/');
-    if (p != std::string::npos && ((p+1) < infile.size())) {
-      files.push_back(infile.substr(p+1) + ".qlm");
-    } else {
-      files.push_back(infile + ".qlm");
-    }
+  std::string outfile="";
+
+  if (files.size() == 1) {  
+    outfile=infile;
+    
+    //remove path information
+    std::string::size_type p = outfile.rfind('/');
+    if (p != std::string::npos && ((p+1) < outfile.size()))           
+      outfile.erase(0,p+1);
+    
+    //eventually strip .gz 
+    if (outfile.compare(outfile.size()-3,3,".gz")==0)
+      outfile.erase(outfile.size()-3,3);
+    
+    outfile+=".qlm";
   }
+  else
+    outfile = files[1];
+  
   
   
   std::cout << "Reading " << infile << "..." << std::endl;
   
-  std::fstream inp(infile.c_str());
+ inputfilestream inp(infile.c_str());
   if (!inp.good()) {
     std::cerr << "Failed to open " << infile << "!\n";
     exit(1);
   }
   
-  std::string outfile = files[1];
+
   std::ofstream out(outfile.c_str());
   std::cout << "Writing " << outfile << "..." << std::endl;
 
+  //prepare temporary file to save n-gram blocks for multiple reads 
+  //this avoids using seeks which do not work with inputfilestream
+  //it's odd but i need a bidirectional filestream!
+  
+  string filePath;ofstream dummy;
+  createtempfile(dummy,filePath,ios::out);
+  dummy.close();
+  
+  fstream filebuff(filePath.c_str(),ios::out|ios::in);
+    
   int nPts = 0;  // actual number of points
   
   // *** Read ARPA FILE ** 
@@ -141,11 +163,12 @@ int main(int argc, const char **argv)
   
   out << "qARPA\n"; //print output header
   
+    
   for (int i=1;i<=MAXLEV;i++) numNgrams[i]=0;
   
-  char line[1024];
+  char line[MAX_LINE];
   
-  while (inp.getline(line,1024)){
+  while (inp.getline(line,MAX_LINE)){
     
     bool backslash = (line[0] == '\\');
     
@@ -165,18 +188,20 @@ int main(int argc, const char **argv)
       if (Order==1) centers=256; // always use 256 centers
       
       char* words[MAXLEV+3];
-      dataPts=new double[N]; // allocate data   
+      dataPts=new double[N]; // allocate data         
       
-      iposition=inp.tellg();
-      
+      //reset tempout file 
+      filebuff.seekg(0);
+           
       for (nPts=0;nPts<N;nPts++){
-        inp.getline(line,1024);
+        inp.getline(line,MAX_LINE);  
+        filebuff << line << std::endl;
         int howmany = parseWords(line, words, Order + 3);
         assert(howmany == Order+2 || howmany == Order+1);
         sscanf(words[0],"%f",&logprob);
         dataPts[nPts]=exp(logprob * logten);
       }
-      
+                
       cerr << "quantizing " << N << " probabilities\n";
       
       centersP=new double[centers];
@@ -184,18 +209,21 @@ int main(int argc, const char **argv)
       
       ComputeCluster(centers,centersP,N,dataPts);
       
-      
+
       assert(bintable !=NULL);
       for (int p=0;p<N;p++){
         mapP[bintable[p].idx]=bintable[p].code;
       }
       
       if (Order<MaxOrder){
-        
-        inp.seekg(iposition);
-        
+        //second pass to read back-off weights
+      
+        filebuff.seekg(0);
+       
         for (nPts=0;nPts<N;nPts++){
-          inp.getline(line,1024);
+         
+          filebuff.getline(line,MAX_LINE);
+          
           int howmany = parseWords(line, words, Order + 3);
           if (howmany==Order+2) //backoff is written
             sscanf(words[Order+1],"%f",&logbow);
@@ -217,8 +245,7 @@ int main(int argc, const char **argv)
         
       }
       
-      inp.seekg(iposition);
-      
+            
       out << centers << "\n";
       for (nPts=0;nPts<centers;nPts++){
         out << log(centersP[nPts])/logten;
@@ -226,9 +253,11 @@ int main(int argc, const char **argv)
         out << "\n";
       }
       
+      filebuff.seekg(0);
+      
       for (nPts=0;nPts<numNgrams[Order];nPts++){
         
-        inp.getline(line,1024);
+        filebuff.getline(line,MAX_LINE);
         
         parseWords(line, words, Order + 3);
         
@@ -261,11 +290,11 @@ int main(int argc, const char **argv)
   cerr << "---- done\n";
   
   out.flush();
-  inp.flush();
-  
+   
   out.close();
   inp.close();
   
+  removefile(filePath);
 }
 
 // Compute Clusters
