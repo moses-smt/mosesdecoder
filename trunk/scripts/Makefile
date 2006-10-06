@@ -22,11 +22,11 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 all: compile
 
 compile:
-	cd training/cmert-0.5/ && make
+	cd training/cmert-0.5/ && make clean && make
 	## Compiled mert
-	cd training/phrase-extract/ && make
+	cd training/phrase-extract/ && make clean && nake
 	## Compiled phrase_extract
-	cd training/symal/ && make
+	cd training/symal/ && make clean && make
 	## Compiled symal
 	## All files that need compilation were compiled
 
