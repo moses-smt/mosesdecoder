@@ -10,7 +10,7 @@ if (!defined $stem) {
 }
 
 my @REF;
-my $ref=0;
+my $ref=1;
 while(-e "$stem$ref") {
     &add_to_ref("$stem$ref",\@REF);
     $ref++;

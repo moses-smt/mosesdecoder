@@ -82,10 +82,12 @@ sub ReadBiAlign{
 }
 
 $skip=0;
+$ccc=0;
 while(!eof(DIR)){
 
     if (ReadBiAlign(CNT,DIR,INV,*src,*tgt,*a,*b,*c))
     {
+	$ccc++;
         print "$c\n";
         print $#a," $src \# @a[1..$#a]\n";
         print $#b," $tgt \# @b[1..$#b]\n";
@@ -94,3 +96,4 @@ while(!eof(DIR)){
         print STDERR "." if !(++$skip % 1000);
     }
 };
+print STDERR "skip=<$skip> counts=<$ccc>\n";
