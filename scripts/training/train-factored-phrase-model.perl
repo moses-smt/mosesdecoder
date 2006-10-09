@@ -640,6 +640,10 @@ sub run_single_giza {
     &run_single_snt2cooc($dir,$e,$f,$vcb_e,$vcb_f,$train) if $___PARTS == 1;
 
     print STDERR "(2.1b) running giza $f-$e @ ".`date`."$GIZA $GizaOptions\n";
+    if (-e "$dir/$f-$e.A3.final.gz") {
+      print "  $dir/$f-$e.A3.final.gz seems finished, reusing.\n";
+      return;
+    }
     print "$GIZA $GizaOptions\n";
     return if  $___ONLY_PRINT_GIZA;
     safesystem("$GIZA $GizaOptions");
