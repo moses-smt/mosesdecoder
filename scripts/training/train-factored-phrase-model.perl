@@ -735,6 +735,11 @@ sub get_lexical {
     print STDERR "(4) [$factor] generate lexical translation table @ ".`date`;
 		my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
 
+    if (-e "$___LEXICAL_DIR/lex.$factor.f2n" && -e "$___LEXICAL_DIR/lex.$factor.n2f") {
+      print STDERR "  reusing: $___LEXICAL_DIR/lex.$factor.f2n and $___LEXICAL_DIR/lex.$factor.n2f\n";
+      return;
+    }
+
 		&open_alignment();
     while(my $e = <E>) {
         if (($alignment_id++ % 1000) == 0) { print STDERR "!"; }
@@ -893,7 +898,6 @@ sub score_phrase {
 	safesystem("cat $___MODEL_DIR/phrase-table-half.$factor.$direction.part* >$___MODEL_DIR/phrase-table-half.$factor.$direction") or die;
     }
     print STDERR "(6.4) [$factor]  sorting inverse n2f table@ ".`date`;
-    print "LC_ALL=C sort -T $___MODEL_DIR $___MODEL_DIR/phrase-table-half.$factor.n2f > $___MODEL_DIR/phrase-table-half.$factor.n2f inverse.sorted\n";
     safesystem("LC_ALL=C sort -T $___MODEL_DIR $___MODEL_DIR/phrase-table-half.$factor.n2f > $___MODEL_DIR/phrase-table-half.$factor.n2f.sorted") or die;
     print STDERR "(6.5) [$factor]  consolidating the two halves @ ".`date`;
     open(F2N,"$___MODEL_DIR/phrase-table-half.$factor.f2n")
