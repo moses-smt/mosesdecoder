@@ -35,6 +35,7 @@ using namespace std;
 std::string stxt = "no";
 std::string seval = "";
 std::string sdebug = "0";
+std::string ssubdict = "";
 
 /********************************/
 
@@ -48,7 +49,8 @@ void usage(const char *msg = 0) {
   std::cerr << "Options:\n"
             << "--text=[yes|no] -t=[yes|no] (output is again in text format)\n"
             << "--eval=text-file -e=text-file (computes perplexity of text-file and returns)\n"
-            << "--debug=1 -d=1 (verbose output for --eval option)\n";
+            << "--debug=1 -d=1 (verbose output for --eval option)\n"
+            << "--subdict=text-file --sd=tex-file (limits LM to include only words in text-file)\n" ;
 }
 
 bool starts_with(const std::string &s, const std::string &pre) {
@@ -87,6 +89,10 @@ void handle_option(const std::string& opt, int argc, const char **argv, int& arg
   else
     if (starts_with(opt, "--debug") || starts_with(opt, "-d"))
       sdebug = get_param(opt, argc, argv, argi);
+
+  else
+    if (starts_with(opt, "--subdict") || starts_with(opt, "-sd"))
+      ssubdict = get_param(opt, argc, argv, argi);
   
   else {
     usage(("Don't understand option " + opt).c_str());
@@ -132,17 +138,26 @@ int main(int argc, const char **argv)
  
   cerr << "outfile: " << outfile << std::endl;
  
-  std::cout << "Reading " << infile << "..." << std::endl;
-   
-  inputfilestream inp(infile.c_str());
-  //std::fstream inp(infile.c_str());
-  if (!inp.good()) {
-    std::cerr << "Failed to open " << infile << "!\n";
-    exit(1);
-  }
-  lmtable lmt; 
-  lmt.load(inp);
   
+  lmtable lmt; 
+  
+
+  
+  if (ssubdict == ""){
+
+    std::cout << "Reading " << infile << "..." << std::endl;
+    inputfilestream inp(infile.c_str());
+    if (!inp.good()) {
+      std::cerr << "Failed to open " << infile << "!\n";
+      exit(1);
+    }    
+    lmt.load(inp);    
+    
+  }
+  else{ //load reduced LM from a binary LM file!
+    lmt.dict->generate((char *)ssubdict.c_str());
+    lmt.filter2(infile.c_str(),100); 
+  }
   
   if (seval != ""){
     ngram ng(lmt.dict);    
