@@ -286,10 +286,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\NGramCollection.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Parameter.cpp"
 				>
 			</File>
@@ -559,10 +555,6 @@
 			</File>
 			<File
 				RelativePath=".\src\mempool.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\NGramCollection.h"
 				>
 			</File>
 			<File
