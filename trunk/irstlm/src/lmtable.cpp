@@ -516,7 +516,7 @@ void lmtable::loadbinheader(istream& inp,const char* header){
   
   if (strncmp(header,"Qblmt",5)==0) isQtable=1;
   else if(strncmp(header,"blmt",4)==0) isQtable=0;
-  else error("loadbin: wrong header");
+  else error("loadbin: LM file is not in binary format");
 	
   configure(maxlev,isQtable);
   
@@ -894,7 +894,11 @@ void lmtable::filter2(const char* binlmfile, int buffMb){
   dsklmt->dict->load(inp); 
   
   //inherit properties of the dsklmt
-  configure(dsklmt->maxlevel(),dsklmt->isQuantized());
+  isQtable=dsklmt->isQtable;
+  configure(dsklmt->maxlevel(),dsklmt->isQtable);
+  if (isQtable)
+    for (int i=1;i<=maxlev;i++) NumCenters[i]=dsklmt->NumCenters[i];
+  
   
   //prepare word code conversion table; words which 
   //are not in the local dictionary will have code -1
