@@ -108,9 +108,10 @@ sub preparing_script(){
     print OUT "rm $tmpdir/cmderr$$\n\n";
     print OUT "echo exit status \$\?\n\n";
   }
-
-
   close(OUT);
+
+  #setting permissions of each script
+  chmod(oct(755),"${jobscript}.bash");
 }
 
 #######################
@@ -124,7 +125,7 @@ safesystem("mkdir -p $tmpdir") or die;
 
 preparing_script();
 
-my $qsubcmd="qsub $queueparameters -sync yes -o $qsubout -e $qsuberr -N $qsubname ${jobscript}.bash >& ${jobscript}.log";
+my $qsubcmd="qsub $queueparameters -b yes -sync yes -o $qsubout -e $qsuberr -N $qsubname ${jobscript}.bash >& ${jobscript}.log";
 
 print  STDERR "$qsubcmd\n";
 safesystem($qsubcmd) or die;
