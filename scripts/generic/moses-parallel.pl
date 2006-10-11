@@ -92,7 +92,8 @@ sub version(){
 #    print STDERR "version 1.7 (29-07-2006)\n";
 #    print STDERR "version 1.8 (31-07-2006)\n";
 #    print STDERR "version 1.9 (01-08-2006)\n";
-    print STDERR "version 1.10 (02-08-2006)\n";
+#    print STDERR "version 1.10 (02-08-2006)\n";
+    print STDERR "version 1.11 (10-10-2006)\n";
     exit(1);
 }
 
@@ -102,8 +103,7 @@ sub usage(){
   print STDERR "Options marked (*) are required.\n";
   print STDERR "Parallel options:\n";
   print STDERR "*  -decoder <file> Moses decoder to use\n";
-  print STDERR "   -i|inputfile|input-file <string> input file\n";
-  print STDERR "*  -inputfile <file>   the input text to translate\n";
+  print STDERR "*  -i|inputfile|input-file <file>   the input text to translate\n";
   print STDERR "*  -jobs <N> number of required jobs\n";
   print STDERR "   -qsub-prefix <string> name for sumbitte jobs\n";
   print STDERR "   -queue-parameters <string> specific requirements for queue\n";
@@ -162,7 +162,7 @@ usage() if $help;
 
 
 if (!defined $orifile || !defined $mosescmd || ! defined $cfgfile) {
-  print STDERR "Please specify -inputfile, -decoder and -config\n";
+  print STDERR "Please specify -input-file, -decoder and -config\n";
   usage();
 }
 
@@ -263,9 +263,9 @@ my @sgepids =();
 
 my $failure=0;
 foreach my $idx (@idxlist){
-  print STDERR "qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash\n" if $dbg; 
+  print STDERR "qsub $queueparameters -b yes -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash\n" if $dbg; 
 
-  $cmd="qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
+  $cmd="qsub $queueparameters -b yes -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
 
   safesystem($cmd) or die;
 
@@ -309,16 +309,19 @@ sub preparing_script(){
     open (OUT, "> ${jobscript}${idx}.bash");
     print OUT $scriptheader;
     if ($nbestflag){
-      print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest -i ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
+      print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest -input-file ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
       print OUT "echo exit status \$\?\n\n";
       print OUT "mv $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
-      print OUT "echo exit status \$\?\n\n";
+      print OUT "echo exit status \$\?\n\n";n
     }else{
-      print OUT "$mosescmd $mosesparameters -i ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
+      print OUT "$mosescmd $mosesparameters -input-file ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
     }
     print OUT "mv $tmpdir/${testfile}.$splitpfx$idx.trans .\n\n";
     print OUT "echo exit status \$\?\n\n";
     close(OUT);
+
+    #setting permissions of each script
+    chmod(oct(755),"${jobscript}${idx}.bash");
   }
 }
 
