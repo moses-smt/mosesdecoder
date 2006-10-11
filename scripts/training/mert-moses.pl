@@ -9,8 +9,15 @@
 
 # Revision history
 
-# 31 Jl 1006 move gzip run*.out to avoid failure wit restartings
-#            adding default paths
+# 11 Oct 2006 Handle different input types through parameter --inputype=[0|1]
+#             (0 for text, 1 for confusion network, default is 0) (Nicola Bertoldi)
+# 10 Oct 2006 Allow skip of filtering of phrase tables (--no-filter-phrase-table)
+#             useful if binary phrase tables are used (Nicola Bertoldi)
+# 28 Aug 2006 Use either closest or average or shortest (default) reference
+#             length as effective reference length
+#             Use either normalization or not (default) of texts (Nicola Bertoldi)
+# 31 Jul 2006 move gzip run*.out to avoid failure wit restartings
+#             adding default paths
 # 29 Jul 2006 run-filter, score-nbest and mert run on the queue (Nicola; Ondrej had to type it in again)
 # 28 Jul 2006 attempt at foolproof usage, strong checking of input validity, merged the parallel and nonparallel version (Ondrej Bojar)
 # 27 Jul 2006 adding the safesystem() function to handle with process failure
@@ -85,12 +92,23 @@ my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $___LAMBDA = undef; # string specifying the seed weights and boundaries of all lambdas
 my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
+my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
 
 # Parameter for effective reference length when computing BLEU score
 # This is used by score-nbest-bleu.py
 # Default is to use shortest reference
 # Use "--average" to use average reference length
+# Use "--closest" to use closest reference length
+# Only one between --average and --closest can be set
+# If both --average is used
 my $___AVERAGE = 0;
+my $___CLOSEST = 0;
+
+# Use "--nonorm" to non normalize translation before computing BLEU
+my $___NONORM = 0;
+
+# set 0 if input type is text, set 1 if input type is confusion network
+my $___INPUTTYPE = 0; 
 
 my $allow_unknown_lambdas = 0;
 my $allow_skipping_lambdas = 0;
@@ -110,6 +128,7 @@ use Getopt::Long;
 GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
   "input=s" => \$___DEV_F,
+  "inputtype=i" => \$___INPUTTYPE,
   "refs=s" => \$___DEV_E,
   "decoder=s" => \$___DECODER,
   "config=s" => \$___CONFIG,
@@ -121,6 +140,8 @@ GetOptions(
   "continue" => \$continue,
   "skip-decoder" => \$skip_decoder,
   "average" => \$___AVERAGE,
+  "closest" => \$___CLOSEST,
+  "nonorm" => \$___NONORM,
   "help" => \$usage,
   "allow-unknown-lambdas" => \$allow_unknown_lambdas,
   "allow-skipping-lambdas" => \$allow_skipping_lambdas,
@@ -132,6 +153,7 @@ GetOptions(
   "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
+  "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -168,21 +190,35 @@ Options:
   --continue  ... continue from the last achieved state
   --skip-decoder ... skip the decoder run for the first time, assuming that
                      we got interrupted during optimization
-  --average   ... Use either average or shortest (default) reference
+  --average ... Use either average or shortest (default) reference
                   length as effective reference length
+  --closest ... Use either closest or shortest (default) reference
+                  length as effective reference length
+  --nonorm ... Do not use text normalization
   --filtercmd=STRING  ... path to filter-model-given-input.pl
-  --roodir=STRING  ... where do helpers reside (if not given explicitly)
+  --rootdir=STRING  ... where do helpers reside (if not given explicitly)
   --cmertdir=STRING ... where is cmert installed
   --pythonpath=STRING  ... where is python executable
   --scorenbestcmd=STRING  ... path to score-nbest.py
+  --inputtype=[0|1] ... Handle different input types (0 for text, 1 for confusion network, default is 0)
+  --no-filter-phrase-table ... disallow filtering of phrase tables
+                              (useful if binary phrase tables are available)
 ";
   exit 1;
 }
 
+# update variables if input is confusion network
+if ($___INPUTTYPE == 1)
+{
+  $ABBR_FULL_MAP = "$ABBR_FULL_MAP I=weight-i";
+  %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
+  %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
+
+  push @{$default_triples -> {"I"}}, [ 1.0, 0.0, 2.0 ];
+  $extra_lambdas_for_model -> {"I"} = 1; #Confusion network posterior
+}
+
 # Check validity of input parameters and set defaults if needed
-
-
-
 
 if (!defined $SCRIPTS_ROOTDIR) {
   $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
@@ -401,21 +437,26 @@ if ($continue) {
   # dump_triples($use_triples);
 }
 
+if ($___FILTER_PHRASE_TABLE){
+  # filter the phrase tables wih respect to input, use --decoder-flags
+  print "filtering the phrase tables... ".`date`;
+  my $cmd = "$filtercmd ./filtered $___CONFIG $___DEV_F";
+  if (defined $___JOBS) {
+    safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\"" ) or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
+  } else {
+    safesystem($cmd) or die "Failed to filter the tables.";
+  }
 
-
-# filter the phrase tables, use --decoder-flags
-print "filtering the phrase tables... ".`date`;
-my $cmd = "$filtercmd ./filtered $___CONFIG $___DEV_F";
-if (defined $___JOBS) {
-  safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\"" ) or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
-} else {
-  safesystem($cmd) or die "Failed to filter the tables.";
+  # the decoder should now use the filtered model
+  $___CONFIG = "filtered/moses.ini";
+}
+else{
+  # do not filter phrase tables (useful if binary phrase tables are available)
+  # use the original configuration file
 }
 
-
-# the decoder should now use the filtered model
 my $PARAMETERS;
-$PARAMETERS = $___DECODER_FLAGS . " -config filtered/moses.ini";
+$PARAMETERS = $___DECODER_FLAGS . " -config $___CONFIG -inputtype $___INPUTTYPE";
 
 my $devbleu = undef;
 my $bestpoint = undef;
@@ -451,7 +492,14 @@ while(1) {
   my $EFF_REF_LEN = "";
   if ($___AVERAGE) {
      $EFF_REF_LEN = "-a";
-  }
+  }elsif ($___CLOSEST){
+     $EFF_REF_LEN = "-e";
+  }   
+
+  my $EFF_NORM = "";
+  if ($___NONORM) {
+     $EFF_NORM = "-n";
+  }   
 
   # To be sure that scoring script produses these fresh:
   safesystem("rm -f cands.opt feats.opt") or die;
@@ -459,7 +507,7 @@ while(1) {
   # convert n-best list into a numberized format with error scores
 
   print STDERR "Scoring the nbestlist.\n";
-  my $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_REF_LEN ".join(" ", @references)." ./";
+  my $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
   if (defined $___JOBS) {
     safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\"") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
   } else {

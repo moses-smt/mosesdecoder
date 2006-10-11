@@ -312,7 +312,7 @@ sub preparing_script(){
       print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest -input-file ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
       print OUT "echo exit status \$\?\n\n";
       print OUT "mv $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
-      print OUT "echo exit status \$\?\n\n";n
+      print OUT "echo exit status \$\?\n\n";
     }else{
       print OUT "$mosescmd $mosesparameters -input-file ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
     }
