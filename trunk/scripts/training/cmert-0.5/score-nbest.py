@@ -27,8 +27,15 @@ def process(sentnum, testsents):
 					    comps['reflen']))
 
 if __name__ == "__main__":
-    import psyco
-    psyco.full()
+
+    import os
+    machtype=os.environ.get("MACHTYPE")
+    if machtype == "i386":
+        import psyco
+        psyco.full()
+        sys.stderr.write("psyco library is imported\n")
+    else:
+        sys.stderr.write("psyco library is not imported because it is not available for %s \n" % machtype)
 
     import getopt
     (opts,args) = getopt.getopt(sys.argv[1:], "casen", [])
