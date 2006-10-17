@@ -24,7 +24,7 @@ class PhraseDictionaryTree : public Dictionary {
 	PhraseDictionaryTree(const PhraseDictionaryTree&); //not implemented
 	void operator=(const PhraseDictionaryTree&); //not implemented
 public:
-	PhraseDictionaryTree(size_t noScoreComponent);
+	PhraseDictionaryTree(size_t numScoreComponent);
 
 	virtual ~PhraseDictionaryTree();
 

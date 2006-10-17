@@ -566,15 +566,15 @@ void StaticData::LoadPhraseTables(bool filter
 			m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
 			string							filePath= token[3];
-			size_t							noScoreComponent	= Scan<size_t>(token[2]);
+			size_t							numScoreComponent	= Scan<size_t>(token[2]);
 			// weights for this phrase dictionary
-			vector<float> weight(noScoreComponent);
-			for (size_t currScore = 0 ; currScore < noScoreComponent ; currScore++)
+			vector<float> weight(numScoreComponent);
+			for (size_t currScore = 0 ; currScore < numScoreComponent ; currScore++)
 				weight[currScore] = weightAll[totalPrevNoScoreComponent + currScore]; 
 
-			if(weight.size()!=noScoreComponent) 
+			if(weight.size()!=numScoreComponent) 
 				{
-					std::cerr<<"ERROR: your phrase table has "<<noScoreComponent<<" scores, but you specified "<<weight.size()<<" weights!\n";
+					std::cerr<<"ERROR: your phrase table has "<<numScoreComponent<<" scores, but you specified "<<weight.size()<<" weights!\n";
 					abort();
 				}
 
@@ -584,14 +584,14 @@ void StaticData::LoadPhraseTables(bool filter
 					for(unsigned k=0;k<m_numInputScores;++k)
 						weight.push_back(Scan<float>(m_parameter.GetParam("weight-i")[k]));
 
-					noScoreComponent+=m_numInputScores;
+					numScoreComponent+=m_numInputScores;
 				}
 
-			assert(noScoreComponent==weight.size());
+			assert(numScoreComponent==weight.size());
 
 			std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
 
-			totalPrevNoScoreComponent += noScoreComponent;
+			totalPrevNoScoreComponent += numScoreComponent;
 			string phraseTableHash	= GetMD5Hash(filePath);
 			string hashFilePath			= GetCachePath() 
 															+ PROJECT_NAME + "--"
@@ -626,7 +626,7 @@ void StaticData::LoadPhraseTables(bool filter
 					filterPhrase = false;
 					
 					VERBOSE(2,"using standard phrase tables");
-					PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(noScoreComponent);
+					PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent);
 					pd->Load(input
 									 , output
 									 , m_factorCollection
@@ -644,7 +644,7 @@ void StaticData::LoadPhraseTables(bool filter
 			else 
 				{
 					TRACE_ERR("using binary phrase tables for idx "<<currDict<<"\n");
-					PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(noScoreComponent,(currDict==0 ? m_numInputScores : 0));
+					PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent,(currDict==0 ? m_numInputScores : 0));
 					pd->Create(input,output,m_factorCollection,filePath,weight,
 										 maxTargetPhrase[index],
 										 GetAllLM(),

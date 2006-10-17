@@ -44,8 +44,8 @@ protected:
 	TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
 	
 public:
-	PhraseDictionaryMemory(size_t noScoreComponent)
-		: MyBase(noScoreComponent)
+	PhraseDictionaryMemory(size_t numScoreComponent)
+		: MyBase(numScoreComponent)
 	{
 	}
 	virtual ~PhraseDictionaryMemory();
