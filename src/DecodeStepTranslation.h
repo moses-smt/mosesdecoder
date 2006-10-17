@@ -23,16 +23,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "DecodeStep.h"
 
-class PhraseDictionaryBase;
+class PhraseDictionary;
 class TargetPhrase;
 
 class DecodeStepTranslation : public DecodeStep
 {
 public:
-	DecodeStepTranslation(PhraseDictionaryBase* dict, const DecodeStep* prev);
+	DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev);
 
   /** returns phrase table (dictionary) for translation step */
-  const PhraseDictionaryBase &GetPhraseDictionary() const;
+  const PhraseDictionary &GetPhraseDictionary() const;
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep

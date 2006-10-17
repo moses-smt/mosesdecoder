@@ -20,20 +20,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "DecodeStepTranslation.h"
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "PartialTranslOptColl.h"
 #include "FactorCollection.h"
 
-DecodeStepTranslation::DecodeStepTranslation(PhraseDictionaryBase* dict, const DecodeStep* prev)
+DecodeStepTranslation::DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev)
 : DecodeStep(dict, prev)
 {
 }
 
-const PhraseDictionaryBase &DecodeStepTranslation::GetPhraseDictionary() const
+const PhraseDictionary &DecodeStepTranslation::GetPhraseDictionary() const
 {
-  return *static_cast<const PhraseDictionaryBase*>(m_ptr);
+  return *static_cast<const PhraseDictionary*>(m_ptr);
 }
 
 TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const
@@ -66,7 +66,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 
   // normal trans step
   const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
-  const PhraseDictionaryBase &phraseDictionary  = decodeStep.GetPhraseDictionary();
+  const PhraseDictionary &phraseDictionary  = decodeStep.GetPhraseDictionary();
 	const size_t currSize = inputPartialTranslOpt.GetTargetPhrase().GetSize();
 	const size_t tableLimit = phraseDictionary.GetTableLimit();
 	

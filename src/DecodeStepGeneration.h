@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class GenerationDictionary;
 class Phrase;
-class ScoreComponentCollection2;
+class ScoreComponentCollection;
 
 class DecodeStepGeneration : public DecodeStep
 {
@@ -44,7 +44,7 @@ public:
 
 private:
   TranslationOption *MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
-                                  , const ScoreComponentCollection2& generationScore) const;
+                                  , const ScoreComponentCollection& generationScore) const;
 
 };
 

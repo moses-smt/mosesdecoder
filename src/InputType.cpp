@@ -1,3 +1,5 @@
+// $Id: InputType.cpp 666 2006-08-11 21:04:38Z eherbst $
+
 #include "InputType.h"
 
 InputType::InputType(long translationId) : m_translationId(translationId) {}

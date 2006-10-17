@@ -65,7 +65,7 @@ class SentenceStats
 		 */
 		void CalcFinalStats(const Hypothesis& bestHypo);
 		
-		unsigned int GetTotalHypos() const {return Hypothesis::s_HypothesesCreated;}
+		unsigned int GetTotalHypos() const {return Hypothesis::GetHypothesesCreated();}
 		size_t GetNumHyposRecombined() const {return m_recombinationInfos.size();}
 		unsigned int GetNumHyposPruned() const {return m_numHyposPruned;}
 		unsigned int GetNumHyposDiscarded() const {return m_numHyposDiscarded;}

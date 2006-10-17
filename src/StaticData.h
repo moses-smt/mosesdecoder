@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class InputType;
 class LexicalReordering;
-class PhraseDictionaryBase;
+class PhraseDictionary;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class WordPenaltyProducer;
@@ -49,7 +49,7 @@ private:
 	static StaticData*									s_instance;
 protected:	
 	FactorCollection										m_factorCollection;
-	std::vector<PhraseDictionaryBase*>	m_phraseDictionary;
+	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::list < DecodeStep* >						m_decodeStepList;
 	Parameter			m_parameter;
@@ -232,7 +232,7 @@ public:
 	{
 		return m_phraseDictionary.size();
 	}
-	std::vector<PhraseDictionaryBase*> GetPhraseDictionaries() const
+	std::vector<PhraseDictionary*> GetPhraseDictionaries() const
 	{
 		return m_phraseDictionary;
 	}

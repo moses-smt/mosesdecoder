@@ -40,7 +40,7 @@ struct WordComparer
 	}
 };
 
-typedef std::map < Word , ScoreComponentCollection2 > OutputWordCollection;
+typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
 		// 1st = output phrase
 		// 2nd = log probability (score)
 
@@ -68,7 +68,7 @@ public:
 									, FactorDirection direction
 									, bool forceSingleFeatureValue);
 
-	unsigned int GetNumScoreComponents() const;
+	size_t GetNumScoreComponents() const;
 	const std::string GetScoreProducerDescription() const;
 
 	size_t GetSize() const

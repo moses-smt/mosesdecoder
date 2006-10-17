@@ -1,3 +1,6 @@
+// $Id: Sentence.cpp 822 2006-09-20 21:49:34Z redpony $
+// vim:tabstop=2
+
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh

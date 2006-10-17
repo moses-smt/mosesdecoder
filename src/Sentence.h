@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 
 class WordsRangs;
-class PhraseDictionaryBase;
+class PhraseDictionary;
 class TranslationOptionCollection;
 
 
@@ -62,7 +62,7 @@ class Sentence : public Phrase, public InputType
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection);
 	void Print(std::ostream& out) const;
 
-	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const;
+	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionary const& d,const WordsRange& r) const;
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
 };
 

@@ -7,7 +7,7 @@
 #include <vector>
 
 class ScoreProducer;
-class ScoreComponentCollection2;  // debugging only
+class ScoreComponentCollection;  // debugging only
 
 class ScoreIndexManager
 {
@@ -19,8 +19,8 @@ public:
 	size_t GetEndIndex(size_t scoreBookkeepingID) const { return m_ends[scoreBookkeepingID]; }
 	size_t GetTotalNumberOfScores() const { return m_last; }
 
-	void Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection2& scc) const;
-  void Debug_PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection2& scc, const std::vector<float>& weights) const;
+	void Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const;
+  void Debug_PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scc, const std::vector<float>& weights) const;
 
 
 private:

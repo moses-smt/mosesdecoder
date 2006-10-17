@@ -37,7 +37,7 @@ const GenerationDictionary &DecodeStepGeneration::GetGenerationDictionary() cons
 }
 
 TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
-                                  , const ScoreComponentCollection2& generationScore) const
+                                  , const ScoreComponentCollection& generationScore) const
 {
 	if (IsFilteringStep()) {
   	if (!oldTO.IsCompatible(mergePhrase, m_conflictFactors)) return 0;
@@ -49,7 +49,7 @@ TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption
 }
 
 // helpers
-typedef pair<Word, ScoreComponentCollection2> WordPair;
+typedef pair<Word, ScoreComponentCollection> WordPair;
 typedef list< WordPair > WordList;
 // 1st = word
 // 2nd = score
@@ -124,7 +124,7 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
           for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
             {
               const Word &outputWord = (*iterWordColl).first;
-              const ScoreComponentCollection2& score = (*iterWordColl).second;
+              const ScoreComponentCollection& score = (*iterWordColl).second;
               // enter into word list generated factor(s) and its(their) score(s)
               wordList.push_back(WordPair(outputWord, score));
             }
@@ -147,7 +147,7 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
   // go thru each possible factor for each word & create hypothesis
   for (size_t currIter = 0 ; currIter < numIteration ; currIter++)
     {
-      ScoreComponentCollection2 generationScore; // total score for this string of words
+      ScoreComponentCollection generationScore; // total score for this string of words
 
       // create vector of words with new factors for last phrase
       for (size_t currPos = 0 ; currPos < targetLength ; currPos++)

@@ -36,7 +36,7 @@ public:
 	void CreateScoreBookkeepingID()	{	m_scoreBookkeepingId = s_globalScoreBookkeepingIdCounter++;}
 	//! returns the number of scores that a subclass produces.
 	//! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
-	virtual unsigned int GetNumScoreComponents() const = 0;
+	virtual size_t GetNumScoreComponents() const = 0;
 
 	//! returns a string description of this producer
 	virtual const std::string GetScoreProducerDescription() const = 0;

@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PhraseDictionaryNode.h"
 #include "TargetPhrase.h"
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 
 PhraseDictionaryNode::~PhraseDictionaryNode()
 {
@@ -62,7 +62,7 @@ const PhraseDictionaryNode *PhraseDictionaryNode::GetChild(const Word &word) con
 	return NULL;
 }
 
-void PhraseDictionaryNode::SetWeightTransModel(const PhraseDictionary *phraseDictionary
+void PhraseDictionaryNode::SetWeightTransModel(const PhraseDictionaryMemory *phraseDictionary
 																							 , const std::vector<float> &weightT)
 {
 	// recursively set weights

@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Dictionary.h"
 
-class PhraseDictionaryBase;
+class PhraseDictionary;
 class GenerationDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
@@ -88,7 +88,7 @@ public:
 	}
 
 	/** returns phrase table (dictionary) for translation step */
-	const PhraseDictionaryBase &GetPhraseDictionary() const;
+	const PhraseDictionary &GetPhraseDictionary() const;
 
 	/** returns generation table (dictionary) for generation step */
 	const GenerationDictionary &GetGenerationDictionary() const;

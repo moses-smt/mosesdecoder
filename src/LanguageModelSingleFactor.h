@@ -27,24 +27,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class FactorCollection;
 class Factor;
 
-/* Abstract class which represent an implement of single factor LM
- * Currently inherited by SRI and IRST LM implmentations
- */
 class LanguageModelSingleFactor : public LanguageModel
 {
 protected:	
 	const Factor *m_sentenceStart, *m_sentenceEnd;
 	FactorType	m_factorType;
 
-	//! constructor to be called by inherited class
 	LanguageModelSingleFactor(bool registerScore);
 
 public:
-	//! ??? if LM return this state when calculating score, then agressive pruning cannot be done
   static State UnknownState;
 
 	virtual ~LanguageModelSingleFactor();
-	//! load data from file
 	virtual void Load(const std::string &fileName
 					, FactorCollection &factorCollection
 					, FactorType factorType
@@ -60,17 +54,15 @@ public:
 	{
 		return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);		
 	}
-	//! factor that represent sentence start. Usually <s>
+	
 	const Factor *GetSentenceStart() const
 	{
 		return m_sentenceStart;
 	}
-	//! factor that represent sentence start. Usually </s>
 	const Factor *GetSentenceEnd() const
 	{
 		return m_sentenceEnd;
 	}
-	//! which factor type this LM uses
 	FactorType GetFactorType() const
 	{
 		return m_factorType;

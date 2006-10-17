@@ -153,7 +153,7 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 		*len = 0;	
 	}
 
-	return TransformIRSTScore(m_lmtb->clprob(*m_lmtb_ng));
+	return TransformIRSTScore((float) m_lmtb->clprob(*m_lmtb_ng));
 }
 
 
