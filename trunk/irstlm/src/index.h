@@ -6,7 +6,7 @@
 
 inline const char *index(const char *str, char search)
 {
-	int i=0;
+	size_t i=0;
 	while (i< strlen(str) ){
 		if (str[i]==search) return &str[i];	
 	}

@@ -43,7 +43,7 @@ Manager::Manager(InputType const& source, StaticData &staticData)
 :m_source(source)
 ,m_hypoStack(source.GetSize() + 1)
 ,m_staticData(staticData)
-,m_possibleTranslations(*source.CreateTranslationOptionCollection())
+,m_possibleTranslations(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 {
 	std::vector < HypothesisCollection >::iterator iterStack;
@@ -57,7 +57,7 @@ Manager::Manager(InputType const& source, StaticData &staticData)
 
 Manager::~Manager() 
 {
-  delete &m_possibleTranslations;
+  delete m_possibleTranslations;
 }
 
 /**
@@ -73,7 +73,7 @@ void Manager::ProcessSentence()
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
-	m_possibleTranslations.CreateTranslationOptions(decodeStepList
+	m_possibleTranslations->CreateTranslationOptions(decodeStepList
   														, m_staticData.GetFactorCollection());
 
 	// initial seed hypothesis: nothing translated, no words produced
@@ -102,9 +102,7 @@ void Manager::ProcessSentence()
 				ProcessOneHypothesis(hypothesis); // expand the hypothesis
 			}
 		// some logging
-		//OutputHypoStackSize();
-		//OutputHypoStack();
-		
+		IFVERBOSE(2) { OutputHypoStackSize(); }
 	}
 
 	// some more logging
@@ -135,7 +133,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 				{
 					ExpandAllHypotheses(hypothesis
-												, m_possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos)));
+												, m_possibleTranslations->GetTranslationOptionList(WordsRange(startPos, endPos)));
 				}
 			}
 		}
@@ -164,7 +162,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 					)
 				{
 					ExpandAllHypotheses(hypothesis
-												,m_possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos)));
+												,m_possibleTranslations->GetTranslationOptionList(WordsRange(startPos, endPos)));
 				}
 			}
 			// filling in gap => just check for overlap
@@ -174,7 +172,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 						&& !hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 					{
 						ExpandAllHypotheses(hypothesis
-													,m_possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos)));
+													,m_possibleTranslations->GetTranslationOptionList(WordsRange(startPos, endPos)));
 					}
 				}
 			// ignoring, continuing forward => be limited by start of gap
@@ -184,7 +182,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 						&& !hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 					{
 						ExpandAllHypotheses(hypothesis
-													,m_possibleTranslations.GetTranslationOptionList(WordsRange(startPos, endPos)));
+													,m_possibleTranslations->GetTranslationOptionList(WordsRange(startPos, endPos)));
 					}
 				}
 		}
@@ -217,7 +215,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 {
 	// create hypothesis and calculate all its scores
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-	newHypo->CalcScore(m_staticData, m_possibleTranslations.GetFutureScore());
+	newHypo->CalcScore(m_staticData, m_possibleTranslations->GetFutureScore());
 	
 	// logging for the curious
 	IFVERBOSE(3) {

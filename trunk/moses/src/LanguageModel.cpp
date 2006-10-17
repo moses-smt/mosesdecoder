@@ -41,7 +41,7 @@ LanguageModel::LanguageModel(bool registerScore)
 LanguageModel::~LanguageModel() {}
 
 // don't inline virtual funcs...
-unsigned int LanguageModel::GetNumScoreComponents() const
+size_t LanguageModel::GetNumScoreComponents() const
 {
 	return 1;
 }

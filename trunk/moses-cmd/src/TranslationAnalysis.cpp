@@ -26,9 +26,9 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 	std::vector<std::string> targetMap;
 	std::vector<unsigned int> lmAcc(0);
 	size_t lmCalls = 0;
-	bool doLMStats = ((*tpi)->_lmstats != 0);
+	bool doLMStats = ((*tpi)->GetLMStats() != 0);
 	if (doLMStats)
-		lmAcc.resize((*tpi)->_lmstats->size(), 0);
+		lmAcc.resize((*tpi)->GetLMStats()->size(), 0);
   for (; tpi != translationPath.end(); ++tpi) {
 		std::ostringstream sms;
 		std::ostringstream tms;
@@ -39,7 +39,7 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 
 		// language model backoff stats,
 		if (doLMStats) {
-			std::vector<std::vector<unsigned int> >& lmstats = *(*tpi)->_lmstats;
+			std::vector<std::vector<unsigned int> >& lmstats = *(*tpi)->GetLMStats();
 			std::vector<std::vector<unsigned int> >::iterator i = lmstats.begin();
 			std::vector<unsigned int>::iterator acc = lmAcc.begin();
 			  // std::cerr << "\n";

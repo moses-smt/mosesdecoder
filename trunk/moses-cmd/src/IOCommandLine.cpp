@@ -114,7 +114,7 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 void IOCommandLine::Backtrack(const Hypothesis *hypo){
 
 	if (hypo->GetPrevHypo() != NULL) {
-		VERBOSE(3,hypo->m_id << " <= ");
+		VERBOSE(3,hypo->GetId() << " <= ");
 		Backtrack(hypo->GetPrevHypo());
 	}
 }
@@ -193,11 +193,11 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
     }
 
 		// translation components
-		vector<PhraseDictionaryBase*> pds = StaticData::Instance()->GetPhraseDictionaries();
+		vector<PhraseDictionary*> pds = StaticData::Instance()->GetPhraseDictionaries();
     if (pds.size() > 0) {
 			if (labeledOutput)
 	      m_nBestFile << "tm: ";
-		  vector<PhraseDictionaryBase*>::iterator iter;
+		  vector<PhraseDictionary*>::iterator iter;
 		  for (iter = pds.begin(); iter != pds.end(); ++iter) {
 			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 			  for (size_t j = 0; j<scores.size(); ++j) 

@@ -44,7 +44,7 @@ class ConfusionNet : public InputType {
 	const Word& GetWord(size_t pos) const;
 
 
-	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionaryBase const& d,const WordsRange& r) const;
+	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionary const& d,const WordsRange& r) const;
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
 
 

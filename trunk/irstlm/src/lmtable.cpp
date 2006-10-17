@@ -247,8 +247,6 @@ void lmtable::loadtxt(istream& inp,const char* header){
 
 //Checkbound with sorting of n-gram table on disk
 
-#include "util.h"
-
 void lmtable::checkbounds(int level){
   
   char*  tbl=table[level];

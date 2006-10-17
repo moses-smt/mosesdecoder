@@ -72,7 +72,7 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypoth
 
 void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc)
 {
-	ScoreComponentCollection2 adj = arc->GetScoreBreakdown();
+	ScoreComponentCollection adj = arc->GetScoreBreakdown();
 	adj.MinusEquals(copy.m_path[edgeIndex]->GetScoreBreakdown());
 	m_scoreBreakdown = copy.m_scoreBreakdown;
 	m_scoreBreakdown.PlusEquals(adj);	

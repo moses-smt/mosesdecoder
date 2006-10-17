@@ -1,3 +1,5 @@
+// $Id: LatticePath.cpp 560 2006-08-08 17:47:46Z redpony $
+
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh

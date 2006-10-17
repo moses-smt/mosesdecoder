@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 #include "Sentence.h"
 #include "Phrase.h"
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
 #include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
@@ -72,10 +72,14 @@ protected:
   bool							m_wordDeleted;
 	float							m_totalScore;  /**< score so far */
 	float							m_futureScore; /**< estimated future cost to translate rest of sentence */
-	ScoreComponentCollection2 m_scoreBreakdown; /**< detailed score break-down by components (for instance language model, word penalty, etc) */
+	ScoreComponentCollection m_scoreBreakdown; /**< detailed score break-down by components (for instance language model, word penalty, etc) */
 	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /**< relevant history for language model scoring -- used for recombination */
 	const Hypothesis 	*m_mainHypo;
 	ArcList 					*m_arcList; /**< all arcs that end at the same lattice point as this hypothesis */
+
+	int m_id; /**< numeric ID of this hypothesis, used for logging */
+	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
+	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
@@ -83,16 +87,10 @@ protected:
 	void CalcDistortionScore();
 	//TODO: add appropriate arguments to score calculator
 
-	//	void GenerateNGramCompareHash() const;
-	// mutable size_t _hash;
-	// mutable bool _hash_computed;
-
-public:
-	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total
-	int m_id; /**< numeric ID of this hypothesis, used for logging */
-
-	std::vector<std::vector<unsigned int> >* _lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
-	
+	/** used by initial seeding of the translation process */
+	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
+	/** used when creating a new hypothesis using a translation option (phrase translation) */
+	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
 public:
 	static ObjectPool<Hypothesis> &GetObjectPool()
@@ -100,10 +98,6 @@ public:
 		return s_objectPool;
 	}
 
-	/** used by initial seeding of the translation process */
-	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
-	/** used when creating a new hypothesis using a translation option (phrase translation) */
-	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 	~Hypothesis();
 	
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
@@ -148,7 +142,10 @@ public:
 
 	void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore);
 
-	int GetId() const;
+	int GetId()const
+	{
+		return m_id;
+	}
 
 	const Hypothesis* GetPrevHypo() const;
 
@@ -245,12 +242,22 @@ public:
 	{
 		return m_arcList;
 	}
-	const ScoreComponentCollection2& GetScoreBreakdown() const
+	const ScoreComponentCollection& GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}
 	float GetTotalScore() const { return m_totalScore; }
 	float GetFutureScore() const { return m_futureScore; }
+
+	std::vector<std::vector<unsigned int> > *GetLMStats() const
+	{
+		return m_lmstats;
+	}
+
+	static unsigned int GetHypothesesCreated()
+	{
+		return s_HypothesesCreated;
+	}
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

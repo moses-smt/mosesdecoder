@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
 
-class PhraseDictionaryBase;
+class PhraseDictionary;
 class GenerationDictionary;
 
 /** Available phrase translation for a particular sentence pair.
@@ -67,7 +67,7 @@ protected:
 	//! for example, know the full n-gram score since the length of the
 	//! TargetPhrase may be shorter than the n-gram order.  But, if it is
 	//! possible to estimate, it is included here.
-	ScoreComponentCollection2	m_scoreBreakdown;
+	ScoreComponentCollection	m_scoreBreakdown;
 
 public:
 	/** constructor. Used by initial translation step */
@@ -82,7 +82,7 @@ public:
 	bool IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const;
 
 	/** used when precomputing (composing) translation options */
-	void MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection2& score, const std::vector<FactorType>& featuresToMerge);
+	void MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToMerge);
 
 	/** returns target phrase */
 	inline const Phrase &GetTargetPhrase() const
@@ -141,7 +141,7 @@ public:
   }
 
 	/** returns detailed component scores */
-	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
+	inline const ScoreComponentCollection &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}

@@ -19,8 +19,9 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
+
 #include "Sentence.h"
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
 #include "Util.h"
@@ -41,7 +42,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
 }
 
 TargetPhraseCollection const* Sentence::
-CreateTargetPhraseCollection(PhraseDictionaryBase const& d,
+CreateTargetPhraseCollection(PhraseDictionary const& d,
 														 const WordsRange& r) const 
 {
 	Phrase src=GetSubString(r);

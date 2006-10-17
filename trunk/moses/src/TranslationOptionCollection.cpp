@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Sentence.h"
 #include "DecodeStep.h"
 #include "LanguageModel.h"
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "InputType.h"
 #include "Util.h"
@@ -119,7 +119,7 @@ void TranslationOptionCollection::Prune()
 * This function calls for unknown words is complicated by the fact it must handle different input types. 
 * The call stack is
 *		Base::ProcessUnknownWord()
-*			Inherited::ProcessUnknownWord()
+*			Inherited::ProcessUnknownWord(position)
 *				Base::ProcessOneUnknownWord()
 *
 * \param decodeStepList list of decoding steps
@@ -424,7 +424,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 															, size_t endPos
 															, bool adhereTableLimit)
 {
-	const PhraseDictionaryBase &phraseDictionary = decodeStep.GetPhraseDictionary();
+	const PhraseDictionary &phraseDictionary = decodeStep.GetPhraseDictionary();
 	const size_t tableLimit = phraseDictionary.GetTableLimit();
 
 	const WordsRange wordsRange(startPos, endPos);

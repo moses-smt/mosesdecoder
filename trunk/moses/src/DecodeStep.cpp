@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "DecodeStep.h"
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
 #include "StaticData.h"
 
@@ -48,9 +48,9 @@ DecodeStep::DecodeStep(Dictionary *ptr, const DecodeStep* prev)
 DecodeStep::~DecodeStep() {}
 
 /** returns phrase table (dictionary) for translation step */
-const PhraseDictionaryBase &DecodeStep::GetPhraseDictionary() const
+const PhraseDictionary &DecodeStep::GetPhraseDictionary() const
 {
-  return *static_cast<const PhraseDictionaryBase*>(m_ptr);
+  return *static_cast<const PhraseDictionary*>(m_ptr);
 }
 
 /** returns generation table (dictionary) for generation step */

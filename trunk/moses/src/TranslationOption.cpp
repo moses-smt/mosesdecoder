@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "TranslationOption.h"
 #include "WordsBitmap.h"
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
 #include "LMList.h"
 #include "StaticData.h"
@@ -46,7 +46,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 {
 }
 
-void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection2& score, const std::vector<FactorType>& featuresToAdd)
+void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)
 {
 	assert(phrase.GetSize() == m_targetPhrase.GetSize());
 	if (featuresToAdd.size() == 1) {

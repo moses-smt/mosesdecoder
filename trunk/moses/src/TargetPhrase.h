@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 
 class LMList;
-class PhraseDictionaryBase;
+class PhraseDictionary;
 class GenerationDictionary;
 class ScoreProducer;
 
@@ -38,7 +38,7 @@ class TargetPhrase: public Phrase
 	friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
 	float m_transScore, m_ngramScore, m_fullScore;
-	ScoreComponentCollection2 m_scoreBreakdown;
+	ScoreComponentCollection m_scoreBreakdown;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
@@ -51,7 +51,7 @@ public:
 
 	/*** Called immediately after creation to initialize scores.
    *
-   * @param translationScoreProducer The PhraseDictionary that this TargetPhrase is contained by.
+   * @param translationScoreProducer The PhraseDictionaryMemory that this TargetPhrase is contained by.
    *        Used to identify where the scores for this phrase belong in the list of all scores.
    * @param scoreVector the vector of scores (log probs) associated with this translation
    * @param weighT the weights for the individual scores (t-weights in the .ini file)
@@ -87,7 +87,7 @@ public:
   {
     return m_fullScore;
   }
-	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
+	inline const ScoreComponentCollection &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}

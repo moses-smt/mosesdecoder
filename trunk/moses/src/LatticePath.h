@@ -37,7 +37,7 @@ protected:
 	std::vector<const Hypothesis *> m_path;
 	size_t		m_prevEdgeChanged;
 
-	ScoreComponentCollection2	m_scoreBreakdown;
+	ScoreComponentCollection	m_scoreBreakdown;
 	float m_totalScore;
  
 	void CalcScore(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc);
@@ -69,7 +69,7 @@ public:
 
 	void CreateDeviantPaths(LatticePathCollection &pathColl) const;
 
-	inline const ScoreComponentCollection2 &GetScoreBreakdown() const
+	inline const ScoreComponentCollection &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}
