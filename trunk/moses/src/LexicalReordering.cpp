@@ -248,7 +248,7 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 }
 
 /** return the number of scores produced by this model */
-unsigned int LexicalReordering::GetNumScoreComponents() const
+size_t LexicalReordering::GetNumScoreComponents() const
 {
 	return m_numScores;
 }

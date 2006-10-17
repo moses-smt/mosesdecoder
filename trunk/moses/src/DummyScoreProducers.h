@@ -15,7 +15,7 @@ public:
 
 	float CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr) const;
 
-	unsigned int GetNumScoreComponents() const;
+	size_t GetNumScoreComponents() const;
 	const std::string GetScoreProducerDescription() const;
 };
 
@@ -26,7 +26,7 @@ class WordPenaltyProducer : public ScoreProducer {
 public:
 	WordPenaltyProducer();
 
-	unsigned int GetNumScoreComponents() const;
+	size_t GetNumScoreComponents() const;
 	const std::string GetScoreProducerDescription() const;
 };
 
@@ -35,7 +35,7 @@ class UnknownWordPenaltyProducer : public ScoreProducer {
 public:
 	UnknownWordPenaltyProducer();
 
-	unsigned int GetNumScoreComponents() const;
+	size_t GetNumScoreComponents() const;
 	const std::string GetScoreProducerDescription() const;
 };
 
