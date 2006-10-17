@@ -102,7 +102,9 @@ void Manager::ProcessSentence()
 				ProcessOneHypothesis(hypothesis); // expand the hypothesis
 			}
 		// some logging
-		IFVERBOSE(2) { OutputHypoStackSize(); }
+		//OutputHypoStackSize();
+		//OutputHypoStack();
+		
 	}
 
 	// some more logging
