@@ -35,6 +35,7 @@ class Phrase;
 class lmtable;  // irst lm table
 class ngram;
 
+//! Wrapper around IRST LM implementation
 class LanguageModelIRST : public LanguageModelSingleFactor
 {
 protected:
