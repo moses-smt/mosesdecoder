@@ -88,11 +88,11 @@ void PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
 
 		vector<float> scoreVector = Tokenize<float>(tokens[2]);
-		if (scoreVector.size() != m_noScoreComponent) {
-			TRACE_ERR("Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_noScoreComponent<<") of score components on line " << line_num);
+		if (scoreVector.size() != m_numScoreComponent) {
+			TRACE_ERR("Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num);
 			abort();
 		}
-//		assert(scoreVector.size() == m_noScoreComponent);
+//		assert(scoreVector.size() == m_numScoreComponent);
 			
 		// source
 		Phrase sourcePhrase(Input);

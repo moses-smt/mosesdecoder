@@ -24,8 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "InputType.h"
 
-PhraseDictionary::PhraseDictionary(size_t noScoreComponent)
-	: Dictionary(noScoreComponent),m_tableLimit(0)
+PhraseDictionary::PhraseDictionary(size_t numScoreComponent)
+	: Dictionary(numScoreComponent),m_tableLimit(0)
 {
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
 }
@@ -45,5 +45,5 @@ const std::string PhraseDictionary::GetScoreProducerDescription() const
 
 size_t PhraseDictionary::GetNumScoreComponents() const
 {
-	return this->GetNoScoreComponents();
+	return m_numScoreComponent;
 }

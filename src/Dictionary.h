@@ -30,12 +30,12 @@ class Dictionary
 protected:
 	static size_t s_index;
 	
-	const size_t m_noScoreComponent, m_index;
+	const size_t m_numScoreComponent, m_index;
 	FactorMask m_inputFactors;
 	FactorMask m_outputFactors;
 
 public:
-	Dictionary(size_t noScoreComponent);
+	Dictionary(size_t numScoreComponent);
 
 	const FactorMask &GetFactorMask(FactorDirection direction) const
 	{
@@ -52,8 +52,6 @@ public:
 		return m_inputFactors;
 	}
 	virtual ~Dictionary();
-
-	size_t GetNoScoreComponents() const { return m_noScoreComponent; }
 
 	size_t GetIndex() const
 	{

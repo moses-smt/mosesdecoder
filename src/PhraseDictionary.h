@@ -42,7 +42,7 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
 	std::string m_filename;    // just for debugging purposes
 
  public:
-	PhraseDictionary(size_t noScoreComponent);
+	PhraseDictionary(size_t numScoreComponent);
 	virtual ~PhraseDictionary();
 		
 	DecodeType GetDecodeType() const	{	return Translate;	}
