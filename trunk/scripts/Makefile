@@ -21,13 +21,24 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 
 all: compile
 
+SUBDIRS=cmert-0.5 phrase-extract symal
+
 compile:
-	cd training/cmert-0.5/ && make clean && make
-	## Compiled mert
-	cd training/phrase-extract/ && make clean && make
-	## Compiled phrase_extract
-	cd training/symal/ && make clean && make
-	## Compiled symal
+	pwd=`pwd`; \
+	for subdir in $(SUBDIRS); do \
+	  cd training/$$subdir/ && make || exit 1; \
+	  echo "### Compiler $$subdir"; \
+	  cd $$pwd; \
+	done
+	## All files that need compilation were compiled
+
+clean:
+	pwd=`pwd`; \
+	for subdir in $(SUBDIRS); do \
+	  cd training/$$subdir/ && make clean || exit 1; \
+	  echo "### Compiler $$subdir"; \
+	  cd $$pwd; \
+	done
 	## All files that need compilation were compiled
 
 
