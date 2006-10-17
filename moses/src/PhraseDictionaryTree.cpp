@@ -274,8 +274,8 @@ void PDTimp::PrintTgtCand(const TgtCands& tcand,std::ostream& out) const
 //
 ////////////////////////////////////////////////////////////
 
-PhraseDictionaryTree::PhraseDictionaryTree(size_t noScoreComponent)
-	: Dictionary(noScoreComponent),imp(new PDTimp)
+PhraseDictionaryTree::PhraseDictionaryTree(size_t numScoreComponent)
+	: Dictionary(numScoreComponent),imp(new PDTimp)
 {
 	if(sizeof(off_t)!=8)
 		{

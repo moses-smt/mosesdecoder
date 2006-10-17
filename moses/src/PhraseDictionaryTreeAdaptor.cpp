@@ -20,8 +20,8 @@
 *************************************************************/
 
 PhraseDictionaryTreeAdaptor::
-PhraseDictionaryTreeAdaptor(size_t noScoreComponent,unsigned numInputScores)
-	: MyBase(noScoreComponent),imp(new PDTAimp(this,numInputScores)) {}
+PhraseDictionaryTreeAdaptor(size_t numScoreComponent,unsigned numInputScores)
+	: MyBase(numScoreComponent),imp(new PDTAimp(this,numInputScores)) {}
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor() 
 {
@@ -54,9 +54,9 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 																				 , float weightWP
 																				 )
 {
-	if(m_noScoreComponent!=weight.size()) {
+	if(m_numScoreComponent!=weight.size()) {
 		std::cerr<<"ERROR: mismatch of number of scaling factors: "<<weight.size()
-						 <<" "<<m_noScoreComponent<<"\n";
+						 <<" "<<m_numScoreComponent<<"\n";
 		abort();
 	}
 	m_filename = filePath;

@@ -122,7 +122,7 @@ GenerationDictionary::~GenerationDictionary()
 
 size_t GenerationDictionary::GetNumScoreComponents() const
 {
-  return this->GetNoScoreComponents();
+  return m_numScoreComponent;
 }
 
 const std::string GenerationDictionary::GetScoreProducerDescription() const
