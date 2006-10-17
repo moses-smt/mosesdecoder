@@ -32,7 +32,7 @@ libmoses_a_SOURCES_TMP = \
 	PartialTranslOptColl.cpp \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
-	PhraseDictionaryBase.cpp \
+	PhraseDictionaryMemory.cpp \
 	PhraseDictionaryNode.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
