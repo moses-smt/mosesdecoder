@@ -4,7 +4,7 @@
 #define PHRASEDICTIONARYTREEADAPTOR_H_
 #include <vector>
 #include "TypeDef.h"
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 #include "TargetPhraseCollection.h"
 
 class Phrase;
@@ -15,8 +15,8 @@ class InputType;
 /*** Implementation of a phrase table in a trie that is binarized and
  * stored on disk.
  */
-class PhraseDictionaryTreeAdaptor : public PhraseDictionaryBase {
-	typedef PhraseDictionaryBase MyBase;
+class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
+	typedef PhraseDictionary MyBase;
 	PDTAimp *imp;
 	friend class PDTAimp;
 	PhraseDictionaryTreeAdaptor();

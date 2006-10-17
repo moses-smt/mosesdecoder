@@ -66,7 +66,7 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 	m_outputFactors = FactorMask(output);
 	VERBOSE(2,"PhraseDictionaryTreeAdaptor: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
 
-	// set PhraseDictionaryBase members
+	// set PhraseDictionary members
 	m_tableLimit=tableLimit;
 
 	imp->Create(input,output,factorCollection,filePath,

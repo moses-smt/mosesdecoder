@@ -41,7 +41,7 @@ protected:
 	std::string	m_filename; //! for debugging purposes
 	size_t			m_nGramOrder; //! max n-gram length contained in this LM
 	Word m_sentenceStartArray, m_sentenceEndArray; //! Contains factors which represents the beging and end words for this LM. 
-																								//! Usually word composed of <s> or </s>
+																								//! Usually <s> and </s>
 
 	/** constructor to be called by inherited class
 	 * \param registerScore whether this LM will be directly used to score sentence. 
@@ -59,7 +59,7 @@ public:
 	virtual ~LanguageModel();
 
 	//! see ScoreProducer.h
-	unsigned int GetNumScoreComponents() const;
+	size_t GetNumScoreComponents() const;
 
 	//! Single or multi-factor
 	virtual LMType GetLMType() const = 0;
@@ -97,7 +97,7 @@ public:
 		return m_nGramOrder;
 	}
 	
-	//! Contains factors which represents the beginning and end words for this LM. Usually word composed of <s> or </s>
+	//! Contains factors which represents the beging and end words for this LM. Usually <s> and </s>
 	const Word &GetSentenceStartArray() const
 	{
 		return m_sentenceStartArray;

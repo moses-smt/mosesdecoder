@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "TargetPhraseCollection.h"
 
-class PhraseDictionary;
+class PhraseDictionaryMemory;
 
 class PhraseDictionaryNode
 {
@@ -57,7 +57,7 @@ public:
 		return m_targetPhraseCollection;
 	}
 	// for mert
-	void SetWeightTransModel(const PhraseDictionary *phraseDictionary
+	void SetWeightTransModel(const PhraseDictionaryMemory *phraseDictionary
 													, const std::vector<float> &weightT);
 
 	// iterators

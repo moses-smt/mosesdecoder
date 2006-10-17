@@ -52,7 +52,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_languageModelStates(StaticData::Instance()->GetLMSize(), LanguageModelSingleFactor::UnknownState)
 	, m_arcList(NULL)
 	, m_id(0)
-	, _lmstats(0)
+	, m_lmstats(NULL)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
@@ -79,7 +79,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_languageModelStates(prevHypo.m_languageModelStates)
 	, m_arcList(NULL)
 	, m_id(s_HypothesesCreated++)
-	, _lmstats(0)
+	, m_lmstats(NULL)
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -105,7 +105,7 @@ Hypothesis::~Hypothesis()
 		delete m_arcList;
 		m_arcList = NULL;
 
-		delete _lmstats; _lmstats = 0;
+		delete m_lmstats; m_lmstats = NULL;
 	}
 }
 
@@ -204,7 +204,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 
 	// will be null if LM stats collection is disabled
 	if (StaticData::Instance()->IsComputeLMBackoffStats()) {
-		_lmstats = new vector<vector<unsigned int> >(languageModels.size(), vector<unsigned int>(0));
+		m_lmstats = new vector<vector<unsigned int> >(languageModels.size(), vector<unsigned int>(0));
 	}
 
 	size_t lmIdx = 0;
@@ -222,8 +222,8 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 		if(m_currTargetWordsRange.GetWordsCount() == 0) {
 			lmScore = 0; //the score associated with dropping source words is not part of the language model
 		} else { //non-empty target phrase
-			if (_lmstats)
-				(*_lmstats)[lmIdx].resize(m_currTargetWordsRange.GetWordsCount(), 0);
+			if (m_lmstats)
+				(*m_lmstats)[lmIdx].resize(m_currTargetWordsRange.GetWordsCount(), 0);
 
 			// 1st n-gram
 			vector<const Word*> contextFactor(nGramOrder);
@@ -236,7 +236,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 					contextFactor[index++] = &languageModel.GetSentenceStartArray();
 			}
 			lmScore	= languageModel.GetValue(contextFactor);
-			if (_lmstats) { languageModel.GetState(contextFactor, &(*_lmstats)[lmIdx][nLmCallCount++]); }
+			if (m_lmstats) { languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]); }
 			//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;
 
 			// main loop
@@ -252,8 +252,8 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 				contextFactor.back() = &GetWord(currPos);
 
 				lmScore	+= languageModel.GetValue(contextFactor);
-				if (_lmstats) 
-					languageModel.GetState(contextFactor, &(*_lmstats)[lmIdx][nLmCallCount++]);
+				if (m_lmstats) 
+					languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]);
 				//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;		
 			}
 
@@ -265,15 +265,15 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 	
 				for (size_t i = 0 ; i < nGramOrder - 1 ; i ++)
 				{
-					int currPos = size - nGramOrder + i + 1;
+					int currPos = (int)(size - nGramOrder + i + 1);
 					if (currPos < 0)
 						contextFactor[i] = &languageModel.GetSentenceStartArray();
 					else
 						contextFactor[i] = &GetWord((size_t)currPos);
 				}
-				if (_lmstats) {
-					(*_lmstats)[lmIdx].resize((*_lmstats)[lmIdx].size() + 1); // extra space for the last call
-					lmScore += languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx], &(*_lmstats)[lmIdx][nLmCallCount++]);
+				if (m_lmstats) {
+					(*m_lmstats)[lmIdx].resize((*m_lmstats)[lmIdx].size() + 1); // extra space for the last call
+					lmScore += languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx], &(*m_lmstats)[lmIdx][nLmCallCount++]);
 				} else
 					lmScore	+= languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx]);
 			} else {
@@ -281,8 +281,8 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 					for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
 						contextFactor[i] = contextFactor[i + 1];
 					contextFactor.back() = &GetWord(currPos);
-					if (_lmstats)
-						languageModel.GetState(contextFactor, &(*_lmstats)[lmIdx][nLmCallCount++]);
+					if (m_lmstats)
+						languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]);
 				}
 				m_languageModelStates[lmIdx]=languageModel.GetState(contextFactor);
 			}
@@ -368,11 +368,6 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 	
 }
 
-
-int Hypothesis::GetId()const{
-	return m_id;
-}
-
 const Hypothesis* Hypothesis::GetPrevHypo()const{
 	return m_prevHypo;
 }
@@ -384,7 +379,7 @@ void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistorti
 {
 	// PLEASE DON'T WRITE TO COUT directly. use TRACE_ERR or cerr 
   TRACE_ERR("creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ");
-  int end = m_prevHypo->m_targetPhrase.GetSize()-1;
+  int end = (int)(m_prevHypo->m_targetPhrase.GetSize()-1);
   int start = end-1;
   if ( start < 0 ) start = 0;
   if ( m_prevHypo->m_currTargetWordsRange.GetStartPos() == NOT_FOUND ) {

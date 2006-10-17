@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * some of these scores may be 0, this number is fixed (and generally quite small, ie, less
  * than 15), for a given model.
  *
- * The values contained in ScoreComponentCollection2 objects are unweighted scores (log-probs).
+ * The values contained in ScoreComponentCollection objects are unweighted scores (log-probs).
  * 
  * ScoreComponentCollection objects can be added and subtracted, which makes them appropriate
  * to be the datatype used to return the result of a score computations (in this case they will
@@ -44,8 +44,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * representing that score must extend the ScoreProducer abstract base class.  For an example
  * refer to the DistortionScoreProducer class.
  */
-class ScoreComponentCollection2 {
-  friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection2& rhs);
+class ScoreComponentCollection {
+  friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
 	friend class ScoreIndexManager;
 private:
 	std::vector<float> m_scores;
@@ -53,10 +53,10 @@ private:
 
 public:
   //! Create a new score collection with all values set to 0.0
-	ScoreComponentCollection2();
+	ScoreComponentCollection();
 
   //! Clone a score collection
-	ScoreComponentCollection2(const ScoreComponentCollection2& rhs)
+	ScoreComponentCollection(const ScoreComponentCollection& rhs)
 	: m_scores(rhs.m_scores)
 	, m_sim(rhs.m_sim)
 	{}
@@ -69,7 +69,7 @@ public:
 	}
 
   //! add the score in rhs
-	void PlusEquals(const ScoreComponentCollection2& rhs)
+	void PlusEquals(const ScoreComponentCollection& rhs)
 	{
 		assert(m_scores.size() >= rhs.m_scores.size());
 		const size_t l = rhs.m_scores.size();
@@ -77,7 +77,7 @@ public:
 	}
 
   //! subtract the score in rhs
-	void MinusEquals(const ScoreComponentCollection2& rhs)
+	void MinusEquals(const ScoreComponentCollection& rhs)
 	{
 		assert(m_scores.size() >= rhs.m_scores.size());
 		const size_t l = rhs.m_scores.size();
@@ -175,7 +175,7 @@ public:
 
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection2& rhs)
+inline std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
 {
   os << "<<" << rhs.m_scores[0];
   for (size_t i=1; i<rhs.m_scores.size(); i++)

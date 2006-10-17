@@ -22,16 +22,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include "PhraseDictionaryBase.h"
+#include "PhraseDictionary.h"
 #include "PhraseDictionaryNode.h"
 
 /*** Implementation of a phrase table in a trie.  Looking up a phrase of
  * length n words requires n look-ups to find the TargetPhraseCollection.
  */
-class PhraseDictionary : public PhraseDictionaryBase
+class PhraseDictionaryMemory : public PhraseDictionary
 {
-	typedef PhraseDictionaryBase MyBase;
-	friend std::ostream& operator<<(std::ostream&, const PhraseDictionary&);
+	typedef PhraseDictionary MyBase;
+	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
 
 protected:
 	PhraseDictionaryNode m_collection;
@@ -44,11 +44,11 @@ protected:
 	TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
 	
 public:
-	PhraseDictionary(size_t noScoreComponent)
+	PhraseDictionaryMemory(size_t noScoreComponent)
 		: MyBase(noScoreComponent)
 	{
 	}
-	virtual ~PhraseDictionary();
+	virtual ~PhraseDictionaryMemory();
 
 	void Load(const std::vector<FactorType> &input
 								, const std::vector<FactorType> &output

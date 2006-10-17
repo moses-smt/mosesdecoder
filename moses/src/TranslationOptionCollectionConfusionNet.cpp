@@ -1,9 +1,10 @@
 // $Id$
+
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "ConfusionNet.h"
 #include "DecodeStep.h"
 #include "LanguageModel.h"
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "LMList.h"
 

@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <cassert>
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -626,7 +626,7 @@ void StaticData::LoadPhraseTables(bool filter
 					filterPhrase = false;
 					
 					VERBOSE(2,"using standard phrase tables");
-					PhraseDictionary *pd=new PhraseDictionary(noScoreComponent);
+					PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(noScoreComponent);
 					pd->Load(input
 									 , output
 									 , m_factorCollection

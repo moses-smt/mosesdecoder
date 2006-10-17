@@ -11,7 +11,7 @@
 #include "Sentence.h"
 
 struct CNStats {
-	unsigned created,destr,read,colls,words;
+	size_t created,destr,read,colls,words;
 
 	CNStats() : created(0),destr(0),read(0),colls(0),words(0) {}
 	~CNStats() {print(std::cerr);}
@@ -152,7 +152,7 @@ bool ConfusionNet::ReadFormat1(std::istream& in,
 		data[i].resize(s);
 		for(size_t j=0;j<s;++j)
 			if(is>>word>>prob) {
-				data[i][j].second=log(prob); 
+				data[i][j].second = (float) log(prob); 
 				if(data[i][j].second<0) {
 					std::cerr<<"WARN: neg costs: "<<data[i][j].second<<" -> set to 0\n";
 					data[i][j].second=0.0;}
@@ -197,7 +197,7 @@ std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn)
 }
 
 TargetPhraseCollection const* ConfusionNet::
-CreateTargetPhraseCollection(PhraseDictionaryBase const& d,
+CreateTargetPhraseCollection(PhraseDictionary const& d,
 														 const WordsRange& r) const 
 {
 	if(PhraseDictionaryTreeAdaptor const* pdict=
@@ -206,7 +206,7 @@ CreateTargetPhraseCollection(PhraseDictionaryBase const& d,
 
 	std::cerr<<"ERROR: wrong phrase dictionary type for confusion net decoding!"
 		"  Has to be PhraseDictionaryTreeAdaptor\n";
-	abort();
+	return NULL;
 }
 
 TranslationOptionCollection* 

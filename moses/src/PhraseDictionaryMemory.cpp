@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iterator>
 #include <algorithm>
 #include <sys/stat.h>
-#include "PhraseDictionary.h"
+#include "PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "Word.h"
 #include "Util.h"
@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-void PhraseDictionary::Load(const std::vector<FactorType> &input
+void PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
 																			, FactorCollection &factorCollection
 																			, const string &filePath
@@ -54,7 +54,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 	//factors	
 	m_inputFactors = FactorMask(input);
 	m_outputFactors = FactorMask(output);
-	VERBOSE(2,"PhraseDictionary: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
+	VERBOSE(2,"PhraseDictionaryMemory: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
 
 	// data from file
 	InputFileStream inFile(filePath);
@@ -115,7 +115,7 @@ void PhraseDictionary::Load(const std::vector<FactorType> &input
 	m_collection.Sort(m_tableLimit);
 }
 
-TargetPhraseCollection *PhraseDictionary::CreateTargetPhraseCollection(const Phrase &source)
+TargetPhraseCollection *PhraseDictionaryMemory::CreateTargetPhraseCollection(const Phrase &source)
 {
 	const size_t size = source.GetSize();
 	
@@ -131,13 +131,13 @@ TargetPhraseCollection *PhraseDictionary::CreateTargetPhraseCollection(const Phr
 	return currNode->CreateTargetPhraseCollection();
 }
 
-void PhraseDictionary::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
+void PhraseDictionaryMemory::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
 {
 	TargetPhraseCollection &phraseColl = *CreateTargetPhraseCollection(source);
 	phraseColl.Add(new TargetPhrase(targetPhrase));
 }
 
-const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const Phrase &source) const
+const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase &source) const
 { // exactly like CreateTargetPhraseCollection, but don't create
 	const size_t size = source.GetSize();
 	
@@ -153,11 +153,11 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const 
 	return currNode->GetTargetPhraseCollection();
 }
 
-PhraseDictionary::~PhraseDictionary()
+PhraseDictionaryMemory::~PhraseDictionaryMemory()
 {
 }
 
-void PhraseDictionary::SetWeightTransModel(const vector<float> &weightT)
+void PhraseDictionaryMemory::SetWeightTransModel(const vector<float> &weightT)
 {
 	PhraseDictionaryNode::iterator iterDict;
 	for (iterDict = m_collection.begin() ; iterDict != m_collection.end() ; ++iterDict)
@@ -168,7 +168,7 @@ void PhraseDictionary::SetWeightTransModel(const vector<float> &weightT)
 	}
 }
 
-bool PhraseDictionary::Contains(const vector< vector<string> > &phraseVector
+bool PhraseDictionaryMemory::Contains(const vector< vector<string> > &phraseVector
 															, const list<Phrase> &inputPhraseList
 															, const vector<FactorType> &inputFactorType)
 {
@@ -182,10 +182,10 @@ bool PhraseDictionary::Contains(const vector< vector<string> > &phraseVector
 	return false;
 }
 
-TO_STRING_BODY(PhraseDictionary);
+TO_STRING_BODY(PhraseDictionaryMemory);
 
 // friend
-ostream& operator<<(ostream& out, const PhraseDictionary& phraseDict)
+ostream& operator<<(ostream& out, const PhraseDictionaryMemory& phraseDict)
 {
 	const PhraseDictionaryNode &coll = phraseDict.m_collection;
 	PhraseDictionaryNode::const_iterator iter;	

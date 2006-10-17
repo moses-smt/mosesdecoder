@@ -35,22 +35,22 @@ class StaticData;
 class InputType;
 class WordsRange;
 
-class PhraseDictionaryBase : public Dictionary, public ScoreProducer
+class PhraseDictionary : public Dictionary, public ScoreProducer
 {
  protected:
 	size_t m_tableLimit;
 	std::string m_filename;    // just for debugging purposes
 
  public:
-	PhraseDictionaryBase(size_t noScoreComponent);
-	virtual ~PhraseDictionaryBase();
+	PhraseDictionary(size_t noScoreComponent);
+	virtual ~PhraseDictionary();
 		
 	DecodeType GetDecodeType() const	{	return Translate;	}
 	size_t GetTableLimit() const { return m_tableLimit; }
 	
 	virtual void InitializeForInput(InputType const&) {}
 	const std::string GetScoreProducerDescription() const;
-	unsigned int GetNumScoreComponents() const;
+	size_t GetNumScoreComponents() const;
 
 	virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
 

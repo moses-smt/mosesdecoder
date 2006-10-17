@@ -26,7 +26,7 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	VERBOSE(2,"Added ScoreProducer(" << sp << "): id=" << sp->GetScoreBookkeepingID() << std::endl);
 }
 
-void ScoreIndexManager::Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection2& scc) const
+void ScoreIndexManager::Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const
 {
 	std::vector<float> weights(scc.m_scores.size(), 1.0f);
 	Debug_PrintLabeledWeightedScores(os, scc, weights);
@@ -39,7 +39,7 @@ static std::string getFormat(float foo)
   return buf;
 }
 
-void ScoreIndexManager::Debug_PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection2& scc, const std::vector<float>& weights) const
+void ScoreIndexManager::Debug_PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scc, const std::vector<float>& weights) const
 {
   size_t cur_i = 0;
   size_t cur_scoreType = 0;

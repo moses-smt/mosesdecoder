@@ -120,7 +120,7 @@ GenerationDictionary::~GenerationDictionary()
 	}
 }
 
-unsigned int GenerationDictionary::GetNumScoreComponents() const
+size_t GenerationDictionary::GetNumScoreComponents() const
 {
   return this->GetNoScoreComponents();
 }
