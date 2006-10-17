@@ -38,7 +38,7 @@ template<typename T> inline size_t fWrite(FILE* f,const T b,const T e) {
 }
 
 template<typename C> inline size_t fWriteVector(FILE* f,const C& v) {
-  unsigned s=v.size();
+  size_t s=v.size();
   size_t rv=fWrite(f,s);
   if(fwrite(&v[0],sizeof(typename C::value_type),s,f)!=s) {std::cerr<<"ERROR: fwrite!\n";abort();}
   return rv+sizeof(typename C::value_type)*s;
@@ -46,7 +46,7 @@ template<typename C> inline size_t fWriteVector(FILE* f,const C& v) {
 
 template<typename C> inline void fReadVector(FILE* f, C& v) {
   unsigned s;fRead(f,s);v.resize(s);
-  unsigned r=fread(&(*v.begin()),sizeof(typename C::value_type),s,f);
+  size_t r=fread(&(*v.begin()),sizeof(typename C::value_type),s,f);
   if(r!=s) {
     std::cerr<<"ERROR: freadVec! "<<r<<" "<<s<<"\n";abort();}
 }
