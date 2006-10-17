@@ -115,6 +115,6 @@ public:
 	
 	float GetProbability(Hypothesis *hypothesis, int orientation);
 
-	unsigned int GetNumScoreComponents() const;
+	size_t GetNumScoreComponents() const;
 	const std::string GetScoreProducerDescription() const;
 };

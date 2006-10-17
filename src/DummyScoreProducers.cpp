@@ -9,7 +9,7 @@ DistortionScoreProducer::DistortionScoreProducer()
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
 }
 
-unsigned int DistortionScoreProducer::GetNumScoreComponents() const
+size_t DistortionScoreProducer::GetNumScoreComponents() const
 {
 	return 1;
 }
@@ -37,7 +37,7 @@ WordPenaltyProducer::WordPenaltyProducer()
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
 }
 
-unsigned int WordPenaltyProducer::GetNumScoreComponents() const
+size_t WordPenaltyProducer::GetNumScoreComponents() const
 {
 	return 1;
 }
@@ -48,7 +48,7 @@ const std::string WordPenaltyProducer::GetScoreProducerDescription() const
 }
 
 
-unsigned int UnknownWordPenaltyProducer::GetNumScoreComponents() const
+size_t UnknownWordPenaltyProducer::GetNumScoreComponents() const
 {
 	return 1;
 }
