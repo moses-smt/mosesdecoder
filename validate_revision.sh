@@ -36,14 +36,14 @@ svn info
 
 cd irstlm || die "Failed to chdir to irstlm"
 ./regenerate-makefiles.sh || die "Failed to regenerate makefiles in irstlm"
-make distclean || die "Failed to distclean irstlm"
 ./configure --prefix=$tempdir/irstlm || die "Failed to configure irstlm"
+make clean || die "Failed to clean irstlm"
 make || die "Failed to compile irstlm"
 make install || die "Failed to install irstlm"
 cd ..
 
-make distclean || die "Failed to distclean moses"
 ./configure --with-irstlm=$tempdir/irstlm || die "Failed to configure moses"
+make clean || die "Failed to clean moses"
 make || die "Failed to compile moses"
   
 rm -rf $tempdir || die "Failed to remove tempdir $tempdir"
