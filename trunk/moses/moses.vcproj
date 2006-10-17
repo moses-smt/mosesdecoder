@@ -302,7 +302,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseDictionaryBase.cpp"
+				RelativePath=".\src\PhraseDictionaryMemory.cpp"
 				>
 			</File>
 			<File
@@ -586,7 +586,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseDictionaryBase.h"
+				RelativePath=".\src\PhraseDictionaryMemory.h"
 				>
 			</File>
 			<File
