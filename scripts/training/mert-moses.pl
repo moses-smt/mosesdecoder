@@ -121,6 +121,7 @@ my $filtercmd = undef; # path to filter-model-given-input.pl
 my $SCORENBESTCMD = undef;
 my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
+my $old_sge = 0; # assume sge<6.0
 
 
 use strict;
@@ -153,6 +154,7 @@ GetOptions(
   "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
+  "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
 ) or exit(1);
 
@@ -200,6 +202,7 @@ Options:
   --cmertdir=STRING ... where is cmert installed
   --pythonpath=STRING  ... where is python executable
   --scorenbestcmd=STRING  ... path to score-nbest.py
+  --old-sge ... passed to moses-parallel, assume Sun Grid Engine < 6.0
   --inputtype=[0|1] ... Handle different input types (0 for text, 1 for confusion network, default is 0)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
@@ -260,6 +263,9 @@ die "File not found: $___DEV_F (interpreted as $input_abs)."
   if ! -e $input_abs;
 $___DEV_F = $input_abs;
 
+
+# Option to pass to qsubwrapper and moses-parallel
+my $pass_old_sge = $old_sge ? "-old-sge" : "";
 
 my $decoder_abs = ensure_full_path($___DECODER);
 die "File not found: $___DECODER (interpreted as $decoder_abs)."
@@ -437,12 +443,14 @@ if ($continue) {
   # dump_triples($use_triples);
 }
 
+
 if ($___FILTER_PHRASE_TABLE){
   # filter the phrase tables wih respect to input, use --decoder-flags
   print "filtering the phrase tables... ".`date`;
   my $cmd = "$filtercmd ./filtered $___CONFIG $___DEV_F";
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\"" ) or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
+      or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
   } else {
     safesystem($cmd) or die "Failed to filter the tables.";
   }
@@ -509,7 +517,7 @@ while(1) {
   print STDERR "Scoring the nbestlist.\n";
   my $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\"") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=scorenbest.out -stderr=scorenbest.err") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
   } else {
     safesystem($cmd) or die "Failed to score nbestlist";
   }
@@ -585,7 +593,7 @@ while(1) {
  
   print STDERR "Starting cmert.\n";
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper -command='$cmd' -stderr=cmert.log -queue-parameter=\"$queue_flags\"") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=cmert.log -queue-parameter=\"$queue_flags\"") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
   } else {
     safesystem("$cmd 2> cmert.log") or die "Failed to run cmert";
   }
@@ -729,7 +737,7 @@ sub run_decoder {
     # run the decoder
     my $decoder_cmd;
     if (defined $___JOBS) {
-      $decoder_cmd = "$moses_parallel_cmd -qsub-prefix mert$run -queue-parameters \"$queue_flags\" $parameters $decoder_config -n-best-file $filename -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -qsub-prefix mert$run -queue-parameters \"$queue_flags\" $parameters $decoder_config -n-best-file $filename -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
       $decoder_cmd = "$___DECODER $parameters $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
     }

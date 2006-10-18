@@ -15,8 +15,14 @@ my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_C
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
+
+# the following line is set installation time by 'make release'.  BEWARE!
+my $BINDIR = "/THIS/PATH/IS/REPLACED/BY/MAKE/RELEASE";
+
+
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
+		       'bin-dir=s' => \$BINDIR, # allow to override default bindir path
 		       'corpus-dir=s' => \$_CORPUS_DIR,
 		       'corpus=s' => \$_CORPUS,
                        'corpus-compression=s' => \$_CORPUS_COMPRESSION,
@@ -78,9 +84,6 @@ if (!defined $SCRIPTS_ROOTDIR) {
   die "Please set SCRIPTS_ROOTDIR or specify --scripts-root-dir" if !defined $SCRIPTS_ROOTDIR;
 }
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
-
-# the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR = "/THIS/PATH/IS/REPLACED/BY/MAKE/RELEASE";
 
 # supporting binaries from other packages
 my $GIZA = "$BINDIR/GIZA++";

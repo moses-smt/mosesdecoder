@@ -38,6 +38,7 @@ while (<INI>) {
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       $fn = fixpath($fn);
       $fn = ensure_relative_to_origin($fn, $ini);
+      -e $fn || die "File $fn not found";
       safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
       $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
     }
@@ -47,6 +48,7 @@ while (<INI>) {
       $cnt{$section}++;
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       $fn = fixpath($fn);
+      -e $fn || die "File $fn not found";
       safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
       $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
     }
@@ -57,6 +59,7 @@ while (<INI>) {
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       $fn = fixpath($fn);
       $fn = ensure_relative_to_origin($fn, $ini);
+      -e $fn || die "File $fn not found";
       safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
       $_ = "./$section.$cnt{$section}$suffix\n";
     }

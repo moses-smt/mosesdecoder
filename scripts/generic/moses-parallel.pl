@@ -52,6 +52,8 @@ my $nbest=undef;
 my $nbestflag=0;
 my $qsubname="MOSES";
 my $inputtype=0;
+my $old_sge = 0; # assume old Sun Grid Engine (<6.0) where qsub does not
+                 # implement -sync and -b
 
 #######################
 # Command line options processing
@@ -68,7 +70,8 @@ sub init(){
 	     'qsub-prefix=s'=> \$qsubname,
 	     'queue-parameters=s'=> \$queueparameters,
 	     'inputtype=i'=> \$inputtype,
-             'config=s'=>\$cfgfile
+             'config=s'=>\$cfgfile,
+             'old-sge' => \$old_sge,
 	    ) or exit(1);
 
   chomp($nbestfile=`basename $orinbestfile`) if defined $orinbestfile;
@@ -107,6 +110,7 @@ sub usage(){
   print STDERR "*  -jobs <N> number of required jobs\n";
   print STDERR "   -qsub-prefix <string> name for sumbitte jobs\n";
   print STDERR "   -queue-parameters <string> specific requirements for queue\n";
+  print STDERR "   -old-sge Assume Sun Grid Engine < 6.0\n";
   print STDERR "   -debug debug\n";
   print STDERR "   -version print version of the script\n";
   print STDERR "   -help this help\n";
@@ -163,25 +167,25 @@ usage() if $help;
 
 if (!defined $orifile || !defined $mosescmd || ! defined $cfgfile) {
   print STDERR "Please specify -input-file, -decoder and -config\n";
-  usage();
+  exit 1;
 }
 
 #checking if inputfile exists
 if (! -e ${orifile} ){
   print STDERR "Inputfile ($orifile) does not exists\n";
-  usage();
+  exit 1;
 }
 
 #checking if decoder exists
 if (! -e $mosescmd) {
   print STDERR "Decoder ($mosescmd) does not exists\n";
-  usage();
+  exit 1;
 }
 
 #checking if configfile exists
 if (! -e $cfgfile) {
   print STDERR "Configuration file ($cfgfile) does not exists\n";
-  usage();
+  exit 1;
 }
 
 
@@ -263,15 +267,13 @@ my @sgepids =();
 
 my $failure=0;
 foreach my $idx (@idxlist){
-  print STDERR "qsub $queueparameters -b yes -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash\n" if $dbg; 
-
-  $cmd="qsub $queueparameters -b yes -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
-
+  $cmd="qsub $queueparameters -j y -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
   safesystem($cmd) or die;
 
   my ($res,$id);
 
-  open (IN,"${jobscript}${idx}.log");
+  open (IN,"${jobscript}${idx}.log")
+    or die "Can't read id of job ${jobscript}${idx}.log";
   chomp($res=<IN>);
   split(/\s+/,$res);
   $id=$_[2];
@@ -283,10 +285,50 @@ foreach my $idx (@idxlist){
 #waiting until all jobs have finished
 my $hj = "-hold_jid " . join(" -hold_jid ", @sgepids);
 
-$cmd="qsub $queueparameters -sync yes $hj -j yes -o /dev/null -e /dev/null -N $qsubname.W -b yes /bin/ls >& $qsubname.W.log";
-safesystem($cmd) or kill_all_and_quit();
+if ($old_sge) {
+  # we need to implement our own waiting script
+  safesystem("echo 'date' > sync_workaround_script.sh") or kill_all_and_quit();
 
-$failure=&check_exit_status();
+  my $pwd = `pwd`; chomp $pwd;
+  my $checkpointfile = "sync_workaround_checkpoint";
+
+  # delete previous checkpoint, if left from previous runs
+  safesystem("rm -f $checkpointfile") or kill_all_and_quit();
+
+  # start the 'hold' job, i.e. the job that will wait
+  $cmd="qsub -cwd $queueparameters $hj -o $checkpointfile -e /dev/null -N $qsubname.W $pwd/sync_workaround_script.sh >& $qsubname.W.log";
+  safesystem($cmd) or kill_all_and_quit();
+  
+  # and wait for checkpoint file to appear
+  my $nr=0;
+  while (!-e $checkpointfile) {
+    sleep(10);
+    $nr++;
+    print STDERR "w" if $nr % 3 == 0;
+  }
+  print STDERR "End of waiting.\n";
+  safesystem("rm -f $checkpointfile sync_workaround_script.sh")
+    or kill_all_and_quit();
+  
+  my $failure = 1;
+  my $nr = 0;
+  while ($nr < 60 && $failure) {
+    $nr ++;
+    $failure=&check_exit_status();
+    if (!$failure) {
+      $failure = ! check_translation();
+    }
+    last if !$failure;
+    print STDERR "Extra wait ($nr) for possibly unfinished processes.\n";
+    sleep 10;
+  }
+} else {
+  # use the -sync option for qsub
+  $cmd="qsub $queueparameters -sync y $hj -j y -o /dev/null -e /dev/null -N $qsubname.W -b y /bin/ls >& $qsubname.W.log";
+  safesystem($cmd) or kill_all_and_quit();
+
+  $failure=&check_exit_status();
+}
 
 kill_all_and_quit() if $failure;
 
@@ -378,7 +420,7 @@ sub kill_all_and_quit(){
   }
 
   print STDERR "Translation was not performed correctly\n";
-  print STDERR "Any of the submitted jobs died not correctly\n";
+  print STDERR "or some of the submitted jobs died.\n";
   print STDERR "qdel function was called for all submitted jobs\n";
 
   exit(1);
@@ -402,9 +444,10 @@ sub check_translation(){
       print STDERR "Split ($idx) were not entirely translated\n";
       print STDERR "outputN=$outputN inputN=$inputN\n";
       print STDERR "outputfile=${testfile}.$splitpfx$idx.trans inputfile=${testfile}.$splitpfx$idx\n";
-      exit(1);
+      return 0;
     }
   }
+  return 1;
 }
 
 sub remove_temporary_files(){
@@ -432,6 +475,7 @@ sub safesystem {
   elsif ($? & 127) {
     printf STDERR "Execution of: @_\n  died with signal %d, %s coredump\n",
       ($? & 127),  ($? & 128) ? 'with' : 'without';
+    exit 1;
   }
   else {
     my $exitcode = $? >> 8;

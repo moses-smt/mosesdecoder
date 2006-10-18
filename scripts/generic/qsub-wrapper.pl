@@ -25,6 +25,7 @@ my $cmd="";
 my $cmdout="";
 my $cmderr="";
 my $parameters="";
+my $old_sge = 0; # assume grid engine < 6.0
 
 sub init(){
   use Getopt::Long qw(:config pass_through);
@@ -35,7 +36,8 @@ sub init(){
              'command=s'=> \$cmd,
              'stdout=s'=> \$cmdout,
              'stderr=s'=> \$cmderr,
-             'queue-parameter=s'=> \$queueparameters
+             'queue-parameter=s'=> \$queueparameters,
+             'old-sge' => \$old_sge,
             ) or exit(1);
   $parameters="@ARGV";
   
@@ -61,6 +63,7 @@ sub usage(){
   print STDERR "-stderr <file> file to save stderr of cmd (optional)\n";
   print STDERR "-qsub-prefix <string> name for sumbitted jobs (optional)\n";
   print STDERR "-queue-parameters <string>  parameter for the queue (optional)\n";
+  print STDERR "-old-sge ... assume Sun Grid Engine < 6.0\n";
   print STDERR "-debug debug\n";
   print STDERR "-version print version of the script\n";
   print STDERR "-help this help\n";
@@ -80,15 +83,15 @@ sub print_parameters(){
 
 #script creation
 sub preparing_script(){
-  my $scriptheader="\#\! /bin/bash\n\n";
+  my $scriptheader="\#\!/bin/csh\n\n";
   $scriptheader.="uname -a\n\n";
 
   $scriptheader.="cd $workingdir\n\n";
     
-  open (OUT, "> ${jobscript}.bash");
+  open (OUT, "> ${jobscript}.csh");
   print OUT $scriptheader;
 
-  print OUT "($cmd $parameters > $tmpdir/cmdout$$) 2> $tmpdir/cmderr$$\n\n";
+  print OUT "($cmd $parameters > $tmpdir/cmdout$$ ) >& $tmpdir/cmderr$$\n\n";
   print OUT "echo exit status \$\?\n\n";
 
   if ($cmdout){
@@ -111,7 +114,7 @@ sub preparing_script(){
   close(OUT);
 
   #setting permissions of each script
-  chmod(oct(755),"${jobscript}.bash");
+  chmod(oct(755),"${jobscript}.csh");
 }
 
 #######################
@@ -125,14 +128,15 @@ safesystem("mkdir -p $tmpdir") or die;
 
 preparing_script();
 
-my $qsubcmd="qsub $queueparameters -b yes -sync yes -o $qsubout -e $qsuberr -N $qsubname ${jobscript}.bash >& ${jobscript}.log";
+my $maysync = $old_sge ? "" : "-sync y";
 
-print  STDERR "$qsubcmd\n";
+# submit the main job
+my $qsubcmd="qsub $queueparameters $maysync -o $qsubout -e $qsuberr -N $qsubname ${jobscript}.csh >& ${jobscript}.log";
 safesystem($qsubcmd) or die;
 
 #getting id of submitted job
 my $res;
-open (IN,"${jobscript}.log");
+open (IN,"${jobscript}.log") or die "Can't read main job id: ${jobscript}.log";
 chomp($res=<IN>);
 split(/\s+/,$res);
 my $id=$_[2];
@@ -141,17 +145,45 @@ close(IN);
 print SDTERR " res:$res\n";
 print SDTERR " id:$id\n";
 
+if ($old_sge) {
+  # need to workaround -sync, add another job that will wait for the main one
+  # prepare a fake waiting script
+  my $syncscript = "${jobscript}.sync_workaround_script.sh";
+  safesystem("echo 'date' > $syncscript") or die;
+
+  my $checkpointfile = "${jobscript}.sync_workaround_checkpoint";
+
+  # ensure checkpoint does not exist
+  safesystem("rm -f $checkpointfile") or die;
+
+  # start the 'hold' job, i.e. the job that will wait
+  $cmd="qsub -cwd $queueparameters -hold_jid $id -o $checkpointfile -e /dev/null -N $qsubname.W $syncscript >& $qsubname.W.log";
+  safesystem($cmd) or die;
+  
+  # and wait for checkpoint file to appear
+  my $nr=0;
+  while (!-e $checkpointfile) {
+    sleep(10);
+    $nr++;
+    print STDERR "w" if $nr % 3 == 0;
+  }
+  safesystem("rm -f $checkpointfile $syncscript") or die();
+  print STDERR "End of waiting workaround.\n";
+}
+
+
 my $failure=&check_exit_status();
+print STDERR "check_exit_status returned $failure\n";
 
 &kill_all_and_quit() if $failure;
 
-&remove_temporary_files();
+&remove_temporary_files() if !$dbg;
 
 sub check_exit_status(){
   my $failure=0;
 
   print STDERR "check_exit_status of submitted job $id\n";
-  open(IN,"$qsubout");
+  open(IN,"$qsubout") or die "Can't read $qsubout";
   while (<IN>){
     $failure=1 if (/exit status 1/);
   }
@@ -173,7 +205,7 @@ sub kill_all_and_quit(){
 sub remove_temporary_files(){
   #removing temporary files
 
-  unlink("${jobscript}.bash");
+  unlink("${jobscript}.csh");
   unlink("${jobscript}.log");
   unlink("$qsubout");
   unlink("$qsuberr");
