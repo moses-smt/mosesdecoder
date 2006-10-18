@@ -129,7 +129,7 @@ tests:
 	done
 	## All tests passed
 
-## Run just one test
+## Run just one test in the background
 tests/%.test.run: tests/%.test
 	export SCRIPTS_ROOTDIR=`pwd`; \
 	ts=`date '+%Y%m%d-%H%M%N'`; \
@@ -140,5 +140,18 @@ tests/%.test.run: tests/%.test
 	  echo "Running $$test  in  tests/$$test.$$ts"; \
 	  ( nohup ../$$test > log 2>&1 & ) || exit 1; \
 	  echo "Observe tests/$$test.$$ts/log"; \
+	cd ..
+
+## Run just one test in the foreground
+tests/%.test.runfg: tests/%.test
+	export SCRIPTS_ROOTDIR=`pwd`; \
+	ts=`date '+%Y%m%d-%H%M%N'`; \
+	cd tests; \
+	  test=$*.test; \
+	  mkdir $$test.$$ts; \
+	  cd $$test.$$ts; \
+	  echo "Running $$test  in  tests/$$test.$$ts"; \
+	  ../$$test 2>&1 | tee log ; \
+	  echo "Log saved to tests/$$test.$$ts/log"; \
 	cd ..
 	
