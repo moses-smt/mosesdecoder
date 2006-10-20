@@ -74,6 +74,7 @@ void lmtable::load(istream& inp){
     loadtxt(inp,header);
   
   dict->genoovcode();
+    
 	
   cerr << "OOV code is " << dict->oovcode() << "\n";
   
@@ -193,7 +194,6 @@ void lmtable::loadtxt(istream& inp,const char* header){
       << MAX_LINE << ") chars " << line << "\n";
       exit(1);
     }
-
     
     bool backslash = (line[0] == '\\');
     
@@ -980,8 +980,6 @@ void lmtable::filter2(const char* binlmfile, int buffMb){
       char* ptable=table[l-1]; 
       LMT_TYPE ptype=tbltype[l-1];
       int pndsz=nodesize(ptype);
-      
-      
       
       //count actual table size, allocate memory, and copy elements
       //we scan elements through the previous table: ptable

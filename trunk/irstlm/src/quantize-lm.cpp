@@ -386,6 +386,8 @@ int ComputeCluster(int centers,double* ctrs,int N,double* dataPts){
     cout.flush();
     
     delete [] population;
+    delete [] species;
+    
     
     return 1;
     
