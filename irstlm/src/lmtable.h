@@ -69,7 +69,7 @@ private:
 public:
     
 	disktable(std::fstream& inp, int buffersize, int entrysize,long max_entries){
-       buffer_size=buffersize;
+      buffer_size=buffersize;
       entry_size=entrysize;
       buffer=new char[(buffer_size+1) * entry_size];
       current_border=0;
@@ -79,7 +79,7 @@ public:
   
   ~disktable() {delete [] buffer;};
   
-  char* get(std::fstream& inp,int position){    
+  char* get(std::fstream& inp,long position){    
     assert(position < file_border);
     
     //you can look back at maximum one position before the first in the buffer!

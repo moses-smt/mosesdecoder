@@ -930,13 +930,12 @@ void lmtable::filter2(const char* binlmfile, int buffMb){
     if (isQtable) loadbincodebook(inp,l);
     
     //allocate the maxumum number of entries to be load at each time    
-    cerr << "loading part of" << dsklmt->cursize[l] << " " << l << "-grams\n";
+    cerr << "loading part of " << dsklmt->cursize[l] << " " << l << "-grams\n";    
     
-    
+    //open a on-disk table buffer starting from current position in stream inp
     dtbl=new disktable(inp, (buffMb * 1024 *1024)/ndsz,ndsz,dsklmt->maxsize[l]);
     
-    if (l==1){      
-      
+    if (l==1){            
       
       //compute actual table size
       maxsize[l]=0;
@@ -959,7 +958,7 @@ void lmtable::filter2(const char* binlmfile, int buffMb){
       for (i=0;i<dsklmt->maxsize[l];i++){
         p=dtbl->get(inp,i);
         if ((w=code2code[dsklmt->word(p)]) != -1) {
-          r=table[l] + cursize[l] * ndsz;
+          r=table[l] + (long) cursize[l] * ndsz;
           memcpy(r,p,ndsz); 
           //store the initial poition in startpos
           startpos[l][cursize[l]]=(i==0?0:bound(dtbl->get(inp,i-1),tbltype[l]));
@@ -969,7 +968,7 @@ void lmtable::filter2(const char* binlmfile, int buffMb){
         }
       }
       
-      for (i=0;i<cursize[l];i++) assert(word(table[l]+i*ndsz)==i);
+      for (i=0;i<cursize[l];i++) assert(word(table[l]+ (long) i * ndsz)==i);
       
       assert(maxsize[l]==cursize[l]);        
       
@@ -1010,7 +1009,7 @@ void lmtable::filter2(const char* binlmfile, int buffMb){
       cursize[l]=0;
       
       for (i=0;i<cursize[l-1];i++){
-        p=ptable+i*pndsz;
+        p=ptable+ i * pndsz;
         for (j=startpos[l-1][i];j<bound(p,ptype);j++){  
           assert(startpos[l-1][i]<bound(p,ptype));                  
           
