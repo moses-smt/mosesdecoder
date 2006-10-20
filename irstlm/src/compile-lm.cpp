@@ -141,7 +141,6 @@ int main(int argc, const char **argv)
   
   lmtable lmt; 
   
-
   
   if (ssubdict == ""){
 
@@ -156,10 +155,17 @@ int main(int argc, const char **argv)
   }
   else{ //load reduced LM from a binary LM file!
     lmt.dict->generate((char *)ssubdict.c_str());
-    lmt.filter2(infile.c_str(),100); 
+    //eventually add OOV code so that it can be found in the table
+    lmt.dict->genoovcode(); //generate OOV code
+    //filter table from the large binary table on disk
+    lmt.filter2(infile.c_str(),1); 
+    //regenerate OOV code as dictionary has been rebuild
+    lmt.dict->genoovcode(); 
   }
   
   if (seval != ""){
+    std::cerr << "Start Eval\n";
+    std::cerr << "OOV code: " << lmt.dict->oovcode() << "\n";
     ngram ng(lmt.dict);    
     std::cout.setf(ios::fixed);
     std::cout.precision(2);
