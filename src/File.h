@@ -26,13 +26,13 @@ template<typename T> inline void fRead(FILE* f,T& t)  {
 }
 
 template<typename T> inline size_t fWrite(FILE* f,const T* b,const T* e) {
-  unsigned s=e-b;size_t rv=fWrite(f,s);
+  size_t s=std::distance(b,e);size_t rv=fWrite(f,s);
   if(fwrite(b,sizeof(T),s,f)!=s) {std::cerr<<"ERROR: fwrite!\n";abort();}
   return rv+sizeof(T)*s;
 }
 
 template<typename T> inline size_t fWrite(FILE* f,const T b,const T e) {
-  unsigned s=std::distance(b,e);size_t rv=fWrite(f,s);
+  size_t s=std::distance(b,e);size_t rv=fWrite(f,s);
   if(fwrite(&(*b),sizeof(T),s,f)!=s) {std::cerr<<"ERROR: fwrite!\n";abort();}
   return rv+sizeof(T)*s;
 }
@@ -45,7 +45,7 @@ template<typename C> inline size_t fWriteVector(FILE* f,const C& v) {
 }
 
 template<typename C> inline void fReadVector(FILE* f, C& v) {
-  unsigned s;fRead(f,s);v.resize(s);
+  size_t s;fRead(f,s);v.resize(s);
   size_t r=fread(&(*v.begin()),sizeof(typename C::value_type),s,f);
   if(r!=s) {
     std::cerr<<"ERROR: freadVec! "<<r<<" "<<s<<"\n";abort();}
