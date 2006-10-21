@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "Parameter.h"
 #include "LanguageModel.h"
-#include "InputOutput.h"
+#include "IODevice.h"
 #include "LMList.h"
 #include "SentenceStats.h"
 //#include "UnknownWordHandler.h"
@@ -78,7 +78,7 @@ protected:
 	
 	std::string									m_nBestFilePath, m_cachePath;
 	std::vector<std::string>		m_mySQLParam;
-	InputOutput									*m_inputOutput;
+	IODevice										*m_inputOutput;
 	bool                        m_fLMsLoaded, m_labeledNBestList;
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
@@ -134,7 +134,7 @@ public:
 		return m_parameter.GetParam(paramName);
 	}
 
-	InputOutput &GetInputOutput()
+	IODevice &GetInputOutput()
 	{
 		return *m_inputOutput;
 	}

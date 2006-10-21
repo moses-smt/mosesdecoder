@@ -64,7 +64,7 @@ IOCommandLine::IOCommandLine(
 
 InputType*IOCommandLine::GetInput(InputType* in)
 {
-	return InputOutput::GetInput(in,std::cin,m_inputFactorOrder, m_factorCollection);
+	return IODevice::GetInput(in,std::cin,m_inputFactorOrder, m_factorCollection);
 }
 
 /***
