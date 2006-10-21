@@ -47,7 +47,7 @@ const std::string LanguageModelSingleFactor::GetScoreProducerDescription() const
 {
 	std::ostringstream oss;
 	// what about LMs that are over multiple factors at once, POS + stem, for example?
-	oss << GetNGramOrder() << "-gram LM score, factor-type=" << GetFactorType() << ", file=" << m_filename;
+	oss << GetNGramOrder() << "-gram LM score, factor-type=" << GetFactorType() << ", file=" << m_filePath;
 	return oss.str();
 } 
 

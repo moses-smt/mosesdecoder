@@ -325,7 +325,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 		bool addPath = true;
 		if(onlyDistinct)
 			{
-				// not entirely correct.
+				// TODO - not entirely correct.
 				// output phrase can't be assumed to only contain factor 0.
 				// have to look in StaticData.GetOutputFactorOrder() to find out what output factors should be
 				std::vector<size_t> tgtPhrase;

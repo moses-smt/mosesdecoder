@@ -35,27 +35,36 @@ class StaticData;
 class InputType;
 class WordsRange;
 
+/** abstract base class for phrase table classes
+*/
 class PhraseDictionary : public Dictionary, public ScoreProducer
 {
  protected:
 	size_t m_tableLimit;
-	std::string m_filename;    // just for debugging purposes
+	std::string m_filePath;    // just for debugging purposes
 
  public:
 	PhraseDictionary(size_t numScoreComponent);
 	virtual ~PhraseDictionary();
-		
+	
 	DecodeType GetDecodeType() const	{	return Translate;	}
+	//! table limit number. 
 	size_t GetTableLimit() const { return m_tableLimit; }
 	
-	virtual void InitializeForInput(InputType const&) {}
+	//! Overriden by load on demand phrase tables classes to load data for each input
+	virtual void InitializeForInput(InputType const &source) {}
 	const std::string GetScoreProducerDescription() const;
 	size_t GetNumScoreComponents() const;
 
+	/** set/change translation weights and recalc weighted score for each translation. 
+		* TODO This may be redundant now we use ScoreCollection
+	*/
 	virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
 
+	//! find list of translations that can translates src. Only for phrase input
 	virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
+	//! find list of translations that can translates a portion of src. Used by confusion network decoding
 	virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
-
+	//! Create entry for translation of source to targetPhrase
 	virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
 };

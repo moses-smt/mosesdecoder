@@ -8,6 +8,7 @@ class Phrase;
 class ScoreColl;
 class ScoreComponentCollection;
 
+//! List of language models
 class LMList : public std::list < LanguageModel* >	
 {
 public:

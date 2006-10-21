@@ -72,7 +72,7 @@ public:
 	*/
 	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);	
 	//! Load list of factors. Deprecated
-	void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &fileName);
+	void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &filePath);
 	
 	TO_STRING();
 	

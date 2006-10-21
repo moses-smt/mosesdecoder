@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class FactorCollection;
 class Factor;
 
+//! Abstract class for for single factor LM 
 class LanguageModelSingleFactor : public LanguageModel
 {
 protected:	
@@ -39,7 +40,7 @@ public:
   static State UnknownState;
 
 	virtual ~LanguageModelSingleFactor();
-	virtual void Load(const std::string &fileName
+	virtual void Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight

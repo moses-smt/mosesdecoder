@@ -33,6 +33,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class Phrase;
 class FactorCollection;
 
+/** LM of multiple factors. A simple extension of single factor LM - factors backoff together.
+ *	Rather slow as this uses string concatenation/split
+*/
 class LanguageModelJoint : public LanguageModelMultiFactor
 {
 protected:
@@ -53,7 +56,7 @@ public:
 		delete m_lmImpl;
 	}
 	
-	void Load(const std::string &fileName
+	void Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, const std::vector<FactorType> &factorTypes
 					, float weight
@@ -61,7 +64,7 @@ public:
 	{
 		m_factorTypes				= FactorMask(factorTypes);
 		m_weight 						= weight;
-		m_filename 					= fileName;
+		m_filePath 					= filePath;
 		m_nGramOrder 				= nGramOrder;
 	
 		m_factorTypesOrdered= factorTypes;
@@ -76,7 +79,7 @@ public:
 			m_sentenceEndArray[factorType] 		= factorCollection.AddFactor(Output, factorType, EOS_);
 		}
 	
-		m_lmImpl->Load(fileName, factorCollection, m_implFactor, weight, nGramOrder);
+		m_lmImpl->Load(filePath, factorCollection, m_implFactor, weight, nGramOrder);
 	}
 	
 	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const

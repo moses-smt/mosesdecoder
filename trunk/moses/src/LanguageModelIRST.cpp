@@ -49,7 +49,7 @@ LanguageModelIRST::~LanguageModelIRST()
 }
 
 
-void LanguageModelIRST::Load(const std::string &fileName
+void LanguageModelIRST::Load(const std::string &filePath
 												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
@@ -58,10 +58,10 @@ void LanguageModelIRST::Load(const std::string &fileName
 	m_factorType 	 = factorType;
 	m_weight			 = weight;
 	m_nGramOrder	 = nGramOrder;
-	m_filename		 = fileName;
+	m_filePath		 = filePath;
 
   // Open the input file (possibly gzipped) and load the (possibly binary) model
-	InputFileStream inp(fileName);
+	InputFileStream inp(filePath);
 	m_lmtb  = new lmtable;
   m_lmtb->load(inp);
   

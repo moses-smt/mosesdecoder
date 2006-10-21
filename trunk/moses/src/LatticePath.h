@@ -29,44 +29,63 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class LatticePathCollection;
 
+/** Encapsulate the set of hypotheses/arcs that goes from decoding 1 phrase to all the source phrases
+ *	to reach a final translation. For the best translation, this consist of all hypotheses, for the other 
+ *	n-best paths, the node on the path can consist of hypotheses or arcs
+ */
 class LatticePath
 {
 	friend std::ostream& operator<<(std::ostream&, const LatticePath&);
 
 protected:
-	std::vector<const Hypothesis *> m_path;
-	size_t		m_prevEdgeChanged;
+	std::vector<const Hypothesis *> m_path; //< list of hypotheses/arcs
+	size_t		m_prevEdgeChanged; /**< the last node that was wiggled to create this path
+																	, or NOT_FOUND if this path is the best trans so consist of only hypos
+															 */
 
 	ScoreComponentCollection	m_scoreBreakdown;
 	float m_totalScore;
  
-	void CalcScore(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc);
+	/** Calculate m_totalScore & m_scoreBreakdown, taking into account the same score in the
+		* original path, copy, and the deviation arc
+		* TODO - check that this is correct when applied to path that just deviated from pure hypo, ie the 2nd constructor below
+	*/
+	void CalcScore(const LatticePath &origPath, size_t edgeIndex, const Hypothesis *arc);
 
 public:
 	LatticePath(); // not implemented
 	
+	//! create path OF pure hypo
 	LatticePath(const Hypothesis *hypo);
-		// create path OF pure hypo
+		
+	/** create path FROM pure hypo, deviate at edgeIndex by using arc instead, 
+		* which may change other hypo back from there
+		*/
 	LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc);
-		// create path FROM pure hypo
-		// deviate from edgeIndex backwards
+
+	/** create path from ANY hypo
+		* \param reserve arg not used. To differentiate from other constructor
+		* deviate from edgeIndex. however, all other edges the same - only correct if prev hypo of original 
+		*	& replacing arc are the same
+		*/
 	LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc, bool reserve);
-		// create path from ANY hypo
-		// reserve arg not used. to differential from other constructor
-		// deviate from edgeIndex. however, all other edges the same
 
 	inline float GetTotalScore() const { return m_totalScore; }
 
+	/** list of each hypo/arcs in path. For anything other than the best hypo, it is not possible just to follow the
+		* m_prevHypo variable in the hypothesis object
+		*/
 	inline const std::vector<const Hypothesis *> &GetEdges() const
 	{
 		return m_path;
 	}
-
+	//! whether or not this consists of only hypos
 	inline bool IsPurePath() const
 	{
 		return m_prevEdgeChanged == NOT_FOUND;
 	}
-
+	
+	//! create a set of next best paths by wiggling 1 of the node at a time. 
 	void CreateDeviantPaths(LatticePathCollection &pathColl) const;
 
 	inline const ScoreComponentCollection &GetScoreBreakdown() const

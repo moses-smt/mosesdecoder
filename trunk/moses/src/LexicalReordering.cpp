@@ -12,10 +12,10 @@
 
 using namespace std;
 
-/** Load the file pointed to by filename; set up the table according to
+/** Load the file pointed to by filePath; set up the table according to
   * the orientation and condition parameters. Direction will be used
   * later for computing the score.
-  * \param filename file that contains the table
+  * \param filePath file that contains the table
   * \param orientation orientation as defined in DistortionOrientationType (monotone/msd)
   * \param direction direction as defined in LexReorderType (forward/backward/bidirectional)
   * \param condition either conditioned on foreign or foreign+english
@@ -23,11 +23,11 @@ using namespace std;
   * \param input input factors
   * \param output output factors
   */
-LexicalReordering::LexicalReordering(const std::string &filename, 
+LexicalReordering::LexicalReordering(const std::string &filePath, 
 																		 int orientation, int direction,
 																		 int condition, const std::vector<float>& weights,
 																		 vector<FactorType> input, vector<FactorType> output) :
-	m_orientation(orientation), m_condition(condition), m_numScores(weights.size()), m_filename(filename), m_sourceFactors(input), m_targetFactors(output)
+	m_orientation(orientation), m_condition(condition), m_numScores(weights.size()), m_filePath(filePath), m_sourceFactors(input), m_targetFactors(output)
 {
 	//add score producer
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
@@ -59,7 +59,7 @@ LexicalReordering::LexicalReordering(const std::string &filename,
   */
 void LexicalReordering::LoadFile()
 {
-	InputFileStream inFile(m_filename);
+	InputFileStream inFile(m_filePath);
 	string line = "", key = "";
 	while (getline(inFile,line))
 		{
@@ -256,5 +256,5 @@ size_t LexicalReordering::GetNumScoreComponents() const
 /** returns description of the model */
 const std::string  LexicalReordering::GetScoreProducerDescription() const
 {
-	return "Lexicalized reordering score, file=" + m_filename;
+	return "Lexicalized reordering score, file=" + m_filePath;
 }

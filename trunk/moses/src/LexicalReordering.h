@@ -75,7 +75,7 @@ private:
 	int m_condition;   /**< fe or f */
 	int m_numScores;   /**< 1, 2, 3, or 6 */
 	int m_numOrientationTypes; /**< 2(mono) or 3(msd) */
-	std::string m_filename; /**< probability table location */
+	std::string m_filePath; /**< probability table location */
 	vector<FactorType> m_sourceFactors; /**< source factors to condition on */
 	vector<FactorType> m_targetFactors; /**< target factors to condition on */
 
@@ -86,10 +86,10 @@ private:
 	void LoadFile(void);
 
 public:
-	// Constructor: takes 3 arguments -- filename is the path to the
+	// Constructor: takes 3 arguments -- filePath is the path to the
 	// orientation probability table, orientation is one of {MSD, MONO},
 	// direction is one of {FOR,BACK,BI}, and condition is one of {F,FE}.
-	LexicalReordering(const std::string &filename, int orientation, int direction, 
+	LexicalReordering(const std::string &filePath, int orientation, int direction, 
 										int condition, const std::vector<float>& weights,
 										vector<FactorType> input, vector<FactorType> output);
 	
