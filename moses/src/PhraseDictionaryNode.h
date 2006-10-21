@@ -30,17 +30,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class PhraseDictionaryMemory;
 
+/** One node of the PhraseDictionaryMemory structure
+*/
 class PhraseDictionaryNode
 {
 	typedef std::map<Word, PhraseDictionaryNode> NodeMap;
+
+	// only these classes are allowed to instantiate this class
+	friend class PhraseDictionaryMemory;
+	friend class NodeMap;
+
 protected:
 	NodeMap m_map;
 	TargetPhraseCollection *m_targetPhraseCollection;
 
-public:
 	PhraseDictionaryNode()
 		:m_targetPhraseCollection(NULL)
 	{}
+public:
 	~PhraseDictionaryNode();
 
 	void Sort(size_t tableLimit);

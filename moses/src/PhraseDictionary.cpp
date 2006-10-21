@@ -40,7 +40,7 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 
 const std::string PhraseDictionary::GetScoreProducerDescription() const
 {
-	return "Translation score, file=" + m_filename;
+	return "Translation score, file=" + m_filePath;
 }
 
 size_t PhraseDictionary::GetNumScoreComponents() const

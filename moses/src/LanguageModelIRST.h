@@ -35,6 +35,9 @@ class Phrase;
 class lmtable;  // irst lm table
 class ngram;
 
+/** Implementation of single factor LM using IRST's code.
+* This is the default LM for Moses and is available from the same sourceforge repository
+*/
 class LanguageModelIRST : public LanguageModelSingleFactor
 {
 protected:
@@ -61,7 +64,7 @@ protected:
 public:
 	LanguageModelIRST(bool registerScore);
 	~LanguageModelIRST();
-	void Load(const std::string &fileName
+	void Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight

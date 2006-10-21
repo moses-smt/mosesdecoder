@@ -49,7 +49,7 @@ void PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 														          , const StaticData& staticData)
 {
 	m_tableLimit = tableLimit;
-	m_filename = filePath;
+	m_filePath = filePath;
 
 	//factors	
 	m_inputFactors = FactorMask(input);
@@ -166,20 +166,6 @@ void PhraseDictionaryMemory::SetWeightTransModel(const vector<float> &weightT)
 		// recursively set weights in nodes
 		phraseDictionaryNode.SetWeightTransModel(this, weightT);
 	}
-}
-
-bool PhraseDictionaryMemory::Contains(const vector< vector<string> > &phraseVector
-															, const list<Phrase> &inputPhraseList
-															, const vector<FactorType> &inputFactorType)
-{
-	std::list<Phrase>::const_iterator	iter;
-	for (iter = inputPhraseList.begin() ; iter != inputPhraseList.end() ; ++iter)
-	{
-		const Phrase &inputPhrase = *iter;
-		if (inputPhrase.Contains(phraseVector, inputFactorType))
-			return true;
-	}
-	return false;
 }
 
 TO_STRING_BODY(PhraseDictionaryMemory);

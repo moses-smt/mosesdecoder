@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class Phrase;
 
+//! Abstract class for for multi factor LM 
 class LanguageModelMultiFactor : public LanguageModel
 {
 protected:
@@ -37,7 +38,7 @@ protected:
 	LanguageModelMultiFactor(bool registerScore);
 	
 public:
-	virtual void Load(const std::string &fileName
+	virtual void Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, const std::vector<FactorType> &factorTypes
 					, float weight

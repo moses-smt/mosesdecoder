@@ -26,7 +26,7 @@ using namespace std;
 
 LatticePath::LatticePath(const Hypothesis *hypo)
 :	m_prevEdgeChanged(NOT_FOUND)
-{ // create path OF pure hypo
+{
 	m_scoreBreakdown					= hypo->GetScoreBreakdown();
 	m_totalScore = hypo->GetTotalScore();
 
@@ -70,15 +70,15 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypoth
 	CalcScore(copy, edgeIndex, arc);
 }
 
-void LatticePath::CalcScore(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc)
+void LatticePath::CalcScore(const LatticePath &origPath, size_t edgeIndex, const Hypothesis *arc)
 {
 	ScoreComponentCollection adj = arc->GetScoreBreakdown();
-	adj.MinusEquals(copy.m_path[edgeIndex]->GetScoreBreakdown());
-	m_scoreBreakdown = copy.m_scoreBreakdown;
+	adj.MinusEquals(origPath.m_path[edgeIndex]->GetScoreBreakdown());
+	m_scoreBreakdown = origPath.m_scoreBreakdown;
 	m_scoreBreakdown.PlusEquals(adj);	
 
-	float fadj = arc->GetTotalScore() - copy.m_path[edgeIndex]->GetTotalScore();
-	m_totalScore = copy.GetTotalScore() + fadj;
+	float fadj = arc->GetTotalScore() - origPath.m_path[edgeIndex]->GetTotalScore();
+	m_totalScore = origPath.GetTotalScore() + fadj;
 }
 
 void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const

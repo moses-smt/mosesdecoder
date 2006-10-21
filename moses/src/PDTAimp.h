@@ -3,9 +3,9 @@
 
 #pragma once
 
-inline bool existsFile(const char* filename) {
+inline bool existsFile(const char* filePath) {
   struct stat mystat;
-  return  (stat(filename,&mystat)==0);
+  return  (stat(filePath,&mystat)==0);
 }
 
 double addLogScale(double x,double y) 

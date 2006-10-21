@@ -59,7 +59,7 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 						 <<" "<<m_numScoreComponent<<"\n";
 		abort();
 	}
-	m_filename = filePath;
+	m_filePath = filePath;
 
 	// set Dictionary members
 	m_inputFactors = FactorMask(input);
