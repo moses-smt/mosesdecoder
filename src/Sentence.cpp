@@ -41,14 +41,6 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
 	return 1;
 }
 
-TargetPhraseCollection const* Sentence::
-CreateTargetPhraseCollection(PhraseDictionary const& d,
-														 const WordsRange& r) const 
-{
-	Phrase src=GetSubString(r);
-	return d.GetTargetPhraseCollection(src);
-}
-
 TranslationOptionCollection* 
 Sentence::CreateTranslationOptionCollection() const 
 {

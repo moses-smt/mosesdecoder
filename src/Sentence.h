@@ -33,36 +33,37 @@ class TranslationOptionCollection;
 
 
 /***
- * a Sentence is a Phrase with an ID
+ * A Phrase class with an ID. Used specifically as source input so contains functionality to read 
+ *	from IODevice and create trans opt
  */
 class Sentence : public Phrase, public InputType
 {
  public:
 	Sentence(FactorDirection direction)	: Phrase(direction), InputType()
-		{
-		}
+	{
+	}
 
+	//! Calls Phrase::GetSubString(). Implements abstract InputType::GetSubString()
 	Phrase GetSubString(const WordsRange& r) const 
-		{
-			return Phrase::GetSubString(r);
-		}
-	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const 
-		{
-			return Phrase::GetStringRep(factorsToPrint);
-		}
+	{
+		return Phrase::GetSubString(r);
+	}
+
+	//! Calls Phrase::GetWord(). Implements abstract InputType::GetWord()
 	const Word& GetWord(size_t pos) const
-		{
-			return Phrase::GetWord(pos);
-		}
+	{
+		return Phrase::GetWord(pos);
+	}
+
+	//! Calls Phrase::GetSize(). Implements abstract InputType::GetSize()
 	size_t GetSize() const 
-		{
-			return Phrase::GetSize();
-		}
+	{
+		return Phrase::GetSize();
+	}
 
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection);
 	void Print(std::ostream& out) const;
 
-	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionary const& d,const WordsRange& r) const;
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
 };
 

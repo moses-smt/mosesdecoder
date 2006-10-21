@@ -18,6 +18,11 @@ class ConfusionNet : public InputType {
  private:
 	std::vector<Column> data;
 	FactorCollection *m_factorCollection;
+
+	bool ReadFormat0(std::istream&,const std::vector<FactorType>& factorOrder);
+	bool ReadFormat1(std::istream&,const std::vector<FactorType>& factorOrder);
+	void String2Word(const std::string& s,Word& w,const std::vector<FactorType>& factorOrder);
+
  public:
 	ConfusionNet(FactorCollection* p=0);
 	~ConfusionNet();
@@ -43,15 +48,7 @@ class ConfusionNet : public InputType {
 	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //TODO not defined
 	const Word& GetWord(size_t pos) const;
 
-
-	TargetPhraseCollection const* CreateTargetPhraseCollection(PhraseDictionary const& d,const WordsRange& r) const;
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
-
-
- private:
-	bool ReadFormat0(std::istream&,const std::vector<FactorType>& factorOrder);
-	bool ReadFormat1(std::istream&,const std::vector<FactorType>& factorOrder);
-	void String2Word(const std::string& s,Word& w,const std::vector<FactorType>& factorOrder);
 };
 
 std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn);
