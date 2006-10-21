@@ -158,7 +158,7 @@ public:
 	//! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
 	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 
   
-	TO_STRING;
+	TO_STRING();
 
 	/** transitive comparison between 2 phrases
 	*		used to insert & find phrase in dictionary

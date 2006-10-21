@@ -25,38 +25,35 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorTypeSet.h"
 #include "ScoreProducer.h"
 
+/** Abstract class from which PhraseDictionary and GenerationDictionary
+	* are inherited.
+*/
 class Dictionary
 {
 protected:
-	static size_t s_index;
 	
-	const size_t m_numScoreComponent, m_index;
+	const size_t m_numScoreComponent;
 	FactorMask m_inputFactors;
 	FactorMask m_outputFactors;
 
 public:
+	//! Constructor
 	Dictionary(size_t numScoreComponent);
+	//!Destructor
+	virtual ~Dictionary();
 
-	const FactorMask &GetFactorMask(FactorDirection direction) const
-	{
-		if (direction == Input) return m_inputFactors;
-		if (direction == Output) return m_outputFactors;
-		assert(!"Impossible");
-	}
+	//! returns output factor types as specified by the ini file
 	const FactorMask& GetOutputFactorMask() const
 	{
 		return m_outputFactors;
 	}
+	//! returns input factor types as specified by the ini file
 	const FactorMask& GetInputFactorMask() const
 	{
 		return m_inputFactors;
 	}
-	virtual ~Dictionary();
 
-	size_t GetIndex() const
-	{
-		return m_index;
-	}
+	//! returns whether this dictionary is to be used for Translate or Generate
 	virtual DecodeType GetDecodeType() const = 0;
 
 	// clean up temporary memory, called after processing each sentence

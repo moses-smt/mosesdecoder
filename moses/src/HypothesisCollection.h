@@ -168,5 +168,5 @@ public:
 	std::vector<const Hypothesis*> GetSortedList() const;
 	void InitializeArcs();
 	
-	TO_STRING;
+	TO_STRING();
 };

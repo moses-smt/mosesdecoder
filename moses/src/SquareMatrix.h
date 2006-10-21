@@ -58,7 +58,7 @@ public:
 		m_array[row * m_size + col] = value;
 	}
 	
-	TO_STRING;
+	TO_STRING();
 };
 
 inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
