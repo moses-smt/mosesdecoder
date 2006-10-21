@@ -51,10 +51,6 @@ protected:
 	const FactorMask							&m_inputFactorUsed;
 	FactorCollection							&m_factorCollection;
 	std::ofstream 								m_nBestFile;
-	/***
-	 * if false, print all factors for best hypotheses (useful for error analysis)
-	 */
-	bool                                m_printSurfaceOnly;
 	
 public:
 	IOCommandLine(const std::vector<FactorType>	&inputFactorOrder

@@ -193,7 +193,7 @@ InputOutput *GetInputOutput(StaticData &staticData)
 		inputFileHash = GetMD5Hash(filePath);
 		VERBOSE(2,"About to LoadPhraseTables" << endl);
 		staticData.LoadPhraseTables(true, inputFileHash, inputPhraseList);
-		ioFile->ResetSentenceId();
+		ioFile->ResetTranslationId();
 	}
 	else
 	{

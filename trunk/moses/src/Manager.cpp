@@ -309,11 +309,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 
 	LatticePathCollection contenders;
 
-	// #ifdef WIN32
-		set<std::vector<size_t> > distinctHyps;
-	//#else
-	//	__gnu_cxx::hash_set<std::vector<size_t>, boost::hash<std::vector<size_t> > > distinctHyps;
-	//#endif
+	set<std::vector<size_t> > distinctHyps;
 
 	// path of the best
 	contenders.insert(new LatticePath(*sortedPureHypo.begin()));
