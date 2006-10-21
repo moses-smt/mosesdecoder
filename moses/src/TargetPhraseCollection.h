@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "Util.h"
 
+//! a list of target phrases that is trsnalated from the same source phrase
 class TargetPhraseCollection
 {
 protected:
@@ -40,34 +41,30 @@ public:
 	const_iterator begin() const { return m_collection.begin(); }
 	const_iterator end() const { return m_collection.end(); }
 	
-	// functions
 	~TargetPhraseCollection()
 	{
 			RemoveAllInColl(m_collection);
 	}
+
+	//! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
 	void Sort(size_t tableLimit);
+
+	//! number of target phrases in this collection
 	size_t GetSize() const
 	{
 		return m_collection.size();
 	}
+	//! wether collection has any phrases
 	bool IsEmpty() const
 	{ 
 		return m_collection.empty();
 	}	
+	//! add a new entry into collection
 	void Add(TargetPhrase *targetPhrase)
 	{
 		m_collection.push_back(targetPhrase);
 	}
 	
-	// legacy
-	void insert(iterator iter, TargetPhrase *targetPhrase)
-	{
-		m_collection.insert(iter, targetPhrase);
-	}
-	void erase(iterator iter)
-	{
-		m_collection.erase(iter);
-	}
 };
 
 

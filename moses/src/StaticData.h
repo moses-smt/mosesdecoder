@@ -107,17 +107,19 @@ protected:
 	size_t m_maxFactorIdx[2];  //! number of factors on source and target side
 	size_t m_maxNumFactors;  //! max number of factors on both source and target sides
 
+	//! helper fn to set bool param from ini file/command line
+	void SetBooleanParameter(bool *paramter, string parameterName, bool defaultValue);
+
 public:
 	StaticData();
 	~StaticData();
 
 	static const StaticData* Instance() { return s_instance; }
 
-	/***
-	 * also initialize the Parameter object
+	/** Main function to load everything.
+	 * Also initialize the Parameter object
 	 */
 	bool LoadParameters(int argc, char* argv[]);
-	void SetBooleanParameter(bool *paramter, string parameterName, bool defaultValue);
 
 	/***
 	 * load not only the main phrase table but also any auxiliary tables that depend on which features are being used

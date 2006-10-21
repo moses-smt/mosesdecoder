@@ -1,3 +1,5 @@
+// $Id$
+
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -29,10 +31,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h" //Join()
 #include "PhraseReference.h"
 
-struct recombinationInfo
+struct RecombinationInfo
 {
-	recombinationInfo() {} //for std::vector
-	recombinationInfo(size_t srcWords, float gProb, float bProb) 
+	RecombinationInfo() {} //for std::vector
+	RecombinationInfo(size_t srcWords, float gProb, float bProb) 
 		: numSourceWords(srcWords), betterProb(gProb), worseProb(bProb) {}
 	
 	size_t numSourceWords;
@@ -77,7 +79,7 @@ class SentenceStats
 		
 		void AddRecombination(const Hypothesis& worseHypo, const Hypothesis& betterHypo)
 		{
-			m_recombinationInfos.push_back(recombinationInfo(worseHypo.GetWordsBitmap().GetNumWordsCovered(), 
+			m_recombinationInfos.push_back(RecombinationInfo(worseHypo.GetWordsBitmap().GetNumWordsCovered(), 
 													betterHypo.GetTotalScore(), worseHypo.GetTotalScore()));
 		}
 		void AddPruning() {m_numHyposPruned++;}
@@ -91,7 +93,7 @@ class SentenceStats
 		void AddDeletedWords(const Hypothesis& hypo);
 	
 		//hypotheses
-		std::vector<recombinationInfo> m_recombinationInfos;
+		std::vector<RecombinationInfo> m_recombinationInfos;
 		unsigned int m_numHyposPruned;
 		unsigned int m_numHyposDiscarded;
 	

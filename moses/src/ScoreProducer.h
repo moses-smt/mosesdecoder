@@ -32,6 +32,7 @@ protected:
 	virtual ~ScoreProducer();
 
 public:
+	//! contiguous id
 	unsigned int GetScoreBookkeepingID() const { return m_scoreBookkeepingId; }
 	void CreateScoreBookkeepingID()	{	m_scoreBookkeepingId = s_globalScoreBookkeepingIdCounter++;}
 	//! returns the number of scores that a subclass produces.
