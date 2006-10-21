@@ -46,7 +46,7 @@ LanguageModelSRI::~LanguageModelSRI()
   delete m_srilmVocab;
 }
 
-void LanguageModelSRI::Load(const std::string &fileName
+void LanguageModelSRI::Load(const std::string &filePath
 												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
@@ -57,11 +57,11 @@ void LanguageModelSRI::Load(const std::string &fileName
 	m_factorType 	= factorType;
 	m_weight			= weight;
 	m_nGramOrder	= nGramOrder;
-	m_filename		= fileName;
+	m_filePath		= filePath;
 
 	m_srilmModel->skipOOVs() = false;
 
-	File file( fileName.c_str(), "r" );
+	File file( filePath.c_str(), "r" );
 	if (m_srilmModel->read(file))
 	{
 	}

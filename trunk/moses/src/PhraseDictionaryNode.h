@@ -38,7 +38,7 @@ class PhraseDictionaryNode
 
 	// only these classes are allowed to instantiate this class
 	friend class PhraseDictionaryMemory;
-	friend class NodeMap;
+	friend class std::map<Word, PhraseDictionaryNode>;
 
 protected:
 	NodeMap m_map;
