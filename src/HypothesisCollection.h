@@ -29,17 +29,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <ext/hash_set>
 #endif
 
+/** defines less-than relation on hypotheses.
+* The particular order is not important for us, we need just to figure out
+* which hypothesis are equal based on:
+*   the last n-1 target words are the same
+*   and the covers (source words translated) are the same
+*/
 class HypothesisRecombinationOrderer
 {
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
-    // this function defines less-than relation on hypotheses
-    // the particular order is not important for us, we need just to figure out
-    // which hypothesis are equal based on:
-    //   the last n-1 target words are the same
-    //   and the covers (source words translated) are the same
 	{
-        // Are the last (n-1) words the same on the target side (n for n-gram LM)?
+		// Are the last (n-1) words the same on the target side (n for n-gram LM)?
 		int ret = hypoA->NGramCompare(*hypoB);
 //		int ret = hypoA->FastNGramCompare(*hypoB, m_NGramMaxOrder - 1);
 		if (ret != 0)
@@ -56,6 +57,7 @@ public:
 	}
 };
 
+//! Comparison for hash_set algorithm. Not currently used
 struct HypothesisRecombinationComparer
 {
 	//! returns true if hypoA can be recombined with hypoB
@@ -96,21 +98,17 @@ protected:
 	_HCType m_hypos; /**< contains hypotheses */
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
+	//! add hypothesis to stack. Prune if necessary
 	void Add(Hypothesis *hypothesis);
-	
-	//TODO where does this comment belong?
-	// if returns false, hypothesis not used
-	// caller must take care to delete unused hypo to avoid leak
-	// used by Add(Hypothesis *hypothesis, float beamThreshold);
-	
-	void RemoveAll();
 
-	/** destroy all instances of Hypothesis in this collection */
+	//! remove hypothesis pointed to by iterator but don't delete the object
 	inline void Detach(const HypothesisCollection::iterator &iter)
 	{
 		m_hypos.erase(iter);
 	}
-	/** destroy all instances of Hypothesis in this collection (object pool version) */
+	/** destroy all instances of Hypothesis in this collection */
+	void RemoveAll();
+	/** destroy Hypothesis pointed to by iterator (object pool version) */
 	inline void Remove(const HypothesisCollection::iterator &iter)
 	{
 		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
@@ -125,21 +123,27 @@ protected:
 	}
 
 public:
+	//! iterators
 	const_iterator begin() const { return m_hypos.begin(); }
 	const_iterator end() const { return m_hypos.end(); }
 	size_t size() const { return m_hypos.size(); }
 
 	HypothesisCollection();
-
-	// this function will recombine hypotheses silently!  There is no record
-	// (could affect n-best list generation...TODO)
-	// AddPrune adds the hypo, but only if within thresholds (beamThr, stackSize)
-	void AddPrune(Hypothesis *hypothesis);
-
-	inline ~HypothesisCollection()
+	~HypothesisCollection()
 	{
 		RemoveAll();
 	}
+
+	/** adds the hypo, but only if within thresholds (beamThr, stackSize).
+	*	This function will recombine hypotheses silently!  There is no record
+	* (could affect n-best list generation...TODO)
+	* Call stack for adding hypothesis is
+			AddPrune()
+				Add()
+					AddNoPrune()
+	*/
+	void AddPrune(Hypothesis *hypothesis);
+
 	/** set maximum number of hypotheses in the collection
    * \param maxHypoStackSize maximum number (typical number: 100)
    */
@@ -161,11 +165,22 @@ public:
 		return m_bestScore;
 	}
 	
-	//void Prune();
+	/** pruning, if too large.
+	 * Pruning algorithm: find a threshold and delete all hypothesis below it.
+	 * The threshold is chosen so that exactly newSize top items remain on the 
+	 * stack in fact, in situations where some of the hypothesis fell below 
+	 * m_beamThreshold, the stack will contain less items.
+	 * \param newSize maximum size */
 	void PruneToSize(size_t newSize);
 
+	//! return the hypothesis with best score. Used to get the translated at end of decoding
 	const Hypothesis *GetBestHypothesis() const;
+	//! return all hypothesis, sorted by descending score. Used in creation of N best list
 	std::vector<const Hypothesis*> GetSortedList() const;
+	
+	/** make all arcs in point to the equiv hypothesis that contains them. 
+	* Ie update doubly linked list be hypo & arcs
+	*/
 	void InitializeArcs();
 	
 	TO_STRING();

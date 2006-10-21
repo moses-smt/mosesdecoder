@@ -31,36 +31,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class FactorCollection;
 
-struct WordComparer
-{
-	//! returns true if hypoA can be recombined with hypoB
-	bool operator()(const Word *a, const Word *b) const
-	{
-		return *a < *b;
-	}
-};
-
 typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
 		// 1st = output phrase
 		// 2nd = log probability (score)
 
+/** Implementation of a generation table in a trie.  
+ */
 class GenerationDictionary : public Dictionary, public ScoreProducer
 {
 protected:
 	std::map<const Word* , OutputWordCollection, WordComparer> m_collection;
 	// 1st = source
 	// 2nd = target
-	std::string						m_filename;
+	std::string						m_filePath;
 
 public:
+	/** constructor.
+	* \param numFeatures number of score components, as specified in ini file
+	*/
 	GenerationDictionary(size_t numFeatures);
 	virtual ~GenerationDictionary();
 
+	// returns Generate
 	DecodeType GetDecodeType() const
 	{
 		return Generate;
 	}
 	
+	//! load data file
 	void Load(const std::vector<FactorType> &input
 									, const std::vector<FactorType> &output
 									, FactorCollection &factorCollection
@@ -71,10 +69,16 @@ public:
 	size_t GetNumScoreComponents() const;
 	const std::string GetScoreProducerDescription() const;
 
+	/** number of unique input entries in the generation table. 
+	* NOT the number of lines in the generation table
+	*/
 	size_t GetSize() const
 	{
 		return m_collection.size();
 	}
+	/** returns a bag of output words, OutputWordCollection, for a particular input word. 
+	*	Or NULL if the input word isn't found. The search function used is the WordComparer functor
+	*/
 	const OutputWordCollection *FindWord(const Word &word) const;
 };
 

@@ -23,8 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "gzfilebuf.h"
 
 InputFileStream::InputFileStream(const std::string &filePath)
-: std::istream(0),
-m_streambuf(0)
+: std::istream(NULL)
+, m_streambuf(NULL)
 {
   if (filePath.size() > 3 &&
       filePath.substr(filePath.size() - 3, 3) == ".gz")
@@ -40,7 +40,8 @@ m_streambuf(0)
 
 InputFileStream::~InputFileStream()
 {
-  delete m_streambuf; m_streambuf = 0;
+  delete m_streambuf;
+	m_streambuf = NULL;
 }
 
 void InputFileStream::Close()

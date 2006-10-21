@@ -92,7 +92,20 @@ public:
 
 	/* static functions */
 	
-	//! transitive comparison of 2 word objects. Used by operator<. Should make it non-static
+	/** transitive comparison of 2 word objects. Used by operator<. 
+	*	Only compare the ?co-joined? factors, ie. where factor exists for both words.
+	*	Should make it non-static
+	*/
 	static int Compare(const Word &targetWord, const Word &sourceWord);
 
 };
+
+struct WordComparer
+{
+	//! returns true if hypoA can be recombined with hypoB
+	bool operator()(const Word *a, const Word *b) const
+	{
+		return *a < *b;
+	}
+};
+
