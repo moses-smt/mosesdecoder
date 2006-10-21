@@ -219,11 +219,11 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 		float lmScore;
 		size_t nLmCallCount = 0;
 
-		if(m_currTargetWordsRange.GetWordsCount() == 0) {
+		if(m_currTargetWordsRange.GetNumWordsCovered() == 0) {
 			lmScore = 0; //the score associated with dropping source words is not part of the language model
 		} else { //non-empty target phrase
 			if (m_lmstats)
-				(*m_lmstats)[lmIdx].resize(m_currTargetWordsRange.GetWordsCount(), 0);
+				(*m_lmstats)[lmIdx].resize(m_currTargetWordsRange.GetNumWordsCovered(), 0);
 
 			// 1st n-gram
 			vector<const Word*> contextFactor(nGramOrder);
@@ -321,7 +321,7 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 	CalcLMScore(staticData.GetAllLM());
 
 	// WORD PENALTY
-	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetWordsCount()); 
+	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
 
 	// FUTURE COST
 	CalcFutureScore(futureScore);

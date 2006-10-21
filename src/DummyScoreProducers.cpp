@@ -21,7 +21,7 @@ const std::string DistortionScoreProducer::GetScoreProducerDescription() const
 
 float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr) const
 {
-  if (prev.GetWordsCount() == 0)
+  if (prev.GetNumWordsCovered() == 0)
   { // 1st hypothesis with translated phrase. NOT the seed hypo.
     return - (float) curr.GetStartPos();
   }
