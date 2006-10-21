@@ -135,7 +135,7 @@ public:
 	/** output length of the translation option used to create this hypothesis */
 	size_t GetCurrTargetLength() const
 	{
-		return m_currTargetWordsRange.GetWordsCount();
+		return m_currTargetWordsRange.GetNumWordsCovered();
 	}
 
 	void ResetScore();

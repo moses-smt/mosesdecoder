@@ -49,16 +49,19 @@ public:
 		return m_endPos;
 	}
 
+	//! distortion cost when phrase is moved from prevRange to this range
 	inline int CalcDistortion(const WordsRange &prevRange) const
 	{
 		int dist = (int)prevRange.GetEndPos() - (int)GetStartPos() + 1 ;
 		return abs(dist);
 	}
-
-	inline size_t GetWordsCount() const
+	//! count of words translated
+	inline size_t GetNumWordsCovered() const
 	{
 		return (m_startPos == NOT_FOUND) ? 0 : m_endPos - m_startPos + 1;
 	}
+
+	//! transitive comparison
 	inline bool operator<(const WordsRange& x) const 
 	{
 		return (m_startPos<x.m_startPos 

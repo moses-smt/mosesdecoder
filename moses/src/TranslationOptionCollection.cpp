@@ -73,7 +73,6 @@ bool CompareTranslationOption(const TranslationOption *a, const TranslationOptio
 	return a->GetFutureScore() > b->GetFutureScore();
 }
 
-/** pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 void TranslationOptionCollection::Prune()
 {	
 	size_t size = m_source.GetSize();
@@ -309,7 +308,7 @@ void TranslationOptionCollection::CalcFutureScore()
 
 
 
-/** Collect all possible translations from the phrase tables
+/** Create all possible translations from the phrase tables
  * for a particular input sentence. This implies applying all
  * translation and generation steps. Also computes future cost matrix.
  * \param decodeStepList list of decoding steps
@@ -342,7 +341,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
 	CalcFutureScore();
 }
 
-/** collect translation options that exactly cover a specific input span. 
+/** create translation options that exactly cover a specific input span. 
  * Called by CreateTranslationOptions() and ProcessUnknownWord()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors

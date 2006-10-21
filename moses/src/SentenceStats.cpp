@@ -38,8 +38,8 @@ void SentenceStats::CalcFinalStats(const Hypothesis& bestHypo)
 void SentenceStats::AddDeletedWords(const Hypothesis& hypo)
 {
 	//don't check either a null pointer or the empty initial hypothesis (if we were given the empty hypo, the null check will save us)
-	if(hypo.GetPrevHypo() != NULL && hypo.GetPrevHypo()->GetCurrSourceWordsRange().GetWordsCount() > 0) AddDeletedWords(*hypo.GetPrevHypo());
-	if(hypo.GetCurrTargetWordsRange().GetWordsCount() == 0)
+	if(hypo.GetPrevHypo() != NULL && hypo.GetPrevHypo()->GetCurrSourceWordsRange().GetNumWordsCovered() > 0) AddDeletedWords(*hypo.GetPrevHypo());
+	if(hypo.GetCurrTargetWordsRange().GetNumWordsCovered() == 0)
 	{
 		m_deletedWords.push_back(PhraseReference(hypo.GetSourcePhrase(), hypo.GetCurrSourceWordsRange()));
 	}

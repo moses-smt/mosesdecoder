@@ -90,7 +90,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
             }
         }
     }
-  else if (sourceWordsRange.GetWordsCount() == 1)
+  else if (sourceWordsRange.GetNumWordsCovered() == 1)
     { // unknown handler
       //toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
     }

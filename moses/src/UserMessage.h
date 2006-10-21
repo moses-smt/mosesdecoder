@@ -24,6 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <queue>
 
+/** User warnings/error messages.
+	* Not the same as tracing messages, this should be usable even if Moses front-end if GUI
+*/
 class UserMessage
 {
 protected:
@@ -31,13 +34,15 @@ protected:
 	static std::queue<std::string> m_msgQueue;
 
 public:
+	//! whether messages to go to stderr, a queue to later display, or both
 	static void SetOutput(bool toStderr, bool toQueue)
 	{
 		m_toStderr	= toStderr;
 		m_toQueue		= toQueue;
 	}
-
+	//! add a message to be displayed
 	static void Add(const std::string &msg);
+	//! get all messages in queue. Each is on a separate line. Clear queue afterwards
 	static std::string GetQueue();
 };
 
