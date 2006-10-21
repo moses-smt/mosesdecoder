@@ -37,13 +37,13 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <vector>
 #include "TypeDef.h"
-#include "InputOutput.h"
+#include "IODevice.h"
 #include "Sentence.h"
 
 class FactorMask;
 class FactorCollection;
 
-class IOCommandLine : public InputOutput
+class IOCommandLine : public IODevice
 {
 protected:
 	const std::vector<FactorType>	&m_inputFactorOrder;

@@ -63,7 +63,7 @@ using namespace std;
 Timer timer;
 
 
-bool readInput(InputOutput *inputOutput, int inputType, InputType*& source) 
+bool readInput(IODevice *inputOutput, int inputType, InputType*& source) 
 {
 	delete source;
 	source=inputOutput->GetInput((inputType ? 
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// set up read/writing class
-	InputOutput *inputOutput = GetInputOutput(staticData);
+	IODevice *inputOutput = GetInputOutput(staticData);
 
 	// check on weights
 	vector<float> weights = staticData.GetAllWeights();
@@ -158,9 +158,9 @@ int main(int argc, char* argv[])
 	return EXIT_SUCCESS;
 }
 
-InputOutput *GetInputOutput(StaticData &staticData)
+IODevice *GetInputOutput(StaticData &staticData)
 {
-	InputOutput *inputOutput;
+	IODevice *inputOutput;
 	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
 																,&outputFactorOrder = staticData.GetOutputFactorOrder();
 	FactorMask inputFactorUsed(inputFactorOrder);

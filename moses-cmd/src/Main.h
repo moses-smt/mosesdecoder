@@ -36,7 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "StaticData.h"
 
-class InputOutput;
+class IODevice;
 
 int main(int argc, char* argv[]);
-InputOutput *GetInputOutput(StaticData &staticData);
+IODevice *GetInputOutput(StaticData &staticData);

@@ -208,11 +208,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\InputOutput.cpp"
+				RelativePath=".\src\InputType.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\InputType.cpp"
+				RelativePath=".\src\IODevice.cpp"
 				>
 			</File>
 			<File
@@ -486,11 +486,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\InputOutput.h"
+				RelativePath=".\src\InputType.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\InputType.h"
+				RelativePath=".\src\IODevice.h"
 				>
 			</File>
 			<File
