@@ -2,7 +2,7 @@
 #include "InputOutput.h"
 #include "InputType.h"
 
-InputOutput::InputOutput() : sentenceId(0) {}
+InputOutput::InputOutput() : m_translationId(0) {}
 
 InputOutput::~InputOutput() {}
 
@@ -16,13 +16,13 @@ InputType* InputOutput::GetInput(InputType *inputType
 {
 	if(inputType->Read(inputStream,factorOrder,factorCollection)) 
 		{
-			inputType->SetTranslationId(sentenceId++);
+			inputType->SetTranslationId(m_translationId++);
 			return inputType;
 		}
 	else 
 		{
 			delete inputType;
-			return 0;
+			return NULL;
 		}
 }
 

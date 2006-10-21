@@ -62,7 +62,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 		exit(1);
 	}
 
-	m_filename = filePath;
+	m_filePath = filePath;
 	string line;
 	size_t lineNum = 0;
 	while(getline(inFile, line)) 
@@ -127,7 +127,7 @@ size_t GenerationDictionary::GetNumScoreComponents() const
 
 const std::string GenerationDictionary::GetScoreProducerDescription() const
 {
-  return "Generation score, file=" + m_filename;
+  return "Generation score, file=" + m_filePath;
 }
 
 const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) const

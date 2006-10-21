@@ -446,10 +446,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\FactorArrayWrapper.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\FactorCollection.h"
 				>
 			</File>
