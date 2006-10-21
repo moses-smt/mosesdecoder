@@ -35,12 +35,7 @@ class PhraseDictionaryMemory : public PhraseDictionary
 
 protected:
 	PhraseDictionaryNode m_collection;
-	// 1st = source
-	// 2nd = target
 
-	bool Contains(const std::vector< std::vector<std::string> >	&phraseVector
-							, const std::list<Phrase>					&inputPhraseList
-							, const std::vector<FactorType>		&inputFactorType);
 	TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
 	
 public:

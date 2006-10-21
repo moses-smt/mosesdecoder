@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "FactorCollection.h"
 
+/* Hacked up LM which skips any factor with string '---'
+* order of chunk hardcoded to 3 (m_realNGramOrder)
+*/
 class LanguageModelChunking : public LanguageModelSingleFactor
 {	
 protected:
@@ -35,6 +38,9 @@ protected:
 	LanguageModelSingleFactor *m_lmImpl;
 	
 public:
+	/** Constructor
+	* \param lmImpl SRI or IRST LM which this LM can use to load data
+	*/
 	LanguageModelChunking(LanguageModelSingleFactor *lmImpl, bool registerScore)
 	: LanguageModelSingleFactor(registerScore)
 	{
@@ -44,7 +50,7 @@ public:
 	{
 		delete m_lmImpl;
 	}
-	void Load(const std::string &fileName
+	void Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
@@ -52,16 +58,15 @@ public:
 	{
 		m_factorType 				= factorType;
 		m_weight 						= weight;
-		m_filename 					= fileName;
+		m_filePath 					= filePath;
 		m_nGramOrder 				= nGramOrder;
 		
-		// hack. this LM is a joint factor of morph and low POS tag & hacked-up TIGER tag 
 		m_realNGramOrder 		= 3;
 
 		m_sentenceStartArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, BOS_);
 		m_sentenceEndArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, EOS_);
 
-		m_lmImpl->Load(fileName, factorCollection, m_factorType, weight, nGramOrder);
+		m_lmImpl->Load(filePath, factorCollection, m_factorType, weight, nGramOrder);
 	}
 			
 	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
@@ -78,7 +83,7 @@ public:
 		// only process context where last word is a word we want
 		const Factor *factor = (*contextFactor.back())[m_factorType];
 		std::string strWord = factor->GetString();
-		if (strWord.find("???") == 0)
+		if (strWord.find("---") == 0)
 			return 0;
 		
 		// add last word
@@ -93,7 +98,7 @@ public:
 			const Word &word = *contextFactor[currPos];
 			factor = word[m_factorType];
 			std::string strWord = factor->GetString();
-			bool skip = strWord.find("???") == 0;
+			bool skip = strWord.find("---") == 0;
 			if (skip)
 				continue;
 

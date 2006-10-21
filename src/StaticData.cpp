@@ -192,7 +192,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 			vector<string> specification = Tokenize<string>(lrFileVector[i]," ");
 				if (specification.size() != 4 )
 				{
-				  TRACE_ERR("ERROR: Expected format 'factors type weight-count filename' in specification of distortion file " << i << std::endl << lrFileVector[i] << std::endl);
+				  TRACE_ERR("ERROR: Expected format 'factors type weight-count filePath' in specification of distortion file " << i << std::endl << lrFileVector[i] << std::endl);
 				  return false;
 				}
 		  
@@ -335,7 +335,7 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 				vector<string>	token		= Tokenize(lmVector[i]);
 				if (token.size() != 4 )
 				{
-					TRACE_ERR("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filename'");
+					TRACE_ERR("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath'");
 					return false;
 				}
 				// type = implementation, SRI, IRST etc

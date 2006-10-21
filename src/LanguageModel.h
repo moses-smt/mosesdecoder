@@ -38,7 +38,7 @@ class LanguageModel : public ScoreProducer
 {
 protected:	
 	float				m_weight; //! scoring weight. Shouldn't this now be superceded by ScoreProducer???
-	std::string	m_filename; //! for debugging purposes
+	std::string	m_filePath; //! for debugging purposes
 	size_t			m_nGramOrder; //! max n-gram length contained in this LM
 	Word m_sentenceStartArray, m_sentenceEndArray; //! Contains factors which represents the beging and end words for this LM. 
 																								//! Usually <s> and </s>
