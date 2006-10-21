@@ -23,8 +23,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <iostream>
 #include "TypeDef.h"
-#include "Util.h" //malloc() replacement
+#include "Util.h"
 
+//! A square array of floats to store future costs
 class SquareMatrix
 {
 	friend std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix);
@@ -72,4 +73,3 @@ inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
 	
 	return out;
 }
-

@@ -30,8 +30,7 @@ class PhraseDictionary;
 class GenerationDictionary;
 class ScoreProducer;
 
-/** TargetPhrase represents a full entry in a phrase table (scores, translation) EXCEPT for the
- * French side of the rule.
+/** represents an entry on the target side of a phrase table (scores, translation)
  */
 class TargetPhrase: public Phrase
 {
@@ -92,6 +91,7 @@ public:
 		return m_scoreBreakdown;
 	}
 
+	//! TODO - why is this needed and is it set correctly by every phrase dictionary class ? should be set in constructor
 	void SetSourcePhrase(Phrase const* p) 
 	{
 		m_sourcePhrase=p;

@@ -468,8 +468,8 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 	return true;
 }
 
-void StaticData::SetBooleanParameter( bool *parameter, string parameterName, bool defaultValue ) {
-
+void StaticData::SetBooleanParameter( bool *parameter, string parameterName, bool defaultValue ) 
+{
   // default value if nothing is specified
   *parameter = defaultValue;
   if (! m_parameter.isParamSpecified( parameterName ) )

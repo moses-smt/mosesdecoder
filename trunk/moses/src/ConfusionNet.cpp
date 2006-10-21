@@ -196,19 +196,6 @@ std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn)
 	cn.Print(out);return out;
 }
 
-TargetPhraseCollection const* ConfusionNet::
-CreateTargetPhraseCollection(PhraseDictionary const& d,
-														 const WordsRange& r) const 
-{
-	if(PhraseDictionaryTreeAdaptor const* pdict=
-		 dynamic_cast<PhraseDictionaryTreeAdaptor const*>(&d))
-		return pdict->GetTargetPhraseCollection(*this,r);
-
-	std::cerr<<"ERROR: wrong phrase dictionary type for confusion net decoding!"
-		"  Has to be PhraseDictionaryTreeAdaptor\n";
-	return NULL;
-}
-
 TranslationOptionCollection* 
 ConfusionNet::CreateTranslationOptionCollection() const 
 {
