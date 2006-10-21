@@ -22,11 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 
 TO_STRING_BODY(WordsBitmap);
+
 int WordsBitmap::GetFutureCosts(int lastPos) const 
 {
-
-	//	std::cerr<<" for  lastpos "<<lastPos<<" and cov: "<<*this<<" got costs  ";
-
 	int sum=0;
 	bool aim1=0,ai=0,aip1=m_bitmap[0];
   

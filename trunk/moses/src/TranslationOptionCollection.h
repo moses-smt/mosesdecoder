@@ -74,13 +74,16 @@ protected:
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos, bool adhereTableLimit );
 
+	//! Force a creation of a translation option where there are none for a particular source position.
 	void ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection);
+	//! special handling of ONE unknown words.
 	virtual void ProcessOneUnknownWord(const Word &sourceWord
 																		 , size_t sourcePos
 																		 , FactorCollection &factorCollection);
-
+	//! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 	void Prune();
 
+	//! list of trans opt for a particular span
 	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
 	{
 		return m_collection[startPos][endPos - startPos];
@@ -91,31 +94,36 @@ protected:
 	}
 	void Add(const TranslationOption *translationOption);
 
+	//! implemented by inherited class, called by this class
 	virtual void ProcessUnknownWord(size_t sourcePos
 																	, FactorCollection &factorCollection)=0;
 
 public:
   virtual ~TranslationOptionCollection();
+
+	//! input sentence/confusion network
 	const InputType& GetSource() const { return m_source; }
 
-	// get length/size of source input
+	//! get length/size of source input
 	size_t GetSize() const;
 
+	//! Create all possible translations from the phrase tables
 	virtual void CreateTranslationOptions(const std::list < DecodeStep* > &decodeStepList
 																			, FactorCollection &factorCollection);
-
+	//! Create translation options that exactly cover a specific input span. 
 	virtual void CreateTranslationOptionsForRange(const std::list < DecodeStep* > &decodeStepList
 																			, FactorCollection &factorCollection
 																			, size_t startPosition
 																			, size_t endPosition
 																			, bool adhereTableLimit);
 
-	/** returns future cost matrix for sentence */
+	//! returns future cost matrix for sentence
 	inline virtual const SquareMatrix &GetFutureScore() const
 	{
 		return m_futureScore;
 	}
 
+	//! list of trans opt for a particular span
 	const TranslationOptionList &GetTranslationOptionList(const WordsRange &coverage) const
 	{
 		return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());

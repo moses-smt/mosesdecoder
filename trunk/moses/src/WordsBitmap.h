@@ -28,18 +28,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cmath>
 #include "TypeDef.h"
 #include "WordsRange.h"
-#include "Util.h" //malloc() replacement
 
+/** vector of boolean used to represent whether a word has been translated or not
+*/
 class WordsBitmap 
 {
 	friend std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap);
 protected:
-	const size_t m_size; //number of words in sentence
-	bool	*m_bitmap;
-	// ticks of words that have been done;
+	const size_t m_size; /**< number of words in sentence */
+	bool	*m_bitmap;	/**< ticks of words that have been done */
 
 	WordsBitmap(); // not implemented
 
+	//! set all elements to false
 	void Initialize()
 	{
 		for (size_t pos = 0 ; pos < m_size ; pos++)
@@ -49,13 +50,14 @@ protected:
 	}
 
 public:
+	//! create WordsBitmap of length size and initialise
 	WordsBitmap(size_t size)
 		:m_size	(size)
 	{
 		m_bitmap = (bool*) malloc(sizeof(bool) * size);
 		Initialize();
 	}
-	
+	//! deep copy
 	WordsBitmap(const WordsBitmap &copy)
 		:m_size		(copy.m_size)
 	{
@@ -69,7 +71,7 @@ public:
 	{
 		free(m_bitmap);
 	}
-
+	//! count of words translated
 	size_t GetNumWordsCovered() const
 	{
 		size_t count = 0;
@@ -81,11 +83,12 @@ public:
 		return count;
 	}
 
+	//! position of 1st word not yet translated, or NOT_FOUND if everything already translated
 	size_t GetFirstGapPos() const
 	{
 		for (size_t pos = 0 ; pos < m_size ; pos++)
 		{
-			if (m_bitmap[pos] == 0)
+			if (!m_bitmap[pos])
 			{
 				return pos;
 			}
@@ -93,6 +96,8 @@ public:
 		// no starting pos
 		return NOT_FOUND;
 	}
+
+	//! position of last translated word
 	size_t GetLastPos() const
 	{
 		for (int pos = (int) m_size - 1 ; pos >= 0 ; pos--)
@@ -105,26 +110,31 @@ public:
 		// no starting pos
 		return NOT_FOUND;
 	}
+
+	//! whether a word has been translated at a particular position
 	bool GetValue(size_t pos) const
 	{
 		return m_bitmap[pos];
 	}
+	//! set value at a particular position
 	void SetValue( size_t pos, bool value )
 	{
 		m_bitmap[pos] = value;
 	}
+	//! set value between 2 positions, inclusive
 	void SetValue( size_t startPos, size_t endPos, bool value )
 	{
 		for(size_t pos = startPos ; pos <= endPos ; pos++) 
 		{
 			m_bitmap[pos] = value;
 		}
-	} 
+	}
+	//! whether every word has been translated
 	bool IsComplete() const
 	{
 		return GetSize() == GetNumWordsCovered();
 	}
-
+	//! whether the wordrange overlaps with any translated word in this bitmap
 	bool Overlap(const WordsRange &compare) const
 	{
 		for (size_t pos = compare.GetStartPos() ; pos <= compare.GetEndPos() ; pos++)
@@ -134,14 +144,17 @@ public:
 		}
 		return false;
 	}
-
+	//! number of elements
 	size_t GetSize() const
 	{
 		return m_size;
 	}
-
+	/** represent this bitmap as 1 or more vector of integers.
+		* Used for exact matching of source words translated in hypothesis recombination
+		*/
 	std::vector<size_t> GetCompressedRepresentation() const;
 	
+	//! transitive comparison of WordsBitmap
 	inline int Compare (const WordsBitmap &compare) const
 	{
 		// -1 = less than
@@ -159,6 +172,7 @@ public:
     return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
 	}
 
+	//! TODO - ??? no idea
 	int GetFutureCosts(int lastPos) const ;
 
 	TO_STRING();

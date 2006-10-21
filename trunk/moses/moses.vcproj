@@ -670,10 +670,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\WordInsertionTable.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\WordsBitmap.h"
 				>
 			</File>
