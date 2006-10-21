@@ -60,25 +60,33 @@ protected:
 	const std::string	*m_ptrString;
 	const size_t			m_id;
 
+	//! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
 	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString);
 	
 public:
+	//! returns whether this factor is part of the source ('Input') or target ('Output') language
 	inline FactorDirection GetFactorDirection() const
 	{
 		return m_direction;
 	}
+	//! index, FactorType. For example, 0=surface, 1=POS. The actual mapping is user defined
 	inline FactorType GetFactorType() const
 	{
 		return m_factorType;
 	}
+	//! original string representation of the factor
 	inline const std::string &GetString() const
 	{
 		return *m_ptrString;
 	}
+	//! contiguous ID
 	inline size_t GetId() const
 	{
 		return m_id;
 	}
+
+	/*
+	//! Alternative comparison between factors. Not yet used
 	inline unsigned int GetHash() const
 	{
 		unsigned int h=quick_hash((const char*)&m_direction, sizeof(FactorDirection), 0xc7e7f2fd);
@@ -86,8 +94,14 @@ public:
 		h=quick_hash((const char*)&m_ptrString, sizeof(const std::string *), h);
 		return h;
 	}
-
-	// do it properly. needed for insert & finding of words in dictionary
+	*/
+	
+	/** transitive comparison between 2 factors.
+	*	-1 = less than
+	*	+1 = more than
+	*	0	= same
+	*	Used by operator< & operator==, as well as other classes
+	*/
 	inline int Compare(const Factor &compare) const
 	{
 		if (m_ptrString < compare.m_ptrString)
@@ -107,18 +121,19 @@ public:
 
 		return 0;
 	}
-	
+	//! transitive comparison used for adding objects into FactorCollection
 	inline bool operator<(const Factor &compare) const
 	{ 
 		return Compare(compare) < 0;
 	}
 
+	// quick equality comparison. Not used
 	inline bool operator==(const Factor &compare) const
 	{ 
-		return Compare(compare) == 0;
+		return this == &compare;
 	}
-	
-	TO_STRING;
+
+	TO_STRING();
 
 };
 

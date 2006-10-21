@@ -65,6 +65,6 @@ public:
 						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
 	}
 	
-	TO_STRING;
+	TO_STRING();
 };
 

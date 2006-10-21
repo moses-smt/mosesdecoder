@@ -40,7 +40,8 @@ TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption
                                   , const ScoreComponentCollection& generationScore) const
 {
 	if (IsFilteringStep()) {
-  	if (!oldTO.IsCompatible(mergePhrase, m_conflictFactors)) return 0;
+  	if (!oldTO.IsCompatible(mergePhrase, m_conflictFactors)) 
+			return NULL;
 	}
 
   TranslationOption *newTransOpt = new TranslationOption(oldTO);

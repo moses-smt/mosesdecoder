@@ -149,7 +149,7 @@ public:
 	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
 	void CalcScore();
 
-	TO_STRING;
+	TO_STRING();
 };
 
 

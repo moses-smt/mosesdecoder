@@ -101,7 +101,7 @@ public:
 		return m_sourcePhrase;
 	}
 
-	TO_STRING;
+	TO_STRING();
 };
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);

@@ -218,7 +218,7 @@ public:
 		out << GetTargetPhrase();
 	}
 
-	TO_STRING;
+	TO_STRING();
 
 	inline void SetMainHypo(const Hypothesis *hypo)
 	{

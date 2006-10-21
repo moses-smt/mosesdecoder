@@ -43,6 +43,9 @@ public:
                               , bool adhereTableLimit) const;
 
 private:
+	/** create new TranslationOption from merging oldTO with mergePhrase
+		This function runs IsCompatible() to ensure the two can be merged
+	*/
   TranslationOption *MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
                                   , const ScoreComponentCollection& generationScore) const;
 
