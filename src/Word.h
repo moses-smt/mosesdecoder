@@ -41,7 +41,7 @@ protected:
 
 	typedef const Factor * FactorArray[MAX_NUM_FACTORS];
 
-	FactorArray m_factorArray;
+	FactorArray m_factorArray; /**< set of factors */
 
 public:
 	/** deep copy */
@@ -56,6 +56,7 @@ public:
 
 	~Word() {}
 
+	//! returns Factor pointer for particular FactorType
 	const Factor*& operator[](FactorType index) {
 		return m_factorArray[index];
 	}
@@ -63,6 +64,8 @@ public:
 	const Factor * const & operator[](FactorType index) const {
 		return m_factorArray[index];
 	}
+
+	//! Deprecated. should use operator[]
 	inline const Factor* GetFactor(FactorType factorType) const {
 		return m_factorArray[factorType];
 	}
@@ -75,21 +78,21 @@ public:
 	 * NULL elements in sourceWord will be skipped */
 	void Merge(const Word &sourceWord);
 
+	//! get string representation of list of factors
 	std::string ToString(const std::vector<FactorType> factorType) const;
-	TO_STRING;
+	TO_STRING();
+
+	//! transitive comparison of Word objects
+  inline bool operator< (const Word &compare) const
+  { // needed to store word in GenerationDictionary map
+          // uses comparison of FactorKey
+          // 'proper' comparison, not address/id comparison
+          return Compare(*this, compare) < 0;
+  }
 
 	/* static functions */
 	
-	/***
-	 * wherever the source word has a given factor that the target word is missing, add it to the target word
-	 */
+	//! transitive comparison of 2 word objects. Used by operator<. Should make it non-static
 	static int Compare(const Word &targetWord, const Word &sourceWord);
-
-        inline bool operator< (const Word &compare) const
-        { // needed to store word in GenerationDictionary map
-                // uses comparison of FactorKey
-                // 'proper' comparison, not address/id comparison
-                return Compare(*this, compare) < 0;
-        }
 
 };

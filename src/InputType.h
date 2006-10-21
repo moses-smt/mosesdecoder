@@ -44,7 +44,7 @@ protected:
 //	virtual std::string GetStringRep(const WordsRange&) const=0;
 	virtual const Word& GetWord(size_t pos) const=0;
 	
-	TO_STRING;
+	TO_STRING();
 	
 };
 

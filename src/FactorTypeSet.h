@@ -27,16 +27,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+/** set of unique FactorTypes. Used to store what factor types are used in phrase tables etc
+*/
 class FactorMask : public std::bitset<MAX_NUM_FACTORS>
 {
 	friend std::ostream& operator<<(std::ostream&, const FactorMask&);
 
 public:
+	//! construct object from list of FactorType.
 	explicit FactorMask(const std::vector<FactorType> &factors);
+	//! default constructor
 	inline FactorMask() {}
+	//! copy constructor
 	FactorMask(const std::bitset<MAX_NUM_FACTORS>& rhs) : std::bitset<MAX_NUM_FACTORS>(rhs) { }
-//	const FactorMask& operator=(const std::bitset<MAX_NUM_FACTORS>& rhs) { return *this = rhs; }
 
-	TO_STRING;	
+
+	TO_STRING();
 };
 

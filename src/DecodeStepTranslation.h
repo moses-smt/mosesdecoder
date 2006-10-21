@@ -41,6 +41,9 @@ public:
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const;
 private:
+	/** create new TranslationOption from merging oldTO with mergePhrase
+		This function runs IsCompatible() to ensure the two can be merged
+	*/
 	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;
 };
 

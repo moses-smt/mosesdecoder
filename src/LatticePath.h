@@ -74,7 +74,7 @@ public:
 		return m_scoreBreakdown;
 	}
 
-	TO_STRING;
+	TO_STRING();
 
 };
 

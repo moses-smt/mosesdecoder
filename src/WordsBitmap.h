@@ -161,7 +161,7 @@ public:
 
 	int GetFutureCosts(int lastPos) const ;
 
-	TO_STRING;
+	TO_STRING();
 };
 
 // friend 

@@ -121,7 +121,7 @@ public:
 		return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
 	}
 
-	TO_STRING;		
+	TO_STRING();		
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
