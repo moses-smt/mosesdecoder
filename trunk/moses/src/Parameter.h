@@ -51,7 +51,9 @@ protected:
 
 	void AddParam(const std::string &paramName, const std::string &description);
 	void AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
-	
+
+	void PrintCredit();
+
 public:
 	Parameter();
 	bool LoadParam(int argc, char* argv[]);

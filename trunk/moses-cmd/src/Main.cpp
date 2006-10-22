@@ -75,13 +75,6 @@ bool readInput(IODevice *inputOutput, int inputType, InputType*& source)
 
 int main(int argc, char* argv[])
 {
-	// Welcome message
-	TRACE_ERR( "Moses (built on " << __DATE__ << ")" << endl );
-	TRACE_ERR( "a beam search decoder for phrase-based statistical machine translation models" << endl );
-	TRACE_ERR( "written by Hieu Hoang, with contributions by Nicola Bertoldi, Ondrej Bojar," << endl << 
-						 "Chris Callison-Burch, Alexandra Constantin, Brooke Cowan, Chris Dyer, Marcello" << endl <<
-						 "Federico, Evan Herbst, Philipp Koehn, Christine Moran, Wade Shen, Richard Zens." << endl);
-	TRACE_ERR( "(c) 2006 University of Edinburgh, Scotland" << endl );
 	TRACE_ERR( "command: " );
 	for(int i=0;i<argc;++i) TRACE_ERR( argv[i]<<" " );
 	TRACE_ERR(endl);
