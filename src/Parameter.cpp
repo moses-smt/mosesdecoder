@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <iostream>
+#include <iterator>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -495,3 +496,4 @@ void Parameter::PrintCredit()
 	copy(everyone.begin(), everyone.end(), out);
 	cerr << endl << endl;
 }
+
