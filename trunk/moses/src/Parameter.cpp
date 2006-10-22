@@ -465,7 +465,7 @@ void Parameter::PrintCredit()
 													, "richard at aachen dot de"
 													, ""
 													, "ambiguous source input, confusion networks, confusing source code"));
-	everyone.push_back(Credit("Hieu Hoang", "http://www.hoang.co.uk"
+	everyone.push_back(Credit("Hieu Hoang", "http://www.hoang.co.uk/hieu/"
 													, "phd student at Edinburgh Uni. Original Moses developer"
 													, "general queries/ flames on Moses. Doing stuff on async factored translation, so anything on that as well"));
 	
