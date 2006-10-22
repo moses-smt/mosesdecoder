@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include "Parameter.h"
 #include "Util.h"
 #include "InputFileStream.h"
@@ -50,7 +51,6 @@ Parameter::Parameter()
 	AddParam("mapping", "description of decoding steps");
 	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
 	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
-	AddParam("mysql", "(deprecated)");
 	AddParam("n-best-list", "file and size of n-best-list to be generated");
 	AddParam("output-factors", "list of factors in the output");
 	AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
@@ -126,6 +126,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	if ( (configPath = FindParam("-f", argc, argv)) == "" 
 		&& (configPath = FindParam("-config", argc, argv)) == "")
 	{
+		PrintCredit();
+
 		UserMessage::Add("No configuration file was specified.  Use -config or -f");
 		return false;
 	}
@@ -371,4 +373,125 @@ bool Parameter::ReadConfigFile( string filePath )
 		}
 	}
 	return true;
+}
+
+struct Credit
+{
+	string name, contact, currentPursuits, areaResponsibility;
+
+	Credit(string name, string contact, string currentPursuits, string areaResponsibility)
+	{
+		this->name								= name							;
+		this->contact							= contact						;
+		this->currentPursuits			= currentPursuits		;
+		this->areaResponsibility	= areaResponsibility;
+	}
+
+	bool operator<(const Credit &other) const
+	{
+		if (areaResponsibility.size() != 0 && other.areaResponsibility.size() ==0)
+			return true;
+		if (areaResponsibility.size() == 0 && other.areaResponsibility.size() !=0)
+			return false;
+
+		return name < other.name;
+	}
+
+};
+
+std::ostream& operator<<(std::ostream &os, const Credit &credit)
+{
+	os << credit.name;
+	if (credit.contact != "")
+		os << "\n   contact: " << credit.contact;
+	if (credit.currentPursuits != "")
+		os << "\n   " << credit.currentPursuits;
+	if (credit.areaResponsibility != "")
+		os << "\n   I'll answer question on: " << credit.areaResponsibility;
+	os << endl;
+	return os;
+}
+
+void Parameter::PrintCredit()
+{
+	vector<Credit> everyone;
+
+	everyone.push_back(Credit("Nicola Bertoldi"
+													, "911"
+													, ""
+													, "scripts & other stuff"));
+	everyone.push_back(Credit("Ondrej Bojar"
+													, ""
+													, "czech this out!"
+													, ""));
+	everyone.push_back(Credit("Chris Callison-Burch"
+													, "anytime, anywhere"
+													, "international playboy"
+													, ""));
+	everyone.push_back(Credit("Alexandra Constantin"
+													, ""
+													, "eu sunt varza"
+													, ""));
+	everyone.push_back(Credit("Brooke Cowan"
+													, "brooke@csail.mit.edu"
+													, "if you're going to san francisco, be sure to wear a flower in your hair"
+													, ""));
+	everyone.push_back(Credit("Chris Dyer"
+													, "can't. i'll be out driving my mustang"
+													, "driving my mustang"
+													, ""));
+	everyone.push_back(Credit("Marcello Federico"
+													, "i love my mac !!"
+													, ""
+													, "irst stuff"));
+	everyone.push_back(Credit("Evan Herbst"
+													, "Small college in upstate New York"
+													, ""
+													, ""));
+	everyone.push_back(Credit("Philipp Koehn"
+													, "only between 2 and 4am"
+													, ""
+													, "Nothing fazes this dude"));
+	everyone.push_back(Credit("Christine Moran"
+													, "weird building at MIT"
+													, ""
+													, ""));
+	everyone.push_back(Credit("Wade Shen"
+													, "via morse code"
+													, "buying another laptop"
+													, ""));
+	everyone.push_back(Credit("Richard Zens"
+													, "richard at aachen dot de"
+													, ""
+													, "ambiguous source input, confusion networks, confusing source code"));
+	everyone.push_back(Credit("Hieu Hoang", "http://www.hoang.co.uk"
+													, "phd student at Edinburgh Uni. Original Moses developer"
+													, "general queries/ flames on Moses. Doing stuff on async factored translation, so anything on that as well"));
+	
+	sort(everyone.begin(), everyone.end());
+
+
+	cerr << "Moses - A beam search decoder for phrase-based statistical machine translation models" << endl
+			<< "Copyright (C) 2006 University of Edinburgh" << endl << endl
+
+			<< "This library is free software; you can redistribute it and/or" << endl
+			<< "modify it under the terms of the GNU Lesser General Public" << endl
+			<< "License as published by the Free Software Foundation; either" << endl
+			<< "version 2.1 of the License, or (at your option) any later version." << endl << endl
+
+			<< "This library is distributed in the hope that it will be useful," << endl
+			<< "but WITHOUT ANY WARRANTY; without even the implied warranty of" << endl
+			<< "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU" << endl
+			<< "Lesser General Public License for more details." << endl << endl
+
+			<< "You should have received a copy of the GNU Lesser General Public" << endl
+			<< "License along with this library; if not, write to the Free Software" << endl
+			<< "Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA" << endl << endl
+			<< "***********************************************************************" << endl << endl
+			<< "Built on " << __DATE__ << endl << endl
+			<< "CREDITS" << endl << endl;
+
+	ostream_iterator<Credit> out(cerr, "\n");
+	copy(everyone.begin(), everyone.end(), out);
+	cerr << endl << endl;
 }
