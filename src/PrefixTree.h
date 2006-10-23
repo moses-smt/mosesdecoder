@@ -134,13 +134,12 @@ public:
     fReadVector(f,keys);
     fReadVector(f,data);
     ptr.clear();ptr.resize(keys.size());
-    for(size_t i=0;i<ptr.size();++i) {
-      off_t pos;
-      fRead(f,pos);
-      if(pos) ptr[i].set(f,pos);
-    }
+    std::vector<off_t> rawOffs(keys.size());
+    fread(&rawOffs[0], sizeof(off_t), keys.size(), f);
+    for(size_t i=0;i<ptr.size();++i)
+      if (rawOffs[i]) ptr[i].set(f, rawOffs[i]);
   }
-
+				      
   void free() {
     for(typename VP::iterator i=ptr.begin();i!=ptr.end();++i) i->free();}
 
@@ -177,21 +176,21 @@ public:
     setDefault(psa.getDefault());
 
     typedef std::pair<const PrefixTreeSA<Key,Data>*,off_t> P;
-    typedef std::deque<P> Next;
+    typedef std::deque<P> Queue;
 
-    Next next;
+    Queue queue;
 
-    next.push_back(P(&psa,fTell(f)));
+    queue.push_back(P(&psa,fTell(f)));
     bool isFirst=1;
     size_t ns=1;
-    while(next.size()) {
-      if(verbose && next.size()>ns) {
-        std::cerr<<"stack size in PF create: "<<next.size()<<"\n";
-        while(ns<next.size()) ns*=2;}
-      const P& pp=next.back();
+    while(queue.size()) {
+      if(verbose && queue.size()>ns) {
+        std::cerr<<"stack size in PF create: "<<queue.size()<<"\n";
+        while(ns<queue.size()) ns*=2;}
+      const P& pp=queue.back();
       const PrefixTreeSA<Key,Data>& p=*pp.first;
       off_t pos=pp.second;
-      next.pop_back();
+      queue.pop_back();
 
       if(!isFirst) {
         off_t curr=fTell(f);
@@ -206,7 +205,7 @@ public:
 
       for(size_t i=0;i<p.ptr.size();++i) {
         if(p.ptr[i])
-          next.push_back(P(p.ptr[i],fTell(f)));
+          queue.push_back(P(p.ptr[i],fTell(f)));
         off_t ppos=0;
         s+=fWrite(f,ppos);
       }
