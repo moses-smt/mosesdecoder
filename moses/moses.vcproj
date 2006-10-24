@@ -220,10 +220,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\LanguageModelChunking.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\LanguageModelFactory.cpp"
 				>
 			</File>
@@ -241,6 +237,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelSingleFactor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelSkip.cpp"
 				>
 			</File>
 			<File
@@ -498,10 +498,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\LanguageModelChunking.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\LanguageModelFactory.h"
 				>
 			</File>
@@ -519,6 +515,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelSingleFactor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelSkip.h"
 				>
 			</File>
 			<File
