@@ -11,6 +11,15 @@
 \usepackage{boxedminipage}
 \usepackage{fancybox}
 \usepackage[square]{natbib}
+\usepackage{ps4pdf}
+\usepackage{picins} % pictures next to paragraphs, Ondrej's part
+\PSforPDF{
+\usepackage{dtree} % a dependency tree
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-plot}
+}
+
 \makeindex
 \theoremstyle{plain}
 
@@ -30,7 +39,7 @@ Center for Speech and Language Processing}
 Marcello Federico,
 Wade Shen,
 Nicola Bertoldi,\\
-\large Ondrej Bojar,
+\large Ond\v{r}ej Bojar,
 Chris Callison-Burch,
 Brooke Cowan,\\
 \large Chris Dyer,
@@ -59,7 +68,7 @@ Evan Herbst}
 \item Richard Zens, Graduate Student, Aachen University
 \item Hieu Hoang, Graduate Student, University of Edinburgh
 \item Brooke Cowan, Graduate Student, MIT
-\item Ondrej Bojar, Graduate Student, Charles University
+\item Ond\v{r}ej Bojar, Graduate Student, Charles University
 \item Chris Dyer, Graduate Student, University of Maryland
 \item Alexandra Constantin, Undergraduate Student, Williams College
 \item Evan Herbst, Undergraduate Student, Cornell
@@ -475,7 +484,7 @@ Proper Noun	& $\to$	& Proper Noun\\
 -	& $\to$	& UNK\\ \hline
 \end{tabular}
 \end{center}
-\\
+
 This algorithm is suitable for proper nouns and numbers, which are one of the main causes of unknown words, but is incorrect for rare conjugation of source words which have not been seen in the training corpus. The algorithm also assumes that the factor set are the same for both source and target language, for instance, th list of POS tags are the same for source and target. This is clearly not the case for the majority of language pairs. Language dependent processing of unknown words, perhaps based on morphology. is a subject of debate for inclusion into Moses.\\
 Unknown word processing is also dependent on the input type - either sentences or confusion networks. This is handled by polymorphism, the call stack is\\
 \\
@@ -508,7 +517,7 @@ LanguageModel	& LanguageModel\\
 \hline
 \end{tabular}\\
 \end{center}
-\\
+
 The scoring framework includes the classes \\
 \\
 \begin{tt}
@@ -535,7 +544,7 @@ m\_arcList & List of equivalent hypothesis which have lower\\
 \hline
 \end{tabular}\\
 \end{center}
-\\
+
 Hypothesis are created by calling the constructor with the preceding hypothesis and an appropriate translation option. The constructors have been wrapped with static functions, Create(), to make use of a memory pool of hypotheses for performance.\\
 \\
 Many of the functionality in the Hypothesis class are for scoring. The outline call stack for this is\\
@@ -892,16 +901,28 @@ A second tool developed during the workshop shows the mapping of individual sour
 {\sc Wade Shen, Brooke Cowan, Christine Moran}
 
 \section{English-Czech}
-%{\sc Ondrej Bojar}
+{  % wrapping all Ondrej's content to prevent confusing macros
+%{\sc Ond\v{r}ej Bojar}
+
+
+\def\clap#1{\hbox to 0pt{\hss #1\hss}}
+\def\equo#1{``#1''}
+\def\ang#1{{$\langle${#1}$\rangle$}}  % snadny zapis spicatych zavorek
+\def\text#1{{\it{}#1}}
+
 
 \def\bidir{Czech$\leftrightarrow$English}
 \def\tocs{English$\rightarrow$Czech}
 \def\toen{Czech$\rightarrow$English}
 \def\parcite#1{\cite{#1}}
-\def\perscite#1{\newcite{#1}}
+\def\perscite#1{\cite{#1}} % XXX no newcite available
 
 \def\max#1{{\bf{} #1}}
 \def\stddev#1{{$\pm$#1}}
+
+
+\def\subsubsubsection#1{{\bf #1\\}}
+
 
 This report describes in detail our experiments on \bidir{} translation
 with the Moses system \parcite{moses} carried out at Johns Hopkins University
@@ -1334,6 +1355,7 @@ We experimented with the following factored translation scenarios:
 \piccaptioninside
 \piccaption{Single-factored scenario (T).}
 \parpic[fr]{%
+\PSforPDF{
 \begin{tabular}{c@{}c@{\hspace{1cm}}c@{}c@{}c@{\hspace{5mm}}c}
 English  &    &    &  Czech\\
 \hline
@@ -1345,6 +1367,7 @@ morphology  &  \Rnode{eAtag}{\strut}  &  \Rnode{cAlemma}{}  &  {lemma} \Rnode{cA
 \everypsbox{\scriptstyle{}}
 \ncLine{eAlc}{cAlc}
 }
+}
 
 The baseline scenario is single-factored: input (English) lowercase word forms
 are directly translated to target (Czech) lowercase forms. A 3-gram language
@@ -1355,6 +1378,7 @@ We call this the \equo{T} (translation) scenario.
 
 \piccaption{Checking morphology (T+C).}
 \parpic[fr]{%
+\PSforPDF{
 \begin{tabular}{c@{}c@{\hspace{1cm}}c@{}c@{}c@{\hspace{5mm}}c}
 English  &    &    &  Czech\\
 \hline
@@ -1366,6 +1390,7 @@ morphology  &  \Rnode{eBtag}{\strut}  &  \Rnode{cBlemma}{}  &  {lemma} \Rnode{cB
 \everypsbox{\scriptstyle{}}
 \ncLine{eBlc}{cBlc}
 \ncbar{->}{cBlcout}{cBtagout}
+}
 }
 
 
@@ -1384,7 +1409,7 @@ We call this the \equo{T+C} (translate and check) scenario.
 
 \piccaption{Translating and checking morphology (T+T+C).}
 \parpic[fr]{
-~\\[1ex]
+\PSforPDF{
 \begin{tabular}{c@{}c@{\hspace{1cm}}c@{}c@{}c@{\hspace{5mm}}c}
 English  &    &    &  Czech\\
 \hline
@@ -1398,6 +1423,7 @@ morphology  &  \Rnode{eCtag}{\strut}  &  \Rnode{cClemma}{}  &  {lemma} \Rnode{cC
 \ncLine{eCtag}{cCtag}
 \ncbar{->}{cClcout}{cCtagout}
 }
+}
 
 As a refinement of T+C, we also used T+T+C scenario, where the morphological
 output stream is constructed based on both, output word forms and input
@@ -1410,6 +1436,7 @@ Again, two types of language models can be used in this \equo{T+T+C} scenario.
 
 \piccaption{Generating forms from lemmas and tags (T+T+G).}
 \parpic[fr]{%
+\PSforPDF{
 \begin{tabular}{c@{}c@{\hspace{1cm}}c@{}c@{}c@{\hspace{5mm}}c}
 English  &    &    &  Czech\\
 \hline
@@ -1423,6 +1450,7 @@ morphology  &  \Rnode{e2tag}{\strut}  &  \Rnode{c2lemma}{}  &  {lemma} \Rnode{c2
 \ncLine{e2lc}{c2lemma}
 \ncbar{->}{c2lemmaout}{c2lcout}
 \ncbar{->}{c2tagout}{c2lcout}
+}
 }
 
 The most complex scenario we used is linguistically appealing: output lemmas
@@ -1649,6 +1677,7 @@ reduction of features used causes a loss.
 
 \begin{figure}[t]
 \begin{center}
+\PSforPDF{
 \psset{xunit=25mm,yunit=10mm}
 \begin{pspicture*}(23.5,-0.7)(28.5,3)
 %\psgrid
@@ -1674,6 +1703,7 @@ reduction of features used causes a loss.
 
 \psaxes[Ox=23,Dx=1,Dy=5](23,0)(29,3)
 \end{pspicture*}
+}
 \end{center}
 
 \begin{center}
@@ -2016,7 +2046,7 @@ would be necessary to describe the linguistic reality more adequately.
 %<f>\broken{.\\PUNCT:.}<A>AuxK<r>11<g>0
 
 \begin{figure}[ht]
-{
+\PSforPDF{
 \def\ctr#1{\hbox to \wd0{\hss{}\hbox{\strut{}#1}\hss{}}}
 \def\ctrclap#1{\hbox to \wd0{\hss{}\strut\clap{#1}\hss{}}}
 \def\brok#1#2#3#4{{\setbox0=\hbox{#1}\vbox{\ctr{#1}\ctrclap{#3}\ctr{#4}\ctr{\scriptsize #2}}}}
@@ -2210,6 +2240,9 @@ the leader of our team, Philipp Koehn, and the teachers Wade Shen and Marcello
 Federico for full support and many stimulating comments and suggestions.
 Finally, I cannot forget to mention the Center for Language and Speech Processing at Johns Hopkins
 University for making this workshop possible.
+
+
+}  % wrapping all Ondrej's content to prevent confusing macros
 
 
 \section{Chinese-English}
