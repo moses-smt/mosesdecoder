@@ -348,13 +348,14 @@ $ $&$ Before JHU workshop $&$ After JHU workshop $\\
 \hline
 Lines of code	& 9000	& 15,652\\
 Number of classes	& 30	& 60\\
-Lines of code attributed to original developer	& 100\%	& 54\%\\
+Lines of code attributed & & \\
+to original developer	& 100\%	& 54\%\\
 \hline
 \end{tabular}
 
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.2]{hieu-1}
+\includegraphics[scale=1]{hieu-1}
 \caption{Percentage of code contribute by each developer}
 \end{figure}
 
@@ -363,37 +364,41 @@ By adding factored translation to conventional phrase based decoding we hope to 
 Resource consumption is of great importance to researchers as it often determine whether or not experiments can be run or what compromises needs to be taken. We therefore also benchmarked resource usage against another phrase-based decoder, Pharaoh, as well as other decoders, to ensure that they were comparable in like-for-like decoding.\\
 
 It is essential that features can be easily added, changed or replace, and that the decoder can be used as a âtoolkitâ in ways not originally envisaged. We followed strict object oriented methodology; all functionality was abstracted into classes which can be more readily changed and extended. For example, we have two implementations of single factor language models which can be used depending on the functionality and licensing terms required. Other implementations for very large and distributed LMs are in the pipeline and can easily be integrated into Moses. The framework also allows for factored LMs; a joint factor and skipping LM are currently available.\\
-
+\begin{center}
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.2]{hieu-2}
+\includegraphics[scale=1]{hieu-2}
 \caption{Language Model Framework}
 \end{figure}
-
+\end{center}
 Another example is the extension of Moses to accept confusion networks as input. This also required changes to the decoding mechanism.\\
 
+\begin{center}
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.2]{hieu-3}
+\includegraphics[scale=1]{hieu-3}
 \caption{Input}
 \end{figure}
+\end{center}
 
+\begin{center}
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.2]{hieu-4}
+\includegraphics[scale=0.8]{hieu-4}
 \caption{Translation Option Collection}
 \end{figure}
-
-
+\end{center}
 Nevertheless, there will be occasions when changes need to be made which are unforeseen and unprepared. In these cases, the coding practises and styles we instigated should help, ensuring that the source code is clear, modular and consistent to enable the developers to quickly assess the algorithms and dependencies of any classes or functions that they may need to change.\\
 
 A major change was implemented when we decided to collect all the score keeping information and functionality into one place. That this was implemented relatively painlessly must be partly due to the clarity of the source code.\\
 
+\begin{center}
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.2]{hieu-5}
+\includegraphics[scale=0.8]{hieu-5}
 \caption{Scoring framework}
 \end{figure}
+\end{center}
 
 The decoder is packaged as a library to enable users to more easily comply with the LGPL license. The library can also be embedded in other programs, for example a GUI front-end or an integrated speech to text translator.
 
@@ -460,7 +465,7 @@ so that the correct Process() is selected by polymorphism rather than using if s
 \subsection{Unknown Word Processing}
 After translation options have been created for all contiguous spans, some positions may not have any translation options which covers it. In these cases, CreateTranslationOptionsForRange() is called again but the table limits on phrase and generation tables are ignored. \\
 If this still fails to cover the position, then a new target word is create by copying the string for each factor from the untranslatable source word, or the string âUNKâ if the source factor is null.\\
-
+\begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
 Source Word & & New Target Word \\ \hline
@@ -469,6 +474,7 @@ Proper Noun	& $\to$	& Proper Noun\\
 -	& $\to$	& UNK\\
 -	& $\to$	& UNK\\ \hline
 \end{tabular}
+\end{center}
 \\
 This algorithm is suitable for proper nouns and numbers, which are one of the main causes of unknown words, but is incorrect for rare conjugation of source words which have not been seen in the training corpus. The algorithm also assumes that the factor set are the same for both source and target language, for instance, th list of POS tags are the same for source and target. This is clearly not the case for the majority of language pairs. Language dependent processing of unknown words, perhaps based on morphology. is a subject of debate for inclusion into Moses.\\
 Unknown word processing is also dependent on the input type - either sentences or confusion networks. This is handled by polymorphism, the call stack is\\
@@ -489,6 +495,7 @@ A class is created which inherits from\\
 \\
 for each scoring model. Moses currently uses the following scoring models:\\
 \\
+\begin{center}
 \begin{tabular}{|r|r|}
 \hline
 $ Scoring model $&$ Class $\\
@@ -500,6 +507,7 @@ Generation	& GenerationDictionary\\
 LanguageModel	& LanguageModel\\
 \hline
 \end{tabular}\\
+\end{center}
 \\
 The scoring framework includes the classes \\
 \\
@@ -510,8 +518,8 @@ The scoring framework includes the classes \\
 \\
 which takes care of maintaining and combining the scores from the different models for each hypothesis.
 \subsection{Hypothesis}
-A hypothesis represents a complete or incomplete translation of the source. Its main properties are\\
-
+A hypothesis represents a complete or incomplete translation of the source. Its main properties are
+\begin{center}
 \begin{tabular}{|r|l|}
 \hline
 $ Variables $&$ $\\
@@ -519,11 +527,14 @@ $ Variables $&$ $\\
 m\_sourceCompleted & Which source words have already been translated\\
 m\_currSourceWordsRange & Source span current being translated\\
 m\_targetPhrase & Target phrase currently being used\\
-m\_prevHypo & Pointer to preceding hypothesis that translated the other words, not including m\_currSourceWordsRange\\
+m\_prevHypo & Pointer to preceding hypothesis that translated \\
+ & the other words, not including m\_currSourceWordsRange\\
 m\_scoreBreakdown & Scores of each scoring model\\
-m\_arcList & List of equivalent hypothesis which have lower score than current hypothesis\\
+m\_arcList & List of equivalent hypothesis which have lower\\
+ & score than current hypothesis\\
 \hline
 \end{tabular}\\
+\end{center}
 \\
 Hypothesis are created by calling the constructor with the preceding hypothesis and an appropriate translation option. The constructors have been wrapped with static functions, Create(), to make use of a memory pool of hypotheses for performance.\\
 \\
@@ -557,8 +568,10 @@ The main function of the phrase table is to look up target phrases give a source
 There are currently two implementation of the PhraseDictionary class\\
 \begin{tabular}{|l|l|}
 \hline
-PhraseDictionaryMemory & Based on std::map. Phrase table loaded completely and held in memory\\
-PhraseDictionaryTreeAdaptor & Binarized phrase table held on disk and loaded on demand.\\
+PhraseDictionaryMemory & Based on std::map. Phrase table loaded\\ 
+ & completely and held in memory\\
+PhraseDictionaryTreeAdaptor & Binarized phrase table held on disk and \\
+ & loaded on demand.\\
 \hline
 \end{tabular}
 \subsection{Command Line Interface}
@@ -571,7 +584,7 @@ Apart from the main() function, there are two classes which inherites from the m
 \indent {\tt	IOCommandLine}\\
 \indent {\tt	IOFile (inherites from IOCommandLine)}\\
 \\
-These implement the required functions to read and write input and output (sentences and confusion network inputs, target phrases and n-best lists) from standard io or files.\\
+These implement the required functions to read and write input and output (sentences and confusion network inputs, target phrases and n-best lists) from standard io or files.
 
 
 
