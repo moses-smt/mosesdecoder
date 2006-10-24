@@ -22,7 +22,7 @@ libmoses_a_SOURCES_TMP = \
 	LanguageModelFactory.cpp \
 	LanguageModelMultiFactor.cpp \
 	LanguageModelSingleFactor.cpp \
-	LanguageModelChunking.cpp \
+	LanguageModelSkip.cpp \
 	LatticePath.cpp \
 	LexicalReordering.cpp \
 	Manager.cpp \

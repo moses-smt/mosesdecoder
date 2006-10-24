@@ -124,10 +124,10 @@ enum LMType
 };
 enum LMImplementation
 {	
-	SRI
-	,IRST
-	,Chunking
-	,Joint
+	SRI				= 0 
+	,IRST			= 1
+	,Skip			= 2
+	,Joint		= 3
 };
 
 enum DictionaryFind

@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #  include "LanguageModelIRST.h"
 #endif
 
-#include "LanguageModelChunking.h"
+#include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
 
 namespace LanguageModelFactory
@@ -59,12 +59,12 @@ namespace LanguageModelFactory
 				  lm = new LanguageModelSRI(true);
 				#endif
 				break;
-			case Chunking:
+			case Skip:
 				#ifdef LM_SRI
-	     		lm = new LanguageModelChunking(new LanguageModelSRI(false), true);
+	     		lm = new LanguageModelSkip(new LanguageModelSRI(false), true);
 				#else
      			#ifdef LM_IRST
-	     			lm = new LanguageModelChunking(new LanguageModelIRST(false), true);
+	     			lm = new LanguageModelSkip(new LanguageModelIRST(false), true);
      			#endif
 				#endif
 				break;
