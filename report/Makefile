@@ -3,6 +3,8 @@ all: report.pdf
 
 PS4PDFDIR=./ps4pdf
 
+export TEXINPUTS=:$(PS4PDFDIR)
+
 # generic rule for using ps4pdf
 %.pdf: %.tex preview.sty $(PS4PDFDIR)
 	$(PS4PDFDIR)/ps4pdf $<
