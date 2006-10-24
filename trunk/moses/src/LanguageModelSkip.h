@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /* Hacked up LM which skips any factor with string '---'
 * order of chunk hardcoded to 3 (m_realNGramOrder)
 */
-class LanguageModelChunking : public LanguageModelSingleFactor
+class LanguageModelSkip : public LanguageModelSingleFactor
 {	
 protected:
 	size_t m_realNGramOrder;
@@ -41,12 +41,12 @@ public:
 	/** Constructor
 	* \param lmImpl SRI or IRST LM which this LM can use to load data
 	*/
-	LanguageModelChunking(LanguageModelSingleFactor *lmImpl, bool registerScore)
+	LanguageModelSkip(LanguageModelSingleFactor *lmImpl, bool registerScore)
 	: LanguageModelSingleFactor(registerScore)
 	{
 		m_lmImpl = lmImpl;		
 	}
-	~LanguageModelChunking()
+	~LanguageModelSkip()
 	{
 		delete m_lmImpl;
 	}
