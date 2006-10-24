@@ -6,11 +6,15 @@ PS4PDFDIR=./ps4pdf
 export TEXINPUTS=:$(PS4PDFDIR)
 
 # generic rule for using ps4pdf
+# The idea is to run ps4pdf once and if the file contains some bibliography,
+# run bibtex and recompile. If labels get changed etc., a third run is issued.
+# The second and third runs are pdflatex only, because otherwise the .aux file
+# gets re-created and forgets label positions.
 %.pdf: %.tex preview.sty $(PS4PDFDIR)
 	$(PS4PDFDIR)/ps4pdf $<
 	if ( grep 'bibstyle' $*.aux >/dev/null 2>/dev/null ) ; then \
 	  bibtex $*; \
-	  $(PS4PDFDIR)/ps4pdf $<; \
+	  pdflatex $<; \
 	fi
 	if ( \
 	  grep 'ref{\|tableofcontents\|\\listof\|prosper' $*.tex >/dev/null 2>/dev/null \
@@ -18,7 +22,7 @@ export TEXINPUTS=:$(PS4PDFDIR)
 	  || grep 'Citation.*undefined' $*.log >/dev/null 2>/dev/null \
 	  ); then \
 	  echo "## Reruning latex"; \
-	  $(PS4PDFDIR)/ps4pdf $<; \
+	  pdflatex $<; \
 	fi
 
 
