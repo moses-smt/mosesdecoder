@@ -13,6 +13,8 @@
 \usepackage[square]{natbib}
 \usepackage{ps4pdf}
 \usepackage{picins} % pictures next to paragraphs, Ondrej's part
+\usepackage{avm}
+\usepackage{epsfig}
 \PSforPDF{
 \usepackage{dtree} % a dependency tree
 \usepackage{pstricks}
@@ -1236,6 +1238,7 @@ searched in the data in order to limit the number of binary searches performed.
  \includegraphics[width=\columnwidth]{marcello-lmcalls}
 \end{center}
  \end{figure}
+
 \section{Lexicalized Reordering Models}
 {\sc Christine Moran}
 
@@ -2888,8 +2891,1335 @@ Model 2 might thus generate an improvement in $AER$.
 
 \chapter{Follow-Up Research Proposals}
 
-\section{Translation with syntax and factors: Handling global and local dependencies in SMT}
-{\sc Brooke Cowan: just cut and paste your proposal here}
+\section{A Syntax and Factor Based Model for Statistical Machine Translation}
+{\sc Brooke Cowan and Michael Collins}
+
+\newcommand{\gen}{\hbox{GEN}}
+\newcommand{\rep}{\bar{\phi}}
+\newcommand{\Rep}{{\Phi}}
+\newfont{\msym}{msbm10}
+\newcommand{\reals}{\mbox{\msym R}}
+\newcommand{\pav}{\bar{\alpha}}
+\newcommand{\ip}[2]{{#1} \cdot {#2}}
+\def\parcite#1{(\cite{#1})}
+\def\perscite#1{\cite{#1}} % XXX no newcite available
+
+\subsection{Introduction}
+\label{intro}
+
+This year's Summer Workshop on Language Engineering at Johns Hopkins
+University focused in part on the development of an open source
+toolkit for statistical machine translation
+(SMT).\footnote{http://www.clsp.jhu.edu/ws2006/groups/ossmt/} The
+toolkit's decoder, known as {\em Moses}, replicates the functionality
+exhibited by the phrase-based decoder Pharaoh \parcite{koe:04}. One of
+the weaknesses of traditional phrase-based models is their inability
+to incorporate syntactic information in a direct and overt manner. For
+instance, most English sentences contain a subject and a verb, but
+there is no straightforward way to model this fact within the
+phrase-based framework. Furthermore, there are translation
+correspondences that are simple to describe using part-of-speech
+information but difficult to model using lexical items
+alone.\footnote{E.g., a French noun phrases that has the
+part-of-speech sequence {\em determiner noun adjective} will most
+likely in English be {\em determiner adjective noun}.} Moses addresses
+the latter problem by extending the phrase-based framework to include
+{\em factors}; hence, it exemplifies a {\em factor-based approach} to
+statistical machine translation. Factor-based models behave much like
+phrase-based models, but have the additional capability to take into
+account information such as morphology and parts of speech, lemmas,
+and phrase bracketing in the source and/or target languages during
+decoding.
+
+The experimental results from this summer's workshop indicate that
+using factors can indeed improve translation performance. However,
+observation of Moses' translation output indicates that, even when
+BLEU scores improves, the system often does not adhere to basic global
+syntactic constraints\footnote{We use the word {\em global} here to
+refer to properties that require examination of the clause in its
+entirety, such as {\em a clause will usually contain a finite verb}
+and {\em a clause will never have more than one finite verb}.} of the
+target language. We propose to address this problem by using a
+syntax-based system that explicitly models syntactic constraints in
+conjunction with the factor-based system developed this summer. A
+baseline version of the syntax-based system has been implemented at
+the Laboratory for Computer Science and Artificial Intelligence
+(CSAIL) at MIT \parcite{cow:06}. A fundamental component of this system
+is a discriminatively-trained model that takes as input a
+source-language parse tree and produces a detailed target-language
+syntactic structure called an {\em aligned extended projection}, or
+AEP. AEPs may include information such as the main verb of the output
+sentence, the number and type of its arguments, and the correspondence
+(alignment) between source-side and target-side modifiers. The
+discriminative AEP model provides an extremely flexible framework for
+experimentation with a variety of language pairs and treebanking
+styles. Most importantly, it provides a framework for modeling global
+sytactic constraints of both the target language, as well as syntactic
+correspondences between the source and target language.
+
+This proposal is structured as follows: we continue this section with
+some background on phrase-based and factor-based approaches to SMT; in
+Section~\ref{framework}, we describe the syntax-based model in more
+detail; and in Section~\ref{future}, we outline the work that we
+propose to carry out this year to integrate the syntax-based and the
+factor-based models.
+
+\subsubsection{From Phrase-Based to Factor-Based Translation}
+Phrase-based systems (e.g., \parcite{koe:04,koe:03,ochney:02,ochney:00})
+advanced the state of the art in statistical machine translation
+during the early part of this decade. They surpassed the performance
+of earlier models, proposed by researchers at IBM and known as the
+{\em IBM models} \parcite{bro:93}, which used alignments between words
+(predicted using the EM algorithm) to estimate the values of
+translation parameters in a generative model.  Phrase-based models
+combine the word alignments induced by the earlier SMT models to
+produce alignments between substrings of source and target text,
+which, in these models, are called {\em phrases}.\footnote{Note that
+these phrases do not have to be phrases in any linguistic sense.}
+These phrasal translations, together with a search algorithm that
+looks for a high-scoring solution, form the basis of the phrase-based
+framework.
+
+The current state-of-the-art phrase-based systems are log-linear
+models of the conditional probability of the target ($e$) given the
+source ($f$):
+
+\begin{equation}
+Pr(e|f) = \frac{\exp{\sum_{i} \lambda_i h_i(e,f)}}{\sum_{e'} \exp{\sum_{i} \lambda_i h_i(e',f)}}
+\label{loglinear}
+\end{equation}
+
+\noindent
+The $\lambda_i$ are weights on feature functions $h_i(e,f)$. The
+weights are usually trained using minimum error rate training
+\parcite{och:03}, although recently an online perceptron training
+algorithm has also been shown effective \parcite{lia:06}. There are
+usually on the order of ten feature functions, among which may be
+
+\begin{itemize}
+\item bidirectional phrase models (models that score phrasal translations);
+\item bidirectional lexical models (models that consider the
+appearance of entries from a conventional translation lexicon in the
+phrasal translation);
+\item $n$-gram target-language models ($n$-th order Markov models
+whose parameters are trained on large amounts of monolingual data; the
+probability of each word in a phrase is conditioned on the preceding
+$n-1$ words, and the probability of the phrase is the product of the
+probabilities the words);
+\item distortion models (models that consider how source phrases get
+reordered in the translation).
+\end{itemize}
+
+Phrase-based models address a severe limitation of the early
+word-based models, which are restricted to many-to-one mappings
+between source and target words. This means that if the Spanish phrase
+{\em el libro del ni\~{n}o} were translated as {\em the boy's book} in
+the data, the pairing between {\em el libro} and {\em book} would be
+allowed when translating from Spanish to English, but not from English
+to Spanish. In contrast, phrase-based models allow for the alignment
+of multi-word units such as {\em the white house} with {\em la casa
+blanca}, {\em and so on and so forth} with {\em etc\'{e}tera}, and
+{\em big crimes need} with {\em los grandes cr\'{i}menes
+necesitan}.\footnote{Note that the final phrasal alignment involves
+phrases that cross syntactic phrasal boundaries. For example, {\em big
+crimes} is a noun phrase, and {\em need} is part of a verb phrase.}
+
+The use of many-to-many phrasal alignments means that these systems
+can capture some lexical reorderings as well as the translation of
+idiomatic expressions.  For example, consider the phrasal translation
+pair {\em the white house} and {\em la casa blanca}. The
+positions of the English noun {\em house} and the adjective {\em
+white} are reversed relative to the positions of the Spanish noun {\em
+casa} and adjective {\em blanca}. Figure~\ref{localreorder}
+illustrates this swapping phenomenon. By learning that these phrases
+are common translations of one another, the system has a better chance
+of outputting the words in this phrase in the correct order. The IBM
+models have to learn how to reorder all of the words in the sentence
+as distinct units.
+
+\begin{figure}
+\centering
+\includegraphics[scale=1]{brooke-localreorder}
+\caption{When translating between Spanish and English, the positions
+of nouns and their modifying adjectives are usually
+swapped. Similarly, possessives in English generally precede nouns,
+whereas in Spanish they follow the noun.}
+\label{localreorder}
+\end{figure}
+
+The generalization capabilities of phrase-based systems are limited
+due to their lack of direct, explicit knowledge of syntax. For
+example, as we have seen, Spanish adjectives tend to follow the noun
+they modify, a relative ordering that is the opposite of what is found
+in English. But while phrase-based models can model this swapping more
+easily than the IBM models can --- by essentially memorizing these
+correspondences\footnote{The IBM models require the target phrase to
+be a single word and therefore cannot memorize such correspondences.}
+--- they have no mechanism for generalizing this phenomenon to novel
+input phrases. Hence, if the phrase {\em the purple apples} is seen
+during testing but not training, the system is forced to translate the
+words individually and relies on a different part of the system (i.e.,
+another component model in the log-linear framework, such as the
+distortion model) to make a prediction about their relative order.
+
+Factor-based translation is equipped to make this kind of
+generalization. These models can, for instance, make use of
+part-of-speech information to express the fact that, even though {\em
+the purple apples} has not been seen, the part-of-speech sequence {\em
+determiner adjective noun} has been seen, and quite often its
+translation has the part-of-speech sequence {\em determiner noun
+adjective}. Furthermore, if {\em the purple apple} has been seen, the
+framework has the ability to model the fact that {\em apple} is the
+lemma form of {\em apples}; the system can therefore make use of the
+translation {\em las manzanas moradas} to derive the singular version
+{\em la manzana morada}. More often than not, in the face of novel
+test strings, phrase-based systems to do not get the ordering
+correct.
+
+Preliminary experimental results from this summer's workshop indicate
+that using factors can indeed improve translation performance. For
+instance, we ran a number of experiments at this summer's workshop
+that used morphological information when translating from English to
+Spanish. The morphological features we used included those shown in
+Table~\ref{morph}. The use of the morphology improved the BLEU score
+by approximately 1.3 points over a phrase-based baseline (i.e., a
+model without any added factor information), from 23.41 to 24.66
+BLEU. This gain was induced by using a language model trained with
+sequences in which the words of the original training data were
+replaced by strings representing their morphological features. During
+decoding, the factor-based model predicts the morphology of a
+translation hypothesis, and the score of the morphological language
+model is combined in the overall score of the hypothesis.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|l|}
+\hline
+{\bf Category} & {\bf Attributes} \\
+\hline
+Adjective & gender, number \\
+\hline
+Determiner & gender, number, person, possessor \\
+\hline
+Noun & gender, number \\
+\hline
+Verb & gender, number, person, mode, tense \\
+\hline
+Pronoun & gender, number, person, case, possessor \\
+\hline
+\end{tabular}
+\end{center}
+\caption{The morphological features used in English-to-Spanish
+translation experiments with a factor-based model.}
+\label{morph}
+\end{table}
+
+\subsubsection{Motivation for a Syntax-Based Model}
+While factor-based models show tremendous promise in solving some of
+the gravest deficiencies of phrase-based systems, there remain some
+problems that are unlikely to be addressed. During decoding, the
+output of factor-based translation is constructed incrementally and
+left-to-right. These partial translations are also scored
+incrementally so as to make the computation tractable. This means that
+the component models $h_i(e,f)$ in equation~\ref{loglinear} cannot
+look globally at the translation to see whether it upholds global
+syntactic constraints of the target language. For instance, it is
+difficult to model the fact that in English, clauses usually have a
+single finite verb and a subject.
+
+The output in Table~\ref{SMTexamples} is taken from a state-of-the-art
+phrase-based SMT system translating from German to English (the
+baseline system described in \perscite{col:05}). This
+system has been trained using over 700K sentence pairs from the
+European Parliament dataset \parcite{koe:05}. These examples represent a
+few of the syntactic errors this system tends to make. We consider
+each example in turn, discussing some, but not all, of the problems:
+
+\begin{itemize}
+\item[1:] 
+\begin{itemize}
+\item[$\bullet$] In the first clause, the substring {\em human rights practical}
+introduces an unlikely ordering of a noun phrase {\em human rights}
+and adjective {\em practical}.
+\item[$\bullet$] In the second clause, there are two finite verbs ({\em must} and
+{\em are}).
+\end{itemize}
+\item[2:]
+\begin{itemize}
+\item[$\bullet$] The clause beginning with {\em the convention...} introduces two
+adjacent noun phrases {\em ...a draft a charter...}, which is an
+unlikely event.
+\item[$\bullet$] The prepositional phrase {\em in the hands of the council}
+appears before the verb it modifies ({\em laid}), which is unusual in
+English.
+\item[$\bullet$] The verb phrase {\em has formulated} has been split by elements
+that normally would not split a verb phrase.
+\item[$\bullet$] The adjective {\em remarkable} is following the noun {\em way}.
+\item[$\bullet$] There is a missing referring pronoun ({\em it}). I.e., the final
+part of the sentence should say something like {\em ...laid it in the
+hands of the council}.
+\end{itemize}
+\item[3:]
+\begin{itemize}
+\item[$\bullet$] The infinitival phrase {\em to maintain} follows its
+noun phrase modifier.
+\end{itemize}
+\item[4:]
+\begin{itemize}
+\item[$\bullet$] The verb phrase {\em will...erected} is not syntactically
+well-formed (the insertion of the verb {\em be} would make it so).
+\end{itemize}
+\item[5:]
+\begin{itemize}
+\item[$\bullet$] The first part of the sentence could be rendered as
+two clauses {\em it seems to us the budget perspectives are not
+appropriate}, in which case there is a missing subject {\em it} and a
+missing verb {\em are}; alternatively, it could be rendered as a
+single clause {\em the budget perspectives seem to us not
+appropriate}, in which case the subject of the sentence has been
+placed after the verb, and there is lack of agreement between the
+subject and the verb.
+\end{itemize}
+\end{itemize}
+
+While this output is taken from a phrase-based, and not a
+factor-based, system, we argue that many of the syntactic errors,
+particularly those that are global in nature, will not be corrected by
+a factor-based system. For example, the misplacement of verbs with
+respect to their modifiers, as in examples 2 and 3, is a very common
+error. The problem stems from the fact that in independent clauses in
+German, the finite verb is placed in the second position of the
+sentence, and the infinitival verb, if it exists, is placed in the
+final position. This means that in the English translation, the
+infinitival verb may have to be moved across an arbitrary number of
+intervening modifiers. Since phrase-based (and factor-based) systems
+tend to either penalize translations that move phrases around too much
+or to explicitly limit the absolute distance that phrases can move
+(compromising the exactness of the search for efficiency), the output
+tends mimic the word ordering of the input.
+
+\begin{table}
+\caption{Some examples of SMT output using a state-of-the-art
+phrase-based system from German to English.}
+\begin{center}
+\begin{tabular}{p{2.25in}p{2.25in}}
+{\bf SMT Output} & {\bf Reference Translation}\\
+\hline
+thus the implementation of human rights practical can be monitored , the union must have clear rules on possible penalties against the member states are available . & for the implementation of human rights to be monitored in practice also , however , the union must have clear rules regarding possible sanction mechanisms to be used against member states . \\
+\hline
+mr president , ladies and gentlemen , under the applause of the courts in luxembourg and strasbourg , the convention has a draft a charter of fundamental rights in a balanced way remarkable and formulated in the hands of the council laid . & mr president , ladies and gentlemen , with the approval of the courts in luxembourg and strasbourg , the convention has put together a draft charter of fundamental rights which is remarkably balanced , and has delivered it into the hands of the council . \\
+\hline
+i am with him that it is necessary , the institutional balance by means of a political revaluation of both the commission and the council to maintain . & i agree with him on the need to maintain the institutional balance and enhance the role , in political terms , of both the commission and the council . \\
+\hline
+irrespective of this , however , i should like to ask for this future is not already expect tomorrow , because they will gradually , stone for stone , erected . & that is why i invite you , in spite of everything , not to throw yourselves headlong into the future , as this is a future that should be built step by step , and stone by stone . \\
+\hline
+fifthly , seems to us the budget perspectives not appropriate... & fifthly , we also feel that the budgetary forecasts are not sufficient... \\
+\hline
+\end{tabular}
+\end{center}
+\label{SMTexamples}
+\end{table}%
+
+Other elements such as subjects and objects may also need to be
+reordered to produce syntactically-sound output. Consider, for
+instance, translation of the following German sentence into English:
+{\em f\"{u}r seinen bericht m\"{o}chte ich dem berichterstatter
+danken}. The English translation of this sentence, {\em i would like
+to thank the rapporteur for his report}, involves a considerable
+amount of reordering of the top-level phrases in the sentence (see
+Figure~\ref{movement}): the subject {\em ich} moves from after the
+German modal verb {\em m\"{o}chte} to the front of the English
+translation; the prepositional-phrase modifier {\em f\"{u}r seinen
+bericht} moves from the front of the sentence to after the object in
+the English.
+
+\begin{figure}
+\centering
+\includegraphics[scale=1]{brooke-movement}
+\caption{The relative positioning of the top-level (bracketed) phrases
+changes considerably in translation German to English.}
+\label{movement}
+\end{figure}
+
+Figure~\ref{freeorder} shows three variations of the German sentence
+introduced above with roughly the same meaning, illustrating how the
+modifiers are relatively free to move around.\footnote{German is often
+characterized as a {\em V2} language due to the obligatory placement
+of the finite verb in the second position in declarative sentences.}
+In contrast, the placement of phrases in English is generally more
+constrained: the subject of an English sentence is almost always
+placed before the verb; the object almost always comes after the
+verb. Hence, English is known as a predominantly {\em
+subject-verb-object}, or {\em S-V-O}, language. Therefore, when
+translating from German to English, there is likely to be quite a bit
+of reordering of top-level phrases.
+
+\begin{figure}
+\centering
+\includegraphics[scale=1]{brooke-freeorder}
+\caption{In German, the top-level phrases can move around positionally
+in the sentence without significantly altering its meaning. In the
+example, the subject ({\em ich}), object ({\em dem berichterstatter}),
+and a prepositional-phrase modifier ({\em f\"{u}r seinen bericht})
+exhibit such behavior.}
+\label{freeorder}
+\end{figure}
+
+The reordering of top-level phrases can also be quite common when
+translating between two fixed-word-order languages whose basic word
+orders differ. For instance, Turkish, Japanese, and Korean, among many
+of the world's other languages exhibit {\em subject-object-verb} word
+order. Figure~\ref{basicorder} shows how key sentential elements move
+around in languages with different basic word orders.
+
+\begin{figure}
+\centering
+\includegraphics[scale=1]{brooke-basicorder}
+\caption{The relative positions of the subject, verb, and object may
+be different for different languages.}
+\label{basicorder}
+\end{figure}
+
+Reordering poses a considerable challenge for phrase-based translation
+systems. Factor-based systems have the potential to model reordering
+based on, for instance, part of speech rather than words (i.e.,
+factor-based distortion models). Indeed, some recent work has in fact
+shown some improvement in translation quality by using part-of-speech
+information in the distortion model \parcite{lia:06}. However, there are
+other global syntactic constraints concerning the presence of
+subjects, objects, verbs, and verbal modifiers, for instance, are
+difficult to enforce within the phrase-based framework, and will very
+likely be difficult to enforce within the factor-based framework as
+well. Our observations of output produced by Moses this summer are
+consistent with this conjecture. For instance, missing verbs in
+sentences continues to be a problem with Moses, as it was with
+Pharaoh.
+
+Our syntax-based model makes predictions about the roles of top-level
+phrases in the source-language input, as well as their positions in
+the target-language output. This approach directly addresses the
+global syntactic constraints, described above, which cannot easily be
+modeled by a factor-based model. We propose using this model to
+automatically reorder the input such that it more closely resembles
+the syntactic ordering of the target language; we also propose making
+use of the syntactic role information (e.g., {\em subject}, {\em
+object}, etc.) that the model predicts to better constrain the output
+of the factor-based system. Finally, by translating certain parts of
+the sentence prior to using the factor-based system, we intend to
+ensure that certain essential parts of the sentence (such as the verb,
+any wh-words or complementizers, etc.) appear in the output. Before
+providing a detailed outline of our proposed integrated syntax and
+factor based system, we describe our syntax-based model.
+
+\subsection{The Syntax-Based Component}
+\label{framework}
+
+This section is based on work we have done at MIT CSAIL on a framework
+for {\em tree-to-tree} based statistical translation \parcite{cow:06}.
+We focus here on one component of this framework: a model that
+predicts {\em aligned extended projections}, or AEPs. AEPs are derived
+from the concept of an {\em extended projection} in lexicalized tree
+adjoining grammars (LTAG) \parcite{fra:02}, with the addition of
+alignment information that is based on work in synchronous LTAG
+\parcite{shisch:90}. The AEP model maps parse trees in the source
+language to parse trees in the target language. We use a feature-based
+model with a perceptron learning algorithm to learn this mapping. The
+model is learned from a corpus of translation pairs, where each
+sentence in the source or target language has an associated parse
+tree.  We see two major benefits of tree-to-tree based
+translation. First, it is possible to explicitly model the syntax of
+the target language, thereby improving grammaticality. Second, we can
+build a detailed model of the correspondence between the source and
+target parse trees, thereby attempting to construct translations that
+preserve the meaning of source language sentences.
+
+Our AEP prediction framework involves a two-step process (described
+below). We will use the German sentence {\em wir wissen da\ss\,das
+haupthemmnis der vorhersehbare widerstand der hersteller war} as a
+running example. For this example we take the desired translation to
+be {\em we know that the main obstacle has been the predictable
+resistance of manufacturers}.
+
+\paragraph{Step 1:} The German sentence is parsed and then broken
+down into separate parse structures for a sequence of clauses. For
+example, the German example above is broken into a parse structure for
+the clause {\em wir wissen} followed by a parse structure for the
+subordinate clause {\em da\ss $\ldots$war}.
+
+\paragraph{Step 2:} An AEP is predicted for
+each German clause. To illustrate this step, consider translation of
+the second German clause, which has the following parse structure:
+
+\begin{small}
+\begin{tabbing}
+$\;$\hspace{1cm} s-oc \=kous-cp da\ss\\
+       \>np-sb\avmbox{1} \= \=art das\\
+                     \>\>\>nn haupthemmnis\\
+       \>np-pd\avmbox{2} \> \>art der\\
+                     \>\>\>adja vorhersehbare\\
+                     \>\>\>nn widerstand\\
+               \>\>np-ag \= \=art der\\
+                               \>\>\>\>nn hersteller\\
+       \>vafin-hd war
+\end{tabbing}
+\end{small}
+Note that we use the symbols $\avmbox{1}$ and $\avmbox{2}$ to identify
+the two modifiers (arguments or adjuncts) in the clause, in this case
+a subject and an object.
+
+A major part of the AEP is a parse-tree fragment, that is similar to a
+TAG elementary tree (see also Figure~\ref{fig-aeps}):
+
+\begin{center}
+\begin{small}
+\includegraphics[scale=1]{brooke-AEP}
+\end{small}
+\end{center}
+
+\noindent
+Following the work of \perscite{fra:02}, we will refer to a
+structure like this as an {\em extended projection} (EP). The EP
+encapsulates the core syntactic structure in the English clause.  It
+contains the main verb {\em been}, as well as the function words {\em
+that} and {\em has}. It also contains a parse tree ``spine'' which has
+the main verb {\em been} as one of its leaves, and has the clause
+label {\tt SBAR} as its root. In addition, it specifies positions for
+arguments in the clause---in this case NPs corresponding to the
+subject and object.
+
+An AEP contains an EP, as well as {\em alignment information} about
+where the German modifiers should be placed in the extended
+projection. For example, the AEP in this case would contain the tree
+fragment shown above, together with an alignment specifying that the
+modifiers $\avmbox{1}$ and $\avmbox{2}$ from the German parse will
+appear in the EP as subject and object, respectively. In summary, an
+AEP encapsulates the core syntactic structure of the English clause,
+as well as information about where the translations of German
+modifiers should appear.
+
+AEPs are detailed structural objects, and their relationship to the
+source-language clause can be quite complex. We use a discriminative
+feature-based model, trained with the perceptron algorithm, to
+incrementally predict the AEP in a sequence of steps. At each step we
+define features that allow the model to capture a wide variety of
+dependencies within the AEP itself, or between the AEP and the
+source-language clause.
+
+\subsubsection{Aligned Extended Projections (AEPs)}
+\label{sec-aep}
+We now provide a detailed description of AEPs.  Figure~\ref{fig-aeps}
+shows examples of German clauses paired with the AEPs found in
+training data.\footnote{Note that in this work we consider translation
+from German to English; in the remainder of the section we take {\em
+English} to be synonymous with the target language in translation and
+{\em German} to be synonymous with the source language.}  The German
+clause is assumed to have $n$ (where $n \geq 0$) modifiers. For
+example, the first German parse in Figure~\ref{fig-aeps} has two
+arguments, indexed as $1$ and $2$. Each of these modifiers must either
+have a translation in the corresponding English clause, or must be
+deleted.
+
+\begin{figure}
+\begin{center}
+\begin{small}
+\begin{tabular}{|l|l|}
+\hline
+German Clause&English AEP\\
+\hline
+\hline
+\parbox{1.5in}{
+\begin{tabbing}
+s-oc \=kous-cp da\ss\\
+       \>np-sb\avmbox{1} \= \=art das\\
+                     \>\>\>nn haupthemmnis\\
+       \>np-pd\avmbox{2} \> \>art der\\
+                     \>\>\>adja vorhersehbare\\
+                     \>\>\>nn widerstand\\
+               \>\>np-ag \= \=art der\\
+                               \>\>\>\>nn hersteller\\
+       \>vafin-hd war
+\end{tabbing}
+
+Paraphrase: {\em that [np-sb the main obstacle] 
+[np-pd the predictable resistance of manufacturers]
+was}
+
+}
+&
+\parbox{1.5in}{
+\begin{tabbing}
+STEM: be\\
+SPINE:\\
+\=SBAR-A \=IN that\\
+                     \>\>S \=NP-A\\
+                         \>\>\>VP \=V\\
+                            \>\>\>\>NP-A\\
+\end{tabbing}
+\begin{tabbing}
+VOICE:     \hspace{0.5cm}\=active\\
+SUBJECT:   \>\avmbox{1}\\
+OBJECT:    \>\avmbox{2}\\
+MODALS:     \>has\\
+INFL:      \>been\\
+\end{tabbing}}\\
+\hline
+\hline
+\parbox{1.5in}{
+\begin{tabbing}
+s   \=pp-mo\avmbox{1} \= \=appr zwischen\\
+                    \>\>\>piat beiden\\
+                    \>\>\>nn gesetzen\\
+    \>vvfin-hd bestehen\\
+    \>adv-mo\avmbox{2} also\\
+    \>np-sb\avmbox{3} \> \>adja erhebliche\\
+                \>\>\> \=adja rechtliche\\
+                       \>\>\>\>\$, ,\\
+                       \>\>\>\>adja praktische\\
+                       \>\>\>\>kon und\\
+                       \>\>\>\>adja wirtschaftliche\\
+                \>\>\>nn unterschiede
+\end{tabbing}
+
+Paraphrase: {\em [pp-mo between the two pieces of legislation] 
+exist so [np-sb significant legal, practical and economic differences]}\\
+
+}
+&
+\parbox{1.5in}{
+\begin{tabbing}
+STEM: be\\
+SPINE:\\
+S \= NP-A\\
+  \>VP \= V\\
+     \>\> NP-A\\
+\end{tabbing}
+\begin{tabbing}
+VOICE:     \hspace{0.5cm}\=active\\
+SUBJECT:   \>``there''\\
+OBJECT:    \>\avmbox{3}\\
+MODALS:     \>NULL\\
+INFL:      \>are\\
+MOD1: \> post-verb\\
+MOD2: \> pre-sub\\
+\end{tabbing}}\\
+\hline
+\hline
+\parbox{1.5in}{
+\begin{tabbing}
+s-rc   \=prels-sb die\\
+       \>vp \=pp-mo\avmbox{1} \= \=appr an\\
+                         \>\>\>\>pdat jenem\\
+                         \>\>\>\>nn tag\\
+             \>\>pp-mo\avmbox{2} \> \=appr in\\
+                           \>\>\>\>ne tschernobyl\\
+               \>\>vvpp-hd gez\"{u}ndet\\
+       \>vafin-hd wurde
+\end{tabbing}
+
+Paraphrase: {\em which [pp-mo on that day] [pp-mo in chernobyl] released were}
+
+}
+&
+\parbox{1.5in}{
+\begin{tabbing}
+STEM: release\\
+SPINE:\\
+SBAR \=WHNP\\
+     \>SG-A VP V\\
+\end{tabbing}
+\begin{tabbing}
+VOICE: \hspace{0.5cm}\=passive\\
+WH:      \> which\\
+MODALS:  \>  was\\
+INFL:    \> released\\
+MOD1:    \> post-verb  \\
+MOD2:    \> post-verb
+\end{tabbing}}\\
+\hline
+\end{tabular}
+\end{small}
+\end{center}
+\caption{Three examples of German parse trees, together with their
+  aligned extended projections (AEPs) in the training data. Note that AEP elements whose value is {\em null} are not shown.
+}
+\label{fig-aeps}
+\end{figure}
+
+An AEP consists of the following parts:\footnote{Note that the
+variables {\tt STEM}, {\tt SPINE}, {\tt VOICE}, {\tt WH}, {\tt
+MODALS}, and {\tt INFL} essentially describe the EP of the English
+main verb in the clause; the remaining variables {\tt SUBJECT}, {\tt
+OBJECT}, and {\tt MOD(i)} specify the position of modifiers in the
+German clause.}
+
+\paragraph{STEM:} A string specifying the stemmed form of the
+main verb in the clause.
+
+\paragraph{SPINE:} A syntactic structure associated with the main verb. 
+  The structure has the symbol {\tt V} as one of its leaf nodes; this
+  is the position of the main verb. It includes higher projections of
+  the verb such as VPs, Ss, and SBARs. It also includes leaf nodes
+  {\tt NP-A} in positions corresponding to noun-phrase arguments
+  (e.g., the subject or object) of the main verb. In addition, it may
+  contain leaf nodes labeled with categories such as {\tt WHNP} or
+  {\tt WHADVP} where a wh-phrase may be placed. It may include leaf
+  nodes corresponding to one or more complementizers (common examples
+  being {\em that}, {\em if}, {\em so that}, and so on).
+
+\paragraph{VOICE:} One of two alternatives, {\tt active} or 
+{\tt passive}, specifying the voice of the main verb.
+
+\paragraph{SUBJECT:} This variable can be one of three types. If there
+is no subject position in the {\tt SPINE} variable, then the value for
+{\tt SUBJECT} is {\tt NULL}. Otherwise, {\tt SUBJECT} can either be a
+string, for example {\em there},\footnote{This happens in the case
+where there exists a subject in the English clause but not in the
+German clause. See, for instance, the second example in
+Figure~\ref{fig-aeps}.} or an index of one of the $n$ modifiers in the
+German clause.
+
+\paragraph{OBJECT:} This variable is similar to {\tt SUBJECT}, and can
+also take three types: {\tt NULL}, a specific string, or an index of
+one of the $n$ German modifiers. It is always {\tt NULL} if there is
+no object position in the {\tt SPINE}; it can never be a modifier
+index that has already been assigned to {\tt SUBJECT}.
+
+\paragraph{WH:} This variable is always {\tt NULL} if there is no
+wh-phrase position within the {\tt SPINE}; it is always a
+non-empty string (such as {\em which}, or {\em in which}) if a
+wh-phrase position does exist.
+
+\paragraph{MODALS:} This is a string of verbs that constitute the
+modals that appear within the clause. We use {\tt NULL} to signify
+that there are no modals.
+
+\paragraph{INFL:} The inflected form of the verb.
+
+\paragraph{MOD(i):} There are $n$ modifier variables {\tt
+  MOD(1), MOD(2), $\ldots$, MOD(n)} that specify the positions for
+German arguments that have not already been assigned to the {\tt
+SUBJECT} or {\tt OBJECT} positions in the spine. Each variable {\tt
+MOD(i)} can take one of five possible values:
+
+\begin{itemize}
+\item {\tt null}: This value is chosen if and only if the modifier has
+  already been assigned to the subject or object position.
+\item {\tt deleted}: This means that a translation of the $i$'th
+  German modifier is not present in the English clause.
+\item {\tt pre-sub}: The modifier appears after any complementizers or
+  wh-phrases, but before the subject of the English clause.
+\item {\tt post-sub}: The modifier appears after the subject of the
+  English clause, but before the modals.
+\item {\tt in-modals}: The modifier appears after the first modal in
+  the sequence of modals, but before the second modal or the main
+  verb. 
+\item {\tt post-verb}: The modifier appears somewhere after the main
+  verb. 
+\end{itemize}
+
+
+\subsubsection{A Discriminative Model for AEP Prediction}
+\label{sec-model}
+In this section we describe linear history-based models with beam
+search, and the perceptron algorithm for learning in these
+models. These methods will form the basis for our model that maps
+German clauses to AEPs.
+
+We have a training set of $n$ examples, $(x_i,y_i)$ for $i = 1 \ldots
+n$, where each $x_i$ is a German parse tree, and each $y_i$ is an AEP.
+We follow previous work on history-based models, by representing each
+$y_i$ as a series of $N$ decisions $\langle d_1, d_2, \ldots d_N
+\rangle$. In our approach, $N$ will be a fixed number for any input
+$x$: we take the $N$ decisions to correspond to the sequence of
+variables {\tt STEM, SPINE, $\ldots$, MOD(1), MOD(2), $\ldots$,
+MOD(n)} described in section~\ref{sec-aep}.  Each $d_i$ is a member of
+a set ${\cal D}_i$ which specifies the set of allowable decisions at
+the $i$'th point (for example, ${\cal D}_2$ would be the set of all
+possible values for {\tt SPINE}).  We assume a function
+$\hbox{ADVANCE}(x, \langle d_1, d_2, \ldots, d_{i-1} \rangle)$ which
+maps an input $x$ together with a prefix of decisions $d_1 \ldots
+d_{i-1}$ to a subset of ${\cal D}_i$. $\hbox{ADVANCE}$ is a function
+that specifies which decisions are allowable for a past history
+$\langle d_1, \ldots, d_{i-1} \rangle$ and an input $x$. In our case
+the $\hbox{ADVANCE}$ function implements hard constraints on AEPs (for
+example, the constraint that the {\tt SUBJECT} variable must be {\tt
+NULL} if no subject position exists in the {\tt SPINE}).  For any
+input $x$, a {\em well-formed} decision sequence for $x$ is a sequence
+$\langle d_1, \ldots, d_N \rangle$ such that for $i = 1 \ldots n$,
+$d_i \in \hbox{ADVANCE}(x, \langle d_1, \ldots, d_{i-1} \rangle)$. We
+define $\gen(x)$ to be the set of all decision sequences (or AEPs)
+which are well-formed for $x$.
+
+The model that we will use is a discriminatively-trained,
+feature-based model. A significant advantage to feature-based models
+is their flexibility: it is very easy to sensitize the model to
+dependencies in the data by encoding new features.  To define a
+feature-based model, we assume a function $\rep(x, \langle d_1,
+\ldots, d_{i-1} \rangle, d_i) \in \reals^d$ which maps a decision
+$d_i$ in context $(x, \langle d_1, \ldots, d_{i-1} \rangle)$ to a {\em
+feature vector}. We also assume a vector $\pav \in \reals^d$ of
+parameter values. We define the {\em score} for any partial or
+complete decision sequence $y = \langle d_1, d_2, \ldots, d_m \rangle$
+paired with $x$ as:
+\begin{equation}
+\hbox{SCORE}(x,y) = \ip{\Rep(x,y)}{\pav}
+\label{eq-score}
+\end{equation}
+where
+$
+\Rep(x,y) = 
+\sum_{i=1}^m \rep(x,\langle d_1, \ldots, d_{i-1} \rangle, d_i)
+$.
+In particular, given the definitions above, the output structure
+$F(x)$ for an input $x$ is the highest--scoring well--formed structure for $x$:
+\begin{equation}
+F(x) = \arg\max_{y \in \gen(x)} \hbox{SCORE}(x,y)
+\label{eq-argmax}
+\end{equation}
+To decode with the model we use a beam-search method. The method
+incrementally builds an AEP in the decision order $d_1, d_2, \ldots,
+d_N$. At each point, a beam contains the top $M$ highest--scoring
+partial paths for the first $m$ decisions, where $M$ is taken to be a
+fixed number. The score for any partial path is defined in
+Eq.~\ref{eq-score}. The $\hbox{ADVANCE}$ function is used to specify
+the set of possible decisions that can extend any given path in the
+beam.
+
+To train the model, we use the averaged perceptron algorithm described
+by \perscite{col:02}.  This combination of the perceptron
+algorithm with beam-search is similar to that described by \perscite{colroa:04}.\footnote{Future work may consider
+alternative algorithms, such as those described by \perscite{daumar:05}.} The perceptron algorithm is a convenient
+choice because it converges quickly --- usually taking only a few
+iterations over the training set \parcite{col:02,colroa:04}.
+
+\subsubsection{The Features of the Model}
+\label{sec-feats}
+
+The model's features allow it to capture dependencies between the AEP
+and the German clause, as well as dependencies between different
+parts of the AEP itself. The features included in $\rep$ can
+consist of any function of the decision history $\langle d_1, \ldots,
+d_{i-1} \rangle$, the current decision $d_i$, or the German clause. In
+defining features over AEP/clause pairs, we make use of some basic
+functions which look at the German clause and the AEP (see
+Tables~\ref{GERfunc} and \ref{AEPfunc}). We use various combinations
+of these basic functions in the prediction of each decision $d_i$, as
+described below.
+
+\begin{table}[!h]
+\begin{center}
+\begin{small}
+\begin{tabular}{|c|l|}
+\hline
+1 & main verb \\
+\hline
+2 & any verb in the clause \\
+\hline
+3 & all verbs, in sequence \\
+\hline
+4 & spine \\
+\hline
+5 & tree \\
+\hline
+6 & preterminal label  of left-most child of subject \\
+\hline
+7 & terminal label of left-most child of subject \\
+\hline
+8 & suffix of terminal label of right-most child of subject \\
+\hline
+9 & preterminal label  of left-most child of object \\
+\hline
+10 & terminal label of left-most child of object \\
+\hline
+11 & suffix of terminal label of right-most child of object \\
+\hline
+12 & preterminal label of the negation word {\em nicht} ({\em not}) \\
+\hline
+13 & is either of the strings {\em es gibt} ({\em there is/are})\\
+& or {\em es gab} ({\em there was/were}) present? \\
+\hline
+14 & complementizers and wh-words \\
+\hline
+15 & labels of all wh-nonterminals \\
+\hline
+16 & terminal labels of all wh-words \\
+\hline
+17 & preterminal label of a verb in first position \\
+\hline
+18 & terminal label of a verb in first position \\
+\hline
+19 & terminal labels of all words in any relative pronoun\\
+&  under a PP \\
+\hline
+20 & are all of the verbs at the end? \\
+\hline
+21 & nonterminal label of the root of the tree \\
+\hline
+22 & terminal labels of all words constituting the subject \\
+\hline
+23 & terminal labels of all words constituting the object \\
+\hline
+24 & the leaves dominated by each node in the tree \\
+\hline
+25 & each node in the context of a CFG rule \\
+\hline
+26 & each node in the context of the RHS of a CFG rule \\
+\hline
+27 & each node with its left and right sibling \\
+\hline
+28 & the number of leaves dominated by each node \\
+&in the tree \\
+\hline
+\end{tabular}
+\end{small}
+\end{center}
+\caption{Functions of the German clause used for making features in
+the AEP prediction model.}
+\label{GERfunc}
+\end{table}
+
+\begin{table}[!h]
+\begin{center}
+\begin{small}
+\begin{tabular}{|c|l|}
+\hline
+1 & does the {\tt SPINE} have a subject? \\
+\hline
+2 & does the {\tt SPINE} have an object? \\
+\hline
+3 & does the {\tt SPINE} have any wh-words? \\
+\hline
+4 & the labels of any complementizer nonterminals \\
+& in the {\tt SPINE} \\
+\hline
+5 & the labels of any wh-nonterminals in the {\tt SPINE} \\
+\hline
+6 & the nonterminal labels {\tt SQ} or {\tt SBARQ} in the {\tt SPINE} \\
+\hline
+7 & the nonterminal label of the root of the {\tt SPINE} \\
+\hline
+8 & the grammatical category of the finite verbal form\\
+ &  {\tt INFL} (i.e., infinitive, 1st-, 2nd-, or 3rd-person pres,\\
+& pres participle, sing past, plur past, past participle) \\
+\hline
+\end{tabular}
+\end{small}
+\end{center}
+\caption{Functions of the English AEP used for making features
+in the AEP prediction model.}
+\label{AEPfunc}
+\end{table}
+
+\paragraph{STEM:} 
+Features for the prediction of {\tt STEM} conjoin
+the value of this variable with each of the functions in lines 1--13
+of Table~\ref{GERfunc}.  For example, one feature is the value of {\tt
+STEM} conjoined with the main verb of the German clause. In addition,
+$\rep$ includes features sensitive to the rank of a
+candidate stem in an externally-compiled lexicon.\footnote{The lexicon
+is derived from GIZA++ and provides, for a large number of German main
+verbs, a ranked list of possible English translations.}
+
+\paragraph{SPINE:} 
+Spine prediction features make use of the values of the variables {\tt
+SPINE} and {\tt STEM} from the AEP, as well as functions of the spine
+in lines 1--7 of Table~\ref{AEPfunc}, conjoined in various ways with
+the functions in lines 4, 12, and 14--21 of Table~\ref{GERfunc}. Note
+that the functions in Table~\ref{AEPfunc} allow us to look at
+substructure in the spine. For instance, one of the features for {\tt
+SPINE} is the label {\tt SBARQ} or {\tt SQ}, if it exists in the
+candidate spine, conjoined with a verbal preterminal label if there is
+a verb in the first position of the German clause. This feature
+captures the fact that German yes/no questions begin with a verb in
+the first position.
+
+\paragraph{VOICE:} 
+Voice features in general combine values of {\tt VOICE}, {\tt SPINE},
+and {\tt STEM}, with the functions in lines 1--5, 22, and 23 of
+Table~\ref{GERfunc}.
+
+\paragraph{SUBJECT:} 
+Features used for subject prediction make use of the AEP variables
+{\tt VOICE} and {\tt STEM}. In addition, if the value of {\tt SUBJECT}
+is an index $i$ (see section~\ref{sec-aep}), then $\rep$ looks at the
+nonterminal label of the German node indexed by $i$ as well as the
+surrounding context in the German clausal tree. Otherwise, $\rep$
+looks at the value of {\tt SUBJECT}. These basic features are combined
+with the functions in lines 1, 3, and 24--27 of Table~\ref{GERfunc}.
+
+\paragraph{OBJECT:} 
+We make similar features to those for the prediction of {\tt
+SUBJECT}. In addition, $\rep$ can look at the value predicted for
+{\tt SUBJECT}.
+
+\paragraph{WH:} 
+Features for {\tt WH} look at the values of {\tt WH} and {\tt SPINE},
+conjoined with the functions in lines 1, 15, and 19 of
+Table~\ref{GERfunc}.
+
+\paragraph{MODALS:} 
+For the prediction of {\tt MODALS}, $\rep$ looks at {\tt MODALS}, {\tt
+SPINE}, and {\tt STEM}, conjoined with the functions in lines 2--5 and
+12 of Table~\ref{GERfunc}.
+
+\paragraph{INFL:} 
+The features for {\tt INFL} include the values of {\tt INFL}, {\tt
+MODALS}, and {\tt SUBJECT}, and {\tt VOICE}, and the function in line
+8 of Table~\ref{AEPfunc}.
+
+\paragraph{MOD(i):} 
+For the {\tt MOD(i)} variables, $\rep$ looks at the value of {\tt
+MODALS}, {\tt SPINE} and the current {\tt MOD(i)}, as well as the
+nonterminal label of the root node of the German modifier being
+placed, and the functions in lines 24 and 28 of Table~\ref{GERfunc}.
+
+\subsubsection{Experiments with the AEP Model}
+We implemented an end-to-end system for translation from German to
+English using our AEP prediction model as a component. The Europarl
+corpus \parcite{koe:05} constituted our training data. This corpus
+contains over 750,000 training sentences; we extracted over 441,000
+training examples for the AEP model from this corpus (see
+\parcite{cow:06} for details on the extraction of these training
+examples). We reserved 35,000 of these training examples as
+development data for the model. We used a set of features derived from
+the those described in section~\ref{sec-feats}. This set was optimized
+using the development data through experimentation with several
+different feature subsets.
+
+Modifiers within German clauses were translated using the phrase-based
+model of \perscite{koe:03}. We first generated $n$-best
+lists for each modifier. We then built a reranking model to choose
+between the elements in the $n$-best lists. The reranker was trained
+using around 800 labeled examples from a development set.
+
+The test data for the experiments consisted of 2,000 sentences, and
+was the same test set as that used by \perscite{col:05}. We use the model of \perscite{koe:03} as a baseline for our experiments. The
+AEP-driven model was used to translate all test set sentences where
+all clauses within the German parse tree contained at least one verb
+and there was no embedding of clauses---there were 1,335 sentences
+which met these criteria. The remaining 665 sentences were translated
+with the baseline system. This set of 2,000 translations had a BLEU
+score \parcite{pap:02} of 23.96. The baseline system alone achieved a
+BLEU score of 25.26 on the same set of 2,000 test sentences. We also
+obtained judgments from two human annotators on 100 randomly-drawn
+sentences on which the baseline and AEP-based outputs differed.  For
+each example the annotator viewed the reference translation, together
+with the two systems' translations presented in a random order.
+Annotator 1 judged 62 translations to be equal in quality, 16
+translations to be better under the AEP system, and 22 to be better
+for the baseline system. Annotator 2 judged 37 translations to be
+equal in quality, 32 to be better under the baseline, and 31 to be
+better under the AEP-based system.
+
+\subsection{A Syntax and Factor Based Model for SMT}
+\label{future}
+In the preceding section, we presented a model that predicts detailed
+target-language syntactic structures, which include constraints on the
+alignments between source and target parse trees. In this work, we
+intend to implement a model that integrates our syntax-based system
+and the factor-based system Moses. The integration involves using the
+syntax-based system to predict the syntactic roles of constituents in
+the source-language input, and reorder them before they are translated
+using Moses. In addition, the syntax-based system would be used to
+translate certain parts of the input and ensure that they appear in
+the target language output. We would like to test this integrated
+model with German-to-English translation, as well as
+Spanish-to-English and English-to-Spanish translation. The work with
+Spanish and English will form a natural continuation of the work we
+performed translating from English to Spanish this summer at the
+workshop. Although the primary focus of this work will be on the
+integration with Moses, we see the need for improvement of our AEP
+model. We hope such improvements will contribute to better quality
+translations produced by the integrated system. Finally, we envision
+implementation of a few alternative approaches to end-to-end
+translation using the AEP model; we expect to use these alternatives
+as points of comparison with the integrated approach. The next few
+sections describe our proposed integration with Moses, some additional
+motivations for investigating Spanish-English translation, the
+AEP-prediction improvements that we anticipate carrying out, and the
+alternative end-to-end translation systems.
+
+\subsubsection{Integration with a Factor-Based System}
+The end-to-end translation framework we have developed in previous
+work uses a phrase-based system to produce $n$-best lists of modifier
+translations, which are then reranked and placed into the final
+translation. By selecting modifier translations independently, we are
+failing to make use of valuable contextual information that could be
+used to form better translations.  Rather than produce modifier
+translations in isolation, we can use the syntax-based system to
+produce modified MT input to the phrase-based
+system. Figure~\ref{modifiedinput} illustrates how the input to the MT
+system is rearranged by the syntax-based AEP model. Note that in step
+two of the figure, some of the input has been translated to English
+(the verb sequence {\em would like to thank}), while some if it has
+merely been reordered. This allows the phrase-based system to decode
+the entire AEP at once.
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=1.2]{brooke-modifiedinput2}
+\end{center}
+\vspace{-0.5cm}
+\caption{The input to the MT system --- {\em f\"{u}r seinen bericht
+m\"{o}chte ich dem berichterstatter danken} --- is rearranged by the
+syntax-based system to produced modified input to the phrase-based
+system.}
+\label{modifiedinput}
+\end{figure}
+
+An approach similar to this one has been investigated in previous work
+using hand-written reordering rules, which improved translation
+quality when compared with a phrase-based baseline system
+\parcite{col:05}. Our current work differs from the previous work in
+several significant ways:
+
+\begin{itemize}
+\item our work is carried out entirely within a statistical
+framework, whereas the earlier work used hand-coded deterministic
+rules for reordering;
+\item our work attempts to identify the roles of target-language
+output phrases and account for them in the source-language input,
+whereas the previous work attempted only to reorder the input; the
+prediction of grammatical functions such as {\em subject} and {\em
+object} can be used as additional input to the phrase-based system
+(see below);
+\item our work explicitly tries to account for the existence and
+translation of certain sentence elements such as complementizers,
+wh-words, and main verbs;
+\end{itemize}
+
+In addition to the simple reordering of input suggested in
+Figure~\ref{modifiedinput}, we envision several extensions. We might,
+for instance, try training language models specific to the syntactic
+roles predicted by the AEP model (e.g., subject, object, verbal
+modifier). These language models could be incorporated into the
+factor-based framework as additional features in the model. The use of
+such language models would be motivated by the desire to have the
+model learn something about the structure of a ``subject'', for
+instance (e.g., that a subject should probably look like a noun
+phrase).
+
+This particular line of investigation raises many interesting research
+questions related to the reordering of top-level phrases (i.e.,
+modifiers):
+
+\begin{itemize}
+\item Does it help to disallow reordering of the top-level phrases in
+the modified input to the phrase-based system (i.e., implement a hard
+constraint on reordering)?  Or, is it better to implement a soft
+constraint on reordering (for example by penalizing the reordering of
+modifiers)?  Or, is it better not to impose any constraints on
+reordering at all?
+\item How much language engineering is necessary to extract a
+reasonable subset of possible permutations of top-level phrases in the
+input?  How well can the phrase-based decoder do by simply taking into
+account all possible reorderings while decoding? (Note that if
+arbitrary reorderings of words in the sentence are allowed, the
+decoding problem is NP-complete \parcite{kni:99}.) Do we really need to
+use a full parse, or can we devise a model that uses only syntactic
+chunking (partial parsing) or semantic role labeling?
+\item Can we simplify the role of the first (preprocessing) step,
+perhaps by (1) learning a mapping from source-sentence elements to
+target-sentence roles (subject, object, modifier, verb,
+complementizer), and then (2) learning an ordering on those elements?
+Note that this approach implies that no part of the input to the
+phrase-based system would be translated by the syntax-based system.
+\end{itemize}
+
+\subsubsection{Other Language Pairs: Spanish/English}
+We would like to test the integrated syntax and factor based system
+with language pairs other than German/English, and for translation
+into a language besides English.  One language pair that we are
+interested in working with is Spanish/English. Spanish is interesting
+for a number of reasons \parcite{zag:02}:
+
+\begin{itemize}
+\item it has a fairly rich morphology, with subjects and verbs
+agreeing in number and person, and the nouns, determiners, and
+adjectives in a noun phrase agreeing in number and gender;
+\item constituent order is not fixed in declarative sentences
+(constituents may appear as S-V-O, V-O-S, or V-S-O);
+\item if understood from context, the subject does not have to appear
+in a sentence;
+\item the use of the subjunctive mood is quite prevalent and may be
+triggered by a phrase that appears far away from the inflected verb;
+\item the passive voice is used in many cases where active voice would
+be the natural choice in English;
+\item Spanish uses two forms of past tense (preterite and imperfect)
+where English uses only one (simple);
+\item Spanish has two forms of the verb {\em to be};
+\item Spanish uses double clitics (that is, two clitics with the same
+referent), and there are two possible positions when placing clitics
+in sentences where a verb appears in the progressive or infinitive
+form.
+\end{itemize} 
+
+From a research perspective, one of the benefits of our approach is
+that we can leverage the relatively recent advances in parsing
+languages other than English (e.g.,
+\parcite{chibik:02,arukel:04,col:99b,cowcol:05}). We have developed a
+statistical parser for Spanish \parcite{cowcol:05} that we intend to use
+for this project. The parser makes use of morphological information
+and reranking techniques to achieve, on test data, an F1 score of
+85.1\% in the recovery of labeled constituents.  The parser is
+currently trained on only 2800 sentences; this number will increase by
+a factor of 10 with the release of new data at the end of 2006.
+
+\subsubsection{Improved AEP Prediction}
+Improvements in the accuracy with which the AEP model predicts AEPs
+will almost certainly lead to improved translation quality, and can
+only reduce the amount of work that the factor-based system has to
+do. We have analyzed several random samples of output from our current
+system in an attempt to characterize its current
+performance. Table~\ref{errors} shows examples of some of the errors
+we have observed:
+
+\begin{enumerate}
+\item {\bf subject/verb agreement}: In English, the subject and verb
+must agree in number. In the example, the verb {\em to be} is
+inflected for plurality, while the subject is singular.
+\item {\bf subject choice}: The AEP model predicts there is no
+subject, or mispredicts the alignment of the subject. In the example,
+the second clause of the sentence ({\em while believe on the same side
+of the political spectrum}) is missing a subject.
+\item {\bf object choice}: The AEP model predicts there is no object,
+or (more commonly) mispredicts the alignment of the object. In the
+example, the true object --- {\em position} --- in the last clause
+({\em to take in his second speech to this issue position}) is
+incorrectly predicted as a modifier and is placed after the object.
+\item {\bf number finite verbs}: The system occasionally produces more
+than one finite verb per clause. In the example, the final clause
+({\em we will come in future this is often}) contains two finite
+verbs, {\em come} and {\em is}. The reason for this is usually that
+the phrase-based system introduces a new finite verb in translating of
+one of the modifiers.
+\item {\bf preposition choice}: Either a preposition is missing, or
+the choice of preposition is incorrect. In the example, the
+preposition {\em at} has been selected; a more appropriate choice
+would have been {\em on}.
+\end{enumerate}
+
+\begin{table}
+\caption{Examples of some common errors in the output of our syntax-based system.}
+\begin{center}
+\begin{tabular}{p{.8in}|p{1.85in}p{1.85in}}
+{\bf Error Type} & {\bf System Output} & {\bf Reference Translation}\\
+\hline subject/verb agreement & the council are denied any power of legislating . & the council is denied any power of legislating .\\
+\hline subject choice & mr blair sees the precondition for more liberalisation while believe on the same side of the political spectrum , this is the prerequisite for the development of a social europe & mr blair sees this as the condition for greater liberalisation , while others , on the same side of the political chessboard , believe that it is the condition for the advent of social europe \\
+\hline object choice & i hope very that the prime minister sets it positive apart and would ask him if it does to take in his second speech to this issue position & i would like to hope that the prime minister will address it positively and i should like , if he can , for him to take a position on this issue in his second speech . \\
+\hline number finite verbs & this annex is and i know we will come in future this is often & this is to be welcomed , and i know we will return to this many times in the future .\\
+\hline preposition choice & i should like to comment at the thessaloniki agenda in the areas of immigration and asylum& mr president , i am going to refer to the thessaloniki agenda in relation to immigration and asylum .\\
+\hline
+\end{tabular}
+\end{center}
+\label{errors}
+\end{table}
+
+It is clear from this list that the prediction of particular parts of
+the AEP could be improved. For instance, subjects and objects are
+often not accurately predicted. In addition, we have routinely
+observed that the choice of the main verb is often not optimal or even
+correct. Based on our informal observations, it seems to be the case
+that high-accuracy AEP prediction is correlated with high-accuracy
+translation output. We intend to produce by hand a set of gold
+standard AEPs which could be used to generate and score
+translations. The difference between generating translations using the
+gold-standard AEPs and generating translations using the predicted
+AEPs will give us a more quantitative idea of the loss incurred by the
+mispredictions.
+
+The feature-driven approach allows a wide range of features to be
+tested in attempting to improve AEP prediction accuracy. For example,
+it would be relatively easy to incorporate a syntactic language model
+(i.e., a prior distribution over AEP structures) induced from a large
+amount of English monolingual data. Future work may also consider
+alternative definitions of AEPs. For example, we might consider AEPs
+that include larger chunks of phrase structure, or we might consider
+AEPs that contain more detailed information about the relative
+ordering of modifiers.
+
+Alternative learning methods might improve the accuracy of the
+model. For example, a large-margin optimization technique such as the
+exponentiated gradient approach to structured prediction \parcite{bar:04}
+might be adapted to the AEP prediction problem. We might also look
+into improving how training examples are extracted, for instance, by
+looking into a better method for extracting and aligning clause pairs
+and modifiers. Our current method involves heuristics for determining
+modifier alignment; this might be done instead by using the EM
+algorithm to induce the best alignment.
+
+\subsubsection{Alternative End-to-End Systems}
+We foresee implementing at least two alternative translation systems
+using our AEP model. One of these systems uses finite state machines
+to represent alternative modifier translations; it is closer in nature
+to our current modifier-reranking framework, although we have reason
+to believe it will perform better than our current implmentation. The
+other alternative involves a recursive application of the AEP model to
+modifier translation.
+
+\paragraph{Using finite state machines}
+Rather than using the phrase-based system to produce $n$-best lists of
+translations, we can use it to produce finite state machines (FSM)
+representing a network of possible translations (see, e.g.,
+\parcite{moh:97}). It is then easy to create an integrated AEP-FSM, in
+which the conjunctions and other substrings of the translation derived
+from the AEP are also represented as finite-state machines. We could
+then take the intersection of the AEP-FSM with an $n$-gram language
+model, for instance. Selecting modifiers using this representation
+would correspond to searching the finite-state network for the most
+likely path. Crucially, this search would take into account the
+contextual information that is being thrown away in our current
+reranking approach. It would also incorporate a language model over
+the entire sentence. The current system uses a language model only
+when producing modifier translation candidates with the phrase-based
+system. Finally, the FSM framework facilitates the incorporation of
+any additional models that can be encoded using a finite-state
+representation. For instance, we might train language models for
+particular types of modifiers predicted by the AEP (e.g., subject,
+object, etc).
+
+\paragraph{Recursive prediction of modifier AEPs}
+\label{recursive}
+According to most (if not all) syntactic theories, classes of words
+other than verbs (such as nouns, adjectives, and prepositions) can
+also subcategorize lexically for certain types of arguments, and can
+influence their distributions \parcite{haegue:99}. Similarly, extended
+projections may be formed for many types of words besides verbs. A
+natural extension to the current AEP model, then, is the application
+of AEP prediction to the translation of modifiers. For example, given
+a German modifier aligned to the English subject, we may try to
+predict a corresponding AEP, which would likely involve the extended
+projection of a noun. Exactly how we would form the modifier AEPs (for
+instance for prepositional phrases) would be part of this work.
+
+This approach is compelling for a couple of reasons:
+
+\begin{itemize}
+\item it facilitates the modeling of syntactic structure conditioned
+on the intended role (subject, object, etc) of the target-language modifier;
+\item it offers an AEP framework that is entirely self-contained,
+without reliance on a phrase-based system.
+\end{itemize}
+
+\noindent
+This system is quite different from the integrated syntax and factor
+based system and should therefore make a very interesting point of
+comparison.
+
+\subsubsection{Summary}
+The goal of this research is to integrate a system that makes explicit
+use of global syntactic information with one that is able to
+incorporate factors in a phrase-based framework. We aim to use the
+mutual strengths of each system to produce high-quality automatic
+translations. We intend to test our model using German/English and
+Spanish/English language pairs. In addition, we plan to implement
+several improvements to the AEP prediction model, as well some
+alternative end-to-end translation models that make use of the AEP
+model and can act as points of comparison to the integrated syntax and
+factor based model. We hope that this work will not only produce
+better machine translation output, but will also help elucidate how
+syntactic information can best be used for SMT.
+
 
 \section{Exploiting Ambiguous Input in Statistical Machine Translation}
 {\sc Richard Zens: just cut and paste your proposal here}
