@@ -1073,6 +1073,7 @@ In conclusion, the choice of the number of splits $N$ is essential for a good ef
 
 
 \section{Tuning}
+\label{merttuning}
 %{\sc Nicola Bertoldi}
 
 \newcommand{\e}{{\bf e}}
@@ -1308,13 +1309,13 @@ A second tool developed during the workshop shows the mapping of individual sour
 \def\tocs{English$\rightarrow$Czech}
 \def\toen{Czech$\rightarrow$English}
 \def\parcite#1{(\cite{#1})}
-\def\perscite#1{\cite{#1}} % XXX no newcite available
+\def\perscite#1{\cite{#1}} % works like newcite
 
 \def\max#1{{\bf{} #1}}
 \def\stddev#1{{$\pm$#1}}
 
 
-\def\subsubsubsection#1{{\bf #1\\}}
+\def\subsubsubsection#1{\bigskip{}{\it #1\\}}
 
 
 This report describes in detail our experiments on \bidir{} translation
@@ -1485,7 +1486,7 @@ In the following, we use the this short notation: \equo{Dev (std)} denotes
 results obtained on the tuning dataset with the model parameters set to the
 default, somewhat even distribution. \equo{Dev (opt)} denotes results on the
 tuning dataset with the parameters optimized using minimum error rate training
-procedure (MERT, XXX). The \equo{Dev (opt)} results are always overly
+procedure (see section \ref{merttuning}). The \equo{Dev (opt)} results are always overly
 optimistic, because MERT had access to the reference translations and tunes the
 MT output to get the highest scores possible. \equo{Test
 (opt)} denotes results on evaluation set with model parameters as optimized on
@@ -2163,6 +2164,7 @@ Several observations can be made:
 
 
 \subsubsubsection{Microstudy: Current MT Errors}
+\label{microstudy}
 
 The previous sections described significant improvements gained on small data
 sets when checking morphological agreement or adding more data (BLEU raised from
@@ -2423,8 +2425,8 @@ would be necessary to describe the linguistic reality more adequately.
 %<f>\v{r}ekl<MDl src="a">\v{r}\'{\i}ci<MDt src="a">VpYS---XR-AA---<A>Pred<r>9<g>0
 %<f>mluv\v{c}\'{\i}<MDl src="a">mluv\v{c}\'{\i}<MDt src="a">NNMS1-----A----<A>Sb<r>10<g>9
 
-%poptÃ¡vka trvale stoupÃ¡ za podpory prospotÅ™ebitelskÃ© vlÃ¡dnÃ­ politiky , Å™ekl mluvÄ�Ã­ asociace .
-%MEMBER:subst+1 --- HEAD:VB:stoupat_:T MEMBER:Rza-1+2 --- --- --- --- MEMBER:Z- HEAD:Vp:Å™Ã­ci MEMBER:subst+1 --- PUNCT:.
+%popt\'{a}vka trvale stoup\'{a} za podpory prospot\v{r}ebitelsk\'{e} vl\'{a}dn\'{\i} politiky , \v{r}ekl mluv\v{c}\'{\i} asociace .
+%MEMBER:subst+1 --- HEAD:VB:stoupat_:T MEMBER:Rza-1+2 --- --- --- --- MEMBER:Z- HEAD:Vp:\v{r}\'{\i}ci MEMBER:subst+1 --- PUNCT:.
 
 %<f>\broken{Popt\'{a}vka\\MEMBER:subst+1}<A>Sb<r>1<g>3
 %<f>\broken{trvale\\---}<A>Adv<r>2<g>3
@@ -2434,7 +2436,7 @@ would be necessary to describe the linguistic reality more adequately.
 %<f>\broken{vl\'{a}dn\'{\i}\\---}<A>Atr<r>6<g>7
 %<f>\broken{politiky\\---}<A>Atr<r>7<g>5
 %<f>\broken{,\\MEMBER:Z-}<A>AuxX<r>8<g>3
-%<f>\broken{\v{r}ekl\\HEAD:Vp:Å™Ã­ci}<A>Pred<r>9<g>0
+%<f>\broken{\v{r}ekl\\HEAD:Vp:\v{r}\'{\i}ci}<A>Pred<r>9<g>0
 %<f>\broken{mluv\v{c}\'{\i}\\MEMBER:subst+1}<A>Sb<r>10<g>9
 %<f>\broken{.\\PUNCT:.}<A>AuxK<r>11<g>0
 
@@ -2521,16 +2523,19 @@ or the Czech side of the Large corpus. In all cases, a simple trigram model
 checks the fluency of word form stream.
 
 
+%VFF: vf LM1-11-czeng	28.68      	19.51       	24.23
+%Baseline: t0-0       	29.24*      	25.68>      	25.23>
+
 \begin{table}[ht]
 \begin{center}
 \begin{tabular}{lccc}
-                 &  BLEU.dev.opt  &  BLEU.dev.std  &  BLEU.opt\\
+                       &  Dev (std)  &  Dev (opt)  &  Test (opt)\\
 \hline
-T+Cvf LM-11gr-Large  &  28.68        &  19.51         &  24.23\\
-T+Cvf LM-7gr-Baseline   &  28.54        &  19.75         &  25.05\\
-T+Cvf LM-7gr-Large   &  28.32        &  19.69         &  25.07\\
-T+Cvf LM-9gr-Large   &  27.98        &  19.55         &  25.09\\
-Baseline: T  &  29.24        &  25.68        &  \max{25.23}\\
+T+Cvf LM-11gr-Large    &         19.51  &       28.68  &        24.23\\
+T+Cvf LM-7gr-Baseline  &         19.75  &       28.54  &        25.05\\
+T+Cvf LM-7gr-Large     &         19.69  &       28.32  &        25.07\\
+T+Cvf LM-9gr-Large     &         19.55  &       27.98  &        25.09\\
+Baseline: T            &         25.68  &       29.24  &  \max{25.23}\\
 \end{tabular}
 \end{center}
 \caption{Preliminary results with checking of verb frame factor.}
@@ -2538,12 +2543,54 @@ Baseline: T  &  29.24        &  25.68        &  \max{25.23}\\
 \end{table}
 
 Unfortunately, all T+Cvf results fall below the single-factored baseline.
-A more
-thorough analysis of the data available and the hypothesis space would be
-necessary to explain why our verb frame factor tends to mislead the decoder.
+Table \ref{vffanalysis} gives some more detail on this result. We performed the
+same type of analysis of verb-modifier pairs in the first 15 output sentences,
+as described in section \ref{microstudy}. The baseline columns are based on the
+single-factored output (BLEU 25.23), the VFF columns are based on T+Cvf
+LM-11gr-Large (BLEU 24.23).
 
-XXX why did it fail? I'm going to check if at least the verb-mod-relations get
-improved.
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{lcc|cc}
+\bf Translation of  &  \multicolumn{2}{c}{\bf Verb}  &  \multicolumn{2}{c}{\bf Modifier}\\
+      &  Baseline  &  VFF  &  Baseline  &  VFF\\
+\hline
+\dots{}preserves meaning    &     38  &    40  &     57  &    55\\
+\dots{}is disrupted   &     17  &    20  &     15  &    15\\
+\dots{}is missing  &     15  &    10  &      0  &     1\\
+\dots{}is unknown (not translated)   &      7  &     7  &      5  &     6\\
+\end{tabular}
+\end{center}
+\caption{Analysis of 77 Verb-Modifier pairs in baseline output and in
+verb-frame-factor (VFF) output.}
+\label{vffanalysis}
+\end{table}
+
+Despite the very small size of our sample, some effects
+of adding the verb-frame-factor can be observed. On the positive side, verbs are
+not missing in MT output that often. On the negative side, translation of verbs
+or nouns gets confused by the additional factor. Unfortunately, also the
+percentage of correctly translated verb-modifier relations in cases where both
+verb and modifier are fine decreased.
+
+Unless the experiment is repeated with more training data and also with a larger
+set of evaluated sentences, it is hard to make any conclusions. The
+verb frame factor at least leads to some more verbs in MT output.
+
+
+%VFF
+%Rok	18 (58.1 %)
+%Rbad	13 (41.9 %)
+%Celkem	31 (100.0 %)
+
+
+% BASE
+%Rok	19 (63.3 %)
+%Rbad	11 (36.7 %)
+%Celkem	30 (100.0 %)
+
+
 
 
 \subsubsection{Single-factored Results \toen{}}
@@ -2904,7 +2951,7 @@ Model 2 might thus generate an improvement in $AER$.
 \newcommand{\pav}{\bar{\alpha}}
 \newcommand{\ip}[2]{{#1} \cdot {#2}}
 \def\parcite#1{(\cite{#1})}
-\def\perscite#1{\cite{#1}} % XXX no newcite available
+\def\perscite#1{\cite{#1}} % works like acl-style \newcite
 
 \subsection{Introduction}
 \label{intro}
