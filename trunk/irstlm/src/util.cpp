@@ -3,6 +3,9 @@
 #include <windows.h>
 #endif
 
+#include <sys/types.h>
+#include <sys/mman.h>
+
 #include "util.h"
 
 using namespace std;
@@ -75,3 +78,77 @@ void inputfilestream::close()
 {
 }
 
+
+
+//MemoryMap Management
+//Code kindly provided by Fabio Brugnara, ITC-irst Trento.
+/* How to use it: 
+call MMap with offset and required size (psgz):
+pg->b = MMap(fd, rdwr,offset,pgsz,&g);
+correct returned pointer with the alignment gap and save the gap:
+pg->b += pg->gap = g;
+when releasing mapped memory, subtract the gap from the pointer and add 
+the gap to the requested dimension 		
+Munmap(pg->b-pg->gap, pgsz+pg->gap, 0);
+*/
+
+void *MMap(int	fd, int	access, off_t	offset, size_t	len, off_t	*gap)
+{
+	void	*p;
+	int	pgsz,g=0;
+  
+#if defined(_WIN32)
+	HANDLE	fh,
+		mh;
+  
+	fh = (HANDLE)_get_osfhandle(fd)
+    if(offset) {
+      /* bisogna accertarsi che l'offset abbia la granularita`
+      * corretta, MAI PROVATA! */
+      SYSTEM_INFO	si;
+      
+      GetSystemInfo(&si);
+      g = *gap = offset%si.dwPageSize;
+    } else if(gap) {
+      *gap=0;
+    }
+	if(!(mh=CreateFileMapping(fh, NULL, PAGE_READWRITE, 0, len+g, NULL))) {
+		return 0;
+	}
+	p = (char*)MapViewOfFile(mh, FILE_MAP_ALL_ACCESS, 0,
+                           offset-*gap, len+*gap);
+	CloseHandle(mh);
+#else
+	if(offset) {
+		pgsz = sysconf(_SC_PAGESIZE);
+		g = *gap = offset%pgsz;
+	} else if(gap) {
+		*gap=0;
+	}
+	p = mmap((void*)0, len+g, access,
+           MAP_SHARED|MAP_FILE,
+           fd, offset-g);
+	if((long)p==-1L) {
+		perror("mmap failed");
+		p=0;
+	}
+#endif
+	return p;
+}
+
+
+int Munmap(void	*p,size_t	len,int	sync)
+{
+	int	r=0;
+  
+#if defined(_WIN32)
+	if(sync) FlushViewOfFile(p, len);
+	UnmapViewOfFile(p);
+#else
+	if(sync) msync(p, len, MS_SYNC);
+	if((r=munmap((void*)p, len))) perror("munmap() failed");
+#endif
+	return r;
+}
+
+  

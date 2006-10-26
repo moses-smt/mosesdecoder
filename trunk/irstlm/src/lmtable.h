@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #ifndef MF_LMTABLE_H
 #define MF_LMTABLE_H
 
+#include "util.h"
 #include "ngramcache.h"
 #include "dictionary.h"
 #include "n_gram.h"
@@ -56,59 +57,6 @@ typedef enum {LMT_FIND,    //!< search: find an entry
 } LMT_ACTION;
 
 
-//disktable or accessing tables stored on disk
-
-class disktable{  
-private:
-  char* buffer;          //!< buffer of disk table
-  int   buffer_size;     //!< size of buffer
-  int   entry_size;      //!< size of each single entry in buffer
-  long  current_border;  //!< current last available entry in buffer
-  long  file_border;     //!< last element in disk table
-  long  start_position;  /* */  
-public:
-    
-	disktable(std::fstream& inp, int buffersize, int entrysize,long max_entries){
-      buffer_size=buffersize;
-      entry_size=entrysize;
-      buffer=new char[(buffer_size+1) * entry_size];
-      current_border=0;
-      file_border=max_entries;
-      start_position=inp.tellp();
-    };
-  
-  ~disktable() {delete [] buffer;};
-  
-  char* get(std::fstream& inp,long position){    
-    assert(position < file_border);
-    
-    //you can look back at maximum one position before the first in the buffer!
-    assert(position >= (current_border-buffer_size -1));
-    
-    while (position>=current_border){
-      int how_many=(current_border + buffer_size <= file_border?buffer_size:file_border-current_border);
-      //store last value in position buffer_size;
-      memcpy(buffer + buffer_size * entry_size, buffer+(buffer_size-1) * entry_size, entry_size);
-      //read the number of elements
-      inp.read(buffer,how_many * entry_size);
-      //update curent border
-      current_border+=how_many;
-    }    
-    if (position > (current_border-buffer_size-1) ) //then it is in buffer
-      return buffer + (position % buffer_size) * entry_size; 
-    else
-      if (current_border>buffer_size) //asks for last of previous block
-        return buffer + buffer_size * entry_size;
-    else return NULL;
-  };
-  
-  void rewind(std::fstream& inp){
-    inp.seekp(start_position);
-    current_border=0;      
-  }  
-  
-};
-
 class lmtable{
   
   char*      table[LMTMAXLEV+1]; //storage of all levels
@@ -141,6 +89,11 @@ class lmtable{
   ngramcache* statecache;
   int max_cache_lev;
 
+  //partial storage/access on disk
+  int KeepOnDiskFromLevel;  //level from which n-grams are accessed from disk
+  int diskid;
+  off_t tableOffs[LMTMAXLEV+1];
+  
 public:
     
 #ifdef TRACE_CACHE
@@ -174,12 +127,17 @@ public:
     } 
     
     
-    for (int i=1;i<=maxlev;i++){
-      if (table[i]) delete [] table[i];
+    for (int l=1;l<=maxlev;l++){
+      if (table[l]){ 
+          if (l < KeepOnDiskFromLevel)
+            delete [] table[l];
+          else
+            Munmap(table[l]-tableOffs[l],cursize[l]*nodesize(tbltype[l])+tableOffs[l],0);
+      }
       if (isQtable){
-        if (Pcenters[i]) delete [] Pcenters[i];
-				if (i<maxlev) 
-          if (Bcenters[i]) delete [] Bcenters[i];
+        if (Pcenters[l]) delete [] Pcenters[l];
+				if (l<maxlev) 
+          if (Bcenters[l]) delete [] Bcenters[l];
       }
     }
   }
@@ -235,24 +193,26 @@ public:
   void savebin(const char *filename);
   void dumplm(std::fstream& out,ngram ng, int ilev, int elev, int ipos,int epos);
   
-  void load(std::istream& inp);
+  void load(std::istream& inp,const char* filename=NULL,int keep_on_disk=0);
   void loadtxt(std::istream& inp,const char* header);
-  void loadbin(std::istream& inp,const char* header);
+  void loadbin(std::istream& inp,const char* header,const char* filename=NULL,int keep_on_disk=0);
   
   void loadbinheader(std::istream& inp, const char* header);
   void loadbincodebook(std::istream& inp,int l);
   
-  void filter(const char* lmfile);
-  void filter2(const char* lmfile,int buffMb=512);
+  void filter(const char* lmfile){};
+  void filter2(const char* lmfile,int buffMb=512){
+    std::cerr << "function is no more available\n";
+    exit(0);
+  };
   
   void loadcenters(std::istream& inp,int Order);
 	
-  double prob(ngram ng); 
   double lprob(ngram ng); 
   double clprob(ngram ng); 
 
   
-  void *search(char *tb,LMT_TYPE ndt,int lev,int n,int sz,int *w,
+  void *search(int lev,int offs,int n,int sz,int *w,
                LMT_ACTION action,char **found=(char **)NULL);
   
   int mybsearch(char *ar, int n, int size, unsigned char *key, int *idx);   

@@ -21,5 +21,8 @@ public:
 	void close();
 };
 
+void *MMap(int	fd, int	access, off_t	offset, size_t	len, off_t	*gap);
+int Munmap(void	*p,size_t	len,int	sync);
+
 #endif
 
