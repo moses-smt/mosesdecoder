@@ -17,6 +17,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 ******************************************************************************/
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -30,10 +34,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #include "lmtable.h"
 #include "util.h"
 
+#define DEBUG 1
+
 using namespace std;
 
 inline void error(char* message){
-  cerr << message << "\n";
+  std::cerr << message << "\n";
   throw std::runtime_error(message);
 }
 
@@ -56,26 +62,29 @@ lmtable::lmtable(){
   probcache=NULL;
   statecache=NULL;
   
+  KeepOnDiskFromLevel=LMTMAXLEV+1;
+  
 };
 
  
 //loadstd::istream& inp a lmtable from a lm file
 
-void lmtable::load(istream& inp){
+void lmtable::load(istream& inp,const char* filename,int keep_on_disk){
   
   //give a look at the header to select loading method
-  char header[1024];
-	
+  char header[1024];	
   inp >> header; cerr << header << "\n";
   
-  if (strncmp(header,"Qblmt",5)==0 || strncmp(header,"blmt",4)==0)
-    loadbin(inp,header);
-  else 
+  if (strncmp(header,"Qblmt",5)==0 || strncmp(header,"blmt",4)==0){        
+    loadbin(inp,header,filename,keep_on_disk);
+  }
+  else{ 
+    if (keep_on_disk>0) 
+      std::cerr << "KeepOnDisk feature is not available with text LM\n";
     loadtxt(inp,header);
-  
+  }
   dict->genoovcode();
-    
-	
+    	
   cerr << "OOV code is " << dict->oovcode() << "\n";
   
 }
@@ -305,7 +314,7 @@ int lmtable::add(ngram& ng,int iprob,int ibow){
 			
       ndt=tbltype[l]; ndsz=nodesize(ndt);
 			
-      if (search(table[l] + (start * ndsz),ndt,l,(end-start),ndsz,
+      if (search(l,start,(end-start),ndsz,
                  ng.wordp(ng.size-l+1),LMT_FIND, &found)){
 				
         //update start-end positions for next step
@@ -354,22 +363,26 @@ int lmtable::add(ngram& ng,int iprob,int ibow){
 }
 
 
-void *lmtable::search(char* tb,
-                      LMT_TYPE ndt,
-                      int lev,
+void *lmtable::search(int lev,
+                      int offs,
                       int n,
                       int sz,
                       int *ngp,
                       LMT_ACTION action,
                       char **found){
 	
-  if (lev==1) return *found=(*ngp <n ? tb + *ngp * sz:NULL);
-  
+  //assume level 1 is always in memory 
+  if (lev==1) return *found=(*ngp <n ? table[1] + *ngp * sz:NULL);
+
+  //prepare table to be searched with mybserach  
+  char* tb;
+  tb=table[lev]+(sz * offs);  
   //prepare search pattern
   char w[LMTCODESIZE];putmem(w,ngp[0],0,LMTCODESIZE);
 	
   int idx=0; // index returned by mybsearch
   *found=NULL;	//initialize output variable	
+  
   switch(action){    
     case LMT_FIND:			
       if (!tb || !mybsearch(tb,n,sz,(unsigned char *)w,&idx)) return NULL;
@@ -518,9 +531,12 @@ void lmtable::loadbinheader(istream& inp,const char* header){
 	
   configure(maxlev,isQtable);
   
-  for (int i=1;i<=maxlev;i++){
-    inp >> cursize[i]; maxsize[i]=cursize[i];
-    table[i]=new char[cursize[i] * nodesize(tbltype[i])];
+  for (int l=1;l<=maxlev;l++){
+    inp >> cursize[l]; maxsize[l]=cursize[l];
+    if ( l < KeepOnDiskFromLevel )
+      table[l]=new char[cursize[l] * nodesize(tbltype[l])];
+    else //just allocate space for successor tables
+      table[l]=new char[cursize[1] * nodesize(tbltype[l])];
   }
   
   
@@ -549,24 +565,48 @@ void lmtable::loadbincodebook(istream& inp,int l){
   
 }
 
+  
 //load a binary lmfile
 
-void lmtable::loadbin(istream& inp, const char* header){
+void lmtable::loadbin(istream& inp, const char* header,const char* filename,int keep_on_disk){
     
   cerr << "loadbin()\n";
-  
   loadbinheader(inp,header);
-  
   dict->load(inp);  
+   
+  //if MMAP is used, then open the file
+  if (filename and keep_on_disk!=-1){
+    
+    if (keep_on_disk>0 && keep_on_disk <= maxlev)
+      KeepOnDiskFromLevel=keep_on_disk;
+    else
+      error("keep_on_disk value is out of range\n");
+    
+    if ((diskid=open(filename, O_RDONLY))<0){
+      std::cerr << "cannot open " << filename << "\n";
+      error("dying");
+    }
+  }
+  
   
   for (int l=1;l<=maxlev;l++){
     if (isQtable) loadbincodebook(inp,l);
-    
-    cerr << "loading " << cursize[l] << " " << l << "-grams\n";
-    inp.read(table[l],cursize[l]*nodesize(tbltype[l]));
+    if (l < KeepOnDiskFromLevel){
+      cerr << "loading " << cursize[l] << " " << l << "-grams\n";
+      inp.read(table[l],cursize[l]*nodesize(tbltype[l]));
+    }
+    else{
+      cerr << "mapping " << cursize[l] << " " << l << "-grams\n";
+      table[l]=(char *)MMap(diskid,PROT_READ,
+                    inp.tellg(), cursize[l]*nodesize(tbltype[l]),
+                    &tableOffs[l]);
+      table[l]+=tableOffs[l];
+      inp.seekg(cursize[l]*nodesize(tbltype[l]),ios_base::cur);
+    }
   };  
   
   cerr << "done\n";
+  
 }
 
 
@@ -592,14 +632,11 @@ int lmtable::get(ngram& ng,int n,int lev){
     //initialize entry information 
     hit = 0 ; found = NULL; ndt=tbltype[l];
     
-    //if (l==2) cout <<"bicache: searching:" << ng <<"\n";
-    
     if (lmtcache[l] && lmtcache[l]->get(ng.wordp(n),(char *)&found))
       hit=1;
     else
-      search(table[l] + (offset * nodesize(ndt)),
-             ndt,
-             l,
+      search(l,
+             offset,
              (limit-offset),
              nodesize(ndt),
              ng.wordp(n-l+1), 
@@ -612,7 +649,9 @@ int lmtable::get(ngram& ng,int n,int lev){
     
     if (!found) return 0;      
     
-    ng.link=found;
+    ng.bow=(l<maxlev?bow(found,ndt):0);    
+    ng.prob=prob(found,ndt);
+    ng.link=found;    
     ng.info=ndt;
     ng.lev=l;
     
@@ -644,7 +683,6 @@ void lmtable::dumplm(fstream& out,ngram ng, int ilev, int elev, int ipos,int epo
 	
   LMT_TYPE ndt=tbltype[ilev];
   int ndsz=nodesize(ndt);
-  
 	
   assert(ng.size==ilev-1);
   assert(ipos>=0 && epos<=cursize[ilev] && ipos<epos);
@@ -768,41 +806,6 @@ const char *lmtable::cmaxsuffptr(ngram ong){
 }
 
 
-// returns the probability of an n-gram
-
-double lmtable::prob(ngram ong){
-	
-  if (ong.size==0) return 1.0;
-  if (ong.size>maxlev) ong.size=maxlev;
-  
-  ngram ng(dict);
-  ng.trans(ong);
-	
-  double rbow;
-  int ibow,iprob;
-  LMT_TYPE ndt;
-  
-	
-  if (get(ng,ng.size,ng.size)){
-    ndt=(LMT_TYPE)ng.info; iprob=prob(ng.link,ndt);		
-    return exp((double)(isQtable?Pcenters[ng.size][iprob]:*((float *)&iprob)));
-  }
-  else{ //size==1 means an OOV word 
-    if (ng.size==1)    
-      return 1.0/UNIGRAM_RESOLUTION;
-    else{ // compute backoff
-          //set backoff state, shift n-gram, set default bow prob 
-      bo_state(1); ng.shift();rbow=1.0; 			
-      if (ng.lev==ng.size){ 
-        ndt= (LMT_TYPE)ng.info; ibow=bow(ng.link,ndt);
-        rbow= (double) (isQtable?Bcenters[ng.size][ibow]:*((float *)&ibow));
-      }
-      //prepare recursion step
-      ong.size--;      
-      return exp(rbow) * prob(ong);
-    }
-  }
-}
 
 //return log10 probs
 
@@ -817,11 +820,10 @@ double lmtable::lprob(ngram ong){
 	
   double rbow;
   int ibow,iprob;
-  LMT_TYPE ndt;
   
 	
   if (get(ng,ng.size,ng.size)){
-    ndt=(LMT_TYPE)ng.info; iprob=prob(ng.link,ndt);		
+    iprob=ng.prob;		
     return (double)(isQtable?Pcenters[ng.size][iprob]:*((float *)&iprob));
   }
   else{ //size==1 means an OOV word 
@@ -831,7 +833,7 @@ double lmtable::lprob(ngram ong){
           //set backoff state, shift n-gram, set default bow prob 
       bo_state(1); ng.shift();rbow=0.0; 			
       if (ng.lev==ng.size){ 
-        ndt= (LMT_TYPE)ng.info; ibow=bow(ng.link,ndt);
+        ibow=ng.bow; 
         rbow= (double) (isQtable?Bcenters[ng.size][ibow]:*((float *)&ibow));
       }
       //prepare recursion step
@@ -872,319 +874,6 @@ double lmtable::clprob(ngram ong){
 
 };
 
-
-
-//Fill the lmtable with the n-grams in a huge lmfile.
-//Use the local dictionary to select the needed ngrams 
-
-
-void lmtable::filter2(const char* binlmfile, int buffMb){
-  
-  //load header and dictionary of binary lm on disk
-  lmtable* dsklmt=new lmtable();
-  fstream inp(binlmfile,ios::in);
-  
-  // read header
-  char header[MAX_LINE]; 
-  inp >> header;
-  
-  dsklmt->loadbinheader(inp, header);
-  dsklmt->dict->load(inp); 
-  
-  //inherit properties of the dsklmt
-  isQtable=dsklmt->isQtable;
-  configure(dsklmt->maxlevel(),dsklmt->isQtable);
-  if (isQtable)
-    for (int i=1;i<=maxlev;i++) NumCenters[i]=dsklmt->NumCenters[i];
-  
-  
-  //prepare word code conversion table; words which 
-  //are not in the local dictionary will have code -1
-  //prepare a new dictionary sorted as the large dictionary
-  
-  dictionary*  newdict=new dictionary((char *)NULL,1000000,(char*)NULL,(char*)NULL);
-  newdict->incflag(1);  
-  int* code2code=new int[dsklmt->dict->size()];
-  for (int w=0;w<dsklmt->dict->size();w++){
-    if (dict->getcode(dsklmt->dict->decode(w))!=-1)
-      code2code[w]=newdict->encode(dsklmt->dict->decode(w));
-    else code2code[w]=-1;
-  }
-  newdict->incflag(0);  
-  delete dict;
-  dict=newdict;
-  
-  //service variables
-  char* p; char* q; char* r; 
-  int ndsz; LMT_TYPE type; int w; 
-  long i,j,l;
-  
-  
-  disktable* dtbl;
-  for (l=1;l<=maxlev;l++){
-    
-    //shortcuts for current table
-    type=tbltype[l]; ndsz=nodesize(type);  
-    
-    //steel eventual coodebooks from dsklm;
-    if (isQtable) loadbincodebook(inp,l);
-    
-    //allocate the maxumum number of entries to be load at each time    
-    cerr << "loading part of " << dsklmt->cursize[l] << " " << l << "-grams\n";    
-    
-    //open a on-disk table buffer starting from current position in stream inp
-    dtbl=new disktable(inp, (buffMb * 1024 *1024)/ndsz,ndsz,dsklmt->maxsize[l]);
-    
-    if (l==1){            
-      
-      //compute actual table size
-      maxsize[l]=0;
-      for (i=0;i<dsklmt->maxsize[l];i++){
-        p=dtbl->get(inp,i);
-        if ((code2code[dsklmt->word(p)]) != -1) maxsize[l]++;
-      }     
-      
-      assert(maxsize[l]<=dsklmt->maxsize[l]);
-      
-      //allocate memory for table and start positions
-      table[l]=new char[maxsize[l] * ndsz];
-      startpos[l]=new int[maxsize[l]];
-      
-      //reset position of dsklmt
-      dtbl->rewind(inp);
-      
-      //copy elements into table[l]    
-      cursize[l]=0;
-      for (i=0;i<dsklmt->maxsize[l];i++){
-        p=dtbl->get(inp,i);
-        if ((w=code2code[dsklmt->word(p)]) != -1) {
-          r=table[l] + (long) cursize[l] * ndsz;
-          memcpy(r,p,ndsz); 
-          //store the initial poition in startpos
-          startpos[l][cursize[l]]=(i==0?0:bound(dtbl->get(inp,i-1),tbltype[l]));
-          word(r,w);
-          //cout << "1-gram bound:" << bound(r,tbltype[l]) << "\n";
-          cursize[l]++;
-        }
-      }
-      
-      for (i=0;i<cursize[l];i++) assert(word(table[l]+ (long) i * ndsz)==i);
-      
-      assert(maxsize[l]==cursize[l]);        
-      
-    }
-    else{
-      
-      //shortcuts for the predecessors table
-      char* ptable=table[l-1]; 
-      LMT_TYPE ptype=tbltype[l-1];
-      int pndsz=nodesize(ptype);
-      
-      //count actual table size, allocate memory, and copy elements
-      //we scan elements through the previous table: ptable
-      //cout << inp.tellp() << "\n";      
-      
-      maxsize[l]=0;  
-      
-      for (i=0;i<cursize[l-1];i++){
-        p=ptable+i*pndsz;         
-        for (j=startpos[l-1][i];j<bound(p,ptype);j++){  
-          assert(startpos[l-1][i]<bound(p,ptype));
-          q=dtbl->get(inp,j);
-          if ((w=code2code[dsklmt->word(q)]) != -1) maxsize[l]++;   
-          
-        }
-      }  
-      
-      //allocate memory for the table, and fill it
-      assert(maxsize[l]<=dsklmt->maxsize[l]);
-      
-      table[l]=new char[maxsize[l] * ndsz];
-      if (l<maxlev) startpos[l]=new int[maxsize[l]];
-      
-      //reset position of dsklmt
-      dtbl->rewind(inp);
-      
-      r=table[l]; //next available position in table[l]
-      cursize[l]=0;
-      
-      for (i=0;i<cursize[l-1];i++){
-        p=ptable+ i * pndsz;
-        for (j=startpos[l-1][i];j<bound(p,ptype);j++){  
-          assert(startpos[l-1][i]<bound(p,ptype));                  
-          
-          q=dtbl->get(inp,j);
-          
-          
-          if ((w=code2code[dsklmt->word(q)]) != -1){
-            //copy element
-            r=table[l] + cursize[l] * ndsz;
-            memcpy(r,q,ndsz);
-            if (l<maxlev) startpos[l][cursize[l]]=(j>0?bound(dtbl->get(inp,j-1),type):0);
-            word(r,w);
-            //cout << "+" << dict->decode(word(q)) << " - bound " 
-            //<< startpos[l][cursize[l]] << " " << bound(p,ptype) << "\n";
-            cursize[l]++; //increment index in startpos
-          }
-          
-        }
-        //update bounds of predecessor
-        bound(p,ptype,cursize[l]);
-      }   
-      
-      assert(cursize[l]==maxsize[l]);     
-    }
-    
-    
-    delete dtbl;
-    if (l>1) delete [] startpos[l-1]; 
-  }
-  
-  
-}
-
-void lmtable::filter(const char* binlmfile){
-  
-  //load header and dictionary of binary lm on disk
-  lmtable* dsklmt=new lmtable();
-  fstream inp(binlmfile,ios::in);  
-  
-  // read header
-  char header[MAX_LINE]; 
-  inp >> header;
-  
-  dsklmt->loadbinheader(inp, header);
-  
-  dsklmt->dict->load(inp); 
-  
-  //inherit properties of the dsklmt
-  configure(dsklmt->maxlevel(),dsklmt->isQuantized());
-  
-  //prepare word code conversion table; words which 
-  //are not in the local dictionary will have code -1
-  //prepare a new dictionary sorted as the large dictionary
-  
-  dictionary*  newdict=new dictionary((char *)NULL,1000000,(char*)NULL,(char*)NULL);
-  newdict->incflag(1);  
-  int* code2code=new int[dsklmt->dict->size()];
-  for (int w=0;w<dsklmt->dict->size();w++){
-    if (dict->getcode(dsklmt->dict->decode(w))!=-1)
-      code2code[w]=newdict->encode(dsklmt->dict->decode(w));
-    else code2code[w]=-1;
-  }
-  newdict->incflag(0);  
-  delete dict;
-  dict=newdict;
-  
-  //service variables
-  char* p; char* q; char* r; 
-  int ndsz; LMT_TYPE type; int w; 
-  int i,j,l;
-  
-  for (l=1;l<=maxlev;l++){
-    
-    //shortcuts for current table
-    type=tbltype[l]; ndsz=nodesize(type);  
-    
-    //steel eventual coodebooks from dsklm;
-    if (isQtable) loadbincodebook(inp,l);
-    
-    //load single l-table from dsklmt: this table can be
-    //removed at the ned of this cycle
-    cerr << "loading " << dsklmt->cursize[l] << " " << l << "-grams\n";
-    dsklmt->table[l]=new char[dsklmt->cursize[l]*ndsz];
-    inp.read(dsklmt->table[l],dsklmt->cursize[l]*ndsz);
-    
-    //shortcuts for dsktable
-    char* dtbl=dsklmt->table[l];
-    int dsize=dsklmt->cursize[l];
-    
-    if (l==1){
-      
-      //count actual table size
-      maxsize[l]=0;
-      for (i=0;i<dsize;i++)    
-        if ((code2code[dsklmt->word(dtbl+i*ndsz)]) != -1) maxsize[l]++;
-      
-      assert(maxsize[l]<=dsklmt->maxsize[l]);
-      //allocate memory for table and start positions
-      table[l]=new char[maxsize[l] * ndsz];
-      startpos[l]=new int[maxsize[l]];
-      
-      //copy elements one by one
-      
-      for (i=0;i<dsize;i++){       
-        p=dtbl+i*ndsz;
-        if ((w=code2code[dsklmt->word(p)]) != -1) {
-          r=table[l] + cursize[l] * ndsz;
-          memcpy(r,p,ndsz); 
-          //store the initial poition in startpos
-          startpos[l][cursize[l]]=(i==0?0:bound(p-ndsz,tbltype[l]));
-          word(r,w);
-          cursize[l]++;
-        }
-      }
-      
-      for (i=0;i<cursize[l];i++) assert(word(table[l]+i*ndsz)==i);
-      
-      assert(maxsize[l]==cursize[l]);        
-      
-    }
-    else{ //l>=1;
-      
-      //shortcuts for the predecessors table
-      char* ptable=table[l-1]; 
-      LMT_TYPE ptype=tbltype[l-1];
-      int pndsz=nodesize(ptype);
-      
-      //count actual table size, allocate memory, and copy elements
-      //we scan elements through the previous table: ptable
-      
-      maxsize[l]=0;  
-      for (i=0;i<cursize[l-1];i++){
-        p=ptable+i*pndsz;
-        for (j=startpos[l-1][i];j<bound(p,ptype);j++){         
-          q=dsklmt->table[l] + j * ndsz;
-          if ((w=code2code[dsklmt->word(q)]) != -1){
-            maxsize[l]++;   
-          } 
-        }
-      }    
-      
-      //allocate memory for the table, and fill it
-      assert(maxsize[l]<=dsklmt->maxsize[l]);
-      table[l]=new char[maxsize[l] * ndsz];
-      if (l<maxlev) startpos[l]=new int[maxsize[l]];
-      
-      r=table[l]; //next available position in table[l]
-      cursize[l]=0;
-      for (i=0;i<cursize[l-1];i++){
-        p=ptable+i*pndsz;
-        for (j=startpos[l-1][i];j<bound(p,ptype);j++){        
-          q=dsklmt->table[l] + j * ndsz;
-          if ((w=code2code[dsklmt->word(q)]) != -1){
-            //copy element
-            r=table[l] + cursize[l] * ndsz;
-            memcpy(r,q,ndsz);
-            if (l<maxlev)
-              startpos[l][cursize[l]]=(j==0?0:dsklmt->bound(q-ndsz,type));
-            word(r,w);
-            //cout << "+" << dict->decode(word(q)) << " - bound " 
-            //<< startpos[l][cursize[l]] << " " << bound(p,ptype) << "\n";
-            cursize[l]++; //increment index in startpos
-          }         
-        }
-        //update bounds of predecessor
-        bound(p,ptype,cursize[l]);
-      }    
-      
-    }
-    
-    delete [] dsklmt->table[l];
-    if (l>1) delete [] startpos[l-1]; 
-  }
-  
-}
 
 
 void lmtable::stat(int level){

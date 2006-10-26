@@ -35,8 +35,7 @@ using namespace std;
 std::string stxt = "no";
 std::string seval = "";
 std::string sdebug = "0";
-std::string ssubdict = "";
-
+std::string skeepondisk = "-1";
 /********************************/
 
 void usage(const char *msg = 0) {
@@ -91,9 +90,9 @@ void handle_option(const std::string& opt, int argc, const char **argv, int& arg
       sdebug = get_param(opt, argc, argv, argi);
 
   else
-    if (starts_with(opt, "--subdict") || starts_with(opt, "-sd"))
-      ssubdict = get_param(opt, argc, argv, argi);
-  
+    if (starts_with(opt, "--KeepOnDisk") || starts_with(opt, "-kd"))
+      skeepondisk = get_param(opt, argc, argv, argi);     
+    
   else {
     usage(("Don't understand option " + opt).c_str());
     exit(1);
@@ -115,7 +114,8 @@ int main(int argc, const char **argv)
 
   bool textoutput = (stxt == "yes"? true : false);
   int debug = atoi(sdebug.c_str()); 
- 
+  int keep_on_disk = atoi(skeepondisk.c_str());
+  
   std::string infile = files[0];
   std::string outfile="";
   
@@ -136,33 +136,22 @@ int main(int argc, const char **argv)
   else
      outfile = files[1];
  
+  cerr << "inpfile: " << infile << std::endl;
   cerr << "outfile: " << outfile << std::endl;
  
   
   lmtable lmt; 
   
-  
-  if (ssubdict == ""){
-
     std::cout << "Reading " << infile << "..." << std::endl;
     inputfilestream inp(infile.c_str());
     if (!inp.good()) {
       std::cerr << "Failed to open " << infile << "!\n";
       exit(1);
-    }    
-    lmt.load(inp);    
+    }
+   
     
-  }
-  else{ //load reduced LM from a binary LM file!
-    lmt.dict->generate((char *)ssubdict.c_str());
-    //eventually add OOV code so that it can be found in the table
-    lmt.dict->genoovcode(); //generate OOV code
-    //filter table from the large binary table on disk
-    lmt.filter2(infile.c_str(),1); 
-    //regenerate OOV code as dictionary has been rebuild
-    lmt.dict->genoovcode(); 
-  }
-  
+   lmt.load(inp,infile.c_str(),keep_on_disk);    
+   
   if (seval != ""){
     std::cerr << "Start Eval\n";
     std::cerr << "OOV code: " << lmt.dict->oovcode() << "\n";
@@ -197,9 +186,7 @@ int main(int argc, const char **argv)
         if (*ng.wordp(1) == lmt.dict->oovcode()) Noov++;        
         Nw++; if (lmt.bo_state()) Nbo++;                   
       }
-    
-    }
-    
+    } 
     PP=exp((-logPr * log(10.0)) /Nw);
     PPwp= PP * exp(Noov * log(10000000.0-lmt.dict->size())/Nw);
     
