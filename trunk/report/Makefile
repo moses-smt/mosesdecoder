@@ -3,6 +3,15 @@ all: report.pdf
 
 PS4PDFDIR=./ps4pdf
 
+#useful for anything other than a standard linux system
+#TEXDIR = c:/progra~1/miktex/miktex-2.4/miktex/bin
+#TEX = $(TEXDIR)/tex
+#PDFLATEX = $(TEXDIR)/pdflatex
+#BIBTEX = $(TEXDIR)/bibtex
+TEX = tex
+PDFLATEX = pdflatex
+BIBTEX = bibtex
+
 export TEXINPUTS=:$(PS4PDFDIR)
 
 # generic rule for using ps4pdf
@@ -13,8 +22,8 @@ export TEXINPUTS=:$(PS4PDFDIR)
 %.pdf: %.tex preview.sty $(PS4PDFDIR)
 	$(PS4PDFDIR)/ps4pdf $<
 	if ( grep 'bibstyle' $*.aux >/dev/null 2>/dev/null ) ; then \
-	  bibtex $*; \
-	  pdflatex $<; \
+	  $(BIBTEX) $*; \
+	  $(PDFLATEX) $<; \
 	fi
 	if ( \
 	  grep 'ref{\|tableofcontents\|\\listof\|prosper' $*.tex >/dev/null 2>/dev/null \
@@ -22,13 +31,13 @@ export TEXINPUTS=:$(PS4PDFDIR)
 	  || grep 'Citation.*undefined' $*.log >/dev/null 2>/dev/null \
 	  ); then \
 	  echo "## Reruning latex"; \
-	  pdflatex $<; \
+	  $(PDFLATEX) $<; \
 	fi
 
 
 # "installing" preview.sty, installing the TeX way
 preview.sty: preview.ins preview.dtx
-	tex preview.ins
+	$(TEX) preview.ins
 
 
 # download ps4pdf
