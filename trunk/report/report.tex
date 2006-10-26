@@ -493,7 +493,7 @@ he$_{.03}$ &  present\'o$_{.22}$  & a$_{.08}$           & $\epsilon_{.10}$& sele
 
 
 \noindent
-The  generation of  a CN  from an  ASR word-graph  \cite{mangu00} can
+The  generation of  a CN  from an  ASR word-graph  \cite{mangu:00} can
 also produce special empty-words $\epsilon$ in some columns. These
 empty-words permit to generate source sentences of different length and 
 are treated differently from regular words only at the level of feature functions.
@@ -1024,10 +1024,9 @@ the speed of the toolkit a parallelization module was developed which exploits s
 
 \begin{figure}
 \begin{center}
-\label{fig:parallel}
-\caption{The parallelization module for {\tt Moses}.}
-% \includegraphics[width=200mm]{Moses-parallel}
  \includegraphics[width=\columnwidth]{Moses-parallel}
+\caption{The parallelization module for {\tt Moses}.}
+\label{fig:parallel}
 \end{center}
  \end{figure}
  
@@ -1040,7 +1039,7 @@ All {\tt Moses} instances are assumed to run on a (possibly remote) cluster. No 
 Time to perform a full translation with one {\tt Moses} instance comprises the time to load data, which is constant, and time to translate the input, which is proportional to its size.
 The parallelization module requires an additional time to access the cluster, which is strictly related to the real load of the cluster itself and hardly forecastable.
 Time to split the input and merge the output can be considered negligible with respect to the translation time.
-Moreover, an ending delay can be observe because the merging module should wait that all decoders have completed their translations, and this does not necessarily happen at the same time. A good splitting policy which allows a balanced translation time among all decoders,  improves the effciency of the whole parallelization module.
+Moreover, an "ending" delay can be observed because the merging module should wait that all decoders have completed their translations, and this does not necessarily happen at the same time. A good splitting policy which allows a balanced translation time among all decoders,  improves the effciency of the whole parallelization module.
 
 We tested the gain in time that  the parallelization module can provide to the toolkit on the Spanish-English EuroParl task. 3 input sets were created of 10, 100 1000 sentences and translated using a standalone  {\tt Moses}, and the parallelization module exploiting difference number of {\tt Moses} instances (1, 5, 10, 20).
 Decoders ran on the 18-processor CLSP cluster. As in the real situation, its load was not in control, and hence the immediate availability of the processors was not assured. Table~\ref{tbl:parallel-time} reports the average translation times for all conditions.
@@ -1050,7 +1049,7 @@ Some considerations can be drawn by inspecting these figures.
 \item Parallelization is uneffective if source input is small, because time to access the cluster becomes prevalent.
 \item Trivially, there is no reason of using the parallelization module if just one processor is required. 
 \item Parallelization is beneficial if more instances of {\tt Moses} are exploited.
-\item The gain in time is not exactly proportional to the number of decoder instances, mainly due to the effect  of ending delay.
+\item The gain in time is not exactly proportional to the number of decoder instances, mainly due to the effect  of "ending" delay.
 \end{itemize}
 
 
@@ -1075,11 +1074,10 @@ In conclusion, the choice of the number of splits $N$ is essential for a good ef
 \section{Tuning}
 \label{merttuning}
 %{\sc Nicola Bertoldi}
-
 \newcommand{\e}{{\bf e}}
 \newcommand{\f}{{\bf f}}
 \label{sec:tuning}
-As described in Section (reference to the correct section), {\tt Moses} decoder relies on a log-linear model to search for the best translation $\e^*$ given an input string $\f$:
+As described in Section~\ref{sec:slt}, {\tt Moses} decoder relies on a log-linear model to search for the best translation $\e^*$ given an input string $\f$:
 \begin{equation}
 \e^* = \arg\max_{\e}  \Pr(\e \mid \f) =\arg\max_{\e}  p_{\lambda}(\e \mid \f) = \arg\max_{\e} \sum_i \lambda_i h_i(\e,\f)
 \end{equation}
@@ -1091,6 +1089,9 @@ Some features are  based on statistical models which are estimated on specific t
 
 Feature weights are useful to balance the (possibly very different) ranges of the feature functions, and to weigh their relative relevance. The most common way to estimate the weights of a log-linear model is called Minimum Error Rate Training (MERT). It consists in an automatic procedure which search for the weights minimizing translation errors on a development set.
 
+In this section we assume that the input type is text string, but trivially there is no matter if input is a Confusion Network, because MERT just estimates weights of the log-linear combination regardless the type and the number of features.
+
+
 Let $\f$ be a source sentence and ${\bf ref}$ the set of its reference translations; 
 let $\bf Err(\e;ref)$ be an error function which measures the quality of a given translation $\e$ with respect to the references ${\bf ref}$. The MERT paradigm can be formally stated as follows:
 
@@ -1101,15 +1102,15 @@ let $\bf Err(\e;ref)$ be an error function which measures the quality of a given
 \end{eqnarray}
 where $\e^*(\lambda)$ is the best translation found by the decoder exploiting a given set of weights $\lambda$.
 
-The error function needs to be computed automatically from $\e$ and ${\bf ref}$ without human intervention. Word Error Rate (WER), Position Independent Word Error Rate (PER), (100-BLEU score), -NIST score, or any combination of them are good candidates as automatic scoring functions.
+The error function needs to be computed automatically from $\e$ and ${\bf ref}$ without human intervention. Word Error Rate (WER), Position Independent Word Error Rate (PER), (100-BLEU score), -NIST score, or any combination of them are good candidates as automatic scoring functions. Notice that MERT minimizes an error function so quality measures need to be transformed accordingly.
 
 An error function is rarely mathematically sound, and hence an exact solution of the previous problem is not usually known. Hence, algorithms like the gradient descent or the downhill simplex, are exploited which iteratively approximate the optimal solution. Unfortunately, these approximate algorithms just assure to find a local optimum.
 
 \begin{figure}
 \begin{center}
-\label{fig:MERT}
-\caption{}
  \includegraphics[width=\columnwidth]{MER-ext}
+\caption{An high-level picture of the Minimum Error Rate Training module for the optimization of the feature weights.}
+\label{fig:MERT}
 \end{center}
  \end{figure}
  
@@ -1139,11 +1140,13 @@ and the best-scored hypothesis is extracted ({\tt Extractor});
 The inner loop ends when the error measure does not improve anymore.
 As the {\tt Optimizer} provides a local optimum for the weights, and strongly depends on the starting point $\bar \lambda$, the inner loop starts over several  times with different choices of $\bar \lambda$. The first time the weights $\lambda^t$ used by {\tt Moses} in the last outer loop are applied; the next times random sets are exploited. The best set of weights are then provided to the outer loop again.
 
-Instead of standard approximate algorithms like the gradient descent or the downhill simplex, in the workshop we employed an {\tt Optimizer} which was developed by XXXX (should we cite the guy form UMaryland?) and based on the idea of \cite{xx} (Och's paper). The algorithm strongly relies on the availability of a finite list of translation alternatives, because this allows a discretization of the $r$-dimensional space of the weights ($r$ is the number of weights). This makes the search of the optimum  faster. The algorithm iteratively optimizes one weight at a time.
+Instead of standard approximate algorithms like the gradient descent or the downhill simplex, in the workshop we employed an {\tt Optimizer} based on the idea proposed by \cite{och:03} and developed by David Chiang (USC-ISI). The algorithm strongly relies on the availability of a finite list of translation alternatives, because this allows a discretization of the $r$-dimensional space of the weights ($r$ is the number of weights). This makes the search of the optimum  faster. The algorithm iteratively optimizes one weight at a time.
 
-The {\tt Scorer} employed in the workshop computes BLEU score (version xxx).
+The {\tt Scorer} employed in the workshop computes BLEU score.
 
-The time spent for each iteration of the outer and inner loops is basically proportional to the size of the input and the amount of translation hypotheses, respectively.
+The time spent for each iteration of the outer is basically proportional to the size of the input  because the translation of the whole input is required. The time for each iteration of the inner loop is proportional to the amount of translation hypotheses because all of them have to be re-scored and evaluated,
+
+
 
 \section{Efficient Language Model Handling}
 %{\sc Marcello Federico}
@@ -1181,9 +1184,9 @@ quantizing both back-off weights and probabilities.
 
 \begin{figure}
 \begin{center}
-\label{fig:LM-struct}
-\caption{Data structure for storing n-gram language models.}
  \includegraphics[width=\columnwidth]{marcello-lmstruct}
+\caption{Data structure for storing n-gram language models.}
+\label{fig:LM-struct}
 \end{center}
  \end{figure}
 
@@ -1236,9 +1239,9 @@ searched in the data in order to limit the number of binary searches performed.
 
 \begin{figure}
 \begin{center}
-\label{fig:LM-calls}
-\caption{LM calls during decoding of a sentence by Moses.}
  \includegraphics[width=\columnwidth]{marcello-lmcalls}
+\caption{LM calls during decoding of a sentence by Moses.}
+\label{fig:LM-calls}
 \end{center}
  \end{figure}
 
@@ -2693,6 +2696,165 @@ University for making this workshop possible.
 
 \section{Tuning}
 {\sc Nicola Bertoldi}
+\label{sec:exp-tuning}
+As stated in Section~\ref{sec:tuning}, training of {\tt Moses} also requires the optimization of the feature weights, which is performed through the there described MERT. We analized how much the experimental set up affects the effectiveness of this procedure. In particular, the amount of translation hypotheses extracted in each outer loop and the size of the development set are taken into account.
+
+Experiments were carried out on two tasks, namely the translation of proceedings of 
+the European Parliament from German into English, and the translation  of  speeches from the  European Parliament Plenary Sessions (EPPS) from Spanish to English.
+
+\paragraph{The German-English EuroParl task}
+\label{sec:ge-en-europarl-task}
+EuroParl \cite{koehn:europarl:mtsummit:2005} is a collection of parallel text in 11 languages from the proceedings of the European Parliament. We worked on the German-English language pair. Training data consist of 751 K sentence pairs. 2000 sentences are provided both for parameter tuning and for testing.  Statistics about training data, development and test sets are reported in Table~\ref{tbl:ge-en-europarl-data}
+Sentences in the development and test sets are provided with just 1 reference translation each.  
+
+\begin{table}[th]
+\begin{center}
+\begin{tabular}{lrr|rr|rrr}
+        &  \multicolumn{2}{c|}{Train}   &  \multicolumn{2}{c|}{Dev}    &  \multicolumn{2}{c}{Test}\\
+ \hline
+        &  Ger   &   Eng  &  Ger   &   Eng  &  Ger   &   Eng     \\
+ \hline
+Sentences    & \multicolumn{2}{c|}{751 K} & \multicolumn{2}{c|}{2,000} & \multicolumn{2}{c}{2,000}\\
+Words & 15 M & 16 M & 55,136 & 58,652 & 54,247 & 57,945\\
+Vocabulary  & 195 K & 66 K & 8,796 & 6,114& 8,668 & 6,054&\\
+Phrase Pairs  & \multicolumn{2}{c|}{12 M}\\
+Phrases & 9 M & 8 M \\
+\end{tabular}
+\caption{Statistics of the German-English EuroParl task. Word counts of  English dev and test sets refer
+ the first reference translation. }
+\begin{center}
+\end{center}
+\label{tbl:ge-en-europarl-data}
+\end{center}
+\end{table}
+
+Models employed in the decoder were estimated with the {\tt Moses} toolkit. A 3-gram target language model was used.
+
+\paragraph{The EPPS task}
+\label{sec:epps-task}
+The EPPS task consists in translating speeches from the  European Parliament  from Spanish to English, This task was organized in the TC-STAR 2005\footnote{http://www.tc-star.org} Evaluation Campaign. 
+
+Speeches included in the development and test sets are automatically recognized by LIMSI, France, which kindly provided the word lattices, and Confusion Networks were extracted from them using the {\tt lattice-tool} software of the {\tt SRILM Toolkit} \cite{stolcke:02}. Instead, training data for the EPPS task consists of the Final Text Editions of the speeches, which are significantly human-revised versions of the simultaneous transcriptions.
+Statistics about the training, development and testing  data are reported in Table~\ref{tbl:epps-data}.  
+Sentences in the development and test sets are provided with two reference translations each.  
+
+
+\begin{table}[th]
+\begin{center}
+\begin{tabular}{lrr|rr|rrr}
+        &  \multicolumn{2}{c|}{Train}   &  \multicolumn{2}{c|}{Dev}    &  \multicolumn{2}{c}{Test}\\
+ \hline
+        &  Spa   &   Eng  &  Spa   &   Eng  &  Spa   &   Eng     \\
+ \hline
+Sentences    &   \multicolumn{2}{c|}{1,308 K} & \multicolumn{2}{c|}{2,643} & \multicolumn{2}{c}{1,073}\\
+Words & 37 M & 36 M & 20,384 & 20,579 & 18,890 & 18,758\\
+Vocabulary   & 143 K & 110 K & 2,883 &  2,362  & 3,139 & 2,567 \\
+Phrase Pairs   & \multicolumn{2}{c|}{83 M}\\
+Phrases   & 48 M & 44 M\\
+\end{tabular}
+\caption{Statistics of the EPPS speech translation task. Word counts of  dev and test sets sets refer
+to human transcriptions (Spanish) and the first reference translation (English). }
+\begin{center}
+\end{center}
+\label{tbl:epps-data}
+\end{center}
+\end{table}
+
+Models were estimated with the {\tt Moses} training tools, apart from the 4-gram target LM which was trained with the IRST LM Toolkit on 47 M running words.
+
+
+\paragraph{MERT vs. amount of translation alternatives}
+First, we tested whether and how the amount of translation alternatives generated by {\tt Moses} impacts on the tuning. For this experiment the EuroParl task was selected. Several MERTs were performed constraining {\tt Moses} to generate a different number of translations in each outer loop ($N=100, 200, 400, 800$). The sets of weights obtained after each iteration of the outer loop are then used to translate the test set. Figure~\ref{fig:MERT-epps-nbest} shows the achieved BLEU score in the different conditions.
+
+\begin{figure}[ht]
+\begin{center}
+\label{fig:MERT-epps-nbest}
+ \includegraphics[width=\columnwidth]{MERT-nbest}
+\caption{Performance (BLEU score) achieved on the EuroParl test set using feature weights optimized exploiting an increasing number of translation alternatives of the development set.}
+\end{center}
+ \end{figure}
+
+We observe that convergence is reached after few iterations (5-6). This fact is positive because it allows to run {\tt Moses} only few times.
+
+The weights obtained in the first iterations seem to award the use large $N$, but this effects vanishes very soon because the set of translation alternatives is continuously enlarged.
+
+The final sets of weights perform very similar for each experimental condition; this is also positive because a limited number of $N$-best can be extracted, speeding up both the translation process and the inner loop.
+
+
+\paragraph{MERT vs. amount of translation alternatives}
+We also tested the impact of the size of the development set on the MERT procedure in both EuroParl and EPPS tasks. 
+From the  development set of the EuroParl we extracted 4 subsets of 100, 200 400 and 800 sentences, respectively. 529 sentences are randomly selected from the EPPS development set .
+The sets of weights obtained after each iteration of the outer loop are then used to translate the corresponding test sets.
+
+\begin{figure}
+\begin{center}
+\label{fig:MERT-europarl-devsize}
+ \includegraphics[width=\columnwidth]{europarl-devsize}
+\caption{Performance (BLEU score) achieved on the EuroParl test set using feature weights optimized on  development sets of increasing size.}
+\end{center}
+ \end{figure}
+
+
+\begin{figure}
+\begin{center}
+\label{fig:MERT-epps-devsize}
+ \includegraphics[width=\columnwidth]{epps-cn-devsize}
+\caption{Performance (BLEU score) achieved on the EPPS test set using feature weights optimized on  development sets of increasing size.}
+\end{center}
+ \end{figure}
+
+Figures~\ref{fig:MERT-europarl-devsize} and \ref{fig:MERT-epps-devsize} show the achieved BLEU score in the different conditions for the EuroParl and EPPS tasks, respectively.
+
+Plots reveal that more stable and better results are obtained with weights optimized on larger dev set; moreover, EuroParl experiments show that MERT with larger dev set tends to end in less iterations.
+In general, these experiments show that 2 iterations give the biggest relative  improvement and that next iterations, which slightly improve on the dev set, are risky on the test set.
+
+This behavior is explained by the tendency of MERT procedure to overfit the development data. Possible ways to limit the overfitting problems consists in enlarging the dev set  and ending the tuning after few iterations.
+The former solution increases the time of tuning, while the latter make it faster and more robust. with respect to differences between dev and test sets. It is also trivial to stress that the development  data should be as close as possible to the test domain.
+
+
+\paragraph{Comparison of different optimization algorithm} We also compared our optimization algorithm against the downhill simplex algorithm. For this experiment we employed {\tt Moses} in the EPPS task.
+
+Table~\ref{tbl:MERT-epps-algorithm} reports the increment of BLEU score achieved on the development and test sets after MERT; it shows that our approach is definitively competitive with (and slightly better than) the widely-used downhill simplex algorithm. The number of iterations to converge are similar, too.
+Moreover, the improvements achieved on the dev and test sets are comparable.
+
+
+ \begin{table}[ht]
+\begin{center}
+\label{tbl:MERT-epps-algorithm}
+\begin{tabular}{l|ccc}
+algorithm               & iteration & \multicolumn{2}{c}{$\Delta$ BLEU}\\
+                                &                & dev & test\\
+\hline
+CLSP-WS              & 6 & +3.2 & +3.6 \\
+downhill simplex  & 7 & +2.9  & +3.4\\
+\end{tabular}
+\caption{Performance improvement (absolute BLEU score) achieved on the EPPS task using two different optimization algorithm.}
+\end{center}
+\end{table}
+
+\paragraph{MERT vs. different input types} Finally, we performed two separate MERT for the two input types handled by {\tt Moses}, namely text and Confusion Networks. The human transcriptions ({\tt verbatim}) and the CNs of the development data of the EPPS task were exploited. Weights optimized in the {\tt verbatim} condition were applied to translate both human transcriptions ({\tt verbatim}), the best automatic transcriptions ({\tt 1-best}),  and the consensus decoding transcriptions ({\tt 1-best-CN}) extracted from the CNs \cite{mangu:00} by taking the most probable words of  each column. Weights optimized in the {\tt CN} condition were applied to the CNs of the test set.
+The increments achieved on the development and test data are reported in Table~\ref{tbl:MERT-epps-summary}.
+
+
+ \begin{table}[ht]
+\begin{center}
+\label{tbl:MERT-epps-summary}
+\begin{tabular}{l|cc}
+input                    &\multicolumn{2}{c}{$\Delta$ BLEU}\\
+                             & dev & test\\
+\hline
+{\tt verbatim}  &  +1.9 & +2.1\\
+{\tt 1best}        &  +2.1 & +2.2\\
+{\tt 1best-CN} &  +1.6 & +2.2\\
+\hline
+{\tt CN}            &  +3.2 & +3.6\\
+\end{tabular}
+\caption{Performance improvement  (absolute BLEU score) achieved on the EPPS task using different input types.}
+\end{center}
+\end{table}
+
+We observe that improvement on the test set ranges from 2.1 to 3.6 absolute BLEU points, and that it is consistent between dev and test. The bigger increase for the CNs is probably due to a choice of the initial set of weights performing worse than the corresponding set for the {\tt verbatim} condition.
+
 
 \section{Linguistic Information for Word Alignment}
 %{\sc Alexandra Constantin}
