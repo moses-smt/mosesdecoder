@@ -10,6 +10,7 @@
 \usepackage{epic,eepic}
 \usepackage{boxedminipage}
 \usepackage{fancybox}
+\usepackage{subfig}
 \usepackage[square]{natbib}
 \usepackage{ps4pdf}
 \usepackage{picins} % pictures next to paragraphs, Ondrej's part
@@ -411,7 +412,8 @@ resulted in an extension of  the standard text decoder.
 \begin{center}
 \label{fig:wer-bleu}
 \caption{Relationship between BLEU score of target strings and word-error-rate (WER) of source strings. 
-Source strings are transcriptions of parliamentary speeches produced by a speech recognition system (To be checked) .}\includegraphics[width=10cm]{marcello-bleu-wer} 
+Source strings are transcriptions of parliamentary speeches produced by a speech recognition system (To be checked) .}
+\includegraphics[width=10cm]{marcello-bleu-wer} 
 \end{center}
 \end{figure}
 
@@ -669,7 +671,7 @@ By adding factored translation to conventional phrase based decoding we hope to 
 
 Resource consumption is of great importance to researchers as it often determine whether or not experiments can be run or what compromises needs to be taken. We therefore also benchmarked resource usage against another phrase-based decoder, Pharaoh, as well as other decoders, to ensure that they were comparable in like-for-like decoding.\\
 
-It is essential that features can be easily added, changed or replace, and that the decoder can be used as a âtoolkitâ in ways not originally envisaged. We followed strict object oriented methodology; all functionality was abstracted into classes which can be more readily changed and extended. For example, we have two implementations of single factor language models which can be used depending on the functionality and licensing terms required. Other implementations for very large and distributed LMs are in the pipeline and can easily be integrated into Moses. The framework also allows for factored LMs; a joint factor and skipping LM are currently available.\\
+It is essential that features can be easily added, changed or replace, and that the decoder can be used as a Ã¢Â€Â˜toolkitÃ¢Â€Â™ in ways not originally envisaged. We followed strict object oriented methodology; all functionality was abstracted into classes which can be more readily changed and extended. For example, we have two implementations of single factor language models which can be used depending on the functionality and licensing terms required. Other implementations for very large and distributed LMs are in the pipeline and can easily be integrated into Moses. The framework also allows for factored LMs; a joint factor and skipping LM are currently available.\\
 \begin{center}
 \begin{figure}[h]
 \centering
@@ -727,7 +729,7 @@ Its outline is shown below\\
 \indent \indent for each hypothesis in stack\\
 \indent \indent \indent ProcessOneHypothesis()\\
 \end{tt}\\
-Each contiguous word coverage (âspanâ) of the source sentence is analysed in\\ 
+Each contiguous word coverage (Ã¢Â€Â˜spanÃ¢Â€Â™) of the source sentence is analysed in\\ 
 \indent {\tt CreateTranslationOptions() }\\
 \\
 and translations are created for that span. Then each hypothesis in each stack is processed in a loop. This loop starts with the stack where nothing has been translated which has been initialised with one empty hypothesis.
@@ -756,9 +758,9 @@ which is out follows\\
 \begin{tt}
 \indent	ProcessInitialTranslation()\\
 \indent	for every subequent decoding step\\
-\indent \indent	if step is âTranslationâ\\
+\indent \indent	if step is Ã¢Â€Â˜TranslationÃ¢Â€Â™\\
 \indent \indent \indent	DecodeStepTranslation::Process()\\
-\indent \indent else if step is âGenerationâ\\
+\indent \indent else if step is Ã¢Â€Â˜GenerationÃ¢Â€Â™\\
 \indent \indent \indent DecodeStepGeneration::Process()\\
 \indent Store translation options for use by decoder\\
 \end{tt}
@@ -770,7 +772,7 @@ However, each decoding step, whether translation or generation, is a subclass of
 so that the correct Process() is selected by polymorphism rather than using if statements as outlined above.
 \subsection{Unknown Word Processing}
 After translation options have been created for all contiguous spans, some positions may not have any translation options which covers it. In these cases, CreateTranslationOptionsForRange() is called again but the table limits on phrase and generation tables are ignored. \\
-If this still fails to cover the position, then a new target word is create by copying the string for each factor from the untranslatable source word, or the string âUNKâ if the source factor is null.\\
+If this still fails to cover the position, then a new target word is create by copying the string for each factor from the untranslatable source word, or the string Ã¢Â€Â˜UNKÃ¢Â€Â™ if the source factor is null.\\
 \begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
@@ -994,7 +996,7 @@ If new regression tests have new data dependencies, the test data
 will need to be updated.  For more information on this workflow,
 refer to the previous section.
 
-\subsection{Accessability}
+\subsection{Accessibility}
 The source code for the Moses project is housed at Sourceforge.net
 in a subversion repository.  The URL for the project is:
 
@@ -1248,7 +1250,7 @@ We describe some statistics generally used to measure error and present two erro
 \subsection{Error Measurement}
 There are three common measures of translation error. BiLingual Evaluation Understudy (BLEU) (\cite{bleu}), the most common, measures matches of short phrases between the translated and reference text as well as the difference in the lengths of the reference and output. BLEU can be applied to multiple references, but in a way such that BLEU scores using different numbers of references are not comparable.
 
-Word Error Rate (WER) measures the number of matching output and reference words given that if output word $i$ is noted as matching reference word $j$, output word $i + 1$ cannot match any reference word before $j$; i.e., word ordering is preserved in both texts. Such a mapping isn't unique, so WER is specified using the maximum attainable number of single-word matches. This number is computable by some simple dynamic programming. [[[Ought I to elaborate here?]]]
+Word Error Rate (WER) measures the number of matching output and reference words given that if output word $i$ is noted as matching reference word $j$, output word $i + 1$ cannot match any reference word before $j$; i.e., word ordering is preserved in both texts. Such a mapping isn't unique, so WER is specified using the maximum attainable number of single-word matches. This number is computable by some simple dynamic programming.
 
 Position-Independent Word Error Rate (PWER) simply counts matching output and reference words regardless of their order in the text. This allows for rearrangement of logical units of text, but allows a system to get away with poor rearrangement of function words.
 
@@ -1269,8 +1271,8 @@ The overall view for a corpus shows a list of files associated with a given corp
 \centering
 \caption{Sample output of corpus-statistics tool.}
 \label{fig:sentence_by_sentence_screenshot}
-%\subfloat[detailed view of sentences]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=6in]{}\hspace{.05in}\vspace{.05in}}} \newline
-%\subfloat[overall corpus view]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=6in]{}\hspace{.05in}\vspace{.05in}}}
+\subfloat[detailed view of sentences]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=6in]{images/sentence-by-sentence_multiref_screenshot.png}\hspace{.05in}\vspace{.05in}}} \newline
+\subfloat[overall corpus view]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=6in]{images/corpus_overview_screenshot_de-en.png}\hspace{.05in}\vspace{.05in}}}
 \end{figure}
 
 A second tool developed during the workshop shows the mapping of individual source to output phrases (boxes of the same color on the two lines in figure \ref{fig:phrases_used_screenshot}) and gives the average source phrase length used. This statistic tells us how much use is being made of the translation model's capabilities. There's no need to take the time to tabulate all phrases of length 10, say, in the training source text if we're pretty sure that at translation time no source phrase longer than 4 words will be chosen.
@@ -1279,7 +1281,7 @@ A second tool developed during the workshop shows the mapping of individual sour
 \centering
 \caption{Sample output of phrase-detail tool.}
 \label{fig:phrases_used_screenshot}
-%\subfloat[]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=5in]{}\hspace{.05in}\vspace{.05in}}}
+\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=5in]{images/show-phrases-used_crossover_screenshot.png}\hspace{.05in}\vspace{.05in}}
 \end{figure}
 
 %{\sc Evan Herbst}
@@ -2421,8 +2423,8 @@ would be necessary to describe the linguistic reality more adequately.
 %<f>\v{r}ekl<MDl src="a">\v{r}\'{\i}ci<MDt src="a">VpYS---XR-AA---<A>Pred<r>9<g>0
 %<f>mluv\v{c}\'{\i}<MDl src="a">mluv\v{c}\'{\i}<MDt src="a">NNMS1-----A----<A>Sb<r>10<g>9
 
-%poptávka trvale stoupá za podpory prospotřebitelské vládní politiky , řekl mluvčí asociace .
-%MEMBER:subst+1 --- HEAD:VB:stoupat_:T MEMBER:Rza-1+2 --- --- --- --- MEMBER:Z- HEAD:Vp:říci MEMBER:subst+1 --- PUNCT:.
+%poptÃ¡vka trvale stoupÃ¡ za podpory prospotÅ™ebitelskÃ© vlÃ¡dnÃ­ politiky , Å™ekl mluvÄ�Ã­ asociace .
+%MEMBER:subst+1 --- HEAD:VB:stoupat_:T MEMBER:Rza-1+2 --- --- --- --- MEMBER:Z- HEAD:Vp:Å™Ã­ci MEMBER:subst+1 --- PUNCT:.
 
 %<f>\broken{Popt\'{a}vka\\MEMBER:subst+1}<A>Sb<r>1<g>3
 %<f>\broken{trvale\\---}<A>Adv<r>2<g>3
@@ -2432,7 +2434,7 @@ would be necessary to describe the linguistic reality more adequately.
 %<f>\broken{vl\'{a}dn\'{\i}\\---}<A>Atr<r>6<g>7
 %<f>\broken{politiky\\---}<A>Atr<r>7<g>5
 %<f>\broken{,\\MEMBER:Z-}<A>AuxX<r>8<g>3
-%<f>\broken{\v{r}ekl\\HEAD:Vp:říci}<A>Pred<r>9<g>0
+%<f>\broken{\v{r}ekl\\HEAD:Vp:Å™Ã­ci}<A>Pred<r>9<g>0
 %<f>\broken{mluv\v{c}\'{\i}\\MEMBER:subst+1}<A>Sb<r>10<g>9
 %<f>\broken{.\\PUNCT:.}<A>AuxK<r>11<g>0
 
