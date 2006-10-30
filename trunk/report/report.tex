@@ -2796,15 +2796,20 @@ confusion network & 21.0  \\
 
 	
 \subsection{Results for the EPPS Task}
-Additional experiments were carried out on the Spanish-to-English EPPS (European Parliament Plenary Sessions) task.
-The training data was collected within the TC-Star project\footnote{http://www.tc-star.org} and is a superset of the Spanish--English EuroParl corpus.
-Statistics for this task are reported in Table~\ref{tbl:epps-data}.  
+Additional experiments for confusion network decoding were carried out on the Spanish-to-English EPPS (European Parliament Plenary Sessions) task.
+The training data was collected within the TC-Star project\footnote{http://www.tc-star.org} and is a superset of the Spanish--English EuroParl corpus (\cite{koehn:europarl:mtsummit:2005}).
+
+
+\subsubsection{Corpus Statistics}
+Statistics for this task are reported in Table~\ref{tbl:epps-corpstat}.  
 The bilingual training corpus consists of about 1.3\,M sentence pairs with about 36\,M running words in each language.
 The training was performed with the {\tt Moses} training tools, while training of the 4-gram target LM was performed with the IRST LM Toolkit.
 Sentences in the dev and test sets are provided with two reference translations each.  
 \begin{table}[t]
 \begin{center}
-\caption{Corpus statistics for the Spanish-English EPPS task. For development and test sets, figures related to Spanish refer to {\tt verbatim} input type, whereas figures related to English refer to the reference translations.} \label{tbl:epps-data}
+\caption{Corpus statistics for the Spanish-English EPPS task.
+% For development and test sets, figures related to Spanish refer to {\tt verbatim} input type, whereas figures related to English refer to the reference translations.
+} \label{tbl:epps-corpstat}
 \begin{tabular}{|l|l|r|r|}
  \hline
        &              &  Spanish   &   English     \\
@@ -2822,25 +2827,29 @@ Train  & Sentences    & \multicolumn{2}{c|}{1.3\,M}\\
 Dev    & Utterances    &   \multicolumn{2}{c|}{2\,643} \\
  \cline{2-4}
        & Words& 20\,384 & 20\,579 \\ 
-\cline{2-4}
-       & Vocabulary   & 2\,883 &  2\,362 \\
+%\cline{2-4}
+%       & Vocabulary   & 2\,883 &  2\,362 \\
  \hline
 Test   & Utterances    & \multicolumn{2}{c|}{1\,073}  \\
  \cline{2-4}
        & Words& 18\,890 & 18\,758 \\
  \cline{2-4}
-       & Vocabulary   & 3\,139 & 2\,567 \\
- \cline{2-4}
+ %      & Vocabulary   & 3\,139 & 2\,567 \\
+ %\cline{2-4}
 %       & OOV Words & 145 & 44\\
  \hline
 \end{tabular}
 \end{center}
 \end{table}
 
+
+The ASR word lattices  were  kindly provided by CNRS-LIMSI, France.
+The confusion networks and $N$-best lists were extracted using the {\tt lattice-tool} included in the SRILM Toolkit (\cite{stolcke:02}). 
+%The consensus decoding transcriptions  were also extracted from the confusion networks, by taking the most probable words from  each column.
 The statistics of the confusion networks for the Spanish--English EPPS task are presented in Table~\ref{tbl:epps-cn}.
 The average depth of the confusion networks, i.e. the average number of alternatives per position, is 2.8 for the development set and 2.7 for the test set.
-Note that the maximum depth is much larger, up to 165 for the development set.
-Also, the average number of paths through the confusion networks is huge. 
+Note that the maximum depth is much larger, e.g. up to 165 for the development set.
+Also, the average number of paths in the confusion networks is huge. 
 
 \begin{table}[t]	
 	\caption{Statistics of the confusion networks for the development and test sets of the Spanish--English EPPS task.}\label{tbl:epps-cn}
@@ -2858,110 +2867,76 @@ Also, the average number of paths through the confusion networks is huge.
 	\end{center}
 \end{table}
 
-\subsubsection{Data Preparation}
-\label{sec:data-preparation}
-\noindent
-Word lattices  were  kindly provided by CNRS-LIMSI, France.
-Confusion Networks and $N$-best lists were extracted by means of {\tt lattice-tool} included in the 
-SRILM Toolkit \cite{stolcke:02}. The consensus decoding transcriptions  were also extracted from the confusion networks, by taking the most probable words from  each column.
-Table~\ref{tbl:epps-results} reports the average  ASR Word Error Rate (WER) achieved by the oracles of the confusion networks and the lattices, the consensus decoding transcriptions, and the $N$-best lists. Furthermore, the human transcriptions themselves were translated for the sake of comparison.
 
 \subsubsection{Parameter Tuning}
-Feature  weights of all presented models were estimated by applying a minimum-error-rate training
-procedure which tries to maximize the BLEU score over the dev set.  A special procedure
-was used for tuning the weights of the $N$-best translation system. First, a single best decoder was
-optimized over the dev set. Then $M$-best translations were generated for each $N$-best input of the
-dev set. Hence, all $N$x$M$ translations were merged and a new log-linear model  including the ASR additional features was trained. 
+The feature  weights of all models were optimized using minimum-error-rate training (\cite{och:03}) which tries to maximize the BLEU score on the development set.  
+A special procedure was used for tuning the weights of the $N$-best translation system. 
+First, a single best decoder was optimized over the development set. 
+Then $M$-best translations were generated for each $N$-best input of the development set. 
+Hence, all $N$x$M$ translations were merged and a new log-linear model  including the ASR additional features was trained. 
 
 
 \subsubsection{Translation Results}
 
 \begin{table}[t]
-\caption{Performance achieved by {\tt Moses} over different inputs.}
+\caption{Translation performance achieved by {\tt Moses} for different input types for the test set of the Spanish--English EPPS task.}
 \begin{center}
-\begin{tabular}{lr|rrr}
- \hline
-\multicolumn{2}{c|}{Input} &\multicolumn{3}{c}{Output}  \\
+\begin{tabular}{|l|l||c||ccc|}
+ %\hline
+%\multicolumn{2}{|c|}{Input} &\multicolumn{3}{c|}{MT Quality}  \\
 \hline
-type                & WER     & BLEU 	& PER 	& WER\\
-\hline
-{\tt verbatim}   & 0.0       & 48.00 & 31.19 & 40.96 \\
- \hline
-{\tt wg-oracle} &7.48     & 44.68 & 33.55 & 43.74 \\ 
-{\tt cn-oracle}  &8.45     & 44.12 & 34.37 & 44.95 \\
- \hline
- 
-{\tt 1-best}        & 22.41 & 37.57 & 39.24 & 50.01 \\
-{\tt cons-dec}  & 23.30  & 36.98 & 39.17 & 49.98  \\
- \hline
-{\tt cn}               &8.45     & 39.17 & 38.64 & 49.52 \\
- \hline
-{\tt 1-best}        & 22.41 & 37.57 & 39.24 & 50.01 \\
+\multicolumn{2}{|c||}{Input Type}                & ASR WER [\%]     & BLEU [\%] 	& PER [\%] 	& WER [\%] \\
+\hline \hline
+\multicolumn{2}{|c||}{{\tt verbatim}}   & \phantom{0}0.00      & 48.00 & 31.19 & 40.96 \\
+ \hline \hline
+%{\tt oracle from wg} &\phantom{0}7.48     & 44.68 & 33.55 & 43.74 \\ 
+%{\tt \phantom{oracle from} cn}  &\phantom{0}8.45     & 44.12 & 34.37 & 44.95 \\
+ %\hline
+ASR & {\tt 1-best, wg}        & 22.41 & 37.57 & 39.24 & 50.01 \\
+&{\tt \phantom{1-best,} cn}  & 23.30  & 36.98 & 39.17 & 49.98  \\
+ \cline{2-6}
+&{\tt cn}               &\phantom{0}8.45     & 39.17 & 38.64 & 49.52 \\
+ \cline{2-6}
+&{\tt N-best, N=1}        & 22.41 & 37.57 & 39.24 & 50.01 \\
 %{\tt 5-best}*      & 18.61 & 38.96 & 38.78 & 49.40 \\
-{\tt 5-best}        & 18.61 & 38.68 & 38.55 & 49.33 \\
+&{\tt \phantom{N-best,} N=5}        & 18.61 & 38.68 & 38.55 & 49.33 \\
 %{\tt 10-best}*    & 17.12 & 38.71 & 38.74 & 49.29 \\
-{\tt 10-best}      & 17.12 & 38.61 & 38.69 & 49.46 \\
+&{\tt \phantom{N-best,} N=10}      & 17.12 & 38.61 & 38.69 & 49.46 \\
  \hline
  \end{tabular}
 \end{center}
 \label{tbl:epps-results}
 \end{table}
 
-\noindent
-Table~\ref{tbl:epps-results} reports BLEU score, PER and WER for a set of experiments we ran to evaluate the quality of {\tt Moses} decoder. Optimization of the decoder was performed separately for each input type, as described in the previous section. 
 
-\noindent
-The comparison of scores achieved on the text inputs ({\tt verbatim}, {\tt wg-oracle}, {\tt cn-oracle}, {\tt 1-best}, and {\tt cons-dec})
-shows a strong correlation between quality of the transcriptions given by the ASR WER and quality of the translation given by the MT automatic scores.
+In Table~\ref{tbl:epps-results}, we report the translation performance for different input types:
+\begin{itemize}
+\item {\tt verbatim}: These are the translation results for the correct transcriptions of the speech signal. Therefore, the ASR word error rate is 0.0\% for this input type.
+%\item {\tt oracle}: These are the translation results for the best ASR transcriptions contained in the word graphs ({\tt wg}) and the confusion networks ({\tt cn}), respectively. 
+\item {\tt 1-best}: Here, we have translated the single-best ASR transcription of the word graphs ({\tt wg}) and the confusion networks ({\tt cn}), respectively.
+\item {\tt cn}: These are the results for decoding the full confusion networks.
+\item {\tt N-best}: These are the results for $N$-best decoding with $N=1,5,10$.
+\end{itemize}
+The optimization of the system was performed separately for each input type, as described before.
+In addition to the translation results, we also report the ASR word error rate.
+Note that for the confusion network ({\tt cn}) and the $N$-best lists ({\tt N-best}) input types,  we reported the ASR WER of the best transcription contained in the confusion network or the $N$-best lists, respectively.
+The comparison of the scores for the different input conditions %on the text inputs ({\tt verbatim}, {\tt wg-oracle}, {\tt cn-oracle}, {\tt 1-best}, and {\tt cons-dec})
+shows a strong correlation between quality of the transcriptions given by the ASR WER and quality of the translation given by the MT scores.
 
-\noindent
-The translation of confusion networks ({\tt cn}) outperforms the translation of all  $N$-best lists with respect to BLEU, and only the translation of 1-best with respect to PER and WER. This could be due to the fact that {\tt Moses} was optimized for BLEU.
+Assuming a perfect ASR system, i.e. in the {\tt verbatim} condition, we achieve a BLEU score of 48\%.
+Comparing this to the ASR input conditions, we observe a degradation of about 10 BLEU points in the case of ASR input.
 
-\noindent
-Experimentally, the ratio between decoding time for translating {\tt cn} and {\tt 1-best} is around 2.1 (87.5 vs 42.5 seconds per sentence). As translating $N$-bests 
-trivially takes time proportional to $N$, we can claim that decoding CNs  is preferrable to translating $N$-best ($N>2$) from the point of view of decoding time.
+The confusion network decoding ({\tt cn}) achieves the best BLEU score among the ASR input types. %, i.e. for all input types except {\tt verbatim}.
+Note the large gain compared to the single-best input types, e.g. 1.6\% BLEU absolute over the single-best from the word graphs and even more over the single-best from the confusion networks.
 
-\noindent
-Hence, we can claim that translating confusion network seems more efficient than translating $N$-best lists, because either translation quality improves or decoding time decreases.
+In terms of WER and PER, the {\tt 5-best} system is slightly better.
+%The translation of confusion networks ({\tt cn}) outperforms the translation of all  $N$-best lists with respect to BLEU, and only the translation of 1-best with respect to PER and WER. 
+This could be due to the fact that the systems were optimized for BLEU.
 
+\subsubsection{Efficiency}
 
-\noindent
-In Table~\ref{tbl:epps-comparison}, performance achieved by {\tt Moses} decoder are compared with those reported by ITC-irst \cite{bertoldi05a}. Input data, but the {\tt verbatim}, are different from the previous test set, because extracted from lattices of higher quality as shown by the ASR WER.
-Undoubtedly, {\tt Moses} significantly outperforms {\tt ITC-irst} over all input types by a 17\% relative BLEU score. The difference between {\tt 1-best} and {\tt cn} are close for both decoder.
-
-
-Interestingly, performance of {\tt Moses} over the unpruned confusion networks ({\tt cn}) and the pruned ones ({\tt cn-p60}) are very similar although the ASR WER is almost twice. This issue will be further investigated.
-
-
-\noindent
-Moreover, {\tt Moses} decoder is much more efficient than {\tt ITC-irst}  in translating confusion network:
-the former takes only 2.1 times the text decoding time, while the latter between 11 and 18 times.
-
-
-\begin{table}[t]
-\caption{Comparison between {\tt Moses} and {\tt ITC-irst} .}
-\small
-\begin{center}
-\begin{tabular}{lr|r|r}
- \hline
-\multicolumn{2}{c|}{Input} &\multicolumn{2}{c}{Output}\\
-\hline  
-type               & WER     &\multicolumn{2}{c}{BLEU}\\
-\hline  
-\multicolumn{2}{c|}{} & {\tt ITC-irst}  & {\tt Moses}\\
-\hline  
-{\tt verbatim}           & 0.0       &  40.84  &  48.00   \\
-\hline
-{\tt 1-best}        & 14.61  & 36.64   &  42.84 \\
-{\tt cons-dec}  &  14.46  & 36.54  &  42.92 \\
-\hline
-{\tt cn}               & 6.41  &            & 43.67 \\
-{\tt cn-p60}      &11.61 & 37.21 & 43.51     \\
-\hline
- \end{tabular}
-\end{center}
-\label{tbl:epps-comparison}
-\end{table}
+Experimentally, the ratio between the decoding time for translating the confusion networks ({\tt cn}) and the single-best ({\tt 1-best}) is about 2.1 (87.5 vs 42.5 seconds per sentence). 
+As the decoding time for $N$-best lists is proportional to $N$, we can claim that decoding CNs  is preferrable to translating $N$-best ($N>2$) with respect to translation speed, i.e. decoding confusion networks is more efficient than translating $N$-best lists.
 
 
 In Figure~\ref{fig-cn-exploration}, we show the effect of the incremental pre-fetching of translation options for confusion network decoding.
@@ -2972,13 +2947,13 @@ Therefore, the naive algorithm is only applicable for very short phrases and hea
 \begin{figure} 
 	\begin{center}
 		\includegraphics[width=0.85\linewidth]{CN_PathExploration}
-		\caption{Exploration of the confusion network for the Spanish--English EPPS task.}\label{fig-cn-exploration}
+		\caption{Exploration of the confusion networks for the Spanish--English EPPS task.}\label{fig-cn-exploration}
 	\end{center}
 \end{figure}
 The next curve, labeled 'CN explored', is the number of paths that are actually explored using the incremental algorithm described in Section~\ref{sec:pre-fetching}.
 We do {\em not} observe the exponential explosion as for the total number of paths.
 %Thus, the presented algorithm effectively solves the combinatorial problem of matching phrases of the input \CN s and the phrase table.
-For comparison, we plotted also the number of explored paths for the case of single-best input, labeled '1-best explored'.
+For comparison, we also plotted the number of explored paths for the case of single-best input, labeled '1-best explored'.
 The maximum phrase length in the phrase table for  these experiments is seven.
 In the case of confusion network input, this length can be exceeded as the confusion networks may contain $\epsilon$-transitions.
 
