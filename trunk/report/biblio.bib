@@ -37,6 +37,23 @@
 % Postup, jak z vybranych publikaci udelat tabulicku:
 % cscharsiso wrap < clip| iu | grep '=\|^$' | sed 's/^[ %]*//' | sed 's/ *= */	/' | sed 's/	["{]*/	/' | sed 's/["},]*$//' | colwise 1 'tr "A-Z" "a-z"'  |dett | numerize_blocks | remove_blank_lines | list2tab 1 2 3 | tt --utf8 | less -S
 
+ @PhdThesis{ OchThesis,
+  author =  {Franz Josef Och},
+  title =   {Statistical Machine Translation: From Single-Word Models to Alignment Templates},
+  school = {RWTH Aachen Department of Computer Science},
+  address =   {Aachen, Germany},
+  year =    {2002},
+  url = {http://www-i6.informatik.rwth-aachen.de/web/PhD/phd_theses.html}
+}
+
+@inproceedings{ Collins2005,
+  author =      { Michael Collins and Philipp Koehn and Ivona Kucerova},
+  title =           {Clause Restructuring for Statistical Machine Translation},
+  booktitle = 	 {Proceedings of ACL},
+  year = 	 {2005}
+}
+
+
 @PhdThesis{SchulteImWalde:03,
   author = 	 "Sabine {Schulte im Walde}",
   title = 	 "Experiments on the {A}utomatic {I}nduction of {G}erman {S}emantic {V}erb {C}lasses",
