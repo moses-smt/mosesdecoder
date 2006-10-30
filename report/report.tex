@@ -91,9 +91,9 @@ Evan Herbst}
 {\sc Philipp Koehn: overview of the goals of the workshop 2-4 pages}
 
 \chapter{Factored Translation Models}
-The current state-of-the-art approach to statistical machine translation, so-called phrase-based models, are limited to the mapping of small text chunks without any explicit use of linguistic information, may it be morphological, syntactic, or semantic. Such additional information has been shown to be valuable, by integrating it in pre-processing or post-processing steps. 
+The current state-of-the-art approach to statistical machine translation, so-called phrase-based models, are limited to the mapping of small text chunks without any explicit use of linguistic information, be it morphological, syntactic, or semantic. Such additional information has been shown to be valuable when it is integrated into pre-processing or post-processing steps. 
 
-For instance, gains have been achieved by handling Arabic morphology through stemming or splitting off of affixes that typically translate into individual words in English. Another example is our earlier work on methods to reorder German input, so it is more similar to English output sentence order, which makes it more amendable to the phrase-based approach ({\sc cite}).
+For instance, improvements in translation quality have been achieved by handling Arabic morphology through stemming or splitting off of affixes that typically translate into individual words in English. Another example is our earlier work on methods to reorder German input, so it is more similar to English output sentence order, which makes it more amendable to the phrase-based approach \cite{Collins2005}.
 
 However, a tighter integration of linguistic information into the translation model is desirable for two reasons:
 \begin{itemize}
@@ -101,7 +101,7 @@ However, a tighter integration of linguistic information into the translation mo
 \item Many aspects of translation can be best explained on a morphological, syntactic, or semantic level. Having such information available to the translation model allows the direct modeling of these aspects. For instance: reordering at the sentence level is mostly driven by general syntactic principles, local agreement constraints show up in morphology, etc.
 \end{itemize}
 
-Therefore, we developed a framework for statistical translation models that tightly integrates additional information. Our framework is an extension of the phrase-based model. It adds additional annotation at the word level. A word in our framework is not anymore only a token, but a vector of factors that represent different levels of annotation.
+Therefore, we developed a framework for statistical translation models that tightly integrates additional information. Our framework is an extension of the phrase-based model \cite{OchThesis}. It adds additional annotation at the word level. A word in our framework is not anymore only a token, but a vector of factors that represent different levels of annotation.
 
 \begin{center}
 \includegraphics[scale=1]{factors.pdf}
