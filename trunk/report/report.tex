@@ -75,7 +75,7 @@ Evan Herbst}
 \item Wade Shen, Senior Researcher, Lincoln Labs
 \item Nicola Bertoldi, Senior Researcher, ITC-IRST
 \item Chris Callison-Burch, Graduate Student, University of Edinburgh
-\item Richard Zens, Graduate Student, Aachen University
+\item Richard Zens, Graduate Student, RWTH Aachen University
 \item Hieu Hoang, Graduate Student, University of Edinburgh
 \item Brooke Cowan, Graduate Student, MIT
 \item Ond\v{r}ej Bojar, Graduate Student, Charles University
@@ -2693,6 +2693,297 @@ University for making this workshop possible.
 
 \section{Confusion Network Decoding}
 {\sc Wade Shen and Richard Zens}
+
+
+\subsection{Results for the BTEC Task}
+
+The experiments were carried out on the {\it Basic Travel Expression Corpus} (BTEC) task \cite{takezawa02}. 
+This is a multilingual speech corpus which contains tourism-related sentences similar to those that are found in phrase books.
+The corpus statistics are shown in Table~\ref{tab-corpus}.
+For the supplied data track, 40\,000 sentences training corpus and three test sets were made available for each language pair.
+
+\begin{table}
+\begin{center}
+\caption{Corpus statistics for the Chinese-English task.} \label{tab-corpus}
+\begin{tabular}{|l|r|r|}
+\hline
+& Chinese & English \\
+\hline
+sentences & \multicolumn{2}{c|}{40 K} \\ \cline{2-3}
+running words & 351 K  &  365 K \\
+avg. sent. length& 8.8& 9.1 \\
+vocabulary entries& 11 K & 10 K \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+%As the BTEC is a rather clean corpus, the preprocessing consisted mainly of tokenization, i.e., separating punctuation marks from words.
+%Additionally, we replaced  contractions such as {\em it's} or {\em I'm} in the English corpus and we removed the case information.
+%There was no special preprocessing for the Chinese and the Japanese training corpora.
+
+
+\subsubsection{Chinese-to-English}
+
+In this section, we will present the experimental results for the Chinese--English task.
+The statistics of the confusion networks are summarized in Table~\ref{tab-ce-cn-stat}.
+Note that the average length of the sentences in the \devfour\ test set is about twice as large as in the training data.
+We also present the depths of the confusion networks. %, i.e. the number of alternatives per position.
+On average we have  between two and three alternatives per position.
+At some positions, however, there are more than 90 alternatives.
+\begin{table}[t]
+\begin{center}
+\caption{Chinese--English: confusion network statistics for the \devfour\ test set (489 sentences).} \label{tab-ce-cn-stat}
+\begin{tabular}{|l|r|r|}
+\cline{2-3}
+\multicolumn{1}{c}{}&\multicolumn{2}{|c|}{speech type} \\ \hline
+& read  & spontaneous  \\
+\hline
+avg. length & 17.2 & 17.4 \\
+avg. / max.  depth & 2.2  / 92 & 2.9 / 82  \\
+avg. number of paths & $10^{21}$ & $10^{32}$ \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+In Table~\ref{tab-ce-cn-results}, we present the translation results for the Chinese--English task for different input conditions on the \devfour\ and the \eval\ test sets.
+Comparing the translation results of 1-best and confusion network, we observe a small but consistent improvement for read speech.
+For spontaneous speech, the improvements are larger, e.g. 1.1\% BLEU for the \eval\ test set.
+
+\begin{table}[t]
+\begin{center}
+\caption{Chinese--English: translation results for different input types.} \label{tab-ce-cn-results}
+\begin{tabular}{|c|l|c|c|}
+\cline{3-4}
+\multicolumn{2}{c}{}&\multicolumn{2}{|c|}{speech type} \\
+\hline
+test  && read  & spontaneous \\
+set &input& BLEU [\%] & BLEU [\%] \\
+\hline \hline
+\devfour & verbatim & \multicolumn{2}{c|}{21.4} \\ \cline{2-4}
+& 1-best  & 19.0 & 17.2 \\ 
+\cline{2-4}
+& full CN & 19.3 & 17.8 \\
+\hline 
+ \hline
+ \eval & verbatim & \multicolumn{2}{c|}{21.4} \\ \cline{2-4}
+ & 1-best  & 18.5 & 17.0 \\ 
+\cline{2-4}
+& full CN & 18.6 & 18.1 \\
+\hline 
+\end{tabular}
+\end{center}
+\end{table}
+
+As described in Section~\ref{sec:repunct}, we did some experiments using the confusion network decoder for repunctuation.
+The results are presented in Table~\ref{tab-ce-pm}.
+We observe a small improvement when using a confusion network for the punctuations.
+Note that this system was not optimized, so we might expect larger improvement when optimizing for this type of input.
+\begin{table}[t]
+\begin{center}
+\caption{Chinese--English: translation results for punctuation insertion.} \label{tab-ce-pm}
+\begin{tabular}{|l|c|}
+\hline
+punctuation input type & BLEU [\%]  \\ \hline
+1-best & 20.8   \\  \hline
+confusion network & 21.0  \\ 
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+	
+\subsection{Results for the EPPS Task}
+Additional experiments were carried out on the Spanish-to-English EPPS (European Parliament Plenary Sessions) task.
+The training data was collected within the TC-Star project\footnote{http://www.tc-star.org} and is a superset of the Spanish--English EuroParl corpus.
+Statistics for this task are reported in Table~\ref{tbl:epps-data}.  
+The bilingual training corpus consists of about 1.3\,M sentence pairs with about 36\,M running words in each language.
+The training was performed with the {\tt Moses} training tools, while training of the 4-gram target LM was performed with the IRST LM Toolkit.
+Sentences in the dev and test sets are provided with two reference translations each.  
+\begin{table}[t]
+\begin{center}
+\caption{Corpus statistics for the Spanish-English EPPS task. For development and test sets, figures related to Spanish refer to {\tt verbatim} input type, whereas figures related to English refer to the reference translations.} \label{tbl:epps-data}
+\begin{tabular}{|l|l|r|r|}
+ \hline
+       &              &  Spanish   &   English     \\
+\hline
+Train  & Sentences    & \multicolumn{2}{c|}{1.3\,M}\\
+\cline{2-4}
+      & Words & 37\,M & 36\,M\\
+\cline{2-4}
+       & Vocabulary   & 143\,K & 110\,K\\
+\cline{2-4}
+       & Phrase Pairs   & \multicolumn{2}{c|}{83\,M}\\
+\cline{2-4}
+       & Phrases   & 48\,M & 44\,M\\
+ \hline
+Dev    & Utterances    &   \multicolumn{2}{c|}{2\,643} \\
+ \cline{2-4}
+       & Words& 20\,384 & 20\,579 \\ 
+\cline{2-4}
+       & Vocabulary   & 2\,883 &  2\,362 \\
+ \hline
+Test   & Utterances    & \multicolumn{2}{c|}{1\,073}  \\
+ \cline{2-4}
+       & Words& 18\,890 & 18\,758 \\
+ \cline{2-4}
+       & Vocabulary   & 3\,139 & 2\,567 \\
+ \cline{2-4}
+%       & OOV Words & 145 & 44\\
+ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+The statistics of the confusion networks for the Spanish--English EPPS task are presented in Table~\ref{tbl:epps-cn}.
+The average depth of the confusion networks, i.e. the average number of alternatives per position, is 2.8 for the development set and 2.7 for the test set.
+Note that the maximum depth is much larger, up to 165 for the development set.
+Also, the average number of paths through the confusion networks is huge. 
+
+\begin{table}[t]	
+	\caption{Statistics of the confusion networks for the development and test sets of the Spanish--English EPPS task.}\label{tbl:epps-cn}
+	\begin{center}
+	\begin{tabular}{|l|r|r|}
+	\hline
+	& Dev & Test \\
+	\hline
+	Utterances & 2\,633  & 1\,071 \\
+	Avg. length & 10.6 &  23.6 \\
+	Avg. / max.  depth & 2.8  / 165 & 2.7 / 136  \\
+	Avg. number of paths & $10^{38}$ & $10^{75}$ \\
+	\hline
+	\end{tabular}
+	\end{center}
+\end{table}
+
+\subsubsection{Data Preparation}
+\label{sec:data-preparation}
+\noindent
+Word lattices  were  kindly provided by CNRS-LIMSI, France.
+Confusion Networks and $N$-best lists were extracted by means of {\tt lattice-tool} included in the 
+SRILM Toolkit \cite{stolcke:02}. The consensus decoding transcriptions  were also extracted from the confusion networks, by taking the most probable words from  each column.
+Table~\ref{tbl:epps-results} reports the average  ASR Word Error Rate (WER) achieved by the oracles of the confusion networks and the lattices, the consensus decoding transcriptions, and the $N$-best lists. Furthermore, the human transcriptions themselves were translated for the sake of comparison.
+
+\subsubsection{Parameter Tuning}
+Feature  weights of all presented models were estimated by applying a minimum-error-rate training
+procedure which tries to maximize the BLEU score over the dev set.  A special procedure
+was used for tuning the weights of the $N$-best translation system. First, a single best decoder was
+optimized over the dev set. Then $M$-best translations were generated for each $N$-best input of the
+dev set. Hence, all $N$x$M$ translations were merged and a new log-linear model  including the ASR additional features was trained. 
+
+
+\subsubsection{Translation Results}
+
+\begin{table}[t]
+\caption{Performance achieved by {\tt Moses} over different inputs.}
+\begin{center}
+\begin{tabular}{lr|rrr}
+ \hline
+\multicolumn{2}{c|}{Input} &\multicolumn{3}{c}{Output}  \\
+\hline
+type                & WER     & BLEU 	& PER 	& WER\\
+\hline
+{\tt verbatim}   & 0.0       & 48.00 & 31.19 & 40.96 \\
+ \hline
+{\tt wg-oracle} &7.48     & 44.68 & 33.55 & 43.74 \\ 
+{\tt cn-oracle}  &8.45     & 44.12 & 34.37 & 44.95 \\
+ \hline
+ 
+{\tt 1-best}        & 22.41 & 37.57 & 39.24 & 50.01 \\
+{\tt cons-dec}  & 23.30  & 36.98 & 39.17 & 49.98  \\
+ \hline
+{\tt cn}               &8.45     & 39.17 & 38.64 & 49.52 \\
+ \hline
+{\tt 1-best}        & 22.41 & 37.57 & 39.24 & 50.01 \\
+%{\tt 5-best}*      & 18.61 & 38.96 & 38.78 & 49.40 \\
+{\tt 5-best}        & 18.61 & 38.68 & 38.55 & 49.33 \\
+%{\tt 10-best}*    & 17.12 & 38.71 & 38.74 & 49.29 \\
+{\tt 10-best}      & 17.12 & 38.61 & 38.69 & 49.46 \\
+ \hline
+ \end{tabular}
+\end{center}
+\label{tbl:epps-results}
+\end{table}
+
+\noindent
+Table~\ref{tbl:epps-results} reports BLEU score, PER and WER for a set of experiments we ran to evaluate the quality of {\tt Moses} decoder. Optimization of the decoder was performed separately for each input type, as described in the previous section. 
+
+\noindent
+The comparison of scores achieved on the text inputs ({\tt verbatim}, {\tt wg-oracle}, {\tt cn-oracle}, {\tt 1-best}, and {\tt cons-dec})
+shows a strong correlation between quality of the transcriptions given by the ASR WER and quality of the translation given by the MT automatic scores.
+
+\noindent
+The translation of confusion networks ({\tt cn}) outperforms the translation of all  $N$-best lists with respect to BLEU, and only the translation of 1-best with respect to PER and WER. This could be due to the fact that {\tt Moses} was optimized for BLEU.
+
+\noindent
+Experimentally, the ratio between decoding time for translating {\tt cn} and {\tt 1-best} is around 2.1 (87.5 vs 42.5 seconds per sentence). As translating $N$-bests 
+trivially takes time proportional to $N$, we can claim that decoding CNs  is preferrable to translating $N$-best ($N>2$) from the point of view of decoding time.
+
+\noindent
+Hence, we can claim that translating confusion network seems more efficient than translating $N$-best lists, because either translation quality improves or decoding time decreases.
+
+
+\noindent
+In Table~\ref{tbl:epps-comparison}, performance achieved by {\tt Moses} decoder are compared with those reported by ITC-irst \cite{bertoldi05a}. Input data, but the {\tt verbatim}, are different from the previous test set, because extracted from lattices of higher quality as shown by the ASR WER.
+Undoubtedly, {\tt Moses} significantly outperforms {\tt ITC-irst} over all input types by a 17\% relative BLEU score. The difference between {\tt 1-best} and {\tt cn} are close for both decoder.
+
+
+Interestingly, performance of {\tt Moses} over the unpruned confusion networks ({\tt cn}) and the pruned ones ({\tt cn-p60}) are very similar although the ASR WER is almost twice. This issue will be further investigated.
+
+
+\noindent
+Moreover, {\tt Moses} decoder is much more efficient than {\tt ITC-irst}  in translating confusion network:
+the former takes only 2.1 times the text decoding time, while the latter between 11 and 18 times.
+
+
+\begin{table}[t]
+\caption{Comparison between {\tt Moses} and {\tt ITC-irst} .}
+\small
+\begin{center}
+\begin{tabular}{lr|r|r}
+ \hline
+\multicolumn{2}{c|}{Input} &\multicolumn{2}{c}{Output}\\
+\hline  
+type               & WER     &\multicolumn{2}{c}{BLEU}\\
+\hline  
+\multicolumn{2}{c|}{} & {\tt ITC-irst}  & {\tt Moses}\\
+\hline  
+{\tt verbatim}           & 0.0       &  40.84  &  48.00   \\
+\hline
+{\tt 1-best}        & 14.61  & 36.64   &  42.84 \\
+{\tt cons-dec}  &  14.46  & 36.54  &  42.92 \\
+\hline
+{\tt cn}               & 6.41  &            & 43.67 \\
+{\tt cn-p60}      &11.61 & 37.21 & 43.51     \\
+\hline
+ \end{tabular}
+\end{center}
+\label{tbl:epps-comparison}
+\end{table}
+
+
+In Figure~\ref{fig-cn-exploration}, we show the effect of the incremental pre-fetching of translation options for confusion network decoding.
+The curve labeled 'CN total', represents the total number of paths in the confusion networks as a function of the path length.
+This is the number of phrases enumerated using a naive pre-fetching algorithm.
+Note the exponential growth with increasing path length.
+Therefore, the naive algorithm is only applicable for very short phrases and heavily pruned confusion networks.
+\begin{figure} 
+	\begin{center}
+		\includegraphics[width=0.85\linewidth]{CN_PathExploration}
+		\caption{Exploration of the confusion network for the Spanish--English EPPS task.}\label{fig-cn-exploration}
+	\end{center}
+\end{figure}
+The next curve, labeled 'CN explored', is the number of paths that are actually explored using the incremental algorithm described in Section~\ref{sec:pre-fetching}.
+We do {\em not} observe the exponential explosion as for the total number of paths.
+%Thus, the presented algorithm effectively solves the combinatorial problem of matching phrases of the input \CN s and the phrase table.
+For comparison, we plotted also the number of explored paths for the case of single-best input, labeled '1-best explored'.
+The maximum phrase length in the phrase table for  these experiments is seven.
+In the case of confusion network input, this length can be exceeded as the confusion networks may contain $\epsilon$-transitions.
+
+
+
 
 \section{Tuning}
 {\sc Nicola Bertoldi}
