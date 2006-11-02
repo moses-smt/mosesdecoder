@@ -19,7 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 ******************************************************************************/
 #include <sys/types.h>
 #include <sys/mman.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <iostream>
 #include <fstream>
@@ -59,11 +58,14 @@ lmtable::lmtable(){
  
   max_cache_lev=0;
   for (int i=0;i<=LMTMAXLEV+1;i++) lmtcache[i]=NULL;
+  
   probcache=NULL;
   statecache=NULL;
   
-  KeepOnDiskFromLevel=LMTMAXLEV+1;
-  
+  memmap=0;
+
+  //statistics
+  for (int i=0;i<=LMTMAXLEV+1;i++) totget[i]=totbsearch[i]=0;
 };
 
  
@@ -80,7 +82,7 @@ void lmtable::load(istream& inp,const char* filename,int keep_on_disk){
   }
   else{ 
     if (keep_on_disk>0) 
-      std::cerr << "KeepOnDisk feature is not available with text LM\n";
+      std::cerr << "Memory Mapping not available for text LM\n";
     loadtxt(inp,header);
   }
   dict->genoovcode();
@@ -371,7 +373,7 @@ void *lmtable::search(int lev,
                       LMT_ACTION action,
                       char **found){
 	
-  //assume level 1 is always in memory 
+  //assume 1-grams is a 1-1 map of the vocabulary
   if (lev==1) return *found=(*ngp <n ? table[1] + *ngp * sz:NULL);
 
   //prepare table to be searched with mybserach  
@@ -382,6 +384,8 @@ void *lmtable::search(int lev,
 	
   int idx=0; // index returned by mybsearch
   *found=NULL;	//initialize output variable	
+  
+  totbsearch[lev]++;
   
   switch(action){    
     case LMT_FIND:			
@@ -400,15 +404,12 @@ int lmtable::mybsearch(char *ar, int n, int size,
                        unsigned char *key, int *idx)
 {
   
-  totbsearch++;
-  
   register int low, high;
   register unsigned char *p;
   register int result;
   register int i;
   
-  /* return idx with the first 
-    position equal or greater than key */
+  /* return idx with the first position equal or greater than key */
   
   /*   Warning("start bsearch \n"); */
   
@@ -519,6 +520,7 @@ void lmtable::savebin(const char *filename){
 
 
 //manages the long header of a bin file
+//and allocates table for each n-gram level
 
 void lmtable::loadbinheader(istream& inp,const char* header){
   
@@ -532,23 +534,16 @@ void lmtable::loadbinheader(istream& inp,const char* header){
   configure(maxlev,isQtable);
   
   for (int l=1;l<=maxlev;l++){
-    inp >> cursize[l]; maxsize[l]=cursize[l];
-    if ( l < KeepOnDiskFromLevel )
-      table[l]=new char[cursize[l] * nodesize(tbltype[l])];
-    else //just allocate space for successor tables
-      table[l]=new char[cursize[1] * nodesize(tbltype[l])];
+    inp >> cursize[l]; maxsize[l]=cursize[l];   
   }
-  
-  
+    
   if (isQtable){
     char header2[100];
-    cerr << "reading num centers:";
     inp >> header2;
     for (int i=1;i<=maxlev;i++){
-      inp >> NumCenters[i];cerr << " " << NumCenters[i];
-      
+      inp >> NumCenters[i];
+      cerr << "reading  " << NumCenters[i] << " centers\n";
     }
-    cerr << "\n";
   } 
 }
 
@@ -568,17 +563,17 @@ void lmtable::loadbincodebook(istream& inp,int l){
   
 //load a binary lmfile
 
-void lmtable::loadbin(istream& inp, const char* header,const char* filename,int keep_on_disk){
+void lmtable::loadbin(istream& inp, const char* header,const char* filename,int mmap){
     
   cerr << "loadbin()\n";
   loadbinheader(inp,header);
   dict->load(inp);  
    
   //if MMAP is used, then open the file
-  if (filename and keep_on_disk!=-1){
+  if (filename and mmap>0){
     
-    if (keep_on_disk>0 && keep_on_disk <= maxlev)
-      KeepOnDiskFromLevel=keep_on_disk;
+    if (mmap <= maxlev)
+      memmap=mmap;
     else
       error("keep_on_disk value is out of range\n");
     
@@ -586,21 +581,30 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
       std::cerr << "cannot open " << filename << "\n";
       error("dying");
     }
+    
+    //check that the LM is uncompressed
+    char miniheader[4];
+    read(diskid,miniheader,4);
+    if (strncmp(miniheader,"Qblm",4) and strncmp(miniheader,"blmt",4))
+      error("mmap functionality does not work with compressed binary LMs\n");  
+    
   }
   
   
   for (int l=1;l<=maxlev;l++){
     if (isQtable) loadbincodebook(inp,l);
-    if (l < KeepOnDiskFromLevel){
+    if ((memmap == 0) or (l < memmap)){
       cerr << "loading " << cursize[l] << " " << l << "-grams\n";
+      table[l]=new char[cursize[l] * nodesize(tbltype[l])];
       inp.read(table[l],cursize[l]*nodesize(tbltype[l]));
     }
     else{
       cerr << "mapping " << cursize[l] << " " << l << "-grams\n";
+      tableOffs[l]=inp.tellg();
       table[l]=(char *)MMap(diskid,PROT_READ,
-                    inp.tellg(), cursize[l]*nodesize(tbltype[l]),
-                    &tableOffs[l]);
-      table[l]+=tableOffs[l];
+                            tableOffs[l], cursize[l]*nodesize(tbltype[l]),
+                    &tableGaps[l]);
+      table[l]+=tableGaps[l];
       inp.seekg(cursize[l]*nodesize(tbltype[l]),ios_base::cur);
     }
   };  
@@ -642,7 +646,7 @@ int lmtable::get(ngram& ng,int n,int lev){
              ng.wordp(n-l+1), 
              LMT_FIND,
              &found);
- 
+        
     //insert both found and not found items!!!
     if (lmtcache[l] && hit==0)
       lmtcache[l]->add(ng.wordp(n),(char *)&found);   
@@ -672,6 +676,12 @@ int lmtable::get(ngram& ng,int n,int lev){
   //put information inside ng
   ng.size=n;  ng.freq=0; 
   ng.succ=(lev<maxlev?limit-offset:0);
+  
+#ifdef TRACE_CACHE
+  if (ng.size==maxlev && sentence_id>0){
+    *cacheout << sentence_id << " miss " << ng << " " << (unsigned int) ng.link << "\n";  
+  }
+#endif  
   
   return 1;
 }
@@ -854,19 +864,20 @@ double lmtable::clprob(ngram ong){
   double logpr; 
 
 #ifdef TRACE_CACHE
-  if (probcache && ong.size==maxlev && sentence_id>0lo){
+  if (probcache && ong.size==maxlev && sentence_id>0){
    *cacheout << sentence_id << " " << ong << "\n";  
   }
 #endif  
   
-  if (probcache && ong.size==maxlev && probcache->get(ong.wordp(maxlev),(char *)&logpr)){
+  //cache hit
+  if (probcache && ong.size==maxlev && probcache->get(ong.wordp(maxlev),(char *)&logpr)){        
     return logpr;   
   }
  
+  //cache miss
   logpr=lprob(ong);
   
   if (probcache && ong.size==maxlev){
-    //if (probcache->isfull()) probcache->reset();
      probcache->add(ong.wordp(maxlev),(char *)&logpr);    
   }; 
   
@@ -895,11 +906,10 @@ void lmtable::stat(int level){
   
   cout << "total allocated mem " << totmem/mega << "Mb\n";
   
-  cout << "total number of get calls\n";
+  cout << "total number of get and binary search calls\n";
   for (int l=1;l<=maxlev;l++){
-    cout << "level " << l << " " << totget[l] << "\n";
+    cout << "level " << l << " get: " << totget[l] << " bsearch: " << totbsearch[l] << "\n";
   }
-  cout << "total binary search : " << totbsearch << "\n";
   
   if (level >1 ) dict->stat();
   
