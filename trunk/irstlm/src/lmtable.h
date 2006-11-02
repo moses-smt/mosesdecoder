@@ -22,12 +22,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #ifndef MF_LMTABLE_H
 #define MF_LMTABLE_H
 
+#include <sys/types.h>
+#include <sys/mman.h>
 #include "util.h"
 #include "ngramcache.h"
 #include "dictionary.h"
 #include "n_gram.h"
 
-#undef TRACE_CACHE
+//#undef TRACE_CACHE
 
 #define LMTMAXLEV  20
 #define MAX_LINE  1024
@@ -70,7 +72,7 @@ class lmtable{
   
   //statistics 
   int    totget[LMTMAXLEV+1];
-  int    totbsearch;
+  int    totbsearch[LMTMAXLEV+1];
   
   //probability quantization
   bool      isQtable;
@@ -89,10 +91,11 @@ class lmtable{
   ngramcache* statecache;
   int max_cache_lev;
 
-  //partial storage/access on disk
-  int KeepOnDiskFromLevel;  //level from which n-grams are accessed from disk
+  //memory map on disk
+  int memmap;  //level from which n-grams are accessed via mmap
   int diskid;
   off_t tableOffs[LMTMAXLEV+1];
+  off_t tableGaps[LMTMAXLEV+1];
   
 public:
     
@@ -129,10 +132,10 @@ public:
     
     for (int l=1;l<=maxlev;l++){
       if (table[l]){ 
-          if (l < KeepOnDiskFromLevel)
-            delete [] table[l];
-          else
-            Munmap(table[l]-tableOffs[l],cursize[l]*nodesize(tbltype[l])+tableOffs[l],0);
+          if (memmap)
+            Munmap(table[l]-tableGaps[l],cursize[l]*nodesize(tbltype[l])+tableGaps[l],0);
+        else
+          delete [] table[l];            
       }
       if (isQtable){
         if (Pcenters[l]) delete [] Pcenters[l];
@@ -169,8 +172,28 @@ public:
     if (statecache && statecache->isfull()) statecache->reset(statecache->cursize());
     for (int i=2;i<=max_cache_lev;i++)
       if (lmtcache[i]->isfull()) lmtcache[i]->reset(lmtcache[i]->cursize());
-  }
-  
+  };
+    
+    void reset_caches(){
+      if (probcache) probcache->reset(probcache->cursize());
+      if (statecache) statecache->reset(statecache->cursize());
+      for (int i=2;i<=max_cache_lev;i++)
+        lmtcache[i]->reset(lmtcache[i]->cursize());
+    };
+    
+    
+    void reset_mmap(){
+    if (memmap>0 and memmap<=maxlev)
+      for (int l=memmap;l<=maxlev;l++){
+        std::cerr << "resetting mmap at level:" << l << "\n";
+        Munmap(table[l]-tableGaps[l],cursize[l]*nodesize(tbltype[l])+tableGaps[l],0);
+        table[l]=(char *)MMap(diskid,PROT_READ,
+                              tableOffs[l], cursize[l]*nodesize(tbltype[l]),
+                               &tableGaps[l]);
+        table[l]+=tableGaps[l];
+      }
+   }
+      
   bool is_probcache_active(){return probcache!=NULL;}
   bool is_statecache_active(){return statecache!=NULL;}
   bool are_lmtcaches_active(){return lmtcache[2]!=NULL;}  
@@ -193,9 +216,9 @@ public:
   void savebin(const char *filename);
   void dumplm(std::fstream& out,ngram ng, int ilev, int elev, int ipos,int epos);
   
-  void load(std::istream& inp,const char* filename=NULL,int keep_on_disk=0);
+  void load(std::istream& inp,const char* filename=NULL,int mmap=0);
   void loadtxt(std::istream& inp,const char* header);
-  void loadbin(std::istream& inp,const char* header,const char* filename=NULL,int keep_on_disk=0);
+  void loadbin(std::istream& inp,const char* header,const char* filename=NULL,int mmap=0);
   
   void loadbinheader(std::istream& inp, const char* header);
   void loadbincodebook(std::istream& inp,int l);

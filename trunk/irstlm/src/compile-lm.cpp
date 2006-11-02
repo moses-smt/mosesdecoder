@@ -35,7 +35,7 @@ using namespace std;
 std::string stxt = "no";
 std::string seval = "";
 std::string sdebug = "0";
-std::string skeepondisk = "-1";
+std::string smemmap = "0";
 /********************************/
 
 void usage(const char *msg = 0) {
@@ -49,7 +49,7 @@ void usage(const char *msg = 0) {
             << "--text=[yes|no] -t=[yes|no] (output is again in text format)\n"
             << "--eval=text-file -e=text-file (computes perplexity of text-file and returns)\n"
             << "--debug=1 -d=1 (verbose output for --eval option)\n"
-            << "--subdict=text-file --sd=tex-file (limits LM to include only words in text-file)\n" ;
+            << "--memmap=1 --mm=1 (uses memory map to read a binary LM)\n" ;
 }
 
 bool starts_with(const std::string &s, const std::string &pre) {
@@ -90,8 +90,8 @@ void handle_option(const std::string& opt, int argc, const char **argv, int& arg
       sdebug = get_param(opt, argc, argv, argi);
 
   else
-    if (starts_with(opt, "--KeepOnDisk") || starts_with(opt, "-kd"))
-      skeepondisk = get_param(opt, argc, argv, argi);     
+    if (starts_with(opt, "--memmap") || starts_with(opt, "-mm"))
+      smemmap = get_param(opt, argc, argv, argi);     
     
   else {
     usage(("Don't understand option " + opt).c_str());
@@ -114,7 +114,7 @@ int main(int argc, const char **argv)
 
   bool textoutput = (stxt == "yes"? true : false);
   int debug = atoi(sdebug.c_str()); 
-  int keep_on_disk = atoi(skeepondisk.c_str());
+  int memmap = atoi(smemmap.c_str());
   
   std::string infile = files[0];
   std::string outfile="";
@@ -150,8 +150,9 @@ int main(int argc, const char **argv)
     }
    
     
-   lmt.load(inp,infile.c_str(),keep_on_disk);    
+   lmt.load(inp,infile.c_str(),memmap);    
    
+    
   if (seval != ""){
     std::cerr << "Start Eval\n";
     std::cerr << "OOV code: " << lmt.dict->oovcode() << "\n";
@@ -194,7 +195,7 @@ int main(int argc, const char **argv)
       << " Nbo=" << Nbo << " Noov=" << Noov 
       << " OOV=" << (float)Noov/Nw * 100.0 << "%\n";
     
-    return 0;    
+      return 0;    
   };
   
   std::cout << "Saving to " << outfile << std::endl;
