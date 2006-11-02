@@ -52,7 +52,7 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
 	size_t GetTableLimit() const { return m_tableLimit; }
 	
 	//! Overriden by load on demand phrase tables classes to load data for each input
-	virtual void InitializeForInput(InputType const &source) {}
+	virtual void InitializeForInput(InputType const &/*source*/) {}
 	const std::string GetScoreProducerDescription() const;
 	size_t GetNumScoreComponents() const;
 
