@@ -442,9 +442,9 @@ void Parameter::PrintCredit()
 													, "driving my mustang"
 													, ""));
 	everyone.push_back(Credit("Marcello Federico"
-													, "i love my mac !!"
-													, ""
-													, "irst stuff"));
+													, "federico at itc at it"
+													, "Researcher at ITC-irst, Trento, Italy"
+													, "IRST language model"));
 	everyone.push_back(Credit("Evan Herbst"
 													, "Small college in upstate New York"
 													, ""
