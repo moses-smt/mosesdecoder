@@ -375,6 +375,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 			if(currFirstWord==InvalidLabelId) currFirstWord=f[0];
 			if(currF.empty()) 
 				{
+					++count;
 					currF=f;
 					// insert src phrase in prefix tree
 					assert(psa);
@@ -430,16 +431,18 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 		}
   tgtCands.writeBin(ot);tgtCands.clear();
 
-  std::cerr<<"total word count: "<<count<<" -- "<<vo.size()<<"  line count: "
-					 <<lnc<<"  -- "<<currFirstWord<<"\n";
-
   PTF pf;
   if(currFirstWord>=vo.size()) vo.resize(currFirstWord+1,InvalidOffT);
   vo[currFirstWord]=fTell(os);
   pf.create(*psa,os);
   delete psa;psa=0;
 
- 	fClose(os);
+  std::cerr<<"distinct source phrases: "<<count
+		<<" distinct first words of source phrases: "<<vo.size()
+		<<" number of phrase pairs (line count): "<<lnc
+		<<"\n";
+ 	
+	fClose(os);
   fClose(ot);
 
   std::vector<size_t> inv;

@@ -61,7 +61,7 @@ void Word::Merge(const Word &sourceWord)
 	}
 }
 
-std::string Word::ToString(const vector<FactorType> factorType) const
+std::string Word::ToString(const vector<FactorType> factorType,bool endWithBlank) const
 {
 	stringstream strme;
 	assert(factorType.size() <= MAX_NUM_FACTORS);
@@ -76,7 +76,7 @@ std::string Word::ToString(const vector<FactorType> factorType) const
 			strme << *factor;
 		}
 	}
-	strme << " ";
+	if(endWithBlank) strme << " ";
 	return strme.str();
 }
 

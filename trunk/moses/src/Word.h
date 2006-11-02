@@ -79,7 +79,7 @@ public:
 	void Merge(const Word &sourceWord);
 
 	//! get string representation of list of factors
-	std::string ToString(const std::vector<FactorType> factorType) const;
+	std::string ToString(const std::vector<FactorType> factorType,bool endWithBlank=1) const;
 	TO_STRING();
 
 	//! transitive comparison of Word objects
