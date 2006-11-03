@@ -9,6 +9,10 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
 <option id="gnu.cpp.compiler.option.debugging.gprof.1713594612" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
 <option id="gnu.cpp.compiler.option.warnings.allwarn.345913036" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
+<option id="gnu.cpp.compiler.option.preprocessor.def.1188129285" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
+<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+</option>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.1727542516" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1884793796" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
@@ -23,6 +27,10 @@
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.release.723647841" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.release"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1586280207" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release">
 <option id="gnu.cpp.compiler.option.warnings.allwarn.1119345025" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
+<option id="gnu.cpp.compiler.option.preprocessor.def.623094051" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
+<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+</option>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.1518934657" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.lib.release.1672118671" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.release"/>
