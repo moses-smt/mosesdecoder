@@ -226,15 +226,15 @@ inline float CalcTranslationScore(const std::vector<float> &probVector,
 }
 
 //! declaration of ToString() function to go in header for each class. 
-#define TO_STRING()	 const char* ToString() const;
+#define TO_STRING()	 std::string ToString() const;
 
 //! definition of ToString() function to go in .cpp file. Can be used for any class that can be piped to a stream
 #define TO_STRING_BODY(CLASS) 	\
-	const char* CLASS::ToString() const	\
+	std::string CLASS::ToString() const	\
 	{															\
 		std::stringstream out;			\
 		out << *this;								\
-		return out.str().c_str();						\
+		return out.str();						\
 	}															\
 
 //! delete and remove every element of a collection object such as map, set, list etc
