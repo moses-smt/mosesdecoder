@@ -45,12 +45,6 @@ protected:
 
 	ScoreComponentCollection	m_scoreBreakdown;
 	float m_totalScore;
- 
-	/** Calculate m_totalScore & m_scoreBreakdown, taking into account the same score in the
-		* original path, copy, and the deviation arc
-		* TODO - check that this is correct when applied to path that just deviated from pure hypo, ie the 2nd constructor below
-	*/
-	void CalcScore(const LatticePath &origPath, size_t edgeIndex, const Hypothesis *arc);
 
 public:
 	LatticePath(); // not implemented
@@ -58,18 +52,11 @@ public:
 	//! create path OF pure hypo
 	LatticePath(const Hypothesis *hypo);
 		
-	/** create path FROM pure hypo, deviate at edgeIndex by using arc instead, 
+	/** create path from another path, deviate at edgeIndex by using arc instead, 
 		* which may change other hypo back from there
 		*/
 	LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc);
-
-	/** create path from ANY hypo
-		* \param reserve arg not used. To differentiate from other constructor
-		* deviate from edgeIndex. however, all other edges the same - only correct if prev hypo of original 
-		*	& replacing arc are the same
-		*/
-	LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc, bool reserve);
-
+	
 	inline float GetTotalScore() const { return m_totalScore; }
 
 	/** list of each hypo/arcs in path. For anything other than the best hypo, it is not possible just to follow the
@@ -79,11 +66,6 @@ public:
 	{
 		return m_path;
 	}
-	//! whether or not this consists of only hypos
-	inline bool IsPurePath() const
-	{
-		return m_prevEdgeChanged == NOT_FOUND;
-	}
 	
 	//! create a set of next best paths by wiggling 1 of the node at a time. 
 	void CreateDeviantPaths(LatticePathCollection &pathColl) const;
@@ -92,7 +74,7 @@ public:
 	{
 		return m_scoreBreakdown;
 	}
-
+	
 	TO_STRING();
 
 };
@@ -104,11 +86,15 @@ inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
 	for (int pos = (int) sizePath - 1 ; pos >= 0 ; pos--)
 	{
 		const Hypothesis *edge = path.m_path[pos];
-		out << *edge;
+		const WordsRange &sourceRange = edge->GetCurrSourceWordsRange();
+		TRACE_ERR(edge->GetId() << " " << sourceRange.GetStartPos() << "-" << sourceRange.GetEndPos() << ", ");
+		//out << *edge;
 	}
 	// scores
 	out << " total=" << path.GetTotalScore();
 	out << " " << path.GetScoreBreakdown();
+
+	TRACE_ERR(endl);
 
 	return out;
 }

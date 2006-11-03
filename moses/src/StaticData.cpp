@@ -493,20 +493,12 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
 StaticData::~StaticData()
 {
 	delete m_inputOutput;
-	for (size_t i = 0 ; i < m_phraseDictionary.size() ; i++)
-	{
-		delete m_phraseDictionary[i];
-	}
-	for (size_t i = 0 ; i < m_generationDictionary.size() ; i++)
-	{
-		delete m_generationDictionary[i];
-	}
-
-	LMList::const_iterator iterLM;
-	for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
-	{
-		delete *iterLM;
-	}
+	RemoveAllInColl(m_phraseDictionary);
+	RemoveAllInColl(m_generationDictionary);
+	RemoveAllInColl(m_languageModel);
+	RemoveAllInColl(m_decodeStepList);
+	RemoveAllInColl(m_reorderModels);
+	
 	// small score producers
 	delete m_distortionScoreProducer;
 	delete m_wpProducer;
