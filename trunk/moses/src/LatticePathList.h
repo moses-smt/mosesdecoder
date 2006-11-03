@@ -22,22 +22,48 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <list>
+#include <set>
 #include "LatticePath.h"
 
 
-class LatticePathList : public std::list<const LatticePath*>
+class LatticePathList
 {
-
+protected:
+	 std::list<const LatticePath*> m_collection;
+	 std::set< std::vector<const Hypothesis *> > m_uniquePath;
 public:
+	// iters
+	typedef std::list<const LatticePath*>::iterator iterator;
+	typedef std::list<const LatticePath*>::const_iterator const_iterator;
+	
+	iterator begin() { return m_collection.begin(); }
+	iterator end() { return m_collection.end(); }
+	const_iterator begin() const { return m_collection.begin(); }
+	const_iterator end() const { return m_collection.end(); }
+
 	~LatticePathList()
 	{
 		// clean up
-		LatticePathList::iterator iter;
-		for (iter = begin() ; iter != end() ; ++iter)
+		RemoveAllInColl(m_collection);
+	}
+
+	//! add a new entry into collection
+	bool Add(LatticePath *latticePath)
+	{
+		// make sure it not duplicated
+		const std::vector<const Hypothesis *> &edges = latticePath->GetEdges();
+		if ( m_uniquePath.insert(edges).second )
 		{
-			delete *iter;
+			m_collection.push_back(latticePath);
+			return true;
 		}
-		clear();
+		else
+			return false;
+	}
+
+	size_t GetSize() const
+	{
+		return m_collection.size();
 	}
 };
 

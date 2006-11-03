@@ -405,6 +405,22 @@ void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistorti
 	//PrintLMScores();
 }
 
+void Hypothesis::InitializeArcs()
+{
+	// point this hypo's main hypo to itself
+	SetWinningHypo(this);
+
+	if (!m_arcList) return;
+
+	// set all arc's main hypo variable to this hypo
+	ArcList::iterator iter = m_arcList->begin();
+	for (; iter != m_arcList->end() ; ++iter)
+	{
+		Hypothesis *arc = *iter;
+		arc->SetWinningHypo(this);
+	}
+}
+
 TO_STRING_BODY(Hypothesis)
  
 // friend

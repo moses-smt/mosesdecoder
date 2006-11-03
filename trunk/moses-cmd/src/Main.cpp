@@ -34,7 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef WIN32
 // Include Visual Leak Detector
-#include <vld.h>
+//#include <vld.h>
 #endif
 
 #include <fstream>
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 					LatticePathList nBestList;
 					manager.CalcNBest(nBestSize, nBestList,staticData.OnlyDistinctNBest());
 					inputOutput->SetNBest(nBestList, source->GetTranslationId());
-					RemoveAllInColl(nBestList);
+					//RemoveAllInColl(nBestList);
 				}
 
 			if (staticData.IsDetailedTranslationReportingEnabled()) {
