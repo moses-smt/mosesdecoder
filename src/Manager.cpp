@@ -311,40 +311,38 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 
 	set<std::vector<size_t> > distinctHyps;
 
-	// path of the best
-	contenders.insert(new LatticePath(*sortedPureHypo.begin()));
-	
-	// used to add next pure hypo path
-	vector<const Hypothesis*>::const_iterator iterBestHypo = ++sortedPureHypo.begin();
+	// add all pure paths
+	vector<const Hypothesis*>::const_iterator iterBestHypo;
+	for (iterBestHypo = sortedPureHypo.begin() 
+			; iterBestHypo != sortedPureHypo.end()
+			; ++iterBestHypo)
+	{
+		contenders.Add(new LatticePath(*iterBestHypo));
+	}
 
-	for (size_t currBest = 0 ; (onlyDistinct ? distinctHyps.size() : currBest) <= count && contenders.size() > 0 && (currBest < count * 20) ; currBest++)
+	// MAIN loop
+	for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) <= count && contenders.GetSize() > 0 && (iteration < count * 20) ; iteration++)
 	{
 		// get next best from list of contenders
 		LatticePath *path = *contenders.begin();
 		assert(path);
 		bool addPath = true;
 		if(onlyDistinct)
-			{
-				// TODO - not entirely correct.
-				// output phrase can't be assumed to only contain factor 0.
-				// have to look in StaticData.GetOutputFactorOrder() to find out what output factors should be
-				std::vector<size_t> tgtPhrase;
-				getSurfacePhrase(tgtPhrase,*path);
-				addPath=distinctHyps.insert(tgtPhrase).second;
-			}
-		
-		if(addPath) ret.push_back(path);
-		contenders.erase(contenders.begin());
-
-		// create deviations from current best
-		path->CreateDeviantPaths(contenders);
-		
-		// if necessary, add next pure path
-		if (path->IsPurePath() && iterBestHypo != sortedPureHypo.end())
 		{
-			contenders.insert(new LatticePath(*iterBestHypo));
-			++iterBestHypo;
+			// TODO - not entirely correct.
+			// output phrase can't be assumed to only contain factor 0.
+			// have to look in StaticData.GetOutputFactorOrder() to find out what output factors should be
+			std::vector<size_t> tgtPhrase;
+			getSurfacePhrase(tgtPhrase,*path);
+			addPath = distinctHyps.insert(tgtPhrase).second;
 		}
+		
+		if(addPath && ret.Add(path)) 
+		{	// create deviations from current best
+			path->CreateDeviantPaths(contenders);		
+		}
+
+		contenders.Detach(contenders.begin());
 	}
 }
 

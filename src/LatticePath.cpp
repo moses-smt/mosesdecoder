@@ -49,7 +49,7 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypoth
 	// 1 deviation
 	m_path.push_back(arc);
 
-	// rest of path comes from the deviation
+	// rest of path comes from following best path backwards
 	const Hypothesis *prevHypo = arc->GetPrevHypo();
 	while (prevHypo != NULL)
 	{
@@ -57,28 +57,22 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypoth
 		prevHypo = prevHypo->GetPrevHypo();
 	}
 
-	CalcScore(copy, edgeIndex, arc);
-}
+	// Calc score
+	m_totalScore		= m_path[0]->GetWinningHypo()->GetTotalScore();
+	m_scoreBreakdown= m_path[0]->GetWinningHypo()->GetScoreBreakdown();
 
-LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc, bool /*reserve*/)
-:m_path(copy.m_path)
-,m_prevEdgeChanged(edgeIndex)
-{
-	// 1 deviation
-	m_path[edgeIndex] = arc;
-
-	CalcScore(copy, edgeIndex, arc);
-}
-
-void LatticePath::CalcScore(const LatticePath &origPath, size_t edgeIndex, const Hypothesis *arc)
-{
-	ScoreComponentCollection adj = arc->GetScoreBreakdown();
-	adj.MinusEquals(origPath.m_path[edgeIndex]->GetScoreBreakdown());
-	m_scoreBreakdown = origPath.m_scoreBreakdown;
-	m_scoreBreakdown.PlusEquals(adj);	
-
-	float fadj = arc->GetTotalScore() - origPath.m_path[edgeIndex]->GetTotalScore();
-	m_totalScore = origPath.GetTotalScore() + fadj;
+	size_t sizePath = m_path.size();
+	for (size_t pos = 0 ; pos < sizePath ; pos++)
+	{
+		const Hypothesis *hypo = m_path[pos];
+		const Hypothesis *winningHypo = hypo->GetWinningHypo();
+		if (hypo != winningHypo)
+		{
+			m_totalScore = m_totalScore - winningHypo->GetTotalScore() + hypo->GetTotalScore();
+			m_scoreBreakdown.MinusEquals(winningHypo->GetScoreBreakdown());
+			m_scoreBreakdown.PlusEquals(hypo->GetScoreBreakdown());
+		}
+	}
 }
 
 void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
@@ -100,34 +94,28 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 			{
 				const Hypothesis *arc = *iterArc;
 				LatticePath *deviantPath = new LatticePath(*this, currEdge, arc);
-				pathColl.insert(deviantPath);
+				pathColl.Add(deviantPath);
 			}
 		}
 	}
 	else
 	{	// wiggle 1 of the edges only
-		for (size_t currEdge = 0 ; currEdge < sizePath ; currEdge++)
+		for (size_t currEdge = m_prevEdgeChanged + 1 ; currEdge < sizePath ; currEdge++)
 		{
-			if (currEdge != m_prevEdgeChanged)
-			{
-				const Hypothesis *edgeOrig = m_path[currEdge];
-				const ArcList *pAL = m_path[currEdge]->GetArcList();
-      	if (!pAL) continue;
-				const ArcList &arcList = *pAL;
-				ArcList::const_iterator iterArc;
+			const Hypothesis *edgeOrig = m_path[currEdge];
+			const ArcList *pAL = m_path[currEdge]->GetArcList();
+    	if (!pAL) continue;
+			const ArcList &arcList = *pAL;
+			ArcList::const_iterator iterArc;
 
-				for (iterArc = arcList.begin() ; iterArc != arcList.end() ; ++iterArc)
-				{	// copy this Path & change 1 edge
-					const Hypothesis *arcReplace = *iterArc;
+			for (iterArc = arcList.begin() ; iterArc != arcList.end() ; ++iterArc)
+			{	// copy this Path & change 1 edge
+				const Hypothesis *arcReplace = *iterArc;
 
-					if (arcReplace != edgeOrig && arcReplace->GetPrevHypo() == edgeOrig->GetPrevHypo())
-					{
-						LatticePath *deviantPath				= new LatticePath(*this, currEdge, arcReplace, true);
-						pathColl.insert(deviantPath);
-					}
-				}
-			}
-		}
+				LatticePath *deviantPath = new LatticePath(*this, currEdge, arcReplace);
+				pathColl.Add(deviantPath);						
+			} // for (iterArc...
+		} // for (currEdge = 0 ...
 	}
 }
 

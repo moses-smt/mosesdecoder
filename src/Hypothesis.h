@@ -74,7 +74,7 @@ protected:
 	float							m_futureScore; /**< estimated future cost to translate rest of sentence */
 	ScoreComponentCollection m_scoreBreakdown; /**< detailed score break-down by components (for instance language model, word penalty, etc) */
 	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /**< relevant history for language model scoring -- used for recombination */
-	const Hypothesis 	*m_mainHypo;
+	const Hypothesis 	*m_winningHypo;
 	ArcList 					*m_arcList; /**< all arcs that end at the same lattice point as this hypothesis */
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
@@ -220,22 +220,17 @@ public:
 
 	TO_STRING();
 
-	inline void SetMainHypo(const Hypothesis *hypo)
+	inline void SetWinningHypo(const Hypothesis *hypo)
 	{
-		m_mainHypo = hypo;
+		m_winningHypo = hypo;
 	}
+	inline const Hypothesis *GetWinningHypo() const
+	{
+		return m_winningHypo;
+	}
+	
 	void AddArc(Hypothesis *loserHypo);
-
-	inline void InitializeArcs()
-	{
-		if (!m_arcList) return;
-		ArcList::iterator iter = m_arcList->begin();
-		for (; iter != m_arcList->end() ; ++iter)
-		{
-			Hypothesis *arc = *iter;
-			arc->SetMainHypo(this);
-		}
-	}
+	void InitializeArcs();
 
 	//! returns a list alternative previous hypotheses (or NULL if n-best support is disabled)
 	inline const ArcList* GetArcList() const
