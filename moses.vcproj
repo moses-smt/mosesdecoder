@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\srilm\misc\src&quot;;&quot;$(SolutionDir)..\srilm\dstruct\src&quot;;&quot;$(SolutionDir)..\srilm\include&quot;;&quot;$(SolutionDir)..\srilm\lm\src&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;LM_IRST;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -106,7 +106,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\srilm\misc\src&quot;;&quot;$(SolutionDir)..\srilm\dstruct\src&quot;;&quot;$(SolutionDir)..\srilm\include&quot;;&quot;$(SolutionDir)..\srilm\lm\src&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;LM_IRST;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -241,6 +241,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelSkip.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelSRI.cpp"
 				>
 			</File>
 			<File
@@ -519,6 +523,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelSkip.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelSRI.h"
 				>
 			</File>
 			<File
