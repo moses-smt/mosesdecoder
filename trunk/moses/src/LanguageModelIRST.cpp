@@ -63,8 +63,13 @@ void LanguageModelIRST::Load(const std::string &filePath
   // Open the input file (possibly gzipped) and load the (possibly binary) model
 	InputFileStream inp(filePath);
 	m_lmtb  = new lmtable;
-  m_lmtb->load(inp,filePath.c_str(),1);
-  
+
+#ifdef WIN32
+	m_lmtb->load(inp);
+#else
+	m_lmtb->load(inp,filePath.c_str(),1);
+#endif
+
   m_lmtb_ng=new ngram(m_lmtb->dict);
   m_lmtb_size=m_lmtb->maxlevel();
   
@@ -159,8 +164,10 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 
 const void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
   cerr << "reset caches and mmap\n";
+#ifndef WIN32
   m_lmtb->reset_caches();  
   m_lmtb->reset_mmap();
+#endif
 }
 
 const void LanguageModelIRST::InitializeBeforeSentenceProcessing(){

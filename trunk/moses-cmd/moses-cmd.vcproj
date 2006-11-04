@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)\$(ConfigurationName)\irstlm.lib&quot; zdll.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)\$(ConfigurationName)\irstlm.lib&quot; zdll.lib &quot;$(SolutionDir)..\srilm\lib\cygwin\libdstruct.a&quot; &quot;$(SolutionDir)..\srilm\lib\cygwin\libflm.a&quot; &quot;$(SolutionDir)..\srilm\lib\cygwin\liblattice.a&quot; &quot;$(SolutionDir)..\srilm\lib\cygwin\liboolm.a&quot; &quot;$(SolutionDir)..\srilm\lib\cygwin\libmisc.a&quot;"
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -137,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)\$(ConfigurationName)\irstlm.lib&quot; zdll.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)\$(ConfigurationName)\irstlm.lib&quot; zdll.lib &quot;$(SolutionDir)..\srilm\lib\cygwin\libdstruct.a&quot; &quot;$(SolutionDir)..\srilm\lib\cygwin\libflm.a&quot; &quot;$(SolutionDir)..\srilm\lib\cygwin\liblattice.a&quot; &quot;$(SolutionDir)..\srilm\lib\cygwin\liboolm.a&quot; &quot;$(SolutionDir)..\srilm\lib\cygwin\libmisc.a&quot;"
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
