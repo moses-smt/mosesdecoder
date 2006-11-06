@@ -1,15 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual C++ Express 2005
+# Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses", "moses.vcproj", "{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-cmd", "..\moses-cmd\moses-cmd.vcproj", "{5BBAC701-84F5-438E-8F54-B3391F451F2A}"
 	ProjectSection(ProjectDependencies) = postProject
+		{002E2134-147C-4C1E-A3FD-2E5E15D59CE0} = {002E2134-147C-4C1E-A3FD-2E5E15D59CE0}
 		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF} = {8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}
 		{19C023D8-67DE-4609-9C89-3152EF95995D} = {19C023D8-67DE-4609-9C89-3152EF95995D}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "irstlm", "..\irstlm\irstlm.vcproj", "{19C023D8-67DE-4609-9C89-3152EF95995D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "srilm", "..\srilm\srilm.vcproj", "{002E2134-147C-4C1E-A3FD-2E5E15D59CE0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +32,10 @@ Global
 		{19C023D8-67DE-4609-9C89-3152EF95995D}.Debug|Win32.Build.0 = Debug|Win32
 		{19C023D8-67DE-4609-9C89-3152EF95995D}.Release|Win32.ActiveCfg = Release|Win32
 		{19C023D8-67DE-4609-9C89-3152EF95995D}.Release|Win32.Build.0 = Release|Win32
+		{002E2134-147C-4C1E-A3FD-2E5E15D59CE0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{002E2134-147C-4C1E-A3FD-2E5E15D59CE0}.Debug|Win32.Build.0 = Debug|Win32
+		{002E2134-147C-4C1E-A3FD-2E5E15D59CE0}.Release|Win32.ActiveCfg = Release|Win32
+		{002E2134-147C-4C1E-A3FD-2E5E15D59CE0}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

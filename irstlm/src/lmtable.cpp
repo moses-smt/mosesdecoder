@@ -17,8 +17,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 ******************************************************************************/
+#ifndef WIN32
 #include <sys/types.h>
 #include <sys/mman.h>
+#endif
 #include <fcntl.h>
 #include <iostream>
 #include <fstream>
@@ -72,7 +74,11 @@ lmtable::lmtable(){
 //loadstd::istream& inp a lmtable from a lm file
 
 void lmtable::load(istream& inp,const char* filename,int keep_on_disk){
-  
+
+	#ifdef WIN32
+		keep_on_disk = 0;
+	#endif
+
   //give a look at the header to select loading method
   char header[1024];	
   inp >> header; cerr << header << "\n";
@@ -570,6 +576,7 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
   dict->load(inp);  
    
   //if MMAP is used, then open the file
+#ifndef WIN32
   if (filename and mmap>0){
     
     if (mmap <= maxlev)
@@ -590,7 +597,6 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
     
   }
   
-  
   for (int l=1;l<=maxlev;l++){
     if (isQtable) loadbincodebook(inp,l);
     if ((memmap == 0) or (l < memmap)){
@@ -608,6 +614,7 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
       inp.seekg(cursize[l]*nodesize(tbltype[l]),ios_base::cur);
     }
   };  
+#endif  
   
   cerr << "done\n";
   

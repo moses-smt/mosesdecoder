@@ -22,8 +22,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #ifndef MF_LMTABLE_H
 #define MF_LMTABLE_H
 
+#ifndef WIN32
 #include <sys/types.h>
 #include <sys/mman.h>
+#endif
+
 #include "util.h"
 #include "ngramcache.h"
 #include "dictionary.h"
@@ -183,6 +186,7 @@ public:
     
     
     void reset_mmap(){
+#ifndef WIN32
     if (memmap>0 and memmap<=maxlev)
       for (int l=memmap;l<=maxlev;l++){
         std::cerr << "resetting mmap at level:" << l << "\n";
@@ -192,6 +196,7 @@ public:
                                &tableGaps[l]);
         table[l]+=tableGaps[l];
       }
+#endif
    }
       
   bool is_probcache_active(){return probcache!=NULL;}
