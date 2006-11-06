@@ -49,36 +49,30 @@ namespace LanguageModelFactory
 	  	case SRI:
 				#ifdef LM_SRI
 				  lm = new LanguageModelSRI(true);
-			  #elif LM_IRST
-	     		lm = new LanguageModelIRST(true);
-				#else
+				#elif LM_INTERNAL
 					lm = new LanguageModelInternal(true);
 			  #endif
 			  break;
 			case IRST:
 				#ifdef LM_IRST
 	     		lm = new LanguageModelIRST(true);
-			  #elif LM_IRST
+			  #elif LM_SRI
 	     		lm = new LanguageModelSRI(true);
-				#else
+				#elif LM_INTERNAL
 					lm = new LanguageModelInternal(true);
 			  #endif
 				break;
 			case Skip:
 				#ifdef LM_SRI
 	     		lm = new LanguageModelSkip(new LanguageModelSRI(false), true);
-				#elif LM_SRI
-	     			lm = new LanguageModelSkip(new LanguageModelIRST(false), true);
-				#else
+				#elif LM_INTERNAL
 	     			lm = new LanguageModelSkip(new LanguageModelInternal(false), true);
 				#endif
 				break;
 			case Joint:
 				#ifdef LM_SRI
 	     		lm = new LanguageModelJoint(new LanguageModelSRI(false), true);
-				#elif LM_IRST
-		     		lm = new LanguageModelJoint(new LanguageModelIRST(false), true);
-				#else
+				#elif LM_INTERNAL
 		     		lm = new LanguageModelJoint(new LanguageModelInternal(false), true);
 				#endif
 				break;
