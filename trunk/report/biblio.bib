@@ -35,7 +35,7 @@
 %}
 
 % Postup, jak z vybranych publikaci udelat tabulicku:
-% cscharsiso wrap < clip| iu | grep '=\|^$' | sed 's/^[ %]*//' | sed 's/ *= */	/' | sed 's/	["{]*/	/' | sed 's/["},]*$//' | colwise 1 'tr "A-Z" "a-z"'  |dett | numerize_blocks | remove_blank_lines | list2tab 1 2 3 | tt --utf8 | less -S
+% cscharsiso wrap < clip| iu | grep '=\|^$' | sed 's/^[ %]*//' | sed 's/ *= */  /' | sed 's/    ["{]*/  /' | sed 's/["},]*$//' | colwise 1 'tr "A-Z" "a-z"'  |dett | numerize_blocks | remove_blank_lines | list2tab 1 2 3 | tt --utf8 | less -S
 
  @PhdThesis{ OchThesis,
   author =  {Franz Josef Och},
@@ -49,16 +49,16 @@
 @inproceedings{ Collins2005,
   author =      { Michael Collins and Philipp Koehn and Ivona Kucerova},
   title =           {Clause Restructuring for Statistical Machine Translation},
-  booktitle = 	 {Proceedings of ACL},
-  year = 	 {2005}
+  booktitle =    {Proceedings of ACL},
+  year =     {2005}
 }
 
 
 @PhdThesis{SchulteImWalde:03,
-  author = 	 "Sabine {Schulte im Walde}",
-  title = 	 "Experiments on the {A}utomatic {I}nduction of {G}erman {S}emantic {V}erb {C}lasses",
-  school = 	 "Institut für Maschinelle Sprachverarbeitung, Universität Stuttgart",
-  year = 	 "2003",
+  author =   "Sabine {Schulte im Walde}",
+  title =    "Experiments on the {A}utomatic {I}nduction of {G}erman {S}emantic {V}erb {C}lasses",
+  school =   "Institut für Maschinelle Sprachverarbeitung, Universität Stuttgart",
+  year =     "2003",
   note =         "Published as AIMS Report 9(2)",
 }
 
@@ -325,7 +325,16 @@
  grants = {GAAV \v{C}R 1ET201120505, LC536 and GA\v{C}R No. 405/04/0243},
 }
 
-
+@InProceedings{koehn-monz:2006:WMT,
+  author    = {Koehn, Philipp  and  Monz, Christof},
+  title     = {Manual and Automatic Evaluation of Machine Translation between European Languages},
+  booktitle = {Proceedings on the Workshop on Statistical Machine Translation},
+  month     = {June},
+  year      = {2006},
+  address   = {New York City},
+  publisher = {Association for Computational Linguistics},
+  pages     = {102--121}
+}
 
 @InProceedings{pharaoh:2003,
     DocumentType = {},
@@ -339,11 +348,11 @@
 }
 
 @misc{och:tutorial:2005,
-	author = {Franz Joseph Och},
-	title = "{Statistical Machine Translation: Foundations and Recent Advances}",
-	howpublished = {Tutorial at MT Summit 2005},
-	year = {2005},
-	month = sep
+    author = {Franz Joseph Och},
+    title = "{Statistical Machine Translation: Foundations and Recent Advances}",
+    howpublished = {Tutorial at MT Summit 2005},
+    year = {2005},
+    month = sep
 }
 
 @inproceedings{pharaoh:2004,
@@ -972,17 +981,17 @@
 
 
 @Article{PTB,
-  author = 	 {M. P. Marcus and B. Santorini and M. A. Marcinkiewicz},
+  author =   {M. P. Marcus and B. Santorini and M. A. Marcinkiewicz},
   title = "{{Building a large annotated corpus of English: the Penn treebank}}",
-  journal = 	 {Computational Linguistics},
-  year = 	 {1993},
-  OPTkey = 	 {},
-  Volume = 	 {19},
-  OPTnumber = 	 {},
-  Pages = 	 {313--330},
-  OPTmonth = 	 {},
-  OPTnote = 	 {},
-  OPTannote = 	 {}
+  journal =      {Computational Linguistics},
+  year =     {1993},
+  OPTkey =   {},
+  Volume =   {19},
+  OPTnumber =    {},
+  Pages =    {313--330},
+  OPTmonth =     {},
+  OPTnote =      {},
+  OPTannote =    {}
 }
 
 @incollection{LDC-PTB1999,
@@ -1005,30 +1014,30 @@
 
 @PhdThesis{skoumalova:2001,
   key  = {Skoumalov{\'{a}},2001},
-  author = 	 {Hana Skoumalov{\'{a}}},
+  author =   {Hana Skoumalov{\'{a}}},
   title = "{Czech syntactic lexicon}",
-  school = 	 {Univerzita Karlova, Filozofick{\'{a}} fakulta},
-  year = 	 {2001},
+  school =   {Univerzita Karlova, Filozofick{\'{a}} fakulta},
+  year =     {2001},
 }
 
 @Article{loppan:2004,
-  author = 	 {Mark{\'{e}}ta Lopatkov{\'{a}} and Jarmila Panevov{\'{a}}},
+  author =   {Mark{\'{e}}ta Lopatkov{\'{a}} and Jarmila Panevov{\'{a}}},
   title = "{Recent developments of the theory of valency in the light of the Prague Dependency Treebank}",
-  journal = 	 {SNK},
-  year = 	 {2004},
+  journal =      {SNK},
+  year =     {2004},
   note =         {in press}
 }
 
 @Article{skoumalova:2002,
   key  = {Skoumalov{\'{a}},2002},
-  author = 	 {Hana Skoumalov{\'{a}}},
+  author =   {Hana Skoumalov{\'{a}}},
   title = "{Verb Frames Extracted from dictionaries}",
-  journal = 	 {The Prague Bulletin of Mathematical Linguistics},
+  journal =      {The Prague Bulletin of Mathematical Linguistics},
   volume = {77},
     ISSN = {0032-6585},
     Publisher = {Charles University},
     PubAddress = {Prague},
-  year = 	 {2002},
+  year =     {2002},
 }
 
 
@@ -1189,9 +1198,9 @@ phenomena in the verbal complex of German verb final sentences.},
 }
 
 @InProceedings{Dubey:Keller:03,
-  author = 	 {Amit Dubey and Frank Keller},
+  author =   {Amit Dubey and Frank Keller},
   title = "{Probabilistic Parsing for {German} using Sister-Head Dependencies}",
-  crossref =	 {ACL:03},
+  crossref =     {ACL:03},
   pages =        {96--103}
 }
 
@@ -2769,33 +2778,33 @@ applications}},
 
 @Book{helsche:69,
   key  = {Helbig,Schenkel,1969},
-  author = 	 {Gerhard Helbig and Wolfgang Schenkel},
+  author =   {Gerhard Helbig and Wolfgang Schenkel},
   title = "{W\"orterbuch zur Valenz und Distribution deutscher Verben}",
-  publisher = 	 {VEB BIBLIOGRAPHISCHES INSTITUT},
-  year = 	 {1969},
-  address = 	 {Leipzig, Germany},
+  publisher =    {VEB BIBLIOGRAPHISCHES INSTITUT},
+  year =     {1969},
+  address =      {Leipzig, Germany},
 }
 
 
 @Book{smolensk,
       key  = {Silnickij et al.,1999},
-  author = 	 {G.G. Silnickij and others},
-  ALTeditor = 	 {},
-  title = 	 {Korreljacionnaja tipologija glagolnych sistem
+  author =   {G.G. Silnickij and others},
+  ALTeditor =    {},
+  title =    {Korreljacionnaja tipologija glagolnych sistem
                   indoevropejskich i inostrukturnych jazykov},
-  publisher = 	 {},
-  year = 	 {1999},
-  address = 	 {Smolensk, Russia},
+  publisher =    {},
+  year =     {1999},
+  address =      {Smolensk, Russia},
 }
 
 @InProceedings{baliva:02,
   key  = {Balabanova,Ivanova,2002},
-  author = 	 {Elisaveta Balabanova and Krasimira Ivanova},
-  title = 	 {Creating a machine-readable version of Bulgarian valence dictionary
+  author =   {Elisaveta Balabanova and Krasimira Ivanova},
+  title =    {Creating a machine-readable version of Bulgarian valence dictionary
                     (A case study of CLaRK system application)},
   booktitle = {Proceedings of The First Workshop on Treebanks and Linguistic Theories},
-  year = 	 {2002},
-  address = 	 {Sozopol, Bulgaria}
+  year =     {2002},
+  address =      {Sozopol, Bulgaria}
 }
 
 
@@ -2804,70 +2813,70 @@ applications}},
 
 @Book{grekar:98,
   key  = {Grepl,Karl{\'{\i}}k,1998},
-  author = 	 {Miroslav Grepl and Petr Karl{\'{\i}}k},
+  author =   {Miroslav Grepl and Petr Karl{\'{\i}}k},
   title = "{Skladba {\v{c}}e{\v{s}}tiny}",
-  publisher = 	 {Votobia},
+  publisher =    {Votobia},
   address = {Olomouc},
-  year = 	 {1998}
+  year =     {1998}
 }
 
 
 @Manual{hps:01,
   key  = {Haji{\v{c}}ov{\'{a}} et al.,2001},
   title = "{Manu{\'{a}}l pro tektogramatick{\'{e}} zna{\v{c}}kov{\'{a}}n{\'{\i}}}",
-  author = 	 {Eva Haji{\v{c}}ov{\'{a}} and Jarmila Panevov{\'{a}} and Petr Sgall},
+  author =   {Eva Haji{\v{c}}ov{\'{a}} and Jarmila Panevov{\'{a}} and Petr Sgall},
   organization = {{\'{U}}FAL},
-  year = 	 {2001}
+  year =     {2001}
 }
 
 
 @Article{kom:01,
   key  = {Kom{\'{a}}rek,2001},
-  author = 	 {Miroslav Kom{\'{a}}rek},
+  author =   {Miroslav Kom{\'{a}}rek},
   title = "{N{\v{e}}kolik pozn{\'{a}}mek k Reflexi reflexivity reflexiv}",
-  journal = 	 {Slovo a slovesnost},
+  journal =      {Slovo a slovesnost},
   pages = {207--209},
-  year = 	 {2001},
+  year =     {2001},
 }
 
 
 @Article{kra:81,
   key  = {Kr{\'{a}}l{\'{\i}}kov{\'{a}},1981},
-  author = 	 {Kv{\v{e}}ta Kr{\'{a}}l{\'{\i}}kov{\'{a}}},
+  author =   {Kv{\v{e}}ta Kr{\'{a}}l{\'{\i}}kov{\'{a}}},
   title = "{Reflex{\'{\i}}vnost sloves z hlediska automatick{\'{e}} anal{\'{y}}zy {\v{c}}e{\v{s}}tiny}",
-  journal = 	 {Slovo a slovesnost},
-  year = 	 {1981},
-  pages = 	 {291--298}
+  journal =      {Slovo a slovesnost},
+  year =     {1981},
+  pages =    {291--298}
 }
 
 
 @PhdThesis{sko:01,
   key  = {Skoumalov{\'{a}},2001},
-  author = 	 {Hana Skoumalov{\'{a}}},
+  author =   {Hana Skoumalov{\'{a}}},
   title = "{Czech syntactic lexicon}",
-  school = 	 {Univerzita Karlova, Filozofick{\'{a}} fakulta},
-  year = 	 {2001},
+  school =   {Univerzita Karlova, Filozofick{\'{a}} fakulta},
+  year =     {2001},
 }
 
 
 @Article{sko:02,
   key  = {Skoumalov{\'{a}},2002},
-  author = 	 {Hana Skoumalov{\'{a}}},
+  author =   {Hana Skoumalov{\'{a}}},
   title = "{Verb Frames Extracted from dictionaries}",
-  journal = 	 {The Prague Bulletin of Mathematical Linguistics},
+  journal =      {The Prague Bulletin of Mathematical Linguistics},
   volume = {77},
     ISSN = {0032-6585},
     Publisher = {Charles University},
     PubAddress = {Prague},
-  year = 	 {2002},
+  year =     {2002},
 }
 
 @Book{smi:66,
   key  = {{\v{S}}milauer,1966},
-  author = 	 {Vladim{\'{\i}}r {\v{S}}milauer},
+  author =   {Vladim{\'{\i}}r {\v{S}}milauer},
   title = "{Novo{\v{c}}esk{\'{a}} skladba}",
-  publisher = 	 {SPN},
-  year = 	 {1966}
+  publisher =    {SPN},
+  year =     {1966}
 }
 
 
@@ -2875,24 +2884,24 @@ applications}},
 
 @Article{pan:96,
   key  = {Panevov{\'{a}},1996},
-  author = 	 {Jarmila Panevov{\'{a}}},
+  author =   {Jarmila Panevov{\'{a}}},
   title = "{More Remarks on Control}",
-  journal = 	 {Prague Linguistic Circle Papers, John Benjamins},
-  year = 	 {1996},
-  volume = 	 {2},
-  publisher = 	 {John Benjamins Publishing Company},
-  pages = 	 {101--120}
+  journal =      {Prague Linguistic Circle Papers, John Benjamins},
+  year =     {1996},
+  volume =   {2},
+  publisher =    {John Benjamins Publishing Company},
+  pages =    {101--120}
 }
 
 
 
 @Misc{pan-kor,
   key  = {Panevov{\'{a}},1998},
-  author = 	 {Jarmila Panevov{\'{a}}},
+  author =   {Jarmila Panevov{\'{a}}},
   title = "{Koreference v gramatice a textu (nutnost strukturn{\'{\i}}ho popisu a jeho hranice}",
-  publisher = 	 {Wydawnictwo Uniwersytetu Slaskiego},
+  publisher =    {Wydawnictwo Uniwersytetu Slaskiego},
   address = {Katowice},
-  year = 	 {1998},
+  year =     {1998},
   pages = {128--135}
 }
 
@@ -2902,25 +2911,25 @@ applications}},
 @Book{SSJC,
   key = {SSJ{\v{C}}},
   title = "{Slovn{\'{\i}}k spisovn{\'{e}} {\v{c}}e{\v{s}}tiny pro {\v{s}}kolu a ve{\v{r}}ejnost}",
-  publisher = 	 {Academia},
-  year = 	 {1978},
-  address = 	 {Praha}
+  publisher =    {Academia},
+  year =     {1978},
+  address =      {Praha}
 }
 
 @Book{SSC,
   key = {SS{\v{C}}},
   title = "{Slovn{\'{\i}}k spisovn{\'{e}}ho jazyka {\v{c}}esk{\'{e}}ho}",
-  year = 	 {1964},
-  address = 	 {Praha}
+  year =     {1964},
+  address =      {Praha}
 }
 
 @Book{SCFI,
   key  = {S{\v{C}}FI},
   title = "{Slovn{\'{\i}}k {\v{c}}esk{\'{e}} frazeologie a idiomatiky}",
   editor =       {Franti{\v{s}}ek {\v{C}}erm{\'{a}}k and Ji{\v{r}}{\'{\i}} Hronek and others},
-  publisher = 	 {Academia},
-  year = 	 {1994},
-  address = 	 {Praha}
+  publisher =    {Academia},
+  year =     {1994},
+  address =      {Praha}
 }
 
 
@@ -2930,17 +2939,17 @@ applications}},
 @Book{mluvnice3,
   key  = {Mluvnice III},
   title = "{Mluvnice {\v{c}}e{\v{s}}tiny III}",
-  publisher = 	 {Academia},
-  year = 	 {1987},
-  address = 	 {Praha}
+  publisher =    {Academia},
+  year =     {1987},
+  address =      {Praha}
 }
 
 @Book{prirucni,
   key      =     {PM{\v{C}}},
   title = "{P{\v{r}}{\'{\i}}ru{\v{c}}n{\'{\i}} mluvnice {\v{c}}e{\v{s}}tiny}",
-  publisher = 	 {Nakladatelstv{\'{\i}} LN},
-  year = 	 {1996},
-  address = 	 {Praha}
+  publisher =    {Nakladatelstv{\'{\i}} LN},
+  year =     {1996},
+  address =      {Praha}
 }
 
 
@@ -2949,12 +2958,12 @@ applications}},
 
 @InProceedings{framenet2,
   key  = {Fillmore,2002b},
-  author = 	 {Charles J. Fillmore and Collin Baker and Hiroaki Sato},
+  author =   {Charles J. Fillmore and Collin Baker and Hiroaki Sato},
   title = "{Seeing Argumens through Transparent Structures}",
   booktitle = {Proceedings of LREC 2002},
-  pages = 	 {787-791},
-  year = 	 {2002},
-  editor = 	 {M. Gonz{\'{a}}lez Rodr{\'{\i}}guez and C. Paz Su{\'{a}}rez Araujo},
+  pages =    {787-791},
+  year =     {2002},
+  editor =   {M. Gonz{\'{a}}lez Rodr{\'{\i}}guez and C. Paz Su{\'{a}}rez Araujo},
   organization = {ELRA}
 }
 
@@ -2964,98 +2973,98 @@ applications}},
 
 
 @Book{pauliny-43,
-  author = 	 {Eugen Pauliny},
+  author =   {Eugen Pauliny},
   title = "{{\v{S}}trukt{\'{u}}ra slovensk{\'{e}}ho slovesa}",
-  year = 	 {1943},
-  address = 	 {Bratislava},
+  year =     {1943},
+  address =      {Bratislava},
 }
 
 @InProceedings{walde-03,
-  author = 	 {Sabine Schulte im Walde},
+  author =   {Sabine Schulte im Walde},
   title = "{Experiments on the Choice of Features for Learning Verb Classes}",
   booktitle = {Proceedings of the 10th Conference of the European Chapter of
                the Association for Computational Linguistics},
-  pages = 	 {315--322},
-  year = 	 {2003},
-  address = 	 {Budapest}
+  pages =    {315--322},
+  year =     {2003},
+  address =      {Budapest}
 }
 
 @Book{lexiko,
   key  = {{\v{C}}erm{\'{a}}k,Blatn{\'{a}},1995},
-  editor = 	 {Franti{\v{s}}ek {\v{C}}erm{\'{a}}k and Renata Blatn{\'{a}}},
+  editor =   {Franti{\v{s}}ek {\v{C}}erm{\'{a}}k and Renata Blatn{\'{a}}},
   title = "{Manu{\'{a}}l lexikografie}",
-  publisher = 	 {H\&H},
+  publisher =    {H\&H},
   address = {Jino{\v{c}}any},
-  year = 	 {1995}
+  year =     {1995}
 }
 
 
 @Article{pan:99,
   key  = {Panevov{\'{a}},1999},
-  author = 	 {Jarmila Panevov{\'{a}}},
+  author =   {Jarmila Panevov{\'{a}}},
   title = "{{\v{C}}esk{\'{a}} recipro{\v{c}}n{\'{\i}} z{\'{a}}jmena a slovesn{\'{a}} valence}",
-  journal = 	 {Slovo a slovesnost},
-  year = 	 {1999},
-  volume = 	 {4}
+  journal =      {Slovo a slovesnost},
+  year =     {1999},
+  volume =   {4}
 }
 
 
 
 @Book{filcer:95,
   key  = {Filipec,{\v{C}}erm{\'{a}}k,1985},
-  author = 	 {Josef Filipec and Franti{\v{s}}ek {\v{C}}erm{\'{a}}k},
-  ALTeditor = 	 {},
+  author =   {Josef Filipec and Franti{\v{s}}ek {\v{C}}erm{\'{a}}k},
+  ALTeditor =    {},
   title = "{{\v{C}}esk{\'{a}} lexikologie}",
-  publisher = 	 {Academia},
-  year = 	 {1985},
-  address = 	 {Praha},
+  publisher =    {Academia},
+  year =     {1985},
+  address =      {Praha},
 }
 
 
 @Article{fil:73,
   key  = {Filipec,1973},
-  author = 	 {Josef Filipec},
+  author =   {Josef Filipec},
   title = "{K ot{\'{a}}zce s{\'{e}}mantick{\'{e}}ho popisu lexik{\'{a}}ln{\'{\i}}ch jednotek}",
-  journal = 	 {Slovo a slovesnost},
-  year = 	 {1973},
-  volume = 	 {34}
+  journal =      {Slovo a slovesnost},
+  year =     {1973},
+  volume =   {34}
 }
 
 @Article{macsvo:90,
   key  = {Mach{\'{a}}{\v{c}}kov{\'{a}},Svozilov{\'{a}},1990},
-  author = 	 {Eva Mach{\'{a}}{\v{c}}kov{\'{a}} and Na{\v{d}}a Svozilov{\'{a}}},
+  author =   {Eva Mach{\'{a}}{\v{c}}kov{\'{a}} and Na{\v{d}}a Svozilov{\'{a}}},
   title = "{Slovesn{\'{a}} valence ve slovn{\'{\i}}c{\'{\i}}ch}",
-  journal = 	 {Slovo a slovesnost},
-  year = 	 {1990},
-  volume = 	 {51}
+  journal =      {Slovo a slovesnost},
+  year =     {1990},
+  volume =   {51}
 }
 
 
 @Book{meaning,
   key  = {Sgall et al.,1986},
-  author = 	 {Petr Sgall and Eva Haji{\v{c}}ov{\'{a}} and Jarmila Panevov{\'{a}}},
+  author =   {Petr Sgall and Eva Haji{\v{c}}ov{\'{a}} and Jarmila Panevov{\'{a}}},
   title = "{The Meaning of the Sentence in Its Semantic and Pragmatic Aspects}",
-  publisher = 	 {D. Reidel Publishing Company},
-  year = 	 {1986},
-  address = 	 {Dordrecht}
+  publisher =    {D. Reidel Publishing Company},
+  year =     {1986},
+  address =      {Dordrecht}
 }
 
 
 @Book{knp:02,
   key  = {Karl{\'{\i}}k et al.,2002},
-  editor = 	 {Petr Karl{\'{\i}}k and Marek Nekula and Jana Pleskalov{\'{a}}},
+  editor =   {Petr Karl{\'{\i}}k and Marek Nekula and Jana Pleskalov{\'{a}}},
   title = "{Encyklopedick{\'{y}} slovn{\'{\i}}k {\v{c}}e{\v{s}}tiny}",
-  publisher = 	 {Nakladatelstv{\'{\i}} Lidov{\'{e}} noviny},
-  year = 	 {2002}
+  publisher =    {Nakladatelstv{\'{\i}} Lidov{\'{e}} noviny},
+  year =     {2002}
 }
 
 
 @Book{tes:59,
   key  = {Tesni\`{e}re,1959},
-  author = 	 {Lucien Tesni\`{e}re},
+  author =   {Lucien Tesni\`{e}re},
   title = "{El{\'{e}}ments de syntaxe structurale}",
-  year = 	 {1959},
-  address = 	 {Paris}
+  year =     {1959},
+  address =      {Paris}
 }
 
 
@@ -3064,19 +3073,19 @@ applications}},
 % taky melo titulek jack1
 @Book{jackendoff:1990,
   key  = {Jackendoff,1990},
-  author = 	 {Ray Jackendoff  },
+  author =   {Ray Jackendoff  },
   title = "{Semantic Structures}",
-  publisher = 	 {The MIT Press},
-  year = 	 {1990}
+  publisher =    {The MIT Press},
+  year =     {1990}
 }
 
 
 @Book{jack2,
   key  = {Jackendoff,1983},
-  author = 	 {Ray Jackendoff  },
+  author =   {Ray Jackendoff  },
   title = "{Semantics and Cognition}",
-  publisher = 	 {The MIT Press},
-  year = 	 {1983}
+  publisher =    {The MIT Press},
+  year =     {1983}
 }
 
 
@@ -3084,10 +3093,10 @@ applications}},
 
 @Book{lot:00,
   key  = {Lotko,2000},
-  author = 	 {Eduard Lotko},
+  author =   {Eduard Lotko},
   title = "{Slovn{\'{\i}}k lingvistick{\'{y}}ch term{\'{\i}}n{\r{u}} pro filology}",
   address =      {Olomouc},
-  year = 	 {2000},
+  year =     {2000},
 }
 
 % --------------- use
@@ -3095,11 +3104,11 @@ applications}},
 
 @Book{cechova,
   key  = {{\v{C}}echov{\'{a}} et al.,1996},
-  author = 	 {Marie {\v{C}}echov{\'{a}} and others},
+  author =   {Marie {\v{C}}echov{\'{a}} and others},
   title = "{{\v{C}}E{\v{S}}TINA -- {\v{R}}e{\v{c}} a jazyk}",
-  publisher = 	 {ISV nakladatelstv{\'{\i}}},
+  publisher =    {ISV nakladatelstv{\'{\i}}},
   address =      {Praha},
-  year = 	 {1996},
+  year =     {1996},
 }
 
 
@@ -3107,11 +3116,11 @@ applications}},
 
 @Article{oli:01,
   key  = {Oliva,2001},
-  author = 	 {Karel Oliva},
+  author =   {Karel Oliva},
   title = "{Reflexe reflixivity reflexiv}",
-  journal = 	 {Slovo a slovesnost},
+  journal =      {Slovo a slovesnost},
   pages = {200-2007},
-  year = 	 {2001},
+  year =     {2001},
 }
 
 
@@ -3121,9 +3130,9 @@ applications}},
 @Book{mluvnice22,
   key  = {Mluvnice II},
   title = "{Mluvnice {\v{c}}e{\v{s}}tiny II}",
-  publisher = 	 {Academia},
-  year = 	 {1986},
-  address = 	 {Praha}
+  publisher =    {Academia},
+  year =     {1986},
+  address =      {Praha}
 }
 
 
@@ -3133,22 +3142,22 @@ applications}},
 
 @InProceedings{hor:98,
   key  = {Hor{\'{a}}k,1998},
-  author = 	 {Ale{\v{s}} Hor{\'{a}}k},
+  author =   {Ale{\v{s}} Hor{\'{a}}k},
   title = "{Verb valency and semantic classification of verbs}",
   booktitle = {Text, Speech and Dialogue - TSD 98},
-  year = 	 {1998},
-  editor = 	 {Petr Sojka and V{\'{a}}clav Matou{\v{s}}ek and Karel Pala and Ivan Kope{\v{c}}ek},
-  address = 	 {Brno}
+  year =     {1998},
+  editor =   {Petr Sojka and V{\'{a}}clav Matou{\v{s}}ek and Karel Pala and Ivan Kope{\v{c}}ek},
+  address =      {Brno}
 }
 
 @InProceedings{palsev:97,
   key  = {Pala,{\v{S}}eve{\v{c}}ek,1997},
-  author = 	 {Karel Pala and Pavel {\v{S}}eve{\v{c}}ek},
+  author =   {Karel Pala and Pavel {\v{S}}eve{\v{c}}ek},
   title = "{Valence {\v{c}}esk{\'{y}}ch sloves}",
   booktitle = {Sborn{\'{\i}}k prac{\'{\i}} FFBU},
-  pages = 	 {41-54},
-  year = 	 {1997},
-  address = 	 {Brno}
+  pages =    {41-54},
+  year =     {1997},
+  address =      {Brno}
 }
 
 
@@ -3157,98 +3166,98 @@ applications}},
 
 @InCollection{fil:68,
   key  = {Fillmore,1968},
-  author = 	 {Charles J. Fillmore},
+  author =   {Charles J. Fillmore},
   title = "{The Case for Case}",
-  booktitle = 	 {Universals in Linguistic Theory},
-  pages = 	 {1--90},
-  year = 	 {1968},
-  editor = 	 {E. Bach and R. Harms},
-  address = 	 {New York},
+  booktitle =    {Universals in Linguistic Theory},
+  pages =    {1--90},
+  year =     {1968},
+  editor =   {E. Bach and R. Harms},
+  address =      {New York},
 }
 
 @InCollection{fil:77,
   key  = {Fillmore,1977},
-  author = 	 {Charles J. Fillmore},
+  author =   {Charles J. Fillmore},
   title = "{The Case for Case Reopened}",
-  booktitle = 	 {Syntax and Semantics 8},
-  pages = 	 {59--81},
-  year = 	 {1977},
-  editor = 	 {P. Cole, J.M. Sadock},
+  booktitle =    {Syntax and Semantics 8},
+  pages =    {59--81},
+  year =     {1977},
+  editor =   {P. Cole, J.M. Sadock},
 }
 
 
 @Book{sga:67,
   key  = {Sgall,1967},
-  author = 	 {Petr Sgall},
+  author =   {Petr Sgall},
   title = "{Generativn{\'{\i}} popis jazyka a {\v{c}}esk{\'{a}} deklinace}",
-  publisher = 	 {Academia},
-  year = 	 {1967},
+  publisher =    {Academia},
+  year =     {1967},
 }
 
 @InCollection{sga:92,
   key  = {Sgall,1992},
-  author = 	 {Petr Sgall},
+  author =   {Petr Sgall},
   title = "{Underlying Structure of Sentences and its Relations to Semantics}",
-  booktitle = 	 {Festschrift f{\"{u}}r Viktor Jul'evi{\v{c}} Rozencvejg zum 80. Geburtstag, Wiener Slawistischer Almanach 33},
-  pages = 	 {273-282},
-  year = 	 {1992},
-  editor = 	 {T. Reuther},
-  address = 	 {Wien},
+  booktitle =    {Festschrift f{\"{u}}r Viktor Jul'evi{\v{c}} Rozencvejg zum 80. Geburtstag, Wiener Slawistischer Almanach 33},
+  pages =    {273-282},
+  year =     {1992},
+  editor =   {T. Reuther},
+  address =      {Wien},
 }
 
 
 
 @Book{pan:80,
   key  = {Panevov{\'{a}},1980},
-  author = 	 {Jarmila Panevov{\'{a}}},
+  author =   {Jarmila Panevov{\'{a}}},
   title = "{Formy a funkce ve stavb{\v{e}} {\v{c}}esk{\'{e}} v{\v{e}}ty}",
-  publisher = 	 {Academia},
-  year = 	 {1980},
-  address = 	 {Praha}
+  publisher =    {Academia},
+  year =     {1980},
+  address =      {Praha}
 }
 
 @InCollection{pan:74,
   key  = {Panevov{\'{a}},1974},
-  author = 	 {Jarmila Panevov{\'{a}}},
+  author =   {Jarmila Panevov{\'{a}}},
   title = "{On Verbal Frames in Functional Generative Description}",
-  booktitle = 	 {The Prague Bulletin of Mathematical Linguistics},
+  booktitle =    {The Prague Bulletin of Mathematical Linguistics},
   volume = {22},
     ISSN = {0032-6585},
     Publisher = {Charles University},
     PubAddress = {Prague},
-  pages = 	 {3-40},
-  year = 	 {1974}
+  pages =    {3-40},
+  year =     {1974}
 }
 
 
 @InCollection{pan:92,
   key  = {Panevov{\'{a}},1992},
-  author = 	 {Jarmila Panevov{\'{a}}},
+  author =   {Jarmila Panevov{\'{a}}},
   title = "{O nekotoryx tipax obobschennyx aktantov}",
-  booktitle = 	 {Festschrift f{\"{u}}r V. J. Rozencvejg, Wiener Slawistischer Almanach 33},
-  pages = 	 {73-78},
-  year = 	 {1992},
-  editor = 	 {T. Reuther},
-  address = 	 {Wien}
+  booktitle =    {Festschrift f{\"{u}}r V. J. Rozencvejg, Wiener Slawistischer Almanach 33},
+  pages =    {73-78},
+  year =     {1992},
+  editor =   {T. Reuther},
+  address =      {Wien}
 }
 
 @InCollection{panrez:01,
   key  = {Panevov{\'{a}},{\v{R}}ezn{\'{\i}}{\v{c}}kov{\'{a}},2001},
-  author = 	 {Jarmila Panevov{\'{a}} and Veronika {\v{R}}ezn{\'{\i}}{\v{c}}kov{\'{a}}},
+  author =   {Jarmila Panevov{\'{a}} and Veronika {\v{R}}ezn{\'{\i}}{\v{c}}kov{\'{a}}},
   title = "{K mo{\v{z}}n{\'{e}}mu pojet{\'{\i}} v{\v{s}}eobecnosti aktantu}",
-  booktitle = 	 {sborn{\'{\i}}k {\v{C}}e{\v{s}}tina - univerz{\'{a}}lia a specifika 3},
-  pages = 	 {139--146},
-  editor = 	 {Zde{\v{n}}ka Hladk{\'{a}} and Petr Karl{\'{\i}}k},
-  year = 	 {2001},
+  booktitle =    {sborn{\'{\i}}k {\v{C}}e{\v{s}}tina - univerz{\'{a}}lia a specifika 3},
+  pages =    {139--146},
+  editor =   {Zde{\v{n}}ka Hladk{\'{a}} and Petr Karl{\'{\i}}k},
+  year =     {2001},
 }
 
 @InCollection{hps:02,
   key  = {Haji{\v{c}}ov{\'{a}} et al.,2002},
-  author = 	 {Eva Haji{\v{c}}ov{\'{a}} and Jarmila Panevov{\'{a}} and Petr Sgall},
+  author =   {Eva Haji{\v{c}}ov{\'{a}} and Jarmila Panevov{\'{a}} and Petr Sgall},
   title = "{K nov{\'{e}} {\'{u}}rovni bohemistick{\'{e}} pr{\'{a}}ce: Vyu{\v{z}}it{\'{\i}} anotovan{\'{e}}ho korpusu}",
-  booktitle = 	 {Slovo a slovesnost 63},
-  pages = 	 {161--177},
-  year = 	 {2002},
+  booktitle =    {Slovo a slovesnost 63},
+  pages =    {161--177},
+  year =     {2002},
 }
 
 
@@ -3269,50 +3278,50 @@ applications}},
 % -------- casopis od prof Hajicove
 
 @Article{fell-mill-03,
-  author = 	 {Christiane Fellbaum and George A. Miller},
+  author =   {Christiane Fellbaum and George A. Miller},
   title = "{Morphosemantic Links in WordNet}",
-  pages = 	 {69--80},
-  journal = 	 {Traitement automatique des languages},
-  year = 	 {2003},
-  volume = 	 {44},
-  number = 	 {2}
+  pages =    {69--80},
+  journal =      {Traitement automatique des languages},
+  year =     {2003},
+  volume =   {44},
+  number =   {2}
 }
 
 @Article{hartrumpf-03,
-  author = 	 {Sven Hartrumpf and Hermann Helbig and Rainer Osswald},
+  author =   {Sven Hartrumpf and Hermann Helbig and Rainer Osswald},
   title = "{The Semantically Based Computer Lexicon HaGenLex}",
-  pages = 	 {81--105},
-  journal = 	 {Traitement automatique des languages},
-  year = 	 {2003},
-  volume = 	 {44},
-  number = 	 {2},
+  pages =    {81--105},
+  journal =      {Traitement automatique des languages},
+  year =     {2003},
+  volume =   {44},
+  number =   {2},
 }
 
 % ------- knizky z knihovny na MS
 
 @Book{wechsler-95,
-  author = 	 {Stephen Wechsler},
+  author =   {Stephen Wechsler},
   title = "{The Semantic Basis of Argument Structure}",
-  publisher = 	 {Center for the Study of Language and Information},
-  year = 	 {1995},
-  address = 	 {Stanford, California},
+  publisher =    {Center for the Study of Language and Information},
+  year =     {1995},
+  address =      {Stanford, California},
 }
 
 
 
 @Book{croft-91,
-  author = 	 {William Croft},
+  author =   {William Croft},
   title = "{Syntactic Categories and Grammatical Relations}",
-  publisher = 	 {The University of Chicago Press},
-  year = 	 {1991}
+  publisher =    {The University of Chicago Press},
+  year =     {1991}
 }
 
 
 @Book{palmer,
-  author = 	 {F. R. Palmer},
+  author =   {F. R. Palmer},
   title = "{Grammatical Roles and Relations}",
-  publisher = 	 {Cambridge University Press},
-  year = 	 {1994},
+  publisher =    {Cambridge University Press},
+  year =     {1994},
 }
 
 
@@ -3331,89 +3340,89 @@ applications}},
 % s obrazkem jak resi koreferenci (striking!)
 
 @InProceedings{king-palm-03,
-  author = 	 {Paul Kingsbury and Martha Palmer},
+  author =   {Paul Kingsbury and Martha Palmer},
   title = "{PropBank: the Next Level of TreeBank}",
-  pages = 	 {105--116},
-  year = 	 {2003},
-  editor = 	 {Joakim Nivre and Erhard Hinrichs},
-  address = 	 {V{\"{a}}xj{\"{o}}, Sweden},
+  pages =    {105--116},
+  year =     {2003},
+  editor =   {Joakim Nivre and Erhard Hinrichs},
+  address =      {V{\"{a}}xj{\"{o}}, Sweden},
   publisher = {V{\"{a}}xj{\"{o}} University Press},
-  booktitle = 	 {In proceedings of the Second Workshop on Treebanks and Linguistic Theories},
+  booktitle =    {In proceedings of the Second Workshop on Treebanks and Linguistic Theories},
 }
 
 
 % ------ clanky ze sborniku Prague School ...
 
 @InCollection{sgall-94,
-  author = 	 {Petr Sgall},
+  author =   {Petr Sgall},
   title = "{Meaning, Reference and Discourse Patterns}",
-  booktitle = 	 {The Prague School of Structural and Functional Linguistics},
-  pages = 	 {277--309},
+  booktitle =    {The Prague School of Structural and Functional Linguistics},
+  pages =    {277--309},
   publisher =    {John Benjamins Publishing Company},
-  year = 	 {1994},
-  editor = 	 {Philip A. Luelsdorff},
+  year =     {1994},
+  editor =   {Philip A. Luelsdorff},
 }
 
 @InCollection{filipec-94,
-  author = 	 {Josef Filipec},
+  author =   {Josef Filipec},
   title = "{Lexicology and Lexicography: Development and State of the Research}",
-  booktitle = 	 {The Prague School of Structural and Functional Linguistics},
-  pages = 	 {164--183},
+  booktitle =    {The Prague School of Structural and Functional Linguistics},
+  pages =    {164--183},
   publisher =    {John Benjamins Publishing Company},
-  year = 	 {1994},
-  editor = 	 {Philip A. Luelsdorff},
+  year =     {1994},
+  editor =   {Philip A. Luelsdorff},
 }
 
 @InCollection{danes-94,
-  author = 	 {Franti{\v{s}}ek Dane{\v{s}}},
+  author =   {Franti{\v{s}}ek Dane{\v{s}}},
   title = "{The Sentence-Pattern Model of Syntax}",
-  booktitle = 	 {The Prague School of Structural and Functional Linguistics},
-  pages = 	 {197--221},
+  booktitle =    {The Prague School of Structural and Functional Linguistics},
+  pages =    {197--221},
   publisher =    {John Benjamins Publishing Company},
-  year = 	 {1994},
-  editor = 	 {Philip A. Luelsdorff},
+  year =     {1994},
+  editor =   {Philip A. Luelsdorff},
 }
 
 
 % ------- ostatni -------
 @Misc{prze-00,
-  author = 	 "Adam Przepi{\'o}rkowski",
-  title = 	 "Slavic Linguistics Formally --- {HPSG}",
+  author =   "Adam Przepi{\'o}rkowski",
+  title =    "Slavic Linguistics Formally --- {HPSG}",
   howpublished = {The future of Slavic linguistics},
   editor =       {George Fowler},
   publisher =    {Slavica Publishers},
-  year =	 2000
+  year =     2000
 }
 
 @Book{lakoff-87,
-  author = 	 {George Lakoff},
+  author =   {George Lakoff},
   title = "{Woman, Fire, and Dangerous Things (What Categories Reveal about the Mind)}",
-  publisher = 	 {The University of Chicago Press},
-  year = 	 {1987}
+  publisher =    {The University of Chicago Press},
+  year =     {1987}
 }
 
 % Mel'cukova tlustokniha, co mam od Kateriny Markove
 @Book{mel-95,
-  author = 	 {Igor Mel'cuk},
+  author =   {Igor Mel'cuk},
   title = "{ The Russian Language in the Meaning-Text Perspective}",
-  publisher = 	 {Wiener Slawistischer Almanach},
-  year = 	 {1995},
+  publisher =    {Wiener Slawistischer Almanach},
+  year =     {1995},
 }
 
 % ??????????? Kahane - od Silvy
 @Article{kah-03,
-  author = 	 {Sylvain Kahane},
+  author =   {Sylvain Kahane},
   title = "{The Meaning-Text Theory}",
-  journal = 	 {Dependency and Valency. An International Handbook of Contemporary Research},
-  year = 	 {???},
+  journal =      {Dependency and Valency. An International Handbook of Contemporary Research},
+  year =     {???},
 }
 
 
 @PhdThesis{verspoor-97,
-  author = 	 {Cornelia Maria Verspoor},
+  author =   {Cornelia Maria Verspoor},
   title = "{Contextually-Dependent Lexical Semantics}",
-  school = 	 {The University of Edinburgh},
-  year = 	 {1997},
+  school =   {The University of Edinburgh},
+  year =     {1997},
 }
 
 
@@ -3429,18 +3438,18 @@ applications}},
 }
 
 @Misc{framenet-03,
-  author = 	 {Christopher R. Johnson and Miriam R. L. Petruck and Collin F.
+  author =   {Christopher R. Johnson and Miriam R. L. Petruck and Collin F.
    Baker and Michael Ellsworth and Josef Ruppenhofer and Charles J. Fillmore},
   title = "{FrameNet: Theory and Practice}",
   howpublished = {{http://www.icsi.berkeley.edu/~framenet/book/book.html}},
-  year = 	 {2003},
+  year =     {2003},
 }
 
 @Book{kop-62,
-  author = 	 {Franti{\v{s}}ek Kope{\v{c}}n{\'{y}}},
+  author =   {Franti{\v{s}}ek Kope{\v{c}}n{\'{y}}},
   title = "{Slovesn{\'{y}} vid v {\v{c}}e{\v{s}}tin{\v{e}}}",
-  publisher = 	 {Nakladatelstv{\'{\i}} {\v{C}}eskoslovensk{\'{e}} akademie v{\v{e}}d},
-  year = 	 {1962},
+  publisher =    {Nakladatelstv{\'{\i}} {\v{C}}eskoslovensk{\'{e}} akademie v{\v{e}}d},
+  year =     {1962},
 }
 
 @InCollection{hasg-03,
@@ -3460,11 +3469,11 @@ applications}},
 }
 
 @Book{psb-71,
-  author = 	 {Jarmila Panevov{\'{a}} and Eva Bene{\v{s}}ov{\'{a}} and Petr Sgall},
+  author =   {Jarmila Panevov{\'{a}} and Eva Bene{\v{s}}ov{\'{a}} and Petr Sgall},
   title = "{{\v{C}}as a modalita v {\v{c}}e{\v{s}}tin{\v{e}}}",
-  publisher = 	 {Universita Karlova},
-  year = 	 {1971},
-  address = 	 {Praha},
+  publisher =    {Universita Karlova},
+  year =     {1971},
+  address =      {Praha},
 }
 
 
@@ -3472,59 +3481,59 @@ applications}},
 % knihy k predponam:
 
 @Book{uher-1987,
-  author = 	 {Franti{\v{s}}ek Uher},
+  author =   {Franti{\v{s}}ek Uher},
   title = "{Slovesn{\'{e}} p{\v{r}}edpony}",
-  publisher = 	 {Univerzita J. E. Purkyn{\v{e}}},
-  year = 	 {1987},
-  address = 	 {Brno},
+  publisher =    {Univerzita J. E. Purkyn{\v{e}}},
+  year =     {1987},
+  address =      {Brno},
 }
 
 
 
 @Article{jir-79,
-  author = 	 {Anna Jirsov{\'{a}}},
+  author =   {Anna Jirsov{\'{a}}},
   title = "{Prefixace sloves a slovesn{\'{a}} vazba}",
-  journal = 	 {Na{\v{s}}e {\v{r}}e{\v{c}}},
-  year = 	 {1979},
-  pages = 	 {1--7},
+  journal =      {Na{\v{s}}e {\v{r}}e{\v{c}}},
+  year =     {1979},
+  pages =    {1--7},
   publisher =    {Academia},
   address =      {Praha}
 }
 
 @Article{oliva:89,
-  author = 	 {Karel Oliva},
+  author =   {Karel Oliva},
   title = "{A Parser for Czech Implemented in Systems Q}",
-  journal = 	 {Explicite Beschreibung der Sprache und automatische Textbearbeitung},
-  year = 	 {1989},
+  journal =      {Explicite Beschreibung der Sprache und automatische Textbearbeitung},
+  year =     {1989},
   publisher =    {MFF UK},
   address =      {Praha},
 }
 
 @Article{bemova:1979,
-  author = 	 {Alla B{\'{e}}mov{\'{a}}},
+  author =   {Alla B{\'{e}}mov{\'{a}}},
   title = "{Synktaktick{\'{e}} vlastnosti prefigovan{\'{y}}ch sloves}",
-  journal = 	 {Explicite Beschreibung der Sprache und automatische Textbearbeitung},
-  year = 	 {1979},
+  journal =      {Explicite Beschreibung der Sprache und automatische Textbearbeitung},
+  year =     {1979},
   publisher =    {MFF UK},
   address =      {Praha},
-  number = 	 {V. Transducing components of functional generative description 2},
+  number =   {V. Transducing components of functional generative description 2},
 }
 
 % --------------
 @Book{bybee-1985,
-  author = 	 {Joan L. Bybee},
+  author =   {Joan L. Bybee},
   title = "{Morphology: A study of the relation between meaning and form }",
-  publisher = 	 {Benjamins},
-  year = 	 {1985},
+  publisher =    {Benjamins},
+  year =     {1985},
   address={Philadelphia}
 }
 
 
 @PhdThesis{kil-92,
-  author = 	 {Adam Kilgarriff},
+  author =   {Adam Kilgarriff},
   title = "{Polysemy}",
-  school = 	 {University of Sussex},
-  year = 	 {1992}
+  school =   {University of Sussex},
+  year =     {1992}
 }
 
 
@@ -3539,10 +3548,10 @@ applications}},
 
 
 @Book{ste-03,
-  author = 	 {Mark Stevenson},
+  author =   {Mark Stevenson},
   title = "{Word Sense Disambiguation: The Case for Combinations of Knowledge Sources}",
-  publisher = 	 {CSLI Publications},
-  year = 	 {2003}
+  publisher =    {CSLI Publications},
+  year =     {2003}
 }
 
 
@@ -3555,10 +3564,10 @@ applications}},
   }
 
 @book{davis-01,
- 	author           = {Anthony R. Davis},
+    author           = {Anthony R. Davis},
   title = "{Linking by Types in the Hierarchical Lexicon}",
- 	publisher        = {CSLI Publications},
- 	year             = {2001}
+    publisher        = {CSLI Publications},
+    year             = {2001}
 }
 
 
@@ -3581,72 +3590,72 @@ applications}},
 
 
 @InProceedings{kudi-04,
-  author = 	 {Manuela Kunze and Dietmar R{\"{o}}sner},
+  author =   {Manuela Kunze and Dietmar R{\"{o}}sner},
   title = "{Corpus based Enrichment of GermaNet Verb Frames}",
   booktitle = { Proceedings of Fourth International Conference on Language Resources and Evaluation, LREC 2004},
   pages = {963--966},
-  year = 	 {2004},
+  year =     {2004},
 }
 
 @InProceedings{cogr-04,
-  author = 	 {Cornelis H.A. Koster and Stefan Gradmann},
+  author =   {Cornelis H.A. Koster and Stefan Gradmann},
   title = "{The language belongs to the People!}",
   booktitle = { Proceedings of Fourth International Conference on Language Resources and Evaluation, LREC 2004},
   pages = {353--356},
-  year = 	 {2004},
+  year =     {2004},
 }
 
 @InProceedings{webserv-04,
-  author = 	 {Angelo Dalli and Valentin Tablan and Kalina Bontcheva and Yorick Wilks and Dan Broeder
+  author =   {Angelo Dalli and Valentin Tablan and Kalina Bontcheva and Yorick Wilks and Dan Broeder
           and Hannie Brugman and Peter Wittenburg},
   title = "{Web Services Architecture for Language Resources}",
   booktitle =  { Proceedings of Fourth International Conference on Language Resources and Evaluation, LREC 2004},
   pages =        {365--368},
-  year = 	 {2004},
+  year =     {2004},
 }
 
 @InProceedings{fs-04,
-  author = 	 {Kiyong Lee and Lou Burnard and Laurent Romary and Eric de la Clergerie and Thierry Declerck and Syd Bauman and Harry Bunt and Lionel Cl{\'{e}}ment and Tomaz Erjavec and Azim Roussanaly and Claude Roux},
+  author =   {Kiyong Lee and Lou Burnard and Laurent Romary and Eric de la Clergerie and Thierry Declerck and Syd Bauman and Harry Bunt and Lionel Cl{\'{e}}ment and Tomaz Erjavec and Azim Roussanaly and Claude Roux},
   title = "{Towards and international standard on feature structure representation}",
   booktitle =  { Proceedings of Fourth International Conference on Language Resources and Evaluation, LREC 2004},
   pages =        {373--376},
-  year = 	 {2004},
+  year =     {2004},
 }
 
 @InProceedings{aldinger-04,
-  author = 	 {Nadine Aldinger},
+  author =   {Nadine Aldinger},
   title = "{Towards a dynamic lexicon: Predicting the syntactic argument structure of complex verbs}",
   booktitle = { Proceedings of Fourth International Conference on Language Resources and Evaluation, LREC 2004},
   pages = {427--430},
-  year = 	 {2004},
+  year =     {2004},
 }
 
 
 @PhdThesis{wechsler-91,
-  author = 	 {Stephen Wechsler},
+  author =   {Stephen Wechsler},
   title = "{Argument Structure and Linking}",
-  school = 	 {Stanfor University},
-  year = 	 {1991}
+  school =   {Stanfor University},
+  year =     {1991}
 }
 
 
 
 
 @InProceedings{fubo-02,
-  author = 	 { Sanae Fujita and Francis Bond},
+  author =   { Sanae Fujita and Francis Bond},
   title = "{ Extending the Coverage of a Valency Dictionary}",
   booktitle = {Proceedings of the 19th International Conference on Computational Linguistics },
-  year = 	 {2002},
-  address = 	 {Taipei, Taiwan}
+  year =     {2002},
+  address =      {Taipei, Taiwan}
 }
 
 % disertace Karoliny, taky tam pouziva VALLEX
 @PhdThesis{skwarska-04,
-  author = 	 {Karol{\'{\i}}na Skwarska},
-  title = 	 {Konkurence genitivu a akuzativu s tranzitivn{\'{\i}}mi slovesy
+  author =   {Karol{\'{\i}}na Skwarska},
+  title =    {Konkurence genitivu a akuzativu s tranzitivn{\'{\i}}mi slovesy
                    v {\v{c}}e{\v{s}}tin{\v{e}}, ru{\v{s}}tin{\v{e}}, pol{\v{s}}tin{\v{e}} a slovin{\v{s}}tin{\v{e}}},
-  school = 	 {Filoofick{\'{a}} fakulta Univerzity Ka},
-  year = 	 {2004}
+  school =   {Filoofick{\'{a}} fakulta Univerzity Ka},
+  year =     {2004}
 }
 
 % Kucerova - rozsireni pojmu projektivity na koordinacni konstrukce
@@ -3678,117 +3687,117 @@ applications}},
 % ------- clanky okopirovane ze SaS
 
 @article{sgall-98,
-  author = 	{Petr Sgall},
+  author =  {Petr Sgall},
   title = "{Teorie valence a jej{\'{\i}} form{\'{a}}ln{\'{\i}} zpracov{\'{a}}n{\'{\i}}}",
-  journal = 	{Slovo a slovesnost},
-  number = 	{59},
-  pages = 	{15--29},
-  year = 	{1998}
+  journal =     {Slovo a slovesnost},
+  number =  {59},
+  pages =   {15--29},
+  year =    {1998}
 }
 
 @article{hnatkova-02,
-  author = 	{Milena Hn{\'{a}}tkov{\'{a}} },
-  title = 	{Zna{\v{c}}kov{\'{a}}n{\'{\i}} fraz{\'{e}}m{\r{u}} a idiom{\r{u}} v {\v{C}}esk{\'{e}}m n{\'{a}}rodn{\'{\i}}m korpusu s pomoc{\'{\i}} Slovn{\'{\i}}ku
+  author =  {Milena Hn{\'{a}}tkov{\'{a}} },
+  title =   {Zna{\v{c}}kov{\'{a}}n{\'{\i}} fraz{\'{e}}m{\r{u}} a idiom{\r{u}} v {\v{C}}esk{\'{e}}m n{\'{a}}rodn{\'{\i}}m korpusu s pomoc{\'{\i}} Slovn{\'{\i}}ku
                  {\v{c}}esk{\'{e}} frazeologie a idiomatiky},
-  journal = 	{Slovo a slovesnost},
-  number = 	{63},
-  pages = 	{117--126},
-  year = 	{2002}
+  journal =     {Slovo a slovesnost},
+  number =  {63},
+  pages =   {117--126},
+  year =    {2002}
 }
 
 @article{karlik-00,
-  author = 	{Petr Karl{\'{\i}}k },
+  author =  {Petr Karl{\'{\i}}k },
   title = "{Hypot{\'{e}}za modifikovan{\'{e}} valen{\v{c}}n{\'{\i}} teorie}",
-  journal = 	{Slovo a slovesnost},
-  number = 	{61},
-  pages = 	{170--189},
-  year = 	{2000}
+  journal =     {Slovo a slovesnost},
+  number =  {61},
+  pages =   {170--189},
+  year =    {2000}
 }
 
 @article{oliva-01,
-  author = 	{Karel Oliva},
+  author =  {Karel Oliva},
   title = "{Reflexe reflexivity reflexiv}",
-  journal = 	{Slovo a slovesnost},
-  number = 	{62},
-  pages = 	{200--207},
-  year = 	{2001}
+  journal =     {Slovo a slovesnost},
+  number =  {62},
+  pages =   {200--207},
+  year =    {2001}
 }
 
 @article{panevova-99,
-  author = 	{Jarmila Panevov{\'{a}} },
+  author =  {Jarmila Panevov{\'{a}} },
   title = "{{\v{C}}esk{\'{a}} recipro{\v{c}}n{\'{\i}} z{\'{a}}jmena a slovesn{\'{a}} valence}",
-  journal = 	{Slovo a slovesnost},
-  number = 	{60},
-  pages = 	{269--275},
-  year = 	{1999}
+  journal =     {Slovo a slovesnost},
+  number =  {60},
+  pages =   {269--275},
+  year =    {1999}
 }
 
 % k lexikologii a lexikografii
 
 @article{filipec-98,
-  author = 	{Josef Filipec},
+  author =  {Josef Filipec},
   title = "{Lex{\'{e}}m-s{\'{e}}m{\'{e}}m, oblast jeho u{\v{z}}it{\'{\i}} a typy neur{\v{c}}itosti}",
-  journal = 	{Slovo a slovesnost},
-  number = 	{59},
-  pages = 	{81--94},
-  year = 	{1998}
+  journal =     {Slovo a slovesnost},
+  number =  {59},
+  pages =   {81--94},
+  year =    {1998}
 }
 
 
 @Book{fice-85,
-  author = 	 {Josef Filipec and Franti{\v{s}}ek {\v{C}}erm{\'{a}}k},
+  author =   {Josef Filipec and Franti{\v{s}}ek {\v{C}}erm{\'{a}}k},
   title = "{{\v{C}}esk{\'{a}} lexikologie}",
-  publisher = 	 {Academia},
-  year = 	 {1985}
+  publisher =    {Academia},
+  year =     {1985}
 }
 
 % ---------- Mel{\v{c}}ukoviny
 
 @Book{mezo-84,
-  author = 	 {Igor A. Mel'{\v{c}}uk and Alexander K. Zholkovsky},
+  author =   {Igor A. Mel'{\v{c}}uk and Alexander K. Zholkovsky},
   title = "{Explanatory Combinatorial Dictionary of Modern Russian}",
-  publisher = 	 {Wiener Slawistischer Almanach},
-  year = 	 {1984},
-  address = 	 {Vienna}
+  publisher =    {Wiener Slawistischer Almanach},
+  year =     {1984},
+  address =      {Vienna}
 }
 
 
 @Book{mel-74,
-  author = 	 {Igor A. Mel'{\v{c}}uk},
+  author =   {Igor A. Mel'{\v{c}}uk},
   title = "{Opyt teorii lingvisticeskix modelej Smysl, Tekst. Semantika, sintaksis.}",
-  publisher = 	 { Izdatel'stvo ``Nauka''},
-  year = 	 {1974},
-  address = 	 {Moskva},
+  publisher =    { Izdatel'stvo ``Nauka''},
+  year =     {1974},
+  address =      {Moskva},
 }
 
 % zminka o aktivni a pasivni valenci
 % melo taky nazev nara-04, konflikt
 @InProceedings{nasr:rambow:2004,
-  author = 	 {Alexis Nasr and Owen Rambow},
+  author =   {Alexis Nasr and Owen Rambow},
   title = "{SuperTagging and Full Parsing}",
   booktitle = {Proceedings of Seventh International Workshop on Tree Adjoining Grammar and Related Formalisms},
-  year = 	 {2004},
+  year =     {2004},
 }
 
 
 
 %  booktitle = {Proceedings of Fourth International Conference on Language Resources and Evaluation, LREC 2004},
 @inproceedings{pcedt:2004,
-  author = 	{Martin {\v{C}}mejrek and Jan Cu{\v{r}}{\'{\i}}n and Ji{\v{r}}{\'{\i}} Havelka and Jan Haji{\v{c}} and Vladislav Kubo{\v{n}}},
+  author =  {Martin {\v{C}}mejrek and Jan Cu{\v{r}}{\'{\i}}n and Ji{\v{r}}{\'{\i}} Havelka and Jan Haji{\v{c}} and Vladislav Kubo{\v{n}}},
   title = "{Prague Czech-English Dependecy Treebank: Syntactically Annotated Resources for Machine Translation}",
   booktitle = {Proceedings of LREC 2004},
-  year = 	{2004},
+  year =    {2004},
   month = {May 26--28},
-  address = 	{Lisbon}
+  address =     {Lisbon}
 }
 
 @inproceedings{tiedemann:opus:2004,
-  author = 	{J{\"{o}}rg Tiedemann and Lars Nygaard},
+  author =  {J{\"{o}}rg Tiedemann and Lars Nygaard},
   title = "{The OPUS corpus - parallel \& free}",
   booktitle = {Proceedings of Fourth International Conference on Language Resources and Evaluation, LREC 2004},
-  year = 	{2004},
+  year =    {2004},
   month = {May 26--28},
-  address = 	{Lisbon},
+  address =     {Lisbon},
   url = {http://stp.ling.uu.se/~joerg/paper/opus\_lrec04.pdf}
 }
 
@@ -3846,23 +3855,23 @@ applications}},
 }
 
 @inproceedings{salsa-04,
-  author = 	{Michael Ellsworth and Katrin Erk and Paul Kingsbury and Sebastian Pado},
+  author =  {Michael Ellsworth and Katrin Erk and Paul Kingsbury and Sebastian Pado},
   title = "{{PropBank}, {SALSA}, and {FrameNet}: How Design Determines Product}",
-  booktitle = 	{Proceedings of the LREC 2004 Workshop
+  booktitle =   {Proceedings of the LREC 2004 Workshop
                  on Building Lexical Resources from Semantically Annotated Corpora},
-  year = 	{2004},
-  address = 	{Lisbon},
-  url = 	{http://www.coli.uni-sb.de/~erk/OnlinePapers/pb-fn.ps}
+  year =    {2004},
+  address =     {Lisbon},
+  url =     {http://www.coli.uni-sb.de/~erk/OnlinePapers/pb-fn.ps}
 }
 
 @inproceedings{tiger-02,
-  author = 	{Brants, Sabine and Dipper, Stefanie and Hansen, Silvia and Lezius, Wolfgang and Smith, George},
+  author =  {Brants, Sabine and Dipper, Stefanie and Hansen, Silvia and Lezius, Wolfgang and Smith, George},
   title = "{The TIGER Treebank}",
-  booktitle = 	{Proceedings of the Workshop on Treebanks and Linguistic Theories, September 20-21},
-  address = 	{Sozopol, Bulgaria},
-  coliurl = 	{Brants:2002:TT.pdf},
-  url = 	{http://www.coli.uni-sb.de/~sabine/tigertreebank.pdf},
-  year = 	{2002}
+  booktitle =   {Proceedings of the Workshop on Treebanks and Linguistic Theories, September 20-21},
+  address =     {Sozopol, Bulgaria},
+  coliurl =     {Brants:2002:TT.pdf},
+  url =     {http://www.coli.uni-sb.de/~sabine/tigertreebank.pdf},
+  year =    {2002}
 }
 
 % ------------------ clanek o srovnani ruznych frameworku
@@ -3889,62 +3898,62 @@ applications}},
 
 % ------------- COLING 2004
 @InProceedings{nara-04,
-  author = 	 {Alexis Nasr and Owen Rambow},
+  author =   {Alexis Nasr and Owen Rambow},
   title = "{A Simple String-Rewriting Formalism for Dependency Grammar}",
   editor = {Geert-Jan M. Kruijff and Denys Duchier},
   booktitle = {Proceedings of the Workshop Recent Advances in Dependency Grammar,
   20th International Conference on Computational Linguistics},
-  pages = 	 {25--32},
-  year = 	 {2004},
+  pages =    {25--32},
+  year =     {2004},
 }
 
 @InProceedings{obgr-04,
-  author = 	 {Tomasz Obrebski and Filip Grali\'{n}ski},
+  author =   {Tomasz Obrebski and Filip Grali\'{n}ski},
   title = "{Some Notes on Generative Capacity of Dependency Grammars}",
   editor = {Geert-Jan M. Kruijff and Denys Duchier},
   booktitle = {Proceedings of the Workshop Recent Advances in Dependency Grammar,
   20th International Conference on Computational Linguistics},
-  pages = 	 {65--71},
-  year = 	 {2004}
+  pages =    {65--71},
+  year =     {2004}
 }
 
 @InProceedings{by-04,
-  author = 	 {Tomas By},
+  author =   {Tomas By},
   title = "{English Dependency Grammar}",
   editor = {Geert-Jan M. Kruijff and Denys Duchier},
   booktitle = {Proceedings of the Workshop Recent Advances in Dependency Grammar,
   20th International Conference on Computational Linguistics},
-  pages = 	 {72--77},
-  year = 	 {2004}
+  pages =    {72--77},
+  year =     {2004}
 }
 
 @InProceedings{dik-04,
-  author = 	 {Alexander Dikovsky},
+  author =   {Alexander Dikovsky},
   title = "{Dependencies as Categories}",
   editor = {Geert-Jan M. Kruijff and Denys Duchier},
   booktitle = {Proceedings of the Workshop Recent Advances in Dependency Grammar,
   20th International Conference on Computational Linguistics},
-  pages = 	 {90--97},
-  year = 	 {2004}
+  pages =    {90--97},
+  year =     {2004}
 }
 
 
 @InCollection{yarowsky-93,
-  author = 	 {David Yarowsky},
+  author =   {David Yarowsky},
   title = "{One Sense Per Collocation}",
-  booktitle = 	 {ARPA Workshop on Human Lanuguage Technology},
-  pages = 	 {266-271},
-  year = 	 {1993}
+  booktitle =    {ARPA Workshop on Human Lanuguage Technology},
+  pages =    {266-271},
+  year =     {1993}
 }
 
 @InProceedings{audibert-04,
-  author = 	 {Laurent Audibert},
+  author =   {Laurent Audibert},
   title = "{Word sense disambiguation criteria: a systematic study}",
   editor = {Geert-Jan M. Kruijff and Denys Duchier},
   booktitle = {Proceedings of the Workshop Recent Advances in Dependency Grammar,
   20th International Conference on Computational Linguistics},
-  pages = 	 {910--916},
-  year = 	 {2004}
+  pages =    {910--916},
+  year =     {2004}
 }
 
 %  address   = {Geneva, Switzerland},
@@ -3970,23 +3979,23 @@ applications}},
 
 
 @Article{pasm-04,
-  author = 	 {Karel Pala and Pavel Smr{\v{z}}},
+  author =   {Karel Pala and Pavel Smr{\v{z}}},
   title = "{Building Czech Wordnet}",
-  journal = 	 {ROMANIAN JOURNAL OF INFORMATION, SCIENCE AND TECHNOLOGY},
-  year = 	 {2004},
-  volume = 	 {7},
-  number = 	 {1-2},
-  pages = 	 {79-88}
+  journal =      {ROMANIAN JOURNAL OF INFORMATION, SCIENCE AND TECHNOLOGY},
+  year =     {2004},
+  volume =   {7},
+  number =   {1-2},
+  pages =    {79-88}
 }
 
 @InProceedings{briscoe-01,
-  author = 	 {Ted Briscoe},
-  title = 	 {From dictionary to corpus to self-organizing dictionary:
+  author =   {Ted Briscoe},
+  title =    {From dictionary to corpus to self-organizing dictionary:
   learning valency associations in the face of variation and change},
   booktitle = {Proceedings of Corpus Linguistics 2001},
-  pages = 	 {79-89},
-  year = 	 {2001},
-  editor = 	 {Paul Rayson, Andrew Wilson, Tony McEnery, Andrew Hardie and Shereen Khoja},
+  pages =    {79-89},
+  year =     {2001},
+  editor =   {Paul Rayson, Andrew Wilson, Tony McEnery, Andrew Hardie and Shereen Khoja},
 }
 
 @InProceedings{ourlrec-02,
@@ -4299,7 +4308,7 @@ senses exist only relative to a task.
 
 @INPROCEEDINGS{sketchengine:2004,
    author = {Adam Kilgarriff and Pavel Rychl{\'{y}} and Pavel Smrz and David
-	Tugwell},
+    Tugwell},
    title = {The Sketch Engine},
    pages = {105--116},
    booktitle = {Proceedings of the Eleventh EURALEX International Congress},
@@ -4375,11 +4384,11 @@ senses exist only relative to a task.
 }
 
 @MastersThesis{ptacek:2005,
-  author = 	 {Jan Pt\'a\v{c}ek},
-  title = 	 {{Generov\'an\'{\i} v\v{e}t z tektogramatick\'ych
+  author =   {Jan Pt\'a\v{c}ek},
+  title =    {{Generov\'an\'{\i} v\v{e}t z tektogramatick\'ych
 strom\r{u} Pra\v{z}sk\'eho z\'avislostn\'{\i}ho korpusu}},
-  school = 	 {MFF, Charles University, Prague},
-  year = 	 {2005},
+  school =   {MFF, Charles University, Prague},
+  year =     {2005},
 }
 
 @article{melcuk:actants:semantics:2004,
@@ -4760,31 +4769,31 @@ strom\r{u} Pra\v{z}sk\'eho z\'avislostn\'{\i}ho korpusu}},
 %%% Evan %%%
 @inproceedings
 {
-	bleu,
-	author = {Papineni, K., et. al.},
-	title = {BLEU: a Method for Automatic Evaluation of Machine Translation},
-	booktitle = {Meeting of the Association for Computational Linguistics},
-	year = {2002},
-	pages = {311 - 318}
+    bleu,
+    author = {Papineni, K., et. al.},
+    title = {BLEU: a Method for Automatic Evaluation of Machine Translation},
+    booktitle = {Meeting of the Association for Computational Linguistics},
+    year = {2002},
+    pages = {311 - 318}
 }
 
 @inproceedings
 {
-	perplexity,
-	author = {Nabhan, A. and A. Rafea},
-	title = {Tuning Statistical Machine Translation Parameters Using Perplexity},
-	booktitle = {IEEE Conference on Information Reuse and Integration},
-	year = {2005}
+    perplexity,
+    author = {Nabhan, A. and A. Rafea},
+    title = {Tuning Statistical Machine Translation Parameters Using Perplexity},
+    booktitle = {IEEE Conference on Information Reuse and Integration},
+    year = {2005}
 }
 
 @inproceedings
 {
-	errMeasures,
-	author = {Popovic, M., et. al.},
-	title = {Morpho-syntactic Information for Automatic Error Analysis of Statistical Machine Translation Output},
-	booktitle = {ACL Workshop on Statistical Machine Translation},
-	year = {2006},
-	pages = {1 - 6}
+    errMeasures,
+    author = {Popovic, M., et. al.},
+    title = {Morpho-syntactic Information for Automatic Error Analysis of Statistical Machine Translation Output},
+    booktitle = {ACL Workshop on Statistical Machine Translation},
+    year = {2006},
+    pages = {1 - 6}
 }
 %%% end Evan %%%
 
@@ -5337,7 +5346,7 @@ strom\r{u} Pra\v{z}sk\'eho z\'avislostn\'{\i}ho korpusu}},
 @article{mangu:00,
 author   = "L. Mangu and E. Brill and A. Stolcke",
 title = "Finding Consensus in Speech Recognition: Word Error Minimization and Other Applications of Confusion Networks",
-journal = "Computer, Speech and Language", 
+journal = "Computer, Speech and Language",
 volume  = 14,
 number   = 4,
 pages   ="373-400",
@@ -5356,7 +5365,7 @@ year         =  2002,
 AUTHOR = {Richard Zens and Franz Josef Och and Hermann Ney},
 TITLE = {Phrase-Based Statistical Machine Translation},
 BOOKTITLE = {25th German Conf. on Artificial Intelligence (KI2002)},
-PUBLISHER	= { Springer Verlag},
+PUBLISHER   = { Springer Verlag},
 YEAR = 2002,
 MONTH = {September},
 ADDRESS = {Aachen, Germany},
@@ -5365,13 +5374,13 @@ CROSSREF = {jarke02:aia},
 }
 
 @Proceedings{jarke02:aia,
-  title = 	 {KI - 2002: Advances in Artificial Intelligence. 25th Annual German Conf. on AI},
-  year = 	 {2002},
-  editor = 	 {M. Jarke and J. Koehler and G. Lakemeyer},
-  volume = 	 {2479},
-  series = 	 {Lecture Notes in Artificial Intelligence ({LNAI})},
-  address = 	 {Aachen, Germany},
-  month = 	 {September},
+  title =    {KI - 2002: Advances in Artificial Intelligence. 25th Annual German Conf. on AI},
+  year =     {2002},
+  editor =   {M. Jarke and J. Koehler and G. Lakemeyer},
+  volume =   {2479},
+  series =   {Lecture Notes in Artificial Intelligence ({LNAI})},
+  address =      {Aachen, Germany},
+  month =    {September},
   publisher = {Springer Verlag},
 }
 
@@ -5438,22 +5447,22 @@ year         =  2005
 }
 
 @InProceedings{kumar05,
-  author = 	 {Shankar Kumar and William Byrne},
-  title = 	 {Local phrase reordering models for statistical machine translation},
-  booktitle = 	 "Human Language Technology Conf. / Conf. on Empirical Methods in Natural Language Processing (HLT/EMNLP)",
-  pages = 	 {161-168},
-  year = 	 {2005},
-  address = 	 {Vancouver, Canada},
-  month = 	 {October},
+  author =   {Shankar Kumar and William Byrne},
+  title =    {Local phrase reordering models for statistical machine translation},
+  booktitle =    "Human Language Technology Conf. / Conf. on Empirical Methods in Natural Language Processing (HLT/EMNLP)",
+  pages =    {161-168},
+  year =     {2005},
+  address =      {Vancouver, Canada},
+  month =    {October},
 }
 
 @InProceedings{xu05,
-  author =	 {Jia Xu and Evgeny Matusov and Richard Zens and Hermann Ney},
-  title =	 {Integrated Chinese Word Segmentation in Statistical Machine Translation},
-  booktitle =	 "Int.~Workshop on Spoken Language Translation (IWSLT)",
-  year =	 2005,
-  address =	 {Pittsburgh, PA},
-  month =	 {October},
+  author =   {Jia Xu and Evgeny Matusov and Richard Zens and Hermann Ney},
+  title =    {Integrated Chinese Word Segmentation in Statistical Machine Translation},
+  booktitle =    "Int.~Workshop on Spoken Language Translation (IWSLT)",
+  year =     2005,
+  address =  {Pittsburgh, PA},
+  month =    {October},
   pages = {141-147}
 }
 
