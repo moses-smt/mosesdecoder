@@ -64,3 +64,8 @@ if IRST_LM
 libmoses_a_SOURCES = $(libmoses_a_SOURCES_TMP) LanguageModelIRST.cpp
 endif
 
+if INTERNAL_LM
+libmoses_a_SOURCES = $(libmoses_a_SOURCES_TMP) LanguageModelInternal.cpp \
+						NGramCollection.cpp
+						NGramNode.cpp
+endif

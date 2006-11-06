@@ -160,10 +160,8 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 
 const void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
   cerr << "reset caches and mmap\n";
-#ifndef WIN32
   m_lmtb->reset_caches();  
   m_lmtb->reset_mmap();
-#endif
 }
 
 const void LanguageModelIRST::InitializeBeforeSentenceProcessing(){
