@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #  include "LanguageModelIRST.h"
 #endif
 
+#include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
 
@@ -48,33 +49,37 @@ namespace LanguageModelFactory
 	  	case SRI:
 				#ifdef LM_SRI
 				  lm = new LanguageModelSRI(true);
-			  #else
+			  #elif LM_IRST
 	     		lm = new LanguageModelIRST(true);
+				#else
+					lm = new LanguageModelInternal(true);
 			  #endif
 			  break;
 			case IRST:
 				#ifdef LM_IRST
 	     		lm = new LanguageModelIRST(true);
-			  #else
-				  lm = new LanguageModelSRI(true);
-				#endif
+			  #elif LM_IRST
+	     		lm = new LanguageModelSRI(true);
+				#else
+					lm = new LanguageModelInternal(true);
+			  #endif
 				break;
 			case Skip:
 				#ifdef LM_SRI
 	     		lm = new LanguageModelSkip(new LanguageModelSRI(false), true);
-				#else
-     			#ifdef LM_IRST
+				#elif LM_SRI
 	     			lm = new LanguageModelSkip(new LanguageModelIRST(false), true);
-     			#endif
+				#else
+	     			lm = new LanguageModelSkip(new LanguageModelInternal(false), true);
 				#endif
 				break;
 			case Joint:
 				#ifdef LM_SRI
 	     		lm = new LanguageModelJoint(new LanguageModelSRI(false), true);
-				#else
-     			#ifdef LM_IRST
+				#elif LM_IRST
 		     		lm = new LanguageModelJoint(new LanguageModelIRST(false), true);
-     			#endif
+				#else
+		     		lm = new LanguageModelJoint(new LanguageModelInternal(false), true);
 				#endif
 				break;
 	  }

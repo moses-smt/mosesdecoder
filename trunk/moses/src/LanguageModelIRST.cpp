@@ -64,11 +64,7 @@ void LanguageModelIRST::Load(const std::string &filePath
 	InputFileStream inp(filePath);
 	m_lmtb  = new lmtable;
 
-#ifdef WIN32
-	m_lmtb->load(inp);
-#else
 	m_lmtb->load(inp,filePath.c_str(),1);
-#endif
 
   m_lmtb_ng=new ngram(m_lmtb->dict);
   m_lmtb_size=m_lmtb->maxlevel();

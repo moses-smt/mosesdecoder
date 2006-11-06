@@ -40,8 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\srilm\misc\src&quot;;&quot;$(SolutionDir)..\srilm\dstruct\src&quot;;&quot;$(SolutionDir)..\srilm\include&quot;;&quot;$(SolutionDir)..\srilm\lm\src&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;LM_IRST;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\srilm\src&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;LM_IRST;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -106,8 +106,8 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\srilm\misc\src&quot;;&quot;$(SolutionDir)..\srilm\dstruct\src&quot;;&quot;$(SolutionDir)..\srilm\include&quot;;&quot;$(SolutionDir)..\srilm\lm\src&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;LM_IRST;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\srilm\src&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;LM_IRST;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -224,6 +224,28 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LanguageModelInternal.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\src\LanguageModelIRST.cpp"
 				>
 			</File>
@@ -241,10 +263,6 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelSkip.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LanguageModelSRI.cpp"
 				>
 			</File>
 			<File
@@ -287,6 +305,14 @@
 			</File>
 			<File
 				RelativePath=".\src\mempool.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\NGramCollection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\NGramNode.cpp"
 				>
 			</File>
 			<File
@@ -506,6 +532,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LanguageModelInternal.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LanguageModelIRST.h"
 				>
 			</File>
@@ -559,6 +589,14 @@
 			</File>
 			<File
 				RelativePath=".\src\mempool.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\NGramCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\NGramNode.h"
 				>
 			</File>
 			<File

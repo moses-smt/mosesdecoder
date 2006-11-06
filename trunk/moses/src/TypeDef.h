@@ -128,6 +128,7 @@ enum LMImplementation
 	,IRST			= 1
 	,Skip			= 2
 	,Joint		= 3
+	,Internal	= 4
 };
 
 enum DictionaryFind

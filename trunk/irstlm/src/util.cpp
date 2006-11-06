@@ -1,10 +1,11 @@
 
 #ifdef WIN32
 #include <windows.h>
-#endif
-
+#include <io.h>
+#else
 #include <sys/types.h>
 #include <sys/mman.h>
+#endif
 
 #include "util.h"
 
@@ -101,7 +102,7 @@ void *MMap(int	fd, int	access, off_t	offset, size_t	len, off_t	*gap)
 	HANDLE	fh,
 		mh;
   
-	fh = (HANDLE)_get_osfhandle(fd)
+	fh = (HANDLE)_get_osfhandle(fd);
     if(offset) {
       /* bisogna accertarsi che l'offset abbia la granularita`
       * corretta, MAI PROVATA! */
