@@ -575,11 +575,11 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
   dict->load(inp);  
    
   //if MMAP is used, then open the file
-  if (filename and mmap>0){
+  if (filename && mmap>0){
  
 #ifdef WIN32
     error("lmtable::loadbin mmap facility not yet supported under WIN32\n");
-#endif   
+#else   
     
     if (mmap <= maxlev) memmap=mmap;
     else error("keep_on_disk value is out of range\n");
@@ -592,14 +592,14 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
     //check that the LM is uncompressed
     char miniheader[4];
     read(diskid,miniheader,4);
-    if (strncmp(miniheader,"Qblm",4) and strncmp(miniheader,"blmt",4))
-      error("mmap functionality does not work with compressed binary LMs\n");  
-    
+    if (strncmp(miniheader,"Qblm",4) && strncmp(miniheader,"blmt",4))
+      error("mmap functionality does not work with compressed binary LMs\n");      
+#endif  
   }
   
   for (int l=1;l<=maxlev;l++){
     if (isQtable) loadbincodebook(inp,l);
-    if ((memmap == 0) or (l < memmap)){
+    if ((memmap == 0) || (l < memmap)){
       cerr << "loading " << cursize[l] << " " << l << "-grams\n";
       table[l]=new char[cursize[l] * nodesize(tbltype[l])];
       inp.read(table[l],cursize[l] * nodesize(tbltype[l]));
