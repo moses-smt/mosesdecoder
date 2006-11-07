@@ -605,6 +605,10 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
       inp.read(table[l],cursize[l] * nodesize(tbltype[l]));
     }
     else{
+      
+#ifdef WIN32
+      error("mmap not available under WIN32\n");
+#else
       cerr << "mapping " << cursize[l] << " " << l << "-grams\n";
       tableOffs[l]=inp.tellg();
       table[l]=(char *)MMap(diskid,PROT_READ,
@@ -612,6 +616,8 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
                     &tableGaps[l]);
       table[l]+=tableGaps[l];
       inp.seekg(cursize[l]*nodesize(tbltype[l]),ios_base::cur);
+#endif
+      
     }
   };  
   
