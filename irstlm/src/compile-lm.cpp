@@ -148,10 +148,8 @@ int main(int argc, const char **argv)
       std::cerr << "Failed to open " << infile << "!\n";
       exit(1);
     }
-   
-    
-   lmt.load(inp,infile.c_str(),memmap);    
-   
+       
+   lmt.load(inp,infile.c_str(),memmap);       
     
   if (seval != ""){
     std::cerr << "Start Eval\n";
@@ -159,7 +157,8 @@ int main(int argc, const char **argv)
     ngram ng(lmt.dict);    
     std::cout.setf(ios::fixed);
     std::cout.precision(2);
-    if (debug>1) std::cout.precision(8);
+   
+    if (debug>0) std::cout.precision(8);
     std::fstream inptxt(seval.c_str(),std::ios::in);
     
     int Nbo=0,Nw=0,Noov=0;
@@ -171,7 +170,7 @@ int main(int argc, const char **argv)
     lmt.init_probcache();
 #endif
     
-    while(inptxt >> ng){
+    while(inptxt >> ng){      
       
       if (ng.size>lmt.maxlevel()) ng.size=lmt.maxlevel();
       
@@ -181,7 +180,7 @@ int main(int argc, const char **argv)
       lmt.bo_state(0);
       if (ng.size>=1){ 
         logPr+=(Pr=lmt.clprob(ng));
-        if (debug>1)
+        if (debug>0)
           std::cout << ng << "[" << ng.size << "-gram]" << " " << Pr << "\n"; 
         
         if (*ng.wordp(1) == lmt.dict->oovcode()) Noov++;        
