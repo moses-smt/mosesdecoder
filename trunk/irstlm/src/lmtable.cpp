@@ -17,10 +17,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 ******************************************************************************/
-#ifndef WIN32
-#include <sys/types.h>
-#include <sys/mman.h>
-#endif
 #include <fcntl.h>
 #include <iostream>
 #include <fstream>
@@ -35,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #include "lmtable.h"
 #include "util.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 using namespace std;
 
@@ -75,9 +71,12 @@ lmtable::lmtable(){
 
 void lmtable::load(istream& inp,const char* filename,int keep_on_disk){
 
-	#ifdef WIN32
+#ifdef WIN32
+  if (keep_on_disk>0){
+    std::cerr << "lmtable::load memory mapping not yet available under WIN32\n";
 		keep_on_disk = 0;
-	#endif
+  }
+#endif
 
   //give a look at the header to select loading method
   char header[1024];	
@@ -576,13 +575,14 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
   dict->load(inp);  
    
   //if MMAP is used, then open the file
-#ifndef WIN32
   if (filename and mmap>0){
+ 
+#ifdef WIN32
+    error("lmtable::loadbin mmap facility not yet supported under WIN32\n");
+#endif   
     
-    if (mmap <= maxlev)
-      memmap=mmap;
-    else
-      error("keep_on_disk value is out of range\n");
+    if (mmap <= maxlev) memmap=mmap;
+    else error("keep_on_disk value is out of range\n");
     
     if ((diskid=open(filename, O_RDONLY))<0){
       std::cerr << "cannot open " << filename << "\n";
@@ -602,7 +602,7 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
     if ((memmap == 0) or (l < memmap)){
       cerr << "loading " << cursize[l] << " " << l << "-grams\n";
       table[l]=new char[cursize[l] * nodesize(tbltype[l])];
-      inp.read(table[l],cursize[l]*nodesize(tbltype[l]));
+      inp.read(table[l],cursize[l] * nodesize(tbltype[l]));
     }
     else{
       cerr << "mapping " << cursize[l] << " " << l << "-grams\n";
@@ -614,7 +614,6 @@ void lmtable::loadbin(istream& inp, const char* header,const char* filename,int 
       inp.seekg(cursize[l]*nodesize(tbltype[l]),ios_base::cur);
     }
   };  
-#endif  
   
   cerr << "done\n";
   
