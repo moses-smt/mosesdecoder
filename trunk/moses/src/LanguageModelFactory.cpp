@@ -51,14 +51,19 @@ namespace LanguageModelFactory
 				  lm = new LanguageModelSRI(true);
 				#elif LM_INTERNAL
 					lm = new LanguageModelInternal(true);
+				#elif LM_IRST
+					// shouldn't really do this. the 2 lm are not compatible
+					lm = new LanguageModelIRST(true);
 			  #endif
 			  break;
 			case IRST:
 				#ifdef LM_IRST
 	     		lm = new LanguageModelIRST(true);
-			  #elif LM_SRI
-	     		lm = new LanguageModelSRI(true);
+				#elif LM_SRI
+					// shouldn't really do this. the 2 lm are not compatible
+				  lm = new LanguageModelSRI(true);
 				#elif LM_INTERNAL
+					// shouldn't really do this. the 2 lm are not compatible
 					lm = new LanguageModelInternal(true);
 			  #endif
 				break;
@@ -66,16 +71,27 @@ namespace LanguageModelFactory
 				#ifdef LM_SRI
 	     		lm = new LanguageModelSkip(new LanguageModelSRI(false), true);
 				#elif LM_INTERNAL
-	     			lm = new LanguageModelSkip(new LanguageModelInternal(false), true);
+     			lm = new LanguageModelSkip(new LanguageModelInternal(false), true);
+				#elif LM_IRST
+					// shouldn't really do this. the 2 lm are not compatible
+	     		lm = new LanguageModelSkip(new LanguageModelIRST(false), true);
 				#endif
 				break;
 			case Joint:
 				#ifdef LM_SRI
 	     		lm = new LanguageModelJoint(new LanguageModelSRI(false), true);
 				#elif LM_INTERNAL
-		     		lm = new LanguageModelJoint(new LanguageModelInternal(false), true);
+	     		lm = new LanguageModelJoint(new LanguageModelInternal(false), true);
+				#elif LM_IRST
+					// shouldn't really do this. the 2 lm are not compatible
+	     		lm = new LanguageModelJoint(new LanguageModelIRST(false), true);
 				#endif
 				break;
+	  	case Internal:
+				#ifdef LM_INTERNAL
+					lm = new LanguageModelInternal(true);
+			  #endif
+			  break;
 	  }
 	  
 	  if (lm == NULL)

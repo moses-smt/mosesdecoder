@@ -18,7 +18,8 @@ void LanguageModelInternal::Load(const std::string &filePath
 					, size_t nGramOrder)
 {
 	assert(nGramOrder <= 3);
-
+	TRACE_ERR("Loading Internal LM: " << filePath << endl);
+	
 	m_filePath		= filePath;
 	m_factorType	= factorType;
 	m_weight			= weight;
@@ -46,8 +47,6 @@ void LanguageModelInternal::Load(const std::string &filePath
 	while( !getline(inFile, line, '\n').eof())
 	{
 		lineNo++;
-		if (( lineNo % 10000) == 0)
-			TRACE_ERR(lineNo << endl);
 
 		if (line.size() != 0 && line.substr(0,1) != "\\")
 		{
@@ -113,33 +112,37 @@ float LanguageModelInternal::GetValue(const std::vector<const Word*> &contextFac
 	const size_t ngram = contextFactor.size();
 	switch (ngram)
 	{
-	case 1: return GetValue((*contextFactor[0])[m_factorType]); break;
+	case 1: return GetValue((*contextFactor[0])[m_factorType], finalState); break;
 	case 2: return GetValue((*contextFactor[0])[m_factorType]
-												, (*contextFactor[1])[m_factorType]); break;
+												, (*contextFactor[1])[m_factorType], finalState); break;
 	case 3: return GetValue((*contextFactor[0])[m_factorType]
 												, (*contextFactor[1])[m_factorType]
-												, (*contextFactor[2])[m_factorType]); break;
+												, (*contextFactor[2])[m_factorType], finalState); break;
 	}
 
 	assert (false);
 	return 0;
 }
 
-float LanguageModelInternal::GetValue(const Factor *factor0) const
+float LanguageModelInternal::GetValue(const Factor *factor0, State* finalState) const
 {
 	float prob;
 	const NGramNode *nGram		= GetLmID(factor0);
 	if (nGram == NULL)
 	{
+		if (finalState != NULL)
+			*finalState = NULL;
 		prob = -numeric_limits<float>::infinity();
 	}
 	else
 	{
+		if (finalState != NULL)
+			*finalState = static_cast<const void*>(nGram);
 		prob = nGram->GetScore();
 	}
 	return FloorSRIScore(prob);
 }
-float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1) const
+float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, State* finalState) const
 {
 	float score;
 	const NGramNode *nGram[2];
@@ -147,6 +150,8 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 	nGram[1]		= GetLmID(factor1);
 	if (nGram[1] == NULL)
 	{
+		if (finalState != NULL)
+			*finalState = NULL;
 		score = -numeric_limits<float>::infinity();
 	}
 	else
@@ -154,6 +159,9 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 		nGram[0] = nGram[1]->GetNGram(factor0);
 		if (nGram[0] == NULL)
 		{ // something unigram
+			if (finalState != NULL)
+				*finalState = static_cast<const void*>(nGram[1]);
+			
 			nGram[0]	= GetLmID(factor0);
 			if (nGram[0] == NULL)
 			{ // stops at unigram
@@ -166,6 +174,8 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 		}
 		else
 		{ // bigram
+			if (finalState != NULL)
+				*finalState = static_cast<const void*>(nGram[0]);
 			score			= nGram[0]->GetScore();
 		}
 	}
@@ -174,7 +184,7 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 
 }
 
-float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2) const
+float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2, State* finalState) const
 {
 	float score;
 	const NGramNode *nGram[3];
@@ -182,6 +192,8 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 	nGram[2]		= GetLmID(factor2);
 	if (nGram[2] == NULL)
 	{
+		if (finalState != NULL)
+			*finalState = NULL;
 		score = -numeric_limits<float>::infinity();
 	}
 	else
@@ -189,6 +201,9 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 		nGram[1] = nGram[2]->GetNGram(factor1);
 		if (nGram[1] == NULL)
 		{ // something unigram
+			if (finalState != NULL)
+				*finalState = static_cast<const void*>(nGram[2]);
+			
 			nGram[1]	= GetLmID(factor1);
 			if (nGram[1] == NULL)
 			{ // stops at unigram
@@ -212,10 +227,15 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 			nGram[0] = nGram[1]->GetNGram(factor0);
 			if (nGram[0] != NULL)
 			{ // trigram
+				if (finalState != NULL)
+					*finalState = static_cast<const void*>(nGram[0]);
 				score = nGram[0]->GetScore();
 			}
 			else
 			{
+				if (finalState != NULL)
+					*finalState = static_cast<const void*>(nGram[1]);
+				
 				score			= nGram[1]->GetScore();
 				nGram[1]	= nGram[1]->GetRootNGram();
 				nGram[0]	= nGram[1]->GetNGram(factor0);
