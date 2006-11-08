@@ -105,15 +105,23 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 		for (size_t i = 0; i < numFeatureValuesInConfig; i++)
 			scores[i] = TransformScore(Scan<float>(token[2+i]));
 		
-		m_collection[inputWord][outputWord].Assign(this, scores);
-//		std::cerr << "CD: " << m_collection[inputWord][outputWord] << std::endl;
+		Collection::iterator iterWord = m_collection.find(inputWord);
+		if (iterWord == m_collection.end())
+		{
+			m_collection[inputWord][outputWord].Assign(this, scores);
+		}
+		else
+		{ // source word already in there. delete input word to avoid mem leak
+			(iterWord->second)[outputWord].Assign(this, scores);
+			delete inputWord;
+		}
 	}
 	inFile.Close();
 }
 
 GenerationDictionary::~GenerationDictionary()
 {
-	std::map<const Word* , OutputWordCollection, WordComparer>::const_iterator iter;
+	Collection::const_iterator iter;
 	for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter)
 	{
 		delete iter->first;
@@ -134,8 +142,7 @@ const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) con
 {
 	const OutputWordCollection *ret;
 	
-	std::map<const Word* , OutputWordCollection, WordComparer>::const_iterator 
-				iter = m_collection.find(&word);
+	Collection::const_iterator iter = m_collection.find(&word);
 	if (iter == m_collection.end())
 	{ // can't find source phrase
 		ret = NULL;
