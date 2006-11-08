@@ -7,7 +7,19 @@
 class LanguageModelInternal : public LanguageModelSingleFactor
 {
 protected:
+	std::vector<const NGramNode*> m_lmIdLookup;
 	NGramCollection m_map;
+
+	const NGramNode* GetLmID( const Factor *factor ) const
+	{
+		size_t factorId = factor->GetId();
+		return ( factorId >= m_lmIdLookup.size()) ? NULL : m_lmIdLookup[factorId];        
+  };
+
+	float GetValue(const Factor *factor0) const;
+	float GetValue(const Factor *factor0, const Factor *factor1) const;
+	float GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2) const;
+
 public:
 	LanguageModelInternal(bool registerScore);
 	void Load(const std::string &filePath

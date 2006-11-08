@@ -24,31 +24,39 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 NGramCollection::~NGramCollection()
 {
-	clear();
+	Collection::iterator iter;
+	for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter)
+	{
+		delete (iter->second);
+	}
+}
+
+void NGramCollection::Add(const Factor *factor, const NGramNode &ngramNode)
+{
 }
 
 NGramNode *NGramCollection::GetOrCreateNGram(const Factor *factor)
 {
-	NGramCollection::iterator iter = this->find(factor);
-	if (iter == NGramCollection::end())
+	Collection::iterator iter = m_collection.find(factor);
+	if (iter == m_collection.end())
 	{
-		return &((*this)[factor] = NGramNode());
+		return (m_collection[factor] = new NGramNode());
 	}
 	else
 	{
-		return &(iter->second);
+		return (iter->second);
 	}
 }
 
 NGramNode *NGramCollection::GetNGram(const Factor *factor)
 {
-	NGramCollection::iterator iter = this->find(factor);
-	return (iter == NGramCollection::end()) ? NULL : &(iter->second) ;
+	Collection::iterator iter = m_collection.find(factor);
+	return (iter == m_collection.end()) ? NULL : (iter->second) ;
 }
 
 const NGramNode *NGramCollection::GetNGram(const Factor *factor) const
 {
-	NGramCollection::const_iterator iter = this->find(factor);
-	return (iter == NGramCollection::end()) ? NULL : &(iter->second) ;
+	Collection::const_iterator iter = m_collection.find(factor);
+	return (iter == m_collection.end()) ? NULL : (iter->second) ;
 }
 

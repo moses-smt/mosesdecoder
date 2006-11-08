@@ -36,13 +36,19 @@ void LanguageModelInternal::Load(const std::string &filePath
 
 	InputFileStream 	inFile(filePath);
 
+	// to create lookup vector later on
+	size_t maxFactorId = 0; 
+	map<size_t, const NGramNode*> lmIdMap;
+
 	string line;
-
 	int lineNo = 0;
-
+	
 	while( !getline(inFile, line, '\n').eof())
 	{
 		lineNo++;
+		if (( lineNo % 10000) == 0)
+			TRACE_ERR(lineNo << endl);
+
 		if (line.size() != 0 && line.substr(0,1) != "\\")
 		{
 			vector<string> tokens = Tokenize(line, "\t");
@@ -61,10 +67,16 @@ void LanguageModelInternal::Load(const std::string &filePath
 					nGram = ngramColl->GetOrCreateNGram(factor);
 	
 					ngramColl = nGram->GetNGramColl();
+
 				}
 
 				NGramNode *rootNGram = m_map.GetNGram(factor);
 				nGram->SetRootNGram(rootNGram);
+
+				// create vector of factors used in this LM
+				size_t factorId = factor->GetId();
+				maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
+				lmIdMap[factorId] = rootNGram;
 				//factorCollection.SetFactorLmId(factor, rootNGram);
 
 				float score = TransformSRIScore(Scan<float>(tokens[0]));
@@ -82,13 +94,145 @@ void LanguageModelInternal::Load(const std::string &filePath
 		}
 	}
 
+		// add to lookup vector in object
+	m_lmIdLookup.resize(maxFactorId+1);
+	fill(m_lmIdLookup.begin(), m_lmIdLookup.end(), static_cast<const NGramNode*>(NULL));
+
+	map<size_t, const NGramNode*>::iterator iterMap;
+	for (iterMap = lmIdMap.begin() ; iterMap != lmIdMap.end() ; ++iterMap)
+	{
+		m_lmIdLookup[iterMap->first] = iterMap->second;
+	}
+
 }
 
 float LanguageModelInternal::GetValue(const std::vector<const Word*> &contextFactor
 												, State* finalState
 												, unsigned int* len) const
 {
+	const size_t ngram = contextFactor.size();
+	switch (ngram)
+	{
+	case 1: return GetValue((*contextFactor[0])[m_factorType]); break;
+	case 2: return GetValue((*contextFactor[0])[m_factorType]
+												, (*contextFactor[1])[m_factorType]); break;
+	case 3: return GetValue((*contextFactor[0])[m_factorType]
+												, (*contextFactor[1])[m_factorType]
+												, (*contextFactor[2])[m_factorType]); break;
+	}
 
+	assert (false);
 	return 0;
 }
 
+float LanguageModelInternal::GetValue(const Factor *factor0) const
+{
+	float prob;
+	const NGramNode *nGram		= GetLmID(factor0);
+	if (nGram == NULL)
+	{
+		prob = -numeric_limits<float>::infinity();
+	}
+	else
+	{
+		prob = nGram->GetScore();
+	}
+	return FloorSRIScore(prob);
+}
+float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1) const
+{
+	float score;
+	const NGramNode *nGram[2];
+
+	nGram[1]		= GetLmID(factor1);
+	if (nGram[1] == NULL)
+	{
+		score = -numeric_limits<float>::infinity();
+	}
+	else
+	{
+		nGram[0] = nGram[1]->GetNGram(factor0);
+		if (nGram[0] == NULL)
+		{ // something unigram
+			nGram[0]	= GetLmID(factor0);
+			if (nGram[0] == NULL)
+			{ // stops at unigram
+				score = nGram[1]->GetScore();
+			}
+			else
+			{	// unigram unigram
+				score = nGram[1]->GetScore() + nGram[0]->GetLogBackOff();
+			}
+		}
+		else
+		{ // bigram
+			score			= nGram[0]->GetScore();
+		}
+	}
+
+	return FloorSRIScore(score);
+
+}
+
+float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2) const
+{
+	float score;
+	const NGramNode *nGram[3];
+
+	nGram[2]		= GetLmID(factor2);
+	if (nGram[2] == NULL)
+	{
+		score = -numeric_limits<float>::infinity();
+	}
+	else
+	{
+		nGram[1] = nGram[2]->GetNGram(factor1);
+		if (nGram[1] == NULL)
+		{ // something unigram
+			nGram[1]	= GetLmID(factor1);
+			if (nGram[1] == NULL)
+			{ // stops at unigram
+				score = nGram[2]->GetScore();
+			}
+			else
+			{
+				nGram[0] = nGram[1]->GetNGram(factor0);
+				if (nGram[0] == NULL)
+				{ // unigram unigram
+					score = nGram[2]->GetScore() + nGram[1]->GetLogBackOff();
+				}
+				else
+				{ // unigram bigram
+					score = nGram[2]->GetScore() + nGram[1]->GetLogBackOff() + nGram[0]->GetLogBackOff();
+				}	
+			}			
+		}
+		else
+		{ // trigram, or something bigram
+			nGram[0] = nGram[1]->GetNGram(factor0);
+			if (nGram[0] != NULL)
+			{ // trigram
+				score = nGram[0]->GetScore();
+			}
+			else
+			{
+				score			= nGram[1]->GetScore();
+				nGram[1]	= nGram[1]->GetRootNGram();
+				nGram[0]	= nGram[1]->GetNGram(factor0);
+				if (nGram[0] == NULL)
+				{ // just bigram
+					// do nothing
+				}
+				else
+				{
+					score	+= nGram[0]->GetLogBackOff();
+				}
+
+			}
+			// else do nothing. just use 1st bigram
+		}
+	}
+
+	return FloorSRIScore(score);
+
+}
