@@ -39,8 +39,9 @@ typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
  */
 class GenerationDictionary : public Dictionary, public ScoreProducer
 {
+	typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
 protected:
-	std::map<const Word* , OutputWordCollection, WordComparer> m_collection;
+	Collection m_collection;
 	// 1st = source
 	// 2nd = target
 	std::string						m_filePath;
