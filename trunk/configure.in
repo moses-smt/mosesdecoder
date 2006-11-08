@@ -30,6 +30,10 @@ AC_ARG_ENABLE(optimization,
             [CPPFLAGS="$CPPFLAGS -O3"; LDFLAGS="$LDFLAGS -O3" ]
            )
 
+AM_CONDITIONAL([INTERNAL_LM], false)
+AM_CONDITIONAL([SRI_LM], false)
+AM_CONDITIONAL([IRST_LM], false)
+
 if test "x$with_srilm" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS"
@@ -48,9 +52,9 @@ then
   LIBS="$LIBS $LIB_SRILM"
   FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
   AM_CONDITIONAL([SRI_LM], true)
-  AM_CONDITIONAL([INTERNAL_LM], false)
-  AM_CONDITIONAL([IRST_LM], false)
-else if test "x$with_irstlm" != 'xno'
+fi
+
+if test "x$with_irstlm" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS"
   CPPFLAGS="$CPPFLAGS -I${with_irstlm}/include"
@@ -63,15 +67,7 @@ then
   LDFLAGS="$LDFLAGS -L${with_irstlm}/lib"
   LIBS="$LIBS $LIB_SRILM"
   FMTLIBS="$FMTLIBS libirstlm.a"
-  AM_CONDITIONAL([SRI_LM], false)
-  AM_CONDITIONAL([INTERNAL_LM], false)
   AM_CONDITIONAL([IRST_LM], true)
-else
-  echo "Using internal language model (use --with-srilm or --with-irstlm to change)!"
-  AM_CONDITIONAL([SRI_LM], false)
-  AM_CONDITIONAL([INTERNAL_LM], true)
-  AM_CONDITIONAL([IRST_LM], false)
-fi
 fi
 
 LIBS="$LIBS -lz"
