@@ -18,6 +18,7 @@
 <option id="gnu.cpp.compiler.option.preprocessor.def.1028025969" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
 <listOptionValue builtIn="false" value="LM_IRST"/>
+<listOptionValue builtIn="false" value="LM_INTERNAL"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 </option>
 <option id="gnu.cpp.compiler.option.debugging.gprof.514527174" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
@@ -61,6 +62,7 @@
 <option id="gnu.cpp.compiler.option.preprocessor.def.542441515" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
 <listOptionValue builtIn="false" value="LM_IRST"/>
+<listOptionValue builtIn="false" value="LM_INTERNAL"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 </option>
 <option id="gnu.cpp.compiler.option.debugging.gprof.24360799" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>

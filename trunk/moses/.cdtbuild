@@ -10,6 +10,7 @@
 <option id="gnu.cpp.compiler.option.preprocessor.def.2071633498" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
 <listOptionValue builtIn="false" value="LM_IRST"/>
+<listOptionValue builtIn="false" value="LM_INTERNAL"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
 <listOptionValue builtIn="false" value="_LARGE_FILES"/>
@@ -43,6 +44,7 @@
 <option id="gnu.cpp.compiler.option.preprocessor.def.444585015" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
 <listOptionValue builtIn="false" value="LM_IRST"/>
+<listOptionValue builtIn="false" value="LM_INTERNAL"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
 <listOptionValue builtIn="false" value="_LARGE_FILES"/>
