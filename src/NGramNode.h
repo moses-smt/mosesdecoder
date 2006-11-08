@@ -32,9 +32,8 @@ protected:
 	NGramCollection	*m_map;
 	NGramNode				*m_rootNGram;
 public:
-	NGramNode()
-	{
-	}
+	NGramNode();
+	~NGramNode();
 	NGramCollection *GetNGramColl()
 	{
 		return m_map;
