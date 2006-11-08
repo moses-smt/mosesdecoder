@@ -4,6 +4,8 @@
 #include "LanguageModelSingleFactor.h"
 #include "NGramCollection.h"
 
+/** Guaranteed cross-platform LM implementation designed to mimic LM used in regression tests
+*/
 class LanguageModelInternal : public LanguageModelSingleFactor
 {
 protected:

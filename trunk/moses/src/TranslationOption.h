@@ -122,11 +122,6 @@ public:
 	{
 		return m_sourceWordsRange.GetEndPos() - m_sourceWordsRange.GetStartPos() + 1;
 	}
-	/** return source words range */
-	inline const WordsRange &GetWordsRange() const
-	{
-		return m_sourceWordsRange;
-	}
 
 	/** return estimate of total cost of this option */
 	inline float GetFutureScore() const 	 
