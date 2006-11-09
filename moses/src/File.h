@@ -13,7 +13,18 @@
 #include "UserMessage.h"
 #include "TypeDef.h"
 
-static const off_t InvalidOffT=-1;
+#ifdef WIN32
+#define OFF_T __int64 
+#define FTELLO(file) _ftelli64(file)
+#define FSEEKO(file, offset, origin) _fseeki64(file, offset, origin)
+
+#else
+#define OFF_T off_t 
+#define FTELLO(f) ftello(f)
+#define FSEEKO(file, offset, origin) fseeko(file, offset, origin)
+#endif
+
+static const OFF_T InvalidOffT=-1;
 
 //  WARNING:
 //    these functions work only for bitwise read/write-able types
@@ -54,27 +65,15 @@ template<typename C> inline void fReadVector(FILE* f, C& v) {
     std::cerr<<"ERROR: freadVec! "<<r<<" "<<s<<"\n";abort();}
 }
 
-#ifdef WIN32
-inline off_t fTell(FILE* f) {return ftell(f);}
+inline OFF_T fTell(FILE* f) {return FTELLO(f);}
 
-inline void fSeek(FILE* f,off_t o) {
-  if(fseek(f,o,SEEK_SET)<0) {
+inline void fSeek(FILE* f,OFF_T o) {
+  if(FSEEKO(f,o,SEEK_SET)<0) {
     std::cerr<<"ERROR: could not fseeko position "<<o<<"\n";
     if(o==InvalidOffT) std::cerr<<"You tried to seek for 'InvalidOffT'!\n";
     abort();
   }
 }
-#else
-inline off_t fTell(FILE* f) {return ftello(f);}
-
-inline void fSeek(FILE* f,off_t o) {
-  if(fseeko(f,o,SEEK_SET)<0) {
-    std::cerr<<"ERROR: could not fseeko position "<<o<<"\n";
-    if(o==InvalidOffT) std::cerr<<"You tried to seek for 'InvalidOffT'!\n";
-    abort();
-  }
-}
-#endif
 
 inline FILE* fOpen(const char* fn,const char* m) {
   if(FILE* f=fopen(fn,m)) 
