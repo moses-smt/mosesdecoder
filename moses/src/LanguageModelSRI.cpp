@@ -129,7 +129,7 @@ VocabIndex LanguageModelSRI::GetLmID( const Factor *factor ) const
 float LanguageModelSRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 {
 	float p = m_srilmModel->wordProb( wordId, context );
-	return FloorSRIScore(TransformSRIScore(p));  // log10->log
+	return FloorScore(TransformSRIScore(p));  // log10->log
 }
 
 float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State* finalState, unsigned int *len) const

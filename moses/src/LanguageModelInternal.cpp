@@ -140,7 +140,7 @@ float LanguageModelInternal::GetValue(const Factor *factor0, State* finalState) 
 			*finalState = static_cast<const void*>(nGram);
 		prob = nGram->GetScore();
 	}
-	return FloorSRIScore(prob);
+	return FloorScore(prob);
 }
 float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, State* finalState) const
 {
@@ -180,7 +180,7 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 		}
 	}
 
-	return FloorSRIScore(score);
+	return FloorScore(score);
 
 }
 
@@ -253,6 +253,6 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 		}
 	}
 
-	return FloorSRIScore(score);
+	return FloorScore(score);
 
 }

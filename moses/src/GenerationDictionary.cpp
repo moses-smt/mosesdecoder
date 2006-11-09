@@ -103,7 +103,7 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 		}
 		std::vector<float> scores(numFeatureValuesInConfig, 0.0f);
 		for (size_t i = 0; i < numFeatureValuesInConfig; i++)
-			scores[i] = TransformScore(Scan<float>(token[2+i]));
+			scores[i] = FloorScore(TransformScore(Scan<float>(token[2+i])));
 		
 		Collection::iterator iterWord = m_collection.find(inputWord);
 		if (iterWord == m_collection.end())
