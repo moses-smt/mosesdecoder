@@ -188,10 +188,10 @@ inline float UntransformIRSTScore(float logNScore)
 	return logNScore / 2.30258509299405f;
 }
 
-//! make sure LM score doesn't fall below LOWEST_SCORE
-inline float FloorIRSTScore(float irstScore)
+//! make sure score doesn't fall below LOWEST_SCORE
+inline float FloorScore(float logScore)
 {
-	return (std::max)(irstScore , LOWEST_SCORE);
+	return (std::max)(logScore , LOWEST_SCORE);
 }
 
 //! Should SRI & IRST transform functions be merged ???
@@ -203,11 +203,6 @@ inline float TransformSRIScore(float sriScore)
 inline float UntransformSRIScore(float logNScore)
 { // opposite of above
 	return logNScore / 2.30258509299405f;
-}
-
-inline float FloorSRIScore(float sriScore)
-{
-	return (std::max)(sriScore, LOWEST_SCORE);
 }
 
 /** convert prob vector to log prob and calc inner product with weight vector.
