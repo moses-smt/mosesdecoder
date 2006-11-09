@@ -165,7 +165,7 @@ public:
 	*/
 	bool operator< (const Phrase &compare) const;
 	
-	/** appends a phrase to the end of current phrase **/
+	/** appends a phrase at the end of current phrase **/
 	void Append(const Phrase &endPhrase);
 };
 
