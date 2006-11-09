@@ -150,6 +150,13 @@ Word &Phrase::AddWord()
 	return m_words[m_phraseSize++];
 }
 
+void Phrase::Append(const Phrase &endPhrase){
+	
+	for (int i = 0; i < endPhrase.GetSize();i++){
+		AddWord(endPhrase.GetWord(i));	
+	}
+}
+
 vector< vector<string> > Phrase::Parse(const std::string &phraseString, const std::vector<FactorType> &factorOrder, const std::string& factorDelimiter)
 {
 	bool isMultiCharDelimiter = factorDelimiter.size() > 1;
