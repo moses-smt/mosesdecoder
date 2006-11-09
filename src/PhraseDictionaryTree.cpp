@@ -27,7 +27,7 @@ LabelId Epsilon=InvalidLabelId-1;
 
 typedef std::vector<LabelId> IPhrase;
 typedef std::vector<float> Scores;
-typedef PrefixTreeF<LabelId,off_t> PTF;
+typedef PrefixTreeF<LabelId,OFF_T> PTF;
 
 // A = type of things to numberize, ie, std::string
 // B = map type to use, might consider using hash_map for better performance
@@ -131,13 +131,13 @@ PhraseDictionaryTree::PrefixPtr::operator bool() const
 
 
 struct PDTimp {
-  typedef PrefixTreeF<LabelId,off_t> PTF;
+  typedef PrefixTreeF<LabelId,OFF_T> PTF;
 	typedef FilePtr<PTF> CPT;
   typedef std::vector<CPT> Data;
 	typedef LVoc<std::string> WordVoc;
 
   Data data;
-  std::vector<off_t> srcOffsets;
+  std::vector<OFF_T> srcOffsets;
 
   FILE *os,*ot;
 	WordVoc sv,tv;
@@ -163,7 +163,7 @@ struct PDTimp {
   	if(f[0]>=data.size()) return;
   	if(!data[f[0]]) return;
 		assert(data[f[0]]->findKey(f[0])<data[f[0]]->size());
-		off_t tCandOffset=data[f[0]]->find(f);
+		OFF_T tCandOffset=data[f[0]]->find(f);
 		if(tCandOffset==InvalidOffT) return;
   	fSeek(ot,tCandOffset);
    	tgtCands.readBin(ot);
@@ -175,7 +175,7 @@ struct PDTimp {
 	{
 		assert(p);
 		if(p.imp->isRoot()) return;
-		off_t tCandOffset=p.imp->ptr()->getData(p.imp->idx);
+		OFF_T tCandOffset=p.imp->ptr()->getData(p.imp->idx);
 		if(tCandOffset==InvalidOffT) return;
   	fSeek(ot,tCandOffset);
    	tgtCands.readBin(ot);
@@ -251,7 +251,7 @@ int PDTimp::Read(const std::string& fn)
 	sv.Read(ifsv);
 	tv.Read(iftv);
   
-	std::cerr<<"binary phrasefile loaded, default off_t: "<<PTF::getDefault()
+	std::cerr<<"binary phrasefile loaded, default OFF_T: "<<PTF::getDefault()
 					 <<"\n";
 	return 1;
 }
@@ -277,9 +277,9 @@ void PDTimp::PrintTgtCand(const TgtCands& tcand,std::ostream& out) const
 PhraseDictionaryTree::PhraseDictionaryTree(size_t numScoreComponent)
 	: Dictionary(numScoreComponent),imp(new PDTimp)
 {
-	if(sizeof(off_t)!=8)
+	if(sizeof(OFF_T)!=8)
 		{
-			std::cerr<<"ERROR: size of type 'off_t' has to be 64 bit!\n"
+			std::cerr<<"ERROR: size of type 'OFF_T' has to be 64 bit!\n"
 				"use compiler settings '-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES'\n"
 				" -> abort \n\n";
 			abort();
@@ -347,13 +347,13 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
   FILE *os=fOpen(ofn.c_str(),"wb"),
     *ot=fOpen(oft.c_str(),"wb");
 
-  typedef PrefixTreeSA<LabelId,off_t> PSA;
+  typedef PrefixTreeSA<LabelId,OFF_T> PSA;
   PSA *psa=new PSA;PSA::setDefault(InvalidOffT);
 
 	LabelId currFirstWord=InvalidLabelId;
 	IPhrase currF;
 	TgtCands tgtCands;
-	std::vector<off_t> vo;
+	std::vector<OFF_T> vo;
 	size_t lnc=0;
 	while(getline(inFile, line)) 	
 		{
@@ -470,7 +470,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 
 int PhraseDictionaryTree::Read(const std::string& fn) 
 {
-  std::cerr<<"size of off_t "<<sizeof(off_t)<<"\n";
+  std::cerr<<"size of OFF_T "<<sizeof(OFF_T)<<"\n";
 	return imp->Read(fn);
 } 
 
