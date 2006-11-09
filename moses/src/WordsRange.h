@@ -68,6 +68,15 @@ public:
 						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
 	}
 	
+	// Whether 2 word ranges overlap or not
+	inline bool Overlap(const WordsRange& x) const
+	{
+		
+		if ( x.m_endPos < m_startPos || x.m_startPos > m_endPos) return false;
+		
+		return true;
+	}
+	
 	TO_STRING();
 };
 
