@@ -77,9 +77,9 @@ if ($error) {
   exit 3;
 }
 
-($o, $ec, $sig) = run_command("$test_dir/filter-stdout $results/run.stdout > $results/results.dat");
+($o, $ec, $sig) = run_command("$test_dir/filter-stdout.pl $results/run.stdout > $results/results.dat");
 warn "filter-stdout failed!" if ($ec > 0 || $sig);
-($o, $ec, $sig) = run_command("$test_dir/filter-stderr $results/run.stderr >> $results/results.dat");
+($o, $ec, $sig) = run_command("$test_dir/filter-stderr.pl $results/run.stderr >> $results/results.dat");
 warn "filter-stderr failed!" if ($ec > 0 || $sig);
 
 open OUT, ">>$results/results.dat";
