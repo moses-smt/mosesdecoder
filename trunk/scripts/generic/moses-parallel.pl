@@ -58,7 +58,7 @@ my $old_sge = 0; # assume old Sun Grid Engine (<6.0) where qsub does not
 #######################
 # Command line options processing
 sub init(){
-  use Getopt::Long qw(:config pass_through);
+  use Getopt::Long qw(:config pass_through no_ignore_case);
   GetOptions('version'=>\$version,
 	     'help'=>\$help,
 	     'debug'=>\$dbg,
@@ -372,17 +372,57 @@ sub preparing_script(){
 sub concatenate_nbest(){
   my $oldcode="";
   my $newcode=-1;
+  my %inplength = ();
+  my $offset = 0;
+ 
+
+# get the list of feature and set a fictitious string with zero scores
+  open (IN, "${nbestfile}.${splitpfx}$idxlist[0]");
+  my $str = <IN>;
+  chomp($str);
+  close(IN);
+  my ($code,$trans,$featurescores,$globalscore)=split(/\|\|\|/,$str);
+  
+  my $emptytrans = "  ";
+  my $emptyglobalscore = " 0.0";
+  my $emptyfeaturescores = $featurescores;
+  $emptyfeaturescores =~ s/[-0-9\.]+/0/g;
+
   open (OUT, "> ${orinbestfile}");
   foreach my $idx (@idxlist){
+
+#computing the length of each input file
+    my @in=();
+    open (IN, "${testfile}.${splitpfx}${idx}.trans");
+    @in=<IN>;
+    close(IN);
+    $inplength{$idx} = scalar(@in);
+
     open (IN, "${nbestfile}.${splitpfx}${idx}");
     while (<IN>){
       my ($code,@extra)=split(/\|\|\|/,$_);
-      $newcode++ if $code ne $oldcode;
+      $code += $offset;
+      if ($code ne $oldcode){
+
+# if there is a jump between two consecutive codes
+# it means that an input sentence is not translated
+# fill this hole with a "fictitious" list of translation
+# comprising just one "emtpy translation" with zero scores
+        while ($code - $oldcode > 1){
+           $oldcode++;
+           print OUT join("\|\|\|",($oldcode,$emptytrans,$emptyfeaturescores,$emptyglobalscore)),"\n";
+        }
+      }
       $oldcode=$code;
-      print OUT join("\|\|\|",($newcode,@extra));
+      print OUT join("\|\|\|",($oldcode,@extra));
     }
     close(IN);
-    $oldcode="";
+    $offset += $inplength{$idx};
+
+    while ($offset - $oldcode > 1){
+      $oldcode++;
+      print OUT join("\|\|\|",($oldcode,$emptytrans,$emptyfeaturescores,$emptyglobalscore)),"\n";
+    }
   }
   close(OUT);
 }
