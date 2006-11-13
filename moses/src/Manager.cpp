@@ -321,7 +321,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 	}
 
 	// MAIN loop
-	for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) <= count && contenders.GetSize() > 0 && (iteration < count * 20) ; iteration++)
+	for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * 20) ; iteration++)
 	{
 		// get next best from list of contenders
 		LatticePath *path = *contenders.begin();
