@@ -22,6 +22,7 @@ library_include_HEADERS = \
 
 bin_PROGRAMS = compile-lm quantize-lm
 
+AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 AM_LDFLAGS=-L.
 LIBS=-lirstlm -lz
 
