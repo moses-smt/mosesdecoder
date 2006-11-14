@@ -1,44 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?fileVersion 3.0.0?>
+<?fileVersion 3.1.0?>
 
 <ManagedProjectBuildInfo>
-<project id="irstlm.cdt.managedbuild.target.gnu.lib.1070956508" name="Static Library (Gnu)" projectType="cdt.managedbuild.target.gnu.lib">
-<configuration artifactExtension="a" artifactName="irstlm" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.debug.8750958" name="Debug" parent="cdt.managedbuild.config.gnu.lib.debug">
-<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.1732402088" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.208381076" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
-<option id="gnu.cpp.compiler.option.debugging.gprof.1713594612" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
-<option id="gnu.cpp.compiler.option.warnings.allwarn.345913036" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
-<option id="gnu.cpp.compiler.option.preprocessor.def.1188129285" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-<listOptionValue builtIn="false" value="_LARGE_FILES"/>
+<project id="moses.cdt.managedbuild.target.gnu.lib.1654550987" name="Static Library (Gnu)" projectType="cdt.managedbuild.target.gnu.lib">
+<configuration artifactExtension="a" artifactName="moses" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.debug.2082569407" name="Debug" parent="cdt.managedbuild.config.gnu.lib.debug">
+<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.2031285777" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1319234555" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1022475428" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
+<option id="gnu.cpp.compiler.option.preprocessor.def.2071633498" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="LM_IRST"/>
+<listOptionValue builtIn="false" value="LM_INTERNAL"/>
+<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 </option>
+<option id="gnu.cpp.compiler.option.include.paths.560695438" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../irstlm/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/misc/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/dstruct/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/include&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/lm/src&quot;"/>
+</option>
+<option id="gnu.cpp.compiler.option.debugging.gprof.1598624147" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
+<option id="gnu.cpp.compiler.option.warnings.allwarn.1855070516" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
 </tool>
-<tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.1727542516" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1884793796" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.187676627" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1660142337" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
 <macros/>
 </toolChain>
-<resourceConfiguration exclude="true" id="cdt.managedbuild.config.gnu.lib.debug.8750958.1054827022" name="compile-lm.cpp" rcbsApplicability="disable" resourcePath="/irstlm/src/compile-lm.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185./irstlm/src/compile-lm.cpp">
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185./irstlm/src/compile-lm.cpp" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1534243185"/>
-</resourceConfiguration>
 </configuration>
-<configuration artifactExtension="a" artifactName="irstlm" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.release.1538178030" name="Release" parent="cdt.managedbuild.config.gnu.lib.release">
-<toolChain id="cdt.managedbuild.toolchain.gnu.lib.release.508823597" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.release">
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.release.723647841" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.release"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1586280207" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release">
-<option id="gnu.cpp.compiler.option.warnings.allwarn.1119345025" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
-<option id="gnu.cpp.compiler.option.preprocessor.def.623094051" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-<listOptionValue builtIn="false" value="_LARGE_FILES"/>
-<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+<configuration artifactExtension="a" artifactName="moses" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.release.875756117" name="Release" parent="cdt.managedbuild.config.gnu.lib.release">
+<toolChain id="cdt.managedbuild.toolchain.gnu.lib.release.1956672127" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.release">
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.release.1930771681" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.release"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.703142952" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release">
+<option id="gnu.cpp.compiler.option.include.paths.28728819" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../irstlm/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/misc/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/dstruct/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/include&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/lm/src&quot;"/>
 </option>
+<option id="gnu.cpp.compiler.option.preprocessor.def.444585015" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="LM_SRI"/>
+<listOptionValue builtIn="false" value="LM_IRST"/>
+<listOptionValue builtIn="false" value="LM_INTERNAL"/>
+<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+<listOptionValue builtIn="false" value="_LARGE_FILES"/>
+</option>
+<option id="gnu.cpp.compiler.option.debugging.gprof.1449614968" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
+<option id="gnu.cpp.compiler.option.warnings.allwarn.1037990342" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="true" valueType="boolean"/>
+<option id="gnu.cpp.compiler.option.warnings.pedantic.280967211" superClass="gnu.cpp.compiler.option.warnings.pedantic" value="false" valueType="boolean"/>
 </tool>
-<tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.1518934657" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>
-<tool id="cdt.managedbuild.tool.gnu.assembler.lib.release.1672118671" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.release"/>
+<tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.1731276863" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>
+<tool id="cdt.managedbuild.tool.gnu.assembler.lib.release.693340097" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.release"/>
 <macros/>
 </toolChain>
-<resourceConfiguration exclude="true" id="cdt.managedbuild.config.gnu.lib.release.1538178030.1743143035" name="compile-lm.cpp" rcbsApplicability="disable" resourcePath="/irstlm/src/compile-lm.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1586280207./irstlm/src/compile-lm.cpp">
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1586280207./irstlm/src/compile-lm.cpp" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1586280207"/>
-</resourceConfiguration>
 </configuration>
+<macros/>
 </project>
 </ManagedProjectBuildInfo>

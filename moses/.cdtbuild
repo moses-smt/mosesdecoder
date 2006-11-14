@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?fileVersion 3.0.0?>
+<?fileVersion 3.1.0?>
 
 <ManagedProjectBuildInfo>
 <project id="moses.cdt.managedbuild.target.gnu.lib.1654550987" name="Static Library (Gnu)" projectType="cdt.managedbuild.target.gnu.lib">
@@ -16,11 +16,11 @@
 <listOptionValue builtIn="false" value="_LARGE_FILES"/>
 </option>
 <option id="gnu.cpp.compiler.option.include.paths.560695438" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../irstlm/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/misc/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/dstruct/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/include&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/lm/src&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.debugging.gprof.1598624147" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
 <option id="gnu.cpp.compiler.option.warnings.allwarn.1855070516" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
@@ -35,11 +35,11 @@
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.release.1930771681" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.release"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.703142952" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release">
 <option id="gnu.cpp.compiler.option.include.paths.28728819" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="${ProjDirPath}/../irstlm/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/misc/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/dstruct/src"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/include"/>
-<listOptionValue builtIn="false" value="${ProjDirPath}/../srilm/lm/src"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../irstlm/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/misc/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/dstruct/src&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/include&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/lm/src&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.444585015" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
