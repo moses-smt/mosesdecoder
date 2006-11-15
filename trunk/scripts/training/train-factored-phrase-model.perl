@@ -1342,30 +1342,31 @@ print INI "\n\n# limit on how many phrase translations e for each phrase f are l
   my $weight_d_count = 0;
   if ($___REORDERING ne "distance") {
     my $file = "# distortion (reordering) files\n[distortion-file]\n";
-    my $type = "# distortion (reordering) type\n[distortion-type]\n";
     my $factor_i = 0;
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
 	foreach my $r (keys %REORDERING_MODEL) {
 	    next if $r eq "fe" || $r eq "f";
 	    next if $r eq "distance" && $factor_i>0;
-	    $type .= $r."\n";
 	    if ($r eq "distance") { $weight_d_count++; } 
 	    else {
+		my $type = $r;
+		$type =~ s/orientation/msd/;
+
 		$r =~ s/-bidirectional/.bi/;
 		$r =~ s/-f/.f/;
 		$r =~ s/orientation/orientation-table.$factor/;
 		$r =~ s/monotonicity/monotonicity-table.$factor/;
-		$file .= "$___MODEL_DIR/$r.$___REORDERING_SMOOTH.gz\n";
 		
 		my $w;
 		if ($r =~ /orient/) { $w = 3; } else { $w = 1; }
 		if ($r =~ /bi/) { $w *= 2; }
 		$weight_d_count += $w;
+		$file .= "$factor $type $w $___MODEL_DIR/$r.$___REORDERING_SMOOTH.gz\n";
 	    }
 	}
         $factor_i++;
     }
-    print INI $type."\n".$file."\n";
+    print INI $file."\n";
   }
   else {
     $weight_d_count = 1;

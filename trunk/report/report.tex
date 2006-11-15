@@ -1,4 +1,4 @@
-\documentclass[10pt]{report} 
+\documentclass[11pt]{report} 
 \usepackage{epsf}
 \usepackage{graphicx}
 \usepackage{index}
@@ -22,6 +22,11 @@
 \usepackage{pst-plot}
 }
 \usepackage{subfig}
+\oddsidemargin 0mm
+\evensidemargin 5mm
+\topmargin 0mm
+\textheight 220mm
+\textwidth 160mm
 
 \makeindex
 \theoremstyle{plain}
@@ -53,15 +58,12 @@ Christine Corbett Moran,
 Evan Herbst}
 
 \maketitle
-
-\section{TODO and HOWTO for authors}
-
-\begin{itemize}
-\item Add your bibtex entries to the file biblio.bib.
-\item Use 'make' to compile the pdf.
-\end{itemize}
-
+ 
 \section*{Abstract}
+{\large The 2006 Language Engineering Workshop {\em Open Source Toolkit for Statistical Machine Translation} had the objective to advance the current state of the art in statistical machine translation in respect to dealing with richer input and richer annotation of the textual data. The work breaks down into three goals: factored translation models, confusion network decoding, and the development of an open source toolkit that incorporates this advancements.
+
+This report describes the scientific goals, the novel methods, and experimental results of the workshop. It also documents details of the implementation of the open source toolkit.
+}
 
 \newpage
 \section*{Acknowledgments}
@@ -88,9 +90,45 @@ Evan Herbst}
 \tableofcontents
 
 \chapter{Introduction}
-{\sc Philipp Koehn: overview of the goals of the workshop 2-4 pages}
+Statistical machine translation has emerged as the dominant paradigm in machine translation research, raising hopes again to come closer to the dream of building machines that translate foreign languages --- a dream that is as old as artificial intelligence research itself.
 
-\chapter{Factored Translation Models}
+While statistical machine translation is built on the insight that many translation choices --- be it be how to translate an ambiguous input word or when to reorder the words of a sentences --- have to balanced against each other. The balancing of these choices is done using probabilistic estimates collected from translated text, or other useful scoring functions.
+
+The multitude of choices is increased, if machine translation becomes part of a larger application, for instance part of a speech translation system. In this case, the input to the machine translation system may be ambiguous in itself, and we would like to add the capability to deal with such ambiguous input. 
+
+While statistical machine translation research has gained much from building on the insight of using probabilistic choices to make the many decisions in translations, it has had problems with another insight into the translation process: much of the transformation is best explained with morphological, syntactical, semantic, or otherwise obtained knowledge. Integrating such knowledge into statistical machine translation will allow us to build richer models.
+
+We address these two challenges with approaches called {\bf confusion network decoding} amd {\bf factored translation models}. We also address another problem of doing research in this field. The methods and systems we develop become increasingly complex. Catching up with the state of the art has become a major part of the work done by research groups. To reduce this tremendous duplication of efforts, we make our work available in form of an {\bf open source toolkit}.
+
+To this end, we merged the efforts of a number of research labs (University of Edinburgh, ITC-irst, MIT, University of Maryland, RWTH Aachen) in a common set of tools, including the core of a machine translation system: the decoder. This report documents this effort that we will persue beyond the efforts at the summer workshop.
+
+\section{Factored Translation Models}
+{\sc \begin{itemize}
+\item outperform traditional phrase-based models
+\item framework for a wide range of models
+\item integrated approach to morphology and syntax
+\end{itemize}}
+
+Our approach to factored translation models is described in detail in Chapter~\ref{chap:factored-models}.
+
+\section{Confusion Network Decoding}
+{\sc \begin{itemize}
+\item exploit ambiguous input and outperform 1-best
+\item enable integrated approach to speech translation
+\end{itemize}}
+
+Our approach to confusion network decoding is described in detail in Chapter~\ref{chap:confusion-networks}.
+
+\section{Open Source Toolkit}
+{\sc \begin{itemize}
+\item advances state-of-the-art of statistical machine translation models
+\item best performance of European Parliament task
+\item competitive on IWSLT and TC-Star
+\end{itemize}}
+
+The implementation and usage of the toolkit is described in more detail in Chapter~\ref{toolkit}.
+
+\chapter{Factored Translation Models}\label{chap:factored-models}
 The current state-of-the-art approach to statistical machine translation, so-called phrase-based models, are limited to the mapping of small text chunks without any explicit use of linguistic information, be it morphological, syntactic, or semantic. Such additional information has been shown to be valuable when it is integrated into pre-processing or post-processing steps. 
 
 For instance, improvements in translation quality have been achieved by handling Arabic morphology through stemming or splitting off of affixes that typically translate into individual words in English. Another example is our earlier work on methods to reorder German input, so it is more similar to English output sentence order, which makes it more amendable to the phrase-based approach \cite{Collins2005}.
@@ -104,7 +142,7 @@ However, a tighter integration of linguistic information into the translation mo
 Therefore, we developed a framework for statistical translation models that tightly integrates additional information. Our framework is an extension of the phrase-based model \cite{OchThesis}. It adds additional annotation at the word level. A word in our framework is not anymore only a token, but a vector of factors that represent different levels of annotation.
 
 \begin{center}
-\includegraphics[scale=1]{factors.pdf}
+\includegraphics[scale=0.75]{factors.pdf}
 \end{center}
 
 Typical factors that we experimented with at this point include surface form, lemma, part-of-speech tag, morphological features such as gender, count and case, automatic word classes, true case forms of words, shallow syntactic tags, as well as dedicated factors to ensure agreement between syntactically related items. 
@@ -119,7 +157,7 @@ Thus, it may be preferably to model translation between morphologically rich lan
 Such a model, which makes more efficient use of the translation lexicon, can be defined as a factored translation model. See below for an illustration of this model in our framework.
 
 \begin{center}
-\includegraphics[scale=1]{factored-morphgen-symmetric.pdf}
+\includegraphics[scale=0.75]{factored-morphgen-symmetric.pdf}
 \end{center}
 
 Note that while we illustrate the use of factored translation models on such a linguistically motivated example, our framework also applies to models that incorporate statistically defined word classes.
@@ -137,7 +175,7 @@ Recall the previous  of a factored model that translates using morphological ana
 Factored translation models build on the phrase-based approach that breaks up the translation of a sentence in the translation of small text chunks (so-called phrases). This model implicitly defines a segmentation of the input and output sentences into such phrases. See an example below:
 
 \begin{center}
-\includegraphics[scale=1]{phrase-model-houses.pdf}
+\includegraphics[scale=0.75]{phrase-model-houses.pdf}
 \end{center}
 
 Our current implementation of factored translation models follows strictly the phrase-based approach, with the additional decomposition of phrase translation into a sequence of mapping steps. Since all mapping steps operate on the same phrase segmentation of the input and output sentence into phrase pairs, we call these {\bf synchronous factored models}. 
@@ -344,7 +382,7 @@ penalty parameter will be introduced that can be tuned along with
 the other parameters used in decoding.
 
 
-\chapter{Confusion Network Decoding}
+\chapter{Confusion Network Decoding}\label{chap:confusion-networks}
 %{\sc Marcello Federico and Richard Zens: cut and paste from your journal paper?}
 
 % Definitions.
@@ -636,7 +674,7 @@ is very similar  to the CN decoder. Specifically,  feature (v) is  replaced   %%
 
 
 
-\chapter{Open Source Toolkit}
+\chapter{Open Source Toolkit}\label{toolkit}
 \section{Overall design}
 In developing the Moses decoder we were aware that the system should be open-sourced if it were to gain the support and interest from the machine translation community that we had hoped. There were already several proprietary decoders available which frustrated the community as the details of their algorithms could not be analysed or changed.
 However, making the source freely available is not enough. The decoder must also advance the state of the art in machine translation to be of interest to other researchers. Its translation quality and runtime resource consumption must be comparable with the best available decoders. Also, as far as possible, it should be compatible with current systems which minimize the learning curve for people who wish to migrate to Moses. 
@@ -2937,7 +2975,7 @@ Note the exponential growth with increasing path length.
 Therefore, the naive algorithm is only applicable for very short phrases and heavily pruned confusion networks.
 \begin{figure} 
 	\begin{center}
-		\includegraphics[width=0.85\linewidth]{CN_PathExploration}
+		\includegraphics[width=0.75\linewidth]{CN_PathExploration}
 		\caption{Exploration of the confusion networks for the Spanish--English EPPS task.}\label{fig-cn-exploration}
 	\end{center}
 \end{figure}
@@ -3026,7 +3064,7 @@ First, we tested whether and how the amount of translation alternatives generate
 \begin{figure}[ht]
 \begin{center}
 \label{fig:MERT-epps-nbest}
- \includegraphics[width=\columnwidth]{MERT-nbest}
+ \includegraphics[width=0.75\columnwidth]{MERT-nbest}
 \caption{Performance (BLEU score) achieved on the EuroParl test set using feature weights optimized exploiting an increasing number of translation alternatives of the development set.}
 \end{center}
  \end{figure}
@@ -3046,7 +3084,7 @@ The sets of weights obtained after each iteration of the outer loop are then use
 \begin{figure}
 \begin{center}
 \label{fig:MERT-europarl-devsize}
- \includegraphics[width=\columnwidth]{europarl-devsize}
+ \includegraphics[width=0.75\columnwidth]{europarl-devsize}
 \caption{Performance (BLEU score) achieved on the EuroParl test set using feature weights optimized on  development sets of increasing size.}
 \end{center}
  \end{figure}
@@ -3055,7 +3093,7 @@ The sets of weights obtained after each iteration of the outer loop are then use
 \begin{figure}
 \begin{center}
 \label{fig:MERT-epps-devsize}
- \includegraphics[width=\columnwidth]{epps-cn-devsize}
+ \includegraphics[width=0.75\columnwidth]{epps-cn-devsize}
 \caption{Performance (BLEU score) achieved on the EPPS test set using feature weights optimized on  development sets of increasing size.}
 \end{center}
  \end{figure}
@@ -3116,7 +3154,7 @@ We observe that improvement on the test set ranges from 2.1 to 3.6 absolute BLEU
 \section{Linguistic Information for Word Alignment}
 %{\sc Alexandra Constantin}
 
-\subsection{Word Alignment\\}
+\subsection{Word Alignment}
 
 If we open a common bilingual dictionary, we may find an entry
 like\\
@@ -3176,7 +3214,7 @@ $a:\{1 \rightarrow 3, 2 \rightarrow 4, 3 \rightarrow 2, 4
 \rightarrow 1\}$.
 
 
-\subsection{IBM Model 1\\}
+\subsection{IBM Model 1}
 
 Lexical translations and the notion of alignment allow us to define
 a model capable of generating a number of different translations for
@@ -3226,7 +3264,7 @@ expectation step, we apply the model to the data and estimate the
 most likely alignments. In the maximization step, we learn the model
 from the data and augment the data with guesses for the gaps.
 
- \textbf{Expectation step\\}
+ \textbf{Expectation step}
 
 When we apply the model to the data, we need to compute the
 probability of different alignments given a sentence pair in the
@@ -3331,7 +3369,9 @@ rate). The data consisted of European Parliament German and English
 parallel corpora. Experiments were done using different sizes of
 corpora. The scores are presented in the following table:
 
-\includegraphics[viewport = 90 600 510 730,clip]{constantin-table.pdf}
+\begin{center}
+\includegraphics[scale=0.75,viewport = 90 600 510 730,clip]{constantin-table.pdf}
+\end{center}
 
 The first row indicates the number of sentences used for training
 and the first column indicates the model used to generate
@@ -3357,10 +3397,8 @@ Model 2 might thus generate an improvement in $AER$.
 
 \appendix
 
-\chapter{Follow-Up Research Proposals}
-
-\section{A Syntax and Factor Based Model for Statistical Machine Translation}
-{\sc Brooke Cowan and Michael Collins}
+\chapter{Follow-Up Research Proposal\\
+A Syntax and Factor Based Model for Statistical Machine Translation}
 
 \newcommand{\gen}{\hbox{GEN}}
 \newcommand{\rep}{\bar{\phi}}
@@ -3372,7 +3410,7 @@ Model 2 might thus generate an improvement in $AER$.
 \def\parcite#1{(\cite{#1})}
 \def\perscite#1{\cite{#1}} % works like acl-style \newcite
 
-\subsection{Introduction}
+\section{Introduction}
 \label{intro}
 
 This year's Summer Workshop on Language Engineering at Johns Hopkins
@@ -3432,7 +3470,7 @@ detail; and in Section~\ref{future}, we outline the work that we
 propose to carry out this year to integrate the syntax-based and the
 factor-based models.
 
-\subsubsection{From Phrase-Based to Factor-Based Translation}
+\subsection{From Phrase-Based to Factor-Based Translation}
 Phrase-based systems (e.g., \parcite{koe:04,koe:03,ochney:02,ochney:00})
 advanced the state of the art in statistical machine translation
 during the early part of this decade. They surpassed the performance
@@ -3582,7 +3620,7 @@ translation experiments with a factor-based model.}
 \label{morph}
 \end{table}
 
-\subsubsection{Motivation for a Syntax-Based Model}
+\subsection{Motivation for a Syntax-Based Model}
 While factor-based models show tremendous promise in solving some of
 the gravest deficiencies of phrase-based systems, there remain some
 problems that are unlikely to be addressed. During decoding, the
@@ -3779,7 +3817,7 @@ any wh-words or complementizers, etc.) appear in the output. Before
 providing a detailed outline of our proposed integrated syntax and
 factor based system, we describe our syntax-based model.
 
-\subsection{The Syntax-Based Component}
+\section{The Syntax-Based Component}
 \label{framework}
 
 This section is based on work we have done at MIT CSAIL on a framework
@@ -3873,7 +3911,7 @@ define features that allow the model to capture a wide variety of
 dependencies within the AEP itself, or between the AEP and the
 source-language clause.
 
-\subsubsection{Aligned Extended Projections (AEPs)}
+\subsection{Aligned Extended Projections (AEPs)}
 \label{sec-aep}
 We now provide a detailed description of AEPs.  Figure~\ref{fig-aeps}
 shows examples of German clauses paired with the AEPs found in
@@ -4086,7 +4124,7 @@ MOD(i)} can take one of five possible values:
 \end{itemize}
 
 
-\subsubsection{A Discriminative Model for AEP Prediction}
+\subsection{A Discriminative Model for AEP Prediction}
 \label{sec-model}
 In this section we describe linear history-based models with beam
 search, and the perceptron algorithm for learning in these
@@ -4160,7 +4198,7 @@ alternative algorithms, such as those described by \perscite{daumar:05}.} The pe
 choice because it converges quickly --- usually taking only a few
 iterations over the training set \parcite{col:02,colroa:04}.
 
-\subsubsection{The Features of the Model}
+\subsection{The Features of the Model}
 \label{sec-feats}
 
 The model's features allow it to capture dependencies between the AEP
@@ -4341,7 +4379,7 @@ MODALS}, {\tt SPINE} and the current {\tt MOD(i)}, as well as the
 nonterminal label of the root node of the German modifier being
 placed, and the functions in lines 24 and 28 of Table~\ref{GERfunc}.
 
-\subsubsection{Experiments with the AEP Model}
+\subsection{Experiments with the AEP Model}
 We implemented an end-to-end system for translation from German to
 English using our AEP prediction model as a component. The Europarl
 corpus \parcite{koe:05} constituted our training data. This corpus
@@ -4379,7 +4417,7 @@ for the baseline system. Annotator 2 judged 37 translations to be
 equal in quality, 32 to be better under the baseline, and 31 to be
 better under the AEP-based system.
 
-\subsection{A Syntax and Factor Based Model for SMT}
+\section{A Syntax and Factor Based Model for SMT}
 \label{future}
 In the preceding section, we presented a model that predicts detailed
 target-language syntactic structures, which include constraints on the
@@ -4407,7 +4445,7 @@ motivations for investigating Spanish-English translation, the
 AEP-prediction improvements that we anticipate carrying out, and the
 alternative end-to-end translation systems.
 
-\subsubsection{Integration with a Factor-Based System}
+\subsection{Integration with a Factor-Based System}
 The end-to-end translation framework we have developed in previous
 work uses a phrase-based system to produce $n$-best lists of modifier
 translations, which are then reranked and placed into the final
@@ -4494,7 +4532,7 @@ Note that this approach implies that no part of the input to the
 phrase-based system would be translated by the syntax-based system.
 \end{itemize}
 
-\subsubsection{Other Language Pairs: Spanish/English}
+\subsection{Other Language Pairs: Spanish/English}
 We would like to test the integrated syntax and factor based system
 with language pairs other than German/English, and for translation
 into a language besides English.  One language pair that we are
@@ -4533,7 +4571,7 @@ and reranking techniques to achieve, on test data, an F1 score of
 currently trained on only 2800 sentences; this number will increase by
 a factor of 10 with the release of new data at the end of 2006.
 
-\subsubsection{Improved AEP Prediction}
+\subsection{Improved AEP Prediction}
 Improvements in the accuracy with which the AEP model predicts AEPs
 will almost certainly lead to improved translation quality, and can
 only reduce the amount of work that the factor-based system has to
@@ -4616,7 +4654,7 @@ and modifiers. Our current method involves heuristics for determining
 modifier alignment; this might be done instead by using the EM
 algorithm to induce the best alignment.
 
-\subsubsection{Alternative End-to-End Systems}
+\subsection{Alternative End-to-End Systems}
 We foresee implementing at least two alternative translation systems
 using our AEP model. One of these systems uses finite state machines
 to represent alternative modifier translations; it is closer in nature
@@ -4674,7 +4712,7 @@ This system is quite different from the integrated syntax and factor
 based system and should therefore make a very interesting point of
 comparison.
 
-\subsubsection{Summary}
+\subsection{Summary}
 The goal of this research is to integrate a system that makes explicit
 use of global syntactic information with one that is able to
 incorporate factors in a phrase-based framework. We aim to use the
@@ -4687,10 +4725,6 @@ model and can act as points of comparison to the integrated syntax and
 factor based model. We hope that this work will not only produce
 better machine translation output, but will also help elucidate how
 syntactic information can best be used for SMT.
-
-
-\section{Exploiting Ambiguous Input in Statistical Machine Translation}
-{\sc Richard Zens: just cut and paste your proposal here}
 
 \bibliographystyle{apalike}
 \bibliography{biblio}
