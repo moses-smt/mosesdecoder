@@ -198,8 +198,8 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 		  
 			//defaults, but at least one of these per model should be explicitly specified in the .ini file
 			int orientation = DistortionOrientationType::Msd, 
-					direction = LexReorderType::Bidirectional, 
-					condition = LexReorderType::Fe;
+			  direction = LexReorderType::Backward,
+			  condition = LexReorderType::Fe;
 
 			//Loop through, overriding defaults with specifications
 			vector<string> parameters = Tokenize<string>(specification[1],"-");
@@ -223,6 +223,11 @@ bool StaticData::LoadParameters(int argc, char* argv[])
 					condition = LexReorderType::F; 
 				else if(val == "fe")
 					condition = LexReorderType::Fe; 
+				//unknown specification
+				else {
+				  TRACE_ERR("ERROR: Unknown orientation type specification '" << val << "'" << endl);
+				  return false;
+				}
 				if (orientation == DistortionOrientationType::Msd) 
 					m_sourceStartPosMattersForRecombination = true;
 			}
@@ -711,11 +716,15 @@ void StaticData::CleanUpAfterSentenceProcessing()
 	}
 }
 
+/** initialize the translation and language models for this sentence 
+    (includes loading of translation table entries on demand, if
+    binary format is used) */
 void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) 
 {
-	for(size_t i=0;i<m_phraseDictionary.size();++i)
-  m_phraseDictionary[i]->InitializeForInput(in);
-  
+	for(size_t i=0;i<m_phraseDictionary.size();++i) 
+	{
+		m_phraseDictionary[i]->InitializeForInput(in);
+  }
   //something LMs could do before translating a sentence
   LMList::const_iterator iterLM;
 	for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
