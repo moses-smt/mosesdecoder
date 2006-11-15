@@ -3,7 +3,7 @@
 
 <ManagedProjectBuildInfo>
 <project id="moses.cdt.managedbuild.target.gnu.lib.1654550987" name="Static Library (Gnu)" projectType="cdt.managedbuild.target.gnu.lib">
-<configuration artifactExtension="a" artifactName="moses" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.debug.2082569407" name="Debug" parent="cdt.managedbuild.config.gnu.lib.debug">
+<configuration artifactExtension="a" artifactName="irstlm" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.debug.2082569407" name="Debug" parent="cdt.managedbuild.config.gnu.lib.debug">
 <toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.2031285777" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1319234555" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1022475428" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
@@ -30,7 +30,7 @@
 <macros/>
 </toolChain>
 </configuration>
-<configuration artifactExtension="a" artifactName="moses" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.release.875756117" name="Release" parent="cdt.managedbuild.config.gnu.lib.release">
+<configuration artifactExtension="a" artifactName="irstlm" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.release.875756117" name="Release" parent="cdt.managedbuild.config.gnu.lib.release">
 <toolChain id="cdt.managedbuild.toolchain.gnu.lib.release.1956672127" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.release">
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.release.1930771681" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.release"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.703142952" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release">
