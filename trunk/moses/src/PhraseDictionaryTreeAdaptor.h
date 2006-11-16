@@ -65,7 +65,6 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 		
 	const std::string GetScoreProducerDescription(int idx = 0) const;
-	const std::string PIPPO() const;
 	
 	size_t GetNumInputScores() const;
 	

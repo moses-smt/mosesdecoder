@@ -395,18 +395,6 @@ public:
 										for(size_t i=0;i<tcands.size();++i)
 										{
 											std::vector<float> nscores(tcands[i].second.size()+m_numInputScores,0.0);
-/*
- std::transform(tcands[i].second.begin(),tcands[i].second.end(),nscores.begin(),TransformScore);
- switch(m_numInputScores)
- {
-	 case 2: nscores[nscores.size()-1-m_numInputScores+2]= -1.0f * newRealWords; // do not use -newRealWords ! -- RZ
-	 case 1: nscores[nscores.size()-1-m_numInputScores+1]= newScore;
-	 case 0: break;
-	 default:
-		 std::cerr<<"ERROR: too many model scaling factors for input weights 'weight-i' : "<<m_numInputScores<<"\n";
-		 abort();
- }
- */
 											switch(m_numInputScores)
 											{
 												case 2: nscores[1]= -1.0f * newRealWords; // do not use -newRealWords ! -- RZ
