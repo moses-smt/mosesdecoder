@@ -49,6 +49,6 @@ public:
 		return MultiFactor;
 	}
 
-	const std::string GetScoreProducerDescription() const;	
+	const std::string GetScoreProducerDescription(int idx = 0) const;	
 	bool Useable(const Phrase &phrase) const;	
 };

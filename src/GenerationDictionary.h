@@ -68,7 +68,7 @@ public:
 									, bool forceSingleFeatureValue);
 
 	size_t GetNumScoreComponents() const;
-	const std::string GetScoreProducerDescription() const;
+	const std::string GetScoreProducerDescription(int idx = 0) const;
 
 	/** number of unique input entries in the generation table. 
 	* NOT the number of lines in the generation table

@@ -133,7 +133,7 @@ size_t GenerationDictionary::GetNumScoreComponents() const
   return m_numScoreComponent;
 }
 
-const std::string GenerationDictionary::GetScoreProducerDescription() const
+const std::string GenerationDictionary::GetScoreProducerDescription(int idx) const
 {
   return "Generation score, file=" + m_filePath;
 }

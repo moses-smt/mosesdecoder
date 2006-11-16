@@ -16,7 +16,7 @@ public:
 	float CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr) const;
 
 	size_t GetNumScoreComponents() const;
-	const std::string GetScoreProducerDescription() const;
+	const std::string GetScoreProducerDescription(int idx = 0) const;
 };
 
 /** Doesn't do anything but provide a key into the global
@@ -27,7 +27,7 @@ public:
 	WordPenaltyProducer();
 
 	size_t GetNumScoreComponents() const;
-	const std::string GetScoreProducerDescription() const;
+	const std::string GetScoreProducerDescription(int idx = 0) const;
 };
 
 /** unknown word penalty */
@@ -36,7 +36,7 @@ public:
 	UnknownWordPenaltyProducer();
 
 	size_t GetNumScoreComponents() const;
-	const std::string GetScoreProducerDescription() const;
+	const std::string GetScoreProducerDescription(int idx = 0) const;
 };
 
 #endif
