@@ -1,4 +1,4 @@
-#Wed Nov 15 13:13:05 GMT 2006
+#Thu Nov 16 18:23:03 GMT 2006
 =\=\=\=\=\=\=
 <<<<<<<=org.eclipse.cdt.managedbuilder.core.prefs
 >>>>>>>=1.2
@@ -15,6 +15,6 @@ environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.875095
 environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.release.1538178030=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<environment>\r\n<variable name\="CPATH" operation\="remove" value\=""/>\r\n<variable name\="C_INCLUDE_PATH" operation\="remove"/>\r\n<variable name\="CPLUS_INCLUDE_PATH" operation\="remove" value\=""/>\r\n</environment>\r\n
 environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.release.32089835=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment>\n<variable name\="CPATH" operation\="remove"/>\n<variable name\="CPLUS_INCLUDE_PATH" operation\="remove"/>\n</environment>\n
 environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.release.875756117=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<environment>\r\n<variable name\="CPATH" operation\="remove"/>\r\n<variable name\="C_INCLUDE_PATH" operation\="remove"/>\r\n<variable name\="CPLUS_INCLUDE_PATH" operation\="remove"/>\r\n</environment>\r\n
-environment/project=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<environment/>\r\n
-environment/project/cdt.managedbuild.config.gnu.lib.debug.2082569407=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<environment/>\r\n
-environment/project/cdt.managedbuild.config.gnu.lib.release.875756117=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<environment/>\r\n
+environment/project=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment/>\n
+environment/project/cdt.managedbuild.config.gnu.lib.debug.2082569407=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment/>\n
+environment/project/cdt.managedbuild.config.gnu.lib.release.875756117=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment/>\n
