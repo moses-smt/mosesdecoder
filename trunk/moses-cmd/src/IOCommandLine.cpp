@@ -193,18 +193,57 @@ void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationI
     }
 
 		// translation components
-		vector<PhraseDictionary*> pds = StaticData::Instance()->GetPhraseDictionaries();
-    if (pds.size() > 0) {
-			if (labeledOutput)
-	      m_nBestFile << "tm: ";
-		  vector<PhraseDictionary*>::iterator iter;
-		  for (iter = pds.begin(); iter != pds.end(); ++iter) {
-			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-			  for (size_t j = 0; j<scores.size(); ++j) 
-				  m_nBestFile << scores[j] << " ";
-			  
-		  }
-    }
+		if (StaticData::Instance()->GetInputType()==0){  
+			// translation components	for text input
+			vector<PhraseDictionary*> pds = StaticData::Instance()->GetPhraseDictionaries();
+			if (pds.size() > 0) {
+				if (labeledOutput)
+					m_nBestFile << "tm: ";
+				vector<PhraseDictionary*>::iterator iter;
+				for (iter = pds.begin(); iter != pds.end(); ++iter) {
+					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+					for (size_t j = 0; j<scores.size(); ++j) 
+						m_nBestFile << scores[j] << " ";
+				}
+			}
+		}
+		else{		
+			// translation components for Confusion Network input
+			// first translation component has GetNumInputScores() scores from the input Confusion Network
+			// at the beginning of the vector
+			vector<PhraseDictionary*> pds = StaticData::Instance()->GetPhraseDictionaries();
+			if (pds.size() > 0) {
+				vector<PhraseDictionary*>::iterator iter;
+				
+				iter = pds.begin();
+				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+					
+				size_t pd_numinputscore = (*iter)->GetNumInputScores();
+
+				if (pd_numinputscore){
+					
+					if (labeledOutput)
+						m_nBestFile << "I: ";
+
+					for (size_t j = 0; j < pd_numinputscore; ++j)
+						m_nBestFile << scores[j] << " ";
+				}
+					
+					
+				for (iter = pds.begin() ; iter != pds.end(); ++iter) {
+					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+					
+					size_t pd_numinputscore = (*iter)->GetNumInputScores();
+
+					if (iter == pds.begin() && labeledOutput)
+						m_nBestFile << "tm: ";
+					for (size_t j = pd_numinputscore; j < scores.size() ; ++j)
+						m_nBestFile << scores[j] << " ";
+				}
+			}
+		}
+		
+		
 		
 		// word penalty
 		if (labeledOutput)
