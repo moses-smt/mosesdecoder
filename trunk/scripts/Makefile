@@ -5,8 +5,10 @@
 TS?=$(shell date '+%Y%m%d-%H%M')
 DS?=$(shell date '+%Y%m%d')
 
-# to simplify redirect to custom releases
-DEFAULTTARGETDIR?=/export/ws06osmt/bin
+# set these 2 variables below to point to a directory where you want the 
+# compiled scripts to be copied to
+TARGETDIR=/home/your_user_name/bin
+BINDIR=/home/your_user_name/bin
 
 MAIN_SCRIPTS_TARGET_DIR=$(TARGETDIR)
 # MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)
