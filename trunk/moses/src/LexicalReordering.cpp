@@ -254,7 +254,7 @@ size_t LexicalReordering::GetNumScoreComponents() const
 }
 
 /** returns description of the model */
-const std::string  LexicalReordering::GetScoreProducerDescription() const
+const std::string  LexicalReordering::GetScoreProducerDescription(int idx) const
 {
 	return "Lexicalized reordering score, file=" + m_filePath;
 }

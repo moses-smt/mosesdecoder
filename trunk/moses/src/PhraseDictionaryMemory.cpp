@@ -89,6 +89,7 @@ void PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 		vector<float> scoreVector = Tokenize<float>(tokens[2]);
 		if (scoreVector.size() != m_numScoreComponent) {
+			TRACE_ERR("Tokens[2]" << tokens[2]);
 			TRACE_ERR("Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num);
 			abort();
 		}

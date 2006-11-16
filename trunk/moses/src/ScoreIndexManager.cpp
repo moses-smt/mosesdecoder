@@ -45,11 +45,27 @@ void ScoreIndexManager::Debug_PrintLabeledWeightedScores(std::ostream& os, const
   size_t cur_scoreType = 0;
   while (cur_i < m_last) {
     bool first = true;
+		
+		size_t nis_idx = 0;
+		while (nis_idx < m_producers[cur_scoreType]->GetNumInputScores()){
+      os << "  " << getFormat(scc.m_scores[cur_i]) << "\t" << getFormat(scc.m_scores[cur_i] * weights[cur_i]) << "\t  " << (cur_i < 10 ? " " : "") << cur_i << " ";
+			if (first) {
+				os << m_producers[cur_scoreType]->GetScoreProducerDescription(1)
+				<< std::endl;
+				first = false;
+			} else {
+				os << "    \"         \"" << std::endl;
+			}
+			nis_idx++;
+			cur_i++;
+		}
+		
+		first = true;
     while (cur_i < m_ends[cur_scoreType]) {
       os << "  " << getFormat(scc.m_scores[cur_i]) << "\t" << getFormat(scc.m_scores[cur_i] * weights[cur_i]) << "\t  " << (cur_i < 10 ? " " : "") << cur_i << " ";
       if (first) {
         os << m_producers[cur_scoreType]->GetScoreProducerDescription()
-           << std::endl;
+				   << std::endl;
         first = false;
       } else {
         os << "    \"         \"" << std::endl;
@@ -66,6 +82,22 @@ std::ostream& operator<<(std::ostream& os, const ScoreIndexManager& sim)
 	size_t cur_scoreType = 0;
 	while (cur_i < sim.m_last) {
 		bool first = true;
+
+		size_t nis_idx = 0;
+		while (nis_idx < sim.m_producers[cur_scoreType]->GetNumInputScores()){
+			os << "  " << (cur_i < 10 ? " " : "") << cur_i << " ";
+			if (first) {
+				os << sim.m_producers[cur_scoreType]->GetScoreProducerDescription(1)
+				   << std::endl;
+				first = false;
+			} else {
+				os << "    \"         \"" << std::endl;
+			}
+			nis_idx++;
+			cur_i++;
+		}
+
+		first = true;
 		while (cur_i < sim.m_ends[cur_scoreType]) {
 			os << "  " << (cur_i < 10 ? " " : "") << cur_i << " ";
 			if (first) {

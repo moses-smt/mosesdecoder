@@ -552,48 +552,55 @@ void StaticData::LoadPhraseTables(bool filter
 		//cerr<<"ttable-limits: ";copy(maxTargetPhrase.begin(),maxTargetPhrase.end(),ostream_iterator<size_t>(cerr," "));cerr<<"\n";
 
 		size_t index = 0;
-		size_t totalPrevNoScoreComponent = 0;		
+		size_t weightAllOffset = 0;
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
-			vector<string>			token		= Tokenize(translationVector[currDict]);
+			vector<string>                  token           = Tokenize(translationVector[currDict]);
 			//characteristics of the phrase table
-			vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
-													,output	= Tokenize<FactorType>(token[1], ",");
+			vector<FactorType>      input           = Tokenize<FactorType>(token[0], ",")
+				,output = Tokenize<FactorType>(token[1], ",");
 			m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
 			m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
-			string							filePath= token[3];
-			size_t							numScoreComponent	= Scan<size_t>(token[2]);
-			// weights for this phrase dictionary
-			vector<float> weight(numScoreComponent);
-			for (size_t currScore = 0 ; currScore < numScoreComponent ; currScore++)
-				weight[currScore] = weightAll[totalPrevNoScoreComponent + currScore]; 
+			string filePath= token[3];
+			size_t numScoreComponent = Scan<size_t>(token[2]);
 
-			if(weight.size()!=numScoreComponent) 
-				{
-					std::cerr<<"ERROR: your phrase table has "<<numScoreComponent<<" scores, but you specified "<<weight.size()<<" weights!\n";
-					abort();
-				}
+			// weights for this phrase dictionary
+			// first InputScores (if any), then translation scores
+			vector<float> weight;
 
 			if(currDict==0 && m_inputType)
+			{		
+				m_numInputScores=m_parameter.GetParam("weight-i").size();
+				for(unsigned k=0;k<m_numInputScores;++k)
+					weight.push_back(Scan<float>(m_parameter.GetParam("weight-i")[k]));
+			}
+			else{
+				m_numInputScores=0;
+			}
+			
+			for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
+				weight.push_back(weightAll[weightAllOffset + currScore]);			
+			
+
+			if(weight.size() - m_numInputScores != numScoreComponent) 
 				{
-					m_numInputScores=m_parameter.GetParam("weight-i").size();
-					for(unsigned k=0;k<m_numInputScores;++k)
-						weight.push_back(Scan<float>(m_parameter.GetParam("weight-i")[k]));
-
-					numScoreComponent+=m_numInputScores;
+					std::cerr<<"ERROR: your phrase table has "<<numScoreComponent<<" scores, but you specified "<<(weight.size() - m_numInputScores)<<" weights!\n";
+					abort();
 				}
-
+						
+			weightAllOffset += numScoreComponent;
+			numScoreComponent += m_numInputScores;
+						
 			assert(numScoreComponent==weight.size());
 
 			std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
-
-			totalPrevNoScoreComponent += numScoreComponent;
+			
 			string phraseTableHash	= GetMD5Hash(filePath);
 			string hashFilePath			= GetCachePath() 
 															+ PROJECT_NAME + "--"
 															+ token[0] + "--"
-															+ inputFileHash + "--" 
+															+ inputFileHash + "--"
 															+ phraseTableHash + ".txt";
 
 			timer.check(("Start loading PhraseTable " + filePath).c_str());
