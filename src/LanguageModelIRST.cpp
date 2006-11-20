@@ -67,7 +67,10 @@ void LanguageModelIRST::Load(const std::string &filePath
 #ifdef WIN32
   m_lmtb->load(inp); //don't use memory map
 #else
-  m_lmtb->load(inp,filePath.c_str(),1); 
+  if (filePath.compare(filePath.size()-3,3,".mm")==0)
+    m_lmtb->load(inp,filePath.c_str(),1);
+  else 
+    m_lmtb->load(inp,filePath.c_str(),0);
 #endif  
   
   m_lmtb_ng=new ngram(m_lmtb->dict);
