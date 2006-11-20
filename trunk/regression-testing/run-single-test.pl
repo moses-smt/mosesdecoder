@@ -13,6 +13,7 @@ my $test_dir = "$script_dir/tests";
 my $data_dir;
 my $BIN_TEST = $script_dir;
 my $results_dir;
+my $NBEST = 0;
 
 GetOptions("decoder=s" => \$decoder,
            "test=s"    => \$test_name,
@@ -52,6 +53,11 @@ die "Cannot find $conf\n" unless (-f $conf);
 die "Cannot locate input at $input" unless (-f $input);
 
 my $local_moses_ini = MosesRegressionTesting::get_localized_moses_ini($conf, $data_dir);
+my ($nbestfile,$nbestsize) = MosesRegressionTesting::get_nbestlist($conf);
+
+if (defined($nbestsize) && $nbestsize > 0){
+  $NBEST=$nbestsize;
+}
 
 my $ts = get_timestamp($decoder);
 my $results = "$results_dir/$ts";
@@ -82,12 +88,20 @@ warn "filter-stdout failed!" if ($ec > 0 || $sig);
 ($o, $ec, $sig) = run_command("$test_dir/filter-stderr.pl $results/run.stderr >> $results/results.dat");
 warn "filter-stderr failed!" if ($ec > 0 || $sig);
 
+if($NBEST > 0){
+  ($o, $ec, $sig) = run_command("$test_dir/filter-nbest.pl $results/run.nbest >> $results/results.dat");
+  warn "filter-nbest failed!" if ($ec > 0 || $sig);
+}
+
 open OUT, ">>$results/results.dat";
 print OUT "TOTAL_WALLTIME ~ $elapsed\n";
 close OUT;
 
 run_command("gzip $results/run.stdout");
 run_command("gzip $results/run.stderr");
+if($NBEST > 0){
+  run_command("gzip $results/run.nbest");
+}
 
 ($o, $ec, $sig) = run_command("$BIN_TEST/compare-results.pl $results $truth");
 print $o;
@@ -102,7 +116,15 @@ exit 0;
 sub exec_moses {
   my ($decoder, $conf, $input, $results) = @_;
   my $start_time = time;
-  my ($o, $ec, $sig) = run_command("$decoder -f $conf -i $input 1> $results/run.stdout 2> $results/run.stderr");
+  my ($o, $ec, $sig);
+  if ($NBEST > 0){
+        print STDERR "Nbest output file is $results/run.nbest\n";
+        print STDERR "Nbest size is $NBEST\n";
+	($o, $ec, $sig) = run_command("$decoder -f $conf -i $input -n-best-list $results/run.nbest $NBEST 1> $results/run.stdout 2> $results/run.stderr");
+  }
+  else{
+	($o, $ec, $sig) = run_command("$decoder -f $conf -i $input 1> $results/run.stdout 2> $results/run.stderr");
+  }
   my $elapsed = time - $start_time;
   return ($o, $elapsed, $ec, $sig);
 }

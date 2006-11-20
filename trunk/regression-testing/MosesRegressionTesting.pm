@@ -5,7 +5,7 @@ use strict;
 # if your tests need a new version of the test data, increment this
 # and make sure that a moses-regression-tests-vX.Y is available for
 # download from statmt.org (redpony AT umd dot edu for more info)
-use constant TESTING_DATA_VERSION => '0.1';
+use constant TESTING_DATA_VERSION => '0.2';
 
 # find the data directory in a few likely locations and make sure
 # that it is the correct version
@@ -55,21 +55,40 @@ sub get_localized_moses_ini
   use File::Temp;
   my ($moses_ini, $data_dir) = @_;
   my $LM_PATH = "$data_dir/lm";
-	my $MODEL_PATH = "$data_dir/models";
-	my $local_moses_ini = new File::Temp( UNLINK => 0, SUFFIX => '.ini' );
+  my $MODEL_PATH = "$data_dir/models";
+  my $local_moses_ini = new File::Temp( UNLINK => 0, SUFFIX => '.ini' );
 
   open MI, "<$moses_ini" or die "Couldn't read $moses_ini";
-	open MO, ">$local_moses_ini" or die "Couldn't open $local_moses_ini for writing";
+  open MO, ">$local_moses_ini" or die "Couldn't open $local_moses_ini for writing";
   while (my $l = <MI>) {
-		$l =~ s/\$\{LM_PATH\}/$LM_PATH/g;
-		$l =~ s/\$\{MODEL_PATH\}/$MODEL_PATH/g;
-		print $local_moses_ini $l;
-	}
-	close MO;
-	close MI;
+	$l =~ s/\$\{LM_PATH\}/$LM_PATH/g;
+	$l =~ s/\$\{MODEL_PATH\}/$MODEL_PATH/g;
+	print $local_moses_ini $l;
+  }
+  close MO;
+  close MI;
 
   return $local_moses_ini->filename;
 }
+
+sub get_nbestlist
+{
+  my ($moses_ini) = @_;
+  my $nbestfile = undef;
+  my $nbestsize = undef;
+
+  open MI, "<$moses_ini" or die "Couldn't read $moses_ini";
+  while (my $l = <MI>) {
+    if ($l =~ /\[n-best-list\]/i){
+      chomp($nbestfile = <MI>);
+      chomp($nbestsize = <MI>);
+    }
+  }
+  close MI;
+
+  return ($nbestfile,$nbestsize);
+}
+
 
 1;
 

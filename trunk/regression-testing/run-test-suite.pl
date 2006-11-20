@@ -11,9 +11,11 @@ my @tests = qw (
   multi-factor
   multi-factor-drop
   confusionNet-surface-only
+  confusionNet-multi-factor
   basic-surface-binptable
   multi-factor-binptable
-               );
+  nbest-multi-factor
+);
 ############################################################
 
 use MosesRegressionTesting;
