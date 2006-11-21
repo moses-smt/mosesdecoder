@@ -56,7 +56,7 @@ public:
 		delete m_lmImpl;
 	}
 	
-	void Load(const std::string &filePath
+	bool Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, const std::vector<FactorType> &factorTypes
 					, float weight
@@ -79,7 +79,7 @@ public:
 			m_sentenceEndArray[factorType] 		= factorCollection.AddFactor(Output, factorType, EOS_);
 		}
 	
-		m_lmImpl->Load(filePath, factorCollection, m_implFactor, weight, nGramOrder);
+		return m_lmImpl->Load(filePath, factorCollection, m_implFactor, weight, nGramOrder);
 	}
 	
 	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
@@ -90,8 +90,8 @@ public:
 		}
 		/*
 		for (size_t i = 0 ; i < contextFactor.size() ; ++i)
-			TRACE_ERR(contextFactor[i] << " ");
-		TRACE_ERR(std::endl);
+			TRACE_ERR( contextFactor[i] << " ";
+		TRACE_ERR( std::endl;
 		*/
 
 		// joint context for internal LM

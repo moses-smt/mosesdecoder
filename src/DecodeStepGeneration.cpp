@@ -82,7 +82,6 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const
 {
-  //TRACE_ERR(inputPartialTranslOpt << endl);
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
     { // word deletion
 

@@ -243,12 +243,12 @@ const Hypothesis *Manager::GetBestHypothesis() const
 void Manager::OutputHypoStackSize()
 {
 	std::vector < HypothesisCollection >::const_iterator iterStack = m_hypoStack.begin();
-	TRACE_ERR("Stack sizes: " << (int)iterStack->size());
+	TRACE_ERR( "Stack sizes: " << (int)iterStack->size());
 	for (++iterStack; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
-		TRACE_ERR ( ", " << (int)iterStack->size());
+		TRACE_ERR( ", " << (int)iterStack->size());
 	}
-	TRACE_ERR (endl);
+	TRACE_ERR( endl);
 }
 
 /**
@@ -259,7 +259,7 @@ void Manager::OutputHypoStack(int stack)
 {
 	if (stack >= 0)
 	{
-		TRACE_ERR ( "Stack " << stack << ": " << endl << m_hypoStack[stack] << endl);
+		TRACE_ERR( "Stack " << stack << ": " << endl << m_hypoStack[stack] << endl);
 	}
 	else
 	{ // all stacks
@@ -268,7 +268,7 @@ void Manager::OutputHypoStack(int stack)
 		for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 		{
 			HypothesisCollection &hypoColl = *iterStack;
-			TRACE_ERR ( "Stack " << i++ << ": " << endl << hypoColl << endl);
+			TRACE_ERR( "Stack " << i++ << ": " << endl << hypoColl << endl);
 		}
 	}
 }
@@ -356,8 +356,8 @@ void Manager::CalcDecoderStatistics(const StaticData& staticData) const
 		 	if (hypo != NULL) {
 		   	string buff;
 		  	string buff2;
-		   	TRACE_ERR ("Source and Target Units:");
-		 		TRACE_ERR ((hypo->GetSourcePhrase()).ToString());
+		   	TRACE_ERR( "Source and Target Units:"
+		 							<< hypo->GetSourcePhrase());
 				buff2.insert(0,"] ");
 				buff2.insert(0,(hypo->GetTargetPhrase()).ToString());
 				buff2.insert(0,":");
@@ -376,8 +376,7 @@ void Manager::CalcDecoderStatistics(const StaticData& staticData) const
 				  buff2.insert(0,"[");
 				  hypo = hypo->GetPrevHypo();
 				}
-				TRACE_ERR (buff);
-				TRACE_ERR ("\n");
+				TRACE_ERR( buff << endl);
       }
     }
   }

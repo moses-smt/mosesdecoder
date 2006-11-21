@@ -35,11 +35,7 @@ using namespace std;
 Parameter::Parameter() 
 {
 	AddParam("beam-threshold", "b", "threshold for threshold pruning");
-	AddParam("cache-path", "?"); //TODO description, please
 	AddParam("config", "f", "location of the configuration file");
-	AddParam("distortion", "?"); //TODO description, please
-	AddParam("distortion-file", "location and properties of the factorized/lexicalized reordering table");
-	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
 	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
 	AddParam("generation-file", "location and properties of the generation table");
@@ -72,8 +68,13 @@ Parameter::Parameter()
 	AddParam("weight-e", "e", "weight for word deletion"); 
 	AddParam("output-factors", "list if factors in the output");
 	AddParam("cache-path", "?");
- 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
+	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");	
+	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
+}
+
+Parameter::~Parameter()
+{
 }
 
 /** initialize a parameter, sub of constructor */
@@ -96,15 +97,15 @@ void Parameter::AddParam(const string &paramName, const string &abbrevName, cons
 void Parameter::Explain() {
 	cerr << "Usage:" << endl;
 	for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++) 
-		{
-			const string paramName = iterParam->first;
-			const string paramDescription = iterParam->second;
-			cerr << "\t-" << paramName;
-			PARAM_STRING::const_iterator iterAbbr = m_abbreviation.find( paramName );
-			if ( iterAbbr != m_abbreviation.end() )
-				cerr << " (" << iterAbbr->second << ")";			
-			cerr << ": " << paramDescription << endl;
-		}
+	{
+		const string paramName = iterParam->first;
+		const string paramDescription = iterParam->second;
+		cerr <<  "\t-" << paramName;
+		PARAM_STRING::const_iterator iterAbbr = m_abbreviation.find( paramName );
+		if ( iterAbbr != m_abbreviation.end() )
+			cerr <<  " (" << iterAbbr->second << ")";
+		cerr <<  ": " << paramDescription << endl;
+	}
 }
 
 /** check whether an item on the command line is a switch or a value 
@@ -117,6 +118,13 @@ bool Parameter::isOption(const char* token) {
   if (length > 0 && tokenString.substr(0,1) != "-") return false;
   if (length > 1 && tokenString.substr(1,1).find_first_not_of("0123456789") == 0) return true;
   return false;
+}
+
+/** load all parameters from the configuration file and the command line switches */
+bool Parameter::LoadParam(const string &filePath)
+{
+	const char *argv[] = {"executable", "-f", filePath.c_str() };
+	return LoadParam(3, (char**) argv);
 }
 
 /** load all parameters from the configuration file and the command line switches */
@@ -140,21 +148,21 @@ bool Parameter::LoadParam(int argc, char* argv[])
 			return false;
 		}
 	}
-
+	
 	// overwrite parameters with values from switches
 	for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++) 
-		{
-			const string paramName = iterParam->first;
-			OverwriteParam("-" + paramName, paramName, argc, argv);
-		}
+	{
+		const string paramName = iterParam->first;
+		OverwriteParam("-" + paramName, paramName, argc, argv);
+	}
 
 	// ... also shortcuts
 	for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin(); iterParam != m_abbreviation.end(); iterParam++) 
-		{
-			const string paramName = iterParam->first;
-			const string paramShortName = iterParam->second;
-			OverwriteParam("-" + paramShortName, paramName, argc, argv);
-		}
+	{
+		const string paramName = iterParam->first;
+		const string paramShortName = iterParam->second;
+		OverwriteParam("-" + paramShortName, paramName, argc, argv);
+	}
 
 	// logging of parameters that were set in either config or switch
 	int verbose = 1;
@@ -162,30 +170,31 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	    m_setting["verbose"].size() > 0)
 	  verbose = Scan<int>(m_setting["verbose"][0]);
 	if (verbose >= 1) { // only if verbose
-	  cerr << "Defined parameters (per moses.ini or switch):" << endl;
+	  TRACE_ERR( "Defined parameters (per moses.ini or switch):" << endl);
 	  for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ; iterParam != m_setting.end(); iterParam++) {
-	    cerr << "\t" << iterParam->first << ": ";
+	    TRACE_ERR( "\t" << iterParam->first << ": ");
 	    for ( size_t i = 0; i < iterParam->second.size(); i++ )
-	      cerr << iterParam->second[i] << " ";
-	    cerr << endl;
+	      TRACE_ERR( iterParam->second[i] << " ");
+	    TRACE_ERR( endl);
 	  }
 	}
 
 	// check for illegal parameters
 	bool noErrorFlag = true;
 	for (int i = 0 ; i < argc ; i++)
-		{
-			if (isOption(argv[i]))
-				{
-					string paramSwitch = (string) argv[i];				
-					string paramName = paramSwitch.substr(1);
-					if (m_valid.find(paramName) == m_valid.end()) 
-						{
-							UserMessage::Add("illegal switch: " + paramSwitch);
-							noErrorFlag = false;
-						}
-				}
-		}
+	{
+		if (isOption(argv[i]))
+			{
+				string paramSwitch = (string) argv[i];				
+				string paramName = paramSwitch.substr(1);
+				if (m_valid.find(paramName) == m_valid.end()) 
+					{
+						UserMessage::Add("illegal switch: " + paramSwitch);
+						noErrorFlag = false;
+					}
+			}
+	}
+
   // check if parameters make sense
 	return Validate() && noErrorFlag;
 }
@@ -239,8 +248,10 @@ bool Parameter::Validate()
 	if (noErrorFlag)
 		noErrorFlag = FilesExist("lmodel-file", 3);
 	// input file
-	if (noErrorFlag)
-		noErrorFlag = FilesExist("input-file", 0);
+	if (noErrorFlag && m_setting["input-file"].size() == 1)
+	{
+		noErrorFlag = FileExists(m_setting["input-file"][0]);
+	}
 
 	return noErrorFlag;
 }
@@ -472,7 +483,7 @@ void Parameter::PrintCredit()
 	sort(everyone.begin(), everyone.end());
 
 
-	cerr << "Moses - A beam search decoder for phrase-based statistical machine translation models" << endl
+	cerr <<  "Moses - A beam search decoder for phrase-based statistical machine translation models" << endl
 			<< "Copyright (C) 2006 University of Edinburgh" << endl << endl
 
 			<< "This library is free software; you can redistribute it and/or" << endl
@@ -494,6 +505,6 @@ void Parameter::PrintCredit()
 
 	ostream_iterator<Credit> out(cerr, "\n");
 	copy(everyone.begin(), everyone.end(), out);
-	cerr << endl << endl;
+	cerr <<  endl << endl;
 }
 

@@ -151,7 +151,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 				
 		// and remember the threshold
 		float scoreThreshold = bestScores.top();
-		// cerr << "threshold: " << scoreThreshold << endl;
+		// TRACE_ERR( "threshold: " << scoreThreshold << endl);
 		
 		// delete all hypos under score threshold
 		iter = m_hypos.begin();
@@ -174,13 +174,13 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 		
 		IFVERBOSE(3) 
 		{
-			cerr << "stack now contains: ";
+			TRACE_ERR("stack now contains: ");
 			for(iter = m_hypos.begin(); iter != m_hypos.end(); iter++) 
 			{
 				Hypothesis *hypo = *iter;
-				cerr << hypo->GetId() << " (" << hypo->GetTotalScore() << ") ";
+				TRACE_ERR( hypo->GetId() << " (" << hypo->GetTotalScore() << ") ");
 			}
-			cerr << endl;
+			TRACE_ERR( endl);
 		}
 
 		// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack

@@ -9,6 +9,7 @@
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "StaticData.h"
 #include "Sentence.h"
+#include "UserMessage.h"
 
 struct CNStats {
 	size_t created,destr,read,colls,words;
@@ -67,16 +68,18 @@ bool ConfusionNet::ReadF(std::istream& in,
 												 const std::vector<FactorType>& factorOrder,
 												 int format) 
 {
-	TRACE_ERR("read confusion net with format "<<format<<"\n");
+	TRACE_ERR( "read confusion net with format "<<format<<"\n");
 	switch(format) 
 		{
 		case 0: return ReadFormat0(in,factorOrder);
 		case 1: return ReadFormat1(in,factorOrder);
 		default: 
-			std::cerr<<"ERROR: unknown format '"<<format
-							 <<"' in ConfusionNet::Read\n";
+			stringstream strme;
+			strme << "ERROR: unknown format '"<<format
+							 <<"' in ConfusionNet::Read";
+			UserMessage::Add(strme.str());
 		}
-	return 0;
+	return false;
 }
 
 int ConfusionNet::Read(std::istream& in,
@@ -115,12 +118,12 @@ bool ConfusionNet::ReadFormat0(std::istream& in,
 			String2Word(word,w,factorOrder);
 			if(prob<0.0) 
 				{
-					std::cerr<<"WARN: negative prob: "<<prob<<" ->set to 0.0\n";
+					TRACE_ERR("WARN: negative prob: "<<prob<<" ->set to 0.0\n");
 					prob=0.0;
 				}
 			else if (prob>1.0)
 				{
-					std::cerr<<"WARN: prob > 1.0 : "<<prob<<" -> set to 1.0\n";
+					TRACE_ERR("WARN: prob > 1.0 : "<<prob<<" -> set to 1.0\n");
 					prob=1.0;
 				}
 			col.push_back(std::make_pair(w,std::max(static_cast<float>(log(prob)),
@@ -154,7 +157,7 @@ bool ConfusionNet::ReadFormat1(std::istream& in,
 			if(is>>word>>prob) {
 				data[i][j].second = (float) log(prob); 
 				if(data[i][j].second<0) {
-					std::cerr<<"WARN: neg costs: "<<data[i][j].second<<" -> set to 0\n";
+					TRACE_ERR("WARN: neg costs: "<<data[i][j].second<<" -> set to 0\n");
 					data[i][j].second=0.0;}
 				String2Word(word,data[i][j].first,factorOrder);
 			} else return 0;
@@ -174,19 +177,19 @@ void ConfusionNet::Print(std::ostream& out) const {
 }
 
 Phrase ConfusionNet::GetSubString(const WordsRange&) const {
-	std::cerr<<"ERROR: call to ConfusionNet::GetSubString\n";
+	TRACE_ERR("ERROR: call to ConfusionNet::GetSubString\n");
 	abort();
 	return Phrase(Input);
 }
 
 std::string ConfusionNet::GetStringRep(const vector<FactorType> factorsToPrint) const{ //not well defined yet
-	std::cerr<<"ERROR: call to ConfusionNet::GeStringRep\n";
+	TRACE_ERR("ERROR: call to ConfusionNet::GeStringRep\n");
 	abort();
 	return "";
 }
 #pragma warning(disable:4716)
 const Word& ConfusionNet::GetWord(size_t) const {
-	std::cerr<<"ERROR: call to ConfusionNet::GetFactorArray\n";
+	TRACE_ERR("ERROR: call to ConfusionNet::GetFactorArray\n");
 	abort();
 }
 #pragma warning(default:4716)

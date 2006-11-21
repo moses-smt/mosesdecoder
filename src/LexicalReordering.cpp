@@ -85,7 +85,7 @@ void LexicalReordering::LoadFile()
 	
 				}
 			if (probs.size() != m_direction.size() * m_numOrientationTypes) {
-				TRACE_ERR("found " << probs.size() << " probabilities, expected " 
+				TRACE_ERR( "found " << probs.size() << " probabilities, expected " 
 									<< m_direction.size() * m_numOrientationTypes << endl);
 				exit(0);
 			}
@@ -236,11 +236,11 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 			}
 
 			//			IFVERBOSE(3) {
-			//				cerr << "\tdistortion type " << orientation << " =>";
+			//				TRACE_ERR( "\tdistortion type " << orientation << " =>");
 			//				for(unsigned int j=0;j<score.size();j++) {
-			//					cerr << " " << score[j];
+			//					TRACE_ERR( " " << score[j]);
 			//				}
-			//				cerr << endl;
+			//				TRACE_ERR( endl);
 			//			}
 		}
 	}

@@ -37,7 +37,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	void DisableCache();
 
 	// initialize ...
-	void Create(const std::vector<FactorType> &input
+	bool Load(const std::vector<FactorType> &input
 							, const std::vector<FactorType> &output
 							, FactorCollection &factorCollection
 							, const std::string &filePath

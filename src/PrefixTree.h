@@ -121,7 +121,7 @@ private:
 
   static Data def;
 
-  off_t startPos;
+  OFF_T startPos;
   FILE* f;
 public:
 
@@ -134,8 +134,8 @@ public:
     fReadVector(f,keys);
     fReadVector(f,data);
     ptr.clear();ptr.resize(keys.size());
-    std::vector<off_t> rawOffs(keys.size());
-    fread(&rawOffs[0], sizeof(off_t), keys.size(), f);
+    std::vector<OFF_T> rawOffs(keys.size());
+    fread(&rawOffs[0], sizeof(OFF_T), keys.size(), f);
     for(size_t i=0;i<ptr.size();++i)
       if (rawOffs[i]) ptr[i].set(f, rawOffs[i]);
   }
@@ -150,18 +150,18 @@ public:
   void changeData(fwiter b,fwiter e,const Data& d) {
     typename VK::const_iterator i=std::lower_bound(keys.begin(),keys.end(),*b);
     if(i==keys.end() || *i!=*b) {
-      std::cerr<<"ERROR: key not found in changeData!\n"; return;}
+      TRACE_ERR("ERROR: key not found in changeData!\n"); return;}
     typename VK::const_iterator kb=keys.begin();
     size_t pos=std::distance(kb,i);
     if(++b==e) {
-      off_t p=startPos+keys.size()*sizeof(Key)+2*sizeof(unsigned)+pos*sizeof(Data);
-      std::cerr<<"elem found at pos "<<p<<" old val: "<<data[pos]<<"  startpos: "<<startPos<<"\n";
+      OFF_T p=startPos+keys.size()*sizeof(Key)+2*sizeof(unsigned)+pos*sizeof(Data);
+      TRACE_ERR("elem found at pos "<<p<<" old val: "<<data[pos]<<"  startpos: "<<startPos<<"\n");
       if(data[pos]!=d) {
         data[pos]=d;fSeek(f,p);fWrite(f,d);}
       return;
     }
     if(ptr[pos]) ptr[pos]->changeData(b,e,d); else {
-      std::cerr<<"ERROR: seg not found!in changeData\n";
+      TRACE_ERR("ERROR: seg not found!in changeData\n");
     }
   }
 
@@ -175,7 +175,7 @@ public:
   void create(const PrefixTreeSA<Key,Data>& psa,FILE* f,int verbose=0) {
     setDefault(psa.getDefault());
 
-    typedef std::pair<const PrefixTreeSA<Key,Data>*,off_t> P;
+    typedef std::pair<const PrefixTreeSA<Key,Data>*,OFF_T> P;
     typedef std::deque<P> Queue;
 
     Queue queue;
@@ -185,15 +185,15 @@ public:
     size_t ns=1;
     while(queue.size()) {
       if(verbose && queue.size()>ns) {
-        std::cerr<<"stack size in PF create: "<<queue.size()<<"\n";
+        TRACE_ERR("stack size in PF create: "<<queue.size()<<"\n");
         while(ns<queue.size()) ns*=2;}
       const P& pp=queue.back();
       const PrefixTreeSA<Key,Data>& p=*pp.first;
-      off_t pos=pp.second;
+      OFF_T pos=pp.second;
       queue.pop_back();
 
       if(!isFirst) {
-        off_t curr=fTell(f);
+        OFF_T curr=fTell(f);
         fSeek(f,pos);
         fWrite(f,curr);
         fSeek(f,curr);
@@ -206,7 +206,7 @@ public:
       for(size_t i=0;i<p.ptr.size();++i) {
         if(p.ptr[i])
           queue.push_back(P(p.ptr[i],fTell(f)));
-        off_t ppos=0;
+        OFF_T ppos=0;
         s+=fWrite(f,ppos);
       }
     }

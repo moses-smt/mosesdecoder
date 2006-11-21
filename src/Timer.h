@@ -51,7 +51,7 @@ inline double Timer::elapsed_time()
 inline void Timer::start(const char* msg)
 {
   // Print an optional message, something like "Starting timer t";
-	if (msg) TRACE_ERR(msg << std::endl);
+	if (msg) TRACE_ERR( msg << std::endl);
 
   // Return immediately if the timer is already running
   if (running) return;
@@ -70,7 +70,7 @@ inline void Timer::start(const char* msg)
 inline void Timer::restart(const char* msg)
 {
   // Print an optional message, something like "Restarting timer t";
-  if (msg) TRACE_ERR(msg << std::endl);
+  if (msg) TRACE_ERR( msg << std::endl;
 
   // Set the timer status to running
   running = true;
@@ -103,9 +103,9 @@ inline void Timer::stop(const char* msg)
 inline void Timer::check(const char* msg)
 {
   // Print an optional message, something like "Checking timer t";
-  if (msg) TRACE_ERR(msg << " : ");
+  if (msg) TRACE_ERR( msg << " : ");
 
-  TRACE_ERR("[" << std::setiosflags(std::ios::fixed) << std::setprecision(2) << (running ? elapsed_time() : 0) << "] seconds\n");
+  TRACE_ERR( "[" << std::setiosflags(std::ios::fixed) << std::setprecision(2) << (running ? elapsed_time() : 0) << "] seconds\n");
 }
 
 /***
@@ -115,9 +115,7 @@ inline void Timer::check(const char* msg)
  */
 inline std::ostream& operator<<(std::ostream& os, Timer& t)
 {
-#ifdef TRACE_ENABLE
   os << std::setprecision(2) << std::setiosflags(std::ios::fixed) << (t.running ? t.elapsed_time() : 0);
-#endif
   return os;
 }
 

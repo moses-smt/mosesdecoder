@@ -40,7 +40,7 @@ public:
   static State UnknownState;
 
 	virtual ~LanguageModelSingleFactor();
-	virtual void Load(const std::string &filePath
+	virtual bool Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
