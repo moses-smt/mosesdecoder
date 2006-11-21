@@ -212,10 +212,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\IODevice.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\LanguageModel.cpp"
 				>
 			</File>
@@ -517,10 +513,6 @@
 			</File>
 			<File
 				RelativePath=".\src\InputType.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\IODevice.h"
 				>
 			</File>
 			<File

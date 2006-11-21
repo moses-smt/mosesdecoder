@@ -16,7 +16,6 @@ libmoses_a_SOURCES_TMP = \
 	HypothesisCollection.cpp \
 	InputType.cpp \
 	InputFileStream.cpp \
-	IODevice.cpp \
 	LMList.cpp \
 	LanguageModel.cpp \
 	LanguageModelFactory.cpp \
