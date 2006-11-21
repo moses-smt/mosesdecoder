@@ -1275,7 +1275,43 @@ searched in the data in order to limit the number of binary searches performed.
  \end{figure}
 
 \section{Lexicalized Reordering Models}
-{\sc Christine Moran}
+\section{Distortion Models} %draft 0.01
+Distortion modeling is  used as a feature function in our translation system adding in a score based on the likely placement of a phrase relative to an adjacent phrase. Two main forms of distortion modeling are used in contemporary state of the art machine translation systems: distance distortion models, which penalize based on the distance of the reorder, and lexical distortion models, which take into account the relationship between the phrase being reordered and adjacent phrases. Moses extends lexical distortion models to factor distortion models, models in which lexical distortion serves as the special case using the surface forms as the factors in the probability distribution table.
+\subsection{Distance Distortion Models}
+
+Distance based distortion models consider the number of words over which the phrase is moved, as measured on the foreign side. An exponential penalty of $\delta^n$ for movements over n words is added.\cite{koehn:05} This distortion model has its limitations, especially in languages such as German and Japanese where reordering over greater distances is more common. Furthermore, some words are more acceptable to be reordered than others; for example an adjective such as ``white'' may often be reordered in a language in which adjectives appear in a different relative word order to English. A distance distortion model still offers a good starting point for distortion modeling; in fact, capping movement to approximately 4 words leads to BLEU score improvement, even in languages with relatively free word order.\cite{koehn:05}
+\subsection{Lexical Distortion Models}
+
+Many of the limitations of distance based distortion modeling are addressed in lexical distortion models\cite{tillmann:04, koehn:05}, which directly learn the probabilities for a given phrase being reordered relative to adjacent phrases. When collecting phrase pairs we can classify phrases as monotone, swap, or discontinuous based upon the relative placement of the phrases.\\
+\indent $\bf{Monotone}$\\
+\indent \indent Forward: word alignment point on bottom right\\
+\indent \indent Backward: word alignment point on top left\\
+\indent $\bf{Swap}$\\
+\indent \indent Forward: word alignment point on bottom left\\
+\indent \indent Backward: word alignment point on top right\\
+\indent $\bf{Discontinuous}$\\
+\indent \indent Not monotone or swap\\
+Based upon this data, we calculate probability distributions of the form 
+\begin{equation}
+p_r(orientation|\bar{e},\bar{f})
+\end{equation}
+The design space for such a model is inherently larger, and three important design decisions are made in configuring the model, granularity of orientation distinction, side of the translation to condition the probability distribution on, and the directions of orientation to consider. Namely, one can distinguish between all three orientation classes or merely between monotone and non-monotone; one can condition the orientation probability distribution on the foreign phrase or on both the foreign and the source phrase; and one can model with respect to the previous phrase, the following phrase or both. Incorporating a lexical reordering model generally offers significant BLEU score improvements and the optimal configuration depends on language pair \cite{KoehnIWSLT05}. Lexical reordering was analogously implemented in Moses, offering the significant gains in BLEU score detailed below.\\
+
+\begin{tabular}{r|rrr}
+Europarl Lang & Pharaoh & Moses\\ 
+\hline
+ En $\rightarrow$ De & 18.15 &18.85 \\ 
+Es $\rightarrow$ En & 31.46 & 32.37 \\
+En $\rightarrow$ Es &  31.06 & 31.85 \\
+\end{tabular}
+\subsection{Factor Distortion Models}
+Hard-coding in a few factor based distortion rules to an existing statistical machine translation system, such as forcing the swap of nouns and adjectives when translating from English to Spanish, improves translation quality as measured by the BLEU score \cite{pop:06}. This is a motivating result for the development factor distortion models which statistically learn and apply such rules in an analogous manner to the lexical distortion model detailed above.
+
+In factor distortion models we define a reordering model over an arbitrary subset of factors. For example, a part of speech factor distortion model has the ability to learn in a given language that the probability of an adjective being swapped with a noun is high, while the probability of an adjective being swapped with a verb is low. As compared with distance or lexical distortion models, generalizing through a factor distortion model makes better use of the available training data and more effectively models long range dependencies. If we encounter a surface form we have not seen before, we are more likely to handle it effectively through information obtained from its factors. In addition, t is more likely we will have seen a sequence of general factors corresponding to a phrase in our training data than the exact lexical surface form of the phrase itself. As such, by having longer phrases of factors in our training data we have access to reordering probabilities over a greater range, enabling us in turn to model reordering over a greater number of words.
+
+\subsection{Future work}
+While factor distortion modeling is integrated into the machinery Moses, its possible limitations and considerable powers are ripe to be fully explored. Which combination of factors is most effective and which model parameters are optimal for those factors; furthermore, are the answers to these questions language specific, or is a particular configuration the clear forerunner?\\
+
 
 \section{Error Analysis}
 We describe some statistics generally used to measure error and present two error analysis tools written over the summer.
@@ -1304,8 +1340,9 @@ The overall view for a corpus shows a list of files associated with a given corp
 \centering
 \caption{Sample output of corpus-statistics tool.}
 \label{fig:sentence_by_sentence_screenshot}
-\subfloat[detailed view of sentences]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=6in]{images/sentence-by-sentence_multiref_screenshot.png}\hspace{.05in}\vspace{.05in}}} \newline
-\subfloat[overall corpus view]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=6in]{images/corpus_overview_screenshot_de-en.png}\hspace{.05in}\vspace{.05in}}}
+%temp removed to encourage document to compile
+%\subfloat[detailed view of sentences]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=6in]{images/sentence-by-sentence_multiref_screenshot.png}\hspace{.05in}\vspace{.05in}}} \newline
+%\subfloat[overall corpus view]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=6in]{images/corpus_overview_screenshot_de-en.png}\hspace{.05in}\vspace{.05in}}}
 \end{figure}
 
 A second tool developed during the workshop shows the mapping of individual source to output phrases (boxes of the same color on the two lines in figure \ref{fig:phrases_used_screenshot}) and gives the average source phrase length used. This statistic tells us how much use is being made of the translation model's capabilities. There's no need to take the time to tabulate all phrases of length 10, say, in the training source text if we're pretty sure that at translation time no source phrase longer than 4 words will be chosen.
