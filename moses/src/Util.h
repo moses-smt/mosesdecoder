@@ -30,18 +30,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include "TypeDef.h"
 
-/** Outputting debugging information. define TRACE_ENABLE as compiler flag (-D for gcc) to enable output
- *  change to send to a log file if required
+/** Outputting debugging/verbose information to stderr.
+ * Use TRACE_ENABLE flag to redirect tracing output into oblivion
+ * so that you can output your own ad-hoc debugging info.
+ * However, if you use stderr diretly, please delete calls to it once
+ * you finished debugging so that it won't clutter up.
+ * Also use TRACE_ENABLE to turn off output of any debugging info
+ * when compiling for a gui front-end so that running gui won't generate
+ * output on command line
  * */
 #ifdef TRACE_ENABLE
-#define TRACE_ERR(str) { std::cerr << str; }
+#define TRACE_ERR(str) std::cerr << str
 #else
-#define TRACE_ERR(str) { }
+#define TRACE_ERR(str) {}
 #endif
 
 /** verbose macros
  * */
-#define VERBOSE(level,str) { if (StaticData::Instance()->GetVerboseLevel() >= level) { std::cerr << str; } }
+#define VERBOSE(level,str) { if (StaticData::Instance()->GetVerboseLevel() >= level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance()->GetVerboseLevel() >= level)
 
 //! get string representation of any object/variable, as long as it can pipe to a stream
@@ -220,7 +226,12 @@ inline float CalcTranslationScore(const std::vector<float> &probVector,
 	return rv;
 }
 
-//! declaration of ToString() function to go in header for each class. 
+/** declaration of ToString() function to go in header for each class. 
+ *	This function, as well as the operator<< fn for each class, is 
+ *	for debugging purposes only. The output format is likely to change from 
+ *	time-to-time as classes are updated so shouldn't be relied upon 
+ *	for any decoding algorithm
+*/
 #define TO_STRING()	 std::string ToString() const;
 
 //! definition of ToString() function to go in .cpp file. Can be used for any class that can be piped to a stream
@@ -266,10 +277,5 @@ const std::string Trim(const std::string& str, const std::string dropChars = " \
 const std::string ToLower(const std::string& str);
 
 // A couple of utilities to measure decoding time
-#ifdef WIN32
-inline void ResetUserTime() {}
-inline void PrintUserTime(std::ostream &out, const std::string &message="") {}
-#else
 void ResetUserTime();
-void PrintUserTime(std::ostream &out, const std::string &message="");
-#endif
+void PrintUserTime(const std::string &message);

@@ -13,6 +13,7 @@
 #include "StaticData.h"
 #include "UniqueObject.h"
 #include "PDTAimp.h"
+#include "UserMessage.h"
 
 /*************************************************************
 	function definitions of the interface class
@@ -44,7 +45,7 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 		imp->CacheSource(ConfusionNet(*s));
 }
 
-void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
+bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 																				 , const std::vector<FactorType> &output
 																				 , FactorCollection &factorCollection
 																				 , const std::string &filePath
@@ -55,9 +56,11 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 																				 )
 {
 	if(m_numScoreComponent!=weight.size()) {
-		std::cerr<<"ERROR: mismatch of number of scaling factors: "<<weight.size()
+		stringstream strme;
+		strme << "ERROR: mismatch of number of scaling factors: "<<weight.size()
 						 <<" "<<m_numScoreComponent<<"\n";
-		abort();
+		UserMessage::Add(strme.str());
+		return false;
 	}
 	m_filePath = filePath;
 
@@ -71,6 +74,7 @@ void PhraseDictionaryTreeAdaptor::Create(const std::vector<FactorType> &input
 
 	imp->Create(input,output,factorCollection,filePath,
 							weight,languageModels,weightWP);
+	return true;
 }
 
 TargetPhraseCollection const* 
@@ -82,9 +86,13 @@ TargetPhraseCollection const*
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(InputType const& src,WordsRange const &range) const
 {
 	if(imp->m_rangeCache.empty())
+	{
 		return imp->GetTargetPhraseCollection(src.GetSubString(range));
+	}
 	else
+	{
 		return imp->m_rangeCache[range.GetStartPos()][range.GetEndPos()];
+	}
 }
 
 void PhraseDictionaryTreeAdaptor::

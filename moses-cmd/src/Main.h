@@ -39,4 +39,4 @@ POSSIBILITY OF SUCH DAMAGE.
 class IODevice;
 
 int main(int argc, char* argv[]);
-IODevice *GetInputOutput(StaticData &staticData);
+IODevice *GetIODevice(StaticData &staticData);

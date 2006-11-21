@@ -54,13 +54,3 @@ InputType* IOFile::GetInput(InputType* in)
 	return IODevice::GetInput(in,m_inputFile, m_inputFactorOrder, m_factorCollection);
 }
 
-void IOFile::GetInputPhrase(std::list<Phrase> &inputPhraseList)
-{
-	ifstream inputFile(m_inputFilePath.c_str());
-	while(Sentence *sentence=dynamic_cast<Sentence*>(IODevice::GetInput(new Sentence(Input),inputFile, m_inputFactorOrder, m_factorCollection)))
-		{
-			inputPhraseList.push_back(*sentence);
-			Release(sentence);
-		}
-}
-

@@ -42,16 +42,16 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 			std::vector<std::vector<unsigned int> >& lmstats = *(*tpi)->GetLMStats();
 			std::vector<std::vector<unsigned int> >::iterator i = lmstats.begin();
 			std::vector<unsigned int>::iterator acc = lmAcc.begin();
-			  // std::cerr << "\n";
+			  // TRACE_ERR("\n");
 			for (; i != lmstats.end(); ++i, ++acc) {
 				std::vector<unsigned int>::iterator j = i->begin();
 				lmCalls += i->size();
-				// std::cerr << "lm: ";
+				// TRACE_ERR("lm: ");
 				for (; j != i->end(); ++j) {
-				//	std::cerr << *j << " ";
+				//	TRACE_ERR(*j << " ");
 					(*acc) += *j;
 				}
-        // std::cerr << " (total=" << *acc << ", lmcalls=" << lmCalls << ")" << std::endl;
+        // TRACE_ERR(" (total=" << *acc << ", lmcalls=" << lmCalls << ")" << std::endl);
 			}
 		}
 		

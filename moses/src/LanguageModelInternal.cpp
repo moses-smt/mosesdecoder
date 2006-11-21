@@ -11,14 +11,14 @@ LanguageModelInternal::LanguageModelInternal(bool registerScore)
 {
 }
 
-void LanguageModelInternal::Load(const std::string &filePath
+bool LanguageModelInternal::Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder)
 {
 	assert(nGramOrder <= 3);
-	TRACE_ERR("Loading Internal LM: " << filePath << endl);
+	TRACE_ERR( "Loading Internal LM: " << filePath << endl);
 	
 	m_filePath		= filePath;
 	m_factorType	= factorType;
@@ -33,7 +33,7 @@ void LanguageModelInternal::Load(const std::string &filePath
 	m_sentenceEndArray[m_factorType] = m_sentenceEnd;
 
 	// read in file
-	TRACE_ERR(filePath << endl);
+	TRACE_ERR( filePath << endl);
 
 	InputFileStream 	inFile(filePath);
 
@@ -103,6 +103,7 @@ void LanguageModelInternal::Load(const std::string &filePath
 		m_lmIdLookup[iterMap->first] = iterMap->second;
 	}
 
+	return true;
 }
 
 float LanguageModelInternal::GetValue(const std::vector<const Word*> &contextFactor

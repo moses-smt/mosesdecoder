@@ -78,8 +78,12 @@ public:
 	 * NULL elements in sourceWord will be skipped */
 	void Merge(const Word &sourceWord);
 
-	//! get string representation of list of factors
-	std::string ToString(const std::vector<FactorType> factorType,bool endWithBlank=1) const;
+	/** get string representation of list of factors. Used by PDTimp so supposed 
+	* to be invariant to changes in format of debuggin output, therefore, doesn't 
+	* use streaming output or ToString() from any class so not dependant on 
+	* these debugging functions.
+	*/
+	std::string GetString(const std::vector<FactorType> factorType,bool endWithBlank) const;
 	TO_STRING();
 
 	//! transitive comparison of Word objects

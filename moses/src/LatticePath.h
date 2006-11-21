@@ -87,14 +87,12 @@ inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
 	{
 		const Hypothesis *edge = path.m_path[pos];
 		const WordsRange &sourceRange = edge->GetCurrSourceWordsRange();
-		TRACE_ERR(edge->GetId() << " " << sourceRange.GetStartPos() << "-" << sourceRange.GetEndPos() << ", ");
-		//out << *edge;
+		out << edge->GetId() << " " << sourceRange.GetStartPos() << "-" << sourceRange.GetEndPos() << ", ";
 	}
 	// scores
-	out << " total=" << path.GetTotalScore();
-	out << " " << path.GetScoreBreakdown();
-
-	TRACE_ERR(endl);
+	out << " total=" << path.GetTotalScore()
+			<< " " << path.GetScoreBreakdown()
+			<< std::endl;
 
 	return out;
 }

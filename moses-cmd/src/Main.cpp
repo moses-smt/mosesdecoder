@@ -60,8 +60,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 using namespace std;
-Timer timer;
-
 
 bool readInput(IODevice *inputOutput, int inputType, InputType*& source) 
 {
@@ -75,40 +73,47 @@ bool readInput(IODevice *inputOutput, int inputType, InputType*& source)
 
 int main(int argc, char* argv[])
 {
-	TRACE_ERR( "command: " );
-	for(int i=0;i<argc;++i) TRACE_ERR( argv[i]<<" " );
+	TRACE_ERR("command: ");
+	for(int i=0;i<argc;++i) TRACE_ERR(argv[i]<<" ");
 	TRACE_ERR(endl);
 
 	// load data structures
-	timer.start();
+	Parameter *parameter = new Parameter();
+	if (!parameter->LoadParam(argc, argv))
+	{
+		parameter->Explain();
+		delete parameter;
+		return EXIT_FAILURE;		
+	}
+
 	StaticData staticData;
-	if (!staticData.LoadParameters(argc, argv))
+	if (!staticData.LoadData(parameter))
 		return EXIT_FAILURE;
 
 	// set up read/writing class
-	IODevice *inputOutput = GetInputOutput(staticData);
+	IODevice *ioDevice = GetIODevice(staticData);
 
 	// check on weights
 	vector<float> weights = staticData.GetAllWeights();
 	IFVERBOSE(2) {
-	  std::cerr << "The score component vector looks like this:\n" << staticData.GetScoreIndexManager();
-	  std::cerr << "The global weight vector looks like this:";
-	  for (size_t j=0; j<weights.size(); j++) { std::cerr << " " << weights[j]; }
-	  std::cerr << "\n";
+	  TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
+	  TRACE_ERR("The global weight vector looks like this:");
+	  for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
+	  TRACE_ERR("\n");
 	}
 	// every score must have a weight!  check that here:
 	if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
-	  std::cerr << "ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl;
+	  TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
 	  return EXIT_FAILURE;
 	}
 
-	if (inputOutput == NULL)
+	if (ioDevice == NULL)
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
 	InputType *source=0;
 	size_t lineCount = 0;
-	while(readInput(inputOutput,staticData.GetInputType(),source))
+	while(readInput(ioDevice,staticData.GetInputType(),source))
 		{
 			// note: source is only valid within this while loop!
     ResetUserTime();
@@ -118,7 +123,7 @@ int main(int argc, char* argv[])
 			staticData.InitializeBeforeSentenceProcessing(*source);
 			Manager manager(*source, staticData);
 			manager.ProcessSentence();
-			inputOutput->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId(),
+			ioDevice->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId(),
 														 staticData.GetReportSegmentation(),
 														 staticData.GetReportAllFactors()
 														 );
@@ -130,7 +135,7 @@ int main(int argc, char* argv[])
 				  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					LatticePathList nBestList;
 					manager.CalcNBest(nBestSize, nBestList,staticData.OnlyDistinctNBest());
-					inputOutput->SetNBest(nBestList, source->GetTranslationId());
+					ioDevice->SetNBest(nBestList, source->GetTranslationId());
 					//RemoveAllInColl(nBestList);
 				}
 
@@ -138,22 +143,22 @@ int main(int argc, char* argv[])
 				TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
 			}
 
-			IFVERBOSE(2) { PrintUserTime(std::cerr, "Sentence Decoding Time:"); }
+			IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
       
 			manager.CalcDecoderStatistics(staticData);
 			staticData.CleanUpAfterSentenceProcessing();      
       
 		}
 	
-	delete inputOutput;
+	delete ioDevice;
 
-	timer.check("End.");
+	PrintUserTime("End.");
 	return EXIT_SUCCESS;
 }
 
-IODevice *GetInputOutput(StaticData &staticData)
+IODevice *GetIODevice(StaticData &staticData)
 {
-	IODevice *inputOutput;
+	IODevice *ioDevice;
 	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
 																,&outputFactorOrder = staticData.GetOutputFactorOrder();
 	FactorMask inputFactorUsed(inputFactorOrder);
@@ -162,43 +167,25 @@ IODevice *GetInputOutput(StaticData &staticData)
 	if (staticData.GetIOMethod() == IOMethodFile)
 	{
 	  VERBOSE(2,"IO from File" << endl);
-		string					inputFileHash;
-		list< Phrase >	inputPhraseList;
 		string filePath = staticData.GetParam("input-file")[0];
 
-		VERBOSE(2,"About to create ioFile" << endl);
-		IOFile *ioFile = new IOFile(inputFactorOrder, outputFactorOrder, inputFactorUsed
+		ioDevice = new IOFile(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath()
 																	, filePath);
-		if(staticData.GetInputType()) 
-			{
-				TRACE_ERR("Do not read input phrases for confusion net translation\n");
-			}
-		else
-			{
-			  VERBOSE(2,"About to GetInputPhrase\n");
-				ioFile->GetInputPhrase(inputPhraseList);
-			}
-		VERBOSE(2,"After GetInputPhrase" << endl);
-		inputOutput = ioFile;
-		inputFileHash = GetMD5Hash(filePath);
-		VERBOSE(2,"About to LoadPhraseTables" << endl);
-		staticData.LoadPhraseTables(true, inputFileHash, inputPhraseList);
-		ioFile->ResetTranslationId();
 	}
 	else
 	{
 	  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
-		inputOutput = new IOCommandLine(inputFactorOrder, outputFactorOrder, inputFactorUsed
+		ioDevice = new IOCommandLine(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath());
-		staticData.LoadPhraseTables();
 	}
-	staticData.LoadMapping();
-	timer.check("Created input-output object");
+	ioDevice->ResetTranslationId();
 
-	return inputOutput;
+	PrintUserTime("Created input-output object");
+
+	return ioDevice;
 }

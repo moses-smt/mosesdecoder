@@ -102,7 +102,6 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 	{	// wiggle 1 of the edges only
 		for (size_t currEdge = m_prevEdgeChanged + 1 ; currEdge < sizePath ; currEdge++)
 		{
-			const Hypothesis *edgeOrig = m_path[currEdge];
 			const ArcList *pAL = m_path[currEdge]->GetArcList();
     	if (!pAL) continue;
 			const ArcList &arcList = *pAL;

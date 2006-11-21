@@ -186,7 +186,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 		if (StaticData::Instance()->GetDropUnknown())
 		{
 			const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-			std::string s = f->ToString();
+			const string &s = f->GetString();
 			isDigit = s.find_first_of("0123456789");
 			if (isDigit == string::npos) 
 				isDigit = 0;
@@ -275,8 +275,8 @@ void TranslationOptionCollection::CalcFutureScore()
               float joinedScore = m_futureScore.GetScore(startPos, joinAt)
                                 + m_futureScore.GetScore(joinAt+1, endPos);
               /* // uncomment to see the cell filling scheme
-              cerr << "[" <<startPos<<","<<endPos<<"] <-? ["<<startPos<<","<<joinAt<<"]+["<<joinAt+1<<","<<endPos
-                << "] (colstart: "<<colstart<<", diagshift: "<<diagshift<<")"<<endl;
+              TRACE_ERR( "[" <<startPos<<","<<endPos<<"] <-? ["<<startPos<<","<<joinAt<<"]+["<<joinAt+1<<","<<endPos
+                << "] (colstart: "<<colstart<<", diagshift: "<<diagshift<<")"<<endl);
               */
               if (joinedScore > m_futureScore.GetScore(startPos, endPos))
                 m_futureScore.SetScore(startPos, endPos, joinedScore);
@@ -292,17 +292,17 @@ void TranslationOptionCollection::CalcFutureScore()
         for(size_t col=row; col<size; col++)
         {
         	int count = GetTranslationOptionList(row, col).size();
-	        TRACE_ERR("translation options spanning from  "
+	        TRACE_ERR( "translation options spanning from  "
 	        				<< row <<" to "<< col <<" is "
 	        				<< count <<endl);
        		total += count;
         }
       }
-      TRACE_ERR("translation options generated in total: "<< total << endl);
+      TRACE_ERR( "translation options generated in total: "<< total << endl);
 
       for(size_t row=0; row<size; row++)
         for(size_t col=row; col<size; col++)
-		  TRACE_ERR("future cost from "<< row <<" to "<< col <<" is "<< m_futureScore.GetScore(row, col) <<endl);
+					TRACE_ERR( "future cost from "<< row <<" to "<< col <<" is "<< m_futureScore.GetScore(row, col) <<endl);
     }
 }
 
@@ -409,7 +409,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	lastPartialTranslOptColl.DetachAll();
 	totalEarlyPruned += oldPtoc->GetPrunedCount();
 	delete oldPtoc;
-	// cerr << "Early translation options pruned: " << totalEarlyPruned << endl;
+	// TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
 }
 
 /** initialize list of partial translation options by applying the first translation step 
@@ -428,6 +428,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 
 	const WordsRange wordsRange(startPos, endPos);
 	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(m_source,wordsRange); 
+
 	if (phraseColl != NULL)
 	{
 		VERBOSE(3,"[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");

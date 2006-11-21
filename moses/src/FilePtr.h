@@ -17,13 +17,13 @@ public:
   typedef T* Ptr;
 private:
   FILE* f;
-  off_t pos;
+  OFF_T pos;
   mutable Ptr t;
 public:
-  FilePtr(FILE* f_=0,off_t p=0) : f(f_),pos(p),t(0) {}
+  FilePtr(FILE* f_=0,OFF_T p=0) : f(f_),pos(p),t(0) {}
   ~FilePtr() {}
 
-  void set(FILE* f_,off_t p) {f=f_;pos=p;}
+  void set(FILE* f_,OFF_T p) {f=f_;pos=p;}
   void free() {delete t;  t=0;}
 
   T& operator* () {load();return *t;}

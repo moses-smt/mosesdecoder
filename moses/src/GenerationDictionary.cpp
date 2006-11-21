@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "UserMessage.h"
 
 using namespace std;
 
@@ -36,7 +37,7 @@ GenerationDictionary::GenerationDictionary(size_t numFeatures)
 	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
 }
 
-void GenerationDictionary::Load(const std::vector<FactorType> &input
+bool GenerationDictionary::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
 																			, FactorCollection &factorCollection
 																			, const std::string &filePath
@@ -58,8 +59,8 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 	// data from file
 	InputFileStream inFile(filePath);
 	if (!inFile.good()) {
-		std::cerr << "Couldn't read " << filePath << std::endl;
-		exit(1);
+		UserMessage::Add(string("Couldn't read ") + filePath);
+		return false;
 	}
 
 	m_filePath = filePath;
@@ -97,9 +98,11 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 		size_t numFeaturesInFile = token.size() - 2;
 		if (forceSingleFeatureValue) numFeaturesInFile = 1;
 		if (numFeaturesInFile < numFeatureValuesInConfig) {
-			std::cerr << filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
+			stringstream strme;
+			strme << filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
 								<< " feature values, but found " << numFeaturesInFile << std::endl;
-			exit(1);
+			UserMessage::Add(strme.str());
+			return false;
 		}
 		std::vector<float> scores(numFeatureValuesInConfig, 0.0f);
 		for (size_t i = 0; i < numFeatureValuesInConfig; i++)
@@ -116,7 +119,9 @@ void GenerationDictionary::Load(const std::vector<FactorType> &input
 			delete inputWord;
 		}
 	}
+
 	inFile.Close();
+	return true;
 }
 
 GenerationDictionary::~GenerationDictionary()

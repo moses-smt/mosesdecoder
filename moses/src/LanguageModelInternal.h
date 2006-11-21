@@ -24,7 +24,7 @@ protected:
 
 public:
 	LanguageModelInternal(bool registerScore);
-	void Load(const std::string &filePath
+	bool Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight

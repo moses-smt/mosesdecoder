@@ -202,10 +202,12 @@ struct PDTimp {
 	}
 
 	PPtr Extend(PPtr p,const std::string& w) 
-	{
+	{	
 		assert(p);
 		if(w.empty() || w==EPSILON) return p;
+	
 		LabelId wi=sv.index(w);
+		
 		if(wi==InvalidLabelId) return PPtr(); // unknown word
 		else if(p.imp->isRoot()) 
 			{
@@ -216,7 +218,9 @@ struct PDTimp {
 					}
 			}
 		else if(PTF const* nextP=p.imp->ptr()->getPtr(p.imp->idx)) 
+		{
 			return PPtr(pPool.get(PPimp(nextP,nextP->findKey(wi),0)));
+		}
 		
 		return PPtr();
 	}
@@ -251,8 +255,8 @@ int PDTimp::Read(const std::string& fn)
 	sv.Read(ifsv);
 	tv.Read(iftv);
   
-	std::cerr<<"binary phrasefile loaded, default OFF_T: "<<PTF::getDefault()
-					 <<"\n";
+	TRACE_ERR("binary phrasefile loaded, default OFF_T: "<<PTF::getDefault()
+					 <<"\n");
 	return 1;
 }
 
@@ -279,9 +283,9 @@ PhraseDictionaryTree::PhraseDictionaryTree(size_t numScoreComponent)
 {
 	if(sizeof(OFF_T)!=8)
 		{
-			std::cerr<<"ERROR: size of type 'OFF_T' has to be 64 bit!\n"
-				"use compiler settings '-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES'\n"
-				" -> abort \n\n";
+			TRACE_ERR("ERROR: size of type 'OFF_T' has to be 64 bit!\n"
+				"In gcc, use compiler settings '-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES'\n"
+				" -> abort \n\n");
 			abort();
 		}
 }
@@ -321,8 +325,8 @@ PrintTargetCandidates(const std::vector<std::string>& src,
 		f[i]=imp->sv.index(src[i]);
 		if(f[i]==InvalidLabelId) 
 			{
-				std::cerr<<"the source phrase '"<<src<<"' contains an unknown word '"
-								 <<src[i]<<"'\n";
+				TRACE_ERR("the source phrase '"<<src<<"' contains an unknown word '"
+								 <<src[i]<<"'\n");
 				return;
 			}
 	}
@@ -368,7 +372,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 
 			if(f.empty()) 
 				{
-					std::cerr<<"WARNING: empty source phrase in line '"<<line<<"'\n";
+					TRACE_ERR("WARNING: empty source phrase in line '"<<line<<"'\n");
 					continue;
 				}
 			
@@ -383,8 +387,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 					if(d==InvalidOffT) d=fTell(ot);
 					else 
 						{
-							std::cerr<<"ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '"
-											 <<line<<"'\nf: "<<f<<"\n";
+							TRACE_ERR("ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '"
+											 <<line<<"'\nf: "<<f<<"\n");
 							abort();
 						}
 				}
@@ -398,8 +402,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 				
 					if(++count%10000==0) 
 						{
-							std::cerr<<".";
-							if(count%500000==0) std::cerr<<"[phrase:"<<count<<"]\n";
+							TRACE_ERR(".");
+							if(count%500000==0) TRACE_ERR("[phrase:"<<count<<"]\n");
 						}
 
 					if(f[0]!=currFirstWord) 
@@ -421,8 +425,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 					if(d==InvalidOffT) d=fTell(ot);
 					else 
 						{
-							std::cerr<<"ERROR: xsource phrase already inserted (B)!\nline(" << lnc << "): '"
-											 <<line<<"'\nf: "<<f<<"\n";
+							TRACE_ERR("ERROR: xsource phrase already inserted (B)!\nline(" << lnc << "): '"
+											 <<line<<"'\nf: "<<f<<"\n");
 							abort();
 						}
 				}
@@ -437,10 +441,10 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
   pf.create(*psa,os);
   delete psa;psa=0;
 
-  std::cerr<<"distinct source phrases: "<<count
+  TRACE_ERR("distinct source phrases: "<<count
 		<<" distinct first words of source phrases: "<<vo.size()
 		<<" number of phrase pairs (line count): "<<lnc
-		<<"\n";
+		<<"\n");
  	
 	fClose(os);
   fClose(ot);
@@ -451,10 +455,10 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 
   if(inv.size()) 
 		{
-			std::cerr<<"WARNING: there are src voc entries with no phrase "
+			TRACE_ERR("WARNING: there are src voc entries with no phrase "
 				"translation: count "<<inv.size()<<"\n"
 				"There exists phrase translations for "<<vo.size()-inv.size()
-							 <<" entries\n";
+							 <<" entries\n");
 		}
   
   FILE *oi=fOpen(ofi.c_str(),"wb");
@@ -470,7 +474,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 
 int PhraseDictionaryTree::Read(const std::string& fn) 
 {
-  std::cerr<<"size of OFF_T "<<sizeof(OFF_T)<<"\n";
+  TRACE_ERR("size of OFF_T "<<sizeof(OFF_T)<<"\n");
 	return imp->Read(fn);
 } 
 

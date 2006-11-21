@@ -132,7 +132,7 @@ int mempool::free(char* addr){
    
     if ((list==NULL) || (((addr - list->block) % item_size)!=0))
     {
-    //cerr << "mempool::free-> addr does not belong to this pool\n";
+    //TRACE_ERR( "mempool::free-> addr does not belong to this pool\n");
     return 0;
     }
   */
@@ -194,7 +194,7 @@ void mempool::map (ostream& co){
 
 void mempool::stat(){
 
-  TRACE_ERR("mempool class statistics\n"
+  TRACE_ERR( "mempool class statistics\n"
 		       << "entries " << entries
 		       << " blocks " << blocknum
 		       << " used memory " << (blocknum * true_size)/1024 << " Kb\n");
@@ -224,7 +224,7 @@ strstack::strstack(int bs){
 
 void strstack::stat(){
 
-  TRACE_ERR("strstack class statistics\n"
+  TRACE_ERR( "strstack class statistics\n"
        << "entries " << entries
        << " blocks " << blocknum
        << " used memory " << memory/1024 << " Kb\n");
@@ -235,7 +235,7 @@ char *strstack::push(char *s){
   int len=strlen(s);
   
   if ((len+1) >= size){
-    cerr << "strstack::push string is too long\n";
+    TRACE_ERR( "strstack::push string is too long\n");
     exit(1);
   };
   
@@ -406,7 +406,7 @@ char *storage::allocate(int size){
     newcalls++;
     char* p=(char *)calloc(sizeof(char),size);
     if (p==NULL){
-      cerr << "storage::alloc insufficient memory\n";
+      TRACE_ERR( "storage::alloc insufficient memory\n");
       exit(1);
     }
     return p;
@@ -437,12 +437,12 @@ char *storage::reallocate(char *oldptr,int oldsize,int newsize){
   else{
     newptr=(char *)realloc(oldptr,newsize);
     if (newptr==oldptr) 
-      cerr << "r\b";
+      TRACE_ERR( "r\b");
     else
-      cerr << "a\b";
+      TRACE_ERR( "a\b");
   }
   if (newptr==NULL){
-    cerr << "storage::realloc insufficient memory\n";
+    TRACE_ERR( "storage::realloc insufficient memory\n");
     exit(1);
   }
   
@@ -479,7 +479,7 @@ void storage::stat(){
       waste+=poolset[i]->wasted();
     }
 
-  TRACE_ERR("storage class statistics\n"
+  TRACE_ERR( "storage class statistics\n"
 	  			<< "alloc entries " << newcalls 
 		      << " used memory " << newmemory/1024 << "Kb\n"
   				<< "mpools " << setsize

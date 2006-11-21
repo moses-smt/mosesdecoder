@@ -38,7 +38,7 @@ protected:
 	LanguageModelMultiFactor(bool registerScore);
 	
 public:
-	virtual void Load(const std::string &filePath
+	virtual bool Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, const std::vector<FactorType> &factorTypes
 					, float weight

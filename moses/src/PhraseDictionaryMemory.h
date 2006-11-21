@@ -45,15 +45,12 @@ public:
 	}
 	virtual ~PhraseDictionaryMemory();
 
-	void Load(const std::vector<FactorType> &input
+	bool Load(const std::vector<FactorType> &input
 								, const std::vector<FactorType> &output
 								, FactorCollection &factorCollection
 								, const std::string &filePath
-								, const std::string &hashFilePath
 								, const std::vector<float> &weight
 								, size_t tableLimit
-								, bool filter
-								, const std::list< Phrase > &inputPhraseList
 								, const LMList &languageModels
 						    , float weightWP
 								, const StaticData& staticData);

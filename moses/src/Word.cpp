@@ -61,7 +61,7 @@ void Word::Merge(const Word &sourceWord)
 	}
 }
 
-std::string Word::ToString(const vector<FactorType> factorType,bool endWithBlank) const
+std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlank) const
 {
 	stringstream strme;
 	assert(factorType.size() <= MAX_NUM_FACTORS);
@@ -73,7 +73,7 @@ std::string Word::ToString(const vector<FactorType> factorType,bool endWithBlank
 		if (factor != NULL)
 		{
 			if (firstPass) { firstPass = false; } else { strme << factorDelimiter; }
-			strme << *factor;
+			strme << factor->GetString();
 		}
 	}
 	if(endWithBlank) strme << " ";
@@ -87,7 +87,6 @@ ostream& operator<<(ostream& out, const Word& word)
 {	
 	stringstream strme;
 
-//	strme << "(";
 	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
 	bool firstPass = true;
 	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)

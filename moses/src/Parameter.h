@@ -56,7 +56,9 @@ protected:
 
 public:
 	Parameter();
+	~Parameter();
 	bool LoadParam(int argc, char* argv[]);
+	bool LoadParam(const std::string &filePath);
 	void Explain();
 
 	/** return a vector of strings holding the whitespace-delimited values on the ini-file line corresponding to the given parameter name */

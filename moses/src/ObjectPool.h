@@ -100,27 +100,27 @@ template<typename T> class ObjectPool {
 		// the block size is doubled every time
 		// if allocation fails, block size is reduced by 1/4
 		void allocate() {
-			//    std::cerr<<"start "<<name<<" - objectpool allocate "<<N<<"\n";
+			//    TRACE_ERR("start "<<name<<" - objectpool allocate "<<N<<"\n");
 			try {
 				if(dataSize.empty()) dataSize.push_back(N); 
 				else dataSize.push_back(dataSize.back()*2);
 				void *m=malloc(sizeof(Object)*dataSize.back());
 				while(!m) {
-					//      std::cerr<<"malloc failed for size "<<dataSize.back()<<"!\n";
+					//      TRACE_ERR("malloc failed for size "<<dataSize.back()<<"!\n");
 					dataSize.back()=static_cast<size_t>(dataSize.back()*0.75);
 					m=malloc(sizeof(Object)*dataSize.back());
 				}
 				data.push_back(static_cast<Object*>(m)); 
 			}
 			catch (const std::exception& e) {
-				std::cerr<<"caught std::exception: "<<e.what()
+				TRACE_ERR("caught std::exception: "<<e.what()
 								 <<" in ObjectPool::allocate(), name: "<<name<<", last size: "
-								 <<dataSize.back()<<"\n";
-				std::cerr<<"OPOOL info: "<<data.size()<<" "<<dataSize.size()<<" "
-								 <<freeObj.size()<<"\n"<<idx<<" "<<dIdx<<" "<<N<<"\n";
+								 <<dataSize.back()<<"\n");
+				TRACE_ERR("OPOOL info: "<<data.size()<<" "<<dataSize.size()<<" "
+								 <<freeObj.size()<<"\n"<<idx<<" "<<dIdx<<" "<<N<<"\n");
 				std::copy(dataSize.begin(),dataSize.end(),
 									std::ostream_iterator<size_t>(std::cerr," "));
-				std::cerr<<"\n";
+				TRACE_ERR("\n");
 				throw;
 			}
 		}

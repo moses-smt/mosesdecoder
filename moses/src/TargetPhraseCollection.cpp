@@ -38,6 +38,7 @@ void TargetPhraseCollection::Sort(size_t tableLimit)
   vector<TargetPhrase*>::iterator 
   	iterMiddle = (tableLimit == 0 || m_collection.size() < tableLimit) ?m_collection.end() : m_collection.begin() + tableLimit;
   
+	//std::sort(m_collection.begin(), m_collection.end(), CompareTargetPhrase());
   std::nth_element(m_collection.begin(), iterMiddle, m_collection.end(), CompareTargetPhrase());
 }
 
