@@ -50,7 +50,7 @@ protected:
 public:
 	LanguageModelSRI(bool registerScore);
 	~LanguageModelSRI();
-	void Load(const std::string &filePath
+	bool Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
