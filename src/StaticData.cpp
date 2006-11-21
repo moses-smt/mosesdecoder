@@ -580,7 +580,8 @@ bool StaticData::LoadPhraseTables()
 			vector<float> weight;
 
 			if(currDict==0 && m_inputType)
-			{		
+			{	// TODO. find what the assumptions made by confusion network about phrase table output which makes
+				// it only work with binrary file. This is a hack 	
 				m_numInputScores=m_parameter->GetParam("weight-i").size();
 				for(unsigned k=0;k<m_numInputScores;++k)
 					weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
@@ -600,15 +601,6 @@ bool StaticData::LoadPhraseTables()
 							<< " scores, but you specified " << weight.size() << " weights!";
 				UserMessage::Add(strme.str());
 				return false;
-			}
-
-			if(currDict==0 && m_inputType)
-			{
-				m_numInputScores=m_parameter->GetParam("weight-i").size();
-				for(unsigned k=0;k<m_numInputScores;++k)
-					weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
-
-				numScoreComponent+=m_numInputScores;
 			}
 						
 			weightAllOffset += numScoreComponent;
