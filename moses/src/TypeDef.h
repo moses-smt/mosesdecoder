@@ -110,13 +110,6 @@ namespace DistortionOrientationType
 		};	
 }
 
-enum IOMethod
-{
-	IOMethodCommandLine
-	,IOMethodFile
-	,IOMethodMySQL
-};
-
 enum LMType
 {	
 	SingleFactor

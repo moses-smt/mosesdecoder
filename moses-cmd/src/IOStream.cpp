@@ -35,16 +35,17 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include "TypeDef.h"
 #include "Util.h"
-#include "IOCommandLine.h"
+#include "IOStream.h"
 #include "Hypothesis.h"
 #include "WordsRange.h"
 #include "LatticePathList.h"
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
+#include "InputFileStream.h"
 
 using namespace std;
 
-IOCommandLine::IOCommandLine(
+IOStream::IOStream(
 				const vector<FactorType>				&inputFactorOrder
 				, const vector<FactorType>			&outputFactorOrder
 				, const FactorMask							&inputFactorUsed
@@ -55,6 +56,8 @@ IOCommandLine::IOCommandLine(
 ,m_outputFactorOrder(outputFactorOrder)
 ,m_inputFactorUsed(inputFactorUsed)
 ,m_factorCollection(factorCollection)
+,m_inputFile(NULL)
+,m_inputStream(&std::cin)
 {
 	if (nBestSize > 0)
 	{
@@ -62,9 +65,46 @@ IOCommandLine::IOCommandLine(
 	}
 }
 
-InputType*IOCommandLine::GetInput(InputType* in)
+IOStream::IOStream(const std::vector<FactorType>	&inputFactorOrder
+						 , const std::vector<FactorType>	&outputFactorOrder
+							, const FactorMask							&inputFactorUsed
+							, FactorCollection							&factorCollection
+							, size_t												nBestSize
+							, const std::string							&nBestFilePath
+							, const std::string							&inputFilePath)
+:m_inputFactorOrder(inputFactorOrder)
+,m_outputFactorOrder(outputFactorOrder)
+,m_inputFactorUsed(inputFactorUsed)
+,m_factorCollection(factorCollection)
+,m_inputFilePath(inputFilePath)
+,m_inputFile(new InputFileStream(inputFilePath))
 {
-	return IODevice::GetInput(in,std::cin,m_inputFactorOrder, m_factorCollection);
+	m_inputStream = m_inputFile;
+
+	if (nBestSize > 0)
+	{
+		m_nBestFile.open(nBestFilePath.c_str());
+	}
+}
+
+IOStream::~IOStream()
+{
+	if (m_inputFile != NULL)
+		delete m_inputFile;
+}
+
+InputType*IOStream::GetInput(InputType* inputType)
+{
+	if(inputType->Read(*m_inputStream, m_inputFactorOrder, m_factorCollection)) 
+	{
+		inputType->SetTranslationId(m_translationId++);
+		return inputType;
+	}
+	else 
+	{
+		delete inputType;
+		return NULL;
+	}
 }
 
 /***
@@ -111,7 +151,7 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 	}
 }
 
-void IOCommandLine::Backtrack(const Hypothesis *hypo){
+void IOStream::Backtrack(const Hypothesis *hypo){
 
 	if (hypo->GetPrevHypo() != NULL) {
 		VERBOSE(3,hypo->GetId() << " <= ");
@@ -119,7 +159,7 @@ void IOCommandLine::Backtrack(const Hypothesis *hypo){
 	}
 }
 
-void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
 {
 	if (hypo != NULL)
 	{
@@ -138,7 +178,7 @@ void IOCommandLine::SetOutput(const Hypothesis *hypo, long /*translationId*/, bo
 	cout << endl;
 }
 
-void IOCommandLine::SetNBest(const LatticePathList &nBestList, long translationId)
+void IOStream::OutputNBestList(const LatticePathList &nBestList, long translationId)
 {
 	bool labeledOutput = StaticData::Instance()->IsLabeledNBestList();
 	
