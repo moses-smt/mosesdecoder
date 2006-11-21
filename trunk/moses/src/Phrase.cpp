@@ -133,7 +133,7 @@ std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 	stringstream strme;
 	for (size_t pos = 0 ; pos < GetSize() ; pos++)
 	{
-		strme << GetWord(pos).ToString(factorsToPrint);
+		strme << GetWord(pos).GetString(factorsToPrint, true);
 	}
 
 	return strme.str();
@@ -152,7 +152,7 @@ Word &Phrase::AddWord()
 
 void Phrase::Append(const Phrase &endPhrase){
 	
-	for (int i = 0; i < endPhrase.GetSize();i++){
+	for (size_t i = 0; i < endPhrase.GetSize();i++){
 		AddWord(endPhrase.GetWord(i));	
 	}
 }
@@ -180,9 +180,9 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString, const st
 		//    to
 		// "KOMMA" "none"
 		if (factorStrVector.size() != factorOrder.size()) {
-			std::cerr << "[ERROR] Malformed input at " << /*StaticData::Instance()->GetCurrentInputPosition() <<*/ std::endl
+			TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance()->GetCurrentInputPosition() <<*/ std::endl
 			          << "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
-								<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n";
+								<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
 			abort();
 		}
 		phraseVector.push_back(factorStrVector);

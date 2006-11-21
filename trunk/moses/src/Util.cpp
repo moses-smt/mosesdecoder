@@ -34,11 +34,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "md5.h"
+#include "Timer.h"
 
 using namespace std;
 
 //global variable
-unsigned long _util_usertime_sec=0;
+Timer g_timer;
 
 string GetTempFolder()
 {	
@@ -114,14 +115,14 @@ bool Scan<bool>(const std::string &input)
 		return true;
 	if (lc == "no" || lc == "n" || lc =="false" || lc == "0")
 		return false;
-	std::cerr << "Scan<bool>: didn't understand '" << lc << "', returning false" << std::endl;
+	TRACE_ERR( "Scan<bool>: didn't understand '" << lc << "', returning false" << std::endl);
 	return false;
 }
 
 bool FileExists(const std::string& filePath)
 {
-        std::ifstream ifs(filePath.c_str());
-        return !ifs.fail();
+  ifstream ifs(filePath.c_str());
+	return !ifs.fail();
 }
 
 const std::string Trim(const std::string& str, const std::string dropChars)
@@ -131,25 +132,12 @@ const std::string Trim(const std::string& str, const std::string dropChars)
 	return res.erase(0, res.find_first_not_of(dropChars));
 }
 
-#ifndef WIN32
 void ResetUserTime()
 {
-  struct rusage ru;  
-  if (getrusage(RUSAGE_SELF, &ru)!=-1)      
-    _util_usertime_sec=(unsigned long) ru.ru_utime.tv_sec;
-  else
-    std::cerr << "ResetUserTime: failure in getrusage!\n";        
+  g_timer.start();
 };
 
-void PrintUserTime(std::ostream &out, const std::string &message){ 
-  struct rusage ru;
-  if (getrusage(RUSAGE_SELF, &ru)!=-1)        
-    out << message.c_str() << " part(sec)=" <<  (unsigned long)ru.ru_utime.tv_sec - _util_usertime_sec 
-        << " cum(sec)=" << (unsigned long)ru.ru_utime.tv_sec << "\n";    
-  else{    
-    std::cerr << "PrintUserTime: failure in getrusage!\n";    
-    out << "PrintUserTime: failure in getrusage!\n";    
-  }
+void PrintUserTime(const std::string &message)
+{ 
+	g_timer.check(message.c_str());
 }
-#endif
-

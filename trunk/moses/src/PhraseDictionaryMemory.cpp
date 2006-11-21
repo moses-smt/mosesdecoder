@@ -32,18 +32,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "StaticData.h"
 #include "WordsRange.h"
+#include "UserMessage.h"
 
 using namespace std;
 
-void PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
+bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
 																			, FactorCollection &factorCollection
 																			, const string &filePath
-																			, const string &hashFilePath
 																			, const vector<float> &weight
 																			, size_t tableLimit
-																			, bool filter_REMOVE
-																			, const list< Phrase > &inputPhraseList
 																			, const LMList &languageModels
 														          , float weightWP
 														          , const StaticData& staticData)
@@ -73,13 +71,15 @@ void PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
 		if (tokens.size() != 3)
 		{
-			TRACE_ERR("Syntax error at " << filePath << ":" << line_num);
-			abort(); // TODO- error handling
+			stringstream strme;
+			strme << "Syntax error at " << filePath << ":" << line_num;
+			UserMessage::Add(strme.str());
+			return false;
 		}
 
 		bool isLHSEmpty = (tokens[1].find_first_not_of(" \t", 0) == string::npos);
 		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
-			TRACE_ERR(filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
+			TRACE_ERR( filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
 			continue;
 		}
 
@@ -88,10 +88,12 @@ void PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
 
 		vector<float> scoreVector = Tokenize<float>(tokens[2]);
-		if (scoreVector.size() != m_numScoreComponent) {
-			TRACE_ERR("Tokens[2]" << tokens[2]);
-			TRACE_ERR("Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num);
-			abort();
+		if (scoreVector.size() != m_numScoreComponent) 
+		{
+			stringstream strme;
+			strme << "Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
+			UserMessage::Add(strme.str());
+			return false;
 		}
 //		assert(scoreVector.size() == m_numScoreComponent);
 			
@@ -114,6 +116,8 @@ void PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 	// sort each target phrase collection
 	m_collection.Sort(m_tableLimit);
+
+	return true;
 }
 
 TargetPhraseCollection *PhraseDictionaryMemory::CreateTargetPhraseCollection(const Phrase &source)

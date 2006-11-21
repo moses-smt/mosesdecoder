@@ -55,6 +55,5 @@ public:
 				, const std::string							&inputFilePath);
 
 	InputType *GetInput(InputType*);
-	void GetInputPhrase(std::list<Phrase> &inputPhraseList);
 };
 

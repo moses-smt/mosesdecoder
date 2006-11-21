@@ -25,17 +25,6 @@ std::ostream& operator<<(std::ostream& out,const std::vector<T>& x)
 		out<<*i<<' ';
 	return out;
 }
-#if 0
-FactorType getFactorType(int i) {
-	switch(i) {
-	case 0: return Surface;
-	case 1: return POS;
-	case 2: return Stem;
-	case 3: return Morphology;
-	}
-	return Surface;
-}
-#endif
 
 FactorCollection factorCollection;
 

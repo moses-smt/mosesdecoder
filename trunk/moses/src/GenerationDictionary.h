@@ -60,7 +60,7 @@ public:
 	}
 	
 	//! load data file
-	void Load(const std::vector<FactorType> &input
+	bool Load(const std::vector<FactorType> &input
 									, const std::vector<FactorType> &output
 									, FactorCollection &factorCollection
 									, const std::string &filePath

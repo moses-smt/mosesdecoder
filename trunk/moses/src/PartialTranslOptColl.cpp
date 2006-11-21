@@ -78,7 +78,7 @@ void PartialTranslOptColl::Prune()
 		return;
 	}
 	
-	//	std::cerr << "pruning partial translation options from size " << m_list.size() << std::endl;
+	//	TRACE_ERR( "pruning partial translation options from size " << m_list.size() << std::endl);
 	
 	// find nth element
 	nth_element(m_list.begin(), 
@@ -94,6 +94,6 @@ void PartialTranslOptColl::Prune()
 		m_totalPruned++;
 	}
 	m_list.resize(m_maxSize);
-	//	std::cerr << "pruned to size " << m_list.size() << ", total pruned: " << m_totalPruned << std::endl;
+	//	TRACE_ERR( "pruned to size " << m_list.size() << ", total pruned: " << m_totalPruned << std::endl);
 }
 

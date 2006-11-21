@@ -377,31 +377,30 @@ const Hypothesis* Hypothesis::GetPrevHypo()const{
  */
 void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistortion*/, float /*weightWordPenalty*/) const
 {
-	// PLEASE DON'T WRITE TO COUT directly. use TRACE_ERR or cerr 
-  TRACE_ERR("creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ");
+  TRACE_ERR( "creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ");
   int end = (int)(m_prevHypo->m_targetPhrase.GetSize()-1);
   int start = end-1;
   if ( start < 0 ) start = 0;
   if ( m_prevHypo->m_currTargetWordsRange.GetStartPos() == NOT_FOUND ) {
-    TRACE_ERR("<s> ");
+    TRACE_ERR( "<s> ");
   }
   else {
-    TRACE_ERR("... ");
+    TRACE_ERR( "... ");
   }
   if (end>=0) {
     WordsRange range(start, end);
-    TRACE_ERR(m_prevHypo->m_targetPhrase.GetSubString(range) << " ");
+    TRACE_ERR( m_prevHypo->m_targetPhrase.GetSubString(range) << " ");
   }
-  TRACE_ERR(")"<<endl);
-	TRACE_ERR("\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
-	TRACE_ERR("\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "<< source.GetSubString(m_currSourceWordsRange)  <<endl);
-	TRACE_ERR("\ttranslated as: "<<m_targetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
-	if (m_wordDeleted) TRACE_ERR("\tword deleted"<<endl); 
-  //	TRACE_ERR("\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
-  //	TRACE_ERR("\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
-  //	TRACE_ERR("\tword penalty "); // <<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
-	TRACE_ERR("\tscore "<<m_totalScore - m_futureScore<<" + future cost "<<m_futureScore<<" = "<<m_totalScore<<endl);
-  TRACE_ERR( "\tunweighted feature scores: " << m_scoreBreakdown << endl);
+  TRACE_ERR( ")"<<endl);
+	TRACE_ERR( "\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
+	TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "<< source.GetSubString(m_currSourceWordsRange)  <<endl);
+	TRACE_ERR( "\ttranslated as: "<<m_targetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
+	if (m_wordDeleted) TRACE_ERR( "\tword deleted"<<endl); 
+  //	TRACE_ERR( "\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
+  //	TRACE_ERR( "\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
+  //	TRACE_ERR( "\tword penalty "); // <<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
+	TRACE_ERR( "\tscore "<<m_totalScore - m_futureScore<<" + future cost "<<m_futureScore<<" = "<<m_totalScore<<endl);
+  TRACE_ERR(  "\tunweighted feature scores: " << m_scoreBreakdown << endl);
 	//PrintLMScores();
 }
 
@@ -442,13 +441,11 @@ std::string Hypothesis::GetSourcePhraseStringRep(const vector<FactorType> factor
 	if (!m_prevHypo) { return ""; }
 	if(m_sourcePhrase) 
 	{
-//				return m_sourcePhrase->GetSubString(m_currSourceWordsRange).ToString();
-				return m_sourcePhrase->GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
+		return m_sourcePhrase->GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
 	}
 	else
 	{ 
-//			return m_sourceInput.GetSubString(m_currSourceWordsRange).ToString();	
-			return m_sourceInput.GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
+		return m_sourceInput.GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
 	}	
 }
 std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const 

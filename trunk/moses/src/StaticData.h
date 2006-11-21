@@ -52,7 +52,7 @@ protected:
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::list < DecodeStep* >						m_decodeStepList;
-	Parameter			m_parameter;
+	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
 	ScoreIndexManager				m_scoreIndexManager;
@@ -76,9 +76,7 @@ protected:
 			, m_maxNoTransOptPerCoverage
 		  , m_maxNoPartTransOpt;
 	
-	std::string									m_nBestFilePath, m_cachePath;
-	std::vector<std::string>		m_mySQLParam;
-	IODevice										*m_inputOutput;
+	std::string									m_nBestFilePath;
 	bool                        m_fLMsLoaded, m_labeledNBestList;
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
@@ -110,6 +108,21 @@ protected:
 	//! helper fn to set bool param from ini file/command line
 	void SetBooleanParameter(bool *paramter, string parameterName, bool defaultValue);
 
+	/***
+	 * load all language models as specified in ini file
+	 */
+	bool LoadLanguageModels();
+	/***
+	 * load not only the main phrase table but also any auxiliary tables that depend on which features are being used
+	 * (eg word-deletion, word-insertion tables)
+	 */
+	bool LoadPhraseTables();
+	//! load all generation tables as specified in ini file
+	bool LoadGenerationTables();
+	//! load decoding steps
+	bool LoadMapping();
+	bool LoadLexicalReorderingModel();
+	
 public:
 	StaticData();
 	~StaticData();
@@ -119,26 +132,11 @@ public:
 	/** Main function to load everything.
 	 * Also initialize the Parameter object
 	 */
-	bool LoadParameters(int argc, char* argv[]);
+	bool LoadData(Parameter *parameter);
 
-	/***
-	 * load not only the main phrase table but also any auxiliary tables that depend on which features are being used
-	 * (eg word-deletion, word-insertion tables)
-	 */
-	void LoadPhraseTables(bool filter
-											, const std::string &inputFileHash
-											, const std::list< Phrase > &inputPhraseList);
-	// what the hell?
-	void LoadPhraseTables();
-	void LoadMapping();
 	const PARAM_VEC &GetParam(const std::string &paramName)
 	{
-		return m_parameter.GetParam(paramName);
-	}
-
-	IODevice &GetInputOutput()
-	{
-		return *m_inputOutput;
+		return m_parameter->GetParam(paramName);
 	}
 
 	const bool IsComputeLMBackoffStats() const
@@ -217,10 +215,6 @@ public:
 		return m_scoreIndexManager;
 	}
 	IOMethod GetIOMethod();
-	const std::vector<std::string> &GetMySQLParam()
-	{
-		return m_mySQLParam;
-	}
 
 	size_t GetLMSize() const
 	{
@@ -246,10 +240,6 @@ public:
 	{
 		return m_generationDictionary.size();
 	}
-	const std::string GetCachePath() const
-	{
-		return m_cachePath;
-	}
 	size_t GetVerboseLevel() const
 	{
 		return m_verboseLevel;
@@ -274,6 +264,10 @@ public:
 	{
 		return m_labeledNBestList;
 	}
+	const std::vector<std::string> &GetDescription() const
+	{
+		return m_parameter->GetParam("description");
+	}
 
 	// for mert
 	size_t GetNBestSize() const
@@ -284,7 +278,6 @@ public:
 	{
 		return m_nBestFilePath;
 	}
-  // TODO use IsNBestEnabled instead of conditional compilation
   const bool IsNBestEnabled() const {
     return !m_nBestFilePath.empty();
   }

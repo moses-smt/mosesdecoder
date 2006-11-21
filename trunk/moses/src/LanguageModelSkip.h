@@ -50,7 +50,7 @@ public:
 	{
 		delete m_lmImpl;
 	}
-	void Load(const std::string &filePath
+	bool Load(const std::string &filePath
 					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
@@ -66,7 +66,7 @@ public:
 		m_sentenceStartArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, BOS_);
 		m_sentenceEndArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, EOS_);
 
-		m_lmImpl->Load(filePath, factorCollection, m_factorType, weight, nGramOrder);
+		return m_lmImpl->Load(filePath, factorCollection, m_factorType, weight, nGramOrder);
 	}
 			
 	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
@@ -77,8 +77,8 @@ public:
 		}
 		/*
 		for (size_t i = 0 ; i < contextFactor.size() ; ++i)
-			TRACE_ERR(contextFactor[i] << " ");
-		TRACE_ERR(std::endl);
+			TRACE_ERR( contextFactor[i] << " ";
+		TRACE_ERR( std::endl;
 		*/
 		// only process context where last word is a word we want
 		const Factor *factor = (*contextFactor.back())[m_factorType];
@@ -112,8 +112,8 @@ public:
 		std::reverse(chunkContext.begin(), chunkContext.end());
 		/*
 		for (size_t i = 0 ; i < chunkContext.size() ; ++i)
-			TRACE_ERR(chunkContext[i] << " ");
-		TRACE_ERR(std::endl);
+			TRACE_ERR( chunkContext[i] << " ";
+		TRACE_ERR( std::endl;
 		*/
 		// calc score on chunked phrase
 		float ret = m_lmImpl->GetValue(chunkContext, finalState, len);

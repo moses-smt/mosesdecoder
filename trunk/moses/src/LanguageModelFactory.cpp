@@ -103,11 +103,19 @@ namespace LanguageModelFactory
 	  	switch (lm->GetLMType())
 	  	{
 	  	case SingleFactor:
-	  		static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorCollection, factorTypes[0], weight, nGramOrder);
+	  		if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorCollection, factorTypes[0], weight, nGramOrder))
+				{
+					delete lm;
+					lm = NULL;
+				}
 	  		break;	  	
 	  	case MultiFactor:
-	  		 static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorCollection, factorTypes, weight, nGramOrder);
-	  			break;
+  			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorCollection, factorTypes, weight, nGramOrder))
+				{
+					delete lm;
+					lm = NULL;
+				}
+  			break;
 	  	}
 	  }
 	  

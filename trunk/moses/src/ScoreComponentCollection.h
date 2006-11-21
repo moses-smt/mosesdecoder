@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cassert>
 #include "ScoreProducer.h"
 #include "ScoreIndexManager.h"
+#include "TypeDef.h"
+#include "Util.h"
 
 /*** An unweighted collection of scores for a translation or step in a translation.
  *
@@ -90,7 +92,7 @@ public:
 	void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores)
 	{
 
-		if(scores.size() != sp->GetNumScoreComponents()) std::cerr<<"ERROr: "<<scores.size()<<" "<<sp->GetNumScoreComponents()<<"\n";
+		if(scores.size() != sp->GetNumScoreComponents()) TRACE_ERR("ERROR: "<<scores.size()<<" "<<sp->GetNumScoreComponents()<<"\n");
 
 		assert(scores.size() == sp->GetNumScoreComponents());
 		size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());

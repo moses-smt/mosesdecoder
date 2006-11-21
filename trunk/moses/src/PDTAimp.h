@@ -60,37 +60,37 @@ public:
 		if (StaticData::Instance()->GetVerboseLevel() >= 2)
 			{
 
-				std::cerr<<"tgt candidates stats:  total="<<totalE<<";  distinct="
+				TRACE_ERR("tgt candidates stats:  total="<<totalE<<";  distinct="
 								 <<distinctE<<" ("<<distinctE/(0.01*totalE)<<");  duplicates="
 								 <<totalE-distinctE<<" ("<<(totalE-distinctE)/(0.01*totalE)
-								 <<")\n";
+								 <<")\n");
 
-				std::cerr<<"\npath statistics\n";
+				TRACE_ERR("\npath statistics\n");
 				std::cerr.setf(std::ios::scientific); 
 				std::cerr.precision(5);
 
 				if(path1Best.size()) 
 					{
-						std::cerr<<"1-best:        ";
+						TRACE_ERR("1-best:        ");
 						std::copy(path1Best.begin()+1,path1Best.end(),
 											std::ostream_iterator<size_t>(std::cerr," \t")); 
-						std::cerr<<"\n";
+						TRACE_ERR("\n");
 					}
 				if(pathCN.size())
 					{
-						std::cerr<<"CN (full):     ";
+						TRACE_ERR("CN (full):     ");
 						std::transform(pathCN.begin()+1
 													,pathCN.end()
 													,std::ostream_iterator<double>(std::cerr," \t")
 													,Exp); 
-						std::cerr<<"\n";
+						TRACE_ERR("\n");
 					}
 				if(pathExplored.size())
 					{
-						std::cerr<<"CN (explored): ";
+						TRACE_ERR("CN (explored): ");
 						std::copy(pathExplored.begin()+1,pathExplored.end(),
 											std::ostream_iterator<size_t>(std::cerr," \t")); 
-						std::cerr<<"\n";
+						TRACE_ERR("\n");
 					}
 			}
 
@@ -98,7 +98,7 @@ public:
 
 	void Factors2String(Word const& w,std::string& s) const 
 	{
-		s=w.ToString(m_input,0);
+		s=w.GetString(m_input,false);
 	}
 
 	void CleanUp() 
@@ -115,7 +115,7 @@ public:
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
 	{
 		assert(GetTargetPhraseCollection(source)==0);
-		TRACE_ERR("adding unk source phrase "<<source<<"\n");
+		TRACE_ERR( "adding unk source phrase "<<source<<"\n");
 		std::pair<MapSrc2Tgt::iterator,bool> p
 			=m_cache.insert(std::make_pair(source,static_cast<TargetPhraseCollection const*>(0)));
 		if(p.second || p.first->second==0) 
@@ -125,7 +125,7 @@ public:
 				p.first->second=ptr;
 				m_tgtColls.push_back(ptr);
 			}
-		else std::cerr<<"WARNING: you added an already existing phrase!\n";
+		else TRACE_ERR("WARNING: you added an already existing phrase!\n");
 	}
 
 	TargetPhraseCollection const* 
@@ -149,12 +149,17 @@ public:
 		std::vector<std::string> srcString(src.GetSize());
 		// convert source Phrase into vector of strings
 		for(size_t i=0;i<srcString.size();++i)
+		{
 			Factors2String(src.GetWord(i),srcString[i]);
+		}
 
 		// get target phrases in string representation
 		std::vector<StringTgtCand> cands;
 		m_dict->GetTargetCandidates(srcString,cands);
-		if(cands.empty()) return 0;
+		if(cands.empty()) 
+		{
+			return 0;
+		}
 			
 		std::vector<TargetPhrase> tCands;tCands.reserve(cands.size());
 		std::vector<std::pair<float,size_t> > costs;costs.reserve(cands.size());
@@ -216,11 +221,11 @@ public:
 
 		std::string binFname=filePath+".binphr.idx";
 		if(!existsFile(binFname.c_str())) {
-			TRACE_ERR("bin ttable does not exist -> create it\n");
+			TRACE_ERR( "bin ttable does not exist -> create it\n");
 			InputFileStream in(filePath);
 			m_dict->Create(in,filePath);
 		}
-		TRACE_ERR("reading bin ttable\n");
+		TRACE_ERR( "reading bin ttable\n");
 		m_dict->Read(filePath);
 	}
 
@@ -321,15 +326,15 @@ public:
 		
 		if (StaticData::Instance()->GetVerboseLevel() >= 2 && exPathsD.size())
 			{
-				std::cerr<<"path stats for current CN: \n";
+				TRACE_ERR("path stats for current CN: \n");
 				std::cerr.setf(std::ios::scientific); 
 				std::cerr.precision(5);
-				std::cerr<<"CN (full):     ";
+				TRACE_ERR("CN (full):     ");
 				std::transform(exPathsD.begin()+1
 											,exPathsD.end()
 											,std::ostream_iterator<double>(std::cerr," ")
 											,Exp);
-				std::cerr<<"\n";
+				TRACE_ERR("\n");
 			}
 
 		typedef StringTgtCand::first_type sPhrase;
@@ -345,7 +350,7 @@ public:
 				State curr(stack.back());
 				stack.pop_back();
 		
-				//std::cerr<<"processing state "<<curr<<" stack size: "<<stack.size()<<"\n";
+				//TRACE_ERR("processing state "<<curr<<" stack size: "<<stack.size()<<"\n");
 
 				assert(curr.end()<srcSize);
 				const ConfusionNet::Column &currCol=src[curr.end()];
@@ -356,7 +361,7 @@ public:
 						std::string s;
 						Factors2String(w,s);
 						bool isEpsilon=(s=="" || s==EPSILON);
-
+						
 						// do not start with epsilon (except at first position)
 						if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue; 
 
@@ -364,6 +369,7 @@ public:
 						// another node (Extend).  Stay at the same node if w==EPSILON
 						PPtr nextP = (isEpsilon ? curr.ptr : m_dict->Extend(curr.ptr,s));
 						unsigned newRealWords=curr.realWords + (isEpsilon ? 0 : 1);
+
 						if(nextP) // w is a word that should be considered
 							{
 								Range newRange(curr.begin(),curr.end()+1);
@@ -386,6 +392,7 @@ public:
 								if(newRange.second>=exploredPaths.size()+newRange.first) 
 									exploredPaths.resize(newRange.second-newRange.first+1,0);
 								++exploredPaths[newRange.second-newRange.first];
+	
 								totalE+=tcands.size();
 
 								if(tcands.size()) 
@@ -401,7 +408,7 @@ public:
 												case 1: nscores[0]= newScore;
 												case 0: break;
 												default:
-													std::cerr<<"ERROR: too many model scaling factors for input weights 'weight-i' : "<<m_numInputScores<<"\n";
+													TRACE_ERR("ERROR: too many model scaling factors for input weights 'weight-i' : "<<m_numInputScores<<"\n");
 													abort();
 											}
 											std::transform(tcands[i].second.begin(),tcands[i].second.end(),nscores.begin() + m_numInputScores,TransformScore);
@@ -430,10 +437,10 @@ public:
 
 		if (StaticData::Instance()->GetVerboseLevel() >= 2 && exploredPaths.size())
 			{
-				std::cerr<<"CN (explored): ";
+				TRACE_ERR("CN (explored): ");
 				std::copy(exploredPaths.begin()+1,exploredPaths.end(),
 									std::ostream_iterator<size_t>(std::cerr," ")); 
-				std::cerr<<"\n";
+				TRACE_ERR("\n");
 			}
 
 		if(pathExplored.size()<exploredPaths.size()) 

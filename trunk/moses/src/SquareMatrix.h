@@ -67,8 +67,8 @@ inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
 	for (size_t col = 0 ; col < matrix.GetSize() ; col++)
 	{
 		for (size_t row = 0 ; row < matrix.GetSize() ; row++)
-			TRACE_ERR(matrix.GetScore(row, col) << " ");
-		TRACE_ERR(std::endl);
+			out << matrix.GetScore(row, col) << " ";
+		out << std::endl;
 	}
 	
 	return out;

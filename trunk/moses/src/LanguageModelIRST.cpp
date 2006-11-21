@@ -49,7 +49,7 @@ LanguageModelIRST::~LanguageModelIRST()
 }
 
 
-void LanguageModelIRST::Load(const std::string &filePath
+bool LanguageModelIRST::Load(const std::string &filePath
 												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
@@ -79,12 +79,14 @@ void LanguageModelIRST::Load(const std::string &filePath
 	// LM can be ok, just outputs warnings
 	CreateFactors(factorCollection);
   m_unknownId = m_lmtb->dict->oovcode();
-  std::cerr << "IRST: m_unknownId=" << m_unknownId << std::endl;
+  TRACE_ERR( "IRST: m_unknownId=" << m_unknownId << std::endl);
   
   //install caches
   m_lmtb->init_probcache();
   m_lmtb->init_statecache();
   m_lmtb->init_lmtcaches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
+
+	return false;
 }
 
 void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
@@ -166,11 +168,11 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 
 
 const void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
-  cerr << "reset caches\n";
+  TRACE_ERR( "reset caches\n");
   m_lmtb->reset_caches(); 
 
 #ifndef WIN32
-  cerr << "reset mmap\n";
+  TRACE_ERR( "reset mmap\n");
   m_lmtb->reset_mmap();
 #endif
   

@@ -51,7 +51,7 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
 	sum+=abs(lastPos-static_cast<int>(m_size)+1); //getCosts(lastPos,as);
 	assert(sum>=0);
 
-	//	std::cerr<<sum<<"\n";
+	//	TRACE_ERR(sum<<"\n");
 
 	return sum;
 }
