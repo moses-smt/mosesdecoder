@@ -12,6 +12,7 @@
 #include <cassert>
 #include "UserMessage.h"
 #include "TypeDef.h"
+#include "Util.h"
 
 #ifdef WIN32
 #define OFF_T __int64 

@@ -46,7 +46,7 @@ LanguageModelSRI::~LanguageModelSRI()
   delete m_srilmVocab;
 }
 
-void LanguageModelSRI::Load(const std::string &filePath
+bool LanguageModelSRI::Load(const std::string &filePath
 												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
@@ -72,6 +72,8 @@ void LanguageModelSRI::Load(const std::string &filePath
 	// LM can be ok, just outputs warnings
 	CreateFactors(factorCollection);		
   m_unknownId = m_srilmVocab->unkIndex();
+  
+  return true;
 }
 
 void LanguageModelSRI::CreateFactors(FactorCollection &factorCollection)
