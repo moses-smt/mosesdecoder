@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "Parameter.h"
 #include "LanguageModel.h"
-#include "IODevice.h"
 #include "LMList.h"
 #include "SentenceStats.h"
 //#include "UnknownWordHandler.h"
@@ -214,7 +213,6 @@ public:
 	{
 		return m_scoreIndexManager;
 	}
-	IOMethod GetIOMethod();
 
 	size_t GetLMSize() const
 	{

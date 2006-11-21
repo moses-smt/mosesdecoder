@@ -83,8 +83,6 @@ StaticData::StaticData()
 
 bool StaticData::LoadData(Parameter *parameter)
 {
-	new Phrase(Input);
-
 	ResetUserTime();
 	m_parameter = parameter;
 	
@@ -246,14 +244,6 @@ StaticData::~StaticData()
 	// memory pools
 	Phrase::FinalizeMemPool();
 
-}
-
-IOMethod StaticData::GetIOMethod()
-{
-	if (m_parameter->GetParam("input-file").size() == 1)
-		return IOMethodFile;
-	else
-		return IOMethodCommandLine;
 }
 
 bool StaticData::LoadLexicalReorderingModel()

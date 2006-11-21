@@ -46,8 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Util.h"
 #include "LatticePathList.h"
 #include "Timer.h"
-#include "IOCommandLine.h"
-#include "IOFile.h"
+#include "IOStream.h"
 #include "Sentence.h"
 #include "ConfusionNet.h"
 #include "TranslationAnalysis.h"
@@ -61,10 +60,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
-bool readInput(IODevice *inputOutput, int inputType, InputType*& source) 
+bool readInput(IOStream &ioStream, int inputType, InputType*& source) 
 {
 	delete source;
-	source=inputOutput->GetInput((inputType ? 
+	source=ioStream.GetInput((inputType ? 
 																static_cast<InputType*>(new ConfusionNet) : 
 																static_cast<InputType*>(new Sentence(Input))));
 	return (source ? true : false);
@@ -91,7 +90,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// set up read/writing class
-	IODevice *ioDevice = GetIODevice(staticData);
+	IOStream *ioStream = GetIODevice(staticData);
 
 	// check on weights
 	vector<float> weights = staticData.GetAllWeights();
@@ -107,13 +106,13 @@ int main(int argc, char* argv[])
 	  return EXIT_FAILURE;
 	}
 
-	if (ioDevice == NULL)
+	if (ioStream == NULL)
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
 	InputType *source=0;
 	size_t lineCount = 0;
-	while(readInput(ioDevice,staticData.GetInputType(),source))
+	while(readInput(*ioStream,staticData.GetInputType(),source))
 		{
 			// note: source is only valid within this while loop!
     ResetUserTime();
@@ -123,7 +122,7 @@ int main(int argc, char* argv[])
 			staticData.InitializeBeforeSentenceProcessing(*source);
 			Manager manager(*source, staticData);
 			manager.ProcessSentence();
-			ioDevice->SetOutput(manager.GetBestHypothesis(), source->GetTranslationId(),
+			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 														 staticData.GetReportSegmentation(),
 														 staticData.GetReportAllFactors()
 														 );
@@ -135,7 +134,7 @@ int main(int argc, char* argv[])
 				  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					LatticePathList nBestList;
 					manager.CalcNBest(nBestSize, nBestList,staticData.OnlyDistinctNBest());
-					ioDevice->SetNBest(nBestList, source->GetTranslationId());
+					ioStream->OutputNBestList(nBestList, source->GetTranslationId());
 					//RemoveAllInColl(nBestList);
 				}
 
@@ -150,26 +149,26 @@ int main(int argc, char* argv[])
       
 		}
 	
-	delete ioDevice;
+	delete ioStream;
 
 	PrintUserTime("End.");
 	return EXIT_SUCCESS;
 }
 
-IODevice *GetIODevice(StaticData &staticData)
+IOStream *GetIODevice(StaticData &staticData)
 {
-	IODevice *ioDevice;
+	IOStream *ioStream;
 	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
 																,&outputFactorOrder = staticData.GetOutputFactorOrder();
 	FactorMask inputFactorUsed(inputFactorOrder);
 
 	// io
-	if (staticData.GetIOMethod() == IOMethodFile)
+	if (staticData.GetParam("input-file").size() == 1)
 	{
 	  VERBOSE(2,"IO from File" << endl);
 		string filePath = staticData.GetParam("input-file")[0];
 
-		ioDevice = new IOFile(inputFactorOrder, outputFactorOrder, inputFactorUsed
+		ioStream = new IOStream(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath()
@@ -178,14 +177,14 @@ IODevice *GetIODevice(StaticData &staticData)
 	else
 	{
 	  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
-		ioDevice = new IOCommandLine(inputFactorOrder, outputFactorOrder, inputFactorUsed
+		ioStream = new IOStream(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath());
 	}
-	ioDevice->ResetTranslationId();
+	ioStream->ResetTranslationId();
 
 	PrintUserTime("Created input-output object");
 
-	return ioDevice;
+	return ioStream;
 }

@@ -37,49 +37,50 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <vector>
 #include "TypeDef.h"
-#include "IODevice.h"
 #include "Sentence.h"
 
 class FactorMask;
 class FactorCollection;
+class Hypothesis;
+class LatticePathList;
+class InputFileStream;
 
-class IOCommandLine : public IODevice
+class IOStream
 {
 protected:
+	long m_translationId;
+
 	const std::vector<FactorType>	&m_inputFactorOrder;
 	const std::vector<FactorType>	&m_outputFactorOrder;
 	const FactorMask							&m_inputFactorUsed;
 	FactorCollection							&m_factorCollection;
 	std::ofstream 								m_nBestFile;
+	std::string										m_inputFilePath;
+	std::istream									*m_inputStream;
+	InputFileStream								*m_inputFile;
 	
 public:
-	IOCommandLine(const std::vector<FactorType>	&inputFactorOrder
+	IOStream(const std::vector<FactorType>	&inputFactorOrder
 		, const std::vector<FactorType>			&outputFactorOrder
 				, const FactorMask							&inputFactorUsed
 				, FactorCollection							&factorCollection
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath);
 
-	InputType* GetInput(InputType*);
-	void SetOutput(const Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-	void SetNBest(const LatticePathList &nBestList, long translationId);
+	IOStream(const std::vector<FactorType>	&inputFactorOrder
+				, const std::vector<FactorType>	&outputFactorOrder
+				, const FactorMask							&inputFactorUsed
+				, FactorCollection							&factorCollection
+				, size_t												nBestSize
+				, const std::string							&nBestFilePath
+				, const std::string							&inputFilePath);
+	~IOStream();
+
+	InputType* GetInput(InputType *inputType);
+	void OutputBestHypo(const Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+	void OutputNBestList(const LatticePathList &nBestList, long translationId);
 	void Backtrack(const Hypothesis *hypo);
+
+	void ResetTranslationId() { m_translationId = 0; }
+
 };
-
-#if 0
-// help fn
-inline Sentence *GetInput(std::istream &inputStream
-									 , const std::vector<FactorType> &factorOrder
-									 , FactorCollection &factorCollection)
-{
-
-	return dynamic_cast<Sentence*>(GetInput(new Sentence(Input),inputStream,factorOrder,factorCollection));
-#if 0
-	Sentence *rv=new Sentence(Input);
-	if(rv->Read(inputStream,factorOrder,factorCollection))
-		return rv;
-	else {delete rv; return 0;}
-#endif
-}
-
-#endif

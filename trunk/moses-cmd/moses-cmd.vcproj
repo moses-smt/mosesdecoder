@@ -181,11 +181,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\IOCommandLine.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\IOFile.cpp"
+				RelativePath=".\src\IOStream.cpp"
 				>
 			</File>
 			<File
@@ -203,11 +199,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\IOCommandLine.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\IOFile.h"
+				RelativePath=".\src\IOStream.h"
 				>
 			</File>
 			<File
