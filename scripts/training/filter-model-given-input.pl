@@ -78,18 +78,21 @@ while(<INI>) {
     elsif (/distortion-file/) {
         while(1) {
     	  my $table_spec = <INI>;
-    	  if ($table_spec !~ /^([\d\-]+) ([\d\-]+) (\d+) (\S+)$/) {
+    	  if ($table_spec !~ /^([\d\-]+) (\S+) (\d+) (\S+)$/) {
     	      print INI_OUT $table_spec;
     	      last;
     	}
-    	my ($source_factor,$t,$w,$file) = ($1,$2,$3,$4);
+    	my ($factors,$t,$w,$file) = ($1,$2,$3,$4);
+	my $source_factor = $factors;
+	$source_factor =~ s/\-\d+$//;
 
     	chomp($file);
     	push @TABLE,$file;
 
     	$file =~ s/^.*\/+([^\/]+)/$1/g;
     	my $new_name = "$dir/$file";
-    	print INI_OUT "$source_factor $t $w $new_name\n";
+	$new_name =~ s/\.gz//;
+    	print INI_OUT "$factors $t $w $new_name\n";
     	push @TABLE_NEW_NAME,$new_name;
 
     	$CONSIDER_FACTORS{$source_factor} = 1;
