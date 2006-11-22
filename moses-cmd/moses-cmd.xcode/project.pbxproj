@@ -26,6 +26,8 @@
 				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "LM_SRI LM_IRST TRACE_ENABLE";
+				HEADER_SEARCH_PATHS = "../irstlm/src ../srilm/misc/src ../srilm/dstruct/src ../srilm/include ../srilm/lm/src ../moses/src";
+				LIBRARY_SEARCH_PATHS = "../moses/build ../irstlm/build ../srilm/lib/macosx";
 				OTHER_LDFLAGS = "-lflm -lmisc -loolm -ldstruct -lz";
 				ZERO_LINK = NO;
 			};
@@ -82,10 +84,8 @@
 		};
 		08FB7795FE84155DC02AAC07 = {
 			children = (
-				1C8CFF410AD68D3600FA22E2,
-				1C8CFF420AD68D3600FA22E2,
-				1C8CFF430AD68D3600FA22E2,
-				1C8CFF440AD68D3600FA22E2,
+				D39BA8610B149B530089AE6A,
+				D39BA8620B149B530089AE6A,
 				1C8CFF450AD68D3600FA22E2,
 				1C8CFF460AD68D3600FA22E2,
 				1C8CFF470AD68D3600FA22E2,
@@ -201,42 +201,6 @@
 			settings = {
 			};
 		};
-		1C8CFF410AD68D3600FA22E2 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = IOCommandLine.cpp;
-			path = src/IOCommandLine.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		1C8CFF420AD68D3600FA22E2 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = IOCommandLine.h;
-			path = src/IOCommandLine.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		1C8CFF430AD68D3600FA22E2 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = IOFile.cpp;
-			path = src/IOFile.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		1C8CFF440AD68D3600FA22E2 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = IOFile.h;
-			path = src/IOFile.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
 		1C8CFF450AD68D3600FA22E2 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -272,30 +236,6 @@
 			path = src/TranslationAnalysis.h;
 			refType = 4;
 			sourceTree = "<group>";
-		};
-		1C8CFF490AD68D3600FA22E2 = {
-			fileRef = 1C8CFF410AD68D3600FA22E2;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		1C8CFF4A0AD68D3600FA22E2 = {
-			fileRef = 1C8CFF420AD68D3600FA22E2;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		1C8CFF4B0AD68D3600FA22E2 = {
-			fileRef = 1C8CFF430AD68D3600FA22E2;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		1C8CFF4C0AD68D3600FA22E2 = {
-			fileRef = 1C8CFF440AD68D3600FA22E2;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		1C8CFF4D0AD68D3600FA22E2 = {
 			fileRef = 1C8CFF450AD68D3600FA22E2;
@@ -362,10 +302,9 @@
 		8DD76F640486A84900D96B5E = {
 			buildActionMask = 2147483647;
 			files = (
-				1C8CFF490AD68D3600FA22E2,
-				1C8CFF4B0AD68D3600FA22E2,
 				1C8CFF4D0AD68D3600FA22E2,
 				1C8CFF4F0AD68D3600FA22E2,
+				D39BA8630B149B530089AE6A,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -384,10 +323,9 @@
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
-				1C8CFF4A0AD68D3600FA22E2,
-				1C8CFF4C0AD68D3600FA22E2,
 				1C8CFF4E0AD68D3600FA22E2,
 				1C8CFF500AD68D3600FA22E2,
+				D39BA8640B149B530089AE6A,
 			);
 			isa = PBXCopyFilesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 1;
@@ -417,6 +355,46 @@
 			name = Documentation;
 			refType = 4;
 			sourceTree = "<group>";
+		};
+//C60
+//C61
+//C62
+//C63
+//C64
+//D30
+//D31
+//D32
+//D33
+//D34
+		D39BA8610B149B530089AE6A = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = IOStream.cpp;
+			path = src/IOStream.cpp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		D39BA8620B149B530089AE6A = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = IOStream.h;
+			path = src/IOStream.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		D39BA8630B149B530089AE6A = {
+			fileRef = D39BA8610B149B530089AE6A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		D39BA8640B149B530089AE6A = {
+			fileRef = D39BA8620B149B530089AE6A;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 	};
 	rootObject = 08FB7793FE84155DC02AAC07;

@@ -53,6 +53,7 @@
 		};
 		08FB7794FE84155DC02AAC07 = {
 			children = (
+				D39BA8500B11FF920089AE6A,
 				08FB7795FE84155DC02AAC07,
 				C6A0FF2B0290797F04C91782,
 				1AB674ADFE9D54B511CA2CBB,
@@ -460,6 +461,7 @@
 				1C8CFE040AD6789400FA22E2,
 				1C8CFE060AD6789400FA22E2,
 				1C8CFE070AD6789400FA22E2,
+				D39BA8510B11FF920089AE6A,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -497,6 +499,31 @@
 			path = libirstlm.a;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+//D20
+//D21
+//D22
+//D23
+//D24
+//D30
+//D31
+//D32
+//D33
+//D34
+		D39BA8500B11FF920089AE6A = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			name = cmd.c;
+			path = src/cmd.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		D39BA8510B11FF920089AE6A = {
+			fileRef = D39BA8500B11FF920089AE6A;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 	};
 	rootObject = 08FB7793FE84155DC02AAC07;
