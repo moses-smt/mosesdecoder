@@ -5,7 +5,7 @@ use strict;
 # if your tests need a new version of the test data, increment this
 # and make sure that a moses-regression-tests-vX.Y is available for
 # download from statmt.org (redpony AT umd dot edu for more info)
-use constant TESTING_DATA_VERSION => '0.1';
+use constant TESTING_DATA_VERSION => '0.2';
 
 # find the data directory in a few likely locations and make sure
 # that it is the correct version
