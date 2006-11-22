@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <vector>
 #include "TypeDef.h"
+#include "boost/filesystem/path.hpp"
+#include "boost/filesystem/operations.hpp"
 
 typedef std::vector<std::string>						PARAM_VEC;
 typedef std::map<std::string, PARAM_VEC > 	PARAM_MAP;
@@ -41,6 +43,7 @@ protected:
 	PARAM_BOOL m_valid;
 	PARAM_STRING m_abbreviation;
 	PARAM_STRING m_description;
+	boost::filesystem::path m_initPath, m_loadPath;
 
 	std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
 	void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);

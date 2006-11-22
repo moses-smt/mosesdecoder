@@ -29,6 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "UserMessage.h"
 
+#ifdef WIN32
+#include <direct.h>
+#endif
+
 using namespace std;
 
 /** define allowed parameters */
@@ -71,10 +75,13 @@ Parameter::Parameter()
 	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");	
 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
+ 	AddParam("description", "Source, Target language, short description of decode step, domain etc");
+	AddParam("load-dir", "Directory to be standing in when loading tables specified in ini file");
 }
 
 Parameter::~Parameter()
 {
+	chdir(m_initPath.native_directory_string().c_str());
 }
 
 /** initialize a parameter, sub of constructor */
@@ -100,11 +107,11 @@ void Parameter::Explain() {
 	{
 		const string paramName = iterParam->first;
 		const string paramDescription = iterParam->second;
-		cerr <<  "\t-" << paramName;
+		cerr << "\t-" << paramName;
 		PARAM_STRING::const_iterator iterAbbr = m_abbreviation.find( paramName );
 		if ( iterAbbr != m_abbreviation.end() )
-			cerr <<  " (" << iterAbbr->second << ")";
-		cerr <<  ": " << paramDescription << endl;
+			cerr << " (" << iterAbbr->second << ")";
+		cerr << ": " << paramDescription << endl;
 	}
 }
 
@@ -193,6 +200,31 @@ bool Parameter::LoadParam(int argc, char* argv[])
 						noErrorFlag = false;
 					}
 			}
+	}
+
+	// do load dir param.
+	// doesn't account whether param was in ini file or from command line.
+	using namespace boost::filesystem;
+	m_initPath = current_path();
+	if (m_setting["load-dir"].size() == 1)
+	{
+		path config = path(configPath, native);
+		config = complete(config, m_initPath).branch_path();
+
+		m_loadPath = path(m_setting["load-dir"][0], native);
+		m_loadPath = complete(m_loadPath, config);
+
+		// input file path always from cmd line. set to be absolute
+		if (m_setting["input-file"].size() == 1)
+		{
+			string &inputPath = m_setting["input-file"][0];
+			path input = path(inputPath, native);
+			input = complete(input, m_initPath);
+			inputPath = input.native_directory_string();
+		}
+
+		//hack - just change to load dir
+		chdir(m_loadPath.native_directory_string().c_str());
 	}
 
   // check if parameters make sense
@@ -483,7 +515,7 @@ void Parameter::PrintCredit()
 	sort(everyone.begin(), everyone.end());
 
 
-	cerr <<  "Moses - A beam search decoder for phrase-based statistical machine translation models" << endl
+	cerr << "Moses - A beam search decoder for phrase-based statistical machine translation models" << endl
 			<< "Copyright (C) 2006 University of Edinburgh" << endl << endl
 
 			<< "This library is free software; you can redistribute it and/or" << endl
@@ -505,6 +537,6 @@ void Parameter::PrintCredit()
 
 	ostream_iterator<Credit> out(cerr, "\n");
 	copy(everyone.begin(), everyone.end(), out);
-	cerr <<  endl << endl;
+	cerr << endl << endl;
 }
 
