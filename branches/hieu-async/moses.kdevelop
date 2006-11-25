@@ -14,8 +14,8 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>moses-cmd-loop/src/moses-cmd-loop</activetarget>
-      <useconfiguration>optimized</useconfiguration>
+      <activetarget>moses-cmd/src/moses-cmd</activetarget>
+      <useconfiguration>debug</useconfiguration>
     </general>
     <run>
       <mainprogram>src/moses</mainprogram>
@@ -23,7 +23,7 @@
       <directoryradio>executable</directoryradio>
       <runarguments>
         <moses-cmd-loop/>
-        <moses-cmd/>
+        <moses-cmd></moses-cmd>
       </runarguments>
     </run>
     <configurations>
