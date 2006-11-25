@@ -1,7 +1,11 @@
-bin_PROGRAMS = moses 
-moses_SOURCES = Main.cpp IOStream.cpp TranslationAnalysis.cpp
-AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -I$(top_srcdir)/moses/src
 
-moses_LDADD = -L$(top_srcdir)/moses/src -lmoses
-moses_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a
+METASOURCES = AUTO
+bin_PROGRAMS = moses-cmd
+moses_cmd_SOURCES = IOStream.cpp IOStream.h Main.cpp Main.h\
+	TranslationAnalysis.cpp TranslationAnalysis.h
+AM_CXXFLAGS = -DLM_SRI -DLM_IRST -DLM_INTERNAL -D_FILE_OFFSET_BITS=64\
+	-D_LARGE_FILES -DTRACE_ENABLE
+moses_cmd_LDADD = $(top_builddir)/moses/src/libmoses.a \
+	$(top_builddir)/irstlm/src/libirstlm.a -lz
 
+INCLUDES = -I$(top_srcdir)/irstlm/src -I$(top_srcdir)/moses/src
