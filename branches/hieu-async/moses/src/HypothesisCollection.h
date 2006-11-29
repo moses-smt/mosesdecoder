@@ -128,17 +128,37 @@ protected:
 	//! remove hypothesis pointed to by iterator but don't delete the object
 	inline void Detach(const HypothesisCollection::iterator &iter)
 	{
+		Hypothesis *hypo = *iter;
+		const Phrase &targetPhrase = hypo->GetTargetPhrase();
+		OutputMap::iterator iterOutput = m_outputPhrase.find(targetPhrase);
+		assert(iterOutput != m_outputPhrase.end());
+		HypothesisVec &hypoVec = iterOutput->second;
+		HypothesisVec::iterator iterVec; 
+		
+		for (iterVec = hypoVec.begin() ; iterVec != hypoVec.end() ; ++iterVec)
+		{
+			if (*iterVec == hypo)
+			{
+				hypoVec.erase(iterVec);
+				break;
+			}
+		}
+		
 		m_hypos.erase(iter);
 	}
 	/** destroy all instances of Hypothesis in this collection */
 	void RemoveAll();
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
-	inline void Remove(const HypothesisCollection::iterator &iter)
+		
+ 	inline void Remove(const HypothesisCollection::iterator &iter)
 	{
-		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
-		pool.freeObject(*iter);
 		Detach(iter);
+
+		Hypothesis *hypo = *iter;		
+		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
+		pool.freeObject(hypo);
 	}
+	
 	/** add Hypothesis to the collection, without pruning */
 	inline void AddNoPrune(Hypothesis *hypothesis)
 	{
