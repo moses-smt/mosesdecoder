@@ -24,10 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <set>
 #include "Hypothesis.h"
-
-#ifdef __GNUG__
-#include <ext/hash_set>
-#endif
+#include "StaticData.h"
 
 /** defines less-than relation on hypotheses.
 * The particular order is not important for us, we need just to figure out
@@ -57,38 +54,63 @@ public:
 	}
 };
 
-//! Comparison for hash_set algorithm. Not currently used
-struct HypothesisRecombinationComparer
+class PhraseCompareOutputFactorOnly
 {
-	//! returns true if hypoA can be recombined with hypoB
-	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
+public:
+	bool operator()(const Phrase &phraseA, const Phrase &phraseB) const
 	{
-		if (hypoA->NGramCompare(*hypoB) != 0) return false;
-		return (hypoA->GetWordsBitmap().Compare(hypoB->GetWordsBitmap()) == 0);
+		size_t sizeA	= phraseA.GetSize()
+					,sizeB	= phraseB.GetSize();
+
+		// decide by using length. quick decision
+		if (sizeA != sizeB)
+		{
+			return sizeA < sizeB;
+		}
+		else
+		{
+			size_t minSize = std::min( sizeA , sizeB );
+
+			const vector<FactorType> &factorTypes = StaticData::Instance()->GetOutputFactorOrder();
+			// taken from word.Compare()
+			for (size_t i = 0 ; i < factorTypes.size() ; i++)
+			{
+				FactorType factorType = factorTypes[i];
+
+				for (size_t currPos = 0 ; currPos < minSize ; currPos++)
+				{
+					const Factor *factorA	= phraseA.GetFactor(currPos, factorType)
+											,*factorB	= phraseB.GetFactor(currPos, factorType);
+					const int result = factorA->Compare(*factorB);
+					if (result == 0)
+					{
+						continue;
+					}
+					else 
+					{
+						return (result < 0);
+					}
+				}
+			}
+
+			// identical
+			return false;
+		}
 	}
 };
-
-//struct HypothesisRecombinationHasher
-//{
-//  size_t operator()(const Hypothesis* hypo) const {
-//    return hypo->hash();
-//  }
-//};
 
 /** Stack for instances of Hypothesis, includes functions for pruning. */ 
 class HypothesisCollection 
 {
 private:
-#if 0
-//#ifdef __GNUG__
-	typedef __gnu_cxx::hash_set< Hypothesis*, HypothesisRecombinationHasher, HypothesisRecombinationComparer > _HCType;
-#else
 	typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
-#endif
+	typedef std::vector< Hypothesis*> HypothesisVec;
+	typedef std::map<Phrase, HypothesisVec, PhraseCompareOutputFactorOnly> OutputMap;
+	friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
+
 public:
 	typedef _HCType::iterator iterator;
 	typedef _HCType::const_iterator const_iterator;
-	friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
 
 protected:
 	float m_bestScore; /**< score of the best hypothesis in collection */
@@ -96,6 +118,8 @@ protected:
 	float m_beamThreshold; /**< minimum score due to threashold pruning */
 	size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
 	_HCType m_hypos; /**< contains hypotheses */
+	OutputMap m_outputPhrase;
+
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
 	//! add hypothesis to stack. Prune if necessary
@@ -118,7 +142,13 @@ protected:
 	/** add Hypothesis to the collection, without pruning */
 	inline void AddNoPrune(Hypothesis *hypothesis)
 	{
-		if (!m_hypos.insert(hypothesis).second) {
+		if (m_hypos.insert(hypothesis).second) 
+		{
+			m_outputPhrase[hypothesis->GetTargetPhrase()].push_back(hypothesis);
+		}
+		else
+		{
+			assert(false);
     }
 	}
 

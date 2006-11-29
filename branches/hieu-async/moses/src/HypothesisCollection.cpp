@@ -74,6 +74,10 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 
 void HypothesisCollection::AddPrune(Hypothesis *hypo)
 { 
+	const Phrase &targetPhrase = hypo->GetTargetPhrase();
+	std::map<Phrase, HypothesisVec, PhraseCompareOutputFactorOnly>::const_iterator outputIter
+				= m_outputPhrase.find(targetPhrase);
+
 	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
 	  StaticData::Instance()->GetSentenceStats().AddDiscarded();
@@ -122,10 +126,43 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	}
 }
 
+bool CompareHypoScore(const Hypothesis *a, const Hypothesis *b)
+{
+	return a->GetTotalScore() > b->GetTotalScore();
+}
+
 void HypothesisCollection::PruneToSize(size_t newSize)
 {
 	if (m_hypos.size() > newSize) // ok, if not over the limit
 	{
+		// sort each bunch of similar hypos
+		size_t bunchSize = (size_t) ceil((float)newSize / m_outputPhrase.size());
+		OutputMap::iterator iterMap;
+		for (iterMap = m_outputPhrase.begin() ; iterMap != m_outputPhrase.end() ; ++iterMap)
+		{
+			HypothesisVec &hypoVec = iterMap->second;
+
+			if (hypoVec.size() > bunchSize)
+			{
+				partial_sort(hypoVec.begin(), hypoVec.begin() + bunchSize, hypoVec.end(), CompareHypoScore);
+				
+				// delete the worst 
+				HypothesisVec::iterator iterVec;
+				for (iterVec = hypoVec.begin() + bunchSize + 1 ; iterVec != hypoVec.end() ; ++iterVec)
+				{
+					Hypothesis *hypo = *iterVec;
+					// remove hypo from list
+					_HCType::iterator iterList = m_hypos.find(hypo);
+					assert(iterList != m_hypos.end());
+					m_hypos.erase(iterList);
+
+					// delete actual hypo
+					delete hypo;
+				}
+				hypoVec.erase(hypoVec.begin() + bunchSize + 1,hypoVec.end());
+			}
+		}
+
 		priority_queue<float> bestScores;
 		
 		// push all scores to a heap
