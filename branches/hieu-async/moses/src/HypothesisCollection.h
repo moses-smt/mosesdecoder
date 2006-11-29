@@ -152,11 +152,11 @@ protected:
 		
  	inline void Remove(const HypothesisCollection::iterator &iter)
 	{
-		Detach(iter);
-
 		Hypothesis *hypo = *iter;		
 		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
 		pool.freeObject(hypo);
+
+		Detach(iter);
 	}
 	
 	/** add Hypothesis to the collection, without pruning */
