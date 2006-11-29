@@ -69,6 +69,7 @@ public:
 		for (std::vector<float>::iterator i=m_scores.begin(); i!=m_scores.end(); ++i)
 			*i = 0.0f;
 	}
+	void FloorAll();
 
   //! add the score in rhs
 	void PlusEquals(const ScoreComponentCollection& rhs)
