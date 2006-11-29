@@ -141,30 +141,27 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 		// sort each bunch of similar hypos
 		size_t bunchSize = (size_t) ceil((float)newSize / m_outputPhrase.size());
 		
-		if (bunchSize > 1)
-		{			 
-			OutputMap::iterator iterMap;
-			for (iterMap = m_outputPhrase.begin() ; iterMap != m_outputPhrase.end() ; ++iterMap)
+		OutputMap::iterator iterMap;
+		for (iterMap = m_outputPhrase.begin() ; iterMap != m_outputPhrase.end() ; ++iterMap)
+		{
+			HypothesisVec &hypoVec = iterMap->second;
+
+			if (hypoVec.size() > bunchSize)
 			{
-				HypothesisVec &hypoVec = iterMap->second;
-	
-				if (hypoVec.size() > bunchSize)
+				partial_sort(hypoVec.begin(), hypoVec.begin() + bunchSize, hypoVec.end(), CompareHypoScore);
+				
+				// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack				
+				m_worstScore = min(m_worstScore, hypoVec[bunchSize-1]->GetTotalScore());
+				
+				// delete the worst 
+				for (size_t currIndex = bunchSize; currIndex < hypoVec.size() ; ++currIndex)
 				{
-					partial_sort(hypoVec.begin(), hypoVec.begin() + bunchSize, hypoVec.end(), CompareHypoScore);
-					
-					// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack				
-					m_worstScore = min(m_worstScore, hypoVec[bunchSize-1]->GetTotalScore());
-					
-					// delete the worst 
-					for (size_t currIndex = bunchSize; currIndex < hypoVec.size() ; ++currIndex)
-					{
-						Hypothesis *hypo = hypoVec[currIndex];
-						// remove hypo from list
-						_HCType::iterator iterList = m_hypos.find(hypo);
-						//TRACE_ERR(*hypo << endl);
-						Remove(iterList);					
-					}				
-				}
+					Hypothesis *hypo = hypoVec[currIndex];
+					// remove hypo from list
+					_HCType::iterator iterList = m_hypos.find(hypo);
+					//TRACE_ERR(*hypo << endl);
+					Remove(iterList);					
+				}				
 			}
 		}
 				
