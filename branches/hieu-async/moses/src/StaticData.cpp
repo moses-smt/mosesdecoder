@@ -165,12 +165,16 @@ bool StaticData::LoadData(Parameter *parameter)
 	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
 	m_weightDistortion				= Scan<float>(distortionWeights[0]);
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
+	m_weightUnknownWord				= 1; // do we want to let mert decide weight for this ??
 
 	m_distortionScoreProducer = new DistortionScoreProducer;
 	m_allWeights.push_back(m_weightDistortion);
 
 	m_wpProducer = new WordPenaltyProducer;
 	m_allWeights.push_back(m_weightWordPenalty);
+
+	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
+	m_allWeights.push_back(m_weightUnknownWord);
 
 	// misc
 	m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
@@ -240,6 +244,7 @@ StaticData::~StaticData()
 	// small score producers
 	delete m_distortionScoreProducer;
 	delete m_wpProducer;
+	delete m_unknownWordPenaltyProducer;
 
 	// memory pools
 	Phrase::FinalizeMemPool();

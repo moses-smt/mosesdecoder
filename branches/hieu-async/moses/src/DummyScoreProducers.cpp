@@ -48,6 +48,11 @@ const std::string WordPenaltyProducer::GetScoreProducerDescription(int idx) cons
 }
 
 
+UnknownWordPenaltyProducer::UnknownWordPenaltyProducer()
+{
+	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+}
+
 size_t UnknownWordPenaltyProducer::GetNumScoreComponents() const
 {
 	return 1;

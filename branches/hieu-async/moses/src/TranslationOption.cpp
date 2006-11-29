@@ -44,7 +44,11 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 ,m_sourceWordsRange	(wordsRange)
 ,m_futureScore(0)
 {
-	m_scoreBreakdown.FloorAll();
+	const UnknownWordPenaltyProducer *up = StaticData::Instance()->GetUnknownWordPenaltyProducer();
+	const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
+	vector<float> score(1);
+	score[0] = FloorScore(-numeric_limits<float>::infinity());
+	m_scoreBreakdown.Assign(scoreProducer, score);
 }
 
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)

@@ -39,6 +39,7 @@ class PhraseDictionary;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class WordPenaltyProducer;
+class UnknownWordPenaltyProducer;
 class DecodeStep;
 
 /** Contains global variables and contants */
@@ -63,7 +64,8 @@ protected:
 		m_beamThreshold,
 		m_weightDistortion, 
 		m_weightWordPenalty, 
-		m_wordDeletionWeight;
+		m_wordDeletionWeight,
+		m_weightUnknownWord;
 									// PhraseTrans, Generation & LanguageModelScore has multiple weights.
 	int																	m_maxDistortion;
 									// do it differently from old pharaoh
@@ -92,6 +94,7 @@ protected:
 	size_t m_verboseLevel;
 	DistortionScoreProducer *m_distortionScoreProducer;
 	WordPenaltyProducer *m_wpProducer;
+	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
 	bool m_useDistortionFutureCosts;
@@ -295,6 +298,7 @@ public:
 	}
 	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
+	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 
 	bool UseDistortionFutureCosts() const {return m_useDistortionFutureCosts;}
 	bool OnlyDistinctNBest() const {return m_onlyDistinctNBest;}
