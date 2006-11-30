@@ -42,3 +42,13 @@ void TargetPhraseCollection::Sort(size_t tableLimit)
   std::nth_element(m_collection.begin(), iterMiddle, m_collection.end(), CompareTargetPhrase());
 }
 
+
+// friend
+ostream& operator<<(ostream& out, const TargetPhraseCollection &coll)
+{
+	TargetPhraseCollection::const_iterator iter;
+	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
+		out << **iter;
+	return out;
+}
+
