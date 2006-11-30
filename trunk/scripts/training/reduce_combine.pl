@@ -27,8 +27,14 @@ my @addfactors = grep { ! /^[0-9]+$/ } @requested_factors;
 # these are the labelled factors we need to load;
 
 
-open CORP, $corppathname or die "Can't read $corppathname";
-binmode(CORP, ":utf8");
+if ($corppathname eq "-") {
+  *CORP=*STDIN;
+
+  die "Won't add factors to corpus coming from stdin." if scalar @addfactors;
+} else {
+  open CORP, $corppathname or die "Can't read $corppathname";
+  binmode(CORP, ":utf8");
+}
 
 my $corpdn = dirname($corppathname);
 my $corpbn = basename($corppathname);
