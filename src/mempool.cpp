@@ -436,10 +436,12 @@ char *storage::reallocate(char *oldptr,int oldsize,int newsize){
   }
   else{
     newptr=(char *)realloc(oldptr,newsize);
-    if (newptr==oldptr) 
+    if (newptr==oldptr){ 
       TRACE_ERR( "r\b");
-    else
+    }
+    else{
       TRACE_ERR( "a\b");
+    }
   }
   if (newptr==NULL){
     TRACE_ERR( "storage::realloc insufficient memory\n");
