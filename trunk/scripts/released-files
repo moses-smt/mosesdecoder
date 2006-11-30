@@ -32,6 +32,7 @@ training/phrase-extract/extract
 training/phrase-extract/score
 training/postprocess-lopar.perl
 training/reduce_combine.pl
+training/combine_factors.pl
 training/train-factored-phrase-model.perl
 training/symal/symal
 training/symal/giza2bal.pl
