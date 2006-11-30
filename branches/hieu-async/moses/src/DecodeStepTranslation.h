@@ -34,6 +34,16 @@ public:
   /** returns phrase table (dictionary) for translation step */
   const PhraseDictionary &GetPhraseDictionary() const;
 
+	/** initialize list of partial translation options by applying the first translation step 
+	* Ideally, this function should be in DecodeStepTranslation class
+	*/
+	void ProcessInitialTranslation(const InputType &source
+															, const DecodeStep &decodeStep
+															, FactorCollection &factorCollection
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, size_t startPos
+															, size_t endPos
+															, bool adhereTableLimit) const;
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl

@@ -47,6 +47,37 @@ TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOpti
   return newTransOpt;
 }
 
+void DecodeStepTranslation::ProcessInitialTranslation(const InputType &source
+															, const DecodeStep &decodeStep
+															, FactorCollection &factorCollection
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, size_t startPos
+															, size_t endPos
+															, bool adhereTableLimit) const
+{
+	const PhraseDictionary &phraseDictionary = decodeStep.GetPhraseDictionary();
+	const size_t tableLimit = phraseDictionary.GetTableLimit();
+
+	const WordsRange wordsRange(startPos, endPos);
+	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(source,wordsRange); 
+
+	if (phraseColl != NULL)
+	{
+		VERBOSE(3,"[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
+			
+		TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
+		iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
+		
+		for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase)
+		{
+			const TargetPhrase	&targetPhrase = **iterTargetPhrase;
+			outputPartialTranslOptColl.Add ( new TranslationOption(wordsRange, targetPhrase) );
+			
+			VERBOSE(3,"\t" << targetPhrase << "\n");
+		}
+		VERBOSE(3,endl);
+	}
+}
 
 void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
