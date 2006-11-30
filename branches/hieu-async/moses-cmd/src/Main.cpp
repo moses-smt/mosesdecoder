@@ -76,6 +76,11 @@ int main(int argc, char* argv[])
 	for(int i=0;i<argc;++i) TRACE_ERR(argv[i]<<" ");
 	TRACE_ERR(endl);
 
+	cout.setf(std::ios::fixed); 
+	cout.precision(5);
+	cerr.setf(std::ios::fixed); 
+	cerr.precision(5);
+
 	// load data structures
 	Parameter *parameter = new Parameter();
 	if (!parameter->LoadParam(argc, argv))

@@ -86,7 +86,7 @@ bool LanguageModelIRST::Load(const std::string &filePath
   m_lmtb->init_statecache();
   m_lmtb->init_lmtcaches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
 
-	return false;
+	return true;
 }
 
 void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)

@@ -180,6 +180,9 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 
 void IOStream::OutputNBestList(const LatticePathList &nBestList, long translationId)
 {
+	m_nBestFile.setf(std::ios::fixed); 
+	m_nBestFile.precision(5);
+
 	bool labeledOutput = StaticData::Instance()->IsLabeledNBestList();
 	
 	LatticePathList::const_iterator iter;
