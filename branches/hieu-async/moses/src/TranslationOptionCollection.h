@@ -118,7 +118,7 @@ public:
 	virtual void CreateTranslationOptions(const std::list < DecodeStep* > &decodeStepList
 																			, FactorCollection &factorCollection);
 	//! Create translation options that exactly cover a specific input span. 
-	virtual void CreateTranslationOptionsForRange(const std::list < DecodeStep* > &decodeStepList
+	virtual void CreateTranslationOptionsForRange(const DecodeStep *decodeStep
 																			, FactorCollection &factorCollection
 																			, size_t startPosition
 																			, size_t endPosition

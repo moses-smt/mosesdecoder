@@ -76,7 +76,6 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 }
 
 void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOpt
-                              , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
@@ -92,8 +91,7 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
     }
 
   // normal generation step
-  const GenerationDictionary &generationDictionary  = decodeStep.GetGenerationDictionary();
-//  const WordsRange &sourceWordsRange                = inputPartialTranslOpt.GetSourceWordsRange();
+  const GenerationDictionary &generationDictionary  = GetGenerationDictionary();
 
   const Phrase &targetPhrase  = inputPartialTranslOpt.GetTargetPhrase();
   size_t targetLength         = targetPhrase.GetSize();

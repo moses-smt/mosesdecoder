@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include "TranslationOptionCollection.h"
 #include "Sentence.h"
-#include "DecodeStep.h"
+#include "DecodeStepTranslation.h"
 #include "LanguageModel.h"
 #include "PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
@@ -334,34 +334,37 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
 	{
 		DecodeStep *decodeStep = *iterDecodeStep;
 
-		// create map of matrices for each trans step
-		TransOptMatrix &transOptMatrix = m_collection[decodeStep];
-		
-		// create 2-d vector
-		size_t size = m_source.GetSize();
-		for (size_t startPos = 0 ; startPos < size ; ++startPos)
+		if (decodeStep->GetDecodeType() == Translate)
 		{
-			transOptMatrix.push_back( vector< TranslationOptionList >() );
-			for (size_t endPos = startPos ; endPos < size ; ++endPos)
+			// create map of matrices for each trans step
+			TransOptMatrix &transOptMatrix = m_collection[decodeStep];
+			
+			// create 2-d vector
+			size_t size = m_source.GetSize();
+			for (size_t startPos = 0 ; startPos < size ; ++startPos)
 			{
-				transOptMatrix[startPos].push_back( TranslationOptionList() );
+				transOptMatrix.push_back( vector< TranslationOptionList >() );
+				for (size_t endPos = startPos ; endPos < size ; ++endPos)
+				{
+					transOptMatrix[startPos].push_back( TranslationOptionList() );
+				}
 			}
-		}
-	
-		// create map of future score matrices
-		m_futureScore[decodeStep] = new SquareMatrix(m_source.GetSize());
-	}
+		
+			// create map of future score matrices
+			m_futureScore[decodeStep] = new SquareMatrix(m_source.GetSize());
 
-	// loop over all substrings of the source sentence, look them up
-	// in the phraseDictionary (which is the- possibly filtered-- phrase
-	// table loaded on initialization), generate TranslationOption objects
-	// for all phrases
-	
-	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
-	{
-		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
-		{
-			CreateTranslationOptionsForRange( decodeStepList, factorCollection, startPos, endPos, true);
+			// loop over all substrings of the source sentence, look them up
+			// in the phraseDictionary (which is the- possibly filtered-- phrase
+			// table loaded on initialization), generate TranslationOption objects
+			// for all phrases
+			
+			for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
+			{
+				for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
+				{
+					CreateTranslationOptionsForRange( decodeStep, factorCollection, startPos, endPos, true);
+				}
+			}
 		}
 	}
 
@@ -374,8 +377,6 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
 	CalcFutureScore();
 }
 
-#include "DecodeStepTranslation.h"
-
 /** create translation options that exactly cover a specific input span. 
  * Called by CreateTranslationOptions() and ProcessUnknownWord()
  * \param decodeStepList list of decoding steps
@@ -385,65 +386,28 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
  * \param adhereTableLimit whether phrase & generation table limits are adhered to
  */
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
-																													 const list < DecodeStep* > &decodeStepList
+																													 const DecodeStep *decodeStep
 																													 , FactorCollection &factorCollection
 																													 , size_t startPos
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
 {
 	// partial trans opt stored in here
-	PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
+	PartialTranslOptColl transOptColl;
 	
 	// initial translation step
-	list < DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
-	const DecodeStep &decodeStep = **iterStep;
-
-	static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation(m_source, decodeStep, factorCollection
-														, *oldPtoc, startPos, endPos, adhereTableLimit );
-
-	// do rest of decode steps
-	size_t totalEarlyPruned = 0;
-	int indexStep = 0;
-	for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
-		{
-			const DecodeStep &decodeStep = **iterStep;
-			PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
-
-			// go thru each intermediate trans opt just created
-			const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
-			vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
-			for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
-			{
-				TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
-				decodeStep.Process(inputPartialTranslOpt
-																	 , decodeStep
-																	 , *newPtoc
-																	 , factorCollection
-																	 , this
-																	 , adhereTableLimit);
-			}
-			// last but 1 partial trans not required anymore
-			totalEarlyPruned += newPtoc->GetPrunedCount();
-			delete oldPtoc;
-			oldPtoc = newPtoc;
-			indexStep++;
-		} // for (++iterStep 
+	static_cast<const DecodeStepTranslation&>(*decodeStep).ProcessInitialTranslation(m_source, factorCollection
+														, transOptColl, startPos, endPos, adhereTableLimit );
 
 	// add to fully formed translation option list
-	PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
-	const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
+	const vector<TranslationOption*>& partTransOptList = transOptColl.GetList();
 	vector<TranslationOption*>::const_iterator iterColl;
 	for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl)
-		{
-			TranslationOption *transOpt = *iterColl;
-			transOpt->CalcScore();
-			Add(&decodeStep, transOpt);
-		}
-
-	lastPartialTranslOptColl.DetachAll();
-	totalEarlyPruned += oldPtoc->GetPrunedCount();
-	delete oldPtoc;
-	// TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
+	{
+		TranslationOption *transOpt = *iterColl;
+		transOpt->CalcScore();
+		Add(decodeStep, transOpt);
+	}
 }
 
 /** add translation option to the list

@@ -48,14 +48,13 @@ TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOpti
 }
 
 void DecodeStepTranslation::ProcessInitialTranslation(const InputType &source
-															, const DecodeStep &decodeStep
 															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos
 															, size_t endPos
 															, bool adhereTableLimit) const
 {
-	const PhraseDictionary &phraseDictionary = decodeStep.GetPhraseDictionary();
+	const PhraseDictionary &phraseDictionary = GetPhraseDictionary();
 	const size_t tableLimit = phraseDictionary.GetTableLimit();
 
 	const WordsRange wordsRange(startPos, endPos);
@@ -80,7 +79,6 @@ void DecodeStepTranslation::ProcessInitialTranslation(const InputType &source
 }
 
 void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
-                              , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
@@ -96,7 +94,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 
   // normal trans step
   const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
-  const PhraseDictionary &phraseDictionary  = decodeStep.GetPhraseDictionary();
+  const PhraseDictionary &phraseDictionary  = GetPhraseDictionary();
 	const size_t currSize = inputPartialTranslOpt.GetTargetPhrase().GetSize();
 	const size_t tableLimit = phraseDictionary.GetTableLimit();
 	

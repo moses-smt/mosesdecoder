@@ -31,6 +31,10 @@ class DecodeStepTranslation : public DecodeStep
 public:
 	DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev);
 
+	DecodeType GetDecodeType() const
+	{
+		return Translate;
+	}
   /** returns phrase table (dictionary) for translation step */
   const PhraseDictionary &GetPhraseDictionary() const;
 
@@ -38,14 +42,12 @@ public:
 	* Ideally, this function should be in DecodeStepTranslation class
 	*/
 	void ProcessInitialTranslation(const InputType &source
-															, const DecodeStep &decodeStep
 															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos
 															, size_t endPos
 															, bool adhereTableLimit) const;
   virtual void Process(const TranslationOption &inputPartialTranslOpt
-                              , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc

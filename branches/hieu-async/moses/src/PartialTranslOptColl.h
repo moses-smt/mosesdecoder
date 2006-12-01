@@ -52,7 +52,6 @@ public:
 	/** destructor, cleans out list */
 	~PartialTranslOptColl()
 	{
-		RemoveAllInColl( m_list );
 	}
 	
 	void AddNoPrune(TranslationOption *partialTranslOpt);

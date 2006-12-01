@@ -32,11 +32,15 @@ class DecodeStepGeneration : public DecodeStep
 public:
 	DecodeStepGeneration(GenerationDictionary* dict, const DecodeStep* prev);
 
+	DecodeType GetDecodeType() const
+	{
+		return Generate;
+	}
+
   /** returns phrase table (dictionary) for translation step */
   const GenerationDictionary &GetGenerationDictionary() const;
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
-                              , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
