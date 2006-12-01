@@ -38,31 +38,26 @@ using namespace std;
 */
 TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage)
 	: m_source(src)
-	,m_futureScore(src.GetSize())
 	,m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
 {
-	// create 2-d vector
-	size_t size = src.GetSize();
-	for (size_t startPos = 0 ; startPos < size ; ++startPos)
-	{
-		m_collection.push_back( vector< TranslationOptionList >() );
-		for (size_t endPos = startPos ; endPos < size ; ++endPos)
-		{
-			m_collection[startPos].push_back( TranslationOptionList() );
-		}
-	}
 }
 
 /** destructor, clears out data structures */
 TranslationOptionCollection::~TranslationOptionCollection()
 {
-	// delete all trans opt
-	size_t size = m_source.GetSize();
-	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	std::map<const DecodeStep*, TransOptMatrix>::iterator iterMap;
+
+	for (iterMap = m_collection.begin() ; iterMap != m_collection.end() ; ++iterMap)
 	{
-		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+		const DecodeStep *decodeStep = iterMap->first;
+		// delete all trans opt
+		size_t size = m_source.GetSize();
+		for (size_t startPos = 0 ; startPos < size ; ++startPos)
 		{
-		 RemoveAllInColl(GetTranslationOptionList(startPos, endPos));
+			for (size_t endPos = startPos ; endPos < size ; ++endPos)
+			{
+				RemoveAllInColl(GetTranslationOptionList(decodeStep, startPos, endPos));
+			}
 		}
 	}
 }
@@ -81,32 +76,38 @@ void TranslationOptionCollection::Prune()
 	if (m_maxNoTransOptPerCoverage == 0)
 		return;
 
-	size_t total = 0;
-	size_t totalPruned = 0;
-	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	std::map<const DecodeStep*, TransOptMatrix>::iterator iterMap;
+	for (iterMap = m_collection.begin() ; iterMap != m_collection.end() ; ++iterMap)
 	{
-		for (size_t endPos = startPos ; endPos < size ; ++endPos)
-		{
-			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
-			total += fullList.size();
-			if (fullList.size() <= m_maxNoTransOptPerCoverage)
-				continue;
-			
-			// sort in vector
-			nth_element(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
+		const DecodeStep *decodeStep = iterMap->first;
 
-			totalPruned += fullList.size() - m_maxNoTransOptPerCoverage;
-			
-			// delete the rest
-			for (size_t i = m_maxNoTransOptPerCoverage ; i < fullList.size() ; ++i)
+		size_t total = 0;
+		size_t totalPruned = 0;
+		for (size_t startPos = 0 ; startPos < size ; ++startPos)
+		{
+			for (size_t endPos = startPos ; endPos < size ; ++endPos)
 			{
-				delete fullList[i];
+				TranslationOptionList &fullList = GetTranslationOptionList(decodeStep, startPos, endPos);
+				total += fullList.size();
+				if (fullList.size() <= m_maxNoTransOptPerCoverage)
+					continue;
+				
+				// sort in vector
+				nth_element(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
+
+				totalPruned += fullList.size() - m_maxNoTransOptPerCoverage;
+				
+				// delete the rest
+				for (size_t i = m_maxNoTransOptPerCoverage ; i < fullList.size() ; ++i)
+				{
+					delete fullList[i];
+				}
+				fullList.resize(m_maxNoTransOptPerCoverage);
 			}
-			fullList.resize(m_maxNoTransOptPerCoverage);
 		}
+		VERBOSE(2,"       Total translation options: " << total << std::endl
+			<< "Total translation options pruned: " << totalPruned << std::endl);
 	}
-	VERBOSE(2,"       Total translation options: " << total << std::endl
-		<< "Total translation options pruned: " << totalPruned << std::endl);
 }
 
 /** Force a creation of a translation option where there are none for a particular source position.
@@ -127,6 +128,8 @@ void TranslationOptionCollection::Prune()
 
 void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection)
 {
+	// TODO - rethink how to do unknown words in async
+	/*
 	size_t size = m_source.GetSize();
 	// try to translate for coverage with no trans by ignoring table limits
 	for (size_t pos = 0 ; pos < size ; ++pos)
@@ -147,6 +150,7 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeSte
 		if (fullList.size() == 0)
 			ProcessUnknownWord(pos, *m_factorCollection);
 	}
+	*/
 }
 
 /** special handling of ONE unknown words. Either add temporarily add word to translation table,
@@ -161,9 +165,8 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeSte
 	* \param sourcePos
 	* \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
-																														size_t sourcePos
-																												, FactorCollection &factorCollection)
+void TranslationOptionCollection::ProcessOneUnknownWord(const DecodeStep *decodeStep, const Word &sourceWord
+																												, size_t sourcePos, FactorCollection &factorCollection)
 {
 	// unknown word, add as trans opt
 
@@ -209,7 +212,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 		}
 
 		transOpt->CalcScore();
-		Add(transOpt);
+		Add(decodeStep, transOpt);
 }
 
 /** compute future score matrix in a dynamic programming fashion.
@@ -221,30 +224,34 @@ void TranslationOptionCollection::CalcFutureScore()
   // setup the matrix (ignore lower triangle, set upper triangle to -inf
   size_t size = m_source.GetSize(); // the width of the matrix
 
-  for(size_t row=0; row<size; row++) {
-    for(size_t col=row; col<size; col++) {
-      m_futureScore.SetScore(row, col, -numeric_limits<float>::infinity());
-    }
-  }
-
   // walk all the translation options and record the cheapest option for each span
-	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; ++startPos)
-	{
-		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; ++endPos)
-		{
-			TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
+	std::map<const DecodeStep*, TransOptMatrix>::iterator iterMap;
+	const DecodeStep *decodeStep = iterMap->first;
 
-			TranslationOptionList::const_iterator iterTransOpt;
-			for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) 
+	for (iterMap = m_collection.begin() ; iterMap != m_collection.end() ; ++iterMap)
+	{
+		const DecodeStep *decodeStep = iterMap->first;
+		SquareMatrix &squareMatrix = GetFutureScore(decodeStep);
+		squareMatrix.ResetScore(-numeric_limits<float>::infinity());
+		//m_futureScore.ResetScore(0);
+
+		for (size_t startPos = 0 ; startPos < m_source.GetSize() ; ++startPos)
+		{
+			for (size_t endPos = startPos ; endPos < m_source.GetSize() ; ++endPos)
 			{
-				const TranslationOption &transOpt = **iterTransOpt;
-				float score = transOpt.GetFutureScore();
-				if (score > m_futureScore.GetScore(startPos, endPos))
-					m_futureScore.SetScore(startPos, endPos, score);
+				TranslationOptionList &transOptList = GetTranslationOptionList(decodeStep, startPos, endPos);
+
+				TranslationOptionList::const_iterator iterTransOpt;
+				for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) 
+				{
+					const TranslationOption &transOpt = **iterTransOpt;
+					float score = transOpt.GetFutureScore();
+					if (score > squareMatrix.GetScore(startPos, endPos))
+						squareMatrix.SetScore(startPos, endPos, score);
+				}
 			}
 		}
 	}
-
   // now fill all the cells in the strictly upper triangle
   //   there is no way to modify the diagonal now, in the case
   //   where no translation option covers a single-word span,
@@ -252,43 +259,59 @@ void TranslationOptionCollection::CalcFutureScore()
   // like in chart parsing we want each cell to contain the highest score
   // of the full-span trOpt or the sum of scores of joining two smaller spans
 
-	for(size_t colstart = 1; colstart < size ; colstart++) {
-		for(size_t diagshift = 0; diagshift < size-colstart ; diagshift++) {
-            size_t startPos = diagshift;
-            size_t endPos = colstart+diagshift;
-			for(size_t joinAt = startPos; joinAt < endPos ; joinAt++)  {
-              float joinedScore = m_futureScore.GetScore(startPos, joinAt)
-                                + m_futureScore.GetScore(joinAt+1, endPos);
-              /* // uncomment to see the cell filling scheme
-              TRACE_ERR( "[" <<startPos<<","<<endPos<<"] <-? ["<<startPos<<","<<joinAt<<"]+["<<joinAt+1<<","<<endPos
-                << "] (colstart: "<<colstart<<", diagshift: "<<diagshift<<")"<<endl);
-              */
-              if (joinedScore > m_futureScore.GetScore(startPos, endPos))
-                m_futureScore.SetScore(startPos, endPos, joinedScore);
-            }
-        }
-    }
+	for (iterMap = m_collection.begin() ; iterMap != m_collection.end() ; ++iterMap)
+	{
+		const DecodeStep *decodeStep = iterMap->first;
+		SquareMatrix &squareMatrix = GetFutureScore(decodeStep);
+
+		for(size_t colstart = 1; colstart < size ; colstart++) 
+		{
+			for(size_t diagshift = 0; diagshift < size-colstart ; diagshift++) 
+			{
+				size_t startPos = diagshift;
+				size_t endPos = colstart+diagshift;
+				for(size_t joinAt = startPos; joinAt < endPos ; joinAt++)  {
+					float joinedScore = squareMatrix.GetScore(startPos, joinAt)
+														+ squareMatrix.GetScore(joinAt+1, endPos);
+					/* // uncomment to see the cell filling scheme
+					TRACE_ERR( "[" <<startPos<<","<<endPos<<"] <-? ["<<startPos<<","<<joinAt<<"]+["<<joinAt+1<<","<<endPos
+						<< "] (colstart: "<<colstart<<", diagshift: "<<diagshift<<")"<<endl);
+					*/
+					if (joinedScore > squareMatrix.GetScore(startPos, endPos))
+						squareMatrix.SetScore(startPos, endPos, joinedScore);
+				}
+			}
+		}
+	}
 
 	IFVERBOSE(3)
 	{		
-      int total = 0;
-      for(size_t row=0; row<size; row++)
-      {
-        for(size_t col=row; col<size; col++)
-        {
-        	int count = GetTranslationOptionList(row, col).size();
-	        TRACE_ERR( "translation options spanning from  "
-	        				<< row <<" to "<< col <<" is "
-	        				<< count <<endl);
-       		total += count;
-        }
-      }
-      TRACE_ERR( "translation options generated in total: "<< total << endl);
+		for (iterMap = m_collection.begin() ; iterMap != m_collection.end() ; ++iterMap)
+		{
+			const DecodeStep *decodeStep = iterMap->first;
+			SquareMatrix &squareMatrix = GetFutureScore(decodeStep);
 
-      for(size_t row=0; row<size; row++)
-        for(size_t col=row; col<size; col++)
-					TRACE_ERR( "future cost from "<< row <<" to "<< col <<" is "<< m_futureScore.GetScore(row, col) <<endl);
-    }
+			size_t total = 0;
+			for(size_t row=0; row<size; row++)
+			{
+				for(size_t col=row; col<size; col++)
+				{
+      		size_t count = GetTranslationOptionList(decodeStep, row, col).size();
+					TRACE_ERR( "translation options spanning from  "
+        					<< row <<" to "<< col <<" is "
+        					<< count <<endl);
+     			total += count;
+				}
+			}
+			TRACE_ERR( "translation options generated in total: "<< total << endl);
+
+			for(size_t row=0; row<size; row++)
+			{
+				for(size_t col=row; col<size; col++)
+					TRACE_ERR( "future cost from "<< row <<" to "<< col <<" is "<< squareMatrix.GetScore(row, col) <<endl);
+			}
+		}
+	}
 }
 
 
@@ -304,6 +327,25 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
 {
 	m_factorCollection = &factorCollection;
 	
+	// create map of matrices for each trans step
+	list < DecodeStep* >::const_iterator iterDecodeStep;
+	for (iterDecodeStep = decodeStepList.begin() ; iterDecodeStep != decodeStepList.end() ; ++iterDecodeStep)
+	{
+	}
+
+		/*
+		// create 2-d vector
+		size_t size = src.GetSize();
+		for (size_t startPos = 0 ; startPos < size ; ++startPos)
+		{
+			m_collection.push_back( vector< TranslationOptionList >() );
+			for (size_t endPos = startPos ; endPos < size ; ++endPos)
+			{
+				m_collection[startPos].push_back( TranslationOptionList() );
+			}
+		}
+		*/
+
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
 	// table loaded on initialization), generate TranslationOption objects
@@ -389,7 +431,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		{
 			TranslationOption *transOpt = *iterColl;
 			transOpt->CalcScore();
-			Add(transOpt);
+			Add(&decodeStep, transOpt);
 		}
 
 	lastPartialTranslOptColl.DetachAll();
@@ -400,10 +442,10 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
 /** add translation option to the list
  * \param translationOption translation option to be added */
-void TranslationOptionCollection::Add(const TranslationOption *translationOption)
+void TranslationOptionCollection::Add(const DecodeStep *decodeStep, const TranslationOption *translationOption)
 {
 	const WordsRange &coverage = translationOption->GetSourceWordsRange();
-	m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].push_back(translationOption);
+	m_collection[decodeStep][coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].push_back(translationOption);
 }
 
 TO_STRING_BODY(TranslationOptionCollection);

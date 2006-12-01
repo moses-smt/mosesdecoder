@@ -58,10 +58,11 @@ class TranslationOptionCollection
 {
 	friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);
 	TranslationOptionCollection(const TranslationOptionCollection&); /*< no copy constructor */
+	typedef std::vector< std::vector< TranslationOptionList > > TransOptMatrix;
 protected:
-	std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
+	std::map<const DecodeStep*, TransOptMatrix>	m_collection; /*< contains translation options */
 	InputType const			&m_source; /*< reference to the input */
-	SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
+	std::map<const DecodeStep*, SquareMatrix>				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
 	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase???) */
 	FactorCollection		*m_factorCollection;
 	
@@ -72,26 +73,37 @@ protected:
 	//! Force a creation of a translation option where there are none for a particular source position.
 	void ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection);
 	//! special handling of ONE unknown words.
-	virtual void ProcessOneUnknownWord(const Word &sourceWord
-																		 , size_t sourcePos
-																		 , FactorCollection &factorCollection);
+	virtual void ProcessOneUnknownWord(const DecodeStep *decodeStep, const Word &sourceWord
+																		 , size_t sourcePos, FactorCollection &factorCollection);
 	//! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 	void Prune();
 
 	//! list of trans opt for a particular span
-	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
+	TranslationOptionList &GetTranslationOptionList(const DecodeStep *decodeStep, size_t startPos, size_t endPos)
 	{
-		return m_collection[startPos][endPos - startPos];
+		return m_collection[decodeStep][startPos][endPos - startPos];
 	}
-	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const
+	const TranslationOptionList &GetTranslationOptionList(const DecodeStep *decodeStep, size_t startPos, size_t endPos) const
 	{
-	  return m_collection[startPos][endPos - startPos];
+		std::map<const DecodeStep*, TransOptMatrix>::const_iterator iter;
+		iter = m_collection.find(decodeStep);
+		assert(iter != m_collection.end());
+		const TransOptMatrix &matrix = iter->second;
+	  return matrix[startPos][endPos - startPos];
 	}
-	void Add(const TranslationOption *translationOption);
+	void Add(const DecodeStep *decodeStep, const TranslationOption *translationOption);
 
 	//! implemented by inherited class, called by this class
-	virtual void ProcessUnknownWord(size_t sourcePos
+	virtual void ProcessUnknownWord(const DecodeStep *decodeStep, size_t sourcePos
 																	, FactorCollection &factorCollection)=0;
+
+	//! returns future cost matrix for sentence
+	inline virtual SquareMatrix &GetFutureScore(const DecodeStep *decodeStep)
+	{
+		std::map<const DecodeStep*, SquareMatrix>::iterator iter = m_futureScore.find(decodeStep);
+		assert(iter != m_futureScore.end());
+		return iter->second;
+	}
 
 public:
   virtual ~TranslationOptionCollection();
@@ -113,15 +125,17 @@ public:
 																			, bool adhereTableLimit);
 
 	//! returns future cost matrix for sentence
-	inline virtual const SquareMatrix &GetFutureScore() const
+	inline virtual const SquareMatrix &GetFutureScore(const DecodeStep *decodeStep) const
 	{
-		return m_futureScore;
+		std::map<const DecodeStep*, SquareMatrix>::const_iterator iter = m_futureScore.find(decodeStep);
+		assert(iter != m_futureScore.end());
+		return iter->second;
 	}
 
 	//! list of trans opt for a particular span
-	const TranslationOptionList &GetTranslationOptionList(const WordsRange &coverage) const
+	const TranslationOptionList &GetTranslationOptionList(const DecodeStep *decodeStep, const WordsRange &coverage) const
 	{
-		return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
+		return GetTranslationOptionList(decodeStep, coverage.GetStartPos(), coverage.GetEndPos());
 	}
 
 	TO_STRING();		
@@ -129,10 +143,16 @@ public:
 
 inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
 {
-  std::vector< std::vector< TranslationOptionList > >::const_iterator i = coll.m_collection.begin();
-	size_t j = 0;
-	for (; i!=coll.m_collection.end(); ++i) {
-    out << "s[" << j++ << "].size=" << i->size() << std::endl;
+	std::map<const DecodeStep*, TranslationOptionCollection::TransOptMatrix>::const_iterator iterMap;
+	for (iterMap = coll.m_collection.begin(); iterMap != coll.m_collection.end(); ++iterMap)
+	{
+		const TranslationOptionCollection::TransOptMatrix matrix = iterMap->second;
+		TranslationOptionCollection::TransOptMatrix::const_iterator iterStart;
+		for (iterStart = matrix.begin(); iterStart != matrix.end(); ++iterStart)
+		{
+			const std::vector< TranslationOptionList > &startVec = *iterStart;
+			out << "matrix size =" << startVec.size() << std::endl;
+		}
 	}
 
 	/*

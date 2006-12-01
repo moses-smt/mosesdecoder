@@ -9,7 +9,7 @@ class TranslationOptionCollectionConfusionNet : public TranslationOptionCollecti
  public:
 	TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage);
 
-	void ProcessUnknownWord(		size_t sourcePos
+	void ProcessUnknownWord(const DecodeStep *decodeStep,		size_t sourcePos
 															, FactorCollection &factorCollection);
 
 };

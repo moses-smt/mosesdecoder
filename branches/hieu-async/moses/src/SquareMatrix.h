@@ -58,6 +58,18 @@ public:
 	{
 		m_array[row * m_size + col] = value;
 	}
+	inline void AddScore(size_t row, size_t col, float value)
+	{
+		m_array[row * m_size + col] += value;
+	}
+	inline void ResetScore(float value)
+	{
+		for(size_t row=0; row<m_size; row++) {
+			for(size_t col=row; col<m_size; col++) {
+				m_array[row * m_size + col] = value;
+			}
+		}
+	}
 	
 	TO_STRING();
 };
