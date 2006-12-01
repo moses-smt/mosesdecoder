@@ -99,7 +99,7 @@ void Manager::ProcessSentence()
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
 			{
 				Hypothesis &hypothesis = **iterHypo;
-				ProcessOneHypothesis(hypothesis); // expand the hypothesis
+				//ProcessOneHypothesis(hypothesis); // expand the hypothesis
 			}
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
@@ -109,11 +109,13 @@ void Manager::ProcessSentence()
 	VERBOSE(2,m_staticData.GetSentenceStats());
 }
 
+
 /** Find all translation options to expand one hypothesis, trigger expansion
  * this is mostly a check for overlap with already covered words, and for
  * violation of reordering limits. 
  * \param hypothesis hypothesis to be expanded upon
  */
+/*
 void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 {
 	// since we check for reordering limits, its good to have that limit handy
@@ -188,13 +190,14 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 		}
 	}
 }
+*/
 
 /**
  * Expand a hypothesis given a list of translation options
  * \param hypothesis hypothesis to be expanded upon
  * \param transOptList list of translation options to be applied
  */
-
+/*
 void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList)
 {
 	TranslationOptionList::const_iterator iter;
@@ -203,6 +206,7 @@ void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const Translation
 		ExpandHypothesis(hypothesis, **iter);
 	}
 }
+*/
 
 /**
  * Expand one hypothesis with a translation option.
@@ -211,6 +215,7 @@ void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const Translation
  * \param transOpt translation option (phrase translation) 
  *        that is applied to create the new hypothesis
  */
+/*
 void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
 	// create hypothesis and calculate all its scores
@@ -226,6 +231,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
 	m_hypoStack[wordsTranslated].AddPrune(newHypo);
 }
+*/
 
 /**
  * Find best hypothesis on the last stack.

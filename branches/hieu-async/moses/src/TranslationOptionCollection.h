@@ -60,9 +60,9 @@ class TranslationOptionCollection
 	TranslationOptionCollection(const TranslationOptionCollection&); /*< no copy constructor */
 	typedef std::vector< std::vector< TranslationOptionList > > TransOptMatrix;
 protected:
-	std::map<const DecodeStep*, TransOptMatrix>	m_collection; /*< contains translation options */
 	InputType const			&m_source; /*< reference to the input */
-	std::map<const DecodeStep*, SquareMatrix>				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
+	std::map<const DecodeStep*, TransOptMatrix>	m_collection; /*< contains translation options */
+	std::map<const DecodeStep*, SquareMatrix*>	m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
 	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase???) */
 	FactorCollection		*m_factorCollection;
 	
@@ -100,9 +100,9 @@ protected:
 	//! returns future cost matrix for sentence
 	inline virtual SquareMatrix &GetFutureScore(const DecodeStep *decodeStep)
 	{
-		std::map<const DecodeStep*, SquareMatrix>::iterator iter = m_futureScore.find(decodeStep);
+		std::map<const DecodeStep*, SquareMatrix*>::iterator iter = m_futureScore.find(decodeStep);
 		assert(iter != m_futureScore.end());
-		return iter->second;
+		return *(iter->second);
 	}
 
 public:
@@ -127,9 +127,9 @@ public:
 	//! returns future cost matrix for sentence
 	inline virtual const SquareMatrix &GetFutureScore(const DecodeStep *decodeStep) const
 	{
-		std::map<const DecodeStep*, SquareMatrix>::const_iterator iter = m_futureScore.find(decodeStep);
+		std::map<const DecodeStep*, SquareMatrix*>::const_iterator iter = m_futureScore.find(decodeStep);
 		assert(iter != m_futureScore.end());
-		return iter->second;
+		return *(iter->second);
 	}
 
 	//! list of trans opt for a particular span

@@ -59,6 +59,9 @@ TranslationOptionCollection::~TranslationOptionCollection()
 				RemoveAllInColl(GetTranslationOptionList(decodeStep, startPos, endPos));
 			}
 		}
+
+		// future cost matrix
+		delete m_futureScore[decodeStep];
 	}
 }
 
@@ -226,7 +229,6 @@ void TranslationOptionCollection::CalcFutureScore()
 
   // walk all the translation options and record the cheapest option for each span
 	std::map<const DecodeStep*, TransOptMatrix>::iterator iterMap;
-	const DecodeStep *decodeStep = iterMap->first;
 
 	for (iterMap = m_collection.begin() ; iterMap != m_collection.end() ; ++iterMap)
 	{
@@ -327,24 +329,28 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
 {
 	m_factorCollection = &factorCollection;
 	
-	// create map of matrices for each trans step
 	list < DecodeStep* >::const_iterator iterDecodeStep;
 	for (iterDecodeStep = decodeStepList.begin() ; iterDecodeStep != decodeStepList.end() ; ++iterDecodeStep)
 	{
-	}
+		DecodeStep *decodeStep = *iterDecodeStep;
 
-		/*
+		// create map of matrices for each trans step
+		TransOptMatrix &transOptMatrix = m_collection[decodeStep];
+		
 		// create 2-d vector
-		size_t size = src.GetSize();
+		size_t size = m_source.GetSize();
 		for (size_t startPos = 0 ; startPos < size ; ++startPos)
 		{
-			m_collection.push_back( vector< TranslationOptionList >() );
+			transOptMatrix.push_back( vector< TranslationOptionList >() );
 			for (size_t endPos = startPos ; endPos < size ; ++endPos)
 			{
-				m_collection[startPos].push_back( TranslationOptionList() );
+				transOptMatrix[startPos].push_back( TranslationOptionList() );
 			}
 		}
-		*/
+	
+		// create map of future score matrices
+		m_futureScore[decodeStep] = new SquareMatrix(m_source.GetSize());
+	}
 
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
@@ -445,7 +451,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 void TranslationOptionCollection::Add(const DecodeStep *decodeStep, const TranslationOption *translationOption)
 {
 	const WordsRange &coverage = translationOption->GetSourceWordsRange();
-	m_collection[decodeStep][coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].push_back(translationOption);
+	TransOptMatrix &transOptMatrix = m_collection[decodeStep];
+	transOptMatrix[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].push_back(translationOption);
 }
 
 TO_STRING_BODY(TranslationOptionCollection);
