@@ -129,31 +129,36 @@ void TranslationOptionCollection::Prune()
 * \param factorCollection input sentence with all factors
 */
 
-void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection)
+void TranslationOptionCollection::ProcessUnknownWord(FactorCollection &factorCollection)
 {
-	// TODO - rethink how to do unknown words in async
-	/*
 	size_t size = m_source.GetSize();
-	// try to translate for coverage with no trans by ignoring table limits
-	for (size_t pos = 0 ; pos < size ; ++pos)
+
+	// use just decode step (ie only translation) in m_collection
+	std::map<const DecodeStep*, TransOptMatrix>::iterator iterMap;
+	for (iterMap = m_collection.begin() ; iterMap != m_collection.end() ; ++iterMap)
 	{
-			TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
-			size_t numTransOpt = fullList.size();
-			if (numTransOpt == 0)
-			{
-				CreateTranslationOptionsForRange(decodeStepList, factorCollection
-																			, pos, pos, false);
-			}
+		const DecodeStep *decodeStep = iterMap->first;
+
+		// try to translate for coverage with no trans by ignoring table limits
+		for (size_t pos = 0 ; pos < size ; ++pos)
+		{
+				TranslationOptionList &fullList = GetTranslationOptionList(decodeStep, pos, pos);
+				size_t numTransOpt = fullList.size();
+				if (numTransOpt == 0)
+				{
+					CreateTranslationOptionsForRange(decodeStep, factorCollection
+																				, pos, pos, false);
+				}
+		}
+			
+		// create unknown words for 1 word coverage where we don't have any trans options
+		for (size_t pos = 0 ; pos < size ; ++pos)
+		{
+			TranslationOptionList &fullList = GetTranslationOptionList(decodeStep, pos, pos);
+			if (fullList.size() == 0)
+				ProcessUnknownWord(decodeStep, pos, *m_factorCollection);
+		}
 	}
-		
-	// create unknown words for 1 word coverage where we don't have any trans options
-	for (size_t pos = 0 ; pos < size ; ++pos)
-	{
-		TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
-		if (fullList.size() == 0)
-			ProcessUnknownWord(pos, *m_factorCollection);
-	}
-	*/
 }
 
 /** special handling of ONE unknown words. Either add temporarily add word to translation table,
@@ -368,7 +373,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
 		}
 	}
 
-	ProcessUnknownWord(decodeStepList, factorCollection);
+	ProcessUnknownWord(factorCollection);
 	
 	// Prune
 	Prune();

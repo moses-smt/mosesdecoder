@@ -71,7 +71,7 @@ protected:
 	void CalcFutureScore();
 
 	//! Force a creation of a translation option where there are none for a particular source position.
-	void ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection);
+	void ProcessUnknownWord(FactorCollection &factorCollection);
 	//! special handling of ONE unknown words.
 	virtual void ProcessOneUnknownWord(const DecodeStep *decodeStep, const Word &sourceWord
 																		 , size_t sourcePos, FactorCollection &factorCollection);
