@@ -62,7 +62,6 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
 #  ifdef HAVE_IRSTLM
 #    define LM_IRST 1
-#    undef LM_SRI
 #  endif
 
 #endif
