@@ -23,20 +23,74 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 TO_STRING_BODY(WordsBitmap);
 
-int WordsBitmap::GetFutureCosts(int lastPos) const 
+WordsBitmap::WordsBitmap(const std::list < DecodeStep* > &decodeStepList, size_t size)
+	:m_size	(size)
 {
+	BitmapType::iterator iter;
+	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+	{
+		bool *bitmap = iter->second;
+		bitmap = (bool*) malloc(sizeof(bool) * size);
+	}
+	Initialize();
+}
+
+WordsBitmap::WordsBitmap(const WordsBitmap &copy)
+	:m_size		(copy.m_size)
+{
+	BitmapType::iterator iter;
+	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+	{
+		const DecodeStep *decodeStep =iter->first;
+		bool *bitmap = iter->second;
+		bitmap = (bool*) malloc(sizeof(bool) * m_size);
+		for (size_t pos = 0 ; pos < m_size ; pos++)
+		{
+			bitmap[pos] = copy.GetValue(decodeStep, pos);
+		}
+	}
+}
+
+WordsBitmap::~WordsBitmap()
+{
+	BitmapType::iterator iter;
+	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+	{
+		bool *bitmap = iter->second;
+		free(bitmap);
+	}
+}
+
+void WordsBitmap::Initialize()
+{
+	BitmapType::iterator iter;
+	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+	{
+		bool *bitmap = iter->second;
+		for (size_t pos = 0 ; pos < m_size ; pos++)
+		{
+			bitmap[pos] = false;
+		}
+	}
+}
+
+int WordsBitmap::GetFutureCosts(const DecodeStep *decoderStep, int lastPos) const 
+{
+	bool *bitmap = GetBitmap(decoderStep);
 	int sum=0;
-	bool aim1=0,ai=0,aip1=m_bitmap[0];
+	bool aim1	= 0
+			,ai		= 0
+			,aip1	= bitmap[0];
   
 	for(size_t i=0;i<m_size;++i) {
 		aim1 = ai;
 		ai   = aip1;
-		aip1 = (i+1==m_size || m_bitmap[i+1]);
+		aip1 = (i+1==m_size || bitmap[i+1]);
 
 #ifndef NDEBUG
-		if( i>0 ) assert( aim1==(i==0||m_bitmap[i-1]==1));
+		if( i>0 ) assert( aim1==(i==0||bitmap[i-1]==1));
 		//assert( ai==a[i] );
-		if( i+1<m_size ) assert( aip1==m_bitmap[i+1]);
+		if( i+1<m_size ) assert( aip1==bitmap[i+1]);
 #endif
 		if((i==0||aim1)&&ai==0) {
 			sum+=abs(lastPos-static_cast<int>(i)+1);
@@ -57,12 +111,14 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
 }
 
 
-std::vector<size_t> WordsBitmap::GetCompressedRepresentation() const
+std::vector<size_t> WordsBitmap::GetCompressedRepresentation(const DecodeStep *decoderStep) const
 {
-  std::vector<size_t> res(1 + (m_size >> (sizeof(int) + 3)), 0);
+	bool *bitmap = GetBitmap(decoderStep);
+
+	std::vector<size_t> res(1 + (m_size >> (sizeof(int) + 3)), 0);
   size_t c=0; size_t x=0; size_t ci=0;
   for(size_t i=0;i<m_size;++i) {
-    x |= (size_t)m_bitmap[i];
+    x |= (size_t)bitmap[i];
 		x <<= 1;
 		c++;
 		if (c == sizeof(int)*8) {

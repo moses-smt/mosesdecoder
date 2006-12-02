@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <limits>
+#include <map>
 #include <vector>
 #include <iostream>
 #include <cstring>
@@ -29,66 +30,60 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "WordsRange.h"
 
+class DecodeStep;
+
 /** vector of boolean used to represent whether a word has been translated or not
 */
 class WordsBitmap 
 {
 	friend std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap);
 protected:
+	typedef std::map<const DecodeStep*, bool	*> BitmapType;
 	const size_t m_size; /**< number of words in sentence */
-	bool	*m_bitmap;	/**< ticks of words that have been done */
+	BitmapType m_bitmap;	/**< ticks of words that have been done */
 
 	WordsBitmap(); // not implemented
 
 	//! set all elements to false
-	void Initialize()
+	void Initialize();
+
+	bool *GetBitmap(const DecodeStep *decoderStep) const
 	{
-		for (size_t pos = 0 ; pos < m_size ; pos++)
-		{
-			m_bitmap[pos] = false;
-		}
+		BitmapType::const_iterator iter = m_bitmap.find(decoderStep);
+		assert(iter != m_bitmap.end());
+		bool *bitmap = iter->second;
+		return bitmap;
 	}
 
 public:
 	//! create WordsBitmap of length size and initialise
-	WordsBitmap(size_t size)
-		:m_size	(size)
-	{
-		m_bitmap = (bool*) malloc(sizeof(bool) * size);
-		Initialize();
-	}
+	WordsBitmap(const std::list < DecodeStep* > &decodeStepList, size_t size);
+
 	//! deep copy
-	WordsBitmap(const WordsBitmap &copy)
-		:m_size		(copy.m_size)
-	{
-		m_bitmap = (bool*) malloc(sizeof(bool) * m_size);
-		for (size_t pos = 0 ; pos < m_size ; pos++)
-		{
-			m_bitmap[pos] = copy.GetValue(pos);
-		}
-	}
-	~WordsBitmap()
-	{
-		free(m_bitmap);
-	}
+	WordsBitmap(const WordsBitmap &copy);
+
+	~WordsBitmap();
+
 	//! count of words translated
-	size_t GetNumWordsCovered() const
+	size_t GetNumWordsCovered(const DecodeStep *decoderStep) const
 	{
+		bool *bitmap = GetBitmap(decoderStep);
 		size_t count = 0;
 		for (size_t pos = 0 ; pos < m_size ; pos++)
 		{
-			if (m_bitmap[pos])
+			if (bitmap[pos])
 				count++;
 		}
 		return count;
 	}
 
 	//! position of 1st word not yet translated, or NOT_FOUND if everything already translated
-	size_t GetFirstGapPos() const
+	size_t GetFirstGapPos(const DecodeStep *decoderStep) const
 	{
+		bool *bitmap = GetBitmap(decoderStep);
 		for (size_t pos = 0 ; pos < m_size ; pos++)
 		{
-			if (!m_bitmap[pos])
+			if (!bitmap[pos])
 			{
 				return pos;
 			}
@@ -98,11 +93,12 @@ public:
 	}
 
 	//! position of last translated word
-	size_t GetLastPos() const
+	size_t GetLastPos(const DecodeStep *decoderStep) const
 	{
+		bool *bitmap = GetBitmap(decoderStep);
 		for (int pos = (int) m_size - 1 ; pos >= 0 ; pos--)
 		{
-			if (m_bitmap[pos])
+			if (bitmap[pos])
 			{
 				return pos;
 			}
@@ -112,34 +108,39 @@ public:
 	}
 
 	//! whether a word has been translated at a particular position
-	bool GetValue(size_t pos) const
+	bool GetValue(const DecodeStep *decoderStep, size_t pos) const
 	{
-		return m_bitmap[pos];
+		bool *bitmap = GetBitmap(decoderStep);
+		return bitmap[pos];
 	}
 	//! set value at a particular position
-	void SetValue( size_t pos, bool value )
+	void SetValue(const DecodeStep *decoderStep, size_t pos, bool value )
 	{
-		m_bitmap[pos] = value;
+		bool *bitmap = GetBitmap(decoderStep);
+		bitmap[pos] = value;
 	}
 	//! set value between 2 positions, inclusive
-	void SetValue( size_t startPos, size_t endPos, bool value )
+	void SetValue(const DecodeStep *decoderStep, size_t startPos, size_t endPos, bool value )
 	{
+		bool *bitmap = GetBitmap(decoderStep);
 		for(size_t pos = startPos ; pos <= endPos ; pos++) 
 		{
-			m_bitmap[pos] = value;
+			bitmap[pos] = value;
 		}
 	}
 	//! whether every word has been translated
-	bool IsComplete() const
+	bool IsComplete(const DecodeStep *decoderStep) const
 	{
-		return GetSize() == GetNumWordsCovered();
+		return GetSize() == GetNumWordsCovered(decoderStep);
 	}
 	//! whether the wordrange overlaps with any translated word in this bitmap
-	bool Overlap(const WordsRange &compare) const
+	bool Overlap(const DecodeStep *decoderStep, const WordsRange &compare) const
 	{
+		bool *bitmap = GetBitmap(decoderStep);
+
 		for (size_t pos = compare.GetStartPos() ; pos <= compare.GetEndPos() ; pos++)
 		{
-			if (m_bitmap[pos])
+			if (bitmap[pos])
 				return true;
 		}
 		return false;
@@ -152,7 +153,7 @@ public:
 	/** represent this bitmap as 1 or more vector of integers.
 		* Used for exact matching of source words translated in hypothesis recombination
 		*/
-	std::vector<size_t> GetCompressedRepresentation() const;
+	std::vector<size_t> GetCompressedRepresentation(const DecodeStep *decoderStep) const;
 	
 	//! transitive comparison of WordsBitmap
 	inline int Compare (const WordsBitmap &compare) const
@@ -169,11 +170,23 @@ public:
 			return (thisSize < compareSize) ? -1 : 1;
 		}
 
-    return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
+		BitmapType::const_iterator iter;
+		for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+		{
+			const DecodeStep *decodeStep =iter->first;
+			const bool *bitmap				= iter->second
+								,*compareBitmap	= compare.GetBitmap(decodeStep);
+
+	    int ret = std::memcmp(bitmap, compareBitmap, thisSize);
+			if (ret != 0)
+				return ret>0 ? 1 : -1;
+		}
+
+		return 0;
 	}
 
 	//! TODO - ??? no idea
-	int GetFutureCosts(int lastPos) const ;
+	int GetFutureCosts(const DecodeStep *decoderStep, int lastPos) const ;
 
 	TO_STRING();
 };
@@ -181,9 +194,14 @@ public:
 // friend 
 inline std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap)
 {
-	for (size_t i = 0 ; i < wordsBitmap.m_size ; i++)
+	WordsBitmap::BitmapType::const_iterator iter;
+	for (iter = wordsBitmap.m_bitmap.begin() ; iter != wordsBitmap.m_bitmap.end() ; ++iter)
 	{
-		out << (wordsBitmap.GetValue(i) ? 1 : 0);
+		const DecodeStep *decodeStep =iter->first;
+		for (size_t i = 0 ; i < wordsBitmap.m_size ; i++)
+		{
+			out << (wordsBitmap.GetValue(decodeStep, i) ? 1 : 0);
+		}
 	}
 	return out;
 }
