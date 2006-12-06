@@ -184,7 +184,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\FactorTypeSet.cpp"
+				RelativePath=".\src\FactorMask.cpp"
 				>
 			</File>
 			<File
@@ -476,7 +476,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\FactorTypeSet.h"
+				RelativePath=".\src\FactorMask.h"
 				>
 			</File>
 			<File
