@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+class DecodeStep;
+
 /***
  * Efficient version of WordsBitmap for contiguous ranges
  */
@@ -32,11 +34,17 @@ class WordsRange
 {
 	friend std::ostream& operator << (std::ostream& out, const WordsRange& range);
 
+	const DecodeStep *m_decodeStep;
 	size_t m_startPos, m_endPos;
 public:
-	inline WordsRange(size_t startPos, size_t endPos) : m_startPos(startPos), m_endPos(endPos) {}
+	inline WordsRange(const DecodeStep *decodeStep, size_t startPos, size_t endPos) 
+	: m_decodeStep(decodeStep)
+	, m_startPos(startPos)
+	, m_endPos(endPos) 
+	{}
 	inline WordsRange(const WordsRange &copy)
-	 : m_startPos(copy.GetStartPos())
+	 : m_decodeStep(copy.m_decodeStep)
+	 , m_startPos(copy.GetStartPos())
 	 , m_endPos(copy.GetEndPos())
 	 {}
 	
@@ -47,6 +55,10 @@ public:
 	inline size_t GetEndPos() const
 	{
 		return m_endPos;
+	}
+	inline const DecodeStep *GetDecodeStep() const
+	{
+		return m_decodeStep;
 	}
 
 	//! distortion cost when phrase is moved from prevRange to this range

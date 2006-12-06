@@ -62,7 +62,7 @@ protected:
 	float								m_totalScore; /*< weighted translation costs of this translation option */
 	float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 	float               m_partialScore; /*< estimate of the partial cost of a preliminary translation option */
-
+	
 	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
 	//! for example, know the full n-gram score since the length of the
 	//! TargetPhrase may be shorter than the n-gram order.  But, if it is
@@ -139,6 +139,11 @@ public:
 	inline const ScoreComponentCollection &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
+	}
+
+	const DecodeStep *GetDecodeStep() const
+	{
+		return m_sourceWordsRange.GetDecodeStep();
 	}
 
 	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */

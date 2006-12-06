@@ -19,13 +19,17 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <algorithm>
 #include "WordsBitmap.h"
+#include "StaticData.h"
 
 TO_STRING_BODY(WordsBitmap);
 
-WordsBitmap::WordsBitmap(const std::list < DecodeStep* > &decodeStepList, size_t size)
+WordsBitmap::WordsBitmap(size_t size)
 	:m_size	(size)
 {
+	const std::list < DecodeStep* > &decodeStepList = StaticData::Instance()->GetDecodeStepList();
+
 	BitmapType::iterator iter;
 	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
 	{
@@ -74,9 +78,9 @@ void WordsBitmap::Initialize()
 	}
 }
 
-int WordsBitmap::GetFutureCosts(const DecodeStep *decoderStep, int lastPos) const 
+int WordsBitmap::GetFutureCosts(const DecodeStep *decodeStep, int lastPos) const 
 {
-	bool *bitmap = GetBitmap(decoderStep);
+	bool *bitmap = GetBitmap(decodeStep);
 	int sum=0;
 	bool aim1	= 0
 			,ai		= 0
@@ -110,10 +114,22 @@ int WordsBitmap::GetFutureCosts(const DecodeStep *decoderStep, int lastPos) cons
 	return sum;
 }
 
-
-std::vector<size_t> WordsBitmap::GetCompressedRepresentation(const DecodeStep *decoderStep) const
+std::vector<size_t> WordsBitmap::GetCompressedRepresentation() const
 {
-	bool *bitmap = GetBitmap(decoderStep);
+	std::vector<size_t> ret;
+	BitmapType::const_iterator iterMap;
+	for (iterMap = m_bitmap.begin() ; iterMap != m_bitmap.end() ; ++iterMap)
+	{
+		const DecodeStep *decodeStep = iterMap->first;
+		std::vector<size_t> compressedRep = GetCompressedRepresentation(decodeStep);
+		std::copy(compressedRep.begin(), compressedRep.end() , std::inserter(ret, ret.end()) );
+	}
+	return ret;
+}
+
+std::vector<size_t> WordsBitmap::GetCompressedRepresentation(const DecodeStep *decodeStep) const
+{
+	bool *bitmap = GetBitmap(decodeStep);
 
 	std::vector<size_t> res(1 + (m_size >> (sizeof(int) + 3)), 0);
   size_t c=0; size_t x=0; size_t ci=0;

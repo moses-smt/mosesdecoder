@@ -47,9 +47,9 @@ protected:
 	//! set all elements to false
 	void Initialize();
 
-	bool *GetBitmap(const DecodeStep *decoderStep) const
+	bool *GetBitmap(const DecodeStep *decodeStep) const
 	{
-		BitmapType::const_iterator iter = m_bitmap.find(decoderStep);
+		BitmapType::const_iterator iter = m_bitmap.find(decodeStep);
 		assert(iter != m_bitmap.end());
 		bool *bitmap = iter->second;
 		return bitmap;
@@ -57,7 +57,7 @@ protected:
 
 public:
 	//! create WordsBitmap of length size and initialise
-	WordsBitmap(const std::list < DecodeStep* > &decodeStepList, size_t size);
+	WordsBitmap(size_t size);
 
 	//! deep copy
 	WordsBitmap(const WordsBitmap &copy);
@@ -65,9 +65,9 @@ public:
 	~WordsBitmap();
 
 	//! count of words translated
-	size_t GetNumWordsCovered(const DecodeStep *decoderStep) const
+	size_t GetNumWordsCovered(const DecodeStep *decodeStep) const
 	{
-		bool *bitmap = GetBitmap(decoderStep);
+		bool *bitmap = GetBitmap(decodeStep);
 		size_t count = 0;
 		for (size_t pos = 0 ; pos < m_size ; pos++)
 		{
@@ -78,9 +78,9 @@ public:
 	}
 
 	//! position of 1st word not yet translated, or NOT_FOUND if everything already translated
-	size_t GetFirstGapPos(const DecodeStep *decoderStep) const
+	size_t GetFirstGapPos(const DecodeStep *decodeStep) const
 	{
-		bool *bitmap = GetBitmap(decoderStep);
+		bool *bitmap = GetBitmap(decodeStep);
 		for (size_t pos = 0 ; pos < m_size ; pos++)
 		{
 			if (!bitmap[pos])
@@ -93,9 +93,9 @@ public:
 	}
 
 	//! position of last translated word
-	size_t GetLastPos(const DecodeStep *decoderStep) const
+	size_t GetLastPos(const DecodeStep *decodeStep) const
 	{
-		bool *bitmap = GetBitmap(decoderStep);
+		bool *bitmap = GetBitmap(decodeStep);
 		for (int pos = (int) m_size - 1 ; pos >= 0 ; pos--)
 		{
 			if (bitmap[pos])
@@ -108,35 +108,36 @@ public:
 	}
 
 	//! whether a word has been translated at a particular position
-	bool GetValue(const DecodeStep *decoderStep, size_t pos) const
+	bool GetValue(const DecodeStep *decodeStep, size_t pos) const
 	{
-		bool *bitmap = GetBitmap(decoderStep);
+		bool *bitmap = GetBitmap(decodeStep);
 		return bitmap[pos];
 	}
 	//! set value at a particular position
-	void SetValue(const DecodeStep *decoderStep, size_t pos, bool value )
+	void SetValue(const DecodeStep *decodeStep, size_t pos, bool value )
 	{
-		bool *bitmap = GetBitmap(decoderStep);
+		bool *bitmap = GetBitmap(decodeStep);
 		bitmap[pos] = value;
 	}
 	//! set value between 2 positions, inclusive
-	void SetValue(const DecodeStep *decoderStep, size_t startPos, size_t endPos, bool value )
+	void SetValue(const DecodeStep *decodeStep, size_t startPos, size_t endPos, bool value )
 	{
-		bool *bitmap = GetBitmap(decoderStep);
+		bool *bitmap = GetBitmap(decodeStep);
 		for(size_t pos = startPos ; pos <= endPos ; pos++) 
 		{
 			bitmap[pos] = value;
 		}
 	}
 	//! whether every word has been translated
-	bool IsComplete(const DecodeStep *decoderStep) const
+	bool IsComplete(const DecodeStep *decodeStep) const
 	{
-		return GetSize() == GetNumWordsCovered(decoderStep);
+		return GetSize() == GetNumWordsCovered(decodeStep);
 	}
 	//! whether the wordrange overlaps with any translated word in this bitmap
-	bool Overlap(const DecodeStep *decoderStep, const WordsRange &compare) const
+	bool Overlap(const WordsRange &compare) const
 	{
-		bool *bitmap = GetBitmap(decoderStep);
+		const DecodeStep *decodeStep = compare.GetDecodeStep();
+		bool *bitmap = GetBitmap(decodeStep);
 
 		for (size_t pos = compare.GetStartPos() ; pos <= compare.GetEndPos() ; pos++)
 		{
@@ -153,7 +154,11 @@ public:
 	/** represent this bitmap as 1 or more vector of integers.
 		* Used for exact matching of source words translated in hypothesis recombination
 		*/
-	std::vector<size_t> GetCompressedRepresentation(const DecodeStep *decoderStep) const;
+	std::vector<size_t> GetCompressedRepresentation() const;
+	/** represent this bitmap as 1 or more vector of integers.
+		* Used for exact matching of source words translated in hypothesis recombination
+		*/
+	std::vector<size_t> GetCompressedRepresentation(const DecodeStep *decodeStep) const;
 	
 	//! transitive comparison of WordsBitmap
 	inline int Compare (const WordsBitmap &compare) const
@@ -186,7 +191,7 @@ public:
 	}
 
 	//! TODO - ??? no idea
-	int GetFutureCosts(const DecodeStep *decoderStep, int lastPos) const ;
+	int GetFutureCosts(const DecodeStep *decodeStep, int lastPos) const ;
 
 	TO_STRING();
 };

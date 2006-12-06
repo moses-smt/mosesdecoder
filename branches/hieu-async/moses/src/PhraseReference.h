@@ -31,7 +31,7 @@ class PhraseReference
 {
 	public:
 	
-		PhraseReference() : fullPhrase(NULL), range(0, 0) {}
+		PhraseReference() : fullPhrase(NULL), range(NULL, 0, 0) {}
 		PhraseReference(const InputType& phrase, const WordsRange& r) : fullPhrase(&phrase), range(r) {}
 		
 		const InputType& GetFullPhrase() const {return *fullPhrase;}

@@ -211,12 +211,12 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const DecodeStep *decode
 	
 			targetPhrase.SetScore();
 			
-			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
+			transOpt = new TranslationOption(WordsRange(decodeStep, sourcePos, sourcePos), targetPhrase, 0);
 		}
 		else 
 		{ // drop source word. create blank trans opt
 			const TargetPhrase targetPhrase(Output);
-			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
+			transOpt = new TranslationOption(WordsRange(decodeStep, sourcePos, sourcePos), targetPhrase, 0);
 		}
 
 		transOpt->CalcScore();

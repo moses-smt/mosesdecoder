@@ -46,8 +46,8 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_sourcePhrase(0)
 	, m_sourceCompleted(source.GetSize())
 	, m_sourceInput(source)
-	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
-	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
+	, m_currSourceWordsRange(NULL, NOT_FOUND, NOT_FOUND)
+	, m_currTargetWordsRange(NULL, NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
 	, m_languageModelStates(StaticData::Instance()->GetLMSize(), LanguageModelSingleFactor::UnknownState)
 	, m_arcList(NULL)
@@ -70,7 +70,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_sourceInput						(prevHypo.m_sourceInput)
 	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
-	, m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
+	, m_currTargetWordsRange	(transOpt.GetDecodeStep(), prevHypo.m_currTargetWordsRange.GetEndPos() + 1
 														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
 	, m_wordDeleted(false)
 	,	m_totalScore(0.0f)
@@ -81,6 +81,8 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_id(s_HypothesesCreated++)
 	, m_lmstats(NULL)
 {
+	const DecodeStep &decodeStep = transOpt.GetDecodeStep();
+
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
 	assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));	

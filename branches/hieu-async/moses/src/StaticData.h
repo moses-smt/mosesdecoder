@@ -154,7 +154,7 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	std::list < DecodeStep* > &GetDecodeStepList()
+	const std::list < DecodeStep* > &GetDecodeStepList() const
 	{
 		return m_decodeStepList;
 	}
