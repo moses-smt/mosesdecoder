@@ -41,12 +41,12 @@ using namespace std;
 
 Manager::Manager(InputType const& source, StaticData &staticData)
 :m_source(source)
-,m_hypoStack(source.GetSize() + 1)
+,m_hypoStack(source.GetSize())
 ,m_staticData(staticData)
 ,m_possibleTranslations(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 {
-	std::vector < HypothesisCollection >::iterator iterStack;
+	HypothesisStack::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
 		HypothesisCollection &sourceHypoColl = *iterStack;
@@ -79,7 +79,7 @@ void Manager::ProcessSentence()
 	// initial seed hypothesis: nothing translated, no words produced
 	{
 		Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
-		m_hypoStack[0].AddPrune(hypo);
+		m_hypoStack.GetStack(0).AddPrune(hypo);
 	}
 	
 	// go through each stack
@@ -265,7 +265,7 @@ void Manager::OutputHypoStack(int stack)
 {
 	if (stack >= 0)
 	{
-		TRACE_ERR( "Stack " << stack << ": " << endl << m_hypoStack[stack] << endl);
+		TRACE_ERR( "Stack " << stack << ": " << endl << m_hypoStack.GetStack(stack) << endl);
 	}
 	else
 	{ // all stacks

@@ -226,6 +226,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\HypothesisStack.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\InputFileStream.cpp"
 				>
 			</File>
@@ -531,6 +535,10 @@
 			</File>
 			<File
 				RelativePath=".\src\HypothesisCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\HypothesisStack.h"
 				>
 			</File>
 			<File
