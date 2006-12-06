@@ -1,5 +1,5 @@
 // $Id$
-  
+ 
 #ifndef CONFUSIONNET_H_
 #define CONFUSIONNET_H_
 #include <vector>
