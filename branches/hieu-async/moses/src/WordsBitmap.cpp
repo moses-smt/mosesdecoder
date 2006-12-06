@@ -79,6 +79,19 @@ void WordsBitmap::Initialize()
 	}
 }
 
+
+int WordsBitmap::GetFutureCosts(int lastPos) const 
+{
+	int ret = 0;
+	BitmapType::const_iterator iterMap;
+	for (iterMap = m_bitmap.begin() ; iterMap != m_bitmap.end() ; ++iterMap)
+	{
+		const DecodeStep *decodeStep = iterMap->first;
+		ret += GetFutureCosts(decodeStep, lastPos);
+	}
+	return ret;
+}
+
 int WordsBitmap::GetFutureCosts(const DecodeStep *decodeStep, int lastPos) const 
 {
 	bool *bitmap = GetBitmap(decodeStep);

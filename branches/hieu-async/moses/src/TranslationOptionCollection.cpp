@@ -38,7 +38,8 @@ using namespace std;
 */
 TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage)
 	: m_source(src)
-	,m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
+	, m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
+	, m_futureScore(src.GetSize())
 {
 }
 
@@ -59,9 +60,6 @@ TranslationOptionCollection::~TranslationOptionCollection()
 				RemoveAllInColl(GetTranslationOptionList(decodeStep, startPos, endPos));
 			}
 		}
-
-		// future cost matrix
-		delete m_futureScore[decodeStep];
 	}
 }
 
@@ -238,10 +236,7 @@ void TranslationOptionCollection::CalcFutureScore()
 	for (iterMap = m_collection.begin() ; iterMap != m_collection.end() ; ++iterMap)
 	{
 		const DecodeStep *decodeStep = iterMap->first;
-		SquareMatrix &squareMatrix = GetFutureScore(decodeStep);
-		squareMatrix.ResetScore(-numeric_limits<float>::infinity());
-		//m_futureScore.ResetScore(0);
-
+		
 		for (size_t startPos = 0 ; startPos < m_source.GetSize() ; ++startPos)
 		{
 			for (size_t endPos = startPos ; endPos < m_source.GetSize() ; ++endPos)
@@ -253,8 +248,8 @@ void TranslationOptionCollection::CalcFutureScore()
 				{
 					const TranslationOption &transOpt = **iterTransOpt;
 					float score = transOpt.GetFutureScore();
-					if (score > squareMatrix.GetScore(startPos, endPos))
-						squareMatrix.SetScore(startPos, endPos, score);
+					if (score > m_futureScore.GetScore(decodeStep, startPos, endPos))
+						m_futureScore.SetScore(decodeStep, startPos, endPos, score);
 				}
 			}
 		}
@@ -269,7 +264,6 @@ void TranslationOptionCollection::CalcFutureScore()
 	for (iterMap = m_collection.begin() ; iterMap != m_collection.end() ; ++iterMap)
 	{
 		const DecodeStep *decodeStep = iterMap->first;
-		SquareMatrix &squareMatrix = GetFutureScore(decodeStep);
 
 		for(size_t colstart = 1; colstart < size ; colstart++) 
 		{
@@ -278,14 +272,14 @@ void TranslationOptionCollection::CalcFutureScore()
 				size_t startPos = diagshift;
 				size_t endPos = colstart+diagshift;
 				for(size_t joinAt = startPos; joinAt < endPos ; joinAt++)  {
-					float joinedScore = squareMatrix.GetScore(startPos, joinAt)
-														+ squareMatrix.GetScore(joinAt+1, endPos);
+					float joinedScore = m_futureScore.GetScore(decodeStep, startPos, joinAt)
+														+ m_futureScore.GetScore(decodeStep, joinAt+1, endPos);
 					/* // uncomment to see the cell filling scheme
 					TRACE_ERR( "[" <<startPos<<","<<endPos<<"] <-? ["<<startPos<<","<<joinAt<<"]+["<<joinAt+1<<","<<endPos
 						<< "] (colstart: "<<colstart<<", diagshift: "<<diagshift<<")"<<endl);
 					*/
-					if (joinedScore > squareMatrix.GetScore(startPos, endPos))
-						squareMatrix.SetScore(startPos, endPos, joinedScore);
+					if (joinedScore > m_futureScore.GetScore(decodeStep, startPos, endPos))
+						m_futureScore.SetScore(decodeStep, startPos, endPos, joinedScore);
 				}
 			}
 		}
@@ -296,7 +290,6 @@ void TranslationOptionCollection::CalcFutureScore()
 		for (iterMap = m_collection.begin() ; iterMap != m_collection.end() ; ++iterMap)
 		{
 			const DecodeStep *decodeStep = iterMap->first;
-			SquareMatrix &squareMatrix = GetFutureScore(decodeStep);
 
 			size_t total = 0;
 			for(size_t row=0; row<size; row++)
@@ -315,7 +308,7 @@ void TranslationOptionCollection::CalcFutureScore()
 			for(size_t row=0; row<size; row++)
 			{
 				for(size_t col=row; col<size; col++)
-					TRACE_ERR( "future cost from "<< row <<" to "<< col <<" is "<< squareMatrix.GetScore(row, col) <<endl);
+					TRACE_ERR( "future cost from "<< row <<" to "<< col <<" is "<< m_futureScore.GetScore(decodeStep, row, col) <<endl);
 			}
 		}
 	}
@@ -356,7 +349,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
 			}
 		
 			// create map of future score matrices
-			m_futureScore[decodeStep] = new SquareMatrix(m_source.GetSize());
+			m_futureScore.AddDecodeStep(decodeStep);
 
 			// loop over all substrings of the source sentence, look them up
 			// in the phraseDictionary (which is the- possibly filtered-- phrase

@@ -28,12 +28,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DummyScoreProducers.h"
 #include "Hypothesis.h"
 #include "Util.h"
-#include "SquareMatrix.h"
 #include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
 #include "LMList.h"
 #include "hash.h"
+#include "FutureScore.h"
 
 using namespace std;
 
@@ -317,7 +317,7 @@ void Hypothesis::ResetScore()
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &futureScore) 
+void Hypothesis::CalcScore(const StaticData& staticData, const FutureScore &futureScore) 
 {
 	// DISTORTION COST
 	CalcDistortionScore();
@@ -343,29 +343,10 @@ void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &fut
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
 }
 
-void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
+void Hypothesis::CalcFutureScore(const FutureScore &futureScore)
 {
-	const size_t maxSize= numeric_limits<size_t>::max();
-	size_t	start				= maxSize;
-	m_futureScore	= 0.0f;
-	for(size_t currPos = 0 ; currPos < m_sourceCompleted.GetSize() ; currPos++) 
-	{
-		if(m_sourceCompleted.GetValue(currPos) == 0 && start == maxSize)
-		{
-			start = currPos;
-		}
-		if(m_sourceCompleted.GetValue(currPos) == 1 && start != maxSize) 
-		{
-//			m_score[ScoreType::FutureScoreEnum] += futureScore[start][currPos - 1];
-			m_futureScore += futureScore.GetScore(start, currPos - 1);
-			start = maxSize;
-		}
-	}
-	if (start != maxSize)
-	{
-//		m_score[ScoreType::FutureScoreEnum] += futureScore[start][m_sourceCompleted.GetSize() - 1];
-		m_futureScore += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
-	}
+	// future cost of untranslated parts of source sentence
+	m_futureScore = futureScore.GetFutureScore(m_sourceCompleted);
 
 	// add future costs for distortion model
 	if(StaticData::Instance()->UseDistortionFutureCosts())
@@ -393,7 +374,7 @@ void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistorti
     TRACE_ERR( "... ");
   }
   if (end>=0) {
-    WordsRange range(start, end);
+    WordsRange range(NULL, start, end); // TODO - hack. 
     TRACE_ERR( m_prevHypo->m_targetPhrase.GetSubString(range) << " ");
   }
   TRACE_ERR( ")"<<endl);

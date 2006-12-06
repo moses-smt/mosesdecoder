@@ -38,7 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ObjectPool.h"
 
 class SquareMatrix;
-class StaticData;
+class FutureScore;
 class TranslationOption;
 class WordsRange;
 class Hypothesis;
@@ -81,7 +81,7 @@ protected:
 	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 
-	void CalcFutureScore(const SquareMatrix &futureScore);
+	void CalcFutureScore(const FutureScore &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
 	void CalcLMScore(const LMList &languageModels);
 	void CalcDistortionScore();
@@ -140,7 +140,7 @@ public:
 
 	void ResetScore();
 
-	void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore);
+	void CalcScore(const StaticData& staticData, const FutureScore &futureScore);
 
 	int GetId()const
 	{

@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisCollection.h"
 #include "TranslationOptionCollection.h"
 #include "LatticePathList.h"
-#include "SquareMatrix.h"
 #include "WordsBitmap.h"
 
 class LatticePath;

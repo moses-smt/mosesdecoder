@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <list>
 #include "TypeDef.h"
 #include "TranslationOption.h"
-#include "SquareMatrix.h"
+#include "FutureScore.h"
 #include "WordsBitmap.h"
 #include "PartialTranslOptColl.h"
 #include "DecodeStep.h"
@@ -62,7 +62,7 @@ class TranslationOptionCollection
 protected:
 	InputType const			&m_source; /*< reference to the input */
 	std::map<const DecodeStep*, TransOptMatrix>	m_collection; /*< contains translation options */
-	std::map<const DecodeStep*, SquareMatrix*>	m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
+	FutureScore	m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
 	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase???) */
 	FactorCollection		*m_factorCollection;
 	
@@ -97,14 +97,6 @@ protected:
 	virtual void ProcessUnknownWord(const DecodeStep *decodeStep, size_t sourcePos
 																	, FactorCollection &factorCollection)=0;
 
-	//! returns future cost matrix for sentence
-	inline virtual SquareMatrix &GetFutureScore(const DecodeStep *decodeStep)
-	{
-		std::map<const DecodeStep*, SquareMatrix*>::iterator iter = m_futureScore.find(decodeStep);
-		assert(iter != m_futureScore.end());
-		return *(iter->second);
-	}
-
 public:
   virtual ~TranslationOptionCollection();
 
@@ -123,14 +115,6 @@ public:
 																			, size_t startPosition
 																			, size_t endPosition
 																			, bool adhereTableLimit);
-
-	//! returns future cost matrix for sentence
-	inline virtual const SquareMatrix &GetFutureScore(const DecodeStep *decodeStep) const
-	{
-		std::map<const DecodeStep*, SquareMatrix*>::const_iterator iter = m_futureScore.find(decodeStep);
-		assert(iter != m_futureScore.end());
-		return *(iter->second);
-	}
 
 	//! list of trans opt for a particular span
 	const TranslationOptionList &GetTranslationOptionList(const DecodeStep *decodeStep, const WordsRange &coverage) const

@@ -55,6 +55,9 @@ protected:
 		return bitmap;
 	}
 
+	//! TODO - ??? no idea
+	int GetFutureCosts(const DecodeStep *decodeStep, int lastPos) const ;
+
 public:
 	//! create WordsBitmap of length size and initialise
 	WordsBitmap(size_t size);
@@ -194,7 +197,7 @@ public:
 	}
 
 	//! TODO - ??? no idea
-	int GetFutureCosts(const DecodeStep *decodeStep, int lastPos) const ;
+	int GetFutureCosts(int lastPos) const ;
 
 	TO_STRING();
 };
