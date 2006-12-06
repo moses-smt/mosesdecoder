@@ -128,6 +128,9 @@ public:
 			bitmap[pos] = value;
 		}
 	}
+	//! whether every word has been translated for a particular factor type
+	bool IsComplete(FactorType factorType) const;
+
 	//! whether every word has been translated
 	bool IsComplete(const DecodeStep *decodeStep) const
 	{

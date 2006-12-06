@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include "WordsBitmap.h"
 #include "StaticData.h"
+#include "DecodeStep.h"
 
 TO_STRING_BODY(WordsBitmap);
 
@@ -144,3 +145,17 @@ std::vector<size_t> WordsBitmap::GetCompressedRepresentation(const DecodeStep *d
   return res;
 }
 
+bool WordsBitmap::IsComplete(FactorType factorType) const
+{
+	BitmapType::const_iterator iter;
+	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+	{
+		const DecodeStep *decodeStep = iter->first;
+		const FactorMask &outputFactorMask = decodeStep->GetOutputFactorMask();
+		if (outputFactorMask[factorType] && IsComplete(decodeStep))
+		{
+			return true;
+		}
+	}
+	return false;
+}

@@ -81,14 +81,14 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_id(s_HypothesesCreated++)
 	, m_lmstats(NULL)
 {
-	const DecodeStep &decodeStep = transOpt.GetDecodeStep();
+	const DecodeStep *decodeStep = transOpt.GetDecodeStep();
 
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
 	assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));	
 
 	//_hash_computed = false;
-  m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
+	m_sourceCompleted.SetValue(transOpt.GetDecodeStep(), m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
 	m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
 }
@@ -260,7 +260,10 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 			}
 
 			// end of sentence
-			if (m_sourceCompleted.IsComplete())
+			if ( (languageModel.GetLMType() == SingleFactor 
+						&& m_sourceCompleted.IsComplete(static_cast<const LanguageModelSingleFactor&>(languageModel).GetFactorType()))
+						|| (languageModel.GetLMType() == MultiFactor && true ) // TODO test when multi factor LM
+					)
 			{
 				const size_t size = GetSize();
 				contextFactor.back() = &languageModel.GetSentenceEndArray();

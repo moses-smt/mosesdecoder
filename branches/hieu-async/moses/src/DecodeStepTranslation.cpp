@@ -57,7 +57,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(const InputType &source
 	const PhraseDictionary &phraseDictionary = GetPhraseDictionary();
 	const size_t tableLimit = phraseDictionary.GetTableLimit();
 
-	const WordsRange wordsRange(startPos, endPos);
+	const WordsRange wordsRange(this, startPos, endPos);
 	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(source,wordsRange); 
 
 	if (phraseColl != NULL)

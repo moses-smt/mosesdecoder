@@ -41,7 +41,6 @@ public:
 	//! copy constructor
 	FactorMask(const std::bitset<MAX_NUM_FACTORS>& rhs) : std::bitset<MAX_NUM_FACTORS>(rhs) { }
 
-
 	TO_STRING();
 };
 
