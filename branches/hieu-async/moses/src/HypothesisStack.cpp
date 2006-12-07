@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 HypothesisStack::iterator::iterator(size_t pos, StackType &stack)
 {
 	m_pos = pos;
-	*m_stack = stack;
+	m_stack = &stack;
 }
 
 bool HypothesisStack::iterator::operator!=(const iterator &compare) const
