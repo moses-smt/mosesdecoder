@@ -83,7 +83,7 @@ void Manager::ProcessSentence()
 	}
 	
 	// go through each stack
-	std::vector < HypothesisCollection >::iterator iterStack;
+	HypothesisStack::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
 		HypothesisCollection &sourceHypoColl = *iterStack;
@@ -248,11 +248,11 @@ const Hypothesis *Manager::GetBestHypothesis() const
  */
 void Manager::OutputHypoStackSize()
 {
-	std::vector < HypothesisCollection >::const_iterator iterStack = m_hypoStack.begin();
-	TRACE_ERR( "Stack sizes: " << (int)iterStack->size());
+	HypothesisStack::iterator iterStack = m_hypoStack.begin();
+	TRACE_ERR( "Stack sizes: " << (*iterStack).size());
 	for (++iterStack; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
-		TRACE_ERR( ", " << (int)iterStack->size());
+		TRACE_ERR( ", " << (*iterStack).size());
 	}
 	TRACE_ERR( endl);
 }
@@ -270,7 +270,7 @@ void Manager::OutputHypoStack(int stack)
 	else
 	{ // all stacks
 		int i = 0;
-		vector < HypothesisCollection >::iterator iterStack;
+		HypothesisStack::iterator iterStack;
 		for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 		{
 			HypothesisCollection &hypoColl = *iterStack;
