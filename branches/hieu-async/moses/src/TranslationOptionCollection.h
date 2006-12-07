@@ -117,9 +117,16 @@ public:
 																			, bool adhereTableLimit);
 
 	//! list of trans opt for a particular span
-	const TranslationOptionList &GetTranslationOptionList(const DecodeStep *decodeStep, const WordsRange &coverage) const
+	const TranslationOptionList &GetTranslationOptionList(const WordsRange &coverage) const
 	{
+		const DecodeStep *decodeStep = coverage.GetDecodeStep();
 		return GetTranslationOptionList(decodeStep, coverage.GetStartPos(), coverage.GetEndPos());
+	}
+
+	//! score for untranslated parts of the sentence
+	const FutureScore &GetFutureScoreObject() const
+	{
+		return m_futureScore;
 	}
 
 	TO_STRING();		

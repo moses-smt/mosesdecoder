@@ -42,10 +42,14 @@ public:
 		:m_stack(sourceSize+1)
 	{}
 
+	//! get a particular stack
 	HypothesisCollection &GetStack(size_t pos)
 	{
 		return m_stack[pos];
 	}
+
+	//! add hypo to appropriate stack
+	void AddPrune(Hypothesis *hypo);
 
 	// iter class
 	class iterator

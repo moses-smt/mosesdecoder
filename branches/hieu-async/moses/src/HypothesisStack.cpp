@@ -33,3 +33,17 @@ bool HypothesisStack::iterator::operator!=(const iterator &compare) const
 	return this->m_pos != compare.m_pos;
 }
 
+void HypothesisStack::AddPrune(Hypothesis *hypo)
+{
+	const WordsBitmap &wordsBitmap = hypo->GetWordsBitmap();
+	size_t wordsTranslated = wordsBitmap.GetNumWordsCovered(NULL); // TODO
+
+	/*
+	std::list<DecodeStep*>::const_iterator iter;
+	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
+	{
+		const DecodeStep *decodeStep =*iter;
+	}
+	*/
+}
+
