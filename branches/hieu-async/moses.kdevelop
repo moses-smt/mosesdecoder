@@ -2,7 +2,7 @@
 <kdevelop>
   <general>
     <author>Hieu Hoang</author>
-    <email>s0565741@rottnest.inf.ed.ac.uk</email>
+    <email>s0565741@fitzroy.inf.ed.ac.uk</email>
     <version>0.1</version>
     <projectmanagement>KDevAutoProject</projectmanagement>
     <primarylanguage>C++</primarylanguage>
@@ -14,7 +14,7 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>moses-cmd/src/moses-cmd</activetarget>
+      <activetarget>src/moses</activetarget>
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
@@ -22,8 +22,7 @@
       <terminal>true</terminal>
       <directoryradio>executable</directoryradio>
       <runarguments>
-        <moses-cmd-loop/>
-        <moses-cmd></moses-cmd>
+        <moses-cmd/>
       </runarguments>
     </run>
     <configurations>
@@ -126,12 +125,12 @@
     <APPNAMESC>Moses</APPNAMESC>
     <APPNAMEUC>MOSES</APPNAMEUC>
     <AUTHOR>Hieu Hoang</AUTHOR>
-    <EMAIL>s0565741@rottnest.inf.ed.ac.uk</EMAIL>
+    <EMAIL>s0565741@fitzroy.inf.ed.ac.uk</EMAIL>
     <LICENSE>GPL</LICENSE>
     <LICENSEFILE>COPYING</LICENSEFILE>
     <VERSION>0.1</VERSION>
     <YEAR>2006</YEAR>
-    <dest>/home/s0565741/moses</dest>
+    <dest>/home/s0565741/temp/moses</dest>
   </substmap>
   <kdevcppsupport>
     <references/>
