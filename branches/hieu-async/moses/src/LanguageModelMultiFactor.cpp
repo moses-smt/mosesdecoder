@@ -47,5 +47,10 @@ bool LanguageModelMultiFactor::Useable(const Phrase &phrase) const
 			return false;
 	}
 	return  true;
+}
 
+bool LanguageModelMultiFactor::Useable(const FactorMask &factorMask) const
+{
+	FactorMask sharedMask = m_factorTypes & factorMask;
+	return (sharedMask == m_factorTypes);
 }

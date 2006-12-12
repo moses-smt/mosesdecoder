@@ -77,11 +77,11 @@ protected:
 	HypothesisStack m_hypoStack; /**< stacks to store hypothesis (partial translations) */ 
 	// no of elements = no of words in source + 1
 	StaticData &m_staticData; /**< holds various kinds of constants, counters, and global data structures */
-	TranslationOptionCollection *m_possibleTranslations; /**< pre-computed list of translation options for the phrases in this sentence */
+	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	
 	// functions for creating hypotheses
-	void ProcessOneHypothesis(const Hypothesis &hypothesis, const std::list<DecodeStep*> &decodeStepList);
+	void ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vector<DecodeStep*> &decodeStepList);
 	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
 

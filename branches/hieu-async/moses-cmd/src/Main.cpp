@@ -118,41 +118,38 @@ int main(int argc, char* argv[])
 	InputType *source=0;
 	size_t lineCount = 0;
 	while(readInput(*ioStream,staticData.GetInputType(),source))
-		{
+	{
 			// note: source is only valid within this while loop!
     ResetUserTime();
 			
     VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 
-			staticData.InitializeBeforeSentenceProcessing(*source);
-			Manager manager(*source, staticData);
-			manager.ProcessSentence();
-			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
-														 staticData.GetReportSegmentation(),
-														 staticData.GetReportAllFactors()
-														 );
-
-			// n-best
-			size_t nBestSize = staticData.GetNBestSize();
-			if (nBestSize > 0)
-				{
-				  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-					LatticePathList nBestList;
-					manager.CalcNBest(nBestSize, nBestList,staticData.OnlyDistinctNBest());
-					ioStream->OutputNBestList(nBestList, source->GetTranslationId());
-					//RemoveAllInColl(nBestList);
-				}
-
-			if (staticData.IsDetailedTranslationReportingEnabled()) {
-				TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
-			}
-
-			IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
-      
-			manager.CalcDecoderStatistics(staticData);
-			staticData.CleanUpAfterSentenceProcessing();      
-      
+		staticData.InitializeBeforeSentenceProcessing(*source);
+		Manager manager(*source, staticData);
+		manager.ProcessSentence();
+		ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
+													 staticData.GetReportSegmentation(),
+													 staticData.GetReportAllFactors()
+													 );
+		// n-best
+		size_t nBestSize = staticData.GetNBestSize();
+		if (nBestSize > 0)
+		{
+		  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+			LatticePathList nBestList;
+			manager.CalcNBest(nBestSize, nBestList,staticData.OnlyDistinctNBest());
+			ioStream->OutputNBestList(nBestList, source->GetTranslationId());
 		}
+
+		if (staticData.IsDetailedTranslationReportingEnabled()) {
+			TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
+		}
+
+		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
+    
+		manager.CalcDecoderStatistics(staticData);
+		staticData.CleanUpAfterSentenceProcessing();       
+	}
 	
 	delete ioStream;
 

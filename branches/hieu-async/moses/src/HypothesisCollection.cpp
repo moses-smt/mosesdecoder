@@ -39,12 +39,9 @@ HypothesisCollection::HypothesisCollection()
 /** remove all hypotheses from the collection */
 void HypothesisCollection::RemoveAll()
 {
-	iterator iter;
-	for(iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter)
+	while (m_hypos.begin() != m_hypos.end())
 	{
-		Hypothesis *hypo = *iter;		
-		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
-		pool.freeObject(hypo);
+		Remove(m_hypos.begin());
 	}
 }
 
@@ -77,10 +74,6 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 
 void HypothesisCollection::AddPrune(Hypothesis *hypo)
 { 
-	const Phrase &targetPhrase = hypo->GetTargetPhrase();
-	std::map<Phrase, HypothesisVec, PhraseCompareOutputFactorOnly>::const_iterator outputIter
-				= m_outputPhrase.find(targetPhrase);
-
 	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
 	  StaticData::Instance()->GetSentenceStats().AddDiscarded();
@@ -129,105 +122,69 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	}
 }
 
-bool CompareHypoScore(const Hypothesis *a, const Hypothesis *b)
-{
-	return a->GetTotalScore() > b->GetTotalScore();
-}
-
 void HypothesisCollection::PruneToSize(size_t newSize)
 {
 	if (m_hypos.size() > newSize) // ok, if not over the limit
 	{
-		// sort each bunch of similar hypos
-		size_t bunchSize = (size_t) ceil((float)newSize / m_outputPhrase.size());
+		priority_queue<float> bestScores;
 		
-		OutputMap::iterator iterMap;
-		for (iterMap = m_outputPhrase.begin() ; iterMap != m_outputPhrase.end() ; ++iterMap)
+		// push all scores to a heap
+		// (but never push scores below m_bestScore+m_beamThreshold)
+		iterator iter = m_hypos.begin();
+		float score = 0;
+		while (iter != m_hypos.end())
 		{
-			HypothesisVec &hypoVec = iterMap->second;
-
-			if (hypoVec.size() > bunchSize)
+			Hypothesis *hypo = *iter;
+			score = hypo->GetTotalScore();
+			if (score > m_bestScore+m_beamThreshold) 
 			{
-				partial_sort(hypoVec.begin(), hypoVec.begin() + bunchSize, hypoVec.end(), CompareHypoScore);
-				
-				// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack				
-				m_worstScore = min(m_worstScore, hypoVec[bunchSize-1]->GetTotalScore());
-				
-				// delete the worst 
-				for (size_t currIndex = bunchSize; currIndex < hypoVec.size() ; ++currIndex)
-				{
-					Hypothesis *hypo = hypoVec[currIndex];
-					// remove hypo from list
-					_HCType::iterator iterList = m_hypos.find(hypo);
-					//TRACE_ERR(*hypo << endl);
-					Remove(iterList);					
-				}				
+				bestScores.push(score);
 			}
-		}
-				
-		// is it still over the limit ?
-		if (m_hypos.size() > newSize)
-		{ // do old pruning
-			priority_queue<float> bestScores;
+			++iter;
+    }
 		
-			// push all scores to a heap
-			// (but never push scores below m_bestScore+m_beamThreshold)
-			iterator iter = m_hypos.begin();
-			float score = 0;
-			while (iter != m_hypos.end())
-			{
-				Hypothesis *hypo = *iter;
-				score = hypo->GetTotalScore();
-				if (score > m_bestScore+m_beamThreshold) 
+		// pop the top newSize scores (and ignore them, these are the scores of hyps that will remain)
+		//  ensure to never pop beyond heap size
+		size_t minNewSizeHeapSize = newSize > bestScores.size() ? bestScores.size() : newSize;
+		for (size_t i = 1 ; i < minNewSizeHeapSize ; i++)
+			bestScores.pop();
+				
+		// and remember the threshold
+		float scoreThreshold = bestScores.top();
+		// TRACE_ERR( "threshold: " << scoreThreshold << endl);
+		
+		// delete all hypos under score threshold
+		iter = m_hypos.begin();
+		while (iter != m_hypos.end())
+		{
+			Hypothesis *hypo = *iter;
+			float score = hypo->GetTotalScore();
+			if (score < scoreThreshold)
 				{
-					bestScores.push(score);
+					iterator iterRemove = iter++;
+					Remove(iterRemove);
+					StaticData::Instance()->GetSentenceStats().AddPruning();
 				}
-				++iter;
-	    }
-			
-			// pop the top newSize scores (and ignore them, these are the scores of hyps that will remain)
-			//  ensure to never pop beyond heap size
-			size_t minNewSizeHeapSize = newSize > bestScores.size() ? bestScores.size() : newSize;
-			for (size_t i = 1 ; i < minNewSizeHeapSize ; i++)
-				bestScores.pop();
-					
-			// and remember the threshold
-			float scoreThreshold = bestScores.top();
-			// TRACE_ERR( "threshold: " << scoreThreshold << endl);
-			
-			// delete all hypos under score threshold
-			iter = m_hypos.begin();
-			while (iter != m_hypos.end())
-			{
-				Hypothesis *hypo = *iter;
-				float score = hypo->GetTotalScore();
-				if (score < scoreThreshold)
-					{
-						iterator iterRemove = iter++;
-						Remove(iterRemove);
-						StaticData::Instance()->GetSentenceStats().AddPruning();
-					}
-				else
-					{
-						++iter;
-					}
-			}
-			VERBOSE(3,", pruned to size " << size() << endl);
-			
-			IFVERBOSE(3) 
-			{
-				TRACE_ERR("stack now contains: ");
-				for(iter = m_hypos.begin(); iter != m_hypos.end(); iter++) 
+			else
 				{
-					Hypothesis *hypo = *iter;
-					TRACE_ERR( hypo->GetId() << " (" << hypo->GetTotalScore() << ") ");
+					++iter;
 				}
-				TRACE_ERR( endl);
-			}
-	
-			// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack
-			m_worstScore = scoreThreshold;
 		}
+		VERBOSE(3,", pruned to size " << size() << endl);
+		
+		IFVERBOSE(3) 
+		{
+			TRACE_ERR("stack now contains: ");
+			for(iter = m_hypos.begin(); iter != m_hypos.end(); iter++) 
+			{
+				Hypothesis *hypo = *iter;
+				TRACE_ERR( hypo->GetId() << " (" << hypo->GetTotalScore() << ") ");
+			}
+			TRACE_ERR( endl);
+		}
+
+		// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack
+		m_worstScore = scoreThreshold;
 	}
 }
 
@@ -251,7 +208,7 @@ const Hypothesis *HypothesisCollection::GetBestHypothesis() const
 // sorting helper
 struct HypothesisSortDescending
 {
-	const bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const
+	bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const
 	{
 		return hypo1->GetTotalScore() > hypo2->GetTotalScore();
 	}

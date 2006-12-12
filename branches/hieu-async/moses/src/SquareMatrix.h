@@ -26,12 +26,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 
 //! A square array of floats to store future costs
+template<typename T>
 class SquareMatrix
 {
-	friend std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix);
+	friend std::ostream& operator<<(std::ostream &out, const SquareMatrix<T> &matrix);
 protected:
 	const size_t m_size;
-	float *m_array;
+	T *m_array;
 
 	SquareMatrix(); // not implemented
 	SquareMatrix(const SquareMatrix &copy); // not implemented
@@ -40,7 +41,7 @@ public:
 	SquareMatrix(size_t size)
 	:m_size(size)
 	{
-		m_array = (float*) malloc(sizeof(float) * size * size);
+		m_array = (T*) malloc(sizeof(T) * size * size);
 	}
 	~SquareMatrix()
 	{
@@ -50,23 +51,26 @@ public:
 	{
 		return m_size;
 	}
-	inline float GetScore(size_t row, size_t col) const
+	inline T GetScore(size_t startPos, size_t endPos) const
 	{
-		return m_array[row * m_size + col];
+		assert(startPos <= endPos);
+		return m_array[startPos * m_size + endPos];
 	}
-	inline void SetScore(size_t row, size_t col, float value)
+	inline void SetScore(size_t startPos, size_t endPos, T value)
 	{
-		m_array[row * m_size + col] = value;
+		assert(startPos <= endPos);
+		m_array[startPos * m_size + endPos] = value;
 	}
-	inline void AddScore(size_t row, size_t col, float value)
+	inline void AddScore(size_t startPos, size_t endPos, T value)
 	{
-		m_array[row * m_size + col] += value;
+		assert(startPos <= endPos);
+		m_array[startPos * m_size + endPos] += value;
 	}
-	inline void ResetScore(float value)
+	inline void ResetScore(T value)
 	{
-		for(size_t row=0; row<m_size; row++) {
-			for(size_t col=row; col<m_size; col++) {
-				m_array[row * m_size + col] = value;
+		for(size_t startPos=0; startPos<m_size; startPos++) {
+			for(size_t endPos=startPos; endPos<m_size; endPos++) {
+				m_array[startPos * m_size + endPos] = value;
 			}
 		}
 	}
@@ -74,14 +78,19 @@ public:
 	TO_STRING();
 };
 
-inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
+
+template<typename T>
+inline std::ostream& operator<<(std::ostream &out, const SquareMatrix<T> &matrix)
 {
-	for (size_t col = 0 ; col < matrix.GetSize() ; col++)
+	for (size_t endPos = 0 ; endPos < matrix.GetSize() ; endPos++)
 	{
-		for (size_t row = 0 ; row < matrix.GetSize() ; row++)
-			out << matrix.GetScore(row, col) << " ";
+		for (size_t startPos = 0 ; startPos < matrix.GetSize() ; startPos++)
+			out << matrix.GetScore(startPos, endPos) << " ";
 		out << std::endl;
 	}
 	
 	return out;
 }
+
+template<typename T>
+TO_STRING_BODY(SquareMatrix<T>);

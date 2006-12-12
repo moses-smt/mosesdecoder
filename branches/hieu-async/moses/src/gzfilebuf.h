@@ -1,3 +1,5 @@
+// $Id$
+
 #ifndef _GZFILEBUF_H_
 #define _GZFILEBUF_H_
 

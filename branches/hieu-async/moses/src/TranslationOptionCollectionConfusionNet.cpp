@@ -19,7 +19,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 	* at a particular source position
 */
 void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(		
-											const DecodeStep *decodeStep
+											size_t decodeStepId
 											, size_t sourcePos
 											, FactorCollection &factorCollection) 
 {
@@ -27,7 +27,7 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(
 
 	ConfusionNet::Column const& coll=source.GetColumn(sourcePos);
 	for(ConfusionNet::Column::const_iterator i=coll.begin();i!=coll.end();++i)
-		ProcessOneUnknownWord(decodeStep, i->first,sourcePos,factorCollection);
+		ProcessOneUnknownWord(decodeStepId, i->first,sourcePos,factorCollection);
 		
 }
 

@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "Phrase.h"
 #include "StaticData.h"  // GetMaxNumFactors
+#include "TranslationOption.h"
 
 using namespace std;
 
@@ -72,6 +73,42 @@ Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWord
 	{
 		AddWord(*mergeWords[currPos]);
 	}
+}
+
+size_t Phrase::FindFirstGap(FactorType factorType)
+{
+	for (size_t pos = 0 ; pos < GetSize() ; ++pos)
+	{
+		if (GetFactor(0, factorType) == NULL)
+			return pos;
+	}
+	// return out of bound index 
+	return GetSize();
+}
+
+void Phrase::MergeFactors(const Phrase &source, const WordsRange &where)
+{
+	size_t sourceSize = source.GetSize();
+	assert(sourceSize == where.GetSize());
+
+	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
+	for (size_t currFactor = 0 ; currFactor < maxNumFactors ; ++currFactor)
+	{
+		// only add factors that exists in trans opt
+		if (source.GetFactor(0, currFactor) != NULL)
+		{
+			// fill with factors from source phrase
+			size_t thisPos = where.GetStartPos();
+			for (size_t sourcePos = 0 ; sourcePos < sourceSize ; ++sourcePos)
+			{
+				if (thisPos >= GetSize())
+					AddWord();
+				SetFactor(thisPos, currFactor, source.GetFactor(sourcePos, currFactor));
+
+				thisPos++;
+			}
+		}
+	}	
 }
 
 Phrase::~Phrase()
@@ -314,7 +351,7 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
-		for (unsigned int currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
+		for (size_t currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
 			const Factor *thisFactor 		= GetFactor(currPos, factorType)
@@ -348,6 +385,25 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase, const std::vector<FactorTyp
 		{
 			if (GetFactor(currPos, *i) != inputPhrase.GetFactor(currPos, *i))
 				return false;
+		}
+	}
+	return true;
+}
+
+bool Phrase::IsSynchronized() const
+{
+	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
+	const size_t size = GetSize();
+	for (size_t currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
+	{
+		const Factor *factor 		= GetFactor(0, currFactor);
+		if (factor != NULL)
+		{
+			for (size_t currPos = 1 ; currPos < size ; currPos++)
+			{
+				if (GetFactor(currPos, currFactor) == NULL)
+					return false;
+			}
 		}
 	}
 	return true;

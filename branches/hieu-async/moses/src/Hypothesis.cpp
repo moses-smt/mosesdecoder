@@ -33,31 +33,40 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "LMList.h"
 #include "hash.h"
-#include "FutureScore.h"
+#include "SpanScore.h"
+#include "LanguageModelMultiFactor.h"
 
 using namespace std;
 
 unsigned int Hypothesis::s_HypothesesCreated = 0;
 ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 
-Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
+Hypothesis::Hypothesis(InputType const& source, const std::vector<DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)
+	, m_backPtr(decodeStepList.size())
+	, m_currSourceRange(decodeStepList.size())
+	, m_currTargetPhrase(emptyTarget)
 	, m_targetPhrase(emptyTarget)
 	, m_sourcePhrase(0)
 	, m_sourceCompleted(source.GetSize())
 	, m_sourceInput(source)
-	, m_currSourceWordsRange(NULL, NOT_FOUND, NOT_FOUND)
-	, m_currTargetWordsRange(NULL, NOT_FOUND, NOT_FOUND)
+	, m_currTargetWordsRange()
 	, m_wordDeleted(false)
 	, m_languageModelStates(StaticData::Instance()->GetLMSize(), LanguageModelSingleFactor::UnknownState)
 	, m_arcList(NULL)
 	, m_id(0)
 	, m_lmstats(NULL)
+	, m_decodeStepId(NOT_FOUND)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
 	s_HypothesesCreated = 1;
 	ResetScore();	
+
+	for (size_t decodeStepId = 0 ; decodeStepId < m_backPtr.size() ; ++decodeStepId)
+	{
+		m_backPtr[decodeStepId] = NULL;
+	}
 }
 
 /***
@@ -65,32 +74,64 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
  */
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: m_prevHypo(&prevHypo)
-	, m_targetPhrase(transOpt.GetTargetPhrase())
+	, m_backPtr(prevHypo.m_backPtr)
+	, m_currSourceRange(prevHypo.m_currSourceRange)
+	, m_currTargetPhrase(transOpt.GetTargetPhrase())
+	, m_targetPhrase(prevHypo.m_targetPhrase)
 	, m_sourcePhrase(0)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_sourceInput						(prevHypo.m_sourceInput)
-	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
-	, m_currTargetWordsRange	(transOpt.GetDecodeStep(), prevHypo.m_currTargetWordsRange.GetEndPos() + 1
-														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
+	, m_currTargetWordsRange()
 	, m_wordDeleted(false)
 	,	m_totalScore(0.0f)
 	,	m_futureScore(0.0f)
-	, m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
+	, m_scoreBreakdown			(prevHypo.m_scoreBreakdown)
 	, m_languageModelStates(prevHypo.m_languageModelStates)
 	, m_arcList(NULL)
 	, m_id(s_HypothesesCreated++)
 	, m_lmstats(NULL)
+	,	m_decodeStepId (transOpt.GetDecodeStepId())
+
 {
-	const DecodeStep *decodeStep = transOpt.GetDecodeStep();
+	const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
+
+	// update curr source range for this step
+	m_currSourceRange[m_decodeStepId] = transOpt.GetSourceWordsRange();
+
+	// update back ptr
+	size_t prevDecodeStepId = prevHypo.GetDecodeStepId();
+	if (prevDecodeStepId != NOT_FOUND)
+		m_backPtr[prevDecodeStepId] = &prevHypo;
+
+	// update target range
+	const Hypothesis *backPtrHypo = m_backPtr[m_decodeStepId];
+	if (backPtrHypo == NULL)
+	{
+		m_currTargetWordsRange = WordsRange(
+																transOpt.GetDecodeStepId()
+																, 0
+																, transOptPhrase.GetSize() - 1 );
+	}
+	else
+	{
+		size_t lastPos = backPtrHypo->GetCurrTargetWordsRange().GetEndPos();
+		m_currTargetWordsRange = WordsRange(
+																transOpt.GetDecodeStepId()
+																, lastPos + 1
+																, lastPos + transOptPhrase.GetSize());
+	}
+
+	// merge factors from new trans opt into taget phrase so far
+	m_targetPhrase.MergeFactors(transOptPhrase, m_currTargetWordsRange);
 
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
-	assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));	
+	assert(!m_sourceCompleted.Overlap(GetCurrSourceWordsRange()));	
 
-	//_hash_computed = false;
-	m_sourceCompleted.SetValue(transOpt.GetDecodeStep(), m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
+	m_sourceCompleted.SetValue(transOpt.GetSourceWordsRange(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
 	m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
+
 }
 
 Hypothesis::~Hypothesis()
@@ -156,38 +197,33 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */
 
-Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &emptyTarget)
+Hypothesis* Hypothesis::Create(InputType const& m_source, const std::vector<DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget)
 {
 	Hypothesis *ptr = s_objectPool.getPtr();
-	return new(ptr) Hypothesis(m_source, emptyTarget);
+	return new(ptr) Hypothesis(m_source, decodeStepList, emptyTarget);
 }
 
-//void Hypothesis::GenerateNGramCompareHash() const
-//{
-//	_hash = quick_hash((const char*)&m_languageModelStates[0], sizeof(LanguageModelSingleFactor::State) * m_languageModelStates.size(), 0xcafe5137);
-//	_hash_computed = true;
-//	vector<size_t> wordCoverage = m_sourceCompleted.GetCompressedRepresentation();
-//	_hash = quick_hash((const char*)&wordCoverage[0], sizeof(size_t)*wordCoverage.size(), _hash);
-//}
+int Hypothesis::CompareSourceRange(const Hypothesis &compare) const
+{
+	for (size_t decodeStepId = 0 ; decodeStepId < m_currSourceRange.size() ; ++decodeStepId)
+	{
+		if (m_currSourceRange[decodeStepId].GetEndPos() < compare.m_currSourceRange[decodeStepId].GetEndPos())
+			return -1;
+		if (m_currSourceRange[decodeStepId].GetEndPos() > compare.m_currSourceRange[decodeStepId].GetEndPos())
+			return +1;
+	}
 
-/** check, if two hypothesis can be recombined.
-    this is actually a sorting function that allows us to
-    keep an ordered list of hypotheses. This makes recombination
-    much quicker. 
-*/
-int Hypothesis::NGramCompare(const Hypothesis &compare) const
-{ // -1 = this < compare
-	// +1 = this > compare
-	// 0	= this ==compare
-	if (m_languageModelStates < compare.m_languageModelStates) return -1;
-	if (m_languageModelStates > compare.m_languageModelStates) return 1;
-	if (m_sourceCompleted.GetCompressedRepresentation() < compare.m_sourceCompleted.GetCompressedRepresentation()) return -1;
-	if (m_sourceCompleted.GetCompressedRepresentation() > compare.m_sourceCompleted.GetCompressedRepresentation()) return 1;
-	if (m_currSourceWordsRange.GetEndPos() < compare.m_currSourceWordsRange.GetEndPos()) return -1;
-	if (m_currSourceWordsRange.GetEndPos() > compare.m_currSourceWordsRange.GetEndPos()) return 1;
-	if (! StaticData::Instance()->GetSourceStartPosMattersForRecombination()) return 0;
-	if (m_currSourceWordsRange.GetStartPos() < compare.m_currSourceWordsRange.GetStartPos()) return -1;
-	if (m_currSourceWordsRange.GetStartPos() > compare.m_currSourceWordsRange.GetStartPos()) return 1;
+	if (! StaticData::Instance()->GetSourceStartPosMattersForRecombination()) 
+		return 0;
+
+	for (size_t decodeStepId = 0 ; decodeStepId < m_currSourceRange.size() ; ++decodeStepId)
+	{
+		if (m_currSourceRange[decodeStepId].GetStartPos() < compare.m_currSourceRange[decodeStepId].GetStartPos())
+			return -1;
+		if (m_currSourceRange[decodeStepId].GetStartPos() > compare.m_currSourceRange[decodeStepId].GetStartPos())
+			return +1;
+	}
+
 	return 0;
 }
 
@@ -196,8 +232,7 @@ int Hypothesis::NGramCompare(const Hypothesis &compare) const
  * represent a variety of tag sets, and because factors with smaller tag sets 
  * (such as POS instead of words) allow us to calculate richer statistics, we
  * allow a different length of n-gram to be specified for each factor.
- * /param lmListInitial todo - describe this parameter 
- * /param lmListEnd todo - describe this parameter
+ * /param languageModels - list of all language models
  */
 void Hypothesis::CalcLMScore(const LMList &languageModels)
 {
@@ -210,101 +245,119 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 	}
 
 	size_t lmIdx = 0;
+	const DecodeStep &decodeStep = StaticData::Instance()->GetDecodeStep(
+																		m_currTargetWordsRange.GetDecodeStepId());
+	const FactorMask &targetMask = decodeStep.GetOutputFactorMask();
 
 	// already have LM scores from previous and trigram score of poss trans.
 	// just need trigram score of the words of the start of current phrase	
 	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM,++lmIdx)
 	{
 		const LanguageModel &languageModel = **iterLM;
-		size_t nGramOrder			= languageModel.GetNGramOrder();
-		size_t currEndPos			= m_currTargetWordsRange.GetEndPos();
-		float lmScore;
-		size_t nLmCallCount = 0;
+		if (languageModel.Useable(targetMask))
+		{
+			size_t nGramOrder			= languageModel.GetNGramOrder();
+			size_t currEndPos			= m_currTargetWordsRange.GetEndPos();
+			float lmScore;
+			size_t nLmCallCount = 0;
 
-		if(m_currTargetWordsRange.GetNumWordsCovered() == 0) {
-			lmScore = 0; //the score associated with dropping source words is not part of the language model
-		} else { //non-empty target phrase
-			if (m_lmstats)
-				(*m_lmstats)[lmIdx].resize(m_currTargetWordsRange.GetNumWordsCovered(), 0);
+			if(m_currTargetWordsRange.GetNumWordsCovered() == 0) {
+				lmScore = 0; //the score associated with dropping source words is not part of the language model
+			} else { //non-empty target phrase
+				if (m_lmstats)
+					(*m_lmstats)[lmIdx].resize(m_currTargetWordsRange.GetNumWordsCovered(), 0);
 
-			// 1st n-gram
-			vector<const Word*> contextFactor(nGramOrder);
-			size_t index = 0;
-			for (int currPos = (int) startPos - (int) nGramOrder + 1 ; currPos <= (int) startPos ; currPos++)
-			{
-				if (currPos >= 0)
-					contextFactor[index++] = &GetWord(currPos);
-				else			
-					contextFactor[index++] = &languageModel.GetSentenceStartArray();
-			}
-			lmScore	= languageModel.GetValue(contextFactor);
-			if (m_lmstats) { languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]); }
-			//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;
-
-			// main loop
-			size_t endPos = std::min(startPos + nGramOrder - 2
-															, currEndPos);
-			for (size_t currPos = startPos + 1 ; currPos <= endPos ; currPos++)
-			{
-				// shift all args down 1 place
-				for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
-					contextFactor[i] = contextFactor[i + 1];
-	
-				// add last factor
-				contextFactor.back() = &GetWord(currPos);
-
-				lmScore	+= languageModel.GetValue(contextFactor);
-				if (m_lmstats) 
-					languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]);
-				//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;		
-			}
-
-			// end of sentence
-			if ( (languageModel.GetLMType() == SingleFactor 
-						&& m_sourceCompleted.IsComplete(static_cast<const LanguageModelSingleFactor&>(languageModel).GetFactorType()))
-						|| (languageModel.GetLMType() == MultiFactor && true ) // TODO test when multi factor LM
-					)
-			{
-				const size_t size = GetSize();
-				contextFactor.back() = &languageModel.GetSentenceEndArray();
-	
-				for (size_t i = 0 ; i < nGramOrder - 1 ; i ++)
+				// 1st n-gram
+				vector<const Word*> contextFactor(nGramOrder);
+				size_t index = 0;
+				for (int currPos = (int) startPos - (int) nGramOrder + 1 ; currPos <= (int) startPos ; currPos++)
 				{
-					int currPos = (int)(size - nGramOrder + i + 1);
-					if (currPos < 0)
-						contextFactor[i] = &languageModel.GetSentenceStartArray();
-					else
-						contextFactor[i] = &GetWord((size_t)currPos);
+					if (currPos >= 0)
+						contextFactor[index++] = &GetWord(currPos);
+					else			
+						contextFactor[index++] = &languageModel.GetSentenceStartArray();
 				}
-				if (m_lmstats) {
-					(*m_lmstats)[lmIdx].resize((*m_lmstats)[lmIdx].size() + 1); // extra space for the last call
-					lmScore += languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx], &(*m_lmstats)[lmIdx][nLmCallCount++]);
-				} else
-					lmScore	+= languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx]);
-			} else {
-				for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
+				lmScore	= languageModel.GetValue(contextFactor);
+				if (m_lmstats) { languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]); }
+
+				// main loop
+				size_t endPos = std::min(startPos + nGramOrder - 2
+																, currEndPos);
+				for (size_t currPos = startPos + 1 ; currPos <= endPos ; currPos++)
+				{
+					// shift all args down 1 place
 					for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
 						contextFactor[i] = contextFactor[i + 1];
-					contextFactor.back() = &GetWord(currPos);
-					if (m_lmstats)
-						languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]);
-				}
-				m_languageModelStates[lmIdx]=languageModel.GetState(contextFactor);
-			}
-		}
 		
-		m_scoreBreakdown.PlusEquals(&languageModel, lmScore);
+					// add last factor
+					contextFactor.back() = &GetWord(currPos);
+
+					lmScore	+= languageModel.GetValue(contextFactor);
+					if (m_lmstats) 
+						languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]);
+					//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;		
+				}
+
+				// end of sentence
+				if ( (languageModel.GetLMType() == SingleFactor 
+							&& m_sourceCompleted.IsComplete(static_cast<const LanguageModelSingleFactor&>(languageModel).GetFactorType()))
+							|| (languageModel.GetLMType() == MultiFactor 
+							&& m_sourceCompleted.IsComplete(static_cast<const LanguageModelMultiFactor&>(languageModel).GetFactorMask()))
+						)
+				{
+					const size_t size = GetSize();
+					contextFactor.back() = &languageModel.GetSentenceEndArray();
+		
+					for (size_t i = 0 ; i < nGramOrder - 1 ; i ++)
+					{
+						int currPos = (int)(size - nGramOrder + i + 1);
+						if (currPos < 0)
+							contextFactor[i] = &languageModel.GetSentenceStartArray();
+						else
+							contextFactor[i] = &GetWord((size_t)currPos);
+					}
+					if (m_lmstats) 
+					{
+						(*m_lmstats)[lmIdx].resize((*m_lmstats)[lmIdx].size() + 1); // extra space for the last call
+						lmScore += languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx], &(*m_lmstats)[lmIdx][nLmCallCount++]);
+					}
+					else
+						lmScore	+= languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx]);
+				}
+				else
+				{ // not yet end of sentence
+					for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
+						for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
+							contextFactor[i] = contextFactor[i + 1];
+						contextFactor.back() = &GetWord(currPos);
+						if (m_lmstats)
+							languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]);
+					}
+					m_languageModelStates[lmIdx]=languageModel.GetState(contextFactor);
+				}
+			}
+			
+			m_scoreBreakdown.PlusEquals(&languageModel, lmScore);
+		} // if (languageModel.Useable())
 	}
 }
 
 void Hypothesis::CalcDistortionScore()
-
 {
 	const DistortionScoreProducer *dsp = StaticData::Instance()->GetDistortionScoreProducer();
-	float distortionScore = dsp->CalculateDistortionScore(
-			m_prevHypo->GetCurrSourceWordsRange(),
-			this->GetCurrSourceWordsRange()
-     );
+
+	float distortionScore;
+	if (m_prevHypo->GetDecodeStepId() == NOT_FOUND)
+	{ // 1st translate phrase. prev hypo is seed hypo
+		distortionScore = - (float) GetCurrSourceWordsRange().GetStartPos();
+	}
+	else
+	{
+		distortionScore = dsp->CalculateDistortionScore(
+				m_prevHypo->GetCurrSourceWordsRange(),
+				this->GetCurrSourceWordsRange()
+			 );
+	}
 	m_scoreBreakdown.PlusEquals(dsp, distortionScore);
 }
 
@@ -317,7 +370,7 @@ void Hypothesis::ResetScore()
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::CalcScore(const StaticData& staticData, const FutureScore &futureScore) 
+void Hypothesis::CalcScore(const StaticData& staticData, const SpanScore &futureScore) 
 {
 	// DISTORTION COST
 	CalcDistortionScore();
@@ -343,14 +396,14 @@ void Hypothesis::CalcScore(const StaticData& staticData, const FutureScore &futu
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
 }
 
-void Hypothesis::CalcFutureScore(const FutureScore &futureScore)
+void Hypothesis::CalcFutureScore(const SpanScore &futureScore)
 {
 	// future cost of untranslated parts of source sentence
 	m_futureScore = futureScore.GetFutureScore(m_sourceCompleted);
 
 	// add future costs for distortion model
 	if(StaticData::Instance()->UseDistortionFutureCosts())
-		m_futureScore += m_sourceCompleted.GetFutureCosts(m_currSourceWordsRange.GetEndPos()) * StaticData::Instance()->GetWeightDistortion();
+		m_futureScore += m_sourceCompleted.GetFutureDistortionScore((int) GetCurrSourceWordsRange().GetEndPos()) * StaticData::Instance()->GetWeightDistortion();
 	
 }
 
@@ -364,7 +417,7 @@ const Hypothesis* Hypothesis::GetPrevHypo()const{
 void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistortion*/, float /*weightWordPenalty*/) const
 {
   TRACE_ERR( "creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ");
-  int end = (int)(m_prevHypo->m_targetPhrase.GetSize()-1);
+  int end = (int)(m_prevHypo->m_currTargetPhrase.GetSize()-1);
   int start = end-1;
   if ( start < 0 ) start = 0;
   if ( m_prevHypo->m_currTargetWordsRange.GetStartPos() == NOT_FOUND ) {
@@ -374,13 +427,13 @@ void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistorti
     TRACE_ERR( "... ");
   }
   if (end>=0) {
-    WordsRange range(NULL, start, end); // TODO - hack. 
-    TRACE_ERR( m_prevHypo->m_targetPhrase.GetSubString(range) << " ");
+    WordsRange range(0, start, end); // TODO - hack. 
+    TRACE_ERR( m_prevHypo->m_currTargetPhrase.GetSubString(range) << " ");
   }
   TRACE_ERR( ")"<<endl);
 	TRACE_ERR( "\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
-	TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "<< source.GetSubString(m_currSourceWordsRange)  <<endl);
-	TRACE_ERR( "\ttranslated as: "<<m_targetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
+	TRACE_ERR( "\tcovering "<< GetCurrSourceWordsRange().GetStartPos()<<"-"<<GetCurrSourceWordsRange().GetEndPos()<<": "<< source.GetSubString(GetCurrSourceWordsRange())  <<endl);
+	TRACE_ERR( "\ttranslated as: "<<m_currTargetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
 	if (m_wordDeleted) TRACE_ERR( "\tword deleted"<<endl); 
   //	TRACE_ERR( "\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
   //	TRACE_ERR( "\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
@@ -411,7 +464,7 @@ TO_STRING_BODY(Hypothesis)
 // friend
 ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 {	
-	hypothesis.ToStream(out);
+	out << hypothesis.GetTargetPhrase();
 	// words bitmap
 	out << "[" << hypothesis.m_sourceCompleted << "] ";
 	
@@ -427,17 +480,17 @@ std::string Hypothesis::GetSourcePhraseStringRep(const vector<FactorType> factor
 	if (!m_prevHypo) { return ""; }
 	if(m_sourcePhrase) 
 	{
-		return m_sourcePhrase->GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
+		return m_sourcePhrase->GetSubString(GetCurrSourceWordsRange()).GetStringRep(factorsToPrint);
 	}
 	else
 	{ 
-		return m_sourceInput.GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
+		return m_sourceInput.GetSubString(GetCurrSourceWordsRange()).GetStringRep(factorsToPrint);
 	}	
 }
 std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const 
 {
 	if (!m_prevHypo) { return ""; }
-	return m_targetPhrase.GetStringRep(factorsToPrint);
+	return m_currTargetPhrase.GetStringRep(factorsToPrint);
 }
 
 std::string Hypothesis::GetSourcePhraseStringRep() const 

@@ -24,15 +24,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "StaticData.h"
 
+size_t DecodeStep::s_id = 0;
+
 DecodeStep::DecodeStep(Dictionary *ptr, const DecodeStep* prev)
 :m_ptr(ptr)
+,m_id(s_id++)
 {
-	FactorMask prevOutputFactors;
-	if (prev) prevOutputFactors = prev->m_outputFactors;
-	m_outputFactors = prevOutputFactors;
-	FactorMask conflictMask = (m_outputFactors & ptr->GetOutputFactorMask());
-	m_outputFactors |= ptr->GetOutputFactorMask();
-	FactorMask newOutputFactorMask = m_outputFactors ^ prevOutputFactors;  //xor
+	FactorMask prevCombinedOutputFactors;
+	if (prev) prevCombinedOutputFactors = prev->m_combinedOutputFactors;
+	m_combinedOutputFactors = prevCombinedOutputFactors;
+	FactorMask conflictMask = (m_combinedOutputFactors & ptr->GetOutputFactorMask());
+	m_combinedOutputFactors |= ptr->GetOutputFactorMask();
+	FactorMask newOutputFactorMask = m_combinedOutputFactors ^ prevCombinedOutputFactors;  //xor
   m_newOutputFactors.resize(newOutputFactorMask.count());
 	m_conflictFactors.resize(conflictMask.count());
 	size_t j=0, k=0;
@@ -40,7 +43,7 @@ DecodeStep::DecodeStep(Dictionary *ptr, const DecodeStep* prev)
     if (newOutputFactorMask[i]) m_newOutputFactors[j++] = i;
 		if (conflictMask[i]) m_conflictFactors[k++] = i;
 	}
-  VERBOSE(2,"DecodeStep():\n\toutputFactors=" << m_outputFactors
+  VERBOSE(2,"DecodeStep():\n\toutputFactors=" << m_combinedOutputFactors
 	  << "\n\tconflictFactors=" << conflictMask
 	  << "\n\tnewOutputFactors=" << newOutputFactorMask << std::endl);
 }

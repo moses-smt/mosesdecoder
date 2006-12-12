@@ -79,7 +79,7 @@ class SentenceStats
 		
 		void AddRecombination(const Hypothesis& worseHypo, const Hypothesis& betterHypo)
 		{
-			//m_recombinationInfos.push_back(RecombinationInfo(worseHypo.GetWordsBitmap().GetNumWordsCovered(), 
+			//m_recombinationInfos.push_back(RecombinationInfo(worseHypo.GetSourceBitmap().GetNumWordsCovered(), 
 			//										betterHypo.GetTotalScore(), worseHypo.GetTotalScore()));
 		}
 		void AddPruning() {m_numHyposPruned++;}

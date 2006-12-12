@@ -106,6 +106,7 @@ void Parameter::Explain() {
 			cerr <<  " (" << iterAbbr->second << ")";
 		cerr <<  ": " << paramDescription << endl;
 	}
+	
 }
 
 /** check whether an item on the command line is a switch or a value 

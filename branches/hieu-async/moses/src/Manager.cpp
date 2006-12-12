@@ -35,9 +35,9 @@ using namespace std;
 
 Manager::Manager(InputType const& source, StaticData &staticData)
 :m_source(source)
-,m_hypoStack(source.GetSize())
+,m_hypoStack(source.GetSize(), staticData.GetDecodeStepList())
 ,m_staticData(staticData)
-,m_possibleTranslations(source.CreateTranslationOptionCollection())
+,m_transOptColl(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 {
 	HypothesisStack::iterator iterStack;
@@ -51,7 +51,7 @@ Manager::Manager(InputType const& source, StaticData &staticData)
 
 Manager::~Manager() 
 {
-  delete m_possibleTranslations;
+  delete m_transOptColl;
 }
 
 /**
@@ -61,18 +61,18 @@ Manager::~Manager()
 void Manager::ProcessSentence()
 {	
 	m_staticData.ResetSentenceStats(m_source);
-	const list < DecodeStep* > &decodeStepList = m_staticData.GetDecodeStepList();
+	const vector<DecodeStep*> &decodeStepList = m_staticData.GetDecodeStepList();
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
-	m_possibleTranslations->CreateTranslationOptions(decodeStepList
+	m_transOptColl->CreateTranslationOptions(decodeStepList
   														, m_staticData.GetFactorCollection());
 
 	// initial seed hypothesis: nothing translated, no words produced
 	{
-		Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
+		Hypothesis *hypo = Hypothesis::Create(m_source, decodeStepList, m_initialTargetPhrase);
 		m_hypoStack.GetStack(0).AddPrune(hypo);
 	}
 	
@@ -91,13 +91,17 @@ void Manager::ProcessSentence()
 		// go through each hypothesis on the stack and try to expand it
 		HypothesisCollection::const_iterator iterHypo;
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
-			{
-				Hypothesis &hypothesis = **iterHypo;
-				ProcessOneHypothesis(hypothesis, decodeStepList); // expand the hypothesis
-			}
+		{
+			Hypothesis &hypothesis = **iterHypo;
+			ProcessOneHypothesis(hypothesis, decodeStepList); // expand the hypothesis
+		}
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
+		//OutputHypoStackSize();
 	}
+
+	//OutputHypoStack();
+	//OutputHypoStackSize();
 
 	// some more logging
 	VERBOSE(2,m_staticData.GetSentenceStats());
@@ -109,7 +113,7 @@ void Manager::ProcessSentence()
  * violation of reordering limits. 
  * \param hypothesis hypothesis to be expanded upon
  */
-void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::list<DecodeStep*> &decodeStepList)
+void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vector<DecodeStep*> &decodeStepList)
 {
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = m_staticData.GetMaxDistortion();
@@ -117,24 +121,28 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::list
 	// no limit of reordering: only check for overlap
 	if (maxDistortion < 0)
 	{	
-		const WordsBitmap &hypoBitmap	= hypothesis.GetWordsBitmap();
+		const WordsBitmap &hypoBitmap	= hypothesis.GetSourceBitmap();
 
-		std::list<DecodeStep*>::const_iterator iter;
+		std::vector<DecodeStep*>::const_iterator iter;
 		for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
 		{
-			const DecodeStep *decodeStep =*iter;
-			const size_t hypoFirstGapPos	= hypoBitmap.GetFirstGapPos(decodeStep)
+			const DecodeStep &decodeStep	= **iter;
+			size_t decodeStepId						= decodeStep.GetId();
+			const size_t hypoFirstGapPos	= hypoBitmap.GetFirstGapPos(decodeStepId)
 									, sourceSize			= m_source.GetSize();
 
 			for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 			{
 				for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
 				{
-					if (!hypoBitmap.Overlap(WordsRange(decodeStep, startPos, endPos)))
+					if (!hypoBitmap.IsHierarchy(decodeStepId, startPos, endPos))
+						break;
+
+					if (!hypoBitmap.Overlap(WordsRange(decodeStepId, startPos, endPos)))
 					{
 						ExpandAllHypotheses(hypothesis
-													, m_possibleTranslations->GetTranslationOptionList(
-																																WordsRange(decodeStep, startPos, endPos)));
+													, m_transOptColl->GetTranslationOptionList(
+																																WordsRange(decodeStepId, startPos, endPos)));
 					}
 				}
 
@@ -145,14 +153,15 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::list
 
 	// if there are reordering limits, make sure it is not violated
 	// the coverage bitmap is handy here (and the position of the first gap)
-	const WordsBitmap &hypoBitmap = hypothesis.GetWordsBitmap();
+	const WordsBitmap &hypoBitmap = hypothesis.GetSourceBitmap();
 
-	std::list<DecodeStep*>::const_iterator iter;
+	std::vector<DecodeStep*>::const_iterator iter;
 	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
 	{
-		const DecodeStep *decodeStep =*iter;
-		const size_t hypoWordCount		= hypoBitmap.GetNumWordsCovered(decodeStep)
-								, hypoFirstGapPos	= hypoBitmap.GetFirstGapPos(decodeStep)
+		const DecodeStep &decodeStep	= **iter;
+		size_t decodeStepId						= decodeStep.GetId();
+		const size_t hypoWordCount		= hypoBitmap.GetNumWordsCovered(decodeStepId)
+								, hypoFirstGapPos	= hypoBitmap.GetFirstGapPos(decodeStepId)
 								, sourceSize			= m_source.GetSize();
 		
 		// MAIN LOOP. go through each possible hypo
@@ -160,6 +169,9 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::list
 		{
 			for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
 			{
+				if (!hypoBitmap.IsHierarchy(decodeStepId, startPos, endPos))
+					break;
+
 				// no gap so far => don't skip more than allowed limit
 				if (hypoFirstGapPos == hypoWordCount)
 				{
@@ -169,27 +181,27 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::list
 						)
 					{
 						ExpandAllHypotheses(hypothesis
-													,m_possibleTranslations->GetTranslationOptionList(WordsRange(decodeStep, startPos, endPos)));
+													,m_transOptColl->GetTranslationOptionList(WordsRange(decodeStepId, startPos, endPos)));
 					}
 				}
 				// filling in gap => just check for overlap
 				else if (startPos < hypoWordCount)
 				{
 					if (startPos >= hypoFirstGapPos
-							&& !hypoBitmap.Overlap(WordsRange(decodeStep, startPos, endPos)))
+						&& !hypoBitmap.Overlap(WordsRange(decodeStepId, startPos, endPos)))
 					{
 						ExpandAllHypotheses(hypothesis
-													,m_possibleTranslations->GetTranslationOptionList(WordsRange(decodeStep, startPos, endPos)));
+													,m_transOptColl->GetTranslationOptionList(WordsRange(decodeStep.GetId(), startPos, endPos)));
 					}
 				}
 				// ignoring, continuing forward => be limited by start of gap
 				else
 				{
 					if (endPos <= hypoFirstGapPos + maxDistortion
-							&& !hypoBitmap.Overlap(WordsRange(decodeStep, startPos, endPos)))
+							&& !hypoBitmap.Overlap(WordsRange(decodeStepId, startPos, endPos)))
 					{
 						ExpandAllHypotheses(hypothesis
-														,m_possibleTranslations->GetTranslationOptionList(WordsRange(decodeStep, startPos, endPos)));
+														,m_transOptColl->GetTranslationOptionList(WordsRange(decodeStepId, startPos, endPos)));
 					}
 				}
 			}
@@ -225,7 +237,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 {
 	// create hypothesis and calculate all its scores
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-	newHypo->CalcScore(m_staticData, m_possibleTranslations->GetFutureScoreObject());
+	newHypo->CalcScore(m_staticData, m_transOptColl->GetFutureScoreObject());
 	
 	// logging for the curious
 	IFVERBOSE(3) {
@@ -287,7 +299,7 @@ void getSurfacePhrase(std::vector<size_t>& tphrase,LatticePath const& path)
 	const std::vector<const Hypothesis *> &edges = path.GetEdges();
 	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
-			const Phrase &phrase = edges[currEdge]->GetTargetPhrase();
+			const Phrase &phrase = edges[currEdge]->GetCurrTargetPhrase();
 			for (size_t pos=0,size=phrase.GetSize() ; pos < size ; ++pos)
 				{
 					const Factor *factor = phrase.GetFactor(pos,0);
@@ -368,7 +380,7 @@ void Manager::CalcDecoderStatistics(const StaticData& staticData) const
 		   	TRACE_ERR( "Source and Target Units:"
 		 							<< hypo->GetSourcePhrase());
 				buff2.insert(0,"] ");
-				buff2.insert(0,(hypo->GetTargetPhrase()).ToString());
+				buff2.insert(0,(hypo->GetCurrTargetPhrase()).ToString());
 				buff2.insert(0,":");
 				buff2.insert(0,(hypo->GetCurrSourceWordsRange()).ToString());
 				buff2.insert(0,"[");
@@ -379,7 +391,7 @@ void Manager::CalcDecoderStatistics(const StaticData& staticData) const
 				  buff.insert(0,buff2);
 				  buff2.clear();
 				  buff2.insert(0,"] ");
-				  buff2.insert(0,(hypo->GetTargetPhrase()).ToString());
+				  buff2.insert(0,(hypo->GetCurrTargetPhrase()).ToString());
 				  buff2.insert(0,":");
 				  buff2.insert(0,(hypo->GetCurrSourceWordsRange()).ToString());
 				  buff2.insert(0,"[");

@@ -23,55 +23,55 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 #include "StaticData.h"
 #include "DecodeStep.h"
+#include "FactorMask.h"
 
 TO_STRING_BODY(WordsBitmap);
 
 WordsBitmap::WordsBitmap(size_t size)
 	:m_size	(size)
 {
-	const std::list < DecodeStep* > &decodeStepList = StaticData::Instance()->GetDecodeStepList();
+	const vector<DecodeStep*> &decodeStepList = StaticData::Instance()->GetDecodeStepList();
+	m_bitmap.resize(decodeStepList.size());
 
-	BitmapType::iterator iter;
-	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+	std::vector<DecodeStep*>::const_iterator iter;
+	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
 	{
-		bool *bitmap = iter->second;
-		bitmap = (bool*) malloc(sizeof(bool) * size);
+		size_t decodeStepId = (*iter)->GetId();
+		bool *bitmap = (bool*) malloc(sizeof(bool) * size);
+		m_bitmap[decodeStepId] = bitmap;
 	}
 	Initialize();
 }
 
 WordsBitmap::WordsBitmap(const WordsBitmap &copy)
 	:m_size		(copy.m_size)
+	,m_bitmap	(copy.m_bitmap)
 {
-	BitmapType::iterator iter;
-	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+	for (size_t decodeStepId = 0 ; decodeStepId < m_bitmap.size() ; ++decodeStepId)
 	{
-		const DecodeStep *decodeStep =iter->first;
-		bool *bitmap = iter->second;
-		bitmap = (bool*) malloc(sizeof(bool) * m_size);
+		bool *bitmap = (bool*) malloc(sizeof(bool) * m_size);
 		for (size_t pos = 0 ; pos < m_size ; pos++)
 		{
-			bitmap[pos] = copy.GetValue(decodeStep, pos);
+			bitmap[pos] = copy.GetValue(decodeStepId, pos);
 		}
+		m_bitmap[decodeStepId] = bitmap;
 	}
 }
 
 WordsBitmap::~WordsBitmap()
 {
-	BitmapType::iterator iter;
-	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+	for (size_t decodeStepId = 0 ; decodeStepId < m_bitmap.size() ; ++decodeStepId)
 	{
-		bool *bitmap = iter->second;
+		bool *bitmap = m_bitmap[decodeStepId];
 		free(bitmap);
 	}
 }
 
 void WordsBitmap::Initialize()
 {
-	BitmapType::iterator iter;
-	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+	for (size_t decodeStepId = 0 ; decodeStepId < m_bitmap.size() ; ++decodeStepId)
 	{
-		bool *bitmap = iter->second;
+		bool *bitmap = m_bitmap[decodeStepId];
 		for (size_t pos = 0 ; pos < m_size ; pos++)
 		{
 			bitmap[pos] = false;
@@ -79,22 +79,19 @@ void WordsBitmap::Initialize()
 	}
 }
 
-
-int WordsBitmap::GetFutureCosts(int lastPos) const 
+int WordsBitmap::GetFutureDistortionScore(int lastPos) const 
 {
 	int ret = 0;
-	BitmapType::const_iterator iterMap;
-	for (iterMap = m_bitmap.begin() ; iterMap != m_bitmap.end() ; ++iterMap)
+	for (size_t decodeStepId = 0 ; decodeStepId < m_bitmap.size() ; ++decodeStepId)
 	{
-		const DecodeStep *decodeStep = iterMap->first;
-		ret += GetFutureCosts(decodeStep, lastPos);
+		ret += GetFutureDistortionScore(decodeStepId, lastPos);
 	}
 	return ret;
 }
 
-int WordsBitmap::GetFutureCosts(const DecodeStep *decodeStep, int lastPos) const 
+int WordsBitmap::GetFutureDistortionScore(size_t decodeStepId, int lastPos) const 
 {
-	bool *bitmap = GetBitmap(decodeStep);
+	bool *bitmap = m_bitmap[decodeStepId];
 	int sum=0;
 	bool aim1	= 0
 			,ai		= 0
@@ -123,27 +120,23 @@ int WordsBitmap::GetFutureCosts(const DecodeStep *decodeStep, int lastPos) const
 	sum+=abs(lastPos-static_cast<int>(m_size)+1); //getCosts(lastPos,as);
 	assert(sum>=0);
 
-	//	TRACE_ERR(sum<<"\n");
-
 	return sum;
 }
 
 std::vector<size_t> WordsBitmap::GetCompressedRepresentation() const
 {
 	std::vector<size_t> ret;
-	BitmapType::const_iterator iterMap;
-	for (iterMap = m_bitmap.begin() ; iterMap != m_bitmap.end() ; ++iterMap)
+	for (size_t decodeStepId = 0 ; decodeStepId < m_bitmap.size() ; ++decodeStepId)
 	{
-		const DecodeStep *decodeStep = iterMap->first;
-		std::vector<size_t> compressedRep = GetCompressedRepresentation(decodeStep);
+		std::vector<size_t> compressedRep = GetCompressedRepresentation(decodeStepId);
 		std::copy(compressedRep.begin(), compressedRep.end() , std::inserter(ret, ret.end()) );
 	}
 	return ret;
 }
 
-std::vector<size_t> WordsBitmap::GetCompressedRepresentation(const DecodeStep *decodeStep) const
+std::vector<size_t> WordsBitmap::GetCompressedRepresentation(size_t decodeStepId) const
 {
-	bool *bitmap = GetBitmap(decodeStep);
+	bool *bitmap = m_bitmap[decodeStepId];
 
 	std::vector<size_t> res(1 + (m_size >> (sizeof(int) + 3)), 0);
   size_t c=0; size_t x=0; size_t ci=0;
@@ -160,15 +153,54 @@ std::vector<size_t> WordsBitmap::GetCompressedRepresentation(const DecodeStep *d
 
 bool WordsBitmap::IsComplete(FactorType factorType) const
 {
-	BitmapType::const_iterator iter;
-	for (iter = m_bitmap.begin() ; iter != m_bitmap.end() ; ++iter)
+	for (size_t decodeStepId = 0 ; decodeStepId < m_bitmap.size() ; ++decodeStepId)
 	{
-		const DecodeStep *decodeStep = iter->first;
-		const FactorMask &outputFactorMask = decodeStep->GetOutputFactorMask();
+		const DecodeStep &decodeStep = StaticData::Instance()->GetDecodeStep(decodeStepId);
+		const FactorMask &outputFactorMask = decodeStep.GetCombinedOutputFactorMask();
 		if (outputFactorMask[factorType] && IsComplete(decodeStep))
 		{
 			return true;
 		}
 	}
 	return false;
+}
+
+bool WordsBitmap::IsComplete(const FactorMask &factorMask) const
+{
+	for (size_t currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; ++currFactor)
+	{
+		if (!IsComplete(currFactor))
+			return false;
+	}
+	return true;
+}
+
+bool WordsBitmap::IsComplete(const DecodeStep &decodeStep) const
+{
+	return GetSize() == GetNumWordsCovered(decodeStep.GetId());
+}
+
+bool WordsBitmap::IsHierarchy(size_t decodeStepId, size_t startPos, size_t endPos) const
+{
+	if (decodeStepId == 0)
+		return true;
+
+	bool *bitmap = m_bitmap[decodeStepId - 1];
+	for (size_t pos = startPos ; pos <= endPos ; ++pos)
+	{
+		if (!bitmap[pos])
+			return false;
+	}
+	return true;
+}
+
+size_t WordsBitmap::GetStackIndex() const
+{
+	size_t ret = 0;
+	for (size_t decodeStepId = 0 ; decodeStepId < m_bitmap.size() ; ++decodeStepId)
+	{
+		size_t wordsTranslated = GetNumWordsCovered(decodeStepId);
+		ret += (size_t) pow((float)(GetSize()+1), (int) decodeStepId) * wordsTranslated;
+	}
+	return ret;
 }

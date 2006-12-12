@@ -48,7 +48,11 @@ public:
 	{
 		return MultiFactor;
 	}
-
+	const FactorMask &GetFactorMask() const
+	{
+		return m_factorTypes;
+	}
 	const std::string GetScoreProducerDescription(int idx = 0) const;	
 	bool Useable(const Phrase &phrase) const;	
+	bool Useable(const FactorMask &factorMask) const;
 };

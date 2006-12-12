@@ -21,15 +21,9 @@ const std::string DistortionScoreProducer::GetScoreProducerDescription(int idx) 
 
 float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr) const
 {
-  if (prev.GetNumWordsCovered() == 0)
-  { // 1st hypothesis with translated phrase. NOT the seed hypo.
-    return - (float) curr.GetStartPos();
-  }
-  else
-  { // add distortion score of current translated phrase to
-    // distortions scores of all previous partial translations
-    return - (float) curr.CalcDistortion(prev);
-	}
+  // add distortion score of current translated phrase to
+  // distortions scores of all previous partial translations
+  return - (float) curr.CalcDistortion(prev);
 }
 
 WordPenaltyProducer::WordPenaltyProducer()

@@ -51,7 +51,7 @@ protected:
 	FactorCollection										m_factorCollection;
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
-	std::list < DecodeStep* >						m_decodeStepList;
+	std::vector<DecodeStep*>						m_decodeStepList;
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
@@ -141,7 +141,7 @@ public:
 		return m_parameter->GetParam(paramName);
 	}
 
-	const bool IsComputeLMBackoffStats() const
+	bool IsComputeLMBackoffStats() const
 	{
 		return m_computeLMBackoffStats;
 	}
@@ -154,9 +154,13 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	const std::list < DecodeStep* > &GetDecodeStepList() const
+	const std::vector<DecodeStep*> &GetDecodeStepList() const
 	{
 		return m_decodeStepList;
+	}
+	const DecodeStep &GetDecodeStep(size_t decodeStepId) const
+	{
+		return *m_decodeStepList[decodeStepId];
 	}
 	
 	inline bool GetSourceStartPosMattersForRecombination() const
@@ -279,7 +283,7 @@ public:
 	{
 		return m_nBestFilePath;
 	}
-  const bool IsNBestEnabled() const {
+  bool IsNBestEnabled() const {
     return !m_nBestFilePath.empty();
   }
 //! Sets the global score vector weights for a given ScoreProducer.

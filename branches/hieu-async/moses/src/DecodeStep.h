@@ -44,21 +44,32 @@ class DecodeStep
 {
 protected:
 	const Dictionary *m_ptr; /*< pointer to translation/generation table */
-	FactorMask m_outputFactors; /** mask of what factors exist on the output side after this decode step */
+	FactorMask m_combinedOutputFactors; /** mask of what factors exist on the output side after this decode step */
 	std::vector<FactorType> m_conflictFactors; /** list of the factors that may conflict during this step*/
 	std::vector<FactorType> m_newOutputFactors; /** list of the factors that are new in this step, may be empty*/
+	size_t m_id;
 
+	static size_t s_id;
 public:
 	DecodeStep(Dictionary *ptr, const DecodeStep* prevDecodeStep);
 	virtual ~DecodeStep();
+
+	size_t GetId() const { return m_id;}
+
 
 	//! whether this is Translate or Generate step
 	virtual DecodeType GetDecodeType() const = 0;
 
 	/** mask of factors that are present after this decode step */
+	const FactorMask& GetCombinedOutputFactorMask() const
+	{
+		return m_combinedOutputFactors;
+	}
+
+	/** mask of factor output by dictionary in this step */
 	const FactorMask& GetOutputFactorMask() const
 	{
-		return m_outputFactors;
+		return m_ptr->GetOutputFactorMask();
 	}
 
 	//! returns true if this decode step must match some pre-existing factors

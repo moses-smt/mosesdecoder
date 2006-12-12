@@ -52,7 +52,7 @@ class GenerationDictionary;
  */
 class TranslationOption
 {
-	friend std::ostream& operator<<(std::ostream& out, const TranslationOption& possibleTranslation);
+	friend std::ostream& operator<<(std::ostream& out, const TranslationOption& transOpt);
 
 protected:
 
@@ -141,9 +141,9 @@ public:
 		return m_scoreBreakdown;
 	}
 
-	const DecodeStep *GetDecodeStep() const
+	size_t GetDecodeStepId() const
 	{
-		return m_sourceWordsRange.GetDecodeStep();
+		return m_sourceWordsRange.GetDecodeStepId();
 	}
 
 	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */

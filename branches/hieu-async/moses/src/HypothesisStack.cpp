@@ -1,4 +1,4 @@
-// $Id: Manager.h 1051 2006-12-06 22:23:52Z hieuhoang1972 $
+// $Id: HypothesisStack.h 1051 2006-12-06 22:23:52Z hieuhoang1972 $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "HypothesisStack.h"
-
+#include "StaticData.h"
 
 HypothesisStack::iterator::iterator(size_t pos, StackType &stack)
 {
@@ -35,15 +35,17 @@ bool HypothesisStack::iterator::operator!=(const iterator &compare) const
 
 void HypothesisStack::AddPrune(Hypothesis *hypo)
 {
-	const WordsBitmap &wordsBitmap = hypo->GetWordsBitmap();
-	size_t wordsTranslated = wordsBitmap.GetNumWordsCovered(NULL); // TODO
+	const WordsBitmap &wordsBitmap = hypo->GetSourceBitmap();
+	size_t stackIndex = wordsBitmap.GetStackIndex();
 
-	/*
-	std::list<DecodeStep*>::const_iterator iter;
-	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
+	// only add to last stack if all factors are specified, ie. sync
+	if ( (stackIndex == m_stack.size() - 1)
+			&& !hypo->GetTargetPhrase().IsSynchronized())
 	{
-		const DecodeStep *decodeStep =*iter;
+		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
+		pool.freeObject(hypo);		
+		return;
 	}
-	*/
+	m_stack[stackIndex].AddPrune(hypo);
 }
 

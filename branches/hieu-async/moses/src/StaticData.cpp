@@ -183,7 +183,7 @@ bool StaticData::LoadData(Parameter *parameter)
 		Scan<int>(m_parameter->GetParam("distortion-limit")[0])
 		: -1;
 	m_useDistortionFutureCosts = (m_parameter->GetParam("use-distortion-future-costs").size() > 0) 
-		? Scan<bool>(m_parameter->GetParam("use-distortion-future-costs")[0]) : false;
+		? Scan<bool>(m_parameter->GetParam("use-distortion-future-costs")[0]) : true;
 	//TRACE_ERR( "using distortion future costs? "<<UseDistortionFutureCosts()<<"\n");
 	
 	m_beamThreshold = (m_parameter->GetParam("beam-threshold").size() > 0) ?
@@ -690,6 +690,7 @@ bool StaticData::LoadMapping()
 				break;
 			}
 			assert(decodeStep);
+			assert(decodeStep->GetId() == m_decodeStepList.size());
 			m_decodeStepList.push_back(decodeStep);
 			prev = decodeStep;
 		} else {

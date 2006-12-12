@@ -37,65 +37,26 @@ class HypothesisRecombinationOrderer
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
 	{
-		// Are the last (n-1) words the same on the target side (n for n-gram LM)?
-		int ret = hypoA->NGramCompare(*hypoB);
-//		int ret = hypoA->FastNGramCompare(*hypoB, m_NGramMaxOrder - 1);
+		/* compare using LM states, source completed bitmap, 
+		 * and other things too. 
+		*/
+		int ret = hypoA->CompareLanguageModel(*hypoB);
 		if (ret != 0)
-		{
 			return (ret < 0);
-		}
 
-		// same last n-grams. compare source words translated
-		const WordsBitmap &bitmapA		= hypoA->GetWordsBitmap()
-			, &bitmapB	= hypoB->GetWordsBitmap();
+		// compare source words translated
+		const WordsBitmap &bitmapA		= hypoA->GetSourceBitmap()
+			, &bitmapB	= hypoB->GetSourceBitmap();
 		ret = bitmapA.Compare(bitmapB);
+		if (ret != 0)
+			return (ret < 0);
 
-		return (ret < 0);
-	}
-};
+		// compare source range just translated
+		ret = hypoA->CompareSourceRange(*hypoB);
+		if (ret != 0)
+			return (ret < 0);
 
-class PhraseCompareOutputFactorOnly
-{
-public:
-	bool operator()(const Phrase &phraseA, const Phrase &phraseB) const
-	{
-		size_t sizeA	= phraseA.GetSize()
-					,sizeB	= phraseB.GetSize();
-
-		// decide by using length. quick decision
-		if (sizeA != sizeB)
-		{
-			return sizeA < sizeB;
-		}
-		else
-		{
-			size_t minSize = std::min( sizeA , sizeB );
-
-			const vector<FactorType> &factorTypes = StaticData::Instance()->GetOutputFactorOrder();
-			// taken from word.Compare()
-			for (size_t i = 0 ; i < factorTypes.size() ; i++)
-			{
-				FactorType factorType = factorTypes[i];
-
-				for (size_t currPos = 0 ; currPos < minSize ; currPos++)
-				{
-					const Factor *factorA	= phraseA.GetFactor(currPos, factorType)
-											,*factorB	= phraseB.GetFactor(currPos, factorType);
-					const int result = factorA->Compare(*factorB);
-					if (result == 0)
-					{
-						continue;
-					}
-					else 
-					{
-						return (result < 0);
-					}
-				}
-			}
-
-			// identical
-			return false;
-		}
+		return false;
 	}
 };
 
@@ -104,13 +65,10 @@ class HypothesisCollection
 {
 private:
 	typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
-	typedef std::vector< Hypothesis*> HypothesisVec;
-	typedef std::map<Phrase, HypothesisVec, PhraseCompareOutputFactorOnly> OutputMap;
-	friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
-
 public:
 	typedef _HCType::iterator iterator;
 	typedef _HCType::const_iterator const_iterator;
+	friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
 
 protected:
 	float m_bestScore; /**< score of the best hypothesis in collection */
@@ -118,8 +76,6 @@ protected:
 	float m_beamThreshold; /**< minimum score due to threashold pruning */
 	size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
 	_HCType m_hypos; /**< contains hypotheses */
-	OutputMap m_outputPhrase;
-
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
 	//! add hypothesis to stack. Prune if necessary
@@ -128,47 +84,21 @@ protected:
 	//! remove hypothesis pointed to by iterator but don't delete the object
 	inline void Detach(const HypothesisCollection::iterator &iter)
 	{
-		Hypothesis *hypo = *iter;
-		const Phrase &targetPhrase = hypo->GetTargetPhrase();
-		OutputMap::iterator iterOutput = m_outputPhrase.find(targetPhrase);
-		assert(iterOutput != m_outputPhrase.end());
-		HypothesisVec &hypoVec = iterOutput->second;
-		HypothesisVec::iterator iterVec; 
-		
-		for (iterVec = hypoVec.begin() ; iterVec != hypoVec.end() ; ++iterVec)
-		{
-			if (*iterVec == hypo)
-			{
-				hypoVec.erase(iterVec);
-				break;
-			}
-		}
-		
 		m_hypos.erase(iter);
 	}
 	/** destroy all instances of Hypothesis in this collection */
 	void RemoveAll();
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
-		
- 	inline void Remove(const HypothesisCollection::iterator &iter)
+	inline void Remove(const HypothesisCollection::iterator &iter)
 	{
-		Hypothesis *hypo = *iter;		
 		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
-		pool.freeObject(hypo);
-
+		pool.freeObject(*iter);
 		Detach(iter);
 	}
-	
 	/** add Hypothesis to the collection, without pruning */
 	inline void AddNoPrune(Hypothesis *hypothesis)
 	{
-		if (m_hypos.insert(hypothesis).second) 
-		{
-			m_outputPhrase[hypothesis->GetTargetPhrase()].push_back(hypothesis);
-		}
-		else
-		{
-			assert(false);
+		if (!m_hypos.insert(hypothesis).second) {
     }
 	}
 

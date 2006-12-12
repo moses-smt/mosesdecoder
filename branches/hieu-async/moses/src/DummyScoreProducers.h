@@ -13,6 +13,7 @@ class DistortionScoreProducer : public ScoreProducer {
 public:
 	DistortionScoreProducer();
 
+	// call WordsRange::CalcDistortion(). both ranges must be valid
 	float CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr) const;
 
 	size_t GetNumScoreComponents() const;

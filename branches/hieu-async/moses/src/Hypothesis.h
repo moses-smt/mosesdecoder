@@ -37,8 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "ObjectPool.h"
 
-class SquareMatrix;
-class FutureScore;
+class SpanScore;
 class TranslationOption;
 class WordsRange;
 class Hypothesis;
@@ -61,13 +60,14 @@ protected:
 	static ObjectPool<Hypothesis> s_objectPool;
 	
 	const Hypothesis* m_prevHypo; /**< backpointer to previous hypothesis (from which this one was created) */
-	const Phrase			&m_targetPhrase; /**< target phrase being created at the current decoding step */
-	Phrase const*     m_sourcePhrase; /**< input sentence */
+	size_t						m_decodeStepId; /**< decode step used to expand this hypo, or NOT_FOUND if 1st hypo */
+	std::vector<const Hypothesis*> m_backPtr; /**< backpointer to previous hypothesis (from which this one was created) */
+	std::vector<WordsRange>	m_currSourceRange; /**< source word positions of the last phrase that was used to create this hypothesis */
+	const Phrase			&m_currTargetPhrase; /**< target phrase being created at the current decoding step */
+	const Phrase			*m_sourcePhrase; /**< input sentence */
+	Phrase						m_targetPhrase; /**< whole of target phrase so far */
 	WordsBitmap				m_sourceCompleted; /**< keeps track of which words have been translated so far */
-	//TODO: how to integrate this into confusion network framework; what if
-	//it's a confusion network in the end???
 	InputType const&  m_sourceInput;
-	WordsRange				m_currSourceWordsRange; /**< source word positions of the last phrase that was used to create this hypothesis */
 	WordsRange        m_currTargetWordsRange; /**< target word positions of the last phrase that was used to create this hypothesis */
   bool							m_wordDeleted;
 	float							m_totalScore;  /**< score so far */
@@ -81,14 +81,13 @@ protected:
 	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 
-	void CalcFutureScore(const FutureScore &futureScore);
+	void CalcFutureScore(const SpanScore &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
 	void CalcLMScore(const LMList &languageModels);
 	void CalcDistortionScore();
-	//TODO: add appropriate arguments to score calculator
 
 	/** used by initial seeding of the translation process */
-	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
+	Hypothesis(InputType const& source, const std::vector<DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget);
 	/** used when creating a new hypothesis using a translation option (phrase translation) */
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
@@ -106,7 +105,7 @@ public:
 	static Hypothesis* Create(const WordsBitmap &initialCoverage);
 
 	/** return the subclass of Hypothesis most appropriate to the given target phrase */
-	static Hypothesis* Create(InputType const& source, const TargetPhrase &emptyTarget);
+	static Hypothesis* Create(InputType const& source, const std::vector<DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget);
 	
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
 	Hypothesis* CreateNext(const TranslationOption &transOpt) const;
@@ -114,17 +113,14 @@ public:
 	void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
 
 	/** return target phrase used to create this hypothesis */
+	const Phrase &GetCurrTargetPhrase() const
+	{
+		return m_currTargetPhrase;
+	}
+	/** return translate target phrase so far */
 	const Phrase &GetTargetPhrase() const
 	{
 		return m_targetPhrase;
-	}
-
- // void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
- 
-	/** return input positions covered by the translation option (phrasal translation) used to create this hypothesis */
-	inline const WordsRange &GetCurrSourceWordsRange() const
-	{
-		return m_currSourceWordsRange;
 	}
 	
 	inline const WordsRange &GetCurrTargetWordsRange() const
@@ -140,7 +136,7 @@ public:
 
 	void ResetScore();
 
-	void CalcScore(const StaticData& staticData, const FutureScore &futureScore);
+	void CalcScore(const StaticData& staticData, const SpanScore &futureScore);
 
 	int GetId()const
 	{
@@ -170,22 +166,16 @@ public:
 	 * not allowed- USE WITH CAUTION) */
 	inline const Word &GetCurrWord(size_t pos) const
 	{
-		return m_targetPhrase.GetWord(pos);
+		return m_currTargetPhrase.GetWord(pos);
 	}
 	inline const Factor *GetCurrFactor(size_t pos, FactorType factorType) const
 	{
-		return m_targetPhrase.GetFactor(pos, factorType);
+		return m_currTargetPhrase.GetFactor(pos, factorType);
 	}
 	/** recursive - pos is relative from start of sentence */
 	inline const Word &GetWord(size_t pos) const
 	{
-		const Hypothesis *hypo = this;
-		while (pos < hypo->GetCurrTargetWordsRange().GetStartPos())
-		{
-			hypo = hypo->GetPrevHypo();
-			assert(hypo != NULL);
-		}
-		return hypo->GetCurrWord(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
+		return m_targetPhrase.GetWord(pos);
 	}
 	inline const Factor* GetFactor(size_t pos, FactorType factorType) const
 	{
@@ -195,30 +185,49 @@ public:
 	/***
 	 * \return The bitmap of source words we cover
 	 */
-	inline const WordsBitmap &GetWordsBitmap() const
+	inline const WordsBitmap &GetSourceBitmap() const
 	{
 		return m_sourceCompleted;
 	}
 
-	int NGramCompare(const Hypothesis &compare) const;
-
-	//	inline size_t hash() const
-	//	{
-	//		if (_hash_computed) return _hash;
-	//		GenerateNGramCompareHash();
-	//		return _hash;
-	//	}
-
-	void ToStream(std::ostream& out) const
+	/**< decode step used to expand this hypo, or NOT_FOUND if 1st hypo */
+	size_t GetDecodeStepId() const
 	{
-		if (m_prevHypo != NULL)
-		{
-			m_prevHypo->ToStream(out);
-		}
-		out << GetTargetPhrase();
+		return m_decodeStepId;
 	}
 
-	TO_STRING();
+	//! get the last curr source range translated by each decode step
+	const WordsRange &GetCurrSourceWordsRange(size_t decodeStepId) const
+	{
+		return m_currSourceRange[decodeStepId];
+	}
+
+	//! get the curr source range translated for this hypo
+	const WordsRange &GetCurrSourceWordsRange() const
+	{
+		return GetCurrSourceWordsRange(GetDecodeStepId());
+	}
+
+	/** check, if two hypothesis can be recombined.
+    this is actually a sorting function that allows us to
+    keep an ordered list of hypotheses. This makes recombination
+    much quicker. 
+*/
+	int CompareLanguageModel(const Hypothesis &compare) const
+	{ // -1 = this < compare
+		// +1 = this > compare
+		// 0	= this ==compare
+		if (m_languageModelStates < compare.m_languageModelStates) return -1;
+		if (m_languageModelStates > compare.m_languageModelStates) return 1;
+		return 0;
+	}
+
+	/** compare source ranges for recombination.
+		*	Assume they have the same number of WordsRange so just 
+		*	compare values, rather than missing obj as well
+	*/
+	int CompareSourceRange(const Hypothesis &compare) const;
+
 
 	inline void SetWinningHypo(const Hypothesis *hypo)
 	{
@@ -253,6 +262,8 @@ public:
 	{
 		return s_HypothesesCreated;
 	}
+
+	TO_STRING();
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

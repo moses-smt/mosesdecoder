@@ -34,20 +34,25 @@ class WordsRange
 {
 	friend std::ostream& operator << (std::ostream& out, const WordsRange& range);
 
-	const DecodeStep *m_decodeStep;
+	size_t m_decodeStepId;
 	size_t m_startPos, m_endPos;
 public:
-	inline WordsRange(const DecodeStep *decodeStep, size_t startPos, size_t endPos) 
-	: m_decodeStep(decodeStep)
+	inline WordsRange()
+	: m_decodeStepId(NOT_FOUND)
+	, m_startPos(NOT_FOUND)
+	, m_endPos(NOT_FOUND)
+	{}
+	inline WordsRange(size_t decodeStepId, size_t startPos, size_t endPos) 
+	: m_decodeStepId(decodeStepId)
 	, m_startPos(startPos)
 	, m_endPos(endPos) 
 	{}
 	inline WordsRange(const WordsRange &copy)
-	 : m_decodeStep(copy.m_decodeStep)
+	 : m_decodeStepId(copy.m_decodeStepId)
 	 , m_startPos(copy.GetStartPos())
 	 , m_endPos(copy.GetEndPos())
 	 {}
-	
+
 	inline size_t GetStartPos() const
 	{
 		return m_startPos;
@@ -56,9 +61,13 @@ public:
 	{
 		return m_endPos;
 	}
-	inline const DecodeStep *GetDecodeStep() const
+	inline size_t GetSize() const
 	{
-		return m_decodeStep;
+		return (m_startPos == NOT_FOUND) ? 0 : m_endPos - m_startPos + 1;
+	}
+	inline size_t GetDecodeStepId() const
+	{
+		return m_decodeStepId;
 	}
 
 	//! distortion cost when phrase is moved from prevRange to this range
@@ -81,10 +90,12 @@ public:
 	}
 	
 	// Whether two word ranges overlap or not
-	inline bool Overlap(const WordsRange& x) const
+	inline bool Overlap(const WordsRange &x) const
 	{
 		
-		if ( x.m_endPos < m_startPos || x.m_startPos > m_endPos) return false;
+		if ( x.m_endPos < m_startPos || x.m_startPos > m_endPos
+				|| m_decodeStepId != x.m_decodeStepId)
+			return false;
 		
 		return true;
 	}

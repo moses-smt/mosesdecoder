@@ -32,6 +32,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "mempool.h"
 
+class TranslationOption;
+
 class Phrase
 {
 	friend std::ostream& operator<<(std::ostream&, const Phrase&);
@@ -45,6 +47,8 @@ class Phrase
 	size_t								m_arraySize;	/** current size of vector m_words. This number is equal or bigger
 																					than m_phraseSize. Used for faster allocation of m_word */
 	std::vector<Word>			m_words;
+
+	size_t FindFirstGap(FactorType factorType);
 
 public:
 	/** No longer does anything as not using mem pool for Phrase class anymore */
@@ -101,13 +105,22 @@ public:
 	//! copy all factors specified in factorVec and none others
 	void MergeFactors(const Phrase &copy, const std::vector<FactorType>& factorVec);
 
+	/** merge factors from trans opt with phrase to create new phrase.
+	 *	Unlike other phrases, the input and output phrases of this fn may 
+	 *	not have factors that fills all the way 'til the end
+	*/
+	void MergeFactors(const Phrase &source, const WordsRange &where);
+
 	/** compare 2 phrases to ensure no factors are lost if the phrases are merged
 	*	must run IsCompatible() to ensure incompatible factors aren't being overwritten
 	*/
 	bool IsCompatible(const Phrase &inputPhrase) const;
 	bool IsCompatible(const Phrase &inputPhrase, FactorType factorType) const;
 	bool IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const;
-	
+
+	// whether every factor for every word is filled in
+	bool IsSynchronized() const;
+
 	//! really means what language. Input = Source, Output = Target
 	inline FactorDirection GetDirection() const
 	{

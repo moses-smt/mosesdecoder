@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class FactorCollection;
 class Factor;
 class Phrase;
+class FactorMask;
 
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModel : public ScoreProducer
@@ -68,6 +69,7 @@ public:
 	 * Should return false if phrase size = 0 or factor types required don't exists
 	 */
 	virtual bool Useable(const Phrase &phrase) const = 0;
+	virtual bool Useable(const FactorMask &factorMask) const = 0;
 
 	/* calc total unweighted LM score of this phrase and return score via arguments.
 	 * Return scores should always be in natural log, regardless of representation with LM implementation.

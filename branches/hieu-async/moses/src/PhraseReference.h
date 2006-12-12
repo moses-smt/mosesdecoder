@@ -1,3 +1,5 @@
+// $Id: PhraseReference.h 988 2006-11-21 19:35:37Z hieuhoang1972 $
+
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -31,16 +33,21 @@ class PhraseReference
 {
 	public:
 	
-		PhraseReference() : fullPhrase(NULL), range(NULL, 0, 0) {}
-		PhraseReference(const InputType& phrase, const WordsRange& r) : fullPhrase(&phrase), range(r) {}
-		
-		const InputType& GetFullPhrase() const {return *fullPhrase;}
-		Phrase GetSubphrase() const {return fullPhrase->GetSubString(range);}
+		PhraseReference() : m_fullPhrase(NULL), m_range()
+		{}
+		PhraseReference(const InputType& phrase, const WordsRange& r) 
+			: m_fullPhrase(&phrase), m_range(r) 
+		{}
+		const InputType& GetFullPhrase() const {return *m_fullPhrase;}
+		Phrase GetSubphrase() const 
+		{
+			return m_fullPhrase->GetSubString(m_range);
+		}
 	
 	protected:
 	
-		const InputType* fullPhrase;
-		WordsRange range;
+		const InputType* m_fullPhrase;
+		WordsRange m_range;
 };
 
 std::ostream& operator << (std::ostream& out, const PhraseReference& phrase);

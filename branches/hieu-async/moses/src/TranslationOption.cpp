@@ -78,7 +78,7 @@ bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<Fac
 
 bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 {
-	const WordsBitmap &bitmap = hypothesis.GetWordsBitmap();
+	const WordsBitmap &bitmap = hypothesis.GetSourceBitmap();
 	return bitmap.Overlap(GetSourceWordsRange());
 }
 
@@ -101,11 +101,11 @@ void TranslationOption::CalcScore()
 TO_STRING_BODY(TranslationOption);
 
 // friend
-ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
+ostream& operator<<(ostream& out, const TranslationOption& transOpt)
 {
-	out << possibleTranslation.GetTargetPhrase() 
-			<< "c=" << possibleTranslation.GetFutureScore()
-			<< " [" << possibleTranslation.GetSourceWordsRange() << "]"
-			<< possibleTranslation.GetScoreBreakdown();
+	out << transOpt.GetTargetPhrase() 
+			<< "c=" << transOpt.GetFutureScore()
+			<< " [" << transOpt.GetSourceWordsRange() << "]"
+			<< transOpt.GetScoreBreakdown();
 	return out;
 }

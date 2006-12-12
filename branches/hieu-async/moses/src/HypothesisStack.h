@@ -1,4 +1,4 @@
-// $Id: Manager.h 1051 2006-12-06 22:23:52Z hieuhoang1972 $
+// $Id: HypothesisStack.h 1051 2006-12-06 22:23:52Z hieuhoang1972 $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -24,6 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include "HypothesisCollection.h"
 
+/** wraps up vector of HypothesisCollection and takes care of adding hypotheses to
+	*	the correct stack
+*/
 class HypothesisStack
 {
 	typedef std::vector < HypothesisCollection > StackType;
@@ -38,8 +41,9 @@ public:
 	iterator end() { return iterator(NOT_FOUND, m_stack); }
 	const HypothesisCollection &back() const { return m_stack.back(); }
 
-	HypothesisStack(size_t sourceSize)
-		:m_stack(sourceSize+1)
+	//! constructor
+	HypothesisStack(size_t sourceSize, const std::vector<DecodeStep*> &decodeStepList)
+		:m_stack( (size_t) pow( (float) sourceSize+1 , (int) decodeStepList.size()) )
 	{}
 
 	//! get a particular stack
@@ -63,9 +67,7 @@ public:
 		bool operator!=(const iterator &compare) const;
 		const iterator &operator++()
 		{
-			++m_pos;
-			if (m_pos >= m_stack->size()) // end
-					m_pos = NOT_FOUND;
+			m_pos = (m_pos >= (m_stack->size()-1) ) ? NOT_FOUND : m_pos+1 ;
 			return *this;
 		}
 		HypothesisCollection &operator*() const
