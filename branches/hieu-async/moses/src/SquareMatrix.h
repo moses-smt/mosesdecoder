@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 template<typename T>
 class SquareMatrix
 {
-	friend std::ostream& operator<<(std::ostream &out, const SquareMatrix<T> &matrix);
 protected:
 	const size_t m_size;
 	T *m_array;
