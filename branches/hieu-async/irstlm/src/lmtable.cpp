@@ -17,7 +17,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 ******************************************************************************/
-#include <unistd.h>
 #include <fcntl.h>
 #include <iostream>
 #include <fstream>
@@ -31,6 +30,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #include "n_gram.h"
 #include "lmtable.h"
 #include "util.h"
+
+#ifndef WIN32
+#include <unistd.h>
+#endif
 
 #define DEBUG 0
 
