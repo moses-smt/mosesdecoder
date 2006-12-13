@@ -107,6 +107,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
 		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
+		std::transform(scv.begin(),scv.end(),scv.begin(),FloorScore);
 		targetPhrase.SetScore(this, scv, weight, weightWP, languageModels);
 
 		AddEquivPhrase(sourcePhrase, targetPhrase);
