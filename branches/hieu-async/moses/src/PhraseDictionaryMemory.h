@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /*** Implementation of a phrase table in a trie.  Looking up a phrase of
  * length n words requires n look-ups to find the TargetPhraseCollection.
  */
+
+#pragma warning(disable:654) // spurious warnings on intel compiler
+ 
 class PhraseDictionaryMemory : public PhraseDictionary
 {
 	typedef PhraseDictionary MyBase;
@@ -65,4 +68,5 @@ public:
 	TO_STRING();
 	
 };
+#pragma warning(default:654)
 

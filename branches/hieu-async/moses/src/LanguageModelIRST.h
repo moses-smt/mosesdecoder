@@ -72,6 +72,6 @@ public:
 
   virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const;
 
-  const void CleanUpAfterSentenceProcessing();
-  const void InitializeBeforeSentenceProcessing();
+  void CleanUpAfterSentenceProcessing();
+  void InitializeBeforeSentenceProcessing();
 };

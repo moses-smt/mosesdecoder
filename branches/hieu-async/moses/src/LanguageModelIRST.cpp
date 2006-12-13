@@ -167,7 +167,7 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 }
 
 
-const void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
+void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
   TRACE_ERR( "reset caches\n");
   m_lmtb->reset_caches(); 
 
@@ -178,7 +178,7 @@ const void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
   
 }
 
-const void LanguageModelIRST::InitializeBeforeSentenceProcessing(){
+void LanguageModelIRST::InitializeBeforeSentenceProcessing(){
   //nothing to do
 #ifdef TRACE_CACHE
  m_lmtb->sentence_id++;
