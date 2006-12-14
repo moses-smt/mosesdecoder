@@ -48,8 +48,6 @@ class Phrase
 																					than m_phraseSize. Used for faster allocation of m_word */
 	std::vector<Word>			m_words;
 
-	size_t FindFirstGap(FactorType factorType);
-
 public:
 	/** No longer does anything as not using mem pool for Phrase class anymore */
 	static void InitializeMemPool();
@@ -170,7 +168,10 @@ public:
 	
 	//! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
 	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 
-  
+
+	//! return 1st pos where factor is NULL, or size of phrase if no factor is NULL
+	size_t FindFirstGap(FactorType factorType) const;
+
 	TO_STRING();
 
 	/** transitive comparison between 2 phrases

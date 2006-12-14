@@ -222,12 +222,16 @@ public:
 		return 0;
 	}
 
-	/** compare source ranges for recombination.
+	/** compare current source ranges for recombination.
 		*	Assume they have the same number of WordsRange so just 
 		*	compare values, rather than missing obj as well
 	*/
-	int CompareSourceRange(const Hypothesis &compare) const;
+	int CompareCurrSourceRange(const Hypothesis &compare) const;
 
+	/** compare the synchronoized words (positions where some factors are NULL and other factor aren't)
+		*	The unsync factors must be exact in both hypos to be able to say they're equal and can be combined.
+	*/
+	int CompareUnsyncFactors(const Hypothesis &compare) const;
 
 	inline void SetWinningHypo(const Hypothesis *hypo)
 	{

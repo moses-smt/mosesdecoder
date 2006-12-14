@@ -52,7 +52,12 @@ public:
 			return (ret < 0);
 
 		// compare source range just translated
-		ret = hypoA->CompareSourceRange(*hypoB);
+		ret = hypoA->CompareCurrSourceRange(*hypoB);
+		if (ret != 0)
+			return (ret < 0);
+
+		// make sure generation steps will be equal going fwd
+		ret = hypoA->CompareUnsyncFactors(*hypoB);
 		if (ret != 0)
 			return (ret < 0);
 

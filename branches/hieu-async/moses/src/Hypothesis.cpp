@@ -203,7 +203,7 @@ Hypothesis* Hypothesis::Create(InputType const& m_source, const std::vector<Deco
 	return new(ptr) Hypothesis(m_source, decodeStepList, emptyTarget);
 }
 
-int Hypothesis::CompareSourceRange(const Hypothesis &compare) const
+int Hypothesis::CompareCurrSourceRange(const Hypothesis &compare) const
 {
 	for (size_t decodeStepId = 0 ; decodeStepId < m_currSourceRange.size() ; ++decodeStepId)
 	{
@@ -222,6 +222,34 @@ int Hypothesis::CompareSourceRange(const Hypothesis &compare) const
 			return -1;
 		if (m_currSourceRange[decodeStepId].GetStartPos() > compare.m_currSourceRange[decodeStepId].GetStartPos())
 			return +1;
+	}
+
+	return 0;
+}
+
+int Hypothesis::CompareUnsyncFactors(const Hypothesis &compare) const
+{
+	const Phrase &phraseThis		= GetTargetPhrase()
+							,&phraseCompare = compare.GetTargetPhrase();
+	size_t	maxGap = 0;
+
+	// find starting pos
+	for (FactorType factorType = 0 ; factorType < StaticData::Instance()->GetMaxNumFactors(Output) ; ++factorType)
+	{
+		size_t gapThis		= GetSize()					- phraseThis.FindFirstGap(factorType)
+					,gapCompare	= compare.GetSize() - phraseCompare.FindFirstGap(factorType);
+		
+		// both hypo must have the same number of factors missing
+		if ( gapThis != gapCompare)
+		{
+			return gapThis < gapCompare ? -1 : +1;
+		}
+
+		maxGap = (gapThis > maxGap) ? gapThis : maxGap;
+	}
+
+	for (size_t gap = 0 ; gap < maxGap ; ++gap)
+	{
 	}
 
 	return 0;

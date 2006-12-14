@@ -75,7 +75,7 @@ Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWord
 	}
 }
 
-size_t Phrase::FindFirstGap(FactorType factorType)
+size_t Phrase::FindFirstGap(FactorType factorType) const
 {
 	for (size_t pos = 0 ; pos < GetSize() ; ++pos)
 	{
