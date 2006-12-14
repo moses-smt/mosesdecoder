@@ -175,6 +175,8 @@ public:
 				std::vector<float> scoreVector(probVector.size());
 				std::transform(probVector.begin(),probVector.end(),scoreVector.begin(),
 											 TransformScore);
+				std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),
+											 FloorScore);
 				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector);
 				costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),
 																			 tCands.size()));
