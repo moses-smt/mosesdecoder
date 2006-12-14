@@ -128,8 +128,7 @@ int main(int argc, char* argv[])
 		Manager manager(*source, staticData);
 		manager.ProcessSentence();
 		ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
-													 staticData.GetReportSegmentation(),
-													 staticData.GetReportAllFactors()
+													 staticData.GetReportSegmentation()
 													 );
 		// n-best
 		size_t nBestSize = staticData.GetNBestSize();

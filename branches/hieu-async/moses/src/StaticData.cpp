@@ -121,9 +121,6 @@ bool StaticData::LoadData(Parameter *parameter)
 	// printing source phrase spans
 	SetBooleanParameter( &m_reportSegmentation, "report-segmentation", false );
 
-	// print all factors of output translations
-	SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
-
 	//input factors
 	const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
 	for(size_t i=0; i<inputFactorVector.size(); i++) 

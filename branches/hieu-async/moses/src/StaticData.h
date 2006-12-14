@@ -96,7 +96,6 @@ protected:
 	WordPenaltyProducer *m_wpProducer;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
-	bool m_reportAllFactors;
 	bool m_useDistortionFutureCosts;
 	bool m_isDetailedTranslationReportingEnabled;
 	bool m_onlyDistinctNBest;
@@ -252,10 +251,6 @@ public:
 	bool GetReportSegmentation() const
 	{
 		return m_reportSegmentation;
-	}
-	bool GetReportAllFactors() const
-	{
-		return m_reportAllFactors;
 	}
 	bool IsDetailedTranslationReportingEnabled() const
 	{

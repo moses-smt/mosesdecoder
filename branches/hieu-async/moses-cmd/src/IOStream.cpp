@@ -110,37 +110,30 @@ InputType*IOStream::GetInput(InputType* inputType)
 /***
  * print surface factor only for the given phrase
  */
-void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
+void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder)
 {
 	assert(outputFactorOrder.size() > 0);
-	if (reportAllFactors == true) 
+	size_t size = phrase.GetSize();
+	for (size_t pos = 0 ; pos < size ; pos++)
 	{
-		out << phrase;
-	} 
-	else 
-	{
-		size_t size = phrase.GetSize();
-		for (size_t pos = 0 ; pos < size ; pos++)
+		const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+		out << *factor;
+		
+		for (size_t i = 1 ; i < outputFactorOrder.size() ; i++)
 		{
-			const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
-			out << *factor;
-			
-			for (size_t i = 1 ; i < outputFactorOrder.size() ; i++)
-			{
-				const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-				out << "|" << *factor;
-			}
-			out << " ";
+			const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
+			out << "|" << *factor;
 		}
+		out << " ";
 	}
 }
 
 void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder
-									 ,bool reportSegmentation, bool reportAllFactors)
+									 ,bool reportSegmentation)
 {
 	if ( hypo != NULL)
 	{
-		OutputSurface(out, hypo->GetTargetPhrase(), outputFactorOrder, reportAllFactors);
+		OutputSurface(out, hypo->GetTargetPhrase(), outputFactorOrder);
 
 		if (reportSegmentation == true
 		    && hypo->GetCurrTargetPhrase().GetSize() > 0) {
@@ -158,7 +151,7 @@ void IOStream::Backtrack(const Hypothesis *hypo){
 	}
 }
 
-void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bool reportSegmentation)
 {
 	if (hypo != NULL)
 	{
@@ -167,7 +160,7 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 		Backtrack(hypo);
 		VERBOSE(3,"0" << std::endl);
 
-		OutputSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors);
+		OutputSurface(cout, hypo, m_outputFactorOrder, reportSegmentation);
 	}
 	else
 	{
@@ -195,7 +188,7 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
 			const Hypothesis &edge = *edges[currEdge];
-			OutputSurface(m_nBestFile, edge.GetCurrTargetPhrase(), m_outputFactorOrder, false); // false for not reporting all factors
+			OutputSurface(m_nBestFile, edge.GetCurrTargetPhrase(), m_outputFactorOrder);
 		}
 		m_nBestFile << " ||| ";
 

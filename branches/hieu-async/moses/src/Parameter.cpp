@@ -51,7 +51,6 @@ Parameter::Parameter()
 	AddParam("n-best-list", "file and size of n-best-list to be generated");
 	AddParam("output-factors", "list of factors in the output");
 	AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
-	AddParam("report-all-factors", "report all factors in output, not just first");
 	AddParam("report-segmentation", "t", "report phrase segmentation in the output");
 	AddParam("stack", "s", "maximum stack size for histogram pruning");
 	AddParam("translation-details", "T", "for each best translation hypothesis, print out details about what sourcce spans were used, dropped");

@@ -77,7 +77,7 @@ public:
 	~IOStream();
 
 	InputType* GetInput(InputType *inputType);
-	void OutputBestHypo(const Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+	void OutputBestHypo(const Hypothesis *hypo, long translationId, bool reportSegmentation);
 	void OutputNBestList(const LatticePathList &nBestList, long translationId);
 	void Backtrack(const Hypothesis *hypo);
 
