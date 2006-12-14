@@ -1,0 +1,28 @@
+==== Running the tests:
+
+All *.test files here are run by ../Makefile.
+Please do not run them from here, as they should depend some variables set by the ../Makefile
+
+To run all tests, issue:
+  make tests
+  !! in the scripts directory
+
+Ro tun a single test, issue:
+  make tests/TESTNAME.test.run
+  !! in the scripts directory
+
+  Example:
+  make tests/train-factored-test-step3.test.run
+
+
+
+==== Building new tests
+
+Each of the test should assume that it is launched in a fresh directory:
+
+tests/TESTNAME.test.TIMESTAMP/
+
+The test should prepare any files needed and then should test what there is to test.
+
+The best way is to make a copy of an older test, rename, modify and add to the CVS.
+

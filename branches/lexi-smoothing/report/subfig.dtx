@@ -1,0 +1,4714 @@
+% \iffalse % meta-comment
+% subfig.dtx
+% Sub-float macros for use with the LaTeX figure/table environments.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Copyright © 2003, 2004, 2005 Steven Douglas Cochran.
+% 
+% This work (the subfig package) may be distributed and/or modified 
+% under the conditions of the LaTeX Project Public License, either 
+% version 1.3 of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2003/12/01 or later.
+%
+% This work has the LPPL maintenance status "author-maintained".
+% 
+% This Current Maintainer of this work is Steven Douglas Cochran.
+%
+% This work consists of all files listed under "MANIFEST" in the
+% README file distributed with the subfig package.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% @LaTeX-style-file{
+%%    author     = "Steven Douglas Cochran",
+%%    version    = "1.3",
+%%    date       = "2005/07/05",
+%%    time       = "04:19:08",
+%%    filename   = "subfig.sty",
+%%    address    = "Digital Mapping Laboratory, 
+%%                  School of Computer Science
+%%                  Carnegie-Mellon University, 
+%%                  5000 Forbes Avenue
+%%                  Pittsburgh, PA 15213-3890
+%%                  USA",
+%%    telephone  = "+1 412.268.5654",
+%%    fax        = "+1 412.268.5576",
+%%    email      = "cochran@ieee.org",
+%%    codetable  = "ISO/ASCII",
+%%    keywords   = "LaTeX, float, sub-float, continued figure",
+%%    supported  = "yes",
+%%    abstract   = "LaTeX package for providing support for the
+%%                  inclusion of small, `sub', figures and tables.  It
+%%                  simplifies the positioning, captioning and
+%%                  labeling of them within a single figure or table
+%%                  environment.  In addition, this package allows
+%%                  such sub-captions to be written to the List of
+%%                  Figures or List of Tables if desired."
+%% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \fi
+%
+% \catcode`\^=14                ^ We will use a ^ for a comment.
+%
+% \def\filename{subfig.dtx}
+% \def\fileversion{version 1.3}
+% \def\filedate{2005/06/28}	^ Last code change
+% \def\docdate{2005/07/05}	^ Last documentation change
+%
+% \CheckSum{1183}
+%
+% \iffalse
+%<*driver>
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesFile{subfig.dtx}
+\documentclass[a4paper]{ltxdoc}
+\usepackage{hyperref}
+\makeatletter
+  \@twosidetrue
+  \def\cmd#1{\cs{\expandafter\cmd@to@cs\string#1}}
+  \def\cmd@to@cs#1#2{#2}
+  \DeclareRobustCommand\cs[1]{\textbackslash #1}
+  %
+  % Widen the standard ltxdoc pagesize, just a little.
+  %
+  \setlength\topmargin        {0pt}
+  \setlength\headheight       {12pt}
+  \setlength\headsep          {24pt}
+  \setlength\@tempdima        {\paperheight}
+  \addtolength\@tempdima      {-2in}
+  \addtolength\@tempdima      {-\headheight}
+  \addtolength\@tempdima      {-\headsep}
+  \divide\@tempdima           \baselineskip
+  \@tempcnta                  \@tempdima
+  \setlength\textheight       {\@tempcnta\baselineskip}
+  %
+  \setlength\textwidth        {\paperwidth}
+  \addtolength\textwidth      {-3in}
+  \addtolength\textwidth      {-20pt}
+  \setlength\oddsidemargin    {1in}
+  \addtolength\textwidth      {20pt}
+  \setlength\evensidemargin   {\oddsidemargin}
+  %
+  \setlength\marginparsep     {8pt}
+  \setlength\marginparwidth   {2in}
+\makeatother
+\RequirePackage[format=hang,justification=RaggedRight]{caption}[2005/06/26]
+\RequirePackage[format=default,justification=justified,%
+                lofdepth=2,lotdepth=2,subrefformat=parens]{subfig}[2005/06/28]
+% Create map and submap floats for example
+\usepackage{float}
+\newfloat{map}{tbph}{lom}
+\restylefloat*{map}
+\floatstyle{plain}
+\floatname{map}{Map}
+\captionsetup[map]{position=top}
+\newsubfloat[position=top,listofformat=simple]{map}
+\newcommand{\listofmaps}{\listof{map}{List of Maps}}
+\setcounter{lomdepth}{2}
+% Other packages
+\usepackage{color}
+\definecolor{lightgray}{gray}{.8}
+\IfFileExists{booktabs.sty}{%
+  \usepackage{booktabs}%
+}{%
+  \PackageWarning{subfig}%
+      {booktabs.sty is missing.\MessageBreak
+      I'm emulating the needed commands, but you should\MessageBreak
+      install it for better results.}%
+  \let\toprule\hline
+  \let\midrule\hline
+  \let\bottomrule\hline
+}
+% Handy temp values.
+\newbox{\tempbox}
+\newdimen{\tempdima}
+\newdimen{\tempdimb}
+% Make a SubFloat environment.
+\makeatletter
+\newbox\sf@box
+\newenvironment{SubFloat}[2][]%
+  {\def\sf@one{#1}%
+   \def\sf@two{#2}%
+   \setbox\sf@box\hbox
+     \bgroup}%
+  {  \egroup
+   \ifx\@empty\sf@two\@empty\relax
+     \def\sf@two{\@empty}
+   \fi
+   \ifx\@empty\sf@one\@empty\relax
+     \subfloat[\sf@two]{\box\sf@box}%
+   \else
+     \subfloat[\sf@one][\sf@two]{\box\sf@box}%
+   \fi}
+\makeatother
+% Adjust internal stuff
+\makeatletter
+\IfFileExists{multirow.sty}{%
+  \usepackage{multirow}%
+}{%
+  \PackageWarning{subfig}%
+      {multirow.sty is missing.\MessageBreak
+      I'm emulating the needed command, but you should\MessageBreak
+      install it for better results.}%
+    \def\multirow##1##2##3{%
+      \@tempcnta=##1%
+      \@tempdima\@tempcnta\ht\@arstrutbox
+      \advance\@tempdima\@tempcnta\dp\@arstrutbox
+      \ifnum\@tempcnta<0%
+        \@tempdima=-\@tempdima
+      \fi
+      \if*##2
+        \setbox0\vtop to \@tempdima{%
+          \vfill
+          \raggedright
+          \hbox{\strut##3\strut}%
+          \vfill}%
+      \else
+        \setbox0\vtop to \@tempdima{%
+          \hsize##2
+          \@parboxrestore
+          \vfill
+          \raggedright
+          \strut##3\strut\par
+          \vfill}%
+      \fi
+      \ht0\z@
+      \dp0\z@
+      \ifnum\@tempcnta<0%
+        \advance\@tempdima-\dp\@arstrutbox
+      \else
+        \@tempdima=\ht\@arstrutbox
+      \fi
+      \leavevmode
+      \vtop{%
+        \vskip-\@tempdima
+        \box0%
+        \vss}}}
+\makeatother
+% Penalty Settings
+\setlength\hfuzz{100pt}  \setlength\vfuzz{100pt}    \clubpenalty=10000
+\widowpenalty=10000      \displaywidowpenalty=5000  \brokenpenalty=5000
+\begin{document}
+  \pagestyle{empty}
+  \DocInput{subfig.dtx}
+\end{document}
+%</driver>
+%
+%<*ltxdoc>
+\AtBeginDocument{%
+%  \OnlyDescription % comment out for implementation details
+  \EnableCrossrefs
+  \RecordChanges
+  \CodelineIndex
+}
+\AtEndDocument{
+  \newpage
+  \PrintChanges
+  \newpage
+  \PrintIndex
+}
+%</ltxdoc>
+%
+% \fi
+% \newcommand*{\Lopt}[1]{\textsf{#1}}         ^ Package options
+% \newcommand*{\Lfile}[1]{\texttt{#1}}        ^ File names
+% \newcommand*{\Lpack}[1]{\textsf{#1}}        ^ Package names
+% \newcommand*{\Lenv}[1]{\texttt{#1}}         ^ Environment names
+% \newcommand*{\Lcount}[1]{\textsl{\small#1}} ^ Counter names
+% \newcommand*{\Lif}[1]{\textsc{\bf#1}}       ^ \if names
+% \newcommand*{\Lvar}[1]{``#1''}              ^ variable names
+% \newcommand*{\Lkv}[1]{`#1'}                 ^ keyword/value names
+%
+% ^^
+% ^^ NOTE: Hacks added to make the final format (if any)
+% ^^       are marked with the comment ``^finalhack''.
+% ^^
+%
+% \changes{v1.0}{21 August 2003}{Created (based on the \Lpack{subfigure}
+% package.} 
+% \changes{v1.2}{28 January 2004}{Changed the names \Lkv{topskip} to
+% \Lkv{farskip}, and \Lkv{bottomskip} to \Lkv{nearskip}.  Added
+% a hyphen to ``sub-float'' and ``sub-caption'' where they occurs as
+% regular text to match the usage in The \LaTeX\ Companion. Also fixed
+% bug in the alternative code if the \Lpack{multirow} package is not found.}
+% \changes{v1.3}{26 March 2004}{Lots of documentation changes.  I hope
+% that they are improvements!}
+%
+% \DoNotIndex{\@@@,\@auxout,\@bsphack,\@classoptionslist,\@currbox}
+% \DoNotIndex{\@currext,\@currname\@dblarg,\@dottedtocline,\@ehd,\@empty}
+% \DoNotIndex{\@esphack,\@expandtwoargs,\@firstofone,\@firstoftwo}
+% \DoNotIndex{\@floatpenalty,\@for,\@gobble,\@ifnextchar}
+% \DoNotIndex{\@ifpackageloaded,\@ifstar,\@ifundefined,\@largefloatcheck}
+% \DoNotIndex{\@latex@error,\@minipagefalse,\@namedef,\@nameuse,\@ne}
+% \DoNotIndex{\@onlypreamble,\@parboxrestore,\@ptionlist,\@removeelement}
+% \DoNotIndex{\@secondoftwo,\@setminipage,\@undefined}
+% \DoNotIndex{\@unprocessedoptions,\@unusedoptionlist,\@xaddvskip}
+% \DoNotIndex{\addcontentsline,\addtocounter,\advance,\alph,\arabic}
+% \DoNotIndex{\AtBeginDocument,\AtEndOfPackage,\begin,\begingroup}
+% \DoNotIndex{\bfseries,\bgroup,\box,\cmd,\csname,\CurrentOption,\def}
+% \DoNotIndex{\define@key,\do,\dp,\edef,\egroup,\else,\end,\endcsname}
+% \DoNotIndex{\endgroup,\endinput,\expandafter,\fi,\footnotesize,\gdef}
+% \DoNotIndex{\global,\hb@xt@,\hbox,\hrule,\hss,\ht,\if@minipage,\ifcase}
+% \DoNotIndex{\ifdim,\ifnum,\ifx,\ignorespaces,\InputIfFileExists}
+% \DoNotIndex{\itshape,\l@addto@macro,\label,\Large,\large,\lastskip}
+% \DoNotIndex{\leaders,\leavevmode,\let,\long,\m@ne,\mdseries}
+% \DoNotIndex{\NeedsTeXFormat,\newcounter,\newdimen,\newif,\newlabel}
+% \DoNotIndex{\newskip,\next,\noexpand,\normalsize,\numberline,\or,\p@}
+% \DoNotIndex{\PackageError,\PackageWarning,\pageref,\par,\parbox}
+% \DoNotIndex{\protect,\protected@edef,\protected@write,\ProvidesPackage}
+% \DoNotIndex{\ref,\refstepcounter,\relax,\RequirePackage,\rmfamily}
+% \DoNotIndex{\romannumeral,\scriptsize,\scshape,\setbox,\setcounter}
+% \DoNotIndex{\sffamily,\slshape,\small,\space,\string,\strip@period}
+% \DoNotIndex{\the,\thepage,\thr@@,\ttfamily,\tw@,\typeout,\upshape}
+% \DoNotIndex{\value,\vbox,\vrule,\vskip,\vtop,\wd,\xdef,\z@}
+%
+% ^ Allow a little more freedom in typesetting floats.
+% \setcounter{topnumber}{8}
+% \def\topfraction{.95}
+% \setcounter{bottomnumber}{8}
+% \def\bottomfraction{.95}
+% \setcounter{totalnumber}{8}
+% \def\textfraction{.05}
+% \def\floatpagefraction{.95}
+% \setcounter{dbltopnumber}{8}
+% \def\dbltopfraction{.95}
+% \def\dblfloatpagefraction{.9}
+%
+% ^  Useful hacks
+% \def\eg{{\em e.g.}}
+% \def\ie{{\em i.e.}}
+% \def\etc{{\em etc.}}
+%
+% ^ Add some space above any footnotes.
+% \skip\footins=1.5\baselineskip
+%
+% ^  Setup for illustrations.
+% \def\sc{Short caption.}
+% \def\lc{Non fuit causa cur postularet. Qui hoc intellegi 
+%         potest? Naevio neque ex societatis ratione neque
+%         privatim quicquam debuit Quinctius.\par
+%         Quis huic rei testis est? Idem qui acerrimus 
+%         adversarius; in hanc rem te, te inquam, testem, 
+%         Naevi, citabo.}
+% \def\lcX{Non fuit causa cur postularet. Qui hoc intellegi 
+%         potest? Naevio neque ex societatis ratione neque
+%         privatim quicquam debuit Quinctius.\par
+%         Quis huic rei testis est? Idem qui acerrimus 
+%         adversarius; in hanc rem te, te inquam, testem, 
+%         Naevi, citabo.\par
+%         Annum et eo diutius post mortem C. Quincti fuit 
+%         in Gallia tecum simul Quinctius.}
+% \def\b{\fboxsep=-\fboxrule
+%        \fbox{\hbox to 2.0in{\vbox to 2mm{\vfil\null}\hfil}}}
+% \def\B#1#2{%
+%        \fcolorbox{black}{#1}{%
+%            \hbox to 1.9in{\vbox to 4mm{\vss\hbox to 1.9in{%
+%            \hfil[\texttt{#2}]\hfil}\vss}}}}
+% \def\g{\hspace{.5in}}
+% 
+%  ^  General drop for text.
+%  \def\drop#1#2{\smash{\lower#1\hbox{#2}}}
+%
+% \makeatletter
+%   ^ Remove some space above minipage footnotes.
+%   \skip\@mpfootins=2.6\p@
+%
+%   ^ Define a raggedright for use in tabular's.
+%   \def\rr{%
+%     \@rightskip\@flushglue
+%     \rightskip\@rightskip
+%     \leftskip\z@
+%     \parindent\z@}
+%   
+%   ^ Turn off any list entries by ``eating'' any \addcontentsline stuff.
+%   \def\eatthree#1#2#3{}^
+%   \def\turnofflistentry{\let\addcontentsline=\eatthree}
+%
+%   ^ Special \footnotetext command for placing footnotes in strange places.
+%   \def\tabFootnotetext#1{^
+%     \vbox{^
+%       \vskip\skip\@mpfootins
+%       \footnotesize
+%       \@parboxrestore
+%      \edef\@currentlabel{\csname p@footnote\endcsname\@thefnmark}^
+%       \@makefntext{\rule{\z@}{\footnotesep}\ignorespaces#1\strut}}}
+% 
+%   ^ Templates for showing options.
+%   \newcommand{\figfont}[3]{%
+%     \captionsetup[subfigure]{#2=#3}^
+%     \subfloat[{Option [\texttt{#2=#3}].}]^
+%              [\sc]{\label{#1}\B{white}{#2=#3}}}
+%   \newcommand{\figfontlist}[3]{^
+%     \captionsetup[subfigure]{#2={#3}}^
+%     \subfloat[{Option [\texttt{#2=\{#3\}}].}]^
+%              [\sc]{\label{#1}\B{white}{#2=\{#3\}}}}
+%   \newcommand{\figfontlistS}[3]{^
+%     \captionsetup[subfigure]{#2={#3}}^
+%     \subfloat[{Option [\texttt{#2=\{#3\}}].}]^
+%              [\sc]{\label{#1}\B{lightgray}{#2=\{#3\}}}}
+%   \newcommand{\figshape}[3][\@empty]{^
+%     \begin{figure}^
+%       \centering
+%       \captionsetup[subfigure]{#3}^
+%       \subfloat[][\sc]{\b}\g\subfloat[][\lc\label{#2b}]{\b}^
+%       \ifx\@empty#1\relax
+%         \caption{Options [\texttt{#3}].}^
+%       \else
+%         \caption[Options [\texttt{#1}{].}]{Options [\texttt{#3}].}^
+%       \fi
+%       \label{#2}^
+%     \end{figure}}
+%
+% \makeatother
+%
+% \title{The \Lpack{Subfig} Package\footnote{This paper documents
+%        the \Lpack{subfig} package \fileversion, last revised 
+%        \filedate.}\\[10pt]}
+% \author{Steven Douglas Cochran\\[15pt]
+%         Digital Mapping Laboratory, School of Computer Science \\
+%         Carnegie-Mellon University, 5000 Forbes Avenue \\
+%         Pittsburgh, PA 15213--3890 \\
+%         USA\\[15pt]
+%         \texttt{cochran@ieee.org}\\
+%         \texttt{sdc@cs.cmu.edu}}
+% \date{\docdate}
+%
+% \addtolength\oddsidemargin{-.5in}
+% \maketitle\thispagestyle{empty}
+%
+% \begin{abstract}
+% \noindent
+% This article documents the \LaTeX\ package `\Lpack{subfig}', which
+% provides support for the inclusion of small, `sub', figures and
+% tables.  It simplifies the positioning, captioning and labeling of
+% such objects within a single \Lenv{figure} or \Lenv{table} environment
+% and to continue a \Lenv{figure} or \Lenv{table} across multiple pages.
+% In addition, this package allows such sub-captions to be written to a
+% List-of-Floats page as desired.  The `\Lpack{subfig}' package requires
+% the `\Lpack{caption}' package by H.A. Sommerfeldt and replaces the
+% older `\Lpack{subfigure}' package.
+% \end{abstract}
+% 
+% \cleardoublepage
+% \addtolength\oddsidemargin{.5in}
+% \setcounter{page}{1}
+% \pagenumbering{roman}
+% \pagestyle{myheadings}
+% \markboth{The \Lpack{Subfig} Package}{\slshape\rightmark}
+% \renewcommand{\sectionmark}[1]{\markright{\thesection\quad#1}}
+%
+% \tableofcontents
+% \listoffigures
+% \listoftables
+% \listofmaps
+% 
+% \cleardoublepage
+% \setcounter{page}{1}
+% \pagenumbering{arabic}
+% \section{Introduction}
+% 
+% This package provides support for the manipulation and reference of
+% small or `sub' floats within a single floating (\eg, \Lenv{figure} or
+% \Lenv{table}) environment\footnote{Section~\ref{sec:customfloat}
+% describes how to add support for additional \Lenv{float}
+% environments.}  It is convenient to use this package when your
+% sub-floats are to be separately captioned, referenced, or when such
+% sub-captions are to be included on a List-of-Floats page.
+% 
+% This package is a replacement for the \Lpack{subfigure} package, from
+% which it was derived.  However, the new \Lpack{subfig} package is not
+% completely backward compatible (see section~\ref{sec:back-compat}.
+% Therefore, a new name was called for.  The newer package is smaller
+% and easier to use than the older package, however, it now uses the
+% following additional packages:
+% \begin{tabbing}
+%   \qquad $\bullet\space$ \Lpack{ragged2e} \= (required) \kill
+%   \qquad $\bullet\space$ \Lpack{caption}  \> (required)\\
+%   \qquad $\bullet\space$ \Lpack{everysel} \> (optional)\\
+%   \qquad $\bullet\space$ \Lpack{keyval}   \> (required)\\
+%   \qquad $\bullet\space$ \Lpack{ragged2e} \> (optional)
+% \end{tabbing}
+% It will work without the \Lpack{ragged2e} and \Lpack{everysel}
+% packages if you do not use the following justification options:
+% \Lkv{Center}, \Lkv{RaggedRight} and \Lkv{RaggedLeft}.  The other
+% justification options \Lkv{center}, \Lkv{raggedright} and 
+% \Lkv{raggedleft} will work without the above two packages.
+%
+% {\scshape\bf Note}: If the \Lpack{ragged2e} package is present, than
+% the \Lpack{caption} package will load it and it will, in turn, load
+% the \Lpack{everysel} package.  This happens whether or not you will
+% be using the justification options that require it.  If it cannot
+% find the \Lpack{ragged2e} package, than the \Lpack{caption} package
+% will print a message that \Lkv{RaggedRight}, \etc\ will not be
+% available.
+% 
+% \subsection{Do You Need This Package?}
+% 
+% Before using the \Lpack{subfig} package, consider the following to
+% see if you really need it.
+% \begin{enumerate}
+%   \item If you simply want to center your figure on the page, then you
+%         can use |\centerline|, |\centering| or the \Lenv{center}
+%         environment to do so, see \cite[page 112]{Lamp94}.
+%   \item If your figure has a short width or if you wrap your figure in
+%         a |\parbox| or a \Lenv{minipage} of a short width, then you
+%         can place multiple figures or tables side-by-side\footnote{You
+%         might have to use the optional position arguments `[b]' or
+%         `[t]' if the figures are of different heights, see
+%         sections~\ref{sec:examples} and \ref{sec:faq:align} as well as
+%         \cite[page 218]{Lamp94}.}.  For example, the following will
+%         put two images side-by-side in a single figure as shown in
+%         figure~\ref{fig:1figs}:
+% \begin{verbatim}
+%     \begin{figure}%
+%       \centering
+%       \parbox{1.2in}{...figure code...}%
+%       \qquad
+%       \begin{minipage}{1.2in}%
+%         ...figure code...
+%       \end{minipage}%
+%       \caption{Here are two figures side-by-side.}%
+%       \label{fig:1figs}%
+%     \end{figure}
+% \end{verbatim}
+% \begin{figure}^
+%   \centering
+%   \parbox{1.2in}{^
+%     \fboxsep=-\fboxrule
+%     \fbox{\hbox to 1.2in{\vbox to 15mm{\null\vfil}\hfil}}}^
+%   \qquad
+%   \begin{minipage}{1.2in}^
+%     \fboxsep=-\fboxrule
+%     \fbox{\hbox to 1.2in{\vbox to 15mm{\null\vfil}\hfil}}^
+%   \end{minipage}^
+%   \caption{Here are two figures side-by-side.}^
+%   \label{fig:1figs}^
+%   \vspace{12pt}
+% \end{figure}
+%   \item Finally, if you place the caption inside the |\parbox| or
+%         \Lenv{minipage}, then the width of the caption will be limited
+%         to the width of the parbox or minipage as shown in
+%         figures~\ref{fig:2figsA} and \ref{fig:2figsB}:
+% \begin{verbatim}
+%     \begin{figure}%
+%       \centering
+%       \parbox{1.2in}{%
+%         ...figure code...
+%         \caption{First.}%
+%         \label{fig:2figsA}}%
+%       \qquad
+%       \begin{minipage}{1.2in}%
+%         ...figure code...
+%         \caption{Second.}%
+%         \label{fig:2figsB}%
+%       \end{minipage}%
+%     \end{figure}
+% \end{verbatim}
+% \begin{figure}^
+%   \centering
+%   \parbox{1.2in}{^
+%     \fboxsep=-\fboxrule
+%     \fbox{\hbox to 1.2in{\vbox to 15mm{\vfil\null}\hfil}}^
+%     \caption{First.}^
+%     \label{fig:2figsA}}^
+%   \qquad
+%   \begin{minipage}{1.2in}^
+%     \fboxsep=-\fboxrule
+%     \fbox{\hbox to 1.2in{\vbox to 15mm{\vfil\null}\hfil}}^
+%     \caption{Second.}^
+%     \label{fig:2figsB}^
+%   \end{minipage}^
+%   \vspace{12pt}
+% \end{figure}
+% \end{enumerate}
+% 
+% For more information on typesetting figures and tables, see 
+% the book ``The \LaTeX\ Companion'' by Mittelbach and Goossens
+% \cite[\textsection~5 \& 6]{Mitt-etal04} and the document ``Using 
+% Imported Graphics in \LaTeXe'' by Keith Reckdahl \cite{Reck97}.
+% 
+% \section{Package Commands}
+% 
+% In this section, we describe the commands defined by the
+% \Lpack{subfig} package and three commands from the \Lpack{caption}
+% package that are needed or very useful in setting and changing the
+% package options.
+% 
+% \subsection{Preamble Commands}
+% 
+% In the preamble of your \LaTeX\ file, you may load the \Lpack{subfig}
+% package, define new and extended options and create new sub-floats.
+% See the documentation for the \Lpack{caption} package for other
+% preamble commands that may be used to customize the caption portion of
+% a sub-float.
+% 
+% \subsubsection{The \cmd{\usepackage} Command}
+% \begin{quote}
+%   |\usepackage|\oarg{KV-list}\{subfig\}
+% \end{quote}
+% 
+% \noindent
+% The optional argument list to the \Lpack{subfig} package is in the
+% form of a KV-list or ``Key-Value list'' (see \cite{Carl99} for more
+% detail).  The KV-list is composed of a comma-separated list of
+% keywords with optional values.  The keywords without a value indicate
+% that a default value is to be used.  This list is bound to the
+% variable \Lvar{subfloat} and is re-evaluated each time a |\subfloat| is
+% encountered.  These initial values may also be viewed, removed or
+% changed with the |\showcaptionsetup|[uniq]\{subfloat\},
+% |\clearcaptionsetup|[subfloat] or
+% |\captionsetup|[subfloat]\marg{KV-list} commands.
+% 
+% \subsubsection{The \cmd{\newsubfloat} Command}
+% \label{sec:newsubfloat}
+% \begin{quote}\DescribeMacro{\newsubfloat}
+%   |\newsubfloat|\oarg{KV-list}\marg{float-name}
+% \end{quote}
+% 
+% \noindent
+% This command creates all of the internal structures and commands
+% needed to support the new subfloat (the corresponding float structure
+% must already exist, see section~\ref{sec:customfloat}).  For instance
+% when the \Lvar{subfigure} is created the set of internals instantiated
+% are shown in table~\ref{tab:newsubfloat}.
+% \begin{table}
+%  \centering
+%  \caption{Example of internals created by a \cmd{\newsubfloat} ``subfigure''.}^
+%  \label{tab:newsubfloat}^
+%  \begin{tabular}{llp{2.2in}}                                                               \toprule
+%    {\bf Function/}     &                            &                                   \\
+%    {\bf \quad Keyword} & {\bf Default}              & {\bf Description}                 \\ \midrule
+%    |\c@subfigure|      & 0                          & Internal counter variable.        \\
+%    |\c@subfigure@save| & 0                          & Internal variable to save last counter value
+%                                                       in case of a continued figure.    \\
+%    |\subfigurename|    &                            & Name prepended to the subcaption 
+%                                                       number (empty by default).        \\
+%    |\p@subfigure|      & |\thefigure|               & Figure number prepended to the subcaption
+%                                                       number in references via |\ref|.  \\
+%    |\thesubfigure|     & |\alph{subfigure}|         & Format of the subcaption number.  \\
+%    |\ext@subfigure|    & lof                        & List-of-Floats file extension.    \\
+%    |\l@subfigure|      & {\textbackslash@dottedxxxline\{figure\}}
+%                                                     & Format of List-of-Floats entry.   \\
+%                        & \multicolumn{2}{l}{{\qquad\{lof\}\{2\}\{\textbackslash sf@indent\}}}
+%                                                                                         \\
+%                        & \multicolumn{2}{l}{{\qquad\qquad\{\textbackslash sf@numwidth\}\}}}
+%                                                                                         \\
+%    |\c@lofdepth|       & 1                          & List-of-Floats depth variable.    \\
+%    \Lkv{lofdepth}      & 2                          & Sets |\c@lofdepth|.               \\ \bottomrule
+%  \end{tabular}
+% \end{table}
+%
+% The two internals \cmd{\subfigurename} and \cmd{\thesubfigure} are left
+% for easy adjustment by the user, the rest should not be directly
+% changed under normal circumstances.  Note that you may change the
+% values of any counter variable |\c@cnt| with the counter functions
+% |\setcounter| or |\addtocounter| (see \cite[pg.~194]{Lamp94}).  Also,
+% the internals |\sf@indent| and |\sf@numwidth| may be change with the
+% keywords \Lkv{listofindent} and \Lkv{listofnumwidth}, respectively.
+% 
+% Once the new float is created, the KV-list is placed at the top ``level''.
+% For example the options for the above {\it subfigure\/} are added to the 
+% name \Lvar{subfigure}. See section~\ref{sec:layers} below, for more detail
+% about option layers.
+% 
+% \subsubsection{The \cmd{\DeclareCaptionListOfFormat} Command}
+% \begin{quote}\DescribeMacro{\DeclareCaptionListOfFormat}
+%   |\DeclareCaptionListOfFormat|\marg{keyword value}\marg{code}
+% \end{quote}
+% 
+% \noindent
+% The |\DeclareCaptionListOfFormat| command allows the specification of
+% how the sub-caption references are shown on the List-of-Floats pages.
+% See section~\ref{sec:lof} for more details on setting up and adjusting
+% the List-of-Floats entries.  
+%
+% The \marg{code} section is passed two parameters that may be used or ignored.  
+% These are the value of the associated \cmd{\p@<sub-float>} type and the 
+% \cmd{\the<sub-float>} respectively.
+% 
+% \subsubsection{The \cmd{\DeclareSubrefFormat} Command}
+% \label{sec:declaresubrefformat}
+% \begin{quote}\DescribeMacro{\DeclareSubrefFormat}
+%   |\DeclareSubrefFormat|\marg{keyword value}\marg{code}
+% \end{quote}
+% 
+% \noindent
+% The |\DeclareSubrefFormat| command allows the specification of how the 
+% \cmd{\subref*} command generates its reference to a sub-caption label in
+% the text.
+% 
+% The \marg{code} section is passed four parameters that may be used or
+% ignored.  The frist two are the values of the associated
+% \cmd{\p@$<$sub-float$>$} type and the \cmd{\the$<$sub-float$>$}
+% (\eg, \cmd{\p@subfigure} and \cmd{\thesubfigure}), like the
+% \cmd{\DeclareCaptionListOfFormat} command.  The second two are the
+% {\em raw} values of the $<$float$>$ and the $<$sub-float$>$ counters.
+% 
+% \subsection{General Commands}
+% 
+% These commands are available within the body of the paper and the
+% commands |\captionsetup|, |\showcaptionsetup| and |\clearcaptionsetup|
+% are available anytime after loading either the \Lpack{caption} or
+% \Lpack{subfig} packages.
+%
+% \subsubsection{The \cmd{\subfloat} Command}
+% \begin{quote}\DescribeMacro{\subfloat}
+%   |\subfloat|\oarg{list\_entry}\oarg{sub-caption}\marg{body}
+% \end{quote}
+% 
+% \noindent
+% This command creates the sub-float in the floating environment.
+% In a \Lenv{figure} environment it creates a subfigure.  The
+% required argument contains the sub-float object or ``body''.  This is
+% the code that imports or creates the figure portion of the sub-float.
+% 
+% The two optional arguments control the caption.  If only one
+% optional argument is present, than a caption label is generated
+% and if any text is included in the optional argument, than it
+% becomes the caption argument.
+% 
+% Normally, if a caption is present, it is also included on the
+% List-of-Floats page.  However, if a second optional argument is
+% present, than the first one controls what is on the List-of-Floats
+% page and the second is the caption text.  If the List-of-Floats
+% argument is empty, than nothing is printed on the List-of-Floats
+% page.  Otherwise, if there is text in the List-of-Floats argument,
+% than that text is used on the List-of-Floats page rather than the text
+% in the other optional argument.
+% 
+% See table~\ref{tab:calling} for more detail on the |\subfloat|
+% command's arguments.
+% 
+% \begin{table}^
+%  \centering
+%  \caption{\cmd{\subfloat} calling arguments.}^
+%  \label{tab:calling}^
+%  \vskip-11pt^
+%  \hbox to \linewidth{\hss\begingroup\small
+%    \begin{tabular}{llc}                                 \\ \toprule
+%      {\normalsize Sub-float Command}
+%                        & \hbox to 1in{\hss\normalsize List-of-Floats Caption}
+%                              & \multicolumn{1}{r}{\hbox to .25in{^
+%                                                     \hss\normalsize 
+%                                                     Sub-float Caption}}
+%                                                         \\ \midrule
+%      \cmd{\subfloat}\{body\}
+%                        &     &                          \\
+%      \cmd{\subfloat}[\space]\{body\}
+%                        & (b)\ \ . . . . . . . . . .  
+%                              & (b)                      \\
+%      \cmd{\subfloat}[Sub-caption.]\{body\}
+%                        & (c) Sub-caption. . . .
+%                              & (c) Sub-caption.         \\
+%      \cmd{\subfloat}[\space][Sub-caption.]\{body\}
+%                        &     & (d) Sub-caption.         \\
+%      \cmd{\subfloat}[\space][\space]\{body\}
+%                        &     & (e)                      \\
+%      \cmd{\subfloat}[List\_entry.][Sub-caption.]\{body\}
+%                        & (f) List\_entry. . . .
+%                              & (f) Sub-caption.          \\
+%      \cmd{\subfloat}[List\_entry.][\space]\{body\}
+%                        & (g) List\_entry. . . .
+%                              & (g)                      \\ \bottomrule
+%    \end{tabular}
+%  \endgroup\hss}
+%  \vspace{-8pt}
+% \end{table}
+% 
+% \subsubsection{The \cmd{\subref} Command}
+% \changes{v1.2}{23 January 2004}{Added documentation for the 
+% \cmd{\subref*} command.}
+% \begin{quote}\DescribeMacro{\subref}\DescribeMacro{\subref*}
+%   |\subref|\marg{label}\\
+%   |\subref*|\marg{label}
+% \end{quote}
+% 
+% \noindent
+% The |\subref| command is provided to give an alternative reference to
+% a sub-float.  The standard |\ref| command returns a label built by
+% concatenating the |\p@float| $+$ |\thesubfloat|, which is often of the
+% form ``1a''.  The |\subref| command returns the label shown on the
+% List-of-Floats page, which may be in the format ``(a)'' (\ie, if
+% \Lkv{listofformat=subparens}, see section~\ref{sec:listsubcaptions}).
+% This may be combined with a reference to the main caption to give 
+% something of the form ``1(a)'', or used within the main caption to
+% refer to a specific local sub-float.
+% 
+% By default, the starred form of the command simply returns the 
+% |\thesubfloat| value, which, for sub-floats is usually something
+% like ``a''.  However, this may be changed by setting \Lkv{subrefformat},
+% similar to the above \Lkv{listofformat}, to a predefined format
+% (see table~\ref{tab:keywords2} or to a unique format defined with the
+% \cmd{\DeclareSubrefFormat} command (section~\ref{sec:declaresubrefformat}).
+% 
+% \subsubsection{The \cmd{\ContinuedFloat} Command}
+% \label{sec:cont}
+% \begin{quote}\DescribeMacro{\ContinuedFloat}
+%   |\ContinuedFloat|
+% \end{quote}
+% 
+% \begin{figure}^
+%   \centering
+%   \subfloat[][]{^
+%     \fboxsep=-\fboxrule
+%     \fbox{\hbox to 1.2in{\vbox to 15mm{\null\vfil}\hfil}}}^
+%   \qquad
+%   \subfloat[][]{^
+%     \fboxsep=-\fboxrule
+%     \fbox{\hbox to 1.2in{\vbox to 15mm{\null\vfil}\hfil}}}
+%   \vskip-4pt
+%   \caption{Here are the first two figures of a continued figure.}^
+%   \label{fig:cont}^
+% \end{figure}
+% 
+% \begin{figure}^
+%   \ContinuedFloat
+%   \centering
+%   \subfloat[][]{^
+%     \fboxsep=-\fboxrule
+%     \fbox{\hbox to 1.2in{\vbox to 15mm{\null\vfil}\hfil}}}^
+%   \qquad
+%   \subfloat[][]{^
+%     \fboxsep=-\fboxrule
+%     \fbox{\hbox to 1.2in{\vbox to 15mm{\null\vfil}\hfil}}}
+%   \vskip-4pt
+%   \caption[]{Here are the last two figures of a continued figure.}^
+%   \label{fig:cont2}^
+% \end{figure}
+%
+% \noindent
+% It sometimes occurs, especially when using sub-floats, that a single
+% figure needs to be continued across pages.  The |\ContinuedFloat|
+% command is placed at the beginning of the floating environment or
+% after changing |\@captype| inside the floating environment to make the
+% next figure, table or other floating |\caption| a continuation of the
+% last float |\caption| of the same type.  It does this by saving the
+% sub-float numbering internally and keeping the float numbering
+% from advancing.
+% 
+% In order to keep subsequent float entries from appearing on the
+% List-of-Floats page, you can use the |\caption| command with the
+% optional argument present, but empty; as shown in
+% figure~\ref{fig:cont} (and on the list-of-figures
+% page).\footnote{Note: This only works if the \Lpack{caption} package
+% is active.  If the \Lkv{caption=true} option is used to load the
+% \Lpack{caption} package or the \Lpack{subfig} package, than an empty
+% optional argument to the \cmd{\caption} command generates a
+% List-of-Floats entry with no caption text unless the document class
+% redefines the \cmd{\caption} command otherwise.}  We also suppress
+% the sub-caption entry with the optional List-of-Floats page argument 
+% empty since there is no accompanying text.
+%
+% \begin{verbatim}
+%     \begin{figure}%
+%       \centering
+%       \subfloat[][]{...figure code...}%
+%       \qquad
+%       \subfloat[][]{...figure code...}
+%       \caption{Here are the first two figures of a continued figure.}%
+%       \label{fig:cont}%
+%     \end{figure}
+%
+%     \begin{figure}%
+%       \ContinuedFloat
+%       \centering
+%       \subfloat[][]{...figure code...}%
+%       \qquad
+%       \subfloat[][]{...figure code...}
+%       \caption[]{Here are the last two figures of a continued figure.}%
+%       \label{fig:cont}%
+%     \end{figure}
+% \end{verbatim}
+% 
+% \subsubsection{The \cmd{\listsubcaptions} Command}
+% \label{sec:listsubcaptions}
+% \begin{quote}\DescribeMacro{\listsubcaptions}
+%   |\listsubcaptions|
+% \end{quote}
+% 
+% \noindent
+% The last command provided by the \Lpack{subfig} package is the
+% |\listsubcaptions|.  This is automatically called in most cases by the
+% |\caption| command and at the end of the \Lenv{float} environment.
+% However, the following example shows a rare situation in which the
+% user will every have to use the |\listsubcaptions| command as shown in
+% the definition of the |\zaptype| command.
+%
+% \begin{quote}
+%   |  \documentclass{article}|\\
+%   |  \usepackage[lofdepth,lotdepth]{subfig}|\\
+%   \null\qquad\vdots\\
+%   |  \makeatletter|\\
+%   |    \def\zaptype#1{%|\\
+%   |        \listsubcaptions  % Finish the last set of sub-floats before|\\
+%   |        \def\@captype{#1}}%   switching to another float type.|\\
+%   |  \makeatother|\\
+%   \null\qquad\vdots\\
+%   |  \begin{document}|\\
+%   \null\qquad\vdots\\
+%   |  \listoffigures|\\
+%   |  \listoftables|\\
+%   |  \clearpage|\\
+%   |  \begin{table}%|\\
+%   |    \begin{center}%|\\
+%   |      \caption{Table caption.}%|\\
+%   |        \subfloat[Tab one]{X}\quad|\\
+%   |        \subfloat[Tab two]{X}\\|\\
+%   |      %|\\
+%   |      \zaptype{figure}%|\\
+%   |      %|\\
+%   |        \subfloat[Fig one]{Y}\quad|\\
+%   |        \subfloat[Fig two]{Y}|\\
+%   |      \caption{Figure caption.}%|\\
+%   |    \end{center}%|\\
+%   |  \end{table}|\\
+%   \null\qquad\vdots\\
+%   |  \end{document}|
+% \end{quote}
+% 
+% \noindent
+% {\scshape\bf Hint}: Don't change the List-of-Floats page properties
+% of any sub-floats until just before you use a |\subfloat| command,
+% or just after you have executed a |\listsubcaptions| command. 
+% Otherwise, the wrong \Lkv{listofformat} or spacing might use the new
+% values for sub-floats that have not been fully processed yet.
+%
+% \subsubsection{The \cmd{\captionsetup} Command}
+% \label{sec:layers}
+% \begin{quote}\DescribeMacro{\captionsetup}
+%   |\captionsetup|\oarg{variable}\marg{KV-list}
+% \end{quote}
+% 
+% \noindent
+% The |\captionsetup| command is actually part of the \Lpack{caption}
+% package, but is very important is you want to adjust some option in
+% the \Lpack{subfig} package.  If the optional \Lvar{variable} is left
+% out, than the settings are made at the global level; otherwise, the
+% settings are bound to the variable and executed just before being
+% used.
+% 
+% \begin{figure}\centering
+%   \begin{picture}(270,180)(0,5)
+%     \put(5,155){\makebox(0,0){\large 1.}}
+%     \put(158,155){\oval(260,30)}
+%     \put(158,155){\makebox(0,0){(global)}}
+%     \put(072,140){\vector(0,-1){10}}
+%     \put(158,140){\vector(0,-1){10}}
+%     \put(244,140){\vector(0,-1){15}}
+%     \put(5,115){\makebox(0,0){\large 2.}}
+%     \put(072,115){\oval(62,30)}
+%     \put(072,115){\makebox(0,0){\Lvar{figure}}}
+%     \put(158,115){\oval(62,30)}
+%     \put(158,115){\makebox(0,0){\Lvar{table}}}
+%     \put(244,115){\makebox(0,0){{\bf\dots}other floats{\bf\dots}}}
+%     \put(072,100){\vector(0,-1){10}}
+%     \put(158,100){\vector(0,-1){10}}
+%     \put(244,105){\vector(0,-1){15}}
+%     \put(5,075){\makebox(0,0){\large 3.}}
+%     \put(158,075){\oval(260,30)}
+%     \put(158,075){\makebox(0,0){\Lvar{subfloat}}}
+%     \put(072,060){\vector(0,-1){10}}
+%     \put(158,060){\vector(0,-1){10}}
+%     \put(244,060){\vector(0,-1){15}}
+%     \put(5,035){\makebox(0,0){\large 4.}}
+%     \put(072,035){\oval(62,30)}
+%     \put(072,035){\makebox(0,0){\Lvar{subfigure}}}
+%     \put(158,035){\oval(62,30)}
+%     \put(158,035){\makebox(0,0){\Lvar{subtable}}}
+%     \put(244,035){\makebox(0,0){{\bf\dots}other sub-floats{\bf\dots}}}
+%   \end{picture}^
+%   \caption{Levels at which keyword/values pairs may be set to apply to,
+%            or override earlier keyword/values pairs, for floats and
+%            sub-floats.}^
+%   \label{fig:levels}^
+% \end{figure}
+%
+% There are four ``levels'' at which you can define options to apply
+% to a sub-float (figure~\ref{fig:levels}.  The first level is the
+% default or global values of the various options, which are set either
+% by the package, by a configuration file or by the optional Key-Value
+% list in the |\usepackage| command when loading the \Lpack{caption} package.
+% 
+% The second ``level'' consists of those options bound to the various
+% floats.  These are set by the |\captionsetup| with the optional argument
+% set to the float name.  For example, the command:
+% \begin{quote}
+%   |\captionsetup|[table]\{position=top\}
+% \end{quote}
+% would indicate that the \Lvar{table} caption will come before its 
+% subfigures rather than after, as is the default.
+
+% The third ``level'' consists of those options bound to the special variable
+% \Lvar{subfloat}.  These are value that hold across all sub-floats, but which
+% are different than the global or float values.  One such item is the
+% ``font'' size, which is usually either null or {\bf normalsized}, but which
+% is set to be {\bf footnotesized} for the sub-float captions.
+% 
+% The fourth ``level'' holds those options bound to a specific sub-float,
+% say \Lvar{subfigure}.  An example is the caption \Lkv{position} relative
+% to the subfigure itself.
+% 
+% \section{Options: Keywords and Values}
+% \changes{v1.2}{22 January 2004}{Changed \Lkv{indent} to \Lkv{indention}.}
+% \changes{v1.3}{10 October 2004}{Added \Lkv{caption}.}
+% 
+% Table~\ref{tab:keywords} shows all of the formal keywords and values
+% from both the \Lpack{caption} and the \Lpack{subfig} packages.  These
+% may be used on the |\usepackage| options line, or with the |\captionsetup|
+% command.
+% 
+% \begin{table}^
+%   \centering
+%   \caption[Keywords with defaults and values.]^
+%           {Keywords with defaults and values. (Note: Entries enclosed
+%            in `[\ ]' indicate initial values rather than defaults.)}^
+%   \label{tab:keywords}^
+%   \begin{tabular}{llll}                                            \toprule
+%   \multicolumn{1}{c}{\drop{1ex}{\bf PACKAGE}}
+%            & \multicolumn{1}{c}{\drop{1ex}{\bf KEYWORD}}
+%                              & \multicolumn{1}{c}{\bf DEFAULT}
+%                                                & \multicolumn{1}{c}{\drop{1ex}{\bf VALUE(S)}}
+%                                                                     \\
+%            &                 & \multicolumn{1}{c}{\bf / [INIT]}
+%                                                &                    \\ \midrule
+%   Caption  & caption\footnotemark
+%                              & true            & $<$Boolean$>$      \\[5pt]
+%   \drop{-6pt}{Package}
+%            & config          & ``caption.cfg'' & $<$filename$>$     \\[5pt]
+%            & font (size)     & [default]       & \multirow{8}{*}{^
+%                                                    \begin{tabular}{@{}llll}
+%                                                        default      &    &    &    \\[3pt]
+%                                                        scriptsize   & rm & md & up \\
+%                                                        footnotesize & sf & bf & it \\
+%                                                        small        & tt &    & sl \\
+%                                                        normalsize   &    &    & sc \\
+%                                                        large        &    &    &    \\
+%                                                        Large        &    &    &    \\
+%                                                      \end{tabular}} \\
+%            & labelfont       & [default]       \\
+%            & textfont        & [default]       \\
+%            &                 &                 \\
+%            &                 &                 \\
+%            &                 &                 \\
+%            &                 &                 \\
+%            &                 &                 \\[5pt]
+%            & style           & [default]       & default            \\
+%            &                 &                 & ruled              \\[5pt]
+%            & singlelinecheck & true            & $<$Boolean$>$      \\[5pt]
+%            & format          & [default]       & default            \\
+%            &                 &                 & hang               \\[5pt]
+%            & indention       & [0pt]           & $<$length$>$       \\[5pt]
+%            & hangindent      & [0pt]           & $<$length$>$       \\[5pt]
+%            & width           & [\cmd{\hsize}]  & $<$length$>$       \\
+%            & margin          & [0pt]           & $<$length$>$       \\[5pt]
+%            & parskip         & [5pt]           & $<$length$>$       \\[5pt]
+%            & justification   & [default]       & justified (default)\\
+%            &                 &                 & centering          \\
+%            &                 &                 & centerfirst        \\
+%            &                 &                 & centerlast         \\
+%            &                 &                 & raggedleft         \\
+%            &                 &                 & raggedright        \\
+%            &                 &                 & Centering          \\
+%            &                 &                 & RaggedLeft         \\
+%            &                 &                 & RaggedRight        \\[5pt]
+%            & labelformat     & [default]       & empty              \\
+%            &                 &                 & simple (default)   \\
+%            &                 &                 & parens             \\[5pt]
+%            & aboveskip       & [10pt]          & $<$length$>$       \\[5pt]
+%            & belowskip       & [0pt]           & $<$length$>$       \\ \bottomrule
+%   \end{tabular}		
+% \end{table}
+
+% \changes{v1.1}{12 January 2004}{Updated the values and the default
+%  for the keyword \Lkv{listofformat} in table~\ref{tab:keywords2}.}
+% \changes{v1.2}{21 January 2004}{Fine-tuned the defaults for \Lkv{farskip},
+% \Lkv{topadjust}, \Lkv{captionskip}, and \Lkv{nearskip}.}
+% \changes{v1.2}{22 January 2004}{Removed \Lkv{widespace}.}
+% \changes{v1.3}{01 March 2004}{Added \Lkv{lofdepth} and \Lkv{lotdepth}. }
+% \changes{v1.3}{10 October 2004}{Added \Lkv{caption}.}
+% \begin{table}^
+%   \ContinuedFloat
+%   \centering
+%   \caption[]{Keywords with Defaults and Values (cont).}^
+%   \label{tab:keywords2}^
+%   \begin{tabular}{llll}                                            \toprule
+%   \multicolumn{1}{c}{\drop{1ex}{\bf PACKAGE}}
+%            & \multicolumn{1}{c}{\drop{1ex}{\bf KEYWORD}}
+%                              & \multicolumn{1}{c}{\bf DEFAULT}
+%                                                & \multicolumn{1}{c}{\drop{1ex}{\bf VALUE(S)}}
+%                                                                     \\
+%            &                 & \multicolumn{1}{c}{\bf / [INIT]}
+%                                                &                    \\ \midrule
+%   Caption  & labelseparator  & [default]       & none               \\
+%   Package  & \quad(labelsep) &                 & colon (default)    \\
+%   (cont.)  &                 &                 & period             \\
+%            &                 &                 & space              \\
+%            &                 &                 & quad               \\
+%            &                 &                 & newline            \\[5pt]
+%            & position\footnotemark
+%                              &                 & top (above)        \\
+%            &                 &                 & bottom (below)     \\ \midrule
+%   Subfig   & caption\addtocounter{footnote}{-2}\footnotemark
+%                              & true            & $<$Boolean$>$      \\[5pt]
+%   \drop{-6pt}{Package}
+%            & config          & ``subfig.cfg''  & $<$filename$>$     \\[5pt]
+%            & lofdepth\addtocounter{footnote}{1}\footnotemark
+%                              & 1               & $<$number$>$       \\[5pt]
+%            & lotdepth\addtocounter{footnote}{-1}\footnotemark
+%                              & 1               & $<$number$>$       \\[5pt]
+%            & listofformat    & [subparens]     & empty              \\
+%            &                 &                 & simple             \\
+%            &                 &                 & parens             \\
+%            &                 &                 & subsimple          \\
+%            &                 &                 & subparens          \\[5pt]
+%            & subrefformat    & [subsimple]     & empty              \\
+%            &                 &                 & simple             \\
+%            &                 &                 & parens             \\
+%            &                 &                 & subsimple          \\
+%            &                 &                 & subparens          \\[5pt]
+%            & listofindent    & 3.8em           & $<$length$>$       \\[5pt]
+%            & listofnumwidth  & 2.5em           & $<$length$>$       \\[5pt]
+%            & farskip         &10pt             & $<$length$>$       \\[5pt]
+%            & captionskip     & 4pt             & $<$length$>$       \\[5pt]
+%            & topadjust       & 0pt             & $<$length$>$       \\[5pt]
+%            & nearskip        & 0pt             & $<$length$>$       \\ \bottomrule
+%   \end{tabular}		
+% \end{table}
+%   
+% If these are not desired, than they may be removed at the beginning of
+% a configuration file with the command:
+%  \begin{quote}^
+%    |  \clearcaptionsetup{subfloat}|
+%  \end{quote}
+% The options are not added to the \Lvar{subfloat} list until after
+% the configuration file(s) are loaded.
+%
+% \subsection{Options from the \Lpack{Caption} Package}
+% \changes{v1.2}{16 January 2004}{Added missing space.}
+% 
+% The \Lpack{subfig} package uses the \Lpack{caption} package commands
+% to typeset the captions under each sub-float.  The settings used in the
+% captions come from three sources.  The first is the global settings
+% provided by the caption package.  The second is the keys and key/value
+% pairs stored on the \Lvar{subfloat} variable.  The third is the keys
+% and key/value pairs stored on (for figure sub-floats) the
+% \Lvar{subfigure} variable.  In these three sources, if a key appears
+% most recent value is used.
+% 
+% \addtocounter{footnote}{-2}
+% \footnotetext{The \Lkv{caption} option is only allowed on the
+% \Lpack{caption} or \Lpack{subfigure} package option list.  In
+% addition, the \Lkv{caption} option can only be used in the
+% \Lpack{subfigure} package option list {\em if} the \Lpack{caption}
+% package has {\em not} been loaded.}
+% \addtocounter{footnote}{1}
+% \footnotetext{Only the \Lkv{top}/\Lkv{above} and \Lkv{bottom}/\Lkv{below}
+%               values are allowed for the \Lkv{position} option with the 
+%               \Lpack{subfig} package.  If no value is set, than 
+%               \Lkv{bottom} is assumed.}%
+% \addtocounter{footnote}{1}
+% \footnotetext{Similar keywords are created automatically by the
+%               \cmd{\newsubfloat} command, see section~\ref{sec:newsubfloat}.}
+%
+% Therefore, you can keep all of your common settings associated with
+% the \Lvar{subfloat} variable and, if needed, special settings for
+% individual sub-float types (figure, table, etc.) on the associated
+% variable (\eg, \Lvar{subfigure}, \Lvar{subtable}, etc.).
+%
+% The package options supplied with the \cmd{\usepackage} command are
+% bound to the \Lvar{subfloat} variable, and so, affect all of the
+% sub-floats.  The one exception to this is the \Lkv{config} or
+% \Lkv{config=filename} option that is executed immediately.  This is
+% handy for two reasons, the first is that you only want to load a
+% configuration file once (not every time you use a sub-float; and,
+% second the \Lkv{config} keyword, without a value, will only load the
+% ``subfig.cfg'' file when used on the options line, therefore you can
+% set common options in both the float and sub-float captions with the
+% command:
+%
+% \begin{quote}
+%   |\usepackage|[config, labelfont=\{sf,bf\}, textfont=sf]\{caption,subfig\}
+% \end{quote}
+% which will load the ``caption.cfg'' file and set the label and text
+% fonts and also load the \Lfile{subfig.cfg} file and set the sublabel and
+% subtext fonts.  Here we don't use the \Lkv{font} key, since this is
+% initialized with the default font sizes to be used and defaults to
+% \Lkv{normalsized} for the float captions and to \Lkv{footnotesized} for the
+% sub-float captions, as shown in figure~\ref{fig:init}.
+% 
+% \begin{figure}^
+%   \vskip-5pt
+%   \centering
+%   \subfloat[Sub-float caption.]{\B{white}{Sub-float Body}}^
+%   \vskip-5pt
+%   \caption{Float caption.}^
+%   \label{fig:init}^
+% \end{figure}
+% 
+% Next we will review the options provided by the \Lpack{caption}
+% package.  First the font settings, then the shape options, the
+% justification and the other caption options that affect the sub-floats.
+% Next, we review the options provided by the \Lpack{subfig} package.
+% 
+% \subsubsection{The \Lpack{Caption} Font Settings}
+%
+% There are three font variables that can be set to control the float or
+% sub-float captions.  They are \Lkv{font}, \Lkv{labelfont} and \Lkv{textfont}.
+% The \Lvar{font} variable is applied to both the caption label and text;
+% and is usually\footnote{But not always, careful use of these three
+% variables can produce useful effects.  Their application is as:
+% \begin{quote}^
+%   \vspace{-2pt}
+%   \{\cmd{\font} \{\cmd{\labelfont} $<$label$><$separator$>$\}\{\cmd{\textfont} $<$text$>$\}
+%   \vspace{-5pt}
+% \end{quote}}
+% used to specify the size of the caption and the other two variables
+% are used to specify the other aspects of the font, the family, series
+% and shape.  The ``labelfont'' variable is used to specify the font
+% used for the caption label and separator, while the ``textfont''
+% specifies that for the caption text.
+% 
+% Each of these variables can have one value from each of the four
+% columns in the ``VALUE'' section of table~\ref{tab:keywords}
+% associated with the font keywords.  If nothing is specified for one of
+% the four sections, than that aspect of the current font is used.
+% 
+% Figures~\subref*{fig:fontsize-01}--\subref{fig:fontsize-06}
+% show the effect of the font size options on the ``font'' variable.
+% 
+%  \begin{figure}^
+%   \vskip4pt
+%   \centering
+%   \figfont{fig:fontsize-01}{font}{Large}\g
+%   \figfont{fig:fontsize-02}{font}{large}\\
+%   \figfont{fig:fontsize-03}{font}{normalsize}\g
+%   \figfont{fig:fontsize-04}{font}{small}\\
+%   \figfont{fig:fontsize-05}{font}{footnotesize}\g
+%   \figfont{fig:fontsize-06}{font}{scriptsize}\\[-2pt]
+%   \caption{Font size options.}
+%   \label{fig:fontsize}
+%   \vskip-16pt
+% \end{figure}
+% \changes{v1.2}{26 January 2004}{Fixed references.}
+% \begin{figure}^
+%   \centering
+%  \figfontlist{fig:textfont-01}{font}{rm,md,up}\g
+%  \figfontlist{fig:textfont-02}{font}{rm,md,it}\\
+%  \figfontlist{fig:textfont-03}{font}{rm,md,sl}\g
+%  \figfontlist{fig:textfont-04}{font}{rm,md,sc}\\
+%  \figfontlist{fig:textfont-05}{font}{rm,bf,up}\g
+%  \figfontlist{fig:textfont-06}{font}{rm,bf,it}\\
+%  \figfontlist{fig:textfont-07}{font}{rm,bf,sl}\g
+%  \figfontlistS{fig:textfont-08}{font}{rm,bf,sc}\\
+%  \figfontlist{fig:textfont-09}{font}{sf,md,up}\g
+%  \figfontlistS{fig:textfont-10}{font}{sf,md,it}\\
+%  \figfontlist{fig:textfont-11}{font}{sf,md,sl}\g
+%  \figfontlistS{fig:textfont-12}{font}{sf,md,sc}\\
+%  \figfontlist{fig:textfont-13}{font}{sf,bf,up}\g
+%  \figfontlistS{fig:textfont-14}{font}{sf,bf,it}\\
+%  \figfontlistS{fig:textfont-15}{font}{sf,bf,sl}\g
+%  \figfontlistS{fig:textfont-16}{font}{sf,bf,sc}\\
+%  \figfontlist{fig:textfont-17}{font}{tt,md,up}\g
+%  \figfontlist{fig:textfont-18}{font}{tt,md,it}\\
+%  \figfontlist{fig:textfont-19}{font}{tt,md,sl}\g
+%  \figfontlist{fig:textfont-20}{font}{tt,md,sc}\\
+%  \figfontlistS{fig:textfont-21}{font}{tt,bf,up}\g
+%  \figfontlistS{fig:textfont-22}{font}{tt,bf,it}\\
+%  \figfontlistS{fig:textfont-23}{font}{tt,bf,sl}\g
+%  \figfontlistS{fig:textfont-24}{font}{tt,bf,sc}\\
+%   \caption[Other Font Options.]%
+%           {Other Font Options (shaded boxes indicate
+%           font combinations that were not available,
+%           see table~\ref{tab:substitutions}).}^
+%   \label{fig:textfont}^
+% \end{figure}
+% 
+% \changes{v1.2}{26 January 2004}{Added footnote to reference NFSS.}
+% Figures~\subref*{fig:textfont-01}--\subref{fig:textfont-24}
+% show the effect of all combinations of the other font settings on the
+% ``textfont'' variable.  Note that not all combinations are necessarily
+% available.\footnote{To modify the fonts used in your document and make
+% specific combinations of family, shape and style available, see the 
+% NFSS documentation in The Latex Companion~\cite{Mitt-etal04}.}
+% Where the specified font attributes are not available \LaTeX\
+% will substitute an alternate font.  For instance, when compiling this file
+% on one system, \LaTeX\ substituted alternate fonts for the requested
+% ones in ten of the twenty-four cases (see table~\ref{tab:substitutions}).
+% Recompiling this documentation on your system and looking at the \LaTeX\
+% warnings will show you any combinations that are not available for you.
+%
+% \subsubsection{The \Lpack{Caption} Shape Settings}
+% \changes{v1.2}{16 January 2004}{Removed two extra commas in the 
+% figure options lists.}
+% \label{sec:shape}
+% 
+% There are seven options for setting the sub-caption shape or ``format''.
+% The default setting is produced by
+% \begin{tabbing}
+%   \qquad 
+%   $\backslash$captionsetup[subfigure]\{\= style=default, margin=0pt, parskip=0pt,\\
+%                                        \> hangindent=0pt, indention=0pt, singlelinecheck=true\}
+% \end{tabbing}
+% which is shown in figure~\ref{fig:shape-01}.
+% Figure~\ref{fig:shape-00} shows the same thing, but without setting
+% the \Lkv{singlelinecheck} to true.  You can see that the
+% \Lkv{singlelinecheck} option only affects the short caption.
+% 
+% \begin{table}^
+%   \def\fig#1{\subref*{fig:textfont-#1}}
+%   \def\uch#1{\underline{\smash{\hbox{#1}}}}
+%   \caption[Example font attribute substitutions.]^
+%           {Example font attribute substitutions.\footnotemark}
+%   \label{tab:substitutions}
+%   \centering
+%   \begin{tabular}{lclc}                                                                        \toprule
+%     \multicolumn{1}{l}{{\bf Figure}}
+%              & \multicolumn{1}{l}{{\bf Desired Options}}
+%                               & \multicolumn{1}{l}{{\bf Substitution Reason}}
+%                                                        & \multicolumn{1}{l}{{\bf Actual Options}}
+%                                                                                             \\ \midrule
+%     \fig{08} & \{{\sf rm,bf,sc}\} & undefined              & \{{\sf rm,bf,\uch{up}}\}       \\
+%     \fig{10} & \{{\sf sf,md,it}\} & unavailable in size 10 & \{{\sf sf,md,\uch{sl}}\}       \\
+%     \fig{12} & \{{\sf sf,md,sc}\} & unavailable in size 10 & \{{\sf \uch{rm},md,sc}\}       \\
+%     \fig{14} & \{{\sf sf,bf,it}\} & undefined              & \{{\sf sf,bf,\uch{up}}\}       \\
+%     \fig{15} & \{{\sf sf,bf,sl}\} & undefined              & \{{\sf sf,bf,\uch{up}}\}       \\
+%     \fig{16} & \{{\sf sf,bf,sc}\} & undefined              & \{{\sf sf,bf,\uch{up}}\}       \\
+%     \fig{21} & \{{\sf tt,bf,up}\} & unavailable in size 10 & \{{\sf tt,\uch{md},up}\}       \\
+%     \fig{22} & \{{\sf tt,bf,it}\} & unavailable in size 10 & \{{\sf tt,\uch{md},it}\}       \\
+%     \fig{23} & \{{\sf tt,bf,sl}\} & unavailable in size 10 & \{{\sf tt,\uch{md},\uch{up}}\} \\
+%     \fig{24} & \{{\sf tt,bf,sc}\} & unavailable in size 10 & \{{\sf tt,\uch{md},\uch{up}}\} \\ \bottomrule
+%   \end{tabular}
+% \end{table}
+% 
+% \footnotetext{This table may differ with different distributions of \LaTeX\ 
+% and the choice of the base font families.  Examine the \LaTeX\ log for
+% font warnings for your specific system.}
+% 
+% Any or all of the other shape option may be used at one time, since
+% they define orthogonal aspects of the caption shape.  The other
+% options are:
+% \begin{itemize}\parskip-2pt
+%   \item \Lkv{singlelinecheck}, (Boolean) which causes a caption that 
+%     will fit on one line to be centered below the figure (actually, 
+%     to use the singlelinecheck format);
+%   \item \Lkv{indention}, (length) which indents the caption text of each 
+%     line of each paragraph (except the first line of the first paragraph);
+%   \item \Lkv{hangindent}, (length) which indents the caption text of 
+%     all but the first line of each paragraph;
+%   \item \Lkv{parskip}, (length) which adds some extra space between 
+%     separate paragraphs in a caption;
+%   \item \Lkv{hang}, which causes the label to hang out to
+%     the left of the caption text, \Lkv{normal} turns it off; and,
+%   \item \Lkv{margin}, (length) which sets extra space to either side of
+%     the caption, the option \Lkv{width} may also be used.  This sets
+%     the margins to provide the requested width of the caption.^
+%     \footnote{Internally, the initial width of the sub-float is set 
+%     equal to the width of the sub-float body (see figure~\ref{fig:layout}).
+%     This value is modified by either the \Lkv{margin} {\bf or} the
+%     \Lkv{width}, if defined (if both are defined than whichever is
+%     specified last is used).  Note that the \Lkv{width} may be larger
+%     than the width of the sub-float body, or equivalently, the \Lkv{width}
+%     may be negative to provide more room for a caption if the sub-float
+%     body is small.  The box holding the caption is centered relative to 
+%     the sub-float body.}
+% \end{itemize}
+% 
+% Figures~\ref{fig:shape-00} thru \ref{fig:shape-63} show all of the 
+% different combinations of these formats.
+%
+% \def\exin{10pt}    ^ indention value
+% \def\exhi{10pt}    ^ hangindent value
+% \def\exps{5pt}     ^ parskip value
+% \def\exma{10pt}    ^ margin value
+% \figshape{fig:shape-00}{singlelinecheck=false}
+% \figshape{fig:shape-01}{ }
+% \figshape{fig:shape-02}{indention=\exin,singlelinecheck=false}
+% \figshape{fig:shape-03}{indention=\exin}
+% \clearpage
+% \figshape{fig:shape-04}{hangindent=\exhi,singlelinecheck=false}
+% \figshape{fig:shape-05}{hangindent=\exhi}
+% \figshape[hangindent=\exhi,indention=\exin,
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-06}{hangindent=\exhi,indention=\exin,singlelinecheck=false}
+% \figshape{fig:shape-07}{hangindent=\exhi,indention=\exin}
+% \figshape{fig:shape-08}{parskip=\exps,singlelinecheck=false}
+% \figshape{fig:shape-09}{parskip=\exps}
+% \figshape{fig:shape-10}{parskip=\exps,indention=\exin,singlelinecheck=false}
+% \figshape{fig:shape-11}{parskip=\exps,indention=\exin}
+% \figshape[parskip=\exps,hangindent=\exhi,
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-12}{parskip=\exps,hangindent=\exhi,singlelinecheck=false}
+% \figshape{fig:shape-13}{parskip=\exps,hangindent=\exhi}
+% \figshape[parskip=\exps,hangindent=\exhi,indention=\exin,
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-14}{parskip=\exps,hangindent=\exhi,indention=\exin, singlelinecheck=false}
+% \figshape{fig:shape-15}{parskip=\exps,hangindent=\exhi,indention=\exin}
+% \figshape{fig:shape-16}{format=hang,singlelinecheck=false}
+% \figshape{fig:shape-17}{format=hang}
+% \figshape{fig:shape-18}{format=hang,indention=\exin,singlelinecheck=false}
+% \figshape{fig:shape-19}{format=hang,indention=\exin}
+% \figshape[format=hang,hangindent=\exhi,
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-20}{format=hang,hangindent=\exhi,singlelinecheck=false}
+% \figshape{fig:shape-21}{format=hang,hangindent=\exhi}
+% \clearpage
+% \figshape[format=hang,hangindent=\exhi,indention=\exin,
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-22}{format=hang,hangindent=\exhi,indention=\exin, singlelinecheck=false}
+% \figshape{fig:shape-23}{format=hang,hangindent=\exhi,indention=\exin}
+% \figshape{fig:shape-24}{format=hang,parskip=\exps,singlelinecheck=false}
+% \figshape{fig:shape-25}{format=hang,parskip=\exps}
+% \figshape[format=hang,parskip=\exps,indention=\exin, 
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-26}{format=hang,parskip=\exps,indention=\exin, singlelinecheck=false}
+% \figshape{fig:shape-27}{format=hang,parskip=\exps,indention=\exin}
+% \figshape[format=hang,parskip=\exps,hangindent=\exhi, 
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-28}{format=hang,parskip=\exps,hangindent=\exhi, singlelinecheck=false}
+% \figshape{fig:shape-29}{format=hang,parskip=\exps,hangindent=\exhi}
+% \figshape[format=hang,parskip=\exps,hangindent=\exhi, 
+%          \hfil\null\string\linebreak\ indention=\exin,singlelinecheck=false]%
+%          {fig:shape-30}{format=hang,parskip=\exps,hangindent=\exhi, indention=\exin,singlelinecheck=false}
+% \figshape[format=hang,parskip=\exps,hangindent=\exhi, 
+%          \hfil\null\string\linebreak\ indention=\exin]%
+%          {fig:shape-31}{format=hang,parskip=\exps,hangindent=\exhi, indention=\exin}
+% \figshape{fig:shape-32}{margin=\exma,singlelinecheck=false}
+% \figshape{fig:shape-33}{margin=\exma}
+% \figshape{fig:shape-34}{margin=\exma,indention=\exin,singlelinecheck=false}
+% \figshape{fig:shape-35}{margin=\exma,indention=\exin}
+% \figshape[margin=\exma,hangindent=\exhi,
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-36}{margin=\exma,hangindent=\exhi,singlelinecheck=false}
+% \figshape{fig:shape-37}{margin=\exma,hangindent=\exhi}
+% \clearpage
+% \figshape[margin=\exma,hangindent=\exhi,indention=\exin,
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-38}{margin=\exma,hangindent=\exhi,indention=\exin, singlelinecheck=false}
+% \figshape{fig:shape-39}{margin=\exma,hangindent=\exhi,indention=\exin}
+% \figshape{fig:shape-40}{margin=\exma,parskip=\exps,singlelinecheck=false}
+% \figshape{fig:shape-41}{margin=\exma,parskip=\exps}
+% \figshape[margin=\exma,parskip=\exps,indention=\exin,
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-42}{margin=\exma,parskip=\exps,indention=\exin, singlelinecheck=false}
+% \figshape{fig:shape-43}{margin=\exma,parskip=\exps,indention=\exin}
+% \figshape[margin=\exma,parskip=\exps,hangindent=\exhi,
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-44}{margin=\exma,parskip=\exps,hangindent=\exhi, singlelinecheck=false}
+% \figshape{fig:shape-45}{margin=\exma,parskip=\exps,hangindent=\exhi}
+% \figshape[margin=\exma,parskip=\exps,hangindent=\exhi, 
+%          \hfil\null\string\linebreak\ indention=\exin,singlelinecheck=false]%
+%          {fig:shape-46}{margin=\exma,parskip=\exps,hangindent=\exhi, indention=\exin,singlelinecheck=false}
+% \figshape[margin=\exma,parskip=\exps,hangindent=\exhi,
+%          \hfil\null\string\linebreak\ indention=\exin]%
+%          {fig:shape-47}{margin=\exma,parskip=\exps,hangindent=\exhi, indention=\exin}
+% \figshape{fig:shape-48}{margin=\exma,format=hang,singlelinecheck=false}
+% \figshape{fig:shape-49}{margin=\exma,format=hang}
+% \figshape[margin=\exma,format=hang,indention=\exin, 
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-50}{margin=\exma,format=hang,indention=\exin, singlelinecheck=false}
+% \figshape{fig:shape-51}{margin=\exma,format=hang,indention=\exin}
+% \figshape[margin=\exma,format=hang,hangindent=\exhi,
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-52}{margin=\exma,format=hang,hangindent=\exhi, singlelinecheck=false}
+% \figshape{fig:shape-53}{margin=\exma,format=hang,hangindent=\exhi}
+% \clearpage
+% \figshape[margin=\exma,format=hang,hangindent=\exhi, 
+%          \hfil\null\string\linebreak\ indention=\exin,singlelinecheck=false]%
+%          {fig:shape-54}{margin=\exma,format=hang,hangindent=\exhi, indention=\exin,singlelinecheck=false}
+% \figshape[margin=\exma,format=hang,hangindent=\exhi, 
+%          \hfil\null\string\linebreak\ indention=\exin]%
+%          {fig:shape-55}{margin=\exma,format=hang,hangindent=\exhi,indention=\exin}
+% \figshape[margin=\exma,format=hang,parskip=\exps, 
+%          \hfil\null\string\linebreak\ singlelinecheck=false]%
+%          {fig:shape-56}{margin=\exma,format=hang,parskip=\exps, singlelinecheck=false}
+% \figshape{fig:shape-57}{margin=\exma,format=hang,parskip=\exps}
+% \figshape[margin=\exma,format=hang,parskip=\exps,
+%          \hfil\null\string\linebreak\ indention=\exin,singlelinecheck=false]%
+%          {fig:shape-58}{margin=\exma,format=hang,parskip=\exps,indention=\exin, singlelinecheck=false}
+% \figshape[margin=\exma,format=hang,parskip=\exps, 
+%          \hfil\null\string\linebreak\ indention=\exin]%
+%          {fig:shape-59}{margin=\exma,format=hang,parskip=\exps, indention=\exin}
+% \figshape[margin=\exma,format=hang,parskip=\exps,
+%          \hfil\null\string\linebreak\ hangindent=\exhi,singlelinecheck=false]%
+%          {fig:shape-60}{margin=\exma,format=hang,parskip=\exps,hangindent=\exhi, singlelinecheck=false}
+% \figshape[margin=\exma,format=hang,parskip=\exps,
+%          \hfil\null\string\linebreak\ hangindent=\exhi]%
+%          {fig:shape-61}{margin=\exma,format=hang,parskip=\exps,hangindent=\exhi}
+% \clearpage
+% \figshape[margin=\exma,format=hang,parskip=\exps,
+%          \hfil\null\string\linebreak\ hangindent=\exhi,indention=\exin,singlelinecheck=false]%
+%          {fig:shape-62}{margin=\exma,format=hang,parskip=\exps,hangindent=\exhi, indention=\exin,singlelinecheck=false}
+% \figshape[margin=\exma,format=hang,parskip=\exps,
+%          \hfil\null\string\linebreak\ hangindent=\exhi,indention=\exin]%
+%          {fig:shape-63}{margin=\exma,format=hang,parskip=\exps,hangindent=\exhi, indention=\exin}
+%
+% \subsubsection{The \Lpack{Caption} Justification Options}
+% 
+% There are nine options for setting the sub-caption format.  The first
+% is \Lkv{justified} which produces the format shows in
+% figure~\ref{fig:justification-00}.  Only one of these options is
+% allowed at a time.  If multiple options appear, then only the last is
+% used.  The figures~\ref{fig:justification-01} thru
+% \ref{fig:justification-08} show the rest of these formats.  The shape
+% options selected along with each format option is the default (see
+% figure~\ref{fig:shape-01}), this shows the effect of the justification
+% option on a single line caption.
+%
+% \figshape{fig:justification-00}{justification=justified,singlelinecheck=false}
+% \figshape{fig:justification-01}{justification=centerfirst,singlelinecheck=false}
+% \figshape{fig:justification-02}{justification=centerlast,singlelinecheck=false}
+% \figshape{fig:justification-03}{justification=centering,singlelinecheck=false}
+% \figshape{fig:justification-04}{justification=Centering,singlelinecheck=false}
+% \figshape{fig:justification-05}{justification=raggedleft,singlelinecheck=false}
+% \figshape{fig:justification-06}{justification=RaggedLeft,singlelinecheck=false}
+% \figshape{fig:justification-07}{justification=raggedright,singlelinecheck=false}
+% \figshape{fig:justification-08}{justification=RaggedRight,singlelinecheck=false}
+%
+% \subsubsection{The \Lpack{Caption} Label Options}
+% 
+% There are three options for setting the sub-caption \Lkv{labelformat}
+% as shown in figures~\ref{fig:lof-01}--\ref{fig:lof-03}.
+% This is the label number and not any following punctuation or separator
+% space (see below for setting these).  The three cases are:
+% \begin{itemize}\parskip-2pt
+%   \item \Lkv{empty}: Without any label.
+%   \item \Lkv{simple}: Just the label number.
+%   \item \Lkv{parens}: The label number surrounded by '()'.
+% \end{itemize}
+% The latter option, \Lkv{parens}, is the default for sub-floats.
+% \figshape{fig:lof-01}{labelformat=empty}
+% \figshape{fig:lof-02}{labelformat=simple}
+% \figshape{fig:lof-03}{labelformat=parens}
+%
+% Figures~\ref{fig:ls-00}--\ref{fig:ls-05} show the options for setting
+% the punctuation and separator space following the figure number.  These
+% options are set with the \Lkv{labelseparator} keyword.
+% 
+% The label separator options are:
+% \begin{itemize}\parskip-2pt
+%   \item \Lkv{none}    Nothing is added after the label.
+%   \item \Lkv{colon}   A colon followed by a |\space| is added following the
+%                       label.
+%   \item \Lkv{period}  A period followed by a |\space| is added following the
+%                       label.
+%   \item \Lkv{space}   Just a |\space| is added following the label.
+%   \item \Lkv{quad}    A |\quad| space is added following the label.
+%   \item \Lkv{newline} A new line is inserted after the label.
+% \end{itemize}
+% 
+% \figshape{fig:ls-00}{labelsep=none}
+% \figshape{fig:ls-01}{labelsep=colon}
+% \figshape{fig:ls-02}{labelsep=period}
+% \figshape{fig:ls-03}{labelsep=space}
+% \figshape{fig:ls-04}{labelsep=quad}
+% \figshape{fig:ls-05}{labelsep=newline}
+% 
+% \subsubsection{The \Lpack{Caption} Position Option}
+% 
+% The \Lpack{caption} package \Lkv{position} option specifies whether the
+% caption appears before or after the figure or table.  This can adjust
+% the relative spacing used to separate the float from the surrounding 
+% text.  However, for the \Lpack{subfig} package, it serves a more important
+% function.  That is it determines if the sub-floats belong to or are associated
+% with the last |\caption| command to be given, or the next one to be executed
+% sometime in the future.  If you find that you sub-references do not agree with
+% the top-level labels, than you may need to specifically set the \Lkv{position}.
+% This is best done when loading the \Lpack{caption} package, but may be done
+% at anytime with the |\captionsetup| command.
+% 
+% \subsection{Options from the \Lpack{Subfig} Package}
+% 
+% In addition to the options provided by the \Lpack{caption} package, the
+% \Lpack{subfig} package provides the options shown in table~\ref{tab:options}.
+%
+% \begin{table}^
+%  \centering
+%  \caption{\Lpack{Subfig} specific options.}^
+%  \label{tab:options}^
+%  \vspace{-10pt}^
+%  \hbox to \linewidth{\hss\begingroup\small
+%    \begin{tabular}{llp{218bp}}                                                      \\ \toprule
+%      {\bf KeyWord}        & {\bf Value}     & {\bf Notes}                           \\ \midrule
+%      \Lkv{config}         & $<$filename$>$  & The default value is ``subfig.cfg''   \\ \midrule
+%      \Lkv{$<$ext$>$depth}\footnotemark
+%                           & $<$number$>$    & The default value is 2.               \\
+%      \Lkv{listofformat}   & \Lkv{empty}     & Label format: (none)                  \\
+%                           & \Lkv{simple}    & Label format: \#\#                    \\
+%                           & \Lkv{parens}    & Label format: \#(\#)                  \\
+%                           & \Lkv{subsimple} & Label format: \#                      \\
+%                           & \Lkv{subparens} & Label format: (\#)                    \\
+%      \Lkv{listofindent}   & $<$length$>$    & Entry indention on List-of-Floats
+%                                               page.                                 \\
+%      \Lkv{listofnumwidth} & $<$length$>$    & Space allocated for entry label.      \\ \midrule 
+%      \Lkv{farskip}        & $<$glue$>$      & Glue placed opposite the sub-float
+%                                               caption.                              \\
+%      \Lkv{captionskip}    & $<$glue$>$      & Glue placed between the sub-float and
+%                                               the caption.                          \\
+%      \Lkv{topadjust}      & $<$glue$>$      & Extra glue added to \Lkv{captionskip} 
+%                                               when above the sub-float.              \\
+%      \Lkv{nearskip}       & $<$glue$>$      & Glue placed opposite the caption from 
+%                                               the sub-float.                         \\ \bottomrule
+%    \end{tabular}
+%  \endgroup\hss}
+% \end{table}
+%
+% \subsubsection{The \Lpack{Subfig} Configuration Specification}
+% \label{sec:config}
+% \changes{v1.2}{21 January 2004}{Rewrote description of the layout.}
+% \changes{v1.3}{18 March 2004}{Moved configuration subsection.}
+% 
+% The default settings and layout of the \Lpack{subfig} package can be
+% modified by loading one or more configuration files.  The \Lpack{subfig}
+% \Lkv{config} option loads the configuration file(s) after the package is
+% setup, but before the \Lvar{subfigure} or \Lvar{subtable} sub-floats
+% have been created (with the |\newsubfloat| command) and before the
+% package options have been processed.  See section~\ref{sec:back-compat}
+% for an example of using the \Lfile{subfigold.cfg} file to emulate the
+% \Lpack{subfigure} package.
+% 
+% Without a value, the \Lkv{config} keyword loads the file
+% \Lfile{subfig.cfg}.  Use the value to load another file, for instance,
+% \Lkv{config=altsf.cfg}.  If more than one configuration file is
+% specified in the package options, than they are loaded in the order in
+% which they appear in the option list.  When used outside the package
+% option list, the \Lkv{config} keyword is processed by the \Lpack{caption}
+% package and loads \Lfile{caption.cfg} by default.
+%
+% {\scshape\bf Note}: The package pre-defines the following values by 
+% adding them to the \Lvar{subfloat} variable list with the |\captionsetup|
+% command before loading the configuration file(s):  
+%
+%  \begin{quote}^
+%    |  \captionsetup[subfloat]{%|\\
+%    |      font=footnotesize,|\\
+%    |      labelformat=parens,labelsep=space,|\\
+%    |      listofformat=subparens}|
+%  \end{quote}
+% 
+% \subsubsection{The \Lpack{Subfig} List-of-Floats Specification}
+% \label{sec:lof}
+% \changes{v1.1}{12 January 2004}{Added explanation for multiple `\#' signs
+% in table~\ref{tab:options}.}
+%
+% \noindent
+% The next two options, \Lkv{lofdepth} and \Lkv{lotdepth}, are created along
+% with the internal subfigure and subtable sub-floats.  If other sub-floats are
+% created, than the associated depth counter and keyword is created for them if
+% it does not already exist.  In order for the sub-captions to be shown in the
+% List-of-Floats page, the related depth counter must be set to 2 or greater.
+% These keywords allow the counters to be easily set in the option list or with
+%^
+% \footnotetext{Where \Lkv{$<$ext$>$depth} is initially only \Lkv{lofdepth} 
+% and \Lkv{lotdepth}.  More such keywords may be added by the \cmd{\newsubfloat} 
+% command (see section~\ref{sec:newsubfloat}.}
+%^
+% the |\captionsetup| command\@.\footnote{The sub-caption depth counters must be
+% set at the ``global'' level (see section~\ref{sec:layers}) and before the
+% corresponding \cmd{\listof\dots} command is used.} The default value is 1,
+% which turns off the printing of the sub-captions.
+%
+% The next three options, \Lkv{listofformat}, \Lkv{listofindent}, and
+% \Lkv{listofnumwidth}, control and adjust the way that the sub-float number
+% is displayed on the respective List-of-Floats page.  The \Lkv{listofformat} 
+% shows how or if the sub-float number is shown.  Where there are two `\#' 
+% signs in the List-of-Page label formats, the first one stands for the 
+% {\bf\cmd{\p@}\textless{\em sub-float\_type}\textgreater} value and the second
+% for the {\bf\cmd{\the}\textless{\em sub-float\_type}\textgreater} value.
+% Where there is only one `\#' it stands for the latter.
+% 
+% The \Lkv{listofindent} keyword sets the total indentation from the left
+% margin, while the \Lkv{listofnumwidth} keyword controls the width of box 
+% for the label number.  This is also the amount of extra indentation added
+% to second and later lines of a multiple line entry.
+% 
+% \subsubsection{The \Lpack{Subfig} Layout}
+% 
+% The layout of the sub-float contains several internal values which may
+% be changed to customize appearance of the object.  The following
+% illustration shows the relationship of these values.
+% Figure~\subref*{fig:layout-A} shows the standard layout
+% with the caption following the figure.  The figure is vertically centered
+% with some vertical space added above.  If this is a float at the top
+% of the page, than the space is suppressed.  If the caption of the
+% float follows the subfigures, than \Lkv{farskip} indicates the amount
+% of space to skip.  Otherwise, if the float caption precedes the subfigures,
+% than \Lkv{nearskip} indicates the value to use.  The best way to think
+% of these two skips is that the \Lkv{nearskip} is closer to the main float
+% caption than the \Lkv{farskip}.  After the subfigure, more vertical space,
+% \Lkv{captionskip}, is added between the subfigure and the sub-caption.
+% Finally, \Lkv{nearskip} (or \Lkv{farskip}) of vertical space added below.
+% The baseline is located at the bottom of the figure.  It is along this
+% baseline that adjacent subfigure boxes are aligned.
+% 
+% \begin{figure}
+%   \captionsetup[subfloat]{singlelinecheck=true,margin=1cm,^
+%                           farskip=0pt,nearskip=10pt}
+%   \centering
+%   \fboxsep=-\fboxrule
+%   \setbox\tempbox\hbox{\Lkv{margin}}
+%   \tempdimb \wd\tempbox
+%   \tempdima \tempdimb
+%   \advance\tempdimb 1mm
+%   \setbox\tempbox\hbox to \tempdimb{^ \tempbox holds margin spacer
+%     \hfil
+%     \vbox to 20pt{^
+%       \vskip4.3pt
+%       \hbox to \tempdima{\leftarrowfill$\mkern-2.5mu\mathord\rightarrow$}
+%       \hbox to \tempdima{\Lkv{margin}}
+%       \vfil}^
+%     \hfil}
+%   \multiply\tempdimb -2
+%   \advance\tempdimb 4.5in ^ \tempdimb is width of sub-caption box
+%   \setbox\tempbox\hbox to 4.5in{^ \tempbox holds margin/sub-caption/margin
+%     \copy\tempbox
+%     \fbox{^
+%       \vbox to 20pt{
+%         \vskip1pt
+%         \vbox to 0pt{
+%           \hbox to\tempdimb{^
+%             \vbox to 0pt{
+%               \hbox to \tempdimb{^
+%                 \hskip1pt^
+%                 \leftarrowfill\Lkv{width}\rightarrowfill^
+%                 \hskip1pt}
+%               \vss}}
+%           \vss}
+%         \vfil
+%         \hbox to\tempdimb{^
+%           \hfil
+%           {\scshape sub-caption}^
+%           \hfil}
+%         \vskip1.5pt}}^
+%     \copy\tempbox
+%     \hfil}
+% ^
+%   \subfloat[Standard layout (Sub-float: position=bottom).]{^
+%     \label{fig:layout-A}^
+%     \fbox{^
+%       \parbox{4.5in}{^
+%         \vskip1pt
+%         \hbox to 4.5in{^
+%           \hskip1.5in^
+%           $\left\updownarrow\vrule width0pt height11pt depth1pt\right.$^
+%           (\Lkv{farskip} or \Lkv{nearskip})^
+%           \hfil}
+%         \fbox{^
+%           \vbox to 45pt{
+%             \vfil\vfil
+%             \hbox to 4.5in{^
+%               \hfil
+%               {\scshape sub-float body}^
+%               \hfil}
+%             \vfil
+%             \vbox to 0pt{
+%               \vss
+%               \hbox to 4.5in{^
+%                 \hskip12pt^
+%                 \hbox{\small Baseline}^
+%                 \hfil}
+%               \vskip1pt}}}
+%         \hbox to 4.5in{^
+%           \hskip1.5in^
+%           $\left\updownarrow\vrule width0pt height11pt depth1pt\right.$^
+%           \Lkv{captionskip}^
+%           \hfil}
+%         \copy\tempbox
+%         \vskip1pt
+%         \hbox to 4.5in{^
+%           \hskip1.5in^
+%           $\left\updownarrow\vrule width0pt height11pt depth1pt\right.$^
+%           \Lkv{nearskip} or \Lkv{farskip}^
+%           \hfil}
+%         \vskip1pt}}}\\
+% ^
+%    \subfloat[Standard layout without a caption (Sub-float: position=bottom)]{^
+%     \label{fig:layout-B}^
+%     \fbox{^
+%       \parbox{4.5in}{
+%         \vskip1pt
+%         \hbox to 4.5in{^
+%           \hskip1.5in^
+%           $\left\updownarrow\vrule width0pt height11pt depth1pt\right.$^
+%           (\Lkv{farskip} or \Lkv{nearskip})^
+%           \hfil}
+%         \fbox{^
+%           \vbox to 45pt{
+%             \vfil\vfil
+%             \hbox to 4.5in{^
+%               \hfil
+%               {\scshape sub-float body}^
+%               \hfil}
+%             \vfil
+%             \vbox to 0pt{^
+%               \vss
+%               \hbox to 4.5in{^
+%                 \hskip12pt^
+%                 {\small Baseline}^
+%                 \hfil}
+%               \vskip1pt}}}
+%       \hbox to 4.5in{^
+%         \hskip1.5in^
+%         $\left\updownarrow\vrule width0pt height11pt depth1pt\right.$^
+%         \Lkv{nearskip} or \Lkv{farskip}^
+%         \hfil}
+%       \vskip1pt}}}\\
+% ^
+%   \subfloat[Reversed layout (Sub-float: position=top).]{^
+%     \label{fig:layout-C}^
+%     \fbox{^
+%       \parbox{4.5in}{
+%         \vskip1pt
+%         \hbox to 4.5in{^
+%           \hskip1.5in^
+%           $\left\updownarrow\vrule width0pt height11pt depth1pt\right.$^
+%           (\Lkv{farskip} or \Lkv{nearskip})^
+%           \hfil}
+%         \box\tempbox
+%         \hbox to 4.5in{^
+%           \hbox to 0pt{^
+%             \hskip12pt
+%             \smash{\raisebox{-6.5pt}{\small Baseline}}^
+%             \hss}^
+%           \hskip1.5in^
+%           $\left\updownarrow\vrule width0pt height11pt depth1pt\right.$^
+%           \Lkv{captionskip}$+$\Lkv{topadjust}^
+%           \hfil}
+%         \fbox{^
+%           \vbox to 45pt{
+%             \vfil
+%             \hbox to 4.5in{^
+%               \hfil
+%               {\scshape sub-float body}^
+%               \hfil}
+%             \vfil}}
+%         \vskip1pt
+%         \hbox to 4.5in{^
+%           \hskip1.5in^
+%           $\left\updownarrow\vrule width0pt height11pt depth1pt\right.$^
+%           \Lkv{nearskip} or \Lkv{farskip}^
+%           \hfil}
+%         \vskip1pt}}}\\
+% ^
+%    \subfloat[Standard layout without a caption (Sub-float: position=top)]{^
+%     \label{fig:layout-D}^
+%     \fbox{^
+%       \parbox{4.5in}{
+%         \vskip1pt
+%         \hbox to 4.5in{^
+%           \hbox to 0pt{^
+%             \hskip12pt^
+%             \smash{\raisebox{-6.5pt}{\small Baseline}}^
+%             \hss}^
+%           \hskip1.5in^
+%           $\left\updownarrow\vrule width0pt height11pt depth1pt\right.$^
+%           (\Lkv{farskip} or \Lkv{nearskip})^
+%           \hfil}
+%         \fbox{^
+%           \vbox to 45pt{
+%             \vfil
+%             \hbox to 4.5in{^
+%               \hfil
+%               {\scshape sub-float body}^
+%               \hfil}
+%             \vfil}}
+%         \hbox to 4.5in{^
+%           \hskip1.5in^
+%           $\left\updownarrow\vrule width0pt height11pt depth1pt\right.$^
+%           \Lkv{nearskip} or \Lkv{farskip}^
+%           \hfil}
+%         \vskip1pt}}}^
+% ^
+%   \clearcaptionsetup{subfloat}^
+%   \vspace{-10pt}^
+%   \caption[Sub-float Layout.]{Sub-float Layout.  If the respective float 
+%   caption position is \Lkv{bottom}, than the \Lkv{farskip} is used at
+%   the top and the \Lkv{nearskip} is used at the bottom.  If the respective
+%   float caption  position is \Lkv{top}, than these skips are reversed.
+%   Also, the top skip is suppressed at the top of a page.}
+%   \label{fig:layout}
+% \end{figure}
+%
+% Figure~\subref*{fig:layout-C} shows the reversed case where
+% the sub-caption precedes the figure (\ie, \Lkv{position=top}).  In
+% this case the \Lkv{farskip} and \Lkv{nearskip} are placed according to
+% the position of the float caption as above and the \Lkv{captionskip} is
+% increased by \Lkv{topadjust}.  The other two cases,
+% figures~\subref*{fig:layout-B} and \subref{fig:layout-D}),
+% show the cases where there is no caption.  Note that the \Lkv{captionskip}
+% (and \Lkv{topadjust} is left out when there is no caption.  Again, note
+% also, for all of these cases, that the space at the top of the subfigure
+% is automatically removed for items that are the first box in a vertical
+% list or other than the first box in a horizontal list.  This allows
+% tighter packing of the sub-floats and the full use of the page or
+% \Lenv{minipage}.
+% 
+% Each of these values, \Lkv{farskip}, \Lkv{captionskip}, \Lkv{topadjust},
+% and \Lkv{nearskip}\footnote{Also the \Lkv{margin} and \Lkv{width} keywords
+% affect the \Lpack{subfig} layout, see section~\ref{sec:shape}}, may be
+% changed from their defaults (see table~\ref{tab:keywords}) to adjust the
+% subfigure for the current layout style.  In addition, they may all assume
+% negative values, which in some cases may solve problems with the layout,
+% but is not recommended, in general.
+% 
+% \subsubsection{The \Lpack{Subfig} Package Startup}
+% \changes{v1.2}{21 January 2004}{Added ``The \Lpack{Subfig} Package
+% Startup'' section.}
+%
+% The startup sequence for the \Lpack{subfig} package is to first load
+% the \Lpack{caption} package (with no options) if it has not already
+% been loaded.  Next it sets the following default values on the
+% \Lvar{subfloat} variable:
+%  \begin{quote}
+%    |  \captionsetup[subfloat]{font=footnotesize,|\\
+%    |                          labelformat=parens,labelsep=space,|\\
+%    |                          listofformat=subparens}|
+%  \end{quote}
+%
+% This overrides the \Lpack{caption} package default in which the font is 
+% undefined and uses that of the surrounding document\footnote{If, in fact,
+% \Lkv{font} is defined in the \Lpack{caption} options list before loading
+% the \Lpack{subfig} package; than the above redefinition on the 
+% \Lvar{subfloat} variable will hide that setting from all of the sub-floats.
+% If you want them to have the same overall font setting (let's say 
+% ``{bf,sl}''), than you will need to add one of the following sets of
+% commands:
+% \begin{quote}^
+%   \cmd{\captionsetup}[subfloat]\{font=\{footnotesize,bf,sl\}\}
+% \end{quote}
+% or
+% \begin{quote}^
+%   \cmd{\captionsetup}\{labelfont=\{bf,sl\},textfont=\{bf,sl\}\}
+% \end{quote}}; the label is \Lkv{simple} and followed by a \Lkv{colon}
+% and space.  It also defines the \Lkv{listofformat} at this level in
+% the case that it is added to the \Lpack{caption} package.
+% Note that if the default settings to the \Lvar{subfloat} list are not
+% desired, they may be removed with a |\clearcaptionsetup| command (see
+% section~\ref{sec:config}).  Also the current settings may be checked
+% using the following (here for a subfigure):
+%  \begin{quote}^
+%    |  \showcaptionsetup{figure}|\\
+%    |  \showcaptionsetup{subfloat}|\\
+%    |  \showcaptionsetup{subfigure}|
+%  \end{quote}
+% placed just before the |\subfloat| will show in the log what overrides
+% are being applied at that point.
+% 
+% Second, any configuration files are loaded.  If there are more than one
+% listed in the |\usepackage| options list, than they are loaded in the
+% order specified in the list.
+% 
+% Next, the other (non-\Lkv{config}) options in the |\usepackage| options
+% list are added to the \Lvar{subfloat} list.
+% 
+% Finally, the \Lpack{subfig} package finishes defining its functions and
+% if the configuration file(s) have not already defined the sub-floats:
+% \Lvar{subfigure} and \Lvar{subtable}, than they are defined.
+% 
+% \section{Compatibility With Other Packages.}
+%
+% This section discusses specific aspects of compatibility
+% with other packages with which the subfig package is often
+% used.
+% 
+% \subsection{\Lpack{Caption} Package}
+% \changes{v1.2}{16 January 2004}{Removed mention of undocumented
+% and/or unreleased \cmd{\topcaption} and \cmd{\bottomcaption} commands.}
+% 
+% The \Lpack{subfig} package requires the \Lpack{caption} package in
+% order to format the sub-float captions.  However, the \Lkv{position}
+% keyword option may only take two values when used with the \Lpack{subfig}
+% package; those are, \Lkv{top} and \Lkv{bottom}.  Any other value will be
+% treated as if \Lkv{position=bottom} was specified.
+% 
+% {\scshape\bf Warning}: By default (without the \Lfile{subfig.cfg} loaded),
+% the \Lkv{position} values are expected to be defined prior to loading
+% the \Lpack{subfig} package or defined afterward.  However they are
+% defined, it is up to the user to insure that the captions are used
+% correctly with the sub-captions, because using a caption, that is
+% expected to precede the sub-captions, after the sub-captions 
+% (or {\em vise-versa\/}) will cause the List-of-Floats page and float label
+% references to be incorrect.
+% 
+% For compatibility with other packages which modify the caption and
+% where the standard \Lpack{caption} package whould interfere with the
+% desired layout, the \Lpack{caption} package has a special option,
+% \Lkv{caption=false}, which loads the internals (\ie, the ``kernel''
+% \Lpack{caption3} package) without modifying the \cmd{\caption} command.
+% 
+% \subsection{\Lpack{Float} Package}
+% \label{sec:customfloat}
+% \changes{v1.1}{12 January 2004}{Updated \Lkv{listofformat} value from
+% \Lkv{simple} to \Lkv{subsimple}.}
+% \changes{v1.2}{16 January 2004}{Removed duplicate line.}
+% \changes{v1.2}{22 January 2004}{Removed separate setting of the mapname
+% since the \Lpack{caption} package now fixes the float command 
+% \cmd{\restylefloat*}.  Also, the same fix in the prolog of this document.}
+% 
+% To create a new sub-float, you first need a new floating environment.
+% If you have that, great, otherwise, load the \Lpack{float} package and
+% create one with a series of commands similar to the following.  Here
+% we create a new \Lenv{map} environment so that the \Lpack{subfig}
+% package will work with it.  For this example we have indicated that we
+% expect to place the main float caption before the sub-floats.
+% \begin{verbatim}
+%     \usepackage{float}
+%     \newfloat{map}{tbph}{lom}
+%     \restylefloat*{map}
+%     \floatstyle{plain}
+%     \floatname{map}{Map}
+%     \captionsetup[map]{position=top}
+%     \newcommand{\listofmaps}{\listof{map}{List of Maps}}
+% \end{verbatim}
+% 
+% Then you can then create the new sub-float with:
+% \begin{verbatim}
+%     \newsubfloat[position=top,listofformat=subsimple]{map}
+% \end{verbatim}
+% \noindent
+% Here we also indicate that we want the sub-caption to be placed
+% above the submaps and that the reference label on the list-of-maps
+% page will be in simple plain format without parentheses.
+%
+% Now the |\subfloat| command will work in the \Lenv{map} environment.
+%
+% For example, the following code generates map~\ref{map:example}:
+% \begin{verbatim}
+%     \begin{map}%
+%       \centering
+%       \caption{This example shows two small maps.}%
+%       \label{map:example}%
+%       \subfloat[First map.]{...figure code...}%
+%       \qquad
+%       \subfloat[Second map.]{...figure code...}%
+%     \end{map}
+% \end{verbatim}
+% \begin{map}^
+%   \centering
+%   \caption{This example shows two small maps.}^
+%   \label{map:example}^
+%   \subfloat[First map.]{^
+%     \begin{picture}(86,42)(0,0)
+%       \thicklines
+%         \put(0,0){\framebox(86,42){}}
+%       \thinlines
+%         \qbezier(20,42)(20,38)(10,30)
+%         \qbezier(10,30)(0,25)(0,0)
+%         \qbezier(25,42)(25,38)(15,30)
+%         \qbezier(15,30)(5,25)(5,0)
+%         \put(28,38){\circle*{3}}
+%         \put(18,8){\circle{15}}
+%         \put(35,0){\line(0,1){30.0}}
+%         \put(40,0){\line(0,1){30.0}}
+%         \put(35,30){\line(1,2){6.0}}
+%         \put(40,30){\line(1,2){6.0}}
+%         \put(60,20){\circle{10}}
+%         \put(57,35){\circle*{3}}
+%         \put(70,10){\circle*{3}}
+%         \put(65,42){\line(1,-1){21.0}}
+%         \put(70,42){\line(1,-1){16.0}}
+%     \end{picture}}
+%   \qquad
+%   \subfloat[Second map.]{^
+%     \begin{picture}(86,42)(0,0)
+%       \thicklines
+%         \put(0,0){\framebox(86,42){}}
+%       \thinlines
+%         \put(10,35){\circle*{3}}
+%         \put(17,10){\circle*{2}}
+%         \qbezier(0,42)(43,42)(43,21)
+%         \qbezier(43,21)(43,0)(86,0)
+%         \qbezier(0,37)(38,37)(38,16)
+%         \qbezier(38,16)(38,5)(55,0)
+%         \put(45,38){\circle{5}}
+%         \put(70,30){\circle*{8}}
+%     \end{picture}}
+% \end{map}
+% 
+% \subsection{\Lpack{FloatRow} Package}
+% \changes{v1.3}{6 May 2005}{Added compatibility with the \Lpack{floatrow}
+% package.}
+% 
+% This package is compatible with the the \Lpack{floatrow} package and
+% contains hooks to allow it to work correctly with subfloats.  In
+% particular, the existance of the \cmd{\FBsc@max} command in the package
+% turns on the hooks.  See the code for the macros \cmd{\sf@@@subfloat} and
+% \cmd{\sf@subcaption} for details.
+% 
+% The following code and table~\ref{tab:floatrow} show an example of
+% using the \Lpack{floatrow} package to align captions.  Without it, the
+% first caption, \subref{tab:floatrow:one}, would be located just above
+% the first table rather than even with the first line of the second
+% caption, \subref{tab:floatrow:two}.
+% 
+% \begin{quote}\small
+%\null\qquad\vdots\\
+%|\usepackage{booktabs}|\\
+%|\usepackage{subfig}|\\
+%|\captionsetup[table]{position=top}|\\
+%|\captionsetup[subtable]{position=top}|\\
+%\null\qquad\vdots\\
+%|\usepackage[heightadjust=all,valign=t]{floatrow,fr-subfig}|\\
+%|\floatsetup{style=Plaintop}|\\
+%\null\qquad\vdots\\
+%|\begin{table}%|\\
+%|\floatbox{table}[\FBwidth]%|\\
+%|         {\caption{Results in Two Tables.}%|\\
+%|          \label{tab:floatrow}}{%|\\
+%|  \begin{subfloatrow}|\\
+%|    \subfloat[First Table of Results.]{\label{tab:floatrow:one}%|\\
+%|      \begin{tabular}{lcc}                                   \toprule|\\
+%|        \multicolumn{1}{c}{\raisebox{-1.5ex}{\bf Result Type}}|\\
+%|                    & \multicolumn{2}{c}{\bf Result Data} \\ |\\
+%|                    & {\bf Set One} & {\bf Set Two}       \\ \midrule|\\
+%|        First type  & 0.24          & 4.12                \\|\\
+%|        Second type & 1.34          & 2.01                \\|\\
+%|        Third type  & 2.99          & 4.13                \\|\\
+%|        Fourth type & 2.67          & 0.08                \\ \bottomrule|\\
+%|      \end{tabular}}|\\
+%|    \subfloat[Second Table of Results.][Second Table of Results.|\\
+%|              However, this one has a very long caption that causes|\\
+%|              problems with alignment.]{\label{tab:floatrow:two}%|\\
+%|      \begin{tabular}{lccc}                                      \toprule|\\
+%|        \multicolumn{1}{c}{\raisebox{-1.5ex}{\bf Result Type}}|\\
+%|                    & \multicolumn{2}{c}{\bf Result Data}     \\|\\
+%|                    & {\bf Set 1} & {\bf Set 2} & {\bf Set 3} \\ \midrule|\\
+%|        First type  & 4.20        & blue        & 2.14        \\|\\
+%|        Second type & 4.31        & red         & 1.02        \\|\\
+%|        Third type  & 4.31        & green       & 8.01        \\ \bottomrule|\\
+%|      \end{tabular}}|\\
+%|  \end{subfloatrow}}%|
+%|\end{table}|
+% \end{quote}
+% \begin{table}^     When/if the floatrow package becomes generally distributed, 
+%   \centering ^                        we can substitute the above example code
+%   \caption{Results in Two Tables.}^  for this hacked code, which has to figure 
+%   \label{tab:floatrow}^                out the magic numbers: 179bp and 188bp.
+%   \captionsetup[subtable]{position=below,captionskip=0pt,farskip=3pt}
+%   \subfloat[First Table of Results.]{^
+%       \label{tab:floatrow:one}^
+%       \vrule height 0pt width 179bp}^
+%   \hfill
+%   \subfloat[Second Table of Results.][Second Table of Results.
+%             However, this one has a very long caption that causes
+%             problems with alignment.]{^
+%       \label{tab:floatrow:two}^
+%       \vrule height 0pt width 188bp}\\
+%   \captionsetup[subtable]{position=above}^
+%   \subfloat{^
+%     \begin{tabular}{lcc}                                   \toprule
+%       \multicolumn{1}{c}{\raisebox{-1.5ex}{\bf Result Type}}
+%                   & \multicolumn{2}{c}{\bf Result Data} \\ 
+%                   & {\bf Set One} & {\bf Set Two}       \\ \midrule
+%       First type  & 0.24          & 4.12                \\
+%       Second type & 1.34          & 2.01                \\
+%       Third type  & 2.99          & 4.13                \\
+%       Fourth type & 2.67          & 0.08                \\ \bottomrule
+%     \end{tabular}}^
+%   \hfill
+%   \subfloat{^
+%     \begin{tabular}{lccc}                                      \toprule
+%       \multicolumn{1}{c}{\raisebox{-1.5ex}{\bf Result Type}}
+%                   & \multicolumn{2}{c}{\bf Result Data}     \\
+%                   & {\bf Set 1} & {\bf Set 2} & {\bf Set 3} \\ \midrule
+%       First type  & 4.20        & blue        & 2.14        \\
+%       Second type & 4.31        & red         & 1.02        \\
+%       Third type  & 4.31        & green       & 8.01        \\ \bottomrule
+%     \end{tabular}}^
+% \end{table}
+%
+% \subsection{\Lpack{verbatim} and \Lpack{fancyvrb} packages}
+% \label{sec:verbatim}
+% \changes{v1.3}{4 July 2005}{Added documentation about including
+% verbatim text in a subfloat.}
+% 
+% You cannot place a \Lenv{verbatim} environment inside of the
+% \cmd{\subfloat} command because the \Lenv{verbatim} environment needs
+% to change the character classes before the text in the environment is
+% read by \TeX.  Therefore, if you really want to include verbatim text
+% inside a sub-float, you will need to place the verbatim text into a
+% box and then feed the box to the \cmd{\subfloat} command.
+% 
+% One way to do this is by defining and using a \Lenv{SubFloat}
+% environment, as shown in figure\ref{fig:label}.  Such as placing the
+% following in the preamble of your paper:
+% 
+% \begin{quote}
+%   |\makeatletter|\\
+%   |\newbox\sf@box|\\
+%   |\newenvironment{SubFloat}[2][]%|\\
+%   |  {\def\sf@one{#1}%|\\
+%   |   \def\sf@two{#2}%|\\
+%   |   \setbox\sf@box\hbox|\\
+%   |     \bgroup}%|\\
+%   |  {  \egroup|\\
+%   |   \ifx\@empty\sf@two\@empty\relax|\\
+%   |     \def\sf@two{\@empty}|\\
+%   |   \fi|\\
+%   |   \ifx\@empty\sf@one\@empty\relax|\\
+%   |     \subfloat[\sf@two]{\box\sf@box}%|\\
+%   |   \else|\\
+%   |     \subfloat[\sf@one][\sf@two]{\box\sf@box}%|\\
+%   |   \fi}|\\
+%   |\makeatother|\\
+% \end{quote}
+% \noindent
+% and then using it in your code as shown below.  While this does not
+% exactly produce the options shown in table~\ref{tab:calling}, it is
+% close enough for regular use and may be adjusted if necessary.
+% 
+% \begin{quote}
+%   |\begin{figure}|\\
+%   |  \centering|\\
+%   |  \begin{SubFloat}[Black box]{\label{fig:label1}Caption 1.}%|\\
+%   |    \rule{4cm}{3cm}%...blackbox subfigure...|\\
+%   |  \end{SubFloat}%|\\
+%   |  \hspace{1.5cm}%|\\
+%   |  \begin{SubFloat}{\label{fig:label2}Caption 2.}%...verbatim subfigure with |\\
+%   |    \begin{minipage}[b]{0.3\linewidth}%  a minipage to control the width...|\\
+%   |      \begin{verbatim}|\\
+%   |abc  def ghi   jkl|\\
+%   |   xx   x   xxx|\\
+%   |abc  def ghi   jkl|\\
+%   |      \end{verbatim}%|\\
+%   |    \end{minipage}%|\\
+%   |  \end{SubFloat}|\\
+%   |  \caption{Main Caption.}|\\
+%   |  \label{fig:label}|\\
+%   |\end{figure}|
+% \end{quote}
+% \begin{figure}
+%   \centering
+%   \begin{SubFloat}[Black box]{\label{fig:label1}Caption 1.}^
+%     \rule{4cm}{3cm}^...blackbox subfigure...
+%   \end{SubFloat}^
+%   \hspace{1.5cm}^
+%   \begin{SubFloat}{\label{fig:label2}Caption 2.}^...verbatim subfigure with 
+%     \begin{minipage}[b]{0.3\linewidth}^  a minipage to control the width...
+%       \begin{verbatim}
+% abc  def ghi   jkl
+%    xx   x   xxx
+% abc  def ghi   jkl
+%       \end{verbatim}^
+%     \end{minipage}^
+%   \end{SubFloat}
+%   \caption{Main Caption.}
+%   \label{fig:label}
+% \end{figure}
+%
+% \subsection{\Lpack{IEEEtrans} Class}
+%
+% The \Lpack{IEEEtrans} Class defines its own caption layout.
+% Therefore to use the \Lpack{subfig} package, you need to 
+% ``turn off'' the \Lpack{caption} package.  The following
+% two setups are the same:
+%  \begin{quote}^
+%    |  \usepackage[caption=false]{caption}|\\
+%    |  \usepackage[...]{subfig}|
+%  \end{quote}
+% or
+%  \begin{quote}^
+%    |  \usepackage[caption=false, ...]{subfig}|
+%  \end{quote}
+%
+% \subsection{Other Packages}
+% 
+% The \Lpack{subfig} package has been tested with the following
+% packages and is known to work correctly.\footnote{If you find
+% any problem with these or any other package, please create a
+% small example demonstrating the problem and send it to the 
+% author.}
+% 
+% \begin{itemize}\parskip-5pt
+%   \item \Lpack{fixltx2e}
+%   \item \Lpack{captcont}
+%   \item \Lpack{hyperref}
+%   \item \Lpack{hypcap}
+% \end{itemize}
+% 
+% Further, the following packages are known not to work with, or
+% that have some problems when used with the \Lpack{subfig} package:
+%
+% \begin{itemize}\parskip-5pt
+%   \item \Lpack{ccaption}
+%   \item \Lpack{hvfloat}
+%   \item \Lpack{nonfloat}
+% \end{itemize}
+% 
+% \subsection{Backward Compatibility with the \Lpack{Subfigure} Package}
+% \label{sec:back-compat}
+% 
+% The following code sets up a configuration file to make the \Lpack{subfig}
+% package be nearly compatible with the older \Lpack{subfigure} package.
+% The first major difference is that the spacing is not quite the same 
+% due to internal changes in the sub-float setup and that some of the 
+% old tweaks that involved changing internal variables often will no 
+% longer work.
+%
+% The other major change si that the old \Lkv{topskip} and \Lkv{bottomskip}
+% no longer exist and their replacements \Lkv{farskip} and \Lkv{nearskip}
+% act differently.  The new skips also surround the sub-caption and 
+% sub-float body, but where the \Lkv{bottomskip} was always next to the
+% sub-caption, the new \Lkv{nearskip} is always nearer the man (float)
+% caption.  The other two vary in the same way.  Normally, this difference
+% is minor and can be ignored, but in some cases you will need to adjust
+% them to get your desired {\em look and feel}.
+% 
+% \begin{macro}{\subfigure}
+% \begin{macro}{\subtable}
+% \changes{v1.2}{16 January 2004}{Removed code that forces the figure or
+% table to be in some place.  The default will be \Lkv{bottom} if nothing 
+% else is set.}
+% \changes{v1.2}{28 January 2004}{Added default setting of \Lkv{loose}.}
+%
+% The first section creates the |\subfigure| and the |\subtable| commands.
+% 
+% \iffalse
+%<*newconf>
+% \fi
+%
+%    \begin{macrocode}
+\@ifundefined{c@subfigure}{\newsubfloat{figure}}{}
+\def\subfigure{\subfloat}
+%    \end{macrocode}
+%
+%
+%    \begin{macrocode}
+\@ifundefined{c@subtable}{\newsubfloat{table}}{}
+\def\subtable{\subfloat}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+%
+% \changes{v1.3}{18 March 2004}{Generalized boolean values.}
+%
+% Next we restore the caption value-keywords for the option list.
+% Currently these are available within the main document with the
+% |\captionsetup| command.  However, this may change in a later
+% release of the \Lpack{subfig} package.
+%
+%    \begin{macrocode}
+\DeclareCaptionOption{normal}[]{\caption@setformat{default}}
+\DeclareCaptionOption{isu}[]{\caption@setformat{format=hang}}
+\DeclareCaptionOption{format=hang}[]{\caption@setformat{format=hang}}
+\DeclareCaptionOption{center}[]{\caption@setjustification{centering}}
+\DeclareCaptionOption{anne}[]{\caption@setjustification{centerlast}}
+\DeclareCaptionOption{centerlast}[]{\caption@setjustification{centerlast}}
+\DeclareCaptionOption{nooneline}[]{\sf@setbool{slc}{0}}
+\DeclareCaptionOption{scriptsize}[]{\def\captionfont{\scriptsize}}
+\DeclareCaptionOption{footnotesize}[]{\def\captionfont{\footnotesize}}
+\DeclareCaptionOption{small}[]{\def\captionfont{\small}}
+\DeclareCaptionOption{normalsize}[]{\def\captionfont{\normalsize}}
+\DeclareCaptionOption{large}[]{\def\captionfont{\large}}
+\DeclareCaptionOption{Large}[]{\def\captionfont{\Large}}
+\DeclareCaptionOption{up}[]{\l@addto@macro\captionlabelfont\upshape}
+\DeclareCaptionOption{it}[]{\l@addto@macro\captionlabelfont\itshape}
+\DeclareCaptionOption{sl}[]{\l@addto@macro\captionlabelfont\slshape}
+\DeclareCaptionOption{sc}[]{\l@addto@macro\captionlabelfont\scshape}
+\DeclareCaptionOption{md}[]{\l@addto@macro\captionlabelfont\mdseries}
+\DeclareCaptionOption{bf}[]{\l@addto@macro\captionlabelfont\bfseries}
+\DeclareCaptionOption{rm}[]{\l@addto@macro\captionlabelfont\rmfamily}
+\DeclareCaptionOption{sf}[]{\l@addto@macro\captionlabelfont\sffamily}
+\DeclareCaptionOption{tt}[]{\l@addto@macro\captionlabelfont\ttfamily}
+\DeclareCaptionOption{ruled}[1]{\sf@setbool{ruled}{#1}}
+\DeclareCaptionOption{singlelinecheck}[true]{\sf@setbool{slc}{#1}}
+\DeclareCaptionOption{oneline}[1]{\sf@setbool{slc}{#1}}
+\DeclareCaptionOption{justified}[]{\caption@setjustification{justified}}
+\DeclareCaptionOption{centering}[]{\caption@setjustification{centering}}
+\DeclareCaptionOption{centerfirst}[]{\caption@setjustification{centerfirst}}
+\DeclareCaptionOption{flushright}[]{\caption@setjustification{raggedleft}}
+\DeclareCaptionOption{raggedleft}[]{\caption@setjustification{raggedleft}}
+\DeclareCaptionOption{raggedright}[]{\caption@setjustification{raggedright}}
+\DeclareCaptionOption{RaggedRight}[]{\caption@setjustification{RaggedRight}}
+\DeclareCaptionOption{RaggedLeft}[]{\caption@setjustification{RaggedLeft}}
+\DeclareCaptionOption{Centering}[]{\caption@setjustification{Centering}}
+%    \end{macrocode}
+%
+% The second list of value-keywords allows the uppercase font options to
+% set the font for the caption text.
+%
+%    \begin{macrocode}
+\DeclareCaptionOption{UP}[]{\l@addto@macro\captiontextfont\upshape}
+\DeclareCaptionOption{IT}[]{\l@addto@macro\captiontextfont\itshape}
+\DeclareCaptionOption{SL}[]{\l@addto@macro\captiontextfont\slshape}
+\DeclareCaptionOption{SC}[]{\l@addto@macro\captiontextfont\scshape}
+\DeclareCaptionOption{MD}[]{\l@addto@macro\captiontextfont\mdseries}
+\DeclareCaptionOption{BF}[]{\l@addto@macro\captiontextfont\bfseries}
+\DeclareCaptionOption{RM}[]{\l@addto@macro\captiontextfont\rmfamily}
+\DeclareCaptionOption{SF}[]{\l@addto@macro\captiontextfont\sffamily}
+\DeclareCaptionOption{TT}[]{\l@addto@macro\captiontextfont\ttfamily}
+%    \end{macrocode}
+%
+% Next, the \Lpack{subfigure} ``\dots topcap'' and ``\dots bottomcap'' options
+% are emulated using the new ``position'' option.
+%
+%    \begin{macrocode}
+\DeclareCaptionOption{figbotcap}[]{\captionsetup[figure]{position=bottom}}
+\DeclareCaptionOption{tabbotcap}[]{\captionsetup[table]{position=bottom}}
+\DeclareCaptionOption{FIGBOTCAP}[]{\captionsetup[figure]{position=bottom}%
+                                   \captionsetup[subfigure]{position=bottom}}
+\DeclareCaptionOption{TABBOTCAP}[]{\captionsetup[table]{position=bottom}%
+                                   \captionsetup[subtable]{position=bottom}}
+\DeclareCaptionOption{figtopcap}[]{\captionsetup[figure]{position=top}}
+\DeclareCaptionOption{tabtopcap}[]{\captionsetup[table]{position=top}}
+\DeclareCaptionOption{FIGTOPCAP}[]{\captionsetup[figure]{position=top}%
+                                   \captionsetup[subfigure]{position=top}}
+\DeclareCaptionOption{TABTOPCAP}[]{\captionsetup[table]{position=top}%
+                                   \captionsetup[subtable]{position=top}}
+%    \end{macrocode}
+%
+% \changes{v1.3}{26 October 2004}{Fixed problem with the ``loose'' and
+% ``tight'' options.}
+% Then, the ``loose'' and ``tight'' options are approximately
+% emulated.
+%
+%    \begin{macrocode}
+\DeclareCaptionOption{loose}[]{%
+    \captionsetup{farskip=10pt,topadjust=0pt,captionskip=10pt,%
+                            nearskip=10pt,margin=10pt}}
+\DeclareCaptionOption{tight}[]{%
+    \captionsetup{farskip=5pt,topadjust=0pt,captionskip=3pt,%
+                  nearskip=5pt,margin=0pt}}
+%    \end{macrocode}
+%
+% We can now set the sub-float defaults beyond what is set in the
+% \Lpack{subfig} package.  We only need to set the default to the 
+% \Lkv{loose} settings.
+%
+%    \begin{macrocode}
+\captionsetup[subfloat]{loose}
+%    \end{macrocode}
+%
+% Finally, we redefine the starred form of \cmd{\subref} to 
+% \cmd{\Subref}.
+% 
+%    \begin{macrocode}
+\def\Subref{\subref*}
+%    \end{macrocode}
+%
+% \iffalse
+%</newconf>
+% \fi
+%
+% \section{Some Examples}
+% \changes{v1.2}{16 January 2004}{Fixed typo: ``Someg eneral'' to 
+% ``Some general''.}
+% \label{sec:examples}
+% 
+% The easiest way to show the use of this package is to give a few
+% examples.  The two most important things to remember when working with
+% the \Lpack{subfig} package are that (1) the sub-floats are aligned
+% along their baselines (see figure~\ref{fig:layout} and (2) that
+% whitespace in the floating environments are significant and affect the
+% layout.
+% 
+% The baseline of the sub-float is usually at the bottom of the sub-float
+% body or (when the sub-caption appears at the top) at the bottom of the
+% sub-caption {\em and\/} the \Lkv{captionskip} space---which is usually
+% the same as the top of the sub-float.  However sometimes, especially
+% when using the \Lenv{tabular}, \Lenv{array}, or \Lenv{minipage}
+% environments to build the figure, the baseline appears elsewhere.  The
+% above three environments are all aligned at their center by default
+% but that may be changed with the optional `{\bf [t]}' or `{\bf [b]}'
+% arguments.  As a last resort you can wrap all of your figures in a
+% |\vtop| box with a |\vbox to 0pt{\null}| at the top followed by the
+% sub-float body.
+% 
+% If your sub-float is not quite centered or where you want it to be, the
+% problem is often a space character being placed to one side or the
+% other of the sub-float body.  Some general rules of thumb
+% are:\footnote{See chapters 7 and 8 of ``The \TeX book'' \cite{Knut86}
+% for details.}
+% \begin{itemize}\parskip-2pt
+%   \item Two end-of-lines following each other (ignoring any
+%         whitespace) are turned into a |\par| or paragraph break.
+%   \item Multiple whitespace (including the end-of-line) are
+%         compressed into a single space.
+%   \item The spaces after a macro command name (\eg, |\foo|) 
+%         are ignored.
+%   \item A `\%' character at the end of the line suppresses the
+%         end-of-line and all of the spaces (if any) at the
+%         beginning of the next line.
+% \end{itemize}
+% 
+% To suppress significant extra whitespace, you can add some `\%'
+% characters at the end of each line that doesn't end with a command name.
+% This is more than is required, but extra `\%' usually don't cause a
+% problem.
+% 
+% \subsection{A Simple Example}
+% 
+% \begin{figure}^
+%   \centering
+%   \fboxsep=-\fboxrule
+%   \fbox{^  
+%     \begin{minipage}{4.0in}^
+%       \vspace{10pt}^
+%       \centering
+%       \begin{minipage}{3.5in}^
+%         \centering
+%           \subfloat[First.]{^
+%             \fbox{\hbox to 20mm{\vbox to 15mm{\vfil\null}\hfil}}}\qquad
+%           \subfloat[Second figure.]{^
+%             \fbox{\hbox to 20mm{\vbox to 10mm{\vfil\null}\hfil}}}\\[6pt]
+%           \subfloat[Third.]{\label{3figs-c}^
+%             \fbox{\hbox to 20mm{\vbox to 10mm{\vfil\null}\hfil}}}\\
+%           \caption{Three sub-floats.}^
+%           \label{3figs}^
+%           \rr
+%           \vspace{15pt}^
+%           Figure~\ref{3figs} contains two top `sub-floats' and
+%           sub-float~\ref{3figs-c}.$\!$\footnotemark
+%         \end{minipage}^
+%       \vspace{4pt}^
+%     \end{minipage}}
+%   \vspace{-5pt}^
+% \end{figure}
+% \footnotetext{In this and later boxed figures, the boxes are intended to
+% represent a portion of the page in which the figure occurs.  This is
+% usually to show the figure along with some text or to show the effect
+% of some option on multiple pages.}
+%
+% \noindent
+% The first example, shown in figure~\ref{3figs}, specifies |\centering|
+% to horizontally center the set of sub-floats, and uses |\\| and some
+% horizontal space (using |\qquad|) to control the placement of the
+% sub-floats.  Note that the alignment of the top two sub-floats is along
+% the bottom of the body portion of each.
+% 
+% \begin{quote}
+%   |  \begin{figure}%|\\
+%   |    \centering|\\
+%   |    \subfloat[First.]{...}\qquad|\\
+%   |    \subfloat[Second figure.]{...}\\|\\
+%   |    \subfloat[Third.]{\label{3figs-c}...}%|\\
+%   |    \caption{Three sub-floats.}|\\
+%   |    \label{3figs}|\\
+%   |  \end{figure}|\\
+%   \null\qquad\vdots\\
+%   |  Figure~\ref{3figs} contains two top `sub-floats' and|\\
+%   |  sub-float~\ref{3figs-c}.|
+% \end{quote}
+% 
+% \subsection{A More Advanced Example}
+% \changes{v1.1}{12 January 2004}{Updated \Lkv{listofformat} value from
+% \Lkv{simple} to \Lkv{subsimple}.}
+% \changes{v1.2}{16 January 2004}{Fixed old reference to \cmd{\subfigure}
+% to \cmd{\subfloat}.}
+% 
+% A second example, shown in figure~\ref{fig:ex2}, demonstrates how to
+% change the sub-float labels and have the sub-captions printed on the
+% List-of-Figures.
+% 
+% The first |\renewcommand| changes the reference to |\thesubfigure| to
+% return both the figure number and the subfigure number separated with
+% a period.  The next two |\renewcommand|'s turn off the |\p@subfigure|
+% (since it is now included in |\thesubfigure| and adds the colon and
+% space to the subfigure label.   Also, the \Lcount{lofdepth} is set to
+% ``2'' so as to allow the subfigure captions to show when the
+% |\listoffigures| loads the \Lfile{lof} file.  Finally, the \Lenv{figure}
+% is defined and a little following text is given that refers to it.
+% \begin{quote}
+%   |  \renewcommand{\thesubfigure}{\thefigure.\arabic{subfigure}}|\\
+%   |  \captionsetup[subfigure]{labelformat=simple,labelsep=colon,|\\
+%   |                           listofformat=subsimple}|\\
+%   |  \captionsetup{lofdepth=2}|\\
+%   |  \makeatletter|\\
+%   |    \renewcommand{\p@subfigure}{}|\\
+%   |  \makeatother|\\
+%   \null\qquad\vdots\\
+%   |  \listoffigures|\\
+%   \null\qquad\vdots\\
+%   |  \begin{figure}%|\\
+%   |    \centering|\\
+%   |    \subfloat[First.]{%|\\
+%   |      \label{fig:first}%|\\
+%   |      ...figure code...}%|\\
+%   |    \qquad|\\
+%   |    \subfloat[Second.]{%|\\
+%   |      \label{fig:second}%|\\
+%   |      ...figure code...}%|\\
+%   |    \caption{Two sub-floats.}|\\
+%   |  \end{figure}|\\
+%   \null\qquad\vdots\\
+%   |  See figures~\ref{fig:first} and \ref{fig:second}.|
+% \end{quote}%
+% \begin{figure}^
+%   \centering
+%   \fboxsep=-\fboxrule
+%   \renewcommand{\thesubfigure}{\thefigure.\arabic{subfigure}}^
+%   \captionsetup[subfigure]{labelformat=simple,labelsep=colon,
+%                            listofformat=subsimple}
+%   \captionsetup{lofdepth=2}^
+%   \makeatletter
+%     \renewcommand{\p@subfigure}{}^
+%   \makeatother
+%   \fbox{^
+%     \begin{minipage}{4.0in}^
+%       \centering
+%       \begin{minipage}{3.5in}^
+%         \vspace{.1in}^
+%         \section*{ List of Figures}^
+%         \vspace{-15pt}^
+%         \hspace{40pt}\vdots
+%         \vspace{3pt}^
+%         \contentsline{figure}{\numberline{\ref{fig:ex2}}^
+%                      {\ignorespaces Two sub-floats.}}{\pageref{fig:ex2}}^
+%                      {figure.93}^
+%         \contentsline{subfigure}{\numberline{\ref{fig:first}}^
+%                      {\ignorespaces First.}}{\pageref{fig:first}}^
+%                      {subfigure.93.1}^
+%         \contentsline{subfigure}{\numberline{\ref{fig:second}}^
+%                      {\ignorespaces Second.}}{\pageref{fig:second}}^
+%                      {subfigure.93.2}^
+%         \hspace{40pt}\vdots
+%         \vspace{8pt}^
+%       \end{minipage}^
+%     \end{minipage}}\\
+%   \fbox{^
+%     \begin{minipage}{4.0in}^
+%       \centering
+%       \begin{minipage}{3.5in}^
+%         \vspace{10pt}^
+%         \centering
+%         \subfloat[First.]{^
+%           \label{fig:first}^
+%           \fbox{\hbox to 22mm{\vbox to 15mm{\vfil\null}\hfil}}}^
+%         \hspace{14pt}^
+%         \subfloat[Second.]{^
+%           \label{fig:second}^
+%           \fbox{\hbox to 22mm{\vbox to 15mm{\vfil\null}\hfil}}}\\
+%         \caption{Two sub-floats.}^
+%         \label{fig:ex2}^
+%         \rr
+%         See figures~\ref{fig:first} and \ref{fig:second}.
+%         \vspace{4pt}^
+%       \end{minipage}^
+%     \end{minipage}}^
+% \end{figure}
+%
+% \subsection{An Example Without Sub-caption Text}
+% \label{sec:ex3}
+% 
+% The next example, shown in figure~\ref{fig:ex3}, demonstrates a
+% commonly required format where the subfigure are just labeled and the
+% description occurs in the main caption.  This is easy to do by using
+% the ``empty'' optional caption arguments ``[\space ][\space ]''.  This
+% creates a label for the subfigure in the text, but it does not show on
+% the list-of-figures page.  However, by default the caption may not be
+% perfectly centered, so |\subfiglabelskip| is reduced to zero points to
+% ensure that there is not any extra space hidden in the sub-caption.  To
+% refer to the subfigure label within the text or the main caption, you
+% can use the |\subref| command, which is similar to the |\ref| command,
+% but does not carry the figure number.
+%
+% \begin{quote}
+%   |  \listoffigures|\\
+%   \null\qquad\vdots\\
+%   |  \begin{figure}%|\\
+%   |    \centering|\\
+%   |    \subfloat[][]{%|\\
+%   |      \label{fig:ex3-a}%|\\
+%   |      ...figure code...}%|\\
+%   |    \hspace{8pt}%|\\
+%   |    \subfloat[][]{%|\\
+%   |      \label{fig:ex3-b}%|\\
+%   |      ...figure code...}\\|\\
+%   |    \subfloat[][]{%|\\
+%   |      \label{fig:ex3-c}%|\\
+%   |      ...figure code...}%|\\
+%   |    \hspace{8pt}%|\\
+%   |    \subfloat[][]{%|\\
+%   |      \label{fig:ex3-d}%|\\
+%   |      ...figure code...}%|\\
+%   |    \caption[A set of four sub-floats.]{A set of four sub-floats:|\\
+%   |             \subref{fig:ex3-a} describes the first sub-float;|\\
+%   |             \subref{fig:ex3-b} describes the second sub-float;|\\
+%   |             \subref{fig:ex3-c} describes the third sub-float; and,|\\
+%   |             \subref{fig:ex3-d} describes the last sub-float.}%|\\
+%   |    \label{fig:ex3}%|\\
+%   |  \end{figure}|\\
+%   \null\qquad\vdots\\
+%   |  The text references the main figure as figure~\ref{fig:ex3}|\\
+%   |  or part of it as|\\
+%   |  figures~\subref*{fig:ex3-a}--\subref{fig:ex3-c}.|
+% \end{quote}%
+% \begin{figure}^
+%   \centering
+%   \fboxsep=-\fboxrule
+%   \fbox{^
+%     \begin{minipage}{4.0in}^
+%       \centering
+%       \begin{minipage}{3.5in}^
+%         \setcounter{lofdepth}{2}^
+%         \vspace{.1in}^
+%         \section*{List of Figures}^
+%         \vspace{-15pt}^
+%         \hspace{40pt}\vdots
+%         \vspace{3pt}^
+%         \contentsline{figure}{\numberline{\ref{fig:ex3}}^
+%                      {\ignorespaces A set of four sub-floats.}}^
+%                      {\pageref{fig:ex3}}^
+%                      {figure.94}^
+%         \hspace{40pt}\vdots
+%         \vspace{8pt}^
+%       \end{minipage}^
+%     \end{minipage}}\\
+%   \fbox{^
+%     \begin{minipage}{4.0in}^
+%       \centering
+%       \begin{minipage}{3.5in}^
+%         \vspace{7pt}^
+%         \centering
+%         \makeatletter
+%         \subfloat[][]{^
+%           \label{fig:ex3-a}^
+%           \fbox{\hbox to 1.2in{\vbox to 15mm{\null\vfil}\hfil}}}^
+%         \hspace{8pt}^
+%         \subfloat[][]{^
+%           \label{fig:ex3-b}^
+%           \fbox{\hbox to 1.2in{\vbox to 15mm{\null\vfil}\hfil}}}\\
+%         \subfloat[][]{^
+%           \label{fig:ex3-c}^
+%           \fbox{\hbox to 1.2in{\vbox to 15mm{\null\vfil}\hfil}}}^
+%         \hspace{8pt}^
+%         \subfloat[][]{^
+%           \label{fig:ex3-d}^
+%           \fbox{\hbox to 1.2in{\vbox to 15mm{\null\vfil}\hfil}}}^
+%         \caption[A set of four sub-floats.]{A set of four sub-floats:
+%                  \subref{fig:ex3-a} describes the first sub-float;
+%                  \subref{fig:ex3-b} describes the second sub-float;
+%                  \subref{fig:ex3-c} describes the third sub-float; and,
+%                  \subref{fig:ex3-d} describes the last sub-float.}^
+%         \label{fig:ex3}^
+%         \rr
+%         The text references the main figure as figure~\ref{fig:ex3}
+%         or part of it as 
+%         figures~\subref*{fig:ex3-a}--\subref{fig:ex3-c}.
+%         \vspace{4pt}^
+%       \end{minipage}^
+%     \end{minipage}}^
+% \end{figure}
+% 
+% \subsection{Another Example}
+% \changes{v1.3}{24 March 2004}{Added another example based on a received
+%  question.}
+% \label{sec:ex4}
+%
+% I was asked if it was possible to center a smaller subfigure next to
+% a larger one while keeping the sub-captions lined up.  The answer is
+% yes.  The older way, shown here, is to vertically center the smaller 
+% subfigure in a |\vbox| the same height as the larger subfigure.  To 
+% make it more interesting, we will also assume that we are not sure 
+% what the height of the larger subfigure will be. 
+%
+% First we place the larger subfigure in a ``savebox'' and then use
+% the height of the ``savebox'' to build the |\vbox| to contain the
+% smaller subfigure. The result is shown in figure~\ref{fig:vertcenter}.
+%
+% \newcommand{\figbox}[3]{{^
+%   \fboxsep = -\fboxrule
+%   \hbox to #2{^
+%     \fbox{^
+%       \vbox to #1{^
+%         \vfil
+%         \hbox to #2{^
+%           \hfil
+%           #3
+%           \hfil}^
+%         \vfil}}}}}
+% \begin{figure}^
+%   \centering
+%   \sbox{\tempbox}{\figbox{2in}{2in}{Big box}}^
+%   \subfloat[Big figure]{\usebox{\tempbox}}^
+%   \qquad
+%   \subfloat[Small figure]{^
+%     \vbox to \ht\tempbox{^
+%       \vfil
+%        \figbox{1in}{1in}{Small box}^
+%       \vfil}}^
+%   \caption{Two more sub-floats.}
+%   \label{fig:vertcenter}
+% \end{figure}
+% \begin{quote}
+%   |\newsavebox{\tempbox}|\\
+%   \null\qquad\vdots\\
+%   |\begin{figure}%|\\
+%   |  \centering|\\
+%   |  \sbox{\tempbox}{|\dots|figure code|\dots|}%|\\
+%   |  \subfloat[Big figure]{\usebox{\tempbox}}%|\\
+%   |  \qquad|\\
+%   |  \subfloat[Small figure]{%|\\
+%   |    \vbox to \ht\tempbox{%|\\
+%   |      \vfil|\\
+%   |      |\dots|figure code|\dots\\
+%   |      \vfil}}%|\\
+%   |  \caption{Two more sub-floats.}|\\
+%   |  \label{fig:vertcenter}|\\
+%   |\end{figure}|
+% \end{quote}%
+%
+% The \Lpack{floatrow} package will automatically check the heights and 
+% widths of your figures and captions and can align your subfigures
+% pretty much any way that you want.  For more information, see the 
+% \Lpack{subfig} package documentation \cite{Lapk05}.
+%
+% \section{Frequently Asked Questions (FAQs)}
+% \label{sec:faq}
+% 
+% The ten most frequently asked questions about the \Lpack{subfig}
+% package are:
+% 
+% \subsection{``My sub-floats are not aligned along their bottoms. Why?''}
+% \label{sec:faq:align}
+% 
+% Remember! The \Lpack{subfig} package aligns sub-floats along
+% their baselines with the sub-caption (if any) sticking out above or
+% below.  The above problem is usually due to using a \Lenv{minipage},
+% \Lenv{tabular} or \Lenv{array} environment that, by default,
+% places the baseline at the center of the box that it generates.  If
+% the two sub-floats are different sizes, or if one sub-float is generated
+% in some other way with its baseline not at the expected place (perhaps
+% an |\includegraphics|), then the sub-float will be misaligned.  One
+% solution is to use the environment options `[t]' or `[b]' to move the
+% baseline to the top or bottom rather than the center.
+% 
+% \subsection{``How can I get my floats/sub-floats to line up the way I
+% want?''}
+% \label{sec:faq:blanks}
+% 
+% A similar question, but this one is caused by extra whitespace in the
+% source text generating spaces next to the floats, and |\par|'s
+% generated by blank lines.  The main thing is {\it be aware\/} that
+% extra whitespace can move floats and sub-floats around, sometimes a lot
+% and sometimes just a little so that they look ``wrong''.  Placing too
+% many `\%'s at the end of the lines is better than too few in the
+% various float environments.  (See the discussion of ``white space'' in
+% section~\ref{sec:examples}.)
+% 
+% \subsection{``I have too many sub-floats for one page, How can I spread
+%             them over two or more pages and continue the numbering?''}
+% \label{sec:faq:cont}
+% 
+% The |\ContinuedFloat| command makes creating continued floating
+% environments easy.  See the discussion in section~\ref{sec:cont}.
+% 
+% \subsection{``Why do I get a garbled caption or an error when I use
+%             square brackets?''}
+% \label{sec:faq:brackets}
+%
+% \begin{verbatim}
+%   \subfloat[SHIFT: ``register[3] $<<=$ 3;'']{... float text ...}
+% \end{verbatim}
+% 
+% Since the |\subfloat| command has an optional argument, delimited
+% with square brackets, before their required argument, you cannot
+% use the `]' character at the top level of either the 
+% \meta{sub-caption} or \meta{list\_entry} argument.  To overcome this
+% problem, you must wrap all or the portion of the text containing
+% the `]' character, in a pair of curly brackets (see
+% \cite[\textsection~C.1.1]{Lamp94} for more detail). For example:
+%
+% \begin{verbatim}
+%   \subfloat[SHIFT: ``register{[3]} $<<=$ 3;'']{... float text ...}
+% \end{verbatim}
+% \vspace{-15pt}
+% \noindent
+% or
+% \vspace{-2pt}
+% \begin{verbatim}
+%   \subfloat[{SHIFT: ``register[3] $<<=$ 3;''}]{... float text ...}.
+% \end{verbatim}
+% 
+% \subsection{``How do I make my subcaptions print on the List-of-Floats
+%  pages?''}
+% \label{sec:faq:depth}
+% \changes{v1.3}{27 February 2004}{Added FAQ for setting the individual
+%  List-of-Floats depth variables in order to show the subcaptions.}
+%
+% You need to set the depth counter for each type of List-of-Floats page
+% to ``2'' or greater.  You can do this in two ways.  The first is by
+% using the standard |\setcounter| command; for instance, if you want
+% to show your subtable captions you will need to set the \Lkv{lotdepth}
+% counter before the |\listoftables| command:
+%  \begin{quote}^
+%    |  \setcounter{lotdepth}{2}|
+%  \end{quote}
+%
+% The other way of setting this is to use the package option list or 
+% the |\captionsetup| command and {\bf globally} 
+% (see section~\ref{sec:layers}) set the assoicated counter (again
+% before using the |\listoftables| command), \eg:
+%  \begin{quote}^
+%    |  \captionsetup{lotdepth=2}|
+%  \end{quote}
+%
+% \subsection{``I set an option and it had no effect. What is happening?''}
+% \label{sec:faq:options_overview}
+% 
+% Most likely, the option that you set is being overridden.  Reread the
+% option scoping in section \ref{sec:layers} and use the following
+% commands to find out if your option is being set and if it is being
+% overridden (here for a subtable):
+%  \begin{quote}^
+%    |  \showcaptionsetup{table}|\\
+%    |  \showcaptionsetup{subfloat}|\\
+%    |  \showcaptionsetup{subtable}|
+%  \end{quote}
+% For instance, if you change the \Lkv{textfont} at the \Lvar{table} level
+% and the \Lvar{subfloat} has another setting for \Lkv{textfont}, than the
+% change will work for table floats, but not for subtables, since the 
+% \Lvar{subfloat} definition will override it.  You can either add the 
+% \Lkv{textfont} change to the \Lvar{subfloat} (which will affect all 
+% sub-floats) or to the \Lvar{subtable} (which will affect all subtables)
+% to override the overridden change.
+%
+% \subsection{``How do I make a change in the settings for just a single
+% float?''}
+% \label{sec:faq:options_specific}
+%
+% If you change the values using the \cmd{\captionsetup} command within a
+% float environment, than the old values will be restored after you exit
+% that float environment.
+%
+% \subsection{``How do I put text labels on an imported sub-float?''}
+% \label{sec:faq:picture}
+%
+% The easiest way is to use the picture commands with the origin
+% set at the bottom right corner of the imported image (actually
+% at the right side of the image's baseline, which is usually along
+% the bottom of the image).  For example, if the imported image is
+% $5\times 5$ inches, than the following code  will place the text
+% ``Label'' in red at its center ({\scshape\bf Note}: 5 inches is 360
+% big points).
+%
+%  \begin{quote}^
+%    |  \usepackage{graphics}|\\
+%    |  \usepackage{color}|\\
+%    \null\qquad\vdots\\
+%    |  \begin{figure}%|\\
+%    \null\qquad\vdots\\
+%    |    \subfloat[Labeled picture]{%|\\
+%    |      \label{fig:labeled-image}%|\\
+%    |      \includegraphics{|\dots|path to image file|\dots|}%|\\
+%    |      \unitlength=1bp%|\\
+%    |      \put(-180,180){\textcolor{red}{\textbf{Label}}}}%|\\
+%    \null\qquad\vdots\\
+%    |  \end{figure}|\\
+%    \null\qquad\vdots
+%  \end{quote}
+%
+% \subsection{``I want my sub-floats to be ordered by column rather
+%  than by row, how do I do that?''}
+% \label{sec:faq:column}
+%
+% The following example shows a schematic for laying out six sub-floats
+% in column order.  The only problem with this approach is that, if the
+% floats and their respective captions are not the same height, than the
+% sub-floats will not line up across the page.
+%
+%  \begin{quote}^
+%    |  \begin{figure}|\\
+%    |    \begin{minipage}{\columnwidth}|\\
+%    \null\qquad\vdots\\
+%    |      \dots sub-floats (a)--(c) go here.|\\
+%    \null\qquad\vdots\\
+%    |    \end{minipage}|\\
+%    |    \begin{minipage}{\columnwidth}|\\
+%    \null\qquad\vdots\\
+%    |      \dots sub-floats (e)--(f) go here.|\\
+%    \null\qquad\vdots\\
+%    |    \end{minipage}|\\
+%    |    \caption{...}|\\
+%    |  \end{figure}|\\
+%  \end{quote}
+%
+% \subsection{``How do I put a verbatim environment in a sub-float?''}
+% \changes{v1.3}{4 July 2005}{Added FAQ for putting a verbatim 
+% environmemnt in a sub-float.}
+%
+% See section~\ref{sec:verbatim}.
+%
+% \StopEventually{^
+%
+% \section{Acknowledgments}
+%
+% This package was adapted from the \Lpack{subfigure} package, which
+% was originally written to automatically line up some figure boxes
+% and place labels under them for my Ph.D.\ dissertation, years ago.
+% I thought it useful and uploaded it to the Internet community and
+% later to CTAN.  Many people have asked questions or given comments
+% which collectively have changed and improved the usefulness of that
+% package.  In 2002, {\bf Michel Goossens} requested an updated version
+% of the \Lpack{subfigure} package to feature in the second edition of 
+% The \LaTeX\ Companion.  In collaboration with {\bf Axel Sommerfeldt}
+% and with many valuable suggestions from {\bf Frank Mittelbach}, this
+% package was developed.  It uses the new version of the \Lpack{caption}
+% package (with which the \Lpack{subfigure} had a large overlap in
+% function), re-written by {\bf Axel Sommerfeldt} for the same
+% book.  This version both simplifies the original package code and,
+% unfortunately, forces it to be backward {\em in}-compatible with the
+% \Lpack{subfigure} package, therefore the change in the package name
+% from \Lpack{subfigure} to \Lpack{subfig}.  Recently, {\bf Olga Lepko}
+% further extended the this package by tightly integrating her extended
+% \Lpack{floatrow} package.  
+%
+% Beyond those mentioned above a few other people have made important
+% contributions to the development of the prior \Lpack{subfigure}
+% package and to the present \Lpack{subfig} package.  I want to thank
+% them publicly and they are, alphabetically: {\bf Frederic Darboux},
+% {\bf Andrew B. Collier}, {\bf Harald Harders}, {\bf David Kastrup},
+% {\bf William `bil' L. Kleb}, {\bf Heiko Oberdiek}, {\bf Axel Reichert},
+% and {\bf Peter Wilson}.
+% 
+% \begin{thebibliography}{6}
+% \itemsep=0.8pt
+% \bibitem{Somm05}^
+%   Axel Sommerfeldt,
+%   \emph{The \Lpack{caption} Package},
+%   Version 3.0g, 2005/06/28.
+%   (Available from CTAN as file 
+%   \texttt{/tex-archive/macros/latex/caption.zip}.)
+% \bibitem{Lapk05}^
+%   Olga Lapko,
+%   \emph{The \Lpack{floatrow} Package},
+%   Version 0.1f, 2005/07/02.
+%   (Available from CTAN as file 
+%   \texttt{/tex-archive/macros/latex/floatrow.zip}.)
+% \bibitem{Mitt-etal04}^
+%   Frank Mittelbach and Michel Goossens, with Johannes Braams, David Carlisle and Chris Rowley,
+%   \emph{The \LaTeX\ Companion, 2\raise.7ex\hbox{\small nd} ed.}, 
+%   Addison-Wesley, Reading, Massachusetts,
+%   2004.
+% \bibitem{Carl99}^
+%   David Carlisle,
+%   \emph{The \Lpack{keyval} Package},
+%   Version 1.13, 1999/03/16.
+%   (Available from CTAN as file 
+%   \texttt{/tex-archive/macros/latex/required/graphics.zip}.)
+% \bibitem{Reck97}^
+%   Keith Reckdahl,
+%   \emph{Using Imported Graphics in \LaTeXe},
+%   1997/12/15.
+%   (Available from CTAN as file \texttt{/tex-archive/info/epslatex.pdf}.)
+% \bibitem{Lamp94}^
+%   Leslie Lamport,
+%   \emph{LaTeX User's Guide and Reference Manual}, 2nd edition,
+%   Addison-Wesley, Reading, Massachusetts,
+%   1994.
+% \bibitem{Knut86}^
+%   Donald Ervin Knuth,
+%   \emph{The \TeX book},
+%   Addison-Wesley, Reading, Massachusetts,
+%   1986.
+% \end{thebibliography}}
+%
+% \iffalse
+%<*package>
+% \fi
+%
+% \cleardoublepage
+% \section{The Code}
+%
+% \subsection{Identification}
+%
+% Check \LaTeX\ release and announce the \Lpack{subfig} package.
+%
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}[1995/06/01]
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\ProvidesPackage{subfig}[2005/06/28 ver: 1.3 subfig package]
+%    \end{macrocode}
+%
+% \subsection{Check for Nasty Classes}
+% \changes{v1.3}{4 May 2005}{At the request of David Kastrup, added
+% code to check for classes that use \cmd{\let} on \cmd{\end@figure}
+% and similar; and to print a warning and fix the problem if detected.}
+%
+% \begin{macro}{\sf@floatfix}
+%
+% Some ``broken'' document classes use \cmd{\let} on \cmd{\end@figure}
+% and similar, which are used as hooks in the end-processing of, in 
+% this case, figures.  The following code, courtesy of David Kastrup
+% (dak\@gnu.org) fixes the problem and prints a warning.
+%    \begin{macrocode}
+\def\sf@floatfix#1#2{%
+  \ifx#1#2%
+    \ifx#1\@undefined\else
+      \PackageWarningNoLine{subfig}{%
+Your document class has a bad definition^^J
+of \string#1, most likely^^J
+\string\let\string#1=\string#2^^J
+which has now been changed to^^J
+\string\def\string#1{\string#2}^^J
+because otherwise subsequent changes to \string#2^^J
+(like done by several packages changing float behaviour)^^J
+can't take effect on \string#1.^^J
+Please complain to your document class author}%
+      \def#1{#2}%
+    \fi
+  \fi}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\begingroup
+\def\next#1#2{%
+    \endgroup
+  \sf@floatfix\endfigure\end@float
+  \sf@floatfix\endtable\end@float
+  \sf@floatfix#1\end@dblfloat
+  \sf@floatfix#2\end@dblfloat}
+\expandafter\next\csname endfigure*\expandafter\endcsname
+  \csname endtable*\endcsname
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \subsection{Load The \Lpack{Caption} Package}
+%
+% This version of the \Lpack{subfig} package is dependent on the new
+% \Lpack{caption} package by Axel Sommerfeldt \cite{Somm05}.  The
+% \Lpack{caption} and the \Lpack{subfig} (formerly \Lpack{subfigure}) 
+% packages were rewritten in order to both improve the processing and
+% to reduce the amount of redundant code.
+%
+% \subsubsection{Load The \Lpack{Keyval} Package and Scan Options}
+% \label{sec:scanops}
+% \changes{v1.3}{9 September 2004}{Added check for `caption[=val]'.}
+% 
+% The user may want to load the \Lpack{caption} package without
+% affecting the caption setup from the class or other packages.  In this
+% case, the user can either separately load the \Lpack{caption} package
+% with the \Lkv{caption=false} option or the user may directly invoke
+% the \Lpack{subfig} package with this option.  Here we check for the
+% latter possibility by scanning the options passed to this package and
+% determine the final setting (if any) of this particular option.
+%
+%    \begin{macrocode}
+\RequirePackage{keyval}[1999/03/16]
+%    \end{macrocode}
+%
+% \begin{macro}{\sf@ifinlist}
+% \changes{v1.3}{18 March 2004}{Added to generalized boolean values.}
+%
+% Since the \Lpack{caption} package is not yet available to us, we need
+% to check for alternate Boolean values ourselves.  The \cmd{\sf@ifinlist}
+% macro checks a value against a list of synonyms.
+%
+%    \begin{macrocode}
+\def\sf@ifinlist#1#2{%
+  \let\next\@secondoftwo
+  \edef\caption@tempa{#1}%
+  \@for\caption@tempb:={#2}\do{%
+    \ifx\caption@tempa\caption@tempb
+      \let\next\@firstoftwo
+    \fi}%
+  \next}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\sf@setbool}
+% \changes{v1.3}{18 March 2004}{Added to generalized boolean values.}
+%
+% The \cmd{\sf@setbool} uses \cmd{\sf@ifinlist} to check if its second
+% argument is {\em true} or {\em false} and set the associated {\em if}
+% (argument one) accordingly.
+%
+%    \begin{macrocode}
+\def\sf@setbool#1#2{%
+  \sf@ifinlist{#2}{1,true,yes,on}{%
+    \@nameuse{#1true}%
+  }{\sf@ifinlist{#2}{0,false,no,off}{%
+    \@nameuse{#1false}%
+  }{%
+    \PackageError{subfig}{Undefined boolean value `#2'}{\@ehc}%
+  }}}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\sf@split}
+%
+% Next, we define a simple version of \cmd{\sf@split} here in order to 
+% check for the \Lkv{caption} option.  Later, we will redefine it
+% to process the rest of the options.  The two new {\em if's} are used
+% to keep track of the state of the \Lkv{caption} option and also if
+% it occurs in the \Lpack{subfig} options list.
+%
+%    \begin{macrocode}
+\def\sf@split#1=#2=#3\relax{%
+  \KV@@sp@def\@tempa{#1}%
+  \ifx\@tempa\@empty
+  \else\ifx\@tempa\KV@caption
+    \sf@usecaptionfoundtrue
+    \ifx\@empty#3\@empty
+      \sf@usecaptiontrue
+    \else
+      \KV@@sp@def\@tempb{#2}%
+      \sf@setbool{sf@usecaption}{\@tempb}%
+    \fi
+  \fi\fi}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\KV@caption{caption}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\newif\ifsf@usecaptionfound
+\sf@usecaptionfoundfalse
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\newif\ifsf@usecaption
+\sf@usecaptiontrue
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% Now we get and scan the optionlist for this package and remember
+% if the \Lkv{caption} option is set.
+%
+%    \begin{macrocode}
+\edef\sf@temp{\@ptionlist{\@currname.\@currext}}
+\let\caption@tempa\@empty
+\@for\CurrentOption:=\sf@temp\do{%
+  \expandafter\sf@split\CurrentOption==\relax}
+%    \end{macrocode}
+%
+% \subsubsection{Load and Extend the \Lpack{Caption} Package}
+%
+% First we load the \Lpack{caption} package if it has not already been
+% loaded using the \Lkv{caption=false} option if specified.  Note that
+% this can cause problems if the \Lpack{caption} was already loaded
+% with different options, so we issue warnings if the user as loaded
+% the \Lpack{caption} package and used the \Lkv{caption} option with
+% the \Lpack{subfig} packare.
+%
+%    \begin{macrocode}
+\ifsf@usecaption 
+  \@ifpackageloaded{caption}{%
+    \ifsf@usecaptionfound
+      \PackageWarning{subfig}{%
+          You cannot set the `caption' option here if the\MessageBreak
+          caption package is already loaded (the option\MessageBreak
+          `caption=true' is ignored)}%
+    \fi
+  }{%
+    \RequirePackage{caption}[2005/06/26]
+  }%
+\else
+  \RequirePackage{caption3}[2005/06/11]
+\fi
+%    \end{macrocode}
+%
+% \begin{macro}{\sf@ifpositiontop}
+% \noindent
+% Then we make certain that the |\caption@position| is recognizable to
+% the \Lpack{subfig} package code.  We assume that if it is not the 
+% same as |\@firstoftwo| (\eg, \Lkv{top}), than it must be |\@secondoftwo|,
+% or \Lkv{bottom} (\ie, anything that isn't designated as 
+% \Lkv{[position=top]} is forced to be \Lkv{[position=bottom]}).
+%
+%    \begin{macrocode}
+\def\sf@ifpositiontop{%
+  \ifx\caption@position\@firstoftwo \let\next\@firstoftwo \else
+  \let\next\@secondoftwo \fi \next}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\DeclareCaptionListOfFormat}
+% \begin{macro}{\caption@setlistofformat}
+% \changes{v1.1}{12 January 2004}{Changed \cmd{\captionlistofformat} to
+% \cmd{\caption@lstfmt}.}
+%
+% Next, we define the \cmd{\DeclareCaptionListOfFormat} command which
+% controls how the sub-float captions appear on the List-of-Floats pages.
+% Note that this command can only be used to define new formats in the
+% preamble of your paper.  The format may be changed at anytime using the 
+% \cmd{\captionsetup} command.
+%
+%    \begin{macrocode}
+\def\DeclareCaptionListOfFormat#1{%
+  \@namedef{caption@lstfmt@#1}##1##2}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\@onlypreamble\DeclareCaptionListOfFormat
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\caption@setlistofformat#1{%
+  \@ifundefined{caption@lstfmt@#1}{%
+    \PackageError
+      {subfig}%
+      {Undefined caption list-of format `#1'}%
+      {\caption@eh}%
+  }{%
+   \expandafter\let\expandafter\caption@lstfmt
+         \csname caption@lstfmt@#1\endcsname}}
+%    \end{macrocode}
+%
+% \noindent
+% Using the \cmd{\DeclareCaptionListOfFormat} command, we define some common
+% formats and the new keyword, \Lkv{listofformat}, which may be used
+% in the key/value option list of the \cmd{\usepackage} command or
+% with the \cmd{\captionsetup} command to change the listing format of
+% the sub-float caption label.
+%
+%    \begin{macrocode}
+\DeclareCaptionListOfFormat{empty}{}
+\DeclareCaptionListOfFormat{simple}{#1#2}
+\DeclareCaptionListOfFormat{parens}{#1(#2)}
+\DeclareCaptionListOfFormat{subsimple}{#2}
+\DeclareCaptionListOfFormat{subparens}{(#2)}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\DeclareCaptionOption{listofformat}{\caption@setlistofformat{#1}}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\sf@indent}
+% \begin{macro}{\sf@numwidth}
+%
+% We also add two new keywords, \Lkv{listofindent} and 
+% \Lkv{listofnumwidth}, which set the lengths used to show where
+% and how wide the caption label will be when typeset.  These are
+% used as the fourth and fifth arguments of the \cmd{\dottedxxxline}
+% command, see section~\ref{sec:dottedxxxline} for more detail.
+%
+%    \begin{macrocode}
+\def\sf@indent{3.8em}
+\define@key{caption}{listofindent}[3.8em]{\def\sf@indent{#1}}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\sf@numwidth{2.5em}
+\define@key{caption}{listofnumwidth}[2.5em]{\def\sf@numwidth{#1}}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\DeclareSubrefFormat}
+% \begin{macro}{\caption@setsubrefformat}
+% \changes{v1.3}{27 May 2005}{Added the ability to format the 
+% \cmd{\subref*} output.}
+%
+% We define the \cmd{\DeclareSubreffFormat} command just like the
+% above \cmd{\DeclareCaptionListOfFormat} command above.  This format,
+% however, controls how the \cmd{\subref*} command formats the sub-float
+% label.  Again, this command can only be used to define new formats in
+% the preamble of your paper and the format may be changed at anytime
+% using the \cmd{\captionsetup} command.
+%
+%    \begin{macrocode}
+\def\DeclareSubrefFormat#1{%
+  \@namedef{caption@subreffmt@#1}##1##2##3##4}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\@onlypreamble\DeclareSubrefFormat
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\caption@setsubrefformat#1{%
+  \@ifundefined{caption@subreffmt@#1}{%
+    \PackageError
+      {subfig}%
+      {Undefined subref format `#1'}%
+      {\caption@eh}%
+  }{%
+   \expandafter\let\expandafter\caption@subreffmt
+         \csname caption@subreffmt@#1\endcsname}}
+%    \end{macrocode}
+%
+% \noindent
+% Using the \cmd{\DeclareSubrefFormat} command, we define some common
+% formats and the new keyword, \Lkv{subrefformat}, which may be used
+% in the key/value option list of the \cmd{\usepackage} command or
+% with the \cmd{\captionsetup} command to change the format of
+% the \cmd{\subref*} references.
+%
+%    \begin{macrocode}
+\DeclareSubrefFormat{empty}{}
+\DeclareSubrefFormat{simple}{#1#2}
+\DeclareSubrefFormat{parens}{#1(#2)}
+\DeclareSubrefFormat{subsimple}{#2}
+\DeclareSubrefFormat{subparens}{(#2)}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\DeclareCaptionOption{subrefformat}{\caption@setsubrefformat{#1}}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Options Processing}
+%
+% \begin{macro}{\KV@config}
+% \begin{macro}{\sf@split}
+% \changes{v1.3}{9 September 2004}{Added check for \Lkv{caption} keyword.}
+% \begin{macro}{\ProcessPackageOptions}
+% 
+% In order to work within the \Lpack{caption} package, the
+% \Lpack{subfig} package saves most of the options provided via
+% \cmd{\usepackage} and (re-)applies them each time a sub-float is
+% started.  The two exceptions are the \Lkv{caption} keyword, which is
+% ignored (see section~\ref{sec:scanops} above), and the \Lkv{config}
+% keyword, which is executed immediately.  To accomplish this, we use a
+% modified version of the \Lpack{keyval} package processing.
+% \Lkv{Config} entries are detected and executed, while other keywords
+% are passed back to add to the \Lvar{subfloat} list.  ({\scshape\bf
+% Note}: Currently the \Lkv{config} files are unable to use
+% |\captionsetup| without its optional argument.  If you need to set a
+% global value in a configuration file, than do it directly.)
+%
+%    \begin{macrocode}
+\newcounter{KVtest}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\KV@config{config}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\sf@split#1=#2=#3\relax{%
+  \setcounter{KVtest}{1}%
+  \KV@@sp@def\@tempa{#1}%
+  \ifx\@tempa\@empty
+  \else\ifx\@tempa\KV@caption
+    \setcounter{KVtest}{2}%
+  \else\ifx\@tempa\KV@config
+    \setcounter{KVtest}{2}%
+    \expandafter\let\expandafter\@tempc
+        \csname\KV@prefix\@tempa\endcsname
+    \ifx\@tempc\relax
+      \KV@errx
+          {\@tempa\space undefined}%
+    \else\ifx\@empty#3\@empty
+      \KV@default
+    \else
+      \KV@@sp@def\@tempb{#2}%
+      \expandafter\@tempc\expandafter{\@tempb}\relax
+    \fi\fi
+  \fi\fi\fi}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\ProcessPackageOptions{%
+  \def\KV@prefix{KV@\@currname @}%
+  \let\@tempc\relax
+  \let\caption@tempa\@empty
+  \@for\CurrentOption:=\@classoptionslist\do{%
+    \@ifundefined{KV@caption@\CurrentOption}{}{%
+      \edef\caption@tempa{\caption@tempa,\CurrentOption,}%
+      \@expandtwoargs\@removeelement\CurrentOption
+        \@unusedoptionlist\@unusedoptionlist}}%
+  \edef\caption@tempb{\@ptionlist{\@currname.\@currext}}%
+  \@for\CurrentOption:=\caption@tempb\do{%
+    \expandafter\sf@split\CurrentOption==\relax
+    \ifnum\c@KVtest<2\relax
+      \edef\caption@tempa{\caption@tempa,\CurrentOption,}%
+    \fi}%
+  \edef\caption@tempa{%
+    \noexpand\captionsetup[subfloat]{\caption@tempa}}%
+  \caption@tempa}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Generalized List-of-Floats}
+% \changes{v1.2}{22 January 2004}{Changed the first parameter to send float name
+%  rather than sub-float name.}
+% \label{sec:dottedxxxline}
+%
+% \begin{macro}{\dottedxxxline}
+%
+% This is a generalized wrapper for the |\@dottedtocline| command for sub-float
+% entries.  It checks for the level based on the output file extension (second
+% argument) and not using only the |\@tocdepth|, as the |\@dottedtocline|
+% command does.
+%
+% \noindent
+% The arguments of the |\@dottedxxxline| command are:
+% \begin{quote}
+%   \begin{enumerate}
+%     \itemsep -\parsep
+%     \item \underline{\smash{\textsf{Main Float Type Relative to the Sub-float}}}.
+%     \item \underline{\smash{\textsf{File Extension}}}.  The usual 
+%           values are: \Lfile{lof} or \Lfile{lot}.  The internal 
+%           values |\ext@subfigure| and |\ext@subtable| hold these
+%           extensions.
+%     \item \underline{\textsf{Level}}.  By default this is `2'
+%           for sub-floats.  If the level is greater than
+%           \Lcount{\meta{Ext}depth} (where
+%           \underline{\smash{\meta{Ext}}} is the second 
+%           argument, above), then no line is produced.  
+%     \item \underline{\textsf{Indent}}.  Total indentation
+%           from the left margin. 
+%     \item \underline{\textsf{Numwidth}}.  Width of box for the
+%           label number if the \underline{\textsf{Title}} has a
+%           |\numberline| command.   This is also the amount of extra
+%           indentation added to second and later lines of a multiple
+%           line entry.    
+%     \item \underline{\textsf{Title}}.  Contents of entry (\eg, the
+%           \meta{list\_entry} or \meta{sub-caption}).
+%     \item \underline{\smash{\textsf{Page}}}.  The page number of the
+%           figure or table.
+%   \end{enumerate}
+% \end{quote}
+%
+% \noindent
+% The final two arguments, \underline{\textsf{title}} and
+% \underline{\smash{\textsf{page}}}, are automatically appended to the
+% value of |\l@subfigure| (and symmetrically for other sub-float types).
+%
+% \changes{v1.2}{22 January 2004}{Added commands to set the float
+% caption keyword/values.}
+%
+%    \begin{macrocode}
+\def\@dottedxxxline#1#2#3#4#5#6#7{%
+  \begingroup
+    \@ifundefined{caption@setfloattype}%
+      \caption@settype
+      \caption@setfloattype
+          {#1}
+    \caption@settype{subfloat}%
+    \caption@settype{sub#1}%
+    \ifnum #3>\@nameuse{c@#2depth}\else
+      \@dottedtocline{\z@}{#4}{#5}{#6}{#7}%
+    \fi
+  \endgroup}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \subsection{Create New Sub-floats}
+%
+% \begin{macro}{\newsubfloat}
+% \begin{macro}{\@newsubfloat}
+% This command is used to create new types of sub-floats.  It is used
+% during the \Lpack{subfig} configuration to create the two standard
+% float types: \Lvar{subfigure} and \Lvar{subtable} and may be used
+% anywhere in the preamble to create other types of sub-floats (see
+% section~\ref{sec:customfloat} and table~\ref{tab:newsubfloat}).
+%
+%    \begin{macrocode}
+\newif\ifmaincaptiontop
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\newsubfloat{%
+  \@ifnextchar[  %] bracket matching
+    {\@newsubfloat}
+    {\@newsubfloat[]}}
+%    \end{macrocode}
+%
+% \changes{v1.2}{16 January 2004}{Removed code setting a default 
+% \Lkv{position} in the new sub-float based on its corresponding float.}
+% \changes{v1.2}{22 January 2004}{Changed first parameter of the 
+% \cmd{\dotttedxxxline} to use the float rather than the sub-float name.}
+% \changes{v1.3}{27 February 2004}{Added creating the key-value
+% options for setting the associated List-of-Floats page depth with a
+% default of 2.}
+%
+%    \begin{macrocode}
+\def\@newsubfloat[#1]#2{%
+  \@ifundefined{c@sub#2}{%
+    \newcounter{sub#2}[#2]
+    \newcounter{sub#2@save}%
+    \@namedef{sub#2name}{}%
+    \@namedef{p@sub#2}{\@nameuse{the#2}}%
+    \@namedef{thesub#2}{\alph{sub#2}}%
+    \@namedef{ext@sub#2}{\@nameuse{ext@#2}}%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+    \@namedef{l@sub#2}{%
+        \@dottedxxxline{#2}%
+            {\@nameuse{ext@sub#2}}{2}{\sf@indent}{\sf@numwidth}}%
+    \@ifundefined{c@\@nameuse{ext@#2}depth}{%
+      \expandafter\newcounter\expandafter{\@nameuse{ext@#2}depth}%
+      \expandafter\addtocounter\expandafter{\@nameuse{ext@#2}depth}\@ne}{}%
+    \@namedef{KV@caption@\@nameuse{ext@#2}depth@default\expandafter}%
+        \expandafter{\csname KV@caption@\@nameuse{ext@#2}depth\endcsname{2}}%
+    \@namedef{KV@caption@\@nameuse{ext@#2}depth}##1{%
+        \setcounter{\@nameuse{ext@#2}depth}{##1}}%
+    \edef\sf@counterlist{%
+      \@ifundefined{sf@counterlist}{}%
+        {\sf@counterlist,}sub#2}%
+    \captionsetup[sub#2]{#1}%
+  }{%
+    \PackageWarning{subfig}{%
+        The sub#2\space type is already defined.}%
+  }}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\@onlypreamble\@newsubfloat
+\@onlypreamble\newsubfloat
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Layout Parameters}
+% \label{sec:layoutparams}
+%
+% \begin{macro}{\sf@farskip}
+% \begin{macro}{\sf@captopadj}
+% \begin{macro}{\sf@capskip}
+% \begin{macro}{\sf@nearskip}
+% \changes{v1.2}{21 January 2004}{Fine-tuned defaults for \Lkv{farskip},
+% \Lkv{topadjust}, \Lkv{captionskip}, and \Lkv{nearskip}.}
+%
+% We now create the sub-float layout parameters.  We do it now so that the 
+% values will be available during the configuration and options processing,
+% below.  The \Lkv{margin} and \Lkv{width} are already defined in the 
+% \Lpack{caption} package.
+%
+%    \begin{macrocode}
+\newskip\sf@farskip
+\sf@farskip 10\p@
+\define@key{caption}{farskip}[10\p@]{\sf@farskip=#1}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\newdimen\sf@captopadj
+\sf@captopadj \z@
+\define@key{caption}{topadjust}[\z@]{\sf@captopadj=#1}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\newskip\sf@capskip
+\sf@capskip 4\p@
+\define@key{caption}{captionskip}[4\p@]{\sf@capskip=#1}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\newskip\sf@nearskip
+\sf@nearskip \z@
+\define@key{caption}{nearskip}[5\p@]{\sf@nearskip=#1}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\sf@old@caption}
+% \begin{macro}{\@caption}
+%
+% Save the current definition of the \cmd{\@caption} command so that
+% we can wrap it with code that first checks if a caption for the 
+% current float type comes before (\Lkv{[position=top]}) or after
+% (\Lkv{[position=bottom]}) the related sub-floats.  Then the decision
+% can be made of whether or not to flush the list of sub-float captions
+% to the proper List-of-Floats file.  See the \cmd{\caption@} definition
+% in section~\ref{sec:listofprocessing}.
+%
+%    \begin{macrocode}
+\let\sf@old@caption\@caption
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\@caption{\caption@}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+% 
+% \subsection{Process the Package Options}
+% \changes{v1.1}{12 January 2004}{Removed \Lkv{position} settings from
+% initial setup to allow the class or other external settings to 
+% control the initial settings of the default (\Lkv{bottom}) and table
+% (\Lkv{top}) positions.}
+% \changes{v1.1}{12 January 2004}{Updated \Lkv{listofformat} value from
+% \Lkv{simple} to \Lkv{subsimple}.}
+%
+% \begin{enumerate}
+%   \item Set the default (override) values in \Lvar{subfloat}.
+%      (It would be nice not to set anything, however, most users will
+%      want something like this set so we do so.  If desired, these may
+%      be wiped out in a configuration file with \cmd{\clearcaptionsetup}
+%      command.)
+%
+% \changes{v1.2}{21 January 2004}{Removed \cmd{\captionsetup} of defaults
+% for \Lkv{farskip}, \Lkv{topadjust}, \Lkv{captionskip}, and 
+% \Lkv{nearskip}; because these are defaulted above.  Any change can be 
+% added to the \Lvar{subfloat} variable.}
+% \changes{v1.3}{27 May 2005}{Added \Lkv{subrefformat} default.}
+%
+%    \begin{macrocode}
+\captionsetup[subfloat]{%
+    font=footnotesize,
+    labelformat=parens,labelsep=space,
+    listofformat=subparens,subrefformat=subsimple}
+%    \end{macrocode}
+%
+%   \item Load the configuration file(s) if `config' keyword is given.
+%      (Use |\captionsetup| to change options (remember, due to a known
+%      bug, you cannot set global-level values because you have to supply
+%      the optional argument in a \Lpack{subfig} package configuration file.)
+%
+%    \begin{macrocode}
+\define@key{subfig}{config}[subfig]{%
+  \InputIfFileExists{#1.cfg}{%
+    \typeout{***********************************************^^J%
+             * Subfig configuration file #1.cfg used ^^J%
+             ***********************************************}%
+  }{%
+    \PackageWarning{subfig}{Configuration file #1.cfg not found}}%
+}
+%    \end{macrocode}
+%
+%   \item Process the options list using the KV macros.  (Note, the
+%      `config' option is processed before any other option in the
+%      package list to load the files in the last step, above.)  The
+%      remaining options are added to the end of \Lvar{subfloat} after
+%      the configuration process.
+%
+%    \begin{macrocode}
+\ProcessPackageOptions
+%    \end{macrocode}
+%
+%   \item If the \Lkv{subfigure} and the \Lkv{subtable} sub-floats
+%      have not been defined during the configuration process, than
+%      we define define them now (along with all of the items in 
+%      table~\ref{tab:newsubfloat}).
+%
+%    \begin{macrocode}
+\@ifundefined{c@subfigure}{\newsubfloat{figure}}{}
+\@ifundefined{c@subtable}{\newsubfloat{table}}{}
+%    \end{macrocode}
+%
+%   \item Finally, we designate those commands that we will not need
+%     after this package is finished.  Also, we reset \cmd{\CaptionOption}
+%     to keep this package from influencing other packages using the
+%      variable.
+%
+% \changes{v1.2}{21 January 2004}{Added the reset of the 
+% \cmd{\CaptionOption} to keep this package from influencing other
+% packages using the variable.}
+% \changes{v1.3}{10 October 2004}{Added new elements due to the addition
+% of the \Lkv{caption} option processing.}
+%
+%    \begin{macrocode}
+\AtEndOfPackage{%
+  \global\let\ifsf@usecaption\relax
+  \global\let\sf@usecaptiontrue\relax
+  \global\let\sf@usecaptionfalse\relax
+  \global\let\ifsf@usecaptionfound\relax
+  \global\let\sf@usecaptionfoundtrue\relax
+  \global\let\sf@usecaptionfoundfalse\relax
+  \global\let\KV@caption\relax
+  \global\let\KV@subfig@caption\relax
+  \global\let\KV@subfig@caption@default\relax
+  \global\let\KV@config\relax
+  \global\let\KV@subfig@config\relax
+  \global\let\KV@subfig@config@default\relax
+  \global\let\ProcessPackageOptions\relax
+  \global\let\@unprocessedoptions\relax
+  \let\CurrentOption\@empty  
+}
+%    \end{macrocode}
+%
+%   \item (And, of course, we process calls to |\captionsetup| throughout
+%      the paper.)
+% \end{enumerate}
+%
+% \subsection{Define the Sub-float Layout}
+%
+% The main command is |\subfloat|.  This command takes the figure code and
+% the optional caption and builds a vertical box that contains them along
+% with some additional padding as defined by the layout parameters defined
+% in section~\ref{sec:layoutparams}
+%
+% \begin{macro}{\sf@top}
+% \begin{macro}{\sf@bottom}
+% 
+% We define two skip variables which are set to the \Lkv{farskip} and the
+% \Lkv{nearskip} values, depending on the \Lkv{position} of the 
+% corresponding float caption.  These are used, when the time comes, to
+% build the sub-float box as illustrated in figure~\ref{fig:layout}.
+%
+%    \begin{macrocode}
+\newskip\sf@top
+\newskip\sf@bottom
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\subfloat}
+%
+% This is the ``main'' command.  All it really does is to check that we
+% are inside a float environment (or at the very least that someone has
+% tricked us by defining \cmd{\@captype}).  If all seems salubrious, than
+% we pass all of the arguments to the internal comamnd \cmd{\sf@subfloat}.
+%
+%    \begin{macrocode}
+\def\subfloat{%
+  \ifx\@captype\@undefined
+    \@latex@error{\noexpand\subfloat outside float}\@ehd
+     \expandafter\@gobble
+  \else
+    \expandafter\@firstofone
+  \fi
+  {\sf@subfloat}}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\sf@subfloat}
+% \changes{v1.2}{22 January 2004}{Changed method of setting the float
+% caption settings to first check for \cmd{\caption@setfloattype} and
+% to use that if present.}
+%
+% \noindent
+% This routine does more setup and at the end begins to parse the
+% optional argument.  First the float options are applied and a flag
+% \texttt{\char`\\ ifmaincaptiontop} is set for later use; the 
+% \Lkv{subfloat} and sub-\cmd{\@captype} options are set and the 
+% \cmd{\label} command is temporarily wrapped with \cmd{\subfloat@label}.
+%
+%    \begin{macrocode}
+\def\sf@subfloat{%
+  \begingroup
+    \@ifundefined{caption@setfloattype}%
+      \caption@settype
+      \caption@setfloattype
+          \@captype
+    \sf@ifpositiontop{%
+      \maincaptiontoptrue
+    }{%
+      \maincaptiontopfalse
+    }%
+    \caption@settype{subfloat}%
+    \caption@settype{sub\@captype}%
+    \let\sf@oldlabel=\label
+    \let\label=\subfloat@label
+%    \end{macrocode}
+%
+% Next, a decision (based on the \texttt{\char`\\ ifmaincaptiontop}
+% flag) is made of how to advance the float counter; then the
+% sub-float counter is advanced and saved and a check is made if an
+% optional argument is present (if not, one is supplied).
+%
+%    \begin{macrocode}
+    \ifmaincaptiontop\else
+      \advance\@nameuse{c@\@captype}\@ne
+    \fi
+    \refstepcounter{sub\@captype}%
+    \setcounter{sub\@captype @save}{\value{sub\@captype}}%
+    \@ifnextchar [%  %] match left bracket
+      {\sf@@subfloat}%
+      {\sf@@subfloat[\@empty]}}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\sf@@subfloat}
+%
+% A check is made for a second optional argument, if one is not found,
+% than one is supplied.  We are now ready to call the real (internal)
+% ``\cmd{\subfloat}'' command, \cmd{\sf@@@subfloat}.
+%
+%    \begin{macrocode}
+\long\def\sf@@subfloat[#1]{%
+    \@ifnextchar [%  %] match left bracket
+      {\sf@@@subfloat{sub\@captype}[{#1}]}%
+      {\sf@@@subfloat{sub\@captype}[\@empty{#1}][{#1}]}}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\sf@@@subfloat}
+%
+% This is the main function in the whole package.  It is the one that builds
+% the sub-float box and stuffs it with the various parts from it's arguments
+% and the currently set options.
+%
+% \changes{v1.2}{21 January 2004}{Changed the top and bottom skips
+% to be placed opposite the main caption rather than the sub-caption;
+% I decided that that looked better.}
+% \changes{v1.2}{21 January 2004}{Inserted another \cmd{\hrule} of zero
+% size to kill extra vertical space from being added.}
+% \changes{v1.3}{6 May 2005}{At the request of Olga Lapko, added a hook
+% into the \cmd{\sf@@@subfloat} macro to record the maximum size of
+% subfloats on the current row and to set the height/depth of the
+% current subfloat.}
+%
+%    \begin{macrocode}
+\long\def\sf@@@subfloat#1[#2][#3]#4{%
+%    \end{macrocode}
+%
+% The next two lines are the first section of a hook for the
+% \Lpack{floatrow} package to obtain and save the height of the
+% highest subfloat on the current row.
+%
+%    \begin{macrocode}
+    \@ifundefined{FBsc@max}{}%
+        {\FB@readaux{\let\FBsuboheight\relax}}%
+%    \end{macrocode}
+%
+% The next section sets a counter, \cmd{\@tempcnta}, depending on the 
+% current interpreter mode.  Zero indicates the start of a minipage;
+% One is the normal; and, Two indicates that there was a non-zero skip
+% preceeding the sub-float.  We save this information for a little later.
+%
+%    \begin{macrocode}
+    \@tempcnta=\@ne
+    \if@minipage
+      \@tempcnta=\z@
+    \else\ifdim \lastskip=\z@ \else
+      \@tempcnta=\tw@
+    \fi\fi
+%    \end{macrocode}
+%
+% Then, set our \cmd{\sf@top} and \cmd{\sf@bottom} variables with right
+% amounts, based on the \texttt{\char`\\ ifmaincaptiontop} flag that we
+% set earlier.  Then we insure that we are in horizontal mode and 
+% process the sub-float body into a box so that we can measure it.  
+% \cmd{\@tempdima} is set to the with of the sub-float body.
+%
+% NOTE: We need to either add negative margins or widths here or allow them
+% to stick out!
+%
+%    \begin{macrocode}
+    \ifmaincaptiontop
+      \sf@top=\sf@nearskip
+      \sf@bottom=\sf@farskip
+    \else
+      \sf@top=\sf@farskip
+      \sf@bottom=\sf@nearskip
+    \fi
+    \leavevmode
+    \setbox\@tempboxa \hbox{#4}%
+    \@tempdima=\wd\@tempboxa
+%    \end{macrocode}
+%
+% The next seven lines are the second section of the \Lpack{floatrow}
+% package hook which counts the maximal height of subfloat row.
+%
+%    \begin{macrocode}
+    \@ifundefined{FBsc@max}{}%
+        {\global\advance\Xhsize-\wd\@tempboxa
+         \dimen@=\ht\@tempboxa
+         \advance\dimen@\dp\@tempboxa
+         \ifdim\dimen@>\FBso@max
+           \global\FBso@max\dimen@
+         \fi}%
+%    \end{macrocode}
+%
+% Now, we begin building our sub-float box.  It will be a vertical box
+% containing two vertical boxes.  The baseline of the upper box is used
+% as the baseline of the final sub-float.  So this section decides what
+% order to fill-in the box.  Figure~\ref{fig:layout} shows the different
+% ways that we can do this.
+%
+% The first thing is to decide what skip to add to the top.  Depending on
+% the initial mode (stored in \cmd{\@tempcnta}) we may put nothing (and 
+% declare \cmd{\@minipagefalse}); the full \cmd{\sf@top} skip; or, the
+% larger of the last skip and \cmd{\sf@top}.
+%
+% ({\scshape\bf Note}: If the \Lkv{debug} option is used in stripping
+% this code to a package file, than a vertical rule instead of a skip
+% is inserted into the box.)
+%
+%    \begin{macrocode}
+    \vtop\bgroup
+      \vbox\bgroup
+        \ifcase\@tempcnta
+          \@minipagefalse
+        \or
+%<+debug>          \leaders\vrule\vskip\sf@top
+%<-debug>          \vskip\sf@top
+        \or
+          \ifdim \lastskip=\z@ \else
+            \@tempskipb\sf@top\relax\@xaddvskip
+          \fi
+        \fi
+%    \end{macrocode}
+%
+% Into the top box, after the initial skip (if any), we place either
+% the sub-float body or the sub-caption.  We decide which one based
+% on the current \Lkv{position} setting.
+% Finally, reset the float counter if we changed it above.
+%
+% ({\scshape\bf Note}: Here also, vertical rules are inserted into the
+% box instead of a skip, if the \Lkv{debug} option is used in stripping
+% this code to a package file.)
+%
+%    \begin{macrocode}
+        \sf@ifpositiontop{%
+          \ifx \@empty#3\relax \else
+            \sf@subcaption{#1}{#2}{#3}%
+%<+debug>            \leaders\vrule width.8pt\vskip\sf@capskip
+%<-debug>            \vskip\sf@capskip
+%<+debug>            \leaders\vrule width1.2pt\vskip\sf@captopadj
+%<-debug>            \vskip\sf@captopadj
+          \fi\egroup
+          \hrule width0pt height0pt depth0pt
+          \box\@tempboxa
+        }{%
+%    \end{macrocode}
+%
+% The next seven lines contain the third section of the \Lpack{floatrow}%
+% hook which applies a given height to the subfloat figure section.
+%
+%    \begin{macrocode}
+        \@ifundefined{FBsc@max}%
+            {\box\@tempboxa}%
+            {\ifx\FBsuboheight\relax
+               \box\@tempboxa
+             \else
+               \vbox to \FBsuboheight{\FBafil\box\@tempboxa\FBbfil}%
+             \fi}%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+          \egroup
+          \ifx \@empty#3\relax \else
+%<+debug>            \leaders\vrule width.8pt\vskip\sf@capskip
+%<-debug>            \vskip\sf@capskip
+            \hrule width0pt height0pt depth0pt
+            \sf@subcaption{#1}{#2}{#3}%
+         \fi
+        }%
+%<+debug>      \leaders\vrule\vskip\sf@bottom
+%<-debug>      \vskip\sf@bottom
+    \egroup
+%    \end{macrocode}
+%
+% The next five lines contain the fourth section of the \Lpack{floatrow}%
+% and the last in this macro.  These add, if necessary, a separator for
+% the  subfloats.
+%
+%    \begin{macrocode}
+    \@ifundefined{FBsc@max}{}%
+        {\addtocounter{FRobj}{-1}%
+         \ifnum\c@FRobj=0\else
+           \subfloatrowsep
+         \fi}%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+    \ifmaincaptiontop\else
+      \global\advance\@nameuse{c@\@captype}\m@ne
+    \fi
+  \endgroup\ignorespaces}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \subsection{Use the \Lpack{Caption} Package to Build the Sub-float Captions}
+% \changes{v1.1}{12 January 2004}{Changed \cmd{\captionlistofformat} to
+% \cmd{\caption@lstfmt}.}
+% \changes{v1.3}{6 May 2005}{At the request of Olga Lapko, added a hook
+% into the \cmd{\@subcaption} macro to record the maximum size of
+% subcaption on the current row and to set  the height/depth of the
+% current subcaption.}
+%
+% \begin{macro}{\sf@updatecaptionlist}
+% \changes{v1.3}{20 May 2005}{Added to support the \cmd{\sf@subcaption}.}
+%
+% This macro is used to setup the \Lpack{hyperref} name, in case it is
+% needed.
+%
+%    \begin{macrocode}
+\def\sf@updatecaptionlist#1#2#3#4{%
+  \xdef\sf@captionlist{%
+    \sf@captionlist,%
+        {\protect\numberline{\@subcaplabel}\noexpand{\ignorespaces #2}}%
+        {#1.#3.#4}}}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+%
+%
+% \begin{macro}{\sf@subcaption}
+% \changes{v1.3}{20 May 2005}{Added \cmd{\sf@updatecaptionlist} to
+% get unique names for hyper-references.}
+%
+% This command is called from within \cmd{\sf@@@subfloat} and does two
+% things.  First it adds the sub-caption to the list of sub-captions for
+% printing later, after the main caption is printed, which is either before
+% the next caption or at the end of the current \Lenv{float} environment. 
+%
+%    \begin{macrocode}
+\long\def\sf@subcaption#1#2#3{%
+  \ifx \relax#2\relax \else
+    \bgroup
+      \let\label=\@gobble
+      \let\protect=\string
+      \def\@subcaplabel{%
+        \caption@lstfmt{\@nameuse{p@#1}}{\@nameuse{the#1}}}%
+      \sf@updatecaptionlist{#1}{#2}{\the\value{\@captype}}{\the\value{#1}}%
+    \egroup
+  \fi
+%    \end{macrocode}
+%
+% Next, it makes a box to hold and center the sub-caption and calls the
+% \Lpack{caption} package \cmd{\caption@make} command to format it. (NOTE:
+% This last section of \cmd{\sf@subcaption} is closely combined with the
+% \Lpack{floatrow} package hooks.)
+%
+%    \begin{macrocode}
+  \bgroup
+    \ifx \relax#3\relax
+      \let\captionlabelsep=\relax
+    \fi
+%    \end{macrocode}
+%
+% This next group of code finishes the \Lpack{floatrow} package
+% hooks into \Lpack{subfig}.  This gets and saves the maximum
+% height/depth of the caption portion of the subfloats on this 
+% row and, optionally, sets the height/depth of the current subcaption.
+% 
+% The first section builds the box and if the marker \cmd{\FBsc@max} is
+% not present, than it sets the box.  Otherwise the \Lpack{floatrow}
+% code is activated.
+% 
+%    \begin{macrocode}
+    \setbox0\vbox{%
+      \hb@xt@\the\@tempdima{%
+        \hss
+        \parbox[t]{\the\@tempdima}{%
+          \caption@make
+              {\@nameuse{sub\@captype name}}%
+              {\@nameuse{thesub\@captype}}%
+              {#3}}%
+          \hss}}%
+    \@ifundefined{FBsc@max}%
+        {\box0}%
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+        {\dimen@\ht0%
+         \advance\dimen@\dp0%
+         \ifdim\dimen@>\FBsc@max
+           \global\FBsc@max\dimen@
+         \fi
+         \FB@readaux{\let\FBsubcheight\relax}%
+         \ifx\FBsubcheight\relax
+           \def\next{\parbox[t]{\the\@tempdima}}%
+         \else
+           \def\next{\parbox[t][\FBsubcheight][t]{\the\@tempdima}}%
+         \fi
+         \vbox{%
+           \hb@xt@\the\@tempdima{%
+             \hss
+             \next{%
+               \caption@make
+                   {\@nameuse{sub\@captype name}}%
+                   {\@nameuse{thesub\@captype}}%
+                   {#3}}%
+             \hss}}}%
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+  \egroup}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \subsection{Subfig Caption Processing for the List-of-Floats Files}
+% \label{sec:listofprocessing}
+%
+% \begin{macro}{\listsubcaptions}
+% \begin{macro}{\listsubcaptions*}
+%
+% The \cmd{\listsubcaptions} command writes the list of sub-captions to the 
+% List-of-Floats file.  This is done so that they will follow the associated
+% caption in the file.  The \cmd{\listsubcaptions} command is (optionally)
+% called by the \cmd{\caption} command and at the end of the float
+% environment by the internal \cmd{\end@float} command.  In rare instances
+% the user may need to call it also, see section~\ref{sec:listsubcaptions}
+% for an example.
+%
+% The starred form of the comamnd, \cmd{\listsubcaptions*}, is not documented
+% as it is not clear that it is of any real use.  It may go away in the 
+% future, so it should not be used.
+%
+%    \begin{macrocode}
+\def\listsubcaptions{%
+  \@ifstar
+    {\gdef\sf@captionlist{}}%
+    {\@listsubcaptions{\@captype}}}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\sf@captionlist}
+%
+% \cmd{\sf@captionlist} is the internal list of pending sub-captions.
+% We initialize it here as an empty list.
+%
+%    \begin{macrocode}
+\def\sf@captionlist{}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\@listsubcaptions}
+% \changes{v1.3}{20 May 2005}{Modified the \cmd{\sf@captionlist} to
+% have a unique name for hyper references to the subfigures.}
+%
+% This is the code that actually writes the sub-captions to the appropriate
+% List-of-Floats file.  First, we check that \cmd{\@captype} is defined
+% and that the current type of sub-float expects to be written to a
+% List-of-Floats file (by virtue of the file extension contained in 
+% \cmd{\ext@sub}-$<$whatever$>$).
+%
+% Next we step through the internal list of pending sub-captions and
+% write the contents line to the List-of-Floats file for each.  Finally,
+% the internal list, \cmd{\sf@captionlist}, is re-initialized.
+%
+%    \begin{macrocode}
+\def\@listsubcaptions#1{%
+  \@ifundefined{@captype}{}{%
+    \@ifundefined{ext@sub#1}{}{%
+      \@for \sf@temp:=\sf@captionlist \do {%
+        \ifx \@empty\sf@temp\relax \else
+          \begingroup
+            \def\@currentHref{\expandafter\@secondoftwo\sf@temp}%
+            \sf@addcontentsline
+              {\@nameuse{ext@sub#1}}%
+              {sub#1}%
+              {\expandafter\@firstoftwo\sf@temp}%
+          \endgroup
+        \fi}}}%
+  \gdef\sf@captionlist{}}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\caption@}
+% \changes{v1.2}{16 January 2004}{Simplified \cmd{\caption@} at the suggestion
+% of Axel Sommerfeldt.}
+% \changes{v1.2}{22 January 2004}{Changed method of setting the float
+% caption settings to first check for \cmd{\caption@setfloattype} and
+% to use that if present.}
+%
+% This last is a wrapper for the standard \cmd{\@caption} command.  It
+% is called by the main float \cmd{\caption} command and makes sure that
+% the \cmd{\@listsubcaptions} is called at the proper time to either add
+% the pending sub-captions for the last caption (if the float caption
+% appears {\em before\/} the corresponding sub-captions); or, to first 
+% write the float caption and then the pending sub-captions (if the float 
+% caption appears {\em after\/} the corresponding sub-captions).
+%
+% It processes the options for the float and then checks the \Lkv{position}
+% setting in order to determine how this float caption is supposed to be
+% used.
+%
+%    \begin{macrocode}
+\long\def\caption@#1[#2]#3{%
+  \@ifundefined{caption@setfloattype}%
+    \caption@settype
+    \caption@setfloattype
+        \@captype
+  \sf@ifpositiontop{%
+    \@listsubcaptions{#1}%
+    \sf@old@caption{#1}[{#2}]{#3}%
+  }{%
+    \sf@old@caption{#1}[{#2}]{#3}%
+    \@listsubcaptions{#1}%
+  }}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\sf@addcontentsline}
+%
+% Some packages may modify \cmd{\addcontentsline} which is used by 
+% \cmd{\@listsubcaptions} to write the sub-captions to the List-of-Float
+% files, therefore we wait until the document begins and grab the 
+% then-current definition for use by the \cmd{\@listsubcaptions}
+% command.
+%
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \let\sf@addcontentsline=\addcontentsline}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \subsection{Sub-float Label Handling}
+% \label{sec:subfloatlabel}
+%
+% The label handling has three aspects.  The first is that the label for
+% a sub-float is defined as the 
+% {\bf\cmd{\p@}\textless{\em sub-float\_type}\textgreater} value
+% prepended to the 
+% {\bf\cmd{\the}\textless{\em sub-float\_type}\textgreater} value.
+% Secondly, the |\subref| command is similar, except that it shows label
+% as formatted on the List-of-Floats page.  Finally, we need to check for the
+% \Lpack{hyperref} package and provide the extended reference format if
+% it is present (see also, section~\ref{sec:hyperref}).
+%
+% \begin{macro}{\subfloat@label}
+%
+% In the \cmd{\sf@subfloat} command, the standard label command,
+% \cmd{\label} is stored in \cmd{\sf@oldlabel} while the sub-float
+% is being processed and this command, \cmd{\subfloat@label} is 
+% substituted for it.
+%
+% This first part checks for the optional argument, which has
+% parentheses rather than square brackets, following the form
+% of the similar command in the \Lpack{hyperref} package.  If 
+% there is no optional argument, than we supply one.
+%
+%    \begin{macrocode}
+\def\subfloat@label{%
+  \@ifnextchar(%   %) match left parenthesis
+    {\sf@sub@label}
+    {\sf@sub@label(Sub\@captype\space
+                   \@ifundefined{thechapter}{}{\@nameuse{thechapter}\space}%
+                   \@nameuse{p@sub\@captype}%
+                   \@nameuse{thesub\@captype}.)}}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\sf@sub@label}
+%
+% The next portion of this process is to define the 
+% \cmd{\@currentlabelname} if the \Lpack{hyperref} package
+% is loaded and save it for later; then call \cmd{\sf@@sub@label}
+% to finish the job.  We know that the \Lpack{hyperref} package
+% is loaded using the \texttt{\char`\\ ifhyperrefloaded} flag
+% which is defined here and will be set later in section~\ref{sec:hyperref}.
+
+%    \begin{macrocode}
+\newif\ifhyperrefloaded
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\sf@sub@label(#1)#2{%
+  \ifhyperrefloaded
+    \protected@edef\@currentlabelname{%
+      \expandafter\strip@period #1\relax.\relax\@@@}%
+  \fi
+  \sf@@sub@label{#2}}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\sf@@sub@label}
+% \changes{v1.1}{12 January 2004}{Fixed bug wherein the subreference
+% could ignore any prefix numbering when set on the List-of-Floats page.
+% Also changed \cmd{\captionlistofformat} to \cmd{\caption@lstfmt}.}
+% \changes{v1.2}{23 January 2004}{Changed \cmd{\thepage} to 
+% \cmd{\@nameuse}\{thesub-\cmd{\@captype}\} so that a starred-form
+% of the \cmd{\subref} command will work to extract the simple
+% form of the subfigure number using the \cmd{\pageref} mechanism.}
+% \changes{v1.3}{27 May 2005}{Added formatting for the \cmd{\subref*}
+% command.}
+%
+% Finally, we get the the value-added portion.  First, we call the
+% standard \cmd{\label} command (via \cmd{\sf@oldlabel}).  Then
+% we write the additional information to support the \cmd{\subref[*]}
+% command.  This will take two forms, depending on the presence of
+% the \Lpack{hyperref} package  However, in either case, we store
+% the formatted label and the raw sub-float label in the auxillary
+% file.
+%
+%    \begin{macrocode}
+\def\sf@@sub@label#1{%
+  \@bsphack
+  \sf@oldlabel{#1}%
+  \ifhyperrefloaded
+    \begingroup
+      \edef\@currentlabstr{%
+        \expandafter\strip@prefix\meaning\@currentlabelname}%
+      \protected@write\@auxout{}{%
+          \string\newlabel{sub@#1}{%
+              {\caption@lstfmt
+                {\@nameuse{p@sub\@captype}}%
+                {\@nameuse{thesub\@captype}}}%
+              {\caption@subreffmt
+                {\@nameuse{p@sub\@captype}}%
+                {\@nameuse{thesub\@captype}}%
+                {\the\value{\@captype}}%
+                {\the\value{sub\@captype}}}%
+              {\expandafter\strip@period\@currentlabelname\relax.\relax\@@@}%
+              {\@currentHref}%
+              {}}}%
+    \endgroup
+  \else
+    \protected@write\@auxout{}{%
+        \string\newlabel{sub@#1}{%
+            {\caption@lstfmt
+              {\@nameuse{p@sub\@captype}}%
+              {\@nameuse{thesub\@captype}}}%
+            {\caption@subreffmt
+              {\@nameuse{p@sub\@captype}}%
+              {\@nameuse{thesub\@captype}}%
+              {\the\value{\@captype}}%
+              {\the\value{sub\@captype}}}}}%
+  \fi
+  \@esphack}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\subref}
+% \begin{macro}{\subref*}
+% \begin{macro}{\sf@subref}
+% \begin{macro}{\sf@@subref}
+% \changes{v1.2}{23 January 2004}{Added a starred-form of the 
+% \cmd{\subref} command.}
+%
+% Now, we can define the \cmd{\subref[*]} commands.  They are
+% just like the \cmd{\ref} and \cmd{\pageref} commands.
+% The only difference is that they use the alternate
+% information placed in the auxillary file above.
+%
+%    \begin{macrocode}
+\def\subref{%
+  \@ifstar
+    \sf@@subref
+    \sf@subref}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\sf@subref#1{\ref{sub@#1}}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\sf@@subref#1{\pageref{sub@#1}}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Support for Continued Figures}
+%
+% Now we add the ability to have continued floating environments
+% and have them work with the sub-floats without having to load the
+% \Lpack{captcont} package (but we stay compatible with it if it
+% {\em is\/} loaded).
+%
+% The \Lpack{caption} package now contains a simple version of
+% the \cmd{\ContinuedFloat} command, which works fine for regular
+% floats.  We redefine it here to also handle the sub-floats.
+%
+%    \begin{macrocode}
+\newif\if@ccflag
+\@ccflagfalse
+%    \end{macrocode}
+%
+% \begin{macro}{\ContinuedFloat}
+% \changes{v1.3}{06 June 2005}{Fixed bug that required new float
+% types to have their corresponding sub-floats defined in order
+% to use the \cmd{\ContinuedFloat} command.}
+%
+% We postpone this definition to the end of the preamble, so that we
+% we can check to see if the \Lpack{captcont} package was loaded.  If
+% it was, then we change its internal \cmd{\refsteponlycounter} command
+% to work with the new and simpler approach to continuing the floats.
+%
+%    \begin{macrocode}
+\AtBeginDocument{%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+  \let\sf@refstepcounter=\refstepcounter
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+  \@ifpackageloaded{captcont}{}{%
+    \def\refsteponlycounter#1{%
+      \if@ccflag
+        \global\expandafter\advance\csname c@#1\endcsname\@ne
+        \let\sf@temp\protect
+        \def\protect{\noexpand\protect\noexpand}%
+        \edef\@currentlabel{\csname p@#1\endcsname\csname the#1\endcsname}%
+        \let\protect\sf@temp
+      \else
+        \sf@refstepcounter{#1}%
+      \fi
+      \@ccflagfalse}%
+  }%
+%    \end{macrocode}
+% \changes{v1.3}{26 June 2005}{Added support for the \Lpack{caption}
+% package version of the \cmd{\ContinuedFloat} command.}
+%
+% Next, we re-define the \cmd{\ContinuedFloat} command to, in addition to
+% backing up the float counter, check if a sub-float type is defined for
+% this float type.  If there is, than it restores the current sub-float
+% counter and to sets the \texttt{\char`\\ if@ccflag} true in order to
+% enable the alternate code in the above \cmd{\refsteponlycounter}.
+%
+%    \begin{macrocode}
+  \def\ContinuedFloat{%
+    \ifx\@captype\@undefined
+      \@latex@error{\noexpand\ContinuedFloat outside float}\@ehd
+    \else
+      \addtocounter{\@captype}{\m@ne}%
+      \caption@ContinuedFloat\@captype
+      \@ifundefined{c@sub\@captype}{}{%
+        \setcounter{sub\@captype}{\value{sub\@captype @save}}%
+        \@ccflagtrue}%
+    \fi}}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\caption@ContinuedFloat}
+% \changes{v1.3}{26 June 2005}{Added \cmd{\caption@ContinuedFloat}
+% command to provide support for older versions of the \Lpack{caption}
+% package.}
+%
+% In addition, we provide the \cmd{\caption@ContinuedFloat} so that
+% earlier versions of the \Lpack{caption} package will not generate
+% an error.
+%
+%    \begin{macrocode}
+  \providecommand*\caption@ContinuedFloat[1]{}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\sf@caption}
+%
+% Finally, we define a wrapper for the \cmd{\caption} command now and wait
+% until the end of the preamble to exchange it for the \cmd{\caption} command.
+% Just in case some other package modifies it.  It is possible that another
+% package will also wait until the end of the preamble to change the 
+% \cmd{\caption} command.  In that case, it may be necessary to load this
+% package and the other in a specific order.  However, this works for now.
+%
+%    \begin{macrocode}
+\def\sf@caption{%
+  \let\refstepcounter=\refsteponlycounter
+  \sf@savecaption}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \let\sf@savecaption=\caption
+  \let\caption=\sf@caption
+}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \subsection{Automate the Sub-float Listings}
+%
+% \begin{macro}{\sf@end@float}
+% \begin{macro}{\sf@end@dblfloat}
+%
+% We use the end@float and end@dblfloat hooks to process the List-of-Floats
+% sub-captions at the end of a float environment so that the page numbers
+% will be correct.  The alternative would be for the user to add a
+% \cmd{\listsubcaptions} command at the end of the float environment if
+% there is not \cmd{\caption} command between the last sub-float and the
+% end of the float envrionment.
+%
+%    \begin{macrocode}
+\let\sf@end@float=\end@float
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\let\sf@end@dblfloat=\end@dblfloat
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\end@float}
+% \begin{macro}{\end@dblfloat}
+%
+% These two wrappers are pretty much the same, they first zero out 
+% the sub-float counters (for all sub-float types, but not the saved
+% counter values).  Next they dump all of the pending sub-captions
+% the currnet List-of-Float page.  Finally, they call the \cmd{\end@float}
+% or \cmd{\end@dblfloat} command.
+%
+% There is one problem, the \Lpack{fixltx2e} and (old) \Lpack{fix2col}
+% packages redefine \cmd{\end@dblfloat} and assume that the first
+% token in \cmd{\end@float} is \cmd{\@endfloatbox}.  Therefore we
+% redefine \cmd{\@endfloatbox} below in section ~\ref{sec:endfloat}
+% if these packages are loaded.
+%
+%    \begin{macrocode}
+\def\end@float{%
+  \@ifundefined{sf@counterlist}{}{%
+    \@for\sf@temp:=\sf@counterlist\do{%
+      \setcounter{\sf@temp}{\z@}}%
+    \@listsubcaptions{\@captype}}%
+  \sf@end@float}%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\end@dblfloat{%
+  \@ifundefined{sf@counterlist}{}{%
+    \@for\sf@temp:=\sf@counterlist\do{%
+      \setcounter{\sf@temp}{\z@}}%
+    \@listsubcaptions{\@captype}}%
+  \sf@end@dblfloat}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Provide Compatibility with Other Packages}
+%
+% We postpone the following to the end of the preamble in order
+% to detect any other packages that are loaded after this one.
+%
+%    \begin{macrocode}
+\AtBeginDocument{%
+%    \end{macrocode}
+%
+% \subsubsection{The \Lpack{Hyperref} Package}
+% \label{sec:hyperref}
+% \changes{v1.3}{28 June 2005}{Added an update to the 
+% \cmd{\H@refstepcounter} so that when it is called within the context
+% of a \cmd{\caption} when the \cmd{\@ccflag} is true, the respective
+% sub-counter will be restored.  This change allows the correct functioning
+% of the \cmd{\ContinuedFloat} command.}
+%
+% We define a \texttt{\char`\\ ifhyperrefloaded} flag which is used with
+% the sub-caption labels (see section~\ref{sec:subfloatlabel}).  If the
+% \Lpack{hyperref} package is loaded, we set this flag to true and, for
+% each sub-float type, we create a \cmd{\theH$<$sub-float$>$} command that
+% it needs.
+%
+%    \begin{macrocode}
+  \@ifpackageloaded{hyperref}{%
+    \hyperrefloadedtrue
+    %
+    \def\sf@setref#1sub#2\relax{%
+      \@namedef{theHsub#2\expandafter}{\@nameuse{the#2}.\arabic{sub#2}}%
+      \@namedef{toclevel@sub#2}{1}%
+    }
+    %
+    \@for\sf@temp:=\sf@counterlist\do{%
+      \expandafter\sf@setref\sf@temp\relax}%
+    %
+    \global\let\sf@setref\relax
+    %
+    \let\sf@Hrefstepcounter\H@refstepcounter
+    \def\H@refstepcounter#1{%
+      \sf@Hrefstepcounter{#1}%
+      \@ifundefined{c@sub#1}{}{%
+        \if@ccflag
+          \setcounter{sub#1}{\value{sub#1@save}}%
+        \fi
+        \@ccflagfalse}}%    
+    %
+  }{}%
+%    \end{macrocode}
+%
+% \subsubsection{The \Lpack{Float} Package}
+% 
+% If the \Lpack{float} package is loaded, we need to modify its wrapper
+% for \cmd{\@endfloatbox} so that \cmd{\listsubcaptions} is called before
+% finishing the float environment in order to get the page numbers right.
+%
+%    \begin{macrocode}
+  \@ifpackageloaded{float}{%
+    \let\sf@endfloatbox=\@endfloatbox
+    \def\@endfloatbox{%
+      \listsubcaptions
+      \sf@endfloatbox}%
+  }{}%
+%    \end{macrocode}
+%
+% \subsubsection{The \Lpack{Fixltx2e} Package}
+% \label{sec:endfloat}
+%
+% We also provide compatibility with the older \Lpack{fix2col} package
+% that the \Lpack{fixltx2e} package supersedes.  They assume that 
+% \cmd{\end@float} command begins with \cmd{\@endfloatbox} which may
+% be removed with a \cmd{\@gobble}; however, we redefine the 
+% \cmd{\@endfloatbox} making this untrue.  Therefore, we have to fix
+% this assumption if one or both of these packages are loaded.
+%
+%    \begin{macrocode}
+  \@ifpackageloaded{fixltx2e}{%
+    \def\end@dblfloat{%
+      \if@twocolumn
+        \@ifundefined{sf@counterlist}{}{%
+          \@for\sf@temp:=\sf@counterlist\do{%
+            \setcounter{\sf@temp}{\z@}}%
+          \@listsubcaptions{\@captype}}%
+        \@endfloatbox
+        \ifnum\@floatpenalty <\z@
+          \@largefloatcheck
+          \global\dp\@currbox1sp %
+          \expandafter\@gobble\sf@end@float
+        \fi
+      \else
+        \end@float
+      \fi}%
+  }{%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+    \@ifpackageloaded{fix2col}{%
+      \def\end@dblfloat{%
+        \if@twocolumn
+          \@ifundefined{sf@counterlist}{}{%
+            \@for\sf@temp:=\sf@counterlist\do{%
+              \setcounter{\sf@temp}{\z@}}%
+            \@listsubcaptions{\@captype}}%
+          \@endfloatbox
+          \ifnum\@floatpenalty <\z@
+            \@largefloatcheck
+            \global\dp\@currbox1sp %
+            \expandafter\@gobble\sf@end@float
+          \fi
+        \else
+          \end@float
+        \fi}}{}%
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\endinput
+%    \end{macrocode}
+%
+% \iffalse
+%</package>
+% \fi
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+% \Finale
