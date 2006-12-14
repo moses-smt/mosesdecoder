@@ -31,7 +31,7 @@ using namespace std;
 // static
 int Word::Compare(const Word &targetWord, const Word &sourceWord)
 {
-	for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++)
+	for (FactorType factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++)
 	{
 		const Factor *targetFactor		= targetWord[factorType]
 								,*sourceFactor	= sourceWord[factorType];
@@ -89,9 +89,8 @@ ostream& operator<<(ostream& out, const Word& word)
 
 	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
 	bool firstPass = true;
-	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+	for (FactorType factorType = 0 ; factorType < MAX_NUM_FACTORS ; ++factorType)
 	{
-		FactorType factorType = static_cast<FactorType>(currFactor);
 		const Factor *factor = word.GetFactor(factorType);
 		if (factor != NULL)
 		{

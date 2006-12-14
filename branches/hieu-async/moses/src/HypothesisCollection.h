@@ -37,8 +37,7 @@ class HypothesisRecombinationOrderer
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
 	{
-		/* compare using LM states, source completed bitmap, 
-		 * and other things too. 
+		/* compare using LM states
 		*/
 		int ret = hypoA->CompareLanguageModel(*hypoB);
 		if (ret != 0)

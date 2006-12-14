@@ -188,11 +188,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(size_t decodeStepId, con
 			TargetPhrase targetPhrase(Output);
 			Word &targetWord = targetPhrase.AddWord();
 						
-			for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+			for (FactorType factorType = 0 ; factorType < MAX_NUM_FACTORS ; ++factorType)
 			{
-				FactorType factorType = static_cast<FactorType>(currFactor);
-				
-				const Factor *sourceFactor = sourceWord[currFactor];
+				const Factor *sourceFactor = sourceWord[factorType];
 				if (sourceFactor == NULL)
 					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
 				else

@@ -248,10 +248,22 @@ int Hypothesis::CompareUnsyncFactors(const Hypothesis &compare) const
 		maxGap = (gapThis > maxGap) ? gapThis : maxGap;
 	}
 
+	// make sure factors are the same in both hypos
 	for (size_t gap = 0 ; gap < maxGap ; ++gap)
 	{
+		size_t posThis		= GetSize() - gap
+					,posCompare = compare.GetSize() - gap;
+
+		for (FactorType factorType = 0 ; factorType < StaticData::Instance()->GetMaxNumFactors(Output) ; ++factorType)
+		{
+			const Factor *factorThis		= GetFactor(posThis, factorType)
+									,*factorCompare	= compare.GetFactor(posCompare, factorType);
+			if (factorThis != factorCompare)
+				return (factorThis < factorCompare) ? -1 : +1;
+		}		
 	}
 
+	// same
 	return 0;
 }
 

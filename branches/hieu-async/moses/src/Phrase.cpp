@@ -122,9 +122,8 @@ void Phrase::MergeFactors(const Phrase &copy)
 	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
-		for (unsigned int currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
+		for (FactorType factorType = 0 ; factorType < maxNumFactors ; factorType++)
 		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
 			const Factor *factor = copy.GetFactor(currPos, factorType);
 			if (factor != NULL)
 				SetFactor(currPos, factorType, factor);
@@ -273,10 +272,8 @@ bool Phrase::operator < (const Phrase &compare) const
 
 		const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
 		// taken from word.Compare()
-		for (size_t i = 0 ; i < maxNumFactors ; i++)
+		for (FactorType factorType = 0 ; factorType < maxNumFactors ; ++factorType)
 		{
-			FactorType factorType = static_cast<FactorType>(i);
-
 			for (size_t currPos = 0 ; currPos < minSize ; currPos++)
 			{
 				const Factor *thisFactor		= GetFactor(currPos, factorType)
@@ -351,9 +348,8 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
-		for (size_t currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
+		for (FactorType factorType = 0 ; factorType < maxNumFactors ; ++factorType)
 		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
 			const Factor *thisFactor 		= GetFactor(currPos, factorType)
 									,*inputFactor	= inputPhrase.GetFactor(currPos, factorType);
 			if (thisFactor != NULL && inputFactor != NULL && thisFactor != inputFactor)
