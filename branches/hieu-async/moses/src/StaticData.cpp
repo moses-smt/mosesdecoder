@@ -551,7 +551,6 @@ bool StaticData::LoadPhraseTables()
 
 		const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
 		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
-		//TRACE_ERR("ttable-limits: ";copy(maxTargetPhrase.begin(),maxTargetPhrase.end(),ostream_iterator<size_t>(cerr," "));cerr<<"\n");
 
 		size_t index = 0;
 		size_t weightAllOffset = 0;

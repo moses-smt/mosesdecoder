@@ -26,6 +26,7 @@ using namespace std;
 
 LatticePath::LatticePath(const Hypothesis *hypo)
 :	m_prevEdgeChanged(NOT_FOUND)
+, m_targetPhrase(hypo->GetTargetPhrase())
 {
 	m_scoreBreakdown					= hypo->GetScoreBreakdown();
 	m_totalScore = hypo->GetTotalScore();
@@ -39,7 +40,8 @@ LatticePath::LatticePath(const Hypothesis *hypo)
 }
 
 LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc)
-:m_prevEdgeChanged(edgeIndex)
+: m_prevEdgeChanged(edgeIndex)
+, m_targetPhrase(copy.m_targetPhrase)
 {
 	for (size_t currEdge = 0 ; currEdge < edgeIndex ; currEdge++)
 	{ // copy path from parent
@@ -54,6 +56,12 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypoth
 	while (prevHypo != NULL)
 	{
 		m_path.push_back(prevHypo);
+
+		// update target phrase
+		const WordsRange &currTargetRange = prevHypo->GetCurrTargetWordsRange();
+		const Phrase &currTargetPhrase = prevHypo->GetCurrTargetPhrase();
+		m_targetPhrase.MergeFactors(currTargetPhrase, currTargetRange);
+
 		prevHypo = prevHypo->GetPrevHypo();
 	}
 

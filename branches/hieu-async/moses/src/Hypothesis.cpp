@@ -231,6 +231,12 @@ int Hypothesis::CompareUnsyncFactors(const Hypothesis &compare) const
 {
 	const Phrase &phraseThis		= GetTargetPhrase()
 							,&phraseCompare = compare.GetTargetPhrase();
+
+	if (phraseThis.GetSize() != phraseCompare.GetSize())
+	{ // need to do this otherwise n-best list generation get ugly
+		return phraseThis.GetSize() < phraseCompare.GetSize();
+	}
+
 	size_t	maxGap = 0;
 
 	// find starting pos

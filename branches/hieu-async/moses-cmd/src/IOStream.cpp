@@ -185,11 +185,7 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 
 		// print the surface factor of the translation
 		m_nBestFile << translationId << " ||| ";
-		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
-		{
-			const Hypothesis &edge = *edges[currEdge];
-			OutputSurface(m_nBestFile, edge.GetCurrTargetPhrase(), m_outputFactorOrder);
-		}
+		OutputSurface(m_nBestFile, path.GetTargetPhrase(), m_outputFactorOrder);
 		m_nBestFile << " ||| ";
 
 		// print the scores in a hardwired order

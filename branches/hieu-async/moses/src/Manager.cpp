@@ -100,8 +100,8 @@ void Manager::ProcessSentence()
 		//OutputHypoStackSize();
 	}
 
-	//OutputHypoStack();
-	OutputHypoStackSize();
+	//OutputHypoStack(3);
+	//OutputHypoStackSize();
 
 	// some more logging
 	VERBOSE(2,m_staticData.GetSentenceStats());
@@ -238,7 +238,6 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	// create hypothesis and calculate all its scores
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
 	newHypo->CalcScore(m_staticData, m_transOptColl->GetFutureScoreObject());
-	
 	// logging for the curious
 	IFVERBOSE(3) {
 	  newHypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
@@ -293,20 +292,17 @@ void Manager::OutputHypoStack(int stack)
 		}
 	}
 }
-void getSurfacePhrase(std::vector<size_t>& tphrase,LatticePath const& path)
+void GetSurfacePhrase(std::vector<size_t>& tphrase, LatticePath const& path)
 {
 	tphrase.clear();
-	const std::vector<const Hypothesis *> &edges = path.GetEdges();
-	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
-		{
-			const Phrase &phrase = edges[currEdge]->GetCurrTargetPhrase();
-			for (size_t pos=0,size=phrase.GetSize() ; pos < size ; ++pos)
-				{
-					const Factor *factor = phrase.GetFactor(pos,0);
-					assert(factor);
-					tphrase.push_back(factor->GetId());
-				}
-		}
+	const Phrase &targetPhrase = path.GetTargetPhrase();
+
+	for (size_t pos = 0 ; pos < targetPhrase.GetSize() ; ++pos)
+	{
+		const Factor *factor = targetPhrase.GetFactor(pos, 0);
+		assert(factor);
+		tphrase.push_back(factor->GetId());
+	}
 }
 
 /**
@@ -354,7 +350,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 			// output phrase can't be assumed to only contain factor 0.
 			// have to look in StaticData.GetOutputFactorOrder() to find out what output factors should be
 			std::vector<size_t> tgtPhrase;
-			getSurfacePhrase(tgtPhrase,*path);
+			GetSurfacePhrase(tgtPhrase,*path);
 			addPath = distinctHyps.insert(tgtPhrase).second;
 		}
 		
@@ -362,6 +358,8 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 		{	// create deviations from current best
 			path->CreateDeviantPaths(contenders);		
 		}
+		else
+			delete path;
 
 		contenders.Detach(contenders.begin());
 	}
