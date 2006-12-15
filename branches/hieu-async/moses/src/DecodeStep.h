@@ -110,11 +110,4 @@ public:
 	/** returns dictionary in abstract class */
 	const Dictionary* GetDictionaryPtr() const {return m_ptr;}
 
-	/** Given an input TranslationOption, extend it in some way (put results in outputPartialTranslOptColl) */
-  virtual void Process(const TranslationOption &inputPartialTranslOpt
-                              , PartialTranslOptColl &outputPartialTranslOptColl
-                              , FactorCollection &factorCollection
-															, TranslationOptionCollection *toc
-															, bool adhereTableLimit) const = 0;
-
 };

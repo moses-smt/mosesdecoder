@@ -354,7 +354,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	PartialTranslOptColl transOptColl;
 	
 	// initial translation step
-	static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation(m_source, factorCollection
+	static_cast<const DecodeStepTranslation&>(decodeStep).Process(m_source, factorCollection
 														, transOptColl, startPos, endPos, adhereTableLimit );
 
 	// add to fully formed translation option list

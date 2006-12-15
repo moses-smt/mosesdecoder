@@ -236,8 +236,8 @@ int Hypothesis::CompareUnsyncFactors(const Hypothesis &compare) const
 	// find starting pos
 	for (FactorType factorType = 0 ; factorType < StaticData::Instance()->GetMaxNumFactors(Output) ; ++factorType)
 	{
-		size_t gapThis		= GetSize()					- phraseThis.FindFirstGap(factorType)
-					,gapCompare	= compare.GetSize() - phraseCompare.FindFirstGap(factorType);
+		size_t gapThis		= phraseThis.GetSize()					- phraseThis.FindFirstGap(factorType)
+					,gapCompare	= phraseCompare.GetSize() - phraseCompare.FindFirstGap(factorType);
 		
 		// both hypo must have the same number of factors missing
 		if ( gapThis != gapCompare)
@@ -251,8 +251,8 @@ int Hypothesis::CompareUnsyncFactors(const Hypothesis &compare) const
 	// make sure factors are the same in both hypos
 	for (size_t gap = 0 ; gap < maxGap ; ++gap)
 	{
-		size_t posThis		= GetSize() - gap
-					,posCompare = compare.GetSize() - gap;
+		size_t posThis		= phraseThis.GetSize() - gap
+					,posCompare = phraseCompare.GetSize() - gap;
 
 		for (FactorType factorType = 0 ; factorType < StaticData::Instance()->GetMaxNumFactors(Output) ; ++factorType)
 		{

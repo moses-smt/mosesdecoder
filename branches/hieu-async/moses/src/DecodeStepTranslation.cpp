@@ -47,7 +47,7 @@ TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOpti
   return newTransOpt;
 }
 
-void DecodeStepTranslation::ProcessInitialTranslation(const InputType &source
+void DecodeStepTranslation::Process(const InputType &source
 															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos
@@ -76,51 +76,5 @@ void DecodeStepTranslation::ProcessInitialTranslation(const InputType &source
 		}
 		VERBOSE(3,endl);
 	}
-}
-
-void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
-                              , PartialTranslOptColl &outputPartialTranslOptColl
-                              , FactorCollection &factorCollection
-                              , TranslationOptionCollection *toc
-                              , bool adhereTableLimit) const
-{
-  if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
-    { // word deletion
-
-      outputPartialTranslOptColl.Add(new TranslationOption(inputPartialTranslOpt));
-
-      return;
-    }
-
-  // normal trans step
-  const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
-  const PhraseDictionary &phraseDictionary  = GetPhraseDictionary();
-	const size_t currSize = inputPartialTranslOpt.GetTargetPhrase().GetSize();
-	const size_t tableLimit = phraseDictionary.GetTableLimit();
-	
-  const TargetPhraseCollection *phraseColl= phraseDictionary.GetTargetPhraseCollection(toc->GetSource(),sourceWordsRange);
-
-  if (phraseColl != NULL)
-    {
-      TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
-		 	iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
-			
-      for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase)
-        {
-          const TargetPhrase& targetPhrase = **iterTargetPhrase;
-					// skip if the 
-					if (targetPhrase.GetSize() != currSize) continue;
-
-          TranslationOption *newTransOpt = MergeTranslation(inputPartialTranslOpt, targetPhrase);
-          if (newTransOpt != NULL)
-            {
-              outputPartialTranslOptColl.Add( newTransOpt );
-            }
-        }
-    }
-  else if (sourceWordsRange.GetNumWordsCovered() == 1)
-    { // unknown handler
-      //toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
-    }
 }
 
