@@ -67,13 +67,14 @@ Manager::~Manager()
 void Manager::ProcessSentence()
 {	
 	m_staticData.ResetSentenceStats(m_source);
-	list < DecodeStep* > &decodeStepList = m_staticData.GetDecodeStepList();
+	vector < list < DecodeStep* > * >&decodeStepVL = m_staticData.GetDecodeStepVL();
+	
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
-	m_possibleTranslations->CreateTranslationOptions(decodeStepList
+	m_possibleTranslations->CreateTranslationOptions(decodeStepVL
   														, m_staticData.GetFactorCollection());
 
 	// initial seed hypothesis: nothing translated, no words produced

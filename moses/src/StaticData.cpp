@@ -234,7 +234,29 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_phraseDictionary);
 	RemoveAllInColl(m_generationDictionary);
 	RemoveAllInColl(m_languageModel);
-	RemoveAllInColl(m_decodeStepList);
+	//need to delete lists within vector as well 
+	while (! m_decodeStepVL.empty() )
+	{
+			list <DecodeStep *> * ptrList = m_decodeStepVL.back();
+			m_decodeStepVL.pop_back();
+			while( ! ptrList->empty() ) 
+			{
+				 DecodeStep * ptrDecodeStep = ptrList->back();
+				 ptrList->pop_back();
+				 if (ptrDecodeStep != NULL) 
+				 {
+					 delete ptrDecodeStep;
+					 ptrDecodeStep = NULL;
+				 }
+			}
+			//cout << "list size " << ptrList->size() << endl;
+			if (ptrList != NULL) 
+			{
+				delete ptrList;
+				ptrList = NULL;
+			}
+	}
+
 	RemoveAllInColl(m_reorderModels);
 	
 	// small score producers
@@ -463,12 +485,12 @@ bool StaticData::LoadGenerationTables()
 		const vector<string> &generationVector = m_parameter->GetParam("generation-file");
 		const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-generation"));
 
-		TRACE_ERR( "weight-generation: ");
-		for (size_t i = 0 ; i < weight.size() ; i++)
-		{
-				TRACE_ERR( weight[i] << "\t");
-		}
-		TRACE_ERR( endl);
+		//TRACE_ERR( "weight-generation: ");
+		//for (size_t i = 0 ; i < weight.size() ; i++)
+		//{
+		//		TRACE_ERR( weight[i] << "\t");
+		//}
+		//TRACE_ERR( endl);
 		size_t currWeightNum = 0;
 		
 		for(size_t currDict = 0 ; currDict < generationVector.size(); currDict++) 
@@ -543,9 +565,9 @@ bool StaticData::LoadPhraseTables()
 		//TRACE_ERR("weight-t: ");
 		//for (size_t i = 0 ; i < weightAll.size() ; i++)
 		//{
-		//		TRACE_ERR(weightAll[i] << "\t");
+				//TRACE_ERR(weightAll[i] << "\t");
 		//}
-		//TRACE_ERR( endl;
+		//TRACE_ERR( endl);
 
 		const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
 		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
@@ -649,48 +671,72 @@ bool StaticData::LoadMapping()
 	// mapping
 	const vector<string> &mappingVector = m_parameter->GetParam("mapping");
 	DecodeStep *prev = 0;
+	size_t previousVectorList = 0;
 	for(size_t i=0; i<mappingVector.size(); i++) 
 	{
 		vector<string>	token		= Tokenize(mappingVector[i]);
+		size_t vectorList;
+		DecodeType decodeType;
+		size_t index;
 		if (token.size() == 2) 
 		{
-			DecodeType decodeType = token[0] == "T" ? Translate : Generate;
-			size_t index = Scan<size_t>(token[1]);
-			DecodeStep* decodeStep = 0;
-			switch (decodeType) {
-				case Translate:
-					if(index>=m_phraseDictionary.size())
-						{
-							stringstream strme;
-							strme << "No phrase dictionary with index "
-										<< index << " available!";
-							UserMessage::Add(strme.str());
-							return false;
-						}
-					decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev);
-				break;
-				case Generate:
-					if(index>=m_generationDictionary.size())
-						{
-							stringstream strme;
-							strme << "No generation dictionary with index "
-										<< index << " available!";
-							UserMessage::Add(strme.str());
-							return false;
-						}
-					decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev);
-				break;
-				case InsertNullFertilityWord:
-					assert(!"Please implement NullFertilityInsertion.");
-				break;
-			}
-			assert(decodeStep);
-			m_decodeStepList.push_back(decodeStep);
-			prev = decodeStep;
-		} else {
+		  vectorList = 0;
+			decodeType = token[0] == "T" ? Translate : Generate;
+			index = Scan<size_t>(token[1]);
+		}
+		//Smoothing
+		else if (token.size() == 3) 
+		{
+		  vectorList = Scan<size_t>(token[0]);
+			//the vectorList index can only increment by one 
+			assert(vectorList == previousVectorList || vectorList == previousVectorList + 1);
+			decodeType = token[1] == "T" ? Translate : Generate;
+			index = Scan<size_t>(token[2]);
+		}		 
+		else 
+		{
 			UserMessage::Add("Malformed mapping!");
 			return false;
 		}
+		
+		DecodeStep* decodeStep = 0;
+		switch (decodeType) {
+			case Translate:
+				if(index>=m_phraseDictionary.size())
+					{
+						stringstream strme;
+						strme << "No phrase dictionary with index "
+									<< index << " available!";
+						UserMessage::Add(strme.str());
+						return false;
+					}
+				decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev);
+			break;
+			case Generate:
+				if(index>=m_generationDictionary.size())
+					{
+						stringstream strme;
+						strme << "No generation dictionary with index "
+									<< index << " available!";
+						UserMessage::Add(strme.str());
+						return false;
+					}
+				decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev);
+			break;
+			case InsertNullFertilityWord:
+				assert(!"Please implement NullFertilityInsertion.");
+			break;
+		}
+		assert(decodeStep);
+		list < DecodeStep *> * decodeList=NULL;
+		if (m_decodeStepVL.size() < vectorList + 1) 
+		{
+		  decodeList = new list < DecodeStep *>;
+			m_decodeStepVL.push_back(decodeList);
+		}
+		m_decodeStepVL[vectorList]->push_back(decodeStep);
+		prev = decodeStep;
+		previousVectorList = vectorList;
 	}
 	
 	return true;

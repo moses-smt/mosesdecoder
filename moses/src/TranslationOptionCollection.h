@@ -75,7 +75,7 @@ protected:
 															, size_t startPos, size_t endPos, bool adhereTableLimit );
 
 	//! Force a creation of a translation option where there are none for a particular source position.
-	void ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection);
+	void ProcessUnknownWord(const std::vector < std::list < DecodeStep* > *> &decodeStepVL, FactorCollection &factorCollection);
 	//! special handling of ONE unknown words.
 	virtual void ProcessOneUnknownWord(const Word &sourceWord
 																		 , size_t sourcePos
@@ -105,10 +105,10 @@ public:
 	const InputType& GetSource() const { return m_source; }
 
 	//! get length/size of source input
-	size_t GetSize() const;
+	size_t GetSize() const { return m_source.GetSize(); };
 
 	//! Create all possible translations from the phrase tables
-	virtual void CreateTranslationOptions(const std::list < DecodeStep* > &decodeStepList
+	virtual void CreateTranslationOptions(const std::vector < std::list < DecodeStep* > * > &decodeStepVL
 																			, FactorCollection &factorCollection);
 	//! Create translation options that exactly cover a specific input span. 
 	virtual void CreateTranslationOptionsForRange(const std::list < DecodeStep* > &decodeStepList
@@ -132,21 +132,4 @@ public:
 	TO_STRING();		
 };
 
-inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
-{
-  std::vector< std::vector< TranslationOptionList > >::const_iterator i = coll.m_collection.begin();
-	size_t j = 0;
-	for (; i!=coll.m_collection.end(); ++i) {
-    out << "s[" << j++ << "].size=" << i->size() << std::endl;
-	}
-
-	/*
-	TranslationOptionCollection::const_iterator iter;
-	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
-	{
-		TRACE_ERR (*iter << std::endl);
-	}	
-	*/
-	return out;
-}
 
