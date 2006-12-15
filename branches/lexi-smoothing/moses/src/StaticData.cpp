@@ -690,6 +690,10 @@ bool StaticData::LoadMapping()
 		  vectorList = Scan<size_t>(token[0]);
 			//the vectorList index can only increment by one 
 			assert(vectorList == previousVectorList || vectorList == previousVectorList + 1);
+      if (vectorList > previousVectorList) 
+      {
+        prev = NULL;
+      }
 			decodeType = token[1] == "T" ? Translate : Generate;
 			index = Scan<size_t>(token[2]);
 		}		 
