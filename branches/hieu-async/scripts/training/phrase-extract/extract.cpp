@@ -1,4 +1,3 @@
-using namespace std;
 
 #include <cstdio>
 #include <iostream>
@@ -7,6 +6,9 @@ using namespace std;
 #include <string>
 #include <stdlib.h>
 #include <assert.h>
+#include <time.h>
+
+using namespace std;
 
 #define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) {_IS.getline(_LINE, _SIZE, _DELIM); if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear();}
 #define LINE_MAX_LENGTH 10000

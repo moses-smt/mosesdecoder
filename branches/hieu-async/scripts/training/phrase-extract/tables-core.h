@@ -1,8 +1,6 @@
 #ifndef _TABLES_H
 #define _TABLES_H
 
-using namespace std;
-
 #include <iostream>
 #include <fstream>
 #include <assert.h>
@@ -11,6 +9,8 @@ using namespace std;
 #include <queue>
 #include <map>
 #include <cmath>
+
+using namespace std;
 
 vector<string> tokenize( char[] );
 
