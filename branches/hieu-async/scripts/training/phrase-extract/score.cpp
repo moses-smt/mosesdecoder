@@ -1,5 +1,3 @@
-using namespace std;
-
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -7,8 +5,11 @@ using namespace std;
 #include <string>
 #include <stdlib.h>
 #include <assert.h>
+#include <time.h>
 
 #include "tables-core.h"
+
+using namespace std;
 
 #define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) {_IS.getline(_LINE, _SIZE, _DELIM); if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear();}
 #define LINE_MAX_LENGTH 10000
@@ -76,7 +77,7 @@ int main(int argc, char* argv[])
     cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
     exit(1);
   }
-  istream *extractFileP = &extractFile;
+  istream &extractFileP = extractFile;
 
   // output file: phrase translation table
   phraseTableFile.open(fileNamePhraseTable);
@@ -92,12 +93,12 @@ int main(int argc, char* argv[])
   int i=0;
   int fileCount = 0;
   while(true) {
-    if (extractFileP->eof()) break;
+    if (extractFileP.eof()) break;
     if (++i % 100000 == 0) cerr << "." << flush;
     char line[LINE_MAX_LENGTH];    
-    SAFE_GETLINE((*extractFileP), line, LINE_MAX_LENGTH, '\n');
+    SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n');
     //    if (fileCount>0)
-    if (extractFileP->eof()) break;
+    if (extractFileP.eof()) break;
     PhraseAlignment phrasePair;
     phrasePair.create( line, i );
     if (lastForeign >= 0 && lastForeign != phrasePair.foreign) {
@@ -115,6 +116,17 @@ int main(int argc, char* argv[])
   }
   processPhrasePairs( phrasePairsWithSameF );
   phraseTableFile.close();
+}
+
+void outputAlignment(const vector<int> &alignmentInfo)
+{
+	phraseTableFile << "|";
+	if (alignmentInfo.size() > 0)
+		phraseTableFile << alignmentInfo[0];
+	for (size_t pos = 1 ; pos < alignmentInfo.size() ; ++pos)
+	{
+		phraseTableFile << "," << alignmentInfo[pos];
+	}
 }
 
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
@@ -178,22 +190,40 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
     // foreign phrase (unless inverse)
     if (! inverseFlag) {
       for(int j=0;j<phraseF.size();j++)
-	phraseTableFile << vcbF.getWord( phraseF[j] ) << " ";
+			{
+				phraseTableFile << vcbF.getWord( phraseF[j] );
+				cerr << vcbF.getWord( phraseF[j] ) << flush;
+				// output alignment
+				outputAlignment(phrasePair[0].alignedToF[j]);
+				phraseTableFile << " ";
+			}
       phraseTableFile << "||| ";
-    }
+		}
 
     // english phrase
     PHRASE phraseE = phraseTableE.getPhrase( i->first );
     for(int j=0;j<phraseE.size();j++)
-      phraseTableFile << vcbE.getWord( phraseE[j] ) << " ";
+		{
+      phraseTableFile << vcbE.getWord( phraseE[j] );
+			cerr << vcbE.getWord( phraseE[j] ) << flush;
+			// output alignment
+			outputAlignment(phrasePair[ i->first ].alignedToE[j]);
+			phraseTableFile << " ";
+		}
     phraseTableFile << "||| ";
 
     // foreign phrase (if inverse)
     if (inverseFlag) {
       for(int j=0;j<phraseF.size();j++)
-	phraseTableFile << vcbF.getWord( phraseF[j] ) << " ";
+			{
+				phraseTableFile << vcbF.getWord( phraseF[j] );
+				cerr << vcbF.getWord( phraseF[j] ) << flush;
+				// output alignment
+				outputAlignment(phrasePair[0].alignedToF[j]);
+				phraseTableFile << " ";
+			}
       phraseTableFile << "||| ";
-    }
+		}
  
     // phrase translation probability
     phraseTableFile << ((double) i->second / (double) phrasePair.size());
