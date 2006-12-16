@@ -85,7 +85,7 @@ my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
 my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
-my $queue_flags = "-l ws06ossmt=true -l mem_free=0.5G -hard";  # extra parameters for parallelizer
+my $queue_flags = "-l mem_free=0.5G -hard";  # extra parameters for parallelizer
       # the -l ws0ssmt is relevant only to JHU workshop
 my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
@@ -180,9 +180,9 @@ Options:
   --mosesparallelcmd=STRING ... use a different script instead of moses-parallel
   --queue-flags=STRING  ... anything you with to pass to 
               qsub, eg. '-l ws06osssmt=true'
-              The default is to submit the jobs to the ws06ossmt queue, which
-              makes sense only at JHU. To reset the default JHU queue
-              parameters, please use \"--queue-flags=' '\" (i.e. a space between
+              The default is 
+								-l mem_free=0.5G -hard
+              To reset the parameters, please use \"--queue-flags=' '\" (i.e. a space between
               the quotes).
   --decoder-flags=STRING ... extra parameters for the decoder
   --lambdas=STRING  ... default values and ranges for lambdas, a complex string
