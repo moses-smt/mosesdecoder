@@ -64,8 +64,7 @@ public:
 									, const std::vector<FactorType> &output
 									, FactorCollection &factorCollection
 									, const std::string &filePath
-									, FactorDirection direction
-									, bool forceSingleFeatureValue);
+									, FactorDirection direction);
 
 	size_t GetNumScoreComponents() const;
 	const std::string GetScoreProducerDescription(int idx = 0) const;

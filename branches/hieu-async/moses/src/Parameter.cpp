@@ -241,8 +241,8 @@ bool Parameter::Validate()
 			noErrorFlag = FilesExist("ttable-file", 3,ext);
 		}
 	// generation tables
-	//	if (noErrorFlag)
-	//		noErrorFlag = FilesExist("generation-file", 2);
+	if (noErrorFlag)
+		noErrorFlag = FilesExist("generation-file", 3);
 	// language model
 	if (noErrorFlag)
 		noErrorFlag = FilesExist("lmodel-file", 3);

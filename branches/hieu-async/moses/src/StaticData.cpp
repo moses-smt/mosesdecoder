@@ -476,18 +476,14 @@ bool StaticData::LoadGenerationTables()
 		for(size_t currDict = 0 ; currDict < generationVector.size(); currDict++) 
 		{
 			vector<string>			token		= Tokenize(generationVector[currDict]);
-			bool oldFormat = (token.size() == 3);
 			vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
 													,output	= Tokenize<FactorType>(token[1], ",");
       m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], input, output);
 			string							filePath;
 			size_t							numFeatures = 1;
-			if (oldFormat)
-				filePath = token[2];
-			else {
-				numFeatures = Scan<size_t>(token[2]);
-				filePath = token[3];
-			}
+			numFeatures = Scan<size_t>(token[2]);
+			filePath = token[3];
+			
 			if (!FileExists(filePath))
 			{
 				stringstream strme;
@@ -497,13 +493,6 @@ bool StaticData::LoadGenerationTables()
 			}
 
 			TRACE_ERR( filePath << endl);
-			if (oldFormat) {
-				TRACE_ERR( "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
-				             "  [WARNING] config file contains old style generation config format.\n"
-				             "  Only the first feature value will be read.  Please use the 4-format\n"
-				             "  form (similar to the phrase table spec) to specify the # of features.\n"
-				             "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-			}
 
 			m_generationDictionary.push_back(new GenerationDictionary(numFeatures));
 			assert(m_generationDictionary.back() && "could not create GenerationDictionary");
@@ -512,7 +501,7 @@ bool StaticData::LoadGenerationTables()
 																		, m_factorCollection
 																		, filePath
 																		, Output				// always target, should we allow source?
-																		, oldFormat))
+																		))
 			{
 				delete m_generationDictionary.back();
 				return false;
