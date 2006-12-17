@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
+#include "PhraseAlignment.h"
 
 using namespace std;
 
@@ -61,7 +62,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	ofstream tempFile;
 	string tempFilePath;
 
-	vector< vector<string> >	phraseVector;
 	string line, prevSourcePhrase = "";
 	size_t count = 0;
   size_t line_num = 0;
@@ -84,8 +84,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		}
 
 		const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
-		if (tokens[0] != prevSourcePhrase)
-			phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
+		
+		// only have to recreate source phrase if different from prev
+		//if (tokens[0] != prevSourcePhrase)
+		//	phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
 
 		vector<float> scoreVector = Tokenize<float>(tokens[2]);
 		if (scoreVector.size() != m_numScoreComponent) 
@@ -97,12 +99,25 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		}
 //		assert(scoreVector.size() == m_numScoreComponent);
 			
+		// alignment info
+		PhraseAlignment phraseAlignment;
+
 		// source
 		Phrase sourcePhrase(Input);
-		sourcePhrase.CreateFromString( input, phraseVector, factorCollection);
+		sourcePhrase.CreateFromString( input
+																, tokens[0]
+																, factorCollection
+																, factorDelimiter
+																, &phraseAlignment.GetInserter(Input));
+
 		//target
 		TargetPhrase targetPhrase(Output);
-		targetPhrase.CreateFromString( output, tokens[1], factorCollection, factorDelimiter);
+		targetPhrase.CreateFromString( output
+																, tokens[1]
+																, factorCollection
+																, factorDelimiter
+																, &phraseAlignment.GetInserter(Output));
+		cerr << endl << sourcePhrase << endl << targetPhrase << endl << phraseAlignment << endl;
 
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());

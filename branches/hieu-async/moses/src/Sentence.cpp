@@ -37,7 +37,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
 			line = Trim(line);
 		} while (line == "");
 	
-	Phrase::CreateFromString(factorOrder, line, factorCollection, factorDelimiter);
+	Phrase::CreateFromString(factorOrder, line, factorCollection, factorDelimiter, NULL);
 	return 1;
 }
 
