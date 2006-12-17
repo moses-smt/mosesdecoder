@@ -99,8 +99,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		}
 //		assert(scoreVector.size() == m_numScoreComponent);
 			
+		TargetPhrase targetPhrase(Output);
+
 		// alignment info
-		PhraseAlignment phraseAlignment;
+		PhraseAlignment &phraseAlignment = targetPhrase.GetPhraseAlignment();
 
 		// source
 		Phrase sourcePhrase(Input);
@@ -111,7 +113,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																, &phraseAlignment.GetInserter(Input));
 
 		//target
-		TargetPhrase targetPhrase(Output);
 		targetPhrase.CreateFromString( output
 																, tokens[1]
 																, factorCollection

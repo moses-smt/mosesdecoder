@@ -24,20 +24,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
+#include "PhraseAlignment.h"
 
 class LMList;
 class PhraseDictionary;
 class GenerationDictionary;
 class ScoreProducer;
 
-/** represents an entry on the target side of a phrase table (scores, translation)
+/** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
 class TargetPhrase: public Phrase
 {
 	friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
 	float m_transScore, m_ngramScore, m_fullScore;
-	ScoreComponentCollection m_scoreBreakdown;
+	ScoreComponentCollection	m_scoreBreakdown;
+	PhraseAlignment						m_phraseAlignment;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
@@ -99,6 +101,15 @@ public:
 	Phrase const* GetSourcePhrase() const 
 	{
 		return m_sourcePhrase;
+	}
+
+	PhraseAlignment &GetPhraseAlignment()
+	{
+		return m_phraseAlignment;
+	}
+	const PhraseAlignment &GetPhraseAlignment() const
+	{
+		return m_phraseAlignment;
 	}
 
 	TO_STRING();

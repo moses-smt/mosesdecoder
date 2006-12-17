@@ -31,8 +31,10 @@ using namespace std;
 
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase)
-	: m_targetPhrase(targetPhrase),m_sourcePhrase(targetPhrase.GetSourcePhrase())
-	,m_sourceWordsRange	(wordsRange)
+	: m_targetPhrase(targetPhrase)
+	, m_sourcePhrase(targetPhrase.GetSourcePhrase())
+	, m_sourceWordsRange	(wordsRange)
+	, m_phraseAlignment(targetPhrase.GetPhraseAlignment())
 {
 	// set score
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
@@ -40,9 +42,10 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/)
-: m_targetPhrase(targetPhrase)
-,m_sourceWordsRange	(wordsRange)
-,m_futureScore(0)
+	: m_targetPhrase(targetPhrase)
+	, m_sourceWordsRange(wordsRange)
+	, m_futureScore(0)
+	, m_phraseAlignment(targetPhrase.GetPhraseAlignment())
 {
 	const UnknownWordPenaltyProducer *up = StaticData::Instance()->GetUnknownWordPenaltyProducer();
 	const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works

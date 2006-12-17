@@ -30,6 +30,7 @@ typedef std::vector<size_t> AlignVec;
 typedef std::vector<AlignVec> PhraseAlignVec;
 typedef std::back_insert_iterator<PhraseAlignVec> AlignInserter;
 
+/** represent the alignment info between source and target phrase */
 class PhraseAlignment
 {
 	friend std::ostream& operator<<(std::ostream&, const PhraseAlignment&);
@@ -40,6 +41,10 @@ protected:
 public:
 	PhraseAlignment()
 	{}
+
+	/** get the back_insert_iterator to the source or target alignment vector so that
+		*	they could be populated
+		*/
 	AlignInserter GetInserter(FactorDirection direction);
 
 	TO_STRING();

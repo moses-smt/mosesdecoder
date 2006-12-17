@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
+#include "PhraseAlignment.h"
 
 class PhraseDictionary;
 class GenerationDictionary;
@@ -59,6 +60,7 @@ protected:
 	Phrase 							m_targetPhrase; /*< output phrase when using this translation option */
 	Phrase const*       m_sourcePhrase; /*< input phrase translated by this */
 	const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
+	PhraseAlignment			m_phraseAlignment; /*< alignment info between source and target phrase */
 	float								m_totalScore; /*< weighted translation costs of this translation option */
 	float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 	float               m_partialScore; /*< estimate of the partial cost of a preliminary translation option */
@@ -74,9 +76,6 @@ public:
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase);
 	/** constructor. Used to create trans opt from unknown word */
 	TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int);
-
-	/** used by initial translation step */
-	TranslationOption(const TranslationOption &copy, const TargetPhrase &targetPhrase);
 
 	/** returns true if all feature types in featuresToCheck are compatible between the two phrases */
 	bool IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const;
