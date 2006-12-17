@@ -11,10 +11,10 @@
 #include "ScoreProducer.h"
 #include "ScoreComponentCollection.h" // debugging
 
-void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
+void ScoreIndexManager::AddScoreProducer(ScoreProducer* sp)
 {
 	// Producers must be inserted in the order they are created
-	const_cast<ScoreProducer*>(sp)->CreateScoreBookkeepingID();
+	sp->CreateScoreBookkeepingID();
   assert(m_begins.size() == (sp->GetScoreBookkeepingID()));
   
 	m_producers.push_back(sp);

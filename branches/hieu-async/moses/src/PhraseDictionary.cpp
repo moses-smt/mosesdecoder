@@ -24,10 +24,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "InputType.h"
 
-PhraseDictionary::PhraseDictionary(size_t numScoreComponent)
+PhraseDictionary::PhraseDictionary(size_t numScoreComponent, ScoreIndexManager &scoreIndexManager)
 	: Dictionary(numScoreComponent),m_tableLimit(0)
 {
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	scoreIndexManager.AddScoreProducer(this);
 }
 
 PhraseDictionary::~PhraseDictionary() {}

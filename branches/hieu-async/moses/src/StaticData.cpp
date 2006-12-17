@@ -164,13 +164,13 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
 	m_weightUnknownWord				= 1; // do we want to let mert decide weight for this ??
 
-	m_distortionScoreProducer = new DistortionScoreProducer;
+	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightDistortion);
 
-	m_wpProducer = new WordPenaltyProducer;
+	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightWordPenalty);
 
-	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
+	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightUnknownWord);
 
 	// misc
@@ -393,7 +393,14 @@ bool StaticData::LoadLexicalReorderingModel()
 		// loading the file
 		std::string	filePath= specification[3];
 		PrintUserTime(string("Start loading distortion table ") + filePath);
-		m_reorderModels.push_back(new LexicalReordering(filePath, orientation, direction, condition, m_lexWeights, input, output));
+		m_reorderModels.push_back(new LexicalReordering(filePath
+																									, orientation
+																									, direction
+																									, condition
+																									, m_lexWeights
+																									, input
+																									, output
+																									, m_scoreIndexManager));
 	}
 	
 	return true;
@@ -495,7 +502,7 @@ bool StaticData::LoadGenerationTables()
 
 			TRACE_ERR( filePath << endl);
 
-			m_generationDictionary.push_back(new GenerationDictionary(numFeatures));
+			m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager));
 			assert(m_generationDictionary.back() && "could not create GenerationDictionary");
 			if (!m_generationDictionary.back()->Load(input
 																		, output
@@ -596,7 +603,7 @@ bool StaticData::LoadPhraseTables()
 			if (!FileExists(filePath+".binphr.idx"))
 			{					
 				VERBOSE(2,"using standard phrase tables");
-				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent);
+				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent, m_scoreIndexManager);
 				if (!pd->Load(input
 								 , output
 								 , m_factorCollection
@@ -615,7 +622,10 @@ bool StaticData::LoadPhraseTables()
 			else 
 			{
 				TRACE_ERR( "using binary phrase tables for idx "<<currDict<<"\n");
-				PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent,(currDict==0 ? m_numInputScores : 0));
+				PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(
+																									numScoreComponent
+																									,(currDict==0 ? m_numInputScores : 0)
+																									, m_scoreIndexManager);
 				if (!pd->Load(input,output,m_factorCollection,filePath,weight,
 									 maxTargetPhrase[index],
 									 GetAllLM(),

@@ -23,14 +23,18 @@ using namespace std;
   * \param input input factors
   * \param output output factors
   */
-LexicalReordering::LexicalReordering(const std::string &filePath, 
-																		 int orientation, int direction,
-																		 int condition, const std::vector<float>& weights,
-																		 vector<FactorType> input, vector<FactorType> output) :
-	m_orientation(orientation), m_condition(condition), m_numScores(weights.size()), m_filePath(filePath), m_sourceFactors(input), m_targetFactors(output)
+LexicalReordering::LexicalReordering(const std::string &filePath
+																		 , int orientation
+																		 , int direction
+																		 , int condition
+																		 , const std::vector<float>& weights
+																		 , vector<FactorType> input
+																		 , vector<FactorType> output
+																		 , ScoreIndexManager &scoreIndexManager)
+: m_orientation(orientation), m_condition(condition), m_numScores(weights.size()), m_filePath(filePath), m_sourceFactors(input), m_targetFactors(output)
 {
 	//add score producer
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	scoreIndexManager.AddScoreProducer(this);
 	//manage the weights by SetWeightsForScoreProducer method of static data.
 	if(direction == LexReorderType::Bidirectional)
 	{

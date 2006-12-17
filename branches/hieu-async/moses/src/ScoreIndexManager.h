@@ -20,7 +20,7 @@ public:
 	ScoreIndexManager() : m_last(0) {}
 
 	//! new score producer to manage. Producers must be inserted in the order they are created
-	void AddScoreProducer(const ScoreProducer* producer);
+	void AddScoreProducer(ScoreProducer* producer);
 
 	//! starting score index for a particular score producer with scoreBookkeepingID
 	size_t GetBeginIndex(size_t scoreBookkeepingID) const { return m_begins[scoreBookkeepingID]; }

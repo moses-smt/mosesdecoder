@@ -11,7 +11,7 @@ class WordsRange;
  */
 class DistortionScoreProducer : public ScoreProducer {
 public:
-	DistortionScoreProducer();
+	DistortionScoreProducer(ScoreIndexManager &scoreIndexManager);
 
 	// call WordsRange::CalcDistortion(). both ranges must be valid
 	float CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr) const;
@@ -25,7 +25,7 @@ public:
  */
 class WordPenaltyProducer : public ScoreProducer {
 public:
-	WordPenaltyProducer();
+	WordPenaltyProducer(ScoreIndexManager &scoreIndexManager);
 
 	size_t GetNumScoreComponents() const;
 	const std::string GetScoreProducerDescription(int idx = 0) const;
@@ -34,7 +34,7 @@ public:
 /** unknown word penalty */
 class UnknownWordPenaltyProducer : public ScoreProducer {
 public:
-	UnknownWordPenaltyProducer();
+	UnknownWordPenaltyProducer(ScoreIndexManager &scoreIndexManager);
 
 	size_t GetNumScoreComponents() const;
 	const std::string GetScoreProducerDescription(int idx = 0) const;

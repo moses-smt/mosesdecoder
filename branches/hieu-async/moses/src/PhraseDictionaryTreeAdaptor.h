@@ -24,7 +24,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	void operator=(const PhraseDictionaryTreeAdaptor&);
 	
  public:
-	PhraseDictionaryTreeAdaptor(size_t numScoreComponent,unsigned numInputScores);
+	PhraseDictionaryTreeAdaptor(size_t numScoreComponent,unsigned numInputScores, ScoreIndexManager &scoreIndexManager);
 	virtual ~PhraseDictionaryTreeAdaptor();
 
 	// enable/disable caching

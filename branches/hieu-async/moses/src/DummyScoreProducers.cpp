@@ -4,9 +4,9 @@
 #include "DummyScoreProducers.h"
 #include "WordsRange.h"
 
-DistortionScoreProducer::DistortionScoreProducer()
+DistortionScoreProducer::DistortionScoreProducer(ScoreIndexManager &scoreIndexManager)
 {
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	scoreIndexManager.AddScoreProducer(this);
 }
 
 size_t DistortionScoreProducer::GetNumScoreComponents() const
@@ -26,9 +26,9 @@ float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, 
   return - (float) curr.CalcDistortion(prev);
 }
 
-WordPenaltyProducer::WordPenaltyProducer()
+WordPenaltyProducer::WordPenaltyProducer(ScoreIndexManager &scoreIndexManager)
 {
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	scoreIndexManager.AddScoreProducer(this);
 }
 
 size_t WordPenaltyProducer::GetNumScoreComponents() const
@@ -42,9 +42,9 @@ const std::string WordPenaltyProducer::GetScoreProducerDescription(int idx) cons
 }
 
 
-UnknownWordPenaltyProducer::UnknownWordPenaltyProducer()
+UnknownWordPenaltyProducer::UnknownWordPenaltyProducer(ScoreIndexManager &scoreIndexManager)
 {
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	scoreIndexManager.AddScoreProducer(this);
 }
 
 size_t UnknownWordPenaltyProducer::GetNumScoreComponents() const

@@ -21,8 +21,9 @@
 *************************************************************/
 
 PhraseDictionaryTreeAdaptor::
-PhraseDictionaryTreeAdaptor(size_t numScoreComponent,unsigned numInputScores)
-	: MyBase(numScoreComponent),imp(new PDTAimp(this,numInputScores)) {}
+PhraseDictionaryTreeAdaptor(size_t numScoreComponent,unsigned numInputScores, ScoreIndexManager &scoreIndexManager)
+	: MyBase(numScoreComponent, scoreIndexManager)
+	,imp(new PDTAimp(this,numInputScores)) {}
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor() 
 {

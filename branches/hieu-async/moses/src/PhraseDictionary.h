@@ -44,7 +44,7 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
 	std::string m_filePath;    // just for debugging purposes
 
  public:
-	PhraseDictionary(size_t numScoreComponent);
+	PhraseDictionary(size_t numScoreComponent, ScoreIndexManager &scoreIndexManager);
 	virtual ~PhraseDictionary();
 	
 	DecodeType GetDecodeType() const	{	return Translate;	}

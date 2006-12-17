@@ -89,9 +89,14 @@ public:
 	// Constructor: takes 3 arguments -- filePath is the path to the
 	// orientation probability table, orientation is one of {MSD, MONO},
 	// direction is one of {FOR,BACK,BI}, and condition is one of {F,FE}.
-	LexicalReordering(const std::string &filePath, int orientation, int direction, 
-										int condition, const std::vector<float>& weights,
-										vector<FactorType> input, vector<FactorType> output);
+	LexicalReordering(const std::string &filePath
+								 , int orientation
+								 , int direction
+								 , int condition
+								 , const std::vector<float>& weights
+								 , std::vector<FactorType> input
+								 , std::vector<FactorType> output
+								 , ScoreIndexManager &scoreIndexManager);
 	
 	// Descructor
 	~LexicalReordering(void) {}
