@@ -35,7 +35,7 @@ class LanguageModelMultiFactor : public LanguageModel
 protected:
 	FactorMask m_factorTypes;
 
-	LanguageModelMultiFactor(bool registerScore);
+	LanguageModelMultiFactor(bool registerScore, ScoreIndexManager &scoreIndexManager);
 	
 public:
 	virtual bool Load(const std::string &filePath

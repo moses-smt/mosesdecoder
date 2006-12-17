@@ -36,8 +36,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-LanguageModelIRST::LanguageModelIRST(bool registerScore)
-:LanguageModelSingleFactor(registerScore)
+LanguageModelIRST::LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager)
+:LanguageModelSingleFactor(registerScore, scoreIndexManager)
 ,m_lmtb(0)
 {
 }

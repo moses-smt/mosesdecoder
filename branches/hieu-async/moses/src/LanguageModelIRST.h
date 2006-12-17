@@ -62,7 +62,7 @@ protected:
   };
   
 public:
-	LanguageModelIRST(bool registerScore);
+	LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager);
 	~LanguageModelIRST();
 	bool Load(const std::string &filePath
 					, FactorCollection &factorCollection

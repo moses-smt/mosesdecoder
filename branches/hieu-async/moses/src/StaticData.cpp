@@ -441,7 +441,8 @@ bool StaticData::LoadLanguageModels()
 			PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
 			
 			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmImplementation, factorTypes     
-                                   									, nGramOrder, languageModelFile, weightAll[i], m_factorCollection);
+                                   									, nGramOrder, languageModelFile, weightAll[i]
+																										, m_factorCollection, m_scoreIndexManager);
       if (lm == NULL) 
       {
       	UserMessage::Add("no LM created. We probably don't have it compiled");

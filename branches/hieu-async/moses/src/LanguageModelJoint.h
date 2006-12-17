@@ -45,8 +45,8 @@ protected:
 	
 	size_t m_implFactor;
 public:
-	LanguageModelJoint(LanguageModelSingleFactor *lmImpl, bool registerScore)
-	:LanguageModelMultiFactor(registerScore)
+	LanguageModelJoint(LanguageModelSingleFactor *lmImpl, bool registerScore, ScoreIndexManager &scoreIndexManager)
+	:LanguageModelMultiFactor(registerScore, scoreIndexManager)
 	{
 		m_lmImpl = lmImpl;
 	}

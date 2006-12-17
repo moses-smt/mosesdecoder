@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class LanguageModel;
 class FactorCollection;
+class ScoreIndexManager;
 
 namespace LanguageModelFactory {
 
@@ -35,8 +36,13 @@ namespace LanguageModelFactory {
 	 * creates a language model that will use the appropriate
    * language model toolkit as its underlying implementation
 	 */
-	 LanguageModel* CreateLanguageModel(LMImplementation lmImplementation, const std::vector<FactorType> &factorTypes     
-                                   , size_t nGramOrder, const std::string &languageModelFile, float weight, FactorCollection &factorCollection);
+	 LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
+																		, const std::vector<FactorType> &factorTypes     
+																		, size_t nGramOrder
+																		, const std::string &languageModelFile
+																		, float weight
+																		, FactorCollection &factorCollection
+																		, ScoreIndexManager &scoreIndexManager);
 	 
 };
 
