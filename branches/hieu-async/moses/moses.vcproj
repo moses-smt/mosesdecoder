@@ -336,6 +336,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionary.cpp"
 				>
 			</File>
@@ -637,6 +641,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Phrase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseCollection.h"
 				>
 			</File>
 			<File

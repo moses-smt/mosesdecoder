@@ -59,7 +59,9 @@ public:
 								, const LMList &languageModels
 						    , float weightWP
 								, const StaticData& staticData
-								, const PhraseCollection *inputPhrases);
+								, bool filter
+								, const PhraseCollection *inputPhrases
+								, const std::string &hashFilePath);
 	
 	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 

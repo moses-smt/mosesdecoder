@@ -69,6 +69,7 @@ Parameter::Parameter()
 	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");	
 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
+	AddParam("cache-path", "specify which folder temporary files should go");
 }
 
 Parameter::~Parameter()

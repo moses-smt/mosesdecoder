@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "UserMessage.h"
 #include "AlignmentPair.h"
 #include "PhraseCollection.h"
+#include <boost/filesystem/operations.hpp>
 
 using namespace std;
 
@@ -47,7 +48,9 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, const LMList &languageModels
 														          , float weightWP
 														          , const StaticData& staticData
-																			, const PhraseCollection *inputPhrases)
+																			, bool filter
+																			, const PhraseCollection *inputPhrases
+																			, const string &hashFilePath)
 {
 	m_tableLimit = tableLimit;
 	m_filePath = filePath;
@@ -63,6 +66,11 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	// create hash file if necessary
 	ofstream tempFile;
 	string tempFilePath;
+	if (filter)
+	{
+		CreateTempFile(tempFile, tempFilePath);
+		TRACE_ERR(filePath << " -> " << tempFilePath << " -> " << hashFilePath << endl);
+	}
 
 	string line, prevSourcePhrase = "";
 	size_t count = 0;
@@ -114,9 +122,16 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																, &alignmentPair.GetInserter(Input));
 
 		// if not part of input, filter it out
-		if (inputPhrases != NULL && !inputPhrases->Find(sourcePhrase, false))
+		if (filter)
 		{
-			continue;
+			if (inputPhrases->Find(sourcePhrase, false))
+			{
+				tempFile << line << endl;
+			}
+			else
+			{
+				continue;
+			}
 		}
 
 		//target
@@ -139,6 +154,26 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 	// sort each target phrase collection
 	m_collection.Sort(m_tableLimit);
+
+	// move temp file to hash file
+	if (filter)
+	{
+		tempFile.close();
+		using namespace boost::filesystem;
+		try 
+		{
+			rename( path(tempFilePath, native) , path(hashFilePath, native) );
+		}
+		catch (...)
+		{ // copy instead
+			copy_file(path(tempFilePath, native) , path(hashFilePath, native) );
+			remove(tempFilePath);
+		}
+		#ifndef _WIN32
+			// change permission to let everyone use cached file
+			chmod(hashFilePath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
+		#endif
+	}
 
 	return true;
 }

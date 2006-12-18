@@ -94,6 +94,11 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
   }
 
+	if (m_parameter->GetParam("cache-path").size() == 1)
+		m_cachePath = m_parameter->GetParam("cache-path")[0];
+  else
+		m_cachePath = GetTempFolder();
+
 	// input type has to be specified BEFORE loading the phrase tables!
 	if(m_parameter->GetParam("inputtype").size()) 
 		m_inputType=Scan<int>(m_parameter->GetParam("inputtype")[0]);
@@ -548,8 +553,12 @@ bool StaticData::LoadPhraseTables()
 		//TRACE_ERR( endl;
 
 		PhraseCollection *inputPhrases = NULL;
+		string inputFileHash;
 		if (m_parameter->GetParam("input-file").size() > 0)
-		{ // load input for filtering
+		{ 
+			inputFileHash = GetMD5Hash(m_parameter->GetParam("input-file")[0]);
+			
+			// load input for filtering
 			TRACE_ERR( "Begin loading input for filtering" << endl);
 			inputPhrases = new PhraseCollection(m_parameter->GetParam("input-file")[0], m_factorCollection);
 			TRACE_ERR( "Completed loading input for filtering" << endl);
@@ -613,6 +622,24 @@ bool StaticData::LoadPhraseTables()
 			PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			if (!FileExists(filePath+".binphr.idx"))
 			{					
+				// does cached filtering exist for this table, given input ?
+				string phraseTableHash	= GetMD5Hash(filePath);
+   			string hashFilePath			= GetCachePath()
+   																+ PROJECT_NAME + "--"
+   																+ inputFileHash + "--"
+   																+ phraseTableHash + ".txt";
+				bool filter;
+				if (FileExists(hashFilePath))
+				{ // load filtered file instead
+					filter = false;
+					filePath = hashFilePath;
+				}
+				else
+				{ // load original file & create hash file
+					filter = true;
+				}
+
+				// LOAD
 				VERBOSE(2,"using standard phrase tables");
 				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent, m_scoreIndexManager);
 				if (!pd->Load(input
@@ -624,7 +651,9 @@ bool StaticData::LoadPhraseTables()
 								 , GetAllLM()
 								 , GetWeightWordPenalty()
 								 , *this
-								 , inputPhrases))
+								 , filter
+								 , inputPhrases
+								 , hashFilePath))
 				{
 					delete pd;
 					return false;

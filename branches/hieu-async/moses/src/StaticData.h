@@ -77,7 +77,7 @@ protected:
 			, m_maxNoTransOptPerCoverage
 		  , m_maxNoPartTransOpt;
 	
-	std::string									m_nBestFilePath;
+	std::string									m_nBestFilePath, m_cachePath;
 	bool                        m_fLMsLoaded, m_labeledNBestList;
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
@@ -140,6 +140,10 @@ public:
 		return m_parameter->GetParam(paramName);
 	}
 
+	const std::string GetCachePath() const
+ 	{
+ 		return m_cachePath;
+ 	}
 	bool IsComputeLMBackoffStats() const
 	{
 		return m_computeLMBackoffStats;
