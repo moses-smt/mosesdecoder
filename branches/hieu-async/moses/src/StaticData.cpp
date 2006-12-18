@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "UserMessage.h"
+#include "PhraseCollection.h"
 
 using namespace std;
 
@@ -546,6 +547,14 @@ bool StaticData::LoadPhraseTables()
 		//}
 		//TRACE_ERR( endl;
 
+		PhraseCollection *inputPhrases = NULL;
+		if (m_parameter->GetParam("input-file").size() > 0)
+		{ // load input for filtering
+			TRACE_ERR( "Begin loading input for filtering" << endl);
+			inputPhrases = new PhraseCollection(m_parameter->GetParam("input-file")[0], m_factorCollection);
+			TRACE_ERR( "Completed loading input for filtering" << endl);
+		}
+
 		const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
 		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
 
@@ -588,6 +597,8 @@ bool StaticData::LoadPhraseTables()
 				strme << "Your phrase table has " << numScoreComponent
 							<< " scores, but you specified " << weight.size() << " weights!";
 				UserMessage::Add(strme.str());
+
+				delete inputPhrases;
 				return false;
 			}
 						
@@ -612,7 +623,8 @@ bool StaticData::LoadPhraseTables()
 								 , maxTargetPhrase[index]
 								 , GetAllLM()
 								 , GetWeightWordPenalty()
-								 , *this))
+								 , *this
+								 , inputPhrases))
 				{
 					delete pd;
 					return false;
@@ -632,6 +644,7 @@ bool StaticData::LoadPhraseTables()
 									 GetWeightWordPenalty()))
 				{
 					delete pd;
+					delete inputPhrases;
 					return false;
 				}
 				m_phraseDictionary.push_back(pd);
@@ -639,8 +652,10 @@ bool StaticData::LoadPhraseTables()
 
 			index++;
 		}
-	}
-	
+
+		delete inputPhrases;
+	}	
+
 	PrintUserTime("Finished loading phrase tables");
 	return true;
 }

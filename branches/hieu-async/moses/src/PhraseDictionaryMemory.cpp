@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsRange.h"
 #include "UserMessage.h"
 #include "AlignmentPair.h"
+#include "PhraseCollection.h"
 
 using namespace std;
 
@@ -45,7 +46,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, size_t tableLimit
 																			, const LMList &languageModels
 														          , float weightWP
-														          , const StaticData& staticData)
+														          , const StaticData& staticData
+																			, const PhraseCollection *inputPhrases)
 {
 	m_tableLimit = tableLimit;
 	m_filePath = filePath;
@@ -97,7 +99,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			UserMessage::Add(strme.str());
 			return false;
 		}
-//		assert(scoreVector.size() == m_numScoreComponent);
 			
 		TargetPhrase targetPhrase(Output);
 
@@ -111,6 +112,12 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																, factorCollection
 																, factorDelimiter
 																, &alignmentPair.GetInserter(Input));
+
+		// if not part of input, filter it out
+		if (inputPhrases != NULL && !inputPhrases->Find(sourcePhrase, false))
+		{
+			continue;
+		}
 
 		//target
 		targetPhrase.CreateFromString( output
