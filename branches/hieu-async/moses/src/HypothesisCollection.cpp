@@ -97,7 +97,6 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	// found existing hypo with same target ending.
 	// keep the best 1
 	Hypothesis *hypoExisting = *iter;
-	//cerr << endl << *hypoExisting << endl << *hypo << endl;
 
 	if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
 	{ // incoming hypo is better than the one we have

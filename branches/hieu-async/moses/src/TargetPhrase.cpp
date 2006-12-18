@@ -41,6 +41,11 @@ void TargetPhrase::SetScore()
 	m_fullScore = - StaticData::Instance()->GetWeightWordPenalty();	
 }
 
+void TargetPhrase::SetAlignment()
+{
+	m_phraseAlignment.SetAlignment();
+}
+
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 														const vector<float> &scoreVector, const vector<float> &weightT,
 														float weightWP, const LMList &languageModels)

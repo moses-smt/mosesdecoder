@@ -118,8 +118,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																, factorCollection
 																, factorDelimiter
 																, &phraseAlignment.GetInserter(Output));
-		cerr << endl << sourcePhrase << endl << targetPhrase << endl << phraseAlignment << endl;
-
+		
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
 		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);

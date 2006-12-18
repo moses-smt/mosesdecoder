@@ -91,7 +91,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_id(s_HypothesesCreated++)
 	, m_lmstats(NULL)
 	,	m_decodeStepId (transOpt.GetDecodeStepId())
-
+	, m_targetPhraseAlign(prevHypo.m_targetPhraseAlign)
 {
 	const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
 
@@ -124,6 +124,10 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	// merge factors from new trans opt into taget phrase so far
 	m_targetPhrase.MergeFactors(transOptPhrase, m_currTargetWordsRange);
 
+	// update alignment
+	m_targetPhraseAlign.Merge(transOpt.GetPhraseAlignment().GetPhraseAlignVec(Output)
+													, m_currTargetWordsRange);
+
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
 	assert(!m_sourceCompleted.Overlap(GetCurrSourceWordsRange()));	
@@ -132,6 +136,25 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
   m_wordDeleted = transOpt.IsDeletionOption();
 	m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
 
+}
+
+size_t Hypothesis::GetNextStartPos(const TranslationOption &transOpt) const
+{
+	// are we in the same decode step at the moment ?
+	if (m_decodeStepId == transOpt.GetDecodeStepId())
+		return GetCurrTargetWordsRange().GetEndPos() + 1;
+
+	// update target range
+	const Hypothesis *backPtrHypo = m_backPtr[transOpt.GetDecodeStepId()];
+	if (backPtrHypo == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		size_t lastPos = backPtrHypo->GetCurrTargetWordsRange().GetEndPos();
+		return lastPos + 1;
+	}
 }
 
 Hypothesis::~Hypothesis()

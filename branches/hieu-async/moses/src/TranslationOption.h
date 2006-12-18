@@ -148,6 +148,11 @@ public:
 	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
 	void CalcScore();
 
+	const PhraseAlignment &GetPhraseAlignment() const
+	{
+		return m_phraseAlignment;
+	}
+
 	TO_STRING();
 };
 

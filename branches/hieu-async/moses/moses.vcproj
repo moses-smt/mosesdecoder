@@ -350,6 +350,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\PhraseAlignVec.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionary.cpp"
 				>
 			</File>
@@ -647,6 +651,10 @@
 			</File>
 			<File
 				RelativePath=".\src\PhraseAlignment.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseAlignVec.h"
 				>
 			</File>
 			<File

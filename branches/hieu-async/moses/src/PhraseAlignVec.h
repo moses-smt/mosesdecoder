@@ -1,4 +1,4 @@
-// $Id: PhraseAlignment.h 988 2006-11-21 19:35:37Z hieuhoang1972 $
+// $Id: PhraseAlignVec.h 988 2006-11-21 19:35:37Z hieuhoang1972 $
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -20,42 +20,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <iostream>
 #include <vector>
-#include <iterator>
-#include "TypeDef.h"
-#include "Util.h"
-#include "PhraseAlignVec.h"
 
-typedef std::back_insert_iterator<PhraseAlignVec> AlignInserter;
+class WordsRange;
 
-/** represent the alignment info between source and target phrase */
-class PhraseAlignment
+typedef std::vector<size_t> AlignVec;
+
+class PhraseAlignVec : public std::vector<AlignVec>
 {
-	friend std::ostream& operator<<(std::ostream&, const PhraseAlignment&);
-
-protected:
-	PhraseAlignVec m_sourceAlign, m_targetAlign;
+	friend std::ostream& operator<<(std::ostream& out, const PhraseAlignVec &phraseAlignment);
 
 public:
-	PhraseAlignment()
-	{}
-
-	/** get the back_insert_iterator to the source or target alignment vector so that
-		*	they could be populated
-		*/
-	AlignInserter GetInserter(FactorDirection direction);
-	const PhraseAlignVec &GetPhraseAlignVec(FactorDirection direction) const
-	{
-		return (direction == Input) ? m_sourceAlign : m_targetAlign;
-
-	}
-
-	/** used by the unknown word handler.
-		* Set alignment to 0
-		*/
-	void SetAlignment();
-
-	TO_STRING();
+	bool IsCompatible(const PhraseAlignVec &compare, size_t startPosCompare) const;
+	void Merge(const PhraseAlignVec &newAlignment, const WordsRange &wordsRange);
 };
+
+
 

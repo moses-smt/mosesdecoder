@@ -235,16 +235,24 @@ void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const Translation
 
 void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
-	// create hypothesis and calculate all its scores
-	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-	newHypo->CalcScore(m_staticData, m_transOptColl->GetFutureScoreObject());
-	// logging for the curious
-	IFVERBOSE(3) {
-	  newHypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
-	}
+	cerr << endl << hypothesis << endl << transOpt << endl;
+	const PhraseAlignVec 
+							&hypoAlignment = hypothesis.GetTargetAlignment()
+						, &targetAlignment = transOpt.GetPhraseAlignment().GetPhraseAlignVec(Output);
+	size_t nextStartPos = hypothesis.GetNextStartPos(transOpt);
+	if (hypoAlignment.IsCompatible(targetAlignment, nextStartPos))
+	{
+		// create hypothesis and calculate all its scores
+		Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+		newHypo->CalcScore(m_staticData, m_transOptColl->GetFutureScoreObject());
+		// logging for the curious
+		IFVERBOSE(3) {
+			newHypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+		}
 
-	// add to hypothesis stack
-	m_hypoStack.AddPrune(newHypo);
+		// add to hypothesis stack
+		m_hypoStack.AddPrune(newHypo);
+	}
 }
 
 /**

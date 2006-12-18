@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "PhraseAlignment.h"
+#include "PhraseAlignVec.h"
 
 using namespace std;
 
@@ -47,6 +48,14 @@ void OutputPhraseAlignVec(std::ostream &out, const PhraseAlignVec &phraseAlignVe
 		}
 	}
 	
+}
+
+void PhraseAlignment::SetAlignment()
+{
+	AlignVec alignment;
+	alignment.push_back(0);
+	m_sourceAlign.push_back(alignment);
+	m_targetAlign.push_back(alignment);
 }
 
 std::ostream& operator<<(std::ostream &out, const PhraseAlignment &phraseAlignment)

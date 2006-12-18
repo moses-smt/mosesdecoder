@@ -198,6 +198,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(size_t decodeStepId, con
 			}
 	
 			targetPhrase.SetScore();
+			targetPhrase.SetAlignment();
 			
 			transOpt = new TranslationOption(WordsRange(decodeStepId, sourcePos, sourcePos), targetPhrase, 0);
 		}
