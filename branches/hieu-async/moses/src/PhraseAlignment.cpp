@@ -36,7 +36,7 @@ void OutputPhraseAlignVec(std::ostream &out, const PhraseAlignVec &phraseAlignVe
 	
 	for (size_t pos = 0 ; pos < phraseAlignVec.size() ; ++pos)
 	{
-		const AlignVec &alignVec = phraseAlignVec[pos];
+		const AlignmentElement &alignVec = phraseAlignVec[pos];
 		if (alignVec.size() > 0)
 		{
 			out << "[" << alignVec[0];
@@ -52,7 +52,7 @@ void OutputPhraseAlignVec(std::ostream &out, const PhraseAlignVec &phraseAlignVe
 
 void PhraseAlignment::SetAlignment()
 {
-	AlignVec alignment;
+	AlignmentElement alignment;
 	alignment.push_back(0);
 	m_sourceAlign.push_back(alignment);
 	m_targetAlign.push_back(alignment);

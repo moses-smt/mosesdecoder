@@ -24,9 +24,30 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class WordsRange;
 
-typedef std::vector<size_t> AlignVec;
 
-class PhraseAlignVec : public std::vector<AlignVec>
+class AlignmentElement : public std::vector<size_t>
+{
+public:
+	AlignmentElement()
+	{}
+
+	AlignmentElement(const std::vector<size_t> &copy);
+
+	bool Equals(const AlignmentElement &compare) const
+	{
+		for (size_t idxThis = 0 ; idxThis < size() ; ++idxThis)
+		{
+			for (size_t idxCompare = 0 ; idxCompare < compare.size() ; ++idxCompare)
+			{
+				if ((*this)[idxThis] == compare[idxCompare])
+					return true;
+			}
+		}
+		return false;
+	}
+};
+
+class PhraseAlignVec : public std::vector<AlignmentElement>
 {
 	friend std::ostream& operator<<(std::ostream& out, const PhraseAlignVec &phraseAlignment);
 

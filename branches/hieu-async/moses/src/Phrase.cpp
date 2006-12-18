@@ -240,7 +240,7 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 			else
 			{ // fill out alignment factor info
 				string alignStr = factorStrVector.back();
-				AlignVec alignVec = Tokenize<size_t>(alignStr, ",");
+				AlignmentElement alignVec = Tokenize<size_t>(alignStr, ",");
 				**alignInserter = alignVec;
 				(*alignInserter)++;
 

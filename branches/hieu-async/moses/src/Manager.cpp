@@ -235,6 +235,8 @@ void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const Translation
 
 void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
+	cerr << endl << hypothesis << endl << transOpt << endl;
+
 	const PhraseAlignVec 
 							&hypoAlignment = hypothesis.GetTargetAlignment()
 						, &targetAlignment = transOpt.GetPhraseAlignment().GetPhraseAlignVec(Output);

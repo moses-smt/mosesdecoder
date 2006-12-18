@@ -18,18 +18,27 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <algorithm>
 #include "PhraseAlignVec.h"
 #include "WordsRange.h"
 
 using namespace std;
 
+AlignmentElement::AlignmentElement(const std::vector<size_t> &copy)
+{
+	std::copy(copy.begin(), copy.end(), back_insert_iterator< vector<size_t> > (*this));
+}
+
 bool PhraseAlignVec::IsCompatible(const PhraseAlignVec &compare, size_t startPosCompare) const 
 {
+	cerr << *this << endl << compare << endl << startPosCompare << endl;
 	const size_t endPos = std::min(size() , startPosCompare + compare.size());
 	size_t posCompare = 0;
 	for (size_t posThis = startPosCompare ; posThis < endPos ; ++posThis)
 	{
-		if ((*this)[posThis] != compare[posCompare])
+		const AlignmentElement &alignThis = (*this)[posThis]
+									,&alignCompare = compare[posCompare];
+		if (!alignThis.Equals(alignCompare))
 			return false;
 
 		posCompare++;
@@ -45,7 +54,7 @@ void PhraseAlignVec::Merge(const PhraseAlignVec &newAlignment, const WordsRange 
 	{
 		if (pos >= this->size())
 		{
-			AlignVec alignVec = newAlignment[index++];
+			AlignmentElement alignVec = newAlignment[index++];
 			for (size_t index = 0 ; index < alignVec.size() ; ++index)
 				alignVec[index] += newAlignmentRange.GetStartPos();
 
@@ -58,7 +67,7 @@ std::ostream& operator<<(std::ostream& out, const PhraseAlignVec &phraseAlignmen
 {
 	for (size_t pos = 0 ; pos < phraseAlignment.size() ; ++pos)
 	{
-		const AlignVec &alignment = phraseAlignment[pos];
+		const AlignmentElement &alignment = phraseAlignment[pos];
 		out << "[";
 		for (size_t index = 0 ; index < alignment.size() ; ++index)
 			out << alignment[index];
