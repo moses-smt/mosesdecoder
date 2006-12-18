@@ -32,7 +32,7 @@ class PhraseAlignVec : public std::vector<AlignVec>
 
 public:
 	bool IsCompatible(const PhraseAlignVec &compare, size_t startPosCompare) const;
-	void Merge(const PhraseAlignVec &newAlignment, const WordsRange &wordsRange);
+	void Merge(const PhraseAlignVec &newAlignment, const WordsRange &newAlignmentRange);
 };
 
 

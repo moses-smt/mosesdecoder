@@ -25,7 +25,6 @@ using namespace std;
 
 bool PhraseAlignVec::IsCompatible(const PhraseAlignVec &compare, size_t startPosCompare) const 
 {
-	cerr << *this << endl << compare << endl << startPosCompare << endl;
 	const size_t endPos = std::min(size() , startPosCompare + compare.size());
 	size_t posCompare = 0;
 	for (size_t posThis = startPosCompare ; posThis < endPos ; ++posThis)
@@ -39,14 +38,18 @@ bool PhraseAlignVec::IsCompatible(const PhraseAlignVec &compare, size_t startPos
 	return true;
 }
 
-void PhraseAlignVec::Merge(const PhraseAlignVec &newAlignment, const WordsRange &wordsRange)
+void PhraseAlignVec::Merge(const PhraseAlignVec &newAlignment, const WordsRange &newAlignmentRange)
 {
 	size_t index = 0;
-	for (size_t pos = wordsRange.GetStartPos() ; pos <= wordsRange.GetEndPos() ; ++pos)
+	for (size_t pos = newAlignmentRange.GetStartPos() ; pos <= newAlignmentRange.GetEndPos() ; ++pos)
 	{
 		if (pos >= this->size())
 		{
-			push_back(newAlignment[index++]);
+			AlignVec alignVec = newAlignment[index++];
+			for (size_t index = 0 ; index < alignVec.size() ; ++index)
+				alignVec[index] += newAlignmentRange.GetStartPos();
+
+			push_back(alignVec);
 		}
 	}
 }
