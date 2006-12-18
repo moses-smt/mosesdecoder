@@ -48,7 +48,7 @@ protected:
 	VocabIndex GetLmID( const Factor *factor ) const;
 	
 public:
-	LanguageModelSRI(bool registerScore);
+	LanguageModelSRI(bool registerScore, ScoreIndexManager &scoreIndexManager);
 	~LanguageModelSRI();
 	bool Load(const std::string &filePath
 					, FactorCollection &factorCollection

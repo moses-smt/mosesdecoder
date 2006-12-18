@@ -109,3 +109,5 @@ bool PhraseCollection::Find(const Phrase &source, bool notFoundValue) const
 	return currNode->Get();
 
 }
+
+
