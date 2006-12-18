@@ -53,7 +53,8 @@ am_moses_cmd_OBJECTS = IOStream.$(OBJEXT) Main.$(OBJEXT) \
 	TranslationAnalysis.$(OBJEXT)
 moses_cmd_OBJECTS = $(am_moses_cmd_OBJECTS)
 moses_cmd_DEPENDENCIES = $(top_builddir)/moses/src/libmoses.a \
-	$(top_builddir)/irstlm/src/libirstlm.a
+	$(top_builddir)/irstlm/src/libirstlm.a \
+	../../../boost/lib/libboost_filesystem-gcc.a
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -182,7 +183,7 @@ moses_cmd_SOURCES = IOStream.cpp IOStream.h Main.cpp Main.h\
 	TranslationAnalysis.cpp TranslationAnalysis.h
 
 moses_cmd_LDADD = $(top_builddir)/moses/src/libmoses.a \
-	$(top_builddir)/irstlm/src/libirstlm.a -L../../../boost/lib -lboost_filesystem-gcc -lz
+	$(top_builddir)/irstlm/src/libirstlm.a ../../../boost/lib/libboost_filesystem-gcc.a -lz
 
 AM_CXXFLAGS = -DLM_SRI -DLM_IRST -DLM_INTERNAL -DTRACE_ENABLE\
 	-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
