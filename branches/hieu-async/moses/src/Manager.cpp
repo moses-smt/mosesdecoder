@@ -235,11 +235,9 @@ void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const Translation
 
 void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
-	cerr << endl << hypothesis << endl << transOpt << endl;
-
-	const PhraseAlignVec 
+	const AlignmentPhrase 
 							&hypoAlignment = hypothesis.GetTargetAlignment()
-						, &targetAlignment = transOpt.GetPhraseAlignment().GetPhraseAlignVec(Output);
+						, &targetAlignment = transOpt.GetAlignmentPair().GetPhraseAlignVec(Output);
 	size_t nextStartPos = hypothesis.GetNextStartPos(transOpt);
 	if (hypoAlignment.IsCompatible(targetAlignment, nextStartPos))
 	{

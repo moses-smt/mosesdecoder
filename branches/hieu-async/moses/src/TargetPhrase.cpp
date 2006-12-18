@@ -43,7 +43,7 @@ void TargetPhrase::SetScore()
 
 void TargetPhrase::SetAlignment()
 {
-	m_phraseAlignment.SetAlignment();
+	m_alignmentPair.SetAlignment();
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,

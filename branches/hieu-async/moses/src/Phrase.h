@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "mempool.h"
-#include "PhraseAlignment.h"
+#include "AlignmentPair.h"
 
 class TranslationOption;
 
@@ -78,7 +78,7 @@ public:
 																const std::string &phraseString
 																, const std::vector<FactorType> &factorOrder
 																, const std::string& factorDelimiter
-																, AlignInserter *alignInserter);
+																, AlignmentPairInserter *alignmentPairInserter);
 	/** Fills phrase with words from 2D string vector
 		* \param factorOrder factor types of each element in 2D string vector
 		* \param phraseVector 2D string vector
@@ -86,7 +86,7 @@ public:
 	void CreateFromString(const std::vector<FactorType> &factorOrder
               , const std::vector< std::vector<std::string> > &phraseVector
               , FactorCollection &factorCollection
-							, AlignInserter *alignInserter);
+							, AlignmentPairInserter *alignmentPairInserter);
 	/** Fills phrase with words from formatted string, typically from phrase table or sentence input
 		* \param factorOrder factor types of each element in 2D string vector
 		* \param phraseString formatted input string to parse
@@ -96,7 +96,7 @@ public:
 											, const std::string &phraseString
 											, FactorCollection &factorCollection
 											, const std::string &factorDelimiter
-											, AlignInserter *alignInserter);
+											, AlignmentPairInserter *alignmentPairInserter);
 
 	/**	copy factors from the other phrase to this phrase. 
 		IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten

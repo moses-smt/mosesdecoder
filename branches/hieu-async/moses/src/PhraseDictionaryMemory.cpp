@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
-#include "PhraseAlignment.h"
+#include "AlignmentPair.h"
 
 using namespace std;
 
@@ -102,7 +102,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		TargetPhrase targetPhrase(Output);
 
 		// alignment info
-		PhraseAlignment &phraseAlignment = targetPhrase.GetPhraseAlignment();
+		AlignmentPair &alignmentPair = targetPhrase.GetAlignmentPair();
 
 		// source
 		Phrase sourcePhrase(Input);
@@ -110,14 +110,14 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																, tokens[0]
 																, factorCollection
 																, factorDelimiter
-																, &phraseAlignment.GetInserter(Input));
+																, &alignmentPair.GetInserter(Input));
 
 		//target
 		targetPhrase.CreateFromString( output
 																, tokens[1]
 																, factorCollection
 																, factorDelimiter
-																, &phraseAlignment.GetInserter(Output));
+																, &alignmentPair.GetInserter(Output));
 		
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());

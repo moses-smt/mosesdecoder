@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "InputType.h"
 #include "ObjectPool.h"
-#include "PhraseAlignVec.h"
+#include "AlignmentPhrase.h"
 
 class SpanScore;
 class TranslationOption;
@@ -77,7 +77,7 @@ protected:
 	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /**< relevant history for language model scoring -- used for recombination */
 	const Hypothesis 	*m_winningHypo;
 	ArcList 					*m_arcList; /**< all arcs that end at the same lattice point as this hypothesis */
-	PhraseAlignVec		m_targetPhraseAlign;
+	AlignmentPhrase		m_targetPhraseAlign;
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
@@ -260,7 +260,7 @@ public:
 	float GetFutureScore() const { return m_futureScore; }
 
 	//! vector of what source words were aligned to each target
-	const PhraseAlignVec &GetTargetAlignment() const
+	const AlignmentPhrase &GetTargetAlignment() const
 	{
 		return m_targetPhraseAlign;
 	}

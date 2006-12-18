@@ -34,7 +34,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 	: m_targetPhrase(targetPhrase)
 	, m_sourcePhrase(targetPhrase.GetSourcePhrase())
 	, m_sourceWordsRange	(wordsRange)
-	, m_phraseAlignment(targetPhrase.GetPhraseAlignment())
+	, m_alignmentPair(targetPhrase.GetAlignmentPair())
 {
 	// set score
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
@@ -45,7 +45,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 	: m_targetPhrase(targetPhrase)
 	, m_sourceWordsRange(wordsRange)
 	, m_futureScore(0)
-	, m_phraseAlignment(targetPhrase.GetPhraseAlignment())
+	, m_alignmentPair(targetPhrase.GetAlignmentPair())
 {
 	const UnknownWordPenaltyProducer *up = StaticData::Instance()->GetUnknownWordPenaltyProducer();
 	const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works

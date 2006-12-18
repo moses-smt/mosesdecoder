@@ -196,7 +196,7 @@ void Phrase::Append(const Phrase &endPhrase){
 vector< vector<string> > Phrase::Parse(const std::string &phraseString
 																			 , const std::vector<FactorType> &factorOrder
 																			 , const std::string& factorDelimiter
-																			 , AlignInserter *alignInserter)
+																			 , AlignmentPairInserter *alignmentPairInserter)
 {
 	bool isMultiCharDelimiter = factorDelimiter.size() > 1;
 	// parse
@@ -218,7 +218,7 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 		// KOMMA|none
 		//    to
 		// "KOMMA" "none"
-		if (alignInserter == NULL)
+		if (alignmentPairInserter == NULL)
 		{
 			if (factorStrVector.size() != factorOrder.size())
 			{
@@ -241,8 +241,8 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 			{ // fill out alignment factor info
 				string alignStr = factorStrVector.back();
 				AlignmentElement alignVec = Tokenize<size_t>(alignStr, ",");
-				**alignInserter = alignVec;
-				(*alignInserter)++;
+				**alignmentPairInserter = alignVec;
+				(*alignmentPairInserter)++;
 
 				// get rid of align info from factor vector
 				factorStrVector.erase(factorStrVector.end()-1);
@@ -257,7 +257,7 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const vector< vector<string> > &phraseVector
 															, FactorCollection &factorCollection
-															, AlignInserter *alignInserter)
+															, AlignmentPairInserter *alignmentPairInserter)
 {
 	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
 	{
@@ -277,10 +277,10 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const string &phraseString
 															, FactorCollection &factorCollection
 															, const string &factorDelimiter
-															, AlignInserter *alignInserter)
+															, AlignmentPairInserter *alignmentPairInserter)
 {
-	vector< vector<string> > phraseVector = Parse(phraseString, factorOrder, factorDelimiter, alignInserter);
-	CreateFromString(factorOrder, phraseVector, factorCollection, alignInserter);
+	vector< vector<string> > phraseVector = Parse(phraseString, factorOrder, factorDelimiter, alignmentPairInserter);
+	CreateFromString(factorOrder, phraseVector, factorCollection, alignmentPairInserter);
 }
 
 bool Phrase::operator < (const Phrase &compare) const

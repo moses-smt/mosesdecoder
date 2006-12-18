@@ -152,6 +152,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\AlignmentPair.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlignmentPhrase.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConfusionNet.cpp"
 				>
 			</File>
@@ -328,32 +336,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseAlignment.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\PhraseAlignVec.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\PhraseDictionary.cpp"
 				>
 			</File>
@@ -477,6 +459,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\src\AlignmentPair.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlignmentPhrase.h"
+				>
+			</File>
 			<File
 				RelativePath=".\src\ConfusionNet.h"
 				>
@@ -647,14 +637,6 @@
 			</File>
 			<File
 				RelativePath=".\src\Phrase.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\PhraseAlignment.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\PhraseAlignVec.h"
 				>
 			</File>
 			<File

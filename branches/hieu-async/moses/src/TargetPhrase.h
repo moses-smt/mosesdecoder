@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
-#include "PhraseAlignment.h"
+#include "AlignmentPair.h"
 
 class LMList;
 class PhraseDictionary;
@@ -39,7 +39,7 @@ class TargetPhrase: public Phrase
 protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 	ScoreComponentCollection	m_scoreBreakdown;
-	PhraseAlignment						m_phraseAlignment;
+	AlignmentPair						m_alignmentPair;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
@@ -109,13 +109,13 @@ public:
 		return m_sourcePhrase;
 	}
 
-	PhraseAlignment &GetPhraseAlignment()
+	AlignmentPair &GetAlignmentPair()
 	{
-		return m_phraseAlignment;
+		return m_alignmentPair;
 	}
-	const PhraseAlignment &GetPhraseAlignment() const
+	const AlignmentPair &GetAlignmentPair() const
 	{
-		return m_phraseAlignment;
+		return m_alignmentPair;
 	}
 
 	TO_STRING();

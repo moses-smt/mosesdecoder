@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
-#include "PhraseAlignment.h"
+#include "AlignmentPair.h"
 
 class PhraseDictionary;
 class GenerationDictionary;
@@ -60,7 +60,7 @@ protected:
 	Phrase 							m_targetPhrase; /*< output phrase when using this translation option */
 	Phrase const*       m_sourcePhrase; /*< input phrase translated by this */
 	const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
-	PhraseAlignment			m_phraseAlignment; /*< alignment info between source and target phrase */
+	AlignmentPair			m_alignmentPair; /*< alignment info between source and target phrase */
 	float								m_totalScore; /*< weighted translation costs of this translation option */
 	float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 	float               m_partialScore; /*< estimate of the partial cost of a preliminary translation option */
@@ -148,9 +148,9 @@ public:
 	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
 	void CalcScore();
 
-	const PhraseAlignment &GetPhraseAlignment() const
+	const AlignmentPair &GetAlignmentPair() const
 	{
-		return m_phraseAlignment;
+		return m_alignmentPair;
 	}
 
 	TO_STRING();

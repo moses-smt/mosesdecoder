@@ -125,7 +125,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	m_targetPhrase.MergeFactors(transOptPhrase, m_currTargetWordsRange);
 
 	// update alignment
-	m_targetPhraseAlign.Merge(transOpt.GetPhraseAlignment().GetPhraseAlignVec(Output)
+	m_targetPhraseAlign.Merge(transOpt.GetAlignmentPair().GetPhraseAlignVec(Output)
 													, m_currTargetWordsRange);
 
 	// assert that we are not extending our hypothesis by retranslating something
