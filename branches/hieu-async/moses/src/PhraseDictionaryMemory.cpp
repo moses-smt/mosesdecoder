@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iterator>
 #include <algorithm>
 #include <sys/stat.h>
+#include <boost/filesystem/operations.hpp>
 #include "PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "Word.h"
@@ -35,7 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "UserMessage.h"
 #include "AlignmentPair.h"
 #include "PhraseCollection.h"
-#include <boost/filesystem/operations.hpp>
 
 using namespace std;
 
@@ -49,7 +49,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 														          , float weightWP
 														          , const StaticData& staticData
 																			, bool filter
-																			, const PhraseCollection *inputPhrases
+																			, const PhraseCollection &inputPhrases
 																			, const string &hashFilePath)
 {
 	m_tableLimit = tableLimit;
@@ -124,7 +124,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		// if not part of input, filter it out
 		if (filter)
 		{
-			if (inputPhrases->Find(sourcePhrase, false))
+			if (inputPhrases.Find(sourcePhrase, false))
 			{
 				tempFile << line << endl;
 			}
@@ -160,16 +160,23 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	{
 		tempFile.close();
 		using namespace boost::filesystem;
+
+		path hashFile(hashFilePath, native)
+					, tempFile(tempFilePath, native);
 		try 
 		{
-			rename( path(tempFilePath, native) , path(hashFilePath, native) );
+			rename( tempFile , hashFile );
 		}
 		catch (...)
 		{ // copy instead
-			copy_file(path(tempFilePath, native) , path(hashFilePath, native) );
-			remove(tempFilePath);
+			copy_file(tempFile , hashFile );
+			remove(tempFile);
 		}
-		#ifndef _WIN32
+
+		// touch file to prevent it being deleted
+		last_write_time(hashFile, time(NULL));
+
+		#ifndef WIN32
 			// change permission to let everyone use cached file
 			chmod(hashFilePath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
 		#endif

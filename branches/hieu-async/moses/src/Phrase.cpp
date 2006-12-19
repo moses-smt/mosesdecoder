@@ -285,9 +285,6 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 
 bool Phrase::operator < (const Phrase &compare) const
 {	
-#ifdef min
-#undef min
-#endif
 	size_t thisSize			= GetSize()
 				,compareSize	= compare.GetSize();
 

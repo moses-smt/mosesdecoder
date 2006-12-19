@@ -66,6 +66,15 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #  endif
 
 #endif
+
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
 ///////////////////////////////////////////////// 
 
 // enums. 

@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <cassert>
+#include <boost/filesystem/operations.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include "PhraseDictionaryMemory.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
@@ -235,6 +238,33 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
   }
 }
 
+// helper fn
+//! delete old cached files that haven't been used for a while
+void DeleteCacheFile(const string &cachePathStr)
+{
+	using namespace boost::filesystem;
+	using namespace boost::posix_time;
+	
+	ptime now(second_clock::local_time());
+
+	path cachePath(cachePathStr, native);
+	directory_iterator end;
+	for (directory_iterator iter(cachePath) ; iter != end ; ++iter)
+	{
+		path &filePath = *iter;
+		// delete of old
+		if (filePath.leaf().find(PROJECT_NAME) == 0)
+		{
+			ptime lastWrite;
+			time_t t = last_write_time(filePath);
+			lastWrite = from_time_t(t);
+
+			if ( (lastWrite + boost::gregorian::days(7) ) < now )
+				remove(filePath);
+		}
+	}
+}
+
 StaticData::~StaticData()
 {
 	delete m_parameter;
@@ -252,6 +282,7 @@ StaticData::~StaticData()
 	// memory pools
 	Phrase::FinalizeMemPool();
 
+	DeleteCacheFile(GetCachePath());
 }
 
 bool StaticData::LoadLexicalReorderingModel()
@@ -533,6 +564,8 @@ bool StaticData::LoadGenerationTables()
 	return true;
 }
 
+#undef max
+
 bool StaticData::LoadPhraseTables()
 {
 	VERBOSE(2,"About to LoadPhraseTables" << endl);
@@ -552,7 +585,7 @@ bool StaticData::LoadPhraseTables()
 		//}
 		//TRACE_ERR( endl;
 
-		PhraseCollection *inputPhrases = NULL;
+		PhraseCollection inputPhrases;
 		string inputFileHash;
 		if (m_parameter->GetParam("input-file").size() > 0)
 		{ 
@@ -560,7 +593,7 @@ bool StaticData::LoadPhraseTables()
 			
 			// load input for filtering
 			TRACE_ERR( "Begin loading input for filtering" << endl);
-			inputPhrases = new PhraseCollection(m_parameter->GetParam("input-file")[0], m_factorCollection);
+			inputPhrases.Load(m_parameter->GetParam("input-file")[0], m_factorCollection);
 			TRACE_ERR( "Completed loading input for filtering" << endl);
 		}
 
@@ -573,8 +606,8 @@ bool StaticData::LoadPhraseTables()
 		{
 			vector<string>                  token           = Tokenize(translationVector[currDict]);
 			//characteristics of the phrase table
-			vector<FactorType>      input           = Tokenize<FactorType>(token[0], ",")
-				,output = Tokenize<FactorType>(token[1], ",");
+			vector<FactorType>	input		= Tokenize<FactorType>(token[0], ",")
+													,output = Tokenize<FactorType>(token[1], ",");
 			m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
 			m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
@@ -607,7 +640,6 @@ bool StaticData::LoadPhraseTables()
 							<< " scores, but you specified " << weight.size() << " weights!";
 				UserMessage::Add(strme.str());
 
-				delete inputPhrases;
 				return false;
 			}
 						
@@ -624,10 +656,21 @@ bool StaticData::LoadPhraseTables()
 			{					
 				// does cached filtering exist for this table, given input ?
 				string phraseTableHash	= GetMD5Hash(filePath);
+
+				// input factors of input
+				const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
+				stringstream inputFactorsStrme("");
+				for (size_t idx = 0 ; idx < inputFactorVector.size() ; ++idx)
+					inputFactorsStrme << inputFactorVector[idx];
+
+
    			string hashFilePath			= GetCachePath()
    																+ PROJECT_NAME + "--"
    																+ inputFileHash + "--"
-   																+ phraseTableHash + ".txt";
+																	+ inputFactorsStrme.str() // input factors of input
+   																+ phraseTableHash + "--"
+																	+ token[0] // input factors of phrase table
+																	+ ".txt";
 				bool filter;
 				if (FileExists(hashFilePath))
 				{ // load filtered file instead
@@ -673,7 +716,6 @@ bool StaticData::LoadPhraseTables()
 									 GetWeightWordPenalty()))
 				{
 					delete pd;
-					delete inputPhrases;
 					return false;
 				}
 				m_phraseDictionary.push_back(pd);
@@ -682,7 +724,6 @@ bool StaticData::LoadPhraseTables()
 			index++;
 		}
 
-		delete inputPhrases;
 	}	
 
 	PrintUserTime("Finished loading phrase tables");

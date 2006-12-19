@@ -52,7 +52,9 @@ protected:
 	PhraseCollectionNode m_collection;
 	void AddPhrase(const Phrase &source);
 public:
-	PhraseCollection(std::string filePath, FactorCollection &factorCollection);
+	PhraseCollection()
+	{}
+	void Load(std::string filePath, FactorCollection &factorCollection);
 	bool Find(const Phrase &source, bool notFoundValue) const;
 
 };

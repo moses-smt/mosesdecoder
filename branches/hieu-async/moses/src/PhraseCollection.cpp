@@ -66,7 +66,7 @@ void PhraseCollection::AddPhrase(const Phrase &source)
 
 }
 
-PhraseCollection::PhraseCollection(std::string filePath, FactorCollection &factorCollection)
+void PhraseCollection::Load(std::string filePath, FactorCollection &factorCollection)
 {
 	InputFileStream inFile(filePath);
 	
