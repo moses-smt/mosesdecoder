@@ -1,3 +1,5 @@
+// vim:tabstop=2
+
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -120,13 +122,14 @@ int main(int argc, char* argv[])
 
 void outputAlignment(const vector<int> &alignmentInfo)
 {
-	phraseTableFile << "|";
+	//phraseTableFile << "|";
 	if (alignmentInfo.size() > 0)
 		phraseTableFile << alignmentInfo[0];
 	for (size_t pos = 1 ; pos < alignmentInfo.size() ; ++pos)
 	{
 		phraseTableFile << "," << alignmentInfo[pos];
 	}
+	phraseTableFile << " ";
 }
 
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
@@ -192,9 +195,6 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
       for(int j=0;j<phraseF.size();j++)
 			{
 				phraseTableFile << vcbF.getWord( phraseF[j] );
-				cerr << vcbF.getWord( phraseF[j] ) << flush;
-				// output alignment
-				outputAlignment(phrasePair[0].alignedToF[j]);
 				phraseTableFile << " ";
 			}
       phraseTableFile << "||| ";
@@ -202,12 +202,9 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
 
     // english phrase
     PHRASE phraseE = phraseTableE.getPhrase( i->first );
-    for(int j=0;j<phraseE.size();j++)
+		for(int j=0;j<phraseE.size();j++)
 		{
       phraseTableFile << vcbE.getWord( phraseE[j] );
-			cerr << vcbE.getWord( phraseE[j] ) << flush;
-			// output alignment
-			outputAlignment(phrasePair[ i->first ].alignedToE[j]);
 			phraseTableFile << " ";
 		}
     phraseTableFile << "||| ";
@@ -217,14 +214,35 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
       for(int j=0;j<phraseF.size();j++)
 			{
 				phraseTableFile << vcbF.getWord( phraseF[j] );
-				cerr << vcbF.getWord( phraseF[j] ) << flush;
-				// output alignment
-				outputAlignment(phrasePair[0].alignedToF[j]);
 				phraseTableFile << " ";
 			}
       phraseTableFile << "||| ";
 		}
  
+
+		// output alignment		
+		if (! inverseFlag) {
+      for(int j=0;j<phraseF.size();j++)
+      {
+        outputAlignment(phrasePair[0].alignedToF[j]);
+      }
+      phraseTableFile << "||| ";
+		}
+
+    for(int j=0;j<phraseE.size();j++)
+    {
+      outputAlignment(phrasePair[ i->first ].alignedToE[j]);
+    }
+    phraseTableFile << "||| ";
+
+		if (inverseFlag) {
+		  for(int j=0;j<phraseF.size();j++)
+  		{
+    		outputAlignment(phrasePair[0].alignedToF[j]);
+  		}
+  		phraseTableFile << "||| ";
+		}
+
     // phrase translation probability
     phraseTableFile << ((double) i->second / (double) phrasePair.size());
 
