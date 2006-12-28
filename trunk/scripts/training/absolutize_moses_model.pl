@@ -65,7 +65,7 @@ sub ensure_absolute {
   my $target = shift;
   my $originfile = shift;
 
-  my $cwd = `pwd`;
+  my $cwd = `pawd`;
   chomp $cwd;
   $cwd.="/";
 

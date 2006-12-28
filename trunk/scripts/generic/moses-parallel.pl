@@ -289,7 +289,7 @@ if ($old_sge) {
   # we need to implement our own waiting script
   safesystem("echo 'date' > sync_workaround_script.sh") or kill_all_and_quit();
 
-  my $pwd = `pwd`; chomp $pwd;
+  my $pwd = `pawd`; chomp $pwd;
   my $checkpointfile = "sync_workaround_checkpoint";
 
   # delete previous checkpoint, if left from previous runs
