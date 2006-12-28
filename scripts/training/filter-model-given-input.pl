@@ -194,7 +194,7 @@ sub safesystem {
 sub ensure_full_path {
     my $PATH = shift;
     return $PATH if $PATH =~ /^\//;
-    $PATH = `pwd`."/".$PATH;
+    $PATH = `pawd`."/".$PATH;
     $PATH =~ s/[\r\n]//g;
     $PATH =~ s/\/\.\//\//g;
     $PATH =~ s/\/+/\//g;

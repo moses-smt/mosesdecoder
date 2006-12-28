@@ -4,7 +4,7 @@ WORKDIR=$1
 if [ ! -d $WORKDIR ]; then
   mkdir -p $WORKDIR
 fi
-RUNDIR=`pwd`
+RUNDIR=`pawd`
 
 SRCFILE=$2
 REFPREFIX=$3
