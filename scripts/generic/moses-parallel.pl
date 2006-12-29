@@ -23,7 +23,10 @@ use strict;
 #NOTE: group name is ws06ossmt (with 2 's') and not ws06osmt (with 1 's')
 my $queueparameters="-l ws06ossmt=true -l mem_free=0.5G -hard";
 
-my $workingdir = `pwd`; chomp $workingdir;
+# look for the correct pwdcmd 
+my $pwdcmd = getPwdCmd();
+
+my $workingdir = `$pwdcmd`; chomp $workingdir;
 my $tmpdir="$workingdir/tmp$$";
 my $splitpfx="split$$";
 
@@ -308,7 +311,7 @@ if ($old_sge) {
   # we need to implement our own waiting script
   safesystem("echo 'date' > sync_workaround_script.sh") or kill_all_and_quit();
 
-  my $pwd = `pwd`; chomp $pwd;
+  my $pwd = `$pwdcmd`; chomp $pwd;
   my $checkpointfile = "sync_workaround_checkpoint";
 
   # delete previous checkpoint, if left from previous runs
@@ -557,5 +560,16 @@ sub safesystem {
     print STDERR "Exit code: $exitcode\n" if $exitcode;
     return ! $exitcode;
   }
+}
+
+
+# look for the correct pwdcmd (pwd by default, pawd if it exists)
+# I assume that pwd always exists
+sub getPwdCmd(){
+	my $pwdcmd="pwd";
+	my $a;
+	chomp($a=`which pawd | head -1 | awk '{print $1}'`);
+	if ($a && -e $a){	$pwdcmd=$a;	}
+	return $pwdcmd;
 }
 
