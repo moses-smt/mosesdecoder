@@ -4,6 +4,11 @@ function die() {
   echo "$@"
   exit 1
 }
+RUNDIR=`pwd 2> /dev/null`
+if [ -z $RUNDIR ]; then
+  RUNDIR=`pwd`
+fi;
+
 
 [ -d $WORKSPACE ] || die "Missing $WORKSPACE"
 echo "Workspace: $WORKSPACE"
@@ -15,7 +20,7 @@ MOSES=$WORKSPACE/moses-cmd/src/moses
 
 export SCRIPTS_ROOTDIR=$WORKSPACE/scripts
 
-cp -r ../cs-en-sample ./corpus || die "Missing "`pawd`"/../cs-en-sample"
+cp -r ../cs-en-sample ./corpus || die "Missing $RUNDIR/../cs-en-sample"
 echo "Copied cs-en-sample files"
 
 mv corpus/test.* ./ || die "Missing corpus/test.*"
@@ -39,17 +44,17 @@ $SCRIPTS_ROOTDIR/training/train-factored-phrase-model.perl \
   --corpus corpus/train \
   --root   . \
   --parallel \
-  --lm 0:3:`pawd`/corpus/lm.en.gz \
+  --lm 0:3:$RUNDIR/corpus/lm.en.gz \
   || die "Failed to train the model"
 
 echo "Finished moses.ini, merting."
 
 $SCRIPTS_ROOTDIR/training/mert-moses.pl  \
     --working-dir=mert-tuning \
-    `pawd`/dev.src \
-    `pawd`/dev.ref \
+    $RUNDIR/dev.src \
+    $RUNDIR/dev.ref \
     $MOSES \
-    `pawd`/model/moses.ini \
+    $RUNDIR/model/moses.ini \
     --decoder-flags="-dl 6 " \
     || die "Merting failed"
 

@@ -1418,7 +1418,10 @@ print INI "\n# word penalty
 sub full_path {
     my ($PATH) = @_;
     return if $$PATH =~ /^\//;
-    $$PATH = `pawd`."/".$$PATH;
+    my $dir = `pawd 2>/dev/null`;
+    if(!$dir){$dir = `pwd`;}
+    chomp $dir;
+    $$PATH = $dir."/".$$PATH;
     $$PATH =~ s/[\r\n]//g;
     $$PATH =~ s/\/\.\//\//g;
     $$PATH =~ s/\/+/\//g;
