@@ -375,12 +375,6 @@ sub preparing_script(){
       print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest -input-file ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
       print OUT "echo exit status \$\?\n\n";
 
-      if ($inputtype==1){ #confusion network
-        print OUT "cat $tmpdir/${nbestfile}.$splitpfx$idx | perl $ENV{SCRIPTS_ROOTDIR}/generic/filterscores.pl > $tmpdir/${nbestfile}.$splitpfx$idx.tmp\n"; 
-        print OUT "echo exit status \$\?\n\n";
-        print OUT "mv $tmpdir/${nbestfile}.$splitpfx$idx.tmp $tmpdir/${nbestfile}.$splitpfx$idx; ";
-        print OUT "echo exit status \$\?\n\n";
-      }
       print OUT "mv $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }else{
