@@ -4,7 +4,6 @@ WORKDIR=$1
 if [ ! -d $WORKDIR ]; then
   mkdir -p $WORKDIR
 fi
-RUNDIR=`pawd`
 
 SRCFILE=$2
 REFPREFIX=$3
@@ -14,6 +13,14 @@ DECODER=$5
 DECODEROPTS=$6
 RANGES=$7
 START=$8
+
+#default pwdcmd is pwd
+#pwdcmd is pawd if exists
+PWDCMD="pwd"
+___PWDCMD=`which pawd | head -1 | awk '{print $1}'`
+if [ $___PWDCMD -a -e $___PWDCMD ] ; then PWDCMD=$___PWDCMD ; fi;
+
+RUNDIR=`$PWDCMD`
 
 makeinitopt "$RANGES" $WORKDIR/weights.txt $WORKDIR/ranges.txt
 DIM=`cat $WORKDIR/weights.txt | awk '{print NF; exit}'`
