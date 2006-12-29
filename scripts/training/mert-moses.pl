@@ -396,7 +396,9 @@ my @order_of_lambdas_from_decoder = ();
 
 
 #store current directory and create the working directory (if needed)
-my $cwd = `pawd`; chop($cwd);
+my $cwd = `pawd 2>/dev/null`; 
+if(!$cwd){$cwd = `pwd`;}
+chomp($cwd);
 safesystem("mkdir -p $___WORKING_DIR") or die "Can't mkdir $___WORKING_DIR";
 
 {
@@ -908,7 +910,10 @@ sub safesystem {
 sub ensure_full_path {
     my $PATH = shift;
     return $PATH if $PATH =~ /^\//;
-    $PATH = `pawd`."/".$PATH;
+    my $dir = `pawd 2>/dev/null`; 
+    if(!$dir){$dir = `pwd`;}
+    chomp($dir);
+    $PATH = $dir."/".$PATH;
     $PATH =~ s/[\r\n]//g;
     $PATH =~ s/\/\.\//\//g;
     $PATH =~ s/\/+/\//g;
