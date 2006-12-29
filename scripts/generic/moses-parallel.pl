@@ -23,7 +23,9 @@ use strict;
 #NOTE: group name is ws06ossmt (with 2 's') and not ws06osmt (with 1 's')
 my $queueparameters="-l ws06ossmt=true -l mem_free=0.5G -hard";
 
-my $workingdir=$ENV{PWD};
+my $workingdir=`pawd`;
+chomp($workingdir);
+
 my $tmpdir="$workingdir/tmp$$";
 my $splitpfx="split$$";
 
