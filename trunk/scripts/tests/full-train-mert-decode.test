@@ -15,7 +15,7 @@ MOSES=$WORKSPACE/moses-cmd/src/moses
 
 export SCRIPTS_ROOTDIR=$WORKSPACE/scripts
 
-cp -r ../cs-en-sample ./corpus || die "Missing "`pwd`"/../cs-en-sample"
+cp -r ../cs-en-sample ./corpus || die "Missing "`pawd`"/../cs-en-sample"
 echo "Copied cs-en-sample files"
 
 mv corpus/test.* ./ || die "Missing corpus/test.*"
@@ -39,17 +39,17 @@ $SCRIPTS_ROOTDIR/training/train-factored-phrase-model.perl \
   --corpus corpus/train \
   --root   . \
   --parallel \
-  --lm 0:3:`pwd`/corpus/lm.en.gz \
+  --lm 0:3:`pawd`/corpus/lm.en.gz \
   || die "Failed to train the model"
 
 echo "Finished moses.ini, merting."
 
 $SCRIPTS_ROOTDIR/training/mert-moses.pl  \
     --working-dir=mert-tuning \
-    `pwd`/dev.src \
-    `pwd`/dev.ref \
+    `pawd`/dev.src \
+    `pawd`/dev.ref \
     $MOSES \
-    `pwd`/model/moses.ini \
+    `pawd`/model/moses.ini \
     --decoder-flags="-dl 6 " \
     || die "Merting failed"
 

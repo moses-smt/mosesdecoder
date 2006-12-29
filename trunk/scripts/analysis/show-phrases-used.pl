@@ -7,7 +7,7 @@
 use strict;
 BEGIN
 {
-	my $wd = `pwd`; chop $wd;
+	my $wd = `pawd`; chop $wd;
 	push @INC, "$wd/perllib/sun4-solaris"; #for GD; if not an absolute path, Polygon.pm throws a fit
 }
 use lib "perllib/sun4-solaris/auto/GD";
