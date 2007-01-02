@@ -48,6 +48,7 @@ bool inverseFlag;
 
 int main(int argc, char* argv[]) 
 {
+  cerr << "HIEU HOANG\n\n";
   cerr << "PhraseScore v1.2.1, written by Philipp Koehn\n"
        << "phrase scoring methods for extracted phrases\n";
   time_t starttime = time(NULL);
@@ -226,21 +227,21 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
       {
         outputAlignment(phrasePair[0].alignedToF[j]);
       }
-      phraseTableFile << "a ||| ";
+      phraseTableFile << " ||| ";
 		}
 
     for(int j=0;j<phraseE.size();j++)
     {
       outputAlignment(phrasePair[ i->first ].alignedToE[j]);
     }
-    phraseTableFile << "b ||| ";
+    phraseTableFile << " ||| ";
 
 		if (inverseFlag) {
 		  for(int j=0;j<phraseF.size();j++)
   		{
     		outputAlignment(phrasePair[0].alignedToF[j]);
   		}
-  		phraseTableFile << "c ||| ";
+  		phraseTableFile << " ||| ";
 		}
 
     // phrase translation probability

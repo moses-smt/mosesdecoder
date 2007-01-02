@@ -13,11 +13,11 @@ $ENV{"LC_ALL"} = "C";
 
 my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER);
 
-my $debug = 0; # debug this script, do not delete any files in debug mode
+my $debug = 1; # debug this script, do not delete any files in debug mode
 
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR = "/THIS/PATH/IS/REPLACED/BY/MAKE/RELEASE";
+my $BINDIR="/home/s0565741/bin";
 
 
 $_HELP = 1
@@ -900,6 +900,7 @@ sub score_phrase {
 	}
 	safesystem("cat $___MODEL_DIR/phrase-table-half.$factor.$direction.part* >$___MODEL_DIR/phrase-table-half.$factor.$direction") or die;
     }
+
     print STDERR "(6.4) [$factor]  sorting inverse n2f table@ ".`date`;
     safesystem("LC_ALL=C sort -T $___MODEL_DIR $___MODEL_DIR/phrase-table-half.$factor.n2f > $___MODEL_DIR/phrase-table-half.$factor.n2f.sorted") or die;
     print STDERR "(6.5) [$factor]  consolidating the two halves @ ".`date`;
@@ -914,10 +915,14 @@ sub score_phrase {
     while(my $f2n = <F2N>) {
 	$i++;
 	my $n2f = <N2F>;
-	my ($english,$foreign,$p) = split(/ \|\|\| /,$n2f); chop($p);
-	my ($english2,$foreign2,$p2) = split(/ \|\|\| /,$f2n); chop($p2);
-	if ($english ne $english2 || $foreign ne $foreign2) {
-	    print STDERR "mismatch line $i: ($english ne $english2 || $foreign ne $foreign2)\n";
+	my ($english, $foreign , $alignEnglish,  $alignForeign,  $p) = split(/ \|\|\| /,$n2f); chop($p);
+	my ($english2,$foreign2, $alignEnglish2, $alignForeign2, $p2) = split(/ \|\|\| /,$f2n); chop($p2);
+	if ($english ne $english2 
+	   || $foreign ne $foreign2
+	   || $alignEnglish ne $alignEnglish2
+	   || $alignForeign ne $alignForeign2) 
+	{
+	    print STDERR "mismatch line $i: ($english ne $english2 || $foreign ne $foreign2  || $alignEnglish ne $alignEnglish2 || $alignForeign ne $alignForeign2 )\n";
             $mismatch++;
             last if $mismatch > 10;
 	    next;
