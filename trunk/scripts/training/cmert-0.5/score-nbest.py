@@ -1,4 +1,4 @@
-#!/usr/bin/python2.3
+#!/usr/bin/python
 
 """Convert n-best list in mert.perl format to format required by
 Venugopal's MER trainer. This entails calculating the BLEU component scores."""
@@ -11,7 +11,6 @@ Venugopal's MER trainer. This entails calculating the BLEU component scores."""
 
 import sys, itertools, re
 import bleu
-#The default python version on DICE is currently 2.3, which does not contain sets as a built-in module.
 #Comment out this line when moving to python 2.4
 from sets import Set as set
 
