@@ -178,10 +178,10 @@ public:
   };
     
     void reset_caches(){
-      if (probcache) probcache->reset(probcache->cursize());
-      if (statecache) statecache->reset(statecache->cursize());
+      if (probcache) probcache->reset(400000);
+      if (statecache) statecache->reset(200000);
       for (int i=2;i<=max_cache_lev;i++)
-        lmtcache[i]->reset(lmtcache[i]->cursize());
+        lmtcache[i]->reset(200000);
     };
     
     
