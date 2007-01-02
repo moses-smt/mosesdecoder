@@ -226,21 +226,21 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
       {
         outputAlignment(phrasePair[0].alignedToF[j]);
       }
-      phraseTableFile << "||| ";
+      phraseTableFile << "a ||| ";
 		}
 
     for(int j=0;j<phraseE.size();j++)
     {
       outputAlignment(phrasePair[ i->first ].alignedToE[j]);
     }
-    phraseTableFile << "||| ";
+    phraseTableFile << "b ||| ";
 
 		if (inverseFlag) {
 		  for(int j=0;j<phraseF.size();j++)
   		{
     		outputAlignment(phrasePair[0].alignedToF[j]);
   		}
-  		phraseTableFile << "||| ";
+  		phraseTableFile << "c ||| ";
 		}
 
     // phrase translation probability

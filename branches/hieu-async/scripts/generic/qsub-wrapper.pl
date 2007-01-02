@@ -8,7 +8,10 @@ use strict;
 #NOTE: group name is ws06ossmt (with 2 's') and not ws06osmt (with 1 's')
 my $queueparameters="-l ws06ossmt=true -l mem_free=0.5G";
 
-my $workingdir=$ENV{PWD};
+# look for the correct pwdcmd 
+my $pwdcmd = getPwdCmd();
+
+my $workingdir = `$pwdcmd`; chomp $workingdir;
 my $tmpdir="$workingdir/tmp$$";
 my $jobscript="$workingdir/job$$";
 my $qsubout="$workingdir/out.job$$";
@@ -229,5 +232,15 @@ sub safesystem {
     print STDERR "Exit code: $exitcode\n" if $exitcode;
     return ! $exitcode;
   }
+}
+
+# look for the correct pwdcmd (pwd by default, pawd if it exists)
+# I assume that pwd always exists
+sub getPwdCmd(){
+	my $pwdcmd="pwd";
+	my $a;
+	chomp($a=`which pawd | head -1 | awk '{print $1}'`);
+	if ($a && -e $a){	$pwdcmd=$a;	}
+	return $pwdcmd;
 }
 

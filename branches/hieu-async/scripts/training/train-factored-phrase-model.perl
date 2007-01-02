@@ -17,7 +17,7 @@ my $debug = 0; # debug this script, do not delete any files in debug mode
 
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR="/home/s0565741/bin";
+my $BINDIR = "/THIS/PATH/IS/REPLACED/BY/MAKE/RELEASE";
 
 
 $_HELP = 1
@@ -914,19 +914,15 @@ sub score_phrase {
     while(my $f2n = <F2N>) {
 	$i++;
 	my $n2f = <N2F>;
-	my ($english, $foreign, $alignEnglish, $alignForeign, $p) = split(/ \|\|\| /,$n2f); chop($p);
-	my ($english2, $foreign2, $alignEnglish2, $alignForeign2, $p2) = split(/ \|\|\| /,$f2n); chop($p2);
-	if ($english ne $english2 
-            || $foreign ne $foreign2
-            || $alignEnglish ne $alignEnglish2
-            || $alignForeign ne $alignForeign2) 
-        {
+	my ($english,$foreign,$p) = split(/ \|\|\| /,$n2f); chop($p);
+	my ($english2,$foreign2,$p2) = split(/ \|\|\| /,$f2n); chop($p2);
+	if ($english ne $english2 || $foreign ne $foreign2) {
 	    print STDERR "mismatch line $i: ($english ne $english2 || $foreign ne $foreign2)\n";
             $mismatch++;
             last if $mismatch > 10;
 	    next;
 	}
-	print TABLE "$english ||| $foreign ||| $alignEnglish ||| $alignForeign ||| $p $p2 2.718\n";
+	print TABLE "$english ||| $foreign ||| $p $p2 2.718\n";
     }
     close(N2F);
     close(F2N);
@@ -1422,7 +1418,10 @@ print INI "\n# word penalty
 sub full_path {
     my ($PATH) = @_;
     return if $$PATH =~ /^\//;
-    $$PATH = `pwd`."/".$$PATH;
+    my $dir = `pawd 2>/dev/null`;
+    if(!$dir){$dir = `pwd`;}
+    chomp $dir;
+    $$PATH = $dir."/".$$PATH;
     $$PATH =~ s/[\r\n]//g;
     $$PATH =~ s/\/\.\//\//g;
     $$PATH =~ s/\/+/\//g;

@@ -23,7 +23,10 @@ use strict;
 #NOTE: group name is ws06ossmt (with 2 's') and not ws06osmt (with 1 's')
 my $queueparameters="-l ws06ossmt=true -l mem_free=0.5G -hard";
 
-my $workingdir=$ENV{PWD};
+# look for the correct pwdcmd 
+my $pwdcmd = getPwdCmd();
+
+my $workingdir = `$pwdcmd`; chomp $workingdir;
 my $tmpdir="$workingdir/tmp$$";
 my $splitpfx="split$$";
 
@@ -50,6 +53,8 @@ my $nbestfile=undef;
 my $orinbestfile=undef;
 my $nbest=undef;
 my $nbestflag=0;
+my $orilogfile="";
+my $logflag="";
 my $qsubname="MOSES";
 my $inputtype=0;
 my $old_sge = 0; # assume old Sun Grid Engine (<6.0) where qsub does not
@@ -64,21 +69,24 @@ sub init(){
 	     'debug'=>\$dbg,
 	     'jobs=i'=>\$jobs,
 	     'decoder=s'=> \$mosescmd,
+       'decoder-parameters=s'=> \$mosesparameters,
+			 'logfile=s'=> \$orilogfile,
 	     'i|inputfile|input-file=s'=> \$orifile,
 	     'n-best-file=s'=> \$orinbestfile,
 	     'n-best-size=i'=> \$nbest,
 	     'qsub-prefix=s'=> \$qsubname,
 	     'queue-parameters=s'=> \$queueparameters,
 	     'inputtype=i'=> \$inputtype,
-             'config=s'=>\$cfgfile,
-             'old-sge' => \$old_sge,
+       'config=s'=>\$cfgfile,
+       'old-sge' => \$old_sge,
 	    ) or exit(1);
 
   chomp($nbestfile=`basename $orinbestfile`) if defined $orinbestfile;
   chomp($testfile=`basename $orifile`) if defined $orifile;
-  
-  $mosesparameters="@ARGV -config $cfgfile -inputtype $inputtype";
+
+  $mosesparameters.="@ARGV -config $cfgfile -inputtype $inputtype";
   getNbestParameters();
+  getLogParameters();
 }
 
 
@@ -96,7 +104,9 @@ sub version(){
 #    print STDERR "version 1.8 (31-07-2006)\n";
 #    print STDERR "version 1.9 (01-08-2006)\n";
 #    print STDERR "version 1.10 (02-08-2006)\n";
-    print STDERR "version 1.11 (10-10-2006)\n";
+#	print STDERR "version 1.11 (10-10-2006)\n";
+#	print STDERR "version 1.12 (27-12-2006)\n";
+	print STDERR "version 1.13 (29-12-2006)\n";
     exit(1);
 }
 
@@ -109,21 +119,25 @@ sub usage(){
   print STDERR "*  -i|inputfile|input-file <file>   the input text to translate\n";
   print STDERR "*  -jobs <N> number of required jobs\n";
   print STDERR "   -qsub-prefix <string> name for sumbitte jobs\n";
-  print STDERR "   -queue-parameters <string> specific requirements for queue\n";
-  print STDERR "   -old-sge Assume Sun Grid Engine < 6.0\n";
+	print STDERR "   -queue-parameters <string> specific requirements for queue\n";
+	print STDERR "   -old-sge Assume Sun Grid Engine < 6.0\n";
   print STDERR "   -debug debug\n";
   print STDERR "   -version print version of the script\n";
   print STDERR "   -help this help\n";
   print STDERR "Moses options:\n";
   print STDERR "   -inputtype <0|1> 0 for text, 1 for confusion networks\n";
   print STDERR "*  -config <cfgfile> configuration file\n";
+  print STDERR "   -decoder-parameters <string> specific parameters for the decoder\n";
   print STDERR "All other options are passed to Moses\n";
-  exit(1);
+  print STDERR "  (This way to pass parameters is maintained for back compatibility\n";
+	print STDERR "   but preferably use -decoder-parameters)\n";
+	exit(1);
 }
 
 #printparameters
 sub print_parameters(){
   print STDERR "Inputfile: $orifile\n";
+  print STDERR "Logfile: $orilogfile\n";
   print STDERR "Configuration file: $cfgfile\n";
   print STDERR "Decoder in use: $mosescmd\n";
   if ($nbestflag) {
@@ -132,11 +146,16 @@ sub print_parameters(){
   }
   print STDERR "Number of jobs:$jobs\n";
   print STDERR "Qsub name: $qsubname\n";
-  print STDERR "Queue parameters: $queueparameters\n";
-  print STDERR "Inputtype: text\n" if $inputtype == 0;
+	print STDERR "Queue parameters: $queueparameters\n";
+	print STDERR "Inputtype: text\n" if $inputtype == 0;
   print STDERR "Inputtype: confusion network\n" if $inputtype == 1;
   
   print STDERR "parameters directly passed to Moses: $mosesparameters\n";
+}
+
+#get parameters for log file
+sub getLogParameters(){
+  $logflag=1 if $orilogfile;
 }
 
 #get parameters for nbest computation from configuration file
@@ -167,25 +186,25 @@ usage() if $help;
 
 if (!defined $orifile || !defined $mosescmd || ! defined $cfgfile) {
   print STDERR "Please specify -input-file, -decoder and -config\n";
-  exit 1;
+  usage();
 }
 
 #checking if inputfile exists
 if (! -e ${orifile} ){
   print STDERR "Inputfile ($orifile) does not exists\n";
-  exit 1;
+  usage();
 }
 
 #checking if decoder exists
 if (! -e $mosescmd) {
   print STDERR "Decoder ($mosescmd) does not exists\n";
-  exit 1;
+  usage();
 }
 
 #checking if configfile exists
 if (! -e $cfgfile) {
   print STDERR "Configuration file ($cfgfile) does not exists\n";
-  exit 1;
+  usage();
 }
 
 
@@ -267,7 +286,10 @@ my @sgepids =();
 
 my $failure=0;
 foreach my $idx (@idxlist){
-  $cmd="qsub $queueparameters -j y -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
+  print STDERR "qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash\n" if $dbg; 
+
+  $cmd="qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
+
   safesystem($cmd) or die;
 
   my ($res,$id);
@@ -289,7 +311,7 @@ if ($old_sge) {
   # we need to implement our own waiting script
   safesystem("echo 'date' > sync_workaround_script.sh") or kill_all_and_quit();
 
-  my $pwd = `pwd`; chomp $pwd;
+  my $pwd = `$pwdcmd`; chomp $pwd;
   my $checkpointfile = "sync_workaround_checkpoint";
 
   # delete previous checkpoint, if left from previous runs
@@ -336,7 +358,9 @@ check_translation();
 
 #concatenating translations and removing temporary files
 concatenate_1best();
-if ($nbestflag){  concatenate_nbest();  }
+concatenate_logs() if $logflag;
+concatenate_nbest() if $nbestflag;  
+
 
 remove_temporary_files();
 
@@ -353,6 +377,7 @@ sub preparing_script(){
     if ($nbestflag){
       print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest -input-file ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
       print OUT "echo exit status \$\?\n\n";
+
       print OUT "mv $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }else{
@@ -436,6 +461,19 @@ sub concatenate_1best(){
     close(IN);
   }
 }
+
+sub concatenate_logs(){
+  open (OUT, "> ${orilogfile}");
+  foreach my $idx (@idxlist){
+    my @in=();
+    open (IN, "$qsubout$idx");
+    @in=<IN>;
+    print OUT "@in";
+    close(IN);
+  }
+  close(OUT);
+}
+
 
 sub check_exit_status(){
   print STDERR "check_exit_status\n";
@@ -522,5 +560,16 @@ sub safesystem {
     print STDERR "Exit code: $exitcode\n" if $exitcode;
     return ! $exitcode;
   }
+}
+
+
+# look for the correct pwdcmd (pwd by default, pawd if it exists)
+# I assume that pwd always exists
+sub getPwdCmd(){
+	my $pwdcmd="pwd";
+	my $a;
+	chomp($a=`which pawd | head -1 | awk '{print $1}'`);
+	if ($a && -e $a){	$pwdcmd=$a;	}
+	return $pwdcmd;
 }
 
