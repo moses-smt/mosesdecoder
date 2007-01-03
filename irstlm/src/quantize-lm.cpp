@@ -17,7 +17,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 ******************************************************************************/
-
 using namespace std;
 
 #include <iostream>
@@ -38,22 +37,20 @@ using namespace std;
 //----------------------------------------------------------------------
 
 typedef struct{
-  double pt;
-  int idx;
-  short code;
-}BinEntry;
+  float pt;
+  unsigned int idx;
+  unsigned short code;
+}DataItem;
 
 
-int cmpBinEntry(const void* a,const void* b){
-  if (*(double *)a > *(double*)b)
+int cmpFloatEntry(const void* a,const void* b){
+  if (*(float *)a > *(float*)b)
     return 1;
-  else if (*(double *)a < *(double*)b)
+  else if (*(float *)a < *(float *)b)
     return -1;
   else
     return 0;
 }
-
-BinEntry* bintable=NULL;
 
 //----------------------------------------------------------------------
 //  Global entry points
@@ -61,7 +58,7 @@ BinEntry* bintable=NULL;
 
 int parseWords(char *sentence, char **words, int max);
 
-int ComputeCluster(int nc, double* cl,int N,double* Pts);
+int ComputeCluster(int nc, double* cl,int N,DataItem* Pts);
 
 //----------------------------------------------------------------------
 //  Global parameters (some are set in getArgs())
@@ -81,12 +78,12 @@ void usage(const char *msg = 0) {
     << "  quantize-lm reads a standard LM file in ARPA format and produces" << std::endl
     << "  a version of it with quantized probabilities and back-off weights"<< std::endl
     << "  that the IRST LMtoolkit can compile. Accepts LMs with .gz suffix." << std::endl;
-  }
+}
 
 
 int main(int argc, const char **argv)
 {
-
+  
   //Process Parameters 
   
   if (argc < 2) { usage(); exit(1); }
@@ -101,7 +98,7 @@ int main(int argc, const char **argv)
   
   std::string infile = files[0];
   std::string outfile="";
-
+  
   if (files.size() == 1) {  
     outfile=infile;
     
@@ -123,16 +120,16 @@ int main(int argc, const char **argv)
   
   std::cout << "Reading " << infile << "..." << std::endl;
   
- inputfilestream inp(infile.c_str());
+  inputfilestream inp(infile.c_str());
   if (!inp.good()) {
     std::cerr << "Failed to open " << infile << "!\n";
     exit(1);
   }
   
-
+  
   std::ofstream out(outfile.c_str());
   std::cout << "Writing " << outfile << "..." << std::endl;
-
+  
   //prepare temporary file to save n-gram blocks for multiple reads 
   //this avoids using seeks which do not work with inputfilestream
   //it's odd but i need a bidirectional filestream!
@@ -142,29 +139,32 @@ int main(int argc, const char **argv)
   dummy.close();
   
   fstream filebuff(filePath.c_str(),ios::out|ios::in);
-    
+  
   int nPts = 0;  // actual number of points
   
   // *** Read ARPA FILE ** 
   
   int numNgrams[MAXLEV + 1]; /* # n-grams for each order */
-  int Order,MaxOrder;
-  int n;
+  int Order=0,MaxOrder=0;
+  int n=0;
   
-  float logprob,logbow, logten=log(10.0);
+  float logprob,logbow;
   
-  double* dataPts=NULL;
-  double* centersP=NULL; double* centersB=NULL;
+  DataItem* dataPts;
   
-  int* mapP=NULL; int* mapB=NULL;
+  double* centersP=NULL; 
+  double* centersB=NULL;
   
-  int centers=k;
+  //maps from point index to code
+  unsigned short* mapP=NULL; unsigned short* mapB=NULL;
+  
+  int centers[MAXLEV + 1];
   streampos iposition;
   
-  out << "qARPA\n"; //print output header
+  for (int i=1;i<=MAXLEV;i++) numNgrams[i]=0;  
+  for (int i=1;i<=MAXLEV;i++) centers[i]=k; 
   
-    
-  for (int i=1;i<=MAXLEV;i++) numNgrams[i]=0;
+  /* all levels 256 centroids; in case read them as parameters */
   
   char line[MAX_LINE];
   
@@ -175,53 +175,67 @@ int main(int argc, const char **argv)
     if (sscanf(line, "ngram %d=%d", &Order, &n) == 2) {
       numNgrams[Order] = n;
       MaxOrder=Order;
+      continue;
     }
+    
+    if (!strncmp(line, "\\data\\", 6) || strlen(line)==0)
+      continue;
     
     if (backslash && sscanf(line, "\\%d-grams", &Order) == 1) {
       
+      // print output header:
+      if (Order == 1) {
+        out << "qARPA " << MaxOrder;
+        for (int i=1;i<=MaxOrder;i++) 
+          out << " " << centers[i];
+        out << "\n\n\\data\\\n";
+        
+        for (int i=1;i<=MaxOrder;i++) 
+          out << "ngram " << i << "= " << numNgrams[i] << "\n";
+      }
+      
+      out << "\n";
       out << line << "\n";
       cerr << "-- Start processing of " << Order << "-grams\n";
       assert(Order <= MAXLEV);
       
       int N=numNgrams[Order];
-      centers=k;
-      if (Order==1) centers=256; // always use 256 centers
       
       char* words[MAXLEV+3];
-      dataPts=new double[N]; // allocate data         
+      dataPts=new DataItem[N]; // allocate data         
       
       //reset tempout file 
       filebuff.seekg(0);
-           
+      
       for (nPts=0;nPts<N;nPts++){
         inp.getline(line,MAX_LINE);  
         filebuff << line << std::endl;
         int howmany = parseWords(line, words, Order + 3);
         assert(howmany == Order+2 || howmany == Order+1);
         sscanf(words[0],"%f",&logprob);
-        dataPts[nPts]=exp(logprob * logten);
+        dataPts[nPts].pt=logprob; //exp(logprob * logten);
+        dataPts[nPts].idx=nPts;
       }
-                
+      
       cerr << "quantizing " << N << " probabilities\n";
       
-      centersP=new double[centers];
-      mapP=new int[N];
+      centersP=new double[centers[Order]];
+      mapP=new unsigned short[N];
       
-      ComputeCluster(centers,centersP,N,dataPts);
+      ComputeCluster(centers[Order],centersP,N,dataPts);
       
-
-      assert(bintable !=NULL);
+      
       for (int p=0;p<N;p++){
-        mapP[bintable[p].idx]=bintable[p].code;
+        mapP[dataPts[p].idx]=dataPts[p].code;
       }
       
       if (Order<MaxOrder){
         //second pass to read back-off weights
-      
+        
         filebuff.seekg(0);
-       
+        
         for (nPts=0;nPts<N;nPts++){
-         
+          
           filebuff.getline(line,MAX_LINE);
           
           int howmany = parseWords(line, words, Order + 3);
@@ -229,27 +243,28 @@ int main(int argc, const char **argv)
             sscanf(words[Order+1],"%f",&logbow);
           else
             logbow=0; // backoff is implicit                    
-          dataPts[nPts]=exp(logbow * logten);
+          
+          dataPts[nPts].pt=logbow; 
+          dataPts[nPts].idx=nPts;
         }
         
-        centersB=new double[centers];
-        mapB=new int[N];
+        centersB=new double[centers[Order]];
+        mapB=new unsigned short[N];
         
         cerr << "quantizing " << N << " backoff weights\n";
-        ComputeCluster(centers,centersB,N,dataPts);
+        ComputeCluster(centers[Order],centersB,N,dataPts);
         
-        assert(bintable !=NULL);
         for (int p=0;p<N;p++){
-          mapB[bintable[p].idx]=bintable[p].code;
+          mapB[dataPts[p].idx]=dataPts[p].code;
         }
         
       }
       
-            
-      out << centers << "\n";
-      for (nPts=0;nPts<centers;nPts++){
-        out << log(centersP[nPts])/logten;
-        if (Order<MaxOrder) out << " " << log(centersB[nPts])/logten;
+      
+      out << centers[Order] << "\n";
+      for (nPts=0;nPts<centers[Order];nPts++){
+        out << centersP[nPts]; 
+        if (Order<MaxOrder) out << " " << centersB[nPts];
         out << "\n";
       }
       
@@ -270,7 +285,7 @@ int main(int argc, const char **argv)
         out << "\n";
         
       }
-            
+      
       if (mapP){delete [] mapP;mapP=NULL;}
       if (mapB){delete [] mapB;mapB=NULL;}
       
@@ -290,7 +305,7 @@ int main(int argc, const char **argv)
   cerr << "---- done\n";
   
   out.flush();
-   
+  
   out.close();
   inp.close();
   
@@ -299,22 +314,16 @@ int main(int argc, const char **argv)
 
 // Compute Clusters
 
-int ComputeCluster(int centers,double* ctrs,int N,double* dataPts){
+int ComputeCluster(int centers,double* ctrs,int N,DataItem* bintable){
   
   
   //cerr << "\nExecuting Clutering Algorithm:  k=" << centers<< "\n";
+  double log10=log(10.0);
   
-  if (bintable) delete [] bintable;
-  
-  bintable=new BinEntry[N];
-  for (int i=0;i<N;i++){
-    bintable[i].pt=dataPts[i];
-    bintable[i].idx=i;
-    bintable[i].code=0;
-  }
+  for (int i=0;i<N;i++) bintable[i].code=0;
   
   //cout << "start sort \n";
-  qsort(bintable,N,sizeof(BinEntry),cmpBinEntry);
+  qsort(bintable,N,sizeof(DataItem),cmpFloatEntry);
   
   int different=1;
   
@@ -333,10 +342,10 @@ int ComputeCluster(int centers,double* ctrs,int N,double* dataPts){
   
   for (int i=0;i<centers;i++){
     population[i]=species[i]=0;
-    ctrs[i]=0.0;
+    ctrs[i]=0;
   }
   
-  // initial values
+  // initial values: this should catch up very low values: -99
   bintable[0].code=0;    
   population[0]=1;
   species[0]=1;
@@ -352,7 +361,7 @@ int ComputeCluster(int centers,double* ctrs,int N,double* dataPts){
         if ((currcode+1) < centers 
             && 
             population[currcode]>0){
-                currcode++;
+          currcode++;
         }
     }
       
@@ -367,19 +376,21 @@ int ComputeCluster(int centers,double* ctrs,int N,double* dataPts){
       
       assert(bintable[i].code < centers);
       
-      ctrs[bintable[i].code]+=bintable[i].pt;
+      ctrs[bintable[i].code]=ctrs[bintable[i].code]+exp(bintable[i].pt * log10);
       
   }
     
-    
     for (int i=0;i<centers;i++){
-      if (population[i]>0){
-        ctrs[i]/=(float)population[i];
-        if (ctrs[i]<1e-99){
-            cerr << "Warning: adjusting center with too small prob " << ctrs[i] << "\n";
-            ctrs[i]=1e-99;
-        }
+      if (population[i]>0)
+        ctrs[i]=log(ctrs[i]/population[i])/log10;
+      else
+        ctrs[i]=-99;
+      
+      if (ctrs[i]<-99){
+        cerr << "Warning: adjusting center with too small prob " << ctrs[i] << "\n";
+        ctrs[i]=-99;
       }
+      
       //cout << i << " ctr " << ctrs[i] << " population " << population[i] << " species " << species[i] <<"\n";
     }
     
@@ -420,5 +431,6 @@ int parseWords(char *sentence, char **words, int max)
   
   return i;
 }
+
 
 

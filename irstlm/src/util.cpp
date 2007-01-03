@@ -64,7 +64,7 @@ m_streambuf(0)
     m_streambuf = new gzfilebuf(filePath.c_str());
   } else {
     std::filebuf* fb = new std::filebuf();
-    fb->open(filePath.c_str(), std::ios::in);
+    _good=(fb->open(filePath.c_str(), std::ios::in)!=NULL);
     m_streambuf = fb;
   }
   this->init(m_streambuf);

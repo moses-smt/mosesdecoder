@@ -57,15 +57,12 @@ void ngramcache::reset(int n){
     entries=0;
   }
 
-
-
-
 char* ngramcache::get(const int* ngp,char* info){       
     char *found;
    // cout << "ngramcache::get() ";
     //for (int i=0;i<ngsize;i++) cout << ngp[i] << " "; cout <<"\n"; 
   accesses++;
-  if (found=ht->search((char *)ngp,HT_FIND)){
+  if ((found=ht->search((char *)ngp,HT_FIND))){
     if (info) memcpy(info,found+ngsize*sizeof(int),infosize);
     hits++;
   }; 
