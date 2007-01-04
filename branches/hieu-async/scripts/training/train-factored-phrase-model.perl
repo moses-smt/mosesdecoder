@@ -927,7 +927,7 @@ sub score_phrase {
             last if $mismatch > 10;
 	    next;
 	}
-	print TABLE "$english ||| $foreign ||| $p $p2 2.718\n";
+	print TABLE "$english ||| $foreign ||| $alignEnglish ||| $alignForeign ||| $p $p2 2.718\n";
     }
     close(N2F);
     close(F2N);
