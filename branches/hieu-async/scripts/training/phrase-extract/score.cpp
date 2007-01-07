@@ -196,9 +196,11 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
     if (! inverseFlag) {
       for(int j=0;j<phraseF.size();j++)
 			{
+				//cerr << vcbF.getWord( phraseF[j] ) << " ";
 				phraseTableFile << vcbF.getWord( phraseF[j] );
 				phraseTableFile << " ";
 			}
+			//cerr << endl;
       phraseTableFile << "||| ";
 		}
 
@@ -206,46 +208,54 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
     PHRASE phraseE = phraseTableE.getPhrase( i->first );
 		for(int j=0;j<phraseE.size();j++)
 		{
+			//cerr << vcbE.getWord( phraseE[j] ) << " ";
       phraseTableFile << vcbE.getWord( phraseE[j] );
 			phraseTableFile << " ";
 		}
+		//cerr << endl;
     phraseTableFile << "||| ";
 
     // foreign phrase (if inverse)
     if (inverseFlag) {
       for(int j=0;j<phraseF.size();j++)
 			{
+				//cerr << vcbF.getWord( phraseF[j] ) << " ";
 				phraseTableFile << vcbF.getWord( phraseF[j] );
 				phraseTableFile << " ";
 			}
+			//cerr << endl;
       phraseTableFile << "||| ";
 		}
  
 
 		// output alignment		
-		if (! inverseFlag) {
-      for(int j=0;j<phraseF.size();j++)
-      {
-        outputAlignment(phrasePair[ i->first ].alignedToF[j]);
-      }
-      phraseTableFile << " ||| ";
+		const PhraseAlignment &phraseAlignment = phrasePair[i->first];
+
+    if (! inverseFlag) 
+		{
+			for(int j=0 ; j < phraseAlignment.alignedToF.size() ; j++)
+			{
+				outputAlignment(phraseAlignment.alignedToF[j]);
+			}
+			phraseTableFile << " ||| ";
 		}
 
-    for(int j=0;j<phraseE.size();j++)
-    {
-      outputAlignment(phrasePair[ i->first ].alignedToE[j]);
-    }
-    phraseTableFile << " ||| ";
+		for(int j=0 ; j < phraseAlignment.alignedToE.size() ; j++)
+		{
+			outputAlignment(phraseAlignment.alignedToE[j]);
+		}
+		phraseTableFile << " ||| ";
 
-		if (inverseFlag) {
-		  for(int j=0;j<phraseF.size();j++)
-  		{
-    		outputAlignment(phrasePair[ i->first ].alignedToF[j]);
-  		}
-  		phraseTableFile << " ||| ";
+    if ( inverseFlag) 
+		{
+			for(int j=0 ; j < phraseAlignment.alignedToF.size() ; j++)
+			{
+				outputAlignment(phraseAlignment.alignedToF[j]);
+			}
+			phraseTableFile << " ||| ";
 		}
 
-    // phrase translation probability
+		// phrase translation probability
     phraseTableFile << ((double) i->second / (double) phrasePair.size());
 
     // lexical translation probability
