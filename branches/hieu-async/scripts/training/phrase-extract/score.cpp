@@ -237,14 +237,14 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
 			{
 				outputAlignment(phraseAlignment.alignedToF[j]);
 			}
-			phraseTableFile << " ||| ";
+			phraseTableFile << "||| ";
 		}
 
 		for(int j=0 ; j < phraseAlignment.alignedToE.size() ; j++)
 		{
 			outputAlignment(phraseAlignment.alignedToE[j]);
 		}
-		phraseTableFile << " ||| ";
+		phraseTableFile << "||| ";
 
     if ( inverseFlag) 
 		{
@@ -252,7 +252,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
 			{
 				outputAlignment(phraseAlignment.alignedToF[j]);
 			}
-			phraseTableFile << " ||| ";
+			phraseTableFile << "||| ";
 		}
 
 		// phrase translation probability
