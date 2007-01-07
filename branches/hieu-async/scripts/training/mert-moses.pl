@@ -943,13 +943,14 @@ sub scan_config {
     "ttable-file" => 3,
     "generation-file" => 3,
     "lmodel-file" => 3,
-    "distortion-file" => 0,
+    "distortion-file" => 3,
   );
   # by default, each line of each section means one lambda, but some sections
   # explicitly state a custom number of lambdas
   my %where_is_lambda_count = (
     "ttable-file" => 2,
     "generation-file" => 2,
+    "distortion-file" => 2,
   );
   
   open INI, $ini or die "Can't read $ini";

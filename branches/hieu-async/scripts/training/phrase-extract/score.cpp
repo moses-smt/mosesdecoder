@@ -124,7 +124,9 @@ void outputAlignment(const vector<int> &alignmentInfo)
 {
 	//phraseTableFile << "|";
 	if (alignmentInfo.size() > 0)
+	{
 		phraseTableFile << alignmentInfo[0];
+	}
 	for (size_t pos = 1 ; pos < alignmentInfo.size() ; ++pos)
 	{
 		phraseTableFile << "," << alignmentInfo[pos];
