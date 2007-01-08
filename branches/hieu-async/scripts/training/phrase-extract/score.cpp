@@ -200,17 +200,17 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
 	size_t index = 0;
   for(II i = countE.begin(); i != countE.end(); i++) {
     //    cout << "\tp( " << i->first << " | " << phrasePair[0].foreign << " ; " << phraseF.size() << " ) = ...\n";
-		cerr << index << endl;
+		//cerr << index << endl;
 
     // foreign phrase (unless inverse)
     if (! inverseFlag) {
       for(int j=0;j<phraseF.size();j++)
 			{
-				cerr << vcbF.getWord( phraseF[j] ) << " ";
+				//cerr << vcbF.getWord( phraseF[j] ) << " ";
 				phraseTableFile << vcbF.getWord( phraseF[j] );
 				phraseTableFile << " ";
 			}
-			cerr << endl;
+			//cerr << endl;
       phraseTableFile << "||| ";
 		}
 
@@ -218,24 +218,24 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
     PHRASE phraseE = phraseTableE.getPhrase( i->first );
 		for(int j=0;j<phraseE.size();j++)
 		{
-			if ( vcbE.getWord( phraseE[j] ) == "herr")
-				cerr << "";
-			cerr << vcbE.getWord( phraseE[j] ) << " ";
+			//if ( vcbE.getWord( phraseE[j] ) == "herr")
+			//	cerr << "";
+			//cerr << vcbE.getWord( phraseE[j] ) << " ";
       phraseTableFile << vcbE.getWord( phraseE[j] );
 			phraseTableFile << " ";
 		}
-		cerr << endl;
+		//cerr << endl;
     phraseTableFile << "||| ";
 
     // foreign phrase (if inverse)
     if (inverseFlag) {
       for(int j=0;j<phraseF.size();j++)
 			{
-				cerr << vcbF.getWord( phraseF[j] ) << " ";
+				//cerr << vcbF.getWord( phraseF[j] ) << " ";
 				phraseTableFile << vcbF.getWord( phraseF[j] );
 				phraseTableFile << " ";
 			}
-			cerr << endl;
+			//cerr << endl;
       phraseTableFile << "||| ";
 		}
  
