@@ -17,6 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 ******************************************************************************/
+
 using namespace std;
 
 #include <iostream>
@@ -58,7 +59,7 @@ int cmpFloatEntry(const void* a,const void* b){
 
 int parseWords(char *sentence, char **words, int max);
 
-int ComputeCluster(int nc, double* cl,int N,DataItem* Pts);
+int ComputeCluster(int nc, double* cl,unsigned int N,DataItem* Pts);
 
 //----------------------------------------------------------------------
 //  Global parameters (some are set in getArgs())
@@ -73,12 +74,15 @@ const int MAXLEV = 11;    //maximum n-gram size
 
 void usage(const char *msg = 0) {
   if (msg) { std::cerr << msg << std::endl; }
-  std::cerr << "Usage: quantize-lm input-file.lm [output-file.qlm]" << std::endl;
+  std::cerr << "Usage: quantize-lm input-file.lm [output-file.qlm [tmpfile]] " << std::endl;
   if (!msg) std::cerr << std::endl
     << "  quantize-lm reads a standard LM file in ARPA format and produces" << std::endl
     << "  a version of it with quantized probabilities and back-off weights"<< std::endl
-    << "  that the IRST LMtoolkit can compile. Accepts LMs with .gz suffix." << std::endl;
-}
+    << "  that the IRST LMtoolkit can compile. Accepts LMs with .gz suffix." << std::endl
+    << "  You can specify the output file to be created and also the pathname " << std::endl
+    << "  of a temporary file used by the program. As default, the temporary "  << std::endl 
+    << "  file is created in the /tmp directory."  << std::endl;
+  }
 
 
 int main(int argc, const char **argv)
@@ -92,12 +96,13 @@ int main(int argc, const char **argv)
     std::string opt = argv[i];
     files.push_back(opt);
   }
-  if (files.size() > 2) { usage("Too many arguments"); exit(1); }
+  if (files.size() > 3) { usage("Too many arguments"); exit(1); }
   if (files.size() < 1) { usage("Please specify a LM file to read from"); exit(1); }
   
   
   std::string infile = files[0];
   std::string outfile="";
+  std::string tmpfile="";
   
   if (files.size() == 1) {  
     outfile=infile;
@@ -117,6 +122,18 @@ int main(int argc, const char **argv)
     outfile = files[1];
   
   
+  if (files.size()==3){
+    //create temporary file
+    tmpfile = files[2]; 
+    ofstream dummy(tmpfile.c_str(),ios::out);
+    dummy.close();
+  }
+  else{
+    //create temporary internal file in /tmp
+    ofstream dummy;  
+    createtempfile(dummy,tmpfile,ios::out);
+    dummy.close();        
+  }
   
   std::cout << "Reading " << infile << "..." << std::endl;
   
@@ -124,34 +141,29 @@ int main(int argc, const char **argv)
   if (!inp.good()) {
     std::cerr << "Failed to open " << infile << "!\n";
     exit(1);
-  }
-  
+  }  
   
   std::ofstream out(outfile.c_str());
   std::cout << "Writing " << outfile << "..." << std::endl;
   
   //prepare temporary file to save n-gram blocks for multiple reads 
   //this avoids using seeks which do not work with inputfilestream
-  //it's odd but i need a bidirectional filestream!
+  //it's odd but i need a bidirectional filestream!  
+  std::cout << "Using temporary file " << tmpfile << std::endl;  
+  fstream filebuff(tmpfile.c_str(),ios::out|ios::in|ios::binary);
   
-  string filePath;ofstream dummy;
-  createtempfile(dummy,filePath,ios::out);
-  dummy.close();
-  
-  fstream filebuff(filePath.c_str(),ios::out|ios::in);
-  
-  int nPts = 0;  // actual number of points
+  unsigned int nPts = 0;  // actual number of points
   
   // *** Read ARPA FILE ** 
   
-  int numNgrams[MAXLEV + 1]; /* # n-grams for each order */
+  unsigned int numNgrams[MAXLEV + 1]; /* # n-grams for each order */
   int Order=0,MaxOrder=0;
   int n=0;
   
   float logprob,logbow;
   
   DataItem* dataPts;
-  
+ 
   double* centersP=NULL; 
   double* centersB=NULL;
   
@@ -199,23 +211,31 @@ int main(int argc, const char **argv)
       cerr << "-- Start processing of " << Order << "-grams\n";
       assert(Order <= MAXLEV);
       
-      int N=numNgrams[Order];
+      unsigned int N=numNgrams[Order];
       
       char* words[MAXLEV+3];
       dataPts=new DataItem[N]; // allocate data         
       
-      //reset tempout file 
-      filebuff.seekg(0);
-      
+      //reset tempout file to start writing      
+      filebuff.seekg((streampos)0);
+           
       for (nPts=0;nPts<N;nPts++){
         inp.getline(line,MAX_LINE);  
         filebuff << line << std::endl;
+        if (!filebuff.good()){
+          std::cerr << "Cannot write in temporary file " << tmpfile  << std::endl
+          << " Probably there is not enough space in this filesystem " << std::endl
+          << " Eventually rerun quantize-lm by specifyng the pathname" << std::endl
+          << " of the temporary file to be used. " << std::endl; 
+          removefile(tmpfile.c_str());
+          exit(1);
+        }
         int howmany = parseWords(line, words, Order + 3);
         assert(howmany == Order+2 || howmany == Order+1);
         sscanf(words[0],"%f",&logprob);
         dataPts[nPts].pt=logprob; //exp(logprob * logten);
         dataPts[nPts].idx=nPts;
-      }
+     }
       
       cerr << "quantizing " << N << " probabilities\n";
       
@@ -225,25 +245,24 @@ int main(int argc, const char **argv)
       ComputeCluster(centers[Order],centersP,N,dataPts);
       
       
-      for (int p=0;p<N;p++){
+      for (unsigned int p=0;p<N;p++){
         mapP[dataPts[p].idx]=dataPts[p].code;
       }
       
       if (Order<MaxOrder){
         //second pass to read back-off weights
-        
-        filebuff.seekg(0);
+        //read from temporary file
+        filebuff.seekg((streampos)0);
         
         for (nPts=0;nPts<N;nPts++){
           
           filebuff.getline(line,MAX_LINE);
-          
           int howmany = parseWords(line, words, Order + 3);
           if (howmany==Order+2) //backoff is written
             sscanf(words[Order+1],"%f",&logbow);
           else
             logbow=0; // backoff is implicit                    
-          
+                  
           dataPts[nPts].pt=logbow; 
           dataPts[nPts].idx=nPts;
         }
@@ -254,7 +273,7 @@ int main(int argc, const char **argv)
         cerr << "quantizing " << N << " backoff weights\n";
         ComputeCluster(centers[Order],centersB,N,dataPts);
         
-        for (int p=0;p<N;p++){
+        for (unsigned int p=0;p<N;p++){
           mapB[dataPts[p].idx]=dataPts[p].code;
         }
         
@@ -262,9 +281,9 @@ int main(int argc, const char **argv)
       
       
       out << centers[Order] << "\n";
-      for (nPts=0;nPts<centers[Order];nPts++){
-        out << centersP[nPts]; 
-        if (Order<MaxOrder) out << " " << centersB[nPts];
+      for (int c=0;c<centers[Order];c++){
+        out << centersP[c]; 
+        if (Order<MaxOrder) out << " " << centersB[c];
         out << "\n";
       }
       
@@ -299,9 +318,9 @@ int main(int argc, const char **argv)
       
     }
     
-    out << line << "\n";
   }
   
+  out << "\\end\\\n";
   cerr << "---- done\n";
   
   out.flush();
@@ -309,33 +328,33 @@ int main(int argc, const char **argv)
   out.close();
   inp.close();
   
-  removefile(filePath);
+  removefile(tmpfile.c_str());
 }
 
 // Compute Clusters
 
-int ComputeCluster(int centers,double* ctrs,int N,DataItem* bintable){
+int ComputeCluster(int centers,double* ctrs,unsigned int N,DataItem* bintable){
   
   
   //cerr << "\nExecuting Clutering Algorithm:  k=" << centers<< "\n";
   double log10=log(10.0);
   
-  for (int i=0;i<N;i++) bintable[i].code=0;
+  for (unsigned int i=0;i<N;i++) bintable[i].code=0;
   
   //cout << "start sort \n";
   qsort(bintable,N,sizeof(DataItem),cmpFloatEntry);
   
-  int different=1;
+  unsigned int different=1;
   
-  for (int i=1;i<N;i++)
+  for (unsigned int i=1;i<N;i++)
     if (bintable[i].pt!=bintable[i-1].pt)
       different++;
   
-  int interval=different/centers;
+  unsigned int interval=different/centers;
   if (interval==0) interval++;
   
-  int* population=new int[centers];    
-  int* species=new int[centers];    
+  unsigned int* population=new unsigned int[centers];    
+  unsigned int* species=new unsigned int[centers];    
   
   //cout << " Different entries=" << different 
   //     << " Total Entries=" << N << " Bin Size=" << interval << "\n";
@@ -353,7 +372,7 @@ int ComputeCluster(int centers,double* ctrs,int N,DataItem* bintable){
   int currcode=0;    
   different=1;
   
-  for (int i=1;i<N;i++){
+  for (unsigned int i=1;i<N;i++){
     
     if ((bintable[i].pt!=bintable[i-1].pt)){
       different++;
@@ -361,7 +380,7 @@ int ComputeCluster(int centers,double* ctrs,int N,DataItem* bintable){
         if ((currcode+1) < centers 
             && 
             population[currcode]>0){
-          currcode++;
+                currcode++;
         }
     }
       
@@ -379,7 +398,7 @@ int ComputeCluster(int centers,double* ctrs,int N,DataItem* bintable){
       ctrs[bintable[i].code]=ctrs[bintable[i].code]+exp(bintable[i].pt * log10);
       
   }
-    
+
     for (int i=0;i<centers;i++){
       if (population[i]>0)
         ctrs[i]=log(ctrs[i]/population[i])/log10;
@@ -391,7 +410,7 @@ int ComputeCluster(int centers,double* ctrs,int N,DataItem* bintable){
         ctrs[i]=-99;
       }
       
-      //cout << i << " ctr " << ctrs[i] << " population " << population[i] << " species " << species[i] <<"\n";
+      cout << i << " ctr " << ctrs[i] << " population " << population[i] << " species " << species[i] <<"\n";
     }
     
     cout.flush();
@@ -431,6 +450,5 @@ int parseWords(char *sentence, char **words, int max)
   
   return i;
 }
-
 
 
