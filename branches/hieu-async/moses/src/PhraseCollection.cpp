@@ -81,7 +81,7 @@ void PhraseCollection::Load(std::string filePath, FactorCollection &factorCollec
 													, line
 													, factorCollection
 													, factorDelimiter
-													, NULL);
+													, NULL, NULL);
 		AddPhrase(phrase);
 
 		// add all suffixes too

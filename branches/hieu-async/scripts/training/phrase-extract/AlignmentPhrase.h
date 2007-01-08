@@ -21,43 +21,50 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <vector>
+#include <set>
 
 class WordsRange;
 
-//! set of alignments of 1 word
-class AlignmentElement : public std::vector<size_t>
+
+class AlignmentElement
 {
+protected:
+	std::set<size_t> m_elements;
 public:
+	typedef std::set<size_t>::iterator iterator;
+	typedef std::set<size_t>::const_iterator const_iterator;
+	const_iterator begin() const { return m_elements.begin(); }
+	const_iterator end() const { return m_elements.end(); }
+
 	AlignmentElement()
 	{}
 
-	AlignmentElement(const std::vector<size_t> &copy);
-	
-	/** compare all alignments for this word. 
-		*	Return true iff both words are aligned to the same words
-	*/
-	bool Equals(const AlignmentElement &compare) const
+	size_t GetSize() const
 	{
-		for (size_t idxThis = 0 ; idxThis < size() ; ++idxThis)
-		{
-			for (size_t idxCompare = 0 ; idxCompare < compare.size() ; ++idxCompare)
-			{
-				if ((*this)[idxThis] == compare[idxCompare])
-					return true;
-			}
-		}
-		return false;
+		return m_elements.size();
 	}
+
+	void Merge(size_t align);
 };
 
-//! alignments of each word in a phrase
-class AlignmentPhrase : public std::vector<AlignmentElement>
+class AlignmentPhrase
 {
-	friend std::ostream& operator<<(std::ostream& out, const AlignmentPhrase &alignmentPhrase);
-
+protected:
+	std::vector<AlignmentElement> m_elements;
 public:
-	bool IsCompatible(const AlignmentPhrase &compare, size_t startPosCompare) const;
+	AlignmentPhrase(size_t size)
+		:m_elements(size)
+	{}
 	void Merge(const AlignmentPhrase &newAlignment, const WordsRange &newAlignmentRange);
+	void Merge(const std::vector< std::vector<size_t> > &source);
+	size_t GetSize() const
+	{
+		return m_elements.size();
+	}
+	const AlignmentElement &GetElement(size_t pos) const
+	{
+		return m_elements[pos];
+	}
 };
 
 

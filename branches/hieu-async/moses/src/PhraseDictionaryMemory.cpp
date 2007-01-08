@@ -79,7 +79,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	{
 		++line_num;
 		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
-		if (tokens.size() != 3)
+		if (tokens.size() != 5)
 		{
 			stringstream strme;
 			strme << "Syntax error at " << filePath << ":" << line_num;
@@ -99,7 +99,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		//if (tokens[0] != prevSourcePhrase)
 		//	phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
 
-		vector<float> scoreVector = Tokenize<float>(tokens[2]);
+		vector<float> scoreVector = Tokenize<float>(tokens[4]);
 		if (scoreVector.size() != m_numScoreComponent) 
 		{
 			stringstream strme;
@@ -119,7 +119,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																, tokens[0]
 																, factorCollection
 																, factorDelimiter
-																, &alignmentPair.GetInserter(Input));
+																, &alignmentPair.GetInserter(Input)
+																, &tokens[2]);
 
 		// if not part of input, filter it out
 		if (filter)
@@ -139,7 +140,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																, tokens[1]
 																, factorCollection
 																, factorDelimiter
-																, &alignmentPair.GetInserter(Output));
+																, &alignmentPair.GetInserter(Output)
+																, &tokens[3]);
 		
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());

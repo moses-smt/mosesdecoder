@@ -78,15 +78,16 @@ public:
 																const std::string &phraseString
 																, const std::vector<FactorType> &factorOrder
 																, const std::string& factorDelimiter
-																, AlignmentPairInserter *alignmentPairInserter);
+																, AlignmentPairInserter *alignmentPairInserter
+																, const std::string *alignString);
 	/** Fills phrase with words from 2D string vector
 		* \param factorOrder factor types of each element in 2D string vector
 		* \param phraseVector 2D string vector
 	*/
-	void CreateFromString(const std::vector<FactorType> &factorOrder
+	void CreateFromString(
+							const std::vector<FactorType> &factorOrder
               , const std::vector< std::vector<std::string> > &phraseVector
-              , FactorCollection &factorCollection
-							, AlignmentPairInserter *alignmentPairInserter);
+              , FactorCollection &factorCollection);
 	/** Fills phrase with words from formatted string, typically from phrase table or sentence input
 		* \param factorOrder factor types of each element in 2D string vector
 		* \param phraseString formatted input string to parse
@@ -96,7 +97,8 @@ public:
 											, const std::string &phraseString
 											, FactorCollection &factorCollection
 											, const std::string &factorDelimiter
-											, AlignmentPairInserter *alignmentPairInserter);
+											, AlignmentPairInserter *alignmentPairInserter
+											, const std::string *alignString);
 
 	/**	copy factors from the other phrase to this phrase. 
 		IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten

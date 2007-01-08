@@ -196,15 +196,28 @@ void Phrase::Append(const Phrase &endPhrase){
 vector< vector<string> > Phrase::Parse(const std::string &phraseString
 																			 , const std::vector<FactorType> &factorOrder
 																			 , const std::string& factorDelimiter
-																			 , AlignmentPairInserter *alignmentPairInserter)
+																			 , AlignmentPairInserter *alignmentPairInserter
+																			 , const std::string *alignString)
 {
 	bool isMultiCharDelimiter = factorDelimiter.size() > 1;
+
 	// parse
 	vector< vector<string> > phraseVector;
 	vector<string> annotatedWordVector = Tokenize(phraseString);
 	// KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none 
 	//		to
 	// "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
+
+	// alignment info
+	vector<string> alignPhraseVector;
+	if (alignString != NULL)
+	{
+		alignPhraseVector = Tokenize(*alignString);
+		assert (alignPhraseVector.size() == annotatedWordVector.size()) ;
+		// (0) (3) (1,2)
+		//		to
+		// "(0)" "(3)" "(1,2)"
+	}
 
 	for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() ; phrasePos++)
 	{
@@ -215,49 +228,36 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 		} else {
 			factorStrVector = Tokenize(annotatedWord, factorDelimiter);
 		}
+		phraseVector.push_back(factorStrVector);
 		// KOMMA|none
 		//    to
 		// "KOMMA" "none"
-		if (alignmentPairInserter == NULL)
-		{
-			if (factorStrVector.size() != factorOrder.size())
-			{
-				TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance()->GetCurrentInputPosition() <<*/ std::endl
-									<< "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
-									<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
-				abort();
-			}
-		}
-		else 
-		{
-			if (factorStrVector.size() != (factorOrder.size() + 1)) 
-			{
-				TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance()->GetCurrentInputPosition() <<*/ std::endl
-									<< "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
-									<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
-				abort();
-			}
-			else
-			{ // fill out alignment factor info
-				string alignStr = factorStrVector.back();
-				AlignmentElement alignVec = Tokenize<size_t>(alignStr, ",");
-				**alignmentPairInserter = alignVec;
-				(*alignmentPairInserter)++;
 
-				// get rid of align info from factor vector
-				factorStrVector.erase(factorStrVector.end()-1);
-			}
+		if (factorStrVector.size() != factorOrder.size())
+		{
+			TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance()->GetCurrentInputPosition() <<*/ std::endl
+								<< "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
+								<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
+			abort();
 		}
-
-		phraseVector.push_back(factorStrVector);
+		
+		if (alignmentPairInserter != NULL)
+		{ // fill out alignment factor info
+			assert(alignString != NULL);
+		
+			string alignStr = alignPhraseVector[phrasePos];
+			alignStr = alignStr.substr(1, alignStr.size() - 2);
+			AlignmentElement alignVec = Tokenize<size_t>(alignStr, ",");
+			**alignmentPairInserter = alignVec;
+			(*alignmentPairInserter)++;
+		}
 	}
 	return phraseVector;
 }
 
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const vector< vector<string> > &phraseVector
-															, FactorCollection &factorCollection
-															, AlignmentPairInserter *alignmentPairInserter)
+															, FactorCollection &factorCollection)
 {
 	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
 	{
@@ -277,10 +277,16 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const string &phraseString
 															, FactorCollection &factorCollection
 															, const string &factorDelimiter
-															, AlignmentPairInserter *alignmentPairInserter)
+															, AlignmentPairInserter *alignmentPairInserter
+															, const string *alignString)
 {
-	vector< vector<string> > phraseVector = Parse(phraseString, factorOrder, factorDelimiter, alignmentPairInserter);
-	CreateFromString(factorOrder, phraseVector, factorCollection, alignmentPairInserter);
+	vector< vector<string> > phraseVector = Parse(
+										phraseString
+										, factorOrder
+										, factorDelimiter
+										, alignmentPairInserter
+										, alignString);
+	CreateFromString(factorOrder, phraseVector, factorCollection);
 }
 
 bool Phrase::operator < (const Phrase &compare) const
