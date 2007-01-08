@@ -48,7 +48,7 @@ Parameter::Parameter()
 	AddParam("mapping", "description of decoding steps");
 	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
 	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
-	AddParam("n-best-list", "file and size of n-best-list to be generated");
+	AddParam("n-best-list", "file and size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
 	AddParam("output-factors", "list of factors in the output");
 	AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
 	AddParam("report-all-factors", "report all factors in output, not just first");
