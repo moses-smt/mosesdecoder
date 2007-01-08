@@ -59,9 +59,18 @@ IOStream::IOStream(
 ,m_inputFile(NULL)
 ,m_inputStream(&std::cin)
 {
+	m_surpressSingleBestOutput = false;
 	if (nBestSize > 0)
 	{
-		m_nBestFile.open(nBestFilePath.c_str());
+		if (nBestFilePath == "-")
+		{
+			m_nBestFile = &std::cout;
+			m_surpressSingleBestOutput = true;
+		} else {
+			std::ofstream *t = new std::ofstream;
+			m_nBestFile = t;
+			t->open(nBestFilePath.c_str());
+		}
 	}
 }
 
@@ -79,11 +88,20 @@ IOStream::IOStream(const std::vector<FactorType>	&inputFactorOrder
 ,m_inputFilePath(inputFilePath)
 ,m_inputFile(new InputFileStream(inputFilePath))
 {
+	m_surpressSingleBestOutput = false;
 	m_inputStream = m_inputFile;
 
 	if (nBestSize > 0)
 	{
-		m_nBestFile.open(nBestFilePath.c_str());
+		if (nBestFilePath == "-")
+		{
+			m_nBestFile = &std::cout;
+			m_surpressSingleBestOutput = true;
+		} else {
+			std::ofstream *t = new std::ofstream;
+			m_nBestFile = t;
+			t->open(nBestFilePath.c_str());
+		}
 	}
 }
 
@@ -168,14 +186,16 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 		Backtrack(hypo);
 		VERBOSE(3,"0" << std::endl);
 
-		OutputSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors);
+		if (!m_surpressSingleBestOutput)
+		{
+			OutputSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors);
+			cout << endl;
+		}
 	}
 	else
 	{
 		TRACE_ERR("NO BEST TRANSLATION" << endl);
 	}
-	
-	cout << endl;
 }
 
 void IOStream::OutputNBestList(const LatticePathList &nBestList, long translationId)
@@ -189,13 +209,13 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
 		// print the surface factor of the translation
-		m_nBestFile << translationId << " ||| ";
+		*m_nBestFile << translationId << " ||| ";
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
 			const Hypothesis &edge = *edges[currEdge];
-			OutputSurface(m_nBestFile, edge.GetTargetPhrase(), m_outputFactorOrder, false); // false for not reporting all factors
+			OutputSurface(*m_nBestFile, edge.GetTargetPhrase(), m_outputFactorOrder, false); // false for not reporting all factors
 		}
-		m_nBestFile << " ||| ";
+		*m_nBestFile << " ||| ";
 
 		// print the scores in a hardwired order
     // before each model type, the corresponding command-line-like name must be emitted
@@ -203,8 +223,8 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 
 		// basic distortion
 		if (labeledOutput)
-	    m_nBestFile << "d: ";
-		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetDistortionScoreProducer()) << " ";
+	    *m_nBestFile << "d: ";
+		*m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetDistortionScoreProducer()) << " ";
 
 //		reordering
 		vector<LexicalReordering*> rms = StaticData::Instance()->GetReorderModels();
@@ -216,7 +236,7 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j) 
 					{
-				  		m_nBestFile << scores[j] << " ";
+				  		*m_nBestFile << scores[j] << " ";
 					}
 				}
 		}
@@ -225,10 +245,10 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		const LMList& lml = StaticData::Instance()->GetAllLM();
     if (lml.size() > 0) {
 			if (labeledOutput)
-	      m_nBestFile << "lm: ";
+	      *m_nBestFile << "lm: ";
 		  LMList::const_iterator lmi = lml.begin();
 		  for (; lmi != lml.end(); ++lmi) {
-			  m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
+			  *m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
 		  }
     }
 
@@ -238,12 +258,12 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 			vector<PhraseDictionary*> pds = StaticData::Instance()->GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
-					m_nBestFile << "tm: ";
+					*m_nBestFile << "tm: ";
 				vector<PhraseDictionary*>::iterator iter;
 				for (iter = pds.begin(); iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j) 
-						m_nBestFile << scores[j] << " ";
+						*m_nBestFile << scores[j] << " ";
 				}
 			}
 		}
@@ -263,10 +283,10 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 				if (pd_numinputscore){
 					
 					if (labeledOutput)
-						m_nBestFile << "I: ";
+						*m_nBestFile << "I: ";
 
 					for (size_t j = 0; j < pd_numinputscore; ++j)
-						m_nBestFile << scores[j] << " ";
+						*m_nBestFile << scores[j] << " ";
 				}
 					
 					
@@ -276,9 +296,9 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 					size_t pd_numinputscore = (*iter)->GetNumInputScores();
 
 					if (iter == pds.begin() && labeledOutput)
-						m_nBestFile << "tm: ";
+						*m_nBestFile << "tm: ";
 					for (size_t j = pd_numinputscore; j < scores.size() ; ++j)
-						m_nBestFile << scores[j] << " ";
+						*m_nBestFile << scores[j] << " ";
 				}
 			}
 		}
@@ -287,26 +307,26 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		
 		// word penalty
 		if (labeledOutput)
-	    m_nBestFile << "w: ";
-		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetWordPenaltyProducer()) << " ";
+	    *m_nBestFile << "w: ";
+		*m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetWordPenaltyProducer()) << " ";
 		
 		// generation
 		vector<GenerationDictionary*> gds = StaticData::Instance()->GetGenerationDictionaries();
     if (gds.size() > 0) {
 			if (labeledOutput)
-	      m_nBestFile << "g: ";
+	      *m_nBestFile << "g: ";
 		  vector<GenerationDictionary*>::iterator iter;
 		  for (iter = gds.begin(); iter != gds.end(); ++iter) {
 			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 			  for (size_t j = 0; j<scores.size(); j++) {
-				  m_nBestFile << scores[j] << " ";
+				  *m_nBestFile << scores[j] << " ";
 			  }
 		  }
     }
 		
 		// total						
-		m_nBestFile << "||| " << path.GetTotalScore() << endl;
+		*m_nBestFile << "||| " << path.GetTotalScore() << endl;
 	}
 
-	m_nBestFile<<std::flush;
+	*m_nBestFile<<std::flush;
 }
