@@ -37,6 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <vld.h>
 #endif
 
+#include <boost/filesystem/operations.hpp>
+
 #include <fstream>
 #include "Main.h"
 #include "LatticePath.h"
@@ -69,9 +71,15 @@ bool readInput(IOStream &ioStream, int inputType, InputType*& source)
 	return (source ? true : false);
 }
 
+using namespace boost::filesystem;
 
 int main(int argc, char* argv[])
 {
+
+	path p = complete(current_path());
+	string pstr = p.native_directory_string();
+	cerr <<"CURRENT DIR IS " << pstr << endl;
+
 	TRACE_ERR("command: ");
 	for(int i=0;i<argc;++i) TRACE_ERR(argv[i]<<" ");
 	TRACE_ERR(endl);

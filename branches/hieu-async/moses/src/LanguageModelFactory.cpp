@@ -52,7 +52,7 @@ namespace LanguageModelFactory
 	  {
 	  	case SRI:
 				#ifdef LM_SRI
-				  lm = new LanguageModelSRI(true);
+				  lm = new LanguageModelSRI(true, scoreIndexManager);
 				#elif LM_INTERNAL
 					lm = new LanguageModelInternal(true, scoreIndexManager);
 				#elif LM_IRST

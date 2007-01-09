@@ -1,98 +1,99 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0'?>
 <?fileVersion 3.1.0?>
-
 <ManagedProjectBuildInfo>
-<project id="moses-cmd.cdt.managedbuild.target.gnu.exe.880461730" name="Executable (Gnu)" projectType="cdt.managedbuild.target.gnu.exe">
-<configuration artifactName="moses-cmd" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.debug.862821065" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
-<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.442539703" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.626133972" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.381079048" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
-<option id="gnu.cpp.compiler.option.include.paths.1241301640" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../moses/src&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../irstlm/src&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/misc/src&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/dstruct/src&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/include&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/lm/src&quot;"/>
+    <project id='moses-cmd.cdt.managedbuild.target.gnu.exe.880461730' name='Executable (Gnu)' projectType='cdt.managedbuild.target.gnu.exe'>
+      <configuration id='cdt.managedbuild.config.gnu.exe.debug.862821065' name='Debug' description='' parent='cdt.managedbuild.config.gnu.exe.debug' artifactName='moses-cmd' errorParsers='org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser' cleanCommand='rm -rf'>
+        <toolChain superClass='cdt.managedbuild.toolchain.gnu.exe.debug' id='cdt.managedbuild.toolchain.gnu.exe.debug.442539703' name='GCC Tool Chain'>
+          <tool superClass='cdt.managedbuild.tool.gnu.c.compiler.exe.debug' id='cdt.managedbuild.tool.gnu.c.compiler.exe.debug.626133972' name='GCC C Compiler'/>
+          <tool superClass='cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug' id='cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.381079048' name='GCC C++ Compiler'>
+            <option superClass='gnu.cpp.compiler.option.include.paths' id='gnu.cpp.compiler.option.include.paths.1241301640' valueType='includePath'>
+              <listOptionValue value='&quot;${ProjDirPath}/../moses/src&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;${ProjDirPath}/../irstlm/src&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;${ProjDirPath}/../srilm/misc/src&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;${ProjDirPath}/../srilm/dstruct/src&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;${ProjDirPath}/../srilm/include&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;${ProjDirPath}/../srilm/lm/src&quot;' builtIn='false'/>
 </option>
-<option id="gnu.cpp.compiler.option.preprocessor.def.1028025969" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-<listOptionValue builtIn="false" value="LM_SRI"/>
-<listOptionValue builtIn="false" value="LM_IRST"/>
-<listOptionValue builtIn="false" value="LM_INTERNAL"/>
-<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+            <option superClass='gnu.cpp.compiler.option.preprocessor.def' id='gnu.cpp.compiler.option.preprocessor.def.1028025969' valueType='definedSymbols'>
+              <listOptionValue value='LM_SRI' builtIn='false'/>
+              <listOptionValue value='LM_IRST' builtIn='false'/>
+              <listOptionValue value='LM_INTERNAL' builtIn='false'/>
+              <listOptionValue value='TRACE_ENABLE' builtIn='false'/>
 </option>
-<option id="gnu.cpp.compiler.option.debugging.gprof.514527174" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
-<option id="gnu.cpp.compiler.option.warnings.allwarn.169517888" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
+            <option superClass='gnu.cpp.compiler.option.debugging.gprof' id='gnu.cpp.compiler.option.debugging.gprof.514527174' value='false' valueType='boolean'/>
+            <option superClass='gnu.cpp.compiler.option.warnings.allwarn' id='gnu.cpp.compiler.option.warnings.allwarn.169517888' value='false' valueType='boolean'/>
 </tool>
-<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1905266391" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.888044188" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
-<option id="gnu.cpp.link.option.libs.427302130" superClass="gnu.cpp.link.option.libs" valueType="libs">
-<listOptionValue builtIn="false" value="pthread"/>
-<listOptionValue builtIn="false" value="z"/>
-<listOptionValue builtIn="false" value="lattice"/>
-<listOptionValue builtIn="false" value="misc"/>
-<listOptionValue builtIn="false" value="dstruct"/>
-<listOptionValue builtIn="false" value="oolm"/>
+          <tool superClass='cdt.managedbuild.tool.gnu.c.linker.exe.debug' id='cdt.managedbuild.tool.gnu.c.linker.exe.debug.1905266391' name='GCC C Linker'/>
+          <tool superClass='cdt.managedbuild.tool.gnu.cpp.linker.exe.debug' id='cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.888044188' name='GCC C++ Linker'>
+            <option superClass='gnu.cpp.link.option.libs' id='gnu.cpp.link.option.libs.427302130' valueType='libs'>
+              <listOptionValue value='pthread' builtIn='false'/>
+              <listOptionValue value='z' builtIn='false'/>
+              <listOptionValue value='lattice' builtIn='false'/>
+              <listOptionValue value='misc' builtIn='false'/>
+              <listOptionValue value='dstruct' builtIn='false'/>
+              <listOptionValue value='oolm' builtIn='false'/>
 </option>
-<option id="gnu.cpp.link.option.paths.1718276622" superClass="gnu.cpp.link.option.paths" valueType="stringList">
-<listOptionValue builtIn="false" value="&quot;../../srilm/lib/cygwin&quot;"/>
-<listOptionValue builtIn="false" value="&quot;../../srilm/lib/i686&quot;"/>
+            <option superClass='gnu.cpp.link.option.paths' id='gnu.cpp.link.option.paths.1718276622' valueType='stringList'>
+              <listOptionValue value='&quot;../../srilm/lib/cygwin&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;../../srilm/lib/i686&quot;' builtIn='false'/>
 </option>
-<option id="gnu.cpp.link.option.userobjs.551693347" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
-<listOptionValue builtIn="false" value="&quot;../../moses/${ConfigName}/libmoses.a&quot;"/>
-<listOptionValue builtIn="false" value="&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;"/>
+            <option superClass='gnu.cpp.link.option.userobjs' id='gnu.cpp.link.option.userobjs.551693347' valueType='userObjs'>
+              <listOptionValue value='&quot;../../boost/lib/libboost_filesystem-gcc.a&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;../../moses/${ConfigName}/libmoses.a&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;' builtIn='false'/>
 </option>
-<option id="gnu.cpp.link.option.flags.1995182231" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
+            <option superClass='gnu.cpp.link.option.flags' id='gnu.cpp.link.option.flags.1995182231' value='' valueType='string'/>
 </tool>
-<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1540394737" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
-<macros/>
+          <tool superClass='cdt.managedbuild.tool.gnu.assembler.exe.debug' id='cdt.managedbuild.tool.gnu.assembler.exe.debug.1540394737' name='GCC Assembler'/>
+          <macros/>
 </toolChain>
 </configuration>
-<configuration artifactName="moses-cmd" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.release.1126249995" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
-<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.1691856622" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1171408650" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1960479367" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
-<option id="gnu.cpp.compiler.option.include.paths.1986529351" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../moses/src&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../irstlm/src&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/misc/src&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/dstruct/src&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/include&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/lm/src&quot;"/>
+      <configuration id='cdt.managedbuild.config.gnu.exe.release.1126249995' name='Release' description='' parent='cdt.managedbuild.config.gnu.exe.release' artifactName='moses-cmd' errorParsers='org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser' cleanCommand='rm -rf'>
+        <toolChain superClass='cdt.managedbuild.toolchain.gnu.exe.release' id='cdt.managedbuild.toolchain.gnu.exe.release.1691856622' name='GCC Tool Chain'>
+          <tool superClass='cdt.managedbuild.tool.gnu.c.compiler.exe.release' id='cdt.managedbuild.tool.gnu.c.compiler.exe.release.1171408650' name='GCC C Compiler'/>
+          <tool superClass='cdt.managedbuild.tool.gnu.cpp.compiler.exe.release' id='cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1960479367' name='GCC C++ Compiler'>
+            <option superClass='gnu.cpp.compiler.option.include.paths' id='gnu.cpp.compiler.option.include.paths.1986529351' valueType='includePath'>
+              <listOptionValue value='&quot;${ProjDirPath}/../moses/src&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;${ProjDirPath}/../irstlm/src&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;${ProjDirPath}/../srilm/misc/src&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;${ProjDirPath}/../srilm/dstruct/src&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;${ProjDirPath}/../srilm/include&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;${ProjDirPath}/../srilm/lm/src&quot;' builtIn='false'/>
 </option>
-<option id="gnu.cpp.compiler.option.preprocessor.def.542441515" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-<listOptionValue builtIn="false" value="LM_SRI"/>
-<listOptionValue builtIn="false" value="LM_IRST"/>
-<listOptionValue builtIn="false" value="LM_INTERNAL"/>
-<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+            <option superClass='gnu.cpp.compiler.option.preprocessor.def' id='gnu.cpp.compiler.option.preprocessor.def.542441515' valueType='definedSymbols'>
+              <listOptionValue value='LM_SRI' builtIn='false'/>
+              <listOptionValue value='LM_IRST' builtIn='false'/>
+              <listOptionValue value='LM_INTERNAL' builtIn='false'/>
+              <listOptionValue value='TRACE_ENABLE' builtIn='false'/>
 </option>
-<option id="gnu.cpp.compiler.option.debugging.gprof.24360799" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
-<option id="gnu.cpp.compiler.option.warnings.allwarn.2108427488" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
+            <option superClass='gnu.cpp.compiler.option.debugging.gprof' id='gnu.cpp.compiler.option.debugging.gprof.24360799' value='false' valueType='boolean'/>
+            <option superClass='gnu.cpp.compiler.option.warnings.allwarn' id='gnu.cpp.compiler.option.warnings.allwarn.2108427488' value='false' valueType='boolean'/>
 </tool>
-<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.285054015" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1153317521" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
-<option id="gnu.cpp.link.option.libs.1100640875" superClass="gnu.cpp.link.option.libs" valueType="libs">
-<listOptionValue builtIn="false" value="pthread"/>
-<listOptionValue builtIn="false" value="z"/>
-<listOptionValue builtIn="false" value="lattice"/>
-<listOptionValue builtIn="false" value="misc"/>
-<listOptionValue builtIn="false" value="dstruct"/>
-<listOptionValue builtIn="false" value="oolm"/>
+          <tool superClass='cdt.managedbuild.tool.gnu.c.linker.exe.release' id='cdt.managedbuild.tool.gnu.c.linker.exe.release.285054015' name='GCC C Linker'/>
+          <tool superClass='cdt.managedbuild.tool.gnu.cpp.linker.exe.release' id='cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1153317521' name='GCC C++ Linker'>
+            <option superClass='gnu.cpp.link.option.libs' id='gnu.cpp.link.option.libs.1100640875' valueType='libs'>
+              <listOptionValue value='pthread' builtIn='false'/>
+              <listOptionValue value='z' builtIn='false'/>
+              <listOptionValue value='lattice' builtIn='false'/>
+              <listOptionValue value='misc' builtIn='false'/>
+              <listOptionValue value='dstruct' builtIn='false'/>
+              <listOptionValue value='oolm' builtIn='false'/>
 </option>
-<option id="gnu.cpp.link.option.paths.724264639" superClass="gnu.cpp.link.option.paths" valueType="stringList">
-<listOptionValue builtIn="false" value="&quot;../../srilm/lib/cygwin&quot;"/>
-<listOptionValue builtIn="false" value="&quot;../../srilm/lib/i686&quot;"/>
+            <option superClass='gnu.cpp.link.option.paths' id='gnu.cpp.link.option.paths.724264639' valueType='stringList'>
+              <listOptionValue value='&quot;../../srilm/lib/cygwin&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;../../srilm/lib/i686&quot;' builtIn='false'/>
 </option>
-<option id="gnu.cpp.link.option.userobjs.1365891611" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
-<listOptionValue builtIn="false" value="&quot;../../moses/${ConfigName}/libmoses.a&quot;"/>
-<listOptionValue builtIn="false" value="&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;"/>
+            <option superClass='gnu.cpp.link.option.userobjs' id='gnu.cpp.link.option.userobjs.1365891611' valueType='userObjs'>
+              <listOptionValue value='&quot;../../boost/lib/libboost_filesystem-gcc.a&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;../../moses/${ConfigName}/libmoses.a&quot;' builtIn='false'/>
+              <listOptionValue value='&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;' builtIn='false'/>
 </option>
-<option id="gnu.cpp.link.option.flags.213483667" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
+            <option superClass='gnu.cpp.link.option.flags' id='gnu.cpp.link.option.flags.213483667' value='' valueType='string'/>
 </tool>
-<tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.1402140367" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release"/>
-<macros/>
+          <tool superClass='cdt.managedbuild.tool.gnu.assembler.exe.release' id='cdt.managedbuild.tool.gnu.assembler.exe.release.1402140367' name='GCC Assembler'/>
+          <macros/>
 </toolChain>
 </configuration>
-<macros/>
+      <macros/>
 </project>
 </ManagedProjectBuildInfo>
