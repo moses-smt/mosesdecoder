@@ -7,8 +7,8 @@ DS?=$(shell date '+%Y%m%d')
 
 # set these 2 variables below to point to a directory where you want the 
 # compiled scripts to be copied to
-TARGETDIR=/home/s0565741/bin
-BINDIR=/home/s0565741/bin
+TARGETDIR=/home/Hieu/bin
+BINDIR=/home/Hieu/bin
 
 MAIN_SCRIPTS_TARGET_DIR=$(TARGETDIR)
 # MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)
