@@ -59,7 +59,7 @@ int verbose=0;
 
 int lc = 0;
 
-int getals(fstream& inp,int& m, int *a,int& n, int *b)
+int getals(istream& inp,int& m, int *a,int& n, int *b)
 {
   char w[MAX_WORD], dummy[10];
   int i,j,freq;
@@ -112,7 +112,7 @@ int getals(fstream& inp,int& m, int *a,int& n, int *b)
 
 
 //compute union alignment
-int prunionalignment(fstream& out,int m,int *a,int n,int* b){
+int prunionalignment(ostream& out,int m,int *a,int n,int* b){
   
   ostringstream sout;
   
@@ -137,7 +137,7 @@ int prunionalignment(fstream& out,int m,int *a,int n,int* b){
 
 //Compute unionalignment Alignment
 
-int printersect(fstream& out,int m,int *a,int n,int* b){
+int printersect(ostream& out,int m,int *a,int n,int* b){
   
   ostringstream sout;
 
@@ -161,7 +161,7 @@ int printersect(fstream& out,int m,int *a,int n,int* b){
 //to represent the grow alignment as the unionalignment of a
 //directed and inverted alignment
 
-int printgrow(fstream& out,int m,int *a,int n,int* b, bool diagonal=false,bool final=false,bool bothuncovered=false){
+int printgrow(ostream& out,int m,int *a,int n,int* b, bool diagonal=false,bool final=false,bool bothuncovered=false){
    
    ostringstream sout;
    
@@ -353,18 +353,33 @@ int bothuncovered=false;
         
    }
 
-	fstream inp(input,ios::in);
-   fstream out(output,ios::out);
-
-	if (!inp.is_open()){
-		cerr << "cannot open " << input << "\n";
-		exit(1);
-	}
+   istream *inp;
+   if (string(input) == string("/dev/stdin") )
+      inp = &cin;
+   else
+   {
+	  fstream *fileStream = new fstream(input,ios::in);
+	  if (fileStream->is_open()){
+		 cerr << "cannot open " << input << "\n";
+		 exit(1);
+	  }
+	  
+	  inp = fileStream;
+   }
    
-   if (!out.is_open()){
-		cerr << "cannot open " << output << "\n";
-		exit(1);
-	}
+   ostream *out;
+   if (string(output) == string("/dev/stdout") )
+      out = &cout;
+   else
+   {
+      fstream *fileStream = new fstream(output,ios::out);
+      if (!fileStream->is_open()){
+		     cerr << "cannot open " << output << "\n";
+ 		     exit(1);
+      }
+			
+			out = fileStream;
+   }
    
 
   int a[MAX_M],b[MAX_N],m,n;
@@ -378,19 +393,19 @@ int bothuncovered=false;
 	switch (alignment){
 		case UNION:
          cerr << "symal: computing union alignment\n";
-			while(getals(inp,m,a,n,b)) prunionalignment(out,m,a,n,b);
+			while(getals(*inp,m,a,n,b)) prunionalignment(*out,m,a,n,b);
 			break;
 		case INTERSECT:
           cerr << "symal: computing intersect alignment\n";
-			while(getals(inp,m,a,n,b)) printersect(out,m,a,n,b);
+			while(getals(*inp,m,a,n,b)) printersect(*out,m,a,n,b);
 			break;
       case GROW:
      cerr << "symal: computing grow alignment: diagonal ("
          << diagonal << ") final ("<< final << ")" 
          <<  "both-uncovered (" << bothuncovered <<")\n"; 
          
-         while(getals(inp,m,a,n,b)) 
-               printgrow(out,m,a,n,b,diagonal,final,bothuncovered);
+         while(getals(*inp,m,a,n,b)) 
+               printgrow(*out,m,a,n,b,diagonal,final,bothuncovered);
          
          break;
 		default:
@@ -401,5 +416,10 @@ int bothuncovered=false;
    for (int i=1;i<=MAX_N;i++) delete [] A[i];
    delete [] A;
    
-   exit(0);
+	 if (inp != &cin)
+	    static_cast<fstream*>(inp)->close();
+	 if (out != &cout)
+	    static_cast<fstream*>(out)->close();
+
+	 exit(0);
 }
