@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "score", "score.vcproj", "{3
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "extract", "extract.vcproj", "{2475F8E8-A5C9-4785-8B09-5F4E120FC518}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "symal", "..\symal\symal.vcproj", "{6716FB26-8298-47A3-A915-958AF0AC80F8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,6 +21,10 @@ Global
 		{2475F8E8-A5C9-4785-8B09-5F4E120FC518}.Debug|Win32.Build.0 = Debug|Win32
 		{2475F8E8-A5C9-4785-8B09-5F4E120FC518}.Release|Win32.ActiveCfg = Release|Win32
 		{2475F8E8-A5C9-4785-8B09-5F4E120FC518}.Release|Win32.Build.0 = Release|Win32
+		{6716FB26-8298-47A3-A915-958AF0AC80F8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6716FB26-8298-47A3-A915-958AF0AC80F8}.Debug|Win32.Build.0 = Debug|Win32
+		{6716FB26-8298-47A3-A915-958AF0AC80F8}.Release|Win32.ActiveCfg = Release|Win32
+		{6716FB26-8298-47A3-A915-958AF0AC80F8}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
