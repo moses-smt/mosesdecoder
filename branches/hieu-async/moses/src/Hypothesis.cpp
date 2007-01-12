@@ -526,6 +526,17 @@ void Hypothesis::InitializeArcs()
 		Hypothesis *arc = *iter;
 		arc->SetWinningHypo(this);
 	}
+
+	/* keep only number of arcs we need to create all n-best paths.
+	 * However, may not be enough if only unique candidates are needed,
+	 * so we'll keep a bit more, but that mightsdfsdf still not be enough...
+	 */
+	size_t nBestSize = StaticData::Instance()->GetNBestSize();
+	nth_element(m_arcList->begin()
+						, m_arcList->begin() + nBestSize
+						, m_arcList->end()
+						, CompareHypoScores);
+
 }
 
 TO_STRING_BODY(Hypothesis)
