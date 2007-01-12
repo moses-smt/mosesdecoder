@@ -65,3 +65,4 @@ std::ostream& operator<<(std::ostream &out, const AlignmentPair &alignmentPair)
 	OutputPhraseAlignVec(out, alignmentPair.m_targetAlign);
 	return out;
 }
+

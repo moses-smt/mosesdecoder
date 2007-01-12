@@ -80,3 +80,4 @@ std::ostream& operator<<(std::ostream& out, const AlignmentPhrase &alignmentPhra
 	}
 	return out;
 }
+
