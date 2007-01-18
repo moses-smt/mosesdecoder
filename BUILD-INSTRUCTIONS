@@ -5,6 +5,11 @@ or IRST's) you want to use.  If you want to use SRI's, you will need
 to download their source and build it.  The SRILM can be downloaded
 from http://www.speech.sri.com/projects/srilm/download.html .
 
+IMPORTANT: These instructions are for building the moses decoder ONLY,
+the training and tuning SCRIPTS contained in scripts/ must be built
+and installed separately.  Also, they may require modification to
+work in certain environments.
+
 --------------------------------------------------------------------------
 
 1) Instructions for building with SRILM
