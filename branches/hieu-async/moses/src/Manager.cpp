@@ -86,7 +86,7 @@ void Manager::ProcessSentence()
 		VERBOSE(3,"processing hypothesis from next stack");
 		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
-		sourceHypoColl.InitializeArcs();
+		sourceHypoColl.CleanupArcList();
 
 		// go through each hypothesis on the stack and try to expand it
 		HypothesisCollection::const_iterator iterHypo;

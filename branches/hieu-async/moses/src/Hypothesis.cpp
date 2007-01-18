@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <limits>
 #include <vector>
+#include <algorithm>
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "DummyScoreProducers.h"
@@ -512,31 +513,47 @@ void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistorti
 	//PrintLMScores();
 }
 
-void Hypothesis::InitializeArcs()
+void Hypothesis::CleanupArcList()
 {
 	// point this hypo's main hypo to itself
 	SetWinningHypo(this);
 
 	if (!m_arcList) return;
 
-	// set all arc's main hypo variable to this hypo
+	/* keep only number of arcs we need to create all n-best paths.
+	 * However, may not be enough if only unique candidates are needed,
+	 * so we'll keep all of arc list if nedd distinct n-best list
+	 */
+	const StaticData *staticData = StaticData::Instance();
+	size_t nBestSize = staticData->GetNBestSize();
+	bool distinctNBest = staticData->GetDistinctNBest();
+
+	if (!distinctNBest && m_arcList->size() > nBestSize)
+	{
+		nth_element(m_arcList->begin()
+							, m_arcList->begin() + nBestSize - 1
+							, m_arcList->end()
+							, CompareHypothesisTotalScore());
+		
+		// delete bad ones
+		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
+		ArcList::iterator iter;
+		for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter)
+		{
+			Hypothesis *arc = *iter;
+			pool.freeObject(arc);
+		}
+		m_arcList->erase(m_arcList->begin() + nBestSize
+										, m_arcList->end());
+	}
+
+	// set all remaining arc's main hypo variable to this hypo
 	ArcList::iterator iter = m_arcList->begin();
 	for (; iter != m_arcList->end() ; ++iter)
 	{
 		Hypothesis *arc = *iter;
 		arc->SetWinningHypo(this);
 	}
-
-	/* keep only number of arcs we need to create all n-best paths.
-	 * However, may not be enough if only unique candidates are needed,
-	 * so we'll keep a bit more, but that mightsdfsdf still not be enough...
-	 */
-	size_t nBestSize = StaticData::Instance()->GetNBestSize();
-	nth_element(m_arcList->begin()
-						, m_arcList->begin() + nBestSize
-						, m_arcList->end()
-						, CompareHypoScores);
-
 }
 
 TO_STRING_BODY(Hypothesis)

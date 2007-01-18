@@ -245,7 +245,7 @@ public:
 	}
 	
 	void AddArc(Hypothesis *loserHypo);
-	void InitializeArcs();
+	void CleanupArcList();
 
 	//! returns a list alternative previous hypotheses (or NULL if n-best support is disabled)
 	inline const ArcList* GetArcList() const
@@ -281,3 +281,11 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);
+
+struct CompareHypothesisTotalScore
+{
+	bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const
+	{
+		return hypo1->GetTotalScore() > hypo2->GetTotalScore();
+	}
+};

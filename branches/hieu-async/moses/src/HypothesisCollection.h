@@ -165,7 +165,7 @@ public:
 	/** make all arcs in point to the equiv hypothesis that contains them. 
 	* Ie update doubly linked list be hypo & arcs
 	*/
-	void InitializeArcs();
+	void CleanupArcList();
 	
 	TO_STRING();
 };

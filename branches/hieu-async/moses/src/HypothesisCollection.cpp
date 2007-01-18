@@ -206,26 +206,17 @@ const Hypothesis *HypothesisCollection::GetBestHypothesis() const
 	return NULL;
 }
 
-// sorting helper
-struct HypothesisSortDescending
-{
-	bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const
-	{
-		return hypo1->GetTotalScore() > hypo2->GetTotalScore();
-	}
-};
-
 vector<const Hypothesis*> HypothesisCollection::GetSortedList() const
 {
 	vector<const Hypothesis*> ret; ret.reserve(m_hypos.size());
 	std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(ret, ret.end()));
-	sort(ret.begin(), ret.end(), HypothesisSortDescending());
+	sort(ret.begin(), ret.end(), CompareHypothesisTotalScore());
 
 	return ret;
 }
 
 
-void HypothesisCollection::InitializeArcs()
+void HypothesisCollection::CleanupArcList()
 {
 	// only necessary if n-best calculations are enabled
 	if (!m_nBestIsEnabled) return;
@@ -234,7 +225,7 @@ void HypothesisCollection::InitializeArcs()
 	for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter)
 	{
 		Hypothesis *mainHypo = *iter;
-		mainHypo->InitializeArcs();
+		mainHypo->CleanupArcList();
 	}
 }
 

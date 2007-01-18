@@ -304,7 +304,7 @@ public:
 	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 
 	bool UseDistortionFutureCosts() const {return m_useDistortionFutureCosts;}
-	bool OnlyDistinctNBest() const {return m_onlyDistinctNBest;}
+	bool GetDistinctNBest() const {return m_onlyDistinctNBest;}
 	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
