@@ -54,7 +54,7 @@ protected:
 	const std::vector<FactorType>	&m_outputFactorOrder;
 	const FactorMask							&m_inputFactorUsed;
 	FactorCollection							&m_factorCollection;
-	std::ostream 								*m_nBestFile;
+	std::ostream 								*m_nBestStream;
 	std::string										m_inputFilePath;
 	std::istream									*m_inputStream;
 	InputFileStream								*m_inputFile;
