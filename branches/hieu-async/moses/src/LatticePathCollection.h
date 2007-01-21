@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <set>
 #include <iostream>
+#include "LatticePath.h"
 
 struct CompareLatticePathCollection
 {
@@ -32,21 +33,33 @@ struct CompareLatticePathCollection
 	}
 };
 
+/** priority queue used in Manager to store list of contenders for N-Best list.
+	* Stored in order of total score so that the best path can just be popped from the top
+	*/
 class LatticePathCollection
 {
+	friend std::ostream& operator<<(std::ostream&, const LatticePathCollection&);
 protected:
-	std::multiset<LatticePath*, CompareLatticePathCollection> m_collection;
-	std::set< std::vector<const Hypothesis *> > m_uniquePath;
-	
-public:
-	// iters
-	typedef std::multiset<LatticePath*, CompareLatticePathCollection>::iterator iterator;
-	typedef std::multiset<LatticePath*, CompareLatticePathCollection>::const_iterator const_iterator;
-	
-	iterator begin() { return m_collection.begin(); }
-	iterator end() { return m_collection.end(); }
-	const_iterator begin() const { return m_collection.begin(); }
-	const_iterator end() const { return m_collection.end(); }
+	typedef std::multiset<LatticePath*, CompareLatticePathCollection> CollectionType;
+	CollectionType m_collection;
+	std::set< std::vector<const Hypothesis *> > m_uniquePath; 
+		// not sure if really needed. does the partitioning algorithm create duplicate paths ?
+
+public:	
+	//iterator begin() { return m_collection.begin(); }
+	LatticePath *pop()
+	{
+		LatticePath *top = *m_collection.begin();
+
+		// Detach
+		// delete from m_uniquePath as well
+		const std::vector<const Hypothesis *> &edges = top->GetEdges();
+		m_uniquePath.erase(edges);
+
+		m_collection.erase(m_collection.begin());
+
+		return top;
+	}
 
 	~LatticePathCollection()
 	{
@@ -72,22 +85,15 @@ public:
 	{
 		return m_collection.size();
 	}
-	void Detach(const LatticePathCollection::iterator &iter)
-	{		
-		// delete from m_uniquePath as well
-		const LatticePath *latticePath = *iter;
-		const std::vector<const Hypothesis *> &edges = latticePath->GetEdges();
-		m_uniquePath.erase(edges);
 
-		m_collection.erase(iter);
-	}
+	void Prune(size_t newSize);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const LatticePathCollection& pathColl)
 {
-	LatticePathCollection::const_iterator iter;
+	LatticePathCollection::CollectionType::const_iterator iter;
 	
-	for (iter = pathColl.begin() ; iter != pathColl.end() ; ++iter)
+	for (iter = pathColl.m_collection.begin() ; iter != pathColl.m_collection.end() ; ++iter)
 	{
 		const LatticePath &path = **iter;
 		out << path << std::endl;

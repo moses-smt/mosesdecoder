@@ -348,7 +348,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 	for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * 20) ; iteration++)
 	{
 		// get next best from list of contenders
-		LatticePath *path = *contenders.begin();
+		LatticePath *path = contenders.pop();
 		assert(path);
 		bool addPath = true;
 		if(onlyDistinct)
@@ -368,7 +368,10 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 		else
 			delete path;
 
-		contenders.Detach(contenders.begin());
+		if(!onlyDistinct)
+		{
+			contenders.Prune(count);
+		}
 	}
 }
 
