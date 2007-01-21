@@ -278,6 +278,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LatticePathCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LexicalReordering.cpp"
 				>
 			</File>
