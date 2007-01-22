@@ -92,7 +92,7 @@ void Manager::ProcessSentence()
 		VERBOSE(3,"processing hypothesis from next stack");
 		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
-		sourceHypoColl.InitializeArcs();
+		sourceHypoColl.CleanupArcList();
 
 		// go through each hypothesis on the stack and try to expand it
 		HypothesisCollection::const_iterator iterHypo;
@@ -324,7 +324,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 	for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * 20) ; iteration++)
 	{
 		// get next best from list of contenders
-		LatticePath *path = *contenders.begin();
+		LatticePath *path = contenders.pop();
 		assert(path);
 		bool addPath = true;
 		if(onlyDistinct)
@@ -342,7 +342,10 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 			path->CreateDeviantPaths(contenders);		
 		}
 
-		contenders.Detach(contenders.begin());
+		if(!onlyDistinct)
+		{
+			contenders.Prune(count);
+		}
 	}
 }
 
