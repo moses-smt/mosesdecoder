@@ -155,10 +155,13 @@ int main(int argc, char* argv[])
 	delete ioStream;
 
 	PrintUserTime("End.");
-//This avoids that detructors are called (it can take a long time)
-        exit(EXIT_SUCCESS);
- 
-//       return EXIT_SUCCESS;
+
+	#ifdef HACK_EXIT
+	//This avoids that detructors are called (it can take a long time)
+		exit(EXIT_SUCCESS);
+	#else
+		return EXIT_SUCCESS;
+	#endif
 }
 
 IOStream *GetIODevice(StaticData &staticData)
