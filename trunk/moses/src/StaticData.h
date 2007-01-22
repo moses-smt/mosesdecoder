@@ -139,7 +139,7 @@ public:
 		return m_parameter->GetParam(paramName);
 	}
 
-	const bool IsComputeLMBackoffStats() const
+	bool IsComputeLMBackoffStats() const
 	{
 		return m_computeLMBackoffStats;
 	}
@@ -277,9 +277,9 @@ public:
 	{
 		return m_nBestFilePath;
 	}
-  const bool IsNBestEnabled() const {
-    return !m_nBestFilePath.empty();
-  }
+  	bool IsNBestEnabled() const {
+    	return !m_nBestFilePath.empty();
+  	}
 	size_t GetNBestFactor() const
 	{
 		return m_nBestFactor;
