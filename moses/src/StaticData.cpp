@@ -109,6 +109,12 @@ bool StaticData::LoadData(Parameter *parameter)
 		m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
 		m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
 		m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 && m_parameter->GetParam("n-best-list")[2]=="distinct");
+
+		if (m_parameter->GetParam("n-best-factor").size() > 0) 
+		{
+			m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
+		}
+
 	}
 	else
 	{
