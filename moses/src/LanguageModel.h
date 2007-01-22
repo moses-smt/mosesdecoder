@@ -120,7 +120,7 @@ public:
 	virtual const std::string GetScoreProducerDescription(int idx = 0) const = 0;
   
   //! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
-  virtual const void InitializeBeforeSentenceProcessing(){};
-  virtual const void CleanUpAfterSentenceProcessing() {};  
+  virtual void InitializeBeforeSentenceProcessing(){};
+  virtual void CleanUpAfterSentenceProcessing() {};  
 };
 
