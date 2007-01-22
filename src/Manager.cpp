@@ -342,7 +342,13 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 			path->CreateDeviantPaths(contenders);		
 		}
 
-		if(!onlyDistinct)
+		if(onlyDistinct)
+		{
+			size_t nBestFactor = StaticData::Instance()->GetNBestFactor();
+			if (nBestFactor > 0)
+				contenders.Prune(count * nBestFactor);
+		}
+		else
 		{
 			contenders.Prune(count);
 		}
