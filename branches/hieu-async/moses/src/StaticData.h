@@ -74,6 +74,7 @@ protected:
 	size_t                              
 			m_maxHypoStackSize //hypothesis-stack size that triggers pruning
 			, m_nBestSize
+			, m_nBestFactor
 			, m_maxNoTransOptPerCoverage
 		  , m_maxNoPartTransOpt;
 	
@@ -285,6 +286,11 @@ public:
   bool IsNBestEnabled() const {
     return !m_nBestFilePath.empty();
   }
+	size_t GetNBestFactor() const
+	{
+		return m_nBestFactor;
+	}
+
 //! Sets the global score vector weights for a given ScoreProducer.
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	int GetInputType() const {return m_inputType;}

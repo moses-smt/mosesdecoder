@@ -49,6 +49,7 @@ Parameter::Parameter()
 	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
 	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
 	AddParam("n-best-list", "file and size of n-best-list to be generated");
+	AddParam("n-best-factor", "Set the maximum number of contenders (=factor*nBestSize) for n-best list. value 0 means infinity, i.e. no threshold. default is 0. Only has effect if using distinct n-best list");
 	AddParam("output-factors", "list of factors in the output");
 	AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
 	AddParam("report-segmentation", "t", "report phrase segmentation in the output");
