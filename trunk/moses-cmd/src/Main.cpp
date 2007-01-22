@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
 				{
 				  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					LatticePathList nBestList;
-					manager.CalcNBest(nBestSize, nBestList,staticData.OnlyDistinctNBest());
+					manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
 					ioStream->OutputNBestList(nBestList, source->GetTranslationId());
 					//RemoveAllInColl(nBestList);
 				}
