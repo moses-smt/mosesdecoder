@@ -23,6 +23,7 @@ libmoses_a_SOURCES = \
 	LanguageModelSingleFactor.cpp \
 	LanguageModelSkip.cpp \
 	LatticePath.cpp \
+	LatticePathCollection.cpp \
 	LexicalReordering.cpp \
 	Manager.cpp \
 	md5.cpp \

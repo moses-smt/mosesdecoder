@@ -26,11 +26,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LatticePath.h"
 
 
+/** used to return n-best list of Lattice Paths from the Manager to the caller */
 class LatticePathList
 {
 protected:
 	 std::list<const LatticePath*> m_collection;
 	 std::set< std::vector<const Hypothesis *> > m_uniquePath;
+		// not sure if really needed. does the partitioning algorithm create duplicate paths ?
 public:
 	// iters
 	typedef std::list<const LatticePath*>::iterator iterator;
