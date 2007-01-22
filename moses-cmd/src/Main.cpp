@@ -126,6 +126,7 @@ int main(int argc, char* argv[])
 														 staticData.GetReportSegmentation(),
 														 staticData.GetReportAllFactors()
 														 );
+			IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
 
 			// n-best
 			size_t nBestSize = staticData.GetNBestSize();
@@ -136,7 +137,9 @@ int main(int argc, char* argv[])
 					manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
 					ioStream->OutputNBestList(nBestList, source->GetTranslationId());
 					//RemoveAllInColl(nBestList);
-				}
+
+					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
+			}
 
 			if (staticData.IsDetailedTranslationReportingEnabled()) {
 				TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
@@ -152,7 +155,10 @@ int main(int argc, char* argv[])
 	delete ioStream;
 
 	PrintUserTime("End.");
-	return EXIT_SUCCESS;
+//This avoids that detructors are called (it can take a long time)
+        exit(EXIT_SUCCESS);
+ 
+//       return EXIT_SUCCESS;
 }
 
 IOStream *GetIODevice(StaticData &staticData)
