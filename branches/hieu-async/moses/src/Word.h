@@ -46,12 +46,12 @@ protected:
 public:
 	/** deep copy */
 	Word(const Word &copy) {
-		std::memcpy(m_factorArray, copy.m_factorArray, sizeof(Factor*) * MAX_NUM_FACTORS);
+		std::memcpy(m_factorArray, copy.m_factorArray, sizeof(FactorArray));
 	}
 
 	/** empty word */
 	Word() {
-		std::memset(m_factorArray, 0, sizeof(Factor*) * MAX_NUM_FACTORS);
+		std::memset(m_factorArray, 0, sizeof(FactorArray));
 	}
 
 	~Word() {}
