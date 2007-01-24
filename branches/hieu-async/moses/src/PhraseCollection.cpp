@@ -78,9 +78,7 @@ void PhraseCollection::AddPhrase(const Phrase &source)
 	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
 		Word word = source.GetWord(pos);
-		cerr << word << " -> " ;
 		word.TrimFactors(m_inputMask);
-		cerr << word << endl;
 		currNode = currNode->GetOrCreateChild(word, true);
 		assert (currNode != NULL);
 	}
