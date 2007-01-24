@@ -420,8 +420,8 @@ void Hypothesis::CleanupArcList()
 	size_t nBestSize = staticData->GetNBestSize();
 	bool distinctNBest = staticData->GetDistinctNBest();
 
-	if (!distinctNBest && m_arcList->size() > nBestSize)
-	{
+	if (!distinctNBest && m_arcList->size() > nBestSize * 5)
+	{ // prune arc list only if there too many arcs
 		nth_element(m_arcList->begin()
 							, m_arcList->begin() + nBestSize - 1
 							, m_arcList->end()
