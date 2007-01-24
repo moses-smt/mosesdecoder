@@ -46,10 +46,12 @@ public:
 	}
 };
 
+/** prefix tree of phrases. Used to store input phrases for filtering */
 class PhraseCollection
 {
 protected:
 	PhraseCollectionNode m_collection;
+	//! Add source phrase and all prefix strings
 	void AddPhrase(const Phrase &source);
 public:
 	PhraseCollection()
