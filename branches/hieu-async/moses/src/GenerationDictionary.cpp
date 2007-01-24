@@ -77,7 +77,7 @@ bool GenerationDictionary::Load(const std::vector<FactorType> &input
 		{
 			FactorType factorType = input[i];
 			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
-			inputWord->SetFactor(factorType, factor);
+			(*inputWord)[factorType] = factor;
 		}
 
 		factorString = Tokenize( token[1], "|" );
@@ -86,7 +86,7 @@ bool GenerationDictionary::Load(const std::vector<FactorType> &input
 			FactorType factorType = output[i];
 			
 			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
-			outputWord.SetFactor(factorType, factor);
+			outputWord[factorType] = factor;
 		}
 
 		size_t numFeaturesInFile = token.size() - 2;

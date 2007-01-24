@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "PhraseList.h"
 
 using namespace std;
 
@@ -50,38 +51,14 @@ const PhraseCollectionNode *PhraseCollectionNode::Find(const Word &word) const
 	return NULL;
 }
 
-void PhraseCollection::AddPhrase(const Phrase &source)
+PhraseCollection::PhraseCollection(const std::vector<FactorType> &input
+																			, const PhraseList &phraseList)
+:m_inputMask(input)
 {
-	const size_t size = source.GetSize();
-	
-	PhraseCollectionNode *currNode = &m_collection;
-	for (size_t pos = 0 ; pos < size ; ++pos)
+	PhraseList::const_iterator iterList;
+	for (iterList = phraseList.begin() ; iterList != phraseList.end() ; ++iterList)
 	{
-		const Word& word = source.GetWord(pos);
-		currNode = currNode->GetOrCreateChild(word, true);
-		assert (currNode != NULL);
-	}
-
-	currNode->Set(true);
-
-}
-
-void PhraseCollection::Load(std::string filePath, FactorCollection &factorCollection)
-{
-	InputFileStream inFile(filePath);
-	
-	const std::vector<FactorType> &factorOrder = StaticData::Instance()->GetInputFactorOrder();
-	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
-
-	string line;
-	while(getline(inFile, line)) 
-	{
-		Phrase phrase(Input);
-		phrase.CreateFromString( factorOrder
-													, line
-													, factorCollection
-													, factorDelimiter
-													, NULL, NULL);
+		const Phrase &phrase = *iterList;
 		AddPhrase(phrase);
 
 		// add all suffixes too
@@ -91,6 +68,25 @@ void PhraseCollection::Load(std::string filePath, FactorCollection &factorCollec
 			AddPhrase(subPhrase);
 		}
 	}
+}
+
+void PhraseCollection::AddPhrase(const Phrase &source)
+{
+	const size_t size = source.GetSize();
+	
+	PhraseCollectionNode *currNode = &m_collection;
+	for (size_t pos = 0 ; pos < size ; ++pos)
+	{
+		Word word = source.GetWord(pos);
+		cerr << word << " -> " ;
+		word.TrimFactors(m_inputMask);
+		cerr << word << endl;
+		currNode = currNode->GetOrCreateChild(word, true);
+		assert (currNode != NULL);
+	}
+
+	currNode->Set(true);
+
 }
 
 bool PhraseCollection::Find(const Phrase &source, bool notFoundValue) const

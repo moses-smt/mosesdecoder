@@ -569,6 +569,8 @@ bool StaticData::LoadGenerationTables()
 	return true;
 }
 
+#include "PhraseList.h"
+
 #undef max
 
 bool StaticData::LoadPhraseTables()
@@ -590,7 +592,7 @@ bool StaticData::LoadPhraseTables()
 		//}
 		//TRACE_ERR( endl;
 
-		PhraseCollection inputPhrases;
+		PhraseList inputPhrases;
 		string inputFileHash;
 		if (m_parameter->GetParam("input-file").size() > 0)
 		{ 
@@ -618,6 +620,8 @@ bool StaticData::LoadPhraseTables()
       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
 			string filePath= token[3];
 			size_t numScoreComponent = Scan<size_t>(token[2]);
+
+			PhraseCollection inputPrefix(input, inputPhrases);
 
 			// weights for this phrase dictionary
 			// first InputScores (if any), then translation scores
@@ -700,7 +704,7 @@ bool StaticData::LoadPhraseTables()
 								 , GetWeightWordPenalty()
 								 , *this
 								 , filter
-								 , inputPhrases
+								 , inputPrefix
 								 , hashFilePath))
 				{
 					delete pd;

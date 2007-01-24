@@ -89,7 +89,7 @@ public:
 		// add last word
 		std::vector<const Word*> chunkContext;
 		Word* chunkWord = new Word;
-		chunkWord->SetFactor(m_factorType, factor);
+		(*chunkWord)[m_factorType] = factor;
 		chunkContext.push_back(chunkWord);
 		
 		// create context in reverse 'cos we skip words we don't want
@@ -104,7 +104,7 @@ public:
 
 			// add word to chunked context
 			Word* chunkWord = new Word;
-			chunkWord->SetFactor(m_factorType, factor);
+			(*chunkWord)[m_factorType] = factor;
 			chunkContext.push_back(chunkWord);
 		}
 	

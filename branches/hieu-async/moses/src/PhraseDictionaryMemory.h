@@ -60,7 +60,7 @@ public:
 						    , float weightWP
 								, const StaticData& staticData
 								, bool filter
-								, const PhraseCollection &inputPhrases
+								, const PhraseCollection &inputPrefix
 								, const std::string &hashFilePath);
 	
 	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;

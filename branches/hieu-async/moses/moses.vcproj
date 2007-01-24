@@ -382,6 +382,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseList.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseReference.cpp"
 				>
 			</File>
@@ -669,6 +673,10 @@
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionaryTreeAdaptor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseList.h"
 				>
 			</File>
 			<File

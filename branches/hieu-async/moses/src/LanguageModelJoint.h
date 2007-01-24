@@ -117,7 +117,7 @@ public:
 			factor = m_factorCollection->AddFactor(Output, m_implFactor, stream.str());
 
 			Word* jointWord = new Word;
-			jointWord->SetFactor(m_implFactor, factor);
+			(*jointWord)[m_implFactor] = factor;
 			jointContext.push_back(jointWord);
 		}
 	

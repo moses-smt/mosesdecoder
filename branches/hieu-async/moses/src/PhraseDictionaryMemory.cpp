@@ -49,7 +49,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 														          , float weightWP
 														          , const StaticData& staticData
 																			, bool filter
-																			, const PhraseCollection &inputPhrases
+																			, const PhraseCollection &inputPrefix
 																			, const string &hashFilePath)
 {
 	m_tableLimit = tableLimit;
@@ -125,7 +125,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		// if not part of input, filter it out
 		if (filter)
 		{
-			if (inputPhrases.Find(sourcePhrase, false))
+			if (inputPrefix.Find(sourcePhrase, false))
 			{
 				tempFile << line << endl;
 			}

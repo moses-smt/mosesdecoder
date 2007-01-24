@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "TypeDef.h"
 #include "StaticData.h"  // needed to determine the FactorDelimiter
+#include "FactorMask.h"
 
 using namespace std;
 
@@ -50,7 +51,7 @@ int Word::Compare(const Word &targetWord, const Word &sourceWord)
 
 void Word::Merge(const Word &sourceWord)
 {
-	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+	for (FactorType currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 	{
 		const Factor *sourcefactor		= sourceWord.m_factorArray[currFactor]
 								,*targetFactor		= this     ->m_factorArray[currFactor];
@@ -58,6 +59,15 @@ void Word::Merge(const Word &sourceWord)
 		{
 			m_factorArray[currFactor] = sourcefactor;
 		}
+	}
+}
+
+void Word::TrimFactors(const FactorMask &inputMask)
+{
+	for (FactorType currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+	{
+		if (!inputMask[currFactor])
+			operator[](currFactor) = NULL;
 	}
 }
 
@@ -91,7 +101,7 @@ ostream& operator<<(ostream& out, const Word& word)
 	bool firstPass = true;
 	for (FactorType factorType = 0 ; factorType < MAX_NUM_FACTORS ; ++factorType)
 	{
-		const Factor *factor = word.GetFactor(factorType);
+		const Factor *factor = word[factorType];
 		if (factor != NULL)
 		{
 			if (firstPass) { firstPass = false; } else { strme << factorDelimiter; }

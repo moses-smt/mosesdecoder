@@ -23,9 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <string>
 #include "Word.h"
+#include "FactorMask.h"
 
 class Phrase;
 class FactorCollection;
+class PhraseList;
 
 class PhraseCollectionNode
 {
@@ -50,13 +52,13 @@ public:
 class PhraseCollection
 {
 protected:
+	FactorMask m_inputMask;
 	PhraseCollectionNode m_collection;
 	//! Add source phrase and all prefix strings
 	void AddPhrase(const Phrase &source);
 public:
-	PhraseCollection()
-	{}
-	void Load(std::string filePath, FactorCollection &factorCollection);
+	PhraseCollection(const std::vector<FactorType> &input
+									,const PhraseList &phraseList);
 	bool Find(const Phrase &source, bool notFoundValue) const;
 
 };
