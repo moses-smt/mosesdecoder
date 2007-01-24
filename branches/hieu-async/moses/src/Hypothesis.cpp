@@ -528,13 +528,34 @@ void Hypothesis::CleanupArcList()
 	size_t nBestSize = staticData->GetNBestSize();
 	bool distinctNBest = staticData->GetDistinctNBest();
 
-	if (!distinctNBest && m_arcList->size() > nBestSize)
-	{
+	if (!distinctNBest && m_arcList->size() > nBestSize * 5)
+	{ // prune arc list only if there too many arcs
+
+		// debug
+		ArcList::iterator iterArcList;
+		/*
+		for (iterArcList = m_arcList->begin() ; iterArcList != m_arcList->end() ; ++iterArcList)
+		{
+			Hypothesis *hypo = *iterArcList;
+			cerr << hypo->GetTotalScore() << endl;
+		}
+		cerr << endl;
+		*/
+
 		nth_element(m_arcList->begin()
 							, m_arcList->begin() + nBestSize - 1
 							, m_arcList->end()
 							, CompareHypothesisTotalScore());
-		
+		// debug
+		/*
+		for (iterArcList = m_arcList->begin() ; iterArcList != m_arcList->end() ; ++iterArcList)
+		{
+			Hypothesis *hypo = *iterArcList;
+			cerr << hypo->GetTotalScore() << endl;
+		}
+		cerr << endl;
+		*/
+
 		// delete bad ones
 		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
 		ArcList::iterator iter;
@@ -545,8 +566,18 @@ void Hypothesis::CleanupArcList()
 		}
 		m_arcList->erase(m_arcList->begin() + nBestSize
 										, m_arcList->end());
-	}
 
+		// debug
+		/*
+		for (iterArcList = m_arcList->begin() ; iterArcList != m_arcList->end() ; ++iterArcList)
+		{
+			Hypothesis *hypo = *iterArcList;
+			cerr << hypo->GetTotalScore() << endl;
+		}
+		cerr << endl;
+		*/
+	}
+	
 	// set all remaining arc's main hypo variable to this hypo
 	ArcList::iterator iter = m_arcList->begin();
 	for (; iter != m_arcList->end() ; ++iter)
