@@ -35,14 +35,13 @@ int Word::Compare(const Word &targetWord, const Word &sourceWord)
 	{
 		const Factor *targetFactor		= targetWord[factorType]
 								,*sourceFactor	= sourceWord[factorType];
-					
+
 		if (targetFactor == NULL || sourceFactor == NULL)
-		{
 			continue;
-		}
-		int result = targetFactor->Compare(*sourceFactor);
-		if ( result )
-			return result;
+		if (targetFactor == sourceFactor)
+			continue;
+		
+		return (targetFactor<sourceFactor) ? -1 : +1;
 	}
 	return 0;
 
