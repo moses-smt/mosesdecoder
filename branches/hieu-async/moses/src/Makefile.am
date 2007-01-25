@@ -33,6 +33,7 @@ libmoses_a_SOURCES = ConfusionNet.cpp ConfusionNet.h DecodeStep.cpp \
 		WordsBitmap.h WordsRange.cpp WordsRange.h AlignmentPair.cpp AlignmentPair.h \
 		AlignmentPhrase.cpp AlignmentPhrase.h PhraseCollection.cpp PhraseCollection.h \
 	PhraseList.cpp PhraseList.h LatticePathCollection.cpp
-AM_CXXFLAGS = -DLM_SRI -DLM_IRST -DLM_INTERNAL -DTRACE_ENABLE\
-	-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 
+
+AM_CXXFLAGS = -DLM_SRI -DLM_IRST -DLM_INTERNAL\
+	-DTRACE_ENABLE	-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES

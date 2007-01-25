@@ -92,7 +92,7 @@ public:
 	/* static functions */
 	
 	/** transitive comparison of 2 word objects. Used by operator<. 
-	*	Only compare the ?co-joined? factors, ie. where factor exists for both words.
+	*	Only compare the co-joined factors, ie. where factor exists for both words.
 	*	Should make it non-static
 	*/
 	static int Compare(const Word &targetWord, const Word &sourceWord);

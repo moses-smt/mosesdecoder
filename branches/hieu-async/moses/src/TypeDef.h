@@ -48,25 +48,6 @@ const float DEFAULT_BEAM_THRESHOLD		= 0.00001f;
 const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
 ///////////////////////////////////////////////// 
-// for those using autoconf/automake
-#if HAVE_CONFIG_H
-#include "config.h"
-
-#define TRACE_ENABLE 1		// REMOVE after we figure this out
-
-#  ifdef HAVE_SRILM
-#    define LM_SRI 1
-#  else
-#    undef LM_SRI
-#  endif
-
-#  ifdef HAVE_IRSTLM
-#    define LM_IRST 1
-#    undef LM_SRI
-#  endif
-
-#endif
-
 #ifdef min
 #undef min
 #endif

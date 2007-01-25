@@ -18,7 +18,7 @@
   <kdevautoproject>
     <general>
       <activetarget>src/moses</activetarget>
-      <useconfiguration>optimized</useconfiguration>
+      <useconfiguration>debug</useconfiguration>
     </general>
     <run>
       <mainprogram>/amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/debug/moses-cmd/src/moses-cmd</mainprogram>
@@ -27,7 +27,7 @@
       <runarguments>
         <moses-cmd/>
       </runarguments>
-      <customdirectory>/home/s0565741/terabyte/en-de/train-async/1000/mert/mert-work/</customdirectory>
+      <customdirectory>/home/s0565741/terabyte/en-de/train-async/mert/</customdirectory>
       <programargs/>
       <autocompile>true</autocompile>
       <envvars/>
@@ -39,6 +39,16 @@
         <cxxcompiler>kdevgppoptions</cxxcompiler>
         <f77compiler>kdevg77options</f77compiler>
         <cxxflags>-O2 -g0</cxxflags>
+        <envvars/>
+        <configargs/>
+        <topsourcedir/>
+        <cppflags>-DLM_SRI -DLM_IRST -DLM_INTERNAL -DTRACE_ENABLE	-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES</cppflags>
+        <ldflags/>
+        <ccompilerbinary/>
+        <cxxcompilerbinary/>
+        <f77compilerbinary/>
+        <cflags/>
+        <f77flags/>
       </optimized>
       <debug>
         <configargs>--enable-debug=full</configargs>
@@ -47,6 +57,15 @@
         <cxxcompiler>kdevgppoptions</cxxcompiler>
         <f77compiler>kdevg77options</f77compiler>
         <cxxflags>-O0 -g3</cxxflags>
+        <envvars/>
+        <topsourcedir/>
+        <cppflags/>
+        <ldflags/>
+        <ccompilerbinary/>
+        <cxxcompilerbinary/>
+        <f77compilerbinary/>
+        <cflags/>
+        <f77flags/>
       </debug>
     </configurations>
     <make>
@@ -181,7 +200,7 @@
   </cppsupportpart>
   <kdevdebugger>
     <general>
-      <programargs>-w 0.000000 -lm 0.200000 0.200000 -d 0.200000 -tm 0.060000 0.040000 0.060000 0.040000 0.000000 0.060000 0.040000 0.060000 0.040000 0.000000 -config ../moses.ini -inputtype 0 -n-best-list /amd/partition/ptn162/hieu/en-de/train-async/1000/mert/mert-work/tmp12484/run1.best100.out.split12484-ak 100 -input-file in.txt.split12484-ak</programargs>
+      <programargs>-f moses.ini -n-best-list nbest.txt 100   -i in.txt</programargs>
       <gdbpath/>
       <dbgshell>libtool</dbgshell>
       <configGdbScript/>

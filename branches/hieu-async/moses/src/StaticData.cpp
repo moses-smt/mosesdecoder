@@ -295,7 +295,7 @@ bool StaticData::LoadLexicalReorderingModel()
 	// load Lexical Reordering model
 	
 	m_sourceStartPosMattersForRecombination = false;
-
+	
 	//distortion weights
 	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
 	//distortional model weights (first weight is distance distortion)
