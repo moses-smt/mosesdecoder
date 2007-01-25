@@ -98,11 +98,13 @@ void Manager::ProcessSentence()
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
 		//OutputHypoStackSize();
+		OutputArcListSize();
 	}
 
 	//OutputHypoStack();
 	OutputHypoStackSize();
-
+	OutputArcListSize();
+	
 	// some more logging
 	VERBOSE(2,m_staticData.GetSentenceStats());
 }
@@ -299,6 +301,33 @@ void Manager::OutputHypoStack(int stack)
 		}
 	}
 }
+
+/** Output arc list information to debug mem leak */
+void Manager::OutputArcListSize()
+{
+	TRACE_ERR( "Arc sizes: ");
+	
+	int i = 0;
+	HypothesisStack::iterator iterStack;
+	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
+	{
+		HypothesisCollection &hypoColl = *iterStack;
+		
+		size_t arcCount = 0;
+		HypothesisCollection::iterator iterColl;
+		for (iterColl = hypoColl.begin() ; iterColl != hypoColl.end() ; ++iterColl)
+		{
+			Hypothesis *hypo = *iterColl;
+			const ArcList *arcList = hypo->GetArcList();
+			if (arcList != NULL)
+				arcCount += arcList->size();
+		}
+		
+		TRACE_ERR( ", " << arcCount);
+	}
+	TRACE_ERR(endl);
+}
+
 void GetSurfacePhrase(std::vector<size_t>& tphrase, LatticePath const& path)
 {
 	tphrase.clear();
