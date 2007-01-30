@@ -311,10 +311,10 @@ void Manager::OutputArcListSize()
 	HypothesisStack::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
-		HypothesisCollection &hypoColl = *iterStack;
+		const HypothesisCollection &hypoColl = *iterStack;
 		
 		size_t arcCount = 0;
-		HypothesisCollection::iterator iterColl;
+		HypothesisCollection::const_iterator iterColl;
 		for (iterColl = hypoColl.begin() ; iterColl != hypoColl.end() ; ++iterColl)
 		{
 			Hypothesis *hypo = *iterColl;
