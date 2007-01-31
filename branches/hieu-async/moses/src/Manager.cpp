@@ -303,12 +303,12 @@ void Manager::OutputHypoStack(int stack)
 }
 
 /** Output arc list information to debug mem leak */
-void Manager::OutputArcListSize()
+void Manager::OutputArcListSize() const
 {
 	TRACE_ERR( "Arc sizes: ");
 	
 	int i = 0;
-	HypothesisStack::iterator iterStack;
+	HypothesisStack::const_iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
 		const HypothesisCollection &hypoColl = *iterStack;

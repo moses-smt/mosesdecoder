@@ -33,6 +33,17 @@ bool HypothesisStack::iterator::operator!=(const iterator &compare) const
 	return this->m_pos != compare.m_pos;
 }
 
+HypothesisStack::const_iterator::const_iterator(size_t pos, const StackType &stack)
+{
+	m_pos = pos;
+	m_stack = &stack;
+}
+
+bool HypothesisStack::const_iterator::operator!=(const const_iterator &compare) const
+{
+	return this->m_pos != compare.m_pos;
+}
+
 void HypothesisStack::AddPrune(Hypothesis *hypo)
 {
 	const WordsBitmap &wordsBitmap = hypo->GetSourceBitmap();

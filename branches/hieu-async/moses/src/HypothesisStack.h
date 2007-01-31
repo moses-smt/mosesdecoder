@@ -37,6 +37,9 @@ public:
 	//! iterators
 	class iterator;
 	class const_iterator;
+	const_iterator begin() const { return const_iterator(0, m_stack); }
+	const_iterator end() const { return const_iterator(NOT_FOUND, m_stack); }
+
 	iterator begin() { return iterator(0, m_stack); }
 	iterator end() { return iterator(NOT_FOUND, m_stack); }
 	const HypothesisCollection &back() const { return m_stack.back(); }
@@ -76,5 +79,24 @@ public:
 		}
 	};
 
+	class const_iterator
+	{
+	protected:
+		size_t m_pos;
+		const StackType *m_stack;
+	public:
+		const_iterator() {}
+		const_iterator(size_t pos, const StackType &m_stack);
+		bool operator!=(const const_iterator &compare) const;
+		const const_iterator &operator++()
+		{
+			m_pos = (m_pos >= (m_stack->size()-1) ) ? NOT_FOUND : m_pos+1 ;
+			return *this;
+		}
+		const HypothesisCollection &operator*() const
+		{
+			return (*m_stack)[m_pos];
+		}
+	};
 };
 
