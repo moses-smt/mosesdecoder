@@ -53,8 +53,7 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 	if ( (stackIndex == m_stack.size() - 1)
 			&& !hypo->GetTargetPhrase().IsSynchronized())
 	{
-		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
-		pool.freeObject(hypo);		
+		FREEHYPO(hypo);		
 		return;
 	}
 	m_stack[stackIndex].AddPrune(hypo);

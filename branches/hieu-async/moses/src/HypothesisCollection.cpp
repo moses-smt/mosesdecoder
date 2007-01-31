@@ -78,8 +78,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	{ // really bad score. don't bother adding hypo into collection
 	  StaticData::Instance()->GetSentenceStats().AddDiscarded();
 	  VERBOSE(3,"discarded, too bad for stack" << std::endl);
-		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
-		pool.freeObject(hypo);		
+		FREEHYPO(hypo);		
 		return;
 	}
 
@@ -116,8 +115,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 		if (m_nBestIsEnabled) {
 			(*iter)->AddArc(hypo);
 		} else {
-			ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
-			pool.freeObject(hypo);				
+			FREEHYPO(hypo);				
 		}
 		return;
 	}

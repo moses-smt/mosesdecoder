@@ -40,7 +40,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 unsigned int Hypothesis::s_HypothesesCreated = 0;
-ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
+
+#ifdef USE_HYPO_POOL
+	ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
+#endif
 
 Hypothesis::Hypothesis(InputType const& source, const std::vector<DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)
@@ -165,7 +168,7 @@ Hypothesis::~Hypothesis()
 		ArcList::iterator iter;
 		for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter)
 		{
-			s_objectPool.freeObject (*iter);
+			FREEHYPO(*iter);
 		}
 		m_arcList->clear();
 
@@ -214,8 +217,12 @@ Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
  */
 Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 {
+#ifdef USE_HYPO_POOL
 	Hypothesis *ptr = s_objectPool.getPtr();
 	return new(ptr) Hypothesis(prevHypo, transOpt);
+#else
+	return new Hypothesis(prevHypo, transOpt);
+#endif
 }
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase
@@ -223,8 +230,12 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 
 Hypothesis* Hypothesis::Create(InputType const& m_source, const std::vector<DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget)
 {
+#ifdef USE_HYPO_POOL
 	Hypothesis *ptr = s_objectPool.getPtr();
 	return new(ptr) Hypothesis(m_source, decodeStepList, emptyTarget);
+#else
+	return new Hypothesis(m_source, decodeStepList, emptyTarget);
+#endif
 }
 
 int Hypothesis::CompareCurrSourceRange(const Hypothesis &compare) const
@@ -557,12 +568,11 @@ void Hypothesis::CleanupArcList()
 		*/
 
 		// delete bad ones
-		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
 		ArcList::iterator iter;
 		for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter)
 		{
 			Hypothesis *arc = *iter;
-			pool.freeObject(arc);
+			FREEHYPO(arc);
 		}
 		m_arcList->erase(m_arcList->begin() + nBestSize
 										, m_arcList->end());
