@@ -98,7 +98,7 @@ void Manager::ProcessSentence()
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
 		//OutputHypoStackSize();
-		OutputArcListSize();
+		//OutputArcListSize();
 	}
 
 	//OutputHypoStack();
@@ -307,7 +307,6 @@ void Manager::OutputArcListSize() const
 {
 	TRACE_ERR( "Arc sizes: ");
 	
-	int i = 0;
 	HypothesisStack::const_iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
@@ -361,7 +360,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 		return;
 
 	LatticePathCollection contenders;
-
+	
 	set<std::vector<size_t> > distinctHyps;
 
 	// add all pure paths
@@ -396,7 +395,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 		}
 		else
 			delete path;
-
+		
 		if(onlyDistinct)
 		{
 			size_t nBestFactor = StaticData::Instance()->GetNBestFactor();
@@ -408,6 +407,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 			contenders.Prune(count);
 		}
 	}
+	
 }
 
 void Manager::CalcDecoderStatistics(const StaticData& staticData) const 
