@@ -99,9 +99,10 @@ protected:
 		Detach(iter);
 	}
 	/** add Hypothesis to the collection, without pruning */
-	inline void AddNoPrune(Hypothesis *hypothesis)
+	inline void AddNoPrune(Hypothesis *hypo)
 	{
-		if (!m_hypos.insert(hypothesis).second) {
+		if (!m_hypos.insert(hypo).second) {
+			FREEHYPO(hypo);
     }
 	}
 
