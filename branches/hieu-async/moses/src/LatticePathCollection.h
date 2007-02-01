@@ -77,6 +77,7 @@ public:
 		}
 		else
 		{ // path already in there
+			assert(false);
 			delete latticePath;
 		}
 	}

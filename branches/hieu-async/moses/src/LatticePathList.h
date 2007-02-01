@@ -60,7 +60,10 @@ public:
 			return true;
 		}
 		else
+		{
+			assert(false);
 			return false;
+		}
 	}
 
 	size_t GetSize() const
