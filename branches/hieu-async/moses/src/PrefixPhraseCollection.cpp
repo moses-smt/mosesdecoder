@@ -20,7 +20,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "PhraseCollection.h"
+#include "PrefixPhraseCollection.h"
 #include "Phrase.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
@@ -28,20 +28,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-PhraseCollectionNode *PhraseCollectionNode::GetOrCreateChild(const Word &word, bool initValue)
+PrefixPhraseCollectionNode *PrefixPhraseCollectionNode::GetOrCreateChild(const Word &word, bool initValue)
 {
 	NodeMap::iterator iter = m_map.find(word);
 	if (iter != m_map.end())
 		return &iter->second;	// found it
 
 	// can't find node. create a new 1
-	PhraseCollectionNode *node = &(m_map[word] = PhraseCollectionNode());
+	PrefixPhraseCollectionNode *node = &(m_map[word] = PrefixPhraseCollectionNode());
 	node->m_value = initValue;
 
 	return node;
 }
 
-const PhraseCollectionNode *PhraseCollectionNode::Find(const Word &word) const
+const PrefixPhraseCollectionNode *PrefixPhraseCollectionNode::Find(const Word &word) const
 {
 	NodeMap::const_iterator iter = m_map.find(word);
 	if (iter != m_map.end())
@@ -51,7 +51,7 @@ const PhraseCollectionNode *PhraseCollectionNode::Find(const Word &word) const
 	return NULL;
 }
 
-PhraseCollection::PhraseCollection(const std::vector<FactorType> &input
+PrefixPhraseCollection::PrefixPhraseCollection(const std::vector<FactorType> &input
 																			, const PhraseList &phraseList)
 :m_inputMask(input)
 {
@@ -70,11 +70,11 @@ PhraseCollection::PhraseCollection(const std::vector<FactorType> &input
 	}
 }
 
-void PhraseCollection::AddPhrase(const Phrase &source)
+void PrefixPhraseCollection::AddPhrase(const Phrase &source)
 {
 	const size_t size = source.GetSize();
 	
-	PhraseCollectionNode *currNode = &m_collection;
+	PrefixPhraseCollectionNode *currNode = &m_collection;
 	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
 		Word word = source.GetWord(pos);
@@ -87,11 +87,11 @@ void PhraseCollection::AddPhrase(const Phrase &source)
 
 }
 
-bool PhraseCollection::Find(const Phrase &source, bool notFoundValue) const
+bool PrefixPhraseCollection::Find(const Phrase &source, bool notFoundValue) const
 {
 	const size_t size = source.GetSize();
 	
-	const PhraseCollectionNode *currNode = &m_collection;
+	const PrefixPhraseCollectionNode *currNode = &m_collection;
 	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
 		const Word& word = source.GetWord(pos);

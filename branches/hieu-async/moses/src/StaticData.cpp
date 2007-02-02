@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "UserMessage.h"
-#include "PhraseCollection.h"
+#include "PrefixPhraseCollection.h"
 #include "PhraseList.h"
 
 using namespace std;
@@ -620,7 +620,7 @@ bool StaticData::LoadPhraseTables()
 			string filePath= token[3];
 			size_t numScoreComponent = Scan<size_t>(token[2]);
 
-			PhraseCollection inputPrefix(input, inputPhrases);
+			PrefixPhraseCollection inputPrefix(input, inputPhrases);
 
 			// weights for this phrase dictionary
 			// first InputScores (if any), then translation scores

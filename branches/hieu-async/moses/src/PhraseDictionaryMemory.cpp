@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsRange.h"
 #include "UserMessage.h"
 #include "AlignmentPair.h"
-#include "PhraseCollection.h"
+#include "PrefixPhraseCollection.h"
 
 using namespace std;
 
@@ -47,7 +47,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 														          , float weightWP
 														          , const StaticData& staticData
 																			, bool filter
-																			, const PhraseCollection &inputPrefix
+																			, const PrefixPhraseCollection &inputPrefix
 																			, const string &hashFilePath)
 {
 	m_tableLimit = tableLimit;

@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryNode.h"
 
-class PhraseCollection;
+class PrefixPhraseCollection;
 
 /*** Implementation of a phrase table in a trie.  Looking up a phrase of
  * length n words requires n look-ups to find the TargetPhraseCollection.
@@ -59,7 +59,7 @@ public:
 						    , float weightWP
 								, const StaticData& staticData
 								, bool filter
-								, const PhraseCollection &inputPrefix
+								, const PrefixPhraseCollection &inputPrefix
 								, const std::string &hashFilePath);
 	
 	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;

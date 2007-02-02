@@ -28,15 +28,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class Phrase;
 class PhraseList;
 
-class PhraseCollectionNode
+class PrefixPhraseCollectionNode
 {
 protected:
-	typedef std::map<Word, PhraseCollectionNode> NodeMap;
+	typedef std::map<Word, PrefixPhraseCollectionNode> NodeMap;
 	NodeMap m_map;
 	bool m_value;
 public:
-	PhraseCollectionNode *GetOrCreateChild(const Word &word, bool initValue);
-	const PhraseCollectionNode *Find(const Word &word) const;
+	PrefixPhraseCollectionNode *GetOrCreateChild(const Word &word, bool initValue);
+	const PrefixPhraseCollectionNode *Find(const Word &word) const;
 	bool Get() const
 	{
 		return m_value;
@@ -48,15 +48,15 @@ public:
 };
 
 /** prefix tree of phrases. Used to store input phrases for filtering */
-class PhraseCollection
+class PrefixPhraseCollection
 {
 protected:
 	FactorMask m_inputMask;
-	PhraseCollectionNode m_collection;
+	PrefixPhraseCollectionNode m_collection;
 	//! Add source phrase and all prefix strings
 	void AddPhrase(const Phrase &source);
 public:
-	PhraseCollection(const std::vector<FactorType> &input
+	PrefixPhraseCollection(const std::vector<FactorType> &input
 									,const PhraseList &phraseList);
 	bool Find(const Phrase &source, bool notFoundValue) const;
 
