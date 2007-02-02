@@ -112,12 +112,12 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
 	size_t size = phrase.GetSize();
 	for (size_t pos = 0 ; pos < size ; pos++)
 	{
-		FACTOR_ID factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+		const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
 		out << *factor;
 		
 		for (size_t i = 1 ; i < outputFactorOrder.size() ; i++)
 		{
-			FACTOR_ID factor = phrase.GetFactor(pos, outputFactorOrder[i]);
+			const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
 			out << "|" << *factor;
 		}
 		out << " ";
