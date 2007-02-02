@@ -28,8 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Vocab.h"
 #include "LanguageModelSingleFactor.h"
 
-
-class FactorCollection;
 class Factor;
 class Phrase;
 class Ngram; // SRI forward decl
@@ -43,7 +41,7 @@ protected:
 	VocabIndex	m_unknownId;
 
 	float GetValue(VocabIndex wordId, VocabIndex *context) const;
-	void CreateFactors(FactorCollection &factorCollection);
+	void CreateFactors();
 	VocabIndex GetLmID( const std::string &str ) const;
 	VocabIndex GetLmID( const Factor *factor ) const;
 	
@@ -51,7 +49,6 @@ public:
 	LanguageModelSRI(bool registerScore, ScoreIndexManager &scoreIndexManager);
 	~LanguageModelSRI();
 	bool Load(const std::string &filePath
-					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder);

@@ -31,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsRange.h"
 #include "ScoreProducer.h"
 
-class FactorCollection;
 class Factor;
 class Phrase;
 class Hypothesis;

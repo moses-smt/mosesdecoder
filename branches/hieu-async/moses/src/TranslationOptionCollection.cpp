@@ -121,7 +121,7 @@ void TranslationOptionCollection::Prune()
 * \param factorCollection input sentence with all factors
 */
 
-void TranslationOptionCollection::ProcessUnknownWord(FactorCollection &factorCollection)
+void TranslationOptionCollection::ProcessUnknownWord()
 {
 	size_t size = m_source.GetSize();
 
@@ -136,8 +136,7 @@ void TranslationOptionCollection::ProcessUnknownWord(FactorCollection &factorCol
 				if (numTransOpt == 0)
 				{
 					const DecodeStep &decodeStep = StaticData::Instance()->GetDecodeStep(decodeStepId);
-					CreateTranslationOptionsForRange(decodeStep, factorCollection
-																				, pos, pos, false);
+					CreateTranslationOptionsForRange(decodeStep, pos, pos, false);
 				}
 		}
 			
@@ -146,7 +145,7 @@ void TranslationOptionCollection::ProcessUnknownWord(FactorCollection &factorCol
 		{
 			TranslationOptionList &fullList = GetTranslationOptionList(decodeStepId, pos, pos);
 			if (fullList.size() == 0)
-				ProcessUnknownWord(decodeStepId, pos, *m_factorCollection);
+				ProcessUnknownWord(decodeStepId, pos);
 		}
 	}
 }
@@ -164,7 +163,7 @@ void TranslationOptionCollection::ProcessUnknownWord(FactorCollection &factorCol
 	* \param factorCollection input sentence with all factors
  */
 void TranslationOptionCollection::ProcessOneUnknownWord(size_t decodeStepId, const Word &sourceWord
-																												, size_t sourcePos, FactorCollection &factorCollection)
+																												, size_t sourcePos)
 {
 	// unknown word, add as trans opt
 
@@ -192,9 +191,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(size_t decodeStepId, con
 			{
 				const Factor *sourceFactor = sourceWord[factorType];
 				if (sourceFactor == NULL)
-					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
+					targetWord[factorType] = FactorCollection::Instance().AddFactor(Output, factorType, UNKNOWN_FACTOR);
 				else
-					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
+					targetWord[factorType] = FactorCollection::Instance().AddFactor(Output, factorType, sourceFactor->GetString());
 			}
 	
 			targetPhrase.SetScore();
@@ -280,11 +279,8 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::CreateTranslationOptions(const vector<DecodeStep*> &decodeStepList
-																													 , FactorCollection &factorCollection)
-{
-	m_factorCollection = &factorCollection;
-	
+void TranslationOptionCollection::CreateTranslationOptions(const vector<DecodeStep*> &decodeStepList)
+{	
 	// resize trans opt collection for each decode step
 	m_collection.resize(decodeStepList.size());
 
@@ -321,13 +317,13 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector<DecodeSt
 			{
 				for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
 				{
-					CreateTranslationOptionsForRange( decodeStep, factorCollection, startPos, endPos, true);
+					CreateTranslationOptionsForRange( decodeStep, startPos, endPos, true);
 				}
 			}
 		}
 	}
 
-	ProcessUnknownWord(factorCollection);
+	ProcessUnknownWord();
 	
 	// Prune
 	Prune();
@@ -346,7 +342,6 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector<DecodeSt
  */
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 const DecodeStep &decodeStep
-																													 , FactorCollection &factorCollection
 																													 , size_t startPos
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
@@ -355,8 +350,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	PartialTranslOptColl transOptColl;
 	
 	// initial translation step
-	static_cast<const DecodeStepTranslation&>(decodeStep).Process(m_source, factorCollection
-														, transOptColl, startPos, endPos, adhereTableLimit );
+	static_cast<const DecodeStepTranslation&>(decodeStep).Process(
+													m_source, transOptColl, startPos, endPos, adhereTableLimit );
 
 	// add to fully formed translation option list
 	const vector<TranslationOption*>& partTransOptList = transOptColl.GetList();

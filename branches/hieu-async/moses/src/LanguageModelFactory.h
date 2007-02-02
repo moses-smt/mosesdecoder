@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 
 class LanguageModel;
-class FactorCollection;
 class ScoreIndexManager;
 
 namespace LanguageModelFactory {
@@ -41,7 +40,6 @@ namespace LanguageModelFactory {
 																		, size_t nGramOrder
 																		, const std::string &languageModelFile
 																		, float weight
-																		, FactorCollection &factorCollection
 																		, ScoreIndexManager &scoreIndexManager);
 	 
 };

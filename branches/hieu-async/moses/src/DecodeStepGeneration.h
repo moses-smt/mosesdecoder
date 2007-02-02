@@ -42,7 +42,6 @@ public:
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                               , PartialTranslOptColl &outputPartialTranslOptColl
-                              , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const;
 

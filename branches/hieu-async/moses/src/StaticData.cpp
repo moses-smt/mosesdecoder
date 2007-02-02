@@ -32,7 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DummyScoreProducers.h"
 #include "StaticData.h"
 #include "Util.h"
-#include "FactorCollection.h"
 #include "HypothesisCollection.h"
 #include "Timer.h"
 #include "LanguageModelSingleFactor.h"
@@ -43,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "UserMessage.h"
 #include "PhraseCollection.h"
+#include "PhraseList.h"
 
 using namespace std;
 
@@ -493,7 +493,7 @@ bool StaticData::LoadLanguageModels()
 			
 			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmImplementation, factorTypes     
                                    									, nGramOrder, languageModelFile, weightAll[i]
-																										, m_factorCollection, m_scoreIndexManager);
+																										, m_scoreIndexManager);
       if (lm == NULL) 
       {
       	UserMessage::Add("no LM created. We probably don't have it compiled");
@@ -550,7 +550,6 @@ bool StaticData::LoadGenerationTables()
 			assert(m_generationDictionary.back() && "could not create GenerationDictionary");
 			if (!m_generationDictionary.back()->Load(input
 																		, output
-																		, m_factorCollection
 																		, filePath
 																		, Output				// always target, should we allow source?
 																		))
@@ -570,8 +569,6 @@ bool StaticData::LoadGenerationTables()
 	
 	return true;
 }
-
-#include "PhraseList.h"
 
 #undef max
 
@@ -602,7 +599,7 @@ bool StaticData::LoadPhraseTables()
 			
 			// load input for filtering
 			TRACE_ERR( "Begin loading input for filtering" << endl);
-			inputPhrases.Load(m_parameter->GetParam("input-file")[0], m_factorCollection);
+			inputPhrases.Load(m_parameter->GetParam("input-file")[0]);
 			TRACE_ERR( "Completed loading input for filtering" << endl);
 		}
 
@@ -698,7 +695,6 @@ bool StaticData::LoadPhraseTables()
 				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent, m_scoreIndexManager);
 				if (!pd->Load(input
 								 , output
-								 , m_factorCollection
 								 , filePath
 								 , weight
 								 , maxTargetPhrase[index]
@@ -721,7 +717,7 @@ bool StaticData::LoadPhraseTables()
 																									numScoreComponent
 																									,(currDict==0 ? m_numInputScores : 0)
 																									, m_scoreIndexManager);
-				if (!pd->Load(input,output,m_factorCollection,filePath,weight,
+				if (!pd->Load(input,output,filePath,weight,
 									 maxTargetPhrase[index],
 									 GetAllLM(),
 									 GetWeightWordPenalty()))

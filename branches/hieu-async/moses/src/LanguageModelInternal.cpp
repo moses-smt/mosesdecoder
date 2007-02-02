@@ -32,13 +32,14 @@ LanguageModelInternal::LanguageModelInternal(bool registerScore, ScoreIndexManag
 }
 
 bool LanguageModelInternal::Load(const std::string &filePath
-					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder)
 {
 	assert(nGramOrder <= 3);
 	TRACE_ERR( "Loading Internal LM: " << filePath << endl);
+	
+	FactorCollection &factorCollection = FactorCollection::Instance();
 	
 	m_filePath		= filePath;
 	m_factorType	= factorType;

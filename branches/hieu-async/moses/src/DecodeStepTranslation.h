@@ -42,7 +42,6 @@ public:
 	* Ideally, this function should be in DecodeStepTranslation class
 	*/
 	void Process(const InputType &source
-															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos
 															, size_t endPos

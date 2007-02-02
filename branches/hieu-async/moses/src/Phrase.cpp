@@ -256,9 +256,9 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 }
 
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
-															, const vector< vector<string> > &phraseVector
-															, FactorCollection &factorCollection)
+															, const vector< vector<string> > &phraseVector)
 {
+	FactorCollection &factorCollection = FactorCollection::Instance();
 	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
 	{
 		// add word this phrase
@@ -275,7 +275,6 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const string &phraseString
-															, FactorCollection &factorCollection
 															, const string &factorDelimiter
 															, AlignmentPairInserter *alignmentPairInserter
 															, const string *alignString)
@@ -286,7 +285,7 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 										, factorDelimiter
 										, alignmentPairInserter
 										, alignString);
-	CreateFromString(factorOrder, phraseVector, factorCollection);
+	CreateFromString(factorOrder, phraseVector);
 }
 
 bool Phrase::operator < (const Phrase &compare) const

@@ -49,7 +49,7 @@ void HypothesisCollection::RemoveAll()
 void HypothesisCollection::Add(Hypothesis *hypo)
 {
 	AddNoPrune(hypo);
-	VERBOSE(3,"added hyp to stack");
+	VERBOSE(3,"added hypo to stack");
 
 	// Update best score, if this hypothesis is new best
 	if (hypo->GetTotalScore() > m_bestScore)

@@ -49,13 +49,11 @@ IOStream::IOStream(
 				const vector<FactorType>				&inputFactorOrder
 				, const vector<FactorType>			&outputFactorOrder
 				, const FactorMask							&inputFactorUsed
-				, FactorCollection							&factorCollection
 				, size_t												nBestSize
 				, const string									&nBestFilePath)
 :m_inputFactorOrder(inputFactorOrder)
 ,m_outputFactorOrder(outputFactorOrder)
 ,m_inputFactorUsed(inputFactorUsed)
-,m_factorCollection(factorCollection)
 ,m_inputFile(NULL)
 ,m_inputStream(&std::cin)
 {
@@ -68,14 +66,12 @@ IOStream::IOStream(
 IOStream::IOStream(const std::vector<FactorType>	&inputFactorOrder
 						 , const std::vector<FactorType>	&outputFactorOrder
 							, const FactorMask							&inputFactorUsed
-							, FactorCollection							&factorCollection
 							, size_t												nBestSize
 							, const std::string							&nBestFilePath
 							, const std::string							&inputFilePath)
 :m_inputFactorOrder(inputFactorOrder)
 ,m_outputFactorOrder(outputFactorOrder)
 ,m_inputFactorUsed(inputFactorUsed)
-,m_factorCollection(factorCollection)
 ,m_inputFilePath(inputFilePath)
 ,m_inputFile(new InputFileStream(inputFilePath))
 {
@@ -95,7 +91,7 @@ IOStream::~IOStream()
 
 InputType*IOStream::GetInput(InputType* inputType)
 {
-	if(inputType->Read(*m_inputStream, m_inputFactorOrder, m_factorCollection)) 
+	if(inputType->Read(*m_inputStream, m_inputFactorOrder)) 
 	{
 		inputType->SetTranslationId(m_translationId++);
 		return inputType;

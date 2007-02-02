@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "FactorMask.h"
 
-class FactorCollection;
 class Factor;
 
 //! Abstract class for for single factor LM 
@@ -42,7 +41,6 @@ public:
 
 	virtual ~LanguageModelSingleFactor();
 	virtual bool Load(const std::string &filePath
-					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder) = 0;

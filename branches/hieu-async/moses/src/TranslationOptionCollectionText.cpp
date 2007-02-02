@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStep.h"
 #include "LanguageModel.h"
 #include "PhraseDictionaryMemory.h"
-#include "FactorCollection.h"
 #include "WordsRange.h"
 #include "LMList.h"
 
@@ -39,9 +38,8 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
 */
 void TranslationOptionCollectionText::ProcessUnknownWord(
 										size_t decodeStepId
-										, size_t sourcePos
-										, FactorCollection &factorCollection)
+										, size_t sourcePos)
 {
 	const Word &sourceWord = m_source.GetWord(sourcePos);
-	ProcessOneUnknownWord(decodeStepId, sourceWord,sourcePos,factorCollection);
+	ProcessOneUnknownWord(decodeStepId, sourceWord,sourcePos);
 }

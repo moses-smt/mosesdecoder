@@ -7,7 +7,7 @@
 class PhraseList : public std::list<Phrase>
 {
 public:
-	void Load(std::string filePath, FactorCollection &factorCollection);
+	void Load(std::string filePath);
 
 };
 

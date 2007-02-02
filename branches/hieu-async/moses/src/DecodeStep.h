@@ -30,7 +30,6 @@ class GenerationDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
 class PartialTranslOptColl;
-class FactorCollection;
 class InputType;
 
 /** Specification for a decoding step.

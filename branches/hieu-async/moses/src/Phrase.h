@@ -86,8 +86,7 @@ public:
 	*/
 	void CreateFromString(
 							const std::vector<FactorType> &factorOrder
-              , const std::vector< std::vector<std::string> > &phraseVector
-              , FactorCollection &factorCollection);
+              , const std::vector< std::vector<std::string> > &phraseVector);
 	/** Fills phrase with words from formatted string, typically from phrase table or sentence input
 		* \param factorOrder factor types of each element in 2D string vector
 		* \param phraseString formatted input string to parse
@@ -95,7 +94,6 @@ public:
 	*/
 	void CreateFromString(const std::vector<FactorType> &factorOrder
 											, const std::string &phraseString
-											, FactorCollection &factorCollection
 											, const std::string &factorDelimiter
 											, AlignmentPairInserter *alignmentPairInserter
 											, const std::string *alignString);

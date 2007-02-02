@@ -39,7 +39,6 @@ protected:
 	
 public:
 	virtual bool Load(const std::string &filePath
-					, FactorCollection &factorCollection
 					, const std::vector<FactorType> &factorTypes
 					, float weight
 					, size_t nGramOrder) = 0;

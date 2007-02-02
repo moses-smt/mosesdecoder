@@ -7,7 +7,6 @@
 #include "Word.h"
 #include "InputType.h"
 
-class FactorCollection;
 class TranslationOptionCollection;
 class Sentence;
 
@@ -17,19 +16,16 @@ class ConfusionNet : public InputType {
 
  private:
 	std::vector<Column> data;
-	FactorCollection *m_factorCollection;
-
+	
 	bool ReadFormat0(std::istream&,const std::vector<FactorType>& factorOrder);
 	bool ReadFormat1(std::istream&,const std::vector<FactorType>& factorOrder);
 	void String2Word(const std::string& s,Word& w,const std::vector<FactorType>& factorOrder);
 
  public:
-	ConfusionNet(FactorCollection* p=0);
+	ConfusionNet();
 	~ConfusionNet();
 
 	ConfusionNet(Sentence const& s);
-
-	void SetFactorCollection(FactorCollection*);
 	
 	const Column& GetColumn(size_t i) const {assert(i<data.size());return data[i];}
 	const Column& operator[](size_t i) const {return GetColumn(i);}
@@ -41,7 +37,7 @@ class ConfusionNet : public InputType {
 	bool ReadF(std::istream&,const std::vector<FactorType>& factorOrder,int format=0);
 	void Print(std::ostream&) const;
 
-	int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection);
+	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
 
 	
 	Phrase GetSubString(const WordsRange&) const; //TODO not defined

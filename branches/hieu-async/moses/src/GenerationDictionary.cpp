@@ -39,10 +39,10 @@ GenerationDictionary::GenerationDictionary(size_t numFeatures, ScoreIndexManager
 
 bool GenerationDictionary::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
-																			, FactorCollection &factorCollection
 																			, const std::string &filePath
 																			, FactorDirection direction)
 {	
+	FactorCollection &factorCollection = FactorCollection::Instance();
 	const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();
 
 	//factors	

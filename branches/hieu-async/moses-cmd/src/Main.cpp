@@ -178,7 +178,6 @@ IOStream *GetIODevice(StaticData &staticData)
 		string filePath = staticData.GetParam("input-file")[0];
 
 		ioStream = new IOStream(inputFactorOrder, outputFactorOrder, inputFactorUsed
-																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath()
 																	, filePath);
@@ -187,7 +186,6 @@ IOStream *GetIODevice(StaticData &staticData)
 	{
 	  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
 		ioStream = new IOStream(inputFactorOrder, outputFactorOrder, inputFactorUsed
-																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath());
 	}

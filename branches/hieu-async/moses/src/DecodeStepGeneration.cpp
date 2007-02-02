@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "PartialTranslOptColl.h"
-#include "FactorCollection.h"
 
 DecodeStepGeneration::DecodeStepGeneration(GenerationDictionary* dict, const DecodeStep* prev)
 : DecodeStep(dict, prev)
@@ -77,7 +76,6 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 
 void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOpt
                               , PartialTranslOptColl &outputPartialTranslOptColl
-                              , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const
 {

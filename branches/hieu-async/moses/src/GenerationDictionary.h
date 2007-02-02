@@ -29,8 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Dictionary.h"
 
-class FactorCollection;
-
 typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
 		// 1st = output phrase
 		// 2nd = log probability (score)
@@ -62,7 +60,6 @@ public:
 	//! load data file
 	bool Load(const std::vector<FactorType> &input
 									, const std::vector<FactorType> &output
-									, FactorCollection &factorCollection
 									, const std::string &filePath
 									, FactorDirection direction);
 

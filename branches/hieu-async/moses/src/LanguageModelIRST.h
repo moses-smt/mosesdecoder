@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "LanguageModelSingleFactor.h"
 
-class FactorCollection;
 class Factor;
 class Phrase;
 
@@ -53,7 +52,7 @@ protected:
   
 //	float GetValue(LmId wordId, ngram *context) const;
 
-	void CreateFactors(FactorCollection &factorCollection);
+	void CreateFactors();
 	int GetLmID( const std::string &str ) const;
 
 	int GetLmID( const Factor *factor ) const{
@@ -65,7 +64,6 @@ public:
 	LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager);
 	~LanguageModelIRST();
 	bool Load(const std::string &filePath
-					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder);

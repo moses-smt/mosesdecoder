@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/stat.h>
 #include <boost/filesystem/operations.hpp>
 #include "PhraseDictionaryMemory.h"
-#include "FactorCollection.h"
 #include "Word.h"
 #include "Util.h"
 #include "InputFileStream.h"
@@ -41,7 +40,6 @@ using namespace std;
 
 bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
-																			, FactorCollection &factorCollection
 																			, const string &filePath
 																			, const vector<float> &weight
 																			, size_t tableLimit
@@ -117,7 +115,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		Phrase sourcePhrase(Input);
 		sourcePhrase.CreateFromString( input
 																, tokens[0]
-																, factorCollection
 																, factorDelimiter
 																, &alignmentPair.GetInserter(Input)
 																, &tokens[2]);
@@ -138,7 +135,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		//target
 		targetPhrase.CreateFromString( output
 																, tokens[1]
-																, factorCollection
 																, factorDelimiter
 																, &alignmentPair.GetInserter(Output)
 																, &tokens[3]);

@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "PartialTranslOptColl.h"
-#include "FactorCollection.h"
 
 DecodeStepTranslation::DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev)
 : DecodeStep(dict, prev)
@@ -48,7 +47,6 @@ TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOpti
 }
 
 void DecodeStepTranslation::Process(const InputType &source
-															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos
 															, size_t endPos

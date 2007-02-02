@@ -22,7 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelFactory.h"
 #include "UserMessage.h"
 #include "TypeDef.h"
-#include "FactorCollection.h"
 
 // include appropriate header
 #ifdef LM_SRI
@@ -44,7 +43,6 @@ namespace LanguageModelFactory
 																		, size_t nGramOrder
 																		, const std::string &languageModelFile
 																		, float weight
-																		, FactorCollection &factorCollection
 																		, ScoreIndexManager &scoreIndexManager)
 	{
 	  LanguageModel *lm = NULL;
@@ -119,14 +117,14 @@ namespace LanguageModelFactory
 	  	switch (lm->GetLMType())
 	  	{
 	  	case SingleFactor:
-	  		if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorCollection, factorTypes[0], weight, nGramOrder))
+	  		if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorTypes[0], weight, nGramOrder))
 				{
 					delete lm;
 					lm = NULL;
 				}
 	  		break;	  	
 	  	case MultiFactor:
-  			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorCollection, factorTypes, weight, nGramOrder))
+  			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, weight, nGramOrder))
 				{
 					delete lm;
 					lm = NULL;

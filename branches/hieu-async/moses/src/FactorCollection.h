@@ -43,10 +43,13 @@ class FactorCollection
 	friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
 
 protected:
-	
+	static FactorCollection s_instance;
+
 	FactorSet m_collection; /**< collection of all factors */
 	StringSet m_factorStringCollection; /**< collection of unique string used by factors */
 public:
+	static FactorCollection& Instance() { return s_instance; }
+
 	//! Destructor
 	~FactorCollection();
 

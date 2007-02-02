@@ -3,7 +3,7 @@
 #include "InputFileStream.h"
 #include "StaticData.h"
 
-void PhraseList::Load(std::string filePath, FactorCollection &factorCollection)
+void PhraseList::Load(std::string filePath)
 {
 	InputFileStream inFile(filePath);
 	
@@ -16,7 +16,6 @@ void PhraseList::Load(std::string filePath, FactorCollection &factorCollection)
 		Phrase phrase(Input);
 		phrase.CreateFromString( factorOrder
 													, line
-													, factorCollection
 													, factorDelimiter
 													, NULL, NULL);
 		push_back(phrase);

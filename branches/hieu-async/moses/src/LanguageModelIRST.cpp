@@ -50,7 +50,6 @@ LanguageModelIRST::~LanguageModelIRST()
 
 
 bool LanguageModelIRST::Load(const std::string &filePath
-												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
 												, size_t nGramOrder)
@@ -77,7 +76,7 @@ bool LanguageModelIRST::Load(const std::string &filePath
   m_lmtb_size=m_lmtb->maxlevel();
   
 	// LM can be ok, just outputs warnings
-	CreateFactors(factorCollection);
+	CreateFactors();
   m_unknownId = m_lmtb->dict->oovcode();
   TRACE_ERR( "IRST: m_unknownId=" << m_unknownId << std::endl);
   
@@ -89,9 +88,11 @@ bool LanguageModelIRST::Load(const std::string &filePath
 	return true;
 }
 
-void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
+void LanguageModelIRST::CreateFactors()
 { // add factors which have srilm id
 	// code copied & paste from SRI LM class. should do template function
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
 	std::map<size_t, int> lmIdMap;
 	size_t maxFactorId = 0; // to create lookup vector later on
 	

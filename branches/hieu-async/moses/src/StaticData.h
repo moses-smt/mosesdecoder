@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <memory>
 #include "TypeDef.h"
 #include "ScoreIndexManager.h"
-#include "FactorCollection.h"
 #include "Parameter.h"
 #include "LanguageModel.h"
 #include "LMList.h"
@@ -48,7 +47,6 @@ class StaticData
 private:
 	static StaticData*									s_instance;
 protected:	
-	FactorCollection										m_factorCollection;
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::vector<DecodeStep*>						m_decodeStepList;
@@ -182,10 +180,6 @@ public:
 	inline size_t GetMaxNoPartTransOpt() const 
 	{ 
 		return m_maxNoPartTransOpt;
-	}
-	FactorCollection &GetFactorCollection()
-	{
-		return m_factorCollection;
 	}
 	std::vector<LexicalReordering*> GetReorderModels() const
 	{

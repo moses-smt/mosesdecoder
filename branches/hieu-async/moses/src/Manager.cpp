@@ -67,8 +67,7 @@ void Manager::ProcessSentence()
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
-	m_transOptColl->CreateTranslationOptions(decodeStepList
-  														, m_staticData.GetFactorCollection());
+	m_transOptColl->CreateTranslationOptions(decodeStepList);
 
 	// initial seed hypothesis: nothing translated, no words produced
 	{

@@ -5,7 +5,6 @@
 #include "DecodeStep.h"
 #include "LanguageModel.h"
 #include "PhraseDictionaryMemory.h"
-#include "FactorCollection.h"
 #include "LMList.h"
 
 /** constructor; just initialize the base class */
@@ -20,14 +19,13 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 */
 void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(		
 											size_t decodeStepId
-											, size_t sourcePos
-											, FactorCollection &factorCollection) 
+											, size_t sourcePos) 
 {
 	ConfusionNet const& source=dynamic_cast<ConfusionNet const&>(m_source);
 
 	ConfusionNet::Column const& coll=source.GetColumn(sourcePos);
 	for(ConfusionNet::Column::const_iterator i=coll.begin();i!=coll.end();++i)
-		ProcessOneUnknownWord(decodeStepId, i->first,sourcePos,factorCollection);
+		ProcessOneUnknownWord(decodeStepId, i->first,sourcePos);
 		
 }
 

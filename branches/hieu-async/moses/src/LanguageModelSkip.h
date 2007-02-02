@@ -51,7 +51,6 @@ public:
 		delete m_lmImpl;
 	}
 	bool Load(const std::string &filePath
-					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder)
@@ -63,10 +62,11 @@ public:
 		
 		m_realNGramOrder 		= 3;
 
+		FactorCollection &factorCollection = FactorCollection::Instance();
 		m_sentenceStartArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, BOS_);
 		m_sentenceEndArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, EOS_);
 
-		return m_lmImpl->Load(filePath, factorCollection, m_factorType, weight, nGramOrder);
+		return m_lmImpl->Load(filePath, m_factorType, weight, nGramOrder);
 	}
 			
 	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const

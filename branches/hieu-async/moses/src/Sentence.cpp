@@ -26,8 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "Util.h"
 
-int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
-									 FactorCollection &factorCollection) 
+int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {
 	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
 	std::string line;
@@ -37,7 +36,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
 			line = Trim(line);
 		} while (line == "");
 	
-	Phrase::CreateFromString(factorOrder, line, factorCollection, factorDelimiter, NULL, NULL);
+	Phrase::CreateFromString(factorOrder, line, factorDelimiter, NULL, NULL);
 	return 1;
 }
 

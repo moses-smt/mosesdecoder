@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "FactorCollection.h"
+
 inline bool existsFile(const char* filePath) {
   struct stat mystat;
   return  (stat(filePath,&mystat)==0);
@@ -25,7 +27,7 @@ class PDTAimp
 	
 protected:
 	PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis) 
-		: m_languageModels(0),m_weightWP(0.0),m_factorCollection(0),m_dict(0),
+		: m_languageModels(0),m_weightWP(0.0),m_dict(0),
 			m_obj(p),useCache(1),m_numInputScores(nis),totalE(0),distinctE(0) {}
 	
 public:
@@ -33,7 +35,6 @@ public:
 	LMList const* m_languageModels;
 	float m_weightWP;
 	std::vector<FactorType> m_input,m_output;
-	FactorCollection *m_factorCollection;
 	PhraseDictionaryTree *m_dict;
 	typedef std::vector<TargetPhraseCollection const*> vTPC;
 	mutable vTPC m_tgtColls;
@@ -199,7 +200,6 @@ public:
 
 	void Create(const std::vector<FactorType> &input
 							, const std::vector<FactorType> &output
-							, FactorCollection &factorCollection
 							, const std::string &filePath
 							, const std::vector<float> &weight
 							, const LMList &languageModels
@@ -208,7 +208,6 @@ public:
 	{
 
 		// set my members	
-		m_factorCollection=&factorCollection;
 		m_dict=new PhraseDictionaryTree(weight.size()-m_numInputScores);
 		m_input=input;
 		m_output=output;
@@ -262,13 +261,14 @@ public:
 													StringTgtCand::second_type const& scoreVector,
 													Phrase const* srcPtr=0) const
 	{
+		FactorCollection &factorCollection = FactorCollection::Instance();
 
 		for(size_t k=0;k<factorStrings.size();++k) 
 			{
 				std::vector<std::string> factors=Tokenize(*factorStrings[k],"|");
 				Word& w=targetPhrase.AddWord();
 				for(size_t l=0;l<m_output.size();++l)
-					w[m_output[l]]=m_factorCollection->AddFactor(Output, m_output[l], factors[l]);
+					w[m_output[l]]=factorCollection.AddFactor(Output, m_output[l], factors[l]);
 			}
 		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
