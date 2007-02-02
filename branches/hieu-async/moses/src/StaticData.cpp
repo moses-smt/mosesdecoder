@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "UserMessage.h"
 #include "PrefixPhraseCollection.h"
 #include "PhraseList.h"
+#include "FactorCollection.h"
 
 using namespace std;
 
@@ -593,15 +594,18 @@ bool StaticData::LoadPhraseTables()
 
 		PhraseList inputPhrases;
 		string inputFileHash;
+		bool inputFileExist;
 		if (m_parameter->GetParam("input-file").size() > 0)
 		{ 
 			inputFileHash = GetMD5Hash(m_parameter->GetParam("input-file")[0]);
-			
+			inputFileExist = true;
 			// load input for filtering
 			TRACE_ERR( "Begin loading input for filtering" << endl);
 			inputPhrases.Load(m_parameter->GetParam("input-file")[0]);
 			TRACE_ERR( "Completed loading input for filtering" << endl);
 		}
+		else
+			inputFileExist = false;
 
 		const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
 		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
@@ -662,34 +666,41 @@ bool StaticData::LoadPhraseTables()
 			PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			if (!FileExists(filePath+".binphr.idx"))
 			{					
-				// does cached filtering exist for this table, given input ?
-				string phraseTableHash	= GetMD5Hash(filePath);
-
-				// input factors of input
-				const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
-				stringstream inputFactorsStrme("");
-				for (size_t idx = 0 ; idx < inputFactorVector.size() ; ++idx)
-					inputFactorsStrme << inputFactorVector[idx];
-
-
-   			string hashFilePath			= GetCachePath()
-   																+ PROJECT_NAME + "--"
-   																+ inputFileHash + "--"
-																	+ inputFactorsStrme.str() // input factors of input
-   																+ phraseTableHash + "--"
-																	+ token[0] // input factors of phrase table
-																	+ ".txt";
 				bool filter;
-				if (FileExists(hashFilePath))
-				{ // load filtered file instead
+				string hashFilePath;
+				
+				if (!inputFileExist)
 					filter = false;
-					filePath = hashFilePath;
+				else				
+				{
+					// does cached filtering exist for this table, given input ?
+					string phraseTableHash	= GetMD5Hash(filePath);
+	
+					// input factors of input
+					const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
+					stringstream inputFactorsStrme("");
+					for (size_t idx = 0 ; idx < inputFactorVector.size() ; ++idx)
+						inputFactorsStrme << inputFactorVector[idx];
+	
+	
+					hashFilePath			= GetCachePath()
+														+ PROJECT_NAME + "--"
+														+ inputFileHash + "--"
+														+ inputFactorsStrme.str() // input factors of input
+														+ phraseTableHash + "--"
+														+ token[0] // input factors of phrase table
+																		+ ".txt";
+					if (FileExists(hashFilePath))
+					{ // load filtered file instead
+						filter = false;
+						filePath = hashFilePath;
+					}
+					else
+					{ // load original file & create hash file
+						filter = true;
+					}
 				}
-				else
-				{ // load original file & create hash file
-					filter = true;
-				}
-
+				
 				// LOAD
 				VERBOSE(2,"using standard phrase tables");
 				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent, m_scoreIndexManager);
