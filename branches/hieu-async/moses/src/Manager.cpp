@@ -335,7 +335,7 @@ void GetSurfacePhrase(std::vector<size_t>& tphrase, LatticePath const& path)
 
 	for (size_t pos = 0 ; pos < targetPhrase.GetSize() ; ++pos)
 	{
-		const Factor *factor = targetPhrase.GetFactor(pos, 0);
+		FACTOR_ID factor = targetPhrase.GetFactor(pos, 0);
 		assert(factor);
 		tphrase.push_back(factor->GetId());
 	}

@@ -340,10 +340,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseCollection.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\PhraseDictionary.cpp"
 				>
 			</File>
@@ -387,6 +383,10 @@
 			</File>
 			<File
 				RelativePath=".\src\PhraseReference.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PrefixPhraseCollection.cpp"
 				>
 			</File>
 			<File
@@ -652,10 +652,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseCollection.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\PhraseDictionary.h"
 				>
 			</File>
@@ -681,6 +677,10 @@
 			</File>
 			<File
 				RelativePath=".\src\phrasereference.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PrefixPhraseCollection.h"
 				>
 			</File>
 			<File

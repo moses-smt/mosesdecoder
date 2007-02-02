@@ -76,7 +76,7 @@ bool GenerationDictionary::Load(const std::vector<FactorType> &input
 		for (size_t i = 0 ; i < input.size() ; i++)
 		{
 			FactorType factorType = input[i];
-			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
+			FACTOR_ID factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
 			(*inputWord)[factorType] = factor;
 		}
 
@@ -85,7 +85,7 @@ bool GenerationDictionary::Load(const std::vector<FactorType> &input
 		{
 			FactorType factorType = output[i];
 			
-			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
+			FACTOR_ID factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
 			outputWord[factorType] = factor;
 		}
 

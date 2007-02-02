@@ -145,12 +145,12 @@ public:
 		return m_words[pos];
 	}
 	//! particular factor at a particular position
-	inline const Factor *GetFactor(size_t pos, FactorType factorType) const
+	inline FACTOR_ID GetFactor(size_t pos, FactorType factorType) const
 	{
 		const Word &ptr = m_words[pos];
 		return ptr[factorType];
 	}
-	inline void SetFactor(size_t pos, FactorType factorType, const Factor *factor)
+	inline void SetFactor(size_t pos, FactorType factorType, FACTOR_ID factor)
 	{
 		Word &ptr = m_words[pos];
 		ptr[factorType] = factor;

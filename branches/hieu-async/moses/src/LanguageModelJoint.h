@@ -102,13 +102,13 @@ public:
 			// add word to chunked context
 			std::stringstream stream("");
 
-			const Factor *factor = word[ m_factorTypesOrdered[0] ];
+			FACTOR_ID factor = word[ m_factorTypesOrdered[0] ];
 			stream << factor->GetString();
 
 			for (size_t index = 1 ; index < m_factorTypesOrdered.size() ; ++index)
 			{
 				FactorType factorType = m_factorTypesOrdered[index];
-				const Factor *factor = word[factorType];
+				FACTOR_ID factor = word[factorType];
 				stream << "|" << factor->GetString();
 			}
 			

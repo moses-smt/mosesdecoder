@@ -61,7 +61,7 @@ bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, 
 	return iterFactor != m_collection.end();
 }
 
-const Factor *FactorCollection::AddFactor(FactorDirection direction
+FACTOR_ID FactorCollection::AddFactor(FactorDirection direction
 																				, FactorType 			factorType
 																				, const string 		&factorString)
 {

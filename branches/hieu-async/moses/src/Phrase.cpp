@@ -124,7 +124,7 @@ void Phrase::MergeFactors(const Phrase &copy)
 	{
 		for (FactorType factorType = 0 ; factorType < maxNumFactors ; factorType++)
 		{
-			const Factor *factor = copy.GetFactor(currPos, factorType);
+			FACTOR_ID factor = copy.GetFactor(currPos, factorType);
 			if (factor != NULL)
 				SetFactor(currPos, factorType, factor);
 		}
@@ -267,7 +267,7 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 		{
 			FactorType factorType = factorOrder[currFactorIndex];
 			const string &factorStr = phraseVector[phrasePos][currFactorIndex];
-			const Factor *factor = factorCollection.AddFactor(m_direction, factorType, factorStr); 
+			FACTOR_ID factor = factorCollection.AddFactor(m_direction, factorType, factorStr); 
 			word[factorType] = factor;
 		}
 	}
@@ -308,8 +308,8 @@ bool Phrase::operator < (const Phrase &compare) const
 		{
 			for (size_t currPos = 0 ; currPos < minSize ; currPos++)
 			{
-				const Factor *thisFactor		= GetFactor(currPos, factorType)
-										,*compareFactor	= compare.GetFactor(currPos, factorType);
+				FACTOR_ID thisFactor				= GetFactor(currPos, factorType)
+										,compareFactor	= compare.GetFactor(currPos, factorType);
 
 				if (thisFactor != NULL && compareFactor != NULL)
 				{
@@ -382,8 +382,8 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 	{
 		for (FactorType factorType = 0 ; factorType < maxNumFactors ; ++factorType)
 		{
-			const Factor *thisFactor 		= GetFactor(currPos, factorType)
-									,*inputFactor	= inputPhrase.GetFactor(currPos, factorType);
+			FACTOR_ID thisFactor 			= GetFactor(currPos, factorType)
+									,inputFactor	= inputPhrase.GetFactor(currPos, factorType);
 			if (thisFactor != NULL && inputFactor != NULL && thisFactor != inputFactor)
 				return false;
 		}
@@ -424,7 +424,7 @@ bool Phrase::IsSynchronized() const
 	const size_t size = GetSize();
 	for (size_t currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
 	{
-		const Factor *factor 		= GetFactor(0, currFactor);
+		FACTOR_ID factor 		= GetFactor(0, currFactor);
 		if (factor != NULL)
 		{
 			for (size_t currPos = 1 ; currPos < size ; currPos++)

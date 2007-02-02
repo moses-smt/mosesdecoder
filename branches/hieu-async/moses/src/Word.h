@@ -40,7 +40,7 @@ class Word
 
 protected:
 
-	typedef const Factor * FactorArray[MAX_NUM_FACTORS];
+	typedef FACTOR_ID  FactorArray[MAX_NUM_FACTORS];
 
 	FactorArray m_factorArray; /**< set of factors */
 
@@ -58,11 +58,11 @@ public:
 	~Word() {}
 
 	//! returns Factor pointer for particular FactorType
-	const Factor*& operator[](FactorType index) {
+	FACTOR_ID &operator[](FactorType index) {
 		return m_factorArray[index];
 	}
 
-	const Factor * const & operator[](FactorType index) const {
+	FACTOR_ID  const & operator[](FactorType index) const {
 		return m_factorArray[index];
 	}
 

@@ -80,7 +80,7 @@ bool LanguageModelInternal::Load(const std::string &filePath
 				// create / traverse down tree
 				NGramCollection *ngramColl = &m_map;
 				NGramNode *nGram;
-				const Factor *factor;
+				FACTOR_ID factor;
 				for (int currFactor = (int) factorStr.size() - 1 ; currFactor >= 0  ; currFactor--)
 				{
 					factor = factorCollection.AddFactor(Output, m_factorType, factorStr[currFactor]);
@@ -146,7 +146,7 @@ float LanguageModelInternal::GetValue(const std::vector<const Word*> &contextFac
 	return 0;
 }
 
-float LanguageModelInternal::GetValue(const Factor *factor0, State* finalState) const
+float LanguageModelInternal::GetValue(FACTOR_ID factor0, State* finalState) const
 {
 	float prob;
 	const NGramNode *nGram		= GetLmID(factor0);
@@ -164,7 +164,7 @@ float LanguageModelInternal::GetValue(const Factor *factor0, State* finalState) 
 	}
 	return FloorScore(prob);
 }
-float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, State* finalState) const
+float LanguageModelInternal::GetValue(FACTOR_ID factor0, FACTOR_ID factor1, State* finalState) const
 {
 	float score;
 	const NGramNode *nGram[2];
@@ -206,7 +206,7 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 
 }
 
-float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2, State* finalState) const
+float LanguageModelInternal::GetValue(FACTOR_ID factor0, FACTOR_ID factor1, FACTOR_ID factor2, State* finalState) const
 {
 	float score;
 	const NGramNode *nGram[3];

@@ -170,7 +170,7 @@ public:
 	{
 		return m_currTargetPhrase.GetWord(pos);
 	}
-	inline const Factor *GetCurrFactor(size_t pos, FactorType factorType) const
+	inline FACTOR_ID GetCurrFactor(size_t pos, FactorType factorType) const
 	{
 		return m_currTargetPhrase.GetFactor(pos, factorType);
 	}
@@ -179,7 +179,7 @@ public:
 	{
 		return m_targetPhrase.GetWord(pos);
 	}
-	inline const Factor* GetFactor(size_t pos, FactorType factorType) const
+	inline FACTOR_ID GetFactor(size_t pos, FactorType factorType) const
 	{
 		return GetWord(pos)[factorType];
 	}

@@ -55,7 +55,7 @@ protected:
 	void CreateFactors();
 	int GetLmID( const std::string &str ) const;
 
-	int GetLmID( const Factor *factor ) const{
+	int GetLmID( FACTOR_ID factor ) const{
     size_t factorId = factor->GetId();
     return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];        
   };

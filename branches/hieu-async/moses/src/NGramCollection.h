@@ -27,24 +27,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class Factor;
 
-typedef std::vector<const Factor*> FactorVector;
+typedef std::vector<FACTOR_ID> FactorVector;
 
 class NGramCollection
 {
 protected:
-	typedef std::map<const Factor*, NGramNode*> Collection;
+	typedef std::map<FACTOR_ID , NGramNode*> Collection;
 	Collection m_collection;
 
-	void Add(const Factor *factor, const NGramNode &ngramNode);
+	void Add(FACTOR_ID factor, const NGramNode &ngramNode);
 public:
 	NGramCollection()
 	{
 	}
 	~NGramCollection();
 
-	NGramNode *GetOrCreateNGram(const Factor *factor);
-	NGramNode *GetNGram(const Factor *factor);
-	const NGramNode *GetNGram(const Factor *factor) const;
+	NGramNode *GetOrCreateNGram(FACTOR_ID factor);
+	NGramNode *GetNGram(FACTOR_ID factor);
+	const NGramNode *GetNGram(FACTOR_ID factor) const;
 
 };
 

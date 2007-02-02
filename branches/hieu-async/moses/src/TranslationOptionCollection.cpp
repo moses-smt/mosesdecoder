@@ -170,7 +170,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(size_t decodeStepId, con
 		size_t isDigit = 0;
 		if (StaticData::Instance()->GetDropUnknown())
 		{
-			const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
+			FACTOR_ID f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
 			const string &s = f->GetString();
 			isDigit = s.find_first_of("0123456789");
 			if (isDigit == string::npos) 
@@ -189,7 +189,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(size_t decodeStepId, con
 						
 			for (FactorType factorType = 0 ; factorType < MAX_NUM_FACTORS ; ++factorType)
 			{
-				const Factor *sourceFactor = sourceWord[factorType];
+				FACTOR_ID sourceFactor = sourceWord[factorType];
 				if (sourceFactor == NULL)
 					targetWord[factorType] = FactorCollection::Instance().AddFactor(Output, factorType, UNKNOWN_FACTOR);
 				else
