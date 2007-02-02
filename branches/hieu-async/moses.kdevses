@@ -1,27 +1,10 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="1" >
-  <Doc0 NumberOfViews="1" URL="file:///amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/moses/src/PhraseDictionaryMemory.cpp" >
-   <View0 line="133" Type="Source" />
-  </Doc0>
- </DocsAndViews>
+ <DocsAndViews NumberOfDocuments="0" />
  <pluginList>
   <kdevdebugger>
-   <breakpointList>
-    <breakpoint0 location="/amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/moses-cmd/src/Main.cpp:161" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
-     <tracedExpressions/>
-    </breakpoint0>
-    <breakpoint1 location="/amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/moses-cmd/src/Main.cpp:109" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
-     <tracedExpressions/>
-    </breakpoint1>
-    <breakpoint2 location="/amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/moses-cmd/src/Main.cpp:131" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
-     <tracedExpressions/>
-    </breakpoint2>
-    <breakpoint3 location="/amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/moses/src/LanguageModelFactory.cpp:50" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
-     <tracedExpressions/>
-    </breakpoint3>
-   </breakpointList>
+   <breakpointList/>
   </kdevdebugger>
   <kdevbookmarks>
    <bookmarks>

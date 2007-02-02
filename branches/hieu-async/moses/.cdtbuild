@@ -14,6 +14,7 @@
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 <listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
 <listOptionValue builtIn="false" value="_LARGE_FILES"/>
+<listOptionValue builtIn="false" value="USE_HYPO_POOL"/>
 </option>
 <option id="gnu.cpp.compiler.option.include.paths.560695438" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../irstlm/src&quot;"/>

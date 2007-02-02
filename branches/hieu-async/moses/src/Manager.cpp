@@ -40,6 +40,7 @@ Manager::Manager(InputType const& source, StaticData &staticData)
 ,m_transOptColl(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 {
+	TRACE_ERR("Start decoding: " << source << endl);
 	HypothesisStack::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
@@ -52,6 +53,7 @@ Manager::Manager(InputType const& source, StaticData &staticData)
 Manager::~Manager() 
 {
   delete m_transOptColl;
+  TRACE_ERR("Completed decoding" << endl);
 }
 
 /**
@@ -358,8 +360,8 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 	if (sortedPureHypo.size() == 0)
 		return;
 
-	LatticePathCollection contenders;
-	
+
+	LatticePathCollection contenders;	
 	set<std::vector<size_t> > distinctHyps;
 
 	// add all pure paths
@@ -370,6 +372,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 	{
 		contenders.Add(new LatticePath(*iterBestHypo));
 	}
+	TRACE_ERR("Num of n-best contenders: " << contenders.GetSize() << " ");
 
 	// MAIN loop
 	for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * 20) ; iteration++)
@@ -395,6 +398,8 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 		else
 			delete path;
 		
+		TRACE_ERR(contenders.GetSize() << " ");
+		
 		if(onlyDistinct)
 		{
 			size_t nBestFactor = StaticData::Instance()->GetNBestFactor();
@@ -407,6 +412,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 		}
 	}
 	
+	TRACE_ERR(contenders.GetSize() << endl);
 }
 
 void Manager::CalcDecoderStatistics(const StaticData& staticData) const 

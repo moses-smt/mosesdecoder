@@ -18,7 +18,7 @@
   <kdevautoproject>
     <general>
       <activetarget>src/moses</activetarget>
-      <useconfiguration>debug</useconfiguration>
+      <useconfiguration>optimized</useconfiguration>
     </general>
     <run>
       <mainprogram>/amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/debug/moses-cmd/src/moses-cmd</mainprogram>
