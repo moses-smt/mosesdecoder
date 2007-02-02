@@ -31,11 +31,11 @@ NGramNode::~NGramNode()
 	delete m_map;
 }
 
-const NGramNode *NGramNode::GetNGram(FACTOR_ID factor) const
+const NGramNode *NGramNode::GetNGram(const Factor *factor) const
 {
 	return m_map->GetNGram(factor);
 }
-NGramNode *NGramNode::GetNGram(FACTOR_ID factor)
+NGramNode *NGramNode::GetNGram(const Factor *factor)
 {
 	return m_map->GetNGram(factor);
 }

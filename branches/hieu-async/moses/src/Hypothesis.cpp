@@ -297,8 +297,8 @@ int Hypothesis::CompareUnsyncFactors(const Hypothesis &compare) const
 
 		for (FactorType factorType = 0 ; factorType < StaticData::Instance()->GetMaxNumFactors(Output) ; ++factorType)
 		{
-			FACTOR_ID factorThis				= GetFactor(posThis, factorType)
-									,factorCompare	= compare.GetFactor(posCompare, factorType);
+			const Factor *factorThis		= GetFactor(posThis, factorType)
+									,*factorCompare	= compare.GetFactor(posCompare, factorType);
 			if (factorThis != factorCompare)
 				return (factorThis < factorCompare) ? -1 : +1;
 		}		

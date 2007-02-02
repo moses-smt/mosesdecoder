@@ -34,8 +34,8 @@ int Word::Compare(const Word &targetWord, const Word &sourceWord)
 {
 	for (FactorType factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++)
 	{
-		FACTOR_ID targetFactor		= targetWord[factorType]
-								,sourceFactor	= sourceWord[factorType];
+		const Factor *targetFactor		= targetWord[factorType]
+								,*sourceFactor	= sourceWord[factorType];
 					
 		if (targetFactor == NULL || sourceFactor == NULL)
 			continue;
@@ -52,8 +52,8 @@ void Word::Merge(const Word &sourceWord)
 {
 	for (FactorType currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 	{
-		FACTOR_ID sourcefactor		= sourceWord.m_factorArray[currFactor]
-								,targetFactor	= m_factorArray[currFactor];
+		const Factor *sourcefactor		= sourceWord.m_factorArray[currFactor]
+								,*targetFactor		= this     ->m_factorArray[currFactor];
 		if (targetFactor == NULL && sourcefactor != NULL)
 		{
 			m_factorArray[currFactor] = sourcefactor;
@@ -78,7 +78,7 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
 	bool firstPass = true;
 	for (unsigned int i = 0 ; i < factorType.size() ; i++)
 	{
-		FACTOR_ID factor = m_factorArray[factorType[i]];
+		const Factor *factor = m_factorArray[factorType[i]];
 		if (factor != NULL)
 		{
 			if (firstPass) { firstPass = false; } else { strme << factorDelimiter; }
@@ -100,7 +100,7 @@ ostream& operator<<(ostream& out, const Word& word)
 	bool firstPass = true;
 	for (FactorType factorType = 0 ; factorType < MAX_NUM_FACTORS ; ++factorType)
 	{
-		FACTOR_ID factor = word[factorType];
+		const Factor *factor = word[factorType];
 		if (factor != NULL)
 		{
 			if (firstPass) { firstPass = false; } else { strme << factorDelimiter; }

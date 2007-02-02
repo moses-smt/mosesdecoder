@@ -123,9 +123,6 @@ enum DictionaryFind
 // typedef
 typedef size_t FactorType;
 
-class Factor;
-typedef const Factor* FACTOR_ID;
-
 #ifdef WIN32
 #include <BaseTsd.h>
 #else

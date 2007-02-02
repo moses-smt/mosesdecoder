@@ -81,7 +81,7 @@ public:
 		TRACE_ERR( std::endl;
 		*/
 		// only process context where last word is a word we want
-		FACTOR_ID factor = (*contextFactor.back())[m_factorType];
+		const Factor *factor = (*contextFactor.back())[m_factorType];
 		std::string strWord = factor->GetString();
 		if (strWord.find("---") == 0)
 			return 0;

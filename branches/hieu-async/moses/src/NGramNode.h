@@ -39,8 +39,8 @@ public:
 		return m_map;
 	}
 
-	const NGramNode *GetNGram(FACTOR_ID factor) const;
-	NGramNode *GetNGram(FACTOR_ID factor);
+	const NGramNode *GetNGram(const Factor *factor) const;
+	NGramNode *GetNGram(const Factor *factor);
 
 	const NGramNode *GetRootNGram() const
 	{

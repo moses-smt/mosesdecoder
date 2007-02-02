@@ -58,7 +58,7 @@ public:
 	/** returns a factor with the same direction, factorType and factorString. 
 	*	If a factor already exist in the collection, return the existing factor, if not create a new 1
 	*/
-	FACTOR_ID AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);	
+	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);	
 	//! Load list of factors. Deprecated
 	void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &filePath);
 	

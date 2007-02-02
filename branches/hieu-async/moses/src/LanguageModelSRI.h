@@ -43,7 +43,7 @@ protected:
 	float GetValue(VocabIndex wordId, VocabIndex *context) const;
 	void CreateFactors();
 	VocabIndex GetLmID( const std::string &str ) const;
-	VocabIndex GetLmID( FACTOR_ID factor ) const;
+	VocabIndex GetLmID( const Factor *factor ) const;
 	
 public:
 	LanguageModelSRI(bool registerScore, ScoreIndexManager &scoreIndexManager);

@@ -31,7 +31,7 @@ class Factor;
 class LanguageModelSingleFactor : public LanguageModel
 {
 protected:	
-	FACTOR_ID m_sentenceStart, m_sentenceEnd;
+	const Factor *m_sentenceStart, *m_sentenceEnd;
 	FactorType	m_factorType;
 
 	LanguageModelSingleFactor(bool registerScore, ScoreIndexManager &scoreIndexManager);
@@ -59,11 +59,11 @@ public:
 		return factorMask[m_factorType];
 	}
 
-	FACTOR_ID GetSentenceStart() const
+	const Factor *GetSentenceStart() const
 	{
 		return m_sentenceStart;
 	}
-	FACTOR_ID GetSentenceEnd() const
+	const Factor *GetSentenceEnd() const
 	{
 		return m_sentenceEnd;
 	}

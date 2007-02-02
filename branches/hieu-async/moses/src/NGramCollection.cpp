@@ -31,11 +31,11 @@ NGramCollection::~NGramCollection()
 	}
 }
 
-void NGramCollection::Add(FACTOR_ID factor, const NGramNode &ngramNode)
+void NGramCollection::Add(const Factor *factor, const NGramNode &ngramNode)
 {
 }
 
-NGramNode *NGramCollection::GetOrCreateNGram(FACTOR_ID factor)
+NGramNode *NGramCollection::GetOrCreateNGram(const Factor *factor)
 {
 	Collection::iterator iter = m_collection.find(factor);
 	if (iter == m_collection.end())
@@ -48,13 +48,13 @@ NGramNode *NGramCollection::GetOrCreateNGram(FACTOR_ID factor)
 	}
 }
 
-NGramNode *NGramCollection::GetNGram(FACTOR_ID factor)
+NGramNode *NGramCollection::GetNGram(const Factor *factor)
 {
 	Collection::iterator iter = m_collection.find(factor);
 	return (iter == m_collection.end()) ? NULL : (iter->second) ;
 }
 
-const NGramNode *NGramCollection::GetNGram(FACTOR_ID factor) const
+const NGramNode *NGramCollection::GetNGram(const Factor *factor) const
 {
 	Collection::const_iterator iter = m_collection.find(factor);
 	return (iter == m_collection.end()) ? NULL : (iter->second) ;
