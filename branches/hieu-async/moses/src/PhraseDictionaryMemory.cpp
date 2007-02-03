@@ -112,11 +112,12 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		AlignmentPair &alignmentPair = targetPhrase.GetAlignmentPair();
 
 		// source
+		AlignmentPairInserter inputInserter = alignmentPair.GetInserter(Input);
 		Phrase sourcePhrase(Input);
 		sourcePhrase.CreateFromString( input
 																, tokens[0]
 																, factorDelimiter
-																, &alignmentPair.GetInserter(Input)
+																, &inputInserter
 																, &tokens[2]);
 
 		// if not part of input, filter it out
@@ -133,10 +134,11 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		}
 
 		//target
+		AlignmentPairInserter outputInserter = alignmentPair.GetInserter(Output);
 		targetPhrase.CreateFromString( output
 																, tokens[1]
 																, factorDelimiter
-																, &alignmentPair.GetInserter(Output)
+																, &outputInserter
 																, &tokens[3]);
 		
 		// component score, for n-best output
