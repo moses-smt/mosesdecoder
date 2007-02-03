@@ -29,7 +29,7 @@ Factor::Factor(FactorDirection direction, FactorType factorType, const std::stri
 :m_direction(direction)
 ,m_factorType(factorType)
 ,m_ptrString(factorString)
-,m_id(s_id++)
+,m_id(NOT_FOUND)
 {
 }
 

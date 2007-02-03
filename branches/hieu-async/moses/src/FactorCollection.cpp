@@ -67,7 +67,10 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
 {
 	// find string id
 	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
-	return &(*m_collection.insert(Factor(direction, factorType, ptrString)).first);
+	Factor &factor = *m_collection.insert(Factor(direction, factorType, ptrString)).first;
+	if (factor.GetId() == NOT_FOUND)
+		factor.SetId();
+	return &factor;
 }
 
 FactorCollection::~FactorCollection()

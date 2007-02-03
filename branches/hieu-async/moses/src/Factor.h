@@ -51,11 +51,16 @@ protected:
 	FactorDirection		m_direction;
 	FactorType				m_factorType;
 	const std::string	*m_ptrString;
-	const size_t			m_id;
+	size_t						m_id;
 
 	//! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
 	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString);
 	
+	// only call this function if factor is new
+	inline void SetId()
+	{
+		m_id = s_id++;
+	}
 public:
 	//! returns whether this factor is part of the source ('Input') or target ('Output') language
 	inline FactorDirection GetFactorDirection() const
@@ -72,7 +77,7 @@ public:
 	{
 		return *m_ptrString;
 	}
-	//! contiguous ID
+	//! contiguous ID starting from 0
 	inline size_t GetId() const
 	{
 		return m_id;
