@@ -53,7 +53,7 @@ bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, 
 	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
 
 	FactorSet::const_iterator iterFactor;
-	Factor search(direction, factorType, ptrString);
+	Factor search(direction, factorType, ptrString); // id not used for searching
 
 	iterFactor = m_collection.find(search);
 	return iterFactor != m_collection.end();
@@ -65,7 +65,12 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
 {
 	// find string id
 	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
-	return &(*m_collection.insert(Factor(direction, factorType, ptrString)).first);
+	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, ptrString, m_factorId) );
+	if (ret.second)
+		++m_factorId; // new factor, make sure next new factor has diffrernt id
+		
+	const Factor *factor = &(*ret.first);
+	return factor;
 }
 
 FactorCollection::~FactorCollection()
