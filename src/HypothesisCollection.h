@@ -118,8 +118,8 @@ protected:
 	/** add Hypothesis to the collection, without pruning */
 	inline void AddNoPrune(Hypothesis *hypothesis)
 	{
-		if (!m_hypos.insert(hypothesis).second) {
-    }
+		// must always insert
+		assert(m_hypos.insert(hypothesis).second);
 	}
 
 public:
