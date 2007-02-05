@@ -135,7 +135,7 @@ void TranslationOptionCollection::ProcessUnknownWord()
 				size_t numTransOpt = fullList.size();
 				if (numTransOpt == 0)
 				{
-					const DecodeStep &decodeStep = StaticData::Instance()->GetDecodeStep(decodeStepId);
+					const DecodeStep &decodeStep = StaticData::Instance().GetDecodeStep(decodeStepId);
 					CreateTranslationOptionsForRange(decodeStep, pos, pos, false);
 				}
 		}
@@ -168,7 +168,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(size_t decodeStepId, con
 	// unknown word, add as trans opt
 
 		size_t isDigit = 0;
-		if (StaticData::Instance()->GetDropUnknown())
+		if (StaticData::Instance().GetDropUnknown())
 		{
 			const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
 			const string &s = f->GetString();
@@ -181,7 +181,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(size_t decodeStepId, con
 		}
 		
 		TranslationOption *transOpt;
-		if (! StaticData::Instance()->GetDropUnknown() || isDigit)
+		if (! StaticData::Instance().GetDropUnknown() || isDigit)
 		{
 			// add to dictionary
 			TargetPhrase targetPhrase(Output);

@@ -45,11 +45,12 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, size_t tableLimit
 																			, const LMList &languageModels
 														          , float weightWP
-														          , const StaticData& staticData
-																			, bool filter
+														     			, bool filter
 																			, const PrefixPhraseCollection &inputPrefix
 																			, const string &hashFilePath)
 {
+	const StaticData &staticData = StaticData::Instance();
+
 	m_tableLimit = tableLimit;
 	m_filePath = filePath;
 
@@ -91,7 +92,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			continue;
 		}
 
-		const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
+		const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 		
 		// only have to recreate source phrase if different from prev
 		//if (tokens[0] != prevSourcePhrase)

@@ -57,7 +57,6 @@ public:
 								, size_t tableLimit
 								, const LMList &languageModels
 						    , float weightWP
-								, const StaticData& staticData
 								, bool filter
 								, const PrefixPhraseCollection &inputPrefix
 								, const std::string &hashFilePath);

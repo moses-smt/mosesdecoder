@@ -48,13 +48,14 @@ protected:
 	size_t		m_factorId; /**< unique, contiguous ids, starting from 0, for each factor */
 	FactorSet m_collection; /**< collection of all factors */
 	StringSet m_factorStringCollection; /**< collection of unique string used by factors */
-public:
-	static FactorCollection& Instance() { return s_instance; }
 
-	//! constructor
+	//! constructor. only the 1 static variable can be created
 	FactorCollection()
 	:m_factorId(0)
 	{}
+
+public:
+	static FactorCollection& Instance() { return s_instance; }
 
 	//! Destructor
 	~FactorCollection();

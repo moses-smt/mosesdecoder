@@ -45,7 +45,7 @@ class DecodeStep;
 class StaticData
 {
 private:
-	static StaticData*									s_instance;
+	static StaticData				*s_instance;
 protected:	
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
@@ -127,7 +127,10 @@ public:
 	StaticData();
 	~StaticData();
 
-	static const StaticData* Instance() { return s_instance; }
+	static const StaticData &Instance() 
+	{ 
+		return *s_instance; 
+	}
 
 	/** Main function to load everything.
 	 * Also initialize the Parameter object

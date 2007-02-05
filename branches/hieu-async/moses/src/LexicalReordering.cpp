@@ -52,7 +52,7 @@ LexicalReordering::LexicalReordering(const std::string &filePath
 	else if ( orientation == DistortionOrientationType::Msd) {
 		m_numOrientationTypes = 3;
 	}
-	const_cast<StaticData*>(StaticData::Instance())->SetWeightsForScoreProducer(this, weights);
+	const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 	// Load the file
 	LoadFile();
 	//	PrintTable();

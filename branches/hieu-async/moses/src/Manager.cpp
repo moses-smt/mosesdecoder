@@ -30,13 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "LMList.h"
 #include "TranslationOptionCollection.h"
+#include "StaticData.h"
 
 using namespace std;
 
-Manager::Manager(InputType const& source, StaticData &staticData)
+Manager::Manager(InputType const& source)
 :m_source(source)
-,m_hypoStack(source.GetSize(), staticData.GetDecodeStepList())
-,m_staticData(staticData)
+,m_hypoStack(source.GetSize(), StaticData::Instance().GetDecodeStepList())
 ,m_transOptColl(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 {
@@ -45,8 +45,8 @@ Manager::Manager(InputType const& source, StaticData &staticData)
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
 		HypothesisCollection &sourceHypoColl = *iterStack;
-		sourceHypoColl.SetMaxHypoStackSize(m_staticData.GetMaxHypoStackSize());
-		sourceHypoColl.SetBeamThreshold(m_staticData.GetBeamThreshold());
+		sourceHypoColl.SetMaxHypoStackSize(StaticData::Instance().GetMaxHypoStackSize());
+		sourceHypoColl.SetBeamThreshold(StaticData::Instance().GetBeamThreshold());
 	}
 }
 
@@ -62,8 +62,8 @@ Manager::~Manager()
  */
 void Manager::ProcessSentence()
 {	
-	m_staticData.ResetSentenceStats(m_source);
-	const vector<DecodeStep*> &decodeStepList = m_staticData.GetDecodeStepList();
+	StaticData::Instance().ResetSentenceStats(m_source);
+	const vector<DecodeStep*> &decodeStepList = StaticData::Instance().GetDecodeStepList();
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
@@ -85,7 +85,7 @@ void Manager::ProcessSentence()
 
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
-		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize());
+		sourceHypoColl.PruneToSize(StaticData::Instance().GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
 
@@ -107,7 +107,7 @@ void Manager::ProcessSentence()
 	OutputArcListSize();
 	
 	// some more logging
-	VERBOSE(2,m_staticData.GetSentenceStats());
+	VERBOSE(2, StaticData::Instance().GetSentenceStats());
 }
 
 
@@ -119,7 +119,7 @@ void Manager::ProcessSentence()
 void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vector<DecodeStep*> &decodeStepList)
 {
 	// since we check for reordering limits, its good to have that limit handy
-	int maxDistortion = m_staticData.GetMaxDistortion();
+	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 
 	// no limit of reordering: only check for overlap
 	if (maxDistortion < 0)
@@ -246,10 +246,10 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	{
 		// create hypothesis and calculate all its scores
 		Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-		newHypo->CalcScore(m_staticData, m_transOptColl->GetFutureScoreObject());
+		newHypo->CalcScore(m_transOptColl->GetFutureScoreObject());
 		// logging for the curious
 		IFVERBOSE(3) {
-			newHypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+			newHypo->PrintHypothesis(m_source, StaticData::Instance().GetWeightDistortion(), StaticData::Instance().GetWeightWordPenalty());
 		}
 
 		// add to hypothesis stack
@@ -402,7 +402,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 		
 		if(onlyDistinct)
 		{
-			size_t nBestFactor = StaticData::Instance()->GetNBestFactor();
+			size_t nBestFactor = StaticData::Instance().GetNBestFactor();
 			if (nBestFactor > 0)
 				contenders.Prune(count * nBestFactor);
 		}
@@ -415,12 +415,12 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 	TRACE_ERR(contenders.GetSize() << endl);
 }
 
-void Manager::CalcDecoderStatistics(const StaticData& staticData) const 
+void Manager::CalcDecoderStatistics() const 
 {
   const Hypothesis *hypo = GetBestHypothesis();
 	if (hypo != NULL)
   {
-  	staticData.GetSentenceStats().CalcFinalStats(*hypo);
+		StaticData::Instance().GetSentenceStats().CalcFinalStats(*hypo);
     IFVERBOSE(2) {
 		 	if (hypo != NULL) {
 		   	string buff;

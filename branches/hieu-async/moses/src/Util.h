@@ -47,8 +47,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 /** verbose macros
  * */
-#define VERBOSE(level,str) { if (StaticData::Instance()->GetVerboseLevel() >= level) { TRACE_ERR(str); } }
-#define IFVERBOSE(level) if (StaticData::Instance()->GetVerboseLevel() >= level)
+#define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
+#define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
 
 //! get string representation of any object/variable, as long as it can pipe to a stream
 template<typename T>

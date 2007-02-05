@@ -31,7 +31,7 @@ using namespace std;
 
 HypothesisCollection::HypothesisCollection()
 {
-	m_nBestIsEnabled = StaticData::Instance()->IsNBestEnabled();
+	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
 	m_worstScore = -std::numeric_limits<float>::infinity();
 }
@@ -76,7 +76,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 { 
 	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
-	  StaticData::Instance()->GetSentenceStats().AddDiscarded();
+	  StaticData::Instance().GetSentenceStats().AddDiscarded();
 	  VERBOSE(3,"discarded, too bad for stack" << std::endl);
 		FREEHYPO(hypo);		
 		return;
@@ -91,7 +91,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 		return;
   }
 
-	StaticData::Instance()->GetSentenceStats().AddRecombination(*hypo, **iter);
+	StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iter);
 	
 	// found existing hypo with same target ending.
 	// keep the best 1
@@ -162,7 +162,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 				{
 					iterator iterRemove = iter++;
 					Remove(iterRemove);
-					StaticData::Instance()->GetSentenceStats().AddPruning();
+					StaticData::Instance().GetSentenceStats().AddPruning();
 				}
 			else
 				{

@@ -74,7 +74,7 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
 {
 	stringstream strme;
 	assert(factorType.size() <= MAX_NUM_FACTORS);
-	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
+	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	bool firstPass = true;
 	for (unsigned int i = 0 ; i < factorType.size() ; i++)
 	{
@@ -96,7 +96,7 @@ ostream& operator<<(ostream& out, const Word& word)
 {	
 	stringstream strme;
 
-	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
+	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	bool firstPass = true;
 	for (FactorType factorType = 0 ; factorType < MAX_NUM_FACTORS ; ++factorType)
 	{

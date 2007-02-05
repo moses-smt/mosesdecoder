@@ -171,7 +171,7 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 	m_nBestFile.setf(std::ios::fixed); 
 	m_nBestFile.precision(5);
 
-	bool labeledOutput = StaticData::Instance()->IsLabeledNBestList();
+	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
 	
 	LatticePathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
@@ -191,10 +191,10 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		// basic distortion
 		if (labeledOutput)
 	    m_nBestFile << "d: ";
-		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetDistortionScoreProducer()) << " ";
+		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
 
 //		reordering
-		vector<LexicalReordering*> rms = StaticData::Instance()->GetReorderModels();
+		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();
 		if(rms.size() > 0)
 		{
 				vector<LexicalReordering*>::iterator iter;
@@ -209,7 +209,7 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		}
 			
 		// lm
-		const LMList& lml = StaticData::Instance()->GetAllLM();
+		const LMList& lml = StaticData::Instance().GetAllLM();
     if (lml.size() > 0) {
 			if (labeledOutput)
 	      m_nBestFile << "lm: ";
@@ -220,9 +220,9 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
     }
 
 		// translation components
-		if (StaticData::Instance()->GetInputType()==0){  
+		if (StaticData::Instance().GetInputType()==0){  
 			// translation components	for text input
-			vector<PhraseDictionary*> pds = StaticData::Instance()->GetPhraseDictionaries();
+			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
 					m_nBestFile << "tm: ";
@@ -238,7 +238,7 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 			// translation components for Confusion Network input
 			// first translation component has GetNumInputScores() scores from the input Confusion Network
 			// at the beginning of the vector
-			vector<PhraseDictionary*> pds = StaticData::Instance()->GetPhraseDictionaries();
+			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				vector<PhraseDictionary*>::iterator iter;
 				
@@ -275,10 +275,10 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		// word penalty
 		if (labeledOutput)
 	    m_nBestFile << "w: ";
-		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetWordPenaltyProducer()) << " ";
+		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetWordPenaltyProducer()) << " ";
 		
 		// generation
-		vector<GenerationDictionary*> gds = StaticData::Instance()->GetGenerationDictionaries();
+		vector<GenerationDictionary*> gds = StaticData::Instance().GetGenerationDictionaries();
     if (gds.size() > 0) {
 			if (labeledOutput)
 	      m_nBestFile << "g: ";

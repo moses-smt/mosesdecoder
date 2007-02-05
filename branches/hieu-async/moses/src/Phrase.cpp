@@ -91,7 +91,7 @@ void Phrase::MergeFactors(const Phrase &source, const WordsRange &where)
 	size_t sourceSize = source.GetSize();
 	assert(sourceSize == where.GetSize());
 
-	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
+	const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
 	for (size_t currFactor = 0 ; currFactor < maxNumFactors ; ++currFactor)
 	{
 		// only add factors that exists in trans opt
@@ -119,7 +119,7 @@ void Phrase::MergeFactors(const Phrase &copy)
 {
 	assert(GetSize() == copy.GetSize());
 	size_t size = GetSize();
-	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
+	const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
 		for (FactorType factorType = 0 ; factorType < maxNumFactors ; factorType++)
@@ -222,7 +222,7 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 
 		if (factorStrVector.size() != factorOrder.size())
 		{
-			TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance()->GetCurrentInputPosition() <<*/ std::endl
+			TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance().GetCurrentInputPosition() <<*/ std::endl
 								<< "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
 								<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
 			abort();
@@ -274,7 +274,7 @@ bool Phrase::operator < (const Phrase &compare) const
 	{
 		size_t minSize = std::min( thisSize , compareSize );
 
-		const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
+		const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
 		// taken from word.Compare()
 		for (FactorType factorType = 0 ; factorType < maxNumFactors ; ++factorType)
 		{
@@ -349,7 +349,7 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 
 	const size_t size = GetSize();
 
-	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
+	const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
 		for (FactorType factorType = 0 ; factorType < maxNumFactors ; ++factorType)
@@ -392,7 +392,7 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase, const std::vector<FactorTyp
 
 bool Phrase::IsSynchronized() const
 {
-	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
+	const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
 	const size_t size = GetSize();
 	for (size_t currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
 	{

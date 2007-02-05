@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
     VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 
 		staticData.InitializeBeforeSentenceProcessing(*source);
-		Manager manager(*source, staticData);
+		Manager manager(*source);
 		manager.ProcessSentence();
 		ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 													 staticData.GetReportSegmentation()
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 
 		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
     
-		manager.CalcDecoderStatistics(staticData);
+		manager.CalcDecoderStatistics();
 		staticData.CleanUpAfterSentenceProcessing();       
 	}
 	

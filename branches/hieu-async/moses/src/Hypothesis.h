@@ -138,7 +138,7 @@ public:
 
 	void ResetScore();
 
-	void CalcScore(const StaticData& staticData, const SpanScore &futureScore);
+	void CalcScore(const SpanScore &futureScore);
 
 	int GetId()const
 	{

@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <list>
 #include "InputType.h"
 #include "Hypothesis.h"
-#include "StaticData.h"
 #include "TranslationOption.h"
 #include "HypothesisCollection.h"
 #include "TranslationOptionCollection.h"
@@ -76,7 +75,6 @@ protected:
 
 	HypothesisStack m_hypoStack; /**< stacks to store hypothesis (partial translations) */ 
 	// no of elements = no of words in source + 1
-	StaticData &m_staticData; /**< holds various kinds of constants, counters, and global data structures */
 	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	
@@ -90,7 +88,7 @@ protected:
 	void OutputHypoStackSize();
 	void OutputArcListSize() const;
 public:
-	Manager(InputType const& source, StaticData &staticData);
+	Manager(InputType const& source);
 	~Manager();
 
 	void ProcessSentence();
@@ -100,5 +98,5 @@ public:
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
 	 */
-	void CalcDecoderStatistics(const StaticData& staticData) const;
+	void CalcDecoderStatistics() const;
 };

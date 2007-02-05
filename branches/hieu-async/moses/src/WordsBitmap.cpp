@@ -30,7 +30,7 @@ TO_STRING_BODY(WordsBitmap);
 WordsBitmap::WordsBitmap(size_t size)
 	:m_size	(size)
 {
-	const vector<DecodeStep*> &decodeStepList = StaticData::Instance()->GetDecodeStepList();
+	const vector<DecodeStep*> &decodeStepList = StaticData::Instance().GetDecodeStepList();
 	m_bitmap.resize(decodeStepList.size());
 
 	std::vector<DecodeStep*>::const_iterator iter;
@@ -155,7 +155,7 @@ bool WordsBitmap::IsComplete(FactorType factorType) const
 {
 	for (size_t decodeStepId = 0 ; decodeStepId < m_bitmap.size() ; ++decodeStepId)
 	{
-		const DecodeStep &decodeStep = StaticData::Instance()->GetDecodeStep(decodeStepId);
+		const DecodeStep &decodeStep = StaticData::Instance().GetDecodeStep(decodeStepId);
 		const FactorMask &outputFactorMask = decodeStep.GetCombinedOutputFactorMask();
 		if (outputFactorMask[factorType] && IsComplete(decodeStep))
 		{

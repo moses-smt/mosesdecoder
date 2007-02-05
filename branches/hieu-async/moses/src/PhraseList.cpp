@@ -7,8 +7,8 @@ void PhraseList::Load(std::string filePath)
 {
 	InputFileStream inFile(filePath);
 	
-	const std::vector<FactorType> &factorOrder = StaticData::Instance()->GetInputFactorOrder();
-	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
+	const std::vector<FactorType> &factorOrder = StaticData::Instance().GetInputFactorOrder();
+	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 
 	string line;
 	while(getline(inFile, line)) 

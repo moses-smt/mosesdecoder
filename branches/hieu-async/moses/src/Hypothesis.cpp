@@ -56,7 +56,7 @@ Hypothesis::Hypothesis(InputType const& source, const std::vector<DecodeStep*> &
 	, m_sourceInput(source)
 	, m_currTargetWordsRange()
 	, m_wordDeleted(false)
-	, m_languageModelStates(StaticData::Instance()->GetLMSize(), LanguageModelSingleFactor::UnknownState)
+	, m_languageModelStates(StaticData::Instance().GetLMSize(), LanguageModelSingleFactor::UnknownState)
 	, m_arcList(NULL)
 	, m_id(0)
 	, m_lmstats(NULL)
@@ -248,7 +248,7 @@ int Hypothesis::CompareCurrSourceRange(const Hypothesis &compare) const
 			return +1;
 	}
 
-	if (! StaticData::Instance()->GetSourceStartPosMattersForRecombination()) 
+	if (! StaticData::Instance().GetSourceStartPosMattersForRecombination()) 
 		return 0;
 
 	for (size_t decodeStepId = 0 ; decodeStepId < m_currSourceRange.size() ; ++decodeStepId)
@@ -275,7 +275,7 @@ int Hypothesis::CompareUnsyncFactors(const Hypothesis &compare) const
 	size_t	maxGap = 0;
 
 	// find starting pos
-	for (FactorType factorType = 0 ; factorType < StaticData::Instance()->GetMaxNumFactors(Output) ; ++factorType)
+	for (FactorType factorType = 0 ; factorType < StaticData::Instance().GetMaxNumFactors(Output) ; ++factorType)
 	{
 		size_t gapThis		= phraseThis.GetSize()					- phraseThis.FindFirstGap(factorType)
 					,gapCompare	= phraseCompare.GetSize() - phraseCompare.FindFirstGap(factorType);
@@ -295,7 +295,7 @@ int Hypothesis::CompareUnsyncFactors(const Hypothesis &compare) const
 		size_t posThis		= phraseThis.GetSize() - gap
 					,posCompare = phraseCompare.GetSize() - gap;
 
-		for (FactorType factorType = 0 ; factorType < StaticData::Instance()->GetMaxNumFactors(Output) ; ++factorType)
+		for (FactorType factorType = 0 ; factorType < StaticData::Instance().GetMaxNumFactors(Output) ; ++factorType)
 		{
 			const Factor *factorThis		= GetFactor(posThis, factorType)
 									,*factorCompare	= compare.GetFactor(posCompare, factorType);
@@ -321,12 +321,12 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 	LMList::const_iterator iterLM;
 
 	// will be null if LM stats collection is disabled
-	if (StaticData::Instance()->IsComputeLMBackoffStats()) {
+	if (StaticData::Instance().IsComputeLMBackoffStats()) {
 		m_lmstats = new vector<vector<unsigned int> >(languageModels.size(), vector<unsigned int>(0));
 	}
 
 	size_t lmIdx = 0;
-	const DecodeStep &decodeStep = StaticData::Instance()->GetDecodeStep(
+	const DecodeStep &decodeStep = StaticData::Instance().GetDecodeStep(
 																		m_currTargetWordsRange.GetDecodeStepId());
 	const FactorMask &targetMask = decodeStep.GetOutputFactorMask();
 
@@ -425,7 +425,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 
 void Hypothesis::CalcDistortionScore()
 {
-	const DistortionScoreProducer *dsp = StaticData::Instance()->GetDistortionScoreProducer();
+	const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
 
 	float distortionScore;
 	if (m_prevHypo->GetDecodeStepId() == NOT_FOUND)
@@ -451,8 +451,10 @@ void Hypothesis::ResetScore()
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::CalcScore(const StaticData& staticData, const SpanScore &futureScore) 
+void Hypothesis::CalcScore(const SpanScore &futureScore) 
 {
+	const StaticData &staticData = StaticData::Instance();
+
 	// DISTORTION COST
 	CalcDistortionScore();
 	
@@ -483,8 +485,8 @@ void Hypothesis::CalcFutureScore(const SpanScore &futureScore)
 	m_futureScore = futureScore.GetFutureScore(m_sourceCompleted);
 
 	// add future costs for distortion model
-	if(StaticData::Instance()->UseDistortionFutureCosts())
-		m_futureScore += m_sourceCompleted.GetFutureDistortionScore((int) GetCurrSourceWordsRange().GetEndPos()) * StaticData::Instance()->GetWeightDistortion();
+	if(StaticData::Instance().UseDistortionFutureCosts())
+		m_futureScore += m_sourceCompleted.GetFutureDistortionScore((int) GetCurrSourceWordsRange().GetEndPos()) * StaticData::Instance().GetWeightDistortion();
 	
 }
 
@@ -535,9 +537,9 @@ void Hypothesis::CleanupArcList()
 	 * However, may not be enough if only unique candidates are needed,
 	 * so we'll keep all of arc list if nedd distinct n-best list
 	 */
-	const StaticData *staticData = StaticData::Instance();
-	size_t nBestSize = staticData->GetNBestSize();
-	bool distinctNBest = staticData->GetDistinctNBest();
+	const StaticData &staticData = StaticData::Instance();
+	size_t nBestSize = staticData.GetNBestSize();
+	bool distinctNBest = staticData.GetDistinctNBest();
 
 	if (!distinctNBest && m_arcList->size() > nBestSize * 5)
 	{ // prune arc list only if there too many arcs
@@ -634,7 +636,7 @@ std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factor
 std::string Hypothesis::GetSourcePhraseStringRep() const 
 {
 	vector<FactorType> allFactors;
-	const size_t maxSourceFactors = StaticData::Instance()->GetMaxNumFactors(Input);
+	const size_t maxSourceFactors = StaticData::Instance().GetMaxNumFactors(Input);
 	for(size_t i=0; i < maxSourceFactors; i++)
 	{
 		allFactors.push_back(i);
@@ -644,7 +646,7 @@ std::string Hypothesis::GetSourcePhraseStringRep() const
 std::string Hypothesis::GetTargetPhraseStringRep() const 
 {
 	vector<FactorType> allFactors;
-	const size_t maxTargetFactors = StaticData::Instance()->GetMaxNumFactors(Output);
+	const size_t maxTargetFactors = StaticData::Instance().GetMaxNumFactors(Output);
 	for(size_t i=0; i < maxTargetFactors; i++)
 	{
 		allFactors.push_back(i);

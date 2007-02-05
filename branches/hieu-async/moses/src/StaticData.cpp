@@ -700,7 +700,6 @@ bool StaticData::LoadPhraseTables()
 								 , maxTargetPhrase[index]
 								 , GetAllLM()
 								 , GetWeightWordPenalty()
-								 , *this
 								 , filter
 								 , inputPrefix
 								 , hashFilePath))
