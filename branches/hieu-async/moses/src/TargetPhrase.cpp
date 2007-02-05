@@ -129,6 +129,42 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 	return clone;
 }
 
+// helper function 
+void AddAlignmentElement(AlignmentPairInserter &inserter, const string &str, size_t phraseSize)
+{
+	// input
+	vector<string> alignPhraseVector;
+	alignPhraseVector = Tokenize(str);
+	// "0 3 1,2"
+	//		to
+	// "0" "3" "1,2"
+	assert (alignPhraseVector.size() == phraseSize) ;
+
+	size_t inputSize = alignPhraseVector.size();
+	for (size_t pos = 0 ; pos < inputSize ; ++pos)
+	{
+		const string &alignElementStr = alignPhraseVector[pos];
+		AlignmentElement alignElement = Tokenize<size_t>(alignElementStr, ",");
+		// "1,2"
+		//  to
+		// [1] [2]
+
+		**inserter = alignElement;
+		(*inserter)++;		
+	}
+}
+
+void TargetPhrase::CreateAlignmentInfo(const string &inputStr, const string &outputStr, size_t sourceSize)
+{
+	AddAlignmentElement(m_alignmentPair.GetInserter(Input)
+										, inputStr
+										, sourceSize);
+	AddAlignmentElement(m_alignmentPair.GetInserter(Output)
+										, outputStr
+										, GetSize());
+}
+
+
 TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)

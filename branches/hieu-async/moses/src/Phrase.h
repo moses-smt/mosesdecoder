@@ -77,9 +77,7 @@ public:
 	static std::vector< std::vector<std::string> > Parse(
 																const std::string &phraseString
 																, const std::vector<FactorType> &factorOrder
-																, const std::string& factorDelimiter
-																, AlignmentPairInserter *alignmentPairInserter
-																, const std::string *alignString);
+																, const std::string& factorDelimiter);
 	/** Fills phrase with words from 2D string vector
 		* \param factorOrder factor types of each element in 2D string vector
 		* \param phraseVector 2D string vector
@@ -94,9 +92,7 @@ public:
 	*/
 	void CreateFromString(const std::vector<FactorType> &factorOrder
 											, const std::string &phraseString
-											, const std::string &factorDelimiter
-											, AlignmentPairInserter *alignmentPairInserter
-											, const std::string *alignString);
+											, const std::string &factorDelimiter);
 
 	/**	copy factors from the other phrase to this phrase. 
 		IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten

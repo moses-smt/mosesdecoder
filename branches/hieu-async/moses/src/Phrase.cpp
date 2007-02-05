@@ -195,9 +195,7 @@ void Phrase::Append(const Phrase &endPhrase){
 
 vector< vector<string> > Phrase::Parse(const std::string &phraseString
 																			 , const std::vector<FactorType> &factorOrder
-																			 , const std::string& factorDelimiter
-																			 , AlignmentPairInserter *alignmentPairInserter
-																			 , const std::string *alignString)
+																			 , const std::string& factorDelimiter)
 {
 	bool isMultiCharDelimiter = factorDelimiter.size() > 1;
 
@@ -207,17 +205,6 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 	// KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none 
 	//		to
 	// "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
-
-	// alignment info
-	vector<string> alignPhraseVector;
-	if (alignString != NULL)
-	{
-		alignPhraseVector = Tokenize(*alignString);
-		assert (alignPhraseVector.size() == annotatedWordVector.size()) ;
-		// (0) (3) (1,2)
-		//		to
-		// "(0)" "(3)" "(1,2)"
-	}
 
 	for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() ; phrasePos++)
 	{
@@ -239,18 +226,7 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 								<< "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
 								<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
 			abort();
-		}
-		
-		if (alignmentPairInserter != NULL)
-		{ // fill out alignment factor info
-			assert(alignString != NULL);
-		
-			string alignStr = alignPhraseVector[phrasePos];
-			alignStr = alignStr.substr(1, alignStr.size() - 2);
-			AlignmentElement alignVec = Tokenize<size_t>(alignStr, ",");
-			**alignmentPairInserter = alignVec;
-			(*alignmentPairInserter)++;
-		}
+		}		
 	}
 	return phraseVector;
 }
@@ -275,16 +251,12 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const string &phraseString
-															, const string &factorDelimiter
-															, AlignmentPairInserter *alignmentPairInserter
-															, const string *alignString)
+															, const string &factorDelimiter)
 {
 	vector< vector<string> > phraseVector = Parse(
 										phraseString
 										, factorOrder
-										, factorDelimiter
-										, alignmentPairInserter
-										, alignString);
+										, factorDelimiter);
 	CreateFromString(factorOrder, phraseVector);
 }
 

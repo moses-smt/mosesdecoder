@@ -709,7 +709,6 @@ bool StaticData::LoadPhraseTables()
 					return false;
 				}
 
-				cerr << *pd << endl;
 				m_phraseDictionary.push_back(pd);
 			}
 			else 

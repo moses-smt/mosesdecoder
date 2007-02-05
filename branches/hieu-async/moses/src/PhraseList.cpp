@@ -16,8 +16,7 @@ void PhraseList::Load(std::string filePath)
 		Phrase phrase(Input);
 		phrase.CreateFromString( factorOrder
 													, line
-													, factorDelimiter
-													, NULL, NULL);
+													, factorDelimiter);
 		push_back(phrase);
 	}
 }
