@@ -30,11 +30,9 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	std::string line;
-	do 
-		{
-			if (getline(in, line, '\n').eof())	return 0;
-			line = Trim(line);
-		} while (line == "");
+	if (getline(in, line, '\n').eof())	
+		return 0;
+	line = Trim(line);
 	
 	Phrase::CreateFromString(factorOrder, line, factorDelimiter);
 	return 1;

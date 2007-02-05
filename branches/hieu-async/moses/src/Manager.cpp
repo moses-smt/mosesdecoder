@@ -418,7 +418,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 void Manager::CalcDecoderStatistics() const 
 {
   const Hypothesis *hypo = GetBestHypothesis();
-	if (hypo != NULL)
+	if (hypo != NULL && hypo->GetSize() > 0)
   {
 		StaticData::Instance().GetSentenceStats().CalcFinalStats(*hypo);
     IFVERBOSE(2) {

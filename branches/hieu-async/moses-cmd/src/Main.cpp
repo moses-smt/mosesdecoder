@@ -98,8 +98,8 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;		
 	}
 
-	StaticData staticData;
-	if (!staticData.LoadData(parameter))
+	const StaticData &staticData = StaticData::Instance();
+	if (!StaticData::LoadDataStatic(parameter))
 		return EXIT_FAILURE;
 
 	// set up read/writing class
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 	return EXIT_SUCCESS;
 }
 
-IOStream *GetIODevice(StaticData &staticData)
+IOStream *GetIODevice(const StaticData &staticData)
 {
 	IOStream *ioStream;
 	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()

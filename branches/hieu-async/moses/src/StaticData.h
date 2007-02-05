@@ -45,7 +45,7 @@ class DecodeStep;
 class StaticData
 {
 private:
-	static StaticData				*s_instance;
+	static StaticData				s_instance;
 protected:	
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
@@ -105,6 +105,9 @@ protected:
 	size_t m_maxFactorIdx[2];  //! number of factors on source and target side
 	size_t m_maxNumFactors;  //! max number of factors on both source and target sides
 
+	//! constructor. only the 1 static variable can be created
+	StaticData();
+
 	//! helper fn to set bool param from ini file/command line
 	void SetBooleanParameter(bool *paramter, string parameterName, bool defaultValue);
 
@@ -124,12 +127,11 @@ protected:
 	bool LoadLexicalReorderingModel();
 	
 public:
-	StaticData();
 	~StaticData();
 
 	static const StaticData &Instance() 
 	{ 
-		return *s_instance; 
+		return s_instance; 
 	}
 
 	/** Main function to load everything.
@@ -137,7 +139,12 @@ public:
 	 */
 	bool LoadData(Parameter *parameter);
 
-	const PARAM_VEC &GetParam(const std::string &paramName)
+	static bool LoadDataStatic(Parameter *parameter)
+	{
+		return s_instance.LoadData(parameter);
+	}
+
+	const PARAM_VEC &GetParam(const std::string &paramName) const
 	{
 		return m_parameter->GetParam(paramName);
 	}
@@ -292,8 +299,8 @@ public:
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	int GetInputType() const {return m_inputType;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
-	void InitializeBeforeSentenceProcessing(InputType const&);
-	void CleanUpAfterSentenceProcessing();
+	void InitializeBeforeSentenceProcessing(InputType const&) const;
+	void CleanUpAfterSentenceProcessing() const;
 	SentenceStats& GetSentenceStats() const
 	{
 		return *m_sentenceStats;

@@ -62,7 +62,7 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
   return max;
 }
 
-StaticData* StaticData::s_instance(0);
+StaticData StaticData::s_instance;
 
 StaticData::StaticData()
 :m_fLMsLoaded(false)
@@ -78,8 +78,6 @@ StaticData::StaticData()
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
-
-	s_instance = this;
 
 	// memory pools
 	Phrase::InitializeMemPool();
@@ -790,7 +788,7 @@ bool StaticData::LoadMapping()
 	return true;
 }
 
-void StaticData::CleanUpAfterSentenceProcessing() 
+void StaticData::CleanUpAfterSentenceProcessing() const
 {
 	for(size_t i=0;i<m_phraseDictionary.size();++i)
 		m_phraseDictionary[i]->CleanUp();
@@ -809,7 +807,7 @@ void StaticData::CleanUpAfterSentenceProcessing()
 /** initialize the translation and language models for this sentence 
     (includes loading of translation table entries on demand, if
     binary format is used) */
-void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) 
+void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) const
 {
 	for(size_t i=0;i<m_phraseDictionary.size();++i) 
 	{
