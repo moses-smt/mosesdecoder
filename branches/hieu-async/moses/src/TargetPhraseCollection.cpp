@@ -48,7 +48,7 @@ ostream& operator<<(ostream& out, const TargetPhraseCollection &coll)
 {
 	TargetPhraseCollection::const_iterator iter;
 	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
-		out << **iter;
+		out << **iter << endl;
 	return out;
 }
 

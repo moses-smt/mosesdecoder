@@ -708,6 +708,8 @@ bool StaticData::LoadPhraseTables()
 					delete pd;
 					return false;
 				}
+
+				cerr << *pd << endl;
 				m_phraseDictionary.push_back(pd);
 			}
 			else 

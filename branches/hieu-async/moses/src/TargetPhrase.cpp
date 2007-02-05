@@ -133,6 +133,8 @@ TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
-  os << static_cast<const Phrase&>(tp) << ", pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
+  os	<< static_cast<const Phrase&>(tp) 
+			<< ", " << tp.GetAlignmentPair()
+			<< ", pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
   return os;
 }

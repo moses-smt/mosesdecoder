@@ -36,6 +36,8 @@ class PhraseDictionaryNode
 {
 	typedef std::map<Word, PhraseDictionaryNode> NodeMap;
 
+	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryNode&);
+
 	// only these classes are allowed to instantiate this class
 	friend class PhraseDictionaryMemory;
 	friend class std::map<Word, PhraseDictionaryNode>;

@@ -243,13 +243,7 @@ TO_STRING_BODY(PhraseDictionaryMemory);
 // friend
 ostream& operator<<(ostream& out, const PhraseDictionaryMemory& phraseDict)
 {
-	const PhraseDictionaryNode &coll = phraseDict.m_collection;
-	PhraseDictionaryNode::const_iterator iter;	
-	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
-	{
-		const Word &word = (*iter).first;
-		out << word;
-	}
+	out << phraseDict.m_collection;
 	return out;
 }
 

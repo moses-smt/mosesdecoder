@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "PhraseDictionaryMemory.h"
 
+using namespace std;
+
 PhraseDictionaryNode::~PhraseDictionaryNode()
 {
 	delete m_targetPhraseCollection;
@@ -86,3 +88,28 @@ void PhraseDictionaryNode::SetWeightTransModel(const PhraseDictionaryMemory *phr
 	}
 
 }
+
+ostream& operator<<(ostream &out, const PhraseDictionaryNode &node)
+{
+	const PhraseDictionaryNode::NodeMap &coll = node.m_map;
+	PhraseDictionaryNode::NodeMap::const_iterator iter;	
+	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
+	{
+		// output this node
+		const Word &word = iter->first;
+		const PhraseDictionaryNode &childNode = iter->second;
+
+		const TargetPhraseCollection *targetPhraseColl = childNode.GetTargetPhraseCollection();
+
+		out << "*** " << word << " ***";
+		if (targetPhraseColl == NULL)
+			out << " NO translations" << endl;
+		else
+			out << endl << *targetPhraseColl << endl;
+
+		// recursively output children
+		out << childNode << endl;
+	}
+	return out;
+}
+
