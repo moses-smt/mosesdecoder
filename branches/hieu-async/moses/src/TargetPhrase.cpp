@@ -156,10 +156,12 @@ void AddAlignmentElement(AlignmentPhraseInserter &inserter, const string &str, s
 
 void TargetPhrase::CreateAlignmentInfo(const string &inputStr, const string &outputStr, size_t sourceSize)
 {
-	AddAlignmentElement(m_alignmentPair.GetInserter(Input)
+	AlignmentPhraseInserter inputInserter = m_alignmentPair.GetInserter(Input)
+													,outputInserter = m_alignmentPair.GetInserter(Output);
+	AddAlignmentElement(inputInserter
 										, inputStr
 										, sourceSize);
-	AddAlignmentElement(m_alignmentPair.GetInserter(Output)
+	AddAlignmentElement(outputInserter
 										, outputStr
 										, GetSize());
 }
