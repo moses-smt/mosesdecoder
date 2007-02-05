@@ -46,6 +46,7 @@ Manager::Manager(InputType const& source, StaticData &staticData)
 ,m_possibleTranslations(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 {
+	TRACE_ERR("Translating: " << m_source << endl);
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
@@ -58,6 +59,7 @@ Manager::Manager(InputType const& source, StaticData &staticData)
 Manager::~Manager() 
 {
   delete m_possibleTranslations;
+	TRACE_ERR("Finished translating" << endl);
 }
 
 /**
