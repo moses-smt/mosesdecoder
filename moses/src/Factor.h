@@ -53,7 +53,6 @@ class Factor
 	friend class FactorCollection;
 
 protected:
-	static size_t			s_id;
 
 	FactorDirection		m_direction;
 	FactorType				m_factorType;
@@ -61,6 +60,8 @@ protected:
 	const size_t			m_id;
 
 	//! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
+	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, size_t id);
+	//! no id set. do not used to create new factors, only used for seeing if factor exists
 	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString);
 	
 public:
