@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-AlignmentPairInserter AlignmentPair::GetInserter(FactorDirection direction)
+AlignmentPhraseInserter AlignmentPair::GetInserter(FactorDirection direction)
 {
 	return (direction == Input) ? back_insert_iterator<AlignmentPhrase>(m_sourceAlign)
 															: back_insert_iterator<AlignmentPhrase>(m_targetAlign);

@@ -130,7 +130,7 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 }
 
 // helper function 
-void AddAlignmentElement(AlignmentPairInserter &inserter, const string &str, size_t phraseSize)
+void AddAlignmentElement(AlignmentPhraseInserter &inserter, const string &str, size_t phraseSize)
 {
 	// input
 	vector<string> alignPhraseVector;

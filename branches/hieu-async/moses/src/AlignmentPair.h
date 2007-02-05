@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "AlignmentPhrase.h"
 
-typedef std::back_insert_iterator<AlignmentPhrase> AlignmentPairInserter;
+typedef std::back_insert_iterator<AlignmentPhrase> AlignmentPhraseInserter;
 
 /** represent the alignment info between source and target phrase */
 class AlignmentPair
@@ -44,7 +44,7 @@ public:
 	/** get the back_insert_iterator to the source or target alignment vector so that
 		*	they could be populated
 		*/
-	AlignmentPairInserter GetInserter(FactorDirection direction);
+	AlignmentPhraseInserter GetInserter(FactorDirection direction);
 	const AlignmentPhrase &GetPhraseAlignVec(FactorDirection direction) const
 	{
 		return (direction == Input) ? m_sourceAlign : m_targetAlign;
