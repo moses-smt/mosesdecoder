@@ -25,10 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <set>
 #include "Hypothesis.h"
 
-#ifdef __GNUG__
-#include <ext/hash_set>
-#endif
-
 /** defines less-than relation on hypotheses.
 * The particular order is not important for us, we need just to figure out
 * which hypothesis are equal based on:
@@ -57,34 +53,11 @@ public:
 	}
 };
 
-//! Comparison for hash_set algorithm. Not currently used
-struct HypothesisRecombinationComparer
-{
-	//! returns true if hypoA can be recombined with hypoB
-	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
-	{
-		if (hypoA->NGramCompare(*hypoB) != 0) return false;
-		return (hypoA->GetWordsBitmap().Compare(hypoB->GetWordsBitmap()) == 0);
-	}
-};
-
-//struct HypothesisRecombinationHasher
-//{
-//  size_t operator()(const Hypothesis* hypo) const {
-//    return hypo->hash();
-//  }
-//};
-
 /** Stack for instances of Hypothesis, includes functions for pruning. */ 
 class HypothesisCollection 
 {
 private:
-#if 0
-//#ifdef __GNUG__
-	typedef __gnu_cxx::hash_set< Hypothesis*, HypothesisRecombinationHasher, HypothesisRecombinationComparer > _HCType;
-#else
 	typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
-#endif
 public:
 	typedef _HCType::iterator iterator;
 	typedef _HCType::const_iterator const_iterator;
@@ -98,8 +71,10 @@ protected:
 	_HCType m_hypos; /**< contains hypotheses */
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
-	//! add hypothesis to stack. Prune if necessary
-	void Add(Hypothesis *hypothesis);
+	/** add hypothesis to stack. Prune if necessary. 
+	 * Returns false if equiv hypo exists in collection, otherwise returns true
+	 */
+	std::pair<HypothesisCollection::iterator, bool> Add(Hypothesis *hypothesis);
 
 	//! remove hypothesis pointed to by iterator but don't delete the object
 	inline void Detach(const HypothesisCollection::iterator &iter)
@@ -114,12 +89,6 @@ protected:
 		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
 		pool.freeObject(*iter);
 		Detach(iter);
-	}
-	/** add Hypothesis to the collection, without pruning */
-	inline void AddNoPrune(Hypothesis *hypothesis)
-	{
-		// must always insert
-		assert(m_hypos.insert(hypothesis).second);
 	}
 
 public:
