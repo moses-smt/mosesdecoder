@@ -266,18 +266,18 @@ int Hypothesis::CompareUnsyncFactors(const Hypothesis &compare) const
 {
 	const Phrase &phraseThis		= GetTargetPhrase()
 							,&phraseCompare = compare.GetTargetPhrase();
-
+/*
 	if (phraseThis.GetSize() != phraseCompare.GetSize())
 	{ // need to do this otherwise n-best list generation get ugly
 		return phraseThis.GetSize() < phraseCompare.GetSize();
 	}
-
+*/
 	size_t	maxGap = 0;
 
 	// find starting pos
 	for (FactorType factorType = 0 ; factorType < StaticData::Instance().GetMaxNumFactors(Output) ; ++factorType)
 	{
-		size_t gapThis		= phraseThis.GetSize()					- phraseThis.FindFirstGap(factorType)
+		size_t gapThis		= phraseThis.GetSize()		- phraseThis.FindFirstGap(factorType)
 					,gapCompare	= phraseCompare.GetSize() - phraseCompare.FindFirstGap(factorType);
 		
 		// both hypo must have the same number of factors missing

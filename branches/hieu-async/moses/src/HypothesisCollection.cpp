@@ -45,10 +45,13 @@ void HypothesisCollection::RemoveAll()
 	}
 }
 
-/** add a hypothesis to the collection, prune if necessary */
-void HypothesisCollection::Add(Hypothesis *hypo)
+bool HypothesisCollection::Add(Hypothesis *hypo)
 {
-	AddNoPrune(hypo);
+	if (!m_hypos.insert(hypo).second) 
+	{ // equiv hypo exists
+		return false;
+	}
+
 	VERBOSE(3,"added hypo to stack");
 
 	// Update best score, if this hypothesis is new best
@@ -70,6 +73,8 @@ void HypothesisCollection::Add(Hypothesis *hypo)
 	else {
 	  VERBOSE(3,std::endl);
 	}
+	
+	return true;
 }
 
 void HypothesisCollection::AddPrune(Hypothesis *hypo)
@@ -82,39 +87,52 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 		return;
 	}
 
-	// over threshold		
-	// recombine if ngram-equivalent to another hypo
-	iterator iter = m_hypos.find(hypo);
-	if (iter == m_hypos.end())
-	{ // nothing found. add to collection
-		Add(hypo);
+	// over threshold, try to add to collection
+	if (Add(hypo))
+	{
 		return;
   }
 
-	StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iter);
+	// equiv hypo exists, recombine with other hypo
+	iterator iterExisting = m_hypos.find(hypo);
+	Hypothesis *hypoExisting = *iterExisting;
+	assert(iterExisting != m_hypos.end());
 	
-	// found existing hypo with same target ending.
-	// keep the best 1
-	Hypothesis *hypoExisting = *iter;
-
+	StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, *hypoExisting);
+	
+	// found existing hypo with same target ending. keep the best 1
 	if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
 	{ // incoming hypo is better than the one we have
 		VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
-		if (m_nBestIsEnabled) {
+		
+		if (m_nBestIsEnabled) 
+		{
 			hypo->AddArc(hypoExisting);
-			Detach(iter);
-		} else {
-			Remove(iter);
+			Detach(iterExisting);
 		}
-		Add(hypo);		
+		else 
+		{
+			Remove(iterExisting);
+		}
+						
+		bool added = Add(hypo);		
+		if (!added)
+		{
+			iterExisting = m_hypos.find(hypo);
+			TRACE_ERR("Offending hypo = " << **iterExisting << endl);
+			assert(false);
+		}
 		return;
 	}
 	else
 	{ // already storing the best hypo. discard current hypo 
 	  VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
-		if (m_nBestIsEnabled) {
-			(*iter)->AddArc(hypo);
-		} else {
+		if (m_nBestIsEnabled) 
+		{
+			hypoExisting->AddArc(hypo);
+		} 
+		else 
+		{
 			FREEHYPO(hypo);				
 		}
 		return;

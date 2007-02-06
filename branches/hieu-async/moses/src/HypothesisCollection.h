@@ -44,22 +44,24 @@ public:
 			return (ret < 0);
 
 		// compare source words translated
-		const WordsBitmap &bitmapA		= hypoA->GetSourceBitmap()
-			, &bitmapB	= hypoB->GetSourceBitmap();
+		const WordsBitmap &bitmapA	= hypoA->GetSourceBitmap()
+										, &bitmapB	= hypoB->GetSourceBitmap();
 		ret = bitmapA.Compare(bitmapB);
 		if (ret != 0)
 			return (ret < 0);
 
-		// compare source range just translated
+		// compare source range just translated. Affects re-ordering
 		ret = hypoA->CompareCurrSourceRange(*hypoB);
 		if (ret != 0)
 			return (ret < 0);
-
-		// make sure generation steps will be equal going fwd
+		
+		/* make sure all factors which don't have factors in another factor type are identical. 
+		 * Affect how future  hypos can be combined. Got that ?!
+		*/
 		ret = hypoA->CompareUnsyncFactors(*hypoB);
 		if (ret != 0)
 			return (ret < 0);
-
+		
 		return false;
 	}
 };
@@ -82,8 +84,8 @@ protected:
 	_HCType m_hypos; /**< contains hypotheses */
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
-	//! add hypothesis to stack. Prune if necessary
-	void Add(Hypothesis *hypothesis);
+	//! add hypothesis to stack. Prune if necessary. Returns false if equiv hypo exists in collection, otherwise returns true
+	bool Add(Hypothesis *hypothesis);
 
 	//! remove hypothesis pointed to by iterator but don't delete the object
 	inline void Detach(const HypothesisCollection::iterator &iter)
@@ -97,13 +99,6 @@ protected:
 	{
 		FREEHYPO(*iter);
 		Detach(iter);
-	}
-	/** add Hypothesis to the collection, without pruning */
-	inline void AddNoPrune(Hypothesis *hypo)
-	{
-		if (!m_hypos.insert(hypo).second) {
-			FREEHYPO(hypo);
-    }
 	}
 
 public:
