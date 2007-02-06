@@ -45,31 +45,35 @@ void HypothesisCollection::RemoveAll()
 	}
 }
 
-/** add a hypothesis to the collection, prune if necessary */
-void HypothesisCollection::Add(Hypothesis *hypo)
+pair<HypothesisCollection::iterator, bool> HypothesisCollection::Add(Hypothesis *hypo)
 {
-	AddNoPrune(hypo);
-	VERBOSE(3,"added hyp to stack");
-
-	// Update best score, if this hypothesis is new best
-	if (hypo->GetTotalScore() > m_bestScore)
-	{
-		VERBOSE(3,", best on stack");
-		m_bestScore = hypo->GetTotalScore();
-		// this may also affect the worst score
-        if ( m_bestScore + m_beamThreshold > m_worstScore )
-          m_worstScore = m_bestScore + m_beamThreshold;
-	}
-
-    // Prune only if stack is twice as big as needed (lazy pruning)
-	VERBOSE(3,", now size " << m_hypos.size());
-	if (m_hypos.size() > 2*m_maxHypoStackSize-1)
-	{
-		PruneToSize(m_maxHypoStackSize);
-	}
-	else {
-	  VERBOSE(3,std::endl);
-	}
+	std::pair<iterator, bool> ret = m_hypos.insert(hypo);
+	if (ret.second) 
+	{ // equiv hypo doesn't exists
+		VERBOSE(3,"added hyp to stack");
+	
+		// Update best score, if this hypothesis is new best
+		if (hypo->GetTotalScore() > m_bestScore)
+		{
+			VERBOSE(3,", best on stack");
+			m_bestScore = hypo->GetTotalScore();
+			// this may also affect the worst score
+	        if ( m_bestScore + m_beamThreshold > m_worstScore )
+	          m_worstScore = m_bestScore + m_beamThreshold;
+		}
+	
+	    // Prune only if stack is twice as big as needed (lazy pruning)
+		VERBOSE(3,", now size " << m_hypos.size());
+		if (m_hypos.size() > 2*m_maxHypoStackSize-1)
+		{
+			PruneToSize(m_maxHypoStackSize);
+		}
+		else {
+		  VERBOSE(3,std::endl);
+		}
+	}	
+	
+	return ret;
 }
 
 void HypothesisCollection::AddPrune(Hypothesis *hypo)
@@ -83,37 +87,46 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 		return;
 	}
 
-	// over threshold		
-	// recombine if ngram-equivalent to another hypo
-	iterator iter = m_hypos.find(hypo);
-	if (iter == m_hypos.end())
+	// over threshold, try to add to collection
+	std::pair<iterator, bool> addRet = Add(hypo); 
+	if (addRet.second)
 	{ // nothing found. add to collection
-		Add(hypo);
 		return;
   }
 
-	StaticData::Instance()->GetSentenceStats().AddRecombination(*hypo, **iter);
+	// equiv hypo exists, recombine with other hypo
+	iterator &iterExisting = addRet.first;
+	Hypothesis *hypoExisting = *iterExisting;
+	assert(iterExisting != m_hypos.end());
+
+	StaticData::Instance()->GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 	
 	// found existing hypo with same target ending.
 	// keep the best 1
-	Hypothesis *hypoExisting = *iter;
 	if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
 	{ // incoming hypo is better than the one we have
 		VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
 		if (m_nBestIsEnabled) {
 			hypo->AddArc(hypoExisting);
-			Detach(iter);
+			Detach(iterExisting);
 		} else {
-			Remove(iter);
+			Remove(iterExisting);
 		}
-		Add(hypo);		
+
+		bool added = Add(hypo).second;		
+		if (!added)
+		{
+			iterExisting = m_hypos.find(hypo);
+			TRACE_ERR("Offending hypo = " << **iterExisting << endl);
+			assert(false);
+		}
 		return;
 	}
 	else
 	{ // already storing the best hypo. discard current hypo 
 	  VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
 		if (m_nBestIsEnabled) {
-			(*iter)->AddArc(hypo);
+			hypoExisting->AddArc(hypo);
 		} else {
 			ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
 			pool.freeObject(hypo);				
