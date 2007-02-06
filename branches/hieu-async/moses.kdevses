@@ -1,10 +1,21 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="0" />
+ <DocsAndViews NumberOfDocuments="2" >
+  <Doc0 NumberOfViews="1" URL="file:///amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/moses/src/HypothesisCollection.cpp" >
+   <View0 line="97" Type="Source" />
+  </Doc0>
+  <Doc1 NumberOfViews="1" URL="file:///amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/moses/src/HypothesisCollection.h" >
+   <View0 line="87" Type="Source" />
+  </Doc1>
+ </DocsAndViews>
  <pluginList>
   <kdevdebugger>
-   <breakpointList/>
+   <breakpointList>
+    <breakpoint0 location="/amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/moses/src/HypothesisCollection.cpp:62" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
+     <tracedExpressions/>
+    </breakpoint0>
+   </breakpointList>
   </kdevdebugger>
   <kdevbookmarks>
    <bookmarks>

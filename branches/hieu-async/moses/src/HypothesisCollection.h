@@ -85,7 +85,7 @@ protected:
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
 	//! add hypothesis to stack. Prune if necessary. Returns false if equiv hypo exists in collection, otherwise returns true
-	bool Add(Hypothesis *hypothesis);
+	std::pair<HypothesisCollection::iterator, bool> Add(Hypothesis *hypothesis);
 
 	//! remove hypothesis pointed to by iterator but don't delete the object
 	inline void Detach(const HypothesisCollection::iterator &iter)

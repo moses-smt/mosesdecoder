@@ -45,36 +45,35 @@ void HypothesisCollection::RemoveAll()
 	}
 }
 
-bool HypothesisCollection::Add(Hypothesis *hypo)
+pair<HypothesisCollection::iterator, bool> HypothesisCollection::Add(Hypothesis *hypo)
 {
-	if (!m_hypos.insert(hypo).second) 
-	{ // equiv hypo exists
-		return false;
-	}
-
-	VERBOSE(3,"added hypo to stack");
-
-	// Update best score, if this hypothesis is new best
-	if (hypo->GetTotalScore() > m_bestScore)
+	std::pair<iterator, bool> ret = m_hypos.insert(hypo);
+	if (ret.second) 
 	{
-		VERBOSE(3,", best on stack");
-		m_bestScore = hypo->GetTotalScore();
-		// this may also affect the worst score
-        if ( m_bestScore + m_beamThreshold > m_worstScore )
-          m_worstScore = m_bestScore + m_beamThreshold;
-	}
-
-    // Prune only if stack is twice as big as needed (lazy pruning)
-	VERBOSE(3,", now size " << m_hypos.size());
-	if (m_hypos.size() > 2*m_maxHypoStackSize-1)
-	{
-		PruneToSize(m_maxHypoStackSize);
-	}
-	else {
-	  VERBOSE(3,std::endl);
+		VERBOSE(3,"added hypo to stack");
+	
+		// Update best score, if this hypothesis is new best
+		if (hypo->GetTotalScore() > m_bestScore)
+		{
+			VERBOSE(3,", best on stack");
+			m_bestScore = hypo->GetTotalScore();
+			// this may also affect the worst score
+					if ( m_bestScore + m_beamThreshold > m_worstScore )
+						m_worstScore = m_bestScore + m_beamThreshold;
+		}
+	
+			// Prune only if stack is twice as big as needed (lazy pruning)
+		VERBOSE(3,", now size " << m_hypos.size());
+		if (m_hypos.size() > 2*m_maxHypoStackSize-1)
+		{
+			PruneToSize(m_maxHypoStackSize);
+		}
+		else {
+			VERBOSE(3,std::endl);
+		}
 	}
 	
-	return true;
+	return ret;
 }
 
 void HypothesisCollection::AddPrune(Hypothesis *hypo)
@@ -88,13 +87,14 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	}
 
 	// over threshold, try to add to collection
-	if (Add(hypo))
+	std::pair<iterator, bool> addRet = Add(hypo); 
+	if (addRet.second)
 	{
 		return;
   }
 
 	// equiv hypo exists, recombine with other hypo
-	iterator iterExisting = m_hypos.find(hypo);
+	iterator &iterExisting = addRet.first;
 	Hypothesis *hypoExisting = *iterExisting;
 	assert(iterExisting != m_hypos.end());
 	
@@ -115,7 +115,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 			Remove(iterExisting);
 		}
 						
-		bool added = Add(hypo);		
+		bool added = Add(hypo).second;		
 		if (!added)
 		{
 			iterExisting = m_hypos.find(hypo);
