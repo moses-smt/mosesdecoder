@@ -494,6 +494,9 @@ bool StaticData::LoadGenerationTables()
 				numFeatures = Scan<size_t>(token[2]);
 				filePath = token[3];
 			}
+			if (!FileExists(filePath) && FileExists(filePath + ".gz")) {
+				filePath = filePath + ".gz";
+			}
 			if (!FileExists(filePath))
 			{
 				stringstream strme;
