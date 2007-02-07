@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <iostream>
+#include <set>
 #include <vector>
 
 //! set of alignments of 1 word
@@ -29,13 +30,14 @@ class AlignmentElement
 	friend std::ostream& operator<<(std::ostream& out, const AlignmentElement &alignElement);
 
 protected:
-	std::vector<size_t> m_collection;
+	typedef std::set<size_t> ContainerType;
+	ContainerType m_collection;
 public:
 	AlignmentElement()
 	{}
 
 	//! inital constructor from parsed info from phrase table
-	AlignmentElement(const std::vector<size_t> &copy); 
+	AlignmentElement(const std::vector<size_t> &alignInfo); 
 	
 	//! number of words this element aligns to
 	size_t GetSize() const
@@ -43,20 +45,18 @@ public:
 		return m_collection.size();
 	}
 	
+	//! return internal collection of elements
+	const ContainerType &GetCollection() const
+	{
+		return m_collection;
+	}
+
 	/** compare all alignments for this word. 
 		*	Return true iff both words are aligned to the same words
 	*/
 	bool Equals(const AlignmentElement &compare) const
 	{
-		for (size_t idxThis = 0 ; idxThis < GetSize() ; ++idxThis)
-		{
-			for (size_t idxCompare = 0 ; idxCompare < compare.GetSize() ; ++idxCompare)
-			{
-				if (this->m_collection[idxThis] == compare.m_collection[idxCompare])
-					return true;
-			}
-		}
-		return false;
+		return m_collection == compare.GetCollection();
 	}
 	
 		/** used by the unknown word handler.
@@ -64,7 +64,7 @@ public:
 		*/
 	void SetIdentityAlignment()
 	{
-		m_collection.push_back(0);
+		m_collection.insert(0);
 	}
 
 	// shift alignment so that it is comparitable to another alignment. 

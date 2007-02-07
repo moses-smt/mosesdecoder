@@ -23,21 +23,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-AlignmentElement::AlignmentElement(const std::vector<size_t> &copy)
+AlignmentElement::AlignmentElement(const vector<size_t> &alignInfo)
 {
-	std::copy(copy.begin(), copy.end(), back_insert_iterator< std::vector<size_t> > (m_collection));
+	insert_iterator<ContainerType> insertIter( m_collection, m_collection.end() );
+	copy(alignInfo.begin(), alignInfo.end(), insertIter);
 }
 
 void AlignmentElement::Shift(int shift)
 {
-	for (size_t index = 0 ; index < GetSize() ; ++index)
-		m_collection[index] += shift;
+	ContainerType  newColl;
+
+	ContainerType::const_iterator iter;
+	for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter)
+		newColl.insert( *iter + shift);
+
+	m_collection = newColl;
 }
 
 std::ostream& operator<<(std::ostream& out, const AlignmentElement &alignElement)
 {
-	for (size_t index = 0 ; index < alignElement.GetSize() ; ++index)
-		out << alignElement.m_collection[index];
+	AlignmentElement::ContainerType::const_iterator iter;
+	for (iter = alignElement.GetCollection().begin() ; iter != alignElement.GetCollection().end() ; ++iter)
+		out << *iter;
 
 	return out;
 }
