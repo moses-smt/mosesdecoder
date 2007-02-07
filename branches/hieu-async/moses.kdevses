@@ -3,7 +3,7 @@
 <KDevPrjSession>
  <DocsAndViews NumberOfDocuments="2" >
   <Doc0 NumberOfViews="1" URL="file:///amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/moses/src/HypothesisCollection.cpp" >
-   <View0 line="97" Type="Source" />
+   <View0 Type="Source" />
   </Doc0>
   <Doc1 NumberOfViews="1" URL="file:///amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/moses/src/HypothesisCollection.h" >
    <View0 line="87" Type="Source" />
