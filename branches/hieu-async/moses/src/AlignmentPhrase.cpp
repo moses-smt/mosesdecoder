@@ -18,16 +18,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <algorithm>
 #include "AlignmentPhrase.h"
 #include "WordsRange.h"
 
 using namespace std;
-
-AlignmentElement::AlignmentElement(const std::vector<size_t> &copy)
-{
-	std::copy(copy.begin(), copy.end(), back_insert_iterator< AlignmentElement > (*this));
-}
 
 bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t startPosCompare) const 
 {
@@ -39,8 +33,7 @@ bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t startP
 		AlignmentElement alignCompare = compare[posCompare];
 
 		// shift alignment
-		for (size_t index = 0 ; index < alignCompare.size() ; ++index)
-			alignCompare[index] += startPosCompare;
+		alignCompare.Shift(startPosCompare);
 
 		if (!alignThis.Equals(alignCompare))
 			return false;
@@ -59,11 +52,10 @@ void AlignmentPhrase::Merge(const AlignmentPhrase &newAlignment, const WordsRang
 		if (pos >= this->size())
 		{
 			// shift alignment
-			AlignmentElement alignVec = newAlignment[index++];
-			for (size_t index = 0 ; index < alignVec.size() ; ++index)
-				alignVec[index] += newAlignmentRange.GetStartPos();
+			AlignmentElement alignElement = newAlignment[index++];
+			alignElement.Shift(newAlignmentRange.GetStartPos());
 
-			push_back(alignVec);
+			push_back(alignElement);
 		}
 	}
 }
@@ -72,11 +64,8 @@ std::ostream& operator<<(std::ostream& out, const AlignmentPhrase &alignmentPhra
 {
 	for (size_t pos = 0 ; pos < alignmentPhrase.size() ; ++pos)
 	{
-		const AlignmentElement &alignment = alignmentPhrase[pos];
-		out << "[";
-		for (size_t index = 0 ; index < alignment.size() ; ++index)
-			out << alignment[index];
-		out << "] ";
+		const AlignmentElement &alignElement = alignmentPhrase[pos];
+		out << "[" << alignElement << "] ";
 	}
 	return out;
 }

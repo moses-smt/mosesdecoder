@@ -54,7 +54,7 @@ public:
 	/** used by the unknown word handler.
 		* Set alignment to 0
 		*/
-	void SetAlignment();
+	void SetIdentityAlignment();
 
 	TO_STRING();
 };

@@ -20,35 +20,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
+#include <iostream>
 #include <vector>
+#include "AlignmentElement.h"
 
 class WordsRange;
 
-//! set of alignments of 1 word
-class AlignmentElement : public std::vector<size_t>
-{
-public:
-	AlignmentElement()
-	{}
-
-	AlignmentElement(const std::vector<size_t> &copy);
-	
-	/** compare all alignments for this word. 
-		*	Return true iff both words are aligned to the same words
-	*/
-	bool Equals(const AlignmentElement &compare) const
-	{
-		for (size_t idxThis = 0 ; idxThis < size() ; ++idxThis)
-		{
-			for (size_t idxCompare = 0 ; idxCompare < compare.size() ; ++idxCompare)
-			{
-				if ((*this)[idxThis] == compare[idxCompare])
-					return true;
-			}
-		}
-		return false;
-	}
-};
 
 //! alignments of each word in a phrase
 class AlignmentPhrase : public std::vector<AlignmentElement>

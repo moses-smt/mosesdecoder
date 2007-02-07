@@ -29,40 +29,22 @@ AlignmentPhraseInserter AlignmentPair::GetInserter(FactorDirection direction)
 															: back_insert_iterator<AlignmentPhrase>(m_targetAlign);
 }
 
-TO_STRING_BODY(AlignmentPair);
-
-void OutputPhraseAlignVec(std::ostream &out, const AlignmentPhrase &phraseAlignVec)
-{
-	
-	for (size_t pos = 0 ; pos < phraseAlignVec.size() ; ++pos)
-	{
-		const AlignmentElement &alignVec = phraseAlignVec[pos];
-		if (alignVec.size() > 0)
-		{
-			out << "[" << alignVec[0];
-			for (size_t index = 1 ; index < alignVec.size() ; ++index)
-			{
-				out << "," << alignVec[index];
-			}
-			out << "] ";
-		}
-	}
-	
-}
-
-void AlignmentPair::SetAlignment()
+void AlignmentPair::SetIdentityAlignment()
 {
 	AlignmentElement alignment;
-	alignment.push_back(0);
+	alignment.SetIdentityAlignment();
+	
 	m_sourceAlign.push_back(alignment);
 	m_targetAlign.push_back(alignment);
 }
 
+TO_STRING_BODY(AlignmentPair);
+
 std::ostream& operator<<(std::ostream &out, const AlignmentPair &alignmentPair)
 {
-	OutputPhraseAlignVec(out, alignmentPair.m_sourceAlign);
-	out << " to ";
-	OutputPhraseAlignVec(out, alignmentPair.m_targetAlign);
+	out << alignmentPair.m_sourceAlign
+			<< " to "
+			<< alignmentPair.m_targetAlign;
 	return out;
 }
 

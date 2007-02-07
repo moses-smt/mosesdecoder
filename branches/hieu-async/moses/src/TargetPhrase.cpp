@@ -32,8 +32,7 @@ using namespace std;
 
 TargetPhrase::TargetPhrase(FactorDirection direction)
 	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
-{
-}
+{}
 
 void TargetPhrase::SetScore()
 { // used when creating translations of unknown words:
@@ -43,7 +42,7 @@ void TargetPhrase::SetScore()
 
 void TargetPhrase::SetAlignment()
 {
-	m_alignmentPair.SetAlignment();
+	m_alignmentPair.SetIdentityAlignment();
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
