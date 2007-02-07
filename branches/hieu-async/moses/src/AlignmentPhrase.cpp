@@ -33,7 +33,7 @@ bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t startP
 		AlignmentElement alignCompare = compare[posCompare];
 
 		// shift alignment
-		alignCompare.Shift(startPosCompare);
+		alignCompare.Shift( (int)startPosCompare );
 
 		if (!alignThis.Equals(alignCompare))
 			return false;
@@ -53,7 +53,7 @@ void AlignmentPhrase::Merge(const AlignmentPhrase &newAlignment, const WordsRang
 		{
 			// shift alignment
 			AlignmentElement alignElement = newAlignment[index++];
-			alignElement.Shift(newAlignmentRange.GetStartPos());
+			alignElement.Shift( (int)newAlignmentRange.GetStartPos() );
 
 			push_back(alignElement);
 		}

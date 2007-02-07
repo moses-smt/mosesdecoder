@@ -472,6 +472,14 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\src\AlignmentElement.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlignmentElement.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\AlignmentPair.h"
 				>
 			</File>
