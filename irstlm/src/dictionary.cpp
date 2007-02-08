@@ -232,10 +232,13 @@ void dictionary::save(std::ostream& out){
 int cmpdictentry(const void *a,const void *b){
   dict_entry *ae=(dict_entry *)a;
   dict_entry *be=(dict_entry *)b;
-  return be->freq-ae->freq;
+  if (be->freq-ae->freq)
+		return be->freq-ae->freq;
+	else
+		return strcmp(ae->word,be->word);
 }
 
-dictionary::dictionary(dictionary* d){
+dictionary::dictionary(dictionary* d, int sortflag){
   
   //transfer values
   
@@ -260,11 +263,13 @@ dictionary::dictionary(dictionary* d){
     tb[i].word=st->push(d->tb[i].word);
   }
   
-  //sort all entries according to frequency
-  cerr << "sorting dictionary ...";
-  qsort(tb,n,sizeof(dict_entry),cmpdictentry);
-  cerr << "done\n";
-
+	if (sortflag){
+		//sort all entries according to frequency
+		cerr << "sorting dictionary ...";
+		qsort(tb,n,sizeof(dict_entry),cmpdictentry);
+		cerr << "done\n";
+	}
+	
   for (int i=0;i<n;i++){
   
     //eventually re-assign oov code
@@ -338,7 +343,7 @@ void dictionary::save(char *filename,int freqflag){
       out << " " << tb[i].freq;
     out << "\n";
   }
-
+	
   out.close();
 }
 

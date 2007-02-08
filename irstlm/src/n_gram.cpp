@@ -179,9 +179,8 @@ ofstream& operator<< (ofstream& fo,ngram& ng){
   assert(ng.dict != NULL);
 
   for (int i=ng.size;i>0;i--)
-    fo << ng.dict->decode(ng.word[MAX_NGRAM-i]) << " ";
-  //fo << "[size " << ng.size << " freq " << ng.freq << "]"; 
-  fo << ng.freq; 
+    fo << ng.dict->decode(ng.word[MAX_NGRAM-i]) << (i>1?" ":"");
+  fo << "\t" << ng.freq; 
   return fo;
 }
 
@@ -190,10 +189,9 @@ ostream& operator<< (ostream& fo,ngram& ng){
   assert(ng.dict != NULL);
 
   for (int i=ng.size;i>0;i--)
-    fo << ng.dict->decode(ng.word[MAX_NGRAM-i]) << " ";
-  //fo << "[size " << ng.size << " freq " << ng.freq << "]"; 
-  fo << ng.freq; 
-
+    fo << ng.dict->decode(ng.word[MAX_NGRAM-i]) << (i>1?" ":"");
+  fo << "\t" << ng.freq; 
+ 
   return fo;
 }
 

@@ -57,6 +57,9 @@ void ngramcache::reset(int n){
     entries=0;
   }
 
+
+
+
 char* ngramcache::get(const int* ngp,char* info){       
     char *found;
    // cout << "ngramcache::get() ";

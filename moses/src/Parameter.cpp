@@ -242,9 +242,6 @@ bool Parameter::Validate()
 			ext.push_back(".binphr.idx");
 			noErrorFlag = FilesExist("ttable-file", 3,ext);
 		}
-	// generation tables
-	//	if (noErrorFlag)
-	//		noErrorFlag = FilesExist("generation-file", 2);
 	// language model
 	if (noErrorFlag)
 		noErrorFlag = FilesExist("lmodel-file", 3);
@@ -253,6 +250,12 @@ bool Parameter::Validate()
 	{
 		noErrorFlag = FileExists(m_setting["input-file"][0]);
 	}
+
+	// checks on non-mandatory tables:
+	if (noErrorFlag && m_setting["generation-file"].size())
+	  noErrorFlag = FilesExist("generation-file", 3);
+	if (noErrorFlag && m_setting["distortion-file"].size())
+	  noErrorFlag = FilesExist("distortion-file", 3);
 
 	return noErrorFlag;
 }

@@ -1,3 +1,4 @@
+
 /******************************************************************************
  IrstLM: IRST Language Model Toolkit 
  Copyright (C) 2006 Marcello Federico, ITC-irst Trento, Italy

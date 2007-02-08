@@ -54,7 +54,7 @@
 typedef struct{
   char *word;
   int  code;
-  int  freq;
+  long long  freq;
 }dict_entry;
 
 class strstack;
@@ -65,7 +65,7 @@ class dictionary{
   dict_entry *tb;  //!< entry table
   htable    *htb;  //!< hash table
   int          n;  //!< number of entries
-  int          N;  //!< total frequency
+  long long    N;  //!< total frequency
   int        lim;  //!< limit of entries
   int   oov_code;  //!< code assigned to oov words
   char*       is;  //!< interruption symbol list
@@ -132,14 +132,14 @@ class dictionary{
   }
 
 
-  inline int incfreq(int code,int value){N+=value;return tb[code].freq+=value;}
+  inline long long incfreq(int code,long long value){N+=value;return tb[code].freq+=value;}
 
-  inline int multfreq(int code,double value){
-    N+=(int)(value * tb[code].freq)-tb[code].freq;
-    return tb[code].freq=(int)(value * tb[code].freq);
+  inline long long multfreq(int code,double value){
+    N+=(long long)(value * tb[code].freq)-tb[code].freq;
+    return tb[code].freq=(long long)(value * tb[code].freq);
   }
   
-  inline int freq(int code,int value=-1){
+  inline long freq(int code,long long value=-1){
     if (value>=0){
       N+=value-tb[code].freq; 
       tb[code].freq=value;
@@ -147,12 +147,12 @@ class dictionary{
     return tb[code].freq;
   }
 
-  inline int totfreq(){return N;}
+  inline long long totfreq(){return N;}
 
   void grow();
   //dictionary(int size=400,char* isym=NULL,char* oovlex=NULL);
   dictionary(char *filename=NULL,int size=DICT_INITSIZE,char* isymb=NULL,char* oovlex=NULL);
-  dictionary(dictionary* d);
+  dictionary(dictionary* d, int sortflag=1); //flag for sorting wrt to frequency (default=1, i.e. sort)
 
   ~dictionary();
   void generate(char *filename);
