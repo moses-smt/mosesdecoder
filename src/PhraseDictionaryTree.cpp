@@ -367,8 +367,12 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 			
 			while(is>>w && w!="|||") f.push_back(imp->sv.add(w));
 			while(is>>w && w!="|||") e.push_back(imp->tv.add(w));
-			while(is>>w && w!="|||") sc.push_back(atof(w.c_str()));
-			
+			//			while(is>>w && w!="|||") sc.push_back(atof(w.c_str()));
+			// Mauro: to handle 0 probs in phrase tables
+			while(is>>w && w!="|||") {
+			  float tmp = (float)atof(w.c_str());
+			  sc.push_back(((tmp>0.0)?tmp:(float)1.0e-38));
+			}
 
 			if(f.empty()) 
 				{

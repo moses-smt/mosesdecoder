@@ -68,19 +68,22 @@ bool LanguageModelIRST::Load(const std::string &filePath
   m_lmtb->load(inp); //don't use memory map
 #else
   if (filePath.compare(filePath.size()-3,3,".mm")==0)
-    m_lmtb->load(inp,filePath.c_str(),1);
+    m_lmtb->load(inp,filePath.c_str(),NULL,1);
   else 
-    m_lmtb->load(inp,filePath.c_str(),0);
+    m_lmtb->load(inp,filePath.c_str(),NULL,0);
 #endif  
   
   m_lmtb_ng=new ngram(m_lmtb->dict);
   m_lmtb_size=m_lmtb->maxlevel();
   
 	// LM can be ok, just outputs warnings
-	CreateFactors(factorCollection);
+
+  // Mauro: in the original, the following two instructions are wrongly switched:
   m_unknownId = m_lmtb->dict->oovcode();
+  CreateFactors(factorCollection);
+
   TRACE_ERR( "IRST: m_unknownId=" << m_unknownId << std::endl);
-  
+
   //install caches
   m_lmtb->init_probcache();
   m_lmtb->init_statecache();
@@ -134,7 +137,7 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 
 int LanguageModelIRST::GetLmID( const std::string &str ) const
 {
-    return m_lmtb->dict->encode( str.c_str() );
+  return m_lmtb->dict->encode( str.c_str() );
 }
 
 float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const
@@ -149,12 +152,12 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 	m_lmtb_ng->size=0;
 	if (count< (size_t)(m_lmtb_size-1)) m_lmtb_ng->pushc(m_lmtb_sentenceEnd);
 	if (count< (size_t)m_lmtb_size) m_lmtb_ng->pushc(m_lmtb_sentenceStart);  
-  
+
 	for (size_t i = 0 ; i < count ; i++)
 	{
 
-		int lmId = GetLmID((*contextFactor[i])[factorType]);
-		m_lmtb_ng->pushc(lmId);
+	  int lmId = GetLmID((*contextFactor[i])[factorType]);
+	  m_lmtb_ng->pushc(lmId);
 	}
   
 	if (finalState){        
