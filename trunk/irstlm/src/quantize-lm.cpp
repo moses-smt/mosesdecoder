@@ -81,7 +81,8 @@ void usage(const char *msg = 0) {
     << "  that the IRST LMtoolkit can compile. Accepts LMs with .gz suffix." << std::endl
     << "  You can specify the output file to be created and also the pathname " << std::endl
     << "  of a temporary file used by the program. As default, the temporary "  << std::endl 
-    << "  file is created in the /tmp directory."  << std::endl;
+    << "  file is created in the /tmp directory. Output file can be " << std::endl
+    << "  written to standard output by using the special name -. "  << std::endl;
   }
 
 
@@ -104,7 +105,8 @@ int main(int argc, const char **argv)
   std::string outfile="";
   std::string tmpfile="";
   
-  if (files.size() == 1) {  
+  if (files.size() == 1){
+  
     outfile=infile;
     
     //remove path information
@@ -135,7 +137,7 @@ int main(int argc, const char **argv)
     dummy.close();        
   }
   
-  std::cout << "Reading " << infile << "..." << std::endl;
+  std::cerr << "Reading " << infile << "..." << std::endl;
   
   inputfilestream inp(infile.c_str());
   if (!inp.good()) {
@@ -143,13 +145,21 @@ int main(int argc, const char **argv)
     exit(1);
   }  
   
-  std::ofstream out(outfile.c_str());
-  std::cout << "Writing " << outfile << "..." << std::endl;
+  
+  std::ofstream* out;
+  if (outfile == "-")
+    out = (ofstream *)&std::cout;
+  else{
+    out=new std::ofstream;
+    out->open(outfile.c_str());
+  }
+  
+  std::cerr << "Writing " << outfile << "..." << std::endl;
   
   //prepare temporary file to save n-gram blocks for multiple reads 
   //this avoids using seeks which do not work with inputfilestream
   //it's odd but i need a bidirectional filestream!  
-  std::cout << "Using temporary file " << tmpfile << std::endl;  
+  std::cerr << "Using temporary file " << tmpfile << std::endl;  
   fstream filebuff(tmpfile.c_str(),ios::out|ios::in|ios::binary);
   
   unsigned int nPts = 0;  // actual number of points
@@ -197,17 +207,17 @@ int main(int argc, const char **argv)
       
       // print output header:
       if (Order == 1) {
-        out << "qARPA " << MaxOrder;
+        *out << "qARPA " << MaxOrder;
         for (int i=1;i<=MaxOrder;i++) 
-          out << " " << centers[i];
-        out << "\n\n\\data\\\n";
+          *out << " " << centers[i];
+        *out << "\n\n\\data\\\n";
         
         for (int i=1;i<=MaxOrder;i++) 
-          out << "ngram " << i << "= " << numNgrams[i] << "\n";
+          *out << "ngram " << i << "= " << numNgrams[i] << "\n";
       }
       
-      out << "\n";
-      out << line << "\n";
+      *out << "\n";
+      *out << line << "\n";
       cerr << "-- Start processing of " << Order << "-grams\n";
       assert(Order <= MAXLEV);
       
@@ -280,11 +290,11 @@ int main(int argc, const char **argv)
       }
       
       
-      out << centers[Order] << "\n";
+      *out << centers[Order] << "\n";
       for (int c=0;c<centers[Order];c++){
-        out << centersP[c]; 
-        if (Order<MaxOrder) out << " " << centersB[c];
-        out << "\n";
+        *out << centersP[c]; 
+        if (Order<MaxOrder) *out << " " << centersB[c];
+        *out << "\n";
       }
       
       filebuff.seekg(0);
@@ -295,13 +305,13 @@ int main(int argc, const char **argv)
         
         parseWords(line, words, Order + 3);
         
-        out << mapP[nPts];
+        *out << mapP[nPts];
         
-        for (int i=1;i<=Order;i++) out << "\t" << words[i];
+        for (int i=1;i<=Order;i++) *out << "\t" << words[i];
         
-        if (Order < MaxOrder) out << "\t" << mapB[nPts];
+        if (Order < MaxOrder) *out << "\t" << mapB[nPts];
         
-        out << "\n";
+        *out << "\n";
         
       }
       
@@ -320,12 +330,12 @@ int main(int argc, const char **argv)
     
   }
   
-  out << "\\end\\\n";
+  *out << "\\end\\\n";
   cerr << "---- done\n";
   
-  out.flush();
+  out->flush();
   
-  out.close();
+  out->close();
   inp.close();
   
   removefile(tmpfile.c_str());
@@ -356,7 +366,7 @@ int ComputeCluster(int centers,double* ctrs,unsigned int N,DataItem* bintable){
   unsigned int* population=new unsigned int[centers];    
   unsigned int* species=new unsigned int[centers];    
   
-  //cout << " Different entries=" << different 
+  //cerr << " Different entries=" << different 
   //     << " Total Entries=" << N << " Bin Size=" << interval << "\n";
   
   for (int i=0;i<centers;i++){
@@ -410,7 +420,7 @@ int ComputeCluster(int centers,double* ctrs,unsigned int N,DataItem* bintable){
         ctrs[i]=-99;
       }
       
-      cout << i << " ctr " << ctrs[i] << " population " << population[i] << " species " << species[i] <<"\n";
+      cerr << i << " ctr " << ctrs[i] << " population " << population[i] << " species " << species[i] <<"\n";
     }
     
     cout.flush();
