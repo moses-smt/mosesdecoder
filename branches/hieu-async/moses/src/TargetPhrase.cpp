@@ -134,17 +134,18 @@ void AddAlignmentElement(AlignmentPhraseInserter &inserter, const string &str, s
 	// input
 	vector<string> alignPhraseVector;
 	alignPhraseVector = Tokenize(str);
-	// "0 3 1,2"
+	// "(0) (3) (1,2)"
 	//		to
-	// "0" "3" "1,2"
+	// "(0)" "(3)" "(1,2)"
 	assert (alignPhraseVector.size() == phraseSize) ;
 
-	size_t inputSize = alignPhraseVector.size();
+	const size_t inputSize = alignPhraseVector.size();
 	for (size_t pos = 0 ; pos < inputSize ; ++pos)
 	{
-		const string &alignElementStr = alignPhraseVector[pos];
+		string alignElementStr = alignPhraseVector[pos];
+		alignElementStr = alignElementStr.substr(1, alignElementStr.size() - 2);
 		AlignmentElement alignElement = Tokenize<size_t>(alignElementStr, ",");
-		// "1,2"
+		// "(1,2)"
 		//  to
 		// [1] [2]
 
@@ -157,6 +158,7 @@ void TargetPhrase::CreateAlignmentInfo(const string &inputStr, const string &out
 {
 	AlignmentPhraseInserter inputInserter = m_alignmentPair.GetInserter(Input)
 													,outputInserter = m_alignmentPair.GetInserter(Output);
+	//cerr << *this << " ::: " << outputStr << " ::: " << inputStr << endl;
 	AddAlignmentElement(inputInserter
 										, inputStr
 										, sourceSize);
