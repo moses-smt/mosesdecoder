@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)\src&quot;;&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\srilm\src&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;LM_IRST;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)\$(ConfigurationName)\irstlm.lib&quot; zlib.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)\$(ConfigurationName)\moses.lib&quot; zlib.lib"
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -119,7 +119,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)\src&quot;;&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\srilm\src&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;LM_IRST;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

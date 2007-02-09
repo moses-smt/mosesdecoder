@@ -502,3 +502,11 @@ std::string Hypothesis::GetTargetPhraseStringRep() const
 	}
 	return GetTargetPhraseStringRep(allFactors);
 }
+
+#include "BleuLoss.h"
+
+void Hypothesis::CalLossScore(const std::list<Phrase> &refList)
+{
+	BleuLoss loss;
+	loss.getScore(*refList.begin(), GetTargetPhrase());
+}

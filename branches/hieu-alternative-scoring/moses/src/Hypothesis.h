@@ -253,6 +253,8 @@ public:
 	{
 		return s_HypothesesCreated;
 	}
+
+	void CalLossScore(const std::list<Phrase> &refList);
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

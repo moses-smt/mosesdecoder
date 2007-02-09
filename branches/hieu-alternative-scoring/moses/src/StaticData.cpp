@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "UserMessage.h"
+#include "InputFileStream.h"
 
 using namespace std;
 
@@ -208,7 +209,32 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
 	if (!LoadMapping()) return false;
+	if (!LoadReferenceTrans()) return false;
 
+	return true;
+}
+
+bool StaticData::LoadReferenceTrans()
+{
+	if (m_parameter->GetParam("reference").size() > 0)
+	{
+		assert(m_parameter->GetParam("reference").size() == 1);
+		InputFileStream refFileBuff(m_parameter->GetParam("reference")[0]);
+		vector<FactorType> factorOrder;
+		factorOrder.push_back(0); // TODO
+
+		string line;
+
+		while(getline(refFileBuff, line)) 
+		{
+			Phrase phrase(Output);
+			phrase.CreateFromString(factorOrder, line, m_factorCollection, "|");
+			
+			list<Phrase> refList;
+			refList.push_back(phrase);
+			m_ref.push_back(refList);
+		}
+	}
 	return true;
 }
 
@@ -754,3 +780,4 @@ void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::
   for (size_t i = begin; i < end; i++)
     m_allWeights[i] = *weightIter++;
 }
+

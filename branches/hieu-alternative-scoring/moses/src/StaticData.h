@@ -59,6 +59,7 @@ protected:
 	std::vector<LexicalReordering*>                   m_reorderModels;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
+	std::vector< std::list<Phrase> > m_ref;
 	float
 		m_beamThreshold,
 		m_weightDistortion, 
@@ -122,6 +123,7 @@ protected:
 	//! load decoding steps
 	bool LoadMapping();
 	bool LoadLexicalReorderingModel();
+	bool LoadReferenceTrans();
 	
 public:
 	StaticData();
@@ -307,4 +309,9 @@ public:
 	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
+
+	const std::list<Phrase> &GetRefList(size_t translationId) const
+	{
+			return m_ref[translationId];
+	}
 };

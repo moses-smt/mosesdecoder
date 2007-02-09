@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\srilm\src&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;USE_BOOST;LM_IRST;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;USE_BOOST;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -107,7 +107,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\mysqlpp\lib&quot;;&quot;$(SolutionDir)..\irstlm\src&quot;;&quot;$(SolutionDir)..\srilm\src&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;USE_BOOST;LM_IRST;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;USE_BOOST;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -151,6 +151,10 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\src\bleuloss.cpp"
+				>
+			</File>
 			<File
 				RelativePath=".\src\ConfusionNet.cpp"
 				>
@@ -242,10 +246,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\LanguageModelIRST.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\LanguageModelJoint.cpp"
 				>
 			</File>
@@ -275,6 +275,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LMList.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\loss.h"
 				>
 			</File>
 			<File
@@ -448,6 +452,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\src\bleuloss.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConfusionNet.h"
 				>
 			</File>
@@ -549,10 +557,6 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelSkip.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LanguageModelSRI.h"
 				>
 			</File>
 			<File
