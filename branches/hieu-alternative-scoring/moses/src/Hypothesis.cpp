@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "LMList.h"
 #include "hash.h"
+#include "BleuLoss.h"
 
 using namespace std;
 
@@ -503,10 +504,22 @@ std::string Hypothesis::GetTargetPhraseStringRep() const
 	return GetTargetPhraseStringRep(allFactors);
 }
 
-#include "BleuLoss.h"
+void Hypothesis::GetTotalTargetPhrase(Phrase &retPhrase) const
+{
+	if (m_prevHypo != NULL)
+		m_prevHypo->GetTotalTargetPhrase(retPhrase);
+
+	retPhrase.Append(GetTargetPhrase());
+
+	return;
+}
 
 void Hypothesis::CalLossScore(const std::list<Phrase> &refList)
 {
 	BleuLoss loss;
-	loss.getScore(*refList.begin(), GetTargetPhrase());
+	Phrase totalTargetPhrase(Output);
+	GetTotalTargetPhrase(totalTargetPhrase);
+
+	m_totalScore = loss.getScore(*refList.begin(), totalTargetPhrase);
+
 }

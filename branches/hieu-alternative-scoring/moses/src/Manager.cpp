@@ -217,7 +217,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 {
 	// create hypothesis and calculate all its scores
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-	//newHypo->CalcScore(m_staticData, m_possibleTranslations->GetFutureScore());
+	newHypo->CalcScore(m_staticData, m_possibleTranslations->GetFutureScore());
 
 	size_t transId = m_source.GetTranslationId();
 	const list<Phrase> &refList = StaticData::Instance()->GetRefList(transId);

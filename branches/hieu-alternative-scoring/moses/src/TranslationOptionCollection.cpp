@@ -303,7 +303,15 @@ void TranslationOptionCollection::CalcFutureScore()
       for(size_t row=0; row<size; row++)
         for(size_t col=row; col<size; col++)
 					TRACE_ERR( "future cost from "<< row <<" to "<< col <<" is "<< m_futureScore.GetScore(row, col) <<endl);
-    }
+	}
+
+	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; ++endPos)
+		{
+			m_futureScore.SetScore(startPos, endPos, 0);
+		}
+	}
 }
 
 
