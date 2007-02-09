@@ -53,6 +53,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 #define UNIGRAM_RESOLUTION 10000000.0
 
 typedef enum {INTERNAL,QINTERNAL,LEAF,QLEAF} LMT_TYPE;
+typedef enum {BINARY,TEXT,NONE} OUTFILE_TYPE;
 typedef char* node;
 
 typedef enum {LMT_FIND,    //!< search: find an entry
@@ -221,7 +222,7 @@ public:
   void savebin(const char *filename);
   void dumplm(std::fstream& out,ngram ng, int ilev, int elev, int ipos,int epos);
   
-  void load(std::istream& inp,const char* filename=NULL,const char* outfilename=NULL,int mmap=0,bool txtout=true);
+  void load(std::istream& inp,const char* filename=NULL,const char* outfilename=NULL,int mmap=0,OUTFILE_TYPE outtype=NONE);
   void loadtxt(std::istream& inp,const char* header,const char* outfilename,int mmap);
   void loadtxt(std::istream& inp,const char* header);
   void loadtxtmmap(std::istream& inp,const char* header,const char* outfilename);

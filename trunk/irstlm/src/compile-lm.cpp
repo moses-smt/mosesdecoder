@@ -51,7 +51,7 @@ void usage(const char *msg = 0) {
             << "--eval=text-file -e=text-file (computes perplexity of text-file and returns)"<< std::endl
             << "--score=[yes|no] -s=[yes|no] (computes log-prob scores from standard input)"<< std::endl
             << "--debug=1 -d=1 (verbose output for --eval option)"<< std::endl
-            << "--memmap=[yes|no] -mm=[yes|no] (use memory mapping to read a binary LM)" ;
+            << "--memmap=1 --mm=1 (uses memory map to read a binary LM)\n" ;
 }
 
 bool starts_with(const std::string &s, const std::string &pre) {
@@ -120,7 +120,8 @@ int main(int argc, const char **argv)
   if (files.size() < 1) { usage("Please specify a LM file to read from"); exit(1); }
 
   bool textoutput = (stxt == "yes"? true : false);
-  
+  OUTFILE_TYPE outtype=(stxt == "yes"? TEXT : BINARY);
+
   int debug = atoi(sdebug.c_str()); 
   int memmap = atoi(smemmap.c_str());
   
@@ -157,7 +158,7 @@ int main(int argc, const char **argv)
     exit(1);
   }
   
-  lmt.load(inp,infile.c_str(),outfile.c_str(),memmap);       
+  lmt.load(inp,infile.c_str(),outfile.c_str(),memmap,outtype);       
 
   if (seval != ""){
     std::cerr << "Start Eval" << std::endl;

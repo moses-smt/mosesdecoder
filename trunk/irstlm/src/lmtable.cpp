@@ -69,7 +69,7 @@ lmtable::lmtable(){
  
 //loadstd::istream& inp a lmtable from a lm file
 
-void lmtable::load(istream& inp,const char* filename,const char* outfilename,int keep_on_disk,bool txtout){
+void lmtable::load(istream& inp,const char* filename,const char* outfilename,int keep_on_disk,OUTFILE_TYPE outtype){
 
 #ifdef WIN32
   if (keep_on_disk>0){
@@ -83,14 +83,14 @@ void lmtable::load(istream& inp,const char* filename,const char* outfilename,int
   inp >> header; cerr << header << "\n";
 
   if (strncmp(header,"Qblmt",5)==0 || strncmp(header,"blmt",4)==0){        
-    if (!txtout) {
+    if (outtype==BINARY) {
       cerr << "Error: nothing to do. Passed input file: binary. Specified output format: binary.\n";
       exit(0);
     }
     loadbin(inp,header,filename,keep_on_disk);
   }
   else {
-    if (txtout) {
+    if (outtype==TEXT) {
       cerr << "Error: nothing to do. Passed input file: textual. Specified output format: textual.\n";
       exit(0);
     }
