@@ -99,7 +99,7 @@ double BleuLoss::getScore(const Phrase &reference, const Phrase &hypothesis)
   //if(pharaoh->verbose >= 2){
   //   cerr << "Smoothed BLEU is " << score << endl;
   //}
-  cerr << reference << endl << hypothesis << endl << score << endl;
+  //cerr << reference << endl << hypothesis << endl << score << endl;
 
   return score;
 }
