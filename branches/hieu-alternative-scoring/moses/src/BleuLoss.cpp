@@ -10,7 +10,7 @@
 //
 //
 
-#include "bleuloss.h"
+#include "BleuLoss.h"
 #include "Phrase.h"
 
 using namespace std;
