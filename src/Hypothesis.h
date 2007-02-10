@@ -114,7 +114,7 @@ public:
 	void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
 
 	/** return target phrase used to create this hypothesis */
-	const Phrase &GetTargetPhrase() const
+	const Phrase &GetCurrTargetPhrase() const
 	{
 		return m_targetPhrase;
 	}
