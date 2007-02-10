@@ -215,7 +215,7 @@ public:
 		{
 			m_prevHypo->ToStream(out);
 		}
-		out << GetTargetPhrase();
+		out << GetCurrTargetPhrase();
 	}
 
 	TO_STRING();
