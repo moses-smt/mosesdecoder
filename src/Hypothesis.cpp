@@ -365,7 +365,8 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 
 	// add future costs for distortion model
 	if(StaticData::Instance()->UseDistortionFutureCosts())
-		m_futureScore += m_sourceCompleted.GetFutureCosts(m_currSourceWordsRange.GetEndPos()) * StaticData::Instance()->GetWeightDistortion();
+		m_futureScore += m_sourceCompleted.GetFutureCosts( (int)m_currSourceWordsRange.GetEndPos() ) 
+											* StaticData::Instance()->GetWeightDistortion();
 	
 }
 
