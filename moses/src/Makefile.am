@@ -1,5 +1,5 @@
 lib_LIBRARIES = libmoses.a
-AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES 
+AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -DUSE_HYPO_POOL 
 libmoses_a_SOURCES = \
 	ConfusionNet.cpp \
 	DecodeStep.cpp \

@@ -169,10 +169,10 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 	if ( hypo != NULL)
 	{
 		OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors);
-		OutputSurface(out, hypo->GetTargetPhrase(), outputFactorOrder, reportAllFactors);
+		OutputSurface(out, hypo->GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
 
 		if (reportSegmentation == true
-		    && hypo->GetTargetPhrase().GetSize() > 0) {
+		    && hypo->GetCurrTargetPhrase().GetSize() > 0) {
 			out << "|" << hypo->GetCurrSourceWordsRange().GetStartPos()
 			    << "-" << hypo->GetCurrSourceWordsRange().GetEndPos() << "| ";
 		}
@@ -223,7 +223,7 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
 			const Hypothesis &edge = *edges[currEdge];
-			OutputSurface(*m_nBestStream, edge.GetTargetPhrase(), m_outputFactorOrder, false); // false for not reporting all factors
+			OutputSurface(*m_nBestStream, edge.GetCurrTargetPhrase(), m_outputFactorOrder, false); // false for not reporting all factors
 		}
 		*m_nBestStream << " ||| ";
 

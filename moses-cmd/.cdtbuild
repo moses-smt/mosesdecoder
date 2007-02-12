@@ -61,6 +61,7 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../srilm/lm/src&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.542441515" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="USE_HYPO_POOL"/>
 <listOptionValue builtIn="false" value="LM_SRI"/>
 <listOptionValue builtIn="false" value="LM_IRST"/>
 <listOptionValue builtIn="false" value="LM_INTERNAL"/>
