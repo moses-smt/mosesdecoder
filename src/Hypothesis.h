@@ -266,3 +266,14 @@ struct CompareHypothesisTotalScore
 	}
 };
 
+#ifdef USE_HYPO_POOL
+
+#define FREEHYPO(hypo) \
+{ \
+	ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool(); \
+	pool.freeObject(hypo); \
+} \
+
+#else
+#define FREEHYPO(hypo) delete hypo
+#endif

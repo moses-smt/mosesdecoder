@@ -39,7 +39,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 unsigned int Hypothesis::s_HypothesesCreated = 0;
-ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
+
+#ifdef USE_HYPO_POOL
+	ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
+#endif
 
 Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)
@@ -99,7 +102,7 @@ Hypothesis::~Hypothesis()
 		ArcList::iterator iter;
 		for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter)
 		{
-			s_objectPool.freeObject (*iter);
+			FREEHYPO(*iter);
 		}
 		m_arcList->clear();
 
@@ -148,8 +151,12 @@ Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
  */
 Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 {
+#ifdef USE_HYPO_POOL
 	Hypothesis *ptr = s_objectPool.getPtr();
 	return new(ptr) Hypothesis(prevHypo, transOpt);
+#else
+	return new Hypothesis(prevHypo, transOpt);
+#endif
 }
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase
@@ -157,17 +164,13 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 
 Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &emptyTarget)
 {
+#ifdef USE_HYPO_POOL
 	Hypothesis *ptr = s_objectPool.getPtr();
 	return new(ptr) Hypothesis(m_source, emptyTarget);
+#else
+	return new Hypothesis(m_source, emptyTarget);
+#endif
 }
-
-//void Hypothesis::GenerateNGramCompareHash() const
-//{
-//	_hash = quick_hash((const char*)&m_languageModelStates[0], sizeof(LanguageModelSingleFactor::State) * m_languageModelStates.size(), 0xcafe5137);
-//	_hash_computed = true;
-//	vector<size_t> wordCoverage = m_sourceCompleted.GetCompressedRepresentation();
-//	_hash = quick_hash((const char*)&wordCoverage[0], sizeof(size_t)*wordCoverage.size(), _hash);
-//}
 
 /** check, if two hypothesis can be recombined.
     this is actually a sorting function that allows us to
@@ -429,12 +432,11 @@ void Hypothesis::CleanupArcList()
 							, CompareHypothesisTotalScore());
 		
 		// delete bad ones
-		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
 		ArcList::iterator iter;
 		for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter)
 		{
 			Hypothesis *arc = *iter;
-			pool.freeObject(arc);
+			FREEHYPO(arc);
 		}
 		m_arcList->erase(m_arcList->begin() + nBestSize
 										, m_arcList->end());

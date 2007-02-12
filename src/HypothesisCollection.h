@@ -86,8 +86,7 @@ protected:
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
 	inline void Remove(const HypothesisCollection::iterator &iter)
 	{
-		ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool();
-		pool.freeObject(*iter);
+		FREEHYPO(*iter);
 		Detach(iter);
 	}
 
