@@ -280,7 +280,7 @@ void getSurfacePhrase(std::vector<size_t>& tphrase,LatticePath const& path)
 	const std::vector<const Hypothesis *> &edges = path.GetEdges();
 	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
-			const Phrase &phrase = edges[currEdge]->GetTargetPhrase();
+			const Phrase &phrase = edges[currEdge]->GetCurrTargetPhrase();
 			for (size_t pos=0,size=phrase.GetSize() ; pos < size ; ++pos)
 				{
 					const Factor *factor = phrase.GetFactor(pos,0);
@@ -370,7 +370,7 @@ void Manager::CalcDecoderStatistics(const StaticData& staticData) const
 		   	TRACE_ERR( "Source and Target Units:"
 		 							<< hypo->GetSourcePhrase());
 				buff2.insert(0,"] ");
-				buff2.insert(0,(hypo->GetTargetPhrase()).ToString());
+				buff2.insert(0,(hypo->GetCurrTargetPhrase()).ToString());
 				buff2.insert(0,":");
 				buff2.insert(0,(hypo->GetCurrSourceWordsRange()).ToString());
 				buff2.insert(0,"[");
@@ -381,7 +381,7 @@ void Manager::CalcDecoderStatistics(const StaticData& staticData) const
 				  buff.insert(0,buff2);
 				  buff2.clear();
 				  buff2.insert(0,"] ");
-				  buff2.insert(0,(hypo->GetTargetPhrase()).ToString());
+				  buff2.insert(0,(hypo->GetCurrTargetPhrase()).ToString());
 				  buff2.insert(0,":");
 				  buff2.insert(0,(hypo->GetCurrSourceWordsRange()).ToString());
 				  buff2.insert(0,"[");
