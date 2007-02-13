@@ -75,6 +75,7 @@ StaticData::StaticData()
 ,m_onlyDistinctNBest(false)
 ,m_computeLMBackoffStats(false)
 ,m_factorDelimiter("|") // default delimiter between factors
+,m_cachePath (GetTempFolder())
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -97,8 +98,6 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	if (m_parameter->GetParam("cache-path").size() == 1)
 		m_cachePath = m_parameter->GetParam("cache-path")[0];
-  else
-		m_cachePath = GetTempFolder();
 
 	// input type has to be specified BEFORE loading the phrase tables!
 	if(m_parameter->GetParam("inputtype").size()) 

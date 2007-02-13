@@ -149,7 +149,7 @@ public:
 		return m_parameter->GetParam(paramName);
 	}
 
-	const std::string GetCachePath() const
+	std::string GetCachePath() const
  	{
  		return m_cachePath;
  	}
