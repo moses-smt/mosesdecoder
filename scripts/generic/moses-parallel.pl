@@ -19,9 +19,8 @@ use strict;
 #######################
 #Customizable parameters 
 
-#parameters for submiiting processes through SGE
-#NOTE: group name is ws06ossmt (with 2 's') and not ws06osmt (with 1 's')
-my $queueparameters="-l ws06ossmt=true -l mem_free=0.5G -hard";
+#parameters for submiiting processes through Sun GridEngine
+my $queueparameters="-l mem_free=0.5G -hard";
 
 # look for the correct pwdcmd 
 my $pwdcmd = getPwdCmd();
@@ -53,6 +52,7 @@ my $nbestfile=undef;
 my $orinbestfile=undef;
 my $nbest=undef;
 my $nbestflag=0;
+my $robust=1; # undef; # resubmit crashed jobs
 my $orilogfile="";
 my $logflag="";
 my $qsubname="MOSES";
@@ -69,6 +69,7 @@ sub init(){
 	     'debug'=>\$dbg,
 	     'jobs=i'=>\$jobs,
 	     'decoder=s'=> \$mosescmd,
+	     'robust' => \$robust,
        'decoder-parameters=s'=> \$mosesparameters,
 			 'logfile=s'=> \$orilogfile,
 	     'i|inputfile|input-file=s'=> \$orifile,
@@ -284,8 +285,16 @@ preparing_script();
 #launching process through the queue
 my @sgepids =();
 
-my $failure=0;
-foreach my $idx (@idxlist){
+# if robust switch is used, redo jobs that crashed
+my @idx_todo = ();
+foreach (@idxlist) { push @idx_todo,$_; }
+
+my $looped_once = 0;
+while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
+ $looped_once = 1;
+
+ my $failure=0;
+ foreach my $idx (@idx_todo){
   print STDERR "qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash\n" if $dbg; 
 
   $cmd="qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
@@ -302,16 +311,17 @@ foreach my $idx (@idxlist){
   close(IN);
 
   push @sgepids, $id;
-}
+ }
 
-#waiting until all jobs have finished
-my $hj = "-hold_jid " . join(" -hold_jid ", @sgepids);
+ #waiting until all jobs have finished
+ my $hj = "-hold_jid " . join(" -hold_jid ", @sgepids);
 
-if ($old_sge) {
+ if ($old_sge) {
   # we need to implement our own waiting script
   safesystem("echo 'date' > sync_workaround_script.sh") or kill_all_and_quit();
 
   my $pwd = `$pwdcmd`; chomp $pwd;
+
   my $checkpointfile = "sync_workaround_checkpoint";
 
   # delete previous checkpoint, if left from previous runs
@@ -344,17 +354,35 @@ if ($old_sge) {
     print STDERR "Extra wait ($nr) for possibly unfinished processes.\n";
     sleep 10;
   }
-} else {
+ } else {
   # use the -sync option for qsub
   $cmd="qsub $queueparameters -sync y $hj -j y -o /dev/null -e /dev/null -N $qsubname.W -b y /bin/ls >& $qsubname.W.log";
   safesystem($cmd) or kill_all_and_quit();
 
   $failure=&check_exit_status();
+ }
+
+ kill_all_and_quit() if $failure && !$robust;
+
+ # check if some translations failed
+ my @idx_still_todo = check_translation();
+ if ($robust) {
+     # if robust, redo crashed jobs
+     if ((scalar @idx_still_todo) == (scalar @idxlist)) {
+	 # ... but not if all crashed
+	 print STDERR "everything crashed, not trying to resubmit jobs\n";
+	 kill_all_and_quit();
+     }
+     @idx_todo = @idx_still_todo;
+ }
+ else {
+     if (scalar (@idx_still_todo)) {
+	 print STDERR "some jobs crashed: ".join(" ",@idx_still_todo)."\n";
+	 kill_all_and_quit();
+     }
+     
+ }
 }
-
-kill_all_and_quit() if $failure;
-
-check_translation();
 
 #concatenating translations and removing temporary files
 concatenate_1best();
@@ -509,7 +537,8 @@ sub check_translation(){
   #checking if all sentences were translated
   my $inputN;
   my $outputN;
-  foreach my $idx (@idxlist){
+  my @failed = ();
+  foreach my $idx (@idx_todo){
     if ($inputtype==0){#text input
       chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
@@ -522,10 +551,10 @@ sub check_translation(){
       print STDERR "Split ($idx) were not entirely translated\n";
       print STDERR "outputN=$outputN inputN=$inputN\n";
       print STDERR "outputfile=${testfile}.$splitpfx$idx.trans inputfile=${testfile}.$splitpfx$idx\n";
-      return 0;
+      push @failed,$idx;
     }
   }
-  return 1;
+  return @failed;
 }
 
 sub remove_temporary_files(){
