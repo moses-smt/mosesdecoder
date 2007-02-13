@@ -11,7 +11,7 @@ use Getopt::Long "GetOptions";
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
 
-my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER);
+my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER,@_PHRASE_TABLE,@_REORDERING_TABLE,$_CONFIG);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
@@ -56,6 +56,9 @@ $_HELP = 1
 		       'decoding-steps=s' => \$_DECODING_STEPS,
 		       'scripts-root-dir=s' => \$SCRIPTS_ROOTDIR,
                        'factor-delimiter=s' => \$_FACTOR_DELIMITER,
+		       'phrase-table=s' => \@_PHRASE_TABLE,
+		       'config=s' => \$_CONFIG,
+		       'reordering-table=s' => \@_REORDERING_TABLE,
                       );
 
 if ($_HELP) {
@@ -147,6 +150,8 @@ $___MODEL_DIR = $_MODEL_DIR if $_MODEL_DIR;
 my $___EXTRACT_FILE = $___MODEL_DIR."/extract";
 $___EXTRACT_FILE = $_EXTRACT_FILE if $_EXTRACT_FILE;
 
+my $___CONFIG = $___ROOT_DIR."/model/moses.ini";
+$___CONFIG = $_CONFIG if $_CONFIG;
 
 my $___MAX_PHRASE_LENGTH = 7;
 my $___LEXICAL_WEIGHTING = 1;
@@ -167,12 +172,14 @@ if ($___LAST_STEP == 9) {
   die "use --lm factor:order:filename to specify at least one language model"
     if scalar @_LM == 0;
   foreach my $lm (@_LM) {
-    my ($f, $order, $filename) = split /:/, $lm, 3;
+    my $type = 0; # default to srilm
+    my ($f, $order, $filename);
+    ($f, $order, $filename, $type) = split /:/, $lm, 4;
     die "Wrong format of --lm. Expected: --lm factor:order:filename"
       if $f !~ /^[0-9]+$/ || $order !~ /^[0-9]+$/ || !defined $filename;
     die "Language model file not found or empty: $filename"
       if ! -s $filename;
-    push @___LM, [ $f, $order, $filename ];
+    push @___LM, [ $f, $order, $filename, $type ];
   }
 }
 
@@ -196,16 +203,17 @@ $___REORDERING_SMOOTH = $_REORDERING_SMOOTH if $_REORDERING_SMOOTH;
 my %REORDERING_MODEL;
 my $REORDERING_LEXICAL = 0; # flag for building lexicalized reordering models
 foreach my $r (split(/,/,$___REORDERING)) {
-    if (!( $r eq "orientation-f" ||
-         $r eq "orientation-fe" ||
-         $r eq "orientation-bidirectional-f" ||
-         $r eq "orientation-bidirectional-fe" ||
+    $r =~ s/orientation/msd/;
+    if (!( $r eq "msd-f" ||
+         $r eq "msd-fe" ||
+         $r eq "msd-bidirectional-f" ||
+         $r eq "msd-bidirectional-fe" ||
          $r eq "monotonicity-f" ||
          $r eq "monotonicity-fe" ||
          $r eq "monotonicity-bidirectional-f" ||
          $r eq "monotonicity-bidirectional-fe" ||
          $r eq "distance")) {
-       print STDERR "unknwown reordering type: $r";
+       print STDERR "unknown reordering type: $r";
        exit(1);
     }
     if ($r ne "distance") { $REORDERING_LEXICAL = 1; }
@@ -225,11 +233,13 @@ $___ALIGNMENT_FACTORS = $_ALIGNMENT_FACTORS if defined($_ALIGNMENT_FACTORS);
 die("format for alignment factors is \"0-0\" or \"0,1,2-0,1\", you provided $___ALIGNMENT_FACTORS\n") if $___ALIGNMENT_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*$/;
 
 my $___TRANSLATION_FACTORS = undef;
+$___TRANSLATION_FACTORS = "0-0" unless defined($_DECODING_STEPS); # single factor default
 $___TRANSLATION_FACTORS = $_TRANSLATION_FACTORS if defined($_TRANSLATION_FACTORS);
 die("format for translation factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___TRANSLATION_FACTORS\n") 
   if defined $___TRANSLATION_FACTORS && $___TRANSLATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
 
 my $___REORDERING_FACTORS = undef;
+$___REORDERING_FACTORS = "0-0" if defined($_REORDERING) && ! defined($_DECODING_STEPS); # single factor default
 $___REORDERING_FACTORS = $_REORDERING_FACTORS if defined($_REORDERING_FACTORS);
 die("format for reordering factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___REORDERING_FACTORS\n") 
   if defined $___REORDERING_FACTORS && $___REORDERING_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
@@ -239,10 +249,10 @@ $___GENERATION_FACTORS = $_GENERATION_FACTORS if defined($_GENERATION_FACTORS);
 die("format for generation factors is \"0-1\" or \"0-1+0-2\" or \"0-1+0,1-1,2\", you provided $___GENERATION_FACTORS\n") 
   if defined $___GENERATION_FACTORS && $___GENERATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
 
-my $___DECODING_STEPS = $_DECODING_STEPS;
-die("use --decoding-steps to specify decoding steps") if ( !defined $_DECODING_STEPS && $___LAST_STEP>=9 && $___FIRST_STEP<=9);
+my $___DECODING_STEPS = "t0";
+$___DECODING_STEPS = $_DECODING_STEPS if defined($_DECODING_STEPS);
 die("format for decoding steps is \"t0,g0,t1,g1\", you provided $___DECODING_STEPS\n") 
-  if defined $___DECODING_STEPS && $___DECODING_STEPS !~ /^[tg]\d+(,[tg]\d+)*$/;
+  if defined $_DECODING_STEPS && $_DECODING_STEPS !~ /^[tg]\d+(,[tg]\d+)*$/;
 
 my ($factor,$factor_e,$factor_f);
 
@@ -1029,14 +1039,14 @@ sub get_reordering {
     print STDERR "(7.2) building tables @ ".`date`;
     open(O,"$___EXTRACT_FILE.$factor.o.sorted")
       or die "Can't read $___EXTRACT_FILE.$factor.o.sorted";
-    open(OF,  "|gzip >$___MODEL_DIR/orientation-table.$factor.f.$___REORDERING_SMOOTH.gz") 
-	if defined($REORDERING_MODEL{"orientation-f"});
-    open(OFE, "|gzip >$___MODEL_DIR/orientation-table.$factor.fe.$___REORDERING_SMOOTH.gz") 
-	if defined($REORDERING_MODEL{"orientation-fe"});
-    open(OBF, "|gzip >$___MODEL_DIR/orientation-table.$factor.bi.f.$___REORDERING_SMOOTH.gz") 
-	if defined($REORDERING_MODEL{"orientation-bidirectional-f"});
-    open(OBFE,"|gzip >$___MODEL_DIR/orientation-table.$factor.bi.fe.$___REORDERING_SMOOTH.gz") 
-	if defined($REORDERING_MODEL{"orientation-bidirectional-fe"});
+    open(OF,  "|gzip >$___MODEL_DIR/msd-table.$factor.f.$___REORDERING_SMOOTH.gz") 
+	if defined($REORDERING_MODEL{"msd-f"});
+    open(OFE, "|gzip >$___MODEL_DIR/msd-table.$factor.fe.$___REORDERING_SMOOTH.gz") 
+	if defined($REORDERING_MODEL{"msd-fe"});
+    open(OBF, "|gzip >$___MODEL_DIR/msd-table.$factor.bi.f.$___REORDERING_SMOOTH.gz") 
+	if defined($REORDERING_MODEL{"msd-bidirectional-f"});
+    open(OBFE,"|gzip >$___MODEL_DIR/msd-table.$factor.bi.fe.$___REORDERING_SMOOTH.gz") 
+	if defined($REORDERING_MODEL{"msd-bidirectional-fe"});
     open(MF,  "|gzip >$___MODEL_DIR/monotonicity-table.$factor.f.$___REORDERING_SMOOTH.gz") 
 	if defined($REORDERING_MODEL{"monotonicity-f"});
     open(MFE, "|gzip >$___MODEL_DIR/monotonicity-table.$factor.fe.$___REORDERING_SMOOTH.gz") 
@@ -1107,14 +1117,14 @@ sub get_reordering {
 sub store_reordering_f {
     my $total_previous_f = $mono_previous_f+$swap_previous_f+$other_previous_f;
     my $total_following_f = $mono_following_f+$swap_following_f+$other_following_f;
-    if(defined($REORDERING_MODEL{"orientation-f"})) {
+    if(defined($REORDERING_MODEL{"msd-f"})) {
  	printf OF ("%s ||| %.5f %.5f %.5f\n",
 		   $f_current, 
 		   $mono_previous_f/$total_previous_f,
 		   $swap_previous_f/$total_previous_f,
 		   $other_previous_f/$total_previous_f);
     }
-    if(defined($REORDERING_MODEL{"orientation-bidirectional-f"})) {
+    if(defined($REORDERING_MODEL{"msd-bidirectional-f"})) {
 	printf OBF ("%s ||| %.5f %.5f %.5f %.5f %.5f %.5f\n",
 		    $f_current, 
 		    $mono_previous_f/$total_previous_f,
@@ -1144,14 +1154,14 @@ sub store_reordering_fe {
     my $total_previous_fe = $mono_previous_fe+$swap_previous_fe+$other_previous_fe;
     my $total_following_fe = $mono_following_fe+$swap_following_fe+$other_following_fe;
     
-    if(defined($REORDERING_MODEL{"orientation-fe"})) {
+    if(defined($REORDERING_MODEL{"msd-fe"})) {
  	printf OFE ("%s ||| %s ||| %.5f %.5f %.5f\n",
 		   $f_current, $e_current, 
 		   $mono_previous_fe/$total_previous_fe,
 		   $swap_previous_fe/$total_previous_fe,
 		   $other_previous_fe/$total_previous_fe);
     }
-    if(defined($REORDERING_MODEL{"orientation-bidirectional-fe"})) {
+    if(defined($REORDERING_MODEL{"msd-bidirectional-fe"})) {
 	printf OBFE ("%s ||| %s ||| %.5f %.5f %.5f %.5f %.5f %.5f\n",
 		    $f_current, $e_current, 
 		    $mono_previous_fe/$total_previous_fe,
@@ -1257,12 +1267,13 @@ sub create_ini {
     &full_path(\$___MODEL_DIR);
     &full_path(\$___VCB_E);
     &full_path(\$___VCB_F);
-    open(INI,">$___MODEL_DIR/moses.ini") or die "Can't write $___MODEL_DIR/moses.ini";
+    `mkdir -p $___MODEL_DIR`;
+    open(INI,">$___CONFIG") or die("Can't write $___CONFIG");
     print INI "#########################
 ### MOSES CONFIG FILE ###
 #########################
 \n";
-
+    
     if (defined $___TRANSLATION_FACTORS) {
       print INI "# input factors\n";
       print INI "[input-factors]\n";
@@ -1278,7 +1289,6 @@ sub create_ini {
       die "No translation steps defined, cannot prepare [input-factors] section\n";
     }
 
-
     my %stepsused;
     print INI "\n# mapping steps
 [mapping]\n";
@@ -1292,11 +1302,14 @@ sub create_ini {
    print INI "\n# translation tables: source-factors, target-factors, number of scores, file 
 [ttable-file]\n";
    my $num_of_ttables = 0;
+   my @SPECIFIED_TABLE = @_PHRASE_TABLE;
    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
      $num_of_ttables++;
      my $ff = $f;
      $ff =~ s/\-/ /;
-     print INI "$ff 5 $___MODEL_DIR/phrase-table.$f.gz\n";
+     my $file = "$___MODEL_DIR/phrase-table.$f.gz";
+     $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+     print INI "$ff 5 $file\n";
    }
    if ($num_of_ttables != $stepsused{"T"}) {
      print STDERR "WARNING: Your [mapping-steps] require translation steps up to id $stepsused{T} but you defined translation steps 0..$num_of_ttables\n";
@@ -1326,12 +1339,11 @@ sub create_ini {
 print INI "\n# language models: type(srilm/irstlm), factors, order, file
 [lmodel-file]\n";
   foreach my $lm (@___LM) {
-    my ($f, $o, $fn) = @$lm;
-    my $type = 0; # default to srilm
+    my ($f, $o, $fn, $type) = @{$lm};
     print INI "$type $f $o $fn\n";
   }
 
-print INI "\n\n# limit on how many phrase translations e for each phrase f are loaded
+print INI "\n\n\# limit on how many phrase translations e for each phrase f are loaded
 # 0 = all elements loaded
 [ttable-limit]
 20\n";
@@ -1341,8 +1353,10 @@ print INI "\n\n# limit on how many phrase translations e for each phrase f are l
 
   my $weight_d_count = 0;
   if ($___REORDERING ne "distance") {
-    my $file = "# distortion (reordering) files\n[distortion-file]\n";
+    my $file = "# distortion (reordering) files\n\[distortion-file]\n";
     my $factor_i = 0;
+ 
+    my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
 	foreach my $r (keys %REORDERING_MODEL) {
 	    next if $r eq "fe" || $r eq "f";
@@ -1350,23 +1364,24 @@ print INI "\n\n# limit on how many phrase translations e for each phrase f are l
 	    if ($r eq "distance") { $weight_d_count++; } 
 	    else {
 		my $type = $r;
-		$type =~ s/orientation/msd/;
-
 		$r =~ s/-bidirectional/.bi/;
 		$r =~ s/-f/.f/;
-		$r =~ s/orientation/orientation-table.$factor/;
+		$r =~ s/msd/msd-table.$factor/;
 		$r =~ s/monotonicity/monotonicity-table.$factor/;
 		
 		my $w;
-		if ($r =~ /orient/) { $w = 3; } else { $w = 1; }
+		if ($r =~ /msd/) { $w = 3; } else { $w = 1; }
 		if ($r =~ /bi/) { $w *= 2; }
 		$weight_d_count += $w;
-		$file .= "$factor $type $w $___MODEL_DIR/$r.$___REORDERING_SMOOTH.gz\n";
+
+                my $table_file = "$___MODEL_DIR/$r.$___REORDERING_SMOOTH.gz";
+		$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+		$file .= "$factor $type $w $table_file\n";
 	    }
 	}
         $factor_i++;
-    }
-    print INI $file."\n";
+      }
+      print INI $file."\n";
   }
   else {
     $weight_d_count = 1;

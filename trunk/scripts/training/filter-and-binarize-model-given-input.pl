@@ -12,6 +12,7 @@ my $MAX_LENGTH = 10;
 # in other words, all phrase-tables will be truncated at least to 10 words per
 # phrase
 
+my $binarizer = shift;
 my $dir = shift; 
 my $config = shift;
 my $input = shift;
@@ -49,7 +50,7 @@ if (-d $dir) {
 safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
 
 # get tables to be filtered (and modify config file)
-my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS);
+my (@TABLE,@TABLE_WEIGHTS,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%BINARIZABLE);
 open(INI_OUT,">$dir/moses.ini") or die "Can't write $dir/moses.ini";
 open(INI,$config) or die "Can't read $config";
 while(<INI>) {
@@ -57,17 +58,19 @@ while(<INI>) {
     if (/ttable-file\]/) {
         while(1) {	       
     	my $table_spec = <INI>;
-    	if ($table_spec !~ /^([\d\-]+) ([\d\-]+) (\d+) (\S+)$/) {
+    	if ($table_spec !~ /^([\d\,\-]+) ([\d\-]+) (\d+) (\S+)$/) {
     	    print INI_OUT $table_spec;
     	    last;
     	}
-    	my ($source_factor,$t,$w,$file) = ($1,$2,$3,$4);
+    	my ($source_factor,$t,$weights,$file) = ($1,$2,$3,$4);
 
     	chomp($file);
     	push @TABLE, $file;
+	push @TABLE_WEIGHTS,$weights;
+	$BINARIZABLE{$#TABLE}++;
 
     	my $new_name = "$dir/phrase-table.$source_factor-$t";
-    	print INI_OUT "$source_factor $t $w $new_name\n";
+    	print INI_OUT "$source_factor $t $weights $new_name\n";
     	push @TABLE_NEW_NAME,$new_name;
 
     	$CONSIDER_FACTORS{$source_factor} = 1;
@@ -78,21 +81,22 @@ while(<INI>) {
     elsif (/distortion-file/) {
         while(1) {
     	  my $table_spec = <INI>;
-    	  if ($table_spec !~ /^([\d\-]+) (\S+) (\d+) (\S+)$/) {
+    	  if ($table_spec !~ /^([\d\,\-]+) (\S+) (\d+) (\S+)$/) {
     	      print INI_OUT $table_spec;
     	      last;
     	}
-    	my ($factors,$t,$w,$file) = ($1,$2,$3,$4);
+    	my ($factors,$t,$weights,$file) = ($1,$2,$3,$4);
 	my $source_factor = $factors;
 	$source_factor =~ s/\-\d+$//;
 
     	chomp($file);
     	push @TABLE,$file;
+	push @TABLE_WEIGHTS,$weights;
 
     	$file =~ s/^.*\/+([^\/]+)/$1/g;
     	my $new_name = "$dir/$file";
 	$new_name =~ s/\.gz//;
-    	print INI_OUT "$factors $t $w $new_name\n";
+    	print INI_OUT "$factors $t $weights $new_name\n";
     	push @TABLE_NEW_NAME,$new_name;
 
     	$CONSIDER_FACTORS{$source_factor} = 1;
@@ -165,6 +169,12 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     close(FILE_OUT);
     die "No phrases found in $file!" if $total == 0;
     printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
+    if ($BINARIZABLE{$i}) {
+	print STDERR "binarizing...";
+	my $cmd = "cat $new_file | sort | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+	print STDERR $cmd."\n";
+	print STDERR `$cmd`;
+    }
 }
 
 open(INFO,">$dir/info");
