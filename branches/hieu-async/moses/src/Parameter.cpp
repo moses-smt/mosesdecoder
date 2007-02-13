@@ -275,8 +275,8 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 		if (tokenizeIndex >= vec.size())
 		{
 			stringstream errorMsg("");
-			errorMsg << "Expected " << tokenizeIndex << " tokens per"
-							<< " entry in '" << paramName << "', but only found "
+			errorMsg << "Expected at least " << (tokenizeIndex + 1) << " tokens per entry in '"
+							<< paramName << "', but only found "
 							<< vec.size();
 			UserMessage::Add(errorMsg.str());
 			return false;

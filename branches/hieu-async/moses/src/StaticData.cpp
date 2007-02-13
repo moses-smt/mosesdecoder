@@ -533,14 +533,6 @@ bool StaticData::LoadGenerationTables()
 			numFeatures = Scan<size_t>(token[2]);
 			filePath = token[3];
 			
-			if (!FileExists(filePath))
-			{
-				stringstream strme;
-				strme << "Generation dictionary '"<<filePath<<"' does not exist!\n";
-				UserMessage::Add(strme.str());
-				return false;				
-			}
-
 			TRACE_ERR( filePath << endl);
 
 			m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager));
