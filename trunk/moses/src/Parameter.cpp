@@ -250,11 +250,11 @@ bool Parameter::Validate()
 	{
 		noErrorFlag = FileExists(m_setting["input-file"][0]);
 	}
-
-	// checks on non-mandatory tables:
-	if (noErrorFlag && m_setting["generation-file"].size())
-	  noErrorFlag = FilesExist("generation-file", 3);
-	if (noErrorFlag && m_setting["distortion-file"].size())
+	// generation tables
+	if (noErrorFlag)
+		noErrorFlag = FilesExist("generation-file", 3);
+	// distortion
+	if (noErrorFlag)
 	  noErrorFlag = FilesExist("distortion-file", 3);
 
 	return noErrorFlag;
@@ -278,8 +278,8 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 		if (tokenizeIndex >= vec.size())
 		{
 			stringstream errorMsg("");
-			errorMsg << "Expected " << tokenizeIndex << " tokens per"
-							<< " entry in '" << paramName << "', but only found "
+			errorMsg << "Expected at least " << (tokenizeIndex+1) << " tokens per emtry in '"
+							<< paramName << "', but only found "
 							<< vec.size();
 			UserMessage::Add(errorMsg.str());
 			return false;

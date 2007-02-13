@@ -41,15 +41,9 @@ bool GenerationDictionary::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
 																			, FactorCollection &factorCollection
 																			, const std::string &filePath
-																			, FactorDirection direction
-																			, bool forceSingleFeatureValue)
+																			, FactorDirection direction)
 {	
 	const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();
-
-  // old hack - originally, moses assumed single generation values
-	if (forceSingleFeatureValue) {
-		assert(numFeatureValuesInConfig == 1);
-	}
 
 	//factors	
 	m_inputFactors = FactorMask(input);
@@ -96,7 +90,6 @@ bool GenerationDictionary::Load(const std::vector<FactorType> &input
 		}
 
 		size_t numFeaturesInFile = token.size() - 2;
-		if (forceSingleFeatureValue) numFeaturesInFile = 1;
 		if (numFeaturesInFile < numFeatureValuesInConfig) {
 			stringstream strme;
 			strme << filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
