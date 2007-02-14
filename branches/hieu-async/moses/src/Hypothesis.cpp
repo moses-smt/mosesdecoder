@@ -95,7 +95,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_id(s_HypothesesCreated++)
 	, m_lmstats(NULL)
 	,	m_decodeStepId (transOpt.GetDecodeStepId())
-	, m_targetPhraseAlign(prevHypo.m_targetPhraseAlign)
+	, m_alignPair(prevHypo.m_alignPair)
 {
 	const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
 
@@ -129,8 +129,19 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	m_targetPhrase.MergeFactors(transOptPhrase, m_currTargetWordsRange);
 
 	// update alignment
-	m_targetPhraseAlign.Merge(transOpt.GetAlignmentPair().GetPhraseAlignVec(Output)
-													, m_currTargetWordsRange);
+	if (transOpt.GetSize() > 1 && transOpt.GetDecodeStepId() > 0)
+	{
+		cerr << *this << endl << transOpt << endl 
+				<< m_alignPair << endl
+				<< transOpt.GetAlignmentPair().GetAlignmentPhrase(Output) << endl;
+	}
+
+	m_alignPair.Merge(transOpt.GetAlignmentPair()
+									, transOpt.GetSourceWordsRange()
+									, m_currTargetWordsRange);
+
+	if (transOpt.GetSize() > 1 && transOpt.GetDecodeStepId() > 0)
+		cerr << m_alignPair << endl;
 
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!

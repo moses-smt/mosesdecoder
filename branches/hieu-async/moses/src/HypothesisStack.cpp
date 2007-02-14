@@ -49,12 +49,23 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 	const WordsBitmap &wordsBitmap = hypo->GetSourceBitmap();
 	size_t stackIndex = wordsBitmap.GetStackIndex();
 
-	// only add to last stack if all factors are specified, ie. sync
-	if ( (stackIndex == m_stack.size() - 1)
-			&& !hypo->GetTargetPhrase().IsSynchronized())
-	{
+	if (stackIndex == m_stack.size() - 1)
+	{	// only add to last stack if all factors are specified, ie. sync
+		if (!hypo->GetTargetPhrase().IsSynchronized())
+		{
 		FREEHYPO(hypo);		
 		return;
+		}
+	}
+	else
+	{ // only add to stack if no dangly words which can never be fitted with other factors
+		/*
+		if (!hypo->GetAl)
+		{
+		FREEHYPO(hypo);		
+		return;
+		}
+		*/
 	}
 	m_stack[stackIndex].AddPrune(hypo);
 }

@@ -36,6 +36,9 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetP
 	, m_sourceWordsRange	(wordsRange)
 	, m_alignmentPair(targetPhrase.GetAlignmentPair())
 {
+	cerr << m_sourcePhrase << endl
+			<< m_targetPhrase << endl
+			<< m_alignmentPair << endl << targetPhrase.GetAlignmentPair() << endl;
 	// set score
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 }

@@ -131,7 +131,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		targetPhrase.CreateFromString( output
 																, tokens[1]
 																, factorDelimiter);
-
+		
 		// alignment info
 		AlignmentPair &alignmentPair = targetPhrase.GetAlignmentPair();		
 		targetPhrase.CreateAlignmentInfo(tokens[2], tokens[3], sourcePhrase.GetSize());

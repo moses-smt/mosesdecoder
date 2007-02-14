@@ -34,6 +34,8 @@ class AlignmentPhrase : public std::vector<AlignmentElement>
 
 public:
 	bool IsCompatible(const AlignmentPhrase &compare, size_t startPosCompare) const;
+
+	//! add newAlignment to this alignment phrase, offsetting by newAlignmentRange.GetStartPos()
 	void Merge(const AlignmentPhrase &newAlignment, const WordsRange &newAlignmentRange);
 };
 

@@ -38,6 +38,18 @@ void AlignmentPair::SetIdentityAlignment()
 	m_targetAlign.push_back(alignment);
 }
 
+bool AlignmentPair::IsCompletable() const
+{
+	// TODO
+	return true;
+}
+
+void AlignmentPair::Merge(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange)
+{
+	m_sourceAlign.Merge(newAlignment.m_sourceAlign, sourceRange);
+	m_targetAlign.Merge(newAlignment.m_targetAlign, sourceRange);
+}
+
 TO_STRING_BODY(AlignmentPair);
 
 std::ostream& operator<<(std::ostream &out, const AlignmentPair &alignmentPair)

@@ -38,6 +38,7 @@ protected:
 	AlignmentPhrase m_sourceAlign, m_targetAlign;
 
 public:
+	// constructor
 	AlignmentPair()
 	{}
 
@@ -45,7 +46,7 @@ public:
 		*	they could be populated
 		*/
 	AlignmentPhraseInserter GetInserter(FactorDirection direction);
-	const AlignmentPhrase &GetPhraseAlignVec(FactorDirection direction) const
+	const AlignmentPhrase &GetAlignmentPhrase(FactorDirection direction) const
 	{
 		return (direction == Input) ? m_sourceAlign : m_targetAlign;
 
@@ -55,6 +56,11 @@ public:
 		* Set alignment to 0
 		*/
 	void SetIdentityAlignment();
+
+	//! call Merge for both source and target alignment phrase
+	void Merge(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange);
+
+	bool IsCompletable() const;
 
 	TO_STRING();
 };
