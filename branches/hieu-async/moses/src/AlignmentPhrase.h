@@ -28,15 +28,40 @@ class WordsRange;
 
 
 //! alignments of each word in a phrase
-class AlignmentPhrase : public std::vector<AlignmentElement>
+class AlignmentPhrase
 {
 	friend std::ostream& operator<<(std::ostream& out, const AlignmentPhrase &alignmentPhrase);
-
 public:
+	typedef std::vector<AlignmentElement> CollectionType;
+protected:
+	CollectionType  m_collection;
+public:
+	AlignmentPhrase()
+	{}
+	AlignmentPhrase(size_t size)
+		:m_collection(size)
+	{}
 	bool IsCompatible(const AlignmentPhrase &compare, size_t startPosCompare) const;
 
 	//! add newAlignment to this alignment phrase, offsetting by newAlignmentRange.GetStartPos()
-	void Merge(const AlignmentPhrase &newAlignment, const WordsRange &newAlignmentRange);
+	void Merge(const AlignmentPhrase &newAlignment
+									, size_t shift
+									, const WordsRange &newAlignmentRange);
+	
+	size_t GetSize() const
+	{
+		return m_collection.size();
+	}
+
+	CollectionType &GetVector()
+	{
+		return m_collection;
+	}
+
+	void Add(const AlignmentElement &element)
+	{
+		m_collection.push_back(element);
+	}
 };
 
 

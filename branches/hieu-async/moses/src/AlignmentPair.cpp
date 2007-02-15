@@ -20,13 +20,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "AlignmentPair.h"
 #include "AlignmentPhrase.h"
+#include "WordsRange.h"
 
 using namespace std;
 
 AlignmentPhraseInserter AlignmentPair::GetInserter(FactorDirection direction)
 {
-	return (direction == Input) ? back_insert_iterator<AlignmentPhrase>(m_sourceAlign)
-															: back_insert_iterator<AlignmentPhrase>(m_targetAlign);
+	return (direction == Input) ? back_insert_iterator<AlignmentPhrase::CollectionType>(m_sourceAlign.GetVector())
+															: back_insert_iterator<AlignmentPhrase::CollectionType>(m_targetAlign.GetVector());
 }
 
 void AlignmentPair::SetIdentityAlignment()
@@ -34,20 +35,25 @@ void AlignmentPair::SetIdentityAlignment()
 	AlignmentElement alignment;
 	alignment.SetIdentityAlignment();
 	
-	m_sourceAlign.push_back(alignment);
-	m_targetAlign.push_back(alignment);
+	m_sourceAlign.Add(alignment);
+	m_targetAlign.Add(alignment);
 }
 
 bool AlignmentPair::IsCompletable() const
 {
-	// TODO
+	/*
+	if (!m_sourceAlign.IsCompletable())
+		return false;
+
+	return m_targetAlign.IsCompletable();
+	*/
 	return true;
 }
 
 void AlignmentPair::Merge(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange)
 {
-	m_sourceAlign.Merge(newAlignment.m_sourceAlign, sourceRange);
-	m_targetAlign.Merge(newAlignment.m_targetAlign, sourceRange);
+	m_sourceAlign.Merge(newAlignment.m_sourceAlign, targetRange.GetStartPos(), sourceRange);	
+	m_targetAlign.Merge(newAlignment.m_targetAlign, sourceRange.GetStartPos(), targetRange);
 }
 
 TO_STRING_BODY(AlignmentPair);

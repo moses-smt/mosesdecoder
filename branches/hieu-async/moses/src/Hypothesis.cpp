@@ -61,6 +61,7 @@ Hypothesis::Hypothesis(InputType const& source, const std::vector<DecodeStep*> &
 	, m_id(0)
 	, m_lmstats(NULL)
 	, m_decodeStepId(NOT_FOUND)
+	, m_alignPair(source.GetSize())
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
@@ -129,19 +130,9 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	m_targetPhrase.MergeFactors(transOptPhrase, m_currTargetWordsRange);
 
 	// update alignment
-	if (transOpt.GetSize() > 1 && transOpt.GetDecodeStepId() > 0)
-	{
-		cerr << *this << endl << transOpt << endl 
-				<< m_alignPair << endl
-				<< transOpt.GetAlignmentPair().GetAlignmentPhrase(Output) << endl;
-	}
-
 	m_alignPair.Merge(transOpt.GetAlignmentPair()
 									, transOpt.GetSourceWordsRange()
 									, m_currTargetWordsRange);
-
-	if (transOpt.GetSize() > 1 && transOpt.GetDecodeStepId() > 0)
-		cerr << m_alignPair << endl;
 
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -556,8 +547,8 @@ void Hypothesis::CleanupArcList()
 	{ // prune arc list only if there too many arcs
 
 		// debug
-		ArcList::iterator iterArcList;
 		/*
+		ArcList::iterator iterArcList;
 		for (iterArcList = m_arcList->begin() ; iterArcList != m_arcList->end() ; ++iterArcList)
 		{
 			Hypothesis *hypo = *iterArcList;
@@ -622,6 +613,9 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 	// scores
 	out << " [total=" << hypothesis.GetTotalScore() << "]";
 	out << " " << hypothesis.GetScoreBreakdown();
+
+	// alignment
+	out << hypothesis.GetAlignmentPair();
 	return out;
 }
 

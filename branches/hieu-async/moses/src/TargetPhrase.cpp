@@ -158,7 +158,6 @@ void TargetPhrase::CreateAlignmentInfo(const string &inputStr, const string &out
 {
 	AlignmentPhraseInserter inputInserter = m_alignmentPair.GetInserter(Input)
 													,outputInserter = m_alignmentPair.GetInserter(Output);
-	//cerr << *this << " ::: " << outputStr << " ::: " << inputStr << endl;
 	AddAlignmentElement(inputInserter
 										, inputStr
 										, sourceSize);

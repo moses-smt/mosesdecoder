@@ -25,12 +25,12 @@ using namespace std;
 
 bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t startPosCompare) const 
 {
-	const size_t endPos = std::min(size() , startPosCompare + compare.size());
+	const size_t endPos = std::min(GetSize() , startPosCompare + compare.GetSize());
 	size_t posCompare = 0;
 	for (size_t posThis = startPosCompare ; posThis < endPos ; ++posThis)
 	{
-		const AlignmentElement &alignThis = (*this)[posThis];
-		AlignmentElement alignCompare = compare[posCompare];
+		const AlignmentElement &alignThis = m_collection[posThis];
+		AlignmentElement alignCompare = compare.m_collection[posCompare];
 
 		// shift alignment
 		alignCompare.Shift( (int)startPosCompare );
@@ -44,27 +44,35 @@ bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t startP
 	return true;
 }
 
-void AlignmentPhrase::Merge(const AlignmentPhrase &newAlignment, const WordsRange &newAlignmentRange)
+void AlignmentPhrase::Merge(const AlignmentPhrase &newAlignment
+																	, size_t shift
+																	, const WordsRange &newAlignmentRange)
 {
-	size_t index = 0;
-	for (size_t pos = newAlignmentRange.GetStartPos() ; pos <= newAlignmentRange.GetEndPos() ; ++pos)
+	for (size_t pos = 0 ; pos < newAlignment.GetSize() ; ++pos)
 	{
-		if (pos >= this->size())
-		{
-			// shift alignment
-			AlignmentElement alignElement = newAlignment[index++];
-			alignElement.Shift( (int)newAlignmentRange.GetStartPos() );
+		size_t insertPos = pos + newAlignmentRange.GetStartPos();
 
-			push_back(alignElement);
+		// shift alignment
+		AlignmentElement alignElement = newAlignment.m_collection[pos];
+		alignElement.Shift( (int)shift );
+		
+		if (insertPos >= GetSize())
+		{ // probably doing target. append alignment to end
+			assert(insertPos == GetSize());
+			m_collection.push_back(alignElement);
+		}
+		else
+		{ // should really merge, rather than replace element
+			m_collection[insertPos] = alignElement;
 		}
 	}
 }
 
 std::ostream& operator<<(std::ostream& out, const AlignmentPhrase &alignmentPhrase)
 {
-	for (size_t pos = 0 ; pos < alignmentPhrase.size() ; ++pos)
+	for (size_t pos = 0 ; pos < alignmentPhrase.GetSize() ; ++pos)
 	{
-		const AlignmentElement &alignElement = alignmentPhrase[pos];
+		const AlignmentElement &alignElement = alignmentPhrase.m_collection[pos];
 		out << "[" << alignElement << "] ";
 	}
 	return out;

@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "AlignmentPhrase.h"
 
-typedef std::back_insert_iterator<AlignmentPhrase> AlignmentPhraseInserter;
+typedef std::back_insert_iterator<AlignmentPhrase::CollectionType> AlignmentPhraseInserter;
 
 /** represent the alignment info between source and target phrase */
 class AlignmentPair
@@ -40,6 +40,10 @@ protected:
 public:
 	// constructor
 	AlignmentPair()
+	{}
+	// constructor, init source size. used in hypo
+	AlignmentPair(size_t sourceSize)
+		:m_sourceAlign(sourceSize)
 	{}
 
 	/** get the back_insert_iterator to the source or target alignment vector so that
