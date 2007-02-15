@@ -52,8 +52,12 @@ bool AlignmentPair::IsCompletable() const
 
 void AlignmentPair::Merge(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange)
 {
-	m_sourceAlign.Merge(newAlignment.m_sourceAlign, targetRange.GetStartPos(), sourceRange);	
-	m_targetAlign.Merge(newAlignment.m_targetAlign, sourceRange.GetStartPos(), targetRange);
+	m_sourceAlign.Merge(newAlignment.m_sourceAlign
+										, targetRange.GetStartPos()
+										, sourceRange.GetStartPos());	
+	m_targetAlign.Merge(newAlignment.m_targetAlign
+											, sourceRange.GetStartPos()
+											, targetRange.GetStartPos());
 }
 
 TO_STRING_BODY(AlignmentPair);

@@ -44,9 +44,7 @@ public:
 	bool IsCompatible(const AlignmentPhrase &compare, size_t startPosCompare) const;
 
 	//! add newAlignment to this alignment phrase, offsetting by newAlignmentRange.GetStartPos()
-	void Merge(const AlignmentPhrase &newAlignment
-									, size_t shift
-									, const WordsRange &newAlignmentRange);
+	void Merge(const AlignmentPhrase &newAlignment, size_t shift, size_t startPos);
 	
 	size_t GetSize() const
 	{

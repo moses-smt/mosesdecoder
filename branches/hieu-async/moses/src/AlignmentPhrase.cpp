@@ -44,13 +44,11 @@ bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t startP
 	return true;
 }
 
-void AlignmentPhrase::Merge(const AlignmentPhrase &newAlignment
-																	, size_t shift
-																	, const WordsRange &newAlignmentRange)
+void AlignmentPhrase::Merge(const AlignmentPhrase &newAlignment, size_t shift, size_t startPos)
 {
 	for (size_t pos = 0 ; pos < newAlignment.GetSize() ; ++pos)
 	{
-		size_t insertPos = pos + newAlignmentRange.GetStartPos();
+		size_t insertPos = pos + startPos;
 
 		// shift alignment
 		AlignmentElement alignElement = newAlignment.m_collection[pos];
