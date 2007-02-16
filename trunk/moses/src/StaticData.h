@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <list>
 #include <vector>
+#include <map>
 #include <memory>
 #include "TypeDef.h"
 #include "ScoreIndexManager.h"
@@ -50,7 +51,7 @@ protected:
 	FactorCollection										m_factorCollection;
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
-	std::list < DecodeStep* >						m_decodeStepList;
+	std::vector < std::list < DecodeStep*> * >		m_decodeStepVL;
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
@@ -152,9 +153,9 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	std::list < DecodeStep* > &GetDecodeStepList()
+	std::vector < std::list < DecodeStep* > * > &GetDecodeStepVL()
 	{
-		return m_decodeStepList;
+		return m_decodeStepVL;
 	}
 	
 	inline bool GetSourceStartPosMattersForRecombination() const
