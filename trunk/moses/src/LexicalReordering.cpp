@@ -30,7 +30,7 @@ LexicalReordering::LexicalReordering(const std::string &filePath,
 	m_orientation(orientation), m_condition(condition), m_numScores(weights.size()), m_filePath(filePath), m_sourceFactors(input), m_targetFactors(output)
 {
 	//add score producer
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
 	//manage the weights by SetWeightsForScoreProducer method of static data.
 	if(direction == LexReorderType::Bidirectional)
 	{
@@ -48,7 +48,7 @@ LexicalReordering::LexicalReordering(const std::string &filePath,
 	else if ( orientation == DistortionOrientationType::Msd) {
 		m_numOrientationTypes = 3;
 	}
-	const_cast<StaticData*>(StaticData::Instance())->SetWeightsForScoreProducer(this, weights);
+	const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 	// Load the file
 	LoadFile();
 	//	PrintTable();

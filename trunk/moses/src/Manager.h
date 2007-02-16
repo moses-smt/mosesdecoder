@@ -76,7 +76,6 @@ protected:
 
 	std::vector < HypothesisCollection > m_hypoStack; /**< stacks to store hypothesis (partial translations) */ 
 	// no of elements = no of words in source + 1
-	StaticData &m_staticData; /**< holds various kinds of constants, counters, and global data structures */
 	TranslationOptionCollection *m_possibleTranslations; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	
@@ -89,7 +88,7 @@ protected:
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
 public:
-	Manager(InputType const& source, StaticData &staticData);
+	Manager(InputType const& source);
 	~Manager();
 
 	void ProcessSentence();

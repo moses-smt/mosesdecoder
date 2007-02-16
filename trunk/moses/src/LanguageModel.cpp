@@ -36,7 +36,7 @@ using namespace std;
 LanguageModel::LanguageModel(bool registerScore) 
 {
 	if (registerScore)
-		const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+		const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
 }
 LanguageModel::~LanguageModel() {}
 

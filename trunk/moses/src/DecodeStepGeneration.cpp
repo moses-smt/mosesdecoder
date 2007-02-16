@@ -78,7 +78,6 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
-                              , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const
 {

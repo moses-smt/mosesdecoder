@@ -61,7 +61,7 @@ class Sentence : public Phrase, public InputType
 		return Phrase::GetSize();
 	}
 
-	int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection);
+	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
 	void Print(std::ostream& out) const;
 
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;

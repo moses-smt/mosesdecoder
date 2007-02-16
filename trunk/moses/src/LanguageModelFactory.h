@@ -8,7 +8,6 @@
 #include "TypeDef.h"
 
 class LanguageModel;
-class FactorCollection;
 
 namespace LanguageModelFactory {
 
@@ -17,7 +16,7 @@ namespace LanguageModelFactory {
    * language model toolkit as its underlying implementation
 	 */
 	 LanguageModel* CreateLanguageModel(LMImplementation lmImplementation, const std::vector<FactorType> &factorTypes     
-                                   , size_t nGramOrder, const std::string &languageModelFile, float weight, FactorCollection &factorCollection);
+                                   , size_t nGramOrder, const std::string &languageModelFile, float weight);
 	 
 };
 

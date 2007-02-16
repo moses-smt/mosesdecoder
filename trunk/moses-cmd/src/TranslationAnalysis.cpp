@@ -91,7 +91,7 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 	os << std::endl << std::endl;
 	if (doLMStats && lmCalls > 0) {
 		std::vector<unsigned int>::iterator acc = lmAcc.begin();
-		const LMList& lmlist = StaticData::Instance()->GetAllLM();
+		const LMList& lmlist = StaticData::Instance().GetAllLM();
 		LMList::const_iterator i = lmlist.begin();
 		for (; acc != lmAcc.end(); ++acc, ++i) {
 			char buf[256];
@@ -108,7 +108,7 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
     }
   }
 	os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED):" << std::endl;
-  StaticData::Instance()->GetScoreIndexManager().Debug_PrintLabeledWeightedScores(os, translationPath.back()->GetScoreBreakdown(), StaticData::Instance()->GetAllWeights());
+  StaticData::Instance().GetScoreIndexManager().Debug_PrintLabeledWeightedScores(os, translationPath.back()->GetScoreBreakdown(), StaticData::Instance().GetAllWeights());
 	os << std::endl;
 }
 

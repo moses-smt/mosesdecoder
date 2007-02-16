@@ -58,7 +58,7 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
   return max;
 }
 
-StaticData* StaticData::s_instance(0);
+StaticData StaticData::s_instance;
 
 StaticData::StaticData()
 :m_fLMsLoaded(false)
@@ -74,8 +74,6 @@ StaticData::StaticData()
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
-
-	s_instance = this;
 
 	// memory pools
 	Phrase::InitializeMemPool();
@@ -469,7 +467,7 @@ bool StaticData::LoadLanguageModels()
 			PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
 			
 			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmImplementation, factorTypes     
-                                   									, nGramOrder, languageModelFile, weightAll[i], m_factorCollection);
+                                   									, nGramOrder, languageModelFile, weightAll[i]);
       if (lm == NULL) 
       {
       	UserMessage::Add("no LM created. We probably don't have it compiled");
@@ -523,7 +521,6 @@ bool StaticData::LoadGenerationTables()
 			assert(m_generationDictionary.back() && "could not create GenerationDictionary");
 			if (!m_generationDictionary.back()->Load(input
 																		, output
-																		, m_factorCollection
 																		, filePath
 																		, Output))
 			{
@@ -623,7 +620,6 @@ bool StaticData::LoadPhraseTables()
 				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent);
 				if (!pd->Load(input
 								 , output
-								 , m_factorCollection
 								 , filePath
 								 , weight
 								 , maxTargetPhrase[index]
@@ -640,7 +636,7 @@ bool StaticData::LoadPhraseTables()
 			{
 				TRACE_ERR( "using binary phrase tables for idx "<<currDict<<"\n");
 				PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent,(currDict==0 ? m_numInputScores : 0));
-				if (!pd->Load(input,output,m_factorCollection,filePath,weight,
+				if (!pd->Load(input,output,filePath,weight,
 									 maxTargetPhrase[index],
 									 GetAllLM(),
 									 GetWeightWordPenalty()))
@@ -739,7 +735,7 @@ bool StaticData::LoadMapping()
 	return true;
 }
 
-void StaticData::CleanUpAfterSentenceProcessing() 
+void StaticData::CleanUpAfterSentenceProcessing() const
 {
 	for(size_t i=0;i<m_phraseDictionary.size();++i)
 		m_phraseDictionary[i]->CleanUp();
@@ -758,7 +754,7 @@ void StaticData::CleanUpAfterSentenceProcessing()
 /** initialize the translation and language models for this sentence 
     (includes loading of translation table entries on demand, if
     binary format is used) */
-void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) 
+void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) const
 {
 	for(size_t i=0;i<m_phraseDictionary.size();++i) 
 	{

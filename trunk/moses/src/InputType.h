@@ -55,7 +55,7 @@ public:
 	virtual size_t GetSize() const =0;
 
 	//! populate this InputType with data from in stream
-	virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder, FactorCollection &factorCollection) =0;
+	virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder) =0;
 	
 	//! Output debugging info to stream out
 	virtual void Print(std::ostream&) const =0;

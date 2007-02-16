@@ -27,7 +27,7 @@ PartialTranslOptColl::PartialTranslOptColl()
 {
 	m_bestScore = -std::numeric_limits<float>::infinity();
 	m_worstScore = -std::numeric_limits<float>::infinity();
-	m_maxSize = StaticData::Instance()->GetMaxNoPartTransOpt();
+	m_maxSize = StaticData::Instance().GetMaxNoPartTransOpt();
 	m_totalPruned = 0;
 }
 
