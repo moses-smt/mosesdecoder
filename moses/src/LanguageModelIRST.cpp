@@ -50,11 +50,12 @@ LanguageModelIRST::~LanguageModelIRST()
 
 
 bool LanguageModelIRST::Load(const std::string &filePath
-												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
 												, size_t nGramOrder)
 {
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
 	m_factorType 	 = factorType;
 	m_weight			 = weight;
 	m_nGramOrder	 = nGramOrder;
