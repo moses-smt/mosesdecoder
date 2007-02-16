@@ -48,8 +48,11 @@ struct CNStats {
 CNStats stats;
 
 
-ConfusionNet::ConfusionNet(FactorCollection* p) 
-	: InputType(),m_factorCollection(p) {stats.createOne();}
+ConfusionNet::ConfusionNet() 
+	: InputType()
+{
+	stats.createOne();
+}
 ConfusionNet::~ConfusionNet() {stats.destroyOne();}
 
 ConfusionNet::ConfusionNet(Sentence const& s)
@@ -59,11 +62,6 @@ ConfusionNet::ConfusionNet(Sentence const& s)
 		data[i].push_back(std::make_pair(s.GetWord(i),0.0));
 }
 
-
-void ConfusionNet::SetFactorCollection(FactorCollection *p) 
-{
-	m_factorCollection=p;
-}
 bool ConfusionNet::ReadF(std::istream& in,
 												 const std::vector<FactorType>& factorOrder,
 												 int format) 
@@ -83,10 +81,8 @@ bool ConfusionNet::ReadF(std::istream& in,
 }
 
 int ConfusionNet::Read(std::istream& in,
-											 const std::vector<FactorType>& factorOrder, 
-											 FactorCollection &factorCollection) 
+											 const std::vector<FactorType>& factorOrder) 
 {
-	SetFactorCollection(&factorCollection);
 	int rv=ReadF(in,factorOrder,0);
 	if(rv) stats.collect(*this);
 	return rv;
@@ -99,14 +95,13 @@ void ConfusionNet::String2Word(const std::string& s,Word& w,
 	std::vector<std::string> factorStrVector = Tokenize(s, "|");
 	for(size_t i=0;i<factorOrder.size();++i) 
 		w.SetFactor(factorOrder[i],
-								m_factorCollection->AddFactor(Input,factorOrder[i],
+								FactorCollection::Instance().AddFactor(Input,factorOrder[i],
 																							factorStrVector[i]));
 }
 
 bool ConfusionNet::ReadFormat0(std::istream& in,
 															 const std::vector<FactorType>& factorOrder) 
 {
-	assert(m_factorCollection);
 	Clear();
 	std::string line;
 	while(getline(in,line)) {
@@ -140,7 +135,6 @@ bool ConfusionNet::ReadFormat0(std::istream& in,
 bool ConfusionNet::ReadFormat1(std::istream& in,
 															 const std::vector<FactorType>& factorOrder) 
 {
-	assert(m_factorCollection);
 	Clear();
 	std::string line;
 	if(!getline(in,line)) return 0;
@@ -202,7 +196,7 @@ std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn)
 TranslationOptionCollection* 
 ConfusionNet::CreateTranslationOptionCollection() const 
 {
-	size_t maxNoTransOptPerCoverage = StaticData::Instance()->GetMaxNoTransOptPerCoverage();
+	size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
 	TranslationOptionCollection *rv= new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage);
 	assert(rv);
 	return rv;

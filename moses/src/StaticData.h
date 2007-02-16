@@ -46,9 +46,8 @@ class DecodeStep;
 class StaticData
 {
 private:
-	static StaticData*									s_instance;
+	static StaticData									s_instance;
 protected:	
-	FactorCollection										m_factorCollection;
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::vector < std::list < DecodeStep*> * >		m_decodeStepVL;
@@ -106,6 +105,9 @@ protected:
 	size_t m_maxFactorIdx[2];  //! number of factors on source and target side
 	size_t m_maxNumFactors;  //! max number of factors on both source and target sides
 
+	//! constructor. only the 1 static variable can be created
+	StaticData();
+
 	//! helper fn to set bool param from ini file/command line
 	void SetBooleanParameter(bool *paramter, string parameterName, bool defaultValue);
 
@@ -125,17 +127,21 @@ protected:
 	bool LoadLexicalReorderingModel();
 	
 public:
-	StaticData();
 	~StaticData();
 
-	static const StaticData* Instance() { return s_instance; }
+	static const StaticData& Instance() { return s_instance; }
+
+	static bool LoadDataStatic(Parameter *parameter)
+	{
+		return s_instance.LoadData(parameter);
+	}
 
 	/** Main function to load everything.
 	 * Also initialize the Parameter object
 	 */
 	bool LoadData(Parameter *parameter);
 
-	const PARAM_VEC &GetParam(const std::string &paramName)
+	const PARAM_VEC &GetParam(const std::string &paramName) const
 	{
 		return m_parameter->GetParam(paramName);
 	}
@@ -153,7 +159,7 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	std::vector < std::list < DecodeStep* > * > &GetDecodeStepVL()
+	const std::vector < std::list < DecodeStep* > * > &GetDecodeStepVL() const
 	{
 		return m_decodeStepVL;
 	}
@@ -173,10 +179,6 @@ public:
 	inline size_t GetMaxNoPartTransOpt() const 
 	{ 
 		return m_maxNoPartTransOpt;
-	}
-	FactorCollection &GetFactorCollection()
-	{
-		return m_factorCollection;
 	}
 	std::vector<LexicalReordering*> GetReorderModels() const
 	{
@@ -290,8 +292,8 @@ public:
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	int GetInputType() const {return m_inputType;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
-	void InitializeBeforeSentenceProcessing(InputType const&);
-	void CleanUpAfterSentenceProcessing();
+	void InitializeBeforeSentenceProcessing(InputType const&) const;
+	void CleanUpAfterSentenceProcessing() const;
 	SentenceStats& GetSentenceStats() const
 	{
 		return *m_sentenceStats;

@@ -47,7 +47,6 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 
 bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 																				 , const std::vector<FactorType> &output
-																				 , FactorCollection &factorCollection
 																				 , const std::string &filePath
 																				 , const std::vector<float> &weight
 																				 , size_t tableLimit
@@ -55,6 +54,8 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 																				 , float weightWP
 																				 )
 {
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
 	if(m_numScoreComponent!=weight.size()) {
 		stringstream strme;
 		strme << "ERROR: mismatch of number of scaling factors: "<<weight.size()

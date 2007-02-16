@@ -28,8 +28,7 @@ class LMList;
 
 class TranslationOptionCollectionText : public TranslationOptionCollection {
  public:
-	void ProcessUnknownWord(		size_t sourcePos
-															, FactorCollection &factorCollection);
+	void ProcessUnknownWord(		size_t sourcePos);
 	
 	TranslationOptionCollectionText(Sentence const& inputSentence, size_t maxNoTransOptPerCoverage);
 	

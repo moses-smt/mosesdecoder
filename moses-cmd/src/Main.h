@@ -39,4 +39,4 @@ POSSIBILITY OF SUCH DAMAGE.
 class IOStream;
 
 int main(int argc, char* argv[]);
-IOStream *GetIODevice(StaticData &staticData);
+IOStream *GetIODevice(const StaticData &staticData);

@@ -85,8 +85,8 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;		
 	}
 
-	StaticData staticData;
-	if (!staticData.LoadData(parameter))
+	const StaticData &staticData = StaticData::Instance();
+	if (!StaticData::LoadDataStatic(parameter))
 		return EXIT_FAILURE;
 
 	// set up read/writing class
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 
 		staticData.InitializeBeforeSentenceProcessing(*source);
-		Manager manager(*source, staticData);
+		Manager manager(*source);
 		manager.ProcessSentence();
 		ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 													 staticData.GetReportSegmentation(),
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 	#endif
 }
 
-IOStream *GetIODevice(StaticData &staticData)
+IOStream *GetIODevice(const StaticData &staticData)
 {
 	IOStream *ioStream;
 	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
@@ -178,7 +178,6 @@ IOStream *GetIODevice(StaticData &staticData)
 		string filePath = staticData.GetParam("input-file")[0];
 
 		ioStream = new IOStream(inputFactorOrder, outputFactorOrder, inputFactorUsed
-																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath()
 																	, filePath);
@@ -187,7 +186,6 @@ IOStream *GetIODevice(StaticData &staticData)
 	{
 	  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
 		ioStream = new IOStream(inputFactorOrder, outputFactorOrder, inputFactorUsed
-																	, staticData.GetFactorCollection()
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath());
 	}

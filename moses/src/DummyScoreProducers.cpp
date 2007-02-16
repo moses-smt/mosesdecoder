@@ -6,7 +6,7 @@
 
 DistortionScoreProducer::DistortionScoreProducer()
 {
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
 }
 
 size_t DistortionScoreProducer::GetNumScoreComponents() const
@@ -34,7 +34,7 @@ float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, 
 
 WordPenaltyProducer::WordPenaltyProducer()
 {
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
 }
 
 size_t WordPenaltyProducer::GetNumScoreComponents() const

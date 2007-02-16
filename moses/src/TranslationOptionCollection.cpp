@@ -125,8 +125,7 @@ void TranslationOptionCollection::Prune()
 * \param factorCollection input sentence with all factors
 */
 
-void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::list < DecodeStep* > * > &decodeStepVL
-																			, FactorCollection &factorCollection)
+void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::list < DecodeStep* > * > &decodeStepVL)
 {
 	size_t size = m_source.GetSize();
 	// try to translation for coverage with no trans by expanding table limit
@@ -139,7 +138,7 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::li
 				size_t numTransOpt = fullList.size();
 				if (numTransOpt == 0)
 				{
-					CreateTranslationOptionsForRange(*decodeStepList, factorCollection
+					CreateTranslationOptionsForRange(*decodeStepList
 																				, pos, pos, false);
 				}
 		}
@@ -165,7 +164,7 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::li
 	for (size_t currPos = 0 ; currPos < size ; ++currPos)
 	{
 		if (process[currPos])
-			ProcessUnknownWord(currPos, *m_factorCollection);
+			ProcessUnknownWord(currPos);
 	}
 }
 
@@ -182,54 +181,54 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::li
 	* \param factorCollection input sentence with all factors
  */
 void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
-																														size_t sourcePos
-																												, FactorCollection &factorCollection)
+																														size_t sourcePos)
 {
 	// unknown word, add as trans opt
+	FactorCollection &factorCollection = FactorCollection::Instance();
 
-		size_t isDigit = 0;
-		if (StaticData::Instance()->GetDropUnknown())
-		{
-			const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-			const string &s = f->GetString();
-			isDigit = s.find_first_of("0123456789");
-			if (isDigit == string::npos) 
-				isDigit = 0;
-			else 
-				isDigit = 1;
-			// modify the starting bitmap
-		}
-		
-		TranslationOption *transOpt;
-		if (! StaticData::Instance()->GetDropUnknown() || isDigit)
-		{
-			// add to dictionary
-			TargetPhrase targetPhrase(Output);
-			Word &targetWord = targetPhrase.AddWord();
-						
-			for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
-			{
-				FactorType factorType = static_cast<FactorType>(currFactor);
-				
-				const Factor *sourceFactor = sourceWord[currFactor];
-				if (sourceFactor == NULL)
-					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
-				else
-					targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
-			}
-	
-			targetPhrase.SetScore();
-			
-			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
-		}
+	size_t isDigit = 0;
+	if (StaticData::Instance().GetDropUnknown())
+	{
+		const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
+		const string &s = f->GetString();
+		isDigit = s.find_first_of("0123456789");
+		if (isDigit == string::npos) 
+			isDigit = 0;
 		else 
-		{ // drop source word. create blank trans opt
-			const TargetPhrase targetPhrase(Output);
-			transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
+			isDigit = 1;
+		// modify the starting bitmap
+	}
+	
+	TranslationOption *transOpt;
+	if (! StaticData::Instance().GetDropUnknown() || isDigit)
+	{
+		// add to dictionary
+		TargetPhrase targetPhrase(Output);
+		Word &targetWord = targetPhrase.AddWord();
+					
+		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			
+			const Factor *sourceFactor = sourceWord[currFactor];
+			if (sourceFactor == NULL)
+				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
+			else
+				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
 		}
 
-		transOpt->CalcScore();
-		Add(transOpt);
+		targetPhrase.SetScore();
+		
+		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
+	}
+	else 
+	{ // drop source word. create blank trans opt
+		const TargetPhrase targetPhrase(Output);
+		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
+	}
+
+	transOpt->CalcScore();
+	Add(transOpt);
 }
 
 /** compute future score matrix in a dynamic programming fashion.
@@ -319,11 +318,8 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::CreateTranslationOptions(const vector <list < DecodeStep* > * > &decodeStepVL
-																													 , FactorCollection &factorCollection)
-{
-	m_factorCollection = &factorCollection;
-	
+void TranslationOptionCollection::CreateTranslationOptions(const vector <list < DecodeStep* > * > &decodeStepVL)
+{	
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
 	// table loaded on initialization), generate TranslationOption objects
@@ -335,14 +331,14 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <list < 
 		{
 			for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
 			{
-				CreateTranslationOptionsForRange( *decodeStepList, factorCollection, startPos, endPos, true);				
+				CreateTranslationOptionsForRange( *decodeStepList, startPos, endPos, true);				
  			}
 		}
 	}
 
 	VERBOSE(3,"Translation Option Collection\n " << *this << endl);
 	
-	ProcessUnknownWord(decodeStepVL, factorCollection);
+	ProcessUnknownWord(decodeStepVL);
 	
 	// Prune
 	Prune();
@@ -361,7 +357,6 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <list < 
  */
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 const list < DecodeStep* > &decodeStepList
-																													 , FactorCollection &factorCollection
 																													 , size_t startPos
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
@@ -373,8 +368,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	list < DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
 	const DecodeStep &decodeStep = **iterStep;
 
-	ProcessInitialTranslation(decodeStep, factorCollection
-														, *oldPtoc
+	ProcessInitialTranslation(decodeStep, *oldPtoc
 														, startPos, endPos, adhereTableLimit );
 
 	// do rest of decode steps
@@ -394,7 +388,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 				decodeStep.Process(inputPartialTranslOpt
 																	 , decodeStep
 																	 , *newPtoc
-																	 , factorCollection
 																	 , this
 																	 , adhereTableLimit);
 			}
@@ -427,7 +420,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	*/
 void TranslationOptionCollection::ProcessInitialTranslation(
 															const DecodeStep &decodeStep
-															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos
 															, size_t endPos

@@ -53,7 +53,6 @@ protected:
 	const std::vector<FactorType>	&m_inputFactorOrder;
 	const std::vector<FactorType>	&m_outputFactorOrder;
 	const FactorMask							&m_inputFactorUsed;
-	FactorCollection							&m_factorCollection;
 	std::ostream 								*m_nBestStream;
 	std::string										m_inputFilePath;
 	std::istream									*m_inputStream;
@@ -64,14 +63,12 @@ public:
 	IOStream(const std::vector<FactorType>	&inputFactorOrder
 		, const std::vector<FactorType>			&outputFactorOrder
 				, const FactorMask							&inputFactorUsed
-				, FactorCollection							&factorCollection
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath);
 
 	IOStream(const std::vector<FactorType>	&inputFactorOrder
 				, const std::vector<FactorType>	&outputFactorOrder
 				, const FactorMask							&inputFactorUsed
-				, FactorCollection							&factorCollection
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath
 				, const std::string							&inputFilePath);

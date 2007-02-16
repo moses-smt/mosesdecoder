@@ -38,7 +38,6 @@ using namespace std;
 
 bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
-																			, FactorCollection &factorCollection
 																			, const string &filePath
 																			, const vector<float> &weight
 																			, size_t tableLimit
@@ -83,7 +82,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			continue;
 		}
 
-		const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
+		const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 		if (tokens[0] != prevSourcePhrase)
 			phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
 
@@ -99,10 +98,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			
 		// source
 		Phrase sourcePhrase(Input);
-		sourcePhrase.CreateFromString( input, phraseVector, factorCollection);
+		sourcePhrase.CreateFromString( input, phraseVector);
 		//target
 		TargetPhrase targetPhrase(Output);
-		targetPhrase.CreateFromString( output, tokens[1], factorCollection, factorDelimiter);
+		targetPhrase.CreateFromString( output, tokens[1], factorDelimiter);
 
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());

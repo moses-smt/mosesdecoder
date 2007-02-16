@@ -29,6 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+FactorCollection FactorCollection::s_instance;
+
 void FactorCollection::LoadVocab(FactorDirection direction, FactorType factorType, const string &filePath)
 {
 	ifstream 	inFile(filePath.c_str());

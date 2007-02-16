@@ -51,7 +51,6 @@ TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOpti
 void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
-                              , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const
 {

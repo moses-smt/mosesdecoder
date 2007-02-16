@@ -82,7 +82,7 @@ void Phrase::MergeFactors(const Phrase &copy)
 {
 	assert(GetSize() == copy.GetSize());
 	size_t size = GetSize();
-	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
+	const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
 		for (unsigned int currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
@@ -180,7 +180,7 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString, const st
 		//    to
 		// "KOMMA" "none"
 		if (factorStrVector.size() != factorOrder.size()) {
-			TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance()->GetCurrentInputPosition() <<*/ std::endl
+			TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance().GetCurrentInputPosition() <<*/ std::endl
 			          << "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
 								<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
 			abort();
@@ -191,9 +191,10 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString, const st
 }
 
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
-															, const vector< vector<string> > &phraseVector
-															, FactorCollection &factorCollection)
+															, const vector< vector<string> > &phraseVector)
 {
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
 	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
 	{
 		// add word this phrase
@@ -210,11 +211,10 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const string &phraseString
-															, FactorCollection &factorCollection
-		, const string &factorDelimiter)
+															, const string &factorDelimiter)
 {
 	vector< vector<string> > phraseVector = Parse(phraseString, factorOrder, factorDelimiter);
-	CreateFromString(factorOrder, phraseVector, factorCollection);
+	CreateFromString(factorOrder, phraseVector);
 }
 
 bool Phrase::operator < (const Phrase &compare) const
@@ -234,7 +234,7 @@ bool Phrase::operator < (const Phrase &compare) const
 	{
 		size_t minSize = std::min( thisSize , compareSize );
 
-		const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
+		const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
 		// taken from word.Compare()
 		for (size_t i = 0 ; i < maxNumFactors ; i++)
 		{
@@ -311,7 +311,7 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 
 	const size_t size = GetSize();
 
-	const size_t maxNumFactors = StaticData::Instance()->GetMaxNumFactors(this->GetDirection());
+	const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
 	for (size_t currPos = 0 ; currPos < size ; currPos++)
 	{
 		for (unsigned int currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)

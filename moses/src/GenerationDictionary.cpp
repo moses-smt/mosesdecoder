@@ -34,15 +34,16 @@ using namespace std;
 GenerationDictionary::GenerationDictionary(size_t numFeatures)
   : Dictionary(numFeatures)
 {
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
 }
 
 bool GenerationDictionary::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
-																			, FactorCollection &factorCollection
 																			, const std::string &filePath
 																			, FactorDirection direction)
 {	
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
 	const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();
 
 	//factors	

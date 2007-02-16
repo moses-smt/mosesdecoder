@@ -49,13 +49,11 @@ IOStream::IOStream(
 				const vector<FactorType>				&inputFactorOrder
 				, const vector<FactorType>			&outputFactorOrder
 				, const FactorMask							&inputFactorUsed
-				, FactorCollection							&factorCollection
 				, size_t												nBestSize
 				, const string									&nBestFilePath)
 :m_inputFactorOrder(inputFactorOrder)
 ,m_outputFactorOrder(outputFactorOrder)
 ,m_inputFactorUsed(inputFactorUsed)
-,m_factorCollection(factorCollection)
 ,m_inputFile(NULL)
 ,m_inputStream(&std::cin)
 ,m_nBestStream(NULL)
@@ -80,14 +78,12 @@ IOStream::IOStream(
 IOStream::IOStream(const std::vector<FactorType>	&inputFactorOrder
 						 , const std::vector<FactorType>	&outputFactorOrder
 							, const FactorMask							&inputFactorUsed
-							, FactorCollection							&factorCollection
 							, size_t												nBestSize
 							, const std::string							&nBestFilePath
 							, const std::string							&inputFilePath)
 :m_inputFactorOrder(inputFactorOrder)
 ,m_outputFactorOrder(outputFactorOrder)
 ,m_inputFactorUsed(inputFactorUsed)
-,m_factorCollection(factorCollection)
 ,m_inputFilePath(inputFilePath)
 ,m_inputFile(new InputFileStream(inputFilePath))
 ,m_nBestStream(NULL)
@@ -123,7 +119,7 @@ IOStream::~IOStream()
 
 InputType*IOStream::GetInput(InputType* inputType)
 {
-	if(inputType->Read(*m_inputStream, m_inputFactorOrder, m_factorCollection)) 
+	if(inputType->Read(*m_inputStream, m_inputFactorOrder)) 
 	{
 		inputType->SetTranslationId(m_translationId++);
 		return inputType;
@@ -210,7 +206,7 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 
 void IOStream::OutputNBestList(const LatticePathList &nBestList, long translationId)
 {
-	bool labeledOutput = StaticData::Instance()->IsLabeledNBestList();
+	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
 	
 	LatticePathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
@@ -234,10 +230,10 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		// basic distortion
 		if (labeledOutput)
 	    *m_nBestStream << "d: ";
-		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetDistortionScoreProducer()) << " ";
+		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
 
 //		reordering
-		vector<LexicalReordering*> rms = StaticData::Instance()->GetReorderModels();
+		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();
 		if(rms.size() > 0)
 		{
 				vector<LexicalReordering*>::iterator iter;
@@ -252,7 +248,7 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		}
 			
 		// lm
-		const LMList& lml = StaticData::Instance()->GetAllLM();
+		const LMList& lml = StaticData::Instance().GetAllLM();
     if (lml.size() > 0) {
 			if (labeledOutput)
 	      *m_nBestStream << "lm: ";
@@ -263,9 +259,9 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
     }
 
 		// translation components
-		if (StaticData::Instance()->GetInputType()==0){  
+		if (StaticData::Instance().GetInputType()==0){  
 			// translation components	for text input
-			vector<PhraseDictionary*> pds = StaticData::Instance()->GetPhraseDictionaries();
+			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
 					*m_nBestStream << "tm: ";
@@ -281,7 +277,7 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 			// translation components for Confusion Network input
 			// first translation component has GetNumInputScores() scores from the input Confusion Network
 			// at the beginning of the vector
-			vector<PhraseDictionary*> pds = StaticData::Instance()->GetPhraseDictionaries();
+			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				vector<PhraseDictionary*>::iterator iter;
 				
@@ -318,10 +314,10 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		// word penalty
 		if (labeledOutput)
 	    *m_nBestStream << "w: ";
-		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance()->GetWordPenaltyProducer()) << " ";
+		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetWordPenaltyProducer()) << " ";
 		
 		// generation
-		vector<GenerationDictionary*> gds = StaticData::Instance()->GetGenerationDictionaries();
+		vector<GenerationDictionary*> gds = StaticData::Instance().GetGenerationDictionaries();
     if (gds.size() > 0) {
 			if (labeledOutput)
 	      *m_nBestStream << "g: ";

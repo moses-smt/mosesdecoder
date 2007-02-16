@@ -63,23 +63,20 @@ protected:
 	InputType const			&m_source; /*< reference to the input */
 	SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
 	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase???) */
-	FactorCollection		*m_factorCollection;
 	
 	TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage);
 	
 	void CalcFutureScore();
 
 	virtual void ProcessInitialTranslation(const DecodeStep &decodeStep
-															, FactorCollection &factorCollection
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos, bool adhereTableLimit );
 
 	//! Force a creation of a translation option where there are none for a particular source position.
-	void ProcessUnknownWord(const std::vector < std::list < DecodeStep* > *> &decodeStepVL, FactorCollection &factorCollection);
+	void ProcessUnknownWord(const std::vector < std::list < DecodeStep* > *> &decodeStepVL);
 	//! special handling of ONE unknown words.
 	virtual void ProcessOneUnknownWord(const Word &sourceWord
-																		 , size_t sourcePos
-																		 , FactorCollection &factorCollection);
+																		 , size_t sourcePos);
 	//! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 	void Prune();
 
@@ -95,8 +92,7 @@ protected:
 	void Add(const TranslationOption *translationOption);
 
 	//! implemented by inherited class, called by this class
-	virtual void ProcessUnknownWord(size_t sourcePos
-																	, FactorCollection &factorCollection)=0;
+	virtual void ProcessUnknownWord(size_t sourcePos)=0;
 
 public:
   virtual ~TranslationOptionCollection();
@@ -108,11 +104,9 @@ public:
 	size_t GetSize() const { return m_source.GetSize(); };
 
 	//! Create all possible translations from the phrase tables
-	virtual void CreateTranslationOptions(const std::vector < std::list < DecodeStep* > * > &decodeStepVL
-																			, FactorCollection &factorCollection);
+	virtual void CreateTranslationOptions(const std::vector < std::list < DecodeStep* > * > &decodeStepVL);
 	//! Create translation options that exactly cover a specific input span. 
 	virtual void CreateTranslationOptionsForRange(const std::list < DecodeStep* > &decodeStepList
-																			, FactorCollection &factorCollection
 																			, size_t startPosition
 																			, size_t endPosition
 																			, bool adhereTableLimit);

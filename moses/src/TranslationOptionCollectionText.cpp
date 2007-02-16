@@ -37,9 +37,8 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
 /* forcibly create translation option for a particular source word.
 	* For text, this function is easy, just call the base class' ProcessOneUnknownWord()
 */
-void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos
-												, FactorCollection &factorCollection)
+void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos)
 {
 	const Word &sourceWord = m_source.GetWord(sourcePos);
-	ProcessOneUnknownWord(sourceWord,sourcePos,factorCollection);
+	ProcessOneUnknownWord(sourceWord,sourcePos);
 }

@@ -25,7 +25,6 @@ protected:
 public:
 	LanguageModelInternal(bool registerScore);
 	bool Load(const std::string &filePath
-					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder);
