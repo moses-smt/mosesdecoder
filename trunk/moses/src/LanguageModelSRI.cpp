@@ -47,11 +47,12 @@ LanguageModelSRI::~LanguageModelSRI()
 }
 
 bool LanguageModelSRI::Load(const std::string &filePath
-												, FactorCollection &factorCollection
 												, FactorType factorType
 												, float weight
 												, size_t nGramOrder)
 {
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
 	m_srilmVocab  = new Vocab();
   m_srilmModel	= new Ngram(*m_srilmVocab, nGramOrder);
 	m_factorType 	= factorType;

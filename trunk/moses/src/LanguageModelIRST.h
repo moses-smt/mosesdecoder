@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "LanguageModelSingleFactor.h"
 
-class FactorCollection;
 class Factor;
 class Phrase;
 
@@ -65,7 +64,6 @@ public:
 	LanguageModelIRST(bool registerScore);
 	~LanguageModelIRST();
 	bool Load(const std::string &filePath
-					, FactorCollection &factorCollection
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder);
