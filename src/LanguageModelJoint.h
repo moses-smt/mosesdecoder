@@ -40,7 +40,6 @@ class LanguageModelJoint : public LanguageModelMultiFactor
 {
 protected:
 	LanguageModelSingleFactor *m_lmImpl;
-	FactorCollection *m_factorCollection;
 	std::vector<FactorType> m_factorTypesOrdered;
 	
 	size_t m_implFactor;
@@ -57,7 +56,6 @@ public:
 	}
 	
 	bool Load(const std::string &filePath
-					, FactorCollection &factorCollection
 					, const std::vector<FactorType> &factorTypes
 					, float weight
 					, size_t nGramOrder)
@@ -68,9 +66,10 @@ public:
 		m_nGramOrder 				= nGramOrder;
 	
 		m_factorTypesOrdered= factorTypes;
-		m_factorCollection	= &factorCollection;
 		m_implFactor				= 0;
 		
+		FactorCollection &factorCollection = FactorCollection::Instance();
+
 		// sentence markers
 		for (size_t index = 0 ; index < factorTypes.size() ; ++index)
 		{
@@ -79,7 +78,7 @@ public:
 			m_sentenceEndArray[factorType] 		= factorCollection.AddFactor(Output, factorType, EOS_);
 		}
 	
-		return m_lmImpl->Load(filePath, factorCollection, m_implFactor, weight, nGramOrder);
+		return m_lmImpl->Load(filePath, m_implFactor, weight, nGramOrder);
 	}
 	
 	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
@@ -114,7 +113,7 @@ public:
 				stream << "|" << factor->GetString();
 			}
 			
-			factor = m_factorCollection->AddFactor(Output, m_implFactor, stream.str());
+			factor = FactorCollection::Instance().AddFactor(Output, m_implFactor, stream.str());
 
 			Word* jointWord = new Word;
 			jointWord->SetFactor(m_implFactor, factor);

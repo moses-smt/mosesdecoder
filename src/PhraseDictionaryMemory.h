@@ -47,7 +47,6 @@ public:
 
 	bool Load(const std::vector<FactorType> &input
 								, const std::vector<FactorType> &output
-								, FactorCollection &factorCollection
 								, const std::string &filePath
 								, const std::vector<float> &weight
 								, size_t tableLimit

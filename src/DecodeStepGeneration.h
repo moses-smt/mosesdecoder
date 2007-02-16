@@ -38,7 +38,6 @@ public:
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
-                              , FactorCollection &factorCollection
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const;
 

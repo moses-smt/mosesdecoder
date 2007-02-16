@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 PhraseDictionary::PhraseDictionary(size_t numScoreComponent)
 	: Dictionary(numScoreComponent),m_tableLimit(0)
 {
-	const_cast<ScoreIndexManager&>(StaticData::Instance()->GetScoreIndexManager()).AddScoreProducer(this);
+	const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
 }
 
 PhraseDictionary::~PhraseDictionary() {}

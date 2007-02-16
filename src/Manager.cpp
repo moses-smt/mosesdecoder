@@ -39,20 +39,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-Manager::Manager(InputType const& source, StaticData &staticData)
+Manager::Manager(InputType const& source)
 :m_source(source)
 ,m_hypoStack(source.GetSize() + 1)
-,m_staticData(staticData)
 ,m_possibleTranslations(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 {
+	const StaticData &staticData = StaticData::Instance();
+
 	TRACE_ERR("Translating: " << m_source << endl);
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
 		HypothesisCollection &sourceHypoColl = *iterStack;
-		sourceHypoColl.SetMaxHypoStackSize(m_staticData.GetMaxHypoStackSize());
-		sourceHypoColl.SetBeamThreshold(m_staticData.GetBeamThreshold());
+		sourceHypoColl.SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
+		sourceHypoColl.SetBeamThreshold(staticData.GetBeamThreshold());
 	}
 }
 
@@ -68,16 +69,17 @@ Manager::~Manager()
  */
 void Manager::ProcessSentence()
 {	
-	m_staticData.ResetSentenceStats(m_source);
-	vector < list < DecodeStep* > * >&decodeStepVL = m_staticData.GetDecodeStepVL();
+	const StaticData &staticData = StaticData::Instance();
+	staticData.ResetSentenceStats(m_source);
+	const vector < list < DecodeStep* > * >
+			&decodeStepVL = staticData.GetDecodeStepVL();
 	
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
-	m_possibleTranslations->CreateTranslationOptions(decodeStepVL
-  														, m_staticData.GetFactorCollection());
+	m_possibleTranslations->CreateTranslationOptions(decodeStepVL);
 
 	// initial seed hypothesis: nothing translated, no words produced
 	{
@@ -93,7 +95,7 @@ void Manager::ProcessSentence()
 
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
-		sourceHypoColl.PruneToSize(m_staticData.GetMaxHypoStackSize());
+		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
 
@@ -109,7 +111,7 @@ void Manager::ProcessSentence()
 	}
 
 	// some more logging
-	VERBOSE(2,m_staticData.GetSentenceStats());
+	VERBOSE(2, staticData.GetSentenceStats());
 }
 
 /** Find all translation options to expand one hypothesis, trigger expansion
@@ -120,7 +122,7 @@ void Manager::ProcessSentence()
 void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 {
 	// since we check for reordering limits, its good to have that limit handy
-	int maxDistortion = m_staticData.GetMaxDistortion();
+	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 
 	// no limit of reordering: only check for overlap
 	if (maxDistortion < 0)
@@ -218,11 +220,14 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 {
 	// create hypothesis and calculate all its scores
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-	newHypo->CalcScore(m_staticData, m_possibleTranslations->GetFutureScore());
+	newHypo->CalcScore(m_possibleTranslations->GetFutureScore());
 	
 	// logging for the curious
 	IFVERBOSE(3) {
-	  newHypo->PrintHypothesis(m_source, m_staticData.GetWeightDistortion(), m_staticData.GetWeightWordPenalty());
+		const StaticData &staticData = StaticData::Instance();
+	  newHypo->PrintHypothesis(m_source
+														, staticData.GetWeightDistortion()
+														, staticData.GetWeightWordPenalty());
 	}
 
 	// add to hypothesis stack
@@ -347,7 +352,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 
 		if(onlyDistinct)
 		{
-			size_t nBestFactor = StaticData::Instance()->GetNBestFactor();
+			size_t nBestFactor = StaticData::Instance().GetNBestFactor();
 			if (nBestFactor > 0)
 				contenders.Prune(count * nBestFactor);
 		}

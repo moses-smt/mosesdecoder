@@ -26,23 +26,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "Util.h"
 
-int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder,
-									 FactorCollection &factorCollection) 
+int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder) 
 {
-	const std::string& factorDelimiter = StaticData::Instance()->GetFactorDelimiter();
+	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	std::string line;
 	if (getline(in, line, '\n').eof())	
 		return 0;
 	line = Trim(line);
 	
-	Phrase::CreateFromString(factorOrder, line, factorCollection, factorDelimiter);
+	Phrase::CreateFromString(factorOrder, line, factorDelimiter);
 	return 1;
 }
 
 TranslationOptionCollection* 
 Sentence::CreateTranslationOptionCollection() const 
 {
-	size_t maxNoTransOptPerCoverage = StaticData::Instance()->GetMaxNoTransOptPerCoverage();
+	size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
 	TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage);
 	assert(rv);
 	return rv;

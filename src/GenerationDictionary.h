@@ -62,7 +62,6 @@ public:
 	//! load data file
 	bool Load(const std::vector<FactorType> &input
 									, const std::vector<FactorType> &output
-									, FactorCollection &factorCollection
 									, const std::string &filePath
 									, FactorDirection direction);
 

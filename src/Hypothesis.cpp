@@ -53,7 +53,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
-	, m_languageModelStates(StaticData::Instance()->GetLMSize(), LanguageModelSingleFactor::UnknownState)
+	, m_languageModelStates(StaticData::Instance().GetLMSize(), LanguageModelSingleFactor::UnknownState)
 	, m_arcList(NULL)
 	, m_id(0)
 	, m_lmstats(NULL)
@@ -187,7 +187,7 @@ int Hypothesis::NGramCompare(const Hypothesis &compare) const
 	if (m_sourceCompleted.GetCompressedRepresentation() > compare.m_sourceCompleted.GetCompressedRepresentation()) return 1;
 	if (m_currSourceWordsRange.GetEndPos() < compare.m_currSourceWordsRange.GetEndPos()) return -1;
 	if (m_currSourceWordsRange.GetEndPos() > compare.m_currSourceWordsRange.GetEndPos()) return 1;
-	if (! StaticData::Instance()->GetSourceStartPosMattersForRecombination()) return 0;
+	if (! StaticData::Instance().GetSourceStartPosMattersForRecombination()) return 0;
 	if (m_currSourceWordsRange.GetStartPos() < compare.m_currSourceWordsRange.GetStartPos()) return -1;
 	if (m_currSourceWordsRange.GetStartPos() > compare.m_currSourceWordsRange.GetStartPos()) return 1;
 	return 0;
@@ -207,7 +207,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 	LMList::const_iterator iterLM;
 
 	// will be null if LM stats collection is disabled
-	if (StaticData::Instance()->IsComputeLMBackoffStats()) {
+	if (StaticData::Instance().IsComputeLMBackoffStats()) {
 		m_lmstats = new vector<vector<unsigned int> >(languageModels.size(), vector<unsigned int>(0));
 	}
 
@@ -299,7 +299,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 void Hypothesis::CalcDistortionScore()
 
 {
-	const DistortionScoreProducer *dsp = StaticData::Instance()->GetDistortionScoreProducer();
+	const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
 	float distortionScore = dsp->CalculateDistortionScore(
 			m_prevHypo->GetCurrSourceWordsRange(),
 			this->GetCurrSourceWordsRange()
@@ -316,8 +316,10 @@ void Hypothesis::ResetScore()
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::CalcScore(const StaticData& staticData, const SquareMatrix &futureScore) 
+void Hypothesis::CalcScore(const SquareMatrix &futureScore) 
 {
+	const StaticData &staticData = StaticData::Instance();
+
 	// DISTORTION COST
 	CalcDistortionScore();
 	
@@ -367,9 +369,9 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 	}
 
 	// add future costs for distortion model
-	if(StaticData::Instance()->UseDistortionFutureCosts())
+	if(StaticData::Instance().UseDistortionFutureCosts())
 		m_futureScore += m_sourceCompleted.GetFutureCosts( (int)m_currSourceWordsRange.GetEndPos() ) 
-											* StaticData::Instance()->GetWeightDistortion();
+											* StaticData::Instance().GetWeightDistortion();
 	
 }
 
@@ -420,9 +422,9 @@ void Hypothesis::CleanupArcList()
 	 * However, may not be enough if only unique candidates are needed,
 	 * so we'll keep all of arc list if nedd distinct n-best list
 	 */
-	const StaticData *staticData = StaticData::Instance();
-	size_t nBestSize = staticData->GetNBestSize();
-	bool distinctNBest = staticData->GetDistinctNBest();
+	const StaticData &staticData = StaticData::Instance();
+	size_t nBestSize = staticData.GetNBestSize();
+	bool distinctNBest = staticData.GetDistinctNBest();
 
 	if (!distinctNBest && m_arcList->size() > nBestSize * 5)
 	{ // prune arc list only if there too many arcs
@@ -488,7 +490,7 @@ std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factor
 std::string Hypothesis::GetSourcePhraseStringRep() const 
 {
 	vector<FactorType> allFactors;
-	const size_t maxSourceFactors = StaticData::Instance()->GetMaxNumFactors(Input);
+	const size_t maxSourceFactors = StaticData::Instance().GetMaxNumFactors(Input);
 	for(size_t i=0; i < maxSourceFactors; i++)
 	{
 		allFactors.push_back(i);
@@ -498,7 +500,7 @@ std::string Hypothesis::GetSourcePhraseStringRep() const
 std::string Hypothesis::GetTargetPhraseStringRep() const 
 {
 	vector<FactorType> allFactors;
-	const size_t maxTargetFactors = StaticData::Instance()->GetMaxNumFactors(Output);
+	const size_t maxTargetFactors = StaticData::Instance().GetMaxNumFactors(Output);
 	for(size_t i=0; i < maxTargetFactors; i++)
 	{
 		allFactors.push_back(i);

@@ -140,7 +140,7 @@ public:
 
 	void ResetScore();
 
-	void CalcScore(const StaticData& staticData, const SquareMatrix &futureScore);
+	void CalcScore(const SquareMatrix &futureScore);
 
 	int GetId()const
 	{

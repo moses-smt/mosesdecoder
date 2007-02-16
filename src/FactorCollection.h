@@ -43,16 +43,20 @@ class FactorCollection
 	friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
 
 protected:
-	size_t		m_factorId; /**< unique, contiguous ids, starting from 0, for each factor */
-	
+	static FactorCollection s_instance;
+
+	size_t		m_factorId; /**< unique, contiguous ids, starting from 0, for each factor */	
 	FactorSet m_collection; /**< collection of all factors */
 	StringSet m_factorStringCollection; /**< collection of unique string used by factors */
-public:
-	//! constructor
+
+	//! constructor. only the 1 static variable can be created
 	FactorCollection()
 	:m_factorId(0)
 	{}
-		
+
+public:		
+	static FactorCollection& Instance() { return s_instance; }
+
 	//! Destructor
 	~FactorCollection();
 

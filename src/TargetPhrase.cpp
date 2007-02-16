@@ -38,7 +38,7 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
 void TargetPhrase::SetScore()
 { // used when creating translations of unknown words:
 	m_transScore = m_ngramScore = 0;	
-	m_fullScore = - StaticData::Instance()->GetWeightWordPenalty();	
+	m_fullScore = - StaticData::Instance().GetWeightWordPenalty();	
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
@@ -84,7 +84,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
 {
 	// calling this function in case of confusion net input is undefined
-	assert(StaticData::Instance()->GetInputType()==0); 
+	assert(StaticData::Instance().GetInputType()==0); 
 	
 	/* one way to fix this, you have to make sure the weightT contains (in 
      addition to the usual phrase translation scaling factors) the input 

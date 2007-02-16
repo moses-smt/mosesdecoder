@@ -83,14 +83,14 @@ void TranslationOption::CalcScore()
 	float m_ngramScore = 0;
 	float retFullScore = 0;
 
-	const LMList &allLM = StaticData::Instance()->GetAllLM();
+	const LMList &allLM = StaticData::Instance().GetAllLM();
 
 	allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, &m_scoreBreakdown);
 	// future score
 	m_futureScore = retFullScore - m_ngramScore;
 
 	size_t phraseSize = GetTargetPhrase().GetSize();
-	m_futureScore += m_scoreBreakdown.InnerProduct(StaticData::Instance()->GetAllWeights()) - phraseSize * StaticData::Instance()->GetWeightWordPenalty();
+	m_futureScore += m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize * StaticData::Instance().GetWeightWordPenalty();
 }
 
 TO_STRING_BODY(TranslationOption);

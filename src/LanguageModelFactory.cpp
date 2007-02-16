@@ -41,7 +41,7 @@ namespace LanguageModelFactory
 {
 
 	LanguageModel* CreateLanguageModel(LMImplementation lmImplementation, const std::vector<FactorType> &factorTypes     
-                                   , size_t nGramOrder, const std::string &languageModelFile, float weight, FactorCollection &factorCollection)
+                                   , size_t nGramOrder, const std::string &languageModelFile, float weight)
 	{
 	  LanguageModel *lm = NULL;
 	  switch (lmImplementation)
@@ -103,14 +103,14 @@ namespace LanguageModelFactory
 	  	switch (lm->GetLMType())
 	  	{
 	  	case SingleFactor:
-	  		if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorCollection, factorTypes[0], weight, nGramOrder))
+	  		if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorTypes[0], weight, nGramOrder))
 				{
 					delete lm;
 					lm = NULL;
 				}
 	  		break;	  	
 	  	case MultiFactor:
-  			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorCollection, factorTypes, weight, nGramOrder))
+  			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, weight, nGramOrder))
 				{
 					delete lm;
 					lm = NULL;
