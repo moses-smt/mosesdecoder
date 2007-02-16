@@ -246,6 +246,14 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	{
 		// create hypothesis and calculate all its scores
 		Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+
+		// alignments don't allow hypo to be decoded to completion
+		if (!newHypo->IsCompletable())
+		{
+			FREEHYPO(newHypo);
+			return;
+		}
+
 		newHypo->CalcScore(m_transOptColl->GetFutureScoreObject());
 		// logging for the curious
 		IFVERBOSE(3) {

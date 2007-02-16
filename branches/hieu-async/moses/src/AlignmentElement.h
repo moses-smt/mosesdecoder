@@ -33,6 +33,11 @@ protected:
 	typedef std::set<size_t> ContainerType;
 	ContainerType m_collection;
 public:
+	typedef ContainerType::iterator iterator;
+	typedef ContainerType::const_iterator const_iterator;
+	const_iterator begin() const { return m_collection.begin(); }
+	const_iterator end() const { return m_collection.end(); }
+
 	AlignmentElement()
 	{}
 
@@ -43,6 +48,11 @@ public:
 	size_t GetSize() const
 	{ 
 		return m_collection.size();
+	}
+
+	bool IsEmpty() const
+	{
+		return m_collection.empty();
 	}
 	
 	//! return internal collection of elements

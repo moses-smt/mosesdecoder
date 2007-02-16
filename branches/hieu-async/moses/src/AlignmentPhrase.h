@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "AlignmentElement.h"
 
 class WordsRange;
-
+class WordsBitmap;
 
 //! alignments of each word in a phrase
 class AlignmentPhrase
@@ -41,6 +41,10 @@ public:
 	AlignmentPhrase(size_t size)
 		:m_collection(size)
 	{}
+
+	/** compare with another alignment phrase, return true if the other alignment phrase is a 
+		*	subset of this. Used to see whether a trans opt can be used to expand a hypo
+		*/
 	bool IsCompatible(const AlignmentPhrase &compare, size_t startPosCompare) const;
 
 	//! add newAlignment to this alignment phrase, offsetting by newAlignmentRange.GetStartPos()
@@ -60,6 +64,10 @@ public:
 	{
 		m_collection.push_back(element);
 	}
+
+	bool IsCompletable(size_t decodeStepId
+										, const WordsBitmap &thisCompleted
+										, const WordsBitmap &otherCompleted) const;
 };
 
 

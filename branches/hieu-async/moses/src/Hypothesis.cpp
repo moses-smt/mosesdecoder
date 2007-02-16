@@ -601,6 +601,17 @@ void Hypothesis::CleanupArcList()
 	}
 }
 
+bool Hypothesis::IsCompletable() const
+{
+	// create target bitmap
+	// hack - only values for this decode step are set
+	WordsBitmap targetCompleted(GetSize());
+	targetCompleted.SetValue(m_decodeStepId, 0, m_currTargetWordsRange.GetEndPos(), true);
+
+	// call IsCompletable() in alignment obj
+	return m_alignPair.IsCompletable(m_decodeStepId, m_sourceCompleted, targetCompleted);
+}
+
 TO_STRING_BODY(Hypothesis)
  
 // friend

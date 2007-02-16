@@ -64,7 +64,9 @@ public:
 	//! call Merge for both source and target alignment phrase
 	void Merge(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange);
 
-	bool IsCompletable() const;
+	bool IsCompletable(size_t decodeStepId
+										, const WordsBitmap &sourceCompleted
+										, const WordsBitmap &targetCompleted) const;
 
 	TO_STRING();
 };

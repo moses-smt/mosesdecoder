@@ -39,15 +39,14 @@ void AlignmentPair::SetIdentityAlignment()
 	m_targetAlign.Add(alignment);
 }
 
-bool AlignmentPair::IsCompletable() const
+bool AlignmentPair::IsCompletable(size_t decodeStepId
+																	, const WordsBitmap &sourceCompleted
+																	, const WordsBitmap &targetCompleted) const
 {
-	/*
-	if (!m_sourceAlign.IsCompletable())
+	if (!m_sourceAlign.IsCompletable(decodeStepId, sourceCompleted, targetCompleted))
 		return false;
 
-	return m_targetAlign.IsCompletable();
-	*/
-	return true;
+	return m_targetAlign.IsCompletable(decodeStepId, targetCompleted, sourceCompleted);
 }
 
 void AlignmentPair::Merge(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange)

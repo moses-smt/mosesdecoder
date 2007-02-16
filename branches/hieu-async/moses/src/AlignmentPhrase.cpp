@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "AlignmentPhrase.h"
 #include "WordsRange.h"
+#include "WordsBitmap.h"
 
 using namespace std;
 
@@ -64,6 +65,43 @@ void AlignmentPhrase::Merge(const AlignmentPhrase &newAlignment, size_t shift, s
 			m_collection[insertPos] = alignElement;
 		}
 	}
+}
+
+bool AlignmentPhrase::IsCompletable(size_t decodeStepId
+																		, const WordsBitmap &thisCompleted
+																		, const WordsBitmap &otherCompleted) const
+{
+	for (size_t pos = 0 ; pos < thisCompleted.GetSize() ; ++pos)
+	{
+		if (!thisCompleted.GetValue(decodeStepId, pos))
+		{ // not yet decoded, see if can be aligned
+			const AlignmentElement &element = m_collection[pos];
+			bool completable = false;
+
+			if (element.IsEmpty())
+			{ // nothing for this element
+				break;
+			}
+
+			AlignmentElement::const_iterator iter;
+			for (iter = element.begin() ; iter != element.end() ; ++iter)
+			{
+				size_t alignPos = *iter;
+				bool completed = otherCompleted.GetValue(decodeStepId, alignPos);
+				if (!completed)
+				{ // not already taken, the element can possibly be aligned in the future
+					completable = true;
+					break;
+				}
+			}
+
+			if (!completable) // 1 element can't be aligned
+				return false;
+		}
+	}
+
+	// all elements can be aligned
+	return true;
 }
 
 std::ostream& operator<<(std::ostream& out, const AlignmentPhrase &alignmentPhrase)

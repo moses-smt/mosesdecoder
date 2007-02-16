@@ -204,6 +204,7 @@ inline std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitma
 		{
 			out << (wordsBitmap.GetValue(decodeStepId, i) ? 1 : 0);
 		}
+		out << " : ";
 	}
 	return out;
 }

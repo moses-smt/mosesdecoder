@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-cmd", "..\moses-cmd\m
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "irstlm", "..\irstlm\irstlm.vcproj", "{19C023D8-67DE-4609-9C89-3152EF95995D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "processPhraseTable", "..\misc\processPhraseTable.vcproj", "{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,16 @@ Global
 		{19C023D8-67DE-4609-9C89-3152EF95995D}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{19C023D8-67DE-4609-9C89-3152EF95995D}.Release|Win32.ActiveCfg = Release|Win32
 		{19C023D8-67DE-4609-9C89-3152EF95995D}.Release|Win32.Build.0 = Release|Win32
+		{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}.Debug|Win32.Build.0 = Debug|Win32
+		{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}.Release|Any CPU.ActiveCfg = Release|Win32
+		{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}.Release|Win32.ActiveCfg = Release|Win32
+		{290CEBD0-8117-4007-B1F8-73AAB2EF99D1}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

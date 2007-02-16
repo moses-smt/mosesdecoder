@@ -272,6 +272,9 @@ public:
 		return m_lmstats;
 	}
 
+	// do alignment allow hypo to be completed?
+	bool IsCompletable() const;
+
 	static unsigned int GetHypothesesCreated()
 	{
 		return s_HypothesesCreated;
