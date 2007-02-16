@@ -125,19 +125,24 @@ void TranslationOptionCollection::Prune()
 * \param factorCollection input sentence with all factors
 */
 
-void TranslationOptionCollection::ProcessUnknownWord(const std::list < DecodeStep* > &decodeStepList, FactorCollection &factorCollection)
+void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::list < DecodeStep* > * > &decodeStepVL
+																			, FactorCollection &factorCollection)
 {
 	size_t size = m_source.GetSize();
 	// try to translation for coverage with no trans by expanding table limit
-	for (size_t pos = 0 ; pos < size ; ++pos)
+	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
-			TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
-			size_t numTransOpt = fullList.size();
-			if (numTransOpt == 0)
-			{
-				CreateTranslationOptionsForRange(decodeStepList, factorCollection
-																			, pos, pos, false);
-			}
+	  const list < DecodeStep* > * decodeStepList = decodeStepVL[startVL];
+		for (size_t pos = 0 ; pos < size ; ++pos)
+		{
+				TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
+				size_t numTransOpt = fullList.size();
+				if (numTransOpt == 0)
+				{
+					CreateTranslationOptionsForRange(*decodeStepList, factorCollection
+																				, pos, pos, false);
+				}
+		}
 	}
 		
 	// create unknown words for 1 word coverage where we don't have any trans options
@@ -314,7 +319,7 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeStep* > &decodeStepList
+void TranslationOptionCollection::CreateTranslationOptions(const vector <list < DecodeStep* > * > &decodeStepVL
 																													 , FactorCollection &factorCollection)
 {
 	m_factorCollection = &factorCollection;
@@ -323,16 +328,21 @@ void TranslationOptionCollection::CreateTranslationOptions(const list < DecodeSt
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
 	// table loaded on initialization), generate TranslationOption objects
 	// for all phrases
-	
-	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
+	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
-		for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
+	  const list < DecodeStep* > * decodeStepList = decodeStepVL[startVL];
+		for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
 		{
-			CreateTranslationOptionsForRange( decodeStepList, factorCollection, startPos, endPos, true);
+			for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
+			{
+				CreateTranslationOptionsForRange( *decodeStepList, factorCollection, startPos, endPos, true);				
+ 			}
 		}
 	}
 
-	ProcessUnknownWord(decodeStepList, factorCollection);
+	VERBOSE(3,"Translation Option Collection\n " << *this << endl);
+	
+	ProcessUnknownWord(decodeStepVL, factorCollection);
 	
 	// Prune
 	Prune();
@@ -457,3 +467,27 @@ void TranslationOptionCollection::Add(const TranslationOption *translationOption
 
 TO_STRING_BODY(TranslationOptionCollection);
 
+inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
+{
+	size_t size = coll.GetSize();
+	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+		{
+			TranslationOptionList fullList = coll.GetTranslationOptionList(startPos, endPos);
+			size_t sizeFull = fullList.size();
+		  for (size_t i = 0; i < sizeFull; i++) 
+			{
+			  out << *fullList[i] << std::endl;
+			}
+		}
+	}
+ 
+  //std::vector< std::vector< TranslationOptionList > >::const_iterator i = coll.m_collection.begin();
+	//size_t j = 0;
+	//for (; i!=coll.m_collection.end(); ++i) {
+    //out << "s[" << j++ << "].size=" << i->size() << std::endl;
+	//}
+
+	return out;
+}
