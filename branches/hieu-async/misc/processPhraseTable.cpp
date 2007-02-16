@@ -26,8 +26,6 @@ std::ostream& operator<<(std::ostream& out,const std::vector<T>& x)
 	return out;
 }
 
-FactorCollection factorCollection;
-
 inline bool existsFile(const char* filename) {
   struct stat mystat;
   return  (stat(filename,&mystat)==0);
