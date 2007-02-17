@@ -80,7 +80,7 @@ bool AlignmentPhrase::IsCompletable(size_t decodeStepId
 
 			if (element.IsEmpty())
 			{ // nothing for this element
-				break;
+				continue;
 			}
 
 			AlignmentElement::const_iterator iter;
