@@ -150,7 +150,7 @@ $___MODEL_DIR = $_MODEL_DIR if $_MODEL_DIR;
 my $___EXTRACT_FILE = $___MODEL_DIR."/extract";
 $___EXTRACT_FILE = $_EXTRACT_FILE if $_EXTRACT_FILE;
 
-my $___CONFIG = $___ROOT_DIR."/model/moses.ini";
+my $___CONFIG = $___MODEL_DIR."/moses.ini";
 $___CONFIG = $_CONFIG if $_CONFIG;
 
 my $___MAX_PHRASE_LENGTH = 7;
