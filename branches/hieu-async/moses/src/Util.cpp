@@ -79,6 +79,7 @@ string GetMD5Hash(const string &filePath)
 	FILE *in;
 	if ((in = fopen(filePath.c_str(), "rb")) == NULL) 
 	{
+		fclose(in);
 	  return "";
 	}
 
@@ -97,6 +98,7 @@ string GetMD5Hash(const string &filePath)
 		stream << setw(2) << setfill('0') << (int) signature[j];
   }
 
+	fclose(in);
 	return stream.str();
 }
 
