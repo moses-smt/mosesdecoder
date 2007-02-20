@@ -135,6 +135,11 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 
 void HypothesisCollection::PruneToSize(size_t newSize)
 {
+	if (m_bestScore == -std::numeric_limits<float>::infinity())
+	{ // the hypo scores are all -inf. something is wrong, this is just a hack
+		return;
+	}
+
 	if (m_hypos.size() > newSize) // ok, if not over the limit
 	{
 		priority_queue<float> bestScores;
@@ -171,15 +176,15 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 			Hypothesis *hypo = *iter;
 			float score = hypo->GetTotalScore();
 			if (score < scoreThreshold)
-				{
-					iterator iterRemove = iter++;
-					Remove(iterRemove);
-					StaticData::Instance().GetSentenceStats().AddPruning();
-				}
+			{
+				iterator iterRemove = iter++;
+				Remove(iterRemove);
+				StaticData::Instance().GetSentenceStats().AddPruning();
+			}
 			else
-				{
-					++iter;
-				}
+			{
+				++iter;
+			}
 		}
 		VERBOSE(3,", pruned to size " << size() << endl);
 		
