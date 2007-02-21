@@ -55,20 +55,11 @@ namespace LanguageModelFactory
 				  lm = new LanguageModelSRI(true, scoreIndexManager);
 				#elif LM_INTERNAL
 					lm = new LanguageModelInternal(true, scoreIndexManager);
-				#elif LM_IRST
-					// shouldn't really do this. the 2 lm are not compatible
-					lm = new LanguageModelIRST(true, scoreIndexManager);
 			  #endif
 			  break;
 			case IRST:
 				#ifdef LM_IRST
 	     		lm = new LanguageModelIRST(true, scoreIndexManager);
-				#elif LM_SRI
-					// shouldn't really do this. the 2 lm are not compatible
-				  lm = new LanguageModelSRI(true, scoreIndexManager);
-				#elif LM_INTERNAL
-					// shouldn't really do this. the 2 lm are not compatible
-					lm = new LanguageModelInternal(true, scoreIndexManager);
 			  #endif
 				break;
 			case Skip:
@@ -80,23 +71,17 @@ namespace LanguageModelFactory
      			lm = new LanguageModelSkip(new LanguageModelInternal(false, scoreIndexManager)
 																		, true
 																		, scoreIndexManager);
-				#elif LM_IRST
-					// shouldn't really do this. the 2 lm are not compatible
-	     		lm = new LanguageModelSkip(new LanguageModelIRST(false, scoreIndexManager)
-																		, true
-																		, scoreIndexManager);
 				#endif
 				break;
 			case Joint:
 				#ifdef LM_SRI
-	     		lm = new LanguageModelJoint(new LanguageModelSRI(false), true);
+	     		lm = new LanguageModelJoint(new LanguageModelSRI(false, scoreIndexManager)
+	     															, true
+	     															, scoreIndexManager);
 				#elif LM_INTERNAL
 	     		lm = new LanguageModelJoint(new LanguageModelInternal(false, scoreIndexManager)
 																		, true
 																		, scoreIndexManager);
-				#elif LM_IRST
-					// shouldn't really do this. the 2 lm are not compatible
-	     		lm = new LanguageModelJoint(new LanguageModelIRST(false), true);
 				#endif
 				break;
 	  	case Internal:
