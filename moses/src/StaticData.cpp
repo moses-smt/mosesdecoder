@@ -169,12 +169,16 @@ bool StaticData::LoadData(Parameter *parameter)
 	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
 	m_weightDistortion				= Scan<float>(distortionWeights[0]);
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
+	m_weightUnknownWord				= 1; // do we want to let mert decide weight for this ???
 
-	m_distortionScoreProducer = new DistortionScoreProducer;
+	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightDistortion);
 
-	m_wpProducer = new WordPenaltyProducer;
+	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightWordPenalty);
+
+	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
+	m_allWeights.push_back(m_weightUnknownWord);
 
 	// misc
 	m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
@@ -466,8 +470,13 @@ bool StaticData::LoadLanguageModels()
 
 			PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
 			
-			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmImplementation, factorTypes     
-                                   									, nGramOrder, languageModelFile, weightAll[i]);
+			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(
+																									lmImplementation
+																									, factorTypes     
+                                   								, nGramOrder
+																									, languageModelFile
+																									, weightAll[i]
+																									, m_scoreIndexManager);
       if (lm == NULL) 
       {
       	UserMessage::Add("no LM created. We probably don't have it compiled");
@@ -517,7 +526,7 @@ bool StaticData::LoadGenerationTables()
 
 			TRACE_ERR( filePath << endl);
 
-			m_generationDictionary.push_back(new GenerationDictionary(numFeatures));
+			m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager));
 			assert(m_generationDictionary.back() && "could not create GenerationDictionary");
 			if (!m_generationDictionary.back()->Load(input
 																		, output

@@ -145,26 +145,11 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::li
 	}
 		
 	// create unknown words for 1 word coverage where we don't have any trans options
-	vector<bool> process(size);
-	fill(process.begin(), process.end(), true);
-	
-	for (size_t startPos = 0 ; startPos < size ; ++startPos)
+	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
-		for (size_t endPos = startPos ; endPos < size ; ++endPos)
-		{
-			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
-			size_t numTransOpt = fullList.size();
-			if (numTransOpt > 0)
-			{
-				fill(process.begin() + startPos, process.begin() + endPos + 1, false);
-			}
-		}	
-	}
-			
-	for (size_t currPos = 0 ; currPos < size ; ++currPos)
-	{
-		if (process[currPos])
-			ProcessUnknownWord(currPos);
+		TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
+		if (fullList.size() == 0)
+			ProcessUnknownWord(pos);
 	}
 }
 

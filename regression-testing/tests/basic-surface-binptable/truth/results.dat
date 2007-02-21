@@ -6,8 +6,8 @@ TRANSLATION_5=only then will the european institutions to its mandate .
 LMLOAD_TIME ~ 10.00
 PTLOAD_TIME ~ 10.00
 SCORE_1 = -14.843
-SCORE_2 = -33.757
-SCORE_3 = -40.241
+SCORE_2 = -133.76
+SCORE_3 = -240.24
 SCORE_4 = -5.9953
 SCORE_5 = -7.0155
 TOTAL_WALLTIME ~ 23
