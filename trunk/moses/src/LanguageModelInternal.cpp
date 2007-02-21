@@ -6,8 +6,8 @@
 
 using namespace std;
 
-LanguageModelInternal::LanguageModelInternal(bool registerScore)
-:LanguageModelSingleFactor(registerScore)
+LanguageModelInternal::LanguageModelInternal(bool registerScore, ScoreIndexManager &scoreIndexManager)
+:LanguageModelSingleFactor(registerScore, scoreIndexManager)
 {
 }
 

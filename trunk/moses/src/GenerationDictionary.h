@@ -50,7 +50,7 @@ public:
 	/** constructor.
 	* \param numFeatures number of score components, as specified in ini file
 	*/
-	GenerationDictionary(size_t numFeatures);
+	GenerationDictionary(size_t numFeatures, ScoreIndexManager &scoreIndexManager);
 	virtual ~GenerationDictionary();
 
 	// returns Generate
