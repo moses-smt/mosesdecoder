@@ -8,6 +8,7 @@
 #include "TypeDef.h"
 
 class LanguageModel;
+class ScoreIndexManager;
 
 namespace LanguageModelFactory {
 
@@ -15,8 +16,12 @@ namespace LanguageModelFactory {
 	 * creates a language model that will use the appropriate
    * language model toolkit as its underlying implementation
 	 */
-	 LanguageModel* CreateLanguageModel(LMImplementation lmImplementation, const std::vector<FactorType> &factorTypes     
-                                   , size_t nGramOrder, const std::string &languageModelFile, float weight);
+	 LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
+																		, const std::vector<FactorType> &factorTypes     
+																		, size_t nGramOrder
+																		, const std::string &languageModelFile
+																		, float weight
+																		, ScoreIndexManager &scoreIndexManager);
 	 
 };
 

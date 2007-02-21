@@ -31,10 +31,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-GenerationDictionary::GenerationDictionary(size_t numFeatures)
+GenerationDictionary::GenerationDictionary(size_t numFeatures, ScoreIndexManager &scoreIndexManager)
   : Dictionary(numFeatures)
 {
-	const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
+	scoreIndexManager.AddScoreProducer(this);
 }
 
 bool GenerationDictionary::Load(const std::vector<FactorType> &input
