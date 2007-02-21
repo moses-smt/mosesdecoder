@@ -36,3 +36,5 @@ training/combine_factors.pl
 training/train-factored-phrase-model.perl
 training/symal/symal
 training/symal/giza2bal.pl
+recaser/train-recaser.perl
+recaser/recase.perl
