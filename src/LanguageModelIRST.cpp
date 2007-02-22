@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "Phrase.h"
 #include "InputFileStream.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -83,7 +84,7 @@ bool LanguageModelIRST::Load(const std::string &filePath
   m_unknownId = m_lmtb->dict->oovcode();
   CreateFactors(factorCollection);
 
-  TRACE_ERR( "IRST: m_unknownId=" << m_unknownId << std::endl);
+  VERBOSE(1, "IRST: m_unknownId=" << m_unknownId << std::endl);
 
   //install caches
   m_lmtb->init_probcache();

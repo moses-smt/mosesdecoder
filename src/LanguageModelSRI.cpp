@@ -31,6 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
+#include "StaticData.h"
+
 using namespace std;
 
 LanguageModelSRI::LanguageModelSRI(bool registerScore, ScoreIndexManager &scoreIndexManager)
@@ -68,7 +70,7 @@ bool LanguageModelSRI::Load(const std::string &filePath
 	}
 	else
 	{
-		TRACE_ERR("warning/failed loading language model" << endl);
+		VERBOSE(1, "warning/failed loading language model" << endl);
 	}
 	// LM can be ok, just outputs warnings
 	CreateFactors(factorCollection);		
