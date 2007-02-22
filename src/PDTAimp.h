@@ -115,7 +115,8 @@ public:
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
 	{
 		assert(GetTargetPhraseCollection(source)==0);
-		TRACE_ERR( "adding unk source phrase "<<source<<"\n");
+		
+		VERBOSE(2, "adding unk source phrase "<<source<<"\n");
 		std::pair<MapSrc2Tgt::iterator,bool> p
 			=m_cache.insert(std::make_pair(source,static_cast<TargetPhraseCollection const*>(0)));
 		if(p.second || p.first->second==0) 
@@ -125,7 +126,7 @@ public:
 				p.first->second=ptr;
 				m_tgtColls.push_back(ptr);
 			}
-		else TRACE_ERR("WARNING: you added an already existing phrase!\n");
+		else VERBOSE(2, "WARNING: you added an already existing phrase!\n");
 	}
 
 	TargetPhraseCollection const* 
@@ -352,8 +353,6 @@ public:
 				State curr(stack.back());
 				stack.pop_back();
 		
-				//TRACE_ERR("processing state "<<curr<<" stack size: "<<stack.size()<<"\n");
-
 				assert(curr.end()<srcSize);
 				const ConfusionNet::Column &currCol=src[curr.end()];
 				// in a given column, loop over all possibilities

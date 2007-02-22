@@ -100,13 +100,11 @@ template<typename T> class ObjectPool {
 		// the block size is doubled every time
 		// if allocation fails, block size is reduced by 1/4
 		void allocate() {
-			//    TRACE_ERR("start "<<name<<" - objectpool allocate "<<N<<"\n");
 			try {
 				if(dataSize.empty()) dataSize.push_back(N); 
 				else dataSize.push_back(dataSize.back()*2);
 				void *m=malloc(sizeof(Object)*dataSize.back());
 				while(!m) {
-					//      TRACE_ERR("malloc failed for size "<<dataSize.back()<<"!\n");
 					dataSize.back()=static_cast<size_t>(dataSize.back()*0.75);
 					m=malloc(sizeof(Object)*dataSize.back());
 				}

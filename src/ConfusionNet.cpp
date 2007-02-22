@@ -66,7 +66,7 @@ bool ConfusionNet::ReadF(std::istream& in,
 												 const std::vector<FactorType>& factorOrder,
 												 int format) 
 {
-	TRACE_ERR( "read confusion net with format "<<format<<"\n");
+	VERBOSE(1, "read confusion net with format "<<format<<"\n");
 	switch(format) 
 		{
 		case 0: return ReadFormat0(in,factorOrder);
@@ -113,12 +113,12 @@ bool ConfusionNet::ReadFormat0(std::istream& in,
 			String2Word(word,w,factorOrder);
 			if(prob<0.0) 
 				{
-					TRACE_ERR("WARN: negative prob: "<<prob<<" ->set to 0.0\n");
+					VERBOSE(1, "WARN: negative prob: "<<prob<<" ->set to 0.0\n");
 					prob=0.0;
 				}
 			else if (prob>1.0)
 				{
-					TRACE_ERR("WARN: prob > 1.0 : "<<prob<<" -> set to 1.0\n");
+					VERBOSE(1, "WARN: prob > 1.0 : "<<prob<<" -> set to 1.0\n");
 					prob=1.0;
 				}
 			col.push_back(std::make_pair(w,std::max(static_cast<float>(log(prob)),
@@ -151,7 +151,7 @@ bool ConfusionNet::ReadFormat1(std::istream& in,
 			if(is>>word>>prob) {
 				data[i][j].second = (float) log(prob); 
 				if(data[i][j].second<0) {
-					TRACE_ERR("WARN: neg costs: "<<data[i][j].second<<" -> set to 0\n");
+					VERBOSE(1, "WARN: neg costs: "<<data[i][j].second<<" -> set to 0\n");
 					data[i][j].second=0.0;}
 				String2Word(word,data[i][j].first,factorOrder);
 			} else return 0;

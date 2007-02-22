@@ -117,7 +117,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 		{
 			iterExisting = m_hypos.find(hypo);
 			TRACE_ERR("Offending hypo = " << **iterExisting << endl);
-			assert(false);
+			abort();
 		}
 		return;
 	}
@@ -162,7 +162,6 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 				
 		// and remember the threshold
 		float scoreThreshold = bestScores.top();
-		// TRACE_ERR( "threshold: " << scoreThreshold << endl);
 		
 		// delete all hypos under score threshold
 		iter = m_hypos.begin();

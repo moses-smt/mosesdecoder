@@ -68,7 +68,6 @@ public:
 	void DetachAll()
 	{
 		m_list.clear();
-		//		TRACE_ERR( "clearing out list of " << m_list.size() << " partial translation options\n";
 	}
 
 	/** return number of pruned partial hypotheses */
