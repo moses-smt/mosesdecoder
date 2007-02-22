@@ -270,6 +270,7 @@ StaticData::~StaticData()
 	// small score producers
 	delete m_distortionScoreProducer;
 	delete m_wpProducer;
+	delete m_unknownWordPenaltyProducer;
 
 	// memory pools
 	Phrase::FinalizeMemPool();
