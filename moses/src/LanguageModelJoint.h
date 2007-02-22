@@ -87,11 +87,6 @@ public:
 		{
 			return 0;
 		}
-		/*
-		for (size_t i = 0 ; i < contextFactor.size() ; ++i)
-			TRACE_ERR( contextFactor[i] << " ";
-		TRACE_ERR( std::endl;
-		*/
 
 		// joint context for internal LM
 		std::vector<const Word*> jointContext;
@@ -120,11 +115,6 @@ public:
 			jointContext.push_back(jointWord);
 		}
 	
-		/*
-		for (size_t i = 0 ; i < chunkContext.size() ; ++i)
-			TRACE_ERR(chunkContext[i] << " ");
-		TRACE_ERR(std::endl);
-		*/
 		// calc score on chunked phrase
 		float ret = m_lmImpl->GetValue(jointContext, finalState, len);
 

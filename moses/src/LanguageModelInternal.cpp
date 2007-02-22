@@ -3,6 +3,7 @@
 #include "FactorCollection.h"
 #include "NGramNode.h"
 #include "InputFileStream.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ bool LanguageModelInternal::Load(const std::string &filePath
 																, size_t nGramOrder)
 {
 	assert(nGramOrder <= 3);
-	TRACE_ERR( "Loading Internal LM: " << filePath << endl);
+	VERBOSE(1, "Loading Internal LM: " << filePath << endl);
 	
 	FactorCollection &factorCollection = FactorCollection::Instance();
 
@@ -34,7 +35,7 @@ bool LanguageModelInternal::Load(const std::string &filePath
 	m_sentenceEndArray[m_factorType] = m_sentenceEnd;
 
 	// read in file
-	TRACE_ERR( filePath << endl);
+	VERBOSE(1, filePath << endl);
 
 	InputFileStream 	inFile(filePath);
 
