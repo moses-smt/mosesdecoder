@@ -72,9 +72,12 @@ bool readInput(IOStream &ioStream, int inputType, InputType*& source)
 
 int main(int argc, char* argv[])
 {
-	TRACE_ERR("command: ");
-	for(int i=0;i<argc;++i) TRACE_ERR(argv[i]<<" ");
-	TRACE_ERR(endl);
+	IFVERBOSE(1)
+	{
+		TRACE_ERR("command: ");
+		for(int i=0;i<argc;++i) TRACE_ERR(argv[i]<<" ");
+		TRACE_ERR(endl);
+	}
 
 	// load data structures
 	Parameter *parameter = new Parameter();
@@ -115,7 +118,8 @@ int main(int argc, char* argv[])
 	while(readInput(*ioStream,staticData.GetInputType(),source))
 	{
 			// note: source is only valid within this while loop!
-    ResetUserTime();
+		IFVERBOSE(1)
+			ResetUserTime();
 			
     VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 
@@ -154,7 +158,8 @@ int main(int argc, char* argv[])
 	
 	delete ioStream;
 
-	PrintUserTime("End.");
+	IFVERBOSE(1)
+		PrintUserTime("End.");
 
 	#ifdef HACK_EXIT
 	//This avoids that detructors are called (it can take a long time)
@@ -191,7 +196,8 @@ IOStream *GetIODevice(const StaticData &staticData)
 	}
 	ioStream->ResetTranslationId();
 
-	PrintUserTime("Created input-output object");
+	IFVERBOSE(1)
+		PrintUserTime("Created input-output object");
 
 	return ioStream;
 }

@@ -78,11 +78,7 @@ public:
 		{
 			return 0;
 		}
-		/*
-		for (size_t i = 0 ; i < contextFactor.size() ; ++i)
-			TRACE_ERR( contextFactor[i] << " ";
-		TRACE_ERR( std::endl;
-		*/
+
 		// only process context where last word is a word we want
 		const Factor *factor = (*contextFactor.back())[m_factorType];
 		std::string strWord = factor->GetString();
@@ -113,11 +109,7 @@ public:
 	
 		// create context factor the right way round
 		std::reverse(chunkContext.begin(), chunkContext.end());
-		/*
-		for (size_t i = 0 ; i < chunkContext.size() ; ++i)
-			TRACE_ERR( chunkContext[i] << " ";
-		TRACE_ERR( std::endl;
-		*/
+
 		// calc score on chunked phrase
 		float ret = m_lmImpl->GetValue(chunkContext, finalState, len);
 

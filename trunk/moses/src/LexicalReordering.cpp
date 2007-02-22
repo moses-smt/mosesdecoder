@@ -87,7 +87,7 @@ void LexicalReordering::LoadFile()
 			if (probs.size() != m_direction.size() * m_numOrientationTypes) {
 				TRACE_ERR( "found " << probs.size() << " probabilities, expected " 
 									<< m_direction.size() * m_numOrientationTypes << endl);
-				exit(0);
+				abort();
 			}
 			std::vector<float> scv(probs.size());
 			std::transform(probs.begin(),probs.end(),probs.begin(),TransformScore);
@@ -234,14 +234,6 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis *hypothesis)
 			else {
 				score[ orientation + i * m_numOrientationTypes ] = value;
 			}
-
-			//			IFVERBOSE(3) {
-			//				TRACE_ERR( "\tdistortion type " << orientation << " =>");
-			//				for(unsigned int j=0;j<score.size();j++) {
-			//					TRACE_ERR( " " << score[j]);
-			//				}
-			//				TRACE_ERR( endl);
-			//			}
 		}
 	}
 	return score;

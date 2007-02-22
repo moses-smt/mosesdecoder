@@ -161,7 +161,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	SetBooleanParameter( &m_computeLMBackoffStats, "lmstats", false );
 	if (m_computeLMBackoffStats && 
 	    ! m_isDetailedTranslationReportingEnabled) {
-	  TRACE_ERR( "-lmstats implies -translation-details, enabling" << std::endl);
+	  VERBOSE(1, "-lmstats implies -translation-details, enabling" << std::endl);
 	  m_isDetailedTranslationReportingEnabled = true;
 	}
 
@@ -188,7 +188,6 @@ bool StaticData::LoadData(Parameter *parameter)
 		: -1;
 	m_useDistortionFutureCosts = (m_parameter->GetParam("use-distortion-future-costs").size() > 0) 
 		? Scan<bool>(m_parameter->GetParam("use-distortion-future-costs")[0]) : false;
-	//TRACE_ERR( "using distortion future costs? "<<UseDistortionFutureCosts()<<"\n");
 	
 	m_beamThreshold = (m_parameter->GetParam("beam-threshold").size() > 0) ?
 		TransformScore(Scan<float>(m_parameter->GetParam("beam-threshold")[0]))
@@ -196,8 +195,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	m_maxNoTransOptPerCoverage = (m_parameter->GetParam("max-trans-opt-per-coverage").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
-	//TRACE_ERR( "max translation options per coverage span: "<<m_maxNoTransOptPerCoverage<<"\n");
-
+	
 	m_maxNoPartTransOpt = (m_parameter->GetParam("max-partial-trans-opt").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("max-partial-trans-opt")[0]) : DEFAULT_MAX_PART_TRANS_OPT_SIZE;
 
@@ -414,16 +412,11 @@ bool StaticData::LoadLexicalReorderingModel()
 			
 		}
 		assert(m_lexWeights.size() == numWeightsInTable);		//the end result should be a weight vector of the same size as the user configured model
-		//			TRACE_ERR( "distortion-weights: ");
-		//for(size_t weight=0; weight<m_lexWeights.size(); weight++)
-		//{
-		//	TRACE_ERR( m_lexWeights[weight] << "\t");
-		//}
-		//TRACE_ERR( endl);
-
+		
 		// loading the file
 		std::string	filePath= specification[3];
-		PrintUserTime(string("Start loading distortion table ") + filePath);
+		IFVERBOSE(1)
+			PrintUserTime(string("Start loading distortion table ") + filePath);
 		m_reorderModels.push_back(new LexicalReordering(filePath, orientation, direction, condition, m_lexWeights, input, output));
 	}
 	
@@ -437,15 +430,10 @@ bool StaticData::LoadLanguageModels()
 		// weights
 		vector<float> weightAll = Scan<float>(m_parameter->GetParam("weight-l"));
 		
-		//TRACE_ERR( "weight-l: ");
-		//
 		for (size_t i = 0 ; i < weightAll.size() ; i++)
 		{
-			//	TRACE_ERR( weightAll[i] << "\t");
 			m_allWeights.push_back(weightAll[i]);
 		}
-		//TRACE_ERR( endl);
-	
 
 	  // initialize n-gram order for each factor. populated only by factored lm
 		const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
@@ -469,7 +457,8 @@ bool StaticData::LoadLanguageModels()
 			
 			string &languageModelFile = token[3];
 
-			PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
+			IFVERBOSE(1)
+				PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
 			
 			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(
 																									lmImplementation
@@ -490,7 +479,8 @@ bool StaticData::LoadLanguageModels()
   // flag indicating that language models were loaded,
   // since phrase table loading requires their presence
   m_fLMsLoaded = true;
-  PrintUserTime("Finished loading LanguageModels");
+	IFVERBOSE(1)
+		PrintUserTime("Finished loading LanguageModels");
   return true;
 }
 
@@ -501,12 +491,15 @@ bool StaticData::LoadGenerationTables()
 		const vector<string> &generationVector = m_parameter->GetParam("generation-file");
 		const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-generation"));
 
-		TRACE_ERR( "weight-generation: ");
-		for (size_t i = 0 ; i < weight.size() ; i++)
+		IFVERBOSE(1)
 		{
-				TRACE_ERR( weight[i] << "\t");
+			TRACE_ERR( "weight-generation: ");
+			for (size_t i = 0 ; i < weight.size() ; i++)
+			{
+					TRACE_ERR( weight[i] << "\t");
+			}
+			TRACE_ERR(endl);
 		}
-		TRACE_ERR( endl);
 		size_t currWeightNum = 0;
 		
 		for(size_t currDict = 0 ; currDict < generationVector.size(); currDict++) 
@@ -525,7 +518,7 @@ bool StaticData::LoadGenerationTables()
 				filePath += ".gz";
 			}
 
-			TRACE_ERR( filePath << endl);
+			VERBOSE(1, filePath << endl);
 
 			m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager));
 			assert(m_generationDictionary.back() && "could not create GenerationDictionary");
@@ -562,17 +555,9 @@ bool StaticData::LoadPhraseTables()
 		// weights
 		vector<float> weightAll									= Scan<float>(m_parameter->GetParam("weight-t"));
 		
-		//TRACE_ERR("weight-t: ");
-		//for (size_t i = 0 ; i < weightAll.size() ; i++)
-		//{
-		//		TRACE_ERR(weightAll[i] << "\t");
-		//}
-		//TRACE_ERR( endl;
-
 		const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
 		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
-		//TRACE_ERR("ttable-limits: ";copy(maxTargetPhrase.begin(),maxTargetPhrase.end(),ostream_iterator<size_t>(cerr," "));cerr<<"\n");
-
+		
 		size_t index = 0;
 		size_t weightAllOffset = 0;
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
@@ -622,8 +607,8 @@ bool StaticData::LoadPhraseTables()
 
 			std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
 			
-
-			PrintUserTime(string("Start loading PhraseTable ") + filePath);
+			IFVERBOSE(1)
+				PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			if (!FileExists(filePath+".binphr.idx"))
 			{					
 				VERBOSE(2,"using standard phrase tables");
@@ -644,7 +629,7 @@ bool StaticData::LoadPhraseTables()
 			}
 			else 
 			{
-				TRACE_ERR( "using binary phrase tables for idx "<<currDict<<"\n");
+				VERBOSE(1, "using binary phrase tables for idx "<<currDict<<"\n");
 				PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent,(currDict==0 ? m_numInputScores : 0));
 				if (!pd->Load(input,output,filePath,weight,
 									 maxTargetPhrase[index],
@@ -661,7 +646,8 @@ bool StaticData::LoadPhraseTables()
 		}
 	}
 	
-	PrintUserTime("Finished loading phrase tables");
+	IFVERBOSE(1)
+		PrintUserTime("Finished loading phrase tables");
 	return true;
 }
 

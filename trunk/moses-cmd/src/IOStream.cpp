@@ -187,7 +187,7 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 {
 	if (hypo != NULL)
 	{
-		VERBOSE(2,"BEST TRANSLATION: " << *hypo << endl);
+		VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);
 		VERBOSE(3,"Best path: ");
 		Backtrack(hypo);
 		VERBOSE(3,"0" << std::endl);
@@ -200,7 +200,7 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 	}
 	else
 	{
-		TRACE_ERR("NO BEST TRANSLATION" << endl);
+		VERBOSE(1, "NO BEST TRANSLATION" << endl);
 	}
 }
 

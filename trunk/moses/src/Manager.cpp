@@ -47,7 +47,7 @@ Manager::Manager(InputType const& source)
 {
 	const StaticData &staticData = StaticData::Instance();
 
-	TRACE_ERR("Translating: " << m_source << endl);
+	VERBOSE(1, "Translating: " << m_source << endl);
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
@@ -60,7 +60,7 @@ Manager::Manager(InputType const& source)
 Manager::~Manager() 
 {
   delete m_possibleTranslations;
-	TRACE_ERR("Finished translating" << endl);
+	VERBOSE(1, "Finished translating" << endl);
 }
 
 /**
