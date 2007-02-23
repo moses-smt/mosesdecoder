@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 
 		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
     
-		manager.CalcDecoderStatistics(staticData);
+		manager.CalcDecoderStatistics();
 		staticData.CleanUpAfterSentenceProcessing();      
     
 	}
