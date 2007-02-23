@@ -1015,7 +1015,7 @@ sub get_reordering_factored {
 	  my %FILE;
 	  foreach my $type ("msd-f","msd-fe","msd-bidirectional-f","msd-bidirectional-fe","monotonicity-f","monotonicity-fe","monotonicity-bidirectional-f","monotonicity-bidirectional-fe") {
 	      if (defined($REORDERING_MODEL{$type})) {
-		  my $file = "reordering-table.$type.$___REORDERING_SMOOTH.$factor";
+		  my $file = "$___MODEL_DIR/reordering-table.$type.$___REORDERING_SMOOTH.$factor";
 		  $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 		  $FILE{$type} = $file;
 	      }
