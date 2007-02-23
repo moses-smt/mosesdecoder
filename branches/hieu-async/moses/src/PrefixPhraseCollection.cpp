@@ -64,7 +64,10 @@ PrefixPhraseCollection::PrefixPhraseCollection(const std::vector<FactorType> &in
 		// add all suffixes too
 		for (size_t startPos = 1 ; startPos < phrase.GetSize() ; ++startPos)
 		{
-			Phrase subPhrase = phrase.GetSubString(WordsRange(NOT_FOUND, startPos, phrase.GetSize()));
+			WordsRange subPhraseRange(NOT_FOUND
+															, startPos
+															, phrase.GetSize()-1);
+			Phrase subPhrase = phrase.GetSubString(subPhraseRange);
 			AddPhrase(subPhrase);
 		}
 	}
@@ -84,7 +87,6 @@ void PrefixPhraseCollection::AddPhrase(const Phrase &source)
 	}
 
 	currNode->Set(true);
-
 }
 
 bool PrefixPhraseCollection::Find(const Phrase &source, bool notFoundValue) const
