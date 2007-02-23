@@ -98,5 +98,5 @@ public:
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
 	 */
-	void CalcDecoderStatistics(const StaticData& staticData) const;
+	void CalcDecoderStatistics() const;
 };

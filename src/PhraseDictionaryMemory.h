@@ -51,8 +51,7 @@ public:
 								, const std::vector<float> &weight
 								, size_t tableLimit
 								, const LMList &languageModels
-						    , float weightWP
-								, const StaticData& staticData);
+						    , float weightWP);
 	
 	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 

@@ -42,9 +42,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, const vector<float> &weight
 																			, size_t tableLimit
 																			, const LMList &languageModels
-														          , float weightWP
-														          , const StaticData& staticData)
+														          , float weightWP)
 {
+	const StaticData &staticData = StaticData::Instance();
+
 	m_tableLimit = tableLimit;
 	m_filePath = filePath;
 
