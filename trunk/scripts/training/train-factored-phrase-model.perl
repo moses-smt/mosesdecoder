@@ -183,7 +183,8 @@ if ($___LAST_STEP == 9) {
   foreach my $lm (@_LM) {
     my $type = 0; # default to srilm
     my ($f, $order, $filename);
-    ($f, $order, $filename) = split /:/, $lm, 3;
+    ($f, $order, $filename, $type) = split /:/, $lm, 4;
+    $type = 0 unless $type;
     die "Wrong format of --lm. Expected: --lm factor:order:filename"
       if $f !~ /^[0-9]+$/ || $order !~ /^[0-9]+$/ || !defined $filename;
     die "Language model file not found or empty: $filename"
