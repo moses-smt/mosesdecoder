@@ -619,8 +619,7 @@ bool StaticData::LoadPhraseTables()
 								 , weight
 								 , maxTargetPhrase[index]
 								 , GetAllLM()
-								 , GetWeightWordPenalty()
-								 , *this))
+								 , GetWeightWordPenalty()))
 				{
 					delete pd;
 					return false;
