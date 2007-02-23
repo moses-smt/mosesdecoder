@@ -318,17 +318,18 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
 
  if ($old_sge) {
   # we need to implement our own waiting script
-  safesystem("echo 'date' > sync_workaround_script.sh") or kill_all_and_quit();
+  my $syncscript = "${jobscript}.sync_workaround_script.sh";
+  safesystem("echo 'date' > $syncscript") or kill_all_and_quit();
 
   my $pwd = `$pwdcmd`; chomp $pwd;
 
-  my $checkpointfile = "sync_workaround_checkpoint";
+  my $checkpointfile = "${jobscript}.sync_workaround_checkpoint";
 
   # delete previous checkpoint, if left from previous runs
   safesystem("rm -f $checkpointfile") or kill_all_and_quit();
 
   # start the 'hold' job, i.e. the job that will wait
-  $cmd="qsub -cwd $queueparameters $hj -o $checkpointfile -e /dev/null -N $qsubname.W $pwd/sync_workaround_script.sh >& $qsubname.W.log";
+  $cmd="qsub -cwd $queueparameters $hj -o $checkpointfile -e /dev/null -N $qsubname.W $syncscript >& $qsubname.W.log";
   safesystem($cmd) or kill_all_and_quit();
   
   # and wait for checkpoint file to appear
@@ -339,8 +340,7 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
     print STDERR "w" if $nr % 3 == 0;
   }
   print STDERR "End of waiting.\n";
-  safesystem("rm -f $checkpointfile sync_workaround_script.sh")
-    or kill_all_and_quit();
+  safesystem("rm -f $checkpointfile $syncscript") or kill_all_and_quit();
   
   my $failure = 1;
   my $nr = 0;
@@ -348,7 +348,7 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
     $nr ++;
     $failure=&check_exit_status();
     if (!$failure) {
-      $failure = ! check_translation();
+      $failure = check_translation_old_sge();
     }
     last if !$failure;
     print STDERR "Extra wait ($nr) for possibly unfinished processes.\n";
@@ -555,6 +555,30 @@ sub check_translation(){
     }
   }
   return @failed;
+}
+
+sub check_translation_old_sge(){
+  #checking if all sentences were translated
+  my $inputN;
+  my $outputN;
+  foreach my $idx (@idx_todo){
+    if ($inputtype==0){#text input
+      chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
+    }
+    else{
+      chomp($inputN=`cat ${testfile}.$splitpfx$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l |
+ cut -d' ' -f1 `);
+    }
+    chomp($outputN=`wc -l ${testfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
+
+    if ($inputN != $outputN){
+      print STDERR "Split ($idx) were not entirely translated\n";
+      print STDERR "outputN=$outputN inputN=$inputN\n";
+      print STDERR "outputfile=${testfile}.$splitpfx$idx.trans inputfile=${testfile}.$splitpfx$idx\n";
+      return 1;
+    }
+  }
+  return 0; 
 }
 
 sub remove_temporary_files(){
