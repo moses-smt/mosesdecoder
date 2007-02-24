@@ -41,18 +41,22 @@ Manager::Manager(InputType const& source)
 ,m_initialTargetPhrase(Output)
 {
 	TRACE_ERR("Start decoding: " << source << endl);
+	const StaticData &staticData = StaticData::Instance();
+	staticData.InitializeBeforeSentenceProcessing(source);
+
 	HypothesisStack::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
 		HypothesisCollection &sourceHypoColl = *iterStack;
-		sourceHypoColl.SetMaxHypoStackSize(StaticData::Instance().GetMaxHypoStackSize());
-		sourceHypoColl.SetBeamThreshold(StaticData::Instance().GetBeamThreshold());
+		sourceHypoColl.SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
+		sourceHypoColl.SetBeamThreshold(staticData.GetBeamThreshold());
 	}
 }
 
 Manager::~Manager() 
 {
   delete m_transOptColl;
+	StaticData::Instance().CleanUpAfterSentenceProcessing();      
   TRACE_ERR("Completed decoding" << endl);
 }
 
