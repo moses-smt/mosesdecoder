@@ -150,7 +150,7 @@ public:
 	/** length of the partial translation (from the start of the sentence) */
 	inline size_t GetSize() const
 	{
-		return m_currTargetWordsRange.GetEndPos() + 1;
+		return m_targetPhrase.GetSize();
 	}
 
 	inline const InputType &GetSourcePhrase() const

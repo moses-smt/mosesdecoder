@@ -18,16 +18,16 @@
   <kdevautoproject>
     <general>
       <activetarget>src/moses</activetarget>
-      <useconfiguration>debug</useconfiguration>
+      <useconfiguration>optimized</useconfiguration>
     </general>
     <run>
-      <mainprogram>/amd/nfs/wyvern/disk/ptn138/s0565741/workspace/branches/hieu-async/debug/moses-cmd/src/moses-cmd</mainprogram>
+      <mainprogram>/home/s0565741/workspace/sourceforge/branches/hieu-async/debug/moses-cmd/src/moses-cmd</mainprogram>
       <terminal>true</terminal>
       <directoryradio>custom</directoryradio>
       <runarguments>
         <moses-cmd/>
       </runarguments>
-      <customdirectory>/home/s0565741/terabyte/en-de/train-async/mert/</customdirectory>
+      <customdirectory>/home/s0565741/terabyte/en-de/train-async/mert/mert-work/</customdirectory>
       <programargs/>
       <autocompile>true</autocompile>
       <envvars/>
@@ -200,7 +200,7 @@
   </cppsupportpart>
   <kdevdebugger>
     <general>
-      <programargs>-f moses.ini -i 1.txt -n-best-list nbest.txt 10 >&amp; out.txt</programargs>
+      <programargs>-w 0.000000 -lm 0.200000 0.200000 -d 0.200000 -tm 0.060000 0.040000 0.060000 0.040000 0.000000 0.060000 0.040000 0.060000 0.040000 0.000000 -config ../moses.ini -inputtype 0 -n-best-list nbest.txt 100 -input-file in.txt</programargs>
       <gdbpath/>
       <dbgshell>libtool</dbgshell>
       <configGdbScript/>
