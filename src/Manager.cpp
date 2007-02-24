@@ -45,9 +45,10 @@ Manager::Manager(InputType const& source)
 ,m_possibleTranslations(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 {
-	const StaticData &staticData = StaticData::Instance();
-
 	VERBOSE(1, "Translating: " << m_source << endl);
+	const StaticData &staticData = StaticData::Instance();
+	staticData.InitializeBeforeSentenceProcessing(source);
+
 	std::vector < HypothesisCollection >::iterator iterStack;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
@@ -60,6 +61,8 @@ Manager::Manager(InputType const& source)
 Manager::~Manager() 
 {
   delete m_possibleTranslations;
+	StaticData::Instance().CleanUpAfterSentenceProcessing();      
+
 	VERBOSE(1, "Finished translating" << endl);
 }
 
