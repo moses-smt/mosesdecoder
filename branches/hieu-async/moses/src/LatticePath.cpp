@@ -21,6 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "LatticePath.h"
 #include "LatticePathCollection.h"
+#include "StaticData.h"
+#include "DecodeStep.h"
 
 using namespace std;
 
@@ -41,8 +43,10 @@ LatticePath::LatticePath(const Hypothesis *hypo)
 
 LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc)
 : m_prevEdgeChanged(edgeIndex)
-, m_targetPhrase(copy.m_targetPhrase)
+, m_targetPhrase(Output)
 {
+	const StaticData &staticData = StaticData::Instance();
+
 	for (size_t currEdge = 0 ; currEdge < edgeIndex ; currEdge++)
 	{ // copy path from parent
 		m_path.push_back(copy.m_path[currEdge]);
@@ -56,13 +60,26 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypoth
 	while (prevHypo != NULL)
 	{
 		m_path.push_back(prevHypo);
+		prevHypo = prevHypo->GetPrevHypo();
+	}
 
-		// update target phrase
-		const WordsRange &currTargetRange = prevHypo->GetCurrTargetWordsRange();
-		const Phrase &currTargetPhrase = prevHypo->GetCurrTargetPhrase();
+	vector<size_t> startPos(staticData.GetDecodeStepList().size(), 0);
+	int numHypo = (int) m_path.size();
+	for (int node = numHypo - 2 ; node >= 0 ; --node)
+	{ // don't do the empty hypo - waste of time and decode step id is invalid
+		const Hypothesis &hypo = *m_path[node];
+		const Phrase &currTargetPhrase = hypo.GetCurrTargetPhrase();
+		
+		// merge factors from hypo to target phrase
+		size_t decodeStepId = hypo.GetDecodeStepId();
+		size_t firstPos			= startPos[decodeStepId]
+					,currTargetSize = currTargetPhrase.GetSize();
+
+		WordsRange currTargetRange(decodeStepId, firstPos, firstPos + currTargetSize - 1);
 		m_targetPhrase.MergeFactors(currTargetPhrase, currTargetRange);
 
-		prevHypo = prevHypo->GetPrevHypo();
+		// increment pos
+		startPos[decodeStepId] += currTargetSize;
 	}
 
 	// Calc score
