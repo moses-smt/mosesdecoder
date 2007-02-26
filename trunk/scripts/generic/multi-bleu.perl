@@ -118,7 +118,7 @@ for(my $n=1;$n<=4;$n++) {
 }
 
 if ($length_reference==0){
-  printf "BLEU = 0, 0/0/0/0 (BP=0, ration=0, hyp_len=0, ref_len=0)\n";
+  printf "BLEU = 0, 0/0/0/0 (BP=0, ratio=0, hyp_len=0, ref_len=0)\n";
   exit(1);
 }
 
@@ -129,7 +129,7 @@ $bleu = $brevity_penalty * exp((my_log( $bleu[1] ) +
 				my_log( $bleu[2] ) +
 				my_log( $bleu[3] ) +
 				my_log( $bleu[4] ) ) / 4) ;
-printf "BLEU = %.2f, %.1f/%.1f/%.1f/%.1f (BP=%.3f, ration=%.3f, hyp_len=%d, ref_len=%d)\n",
+printf "BLEU = %.2f, %.1f/%.1f/%.1f/%.1f (BP=%.3f, ratio=%.3f, hyp_len=%d, ref_len=%d)\n",
     100*$bleu,
     100*$bleu[1],
     100*$bleu[2],
