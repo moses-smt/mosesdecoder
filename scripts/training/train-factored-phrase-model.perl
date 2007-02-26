@@ -1430,7 +1430,7 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
 		if ($r =~ /bi/) { $w *= 2; }
 		$weight_d_count += $w;
 
-                my $table_file = "$___MODEL_DIR/$r.$___REORDERING_SMOOTH.gz";
+                my $table_file = "$___MODEL_DIR/reordering-table.$type.$___REORDERING_SMOOTH.$factor.gz";
 		$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 		$file .= "$factor $type $w $table_file\n";
 	    }
