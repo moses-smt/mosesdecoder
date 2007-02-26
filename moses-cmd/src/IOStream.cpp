@@ -207,6 +207,7 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 void IOStream::OutputNBestList(const LatticePathList &nBestList, long translationId)
 {
 	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
+	bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
 	
 	LatticePathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
@@ -331,7 +332,25 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
     }
 		
 		// total						
-		*m_nBestStream << "||| " << path.GetTotalScore() << endl;
+    *m_nBestStream << "||| " << path.GetTotalScore();
+    if (includeAlignment) {
+		*m_nBestStream << " |||";
+		for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
+		{
+			const Hypothesis &edge = *edges[currEdge];
+			WordsRange sourceRange = edge.GetCurrSourceWordsRange();
+			WordsRange targetRange = edge.GetCurrTargetWordsRange();
+			*m_nBestStream << " " << sourceRange.GetStartPos();
+			if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
+			  *m_nBestStream << "-" << sourceRange.GetEndPos();
+			}
+			*m_nBestStream << "=" << targetRange.GetStartPos();
+			if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
+			  *m_nBestStream << "-" << targetRange.GetEndPos();
+			}
+		}
+    }
+    *m_nBestStream << endl;
 	}
 
 	*m_nBestStream<<std::flush;

@@ -122,6 +122,9 @@ bool StaticData::LoadData(Parameter *parameter)
 	// include feature names in the n-best list
 	SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
 
+	// include word alignment in the n-best list
+	SetBooleanParameter( &m_nBestIncludesAlignment, "include-alignment-in-n-best", false );
+
 	// printing source phrase spans
 	SetBooleanParameter( &m_reportSegmentation, "report-segmentation", false );
 

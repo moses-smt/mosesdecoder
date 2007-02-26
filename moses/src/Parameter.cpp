@@ -42,7 +42,8 @@ Parameter::Parameter()
 	AddParam("input-factors", "list of factors in the input");
 	AddParam("input-file", "i", "location of the input file to be translated");
 	AddParam("inputtype", "text (0) or confusion network (1)");
-	AddParam("labeled-n-best-list", "labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
+	AddParam("labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
+	AddParam("include-alignment-in-n-best", "include word alignment in the n-best list. default is false");
 	AddParam("lmodel-file", "location and properties of the language models");
 	AddParam("lmstats", "L", "(1/0) compute LM backoff statistics for each translation hypothesis");
 	AddParam("mapping", "description of decoding steps");
