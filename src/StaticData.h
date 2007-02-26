@@ -79,7 +79,7 @@ protected:
 		  , m_maxNoPartTransOpt;
 	
 	std::string									m_nBestFilePath;
-	bool                        m_fLMsLoaded, m_labeledNBestList;
+	bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
 	 * true = drop (ignore) them
@@ -268,6 +268,10 @@ public:
 	bool IsLabeledNBestList() const
 	{
 		return m_labeledNBestList;
+	}
+	bool NBestIncludesAlignment() const
+	{
+		return m_nBestIncludesAlignment;
 	}
 	const std::vector<std::string> &GetDescription() const
 	{
