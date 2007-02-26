@@ -86,6 +86,7 @@ sub train_recase_model {
     print STDERR "\n(4) Training recasing model @ ".`date`;
     my $cmd = "$TRAIN_SCRIPT --root-dir $DIR --model-dir $DIR --first-step $first --alignment a --corpus $DIR/aligned --f lowercased --e cased --max-phrase-length $MAX_LEN --lm 0:3:$DIR/cased.srilm.gz:0";
     $cmd .= " -scripts-root-dir $SCRIPTS_ROOT_DIR" if $SCRIPTS_ROOT_DIR;
+    $cmd .= " -config $CONFIG" if $CONFIG;
     print STDERR $cmd."\n";
     print STDERR `$cmd`;
 }
