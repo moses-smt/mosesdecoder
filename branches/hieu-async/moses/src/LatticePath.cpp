@@ -122,11 +122,6 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 
 Phrase LatticePath::GetTargetPhrase() const
 {
-	static int i = 0;
-	cerr << ++i << endl;
-
-	if (i==97)
-		cerr << endl;
 	const StaticData &staticData = StaticData::Instance();
 	Phrase targetPhrase(Output);
 	vector<size_t> startPos(staticData.GetDecodeStepList().size(), 0);
@@ -135,7 +130,6 @@ Phrase LatticePath::GetTargetPhrase() const
 	{ // don't do the empty hypo - waste of time and decode step id is invalid
 		const Hypothesis &hypo = *m_path[node];
 		const Phrase &currTargetPhrase = hypo.GetCurrTargetPhrase();
-		cerr << currTargetPhrase;	
 
 		// merge factors from hypo to target phrase
 		size_t decodeStepId = hypo.GetDecodeStepId();
@@ -145,12 +139,9 @@ Phrase LatticePath::GetTargetPhrase() const
 		WordsRange currTargetRange(decodeStepId, firstPos, firstPos + currTargetSize - 1);
 		targetPhrase.MergeFactors(currTargetPhrase, currTargetRange);
 
-		cerr << " -> " << targetPhrase << endl;
 		// increment pos
 		startPos[decodeStepId] += currTargetSize;
 	}
-
-	cerr << endl;
 
 	return targetPhrase;
 }

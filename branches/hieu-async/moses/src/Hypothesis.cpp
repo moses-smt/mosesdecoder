@@ -51,6 +51,7 @@ Hypothesis::Hypothesis(InputType const& source, const std::vector<DecodeStep*> &
 	, m_currSourceRange(decodeStepList.size())
 	, m_currTargetPhrase(emptyTarget)
 	, m_targetPhrase(emptyTarget)
+	, m_targetSize(decodeStepList.size(), 0)
 	, m_sourcePhrase(0)
 	, m_sourceCompleted(source.GetSize())
 	, m_sourceInput(source)
@@ -83,6 +84,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_currSourceRange(prevHypo.m_currSourceRange)
 	, m_currTargetPhrase(transOpt.GetTargetPhrase())
 	, m_targetPhrase(prevHypo.m_targetPhrase)
+	, m_targetSize(prevHypo.m_targetSize)
 	, m_sourcePhrase(0)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_sourceInput						(prevHypo.m_sourceInput)
@@ -102,6 +104,9 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 	// update curr source range for this step
 	m_currSourceRange[m_decodeStepId] = transOpt.GetSourceWordsRange();
+
+	// update target size for this step
+	m_targetSize[m_decodeStepId] += transOptPhrase.GetSize();
 
 	// update back ptr
 	size_t prevDecodeStepId = prevHypo.GetDecodeStepId();
@@ -264,50 +269,28 @@ int Hypothesis::CompareCurrSourceRange(const Hypothesis &compare) const
 	return 0;
 }
 
+//helper fn - turn vector arg from vector of 
+// sizes to vector of diff to the 0 element
+void SizeDiff(vector<size_t> &phraseSize)
+{
+	const size_t numElem = phraseSize.size();
+	for (size_t idx = 1 ; idx < numElem ; ++idx)
+		phraseSize[idx] -= phraseSize[0];
+
+	phraseSize[0] = 0;
+}
+
 int Hypothesis::CompareUnsyncFactors(const Hypothesis &compare) const
 {
-	const Phrase &phraseThis		= GetTargetPhrase()
-							,&phraseCompare = compare.GetTargetPhrase();
-/*
-	if (phraseThis.GetSize() != phraseCompare.GetSize())
-	{ // need to do this otherwise n-best list generation get ugly
-		return phraseThis.GetSize() < phraseCompare.GetSize();
-	}
-*/
-	size_t	maxGap = 0;
+	std::vector<size_t> thisSizeDiff		= m_targetSize
+										,compareSizeDiff	= compare.m_targetSize;
+	SizeDiff(thisSizeDiff);
+	SizeDiff(compareSizeDiff);
 
-	// find starting pos
-	for (FactorType factorType = 0 ; factorType < StaticData::Instance().GetMaxNumFactors(Output) ; ++factorType)
-	{
-		size_t gapThis		= phraseThis.GetSize()		- phraseThis.FindFirstGap(factorType)
-					,gapCompare	= phraseCompare.GetSize() - phraseCompare.FindFirstGap(factorType);
-		
-		// both hypo must have the same number of factors missing
-		if ( gapThis != gapCompare)
-		{
-			return gapThis < gapCompare ? -1 : +1;
-		}
+	if (thisSizeDiff == compareSizeDiff)
+		return 0;
 
-		maxGap = (gapThis > maxGap) ? gapThis : maxGap;
-	}
-
-	// make sure factors are the same in both hypos
-	for (size_t gap = 0 ; gap < maxGap ; ++gap)
-	{
-		size_t posThis		= phraseThis.GetSize() - gap
-					,posCompare = phraseCompare.GetSize() - gap;
-
-		for (FactorType factorType = 0 ; factorType < StaticData::Instance().GetMaxNumFactors(Output) ; ++factorType)
-		{
-			const Factor *factorThis		= GetFactor(posThis, factorType)
-									,*factorCompare	= compare.GetFactor(posCompare, factorType);
-			if (factorThis != factorCompare)
-				return (factorThis < factorCompare) ? -1 : +1;
-		}		
-	}
-
-	// same
-	return 0;
+	return (thisSizeDiff < compareSizeDiff) ? +1 : -1;
 }
 
 /** Calculates the overall language model score by combining the scores
@@ -545,31 +528,10 @@ void Hypothesis::CleanupArcList()
 
 	if (!distinctNBest && m_arcList->size() > nBestSize * 5)
 	{ // prune arc list only if there too many arcs
-
-		// debug
-		/*
-		ArcList::iterator iterArcList;
-		for (iterArcList = m_arcList->begin() ; iterArcList != m_arcList->end() ; ++iterArcList)
-		{
-			Hypothesis *hypo = *iterArcList;
-			cerr << hypo->GetTotalScore() << endl;
-		}
-		cerr << endl;
-		*/
-
 		nth_element(m_arcList->begin()
 							, m_arcList->begin() + nBestSize - 1
 							, m_arcList->end()
 							, CompareHypothesisTotalScore());
-		// debug
-		/*
-		for (iterArcList = m_arcList->begin() ; iterArcList != m_arcList->end() ; ++iterArcList)
-		{
-			Hypothesis *hypo = *iterArcList;
-			cerr << hypo->GetTotalScore() << endl;
-		}
-		cerr << endl;
-		*/
 
 		// delete bad ones
 		ArcList::iterator iter;
@@ -580,16 +542,6 @@ void Hypothesis::CleanupArcList()
 		}
 		m_arcList->erase(m_arcList->begin() + nBestSize
 										, m_arcList->end());
-
-		// debug
-		/*
-		for (iterArcList = m_arcList->begin() ; iterArcList != m_arcList->end() ; ++iterArcList)
-		{
-			Hypothesis *hypo = *iterArcList;
-			cerr << hypo->GetTotalScore() << endl;
-		}
-		cerr << endl;
-		*/
 	}
 	
 	// set all remaining arc's main hypo variable to this hypo

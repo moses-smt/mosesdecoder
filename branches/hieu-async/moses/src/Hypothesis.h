@@ -64,6 +64,7 @@ protected:
 	size_t						m_decodeStepId; /**< decode step used to expand this hypo, or NOT_FOUND if 1st hypo */
 	std::vector<const Hypothesis*> m_backPtr; /**< backpointer to previous hypothesis (from which this one was created) */
 	std::vector<WordsRange>	m_currSourceRange; /**< source word positions of the last phrase that was used to create this hypothesis */
+	std::vector<size_t> m_targetSize;
 	const Phrase			&m_currTargetPhrase; /**< target phrase being created at the current decoding step */
 	const Phrase			*m_sourcePhrase; /**< input sentence */
 	Phrase						m_targetPhrase; /**< whole of target phrase so far */
