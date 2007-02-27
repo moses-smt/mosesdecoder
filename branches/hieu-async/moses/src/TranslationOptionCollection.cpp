@@ -166,28 +166,33 @@ void TranslationOptionCollection::ProcessOneUnknownWord(size_t decodeStepId, con
 																												, size_t sourcePos)
 {
 	// unknown word, add as trans opt
+	const StaticData &staticData = StaticData::Instance();
 
-		size_t isDigit = 0;
-		if (StaticData::Instance().GetDropUnknown())
+	size_t isDigit = 0;
+	if (staticData.GetDropUnknown())
+	{
+		const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
+		const string &s = f->GetString();
+		isDigit = s.find_first_of("0123456789");
+		if (isDigit == string::npos) 
+			isDigit = 0;
+		else 
+			isDigit = 1;
+		// modify the starting bitmap
+	}
+	
+	TranslationOption *transOpt;
+	if (! staticData.GetDropUnknown() || isDigit)
+	{
+		// add to dictionary
+		TargetPhrase targetPhrase(Output);
+		Word &targetWord = targetPhrase.AddWord();
+			
+		// only copy over factors specified as output factors
+		const FactorMask &outputMask = staticData.GetDecodeStep(decodeStepId).GetOutputFactorMask();
+		for (FactorType factorType = 0 ; factorType < MAX_NUM_FACTORS ; ++factorType)
 		{
-			const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-			const string &s = f->GetString();
-			isDigit = s.find_first_of("0123456789");
-			if (isDigit == string::npos) 
-				isDigit = 0;
-			else 
-				isDigit = 1;
-			// modify the starting bitmap
-		}
-		
-		TranslationOption *transOpt;
-		if (! StaticData::Instance().GetDropUnknown() || isDigit)
-		{
-			// add to dictionary
-			TargetPhrase targetPhrase(Output);
-			Word &targetWord = targetPhrase.AddWord();
-						
-			for (FactorType factorType = 0 ; factorType < MAX_NUM_FACTORS ; ++factorType)
+			if (outputMask[factorType])
 			{
 				const Factor *sourceFactor = sourceWord[factorType];
 				if (sourceFactor == NULL)
@@ -195,20 +200,21 @@ void TranslationOptionCollection::ProcessOneUnknownWord(size_t decodeStepId, con
 				else
 					targetWord[factorType] = FactorCollection::Instance().AddFactor(Output, factorType, sourceFactor->GetString());
 			}
-	
-			targetPhrase.SetScore();
-			targetPhrase.SetAlignment();
-			
-			transOpt = new TranslationOption(WordsRange(decodeStepId, sourcePos, sourcePos), targetPhrase, 0);
-		}
-		else 
-		{ // drop source word. create blank trans opt
-			const TargetPhrase targetPhrase(Output);
-			transOpt = new TranslationOption(WordsRange(decodeStepId, sourcePos, sourcePos), targetPhrase, 0);
 		}
 
-		transOpt->CalcScore();
-		Add(decodeStepId, transOpt);
+		targetPhrase.SetScore();
+		targetPhrase.SetAlignment();
+		
+		transOpt = new TranslationOption(WordsRange(decodeStepId, sourcePos, sourcePos), targetPhrase, 0);
+	}
+	else 
+	{ // drop source word. create blank trans opt
+		const TargetPhrase targetPhrase(Output);
+		transOpt = new TranslationOption(WordsRange(decodeStepId, sourcePos, sourcePos), targetPhrase, 0);
+	}
+
+	transOpt->CalcScore();
+	Add(decodeStepId, transOpt);
 }
 
 /** compute future score matrix in a dynamic programming fashion.

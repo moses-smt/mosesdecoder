@@ -42,7 +42,6 @@ protected:
 	size_t		m_prevEdgeChanged; /**< the last node that was wiggled to create this path
 																	, or NOT_FOUND if this path is the best trans so consist of only hypos
 															 */
-	Phrase m_targetPhrase;
 	ScoreComponentCollection	m_scoreBreakdown;
 	float m_totalScore;
 
@@ -74,13 +73,9 @@ public:
 	{
 		return m_scoreBreakdown;
 	}
-	
-	TO_STRING();
+	Phrase LatticePath::GetTargetPhrase() const;
 
-	const Phrase &GetTargetPhrase() const
-	{
-		return m_targetPhrase;
-	}
+	TO_STRING();
 };
 
 // friend
