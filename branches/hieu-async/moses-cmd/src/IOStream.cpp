@@ -107,12 +107,15 @@ InputType*IOStream::GetInput(InputType* inputType)
  * print surface factor only for the given phrase
  */
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder)
-{
+{	
 	assert(outputFactorOrder.size() > 0);
 	size_t size = phrase.GetSize();
 	for (size_t pos = 0 ; pos < size ; pos++)
 	{
 		const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+		if (factor == NULL)
+			cerr << phrase << endl;
+	
 		out << *factor;
 		
 		for (size_t i = 1 ; i < outputFactorOrder.size() ; i++)

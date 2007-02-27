@@ -73,7 +73,7 @@ public:
 	{
 		return m_scoreBreakdown;
 	}
-	Phrase LatticePath::GetTargetPhrase() const;
+	Phrase GetTargetPhrase() const;
 
 	TO_STRING();
 };
