@@ -61,13 +61,10 @@ bool LanguageModelSRI::Load(const std::string &filePath
 	m_srilmModel->skipOOVs() = false;
 
 	File file( filePath.c_str(), "r" );
-	if (m_srilmModel->read(file))
-	{
-	}
-	else
-	{
-		TRACE_ERR("warning/failed loading language model" << endl);
-	}
+
+	// read file, no error catching
+	m_srilmModel->read(file);
+
 	// LM can be ok, just outputs warnings
 	CreateFactors();		
   m_unknownId = m_srilmVocab->unkIndex();
