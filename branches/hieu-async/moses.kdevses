@@ -1,17 +1,7 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="3" >
-  <Doc0 NumberOfViews="1" URL="file:///amd/nfs/wyvern/disk/ptn138/s0565741/workspace/sourceforge/branches/hieu-async/moses/src/Factor.h" >
-   <View0 line="72" Type="Source" />
-  </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///amd/nfs/wyvern/disk/ptn138/s0565741/workspace/sourceforge/branches/hieu-async/moses/src/Factor.cpp" >
-   <View0 line="44" Type="Source" />
-  </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///amd/nfs/wyvern/disk/ptn138/s0565741/workspace/sourceforge/branches/hieu-async/moses-cmd/src/IOStream.cpp" >
-   <View0 line="118" Type="Source" />
-  </Doc2>
- </DocsAndViews>
+ <DocsAndViews NumberOfDocuments="0" />
  <pluginList>
   <kdevdebugger>
    <breakpointList>

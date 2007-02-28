@@ -388,7 +388,9 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 						lmScore += languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx], &(*m_lmstats)[lmIdx][nLmCallCount++]);
 					}
 					else
+					{
 						lmScore	+= languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx]);
+					}
 				}
 				else
 				{ // not yet end of sentence
@@ -555,8 +557,15 @@ void Hypothesis::CleanupArcList()
 
 bool Hypothesis::IsCompletable() const
 {
-	// create target bitmap
-	// hack - only values for this decode step are set
+	// if all source words for this decode step is covered, then target sentence length must equal
+	// to previous length. 
+	if (m_sourceCompleted.IsComplete(m_decodeStepId))
+	{
+		return (m_targetSize[m_decodeStepId] == m_targetPhrase.GetSize());
+	}
+	
+	// not all source words have been translated
+	// create target bitmap. Hack - only values for this decode step are set
 	WordsBitmap targetCompleted(GetSize());
 	targetCompleted.SetValue(m_decodeStepId, 0, m_currTargetWordsRange.GetEndPos(), true);
 

@@ -13,7 +13,7 @@
     <ignoreparts/>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
+    <description></description>
   </general>
   <kdevautoproject>
     <general>
@@ -27,8 +27,8 @@
       <runarguments>
         <moses-cmd/>
       </runarguments>
-      <customdirectory>/home/s0565741/terabyte/en-de/train-async/mert/mert-work/</customdirectory>
-      <programargs/>
+      <customdirectory>/home/s0565741/c++/data/Async-large/</customdirectory>
+      <programargs></programargs>
       <autocompile>true</autocompile>
       <envvars/>
     </run>
@@ -184,7 +184,7 @@
       <root>/usr/lib/qt-3.3</root>
     </qt>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>
@@ -200,12 +200,12 @@
   </cppsupportpart>
   <kdevdebugger>
     <general>
-      <programargs>-w 0.000000 -lm 0.200000 0.200000 -d 0.200000 -tm 0.060000 0.040000 0.060000 0.040000 0.000000 0.060000 0.040000 0.060000 0.040000 0.000000 -config ../moses.ini -inputtype 0 -n-best-list nbest.txt 100 -input-file in.txt</programargs>
-      <gdbpath/>
+      <programargs>-f moses.ini -i in.txt</programargs>
+      <gdbpath></gdbpath>
       <dbgshell>libtool</dbgshell>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
