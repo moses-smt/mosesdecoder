@@ -332,13 +332,13 @@ if (defined $___LAMBDA) {
   }
   # sanity checks for specified lambda triples
   foreach my $name (keys %used_triples) {
-      die "No lambdas specified for '$name', but ".($used_triples{$name})." needed.\n"
+      die "No lambdas specified for '$name', but ".($#{$used_triples{$name}}+1)." needed.\n"
 	  unless defined($specified_triples{$name});
-      die "Number of lambdas specified for '$name' (".($specified_triples{$name}).") does not match number needed (".($used_triples{$name}).")\n"
-	  if scalar $used_triples{$name} != scalar $specified_triples{$name};
+      die "Number of lambdas specified for '$name' (".($#{$specified_triples{$name}}+1).") does not match number needed (".($#{$used_triples{$name}}+1).")\n"
+	  if (($#{$used_triples{$name}}) != ($#{$specified_triples{$name}}));
   }
   foreach my $name (keys %specified_triples) {
-      die "Lambdas specified for '$name' ".($specified_triples{$name}).", but none needed.\n"
+      die "Lambdas specified for '$name' ".(@{$specified_triples{$name}}).", but none needed.\n"
 	  unless defined($used_triples{$name});
   }
   %used_triples = %specified_triples;
@@ -881,6 +881,7 @@ sub safesystem {
 }
 sub ensure_full_path {
     my $PATH = shift;
+$PATH =~ s/\/nfsmnt//;
     return $PATH if $PATH =~ /^\//;
     my $dir = `pawd 2>/dev/null`; 
     if(!$dir){$dir = `pwd`;}
@@ -896,6 +897,7 @@ sub ensure_full_path {
     }
     $PATH =~ s/\/[^\/]+\/\.\.$//;
     $PATH =~ s/\/+$//;
+$PATH =~ s/\/nfsmnt//;
     return $PATH;
 }
 
