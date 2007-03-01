@@ -559,7 +559,8 @@ bool Hypothesis::IsCompletable() const
 {
 	// if all source words for this decode step is covered, then target sentence length must equal
 	// to previous length. 
-	if (m_sourceCompleted.IsComplete(m_decodeStepId))
+	const DecodeStep &decodeStep = StaticData::Instance().GetDecodeStep(m_decodeStepId);
+	if (m_sourceCompleted.IsComplete(decodeStep))
 	{
 		return (m_targetSize[m_decodeStepId] == m_targetPhrase.GetSize());
 	}
