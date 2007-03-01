@@ -108,7 +108,7 @@ void Manager::ProcessSentence()
 
 	//OutputHypoStack();
 	OutputHypoStackSize();
-	OutputArcListSize();
+	//OutputArcListSize();
 	
 	// some more logging
 	VERBOSE(2, StaticData::Instance().GetSentenceStats());
