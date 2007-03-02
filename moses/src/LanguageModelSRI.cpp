@@ -68,14 +68,15 @@ bool LanguageModelSRI::Load(const std::string &filePath
 	m_srilmModel->read(file);
 
 	// LM can be ok, just outputs warnings
-	CreateFactors(factorCollection);		
+	CreateFactors();		
   m_unknownId = m_srilmVocab->unkIndex();
   
   return true;
 }
 
-void LanguageModelSRI::CreateFactors(FactorCollection &factorCollection)
+void LanguageModelSRI::CreateFactors()
 { // add factors which have srilm id
+	FactorCollection &factorCollection = FactorCollection::Instance();
 	
 	std::map<size_t, VocabIndex> lmIdMap;
 	size_t maxFactorId = 0; // to create lookup vector later on

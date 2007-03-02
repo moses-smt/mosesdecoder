@@ -41,7 +41,7 @@ protected:
 	VocabIndex	m_unknownId;
 
 	float GetValue(VocabIndex wordId, VocabIndex *context) const;
-	void CreateFactors(FactorCollection &factorCollection);
+	void CreateFactors();
 	VocabIndex GetLmID( const std::string &str ) const;
 	VocabIndex GetLmID( const Factor *factor ) const;
 	
