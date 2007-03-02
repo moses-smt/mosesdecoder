@@ -106,7 +106,7 @@ void Manager::ProcessSentence()
 		//OutputArcListSize();
 	}
 
-	//OutputHypoStack();
+	OutputHypoStack();
 	OutputHypoStackSize();
 	//OutputArcListSize();
 	
@@ -176,6 +176,9 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vect
 		{
 			for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
 			{
+				//if (hypoWordCount == 7)
+				//	cerr << hypothesis << endl;
+					
 				if (!hypoBitmap.IsHierarchy(decodeStepId, startPos, endPos))
 					break;
 
@@ -251,6 +254,9 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 		// create hypothesis and calculate all its scores
 		Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
 
+		bool show = false;
+		if (show)
+			cerr << *newHypo << endl;
 		// alignments don't allow hypo to be decoded to completion
 		if (!newHypo->IsCompletable())
 		{

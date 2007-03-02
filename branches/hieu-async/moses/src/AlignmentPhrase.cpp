@@ -24,17 +24,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t startPosCompare) const 
+bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t shiftCompare) const 
 {
-	const size_t endPos = std::min(GetSize() , startPosCompare + compare.GetSize());
+	const size_t endPos = std::min(GetSize() , shiftCompare + compare.GetSize());
 	size_t posCompare = 0;
-	for (size_t posThis = startPosCompare ; posThis < endPos ; ++posThis)
+	for (size_t posThis = shiftCompare ; posThis < endPos ; ++posThis)
 	{
 		const AlignmentElement &alignThis = m_collection[posThis];
 		AlignmentElement alignCompare = compare.m_collection[posCompare];
 
 		// shift alignment
-		alignCompare.Shift( (int)startPosCompare );
+		alignCompare.Shift( (int)shiftCompare );
 
 		if (!alignThis.Equals(alignCompare))
 			return false;
