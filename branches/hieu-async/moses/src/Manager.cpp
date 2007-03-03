@@ -76,10 +76,8 @@ void Manager::ProcessSentence()
 	m_transOptColl->CreateTranslationOptions(decodeStepList);
 
 	// initial seed hypothesis: nothing translated, no words produced
-	{
-		Hypothesis *hypo = Hypothesis::Create(m_source, decodeStepList, m_initialTargetPhrase);
-		m_hypoStack.GetStack(0).AddPrune(hypo);
-	}
+	Hypothesis *seedHypo = Hypothesis::Create(m_source, decodeStepList, m_initialTargetPhrase);
+	m_hypoStack.GetStack(0).AddPrune(seedHypo);
 	
 	// go through each stack
 	HypothesisStack::iterator iterStack;
@@ -102,11 +100,11 @@ void Manager::ProcessSentence()
 		}
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
-		OutputHypoStackSize();
+		//OutputHypoStackSize();
 		//OutputArcListSize();
 	}
 
-	OutputHypoStack();
+	//OutputHypoStack();
 	OutputHypoStackSize();
 	//OutputArcListSize();
 	
@@ -175,10 +173,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vect
 		for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 		{
 			for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
-			{
-				//if (hypoWordCount == 7)
-				//	cerr << hypothesis << endl;
-					
+			{					
 				if (!hypoBitmap.IsHierarchy(decodeStepId, startPos, endPos))
 					break;
 
@@ -248,15 +243,14 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	const AlignmentPhrase 
 							&hypoAlignment		= hypothesis.GetAlignmentPair().GetAlignmentPhrase(Output)
 						, &targetAlignment	= transOpt.GetAlignmentPair().GetAlignmentPhrase(Output);
-	size_t transOptStart = transOpt.GetStartPos();
-	if (hypoAlignment.IsCompatible(targetAlignment, transOptStart))
+	size_t 	transOptStart 				= transOpt.GetStartPos()
+					,decodeStepId					= transOpt.GetDecodeStepId();
+					
+	if (decodeStepId == 0 ||  hypoAlignment.IsCompatible(targetAlignment, transOptStart))
 	{
 		// create hypothesis and calculate all its scores
 		Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-
-		bool show = false;
-		if (show)
-			cerr << *newHypo << endl;
+	
 		// alignments don't allow hypo to be decoded to completion
 		if (!newHypo->IsCompletable())
 		{
