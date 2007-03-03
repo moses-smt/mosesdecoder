@@ -282,15 +282,18 @@ const Hypothesis *Manager::GetBestHypothesis() const
 /**
  * Logging of hypothesis stack sizes
  */
-void Manager::OutputHypoStackSize()
+void Manager::OutputHypoStackSize() const
 {
-	HypothesisStack::iterator iterStack = m_hypoStack.begin();
-	TRACE_ERR( "Stack sizes: " << (*iterStack).size());
-	for (++iterStack; iterStack != m_hypoStack.end() ; ++iterStack)
+	HypothesisStack::const_iterator iterStack;
+	TRACE_ERR( "Stack sizes: " << endl);
+	int sqSize	= m_source.GetSize() + 1
+			, i 		= 1;
+	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
-		TRACE_ERR( ", " << (*iterStack).size());
+		TRACE_ERR((*iterStack).size() << "\t");
+		if (i++ % sqSize == 0)
+			TRACE_ERR( endl);
 	}
-	TRACE_ERR( endl);
 }
 
 /**

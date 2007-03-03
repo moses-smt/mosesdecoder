@@ -85,7 +85,7 @@ protected:
 
 	// logging
 	void OutputHypoStack(int stack = -1);
-	void OutputHypoStackSize();
+	void OutputHypoStackSize() const;
 	void OutputArcListSize() const;
 public:
 	Manager(InputType const& source);
