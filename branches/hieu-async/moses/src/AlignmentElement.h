@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <set>
 #include <vector>
+#include "Util.h"
 
 //! set of alignments of 1 word
 class AlignmentElement
@@ -79,4 +80,6 @@ public:
 
 	// shift alignment so that it is comparitable to another alignment. 
 	void Shift(int shift);
+	
+	TO_STRING();
 };

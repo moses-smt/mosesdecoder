@@ -49,3 +49,4 @@ std::ostream& operator<<(std::ostream& out, const AlignmentElement &alignElement
 	return out;
 }
 
+TO_STRING_BODY(AlignmentElement);

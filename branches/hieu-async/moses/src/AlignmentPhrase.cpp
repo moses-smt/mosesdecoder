@@ -114,3 +114,5 @@ std::ostream& operator<<(std::ostream& out, const AlignmentPhrase &alignmentPhra
 	return out;
 }
 
+TO_STRING_BODY(AlignmentPhrase);
+
