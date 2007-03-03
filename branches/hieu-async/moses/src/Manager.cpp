@@ -102,7 +102,7 @@ void Manager::ProcessSentence()
 		}
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
-		//OutputHypoStackSize();
+		OutputHypoStackSize();
 		//OutputArcListSize();
 	}
 
@@ -248,8 +248,8 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	const AlignmentPhrase 
 							&hypoAlignment		= hypothesis.GetAlignmentPair().GetAlignmentPhrase(Output)
 						, &targetAlignment	= transOpt.GetAlignmentPair().GetAlignmentPhrase(Output);
-	size_t nextStartPos = hypothesis.GetNextStartPos(transOpt);
-	if (hypoAlignment.IsCompatible(targetAlignment, nextStartPos))
+	size_t transOptStart = transOpt.GetStartPos();
+	if (hypoAlignment.IsCompatible(targetAlignment, transOptStart))
 	{
 		// create hypothesis and calculate all its scores
 		Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
