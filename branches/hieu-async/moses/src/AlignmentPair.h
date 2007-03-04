@@ -71,6 +71,10 @@ public:
 										, const WordsBitmap &sourceCompleted
 										, const WordsBitmap &targetCompleted) const;
 
+	bool IsCompatible(const AlignmentPair &compare
+									, size_t sourceStart
+									, size_t targetStart) const;
+
 	TO_STRING();
 };
 

@@ -49,7 +49,29 @@ bool AlignmentPair::IsCompletable(size_t decodeStepId
 	return m_targetAlign.IsCompletable(decodeStepId, targetCompleted, sourceCompleted);
 }
 
-void AlignmentPair::Add(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange)
+bool AlignmentPair::IsCompatible(const AlignmentPair &compare
+																, size_t sourceStart
+																, size_t targetStart) const
+{
+	// source
+	bool ret = GetAlignmentPhrase(Input).IsCompatible(
+							compare.GetAlignmentPhrase(Input)
+							, sourceStart
+							, targetStart);
+
+	if (!ret)
+		return false;
+
+	// target
+	return GetAlignmentPhrase(Output).IsCompatible(
+							compare.GetAlignmentPhrase(Output)
+							, targetStart
+							, sourceStart);
+}
+
+void AlignmentPair::Add(const AlignmentPair &newAlignment
+												, const WordsRange &sourceRange
+												, const WordsRange &targetRange)
 {
 	m_sourceAlign.Add(newAlignment.m_sourceAlign
 										, targetRange.GetStartPos()

@@ -240,14 +240,17 @@ void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const Translation
 
 void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
-	const AlignmentPhrase 
-							&hypoAlignment		= hypothesis.GetAlignmentPair().GetAlignmentPhrase(Output)
-						, &targetAlignment	= transOpt.GetAlignmentPair().GetAlignmentPhrase(Output);
+	const AlignmentPair
+							&hypoAlignment		= hypothesis.GetAlignmentPair()
+						, &targetAlignment	= transOpt.GetAlignmentPair();
 	size_t 	decodeStepId					= transOpt.GetDecodeStepId()
-					, transOptStart 			= transOpt.GetStartPos()
-					, mergePosStart				= hypothesis.GetNextStartPos(transOpt);
+					, sourceStart 				= transOpt.GetStartPos()
+					, targetStart					= hypothesis.GetNextStartPos(transOpt);
 					
-	if (decodeStepId == 0 ||  hypoAlignment.IsCompatible(targetAlignment, mergePosStart, transOptStart))
+	if (decodeStepId == 0 ||  hypoAlignment.IsCompatible(
+																	targetAlignment
+																	, sourceStart
+																	, targetStart))
 	{
 		// create hypothesis and calculate all its scores
 		Hypothesis *newHypo = hypothesis.CreateNext(transOpt);

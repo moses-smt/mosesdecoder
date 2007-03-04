@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t mergePosStart, size_t transOptStart) const 
+bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t mergePosStart, size_t shiftPos) const 
 {
 	const size_t compareSize = compare.GetSize();
 	
@@ -40,7 +40,7 @@ bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t mergeP
 		AlignmentElement alignCompare = compare.m_collection[posCompare];
 
 		// shift alignment
-		alignCompare.Shift( (int)transOptStart);
+		alignCompare.Shift( (int)shiftPos);
 
 		if (!alignThis.Equals(alignCompare))
 			return false;
