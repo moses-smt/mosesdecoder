@@ -65,8 +65,6 @@ public:
 								 <<")\n");
 
 				TRACE_ERR("\npath statistics\n");
-				std::cerr.setf(std::ios::scientific); 
-				std::cerr.precision(5);
 
 				if(path1Best.size()) 
 					{
@@ -327,10 +325,7 @@ public:
 		
 		if (StaticData::Instance().GetVerboseLevel() >= 2 && exPathsD.size())
 			{
-				TRACE_ERR("path stats for current CN: \n");
-				std::cerr.setf(std::ios::scientific); 
-				std::cerr.precision(5);
-				TRACE_ERR("CN (full):     ");
+				TRACE_ERR("path stats for current CN: \nCN (full):     ");
 				std::transform(exPathsD.begin()+1
 											,exPathsD.end()
 											,std::ostream_iterator<double>(std::cerr," ")
