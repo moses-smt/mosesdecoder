@@ -1,22 +1,22 @@
-TRANSLATION_OPTION_1=form of , pC=-0.57, c=-0.81
-TRANSLATION_OPTION_2=from , pC=-0.60, c=-0.78
-TRANSLATION_OPTION_3=money , pC=-0.38, c=-0.68
-TRANSLATION_OPTION_4=money transfers , pC=-0.29, c=-0.80
-TRANSLATION_OPTION_5=of transfers , pC=-0.32, c=-0.80
-TRANSLATION_OPTION_6=payments , pC=-0.49, c=-0.82
-TRANSLATION_OPTION_7=providing , pC=-0.54, c=-0.87
-TRANSLATION_OPTION_8=remittance , pC=-0.06, c=-0.63
-TRANSLATION_OPTION_9=remittance of , pC=-0.15, c=-0.73
-TRANSLATION_OPTION_10=remittances , , pC=-0.20, c=-0.79
-TRANSLATION_OPTION_11=remittances , pC=-0.04, c=-0.61
-TRANSLATION_OPTION_12=remittances , to , pC=-0.16, c=-0.86
-TRANSLATION_OPTION_13=remittances from , pC=-0.15, c=-0.75
-TRANSLATION_OPTION_14=represents , pC=-0.55, c=-0.85
-TRANSLATION_OPTION_15=sending money , pC=-0.33, c=-0.84
-TRANSLATION_OPTION_16=sent , pC=-0.49, c=-0.83
-TRANSLATION_OPTION_17=transfer , pC=-0.37, c=-0.72
-TRANSLATION_OPTION_18=transfer of money , pC=-0.35, c=-0.80
-TRANSLATION_OPTION_19=transfers , pC=-0.33, c=-0.69
-TRANSLATION_OPTION_20=transfers from , pC=-0.36, c=-0.76
+TRANSLATION_OPTION_1=form of , pC=-0.571, c=-0.815
+TRANSLATION_OPTION_2=from , pC=-0.604, c=-0.783
+TRANSLATION_OPTION_3=money , pC=-0.380, c=-0.680
+TRANSLATION_OPTION_4=money transfers , pC=-0.291, c=-0.797
+TRANSLATION_OPTION_5=of transfers , pC=-0.323, c=-0.805
+TRANSLATION_OPTION_6=payments , pC=-0.493, c=-0.816
+TRANSLATION_OPTION_7=providing , pC=-0.536, c=-0.866
+TRANSLATION_OPTION_8=remittance , pC=-0.059, c=-0.627
+TRANSLATION_OPTION_9=remittance of , pC=-0.154, c=-0.726
+TRANSLATION_OPTION_10=remittances , , pC=-0.202, c=-0.793
+TRANSLATION_OPTION_11=remittances , pC=-0.043, c=-0.611
+TRANSLATION_OPTION_12=remittances , to , pC=-0.161, c=-0.864
+TRANSLATION_OPTION_13=remittances from , pC=-0.154, c=-0.753
+TRANSLATION_OPTION_14=represents , pC=-0.551, c=-0.852
+TRANSLATION_OPTION_15=sending money , pC=-0.333, c=-0.835
+TRANSLATION_OPTION_16=sent , pC=-0.491, c=-0.833
+TRANSLATION_OPTION_17=transfer , pC=-0.374, c=-0.717
+TRANSLATION_OPTION_18=transfer of money , pC=-0.352, c=-0.801
+TRANSLATION_OPTION_19=transfers , pC=-0.333, c=-0.692
+TRANSLATION_OPTION_20=transfers from , pC=-0.359, c=-0.759
 TRANSLATION_1 = from the west .
 TOTAL_WALLTIME ~ 14

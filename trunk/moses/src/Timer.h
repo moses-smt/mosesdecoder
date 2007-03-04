@@ -105,7 +105,8 @@ inline void Timer::check(const char* msg)
   // Print an optional message, something like "Checking timer t";
   if (msg) TRACE_ERR( msg << " : ");
 
-  TRACE_ERR( "[" << std::setiosflags(std::ios::fixed) << std::setprecision(2) << (running ? elapsed_time() : 0) << "] seconds\n");
+//  TRACE_ERR( "[" << std::setiosflags(std::ios::fixed) << std::setprecision(2) << (running ? elapsed_time() : 0) << "] seconds\n");
+  TRACE_ERR( "[" << (running ? elapsed_time() : 0) << "] seconds\n");
 }
 
 /***
@@ -115,7 +116,8 @@ inline void Timer::check(const char* msg)
  */
 inline std::ostream& operator<<(std::ostream& os, Timer& t)
 {
-  os << std::setprecision(2) << std::setiosflags(std::ios::fixed) << (t.running ? t.elapsed_time() : 0);
+  //os << std::setprecision(2) << std::setiosflags(std::ios::fixed) << (t.running ? t.elapsed_time() : 0);
+  os << (t.running ? t.elapsed_time() : 0);
   return os;
 }
 
