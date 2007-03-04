@@ -81,5 +81,6 @@ public:
 	// shift alignment so that it is comparitable to another alignment. 
 	void Shift(int shift);
 	
+	void Intersect(const AlignmentElement &otherElement);
 	TO_STRING();
 };

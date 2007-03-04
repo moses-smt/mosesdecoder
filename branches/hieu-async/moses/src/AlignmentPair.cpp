@@ -49,6 +49,16 @@ bool AlignmentPair::IsCompletable(size_t decodeStepId
 	return m_targetAlign.IsCompletable(decodeStepId, targetCompleted, sourceCompleted);
 }
 
+void AlignmentPair::Add(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange)
+{
+	m_sourceAlign.Add(newAlignment.m_sourceAlign
+										, targetRange.GetStartPos()
+										, sourceRange.GetStartPos());	
+	m_targetAlign.Add(newAlignment.m_targetAlign
+											, sourceRange.GetStartPos()
+											, targetRange.GetStartPos());
+}
+
 void AlignmentPair::Merge(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange)
 {
 	m_sourceAlign.Merge(newAlignment.m_sourceAlign

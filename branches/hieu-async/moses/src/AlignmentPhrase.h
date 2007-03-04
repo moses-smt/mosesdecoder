@@ -48,9 +48,14 @@ public:
 		*/
 	bool IsCompatible(const AlignmentPhrase &compare, size_t mergePosStart, size_t transOptStart) const;
 
-	//! add newAlignment to this alignment phrase, offsetting by newAlignmentRange.GetStartPos()
+	//! add newAlignment to end of this alignment phrase, offsetting by newAlignmentRange.GetStartPos()
+	void Add(const AlignmentPhrase &newAlignment, size_t shift, size_t startPos);
+
+	/*< merge newAlignment to this alignment phrase, offsetting by newAlignmentRange.GetStartPos().
+			Use intersection of each alignment element
+	*/
 	void Merge(const AlignmentPhrase &newAlignment, size_t shift, size_t startPos);
-	
+
 	size_t GetSize() const
 	{
 		return m_collection.size();

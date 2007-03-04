@@ -42,11 +42,30 @@ void AlignmentElement::Shift(int shift)
 
 std::ostream& operator<<(std::ostream& out, const AlignmentElement &alignElement)
 {
-	AlignmentElement::ContainerType::const_iterator iter;
-	for (iter = alignElement.GetCollection().begin() ; iter != alignElement.GetCollection().end() ; ++iter)
+	const AlignmentElement::ContainerType &elemSet = alignElement.GetCollection();
+
+	out << "(";
+	if (alignElement.GetCollection().size() > 0)
+	{
+		AlignmentElement::ContainerType::const_iterator 
+							iter = elemSet.begin();
 		out << *iter;
+		for (++iter ; iter != elemSet.end() ; ++iter)
+			out << "," << *iter;
+	}
+	out << ")";
 
 	return out;
 }
 
+void AlignmentElement::Intersect(const AlignmentElement &otherElement)
+{
+	ContainerType newElement;
+	set_intersection(m_collection.begin() , m_collection.end()
+									,otherElement.begin() , otherElement.end()
+									,inserter(newElement , newElement.begin()) );
+	m_collection = newElement;
+}
+
 TO_STRING_BODY(AlignmentElement);
+

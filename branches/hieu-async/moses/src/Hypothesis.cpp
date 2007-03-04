@@ -135,9 +135,18 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	m_targetPhrase.MergeFactors(transOptPhrase, m_currTargetWordsRange);
 
 	// update alignment
-	m_alignPair.Merge(transOpt.GetAlignmentPair()
-									, transOpt.GetSourceWordsRange()
-									, m_currTargetWordsRange);
+	if (m_decodeStepId == 0)
+	{
+		m_alignPair.Add(transOpt.GetAlignmentPair()
+										, transOpt.GetSourceWordsRange()
+										, m_currTargetWordsRange);
+	}
+	else
+	{
+		m_alignPair.Merge(transOpt.GetAlignmentPair()
+										, transOpt.GetSourceWordsRange()
+										, m_currTargetWordsRange);
+	}
 
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!

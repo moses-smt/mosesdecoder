@@ -61,6 +61,9 @@ public:
 		*/
 	void SetIdentityAlignment();
 
+	//! call Merge() for source and and Add() target alignment phrase
+	void Add(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange);
+
 	//! call Merge for both source and target alignment phrase
 	void Merge(const AlignmentPair &newAlignment, const WordsRange &sourceRange, const WordsRange &targetRange);
 

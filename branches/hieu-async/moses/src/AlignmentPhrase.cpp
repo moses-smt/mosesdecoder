@@ -51,12 +51,11 @@ bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t mergeP
 	return true;
 }
 
-void AlignmentPhrase::Merge(const AlignmentPhrase &newAlignment, size_t shift, size_t startPos)
+void AlignmentPhrase::Add(const AlignmentPhrase &newAlignment, size_t shift, size_t startPos)
 {
+	size_t insertPos = startPos;
 	for (size_t pos = 0 ; pos < newAlignment.GetSize() ; ++pos)
 	{
-		size_t insertPos = pos + startPos;
-
 		// shift alignment
 		AlignmentElement alignElement = newAlignment.m_collection[pos];
 		alignElement.Shift( (int)shift );
@@ -70,6 +69,26 @@ void AlignmentPhrase::Merge(const AlignmentPhrase &newAlignment, size_t shift, s
 		{ // should really merge, rather than replace element
 			m_collection[insertPos] = alignElement;
 		}
+
+		insertPos++;
+	}
+}
+
+void AlignmentPhrase::Merge(const AlignmentPhrase &newAlignment, size_t shift, size_t startPos)
+{
+	assert(startPos < GetSize());
+	
+	size_t insertPos = startPos;
+	for (size_t pos = 0 ; pos < newAlignment.GetSize() ; ++pos)
+	{
+		// shift alignment
+		AlignmentElement alignElement = newAlignment.m_collection[pos];
+		alignElement.Shift( (int)shift );
+		
+		// merge elements to only contain co-joined elements
+		m_collection[insertPos].Intersect(alignElement);
+
+		insertPos++;
 	}
 }
 
@@ -115,7 +134,7 @@ std::ostream& operator<<(std::ostream& out, const AlignmentPhrase &alignmentPhra
 	for (size_t pos = 0 ; pos < alignmentPhrase.GetSize() ; ++pos)
 	{
 		const AlignmentElement &alignElement = alignmentPhrase.m_collection[pos];
-		out << "[" << alignElement << "] ";
+		out << alignElement << " ";
 	}
 	return out;
 }
