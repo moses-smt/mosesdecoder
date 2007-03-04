@@ -86,14 +86,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			return false;
 		}
 
-		/* don't use phrase trans where a source word is not aligned to any
-				target words, or vice versa
-		*/
-		bool noAligment = (tokens[2].find("()") != string::npos)
-										||(tokens[3].find("()") != string::npos);
-		if (noAligment)
-			continue;
-
 		bool isLHSEmpty = (tokens[1].find_first_not_of(" \t", 0) == string::npos);
 		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
 			TRACE_ERR( filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");

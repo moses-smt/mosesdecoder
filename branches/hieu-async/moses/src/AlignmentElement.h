@@ -78,6 +78,11 @@ public:
 		m_collection.insert(0);
 	}
 
+	/** align to all elements on other side, where the size of the other 
+		*	phrase is otherPhraseSize. Used when element has no alignment info
+	*/
+	void SetUniformAlignment(size_t otherPhraseSize);
+
 	// shift alignment so that it is comparitable to another alignment. 
 	void Shift(int shift);
 	

@@ -119,7 +119,9 @@ public:
 	}
 
 	/** Parse the alignment info portion of phrase table string to create alignment info */
-	void CreateAlignmentInfo(const std::string &inputStr, const std::string &outputStr, size_t sourceSize);
+	void CreateAlignmentInfo(const std::string &sourceStr
+													, const std::string &targetStr
+													, size_t sourceSize);
 
 	TO_STRING();
 };

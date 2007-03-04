@@ -67,5 +67,11 @@ void AlignmentElement::Intersect(const AlignmentElement &otherElement)
 	m_collection = newElement;
 }
 
+void AlignmentElement::SetUniformAlignment(size_t otherPhraseSize)
+{
+	for (size_t pos = 0 ; pos < otherPhraseSize ; ++pos)
+		m_collection.insert(pos);
+}
+
 TO_STRING_BODY(AlignmentElement);
 
