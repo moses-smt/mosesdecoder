@@ -5,9 +5,9 @@ TRANSLATION_4=parliament wants the in two ways .
 TRANSLATION_5=only then will the european institutions to its mandate . 
 LMLOAD_TIME ~ 8.00
 PTLOAD_TIME ~ 9.00
-SCORE_1 = -14.84
-SCORE_2 = -133.76
-SCORE_3 = -240.24
-SCORE_4 = -6.00
-SCORE_5 = -7.02
+SCORE_1 = -14.843
+SCORE_2 = -133.757
+SCORE_3 = -240.241
+SCORE_4 = -5.995
+SCORE_5 = -7.015
 TOTAL_WALLTIME ~ 28

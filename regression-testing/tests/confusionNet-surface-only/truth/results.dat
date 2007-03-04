@@ -3,7 +3,7 @@ TRANSLATION_2=this is the order of business
 TRANSLATION_3=that is the order of business 
 LMLOAD_TIME ~ 10.00
 PTLOAD_TIME ~ 10.00
-SCORE_1 = -2.9661
-SCORE_2 = -2.5648
-SCORE_3 = -2.9661
+SCORE_1 = -2.966
+SCORE_2 = -2.565
+SCORE_3 = -2.966
 TOTAL_WALLTIME ~ 11

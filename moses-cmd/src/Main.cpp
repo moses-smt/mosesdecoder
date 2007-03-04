@@ -80,9 +80,9 @@ int main(int argc, char* argv[])
 	}
 
 	cout.setf(std::ios::fixed); 
-	cout.precision(5);
+	cout.precision(3);
 	cerr.setf(std::ios::fixed); 
-	cerr.precision(5);
+	cerr.precision(3);
 
 	// load data structures
 	Parameter *parameter = new Parameter();
