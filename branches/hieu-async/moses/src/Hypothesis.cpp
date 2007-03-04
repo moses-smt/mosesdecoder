@@ -151,21 +151,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
 size_t Hypothesis::GetNextStartPos(const TranslationOption &transOpt) const
 {
-	// are we in the same decode step at the moment ?
-	if (m_decodeStepId == transOpt.GetDecodeStepId())
-		return GetCurrTargetWordsRange().GetEndPos() + 1;
-
-	// update target range
-	const Hypothesis *backPtrHypo = m_backPtr[transOpt.GetDecodeStepId()];
-	if (backPtrHypo == NULL)
-	{
-		return 0;
-	}
-	else
-	{
-		size_t lastPos = backPtrHypo->GetCurrTargetWordsRange().GetEndPos();
-		return lastPos + 1;
-	}
+	return m_targetSize[transOpt.GetDecodeStepId()];
 }
 
 Hypothesis::~Hypothesis()

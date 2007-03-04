@@ -46,7 +46,7 @@ public:
 	/** compare with another alignment phrase, return true if the other alignment phrase is a 
 		*	subset of this. Used to see whether a trans opt can be used to expand a hypo
 		*/
-	bool IsCompatible(const AlignmentPhrase &compare, size_t shiftCompare) const;
+	bool IsCompatible(const AlignmentPhrase &compare, size_t mergePosStart, size_t transOptStart) const;
 
 	//! add newAlignment to this alignment phrase, offsetting by newAlignmentRange.GetStartPos()
 	void Merge(const AlignmentPhrase &newAlignment, size_t shift, size_t startPos);

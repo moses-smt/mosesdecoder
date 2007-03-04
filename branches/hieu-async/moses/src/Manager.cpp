@@ -119,7 +119,7 @@ void Manager::ProcessSentence()
  * \param hypothesis hypothesis to be expanded upon
  */
 void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vector<DecodeStep*> &decodeStepList)
-{
+{	
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 
@@ -243,10 +243,11 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	const AlignmentPhrase 
 							&hypoAlignment		= hypothesis.GetAlignmentPair().GetAlignmentPhrase(Output)
 						, &targetAlignment	= transOpt.GetAlignmentPair().GetAlignmentPhrase(Output);
-	size_t 	transOptStart 				= transOpt.GetStartPos()
-					,decodeStepId					= transOpt.GetDecodeStepId();
+	size_t 	decodeStepId					= transOpt.GetDecodeStepId()
+					, transOptStart 			= transOpt.GetStartPos()
+					, mergePosStart				= hypothesis.GetNextStartPos(transOpt);
 					
-	if (decodeStepId == 0 ||  hypoAlignment.IsCompatible(targetAlignment, transOptStart))
+	if (decodeStepId == 0 ||  hypoAlignment.IsCompatible(targetAlignment, mergePosStart, transOptStart))
 	{
 		// create hypothesis and calculate all its scores
 		Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
