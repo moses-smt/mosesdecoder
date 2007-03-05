@@ -662,7 +662,7 @@ bool StaticData::LoadPhraseTables()
 
 
    			string hashFilePath			= GetCachePath()
-   																+ PROJECT_NAME + "--"
+   																+ PROJECT_NAME + "--1--" 	// filter file version
    																+ inputFileHash + "--"
 																	+ inputFactorsStrme.str() // input factors of input
    																+ phraseTableHash + "--"
