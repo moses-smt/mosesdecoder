@@ -135,7 +135,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	m_targetPhrase.MergeFactors(transOptPhrase, m_currTargetWordsRange);
 
 	// update alignment
-	if (m_decodeStepId == 0)
+	if (m_decodeStepId == INITIAL_DECODE_STEP_ID)
 	{
 		m_alignPair.Add(transOpt.GetAlignmentPair()
 										, transOpt.GetSourceWordsRange()
@@ -187,7 +187,7 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 		if (loserHypo->m_arcList)  // we don't have an arcList, but loser does
 		{
 			this->m_arcList = loserHypo->m_arcList;  // take ownership, we'll delete
-			loserHypo->m_arcList = 0;                // prevent a double deletion
+			loserHypo->m_arcList = NULL;                // prevent a double deletion
 		}
 		else
 			{ this->m_arcList = new ArcList(); }
@@ -198,7 +198,7 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 			this->m_arcList->resize(my_size + add_size, 0);
 			std::memcpy(&(*m_arcList)[0] + my_size, &(*m_arcList)[0], add_size * sizeof(Hypothesis *));
 			delete loserHypo->m_arcList;
-			loserHypo->m_arcList = 0;
+			loserHypo->m_arcList = NULL;
 		} else { // loserHypo doesn't have any arcs
 		  // DO NOTHING
 		}

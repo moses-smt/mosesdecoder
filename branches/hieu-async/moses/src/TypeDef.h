@@ -43,6 +43,7 @@ const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 50;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
 const size_t ARRAY_SIZE_INCR					= 10; //amount by which a phrase gets resized when necessary
+const size_t INITIAL_DECODE_STEP_ID		= 0;
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_THRESHOLD		= 0.00001f;
 const size_t DEFAULT_VERBOSE_LEVEL = 1;

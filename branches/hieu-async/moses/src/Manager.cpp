@@ -247,7 +247,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 					, sourceStart 				= transOpt.GetStartPos()
 					, targetStart					= hypothesis.GetNextStartPos(transOpt);
 					
-	if (decodeStepId == 0 ||  hypoAlignment.IsCompatible(
+	if (decodeStepId == INITIAL_DECODE_STEP_ID ||  hypoAlignment.IsCompatible(
 																	targetAlignment
 																	, sourceStart
 																	, targetStart))

@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "StaticData.h"
 
-size_t DecodeStep::s_id = 0;
+size_t DecodeStep::s_id = INITIAL_DECODE_STEP_ID;
 
 DecodeStep::DecodeStep(Dictionary *ptr, const DecodeStep* prev)
 :m_ptr(ptr)
