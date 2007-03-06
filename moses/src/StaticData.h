@@ -130,10 +130,17 @@ protected:
 	bool LoadLexicalReorderingModel();
 	
 public:
+	//! destructor
 	~StaticData();
-
+	//! return static instance for use like global variable
 	static const StaticData& Instance() { return s_instance; }
-
+	/** delete current static instance and replace with another. 
+		* Used by gui front end
+		*/
+	static void Reset() { s_instance = StaticData(); }
+	/** load data into static instance. This function is required
+		* as LoadData() is not const
+		*/
 	static bool LoadDataStatic(Parameter *parameter)
 	{
 		return s_instance.LoadData(parameter);
