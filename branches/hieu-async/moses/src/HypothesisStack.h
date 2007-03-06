@@ -49,11 +49,17 @@ public:
 		:m_stack( (size_t) pow( (float) sourceSize+1 , (int) decodeStepList.size()) )
 	{}
 
+	//! destructor
+	~HypothesisStack();
+
 	//! get a particular stack
 	HypothesisCollection &GetStack(size_t pos)
 	{
 		return m_stack[pos];
 	}
+
+	size_t GetSize() const
+	{ return m_stack.size(); }
 
 	//! add hypo to appropriate stack
 	void AddPrune(Hypothesis *hypo);

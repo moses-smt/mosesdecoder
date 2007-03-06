@@ -92,19 +92,12 @@ protected:
 	{
 		m_hypos.erase(iter);
 	}
-	/** destroy all instances of Hypothesis in this collection */
-	void RemoveAll();
-	/** destroy Hypothesis pointed to by iterator (object pool version) */
-	inline void Remove(const HypothesisCollection::iterator &iter)
-	{
-		FREEHYPO(*iter);
-		Detach(iter);
-	}
-
 public:
 	//! iterators
 	const_iterator begin() const { return m_hypos.begin(); }
 	const_iterator end() const { return m_hypos.end(); }
+	iterator begin() { return m_hypos.begin(); }
+	iterator end() { return m_hypos.end(); }
 	size_t size() const { return m_hypos.size(); }
 
 	HypothesisCollection();
@@ -112,6 +105,16 @@ public:
 	{
 		RemoveAll();
 	}
+
+	/** destroy Hypothesis pointed to by iterator (object pool version) */
+	inline void Remove(const HypothesisCollection::iterator &iter)
+	{
+		FREEHYPO(*iter);
+		Detach(iter);
+	}
+
+	/** destroy all instances of Hypothesis in this collection */
+	void RemoveAll();
 
 	/** adds the hypo, but only if within thresholds (beamThr, stackSize).
 	*	This function will recombine hypotheses silently!  There is no record

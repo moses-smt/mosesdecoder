@@ -82,7 +82,8 @@ protected:
 	void ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vector<DecodeStep*> &decodeStepList);
 	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
-
+	
+	void RemoveDeadendHypotheses(size_t stackNo);
 	// logging
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize() const;

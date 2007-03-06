@@ -63,6 +63,7 @@ Hypothesis::Hypothesis(InputType const& source, const std::vector<DecodeStep*> &
 	, m_lmstats(NULL)
 	, m_decodeStepId(NOT_FOUND)
 	, m_alignPair(source.GetSize())
+	, m_refCount(0)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
@@ -99,6 +100,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_lmstats(NULL)
 	,	m_decodeStepId (transOpt.GetDecodeStepId())
 	, m_alignPair(prevHypo.m_alignPair)
+	, m_refCount(0)
 {
 	const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
 
@@ -156,6 +158,8 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
   m_wordDeleted = transOpt.IsDeletionOption();
 	m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
 
+	// update ref count of prev hypo
+	prevHypo.IncrementRefCount();
 }
 
 size_t Hypothesis::GetNextStartPos(const TranslationOption &transOpt) const
@@ -179,6 +183,9 @@ Hypothesis::~Hypothesis()
 
 		delete m_lmstats; m_lmstats = NULL;
 	}
+
+	if (m_prevHypo != NULL)
+		m_prevHypo->DecrementRefCount();
 }
 
 void Hypothesis::AddArc(Hypothesis *loserHypo)

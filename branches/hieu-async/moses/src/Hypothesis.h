@@ -82,6 +82,8 @@ protected:
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
+	mutable size_t m_refCount;
+
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 
 	void CalcFutureScore(const SpanScore &futureScore);
@@ -280,7 +282,15 @@ public:
 	{
 		return s_HypothesesCreated;
 	}
-	
+
+	// reference counting functions
+	void IncrementRefCount() const
+	{ m_refCount++;	}
+	void DecrementRefCount() const
+	{ m_refCount--;	}
+	size_t GetRefCount() const
+	{ return m_refCount;	}
+
 	TO_STRING();
 };
 

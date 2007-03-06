@@ -79,11 +79,10 @@ void Manager::ProcessSentence()
 	Hypothesis *seedHypo = Hypothesis::Create(m_source, decodeStepList, m_initialTargetPhrase);
 	m_hypoStack.GetStack(0).AddPrune(seedHypo);
 	
-	// go through each stack
-	HypothesisStack::iterator iterStack;
-	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
+	// go through each stack	
+	for (size_t stackNo = 0 ; stackNo < m_hypoStack.GetSize() - 1 ; ++stackNo)
 	{
-		HypothesisCollection &sourceHypoColl = *iterStack;
+		HypothesisCollection &sourceHypoColl = m_hypoStack.GetStack(stackNo);
 
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
@@ -98,11 +97,19 @@ void Manager::ProcessSentence()
 			Hypothesis &hypothesis = **iterHypo;
 			ProcessOneHypothesis(hypothesis, decodeStepList); // expand the hypothesis
 		}
+
+		RemoveDeadendHypotheses(stackNo);
+		
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
 		//OutputHypoStackSize();
 		//OutputArcListSize();
 	}
+
+	// last stack
+	HypothesisCollection &lastHypoColl = m_hypoStack.GetStack(m_hypoStack.GetSize() - 1);
+	lastHypoColl.PruneToSize(StaticData::Instance().GetMaxHypoStackSize());
+	lastHypoColl.CleanupArcList();
 
 	//OutputHypoStack();
 	OutputHypoStackSize();
@@ -111,7 +118,6 @@ void Manager::ProcessSentence()
 	// some more logging
 	VERBOSE(2, StaticData::Instance().GetSentenceStats());
 }
-
 
 /** Find all translation options to expand one hypothesis, trigger expansion
  * this is mostly a check for overlap with already covered words, and for
@@ -290,7 +296,7 @@ void Manager::OutputHypoStackSize() const
 {
 	HypothesisStack::const_iterator iterStack;
 	TRACE_ERR( "Stack sizes: " << endl);
-	int sqSize	= m_source.GetSize() + 1
+	int sqSize	= (int) m_source.GetSize() + 1
 			, i 		= 1;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
@@ -469,3 +475,27 @@ void Manager::CalcDecoderStatistics() const
     }
   }
 }
+
+void Manager::RemoveDeadendHypotheses(size_t stackNo)
+{
+	for (int currStackNo = (int) stackNo ; currStackNo > 0 ; --currStackNo)
+	{
+		HypothesisCollection &hypoColl = m_hypoStack.GetStack(currStackNo);
+		
+		HypothesisCollection::iterator iter = hypoColl.begin();
+		while (iter != hypoColl.end())
+		{
+			const Hypothesis *hypo = *iter;
+			if (hypo->GetRefCount() == 0)
+			{
+				HypothesisCollection::iterator iterDelete = iter++;
+				hypoColl.Remove(iterDelete);
+			}
+			else
+			{
+				++iter;
+			}
+		}
+	}
+}
+

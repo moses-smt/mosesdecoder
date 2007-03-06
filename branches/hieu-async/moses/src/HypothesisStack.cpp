@@ -22,6 +22,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisStack.h"
 #include "StaticData.h"
 
+HypothesisStack::~HypothesisStack()
+{
+	StackType::reverse_iterator iter;
+	for (iter = m_stack.rbegin() ; iter != m_stack.rend() ; ++iter)
+	{
+		HypothesisCollection &hypoColl = *iter;
+		hypoColl.RemoveAll();
+	}
+}
+
 HypothesisStack::iterator::iterator(size_t pos, StackType &stack)
 {
 	m_pos = pos;
