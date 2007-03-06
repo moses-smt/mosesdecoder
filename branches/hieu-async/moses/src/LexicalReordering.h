@@ -72,8 +72,8 @@ private:
 	int m_orientation; /**< msd or monotone */
 	std::vector<int> m_direction;   /**< contains forward, backward, or both (bidirectional) */
 	int m_condition;   /**< fe or f */
-	int m_numScores;   /**< 1, 2, 3, or 6 */
-	int m_numOrientationTypes; /**< 2(mono) or 3(msd) */
+	size_t m_numScores;   /**< 1, 2, 3, or 6 */
+	size_t m_numOrientationTypes; /**< 2(mono) or 3(msd) */
 	std::string m_filePath; /**< probability table location */
 	vector<FactorType> m_sourceFactors; /**< source factors to condition on */
 	vector<FactorType> m_targetFactors; /**< target factors to condition on */

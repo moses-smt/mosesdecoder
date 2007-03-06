@@ -204,7 +204,7 @@ void mempool::stat(){
 
 
 
-strstack::strstack(int bs){
+strstack::strstack(size_t bs){
   
   size=bs;
   list=new memnode;
@@ -234,7 +234,7 @@ void strstack::stat(){
 
 
 char *strstack::push(char *s){
-  int len=strlen(s);
+  size_t len=strlen(s);
   
   if ((len+1) >= size){
     TRACE_ERR( "strstack::push string is too long\n");
@@ -325,7 +325,7 @@ char *strstack::pop(){
 
 char *strstack::top(){
   
-  int tidx=idx;
+  size_t tidx=idx;
   memnode *tlist=list;
 
   if (tlist==0) return 0;

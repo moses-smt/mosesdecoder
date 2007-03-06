@@ -113,8 +113,9 @@ void LexicalReordering::PrintTable()
 				cout << table_iter->first << " ||| ";
 				// print values
 				vector<float> val = table_iter->second;
-				int i=0, num_probs = val.size();
-				while (i<num_probs-1)
+				int i=0;
+				size_t num_probs = val.size();
+				while (i<(int)num_probs-1)
 					{
 						cout << val[i] << " ";
 						i++;

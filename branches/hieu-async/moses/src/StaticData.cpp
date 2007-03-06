@@ -704,7 +704,7 @@ bool StaticData::LoadPhraseTables()
 				TRACE_ERR( "using binary phrase tables for idx "<<currDict<<"\n");
 				PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(
 																									numScoreComponent
-																									,(currDict==0 ? m_numInputScores : 0)
+																									,(unsigned) (currDict==0 ? m_numInputScores : 0)
 																									, m_scoreIndexManager);
 				if (!pd->Load(input,output,filePath,weight,
 									 maxTargetPhrase[index],

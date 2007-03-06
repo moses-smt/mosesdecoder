@@ -103,16 +103,16 @@ class mempool{
 
 class strstack{
   memnode* list; //!< list of memory blocks
-  int   size;    //!< size of each block
-  int    idx;    //!< index of last stored string
-  int  waste;    //!< current waste of memory
-  int memory;    //!< current use of memory
+  size_t   size;    //!< size of each block
+  size_t    idx;    //!< index of last stored string
+  size_t  waste;    //!< current waste of memory
+  size_t memory;    //!< current use of memory
   int entries;   //!< current number of stored strings
   int blocknum;  //!< current number of used blocks
 
  public:
 
-  strstack(int bs=1000);
+  strstack(size_t bs=1000);
 
   ~strstack();
   
@@ -124,9 +124,9 @@ class strstack{
   
   void stat();
   
-  int used(){return memory;}
+  size_t used(){return memory;}
   
-  int wasted(){return waste;}
+  size_t wasted(){return waste;}
 };
 
 //! Manage multiple memory pools 
