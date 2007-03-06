@@ -85,9 +85,8 @@ void Manager::ProcessSentence()
 		HypothesisCollection &sourceHypoColl = m_hypoStack.GetStack(stackNo);
 
 		// the stack is pruned before processing (lazy pruning):
-		VERBOSE(3,"processing hypothesis from next stack");
+		VERBOSE(1,"processing hypothesis from stack " << stackNo++ << endl);
 		sourceHypoColl.PruneToSize(StaticData::Instance().GetMaxHypoStackSize());
-		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
 
 		// go through each hypothesis on the stack and try to expand it
@@ -101,9 +100,9 @@ void Manager::ProcessSentence()
 		RemoveDeadendHypotheses(stackNo);
 		
 		// some logging
-		IFVERBOSE(2) { OutputHypoStackSize(); }
-		//OutputHypoStackSize();
-		//OutputArcListSize();
+		IFVERBOSE(2) { OutputHypoStackSize(false); }
+		OutputHypoStackSize(false);
+		OutputArcListSize();
 	}
 
 	// last stack
@@ -112,7 +111,7 @@ void Manager::ProcessSentence()
 	lastHypoColl.CleanupArcList();
 
 	//OutputHypoStack();
-	OutputHypoStackSize();
+	OutputHypoStackSize(true);
 	//OutputArcListSize();
 	
 	// some more logging
@@ -292,18 +291,30 @@ const Hypothesis *Manager::GetBestHypothesis() const
 /**
  * Logging of hypothesis stack sizes
  */
-void Manager::OutputHypoStackSize() const
+void Manager::OutputHypoStackSize(bool formatted) const
 {
 	HypothesisStack::const_iterator iterStack;
-	TRACE_ERR( "Stack sizes: " << endl);
+	TRACE_ERR( "Stack sizes: ");
+	
+	if (formatted)
+		TRACE_ERR(endl);
+	
 	int sqSize	= (int) m_source.GetSize() + 1
 			, i 		= 1;
 	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
 	{
-		TRACE_ERR((*iterStack).size() << "\t");
-		if (i++ % sqSize == 0)
-			TRACE_ERR( endl);
+		if (formatted)
+		{
+			TRACE_ERR((*iterStack).size() << "\t");
+			if (i++ % sqSize == 0)
+				TRACE_ERR( endl);
+		}
+		else
+			TRACE_ERR((*iterStack).size() << " ");
 	}
+	
+	if (!formatted)
+		TRACE_ERR(endl);
 }
 
 /**

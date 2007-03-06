@@ -86,7 +86,7 @@ protected:
 	void RemoveDeadendHypotheses(size_t stackNo);
 	// logging
 	void OutputHypoStack(int stack = -1);
-	void OutputHypoStackSize() const;
+	void OutputHypoStackSize(bool formatted) const;
 	void OutputArcListSize() const;
 public:
 	Manager(InputType const& source);
