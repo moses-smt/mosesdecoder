@@ -246,11 +246,11 @@ StaticData::~StaticData()
 	//need to delete lists within vector as well 
 	while (! m_decodeStepVL.empty() )
 	{
-			list <DecodeStep *> * ptrList = m_decodeStepVL.back();
+			list <const DecodeStep *> * ptrList = m_decodeStepVL.back();
 			m_decodeStepVL.pop_back();
 			while( ! ptrList->empty() ) 
 			{
-				 DecodeStep * ptrDecodeStep = ptrList->back();
+				 const DecodeStep * ptrDecodeStep = ptrList->back();
 				 ptrList->pop_back();
 				 if (ptrDecodeStep != NULL) 
 				 {
@@ -719,10 +719,10 @@ bool StaticData::LoadMapping()
 			break;
 		}
 		assert(decodeStep);
-		list < DecodeStep *> * decodeList=NULL;
+		list <const DecodeStep *> * decodeList=NULL;
 		if (m_decodeStepVL.size() < vectorList + 1) 
 		{
-		  decodeList = new list < DecodeStep *>;
+		  decodeList = new list <const DecodeStep *>;
 			m_decodeStepVL.push_back(decodeList);
 		}
 		m_decodeStepVL[vectorList]->push_back(decodeStep);
