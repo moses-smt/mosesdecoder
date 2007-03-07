@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "Hypothesis.h"
 #include "TranslationOption.h"
-#include "HypothesisCollection.h"
+#include "HypothesisStack.h"
 #include "TranslationOptionCollection.h"
 #include "LatticePathList.h"
 #include "WordsBitmap.h"
@@ -38,7 +38,7 @@ class TranslationOptionCollection;
 /** The Manager class implements a stack decoding algorithm.
  * Hypotheses are organized in stacks. One stack contains all hypothesis that have 
  * the same number of foreign words translated.  The data structure for hypothesis 
- * stacks is the class HypothesisCollection. The data structure for a hypothesis 
+ * stacks is the class HypothesisStack. The data structure for a hypothesis 
  * is the class Hypothesis. 
  *
  * The main decoder loop in the function ProcessSentence() consists of the steps: 
@@ -73,7 +73,7 @@ protected:
 	// data
 	InputType const& m_source; /**< source sentence to be translated */
 
-	HypothesisStackCollection m_hypoStackColl; /**< stacks to store hypothesis (partial translations) */ 
+	HypothesisStackCollection m_hypoStackColl; /**< vector of stacks to store hypothesis (partial translations) */ 
 	// no of elements = no of words in source + 1
 	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */

@@ -22,14 +22,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <set>
 #include <queue>
-#include "HypothesisCollection.h"
+#include "HypothesisStack.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "StaticData.h"
 
 using namespace std;
 
-HypothesisCollection::HypothesisCollection()
+HypothesisStack::HypothesisStack()
 {
 	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
@@ -37,7 +37,7 @@ HypothesisCollection::HypothesisCollection()
 }
 
 /** remove all hypotheses from the collection */
-void HypothesisCollection::RemoveAll()
+void HypothesisStack::RemoveAll()
 {
 	while (m_hypos.begin() != m_hypos.end())
 	{
@@ -45,7 +45,7 @@ void HypothesisCollection::RemoveAll()
 	}
 }
 
-pair<HypothesisCollection::iterator, bool> HypothesisCollection::Add(Hypothesis *hypo)
+pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 {
 	std::pair<iterator, bool> ret = m_hypos.insert(hypo);
 	if (ret.second) 
@@ -76,7 +76,7 @@ pair<HypothesisCollection::iterator, bool> HypothesisCollection::Add(Hypothesis 
 	return ret;
 }
 
-void HypothesisCollection::AddPrune(Hypothesis *hypo)
+void HypothesisStack::AddPrune(Hypothesis *hypo)
 { 
 	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
@@ -139,7 +139,7 @@ void HypothesisCollection::AddPrune(Hypothesis *hypo)
 	}
 }
 
-void HypothesisCollection::PruneToSize(size_t newSize)
+void HypothesisStack::PruneToSize(size_t newSize)
 {
 	if (m_hypos.size() > newSize) // ok, if not over the limit
 	{
@@ -205,7 +205,7 @@ void HypothesisCollection::PruneToSize(size_t newSize)
 	}
 }
 
-const Hypothesis *HypothesisCollection::GetBestHypothesis() const
+const Hypothesis *HypothesisStack::GetBestHypothesis() const
 {
 	if (!m_hypos.empty())
 	{
@@ -222,7 +222,7 @@ const Hypothesis *HypothesisCollection::GetBestHypothesis() const
 	return NULL;
 }
 
-vector<const Hypothesis*> HypothesisCollection::GetSortedList() const
+vector<const Hypothesis*> HypothesisStack::GetSortedList() const
 {
 	vector<const Hypothesis*> ret; ret.reserve(m_hypos.size());
 	std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(ret, ret.end()));
@@ -232,7 +232,7 @@ vector<const Hypothesis*> HypothesisCollection::GetSortedList() const
 }
 
 
-void HypothesisCollection::CleanupArcList()
+void HypothesisStack::CleanupArcList()
 {
 	// only necessary if n-best calculations are enabled
 	if (!m_nBestIsEnabled) return;
@@ -245,13 +245,13 @@ void HypothesisCollection::CleanupArcList()
 	}
 }
 
-TO_STRING_BODY(HypothesisCollection);
+TO_STRING_BODY(HypothesisStack);
 
 
 // friend
-std::ostream& operator<<(std::ostream& out, const HypothesisCollection& hypoColl)
+std::ostream& operator<<(std::ostream& out, const HypothesisStack& hypoColl)
 {
-	HypothesisCollection::const_iterator iter;
+	HypothesisStack::const_iterator iter;
 	
 	for (iter = hypoColl.begin() ; iter != hypoColl.end() ; ++iter)
 	{

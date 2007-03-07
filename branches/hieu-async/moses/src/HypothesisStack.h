@@ -67,14 +67,14 @@ public:
 };
 
 /** Stack for instances of Hypothesis, includes functions for pruning. */ 
-class HypothesisCollection 
+class HypothesisStack 
 {
 private:
 	typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
 public:
 	typedef _HCType::iterator iterator;
 	typedef _HCType::const_iterator const_iterator;
-	friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
+	friend std::ostream& operator<<(std::ostream&, const HypothesisStack&);
 
 protected:
 	float m_bestScore; /**< score of the best hypothesis in collection */
@@ -85,10 +85,10 @@ protected:
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
 	//! add hypothesis to stack. Prune if necessary. Returns false if equiv hypo exists in collection, otherwise returns true
-	std::pair<HypothesisCollection::iterator, bool> Add(Hypothesis *hypothesis);
+	std::pair<HypothesisStack::iterator, bool> Add(Hypothesis *hypothesis);
 
 	//! remove hypothesis pointed to by iterator but don't delete the object
-	inline void Detach(const HypothesisCollection::iterator &iter)
+	inline void Detach(const HypothesisStack::iterator &iter)
 	{
 		m_hypos.erase(iter);
 	}
@@ -100,14 +100,14 @@ public:
 	iterator end() { return m_hypos.end(); }
 	size_t size() const { return m_hypos.size(); }
 
-	HypothesisCollection();
-	~HypothesisCollection()
+	HypothesisStack();
+	~HypothesisStack()
 	{
 		RemoveAll();
 	}
 
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
-	inline void Remove(const HypothesisCollection::iterator &iter)
+	inline void Remove(const HypothesisStack::iterator &iter)
 	{
 		FREEHYPO(*iter);
 		Detach(iter);

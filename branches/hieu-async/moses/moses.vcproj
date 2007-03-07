@@ -214,11 +214,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HypothesisCollection.cpp"
+				RelativePath=".\src\HypothesisStack.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\HypothesisStack.cpp"
+				RelativePath=".\src\HypothesisStackCollection.cpp"
 				>
 			</File>
 			<File
@@ -570,11 +570,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HypothesisCollection.h"
+				RelativePath=".\src\HypothesisStack.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\HypothesisStack.h"
+				RelativePath=".\src\HypothesisStackCollection.h"
 				>
 			</File>
 			<File

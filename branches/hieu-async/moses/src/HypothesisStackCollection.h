@@ -22,14 +22,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <map>
-#include "HypothesisCollection.h"
+#include "HypothesisStack.h"
 
-/** wraps up vector of HypothesisCollection and takes care of adding hypotheses to
+/** wraps up vector of HypothesisStack and takes care of adding hypotheses to
 	*	the correct stack
 */
 class HypothesisStackCollection
 {
-	typedef std::vector < HypothesisCollection > StackColl;
+	typedef std::vector < HypothesisStack > StackColl;
 protected:
 	StackColl m_stackColl;
 
@@ -42,7 +42,7 @@ public:
 
 	iterator begin() { return iterator(0, m_stackColl); }
 	iterator end() { return iterator(NOT_FOUND, m_stackColl); }
-	const HypothesisCollection &back() const { return m_stackColl.back(); }
+	const HypothesisStack &back() const { return m_stackColl.back(); }
 
 	//! constructor
 	HypothesisStackCollection(size_t sourceSize, const std::vector<DecodeStep*> &decodeStepList)
@@ -53,7 +53,7 @@ public:
 	~HypothesisStackCollection();
 
 	//! get a particular stack
-	HypothesisCollection &GetStack(size_t pos)
+	HypothesisStack &GetStack(size_t pos)
 	{
 		return m_stackColl[pos];
 	}
@@ -79,7 +79,7 @@ public:
 			m_pos = (m_pos >= (m_stackColl->size()-1) ) ? NOT_FOUND : m_pos+1 ;
 			return *this;
 		}
-		HypothesisCollection &operator*() const
+		HypothesisStack &operator*() const
 		{
 			return (*m_stackColl)[m_pos];
 		}
@@ -99,7 +99,7 @@ public:
 			m_pos = (m_pos >= (m_stackColl->size()-1) ) ? NOT_FOUND : m_pos+1 ;
 			return *this;
 		}
-		const HypothesisCollection &operator*() const
+		const HypothesisStack &operator*() const
 		{
 			return (*m_stackColl)[m_pos];
 		}

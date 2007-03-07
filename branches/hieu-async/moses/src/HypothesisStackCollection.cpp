@@ -27,7 +27,7 @@ HypothesisStackCollection::~HypothesisStackCollection()
 	StackColl::reverse_iterator iter;
 	for (iter = m_stackColl.rbegin() ; iter != m_stackColl.rend() ; ++iter)
 	{
-		HypothesisCollection &hypoColl = *iter;
+		HypothesisStack &hypoColl = *iter;
 		hypoColl.RemoveAll();
 	}
 }
