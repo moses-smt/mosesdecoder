@@ -53,7 +53,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	ngramScore	= 0;
 
 	size_t phraseSize = phrase.GetSize();
-	vector<const Word> contextFactor;
+	vector<Word> contextFactor;
 	contextFactor.reserve(m_nGramOrder);
 
 	// start of sentence
@@ -83,7 +83,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	fullScore += ngramScore;	
 }
 
-LanguageModel::State LanguageModel::GetState(const std::vector<const Word> &contextFactor, unsigned int* len) const
+LanguageModel::State LanguageModel::GetState(const std::vector<Word> &contextFactor, unsigned int* len) const
 {
   State state;
 	unsigned int dummy;

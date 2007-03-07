@@ -101,7 +101,6 @@ void Manager::ProcessSentence()
 		
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(false); }
-		OutputHypoStackSize(false);
 		//OutputArcListSize();
 	}
 

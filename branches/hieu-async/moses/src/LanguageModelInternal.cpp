@@ -127,7 +127,7 @@ bool LanguageModelInternal::Load(const std::string &filePath
 	return true;
 }
 
-float LanguageModelInternal::GetValue(const std::vector<const Word> &contextFactor
+float LanguageModelInternal::GetValue(const std::vector<Word> &contextFactor
 												, State* finalState
 												, unsigned int* len) const
 {

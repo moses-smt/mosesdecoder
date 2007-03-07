@@ -80,7 +80,7 @@ public:
 		return m_lmImpl->Load(filePath, m_implFactor, weight, nGramOrder);
 	}
 	
-	float GetValue(const std::vector<const Word> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
+	float GetValue(const std::vector<Word> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -93,7 +93,7 @@ public:
 		*/
 
 		// joint context for internal LM
-		std::vector<const Word> jointContext;
+		std::vector<Word> jointContext;
 		
 		for (size_t currPos = 0 ; currPos < m_nGramOrder ; ++currPos )
 		{

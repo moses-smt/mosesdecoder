@@ -138,7 +138,7 @@ int LanguageModelIRST::GetLmID( const std::string &str ) const
     return m_lmtb->dict->encode( str.c_str() );
 }
 
-float LanguageModelIRST::GetValue(const vector<const Word> &contextFactor, State* finalState, unsigned int* len) const
+float LanguageModelIRST::GetValue(const vector<Word> &contextFactor, State* finalState, unsigned int* len) const
 {
 	unsigned int dummy;
 	if (!len) { len = &dummy; }

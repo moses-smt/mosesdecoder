@@ -28,7 +28,7 @@
         <moses-cmd/>
       </runarguments>
       <customdirectory>/home/s0565741/terabyte/en-de/train-async/mert/mert-work/</customdirectory>
-      <programargs/>
+      <programargs></programargs>
       <autocompile>true</autocompile>
       <envvars/>
     </run>
@@ -200,7 +200,7 @@
   </cppsupportpart>
   <kdevdebugger>
     <general>
-      <programargs>-w 0.000000 -lm 0.200000 0.200000 -d 0.200000 -tm 0.060000 0.040000 0.060000 0.040000 0.000000 0.060000 0.040000 0.060000 0.040000 0.000000 -config /amd/partition/ptn162/hieu/en-de/train-async/mert/moses.ini -inputtype 0 -n-best-list nbest.txt 20 -input-file in.txt.split10977-ac 2> err.txt > out.txt</programargs>
+      <programargs> -config ../moses.ini -inputtype 0 -n-best-list nbest.txt 20 -input-file in.txt</programargs>
       <gdbpath></gdbpath>
       <dbgshell>libtool</dbgshell>
       <configGdbScript></configGdbScript>

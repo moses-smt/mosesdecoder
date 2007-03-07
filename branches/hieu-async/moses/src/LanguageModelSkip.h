@@ -69,7 +69,7 @@ public:
 		return m_lmImpl->Load(filePath, m_factorType, weight, nGramOrder);
 	}
 			
-	float GetValue(const std::vector<const Word> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
+	float GetValue(const std::vector<Word> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -87,7 +87,7 @@ public:
 			return 0;
 		
 		// add last word
-		std::vector<const Word> chunkContext;
+		std::vector<Word> chunkContext;
 		Word chunkWord;
 		chunkWord[m_factorType] = factor;
 		chunkContext.push_back(chunkWord);

@@ -331,7 +331,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 					(*m_lmstats)[lmIdx].resize(m_currTargetWordsRange.GetNumWordsCovered(), 0);
 
 				// 1st n-gram
-				vector<const Word> contextFactor(nGramOrder);
+				vector<Word> contextFactor(nGramOrder);
 				size_t index = 0;
 				for (int currPos = (int) startPos - (int) nGramOrder + 1 ; currPos <= (int) startPos ; currPos++)
 				{

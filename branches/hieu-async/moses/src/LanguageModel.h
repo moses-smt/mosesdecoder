@@ -86,11 +86,11 @@ public:
 	 * \param finalState state used by LM. Return arg
 	 * \param len ???
 	 */
-	virtual float GetValue(const std::vector<const Word> &contextFactor
+	virtual float GetValue(const std::vector<Word> &contextFactor
 												, State* finalState = 0
 												, unsigned int* len = 0) const = 0;
 	//! get State for a particular n-gram
-	State GetState(const std::vector<const Word> &contextFactor, unsigned int* len = 0) const;
+	State GetState(const std::vector<Word> &contextFactor, unsigned int* len = 0) const;
 
 	//! max n-gram order of LM
 	size_t GetNGramOrder() const
