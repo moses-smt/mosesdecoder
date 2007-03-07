@@ -127,19 +127,19 @@ bool LanguageModelInternal::Load(const std::string &filePath
 	return true;
 }
 
-float LanguageModelInternal::GetValue(const std::vector<const Word*> &contextFactor
+float LanguageModelInternal::GetValue(const std::vector<const Word> &contextFactor
 												, State* finalState
 												, unsigned int* len) const
 {
 	const size_t ngram = contextFactor.size();
 	switch (ngram)
 	{
-	case 1: return GetValue((*contextFactor[0])[m_factorType], finalState); break;
-	case 2: return GetValue((*contextFactor[0])[m_factorType]
-												, (*contextFactor[1])[m_factorType], finalState); break;
-	case 3: return GetValue((*contextFactor[0])[m_factorType]
-												, (*contextFactor[1])[m_factorType]
-												, (*contextFactor[2])[m_factorType], finalState); break;
+	case 1: return GetValue((contextFactor[0])[m_factorType], finalState); break;
+	case 2: return GetValue((contextFactor[0])[m_factorType]
+												, (contextFactor[1])[m_factorType], finalState); break;
+	case 3: return GetValue((contextFactor[0])[m_factorType]
+												, (contextFactor[1])[m_factorType]
+												, (contextFactor[2])[m_factorType], finalState); break;
 	}
 
 	assert (false);

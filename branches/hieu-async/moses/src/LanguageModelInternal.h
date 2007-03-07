@@ -48,7 +48,7 @@ public:
 					, FactorType factorType
 					, float weight
 					, size_t nGramOrder);
-	float GetValue(const std::vector<const Word*> &contextFactor
+	float GetValue(const std::vector<const Word> &contextFactor
 												, State* finalState = 0
 												, unsigned int* len = 0) const;
 };

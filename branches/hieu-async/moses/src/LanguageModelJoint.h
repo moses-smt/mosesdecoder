@@ -80,7 +80,7 @@ public:
 		return m_lmImpl->Load(filePath, m_implFactor, weight, nGramOrder);
 	}
 	
-	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
+	float GetValue(const std::vector<const Word> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -93,11 +93,11 @@ public:
 		*/
 
 		// joint context for internal LM
-		std::vector<const Word*> jointContext;
+		std::vector<const Word> jointContext;
 		
 		for (size_t currPos = 0 ; currPos < m_nGramOrder ; ++currPos )
 		{
-			const Word &word = *contextFactor[currPos];
+			const Word &word = contextFactor[currPos];
 
 			// add word to chunked context
 			std::stringstream stream("");
@@ -114,8 +114,8 @@ public:
 			
 			factor = FactorCollection::Instance().AddFactor(Output, m_implFactor, stream.str());
 
-			Word* jointWord = new Word;
-			(*jointWord)[m_implFactor] = factor;
+			Word jointWord;
+			jointWord[m_implFactor] = factor;
 			jointContext.push_back(jointWord);
 		}
 	
@@ -126,8 +126,6 @@ public:
 		*/
 		// calc score on chunked phrase
 		float ret = m_lmImpl->GetValue(jointContext, finalState, len);
-
-		RemoveAllInColl(jointContext);
 		
 		return ret;
 	}

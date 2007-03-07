@@ -61,7 +61,7 @@ void HypothesisStackCollection::AddPrune(Hypothesis *hypo)
 
 	if (stackIndex == m_stackColl.size() - 1)
 	{	// only add to last stack if all factors are specified, ie. sync
-		if (!hypo->GetTargetPhrase().IsSynchronized())
+		if (!hypo->IsSynchronized())
 		{
 		FREEHYPO(hypo);		
 		return;

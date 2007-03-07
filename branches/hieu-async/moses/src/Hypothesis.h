@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "ObjectPool.h"
 #include "AlignmentPair.h"
+#include "DecodeStep.h"
 
 class SpanScore;
 class TranslationOption;
@@ -67,7 +68,6 @@ protected:
 	std::vector<size_t> m_targetSize;		/**< size of target phrase for each decode step */
 	const Phrase			&m_currTargetPhrase; /**< target phrase being created at the current decoding step */
 	const Phrase			*m_sourcePhrase; /**< input sentence */
-	Phrase						m_targetPhrase; /**< whole of target phrase so far */
 	WordsBitmap				m_sourceCompleted; /**< keeps track of which words have been translated so far */
 	InputType const&  m_sourceInput;
 	WordsRange        m_currTargetWordsRange; /**< target word positions of the last phrase that was used to create this hypothesis */
@@ -122,11 +122,6 @@ public:
 	{
 		return m_currTargetPhrase;
 	}
-	/** return translate target phrase so far */
-	const Phrase &GetTargetPhrase() const
-	{
-		return m_targetPhrase;
-	}
 	
 	inline const WordsRange &GetCurrTargetWordsRange() const
 	{
@@ -153,7 +148,7 @@ public:
 	/** length of the partial translation (from the start of the sentence) */
 	inline size_t GetSize() const
 	{
-		return m_targetPhrase.GetSize();
+		return m_targetSize[INITIAL_DECODE_STEP_ID];
 	}
 
 	inline const InputType &GetSourcePhrase() const
@@ -178,14 +173,19 @@ public:
 		return m_currTargetPhrase.GetFactor(pos, factorType);
 	}
 	/** recursive - pos is relative from start of sentence */
-	inline const Word &GetWord(size_t pos) const
-	{
-		return m_targetPhrase.GetWord(pos);
-	}
+	Word GetWord(size_t pos) const;
+
+	/** recursive - pos is relative from start of sentence 
+		* Get part of word at a particular pos created by decode step
+	*/
+	const Word &GetWord(size_t pos, const DecodeStep &decodeStep) const;
+
 	inline const Factor* GetFactor(size_t pos, FactorType factorType) const
 	{
 		return GetWord(pos)[factorType];
 	}
+
+	Phrase GetTargetPhrase() const;
 
 	/***
 	 * \return The bitmap of source words we cover
@@ -278,11 +278,22 @@ public:
 	// do alignment allow hypo to be completed?
 	bool IsCompletable() const;
 
+	bool IsSynchronized() const;
+
 	static unsigned int GetHypothesesCreated()
 	{
 		return s_HypothesesCreated;
 	}
 
+	size_t GetTargetSize(const DecodeStep &decodeStep) const
+	{
+		return m_targetSize[decodeStep.GetId()];
+	}
+	const Hypothesis *GetPrevHypo(const DecodeStep &decodeStep) const
+	{
+		return m_backPtr[decodeStep.GetId()];
+	}
+	
 	// reference counting functions
 	void IncrementRefCount() const
 	{ m_refCount++;	}

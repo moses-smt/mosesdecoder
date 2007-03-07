@@ -50,7 +50,6 @@ Hypothesis::Hypothesis(InputType const& source, const std::vector<DecodeStep*> &
 	, m_backPtr(decodeStepList.size())
 	, m_currSourceRange(decodeStepList.size())
 	, m_currTargetPhrase(emptyTarget)
-	, m_targetPhrase(emptyTarget)
 	, m_targetSize(decodeStepList.size(), 0)
 	, m_sourcePhrase(0)
 	, m_sourceCompleted(source.GetSize())
@@ -84,7 +83,6 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_backPtr(prevHypo.m_backPtr)
 	, m_currSourceRange(prevHypo.m_currSourceRange)
 	, m_currTargetPhrase(transOpt.GetTargetPhrase())
-	, m_targetPhrase(prevHypo.m_targetPhrase)
 	, m_targetSize(prevHypo.m_targetSize)
 	, m_sourcePhrase(0)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
@@ -132,9 +130,6 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 																, lastPos + 1
 																, lastPos + transOptPhrase.GetSize());
 	}
-
-	// merge factors from new trans opt into taget phrase so far
-	m_targetPhrase.MergeFactors(transOptPhrase, m_currTargetWordsRange);
 
 	// update alignment
 	if (m_decodeStepId == INITIAL_DECODE_STEP_ID)
@@ -336,14 +331,14 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 					(*m_lmstats)[lmIdx].resize(m_currTargetWordsRange.GetNumWordsCovered(), 0);
 
 				// 1st n-gram
-				vector<const Word*> contextFactor(nGramOrder);
+				vector<const Word> contextFactor(nGramOrder);
 				size_t index = 0;
 				for (int currPos = (int) startPos - (int) nGramOrder + 1 ; currPos <= (int) startPos ; currPos++)
 				{
 					if (currPos >= 0)
-						contextFactor[index++] = &GetWord(currPos);
+						contextFactor[index++] = GetWord(currPos);
 					else			
-						contextFactor[index++] = &languageModel.GetSentenceStartArray();
+						contextFactor[index++] = languageModel.GetSentenceStartArray();
 				}
 				lmScore	= languageModel.GetValue(contextFactor);
 				if (m_lmstats) { languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]); }
@@ -358,7 +353,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 						contextFactor[i] = contextFactor[i + 1];
 		
 					// add last factor
-					contextFactor.back() = &GetWord(currPos);
+					contextFactor.back() = GetWord(currPos);
 
 					lmScore	+= languageModel.GetValue(contextFactor);
 					if (m_lmstats) 
@@ -374,15 +369,15 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 						)
 				{
 					const size_t size = GetSize();
-					contextFactor.back() = &languageModel.GetSentenceEndArray();
+					contextFactor.back() = languageModel.GetSentenceEndArray();
 		
 					for (size_t i = 0 ; i < nGramOrder - 1 ; i ++)
 					{
 						int currPos = (int)(size - nGramOrder + i + 1);
 						if (currPos < 0)
-							contextFactor[i] = &languageModel.GetSentenceStartArray();
+							contextFactor[i] = languageModel.GetSentenceStartArray();
 						else
-							contextFactor[i] = &GetWord((size_t)currPos);
+							contextFactor[i] = GetWord((size_t)currPos);
 					}
 					if (m_lmstats) 
 					{
@@ -399,7 +394,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 					for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
 						for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
 							contextFactor[i] = contextFactor[i + 1];
-						contextFactor.back() = &GetWord(currPos);
+						contextFactor.back() = GetWord(currPos);
 						if (m_lmstats)
 							languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]);
 					}
@@ -564,7 +559,7 @@ bool Hypothesis::IsCompletable() const
 	const DecodeStep &decodeStep = StaticData::Instance().GetDecodeStep(m_decodeStepId);
 	if (m_sourceCompleted.IsComplete(decodeStep))
 	{
-		return (m_targetSize[m_decodeStepId] == m_targetPhrase.GetSize());
+		return (m_targetSize[m_decodeStepId] == GetSize());
 	}
 	
 	// not all source words have been translated
@@ -574,6 +569,17 @@ bool Hypothesis::IsCompletable() const
 
 	// call IsCompletable() in alignment obj
 	return m_alignPair.IsCompletable(m_decodeStepId, m_sourceCompleted, targetCompleted);
+}
+
+bool Hypothesis::IsSynchronized() const
+{
+	size_t targetSize = m_targetSize[0];
+	for (size_t idx = 1 ; idx < m_targetSize.size() ; ++idx)
+	{
+		if (targetSize != m_targetSize[idx])
+			return false;
+	}
+	return true;
 }
 
 TO_STRING_BODY(Hypothesis)
@@ -633,3 +639,59 @@ std::string Hypothesis::GetTargetPhraseStringRep() const
 	}
 	return GetTargetPhraseStringRep(allFactors);
 }
+
+Word Hypothesis::GetWord(size_t pos) const
+{
+	Word ret;
+
+	const std::vector<DecodeStep*> &decodeStepList = StaticData::Instance().GetDecodeStepList();
+	std::vector<DecodeStep*>::const_iterator iter;
+	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
+	{
+		const DecodeStep &decodeStep = **iter;
+
+		if (m_decodeStepId == decodeStep.GetId()
+			|| m_backPtr[decodeStep.GetId()] != NULL)
+		{
+			// partial word for each decode step
+			const Word &partialWord = GetWord(pos, decodeStep);
+			ret.Merge(partialWord);
+		}
+	}
+
+	return ret;
+}
+
+const Word &Hypothesis::GetWord(size_t pos, const DecodeStep &decodeStep) const
+{
+	const Hypothesis *hypo;
+
+	// get 1st hypo for this step id
+	if (m_decodeStepId == decodeStep.GetId())
+		hypo = this;
+	else
+		hypo = m_backPtr[decodeStep.GetId()];
+
+	size_t startPos = hypo->GetCurrTargetWordsRange().GetStartPos();
+	while (pos < startPos)
+	{
+		hypo = hypo->GetPrevHypo(decodeStep);
+		startPos = hypo->GetCurrTargetWordsRange().GetStartPos();
+	}
+
+	return hypo->GetCurrWord(pos - startPos);
+}
+
+Phrase Hypothesis::GetTargetPhrase() const
+{
+	Phrase ret(Output);
+	
+	for (size_t pos = 0 ; pos < GetSize() ; ++pos)
+	{
+		ret.AddWord(GetWord(pos));
+	}
+
+	return ret;
+}
+
+
