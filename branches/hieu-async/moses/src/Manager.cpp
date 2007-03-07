@@ -97,10 +97,11 @@ void Manager::ProcessSentence()
 			ProcessOneHypothesis(hypothesis, decodeStepList); // expand the hypothesis
 		}
 
-		//RemoveDeadendHypotheses(stackNo);
+		RemoveDeadendHypotheses(stackNo);
 		
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(false); }
+		OutputHypoStackSize(false);
 		//OutputArcListSize();
 	}
 
