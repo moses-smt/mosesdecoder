@@ -13,7 +13,7 @@ libmoses_a_SOURCES = \
 	GenerationDictionary.cpp \
 	hash.cpp \
 	Hypothesis.cpp \
-	HypothesisCollection.cpp \
+	HypothesisStack.cpp \
 	InputType.cpp \
 	InputFileStream.cpp \
 	LMList.cpp \
