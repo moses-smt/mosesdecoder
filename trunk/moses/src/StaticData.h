@@ -51,7 +51,7 @@ private:
 protected:	
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
-	std::vector < std::list < DecodeStep*> * >		m_decodeStepVL;
+	std::vector < std::list <const DecodeStep*> * >		m_decodeStepVL;
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
@@ -173,7 +173,7 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	const std::vector < std::list < DecodeStep* > * > &GetDecodeStepVL() const
+	const std::vector < std::list <const DecodeStep* > * > &GetDecodeStepVL() const
 	{
 		return m_decodeStepVL;
 	}
