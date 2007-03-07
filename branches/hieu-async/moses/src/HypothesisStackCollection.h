@@ -1,4 +1,4 @@
-// $Id: HypothesisStack.h 1051 2006-12-06 22:23:52Z hieuhoang1972 $
+// $Id: HypothesisStackCollection.h 1051 2006-12-06 22:23:52Z hieuhoang1972 $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -27,39 +27,39 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /** wraps up vector of HypothesisCollection and takes care of adding hypotheses to
 	*	the correct stack
 */
-class HypothesisStack
+class HypothesisStackCollection
 {
-	typedef std::vector < HypothesisCollection > StackType;
+	typedef std::vector < HypothesisCollection > StackColl;
 protected:
-	StackType m_stack;
+	StackColl m_stackColl;
 
 public:
 	//! iterators
 	class iterator;
 	class const_iterator;
-	const_iterator begin() const { return const_iterator(0, m_stack); }
-	const_iterator end() const { return const_iterator(NOT_FOUND, m_stack); }
+	const_iterator begin() const { return const_iterator(0, m_stackColl); }
+	const_iterator end() const { return const_iterator(NOT_FOUND, m_stackColl); }
 
-	iterator begin() { return iterator(0, m_stack); }
-	iterator end() { return iterator(NOT_FOUND, m_stack); }
-	const HypothesisCollection &back() const { return m_stack.back(); }
+	iterator begin() { return iterator(0, m_stackColl); }
+	iterator end() { return iterator(NOT_FOUND, m_stackColl); }
+	const HypothesisCollection &back() const { return m_stackColl.back(); }
 
 	//! constructor
-	HypothesisStack(size_t sourceSize, const std::vector<DecodeStep*> &decodeStepList)
-		:m_stack( (size_t) pow( (float) sourceSize+1 , (int) decodeStepList.size()) )
+	HypothesisStackCollection(size_t sourceSize, const std::vector<DecodeStep*> &decodeStepList)
+		:m_stackColl( (size_t) pow( (float) sourceSize+1 , (int) decodeStepList.size()) )
 	{}
 
 	//! destructor
-	~HypothesisStack();
+	~HypothesisStackCollection();
 
 	//! get a particular stack
 	HypothesisCollection &GetStack(size_t pos)
 	{
-		return m_stack[pos];
+		return m_stackColl[pos];
 	}
 
 	size_t GetSize() const
-	{ return m_stack.size(); }
+	{ return m_stackColl.size(); }
 
 	//! add hypo to appropriate stack
 	void AddPrune(Hypothesis *hypo);
@@ -69,19 +69,19 @@ public:
 	{
 	protected:
 		size_t m_pos;
-		StackType *m_stack;
+		StackColl *m_stackColl;
 	public:
 		iterator() {}
-		iterator(size_t pos, StackType &m_stack);
+		iterator(size_t pos, StackColl &m_stackColl);
 		bool operator!=(const iterator &compare) const;
 		const iterator &operator++()
 		{
-			m_pos = (m_pos >= (m_stack->size()-1) ) ? NOT_FOUND : m_pos+1 ;
+			m_pos = (m_pos >= (m_stackColl->size()-1) ) ? NOT_FOUND : m_pos+1 ;
 			return *this;
 		}
 		HypothesisCollection &operator*() const
 		{
-			return (*m_stack)[m_pos];
+			return (*m_stackColl)[m_pos];
 		}
 	};
 
@@ -89,19 +89,19 @@ public:
 	{
 	protected:
 		size_t m_pos;
-		const StackType *m_stack;
+		const StackColl *m_stackColl;
 	public:
 		const_iterator() {}
-		const_iterator(size_t pos, const StackType &m_stack);
+		const_iterator(size_t pos, const StackColl &m_stackColl);
 		bool operator!=(const const_iterator &compare) const;
 		const const_iterator &operator++()
 		{
-			m_pos = (m_pos >= (m_stack->size()-1) ) ? NOT_FOUND : m_pos+1 ;
+			m_pos = (m_pos >= (m_stackColl->size()-1) ) ? NOT_FOUND : m_pos+1 ;
 			return *this;
 		}
 		const HypothesisCollection &operator*() const
 		{
-			return (*m_stack)[m_pos];
+			return (*m_stackColl)[m_pos];
 		}
 	};
 };

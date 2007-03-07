@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "LatticePathList.h"
 #include "WordsBitmap.h"
-#include "HypothesisStack.h"
+#include "HypothesisStackCollection.h"
 
 class LatticePath;
 class TranslationOptionCollection;
@@ -73,7 +73,7 @@ protected:
 	// data
 	InputType const& m_source; /**< source sentence to be translated */
 
-	HypothesisStack m_hypoStack; /**< stacks to store hypothesis (partial translations) */ 
+	HypothesisStackCollection m_hypoStackColl; /**< stacks to store hypothesis (partial translations) */ 
 	// no of elements = no of words in source + 1
 	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */

@@ -36,7 +36,7 @@ using namespace std;
 
 Manager::Manager(InputType const& source)
 :m_source(source)
-,m_hypoStack(source.GetSize(), StaticData::Instance().GetDecodeStepList())
+,m_hypoStackColl(source.GetSize(), StaticData::Instance().GetDecodeStepList())
 ,m_transOptColl(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 {
@@ -44,8 +44,8 @@ Manager::Manager(InputType const& source)
 	const StaticData &staticData = StaticData::Instance();
 	staticData.InitializeBeforeSentenceProcessing(source);
 
-	HypothesisStack::iterator iterStack;
-	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
+	HypothesisStackCollection::iterator iterStack;
+	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
 		HypothesisCollection &sourceHypoColl = *iterStack;
 		sourceHypoColl.SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
@@ -77,12 +77,12 @@ void Manager::ProcessSentence()
 
 	// initial seed hypothesis: nothing translated, no words produced
 	Hypothesis *seedHypo = Hypothesis::Create(m_source, decodeStepList, m_initialTargetPhrase);
-	m_hypoStack.GetStack(0).AddPrune(seedHypo);
+	m_hypoStackColl.GetStack(0).AddPrune(seedHypo);
 	
 	// go through each stack	
-	for (size_t stackNo = 0 ; stackNo < m_hypoStack.GetSize() - 1 ; ++stackNo)
+	for (size_t stackNo = 0 ; stackNo < m_hypoStackColl.GetSize() - 1 ; ++stackNo)
 	{
-		HypothesisCollection &sourceHypoColl = m_hypoStack.GetStack(stackNo);
+		HypothesisCollection &sourceHypoColl = m_hypoStackColl.GetStack(stackNo);
 
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(1,"processing hypothesis from stack " << stackNo << endl);
@@ -97,7 +97,7 @@ void Manager::ProcessSentence()
 			ProcessOneHypothesis(hypothesis, decodeStepList); // expand the hypothesis
 		}
 
-		RemoveDeadendHypotheses(stackNo);
+		//RemoveDeadendHypotheses(stackNo);
 		
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(false); }
@@ -106,7 +106,7 @@ void Manager::ProcessSentence()
 	}
 
 	// last stack
-	HypothesisCollection &lastHypoColl = m_hypoStack.GetStack(m_hypoStack.GetSize() - 1);
+	HypothesisCollection &lastHypoColl = m_hypoStackColl.GetStack(m_hypoStackColl.GetSize() - 1);
 	lastHypoColl.PruneToSize(StaticData::Instance().GetMaxHypoStackSize());
 	lastHypoColl.CleanupArcList();
 
@@ -274,7 +274,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 		}
 
 		// add to hypothesis stack
-		m_hypoStack.AddPrune(newHypo);
+		m_hypoStackColl.AddPrune(newHypo);
 	}
 }
 
@@ -284,7 +284,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
  */
 const Hypothesis *Manager::GetBestHypothesis() const
 {
-	const HypothesisCollection &hypoColl = m_hypoStack.back();
+	const HypothesisCollection &hypoColl = m_hypoStackColl.back();
 	return hypoColl.GetBestHypothesis();
 }
 
@@ -293,7 +293,7 @@ const Hypothesis *Manager::GetBestHypothesis() const
  */
 void Manager::OutputHypoStackSize(bool formatted) const
 {
-	HypothesisStack::const_iterator iterStack;
+	HypothesisStackCollection::const_iterator iterStack;
 	TRACE_ERR( "Stack sizes: ");
 	
 	if (formatted)
@@ -301,7 +301,7 @@ void Manager::OutputHypoStackSize(bool formatted) const
 	
 	int sqSize	= (int) m_source.GetSize() + 1
 			, i 		= 1;
-	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
+	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
 		if (formatted)
 		{
@@ -325,13 +325,13 @@ void Manager::OutputHypoStack(int stack)
 {
 	if (stack >= 0)
 	{
-		TRACE_ERR( "Stack " << stack << ": " << endl << m_hypoStack.GetStack(stack) << endl);
+		TRACE_ERR( "Stack " << stack << ": " << endl << m_hypoStackColl.GetStack(stack) << endl);
 	}
 	else
 	{ // all stacks
 		int i = 0;
-		HypothesisStack::iterator iterStack;
-		for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
+		HypothesisStackCollection::iterator iterStack;
+		for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 		{
 			HypothesisCollection &hypoColl = *iterStack;
 			TRACE_ERR( "Stack " << i++ << ": " << endl << hypoColl << endl);
@@ -344,8 +344,8 @@ void Manager::OutputArcListSize() const
 {
 	TRACE_ERR( "Arc sizes: ");
 	
-	HypothesisStack::const_iterator iterStack;
-	for (iterStack = m_hypoStack.begin() ; iterStack != m_hypoStack.end() ; ++iterStack)
+	HypothesisStackCollection::const_iterator iterStack;
+	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
 		const HypothesisCollection &hypoColl = *iterStack;
 		
@@ -391,7 +391,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 	if (count <= 0)
 		return;
 
-	vector<const Hypothesis*> sortedPureHypo = m_hypoStack.back().GetSortedList();
+	vector<const Hypothesis*> sortedPureHypo = m_hypoStackColl.back().GetSortedList();
 
 	if (sortedPureHypo.size() == 0)
 		return;
@@ -491,7 +491,7 @@ void Manager::RemoveDeadendHypotheses(size_t stackNo)
 {
 	for (int currStackNo = (int) stackNo ; currStackNo > 0 ; --currStackNo)
 	{
-		HypothesisCollection &hypoColl = m_hypoStack.GetStack(currStackNo);
+		HypothesisCollection &hypoColl = m_hypoStackColl.GetStack(currStackNo);
 		
 		HypothesisCollection::iterator iter = hypoColl.begin();
 		while (iter != hypoColl.end())

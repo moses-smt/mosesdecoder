@@ -1,4 +1,4 @@
-// $Id: HypothesisStack.h 1051 2006-12-06 22:23:52Z hieuhoang1972 $
+// $Id: HypothesisStackCollection.h 1051 2006-12-06 22:23:52Z hieuhoang1972 $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -19,47 +19,47 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "HypothesisStack.h"
+#include "HypothesisStackCollection.h"
 #include "StaticData.h"
 
-HypothesisStack::~HypothesisStack()
+HypothesisStackCollection::~HypothesisStackCollection()
 {
-	StackType::reverse_iterator iter;
-	for (iter = m_stack.rbegin() ; iter != m_stack.rend() ; ++iter)
+	StackColl::reverse_iterator iter;
+	for (iter = m_stackColl.rbegin() ; iter != m_stackColl.rend() ; ++iter)
 	{
 		HypothesisCollection &hypoColl = *iter;
 		hypoColl.RemoveAll();
 	}
 }
 
-HypothesisStack::iterator::iterator(size_t pos, StackType &stack)
+HypothesisStackCollection::iterator::iterator(size_t pos, StackColl &stackColl)
 {
 	m_pos = pos;
-	m_stack = &stack;
+	m_stackColl = &stackColl;
 }
 
-bool HypothesisStack::iterator::operator!=(const iterator &compare) const
+bool HypothesisStackCollection::iterator::operator!=(const iterator &compare) const
 {
 	return this->m_pos != compare.m_pos;
 }
 
-HypothesisStack::const_iterator::const_iterator(size_t pos, const StackType &stack)
+HypothesisStackCollection::const_iterator::const_iterator(size_t pos, const StackColl &stackColl)
 {
 	m_pos = pos;
-	m_stack = &stack;
+	m_stackColl = &stackColl;
 }
 
-bool HypothesisStack::const_iterator::operator!=(const const_iterator &compare) const
+bool HypothesisStackCollection::const_iterator::operator!=(const const_iterator &compare) const
 {
 	return this->m_pos != compare.m_pos;
 }
 
-void HypothesisStack::AddPrune(Hypothesis *hypo)
+void HypothesisStackCollection::AddPrune(Hypothesis *hypo)
 {
 	const WordsBitmap &wordsBitmap = hypo->GetSourceBitmap();
 	size_t stackIndex = wordsBitmap.GetStackIndex();
 
-	if (stackIndex == m_stack.size() - 1)
+	if (stackIndex == m_stackColl.size() - 1)
 	{	// only add to last stack if all factors are specified, ie. sync
 		if (!hypo->GetTargetPhrase().IsSynchronized())
 		{
@@ -77,6 +77,6 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 		}
 		*/
 	}
-	m_stack[stackIndex].AddPrune(hypo);
+	m_stackColl[stackIndex].AddPrune(hypo);
 }
 
