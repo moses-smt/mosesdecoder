@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *  The expansion process itself may be still explode, so efficient handling
  *  of partial translation options during expansion is required. 
  *  This class assists in this tasks by implementing pruning. 
- *  This implementation is similar to the one in HypothesisCollection. */
+ *  This implementation is similar to the one in HypothesisStack. */
 
 class PartialTranslOptColl
 {
