@@ -202,7 +202,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HypothesisCollection.cpp"
+				RelativePath=".\src\HypothesisStack.cpp"
 				>
 			</File>
 			<File
@@ -526,7 +526,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HypothesisCollection.h"
+				RelativePath=".\src\HypothesisStack.h"
 				>
 			</File>
 			<File
