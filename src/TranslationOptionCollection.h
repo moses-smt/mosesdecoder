@@ -73,7 +73,7 @@ protected:
 															, size_t startPos, size_t endPos, bool adhereTableLimit );
 
 	//! Force a creation of a translation option where there are none for a particular source position.
-	void ProcessUnknownWord(const std::vector < std::list < DecodeStep* > *> &decodeStepVL);
+	void ProcessUnknownWord(const std::vector < std::list <const DecodeStep* > *> &decodeStepVL);
 	//! special handling of ONE unknown words.
 	virtual void ProcessOneUnknownWord(const Word &sourceWord
 																		 , size_t sourcePos);
@@ -104,9 +104,9 @@ public:
 	size_t GetSize() const { return m_source.GetSize(); };
 
 	//! Create all possible translations from the phrase tables
-	virtual void CreateTranslationOptions(const std::vector < std::list < DecodeStep* > * > &decodeStepVL);
+	virtual void CreateTranslationOptions(const std::vector < std::list <const DecodeStep* > * > &decodeStepVL);
 	//! Create translation options that exactly cover a specific input span. 
-	virtual void CreateTranslationOptionsForRange(const std::list < DecodeStep* > &decodeStepList
+	virtual void CreateTranslationOptionsForRange(const std::list <const DecodeStep* > &decodeStepList
 																			, size_t startPosition
 																			, size_t endPosition
 																			, bool adhereTableLimit);

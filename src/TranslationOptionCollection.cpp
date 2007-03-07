@@ -125,13 +125,13 @@ void TranslationOptionCollection::Prune()
 * \param factorCollection input sentence with all factors
 */
 
-void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::list < DecodeStep* > * > &decodeStepVL)
+void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::list <const DecodeStep* > * > &decodeStepVL)
 {
 	size_t size = m_source.GetSize();
 	// try to translation for coverage with no trans by expanding table limit
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
-	  const list < DecodeStep* > * decodeStepList = decodeStepVL[startVL];
+	  const list <const DecodeStep* > * decodeStepList = decodeStepVL[startVL];
 		for (size_t pos = 0 ; pos < size ; ++pos)
 		{
 				TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
@@ -303,7 +303,7 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::CreateTranslationOptions(const vector <list < DecodeStep* > * > &decodeStepVL)
+void TranslationOptionCollection::CreateTranslationOptions(const vector <list <const DecodeStep* > * > &decodeStepVL)
 {	
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
@@ -311,7 +311,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <list < 
 	// for all phrases
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
-	  const list < DecodeStep* > * decodeStepList = decodeStepVL[startVL];
+	  const list <const DecodeStep* > * decodeStepList = decodeStepVL[startVL];
 		for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
 		{
 			for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
@@ -341,7 +341,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <list < 
  * \param adhereTableLimit whether phrase & generation table limits are adhered to
  */
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
-																													 const list < DecodeStep* > &decodeStepList
+																													 const list <const DecodeStep* > &decodeStepList
 																													 , size_t startPos
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
@@ -350,7 +350,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
 	
 	// initial translation step
-	list < DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
+	list <const DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
 	const DecodeStep &decodeStep = **iterStep;
 
 	ProcessInitialTranslation(decodeStep, *oldPtoc
