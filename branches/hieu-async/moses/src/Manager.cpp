@@ -85,7 +85,7 @@ void Manager::ProcessSentence()
 		HypothesisCollection &sourceHypoColl = m_hypoStack.GetStack(stackNo);
 
 		// the stack is pruned before processing (lazy pruning):
-		VERBOSE(1,"processing hypothesis from stack " << stackNo++ << endl);
+		VERBOSE(1,"processing hypothesis from stack " << stackNo << endl);
 		sourceHypoColl.PruneToSize(StaticData::Instance().GetMaxHypoStackSize());
 		sourceHypoColl.CleanupArcList();
 
@@ -102,7 +102,7 @@ void Manager::ProcessSentence()
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(false); }
 		OutputHypoStackSize(false);
-		OutputArcListSize();
+		//OutputArcListSize();
 	}
 
 	// last stack
@@ -499,8 +499,9 @@ void Manager::RemoveDeadendHypotheses(size_t stackNo)
 			const Hypothesis *hypo = *iter;
 			if (hypo->GetRefCount() == 0)
 			{
-				HypothesisCollection::iterator iterDelete = iter++;
+				HypothesisCollection::iterator iterDelete = iter--;
 				hypoColl.Remove(iterDelete);
+				++iter;
 			}
 			else
 			{
