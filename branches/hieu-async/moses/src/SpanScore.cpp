@@ -34,7 +34,7 @@ SpanScore::~SpanScore()
 	}
 }
 
-void SpanScore::Initialize(const vector<DecodeStep*> &decodeStepList)
+void SpanScore::Initialize(const vector<const DecodeStep*> &decodeStepList)
 {
 	m_matrices.resize(decodeStepList.size());
 	for (size_t decodeStepId = 0 ; decodeStepId < m_matrices.size() ; ++decodeStepId)

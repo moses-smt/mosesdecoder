@@ -51,7 +51,7 @@ public:
 	~SpanScore();
 
 	//! resize number of square matrices and initiliase all elements to -inf
-	void Initialize(const std::vector<DecodeStep*> &decodeStepList);
+	void Initialize(const std::vector<const DecodeStep*> &decodeStepList);
 
 	inline size_t GetSize() const
 	{

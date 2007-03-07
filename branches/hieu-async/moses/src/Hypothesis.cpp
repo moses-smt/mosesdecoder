@@ -45,7 +45,7 @@ unsigned int Hypothesis::s_HypothesesCreated = 0;
 	ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 #endif
 
-Hypothesis::Hypothesis(InputType const& source, const std::vector<DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget)
+Hypothesis::Hypothesis(InputType const& source, const std::vector<const DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)
 	, m_backPtr(decodeStepList.size())
 	, m_currSourceRange(decodeStepList.size())
@@ -232,7 +232,7 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */
 
-Hypothesis* Hypothesis::Create(InputType const& m_source, const std::vector<DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget)
+Hypothesis* Hypothesis::Create(InputType const& m_source, const std::vector<const DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget)
 {
 #ifdef USE_HYPO_POOL
 	Hypothesis *ptr = s_objectPool.getPtr();
@@ -644,8 +644,8 @@ Word Hypothesis::GetWord(size_t pos) const
 {
 	Word ret;
 
-	const std::vector<DecodeStep*> &decodeStepList = StaticData::Instance().GetDecodeStepList();
-	std::vector<DecodeStep*>::const_iterator iter;
+	const vector<const DecodeStep*> &decodeStepList = StaticData::Instance().GetDecodeStepList();
+	vector<const DecodeStep*>::const_iterator iter;
 	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
 	{
 		const DecodeStep &decodeStep = **iter;

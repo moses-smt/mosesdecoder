@@ -285,7 +285,7 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::CreateTranslationOptions(const vector<DecodeStep*> &decodeStepList)
+void TranslationOptionCollection::CreateTranslationOptions(const vector<const DecodeStep*> &decodeStepList)
 {	
 	// resize trans opt collection for each decode step
 	m_collection.resize(decodeStepList.size());
@@ -293,10 +293,10 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector<DecodeSt
 	// create map of future score matrices
 	m_futureScore.Initialize(decodeStepList);
 
-	vector<DecodeStep*>::const_iterator iterDecodeStep;
+	vector<const DecodeStep*>::const_iterator iterDecodeStep;
 	for (iterDecodeStep = decodeStepList.begin() ; iterDecodeStep != decodeStepList.end() ; ++iterDecodeStep)
 	{
-		DecodeStep &decodeStep = **iterDecodeStep;
+		const DecodeStep &decodeStep = **iterDecodeStep;
 
  		if (decodeStep.GetDecodeType() == Translate)
 		{

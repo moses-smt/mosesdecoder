@@ -45,7 +45,7 @@ public:
 	const HypothesisStack &back() const { return m_stackColl.back(); }
 
 	//! constructor
-	HypothesisStackCollection(size_t sourceSize, const std::vector<DecodeStep*> &decodeStepList)
+	HypothesisStackCollection(size_t sourceSize, const std::vector<const DecodeStep*> &decodeStepList)
 		:m_stackColl( (size_t) pow( (float) sourceSize+1 , (int) decodeStepList.size()) )
 	{}
 

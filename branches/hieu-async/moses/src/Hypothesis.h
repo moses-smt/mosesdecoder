@@ -92,7 +92,7 @@ protected:
 	void CalcDistortionScore();
 
 	/** used by initial seeding of the translation process */
-	Hypothesis(InputType const& source, const std::vector<DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget);
+	Hypothesis(InputType const& source, const std::vector<const DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget);
 	/** used when creating a new hypothesis using a translation option (phrase translation) */
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
@@ -110,7 +110,7 @@ public:
 	static Hypothesis* Create(const WordsBitmap &initialCoverage);
 
 	/** return the subclass of Hypothesis most appropriate to the given target phrase */
-	static Hypothesis* Create(InputType const& source, const std::vector<DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget);
+	static Hypothesis* Create(InputType const& source, const std::vector<const DecodeStep*> &decodeStepList, const TargetPhrase &emptyTarget);
 	
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
 	Hypothesis* CreateNext(const TranslationOption &transOpt) const;

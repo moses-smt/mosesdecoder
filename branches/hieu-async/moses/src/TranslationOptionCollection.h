@@ -107,7 +107,7 @@ public:
 	size_t GetSize() const;
 
 	//! Create all possible translations from the phrase tables
-	virtual void CreateTranslationOptions(const std::vector<DecodeStep*> &decodeStepList);
+	virtual void CreateTranslationOptions(const std::vector<const DecodeStep*> &decodeStepList);
 	//! Create translation options that exactly cover a specific input span. 
 	virtual void CreateTranslationOptionsForRange(const DecodeStep &decodeStep
 																			, size_t startPosition

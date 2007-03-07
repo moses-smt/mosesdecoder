@@ -30,10 +30,10 @@ TO_STRING_BODY(WordsBitmap);
 WordsBitmap::WordsBitmap(size_t size)
 	:m_size	(size)
 {
-	const vector<DecodeStep*> &decodeStepList = StaticData::Instance().GetDecodeStepList();
+	const vector<const DecodeStep*> &decodeStepList = StaticData::Instance().GetDecodeStepList();
 	m_bitmap.resize(decodeStepList.size());
 
-	std::vector<DecodeStep*>::const_iterator iter;
+	vector<const DecodeStep*>::const_iterator iter;
 	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
 	{
 		size_t decodeStepId = (*iter)->GetId();

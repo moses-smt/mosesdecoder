@@ -67,7 +67,7 @@ Manager::~Manager()
 void Manager::ProcessSentence()
 {	
 	StaticData::Instance().ResetSentenceStats(m_source);
-	const vector<DecodeStep*> &decodeStepList = StaticData::Instance().GetDecodeStepList();
+	const vector<const DecodeStep*> &decodeStepList = StaticData::Instance().GetDecodeStepList();
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
@@ -123,7 +123,7 @@ void Manager::ProcessSentence()
  * violation of reordering limits. 
  * \param hypothesis hypothesis to be expanded upon
  */
-void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vector<DecodeStep*> &decodeStepList)
+void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const vector<const DecodeStep*> &decodeStepList)
 {	
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
@@ -133,7 +133,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vect
 	{	
 		const WordsBitmap &hypoBitmap	= hypothesis.GetSourceBitmap();
 
-		std::vector<DecodeStep*>::const_iterator iter;
+		std::vector<const DecodeStep*>::const_iterator iter;
 		for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
 		{
 			const DecodeStep &decodeStep	= **iter;
@@ -165,7 +165,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vect
 	// the coverage bitmap is handy here (and the position of the first gap)
 	const WordsBitmap &hypoBitmap = hypothesis.GetSourceBitmap();
 
-	std::vector<DecodeStep*>::const_iterator iter;
+	std::vector<const DecodeStep*>::const_iterator iter;
 	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
 	{
 		const DecodeStep &decodeStep	= **iter;
