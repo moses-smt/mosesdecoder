@@ -85,7 +85,7 @@ void Manager::ProcessSentence()
 		HypothesisStack &sourceHypoColl = m_hypoStackColl.GetStack(stackNo);
 
 		// the stack is pruned before processing (lazy pruning):
-		VERBOSE(1,"processing hypothesis from stack " << stackNo << endl);
+		VERBOSE(3,"processing hypothesis from stack " << stackNo << endl);
 		sourceHypoColl.PruneToSize(StaticData::Instance().GetMaxHypoStackSize());
 		sourceHypoColl.CleanupArcList();
 
@@ -98,14 +98,16 @@ void Manager::ProcessSentence()
 		}
 
 		if (stackNo % 100 == 99)
-		RemoveDeadendHypotheses(stackNo);
+			RemoveDeadendHypotheses(stackNo);
 		
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(false); }
-		OutputHypoStackSize(false);
+		//OutputHypoStackSize(false);
 		//OutputArcListSize();
 	}
 
+	RemoveDeadendHypotheses(m_hypoStackColl.GetSize() - 2);
+	
 	// last stack
 	HypothesisStack &lastHypoColl = m_hypoStackColl.GetStack(m_hypoStackColl.GetSize() - 1);
 	lastHypoColl.PruneToSize(StaticData::Instance().GetMaxHypoStackSize());
@@ -292,6 +294,18 @@ const Hypothesis *Manager::GetBestHypothesis() const
 /**
  * Logging of hypothesis stack sizes
  */
+ // helper
+void OutputNumber(size_t num)
+{
+	if (num > 99)
+		TRACE_ERR(" ");
+	else if (num > 9)
+		TRACE_ERR("  ");
+	else
+		TRACE_ERR("   ");
+	TRACE_ERR(num);
+}
+
 void Manager::OutputHypoStackSize(bool formatted) const
 {
 	HypothesisStackCollection::const_iterator iterStack;
@@ -306,12 +320,12 @@ void Manager::OutputHypoStackSize(bool formatted) const
 	{
 		if (formatted)
 		{
-			TRACE_ERR((*iterStack).size() << "\t");
+			OutputNumber((*iterStack).size());
 			if (i++ % sqSize == 0)
 				TRACE_ERR( endl);
 		}
 		else
-			TRACE_ERR((*iterStack).size() << " ");
+			OutputNumber((*iterStack).size());
 	}
 	
 	if (!formatted)
