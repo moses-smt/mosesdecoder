@@ -296,9 +296,11 @@ public:
 	
 	// reference counting functions
 	void IncrementRefCount() const
-	{ m_refCount++;	}
+	{ m_refCount++;	
+	}
 	void DecrementRefCount() const
-	{ m_refCount--;	}
+	{ m_refCount--;	
+	}
 	size_t GetRefCount() const
 	{ return m_refCount;	}
 

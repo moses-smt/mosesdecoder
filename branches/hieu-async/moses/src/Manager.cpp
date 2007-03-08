@@ -97,6 +97,7 @@ void Manager::ProcessSentence()
 			ProcessOneHypothesis(hypothesis, decodeStepList); // expand the hypothesis
 		}
 
+		if (stackNo % 100 == 99)
 		RemoveDeadendHypotheses(stackNo);
 		
 		// some logging
@@ -499,9 +500,8 @@ void Manager::RemoveDeadendHypotheses(size_t stackNo)
 			const Hypothesis *hypo = *iter;
 			if (hypo->GetRefCount() == 0)
 			{
-				HypothesisStack::iterator iterDelete = iter--;
+				HypothesisStack::iterator iterDelete = iter++;
 				hypoColl.Remove(iterDelete);
-				++iter;
 			}
 			else
 			{
