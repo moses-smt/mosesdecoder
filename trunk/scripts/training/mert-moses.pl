@@ -943,7 +943,7 @@ sub scan_config {
     }
     if (defined $section && $section eq "mapping") {
       # keep track of mapping steps used
-      $defined_steps{$1}++ if /^([TG])/;
+      $defined_steps{$1}++ if /^([TG])/ || /^\d+ ([TG])/;
     }
     if (defined $section && defined $where_is_filename{$section}) {
       # this ini section is relevant to lambdas
