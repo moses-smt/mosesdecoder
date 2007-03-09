@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # given a list of files, combines them to a single corpus (sent to stdout)
-
+ 
 use strict;
 use warnings;
 use Getopt::Long;
