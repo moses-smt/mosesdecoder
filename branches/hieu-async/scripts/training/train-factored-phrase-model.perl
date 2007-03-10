@@ -11,7 +11,7 @@ use Getopt::Long "GetOptions";
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
 
-my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER);
+my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER, $_CONFIG, $_DONT_ZIP);
 
 my $debug = 1; # debug this script, do not delete any files in debug mode
 
@@ -44,6 +44,7 @@ $_HELP = 1
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
 		       'debug' => \$debug,
+		       'dont-zip' => \$_DONT_ZIP,
 		       'parts=i' => \$_PARTS,
 		       'direction=i' => \$_DIRECTION,
 		       'only-print-giza' => \$_ONLY_PRINT_GIZA,
@@ -55,7 +56,8 @@ $_HELP = 1
 		       'generation-factors=s' => \$_GENERATION_FACTORS,
 		       'decoding-steps=s' => \$_DECODING_STEPS,
 		       'scripts-root-dir=s' => \$SCRIPTS_ROOTDIR,
-                       'factor-delimiter=s' => \$_FACTOR_DELIMITER,
+               'factor-delimiter=s' => \$_FACTOR_DELIMITER,
+               'config=s' => \$_CONFIG
                       );
 
 if ($_HELP) {
@@ -147,6 +149,11 @@ $___MODEL_DIR = $_MODEL_DIR if $_MODEL_DIR;
 my $___EXTRACT_FILE = $___MODEL_DIR."/extract";
 $___EXTRACT_FILE = $_EXTRACT_FILE if $_EXTRACT_FILE;
 
+my $___CONFIG = $___MODEL_DIR."/moses.ini";
+$___CONFIG = $_CONFIG if $_CONFIG;
+
+my $___DONT_ZIP = 0; 
+$_DONT_ZIP = $___DONT_ZIP unless $___DONT_ZIP;
 
 my $___MAX_PHRASE_LENGTH = 7;
 my $___LEXICAL_WEIGHTING = 1;
@@ -1262,7 +1269,9 @@ sub create_ini {
     &full_path(\$___MODEL_DIR);
     &full_path(\$___VCB_E);
     &full_path(\$___VCB_F);
-    open(INI,">$___MODEL_DIR/moses.ini") or die "Can't write $___MODEL_DIR/moses.ini";
+    `mkdir -p $___MODEL_DIR`;
+    open(INI,">$___CONFIG") or die("Can't write $___CONFIG");
+
     print INI "#########################
 ### MOSES CONFIG FILE ###
 #########################
