@@ -11,7 +11,7 @@ use Getopt::Long "GetOptions";
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
 
-my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER, $_CONFIG, $_DONT_ZIP);
+my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_DIR,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER, $_CONFIG, $_DONT_ZIP, $_INPUT_FACTOR_MAX);
 
 my $debug = 1; # debug this script, do not delete any files in debug mode
 
@@ -50,6 +50,7 @@ $_HELP = 1
 		       'only-print-giza' => \$_ONLY_PRINT_GIZA,
 		       'reordering=s' => \$_REORDERING,
 		       'reordering-smooth=s' => \$_REORDERING_SMOOTH,
+		       'input-factor-max=i' => \$_INPUT_FACTOR_MAX,
 		       'alignment-factors=s' => \$_ALIGNMENT_FACTORS,
 		       'translation-factors=s' => \$_TRANSLATION_FACTORS,
 		       'reordering-factors=s' => \$_REORDERING_FACTORS,
@@ -1287,6 +1288,7 @@ sub create_ini {
           $INPUT_FACTOR_MAX = $_ if $_>$INPUT_FACTOR_MAX;
         }  
       }
+      $INPUT_FACTOR_MAX = $_INPUT_FACTOR_MAX if $_INPUT_FACTOR_MAX; # use specified, if exists
       for (my $c = 0; $c <= $INPUT_FACTOR_MAX; $c++) { print INI "$c\n"; }
     } else {
       die "No translation steps defined, cannot prepare [input-factors] section\n";
