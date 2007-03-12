@@ -27,8 +27,22 @@ my $max = $ARGV[5];
 
 print STDERR "clean-corpus.perl: processing $corpus.$l1 & .$l2 to $out, cutoff $min-$max\n";
 
-open(F,"$corpus.$l1") or die "Can't read $corpus.$l1";
-open(E,"$corpus.$l2") or die "Can't read $corpus.$l2";
+my $opn = undef;
+my $l1input = "$corpus.$l1";
+if (-e $l1input) {
+  $opn = $l1input;
+} elsif (-e $l1input.".gz") {
+  $opn = "zcat $l1input.gz |";
+}
+open(F,$opn) or die "Can't open '$opn'";
+my $l2input = "$corpus.$l2";
+if (-e $l2input) {
+  $opn = $l2input;
+} elsif (-e $l2input.".gz") {
+  $opn = "zcat $l2input.gz |";
+}
+open(E,$opn) or die "Can't open '$opn'";
+
 open(FO,">$out.$l1") or die "Can't write $out.$l1";
 open(EO,">$out.$l2") or die "Can't write $out.$l2";
 
