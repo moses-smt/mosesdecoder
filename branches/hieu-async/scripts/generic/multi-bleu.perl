@@ -10,7 +10,7 @@ if (!defined $stem) {
 }
 
 my @REF;
-my $ref=1;
+my $ref=0;
 while(-e "$stem$ref") {
     &add_to_ref("$stem$ref",\@REF);
     $ref++;
@@ -40,11 +40,16 @@ while(<STDIN>) {
 #      print "$s $_ <=> $reference\n";
 	my @WORD = split(/ /,$reference);
 	my $length = scalar(@WORD);
-	if (abs($length_translation_this_sentence-$length) < $closest_diff) {
-	    $closest_diff = abs($length_translation_this_sentence-$length);
+        my $diff = abs($length_translation_this_sentence-$length);
+	if ($diff < $closest_diff) {
+	    $closest_diff = $diff;
 	    $closest_length = $length;
-#	    print "$s: closest diff = abs($length_translation_this_sentence-$length)<BR>\n";
-	}
+	    # print STDERR "$s: closest diff ".abs($length_translation_this_sentence-$length)." = abs($length_translation_this_sentence-$length), setting len: $closest_length\n";
+	} elsif ($diff == $closest_diff) {
+            $closest_length = $length if $length < $closest_length;
+            # from two references with the same closeness to me
+            # take the *shorter* into account, not the "first" one.
+        }
 	for(my $n=1;$n<=4;$n++) {
 	    my %REF_NGRAM_N = ();
 	    for(my $start=0;$start<=$#WORD-($n-1);$start++) {
@@ -77,18 +82,23 @@ while(<STDIN>) {
 	foreach my $ngram (keys %T_NGRAM) {
 	    $ngram =~ /^(\d+) /;
 	    my $n = $1;
+            # my $corr = 0;
 #	print "$i e $ngram $T_NGRAM{$ngram}<BR>\n";
 	    $TOTAL[$n] += $T_NGRAM{$ngram};
 	    if (defined($REF_NGRAM{$ngram})) {
 		if ($REF_NGRAM{$ngram} >= $T_NGRAM{$ngram}) {
 		    $CORRECT[$n] += $T_NGRAM{$ngram};
+                    # $corr =  $T_NGRAM{$ngram};
 #	    print "$i e correct1 $T_NGRAM{$ngram}<BR>\n";
 		}
 		else {
 		    $CORRECT[$n] += $REF_NGRAM{$ngram};
+                    # $corr =  $REF_NGRAM{$ngram};
 #	    print "$i e correct2 $REF_NGRAM{$ngram}<BR>\n";
 		}
 	    }
+            # $REF_NGRAM{$ngram} = 0 if !defined $REF_NGRAM{$ngram};
+            # print STDERR "$ngram: {$s, $REF_NGRAM{$ngram}, $T_NGRAM{$ngram}, $corr}\n"
 	}
     }
     $s++;
@@ -101,14 +111,14 @@ my @bleu=();
 for(my $n=1;$n<=4;$n++) {
   if (defined ($TOTAL[$n])){
     $bleu[$n]=($TOTAL[$n])?$CORRECT[$n]/$TOTAL[$n]:0;
-#    print STDERR "CORRECT[$n]:$CORRECT[$n] TOTAL[$n]:$TOTAL[$n]\n";
+    # print STDERR "CORRECT[$n]:$CORRECT[$n] TOTAL[$n]:$TOTAL[$n]\n";
   }else{
     $bleu[$n]=0;
   }
 }
 
 if ($length_reference==0){
-  printf "BLEU = 0, 0/0/0/0 (BP=0, ration=0, hyp_len=0, ref_len=0)\n";
+  printf "BLEU = 0, 0/0/0/0 (BP=0, ratio=0, hyp_len=0, ref_len=0)\n";
   exit(1);
 }
 
@@ -119,7 +129,7 @@ $bleu = $brevity_penalty * exp((my_log( $bleu[1] ) +
 				my_log( $bleu[2] ) +
 				my_log( $bleu[3] ) +
 				my_log( $bleu[4] ) ) / 4) ;
-printf "BLEU = %.2f, %.1f/%.1f/%.1f/%.1f (BP=%.3f, ration=%.3f, hyp_len=%d, ref_len=%d)\n",
+printf "BLEU = %.2f, %.1f/%.1f/%.1f/%.1f (BP=%.3f, ratio=%.3f, hyp_len=%d, ref_len=%d)\n",
     100*$bleu,
     100*$bleu[1],
     100*$bleu[2],

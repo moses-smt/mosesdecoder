@@ -9,6 +9,8 @@
 
 # Revision history
 
+# 13 Feb 2007 Better handling of default values for lambda, now works with multiple
+#             models and lexicalized reordering
 # 11 Oct 2006 Handle different input types through parameter --inputype=[0|1]
 #             (0 for text, 1 for confusion network, default is 0) (Nicola Bertoldi)
 # 10 Oct 2006 Allow skip of filtering of phrase tables (--no-filter-phrase-table)
@@ -32,25 +34,38 @@
 # 13 Oct 2004 Use alternative decoders (DWC)
 # Original version by Philipp Koehn
 
+
+# for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
+# of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
+# but the translation model has currently 5 features
+
 # defaults for initial values and ranges are:
+
 my $default_triples = {
-  # for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
-  # of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
-  # but the translation model has currently 5 features
-  "d" => [ [ 1.0, 0.0, 2.0 ] ],
-  "lm" => [ [ 1.0, 0.0, 2.0 ] ],
-  "tm" => [
-            [ 0.3, 0.0, 0.5 ],
-            [ 0.2, 0.0, 0.5 ],
-            [ 0.3, 0.0, 0.5 ],
-            [ 0.2, 0.0, 0.5 ],
-            [ 0.0, -1.0, 1.0 ],
-	  ],
-  "g" => [
-           [ 1.0, 0.0, 2.0 ],
-           [ 1.0, 0.0, 2.0 ],
-         ],
-  "w" => [ [ 0.0, -1.0, 1.0 ] ],
+    # these two basic models exist even if not specified, they are
+    # not associated with any model file
+    "d" => [ [ 1.0, 0.0, 2.0 ] ],   # distance-based distortion
+    "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
+};
+
+my $additional_triples = {
+    # if the more lambda parameters for the weights are needed
+    # (due to additional tables) use the following values for them
+    "d"  => [ [ 1.0, 0.0, 2.0 ],    # lexicalized reordering model
+	      [ 1.0, 0.0, 2.0 ],
+	      [ 1.0, 0.0, 2.0 ],
+	      [ 1.0, 0.0, 2.0 ],
+	      [ 1.0, 0.0, 2.0 ],
+	      [ 1.0, 0.0, 2.0 ],
+	      [ 1.0, 0.0, 2.0 ] ],
+    "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
+    "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
+	      [ 1.0, 0.0, 2.0 ] ],
+    "tm" => [ [ 0.3, 0.0, 0.5 ],    # translation model
+	      [ 0.2, 0.0, 0.5 ],
+	      [ 0.3, 0.0, 0.5 ],
+	      [ 0.2, 0.0, 0.5 ],
+	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
 };
 
 # moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
@@ -66,13 +81,10 @@ my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d gene
 my %TABLECONFIG2ABBR = map {split(/=/,$_,2)} split /\s+/, $TABLECONFIG_ABBR_MAP;
 
 # There are weights that do not correspond to any input file, they just increase the total number of lambdas we optimize
-my $extra_lambdas_for_model = {
-  "w" => 1,  # word penalty
-  "d" => 1,  # basic distortion
-};
-
-
-
+#my $extra_lambdas_for_model = {
+#  "w" => 1,  # word penalty
+#  "d" => 1,  # basic distortion
+#};
 
 my $minimum_required_change_in_weights = 0.00001;
     # stop if no lambda changes more than this
@@ -218,7 +230,7 @@ if ($___INPUTTYPE == 1)
   %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
 
   push @{$default_triples -> {"I"}}, [ 1.0, 0.0, 2.0 ];
-  $extra_lambdas_for_model -> {"I"} = 1; #Confusion network posterior
+  #$extra_lambdas_for_model -> {"I"} = 1; #Confusion network posterior
 }
 
 # Check validity of input parameters and set defaults if needed
@@ -229,9 +241,6 @@ if (!defined $SCRIPTS_ROOTDIR) {
 }
 
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
-
-
-
 
 # path of script for filtering phrase tables and running the decoder
 $filtercmd="$SCRIPTS_ROOTDIR/training/filter-model-given-input.pl" if !defined $filtercmd;
@@ -250,8 +259,8 @@ $pythonpath = "$cmertdir/python" if !defined $pythonpath;
 
 $ENV{PYTHONPATH} = $pythonpath; # other scripts need to know
 
-
-die "Not executable: $filtercmd" if ! -x $filtercmd;
+my ($just_cmd_filtercmd,$x) = split(/ /,$filtercmd);
+die "Not executable: $just_cmd_filtercmd" if ! -x $just_cmd_filtercmd;
 die "Not executable: $cmertcmd" if ! -x $cmertcmd;
 die "Not executable: $moses_parallel_cmd" if defined $___JOBS && ! -x $moses_parallel_cmd;
 die "Not executable: $qsubwrapper" if defined $___JOBS && ! -x $qsubwrapper;
@@ -298,13 +307,13 @@ $___CONFIG = $config_abs;
 
 # check validity of moses.ini and collect number of models and lambdas per model
 # need to make a copy of $extra_lambdas_for_model, scan_config spoils it
-my %copy_of_extra_lambdas_for_model = %$extra_lambdas_for_model;
-my ($lambdas_per_model, $models_used) = scan_config($___CONFIG, \%copy_of_extra_lambdas_for_model);
+#my %copy_of_extra_lambdas_for_model = %$extra_lambdas_for_model;
+my %used_triples = %{$default_triples};
+my ($models_used) = scan_config($___CONFIG);
 
-
-# Parse the lambda config string and convert it to a nice structure in the same format as $default_triples
-my $use_triples = undef;
+# Parse the lambda config string and convert it to a nice structure in the same format as $used_triples
 if (defined $___LAMBDA) {
+  my %specified_triples;
   # interpreting lambdas from command line
   foreach (split(/\s+/,$___LAMBDA)) {
       my ($name,$values) = split(/:/);
@@ -314,43 +323,25 @@ if (defined $___LAMBDA) {
 	      my $start = $1;
 	      my $min = $2;
 	      my $max = $3;
-              push @{$use_triples->{$name}}, [$start, $min, $max];
+              push @{$specified_triples{$name}}, [$start, $min, $max];
 	  }
 	  else {
 	      die "Malformed feature range definition: $name => $startminmax\n";
 	  }
       } 
   }
-} else {
-  # no lambdas supplied, use the default ones, but do not forget to repeat them accordingly
-  # first for or inherent models
-  foreach my $name (keys %$extra_lambdas_for_model) {
-    foreach (1..$extra_lambdas_for_model->{$name}) {
-      die "No default weights defined for -$name"
-        if !defined $default_triples->{$name};
-      # XXX here was a deadly bug: we need a deep copy of the default values
-      my @copy = ();
-      foreach my $triple (@{$default_triples->{$name}}) {
-        my @copy_triple = @$triple;
-        push @copy, [ @copy_triple ];
-      }
-      push @{$use_triples->{$name}}, @copy;
-    }
+  # sanity checks for specified lambda triples
+  foreach my $name (keys %used_triples) {
+      die "No lambdas specified for '$name', but ".($#{$used_triples{$name}}+1)." needed.\n"
+	  unless defined($specified_triples{$name});
+      die "Number of lambdas specified for '$name' (".($#{$specified_triples{$name}}+1).") does not match number needed (".($#{$used_triples{$name}}+1).")\n"
+	  if (($#{$used_triples{$name}}) != ($#{$specified_triples{$name}}));
   }
-  # and then for all models used
-  foreach my $name (keys %$models_used) {
-    foreach (1..$models_used->{$name}) {
-      die "No default weights defined for -$name"
-        if !defined $default_triples->{$name};
-      # XXX here was a deadly bug: we need a deep copy of the default values
-      my @copy = ();
-      foreach my $triple (@{$default_triples->{$name}}) {
-        my @copy_triple = @$triple;
-        push @copy, [ @copy_triple ];
-      }
-      push @{$use_triples->{$name}}, @copy;
-    }
+  foreach my $name (keys %specified_triples) {
+      die "Lambdas specified for '$name' ".(@{$specified_triples{$name}}).", but none needed.\n"
+	  unless defined($used_triples{$name});
   }
+  %used_triples = %specified_triples;
 }
 
 # moses should use our config
@@ -361,24 +352,6 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
 || $___DECODER_FLAGS =~ /(^|\s)-(lmodel-file) /
 ) {
   die "It is forbidden to supply any of -config, -ttable-file, -distortion-file, -generation-file or -lmodel-file in the --decoder-flags.\nPlease use only the --config option to give the config file that lists all the supplementary files.";
-}
-
-# walk through all lambdas the user wishes to optimize and check
-# if the number of lambdas matches
-foreach my $name (keys %$use_triples) {
-  my $expected_lambdas = $lambdas_per_model->{$name};
-  $expected_lambdas = 0 if !defined $expected_lambdas;
-  my $got_lambdas = defined $use_triples->{$name} ? scalar @{$use_triples->{$name}}  : 0;
-  if ($got_lambdas != $expected_lambdas) {
-    if ($allow_unknown_lambdas && $expected_lambdas == 0) {
-      print STDERR "Allowing to optimize $name, although I have no idea what it is.\n";
-    } else {
-      print STDERR "Wrong number of lambdas for $name. Expected (given the config file): $expected_lambdas, got: $got_lambdas.
-Use --allow-unknown-lambdas to optimize lambdas that you are just introducing
-and I cannot validate against the models mentioned in moses.ini.\n";
-      exit 1;
-    }
-  }
 }
 
 # as weights are normalized in the next steps (by cmert)
@@ -399,6 +372,7 @@ my @order_of_lambdas_from_decoder = ();
 my $cwd = `pawd 2>/dev/null`; 
 if(!$cwd){$cwd = `pwd`;}
 chomp($cwd);
+
 safesystem("mkdir -p $___WORKING_DIR") or die "Can't mkdir $___WORKING_DIR";
 
 {
@@ -440,11 +414,10 @@ if ($continue) {
   close IN;
   my @newweights = split /\s+/, $newweights;
 
-  # dump_triples($use_triples);
-  $use_triples = store_new_lambda_values($use_triples, \@order_of_lambdas_from_decoder, \@newweights);
-  # dump_triples($use_triples);
+  #dump_triples(\%used_triples);
+  store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
+  #dump_triples(\%used_triples);
 }
-
 
 if ($___FILTER_PHRASE_TABLE){
   # filter the phrase tables wih respect to input, use --decoder-flags
@@ -480,13 +453,13 @@ while(1) {
   print "run $run start at ".`date`;
 
   # In case something dies later, we might wish to have a copy
-  create_config($___CONFIG, "./run$run.moses.ini", $use_triples, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
+  create_config($___CONFIG, "./run$run.moses.ini", \%used_triples, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
 
 
   # skip if the user wanted
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
-      @order_of_lambdas_from_decoder = run_decoder($use_triples, $PARAMETERS, $run, \@order_of_lambdas_from_decoder, $need_to_normalize);
+      @order_of_lambdas_from_decoder = run_decoder(\%used_triples, $PARAMETERS, $run, \@order_of_lambdas_from_decoder, $need_to_normalize);
       $need_to_normalize = 0;
       safesystem("gzip -f run*out") or die "Failed to gzip run*out";
   }
@@ -566,8 +539,8 @@ while(1) {
     next if $visited{$name};
     $visited{$name} = 1;
     die "The decoder produced also some '$name' scores, but we do not know the ranges for them, no way to optimize them\n"
-      if !defined $use_triples->{$name};
-    foreach my $feature (@{$use_triples->{$name}}) {
+      if !defined $used_triples{$name};
+    foreach my $feature (@{$used_triples{$name}}) {
       my ($val, $min, $max) = @$feature;
       push @CURR, $val;
       push @MIN, $min;
@@ -624,7 +597,7 @@ while(1) {
   my @newweights = split /\s+/, $bestpoint;
 
   # update my cache of lambda values
-  $use_triples = store_new_lambda_values($use_triples, \@order_of_lambdas_from_decoder, \@newweights);
+  store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
 
   ## additional stopping criterion: weights have not changed
   my $shouldstop = 1;
@@ -653,7 +626,7 @@ print "Training finished at ".`date`;
 safesystem("cp init.opt run$run.init.opt") or die;
 safesystem ("cp cmert.log run$run.cmert.log") or die;
 
-create_config($___CONFIG, "./moses.ini", $use_triples, $run, $devbleu);
+create_config($___CONFIG, "./moses.ini", \%used_triples, $run, $devbleu);
 
 # just to be sure that we have the really last finished step marked
 open F, "> finished_step.txt" or die "Can't mark finished step";
@@ -693,7 +666,6 @@ sub store_new_lambda_values {
     # print STDERR "Storing $i-th score as $name: $idx{$name}: $values->[$i]\n";
     $triples->{$name}->[$idx{$name}]->[0] = $values->[$i];
   }
-  return $triples;
 }
 
 sub dump_triples {
@@ -820,7 +792,7 @@ sub create_config {
       delete($P{$abbr});
       delete($P{$ABBR2FULL{$abbr}});
       # Then feed P with the current values
-      foreach my $feature (@{$use_triples->{$abbr}}) {
+      foreach my $feature (@{$used_triples{$abbr}}) {
         my ($val, $min, $max) = @$feature;
         my $name = defined $ABBR2FULL{$abbr} ? $ABBR2FULL{$abbr} : $abbr;
         push @{$P{$name}}, $val;
@@ -909,6 +881,7 @@ sub safesystem {
 }
 sub ensure_full_path {
     my $PATH = shift;
+$PATH =~ s/\/nfsmnt//;
     return $PATH if $PATH =~ /^\//;
     my $dir = `pawd 2>/dev/null`; 
     if(!$dir){$dir = `pwd`;}
@@ -924,6 +897,7 @@ sub ensure_full_path {
     }
     $PATH =~ s/\/[^\/]+\/\.\.$//;
     $PATH =~ s/\/+$//;
+$PATH =~ s/\/nfsmnt//;
     return $PATH;
 }
 
@@ -933,7 +907,6 @@ sub ensure_full_path {
 sub scan_config {
   my $ini = shift;
   my $inishortname = $ini; $inishortname =~ s/^.*\///; # for error reporting
-  my $lambda_counts = shift;
   # we get a pre-filled counts, because some lambdas are always needed (word penalty, for instance)
   # as we walk though the ini file, we record how many extra lambdas do we need
   # and finally, we report it
@@ -970,7 +943,7 @@ sub scan_config {
     }
     if (defined $section && $section eq "mapping") {
       # keep track of mapping steps used
-      $defined_steps{$1}++ if /^([TG])/;
+      $defined_steps{$1}++ if /^([TG])/ || /^\d+ ([TG])/;
     }
     if (defined $section && defined $where_is_filename{$section}) {
       # this ini section is relevant to lambdas
@@ -978,12 +951,13 @@ sub scan_config {
       my @flds = split / +/;
       my $fn = $flds[$where_is_filename{$section}];
       if (defined $fn && $fn !~ /^\s+$/) {
+	  print "checking weight-count for $section\n";
         # this is a filename! check it
 	if ($fn !~ /^\//) {
 	  $error = 1;
 	  print STDERR "$inishortname:$nr:Filename not absolute: $fn\n";
 	}
-	if (! -s $fn) {
+	if (! -s $fn && ! -s "$fn.gz") {
 	  $error = 1;
 	  print STDERR "$inishortname:$nr:File does not exist or empty: $fn\n";
 	}
@@ -996,12 +970,20 @@ sub scan_config {
         my $needlambdas = defined $where_is_lambda_count{$section} ? $flds[$where_is_lambda_count{$section}] : 1;
 
         print STDERR "Config needs $needlambdas lambdas for $section (i.e. $shortname)\n" if $verbose;
-	$lambda_counts->{$shortname}+=$needlambdas;
-        if (!defined $___LAMBDA && (!defined $default_triples->{$shortname} || scalar(@{$default_triples->{$shortname}}) != $needlambdas)) {
-          print STDERR "$inishortname:$nr:Your model $shortname needs $needlambdas weights but we define the default ranges for "
-            .scalar(@{$default_triples->{$shortname}})." weights. Cannot use the default, you must supply lambdas by hand.\n";
+        if (!defined $___LAMBDA && (!defined $additional_triples->{$shortname} || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)) {
+          print STDERR "$inishortname:$nr:Your model $shortname needs $needlambdas weights but we define the default ranges for only "
+            .scalar(@{$additional_triples->{$shortname}})." weights. Cannot use the default, you must supply lambdas by hand.\n";
           $error = 1;
         }
+	else {
+	    # note: table may use less parameters than the maximum number
+	    # of triples
+	    for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
+		my ($start, $min, $max) 
+		    = @{${$additional_triples->{$shortname}}[$lambda]};
+		push @{$used_triples{$shortname}}, [$start, $min, $max];
+	    }
+	}
         $defined_files{$shortname}++;
       }
     }
@@ -1018,6 +1000,6 @@ sub scan_config {
     }
   }
   exit(1) if $error;
-  return ($lambda_counts, \%defined_files);
+  return (\%defined_files);
 }
 

@@ -37,8 +37,6 @@ int phraseCount = 0;
 char* fileNameExtract;
 bool orientationFlag;
 
-// $PHRASE_EXTRACT $___MODEL_DIR/aligned.$factor_e.$___E $___MODEL_DIR/aligned.$factor_f.$___F $___MODEL_DIR/aligned.$___ALIGNMENT $___EXTRACT_FILE.$factor $___MAX_PHRASE_LENGTH orientation
-
 int main(int argc, char* argv[]) 
 {
   cerr << "PhraseExtract v1.3.0, written by Philipp Koehn\n"

@@ -141,7 +141,9 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     print STDERR "filtering $file -> $new_file...\n";
 
     my $openstring;
-    if ($file =~ /\.gz$/) {
+    if ($file !~ /\.gz$/ && -e "$file.gz") {
+      $openstring = "zcat $file.gz |";
+    } elsif ($file =~ /\.gz$/) {
       $openstring = "zcat $file |";
     } else {
       $openstring = "< $file";
