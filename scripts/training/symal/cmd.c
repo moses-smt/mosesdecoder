@@ -6,6 +6,11 @@
 
 #include	"cmd.h"
 
+#ifdef WIN32
+#		define popen	_popen
+#		define pclose _pclose
+#endif
+
 static Enum_T	BoolEnum[] = {
 	{	"FALSE",	0	},
 	{	"TRUE",		1	},
