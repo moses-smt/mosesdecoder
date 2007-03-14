@@ -1,4 +1,6 @@
 
+// $Id$
+
 #if !defined(CMD_H)
 
 #define	CMD_H

@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+# $Id$
 #show-phrases-used: display all source and target phrases for each sentence in a corpus, and give average phrase length used
 #usage: show-phrases-used DECODER_OUTFILE > output.html
 #  where DECODER_OUTFILE is the output of moses with the -T (show alignments) option

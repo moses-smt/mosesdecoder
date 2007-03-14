@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# $Id$
+
 '''Provides:
 
 cook_refs(refs, n=4): Transform a list of reference sentences as strings into a form usable by cook_test().

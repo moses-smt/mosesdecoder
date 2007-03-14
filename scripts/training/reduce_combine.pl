@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+
+# $Id$
 # given a pathname to a factored corpus, a list of (numeric) factors to keep
 # and a list of (labelled) factors to attach from factors/<basename>.label
 # produces new corpus on stdout

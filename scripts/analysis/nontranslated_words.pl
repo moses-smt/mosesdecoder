@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+
+# $Id$
 # Reads a source and hypothesis file and counts equal tokens. Some of these
 # are punctuation, some are numbers, but most of the remaining are simply
 # unknown words that the decoder just copied. This script tells you how often

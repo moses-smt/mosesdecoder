@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+# $Id$
 """Convert n-best list in mert.perl format to format required by
 Venugopal's MER trainer. This entails calculating the BLEU component scores."""
 

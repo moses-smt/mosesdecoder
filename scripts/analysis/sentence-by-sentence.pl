@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+# $Id$
 #sentence-by-sentence: take in a system output, with any number of factors, and a reference translation, also maybe with factors, and show each sentence and its errors
 #usage: sentence-by-sentence SYSOUT [REFERENCE]+ > sentences.html
 

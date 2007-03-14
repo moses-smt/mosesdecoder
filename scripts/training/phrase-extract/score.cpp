@@ -1,3 +1,4 @@
+// $Id$
 using namespace std;
 
 #include <cstdio>
