@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: consolidate-training-data.perl 40 2007-03-14 22:48:03Z hieu $
+# $Id$
 use strict;
 use Getopt::Long "GetOptions";
 
