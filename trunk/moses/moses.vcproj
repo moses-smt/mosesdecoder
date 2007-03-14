@@ -292,7 +292,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LexicalReorderingTable.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LMList.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LVoc.cpp"
 				>
 			</File>
 			<File
@@ -385,6 +393,10 @@
 			</File>
 			<File
 				RelativePath=".\src\PhraseReference.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PrefixTreeMap.cpp"
 				>
 			</File>
 			<File
@@ -586,7 +598,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LexicalReorderingTable.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LMList.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LVoc.h"
 				>
 			</File>
 			<File
@@ -651,6 +671,10 @@
 			</File>
 			<File
 				RelativePath=".\src\PrefixTree.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PrefixTreeMap.h"
 				>
 			</File>
 			<File
