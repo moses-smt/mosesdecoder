@@ -123,11 +123,8 @@ size_t PhraseDictionaryTreeAdaptor::GetNumInputScores() const {
 	return imp->GetNumInputScores();
 }
 
-const std::string PhraseDictionaryTreeAdaptor::GetScoreProducerDescription(int idx) const
+std::string PhraseDictionaryTreeAdaptor::GetScoreProducerDescription() const
 {
-	if (idx)
-		return "Input score";
-	else
-		return "Translation score, file=" + m_filePath;
+	return "Translation score, file=" + m_filePath;
 }
 

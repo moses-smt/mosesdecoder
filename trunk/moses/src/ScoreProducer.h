@@ -40,7 +40,7 @@ public:
 	virtual size_t GetNumScoreComponents() const = 0;
 
 	//! returns a string description of this producer
-	virtual const std::string GetScoreProducerDescription(int idx = 0) const = 0;
+	virtual std::string GetScoreProducerDescription() const = 0;
 
 	//! returns the number of scores gathered from the input (0 by default)
 	virtual size_t GetNumInputScores() const { return 0; };
