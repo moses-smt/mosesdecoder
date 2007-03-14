@@ -26,7 +26,7 @@ LanguageModelMultiFactor::LanguageModelMultiFactor(bool registerScore, ScoreInde
 :LanguageModel(registerScore, scoreIndexManager)
 {}
 
-const std::string LanguageModelMultiFactor::GetScoreProducerDescription(int idx) const
+std::string LanguageModelMultiFactor::GetScoreProducerDescription() const
 {
 	std::ostringstream oss;
 	// what about LMs that are over multiple factors at once, POS + stem, for example?

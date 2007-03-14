@@ -50,7 +50,7 @@ void ScoreIndexManager::Debug_PrintLabeledWeightedScores(std::ostream& os, const
 		while (nis_idx < m_producers[cur_scoreType]->GetNumInputScores()){
       os << "  " << getFormat(scc.m_scores[cur_i]) << "\t" << getFormat(scc.m_scores[cur_i] * weights[cur_i]) << "\t  " << (cur_i < 10 ? " " : "") << cur_i << " ";
 			if (first) {
-				os << m_producers[cur_scoreType]->GetScoreProducerDescription(1)
+				os << m_producers[cur_scoreType]->GetScoreProducerDescription()
 				<< std::endl;
 				first = false;
 			} else {
@@ -87,7 +87,7 @@ std::ostream& operator<<(std::ostream& os, const ScoreIndexManager& sim)
 		while (nis_idx < sim.m_producers[cur_scoreType]->GetNumInputScores()){
 			os << "  " << (cur_i < 10 ? " " : "") << cur_i << " ";
 			if (first) {
-				os << sim.m_producers[cur_scoreType]->GetScoreProducerDescription(1)
+				os << sim.m_producers[cur_scoreType]->GetScoreProducerDescription()
 				   << std::endl;
 				first = false;
 			} else {

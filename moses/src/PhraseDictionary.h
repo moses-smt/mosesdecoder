@@ -53,7 +53,7 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
 	
 	//! Overriden by load on demand phrase tables classes to load data for each input
 	virtual void InitializeForInput(InputType const &/*source*/) {}
-	const std::string GetScoreProducerDescription(int idx = 0) const;
+	std::string GetScoreProducerDescription() const;
 	size_t GetNumScoreComponents() const;
 
 	/** set/change translation weights and recalc weighted score for each translation. 
