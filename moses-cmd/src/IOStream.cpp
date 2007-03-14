@@ -201,6 +201,10 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 	else
 	{
 		VERBOSE(1, "NO BEST TRANSLATION" << endl);
+		if (!m_surpressSingleBestOutput)
+		{
+			cout << endl;
+		}
 	}
 }
 
