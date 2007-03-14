@@ -134,7 +134,7 @@ my $SCORENBESTCMD = undef;
 my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
 my $old_sge = 0; # assume sge<6.0
-
+my $___CONFIG_BAK = undef; # backup pathname to startup ini file
 
 use strict;
 use Getopt::Long;
@@ -430,6 +430,8 @@ if ($___FILTER_PHRASE_TABLE){
     safesystem($cmd) or die "Failed to filter the tables.";
   }
 
+  # make a backup copy of startup ini file
+  $___CONFIG_BAK = $___CONFIG;
   # the decoder should now use the filtered model
   $___CONFIG = "filtered/moses.ini";
 }
@@ -626,7 +628,7 @@ print "Training finished at ".`date`;
 safesystem("cp init.opt run$run.init.opt") or die;
 safesystem ("cp cmert.log run$run.cmert.log") or die;
 
-create_config($___CONFIG, "./moses.ini", \%used_triples, $run, $devbleu);
+create_config($___CONFIG_BAK, "./moses.ini", \%used_triples, $run, $devbleu);
 
 # just to be sure that we have the really last finished step marked
 open F, "> finished_step.txt" or die "Can't mark finished step";
