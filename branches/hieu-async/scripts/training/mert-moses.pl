@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+
+# $Id$
 # Usage:
 # mert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
 # For other options see below or run 'mert-moses.pl --help'

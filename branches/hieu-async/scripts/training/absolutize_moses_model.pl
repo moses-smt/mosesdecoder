@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+
+# $Id$
 # given a moses.ini file, prints a copy to stdout but replaces all relative
 # paths with absolute paths.
 #

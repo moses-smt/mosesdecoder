@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+
+# $Id$
 # given a moses.ini file, checks the translation and generation tables and reports
 # statistics on ambiguity
 # Ondrej Bojar

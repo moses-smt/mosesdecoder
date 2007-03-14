@@ -1,3 +1,4 @@
+// $Id$
 // vim:tabstop=2
 
 #include <sstream>

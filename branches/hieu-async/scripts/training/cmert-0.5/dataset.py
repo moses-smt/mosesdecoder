@@ -1,5 +1,6 @@
 #!/usr/bin/python2.3
 
+# $Id$
 '''Decoder interface:
 
 Dataset.process() expects a function, which in turn takes a Sentence as input

@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+# $Id$
 #by Philipp Koehn, de-augmented by Evan Herbst
 #filter a phrase table for a specific input corpus
 #arguments: phrasetable_filename input_filename factor_index (0...)

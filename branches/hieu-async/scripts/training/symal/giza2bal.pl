@@ -1,5 +1,6 @@
 #! /usr/bin/perl
 
+# $Id$
 #Converts direct and inverted alignments into a more compact 
 #bi-alignment format. It optionally reads the counting file 
 #produced by giza containing the frequency of each traning sentence.

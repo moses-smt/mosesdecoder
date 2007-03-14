@@ -1,3 +1,4 @@
+// $Id$
 //#include "beammain.h"
 #include "tables-core.h"
 

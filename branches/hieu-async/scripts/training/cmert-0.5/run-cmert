@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# $Id$
+
 unset LANG
 export PATH=$PATH:/group/project/statmt/pkoehn/user/abhishek:/group/project/statmt/pkoehn/user/abhishek/cmert-0.5
 export EVAL=/group/project/statmt/pkoehn/user/abhishek/WST05/fr-en-train/dev

@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+
+# $Id$
 # given a moses.ini file, creates a wiseln of it and all the included bits
 # in the current directory
 
