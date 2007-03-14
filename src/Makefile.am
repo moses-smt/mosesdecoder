@@ -25,6 +25,9 @@ libmoses_a_SOURCES = \
 	LatticePath.cpp \
 	LatticePathCollection.cpp \
 	LexicalReordering.cpp \
+	LexicalReorderingTable.cpp \
+	PrefixTreeMap.cpp \
+	LVoc.cpp \
 	Manager.cpp \
 	md5.cpp \
 	mempool.cpp \
