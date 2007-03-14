@@ -255,9 +255,15 @@ bool Parameter::Validate()
 	if (noErrorFlag)
 		noErrorFlag = FilesExist("generation-file", 3);
 	// distortion
-	if (noErrorFlag)
-	  noErrorFlag = FilesExist("distortion-file", 3);
-
+	if (noErrorFlag){
+	  std::vector<std::string> ext;
+	  //raw tables in either un compressed or compressed form
+	  ext.push_back("");
+	  ext.push_back(".gz");
+	  //prefix tree format
+	  ext.push_back(".binlexr.idx");
+	  noErrorFlag = FilesExist("distortion-file", 3, ext);
+	}
 	return noErrorFlag;
 }
 
