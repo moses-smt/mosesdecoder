@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# $Id: consolidate-training-data.perl 40 2007-03-14 22:48:03Z hieu $
+
 function die() {
   echo "$@"
   exit 1

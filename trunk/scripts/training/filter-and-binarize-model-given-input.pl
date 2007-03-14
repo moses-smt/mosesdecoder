@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+
+# $Id$
 # Given a moses.ini file and an input text prepare minimized translation
 # tables and a new moses.ini, so that loading of tables is much faster.
 

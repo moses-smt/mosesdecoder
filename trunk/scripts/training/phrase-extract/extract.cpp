@@ -1,3 +1,4 @@
+// $Id$
 
 #include <cstdio>
 #include <iostream>

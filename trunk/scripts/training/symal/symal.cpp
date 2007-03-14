@@ -1,5 +1,7 @@
 using namespace std;
 
+// $Id$
+
 #include <cassert>
 #include <iomanip>
 #include <iostream>

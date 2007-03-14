@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+# $Id$
 #extract-factors.pl: extract only the desired factors from a factored corpus
 #usage: extract-factors corpusfile factor-index factor-index ... > outfile
 #factor indices start at 0

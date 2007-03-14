@@ -1,3 +1,4 @@
+// $Id$
 #ifndef SCORE_H
 #define SCORE_H
 

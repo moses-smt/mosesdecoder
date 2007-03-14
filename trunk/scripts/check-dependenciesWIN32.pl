@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+# $Id: consolidate-training-data.perl 40 2007-03-14 22:48:03Z hieu $
+
 my ($home, $target_dir, $release_dir, $bin_dir) = @ARGV;
 
 #print "HOME: $home\nTARGET_DIR: $target_dir\nRELEASE_DIR: $release_dir\n";

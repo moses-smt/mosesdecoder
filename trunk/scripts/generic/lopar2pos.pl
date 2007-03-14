@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+# $Id$
 #lopar2pos: extract POSs from LOPAR output
 #usage: lopar2pos.pl CORPUS.lopar > CORPUS.pos
 
