@@ -1,4 +1,4 @@
-// $Id: LanguageModelInternal.h 979 2006-11-16 10:43:40Z nicolabertoldi $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

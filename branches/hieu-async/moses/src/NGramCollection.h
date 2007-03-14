@@ -1,4 +1,4 @@
-// $Id: NGramCollection.h,v 1.2 2006/06/14 18:27:55 h.hoang Exp $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

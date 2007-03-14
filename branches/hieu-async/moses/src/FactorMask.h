@@ -1,4 +1,4 @@
-// $Id: FactorMask.h 1048 2006-12-06 20:33:16Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

@@ -1,4 +1,4 @@
-// $Id: SpanScore.cpp 1034 2006-12-01 22:10:23Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

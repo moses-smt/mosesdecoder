@@ -1,4 +1,4 @@
-// $Id: HypothesisStackCollection.h 1051 2006-12-06 22:23:52Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
