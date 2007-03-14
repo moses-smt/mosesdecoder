@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: consolidate-training-data.perl 40 2007-03-14 22:48:03Z hieu $
+# $Id$
 
 my ($home, $target_dir, $release_dir, $bin_dir) = @ARGV;
 
