@@ -63,7 +63,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	// this function can be only used for UNKNOWN source phrases
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 		
-	const std::string GetScoreProducerDescription(int idx = 0) const;
+	std::string GetScoreProducerDescription() const;
 	
 	size_t GetNumInputScores() const;
 	

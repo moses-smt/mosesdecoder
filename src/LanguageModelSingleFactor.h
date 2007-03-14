@@ -75,6 +75,6 @@ public:
 	{
 		m_weight = weight;
 	}
-	const std::string GetScoreProducerDescription(int idx = 0) const;
+	std::string GetScoreProducerDescription() const;
 };
 

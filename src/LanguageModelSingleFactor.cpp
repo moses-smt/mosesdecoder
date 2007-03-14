@@ -43,7 +43,7 @@ LanguageModelSingleFactor::LanguageModelSingleFactor(bool registerScore, ScoreIn
 LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
 
 
-const std::string LanguageModelSingleFactor::GetScoreProducerDescription(int idx) const
+std::string LanguageModelSingleFactor::GetScoreProducerDescription() const
 {
 	std::ostringstream oss;
 	// what about LMs that are over multiple factors at once, POS + stem, for example?

@@ -38,7 +38,7 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 	return GetTargetPhraseCollection(src.GetSubString(range));
 }
 
-const std::string PhraseDictionary::GetScoreProducerDescription(int idx) const
+std::string PhraseDictionary::GetScoreProducerDescription() const
 {
 	return "Translation score, file=" + m_filePath;
 }

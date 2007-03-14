@@ -14,7 +14,7 @@ size_t DistortionScoreProducer::GetNumScoreComponents() const
 	return 1;
 }
 
-const std::string DistortionScoreProducer::GetScoreProducerDescription(int idx) const
+std::string DistortionScoreProducer::GetScoreProducerDescription() const
 {
 	return "distortion score";
 }
@@ -42,7 +42,7 @@ size_t WordPenaltyProducer::GetNumScoreComponents() const
 	return 1;
 }
 
-const std::string WordPenaltyProducer::GetScoreProducerDescription(int idx) const
+std::string WordPenaltyProducer::GetScoreProducerDescription() const
 {
 	return "word penalty";
 }
@@ -57,7 +57,7 @@ size_t UnknownWordPenaltyProducer::GetNumScoreComponents() const
 	return 1;
 }
 
-const std::string UnknownWordPenaltyProducer::GetScoreProducerDescription(int idx) const
+std::string UnknownWordPenaltyProducer::GetScoreProducerDescription() const
 {
 	return "unknown word penalty";
 }
