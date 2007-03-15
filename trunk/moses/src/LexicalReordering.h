@@ -36,7 +36,7 @@ class LexicalReordering : public ScoreProducer {
   virtual ~LexicalReordering();
  public: //interface
   //inherited
-  virtual unsigned int GetNumScoreComponents() const {
+  virtual size_t GetNumScoreComponents() const {
     return m_NumScoreComponents; 
   };
   
@@ -58,7 +58,7 @@ class LexicalReordering : public ScoreProducer {
   Phrase auxGetContext(const Hypothesis* hypothesis) const;
  private:
   LexicalReorderingTable* m_Table;
-  int m_NumScoreComponents;
+  size_t m_NumScoreComponents;
   std::vector< Direction > m_Direction;
   std::vector< Condition > m_Condition;
   bool m_OneScorePerDirection;
