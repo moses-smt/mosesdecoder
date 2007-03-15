@@ -71,8 +71,8 @@ sub init(){
 	     'jobs=i'=>\$jobs,
 	     'decoder=s'=> \$mosescmd,
 	     'robust' => \$robust,
-       'decoder-parameters=s'=> \$mosesparameters,
-			 'logfile=s'=> \$orilogfile,
+             'decoder-parameters=s'=> \$mosesparameters,
+	     'logfile=s'=> \$orilogfile,
 	     'i|inputfile|input-file=s'=> \$orifile,
 	     'n-best-file=s'=> \$orinbestfile,
 	     'n-best-size=i'=> \$nbest,
@@ -120,20 +120,24 @@ sub usage(){
   print STDERR "*  -decoder <file> Moses decoder to use\n";
   print STDERR "*  -i|inputfile|input-file <file>   the input text to translate\n";
   print STDERR "*  -jobs <N> number of required jobs\n";
+  print STDERR "   -logfile <file> file where storing log files of all jobs\n";
   print STDERR "   -qsub-prefix <string> name for sumbitte jobs\n";
-	print STDERR "   -queue-parameters <string> specific requirements for queue\n";
-	print STDERR "   -old-sge Assume Sun Grid Engine < 6.0\n";
+  print STDERR "   -queue-parameters <string> specific requirements for queue\n";
+  print STDERR "   -old-sge Assume Sun Grid Engine < 6.0\n";
   print STDERR "   -debug debug\n";
   print STDERR "   -version print version of the script\n";
   print STDERR "   -help this help\n";
   print STDERR "Moses options:\n";
   print STDERR "   -inputtype <0|1> 0 for text, 1 for confusion networks\n";
+  print STDERR "   -n-best-file <file> file where storing nbet lists\n";
+  print STDERR "   -n-best-size <N> size of nbest lists\n";
+  print STDERR "    NOTE: -n-best-file-n-best-size    are passed to the decoder as \"-n-best-list <file> <N>\"\n";
   print STDERR "*  -config <cfgfile> configuration file\n";
   print STDERR "   -decoder-parameters <string> specific parameters for the decoder\n";
   print STDERR "All other options are passed to Moses\n";
   print STDERR "  (This way to pass parameters is maintained for back compatibility\n";
-	print STDERR "   but preferably use -decoder-parameters)\n";
-	exit(1);
+  print STDERR "   but preferably use -decoder-parameters)\n";
+  exit(1);
 }
 
 #printparameters
@@ -147,9 +151,12 @@ sub print_parameters(){
     print STDERR "Nbest size: $nbest\n";
   }
   print STDERR "Number of jobs:$jobs\n";
+  if ($logflag) {
+    print STDERR "LogFile:$orilogfile\n";
+  }
   print STDERR "Qsub name: $qsubname\n";
-	print STDERR "Queue parameters: $queueparameters\n";
-	print STDERR "Inputtype: text\n" if $inputtype == 0;
+  print STDERR "Queue parameters: $queueparameters\n";
+  print STDERR "Inputtype: text\n" if $inputtype == 0;
   print STDERR "Inputtype: confusion network\n" if $inputtype == 1;
   
   print STDERR "parameters directly passed to Moses: $mosesparameters\n";
@@ -272,7 +279,7 @@ else{ #confusion network input
 
   foreach my $idx (@idxlist){
     $cmd="perl -pe 's/ _CNendline_ /\\n/g;s/ _CNendline_/\\n/g;'";
-    safesystem("cat $tmpfile$idx | $cmd > ${testfile}.$splitpfx$idx ; rm $tmpfile$idx;");
+    safesystem("cat $tmpfile$idx | $cmd > ${testfile}.$splitpfx$idx ; \\rm -f $tmpfile$idx;");
   }
 }
 
@@ -327,7 +334,7 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
   my $checkpointfile = "${jobscript}.sync_workaround_checkpoint";
 
   # delete previous checkpoint, if left from previous runs
-  safesystem("rm -f $checkpointfile") or kill_all_and_quit();
+  safesystem("\\rm -f $checkpointfile") or kill_all_and_quit();
 
   # start the 'hold' job, i.e. the job that will wait
   $cmd="qsub -cwd $queueparameters $hj -o $checkpointfile -e /dev/null -N $qsubname.W $syncscript >& $qsubname.W.log";
@@ -341,7 +348,7 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
     print STDERR "w" if $nr % 3 == 0;
   }
   print STDERR "End of waiting.\n";
-  safesystem("rm -f $checkpointfile $syncscript") or kill_all_and_quit();
+  safesystem("\\rm -f $checkpointfile $syncscript") or kill_all_and_quit();
   
   my $failure = 1;
   my $nr = 0;
@@ -407,12 +414,12 @@ sub preparing_script(){
       print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest -input-file ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
       print OUT "echo exit status \$\?\n\n";
 
-      print OUT "mv $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
+      print OUT "\\mv -f $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }else{
       print OUT "$mosescmd $mosesparameters -input-file ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
     }
-    print OUT "mv $tmpdir/${testfile}.$splitpfx$idx.trans .\n\n";
+    print OUT "\\mv -f $tmpdir/${testfile}.$splitpfx$idx.trans .\n\n";
     print OUT "echo exit status \$\?\n\n";
     close(OUT);
 

@@ -99,20 +99,20 @@ sub preparing_script(){
   print OUT "echo exit status \$\?\n\n";
 
   if ($cmdout){
-    print OUT "mv $tmpdir/cmdout$$ $cmdout\n\n";
+    print OUT "\\mv -f $tmpdir/cmdout$$ $cmdout\n\n";
     print OUT "echo exit status \$\?\n\n";
   }
   else{
-    print OUT "rm $tmpdir/cmdout$$\n\n";
+    print OUT "\\rm -f $tmpdir/cmdout$$\n\n";
     print OUT "echo exit status \$\?\n\n";
   }
 
   if ($cmderr){
-    print OUT "mv $tmpdir/cmderr$$ $cmderr\n\n";
+    print OUT "\\mv -f $tmpdir/cmderr$$ $cmderr\n\n";
     print OUT "echo exit status \$\?\n\n";
   }
   else{
-    print OUT "rm $tmpdir/cmderr$$\n\n";
+    print OUT "\\rm -f $tmpdir/cmderr$$\n\n";
     print OUT "echo exit status \$\?\n\n";
   }
   close(OUT);
@@ -158,7 +158,7 @@ if ($old_sge) {
   my $checkpointfile = "${jobscript}.sync_workaround_checkpoint";
 
   # ensure checkpoint does not exist
-  safesystem("rm -f $checkpointfile") or die;
+  safesystem("\\rm -f $checkpointfile") or die;
 
   # start the 'hold' job, i.e. the job that will wait
   $cmd="qsub -cwd $queueparameters -hold_jid $id -o $checkpointfile -e /dev/null -N $qsubname.W $syncscript >& $qsubname.W.log";
@@ -171,7 +171,7 @@ if ($old_sge) {
     $nr++;
     print STDERR "w" if $nr % 3 == 0;
   }
-  safesystem("rm -f $checkpointfile $syncscript") or die();
+  safesystem("\\rm -f $checkpointfile $syncscript") or die();
   print STDERR "End of waiting workaround.\n";
 }
 

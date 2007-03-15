@@ -489,7 +489,7 @@ while(1) {
   }   
 
   # To be sure that scoring script produses these fresh:
-  safesystem("rm -f cands.opt feats.opt") or die;
+  safesystem("\\rm -f cands.opt feats.opt") or die;
   
   # convert n-best list into a numberized format with error scores
 
@@ -565,7 +565,7 @@ while(1) {
   close(OUT);
 
   # make a backup copy labelled with this run number
-  safesystem("cp init.opt run$run.init.opt") or die;
+  safesystem("\\cp -f init.opt run$run.init.opt") or die;
 
   my $DIM = scalar(@CURR); # number of lambdas
   $cmd="$cmertcmd -d $DIM";
@@ -579,8 +579,8 @@ while(1) {
   die "Optimization failed, file weights.txt does not exist or is empty"
     if ! -s "weights.txt";
   # backup copies
-  safesystem ("cp cmert.log run$run.cmert.log") or die;
-  safesystem ("cp weights.txt run$run.weights.txt") or die; # this one is needed for restarts, too
+  safesystem ("\\cp -f cmert.log run$run.cmert.log") or die;
+  safesystem ("\\cp -f weights.txt run$run.weights.txt") or die; # this one is needed for restarts, too
   print "run $run end at ".`date`;
 
   $bestpoint = undef;
@@ -627,8 +627,8 @@ while(1) {
 }
 print "Training finished at ".`date`;
 
-safesystem("cp init.opt run$run.init.opt") or die;
-safesystem ("cp cmert.log run$run.cmert.log") or die;
+safesystem("\\cp -f init.opt run$run.init.opt") or die;
+safesystem ("\\cp -f cmert.log run$run.cmert.log") or die;
 
 create_config($___CONFIG_BAK, "./moses.ini", \%used_triples, $run, $devbleu);
 
