@@ -547,7 +547,7 @@ void LexicalReorderingTableTree::auxCacheForSrcPhrase(const Phrase& f){
 	ObjectPool<PPimp>     pool;
 	PPimp* pPos  = m_Table.GetRoot();
 	//1) goto subtree for f
-	for(int i = 0; i < f.GetSize() && pPos->isValid() && 0 != pPos; ++i){
+	for(int i = 0; i < f.GetSize() && 0 != pPos && pPos->isValid(); ++i){
 	  /* old code
 	  pPos = m_Table.Extend(pPos, auxClearString(f.GetWord(i).ToString(m_FactorsF)), SourceVocId);
 	  */
