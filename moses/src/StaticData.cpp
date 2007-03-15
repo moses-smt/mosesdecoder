@@ -389,7 +389,7 @@ bool StaticData::LoadLexicalReorderingModel()
 	  //std::cerr << type;
       if("monotonicity" == type){
 		m_reorderModels.push_back(new LexicalMonotonicReordering(filePath, mweights, direction, condition, input, output));
-      } else if("orientation" == type){
+      } else if("orientation" == type || "msd" == type){
 		m_reorderModels.push_back(new LexicalOrientationReordering(filePath, mweights, direction, condition, input, output));
       } else if("directional" == type){
 		m_reorderModels.push_back(new LexicalDirectionalReordering(filePath, mweights, direction, condition, input, output));
