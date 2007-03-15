@@ -494,7 +494,7 @@ while(1) {
   # convert n-best list into a numberized format with error scores
 
   print STDERR "Scoring the nbestlist.\n";
-  my $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
+  my $cmd = "setenv PYTHONPATH $pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=scorenbest.out -stderr=scorenbest.err") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
   } else {
