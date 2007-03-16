@@ -135,7 +135,7 @@ preparing_script();
 my $maysync = $old_sge ? "" : "-sync y";
 
 # submit the main job
-my $qsubcmd="qsub $queueparameters $maysync -o $qsubout -e $qsuberr -N $qsubname ${jobscript}.csh >& ${jobscript}.log";
+my $qsubcmd="qsub $queueparameters $maysync -V -o $qsubout -e $qsuberr -N $qsubname ${jobscript}.csh >& ${jobscript}.log";
 safesystem($qsubcmd) or die;
 
 #getting id of submitted job
