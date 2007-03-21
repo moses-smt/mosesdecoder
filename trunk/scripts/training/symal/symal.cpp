@@ -150,7 +150,10 @@ int printersect(fstream& out,int m,int *a,int n,int* b){
   
   //fix the last " "
   string str = sout.str();
-  str.replace(str.length()-1,1,"\n");
+  if (str.length() == 0)
+    str = "\n";
+  else
+    str.replace(str.length()-1,1,"\n");
 
   out << str;
          out.flush();
