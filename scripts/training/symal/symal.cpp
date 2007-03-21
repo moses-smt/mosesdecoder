@@ -131,6 +131,7 @@ int prunionalignment(fstream& out,int m,int *a,int n,int* b){
   str.replace(str.length()-1,1,"\n");
 
   out << str;
+         out.flush();
  
 	return 1;
 }
@@ -152,6 +153,7 @@ int printersect(fstream& out,int m,int *a,int n,int* b){
   str.replace(str.length()-1,1,"\n");
 
   out << str;
+         out.flush();
 
 	return 1;
 }
@@ -374,17 +376,26 @@ int bothuncovered=false;
   ea=new int[MAX_N+1];
  
       
+  int sents = 0;
   A=new int *[MAX_N+1]; 
   for (int i=1;i<=MAX_N;i++) A[i]=new int[MAX_M+1];
       
 	switch (alignment){
 		case UNION:
          cerr << "symal: computing union alignment\n";
-			while(getals(inp,m,a,n,b)) prunionalignment(out,m,a,n,b);
+			while(getals(inp,m,a,n,b)) {
+                          prunionalignment(out,m,a,n,b);
+                          sents++;
+                        }
+                        cerr << "Sents: " << sents << endl;
 			break;
 		case INTERSECT:
           cerr << "symal: computing intersect alignment\n";
-			while(getals(inp,m,a,n,b)) printersect(out,m,a,n,b);
+			while(getals(inp,m,a,n,b)) {
+                          printersect(out,m,a,n,b);
+                          sents++;
+                        }
+                        cerr << "Sents: " << sents << endl;
 			break;
       case GROW:
      cerr << "symal: computing grow alignment: diagonal ("
