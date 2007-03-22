@@ -1,7 +1,5 @@
 #!/usr/bin/perl -w
 
-# $Id$
-
 use strict;
 use Getopt::Long "GetOptions";
 
@@ -263,8 +261,8 @@ die("format for generation factors is \"0-1\" or \"0-1+0-2\" or \"0-1+0,1-1,2\",
 
 my $___DECODING_STEPS = "t0";
 $___DECODING_STEPS = $_DECODING_STEPS if defined($_DECODING_STEPS);
-die("format for decoding steps is \"t0,g0,t1,g1\", you provided $___DECODING_STEPS\n") 
-  if defined $_DECODING_STEPS && $_DECODING_STEPS !~ /^[tg]\d+(,[tg]\d+)*$/;
+die("format for decoding steps is \"t0,g0,t1,g1:t2\", you provided $___DECODING_STEPS\n") 
+  if defined $_DECODING_STEPS && $_DECODING_STEPS !~ /^[tg]\d+(,[tg]\d+)*(:[tg]\d+(,[tg]\d+)*)*$/;
 
 my ($factor,$factor_e,$factor_f);
 
@@ -1346,12 +1344,16 @@ sub create_ini {
     my %stepsused;
     print INI "\n# mapping steps
 [mapping]\n";
-   foreach (split(/,/,$___DECODING_STEPS)) {
-     s/t/T /g; 
-     s/g/G /g;
-     my ($type, $num) = split /\s+/;
-     $stepsused{$type} = $num+1 if !defined $stepsused{$type} || $stepsused{$type} < $num+1;
-     print INI $_."\n";
+   my $steplist = 0;
+   foreach my $list (split(/:/,$___DECODING_STEPS)) {
+     foreach (split(/,/,$list)) {
+       s/t/T /g; 
+       s/g/G /g;
+       my ($type, $num) = split /\s+/;
+       $stepsused{$type} = $num+1 if !defined $stepsused{$type} || $stepsused{$type} < $num+1;
+       print INI $steplist," ",$_,"\n";
+     }
+     $steplist++;
    }
    print INI "\n# translation tables: source-factors, target-factors, number of scores, file 
 [ttable-file]\n";
