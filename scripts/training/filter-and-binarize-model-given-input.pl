@@ -60,7 +60,7 @@ while(<INI>) {
     if (/ttable-file\]/) {
         while(1) {	       
     	my $table_spec = <INI>;
-    	if ($table_spec !~ /^([\d\,\-]+) ([\d\-]+) (\d+) (\S+)$/) {
+    	if ($table_spec !~ /^([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)$/) {
     	    print INI_OUT $table_spec;
     	    last;
     	}
