@@ -40,6 +40,9 @@ my $qsuberr="$workingdir/err.job$$";
 
 
 my $mosesparameters="";
+my $feed_moses_via_stdin = 0;
+      # a workaround, for a reason, the default "-input-file X" blocks
+      # my moses, while "< X" works fine.
 my $cfgfile=""; #configuration file
 
 my $version=undef;
@@ -72,6 +75,7 @@ sub init(){
 	     'decoder=s'=> \$mosescmd,
 	     'robust' => \$robust,
              'decoder-parameters=s'=> \$mosesparameters,
+             'feed-decoder-via-stdin'=> \$feed_moses_via_stdin,
 	     'logfile=s'=> \$orilogfile,
 	     'i|inputfile|input-file=s'=> \$orifile,
 	     'n-best-file=s'=> \$orinbestfile,
@@ -303,9 +307,16 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
 
  my $failure=0;
  foreach my $idx (@idx_todo){
-  print STDERR "qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash\n" if $dbg; 
 
-  $cmd="qsub $queueparameters -b no -j yes -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
+  my $batch_and_join = undef;
+  if ($old_sge) {
+    # old SGE understands -b no as the default and does not understand 'yes'
+    $batch_and_join = "-j y";
+  } else {
+    $batch_and_join = "-b no -j yes";
+  }
+  $cmd="qsub $queueparameters $batch_and_join -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
+  print STDERR "$cmd\n" if $dbg; 
 
   safesystem($cmd) or die;
 
@@ -410,14 +421,15 @@ sub preparing_script(){
 
     open (OUT, "> ${jobscript}${idx}.bash");
     print OUT $scriptheader;
+    my $inputmethod = $feed_moses_via_stdin ? "<" : "-input-file";
     if ($nbestflag){
-      print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest -input-file ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
+      print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest $inputmethod ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
       print OUT "echo exit status \$\?\n\n";
 
       print OUT "\\mv -f $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }else{
-      print OUT "$mosescmd $mosesparameters -input-file ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
+      print OUT "$mosescmd $mosesparameters $inputmethod ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
     }
     print OUT "\\mv -f $tmpdir/${testfile}.$splitpfx$idx.trans .\n\n";
     print OUT "echo exit status \$\?\n\n";
