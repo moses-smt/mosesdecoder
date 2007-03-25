@@ -68,6 +68,8 @@ sub ensure_absolute {
   my $originfile = shift;
 
   my $cwd = `pawd`;
+  $cwd = `pwd` if ! defined $cwd; # not everyone has pawd!
+  die "Failed to absolutize $target. Failing to get cwd!" if ! defined $cwd;
   chomp $cwd;
   $cwd.="/";
 
