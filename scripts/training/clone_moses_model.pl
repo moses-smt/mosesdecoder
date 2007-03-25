@@ -37,10 +37,10 @@ while (<INI>) {
       chomp;
       my ($a, $b, $c, $fn) = split / /;
       $cnt{$section}++;
-      my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       $fn = fixpath($fn);
       $fn = ensure_relative_to_origin($fn, $ini);
-      -e $fn || die "File $fn not found";
+      $fn = ensure_exists_or_gzipped_exists($fn);
+      my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
       $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
     }
@@ -48,9 +48,9 @@ while (<INI>) {
       chomp;
       my ($a, $b, $c, $fn) = split / /;
       $cnt{$section}++;
-      my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       $fn = fixpath($fn);
-      -e $fn || die "File $fn not found";
+      $fn = ensure_exists_or_gzipped_exists($fn);
+      my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
       $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
     }
@@ -58,10 +58,10 @@ while (<INI>) {
       chomp;
       my $fn = $_;
       $cnt{$section}++;
-      my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       $fn = fixpath($fn);
       $fn = ensure_relative_to_origin($fn, $ini);
-      -e $fn || die "File $fn not found";
+      $fn = ensure_exists_or_gzipped_exists($fn);
+      my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
       $_ = "./$section.$cnt{$section}$suffix\n";
     }
@@ -71,6 +71,13 @@ while (<INI>) {
 close INI;
 close OUT;
 
+sub ensure_exists_or_gzipped_exists {
+  my $fn = shift;
+  return $fn if -e $fn;
+  my $tryfn = $fn.".gz";
+  return $tryfn if -e $tryfn;
+  die "$0:$ini:Neither file $fn nor $tryfn found.";
+}
 
 sub fixpath {
   my $fn = shift;
