@@ -6,17 +6,25 @@ use Getopt::Long "GetOptions";
 
 my ($SRC,$INFILE,$RECASE_MODEL);
 my $MOSES = "moses";
+my $LANGUAGE = "en"; # English by default;
 die("recase.perl --in file --model ini-file > out")
     unless &GetOptions('in=s' => \$INFILE,
                        'headline=s' => \$SRC,
+                       'lang=s' => \$LANGUAGE,
 		       'moses=s' => \$MOSES,
                        'model=s' => \$RECASE_MODEL)
     && defined($INFILE)
     && defined($RECASE_MODEL);
 
+my %treated_languages = map { ($_,1) } qw/en cs/;
+die "I don't know any rules for $LANGUAGE. Use 'en' as the default."
+  if ! defined $treated_languages{$LANGUAGE};
+
 # lowercase even in headline
 my %ALWAYS_LOWER;
-foreach ("a","after","against","al-.+","and","any","as","at","be","because","between","by","during","el-.+","for","from","his","in","is","its","last","not","of","off","on","than","the","their","this","to","was","were","which","will","with") { $ALWAYS_LOWER{$_} = 1; }
+if ($LANGUAGE eq "en" ) {
+  foreach ("a","after","against","al-.+","and","any","as","at","be","because","between","by","during","el-.+","for","from","his","in","is","its","last","not","of","off","on","than","the","their","this","to","was","were","which","will","with") { $ALWAYS_LOWER{$_} = 1; }
+}
 
 # find out about the headlines
 my @HEADLINE;
@@ -32,10 +40,13 @@ if (defined($SRC)) {
     close(SRC);
 }
 
+binmode(STDOUT, ":utf8");
+
 my $sentence = 0;
 my $infile = $INFILE;
 $infile =~ s/[\.\/]/_/g;
 open(MODEL,"$MOSES -f $RECASE_MODEL -i $INFILE -dl 1|");
+binmode(MODEL, ":utf8");
 while(<MODEL>) {
     chomp;
     s/\s+$//;
@@ -44,11 +55,14 @@ while(<MODEL>) {
     # uppercase initial word
     &uppercase(\$WORD[0]);
 
-    # uppercase after period
-    for(my $i=1;$i<scalar(@WORD);$i++) {
-	if ($WORD[$i-1] eq '.') {
-	    &uppercase(\$WORD[$i]);
-	}
+    if ($LANGUAGE ne "cs") {
+      # uppercase after period
+      # unless in Czech where '.' is used after all ordinals
+      for(my $i=1;$i<scalar(@WORD);$i++) {
+	  if ($WORD[$i-1] eq '.') {
+	      &uppercase(\$WORD[$i]);
+	  }
+      }
     }
 
     # uppercase headlines {
@@ -74,6 +88,5 @@ close(MODEL);
 
 sub uppercase {
     my ($W) = @_;
-    substr($$W,0,1) =~ tr/a-z/A-Z/;
-    substr($$W,0,1) =~ tr/à-þ/À-Þ/;
+    $$W = ucfirst($$W); # rely on Perl's Unicode knowledge, never use tr//
 }
