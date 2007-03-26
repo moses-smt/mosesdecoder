@@ -137,6 +137,8 @@ my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
 my $old_sge = 0; # assume sge<6.0
 my $___CONFIG_BAK = undef; # backup pathname to startup ini file
+my $obo_scorenbest = undef; # set to pathname to a Ondrej Bojar's scorer (not included
+                            # in scripts distribution)
 
 use strict;
 use Getopt::Long;
@@ -170,6 +172,7 @@ GetOptions(
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
   "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
+  "obo-scorenbest=s" => \$obo_scorenbest, # see above
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -268,6 +271,12 @@ die "Not executable: $moses_parallel_cmd" if defined $___JOBS && ! -x $moses_par
 die "Not executable: $qsubwrapper" if defined $___JOBS && ! -x $qsubwrapper;
 die "Not a dir: $pythonpath" if ! -d $pythonpath;
 die "Not executable: $___DECODER" if ! -x $___DECODER;
+
+if (defined $obo_scorenbest) {
+  die "Not executable: $obo_scorenbest" if ! -x $___DECODER;
+  die "Ondrej's scorenbest supports only closest ref length"
+    if $___AVERAGE;
+}
 
 my $input_abs = ensure_full_path($___DEV_F);
 die "File not found: $___DEV_F (interpreted as $input_abs)."
@@ -448,7 +457,7 @@ $PARAMETERS = $___DECODER_FLAGS . " -config $___CONFIG -inputtype $___INPUTTYPE"
 my $devbleu = undef;
 my $bestpoint = undef;
 my $run=$start_run-1;
-my $prev_size = -1;
+my $prev_aggregate_nbl_size = -1;
 while(1) {
   $run++;
   # run beamdecoder with option to output nbestlists
@@ -494,34 +503,69 @@ while(1) {
   # convert n-best list into a numberized format with error scores
 
   print STDERR "Scoring the nbestlist.\n";
-  my $cmd = "gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
-  if (defined $___JOBS) {
-    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=scorenbest.out -stderr=scorenbest.err") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
+
+  my $aggregate_nbl_size=0;
+  if (defined $obo_scorenbest) {
+    # Faster scoring method, never rescore previous iterations
+    my $cmd = "zcat run$run.best*.out.gz | $obo_scorenbest ".join(" ", @references);
+    my $targetfile = "run$run.feats";
+    if (defined $___JOBS) {
+      safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=$targetfile -stderr=run$run.scorenbest.err")
+        or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
+    } else {
+      safesystem("$cmd > $targetfile") or die "Failed to score nbestlist";
+    }
+    print STDERR "Combining all run*.feats\n";
+    my $cmd = "sort -n -t: -k1,1 run*.feats | cut -d: -f2- > feats.opt";
+    safesystem($cmd) or die "Failed to create feats.opt";
+
+    print STDERR "Creating cands.opt\n";
+    open C, "cut -d: -f1 run*.feats | uniq -c |" or die "Failed to load counts from run*.feats";
+    my @cnts = ();
+    while (<C>) {
+      chomp;
+      s/^\s+//; s/\s+$//;
+      my ($cnt, $sent) = split /\s+/;
+      $aggregate_nbl_size += $cnt;
+      $cnts[$sent]+=$cnt;
+    }
+    close C;
+    print STDERR "Total candidates: $aggregate_nbl_size  in ".(scalar @cnts)." sentences\n";
+    die "Lost all candidates!" if $aggregate_nbl_size == 0;
+    open C, ">cands.opt" or die "Failed to create  cands.opt";
+    for (my $i=0; $i<@cnts; $i++) {
+      print C "$i $cnts[$i]\n";
+    }
+    close C;
+  
   } else {
-    safesystem($cmd) or die "Failed to score nbestlist";
+    # traditional scoring code
+    my $cmd = "gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
+    if (defined $___JOBS) {
+      safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=scorenbest.out -stderr=scorenbest.err") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
+    } else {
+      safesystem($cmd) or die "Failed to score nbestlist";
+    }
+
+    print STDERR "Hoping that scoring succeeded. We'll see if we can read the output files now.\n";
+
+    # keep a count of lines in nbests lists (alltogether)
+    # if it did not increase since last iteration, we are DONE
+    open(IN,"cands.opt") or die "Can't read cands.opt";
+    while (<IN>) {
+      chomp;
+      my @flds = split / /;
+      $aggregate_nbl_size += $flds[1];
+    }
+    close(IN);
   }
-
-
-  print STDERR "Hoping that scoring succeeded. We'll see if we can read the output files now.\n";
-
-
-  # keep a count of lines in nbests lists (alltogether)
-  # if it did not increase since last iteration, we are DONE
-  open(IN,"cands.opt") or die "Can't read cands.opt";
-  my $size=0;
-  while (<IN>) {
-    chomp;
-    my @flds = split / /;
-    $size += $flds[1];
-  }
-  close(IN);
-  print "$size accumulated translations\n";
-  print "prev accumulated translations was : $prev_size\n";
-  if ($size <= $prev_size){
+  print "$aggregate_nbl_size accumulated translations\n";
+  print "prev accumulated translations was : $prev_aggregate_nbl_size\n";
+  if ($aggregate_nbl_size <= $prev_aggregate_nbl_size){
      print STDERR "No new hypotheses in nbest list. Stopping.\n";
      last;
   }
-  $prev_size = $size;
+  $prev_aggregate_nbl_size = $aggregate_nbl_size;
 
 
   # run cmert
@@ -568,7 +612,7 @@ while(1) {
   safesystem("\\cp -f init.opt run$run.init.opt") or die;
 
   my $DIM = scalar(@CURR); # number of lambdas
-  $cmd="$cmertcmd -d $DIM";
+  my $cmd="$cmertcmd -d $DIM";
  
   print STDERR "Starting cmert.\n";
   if (defined $___JOBS) {
