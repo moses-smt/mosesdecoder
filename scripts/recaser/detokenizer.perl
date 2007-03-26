@@ -22,8 +22,12 @@ if ($HELP) {
 	print "Usage ./detokenizer.perl (-l [en|de|...]) < tokenizedfile > detokenizedfile\n";
 	exit;
 }
+
+die "No built-in rules for language $language, claim en for default behaviour."
+	if $language !~ /^(cs|en|fr)$/;
+
 if (!$QUIET) {
-	print STDERR "Detokenizer Version 1.0\n";
+	print STDERR "Detokenizer Version ".'$Revision$'."\n";
 	print STDERR "Language: $language\n";
 }
 
@@ -61,9 +65,18 @@ sub detokenize {
 			#left-shift the contraction for English
 			$text=$text.$words[$i];
 			$prependSpace = " ";
-		}  elsif (($language eq "fr") && ($i<(scalar(@words)-2)) && ($words[$i] =~ /[\p{IsAlpha}][\']$/) && ($words[$i+1] =~ /^[\p{IsAlpha}]/)) {
+		} elsif (($language eq "fr") && ($i<(scalar(@words)-2)) && ($words[$i] =~ /[\p{IsAlpha}][\']$/) && ($words[$i+1] =~ /^[\p{IsAlpha}]/)) {
 			#right-shift the contraction for French
 			$text = $text.$prependSpace.$words[$i];
+			$prependSpace = "";
+		} elsif (($language eq "cs") && ($i<(scalar(@words)-3))
+				&& ($words[$i] =~ /[\p{IsAlpha}]$/)
+				&& ($words[$i+1] =~ /^[-–]$/)
+				&& ($words[$i+2] =~ /^li$/i)
+				) {
+			#right-shift "-li" in Czech
+			$text = $text.$prependSpace.$words[$i].$words[$i+1];
+			$i++; # advance over the dash
 			$prependSpace = "";
 		} elsif ($words[$i] =~ /^[\'\"]+$/) {
 			#combine punctuation smartly
