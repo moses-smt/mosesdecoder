@@ -54,9 +54,12 @@ sub train_lm {
 sub prepare_data {
     print STDERR "\n(3) Preparing data for training recasing model @ ".`date`;
     open(CORPUS,$CORPUS);
+    binmode(CORPUS, ":utf8");
     open(CASED,">$DIR/aligned.cased");
+    binmode(CASED, ":utf8");
     print "$DIR/aligned.lowercased\n";
     open(LOWERCASED,">$DIR/aligned.lowercased");
+    binmode(LOWERCASED, ":utf8");
     open(ALIGNMENT,">$DIR/aligned.a");
     while(<CORPUS>) {
 	next if length($_)>2000;
