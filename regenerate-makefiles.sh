@@ -5,12 +5,28 @@ function die () {
   exit 1
 }
 
-echo "Calling aclocal..."
-aclocal || die "aclocal failed"
-echo "Calling autoconf..."
-autoconf || die "autoconf failed"
-echo "Calling automake..."
-automake || die "automake failed"
+if [ -z "$ACLOCAL" ]
+then
+    ACLOCAL=`which aclocal`
+fi
+
+if [ -z "$AUTOMAKE" ]
+then
+    AUTOMAKE=`which automake`
+fi
+
+if [ -z "$AUTOCONF" ]
+then
+    AUTOCONF=`which autoconf`
+fi
+
+
+echo "Calling $ACLOCAL..."
+$ACLOCAL || die "aclocal failed"
+echo "Calling $AUTOCONF..."
+$AUTOCONF || die "autoconf failed"
+echo "Calling $AUTOMAKE..."
+$AUTOMAKE || die "automake failed"
 
 echo
 echo "You should now be able to configure and build:"
