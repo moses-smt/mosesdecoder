@@ -45,7 +45,7 @@ binmode(STDOUT, ":utf8");
 my $sentence = 0;
 my $infile = $INFILE;
 $infile =~ s/[\.\/]/_/g;
-open(MODEL,"$MOSES -f $RECASE_MODEL -i $INFILE -dl 1|");
+open(MODEL,"$MOSES -v 0 -f $RECASE_MODEL -i $INFILE -dl 1|");
 binmode(MODEL, ":utf8");
 while(<MODEL>) {
     chomp;
