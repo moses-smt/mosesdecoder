@@ -173,8 +173,8 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
     if ($BINARIZABLE{$i}) {
 	print STDERR "binarizing...";
-	my $cmd = "cat $new_file | sort | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
-	print STDERR $cmd."\n";
+	my $cmd = "cat $new_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+       	print STDERR $cmd."\n";
 	print STDERR `$cmd`;
     }
 }
