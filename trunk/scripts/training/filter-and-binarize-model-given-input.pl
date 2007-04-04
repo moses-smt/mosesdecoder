@@ -55,6 +55,7 @@ safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
 my (@TABLE,@TABLE_WEIGHTS,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%BINARIZABLE);
 open(INI_OUT,">$dir/moses.ini") or die "Can't write $dir/moses.ini";
 open(INI,$config) or die "Can't read $config";
+my $ttable_iterator = 0;
 while(<INI>) {
     print INI_OUT $_;
     if (/ttable-file\]/) {
@@ -71,13 +72,14 @@ while(<INI>) {
 	push @TABLE_WEIGHTS,$weights;
 	$BINARIZABLE{$#TABLE}++;
 
-    	my $new_name = "$dir/phrase-table.$source_factor-$t";
+    	my $new_name = "$dir/phrase-table.$source_factor-$t-$ttable_iterator";
     	print INI_OUT "$source_factor $t $weights $new_name\n";
     	push @TABLE_NEW_NAME,$new_name;
 
     	$CONSIDER_FACTORS{$source_factor} = 1;
         print STDERR "Considering factor $source_factor\n";
     	push @TABLE_FACTORS, $source_factor;
+	$ttable_iterator++;
         }
     }
     elsif (/distortion-file/) {
@@ -174,7 +176,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     if ($BINARIZABLE{$i}) {
 	print STDERR "binarizing...";
 	my $cmd = "cat $new_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
-       	print STDERR $cmd."\n";
+        print STDERR $cmd."\n";
 	print STDERR `$cmd`;
     }
 }
