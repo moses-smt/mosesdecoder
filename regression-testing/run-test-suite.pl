@@ -17,6 +17,7 @@ my @tests = qw (
   basic-surface-binptable
   multi-factor-binptable
   nbest-multi-factor
+  lexicalized-reordering
 );
 ############################################################
 
