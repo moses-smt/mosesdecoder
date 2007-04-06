@@ -149,7 +149,7 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 }
 
 void TranslationOption::CacheReorderingProb(const LexicalReordering &lexreordering
-												, const Score &score) const
+												, const Score &score)
 {
 	m_reordering.Assign(&lexreordering, score);
 }

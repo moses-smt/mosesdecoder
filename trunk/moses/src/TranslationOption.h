@@ -68,7 +68,7 @@ protected:
 	//! TargetPhrase may be shorter than the n-gram order.  But, if it is
 	//! possible to estimate, it is included here.
 	ScoreComponentCollection	m_scoreBreakdown;
-	mutable ScoreComponentCollection	m_reordering;
+	ScoreComponentCollection	m_reordering;
 
 public:
 	/** constructor. Used by initial translation step */
@@ -160,7 +160,7 @@ public:
 	void CalcScore();
 
 	void CacheReorderingProb(const LexicalReordering &lexreordering
-													, const Score &score) const;
+													, const Score &score);
 
 	TO_STRING();
 };
