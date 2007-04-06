@@ -41,9 +41,9 @@ standard locations: $test_script_root, /tmp, or /var/tmp with these
 commands:
 
   cd <DESIRED_INSTALLATION_DIRECTORY>
-  wget http://www.statmt.org/moses/reg-testing/moses-regression-tests-v$data_version.tar
-  tar xf moses-regression-tests-v$data_version.tar
-  rm moses-regression-tests-v$data_version.tar
+  wget http://www.statmt.org/moses/reg-testing/moses-reg-test-data-$data_version.tgz
+  tar xzf moses-reg-test-data-$data_version.tgz
+  rm moses-reg-test-data-$data_version.tgz
 
 EOT
 	exit 1;
