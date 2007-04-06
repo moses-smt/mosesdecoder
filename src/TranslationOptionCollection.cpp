@@ -204,12 +204,12 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 
 		targetPhrase.SetScore();
 		
-		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
+		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, m_source, 0);
 	}
 	else 
 	{ // drop source word. create blank trans opt
 		const TargetPhrase targetPhrase(Output);
-		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, 0);
+		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, m_source, 0);
 	}
 
 	transOpt->CalcScore();
@@ -330,6 +330,9 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <list <c
 
 	// future score matrix
 	CalcFutureScore();
+
+	// Cached lex reodering costs
+	CacheLexReordering();
 }
 
 /** create translation options that exactly cover a specific input span. 
@@ -426,7 +429,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 		for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase)
 		{
 			const TargetPhrase	&targetPhrase = **iterTargetPhrase;
-			outputPartialTranslOptColl.Add ( new TranslationOption(wordsRange, targetPhrase) );
+			outputPartialTranslOptColl.Add ( new TranslationOption(wordsRange, targetPhrase, m_source) );
 			
 			VERBOSE(3,"\t" << targetPhrase << "\n");
 		}
@@ -467,4 +470,38 @@ inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollec
 	//}
 
 	return out;
+}
+
+void TranslationOptionCollection::CacheLexReordering()
+{
+	const std::vector<LexicalReordering*> &lexReorderingModels = StaticData::Instance().GetReorderModels();
+
+	std::vector<LexicalReordering*>::const_iterator iterLexreordering;
+
+	for (iterLexreordering = lexReorderingModels.begin() ; iterLexreordering != lexReorderingModels.end() ; ++iterLexreordering)
+	{
+		LexicalReordering &lexreordering = **iterLexreordering;
+
+		for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
+		{
+			for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
+			{
+				TranslationOptionList &transOptList = GetTranslationOptionList( startPos, endPos);				
+				TranslationOptionList::iterator iterTransOpt;
+				for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) 
+				{
+					const TranslationOption &transOpt = **iterTransOpt;
+					const Phrase *sourcePhrase = transOpt.GetSourcePhrase();
+					if (sourcePhrase)
+					{
+						Score score = lexreordering.GetProb(*sourcePhrase
+																							, transOpt.GetTargetPhrase());
+						// TODO should have better handling of unknown reordering entries
+						if (!score.empty())
+							transOpt.CacheReorderingProb(lexreordering, score);
+					}
+				}
+			}
+		}
+	}
 }

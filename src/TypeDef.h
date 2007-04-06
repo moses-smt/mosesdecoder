@@ -123,6 +123,13 @@ enum LMImplementation
 	,Internal	= 4
 };
 
+
+enum InputTypeEnum
+{
+	SentenceInput						= 0
+	,ConfusionNetworkInput	= 1
+};
+
 enum DictionaryFind
 {	
 	Best

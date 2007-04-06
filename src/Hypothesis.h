@@ -76,6 +76,7 @@ protected:
 	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /**< relevant history for language model scoring -- used for recombination */
 	const Hypothesis 	*m_winningHypo;
 	ArcList 					*m_arcList; /**< all arcs that end at the same lattice point as this hypothesis */
+	const TranslationOption *m_transOpt;
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
@@ -253,6 +254,9 @@ public:
 	{
 		return s_HypothesesCreated;
 	}
+
+	const ScoreComponentCollection &GetCachedReorderingScore() const;
+
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

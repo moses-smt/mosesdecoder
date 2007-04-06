@@ -28,6 +28,9 @@ class ConfusionNet : public InputType {
 
 	ConfusionNet(Sentence const& s);
 	
+	InputTypeEnum GetType() const
+	{	return ConfusionNetworkInput;}
+
 	const Column& GetColumn(size_t i) const {assert(i<data.size());return data[i];}
 	const Column& operator[](size_t i) const {return GetColumn(i);}
 

@@ -46,6 +46,7 @@ unsigned int Hypothesis::s_HypothesesCreated = 0;
 
 Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)
+	, m_transOpt(NULL)
 	, m_targetPhrase(emptyTarget)
 	, m_sourcePhrase(0)
 	, m_sourceCompleted(source.GetSize())
@@ -69,6 +70,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
  */
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: m_prevHypo(&prevHypo)
+	, m_transOpt(&transOpt)
 	, m_targetPhrase(transOpt.GetTargetPhrase())
 	, m_sourcePhrase(0)
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
@@ -506,4 +508,10 @@ std::string Hypothesis::GetTargetPhraseStringRep() const
 		allFactors.push_back(i);
 	}
 	return GetTargetPhraseStringRep(allFactors);
+}
+
+
+const ScoreComponentCollection &Hypothesis::GetCachedReorderingScore() const
+{
+	return m_transOpt->GetReorderingScore();
 }

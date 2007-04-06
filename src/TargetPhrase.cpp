@@ -84,7 +84,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
 {
 	// calling this function in case of confusion net input is undefined
-	assert(StaticData::Instance().GetInputType()==0); 
+	assert(StaticData::Instance().GetInputType()==SentenceInput); 
 	
 	/* one way to fix this, you have to make sure the weightT contains (in 
      addition to the usual phrase translation scaling factors) the input 
