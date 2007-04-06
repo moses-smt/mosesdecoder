@@ -38,7 +38,7 @@ class LMList;
 class FactorMask;
 class Word;
 
-typedef std::vector<const TranslationOption*> TranslationOptionList;
+typedef std::vector<TranslationOption*> TranslationOptionList;
 
 /** Contains all phrase translations applicable to current input type (a sentence or confusion network).
  * A key insight into efficient decoding is that various input
@@ -89,7 +89,7 @@ protected:
 	{
 	  return m_collection[startPos][endPos - startPos];
 	}
-	void Add(const TranslationOption *translationOption);
+	void Add(TranslationOption *translationOption);
 
 	//! implemented by inherited class, called by this class
 	virtual void ProcessUnknownWord(size_t sourcePos)=0;
