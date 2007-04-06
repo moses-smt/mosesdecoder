@@ -48,7 +48,7 @@ if (!-d $results_dir) {
 ##########
 
 my $conf = "$test_dir/moses.ini";
-my $input = "$test_dir/to-translate";
+my $input = "$test_dir/to-translate.txt";
 
 die "Cannot locate executable called $decoder\n" unless (-x $decoder);
 die "Cannot find $conf\n" unless (-f $conf);
@@ -85,17 +85,17 @@ if ($error) {
   exit 3;
 }
 
-($o, $ec, $sig) = run_command("$test_dir/filter-stdout.pl $results/run.stdout > $results/results.dat");
+($o, $ec, $sig) = run_command("$test_dir/filter-stdout.pl $results/run.stdout > $results/results.txt");
 warn "filter-stdout failed!" if ($ec > 0 || $sig);
-($o, $ec, $sig) = run_command("$test_dir/filter-stderr.pl $results/run.stderr >> $results/results.dat");
+($o, $ec, $sig) = run_command("$test_dir/filter-stderr.pl $results/run.stderr >> $results/results.txt");
 warn "filter-stderr failed!" if ($ec > 0 || $sig);
 
 if($NBEST > 0){
-  ($o, $ec, $sig) = run_command("$test_dir/filter-nbest.pl $results/run.nbest >> $results/results.dat");
+  ($o, $ec, $sig) = run_command("$test_dir/filter-nbest.pl $results/run.nbest >> $results/results.txt");
   warn "filter-nbest failed!" if ($ec > 0 || $sig);
 }
 
-open OUT, ">>$results/results.dat";
+open OUT, ">>$results/results.txt";
 print OUT "TOTAL_WALLTIME ~ $elapsed\n";
 close OUT;
 
