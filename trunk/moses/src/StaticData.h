@@ -89,7 +89,7 @@ protected:
 
 	bool m_sourceStartPosMattersForRecombination;
 
-	int m_inputType;
+	InputTypeEnum m_inputType;
 	size_t m_numInputScores;
 
 	size_t m_verboseLevel;
@@ -308,7 +308,7 @@ public:
 
 	//! Sets the global score vector weights for a given ScoreProducer.
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
-	int GetInputType() const {return m_inputType;}
+	InputTypeEnum GetInputType() const {return m_inputType;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
 	void InitializeBeforeSentenceProcessing(InputType const&) const;
 	void CleanUpAfterSentenceProcessing() const;

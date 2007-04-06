@@ -26,30 +26,68 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "LMList.h"
 #include "StaticData.h"
+#include "InputType.h"
 
 using namespace std;
 
 //TODO this should be a factory function!
-TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase)
-	: m_targetPhrase(targetPhrase),m_sourcePhrase(targetPhrase.GetSourcePhrase())
-	,m_sourceWordsRange	(wordsRange)
+TranslationOption::TranslationOption(const WordsRange &wordsRange
+																		, const TargetPhrase &targetPhrase
+																		, const InputType &inputType)
+: m_targetPhrase(targetPhrase)
+, m_sourceWordsRange(wordsRange)
 {
 	// set score
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
+
+	if (inputType.GetType() == SentenceInput)
+	{
+		Phrase phrase = inputType.GetSubString(wordsRange);
+		m_sourcePhrase = new Phrase(phrase);
+	}
+	else
+	{ // TODO lex reordering with confusion network
+		m_sourcePhrase = NULL;
+	}
 }
 
 //TODO this should be a factory function!
-TranslationOption::TranslationOption(const WordsRange &wordsRange, const TargetPhrase &targetPhrase, int /*whatever*/)
+TranslationOption::TranslationOption(const WordsRange &wordsRange
+																		 , const TargetPhrase &targetPhrase
+																		 , const InputType &inputType
+																		 , int /*whatever*/)
 : m_targetPhrase(targetPhrase)
-,m_sourceWordsRange	(wordsRange)
-,m_futureScore(0)
+, m_sourceWordsRange	(wordsRange)
+, m_futureScore(0)
 {
 	const UnknownWordPenaltyProducer *up = StaticData::Instance().GetUnknownWordPenaltyProducer();
 	const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
 	vector<float> score(1);
 	score[0] = FloorScore(-numeric_limits<float>::infinity());
 	m_scoreBreakdown.Assign(scoreProducer, score);
+
+	if (inputType.GetType() == SentenceInput)
+	{
+		Phrase phrase = inputType.GetSubString(wordsRange);
+		m_sourcePhrase = new Phrase(phrase);
+	}
+	else
+	{ // TODO lex reordering with confusion network
+		m_sourcePhrase = NULL;
+	}
 }
+
+TranslationOption::TranslationOption(const TranslationOption &copy)
+: m_targetPhrase(copy.m_targetPhrase)
+//, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented 
+, m_sourcePhrase( (copy.m_sourcePhrase == NULL) ? new Phrase(Input) : new Phrase(*copy.m_sourcePhrase))
+, m_sourceWordsRange(copy.m_sourceWordsRange)
+, m_totalScore(copy.m_totalScore)
+, m_futureScore(copy.m_futureScore)
+, m_partialScore(copy.m_partialScore)
+, m_scoreBreakdown(copy.m_scoreBreakdown)
+, m_reordering(copy.m_reordering)
+{}
 
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)
 {
@@ -109,3 +147,10 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 			<< possibleTranslation.GetScoreBreakdown();
 	return out;
 }
+
+void TranslationOption::CacheReorderingProb(const LexicalReordering &lexreordering
+												, const Score &score) const
+{
+	m_reordering.Assign(&lexreordering, score);
+}
+

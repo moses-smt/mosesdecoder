@@ -93,6 +93,7 @@ protected:
 
 	//! implemented by inherited class, called by this class
 	virtual void ProcessUnknownWord(size_t sourcePos)=0;
+	void CacheLexReordering();
 
 public:
   virtual ~TranslationOptionCollection();
