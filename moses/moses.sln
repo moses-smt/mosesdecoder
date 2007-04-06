@@ -14,6 +14,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "processPhraseTable", "..\mi
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "processLexicalTable", "..\misc\processLexicalTable.vcproj", "{9834EABB-2033-4607-9DAC-36D16E0725B5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF} = {8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
