@@ -5,7 +5,7 @@
 use strict;
 my ($results, $truth) = @ARGV;
 
-my ($report, $pass, $fail) = compare_results("$results/results.dat", "$truth/results.dat");
+my ($report, $pass, $fail) = compare_results("$results/results.txt", "$truth/results.txt");
 open OUT, ">$results/Summary";
 print OUT $report;
 print $report;
