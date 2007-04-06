@@ -264,7 +264,7 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
     }
 
 		// translation components
-		if (StaticData::Instance().GetInputType()==0){  
+		if (StaticData::Instance().GetInputType()==SentenceInput){  
 			// translation components	for text input
 			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {

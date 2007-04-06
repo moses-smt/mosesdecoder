@@ -60,12 +60,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
-bool readInput(IOStream &ioStream, int inputType, InputType*& source) 
+bool ReadInput(IOStream &ioStream, InputTypeEnum inputType, InputType*& source) 
 {
 	delete source;
-	source=ioStream.GetInput((inputType ? 
-																static_cast<InputType*>(new ConfusionNet) : 
-																static_cast<InputType*>(new Sentence(Input))));
+	source=ioStream.GetInput((inputType == SentenceInput ? 
+																static_cast<InputType*>(new Sentence(Input)) : 
+																static_cast<InputType*>(new ConfusionNet)));
 	return (source ? true : false);
 }
 
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 	// read each sentence & decode
 	InputType *source=0;
 	size_t lineCount = 0;
-	while(readInput(*ioStream,staticData.GetInputType(),source))
+	while(ReadInput(*ioStream,staticData.GetInputType(),source))
 	{
 			// note: source is only valid within this while loop!
 		IFVERBOSE(1)

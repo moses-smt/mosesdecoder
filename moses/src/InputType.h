@@ -43,6 +43,8 @@ public:
 	InputType(long translationId = 0);
 	virtual ~InputType();
 
+	virtual InputTypeEnum GetType() const = 0;
+
 	long GetTranslationId() const
 	{
 		return m_translationId;

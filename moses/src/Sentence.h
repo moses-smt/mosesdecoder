@@ -43,6 +43,9 @@ class Sentence : public Phrase, public InputType
 	{
 	}
 
+	InputTypeEnum GetType() const
+	{	return SentenceInput;}
+
 	//! Calls Phrase::GetSubString(). Implements abstract InputType::GetSubString()
 	Phrase GetSubString(const WordsRange& r) const 
 	{
