@@ -439,7 +439,7 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 
 /** add translation option to the list
  * \param translationOption translation option to be added */
-void TranslationOptionCollection::Add(const TranslationOption *translationOption)
+void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
 	const WordsRange &coverage = translationOption->GetSourceWordsRange();
 	m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].push_back(translationOption);
@@ -490,7 +490,7 @@ void TranslationOptionCollection::CacheLexReordering()
 				TranslationOptionList::iterator iterTransOpt;
 				for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) 
 				{
-					const TranslationOption &transOpt = **iterTransOpt;
+					TranslationOption &transOpt = **iterTransOpt;
 					const Phrase *sourcePhrase = transOpt.GetSourcePhrase();
 					if (sourcePhrase)
 					{
