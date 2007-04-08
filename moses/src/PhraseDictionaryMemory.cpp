@@ -65,11 +65,20 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	string line, prevSourcePhrase = "";
 	size_t count = 0;
   size_t line_num = 0;
+  size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
+  
 	while(getline(inFile, line)) 
 	{
 		++line_num;
 		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
-		if (tokens.size() != 3)
+		
+		if (numElement == NOT_FOUND) 
+		{ // init numElement
+			numElement = tokens.size();
+			assert(numElement == 3 || numElement == 5);
+		}
+			 
+		if (tokens.size() != numElement)
 		{
 			stringstream strme;
 			strme << "Syntax error at " << filePath << ":" << line_num;
@@ -87,7 +96,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		if (tokens[0] != prevSourcePhrase)
 			phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
 
-		vector<float> scoreVector = Tokenize<float>(tokens[2]);
+		vector<float> scoreVector = Tokenize<float>(tokens[(numElement==3) ? 2 : 4]);
 		if (scoreVector.size() != m_numScoreComponent) 
 		{
 			stringstream strme;
