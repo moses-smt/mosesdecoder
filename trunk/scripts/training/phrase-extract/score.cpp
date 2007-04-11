@@ -1,4 +1,7 @@
 // $Id$
+// vim:tabstop=2
+
+#include <sstream>
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -7,7 +10,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
-
+#include "AlignmentPhrase.h"
 #include "tables-core.h"
 
 using namespace std;
@@ -18,8 +21,8 @@ using namespace std;
 class PhraseAlignment {
 public:
   int english, foreign;
-  vector< vector<int> > alignedToE;
-  vector< vector<int> > alignedToF;
+  vector< vector<size_t> > alignedToE;
+  vector< vector<size_t> > alignedToF;
   
   void create( char*, int );
   void clear();
@@ -78,7 +81,7 @@ int main(int argc, char* argv[])
     cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
     exit(1);
   }
-  istream *extractFileP = &extractFile;
+  istream &extractFileP = extractFile;
 
   // output file: phrase translation table
   phraseTableFile.open(fileNamePhraseTable);
@@ -94,12 +97,12 @@ int main(int argc, char* argv[])
   int i=0;
   int fileCount = 0;
   while(true) {
-    if (extractFileP->eof()) break;
+    if (extractFileP.eof()) break;
     if (++i % 100000 == 0) cerr << "." << flush;
     char line[LINE_MAX_LENGTH];    
-    SAFE_GETLINE((*extractFileP), line, LINE_MAX_LENGTH, '\n');
+    SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n');
     //    if (fileCount>0)
-    if (extractFileP->eof()) break;
+    if (extractFileP.eof()) break;
     PhraseAlignment phrasePair;
     phrasePair.create( line, i );
     if (lastForeign >= 0 && lastForeign != phrasePair.foreign) {
@@ -119,6 +122,27 @@ int main(int argc, char* argv[])
   phraseTableFile.close();
 }
 
+void outputAlignment(const AlignmentPhrase &alignmentPhrase)
+{
+	for (size_t posWord = 0 ; posWord < alignmentPhrase.GetSize() ; ++posWord)
+	{
+		stringstream strme("");
+		const AlignmentElement &alignmentElement = alignmentPhrase.GetElement(posWord);
+		AlignmentElement::const_iterator iterElement;
+		for (iterElement = alignmentElement.begin() ; iterElement != alignmentElement.end() ; ++iterElement)
+		{
+			size_t align = *iterElement;
+			strme << "," << align;
+		}
+		string str = strme.str();
+		if (str.size() > 0)
+			str = str.substr(1, str.size() - 1);
+		phraseTableFile << "(" << str << ") ";
+	}
+
+	phraseTableFile << "||| ";
+}
+
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
   map<int, int> countE;
   map<int, int> alignmentE;
@@ -130,31 +154,31 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
   for(int i=0;i<phrasePair.size();i++) {
     if (i>0) {
       if (phrasePair[old].english == phrasePair[i].english) {
-	if (! phrasePair[i].equals( phrasePair[old] )) {
-	  if (currentCount > maxSameCount) {
-	    maxSameCount = currentCount;
-	    maxSame = i-1;
-	  }
-	  currentCount = 0;
-	}
-      }
+				if (! phrasePair[i].equals( phrasePair[old] )) {
+					if (currentCount > maxSameCount) {
+						maxSameCount = currentCount;
+						maxSame = i-1;
+					}
+					currentCount = 0;
+				}
+			}
       else {
-	// wrap up old E
-	if (currentCount > maxSameCount) {
-	  maxSameCount = currentCount;
-	  maxSame = i-1;
-	}
+				// wrap up old E
+				if (currentCount > maxSameCount) {
+					maxSameCount = currentCount;
+					maxSame = i-1;
+				}
 
-	alignmentE[ phrasePair[old].english ] = maxSame;
-	//	if (maxSameCount != totalCount)
-	//  cout << "max count is " << maxSameCount << "/" << totalCount << endl;
-	
-	// get ready for new E
-	totalCount = 0;
-	currentCount = 0;
-	maxSameCount = 0;
-	maxSame = -1;
-      }
+				alignmentE[ phrasePair[old].english ] = maxSame;
+				//	if (maxSameCount != totalCount)
+				//  cout << "max count is " << maxSameCount << "/" << totalCount << endl;
+				
+				// get ready for new E
+				totalCount = 0;
+				currentCount = 0;
+				maxSameCount = 0;
+				maxSame = -1;
+			}
     }
     countE[ phrasePair[i].english ]++;
     old = i;
@@ -174,30 +198,74 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
   // output table
   typedef map< int, int >::iterator II;
   PHRASE phraseF = phraseTableF.getPhrase( phrasePair[0].foreign );
+	size_t index = 0;
   for(II i = countE.begin(); i != countE.end(); i++) {
     //    cout << "\tp( " << i->first << " | " << phrasePair[0].foreign << " ; " << phraseF.size() << " ) = ...\n";
+		//cerr << index << endl;
 
     // foreign phrase (unless inverse)
     if (! inverseFlag) {
       for(int j=0;j<phraseF.size();j++)
-	phraseTableFile << vcbF.getWord( phraseF[j] ) << " ";
+			{
+				//cerr << vcbF.getWord( phraseF[j] ) << " ";
+				phraseTableFile << vcbF.getWord( phraseF[j] );
+				phraseTableFile << " ";
+			}
+			//cerr << endl;
       phraseTableFile << "||| ";
-    }
+		}
 
     // english phrase
     PHRASE phraseE = phraseTableE.getPhrase( i->first );
-    for(int j=0;j<phraseE.size();j++)
-      phraseTableFile << vcbE.getWord( phraseE[j] ) << " ";
+		for(int j=0;j<phraseE.size();j++)
+		{
+			//if ( vcbE.getWord( phraseE[j] ) == "herr")
+			//	cerr << "";
+			//cerr << vcbE.getWord( phraseE[j] ) << " ";
+      phraseTableFile << vcbE.getWord( phraseE[j] );
+			phraseTableFile << " ";
+		}
+		//cerr << endl;
     phraseTableFile << "||| ";
 
     // foreign phrase (if inverse)
     if (inverseFlag) {
       for(int j=0;j<phraseF.size();j++)
-	phraseTableFile << vcbF.getWord( phraseF[j] ) << " ";
+			{
+				//cerr << vcbF.getWord( phraseF[j] ) << " ";
+				phraseTableFile << vcbF.getWord( phraseF[j] );
+				phraseTableFile << " ";
+			}
+			//cerr << endl;
       phraseTableFile << "||| ";
-    }
+		}
  
-    // phrase translation probability
+		// merge all alignments 
+		AlignmentPhrase alignementF(phraseF.size())
+										,alignementE(phraseE.size());
+
+		size_t numExamples = i->second;
+		for (size_t currExample = index ; currExample < index + numExamples ; ++currExample)
+		{
+			vector< vector<size_t> > &currAlignmentF	= phrasePair[currExample].alignedToF
+														,&currAlignmentE = phrasePair[currExample].alignedToE;
+			alignementF.Merge(currAlignmentF);
+			alignementE.Merge(currAlignmentE);
+		}
+
+    if (! inverseFlag) 
+		{
+			outputAlignment(alignementF);
+		}
+
+		outputAlignment(alignementE);
+
+    if ( inverseFlag) 
+		{
+			outputAlignment(alignementF);
+		}
+
+		// phrase translation probability
     phraseTableFile << ((double) i->second / (double) phrasePair.size());
 
     // lexical translation probability
@@ -224,6 +292,8 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
     // zens&ney lexical score
 
     phraseTableFile << endl;
+
+		index += i->second;
   }
 }
 
@@ -245,7 +315,7 @@ void PhraseAlignment::create( char line[], int lineID ) {
 	  cerr << "WARNING: sentence " << lineID << " has alignment point (" << f << ", " << e << ") out of bounds (" << phraseF.size() << ", " << phraseE.size() << ")\n"; }
 	else {
 	  if (alignedToE.size() == 0) {
-	    vector< int > dummy;
+	    vector< size_t > dummy;
 	    for(int i=0;i<phraseE.size();i++)
 	      alignedToE.push_back( dummy );
 	    for(int i=0;i<phraseF.size();i++)

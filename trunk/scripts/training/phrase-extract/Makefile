@@ -6,4 +6,4 @@ clean:
 
 extract: tables-core.o
 
-score: tables-core.o
+score: tables-core.o AlignmentPhrase.o
