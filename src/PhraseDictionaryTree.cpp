@@ -6,11 +6,14 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #include "PrefixTree.h"
 #include "File.h"
 #include "ObjectPool.h"
 #include "LVoc.h"
+#include "TypeDef.h"
+#include "Util.h"
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out,const std::vector<T>& x)
@@ -303,21 +306,46 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 	TgtCands tgtCands;
 	std::vector<OFF_T> vo;
 	size_t lnc=0;
+	size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
+	
 	while(getline(inFile, line)) 	
 		{
 			++lnc;
-			std::istringstream is(line);std::string w;
+			
+			std::vector<std::string> tokens = TokenizeMultiCharSeparator( line , "|||" );
+			if (numElement == NOT_FOUND) 
+			{ // init numElement
+				numElement = tokens.size();
+				assert(numElement == 3 || numElement == 5);
+			}
+			else if (tokens.size() != numElement)
+			{
+				std::stringstream strme;
+				strme << "Syntax error at line " << lnc  << " : " << line;
+				UserMessage::Add(strme.str());
+				abort();
+			}
+			
+				
 			IPhrase f,e;Scores sc;
 			
-			while(is>>w && w!="|||") f.push_back(imp->sv.add(w));
-			while(is>>w && w!="|||") e.push_back(imp->tv.add(w));
+			std::vector<std::string> wordVec = Tokenize(tokens[0]);
+			for (size_t i = 0 ; i < wordVec.size() ; ++i)
+				f.push_back(imp->sv.add(wordVec[i]));
+
+			wordVec = Tokenize(tokens[1]);
+			for (size_t i = 0 ; i < wordVec.size() ; ++i)
+				f.push_back(imp->tv.add(wordVec[i]));
+			
 			//			while(is>>w && w!="|||") sc.push_back(atof(w.c_str()));
 			// Mauro: to handle 0 probs in phrase tables
-			while(is>>w && w!="|||") {
-			  float tmp = (float)atof(w.c_str());
+			std::vector<float> scoreVector = Tokenize<float>(tokens[(numElement==3) ? 2 : 4]);
+			for (size_t i = 0 ; i < scoreVector.size() ; ++i)
+			{
+			  float tmp = scoreVector[i];
 			  sc.push_back(((tmp>0.0)?tmp:(float)1.0e-38));
 			}
-
+			
 			if(f.empty()) 
 				{
 					TRACE_ERR("WARNING: empty source phrase in line '"<<line<<"'\n");
