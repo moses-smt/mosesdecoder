@@ -1,5 +1,3 @@
-using namespace std;
-
 // $Id$
 
 #include <cassert>
@@ -13,6 +11,8 @@ using namespace std;
 #include <set>
 #include <algorithm>
 #include "cmd.h"
+
+using namespace std;
 
 #define MAX_WORD 1000  //maximum lengthsource/target strings 
 #define MAX_M 200     //maximum length of source strings
