@@ -1,55 +1,71 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <?fileVersion 3.1.0?>
+
 <ManagedProjectBuildInfo>
-  <project id="misc.cdt.managedbuild.target.gnu.exe.140315155" name="Executable (Gnu)" projectType="cdt.managedbuild.target.gnu.exe">
-    <configuration id="cdt.managedbuild.config.gnu.exe.debug.1784301081" name="Debug" description="" parent="cdt.managedbuild.config.gnu.exe.debug" artifactName="processPhraseTable" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" cleanCommand="rm -rf">
-      <toolChain superClass="cdt.managedbuild.toolchain.gnu.exe.debug" id="cdt.managedbuild.toolchain.gnu.exe.debug.108800981" name="GCC Tool Chain">
-        <tool superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2129135681" name="GCC C++ Compiler">
-          <option superClass="gnu.cpp.compiler.option.include.paths" id="gnu.cpp.compiler.option.include.paths.767202721" valueType="includePath">
-            <listOptionValue value="&quot;${ProjDirPath}/../moses/src&quot;" builtIn="false"/>
-          </option>
-        </tool>
-        <tool superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug" id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1058943429" name="GCC C Compiler"/>
-        <tool superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug" id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1552437773" name="GCC C Linker"/>
-        <tool superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug" id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.647440563" name="GCC C++ Linker">
-          <option superClass="gnu.cpp.link.option.userobjs" id="gnu.cpp.link.option.userobjs.1169246285" valueType="userObjs">
-            <listOptionValue value="&quot;../../moses/${ConfigName}/libmoses.a&quot;" builtIn="false"/>
-          </option>
-        </tool>
-        <tool superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug" id="cdt.managedbuild.tool.gnu.assembler.exe.debug.640933481" name="GCC Assembler"/>
-        <macros/>
-      </toolChain>
-      <resourceConfiguration id="cdt.managedbuild.config.gnu.exe.debug.1784301081./misc/queryLexicalTable.cpp" name="queryLexicalTable.cpp" exclude="true" resourcePath="/misc/queryLexicalTable.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2129135681./misc/queryLexicalTable.cpp" rcbsApplicability="disable">
-        <tool superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2129135681" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2129135681./misc/queryLexicalTable.cpp" name="GCC C++ Compiler"/>
-      </resourceConfiguration>
-      <resourceConfiguration id="cdt.managedbuild.config.gnu.exe.debug.1784301081./misc/processLexicalTable.cpp" name="processLexicalTable.cpp" exclude="true" resourcePath="/misc/processLexicalTable.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2129135681./misc/processLexicalTable.cpp" rcbsApplicability="disable">
-        <tool superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2129135681" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2129135681./misc/processLexicalTable.cpp" name="GCC C++ Compiler"/>
-      </resourceConfiguration>
-    </configuration>
-    <configuration id="cdt.managedbuild.config.gnu.exe.release.18314623" name="Release" description="" parent="cdt.managedbuild.config.gnu.exe.release" artifactName="processPhraseTable" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" cleanCommand="rm -rf">
-      <toolChain superClass="cdt.managedbuild.toolchain.gnu.exe.release" id="cdt.managedbuild.toolchain.gnu.exe.release.2043177917" name="GCC Tool Chain">
-        <tool superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2104666145" name="GCC C++ Compiler">
-          <option superClass="gnu.cpp.compiler.option.include.paths" id="gnu.cpp.compiler.option.include.paths.1964480027" valueType="includePath">
-            <listOptionValue value="&quot;${ProjDirPath}/../moses/src&quot;" builtIn="false"/>
-          </option>
-        </tool>
-        <tool superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release" id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1180307413" name="GCC C Compiler"/>
-        <tool superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release" id="cdt.managedbuild.tool.gnu.c.linker.exe.release.2012700562" name="GCC C Linker"/>
-        <tool superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release" id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.844050417" name="GCC C++ Linker">
-          <option superClass="gnu.cpp.link.option.userobjs" id="gnu.cpp.link.option.userobjs.1028473024" valueType="userObjs">
-            <listOptionValue value="&quot;../../moses/${ConfigName}/libmoses.a&quot;" builtIn="false"/>
-          </option>
-        </tool>
-        <tool superClass="cdt.managedbuild.tool.gnu.assembler.exe.release" id="cdt.managedbuild.tool.gnu.assembler.exe.release.604583031" name="GCC Assembler"/>
-        <macros/>
-      </toolChain>
-      <resourceConfiguration id="cdt.managedbuild.config.gnu.exe.release.18314623./misc/processLexicalTable.cpp" name="processLexicalTable.cpp" exclude="true" resourcePath="/misc/processLexicalTable.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2104666145./misc/processLexicalTable.cpp" rcbsApplicability="disable">
-        <tool superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2104666145" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2104666145./misc/processLexicalTable.cpp" name="GCC C++ Compiler"/>
-      </resourceConfiguration>
-      <resourceConfiguration id="cdt.managedbuild.config.gnu.exe.release.18314623./misc/queryLexicalTable.cpp" name="queryLexicalTable.cpp" exclude="true" resourcePath="/misc/queryLexicalTable.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2104666145./misc/queryLexicalTable.cpp" rcbsApplicability="disable">
-        <tool superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2104666145" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2104666145./misc/queryLexicalTable.cpp" name="GCC C++ Compiler"/>
-      </resourceConfiguration>
-    </configuration>
-    <macros/>
-  </project>
+<project id="misc.cdt.managedbuild.target.gnu.exe.720875320" name="Executable (Gnu)" projectType="cdt.managedbuild.target.gnu.exe">
+<configuration artifactName="processPhraseTable" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.debug.968564372" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
+<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.9940797" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1174838323" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
+<option id="gnu.cpp.compiler.option.include.paths.634924686" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../moses/src&quot;"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.694708706" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1774294955" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1519446567" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
+<option id="gnu.cpp.link.option.userobjs.1214926161" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
+<listOptionValue builtIn="false" value="&quot;../../moses/${ConfigName}/libmoses.a&quot;"/>
+<listOptionValue builtIn="false" value="&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.668977706" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
+<macros/>
+</toolChain>
+<resourceConfiguration exclude="true" id="cdt.managedbuild.config.gnu.exe.debug.968564372./misc/processLexicalTable.cpp" name="processLexicalTable.cpp" rcbsApplicability="disable" resourcePath="/misc/processLexicalTable.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1174838323./misc/processLexicalTable.cpp">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1174838323./misc/processLexicalTable.cpp" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1174838323"/>
+</resourceConfiguration>
+<resourceConfiguration exclude="true" id="cdt.managedbuild.config.gnu.exe.debug.968564372./misc/queryLexicalTable.cpp" name="queryLexicalTable.cpp" rcbsApplicability="disable" resourcePath="/misc/queryLexicalTable.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1174838323./misc/queryLexicalTable.cpp">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1174838323./misc/queryLexicalTable.cpp" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1174838323"/>
+</resourceConfiguration>
+</configuration>
+<configuration artifactName="processPhraseTable" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.release.740659024" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
+<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.548693740" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1949270067" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
+<option id="gnu.cpp.compiler.option.include.paths.1215088252" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../moses/src&quot;"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.871712778" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release"/>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.143684865" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.792459607" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
+<option id="gnu.cpp.link.option.userobjs.1902362839" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
+<listOptionValue builtIn="false" value="&quot;../../moses/${ConfigName}/libmoses.a&quot;"/>
+<listOptionValue builtIn="false" value="&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;"/>
+</option>
+<option id="gnu.cpp.link.option.libs.679824006" superClass="gnu.cpp.link.option.libs" valueType="libs">
+<listOptionValue builtIn="false" value="z"/>
+<listOptionValue builtIn="false" value="lattice"/>
+<listOptionValue builtIn="false" value="misc"/>
+<listOptionValue builtIn="false" value="dstruct"/>
+<listOptionValue builtIn="false" value="oolm"/>
+</option>
+<option id="gnu.cpp.link.option.paths.1956617803" superClass="gnu.cpp.link.option.paths" valueType="stringList">
+<listOptionValue builtIn="false" value="&quot;../../srilm/lib/i686&quot;"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.1701666898" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release"/>
+<macros/>
+</toolChain>
+<resourceConfiguration exclude="true" id="cdt.managedbuild.config.gnu.exe.release.740659024./misc/GenerateTuples.cpp" name="GenerateTuples.cpp" rcbsApplicability="disable" resourcePath="/misc/GenerateTuples.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1949270067./misc/GenerateTuples.cpp">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1949270067./misc/GenerateTuples.cpp" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1949270067"/>
+</resourceConfiguration>
+<resourceConfiguration exclude="true" id="cdt.managedbuild.config.gnu.exe.release.740659024./misc/queryLexicalTable.cpp" name="queryLexicalTable.cpp" rcbsApplicability="disable" resourcePath="/misc/queryLexicalTable.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1949270067./misc/queryLexicalTable.cpp">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1949270067./misc/queryLexicalTable.cpp" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1949270067"/>
+</resourceConfiguration>
+<resourceConfiguration exclude="true" id="cdt.managedbuild.config.gnu.exe.release.740659024./misc/processLexicalTable.cpp" name="processLexicalTable.cpp" rcbsApplicability="disable" resourcePath="/misc/processLexicalTable.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1949270067./misc/processLexicalTable.cpp">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1949270067./misc/processLexicalTable.cpp" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1949270067"/>
+</resourceConfiguration>
+</configuration>
+<macros/>
+</project>
 </ManagedProjectBuildInfo>
