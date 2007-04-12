@@ -335,7 +335,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 
 			wordVec = Tokenize(tokens[1]);
 			for (size_t i = 0 ; i < wordVec.size() ; ++i)
-				f.push_back(imp->tv.add(wordVec[i]));
+				e.push_back(imp->tv.add(wordVec[i]));
 			
 			//			while(is>>w && w!="|||") sc.push_back(atof(w.c_str()));
 			// Mauro: to handle 0 probs in phrase tables
