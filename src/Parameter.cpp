@@ -235,14 +235,16 @@ bool Parameter::Validate()
   // do files exist?
 	// phrase tables
 	if (noErrorFlag) 
-		{
-			std::vector<std::string> ext;
-			// standard phrase table extension (i.e. full name has to be specified)
-			ext.push_back("");
-			// alternative file extension for binary phrase table format:
-			ext.push_back(".binphr.idx");
-			noErrorFlag = FilesExist("ttable-file", 3,ext);
-		}
+	{
+		std::vector<std::string> ext;
+		// standard phrase table extension (i.e. full name has to be specified)
+		// raw tables in either un compressed or compressed form
+		ext.push_back("");
+	  ext.push_back(".gz");
+		// alternative file extension for binary phrase table format:
+		ext.push_back(".binphr.idx");
+		noErrorFlag = FilesExist("ttable-file", 3,ext);
+	}
 	// language model
 	if (noErrorFlag)
 		noErrorFlag = FilesExist("lmodel-file", 3);
@@ -253,9 +255,16 @@ bool Parameter::Validate()
 	}
 	// generation tables
 	if (noErrorFlag)
-		noErrorFlag = FilesExist("generation-file", 3);
+	{
+	  std::vector<std::string> ext;
+	  //raw tables in either un compressed or compressed form
+	  ext.push_back("");
+	  ext.push_back(".gz");
+		noErrorFlag = FilesExist("generation-file", 3, ext);
+	}
 	// distortion
-	if (noErrorFlag){
+	if (noErrorFlag)
+	{
 	  std::vector<std::string> ext;
 	  //raw tables in either un compressed or compressed form
 	  ext.push_back("");
