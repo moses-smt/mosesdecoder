@@ -42,6 +42,7 @@ EXTRA_PACKAGES=preview.sty caption.sty subfig.sty
 caption.dtx: caption2.dtx
 
 # "installing" preview.sty, caption.sty or subfig.sty, installing the TeX way
+.PRECIOUS: %.sty
 %.sty: %.ins %.dtx
 	$(TEX) $<
 
