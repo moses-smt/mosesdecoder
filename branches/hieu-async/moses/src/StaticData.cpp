@@ -734,6 +734,14 @@ bool StaticData::LoadMapping()
 	for(size_t i=0; i<mappingVector.size(); i++) 
 	{
 		vector<string>	token		= Tokenize(mappingVector[i]);
+		
+		// using 0 T filePath - lexi's smoothing format. not used 
+		if (token.size() == 3)
+		{
+			assert(Scan<size_t>(token[0])==0);
+			token.erase(token.begin());
+		}
+
 		if (token.size() == 2) 
 		{
 			DecodeType decodeType = token[0] == "T" ? Translate : Generate;
