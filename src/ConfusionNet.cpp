@@ -47,6 +47,12 @@ struct CNStats {
 
 CNStats stats;
 
+size_t ConfusionNet::GetColumnIncrement(size_t i, size_t j) const
+{
+  (void) i;
+  (void) j;
+  return 1;
+}
 
 ConfusionNet::ConfusionNet() 
 	: InputType()
