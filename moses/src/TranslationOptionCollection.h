@@ -76,7 +76,7 @@ protected:
 	void ProcessUnknownWord(const std::vector < std::list <const DecodeStep* > *> &decodeStepVL);
 	//! special handling of ONE unknown words.
 	virtual void ProcessOneUnknownWord(const Word &sourceWord
-																		 , size_t sourcePos);
+																		 , size_t sourcePos, size_t length = 1);
 	//! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 	void Prune();
 

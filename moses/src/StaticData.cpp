@@ -94,7 +94,10 @@ bool StaticData::LoadData(Parameter *parameter)
 	// input type has to be specified BEFORE loading the phrase tables!
 	if(m_parameter->GetParam("inputtype").size()) 
 		m_inputType= (InputTypeEnum) Scan<int>(m_parameter->GetParam("inputtype")[0]);
-	VERBOSE(2,"input type is: "<<(m_inputType?"confusion net":"text input")<<"\n");
+	std::string s_it = "text input";
+	if (m_inputType == 1) { s_it = "confusion net"; }
+	if (m_inputType == 2) { s_it = "word lattice"; }
+	VERBOSE(2,"input type is: "<<s_it<<"\n");
 
 	// factor delimiter
 	if (m_parameter->GetParam("factor-delimiter").size() > 0) {

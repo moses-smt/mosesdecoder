@@ -279,3 +279,8 @@ const std::string ToLower(const std::string& str);
 // A couple of utilities to measure decoding time
 void ResetUserTime();
 void PrintUserTime(const std::string &message);
+
+// dump SGML parser for <seg> tags
+#include <map>
+std::map<std::string, std::string> ProcessAndStripSGML(std::string &line);
+

@@ -37,6 +37,8 @@ class InputType
 {
 protected:
 	long m_translationId; 	//< contiguous Id
+	bool m_hasMetaData;
+	long m_segId;
  
 public:
 
@@ -70,7 +72,7 @@ public:
 
 	//! return substring at a particular position. Only valid for Sentence class. TODO - get rid of this fn
 	virtual const Word& GetWord(size_t pos) const=0;
-	
+
 	TO_STRING();
 	
 };

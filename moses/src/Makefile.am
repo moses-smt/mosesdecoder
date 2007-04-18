@@ -1,5 +1,5 @@
 lib_LIBRARIES = libmoses.a
-AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -DUSE_HYPO_POOL 
+AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES 
 libmoses_a_SOURCES = \
 	ConfusionNet.cpp \
 	DecodeStep.cpp \
@@ -17,6 +17,7 @@ libmoses_a_SOURCES = \
 	InputType.cpp \
 	InputFileStream.cpp \
 	LMList.cpp \
+	LVoc.cpp \
 	LanguageModel.cpp \
 	LanguageModelFactory.cpp \
 	LanguageModelMultiFactor.cpp \
@@ -26,11 +27,10 @@ libmoses_a_SOURCES = \
 	LatticePathCollection.cpp \
 	LexicalReordering.cpp \
 	LexicalReorderingTable.cpp \
-	PrefixTreeMap.cpp \
-	LVoc.cpp \
 	Manager.cpp \
 	md5.cpp \
 	mempool.cpp \
+	PCNTools.cpp \
 	Parameter.cpp \
 	PartialTranslOptColl.cpp \
 	Phrase.cpp \
@@ -40,6 +40,7 @@ libmoses_a_SOURCES = \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
 	PhraseReference.cpp \
+	PrefixTreeMap.cpp \
 	ScoreComponentCollection.cpp \
 	ScoreIndexManager.cpp \
 	ScoreProducer.cpp \
@@ -56,6 +57,7 @@ libmoses_a_SOURCES = \
 	Util.cpp \
 	Word.cpp \
 	WordsBitmap.cpp \
+	WordLattice.cpp \
 	WordsRange.cpp
 
 

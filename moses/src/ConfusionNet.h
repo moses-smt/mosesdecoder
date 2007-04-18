@@ -15,7 +15,7 @@ class ConfusionNet : public InputType {
  public: 
 	typedef std::vector<std::pair<Word,float> > Column;
 
- private:
+ protected:
 	std::vector<Column> data;
 
 	bool ReadFormat0(std::istream&,const std::vector<FactorType>& factorOrder);
@@ -24,7 +24,7 @@ class ConfusionNet : public InputType {
 
  public:
 	ConfusionNet();
-	~ConfusionNet();
+	virtual ~ConfusionNet();
 
 	ConfusionNet(Sentence const& s);
 	
@@ -33,13 +33,14 @@ class ConfusionNet : public InputType {
 
 	const Column& GetColumn(size_t i) const {assert(i<data.size());return data[i];}
 	const Column& operator[](size_t i) const {return GetColumn(i);}
+	virtual size_t GetColumnIncrement(size_t i, size_t j) const; //! returns 1 for CNs
 
 	bool Empty() const {return data.empty();}
 	size_t GetSize() const {return data.size();}
 	void Clear() {data.clear();}
 
 	bool ReadF(std::istream&,const std::vector<FactorType>& factorOrder,int format=0);
-	void Print(std::ostream&) const;
+	virtual void Print(std::ostream&) const;
 
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
 	
