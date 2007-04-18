@@ -350,6 +350,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PCNTools.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Phrase.cpp"
 				>
 			</File>
@@ -461,6 +465,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Word.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\WordLattice.cpp"
 				>
 			</File>
 			<File
@@ -642,6 +650,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PCNTools.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PDTAimp.h"
 				>
 			</File>
@@ -747,6 +759,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Word.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\WordLattice.h"
 				>
 			</File>
 			<File
