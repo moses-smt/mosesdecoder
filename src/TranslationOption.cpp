@@ -47,7 +47,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 	}
 	else
 	{ // TODO lex reordering with confusion network
-		m_sourcePhrase = NULL;
+		m_sourcePhrase = new Phrase(*targetPhrase.GetSourcePhrase());
 	}
 }
 
@@ -73,7 +73,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 	}
 	else
 	{ // TODO lex reordering with confusion network
-		m_sourcePhrase = NULL;
+		m_sourcePhrase = new Phrase(*targetPhrase.GetSourcePhrase());
 	}
 }
 
