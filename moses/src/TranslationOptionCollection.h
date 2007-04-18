@@ -63,6 +63,7 @@ protected:
 	InputType const			&m_source; /*< reference to the input */
 	SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
 	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase???) */
+	std::vector<Phrase*> m_unksrcs;
 	
 	TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage);
 	
