@@ -49,6 +49,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "IOStream.h"
 #include "Sentence.h"
 #include "ConfusionNet.h"
+#include "WordLattice.h"
 #include "TranslationAnalysis.h"
 
 #if HAVE_CONFIG_H
@@ -63,9 +64,13 @@ using namespace std;
 bool ReadInput(IOStream &ioStream, InputTypeEnum inputType, InputType*& source) 
 {
 	delete source;
-	source=ioStream.GetInput((inputType == SentenceInput ? 
-																static_cast<InputType*>(new Sentence(Input)) : 
-																static_cast<InputType*>(new ConfusionNet)));
+	switch(inputType)
+	{
+		case SentenceInput:         source = ioStream.GetInput(new Sentence(Input)); break;
+		case ConfusionNetworkInput: source = ioStream.GetInput(new ConfusionNet);    break;
+		case WordLatticeInput:      source = ioStream.GetInput(new WordLattice);     break;
+		default: TRACE_ERR("Unknown input type: " << inputType << "\n");
+	}
 	return (source ? true : false);
 }
 

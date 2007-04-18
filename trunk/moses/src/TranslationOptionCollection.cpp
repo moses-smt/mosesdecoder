@@ -166,7 +166,7 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::li
 	* \param factorCollection input sentence with all factors
  */
 void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
-																														size_t sourcePos)
+																														size_t sourcePos, size_t length)
 {
 	// unknown word, add as trans opt
 	FactorCollection &factorCollection = FactorCollection::Instance();
@@ -203,13 +203,12 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 		}
 
 		targetPhrase.SetScore();
-		
-		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, m_source, 0);
+		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);	
 	}
 	else 
 	{ // drop source word. create blank trans opt
 		const TargetPhrase targetPhrase(Output);
-		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos), targetPhrase, m_source, 0);
+		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);
 	}
 
 	transOpt->CalcScore();

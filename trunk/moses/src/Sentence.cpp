@@ -30,10 +30,14 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	std::string line;
-	if (getline(in, line, '\n').eof())	
-		return 0;
-	line = Trim(line);
-	
+	std::map<std::string, std::string> meta;
+	do 
+		{
+			if (getline(in, line, '\n').eof())	return 0;
+			line = Trim(line);
+	    meta = ProcessAndStripSGML(line);
+		} while (line == "");
+	if (meta.find("id") != meta.end()) { this->SetTranslationId(atol(meta["id"].c_str())); }
 	Phrase::CreateFromString(factorOrder, line, factorDelimiter);
 	return 1;
 }

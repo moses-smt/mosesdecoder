@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "StaticData.h"  // needed for factor splitter
+
 inline bool existsFile(const char* filePath) {
   struct stat mystat;
   return  (stat(filePath,&mystat)==0);
@@ -265,7 +267,7 @@ public:
 
 		for(size_t k=0;k<factorStrings.size();++k) 
 			{
-				std::vector<std::string> factors=Tokenize(*factorStrings[k],"|");
+				std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
 				Word& w=targetPhrase.AddWord();
 				for(size_t l=0;l<m_output.size();++l)
 					w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
@@ -366,14 +368,14 @@ public:
 
 						if(nextP) // w is a word that should be considered
 							{
-								Range newRange(curr.begin(),curr.end()+1);
+								Range newRange(curr.begin(),curr.end()+src.GetColumnIncrement(curr.end(),colidx));
 								float newScore=curr.GetScore()+currCol[colidx].second;  // CN score
 								Phrase newSrc(curr.src);
 								if(!isEpsilon) newSrc.AddWord(w);
 								if(newRange.second<srcSize && newScore>LOWEST_SCORE)
 									{
 									  // if there is more room to grow, add a new state onto the queue
-										// to be explored that represents [begin, curEnd+1)
+										// to be explored that represents [begin, curEnd+)
 										stack.push_back(State(newRange,nextP,newScore,newRealWords));
 										stack.back().src=newSrc;
 									}
@@ -462,6 +464,7 @@ public:
 						CreateTargetPhrase(targetPhrase,j->first,scores.trans,scores.src);
 						costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
 						tCands.push_back(targetPhrase);
+						//std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;
 					}
 
 				TargetPhraseCollection *rv=PruneTargetCandidates(tCands,costs);

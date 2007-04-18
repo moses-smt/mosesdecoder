@@ -141,3 +141,61 @@ void PrintUserTime(const std::string &message)
 { 
 	g_timer.check(message.c_str());
 }
+
+std::map<std::string, std::string> ProcessAndStripSGML(std::string &line)
+{
+	std::map<std::string, std::string> meta;
+	std::string lline = ToLower(line);
+	if (lline.find("<seg")!=0) return meta;
+	size_t close = lline.find(">");
+	if (close == std::string::npos) return meta; // error
+	size_t end = lline.find("</seg>");
+	std::string seg = Trim(lline.substr(4, close-4));
+	std::string text = line.substr(close+1, end - close - 1);
+	for (size_t i = 1; i < seg.size(); i++) {
+		if (seg[i] == '=' && seg[i-1] == ' ') {
+			std::string less = seg.substr(0, i-1) + seg.substr(i);
+			seg = less; i = 0; continue;
+		}
+		if (seg[i] == '=' && seg[i+1] == ' ') {
+			std::string less = seg.substr(0, i+1);
+			if (i+2 < seg.size()) less += seg.substr(i+2);
+			seg = less; i = 0; continue;
+		}
+	}
+	line = Trim(text);
+	if (seg == "") return meta;
+	for (size_t i = 1; i < seg.size(); i++) {
+		if (seg[i] == '=') {
+			std::string label = seg.substr(0, i);
+			std::string val = seg.substr(i+1);
+			if (val[0] == '"') {
+				val = val.substr(1);
+				size_t close = val.find('"');
+				if (close == std::string::npos) {
+					TRACE_ERR("SGML parse error: missing \"\n");
+					seg = "";
+					i = 0;
+				} else {
+					seg = val.substr(close+1);
+					val = val.substr(0, close);
+					i = 0;
+				}
+			} else {
+				size_t close = val.find(' ');
+				if (close == std::string::npos) {
+					seg = "";
+					i = 0;
+				} else {
+					seg = val.substr(close+1);
+					val = val.substr(0, close);
+				}
+			}
+			label = Trim(label);
+			seg = Trim(seg);
+			meta[label] = val;
+		}
+	}
+	return meta;
+}
+

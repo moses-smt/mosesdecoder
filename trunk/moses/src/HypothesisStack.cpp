@@ -60,7 +60,7 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 			// this may also affect the worst score
 	        if ( m_bestScore + m_beamThreshold > m_worstScore )
 	          m_worstScore = m_bestScore + m_beamThreshold;
-		}
+					}
 	
 	    // Prune only if stack is twice as big as needed (lazy pruning)
 		VERBOSE(3,", now size " << m_hypos.size());

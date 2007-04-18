@@ -128,6 +128,7 @@ enum InputTypeEnum
 {
 	SentenceInput						= 0
 	,ConfusionNetworkInput	= 1
+	,WordLatticeInput				= 2
 };
 
 enum DictionaryFind

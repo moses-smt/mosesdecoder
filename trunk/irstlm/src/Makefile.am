@@ -1,4 +1,5 @@
 lib_LIBRARIES = libirstlm.a
+AM_CPPFLAGS = -fPIC
 
 libirstlm_a_SOURCES = \
 	dictionary.cpp \

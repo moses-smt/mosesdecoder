@@ -7,8 +7,13 @@ DS?=$(shell date '+%Y%m%d')
 
 # set these 2 variables below to point to a directory where you want the 
 # compiled scripts to be copied to
+<<<<<<< .mine
+TARGETDIR=/chomes/redpony/moses
+BINDIR=/fs/cliplab/software/moses-scripts/giza
+=======
 TARGETDIR=/home/s0565741/terabyte/bin
 BINDIR=/home/s0565741/terabyte/bin
+>>>>>>> .r1358
 
 MAIN_SCRIPTS_TARGET_DIR=$(TARGETDIR)
 # MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)
