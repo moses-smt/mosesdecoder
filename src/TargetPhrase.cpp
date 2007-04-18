@@ -109,7 +109,7 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 
 	// ok, merge
 	TargetPhrase *clone				= new TargetPhrase(*this);
-
+	clone->m_sourcePhrase = m_sourcePhrase;
 	int currWord = 0;
 	const size_t len = GetSize();
 	for (size_t currPos = 0 ; currPos < len ; currPos++)

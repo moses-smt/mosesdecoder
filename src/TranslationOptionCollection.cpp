@@ -65,6 +65,7 @@ TranslationOptionCollection::~TranslationOptionCollection()
 		 RemoveAllInColl(GetTranslationOptionList(startPos, endPos));
 		}
 	}
+	RemoveAllInColl(m_unksrcs);
 }
 
 /** helper for pruning */
@@ -183,6 +184,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 			isDigit = 1;
 		// modify the starting bitmap
 	}
+	Phrase* m_unksrc = new Phrase(Input); m_unksrc->AddWord() = sourceWord;
+	m_unksrcs.push_back(m_unksrc);
 	
 	TranslationOption *transOpt;
 	if (! StaticData::Instance().GetDropUnknown() || isDigit)
@@ -203,11 +206,13 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 		}
 
 		targetPhrase.SetScore();
+		targetPhrase.SetSourcePhrase(m_unksrc);
 		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);	
 	}
 	else 
 	{ // drop source word. create blank trans opt
-		const TargetPhrase targetPhrase(Output);
+		TargetPhrase targetPhrase(Output);
+		targetPhrase.SetSourcePhrase(m_unksrc);
 		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);
 	}
 
