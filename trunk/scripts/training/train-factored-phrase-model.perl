@@ -1415,7 +1415,7 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
     print INI "0\n";
   }
 
-  my $weight_d_count = 0;
+  my $weight_d_count = 1;
   if ($___REORDERING ne "distance") {
     my $file = "# distortion (reordering) files\n\[distortion-file]\n";
     my $factor_i = 0;
