@@ -20,6 +20,7 @@ my @tests = qw (
   lattice-surface
   lexicalized-reordering
 );
+  #lexicalized-reordering-cn
 ############################################################
 
 use MosesRegressionTesting;
