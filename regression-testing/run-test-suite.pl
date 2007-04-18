@@ -19,8 +19,8 @@ my @tests = qw (
   nbest-multi-factor
   lattice-surface
   lexicalized-reordering
+  lexicalized-reordering-cn
 );
-  #lexicalized-reordering-cn
 ############################################################
 
 use MosesRegressionTesting;
