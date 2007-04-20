@@ -129,6 +129,19 @@ bool AlignmentPhrase::IsCompletable(size_t decodeStepId
 	return true;
 }
 
+void AlignmentPhrase::AddUniformAlignmentElement(std::list<size_t> &uniformAlignmentTarget)
+{
+	list<size_t>::iterator iter;
+	for (iter = uniformAlignmentTarget.begin() ; iter != uniformAlignmentTarget.end() ; ++iter)
+	{
+		for (size_t pos = 0 ; pos < GetSize() ; ++pos)
+		{
+			AlignmentElement &alignElement = m_collection[pos];
+			alignElement.Add(*iter);
+		}
+	}
+}
+
 std::ostream& operator<<(std::ostream& out, const AlignmentPhrase &alignmentPhrase)
 {
 	for (size_t pos = 0 ; pos < alignmentPhrase.GetSize() ; ++pos)

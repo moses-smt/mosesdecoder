@@ -74,7 +74,10 @@ public:
 	bool IsCompletable(size_t decodeStepId
 										, const WordsBitmap &thisCompleted
 										, const WordsBitmap &otherCompleted) const;
-										
+				
+	// add elements which didn't have alignments, so are set to uniform on the other side
+	void AddUniformAlignmentElement(std::list<size_t> &uniformAlignmentTarget);
+
 	TO_STRING();									
 };
 

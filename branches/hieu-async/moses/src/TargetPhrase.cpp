@@ -128,11 +128,12 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 	return clone;
 }
 
-// helper function 
+// helper functions
 void AddAlignmentElement(AlignmentPhraseInserter &inserter
 												 , const string &str
 												 , size_t phraseSize
-												 , size_t otherPhraseSize)
+												 , size_t otherPhraseSize
+												 , list<size_t> &uniformAlignment)
 {
 	// input
 	vector<string> alignPhraseVector;
@@ -154,6 +155,7 @@ void AddAlignmentElement(AlignmentPhraseInserter &inserter
 		if (alignElement.GetSize() == 0)
 		{ // no alignment info. add uniform alignment, ie. can be aligned to any word
 			alignElement.SetUniformAlignment(otherPhraseSize);
+			uniformAlignment.push_back(pos);
 		}
 
 		**inserter = alignElement;
@@ -167,14 +169,21 @@ void TargetPhrase::CreateAlignmentInfo(const string &sourceStr
 {
 	AlignmentPhraseInserter sourceInserter = m_alignmentPair.GetInserter(Input)
 													,targetInserter = m_alignmentPair.GetInserter(Output);
+	list<size_t> uniformAlignmentSource
+							,uniformAlignmentTarget;
 	AddAlignmentElement(sourceInserter
 										, sourceStr
 										, sourceSize
-										, GetSize());
+										, GetSize()
+										, uniformAlignmentSource);
 	AddAlignmentElement(targetInserter
 										, targetStr
 										, GetSize()
-										, sourceSize);
+										, sourceSize
+										, uniformAlignmentTarget);
+	// propergate uniform alignments to other side
+	m_alignmentPair.GetAlignmentPhrase(Output).AddUniformAlignmentElement(uniformAlignmentSource);
+	m_alignmentPair.GetAlignmentPhrase(Input).AddUniformAlignmentElement(uniformAlignmentTarget);
 }
 
 

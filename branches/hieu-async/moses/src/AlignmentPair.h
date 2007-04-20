@@ -55,6 +55,11 @@ public:
 		return (direction == Input) ? m_sourceAlign : m_targetAlign;
 
 	}
+	AlignmentPhrase &GetAlignmentPhrase(FactorDirection direction)
+	{
+		return (direction == Input) ? m_sourceAlign : m_targetAlign;
+
+	}
 
 	/** used by the unknown word handler.
 		* Set alignment to 0

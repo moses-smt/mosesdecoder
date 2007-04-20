@@ -83,6 +83,11 @@ public:
 	*/
 	void SetUniformAlignment(size_t otherPhraseSize);
 
+	void Add(size_t pos)
+	{
+		m_collection.insert(pos);
+	}
+
 	// shift alignment so that it is comparitable to another alignment. 
 	void Shift(int shift);
 	

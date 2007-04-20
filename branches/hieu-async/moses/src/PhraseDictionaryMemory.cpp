@@ -77,6 +77,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	while(getline(inFile, line)) 
 	{
 		++line_num;
+
 		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
 		if (tokens.size() != 5)
 		{
