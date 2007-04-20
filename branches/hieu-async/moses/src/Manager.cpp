@@ -127,20 +127,21 @@ void Manager::ProcessSentence()
  * \param hypothesis hypothesis to be expanded upon
  */
 void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const vector<const DecodeStep*> &decodeStepList)
-{	
-	// since we check for reordering limits, its good to have that limit handy
-	int maxDistortion = StaticData::Instance().GetMaxDistortion();
+{
+	std::vector<const DecodeStep*>::const_iterator iter;
+	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
+	{
+		const DecodeStep &decodeStep	= **iter;
+		size_t decodeStepId						= decodeStep.GetId();
+
+		// since we check for reordering limits, its good to have that limit handy
+		int maxDistortion = StaticData::Instance().GetMaxDistortion(decodeStepId);
 
 	// no limit of reordering: only check for overlap
-	if (maxDistortion < 0)
-	{	
-		const WordsBitmap &hypoBitmap	= hypothesis.GetSourceBitmap();
+		if (maxDistortion < 0)
+		{	
+			const WordsBitmap &hypoBitmap	= hypothesis.GetSourceBitmap();
 
-		std::vector<const DecodeStep*>::const_iterator iter;
-		for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
-		{
-			const DecodeStep &decodeStep	= **iter;
-			size_t decodeStepId						= decodeStep.GetId();
 			const size_t hypoFirstGapPos	= hypoBitmap.GetFirstGapPos(decodeStepId)
 									, sourceSize			= m_source.GetSize();
 
@@ -155,24 +156,17 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const vector<co
 					{
 						ExpandAllHypotheses(hypothesis
 													, m_transOptColl->GetTranslationOptionList(
-																																WordsRange(decodeStepId, startPos, endPos)));
+																									WordsRange(decodeStepId, startPos, endPos)));
 					}
 				}
-
 			}
+			return; // done with special case (no reordering limit)
 		}
-		return; // done with special case (no reordering limit)
-	}
 
-	// if there are reordering limits, make sure it is not violated
-	// the coverage bitmap is handy here (and the position of the first gap)
-	const WordsBitmap &hypoBitmap = hypothesis.GetSourceBitmap();
+		// if there are reordering limits, make sure it is not violated
+		// the coverage bitmap is handy here (and the position of the first gap)
+		const WordsBitmap &hypoBitmap = hypothesis.GetSourceBitmap();
 
-	std::vector<const DecodeStep*>::const_iterator iter;
-	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
-	{
-		const DecodeStep &decodeStep	= **iter;
-		size_t decodeStepId						= decodeStep.GetId();
 		const size_t hypoWordCount		= hypoBitmap.GetNumWordsCovered(decodeStepId)
 								, hypoFirstGapPos	= hypoBitmap.GetFirstGapPos(decodeStepId)
 								, sourceSize			= m_source.GetSize();
@@ -273,7 +267,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 		newHypo->CalcScore(m_transOptColl->GetFutureScoreObject());
 		// logging for the curious
 		IFVERBOSE(3) {
-			newHypo->PrintHypothesis(m_source, StaticData::Instance().GetWeightDistortion(), StaticData::Instance().GetWeightWordPenalty());
+			newHypo->PrintHypothesis(m_source, StaticData::Instance().GetWeightDistortion(newHypo->GetDecodeStepId()), StaticData::Instance().GetWeightWordPenalty());
 		}
 
 		// add to hypothesis stack

@@ -194,7 +194,16 @@ void IOStream::OutputNBestList(const LatticePathList &nBestList, long translatio
 		// basic distortion
 		if (labeledOutput)
 	    m_nBestFile << "d: ";
-		m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
+
+		const vector<DistortionScoreProducer*> &distortionProducer = StaticData::Instance().GetDistortionScoreProducer();
+		vector<DistortionScoreProducer*>::const_iterator iterDistortionProducer;
+		for (iterDistortionProducer = distortionProducer.begin() 
+				; iterDistortionProducer != distortionProducer.end() 
+				; ++iterDistortionProducer)
+		{
+			const DistortionScoreProducer *distortionScoreProducer = *iterDistortionProducer;
+			m_nBestFile << path.GetScoreBreakdown().GetScoreForProducer(distortionScoreProducer) << " ";
+		}
 
 //		reordering
 		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();

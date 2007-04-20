@@ -409,7 +409,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 
 void Hypothesis::CalcDistortionScore()
 {
-	const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
+	const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer(m_decodeStepId);
 
 	float distortionScore;
 	if (m_prevHypo->GetDecodeStepId() == NOT_FOUND)
@@ -470,7 +470,8 @@ void Hypothesis::CalcFutureScore(const SpanScore &futureScore)
 
 	// add future costs for distortion model
 	if(StaticData::Instance().UseDistortionFutureCosts())
-		m_futureScore += m_sourceCompleted.GetFutureDistortionScore((int) GetCurrSourceWordsRange().GetEndPos()) * StaticData::Instance().GetWeightDistortion();
+		m_futureScore += m_sourceCompleted.GetFutureDistortionScore((int) GetCurrSourceWordsRange().GetEndPos()) 
+										* StaticData::Instance().GetWeightDistortion(m_decodeStepId);
 	
 }
 

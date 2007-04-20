@@ -54,18 +54,17 @@ protected:
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
 	ScoreIndexManager				m_scoreIndexManager;
-	std::vector<float>			m_allWeights;
+	std::vector<float>			m_allWeights, m_weightDistortion;
 	std::vector<LexicalReordering*>                   m_reorderModels;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float
 		m_beamThreshold,
-		m_weightDistortion, 
 		m_weightWordPenalty, 
 		m_wordDeletionWeight,
 		m_weightUnknownWord;
 									// PhraseTrans, Generation & LanguageModelScore has multiple weights.
-	int																	m_maxDistortion;
+	std::vector<int>	m_maxDistortion;
 									// do it differently from old pharaoh
 									// -ve	= no limit on distortion
 									// 0		= no disortion (monotone in old pharaoh)
@@ -91,7 +90,7 @@ protected:
 	size_t m_numInputScores;
 
 	size_t m_verboseLevel;
-	DistortionScoreProducer *m_distortionScoreProducer;
+	std::vector<DistortionScoreProducer*> m_distortionScoreProducer;
 	WordPenaltyProducer *m_wpProducer;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
@@ -195,9 +194,9 @@ public:
 	{
 		return m_reorderModels;
 	}
-	float GetWeightDistortion() const
+	float GetWeightDistortion(size_t decodeStepId) const
 	{
-		return m_weightDistortion;
+		return m_weightDistortion[decodeStepId];
 	}
 	float GetWeightWordPenalty() const
 	{
@@ -211,9 +210,9 @@ public:
 	{
 		return m_maxHypoStackSize;
 	}
-	int GetMaxDistortion() const
+	int GetMaxDistortion(size_t decodeStepId) const
 	{
-		return m_maxDistortion;
+		return m_maxDistortion[decodeStepId];
 	}
 	float GetBeamThreshold() const
 	{
@@ -309,7 +308,10 @@ public:
 	{
 		return m_allWeights;
 	}
-	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
+	const std::vector<DistortionScoreProducer*> GetDistortionScoreProducer() const 
+	{ return m_distortionScoreProducer; }
+	const DistortionScoreProducer* GetDistortionScoreProducer(size_t decodeStepId) const 
+	{ return m_distortionScoreProducer[decodeStepId]; }
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
 	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 

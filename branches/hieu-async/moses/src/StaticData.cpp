@@ -169,14 +169,19 @@ bool StaticData::LoadData(Parameter *parameter)
 	  m_isDetailedTranslationReportingEnabled = true;
 	}
 
+	// distortion
+	m_weightDistortion				= Scan<float>(m_parameter->GetParam("weight-d"));
+	assert(m_weightDistortion.size() == m_parameter->GetParam("mapping").size());
+
+	for (size_t i = 0 ; i < m_weightDistortion.size() ; i++)
+	{
+		m_distortionScoreProducer.push_back(new DistortionScoreProducer(m_scoreIndexManager));
+		m_allWeights.push_back(m_weightDistortion[i]);
+	}
+
 	// score weights
-	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
-	m_weightDistortion				= Scan<float>(distortionWeights[0]);
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
 	m_weightUnknownWord				= 1; // do we want to let mert decide weight for this ??
-
-	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
-	m_allWeights.push_back(m_weightDistortion);
 
 	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightWordPenalty);
@@ -187,9 +192,9 @@ bool StaticData::LoadData(Parameter *parameter)
 	// misc
 	m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
-	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
-		Scan<int>(m_parameter->GetParam("distortion-limit")[0])
-		: -1;
+	m_maxDistortion = Scan<int>(m_parameter->GetParam("distortion-limit"));
+	assert(m_maxDistortion.size() == m_parameter->GetParam("mapping").size());
+
 	m_useDistortionFutureCosts = (m_parameter->GetParam("use-distortion-future-costs").size() > 0) 
 		? Scan<bool>(m_parameter->GetParam("use-distortion-future-costs")[0]) : true;
 	//TRACE_ERR( "using distortion future costs? "<<UseDistortionFutureCosts()<<"\n");
@@ -275,9 +280,9 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_languageModel);
 	RemoveAllInColl(m_decodeStepList);
 	RemoveAllInColl(m_reorderModels);
+	RemoveAllInColl(m_distortionScoreProducer);
 	
 	// small score producers
-	delete m_distortionScoreProducer;
 	delete m_wpProducer;
 	delete m_unknownWordPenaltyProducer;
 
