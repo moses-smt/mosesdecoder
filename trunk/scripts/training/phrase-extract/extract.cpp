@@ -37,6 +37,7 @@ int maxPhraseLength;
 int phraseCount = 0;
 char* fileNameExtract;
 bool orientationFlag;
+bool onlyOutputSpanInfo;
 
 int main(int argc, char* argv[]) 
 {
@@ -45,7 +46,7 @@ int main(int argc, char* argv[])
   time_t starttime = time(NULL);
 
   if (argc != 6 && argc != 7) {
-    cerr << "syntax: phrase-extract en de align extract max-length [orientation]\n";
+    cerr << "syntax: phrase-extract en de align extract max-length [orientation | --OnlyOutputSpanInfo]\n";
     exit(1);
   }
   char* &fileNameE = argv[1];
@@ -53,7 +54,9 @@ int main(int argc, char* argv[])
   char* &fileNameA = argv[3];
   fileNameExtract = argv[4];
   maxPhraseLength = atoi(argv[5]);
-  orientationFlag = (argc == 7);
+  onlyOutputSpanInfo = argc == 7 && strcmp(argv[6],"--OnlyOutputSpanInfo") == 0; //az
+  if (onlyOutputSpanInfo) cerr << "Only outputting span info in format (starting from 0): SrcBegin SrcEnd TgtBegin TgtEnd\n"; //az
+  orientationFlag = (argc == 7 && !onlyOutputSpanInfo);
   if (orientationFlag) cerr << "(also extracting orientation)\n";
 
   //  string fileNameE = "/data/nlp/koehn/europarl-v2/models/de-en/model/aligned.en";
@@ -85,15 +88,28 @@ int main(int argc, char* argv[])
     SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n');
     SentenceAlignment sentence;
     // cout << "read in: " << englishString << " & " << foreignString << " & " << alignmentString << endl;
+    //az: output src, tgt, and alingment line
+    if (onlyOutputSpanInfo) {
+      cout << "LOG: SRC: " << foreignString << endl;
+      cout << "LOG: TGT: " << englishString << endl;
+      cout << "LOG: ALT: " << alignmentString << endl;
+      cout << "LOG: PHRASES_BEGIN:" << endl;
+    }
+      
     if (sentence.create( englishString, foreignString, alignmentString, i ))
       extract(sentence);
+    if (onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
   }
 
   eFile.close();
   fFile.close();
   aFile.close();
-  extractFile.close();
-  extractFileInv.close();
+  //az: only close if we actually opened it
+  if (!onlyOutputSpanInfo) {
+    extractFile.close();
+    extractFileInv.close();
+    if (orientationFlag) extractFileOrientation.close();
+  }
 }
  
 void extract( SentenceAlignment &sentence ) {
@@ -155,6 +171,11 @@ void extract( SentenceAlignment &sentence ) {
 void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF ) {
   // foreign
   // cout << "adding ( " << startF << "-" << endF << ", " << startE << "-" << endE << ")\n"; 
+
+ if (onlyOutputSpanInfo) {
+   cout << startF << " " << endF << " " << startE << " " << endE << endl;
+ } else {
+
   if (phraseCount % 10000000 == 0) {
     if (phraseCount>0) {
       extractFile.close();
@@ -228,6 +249,7 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   extractFile << "\n";
   extractFileInv << "\n";
   if (orientationFlag) extractFileOrientation << "\n";
+ } // end: if (onlyOutputSpanInfo)
 }
   
 bool isAligned ( SentenceAlignment &sentence, int fi, int ei ) {
