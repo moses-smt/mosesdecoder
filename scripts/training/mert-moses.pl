@@ -46,7 +46,6 @@
 my $default_triples = {
     # these two basic models exist even if not specified, they are
     # not associated with any model file
-    "d" => [ [ 1.0, 0.0, 2.0 ] ],   # distance-based distortion
     "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
 };
 
@@ -124,6 +123,9 @@ my $___NONORM = 0;
 # set 0 if input type is text, set 1 if input type is confusion network
 my $___INPUTTYPE = 0; 
 
+# set 1 if using with async decoder
+my $___ASYNC = 0; 
+
 my $allow_unknown_lambdas = 0;
 my $allow_skipping_lambdas = 0;
 
@@ -173,6 +175,7 @@ GetOptions(
   "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
   "obo-scorenbest=s" => \$obo_scorenbest, # see above
+  "async=i" => \$___ASYNC, #whether script to be used with async decoder
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -588,7 +591,9 @@ while(1) {
     $visited{$name} = 1;
     die "The decoder produced also some '$name' scores, but we do not know the ranges for them, no way to optimize them\n"
       if !defined $used_triples{$name};
+		my $count = 0;
     foreach my $feature (@{$used_triples{$name}}) {
+			$count++;
       my ($val, $min, $max) = @$feature;
       push @CURR, $val;
       push @MIN, $min;
@@ -1042,11 +1047,40 @@ sub scan_config {
     my ($tg, $shortname, $label) = split /=/, $pair;
     $defined_files{$shortname} = 0 if ! defined $defined_files{$shortname};
     $defined_steps{$tg} = 0 if ! defined $defined_steps{$tg};
+
     if ($defined_files{$shortname} != $defined_steps{$tg}) {
       print STDERR "$inishortname: You defined $defined_files{$shortname} files for $label but use $defined_steps{$tg} in [mapping]!\n";
       $error = 1;
     }
   }
+
+	# distance-based distortion
+  if ($___ASYNC == 1)
+  {
+		my @my_array;
+    for(my $i=0 ; $i < $defined_steps{"T"} ; $i++) 
+		{
+	    push @my_array, [ 1.0, 0.0, 2.0 ];
+		}
+
+		push @{$used_triples{"d"}}, @my_array;
+
+		# debug print
+		print "distortion:";
+		my $refarray=$used_triples{"d"};
+		my @vector=@$refarray;
+		foreach my $subarray (@vector) {
+			my @toto=@$subarray;
+			print @toto,"\n";
+		}
+		#exit 1;
+  }
+	else
+	{
+		push @{$used_triples{"d"}}, [1.0, 0.0, 2.0];
+	}
+
+
   exit(1) if $error;
   return (\%defined_files);
 }
