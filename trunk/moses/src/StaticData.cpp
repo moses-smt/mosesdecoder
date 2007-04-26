@@ -623,8 +623,14 @@ bool StaticData::LoadPhraseTables()
 			IFVERBOSE(1)
 				PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			if (!FileExists(filePath+".binphr.idx"))
-			{					
+			{	// memory phrase table
 				VERBOSE(2,"using standard phrase tables");
+				if (m_inputType != SentenceInput)
+				{
+					UserMessage::Add("Must use binary phrase table for this input type");
+					return false;
+				}
+				
 				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent);
 				if (!pd->Load(input
 								 , output
@@ -640,7 +646,7 @@ bool StaticData::LoadPhraseTables()
 				m_phraseDictionary.push_back(pd);
 			}
 			else 
-			{
+			{ // binary phrase table
 				VERBOSE(1, "using binary phrase tables for idx "<<currDict<<"\n");
 				PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent,(currDict==0 ? m_numInputScores : 0));
 				if (!pd->Load(input,output,filePath,weight,
