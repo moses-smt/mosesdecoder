@@ -26,6 +26,7 @@ training/cmert-0.5/python/psyco/_psyco.so
 training/cmert-0.5/python/psyco/support.py
 training/cmert-0.5/README
 training/cmert-0.5/score-nbest.py
+training/mbr/mbr
 training/filter-model-given-input.pl
 training/filter-and-binarize-model-given-input.pl
 training/mert-moses.pl

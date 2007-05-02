@@ -23,7 +23,7 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 
 all: compile
 
-SUBDIRS=cmert-0.5 phrase-extract symal
+SUBDIRS=cmert-0.5 phrase-extract symal mbr
 
 compile:
 	pwd=`pwd`; \
