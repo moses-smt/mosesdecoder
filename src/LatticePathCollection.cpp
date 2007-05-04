@@ -1,19 +1,20 @@
-
 #include "LatticePathCollection.h"
 
 void LatticePathCollection::Prune(size_t newSize)
 {
-	if (m_collection.size() <= newSize)
+	size_t currSize = m_collection.size(); 
+
+	if (currSize <= newSize)
 		return; // don't need to prune
 
 	CollectionType::reverse_iterator iterRev;
 	for (iterRev = m_collection.rbegin() ; iterRev != m_collection.rend() ; ++iterRev)
 	{
 		LatticePath *latticePath = *iterRev;
-
-		// delete path in m_uniquePath
 		delete latticePath;
-		if (m_collection.size() == newSize)
+		
+		currSize--;
+		if (currSize == newSize)
 			break;
 	}
 	
