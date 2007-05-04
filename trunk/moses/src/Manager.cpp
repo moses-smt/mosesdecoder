@@ -348,8 +348,10 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 			addPath = distinctHyps.insert(tgtPhrase).second;
 		}
 		
-		if(addPath && ret.Add(path)) 
-		{	// create deviations from current best
+		if(addPath) 
+		{	
+			ret.Add(path);
+			// create deviations from current best
 			path->CreateDeviantPaths(contenders);		
 		}
 		else
