@@ -42,9 +42,6 @@ class LatticePathCollection
 protected:
 	typedef std::multiset<LatticePath*, CompareLatticePathCollection> CollectionType;
 	CollectionType m_collection;
-	std::set< std::vector<const Hypothesis *> > m_uniquePath; 
-		// not sure if really needed. does the partitioning algorithm create duplicate paths ?
-
 public:	
 	//iterator begin() { return m_collection.begin(); }
 	LatticePath *pop()
@@ -52,12 +49,7 @@ public:
 		LatticePath *top = *m_collection.begin();
 
 		// Detach
-		// delete from m_uniquePath as well
-		const std::vector<const Hypothesis *> &edges = top->GetEdges();
-		m_uniquePath.erase(edges);
-
 		m_collection.erase(m_collection.begin());
-
 		return top;
 	}
 
@@ -70,16 +62,7 @@ public:
 	//! add a new entry into collection
 	void Add(LatticePath *latticePath)
 	{
-		const std::vector<const Hypothesis *> &edges = latticePath->GetEdges();
-		if ( m_uniquePath.insert(edges).second )
-		{ // path not yet in collection
-			m_collection.insert(latticePath);
-		}
-		else
-		{ // path already in there
-			assert(false);
-			delete latticePath;
-		}
+		m_collection.insert(latticePath);
 	}
 	
 	size_t GetSize() const

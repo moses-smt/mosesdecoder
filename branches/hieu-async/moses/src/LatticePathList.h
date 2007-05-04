@@ -31,8 +31,6 @@ class LatticePathList
 {
 protected:
 	 std::list<const LatticePath*> m_collection;
-	 std::set< std::vector<const Hypothesis *> > m_uniquePath;
-		// not sure if really needed. does the partitioning algorithm create duplicate paths ?
 public:
 	// iters
 	typedef std::list<const LatticePath*>::iterator iterator;
@@ -50,20 +48,9 @@ public:
 	}
 
 	//! add a new entry into collection
-	bool Add(LatticePath *latticePath)
+	void Add(LatticePath *latticePath)
 	{
-		// make sure it not duplicated
-		const std::vector<const Hypothesis *> &edges = latticePath->GetEdges();
-		if ( m_uniquePath.insert(edges).second )
-		{
-			m_collection.push_back(latticePath);
-			return true;
-		}
-		else
-		{
-			assert(false);
-			return false;
-		}
+		m_collection.push_back(latticePath);
 	}
 
 	size_t GetSize() const

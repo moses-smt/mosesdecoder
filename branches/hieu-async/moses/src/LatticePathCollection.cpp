@@ -3,20 +3,19 @@
 
 void LatticePathCollection::Prune(size_t newSize)
 {
-	assert( m_collection.size() == m_uniquePath.size() );
-	if (m_collection.size() <= newSize)
+	size_t currSize = m_collection.size(); 
+
+	if (currSize <= newSize)
 		return; // don't need to prune
 
 	CollectionType::reverse_iterator iterRev;
 	for (iterRev = m_collection.rbegin() ; iterRev != m_collection.rend() ; ++iterRev)
 	{
 		LatticePath *latticePath = *iterRev;
-
-		// delete path in m_uniquePath
-		m_uniquePath.erase(latticePath->GetEdges());
-
 		delete latticePath;
-		if (m_uniquePath.size() == newSize)
+
+		currSize--;
+		if (currSize == newSize)
 			break;
 	}
 	
@@ -26,8 +25,5 @@ void LatticePathCollection::Prune(size_t newSize)
 		iter++;
 	
 	m_collection.erase(iter, m_collection.end());
-
-	assert( m_collection.size() == m_uniquePath.size() );
-
 }
 
