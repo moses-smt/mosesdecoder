@@ -3,7 +3,6 @@
 
 void LatticePathCollection::Prune(size_t newSize)
 {
-	assert( m_collection.size() == m_uniquePath.size() );
 	if (m_collection.size() <= newSize)
 		return; // don't need to prune
 
@@ -24,8 +23,5 @@ void LatticePathCollection::Prune(size_t newSize)
 		iter++;
 	
 	m_collection.erase(iter, m_collection.end());
-
-	assert( m_collection.size() == m_uniquePath.size() );
-
 }
 
