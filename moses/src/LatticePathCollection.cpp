@@ -13,10 +13,8 @@ void LatticePathCollection::Prune(size_t newSize)
 		LatticePath *latticePath = *iterRev;
 
 		// delete path in m_uniquePath
-		m_uniquePath.erase(latticePath->GetEdges());
-
 		delete latticePath;
-		if (m_uniquePath.size() == newSize)
+		if (m_collection.size() == newSize)
 			break;
 	}
 	
