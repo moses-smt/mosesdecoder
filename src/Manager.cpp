@@ -352,6 +352,10 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 		{	// create deviations from current best
 			path->CreateDeviantPaths(contenders);		
 		}
+		else
+		{ // path not distinct. delete
+			delete path;
+		}
 
 		if(onlyDistinct)
 		{
