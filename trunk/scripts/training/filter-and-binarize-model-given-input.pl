@@ -5,7 +5,7 @@
 # tables and a new moses.ini, so that loading of tables is much faster.
 
 # original code by Philipp Koehn
-# changes by Ondrej Bojar
+# changes by Ondrej Bojar and others
 
 use strict;
 
@@ -14,13 +14,14 @@ my $MAX_LENGTH = 10;
 # in other words, all phrase-tables will be truncated at least to 10 words per
 # phrase
 
-my $binarizer = shift;
+my $binarizer = shift; # use mosesdecoder/misc/processPhraseTable for that
 my $dir = shift; 
 my $config = shift;
 my $input = shift;
 
 if (!defined $dir || !defined $config || !defined $input) {
-  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text\n";
+  print STDERR "usage: filter-and-binarize-model-given-input.pl binarizer targetdir moses.ini input.text\n";
+  print STDERR "...use mosesdecoder/misc/processPhraseTable as the binarizer\n";
   exit 1;
 }
 
