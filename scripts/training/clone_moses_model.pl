@@ -1,10 +1,9 @@
 #!/usr/bin/perl
 
 # $Id$
-# given a moses.ini file, creates a wiseln of it and all the included bits
+# given a moses.ini file, creates a fresh version of it
 # in the current directory
-
-# relies on wiseln, a wise variant of linking. You might just use ln -s instead.
+# All relevant files are hardlinked or copied to the directory, too.
 
 use strict;
 use Getopt::Long;
@@ -12,8 +11,11 @@ use Getopt::Long;
 my @fixpath = ();
   # specify search-replace pattern to fix paths.
   # use a space to delimit source and target pathnames
+my $symlink = 0; # prefer symlink over hardlink, but revert to hardlink or copy
+                 # if symlink fails
 GetOptions(
   "fixpath=s" => \@fixpath,
+  "symlink"=>\$symlink,
 );
 my @fixrepls = map {
     my ($fixsrc, $fixtgt) = split / /, $_;
@@ -22,7 +24,9 @@ my @fixrepls = map {
   } @fixpath;
 
 my $ini = shift;
-die "usage!" if !defined $ini;
+die "usage: clone_moses_model.pl /a/source/moses.ini" if !defined $ini;
+
+die "./moses.ini exists, will not overwrite" if -e "moses.ini";
 
 my %cnt; # count files per section
 open INI, $ini or die "Can't read $ini";
@@ -38,10 +42,10 @@ while (<INI>) {
       my ($a, $b, $c, $fn) = split / /;
       $cnt{$section}++;
       $fn = fixpath($fn);
-      $fn = ensure_relative_to_origin($fn, $ini);
+      $fn = ensure_relative_from_origin($fn, $ini);
       $fn = ensure_exists_or_gzipped_exists($fn);
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
-      safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
+      clone_file_or_die($fn, "./$section.$cnt{$section}$suffix");
       $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
     }
     if ($section eq "generation-file") {
@@ -49,9 +53,10 @@ while (<INI>) {
       my ($a, $b, $c, $fn) = split / /;
       $cnt{$section}++;
       $fn = fixpath($fn);
+      $fn = ensure_relative_from_origin($fn, $ini);
       $fn = ensure_exists_or_gzipped_exists($fn);
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
-      safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
+      clone_file_or_die($fn, "./$section.$cnt{$section}$suffix");
       $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
     }
     if ($section eq "distortion-file") {
@@ -59,10 +64,10 @@ while (<INI>) {
       my $fn = $_;
       $cnt{$section}++;
       $fn = fixpath($fn);
-      $fn = ensure_relative_to_origin($fn, $ini);
+      $fn = ensure_relative_from_origin($fn, $ini);
       $fn = ensure_exists_or_gzipped_exists($fn);
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
-      safesystem("wiseln $fn ./$section.$cnt{$section}$suffix") or die;
+      clone_file_or_die($fn, "./$section.$cnt{$section}$suffix");
       $_ = "./$section.$cnt{$section}$suffix\n";
     }
   }
@@ -70,6 +75,30 @@ while (<INI>) {
 }
 close INI;
 close OUT;
+
+sub clone_file_or_die {
+  my $src = shift;
+  my $tgt = shift;
+
+  my $src = resolve($src); # resolve symlinks
+
+  my $ok = 0;
+  if ($symlink) {
+    # attemt a symlink
+    $ok = safesystem("ln", "-s", $src, $tgt);
+  }
+
+  if (!$ok) {
+    # perform a hardlink or a copy
+    if (! safesystem("ln", $src, $tgt)) {
+      # hardlink failed perform a copy
+      safesystem("cp", "-u", $src, $tgt)
+        or die "Failed to clone $src into $tgt";
+    }
+  }
+  
+  safesystem("echo $src > $tgt.info"); # dump a short information
+}
 
 sub ensure_exists_or_gzipped_exists {
   my $fn = shift;
@@ -105,10 +134,40 @@ sub safesystem {
   }
 }
 
-sub ensure_relative_to_origin {
+sub resolve {
+  my $f = shift;
+  return $f if ! -l $f;
+  my $targ_from_lnk = readlink($f) or die "Can't lstat $f";
+  my $targ = ensure_relative_from_origin($targ_from_lnk, $f);
+  # print STDERR "$f   ---> $targ_from_lnk  ---> $targ\n";
+
+  my $fully = 1; # resolve the full chain of symlinks
+  if ($fully) {
+    my $newtarg = resolve($targ);
+    $targ = $newtarg if defined $newtarg;
+  }
+  return $targ;
+}
+
+sub ensure_relative_from_origin {
   my $target = shift;
   my $originfile = shift;
   return $target if $target =~ /^\/|^~/; # the target path is absolute already
   $originfile =~ s/[^\/]*$//;
-  return $originfile."/".$target;
+  my $prefix = ($originfile eq "" ? "" : $originfile."/");
+  return simplify_path($prefix.$target);
+}
+
+
+sub simplify_path {
+  my $path = shift;
+  my $lastpath = "";
+  while ($lastpath ne $path) {
+    $lastpath = $path;
+    $path =~ s/\/+/\//g;
+    $path =~ s/(\/\.)+\//\//g;
+    $path =~ s/\/[^\/]+(?<!\/\.\.)\/\.\.\//\//g;
+    $path =~ s/^[^\/]+(?<!\/\.\.)\/\.\.\///g;
+  }
+  return $path;
 }
