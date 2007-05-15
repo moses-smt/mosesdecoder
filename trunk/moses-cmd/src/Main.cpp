@@ -136,6 +136,7 @@ int main(int argc, char* argv[])
 
 		Manager manager(*source);
 		manager.ProcessSentence();
+		cerr << "DECODER TYPE : " << staticData.GetDecoderType() << endl;
 		if (staticData.GetDecoderType() == MAP){
 			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 													 staticData.GetReportSegmentation(),
@@ -158,6 +159,7 @@ int main(int argc, char* argv[])
 		}
 		else if (staticData.GetDecoderType() == MBR){
 			size_t nBestSize = staticData.GetNBestSize();
+			cerr << "NBEST SIZE : " << nBestSize << endl;
 			assert(nBestSize > 0);
 			
 		  if (nBestSize > 0)
