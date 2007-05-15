@@ -30,105 +30,10 @@ using namespace std ;
 
 */
 
-int TABLE_LINE_MAX_LENGTH = 5000;
-vector<float> weights;
-float SCALE = 1.0;
 int BLEU_ORDER = 4;
 int SMOOTH = 1;
 int DEBUG = 0;
 float min_interval = 1e-4;
-
-#define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) {_IS.getline(_LINE, _SIZE, _DELIM); if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear();}
-
-typedef string WORD;
-typedef unsigned int WORD_ID;
-
-
-map<WORD, WORD_ID>  lookup;
-vector< WORD > vocab;
-
-class candidate_t{
-  public:
-    vector<WORD_ID> translation; 
-    vector<float> features;
-    int translation_size;
-} ;
-
-
-void usage(void)
-{
-    fprintf(stderr,
-	    "usage: mbr -s SCALE -n BLEU_ORDER -w weights.txt -i nbest.txt"); 
-}
-
-
-char *strstrsep(char **stringp, const char *delim) {
-  char *match, *save;
-  save = *stringp;
-  if (*stringp == NULL)
-    return NULL;
-  match = strstr(*stringp, delim);
-  if (match == NULL) {
-    *stringp = NULL;
-    return save;
-  }
-  *match = '\0';
-  *stringp = match + strlen(delim);
-  return save;
-}
-
-
-
-vector<string> tokenize( const char input[] )
-{
-  vector< string > token;
-  bool betweenWords = true;
-  int start;
-  int i=0;
-  for(; input[i] != '\0'; i++)
-  {
-    bool isSpace = (input[i] == ' ' || input[i] == '\t');
-
-    if (!isSpace && betweenWords)
-    {
-      start = i;
-      betweenWords = false;
-    }
-    else if (isSpace && !betweenWords)
-    {
-      token.push_back( string( input+start, i-start ) );
-      betweenWords = true;
-    }
-  }
-  if (!betweenWords)
-    token.push_back( string( input+start, i-start+1 ) );
-  return token;
-}
-
-  
-
-WORD_ID storeIfNew( WORD word )
-{
-  if( lookup.find( word ) != lookup.end() )
-    return lookup[ word ];
-
-  WORD_ID id = vocab.size();
-  vocab.push_back( word );
-  lookup[ word ] = id;
-  return id;
-}
-
-int count( string input, char delim )
-{
-  int count = 0;
-  for ( int i = 0; i < input.size(); i++){
-      if ( input[i] == delim)
-         count++;
-  }
-  return count;
-}
-
-
 void extract_ngrams(const vector<const Factor* >& sentence, map < vector < const Factor* >, int >  & allngrams)
 {
   vector< const Factor* > ngram;
@@ -195,8 +100,6 @@ float calculate_score(const vector< vector<const Factor*> > & sents, int ref, in
   return exp(logbleu);
 }
 
-
-
 vector<const Factor*> doMBR(const LatticePathList& nBestList){
 //   cerr << "Sentence " << sent << " has " << sents.size() << " candidate translations" << endl;
   float marginal = 0;
@@ -224,8 +127,7 @@ vector<const Factor*> doMBR(const LatticePathList& nBestList){
     ngram_stats.push_back(counts);
     translations.push_back(translation);
    }
-   //cerr << "Marginal is " << marginal;
-
+   
    vector<float> mbr_loss;
    float bleu, weightedLoss;
    float weightedLossCumul = 0;
@@ -249,15 +151,8 @@ vector<const Factor*> doMBR(const LatticePathList& nBestList){
            minMBRLossIdx = i;
        }
    }
-//    cerr << "Min pos is : " << minMBRLossIdx << endl;
-//    cerr << "Min mbr loss is : " << minMBRLoss << endl;
    /* Find sentence that minimises Bayes Risk under 1- BLEU loss */
-   
    return translations[minMBRLossIdx];
-   //for (int i = 0; i < best_translation.size(); i++)
-   //    cout << vocab[best_translation[i]] << " " ;
-   //cout << endl;
-   //return best_translation;
 }
 
 void GetOutputFactors(const LatticePath &path, vector <const Factor*> &translation){
@@ -280,110 +175,3 @@ void GetOutputFactors(const LatticePath &path, vector <const Factor*> &translati
 	}
 }
 
-/*
-void read_nbest_data(string fileName)
-{
-
-   FILE * fp;
-   fp = fopen (fileName.c_str() , "r");
-
-   static char buf[10000];
-   char *rest, *tok;
-   int field;
-   int sent_i, cur_sent;
-   candidate_t *cand = NULL;
-   vector<candidate_t*> testsents;
-   
-   cur_sent = -1;
-   
-    while (fgets(buf, sizeof(buf), fp) != NULL) {
-	field = 0;
-	rest = buf;
-	while ((tok = strstrsep(&rest, "|||")) != NULL) {
-            if (field == 0) {
-		sent_i = strtol(tok, NULL, 10);
-                cand = new candidate_t;
-	    } else if (field == 2) {
-                   vector<float> features;
-                   char * subtok;
-                   subtok = strtok (tok," ");
-
-  		   while (subtok != NULL)
-                   {
-    		     features.push_back(atof(subtok));
-    		     subtok = strtok (NULL, " ");
-  	           }
-                   cand->features = features;
-            } else if (field == 1) {
-                vector<string> trans_str = tokenize(tok);
-                vector<WORD_ID> trans_int;
-                for (int j=0; j<trans_str.size(); j++)
-                {
-                    trans_int.push_back( storeIfNew( trans_str[j] ) );
-                }
-                cand->translation= trans_int;
-                cand->translation_size = cand->translation.size();
-            } else if (field == 3) {
-                continue;
-            } 
-            else {
-		fprintf(stderr, "too many fields in n-best list line\n");
-	    }
-            field++;
-	}
-        if (sent_i != cur_sent){
-           if (cur_sent != - 1) {
-              process(cur_sent,testsents);
-           }
-           cur_sent = sent_i;
-           testsents.clear();
-        }
-    testsents.push_back(cand);
-    }
-    process(cur_sent,testsents);
-    cerr << endl;
-}*/
-/*
-int main(int argc, char **argv)
-{
-
-    time_t starttime = time(NULL);
-    int c;
-    
-    string f_weight = "";
-    string f_nbest = "";
-    
-    while ((c = getopt(argc, argv, "s:w:n:i:")) != -1) {
-	switch (c) {
-	case 's':
-	    SCALE = atof(optarg);
-	    break;
-	case 'n':
-	    BLEU_ORDER = atoi(optarg);
-	    break;
-	case 'w':
-	    f_weight =  optarg;
-	    break;
-	case 'i':
-	    f_nbest = optarg;
-	    break;
-	default:
-	    usage();
-	}
-    }
-
-    argc -= optind;
-    argv += optind;
-
-    if (argc < 2) {
-	usage();
-    }
-       
-
-    weights = read_weights(f_weight);    
-    read_nbest_data(f_nbest);
-    
-    time_t endtime = time(NULL);
-    cerr << "Processed data in" << (endtime-starttime) << " seconds\n";
-}*/
-    
