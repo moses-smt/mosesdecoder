@@ -184,6 +184,15 @@ void IOStream::Backtrack(const Hypothesis *hypo){
 		Backtrack(hypo->GetPrevHypo());
 	}
 }
+				
+void IOStream::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+{
+	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
+			{
+				const Factor *factor = mbrBestHypo[i];
+				cout << *factor << " ";
+			}
+}													 
 
 void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
 {

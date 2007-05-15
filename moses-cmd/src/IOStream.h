@@ -76,6 +76,7 @@ public:
 
 	InputType* GetInput(InputType *inputType);
 	void OutputBestHypo(const Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+	void OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
 	void OutputNBestList(const LatticePathList &nBestList, long translationId);
 	void Backtrack(const Hypothesis *hypo);
 
