@@ -208,9 +208,10 @@ bool StaticData::LoadData(Parameter *parameter)
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH
 	SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
-	
-	m_decoderType = MAP;
-	
+	  
+	m_decoderType = (DecoderType) ((m_parameter->GetParam("decoder-type").size() > 0) ? Scan<int>(m_parameter->GetParam("decoder-type")[0]) : 0);
+	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0)
+				? Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
 
 	if (!LoadLexicalReorderingModel()) return false;
 	if (!LoadLanguageModels()) return false;
