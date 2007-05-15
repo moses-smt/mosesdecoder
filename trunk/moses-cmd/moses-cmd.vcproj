@@ -189,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\mbr.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TranslationAnalysis.cpp"
 				>
 			</File>
@@ -204,6 +208,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Main.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\mbr.h"
 				>
 			</File>
 			<File

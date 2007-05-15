@@ -92,7 +92,7 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 		LMList::const_iterator i = lmlist.begin();
 		for (; acc != lmAcc.end(); ++acc, ++i) {
 			char buf[256];
-			sprintf(buf, "%.4f", (double)(*acc)/(double)lmCalls);
+			sprintf(buf, "%.4f", (float)(*acc)/(float)lmCalls);
 			os << (*i)->GetScoreProducerDescription() <<", AVG N-GRAM LENGTH: " << buf << std::endl;
 		}
 	}
