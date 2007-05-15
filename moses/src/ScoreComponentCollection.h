@@ -137,6 +137,13 @@ public:
 	{
 		return std::inner_product(m_scores.begin(), m_scores.end(), rhs.begin(), 0.0f);
 	}
+	
+	//! Used to find the weighted total of scores, using scale as a scaling factor.  rhs should contain a vector of weights
+  //! of the same length as the number of scores
+	float InnerProduct(const std::vector<float>& rhs, float scale) const
+	{
+		return scale * std::inner_product(m_scores.begin(), m_scores.end(), rhs.begin(), 0.0f);
+	}
 
 	float PartialInnerProduct(const ScoreProducer* sp, const std::vector<float>& rhs) const
 	{

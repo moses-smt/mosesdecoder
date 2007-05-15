@@ -137,6 +137,12 @@ enum DictionaryFind
 	,All
 };
 
+enum DecoderType
+{	
+	MAP
+	,MBR
+};
+
 // typedef
 typedef size_t FactorType;
 
