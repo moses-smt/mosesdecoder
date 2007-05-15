@@ -108,6 +108,8 @@ protected:
 	size_t m_maxFactorIdx[2];  //! number of factors on source and target side
 	size_t m_maxNumFactors;  //! max number of factors on both source and target sides
 
+  DecoderType m_decoderType; //! MAP or MBR decoder
+  float m_mbrScale; //! Scaling factor for computing marginal probability of candidate translation
 	//! constructor. only the 1 static variable can be created
 	StaticData();
 
@@ -329,4 +331,6 @@ public:
 	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
+	DecoderType GetDecoderType() const {return m_decoderType;}
+	float GetMBRScale() const {return m_mbrScale;}
 };
