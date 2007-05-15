@@ -51,6 +51,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ConfusionNet.h"
 #include "WordLattice.h"
 #include "TranslationAnalysis.h"
+#include "mbr.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -135,26 +136,47 @@ int main(int argc, char* argv[])
 
 		Manager manager(*source);
 		manager.ProcessSentence();
-		ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
+		if (staticData.GetDecoderType() == MAP){
+			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 													 staticData.GetReportSegmentation(),
 													 staticData.GetReportAllFactors()
 													 );
-		IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
+			IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
+			
+			// n-best
+			size_t nBestSize = staticData.GetNBestSize();
+			if (nBestSize > 0)
+				{
+			  	VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+					LatticePathList nBestList;
+					manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
+					ioStream->OutputNBestList(nBestList, source->GetTranslationId());
+					//RemoveAllInColl(nBestList);
 
-		// n-best
-		size_t nBestSize = staticData.GetNBestSize();
-		if (nBestSize > 0)
+					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
+			}
+		}
+		else if (staticData.GetDecoderType() == MBR){
+			size_t nBestSize = staticData.GetNBestSize();
+			assert(nBestSize > 0);
+			
+		  if (nBestSize > 0)
 			{
 			  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 				LatticePathList nBestList;
-				manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-				ioStream->OutputNBestList(nBestList, source->GetTranslationId());
-				//RemoveAllInColl(nBestList);
-
+				manager.CalcNBest(nBestSize, nBestList,true);
+				std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
+				ioStream->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
+													 staticData.GetReportSegmentation(),
+													 staticData.GetReportAllFactors()
+													 );
 				IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
-		}
-
-		if (staticData.IsDetailedTranslationReportingEnabled()) {
+		  }
+			
+			
+		}	
+		 
+				if (staticData.IsDetailedTranslationReportingEnabled()) {
 			TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
 		}
 
