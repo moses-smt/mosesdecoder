@@ -23,5 +23,5 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 std::vector<const Factor*> doMBR(const LatticePathList& nBestList);
 void GetOutputFactors(const LatticePath &path, std::vector <const Factor*> &translation);
-double calculate_score(const std::vector< std::vector<const Factor*> > & sents, int ref, int hyp,  std::vector < std::map < std::vector < const Factor *>, int > > & ngram_stats );
+float calculate_score(const std::vector< std::vector<const Factor*> > & sents, int ref, int hyp,  std::vector < std::map < std::vector < const Factor *>, int > > & ngram_stats );
 

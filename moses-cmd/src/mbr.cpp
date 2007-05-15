@@ -31,12 +31,12 @@ using namespace std ;
 */
 
 int TABLE_LINE_MAX_LENGTH = 5000;
-vector<double> weights;
+vector<float> weights;
 float SCALE = 1.0;
 int BLEU_ORDER = 4;
 int SMOOTH = 1;
 int DEBUG = 0;
-double min_interval = 1e-4;
+float min_interval = 1e-4;
 
 #define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) {_IS.getline(_LINE, _SIZE, _DELIM); if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear();}
 
@@ -50,7 +50,7 @@ vector< WORD > vocab;
 class candidate_t{
   public:
     vector<WORD_ID> translation; 
-    vector<double> features;
+    vector<float> features;
     int translation_size;
 } ;
 
@@ -146,10 +146,10 @@ void extract_ngrams(const vector<const Factor* >& sentence, map < vector < const
   }
 }
 
-double calculate_score(const vector< vector<const Factor*> > & sents, int ref, int hyp,  vector < map < vector < const Factor *>, int > > & ngram_stats ) {
+float calculate_score(const vector< vector<const Factor*> > & sents, int ref, int hyp,  vector < map < vector < const Factor *>, int > > & ngram_stats ) {
   int comps_n = 2*BLEU_ORDER+1;
-  int comps[comps_n];
-  double logbleu = 0.0, brevity;
+  vector<int> comps(comps_n);
+  float logbleu = 0.0, brevity;
   
   int hyp_length = sents[hyp].size();
 
@@ -184,12 +184,12 @@ double calculate_score(const vector< vector<const Factor*> > & sents, int ref, i
     if (comps[0] == 0)
       return 0.0;
     if ( i > 0 )
-      logbleu += log(comps[2*i]+SMOOTH)-log(comps[2*i+1]+SMOOTH);
+      logbleu += log((float)comps[2*i]+SMOOTH)-log((float)comps[2*i+1]+SMOOTH);
     else
-      logbleu += log(comps[2*i])-log(comps[2*i+1]);
+      logbleu += log((float)comps[2*i])-log((float)comps[2*i+1]);
   }
   logbleu /= BLEU_ORDER;
-  brevity = 1.0-(double)comps[comps_n-1]/comps[1]; // comps[comps_n-1] is the ref length, comps[1] is the test length
+  brevity = 1.0-(float)comps[comps_n-1]/comps[1]; // comps[comps_n-1] is the ref length, comps[1] is the test length
   if (brevity < 0.0)
     logbleu += brevity;
   return exp(logbleu);
@@ -199,11 +199,11 @@ double calculate_score(const vector< vector<const Factor*> > & sents, int ref, i
 
 vector<const Factor*> doMBR(const LatticePathList& nBestList){
 //   cerr << "Sentence " << sent << " has " << sents.size() << " candidate translations" << endl;
-  double marginal = 0;
+  float marginal = 0;
 
-  vector<double> joint_prob_vec;
+  vector<float> joint_prob_vec;
   vector< vector<const Factor*> > translations;
-  double joint_prob;
+  float joint_prob;
   vector< map < vector <const Factor *>, int > > ngram_stats;
 
   LatticePathList::const_iterator iter;
@@ -226,10 +226,10 @@ vector<const Factor*> doMBR(const LatticePathList& nBestList){
    }
    //cerr << "Marginal is " << marginal;
 
-   vector<double> mbr_loss;
-   double bleu, weightedLoss;
-   double weightedLossCumul = 0;
-   double minMBRLoss = 1000000;
+   vector<float> mbr_loss;
+   float bleu, weightedLoss;
+   float weightedLossCumul = 0;
+   float minMBRLoss = 1000000;
    int minMBRLossIdx = -1;
    
    /* Main MBR computation done here */
@@ -304,7 +304,7 @@ void read_nbest_data(string fileName)
 		sent_i = strtol(tok, NULL, 10);
                 cand = new candidate_t;
 	    } else if (field == 2) {
-                   vector<double> features;
+                   vector<float> features;
                    char * subtok;
                    subtok = strtok (tok," ");
 
