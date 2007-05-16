@@ -29,11 +29,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "HypothesisStack.h"
 #include "TranslationOptionCollection.h"
-#include "LatticePathList.h"
+#include "TrellisPathList.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
 
-class LatticePath;
+class TrellisPath;
 class TranslationOptionCollection;
 
 /** The Manager class implements a stack decoding algorithm.
@@ -93,7 +93,7 @@ public:
 
 	void ProcessSentence();
 	const Hypothesis *GetBestHypothesis() const;
-	void CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct=0) const;
+	void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;
 	
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
