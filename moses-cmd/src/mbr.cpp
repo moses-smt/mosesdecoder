@@ -114,7 +114,7 @@ vector<const Factor*> doMBR(const LatticePathList& nBestList){
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
 	{
 		const LatticePath &path = **iter;
-    joint_prob = UntransformScore(path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights(),StaticData::Instance().GetMBRScale()));
+    joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights()));
     marginal += joint_prob;
     joint_prob_vec.push_back(joint_prob);
     //Cache ngram counts
