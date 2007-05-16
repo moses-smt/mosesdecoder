@@ -27,15 +27,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "TypeDef.h"
 
-class LatticePathCollection;
+class TrellisPathCollection;
 
 /** Encapsulate the set of hypotheses/arcs that goes from decoding 1 phrase to all the source phrases
  *	to reach a final translation. For the best translation, this consist of all hypotheses, for the other 
  *	n-best paths, the node on the path can consist of hypotheses or arcs
  */
-class LatticePath
+class TrellisPath
 {
-	friend std::ostream& operator<<(std::ostream&, const LatticePath&);
+	friend std::ostream& operator<<(std::ostream&, const TrellisPath&);
 
 protected:
 	std::vector<const Hypothesis *> m_path; //< list of hypotheses/arcs
@@ -46,15 +46,15 @@ protected:
 	float m_totalScore;
 
 public:
-	LatticePath(); // not implemented
+	TrellisPath(); // not implemented
 	
 	//! create path OF pure hypo
-	LatticePath(const Hypothesis *hypo);
+	TrellisPath(const Hypothesis *hypo);
 		
 	/** create path from another path, deviate at edgeIndex by using arc instead, 
 		* which may change other hypo back from there
 		*/
-	LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc);
+	TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypothesis *arc);
 	
 	inline float GetTotalScore() const { return m_totalScore; }
 
@@ -67,7 +67,7 @@ public:
 	}
 	
 	//! create a set of next best paths by wiggling 1 of the node at a time. 
-	void CreateDeviantPaths(LatticePathCollection &pathColl) const;
+	void CreateDeviantPaths(TrellisPathCollection &pathColl) const;
 
 	inline const ScoreComponentCollection &GetScoreBreakdown() const
 	{
@@ -79,7 +79,7 @@ public:
 };
 
 // friend
-inline std::ostream& operator<<(std::ostream& out, const LatticePath& path)
+inline std::ostream& operator<<(std::ostream& out, const TrellisPath& path)
 {
 	const size_t sizePath = path.m_path.size();
 	for (int pos = (int) sizePath - 1 ; pos >= 0 ; pos--)

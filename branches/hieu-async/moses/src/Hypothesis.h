@@ -77,7 +77,7 @@ protected:
 	ScoreComponentCollection m_scoreBreakdown; /**< detailed score break-down by components (for instance language model, word penalty, etc) */
 	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /**< relevant history for language model scoring -- used for recombination */
 	const Hypothesis 	*m_winningHypo;
-	ArcList 					*m_arcList; /**< all arcs that end at the same lattice point as this hypothesis */
+	ArcList 					*m_arcList; /**< all arcs that end at the same trellis point as this hypothesis */
 	AlignmentPair			m_alignPair;
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */

@@ -41,7 +41,7 @@ typedef std::vector<const TranslationOption*> TranslationOptionList;
 
 /** Contains all phrase translations applicable to current input type (a sentence or confusion network).
  * A key insight into efficient decoding is that various input
- * conditions (lattices, factored input, normal text, xml markup)
+ * conditions (trelliss, factored input, normal text, xml markup)
  * all lead to the same decoding algorithm: hypotheses are expanded
  * by applying phrase translations, which can be precomputed.
  *

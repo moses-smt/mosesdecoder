@@ -1,7 +1,7 @@
 
-#include "LatticePathCollection.h"
+#include "TrellisPathCollection.h"
 
-void LatticePathCollection::Prune(size_t newSize)
+void TrellisPathCollection::Prune(size_t newSize)
 {
 	size_t currSize = m_collection.size(); 
 
@@ -11,8 +11,8 @@ void LatticePathCollection::Prune(size_t newSize)
 	CollectionType::reverse_iterator iterRev;
 	for (iterRev = m_collection.rbegin() ; iterRev != m_collection.rend() ; ++iterRev)
 	{
-		LatticePath *latticePath = *iterRev;
-		delete latticePath;
+		TrellisPath *trellisPath = *iterRev;
+		delete trellisPath;
 
 		currSize--;
 		if (currSize == newSize)

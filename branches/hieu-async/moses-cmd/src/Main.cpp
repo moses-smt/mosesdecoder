@@ -41,12 +41,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <fstream>
 #include "Main.h"
-#include "LatticePath.h"
+#include "TrellisPath.h"
 #include "FactorCollection.h"
 #include "Manager.h"
 #include "Phrase.h"
 #include "Util.h"
-#include "LatticePathList.h"
+#include "TrellisPathList.h"
 #include "Timer.h"
 #include "IOStream.h"
 #include "Sentence.h"
@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
 		if (nBestSize > 0)
 		{
 		  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-			LatticePathList nBestList;
+			TrellisPathList nBestList;
 			manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
 			ioStream->OutputNBestList(nBestList, source->GetTranslationId());
 		}
