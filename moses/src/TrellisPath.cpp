@@ -19,12 +19,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "LatticePath.h"
-#include "LatticePathCollection.h"
+#include "TrellisPath.h"
+#include "TrellisPathCollection.h"
 
 using namespace std;
 
-LatticePath::LatticePath(const Hypothesis *hypo)
+TrellisPath::TrellisPath(const Hypothesis *hypo)
 :	m_prevEdgeChanged(NOT_FOUND)
 {
 	m_scoreBreakdown					= hypo->GetScoreBreakdown();
@@ -38,7 +38,7 @@ LatticePath::LatticePath(const Hypothesis *hypo)
 	}
 }
 
-LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypothesis *arc)
+TrellisPath::TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypothesis *arc)
 :m_prevEdgeChanged(edgeIndex)
 {
 	for (size_t currEdge = 0 ; currEdge < edgeIndex ; currEdge++)
@@ -75,7 +75,7 @@ LatticePath::LatticePath(const LatticePath &copy, size_t edgeIndex, const Hypoth
 	}
 }
 
-void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
+void TrellisPath::CreateDeviantPaths(TrellisPathCollection &pathColl) const
 {
 	const size_t sizePath = m_path.size();
 
@@ -93,7 +93,7 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 			for (iterArc = arcList.begin() ; iterArc != arcList.end() ; ++iterArc)
 			{
 				const Hypothesis *arc = *iterArc;
-				LatticePath *deviantPath = new LatticePath(*this, currEdge, arc);
+				TrellisPath *deviantPath = new TrellisPath(*this, currEdge, arc);
 				pathColl.Add(deviantPath);
 			}
 		}
@@ -111,12 +111,12 @@ void LatticePath::CreateDeviantPaths(LatticePathCollection &pathColl) const
 			{	// copy this Path & change 1 edge
 				const Hypothesis *arcReplace = *iterArc;
 
-				LatticePath *deviantPath = new LatticePath(*this, currEdge, arcReplace);
+				TrellisPath *deviantPath = new TrellisPath(*this, currEdge, arcReplace);
 				pathColl.Add(deviantPath);						
 			} // for (iterArc...
 		} // for (currEdge = 0 ...
 	}
 }
 
-TO_STRING_BODY(LatticePath);
+TO_STRING_BODY(TrellisPath);
 

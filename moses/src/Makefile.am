@@ -23,8 +23,8 @@ libmoses_a_SOURCES = \
 	LanguageModelMultiFactor.cpp \
 	LanguageModelSingleFactor.cpp \
 	LanguageModelSkip.cpp \
-	LatticePath.cpp \
-	LatticePathCollection.cpp \
+	TrellisPath.cpp \
+	TrellisPathCollection.cpp \
 	LexicalReordering.cpp \
 	LexicalReorderingTable.cpp \
 	Manager.cpp \

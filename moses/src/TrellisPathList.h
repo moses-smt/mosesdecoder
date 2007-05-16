@@ -23,34 +23,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <list>
 #include <set>
-#include "LatticePath.h"
+#include "TrellisPath.h"
 
 
-/** used to return n-best list of Lattice Paths from the Manager to the caller */
-class LatticePathList
+/** used to return n-best list of Trellis Paths from the Manager to the caller */
+class TrellisPathList
 {
 protected:
-	 std::list<const LatticePath*> m_collection;
+	 std::list<const TrellisPath*> m_collection;
 public:
 	// iters
-	typedef std::list<const LatticePath*>::iterator iterator;
-	typedef std::list<const LatticePath*>::const_iterator const_iterator;
+	typedef std::list<const TrellisPath*>::iterator iterator;
+	typedef std::list<const TrellisPath*>::const_iterator const_iterator;
 	
 	iterator begin() { return m_collection.begin(); }
 	iterator end() { return m_collection.end(); }
 	const_iterator begin() const { return m_collection.begin(); }
 	const_iterator end() const { return m_collection.end(); }
 
-	~LatticePathList()
+	~TrellisPathList()
 	{
 		// clean up
 		RemoveAllInColl(m_collection);
 	}
 
 	//! add a new entry into collection
-	void Add(LatticePath *latticePath)
+	void Add(TrellisPath *trellisPath)
 	{
-		m_collection.push_back(latticePath);
+		m_collection.push_back(trellisPath);
 	}
 
 	size_t GetSize() const

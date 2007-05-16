@@ -38,7 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "IOStream.h"
 #include "Hypothesis.h"
 #include "WordsRange.h"
-#include "LatticePathList.h"
+#include "TrellisPathList.h"
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
 #include "InputFileStream.h"
@@ -219,15 +219,15 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 	}
 }
 
-void IOStream::OutputNBestList(const LatticePathList &nBestList, long translationId)
+void IOStream::OutputNBestList(const TrellisPathList &nBestList, long translationId)
 {
 	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
 	bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
 	
-	LatticePathList::const_iterator iter;
+	TrellisPathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
 	{
-		const LatticePath &path = **iter;
+		const TrellisPath &path = **iter;
 		const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
 		// print the surface factor of the translation

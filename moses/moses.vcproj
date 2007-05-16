@@ -280,14 +280,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\LatticePath.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LatticePathCollection.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\LexicalReordering.cpp"
 				>
 			</File>
@@ -456,6 +448,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TrellisPath.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TrellisPathCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\UserMessage.cpp"
 				>
 			</File>
@@ -587,18 +587,6 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelSRI.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LatticePath.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LatticePathCollection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LatticePathList.h"
 				>
 			</File>
 			<File
@@ -743,6 +731,18 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionCollectionText.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TrellisPath.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TrellisPathCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TrellisPathList.h"
 				>
 			</File>
 			<File
