@@ -589,6 +589,8 @@ bool StaticData::LoadPhraseTables()
 			string filePath= token[3];
 			size_t numScoreComponent = Scan<size_t>(token[2]);
 
+			assert(weightAll.size() >= weightAllOffset + numScoreComponent);
+
 			// weights for this phrase dictionary
 			// first InputScores (if any), then translation scores
 			vector<float> weight;
