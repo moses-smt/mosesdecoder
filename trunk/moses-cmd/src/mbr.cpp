@@ -8,8 +8,8 @@
 #include <math.h>
 #include <algorithm>
 #include <stdio.h>
-#include "LatticePathList.h"
-#include "LatticePath.h"
+#include "TrellisPathList.h"
+#include "TrellisPath.h"
 #include "StaticData.h"
 #include "Util.h"
 #include "mbr.h"
@@ -100,7 +100,7 @@ float calculate_score(const vector< vector<const Factor*> > & sents, int ref, in
   return exp(logbleu);
 }
 
-vector<const Factor*> doMBR(const LatticePathList& nBestList){
+vector<const Factor*> doMBR(const TrellisPathList& nBestList){
 //   cerr << "Sentence " << sent << " has " << sents.size() << " candidate translations" << endl;
   float marginal = 0;
 
@@ -109,11 +109,11 @@ vector<const Factor*> doMBR(const LatticePathList& nBestList){
   float joint_prob;
   vector< map < vector <const Factor *>, int > > ngram_stats;
 
-  LatticePathList::const_iterator iter;
-  LatticePath* hyp = NULL;
+  TrellisPathList::const_iterator iter;
+  TrellisPath* hyp = NULL;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
 	{
-		const LatticePath &path = **iter;
+		const TrellisPath &path = **iter;
     joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights()));
     marginal += joint_prob;
     joint_prob_vec.push_back(joint_prob);
@@ -155,7 +155,7 @@ vector<const Factor*> doMBR(const LatticePathList& nBestList){
    return translations[minMBRLossIdx];
 }
 
-void GetOutputFactors(const LatticePath &path, vector <const Factor*> &translation){
+void GetOutputFactors(const TrellisPath &path, vector <const Factor*> &translation){
 	const std::vector<const Hypothesis *> &edges = path.GetEdges();
 	const std::vector<FactorType>& outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 	assert (outputFactorOrder.size() == 1);

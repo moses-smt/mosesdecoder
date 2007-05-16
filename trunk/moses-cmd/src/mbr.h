@@ -1,4 +1,4 @@
-// $Id: StaticData.h 1338 2007-04-06 00:24:25Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-std::vector<const Factor*> doMBR(const LatticePathList& nBestList);
-void GetOutputFactors(const LatticePath &path, std::vector <const Factor*> &translation);
+std::vector<const Factor*> doMBR(const TrellisPathList& nBestList);
+void GetOutputFactors(const TrellisPath &path, std::vector <const Factor*> &translation);
 float calculate_score(const std::vector< std::vector<const Factor*> > & sents, int ref, int hyp,  std::vector < std::map < std::vector < const Factor *>, int > > & ngram_stats );
 

@@ -31,8 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "TargetPhrase.h"
-#include "LatticePath.h"
-#include "LatticePathCollection.h"
+#include "TrellisPath.h"
+#include "TrellisPathCollection.h"
 #include "TranslationOption.h"
 #include "LMList.h"
 #include "TranslationOptionCollection.h"
@@ -283,7 +283,7 @@ void Manager::OutputHypoStack(int stack)
 		}
 	}
 }
-void getSurfacePhrase(std::vector<size_t>& tphrase,LatticePath const& path)
+void getSurfacePhrase(std::vector<size_t>& tphrase,TrellisPath const& path)
 {
 	tphrase.clear();
 	const std::vector<const Hypothesis *> &edges = path.GetEdges();
@@ -302,13 +302,13 @@ void getSurfacePhrase(std::vector<size_t>& tphrase,LatticePath const& path)
 /**
  * After decoding, the hypotheses in the stacks and additional arcs
  * form a search graph that can be mined for n-best lists.
- * The heavy lifting is done in the LatticePath and LatticePathCollection
+ * The heavy lifting is done in the TrellisPath and TrellisPathCollection
  * this function controls this for one sentence.
  *
  * \param count the number of n-best translations to produce
  * \param ret holds the n-best list that was calculated
  */
-void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) const
+void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) const
 {
 	if (count <= 0)
 		return;
@@ -318,7 +318,7 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 	if (sortedPureHypo.size() == 0)
 		return;
 
-	LatticePathCollection contenders;
+	TrellisPathCollection contenders;
 
 	set<std::vector<size_t> > distinctHyps;
 
@@ -328,14 +328,14 @@ void Manager::CalcNBest(size_t count, LatticePathList &ret,bool onlyDistinct) co
 			; iterBestHypo != sortedPureHypo.end()
 			; ++iterBestHypo)
 	{
-		contenders.Add(new LatticePath(*iterBestHypo));
+		contenders.Add(new TrellisPath(*iterBestHypo));
 	}
 
 	// MAIN loop
 	for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * 20) ; iteration++)
 	{
 		// get next best from list of contenders
-		LatticePath *path = contenders.pop();
+		TrellisPath *path = contenders.pop();
 		assert(path);
 		bool addPath = true;
 		if(onlyDistinct)
