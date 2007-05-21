@@ -13,10 +13,9 @@ libmoses_a_SOURCES = ConfusionNet.cpp ConfusionNet.h DecodeStep.cpp \
 	LanguageModelIRST.h LanguageModelJoint.cpp LanguageModelJoint.h \
 	LanguageModelMultiFactor.cpp LanguageModelMultiFactor.h LanguageModelSingleFactor.cpp \
 	LanguageModelSingleFactor.h LanguageModelSkip.cpp LanguageModelSkip.h LanguageModelSRI.cpp \
-	LanguageModelSRI.h LatticePathCollection.h LatticePath.cpp LatticePath.h LatticePathList.h \
-	LexicalReordering.cpp LexicalReordering.h LMList.cpp LMList.h Manager.cpp Manager.h md5.cpp \
-	md5.h mempool.cpp mempool.h NGramCollection.cpp NGramCollection.h \
-	NGramNode.cpp NGramNode.h ObjectPool.h Parameter.cpp Parameter.h \
+	LanguageModelSRI.h LexicalReordering.cpp LexicalReordering.h LMList.cpp LMList.h \
+	Manager.cpp Manager.h md5.cpp md5.h mempool.cpp mempool.h NGramCollection.cpp \
+	NGramCollection.h NGramNode.cpp NGramNode.h ObjectPool.h Parameter.cpp Parameter.h \
 	PartialTranslOptColl.cpp PartialTranslOptColl.h PDTAimp.h Phrase.cpp PhraseDictionary.cpp \
 	PhraseDictionary.h PhraseDictionaryMemory.cpp PhraseDictionaryMemory.h \
 	PhraseDictionaryNode.cpp PhraseDictionaryNode.h PhraseDictionaryTreeAdaptor.cpp \
@@ -31,9 +30,10 @@ libmoses_a_SOURCES = ConfusionNet.cpp ConfusionNet.h DecodeStep.cpp \
 	TranslationOptionCollectionText.h TranslationOption.cpp TranslationOption.h TypeDef.h UniqueObject.h \
 	UserMessage.cpp UserMessage.h Util.cpp Util.h Word.cpp Word.h WordsBitmap.cpp \
 	WordsBitmap.h WordsRange.cpp WordsRange.h AlignmentPair.cpp AlignmentPair.h \
-	AlignmentPhrase.cpp AlignmentPhrase.h PhraseList.cpp PhraseList.h LatticePathCollection.cpp \
+	AlignmentPhrase.cpp AlignmentPhrase.h PhraseList.cpp PhraseList.h \
 	PrefixPhraseCollection.cpp PrefixPhraseCollection.h AlignmentElement.cpp AlignmentElement.h \
-	HypothesisStackCollection.cpp HypothesisStackCollection.h
+	HypothesisStackCollection.cpp HypothesisStackCollection.h TrellisPathCollection.cpp \
+	TrellisPathCollection.h TrellisPath.cpp TrellisPath.h TrellisPathList.h
 
 
 AM_CXXFLAGS = -DLM_SRI -DLM_IRST -DLM_INTERNAL\
