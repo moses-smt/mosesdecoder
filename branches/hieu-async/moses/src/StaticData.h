@@ -73,7 +73,12 @@ protected:
 			, m_nBestSize
 			, m_nBestFactor
 			, m_maxNoTransOptPerCoverage
-		  , m_maxNoPartTransOpt;
+		  , m_maxNoPartTransOpt
+		  , m_verboseLevel
+		  , m_numInputScores
+		  , m_asyncDiagonalSlack;
+		  
+	AsyncMethod m_asyncMethod;
 	
 	std::string									m_nBestFilePath, m_cachePath;
 	bool                        m_fLMsLoaded, m_labeledNBestList;
@@ -83,13 +88,10 @@ protected:
 	 */
 	bool m_dropUnknown;
 	bool m_wordDeletionEnabled;
-
 	bool m_sourceStartPosMattersForRecombination;
 
 	int m_inputType;
-	size_t m_numInputScores;
 
-	size_t m_verboseLevel;
 	std::vector<DistortionScoreProducer*> m_distortionScoreProducer;
 	WordPenaltyProducer *m_wpProducer;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
@@ -320,4 +322,6 @@ public:
 	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
+	AsyncMethod GetAsyncMethod() const { return m_asyncMethod; }
+	size_t GetAsyncDiagonalSlack() const { return m_asyncDiagonalSlack; }
 };

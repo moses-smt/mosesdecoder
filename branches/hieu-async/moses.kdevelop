@@ -18,7 +18,7 @@
   <kdevautoproject>
     <general>
       <activetarget>src/moses</activetarget>
-      <useconfiguration>optimized</useconfiguration>
+      <useconfiguration>debug</useconfiguration>
     </general>
     <run>
       <mainprogram>/home/s0565741/workspace/sourceforge/branches/hieu-async/debug/moses-cmd/src/moses-cmd</mainprogram>
@@ -27,8 +27,8 @@
       <runarguments>
         <moses-cmd/>
       </runarguments>
-      <customdirectory>/home/s0565741/terabyte/en-de/train-async/mert/mert-work/</customdirectory>
-      <programargs/>
+      <customdirectory>/home/s0565741/c++/data/Async-tiny/</customdirectory>
+      <programargs>-f moses.ini -i in.txt</programargs>
       <autocompile>true</autocompile>
       <envvars/>
     </run>
@@ -200,7 +200,7 @@
   </cppsupportpart>
   <kdevdebugger>
     <general>
-      <programargs> -config ../moses.ini -inputtype 0 -n-best-list nbest.txt 20 -input-file in.txt</programargs>
+      <programargs>-f moses.ini -i in.txt</programargs>
       <gdbpath/>
       <dbgshell>libtool</dbgshell>
       <configGdbScript/>

@@ -79,7 +79,9 @@ protected:
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	
 	// functions for creating hypotheses
-	void ProcessOneHypothesis(const Hypothesis &hypothesis, const std::vector<const DecodeStep*> &decodeStepList);
+	void ProcessOneHypothesis(const Hypothesis &hypothesis
+													, const std::vector<const DecodeStep*> &decodeStepList
+													, size_t stackNo);
 	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
 	

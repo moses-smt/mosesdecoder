@@ -109,6 +109,13 @@ bool StaticData::LoadData(Parameter *parameter)
 		m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
 	}
 
+	m_asyncMethod = (AsyncMethod) ((m_parameter->GetParam("async-method").size() > 0)
+				? Scan<size_t>(m_parameter->GetParam("async-method")[0]) : UpperTriangle);
+	if (m_asyncMethod == Diagonal)
+	{
+		m_asyncDiagonalSlack = Scan<size_t>(m_parameter->GetParam("async-method")[1]);
+	}
+	
 	// n-best
 	if (m_parameter->GetParam("n-best-list").size() >= 2)
 	{
@@ -209,6 +216,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	m_maxNoPartTransOpt = (m_parameter->GetParam("max-partial-trans-opt").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("max-partial-trans-opt")[0]) : DEFAULT_MAX_PART_TRANS_OPT_SIZE;
+
 
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH

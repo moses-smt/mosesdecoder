@@ -49,7 +49,7 @@ Manager::Manager(InputType const& source)
 	{
 		HypothesisStack &sourceHypoColl = *iterStack;
 		sourceHypoColl.SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
-		sourceHypoColl.SetBeamThreshold(staticData.GetBeamThreshold());
+		sourceHypoColl.SetBeamThreshold(staticData.GetBeamThreshold());		
 	}
 }
 
@@ -79,13 +79,17 @@ void Manager::ProcessSentence()
 	Hypothesis *seedHypo = Hypothesis::Create(m_source, decodeStepList, m_initialTargetPhrase);
 	m_hypoStackColl.GetStack(0).AddPrune(seedHypo);
 	
+	size_t colIndex		= 0
+				, rowIndex 	= 0;
+
 	// go through each stack	
 	for (size_t stackNo = 0 ; stackNo < m_hypoStackColl.GetSize() - 1 ; ++stackNo)
 	{
 		HypothesisStack &sourceHypoColl = m_hypoStackColl.GetStack(stackNo);
 
 		// the stack is pruned before processing (lazy pruning):
-		VERBOSE(3,"processing hypothesis from stack " << stackNo << endl);
+		TRACE_ERR("processing hypothesis from stack " << stackNo 
+							<< "(" << rowIndex << "," << colIndex << ")" << endl);
 		sourceHypoColl.PruneToSize(StaticData::Instance().GetMaxHypoStackSize());
 		sourceHypoColl.CleanupArcList();
 
@@ -94,7 +98,8 @@ void Manager::ProcessSentence()
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
 		{
 			Hypothesis &hypothesis = **iterHypo;
-			ProcessOneHypothesis(hypothesis, decodeStepList); // expand the hypothesis
+			//TRACE_ERR(hypothesis << endl);			
+			ProcessOneHypothesis(hypothesis, decodeStepList, stackNo); // expand the hypothesis
 		}
 
 		if (stackNo % 100 == 99)
@@ -102,8 +107,14 @@ void Manager::ProcessSentence()
 		
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(false); }
-		//OutputHypoStackSize(false);
+		OutputHypoStackSize(true);
 		//OutputArcListSize();
+		
+		if (++colIndex > m_source.GetSize())
+		{
+			colIndex = 0;
+			++rowIndex;
+		}
 	}
 
 	RemoveDeadendHypotheses(m_hypoStackColl.GetSize() - 2);
@@ -121,12 +132,20 @@ void Manager::ProcessSentence()
 	VERBOSE(2, StaticData::Instance().GetSentenceStats());
 }
 
+// helper function
+int DistanceFromDiagonal(size_t stackNo, size_t sourceSize)
+{
+	return stackNo % (sourceSize + 2);
+}
+
 /** Find all translation options to expand one hypothesis, trigger expansion
  * this is mostly a check for overlap with already covered words, and for
  * violation of reordering limits. 
  * \param hypothesis hypothesis to be expanded upon
  */
-void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const vector<const DecodeStep*> &decodeStepList)
+void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis
+																	, const vector<const DecodeStep*> &decodeStepList
+																	, size_t stackNo)
 {
 	std::vector<const DecodeStep*>::const_iterator iter;
 	for (iter = decodeStepList.begin() ; iter != decodeStepList.end() ; ++iter)
@@ -134,6 +153,22 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis, const vector<co
 		const DecodeStep &decodeStep	= **iter;
 		size_t decodeStepId						= decodeStep.GetId();
 
+		switch (StaticData::Instance().GetAsyncMethod())
+		{
+			case Multipass:
+				// finish 1st decode step before doing next
+				if (decodeStepId > 0 && stackNo < m_source.GetSize())
+					continue;
+				break;
+			case Diagonal:
+				int distFromDiagonal = DistanceFromDiagonal(stackNo, m_source.GetSize());
+				size_t diagSlack = StaticData::Instance().GetAsyncDiagonalSlack();
+				if (distFromDiagonal > diagSlack && decodeStepId == 0)
+				{
+					continue;
+				}
+				break;
+		}
 		// since we check for reordering limits, its good to have that limit handy
 		int maxDistortion = StaticData::Instance().GetMaxDistortion(decodeStepId);
 

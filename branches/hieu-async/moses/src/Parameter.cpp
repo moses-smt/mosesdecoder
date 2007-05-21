@@ -71,6 +71,7 @@ Parameter::Parameter()
 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
 	AddParam("cache-path", "specify which folder temporary files should go");
+	AddParam("async-method", "which method to go thru stacks? 0=upper triangle, 1=complete each decode step 1st. Default is 0");
 }
 
 Parameter::~Parameter()
@@ -231,6 +232,24 @@ bool Parameter::Validate()
 		noErrorFlag = false;
 	}
 
+	if (m_setting["lmodel-file"].size() == 0)
+	{
+		UserMessage::Add("No language model (lmodel-file)");
+		noErrorFlag = false;
+	}
+
+	if (m_setting["weight-d"].size() != m_setting["mapping"].size())
+	{
+		UserMessage::Add("Need 1 distortion weight for each decode step");
+		noErrorFlag = false;
+	}
+	
+	if (m_setting["distortion-limit"].size() != m_setting["mapping"].size())
+	{
+		UserMessage::Add("Need separate distortion limit for each decode step");
+		noErrorFlag = false;
+	}
+  
   // do files exist?
 	// phrase tables
 	if (noErrorFlag) 
@@ -239,6 +258,7 @@ bool Parameter::Validate()
 		// standard phrase table extension (i.e. full name has to be specified)
 		ext.push_back("");
 		// alternative file extension for binary phrase table format:
+		ext.push_back(".gz");
 		ext.push_back(".binphr.idx");
 		noErrorFlag = FilesExist("ttable-file", 3,ext);
 	}

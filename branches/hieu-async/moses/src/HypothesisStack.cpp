@@ -103,7 +103,8 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 	// found existing hypo with same target ending. keep the best 1
 	if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
 	{ // incoming hypo is better than the one we have
-		VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
+		VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");		
+		//TRACE_ERR("THROW AWAY " << *hypoExisting << endl);
 		
 		if (m_nBestIsEnabled) 
 		{
@@ -127,6 +128,8 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 	else
 	{ // already storing the best hypo. discard current hypo 
 	  VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
+		//TRACE_ERR("THROW AWAY " << *hypo << endl);
+	  
 		if (m_nBestIsEnabled) 
 		{
 			hypoExisting->AddArc(hypo);

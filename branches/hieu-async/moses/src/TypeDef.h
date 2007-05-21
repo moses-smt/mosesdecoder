@@ -121,6 +121,13 @@ enum DictionaryFind
 	,All
 };
 
+enum AsyncMethod
+{	
+	UpperTriangle
+	,Multipass
+	,Diagonal
+};
+
 // typedef
 typedef size_t FactorType;
 
