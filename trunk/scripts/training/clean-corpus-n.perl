@@ -11,7 +11,7 @@ my $enc = "utf8"; # encoding of the input and output files
 GetOptions(
   "help" => \$help,
   "lowercase|lc" => \$lc,
-  "encoding" => \$enc,
+  "encoding=s" => \$enc,
 ) or exit(1);
 
 if (scalar(@ARGV) != 6 || $help) {
