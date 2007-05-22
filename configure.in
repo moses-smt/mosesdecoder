@@ -63,9 +63,11 @@ then
                  [AC_DEFINE([HAVE_IRSTLM], [], [flag for IRSTLM])],
                  [AC_MSG_ERROR([Cannot find IRST-LM!])])
 
-  LIB_SRILM="-lirstlm"
-  LDFLAGS="$LDFLAGS -L${with_irstlm}/lib"
-  LIBS="$LIBS $LIB_SRILM"
+
+  MY_ARCH="${MACHTYPE}"
+  LIB_IRSTLM="-lirstlm"
+  LDFLAGS="$LDFLAGS -L${with_irstlm}/lib/${MY_ARCH}"
+  LIBS="$LIBS $LIB_IRSTLM"
   FMTLIBS="$FMTLIBS libirstlm.a"
   AM_CONDITIONAL([IRST_LM], true)
 fi

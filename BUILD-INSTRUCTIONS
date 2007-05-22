@@ -1,9 +1,16 @@
 0) Preliminaries
 
 Before building you need to decide what language model toolkit (SRI's
-or IRST's) you want to use.  If you want to use SRI's, you will need
-to download their source and build it.  The SRILM can be downloaded
-from http://www.speech.sri.com/projects/srilm/download.html .
+or IRST's) you want to use.
+
+If you want to use SRI's, you will need to download its source 
+and build it.  The SRILM can be downloaded from 
+http://www.speech.sri.com/projects/srilm/download.html .
+
+
+If you want to use IRST's, you will need to download its source
+and build it.  The IRSTLM can be downloaded from 
+http://sourceforge.net/projects/irstlm/
 
 IMPORTANT: These instructions are for building the moses decoder ONLY,
 the training and tuning SCRIPTS contained in scripts/ must be built
@@ -28,18 +35,11 @@ you do so, as this can lead to problems locating the library.
 
 2) Instructions for building with IRSTLM
 
- Build IRSTLM, and install it to a location of your choice.
+Build IRSTLM according to its release instructions.  Make sure that
+you DO NOT override the MACHINE_TYPE variable on the command line when
+you do so, as this can lead to problems locating the library.
 
-   cd irstlm
-   ./configure --prefix=/path/to/irstlm
-   make
-   make install
-
- Build moses:
-
-   cd ..
-   ./configure --with-irstlm=/path/to/irstlm
-   make
+ ./configure --with-irstlm=/path/to/irstlm
 
  The resulting decoder binary will be moses-cmd/src/moses .
 
