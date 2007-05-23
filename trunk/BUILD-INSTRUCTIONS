@@ -17,7 +17,12 @@ the training and tuning SCRIPTS contained in scripts/ must be built
 and installed separately.  Also, they may require modification to
 work in certain environments.
 
-Automake 1.9 or higher is required
+Versions 1.9 (or higher) of aclocal and automake are required.
+
+For Mac OSX users:
+Standard distribution usually includes versions 1.6.
+Get correct versions, and set the environment variables ACLOCAL and 
+AUTOMAKE to the correct paths in ./regenerate-makefiles.sh.
 
 --------------------------------------------------------------------------
 
@@ -27,9 +32,10 @@ Build SRILM according to their release instructions.  Make sure that
 you DO NOT override the MACHINE_TYPE variable on the command line when
 you do so, as this can lead to problems locating the library.
 
+ ./regenerate-makefiles.sh
  ./configure --with-srilm=/path/to/srilm
 
- The resulting decoder binary will be moses-cmd/src/moses .
+The resulting decoder binary will be moses-cmd/src/moses .
 
 --------------------------------------------------------------------------
 
@@ -39,9 +45,10 @@ Build IRSTLM according to its release instructions.  Make sure that
 you DO NOT override the MACHINE_TYPE variable on the command line when
 you do so, as this can lead to problems locating the library.
 
+ ./regenerate-makefiles.sh
  ./configure --with-irstlm=/path/to/irstlm
 
- The resulting decoder binary will be moses-cmd/src/moses .
+The resulting decoder binary will be moses-cmd/src/moses .
 
 --------------------------------------------------------------------------
 

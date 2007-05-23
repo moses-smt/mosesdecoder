@@ -1,5 +1,15 @@
 #!/bin/sh
 
+# NOTE:
+# Versions 1.9 (or higher) of aclocal and automake are required.
+
+# For Mac OSX users:
+# Standard distribution usually includes versions 1.6.
+# Get versions 1.9 or higher
+# Set the following variable to the correct paths
+#ACLOCAL="/path/to/aclocal-1.9"
+#AUTOMAKE="/path/to/automake-1.9"
+
 function die () {
   echo "$@" >&2
   exit 1
