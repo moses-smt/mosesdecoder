@@ -90,6 +90,7 @@ protected:
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize(bool formatted) const;
 	void OutputArcListSize() const;
+	
 public:
 	Manager(InputType const& source);
 	~Manager();
@@ -101,5 +102,5 @@ public:
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
 	 */
-	void CalcDecoderStatistics() const;
+	void CalcDecoderStatistics() const;	
 };

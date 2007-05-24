@@ -316,7 +316,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
  */
 const Hypothesis *Manager::GetBestHypothesis() const
 {
-	const HypothesisStack &hypoColl = m_hypoStackColl.back();
+	const HypothesisStack &hypoColl = m_hypoStackColl.GetLastFilledStack();
 	return hypoColl.GetBestHypothesis();
 }
 
@@ -435,7 +435,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 	if (count <= 0)
 		return;
 
-	vector<const Hypothesis*> sortedPureHypo = m_hypoStackColl.back().GetSortedList();
+	vector<const Hypothesis*> sortedPureHypo = m_hypoStackColl.GetLastFilledStack().GetSortedList();
 
 	if (sortedPureHypo.size() == 0)
 		return;

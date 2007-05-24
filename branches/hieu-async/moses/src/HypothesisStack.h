@@ -164,6 +164,9 @@ public:
 	* Ie update doubly linked list be hypo & arcs
 	*/
 	void CleanupArcList();
+	size_t GetSize() const
+	{	return m_hypos.size(); }
+		
 	
 	TO_STRING();
 };

@@ -42,8 +42,7 @@ public:
 
 	iterator begin() { return iterator(0, m_stackColl); }
 	iterator end() { return iterator(NOT_FOUND, m_stackColl); }
-	const HypothesisStack &back() const { return m_stackColl.back(); }
-
+	
 	//! constructor
 	HypothesisStackCollection(size_t sourceSize, const std::vector<const DecodeStep*> &decodeStepList)
 		:m_stackColl( (size_t) pow( (float) sourceSize+1 , (int) decodeStepList.size()) )
@@ -63,6 +62,9 @@ public:
 
 	//! add hypo to appropriate stack
 	void AddPrune(Hypothesis *hypo);
+
+	//! stack with something in it. Use this instead to last stack so never return no translation
+	const HypothesisStack &GetLastFilledStack() const;
 
 	// iter class
 	class iterator
