@@ -73,6 +73,7 @@ Parameter::Parameter()
 	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");	
 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
+	AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
  	AddParam("mbr-scale", "scaling factor to convert log linear score into a probability.");
  	AddParam("decoder-type", "MAP/MBR decoder (default=MAP=0)");
 }

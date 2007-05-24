@@ -112,6 +112,13 @@ public:
 																			, size_t startPosition
 																			, size_t endPosition
 																			, bool adhereTableLimit);
+																			
+	//!Check if this range has XML options
+	virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
+	
+	//! Create xml-based translation options for the specific input span
+	virtual void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
+	
 
 	//! returns future cost matrix for sentence
 	inline virtual const SquareMatrix &GetFutureScore() const

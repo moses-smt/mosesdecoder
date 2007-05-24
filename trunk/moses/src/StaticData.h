@@ -107,6 +107,8 @@ protected:
 	std::string m_factorDelimiter; //! by default, |, but it can be changed
 	size_t m_maxFactorIdx[2];  //! number of factors on source and target side
 	size_t m_maxNumFactors;  //! max number of factors on both source and target sides
+	
+	XmlInputType m_xmlInputType; //! method for handling sentence XML input
 
   DecoderType m_decoderType; //! MAP or MBR decoder
   float m_mbrScale; //! Scaling factor for computing marginal probability of candidate translation
@@ -333,4 +335,7 @@ public:
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
 	DecoderType GetDecoderType() const {return m_decoderType;}
 	float GetMBRScale() const {return m_mbrScale;}
+		
+	XmlInputType GetXmlInputType() const { return m_xmlInputType; }
+	
 };

@@ -27,9 +27,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "InputType.h"
 
-class WordsRangs;
+class WordsRange;
 class PhraseDictionary;
+class TranslationOption;
 class TranslationOptionCollection;
+
+/** This struct is used for storing XML force translation data for a given range in the sentence
+ */
+struct XmlOption {
+
+	size_t startPos, endPos;
+	std::vector<std::string> targetPhrases;
+	std::vector<float> targetScores;
+	
+	XmlOption(int s, int e, std::string targetPhrase, float targetScore): startPos(s), endPos(e) {
+		targetPhrases.push_back(targetPhrase);
+		targetScores.push_back(targetScore);
+	}
+
+};
 
 
 /***
@@ -38,6 +54,17 @@ class TranslationOptionCollection;
  */
 class Sentence : public Phrase, public InputType
 {
+
+ private:
+ 
+	/**
+	 * Utility method that takes in a string representing an XML tag and the name of the attribute,
+	 * and returns the value of that tag if present, empty string otherwise
+	 */
+	static std::string ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName);
+	std::vector <XmlOption> m_xmlOptionsList;
+	std::vector <bool> m_xmlCoverageMap;
+
  public:
 	Sentence(FactorDirection direction)	: Phrase(direction), InputType()
 	{
@@ -63,6 +90,13 @@ class Sentence : public Phrase, public InputType
 	{
 		return Phrase::GetSize();
 	}
+	
+	//! Returns true if there were any XML tags parsed that at least partially covered the range passed
+	bool XmlOverlap(size_t startPos, size_t endPos) const;
+
+	//! populates vector argument with XML force translation options for the specific range passed
+	void GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const;
+
 
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
 	void Print(std::ostream& out) const;
