@@ -24,15 +24,15 @@
 \usepackage{subfig}
 \oddsidemargin 0mm
 \evensidemargin 5mm
-\topmargin 0mm
-\textheight 220mm
+\topmargin -20mm
+\textheight 240mm
 \textwidth 160mm
 
 \makeindex
 \theoremstyle{plain}
 
 \begin{document}
-\title{\vspace{-25mm}\LARGE {\bf Final Report}\\[2mm]
+\title{\vspace{-15mm}\LARGE {\bf Final Report}\\[2mm]
 of the\\[2mm]
 2006 Language Engineering Workshop\\[15mm]
 {\huge \bf Open Source Toolkit\\[2mm]
@@ -60,17 +60,28 @@ Evan Herbst}
 \maketitle
  
 \section*{Abstract}
-{\large The 2006 Language Engineering Workshop {\em Open Source Toolkit for Statistical Machine Translation} had the objective to advance the current state of the art in statistical machine translation in respect to dealing with richer input and richer annotation of the textual data. The work breaks down into three goals: factored translation models, confusion network decoding, and the development of an open source toolkit that incorporates this advancements.
+{\Large The 2006 Language Engineering Workshop {\em Open Source Toolkit for Statistical Machine Translation} had the objective to advance the current state of the art in statistical machine translation in respect to dealing with richer input and richer annotation of the textual data. The work breaks down into three goals: factored translation models, confusion network decoding, and the development of an open source toolkit that incorporates this advancements.
 
 This report describes the scientific goals, the novel methods, and experimental results of the workshop. It also documents details of the implementation of the open source toolkit.
+
+\phantom{.}
 }
 
 \newpage
 \section*{Acknowledgments}
+{\Large
+The participants at the workshop would like to thank everybody at Johns Hopkins University who made the summer workshop such a memorable --- and in our view very successful --- event. The JHU Summer Workshop is a great venue to bring together researchers from various backgrounds and focus their minds on a problem, leading to intense future collaboration that would not have been possible otherwise.
+
+We especially would like to thank Fred Jelinek for heading the Summer School effort as well as Laura Graham and Sue Porterfield for keeping us sane during the hot summer weeks in Baltimore.
+
+Besides the funding acquired from JHU for this workshop from DARPA and NSF, the participation at the workshop was also financially supported by the funding by the GALE program of the Defense Advanced Research Projects Agency, Contract No. HR0011-06-C-0022 and funding by the University of Maryland, the University of Edinburgh and MIT Lincoln Labs.
+
+\phantom{.}}
 
 \newpage
 \section*{Team Members}
 
+{\Large
 \begin{itemize}
 \item Philipp Koehn, Team Leader, University of Edinburgh
 \item Marcello Federico, Senior Researcher, ITC-IRST
@@ -86,6 +97,7 @@ This report describes the scientific goals, the novel methods, and experimental 
 \item Evan Herbst, Undergraduate Student, Cornell
 \item Christine Corbett Moran, Undergraduate Student, MIT
 \end{itemize}
+}
 
 \tableofcontents
 
@@ -100,31 +112,32 @@ While statistical machine translation research has gained much from building on 
 
 We address these two challenges with approaches called {\bf confusion network decoding} amd {\bf factored translation models}. We also address another problem of doing research in this field. The methods and systems we develop become increasingly complex. Catching up with the state of the art has become a major part of the work done by research groups. To reduce this tremendous duplication of efforts, we make our work available in form of an {\bf open source toolkit}.
 
-To this end, we merged the efforts of a number of research labs (University of Edinburgh, ITC-irst, MIT, University of Maryland, RWTH Aachen) in a common set of tools, including the core of a machine translation system: the decoder. This report documents this effort that we will persue beyond the efforts at the summer workshop.
+To this end, we merged the efforts of a number of research labs (University of Edinburgh, ITC-irst, MIT, University of Maryland, RWTH Aachen) in a common set of tools, including the core of a machine translation system: the decoder. This report documents this effort that we will pursue beyond the efforts at the summer workshop.
 
 \section{Factored Translation Models}
-{\sc \begin{itemize}
-\item outperform traditional phrase-based models
-\item framework for a wide range of models
-\item integrated approach to morphology and syntax
-\end{itemize}}
+Extending traditional phrase-based statistical machine translation models to be able to take advantage from additional annotation, especially linguistic markup, has been a challenge for the research community. We are proposing a new approach to this problem that we call factored translation models.
+
+Building on phrase-based SMT gives us a great baseline to improve upon. Phrase-based SMT system have been consistently outperforming other methods in recent competitions. Any improvements over this approach will lead automatically to improving the state of the art.
+
+The basic idea behind factored translation models is to represent a word in the model not anymore as a single token, but as a vector of factors. This enables straight-forward integration of part-of-speech tags, morphological information, or even shallow syntax.
+
+Instead of dealing with linguistic markup in preprocessing or postprocessing steps (e.g., reranking approaches of the 2003 JHU workshop), we are able to build system that intergrate this information into the decoding process which will better guide the heuristic search.
 
 Our approach to factored translation models is described in detail in Chapter~\ref{chap:factored-models}.
 
 \section{Confusion Network Decoding}
-{\sc \begin{itemize}
-\item exploit ambiguous input and outperform 1-best
-\item enable integrated approach to speech translation
-\end{itemize}}
+There are several reasons, why we may have to deal with ambiguous input to statistical machine translation systems. One is the use of annotation tools that may not be able to make deterministic decisions. For instance, morphological analysis is often ambiguous. Another reason is the current effort of bringing together speech recognition and machine translation into a combined approach to speech translation.
+
+Instead of breaking up the integration of multiple error-prone processing steps into stages and only passing along 1-best output to the next stage, it has been shown to be advantagous in general to preserve ambiguity and defer decisions until the final stage. Our solution to this problem for statistical machine translation is to enable the system to accept ambiguous input in form of confusion networks.
 
 Our approach to confusion network decoding is described in detail in Chapter~\ref{chap:confusion-networks}.
 
 \section{Open Source Toolkit}
-{\sc \begin{itemize}
-\item advances state-of-the-art of statistical machine translation models
-\item best performance of European Parliament task
-\item competitive on IWSLT and TC-Star
-\end{itemize}}
+There are several reasons to create an open research environment by opening up resources (tools and corpora) freely to the wider community. Since much of research is publicly funded, it seems to be appropriate to return the products of this work to the public. Access to free resources enables research group to continue and advance work that was started elsewhere, or at least provide baseline performance for novel efforts.
+
+While these are honorable goals, our motivation for creating this toolkit is also very selfish: Building statistical machine translation systems has become a very complex task, and rapid progress in the field forces us to spend much time reimplementing other researchers advances into our system. By bringing several research groups together to work on the same system, this duplication of effort is reduced and we can spend more time on what we would really like to do: Come up with new ideas and test them.
+
+The starting point of the Moses system is the Pharaoh system of the University of Edinburgh, extended during the workshop with major new components. It is a full-fledge statistical machine translation system, including the training, tuning and decoding components. The system provides out of the box state of the art performance, as has been shown at recent ACL-WMT, TC-STAR, and IWSLT evaluation campaigns.
 
 The implementation and usage of the toolkit is described in more detail in Chapter~\ref{toolkit}.
 
@@ -165,12 +178,13 @@ Note that while we illustrate the use of factored translation models on such a l
 \section{Decomposition of Factored Translation}\label{sec:factored-decomposition}
 The translation of the factored representation of source words into the factored representation of target words is broken up into a sequence of {\bf mapping steps} that either {\bf translate} input factors into output factors, or {\bf generate} additional target factors from existing target factors.
 
-Recall the previous  of a factored model that translates using morphological analysis and generation. This model breaks up the translation process into the following steps:
-\begin{itemize}
-\item Translating of input lemmas into target lemmas
+Recall the previous  of a factored model that translates using morphological analysis and generation. This model breaks up the translation process into the following steps: \vspace{-3pt}
+{
+\begin{itemize}\itemsep=-3pt
 \item Translating of morphological and syntactic factors
 \item Generating of surface forms given the lemma and linguistic factors
 \end{itemize}
+}
 
 Factored translation models build on the phrase-based approach that breaks up the translation of a sentence in the translation of small text chunks (so-called phrases). This model implicitly defines a segmentation of the input and output sentences into such phrases. See an example below:
 
@@ -341,7 +355,7 @@ benefits of conventional phrase-based translation models since
 mistranslating common stock phrases results is significantly
 diminished fluency and understanding, and common evaluation metrics
 assign a great deal of value to correctly translated stock phrases
-(since they are, by definition, several words in length and tend to
+(since they are several words in length and tend to
 exhibit relatively fixed word order).
 
 Multi-factored models that analyze the source language in terms of
@@ -678,7 +692,7 @@ is very similar  to the CN decoder. Specifically,  feature (v) is  replaced   %%
 \section{Overall design}
 In developing the Moses decoder we were aware that the system should be open-sourced if it were to gain the support and interest from the machine translation community that we had hoped. There were already several proprietary decoders available which frustrated the community as the details of their algorithms could not be analysed or changed.
 However, making the source freely available is not enough. The decoder must also advance the state of the art in machine translation to be of interest to other researchers. Its translation quality and runtime resource consumption must be comparable with the best available decoders. Also, as far as possible, it should be compatible with current systems which minimize the learning curve for people who wish to migrate to Moses. 
-We therefore kept to the following principles when developing Moses: \\
+We therefore kept to the following principles when developing Moses:
 \begin{itemize}	
  \item Accessibility 
  \item 	Easy to Maintain
@@ -688,69 +702,68 @@ We therefore kept to the following principles when developing Moses: \\
 \end{itemize}
 The number of functionality added in the six weeks by every member of the team at the Johns Hopkins University workshop, as can be seen from the figures below, is evident that many of these design goals were met.
 
-\begin{center}
 \begin{figure}[h]
+\begin{center}
 \centering
 \includegraphics[scale=0.8]{hieu-1}
+\end{center}
 \caption{Lines of code contribute by each developer}
 \end{figure}
-\end{center}
 
-By adding factored translation to conventional phrase based decoding we hope to incorporate linguistic information into the translation process in order to create a competitive system.\\
+By adding factored translation to conventional phrase based decoding we hope to incorporate linguistic information into the translation process in order to create a competitive system.
 
-Resource consumption is of great importance to researchers as it often determine whether or not experiments can be run or what compromises needs to be taken. We therefore also benchmarked resource usage against another phrase-based decoder, Pharaoh, as well as other decoders, to ensure that they were comparable in like-for-like decoding.\\
+Resource consumption is of great importance to researchers as it often determine whether or not experiments can be run or what compromises needs to be taken. We therefore also benchmarked resource usage against another phrase-based decoder, Pharaoh, as well as other decoders, to ensure that they were comparable in like-for-like decoding.
 
-It is essential that features can be easily added, changed or replace, and that the decoder can be used as a Ã¢Â€Â˜toolkitÃ¢Â€Â™ in ways not originally envisaged. We followed strict object oriented methodology; all functionality was abstracted into classes which can be more readily changed and extended. For example, we have two implementations of single factor language models which can be used depending on the functionality and licensing terms required. Other implementations for very large and distributed LMs are in the pipeline and can easily be integrated into Moses. The framework also allows for factored LMs; a joint factor and skipping LM are currently available.\\
-\begin{center}
+It is essential that features can be easily added, changed or replace, and that the decoder can be used as a Ã¢Â€Â˜toolkitÃ¢Â€Â™ in ways not originally envisaged. We followed strict object oriented methodology; all functionality was abstracted into classes which can be more readily changed and extended. For example, we have two implementations of single factor language models which can be used depending on the functionality and licensing terms required. Other implementations for very large and distributed LMs are in the pipeline and can easily be integrated into Moses. The framework also allows for factored LMs; a joint factor and skipping LM are currently available.
+
 \begin{figure}[h]
-\centering
+\begin{center}
 \includegraphics[scale=1]{hieu-2}
+\end{center}
 \caption{Language Model Framework}
 \end{figure}
-\end{center}
-Another example is the extension of Moses to accept confusion networks as input. This also required changes to the decoding mechanism.\\
 
-\begin{center}
+Another example is the extension of Moses to accept confusion networks as input. This also required changes to the decoding mechanism.
+
 \begin{figure}[h]
+\begin{center}
 \centering
 \includegraphics[scale=1]{hieu-3}
+\end{center}
 \caption{Input}
 \end{figure}
-\end{center}
 
-\begin{center}
 \begin{figure}[h]
+\begin{center}
 \centering
 \includegraphics[scale=0.8]{hieu-4}
 \caption{Translation Option Collection}
-\end{figure}
 \end{center}
-Nevertheless, there will be occasions when changes need to be made which are unforeseen and unprepared. In these cases, the coding practises and styles we instigated should help, ensuring that the source code is clear, modular and consistent to enable the developers to quickly assess the algorithms and dependencies of any classes or functions that they may need to change.\\
+\end{figure}
 
-A major change was implemented when we decided to collect all the score keeping information and functionality into one place. That this was implemented relatively painlessly must be partly due to the clarity of the source code.\\
+Nevertheless, there will be occasions when changes need to be made which are unforeseen and unprepared. In these cases, the coding practises and styles we instigated should help, ensuring that the source code is clear, modular and consistent to enable the developers to quickly assess the algorithms and dependencies of any classes or functions that they may need to change.
 
-\begin{center}
+A major change was implemented when we decided to collect all the score keeping information and functionality into one place. That this was implemented relatively painlessly must be partly due to the clarity of the source code.
+
 \begin{figure}[h]
+\begin{center}
 \centering
 \includegraphics[scale=0.8]{hieu-5}
 \caption{Scoring framework}
-\end{figure}
 \end{center}
+\end{figure}
 
 The decoder is packaged as a library to enable users to more easily comply with the LGPL license. The library can also be embedded in other programs, for example a GUI front-end or an integrated speech to text translator.
 
 \subsection{Entry Point to Moses library}
 
 The main entry point to the library is the class\\
-\\
 \indent{\tt Manager}\\
 \\
 For each sentence or confusion network to be decoded, this class is instantiated and the following function called\\
-\\
 \indent{\tt ProcessSentence()}\\
 \\
 Its outline is shown below\\
-\\
 \begin{tt}
 \indent CreateTranslationOptions()\\
 \indent for each stack in m\_hypoStack\\
@@ -758,32 +771,28 @@ Its outline is shown below\\
 \indent \indent for each hypothesis in stack\\
 \indent \indent \indent ProcessOneHypothesis()\\
 \end{tt}\\
-Each contiguous word coverage (Ã¢Â€Â˜spanÃ¢Â€Â™) of the source sentence is analysed in\\ 
+Each contiguous word coverage ("span") of the source sentence is analysed in\\ 
 \indent {\tt CreateTranslationOptions() }\\
 \\
 and translations are created for that span. Then each hypothesis in each stack is processed in a loop. This loop starts with the stack where nothing has been translated which has been initialised with one empty hypothesis.
 \\
 \subsection{Creating Translations for Spans}
 The outline of the function \\
-\\
-\indent {\tt TranslationOptionCollection::CreateTranslationOptions()}\\
-\\
+\indent {\tt TranslationOptionCollection::CreateTranslationOptions()}
+
 is as follows:\\
-\\
 \begin{tt}
 \indent	for each span of the source input\\
 \indent \indent	CreateTranslationOptionsForRange(span)\\
 \indent	ProcessUnknownWord()\\
 \indent	Prune()\\
-\indent	CalcFutureScoreMatrix()\\
+\indent	CalcFutureScoreMatrix()
 \end{tt}
-\\
+
 A translation option is a pre-processed translation of the source span, taking into account all the translation and generation steps required. Translations options are created in\\
-\\
 \indent {\tt CreateTranslationOptionsForRange()}
-\\
+
 which is out follows\\
-\\
 \begin{tt}
 \indent	ProcessInitialTranslation()\\
 \indent	for every subequent decoding step\\
@@ -793,15 +802,18 @@ which is out follows\\
 \indent \indent \indent DecodeStepGeneration::Process()\\
 \indent Store translation options for use by decoder\\
 \end{tt}
-\\
+
 However, each decoding step, whether translation or generation, is a subclass of\\
-\\
-\indent {\tt DecodeStep}\\
-\\
+\indent {\tt DecodeStep}
+
 so that the correct Process() is selected by polymorphism rather than using if statements as outlined above.
+
+
 \subsection{Unknown Word Processing}
-After translation options have been created for all contiguous spans, some positions may not have any translation options which covers it. In these cases, CreateTranslationOptionsForRange() is called again but the table limits on phrase and generation tables are ignored. \\
-If this still fails to cover the position, then a new target word is create by copying the string for each factor from the untranslatable source word, or the string Ã¢Â€Â˜UNKÃ¢Â€Â™ if the source factor is null.\\
+After translation options have been created for all contiguous spans, some positions may not have any translation options which covers it. In these cases, CreateTranslationOptionsForRange() is called again but the table limits on phrase and generation tables are ignored.
+
+If this still fails to cover the position, then a new target word is create by copying the string for each factor from the untranslatable source word, or the string "UNK" if the source factor is null.
+
 \begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
@@ -813,25 +825,25 @@ Proper Noun	& $\to$	& Proper Noun\\
 \end{tabular}
 \end{center}
 
-This algorithm is suitable for proper nouns and numbers, which are one of the main causes of unknown words, but is incorrect for rare conjugation of source words which have not been seen in the training corpus. The algorithm also assumes that the factor set are the same for both source and target language, for instance, th list of POS tags are the same for source and target. This is clearly not the case for the majority of language pairs. Language dependent processing of unknown words, perhaps based on morphology. is a subject of debate for inclusion into Moses.\\
+This algorithm is suitable for proper nouns and numbers, which are one of the main causes of unknown words, but is incorrect for rare conjugation of source words which have not been seen in the training corpus. The algorithm also assumes that the factor set are the same for both source and target language, for instance, th list of POS tags are the same for source and target. This is clearly not the case for the majority of language pairs. Language dependent processing of unknown words, perhaps based on morphology. is a subject of debate for inclusion into Moses.
+
 Unknown word processing is also dependent on the input type - either sentences or confusion networks. This is handled by polymorphism, the call stack is\\
-\\
 \begin{tt}
 \indent	Base::ProcessUnknownWord()\\
 \indent \indent	Inherited::ProcessUnknownWord(position)\\
 \indent \indent \indent	Base::ProcessOneUnknownWord()\\
 \end{tt}
+
 where\\
 \indent {\tt Inherited::ProcessUnknownWord(position)}\\
-\\
+
 is dependent on the input type.
+
 \subsection{Scoring}
 A class is created which inherits from\\
-\\
-\indent {\tt ScoreProducer}\\
-\\
+\indent {\tt ScoreProducer}
+
 for each scoring model. Moses currently uses the following scoring models:\\
-\\
 \begin{center}
 \begin{tabular}{|r|r|}
 \hline
@@ -843,19 +855,20 @@ Translation	& PhraseDictionary\\
 Generation	& GenerationDictionary\\
 LanguageModel	& LanguageModel\\
 \hline
-\end{tabular}\\
+\end{tabular}
 \end{center}
 
 The scoring framework includes the classes \\
-\\
 \begin{tt}
 \indent ScoreIndexManager\\
-\indent	ScoreComponentCollection\\
+\indent	ScoreComponentCollection
 \end{tt}
-\\
+
 which takes care of maintaining and combining the scores from the different models for each hypothesis.
+
 \subsection{Hypothesis}
 A hypothesis represents a complete or incomplete translation of the source. Its main properties are
+
 \begin{center}
 \begin{tabular}{|r|l|}
 \hline
@@ -870,39 +883,39 @@ m\_scoreBreakdown & Scores of each scoring model\\
 m\_arcList & List of equivalent hypothesis which have lower\\
  & score than current hypothesis\\
 \hline
-\end{tabular}\\
+\end{tabular}
 \end{center}
 
-Hypothesis are created by calling the constructor with the preceding hypothesis and an appropriate translation option. The constructors have been wrapped with static functions, Create(), to make use of a memory pool of hypotheses for performance.\\
-\\
+Hypothesis are created by calling the constructor with the preceding hypothesis and an appropriate translation option. The constructors have been wrapped with static functions, Create(), to make use of a memory pool of hypotheses for performance.
+
 Many of the functionality in the Hypothesis class are for scoring. The outline call stack for this is\\
-\\
 \begin{tt}
 \indent CalcScore()\\
 \indent	\indent	CalcDistortionScore()\\
 \indent	\indent	CalcLMScore()\\
 \indent	\indent	CalcFutureScore()\\
 \end{tt}
-\\
-The Hypothesis class also contains functions for recombination with other hypotheses. Before a hypothesis is added to a decoding stack, it is compare to other other hypotheses on the stack. If they have translated the same source words and the last n-words for each target factor are the same (where n is determined by the language models on that factor), then only the best scoring hypothesis will be kept. The losing hypothesis may be used latter when generating the n-best list but it is otherwise not used for creating the best translation.\\
-\\
-In practise, language models often backoff to lower n-gram than the context words they are given. Where it is available, we use information on the backoff to more agressively recombine hypotheses, potentially speeding up the decoding.\\
-\\
+
+The Hypothesis class also contains functions for recombination with other hypotheses. Before a hypothesis is added to a decoding stack, it is compare to other other hypotheses on the stack. If they have translated the same source words and the last n-words for each target factor are the same (where n is determined by the language models on that factor), then only the best scoring hypothesis will be kept. The losing hypothesis may be used latter when generating the n-best list but it is otherwise not used for creating the best translation.
+
+In practise, language models often backoff to lower n-gram than the context words they are given. Where it is available, we use information on the backoff to more agressively recombine hypotheses, potentially speeding up the decoding.
+
 The hypothesis comparison is evaluated in \\
-\\
-\indent {\tt NGramCompare()}\\
-\\
+\indent {\tt NGramCompare()}
+
 while the recombination is processed in the hypothesis stack class\\
-\\
-\indent {\tt HypothesisCollection::AddPrune()}\\
-\\
+\indent {\tt HypothesisCollection::AddPrune()}
+
 and in the comparison functor class\\
-\\
 \indent {\tt HypothesisRecombinationOrderer}
+
+
 \subsection{Phrase Tables}	
 The main function of the phrase table is to look up target phrases give a source phrase, encapsulated in the function\\
-\indent {\tt PhraseDictionary::GetTargetPhraseCollection()}\\
-There are currently two implementation of the PhraseDictionary class\\
+\indent {\tt PhraseDictionary::GetTargetPhraseCollection()}
+
+There are currently two implementation of the PhraseDictionary class
+
 \begin{tabular}{|l|l|}
 \hline
 PhraseDictionaryMemory & Based on std::map. Phrase table loaded\\ 
@@ -911,21 +924,17 @@ PhraseDictionaryTreeAdaptor & Binarized phrase table held on disk and \\
  & loaded on demand.\\
 \hline
 \end{tabular}
+
 \subsection{Command Line Interface}
-The subproject, moses-cmd, is a user of the Moses library and provides an illustration on how the library functions should be called. It is licensed under a BSD license to enable other users to copy it source code for using the Moses library in their own application.\\
-\\
-However, since most researchers will be using a command line program for running experiments, it will remain the defacto Moses application for the time being.\\
-\\
+The subproject, moses-cmd, is a user of the Moses library and provides an illustration on how the library functions should be called. It is licensed under a BSD license to enable other users to copy it source code for using the Moses library in their own application.
+
+However, since most researchers will be using a command line program for running experiments, it will remain the defacto Moses application for the time being.
+
 Apart from the main() function, there are two classes which inherites from the moses abstract class, InputOutput:\\
-\\
 \indent {\tt	IOCommandLine}\\
-\indent {\tt	IOFile (inherites from IOCommandLine)}\\
-\\
+\indent {\tt	IOFile (inherites from IOCommandLine)}
+
 These implement the required functions to read and write input and output (sentences and confusion network inputs, target phrases and n-best lists) from standard io or files.
-
-
-
-
 
 \section{Software Engineering Aspects}
 
@@ -972,6 +981,7 @@ Timing information is also provided so that changes that have
 serious performance implications can be identified as they are made.
 This information is dependent on a variety of factors (system load,
 disk speed), so it is only useful as a rough estimate.
+
 \subsubsection{Versioning}
 The code for the regression test suite is in the
 \texttt{regression/tests} subdirectory of the Subversion repository.
@@ -1040,10 +1050,6 @@ The source code is publicly accessible and in two ways:
   \item The current development source code can be accessed with a subversion client (see \texttt{http://subversion.tigris.org/}
 for more details how to acquire and use the client software).
 \end{enumerate}
-
-
-\subsection{Documentation}
-{\sc Philipp Koehn and Chris Callison-Burch: Doxygen}
 
 \section{Parallelization}
 %{\sc Nicola Bertoldi}
@@ -1214,6 +1220,7 @@ quantizing both back-off weights and probabilities.
 \begin{figure}
 \begin{center}
  \includegraphics[width=\columnwidth]{marcello-lmstruct}
+\vspace{-3cm}
 \caption{Data structure for storing n-gram language models.}
 \label{fig:LM-struct}
 \end{center}
@@ -1295,7 +1302,7 @@ Based upon this data, we calculate probability distributions of the form
 \begin{equation}
 p_r(orientation|\bar{e},\bar{f})
 \end{equation}
-The design space for such a model is inherently larger, and three important design decisions are made in configuring the model, granularity of orientation distinction, side of the translation to condition the probability distribution on, and the directions of orientation to consider. Namely, one can distinguish between all three orientation classes or merely between monotone and non-monotone; one can condition the orientation probability distribution on the foreign phrase or on both the foreign and the source phrase; and one can model with respect to the previous phrase, the following phrase or both. Incorporating a lexical reordering model generally offers significant BLEU score improvements and the optimal configuration depends on language pair \cite{KoehnIWSLT05}. Lexical reordering was analogously implemented in Moses, offering the significant gains in BLEU score detailed below.\\
+The design space for such a model is inherently larger, and three important design decisions are made in configuring the model, granularity of orientation distinction, side of the translation to condition the probability distribution on, and the directions of orientation to consider. Namely, one can distinguish between all three orientation classes or merely between monotone and non-monotone; one can condition the orientation probability distribution on the foreign phrase or on both the foreign and the source phrase; and one can model with respect to the previous phrase, the following phrase or both. Incorporating a lexical reordering model generally offers significant BLEU score improvements and the optimal configuration depends on language pair \cite{koehn:05}. Lexical reordering was analogously implemented in Moses, offering the significant gains in BLEU score detailed below.\\
 
 \begin{tabular}{r|rrr}
 Europarl Lang & Pharaoh & Moses\\ 
@@ -1310,8 +1317,7 @@ Hard-coding in a few factor based distortion rules to an existing statistical ma
 In factor distortion models we define a reordering model over an arbitrary subset of factors. For example, a part of speech factor distortion model has the ability to learn in a given language that the probability of an adjective being swapped with a noun is high, while the probability of an adjective being swapped with a verb is low. As compared with distance or lexical distortion models, generalizing through a factor distortion model makes better use of the available training data and more effectively models long range dependencies. If we encounter a surface form we have not seen before, we are more likely to handle it effectively through information obtained from its factors. In addition, t is more likely we will have seen a sequence of general factors corresponding to a phrase in our training data than the exact lexical surface form of the phrase itself. As such, by having longer phrases of factors in our training data we have access to reordering probabilities over a greater range, enabling us in turn to model reordering over a greater number of words.
 
 \subsection{Future work}
-While factor distortion modeling is integrated into the machinery Moses, its possible limitations and considerable powers are ripe to be fully explored. Which combination of factors is most effective and which model parameters are optimal for those factors; furthermore, are the answers to these questions language specific, or is a particular configuration the clear forerunner?\\
-
+While factor distortion modeling is integrated into the machinery Moses, its possible limitations and considerable powers are ripe to be fully explored. Which combination of factors is most effective and which model parameters are optimal for those factors; furthermore, are the answers to these questions language specific, or is a particular configuration the clear forerunner?
 
 \section{Error Analysis}
 We describe some statistics generally used to measure error and present two error analysis tools written over the summer.
@@ -1332,34 +1338,197 @@ Along with these statistics, we'd like some assurance that they're stable, prefe
 All of these measures can be applied to a text of any size, but the larger the text, the more statistical these scores become. For detail about the kinds of errors a translation system is making, we need sentence-by-sentence error analysis. For this purpose we wrote two graphical tools.
 
 \subsection{Tools}
-While working on his thesis Dr. Koehn wrote an online tool that keeps track of a set of corpuses (a corpus is a source text, at least one system output and at least one reference) and generates various statistics each time a corpus is added or changed. Before the workshop, his system showed BLEU scores and allowed a user to view individual sentences (source, output, reference) and score the output. For large numbers of sentences manual scoring isn't a good use of our time; the system was designed for small corpuses. To replace the manual-scoring feature we created a display of the BLEU scores in detail for each sentence: counts and graphical displays of matching n-grams of all sizes used by BLEU. See figure \ref{fig:sentence_by_sentence_screenshot} for screenshots.
+As part of Koehn's PhD thesis, an online tool was developed that that keeps track of a set of corpuses (a corpus is a source text, at least one system output and at least one reference) and generates various statistics each time a corpus is added or changed. Before the workshop, his system showed BLEU scores and allowed a user to view individual sentences (source, output, reference) and score the output. For large numbers of sentences manual scoring isn't a good use of our time; the system was designed for small corpuses. To replace the manual-scoring feature we created a display of the BLEU scores in detail for each sentence: counts and graphical displays of matching n-grams of all sizes used by BLEU. See Figure~\ref{fig:sentence_by_sentence_screenshot} for screenshots.
 
 The overall view for a corpus shows a list of files associated with a given corpus: a source text, one or more reference translations, one or more system translations. For the source it gives a count of unknown words in the source text (a measure of difficulty of translation, since we can't possibly correctly translate a word we don't recognize) and the perplexity. For each reference it shows perplexity. For each system output it shows WER and PWER, the difference between WER and PWER two for nouns and adjectives only (\cite{errMeasures}), the ratio of PWER of surface forms to PWER of lemmas (\cite{errMeasures}), and the results of some simple statistical tests, as described above, for the consistency of BLEU scores in different sections of the text. The system handles missing information decently, and shows the user a message to the effect that some measure is not computable. Also displayed are results of a $t$ test on BLEU scores between each pair of systems' outputs, which give the significance of the difference in BLEU scores of two systems on the same input.
 
-\begin{figure}[h]
-\centering
-\caption{Sample output of corpus-statistics tool.}
-\label{fig:sentence_by_sentence_screenshot}
-%temp removed to encourage document to compile
-%\subfloat[detailed view of sentences]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=6in]{images/sentence-by-sentence_multiref_screenshot.png}\hspace{.05in}\vspace{.05in}}} \newline
-%\subfloat[overall corpus view]{\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=6in]{images/corpus_overview_screenshot_de-en.png}\hspace{.05in}\vspace{.05in}}}
-\end{figure}
-
-A second tool developed during the workshop shows the mapping of individual source to output phrases (boxes of the same color on the two lines in figure \ref{fig:phrases_used_screenshot}) and gives the average source phrase length used. This statistic tells us how much use is being made of the translation model's capabilities. There's no need to take the time to tabulate all phrases of length 10, say, in the training source text if we're pretty sure that at translation time no source phrase longer than 4 words will be chosen.
+A second tool developed during the workshop shows the mapping of individual source to output phrases (boxes of the same color on the two lines in Figure~\ref{fig:phrases_used_screenshot}) and gives the average source phrase length used. This statistic tells us how much use is being made of the translation model's capabilities. There's no need to take the time to tabulate all phrases of length 10, say, in the training source text if we're pretty sure that at translation time no source phrase longer than 4 words will be chosen.
 
 \begin{figure}[h]
 \centering
+\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=5in]{images/show-phrases-used_crossover_screenshot.png}\hspace{.05in}\vspace{.05in}}
 \caption{Sample output of phrase-detail tool.}
 \label{fig:phrases_used_screenshot}
-\frame{\vspace{.05in}\hspace{.05in}\includegraphics[width=5in]{images/show-phrases-used_crossover_screenshot.png}\hspace{.05in}\vspace{.05in}}
 \end{figure}
 
-%{\sc Evan Herbst}
+\begin{figure}
+\centering
+%temp removed to encourage document to compile
+{\bf Detailed view of sentences}\\
+\includegraphics[width=6in]{images/sentence-by-sentence_multiref_screenshot.png}
+
+\vspace{5mm}
+{\bf Overall corpus view}
+\includegraphics[width=6in]{images/corpus_overview_screenshot_de-en.png}
+\caption{Sample output of corpus-statistics tool.}
+\label{fig:sentence_by_sentence_screenshot}
+\end{figure}
+
+
+
 
 \chapter{Experiments}
 
 \section{English-German}
-{\sc Philipp Koehn, Chris Callison-Burch, Chris Dyer}
+
+German is an example for a language with a relatively rich morphology. Historically, most research in statistical machine translation has been carried out on language pairs with the target language English.
+
+This leads to the question: Does rich morphology pose problems that have not been addressed so far, if it occurs on the target side? Previous research has shown, that stemming morphologically rich input languages leads to better performance. This trick does not work, when we have to generate rich morphology.
+
+\subsection{Impact of morphological complexity}
+To assess the impact of rich morphology, we carried out a study to see what performance gains could be achieved, if we could generate German morphology perfectlty.
+
+For this, we used a translation model trained on 700,000 sentences of the Englisg--German Europarl corpus (a training corpus we will work throughout this section), and the test sets taken from the 2006 ACL Workshop of Statistical Machine Translation. We trained a system with the standard settings of the Moses system.
+
+English--German is a difficult language pair, which is also reflected in the BLEU scores for this task. For our setup, we achieved a score of 17.80 on the 2006 test set, whereas for other language pairs scores of over 30 BLEU can be achieved. How much of this is due to the morphological complexity of German? If we measure BLEU not on words (as it typically done), but on stems, we can get some idea how to answer this question. The stem-BLEU score is 21.47, almost 4 points higher. See also Table~\ref{tab:german:stem-bleu} for the result.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|c|} \hline
+\bf Method &  \bf devtest & \bf test\\ \hline
+BLEU measured on words & 17.76 & 17.80 \\ \hline
+BLEU measured on stems & 21.70 & 21.47 \\ \hline
+\end{tabular}
+\end{center}
+\caption{Assessment of what could be gained with perfect morphology: BLEU scores measured on the word leveled on on stemmed system output and reference sets. The BLEU score decreases by 4 points due to errors in the morphology.}
+\label{tab:german:stem-bleu}
+\end{table}
+
+One of the motivations for the introduction of factored translation models is the problem of rich morphology. Morphology increases the vocabulary size and leads to sparse data problems. We expect that backing off to word representations with richer statistics such as stems or word classes will allow us to deal with this problem. Also, morphology carries information about grammatical information such as case, gender, and number, and by explicitly expressing this information in form of factors will allow us to develop models that take grammatical constraints into account.
+
+\subsection{Addressing data sparesness with lemmas}
+The German language model may not be as powerful as language models for English, since the rich morphology fragments the data. This raises the question, if this problem of data sparseness may be overcome by building a language model on lemmas instead of the surface form of words.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[scale=1]{factored-lemma2.pdf}
+&
+\includegraphics[scale=1]{factored-lemma1.pdf}
+\\
+Lemma Model 1 & Lemma Model 2
+\end{tabular}
+\end{center}
+\caption{Two models for including lemmas in factored translation models: Both models map words from input to output in a translation step and generate the lemma on the output side. Model 2 includes an additional step that maps input words to output lemmas.}
+\label{fig:german:lemma-model}
+\end{figure}
+
+To test this hypothesis, we build two factored translation models, as illustrated in Figure~\ref{fig:german:lemma-model}. The models are based on traditional phrase-based statistical machine translation systems, but add additional information in form of lemmas on the output side which allows the integration of a language model trained on lemmas. Note that this goes beyond previous work in reranking, since the second language model trained on lemmas is integrated into the search.
+
+In our experiments, we obtained higher translation performance when using the factored translation models that integrate a lemma language models (all language models are trigram models trained with the SRILM toolkit). See Table~\ref{tab:german:lemma-model} for details. On the two different set sets we used, we gained 0.60 and 0.65 BLEU with Model 1 and 0.19 BLEU and 0.48 BLEU with Model 2 for the two test sets, respectively. The additional translation step does not seem to be useful.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|c|} \hline
+\bf Method &  \bf devtest & \bf test\\ \hline
+baseline & 18.22 & 18.04 \\ \hline
+hidden lemma (gen only) & \bf 18.82 & \bf 18.69 \\ \hline
+hidden lemma (gen and trans) & 18.41 & 18.52 \\ \hline
+best published results & - & 18.15 \\ \hline
+\end{tabular}
+\end{center}
+\caption{Results with the factored translation models integrating lemmas from Figure~\ref{fig:german:lemma-model}: language models over lemmas lead to better performance, beating the best published results. Note: the baseline presented here is higher than the one used in Table~\ref{tab:german:stem-bleu}, since we used a more mature version of our translation system.}
+\label{tab:german:lemma-model}
+\end{table}
+
+\subsection{Overall grammatical coherence}
+The last experiment tried to take advantage of models trained with richer statistics over more general representation of words by focussing the the lexical level. Another aspect of words is their grammatical role in the sentence. A straight-forward aspect to focus on are part-of-speech tags. The hope is that constraints over part-of-speech tags gives us means to ensure more grammatical output.
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=1]{factored-simple-pos-lm.pdf}
+\end{center}
+\caption{Adding part-of-speech information to a statistical machine translation model: By generating POS tags on the target side, it is possible to use high-order language models over these tags that help ensure more grammatical output. In our experiment, we only obtained a minor gain (BLEU 18.25 vs. 18.22).}
+\label{fig:german:pos-model}
+\end{figure}
+
+The factored translation model that integrates part-of-speech information is very similar to the lemma models from the previous section. See Figure~\ref{fig:german:pos-model} for an illustration. Again the additional information on the target side is generated by a generation step, and a language model over this factor is employed.
+
+Since there are only very few part-of-speech tags compared to surface forms of words, it is possible to build very high-order language models for them. In our experiments with used 5-gram and 7-gram models. However, the gains with obtained by adding such a model were only minor: for instance, on the devtest set we imrpoved BLEU to 18.25 from 18.22, while on the test set, no difference in BLEU could be measured.
+
+A closer look at the output of the systems suggests that local grammatical coherence is already fairly good, so that the POS sequence models are not necessary. On the other hand, for large-scale grammatical concerns, the added sequence models are not strong enough to support major restructuring.
+
+\subsection{Local agreement (esp. within noun phrases)}
+The expectation with adding POS tags is to have a handle on relatively local grammatical coherence, i.e. word order, maybe even insertion of the proper function words. Another aspect is morphological coherence. In languages as German not only nouns, but also adjectives and determiners are inflected for count (singular versus plural), case and grammatical gender. When translating from English, there is not sufficient indication from the translation model which inflectional form to chose and the language model is the only means to ensure agreement.
+
+By introducing morphological information as a factor to our model, we expect to be able to detect word sequences with agreement violation such as
+\begin{itemize}
+\item {\em DET-sgl NOUN-sgl} good sequence
+\item {\em DET-sgl NOUN-plural} bad sequence
+\end{itemize}
+
+The model for integrating morphological factors is similar to the previous models, see Figure\ref{fig:german:morphology} for an illustration. We generate a morphological tag in addition to the word and part-of-speech tag. This allows us to use a language model over the tags. Tags are generated with the LoPar parser.
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=1]{factored-posmorph-lm.pdf}
+\end{center} 
+\caption{Adding morphological information: This enables the incorporation of language models over morphological factors and ensure agreement, especially in local contexts such as noun phrases.}
+\label{fig:german:morphology}
+\end{figure}
+
+When using a 7-gram POS model in addition to the language model, we see minor improvements in BLEU (+0.03 and +0.18 for the devtest and test set, respectively). But an analysis on agreement within noun phrases shows that we dramatically reduced the agreement error rate from 15\% to 4\%. See Table~\ref{tab:german:morphology} for the summary of the results.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|c|c|} \hline
+\bf Method & \bf Agreement errors in NP & \bf devtest & \bf test\\ \hline
+baseline & 15\% in NP $\ge$ 3 words & 18.22 BLEU & 18.04 BLEU \\ \hline
+factored model & 4\% in NP $\ge$ 3 words & 18.25 BLEU & 18.22 BLEU \\ \hline
+\end{tabular}
+\end{center}
+\caption{Results with the factored translation model integrating morphology from Figure~\ref{fig:german:morphology}. Besides minor improvement in BLEU, we drastically reduced the number of agreement errors within noun phrases.}
+\label{tab:german:morphology}
+\end{table}
+
+Here two examples, where the factored model outperformed the phrase-based baselines:
+\begin{itemize}
+\item Example 1: rare adjective in-between preposition and noun
+\begin{itemize}
+\item baseline: {\em ... \underline{zur} zwischenstaatlichen methoden ...}
+\item factored model: {\em ... zu zwischenstaatlichen methoden ... }
+\end{itemize}
+\item Example 2: too many words between determiner and noun
+\begin{itemize}
+\item baseline: {\em ... \underline{das} zweite wichtige {\"a}nderung ...}
+\item factored model: {\em ... die zweite wichtige {\"a}nderung ... }
+\end{itemize}
+\end{itemize}
+
+In both cases, the language model over surface forms of words is not strong enough. Locally, on a bigram level the word sequences are correct, due to the ambiguity in the morphology of German adjectives. For instance, {\em zwischenstaatlichen} could be both singular female dative, as the preposition {\em zur}, or plural, as the noun {\em methoden}. The agreement error is between preposition and noun, but the language model has to overcome the context of the unusual adjective {\em zwischenstaatlichen} which is not very frequent in the training corpus. For the morphological tags, however, we have very rich statistics that rule the erroneous word sequence out.
+
+\subsection{Subject-verb agreement}
+Besides agreement errors within noun phrases, another source for disfluent German output are agreement errors between subject in verb. In German, subject and verb are often next to each other (for instance, {\em \underline{hans} \underline{schwimmt}.}), but may be several words apart, which almost always the case in relative clauses ({\em ... damit \underline{hans} im see ... \underline{schwimmt}.}).
+
+We plan in future experiments to address this problems with factors and skip language models. Consider the following example of a English sentence which may be generated wrongly by a machine translation system: 
+
+{\em \begin{center} 
+\begin{tabular}{cccccccc}
+\bf the & \bf paintings & \bf of & \bf the & \bf old & \bf man & \underline{\bf is} & \bf beautiful \\
+\end{tabular}
+\end{center}}
+
+In this sentence, {\em old man is} is a better trigram than {\em old man are} so the language model will more likely prefer the wrong translation. The subject-verb agreement is between the words {\em paintings} and {\em are}, which are several words apart. Since this out of the reach of traditional language models, we would want to introduce tags for subject and verb to check for this agreement. For all the other wirdsm, the tag is empty. See the extended example below:
+
+{\em \begin{center}
+\begin{tabular}{cccccccc}
+\bf the & \bf paintings & \bf of & \bf the & \bf old & \bf man & \bf are & \bf beautiful \\
+- & SBJ-plural & - & - & - & - & V-plural & - \\
+\end{tabular}
+\end{center}} 
+
+Given these tags, we should prefer the correct morphological forms:
+\begin{center}
+{\em p(-,SBJ-plural,-,-,-,-,V-plural,-) $>$ p(-,SBJ-plural,-,-,-,-,V-singular,-)}
+\end{center}
+
+We implemented a skip language model, so that the empty tags are ignored, and the language model decision is simply made on the base of the subject and verb tags:
+\begin{center}
+{\em p(SBJ-plural,V-plural) $>$ p(SBJ-plural,V-singular)}
+\end{center}
+
+We will explore this in future work.
+
 \section{English-Spanish}
 {\sc Wade Shen, Brooke Cowan, Christine Moran}
 
@@ -2702,8 +2871,6 @@ by adding more data and quite differently from \tocs{} results (see section
 and out-of-domain LM data does not hurt the performance.
 
 
-
-
 \subsubsection{Summary and Conclusion}
 
 We experimented with factored \tocs{} translation. The majority of our
@@ -2754,12 +2921,7 @@ University for making this workshop possible.
 }  % wrapping all Ondrej's content to prevent confusing macros
 
 
-\section{Chinese-English}
-{\sc Wade Shen}
-
 \section{Confusion Network Decoding}
-{\sc Wade Shen and Richard Zens}
-
 
 \subsection{Results for the BTEC Task}
 
@@ -3027,7 +3189,7 @@ In the case of confusion network input, this length can be exceeded as the confu
 
 
 \section{Tuning}
-{\sc Nicola Bertoldi}
+
 \label{sec:exp-tuning}
 As stated in Section~\ref{sec:tuning}, training of {\tt Moses} also requires the optimization of the feature weights, which is performed through the there described MERT. We analized how much the experimental set up affects the effectiveness of this procedure. In particular, the amount of translation hypotheses extracted in each outer loop and the size of the development set are taken into account.
 
@@ -3054,8 +3216,6 @@ Phrases & 9 M & 8 M \\
 \end{tabular}
 \caption{Statistics of the German-English EuroParl task. Word counts of  English dev and test sets refer
  the first reference translation. }
-\begin{center}
-\end{center}
 \label{tbl:ge-en-europarl-data}
 \end{center}
 \end{table}
@@ -3086,8 +3246,6 @@ Phrases   & 48 M & 44 M\\
 \end{tabular}
 \caption{Statistics of the EPPS speech translation task. Word counts of  dev and test sets sets refer
 to human transcriptions (Spanish) and the first reference translation (English). }
-\begin{center}
-\end{center}
 \label{tbl:epps-data}
 \end{center}
 \end{table}
@@ -3135,9 +3293,7 @@ The sets of weights obtained after each iteration of the outer loop are then use
 \end{center}
  \end{figure}
 
-Figures~\ref{fig:MERT-europarl-devsize} and \ref{fig:MERT-epps-devsize} show the achieved BLEU score in the different conditions for the EuroParl and EPPS tasks, respectively.
-
-Plots reveal that more stable and better results are obtained with weights optimized on larger dev set; moreover, EuroParl experiments show that MERT with larger dev set tends to end in less iterations.
+Figures~\ref{fig:MERT-europarl-devsize} and \ref{fig:MERT-epps-devsize} show the achieved BLEU score in the different conditions for the EuroParl and EPPS tasks, respectively.  Plots reveal that more stable and better results are obtained with weights optimized on larger dev set; moreover, EuroParl experiments show that MERT with larger dev set tends to end in less iterations.
 In general, these experiments show that 2 iterations give the biggest relative  improvement and that next iterations, which slightly improve on the dev set, are risky on the test set.
 
 This behavior is explained by the tendency of MERT procedure to overfit the development data. Possible ways to limit the overfitting problems consists in enlarging the dev set  and ending the tuning after few iterations.
@@ -3193,13 +3349,12 @@ We observe that improvement on the test set ranges from 2.1 to 3.6 absolute BLEU
 
 \subsection{Word Alignment}
 
-If we open a common bilingual dictionary, we may find an entry
-like\\
+If we open a common bilingual dictionary, we find that many words have multiple translations, some of which are more likely
+than others, for instance:
+
 \begin{center}
-\textbf{Haus} = house, building, home, household\\
+\textbf{Haus} = house, building, home, household
 \end{center}
-Many words have multiple translations, some of which are more likely
-than others.
 
 If we had a large collection of German text, paired with its
 translation into English, we could count how often $Haus$ is
@@ -3235,7 +3390,9 @@ translated word by word into English. One possible translation is
 Implicit in these translations is an alignment, a mapping from
 German words to English words:
 
-\includegraphics[viewport = 100 440 400 530,clip]{constantin-figure1.pdf}
+\begin{center}
+\includegraphics[viewport = 100 440 400 530,clip,scale=0.5]{constantin-figure1.pdf}
+\end{center}
 
 An alignment can be formalized with an alignment function $a : i
 \rightarrow j$. This function maps each English target word at
@@ -3243,13 +3400,13 @@ position $i$ to a German source word at position $j$.
 
 For example, if we are given the following pair of sentences:
 
-\includegraphics[viewport = 100 400 400 550,clip]{constantin-figure2.pdf}
+\begin{center}
+\includegraphics[viewport = 100 400 400 550,clip,scale=0.5]{constantin-figure2.pdf}
+\end{center}
 
 the alignment function will be
-
 $a:\{1 \rightarrow 3, 2 \rightarrow 4, 3 \rightarrow 2, 4
 \rightarrow 1\}$.
-
 
 \subsection{IBM Model 1}
 
@@ -3286,14 +3443,15 @@ thus like to estimate these lexical translation distributions
 without knowing the actual word alignment, which we consider a
 hidden variable. To do this, we use the Expectation-Maximization
 algorithm:
-
-\paragraph{EM algorithm}
-\begin{itemize}
+\vspace{-3pt}
+{
+\begin{itemize} \itemsep=-3pt
 \item{Initialize model (typically with uniform distribution)}
 \item{Apply the model to the data (expectation step)}
 \item{Learn the model from the data (maximization step)}
 \item{Iterate steps 2-3 until convergence}
 \end{itemize}
+}
 
 First, we initialize the model. Without prior knowledge, uniform
 probability distributions are a good starting point. In the
@@ -3301,12 +3459,12 @@ expectation step, we apply the model to the data and estimate the
 most likely alignments. In the maximization step, we learn the model
 from the data and augment the data with guesses for the gaps.
 
- \textbf{Expectation step}
+\subsubsection{Expectation step}
 
 When we apply the model to the data, we need to compute the
 probability of different alignments given a sentence pair in the
 data:
-
+\vspace{-1mm}
 \begin{center}
 $p(a|\textbf{e},\textbf{f}) =
 \frac{p(\textbf{e},a|\textbf{f})}{p(\textbf{e}|\textbf{f})}$
@@ -3314,26 +3472,22 @@ $p(a|\textbf{e},\textbf{f}) =
 
 $p(\textbf{e}|\textbf{f})$, the probability of translating sentence
 $\textbf{f}$ into sentence $\textbf{e}$ is derived as:
-
+\vspace{-1mm}
 \begin{center}
-
 $p(\textbf{e}|\textbf{f}) = \sum_a p(\textbf{e},a|\textbf{f}) =
 \prod_{j=1}^{l_e} \sum_{i=0}^{l_f}t(e_j|f_i)$
 \end{center}
 
 Putting the previous two equations together,
-
+\vspace{-1mm}
 \begin{center}
-
  $p(a|\textbf{e},\textbf{f}) =
 \frac{p(\textbf{e},a|\textbf{f})}{p(\textbf{e}|\textbf{f})}
 =\prod_{j=1}^{l_e} \frac {t(e_j | f_{a(j)})}{\sum_{i=0}^{l_f}
 t(e_j|f_i)}$.
-
-
 \end{center}
 
-\textbf{Maximization Step}
+\subsubsection{Maximization Step}
 
 For the maximization step, we need to collect counts over all
 possible alignments, weighted by their probabilities. For this
@@ -3430,7 +3584,16 @@ Model 2 might thus generate an improvement in $AER$.
 
 
 \chapter{Conclusions}
-{\sc Philipp Koehn: Accomplishments}
+The 2006 JHU Summer Workshop on statistical machine translation brought together efforts to build an open source toolkit and carry out research along two research goals: factored translation models and confusion network decoding.
+
+We are optimistic that the toolkit will be the basis of much future research to improve statistical machine translation. Already during the workshop we received requests for Moses, and at the time of this writing the Moses web site\footnote{\tt http://www.statmt.org/moses/} attracts 1000 visitors a month and a support mailing list gets a few emails a day. The performance of the system has been demonstrated, included by newcomers who took the software and obtained competitive performance at recent evaluation campaigns.
+
+Our work of factored translation models has been demonstration not only in the experiments reported in this report, but also in follow-up work at our home instititions and beyond, resulting in publications in forthcoming conferences and workshops.
+
+Our work on confusion network decoding has been demonstrated to be helpful to integrate speech recognition and machine translation, and even in more recent follow-up work, the integration of ambiguous morphological analysis tools to better deal with morphological rich languages.
+
+While six weeks in summer in Baltimore seem like a short period of time, it was a focal point of many of our efforts and resulted in stimulating exchange of ideas and the establishment of lasting research relationships.
+
 
 \appendix
 
