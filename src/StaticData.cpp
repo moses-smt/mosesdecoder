@@ -133,7 +133,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	// print all factors of output translations
 	SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
-
+	
 	//input factors
 	const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
 	for(size_t i=0; i<inputFactorVector.size(); i++) 
@@ -212,7 +212,19 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_decoderType = (DecoderType) ((m_parameter->GetParam("decoder-type").size() > 0) ? Scan<int>(m_parameter->GetParam("decoder-type")[0]) : 0);
 	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0)
 				? Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
-
+	
+	//default case
+	
+	if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
+	else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
+	else if (m_parameter->GetParam("xml-input")[0]=="inclusive") m_xmlInputType = XmlInclusive;
+	else if (m_parameter->GetParam("xml-input")[0]=="ignore") m_xmlInputType = XmlIgnore;
+	else if (m_parameter->GetParam("xml-input")[0]=="pass-through") m_xmlInputType = XmlPassThrough;
+	else {
+		UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
+		return false;
+	}
+	
 	if (!LoadLexicalReorderingModel()) return false;
 	if (!LoadLanguageModels()) return false;
 	if (!LoadGenerationTables()) return false;

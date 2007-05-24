@@ -37,6 +37,7 @@ class TargetPhrase: public Phrase
 	friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
 	float m_transScore, m_ngramScore, m_fullScore;
+	//float m_ngramScore, m_fullScore;
 	ScoreComponentCollection m_scoreBreakdown;
 
 	// in case of confusion net, ptr to source phrase
@@ -47,7 +48,10 @@ public:
 	//! used by the unknown word handler- these targets
 	//! don't have a translation score, so wp is the only thing used
 	void SetScore();
-
+	
+	//!Set score for Sentence XML target options
+	void SetScore(float score);
+	
 	/*** Called immediately after creation to initialize scores.
    *
    * @param translationScoreProducer The PhraseDictionaryMemory that this TargetPhrase is contained by.

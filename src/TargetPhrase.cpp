@@ -20,17 +20,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <cassert>
+#include <algorithm>
 #include "TargetPhrase.h"
 #include "PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
 #include "LanguageModel.h"
 #include "StaticData.h"
+#include "ScoreIndexManager.h"
 #include "LMList.h"
 #include "ScoreComponentCollection.h"
+#include "Util.h"
 
 using namespace std;
 
 TargetPhrase::TargetPhrase(FactorDirection direction)
+	//:Phrase(direction), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
 	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
 {
 }
@@ -38,7 +42,37 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
 void TargetPhrase::SetScore()
 { // used when creating translations of unknown words:
 	m_transScore = m_ngramScore = 0;	
+	//m_ngramScore = 0;	
 	m_fullScore = - StaticData::Instance().GetWeightWordPenalty();	
+}
+
+void TargetPhrase::SetScore(float score) 
+{
+	//we use an existing score producer to figure out information for score setting (number of scores and weights)
+	//TODO: is this a good idea?
+	ScoreProducer* prod = StaticData::Instance().GetPhraseDictionaries()[0];
+	
+	//get the weight list
+	unsigned int id = prod->GetScoreBookkeepingID();
+	
+	const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
+
+	size_t beginIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(id);
+	size_t endIndex = StaticData::Instance().GetScoreIndexManager().GetEndIndex(id);
+
+	vector<float> weights;
+
+	std::copy(allWeights.begin() +beginIndex, allWeights.begin() + endIndex,std::back_inserter(weights));
+	
+	//find out how many items are in the score vector for this producer	
+	size_t numScores = prod->GetNumScoreComponents();
+
+	//divide up the score among all of the score vectors
+	vector <float> scoreVector(numScores,score/numScores);
+	
+	//Now we have what we need to call the full SetScore method
+	SetScore(prod,scoreVector,weights,StaticData::Instance().GetWeightWordPenalty(),StaticData::Instance().GetAllLM());
+
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
@@ -96,7 +130,7 @@ void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, con
 
 void TargetPhrase::ResetScore()
 {
-	m_transScore = m_fullScore = m_ngramScore = 0;
+	m_fullScore = m_ngramScore = 0;
 	m_scoreBreakdown.ZeroAll();
 }
 
@@ -129,5 +163,6 @@ TO_STRING_BODY(TargetPhrase);
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
   os << static_cast<const Phrase&>(tp) << ", pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
+  //os << static_cast<const Phrase&>(tp) << ", c=" << tp.m_fullScore;
   return os;
 }

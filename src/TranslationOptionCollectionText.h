@@ -32,5 +32,10 @@ class TranslationOptionCollectionText : public TranslationOptionCollection {
 	
 	TranslationOptionCollectionText(Sentence const& inputSentence, size_t maxNoTransOptPerCoverage);
 	
+	bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
+	
+	void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
+	
+	
 };
 

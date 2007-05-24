@@ -42,3 +42,32 @@ void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos)
 	const Word &sourceWord = m_source.GetWord(sourcePos);
 	ProcessOneUnknownWord(sourceWord,sourcePos);
 }
+
+/**
+ * Check the source sentence for coverage data
+ */
+bool TranslationOptionCollectionText::HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const {
+	Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+	return source.XmlOverlap(startPosition,endPosition);
+
+}
+
+/**
+ * Create xml-based translation options for the specific input span
+ */
+void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosition, size_t endPosition) {
+	Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+	
+	vector <TranslationOption*> xmlOptions;
+	
+	source.GetXmlTranslationOptions(xmlOptions,startPosition,endPosition);
+
+	//get vector of TranslationOptions from Sentence
+	for(size_t i=0;i<xmlOptions.size();i++) {
+		xmlOptions[i]->CalcScore();
+		Add(xmlOptions[i]);
+	}
+
+};
+
+
