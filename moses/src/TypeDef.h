@@ -131,6 +131,14 @@ enum InputTypeEnum
 	,WordLatticeInput				= 2
 };
 
+enum XmlInputType
+{
+	XmlPassThrough = 0,
+	XmlIgnore = 1,
+	XmlExclusive = 2,
+	XmlInclusive = 3
+};
+
 enum DictionaryFind
 {	
 	Best

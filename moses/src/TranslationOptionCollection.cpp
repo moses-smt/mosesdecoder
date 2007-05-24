@@ -353,58 +353,71 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
 {
-	// partial trans opt stored in here
-	PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
+
+	if ((StaticData::Instance().GetXmlInputType() != XmlPassThrough) && HasXmlOptionsOverlappingRange(startPos,endPos)) 
+	{
+		
+		CreateXmlOptionsForRange(startPos, endPos);
+
+	} 
 	
-	// initial translation step
-	list <const DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
-	const DecodeStep &decodeStep = **iterStep;
+	if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
+	{
+		
+		// partial trans opt stored in here
+		PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
+		size_t totalEarlyPruned = 0;
+		
+		// initial translation step
+		list <const DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
+		const DecodeStep &decodeStep = **iterStep;
 
-	ProcessInitialTranslation(decodeStep, *oldPtoc
-														, startPos, endPos, adhereTableLimit );
+		ProcessInitialTranslation(decodeStep, *oldPtoc
+															, startPos, endPos, adhereTableLimit );
 
-	// do rest of decode steps
-	size_t totalEarlyPruned = 0;
-	int indexStep = 0;
-	for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
-		{
-			const DecodeStep &decodeStep = **iterStep;
-			PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
-
-			// go thru each intermediate trans opt just created
-			const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
-			vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
-			for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
+		// do rest of decode steps
+		int indexStep = 0;
+		for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
 			{
-				TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
-				decodeStep.Process(inputPartialTranslOpt
-																	 , decodeStep
-																	 , *newPtoc
-																	 , this
-																	 , adhereTableLimit);
+				const DecodeStep &decodeStep = **iterStep;
+				PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
+
+				// go thru each intermediate trans opt just created
+				const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
+				vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
+				for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
+				{
+					TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
+					decodeStep.Process(inputPartialTranslOpt
+																		 , decodeStep
+																		 , *newPtoc
+																		 , this
+																		 , adhereTableLimit);
+				}
+				// last but 1 partial trans not required anymore
+				totalEarlyPruned += newPtoc->GetPrunedCount();
+				delete oldPtoc;
+				oldPtoc = newPtoc;
+				indexStep++;
+			} // for (++iterStep 
+			// add to fully formed translation option list
+		PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
+		const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
+		vector<TranslationOption*>::const_iterator iterColl;
+		for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl)
+			{
+				TranslationOption *transOpt = *iterColl;
+				transOpt->CalcScore();
+				Add(transOpt);
 			}
-			// last but 1 partial trans not required anymore
-			totalEarlyPruned += newPtoc->GetPrunedCount();
-			delete oldPtoc;
-			oldPtoc = newPtoc;
-			indexStep++;
-		} // for (++iterStep 
 
-	// add to fully formed translation option list
-	PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
-	const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
-	vector<TranslationOption*>::const_iterator iterColl;
-	for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl)
-		{
-			TranslationOption *transOpt = *iterColl;
-			transOpt->CalcScore();
-			Add(transOpt);
-		}
+		lastPartialTranslOptColl.DetachAll();
+		totalEarlyPruned += oldPtoc->GetPrunedCount();
+		delete oldPtoc;
+		// TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
 
-	lastPartialTranslOptColl.DetachAll();
-	totalEarlyPruned += oldPtoc->GetPrunedCount();
-	delete oldPtoc;
-	// TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
+	} //if non-exclusive XML or no options for range
+
 }
 
 /** initialize list of partial translation options by applying the first translation step 
@@ -440,6 +453,31 @@ void TranslationOptionCollection::ProcessInitialTranslation(
 		VERBOSE(3,endl);
 	}
 }
+
+
+	/** Check if this range overlaps with any XML options. This doesn't need to be an exact match, only an overlap.
+	 * by default, we don't support XML options. subclasses need to override this function.
+	 * called by CreateTranslationOptionsForRange()
+	 * \param startPos first position in input sentence
+	 * \param lastPos last position in input sentence 
+	 * \param adhereTableLimit whether phrase & generation table limits are adhered to
+	 */
+	bool TranslationOptionCollection::HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const {
+		return false;
+	
+	}
+	
+	/** Populates the current Collection with XML options exactly covering the range specified. Default implementation does nothing.
+	 * called by CreateTranslationOptionsForRange()
+	 * \param startPos first position in input sentence
+	 * \param lastPos last position in input sentence 
+	 */
+	 void TranslationOptionCollection::CreateXmlOptionsForRange(size_t startPosition, size_t endPosition) {
+		//not implemented for base class
+	 };
+
+
+
 
 /** add translation option to the list
  * \param translationOption translation option to be added */
