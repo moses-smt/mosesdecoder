@@ -83,7 +83,7 @@ void HypothesisStackCollection::AddPrune(Hypothesis *hypo)
 const HypothesisStack &HypothesisStackCollection::GetLastFilledStack() const
 {
 	StackColl::const_reverse_iterator iter;
-	for (iter = m_stackColl.rbegin() ; iter != m_stackColl.rend() ; --iter)
+	for (iter = m_stackColl.rbegin() ; iter != m_stackColl.rend() ; ++iter)
 	{
 		const HypothesisStack &stack = *iter;
 		if (stack.GetSize() > 0)
