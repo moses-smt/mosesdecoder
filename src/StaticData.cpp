@@ -458,9 +458,9 @@ bool StaticData::LoadLanguageModels()
 		for(size_t i=0; i<lmVector.size(); i++) 
 		{
 			vector<string>	token		= Tokenize(lmVector[i]);
-			if (token.size() != 4 )
+			if (token.size() != 4 && token.size() != 5 )
 			{
-				UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath'");
+				UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
 				return false;
 			}
 			// type = implementation, SRI, IRST etc
@@ -473,7 +473,13 @@ bool StaticData::LoadLanguageModels()
 			size_t nGramOrder = Scan<int>(token[2]);
 			
 			string &languageModelFile = token[3];
-
+			if (token.size() == 5)
+			  if (lmImplementation==IRST)
+			    languageModelFile += " " + token[4];
+			  else {
+			    UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
+			    return false;
+			  }
 			IFVERBOSE(1)
 				PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
 			

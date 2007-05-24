@@ -32,6 +32,7 @@ class Factor;
 class Phrase;
 
 class lmtable;  // irst lm table
+class lmmacro;  // irst lm for macro tags
 class ngram;
 
 /** Implementation of single factor LM using IRST's code.
@@ -42,13 +43,14 @@ class LanguageModelIRST : public LanguageModelSingleFactor
 protected:
 	std::vector<int> m_lmIdLookup;
 	lmtable* m_lmtb;
-  ngram* m_lmtb_ng;
+	ngram* m_lmtb_ng;
   
 	int	m_unknownId;
-  int m_lmtb_sentenceStart; //lmtb symbols to initialize ngram with
-  int m_lmtb_sentenceEnd;   //lmt symbol to initialize ngram with 
+	int m_lmtb_sentenceStart; //lmtb symbols to initialize ngram with
+	int m_lmtb_sentenceEnd;   //lmt symbol to initialize ngram with 
 	int m_lmtb_size;          //max ngram stored in the table
 
+	std::string m_mapFilePath;
   
 //	float GetValue(LmId wordId, ngram *context) const;
 
@@ -56,9 +58,9 @@ protected:
 	int GetLmID( const std::string &str ) const;
 
 	int GetLmID( const Factor *factor ) const{
-    size_t factorId = factor->GetId();
-    return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];        
-  };
+	  size_t factorId = factor->GetId();
+	  return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];        
+	};
   
 public:
 	LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager);
