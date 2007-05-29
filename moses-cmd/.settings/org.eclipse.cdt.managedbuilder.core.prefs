@@ -1,4 +1,4 @@
-#Tue Nov 14 23:00:18 GMT 2006
+#Tue May 29 14:31:12 BST 2007
 =\=\=\=\=\=\=
 <<<<<<<=org.eclipse.cdt.managedbuilder.core.prefs
 >>>>>>>=1.2
@@ -15,6 +15,6 @@ environment/buildEnvironmentLibrary/cdt.managedbuild.config.gnu.exe.debug.807464
 environment/buildEnvironmentLibrary/cdt.managedbuild.config.gnu.exe.debug.862821065=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment>\n<variable name\="LIBRARY_PATH" operation\="remove"/>\n</environment>\n
 environment/buildEnvironmentLibrary/cdt.managedbuild.config.gnu.exe.release.1126249995=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment>\n<variable name\="LIBRARY_PATH" operation\="remove"/>\n</environment>\n
 environment/buildEnvironmentLibrary/cdt.managedbuild.config.gnu.exe.release.797815336=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment>\n<variable name\="LIBRARY_PATH" operation\="remove"/>\n</environment>\n
-environment/project=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<environment/>\r\n
-environment/project/cdt.managedbuild.config.gnu.exe.debug.862821065=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<environment/>\r\n
-environment/project/cdt.managedbuild.config.gnu.exe.release.1126249995=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<environment/>\r\n
+environment/project=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment/>\n
+environment/project/cdt.managedbuild.config.gnu.exe.debug.862821065=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment/>\n
+environment/project/cdt.managedbuild.config.gnu.exe.release.1126249995=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment/>\n
