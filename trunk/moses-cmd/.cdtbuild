@@ -33,14 +33,15 @@
 <listOptionValue builtIn="false" value="misc"/>
 <listOptionValue builtIn="false" value="dstruct"/>
 <listOptionValue builtIn="false" value="oolm"/>
+<listOptionValue builtIn="false" value="irstlm"/>
 </option>
 <option id="gnu.cpp.link.option.paths.1718276622" superClass="gnu.cpp.link.option.paths" valueType="stringList">
 <listOptionValue builtIn="false" value="&quot;../../srilm/lib/cygwin&quot;"/>
 <listOptionValue builtIn="false" value="&quot;../../srilm/lib/i686&quot;"/>
+<listOptionValue builtIn="false" value="&quot;../../irstlm/lib&quot;"/>
 </option>
 <option id="gnu.cpp.link.option.userobjs.551693347" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="&quot;../../moses/${ConfigName}/libmoses.a&quot;"/>
-<listOptionValue builtIn="false" value="&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;"/>
 </option>
 <option id="gnu.cpp.link.option.flags.1995182231" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 </tool>
@@ -79,14 +80,15 @@
 <listOptionValue builtIn="false" value="misc"/>
 <listOptionValue builtIn="false" value="dstruct"/>
 <listOptionValue builtIn="false" value="oolm"/>
+<listOptionValue builtIn="false" value="irstlm"/>
 </option>
 <option id="gnu.cpp.link.option.paths.724264639" superClass="gnu.cpp.link.option.paths" valueType="stringList">
 <listOptionValue builtIn="false" value="&quot;../../srilm/lib/cygwin&quot;"/>
 <listOptionValue builtIn="false" value="&quot;../../srilm/lib/i686&quot;"/>
+<listOptionValue builtIn="false" value="&quot;../../irstlm/lib&quot;"/>
 </option>
 <option id="gnu.cpp.link.option.userobjs.1365891611" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="&quot;../../moses/${ConfigName}/libmoses.a&quot;"/>
-<listOptionValue builtIn="false" value="&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;"/>
 </option>
 <option id="gnu.cpp.link.option.flags.213483667" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 </tool>
