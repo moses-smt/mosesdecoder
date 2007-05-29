@@ -15,7 +15,6 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1519446567" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 <option id="gnu.cpp.link.option.userobjs.1214926161" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="&quot;../../moses/${ConfigName}/libmoses.a&quot;"/>
-<listOptionValue builtIn="false" value="&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;"/>
 </option>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.668977706" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
@@ -40,7 +39,6 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.792459607" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
 <option id="gnu.cpp.link.option.userobjs.1902362839" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="&quot;../../moses/${ConfigName}/libmoses.a&quot;"/>
-<listOptionValue builtIn="false" value="&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;"/>
 </option>
 <option id="gnu.cpp.link.option.libs.679824006" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="z"/>
