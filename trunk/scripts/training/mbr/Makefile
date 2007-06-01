@@ -1,6 +1,6 @@
 CC=g++
 OBJS=mbr.o 
-CFLAGS=-O3
+CXXFLAGS=-O3
 LDFLAGS=
 LDLIBS= 
 

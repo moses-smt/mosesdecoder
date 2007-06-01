@@ -8,7 +8,7 @@
 #include <math.h>
 #include <algorithm>
 #include <stdio.h>
-
+#include <unistd.h>
 
 using namespace std ;
 
@@ -193,9 +193,9 @@ double calculate_score(const vector<candidate_t*> & sents, int ref, int hyp,  ve
     if (comps[0] == 0)
       return 0.0;
     if ( i > 0 )
-      logbleu += log(comps[2*i]+SMOOTH)-log(comps[2*i+1]+SMOOTH);
+      logbleu += log(static_cast<double>(comps[2*i]+SMOOTH))-log(static_cast<double>(comps[2*i+1]+SMOOTH));
     else
-      logbleu += log(comps[2*i])-log(comps[2*i+1]);
+      logbleu += log(static_cast<double>(comps[2*i]))-log(static_cast<double>(comps[2*i+1]));
   }
   logbleu /= BLEU_ORDER;
   brevity = 1.0-(double)comps[comps_n-1]/comps[1]; // comps[comps_n-1] is the ref length, comps[1] is the test length
