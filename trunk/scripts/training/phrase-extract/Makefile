@@ -4,6 +4,12 @@ all: extract score
 clean: 
 	rm -f *.o
 
-extract: tables-core.o
+.cpp.o:
+	g++ -O6 -g -c $<
 
-score: tables-core.o AlignmentPhrase.o
+extract: tables-core.o extract.o
+	g++ tables-core.o extract.o
+
+score: tables-core.o AlignmentPhrase.o score.o
+	g++ tables-core.o AlignmentPhrase.o score.o
+
