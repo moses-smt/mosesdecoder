@@ -64,7 +64,7 @@ then
                  [AC_MSG_ERROR([Cannot find IRST-LM!])])
 
 
-  MY_ARCH="${MACHTYPE}"
+  MY_ARCH=`uname -m`
   LIB_IRSTLM="-lirstlm"
   LDFLAGS="$LDFLAGS -L${with_irstlm}/lib/${MY_ARCH}"
   LIBS="$LIBS $LIB_IRSTLM"
