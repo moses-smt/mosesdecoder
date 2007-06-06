@@ -24,16 +24,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 Factor::Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, size_t id)
-:m_direction(direction)
-,m_factorType(factorType)
-,m_ptrString(factorString)
+://m_direction(direction)
+//,m_factorType(factorType)
+m_ptrString(factorString)
 ,m_id(id)
 {}
 
 Factor::Factor(FactorDirection direction, FactorType factorType, const std::string *factorString)
-:m_direction(direction)
-,m_factorType(factorType)
-,m_ptrString(factorString)
+//:m_direction(direction)
+//,m_factorType(factorType)
+:m_ptrString(factorString)
 ,m_id(NOT_FOUND)
 {}
 
