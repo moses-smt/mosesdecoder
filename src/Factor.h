@@ -54,8 +54,8 @@ class Factor
 
 protected:
 
-	FactorDirection		m_direction;
-	FactorType				m_factorType;
+	//FactorDirection		m_direction;
+	//FactorType				m_factorType;
 	const std::string	*m_ptrString;
 	const size_t			m_id;
 
@@ -66,15 +66,15 @@ protected:
 	
 public:
 	//! returns whether this factor is part of the source ('Input') or target ('Output') language
-	inline FactorDirection GetFactorDirection() const
-	{
-		return m_direction;
-	}
+	//inline FactorDirection GetFactorDirection() const
+	//{
+	//	return m_direction;
+	//}
 	//! index, FactorType. For example, 0=surface, 1=POS. The actual mapping is user defined
-	inline FactorType GetFactorType() const
-	{
-		return m_factorType;
-	}
+	//inline FactorType GetFactorType() const
+	//{
+	//	return m_factorType;
+	//}
 	//! original string representation of the factor
 	inline const std::string &GetString() const
 	{
@@ -109,7 +109,7 @@ public:
 			return -1;
 		if (m_ptrString > compare.m_ptrString)
 			return 1;
-
+/*
 		if (m_direction < compare.m_direction)
 			return -1;
 		if (m_direction > compare.m_direction)
@@ -119,7 +119,7 @@ public:
 			return -1;
 		if (m_factorType > compare.m_factorType)
 			return 1;
-
+*/
 		return 0;
 	}
 	//! transitive comparison used for adding objects into FactorCollection
