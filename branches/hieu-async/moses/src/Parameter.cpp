@@ -71,7 +71,7 @@ Parameter::Parameter()
 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
 	AddParam("cache-path", "specify which folder temporary files should go");
-	AddParam("async-method", "which method to go thru stacks? 0=upper triangle, 1=complete each decode step 1st. Default is 0");
+	AddParam("async-method", "which method to go thru stacks? 0=upper triangle, 1=complete each decode step 1st. 2=stay near diagonal (need 2nd param). Default is 0");
 }
 
 Parameter::~Parameter()
