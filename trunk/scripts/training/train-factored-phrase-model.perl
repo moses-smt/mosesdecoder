@@ -13,7 +13,9 @@ $ENV{"LC_ALL"} = "C";
 
 my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_FILE,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,$_ALIGNMENT_FILE,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_INPUT_FACTOR_MAX,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER,@_PHRASE_TABLE,@_REORDERING_TABLE,@_GENERATION_TABLE,$_CONFIG,$_DONT_ZIP,@_GENERATION_TYPE);
 
+$SCRIPTS_ROOTDIR="/voxgate/ssi/HermesTools/mosesdecoder.release20070624/scripts";
 my $debug = 1; # debug this script, do not delete any files in debug mode
+my $nodebug = 1; # no debug this script, delete any files
 
 # the following line is set installation time by 'make release'.  BEWARE!
 my $BINDIR="/home/s0565741/terabyte/bin";
@@ -43,6 +45,7 @@ $_HELP = 1
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
 		       'debug' => \$debug,
+		       'nodebug' => \$nodebug,
 		       'dont-zip' => \$_DONT_ZIP,
 		       'parts=i' => \$_PARTS,
 		       'direction=i' => \$_DIRECTION,
@@ -63,6 +66,8 @@ $_HELP = 1
                        'generation-type=s' => \@_GENERATION_TYPE,
 		       'config=s' => \$_CONFIG
                       );
+
+if ($nodebug){ $debug = 0; };
 
 if ($_HELP) {
     print "Train Phrase Model
@@ -906,31 +911,39 @@ sub score_phrase {
     if (-e "$___EXTRACT_FILE.$factor.gz") {
       safesystem("gunzip < $___EXTRACT_FILE.$factor.gz > $___EXTRACT_FILE.$factor") or die;
     }
-    if (-e "$___EXTRACT_FILE.$factor.inv.gz") {
-      safesystem("gunzip < $___EXTRACT_FILE.$factor.inv.gz > $___EXTRACT_FILE.$factor.inv") or die;
-    }
     print STDERR "(6.1) [$factor]  sorting @ ".`date`;
     # print "LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor > $___EXTRACT_FILE.$factor.sorted\n";
     safesystem("LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor > $___EXTRACT_FILE.$factor.sorted") or die;
     if (! $___DONT_ZIP) {
 	safesystem("rm -f $___EXTRACT_FILE.$factor.gz") or die;
 	safesystem("gzip $___EXTRACT_FILE.$factor") or die;
+	safesystem("rm -f $___EXTRACT_FILE.$factor.sorted.gz") or die;
+	safesystem("gzip $___EXTRACT_FILE.$factor.sorted") or die;
     }
+
+    if (-e "$___EXTRACT_FILE.$factor.inv.gz") {
+       safesystem("gunzip < $___EXTRACT_FILE.$factor.inv.gz > $___EXTRACT_FILE.$factor.inv") or die;
+    }                                                                                                         
     print STDERR "(6.2) [$factor]  sorting inv @ ".`date`;
     # print "LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor.inv > $___EXTRACT_FILE.$factor.inv.sorted\n";
     safesystem("LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor.inv > $___EXTRACT_FILE.$factor.inv.sorted") or die;
     if (! $___DONT_ZIP) {
 	safesystem("rm -f $___EXTRACT_FILE.$factor.inv.gz") or die;
 	safesystem("gzip $___EXTRACT_FILE.$factor.inv") or die;
+	safesystem("rm -f $___EXTRACT_FILE.$factor.inv.sorted.gz") or die;
+	safesystem("gzip $___EXTRACT_FILE.$factor.inv.sorted") or die;
     }
 
     for my $direction ("f2n","n2f") {
 	print STDERR "(6.3) [$factor]  creating table half $ttable_file.half.$direction @ ".`date`;
 	my $extract = "$___EXTRACT_FILE.$factor.sorted";
+	#my $extract = "$___EXTRACT_FILE.$factor.sorted";
 	$extract = "$___EXTRACT_FILE.$factor.inv.sorted" if $direction eq "n2f";
+	#$extract = "$___EXTRACT_FILE.$factor.inv.sorted" if $direction eq "n2f";
 	my $inverse = "";
 	$inverse = " inverse" if $direction eq "n2f";
-	my $part_count = &split_extract($extract);
+	my $part_count = &split_extract_gzipped("$extract.gz");
+	#my $part_count = &split_extract($extract);
 	for(my $i=0;$i<$part_count;$i++) {
 	    my $part = sprintf("%04d",$i);
 	    print "$PHRASE_SCORE $extract.part$part $___LEXICAL_FILE.$factor.$direction $ttable_file.half.$direction.part$part $inverse\n";
@@ -938,15 +951,19 @@ sub score_phrase {
               or die "Scoring of phrases failed";
 	    if (! $debug) { safesystem("rm $extract.part$part") or die;}
 	}
-	safesystem("cat $ttable_file.half.$direction.part* >$ttable_file.half.$direction") or die;
+	safesystem("cat $ttable_file.half.$direction.part* > $ttable_file.half.$direction") or die;
+	if (! $debug){ safesystem("rm -f $ttable_file.half.$direction.part*") or die; }
     }
+    safesystem("gzip $ttable_file.half.f2n") or die;
     print STDERR "(6.4) [$factor]  sorting inverse n2f table@ ".`date`;
     safesystem("LC_ALL=C sort -T $___MODEL_DIR $ttable_file.half.n2f > $ttable_file.half.n2f.sorted") or die;
+    safesystem("gzip $ttable_file.half.n2f") or die;
+    safesystem("gzip $ttable_file.half.n2f.sorted") or die;
     print STDERR "(6.5) [$factor]  consolidating the two halves @ ".`date`;
-    open(F2N,"$ttable_file.half.f2n")
-      or die "Can't read $ttable_file.half.f2n";
-    open(N2F,"$ttable_file.half.n2f.sorted")
-      or die "Can't read $ttable_file.half.n2f.sorted";
+    open(F2N,"gunzip < $ttable_file.half.f2n.gz |")
+      or die "Can't read $ttable_file.half.f2n.gz";
+    open(N2F,"gunzip < $ttable_file.half.n2f.sorted.gz |")
+      or die "Can't read $ttable_file.half.n2f.sorted.gz";
     open(TABLE,">$ttable_file")
       or die "Can't write $ttable_file";
     my $i=0;
@@ -1003,6 +1020,39 @@ sub split_extract {
 	}
 	print PART $_;
 	$i++;
+    }
+    close(EXTRACT);
+    return $part;
+}
+
+sub split_extract_gzipped {
+    my ($file) = @_;
+    my $i=0;
+    my $part = 1;
+    my $split_when_possible = 0;
+    my ($first,$dummy,$unzippedfile);
+    $unzippedfile=$file;
+    $unzippedfile =~ s/\.gz//;
+    my $partfname = sprintf("%s.part%04d",$unzippedfile,0);
+    open(PART,">$partfname") or die "Can't write $partfname";
+    open(EXTRACT,"zcat $file | ") or die "Can't read $file";
+    while(<EXTRACT>) {
+        if ($i>0 && $i % 10000000 == 0) {
+            $split_when_possible = 1;
+            ($first,$dummy) = split(/ \|\|\| /);
+        }
+        elsif ($split_when_possible) {
+            my ($f,$dummy) = split(/ \|\|\| /);
+            if ($f ne $first) {
+                close(PART) if $i;
+                my $partfname = sprintf("%s.part%04d",$unzippedfile,$part);
+                open(PART,">$partfname") or die "Can't write $partfname";
+                $split_when_possible = 0;
+                $part++;
+            }
+        }
+        print PART $_;
+        $i++;
     }
     close(EXTRACT);
     return $part;
