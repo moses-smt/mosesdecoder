@@ -171,10 +171,10 @@ int printtgttosrc(fstream& out,int m,int *a,int n,int* b){
   
   ostringstream sout;
 
-  for (int j=1;j<=m;j++)
-    if (a[j])
-	sout << j-1 << "-" << a[j]-1 << " ";
-  
+  for (int i=1;i<=n;i++)
+    if (b[i])
+        sout << b[i]-1 << "-" << i-1 << " ";
+
   //fix the last " "
   string str = sout.str();
   if (str.length() == 0)
@@ -194,9 +194,9 @@ int printsrctotgt(fstream& out,int m,int *a,int n,int* b){
 
   ostringstream sout;
 
-  for (int i=1;i<=n;i++)
-    if (b[i])
-        sout << b[i]-1 << "-" << i-1 << " ";
+  for (int j=1;j<=m;j++)
+    if (a[j])
+        sout << j-1 << "-" << a[j]-1 << " ";
 
   //fix the last " "
   string str = sout.str();
