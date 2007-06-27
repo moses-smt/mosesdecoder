@@ -21,6 +21,8 @@ using namespace std;
 #define UNION                      1
 #define INTERSECT                  2
 #define GROW                       3
+#define SRCTOTGT                   4
+#define TGTTOSRC                   5
 #define BOOL_YES                   1
 #define BOOL_NO                    0
 
@@ -33,7 +35,10 @@ static Enum_T AlignEnum [] = {
 {    "i",                            INTERSECT},
 {    "grow",                         GROW }, 
 {    "g",                            GROW }, 
-
+{    "srctotgt",                     SRCTOTGT },
+{    "s2t",                          SRCTOTGT },
+{    "tgttosrc",                     TGTTOSRC },
+{    "t2s",                          TGTTOSRC },
   END_ENUM
 };
 
@@ -137,16 +142,38 @@ int prunionalignment(fstream& out,int m,int *a,int n,int* b){
 }
 
 
-
-//Compute unionalignment Alignment
+//Compute intersection alignment
 
 int printersect(fstream& out,int m,int *a,int n,int* b){
-  
+
   ostringstream sout;
 
   for (int j=1;j<=m;j++)
     if (a[j] && b[a[j]]==j)
       sout << j-1 << "-" << a[j]-1 << " ";
+
+  //fix the last " "
+  string str = sout.str();
+  if (str.length() == 0)
+    str = "\n";
+  else
+    str.replace(str.length()-1,1,"\n");
+
+  out << str;
+         out.flush();
+
+        return 1;
+}
+
+//Compute target-to-source alignment
+
+int printtgttosrc(fstream& out,int m,int *a,int n,int* b){
+  
+  ostringstream sout;
+
+  for (int j=1;j<=m;j++)
+    if (a[j])
+	sout << j-1 << "-" << a[j]-1 << " ";
   
   //fix the last " "
   string str = sout.str();
@@ -161,6 +188,28 @@ int printersect(fstream& out,int m,int *a,int n,int* b){
 	return 1;
 }
 
+//Compute source-to-target alignment
+
+int printsrctotgt(fstream& out,int m,int *a,int n,int* b){
+
+  ostringstream sout;
+
+  for (int i=1;i<=n;i++)
+    if (b[i])
+        sout << b[i]-1 << "-" << i-1 << " ";
+
+  //fix the last " "
+  string str = sout.str();
+  if (str.length() == 0)
+    str = "\n";
+  else
+    str.replace(str.length()-1,1,"\n");
+
+  out << str;
+         out.flush();
+
+        return 1;
+}
 
 //Compute Grow Diagonal Alignment
 //Nice property: you will never introduce more points
@@ -409,6 +458,24 @@ int bothuncovered=false;
                printgrow(out,m,a,n,b,diagonal,final,bothuncovered);
          
          break;
+      case TGTTOSRC:
+        cerr << "symal: computing target-to-source alignment\n";
+                                     
+         while(getals(inp,m,a,n,b)){ 
+                  printtgttosrc(out,m,a,n,b);
+                  sents++;           
+               }                     
+               cerr << "Sents: " << sents << endl;
+          break;                     
+      case SRCTOTGT:
+        cerr << "symal: computing source-to-target alignment\n";
+         
+         while(getals(inp,m,a,n,b)){
+                  printsrctotgt(out,m,a,n,b);
+                  sents++;
+               }
+               cerr << "Sents: " << sents << endl;
+          break;
 		default:
 			exit(1);
 	}
