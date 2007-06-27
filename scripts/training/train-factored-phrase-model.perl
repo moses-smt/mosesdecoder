@@ -725,11 +725,13 @@ sub word_align {
     
    safesystem("mkdir -p $___MODEL_DIR") or die;
    
-   #build argumens for symal
+   #build arguments for symal
     my($__symal_a)="";
     $__symal_a="union" if $___ALIGNMENT eq 'union';
     $__symal_a="intersect" if $___ALIGNMENT=~ /intersect/;
     $__symal_a="grow" if $___ALIGNMENT=~ /grow/;
+    $__symal_a="srctotgt" if $___ALIGNMENT=~ /srctotgt/;
+    $__symal_a="tgttosrc" if $___ALIGNMENT=~ /tgttosrc/;
     
     my($__symal_d,$__symal_f,$__symal_b);
     ($__symal_d,$__symal_f,$__symal_b)=("no","no","no");
@@ -1548,10 +1550,12 @@ print INI "\n# word penalty
 
 sub full_path {
     my ($PATH) = @_;
+$$PATH =~ s/\/nfsmnt//;
     return if $$PATH =~ /^\//;
     
     my $dir = `pawd 2>/dev/null`;
 	if(!$dir){$dir = `pwd`;}
+$PATH =~ s/\/nfsmnt//;
 	chomp $dir;
 	$$PATH = $dir."/".$$PATH;
 
