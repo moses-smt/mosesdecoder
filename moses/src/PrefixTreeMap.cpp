@@ -1,16 +1,17 @@
 #include "PrefixTreeMap.h"
+#include "TypeDef.h"
 
 void GenericCandidate::readBin(FILE* f){
   m_PhraseList.clear();
   m_ScoreList.clear();
-  uint32_t num_phrases;  // on older compilers, <stdint.h> may need to be included
+  UINT32 num_phrases;  // on older compilers, <stdint.h> may need to be included
   fRead(f, num_phrases);
   for(unsigned int i = 0; i < num_phrases; ++i){
 	IPhrase phrase;
 	fReadVector(f, phrase);
 	m_PhraseList.push_back(phrase);
   };
-  uint32_t num_scores;
+  UINT32 num_scores;
   fRead(f, num_scores);
   for(unsigned int j = 0; j < num_scores; ++j){
 	std::vector<float> score;
@@ -21,11 +22,11 @@ void GenericCandidate::readBin(FILE* f){
 
 void GenericCandidate::writeBin(FILE* f) const {
   // cast is necessary to ensure compatibility between 32- and 64-bit platforms
-  fWrite(f, static_cast<uint32_t>(m_PhraseList.size()));
+  fWrite(f, static_cast<UINT32>(m_PhraseList.size()));
   for(size_t i = 0; i < m_PhraseList.size(); ++i){
 	fWriteVector(f, m_PhraseList[i]);
   }
-  fWrite(f, static_cast<uint32_t>(m_ScoreList.size()));
+  fWrite(f, static_cast<UINT32>(m_ScoreList.size()));
   for(size_t j = 0; j < m_ScoreList.size(); ++j){
 	fWriteVector(f, m_ScoreList[j]);
   }
@@ -33,7 +34,7 @@ void GenericCandidate::writeBin(FILE* f) const {
 
 
 void Candidates::writeBin(FILE* f) const {
-  uint32_t s = this->size();
+  UINT32 s = this->size();
   fWrite(f,s);
   for(size_t i = 0; i < s; ++i) {
 	MyBase::operator[](i).writeBin(f);
@@ -41,7 +42,7 @@ void Candidates::writeBin(FILE* f) const {
 }
 
 void Candidates::readBin(FILE* f) {
-  uint32_t s;
+  UINT32 s;
   fRead(f,s);
   this->resize(s);
   for(size_t i = 0; i<s; ++i) {
