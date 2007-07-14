@@ -1350,6 +1350,7 @@ sub get_generation {
     } 
     close(E);
  
+	safesystem("mkdir -p $___MODEL_DIR") or die;
     open(GEN,">$file") or die "Can't write $file";
     foreach my $source (keys %GENERATION) {
 	foreach my $target (keys %{$GENERATION{$source}}) {
