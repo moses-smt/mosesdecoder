@@ -418,6 +418,7 @@ bool StaticData::LoadLexicalReorderingModel()
 		{
 			if(w >= weights.size()){
 				//error not enough weights...
+				std::cerr << "Lexicalized distortion model: Not enough weights, add to [weight-d]\n";
 				return false;
 			} else {
 				mweights.push_back(weights[w]);
