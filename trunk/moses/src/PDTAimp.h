@@ -178,7 +178,7 @@ public:
 				std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),
 											 FloorScore);
 				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector);
-				costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),
+				costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),
 																			 tCands.size()));
 				tCands.push_back(targetPhrase);
 			}
@@ -282,9 +282,21 @@ public:
 	{
 		// convert into TargetPhraseCollection
 		TargetPhraseCollection *rv=new TargetPhraseCollection;
-		for(std::vector<std::pair<float,size_t> >::iterator it=costs.begin();it!=costs.end();++it)
-			rv->Add(new TargetPhrase(tCands[it->second]));
-		rv->Sort(m_obj->m_tableLimit);
+
+		// set limit to tableLimit or actual size, whatever is smaller
+		std::vector<std::pair<float,size_t> >::iterator nth = 
+		  costs.begin() + ((m_obj->m_tableLimit>0 && // 0 indicates no limit
+				    m_obj->m_tableLimit < costs.size()) ? 
+				   m_obj->m_tableLimit : costs.size());
+
+		// find the nth phrase according to future cost
+		std::nth_element(costs.begin(),nth ,costs.end());
+
+		// add n top phrases to the return list
+		for(std::vector<std::pair<float,size_t> >::iterator 
+		      it = costs.begin(); it != nth; ++it)
+		  rv->Add(new TargetPhrase(tCands[it->second]));
+
 		return rv;
 	}
 
@@ -462,7 +474,7 @@ public:
 						TScores const & scores=j->second;
 						TargetPhrase targetPhrase(Output);
 						CreateTargetPhrase(targetPhrase,j->first,scores.trans,scores.src);
-						costs.push_back(std::make_pair(targetPhrase.GetFutureScore(),tCands.size()));
+						costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
 						tCands.push_back(targetPhrase);
 						//std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;
 					}

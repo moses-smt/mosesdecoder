@@ -216,7 +216,8 @@ Score LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, con
      || (!m_FactorsE.empty() && 0 == e.GetSize())){
     //NOTE: no check for c as c might be empty, e.g. start of sentence
     //not a proper key
-    std::cerr << "Not a proper key!\n";
+    // phi: commented out, since e may be empty (drop-unknown)
+    //std::cerr << "Not a proper key!\n";
     return Score();
   }
   CacheType::iterator i;;
@@ -295,7 +296,8 @@ void LexicalReorderingTableTree::InitializeForInput(const InputType& input){
   if(ConfusionNet const* cn = dynamic_cast<ConfusionNet const*>(&input)){
     Cache(*cn);
   } else if(Sentence const* s = dynamic_cast<Sentence const*>(&input)){
-    Cache(*s);
+    // Cache(*s); ... this just takes up too much memory, we cache elsewhere
+    DisableCache();
   }
 };
  
