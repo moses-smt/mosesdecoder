@@ -362,8 +362,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	} 
 	
 	if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
-	{
-		
+	{		
 		// partial trans opt stored in here
 		PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
 		size_t totalEarlyPruned = 0;

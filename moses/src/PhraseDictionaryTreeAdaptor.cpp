@@ -38,11 +38,12 @@ void PhraseDictionaryTreeAdaptor::CleanUp()
 
 void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 {
-	// only required for confusion net
+	// caching only required for confusion net
 	if(ConfusionNet const* cn=dynamic_cast<ConfusionNet const*>(&source))
 		imp->CacheSource(*cn);
-	else if(Sentence const* s=dynamic_cast<Sentence const*>(&source))
-		imp->CacheSource(ConfusionNet(*s));
+	//else if(Sentence const* s=dynamic_cast<Sentence const*>(&source))
+	// following removed by phi, not helpful
+	//	imp->CacheSource(ConfusionNet(*s));
 }
 
 bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
