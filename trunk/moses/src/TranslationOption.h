@@ -83,6 +83,9 @@ public:
 	/** copy constructor */
 	TranslationOption(const TranslationOption &copy);
 
+	/** copy constructor, but change words range. used by caching */
+	TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange);
+
 	~TranslationOption()
 	{
 		delete m_sourcePhrase;

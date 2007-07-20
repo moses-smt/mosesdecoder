@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <list>
 #include <limits>
+#include <vector>
 
 #define PROJECT_NAME		"moses"
 
@@ -160,4 +161,7 @@ typedef size_t FactorType;
 #include <stdint.h>
 typedef uint32_t UINT32;
 #endif
+
+class TranslationOption;
+typedef std::vector<TranslationOption*> TranslationOptionList;
 

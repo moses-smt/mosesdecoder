@@ -56,7 +56,6 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& src, s
 /** destructor, clears out data structures */
 TranslationOptionCollection::~TranslationOptionCollection()
 {
-	// delete all trans opt
 	size_t size = m_source.GetSize();
 	for (size_t startPos = 0 ; startPos < size ; ++startPos)
 	{
@@ -65,6 +64,7 @@ TranslationOptionCollection::~TranslationOptionCollection()
 		 RemoveAllInColl(GetTranslationOptionList(startPos, endPos));
 		}
 	}
+
 	RemoveAllInColl(m_unksrcs);
 }
 
@@ -352,31 +352,47 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 , size_t startPos
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
-{
-
-	if ((StaticData::Instance().GetXmlInputType() != XmlPassThrough) && HasXmlOptionsOverlappingRange(startPos,endPos)) 
-	{
-		
-		CreateXmlOptionsForRange(startPos, endPos);
-
-	} 
-	
+{	
 	if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
-	{		
-		// partial trans opt stored in here
-		PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
-		size_t totalEarlyPruned = 0;
-		
-		// initial translation step
-		list <const DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
-		const DecodeStep &decodeStep = **iterStep;
+	{
+	  Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 
-		ProcessInitialTranslation(decodeStep, *oldPtoc
-															, startPos, endPos, adhereTableLimit );
+		// consult persistent (cross-sentence) cache for stored translation options
+		bool skipTransOptCreation = false;
+		if (StaticData::Instance().GetUseTransOptCache()) 
+		{
+		  const WordsRange wordsRange(startPos, endPos);
+		  sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
+		  
+			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(*sourcePhrase);
+			// is phrase in cache?
+			if (transOptList != NULL) {
+				skipTransOptCreation = true;
+		    TranslationOptionList::const_iterator iterTransOpt;
+		    for (iterTransOpt = transOptList->begin() ; iterTransOpt != transOptList->end() ; ++iterTransOpt)
+				{
+					TranslationOption *transOpt = new TranslationOption(**iterTransOpt, wordsRange);
+					Add(transOpt);
+				}
+			}
+		}
 
-		// do rest of decode steps
-		int indexStep = 0;
-		for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
+		if (!skipTransOptCreation)
+		{
+			// partial trans opt stored in here
+			PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
+			size_t totalEarlyPruned = 0;
+			
+			// initial translation step
+			list <const DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
+			const DecodeStep &decodeStep = **iterStep;
+
+			ProcessInitialTranslation(decodeStep, *oldPtoc
+																, startPos, endPos, adhereTableLimit );
+
+			// do rest of decode steps
+			int indexStep = 0;
+			for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
 			{
 				const DecodeStep &decodeStep = **iterStep;
 				PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
@@ -399,23 +415,47 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 				oldPtoc = newPtoc;
 				indexStep++;
 			} // for (++iterStep 
-			// add to fully formed translation option list
-		PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
-		const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
-		vector<TranslationOption*>::const_iterator iterColl;
-		for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl)
+
+				// add to fully formed translation option list
+			PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
+			const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
+			vector<TranslationOption*>::const_iterator iterColl;
+			for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl)
 			{
 				TranslationOption *transOpt = *iterColl;
 				transOpt->CalcScore();
 				Add(transOpt);
 			}
 
-		lastPartialTranslOptColl.DetachAll();
-		totalEarlyPruned += oldPtoc->GetPrunedCount();
-		delete oldPtoc;
-		// TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
+			// storing translation options in persistent cache (kept across sentences) 
+			if (StaticData::Instance().GetUseTransOptCache()) 
+			{
+				if (partTransOptList.size() > 0)
+				{
+					vector<TranslationOption*> cachedTransOptList = GetTranslationOptionList(startPos, endPos);
+					vector<TranslationOption*>::iterator iterList;
+					for (size_t i = 0 ; i < cachedTransOptList.size() ; ++i)
+					{
+						cachedTransOptList[i] = new TranslationOption(*cachedTransOptList[i]);
+					}
+	
+					StaticData::Instance().AddTransOptListToCache(*sourcePhrase, cachedTransOptList);
+				}
+				
+				delete sourcePhrase;
+			}
 
-	} //if non-exclusive XML or no options for range
+			lastPartialTranslOptColl.DetachAll();
+			totalEarlyPruned += oldPtoc->GetPrunedCount();
+			delete oldPtoc;
+			// TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
+		} //if non-exclusive XML or no options for range
+	} // skipTransOptCreation
+
+	if ((StaticData::Instance().GetXmlInputType() != XmlPassThrough) && HasXmlOptionsOverlappingRange(startPos,endPos)) 
+	{
+		CreateXmlOptionsForRange(startPos, endPos);
+	} 
 
 }
 
