@@ -137,7 +137,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	// 
 	if (m_inputType == SentenceInput)
 	{
-		SetBooleanParameter( &m_useTransOptCache, "use-persistent-cache", false );
+		SetBooleanParameter( &m_useTransOptCache, "use-persistent-cache", true );
 	}
 	else
 	{
