@@ -133,7 +133,18 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	// print all factors of output translations
 	SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
-	
+
+	// 
+	if (m_inputType == SentenceInput)
+	{
+		SetBooleanParameter( &m_useTransOptCache, "use-persistent-cache", false );
+	}
+	else
+	{
+		m_useTransOptCache = false;
+	}
+		
+
 	//input factors
 	const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
 	for(size_t i=0; i<inputFactorVector.size(); i++) 
@@ -283,6 +294,19 @@ StaticData::~StaticData()
 				delete ptrList;
 				ptrList = NULL;
 			}
+	}
+
+	// delete trans opt
+	map<Phrase, std::vector<TranslationOption*> >::iterator iterCache;
+	for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache)
+	{
+		TranslationOptionList &transOptList = iterCache->second;
+
+		TranslationOptionList::iterator iterTransOpt;
+		for (iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt)
+		{
+			delete *iterTransOpt;
+		}
 	}
 
 	RemoveAllInColl(m_reorderModels);
@@ -823,3 +847,14 @@ void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::
   for (size_t i = begin; i < end; i++)
     m_allWeights[i] = *weightIter++;
 }
+
+const TranslationOptionList* StaticData::FindTransOptListInCache(const Phrase &sourcePhrase) const
+{
+	std::map<Phrase, TranslationOptionList>::const_iterator iter
+			= m_transOptCache.find(sourcePhrase);
+	if (iter == m_transOptCache.end())
+		return NULL;
+
+	return &(iter->second);
+}
+

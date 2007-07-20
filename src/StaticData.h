@@ -111,6 +111,10 @@ protected:
 	XmlInputType m_xmlInputType; //! method for handling sentence XML input
 
   DecoderType m_decoderType; //! MAP or MBR decoder
+
+	bool m_useTransOptCache;
+	mutable std::map<Phrase, TranslationOptionList> m_transOptCache;
+
   float m_mbrScale; //! Scaling factor for computing marginal probability of candidate translation
 	//! constructor. only the 1 static variable can be created
 	StaticData();
@@ -134,6 +138,7 @@ protected:
 	bool LoadLexicalReorderingModel();
 	
 public:
+
 	//! destructor
 	~StaticData();
 	//! return static instance for use like global variable
@@ -337,5 +342,13 @@ public:
 	float GetMBRScale() const {return m_mbrScale;}
 		
 	XmlInputType GetXmlInputType() const { return m_xmlInputType; }
-	
+
+	bool GetUseTransOptCache() const { return m_useTransOptCache; }
+
+	void AddTransOptListToCache(const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
+	{
+		m_transOptCache[sourcePhrase] = transOptList;
+	}
+
+	const TranslationOptionList* FindTransOptListInCache(const Phrase &sourcePhrase) const;
 };
