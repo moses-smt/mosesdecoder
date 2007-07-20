@@ -89,6 +89,18 @@ TranslationOption::TranslationOption(const TranslationOption &copy)
 , m_reordering(copy.m_reordering)
 {}
 
+TranslationOption::TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange)
+: m_targetPhrase(copy.m_targetPhrase)
+//, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented 
+, m_sourcePhrase( (copy.m_sourcePhrase == NULL) ? new Phrase(Input) : new Phrase(*copy.m_sourcePhrase))
+, m_sourceWordsRange(sourceWordsRange)
+, m_totalScore(copy.m_totalScore)
+, m_futureScore(copy.m_futureScore)
+, m_partialScore(copy.m_partialScore)
+, m_scoreBreakdown(copy.m_scoreBreakdown)
+, m_reordering(copy.m_reordering)
+{}
+
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)
 {
 	assert(phrase.GetSize() == m_targetPhrase.GetSize());

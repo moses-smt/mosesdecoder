@@ -76,6 +76,7 @@ Parameter::Parameter()
 	AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
  	AddParam("mbr-scale", "scaling factor to convert log linear score into a probability.");
  	AddParam("decoder-type", "MAP/MBR decoder (default=MAP=0)");
+	AddParam("use-persistent-cache", "cache translation options across sentences (default=true)");
 }
 
 Parameter::~Parameter()
