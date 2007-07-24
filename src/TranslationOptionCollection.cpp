@@ -358,8 +358,9 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	  Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 
 		// consult persistent (cross-sentence) cache for stored translation options
-		bool skipTransOptCreation = false;
-		if (StaticData::Instance().GetUseTransOptCache()) 
+		bool skipTransOptCreation = false
+				, useCache = StaticData::Instance().GetUseTransOptCache();
+		if (useCache) 
 		{
 		  const WordsRange wordsRange(startPos, endPos);
 		  sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
@@ -375,7 +376,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 					Add(transOpt);
 				}
 			}
-		}
+		} // useCache
 
 		if (!skipTransOptCreation)
 		{
@@ -428,7 +429,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			}
 
 			// storing translation options in persistent cache (kept across sentences) 
-			if (StaticData::Instance().GetUseTransOptCache()) 
+			if (useCache) 
 			{
 				if (partTransOptList.size() > 0)
 				{
@@ -440,17 +441,18 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 					}
 	
 					StaticData::Instance().AddTransOptListToCache(*sourcePhrase, cachedTransOptList);
-				}
-				
-				delete sourcePhrase;
+				}				
 			}
 
 			lastPartialTranslOptColl.DetachAll();
 			totalEarlyPruned += oldPtoc->GetPrunedCount();
 			delete oldPtoc;
 			// TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
-		} //if non-exclusive XML or no options for range
-	} // skipTransOptCreation
+		} // if (!skipTransOptCreation)
+
+		if (useCache) 
+			delete sourcePhrase;
+	} // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
 
 	if ((StaticData::Instance().GetXmlInputType() != XmlPassThrough) && HasXmlOptionsOverlappingRange(startPos,endPos)) 
 	{
