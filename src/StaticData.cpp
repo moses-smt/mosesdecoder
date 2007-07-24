@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
+#include "DecodeGraph.h"
 
 using namespace std;
 
@@ -274,40 +275,13 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_phraseDictionary);
 	RemoveAllInColl(m_generationDictionary);
 	RemoveAllInColl(m_languageModel);
-	//need to delete lists within vector as well 
-	while (! m_decodeStepVL.empty() )
-	{
-			list <const DecodeStep *> * ptrList = m_decodeStepVL.back();
-			m_decodeStepVL.pop_back();
-			while( ! ptrList->empty() ) 
-			{
-				 const DecodeStep * ptrDecodeStep = ptrList->back();
-				 ptrList->pop_back();
-				 if (ptrDecodeStep != NULL) 
-				 {
-					 delete ptrDecodeStep;
-					 ptrDecodeStep = NULL;
-				 }
-			}
-			//cout << "list size " << ptrList->size() << endl;
-			if (ptrList != NULL) 
-			{
-				delete ptrList;
-				ptrList = NULL;
-			}
-	}
-
+	
 	// delete trans opt
 	map<Phrase, std::vector<TranslationOption*> >::iterator iterCache;
 	for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache)
 	{
 		TranslationOptionList &transOptList = iterCache->second;
-
-		TranslationOptionList::iterator iterTransOpt;
-		for (iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt)
-		{
-			delete *iterTransOpt;
-		}
+		RemoveAllInColl(transOptList);
 	}
 
 	RemoveAllInColl(m_reorderModels);
@@ -785,13 +759,11 @@ bool StaticData::LoadMapping()
 			break;
 		}
 		assert(decodeStep);
-		list <const DecodeStep *> * decodeList=NULL;
 		if (m_decodeStepVL.size() < vectorList + 1) 
 		{
-		  decodeList = new list <const DecodeStep *>;
-			m_decodeStepVL.push_back(decodeList);
+			m_decodeStepVL.push_back(DecodeGraph());
 		}
-		m_decodeStepVL[vectorList]->push_back(decodeStep);
+		m_decodeStepVL[vectorList].Add(decodeStep);
 		prev = decodeStep;
 		previousVectorList = vectorList;
 	}

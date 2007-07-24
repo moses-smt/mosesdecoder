@@ -74,7 +74,7 @@ void Manager::ProcessSentence()
 {	
 	const StaticData &staticData = StaticData::Instance();
 	staticData.ResetSentenceStats(m_source);
-	const vector < list <const DecodeStep* > * >
+	const vector <DecodeGraph>
 			&decodeStepVL = staticData.GetDecodeStepVL();
 	
 	// create list of all possible translations

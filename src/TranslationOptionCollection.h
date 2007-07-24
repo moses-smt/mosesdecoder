@@ -52,6 +52,8 @@ class Word;
  * classes instead, for a particular input type
  **/
 
+class DecodeGraph;
+
 class TranslationOptionCollection
 {
 	friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);
@@ -68,7 +70,7 @@ protected:
 	void CalcFutureScore();
 
 	//! Force a creation of a translation option where there are none for a particular source position.
-	void ProcessUnknownWord(const std::vector < std::list <const DecodeStep* > *> &decodeStepVL);
+	void ProcessUnknownWord(const std::vector <DecodeGraph> &decodeStepVL);
 	//! special handling of ONE unknown words.
 	virtual void ProcessOneUnknownWord(const Word &sourceWord
 																		 , size_t sourcePos, size_t length = 1);
@@ -100,9 +102,9 @@ public:
 	size_t GetSize() const { return m_source.GetSize(); };
 
 	//! Create all possible translations from the phrase tables
-	virtual void CreateTranslationOptions(const std::vector < std::list <const DecodeStep* > * > &decodeStepVL);
+	virtual void CreateTranslationOptions(const std::vector <DecodeGraph> &decodeStepVL);
 	//! Create translation options that exactly cover a specific input span. 
-	virtual void CreateTranslationOptionsForRange(const std::list <const DecodeStep* > &decodeStepList
+	virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
 																			, size_t startPosition
 																			, size_t endPosition
 																			, bool adhereTableLimit);
