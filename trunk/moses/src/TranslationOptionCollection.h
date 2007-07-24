@@ -67,10 +67,6 @@ protected:
 	
 	void CalcFutureScore();
 
-	virtual void ProcessInitialTranslation(const DecodeStep &decodeStep
-															, PartialTranslOptColl &outputPartialTranslOptColl
-															, size_t startPos, size_t endPos, bool adhereTableLimit );
-
 	//! Force a creation of a translation option where there are none for a particular source position.
 	void ProcessUnknownWord(const std::vector < std::list <const DecodeStep* > *> &decodeStepVL);
 	//! special handling of ONE unknown words.

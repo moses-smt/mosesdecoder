@@ -39,6 +39,14 @@ public:
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const;
+
+	/** initialize list of partial translation options by applying the first translation step 
+	* Ideally, this function should be in DecodeStepTranslation class
+	*/
+	void ProcessInitialTranslation(
+															const InputType &source
+															, PartialTranslOptColl &outputPartialTranslOptColl
+															, size_t startPos, size_t endPos, bool adhereTableLimit) const;
 private:
 	/** create new TranslationOption from merging oldTO with mergePhrase
 		This function runs IsCompatible() to ensure the two can be merged
