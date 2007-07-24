@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "UserMessage.h"
+#include "TranslationOption.h"
 
 using namespace std;
 
