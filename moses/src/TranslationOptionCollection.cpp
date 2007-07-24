@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "Util.h"
 #include "StaticData.h"
+#include "DecodeStepTranslation.h"
 
 using namespace std;
 
@@ -388,7 +389,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			list <const DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
 			const DecodeStep &decodeStep = **iterStep;
 
-			ProcessInitialTranslation(decodeStep, *oldPtoc
+			static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
+																(m_source, *oldPtoc
 																, startPos, endPos, adhereTableLimit );
 
 			// do rest of decode steps
@@ -460,41 +462,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	} 
 
 }
-
-/** initialize list of partial translation options by applying the first translation step 
-	* Ideally, this function should be in DecodeStepTranslation class
-	*/
-void TranslationOptionCollection::ProcessInitialTranslation(
-															const DecodeStep &decodeStep
-															, PartialTranslOptColl &outputPartialTranslOptColl
-															, size_t startPos
-															, size_t endPos
-															, bool adhereTableLimit)
-{
-	const PhraseDictionary &phraseDictionary = decodeStep.GetPhraseDictionary();
-	const size_t tableLimit = phraseDictionary.GetTableLimit();
-
-	const WordsRange wordsRange(startPos, endPos);
-	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(m_source,wordsRange); 
-
-	if (phraseColl != NULL)
-	{
-		VERBOSE(3,"[" << m_source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
-			
-		TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
-		iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
-		
-		for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase)
-		{
-			const TargetPhrase	&targetPhrase = **iterTargetPhrase;
-			outputPartialTranslOptColl.Add ( new TranslationOption(wordsRange, targetPhrase, m_source) );
-			
-			VERBOSE(3,"\t" << targetPhrase << "\n");
-		}
-		VERBOSE(3,endl);
-	}
-}
-
 
 	/** Check if this range overlaps with any XML options. This doesn't need to be an exact match, only an overlap.
 	 * by default, we don't support XML options. subclasses need to override this function.
