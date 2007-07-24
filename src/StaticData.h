@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModel.h"
 #include "LMList.h"
 #include "SentenceStats.h"
+#include "DecodeGraph.h"
 //#include "UnknownWordHandler.h"
 
 class InputType;
@@ -42,7 +43,6 @@ class DistortionScoreProducer;
 class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
-class DecodeGraph;
 
 /** Contains global variables and contants */
 class StaticData
