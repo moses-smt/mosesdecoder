@@ -38,6 +38,8 @@ public:
 	typedef std::list<const DecodeStep*>::const_iterator const_iterator;
 	const_iterator begin() const { return m_steps.begin(); }
 	const_iterator end() const { return m_steps.end(); }
+	
+	~DecodeGraph();
 
 	void Add(const DecodeStep *decodeStep)
 	{
