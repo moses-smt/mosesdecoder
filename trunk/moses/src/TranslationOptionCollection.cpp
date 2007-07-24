@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
+#include "DecodeGraph.h"
 
 using namespace std;
 
@@ -127,20 +128,20 @@ void TranslationOptionCollection::Prune()
 * \param factorCollection input sentence with all factors
 */
 
-void TranslationOptionCollection::ProcessUnknownWord(const std::vector < std::list <const DecodeStep* > * > &decodeStepVL)
+void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGraph> &decodeStepVL)
 {
 	size_t size = m_source.GetSize();
 	// try to translation for coverage with no trans by expanding table limit
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
-	  const list <const DecodeStep* > * decodeStepList = decodeStepVL[startVL];
+	  const DecodeGraph &decodeStepList = decodeStepVL[startVL];
 		for (size_t pos = 0 ; pos < size ; ++pos)
 		{
 				TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
 				size_t numTransOpt = fullList.size();
 				if (numTransOpt == 0)
 				{
-					CreateTranslationOptionsForRange(*decodeStepList
+					CreateTranslationOptionsForRange(decodeStepList
 																				, pos, pos, false);
 				}
 		}
@@ -308,7 +309,7 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::CreateTranslationOptions(const vector <list <const DecodeStep* > * > &decodeStepVL)
+void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeGraph> &decodeStepVL)
 {	
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
@@ -316,12 +317,12 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <list <c
 	// for all phrases
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
-	  const list <const DecodeStep* > * decodeStepList = decodeStepVL[startVL];
+	  const DecodeGraph &decodeStepList = decodeStepVL[startVL];
 		for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
 		{
 			for (size_t endPos = startPos ; endPos < m_source.GetSize() ; endPos++)
 			{
-				CreateTranslationOptionsForRange( *decodeStepList, startPos, endPos, true);				
+				CreateTranslationOptionsForRange( decodeStepList, startPos, endPos, true);				
  			}
 		}
 	}
@@ -349,7 +350,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <list <c
  * \param adhereTableLimit whether phrase & generation table limits are adhered to
  */
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
-																													 const list <const DecodeStep* > &decodeStepList
+																													 const DecodeGraph &decodeStepList
 																													 , size_t startPos
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
