@@ -21,4 +21,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "DecodeGraph.h"
+#include "DecodeStep.h"
+#include "TypeDef.h"
+#include "Util.h"
 
+DecodeGraph::~DecodeGraph()
+{
+	RemoveAllInColl(m_steps);
+}

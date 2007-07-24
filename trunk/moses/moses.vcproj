@@ -287,6 +287,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DecodeGraph.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DecodeStep.cpp"
 				>
 			</File>
@@ -420,20 +424,6 @@
 				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-withSRILM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug-withSRILM|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -684,6 +674,10 @@
 			>
 			<File
 				RelativePath=".\src\ConfusionNet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DecodeGraph.h"
 				>
 			</File>
 			<File
