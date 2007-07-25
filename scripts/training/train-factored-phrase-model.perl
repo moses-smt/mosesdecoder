@@ -14,7 +14,7 @@ $ENV{"LC_ALL"} = "C";
 my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_FILE,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,$_ALIGNMENT_FILE,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_INPUT_FACTOR_MAX,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER,@_PHRASE_TABLE,@_REORDERING_TABLE,@_GENERATION_TABLE,$_CONFIG,$_DONT_ZIP,@_GENERATION_TYPE);
 
 $SCRIPTS_ROOTDIR="/voxgate/ssi/HermesTools/mosesdecoder.release20070624/scripts";
-my $debug = 1; # debug this script, do not delete any files in debug mode
+my $debug = 0; # debug this script, do not delete any files in debug mode
 my $nodebug = 1; # no debug this script, delete any files
 
 # the following line is set installation time by 'make release'.  BEWARE!
