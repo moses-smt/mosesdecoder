@@ -90,6 +90,24 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
       return;
     }
 
+//This class sorts the generation list 
+  class SortGenList 
+  {
+	  const Word *m_outputWord;
+	  float m_totalScore;
+	 public:
+		SortGenList (const Word *outputWord, float totalScore)
+		{
+			m_totalScore = totalScore;
+			m_outputWord = outputWord;
+		}
+		float getScore()
+		{
+		 return m_totalScore;
+		}
+  };
+
+
   // normal generation step
   const GenerationDictionary &generationDictionary  = decodeStep.GetGenerationDictionary();
 //  const WordsRange &sourceWordsRange                = inputPartialTranslOpt.GetSourceWordsRange();
@@ -111,7 +129,8 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
       // consult dictionary for possible generations for this word
       const OutputWordCollection *wordColl = generationDictionary.FindWord(word);
 
-      if (wordColl == NULL)
+      
+	  if (wordColl == NULL)
         { // word not found in generation dictionary
           //toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
           return; // can't be part of a phrase, special handling
@@ -124,15 +143,33 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
             {
               const Word &outputWord = (*iterWordColl).first;
               const ScoreComponentCollection& score = (*iterWordColl).second;
+			  float totalScore = score.InnerProduct(StaticData::Instance().GetAllWeights());
+
               // enter into word list generated factor(s) and its(their) score(s)
               wordList.push_back(WordPair(outputWord, score));
+
+			  //Creates a list of possible factors for a word together with their score and stores them in genList 
+			  vector <SortGenList> genList;			  
+			  SortGenList list(&outputWord, totalScore);
+			  genList.push_back(list);
+			  	
             }
+		    
+		    //Sort the list according to descending order of scores before moving to the next word
+             for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
+			 {
+				//while (genList[1]
+
+			 }
 
           wordListVectorPos++; // done, next word
         }
     }
-
-  // use generation list (wordList)
+   
+  
+  
+  
+   // use generation list (wordList)
   // set up iterators (total number of expansions)
   size_t numIteration = 1;
   vector< WordListIterator >  wordListIterVector(targetLength);
