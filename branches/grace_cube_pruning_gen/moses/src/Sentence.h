@@ -1,0 +1,106 @@
+// $Id$
+
+/***********************************************************************
+Moses - factored phrase-based language decoder
+Copyright (C) 2006 University of Edinburgh
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+***********************************************************************/
+
+#pragma once
+
+#include <vector>
+#include <string>
+#include "Word.h"
+#include "Phrase.h"
+#include "InputType.h"
+
+class WordsRange;
+class PhraseDictionary;
+class TranslationOption;
+class TranslationOptionCollection;
+
+/** This struct is used for storing XML force translation data for a given range in the sentence
+ */
+struct XmlOption {
+
+	size_t startPos, endPos;
+	std::vector<std::string> targetPhrases;
+	std::vector<float> targetScores;
+	
+	XmlOption(int s, int e, std::string targetPhrase, float targetScore): startPos(s), endPos(e) {
+		targetPhrases.push_back(targetPhrase);
+		targetScores.push_back(targetScore);
+	}
+
+};
+
+
+/***
+ * A Phrase class with an ID. Used specifically as source input so contains functionality to read 
+ *	from IODevice and create trans opt
+ */
+class Sentence : public Phrase, public InputType
+{
+
+ private:
+ 
+	/**
+	 * Utility method that takes in a string representing an XML tag and the name of the attribute,
+	 * and returns the value of that tag if present, empty string otherwise
+	 */
+	static std::string ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName);
+	std::vector <XmlOption> m_xmlOptionsList;
+	std::vector <bool> m_xmlCoverageMap;
+
+ public:
+	Sentence(FactorDirection direction)	: Phrase(direction), InputType()
+	{
+	}
+
+	InputTypeEnum GetType() const
+	{	return SentenceInput;}
+
+	//! Calls Phrase::GetSubString(). Implements abstract InputType::GetSubString()
+	Phrase GetSubString(const WordsRange& r) const 
+	{
+		return Phrase::GetSubString(r);
+	}
+
+	//! Calls Phrase::GetWord(). Implements abstract InputType::GetWord()
+	const Word& GetWord(size_t pos) const
+	{
+		return Phrase::GetWord(pos);
+	}
+
+	//! Calls Phrase::GetSize(). Implements abstract InputType::GetSize()
+	size_t GetSize() const 
+	{
+		return Phrase::GetSize();
+	}
+	
+	//! Returns true if there were any XML tags parsed that at least partially covered the range passed
+	bool XmlOverlap(size_t startPos, size_t endPos) const;
+
+	//! populates vector argument with XML force translation options for the specific range passed
+	void GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const;
+
+
+	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+	void Print(std::ostream& out) const;
+
+	TranslationOptionCollection* CreateTranslationOptionCollection() const;
+};
+
