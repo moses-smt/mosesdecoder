@@ -80,11 +80,13 @@ protected:
 	//! list of trans opt for a particular span
 	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
 	{
+		assert(endPos-startPos < m_collection[startPos].size());
 		return m_collection[startPos][endPos - startPos];
 	}
 	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const
 	{
-	  return m_collection[startPos][endPos - startPos];
+		assert(endPos-startPos < m_collection[startPos].size());
+	 	return m_collection[startPos][endPos - startPos];
 	}
 	void Add(TranslationOption *translationOption);
 
