@@ -218,6 +218,9 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_maxNoPartTransOpt = (m_parameter->GetParam("max-partial-trans-opt").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("max-partial-trans-opt")[0]) : DEFAULT_MAX_PART_TRANS_OPT_SIZE;
 
+	m_maxPhraseLength = (m_parameter->GetParam("max-phrase-length").size() > 0)
+				? Scan<size_t>(m_parameter->GetParam("max-phrase-length")[0]) : DEFAULT_MAX_PHRASE_LENGTH;
+
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH
 	SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );

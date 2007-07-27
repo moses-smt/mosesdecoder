@@ -77,7 +77,8 @@ protected:
 			, m_nBestSize
 			, m_nBestFactor
 			, m_maxNoTransOptPerCoverage
-		  , m_maxNoPartTransOpt;
+			, m_maxNoPartTransOpt
+			, m_maxPhraseLength;
 	
 	std::string									m_nBestFilePath;
 	bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
@@ -203,6 +204,10 @@ public:
 	inline size_t GetMaxNoPartTransOpt() const 
 	{ 
 		return m_maxNoPartTransOpt;
+	}
+	inline size_t GetMaxPhraseLength() const 
+	{ 
+		return m_maxPhraseLength;
 	}
 	std::vector<LexicalReordering*> GetReorderModels() const
 	{

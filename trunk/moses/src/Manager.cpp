@@ -136,7 +136,11 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 		for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 		{
-			for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
+      size_t maxSize = sourceSize - startPos;
+      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+      maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+
+			for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 			{
 				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 				{
@@ -159,7 +163,11 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	// MAIN LOOP. go through each possible hypo
 	for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 	{
-		for (size_t endPos = startPos ; endPos < sourceSize ; ++endPos)
+    size_t maxSize = sourceSize - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+
+		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
 			// no gap so far => don't skip more than allowed limit
 			if (hypoFirstGapPos == hypoWordCount)
