@@ -56,6 +56,7 @@ struct PTEntry {
     PTEntry(const std::string& str, int index);
     std::string f_phrase;
     std::string e_phrase;
+    std::string extra;
     std::string scores;
     float pfe;
     int cf;
@@ -79,7 +80,9 @@ PTEntry::PTEntry(const std::string& str, int index) :
     this->f_phrase = str.substr(pos,nextPos); pos = nextPos + SEPARATOR.size();
     nextPos = str.find(SEPARATOR, pos);
     this->e_phrase = str.substr(pos,nextPos-pos); pos = nextPos + SEPARATOR.size();
-    this->scores = str.substr(pos,std::string::npos);
+    nextPos = str.rfind(SEPARATOR);
+    this->extra = str.substr(pos, nextPos-pos);
+    this->scores = str.substr(nextPos + SEPARATOR.size(),std::string::npos);
     int c = 0;
     std::string::iterator i=scores.begin();
     if (index > 0) {
@@ -100,6 +103,7 @@ PTEntry::PTEntry(const std::string& str, int index) :
     char *x;
     this->pfe = strtof(f, &x);
     // std::cerr << "L: " << f_phrase << " ::: " << e_phrase << " ::: " << scores << " ::: " << pfe << std::endl;
+    // std::cerr << "X: " << extra << "\n"; 
 }
 
 struct PfeComparer {
@@ -114,7 +118,9 @@ struct NlogSigThresholder {
 
 std::ostream& operator << (std::ostream& os, const PTEntry& pp)
 {
-  os << pp.f_phrase << " ||| " << pp.e_phrase << " ||| " << pp.scores;
+  os << pp.f_phrase << " ||| " << pp.e_phrase;
+  if (pp.extra.size()>0) os << " ||| " << pp.extra;
+  os << " ||| " << pp.scores;
   if (print_cooc_counts) os << " ||| " << pp.cfe << " " << pp.cf << " " << pp.ce;
   if (print_neglog_significance) os << " ||| " << pp.nlog_pte;
   return os;
