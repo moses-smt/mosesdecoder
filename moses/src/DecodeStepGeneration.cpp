@@ -75,6 +75,70 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
     }
 }
 
+//This class helps sorts the generation list 
+ class SortGenList 
+  {
+	  const Word *m_outputWord;
+	  float m_totalScore;
+	  public:
+		SortGenList (const Word *outputWord, float totalScore)
+		{
+			m_totalScore = totalScore;
+			m_outputWord = outputWord;
+						
+		}
+		float getScore()
+		{
+		 return m_totalScore;
+		}
+
+        const Word getOutputWord()
+		{
+		  return *m_outputWord;
+		}
+    
+ };
+
+ //Implements a simple sort algorithm that helps us sort the factors according to descending order of scores
+vector<SortGenList> genSort(vector <SortGenList> &v)
+{	
+ int i,j,flag = 1;
+ int vLength =  v.size();
+ for(i=1; (i<=vLength) && flag; i++)
+ {
+	flag =0;
+	for (j=0; (j<=vLength-1); j++)
+	{
+		if(v[j+1].getScore() > v[j].getScore())
+		{
+			SortGenList tmp = v[j];
+			v[j]=v[j+1];
+			v[j+1]=tmp;
+			flag=1;
+           
+		}
+	}
+ }
+
+ return v;   //returns genList sorted according to descending order of scores vector array 
+
+
+}
+
+// Gets the best three
+vector <SortGenList> topThree(vector <SortGenList> toSelect)
+{
+	vector <SortGenList> best;
+	for (int i = 0; i < toSelect.size(); i++)
+    {
+		best.push_back(toSelect[0]);
+		best.push_back(toSelect[1]);
+		best.push_back(toSelect[2]);
+	}
+	return best;
+}
+
+
 void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
@@ -90,24 +154,9 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
       return;
     }
 
-//This class sorts the generation list 
-  class SortGenList 
-  {
-	  const Word *m_outputWord;
-	  float m_totalScore;
-	 public:
-		SortGenList (const Word *outputWord, float totalScore)
-		{
-			m_totalScore = totalScore;
-			m_outputWord = outputWord;
-		}
-		float getScore()
-		{
-		 return m_totalScore;
-		}
-  };
 
 
+  
   // normal generation step
   const GenerationDictionary &generationDictionary  = decodeStep.GetGenerationDictionary();
 //  const WordsRange &sourceWordsRange                = inputPartialTranslOpt.GetSourceWordsRange();
@@ -118,6 +167,10 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
   // generation list for each word in phrase
   vector< WordList > wordListVector(targetLength);
 
+  // lists of classes for generation list
+  vector <SortGenList> genList;	
+
+  
   // create generation list
   int wordListVectorPos = 0;
   for (size_t currPos = 0 ; currPos < targetLength ; currPos++) // going thorugh all words
@@ -148,20 +201,18 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
               // enter into word list generated factor(s) and its(their) score(s)
               wordList.push_back(WordPair(outputWord, score));
 
-			  //Creates a list of possible factors for a word together with their score and stores them in genList 
-			  vector <SortGenList> genList;			  
-			  SortGenList list(&outputWord, totalScore);
+			  //Creates a list of possible factors for a word together with their score and stores them in genList 			   
+			  SortGenList list(&outputWord, totalScore);			  
 			  genList.push_back(list);
 			  	
             }
-		    
-		    //Sort the list according to descending order of scores before moving to the next word
-             for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
-			 {
-				//while (genList[1]
 
-			 }
-
+		     //Sort the list according to descending order of scores before moving to the next word
+			  vector <SortGenList> sortedGenList = genSort(genList);		            
+		     
+              //Select the top three
+			  vector <SortGenList> best3 = topThree(sortedGenList);
+			  			    			      
           wordListVectorPos++; // done, next word
         }
     }
