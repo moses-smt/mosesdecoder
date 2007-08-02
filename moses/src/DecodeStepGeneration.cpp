@@ -100,42 +100,41 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
  };
 
  //Implements a simple sort algorithm that helps us sort the factors according to descending order of scores
-vector<SortGenList> genSort(vector <SortGenList> &v)
-{	
- int i,j,flag = 1;
- int vLength =  v.size();
- for(i=1; (i<=vLength) && flag; i++)
- {
-	flag =0;
-	for (j=0; (j<=vLength-1); j++)
-	{
-		if(v[j+1].getScore() > v[j].getScore())
-		{
-			SortGenList tmp = v[j];
-			v[j]=v[j+1];
-			v[j+1]=tmp;
-			flag=1;
-           
-		}
-	}
- }
-
- return v;   //returns genList sorted according to descending order of scores vector array 
-
-
+ 
+ vector<SortGenList> b_sort(vector <SortGenList> &array)
+{
+      int i, j, flag = 1;    // set flag to 1 to begin initial pass
+      //int temp;             // holding variable
+      int arrayLength = array.size( ); 
+      for(i = 1; (i <= arrayLength) && flag; i++)
+     {
+          flag = 0;
+          for (j=0; j < (arrayLength -1); j++)
+         {
+               if (array[j+1].getScore() > array[j].getScore())      // ascending order simply changes to <
+              { 
+                    SortGenList temp = array[j];             // swap elements
+                    array[j] = array[j+1];
+                    array[j+1] = temp;
+                    flag = 1;               // indicates that a swap occurred.
+               }
+          }
+     }
+     return array;   //arrays are passed to functions by address; nothing is returned
 }
 
-// Gets the best three
+
+
+// Gets the best three from the sorted genlist 
 vector <SortGenList> topThree(vector <SortGenList> toSelect)
 {
+	vector<SortGenList>::iterator iter;
 	vector <SortGenList> best;
-	for (int i = 0; i < toSelect.size(); i++)
-    {
+	for( iter = toSelect.begin(); iter != toSelect.end(); iter++ )
+	{	
 		best.push_back(toSelect[0]);
-		best.push_back(toSelect[1]);
-		best.push_back(toSelect[2]);
+		return best;
 	}
-	return best;
 }
 
 
@@ -200,26 +199,59 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
 
               // enter into word list generated factor(s) and its(their) score(s)
               wordList.push_back(WordPair(outputWord, score));
+			  //WordList::iterator iter;
+			  //for( iter = wordList.begin(); iter != wordList.end(); iter++ ) 
+			  //for(int i= 0; i <= wordList.size(); i++)
+			  //{
+				  //WordPair &pair = *iter;
+				  //cout << pair.first << endl;
+                  //cout << pair.second << endl;
 
+
+				  //cout << *iter << endl;
+			 // }
+			  
 			  //Creates a list of possible factors for a word together with their score and stores them in genList 			   
 			  SortGenList list(&outputWord, totalScore);			  
-			  genList.push_back(list);
+			  genList.push_back(list);  
+			 
 			  	
             }
+		  
+		  //Sort the list according to descending order of scores before moving to the next word
+		  vector <SortGenList> sortedGenList = b_sort(genList);
 
-		     //Sort the list according to descending order of scores before moving to the next word
-			  vector <SortGenList> sortedGenList = genSort(genList);		            
-		     
-              //Select the top three
-			  vector <SortGenList> best3 = topThree(sortedGenList);
-			  			    			      
+		  //view the sorted generation list
+		  vector<SortGenList>::iterator iter;
+		  
+		  for( iter = genList.begin(); iter != genList.end(); iter++ )
+		  {
+			  SortGenList &list = *iter;
+			  cout<< "my choices here" << endl;
+			  cout << list.getOutputWord() << endl;
+			  cout << list.getScore() << endl;
+			  
+		  }
+
+		  //Select the top three
+		  vector <SortGenList> best3 = topThree(sortedGenList);
+		  for( iter = best3.begin(); iter != best3.end(); iter++ )
+			  {
+				  SortGenList &list = *iter;
+				  cout<< " so my best here is" << endl;
+				  cout << list.getOutputWord() << endl;
+				  cout << list.getScore() << endl;		  
+			  			  		  
+		  }
+		  		  			  			    			      
           wordListVectorPos++; // done, next word
+		  cout << " next word choices" << endl;
         }
     }
    
   
   
-  
+   
    // use generation list (wordList)
   // set up iterators (total number of expansions)
   size_t numIteration = 1;
