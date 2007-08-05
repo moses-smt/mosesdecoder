@@ -769,7 +769,7 @@ sub run_decoder {
       $decoder_cmd = "$___DECODER $parameters $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
     }
 
-    safesystem($decoder_cmd) or die "The decoder died.";
+    safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
 
     if (0 == scalar @$output_order_of_lambdas) {
       # we have to peek at the nbestlist
@@ -1075,10 +1075,11 @@ sub scan_config {
 		}
 		#exit 1;
   }
-	else
-	{
-		push @{$used_triples{"d"}}, [1.0, 0.0, 2.0];
-	}
+  else
+  { 
+	print STDERR "PERL IS SOO CRAP!!!";
+    push @{$used_triples{"d"}}, [1.0, 0.0, 2.0];
+  }
 
 
   exit(1) if $error;
