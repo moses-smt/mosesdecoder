@@ -1,5 +1,7 @@
 #include "PCNTools.h"
 
+#include <iostream>
+
 namespace PCN
 {
 
@@ -62,9 +64,9 @@ int getInt(const std::string& in, int &c)
 // parse ('foo', 0.23)
 CNAlt getCNAlt(const std::string& in, int &c)
 {
-	if (get(in,c++) != '(') return CNAlt(); // throw "expected (";
+	if (get(in,c++) != '(') { std::cerr << "PCN/PLF parse error: expected ( at start of cn alt block\n"; return CNAlt(); } // throw "expected (";
 	std::string word = getEscapedString(in,c);
-	if (get(in,c++) != ',') return CNAlt(); // throw "expected , after string";
+	if (get(in,c++) != ',') { std::cerr << "PCN/PLF parse error: expected , after string\n"; return CNAlt(); } // throw "expected , after string";
 	size_t cnNext = 1;
 	float prob = getFloat(in,c);
 	if (get(in,c) == ',') {  // WORD LATTICE
@@ -74,7 +76,7 @@ CNAlt getCNAlt(const std::string& in, int &c)
 	  }
 	  cnNext = (size_t)colIncr;
 	}
-	if (get(in,c++) != ')') return CNAlt(); // throw "expected )";
+	if (get(in,c++) != ')') { std::cerr << "PCN/PLF parse error: expected ) at end of cn alt block\n"; return CNAlt(); } // throw "expected )";
 	eatws(in,c);
 	return CNAlt(std::pair<std::string, float>(word,prob), cnNext);
 }
