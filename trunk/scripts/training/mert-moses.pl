@@ -452,6 +452,7 @@ if ($___FILTER_PHRASE_TABLE){
 else{
   # do not filter phrase tables (useful if binary phrase tables are available)
   # use the original configuration file
+  $___CONFIG_BAK = $___CONFIG;
 }
 
 my $PARAMETERS;
@@ -1057,6 +1058,7 @@ sub scan_config {
 	# distance-based distortion
   if ($___ASYNC == 1)
   {
+		print STDERR "ASYNC distortion";
 		my @my_array;
     for(my $i=0 ; $i < $defined_steps{"T"} ; $i++) 
 		{
@@ -1077,7 +1079,7 @@ sub scan_config {
   }
   else
   { 
-	print STDERR "PERL IS SOO CRAP!!!";
+	print STDERR "SYNC distortion";
     push @{$used_triples{"d"}}, [1.0, 0.0, 2.0];
   }
 
