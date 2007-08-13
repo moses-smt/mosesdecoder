@@ -75,6 +75,9 @@ public:
 		return m_scoreBreakdown;
 	}
 	
+	Phrase GetTargetPhrase() const;
+	Phrase GetSurfacePhrase() const;
+	
 	TO_STRING();
 
 };
