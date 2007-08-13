@@ -330,27 +330,19 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 		// get next best from list of contenders
 		TrellisPath *path = contenders.pop();
 		assert(path);
-		bool addPath = true;
 		if(onlyDistinct)
 		{
 			Phrase tgtPhrase = path->GetSurfacePhrase();
-			addPath = distinctHyps.insert(tgtPhrase).second;
+			distinctHyps.insert(tgtPhrase).second;
 		}
 		
-		if(addPath) 
-		{	
-			ret.Add(path);
-			// create deviations from current best
-			path->CreateDeviantPaths(contenders);		
-		}
-		else
-		{ // path not distinct. delete
-			delete path;
-		}
+		ret.Add(path);
+		// create deviations from current best
+		path->CreateDeviantPaths(contenders);		
 
 		if(onlyDistinct)
 		{
-			size_t nBestFactor = StaticData::Instance().GetNBestFactor();
+			const size_t nBestFactor = StaticData::Instance().GetNBestFactor();
 			if (nBestFactor > 0)
 				contenders.Prune(count * nBestFactor);
 		}
