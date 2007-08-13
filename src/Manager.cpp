@@ -291,21 +291,6 @@ void Manager::OutputHypoStack(int stack)
 		}
 	}
 }
-void getSurfacePhrase(std::vector<size_t>& tphrase,TrellisPath const& path)
-{
-	tphrase.clear();
-	const std::vector<const Hypothesis *> &edges = path.GetEdges();
-	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
-		{
-			const Phrase &phrase = edges[currEdge]->GetCurrTargetPhrase();
-			for (size_t pos=0,size=phrase.GetSize() ; pos < size ; ++pos)
-				{
-					const Factor *factor = phrase.GetFactor(pos,0);
-					assert(factor);
-					tphrase.push_back(factor->GetId());
-				}
-		}
-}
 
 /**
  * After decoding, the hypotheses in the stacks and additional arcs
@@ -328,7 +313,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 
 	TrellisPathCollection contenders;
 
-	set<std::vector<size_t> > distinctHyps;
+	set<Phrase> distinctHyps;
 
 	// add all pure paths
 	vector<const Hypothesis*>::const_iterator iterBestHypo;
@@ -348,11 +333,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 		bool addPath = true;
 		if(onlyDistinct)
 		{
-			// TODO - not entirely correct.
-			// output phrase can't be assumed to only contain factor 0.
-			// have to look in StaticData.GetOutputFactorOrder() to find out what output factors should be
-			std::vector<size_t> tgtPhrase;
-			getSurfacePhrase(tgtPhrase,*path);
+			Phrase tgtPhrase = path->GetSurfacePhrase();
 			addPath = distinctHyps.insert(tgtPhrase).second;
 		}
 		

@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "TrellisPath.h"
 #include "TrellisPathCollection.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -116,6 +117,43 @@ void TrellisPath::CreateDeviantPaths(TrellisPathCollection &pathColl) const
 			} // for (iterArc...
 		} // for (currEdge = 0 ...
 	}
+}
+
+Phrase TrellisPath::GetTargetPhrase() const
+{
+	Phrase targetPhrase(Output);
+
+	int numHypo = (int) m_path.size();
+	for (int node = numHypo - 2 ; node >= 0 ; --node)
+	{ // don't do the empty hypo - waste of time and decode step id is invalid
+		const Hypothesis &hypo = *m_path[node];
+		const Phrase &currTargetPhrase = hypo.GetCurrTargetPhrase();
+
+		targetPhrase.Append(currTargetPhrase);
+	}
+
+	return targetPhrase;
+}
+
+Phrase TrellisPath::GetSurfacePhrase() const
+{
+	const std::vector<FactorType> &outputFactor = StaticData::Instance().GetOutputFactorOrder();
+	Phrase targetPhrase = GetTargetPhrase()
+				,ret(Output);
+
+	for (size_t pos = 0 ; pos < targetPhrase.GetSize() ; ++pos)
+	{
+		Word &newWord = ret.AddWord();
+		for (size_t i = 0 ; i < outputFactor.size() ; i++)
+		{
+			FactorType factorType = outputFactor[i];
+			const Factor *factor = ret.GetFactor(pos, factorType);
+			assert(factor);
+			newWord[factorType] = factor;
+		}
+	}
+
+	return ret;
 }
 
 TO_STRING_BODY(TrellisPath);
