@@ -1,7 +1,9 @@
+
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
-#include <unistd.h>
+//#include <unistd.h>
+#include <algorithm>
 
 #include "_SuffixArraySearchApplicationBase.h"
 
@@ -9,8 +11,12 @@
 #include <iostream>
 #include <set>
 
+#include "XGetopt.h"
+
 typedef std::set<TextLenType> SentIdSet;
 typedef std::map<std::string, SentIdSet> PhraseSetMap;
+
+#undef min
 
 // constants
 const size_t MINIMUM_SIZE_TO_KEEP = 10000;     // reduce this to improve memory usage,
@@ -100,8 +106,9 @@ PTEntry::PTEntry(const std::string& str, int index) :
       *fp++=*i++;
     }
     *fp++=0;
-    char *x;
-    this->pfe = strtof(f, &x);
+    
+		this->pfe = atof(f);
+
     // std::cerr << "L: " << f_phrase << " ::: " << e_phrase << " ::: " << scores << " ::: " << pfe << std::endl;
     // std::cerr << "X: " << extra << "\n"; 
 }
