@@ -2,7 +2,6 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
-//#include <unistd.h>
 #include <algorithm>
 
 #include "_SuffixArraySearchApplicationBase.h"
@@ -11,7 +10,11 @@
 #include <iostream>
 #include <set>
 
+#ifdef WIN32
 #include "XGetopt.h"
+#else
+#include <unistd.h>
+#endif
 
 typedef std::set<TextLenType> SentIdSet;
 typedef std::map<std::string, SentIdSet> PhraseSetMap;
