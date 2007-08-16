@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 //variables that help is keeping the partial and total scores of each generation list combination 
 float outputStringScore, sumUp =0;
+const Word outputStringWord;
 
 DecodeStepGeneration::DecodeStepGeneration(GenerationDictionary* dict, const DecodeStep* prev)
 : DecodeStep(dict, prev)
@@ -55,6 +56,8 @@ TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption
 // helpers
 typedef pair<Word, ScoreComponentCollection> WordPair;
 typedef list< WordPair > WordList;
+//typedef pair<Word, ScoreComponentCollection> GenWordPair;
+
 // 1st = word
 // 2nd = score
 typedef list< WordPair >::const_iterator WordListIterator;
@@ -81,17 +84,16 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 //This class helps sort the generation list 
  class SortGenList 
   {
-	  size_t m_targetLength;
-	  size_t targetLength;
+	  const ScoreComponentCollection *m_score;
 	  const Word *m_outputWord;
 	  float m_totalScore;
 	  public:
-		SortGenList (const Word *outputWord, float totalScore)
+		SortGenList (const Word *outputWord, float totalScore, const ScoreComponentCollection *score)
 		{
-				
+			m_score = score;	
 			m_totalScore = totalScore;
 			m_outputWord = outputWord;
-			m_targetLength = targetLength;
+			
 
 		}
 		float getScore()
@@ -103,9 +105,9 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 		{
 		  return *m_outputWord;
 		}
-		size_t getTargetLength()
+		const ScoreComponentCollection getScoreColl()
 		{
-			return m_targetLength;
+			return *m_score;
 		}
     
  };
@@ -236,20 +238,25 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
 			  float totalScore = score.InnerProduct(StaticData::Instance().GetAllWeights());
 
               // enter into word list generated factor(s) and its(their) score(s)
-              wordList.push_back(WordPair(outputWord, score));
+              //wordList.push_back(WordPair(outputWord, score));
 			  			  
 			  //Creates a list of possible factors for a word together with their score and stores them in genList 			   
-			  SortGenList list(&outputWord, totalScore);			  
+			  SortGenList list(&outputWord, totalScore, &score);			  
 			  genList.push_back(list);  			 
 			  	
             }
-		  
+
+		            
+		   
 		  //Sort the list of factors according to descending order of scores before moving to the next word
 		  sortedGenList = b_sort(genList);
 
 		  //Select the top three from the sorted version
 		  best3 = topThree(sortedGenList);
-		  
+
+		  wordList.push_back(WordPair(best3[0].getOutputWord(), best3[0].getScoreColl()));
+
+		  /**
 		  //print sorted list for debug purposes
 		  vector<SortGenList>::iterator iter;
 		  for( iter = genList.begin(); iter != genList.end(); iter++ )
@@ -258,6 +265,7 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
 			  cout<< "my choices here" << endl;
 			  cout << list.getOutputWord() << endl;
 			  cout << list.getScore() << endl;
+			  cout << list.getScoreColl()<< endl;
 			  
 		  }
 
@@ -268,18 +276,22 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
 			  cout<< " so my best here is" << endl;
 			  cout << list.getOutputWord() << endl;
 			  cout << list.getScore() << endl;	
+			  cout << list.getScoreColl()<< endl;
 		  } 
-		  
-		  outputStringScore= best3[0].getScore();
-		  sumUp = sumUp + outputStringScore;
+		  **/
+
+
+		  //outputStringScore= best3[0].getScore();
+		  //sumUp = sumUp + outputStringScore;
           	  
 		  wordListVectorPos++; // done, next word
 		  		 	  		 
         }
   
-   //code's mine to here
+   //here
     }
-   cout<<" summing here"<<sumUp<<endl;
+  
+  
 
   // use generation list (wordList)
   // set up iterators (total number of expansions)
