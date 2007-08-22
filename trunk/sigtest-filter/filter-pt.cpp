@@ -90,7 +90,7 @@ PTEntry::PTEntry(const std::string& str, int index) :
     nextPos = str.find(SEPARATOR, pos);
     this->e_phrase = str.substr(pos,nextPos-pos); pos = nextPos + SEPARATOR.size();
     nextPos = str.rfind(SEPARATOR);
-    this->extra = str.substr(pos, nextPos-pos);
+    this->extra = str.substr(pos, ((nextPos > pos)?(nextPos-pos):0));
     this->scores = str.substr(nextPos + SEPARATOR.size(),std::string::npos);
     int c = 0;
     std::string::iterator i=scores.begin();
