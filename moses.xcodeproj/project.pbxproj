@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		037C639A0C8EBFB400584F2E /* DecodeGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 037C63980C8EBFB400584F2E /* DecodeGraph.cpp */; };
+		037C639B0C8EBFB400584F2E /* DecodeGraph.h in Headers */ = {isa = PBXBuildFile; fileRef = 037C63990C8EBFB400584F2E /* DecodeGraph.h */; };
 		0396E1A70C0B189200D95CFF /* HypothesisStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0396E1960C0B189200D95CFF /* HypothesisStack.cpp */; };
 		0396E1A80C0B189200D95CFF /* HypothesisStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 0396E1970C0B189200D95CFF /* HypothesisStack.h */; };
 		0396E1A90C0B189200D95CFF /* LexicalReorderingTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0396E1980C0B189200D95CFF /* LexicalReorderingTable.cpp */; };
@@ -151,6 +153,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		037C63980C8EBFB400584F2E /* DecodeGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeGraph.cpp; path = src/DecodeGraph.cpp; sourceTree = "<group>"; };
+		037C63990C8EBFB400584F2E /* DecodeGraph.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DecodeGraph.h; path = src/DecodeGraph.h; sourceTree = "<group>"; };
 		0396E1960C0B189200D95CFF /* HypothesisStack.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = HypothesisStack.cpp; path = src/HypothesisStack.cpp; sourceTree = "<group>"; };
 		0396E1970C0B189200D95CFF /* HypothesisStack.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = HypothesisStack.h; path = src/HypothesisStack.h; sourceTree = "<group>"; };
 		0396E1980C0B189200D95CFF /* LexicalReorderingTable.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReorderingTable.cpp; path = src/LexicalReorderingTable.cpp; sourceTree = "<group>"; };
@@ -320,6 +324,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				037C63980C8EBFB400584F2E /* DecodeGraph.cpp */,
+				037C63990C8EBFB400584F2E /* DecodeGraph.h */,
 				0396E1960C0B189200D95CFF /* HypothesisStack.cpp */,
 				0396E1970C0B189200D95CFF /* HypothesisStack.h */,
 				0396E1980C0B189200D95CFF /* LexicalReorderingTable.cpp */,
@@ -563,6 +569,7 @@
 				0396E1B40C0B189200D95CFF /* TrellisPathCollection.h in Headers */,
 				0396E1B50C0B189200D95CFF /* TrellisPathList.h in Headers */,
 				0396E1B70C0B189200D95CFF /* WordLattice.h in Headers */,
+				037C639B0C8EBFB400584F2E /* DecodeGraph.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -672,6 +679,7 @@
 				0396E1B10C0B189200D95CFF /* TrellisPath.cpp in Sources */,
 				0396E1B30C0B189200D95CFF /* TrellisPathCollection.cpp in Sources */,
 				0396E1B60C0B189200D95CFF /* WordLattice.cpp in Sources */,
+				037C639A0C8EBFB400584F2E /* DecodeGraph.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
