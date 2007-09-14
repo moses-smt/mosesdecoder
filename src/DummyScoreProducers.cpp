@@ -1,5 +1,6 @@
 // $Id$
 
+#include <cassert>
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
 #include "WordsRange.h"
@@ -21,15 +22,7 @@ std::string DistortionScoreProducer::GetScoreProducerDescription() const
 
 float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr) const
 {
-  if (prev.GetNumWordsCovered() == 0)
-  { // 1st hypothesis with translated phrase. NOT the seed hypo.
-    return - (float) curr.GetStartPos();
-  }
-  else
-  { // add distortion score of current translated phrase to
-    // distortions scores of all previous partial translations
-    return - (float) curr.CalcDistortion(prev);
-	}
+	return - (float) StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
 }
 
 WordPenaltyProducer::WordPenaltyProducer(ScoreIndexManager &scoreIndexManager)

@@ -1,5 +1,8 @@
+#include "StaticData.h"
 #include "WordLattice.h"
 #include "PCNTools.h"
+#include "Util.h"
+#include "FloydWarshall.h"
 
 WordLattice::WordLattice() {}
 
@@ -18,7 +21,6 @@ void WordLattice::Print(std::ostream& out) const {
 	}
 	out<<"\n\n";
 }
-													
 
 int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {
@@ -44,6 +46,44 @@ int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrde
 			next_nodes[i][j] = alt.second;
 		}
 	}
+	if (!cn.empty()) {
+		std::vector<std::vector<bool> > edges(0);
+		this->GetAsEdgeMatrix(edges);
+		floyd_warshall(edges,distances);
+
+		IFVERBOSE(2) {
+			TRACE_ERR("Shortest paths:\n");
+			for (size_t i=0; i<edges.size(); ++i) {
+				for (size_t j=0; j<edges.size(); ++j) {
+					int d = distances[i][j];
+					if (d > 99999) { d=-1; }
+					TRACE_ERR("\t" << d);
+				}
+				TRACE_ERR("\n");
+			}
+		}
+	}
 	return !cn.empty();
+}
+
+void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const
+{
+  edges.resize(data.size(),std::vector<bool>(data.size(), false));
+  for (size_t i=0;i<data.size();++i) {
+    for (size_t j=0;j<data[i].size(); ++j) {
+      edges[i][i+next_nodes[i][j]] = true;
+    }
+  }
+}
+
+int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const
+{
+  if (prev.GetStartPos() == NOT_FOUND) {
+    return distances[0][current.GetStartPos()];
+  } else if (prev.GetEndPos() > current.GetStartPos()) {
+    return distances[current.GetStartPos()][prev.GetEndPos()] + 1;
+  } else {
+    return distances[prev.GetEndPos()][current.GetStartPos()] - 1;
+  }
 }
 

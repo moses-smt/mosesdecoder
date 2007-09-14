@@ -8,12 +8,22 @@
 class WordLattice: public ConfusionNet {
 private:
 	std::vector<std::vector<size_t> > next_nodes;
+	std::vector<std::vector<int> > distances;
 		 
 public:
 	WordLattice();
-	size_t GetColumnIncrement(size_t i, size_t j) const;
+	size_t GetColumnIncrement(size_t ic, size_t j) const;
 	void Print(std::ostream&) const;
+	/** Get shortest path between two nodes
+	 */
+	virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
+	
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+
+	/** Convert internal representation into an edge matrix
+	 * @note edges[1][2] means there is an edge from 1 to 2
+	 */
+	void GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const;
 };
 
 #endif
