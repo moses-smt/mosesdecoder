@@ -55,6 +55,8 @@ public:
 	{
 		m_translationId = translationId;
 	}
+	//! returns the number of words moved
+	virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
 	//! number of words in this sentence/confusion network
 	virtual size_t GetSize() const =0;
 

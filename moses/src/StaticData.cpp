@@ -795,6 +795,7 @@ void StaticData::CleanUpAfterSentenceProcessing() const
     binary format is used) */
 void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) const
 {
+  m_input = &in;
   for(size_t i=0;i<m_phraseDictionary.size();++i) {
 	m_phraseDictionary[i]->InitializeForInput(in);
   }

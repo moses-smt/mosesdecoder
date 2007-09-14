@@ -56,6 +56,7 @@ sub get_localized_moses_ini
   my ($moses_ini, $data_dir) = @_;
   my $LM_PATH = "$data_dir/lm";
   my $MODEL_PATH = "$data_dir/models";
+  use Cwd qw/ abs_path /; use File::Basename; my $TEST_PATH = dirname(abs_path($moses_ini));
   my $local_moses_ini = new File::Temp( UNLINK => 0, SUFFIX => '.ini' );
 
   open MI, "<$moses_ini" or die "Couldn't read $moses_ini";
@@ -63,6 +64,7 @@ sub get_localized_moses_ini
   while (my $l = <MI>) {
 	$l =~ s/\$\{LM_PATH\}/$LM_PATH/g;
 	$l =~ s/\$\{MODEL_PATH\}/$MODEL_PATH/g;
+	$l =~ s/\$\{TEST_PATH\}/$TEST_PATH/g;
 	print $local_moses_ini $l;
   }
   close MO;

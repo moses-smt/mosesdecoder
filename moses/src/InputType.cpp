@@ -20,6 +20,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <cstdlib>
+
 #include "InputType.h"
 
 InputType::InputType(long translationId) : m_translationId(translationId) {}
@@ -31,3 +33,16 @@ std::ostream& operator<<(std::ostream& out,InputType const& x)
 {
 	x.Print(out); return out;
 }
+
+// default implementation is one column equals one word
+int InputType::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const
+{
+  int dist = 0;
+	if (prev.GetNumWordsCovered() == 0) {
+	  dist = current.GetStartPos();
+	} else {
+	  dist = (int)prev.GetEndPos() - (int)current.GetStartPos() + 1 ;
+	}
+	return abs(dist);
+}
+

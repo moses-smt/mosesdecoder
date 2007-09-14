@@ -118,6 +118,7 @@ protected:
 	mutable std::map<Phrase, TranslationOptionList> m_transOptCache;
 
   float m_mbrScale; //! Scaling factor for computing marginal probability of candidate translation
+	mutable const InputType* m_input;  //! holds reference to current sentence
 	//! constructor. only the 1 static variable can be created
 	StaticData();
 
@@ -325,6 +326,7 @@ public:
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	InputTypeEnum GetInputType() const {return m_inputType;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
+	const InputType* GetInput() const { return m_input; }
 	void InitializeBeforeSentenceProcessing(InputType const&) const;
 	void CleanUpAfterSentenceProcessing() const;
 	SentenceStats& GetSentenceStats() const
