@@ -156,8 +156,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	// if there are reordering limits, make sure it is not violated
 	// the coverage bitmap is handy here (and the position of the first gap)
 	const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
-	const size_t hypoWordCount		= hypoBitmap.GetNumWordsCovered()
-							, hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
+	const size_t	hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
 							, sourceSize			= m_source.GetSize();
 	
 	// MAIN LOOP. go through each possible hypo
@@ -169,38 +168,24 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
-			// no gap so far => don't skip more than allowed limit
-			if (hypoFirstGapPos == hypoWordCount)
-				{
-					if (startPos == hypoWordCount
-							|| (startPos > hypoWordCount 
-									&& endPos <= hypoWordCount + maxDistortion)
-					)
-				{
-					ExpandAllHypotheses(hypothesis
-												,m_possibleTranslations->GetTranslationOptionList(WordsRange(startPos, endPos)));
-				}
+			// check for overlap
+		  WordsRange extRange(startPos, endPos);
+			if (hypoBitmap.Overlap(extRange)) { continue; }
+
+			bool leftMostEdge = (hypoFirstGapPos == startPos);
+			
+			// any length extension is okay if starting at left-most edge
+			if (leftMostEdge)
+			{
+				ExpandAllHypotheses(hypothesis
+							,m_possibleTranslations->GetTranslationOptionList(extRange));
 			}
-			// filling in gap => just check for overlap
-			else if (startPos < hypoWordCount)
-				{
-					if (startPos >= hypoFirstGapPos
-						&& !hypoBitmap.Overlap(WordsRange(startPos, endPos)))
-					{
-						ExpandAllHypotheses(hypothesis
-													,m_possibleTranslations->GetTranslationOptionList(WordsRange(startPos, endPos)));
-					}
-				}
-			// ignoring, continuing forward => be limited by start of gap
-			else
-				{
-					if (endPos <= hypoFirstGapPos + maxDistortion
-						&& !hypoBitmap.Overlap(WordsRange(startPos, endPos)))
-					{
-						ExpandAllHypotheses(hypothesis
-													,m_possibleTranslations->GetTranslationOptionList(WordsRange(startPos, endPos)));
-					}
-				}
+			// starting somewhere other than left-most edge, use caution
+			else if (endPos <= hypoFirstGapPos + maxDistortion)
+			{
+				ExpandAllHypotheses(hypothesis
+							,m_possibleTranslations->GetTranslationOptionList(extRange));
+			}
 		}
 	}
 }
