@@ -181,10 +181,24 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 							,m_possibleTranslations->GetTranslationOptionList(extRange));
 			}
 			// starting somewhere other than left-most edge, use caution
-			else if (endPos <= hypoFirstGapPos + maxDistortion)
+			else
 			{
-				ExpandAllHypotheses(hypothesis
-							,m_possibleTranslations->GetTranslationOptionList(extRange));
+				// the basic idea is this: we would like to translate a phrase starting
+				// from a position further right than the left-most open gap. The
+				// distortion penalty for the following phrase will be computed relative
+				// to the ending position of the current extension, so we ask now what
+				// its maximum value will be (which will always be the value of the
+				// hypothesis starting at the left-most edge).  If this vlaue is than
+				// the distortion limit, we don't allow this extension to be made.
+				WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
+				int required_distortion =
+					m_source.ComputeDistortionDistance(extRange, bestNextExtension);
+
+//				std::cerr << "CD[" << startPos << "-" << endPos << "]: next distortion required = " << required_distortion << std::endl;
+				if (required_distortion <= maxDistortion) {
+					ExpandAllHypotheses(hypothesis
+								,m_possibleTranslations->GetTranslationOptionList(extRange));
+				}
 			}
 		}
 	}
