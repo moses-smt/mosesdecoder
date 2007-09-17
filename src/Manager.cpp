@@ -44,6 +44,7 @@ Manager::Manager(InputType const& source)
 ,m_hypoStackColl(source.GetSize() + 1)
 ,m_possibleTranslations(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
+,m_start(clock())
 {
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
@@ -63,6 +64,10 @@ Manager::~Manager()
   delete m_possibleTranslations;
 	StaticData::Instance().CleanUpAfterSentenceProcessing();      
 
+	clock_t end = clock();
+	float et = (end - m_start);
+	et /= (float)CLOCKS_PER_SEC;
+	VERBOSE(1, "Translation took " << et << " seconds" << endl);
 	VERBOSE(1, "Finished translating" << endl);
 }
 
