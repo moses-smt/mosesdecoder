@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include <list>
+#include <ctime>
 #include "InputType.h"
 #include "Hypothesis.h"
 #include "StaticData.h"
@@ -78,6 +79,7 @@ protected:
 	// no of elements = no of words in source + 1
 	TranslationOptionCollection *m_possibleTranslations; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
+	clock_t m_start; /**< starting time, used for logging */
 	
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
