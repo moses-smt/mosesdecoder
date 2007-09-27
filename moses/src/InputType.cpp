@@ -46,13 +46,8 @@ int InputType::ComputeDistortionDistance(const WordsRange& prev, const WordsRang
 	return abs(dist);
 }
 
-bool InputType::IsCoveragePossible(const WordsRange&) const
+bool InputType::CanIGetFromAToB(size_t start, size_t end) const
 {
-  return true;  // always possible for CNs and text
-}
-
-bool InputType::IsExtensionPossible(const WordsRange&, const WordsRange&) const
-{
-  return true;  // always possible for CNs and text
+  return true;
 }
 

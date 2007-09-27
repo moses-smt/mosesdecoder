@@ -18,10 +18,7 @@ public:
 	 */
 	virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
 	// is it possible to get from the edge of the previous word range to the current word range
-	virtual bool IsExtensionPossible(const WordsRange& prev, const WordsRange& current) const;
-	virtual bool IsCoveragePossible(const WordsRange& range) const;
-	
-	
+	virtual bool CanIGetFromAToB(size_t start, size_t end) const;
 	
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
 
