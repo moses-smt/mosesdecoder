@@ -168,9 +168,25 @@ public:
 		{
 			return (thisSize < compareSize) ? -1 : 1;
 		}
-
-    return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
+    		return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
 	}
+
+	inline size_t GetEdgeToTheLeftOf(size_t l) const
+	{
+		if (l == 0) return l;
+		--l;
+		while (!m_bitmap[l] && l) { --l; }
+		return l;
+	}
+
+	inline size_t GetEdgeToTheRightOf(size_t r) const
+	{
+		if (r+1 == m_size) return r;
+		++r;
+		while (!m_bitmap[r] && r < m_size) { ++r; }
+		return r;
+	}
+
 
 	//! TODO - ??? no idea
 	int GetFutureCosts(int lastPos) const ;

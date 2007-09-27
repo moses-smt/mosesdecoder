@@ -87,16 +87,9 @@ int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRa
   }
 }
 
-bool WordLattice::IsExtensionPossible(const WordsRange& prev, const WordsRange& current) const
+bool WordLattice::CanIGetFromAToB(size_t start, size_t end) const
 {
-  //std::cerr << "CD: IsExtPossible(" << prev << "," << current << ")= " << ComputeDistortionDistance(prev, current) << "\n";
-  return ComputeDistortionDistance(prev, current) < 100000;
+//  std::cerr << "CanIgetFromAToB(" << start << "," << end << ")=" << distances[start][end] << std::endl;
+  return distances[start][end] < 100000;
 }
 
-bool WordLattice::IsCoveragePossible(const WordsRange& range) const
-{
-  if (range.GetStartPos() == NOT_FOUND) { return true; }
-  //std::cerr << "IsCovPossibe(" << range << ")= " << distances[range.GetStartPos()][range.GetEndPos()+1] << "\n";
-  return distances[range.GetStartPos()][range.GetEndPos()+1] < 100000;
-}
-  
