@@ -104,7 +104,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 						float probValue = 1;
 						if (altProb != "") probValue = Scan<float>(altProb);
 						//Convert from prob to log-prob
-						float scoreValue = TransformScore(probValue);
+						float scoreValue = FloorScore(TransformScore(probValue));
 						XmlOption option(tagStart,tagEnd,altText,scoreValue);
 						m_xmlOptionsList.push_back(option);
 					}
