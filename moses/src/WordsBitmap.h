@@ -174,16 +174,14 @@ public:
 	inline size_t GetEdgeToTheLeftOf(size_t l) const
 	{
 		if (l == 0) return l;
-		--l;
-		while (!m_bitmap[l] && l) { --l; }
+		while (l && !m_bitmap[l-1]) { --l; }
 		return l;
 	}
 
 	inline size_t GetEdgeToTheRightOf(size_t r) const
 	{
 		if (r+1 == m_size) return r;
-		++r;
-		while (!m_bitmap[r] && r < m_size) { ++r; }
+		while (r < m_size && !m_bitmap[r+1]) { ++r; }
 		return r;
 	}
 

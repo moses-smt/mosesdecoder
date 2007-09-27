@@ -94,7 +94,7 @@ protected:
 	InputTypeEnum m_inputType;
 	size_t m_numInputScores;
 
-	size_t m_verboseLevel;
+	mutable size_t m_verboseLevel;
 	DistortionScoreProducer *m_distortionScoreProducer;
 	WordPenaltyProducer *m_wpProducer;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
@@ -276,6 +276,7 @@ public:
 	{
 		return m_verboseLevel;
 	}
+	void SetVerboseLevel(int x) const { m_verboseLevel = x; }
 	bool GetReportSegmentation() const
 	{
 		return m_reportSegmentation;
