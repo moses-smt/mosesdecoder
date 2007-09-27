@@ -178,13 +178,11 @@ void ConfusionNet::Print(std::ostream& out) const {
 
 Phrase ConfusionNet::GetSubString(const WordsRange&) const {
 	TRACE_ERR("ERROR: call to ConfusionNet::GetSubString\n");
-	abort();
 	return Phrase(Input);
 }
 
 std::string ConfusionNet::GetStringRep(const vector<FactorType> factorsToPrint) const{ //not well defined yet
 	TRACE_ERR("ERROR: call to ConfusionNet::GeStringRep\n");
-	abort();
 	return "";
 }
 #pragma warning(disable:4716)

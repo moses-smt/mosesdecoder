@@ -57,6 +57,13 @@ public:
 	}
 	//! returns the number of words moved
 	virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
+
+  //! is there a path covering [range] (lattice only, otherwise true)
+	virtual bool InputType::IsCoveragePossible(const WordsRange& range) const;
+
+  //! In a word lattice, you can't always get from node A to node B
+	virtual bool IsExtensionPossible(const WordsRange& prev, const WordsRange& current) const;
+	
 	//! number of words in this sentence/confusion network
 	virtual size_t GetSize() const =0;
 
