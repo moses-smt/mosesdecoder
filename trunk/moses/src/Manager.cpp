@@ -170,6 +170,14 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
     size_t maxSize = sourceSize - startPos;
     size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
     maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+		if (isWordLattice) {
+			// first question: is there a path from the closest translated word to the left
+			// of the hypothesized extension to the start of the hypothesized extension?
+			size_t closestLeft = hypoBitmap.GetEdgeToTheLeftOf(startPos);
+			if (closestLeft != startPos && closestLeft != 0 && !m_source.CanIGetFromAToB(closestLeft+1, startPos+1)) {
+			  continue;
+			}
+		}
 
 		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
@@ -183,8 +191,14 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 		  {
 			  continue;
 			}
+		  // TODO ask second question here
+			if (isWordLattice) {
+				size_t closestRight = hypoBitmap.GetEdgeToTheRightOf(endPos);
+				if (closestRight != endPos && closestRight != sourceSize && !m_source.CanIGetFromAToB(endPos, closestRight)) {
+				  continue;
+				}
+			}
 			
-
 			bool leftMostEdge = (hypoFirstGapPos == startPos);
 			
 			// any length extension is okay if starting at left-most edge
