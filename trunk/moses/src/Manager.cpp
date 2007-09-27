@@ -39,6 +39,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+#undef DEBUGLATTICE
+#ifdef DEBUGLATTICE
+static bool debug2 = false;
+#endif
+
 Manager::Manager(InputType const& source)
 :m_source(source)
 ,m_hypoStackColl(source.GetSize() + 1)
@@ -169,12 +174,21 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	{
     size_t maxSize = sourceSize - startPos;
     size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+#ifdef DEBUGLATTICE
+		const int INTEREST = 114;
+#endif
     maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
 		if (isWordLattice) {
 			// first question: is there a path from the closest translated word to the left
 			// of the hypothesized extension to the start of the hypothesized extension?
 			size_t closestLeft = hypoBitmap.GetEdgeToTheLeftOf(startPos);
 			if (closestLeft != startPos && closestLeft != 0 && !m_source.CanIGetFromAToB(closestLeft+1, startPos+1)) {
+#ifdef DEBUGLATTICE
+			  if (startPos == INTEREST) {
+				  std::cerr << hypothesis <<"\n";
+				  std::cerr << "Die0: " << (closestLeft) << " " << startPos << "\n";
+				}
+#endif
 			  continue;
 			}
 		}
@@ -183,18 +197,29 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 		{
 			// check for overlap
 		  WordsRange extRange(startPos, endPos);
+#ifdef DEBUGLATTICE
+	    bool debug = (startPos > (INTEREST-25) && hypoFirstGapPos > 0 && startPos <= INTEREST && endPos >=INTEREST && endPos < (INTEREST+150) && hypoFirstGapPos == INTEREST);
+	    debug2 = debug && (startPos==INTEREST && endPos >=INTEREST);
+			if (debug) { std::cerr << (startPos==INTEREST? "LOOK-->" : "") << "XP: " << hypothesis << "\next: " << extRange << "\n"; }
+#endif
 			if (hypoBitmap.Overlap(extRange) ||
 			      (isWordLattice && (!m_source.IsCoveragePossible(extRange) ||
 					                     !m_source.IsExtensionPossible(hypothesis.GetCurrSourceWordsRange(), extRange))
 					  )
 			   )
 		  {
+#ifdef DEBUGLATTICE
+			  if (debug) { std::cerr << "Die1\n"; }
+#endif
 			  continue;
 			}
 		  // TODO ask second question here
 			if (isWordLattice) {
 				size_t closestRight = hypoBitmap.GetEdgeToTheRightOf(endPos);
 				if (closestRight != endPos && closestRight != sourceSize && !m_source.CanIGetFromAToB(endPos, closestRight)) {
+#ifdef DEBUGLATTICE
+			    if (debug) { std::cerr << "Can't get to right edge\n"; }
+#endif
 				  continue;
 				}
 			}
@@ -204,8 +229,15 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			// any length extension is okay if starting at left-most edge
 			if (leftMostEdge)
 			{
+#ifdef DEBUGLATTICE
+			  size_t vl = StaticData::Instance().GetVerboseLevel();
+			  if (debug2) { std::cerr << "Ext!\n"; StaticData::Instance().SetVerboseLevel(4); }
+#endif
 				ExpandAllHypotheses(hypothesis
 							,m_possibleTranslations->GetTranslationOptionList(extRange));
+#ifdef DEBUGLATTICE
+			  StaticData::Instance().SetVerboseLevel(vl);
+#endif
 			}
 			// starting somewhere other than left-most edge, use caution
 			else
@@ -225,6 +257,10 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 					ExpandAllHypotheses(hypothesis
 								,m_possibleTranslations->GetTranslationOptionList(extRange));
 				}
+#ifdef DEBUGLATTICE
+				else
+			    if (debug) { std::cerr << "Distortion violation\n"; }
+#endif
 			}
 		}
 	}
@@ -255,6 +291,9 @@ void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const Translation
 void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
 	// create hypothesis and calculate all its scores
+#ifdef DEBUGLATTICE
+	if (debug2) { std::cerr << "::EXT: " << transOpt << "\n"; }
+#endif
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
 	newHypo->CalcScore(m_possibleTranslations->GetFutureScore());
 	
