@@ -21,7 +21,7 @@ void floyd_warshall(const std::vector<std::vector<bool> >& edges, std::vector<st
         dist[i][j] = 1;
       else
         dist[i][j] = MAX_DIST;
-      if (i == j) dist[i][j] = 0;
+      if (i == j) dist[i][j] = MAX_DIST;
     }
   }
 

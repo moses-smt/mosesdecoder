@@ -68,7 +68,7 @@ int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrde
 
 void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const
 {
-  edges.resize(data.size(),std::vector<bool>(data.size(), false));
+  edges.resize(data.size()+1,std::vector<bool>(data.size()+1, false));
   for (size_t i=0;i<data.size();++i) {
     for (size_t j=0;j<data[i].size(); ++j) {
       edges[i][i+next_nodes[i][j]] = true;
@@ -79,11 +79,24 @@ void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const
 int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const
 {
   if (prev.GetStartPos() == NOT_FOUND) {
-    return distances[0][current.GetStartPos()];
+    return distances[0][current.GetStartPos()+1] - 1;
   } else if (prev.GetEndPos() > current.GetStartPos()) {
-    return distances[current.GetStartPos()][prev.GetEndPos()] + 1;
+    return distances[current.GetStartPos()][prev.GetEndPos()+1];
   } else {
-    return distances[prev.GetEndPos()][current.GetStartPos()] - 1;
+    return distances[prev.GetEndPos()+1][current.GetStartPos()+1] - 1;
   }
 }
 
+bool WordLattice::IsExtensionPossible(const WordsRange& prev, const WordsRange& current) const
+{
+  //std::cerr << "CD: IsExtPossible(" << prev << "," << current << ")= " << ComputeDistortionDistance(prev, current) << "\n";
+  return ComputeDistortionDistance(prev, current) < 100000;
+}
+
+bool WordLattice::IsCoveragePossible(const WordsRange& range) const
+{
+  if (range.GetStartPos() == NOT_FOUND) { return true; }
+  //std::cerr << "IsCovPossibe(" << range << ")= " << distances[range.GetStartPos()][range.GetEndPos()+1] << "\n";
+  return distances[range.GetStartPos()][range.GetEndPos()+1] < 100000;
+}
+  

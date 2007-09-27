@@ -106,7 +106,6 @@ void Manager::ProcessSentence()
 		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
-
 		// go through each hypothesis on the stack and try to expand it
 		HypothesisStack::const_iterator iterHypo;
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
@@ -131,6 +130,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 {
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
+	bool isWordLattice = StaticData::Instance().GetInputType() == WordLatticeInput;
 
 	// no limit of reordering: only check for overlap
 	if (maxDistortion < 0)
@@ -175,7 +175,15 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 		{
 			// check for overlap
 		  WordsRange extRange(startPos, endPos);
-			if (hypoBitmap.Overlap(extRange)) { continue; }
+			if (hypoBitmap.Overlap(extRange) ||
+			      (isWordLattice && (!m_source.IsCoveragePossible(extRange) ||
+					                     !m_source.IsExtensionPossible(hypothesis.GetCurrSourceWordsRange(), extRange))
+					  )
+			   )
+		  {
+			  continue;
+			}
+			
 
 			bool leftMostEdge = (hypoFirstGapPos == startPos);
 			
@@ -199,7 +207,6 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 				int required_distortion =
 					m_source.ComputeDistortionDistance(extRange, bestNextExtension);
 
-//				std::cerr << "CD[" << startPos << "-" << endPos << "]: next distortion required = " << required_distortion << std::endl;
 				if (required_distortion <= maxDistortion) {
 					ExpandAllHypotheses(hypothesis
 								,m_possibleTranslations->GetTranslationOptionList(extRange));

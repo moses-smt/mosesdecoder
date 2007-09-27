@@ -386,6 +386,7 @@ const Hypothesis* Hypothesis::GetPrevHypo()const{
  */
 void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistortion*/, float /*weightWordPenalty*/) const
 {
+  if (!m_prevHypo) { TRACE_ERR(endl << "NULL hypo" << endl); return; }
   TRACE_ERR(endl << "creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ");
   int end = (int)(m_prevHypo->m_targetPhrase.GetSize()-1);
   int start = end-1;
