@@ -78,6 +78,7 @@ Parameter::Parameter()
  	AddParam("mbr-scale", "scaling factor to convert log linear score into a probability.");
  	AddParam("decoder-type", "MAP/MBR decoder (default=MAP=0)");
 	AddParam("use-persistent-cache", "cache translation options across sentences (default=true)");
+	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
 }
 
 Parameter::~Parameter()

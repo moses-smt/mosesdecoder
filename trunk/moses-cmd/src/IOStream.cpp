@@ -194,6 +194,24 @@ void IOStream::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, lo
 			}
 }													 
 
+void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
+{
+	if (hypo->GetPrevHypo())
+	{
+	  	OutputInput(map, hypo->GetPrevHypo());
+		map[hypo->GetCurrSourceWordsRange().GetStartPos()] = hypo->GetSourcePhrase();
+	}
+}
+
+void OutputInput(std::ostream& os, const Hypothesis* hypo)
+{
+	size_t len = StaticData::Instance().GetInput()->GetSize();
+	std::vector<const Phrase*> inp_phrases(len, 0);
+	OutputInput(inp_phrases, hypo);
+	for (size_t i=0; i<len; ++i)
+		if (inp_phrases[i]) os << *inp_phrases[i];
+}
+
 void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
 {
 	if (hypo != NULL)
@@ -205,6 +223,10 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 
 		if (!m_surpressSingleBestOutput)
 		{
+			if (StaticData::Instance().IsPathRecoveryEnabled()) {
+				OutputInput(cout, hypo);
+				cout << "||| ";
+			}
 			OutputSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors);
 			cout << endl;
 		}

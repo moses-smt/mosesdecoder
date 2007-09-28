@@ -41,7 +41,6 @@ libmoses_a_SOURCES = \
 	PhraseDictionaryNode.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
-	PhraseReference.cpp \
 	PrefixTreeMap.cpp \
 	ScoreComponentCollection.cpp \
 	ScoreIndexManager.cpp \

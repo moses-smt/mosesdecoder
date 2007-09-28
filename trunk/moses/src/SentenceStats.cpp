@@ -41,6 +41,6 @@ void SentenceStats::AddDeletedWords(const Hypothesis& hypo)
 	if(hypo.GetPrevHypo() != NULL && hypo.GetPrevHypo()->GetCurrSourceWordsRange().GetNumWordsCovered() > 0) AddDeletedWords(*hypo.GetPrevHypo());
 	if(hypo.GetCurrTargetWordsRange().GetNumWordsCovered() == 0)
 	{
-		m_deletedWords.push_back(PhraseReference(hypo.GetSourcePhrase(), hypo.GetCurrSourceWordsRange()));
+		m_deletedWords.push_back(hypo.GetSourcePhrase());
 	}
 }
