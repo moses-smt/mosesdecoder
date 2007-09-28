@@ -156,9 +156,9 @@ public:
 		return m_currTargetWordsRange.GetEndPos() + 1;
 	}
 
-	inline const InputType &GetSourcePhrase() const
+	inline const Phrase* GetSourcePhrase() const
 	{
-		return m_sourceInput;
+		return m_sourcePhrase;
 	}
 
 	std::string GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const;

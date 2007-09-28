@@ -101,6 +101,14 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (m_inputType == 2) { s_it = "word lattice"; }
 	VERBOSE(2,"input type is: "<<s_it<<"\n");
 
+	if(m_parameter->GetParam("recover-input-path").size()) {
+	  m_recoverPath = Scan<bool>(m_parameter->GetParam("recover-input-path")[0]);
+		if (m_recoverPath && m_inputType == SentenceInput) {
+		  TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
+			m_recoverPath = false;
+		}
+	}
+
 	// factor delimiter
 	if (m_parameter->GetParam("factor-delimiter").size() > 0) {
 		m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
