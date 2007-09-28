@@ -72,7 +72,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	: m_prevHypo(&prevHypo)
 	, m_transOpt(&transOpt)
 	, m_targetPhrase(transOpt.GetTargetPhrase())
-	, m_sourcePhrase(0)
+	, m_sourcePhrase(transOpt.GetSourcePhrase())
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_sourceInput						(prevHypo.m_sourceInput)
 	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
@@ -403,7 +403,8 @@ void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistorti
   }
   TRACE_ERR( ")"<<endl);
 	TRACE_ERR( "\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
-	TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "<< source.GetSubString(m_currSourceWordsRange)  <<endl);
+	TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "
+	  << *m_sourcePhrase <<endl);
 	TRACE_ERR( "\ttranslated as: "<<m_targetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
 	if (m_wordDeleted) TRACE_ERR( "\tword deleted"<<endl); 
   //	TRACE_ERR( "\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
@@ -475,6 +476,8 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 std::string Hypothesis::GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const 
 {
 	if (!m_prevHypo) { return ""; }
+	return m_sourcePhrase->GetStringRep(factorsToPrint);
+#if 0
 	if(m_sourcePhrase) 
 	{
 		return m_sourcePhrase->GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
@@ -483,6 +486,7 @@ std::string Hypothesis::GetSourcePhraseStringRep(const vector<FactorType> factor
 	{ 
 		return m_sourceInput.GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
 	}	
+#endif
 }
 std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const 
 {
