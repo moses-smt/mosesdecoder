@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h" //FactorArray
 #include "InputType.h"
 #include "Util.h" //Join()
-#include "PhraseReference.h"
 
 struct RecombinationInfo
 {
@@ -74,7 +73,7 @@ class SentenceStats
 		size_t GetTotalSourceWords() const {return m_totalSourceWords;}
 		size_t GetNumWordsDeleted() const {return m_deletedWords.size();}
 		size_t GetNumWordsInserted() const {return m_insertedWords.size();}
-		const std::vector<PhraseReference>& GetDeletedWords() const {return m_deletedWords;}
+		const std::vector<const Phrase*>& GetDeletedWords() const {return m_deletedWords;}
 		const std::vector<std::string>& GetInsertedWords() const {return m_insertedWords;}
 		
 		void AddRecombination(const Hypothesis& worseHypo, const Hypothesis& betterHypo)
@@ -99,7 +98,7 @@ class SentenceStats
 	
 		//words
 		size_t m_totalSourceWords;
-		std::vector<PhraseReference> m_deletedWords; //count deleted words/phrases in the final hypothesis
+		std::vector<const Phrase*> m_deletedWords; //count deleted words/phrases in the final hypothesis
 		std::vector<std::string> m_insertedWords; //count inserted words in the final hypothesis
 };
 

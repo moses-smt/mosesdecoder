@@ -428,7 +428,7 @@ void Manager::CalcDecoderStatistics() const
 		   	string buff;
 		  	string buff2;
 		   	TRACE_ERR( "Source and Target Units:"
-		 							<< hypo->GetSourcePhrase());
+		 							<< *StaticData::Instance().GetInput());
 				buff2.insert(0,"] ");
 				buff2.insert(0,(hypo->GetCurrTargetPhrase()).ToString());
 				buff2.insert(0,":");

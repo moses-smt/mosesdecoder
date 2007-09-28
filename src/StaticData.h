@@ -90,6 +90,7 @@ protected:
 	bool m_wordDeletionEnabled;
 
 	bool m_sourceStartPosMattersForRecombination;
+	bool m_recoverPath;
 
 	InputTypeEnum m_inputType;
 	size_t m_numInputScores;
@@ -229,6 +230,10 @@ public:
 	size_t GetMaxHypoStackSize() const
 	{
 		return m_maxHypoStackSize;
+	}
+	size_t IsPathRecoveryEnabled() const
+	{
+		return m_recoverPath;
 	}
 	int GetMaxDistortion() const
 	{
