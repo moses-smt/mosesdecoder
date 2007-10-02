@@ -30,9 +30,11 @@ vector<string> tokenize( char input[] ) {
   return token;
 }
 
-WORD_ID Vocabulary::storeIfNew( WORD word ) {
-  if( lookup.find( word ) != lookup.end() )
-    return lookup[ word ];
+WORD_ID Vocabulary::storeIfNew( const WORD& word ) {
+  map<WORD, WORD_ID>::iterator i = lookup.find( word );
+  
+  if( i != lookup.end() )
+    return i->second;
 
   WORD_ID id = vocab.size();
   vocab.push_back( word );
@@ -40,15 +42,17 @@ WORD_ID Vocabulary::storeIfNew( WORD word ) {
   return id;  
 }
 
-WORD_ID Vocabulary::getWordID( WORD word ) {
-  if( lookup.find( word ) == lookup.end() )
+WORD_ID Vocabulary::getWordID( const WORD& word ) {
+  map<WORD, WORD_ID>::iterator i = lookup.find( word );
+  if( i == lookup.end() )
     return 0;
-  return lookup[ word ];
+  return i->second;
 }
 
-PHRASE_ID PhraseTable::storeIfNew( PHRASE phrase ) {
-  if( lookup.find( phrase ) != lookup.end() )
-    return lookup[ phrase ];
+PHRASE_ID PhraseTable::storeIfNew( const PHRASE& phrase ) {
+  map< PHRASE, PHRASE_ID >::iterator i = lookup.find( phrase );
+  if( i != lookup.end() )
+    return i->second;
 
   PHRASE_ID id  = phraseTable.size();
   phraseTable.push_back( phrase );
@@ -56,10 +60,11 @@ PHRASE_ID PhraseTable::storeIfNew( PHRASE phrase ) {
   return id;
 }
 
-PHRASE_ID PhraseTable::getPhraseID( PHRASE phrase ) {
-  if( lookup.find( phrase ) == lookup.end() )
+PHRASE_ID PhraseTable::getPhraseID( const PHRASE& phrase ) {
+  map< PHRASE, PHRASE_ID >::iterator i = lookup.find( phrase );
+  if( i == lookup.end() )
     return 0;
-  return lookup[ phrase ];
+  return i->second;
 }
 
 void PhraseTable::clear() {
@@ -72,7 +77,7 @@ void DTable::init() {
     dtable[i] = -abs( i );
 }
 
-void DTable::load( string fileName ) {
+void DTable::load( const string& fileName ) {
   ifstream inFile;
   inFile.open(fileName.c_str());
   istream *inFileP = &inFile;
@@ -101,3 +106,4 @@ double DTable::get( int distortion ) {
     return log( 0.00001 );
   return dtable[ distortion ];
 }
+

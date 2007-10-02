@@ -23,8 +23,8 @@ class Vocabulary {
  public:
   map<WORD, WORD_ID>  lookup;
   vector< WORD > vocab;
-  WORD_ID storeIfNew( WORD );
-  WORD_ID getWordID( WORD );
+  WORD_ID storeIfNew( const WORD& );
+  WORD_ID getWordID( const WORD& );
   inline WORD &getWord( WORD_ID id ) { return vocab[ id ]; }
 };
 
@@ -35,8 +35,8 @@ class PhraseTable {
  public:
   map< PHRASE, PHRASE_ID > lookup;
   vector< PHRASE > phraseTable;
-  PHRASE_ID storeIfNew( PHRASE );
-  PHRASE_ID getPhraseID( PHRASE );
+  PHRASE_ID storeIfNew( const PHRASE& );
+  PHRASE_ID getPhraseID( const PHRASE& );
   void clear();
   inline PHRASE &getPhrase( const PHRASE_ID id ) { return phraseTable[ id ]; }
 };
@@ -53,7 +53,7 @@ class DTable {
  public:
   map< int, double > dtable;
   void init();
-  void load( string );
+  void load( const string& );
   double get( int );
 };
 
