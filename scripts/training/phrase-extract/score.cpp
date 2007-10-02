@@ -26,7 +26,7 @@ public:
   
   void create( char*, int );
   void clear();
-  bool equals( PhraseAlignment );
+  bool equals( const PhraseAlignment& );
 };
 
 class LexicalTable {
@@ -340,7 +340,8 @@ void PhraseAlignment::clear() {
   alignedToF.clear();
 }
 
-bool PhraseAlignment::equals( PhraseAlignment other ) {
+bool PhraseAlignment::equals( const PhraseAlignment& other ) {
+  if (this == &other) return true;
   if (other.english != english) return false;
   if (other.foreign != foreign) return false;
   PHRASE phraseE = phraseTableE.getPhrase( english );
