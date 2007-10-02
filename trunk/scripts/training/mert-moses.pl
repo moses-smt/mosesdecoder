@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w 
 
 # $Id$
 # Usage:
@@ -46,7 +46,7 @@
 my $default_triples = {
     # these two basic models exist even if not specified, they are
     # not associated with any model file
-    "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
+    #"w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
 };
 
 my $additional_triples = {
@@ -67,6 +67,7 @@ my $additional_triples = {
 	      [ 0.3, 0.0, 0.5 ],
 	      [ 0.2, 0.0, 0.5 ],
 	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
+	"w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
 };
 
 # moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
@@ -588,10 +589,14 @@ while(1) {
   # walk in order of @order_of_lambdas_from_decoder and collect the min,max,val
   my %visited = ();
   foreach my $name (@order_of_lambdas_from_decoder) {
+	print $name .'\n';
     next if $visited{$name};
     $visited{$name} = 1;
-    die "The decoder produced also some '$name' scores, but we do not know the ranges for them, no way to optimize them\n"
-      if !defined $used_triples{$name};
+	if (!defined $used_triples{$name})
+	{
+    	die "The decoder produced also some '$name' scores, but we do not know the ranges for them, no way to optimize them\n";
+	}
+      
 		my $count = 0;
     foreach my $feature (@{$used_triples{$name}}) {
 			$count++;
@@ -763,7 +768,9 @@ sub run_decoder {
     print "decoder_config = $decoder_config\n";
 
     # run the decoder
+	my $nBest_cmd = "-n-best-size $___N_BEST_LIST_SIZE";
     my $decoder_cmd;
+
     if (defined $___JOBS) {
       $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -qsub-prefix mert$run -queue-parameters \"$queue_flags\" $parameters $decoder_config -n-best-file $filename -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
@@ -1058,14 +1065,21 @@ sub scan_config {
 	# distance-based distortion
   if ($___ASYNC == 1)
   {
-		print STDERR "ASYNC distortion";
-		my @my_array;
-    for(my $i=0 ; $i < $defined_steps{"T"} ; $i++) 
-		{
-	    push @my_array, [ 1.0, 0.0, 2.0 ];
-		}
+		print STDERR "ASYNC distortion & word penalty";
 
+		my @my_array;
+	    for(my $i=0 ; $i < $defined_steps{"T"} ; $i++) 
+		{
+		    push @my_array, [ 1.0, 0.0, 2.0 ];
+		}
 		push @{$used_triples{"d"}}, @my_array;
+
+		@my_array = ();
+	    for(my $i=0 ; $i < $defined_steps{"T"} ; $i++) 
+		{
+		    push @my_array, [ 0.5, -1.0, 1.0 ];
+		}
+		push @{$used_triples{"w"}}, @my_array;
 
 		# debug print
 		print "distortion:";
