@@ -46,7 +46,7 @@
 my $default_triples = {
     # these two basic models exist even if not specified, they are
     # not associated with any model file
-    #"w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
+    "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
 };
 
 my $additional_triples = {
@@ -67,7 +67,6 @@ my $additional_triples = {
 	      [ 0.3, 0.0, 0.5 ],
 	      [ 0.2, 0.0, 0.5 ],
 	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
-	"w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
 };
 
 # moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
@@ -189,6 +188,10 @@ if (scalar @ARGV == 4) {
   $___CONFIG = shift;
 }
 
+if ($___ASYNC) {
+	delete $default_triples->{"w"};
+	$additional_triples->{"w"} = [ [ 0.0, -1.0, 1.0 ] ];
+}
 
 print STDERR "After default: $queue_flags\n";
 
