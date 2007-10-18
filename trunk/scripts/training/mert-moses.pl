@@ -141,6 +141,9 @@ my $old_sge = 0; # assume sge<6.0
 my $___CONFIG_BAK = undef; # backup pathname to startup ini file
 my $obo_scorenbest = undef; # set to pathname to a Ondrej Bojar's scorer (not included
                             # in scripts distribution)
+my $___ACTIVATE_FEATURES = undef; # comma-separated list of features to work on 
+                                  # if undef work on all features
+                                  # (others are fixed to the starting values)
 
 use strict;
 use Getopt::Long;
@@ -176,6 +179,7 @@ GetOptions(
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
   "obo-scorenbest=s" => \$obo_scorenbest, # see above
   "async=i" => \$___ASYNC, #whether script to be used with async decoder
+  "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated list of features to work on (others are fixed to the starting values)
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -230,6 +234,9 @@ Options:
   --inputtype=[0|1] ... Handle different input types (0 for text, 1 for confusion network, default is 0)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
+  --activate-features=STRING  ... comma-separated list of features to work on
+                                  ( if undef work on all features)
+                                  # (others are fixed to the starting values)
 ";
   exit 1;
 }
@@ -263,7 +270,9 @@ $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
   if !defined $moses_parallel_cmd;
 
 $cmertdir = "$SCRIPTS_ROOTDIR/training/cmert-0.5" if !defined $cmertdir;
-my $cmertcmd="$cmertdir/mert";
+my $cmertcmd;
+if ($___ACTIVATE_FEATURES){ $cmertcmd="$cmertdir/enhanced-mert -activate $___ACTIVATE_FEATURES"; }
+else{ $cmertcmd="$cmertdir/mert"; }
 
 $SCORENBESTCMD = "$cmertdir/score-nbest.py" if ! defined $SCORENBESTCMD;
 
@@ -460,7 +469,8 @@ else{
 }
 
 my $PARAMETERS;
-$PARAMETERS = $___DECODER_FLAGS . " -config $___CONFIG -inputtype $___INPUTTYPE";
+#$PARAMETERS = $___DECODER_FLAGS . " -config $___CONFIG -inputtype $___INPUTTYPE";
+$PARAMETERS = $___DECODER_FLAGS";
 
 my $devbleu = undef;
 my $bestpoint = undef;
@@ -775,7 +785,7 @@ sub run_decoder {
     my $decoder_cmd;
 
     if (defined $___JOBS) {
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -qsub-prefix mert$run -queue-parameters \"$queue_flags\" $parameters $decoder_config -n-best-file $filename -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-file $filename -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
       $decoder_cmd = "$___DECODER $parameters $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
     }
