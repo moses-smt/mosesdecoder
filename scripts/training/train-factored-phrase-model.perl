@@ -11,9 +11,8 @@ use Getopt::Long "GetOptions";
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
 
-my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_FILE,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,$_ALIGNMENT_FILE,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_INPUT_FACTOR_MAX,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER,@_PHRASE_TABLE,@_REORDERING_TABLE,@_GENERATION_TABLE,$_CONFIG,$_DONT_ZIP,@_GENERATION_TYPE);
+my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_FILE,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,$_ALIGNMENT_FILE,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_GIZA_EXTENSION,$_REORDERING,$_REORDERING_SMOOTH,$_INPUT_FACTOR_MAX,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER,@_PHRASE_TABLE,@_REORDERING_TABLE,@_GENERATION_TABLE,$_CONFIG,$_DONT_ZIP,$_HMM_ALIGN,@_GENERATION_TYPE);
 
-$SCRIPTS_ROOTDIR="/voxgate/ssi/HermesTools/mosesdecoder.release20070624/scripts";
 my $debug = 0; # debug this script, do not delete any files in debug mode
 my $nodebug = 1; # no debug this script, delete any files
 
@@ -30,6 +29,7 @@ $_HELP = 1
 		       'e=s' => \$_E,
 		       'giza-e2f=s' => \$_GIZA_E2F,
 		       'giza-f2e=s' => \$_GIZA_F2E,
+		       'giza-extension=s' => \$_GIZA_EXTENSION,
 		       'max-phrase-length=i' => \$_MAX_PHRASE_LENGTH,
 		       'lexical-file=s' => \$_LEXICAL_FILE,
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
@@ -44,6 +44,7 @@ $_HELP = 1
 		       'parallel' => \$_PARALLEL,
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
+		       'hmm-align' => \$_HMM_ALIGN,
 		       'debug' => \$debug,
 		       'nodebug' => \$nodebug,
 		       'dont-zip' => \$_DONT_ZIP,
@@ -122,6 +123,10 @@ my $___CORPUS_DIR  = $___ROOT_DIR."/corpus";
 $___CORPUS_DIR = $_CORPUS_DIR if $_CORPUS_DIR;
 die("use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1 && $_FIRST_STEP!=8);
 my $___CORPUS      = $_CORPUS;
+
+my $___GIZA_EXTENSION = 'A3.final';
+$___GIZA_EXTENSION = 'Ahmm.5' if $_HMM_ALIGN;
+$___GIZA_EXTENSION = $_GIZA_EXTENSION if $_GIZA_EXTENSION;
 
 my $___CORPUS_COMPRESSION = '';
 if ($_CORPUS_COMPRESSION) {
@@ -657,6 +662,14 @@ sub run_single_giza {
 	 CoocurrenceFile => "$dir/$f-$e.cooc",
 	 o => "$dir/$f-$e");
 
+    if ($_HMM_ALIGN) {
+    	$GizaDefaultOptions{m3} = 0;
+    	$GizaDefaultOptions{m4} = 0;
+	$GizaDefaultOptions{hmmiterations} = 5;
+	$GizaDefaultOptions{hmmdumpfrequency} = 5;
+	$GizaDefaultOptions{nodumps} = 0;
+    }
+
     if ($___GIZA_OPTION) {
 	foreach (split(/[ ,]+/,$___GIZA_OPTION)) {
 	    my ($option,$value) = split(/=/,$_,2);
@@ -673,17 +686,17 @@ sub run_single_giza {
     &run_single_snt2cooc($dir,$e,$f,$vcb_e,$vcb_f,$train) if $___PARTS == 1;
 
     print STDERR "(2.1b) running giza $f-$e @ ".`date`."$GIZA $GizaOptions\n";
-    if (-e "$dir/$f-$e.A3.final.gz") {
-      print "  $dir/$f-$e.A3.final.gz seems finished, reusing.\n";
+    if (-e "$dir/$f-$e.$___GIZA_EXTENSION.gz") {
+      print "  $dir/$f-$e.$___GIZA_EXTENSION.gz seems finished, reusing.\n";
       return;
     }
     print "$GIZA $GizaOptions\n";
     return if  $___ONLY_PRINT_GIZA;
     safesystem("$GIZA $GizaOptions");
-    die "Giza did not produce the output file $dir/$f-$e.A3.final. Is your corpus clean (reasonably-sized sentences)?"
-      if ! -e "$dir/$f-$e.A3.final";
-    safesystem("rm -f $dir/$f-$e.A3.final.gz") or die;
-    safesystem("gzip $dir/$f-$e.A3.final") or die;
+    die "Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
+      if ! -e "$dir/$f-$e.$___GIZA_EXTENSION";
+    safesystem("rm -f $dir/$f-$e.$___GIZA_EXTENSION.gz") or die;
+    safesystem("gzip $dir/$f-$e.$___GIZA_EXTENSION") or die;
 }
 
 sub run_single_snt2cooc {
@@ -701,26 +714,26 @@ sub word_align {
     print STDERR "(3) generate word alignment @ ".`date`;
     my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
     print STDERR "Combining forward and inverted alignment from files:\n";
-    print STDERR "  $___GIZA_F2E/$___F-$___E.A3.final.{bz2,gz}\n";
-    print STDERR "  $___GIZA_E2F/$___E-$___F.A3.final.{bz2,gz}\n";
+    print STDERR "  $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.{bz2,gz}\n";
+    print STDERR "  $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.{bz2,gz}\n";
 
     ### build arguments for giza2bal.pl
     my($__ALIGNMENT_CMD,$__ALIGNMENT_INV_CMD);
     
-    if (-e "$___GIZA_F2E/$___F-$___E.A3.final.bz2"){
-      $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.A3.final.bz2\"";
-    } elsif (-e "$___GIZA_F2E/$___F-$___E.A3.final.gz") {
-      $__ALIGNMENT_CMD="\"$ZCAT $___GIZA_F2E/$___F-$___E.A3.final.gz\"";
+    if (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2"){
+      $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2\"";
+    } elsif (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz") {
+      $__ALIGNMENT_CMD="\"$ZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz\"";
     } else {
-      die "Can't read $___GIZA_F2E/$___F-$___E.A3.final.{bz2,gz}\n";
+      die "Can't read $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.{bz2,gz}\n";
     }
   
-    if ( -e "$___GIZA_E2F/$___E-$___F.A3.final.bz2"){
-      $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.A3.final.bz2\"";
-    }elsif (-e "$___GIZA_E2F/$___E-$___F.A3.final.gz"){
-      $__ALIGNMENT_INV_CMD="\"$ZCAT $___GIZA_E2F/$___E-$___F.A3.final.gz\"";
+    if ( -e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2"){
+      $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2\"";
+    }elsif (-e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz"){
+      $__ALIGNMENT_INV_CMD="\"$ZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz\"";
     }else{
-      die "Can't read $___GIZA_E2F/$___E-$___F.A3.final.{bz2,gz}\n\n";
+      die "Can't read $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.{bz2,gz}\n\n";
     }
     
    safesystem("mkdir -p $___MODEL_DIR") or die;
