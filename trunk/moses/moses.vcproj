@@ -579,10 +579,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseReference.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\PrefixTreeMap.cpp"
 				>
 			</File>
