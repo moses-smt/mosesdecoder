@@ -77,7 +77,7 @@ protected:
 
 	std::vector < HypothesisStack > m_hypoStackColl; /**< stacks to store hypothesis (partial translations) */ 
 	// no of elements = no of words in source + 1
-	TranslationOptionCollection *m_possibleTranslations; /**< pre-computed list of translation options for the phrases in this sentence */
+	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	clock_t m_start; /**< starting time, used for logging */
 	
