@@ -47,7 +47,7 @@ static bool debug2 = false;
 Manager::Manager(InputType const& source)
 :m_source(source)
 ,m_hypoStackColl(source.GetSize() + 1)
-,m_possibleTranslations(source.CreateTranslationOptionCollection())
+,m_transOptColl(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 ,m_start(clock())
 {
@@ -66,7 +66,7 @@ Manager::Manager(InputType const& source)
 
 Manager::~Manager() 
 {
-  delete m_possibleTranslations;
+  delete m_transOptColl;
 	StaticData::Instance().CleanUpAfterSentenceProcessing();      
 
 	clock_t end = clock();
@@ -92,7 +92,7 @@ void Manager::ProcessSentence()
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
-	m_possibleTranslations->CreateTranslationOptions(decodeStepVL);
+	m_transOptColl->CreateTranslationOptions(decodeStepVL);
 
 	// initial seed hypothesis: nothing translated, no words produced
 	{
@@ -155,7 +155,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 				{
 					ExpandAllHypotheses(hypothesis
-												, m_possibleTranslations->GetTranslationOptionList(WordsRange(startPos, endPos)));
+												, m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos)));
 				}
 			}
 		}
@@ -234,7 +234,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			  if (debug2) { std::cerr << "Ext!\n"; StaticData::Instance().SetVerboseLevel(4); }
 #endif
 				ExpandAllHypotheses(hypothesis
-							,m_possibleTranslations->GetTranslationOptionList(extRange));
+							,m_transOptColl->GetTranslationOptionList(extRange));
 #ifdef DEBUGLATTICE
 			  StaticData::Instance().SetVerboseLevel(vl);
 #endif
@@ -255,7 +255,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 				if (required_distortion <= maxDistortion) {
 					ExpandAllHypotheses(hypothesis
-								,m_possibleTranslations->GetTranslationOptionList(extRange));
+								,m_transOptColl->GetTranslationOptionList(extRange));
 				}
 #ifdef DEBUGLATTICE
 				else
@@ -295,7 +295,7 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	if (debug2) { std::cerr << "::EXT: " << transOpt << "\n"; }
 #endif
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-	newHypo->CalcScore(m_possibleTranslations->GetFutureScore());
+	newHypo->CalcScore(m_transOptColl->GetFutureScore());
 	
 	// logging for the curious
 	IFVERBOSE(3) {
