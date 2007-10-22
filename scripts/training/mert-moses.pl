@@ -270,9 +270,7 @@ $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
   if !defined $moses_parallel_cmd;
 
 $cmertdir = "$SCRIPTS_ROOTDIR/training/cmert-0.5" if !defined $cmertdir;
-my $cmertcmd;
-if ($___ACTIVATE_FEATURES){ $cmertcmd="$cmertdir/enhanced-mert -activate $___ACTIVATE_FEATURES"; }
-else{ $cmertcmd="$cmertdir/mert"; }
+my $cmertcmd="$cmertdir/enhanced-mert";
 
 $SCORENBESTCMD = "$cmertdir/score-nbest.py" if ! defined $SCORENBESTCMD;
 
@@ -293,6 +291,8 @@ if (defined $obo_scorenbest) {
   die "Ondrej's scorenbest supports only closest ref length"
     if $___AVERAGE;
 }
+
+if ($___ACTIVATE_FEATURES){ $cmertcmd.=" -activate $___ACTIVATE_FEATURES"; }
 
 my $input_abs = ensure_full_path($___DEV_F);
 die "File not found: $___DEV_F (interpreted as $input_abs)."
@@ -646,9 +646,19 @@ while(1) {
   }
   die "Optimization failed, file weights.txt does not exist or is empty"
     if ! -s "weights.txt";
+
   # backup copies
+  safesystem ("\\cp -f feats.opt run$run.feats.opt ; gzip run$run.feats.opt") or die;
+  safesystem ("\\cp -f cands.opt run$run.cands.opt") or die;
   safesystem ("\\cp -f cmert.log run$run.cmert.log") or die;
   safesystem ("\\cp -f weights.txt run$run.weights.txt") or die; # this one is needed for restarts, too
+
+  if ($___ACTIVATE_FEATURES){
+    safesystem ("\\cp -f reduced_feats.opt run$run.reduced_feats.opt") or die;
+    safesystem ("\\cp -f reduced_init.opt run$run.reduced_init.opt") or die;
+    safesystem ("\\cp -f reduced_weights.txt run$run.reduced_weights.txt") or die;
+  }
+
   print "run $run end at ".`date`;
 
   $bestpoint = undef;
@@ -696,7 +706,7 @@ while(1) {
 print "Training finished at ".`date`;
 
 safesystem("\\cp -f init.opt run$run.init.opt") or die;
-safesystem ("\\cp -f cmert.log run$run.cmert.log") or die;
+safesystem("\\cp -f cmert.log run$run.cmert.log") or die;
 
 create_config($___CONFIG_BAK, "./moses.ini", \%used_triples, $run, $devbleu);
 
