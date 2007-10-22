@@ -525,7 +525,8 @@ while(1) {
   }   
 
   # To be sure that scoring script produses these fresh:
-  safesystem("\\rm -f cands.opt feats.opt") or die;
+  if (-e "cands.opt"){ safesystem("\\rm -f cands.opt") or die; }
+  if (-e "feats.opt"){ safesystem("\\rm -f feats.opt") or die; }
   
   # convert n-best list into a numberized format with error scores
 
@@ -683,8 +684,8 @@ while(1) {
   # backup copies
   safesystem ("\\mv -f feats.opt run$run.feats.opt; gzip run$run.feats.opt; ") or die;
   safesystem ("\\mv -f cands.opt run$run.cands.opt") or die;
-  safesystem ("\\mv -f cmert.log run$run.cmert.log") or die;
-  safesystem ("\\mv -f weights.txt run$run.weights.txt") or die; # this one is needed for restarts, too
+  safesystem ("\\cp -f cmert.log run$run.cmert.log") or die;
+  safesystem ("\\cp -f weights.txt run$run.weights.txt") or die; # this one is needed for restarts, too
 
   if ($___ACTIVATE_FEATURES){
     safesystem ("\\mv -f reduced_feats.opt run$run.reduced_feats.opt ; gzip run$run.reduced_feats.opt") or die;
