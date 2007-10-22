@@ -141,6 +141,8 @@ my $old_sge = 0; # assume sge<6.0
 my $___CONFIG_BAK = undef; # backup pathname to startup ini file
 my $obo_scorenbest = undef; # set to pathname to a Ondrej Bojar's scorer (not included
                             # in scripts distribution)
+my $efficient_scorenbest_flag = undef; # set to 1 to activate a time-efficient scoring of nbest lists
+                                  # (this method is more memory-consumptive)
 my $___ACTIVATE_FEATURES = undef; # comma-separated list of features to work on 
                                   # if undef work on all features
                                   # (others are fixed to the starting values)
@@ -178,6 +180,7 @@ GetOptions(
   "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
   "obo-scorenbest=s" => \$obo_scorenbest, # see above
+  "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
   "async=i" => \$___ASYNC, #whether script to be used with async decoder
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated list of features to work on (others are fixed to the starting values)
 ) or exit(1);
@@ -234,8 +237,10 @@ Options:
   --inputtype=[0|1] ... Handle different input types (0 for text, 1 for confusion network, default is 0)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
+  --efficient_scorenbest_flag ... activate a time-efficient scoring of nbest lists
+                                  (this method is more memory-consumptive)
   --activate-features=STRING  ... comma-separated list of features to work on
-                                  ( if undef work on all features)
+                                  (if undef work on all features)
                                   # (others are fixed to the starting values)
 ";
   exit 1;
@@ -475,6 +480,10 @@ $PARAMETERS = $___DECODER_FLAGS;
 my $devbleu = undef;
 my $bestpoint = undef;
 my $run=$start_run-1;
+
+my $oldallsorted = undef;
+my $allsorted = undef;
+
 my $prev_aggregate_nbl_size = -1;
 while(1) {
   $run++;
@@ -534,7 +543,7 @@ while(1) {
       safesystem("$cmd > $targetfile") or die "Failed to score nbestlist";
     }
     print STDERR "Combining all run*.feats\n";
-    my $cmd = "sort -n -t: -k1,1 run*.feats | cut -d: -f2- > feats.opt";
+    $cmd = "sort -n -t: -k1,1 run*.feats | cut -d: -f2- > feats.opt";
     safesystem($cmd) or die "Failed to create feats.opt";
 
     print STDERR "Creating cands.opt\n";
@@ -558,7 +567,25 @@ while(1) {
   
   } else {
     # traditional scoring code
-    my $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
+    my $cmd;
+    if (defined $efficient_scorenbest_flag){# time-efficient sorting method of nbest lists 
+       $oldallsorted="all.sorted.run".($run-1)."best$___N_BEST_LIST_SIZE";
+       $allsorted="all.sorted.run$run.best$___N_BEST_LIST_SIZE";
+
+       # Create an empty file for the first iteration
+       if ($run == 1){ safesystem("touch $oldallsorted"); };
+
+       if (-e $oldallsorted){ # the mert process works properly; the sorted file containing all previous nbests are already present
+          $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run$run.best$___N_BEST_LIST_SIZE.out.gz | sort -m -n -t \"|\" -k 1,1 $oldallsorted - > $allsorted ; rm $oldallsorted ; mv $allsorted $oldallsorted ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./"; 
+       }
+       else{ # the mert process did not work properly; the sorted file containing all previous nbests is no more present; create again
+          $cmd = "export PYTHONPATH=$pythonpath ; gzip -d run*.best$___N_BEST_LIST_SIZE.out.gz ; sort -m -n -t \"|\" -k 1,1 run*.best$___N_BEST_LIST_SIZE.out > $allsorted ; rm $oldallsorted ; gzip run*.best$___N_BEST_LIST_SIZE.out ; mv $allsorted $oldallsorted ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
+       }
+    }
+    else{ # traditional scoring code
+       $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
+    }
+
     if (defined $___JOBS) {
       safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=scorenbest.out -stderr=scorenbest.err") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
     } else {
@@ -647,16 +674,22 @@ while(1) {
   die "Optimization failed, file weights.txt does not exist or is empty"
     if ! -s "weights.txt";
 
+  #remove temporary (very large) files
+  if (defined $efficient_scorenbest_flag){
+    if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
+    if (defined $oldallsorted){ safesystem ("\\rm -f $oldallsorted") or die; };
+  }
+
   # backup copies
-  safesystem ("\\cp -f feats.opt run$run.feats.opt ; gzip run$run.feats.opt") or die;
-  safesystem ("\\cp -f cands.opt run$run.cands.opt") or die;
-  safesystem ("\\cp -f cmert.log run$run.cmert.log") or die;
-  safesystem ("\\cp -f weights.txt run$run.weights.txt") or die; # this one is needed for restarts, too
+  safesystem ("\\mv -f feats.opt run$run.feats.opt; gzip run$run.feats.opt; ") or die;
+  safesystem ("\\mv -f cands.opt run$run.cands.opt") or die;
+  safesystem ("\\mv -f cmert.log run$run.cmert.log") or die;
+  safesystem ("\\mv -f weights.txt run$run.weights.txt") or die; # this one is needed for restarts, too
 
   if ($___ACTIVATE_FEATURES){
-    safesystem ("\\cp -f reduced_feats.opt run$run.reduced_feats.opt") or die;
-    safesystem ("\\cp -f reduced_init.opt run$run.reduced_init.opt") or die;
-    safesystem ("\\cp -f reduced_weights.txt run$run.reduced_weights.txt") or die;
+    safesystem ("\\mv -f reduced_feats.opt run$run.reduced_feats.opt ; gzip run$run.reduced_feats.opt") or die;
+    safesystem ("\\mv -f reduced_init.opt run$run.reduced_init.opt") or die;
+    safesystem ("\\mv -f reduced_weights.txt run$run.reduced_weights.txt") or die;
   }
 
   print "run $run end at ".`date`;
