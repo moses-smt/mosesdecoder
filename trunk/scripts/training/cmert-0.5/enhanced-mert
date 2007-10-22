@@ -1,0 +1,69 @@
+#! /bin/sh
+
+PrintUsageAndDie(){
+echo "USAGE: enhanced-cmert.sh -d size [-active] [-help]"
+echo "       perform cmert on a subset of the feature scores"
+echo "       the ratios among not activated weights are not modified"
+echo "       Parameters (*=optional):"
+echo "       -d: the number of original features"
+echo "       -activate (*): comma-separated list of the indexes of active features"
+echo "                      if not set, all features are optimized"
+echo "       -help(*): print his help"
+echo
+echo "Example: see examples in the directory example which are created with the script readme.txt"
+exit
+}
+
+activeflag=0;
+help=0
+
+if [ $# -lt 1 ] ; then PrintUsageAndDie ; fi
+
+while [ $# -gt 0 ]
+do
+   case $1 in
+      -help) help=1 ; shift 1 ; ;;
+      -d) size=$2 ; shift 2 ; ;;
+      -activate) activeflag=1 ; activefields=$2 ; shift 2 ; ;;
+      *) shift $# ; ;;
+   esac
+done
+
+if [ $help == 1 ] ; then PrintUsageAndDie ; fi
+
+# call the basic mert command
+if [ $activeflag == 0 ] ; then
+$SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $size 2> cmert.log
+exit
+fi
+
+# else filter active fields, perform cmert and ...
+
+tmpdir=tmp$$
+mkdir -p $tmpdir
+
+for file in feats.opt init.opt ; do
+mv $file $tmpdir
+done
+
+cat $tmpdir/init.opt | tail -1 > $tmpdir/weight.opt
+
+cat $tmpdir/init.opt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/reduce-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields | perl -pe 's/^\S+ /1 /' > init.opt
+cat $tmpdir/feats.opt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/reduce-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields > feats.opt
+
+active=`cat init.opt | head -1 | awk '{print NF}'`
+ 
+#echo "$SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $active 2> cmert.log"
+$SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $active 2> cmert.log
+
+for file in feats.opt init.opt; do
+mv $file reduced_$file
+mv $tmpdir/$file $file
+done
+
+mv weights.txt reduced_weights.txt
+#echo "cat reduced_weights.txt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/extend-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields > weights.txt"
+cat reduced_weights.txt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/extend-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields > weights.txt
+rm -r $tmpdir
+
+exit
