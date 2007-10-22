@@ -569,7 +569,7 @@ while(1) {
     # traditional scoring code
     my $cmd;
     if (defined $efficient_scorenbest_flag){# time-efficient sorting method of nbest lists 
-       $oldallsorted="all.sorted.run".($run-1)."best$___N_BEST_LIST_SIZE";
+       $oldallsorted="all.sorted.run".($run-1).".best$___N_BEST_LIST_SIZE";
        $allsorted="all.sorted.run$run.best$___N_BEST_LIST_SIZE";
 
        # Create an empty file for the first iteration
