@@ -577,10 +577,10 @@ while(1) {
        if ($run == 1){ safesystem("touch $oldallsorted"); };
 
        if (-e $oldallsorted){ # the mert process works properly; the sorted file containing all previous nbests are already present
-          $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run$run.best$___N_BEST_LIST_SIZE.out.gz | sort -m -n -t \"|\" -k 1,1 $oldallsorted - > $allsorted ; rm $oldallsorted ; mv $allsorted $oldallsorted ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./"; 
+          $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run$run.best$___N_BEST_LIST_SIZE.out.gz | sort -m -n -t \"|\" -k 1,1 $oldallsorted - > $allsorted ; rm $oldallsorted ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./"; 
        }
        else{ # the mert process did not work properly; the sorted file containing all previous nbests is no more present; create again
-          $cmd = "export PYTHONPATH=$pythonpath ; gzip -d run*.best$___N_BEST_LIST_SIZE.out.gz ; sort -m -n -t \"|\" -k 1,1 run*.best$___N_BEST_LIST_SIZE.out > $allsorted ; rm $oldallsorted ; gzip run*.best$___N_BEST_LIST_SIZE.out ; mv $allsorted $oldallsorted ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
+          $cmd = "export PYTHONPATH=$pythonpath ; gzip -d run*.best$___N_BEST_LIST_SIZE.out.gz ; sort -m -n -t \"|\" -k 1,1 run*.best$___N_BEST_LIST_SIZE.out > $allsorted ; gzip run*.best$___N_BEST_LIST_SIZE.out ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
        }
     }
     else{ # traditional scoring code
