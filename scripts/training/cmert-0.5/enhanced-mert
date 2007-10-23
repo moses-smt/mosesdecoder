@@ -8,6 +8,7 @@ echo "       Parameters (*=optional):"
 echo "       -d: the number of original features"
 echo "       -activate (*): comma-separated list of the indexes of active features"
 echo "                      if not set, all features are optimized"
+echo "       -debug(*): debug information"
 echo "       -help(*): print his help"
 echo
 echo "Example: see examples in the directory example which are created with the script readme.txt"
@@ -20,6 +21,7 @@ perl -ne '{$tot=0;chomp;split;grep($tot+=($_>0)?$_:-$_,@_); grep($_/=$tot,@_); f
 
 activeflag=0;
 help=0
+debug=""
 
 if [ $# -lt 1 ] ; then PrintUsageAndDie ; fi
 
@@ -28,6 +30,7 @@ do
    case $1 in
       -help) help=1 ; shift 1 ; ;;
       -d) size=$2 ; shift 2 ; ;;
+      -debug) debug="-debug"; shift 1 ; ;;
       -activate) activeflag=1 ; activefields=$2 ; shift 2 ; ;;
       *) shift $# ; ;;
    esac
@@ -41,8 +44,46 @@ $SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $size
 exit
 fi
 
-# else filter active fields, perform cmert and ...
+# else 
+if [ $debug ] ; then echo "names of active fields: $activefields" ; fi
 
+#get indexes of active fields from file "names.txt
+oldname="__FALSE_NAME__"
+name="__FALSE_NAME__"
+separator="_"
+
+i=1 lastj=1
+for name in `cat names.txt` ; do
+if [ $name == $oldname ] ; then i=$(( i + 1 )) ; else i=1 ; fi
+arrayname[$lastj]=$name
+arrayname2[$lastj]=$name$separator$i
+lastj=$(( lastj + 1 ))
+oldname=$name
+done
+
+#map feature names into feature indexes
+out=""
+for name in `echo $activefields | tr ',' ' ' ` ; do
+match=0; j=1
+while [ $j -lt $lastj ] ; do
+
+if  [ ${arrayname[$j]} == $name -o ${arrayname2[$j]} == "$name" ] ; then
+match=$j
+if [ $out ] ; then out="$out,$j" ; else out="$j" ; fi
+fi
+
+j=$(( j + 1 ))
+done
+
+if [ $match -eq 0 ] ; then echo "feature $name you are asking for is not present"  ; fi
+
+done
+
+activefields=`echo $out | tr ',' '\012' | sort -nu | tr '\012' ',' | perl -pe 's/\,$//' `
+
+if [ $debug ] ; then echo "indexes of active fields: $activefields" ; fi
+
+#filter active fields, perform cmert and ...
 tmpdir=tmp$$
 mkdir -p $tmpdir
 
@@ -52,8 +93,8 @@ done
 
 cat $tmpdir/init.opt | tail -1 > $tmpdir/weight.opt
 
-cat $tmpdir/init.opt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/reduce-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields | perl -pe 's/^\S+ /1 /' > init.opt
-cat $tmpdir/feats.opt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/reduce-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields > feats.opt
+cat $tmpdir/init.opt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/reduce-field.pl $debug -weight $tmpdir/weight.opt -d $size -activate $activefields | perl -pe 's/^\S+ /1 /' > init.opt
+cat $tmpdir/feats.opt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/reduce-field.pl $debug -weight $tmpdir/weight.opt -d $size -activate $activefields > feats.opt
 
 active=`cat init.opt | head -1 | awk '{print NF}'`
  
@@ -65,8 +106,7 @@ mv $tmpdir/$file $file
 done
 
 mv weights.txt reduced_weights.txt
-cat reduced_weights.txt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/extend-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields | normalize_weights > weights.txt
-#cat reduced_weights.txt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/extend-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields > weights.txt
+cat reduced_weights.txt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/extend-field.pl $debug -weight $tmpdir/weight.opt -d $size -activate $activefields | normalize_weights > weights.txt
 rm -r $tmpdir
 
 exit
