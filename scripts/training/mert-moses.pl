@@ -143,7 +143,7 @@ my $obo_scorenbest = undef; # set to pathname to a Ondrej Bojar's scorer (not in
                             # in scripts distribution)
 my $efficient_scorenbest_flag = undef; # set to 1 to activate a time-efficient scoring of nbest lists
                                   # (this method is more memory-consumptive)
-my $___ACTIVATE_FEATURES = undef; # comma-separated list of features to work on 
+my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to work on 
                                   # if undef work on all features
                                   # (others are fixed to the starting values)
 
@@ -182,7 +182,7 @@ GetOptions(
   "obo-scorenbest=s" => \$obo_scorenbest, # see above
   "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
   "async=i" => \$___ASYNC, #whether script to be used with async decoder
-  "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated list of features to work on (others are fixed to the starting values)
+  "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -297,7 +297,7 @@ if (defined $obo_scorenbest) {
     if $___AVERAGE;
 }
 
-if ($___ACTIVATE_FEATURES){ $cmertcmd.=" -activate $___ACTIVATE_FEATURES"; }
+if ($___ACTIVATE_FEATURES){ $cmertcmd.=" -activate \"$___ACTIVATE_FEATURES\""; }
 
 my $input_abs = ensure_full_path($___DEV_F);
 die "File not found: $___DEV_F (interpreted as $input_abs)."
