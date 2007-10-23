@@ -1,7 +1,7 @@
 #! /usr/bin/perl
 
 sub PrintArgsAndDie () {
-    print stderr "USAGE: enhanced-mert.pl [-h] \n";
+    print stderr "USAGE: reduce-field.pl [-h] \n";
     print stderr "This scripts reduce the number of active fields for the mert procedure.\n";
     exit(1);
 }
@@ -15,7 +15,7 @@ while (@ARGV){
     if ($ARGV[0] eq "-h"){
         &PrintArgsAndDie();
     }
-    if ($ARGV[0] eq "-d"){
+    if ($ARGV[0] eq "-debug"){
         $debug=1; 
 	shift(@ARGV);
     }
@@ -47,7 +47,7 @@ my @invertedactive=();
 if ($activefields eq ""){
 	for (my $i=1; $i<=$size; $i++){	$active[$i]=1; };
 }else{
-	@active=split(/,/,$activefields);
+        @active=split(/,/,$activefields);
 }
 
 for (my $i=0; $i<=$size; $i++){	$invertedactive[$i]=0; };

@@ -1,7 +1,7 @@
 #! /usr/bin/perl
 
 sub PrintArgsAndDie () {
-    print stderr "USAGE: enhanced-mert.pl [-h] \n";
+    print stderr "USAGE: extend-field.pl [-h] \n";
     print stderr "This scripts extend the number of active fields for the mert procedure. (See the dual script reduce-field.pl)\n";
     exit(1);
 }
@@ -14,7 +14,7 @@ while (@ARGV){
     if ($ARGV[0] eq "-h"){
         &PrintArgsAndDie();
     }
-    if ($ARGV[0] eq "-d"){
+    if ($ARGV[0] eq "-debug"){
         $debug=1; 
 	shift(@ARGV);
     }
