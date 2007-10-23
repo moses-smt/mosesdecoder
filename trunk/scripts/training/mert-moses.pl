@@ -630,7 +630,6 @@ while(1) {
   # walk in order of @order_of_lambdas_from_decoder and collect the min,max,val
   my %visited = ();
   foreach my $name (@order_of_lambdas_from_decoder) {
-	print $name .'\n';
     next if $visited{$name};
     $visited{$name} = 1;
 	if (!defined $used_triples{$name})
@@ -664,7 +663,7 @@ while(1) {
   safesystem("\\cp -f init.opt run$run.init.opt") or die;
 
   my $DIM = scalar(@CURR); # number of lambdas
-  my $cmd="$cmertcmd -d $DIM";
+  my $cmd="export SCRIPTS_ROOTDIR=$SCRIPTS_ROOTDIR ; $cmertcmd -d $DIM";
  
   print STDERR "Starting cmert.\n";
   if (defined $___JOBS) {

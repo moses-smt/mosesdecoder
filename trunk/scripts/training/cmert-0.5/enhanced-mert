@@ -14,6 +14,10 @@ echo "Example: see examples in the directory example which are created with the 
 exit
 }
 
+normalize_weights(){
+perl -ne '{$tot=0;chomp;split;grep($tot+=($_>0)?$_:-$_,@_); grep($_/=$tot,@_); for ($i=0;$i<scalar(@_);$i++){printf STDOUT "%.6f ",$_[$i];};printf STDOUT "\n";}'
+}
+
 activeflag=0;
 help=0
 
@@ -33,7 +37,7 @@ if [ $help == 1 ] ; then PrintUsageAndDie ; fi
 
 # call the basic mert command
 if [ $activeflag == 0 ] ; then
-$SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $size 2> cmert.log
+$SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $size
 exit
 fi
 
@@ -53,8 +57,7 @@ cat $tmpdir/feats.opt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/reduce-field.pl
 
 active=`cat init.opt | head -1 | awk '{print NF}'`
  
-#echo "$SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $active 2> cmert.log"
-$SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $active 2> cmert.log
+$SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $active 
 
 for file in feats.opt init.opt; do
 mv $file reduced_$file
@@ -62,8 +65,8 @@ mv $tmpdir/$file $file
 done
 
 mv weights.txt reduced_weights.txt
-#echo "cat reduced_weights.txt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/extend-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields > weights.txt"
-cat reduced_weights.txt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/extend-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields > weights.txt
+cat reduced_weights.txt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/extend-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields | normalize_weights > weights.txt
+#cat reduced_weights.txt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/extend-field.pl -weight $tmpdir/weight.opt -d $size -activate $activefields > weights.txt
 rm -r $tmpdir
 
 exit
