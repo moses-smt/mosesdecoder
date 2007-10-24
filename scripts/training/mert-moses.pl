@@ -674,12 +674,6 @@ while(1) {
   die "Optimization failed, file weights.txt does not exist or is empty"
     if ! -s "weights.txt";
 
-  #remove temporary (very large) files
-  if (defined $efficient_scorenbest_flag){
-    if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
-    if (defined $oldallsorted){ safesystem ("\\rm -f $oldallsorted") or die; };
-  }
-
   # backup copies
   safesystem ("\\mv -f feats.opt run$run.feats.opt; gzip run$run.feats.opt; ") or die;
   safesystem ("\\mv -f cands.opt run$run.cands.opt") or die;
@@ -737,6 +731,8 @@ while(1) {
 
 }
 print "Training finished at ".`date`;
+
+if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
 
 safesystem("\\cp -f init.opt run$run.init.opt") or die;
 safesystem("\\cp -f cmert.log run$run.cmert.log") or die;
