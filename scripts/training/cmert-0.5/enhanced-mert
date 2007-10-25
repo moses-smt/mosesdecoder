@@ -98,7 +98,7 @@ cat $tmpdir/feats.opt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/reduce-field.pl
 
 active=`cat init.opt | head -1 | awk '{print NF}'`
  
-$SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $active 
+$SCRIPTS_ROOTDIR/training/cmert-0.5/mert -d $active 2> reduced_cmert.log 
 
 for file in feats.opt init.opt; do
 mv $file reduced_$file
@@ -108,5 +108,10 @@ done
 mv weights.txt reduced_weights.txt
 cat reduced_weights.txt | perl $SCRIPTS_ROOTDIR/training/cmert-0.5/extend-field.pl $debug -weight $tmpdir/weight.opt -d $size -activate $activefields | normalize_weights > weights.txt
 rm -r $tmpdir
+
+bestpointline=`echo "Best point:"`
+bestpointline="$bestpointline "`cat weights.txt`
+bestpointline="$bestpointline => "`cat reduced_cmert.log | grep -i "Best point:" | awk '{print $NF}'`
+echo $bestpointline > /dev/stderr
 
 exit

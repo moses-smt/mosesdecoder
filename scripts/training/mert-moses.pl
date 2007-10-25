@@ -684,6 +684,7 @@ while(1) {
     safesystem ("\\mv -f reduced_feats.opt run$run.reduced_feats.opt ; gzip run$run.reduced_feats.opt") or die;
     safesystem ("\\mv -f reduced_init.opt run$run.reduced_init.opt") or die;
     safesystem ("\\mv -f reduced_weights.txt run$run.reduced_weights.txt") or die;
+    safesystem ("\\mv -f reduced_cmert.log run$run.reduced_cmert.log") or die;
   }
 
   print "run $run end at ".`date`;
