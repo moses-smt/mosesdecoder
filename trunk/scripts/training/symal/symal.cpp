@@ -133,7 +133,10 @@ int prunionalignment(fstream& out,int m,int *a,int n,int* b){
 
   //fix the last " "
   string str = sout.str();
-  str.replace(str.length()-1,1,"\n");
+  if (str.length() == 0)
+    str = "\n";
+  else
+    str.replace(str.length()-1,1,"\n");
 
   out << str;
          out.flush();
@@ -359,8 +362,11 @@ int printgrow(fstream& out,int m,int *a,int n,int* b, bool diagonal=false,bool f
          
          
          //fix the last " "
-         string str = sout.str();
-         str.replace(str.length()-1,1,"\n");
+         string str = sout.str();  
+	 if (str.length() == 0)
+	   str = "\n";
+	 else
+	   str.replace(str.length()-1,1,"\n");
          
          out << str;
          out.flush();
