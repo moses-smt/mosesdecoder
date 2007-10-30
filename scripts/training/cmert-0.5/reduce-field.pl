@@ -40,7 +40,7 @@ my @weight=();
 open(IN,$weightfile);
 chomp($weight=<IN>);
 close(IN);
-push @weight,split(/[ \t]+/,$weight);
+push @weight,split(/[ \t]+/,"1 $weight");
 my @active=();
 my @invertedactive=();
 
@@ -71,18 +71,18 @@ while(chomp($_=<STDIN>)){
 	for (my $i=0; $i<scalar(@notactive); $i++){
 		$j=$notactive[$i];
 		$notactivedweightedsum+=($weight[$j]*$field[$j]);
-		printf STDERR "i:$i j:$j -> $weight[$j] - $field[$j] -> $notactivedweightedsum\n" if $debug>0;
+		printf STDERR "notactive -> i:$i j:$j -> $weight[$j] - $field[$j] -> $notactivedweightedsum\n" if $debug>0;
 	};
 
 	printf STDOUT "%.3f",$notactivedweightedsum;
 	printf STDERR "sum not active features: %.3f\n",$notactivedweightedsum if $debug>0;
 	for (my $i=0; $i<scalar(@active); $i++){
 		print STDOUT " $field[$active[$i]]";
-		printf STDERR "i:$i j:$active[$i] -> $field[$active[$i]]\n" if $debug>0;
+		printf STDERR "active -> i:$i j:$active[$i] -> $field[$active[$i]]\n" if $debug>0;
 	};
 	for (my $i=scalar(@active)+scalar(@notactive)+1; $i< scalar(@field); $i++){
 		print STDOUT " $field[$i]";
-		printf STDERR "i:$i -> $field[$i]\n" if $debug>0;
+		printf STDERR "extra -> i:$i -> $field[$i]\n" if $debug>0;
 	};
 	print STDOUT "\n";
 }
