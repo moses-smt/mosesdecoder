@@ -53,6 +53,19 @@ public:
 	}
 };
 
+
+class HypothesisScoreOrderer
+{
+public:
+	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
+	{
+		// Get score so far
+		float scoreA = hypoA->GetTotalScore();
+		float scoreB = hypoB->GetTotalScore();
+		return (scoreA < scoreB);
+	}
+};
+
 /** Stack for instances of Hypothesis, includes functions for pruning. */ 
 class HypothesisStack 
 {
@@ -153,7 +166,9 @@ public:
 	
 	TO_STRING();
 	
-	std::set< Hypothesis*> getCoverageSet(std::vector<size_t> reqCoverage) const;
+	const std::set< Hypothesis*, HypothesisScoreOrderer> getCoverageSet(std::vector<size_t> reqCoverage) const;
+	
+	const Hypothesis getTopHypothesis() const;
 };
 
 
