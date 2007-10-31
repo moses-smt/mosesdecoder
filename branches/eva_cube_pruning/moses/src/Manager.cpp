@@ -111,37 +111,46 @@ void Manager::ProcessSentence()
 		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
+		
+		// keep already seen coverages in mind
+		set<vector<size_t> > seenCoverages; 
+		
 		// go through each hypothesis on the stack and try to expand it
 		HypothesisStack::const_iterator iterHypo;
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
-			{
+		{
 				// take first hypothesis from stack to get coverage
 				Hypothesis &hypothesis = **iterHypo;
-				
-				// -> new
 				const WordsBitmap &wb = hypothesis.GetWordsBitmap();
-				const set<Hypothesis*> coverageSet = sourceHypoColl.getCoverageSet( wb.GetCompressedRepresentation());
-				// iterate over set of hypotheses
-				set<Hypothesis*>::iterator set_Iter;
+				vector<size_t> cov = wb.GetCompressedRepresentation();
+				
+				// check if coverage of current hypothesis was already seen --> if no, proceed
+				if( (seenCoverages.count( cov )) == 0)
+				{
+					seenCoverages.insert(cov);
+					const set<Hypothesis*, HypothesisScoreOrderer> coverageSet = sourceHypoColl.getCoverageSet( cov );
+					// iterate over set of hypotheses
+					set<Hypothesis*>::iterator set_Iter;
    				for ( set_Iter = coverageSet.begin(); set_Iter != coverageSet.end(); ++set_Iter )
    				{
-	   				Hypothesis &hypo = **set_Iter;
+		   			Hypothesis &hypo = **set_Iter;
 	   				size_t n = 1;
 	   				float score = hypo.GetTotalScore();
-	   				vector<size_t> compr = wb.GetCompressedRepresentation();
+	   
 	   				vector<size_t>::iterator vec_iter;
 	   				cout << i << "  " << score << "   "; 
-	   				for(vec_iter = compr.begin(); vec_iter != compr.end(); ++vec_iter)
-	   				{
-	   					size_t bin = *vec_iter;
-   						cout << bin << " "; 	
-	   				}
+	  				for(vec_iter = cov.begin(); vec_iter != cov.end(); ++vec_iter)
+	  				{
+		  					size_t bin = *vec_iter;
+   							cout << bin << " "; 	
+	  				}
 	   				cout << endl;
    				}
 				
-				ProcessCoverageSet(&coverageSet, wb);
-				//ProcessOneHypothesis(hypothesis); // expand the hypothesis
-			}
+					ProcessCoverageSet(coverageSet, wb);
+					ProcessOneHypothesis(hypothesis); // expand the hypothesis
+				}
+		}
 		i++;
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
@@ -152,7 +161,7 @@ void Manager::ProcessSentence()
 }
 
 // --> ProcessOneHypothesis --> only non-reordering case 
-void Manager::ProcessCoverageSet(const std::set< Hypothesis*> *coverageSet, const WordsBitmap hypoBitmap)
+void Manager::ProcessCoverageSet(const std::set< Hypothesis*, HypothesisScoreOrderer> &coverageSet, const WordsBitmap &hypoBitmap)
 {
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = -1;
@@ -180,9 +189,17 @@ void Manager::ProcessCoverageSet(const std::set< Hypothesis*> *coverageSet, cons
 				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 				{
 					// translationOptionList has to be sorted wrt word coverage
+					// TOL is a vector of translation options
 					TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos));
+					vector<TranslationOption*>::iterator iterOptions;
+					for(iterOptions = tol.begin(); iterOptions != tol.end(); ++iterOptions)
+					{
+						TranslationOption *opt = *iterOptions;
+						const Phrase &source = *(opt->GetSourcePhrase());
+						const Phrase &target = opt->GetTargetPhrase();
+						ScoreComponentCollection scoreBreakdown = opt->returnScoreBreakdown();
+					}
 					
-					cout << "stop here" << endl;
 					//ExpandAllHypotheses(hypothesis
 								//				, m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos)));
 				}

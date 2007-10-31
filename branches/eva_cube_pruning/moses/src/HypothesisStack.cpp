@@ -255,9 +255,9 @@ std::ostream& operator<<(std::ostream& out, const HypothesisStack& hypoColl)
 	return out;
 }
 
-std::set< Hypothesis*> HypothesisStack::getCoverageSet(std::vector<size_t> reqCoverage) const
+const std::set< Hypothesis*, HypothesisScoreOrderer> HypothesisStack::getCoverageSet(std::vector<size_t> reqCoverage) const
 {
-	std::set< Hypothesis*> coverageSet;
+	std::set< Hypothesis*, HypothesisScoreOrderer> coverageSet;
 	HypothesisStack::const_iterator iter;
 	for( iter = this->begin(); iter != this->end(); ++iter)
 	{
@@ -272,4 +272,12 @@ std::set< Hypothesis*> HypothesisStack::getCoverageSet(std::vector<size_t> reqCo
 	}
 	return coverageSet;
 }
+
+const Hypothesis HypothesisStack::getTopHypothesis() const
+{
+	HypothesisStack::const_iterator iterHypo = (*this).begin();
+	Hypothesis &hypothesis = **iterHypo;	
+	return hypothesis;
+}
+
 
