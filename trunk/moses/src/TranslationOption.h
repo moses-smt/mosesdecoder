@@ -59,10 +59,8 @@ protected:
 	Phrase 							m_targetPhrase; /*< output phrase when using this translation option */
 	Phrase				      *m_sourcePhrase; /*< input phrase translated by this */
 	const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
-	float								m_totalScore; /*< weighted translation costs of this translation option */
 	float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
-	float               m_partialScore; /*< estimate of the partial cost of a preliminary translation option */
-
+	
 	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
 	//! for example, know the full n-gram score since the length of the
 	//! TargetPhrase may be shorter than the n-gram order.  But, if it is
