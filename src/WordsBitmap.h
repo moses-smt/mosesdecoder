@@ -153,6 +153,7 @@ public:
 		* Used for exact matching of source words translated in hypothesis recombination
 		*/
 	std::vector<size_t> GetCompressedRepresentation() const;
+
 	
 	//! transitive comparison of WordsBitmap
 	inline int Compare (const WordsBitmap &compare) const

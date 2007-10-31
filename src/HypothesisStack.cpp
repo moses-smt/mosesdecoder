@@ -255,3 +255,21 @@ std::ostream& operator<<(std::ostream& out, const HypothesisStack& hypoColl)
 	return out;
 }
 
+std::set< Hypothesis*> HypothesisStack::getCoverageSet(std::vector<size_t> reqCoverage) const
+{
+	std::set< Hypothesis*> coverageSet;
+	HypothesisStack::const_iterator iter;
+	for( iter = this->begin(); iter != this->end(); ++iter)
+	{
+		Hypothesis &hypothesis = **iter;
+		const WordsBitmap &wb = hypothesis.GetWordsBitmap();
+		std::vector<size_t> coverage = wb.GetCompressedRepresentation();
+		
+		if(coverage == reqCoverage)
+		{
+			coverageSet.insert(&hypothesis);
+		}
+	}
+	return coverageSet;
+}
+

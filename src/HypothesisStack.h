@@ -152,4 +152,10 @@ public:
 	void CleanupArcList();
 	
 	TO_STRING();
+	
+	std::set< Hypothesis*> getCoverageSet(std::vector<size_t> reqCoverage) const;
 };
+
+
+
+
