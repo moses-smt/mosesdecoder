@@ -82,9 +82,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy)
 //, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented 
 , m_sourcePhrase( (copy.m_sourcePhrase == NULL) ? new Phrase(Input) : new Phrase(*copy.m_sourcePhrase))
 , m_sourceWordsRange(copy.m_sourceWordsRange)
-, m_totalScore(copy.m_totalScore)
 , m_futureScore(copy.m_futureScore)
-, m_partialScore(copy.m_partialScore)
 , m_scoreBreakdown(copy.m_scoreBreakdown)
 , m_reordering(copy.m_reordering)
 {}
@@ -94,9 +92,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const WordsR
 //, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented 
 , m_sourcePhrase( (copy.m_sourcePhrase == NULL) ? new Phrase(Input) : new Phrase(*copy.m_sourcePhrase))
 , m_sourceWordsRange(sourceWordsRange)
-, m_totalScore(copy.m_totalScore)
 , m_futureScore(copy.m_futureScore)
-, m_partialScore(copy.m_partialScore)
 , m_scoreBreakdown(copy.m_scoreBreakdown)
 , m_reordering(copy.m_reordering)
 {}
@@ -135,17 +131,17 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 void TranslationOption::CalcScore()
 {
 	// LM scores
-	float m_ngramScore = 0;
+	float ngramScore = 0;
 	float retFullScore = 0;
 
 	const LMList &allLM = StaticData::Instance().GetAllLM();
 
-	allLM.CalcScore(GetTargetPhrase(), retFullScore, m_ngramScore, &m_scoreBreakdown);
-	// future score
-	m_futureScore = retFullScore - m_ngramScore;
+	allLM.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, &m_scoreBreakdown);
 
 	size_t phraseSize = GetTargetPhrase().GetSize();
-	m_futureScore += m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize * StaticData::Instance().GetWeightWordPenalty();
+	// future score
+	m_futureScore = retFullScore - ngramScore
+								+ m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize * StaticData::Instance().GetWeightWordPenalty();
 }
 
 TO_STRING_BODY(TranslationOption);
