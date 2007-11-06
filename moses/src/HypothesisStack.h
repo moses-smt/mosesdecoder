@@ -62,7 +62,7 @@ public:
 		// Get score so far
 		float scoreA = hypoA->GetTotalScore();
 		float scoreB = hypoB->GetTotalScore();
-		return (scoreA < scoreB);
+		return (scoreA >= scoreB);
 	}
 };
 
