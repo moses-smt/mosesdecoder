@@ -5,10 +5,13 @@
 TS?=$(shell date '+%Y%m%d-%H%M')
 DS?=$(shell date '+%Y%m%d')
 
-# set these 2 variables below to point to a directory where you want the 
-# compiled scripts to be copied to
-TARGETDIR=/home/s0565741/terabyte/bin
-BINDIR=/home/s0565741/terabyte/bin
+# Set TARGETDIR to directory where you want the compiled scripts to be copied
+# to.
+# Set BINDIR to the directory where GIZA++ and other tools are installed.
+# The values here are just the defaults in case your environment does not set
+# them.
+TARGETDIR?=/home/s0565741/terabyte/bin
+BINDIR?=/home/s0565741/terabyte/bin
 
 MAIN_SCRIPTS_TARGET_DIR=$(TARGETDIR)
 # MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)
