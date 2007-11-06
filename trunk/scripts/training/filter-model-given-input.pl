@@ -52,6 +52,7 @@ safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
 
 # get tables to be filtered (and modify config file)
 my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS);
+my %new_name_used = ();
 open(INI_OUT,">$dir/moses.ini") or die "Can't write $dir/moses.ini";
 open(INI,$config) or die "Can't read $config";
 while(<INI>) {
@@ -69,6 +70,10 @@ while(<INI>) {
     	push @TABLE, $file;
 
     	my $new_name = "$dir/phrase-table.$source_factor-$t";
+        my $cnt = 1;
+        $cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
+        $new_name .= ".$cnt";
+        $new_name_used{$new_name} = 1;
     	print INI_OUT "$source_factor $t $w $new_name\n";
     	push @TABLE_NEW_NAME,$new_name;
 
