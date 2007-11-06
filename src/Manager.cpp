@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "LMList.h"
 #include "TranslationOptionCollection.h"
+#include "ScoreGrid.h"
 
 using namespace std;
 
@@ -43,6 +44,8 @@ using namespace std;
 #ifdef DEBUGLATTICE
 static bool debug2 = false;
 #endif
+
+const float negativeInfinity = -numeric_limits<float>::infinity();
 
 Manager::Manager(InputType const& source)
 :m_source(source)
@@ -130,21 +133,26 @@ void Manager::ProcessSentence()
 					seenCoverages.insert(cov);
 					const set<Hypothesis*, HypothesisScoreOrderer> coverageSet = sourceHypoColl.getCoverageSet( cov );
 					// iterate over set of hypotheses
+					int k = 0;
 					set<Hypothesis*>::iterator set_Iter;
    				for ( set_Iter = coverageSet.begin(); set_Iter != coverageSet.end(); ++set_Iter )
    				{
-		   			Hypothesis &hypo = **set_Iter;
-	   				size_t n = 1;
-	   				float score = hypo.GetTotalScore();
+   					if(k<3)
+   					{
+		  	 			Hypothesis &hypo = **set_Iter;
+	   					size_t n = 1;
+	   					float score = hypo.GetTotalScore();
 	   
-	   				vector<size_t>::iterator vec_iter;
-	   				cout << i << "  " << score << "   "; 
-	  				for(vec_iter = cov.begin(); vec_iter != cov.end(); ++vec_iter)
-	  				{
-		  					size_t bin = *vec_iter;
+	  	 				vector<size_t>::iterator vec_iter;
+	   					cout << i << "  " << score << "   "; 
+	  					for(vec_iter = cov.begin(); vec_iter != cov.end(); ++vec_iter)
+	  					{
+		 	 					size_t bin = *vec_iter;
    							cout << bin << " "; 	
-	  				}
-	   				cout << endl;
+	  					}
+	   					cout << endl;
+	   					k++;
+   					}
    				}
 				
 					ProcessCoverageSet(coverageSet, wb);
@@ -191,15 +199,97 @@ void Manager::ProcessCoverageSet(const std::set< Hypothesis*, HypothesisScoreOrd
 					// translationOptionList has to be sorted wrt word coverage
 					// TOL is a vector of translation options
 					TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos));
+					
 					vector<TranslationOption*>::iterator iterOptions;
+					cout << "possible translation options for coverage set:" << endl;
+					// get 3 best options
+					TranslationOption *best1, *best2, *best3; 
+					float score1 =  negativeInfinity, score2 = negativeInfinity, score3 = negativeInfinity; 
 					for(iterOptions = tol.begin(); iterOptions != tol.end(); ++iterOptions)
 					{
 						TranslationOption *opt = *iterOptions;
-						const Phrase &source = *(opt->GetSourcePhrase());
-						const Phrase &target = opt->GetTargetPhrase();
 						ScoreComponentCollection scoreBreakdown = opt->returnScoreBreakdown();
+						vector<float> scores = scoreBreakdown.ReturnScores();
+						vector<float>::iterator score_iter;
+						float combinedScore = 0.0;
+						for(score_iter = scores.begin(); score_iter != scores.end(); ++score_iter)
+						{
+							float f = *score_iter;
+							combinedScore += f;
+						}
+						if(combinedScore > score1)
+						{
+							score3 = score2; score2 = score1; score1 = combinedScore;
+							best3 = best2; best2 = best1; best1 = opt;
+						}
+						else if(combinedScore > score2)
+						{
+							score3 = score2; score2 = combinedScore;
+							best3 = best2; best2 = opt;
+						}
+						else if(combinedScore > score3)
+						{
+							score3 = combinedScore; 
+							best3 = opt;
+						}
+						//cout << scoreBreakdown << "  " << combinedScore << endl;
 					}
+					//cout << endl;
 					
+					// top 3 hypotheses
+					set<Hypothesis*>::iterator set_Iter;
+					Hypothesis *hypo1 = Hypothesis::Create(m_source, m_initialTargetPhrase);
+					Hypothesis *hypo2 = hypo1;
+					Hypothesis *hypo3 = hypo1;
+					int i=1;
+   				for ( set_Iter = coverageSet.begin(); set_Iter != coverageSet.end(); ++set_Iter )
+   				{
+		   			Hypothesis *hypo = *set_Iter;
+		   			if(i == 1)
+		   				hypo1 = hypo;
+		   			else if(i == 2)
+		   				hypo2 = hypo;
+		   			else if(i == 3)
+		   			{
+		   				hypo3 = hypo;
+		   				break;
+		   			}
+		   			i++;
+   				}
+   				
+   				cout << "hypo1: " << hypo1->GetTotalScore() << "  hypo2: " << hypo2->GetTotalScore() << "  hypo3: " << hypo3->GetTotalScore() << endl;
+   				cout << "score1: " << score1 << "  score2: " << score2 << "  score3: " << score3 << endl;
+   				
+   				ScoreGrid scoreGrid(3);
+   				
+   				vector<Hypothesis*> hypos;
+   				hypos.push_back(hypo1);
+   				hypos.push_back(hypo2);
+   				hypos.push_back(hypo3);
+   				
+   				vector<float> scores;
+   				scores.push_back(score1);
+   				scores.push_back(score2);
+   				scores.push_back(score3);
+   				
+   				scoreGrid.FillGrid(hypos, scores);
+   				scoreGrid.PrintGrid();
+   				
+   				set< float > D;
+   				set< float > cand;
+   				set< float > buffer;
+   				 				
+   				
+   				float current;
+ /*  				while( !(cand.empty()) && (buffer.size() > 0) )
+   				{
+   						current = *(cand.begin());
+   						buffer.insert(current);
+   						// insert neighbours of current into cand
+   						cand.insert( scoreGrid[j+1][k] );
+   						cand.insert( scoreGrid[j][k+1] );
+   				}
+ */
 					//ExpandAllHypotheses(hypothesis
 								//				, m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos)));
 				}

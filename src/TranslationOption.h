@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class PhraseDictionary;
 class GenerationDictionary;
 
+
 /** Available phrase translation for a particular sentence pair.
  * In a multi-factor model, this is expanded from the entries in the 
  * translation tables and generation tables (and pruned to the maximum

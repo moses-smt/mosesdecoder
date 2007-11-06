@@ -164,5 +164,6 @@ typedef uint32_t UINT32;
 #endif
 
 class TranslationOption;
+
 typedef std::vector<TranslationOption*> TranslationOptionList;
 

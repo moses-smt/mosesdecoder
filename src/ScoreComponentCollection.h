@@ -171,6 +171,11 @@ public:
 #endif
 		return m_scores[begin];
 	}
+	
+	std::vector<float> ReturnScores() const
+	{
+		return m_scores;
+	}
 
 };
 
