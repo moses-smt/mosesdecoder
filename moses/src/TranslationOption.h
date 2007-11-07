@@ -166,7 +166,7 @@ public:
 
 	TO_STRING();
 	
-	ScoreComponentCollection returnScoreBreakdown();
+	ScoreComponentCollection ReturnScoreBreakdown();
 };
 
 

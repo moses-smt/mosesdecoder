@@ -83,7 +83,7 @@ protected:
 	
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
-	void ProcessCoverageSet(const std::set< Hypothesis*, HypothesisScoreOrderer> &coverageSet, const WordsBitmap &hypoBitmap);
+	void ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap, const size_t top_k);
 	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
 
