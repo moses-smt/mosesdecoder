@@ -81,6 +81,9 @@ protected:
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
+	
+	// new: x and y position in a cube pruning grid
+	int m_x, m_y;
 
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
@@ -256,7 +259,23 @@ public:
 	}
 
 	const ScoreComponentCollection &GetCachedReorderingScore() const;
-
+	
+	void SetGridPosition(int x, int y)
+	{
+		m_x = x;
+		m_y = y;
+	}
+	
+	int GetXGridPosition()
+	{
+		return m_x;
+	}
+	
+	int GetYGridPosition()
+	{
+		return m_y;
+	}
+	
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

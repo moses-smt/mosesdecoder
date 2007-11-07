@@ -176,6 +176,8 @@ public:
 	{
 		return m_scores;
 	}
+	
+	float CombineScoreBreakdown();
 
 };
 
