@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LMList.h"
 #include "TranslationOptionCollection.h"
 #include "ScoreGrid.h"
+#include "TranslationOptionOrderer.h"
 
 using namespace std;
 
@@ -45,7 +46,6 @@ using namespace std;
 static bool debug2 = false;
 #endif
 
-const float negativeInfinity = -numeric_limits<float>::infinity();
 
 Manager::Manager(InputType const& source)
 :m_source(source)
@@ -104,7 +104,7 @@ void Manager::ProcessSentence()
 	}
 	
 	// go through each stack
-	int i=0;
+	size_t i=0;
 	std::vector < HypothesisStack >::iterator iterStack;
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
@@ -118,7 +118,7 @@ void Manager::ProcessSentence()
 		// keep already seen coverages in mind
 		set<vector<size_t> > seenCoverages; 
 		
-		// go through each hypothesis on the stack and try to expand it
+		// go through each hypothesis on the stack, find the set of hypothesis with same coverage and expand this set using cube pruning
 		HypothesisStack::const_iterator iterHypo;
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
 		{
@@ -132,31 +132,37 @@ void Manager::ProcessSentence()
 				{
 					seenCoverages.insert(cov);
 					const set<Hypothesis*, HypothesisScoreOrderer> coverageSet = sourceHypoColl.getCoverageSet( cov );
-					// iterate over set of hypotheses
-					int k = 0;
+					// set K
+					const size_t top_k = 3;
+					size_t j = 0;
+					// make subset of HYPOTHESES
+					set<Hypothesis*, HypothesisScoreOrderer> topkCoverageSet;
 					set<Hypothesis*>::iterator set_Iter;
    				for ( set_Iter = coverageSet.begin(); set_Iter != coverageSet.end(); ++set_Iter )
    				{
-   					if(k<3)
+   					if(j < top_k)
    					{
-		  	 			Hypothesis &hypo = **set_Iter;
-	   					size_t n = 1;
-	   					float score = hypo.GetTotalScore();
-	   
+		  	 			Hypothesis *hypo = *set_Iter;
+		  	 			topkCoverageSet.insert(hypo);
+	   /*					float score = hypo->GetTotalScore();
 	  	 				vector<size_t>::iterator vec_iter;
-	   					cout << i << "  " << score << "   "; 
+	   					cout << "stack: " << i << " score: " << score << " cov: "; 
 	  					for(vec_iter = cov.begin(); vec_iter != cov.end(); ++vec_iter)
 	  					{
 		 	 					size_t bin = *vec_iter;
    							cout << bin << " "; 	
 	  					}
 	   					cout << endl;
-	   					k++;
+	   */
+	   					j++;
    					}
    				}
 				
-					ProcessCoverageSet(coverageSet, wb);
-					ProcessOneHypothesis(hypothesis); // expand the hypothesis
+					// instead of the whole coverage set, pass only top k hypothesis
+					// for easier handling, turn coverageSet into a vector 
+					vector< Hypothesis*> coverageVec(topkCoverageSet.begin(), topkCoverageSet.end());
+					ProcessCoverageVector(coverageVec, wb, top_k);
+	//				ProcessOneHypothesis(hypothesis); // expand the hypothesis
 				}
 		}
 		i++;
@@ -168,16 +174,17 @@ void Manager::ProcessSentence()
 	VERBOSE(2, staticData.GetSentenceStats());
 }
 
-// --> ProcessOneHypothesis --> only non-reordering case 
-void Manager::ProcessCoverageSet(const std::set< Hypothesis*, HypothesisScoreOrderer> &coverageSet, const WordsBitmap &hypoBitmap)
+
+
+void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap, const size_t top_k)
 {
 	// since we check for reordering limits, its good to have that limit handy
-	int maxDistortion = -1;
 	/*
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 	bool isWordLattice = StaticData::Instance().GetInputType() == WordLatticeInput;
 	*/
 	// no limit of reordering: only check for overlap
+	int maxDistortion = -1;
 	if (maxDistortion < 0)
 	{	
 		//const WordsBitmap hypoBitmap	= hypothesis.GetWordsBitmap();
@@ -196,147 +203,150 @@ void Manager::ProcessCoverageSet(const std::set< Hypothesis*, HypothesisScoreOrd
 			{
 				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 				{
-					// translationOptionList has to be sorted wrt word coverage
-					// TOL is a vector of translation options
+					// all TranslationOptions returned by 'GetTranslationOptionList' have the same word range
+					// 'tol' is of type vector<TranslationOption*>
 					TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos));
 					
-					vector<TranslationOption*>::iterator iterOptions;
-					cout << "possible translation options for coverage set:" << endl;
-					// get 3 best options
-					TranslationOption *best1, *best2, *best3; 
-					float score1 =  negativeInfinity, score2 = negativeInfinity, score3 = negativeInfinity; 
-					for(iterOptions = tol.begin(); iterOptions != tol.end(); ++iterOptions)
-					{
-						TranslationOption *opt = *iterOptions;
-						ScoreComponentCollection scoreBreakdown = opt->returnScoreBreakdown();
-						vector<float> scores = scoreBreakdown.ReturnScores();
-						vector<float>::iterator score_iter;
-						float combinedScore = 0.0;
-						for(score_iter = scores.begin(); score_iter != scores.end(); ++score_iter)
-						{
-							float f = *score_iter;
-							combinedScore += f;
-						}
-						if(combinedScore > score1)
-						{
-							score3 = score2; score2 = score1; score1 = combinedScore;
-							best3 = best2; best2 = best1; best1 = opt;
-						}
-						else if(combinedScore > score2)
-						{
-							score3 = score2; score2 = combinedScore;
-							best3 = best2; best2 = opt;
-						}
-						else if(combinedScore > score3)
-						{
-							score3 = combinedScore; 
-							best3 = opt;
-						}
-						//cout << scoreBreakdown << "  " << combinedScore << endl;
-					}
-					//cout << endl;
+					if(tol.size() > 0)
+					{					
+						set<TranslationOption*, TranslationOptionOrderer> translationOptionSet;
+						translationOptionSet.insert(tol.begin(), tol.end());
+						
+						vector<TranslationOption*>::iterator iterOptions;
 					
-					// top 3 hypotheses
-					set<Hypothesis*>::iterator set_Iter;
-					Hypothesis *hypo1 = Hypothesis::Create(m_source, m_initialTargetPhrase);
-					Hypothesis *hypo2 = hypo1;
-					Hypothesis *hypo3 = hypo1;
-					int i=1;
-   				for ( set_Iter = coverageSet.begin(); set_Iter != coverageSet.end(); ++set_Iter )
-   				{
-		   			Hypothesis *hypo = *set_Iter;
-		   			if(i == 1)
-		   				hypo1 = hypo;
-		   			else if(i == 2)
-		   				hypo2 = hypo;
-		   			else if(i == 3)
-		   			{
-		   				hypo3 = hypo;
-		   				break;
-		   			}
-		   			i++;
-   				}
+						// find the k best options
+						TranslationOptionList topkOptions;
+						size_t i = 0;
+						set<TranslationOption*, TranslationOptionOrderer>::iterator opt_iter;
+						for(opt_iter = translationOptionSet.begin(); opt_iter != translationOptionSet.end(); ++opt_iter)
+						{
+							if(i < top_k)
+							{
+								TranslationOption *opt = *opt_iter;
+								float score = (opt->ReturnScoreBreakdown()).CombineScoreBreakdown();
+								WordsRange range = opt->GetSourceWordsRange();
+		//						cout << "option score: " << score << endl;
+								topkOptions.push_back(opt);
+								i++;
+							}
+						}
+	   				
+	   				// KBEST
+	   				// ".. enumerating the consequent items best-first while keeping track of a relatively small
+	   				//  number of candidates [..] for the next best item." 
+	   				// "When we take into account the combination costs, the grid is no longer monotonic in general.."
+	   				// "Because of this disordering, we do not put the enumerated items direcly into D(v); instead,
+	   				//  we collect items in a buffer.."
+   					set<Hypothesis*, HypothesisScoreOrderer > D, cand, buf;
    				
-   				cout << "hypo1: " << hypo1->GetTotalScore() << "  hypo2: " << hypo2->GetTotalScore() << "  hypo3: " << hypo3->GetTotalScore() << endl;
-   				cout << "score1: " << score1 << "  score2: " << score2 << "  score3: " << score3 << endl;
-   				
-   				ScoreGrid scoreGrid(3);
-   				
-   				vector<Hypothesis*> hypos;
-   				hypos.push_back(hypo1);
-   				hypos.push_back(hypo2);
-   				hypos.push_back(hypo3);
-   				
-   				vector<float> scores;
-   				scores.push_back(score1);
-   				scores.push_back(score2);
-   				scores.push_back(score3);
-   				
-   				scoreGrid.FillGrid(hypos, scores);
-   				scoreGrid.PrintGrid();
-   				
-   				set< float > D;
-   				set< float > cand;
-   				set< float > buffer;
-   				 				
-   				
-   				float current;
- /*  				while( !(cand.empty()) && (buffer.size() > 0) )
-   				{
-   						current = *(cand.begin());
-   						buffer.insert(current);
-   						// insert neighbours of current into cand
-   						cand.insert( scoreGrid[j+1][k] );
-   						cand.insert( scoreGrid[j][k+1] );
-   				}
- */
-					//ExpandAllHypotheses(hypothesis
-								//				, m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos)));
+   					size_t x = 0, y = 0;
+   					// initialize cand with the hypothesis 1,1
+   				#ifdef DEBUGLATTICE
+						if (debug2) { std::cerr << "::EXT: " << *topkOptions[y] << "\n"; }
+					#endif
+   					Hypothesis *newHypo = (coverageVec[x])->CreateNext(*topkOptions[y]);
+						newHypo->CalcScore(m_transOptColl->GetFutureScore());
+						newHypo->SetGridPosition(x, y);
+						cand.insert(newHypo);
+						// logging for the curious
+						IFVERBOSE(3) {
+							const StaticData &staticData = StaticData::Instance();
+	  					newHypo->PrintHypothesis(m_source
+														, staticData.GetWeightDistortion()
+														, staticData.GetWeightWordPenalty());
+						}
+   					
+   					set<Hypothesis*, HypothesisScoreOrderer >::iterator cand_iter;
+   					
+	   				Hypothesis *item;
+	   				// TODO: the size of the buffer could be a little bigger than top_k to allow for more possible hypotheses being found
+	   				size_t extra = 0;
+ 	  				while( !(cand.empty()) && (buf.size() < top_k+extra) )
+   					{
+   							IFVERBOSE(3) {
+   								cout << "candidates: " << endl;
+   								for(cand_iter = cand.begin(); cand_iter != cand.end(); ++cand_iter)
+   								{
+   									cout << (*cand_iter)->GetXGridPosition() << " " << (*cand_iter)->GetYGridPosition() << "   " << (*cand_iter)->GetTotalScore() << endl;
+   								}
+   								cout << endl; 
+   							}	
+   							// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
+   							// and then line 12 pushes its successors [..] into cand." 
+   							// 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
+   							item = *(cand.begin());
+   							// update grid position
+   							x = item->GetXGridPosition();
+   							y = item->GetYGridPosition();
+   //							cout << "chosen cand: " << x << " " << y << endl;
+   							buf.insert(item);
+   							cand.erase(cand.begin());
+   							// PUSHSUCC(item, cand); --> insert neighbours of item into cand
+   							// neighbour on the right side, same hypothesis, new extension
+   							if( (coverageVec.size() > x) && (topkOptions.size() > y+1) )
+   							{ 
+   							#ifdef DEBUGLATTICE
+									if (debug2) { std::cerr << "::EXT: " << *topkOptions[y+1] << "\n"; }
+								#endif
+   								newHypo = (coverageVec[x])->CreateNext(*topkOptions[y+1]);
+									newHypo->CalcScore(m_transOptColl->GetFutureScore());
+									newHypo->SetGridPosition(x, y+1);
+   								cand.insert( newHypo );
+   								// logging for the curious
+									IFVERBOSE(3) {
+										const StaticData &staticData = StaticData::Instance();
+		  							newHypo->PrintHypothesis(m_source
+														, staticData.GetWeightDistortion()
+														, staticData.GetWeightWordPenalty());
+									}
+   							}
+   							// neighbour below, new hypothesis, same extension
+   							if( (coverageVec.size() > x+1) && (topkOptions.size() > y) )
+   							{
+   							#ifdef DEBUGLATTICE
+									if (debug2) { std::cerr << "::EXT: " << *topkOptions[y] << "\n"; }
+								#endif
+   								newHypo = (coverageVec[x+1])->CreateNext(*topkOptions[y]);
+									newHypo->CalcScore(m_transOptColl->GetFutureScore());
+									newHypo->SetGridPosition(x+1, y);
+   								cand.insert( newHypo );
+   								// logging for the curious
+									IFVERBOSE(3) {
+										const StaticData &staticData = StaticData::Instance();
+		  							newHypo->PrintHypothesis(m_source
+														, staticData.GetWeightDistortion()
+														, staticData.GetWeightWordPenalty());
+									}
+   							}
+   					}
+   					// "Re-sort the buffer into D(v) after it has accumulated k items."
+   					// buffer has an ordering function, just copy to D or if buf is larger than D, copy the top_k items of buf to D
+   					set<Hypothesis*, HypothesisScoreOrderer >::iterator buf_iter;
+   					size_t l=0;
+   					for(buf_iter = buf.begin(); buf_iter != buf.end(); ++buf_iter)
+   					{
+   						if(l < top_k)
+   							D.insert(*buf_iter);
+   						else
+   							break;
+   						l++;
+   					}
+   					// add all hypothesis in D to hypothesis stack
+   					set<Hypothesis*, HypothesisScoreOrderer >::iterator d_iter;
+   					for(d_iter = D.begin(); d_iter != D.end(); ++d_iter)
+   					{
+   						Hypothesis *newHypo = *d_iter;
+   						size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
+							m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
+   					}
+					}
 				}
 			}
 		}
 
 		return; // done with special case (no reordering limit)
 	}
-}
-
-/** Find all translation options to expand one hypothesis, trigger expansion
- * this is mostly a check for overlap with already covered words, and for
- * violation of reordering limits. 
- * \param hypothesis hypothesis to be expanded upon
- */
-void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
-{
-	// since we check for reordering limits, its good to have that limit handy
-	int maxDistortion = StaticData::Instance().GetMaxDistortion();
-	bool isWordLattice = StaticData::Instance().GetInputType() == WordLatticeInput;
-
-	// no limit of reordering: only check for overlap
-	if (maxDistortion < 0)
-	{	
-		const WordsBitmap hypoBitmap	= hypothesis.GetWordsBitmap();
-		const size_t hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
-								, sourceSize			= m_source.GetSize();
-
-		for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
-		{
-      size_t maxSize = sourceSize - startPos;
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
-
-			for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
-			{
-				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
-				{
-					ExpandAllHypotheses(hypothesis
-												, m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos)));
-				}
-			}
-		}
-
-		return; // done with special case (no reordering limit)
-	}
-
+/*	
 	// if there are reordering limits, make sure it is not violated
 	// the coverage bitmap is handy here (and the position of the first gap)
 	const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
@@ -437,8 +447,9 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 #endif
 			}
 		}
-	}
+	}*/
 }
+
 
 /**
  * Expand a hypothesis given a list of translation options
