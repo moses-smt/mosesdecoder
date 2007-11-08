@@ -136,7 +136,7 @@ void Manager::ProcessSentence()
 					size_t j = 0;
 					// make subset of HYPOTHESES
 					set<Hypothesis*, HypothesisScoreOrderer> topkCoverageSet;
-					set<Hypothesis*>::iterator set_Iter;
+					set<Hypothesis*, HypothesisScoreOrderer>::const_iterator set_Iter;
    				for ( set_Iter = coverageSet.begin(); set_Iter != coverageSet.end(); ++set_Iter )
    				{
    					if(j < top_k)
