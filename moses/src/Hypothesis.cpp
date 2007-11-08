@@ -89,6 +89,8 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
+	
+	//cerr << m_sourceCompleted << "   " << m_currSourceWordsRange << endl;
 	assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));	
 
 	//_hash_computed = false;

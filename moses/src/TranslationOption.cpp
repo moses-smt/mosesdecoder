@@ -162,9 +162,9 @@ void TranslationOption::CacheReorderingProb(const LexicalReordering &lexreorderi
 	m_reordering.Assign(&lexreordering, score);
 }
 
-ScoreComponentCollection TranslationOption::ReturnScoreBreakdown()
+float TranslationOption::GetFutureScore()
 {
-	return m_scoreBreakdown;
+	return m_futureScore;
 }
 
 
