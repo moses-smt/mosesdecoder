@@ -35,6 +35,7 @@ bool print_cooc_counts = false;         // add cooc counts to phrase table?
 bool print_neglog_significance = false; // add -log(p) to phrase table?
 double sig_filter_limit = 0;            // keep phrase pairs with -log(sig) > sig_filter_limit
                                         //    higher = filter-more
+bool pef_filter_only = false;           // only filter based on pef
 
 // globals
 PhraseSetMap esets;
@@ -193,6 +194,7 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
       delete *i;
     options.erase(options.begin()+pfe_filter_limit,options.end());
   }
+  if (pef_filter_only) return;
   
   SentIdSet fset;
   vector<S_SimplePhraseLocationElement> locations;
@@ -288,28 +290,33 @@ int main(int argc, char * argv[]){
                 usage();
         }
     }
+    if (sig_filter_limit == 0.0) pef_filter_only = true;
     //-----------------------------------------------------------------------------	
-    if (optind != argc || !efile || !ffile) {
+    if (optind != argc || ((!efile || !ffile) && !pef_filter_only)) {
       usage();
     }
 
     //load the indexed corpus with vocabulary(noVoc=false) and with offset(noOffset=false)
-    e_sa.loadData_forSearch(efile, false, false);
-    f_sa.loadData_forSearch(ffile, false, false);
-    size_t elines = e_sa.returnTotalSentNumber();
-    size_t flines = f_sa.returnTotalSentNumber();
-    if (elines != flines) {
-      std::cerr << "Number of lines in e-corpus != number of lines in f-corpus!\n";
-      usage();
+    if (!pef_filter_only) {
+      e_sa.loadData_forSearch(efile, false, false);
+      f_sa.loadData_forSearch(ffile, false, false);
+      size_t elines = e_sa.returnTotalSentNumber();
+      size_t flines = f_sa.returnTotalSentNumber();
+      if (elines != flines) {
+        std::cerr << "Number of lines in e-corpus != number of lines in f-corpus!\n";
+        usage();
+      } else {
+        std::cerr << "Training corpus: " << elines << " lines\n";
+        num_lines = elines;
+      }
+      p_111 = -log(fisher_exact(1,1,1));
+      std::cerr << "\\alpha = " << p_111 << "\n";
+      if (sig_filter_limit == ALPHA_MINUS_EPS) { sig_filter_limit = p_111 - 0.001; }
+        else if (sig_filter_limit == ALPHA_PLUS_EPS) { sig_filter_limit = p_111 + 0.001; }
+      std::cerr << "Sig filter threshold is = " << sig_filter_limit << "\n";
     } else {
-      std::cerr << "Training corpus: " << elines << " lines\n";
-      num_lines = elines;
+      std::cerr << "Filtering using P(e|f) only. n=" << pfe_filter_limit << std::endl;
     }
-    p_111 = -log(fisher_exact(1,1,1));
-    std::cerr << "\\alpha = " << p_111 << "\n";
-    if (sig_filter_limit == ALPHA_MINUS_EPS) { sig_filter_limit = p_111 - 0.001; }
-      else if (sig_filter_limit == ALPHA_PLUS_EPS) { sig_filter_limit = p_111 + 0.001; }
-    std::cerr << "Sig filter threshold is = " << sig_filter_limit << "\n";
 
     char tmpString[10000];
     std::string prev = "";
