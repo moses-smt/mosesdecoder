@@ -137,21 +137,6 @@ std::ostream& operator << (std::ostream& os, const PTEntry& pp)
   return os;
 }
 
-// for an overview, see 
-//    W. Press, S. Teukolsky and W. Vetterling. (1992) Numerical Recipes in C. Chapter 6.1.
-double log_gamma(int x)
-{
-  // size_t xx=(size_t)x; xx--; size_t sum=1; while (xx) { sum *= xx--; } return log((double)(sum));
-  if (x <= 2) { return 0.0; }
-  static double coefs[6] = {76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5};
-  double tmp=(double)x+5.5;
-  tmp -= (((double)x)+0.5)*log(tmp);
-  double y=(double)x;
-  double sum = 1.000000000190015;
-  for (size_t j=0;j<6;++j) { sum += coefs[j]/++y; }
-  return -tmp+log(2.5066282746310005*sum/(double)x); 
-}
-
 void print(int a, int b, int c, int d, float p) {
   std::cerr << a << "\t" << b << "\t P=" << p << "\n"
             << c << "\t" << d << "\t xf=" << (double)(b)*(double)(c)/(double)(a+1)/(double)(d+1) << "\n\n";
@@ -170,12 +155,12 @@ double fisher_exact(int cfe, int ce, int cf)
     int d = (num_lines - ce - cf + cfe);
     int n = a + b + c + d;
 
-    double cp = exp(log_gamma(1+a+c) + log_gamma(1+b+d) + log_gamma(1+a+b) + log_gamma(1+c+d) - log_gamma(1+n) - log_gamma(1+a) - log_gamma(1+b) - log_gamma(1+c) - log_gamma(1+d));
+    double cp = exp(lgamma(1+a+c) + lgamma(1+b+d) + lgamma(1+a+b) + lgamma(1+c+d) - lgamma(1+n) - lgamma(1+a) - lgamma(1+b) - lgamma(1+c) - lgamma(1+d));
     double total_p = 0.0;
     int tc = std::min(b,c);
     for (int i=0; i<=tc; i++) {
       total_p += cp;
-//      double lg = log_gamma(1+a+c) + log_gamma(1+b+d) + log_gamma(1+a+b) + log_gamma(1+c+d) - log_gamma(1+n) - log_gamma(1+a) - log_gamma(1+b) - log_gamma(1+c) - log_gamma(1+d); double cp = exp(lg);
+//      double lg = lgamma(1+a+c) + lgamma(1+b+d) + lgamma(1+a+b) + lgamma(1+c+d) - lgamma(1+n) - lgamma(1+a) - lgamma(1+b) - lgamma(1+c) - lgamma(1+d); double cp = exp(lg);
 //      print(a,b,c,d,cp);
       double coef = (double)(b)*(double)(c)/(double)(a+1)/(double)(d+1);
       cp *= coef;
