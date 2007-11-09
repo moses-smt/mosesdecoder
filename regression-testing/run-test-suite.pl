@@ -21,9 +21,10 @@ my @tests = qw (
   lattice-surface
   lexicalized-reordering
   lexicalized-reordering-cn
+  xml-markup
 );
 ############################################################
-#@tests=qw(lattice-distortion);
+#@tests=qw(xml-markup);
 use MosesRegressionTesting;
 use File::Temp qw ( tempfile );
 use POSIX qw ( strftime );
