@@ -46,8 +46,8 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 		std::vector<string> xmlTokens = Tokenize(line,"<>");
 		std::string tagName = "";
 		std::string tagContents = "";
-		std::string altText = "";
-		std::string altProb = "";
+		std::vector<std::string> altTexts;
+		std::vector<std::string> altProbs;
 		size_t offset=0;
 		size_t tagStart=0;
 		if (xmlTokens.size()>1 && line.at(0) == '<') offset=1;
@@ -75,13 +75,17 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 				{
 					//this is an open tag
 					tagName = nextTagName;
-					altText = Sentence::ParseXmlTagAttribute(tagContents,"english");
-					altProb = Sentence::ParseXmlTagAttribute(tagContents,"prob");
+					altTexts = TokenizeMultiCharSeparator(Sentence::ParseXmlTagAttribute(tagContents,"english"), "||");
+					altProbs = TokenizeMultiCharSeparator(Sentence::ParseXmlTagAttribute(tagContents,"prob"), "||");
 					tagStart =  Phrase::GetSize();
 					VERBOSE(3,"XML TAG NAME IS: '" << tagName << "'" << endl);
-					VERBOSE(3,"XML TAG ENGLISH IS: '" << altText << "'" << endl);
-					VERBOSE(3,"XML TAG PROB IS: '" << altProb << "'" << endl);
+					VERBOSE(3,"XML TAG ENGLISH IS: '" << altTexts[0] << "'" << endl);
+					VERBOSE(3,"XML TAG PROB IS: '" << altProbs[0] << "'" << endl);
 					VERBOSE(3,"XML TAG STARTS AT WORD: " << Phrase::GetSize() << endl);					
+					if (altTexts.size() != altProbs.size()) {
+					  TRACE_ERR("ERROR: Unequal number of probabilities and translation alternatives: " << line << endl);
+						return 0;
+					}
 				}
 				else if ((nextTagName.size() == 0) || (nextTagName.at(0) != '/') || (nextTagName.substr(1) != tagName)) 
 				{
@@ -99,19 +103,21 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 					//TODO: deal with multiple XML options here
 					
 					if (staticData.GetXmlInputType() != XmlIgnore) {
-						//only store options if we aren't ignoring them
-						//set default probability
-						float probValue = 1;
-						if (altProb != "") probValue = Scan<float>(altProb);
-						//Convert from prob to log-prob
-						float scoreValue = FloorScore(TransformScore(probValue));
-						XmlOption option(tagStart,tagEnd,altText,scoreValue);
-						m_xmlOptionsList.push_back(option);
+						for (size_t i=0; i<altTexts.size(); ++i) {
+							//only store options if we aren't ignoring them
+							//set default probability
+							float probValue = 1;
+							if (altProbs[i] != "") probValue = Scan<float>(altProbs[i]);
+							//Convert from prob to log-prob
+							float scoreValue = FloorScore(TransformScore(probValue));
+							XmlOption option(tagStart,tagEnd,altTexts[i],scoreValue);
+							m_xmlOptionsList.push_back(option);
+						}
 					}
 					tagName= "";
 					tagContents = "";
-					altText = "";
-					altProb = "";
+					altTexts.clear();
+					altProbs.clear();
 				}
 			
 			}

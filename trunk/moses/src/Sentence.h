@@ -26,26 +26,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "Phrase.h"
 #include "InputType.h"
+#include "XmlOption.h"
 
 class WordsRange;
 class PhraseDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
-
-/** This struct is used for storing XML force translation data for a given range in the sentence
- */
-struct XmlOption {
-
-	size_t startPos, endPos;
-	std::vector<std::string> targetPhrases;
-	std::vector<float> targetScores;
-	
-	XmlOption(int s, int e, std::string targetPhrase, float targetScore): startPos(s), endPos(e) {
-		targetPhrases.push_back(targetPhrase);
-		targetScores.push_back(targetScore);
-	}
-
-};
 
 
 /***
