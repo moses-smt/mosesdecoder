@@ -59,7 +59,8 @@ libmoses_a_SOURCES = \
 	Word.cpp \
 	WordsBitmap.cpp \
 	WordLattice.cpp \
-	WordsRange.cpp
+	WordsRange.cpp \
+	XmlOption.cpp
 
 
 if SRI_LM
