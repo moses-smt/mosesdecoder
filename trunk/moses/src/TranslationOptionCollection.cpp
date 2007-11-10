@@ -160,11 +160,12 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGr
 		}
 	}
 		
+	bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
 	// create unknown words for 1 word coverage where we don't have any trans options
 	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
 		TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
-		if (fullList.size() == 0)
+		if (fullList.size() == 0 || alwaysCreateDirectTranslationOption)
 			ProcessUnknownWord(pos);
 	}
 }
