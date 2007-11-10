@@ -120,6 +120,7 @@ protected:
 
   float m_mbrScale; //! Scaling factor for computing marginal probability of candidate translation
 	mutable const InputType* m_input;  //! holds reference to current sentence
+	bool m_isAlwaysCreateDirectTranslationOption;
 	//! constructor. only the 1 static variable can be created
 	StaticData();
 
@@ -143,6 +144,9 @@ protected:
 	
 public:
 
+	bool IsAlwaysCreateDirectTranslationOption() const {
+		return m_isAlwaysCreateDirectTranslationOption;
+	}
 	//! destructor
 	~StaticData();
 	//! return static instance for use like global variable

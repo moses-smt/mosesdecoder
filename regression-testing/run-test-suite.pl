@@ -24,7 +24,7 @@ my @tests = qw (
   xml-markup
 );
 ############################################################
-#@tests=qw(xml-markup);
+#@tests=qw(lattice-distortion);
 use MosesRegressionTesting;
 use File::Temp qw ( tempfile );
 use POSIX qw ( strftime );

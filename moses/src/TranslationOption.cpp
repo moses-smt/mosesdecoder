@@ -61,10 +61,12 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 , m_futureScore(0)
 {
 	const UnknownWordPenaltyProducer *up = StaticData::Instance().GetUnknownWordPenaltyProducer();
-	const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
-	vector<float> score(1);
-	score[0] = FloorScore(-numeric_limits<float>::infinity());
-	m_scoreBreakdown.Assign(scoreProducer, score);
+  if (up) {
+		const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
+		vector<float> score(1);
+		score[0] = FloorScore(-numeric_limits<float>::infinity());
+		m_scoreBreakdown.Assign(scoreProducer, score);
+	}
 
 	if (inputType.GetType() == SentenceInput)
 	{

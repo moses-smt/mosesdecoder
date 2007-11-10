@@ -73,6 +73,7 @@ StaticData::StaticData()
 ,m_onlyDistinctNBest(false)
 ,m_computeLMBackoffStats(false)
 ,m_factorDelimiter("|") // default delimiter between factors
+,m_isAlwaysCreateDirectTranslationOption(true)
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
