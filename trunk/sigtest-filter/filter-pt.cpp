@@ -11,7 +11,7 @@
 #include <set>
 
 #ifdef WIN32
-#include "XGetopt.h"
+#include "WIN32_functions.h"
 #else
 #include <unistd.h>
 #endif

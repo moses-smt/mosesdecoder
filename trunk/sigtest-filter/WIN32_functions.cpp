@@ -38,7 +38,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "XGetopt.h"
+#include <math.h>
+#include "WIN32_functions.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -218,3 +219,18 @@ int getopt(int argc, char *argv[], char *optstring)
 
 	return c;
 }
+
+ // for an overview, see 	 
+ //    W. Press, S. Teukolsky and W. Vetterling. (1992) Numerical Recipes in C. Chapter 6.1. 	 
+ double lgamma(int x) 	 
+ { 	 
+   // size_t xx=(size_t)x; xx--; size_t sum=1; while (xx) { sum *= xx--; } return log((double)(sum)); 	 
+   if (x <= 2) { return 0.0; } 	 
+   static double coefs[6] = {76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5}; 	 
+   double tmp=(double)x+5.5; 	 
+   tmp -= (((double)x)+0.5)*log(tmp); 	 
+   double y=(double)x; 	 
+   double sum = 1.000000000190015; 	 
+   for (size_t j=0;j<6;++j) { sum += coefs[j]/++y; } 	 
+   return -tmp+log(2.5066282746310005*sum/(double)x); 	 
+ }
