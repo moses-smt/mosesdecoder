@@ -666,6 +666,10 @@
 				RelativePath=".\src\WordsRange.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\XmlOption.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -962,6 +966,10 @@
 			</File>
 			<File
 				RelativePath=".\src\WordsRange.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\XmlOption.h"
 				>
 			</File>
 		</Filter>
