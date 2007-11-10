@@ -18,3 +18,5 @@ struct XmlOption {
 
 };
 
+std::vector<XmlOption> ProcessAndStripXMLTags(std::string& line);
+

@@ -1,3 +1,6 @@
 das ist ein kleines <n english="dwelling" prob="0.8">haus</n> .
 das ist ein kleines <n english="dwelling||building" prob="0.6||0.4">haus</n> .
 das ist ein kleines <n english="dwelling||building" prob="0.6||100.0">haus</n> .
+<n english="dwelling||building" prob="10.6||0.4" span="4,4" />das ist ein kleines haus .
+<n english="dwelling" prob="10.6" span="4,4" />das ist ein kleines haus .
+<n english="nice place" prob="4.0" span="3,4" /><n english="dwelling" prob="10.6" span="4,4" />das ist ein kleines haus .

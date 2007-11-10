@@ -41,93 +41,9 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	
 	//parse XML markup in translation line
 	const StaticData &staticData = StaticData::Instance();
-	if (staticData.GetXmlInputType() != XmlPassThrough && (line.find_first_of('<') != std::string::npos))
-	{
-		std::vector<string> xmlTokens = Tokenize(line,"<>");
-		std::string tagName = "";
-		std::string tagContents = "";
-		std::vector<std::string> altTexts;
-		std::vector<std::string> altProbs;
-		size_t offset=0;
-		size_t tagStart=0;
-		if (xmlTokens.size()>1 && line.at(0) == '<') offset=1;
-		for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++)
-		{
-			if(((xmlTokenPos+offset) % 2) == 0)
-			{
-				//phrase, not tag
-				Phrase::CreateFromString(factorOrder,xmlTokens[xmlTokenPos],factorDelimiter);
-			}
-			else
-			{
-				//TODO: support UNARY tags
-
-				//tag data
-				std::string tag =  Trim(xmlTokens[xmlTokenPos]);
-				VERBOSE(3,"XML TAG IS: " << tag << endl);
-				std::string::size_type endOfName = xmlTokens[xmlTokenPos].find_first_of(' ');
-				std::string nextTagName = tag;
-				if (endOfName != std::string::npos) {
-					nextTagName = xmlTokens[xmlTokenPos].substr(0,endOfName);
-					tagContents = xmlTokens[xmlTokenPos].substr(endOfName+1);
-				}
-				if ((xmlTokenPos-1+offset) % 4 == 0)
-				{
-					//this is an open tag
-					tagName = nextTagName;
-					altTexts = TokenizeMultiCharSeparator(Sentence::ParseXmlTagAttribute(tagContents,"english"), "||");
-					altProbs = TokenizeMultiCharSeparator(Sentence::ParseXmlTagAttribute(tagContents,"prob"), "||");
-					tagStart =  Phrase::GetSize();
-					VERBOSE(3,"XML TAG NAME IS: '" << tagName << "'" << endl);
-					VERBOSE(3,"XML TAG ENGLISH IS: '" << altTexts[0] << "'" << endl);
-					VERBOSE(3,"XML TAG PROB IS: '" << altProbs[0] << "'" << endl);
-					VERBOSE(3,"XML TAG STARTS AT WORD: " << Phrase::GetSize() << endl);					
-					if (altTexts.size() != altProbs.size()) {
-					  TRACE_ERR("ERROR: Unequal number of probabilities and translation alternatives: " << line << endl);
-						return 0;
-					}
-				}
-				else if ((nextTagName.size() == 0) || (nextTagName.at(0) != '/') || (nextTagName.substr(1) != tagName)) 
-				{
-					//mismatched tag, abort!
-					TRACE_ERR("ERROR: tried to parse malformed XML with xml-input enabled: " << line << endl);
-					return 0;
-				}
-				else 
-				{
-					VERBOSE(3,"XML END TAG IS: " << nextTagName.substr(1) << endl);
-					VERBOSE(3,"XML TAG ENDS AT WORD: " << Phrase::GetSize() << endl);
-					//store translation options into members
-					size_t tagEnd = Phrase::GetSize()-1; //size is inclusive
-					
-					//TODO: deal with multiple XML options here
-					
-					if (staticData.GetXmlInputType() != XmlIgnore) {
-						for (size_t i=0; i<altTexts.size(); ++i) {
-							//only store options if we aren't ignoring them
-							//set default probability
-							float probValue = 1;
-							if (altProbs[i] != "") probValue = Scan<float>(altProbs[i]);
-							//Convert from prob to log-prob
-							float scoreValue = FloorScore(TransformScore(probValue));
-							XmlOption option(tagStart,tagEnd,altTexts[i],scoreValue);
-							m_xmlOptionsList.push_back(option);
-						}
-					}
-					tagName= "";
-					tagContents = "";
-					altTexts.clear();
-					altProbs.clear();
-				}
-			
-			}
-		
-		}
-	}
-	else 
-	{
-		Phrase::CreateFromString(factorOrder, line, factorDelimiter);
-	}
+	if (staticData.GetXmlInputType() != XmlPassThrough)
+		m_xmlOptionsList = ProcessAndStripXMLTags(line);
+	Phrase::CreateFromString(factorOrder, line, factorDelimiter);
 	
 	//only fill the vector if we are parsing XML
 	if (staticData.GetXmlInputType() != XmlPassThrough ) {
