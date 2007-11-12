@@ -62,7 +62,7 @@ protected:
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float
-		m_beamThreshold,
+		m_beamWidth,
 		m_weightDistortion, 
 		m_weightWordPenalty, 
 		m_wordDeletionWeight,
@@ -243,9 +243,9 @@ public:
 	{
 		return m_maxDistortion;
 	}
-	float GetBeamThreshold() const
+	float GetBeamWidth() const
 	{
-		return m_beamThreshold;
+		return m_beamWidth;
 	}
 	//! returns the total number of score components across all types, all factors
 	size_t GetTotalScoreComponents() const

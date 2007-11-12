@@ -58,8 +58,8 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 			VERBOSE(3,", best on stack");
 			m_bestScore = hypo->GetTotalScore();
 			// this may also affect the worst score
-	        if ( m_bestScore + m_beamThreshold > m_worstScore )
-	          m_worstScore = m_bestScore + m_beamThreshold;
+	        if ( m_bestScore + m_beamWidth > m_worstScore )
+	          m_worstScore = m_bestScore + m_beamWidth;
 					}
 	
 	    // Prune only if stack is twice as big as needed (lazy pruning)
@@ -140,14 +140,14 @@ void HypothesisStack::PruneToSize(size_t newSize)
 		priority_queue<float> bestScores;
 		
 		// push all scores to a heap
-		// (but never push scores below m_bestScore+m_beamThreshold)
+		// (but never push scores below m_bestScore+m_beamWidth)
 		iterator iter = m_hypos.begin();
 		float score = 0;
 		while (iter != m_hypos.end())
 		{
 			Hypothesis *hypo = *iter;
 			score = hypo->GetTotalScore();
-			if (score > m_bestScore+m_beamThreshold) 
+			if (score > m_bestScore+m_beamWidth) 
 			{
 				bestScores.push(score);
 			}

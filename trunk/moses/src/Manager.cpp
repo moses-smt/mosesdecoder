@@ -60,7 +60,7 @@ Manager::Manager(InputType const& source)
 	{
 		HypothesisStack &sourceHypoColl = *iterStack;
 		sourceHypoColl.SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
-		sourceHypoColl.SetBeamThreshold(staticData.GetBeamThreshold());
+		sourceHypoColl.SetBeamWidth(staticData.GetBeamWidth());
 	}
 }
 

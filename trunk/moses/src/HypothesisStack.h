@@ -66,7 +66,7 @@ public:
 protected:
 	float m_bestScore; /**< score of the best hypothesis in collection */
 	float m_worstScore; /**< score of the worse hypthesis in collection */
-	float m_beamThreshold; /**< minimum score due to threashold pruning */
+	float m_beamWidth; /**< minimum score due to threashold pruning */
 	size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
 	_HCType m_hypos; /**< contains hypotheses */
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
@@ -123,9 +123,9 @@ public:
     * this factor times the best score to be allowed in the stack
 	 * \param beamThreshold minimum factor (typical number: 0.03)
 	 */
-	inline void SetBeamThreshold(float beamThreshold)
+	inline void SetBeamWidth(float beamWidth)
 	{
-		m_beamThreshold = beamThreshold;
+		m_beamWidth = beamWidth;
 	}
 	/** return score of the best hypothesis in the stack */
 	inline float GetBestScore() const
@@ -137,7 +137,7 @@ public:
 	 * Pruning algorithm: find a threshold and delete all hypothesis below it.
 	 * The threshold is chosen so that exactly newSize top items remain on the 
 	 * stack in fact, in situations where some of the hypothesis fell below 
-	 * m_beamThreshold, the stack will contain less items.
+	 * m_beamWidth, the stack will contain less items.
 	 * \param newSize maximum size */
 	void PruneToSize(size_t newSize);
 
