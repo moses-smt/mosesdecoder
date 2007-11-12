@@ -217,9 +217,9 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_useDistortionFutureCosts = (m_parameter->GetParam("use-distortion-future-costs").size() > 0) 
 		? Scan<bool>(m_parameter->GetParam("use-distortion-future-costs")[0]) : false;
 	
-	m_beamThreshold = (m_parameter->GetParam("beam-threshold").size() > 0) ?
+	m_beamWidth = (m_parameter->GetParam("beam-threshold").size() > 0) ?
 		TransformScore(Scan<float>(m_parameter->GetParam("beam-threshold")[0]))
-		: TransformScore(DEFAULT_BEAM_THRESHOLD);
+		: TransformScore(DEFAULT_BEAM_WIDTH);
 
 	m_maxNoTransOptPerCoverage = (m_parameter->GetParam("max-trans-opt-per-coverage").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
