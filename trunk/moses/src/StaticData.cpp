@@ -287,6 +287,7 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_phraseDictionary);
 	RemoveAllInColl(m_generationDictionary);
 	RemoveAllInColl(m_languageModel);
+	RemoveAllInColl(m_decodeStepVL);
 	
 	// delete trans opt
 	map<Phrase, std::vector<TranslationOption*> >::iterator iterCache;
@@ -773,9 +774,9 @@ bool StaticData::LoadMapping()
 		assert(decodeStep);
 		if (m_decodeStepVL.size() < vectorList + 1) 
 		{
-			m_decodeStepVL.push_back(DecodeGraph());
+			m_decodeStepVL.push_back(new DecodeGraph());
 		}
-		m_decodeStepVL[vectorList].Add(decodeStep);
+		m_decodeStepVL[vectorList]->Add(decodeStep);
 		prev = decodeStep;
 		previousVectorList = vectorList;
 	}
