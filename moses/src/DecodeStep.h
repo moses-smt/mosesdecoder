@@ -49,6 +49,7 @@ protected:
 	std::vector<FactorType> m_newOutputFactors; /** list of the factors that are new in this step, may be empty*/
 
 public:
+	DecodeStep(); // not implemented
 	DecodeStep(Dictionary *ptr, const DecodeStep* prevDecodeStep);
 	virtual ~DecodeStep();
 

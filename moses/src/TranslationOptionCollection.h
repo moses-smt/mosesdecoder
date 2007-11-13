@@ -70,7 +70,7 @@ protected:
 	void CalcFutureScore();
 
 	//! Force a creation of a translation option where there are none for a particular source position.
-	void ProcessUnknownWord(const std::vector <DecodeGraph> &decodeStepVL);
+	void ProcessUnknownWord(const std::vector <DecodeGraph*> &decodeStepVL);
 	//! special handling of ONE unknown words.
 	virtual void ProcessOneUnknownWord(const Word &sourceWord
 																		 , size_t sourcePos, size_t length = 1);
@@ -104,7 +104,7 @@ public:
 	size_t GetSize() const { return m_source.GetSize(); };
 
 	//! Create all possible translations from the phrase tables
-	virtual void CreateTranslationOptions(const std::vector <DecodeGraph> &decodeStepVL);
+	virtual void CreateTranslationOptions(const std::vector <DecodeGraph*> &decodeStepVL);
 	//! Create translation options that exactly cover a specific input span. 
 	virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
 																			, size_t startPosition

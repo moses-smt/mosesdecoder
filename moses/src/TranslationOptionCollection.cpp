@@ -141,13 +141,13 @@ void TranslationOptionCollection::Prune()
 * \param factorCollection input sentence with all factors
 */
 
-void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGraph> &decodeStepVL)
+void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGraph*> &decodeStepVL)
 {
 	size_t size = m_source.GetSize();
 	// try to translation for coverage with no trans by expanding table limit
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
-	  const DecodeGraph &decodeStepList = decodeStepVL[startVL];
+	  const DecodeGraph &decodeStepList = *decodeStepVL[startVL];
 		for (size_t pos = 0 ; pos < size ; ++pos)
 		{
 				TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
@@ -331,7 +331,7 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeGraph> &decodeStepVL)
+void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeGraph*> &decodeStepVL)
 {	
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
@@ -339,7 +339,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 	// for all phrases
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
-	  const DecodeGraph &decodeStepList = decodeStepVL[startVL];
+	  const DecodeGraph &decodeStepList = *decodeStepVL[startVL];
 		for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
 		{
       size_t maxSize = m_source.GetSize() - startPos;

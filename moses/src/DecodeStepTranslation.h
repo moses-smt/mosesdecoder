@@ -29,6 +29,7 @@ class TargetPhrase;
 class DecodeStepTranslation : public DecodeStep
 {
 public:
+	DecodeStepTranslation(); // not implemented
 	DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev);
 
   /** returns phrase table (dictionary) for translation step */
