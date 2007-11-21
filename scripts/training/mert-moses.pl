@@ -262,6 +262,8 @@ if ($___INPUTTYPE == 1)
 if (!defined $SCRIPTS_ROOTDIR) {
   $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
   die "Please set SCRIPTS_ROOTDIR or specify --rootdir" if !defined $SCRIPTS_ROOTDIR;
+}else{
+  $ENV{"SCRIPTS_ROOTDIR"}=$SCRIPTS_ROOTDIR;
 }
 
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
@@ -577,17 +579,18 @@ while(1) {
        if ($run == 1){ safesystem("touch $oldallsorted"); };
 
        if (-e $oldallsorted){ # the mert process works properly; the sorted file containing all previous nbests are already present
-          $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run$run.best$___N_BEST_LIST_SIZE.out.gz | sort -m -n -t \"|\" -k 1,1 $oldallsorted - > $allsorted ; rm $oldallsorted ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./"; 
+          $cmd = "gunzip -dc run$run.best$___N_BEST_LIST_SIZE.out.gz | sort -m -n -t \"|\" -k 1,1 $oldallsorted - > $allsorted ; rm $oldallsorted ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./"; 
        }
        else{ # the mert process did not work properly; the sorted file containing all previous nbests is no more present; create again
-          $cmd = "export PYTHONPATH=$pythonpath ; gzip -d run*.best$___N_BEST_LIST_SIZE.out.gz ; sort -m -n -t \"|\" -k 1,1 run*.best$___N_BEST_LIST_SIZE.out > $allsorted ; gzip run*.best$___N_BEST_LIST_SIZE.out ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
+          $cmd = "gzip -d run*.best$___N_BEST_LIST_SIZE.out.gz ; sort -m -n -t \"|\" -k 1,1 run*.best$___N_BEST_LIST_SIZE.out > $allsorted ; gzip run*.best$___N_BEST_LIST_SIZE.out ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
        }
     }
     else{ # traditional scoring code
-       $cmd = "export PYTHONPATH=$pythonpath ; gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
+       $cmd = "gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
     }
 
     if (defined $___JOBS) {
+      $cmd = "setenv PYTHONPATH $pythonpath ; $cmd";
       safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=scorenbest.out -stderr=scorenbest.err") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
     } else {
       safesystem($cmd) or die "Failed to score nbestlist";
@@ -663,10 +666,11 @@ while(1) {
   safesystem("\\cp -f init.opt run$run.init.opt") or die;
 
   my $DIM = scalar(@CURR); # number of lambdas
-  my $cmd="export SCRIPTS_ROOTDIR=$SCRIPTS_ROOTDIR ; $cmertcmd -d $DIM";
+  my $cmd="$cmertcmd -d $DIM";
  
   print STDERR "Starting cmert.\n";
   if (defined $___JOBS) {
+    $cmd="setenv SCRIPTS_ROOTDIR $SCRIPTS_ROOTDIR ; $cmd";
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=cmert.log -queue-parameter=\"$queue_flags\"") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
   } else {
     safesystem("$cmd 2> cmert.log") or die "Failed to run cmert";
