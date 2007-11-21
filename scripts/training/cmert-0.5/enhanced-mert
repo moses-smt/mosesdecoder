@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/csh
 
 PrintUsageAndDie(){
 echo "USAGE: enhanced-cmert.sh -d size [-active] [-help]"
