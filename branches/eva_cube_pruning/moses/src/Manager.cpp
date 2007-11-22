@@ -124,15 +124,16 @@ void Manager::ProcessSentence()
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
 		{
 				// take first hypothesis from stack to get coverage
-				Hypothesis &hypothesis = **iterHypo;
-				const WordsBitmap &wb = hypothesis.GetWordsBitmap();
+				Hypothesis *hypothesis = *iterHypo;
+				const WordsBitmap &wb = hypothesis->GetWordsBitmap();
 				vector<size_t> cov = wb.GetCompressedRepresentation();
 				
 				// check if coverage of current hypothesis was already seen --> if no, proceed
-				if( (seenCoverages.count( cov )) == 0)
+				if( (seenCoverages.count( cov )) == 0 )
 				{
-					seenCoverages.insert(cov);
-					const set<Hypothesis*, HypothesisScoreOrderer> coverageSet = sourceHypoColl.getCoverageSet( cov );
+					seenCoverages.insert( cov );
+					const set<Hypothesis*, HypothesisScoreOrderer> coverageSet = sourceHypoColl.GetCoverageSet( wb );
+					
 					size_t j = 0;
 					// make subset of HYPOTHESES
 					set<Hypothesis*, HypothesisScoreOrderer> topkCoverageSet;
@@ -145,17 +146,19 @@ void Manager::ProcessSentence()
 		  	 			topkCoverageSet.insert(hypo);
 	   						float score = hypo->GetTotalScore();
 	  	 					vector<size_t>::iterator vec_iter;
-	   						cout << "Stack: " << i << " hypothesis_score: " << score << " coverage: " << wb << endl; 
+	//   						cout << "Stack: " << i << " hypothesis_score: " << score << " coverage: " << wb << endl; 
 	   					j++;
    					}
    				}
-   				cout << endl;
+  // 				cout << endl;
 				
 					// Instead of passing the whole coverage set, pass only the top k hypotheses.
 					// For easier handling, turn coverageSet into a vector. 
-					vector< Hypothesis*> coverageVec(topkCoverageSet.begin(), topkCoverageSet.end());
+					vector< Hypothesis*> coverageVec(topkCoverageSet.begin(), topkCoverageSet.end());					
 					if(coverageVec.size() > 0)
+					{
 						ProcessCoverageVector(coverageVec, wb);
+					}
 				}
 		}
 		i++;
@@ -274,7 +277,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 }
 
 void Manager::CubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol)
-{
+{	
 	set<TranslationOption*, TranslationOptionOrderer> translationOptionSet;
 	translationOptionSet.insert(tol.begin(), tol.end());
 						
@@ -289,12 +292,12 @@ void Manager::CubePruning(const vector< Hypothesis*> &coverageVec, TranslationOp
 		if(i < top_k)
 		{
 			TranslationOption *opt = *opt_iter;
-			cout << "option: " << opt->GetFutureScore() << endl;
+//			cout << "option: " << opt->GetFutureScore() << endl;
 			topkOptions.push_back(opt);
 			i++;
 		}
 	}
-	cout << endl;
+//	cout << endl;
 	   				
 	// KBEST
 	// ".. enumerating the consequent items best-first while keeping track of a relatively small
@@ -333,68 +336,68 @@ void Manager::CubePruning(const vector< Hypothesis*> &coverageVec, TranslationOp
    		}
    		cout << endl; 
    	}	
-  // "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
-  // and then line 12 pushes its successors [..] into cand." 
-  // 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
-  item = *(cand.begin());
-  // update grid position
-  x = item->GetXGridPosition();
-  y = item->GetYGridPosition();
-//cout << "chosen cand: " << x << " " << y << endl;
-  buf.insert(item);
-  cand.erase(cand.begin());
-  // PUSHSUCC(item, cand); --> insert neighbours of item into cand
-  // neighbour on the right side, same hypothesis, new extension
-  if( (coverageVec.size() > x) && (topkOptions.size() > y+1) )
-  { 
-  	newHypo = (coverageVec[x])->CreateNext(*topkOptions[y+1]);
-		newHypo->CalcScore(m_transOptColl->GetFutureScore());
-		newHypo->SetGridPosition(x, y+1);
-  	cand.insert( newHypo );
-  	// logging for the curious
-		IFVERBOSE(3) {
-			const StaticData &staticData = StaticData::Instance();
-			newHypo->PrintHypothesis(m_source
-					, staticData.GetWeightDistortion()
-					, staticData.GetWeightWordPenalty());
-		}
+  	// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
+  	// and then line 12 pushes its successors [..] into cand." 
+  	// 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
+  	item = *(cand.begin());
+  	// update grid position
+  	x = item->GetXGridPosition();
+  	y = item->GetYGridPosition();
+	//cout << "chosen cand: " << x << " " << y << endl;
+	  buf.insert(item);
+	  cand.erase(cand.begin());
+	  // PUSHSUCC(item, cand); --> insert neighbours of item into cand
+	  // neighbour on the right side, same hypothesis, new extension
+	  if( (coverageVec.size() > x) && (topkOptions.size() > y+1) )
+	  { 
+  		newHypo = (coverageVec[x])->CreateNext(*topkOptions[y+1]);
+			newHypo->CalcScore(m_transOptColl->GetFutureScore());
+			newHypo->SetGridPosition(x, y+1);
+  		cand.insert( newHypo );
+  		// logging for the curious
+			IFVERBOSE(3) {
+				const StaticData &staticData = StaticData::Instance();
+				newHypo->PrintHypothesis(m_source
+						, staticData.GetWeightDistortion()
+						, staticData.GetWeightWordPenalty());
+			}
+  	}
+  	// neighbour below, new hypothesis, same extension
+  	if( (coverageVec.size() > x+1) && (topkOptions.size() > y) )
+  	{
+	  	newHypo = (coverageVec[x+1])->CreateNext(*topkOptions[y]);
+			newHypo->CalcScore(m_transOptColl->GetFutureScore());
+			newHypo->SetGridPosition(x+1, y);
+   		cand.insert( newHypo );
+   		// logging for the curious
+			IFVERBOSE(3) {
+				const StaticData &staticData = StaticData::Instance();
+		  	newHypo->PrintHypothesis(m_source
+										, staticData.GetWeightDistortion()
+										, staticData.GetWeightWordPenalty());
+			}
+   	}
   }
-  // neighbour below, new hypothesis, same extension
-  if( (coverageVec.size() > x+1) && (topkOptions.size() > y) )
-   							{
-   								newHypo = (coverageVec[x+1])->CreateNext(*topkOptions[y]);
-									newHypo->CalcScore(m_transOptColl->GetFutureScore());
-									newHypo->SetGridPosition(x+1, y);
-   								cand.insert( newHypo );
-   								// logging for the curious
-									IFVERBOSE(3) {
-										const StaticData &staticData = StaticData::Instance();
-		  							newHypo->PrintHypothesis(m_source
-														, staticData.GetWeightDistortion()
-														, staticData.GetWeightWordPenalty());
-									}
-   							}
-   					}
-   					// "Re-sort the buffer into D(v) after it has accumulated k items."
-   					// buffer has an ordering function, just copy to D or if buf is larger than D, copy the top_k items of buf to D
-   					set<Hypothesis*, HypothesisScoreOrderer >::iterator buf_iter;
-   					size_t l=0;
-   					for(buf_iter = buf.begin(); buf_iter != buf.end(); ++buf_iter)
-   					{
-   						if(l < top_k)
-   							D.insert(*buf_iter);
-   						else
-   							break;
-   						l++;
-   					}
-   					// add all hypothesis in D to hypothesis stack
-   					set<Hypothesis*, HypothesisScoreOrderer >::iterator d_iter;
-   					for(d_iter = D.begin(); d_iter != D.end(); ++d_iter)
-   					{
-   						Hypothesis *newHypo = *d_iter;
-   						size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
-							m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
-   					}
+  // "Re-sort the buffer into D(v) after it has accumulated k items."
+  // buffer has an ordering function, just copy to D or if buf is larger than D, copy the top_k items of buf to D
+  set<Hypothesis*, HypothesisScoreOrderer >::iterator buf_iter;
+  size_t l=0;
+  for(buf_iter = buf.begin(); buf_iter != buf.end(); ++buf_iter)
+  {
+  	if(l < top_k)
+   		D.insert(*buf_iter);
+   	else
+   		break;
+    l++;
+  }
+  // add all hypothesis in D to hypothesis stack
+  set<Hypothesis*, HypothesisScoreOrderer >::iterator d_iter;
+  for(d_iter = D.begin(); d_iter != D.end(); ++d_iter)
+  {
+  	Hypothesis *newHypo = *d_iter;
+  	size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
+		m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
+  }
 }
 				
 
