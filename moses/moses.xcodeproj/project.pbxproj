@@ -135,6 +135,10 @@
 		1C8CFF090AD67A9700FA22E2 /* WordsBitmap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8C0AD67A9700FA22E2 /* WordsBitmap.h */; };
 		1C8CFF0A0AD67A9700FA22E2 /* WordsRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFE8D0AD67A9700FA22E2 /* WordsRange.cpp */; };
 		1C8CFF0B0AD67A9700FA22E2 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */; };
+		B2136E960CFB2ACC0097AB84 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2136E900CFB2ACC0097AB84 /* FloydWarshall.cpp */; };
+		B2136E970CFB2ACC0097AB84 /* FloydWarshall.h in Headers */ = {isa = PBXBuildFile; fileRef = B2136E910CFB2ACC0097AB84 /* FloydWarshall.h */; };
+		B2136E9A0CFB2ACC0097AB84 /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2136E940CFB2ACC0097AB84 /* XmlOption.cpp */; };
+		B2136E9B0CFB2ACC0097AB84 /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = B2136E950CFB2ACC0097AB84 /* XmlOption.h */; };
 		D39BA82D0AFBB7090089AE6A /* LanguageModelSkip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D39BA8270AFBB7090089AE6A /* LanguageModelSkip.cpp */; };
 		D39BA82E0AFBB7090089AE6A /* LanguageModelSkip.h in Headers */ = {isa = PBXBuildFile; fileRef = D39BA8280AFBB7090089AE6A /* LanguageModelSkip.h */; };
 		D39BA82F0AFBB7090089AE6A /* PhraseDictionaryMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D39BA8290AFBB7090089AE6A /* PhraseDictionaryMemory.cpp */; };
@@ -296,6 +300,12 @@
 		1C8CFE8C0AD67A9700FA22E2 /* WordsBitmap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsBitmap.h; path = src/WordsBitmap.h; sourceTree = "<group>"; };
 		1C8CFE8D0AD67A9700FA22E2 /* WordsRange.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = WordsRange.cpp; path = src/WordsRange.cpp; sourceTree = "<group>"; };
 		1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = src/WordsRange.h; sourceTree = "<group>"; };
+		B2136E900CFB2ACC0097AB84 /* FloydWarshall.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FloydWarshall.cpp; path = src/FloydWarshall.cpp; sourceTree = "<group>"; };
+		B2136E910CFB2ACC0097AB84 /* FloydWarshall.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FloydWarshall.h; path = src/FloydWarshall.h; sourceTree = "<group>"; };
+		B2136E920CFB2ACC0097AB84 /* LanguageModelIRST.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelIRST.cpp; path = src/LanguageModelIRST.cpp; sourceTree = "<group>"; };
+		B2136E930CFB2ACC0097AB84 /* LanguageModelIRST.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = LanguageModelIRST.h; path = src/LanguageModelIRST.h; sourceTree = "<group>"; };
+		B2136E940CFB2ACC0097AB84 /* XmlOption.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = XmlOption.cpp; path = src/XmlOption.cpp; sourceTree = "<group>"; };
+		B2136E950CFB2ACC0097AB84 /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = src/XmlOption.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D39BA8270AFBB7090089AE6A /* LanguageModelSkip.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelSkip.cpp; path = src/LanguageModelSkip.cpp; sourceTree = "<group>"; };
 		D39BA8280AFBB7090089AE6A /* LanguageModelSkip.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = LanguageModelSkip.h; path = src/LanguageModelSkip.h; sourceTree = "<group>"; };
@@ -453,6 +463,12 @@
 				1C8CFE740AD67A9700FA22E2 /* StaticData.cpp */,
 				1C8CFE750AD67A9700FA22E2 /* StaticData.h */,
 				1C8CFE760AD67A9700FA22E2 /* TargetPhrase.cpp */,
+				B2136E900CFB2ACC0097AB84 /* FloydWarshall.cpp */,
+				B2136E910CFB2ACC0097AB84 /* FloydWarshall.h */,
+				B2136E920CFB2ACC0097AB84 /* LanguageModelIRST.cpp */,
+				B2136E930CFB2ACC0097AB84 /* LanguageModelIRST.h */,
+				B2136E940CFB2ACC0097AB84 /* XmlOption.cpp */,
+				B2136E950CFB2ACC0097AB84 /* XmlOption.h */,
 				1C8CFE770AD67A9700FA22E2 /* TargetPhrase.h */,
 				1C8CFE780AD67A9700FA22E2 /* TargetPhraseCollection.cpp */,
 				1C8CFE790AD67A9700FA22E2 /* TargetPhraseCollection.h */,
@@ -577,6 +593,8 @@
 				0396E1B50C0B189200D95CFF /* TrellisPathList.h in Headers */,
 				0396E1B70C0B189200D95CFF /* WordLattice.h in Headers */,
 				037C639B0C8EBFB400584F2E /* DecodeGraph.h in Headers */,
+				B2136E970CFB2ACC0097AB84 /* FloydWarshall.h in Headers */,
+				B2136E9B0CFB2ACC0097AB84 /* XmlOption.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -691,6 +709,8 @@
 				0396E1B30C0B189200D95CFF /* TrellisPathCollection.cpp in Sources */,
 				0396E1B60C0B189200D95CFF /* WordLattice.cpp in Sources */,
 				037C639A0C8EBFB400584F2E /* DecodeGraph.cpp in Sources */,
+				B2136E960CFB2ACC0097AB84 /* FloydWarshall.cpp in Sources */,
+				B2136E9A0CFB2ACC0097AB84 /* XmlOption.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
