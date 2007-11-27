@@ -117,7 +117,8 @@ void Manager::ProcessSentence()
 		sourceHypoColl.CleanupArcList();
 		
 		// keep already seen coverages in mind
-		set<vector<size_t> > seenCoverages; 
+		//set<vector<size_t> > seenCoverages; 
+		set< WordsBitmap > seenCoverages;
 		
 		// go through each hypothesis on the stack, find the set of hypothesis with same coverage and expand this set using cube pruning
 		HypothesisStack::const_iterator iterHypo;
@@ -126,12 +127,12 @@ void Manager::ProcessSentence()
 				// take first hypothesis from stack to get coverage
 				Hypothesis *hypothesis = *iterHypo;
 				const WordsBitmap &wb = hypothesis->GetWordsBitmap();
-				vector<size_t> cov = wb.GetCompressedRepresentation();
+				//vector<size_t> cov = wb.GetCompressedRepresentation();
 				
 				// check if coverage of current hypothesis was already seen --> if no, proceed
-				if( (seenCoverages.count( cov )) == 0 )
+				if( (seenCoverages.count( wb )) == 0 )
 				{
-					seenCoverages.insert( cov );
+					seenCoverages.insert( wb );
 					const set<Hypothesis*, HypothesisScoreOrderer> coverageSet = sourceHypoColl.GetCoverageSet( wb );
 					
 					size_t j = 0;
@@ -163,7 +164,7 @@ void Manager::ProcessSentence()
 		}
 		i++;
 		// some logging
-		IFVERBOSE(2) { OutputHypoStackSize(); }
+		OutputHypoStackSize();
 	}
 
 	// some more logging
@@ -326,7 +327,7 @@ void Manager::CubePruning(const vector< Hypothesis*> &coverageVec, TranslationOp
 	Hypothesis *item;
 	// TODO: the size of the buffer could be a little bigger than top_k to allow for more possible hypotheses being found
 	size_t extra = 0;
- 	while( !(cand.empty()) && (buf.size() < top_k+extra) )
+ 	while( !(cand.empty()) && (buf.size() < top_k + extra) )
   {
   	IFVERBOSE(3) {
    		cout << "candidates: " << endl;

@@ -149,11 +149,6 @@ public:
 	{
 		return m_size;
 	}
-	/** represent this bitmap as 1 or more vector of integers.
-		* Used for exact matching of source words translated in hypothesis recombination
-		*/
-	std::vector<size_t> GetCompressedRepresentation() const;
-
 	
 	//! transitive comparison of WordsBitmap
 	inline int Compare (const WordsBitmap &compare) const
@@ -170,6 +165,11 @@ public:
 			return (thisSize < compareSize) ? -1 : 1;
 		}
     		return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
+	}
+
+	inline bool operator<(const WordsBitmap &compare) const
+	{
+		return Compare(compare) < 0;
 	}
 
 	inline size_t GetEdgeToTheLeftOf(size_t l) const
