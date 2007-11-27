@@ -187,8 +187,10 @@ int Hypothesis::NGramCompare(const Hypothesis &compare) const
 	// 0	= this ==compare
 	if (m_languageModelStates < compare.m_languageModelStates) return -1;
 	if (m_languageModelStates > compare.m_languageModelStates) return 1;
-	if (m_sourceCompleted.GetCompressedRepresentation() < compare.m_sourceCompleted.GetCompressedRepresentation()) return -1;
-	if (m_sourceCompleted.GetCompressedRepresentation() > compare.m_sourceCompleted.GetCompressedRepresentation()) return 1;
+	
+	int compareBitmap = m_sourceCompleted.Compare(compare.m_sourceCompleted);
+	if (compareBitmap != 0)
+		return compareBitmap;
 	if (m_currSourceWordsRange.GetEndPos() < compare.m_currSourceWordsRange.GetEndPos()) return -1;
 	if (m_currSourceWordsRange.GetEndPos() > compare.m_currSourceWordsRange.GetEndPos()) return 1;
 	if (! StaticData::Instance().GetSourceStartPosMattersForRecombination()) return 0;
