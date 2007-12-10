@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LMList.h"
 #include "TranslationOptionCollection.h"
 #include "TranslationOptionOrderer.h"
+#include "CubePruningData.h"
 
 using namespace std;
 
@@ -46,7 +47,10 @@ static bool debug2 = false;
 #endif
 
 // set k for cube pruning 
-const size_t top_k = 3;
+const size_t top_k = 30;
+
+// the size of the buffer could be a little bigger than top_k to allow for more possible hypotheses 
+	size_t extra = 10;
 
 Manager::Manager(InputType const& source)
 :m_source(source)
@@ -107,8 +111,14 @@ void Manager::ProcessSentence()
 	// go through each stack
 	size_t i=0;
 	std::vector < HypothesisStack >::iterator iterStack;
+	
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
+		// store Cube Pruning information in CubePruningData object
+		CubePruningData cubePruningData;
+	
+		cout << endl << "Stack " << i << ":" << endl;
+		
 		HypothesisStack &sourceHypoColl = *iterStack;
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
@@ -158,10 +168,13 @@ void Manager::ProcessSentence()
 					vector< Hypothesis*> coverageVec(topkCoverageSet.begin(), topkCoverageSet.end());					
 					if(coverageVec.size() > 0)
 					{
-						ProcessCoverageVector(coverageVec, wb);
+						cout << endl << "Coverage: " << wb << endl;
+						ProcessCoverageVector(coverageVec, wb, cubePruningData);
 					}
 				}
 		}
+		// do cube pruning for current stack
+		CubePruning(cubePruningData);
 		i++;
 		// some logging
 		OutputHypoStackSize();
@@ -173,7 +186,7 @@ void Manager::ProcessSentence()
 
 
 
-void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap)
+void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap, CubePruningData &cubePruningData)
 {
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
@@ -201,7 +214,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 					TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos));
 					if(tol.size() > 0)
 					{	
-						CubePruning(coverageVec, tol);
+						PrepareCubePruning(hypoBitmap, coverageVec, tol, cubePruningData);
 					}
 				}
 			}
@@ -247,7 +260,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 				TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(extRange);
 				if(tol.size() > 0)
 				{	
-					CubePruning(coverageVec, tol);
+					PrepareCubePruning(hypoBitmap, coverageVec, tol, cubePruningData);
 				}
 			}
 			// starting somewhere other than left-most edge, use caution
@@ -269,7 +282,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 					TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(extRange);
 					if(tol.size() > 0)
 					{	
-						CubePruning(coverageVec, tol);
+						PrepareCubePruning(hypoBitmap, coverageVec, tol, cubePruningData);
 					}
 				}
 			}
@@ -277,8 +290,9 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 	}
 }
 
-void Manager::CubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol)
-{	
+void Manager::PrepareCubePruning(const WordsBitmap &hypoBitmap, const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol, CubePruningData &cubePruningData)
+{
+	cout << "PrepareCubePruning" << endl;
 	set<TranslationOption*, TranslationOptionOrderer> translationOptionSet;
 	translationOptionSet.insert(tol.begin(), tol.end());
 						
@@ -299,34 +313,38 @@ void Manager::CubePruning(const vector< Hypothesis*> &coverageVec, TranslationOp
 		}
 	}
 //	cout << endl;
-	   				
+   				
+  size_t x = 0, y = 0;
+  // initialize cand with the hypothesis 1,1
+  Hypothesis *newHypo = (coverageVec[x])->CreateNext(*topkOptions[y]);
+  cout << endl << coverageVec[x] << "  " << *topkOptions[y] << endl;
+	newHypo->CalcScore(m_transOptColl->GetFutureScore());
+	newHypo->SetGridPosition(x, y);
+	(cubePruningData.cand).insert(newHypo);
+	cout << "\tinsert into cand: " << newHypo->GetId() <<  "  score: " << newHypo->GetTotalScore() <<  endl;
+	
+	// save data for this coverage
+	cubePruningData.SaveData(hypoBitmap, coverageVec, topkOptions);
+}
+
+void Manager::CubePruning(CubePruningData &cubePruningData)
+{	
+	vector< Hypothesis*> coverageVec; 
+  TranslationOptionList topkOptions;
+   					
+  set<Hypothesis*, HypothesisScoreOrderer >::iterator cand_iter;
+   					
+	Hypothesis *item, *newHypo;
 	// KBEST
 	// ".. enumerating the consequent items best-first while keeping track of a relatively small
 	//  number of candidates [..] for the next best item." 
 	// "When we take into account the combination costs, the grid is no longer monotonic in general.."
 	// "Because of this disordering, we do not put the enumerated items direcly into D(v); instead,
 	//  we collect items in a buffer.."
-  set<Hypothesis*, HypothesisScoreOrderer > D, cand, buf;
-   				
-  size_t x = 0, y = 0;
-  // initialize cand with the hypothesis 1,1
-  Hypothesis *newHypo = (coverageVec[x])->CreateNext(*topkOptions[y]);
-	newHypo->CalcScore(m_transOptColl->GetFutureScore());
-	newHypo->SetGridPosition(x, y);
-	cand.insert(newHypo);
-	// logging for the curious
-	IFVERBOSE(3) {
-		const StaticData &staticData = StaticData::Instance();
-	  newHypo->PrintHypothesis(m_source
-				, staticData.GetWeightDistortion()
-				, staticData.GetWeightWordPenalty());
-	}
-   					
-  set<Hypothesis*, HypothesisScoreOrderer >::iterator cand_iter;
-   					
-	Hypothesis *item;
-	// TODO: the size of the buffer could be a little bigger than top_k to allow for more possible hypotheses being found
-	size_t extra = 0;
+  set<Hypothesis*, HypothesisScoreOrderer > D, buf;
+  set<Hypothesis*, HypothesisScoreOrderer > &cand = cubePruningData.cand;
+	size_t x = 0, y = 0;
+	cout << "size of cand: " << cand.size() << endl;
  	while( !(cand.empty()) && (buf.size() < top_k + extra) )
   {
   	IFVERBOSE(3) {
@@ -341,6 +359,9 @@ void Manager::CubePruning(const vector< Hypothesis*> &coverageVec, TranslationOp
   	// and then line 12 pushes its successors [..] into cand." 
   	// 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
   	item = *(cand.begin());
+  	coverageVec = (cubePruningData.xData)[item->GetWordsBitmap()];
+  	topkOptions = (cubePruningData.yData)[item->GetWordsBitmap()];
+  	
   	// update grid position
   	x = item->GetXGridPosition();
   	y = item->GetYGridPosition();
@@ -392,6 +413,7 @@ void Manager::CubePruning(const vector< Hypothesis*> &coverageVec, TranslationOp
     l++;
   }
   // add all hypothesis in D to hypothesis stack
+  cout << "size of D: " << D.size() << endl << endl;
   set<Hypothesis*, HypothesisScoreOrderer >::iterator d_iter;
   for(d_iter = D.begin(); d_iter != D.end(); ++d_iter)
   {

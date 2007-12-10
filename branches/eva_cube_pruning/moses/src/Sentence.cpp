@@ -31,8 +31,11 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	std::string line;
 	std::map<std::string, std::string> meta;
+	
+	int ret = getline(in, line, '\n').eof();
+	std::cerr << ret << ": " << line << std::endl;  
 
-	if (getline(in, line, '\n').eof())	
+	if (ret)	
 			return 0;
 	line = Trim(line);
   meta = ProcessAndStripSGML(line);

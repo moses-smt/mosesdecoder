@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TrellisPathList.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
+#include "CubePruningData.h"
 
 class TrellisPath;
 class TranslationOptionCollection;
@@ -83,8 +84,9 @@ protected:
 	
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
-	void ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap);
-	void CubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol);
+	void ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap, CubePruningData &cubePruningData);
+	void PrepareCubePruning(const WordsBitmap &hypoBitmap, const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol, CubePruningData &CubePruningData);
+	void CubePruning(CubePruningData &cubePruningData);
 
 	// logging
 	void OutputHypoStack(int stack = -1);
