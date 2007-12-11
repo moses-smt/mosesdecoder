@@ -47,10 +47,7 @@ static bool debug2 = false;
 #endif
 
 // set k for cube pruning 
-const size_t top_k = 30;
-
-// the size of the buffer could be a little bigger than top_k to allow for more possible hypotheses 
-	size_t extra = 10;
+const size_t top_k = 40;
 
 Manager::Manager(InputType const& source)
 :m_source(source)
@@ -109,15 +106,15 @@ void Manager::ProcessSentence()
 	}
 	
 	// go through each stack
-	size_t i=0;
+	size_t stack=0;
 	std::vector < HypothesisStack >::iterator iterStack;
+	
+	// store Cube Pruning information in CubePruningData object
+	CubePruningData cubePruningData;
 	
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
-		// store Cube Pruning information in CubePruningData object
-		CubePruningData cubePruningData;
-	
-		cout << endl << "Stack " << i << ":" << endl;
+		cout << endl << "STACK " << stack << ":" << endl;
 		
 		HypothesisStack &sourceHypoColl = *iterStack;
 		// the stack is pruned before processing (lazy pruning):
@@ -144,28 +141,8 @@ void Manager::ProcessSentence()
 				{
 					seenCoverages.insert( wb );
 					const set<Hypothesis*, HypothesisScoreOrderer> coverageSet = sourceHypoColl.GetCoverageSet( wb );
-					
-					size_t j = 0;
-					// make subset of HYPOTHESES
-					set<Hypothesis*, HypothesisScoreOrderer> topkCoverageSet;
-					set<Hypothesis*, HypothesisScoreOrderer>::const_iterator set_Iter;
-   				for ( set_Iter = coverageSet.begin(); set_Iter != coverageSet.end(); ++set_Iter )
-   				{
-   					if(j < top_k)
-   					{
-		  	 			Hypothesis *hypo = *set_Iter;
-		  	 			topkCoverageSet.insert(hypo);
-	   						float score = hypo->GetTotalScore();
-	  	 					vector<size_t>::iterator vec_iter;
-	//   						cout << "Stack: " << i << " hypothesis_score: " << score << " coverage: " << wb << endl; 
-	   					j++;
-   					}
-   				}
-  // 				cout << endl;
-				
-					// Instead of passing the whole coverage set, pass only the top k hypotheses.
-					// For easier handling, turn coverageSet into a vector. 
-					vector< Hypothesis*> coverageVec(topkCoverageSet.begin(), topkCoverageSet.end());					
+					vector< Hypothesis*> coverageVec(coverageSet.begin(), coverageSet.end());	
+								
 					if(coverageVec.size() > 0)
 					{
 						cout << endl << "Coverage: " << wb << endl;
@@ -174,8 +151,9 @@ void Manager::ProcessSentence()
 				}
 		}
 		// do cube pruning for current stack
-		CubePruning(cubePruningData);
-		i++;
+		cout << "--> CubePruning" << endl << endl;
+		CubePruning(stack, cubePruningData);
+		stack++;
 		// some logging
 		OutputHypoStackSize();
 	}
@@ -188,6 +166,9 @@ void Manager::ProcessSentence()
 
 void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap, CubePruningData &cubePruningData)
 {
+	Hypothesis *best;
+	TranslationOptionList bestTol;
+	
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 	bool isWordLattice = StaticData::Instance().GetInputType() == WordLatticeInput;
@@ -214,7 +195,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 					TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos));
 					if(tol.size() > 0)
 					{	
-						PrepareCubePruning(hypoBitmap, coverageVec, tol, cubePruningData);
+						PrepareCubePruning(coverageVec, tol, cubePruningData);
 					}
 				}
 			}
@@ -260,7 +241,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 				TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(extRange);
 				if(tol.size() > 0)
 				{	
-					PrepareCubePruning(hypoBitmap, coverageVec, tol, cubePruningData);
+					PrepareCubePruning(coverageVec, tol, cubePruningData);
 				}
 			}
 			// starting somewhere other than left-most edge, use caution
@@ -282,7 +263,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 					TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(extRange);
 					if(tol.size() > 0)
 					{	
-						PrepareCubePruning(hypoBitmap, coverageVec, tol, cubePruningData);
+						PrepareCubePruning(coverageVec, tol, cubePruningData);
 					}
 				}
 			}
@@ -290,47 +271,31 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 	}
 }
 
-void Manager::PrepareCubePruning(const WordsBitmap &hypoBitmap, const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol, CubePruningData &cubePruningData)
+void Manager::PrepareCubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol, CubePruningData &cubePruningData)
 {
-	cout << "PrepareCubePruning" << endl;
+//	cout << "PrepareCubePruning" << endl;
 	set<TranslationOption*, TranslationOptionOrderer> translationOptionSet;
 	translationOptionSet.insert(tol.begin(), tol.end());
-						
-	vector<TranslationOption*>::iterator iterOptions;
-					
-	// find the k best options
-	TranslationOptionList topkOptions;
-	size_t i = 0;
-	set<TranslationOption*, TranslationOptionOrderer>::iterator opt_iter;
-	for(opt_iter = translationOptionSet.begin(); opt_iter != translationOptionSet.end(); ++opt_iter)
-	{
-		if(i < top_k)
-		{
-			TranslationOption *opt = *opt_iter;
-//			cout << "option: " << opt->GetFutureScore() << endl;
-			topkOptions.push_back(opt);
-			i++;
-		}
-	}
-//	cout << endl;
+	
+	// translation options are ordered now
+	TranslationOptionList orderedTol( translationOptionSet.begin(), translationOptionSet.end() );
    				
-  size_t x = 0, y = 0;
   // initialize cand with the hypothesis 1,1
-  Hypothesis *newHypo = (coverageVec[x])->CreateNext(*topkOptions[y]);
-  cout << endl << coverageVec[x] << "  " << *topkOptions[y] << endl;
+  Hypothesis *newHypo = (coverageVec[0])->CreateNext(*orderedTol[0]);
 	newHypo->CalcScore(m_transOptColl->GetFutureScore());
-	newHypo->SetGridPosition(x, y);
-	(cubePruningData.cand).insert(newHypo);
-	cout << "\tinsert into cand: " << newHypo->GetId() <<  "  score: " << newHypo->GetTotalScore() <<  endl;
+	newHypo->SetGridPosition(0, 0);
+	(cubePruningData.cand)[ coverageVec[0]->GetWordsBitmap().GetNumWordsCovered() ].insert(newHypo);
+//	cout << "\tinsert into cand " << coverageVec[0]->GetWordsBitmap().GetNumWordsCovered() << ": " << newHypo->GetTotalScore() << "  cov: " << coverageVec[0]->GetWordsBitmap() << "  tol: " << orderedTol[0]->GetSourceWordsRange() << endl;
 	
 	// save data for this coverage
-	cubePruningData.SaveData(hypoBitmap, coverageVec, topkOptions);
+	cout << "SAVE: " << newHypo->GetWordsBitmap() << " cov: " << coverageVec.size() << "  tol: " << orderedTol.size() << endl;
+	cubePruningData.SaveData(newHypo->GetWordsBitmap(), coverageVec, orderedTol);
 }
 
-void Manager::CubePruning(CubePruningData &cubePruningData)
+void Manager::CubePruning(size_t stack, CubePruningData &cubePruningData)
 {	
 	vector< Hypothesis*> coverageVec; 
-  TranslationOptionList topkOptions;
+  TranslationOptionList tol;
    					
   set<Hypothesis*, HypothesisScoreOrderer >::iterator cand_iter;
    					
@@ -342,10 +307,10 @@ void Manager::CubePruning(CubePruningData &cubePruningData)
 	// "Because of this disordering, we do not put the enumerated items direcly into D(v); instead,
 	//  we collect items in a buffer.."
   set<Hypothesis*, HypothesisScoreOrderer > D, buf;
-  set<Hypothesis*, HypothesisScoreOrderer > &cand = cubePruningData.cand;
+  set<Hypothesis*, HypothesisScoreOrderer > &cand = (cubePruningData.cand)[stack];
 	size_t x = 0, y = 0;
 	cout << "size of cand: " << cand.size() << endl;
- 	while( !(cand.empty()) && (buf.size() < top_k + extra) )
+ 	while( !(cand.empty()) && (buf.size() < top_k) )
   {
   	IFVERBOSE(3) {
    		cout << "candidates: " << endl;
@@ -358,9 +323,19 @@ void Manager::CubePruning(CubePruningData &cubePruningData)
   	// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
   	// and then line 12 pushes its successors [..] into cand." 
   	// 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
-  	item = *(cand.begin());
+  	item = *(cand.begin());  		
   	coverageVec = (cubePruningData.xData)[item->GetWordsBitmap()];
-  	topkOptions = (cubePruningData.yData)[item->GetWordsBitmap()];
+  	tol = (cubePruningData.yData)[item->GetWordsBitmap()];
+  	
+  	cout << "item bitmap: " << item->GetWordsBitmap() << endl;
+  	if(coverageVec.size() > 0)
+  		cout << "coverageVec: " << coverageVec[0]->GetWordsBitmap() << endl;
+  	else
+  		cout << endl;
+  	if(tol.size() > 0)
+  		cout << "tol: " << tol[0]->GetSourceWordsRange() << endl << endl;
+  	else
+  		cout << endl;
   	
   	// update grid position
   	x = item->GetXGridPosition();
@@ -370,9 +345,9 @@ void Manager::CubePruning(CubePruningData &cubePruningData)
 	  cand.erase(cand.begin());
 	  // PUSHSUCC(item, cand); --> insert neighbours of item into cand
 	  // neighbour on the right side, same hypothesis, new extension
-	  if( (coverageVec.size() > x) && (topkOptions.size() > y+1) )
+	  if( (coverageVec.size() > x) && (tol.size() > y+1) )
 	  { 
-  		newHypo = (coverageVec[x])->CreateNext(*topkOptions[y+1]);
+  		newHypo = (coverageVec[x])->CreateNext(*tol[y+1]);
 			newHypo->CalcScore(m_transOptColl->GetFutureScore());
 			newHypo->SetGridPosition(x, y+1);
   		cand.insert( newHypo );
@@ -385,9 +360,9 @@ void Manager::CubePruning(CubePruningData &cubePruningData)
 			}
   	}
   	// neighbour below, new hypothesis, same extension
-  	if( (coverageVec.size() > x+1) && (topkOptions.size() > y) )
+  	if( (coverageVec.size() > x+1) && (tol.size() > y) )
   	{
-	  	newHypo = (coverageVec[x+1])->CreateNext(*topkOptions[y]);
+	  	newHypo = (coverageVec[x+1])->CreateNext(*tol[y]);
 			newHypo->CalcScore(m_transOptColl->GetFutureScore());
 			newHypo->SetGridPosition(x+1, y);
    		cand.insert( newHypo );
@@ -413,7 +388,7 @@ void Manager::CubePruning(CubePruningData &cubePruningData)
     l++;
   }
   // add all hypothesis in D to hypothesis stack
-  cout << "size of D: " << D.size() << endl << endl;
+  cout << "size D: " << D.size() << endl << endl;
   set<Hypothesis*, HypothesisScoreOrderer >::iterator d_iter;
   for(d_iter = D.begin(); d_iter != D.end(); ++d_iter)
   {
@@ -421,6 +396,7 @@ void Manager::CubePruning(CubePruningData &cubePruningData)
   	size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
 		m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
   }
+  cout << endl;
 }
 				
 
