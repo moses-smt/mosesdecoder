@@ -162,9 +162,5 @@ void TranslationOption::CacheReorderingProb(const LexicalReordering &lexreorderi
 	m_reordering.Assign(&lexreordering, score);
 }
 
-float TranslationOption::GetFutureScore()
-{
-	return m_futureScore;
-}
 
 
