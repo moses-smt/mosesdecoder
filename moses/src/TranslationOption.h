@@ -166,7 +166,6 @@ public:
 
 	TO_STRING();
 	
-	float GetFutureScore();
 };
 
 
