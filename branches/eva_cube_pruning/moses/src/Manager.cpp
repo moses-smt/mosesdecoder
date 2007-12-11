@@ -120,7 +120,7 @@ void Manager::ProcessSentence()
 	
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
-		cout << endl << "STACK " << stack << ":" << endl;
+//		cout << endl << "STACK " << stack << ":" << endl;
 		
 		HypothesisStack &sourceHypoColl = *iterStack;
 		// the stack is pruned before processing (lazy pruning):
@@ -323,82 +323,80 @@ void Manager::CubePruning(size_t stack)
 		//  we collect items in a buffer.."
   	OrderedHypothesesSet D, buf;  
   
-	size_t x = 0, y = 0;
-//	cout << "size of cand: " << cand.size() << endl;
- 	while( !(cand.empty()) && (buf.size() < top_k) )
-  {
-  	// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
-  	// and then line 12 pushes its successors [..] into cand." 
-  	// 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
-  	item = *(cand.begin());  		
-  	coverageVec = (cubePruningData.xData)[item->GetId()];
-  	tol = (cubePruningData.yData)[item->GetId()];
+		size_t x = 0, y = 0;
+	//	cout << "size of cand: " << cand.size() << endl;
+	 	while( !(cand.empty()) && (buf.size() < top_k) )
+	  {
+  		// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
+  		// and then line 12 pushes its successors [..] into cand." 
+  		// 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
+  		item = *(cand.begin());  		
+  		coverageVec = (cubePruningData.xData)[item->GetId()];
+  		tol = (cubePruningData.yData)[item->GetId()];
   	
- /*   // information about hypotheses compared 	
-    cout << "item " << item->GetId() << "  " << item->GetWordsBitmap() << endl;
-  	if(coverageVec.size() > 0)
-  		cout << coverageVec[0]->GetWordsBitmap() << endl;
-  	else 
+	 /*   // information about hypotheses compared 	
+    	cout << "item " << item->GetId() << "  " << item->GetWordsBitmap() << endl;
+  		if(coverageVec.size() > 0)
+	  		cout << coverageVec[0]->GetWordsBitmap() << endl;
+  		else 
+	  		cout << endl;
+  		if(tol.size() > 0)
+	  		cout << tol[0]->GetSourceWordsRange() << endl;
+  		else
+	  		cout << endl;
   		cout << endl;
-  	if(tol.size() > 0)
-  		cout << tol[0]->GetSourceWordsRange() << endl;
-  	else
-  		cout << endl;
-  	cout << endl;
-*/
-  	
-  	// update grid position
-  	x = item->GetXGridPosition();
-  	y = item->GetYGridPosition();
-	  buf.insert(item);
-	  cand.erase(cand.begin());
-	  // Release memory for hypothesis deleted from cand
-	  cubePruningData.DeleteData(item);
-	  
-	  // PUSHSUCC(item, cand); --> insert neighbours of item into cand
-	  // neighbour on the right side, same hypothesis, new extension
-	  if( (coverageVec.size() > x) && (tol.size() > y+1) )
-	  { 
-  		newHypo = (coverageVec[x])->CreateNext(*tol[y+1]);
-			newHypo->CalcScore(m_transOptColl->GetFutureScore());
-			newHypo->SetGridPosition(x, y+1);
-  		cand.insert( newHypo );
-  		// TODO: this is not efficient because the same information is stored for different hypothesis in the same grid
-			cubePruningData.SaveData(newHypo, coverageVec,tol);
+	*/
+  		
+  		// update grid position
+  		x = item->GetXGridPosition();
+  		y = item->GetYGridPosition();
+	  	buf.insert(item);
+	  	cand.erase(cand.begin());
+	  	// Release memory for hypothesis deleted from cand
+	  	cubePruningData.DeleteData(item);
+		  
+	  	// PUSHSUCC(item, cand); --> insert neighbours of item into cand
+	  	// neighbour on the right side, same hypothesis, new extension
+	  	if( (coverageVec.size() > x) && (tol.size() > y+1) )
+	  	{ 
+	  		newHypo = (coverageVec[x])->CreateNext(*tol[y+1]);
+				newHypo->CalcScore(m_transOptColl->GetFutureScore());
+				newHypo->SetGridPosition(x, y+1);
+  			cand.insert( newHypo );
+  			// TODO: this is not efficient because the same information is stored for different hypothesis in the same grid
+				cubePruningData.SaveData(newHypo, coverageVec,tol);
+  		}
+  		// neighbour below, new hypothesis, same extension
+  		if( (coverageVec.size() > x+1) && (tol.size() > y) )
+  		{
+		  	newHypo = (coverageVec[x+1])->CreateNext(*tol[y]);
+				newHypo->CalcScore(m_transOptColl->GetFutureScore());
+				newHypo->SetGridPosition(x+1, y);
+   			cand.insert( newHypo );
+   			// TODO: this is not efficient because the same information is stored for different hypothesis in the same grid
+				cubePruningData.SaveData(newHypo, coverageVec,tol);
+   		}
   	}
-  	// neighbour below, new hypothesis, same extension
-  	if( (coverageVec.size() > x+1) && (tol.size() > y) )
+  	// "Re-sort the buffer into D(v) after it has accumulated k items."
+  	// buffer has an ordering function, just copy to D or if buf is larger than D, copy the top_k items of buf to D
+  	set<Hypothesis*, HypothesisScoreOrderer >::iterator buf_iter;
+  	size_t l=0;
+  	for(buf_iter = buf.begin(); buf_iter != buf.end(); ++buf_iter)
   	{
-	  	newHypo = (coverageVec[x+1])->CreateNext(*tol[y]);
-			newHypo->CalcScore(m_transOptColl->GetFutureScore());
-			newHypo->SetGridPosition(x+1, y);
-   		cand.insert( newHypo );
-   		// TODO: this is not efficient because the same information is stored for different hypothesis in the same grid
-			cubePruningData.SaveData(newHypo, coverageVec,tol);
-   	}
-  }
-  // "Re-sort the buffer into D(v) after it has accumulated k items."
-  // buffer has an ordering function, just copy to D or if buf is larger than D, copy the top_k items of buf to D
-  set<Hypothesis*, HypothesisScoreOrderer >::iterator buf_iter;
-  size_t l=0;
-  for(buf_iter = buf.begin(); buf_iter != buf.end(); ++buf_iter)
-  {
-  	if(l < top_k)
-   		D.insert(*buf_iter);
-   	else
-   		break;
-    l++;
-  }
-  // add all hypothesis in D to hypothesis stack
-  set<Hypothesis*, HypothesisScoreOrderer >::iterator d_iter;
-  for(d_iter = D.begin(); d_iter != D.end(); ++d_iter)
-  {
-  	Hypothesis *newHypo = *d_iter;
-  	size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
-		m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
-  }
-  cout << endl;
-  
+	  	if(l < top_k)
+   			D.insert(*buf_iter);
+   		else
+	   		break;
+    	l++;
+  	}
+  	// add all hypothesis in D to hypothesis stack
+  	set<Hypothesis*, HypothesisScoreOrderer >::iterator d_iter;
+  	for(d_iter = D.begin(); d_iter != D.end(); ++d_iter)
+  	{
+	  	Hypothesis *newHypo = *d_iter;
+  		size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
+			m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
+  	}
   }
 }
 				
