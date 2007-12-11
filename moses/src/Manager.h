@@ -85,8 +85,8 @@ protected:
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
 	void ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap, CubePruningData &cubePruningData);
-	void PrepareCubePruning(const WordsBitmap &hypoBitmap, const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol, CubePruningData &CubePruningData);
-	void CubePruning(CubePruningData &cubePruningData);
+	void PrepareCubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol, CubePruningData &CubePruningData);
+	void CubePruning(size_t stack, CubePruningData &cubePruningData);
 
 	// logging
 	void OutputHypoStack(int stack = -1);
