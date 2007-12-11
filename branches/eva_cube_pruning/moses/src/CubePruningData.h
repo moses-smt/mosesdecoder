@@ -8,15 +8,15 @@
 class CubePruningData
 {
 public:
-	std::map<const WordsBitmap, vector< Hypothesis*> > xData;
-	std::map<const WordsBitmap, TranslationOptionList > yData;
-	typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypotheses;
-	std::map<size_t, OrderedHypotheses > cand; 
+	// key of maps is hypothesis ID
+	std::map< size_t, std::vector< Hypothesis*> > xData;
+	std::map< size_t, TranslationOptionList > yData;
 	
 	CubePruningData();
 	virtual ~CubePruningData();
 	
-	void SaveData(const WordsBitmap &hypoBitmap, const vector< Hypothesis*> &coverageVec, const TranslationOptionList &tol);
+	void SaveData(Hypothesis *hypo, const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol);
+	void DeleteData(Hypothesis *hypo);
 };
 
 #endif /*CUBEPRUNINGDATA_H_*/

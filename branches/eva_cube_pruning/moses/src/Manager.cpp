@@ -47,7 +47,16 @@ static bool debug2 = false;
 #endif
 
 // set k for cube pruning 
-const size_t top_k = 40;
+const size_t top_k = 5;
+
+// store candidates for each stack
+typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
+//map<size_t, OrderedHypotheses > candidates;
+
+typedef map< WordsBitmap, OrderedHypothesesSet > CoverageHypothesesMap;
+map<size_t, CoverageHypothesesMap > candidates; 
+
+CubePruningData cubePruningData;
 
 Manager::Manager(InputType const& source)
 :m_source(source)
@@ -109,9 +118,6 @@ void Manager::ProcessSentence()
 	size_t stack=0;
 	std::vector < HypothesisStack >::iterator iterStack;
 	
-	// store Cube Pruning information in CubePruningData object
-	CubePruningData cubePruningData;
-	
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
 		cout << endl << "STACK " << stack << ":" << endl;
@@ -140,19 +146,18 @@ void Manager::ProcessSentence()
 				if( (seenCoverages.count( wb )) == 0 )
 				{
 					seenCoverages.insert( wb );
-					const set<Hypothesis*, HypothesisScoreOrderer> coverageSet = sourceHypoColl.GetCoverageSet( wb );
+					const OrderedHypothesesSet coverageSet = sourceHypoColl.GetCoverageSet( wb );
 					vector< Hypothesis*> coverageVec(coverageSet.begin(), coverageSet.end());	
 								
 					if(coverageVec.size() > 0)
 					{
-						cout << endl << "Coverage: " << wb << endl;
-						ProcessCoverageVector(coverageVec, wb, cubePruningData);
+//						cout << endl << "Coverage: " << wb << endl;
+						ProcessCoverageVector(coverageVec, wb);
 					}
 				}
 		}
 		// do cube pruning for current stack
-		cout << "--> CubePruning" << endl << endl;
-		CubePruning(stack, cubePruningData);
+		CubePruning(stack);
 		stack++;
 		// some logging
 		OutputHypoStackSize();
@@ -164,7 +169,7 @@ void Manager::ProcessSentence()
 
 
 
-void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap, CubePruningData &cubePruningData)
+void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap)
 {
 	Hypothesis *best;
 	TranslationOptionList bestTol;
@@ -195,7 +200,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 					TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos));
 					if(tol.size() > 0)
 					{	
-						PrepareCubePruning(coverageVec, tol, cubePruningData);
+						PrepareCubePruning(coverageVec, tol);
 					}
 				}
 			}
@@ -241,7 +246,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 				TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(extRange);
 				if(tol.size() > 0)
 				{	
-					PrepareCubePruning(coverageVec, tol, cubePruningData);
+					PrepareCubePruning(coverageVec, tol);
 				}
 			}
 			// starting somewhere other than left-most edge, use caution
@@ -263,7 +268,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 					TranslationOptionList tol = m_transOptColl->GetTranslationOptionList(extRange);
 					if(tol.size() > 0)
 					{	
-						PrepareCubePruning(coverageVec, tol, cubePruningData);
+						PrepareCubePruning(coverageVec, tol);
 					}
 				}
 			}
@@ -271,7 +276,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 	}
 }
 
-void Manager::PrepareCubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol, CubePruningData &cubePruningData)
+void Manager::PrepareCubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol)
 {
 //	cout << "PrepareCubePruning" << endl;
 	set<TranslationOption*, TranslationOptionOrderer> translationOptionSet;
@@ -284,65 +289,72 @@ void Manager::PrepareCubePruning(const vector< Hypothesis*> &coverageVec, Transl
   Hypothesis *newHypo = (coverageVec[0])->CreateNext(*orderedTol[0]);
 	newHypo->CalcScore(m_transOptColl->GetFutureScore());
 	newHypo->SetGridPosition(0, 0);
-	(cubePruningData.cand)[ coverageVec[0]->GetWordsBitmap().GetNumWordsCovered() ].insert(newHypo);
-//	cout << "\tinsert into cand " << coverageVec[0]->GetWordsBitmap().GetNumWordsCovered() << ": " << newHypo->GetTotalScore() << "  cov: " << coverageVec[0]->GetWordsBitmap() << "  tol: " << orderedTol[0]->GetSourceWordsRange() << endl;
+	//candidates[ coverageVec[0]->GetWordsBitmap().GetNumWordsCovered() ].insert(newHypo);
+	candidates[ coverageVec[0]->GetWordsBitmap().GetNumWordsCovered() ][newHypo->GetWordsBitmap()].insert(newHypo);
 	
-	// save data for this coverage
-	cout << "SAVE: " << newHypo->GetWordsBitmap() << " cov: " << coverageVec.size() << "  tol: " << orderedTol.size() << endl;
-	cubePruningData.SaveData(newHypo->GetWordsBitmap(), coverageVec, orderedTol);
+	// store information for this hypothesis and coverage in CubePruningData object
+	cubePruningData.SaveData(newHypo, coverageVec, orderedTol);
 }
 
-void Manager::CubePruning(size_t stack, CubePruningData &cubePruningData)
+void Manager::CubePruning(size_t stack)
 {	
-	vector< Hypothesis*> coverageVec; 
-  TranslationOptionList tol;
+  //OrderedHypothesesSet &cand = candidates[stack];
+  
+  CoverageHypothesesMap candsForStack = candidates[stack];
+  CoverageHypothesesMap::iterator cands_iter;
+  for(cands_iter = candsForStack.begin(); cands_iter != candsForStack.end(); ++cands_iter)
+  {
+  	//pair< WordsBitmap, OrderedHypothesesSet > cand = *cands_iter;
+  	WordsBitmap wb = (*cands_iter).first;
+//  	cout << "CubePruning for coverage " << wb << endl;
+  	OrderedHypothesesSet cand = (*cands_iter).second;
+		
+		vector< Hypothesis*> coverageVec; 
+  	TranslationOptionList tol;
    					
-  set<Hypothesis*, HypothesisScoreOrderer >::iterator cand_iter;
+  	OrderedHypothesesSet::iterator cand_iter;
    					
-	Hypothesis *item, *newHypo;
-	// KBEST
-	// ".. enumerating the consequent items best-first while keeping track of a relatively small
-	//  number of candidates [..] for the next best item." 
-	// "When we take into account the combination costs, the grid is no longer monotonic in general.."
-	// "Because of this disordering, we do not put the enumerated items direcly into D(v); instead,
-	//  we collect items in a buffer.."
-  set<Hypothesis*, HypothesisScoreOrderer > D, buf;
-  set<Hypothesis*, HypothesisScoreOrderer > &cand = (cubePruningData.cand)[stack];
+		Hypothesis *item, *newHypo;
+		// KBEST
+		// ".. enumerating the consequent items best-first while keeping track of a relatively small
+		//  number of candidates [..] for the next best item." 
+		// "When we take into account the combination costs, the grid is no longer monotonic in general.."
+		// "Because of this disordering, we do not put the enumerated items direcly into D(v); instead,
+		//  we collect items in a buffer.."
+  	OrderedHypothesesSet D, buf;  
+  
 	size_t x = 0, y = 0;
-	cout << "size of cand: " << cand.size() << endl;
+//	cout << "size of cand: " << cand.size() << endl;
  	while( !(cand.empty()) && (buf.size() < top_k) )
   {
-  	IFVERBOSE(3) {
-   		cout << "candidates: " << endl;
-   		for(cand_iter = cand.begin(); cand_iter != cand.end(); ++cand_iter)
-   		{
-   			cout << (*cand_iter)->GetXGridPosition() << " " << (*cand_iter)->GetYGridPosition() << "   " << (*cand_iter)->GetTotalScore() << endl;
-   		}
-   		cout << endl; 
-   	}	
   	// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
   	// and then line 12 pushes its successors [..] into cand." 
   	// 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
   	item = *(cand.begin());  		
-  	coverageVec = (cubePruningData.xData)[item->GetWordsBitmap()];
-  	tol = (cubePruningData.yData)[item->GetWordsBitmap()];
+  	coverageVec = (cubePruningData.xData)[item->GetId()];
+  	tol = (cubePruningData.yData)[item->GetId()];
   	
-  	cout << "item bitmap: " << item->GetWordsBitmap() << endl;
+ /*   // information about hypotheses compared 	
+    cout << "item " << item->GetId() << "  " << item->GetWordsBitmap() << endl;
   	if(coverageVec.size() > 0)
-  		cout << "coverageVec: " << coverageVec[0]->GetWordsBitmap() << endl;
-  	else
+  		cout << coverageVec[0]->GetWordsBitmap() << endl;
+  	else 
   		cout << endl;
   	if(tol.size() > 0)
-  		cout << "tol: " << tol[0]->GetSourceWordsRange() << endl << endl;
+  		cout << tol[0]->GetSourceWordsRange() << endl;
   	else
   		cout << endl;
+  	cout << endl;
+*/
   	
   	// update grid position
   	x = item->GetXGridPosition();
   	y = item->GetYGridPosition();
-	//cout << "chosen cand: " << x << " " << y << endl;
 	  buf.insert(item);
 	  cand.erase(cand.begin());
+	  // Release memory for hypothesis deleted from cand
+	  cubePruningData.DeleteData(item);
+	  
 	  // PUSHSUCC(item, cand); --> insert neighbours of item into cand
 	  // neighbour on the right side, same hypothesis, new extension
 	  if( (coverageVec.size() > x) && (tol.size() > y+1) )
@@ -351,13 +363,8 @@ void Manager::CubePruning(size_t stack, CubePruningData &cubePruningData)
 			newHypo->CalcScore(m_transOptColl->GetFutureScore());
 			newHypo->SetGridPosition(x, y+1);
   		cand.insert( newHypo );
-  		// logging for the curious
-			IFVERBOSE(3) {
-				const StaticData &staticData = StaticData::Instance();
-				newHypo->PrintHypothesis(m_source
-						, staticData.GetWeightDistortion()
-						, staticData.GetWeightWordPenalty());
-			}
+  		// TODO: this is not efficient because the same information is stored for different hypothesis in the same grid
+			cubePruningData.SaveData(newHypo, coverageVec,tol);
   	}
   	// neighbour below, new hypothesis, same extension
   	if( (coverageVec.size() > x+1) && (tol.size() > y) )
@@ -366,13 +373,8 @@ void Manager::CubePruning(size_t stack, CubePruningData &cubePruningData)
 			newHypo->CalcScore(m_transOptColl->GetFutureScore());
 			newHypo->SetGridPosition(x+1, y);
    		cand.insert( newHypo );
-   		// logging for the curious
-			IFVERBOSE(3) {
-				const StaticData &staticData = StaticData::Instance();
-		  	newHypo->PrintHypothesis(m_source
-										, staticData.GetWeightDistortion()
-										, staticData.GetWeightWordPenalty());
-			}
+   		// TODO: this is not efficient because the same information is stored for different hypothesis in the same grid
+			cubePruningData.SaveData(newHypo, coverageVec,tol);
    	}
   }
   // "Re-sort the buffer into D(v) after it has accumulated k items."
@@ -388,7 +390,6 @@ void Manager::CubePruning(size_t stack, CubePruningData &cubePruningData)
     l++;
   }
   // add all hypothesis in D to hypothesis stack
-  cout << "size D: " << D.size() << endl << endl;
   set<Hypothesis*, HypothesisScoreOrderer >::iterator d_iter;
   for(d_iter = D.begin(); d_iter != D.end(); ++d_iter)
   {
@@ -397,6 +398,8 @@ void Manager::CubePruning(size_t stack, CubePruningData &cubePruningData)
 		m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
   }
   cout << endl;
+  
+  }
 }
 				
 
