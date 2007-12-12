@@ -46,17 +46,19 @@ using namespace std;
 static bool debug2 = false;
 #endif
 
+// SOME GLOBAL VARIABLES
 // set k for cube pruning 
 const size_t top_k = 5;
 
-// store candidates for each stack
 typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
-//map<size_t, OrderedHypotheses > candidates;
-
 typedef map< WordsBitmap, OrderedHypothesesSet > CoverageHypothesesMap;
+
+// store candidates for each stack
 map<size_t, CoverageHypothesesMap > candidates; 
 
+// store Hypothesis list and TranslationOption list for each grid
 CubePruningData cubePruningData;
+
 
 Manager::Manager(InputType const& source)
 :m_source(source)
@@ -162,6 +164,10 @@ void Manager::ProcessSentence()
 		// some logging
 		OutputHypoStackSize();
 	}
+	
+	// clear global variables
+	candidates.clear();
+	cubePruningData.DeleteAll();
 
 	// some more logging
 	VERBOSE(2, staticData.GetSentenceStats());
@@ -171,9 +177,6 @@ void Manager::ProcessSentence()
 
 void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap)
 {
-	Hypothesis *best;
-	TranslationOptionList bestTol;
-	
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 	bool isWordLattice = StaticData::Instance().GetInputType() == WordLatticeInput;
@@ -324,7 +327,7 @@ void Manager::CubePruning(size_t stack)
   	OrderedHypothesesSet D, buf;  
   
 		size_t x = 0, y = 0;
-	//	cout << "size of cand: " << cand.size() << endl;
+//		cout << "size of cand: " << cand.size() << endl;
 	 	while( !(cand.empty()) && (buf.size() < top_k) )
 	  {
   		// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
@@ -334,8 +337,8 @@ void Manager::CubePruning(size_t stack)
   		coverageVec = (cubePruningData.xData)[item->GetId()];
   		tol = (cubePruningData.yData)[item->GetId()];
   	
-	 /*   // information about hypotheses compared 	
-    	cout << "item " << item->GetId() << "  " << item->GetWordsBitmap() << endl;
+	    // information about hypotheses compared 	
+/*    	cout << "item id: " << item->GetId() << "  bmp: " << item->GetWordsBitmap() << endl;
   		if(coverageVec.size() > 0)
 	  		cout << coverageVec[0]->GetWordsBitmap() << endl;
   		else 
@@ -345,7 +348,7 @@ void Manager::CubePruning(size_t stack)
   		else
 	  		cout << endl;
   		cout << endl;
-	*/
+*/	
   		
   		// update grid position
   		x = item->GetXGridPosition();

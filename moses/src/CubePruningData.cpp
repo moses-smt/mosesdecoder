@@ -10,7 +10,6 @@ CubePruningData::~CubePruningData()
 {
 }
 
-//void CubePruningData::SaveData(const WordsBitmap &hypoBitmap, const vector< Hypothesis*> &coverageVec, const TranslationOptionList &tol)
 void CubePruningData::SaveData(Hypothesis *hypo, const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol)
 {
 	xData[hypo->GetId()] = coverageVec;
@@ -21,4 +20,10 @@ void CubePruningData::DeleteData(Hypothesis *hypo)
 {
 	xData.erase(hypo->GetId());
 	yData.erase(hypo->GetId());
+}
+
+void CubePruningData::DeleteAll()
+{
+	xData.clear();
+	yData.clear();
 }
