@@ -17,6 +17,7 @@ public:
 	
 	void SaveData(Hypothesis *hypo, const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol);
 	void DeleteData(Hypothesis *hypo);
+	void DeleteAll();
 };
 
 #endif /*CUBEPRUNINGDATA_H_*/
