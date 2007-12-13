@@ -115,7 +115,6 @@ void Manager::ProcessSentence()
 		Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
 		m_hypoStackColl[0].AddPrune(hypo);
 	}
-	
 	// go through each stack
 	size_t stack=0;
 	std::vector < HypothesisStack >::iterator iterStack;
@@ -140,8 +139,9 @@ void Manager::ProcessSentence()
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
 		{
 				// take first hypothesis from stack to get coverage
-				Hypothesis *hypothesis = *iterHypo;
-				const WordsBitmap &wb = hypothesis->GetWordsBitmap();
+			  Hypothesis &hypothesis = **iterHypo;
+			
+				const WordsBitmap &wb = hypothesis.GetWordsBitmap();
 				//vector<size_t> cov = wb.GetCompressedRepresentation();
 				
 				// check if coverage of current hypothesis was already seen --> if no, proceed
@@ -161,6 +161,7 @@ void Manager::ProcessSentence()
 		// do cube pruning for current stack
 		CubePruning(stack);
 		stack++;
+		
 		// some logging
 		OutputHypoStackSize();
 	}
@@ -226,7 +227,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
     maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
     
     // check conditions for one hypothesis of the coverage vector
-    Hypothesis *hypothesis = coverageVec[0];
+    Hypothesis &hypothesis = *coverageVec[0];
 
 		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
@@ -234,7 +235,7 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 		  WordsRange extRange(startPos, endPos);
 			if (hypoBitmap.Overlap(extRange) ||
 			      (isWordLattice && (!m_source.IsCoveragePossible(extRange) ||
-					                     !m_source.IsExtensionPossible(hypothesis->GetCurrSourceWordsRange(), extRange))
+					                     !m_source.IsExtensionPossible(hypothesis.GetCurrSourceWordsRange(), extRange))
 					  )
 			   )
 		  {
@@ -289,7 +290,7 @@ void Manager::PrepareCubePruning(const vector< Hypothesis*> &coverageVec, Transl
 	TranslationOptionList orderedTol( translationOptionSet.begin(), translationOptionSet.end() );
    				
   // initialize cand with the hypothesis 1,1
-  Hypothesis *newHypo = (coverageVec[0])->CreateNext(*orderedTol[0]);
+	Hypothesis *newHypo = (coverageVec[0])->CreateNext(*orderedTol[0]);
 	newHypo->CalcScore(m_transOptColl->GetFutureScore());
 	newHypo->SetGridPosition(0, 0);
 	//candidates[ coverageVec[0]->GetWordsBitmap().GetNumWordsCovered() ].insert(newHypo);
@@ -301,13 +302,10 @@ void Manager::PrepareCubePruning(const vector< Hypothesis*> &coverageVec, Transl
 
 void Manager::CubePruning(size_t stack)
 {	
-  //OrderedHypothesesSet &cand = candidates[stack];
-  
   CoverageHypothesesMap candsForStack = candidates[stack];
   CoverageHypothesesMap::iterator cands_iter;
   for(cands_iter = candsForStack.begin(); cands_iter != candsForStack.end(); ++cands_iter)
   {
-  	//pair< WordsBitmap, OrderedHypothesesSet > cand = *cands_iter;
   	WordsBitmap wb = (*cands_iter).first;
 //  	cout << "CubePruning for coverage " << wb << endl;
   	OrderedHypothesesSet cand = (*cands_iter).second;
@@ -315,7 +313,7 @@ void Manager::CubePruning(size_t stack)
 		vector< Hypothesis*> coverageVec; 
   	TranslationOptionList tol;
    					
-  	OrderedHypothesesSet::iterator cand_iter;
+  //	OrderedHypothesesSet::iterator cand_iter;
    					
 		Hypothesis *item, *newHypo;
 		// KBEST
@@ -380,6 +378,9 @@ void Manager::CubePruning(size_t stack)
 				cubePruningData.SaveData(newHypo, coverageVec,tol);
    		}
   	}
+  	// delete elements in cand that were not transferred to buffer
+		cand.clear();
+		  	
   	// "Re-sort the buffer into D(v) after it has accumulated k items."
   	// buffer has an ordering function, just copy to D or if buf is larger than D, copy the top_k items of buf to D
   	set<Hypothesis*, HypothesisScoreOrderer >::iterator buf_iter;
@@ -396,9 +397,9 @@ void Manager::CubePruning(size_t stack)
   	set<Hypothesis*, HypothesisScoreOrderer >::iterator d_iter;
   	for(d_iter = D.begin(); d_iter != D.end(); ++d_iter)
   	{
-	  	Hypothesis *newHypo = *d_iter;
-  		size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
-			m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
+	  	Hypothesis &newHypo = **d_iter;
+  		size_t wordsTranslated = newHypo.GetWordsBitmap().GetNumWordsCovered();	
+			m_hypoStackColl[wordsTranslated].AddPrune(&newHypo);
   	}
   }
 }

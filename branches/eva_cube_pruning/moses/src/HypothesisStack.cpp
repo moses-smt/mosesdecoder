@@ -261,23 +261,17 @@ const std::set< Hypothesis*, HypothesisScoreOrderer> HypothesisStack::GetCoverag
 	HypothesisStack::const_iterator iter;
 	for( iter = this->begin(); iter != this->end(); ++iter)
 	{
-		Hypothesis *hypothesis = *iter;
-		const WordsBitmap &wb = hypothesis->GetWordsBitmap();
+		Hypothesis &hypothesis = **iter;
+		const WordsBitmap &wb = hypothesis.GetWordsBitmap();
 		
 		std::vector<size_t>::iterator cov_iter;
 		if( reqWb.Compare(wb) == 0)
 		{
-			coverageSet.insert(hypothesis);
+			coverageSet.insert(&hypothesis);
 		}
 	}
 	return coverageSet;
 }
 
-const Hypothesis HypothesisStack::getTopHypothesis() const
-{
-	HypothesisStack::const_iterator iterHypo = (*this).begin();
-	Hypothesis &hypothesis = **iterHypo;	
-	return hypothesis;
-}
 
 

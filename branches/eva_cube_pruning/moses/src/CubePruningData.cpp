@@ -27,3 +27,4 @@ void CubePruningData::DeleteAll()
 	xData.clear();
 	yData.clear();
 }
+

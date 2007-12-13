@@ -13,7 +13,7 @@ public:
 	std::map< size_t, TranslationOptionList > yData;
 	
 	CubePruningData();
-	virtual ~CubePruningData();
+	~CubePruningData();
 	
 	void SaveData(Hypothesis *hypo, const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol);
 	void DeleteData(Hypothesis *hypo);
