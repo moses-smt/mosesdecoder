@@ -167,8 +167,6 @@ public:
 	TO_STRING();
 	
 	const std::set< Hypothesis*, HypothesisScoreOrderer> GetCoverageSet(const WordsBitmap reqWb) const;
-	
-	const Hypothesis getTopHypothesis() const;
 };
 
 
