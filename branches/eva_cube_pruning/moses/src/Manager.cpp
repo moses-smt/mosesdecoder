@@ -49,6 +49,7 @@ static bool debug2 = false;
 // SOME GLOBAL VARIABLES
 // set k for cube pruning 
 const size_t top_k = 5;
+const size_t buffer_size = 15;
 
 typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
 typedef map< WordsBitmap, OrderedHypothesesSet > CoverageHypothesesMap;
@@ -326,7 +327,7 @@ void Manager::CubePruning(size_t stack)
   
 		size_t x = 0, y = 0;
 //		cout << "size of cand: " << cand.size() << endl;
-	 	while( !(cand.empty()) && (buf.size() < top_k) )
+	 	while( !(cand.empty()) && (buf.size() < buffer_size) )
 	  {
   		// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
   		// and then line 12 pushes its successors [..] into cand." 
@@ -379,28 +380,27 @@ void Manager::CubePruning(size_t stack)
    		}
   	}
   	// delete elements in cand that were not transferred to buffer
-		cand.clear();
+  	OrderedHypothesesSet::iterator cand_iter;
+		RemoveAllInColl(cand);
 		  	
   	// "Re-sort the buffer into D(v) after it has accumulated k items."
   	// buffer has an ordering function, just copy to D or if buf is larger than D, copy the top_k items of buf to D
   	set<Hypothesis*, HypothesisScoreOrderer >::iterator buf_iter;
   	size_t l=0;
+  	// add top_k hypothesis to hypothesis stack
   	for(buf_iter = buf.begin(); buf_iter != buf.end(); ++buf_iter)
   	{
-	  	if(l < top_k)
-   			D.insert(*buf_iter);
-   		else
-	   		break;
+				if(l < top_k)
+				{
+					Hypothesis *newHypo = *buf_iter;
+					size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
+					m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
+				}
+   			else
+	   			delete *buf_iter;
     	l++;
   	}
-  	// add all hypothesis in D to hypothesis stack
-  	set<Hypothesis*, HypothesisScoreOrderer >::iterator d_iter;
-  	for(d_iter = D.begin(); d_iter != D.end(); ++d_iter)
-  	{
-	  	Hypothesis &newHypo = **d_iter;
-  		size_t wordsTranslated = newHypo.GetWordsBitmap().GetNumWordsCovered();	
-			m_hypoStackColl[wordsTranslated].AddPrune(&newHypo);
-  	}
+  	buf.clear();
   }
 }
 				
