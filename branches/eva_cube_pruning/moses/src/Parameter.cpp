@@ -79,6 +79,7 @@ Parameter::Parameter()
  	AddParam("decoder-type", "MAP/MBR decoder (default=MAP=0)");
 	AddParam("use-persistent-cache", "cache translation options across sentences (default=true)");
 	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
+	AddParam("cube-values", "cv", "set top_k and buffer_size for cube pruning, default: -1 -1, no cube pruning");
 }
 
 Parameter::~Parameter()

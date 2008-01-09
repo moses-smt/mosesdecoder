@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 	const StaticData &staticData = StaticData::Instance();
 	if (!StaticData::LoadDataStatic(parameter))
 		return EXIT_FAILURE;
-
+		
 	// set up read/writing class
 	IOStream *ioStream = GetIODevice(staticData);
 

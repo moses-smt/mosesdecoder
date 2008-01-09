@@ -48,8 +48,8 @@ static bool debug2 = false;
 
 // SOME GLOBAL VARIABLES
 // set k for cube pruning 
-const size_t top_k = 5;
-const size_t buffer_size = 15;
+int top_k;
+int buffer_size;
 
 typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
 typedef map< WordsBitmap, OrderedHypothesesSet > CoverageHypothesesMap;
@@ -103,7 +103,10 @@ void Manager::ProcessSentence()
 	staticData.ResetSentenceStats(m_source);
 	const vector <DecodeGraph>
 			&decodeStepVL = staticData.GetDecodeStepVL();
-	
+	top_k = staticData.GetTopK();
+	buffer_size = staticData.GetBufferSize();
+	cout << "Cube pruning values: " << top_k << " " << buffer_size << endl; 
+		
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
@@ -164,12 +167,13 @@ void Manager::ProcessSentence()
 		stack++;
 		
 		// some logging
-		OutputHypoStackSize();
+		IFVERBOSE(2) {
+			OutputHypoStackSize();
+		}
 	}
 	
-	// clear global variables
+	// clear global variable
 	candidates.clear();
-	cubePruningData.DeleteAll();
 
 	// some more logging
 	VERBOSE(2, staticData.GetSentenceStats());
@@ -323,11 +327,10 @@ void Manager::CubePruning(size_t stack)
 		// "When we take into account the combination costs, the grid is no longer monotonic in general.."
 		// "Because of this disordering, we do not put the enumerated items direcly into D(v); instead,
 		//  we collect items in a buffer.."
-  	OrderedHypothesesSet D, buf;  
+  	OrderedHypothesesSet buf;  
   
 		size_t x = 0, y = 0;
-//		cout << "size of cand: " << cand.size() << endl;
-	 	while( !(cand.empty()) && (buf.size() < buffer_size) )
+	 	while( !(cand.empty()) && ((buffer_size == -1) || (buf.size() < buffer_size)) )
 	  {
   		// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
   		// and then line 12 pushes its successors [..] into cand." 
@@ -336,23 +339,11 @@ void Manager::CubePruning(size_t stack)
   		coverageVec = (cubePruningData.xData)[item->GetId()];
   		tol = (cubePruningData.yData)[item->GetId()];
   	
-	    // information about hypotheses compared 	
-/*    	cout << "item id: " << item->GetId() << "  bmp: " << item->GetWordsBitmap() << endl;
-  		if(coverageVec.size() > 0)
-	  		cout << coverageVec[0]->GetWordsBitmap() << endl;
-  		else 
-	  		cout << endl;
-  		if(tol.size() > 0)
-	  		cout << tol[0]->GetSourceWordsRange() << endl;
-  		else
-	  		cout << endl;
-  		cout << endl;
-*/	
-  		
   		// update grid position
   		x = item->GetXGridPosition();
   		y = item->GetYGridPosition();
 	  	buf.insert(item);
+//	  	cout << item->GetTotalScore() << endl;
 	  	cand.erase(cand.begin());
 	  	// Release memory for hypothesis deleted from cand
 	  	cubePruningData.DeleteData(item);
@@ -384,21 +375,23 @@ void Manager::CubePruning(size_t stack)
 		RemoveAllInColl(cand);
 		  	
   	// "Re-sort the buffer into D(v) after it has accumulated k items."
-  	// buffer has an ordering function, just copy to D or if buf is larger than D, copy the top_k items of buf to D
+  	// --> chose top_k items in buffer and add to stacks 
   	set<Hypothesis*, HypothesisScoreOrderer >::iterator buf_iter;
-  	size_t l=0;
+  	size_t i=0;
   	// add top_k hypothesis to hypothesis stack
+//  	cout << endl << "Selecting top_k items in buffer" << endl;
   	for(buf_iter = buf.begin(); buf_iter != buf.end(); ++buf_iter)
   	{
-				if(l < top_k)
-				{
-					Hypothesis *newHypo = *buf_iter;
-					size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
-					m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
-				}
-   			else
-	   			delete *buf_iter;
-    	l++;
+			if((top_k == -1) || (i < top_k))
+			{
+				Hypothesis *newHypo = *buf_iter;
+//				cout << newHypo->GetTotalScore() << endl;
+				size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
+				m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
+			}
+   		else
+	   		delete *buf_iter;
+    	i++;
   	}
   	buf.clear();
   }

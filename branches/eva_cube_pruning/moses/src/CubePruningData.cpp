@@ -22,9 +22,4 @@ void CubePruningData::DeleteData(Hypothesis *hypo)
 	yData.erase(hypo->GetId());
 }
 
-void CubePruningData::DeleteAll()
-{
-	xData.clear();
-	yData.clear();
-}
 
