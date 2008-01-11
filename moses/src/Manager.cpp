@@ -321,7 +321,7 @@ void Manager::CubePruning(size_t stack)
 		vector< Hypothesis*> coverageVec; 
   	TranslationOptionList tol;
   	
-////		cout << "Initial size of candidates: " << cand.size() << endl;
+/*		cout << "Initial size of candidates: " << cand.size() << endl;
 		size_t initial_cand_size = cand.size();
   	OrderedHypothesesSet::iterator cand_iter;
   	for(cand_iter = cand.begin(); cand_iter != cand.end(); cand_iter++)
@@ -329,10 +329,9 @@ void Manager::CubePruning(size_t stack)
   		Hypothesis *c = *cand_iter;
   		coverageVec = (cubePruningData.xData)[c->GetId()];
   		tol = (cubePruningData.yData)[c->GetId()];
-////  		cout << c->GetId() << ": xData -> " << (*coverageVec.begin())->GetWordsBitmap() << endl;
+  		cout << c->GetId() << ": xData -> " << (*coverageVec.begin())->GetWordsBitmap() << endl;
   	}  	
-   					
-   					
+ */  					
 		Hypothesis *item, *newHypo;
 		// KBEST
 		// ".. enumerating the consequent items best-first while keeping track of a relatively small
@@ -370,7 +369,6 @@ void Manager::CubePruning(size_t stack)
 	  	
 	  	cand.erase(cand.begin());
 ////	  	cout << "\nitem " << item->GetId() << " ("  << x << " " << y << ") " << " added to buffer and erased from cand; grid_counter: " << grid_counter << endl;
-	  	// Release memory for hypothesis deleted from cand
 	  	
 	  	// PUSHSUCC(item, cand); --> insert neighbours of item into cand
 	  	// neighbour on the right side, same hypothesis, new extension
