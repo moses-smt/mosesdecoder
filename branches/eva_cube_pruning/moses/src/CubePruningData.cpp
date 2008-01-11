@@ -16,10 +16,11 @@ void CubePruningData::SaveData(Hypothesis *hypo, const vector< Hypothesis*> &cov
 	yData[hypo->GetId()] = tol;
 }
 
-void CubePruningData::DeleteData(Hypothesis *hypo)
+void CubePruningData::DeleteData()
 {
-	xData.erase(hypo->GetId());
-	yData.erase(hypo->GetId());
+	cout << "Delete Cube Pruning data for this sentence! " << endl;
+	xData.clear();
+	yData.clear();
 }
 
 

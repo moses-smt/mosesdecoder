@@ -165,5 +165,10 @@ public:
 	
 	/** appends a phrase at the end of current phrase **/
 	void Append(const Phrase &endPhrase);
+	
+	std::vector<Word> ReturnWords() const
+	{
+		return m_words;
+	}
 };
 
