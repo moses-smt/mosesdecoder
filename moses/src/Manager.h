@@ -87,6 +87,8 @@ protected:
 	void ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap);
 	void PrepareCubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol);
 	void CubePruning(size_t stack);
+	typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
+	bool InSet(vector<Hypothesis*> &coverageVec, size_t x, size_t y, OrderedHypothesesSet buf);
 
 	// logging
 	void OutputHypoStack(int stack = -1);

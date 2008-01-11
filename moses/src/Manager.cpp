@@ -85,6 +85,7 @@ Manager::~Manager()
 {
   delete m_transOptColl;
 	StaticData::Instance().CleanUpAfterSentenceProcessing();      
+	cubePruningData.DeleteData();
 
 	clock_t end = clock();
 	float et = (end - m_start);
@@ -303,22 +304,34 @@ void Manager::PrepareCubePruning(const vector< Hypothesis*> &coverageVec, Transl
 	
 	// store information for this hypothesis and coverage in CubePruningData object
 	cubePruningData.SaveData(newHypo, coverageVec, orderedTol);
+////	cout << "Saved data for hypothesis " << newHypo->GetId() << "  " << (coverageVec[0])->GetWordsBitmap() << " -> " << newHypo->GetWordsBitmap() << endl;
 }
 
 void Manager::CubePruning(size_t stack)
 {	
+////	cout << "\n\nCUBE PRUNING FOR STACK " << stack << endl;
   CoverageHypothesesMap candsForStack = candidates[stack];
   CoverageHypothesesMap::iterator cands_iter;
   for(cands_iter = candsForStack.begin(); cands_iter != candsForStack.end(); ++cands_iter)
   {
   	WordsBitmap wb = (*cands_iter).first;
-//  	cout << "CubePruning for coverage " << wb << endl;
+ //// 	cout << "\nCubePruning for coverage " << wb << endl;
   	OrderedHypothesesSet cand = (*cands_iter).second;
 		
 		vector< Hypothesis*> coverageVec; 
   	TranslationOptionList tol;
+  	
+////		cout << "Initial size of candidates: " << cand.size() << endl;
+		size_t initial_cand_size = cand.size();
+  	OrderedHypothesesSet::iterator cand_iter;
+  	for(cand_iter = cand.begin(); cand_iter != cand.end(); cand_iter++)
+  	{
+  		Hypothesis *c = *cand_iter;
+  		coverageVec = (cubePruningData.xData)[c->GetId()];
+  		tol = (cubePruningData.yData)[c->GetId()];
+////  		cout << c->GetId() << ": xData -> " << (*coverageVec.begin())->GetWordsBitmap() << endl;
+  	}  	
    					
-  //	OrderedHypothesesSet::iterator cand_iter;
    					
 		Hypothesis *item, *newHypo;
 		// KBEST
@@ -330,12 +343,17 @@ void Manager::CubePruning(size_t stack)
   	OrderedHypothesesSet buf;  
   
 		size_t x = 0, y = 0;
+		int grid_counter = 0;
 	 	while( !(cand.empty()) && ((buffer_size == -1) || (buf.size() < buffer_size)) )
 	  {
   		// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
   		// and then line 12 pushes its successors [..] into cand." 
   		// 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
+////  		cout << "\ncand size: " << cand.size() << endl;
+////  		cout << "buffer size: " << buf.size() << endl;
+  		
   		item = *(cand.begin());  		
+  		
   		coverageVec = (cubePruningData.xData)[item->GetId()];
   		tol = (cubePruningData.yData)[item->GetId()];
   	
@@ -343,35 +361,65 @@ void Manager::CubePruning(size_t stack)
   		x = item->GetXGridPosition();
   		y = item->GetYGridPosition();
 	  	buf.insert(item);
-//	  	cout << item->GetTotalScore() << endl;
+	  	grid_counter++;
+	  	
+	  	// If the search is performed in more than one grid, the grids have to be differentiated by the coverage
+	  	// on the left side of the grid.
+	    WordsBitmap gridID = (*coverageVec.begin())->GetWordsBitmap(); 
+////	    cout << "gridID: " << gridID << endl;
+	  	
 	  	cand.erase(cand.begin());
+////	  	cout << "\nitem " << item->GetId() << " ("  << x << " " << y << ") " << " added to buffer and erased from cand; grid_counter: " << grid_counter << endl;
 	  	// Release memory for hypothesis deleted from cand
-	  	cubePruningData.DeleteData(item);
-		  
+	  	
 	  	// PUSHSUCC(item, cand); --> insert neighbours of item into cand
 	  	// neighbour on the right side, same hypothesis, new extension
 	  	if( (coverageVec.size() > x) && (tol.size() > y+1) )
 	  	{ 
-	  		newHypo = (coverageVec[x])->CreateNext(*tol[y+1]);
-				newHypo->CalcScore(m_transOptColl->GetFutureScore());
-				newHypo->SetGridPosition(x, y+1);
-  			cand.insert( newHypo );
-  			// TODO: this is not efficient because the same information is stored for different hypothesis in the same grid
-				cubePruningData.SaveData(newHypo, coverageVec,tol);
+				if( !(InSet(coverageVec, x, y+1, buf)) && !(InSet(coverageVec, x, y+1, cand)) )
+				{
+					newHypo = (coverageVec[x])->CreateNext(*tol[y+1]);
+					newHypo->CalcScore(m_transOptColl->GetFutureScore());
+					newHypo->SetGridPosition(x, y+1);
+  				cand.insert( newHypo );
+  				// TODO: this is not efficient because the same information is stored for different hypothesis in the same grid
+					cubePruningData.SaveData(newHypo, coverageVec,tol);
+				
+/*					vector<Word> targetWords = newHypo->GetCurrTargetPhrase().ReturnWords();
+					vector<Word>::iterator iter_words;
+					cout << "\n\tright: " << newHypo->GetId() << " (" << x << " " << y+1 << ")" << endl;
+					cout << "\tnew coverage: " << newHypo->GetWordsBitmap() << endl << "\t\"";
+					for(iter_words = targetWords.begin(); iter_words != targetWords.end(); iter_words++)
+					{
+						cout << "\t" << *iter_words << " ";
+					}
+					cout << "\"" << endl;
+*/				}
   		}
   		// neighbour below, new hypothesis, same extension
   		if( (coverageVec.size() > x+1) && (tol.size() > y) )
   		{
-		  	newHypo = (coverageVec[x+1])->CreateNext(*tol[y]);
-				newHypo->CalcScore(m_transOptColl->GetFutureScore());
-				newHypo->SetGridPosition(x+1, y);
-   			cand.insert( newHypo );
-   			// TODO: this is not efficient because the same information is stored for different hypothesis in the same grid
-				cubePruningData.SaveData(newHypo, coverageVec,tol);
+				if( !(InSet(coverageVec, x+1, y, buf)) && !(InSet(coverageVec, x+1, y, cand)) )
+				{
+					newHypo = (coverageVec[x+1])->CreateNext(*tol[y]);
+					newHypo->CalcScore(m_transOptColl->GetFutureScore());
+					newHypo->SetGridPosition(x+1, y);
+   				cand.insert( newHypo );
+   				// TODO: this is not efficient because the same information is stored for different hypothesis in the same grid
+					cubePruningData.SaveData(newHypo, coverageVec,tol);
+/*					vector<Word> targetWords = newHypo->GetCurrTargetPhrase().ReturnWords();
+					vector<Word>::iterator iter_words;
+					cout << "\n\tdown: " << newHypo->GetId() << " (" << x+1 << " " << y << ")" << endl;
+					cout << "\tnew coverage: " << newHypo->GetWordsBitmap() << endl << "\t\"";
+					for(iter_words = targetWords.begin(); iter_words != targetWords.end(); iter_words++)
+					{
+						cout << *iter_words << " ";
+					}
+					cout << "\"" << endl;
+*/				}
    		}
   	}
   	// delete elements in cand that were not transferred to buffer
-  	OrderedHypothesesSet::iterator cand_iter;
 		RemoveAllInColl(cand);
 		  	
   	// "Re-sort the buffer into D(v) after it has accumulated k items."
@@ -397,6 +445,30 @@ void Manager::CubePruning(size_t stack)
   }
 }
 				
+// Check if a new hypothesis is already in buffer (buf) or candidates (cand)
+bool Manager::InSet(vector<Hypothesis*> &coverageVec, size_t x, size_t y, OrderedHypothesesSet set)
+{
+	WordsBitmap gridID = (*coverageVec.begin())->GetWordsBitmap(); 
+	
+	OrderedHypothesesSet::iterator set_iter;
+	for(set_iter = set.begin(); set_iter != set.end(); set_iter++)
+	{
+		Hypothesis *set_item = *set_iter;
+		vector<Hypothesis*> set_coverageVec = (cubePruningData.xData)[set_item->GetId()];
+		
+		// check if the hypotheses are at the same position in the same grid
+		WordsBitmap set_gridID = (*set_coverageVec.begin())->GetWordsBitmap(); 
+		size_t set_x = set_item->GetXGridPosition();
+  	size_t set_y = set_item->GetYGridPosition();
+  	if( (gridID.Compare(set_gridID) == 0) && (x == set_x) && (y == set_y) )
+  	{
+////	 		cout << "\n-->ID of item already in set: " << set_item->GetId() << endl;
+  		return true;
+  	}
+	}
+	return false;
+}
+
 
 /**
  * Find best hypothesis on the last stack.
