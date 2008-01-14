@@ -88,7 +88,7 @@ protected:
 	void PrepareCubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol);
 	void CubePruning(size_t stack);
 	typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
-	bool InSet(vector<Hypothesis*> &coverageVec, size_t x, size_t y, OrderedHypothesesSet buf);
+	bool IsTickedOff(map< WordsBitmap, map< size_t, list<size_t> > > &tickedOff, WordsBitmap &wb, size_t x, size_t y);
 
 	// logging
 	void OutputHypoStack(int stack = -1);
