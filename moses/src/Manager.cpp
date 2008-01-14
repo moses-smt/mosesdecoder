@@ -126,7 +126,9 @@ void Manager::ProcessSentence()
 	
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
-//		cout << endl << "STACK " << stack << ":" << endl;
+		IFVERBOSE(2) {
+			cout << endl << "PROCESS STACK " << stack << ":" << endl;
+		}
 		
 		HypothesisStack &sourceHypoColl = *iterStack;
 		// the stack is pruned before processing (lazy pruning):
@@ -136,7 +138,6 @@ void Manager::ProcessSentence()
 		sourceHypoColl.CleanupArcList();
 		
 		// keep already seen coverages in mind
-		//set<vector<size_t> > seenCoverages; 
 		set< WordsBitmap > seenCoverages;
 		
 		// go through each hypothesis on the stack, find the set of hypothesis with same coverage and expand this set using cube pruning
@@ -147,7 +148,6 @@ void Manager::ProcessSentence()
 			  Hypothesis &hypothesis = **iterHypo;
 			
 				const WordsBitmap &wb = hypothesis.GetWordsBitmap();
-				//vector<size_t> cov = wb.GetCompressedRepresentation();
 				
 				// check if coverage of current hypothesis was already seen --> if no, proceed
 				if( (seenCoverages.count( wb )) == 0 )
@@ -158,7 +158,9 @@ void Manager::ProcessSentence()
 								
 					if(coverageVec.size() > 0)
 					{
-//						cout << endl << "Coverage: " << wb << endl;
+						IFVERBOSE(2) {
+							cout << endl << "Process coverage vector " << wb << endl;
+						}
 						ProcessCoverageVector(coverageVec, wb);
 					}
 				}
@@ -298,6 +300,9 @@ void Manager::PrepareCubePruning(const vector< Hypothesis*> &coverageVec, Transl
 	Hypothesis *newHypo = (coverageVec[0])->CreateNext(*orderedTol[0]);
 	newHypo->CalcScore(m_transOptColl->GetFutureScore());
 	newHypo->SetGridPosition(0, 0);
+	IFVERBOSE(2) {
+		cout << "store hypothesis on stack " << coverageVec[0]->GetWordsBitmap().GetNumWordsCovered() << " and coverage " << newHypo->GetWordsBitmap() << endl;
+	}
 	candidates[ coverageVec[0]->GetWordsBitmap().GetNumWordsCovered() ][newHypo->GetWordsBitmap()].insert(newHypo);
 	
 	// store information for this hypothesis and coverage in CubePruningData object
@@ -306,14 +311,18 @@ void Manager::PrepareCubePruning(const vector< Hypothesis*> &coverageVec, Transl
 
 void Manager::CubePruning(size_t stack)
 {	
-////	cout << "\n\nCUBE PRUNING FOR STACK " << stack << endl;
+	IFVERBOSE(2) {
+		cout << "\n\nCUBE PRUNING FOR STACK " << stack << endl;
+	}
   CoverageHypothesesMap candsForStack = candidates[stack];
   CoverageHypothesesMap::iterator cands_iter;
   for(cands_iter = candsForStack.begin(); cands_iter != candsForStack.end(); ++cands_iter)
   {
   	WordsBitmap wb = (*cands_iter).first;
- //// 	cout << "\nCubePruning for coverage " << wb << endl;
   	OrderedHypothesesSet cand = (*cands_iter).second;
+  	IFVERBOSE(2) {
+  		cout << "CubePruning for coverage " << wb << "  within " << cand.size() << " grid(s)" << endl;
+  	}
 		
 		vector< Hypothesis*> coverageVec; 
   	TranslationOptionList tol;
