@@ -49,7 +49,6 @@ static bool debug2 = false;
 // SOME GLOBAL VARIABLES
 // set k for cube pruning 
 int top_k;
-int buffer_size;
 
 typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
 typedef map< WordsBitmap, OrderedHypothesesSet > CoverageHypothesesMap;
@@ -105,8 +104,7 @@ void Manager::ProcessSentence()
 	const vector <DecodeGraph>
 			&decodeStepVL = staticData.GetDecodeStepVL();
 	top_k = staticData.GetTopK();
-	buffer_size = staticData.GetBufferSize();
-	cout << "Cube pruning values: " << top_k << " " << buffer_size << endl; 
+	cout << "Cube pruning top-k: " << top_k << " " << endl; 
 		
 	// create list of all possible translations
 	// this is only valid if:
@@ -340,7 +338,7 @@ void Manager::CubePruning(size_t stack)
 	
 		map< WordsBitmap, map< size_t, list<size_t> > > tickedOff;
 		
-	 	while( !(cand.empty()) && ((buffer_size == -1) || (buf.size() < buffer_size)) )
+	 	while( !(cand.empty()) && ((top_k == -1) || (buf.size() < top_k)) )
 	  {
   		// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
   		// and then line 12 pushes its successors [..] into cand." 
@@ -396,27 +394,21 @@ void Manager::CubePruning(size_t stack)
   	// "Re-sort the buffer into D(v) after it has accumulated k items."
   	// --> chose top_k items in buffer and add to stacks 
   	set<Hypothesis*, HypothesisScoreOrderer >::iterator buf_iter;
-  	size_t i=0;
+  	
   	// add top_k hypothesis to hypothesis stack
   	for(buf_iter = buf.begin(); buf_iter != buf.end(); ++buf_iter)
   	{
-			if((top_k == -1) || (i < top_k))
-			{
-				Hypothesis *newHypo = *buf_iter;
-				size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();
+			Hypothesis *newHypo = *buf_iter;
+			size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();
 					
-				// logging for the curious
+			// logging for the curious
 	IFVERBOSE(3) {
 		const StaticData &staticData = StaticData::Instance();
 	  newHypo->PrintHypothesis(m_source
 														, staticData.GetWeightDistortion()
 														, staticData.GetWeightWordPenalty());
 	}	
-				m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
-			}
-   		else
-	   		delete *buf_iter;
-    	i++;
+			m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
   	}
   	buf.clear();
   }

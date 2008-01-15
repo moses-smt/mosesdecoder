@@ -36,6 +36,7 @@ Parameter::Parameter()
 {
 	AddParam("beam-threshold", "b", "threshold for threshold pruning");
 	AddParam("config", "f", "location of the configuration file");
+	AddParam("cube-top-k", "ck", "set top_k for cube pruning, default: -1, no restrictions");
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
 	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
 	AddParam("generation-file", "location and properties of the generation table");
@@ -79,7 +80,6 @@ Parameter::Parameter()
  	AddParam("decoder-type", "MAP/MBR decoder (default=MAP=0)");
 	AddParam("use-persistent-cache", "cache translation options across sentences (default=true)");
 	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
-	AddParam("cube-values", "cv", "set top_k and buffer_size for cube pruning, default: -1 -1, no cube pruning");
 }
 
 Parameter::~Parameter()
