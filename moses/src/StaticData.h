@@ -113,12 +113,13 @@ protected:
 	
 	XmlInputType m_xmlInputType; //! method for handling sentence XML input
 
-  DecoderType m_decoderType; //! MAP or MBR decoder
+	bool m_mbr; //! use MBR decoder
+	size_t m_mbrSize; //! number of translation candidates considered
+	float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
 
 	bool m_useTransOptCache;
 	mutable std::map<Phrase, TranslationOptionList> m_transOptCache;
 
-  float m_mbrScale; //! Scaling factor for computing marginal probability of candidate translation
 	mutable const InputType* m_input;  //! holds reference to current sentence
 	bool m_isAlwaysCreateDirectTranslationOption;
 	//! constructor. only the 1 static variable can be created
@@ -325,7 +326,7 @@ public:
 		return m_nBestFilePath;
 	}
   	bool IsNBestEnabled() const {
-    	return !m_nBestFilePath.empty();
+	  return (!m_nBestFilePath.empty()) || m_mbr;
   	}
 	size_t GetNBestFactor() const
 	{
@@ -356,8 +357,9 @@ public:
 	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
-	DecoderType GetDecoderType() const {return m_decoderType;}
-	float GetMBRScale() const {return m_mbrScale;}
+	size_t UseMBR() const { return m_mbr; }
+	size_t GetMBRSize() const { return m_mbrSize; }
+	float GetMBRScale() const { return m_mbrScale; }
 		
 	XmlInputType GetXmlInputType() const { return m_xmlInputType; }
 

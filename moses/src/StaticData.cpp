@@ -128,6 +128,10 @@ bool StaticData::LoadData(Parameter *parameter)
 		}
 
 	}
+	else if (m_parameter->GetParam("n-best-list").size() == 1) {
+	  UserMessage::Add(string("ERROR: wrong format for switch -n-best-list file size"));
+	  return false;
+	}
 	else
 	{
 		m_nBestSize = 0;
@@ -234,9 +238,12 @@ bool StaticData::LoadData(Parameter *parameter)
 	//TODO replace this w/general word dropping -- EVH
 	SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 	  
-	m_decoderType = (DecoderType) ((m_parameter->GetParam("decoder-type").size() > 0) ? Scan<int>(m_parameter->GetParam("decoder-type")[0]) : 0);
-	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0)
-				? Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
+	// minimum Bayes risk decoding
+	SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
+	m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
+	  Scan<size_t>(m_parameter->GetParam("mbr-size")[0]) : 200;
+	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0) ?
+	  Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
 	
 	//default case
 	

@@ -147,7 +147,7 @@ Phrase TrellisPath::GetSurfacePhrase() const
 		for (size_t i = 0 ; i < outputFactor.size() ; i++)
 		{
 			FactorType factorType = outputFactor[i];
-			const Factor *factor = ret.GetFactor(pos, factorType);
+			const Factor *factor = targetPhrase.GetFactor(pos, factorType);
 			assert(factor);
 			newWord[factorType] = factor;
 		}

@@ -108,6 +108,7 @@ void Manager::ProcessSentence()
 
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
+		// VERBOSE("processing next stack at ");
 		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
@@ -397,10 +398,14 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 		if(onlyDistinct)
 		{
 			Phrase tgtPhrase = path->GetSurfacePhrase();
-			distinctHyps.insert(tgtPhrase).second;
+			if (distinctHyps.insert(tgtPhrase).second) 
+        ret.Add(path);
 		}
-		
-		ret.Add(path);
+		else 
+    {
+		  ret.Add(path);
+    }
+ 
 		// create deviations from current best
 		path->CreateDeviantPaths(contenders);		
 
