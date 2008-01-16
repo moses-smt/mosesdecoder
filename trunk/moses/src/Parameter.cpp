@@ -75,9 +75,10 @@ Parameter::Parameter()
 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
 	AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
- 	AddParam("mbr-scale", "scaling factor to convert log linear score into a probability.");
- 	AddParam("decoder-type", "MAP/MBR decoder (default=MAP=0)");
-	AddParam("use-persistent-cache", "cache translation options across sentences (default=true)");
+ 	AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
+	AddParam("mbr-size", "number of translation candidates considered in MBR decoding (default 200)");
+ 	AddParam("mbr-scale", "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");
+	AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
 	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
 }
 

@@ -190,8 +190,10 @@ void IOStream::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, lo
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
 			{
 				const Factor *factor = mbrBestHypo[i];
-				cout << *factor << " ";
+				if (i>0) cout << " ";
+				cout << factor->GetString();
 			}
+	cout << endl;
 }													 
 
 void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)

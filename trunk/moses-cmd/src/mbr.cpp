@@ -32,7 +32,6 @@ using namespace std ;
 
 int BLEU_ORDER = 4;
 int SMOOTH = 1;
-int DEBUG = 0;
 float min_interval = 1e-4;
 void extract_ngrams(const vector<const Factor* >& sentence, map < vector < const Factor* >, int >  & allngrams)
 {
@@ -78,12 +77,6 @@ float calculate_score(const vector< vector<const Factor*> > & sents, int ref, in
   }
   comps[comps_n-1] = sents[ref].size();
 
-  if (DEBUG)
-  {
-    for ( int i = 0; i < comps_n; i++)
-      cerr << "Comp " << i << " : " << comps[i];
-  }
-
   for (int i=0; i<BLEU_ORDER; i++)
   {
     if (comps[0] == 0)
@@ -101,7 +94,6 @@ float calculate_score(const vector< vector<const Factor*> > & sents, int ref, in
 }
 
 vector<const Factor*> doMBR(const TrellisPathList& nBestList){
-//   cerr << "Sentence " << sent << " has " << sents.size() << " candidate translations" << endl;
   float marginal = 0;
 
   vector<float> joint_prob_vec;
@@ -110,24 +102,36 @@ vector<const Factor*> doMBR(const TrellisPathList& nBestList){
   vector< map < vector <const Factor *>, int > > ngram_stats;
 
   TrellisPathList::const_iterator iter;
-  TrellisPath* hyp = NULL;
-	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
-	{
-		const TrellisPath &path = **iter;
-    joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights()));
+  
+  // get max score to prevent underflow
+  float maxScore = -1e20;
+  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
+  {
+    const TrellisPath &path = **iter;
+    float score = StaticData::Instance().GetMBRScale()
+      * path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights());
+    if (maxScore < score) maxScore = score;
+  }
+  
+  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
+  {
+    const TrellisPath &path = **iter;
+    joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights()) - maxScore);
     marginal += joint_prob;
     joint_prob_vec.push_back(joint_prob);
-    //Cache ngram counts
-    map < vector < const Factor *>, int > counts;
+
+    // get words in translation
     vector<const Factor*> translation;
     GetOutputFactors(path, translation);
     
-    //TO DO
+    // collect n-gram counts
+    map < vector < const Factor *>, int > counts;
     extract_ngrams(translation,counts);
+
     ngram_stats.push_back(counts);
     translations.push_back(translation);
    }
-   
+
    vector<float> mbr_loss;
    float bleu, weightedLoss;
    float weightedLossCumul = 0;
@@ -135,9 +139,9 @@ vector<const Factor*> doMBR(const TrellisPathList& nBestList){
    int minMBRLossIdx = -1;
    
    /* Main MBR computation done here */
-   for (int i = 0; i < nBestList.GetSize(); i++){
+   for (unsigned int i = 0; i < nBestList.GetSize(); i++){
        weightedLossCumul = 0;
-       for (int j = 0; j < nBestList.GetSize(); j++){
+       for (unsigned int j = 0; j < nBestList.GetSize(); j++){
             if ( i != j) {
                bleu = calculate_score(translations, j, i,ngram_stats );
                weightedLoss = ( 1 - bleu) * ( joint_prob_vec[j]/marginal);
