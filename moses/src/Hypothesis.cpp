@@ -130,7 +130,7 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 			size_t my_size = m_arcList->size();
 			size_t add_size = loserHypo->m_arcList->size();
 			this->m_arcList->resize(my_size + add_size, 0);
-			std::memcpy(&(*m_arcList)[0] + my_size, &(*m_arcList)[0], add_size * sizeof(Hypothesis *));
+			std::memcpy(&(*m_arcList)[0] + my_size, &(*loserHypo->m_arcList)[0], add_size * sizeof(Hypothesis *));
 			delete loserHypo->m_arcList;
 			loserHypo->m_arcList = 0;
 		} else { // loserHypo doesn't have any arcs
