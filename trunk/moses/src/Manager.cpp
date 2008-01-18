@@ -108,7 +108,7 @@ void Manager::ProcessSentence()
 
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
-		// VERBOSE("processing next stack at ");
+	        // VERBOSE("processing next stack at ");
 		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
@@ -389,8 +389,12 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 		contenders.Add(new TrellisPath(*iterBestHypo));
 	}
 
+  // factor defines stopping point for distinct n-best list if too many candidates identical
+	const size_t nBestFactor = StaticData::Instance().GetNBestFactor();
+  if (nBestFactor < 1) nBestFactor = 1000; // 0 = unlimited
+
 	// MAIN loop
-	for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * 20) ; iteration++)
+	for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * nBestFactor) ; iteration++)
 	{
 		// get next best from list of contenders
 		TrellisPath *path = contenders.pop();
