@@ -138,7 +138,6 @@ int main(int argc, char* argv[])
 		manager.ProcessSentence();
 
 		// pick best translation (maximum a posteriori decoding)
-		cerr << "using MBR ? " << ( staticData.UseMBR() ? "yes" : "no" ) << endl;
 		if (! staticData.UseMBR()) {
 			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 													 staticData.GetReportSegmentation(),
@@ -172,7 +171,7 @@ int main(int argc, char* argv[])
 		    {
 		      TrellisPathList nBestList;
 		      manager.CalcNBest(nBestSize, nBestList,true);
-		      cerr << "size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl;
+		      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
 		      IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
 		      std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
 		      ioStream->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
