@@ -390,7 +390,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 	}
 
   // factor defines stopping point for distinct n-best list if too many candidates identical
-	const size_t nBestFactor = StaticData::Instance().GetNBestFactor();
+	size_t nBestFactor = StaticData::Instance().GetNBestFactor();
   if (nBestFactor < 1) nBestFactor = 1000; // 0 = unlimited
 
 	// MAIN loop
