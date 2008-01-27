@@ -74,6 +74,10 @@ StaticData::StaticData()
 ,m_computeLMBackoffStats(false)
 ,m_factorDelimiter("|") // default delimiter between factors
 ,m_isAlwaysCreateDirectTranslationOption(true)
+ // SCORER start
+,m_score(false)
+,m_translatedPhrase(NULL)
+ // SCORER end
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -109,7 +113,7 @@ bool StaticData::LoadData(Parameter *parameter)
 			m_recoverPath = false;
 		}
 	}
-
+	
 	// factor delimiter
 	if (m_parameter->GetParam("factor-delimiter").size() > 0) {
 		m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
@@ -121,13 +125,7 @@ bool StaticData::LoadData(Parameter *parameter)
 		m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
 		m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
 		m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 && m_parameter->GetParam("n-best-list")[2]=="distinct");
-
-		if (m_parameter->GetParam("n-best-factor").size() > 0) 
-		{
-			m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
-		}
-
-	}
+  }
 	else if (m_parameter->GetParam("n-best-list").size() == 1) {
 	  UserMessage::Add(string("ERROR: wrong format for switch -n-best-list file size"));
 	  return false;
@@ -136,6 +134,13 @@ bool StaticData::LoadData(Parameter *parameter)
 	{
 		m_nBestSize = 0;
 	}
+	if (m_parameter->GetParam("n-best-factor").size() > 0) 
+	{
+		m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
+	}
+   else {
+		m_nBestFactor = 20;
+  }
 	
 	// include feature names in the n-best list
 	SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
@@ -158,7 +163,13 @@ bool StaticData::LoadData(Parameter *parameter)
 	{
 		m_useTransOptCache = false;
 	}
-		
+	// SCORER start
+	SetBooleanParameter(&m_score, "score", false);
+	  // the scorer disables the translation option cache since it doesn't work when
+	  // the translation options are filtered
+	if (m_score)
+	  m_useTransOptCache = false;
+	// SCORER end
 
 	//input factors
 	const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
@@ -327,8 +338,8 @@ bool StaticData::LoadLexicalReorderingModel()
   const vector<string> weightsStr = m_parameter.GetParam("weight-d");
   */
   std::vector<float>   weights;
-  int w = 1; //cur weight
-  int f = 0; //cur file
+  size_t w = 1; //cur weight
+  size_t f = 0; //cur file
   //get weights values
   std::cerr << "have " << fileStr.size() << " models\n";
   for(size_t j = 0; j < weightsStr.size(); ++j){
@@ -354,7 +365,7 @@ bool StaticData::LoadLexicalReorderingModel()
     vector<FactorType> input,output;
     LexicalReordering::Direction direction;
     LexicalReordering::Condition condition;
-    int numWeights;
+    size_t numWeights;
     //decode factor map
     vector<string> inputfactors = Tokenize(spec[0],"-");
     if(inputfactors.size() == 2){

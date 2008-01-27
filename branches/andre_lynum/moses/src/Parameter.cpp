@@ -80,6 +80,9 @@ Parameter::Parameter()
  	AddParam("mbr-scale", "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");
 	AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
 	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
+	// SCORER start
+	AddParam("score", "Score i source/translation pair. Takes the translation as a second line of input");
+	// SCORER end
 }
 
 Parameter::~Parameter()

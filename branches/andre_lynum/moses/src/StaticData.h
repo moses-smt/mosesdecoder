@@ -49,7 +49,13 @@ class StaticData
 {
 private:
 	static StaticData									s_instance;
-protected:	
+protected:
+	/* SCORER start
+	   Members for -score parameter switch and translated phrase
+	 */
+	bool m_score;
+	mutable Phrase *m_translatedPhrase;
+	// SCORER end
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::vector <DecodeGraph*>		m_decodeStepVL;
@@ -371,4 +377,12 @@ public:
 	}
 
 	const TranslationOptionList* FindTransOptListInCache(const Phrase &sourcePhrase) const;
+
+	// SCORER start
+	// Accessors for the translated phrase
+	Phrase *GetTranslatedPhrase() const { return m_translatedPhrase; };
+        void SetTranslatedPhrase(Phrase *phrase) const  {m_translatedPhrase = phrase; }
+	// Accessor for the scorer flag
+	const bool GetScoreFlag() const { return m_score; }
+	// SCORER end
 };

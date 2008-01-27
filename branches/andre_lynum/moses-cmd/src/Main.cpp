@@ -125,9 +125,25 @@ int main(int argc, char* argv[])
 
 	// read each sentence & decode
 	InputType *source=0;
+	
 	size_t lineCount = 0;
 	while(ReadInput(*ioStream,staticData.GetInputType(),source))
 	{
+	  // SCORER start
+	  // Additional InputType for translation when scoring
+	  InputType *trans = 0;
+
+	  if (staticData.GetScoreFlag()) {
+	    trans = ioStream->GetInput(new Sentence(Input));
+
+			Phrase *transPhrase = new Phrase(trans->GetSubString(WordsRange(0, trans->GetSize() - 1)));
+			delete staticData.GetTranslatedPhrase();
+			staticData.SetTranslatedPhrase(transPhrase);
+		}
+
+		delete trans;
+	  // SCORER end
+	
 			// note: source is only valid within this while loop!
 		IFVERBOSE(1)
 			ResetUserTime();
@@ -138,7 +154,6 @@ int main(int argc, char* argv[])
 		manager.ProcessSentence();
 
 		// pick best translation (maximum a posteriori decoding)
-		cerr << "using MBR ? " << ( staticData.UseMBR() ? "yes" : "no" ) << endl;
 		if (! staticData.UseMBR()) {
 			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 													 staticData.GetReportSegmentation(),
@@ -172,7 +187,7 @@ int main(int argc, char* argv[])
 		    {
 		      TrellisPathList nBestList;
 		      manager.CalcNBest(nBestSize, nBestList,true);
-		      cerr << "size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl;
+		      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
 		      IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
 		      std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
 		      ioStream->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
@@ -188,7 +203,7 @@ int main(int argc, char* argv[])
 
 		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
     
-		manager.CalcDecoderStatistics();    
+		manager.CalcDecoderStatistics();
 	}
 	
 	delete ioStream;
