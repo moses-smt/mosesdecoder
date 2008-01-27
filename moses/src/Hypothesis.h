@@ -256,6 +256,10 @@ public:
 
 	const ScoreComponentCollection &GetCachedReorderingScore() const;
 
+	// SCORER start
+	// Compares this and previous hypothesises to a phrase
+	bool CompareHypothesisToPhrase(const Phrase *inputPhrase, size_t wordsSoFar) const;
+	// SCORER end
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

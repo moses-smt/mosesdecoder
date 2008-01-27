@@ -143,6 +143,10 @@ public:
 	bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector
 							, const std::vector<FactorType> &inputFactor) const;
 
+	// SCORER start
+	// Check wether the phrase is contained in this phrase
+	bool Contains(const Phrase &inputPhrase) const;
+	// SCORER end
 	//! create an empty word at the end of the phrase
 	Word &AddWord();
 	//! create copy of input word at the end of the phrase

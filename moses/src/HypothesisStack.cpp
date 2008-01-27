@@ -76,8 +76,17 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 	return ret;
 }
 
+// !!! clear up the pruning issue while scoring
 void HypothesisStack::AddPrune(Hypothesis *hypo)
 { 
+	// SCORER start
+	// don't prune any hypothesis when scoring
+	if (StaticData::Instance().GetScoreFlag()) {
+		Add(hypo);
+		return;
+	}
+	// SCORER end
+		
 	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
 	  StaticData::Instance().GetSentenceStats().AddDiscarded();
@@ -121,8 +130,8 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 		}
 		return;
 	}
-	else
-	{ // already storing the best hypo. discard current hypo 
+	else 
+		{ // already storing the best hypo. discard current hypo 
 	  VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
 		if (m_nBestIsEnabled) {
 			hypoExisting->AddArc(hypo);

@@ -302,6 +302,21 @@ bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
 	return false;
 }
 
+// SCORER start
+bool Phrase::Contains(const Phrase &inputPhrase) const {
+  const size_t inputSize = inputPhrase.GetSize();
+  const size_t thisSize = GetSize();
+
+  for (size_t startPos = 0; startPos < (thisSize - inputSize + 1); startPos++) {
+    const WordsRange inputRange(startPos, startPos + inputSize - 1);
+    if (GetSubString(inputRange).IsCompatible(inputPhrase))
+      return true;
+  }
+
+  return false;
+}
+//SCORER end
+
 bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 {
 	if (inputPhrase.GetSize() != GetSize())

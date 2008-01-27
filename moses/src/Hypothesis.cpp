@@ -130,7 +130,7 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 			size_t my_size = m_arcList->size();
 			size_t add_size = loserHypo->m_arcList->size();
 			this->m_arcList->resize(my_size + add_size, 0);
-			std::memcpy(&(*m_arcList)[0] + my_size, &(*m_arcList)[0], add_size * sizeof(Hypothesis *));
+			std::memcpy(&(*m_arcList)[0] + my_size, &(*loserHypo->m_arcList)[0], add_size * sizeof(Hypothesis *));
 			delete loserHypo->m_arcList;
 			loserHypo->m_arcList = 0;
 		} else { // loserHypo doesn't have any arcs
@@ -520,3 +520,34 @@ const ScoreComponentCollection &Hypothesis::GetCachedReorderingScore() const
 {
 	return m_transOpt->GetReorderingScore();
 }
+
+// SCORER start
+// Checks the hypothesises originating from this hypothesis for compatibility with the phrase
+// within the output positions covered by the hypothesis
+bool Hypothesis::CompareHypothesisToPhrase(const Phrase *inputPhrase, size_t wordsSoFar) const
+{
+	// Check that the hypothesis chain doesn't cover more words than is in the phrase
+	if ((wordsSoFar + m_targetPhrase.GetSize()) > inputPhrase->GetSize())
+		return false;
+  // check for compatibility or if we're in the root hypothesis (better test for this ?)
+  if ((m_targetPhrase.GetSize() == 0) || inputPhrase->GetSubString(m_currTargetWordsRange).IsCompatible(m_targetPhrase)) {
+    // should follow the arclist too ???
+    if (m_prevHypo == NULL)
+      return true;
+
+    else if ((m_prevHypo != NULL) && m_prevHypo->CompareHypothesisToPhrase(inputPhrase, wordsSoFar + m_targetPhrase.GetSize()))
+      return true;
+    
+    else if ((m_arcList != NULL) && m_arcList->size() > 0) {
+      for (ArcList::const_iterator it = m_arcList->begin(); it != m_arcList->end(); it++) {
+				Hypothesis *hypo = *it;
+
+				if (hypo->CompareHypothesisToPhrase(inputPhrase, wordsSoFar + m_targetPhrase.GetSize()))
+					return true;
+      }
+    }
+  }
+
+  return false;
+}
+// SCORER end
