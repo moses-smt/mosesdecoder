@@ -122,7 +122,7 @@ std::vector<XmlOption> ProcessAndStripXMLTags(std::string& line) {
 			std::string::size_type endOfName = tag.find_first_of(' ');
 			std::string nextTagName = tag;
 			bool isUnary = tag[tag.size() - 1] == '/';
-			bool isOpen = tag[1] != '/';
+			bool isOpen = tag[0] != '/';
 			if (endOfName != std::string::npos) {
 				nextTagName = tag.substr(0,endOfName);
 				tagContents = tag.substr(endOfName+1);
