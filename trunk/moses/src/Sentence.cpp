@@ -42,7 +42,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	//parse XML markup in translation line
 	const StaticData &staticData = StaticData::Instance();
 	if (staticData.GetXmlInputType() != XmlPassThrough)
-		m_xmlOptionsList = ProcessAndStripXMLTags(line, *this);
+		m_xmlOptionsList = ProcessAndStripXMLTags(line);
 	Phrase::CreateFromString(factorOrder, line, factorDelimiter);
 	
 	//only fill the vector if we are parsing XML
@@ -50,10 +50,9 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 		for (size_t i=0; i<GetSize();i++) {
 			m_xmlCoverageMap.push_back(false);
 		}
-		for (std::vector<TranslationOption*>::const_iterator iterXMLOpts = m_xmlOptionsList.begin();
-		        iterXMLOpts != m_xmlOptionsList.end(); iterXMLOpts++) {
+		for (size_t i=0; i< m_xmlOptionsList.size();i++) {
 			//m_xmlOptionsList will be empty for XmlIgnore
-			for(size_t j=(**iterXMLOpts).GetSourceWordsRange().GetStartPos();j<=(**iterXMLOpts).GetSourceWordsRange().GetEndPos();j++) {
+			for(size_t j=m_xmlOptionsList[i].startPos;j<=m_xmlOptionsList[i].endPos;j++) {
 				m_xmlCoverageMap[j]=true;
 				
 			}
@@ -89,12 +88,24 @@ bool Sentence::XmlOverlap(size_t startPos, size_t endPos) const {
 
 void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const {
 	//iterate over XmlOptions list, find exact source/target matches
+	//we don't worry about creating the objects ahead of time because this should only be called once for each unique start/end when a given sentence is processed
 	const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 	
-	for (std::vector<TranslationOption*>::const_iterator iterXMLOpts = m_xmlOptionsList.begin();
-	        iterXMLOpts != m_xmlOptionsList.end(); iterXMLOpts++) {
-		if (startPos == (**iterXMLOpts).GetSourceWordsRange().GetStartPos() && endPos == (**iterXMLOpts).GetSourceWordsRange().GetEndPos()) {
- 			list.push_back(*iterXMLOpts);
+	for(size_t i=0;i<m_xmlOptionsList.size();i++) {
+		if (startPos == m_xmlOptionsList[i].startPos && endPos == m_xmlOptionsList[i].endPos) {
+			//create TranslationOptions
+			
+			for (size_t j=0;j<m_xmlOptionsList[i].targetPhrases.size();j++) {
+				TargetPhrase targetPhrase(Output);
+				targetPhrase.CreateFromString(outputFactorOrder,m_xmlOptionsList[i].targetPhrases[j],StaticData::Instance().GetFactorDelimiter());
+				targetPhrase.SetScore(m_xmlOptionsList[i].targetScores[j]);
+				WordsRange range(m_xmlOptionsList[i].startPos,m_xmlOptionsList[i].endPos);
+				
+				TranslationOption *option = new TranslationOption(range,targetPhrase,*this);
+				assert(option);
+				list.push_back(option);
+
+			}
 		}
 	}
 }
