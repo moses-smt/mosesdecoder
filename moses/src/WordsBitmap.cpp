@@ -59,16 +59,20 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
 
 std::vector<size_t> WordsBitmap::GetCompressedRepresentation() const
 {
-  std::vector<size_t> res(1 + (m_size >> (sizeof(int) + 3)), 0);
-  size_t c=0; size_t x=0; size_t ci=0;
-  for(size_t i=0;i<m_size;++i) {
-    x |= (size_t)m_bitmap[i];
+	int vectorSize = 1 + m_size / (sizeof(int) * CHAR_BIT);
+	std::vector<size_t> res(vectorSize, 0);
+	size_t x=0; size_t ci=0;
+	for(size_t i=0;i<m_size;++i) {
 		x <<= 1;
-		c++;
-		if (c == sizeof(int)*8) {
+		x |= (size_t)m_bitmap[i];
+		if ((i + 1) % (sizeof(int) * CHAR_BIT) == 0) {
 			res[ci++] = x; x = 0;
 		}
-  }
-  return res;
+	}
+	x <<= vectorSize * sizeof(int) * CHAR_BIT - m_size;
+	res[ci] = x;
+	return res;
 }
+
+
 

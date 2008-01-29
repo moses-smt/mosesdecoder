@@ -26,6 +26,7 @@
 #include <iostream>
 #include "Util.h"
 #include "StaticData.h"
+#include "TranslationOption.h"
 
 namespace {
 
@@ -91,10 +92,11 @@ inline std::vector<std::string> TokenizeXml(const std::string& str)
 
 }
 
-std::vector<XmlOption> ProcessAndStripXMLTags(std::string& line) {
+std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const InputType &source) {
 	//parse XML markup in translation line
-	std::vector<XmlOption> res;
+	std::vector<TranslationOption*> res;
 	std::string rstr;
+	std::string linkedStr;
 	if (line.find_first_of('<') == std::string::npos) { return res; }
 	std::vector<std::string> xmlTokens = TokenizeXml(line);
 	std::string tagName = "";
@@ -106,6 +108,7 @@ std::vector<XmlOption> ProcessAndStripXMLTags(std::string& line) {
 	size_t curWord=0;
 	int numUnary = 0;
 	bool doClose = false;
+	bool isLinked = false;
 	for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++)
 	{
 		if(!isXmlTag(xmlTokens[xmlTokenPos]))
@@ -127,7 +130,30 @@ std::vector<XmlOption> ProcessAndStripXMLTags(std::string& line) {
 				nextTagName = tag.substr(0,endOfName);
 				tagContents = tag.substr(endOfName+1);
 			}
-			if (isOpen)
+			if (nextTagName == "linked") {
+				isLinked = true;
+				linkedStr = "";
+			}
+			else if (nextTagName == "/linked") {
+				isLinked = false;
+				// recurse to process linked tags
+				std::vector<TranslationOption*> tOptions = ProcessAndStripXMLTags(linkedStr, source);
+				// link them together
+				std::vector<TranslationOption*>::const_iterator iterTransOpts1;
+				std::vector<TranslationOption*>::const_iterator iterTransOpts2;
+				for (iterTransOpts1 = tOptions.begin(); iterTransOpts1 != tOptions.end(); iterTransOpts1++) {
+					for (iterTransOpts2 = tOptions.begin(); iterTransOpts2 != tOptions.end(); iterTransOpts2++) {
+						if (iterTransOpts1 != iterTransOpts2) {
+							(**iterTransOpts1).AddLinkedTransOpt(*iterTransOpts2);
+						}
+					}
+					res.push_back(*iterTransOpts1);
+				}
+			}
+			else if (isLinked) {
+				linkedStr += xmlTokens[xmlTokenPos];
+			}
+			else if (isOpen)
 			{
 				//this is an open tag
 				tagName = nextTagName;
@@ -182,6 +208,7 @@ std::vector<XmlOption> ProcessAndStripXMLTags(std::string& line) {
 				//TODO: deal with multiple XML options here
 
 				if (StaticData::Instance().GetXmlInputType() != XmlIgnore) {
+					const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 					for (size_t i=0; i<altTexts.size(); ++i) {
 						//only store options if we aren't ignoring them
 						//set default probability
@@ -189,7 +216,15 @@ std::vector<XmlOption> ProcessAndStripXMLTags(std::string& line) {
 						if (altProbs[i] != "") probValue = Scan<float>(altProbs[i]);
 						//Convert from prob to log-prob
 						float scoreValue = FloorScore(TransformScore(probValue));
-						XmlOption option(tagStart,tagEnd,altTexts[i],scoreValue);
+						
+						TargetPhrase targetPhrase(Output);
+						targetPhrase.CreateFromString(outputFactorOrder,altTexts[i],StaticData::Instance().GetFactorDelimiter());
+						targetPhrase.SetScore(scoreValue);
+						WordsRange range(tagStart,tagEnd);
+						
+						TranslationOption *option = new TranslationOption(range,targetPhrase,source);
+						assert(option);
+						
 						res.push_back(option);
 					}
 				}
@@ -204,4 +239,5 @@ std::vector<XmlOption> ProcessAndStripXMLTags(std::string& line) {
 	line = rstr;
 	return res;
 }
+
 

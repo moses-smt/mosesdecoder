@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include "InputType.h"
 
 /** This struct is used for storing XML force translation data for a given range in the sentence
  */
@@ -18,5 +19,6 @@ struct XmlOption {
 
 };
 
-std::vector<XmlOption> ProcessAndStripXMLTags(std::string& line);
+std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const InputType &source);
+
 
