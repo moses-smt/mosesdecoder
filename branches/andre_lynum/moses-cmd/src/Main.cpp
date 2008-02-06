@@ -136,7 +136,11 @@ int main(int argc, char* argv[])
 	  if (staticData.GetScoreFlag()) {
 	    trans = ioStream->GetInput(new Sentence(Input));
 
-			Phrase *transPhrase = new Phrase(trans->GetSubString(WordsRange(0, trans->GetSize() - 1)));
+			size_t transSize = trans->GetSize();
+			// Do not subtract if we got an empty input
+			transSize = (transSize == 0 ? transSize : transSize - 1);
+			
+			Phrase *transPhrase = new Phrase(trans->GetSubString(WordsRange(0, transSize)));
 			delete staticData.GetTranslatedPhrase();
 			staticData.SetTranslatedPhrase(transPhrase);
 		}

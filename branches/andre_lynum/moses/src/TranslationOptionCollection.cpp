@@ -33,6 +33,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
 
+// SCORER start
+#include "Scorer.h"
+// SCORER end
+
 using namespace std;
 
 /** constructor; since translation options are indexed by coverage span, the corresponding data structure is initialized here 
@@ -144,6 +148,30 @@ void TranslationOptionCollection::Prune()
 void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGraph*> &decodeStepVL)
 {
 	size_t size = m_source.GetSize();
+
+	// SCORER start
+	// Add translationoptions for all possible phrase combinations possible between source and translation
+	if (StaticData::Instance().GetScoreFlag()) {
+		const Phrase *transPhrase = StaticData::Instance().GetTranslatedPhrase();
+
+		// Loop over all possible phrases in translation
+		for (size_t i = 0; i < transPhrase->GetSize(); i++) {
+			for (size_t j = i; j < transPhrase->GetSize(); j++) {
+				TargetPhrase targetPhrase(Output);
+				targetPhrase.Append(transPhrase->GetSubString(WordsRange(i, j)));
+
+				// Add translationoptions for all positions in source
+				for (size_t pos = 0; pos < size; pos++) {
+					VERBOSE(3, "Generating transopt at pos " << pos << " with target " << targetPhrase.ToString() << endl);
+					TranslationOption *transOpt = new TranslationOption(WordsRange(pos, pos), targetPhrase, m_source, 0);
+					transOpt->CalcScore();
+					Add(transOpt);
+				}
+			}
+		}
+	}
+	// SCORER end
+	
 	// try to translation for coverage with no trans by expanding table limit
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
@@ -388,6 +416,11 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		// consult persistent (cross-sentence) cache for stored translation options
 		bool skipTransOptCreation = false
 				, useCache = StaticData::Instance().GetUseTransOptCache();
+
+		// SCORER start
+		Phrase *transPhrase = StaticData::Instance().GetTranslatedPhrase();
+		// SCORER end
+
 		if (useCache) 
 		{
 		  const WordsRange wordsRange(startPos, endPos);
@@ -401,7 +434,18 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		    for (iterTransOpt = transOptList->begin() ; iterTransOpt != transOptList->end() ; ++iterTransOpt)
 				{
 					TranslationOption *transOpt = new TranslationOption(**iterTransOpt, wordsRange);
-					Add(transOpt);
+					// SCORER start
+					// Is this section used when caching is disabled ?
+					// Check if we're scoring, if we are only add translationoptions that are contained
+					// in the translation
+					if (SCORER_FILTER_TRANSOPTS && StaticData::Instance().GetScoreFlag()) {
+						if (transPhrase->Contains(transOpt->GetTargetPhrase()))
+							Add(transOpt);
+					}
+					else
+						Add(transOpt);
+					// SCORER end
+
 				}
 			}
 		} // useCache
@@ -454,7 +498,16 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			{
 				TranslationOption *transOpt = *iterColl;
 				transOpt->CalcScore();
-				Add(transOpt);
+				// SCORER start
+				// Check if we're scoring, if we are only add translationoptions that are contained
+				// in the translation
+				if (SCORER_FILTER_TRANSOPTS && StaticData::Instance().GetScoreFlag()) {
+				  if (transPhrase->Contains(transOpt->GetTargetPhrase()))
+				    Add(transOpt);
+				}
+				else
+				  Add(transOpt);
+				// SCORER end
 			}
 
 			// storing translation options in persistent cache (kept across sentences) 
