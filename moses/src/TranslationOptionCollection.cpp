@@ -161,11 +161,13 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGr
 				targetPhrase.Append(transPhrase->GetSubString(WordsRange(i, j)));
 
 				// Add translationoptions for all positions in source
-				for (size_t pos = 0; pos < size; pos++) {
-					VERBOSE(3, "Generating transopt at pos " << pos << " with target " << targetPhrase.ToString() << endl);
-					TranslationOption *transOpt = new TranslationOption(WordsRange(pos, pos), targetPhrase, m_source, 0);
-					transOpt->CalcScore();
-					Add(transOpt);
+				for (size_t i_pos = 0; i_pos < size; i_pos++) {
+					for (size_t j_pos = i_pos; j_pos < size; j_pos++) {
+						VERBOSE(3, "Generating transopt at " << i_pos << "-" << j_pos << " with target " << targetPhrase.ToString() << endl);
+						TranslationOption *transOpt = new TranslationOption(WordsRange(i_pos, j_pos), targetPhrase, m_source, 0);
+						transOpt->CalcScore();
+						Add(transOpt);
+					}
 				}
 			}
 		}

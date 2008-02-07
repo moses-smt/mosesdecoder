@@ -48,7 +48,11 @@ void HypothesisStack::RemoveAll()
 pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 {
 	std::pair<iterator, bool> ret = m_hypos.insert(hypo);
-	if (ret.second) 
+
+	// SCORER start
+	// When scoring we're adding all hypothesises on stack regardless
+	if (ret.second || StaticData::Instance().GetScoreFlag())
+	// SCORER end
 	{ // equiv hypo doesn't exists
 		VERBOSE(3,"added hyp to stack");
 	
@@ -106,12 +110,20 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 	iterator &iterExisting = addRet.first;
 	Hypothesis *hypoExisting = *iterExisting;
 	assert(iterExisting != m_hypos.end());
-
-	StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
+	// SCORER start
+	// Avoid recombination when scoring
+	if (!StaticData::Instance().GetScoreFlag()) {
+		StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
+	}
 	
 	// found existing hypo with same target ending.
 	// keep the best 1
-	if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
+	
+	if (StaticData::Instance().GetScoreFlag()) {
+		// Do nothing
+	}
+	else if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
+	// SCORER end
 	{ // incoming hypo is better than the one we have
 		VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
 		if (m_nBestIsEnabled) {
@@ -209,7 +221,28 @@ void HypothesisStack::PruneToSize(size_t newSize)
 
 const Hypothesis *HypothesisStack::GetBestHypothesis() const
 {
-	if (!m_hypos.empty())
+	// SCORER start
+	// return only hypothesises that is the same as translated input when scoring
+	if (StaticData::Instance().GetScoreFlag()) {
+		Hypothesis *bestHypo = NULL;
+		Phrase *trans = StaticData::Instance().GetTranslatedPhrase();
+
+		for (const_iterator iter = m_hypos.begin(); iter != m_hypos.end(); iter++) {
+			// Check for compatible and best hypothesis
+			Hypothesis *hypo = *iter;
+			if (hypo->IsHypothesisEqual(*trans)) {
+				if (bestHypo == NULL)
+					bestHypo = hypo;
+				else 
+					if (hypo->GetTotalScore() > bestHypo->GetTotalScore())
+						bestHypo = hypo;
+			}
+		}
+
+		return bestHypo;
+	}
+	else if (!m_hypos.empty())
+		// SCORER end
 	{
 		const_iterator iter = m_hypos.begin();
 		Hypothesis *bestHypo = *iter;

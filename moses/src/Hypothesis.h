@@ -259,6 +259,7 @@ public:
 	// SCORER start
 	// Compares this and previous hypothesises to a phrase
 	bool CompareHypothesisToPhrase(const Phrase *inputPhrase, size_t wordsSoFar) const;
+	bool Hypothesis::IsHypothesisEqual(const Phrase &phrase) const;
 	// SCORER end
 };
 
