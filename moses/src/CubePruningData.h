@@ -8,7 +8,11 @@
 class CubePruningData
 {
 public:
+	// global counter for coverage grids
+	static size_t gridNr;
+
 	// key of maps is hypothesis ID
+	// new: key of maps is grid nr.
 	std::map< size_t, std::vector< Hypothesis*> > xData;
 	std::map< size_t, TranslationOptionList > yData;
 	

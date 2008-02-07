@@ -84,6 +84,7 @@ protected:
 	
 	// new: x and y position in a cube pruning grid
 	int m_x, m_y;
+	int nr_in_buffer;
 
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
@@ -274,6 +275,16 @@ public:
 	int GetYGridPosition()
 	{
 		return m_y;
+	}
+	
+	void SetNrInBuffer(int nr)
+	{
+		nr_in_buffer = nr;
+	}
+	
+	int GetNrInBuffer() const
+	{
+		return nr_in_buffer;
 	}
 	
 };

@@ -105,6 +105,8 @@ void Manager::ProcessSentence()
 			&decodeStepVL = staticData.GetDecodeStepVL();
 	top_k = staticData.GetTopK();
 	cout << "Cube pruning top-k: " << top_k << " " << endl; 
+	
+	m_beamThreshold = (StaticData::Instance()).GetBeamThreshold();
 		
 	// create list of all possible translations
 	// this is only valid if:
@@ -288,6 +290,9 @@ void Manager::ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, con
 
 void Manager::PrepareCubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol)
 {
+	// increment grid counter
+	CubePruningData::gridNr++;
+	
 	set<TranslationOption*, TranslationOptionOrderer> translationOptionSet;
 	translationOptionSet.insert(tol.begin(), tol.end());
 	
@@ -337,7 +342,7 @@ void Manager::CubePruning(size_t stack)
 		size_t x = 0, y = 0;
 	
 		map< WordsBitmap, map< size_t, list<size_t> > > tickedOff;
-		
+		float best_score_in_buf = (*cand.begin())->GetTotalScore();
 	 	while( !(cand.empty()) && ((top_k == -1) || (buf.size() < top_k)) )
 	  {
   		// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
@@ -345,7 +350,18 @@ void Manager::CubePruning(size_t stack)
   		// 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
   		
   		item = *(cand.begin());  		
-  		
+// 		  if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf  + m_beamThreshold) )
+//  		if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf * 1.1) ) 
+//				if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf * 1.15) ) 
+//				if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf * 1.2) ) 
+//  		if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf  -7 ) )
+//  		{
+// 			cout << "score is " << item->GetTotalScore() << " (best: " << best_score_in_buf << ").. break at buffer size " << buf.size() << endl;
+//  			break; 
+//  		}
+//   		else if( best_score_in_buf > 0 )
+//  			cout << "Score is above zero! (" << best_score_in_buf << ")" << endl;
+  			
   		coverageVec = (cubePruningData.xData)[item->GetId()];
   		tol = (cubePruningData.yData)[item->GetId()];
   		// If the search is performed in more than one grid, the grids have to be differentiated by the coverage
@@ -355,7 +371,16 @@ void Manager::CubePruning(size_t stack)
   		// update grid position
   		x = item->GetXGridPosition();
   		y = item->GetYGridPosition();
+	  	
+			// insert hypothesis in buffer
 	  	buf.insert(item);
+	  	
+	  	// debug info
+	  	item->SetNrInBuffer( buf.size() );
+	  	
+	  	// update best score in buffer
+	  	best_score_in_buf = (*buf.begin())->GetTotalScore();
+	  	
 	  	// tick off hypothesis
 	  	tickedOff[grid_wb][x].push_back(y);
 	  	cand.erase(cand.begin());
@@ -388,6 +413,8 @@ void Manager::CubePruning(size_t stack)
 				cubePruningData.SaveData(newHypo, coverageVec,tol);
    		}
   	}
+  	//		cout << "Finished loop at buffer size " << buf.size() << endl;
+  	
   	// delete elements in cand that were not transferred to buffer
 		RemoveAllInColl(cand);
 		  	

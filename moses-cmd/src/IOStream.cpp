@@ -180,6 +180,7 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 void IOStream::Backtrack(const Hypothesis *hypo){
 
 	if (hypo->GetPrevHypo() != NULL) {
+		cout << "BACKTRACK: " << hypo->GetNrInBuffer() << endl;
 		VERBOSE(3,hypo->GetId() << " <= ");
 		Backtrack(hypo->GetPrevHypo());
 	}
