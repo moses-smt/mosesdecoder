@@ -550,4 +550,18 @@ bool Hypothesis::CompareHypothesisToPhrase(const Phrase *inputPhrase, size_t wor
 
   return false;
 }
+
+// Checks if hypothesis is equal to phrase, used to find relevant best hypothesis
+bool Hypothesis::IsHypothesisEqual(const Phrase &phrase) const {
+  if (GetSize() != phrase.GetSize())
+    return false;
+
+  for (size_t i = 0; i < GetSize(); i++) {
+    if (!(GetWord(i)[0]->GetString() == phrase.GetWord(i)[0]->GetString()))
+      return false;
+  }
+
+  return true;
+}
+
 // SCORER end

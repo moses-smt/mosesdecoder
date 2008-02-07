@@ -46,23 +46,13 @@ static bool debug2 = false;
 
 Manager::Manager(InputType const& source)
 :m_source(source)
- // ,m_hypoStackColl(source.GetSize() + 1) // SCORER conditionally initialized below
+,m_hypoStackColl(source.GetSize() + 1)
 ,m_transOptColl(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 ,m_start(clock())
 {
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
- 	// SCORER start
- 	// If we're scoring make the hypostack collection the size of the translation instead of the source
- 	if (staticData.GetScoreFlag()) {
- 		m_hypoStackColl = std::vector < HypothesisStack > (staticData.GetTranslatedPhrase()->GetSize() + 1);
- 	}
- 	else {
- 		m_hypoStackColl = std::vector < HypothesisStack > (source.GetSize() + 1);
- 	}
-// 	// SCORER end
-	
 
 	staticData.InitializeBeforeSentenceProcessing(source);
 
@@ -341,15 +331,6 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
  */
 const Hypothesis *Manager::GetBestHypothesis() const
 {
-	// SCORER start
-	// Only check in the relevant stack when scoring
-	if (StaticData::Instance().GetScoreFlag()) {
-		size_t back = StaticData::Instance().GetTranslatedPhrase()->GetSize();
-		const HypothesisStack &hypoColl = m_hypoStackColl[back];
-		return hypoColl.GetBestHypothesis();
-	}
-	// SCORER end
-
 	const HypothesisStack &hypoColl = m_hypoStackColl.back();
 	return hypoColl.GetBestHypothesis();
 }
