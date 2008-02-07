@@ -82,6 +82,8 @@ protected:
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	clock_t m_start; /**< starting time, used for logging */
 	
+	float m_beamThreshold; /* copy from StaticData for Cube Pruning */
+	
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
 	void ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap);
