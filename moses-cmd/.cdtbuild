@@ -20,6 +20,7 @@
 <listOptionValue builtIn="false" value="LM_IRST"/>
 <listOptionValue builtIn="false" value="LM_INTERNAL"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+<listOptionValue builtIn="false" value="EXIT_RETURN"/>
 </option>
 <option id="gnu.cpp.compiler.option.debugging.gprof.514527174" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
 <option id="gnu.cpp.compiler.option.warnings.allwarn.169517888" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
@@ -66,6 +67,7 @@
 <listOptionValue builtIn="false" value="LM_IRST"/>
 <listOptionValue builtIn="false" value="LM_INTERNAL"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+<listOptionValue builtIn="false" value="EXIT_RETURN"/>
 </option>
 <option id="gnu.cpp.compiler.option.debugging.gprof.24360799" superClass="gnu.cpp.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
 <option id="gnu.cpp.compiler.option.warnings.allwarn.2108427488" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
