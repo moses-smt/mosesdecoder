@@ -77,15 +77,19 @@ protected:
 	const Hypothesis 	*m_winningHypo;
 	ArcList 					*m_arcList; /**< all arcs that end at the same trellis point as this hypothesis */
 	const TranslationOption *m_transOpt;
+	// information about previous hypothesis to retrieve data for current hypothesis in method CubePruning()
+  WordsBitmap m_prev_words_bitmap;
+	WordsRange m_prev_words_range; 
+	// new: x and y position in a cube pruning grid
+	size_t m_x, m_y;
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 	
-	// new: x and y position in a cube pruning grid
-	int m_x, m_y;
-	int nr_in_buffer;
-
+	// for debugging
+	size_t nr_in_buffer;
+	
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
 	void CalcLMScore(const LMList &languageModels);
@@ -277,16 +281,28 @@ public:
 		return m_y;
 	}
 	
-	void SetNrInBuffer(int nr)
+	void SetNrInBuffer(size_t nr)
 	{
 		nr_in_buffer = nr;
 	}
 	
-	int GetNrInBuffer() const
+	size_t GetNrInBuffer() const
 	{
 		return nr_in_buffer;
 	}
 	
+
+	
+	const WordsBitmap GetPreviousWordsBitmap() const
+	{
+		return m_prev_words_bitmap;
+	}
+	
+	
+	const WordsRange GetPreviousSourceWordsRange() const
+	{
+		return m_prev_words_range;
+	}
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

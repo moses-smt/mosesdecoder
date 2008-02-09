@@ -86,8 +86,8 @@ protected:
 	
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
-	void ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap);
-	void PrepareCubePruning(const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol);
+	void ProcessCoverageVector(const WordsBitmap &wb);
+	void PrepareCubePruning(Hypothesis &firstHypo, const WordsRange &wr);
 	void CubePruning(size_t stack);
 	typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
 	bool IsTickedOff(map< WordsBitmap, map< size_t, list<size_t> > > &tickedOff, WordsBitmap &wb, size_t x, size_t y);
