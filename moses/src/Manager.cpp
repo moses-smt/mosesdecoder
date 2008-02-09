@@ -147,10 +147,10 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 		for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 		{
-      size_t maxSize = sourceSize - startPos;
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
-
+			size_t maxSize = sourceSize - startPos;
+			size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+			maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+			
 			for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 			{
 				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
@@ -296,6 +296,20 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	if (debug2) { std::cerr << "::EXT: " << transOpt << "\n"; }
 #endif
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+	// expand hypothesis further if transOpt was linked
+	for (std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
+	       iterLinked != transOpt.GetLinkedTransOpts().end(); iterLinked++) {
+		const WordsBitmap hypoBitmap = newHypo->GetWordsBitmap();
+		if (hypoBitmap.Overlap((**iterLinked).GetSourceWordsRange())) {
+			// don't want to add a hypothesis that has some but not all of a linked TO set, so return
+			return;
+		}
+		else
+		{
+			newHypo->CalcScore(m_transOptColl->GetFutureScore());
+			newHypo = newHypo->CreateNext(**iterLinked);
+		}
+	}
 	newHypo->CalcScore(m_transOptColl->GetFutureScore());
 	
 	// logging for the curious

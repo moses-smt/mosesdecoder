@@ -60,6 +60,7 @@ protected:
 	Phrase				      *m_sourcePhrase; /*< input phrase translated by this */
 	const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
 	float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
+	std::vector<TranslationOption*> m_linkedTransOpts; /* list of linked TOs which must be included with this in any hypothesis */
 	
 	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
 	//! for example, know the full n-gram score since the length of the
@@ -111,6 +112,18 @@ public:
 	const Phrase *GetSourcePhrase() const 
 	{
 	  return m_sourcePhrase;
+	}
+	
+	/** returns linked TOs */
+	inline const std::vector<TranslationOption*> &GetLinkedTransOpts() const
+	{
+		return m_linkedTransOpts;
+	}
+	
+	/** add link to another TO */
+	inline void AddLinkedTransOpt(TranslationOption* to)
+	{
+		m_linkedTransOpts.push_back(to);
 	}
 
 	/** whether source span overlaps with those of a hypothesis */
@@ -165,5 +178,6 @@ public:
 
 	TO_STRING();
 };
+
 
 
