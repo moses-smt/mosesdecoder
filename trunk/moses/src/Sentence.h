@@ -48,7 +48,7 @@ class Sentence : public Phrase, public InputType
 	 * and returns the value of that tag if present, empty string otherwise
 	 */
 	static std::string ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName);
-	std::vector <XmlOption> m_xmlOptionsList;
+	std::vector <TranslationOption*> m_xmlOptionsList;
 	std::vector <bool> m_xmlCoverageMap;
 
  public:
@@ -89,4 +89,5 @@ class Sentence : public Phrase, public InputType
 
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
 };
+
 
