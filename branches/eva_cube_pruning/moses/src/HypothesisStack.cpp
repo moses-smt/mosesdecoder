@@ -255,7 +255,8 @@ std::ostream& operator<<(std::ostream& out, const HypothesisStack& hypoColl)
 	return out;
 }
 
-const std::set< Hypothesis*, HypothesisScoreOrderer> HypothesisStack::GetCoverageSet(const WordsBitmap reqWb) const
+
+const std::vector< Hypothesis*> HypothesisStack::GetCoverageVector(const WordsBitmap reqWb) const
 {
 	std::set< Hypothesis*, HypothesisScoreOrderer> coverageSet;
 	HypothesisStack::const_iterator iter;
@@ -270,7 +271,10 @@ const std::set< Hypothesis*, HypothesisScoreOrderer> HypothesisStack::GetCoverag
 			coverageSet.insert(&hypothesis);
 		}
 	}
-	return coverageSet;
+	
+	vector< Hypothesis*> coverageVec(coverageSet.begin(), coverageSet.end());
+	
+	return coverageVec;
 }
 
 

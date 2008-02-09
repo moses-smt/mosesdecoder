@@ -58,6 +58,9 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_arcList(NULL)
 	, m_id(0)
 	, m_lmstats(NULL)
+	// monitor if problems occur with these initializations
+	, m_prev_words_bitmap( 0 )
+	, m_prev_words_range( 0, 1)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
@@ -86,6 +89,8 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_arcList(NULL)
 	, m_id(s_HypothesesCreated++)
 	, m_lmstats(NULL)
+	, m_prev_words_bitmap( prevHypo.GetWordsBitmap() )
+	, m_prev_words_range( transOpt.GetSourceWordsRange() )
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -328,11 +333,17 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	// DISTORTION COST
 	CalcDistortionScore();
 	
+	cout << "after distortion" << endl;
+	
 	// LANGUAGE MODEL COST
 	CalcLMScore(staticData.GetAllLM());
+	
+	cout << "after lm cost" << endl; 
 
 	// WORD PENALTY
 	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
+
+	cout << "after word penalty" << endl;
 
 	// FUTURE COST
 	CalcFutureScore(futureScore);

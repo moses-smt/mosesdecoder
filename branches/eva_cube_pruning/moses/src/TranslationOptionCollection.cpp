@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
+#include "TranslationOptionOrderer.h"
 
 using namespace std;
 
@@ -589,3 +590,15 @@ void TranslationOptionCollection::CacheLexReordering()
 		}
 	}
 }
+
+// same as returned by GetTranslationOptionList but ordered by score
+const TranslationOptionList TranslationOptionCollection::GetOrderedTranslationOptionList(const WordsRange &coverage) const
+	{
+		TranslationOptionList tol = GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
+		set<TranslationOption*, TranslationOptionOrderer> translationOptionSet;
+  	translationOptionSet.insert(tol.begin(), tol.end());
+	
+	  // translation options are ordered now
+  	TranslationOptionList orderedTol( translationOptionSet.begin(), translationOptionSet.end() );
+		return orderedTol;
+	}
