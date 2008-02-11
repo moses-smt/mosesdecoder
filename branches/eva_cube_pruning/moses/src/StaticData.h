@@ -66,13 +66,15 @@ protected:
 		m_weightDistortion, 
 		m_weightWordPenalty, 
 		m_wordDeletionWeight,
-		m_weightUnknownWord;
+		m_weightUnknownWord,
+		m_pruning_factor;
 									// PhraseTrans, Generation & LanguageModelScore has multiple weights.
 	int																	m_maxDistortion
 									// do it differently from old pharaoh
 									// -ve	= no limit on distortion
 									// 0		= no disortion (monotone in old pharaoh)
-									, m_top_k;
+									,m_top_k;
+									
 	size_t                              
 			m_maxHypoStackSize //hypothesis-stack size that triggers pruning
 			, m_nBestSize
@@ -367,5 +369,7 @@ public:
 
 	const TranslationOptionList* FindTransOptListInCache(const Phrase &sourcePhrase) const;
 	
-	size_t GetTopK() const { return m_top_k; }
+	int GetTopK() const { return m_top_k; }
+	
+	float GetPruningFactor() const { return m_pruning_factor; }
 };

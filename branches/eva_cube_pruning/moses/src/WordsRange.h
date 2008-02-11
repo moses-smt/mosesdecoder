@@ -42,6 +42,8 @@ public:
 	
 	inline size_t GetStartPos() const
 	{
+		if(m_startPos > 1000)
+			std::cout << "m_startPos: " << m_startPos << std::endl;
 		return m_startPos;
 	}
 	inline size_t GetEndPos() const

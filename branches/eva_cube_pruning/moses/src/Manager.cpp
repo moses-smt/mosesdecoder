@@ -46,9 +46,6 @@ using namespace std;
 static bool debug2 = false;
 #endif
 
-// SOME GLOBAL VARIABLES
-// set k for cube pruning 
-int top_k;
 
 typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
 typedef map< WordsBitmap, OrderedHypothesesSet > CoverageHypothesesMap;
@@ -56,8 +53,9 @@ typedef map< WordsBitmap, OrderedHypothesesSet > CoverageHypothesesMap;
 // store candidates for each stack
 map<size_t, CoverageHypothesesMap > candidates; 
 
-
+// store Hypothesis list and TranslationOption list for each grid
 CubePruningData cubePruningData;
+
 
 Manager::Manager(InputType const& source)
 :m_source(source)
@@ -65,6 +63,9 @@ Manager::Manager(InputType const& source)
 ,m_transOptColl(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 ,m_start(clock())
+,m_top_k(-1)
+,m_beamThreshold(-1)
+,m_pruning_factor(1.3)
 {
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
@@ -82,9 +83,8 @@ Manager::Manager(InputType const& source)
 Manager::~Manager() 
 {
   delete m_transOptColl;
-	StaticData::Instance().CleanUpAfterSentenceProcessing();    
-	
-	cubePruningData.DeleteData();  
+	StaticData::Instance().CleanUpAfterSentenceProcessing();      
+	cubePruningData.DeleteData();
 
 	clock_t end = clock();
 	float et = (end - m_start);
@@ -103,10 +103,13 @@ void Manager::ProcessSentence()
 	staticData.ResetSentenceStats(m_source);
 	const vector <DecodeGraph>
 			&decodeStepVL = staticData.GetDecodeStepVL();
-	top_k = staticData.GetTopK();
-	cout << "Cube pruning top-k: " << top_k << " " << endl; 
 	
-	m_beamThreshold = (StaticData::Instance()).GetBeamThreshold();
+	m_top_k = staticData.GetTopK();
+	m_beamThreshold = staticData.GetBeamThreshold();
+	m_pruning_factor = staticData.GetPruningFactor();
+	cout << "m_top_k: " << m_top_k << endl; 
+	cout << "m_beamThreshold: " << m_beamThreshold << endl;
+	cout << "m_pruning_factor: " << m_pruning_factor << endl; 
 		
 	// create list of all possible translations
 	// this is only valid if:
@@ -153,25 +156,14 @@ void Manager::ProcessSentence()
 				if( (seenCoverages.count( wb )) == 0 )
 				{
 					seenCoverages.insert( wb );
-					if( cubePruningData.SourceHypoCollExists(wb) )
-					{
-						IFVERBOSE(2) {
-							cout << endl << "Process existing coverage vector " << wb << endl;
-						}
-						ProcessCoverageVector(wb);
-					}
-					else
-					{
-						const vector< Hypothesis*> coverageVec = sourceHypoColl.GetCoverageVector( wb );
+//					const OrderedHypothesesSet coverageSet = sourceHypoColl.GetCoverageSet( wb );
+//					vector< Hypothesis*> coverageVec(coverageSet.begin(), coverageSet.end());	
+					const vector< Hypothesis*> coverageVec = sourceHypoColl.GetCoverageVector( wb );
 								
-						if(coverageVec.size() > 0)
-						{
-							IFVERBOSE(2) {
-								cout << endl << "Process coverage vector " << wb << endl;
-							}
-							cubePruningData.SaveSourceHypoColl(wb, coverageVec);
-							ProcessCoverageVector(wb);
-						}
+					if(coverageVec.size() > 0)
+					{
+						ProcessCoverageVector(*coverageVec[0], wb);
+						cubePruningData.SaveCoverageVector(wb, coverageVec);
 					}
 				}
 		}
@@ -193,18 +185,15 @@ void Manager::ProcessSentence()
 }
 
 
-
-void Manager::ProcessCoverageVector(const WordsBitmap &wb)
+void Manager::ProcessCoverageVector(const Hypothesis &firstHypo, const WordsBitmap &hypoBitmap)
 {
-	cout << "in function ProcessCoverageVector" << endl;
-	Hypothesis firstHypo = cubePruningData.GetFirstHypothesis(wb);
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 	bool isWordLattice = StaticData::Instance().GetInputType() == WordLatticeInput;
 	// no limit of reordering: only check for overlap
 	if (maxDistortion < 0)
 	{	
-		const size_t hypoFirstGapPos	= wb.GetFirstGapPos();
+		const size_t hypoFirstGapPos	= hypoBitmap.GetFirstGapPos();
 		const size_t sourceSize = m_source.GetSize();
 
 		for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
@@ -217,23 +206,24 @@ void Manager::ProcessCoverageVector(const WordsBitmap &wb)
 
 			for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 			{
-				if (!wb.Overlap(WordsRange(startPos, endPos)))
+				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 				{
 					// all TranslationOptions returned by 'GetTranslationOptionList' have the same word range
 					// 'tol' is of type vector<TranslationOption*>
-					cout << "CASE 1" << endl;
-					if( cubePruningData.TolExists( WordsRange(startPos, endPos) ) )
-					{
-						PrepareCubePruning(firstHypo, WordsRange(startPos, endPos) );
+					
+					if( cubePruningData.EntryExists(WordsRange(startPos, endPos)) ){
+						const TranslationOptionList tol = cubePruningData.tols[ WordsRange(startPos, endPos) ];
+						PrepareCubePruning(firstHypo, *tol[0]);
 					}
 					else{
-						TranslationOptionList tol = m_transOptColl->GetOrderedTranslationOptionList(WordsRange(startPos, endPos));
+						const TranslationOptionList tol = m_transOptColl->GetOrderedTranslationOptionList(WordsRange(startPos, endPos));
 						if(tol.size() > 0)
 						{	
-							cubePruningData.SaveTol( WordsRange(startPos, endPos), tol);
-							PrepareCubePruning(firstHypo, WordsRange(startPos, endPos) );
+							PrepareCubePruning(firstHypo, *tol[0]);	
+							cubePruningData.SaveTol(WordsRange(startPos, endPos), tol);
 						}
 					}
+					
 				}
 			}
 		}
@@ -243,7 +233,7 @@ void Manager::ProcessCoverageVector(const WordsBitmap &wb)
 	
 	// if there are reordering limits, make sure it is not violated
 	// the coverage bitmap is handy here (and the position of the first gap)
-	const size_t	hypoFirstGapPos	= wb.GetFirstGapPos()
+	const size_t	hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
 							, sourceSize			= m_source.GetSize();
 	
 	// MAIN LOOP. go through each possible hypo
@@ -255,12 +245,11 @@ void Manager::ProcessCoverageVector(const WordsBitmap &wb)
     maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
     
     // check conditions for one hypothesis of the coverage vector
-
 		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
 			// check for overlap
 		  WordsRange extRange(startPos, endPos);
-			if (wb.Overlap(extRange) ||
+			if (hypoBitmap.Overlap(extRange) ||
 			      (isWordLattice && (!m_source.IsCoveragePossible(extRange) ||
 					                     !m_source.IsExtensionPossible(firstHypo.GetCurrSourceWordsRange(), extRange))
 					  )
@@ -274,21 +263,22 @@ void Manager::ProcessCoverageVector(const WordsBitmap &wb)
 			// any length extension is okay if starting at left-most edge
 			if (leftMostEdge)
 			{
-				cout << "CASE 2" << endl;
-				if( cubePruningData.TolExists( extRange ) )
+
+				if(cubePruningData.EntryExists(extRange) )
 				{
-					cout << "IF" << endl;
-					PrepareCubePruning(firstHypo, extRange);
+					const TranslationOptionList tol = cubePruningData.tols[extRange];
+					PrepareCubePruning(firstHypo, *tol[0]);
 				}
-				else{
-					cout << "ELSE" << endl;
-					TranslationOptionList tol = m_transOptColl->GetOrderedTranslationOptionList( extRange );
+				else
+				{
+					const TranslationOptionList tol = m_transOptColl->GetOrderedTranslationOptionList(extRange);
 					if(tol.size() > 0)
-					{	
-						cubePruningData.SaveTol( extRange, tol);
-						PrepareCubePruning(firstHypo, extRange);
+					{
+						PrepareCubePruning(firstHypo, *tol[0]);	
+						cubePruningData.SaveTol(extRange, tol);
 					}
 				}
+				
 			}
 			// starting somewhere other than left-most edge, use caution
 			else
@@ -305,41 +295,40 @@ void Manager::ProcessCoverageVector(const WordsBitmap &wb)
 					m_source.ComputeDistortionDistance(extRange, bestNextExtension);
 
 				if (required_distortion <= maxDistortion) {
-					cout << "CASE 3" << endl;
-					if( cubePruningData.TolExists( extRange ) )
+					
+					if(cubePruningData.EntryExists(extRange) )
 					{
-						PrepareCubePruning(firstHypo, extRange);
+						const TranslationOptionList tol = cubePruningData.tols[extRange];
+						PrepareCubePruning(firstHypo, *tol[0]);
 					}
-					else{
-						TranslationOptionList tol = m_transOptColl->GetOrderedTranslationOptionList( extRange );
+					else
+					{
+						const TranslationOptionList tol = m_transOptColl->GetOrderedTranslationOptionList(extRange);
 						if(tol.size() > 0)
-						{	
-							cubePruningData.SaveTol( WordsRange(startPos, endPos), tol);
-							PrepareCubePruning(firstHypo, extRange);
+						{
+							PrepareCubePruning(firstHypo, *tol[0]);	
+							cubePruningData.SaveTol(extRange, tol);
 						}
 					}
+					
 				}
 			}
 		}
 	}
 }
 
-void Manager::PrepareCubePruning(Hypothesis &firstHypo, const WordsRange &wr)
-{	
-	cout << "PrepareCubePruning" << endl;
+void Manager::PrepareCubePruning(const Hypothesis &firstHypo, const TranslationOption &firstTol)
+{
   // initialize cand with the hypothesis 1,1
-  cout << "tol " << cubePruningData.GetFirstTol(wr) << endl;
-	Hypothesis *newHypo = ( firstHypo.CreateNext( cubePruningData.GetFirstTol(wr) ) );
-	cout << "newHypo " << newHypo << endl;
+//	Hypothesis *newHypo = (coverageVec[0])->CreateNext(*tol[0]);
+  Hypothesis *newHypo = firstHypo.CreateNext( firstTol );
 	newHypo->CalcScore(m_transOptColl->GetFutureScore());
-	cout << "calculated score" << endl;
 	newHypo->SetGridPosition(0, 0);
-	cout << "set position" << endl;
-	
-	IFVERBOSE(2) {
-		cout << "store hypothesis on stack " << firstHypo.GetWordsBitmap().GetNumWordsCovered() << " and coverage " << newHypo->GetWordsBitmap() << endl;
-	}
-	candidates[ firstHypo.GetWordsBitmap().GetNumWordsCovered() ][newHypo->GetWordsBitmap()].insert(newHypo);	
+//	IFVERBOSE(2) {
+//		cout << "store hypothesis on stack " << firstHypo.GetWordsBitmap().GetNumWordsCovered() << " and coverage " << newHypo->GetWordsBitmap() << endl;
+//		cout << "new hypothesis is: " << *newHypo << endl;
+//	}
+	candidates[ firstHypo.GetWordsBitmap().GetNumWordsCovered() ][newHypo->GetWordsBitmap()].insert(newHypo);
 }
 
 void Manager::CubePruning(size_t stack)
@@ -373,33 +362,26 @@ void Manager::CubePruning(size_t stack)
 	
 		map< WordsBitmap, map< size_t, list<size_t> > > tickedOff;
 		float best_score_in_buf = (*cand.begin())->GetTotalScore();
-	 	while( !(cand.empty()) && ((top_k == -1) || (buf.size() < top_k)) )
+		
+	 	while( !(cand.empty()) && ((m_top_k == -1) || (buf.size() < m_top_k)) )
 	  {
   		// "The heart of the algorithm is lines 10-12. Lines 10-11 move the best derivation [..] from cand to buf, 
   		// and then line 12 pushes its successors [..] into cand." 
   		// 10: POP-MIN(cand); 11: append item to buf; 12: PUSHSUCC(item, cand);
   		
   		item = *(cand.begin());  		
- 		  if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf  + m_beamThreshold) )
-//  		if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf * 1.1) ) 
-//				if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf * 1.15) ) 
-//				if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf * 1.2) ) 
-//  		if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf  -7 ) )
+// 		  if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf  + m_beamThreshold) )
+			if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf * 1.2) )
   		{
- 			cout << "score is " << item->GetTotalScore() << " (best: " << best_score_in_buf << ").. break at buffer size " << buf.size() << endl;
+// 			cout << "score is " << item->GetTotalScore() << " (best: " << best_score_in_buf << ").. break at buffer size " << buf.size() << endl;
   			break; 
   		}
-   		else if( best_score_in_buf > 0 )
-  			cout << "Score is above zero! (" << best_score_in_buf << ")" << endl;
+//   		else if( best_score_in_buf > 0 )
+//      	cout << "Score is above zero! (" << best_score_in_buf << ")" << endl;
   			
- 			// get coverage vector by coverage of previous hypothesis!!
-//			coverageVec = sourceHypoColl.GetCoverageVector( item->GetPreviousWordsBitmap() );
-			coverageVec = cubePruningData.xData[ item->GetPreviousWordsBitmap() ];
-			
-			// get TranslationOptionList by WordsRange of previous hypothesis!!
-//			tol = m_transOptColl->GetOrderedTranslationOptionList( item->GetPreviousSourceWordsRange() );
-			tol = cubePruningData.yData[ item->GetPreviousSourceWordsRange() ];
-  		
+  		coverageVec = cubePruningData.covVecs[ item->GetPreviousWordsBitmap() ];  		
+  		tol = cubePruningData.tols[ item->GetPreviousSourceWordsRange() ];
+  		  		
   		// If the search is performed in more than one grid, the grids have to be differentiated by the coverage
 	  	// on the left side of the grid.
 	    WordsBitmap grid_wb = (*coverageVec.begin())->GetWordsBitmap(); 
@@ -433,7 +415,7 @@ void Manager::CubePruning(size_t stack)
   			cand.insert( newHypo );
   			// tick off hypothesis
   			tickedOff[grid_wb][x].push_back(y+1);
-   		}
+  		}
   		// neighbour below, new hypothesis, same extension
   		if( (coverageVec.size() > x+1) && (tol.size() > y) && !IsTickedOff(tickedOff, grid_wb, x+1, y) )
   		{

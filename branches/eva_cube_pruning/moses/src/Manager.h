@@ -82,12 +82,16 @@ protected:
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	clock_t m_start; /**< starting time, used for logging */
 	
+	int m_top_k;
 	float m_beamThreshold; /* copy from StaticData for Cube Pruning */
+	float m_pruning_factor;
 	
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
-	void ProcessCoverageVector(const WordsBitmap &wb);
-	void PrepareCubePruning(Hypothesis &firstHypo, const WordsRange &wr);
+//	void ProcessCoverageVector(const vector< Hypothesis*> &coverageVec, const WordsBitmap &hypoBitmap);
+  void ProcessCoverageVector(const Hypothesis &firstHypo, const WordsBitmap &hypoBitmap);
+//	void PrepareCubePruning(const vector< Hypothesis*> &coverageVec, const TranslationOptionList &tol);
+  void PrepareCubePruning(const Hypothesis &firstHypo, const TranslationOption &firstTol);
 	void CubePruning(size_t stack);
 	typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
 	bool IsTickedOff(map< WordsBitmap, map< size_t, list<size_t> > > &tickedOff, WordsBitmap &wb, size_t x, size_t y);

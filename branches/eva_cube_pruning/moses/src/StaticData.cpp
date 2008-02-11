@@ -74,6 +74,8 @@ StaticData::StaticData()
 ,m_computeLMBackoffStats(false)
 ,m_factorDelimiter("|") // default delimiter between factors
 ,m_top_k(-1)
+,m_beamThreshold(-1)
+,m_pruning_factor(1.3)
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -136,6 +138,11 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (m_parameter->GetParam("cube-top-k").size() == 1)
 	{
 		m_top_k = Scan<size_t>( m_parameter->GetParam("cube-top-k")[0] );
+	}
+	// cube pruning value: pruning factor
+	if (m_parameter->GetParam("cube-factor").size() == 1)
+	{
+		m_pruning_factor = Scan<float>( m_parameter->GetParam("cube-factor")[0] );
 	}
 	
 	// include feature names in the n-best list

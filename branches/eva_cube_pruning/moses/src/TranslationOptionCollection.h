@@ -129,10 +129,9 @@ public:
 	{
 		return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
 	}
-	
+
 	const TranslationOptionList GetOrderedTranslationOptionList(const WordsRange &coverage) const;
 	
-
 	TO_STRING();		
 };
 
