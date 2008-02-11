@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "TypeDef.h"
 #include "WordsBitmap.h"
+#include "WordsRange.h"
 #include "Sentence.h"
 #include "Phrase.h"
 #include "PhraseDictionaryMemory.h"
@@ -77,19 +78,19 @@ protected:
 	const Hypothesis 	*m_winningHypo;
 	ArcList 					*m_arcList; /**< all arcs that end at the same trellis point as this hypothesis */
 	const TranslationOption *m_transOpt;
-	// information about previous hypothesis to retrieve data for current hypothesis in method CubePruning()
-  WordsBitmap m_prev_words_bitmap;
-	WordsRange m_prev_words_range; 
-	// new: x and y position in a cube pruning grid
-	size_t m_x, m_y;
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 	
-	// for debugging
-	size_t nr_in_buffer;
+  // new: information about previous hypothesis to retrieve data for current hypothesis in method CubePruning()
+  WordsBitmap m_prev_words_bitmap;
+  WordsRange m_prev_words_range;
 	
+	// x and y position in a cube pruning grid
+	int m_x, m_y;
+	int nr_in_buffer;
+
 	void CalcFutureScore(const SquareMatrix &futureScore);
 	//void CalcFutureScore(float futureScore[256][256]);
 	void CalcLMScore(const LMList &languageModels);
@@ -281,28 +282,28 @@ public:
 		return m_y;
 	}
 	
-	void SetNrInBuffer(size_t nr)
+	void SetNrInBuffer(int nr)
 	{
 		nr_in_buffer = nr;
 	}
 	
-	size_t GetNrInBuffer() const
+	int GetNrInBuffer() const
 	{
 		return nr_in_buffer;
 	}
 	
-
 	
 	const WordsBitmap GetPreviousWordsBitmap() const
-	{
-		return m_prev_words_bitmap;
-	}
+  {
+	  return m_prev_words_bitmap;
+  }
+	  	 
+	  	 
+  const WordsRange GetPreviousSourceWordsRange() const
+  {
+	  return m_prev_words_range;
+  }
 	
-	
-	const WordsRange GetPreviousSourceWordsRange() const
-	{
-		return m_prev_words_range;
-	}
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

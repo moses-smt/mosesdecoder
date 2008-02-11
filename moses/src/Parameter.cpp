@@ -36,7 +36,8 @@ Parameter::Parameter()
 {
 	AddParam("beam-threshold", "b", "threshold for threshold pruning");
 	AddParam("config", "f", "location of the configuration file");
-	AddParam("cube-top-k", "ck", "set top_k for cube pruning, default: -1, no restrictions");
+	AddParam("cube-top-k", "ck", "set top_k for Cube Pruning, default: -1, no restrictions");
+	AddParam("cube-factor", "cf", "set pruning factor for Cube Pruning, default: 1.3 (should retain BLUE score)");
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
 	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
 	AddParam("generation-file", "location and properties of the generation table");

@@ -7,31 +7,23 @@
 #include "HypothesisStack.h"
 #include "TranslationOption.h"
 
-
 class CubePruningData
 {
 public:
 
-	// keys for xData: coverage 
-	std::map< WordsBitmap, std::vector< Hypothesis*> > xData;
-	
-	// key for yData: source words range
-	std::map< WordsRange, TranslationOptionList > yData;
+	std::map< WordsBitmap, std::vector< Hypothesis*> > covVecs;
+	std::map< WordsRange, TranslationOptionList > tols;
 	
 	CubePruningData();
 	~CubePruningData();
 	
-//	void SaveData(Hypothesis *hypo, const vector< Hypothesis*> &coverageVec, TranslationOptionList &tol);
-
-  void SaveSourceHypoColl(const WordsBitmap &wb, const vector< Hypothesis*> &coverageVec);
-  bool SourceHypoCollExists(const WordsBitmap &wb ){	return ( xData.find(wb) != xData.end() ); }
-	Hypothesis GetFirstHypothesis( const WordsBitmap &wb ) { return *(((*(xData.find(wb))).second)[0]); }
-
-	void SaveTol(const WordsRange &wbr, TranslationOptionList &tol);
-	bool TolExists(const WordsRange &wr ){	return ( yData.find(wr) != yData.end() ); }
-	TranslationOption GetFirstTol( const WordsRange &wr ) { return *(((*(yData.find(wr))).second)[0]); }
+	void SaveCoverageVector(const WordsBitmap &wb, const vector< Hypothesis*> &coverageVec);
+	void SaveTol(const WordsRange wr, const TranslationOptionList &tol);
+	
+	bool EntryExists(const WordsRange wr){	return ( tols.find(wr) != tols.end() ); }
 	
 	void DeleteData();
+	
 };
 
 #endif /*CUBEPRUNINGDATA_H_*/
