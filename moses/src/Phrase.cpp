@@ -139,6 +139,16 @@ std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 	return strme.str();
 }
 
+std::string Phrase::GetStringRep() const
+{
+	stringstream strme;
+	for (size_t pos = 0 ; pos < GetSize() ; pos++)
+	{
+		strme << GetWord(pos);
+	}
+	return strme.str();
+}
+
 Word &Phrase::AddWord()
 {
 	if ((m_phraseSize+1) % ARRAY_SIZE_INCR == 0)
@@ -300,57 +310,6 @@ bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
 			return true;
 	}
 	return false;
-}
-
-bool Phrase::IsCompatible(const Phrase &inputPhrase) const
-{
-	if (inputPhrase.GetSize() != GetSize())
-	{
-		return false;
-	}
-
-	const size_t size = GetSize();
-
-	const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
-	for (size_t currPos = 0 ; currPos < size ; currPos++)
-	{
-		for (unsigned int currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
-		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-			const Factor *thisFactor 		= GetFactor(currPos, factorType)
-									,*inputFactor	= inputPhrase.GetFactor(currPos, factorType);
-			if (thisFactor != NULL && inputFactor != NULL && thisFactor != inputFactor)
-				return false;
-		}
-	}
-	return true;
-
-}
-
-bool Phrase::IsCompatible(const Phrase &inputPhrase, FactorType factorType) const
-{
-	if (inputPhrase.GetSize() != GetSize())	{ return false;	}
-	for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
-	{
-		if (GetFactor(currPos, factorType) != inputPhrase.GetFactor(currPos, factorType))
-			return false;
-	}
-	return true;
-}
-
-bool Phrase::IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const
-{
-	if (inputPhrase.GetSize() != GetSize())	{ return false;	}
-	for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
-	{
-		for (std::vector<FactorType>::const_iterator i = factorVec.begin();
-		     i != factorVec.end(); ++i)
-		{
-			if (GetFactor(currPos, *i) != inputPhrase.GetFactor(currPos, *i))
-				return false;
-		}
-	}
-	return true;
 }
 
 void Phrase::InitializeMemPool()

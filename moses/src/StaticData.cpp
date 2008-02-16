@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <cassert>
+#include <boost/filesystem/operations.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include "PhraseDictionaryMemory.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
@@ -41,8 +44,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
+#include "PhraseList.h"
+#include "PrefixPhraseCollection.h"
 
 using namespace std;
+
 
 static size_t CalcMax(size_t x, const vector<size_t>& y) {
   size_t max = x;
@@ -74,6 +80,7 @@ StaticData::StaticData()
 ,m_computeLMBackoffStats(false)
 ,m_factorDelimiter("|") // default delimiter between factors
 ,m_isAlwaysCreateDirectTranslationOption(true)
+,m_cachePath (GetTempFolder())
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -115,28 +122,35 @@ bool StaticData::LoadData(Parameter *parameter)
 		m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
 	}
 
+	// use alignment from phrase tables ?
+	m_useAlignmentInfo = (m_parameter->GetParam("use-alignment-info").size()>0) 
+				? Scan<bool>(m_parameter->GetParam("use-alignment-info")[0]) : true;
+
+	m_numSubRanges = (m_parameter->GetParam("num-subranges").size()>0) 
+				? Scan<size_t>(m_parameter->GetParam("num-subranges")[0]) : 3;
+
 	// n-best
 	if (m_parameter->GetParam("n-best-list").size() >= 2)
 	{
 		m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
 		m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
-		m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 && m_parameter->GetParam("n-best-list")[2]=="distinct");
-  }
-	else if (m_parameter->GetParam("n-best-list").size() == 1) {
-	  UserMessage::Add(string("ERROR: wrong format for switch -n-best-list file size"));
-	  return false;
+		if (m_parameter->GetParam("n-best-list").size()>2)
+			m_onlyDistinctNBest = m_parameter->GetParam("n-best-list")[2]=="distinct";
+		else
+			m_onlyDistinctNBest = true;
+
+		if (m_parameter->GetParam("n-best-factor").size() > 0) 
+		{
+			m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
+		}
+		else
+			m_nBestFactor = 20;
+
 	}
 	else
 	{
 		m_nBestSize = 0;
 	}
-	if (m_parameter->GetParam("n-best-factor").size() > 0) 
-	{
-		m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
-	}
-   else {
-		m_nBestFactor = 20;
-  }
 	
 	// include feature names in the n-best list
 	SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
@@ -239,12 +253,9 @@ bool StaticData::LoadData(Parameter *parameter)
 	//TODO replace this w/general word dropping -- EVH
 	SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 	  
-	// minimum Bayes risk decoding
-	SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
-	m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
-	  Scan<size_t>(m_parameter->GetParam("mbr-size")[0]) : 200;
-	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0) ?
-	  Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
+	m_decoderType = (DecoderType) ((m_parameter->GetParam("decoder-type").size() > 0) ? Scan<int>(m_parameter->GetParam("decoder-type")[0]) : 0);
+	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0)
+				? Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
 	
 	//default case
 	
@@ -289,6 +300,33 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
   }
 }
 
+// helper fn
+//! delete old cached files that haven't been used for a while
+void DeleteCacheFile(const string &cachePathStr)
+{
+	using namespace boost::filesystem;
+	using namespace boost::posix_time;
+	
+	ptime now(second_clock::local_time());
+
+	path cachePath(cachePathStr, native);
+	directory_iterator end;
+	for (directory_iterator iter(cachePath) ; iter != end ; ++iter)
+	{
+		path &filePath = *iter;
+		// delete of old
+		if (filePath.leaf().find(PROJECT_NAME) == 0)
+		{
+			ptime lastWrite;
+			time_t t = last_write_time(filePath);
+			lastWrite = from_time_t(t);
+
+			if ( (lastWrite + boost::gregorian::days(7) ) < now )
+				remove(filePath);
+		}
+	}
+}
+
 StaticData::~StaticData()
 {
 	delete m_parameter;
@@ -296,17 +334,15 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_generationDictionary);
 	RemoveAllInColl(m_languageModel);
 	RemoveAllInColl(m_decodeStepVL);
-	
-	// delete trans opt
-	map<Phrase, std::vector<TranslationOption*> >::iterator iterCache;
-	for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache)
-	{
-		TranslationOptionList &transOptList = iterCache->second;
-		RemoveAllInColl(transOptList);
-	}
-
 	RemoveAllInColl(m_reorderModels);
 	
+	std::map<Phrase, TranslationOptionList*>::iterator iterCache;
+	for (iterCache = m_transOptCache.begin(); iterCache != m_transOptCache.end(); ++iterCache)
+	{
+		TranslationOptionList *transOptList = iterCache->second;
+		delete transOptList;
+	}
+
 	// small score producers
 	delete m_distortionScoreProducer;
 	delete m_wpProducer;
@@ -315,6 +351,7 @@ StaticData::~StaticData()
 	// memory pools
 	Phrase::FinalizeMemPool();
 
+	DeleteCacheFile(GetCachePath());
 }
 
 bool StaticData::LoadLexicalReorderingModel()
@@ -328,8 +365,8 @@ bool StaticData::LoadLexicalReorderingModel()
   const vector<string> weightsStr = m_parameter.GetParam("weight-d");
   */
   std::vector<float>   weights;
-  size_t w = 1; //cur weight
-  size_t f = 0; //cur file
+  int w = 1; //cur weight
+  int f = 0; //cur file
   //get weights values
   std::cerr << "have " << fileStr.size() << " models\n";
   for(size_t j = 0; j < weightsStr.size(); ++j){
@@ -355,7 +392,7 @@ bool StaticData::LoadLexicalReorderingModel()
     vector<FactorType> input,output;
     LexicalReordering::Direction direction;
     LexicalReordering::Condition condition;
-    size_t numWeights;
+    int numWeights;
     //decode factor map
     vector<string> inputfactors = Tokenize(spec[0],"-");
     if(inputfactors.size() == 2){
@@ -451,15 +488,15 @@ bool StaticData::LoadLexicalReorderingModel()
 		//all ready load it
 		//std::cerr << type;
 		if("monotonicity" == type){
-			m_reorderModels.push_back(new LexicalMonotonicReordering(filePath, mweights, direction, condition, input, output));
+			m_reorderModels.push_back(new LexicalMonotonicReordering(filePath, mweights, direction, condition, input, output, m_scoreIndexManager));
 		} 
 		else if("orientation" == type || "msd" == type)
 		{
-			m_reorderModels.push_back(new LexicalOrientationReordering(filePath, mweights, direction, condition, input, output));
+			m_reorderModels.push_back(new LexicalOrientationReordering(filePath, mweights, direction, condition, input, output, m_scoreIndexManager));
 		} 
 		else if("directional" == type)
 		{
-			m_reorderModels.push_back(new LexicalDirectionalReordering(filePath, mweights, direction, condition, input, output));
+			m_reorderModels.push_back(new LexicalDirectionalReordering(filePath, mweights, direction, condition, input, output, m_scoreIndexManager));
 		} 
 		else 
 		{
@@ -603,6 +640,10 @@ bool StaticData::LoadPhraseTables()
 {
 	VERBOSE(2,"About to LoadPhraseTables" << endl);
 
+	static bool loadedInputPhrases = false;
+	static PhraseList inputPhrases;
+	static string inputFileHash;
+
 	// language models must be loaded prior to loading phrase tables
 	assert(m_fLMsLoaded);
 	// load phrase translation tables
@@ -620,9 +661,9 @@ bool StaticData::LoadPhraseTables()
 		{
 			vector<string>                  token           = Tokenize(translationVector[currDict]);
 			//characteristics of the phrase table
-			vector<FactorType>      input           = Tokenize<FactorType>(token[0], ",")
+			vector<FactorType>      inputFactorVector           = Tokenize<FactorType>(token[0], ",")
 				,output = Tokenize<FactorType>(token[1], ",");
-			m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
+			m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], inputFactorVector);
 			m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
 			string filePath= token[3];
@@ -676,14 +717,59 @@ bool StaticData::LoadPhraseTables()
 					return false;
 				}
 				
-				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent);
-				if (!pd->Load(input
+				// filtering
+				if (!loadedInputPhrases && m_parameter->GetParam("input-file").size() > 0)
+				{ 
+					inputFileHash = GetMD5Hash(m_parameter->GetParam("input-file")[0]);
+					
+					// load input for filtering
+					TRACE_ERR( "Begin loading input for filtering" << endl);
+					inputPhrases.Load(m_parameter->GetParam("input-file")[0]);
+					TRACE_ERR( "Completed loading input for filtering" << endl);
+				}
+				PrefixPhraseCollection inputPrefix(inputFactorVector, inputPhrases);
+
+				// does cached filtering exist for this table, given input ?
+				if (!FileExists(filePath) && FileExists(filePath + ".gz"))
+					filePath += ".gz";
+				string phraseTableHash	= GetMD5Hash(filePath);
+
+				// input factors of input
+				stringstream inputFactorsStrme("");
+				for (size_t idx = 0 ; idx < inputFactorVector.size() ; ++idx)
+					inputFactorsStrme << inputFactorVector[idx];
+
+
+				string hashFilePath			= GetCachePath()
+																	+ PROJECT_NAME + "--1--" 	// filter file version
+																	+ inputFileHash + "--"
+																	+ inputFactorsStrme.str() // input factors of input
+																	+ phraseTableHash + "--"
+																	+ Join(",", inputFactorVector) // input factors of phrase table
+																	+ ".txt";
+
+				bool filter;
+				if (FileExists(hashFilePath))
+				{ // load filtered file instead
+					filter = false;
+					filePath = hashFilePath;
+				}
+				else
+				{ // load original file & create hash file
+					filter = true;
+				}
+
+				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent, m_scoreIndexManager);
+				if (!pd->Load(inputFactorVector
 								 , output
 								 , filePath
 								 , weight
 								 , maxTargetPhrase[index]
 								 , GetAllLM()
-								 , GetWeightWordPenalty()))
+								 , GetWeightWordPenalty()
+								 , filter
+								 , inputPrefix
+								 , hashFilePath))
 				{
 					delete pd;
 					return false;
@@ -693,8 +779,10 @@ bool StaticData::LoadPhraseTables()
 			else 
 			{ // binary phrase table
 				VERBOSE(1, "using binary phrase tables for idx "<<currDict<<"\n");
-				PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent,(currDict==0 ? m_numInputScores : 0));
-				if (!pd->Load(input,output,filePath,weight,
+				PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent
+																																				,(currDict==0 ? m_numInputScores : 0)
+																																				, m_scoreIndexManager);
+				if (!pd->Load(inputFactorVector,output,filePath,weight,
 									 maxTargetPhrase[index],
 									 GetAllLM(),
 									 GetWeightWordPenalty()))
@@ -845,11 +933,15 @@ void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::
 
 const TranslationOptionList* StaticData::FindTransOptListInCache(const Phrase &sourcePhrase) const
 {
-	std::map<Phrase, TranslationOptionList>::const_iterator iter
+	std::map<Phrase, TranslationOptionList*>::const_iterator iter
 			= m_transOptCache.find(sourcePhrase);
 	if (iter == m_transOptCache.end())
 		return NULL;
 
-	return &(iter->second);
+	return iter->second;
 }
 
+void StaticData::AddTransOptListToCache(const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
+{
+	m_transOptCache[sourcePhrase] = new TranslationOptionList(transOptList);
+}

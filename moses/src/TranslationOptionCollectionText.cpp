@@ -64,8 +64,7 @@ void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosit
 
 	//get vector of TranslationOptions from Sentence
 	for(size_t i=0;i<xmlOptions.size();i++) {
-		xmlOptions[i]->CalcScore();
-		Add(xmlOptions[i]);
+		Add(*xmlOptions[i]);
 	}
 
 };

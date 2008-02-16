@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 
 class Phrase;
+class FactorMask;
 
 /***
  * hold a set of factors for a single word
@@ -77,6 +78,9 @@ public:
 	/** add the factors from sourceWord into this representation,
 	 * NULL elements in sourceWord will be skipped */
 	void Merge(const Word &sourceWord);
+
+	//! keep only factors in inputMask, NULL all other factors
+	void TrimFactors(const FactorMask &inputMask);
 
 	/** get string representation of list of factors. Used by PDTimp so supposed 
 	* to be invariant to changes in format of debuggin output, therefore, doesn't 

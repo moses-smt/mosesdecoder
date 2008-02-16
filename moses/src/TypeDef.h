@@ -44,7 +44,7 @@ const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 50;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
-const size_t ARRAY_SIZE_INCR					= 10; //amount by which a phrase gets resized when necessary
+const size_t ARRAY_SIZE_INCR					= 5; //amount by which a phrase gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_WIDTH				= 0.00001f;
 const size_t DEFAULT_VERBOSE_LEVEL = 1;
@@ -75,7 +75,7 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 // can only be 2 at the moment
 const int NUM_LANGUAGES = 2;
 
-const size_t MAX_NUM_FACTORS = 4;
+const size_t MAX_NUM_FACTORS = 2;
 
 enum FactorDirection
 {	
@@ -147,6 +147,12 @@ enum DictionaryFind
 	,All
 };
 
+enum DecoderType
+{	
+	MAP
+	,MBR
+};
+
 // typedef
 typedef size_t FactorType;
 
@@ -157,6 +163,4 @@ typedef size_t FactorType;
 typedef uint32_t UINT32;
 #endif
 
-class TranslationOption;
-typedef std::vector<TranslationOption*> TranslationOptionList;
 

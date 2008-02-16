@@ -326,17 +326,28 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 				abort();
 			}
 			
-				
 			IPhrase f,e;Scores sc;
 			
+			// source phrase
 			std::vector<std::string> wordVec = Tokenize(tokens[0]);
 			for (size_t i = 0 ; i < wordVec.size() ; ++i)
 				f.push_back(imp->sv.add(wordVec[i]));
 
+			// target phrase
 			wordVec = Tokenize(tokens[1]);
+
+			// add target alignment
+			std::vector<std::string> alignment = Tokenize(tokens[3]);
+			assert (wordVec.size() == alignment.size());
+			for (size_t i = 0 ; i < wordVec.size() ; ++i)
+			{
+				wordVec[i] += "|" + alignment[i];
+			}
+
 			for (size_t i = 0 ; i < wordVec.size() ; ++i)
 				e.push_back(imp->tv.add(wordVec[i]));
 			
+
 			//			while(is>>w && w!="|||") sc.push_back(atof(w.c_str()));
 			// Mauro: to handle 0 probs in phrase tables
 			std::vector<float> scoreVector = Tokenize<float>(tokens[(numElement==3) ? 2 : 4]);

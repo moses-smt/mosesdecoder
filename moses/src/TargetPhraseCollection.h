@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //! a list of target phrases that is trsnalated from the same source phrase
 class TargetPhraseCollection
 {
+	friend std::ostream& operator<<(std::ostream&, const TargetPhraseCollection&);
+
 protected:
 	std::vector<TargetPhrase*> m_collection;
 	
@@ -44,6 +46,11 @@ public:
 	~TargetPhraseCollection()
 	{
 			RemoveAllInColl(m_collection);
+	}
+
+	const TargetPhrase *Get(size_t ind) const
+	{
+		return m_collection[ind];
 	}
 
 	//! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
@@ -65,6 +72,7 @@ public:
 		m_collection.push_back(targetPhrase);
 	}
 	
+	void Prune(size_t tableLimit);
 };
 
 

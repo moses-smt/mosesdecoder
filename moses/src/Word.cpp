@@ -60,6 +60,15 @@ void Word::Merge(const Word &sourceWord)
 	}
 }
 
+void Word::TrimFactors(const FactorMask &inputMask)
+{
+	for (FactorType currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+	{
+		if (!inputMask[currFactor])
+			operator[](currFactor) = NULL;
+	}
+}
+
 std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlank) const
 {
 	stringstream strme;

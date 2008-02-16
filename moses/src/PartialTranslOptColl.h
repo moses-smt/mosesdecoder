@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "Util.h"
 #include "StaticData.h"
-#include "FactorTypeSet.h"
+#include "FactorMask.h"
 
 /** Contains partial translation options, while these are constructed in the class TranslationOption.
  *  The factored translation model allows for multiple translation and 
@@ -59,8 +59,11 @@ public:
 	void Add(TranslationOption *partialTranslOpt);
 	void Prune();
 
+	size_t GetSize() const
+	{ return m_list.size(); }
+
 	/** returns list of translation options */
-	const std::vector<TranslationOption*>& GetList() const {
+	std::vector<TranslationOption*>& GetList() {
 		return m_list;
 	}
 

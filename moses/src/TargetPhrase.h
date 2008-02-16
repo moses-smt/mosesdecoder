@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
+#include "AlignmentPair.h"
 
 class LMList;
 class PhraseDictionary;
@@ -39,6 +40,8 @@ protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 	//float m_ngramScore, m_fullScore;
 	ScoreComponentCollection m_scoreBreakdown;
+	AlignmentPair						m_alignmentPair;
+	size_t m_subRangeCount;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
@@ -69,9 +72,14 @@ public:
 								float weightWP,
 								const LMList &languageModels);
 
+	void RecalcLMScore(float weightWP, const LMList &languageModels);
+
 	// used when creating translations of unknown words:
 	void ResetScore();
 	void SetWeights(const ScoreProducer*, const std::vector<float> &weightT);
+
+	// used by binary phrase table
+	void SetAlignment(const std::vector<std::string> &alignStrVec, FactorDirection direction);
 
 	TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
 		// used for translation step
@@ -104,7 +112,29 @@ public:
 	{
 		return m_sourcePhrase;
 	}
+	void Append(const WordsRange &sourceRange, const TargetPhrase &endPhrase);
 
+	AlignmentPair &GetAlignmentPair()
+	{ return m_alignmentPair;	}
+	const AlignmentPair &GetAlignmentPair() const
+	{ return m_alignmentPair;	}
+
+	/** Parse the alignment info portion of phrase table string to create alignment info */
+	void CreateAlignmentInfo(const std::string &sourceStr
+													, const std::string &targetStr
+													, size_t sourceSize);
+
+	/** compare 2 phrases to ensure no factors are lost if the phrases are merged
+	*	must run IsCompatible() to ensure incompatible factors aren't being overwritten
+	*/
+	bool IsCompatible(const TargetPhrase &inputPhrase) const;
+	//! Used by generation step.
+	bool IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const;
+  //! Used by translation step.
+  bool IsCompatible(const TargetPhrase &inputPhrase, const std::vector<FactorType>& factorVec) const;
+
+	size_t GetSubRangeCount() const
+	{ return m_subRangeCount; }
 	TO_STRING();
 };
 

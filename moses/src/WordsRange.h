@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+#undef max
+
 /***
  * Efficient version of WordsBitmap for contiguous ranges
  */
@@ -34,6 +36,11 @@ class WordsRange
 
 	size_t m_startPos, m_endPos;
 public:
+	inline WordsRange()
+		: m_startPos(NOT_FOUND)
+		, m_endPos(NOT_FOUND)
+	{}
+
 	inline WordsRange(size_t startPos, size_t endPos) : m_startPos(startPos), m_endPos(endPos) {}
 	inline WordsRange(const WordsRange &copy)
 	 : m_startPos(copy.GetStartPos())
@@ -67,7 +74,19 @@ public:
 		return (m_startPos<x.m_startPos 
 						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
 	}
-	
+
+	inline bool operator!=(const WordsRange& x) const 
+	{ return m_startPos!=x.m_startPos || m_endPos!=x.m_endPos; };
+	WordsRange& operator=(const WordsRange& x) 
+	{
+		if(this!=&x)
+		{
+			m_startPos	=x.m_startPos;
+			m_endPos		=x.m_endPos;
+		}
+		return *this;
+	}
+
 	// Whether two word ranges overlap or not
 	inline bool Overlap(const WordsRange& x) const
 	{

@@ -93,12 +93,10 @@ void Manager::ProcessSentence()
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
 	m_transOptColl->CreateTranslationOptions(decodeStepVL);
-
+	
 	// initial seed hypothesis: nothing translated, no words produced
-	{
-		Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
-		m_hypoStackColl[0].AddPrune(hypo);
-	}
+	Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
+	m_hypoStackColl[0].AddPrune(hypo);
 	
 	// go through each stack
 	std::vector < HypothesisStack >::iterator iterStack;
@@ -108,7 +106,6 @@ void Manager::ProcessSentence()
 
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
-	        // VERBOSE("processing next stack at ");
 		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
@@ -147,10 +144,10 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 		for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 		{
-			size_t maxSize = sourceSize - startPos;
-			size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-			maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
-			
+      size_t maxSize = sourceSize - startPos;
+      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+      maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+
 			for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 			{
 				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
@@ -296,20 +293,6 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	if (debug2) { std::cerr << "::EXT: " << transOpt << "\n"; }
 #endif
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
-	// expand hypothesis further if transOpt was linked
-	for (std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
-	       iterLinked != transOpt.GetLinkedTransOpts().end(); iterLinked++) {
-		const WordsBitmap hypoBitmap = newHypo->GetWordsBitmap();
-		if (hypoBitmap.Overlap((**iterLinked).GetSourceWordsRange())) {
-			// don't want to add a hypothesis that has some but not all of a linked TO set, so return
-			return;
-		}
-		else
-		{
-			newHypo->CalcScore(m_transOptColl->GetFutureScore());
-			newHypo = newHypo->CreateNext(**iterLinked);
-		}
-	}
 	newHypo->CalcScore(m_transOptColl->GetFutureScore());
 	
 	// logging for the curious
@@ -403,9 +386,10 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 		contenders.Add(new TrellisPath(*iterBestHypo));
 	}
 
-  // factor defines stopping point for distinct n-best list if too many candidates identical
+	// factor defines stopping point for distinct n-best list if too many candidates identical
 	size_t nBestFactor = StaticData::Instance().GetNBestFactor();
-  if (nBestFactor < 1) nBestFactor = 1000; // 0 = unlimited
+  if (nBestFactor < 1) 
+		nBestFactor = 1000; // 0 = unlimited
 
 	// MAIN loop
 	for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * nBestFactor) ; iteration++)
@@ -413,19 +397,21 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 		// get next best from list of contenders
 		TrellisPath *path = contenders.pop();
 		assert(path);
+		bool addPath = true;
 		if(onlyDistinct)
 		{
 			Phrase tgtPhrase = path->GetSurfacePhrase();
-			if (distinctHyps.insert(tgtPhrase).second) 
-        ret.Add(path);
+			addPath = distinctHyps.insert(tgtPhrase).second;
 		}
-		else 
-    {
-		  ret.Add(path);
-    }
- 
+		
+		if (addPath)
+			ret.Add(path);
+
 		// create deviations from current best
 		path->CreateDeviantPaths(contenders);		
+
+		if (!addPath) // delete path if not used
+			delete path;
 
 		if(onlyDistinct)
 		{

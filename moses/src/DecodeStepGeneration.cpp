@@ -40,12 +40,12 @@ TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption
                                   , const ScoreComponentCollection& generationScore) const
 {
 	if (IsFilteringStep()) {
-  	if (!oldTO.IsCompatible(mergePhrase, m_conflictFactors)) 
+  	if (!oldTO.GetTargetPhrase().IsCompatible(mergePhrase, m_conflictFactors)) 
 			return NULL;
 	}
 
   TranslationOption *newTransOpt = new TranslationOption(oldTO);
-  newTransOpt->MergeNewFeatures(mergePhrase, generationScore, m_newOutputFactors);
+  newTransOpt->MergePhrase(mergePhrase, generationScore, m_newOutputFactors);
   return newTransOpt;
 }
 
@@ -76,7 +76,6 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 }
 
 void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOpt
-                              , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const
@@ -91,7 +90,7 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
     }
 
   // normal generation step
-  const GenerationDictionary &generationDictionary  = decodeStep.GetGenerationDictionary();
+  const GenerationDictionary &generationDictionary  = GetGenerationDictionary();
 //  const WordsRange &sourceWordsRange                = inputPartialTranslOpt.GetSourceWordsRange();
 
   const Phrase &targetPhrase  = inputPartialTranslOpt.GetTargetPhrase();

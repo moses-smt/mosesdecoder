@@ -283,6 +283,22 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\AlignmentElement.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlignmentPair.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlignmentPhrase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ConcatenatedPhrase.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConfusionNet.cpp"
 				>
 			</File>
@@ -319,7 +335,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\FactorTypeSet.cpp"
+				RelativePath=".\src\FactorMask.cpp"
 				>
 			</File>
 			<File
@@ -579,6 +595,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseList.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PrefixPhraseCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PrefixTreeMap.cpp"
 				>
 			</File>
@@ -619,6 +643,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TargetPhraseMatrix.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TranslationOption.cpp"
 				>
 			</File>
@@ -632,6 +660,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionCollectionText.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOptionList.cpp"
 				>
 			</File>
 			<File
@@ -677,6 +709,22 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\src\AlignmentElement.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlignmentPair.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlignmentPhrase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ConcatenatedPhrase.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConfusionNet.h"
 				>
 			</File>
@@ -713,7 +761,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\FactorTypeSet.h"
+				RelativePath=".\src\FactorMask.h"
 				>
 			</File>
 			<File
@@ -865,6 +913,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseList.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PrefixPhraseCollection.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PrefixTree.h"
 				>
 			</File>
@@ -909,6 +965,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TargetPhraseMatrix.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Timer.h"
 				>
 			</File>
@@ -926,6 +986,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionCollectionText.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOptionList.h"
 				>
 			</File>
 			<File
