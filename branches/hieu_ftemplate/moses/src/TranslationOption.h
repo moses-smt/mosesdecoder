@@ -56,12 +56,13 @@ class TranslationOption
 
 protected:
 
-	Phrase 							m_targetPhrase; /*< output phrase when using this translation option */
+	TargetPhrase 				m_targetPhrase; /*< output phrase when using this translation option */
 	Phrase				      *m_sourcePhrase; /*< input phrase translated by this */
 	const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
 	float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
-	std::vector<TranslationOption*> m_linkedTransOpts; /* list of linked TOs which must be included with this in any hypothesis */
 	
+	std::vector<size_t> m_subRangeCount;
+
 	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
 	//! for example, know the full n-gram score since the length of the
 	//! TargetPhrase may be shorter than the n-gram order.  But, if it is
@@ -69,16 +70,21 @@ protected:
 	ScoreComponentCollection	m_scoreBreakdown;
 	ScoreComponentCollection	m_reordering;
 
+	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
+	void CalcScore();
+
 public:
 	/** constructor. Used by initial translation step */
 	TranslationOption(const WordsRange &wordsRange
 									, const TargetPhrase &targetPhrase
-									, const InputType &inputType);
-	/** constructor. Used to create trans opt from unknown word */
-	TranslationOption(const WordsRange &wordsRange
-									, const TargetPhrase &targetPhrase
 									, const InputType &inputType
-									, int);
+									, size_t decodeStepId);
+
+	/** constructor. Used to create trans opt from unknown word */
+	TranslationOption(int
+									, const WordsRange &wordsRange
+									, const TargetPhrase &targetPhrase
+									, const InputType &inputType);
 	/** copy constructor */
 	TranslationOption(const TranslationOption &copy);
 
@@ -90,14 +96,19 @@ public:
 		delete m_sourcePhrase;
 	}
 
-	/** returns true if all feature types in featuresToCheck are compatible between the two phrases */
-	bool IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const;
-
 	/** used when precomputing (composing) translation options */
-	void MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToMerge);
+	// used by translation step
+  void MergeTargetPhrase(const TargetPhrase &targetPhrase
+											, const ScoreComponentCollection& score
+											, const std::vector<FactorType>& featuresToMerge
+											, size_t decodeStepId);
+	// used by gen step
+	void MergePhrase(const Phrase& phrase
+											, const ScoreComponentCollection& score
+											, const std::vector<FactorType>& featuresToMerge);
 
 	/** returns target phrase */
-	inline const Phrase &GetTargetPhrase() const
+	inline const TargetPhrase &GetTargetPhrase() const
 	{
 		return m_targetPhrase;
 	}
@@ -112,18 +123,6 @@ public:
 	const Phrase *GetSourcePhrase() const 
 	{
 	  return m_sourcePhrase;
-	}
-	
-	/** returns linked TOs */
-	inline const std::vector<TranslationOption*> &GetLinkedTransOpts() const
-	{
-		return m_linkedTransOpts;
-	}
-	
-	/** add link to another TO */
-	inline void AddLinkedTransOpt(TranslationOption* to)
-	{
-		m_linkedTransOpts.push_back(to);
 	}
 
 	/** whether source span overlaps with those of a hypothesis */
@@ -142,9 +141,13 @@ public:
 	}
 
 	/** return length of source phrase */
-	inline size_t GetSize() const
+	inline size_t GetSourceSize() const
 	{
-		return m_sourceWordsRange.GetEndPos() - m_sourceWordsRange.GetStartPos() + 1;
+		return m_sourceWordsRange.GetNumWordsCovered();
+	}
+	inline size_t GetTargetSize() const
+	{
+		return m_targetPhrase.GetSize();
 	}
 
 	/** return estimate of total cost of this option */
@@ -170,14 +173,16 @@ public:
 		return m_reordering;
 	}
 
-	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
-	void CalcScore();
-
 	void CacheReorderingProb(const LexicalReordering &lexreordering
 													, const Score &score);
 
+ 	const AlignmentPair &GetAlignmentPair() const
+	{	return m_targetPhrase.GetAlignmentPair();	}
+
+	size_t GetSubRangeCount(size_t decodeStepId) const
+	{ return m_subRangeCount[decodeStepId]; }
+
 	TO_STRING();
 };
-
 
 

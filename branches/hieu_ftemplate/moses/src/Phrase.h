@@ -98,13 +98,6 @@ public:
 	void MergeFactors(const Phrase &copy, FactorType factorType);
 	//! copy all factors specified in factorVec and none others
 	void MergeFactors(const Phrase &copy, const std::vector<FactorType>& factorVec);
-
-	/** compare 2 phrases to ensure no factors are lost if the phrases are merged
-	*	must run IsCompatible() to ensure incompatible factors aren't being overwritten
-	*/
-	bool IsCompatible(const Phrase &inputPhrase) const;
-	bool IsCompatible(const Phrase &inputPhrase, FactorType factorType) const;
-	bool IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const;
 	
 	//! really means what language. Input = Source, Output = Target
 	inline FactorDirection GetDirection() const
@@ -155,6 +148,7 @@ public:
 	
 	//! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
 	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 
+	std::string GetStringRep() const; 
   
 	TO_STRING();
 

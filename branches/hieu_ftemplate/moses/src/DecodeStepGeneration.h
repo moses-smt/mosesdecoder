@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include "DecodeStep.h"
+#include "TypeDef.h"
 
 class GenerationDictionary;
 class Phrase;
@@ -32,14 +33,15 @@ class DecodeStepGeneration : public DecodeStep
 public:
 	DecodeStepGeneration(GenerationDictionary* dict, const DecodeStep* prev);
 
+	DecodeType GetDecodeType() const
+	{ return Generate; }
   /** returns phrase table (dictionary) for translation step */
   const GenerationDictionary &GetGenerationDictionary() const;
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
-                              , const DecodeStep &decodeStep
-                              , PartialTranslOptColl &outputPartialTranslOptColl
-                              , TranslationOptionCollection *toc
-                              , bool adhereTableLimit) const;
+											, PartialTranslOptColl &outputPartialTranslOptColl
+											, TranslationOptionCollection *toc
+											, bool adhereTableLimit) const;
 
 private:
 	/** create new TranslationOption from merging oldTO with mergePhrase

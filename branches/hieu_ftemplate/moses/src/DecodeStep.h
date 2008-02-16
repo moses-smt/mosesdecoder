@@ -53,6 +53,9 @@ public:
 	DecodeStep(Dictionary *ptr, const DecodeStep* prevDecodeStep);
 	virtual ~DecodeStep();
 
+	//! whether this is Translate or Generate step
+	virtual DecodeType GetDecodeType() const = 0;
+
 	/** mask of factors that are present after this decode step */
 	const FactorMask& GetOutputFactorMask() const
 	{
@@ -99,9 +102,8 @@ public:
 
 	/** Given an input TranslationOption, extend it in some way (put results in outputPartialTranslOptColl) */
   virtual void Process(const TranslationOption &inputPartialTranslOpt
-                              , const DecodeStep &decodeStep
-                              , PartialTranslOptColl &outputPartialTranslOptColl
-                      				, TranslationOptionCollection *toc
-															, bool adhereTableLimit) const = 0;
+											, PartialTranslOptColl &outputPartialTranslOptColl
+            					, TranslationOptionCollection *toc
+											, bool adhereTableLimit) const = 0;
 
 };

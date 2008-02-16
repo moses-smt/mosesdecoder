@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelSingleFactor.h"
 #include "LanguageModelMultiFactor.h"
 #include "Word.h"
-#include "FactorTypeSet.h"
+#include "FactorMask.h"
 #include "FactorCollection.h"
 
 class Phrase;

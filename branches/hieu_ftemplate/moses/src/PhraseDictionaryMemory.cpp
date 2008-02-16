@@ -25,16 +25,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iterator>
 #include <algorithm>
 #include <sys/stat.h>
+#include <boost/filesystem/operations.hpp>
 #include "PhraseDictionaryMemory.h"
-#include "FactorCollection.h"
 #include "Word.h"
 #include "Util.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
+#include "AlignmentPair.h"
+#include "PrefixPhraseCollection.h"
 
 using namespace std;
+
+void EmptyAlignment(string &sourceAlign, string &targetAlign, size_t sourceSize, size_t targetSize)
+{
+	sourceAlign = targetAlign = " ";
+	for (size_t pos = 0 ; pos < sourceSize ; ++pos)
+		sourceAlign += "() ";
+	for (size_t pos = 0 ; pos < targetSize ; ++pos)
+		targetAlign += "() ";
+}
 
 bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
@@ -42,7 +53,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, const vector<float> &weight
 																			, size_t tableLimit
 																			, const LMList &languageModels
-														          , float weightWP)
+														          , float weightWP
+														     			, bool filter
+																			, const PrefixPhraseCollection &inputPrefix
+																			, const string &hashFilePath)
 {
 	const StaticData &staticData = StaticData::Instance();
 
@@ -60,29 +74,26 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	// create hash file if necessary
 	ofstream tempFile;
 	string tempFilePath;
+	if (filter)
+	{
+		CreateTempFile(tempFile, tempFilePath);
+		TRACE_ERR(filePath << " -> " << tempFilePath << " -> " << hashFilePath << endl);
+	}
 
-	vector< vector<string> >	phraseVector;
 	string line, prevSourcePhrase = "";
 	size_t count = 0;
   size_t line_num = 0;
-  size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
-  
 	while(getline(inFile, line)) 
 	{
 		++line_num;
+
 		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
-		
-		if (numElement == NOT_FOUND) 
-		{ // init numElement
-			numElement = tokens.size();
-			assert(numElement == 3 || numElement == 5);
-		}
-			 
-		if (tokens.size() != numElement)
+		if (tokens.size() != 5)
 		{
 			stringstream strme;
 			strme << "Syntax error at " << filePath << ":" << line_num;
 			UserMessage::Add(strme.str());
+			TRACE_ERR(line << endl);
 			return false;
 		}
 
@@ -93,10 +104,12 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		}
 
 		const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-		if (tokens[0] != prevSourcePhrase)
-			phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
+		
+		// only have to recreate source phrase if different from prev
+		//if (tokens[0] != prevSourcePhrase)
+		//	phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
 
-		vector<float> scoreVector = Tokenize<float>(tokens[(numElement==3) ? 2 : 4]);
+		vector<float> scoreVector = Tokenize<float>(tokens[4]);
 		if (scoreVector.size() != m_numScoreComponent) 
 		{
 			stringstream strme;
@@ -104,14 +117,37 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			UserMessage::Add(strme.str());
 			return false;
 		}
-//		assert(scoreVector.size() == m_numScoreComponent);
 			
 		// source
 		Phrase sourcePhrase(Input);
-		sourcePhrase.CreateFromString( input, phraseVector);
+		sourcePhrase.CreateFromString( input
+																, tokens[0]
+																, factorDelimiter);
+
+		// if not part of input, filter it out
+		if (filter)
+		{
+			if (inputPrefix.Find(sourcePhrase, false))
+			{
+				tempFile << line << endl;
+			}
+			else
+			{
+				continue;
+			}
+		}
+
 		//target
 		TargetPhrase targetPhrase(Output);
-		targetPhrase.CreateFromString( output, tokens[1], factorDelimiter);
+		targetPhrase.CreateFromString( output
+																, tokens[1]
+																, factorDelimiter);
+		if (!staticData.UseAlignmentInfo())
+			EmptyAlignment(tokens[2], tokens[3], sourcePhrase.GetSize(), targetPhrase.GetSize());
+		
+		// alignment info
+		targetPhrase.CreateAlignmentInfo(tokens[2], tokens[3], sourcePhrase.GetSize());
+
 
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
@@ -126,6 +162,33 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 	// sort each target phrase collection
 	m_collection.Sort(m_tableLimit);
+
+	// move temp file to hash file
+	if (filter)
+	{
+		tempFile.close();
+		using namespace boost::filesystem;
+
+		path hashFile(hashFilePath, native)
+					, tempFile(tempFilePath, native);
+		try 
+		{
+			rename( tempFile , hashFile );
+		}
+		catch (...)
+		{ // copy instead
+			copy_file(tempFile , hashFile );
+			remove(tempFile);
+		}
+
+		// touch file to prevent it being deleted
+		last_write_time(hashFile, time(NULL));
+
+		#ifndef WIN32
+			// change permission to let everyone use cached file
+			chmod(hashFilePath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
+		#endif
+	}
 
 	return true;
 }
@@ -188,13 +251,7 @@ TO_STRING_BODY(PhraseDictionaryMemory);
 // friend
 ostream& operator<<(ostream& out, const PhraseDictionaryMemory& phraseDict)
 {
-	const PhraseDictionaryNode &coll = phraseDict.m_collection;
-	PhraseDictionaryNode::const_iterator iter;	
-	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
-	{
-		const Word &word = (*iter).first;
-		out << word;
-	}
+	out << phraseDict.m_collection;
 	return out;
 }
 

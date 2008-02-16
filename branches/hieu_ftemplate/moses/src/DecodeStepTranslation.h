@@ -22,9 +22,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include "DecodeStep.h"
+#include "WordsRange.h"
+#include "ConcatenatedPhrase.h"
 
 class PhraseDictionary;
 class TargetPhrase;
+class TargetPhraseCollection;
 
 class DecodeStepTranslation : public DecodeStep
 {
@@ -32,14 +35,28 @@ public:
 	DecodeStepTranslation(); // not implemented
 	DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev);
 
+	DecodeType GetDecodeType() const
+	{ return Translate; }
+ 	size_t GetId() const 
+	{ return m_id;}
+ 	static size_t GetNumTransStep() 
+	{ return s_id;}
+
   /** returns phrase table (dictionary) for translation step */
   const PhraseDictionary &GetPhraseDictionary() const;
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
-                              , const DecodeStep &decodeStep
-                              , PartialTranslOptColl &outputPartialTranslOptColl
+											, PartialTranslOptColl &outputPartialTranslOptColl
+											, TranslationOptionCollection *toc
+											, bool adhereTableLimit) const;
+
+	void CreateTargetPhrases(ConcatenatedPhraseColl &concatenatedPhraseColl
+															, const WordsRange &sourceWordsRange
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const;
+
+	void SetTargetPhraseCollection(ConcatenatedPhraseColl &concatenatedPhraseColl) const
+	{ m_concatenatedPhraseColl = &concatenatedPhraseColl; }
 
 	/** initialize list of partial translation options by applying the first translation step 
 	* Ideally, this function should be in DecodeStepTranslation class
@@ -49,9 +66,13 @@ public:
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos, bool adhereTableLimit) const;
 private:
+	static size_t s_id;
+	size_t m_id;
 	/** create new TranslationOption from merging oldTO with mergePhrase
 		This function runs IsCompatible() to ensure the two can be merged
 	*/
 	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;
+
+	mutable ConcatenatedPhraseColl *m_concatenatedPhraseColl;
 };
 

@@ -25,9 +25,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryNode.h"
 
+class PrefixPhraseCollection;
+
 /*** Implementation of a phrase table in a trie.  Looking up a phrase of
  * length n words requires n look-ups to find the TargetPhraseCollection.
  */
+
+#pragma warning(disable:654) // spurious warnings on intel compiler
+ 
 class PhraseDictionaryMemory : public PhraseDictionary
 {
 	typedef PhraseDictionary MyBase;
@@ -39,8 +44,8 @@ protected:
 	TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
 	
 public:
-	PhraseDictionaryMemory(size_t numScoreComponent)
-		: MyBase(numScoreComponent)
+	PhraseDictionaryMemory(size_t numScoreComponent, ScoreIndexManager &scoreIndexManager)
+		: MyBase(numScoreComponent,scoreIndexManager)
 	{
 	}
 	virtual ~PhraseDictionaryMemory();
@@ -51,7 +56,10 @@ public:
 								, const std::vector<float> &weight
 								, size_t tableLimit
 								, const LMList &languageModels
-						    , float weightWP);
+						    , float weightWP
+								, bool filter
+								, const PrefixPhraseCollection &inputPrefix
+								, const std::string &hashFilePath);
 	
 	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 
@@ -62,5 +70,8 @@ public:
 	
 	TO_STRING();
 	
+	void InitializeForInput(InputType const &/*source*/) {};
+	void CleanUp() {};
 };
+#pragma warning(default:654)
 

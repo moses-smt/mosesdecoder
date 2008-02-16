@@ -249,6 +249,9 @@ public:
 		return m_lmstats;
 	}
 
+	const TranslationOption *GetTranslationOption() const
+	{ return m_transOpt; }
+
 	static unsigned int GetHypothesesCreated()
 	{
 		return s_HypothesesCreated;

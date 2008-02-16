@@ -35,7 +35,6 @@ PartialTranslOptColl::PartialTranslOptColl()
 /** add a partial translation option to the collection (without pruning) */
 void PartialTranslOptColl::AddNoPrune(TranslationOption *partialTranslOpt)
 {
-	partialTranslOpt->CalcScore();
 	if (partialTranslOpt->GetFutureScore() >= m_worstScore) 
 	{
 		m_list.push_back(partialTranslOpt);

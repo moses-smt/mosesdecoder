@@ -177,7 +177,7 @@ public:
 											 TransformScore);
 				std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),
 											 FloorScore);
-				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector);
+				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, &src);
 				costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),
 																			 tCands.size()));
 				tCands.push_back(targetPhrase);
@@ -261,19 +261,27 @@ public:
 	void CreateTargetPhrase(TargetPhrase& targetPhrase,
 													StringTgtCand::first_type const& factorStrings,
 													StringTgtCand::second_type const& scoreVector,
-													Phrase const* srcPtr=0) const
+													Phrase const* srcPtr) const
 	{
 		FactorCollection &factorCollection = FactorCollection::Instance();
+		std::vector<std::string> targetAlignment;
+		targetAlignment.reserve(factorStrings.size());
 
 		for(size_t k=0;k<factorStrings.size();++k) 
+		{
+			std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
+			assert(factors.size() == m_output.size() + 1);
+			Word& w=targetPhrase.AddWord();
+			for(size_t l=0;l<m_output.size();++l)
 			{
-				std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
-				Word& w=targetPhrase.AddWord();
-				for(size_t l=0;l<m_output.size();++l)
-					w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
+				w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
 			}
+
+			targetAlignment.push_back(factors.back());
+		}
 		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
+		targetPhrase.SetAlignment(targetAlignment, Output);
 	}
 
 

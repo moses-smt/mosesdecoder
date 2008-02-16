@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 #include "PartialTranslOptColl.h"
 #include "DecodeStep.h"
+#include "TranslationOptionList.h"
 
 class LanguageModel;
 class FactorCollection;
@@ -88,7 +89,7 @@ protected:
 		assert(endPos-startPos < m_collection[startPos].size());
 	 	return m_collection[startPos][endPos - startPos];
 	}
-	void Add(TranslationOption *translationOption);
+	void Add(TranslationOption &translationOption);
 
 	//! implemented by inherited class, called by this class
 	virtual void ProcessUnknownWord(size_t sourcePos)=0;

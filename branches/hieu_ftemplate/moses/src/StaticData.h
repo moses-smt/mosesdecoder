@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
 //#include "UnknownWordHandler.h"
+#include "TranslationOptionList.h"
 
 class InputType;
 class LexicalReordering;
@@ -80,7 +81,7 @@ protected:
 			, m_maxNoPartTransOpt
 			, m_maxPhraseLength;
 	
-	std::string									m_nBestFilePath;
+	std::string									m_nBestFilePath, m_cachePath;
 	bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
@@ -92,8 +93,10 @@ protected:
 	bool m_sourceStartPosMattersForRecombination;
 	bool m_recoverPath;
 
+	bool m_useAlignmentInfo;
+
 	InputTypeEnum m_inputType;
-	size_t m_numInputScores;
+	size_t m_numInputScores, m_numSubRanges;
 
 	mutable size_t m_verboseLevel;
 	DistortionScoreProducer *m_distortionScoreProducer;
@@ -113,13 +116,12 @@ protected:
 	
 	XmlInputType m_xmlInputType; //! method for handling sentence XML input
 
-	bool m_mbr; //! use MBR decoder
-	size_t m_mbrSize; //! number of translation candidates considered
-	float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
+  DecoderType m_decoderType; //! MAP or MBR decoder
 
 	bool m_useTransOptCache;
-	mutable std::map<Phrase, TranslationOptionList> m_transOptCache;
+	mutable std::map<Phrase, TranslationOptionList*> m_transOptCache;
 
+  float m_mbrScale; //! Scaling factor for computing marginal probability of candidate translation
 	mutable const InputType* m_input;  //! holds reference to current sentence
 	bool m_isAlwaysCreateDirectTranslationOption;
 	//! constructor. only the 1 static variable can be created
@@ -326,7 +328,7 @@ public:
 		return m_nBestFilePath;
 	}
   	bool IsNBestEnabled() const {
-	  return (!m_nBestFilePath.empty()) || m_mbr;
+    	return !m_nBestFilePath.empty();
   	}
 	size_t GetNBestFactor() const
 	{
@@ -357,18 +359,19 @@ public:
 	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
-	size_t UseMBR() const { return m_mbr; }
-	size_t GetMBRSize() const { return m_mbrSize; }
-	float GetMBRScale() const { return m_mbrScale; }
-		
+	DecoderType GetDecoderType() const {return m_decoderType;}
+	float GetMBRScale() const {return m_mbrScale;}
+	bool UseAlignmentInfo() const {return m_useAlignmentInfo;}
+	size_t GetMaxNumSubRanges() const {return m_numSubRanges;}
 	XmlInputType GetXmlInputType() const { return m_xmlInputType; }
 
 	bool GetUseTransOptCache() const { return m_useTransOptCache; }
+	void AddTransOptListToCache(const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
 
-	void AddTransOptListToCache(const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
-	{
-		m_transOptCache[sourcePhrase] = transOptList;
-	}
+	std::string GetCachePath() const
+ 	{
+ 		return m_cachePath;
+ 	}
 
 	const TranslationOptionList* FindTransOptListInCache(const Phrase &sourcePhrase) const;
 };

@@ -136,9 +136,8 @@ int main(int argc, char* argv[])
 
 		Manager manager(*source);
 		manager.ProcessSentence();
-
-		// pick best translation (maximum a posteriori decoding)
-		if (! staticData.UseMBR()) {
+		cerr << "DECODER TYPE : " << staticData.GetDecoderType() << endl;
+		if (staticData.GetDecoderType() == MAP){
 			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 													 staticData.GetReportSegmentation(),
 													 staticData.GetReportAllFactors()
@@ -158,31 +157,29 @@ int main(int argc, char* argv[])
 					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
 			}
 		}
-		// consider top candidate translations to find minimum Bayes risk translation
-		else {
-		  size_t nBestSize = staticData.GetMBRSize();
-		  
-		  if (nBestSize <= 0) 
-		    {
-		      cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
-		      return EXIT_FAILURE;
-		    }
-		  else
-		    {
-		      TrellisPathList nBestList;
-		      manager.CalcNBest(nBestSize, nBestList,true);
-		      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
-		      IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
-		      std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
-		      ioStream->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
-					       staticData.GetReportSegmentation(),
-					       staticData.GetReportAllFactors());
-		      IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
-		    }
+		else if (staticData.GetDecoderType() == MBR){
+			size_t nBestSize = staticData.GetNBestSize();
+			cerr << "NBEST SIZE : " << nBestSize << endl;
+			assert(nBestSize > 0);
+			
+		  if (nBestSize > 0)
+			{
+			  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+				TrellisPathList nBestList;
+				manager.CalcNBest(nBestSize, nBestList,true);
+				std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
+				ioStream->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
+													 staticData.GetReportSegmentation(),
+													 staticData.GetReportAllFactors()
+													 );
+				IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
+		  }
+			
+			
 		}	
 		 
-		if (staticData.IsDetailedTranslationReportingEnabled()) {
-		  TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
+				if (staticData.IsDetailedTranslationReportingEnabled()) {
+			TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
 		}
 
 		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
@@ -195,7 +192,7 @@ int main(int argc, char* argv[])
 	IFVERBOSE(1)
 		PrintUserTime("End.");
 
-	#ifndef EXIT_RETURN
+	#ifdef HACK_EXIT
 	//This avoids that detructors are called (it can take a long time)
 		exit(EXIT_SUCCESS);
 	#else
