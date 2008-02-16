@@ -1,0 +1,11 @@
+To build:
+
+  ./regenerate-makefiles.sh
+  ./configure --with-prefix=PATH-TO-INSTALL    (probably `pwd`)
+  make
+  make install
+
+*Make install is important since it creates the include/ and lib/ directories
+that client software will depend on.
+
+
