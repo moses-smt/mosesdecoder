@@ -15,6 +15,8 @@ while ($w=shift @ARGV){
   $cnt=shift(@ARGV),next  if $w eq "-c";
 } 
 
+my $lc = 0;
+
 if (!$dir || !inv){
  print  "usage: giza2bal.pl [-c <count-file>] -d <dir-align-file> -i <inv-align-file>\n"; 
  print  "input files can be also commands, e.g. -d \"gunzip -c file.gz\"\n";
@@ -49,26 +51,35 @@ sub ReadBiAlign{
     chop($t2=<$fd2>);
 
     @a=@b=();
+    $lc++;
 
     #get target statistics
     $n=1;
-    $t1=~s/NULL \(\{(( \d+)*) \}\)//;
-    while ($t1=~s/(\S+) \(\{(( \d+)*) \}\)//){
-        grep($a[$_]=$n,split(/ /,$2));
+    $t1=~s/NULL \(\{((\s+\d+)*)\s+\}\)//;
+    while ($t1=~s/(\S+)\s+\(\{((\s+\d+)*)\s+\}\)//){
+        grep($a[$_]=$n,split(/\s+/,$2));
         $n++;
     }
 
     $m=1;
-    $t2=~s/NULL \(\{(( \d+)*) \}\)//;
-    while ($t2=~s/(\S+) \(\{(( \d+)*) \}\)//){
-        grep($b[$_]=$m,split(/ /,$2));
+    $t2=~s/NULL \(\{((\s+\d+)*)\s+\}\)//;
+    while ($t2=~s/(\S+)\s+\(\{((\s+\d+)*)\s+\}\)//){
+        grep($b[$_]=$m,split(/\s+/,$2));
         $m++;
     }
 
-    $M=split(/ /,$s1);
-    $N=split(/ /,$s2);
+    $M=split(/\s+/,$s1);
+    $N=split(/\s+/,$s2);
 
-    return 0 if $m != ($M+1) || $n != ($N+1);
+    if ($m != ($M+1) || $n != ($N+1)) {
+      print STDERR "Sentence mismatch error! Line #$lc\n";
+      $s1 = "ALIGN_ERR";
+      $s2 = "ALIGN_ERR";
+      @a=(); @b=();
+      for ($j=1;$j<2;$j++){ $a[$j]=1; }
+      for ($i=1;$i<2;$i++){ $b[$i]=1; }
+      return 1;
+    }
 
     for ($j=1;$j<$m;$j++){
         $a[$j]=0 if !$a[$j];
@@ -94,6 +105,7 @@ while(!eof(DIR)){
         print $#b," $tgt \# @b[1..$#b]\n";
     }
     else{
+    	print "\n";
         print STDERR "." if !(++$skip % 1000);
     }
 };
