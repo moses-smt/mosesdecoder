@@ -29,26 +29,26 @@ my @addfactors = grep { ! /^[0-9]+$/ } @requested_factors;
 # these are the labelled factors we need to load;
 
 
+my $corp_stream;
 if ($corppathname eq "-") {
-  *CORP=*STDIN;
+  $corp_stream=*STDIN;
 
   die "Won't add factors to corpus coming from stdin." if scalar @addfactors;
 } else {
-  open CORP, $corppathname or die "Can't read $corppathname";
-  binmode(CORP, ":utf8");
+  $corp_stream = my_open($corppathname);
 }
 
 my $corpdn = dirname($corppathname);
 my $corpbn = basename($corppathname);
 my %streams = map {
   my $fn = "$corpdn/$factordir/$corpbn.$_";
-  my $stream = IO::File->new($fn, "<:utf8");
+  my $stream = my_open($fn);
   die "Can't read '$fn'" if !defined $stream;
   ( $_, $stream ); # define a mapping factorlabel->stream
 } @addfactors;
 
 my $nr=0;
-while (<CORP>) {
+while (<$corp_stream>) {
   $nr++;
   print STDERR "." if $nr % 10000 == 0;
   print STDERR "($nr)" if $nr % 100000 == 0;
@@ -94,8 +94,26 @@ while (<CORP>) {
   }
   print "\n";
 }
-close CORP;
+close $corp_stream;
 print STDERR "Done.\n";
 
 
+sub my_open {
+  my $f = shift;
+  die "Not found: $f" if ! -e $f;
 
+  my $opn;
+  my $hdl;
+  my $ft = `file $f`;
+  # file might not recognize some files!
+  if ($f =~ /\.gz$/ || $ft =~ /gzip compressed data/) {
+    $opn = "zcat $f |";
+  } elsif ($f =~ /\.bz2$/ || $ft =~ /bzip2 compressed data/) {
+    $opn = "bzcat $f |";
+  } else {
+    $opn = "$f";
+  }
+  open $hdl, $opn or die "Can't open '$opn': $!";
+  binmode $hdl, ":utf8";
+  return $hdl;
+}
