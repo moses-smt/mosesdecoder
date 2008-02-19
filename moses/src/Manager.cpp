@@ -176,30 +176,33 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
     size_t maxSize = sourceSize - startPos;
     size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 #ifdef DEBUGLATTICE
-		const int INTEREST = 114;
+		const int INTEREST = 11;
 #endif
     maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
 		if (isWordLattice) {
 			// first question: is there a path from the closest translated word to the left
 			// of the hypothesized extension to the start of the hypothesized extension?
 			size_t closestLeft = hypoBitmap.GetEdgeToTheLeftOf(startPos);
-			if (closestLeft != startPos && closestLeft != 0 && !m_source.CanIGetFromAToB(closestLeft+1, startPos+1)) {
+			if (closestLeft != startPos && closestLeft != 0 && ((startPos - closestLeft) != 1 && !m_source.CanIGetFromAToB(closestLeft+1, startPos+1))) {
 #ifdef DEBUGLATTICE
 			  if (startPos == INTEREST) {
 				  std::cerr << hypothesis <<"\n";
+					std::cerr << m_source.CanIGetFromAToB(closestLeft+1,startPos+1) << "\n";
 				  std::cerr << "Die0: " << (closestLeft) << " " << startPos << "\n";
 				}
 #endif
 			  continue;
 			}
 		}
+		//if (startPos == INTEREST) { std::cerr << "INTEREST: " << hypothesis << "\n"; }
 
 		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
 			// check for overlap
 		  WordsRange extRange(startPos, endPos);
 #ifdef DEBUGLATTICE
-	    bool debug = (startPos > (INTEREST-25) && hypoFirstGapPos > 0 && startPos <= INTEREST && endPos >=INTEREST && endPos < (INTEREST+150) && hypoFirstGapPos == INTEREST);
+			//if (startPos == INTEREST) { std::cerr << "  (" << hypoFirstGapPos << ")-> wr: " << extRange << "\n"; }
+	    bool debug = (startPos > (INTEREST-8) && hypoFirstGapPos > 0 && startPos <= INTEREST && endPos >=INTEREST && endPos < (INTEREST+25) && hypoFirstGapPos == INTEREST);
 	    debug2 = debug && (startPos==INTEREST && endPos >=INTEREST);
 			if (debug) { std::cerr << (startPos==INTEREST? "LOOK-->" : "") << "XP: " << hypothesis << "\next: " << extRange << "\n"; }
 #endif
@@ -214,18 +217,19 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 #endif
 			  continue;
 			}
+			bool leftMostEdge = (hypoFirstGapPos == startPos);
+			
 		  // TODO ask second question here
 			if (isWordLattice) {
 				size_t closestRight = hypoBitmap.GetEdgeToTheRightOf(endPos);
-				if (closestRight != endPos && closestRight != sourceSize && !m_source.CanIGetFromAToB(endPos, closestRight)) {
+//				std::cerr << "CR: " << closestRight << "," << endPos << "\n";
+				if (!leftMostEdge && closestRight != endPos && closestRight != sourceSize && !m_source.CanIGetFromAToB(endPos, closestRight + 1)) {
 #ifdef DEBUGLATTICE
-			    if (debug) { std::cerr << "Can't get to right edge\n"; }
+			    if (debug) { std::cerr << "Can't get to right edge (" << endPos << "," << closestRight << ")\n"; }
 #endif
 				  continue;
 				}
 			}
-			
-			bool leftMostEdge = (hypoFirstGapPos == startPos);
 			
 			// any length extension is okay if starting at left-most edge
 			if (leftMostEdge)

@@ -42,6 +42,7 @@ int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrde
 			if (alt.first.second < 0.0f) { TRACE_ERR("WARN: neg probability: " << alt.first.second); alt.first.second = 0.0f; }
 			if (alt.first.second > 1.0f) { TRACE_ERR("WARN: probability > 1: " << alt.first.second); alt.first.second = 1.0f; }
 			data[i][j].second = std::max(static_cast<float>(log(alt.first.second)), LOWEST_SCORE);
+			//data[i][j].second = std::max(static_cast<float>((alt.first.second)), LOWEST_SCORE);
 			String2Word(alt.first.first,data[i][j].first,factorOrder);
 			next_nodes[i][j] = alt.second;
 		}
@@ -78,6 +79,8 @@ void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const
 
 int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const
 {
+
+#if 1
   if (prev.GetStartPos() == NOT_FOUND) {
     return distances[0][current.GetStartPos()+1] - 1;
   } else if (prev.GetEndPos() > current.GetStartPos()) {
@@ -85,6 +88,15 @@ int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRa
   } else {
     return distances[prev.GetEndPos()+1][current.GetStartPos()+1] - 1;
   }
+#else
+  int dist = 0;
+  if (prev.GetNumWordsCovered() == 0) {
+	  dist = current.GetStartPos();
+  } else {
+	  dist = (int)prev.GetEndPos() - (int)current.GetStartPos() + 1 ;
+  }
+  return abs(dist);
+#endif
 }
 
 bool WordLattice::CanIGetFromAToB(size_t start, size_t end) const
