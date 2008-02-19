@@ -40,8 +40,10 @@ if ($corppathname eq "-") {
 
 my $corpdn = dirname($corppathname);
 my $corpbn = basename($corppathname);
+$corpbn =~ s/\.gz$//;
 my %streams = map {
   my $fn = "$corpdn/$factordir/$corpbn.$_";
+  $fn .= ".gz" if ! -e $fn;
   my $stream = my_open($fn);
   die "Can't read '$fn'" if !defined $stream;
   ( $_, $stream ); # define a mapping factorlabel->stream
