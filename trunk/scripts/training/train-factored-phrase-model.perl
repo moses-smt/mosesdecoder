@@ -375,14 +375,7 @@ sub reduce_factors {
     # }
     my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
 
-    my $read = $full;
-    if ($full =~ /\.bz2$/) {
-        $read = "$BZCAT $full|";
-    } elsif ($full =~ /\.gz$/) {
-        $read = "$ZCAT $full|";
-    }
-    open(IN,$read) or die "Can't read $full ($read)";
-
+    *IN = open_or_zcat($full);
     open(OUT,">".$reduced) or die "Can't write $reduced";
     my $nr = 0;
     while(<IN>) {
@@ -1335,7 +1328,7 @@ sub get_generation {
     }
 
     my (%GENERATION,%GENERATION_TOTAL_SOURCE,%GENERATION_TOTAL_TARGET);
-    open(E,$___CORPUS.".".$___E) or die "Can't read ".$___CORPUS.".".$___E;
+    *E = open_or_zcat($___CORPUS.".".$___E.$___CORPUS_COMPRESSION);
     $alignment_id=0;
     while(<E>) {
 	chomp;
@@ -1602,4 +1595,17 @@ sub safesystem {
     print STDERR "Exit code: $exitcode\n" if $exitcode;
     return ! $exitcode;
   }
+}
+
+sub open_or_zcat {
+  my $fn = shift;
+  my $read = $fn;
+  if ($fn =~ /\.bz2$/) {
+      $read = "$BZCAT $fn|";
+  } elsif ($fn =~ /\.gz$/) {
+      $read = "$ZCAT $fn|";
+  }
+  my $hdl;
+  open($hdl,$read) or die "Can't read $fn ($read)";
+  return $hdl;
 }
