@@ -16,6 +16,7 @@ training/cmert-0.5/bleu.py
 training/cmert-0.5/dataset.py
 training/cmert-0.5/log.py
 training/cmert-0.5/mert
+training/cmert-0.5/enhanced-mert
 training/cmert-0.5/python/psyco/classes.py
 training/cmert-0.5/python/psyco/core.py
 training/cmert-0.5/python/psyco/__init__.py
