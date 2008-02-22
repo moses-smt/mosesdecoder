@@ -7,6 +7,7 @@
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 use strict;
+use utf8; # tell perl this script file is in UTF-8 (see all funny punct below)
 
 my $language = "en";
 my $QUIET = 0;
@@ -84,9 +85,21 @@ sub detokenize {
 			$text = $text.$prependSpace.$words[$i].$words[$i+1];
 			$i++; # advance over the dash
 			$prependSpace = "";
-		} elsif ($words[$i] =~ /^[\'\"]+$/) {
+		} elsif ($words[$i] =~ /^[\'\"„“`]+$/) {
 			#combine punctuation smartly
-			if (($quoteCount{$words[$i]} % 2) eq 0) {
+                        my $normalized_quo = $words[$i];
+                        $normalized_quo = '"' if $words[$i] =~ /^[„“”]+$/;
+                        $quoteCount{$normalized_quo} = 0
+                                if !defined $quoteCount{$normalized_quo};
+                        if ($language eq "cs" && $words[$i] eq "„") {
+                          # this is always the starting quote in Czech
+                          $quoteCount{$normalized_quo} = 0;
+                        }
+                        if ($language eq "cs" && $words[$i] eq "“") {
+                          # this is usually the ending quote in Czech
+                          $quoteCount{$normalized_quo} = 1;
+                        }
+			if (($quoteCount{$normalized_quo} % 2) eq 0) {
 				if(($language eq "en") && ($words[$i] eq "'") && ($i > 0) && ($words[$i-1] =~ /[s]$/)) {
 					#single quote for posesssives ending in s... "The Jones' house"
 					#left shift
@@ -96,14 +109,14 @@ sub detokenize {
 					#right shift
 					$text = $text.$prependSpace.$words[$i];
 					$prependSpace = "";
-					$quoteCount{$words[$i]} = $quoteCount{$words[$i]} + 1;
+					$quoteCount{$normalized_quo} ++;
 
 				}
 			} else {
 				#left shift
 				$text=$text.$words[$i];
 				$prependSpace = " ";
-				$quoteCount{$words[$i]} = $quoteCount{$words[$i]} + 1;
+				$quoteCount{$normalized_quo} ++;
 
 			}
 			
