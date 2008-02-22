@@ -2,6 +2,7 @@
 
 # Sample De-Tokenizer
 # written by Josh Schroeder, based on code by Philipp Koehn
+# further modifications by Ondrej Bojar
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
@@ -10,16 +11,21 @@ use strict;
 my $language = "en";
 my $QUIET = 0;
 my $HELP = 0;
+my $UPPERCASE_SENT = 0;
 
 while (@ARGV) {
 	$_ = shift;
 	/^-l$/ && ($language = shift, next);
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
+	/^-u$/ && ($UPPERCASE_SENT = 1, next);
 }
 
 if ($HELP) {
-	print "Usage ./detokenizer.perl (-l [en|de|...]) < tokenizedfile > detokenizedfile\n";
+	print "Usage ./detokenizer.perl (-l [en|fr|cs]) < tokenizedfile > detokenizedfile\n";
+        print "Options:\n";
+        print "  -u  ... uppercase the first char in the final sentence.\n";
+        print "  -q  ... don't report detokenizer revision.\n";
 	exit;
 }
 
@@ -116,6 +122,8 @@ sub detokenize {
 	
 	#add trailing break
 	$text .= "\n" unless $text =~ /\n$/;
+
+        $text = ucfirst($text) if $UPPERCASE_SENT;
 
 	return $text;
 }
