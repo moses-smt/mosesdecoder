@@ -43,6 +43,7 @@ class TranslationOption;
 class WordsRange;
 class Hypothesis;
 
+
 typedef std::vector<Hypothesis*> ArcList;
 
 /** Used to store a state in the beam search
@@ -259,7 +260,8 @@ public:
 	// SCORER start
 	// Compares this and previous hypothesises to a phrase
 	bool CompareHypothesisToPhrase(const Phrase *inputPhrase, size_t wordsSoFar) const;
-	bool Hypothesis::IsHypothesisEqual(const Phrase &phrase) const;
+	bool IsHypothesisEqual(const Phrase &phrase) const;
+	void Penalize(size_t iterations);
 	// SCORER end
 };
 

@@ -331,8 +331,22 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
  */
 const Hypothesis *Manager::GetBestHypothesis() const
 {
-	const HypothesisStack &hypoColl = m_hypoStackColl.back();
-	return hypoColl.GetBestHypothesis();
+	// SCORER start
+	if (StaticData::Instance().GetScoreFlag()) {
+		for (std::vector<HypothesisStack>::const_iterator it = m_hypoStackColl.end(); it != m_hypoStackColl.begin(); it--) {
+			const HypothesisStack &hypoColl = *it;
+			
+			if ((hypoColl.size() > 0) && (hypoColl.size() < 327685)) // what constant is this ?
+				return hypoColl.GetBestHypothesis();
+		}
+
+		return NULL;
+	}
+	else {
+		// SCORER end
+		const HypothesisStack &hypoColl = m_hypoStackColl.back();
+		return hypoColl.GetBestHypothesis();
+	}
 }
 
 /**

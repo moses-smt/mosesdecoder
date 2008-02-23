@@ -167,8 +167,10 @@ bool StaticData::LoadData(Parameter *parameter)
 	SetBooleanParameter(&m_score, "score", false);
 	  // the scorer disables the translation option cache since it doesn't work when
 	  // the translation options are filtered
-	if (m_score)
+	if (m_score) {
 	  m_useTransOptCache = false;
+		// m_isAlwaysCreateDirectTranslationOption = true;
+	}
 	// SCORER end
 
 	//input factors

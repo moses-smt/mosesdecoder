@@ -564,4 +564,11 @@ bool Hypothesis::IsHypothesisEqual(const Phrase &phrase) const {
   return true;
 }
 
+void Hypothesis::Penalize(size_t iterations) {
+
+	for (size_t i = 0; i < iterations; i++) {
+		m_totalScore += - StaticData::Instance().GetWeightWordPenalty();	
+	}
+}
+
 // SCORER end

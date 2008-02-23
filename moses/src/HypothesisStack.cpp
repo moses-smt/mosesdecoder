@@ -27,6 +27,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "StaticData.h"
 
+// SCORER start
+#include <cassert>
+// SCORER end
+
 using namespace std;
 
 HypothesisStack::HypothesisStack()
@@ -223,25 +227,29 @@ const Hypothesis *HypothesisStack::GetBestHypothesis() const
 {
 	// SCORER start
 	// return only hypothesises that is the same as translated input when scoring
-	if (StaticData::Instance().GetScoreFlag()) {
-		Hypothesis *bestHypo = NULL;
+ 	if (StaticData::Instance().GetScoreFlag()) {
+ 		Hypothesis *bestHypo = NULL;
 		Phrase *trans = StaticData::Instance().GetTranslatedPhrase();
 
-		for (const_iterator iter = m_hypos.begin(); iter != m_hypos.end(); iter++) {
-			// Check for compatible and best hypothesis
-			Hypothesis *hypo = *iter;
-			if (hypo->IsHypothesisEqual(*trans)) {
-				if (bestHypo == NULL)
+ 		for (const_iterator iter = m_hypos.begin(); iter != m_hypos.end(); iter++) {
+ 			Hypothesis *hypo = *iter;
+			size_t source_covered = hypo->GetWordsBitmap().GetSize() - hypo->GetWordsBitmap().GetNumWordsCovered();
+			size_t trans_covered = trans->GetSize() - hypo->GetSize();
+
+			size_t missing_words =  source_covered + trans_covered;
+			assert(missing_words >= 0);
+
+			hypo->Penalize(missing_words);
+			if (bestHypo == NULL)
+				bestHypo = hypo;
+			else 
+				if (hypo->GetTotalScore() > bestHypo->GetTotalScore())
 					bestHypo = hypo;
-				else 
-					if (hypo->GetTotalScore() > bestHypo->GetTotalScore())
-						bestHypo = hypo;
-			}
 		}
 
-		return bestHypo;
-	}
-	else if (!m_hypos.empty())
+ 		return bestHypo;
+ 	}
+ 	else if (!m_hypos.empty())
 		// SCORER end
 	{
 		const_iterator iter = m_hypos.begin();

@@ -149,31 +149,6 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGr
 {
 	size_t size = m_source.GetSize();
 
-	// SCORER start
-	// Add translationoptions for all possible phrase combinations possible between source and translation
-	if (StaticData::Instance().GetScoreFlag()) {
-		const Phrase *transPhrase = StaticData::Instance().GetTranslatedPhrase();
-
-		// Loop over all possible phrases in translation
-		for (size_t i = 0; i < transPhrase->GetSize(); i++) {
-			for (size_t j = i; j < transPhrase->GetSize(); j++) {
-				TargetPhrase targetPhrase(Output);
-				targetPhrase.Append(transPhrase->GetSubString(WordsRange(i, j)));
-
-				// Add translationoptions for all positions in source
-				for (size_t i_pos = 0; i_pos < size; i_pos++) {
-					for (size_t j_pos = i_pos; j_pos < size; j_pos++) {
-						VERBOSE(3, "Generating transopt at " << i_pos << "-" << j_pos << " with target " << targetPhrase.ToString() << endl);
-						TranslationOption *transOpt = new TranslationOption(WordsRange(i_pos, j_pos), targetPhrase, m_source, 0);
-						transOpt->CalcScore();
-						Add(transOpt);
-					}
-				}
-			}
-		}
-	}
-	// SCORER end
-	
 	// try to translation for coverage with no trans by expanding table limit
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
