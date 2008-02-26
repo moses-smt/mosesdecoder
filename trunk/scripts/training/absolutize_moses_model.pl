@@ -34,11 +34,11 @@ while (<INI>) {
     }
     if ($section eq "distortion-file") {
       chomp;
-      my $fn = $_;
+      my ($a, $b, $c, $fn) = split / /;
       $abs = ensure_absolute($fn, $ini);
       die "File not found or empty: $fn (interpreted as $abs)"
         if ! -s $abs;
-      $_ = "$abs\n";
+      $_ = "$a $b $c $abs\n";
     }
   }
   print $_;

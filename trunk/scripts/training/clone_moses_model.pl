@@ -61,14 +61,14 @@ while (<INI>) {
     }
     if ($section eq "distortion-file") {
       chomp;
-      my $fn = $_;
+      my ($a, $b, $c, $fn) = split / /;
       $cnt{$section}++;
       $fn = fixpath($fn);
       $fn = ensure_relative_from_origin($fn, $ini);
       $fn = ensure_exists_or_gzipped_exists($fn);
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       clone_file_or_die($fn, "./$section.$cnt{$section}$suffix");
-      $_ = "./$section.$cnt{$section}$suffix\n";
+      $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
     }
   }
   print OUT $_;
