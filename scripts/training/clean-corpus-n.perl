@@ -11,11 +11,11 @@ my $enc = "utf8"; # encoding of the input and output files
 GetOptions(
   "help" => \$help,
   "lowercase|lc" => \$lc,
-  "encoding=s" => \$enc,
+  "encoding" => \$enc,
 ) or exit(1);
 
-if (scalar(@ARGV) != 6 || $help) {
-    print "syntax: clean-corpus-n.perl corpus l1 l2 clean-corpus min max\n";
+if (scalar(@ARGV) < 6 || $help) {
+    print "syntax: clean-corpus-n.perl corpus l1 l2 clean-corpus min max [lines retained file]\n";
     exit;
 }
 
@@ -25,6 +25,12 @@ my $l2 = $ARGV[2];
 my $out = $ARGV[3];
 my $min = $ARGV[4];
 my $max = $ARGV[5];
+
+my $linesRetainedFile = "";
+if (scalar(@ARGV) > 6) {
+	$linesRetainedFile = $ARGV[6];
+	open(LINES_RETAINED,">$linesRetainedFile") or die "Can't write $linesRetainedFile";
+}
 
 print STDERR "clean-corpus.perl: processing $corpus.$l1 & .$l2 to $out, cutoff $min-$max\n";
 
@@ -61,7 +67,6 @@ binmode(EO, $binmode);
 
 my $innr = 0;
 my $outnr = 0;
-my $factored_flag;
 while(my $f = <F>) {
   $innr++;
   print STDERR "." if $innr % 10000 == 0;
@@ -70,9 +75,6 @@ while(my $f = <F>) {
   die "$corpus.$l2 is too short!" if !defined $e;
   chomp($e);
   chomp($f);
-  if ($innr == 1) {
-    $factored_flag = ($e =~ /\|/ || $f =~ /\|/);
-  }
 
   #if lowercasing, lowercase
   if ($lc) {
@@ -80,11 +82,11 @@ while(my $f = <F>) {
     $f = lc($f);
   }
   
-  $e =~ s/\|//g unless $factored_flag;
+  # $e =~ s/\|//g;  # kinda hurts in factored input
   $e =~ s/\s+/ /g;
   $e =~ s/^ //;
   $e =~ s/ $//;
-  $f =~ s/\|//g unless $factored_flag;
+  # $f =~ s/\|//g;  # kinda hurts in factored input
   $f =~ s/\s+/ /g;
   $f =~ s/^ //;
   $f =~ s/ $//;
@@ -109,7 +111,16 @@ while(my $f = <F>) {
   $outnr++;
   print FO $f."\n";
   print EO $e."\n";
+
+  if ($linesRetainedFile ne "") {
+	print LINES_RETAINED $innr."\n";
+  }
 }
+
+if ($linesRetainedFile ne "") {
+  close LINES_RETAINED;
+}
+
 print STDERR "\n";
 my $e = <E>;
 die "$corpus.$l2 is too long!" if defined $e;
