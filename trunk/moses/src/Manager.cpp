@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "LMList.h"
 #include "TranslationOptionCollection.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 
@@ -480,7 +481,81 @@ void Manager::CalcDecoderStatistics() const
   }
 }
 
-void Manager::GetWordGraph() const
+void OutputWordGraph(std::ofstream &wordGraphFile, const Hypothesis *hypo, size_t &linkId)
+{
+	const StaticData &staticData = StaticData::Instance();
+
+	const Hypothesis *prevHypo = hypo->GetPrevHypo();
+			const Phrase *sourcePhrase = hypo->GetSourcePhrase();
+			const Phrase &targetPhrase = hypo->GetCurrTargetPhrase();
+
+			
+			wordGraphFile << "J=" << linkId++
+						<< "\tS=" << prevHypo->GetId()
+						<< "\tE=" << hypo->GetId()
+						<< "\ta=";
+
+			// phrase table scores
+			const std::vector<PhraseDictionary*> &phraseTables = staticData.GetPhraseDictionaries();
+			std::vector<PhraseDictionary*>::const_iterator iterPhraseTable;
+			for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable)
+			{
+				const PhraseDictionary *phraseTable = *iterPhraseTable;
+				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(phraseTable);
+
+				wordGraphFile << scores[0];
+				vector<float>::const_iterator iterScore;
+				for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore)
+				{
+					wordGraphFile << ", " << *iterScore;
+				}
+			}
+
+			// language model scores
+			wordGraphFile << "\tl=";
+			const LMList &lmList = staticData.GetAllLM();
+			LMList::const_iterator iterLM;
+			for (iterLM = lmList.begin() ; iterLM != lmList.end() ; ++iterLM)
+			{
+				LanguageModel *lm = *iterLM;
+				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(lm);
+				
+				wordGraphFile << scores[0];
+				vector<float>::const_iterator iterScore;
+				for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore)
+				{
+					wordGraphFile << ", " << *iterScore;
+				}
+			}
+
+			// re-ordering
+			wordGraphFile << "\tr=";
+
+			wordGraphFile << hypo->GetScoreBreakdown().GetScoreForProducer(staticData.GetDistortionScoreProducer());
+
+			// lexicalised re-ordering
+			std::vector<LexicalReordering*> &lexOrderings = staticData.GetReorderModels();
+			std::vector<LexicalReordering*>::const_iterator iterLexOrdering;
+			for (iterLexOrdering = lexOrderings.begin() ; iterLexOrdering != lexOrderings.end() ; ++iterLexOrdering)
+			{
+				LexicalReordering *lexicalReordering = *iterLexOrdering;
+				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(lexicalReordering);
+				
+				wordGraphFile << scores[0];
+				vector<float>::const_iterator iterScore;
+				for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore)
+				{
+					wordGraphFile << ", " << *iterScore;
+				}
+			}
+
+			// words !!
+			wordGraphFile << "\tw=" << hypo->GetCurrTargetPhrase();
+
+			wordGraphFile << endl;
+}
+
+void Manager::GetWordGraph(long translationId) const
 {
 	const StaticData &staticData = StaticData::Instance();
 	string fileName = staticData.GetParam("output-word-graph")[0];
@@ -489,6 +564,10 @@ void Manager::GetWordGraph() const
 	std::ofstream wordGraphFile;
 	wordGraphFile.open(fileName.c_str());
 
+	wordGraphFile << "VERSION=1.0" << endl
+								<< "UTTERANCE=" << translationId << endl;
+
+	size_t linkId = 0;
 	size_t stackNo = 1;
 	std::vector < HypothesisStack >::const_iterator iterStack;
 	for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
@@ -499,16 +578,8 @@ void Manager::GetWordGraph() const
 		for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
 		{
 			const Hypothesis *hypo = *iterHypo;
-			const Hypothesis *prevHypo = hypo->GetPrevHypo();
-			const Phrase *sourcePhrase = hypo->GetSourcePhrase();
-			const Phrase &targetPhrase = hypo->GetCurrTargetPhrase();
-
+			OutputWordGraph(wordGraphFile, hypo, linkId);
 			
-			wordGraphFile << prevHypo->GetId() << " -> " << hypo->GetId()  << ": "
-						<< *sourcePhrase << " " 
-						<< targetPhrase << " "
-						<< hypo->GetTranslationOption().GetScoreBreakdown() << endl;
-
 			if (outputNBest)
 			{
 				const ArcList *arcList = hypo->GetArcList();
@@ -518,12 +589,7 @@ void Manager::GetWordGraph() const
 					for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
 					{
 						const Hypothesis *loserHypo = *iterArcList;
-						const Hypothesis *prevHypo = loserHypo->GetPrevHypo();
-
-						wordGraphFile << prevHypo->GetId() << " -> " << loserHypo->GetId()  << ": "
-								<< *sourcePhrase << " " 
-								<< targetPhrase << " "
-								<< loserHypo->GetTranslationOption().GetScoreBreakdown() << endl;
+						OutputWordGraph(wordGraphFile, loserHypo, linkId);
 					}
 				}
 			} //if (outputNBest)
