@@ -479,3 +479,56 @@ void Manager::CalcDecoderStatistics() const
     }
   }
 }
+
+void Manager::GetWordGraph() const
+{
+	const StaticData &staticData = StaticData::Instance();
+	string fileName = staticData.GetParam("output-word-graph")[0];
+	bool outputNBest = Scan<bool>(staticData.GetParam("output-word-graph")[1]);
+	
+	std::ofstream wordGraphFile;
+	wordGraphFile.open(fileName.c_str());
+
+	size_t stackNo = 1;
+	std::vector < HypothesisStack >::const_iterator iterStack;
+	for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
+	{
+		cerr << endl << stackNo++ << endl;
+		const HypothesisStack &stack = *iterStack;
+		HypothesisStack::const_iterator iterHypo;
+		for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
+		{
+			const Hypothesis *hypo = *iterHypo;
+			const Hypothesis *prevHypo = hypo->GetPrevHypo();
+			const Phrase *sourcePhrase = hypo->GetSourcePhrase();
+			const Phrase &targetPhrase = hypo->GetCurrTargetPhrase();
+
+			
+			wordGraphFile << prevHypo->GetId() << " -> " << hypo->GetId()  << ": "
+						<< *sourcePhrase << " " 
+						<< targetPhrase << " "
+						<< hypo->GetTranslationOption().GetScoreBreakdown() << endl;
+
+			if (outputNBest)
+			{
+				const ArcList *arcList = hypo->GetArcList();
+				if (arcList != NULL)
+				{
+					ArcList::const_iterator iterArcList;
+					for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+					{
+						const Hypothesis *loserHypo = *iterArcList;
+						const Hypothesis *prevHypo = loserHypo->GetPrevHypo();
+
+						wordGraphFile << prevHypo->GetId() << " -> " << loserHypo->GetId()  << ": "
+								<< *sourcePhrase << " " 
+								<< targetPhrase << " "
+								<< loserHypo->GetTranslationOption().GetScoreBreakdown() << endl;
+					}
+				}
+			} //if (outputNBest)
+		} //for (iterHypo
+	} // for (iterStack 
+
+	wordGraphFile.close();		
+}
