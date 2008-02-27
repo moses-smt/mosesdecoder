@@ -338,10 +338,10 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 
 	
 	//LEXICAL REORDERING COST
-	std::vector<LexicalReordering*> m_reorderModels = staticData.GetReorderModels();
-	for(unsigned int i = 0; i < m_reorderModels.size(); i++)
+	const std::vector<LexicalReordering*> &reorderModels = staticData.GetReorderModels();
+	for(unsigned int i = 0; i < reorderModels.size(); i++)
 	{
-		m_scoreBreakdown.PlusEquals(m_reorderModels[i], m_reorderModels[i]->CalcScore(this));
+		m_scoreBreakdown.PlusEquals(reorderModels[i], reorderModels[i]->CalcScore(this));
 	}
 
 	// TOTAL

@@ -534,7 +534,7 @@ void OutputWordGraph(std::ofstream &wordGraphFile, const Hypothesis *hypo, size_
 			wordGraphFile << hypo->GetScoreBreakdown().GetScoreForProducer(staticData.GetDistortionScoreProducer());
 
 			// lexicalised re-ordering
-			std::vector<LexicalReordering*> &lexOrderings = staticData.GetReorderModels();
+			const std::vector<LexicalReordering*> &lexOrderings = staticData.GetReorderModels();
 			std::vector<LexicalReordering*>::const_iterator iterLexOrdering;
 			for (iterLexOrdering = lexOrderings.begin() ; iterLexOrdering != lexOrderings.end() ; ++iterLexOrdering)
 			{
@@ -598,3 +598,4 @@ void Manager::GetWordGraph(long translationId) const
 
 	wordGraphFile.close();		
 }
+

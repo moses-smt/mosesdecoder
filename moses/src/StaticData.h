@@ -219,7 +219,7 @@ public:
 	{ 
 		return m_maxPhraseLength;
 	}
-	std::vector<LexicalReordering*> GetReorderModels() const
+	const std::vector<LexicalReordering*> &GetReorderModels() const
 	{
 		return m_reorderModels;
 	}
