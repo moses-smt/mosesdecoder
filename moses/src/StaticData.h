@@ -273,11 +273,11 @@ public:
 	{
 		return m_phraseDictionary.size();
 	}
-	std::vector<PhraseDictionary*> GetPhraseDictionaries() const
+	const std::vector<PhraseDictionary*> &GetPhraseDictionaries() const
 	{
 		return m_phraseDictionary;
 	}
-	std::vector<GenerationDictionary*> GetGenerationDictionaries() const
+	const std::vector<GenerationDictionary*> &GetGenerationDictionaries() const
 	{
 		return m_generationDictionary;
 	}

@@ -97,7 +97,7 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 	void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;
 	
-	void GetWordGraph() const;
+	void GetWordGraph(long translationId) const;
 
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )

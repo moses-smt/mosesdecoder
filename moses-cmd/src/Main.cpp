@@ -136,9 +136,9 @@ int main(int argc, char* argv[])
 
 		Manager manager(*source);
 		manager.ProcessSentence();
-
+		
 		if (staticData.GetOutputWordGraph())
-			manager.GetWordGraph();
+			manager.GetWordGraph(source->GetTranslationId());
 
 		// pick best translation (maximum a posteriori decoding)
 		if (! staticData.UseMBR()) {
