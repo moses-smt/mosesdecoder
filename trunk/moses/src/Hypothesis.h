@@ -256,6 +256,8 @@ public:
 
 	const ScoreComponentCollection &GetCachedReorderingScore() const;
 
+	const TranslationOption &GetTranslationOption() const
+	{ return *m_transOpt; }
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

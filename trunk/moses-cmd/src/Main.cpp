@@ -137,6 +137,9 @@ int main(int argc, char* argv[])
 		Manager manager(*source);
 		manager.ProcessSentence();
 
+		if (staticData.GetOutputWordGraph())
+			manager.GetWordGraph();
+
 		// pick best translation (maximum a posteriori decoding)
 		if (! staticData.UseMBR()) {
 			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),

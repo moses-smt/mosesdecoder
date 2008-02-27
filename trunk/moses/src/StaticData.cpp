@@ -138,6 +138,12 @@ bool StaticData::LoadData(Parameter *parameter)
 		m_nBestFactor = 20;
   }
 	
+ 	// word graph
+	if (m_parameter->GetParam("output-word-graph").size() == 2)
+		m_outputWordGraph = true;
+	else
+		m_outputWordGraph = false;
+
 	// include feature names in the n-best list
 	SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
 
