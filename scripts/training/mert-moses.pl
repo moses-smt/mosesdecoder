@@ -234,7 +234,7 @@ Options:
   --pythonpath=STRING  ... where is python executable
   --scorenbestcmd=STRING  ... path to score-nbest.py
   --old-sge ... passed to moses-parallel, assume Sun Grid Engine < 6.0
-  --inputtype=[0|1] ... Handle different input types (0 for text, 1 for confusion network, default is 0)
+  --inputtype=[0|1|2] ... Handle different input types (0 for text, 1 for confusion network, 2 for lattices, default is 0)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
   --efficient_scorenbest_flag ... activate a time-efficient scoring of nbest lists
@@ -255,6 +255,12 @@ if ($___INPUTTYPE == 1)
 
   push @{$default_triples -> {"I"}}, [ 1.0, 0.0, 2.0 ];
   #$extra_lambdas_for_model -> {"I"} = 1; #Confusion network posterior
+}
+
+# update variables if input is lattice
+if ($___INPUTTYPE == 2)
+{
+# TODO
 }
 
 # Check validity of input parameters and set defaults if needed
