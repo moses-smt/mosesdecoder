@@ -132,7 +132,7 @@ sub usage(){
   print STDERR "   -version print version of the script\n";
   print STDERR "   -help this help\n";
   print STDERR "Moses options:\n";
-  print STDERR "   -inputtype <0|1> 0 for text, 1 for confusion networks\n";
+  print STDERR "   -inputtype <0|1|2> 0 for text, 1 for confusion networks, for lattices\n";
   print STDERR "   -n-best-file <file> file where storing nbet lists\n";
   print STDERR "   -n-best-size <N> size of nbest lists\n";
   print STDERR "    NOTE: -n-best-file-n-best-size    are passed to the decoder as \"-n-best-list <file> <N>\"\n";
@@ -162,6 +162,7 @@ sub print_parameters(){
   print STDERR "Queue parameters: $queueparameters\n";
   print STDERR "Inputtype: text\n" if $inputtype == 0;
   print STDERR "Inputtype: confusion network\n" if $inputtype == 1;
+  print STDERR "Inputtype: lattices\n" if $inputtype == 2;
   
   print STDERR "parameters directly passed to Moses: $mosesparameters\n";
 }
@@ -236,7 +237,7 @@ my $splitN;
 my @idxlist=();
 
 if ($inputtype==0){ #text input
-#getting the number of input sentences
+#getting the number of input sentences (one sentence per line)
   chomp($sentenceN=`wc -l ${orifile} | awk '{print \$1}' `);
 
 #Reducing the number of jobs if less sentences to translate
@@ -254,7 +255,7 @@ if ($inputtype==0){ #text input
   $cmd="split $decimal -a 2 -l $splitN $orifile ${testfile}.$splitpfx-";
   safesystem("$cmd") or die;
 }
-else{ #confusion network input
+elsif ($inputtype==1){ #confusion network input
   my $tmpfile="/tmp/cnsplit$$";
   $cmd="cat $orifile | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' > $tmpfile";
   safesystem("$cmd") or die;
@@ -285,6 +286,28 @@ else{ #confusion network input
     $cmd="perl -pe 's/ _CNendline_ /\\n/g;s/ _CNendline_/\\n/g;'";
     safesystem("cat $tmpfile$idx | $cmd > ${testfile}.$splitpfx$idx ; \\rm -f $tmpfile$idx;");
   }
+}
+elsif ($inputtype==2){ #confusion network input
+#getting the number of input lattices (one lattice per line)
+  chomp($sentenceN=`wc -l ${orifile} | awk '{print \$1}' `);
+
+#Reducing the number of jobs if less lattices to translate
+  if ($jobs>$sentenceN){ $jobs=$sentenceN; }
+
+#Computing the number of sentences for each files
+  if ($sentenceN % $jobs == 0){ $splitN=int($sentenceN / $jobs); }
+  else{ $splitN=int($sentenceN /$jobs) + 1; }
+
+  if ($dbg){
+    print STDERR "There are $sentenceN lattices to translate\n";
+    print STDERR "There are at most $splitN lattices per job\n";
+  }
+
+  $cmd="split $decimal -a 2 -l $splitN $orifile ${testfile}.$splitpfx-";
+  safesystem("$cmd") or die;
+}
+else{ #unknown input type
+  die "INPUTTYPE:$inputtype is unknown!\n";
 }
 
 chomp(@idxlist=`ls ${testfile}.$splitpfx-*`);
@@ -562,8 +585,14 @@ sub check_translation(){
     if ($inputtype==0){#text input
       chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
-    else{
+    elsif ($inputtype==1){#confusion network input
       chomp($inputN=`cat ${testfile}.$splitpfx$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l | cut -d' ' -f1 `);
+    }
+    elsif ($inputtype==2){#lattice input
+      chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
+    }
+    else{#unknown input
+      die "INPUTTYPE:$inputtype is unknown!\n";
     }
     chomp($outputN=`wc -l ${testfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
     
@@ -585,9 +614,15 @@ sub check_translation_old_sge(){
     if ($inputtype==0){#text input
       chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
-    else{
+    elsif ($inputtype==1){#confusion network input
       chomp($inputN=`cat ${testfile}.$splitpfx$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l |
  cut -d' ' -f1 `);
+    }
+    elsif ($inputtype==2){#lattice input
+      chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
+    }
+    else{#unknown input
+      die "INPUTTYPE:$inputtype is unknown!\n";
     }
     chomp($outputN=`wc -l ${testfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
 
