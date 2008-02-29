@@ -57,22 +57,11 @@ IOStream::IOStream(
 ,m_inputFile(NULL)
 ,m_inputStream(&std::cin)
 ,m_nBestStream(NULL)
+,m_outputWordGraphStream(NULL)
 {
-	m_surpressSingleBestOutput = false;
-	if (nBestSize > 0)
-	{
-		if (nBestFilePath == "-")
-		{
-			m_nBestStream = &std::cout;
-			m_surpressSingleBestOutput = true;
-		} 
-		else 
-		{
-			std::ofstream *nBestFile = new std::ofstream;
-			m_nBestStream = nBestFile;
-			nBestFile->open(nBestFilePath.c_str());
-		}
-	}
+	Initialization(inputFactorOrder, outputFactorOrder
+								, inputFactorUsed
+								, nBestSize, nBestFilePath);
 }
 
 IOStream::IOStream(const std::vector<FactorType>	&inputFactorOrder
@@ -87,24 +76,13 @@ IOStream::IOStream(const std::vector<FactorType>	&inputFactorOrder
 ,m_inputFilePath(inputFilePath)
 ,m_inputFile(new InputFileStream(inputFilePath))
 ,m_nBestStream(NULL)
+,m_outputWordGraphStream(NULL)
 {
-	m_surpressSingleBestOutput = false;
-	m_inputStream = m_inputFile;
+	Initialization(inputFactorOrder, outputFactorOrder
+								, inputFactorUsed
+								, nBestSize, nBestFilePath);
 
-	if (nBestSize > 0)
-	{
-		if (nBestFilePath == "-")
-		{
-			m_nBestStream = &std::cout;
-			m_surpressSingleBestOutput = true;
-		} 
-		else 
-		{
-			std::ofstream *nBestFile = new std::ofstream;
-			m_nBestStream = nBestFile;
-			nBestFile->open(nBestFilePath.c_str());
-		}
-	}
+	m_inputStream = m_inputFile;
 }
 
 IOStream::~IOStream()
@@ -114,6 +92,47 @@ IOStream::~IOStream()
 	if (m_nBestStream != NULL && !m_surpressSingleBestOutput)
 	{ // outputting n-best to file, rather than stdout. need to close file and delete obj
 		delete m_nBestStream;
+	}
+	if (m_outputWordGraphStream != NULL)
+	{
+		delete m_outputWordGraphStream;
+	}
+}
+
+void IOStream::Initialization(const std::vector<FactorType>	&inputFactorOrder
+														, const std::vector<FactorType>			&outputFactorOrder
+														, const FactorMask							&inputFactorUsed
+														, size_t												nBestSize
+														, const std::string							&nBestFilePath)
+{
+	const StaticData &staticData = StaticData::Instance();
+
+	// n-best
+	m_surpressSingleBestOutput = false;
+	if (nBestSize > 0)
+	{
+		if (nBestFilePath == "-")
+		{
+			m_nBestStream = &std::cout;
+			m_surpressSingleBestOutput = true;
+		} 
+		else 
+		{
+			std::ofstream *file = new std::ofstream;
+			m_nBestStream = file;
+			file->open(nBestFilePath.c_str());
+		}
+	}
+
+	// wordgraph output
+	if (staticData.GetOutputWordGraph())
+	{
+		string fileName = staticData.GetParam("output-word-graph")[0];
+		bool outputNBest = Scan<bool>(staticData.GetParam("output-word-graph")[1]);
+
+		std::ofstream *file = new std::ofstream;
+		m_outputWordGraphStream  = file;
+		file->open(fileName.c_str());
 	}
 }
 
