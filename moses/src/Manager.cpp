@@ -562,7 +562,7 @@ void Manager::GetWordGraph(long translationId) const
 	bool outputNBest = Scan<bool>(staticData.GetParam("output-word-graph")[1]);
 	
 	std::ofstream wordGraphFile;
-	wordGraphFile.open(fileName.c_str());
+	wordGraphFile.open(fileName.c_str(), ios::app);
 
 	wordGraphFile << "VERSION=1.0" << endl
 								<< "UTTERANCE=" << translationId << endl;
