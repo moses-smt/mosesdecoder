@@ -481,7 +481,7 @@ void Manager::CalcDecoderStatistics() const
   }
 }
 
-void OutputWordGraph(std::ofstream &wordGraphFile, const Hypothesis *hypo, size_t &linkId)
+void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId)
 {
 	const StaticData &staticData = StaticData::Instance();
 
@@ -490,7 +490,7 @@ void OutputWordGraph(std::ofstream &wordGraphFile, const Hypothesis *hypo, size_
 			const Phrase &targetPhrase = hypo->GetCurrTargetPhrase();
 
 			
-			wordGraphFile << "J=" << linkId++
+			outputWordGraphStream << "J=" << linkId++
 						<< "\tS=" << prevHypo->GetId()
 						<< "\tE=" << hypo->GetId()
 						<< "\ta=";
@@ -503,16 +503,16 @@ void OutputWordGraph(std::ofstream &wordGraphFile, const Hypothesis *hypo, size_
 				const PhraseDictionary *phraseTable = *iterPhraseTable;
 				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(phraseTable);
 
-				wordGraphFile << scores[0];
+				outputWordGraphStream << scores[0];
 				vector<float>::const_iterator iterScore;
 				for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore)
 				{
-					wordGraphFile << ", " << *iterScore;
+					outputWordGraphStream << ", " << *iterScore;
 				}
 			}
 
 			// language model scores
-			wordGraphFile << "\tl=";
+			outputWordGraphStream << "\tl=";
 			const LMList &lmList = staticData.GetAllLM();
 			LMList::const_iterator iterLM;
 			for (iterLM = lmList.begin() ; iterLM != lmList.end() ; ++iterLM)
@@ -520,18 +520,18 @@ void OutputWordGraph(std::ofstream &wordGraphFile, const Hypothesis *hypo, size_
 				LanguageModel *lm = *iterLM;
 				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(lm);
 				
-				wordGraphFile << scores[0];
+				outputWordGraphStream << scores[0];
 				vector<float>::const_iterator iterScore;
 				for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore)
 				{
-					wordGraphFile << ", " << *iterScore;
+					outputWordGraphStream << ", " << *iterScore;
 				}
 			}
 
 			// re-ordering
-			wordGraphFile << "\tr=";
+			outputWordGraphStream << "\tr=";
 
-			wordGraphFile << hypo->GetScoreBreakdown().GetScoreForProducer(staticData.GetDistortionScoreProducer());
+			outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(staticData.GetDistortionScoreProducer());
 
 			// lexicalised re-ordering
 			const std::vector<LexicalReordering*> &lexOrderings = staticData.GetReorderModels();
@@ -541,30 +541,27 @@ void OutputWordGraph(std::ofstream &wordGraphFile, const Hypothesis *hypo, size_
 				LexicalReordering *lexicalReordering = *iterLexOrdering;
 				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(lexicalReordering);
 				
-				wordGraphFile << scores[0];
+				outputWordGraphStream << scores[0];
 				vector<float>::const_iterator iterScore;
 				for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore)
 				{
-					wordGraphFile << ", " << *iterScore;
+					outputWordGraphStream << ", " << *iterScore;
 				}
 			}
 
 			// words !!
-			wordGraphFile << "\tw=" << hypo->GetCurrTargetPhrase();
+			outputWordGraphStream << "\tw=" << hypo->GetCurrTargetPhrase();
 
-			wordGraphFile << endl;
+			outputWordGraphStream << endl;
 }
 
-void Manager::GetWordGraph(long translationId) const
+void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const
 {
 	const StaticData &staticData = StaticData::Instance();
 	string fileName = staticData.GetParam("output-word-graph")[0];
 	bool outputNBest = Scan<bool>(staticData.GetParam("output-word-graph")[1]);
 	
-	std::ofstream wordGraphFile;
-	wordGraphFile.open(fileName.c_str(), ios::app);
-
-	wordGraphFile << "VERSION=1.0" << endl
+	outputWordGraphStream << "VERSION=1.0" << endl
 								<< "UTTERANCE=" << translationId << endl;
 
 	size_t linkId = 0;
@@ -578,7 +575,7 @@ void Manager::GetWordGraph(long translationId) const
 		for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
 		{
 			const Hypothesis *hypo = *iterHypo;
-			OutputWordGraph(wordGraphFile, hypo, linkId);
+			OutputWordGraph(outputWordGraphStream, hypo, linkId);
 			
 			if (outputNBest)
 			{
@@ -589,13 +586,11 @@ void Manager::GetWordGraph(long translationId) const
 					for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
 					{
 						const Hypothesis *loserHypo = *iterArcList;
-						OutputWordGraph(wordGraphFile, loserHypo, linkId);
+						OutputWordGraph(outputWordGraphStream, loserHypo, linkId);
 					}
 				}
 			} //if (outputNBest)
 		} //for (iterHypo
 	} // for (iterStack 
-
-	wordGraphFile.close();		
 }
 

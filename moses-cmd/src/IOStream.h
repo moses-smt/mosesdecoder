@@ -53,12 +53,19 @@ protected:
 	const std::vector<FactorType>	&m_inputFactorOrder;
 	const std::vector<FactorType>	&m_outputFactorOrder;
 	const FactorMask							&m_inputFactorUsed;
-	std::ostream 								*m_nBestStream;
+	std::ostream 									*m_nBestStream
+																,*m_outputWordGraphStream;
 	std::string										m_inputFilePath;
 	std::istream									*m_inputStream;
 	InputFileStream								*m_inputFile;
 	bool													m_surpressSingleBestOutput;
 	
+	void Initialization(const std::vector<FactorType>	&inputFactorOrder
+										, const std::vector<FactorType>			&outputFactorOrder
+										, const FactorMask							&inputFactorUsed
+										, size_t												nBestSize
+										, const std::string							&nBestFilePath);
+
 public:
 	IOStream(const std::vector<FactorType>	&inputFactorOrder
 		, const std::vector<FactorType>			&outputFactorOrder
@@ -82,4 +89,8 @@ public:
 
 	void ResetTranslationId() { m_translationId = 0; }
 
+	std::ostream &GetOutputWordGraphStream()
+	{
+		return *m_outputWordGraphStream;
+	}
 };
