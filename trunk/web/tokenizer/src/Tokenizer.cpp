@@ -1,4 +1,4 @@
-// $Id: FactorCollection.cpp 1218 2007-02-16 18:08:37Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -199,6 +199,6 @@ Tokenizer::Tokenizer(const std::string &language)
 
 	m_quotes.insert("\"");
 	m_quotes.insert("'");
-	m_quotes.insert("�");
-	m_quotes.insert("�");
+	m_quotes.insert("“");
+	m_quotes.insert("„");
 }
