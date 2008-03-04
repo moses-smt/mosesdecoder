@@ -199,6 +199,6 @@ Tokenizer::Tokenizer(const std::string &language)
 
 	m_quotes.insert("\"");
 	m_quotes.insert("'");
-	m_quotes.insert("“");
-	m_quotes.insert("„");
+	m_quotes.insert("ï¿½");
+	m_quotes.insert("ï¿½");
 }
