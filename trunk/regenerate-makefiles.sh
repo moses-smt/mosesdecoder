@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # NOTE:
 # Versions 1.9 (or higher) of aclocal and automake are required.
