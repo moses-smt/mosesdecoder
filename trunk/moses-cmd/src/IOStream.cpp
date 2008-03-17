@@ -58,6 +58,7 @@ IOStream::IOStream(
 ,m_inputStream(&std::cin)
 ,m_nBestStream(NULL)
 ,m_outputWordGraphStream(NULL)
+,m_outputSearchGraphStream(NULL)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed
@@ -77,6 +78,7 @@ IOStream::IOStream(const std::vector<FactorType>	&inputFactorOrder
 ,m_inputFile(new InputFileStream(inputFilePath))
 ,m_nBestStream(NULL)
 ,m_outputWordGraphStream(NULL)
+,m_outputSearchGraphStream(NULL)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed
@@ -96,6 +98,10 @@ IOStream::~IOStream()
 	if (m_outputWordGraphStream != NULL)
 	{
 		delete m_outputWordGraphStream;
+	}
+	if (m_outputSearchGraphStream != NULL)
+	{
+	  delete m_outputSearchGraphStream;
 	}
 }
 
@@ -133,6 +139,15 @@ void IOStream::Initialization(const std::vector<FactorType>	&inputFactorOrder
 		std::ofstream *file = new std::ofstream;
 		m_outputWordGraphStream  = file;
 		file->open(fileName.c_str());
+	}
+
+	// search graph output
+	if (staticData.GetOutputSearchGraph())
+	{
+	  std::ofstream *file = new std::ofstream;
+	  string fileName = staticData.GetParam("output-search-graph")[0];
+	  m_outputSearchGraphStream = file;
+	  file->open(fileName.c_str());
 	}
 }
 

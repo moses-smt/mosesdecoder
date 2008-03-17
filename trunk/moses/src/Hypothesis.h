@@ -243,6 +243,7 @@ public:
 		return m_scoreBreakdown;
 	}
 	float GetTotalScore() const { return m_totalScore; }
+	float GetScore() const { return m_totalScore-m_futureScore; }
 	
 	std::vector<std::vector<unsigned int> > *GetLMStats() const
 	{

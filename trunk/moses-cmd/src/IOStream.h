@@ -54,7 +54,7 @@ protected:
 	const std::vector<FactorType>	&m_outputFactorOrder;
 	const FactorMask							&m_inputFactorUsed;
 	std::ostream 									*m_nBestStream
-																,*m_outputWordGraphStream;
+																,*m_outputWordGraphStream,*m_outputSearchGraphStream;
 	std::string										m_inputFilePath;
 	std::istream									*m_inputStream;
 	InputFileStream								*m_inputFile;
@@ -78,7 +78,7 @@ public:
 				, const FactorMask							&inputFactorUsed
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath
-				, const std::string							&inputFilePath);
+		 , const std::string                                                     &infilePath);
 	~IOStream();
 
 	InputType* GetInput(InputType *inputType);
@@ -92,5 +92,9 @@ public:
 	std::ostream &GetOutputWordGraphStream()
 	{
 		return *m_outputWordGraphStream;
+	}
+        std::ostream &GetOutputSearchGraphStream()
+	{
+	  return *m_outputSearchGraphStream;
 	}
 };

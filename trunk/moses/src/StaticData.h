@@ -125,6 +125,7 @@ protected:
 	//! constructor. only the 1 static variable can be created
 
 	bool m_outputWordGraph; //! whether to output word graph
+        bool m_outputSearchGraph; //! whether to output search graph
 
 	StaticData();
 
@@ -329,7 +330,7 @@ public:
 		return m_nBestFilePath;
 	}
   	bool IsNBestEnabled() const {
-	  return (!m_nBestFilePath.empty()) || m_mbr;
+	  return (!m_nBestFilePath.empty()) || m_mbr || m_outputSearchGraph;
   	}
 	size_t GetNBestFactor() const
 	{
@@ -365,6 +366,7 @@ public:
 	size_t UseMBR() const { return m_mbr; }
 	size_t GetMBRSize() const { return m_mbrSize; }
 	float GetMBRScale() const { return m_mbrScale; }
+	size_t GetOutputSearchGraph() const { return m_outputSearchGraph; }
 		
 	XmlInputType GetXmlInputType() const { return m_xmlInputType; }
 

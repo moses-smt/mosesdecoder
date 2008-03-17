@@ -140,6 +140,9 @@ int main(int argc, char* argv[])
 		if (staticData.GetOutputWordGraph())
 			manager.GetWordGraph(source->GetTranslationId(), ioStream->GetOutputWordGraphStream());
 
+                if (staticData.GetOutputSearchGraph())
+		  manager.GetSearchGraph(source->GetTranslationId(), ioStream->GetOutputSearchGraphStream());
+
 		// pick best translation (maximum a posteriori decoding)
 		if (! staticData.UseMBR()) {
 			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),

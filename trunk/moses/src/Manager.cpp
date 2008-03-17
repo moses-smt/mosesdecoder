@@ -594,3 +594,168 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 	} // for (iterStack 
 }
 
+void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const Hypothesis *hypo, const Hypothesis *recombinationHypo, int forward, double fscore)
+{
+        outputSearchGraphStream << translationId
+				<< " hyp=" << hypo->GetId()
+				<< " stack=" << hypo->GetWordsBitmap().GetNumWordsCovered();
+	if (hypo->GetId() > 0)
+	{
+	  const Hypothesis *prevHypo = hypo->GetPrevHypo();
+	  outputSearchGraphStream << " back=" << prevHypo->GetId()
+				  << " score=" << hypo->GetScore()
+				  << " transition=" << (hypo->GetScore() - prevHypo->GetScore());
+	}
+
+	if (recombinationHypo != NULL)
+	{
+	  outputSearchGraphStream << " recombined=" << recombinationHypo->GetId();
+	}
+
+	outputSearchGraphStream << " forward=" << forward
+				<< " fscore=" << fscore;
+
+	if (hypo->GetId() > 0)
+	{
+	  outputSearchGraphStream << " covered=" << hypo->GetCurrSourceWordsRange().GetStartPos() 
+				  << "-" << hypo->GetCurrSourceWordsRange().GetEndPos()
+				  << " out=" << hypo->GetCurrTargetPhrase();
+	}
+
+	outputSearchGraphStream << endl;
+}
+
+void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
+{
+  std::map < int, bool > connected;
+  std::map < int, int > forward;
+  std::map < int, double > forwardScore;
+
+  // *** find connected hypotheses ***
+
+  std::vector< const Hypothesis *> connectedList;
+
+  // start with the ones in the final stack
+  const HypothesisStack &finalStack = m_hypoStackColl.back();
+  HypothesisStack::const_iterator iterHypo;
+  for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
+  {
+    const Hypothesis *hypo = *iterHypo;
+    connected[ hypo->GetId() ] = true;
+    connectedList.push_back( hypo );
+  }
+
+  // move back from known connected hypotheses
+  for(size_t i=0; i<connectedList.size(); i++) {
+    const Hypothesis *hypo = connectedList[i];
+
+    // add back pointer
+    const Hypothesis *prevHypo = hypo->GetPrevHypo();
+    if (prevHypo->GetId() > 0 // don't add empty hypothesis
+	&& connected.find( prevHypo->GetId() ) == connected.end()) // don't add already added
+    {
+      connected[ prevHypo->GetId() ] = true;
+      connectedList.push_back( prevHypo );
+    }
+
+    // add arcs
+    const ArcList *arcList = hypo->GetArcList();
+    if (arcList != NULL)
+    {
+      ArcList::const_iterator iterArcList;
+      for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+      {
+	const Hypothesis *loserHypo = *iterArcList;
+	if (connected.find( loserHypo->GetId() ) == connected.end()) // don't add already added
+	{
+	  connected[ loserHypo->GetId() ] = true;
+	  connectedList.push_back( loserHypo );
+	}
+      }
+    }
+  }
+
+  // ** compute best forward path for each hypothesis *** //
+
+  // forward cost of hypotheses on final stack is 0
+  for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
+  {
+    const Hypothesis *hypo = *iterHypo;
+    forwardScore[ hypo->GetId() ] = 0.0f;
+    forward[ hypo->GetId() ] = -1;
+  }
+
+  // compete for best forward score of previous hypothesis
+  std::vector < HypothesisStack >::const_iterator iterStack;
+  for (iterStack = --m_hypoStackColl.end() ; iterStack != m_hypoStackColl.begin() ; --iterStack)
+  {
+    const HypothesisStack &stack = *iterStack;
+    HypothesisStack::const_iterator iterHypo;
+    for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
+    {
+      const Hypothesis *hypo = *iterHypo;
+      if (connected.find( hypo->GetId() ) != connected.end())
+      {
+	// make a play for previous hypothesis
+	const Hypothesis *prevHypo = hypo->GetPrevHypo();
+	double fscore = forwardScore[ hypo->GetId() ] +
+	  hypo->GetScore() - prevHypo->GetScore();
+	if (forwardScore.find( prevHypo->GetId() ) == forwardScore.end()
+	    || forwardScore.find( prevHypo->GetId() )->second < fscore)
+	{
+	  forwardScore[ prevHypo->GetId() ] = fscore;
+	  forward[ prevHypo->GetId() ] = hypo->GetId();
+	}
+	// all arcs also make a play
+        const ArcList *arcList = hypo->GetArcList();
+        if (arcList != NULL)
+	{
+	  ArcList::const_iterator iterArcList;
+	  for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+	  {
+	    const Hypothesis *loserHypo = *iterArcList;
+	    // make a play
+	    const Hypothesis *loserPrevHypo = loserHypo->GetPrevHypo();
+	    double fscore = forwardScore[ hypo->GetId() ] +
+	      loserHypo->GetScore() - loserPrevHypo->GetScore();
+	    if (forwardScore.find( loserPrevHypo->GetId() ) == forwardScore.end()
+		|| forwardScore.find( loserPrevHypo->GetId() )->second < fscore)
+	    {
+	      forwardScore[ loserPrevHypo->GetId() ] = fscore;
+	      forward[ loserPrevHypo->GetId() ] = loserHypo->GetId();
+	    }
+	  } // end for arc list  
+	} // end if arc list empty
+      } // end if hypo connected
+    } // end for hypo
+  } // end for stack
+
+  // *** output all connected hypotheses *** //
+  
+  connected[ 0 ] = true;
+  for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
+  {
+    const HypothesisStack &stack = *iterStack;
+    HypothesisStack::const_iterator iterHypo;
+    for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
+    {
+      const Hypothesis *hypo = *iterHypo;
+      if (connected.find( hypo->GetId() ) != connected.end())
+      {
+	OutputSearchGraph(translationId, outputSearchGraphStream, hypo, NULL, forward[ hypo->GetId() ], forwardScore[ hypo->GetId() ]);
+	
+	const ArcList *arcList = hypo->GetArcList();
+	if (arcList != NULL)
+	{
+	  ArcList::const_iterator iterArcList;
+	  for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+	  {
+	    const Hypothesis *loserHypo = *iterArcList;
+	    OutputSearchGraph(translationId, outputSearchGraphStream, loserHypo, hypo, forward[ hypo->GetId() ], forwardScore[ hypo->GetId() ]);
+	  }
+	} // end if arcList empty
+      } // end if connected
+    } // end for iterHypo
+  } // end for iterStack 
+}
+

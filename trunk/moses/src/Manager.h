@@ -98,6 +98,7 @@ public:
 	void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;
 	
 	void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
+        void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
 
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
