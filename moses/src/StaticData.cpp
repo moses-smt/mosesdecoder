@@ -144,6 +144,18 @@ bool StaticData::LoadData(Parameter *parameter)
 	else
 		m_outputWordGraph = false;
 
+	// search graph
+	if (m_parameter->GetParam("output-search-graph").size() > 0)
+	{
+	  if (m_parameter->GetParam("output-search-graph").size() != 1) {
+	    UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph file"));
+	    return false;
+	  }	    
+	  m_outputSearchGraph = true;
+	}
+        else
+	  m_outputSearchGraph = false;
+
 	// include feature names in the n-best list
 	SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
 
