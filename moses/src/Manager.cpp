@@ -317,8 +317,10 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 		
 	  if (newHypo->CompareHypothesisToPhrase(transPhrase, 0))
 	    m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
-		else
+		else {
 			VERBOSE(3, "Not Compatible with translation." << endl);
+			FREEHYPO(newHypo);
+		}
 	}
 	else
 	  m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
@@ -332,15 +334,24 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 const Hypothesis *Manager::GetBestHypothesis() const
 {
 	// SCORER start
+	// search all hypothesis stacks
+	const Hypothesis* bestHypo = NULL;
+
 	if (StaticData::Instance().GetScoreFlag()) {
 		for (std::vector<HypothesisStack>::const_iterator it = m_hypoStackColl.end(); it != m_hypoStackColl.begin(); it--) {
 			const HypothesisStack &hypoColl = *it;
 			
-			if ((hypoColl.size() > 0) && (hypoColl.size() < 327685)) // what constant is this ?
-				return hypoColl.GetBestHypothesis();
+			if ((hypoColl.size() > 0) && (hypoColl.size() < 327685)) {// what constant is this ?
+				const Hypothesis *hypo = hypoColl.GetBestHypothesis();
+				if (bestHypo == NULL)
+					bestHypo = hypo;
+				else
+					if (hypo->GetTotalScore() > bestHypo->GetTotalScore())
+						bestHypo = hypo;
+			}
 		}
 
-		return NULL;
+		return bestHypo;
 	}
 	else {
 		// SCORER end

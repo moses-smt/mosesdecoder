@@ -79,6 +79,10 @@ protected:
 	ArcList 					*m_arcList; /**< all arcs that end at the same trellis point as this hypothesis */
 	const TranslationOption *m_transOpt;
 
+	// SCORER start
+	float m_penalizedScore;
+	// SCORER end
+
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
@@ -260,8 +264,12 @@ public:
 	// SCORER start
 	// Compares this and previous hypothesises to a phrase
 	bool CompareHypothesisToPhrase(const Phrase *inputPhrase, size_t wordsSoFar) const;
-	bool IsHypothesisEqual(const Phrase &phrase) const;
-	void Penalize(size_t iterations);
+	// bool IsHypothesisEqual(const Phrase &phrase) const;
+	void Penalize(size_t word_count);
+	size_t SourceWordsNotCovered() const;
+	float GetPenalizedScore() const {
+	  return m_penalizedScore;
+	}
 	// SCORER end
 };
 

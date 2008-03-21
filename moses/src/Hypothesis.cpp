@@ -58,6 +58,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_arcList(NULL)
 	, m_id(0)
 	, m_lmstats(NULL)
+	, m_penalizedScore(0)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
@@ -86,6 +87,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_arcList(NULL)
 	, m_id(s_HypothesesCreated++)
 	, m_lmstats(NULL)
+	, m_penalizedScore(0)
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -552,23 +554,27 @@ bool Hypothesis::CompareHypothesisToPhrase(const Phrase *inputPhrase, size_t wor
 }
 
 // Checks if hypothesis is equal to phrase, used to find relevant best hypothesis
-bool Hypothesis::IsHypothesisEqual(const Phrase &phrase) const {
-  if (GetSize() != phrase.GetSize())
-    return false;
+// bool Hypothesis::IsHypothesisEqual(const Phrase &phrase) const {
+//   if (GetSize() != phrase.GetSize())
+//     return false;
 
-  for (size_t i = 0; i < GetSize(); i++) {
-    if (!(GetWord(i)[0]->GetString() == phrase.GetWord(i)[0]->GetString()))
-      return false;
-  }
+//   for (size_t i = 0; i < GetSize(); i++) {
+//     if (!(GetWord(i)[0]->GetString() == phrase.GetWord(i)[0]->GetString()))
+//       return false;
+//   }
 
-  return true;
+//   return true;
+// }
+
+void Hypothesis::Penalize(size_t word_count) {
+	m_penalizedScore = m_totalScore;
+	//	m_scoreBreakdown.PlusEquals(StaticData::Instance().GetWordPenaltyProducer(), - (float) iterations); 
+  
+	m_penalizedScore += StaticData::Instance().GetScorerWordPenalty() * word_count;	// add or subtract ???
 }
 
-void Hypothesis::Penalize(size_t iterations) {
-
-	for (size_t i = 0; i < iterations; i++) {
-		m_totalScore += - StaticData::Instance().GetWeightWordPenalty();	
-	}
+size_t Hypothesis::SourceWordsNotCovered() const {
+  return GetWordsBitmap().GetSize() - GetWordsBitmap().GetNumWordsCovered();
 }
 
 // SCORER end

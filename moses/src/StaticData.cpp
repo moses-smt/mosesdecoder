@@ -77,6 +77,7 @@ StaticData::StaticData()
  // SCORER start
 ,m_score(false)
 ,m_translatedPhrase(NULL)
+,m_scorerWordPenalty(-100)
  // SCORER end
 {
   m_maxFactorIdx[0] = 0;  // source side
@@ -170,6 +171,9 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (m_score) {
 	  m_useTransOptCache = false;
 		// m_isAlwaysCreateDirectTranslationOption = true;
+	}
+	if (m_parameter->GetParam("scorePenalty").size() == 1) {
+		m_factorDelimiter = Scan<float>(m_parameter->GetParam("scorePenalty")[0]);
 	}
 	// SCORER end
 
