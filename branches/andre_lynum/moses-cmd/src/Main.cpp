@@ -157,8 +157,21 @@ int main(int argc, char* argv[])
 		Manager manager(*source);
 		manager.ProcessSentence();
 
+		// SCORER start
+		if (staticData.GetScoreFlag()) {
+			const Hypothesis *bestHypo = manager.GetBestHypothesis();
+
+			if (bestHypo == NULL) {
+				VERBOSE(1, "No hypothesis available." << endl);
+				cout << 0 << " " << StaticData::Instance().GetInput()->GetSize() << " "
+						 << StaticData::Instance().GetTranslatedPhrase()->GetSize() << endl;
+			}
+			else 
+				ioStream->OutputScore(bestHypo);
+		}
 		// pick best translation (maximum a posteriori decoding)
-		if (! staticData.UseMBR()) {
+		else if (! staticData.UseMBR()) {
+		  // SCORER end
 			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 													 staticData.GetReportSegmentation(),
 													 staticData.GetReportAllFactors()

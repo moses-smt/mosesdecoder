@@ -82,6 +82,7 @@ Parameter::Parameter()
 	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
 	// SCORER start
 	AddParam("score", "Score i source/translation pair. Takes the translation as a second line of input");
+	AddParam("scorePenalty", "Unaccounted word penalty for scoring.");
 	// SCORER end
 }
 

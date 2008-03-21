@@ -27,10 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "StaticData.h"
 
-// SCORER start
-#include <cassert>
-// SCORER end
-
 using namespace std;
 
 HypothesisStack::HypothesisStack()
@@ -53,10 +49,7 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 {
 	std::pair<iterator, bool> ret = m_hypos.insert(hypo);
 
-	// SCORER start
-	// When scoring we're adding all hypothesises on stack regardless
-	if (ret.second || StaticData::Instance().GetScoreFlag())
-	// SCORER end
+	if (ret.second)
 	{ // equiv hypo doesn't exists
 		VERBOSE(3,"added hyp to stack");
 	
@@ -74,7 +67,11 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 		VERBOSE(3,", now size " << m_hypos.size());
 		if (m_hypos.size() > 2*m_maxHypoStackSize-1)
 		{
-			PruneToSize(m_maxHypoStackSize);
+			// SCORER start
+			// avoid pruning
+			if (!StaticData::Instance().GetScoreFlag())
+				// SCORER end
+				PruneToSize(m_maxHypoStackSize);
 		}
 		else {
 		  VERBOSE(3,std::endl);
@@ -118,7 +115,7 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 	// Avoid recombination when scoring
 	if (!StaticData::Instance().GetScoreFlag()) {
 		StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
-	}
+  }
 	
 	// found existing hypo with same target ending.
 	// keep the best 1
@@ -226,18 +223,14 @@ void HypothesisStack::PruneToSize(size_t newSize)
 const Hypothesis *HypothesisStack::GetBestHypothesis() const
 {
 	// SCORER start
-	// return only hypothesises that is the same as translated input when scoring
  	if (StaticData::Instance().GetScoreFlag()) {
  		Hypothesis *bestHypo = NULL;
 		Phrase *trans = StaticData::Instance().GetTranslatedPhrase();
 
  		for (const_iterator iter = m_hypos.begin(); iter != m_hypos.end(); iter++) {
  			Hypothesis *hypo = *iter;
-			size_t source_covered = hypo->GetWordsBitmap().GetSize() - hypo->GetWordsBitmap().GetNumWordsCovered();
 			size_t trans_covered = trans->GetSize() - hypo->GetSize();
-
-			size_t missing_words =  source_covered + trans_covered;
-			assert(missing_words >= 0);
+			size_t missing_words =  hypo->SourceWordsNotCovered() + trans_covered;
 
 			hypo->Penalize(missing_words);
 			if (bestHypo == NULL)

@@ -82,4 +82,7 @@ public:
 
 	void ResetTranslationId() { m_translationId = 0; }
 
+	// SCORER start
+	void OutputScore(const Hypothesis *hypo);
+	// SCORER end
 };

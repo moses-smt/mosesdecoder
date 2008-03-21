@@ -55,6 +55,8 @@ protected:
 	 */
 	bool m_score;
 	mutable Phrase *m_translatedPhrase;
+	// unaccounted word penalty
+	float m_scorerWordPenalty;
 	// SCORER end
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
@@ -384,5 +386,6 @@ public:
         void SetTranslatedPhrase(Phrase *phrase) const  {m_translatedPhrase = phrase; }
 	// Accessor for the scorer flag
 	const bool GetScoreFlag() const { return m_score; }
+	float GetScorerWordPenalty() const { return m_scorerWordPenalty; }
 	// SCORER end
 };
