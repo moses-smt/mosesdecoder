@@ -338,17 +338,22 @@ const Hypothesis *Manager::GetBestHypothesis() const
 	const Hypothesis* bestHypo = NULL;
 
 	if (StaticData::Instance().GetScoreFlag()) {
-		for (std::vector<HypothesisStack>::const_iterator it = m_hypoStackColl.end(); it != m_hypoStackColl.begin(); it--) {
+		// having trouble getting reverse iterators to work
+		std::vector<HypothesisStack>::const_iterator it = m_hypoStackColl.end();
+		it--;
+		for (;; it--) {
 			const HypothesisStack &hypoColl = *it;
 			
-			if ((hypoColl.size() > 0) && (hypoColl.size() < 327685)) {// what constant is this ?
+			if ((hypoColl.size() > 0) && (hypoColl.size() < 327685)) {// what constant is this ? 
 				const Hypothesis *hypo = hypoColl.GetBestHypothesis();
 				if (bestHypo == NULL)
 					bestHypo = hypo;
 				else
-					if (hypo->GetTotalScore() > bestHypo->GetTotalScore())
+					if ((hypo->GetTotalScore() < 0.0) && (hypo->GetTotalScore() > bestHypo->GetTotalScore()))
 						bestHypo = hypo;
 			}
+
+			if (it == m_hypoStackColl.begin()) break;
 		}
 
 		return bestHypo;

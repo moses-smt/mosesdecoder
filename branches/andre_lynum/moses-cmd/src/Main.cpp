@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 	  InputType *trans = 0;
 
 	  if (staticData.GetScoreFlag()) {
-	    trans = ioStream->GetInput(new Sentence(Input));
+	    trans = ioStream->GetInput(new Sentence(Input)); // The newed object is returned
 
 			size_t transSize = trans->GetSize();
 			// Do not subtract if we got an empty input
