@@ -117,6 +117,9 @@ protected:
 	size_t m_mbrSize; //! number of translation candidates considered
 	float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
 
+	bool m_timeout; //! use timeout
+	size_t m_timeout_threshold; //! seconds after which time out is activated
+
 	bool m_useTransOptCache;
 	mutable std::map<Phrase, TranslationOptionList> m_transOptCache;
 
@@ -363,9 +366,13 @@ public:
 	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
-	size_t UseMBR() const { return m_mbr; }
+	bool UseMBR() const { return m_mbr; }
 	size_t GetMBRSize() const { return m_mbrSize; }
 	float GetMBRScale() const { return m_mbrScale; }
+	
+	bool UseTimeout() const { return m_timeout; }
+	size_t GetTimeoutThreshold() const { return m_timeout_threshold; }
+	
 	size_t GetOutputSearchGraph() const { return m_outputSearchGraph; }
 		
 	XmlInputType GetXmlInputType() const { return m_xmlInputType; }

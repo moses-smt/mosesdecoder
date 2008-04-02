@@ -28,6 +28,7 @@ class Timer
 //  void restart(const char* msg = 0);
 //  void stop(const char* msg = 0);
   void check(const char* msg = 0);
+  double get_elapsed_time();
 
 };
 
@@ -42,6 +43,18 @@ inline double Timer::elapsed_time()
 	time_t now;
 	time(&now);
   return difftime(now, start_time);
+}
+
+/***
+ * Return the total time that the timer has been in the "running"
+ * state since it was first "started" or last "restarted".  For
+ * "short" time periods (less than an hour), the actual cpu time
+ * used is reported instead of the elapsed time.
+ * This function is the public version of elapsed_time()
+ */
+inline double Timer::get_elapsed_time()
+{
+  return elapsed_time();
 }
 
 /***

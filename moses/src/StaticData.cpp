@@ -263,7 +263,11 @@ bool StaticData::LoadData(Parameter *parameter)
 	  Scan<size_t>(m_parameter->GetParam("mbr-size")[0]) : 200;
 	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0) ?
 	  Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
-	
+
+  m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
+	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
+	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;
+
 	//default case
 	
 	if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
