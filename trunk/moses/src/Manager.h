@@ -75,7 +75,10 @@ protected:
 	// data
 	InputType const& m_source; /**< source sentence to be translated */
 
-	std::vector < HypothesisStack > m_hypoStackColl; /**< stacks to store hypothesis (partial translations) */ 
+	size_t interrupted_flag;
+
+	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
+	std::vector < HypothesisStack > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */ 
 	// no of elements = no of words in source + 1
 	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
@@ -95,6 +98,7 @@ public:
 
 	void ProcessSentence();
 	const Hypothesis *GetBestHypothesis() const;
+	const Hypothesis *GetActualBestHypothesis() const;
 	void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;
 	
 	void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;

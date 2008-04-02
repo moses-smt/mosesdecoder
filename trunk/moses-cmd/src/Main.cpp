@@ -146,9 +146,7 @@ int main(int argc, char* argv[])
 		// pick best translation (maximum a posteriori decoding)
 		if (! staticData.UseMBR()) {
 			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
-													 staticData.GetReportSegmentation(),
-													 staticData.GetReportAllFactors()
-													 );
+						 staticData.GetReportSegmentation(), staticData.GetReportAllFactors());
 			IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
 			
 			// n-best

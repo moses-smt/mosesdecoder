@@ -142,6 +142,11 @@ void PrintUserTime(const std::string &message)
 	g_timer.check(message.c_str());
 }
 
+double GetUserTime()
+{
+        return g_timer.get_elapsed_time();
+}
+
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line)
 {
 	std::map<std::string, std::string> meta;

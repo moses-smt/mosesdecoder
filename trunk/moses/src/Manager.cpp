@@ -51,6 +51,7 @@ Manager::Manager(InputType const& source)
 ,m_transOptColl(source.CreateTranslationOptionCollection())
 ,m_initialTargetPhrase(Output)
 ,m_start(clock())
+,interrupted_flag(0)
 {
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
@@ -105,6 +106,14 @@ void Manager::ProcessSentence()
 	std::vector < HypothesisStack >::iterator iterStack;
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
+
+//checked if elapsed time ran out of time with respect 
+		double _elapsed_time = GetUserTime();
+		if (_elapsed_time > staticData.GetTimeoutThreshold()){
+	  	VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
+			interrupted_flag = 1;
+			return;
+		}
 		HypothesisStack &sourceHypoColl = *iterStack;
 
 		// the stack is pruned before processing (lazy pruning):
@@ -122,6 +131,9 @@ void Manager::ProcessSentence()
 			}
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
+
+		//This stack is fully expanded;
+		actual_hypoStack = &sourceHypoColl;
 	}
 
 	// some more logging
@@ -336,9 +348,17 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
  */
 const Hypothesis *Manager::GetBestHypothesis() const
 {
-	const HypothesisStack &hypoColl = m_hypoStackColl.back();
-	return hypoColl.GetBestHypothesis();
+//	const HypothesisStack &hypoColl = m_hypoStackColl.back();
+	if (interrupted_flag == 0){
+  	const HypothesisStack &hypoColl = m_hypoStackColl.back();
+		return hypoColl.GetBestHypothesis();
+	}
+	else{
+  	const HypothesisStack &hypoColl = *actual_hypoStack;
+		return hypoColl.GetBestHypothesis();
+	}
 }
+
 
 /**
  * Logging of hypothesis stack sizes
