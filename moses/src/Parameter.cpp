@@ -45,6 +45,7 @@ Parameter::Parameter()
 	AddParam("labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
 	AddParam("include-alignment-in-n-best", "include word alignment in the n-best list. default is false");
 	AddParam("lmodel-file", "location and properties of the language models");
+	AddParam("lmodel-dub", "dictionary upper bounds of language models");
 	AddParam("lmstats", "L", "(1/0) compute LM backoff statistics for each translation hypothesis");
 	AddParam("mapping", "description of decoding steps");
 	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
@@ -229,8 +230,22 @@ bool Parameter::Validate()
 		noErrorFlag = false;
 	}
 
+        if (m_setting["lmodel-dub"].size() > 0){
+	        if (m_setting["lmodel-file"].size() != m_setting["lmodel-dub"].size()){
+	                stringstream errorMsg("");
+        	        errorMsg << "Config and parameters specify "
+            			<< static_cast<int>(m_setting["lmodel-file"].size())
+                                << " language model files (lmodel-file), but "
+                                << static_cast<int>(m_setting["lmodel-dub"].size())
+                                                << " LM upperbounds (lmodel-dub)"
+						<< endl;
+                	UserMessage::Add(errorMsg.str());
+                	noErrorFlag = false;
+		}
+	}
+
 	if (m_setting["lmodel-file"].size() != m_setting["weight-l"].size()) 
-	{
+	{	
 		stringstream errorMsg("");
 		errorMsg << "Config and parameters specify "
             << static_cast<int>(m_setting["lmodel-file"].size()) 

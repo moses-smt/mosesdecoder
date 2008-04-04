@@ -39,9 +39,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-LanguageModelIRST::LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager)
+LanguageModelIRST::LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub)
 :LanguageModelSingleFactor(registerScore, scoreIndexManager)
-,m_lmtb(0)
+,m_lmtb(0),m_lmtb_dub(dub)
 {
 }
 
@@ -117,6 +117,8 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   m_lmtb->init_probcache();
   m_lmtb->init_statecache();
   m_lmtb->init_lmtcaches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
+
+  m_lmtb->set_dictionary_upperbound(m_lmtb_dub);
 
   return true;
 }

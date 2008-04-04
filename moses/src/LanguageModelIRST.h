@@ -49,6 +49,7 @@ protected:
 	int m_lmtb_sentenceStart; //lmtb symbols to initialize ngram with
 	int m_lmtb_sentenceEnd;   //lmt symbol to initialize ngram with 
 	int m_lmtb_size;          //max ngram stored in the table
+	int m_lmtb_dub;           //dictionary upperboud
 
 	std::string m_mapFilePath;
   
@@ -63,7 +64,7 @@ protected:
 	};
   
 public:
-	LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager);
+	LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub);
 	~LanguageModelIRST();
 	bool Load(const std::string &filePath
 					, FactorType factorType
@@ -74,4 +75,8 @@ public:
 
   void CleanUpAfterSentenceProcessing();
   void InitializeBeforeSentenceProcessing();
+
+  void set_dictionary_upperbound(int dub){ m_lmtb_size=dub ; 
+//m_lmtb->set_dictionary_upperbound(dub);
+};
 };
