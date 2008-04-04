@@ -45,7 +45,8 @@ namespace LanguageModelFactory
 																		, size_t nGramOrder
 																		, const std::string &languageModelFile
 																		, float weight
-																		, ScoreIndexManager &scoreIndexManager)
+																		, ScoreIndexManager &scoreIndexManager
+																		, int dub)
 	{
 	  LanguageModel *lm = NULL;
 	  switch (lmImplementation)
@@ -59,7 +60,7 @@ namespace LanguageModelFactory
 			  break;
 			case IRST:
 				#ifdef LM_IRST
-	     		lm = new LanguageModelIRST(true, scoreIndexManager);
+	     		lm = new LanguageModelIRST(true, scoreIndexManager, dub);
 			  #endif
 				break;
 			case Skip:

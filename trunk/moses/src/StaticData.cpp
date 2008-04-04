@@ -506,6 +506,13 @@ bool StaticData::LoadLanguageModels()
 		{
 			m_allWeights.push_back(weightAll[i]);
 		}
+		
+		// dictionary upper-bounds fo all IRST LMs
+		vector<int> LMdub = Scan<int>(m_parameter->GetParam("lmodel-dub"));
+    if (m_parameter->GetParam("lmodel-dub").size() == 0){
+			for(size_t i=0; i<m_parameter->GetParam("lmodel-file").size(); i++)
+				LMdub.push_back(0);
+		}
 
 	  // initialize n-gram order for each factor. populated only by factored lm
 		const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
@@ -528,14 +535,15 @@ bool StaticData::LoadLanguageModels()
 			size_t nGramOrder = Scan<int>(token[2]);
 			
 			string &languageModelFile = token[3];
-			if (token.size() == 5)
+			if (token.size() == 5){
 			  if (lmImplementation==IRST)
 			    languageModelFile += " " + token[4];
 			  else {
 			    UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
 			    return false;
 			  }
-			IFVERBOSE(1)
+		}
+		IFVERBOSE(1)
 				PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
 			
 			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(
@@ -544,7 +552,8 @@ bool StaticData::LoadLanguageModels()
                                    								, nGramOrder
 																									, languageModelFile
 																									, weightAll[i]
-																									, m_scoreIndexManager);
+																									, m_scoreIndexManager
+																									, LMdub[i]);
       if (lm == NULL) 
       {
       	UserMessage::Add("no LM created. We probably don't have it compiled");
