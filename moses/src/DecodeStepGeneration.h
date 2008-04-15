@@ -27,12 +27,13 @@ class GenerationDictionary;
 class Phrase;
 class ScoreComponentCollection;
 
+//! subclass of DecodeStep for generation step
 class DecodeStepGeneration : public DecodeStep
 {
 public:
 	DecodeStepGeneration(GenerationDictionary* dict, const DecodeStep* prev);
 
-  /** returns phrase table (dictionary) for translation step */
+  //! returns phrase table (dictionary) for translation step 
   const GenerationDictionary &GetGenerationDictionary() const;
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
@@ -42,7 +43,7 @@ public:
                               , bool adhereTableLimit) const;
 
 private:
-	/** create new TranslationOption from merging oldTO with mergePhrase
+	/*! create new TranslationOption from merging oldTO with mergePhrase
 		This function runs IsCompatible() to ensure the two can be merged
 	*/
   TranslationOption *MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
