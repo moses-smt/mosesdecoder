@@ -60,26 +60,26 @@ class Hypothesis
 protected:
 	static ObjectPool<Hypothesis> s_objectPool;
 	
-	const Hypothesis* m_prevHypo; /**< backpointer to previous hypothesis (from which this one was created) */
-	const Phrase			&m_targetPhrase; /**< target phrase being created at the current decoding step */
-	Phrase const*     m_sourcePhrase; /**< input sentence */
-	WordsBitmap				m_sourceCompleted; /**< keeps track of which words have been translated so far */
+	const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
+	const Phrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
+	Phrase const*     m_sourcePhrase; /*! input sentence */
+	WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
 	//TODO: how to integrate this into confusion network framework; what if
 	//it's a confusion network in the end???
 	InputType const&  m_sourceInput;
-	WordsRange				m_currSourceWordsRange; /**< source word positions of the last phrase that was used to create this hypothesis */
-	WordsRange        m_currTargetWordsRange; /**< target word positions of the last phrase that was used to create this hypothesis */
+	WordsRange				m_currSourceWordsRange; /*! source word positions of the last phrase that was used to create this hypothesis */
+	WordsRange        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
   bool							m_wordDeleted;
-	float							m_totalScore;  /**< score so far */
-	float							m_futureScore; /**< estimated future cost to translate rest of sentence */
-	ScoreComponentCollection m_scoreBreakdown; /**< detailed score break-down by components (for instance language model, word penalty, etc) */
-	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /**< relevant history for language model scoring -- used for recombination */
+	float							m_totalScore;  /*! score so far */
+	float							m_futureScore; /*! estimated future cost to translate rest of sentence */
+	ScoreComponentCollection m_scoreBreakdown; /*! detailed score break-down by components (for instance language model, word penalty, etc) */
+	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /*! relevant history for language model scoring -- used for recombination */
 	const Hypothesis 	*m_winningHypo;
-	ArcList 					*m_arcList; /**< all arcs that end at the same trellis point as this hypothesis */
+	ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
 	const TranslationOption *m_transOpt;
 
-	int m_id; /**< numeric ID of this hypothesis, used for logging */
-	std::vector<std::vector<unsigned int> >* m_lmstats; /** Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
+	int m_id; /*! numeric ID of this hypothesis, used for logging */
+	std::vector<std::vector<unsigned int> >* m_lmstats; /*! Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 
 	void CalcFutureScore(const SquareMatrix &futureScore);
@@ -88,9 +88,9 @@ protected:
 	void CalcDistortionScore();
 	//TODO: add appropriate arguments to score calculator
 
-	/** used by initial seeding of the translation process */
+	/*! used by initial seeding of the translation process */
 	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
-	/** used when creating a new hypothesis using a translation option (phrase translation) */
+	/*! used when creating a new hypothesis using a translation option (phrase translation) */
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
 public:

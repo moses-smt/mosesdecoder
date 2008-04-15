@@ -26,13 +26,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class PhraseDictionary;
 class TargetPhrase;
 
+//! subclass of DecodeStep for translation step
 class DecodeStepTranslation : public DecodeStep
 {
 public:
-	DecodeStepTranslation(); // not implemented
+	DecodeStepTranslation(); //! not implemented
 	DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev);
 
-  /** returns phrase table (dictionary) for translation step */
+  //! returns phrase table (dictionary) for translation step 
   const PhraseDictionary &GetPhraseDictionary() const;
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
@@ -41,7 +42,7 @@ public:
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const;
 
-	/** initialize list of partial translation options by applying the first translation step 
+	/*! initialize list of partial translation options by applying the first translation step 
 	* Ideally, this function should be in DecodeStepTranslation class
 	*/
 	void ProcessInitialTranslation(
@@ -49,7 +50,7 @@ public:
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos, bool adhereTableLimit) const;
 private:
-	/** create new TranslationOption from merging oldTO with mergePhrase
+	/*! create new TranslationOption from merging oldTO with mergePhrase
 		This function runs IsCompatible() to ensure the two can be merged
 	*/
 	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;

@@ -33,27 +33,26 @@ class PartialTranslOptColl;
 class FactorCollection;
 class InputType;
 
-/** Specification for a decoding step.
+/*! Specification for a decoding step.
  * The factored translation model consists of Translation and Generation
  * steps, which consult a Dictionary of phrase translations or word
  * generations. This class implements the specification for one of these
  * steps, both the DecodeType and a pointer to the Dictionary
  **/
- 
 class DecodeStep 
 {
 protected:
-	const Dictionary *m_ptr; /*< pointer to translation/generation table */
-	FactorMask m_outputFactors; /** mask of what factors exist on the output side after this decode step */
-	std::vector<FactorType> m_conflictFactors; /** list of the factors that may conflict during this step*/
-	std::vector<FactorType> m_newOutputFactors; /** list of the factors that are new in this step, may be empty*/
+	const Dictionary *m_ptr; //! pointer to translation/generation table 
+	FactorMask m_outputFactors; //! mask of what factors exist on the output side after this decode step 
+	std::vector<FactorType> m_conflictFactors; //! list of the factors that may conflict during this step
+	std::vector<FactorType> m_newOutputFactors; //! list of the factors that are new in this step, may be empty
 
 public:
-	DecodeStep(); // not implemented
+	DecodeStep(); //! not implemented
 	DecodeStep(Dictionary *ptr, const DecodeStep* prevDecodeStep);
 	virtual ~DecodeStep();
 
-	/** mask of factors that are present after this decode step */
+	//! mask of factors that are present after this decode step
 	const FactorMask& GetOutputFactorMask() const
 	{
 		return m_outputFactors;
@@ -71,7 +70,7 @@ public:
 		return !m_newOutputFactors.empty();
 	}
 
-	/** returns a list (possibly empty) of the (target side) factors that
+	/*! returns a list (possibly empty) of the (target side) factors that
 	 * are produced in this decoding step.  For example, if a previous step
 	 * generated factor 1, and this step generates 1,2, then only 2 will be
 	 * in the returned vector. */
@@ -80,7 +79,7 @@ public:
 		return m_newOutputFactors;
 	}
 
-	/** returns a list (possibly empty) of the (target side) factors that
+	/*! returns a list (possibly empty) of the (target side) factors that
 	 * are produced BUT ALREADY EXIST and therefore must be checked for
 	 * conflict or compatibility */
 	const std::vector<FactorType>& GetConflictFactors() const
@@ -88,16 +87,16 @@ public:
 		return m_conflictFactors;
 	}
 
-	/** returns phrase table (dictionary) for translation step */
+	/*! returns phrase table (dictionary) for translation step */
 	const PhraseDictionary &GetPhraseDictionary() const;
 
-	/** returns generation table (dictionary) for generation step */
+	/*! returns generation table (dictionary) for generation step */
 	const GenerationDictionary &GetGenerationDictionary() const;
 
-	/** returns dictionary in abstract class */
+	/*! returns dictionary in abstract class */
 	const Dictionary* GetDictionaryPtr() const {return m_ptr;}
 
-	/** Given an input TranslationOption, extend it in some way (put results in outputPartialTranslOptColl) */
+	/*! Given an input TranslationOption, extend it in some way (put results in outputPartialTranslOptColl) */
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl

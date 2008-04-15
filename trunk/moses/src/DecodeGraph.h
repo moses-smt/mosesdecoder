@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class DecodeStep;
 
+//! list of DecodeStep s which factorizes the translation
 class DecodeGraph
 {
 protected:
@@ -41,6 +42,7 @@ public:
 	
 	~DecodeGraph();
 
+	//! Add another decode step to the graph
 	void Add(const DecodeStep *decodeStep)
 	{
 		m_steps.push_back(decodeStep);
