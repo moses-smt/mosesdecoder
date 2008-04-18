@@ -1222,14 +1222,14 @@ sub store_reordering_f {
     my $total_previous_f = $mono_previous_f+$swap_previous_f+$other_previous_f;
     my $total_following_f = $mono_following_f+$swap_following_f+$other_following_f;
     if(defined($REORDERING_MODEL{"msd-f"})) {
- 	printf OF ("%s ||| %.5f %.5f %.5f\n",
+ 	printf OF ("%s ||| %g %g %g\n",
 		   $f_current, 
 		   $mono_previous_f/$total_previous_f,
 		   $swap_previous_f/$total_previous_f,
 		   $other_previous_f/$total_previous_f);
     }
     if(defined($REORDERING_MODEL{"msd-bidirectional-f"})) {
-	printf OBF ("%s ||| %.5f %.5f %.5f %.5f %.5f %.5f\n",
+	printf OBF ("%s ||| %g %g %g %g %g %g\n",
 		    $f_current, 
 		    $mono_previous_f/$total_previous_f,
 		    $swap_previous_f/$total_previous_f,
@@ -1239,13 +1239,13 @@ sub store_reordering_f {
 		    $other_following_f/$total_following_f);
     }
     if(defined($REORDERING_MODEL{"monotonicity-f"})) {
-	printf MF ("%s ||| %.5f %.5f\n",
+	printf MF ("%s ||| %g %g\n",
 		  $f_current, 
 		   $mono_previous_f/$total_previous_f,
 		   ($swap_previous_f+$other_previous_f)/$total_previous_f);
     }
     if(defined($REORDERING_MODEL{"monotonicity-bidirectional-f"})) {
-	printf MBF ("%s ||| %.5f %.5f %.5f %.5f\n",
+	printf MBF ("%s ||| %g %g %g %g\n",
 		    $f_current, 
 		    $mono_previous_f/$total_previous_f,
 		    ($swap_previous_f+$other_previous_f)/$total_previous_f,
@@ -1259,14 +1259,14 @@ sub store_reordering_fe {
     my $total_following_fe = $mono_following_fe+$swap_following_fe+$other_following_fe;
     
     if(defined($REORDERING_MODEL{"msd-fe"})) {
- 	printf OFE ("%s ||| %s ||| %.5f %.5f %.5f\n",
+ 	printf OFE ("%s ||| %s ||| %g %g %g\n",
 		   $f_current, $e_current, 
 		   $mono_previous_fe/$total_previous_fe,
 		   $swap_previous_fe/$total_previous_fe,
 		   $other_previous_fe/$total_previous_fe);
     }
     if(defined($REORDERING_MODEL{"msd-bidirectional-fe"})) {
-	printf OBFE ("%s ||| %s ||| %.5f %.5f %.5f %.5f %.5f %.5f\n",
+	printf OBFE ("%s ||| %s ||| %g %g %g %g %g %g\n",
 		    $f_current, $e_current, 
 		    $mono_previous_fe/$total_previous_fe,
 		    $swap_previous_fe/$total_previous_fe,
@@ -1276,13 +1276,13 @@ sub store_reordering_fe {
 		    $other_following_fe/$total_following_fe);
     }
     if(defined($REORDERING_MODEL{"monotonicity-fe"})) {
-	printf MFE ("%s ||| %s ||| %.5f %.5f\n",
+	printf MFE ("%s ||| %s ||| %g %g\n",
 		   $f_current, $e_current, 
 		   $mono_previous_fe/$total_previous_fe,
 		   ($swap_previous_fe+$other_previous_fe)/$total_previous_fe);
     }
     if(defined($REORDERING_MODEL{"monotonicity-bidirectional-fe"})) {
-	printf MBFE ("%s ||| %s ||| %.5f %.5f %.5f %.5f\n",
+	printf MBFE ("%s ||| %s ||| %g %g %g %g\n",
 		    $f_current, $e_current, 
 		    $mono_previous_fe/$total_previous_fe,
 		    ($swap_previous_fe+$other_previous_fe)/$total_previous_fe,
