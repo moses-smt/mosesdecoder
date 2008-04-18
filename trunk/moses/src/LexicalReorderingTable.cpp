@@ -189,6 +189,7 @@ void  LexicalReorderingTableMemory::LoadFromFile(const std::string& filePath){
       exit(0);
     }
     std::transform(p.begin(),p.end(),p.begin(),TransformScore);
+    std::transform(p.begin(),p.end(),p.begin(),FloorScore);
     //save it all into our map
     m_Table[MakeKey(f,e,c)] = p;
   }
@@ -386,6 +387,7 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
     }
     //transform score now...
     std::transform(score.begin(),score.end(),score.begin(),TransformScore);
+    std::transform(score.begin(),score.end(),score.begin(),FloorScore);
     std::vector<Score> scores;
     scores.push_back(score);
     
