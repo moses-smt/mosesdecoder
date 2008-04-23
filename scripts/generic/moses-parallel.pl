@@ -50,24 +50,29 @@ my $help=0;
 my $dbg=0;
 my $jobs=4;
 my $mosescmd="$ENV{MOSESBIN}/moses"; #decoder in use
-my $orifile=undef;
-my $testfile=undef;
+my $inputlist=undef;
+my $inputfile=undef;
+my $inputtype=0;
+my @nbestlist=();
+my $nbestlist=undef;
 my $nbestfile=undef;
-my $orinbestfile=undef;
-my $nbest=undef;
+my $oldnbestfile=undef;
+my $oldnbest=undef;
 my $nbestflag=0;
 my $robust=1; # undef; # resubmit crashed jobs
-my $orilogfile="";
+my $logfile="";
 my $logflag="";
+my $searchgraphlist="";
+my $searchgraphfile="";
+my $searchgraphflag=0;
 my $qsubname="MOSES";
-my $inputtype=0;
 my $old_sge = 0; # assume old Sun Grid Engine (<6.0) where qsub does not
                  # implement -sync and -b
 
 #######################
 # Command line options processing
 sub init(){
-  use Getopt::Long qw(:config pass_through no_ignore_case);
+  use Getopt::Long qw(:config pass_through no_ignore_case permute);
   GetOptions('version'=>\$version,
 	     'help'=>\$help,
 	     'debug'=>\$dbg,
@@ -76,23 +81,33 @@ sub init(){
 	     'robust' => \$robust,
              'decoder-parameters=s'=> \$mosesparameters,
              'feed-decoder-via-stdin'=> \$feed_moses_via_stdin,
-	     'logfile=s'=> \$orilogfile,
-	     'i|inputfile|input-file=s'=> \$orifile,
-	     'n-best-file=s'=> \$orinbestfile,
-	     'n-best-size=i'=> \$nbest,
+	     'logfile=s'=> \$logfile,
+	     'i|inputfile|input-file=s'=> \$inputlist,
+             'n-best-list=s'=> \$nbestlist,
+             'n-best-file=s'=> \$oldnbestfile,
+             'n-best-size=i'=> \$oldnbest,
+	     'output-search-graph|osg=s'=> \$searchgraphlist,
 	     'qsub-prefix=s'=> \$qsubname,
 	     'queue-parameters=s'=> \$queueparameters,
 	     'inputtype=i'=> \$inputtype,
-       'config=s'=>\$cfgfile,
-       'old-sge' => \$old_sge,
+	     'config|f=s'=>\$cfgfile,
+	     'old-sge' => \$old_sge,
 	    ) or exit(1);
 
-  chomp($nbestfile=`basename $orinbestfile`) if defined $orinbestfile;
-  chomp($testfile=`basename $orifile`) if defined $orifile;
+  getNbestParameters();
+
+  getSearchGraphParameters();
+  
+  getLogParameters();
+
+#print_parameters();
+#print STDERR "nbestflag:$nbestflag\n";
+#print STDERR "searchgraphflag:$searchgraphflag\n";
+#print STDERR "inputlist:$inputlist\n";
+
+  chomp($inputfile=`basename $inputlist`) if defined($inputlist);
 
   $mosesparameters.="@ARGV -config $cfgfile -inputtype $inputtype";
-  getNbestParameters();
-  getLogParameters();
 }
 
 
@@ -132,11 +147,19 @@ sub usage(){
   print STDERR "   -version print version of the script\n";
   print STDERR "   -help this help\n";
   print STDERR "Moses options:\n";
-  print STDERR "   -inputtype <0|1|2> 0 for text, 1 for confusion networks, for lattices\n";
-  print STDERR "   -n-best-file <file> file where storing nbet lists\n";
-  print STDERR "   -n-best-size <N> size of nbest lists\n";
+  print STDERR "   -inputtype <0|1|2> 0 for text, 1 for confusion networks, 2 for lattices\n";
+  print STDERR "   -output-search-graph (osg): Output connected hypotheses of search into specified filename\n";
+  print STDERR "   -n-best-list '<file> <N> [distinct]' where\n";
+  print STDERR "                <file>:   file where storing nbest lists\n";
+  print STDERR "                <N>:      size of nbest lists\n";
+  print STDERR "                distinct: to activate generation of distinct nbest alternatives\n";
+  print STDERR "   IMPORTANT NOTE: use single quote to group parameters of -n-best-list\n";
+  print STDERR "                   This is different from standard moses\n";
+  print STDERR "   IMPORTANT NOTE: The following two parameters are now OBSOLETE, and they are no more supported\n";
+  print STDERR "                   -n-best-file <file> file where storing nbet lists\n";
+  print STDERR "                   -n-best-size <N> size of nbest lists\n";
   print STDERR "    NOTE: -n-best-file-n-best-size    are passed to the decoder as \"-n-best-list <file> <N>\"\n";
-  print STDERR "*  -config <cfgfile> configuration file\n";
+  print STDERR "*  -config (f) <cfgfile> configuration file\n";
   print STDERR "   -decoder-parameters <string> specific parameters for the decoder\n";
   print STDERR "All other options are passed to Moses\n";
   print STDERR "  (This way to pass parameters is maintained for back compatibility\n";
@@ -146,18 +169,13 @@ sub usage(){
 
 #printparameters
 sub print_parameters(){
-  print STDERR "Inputfile: $orifile\n";
-  print STDERR "Logfile: $orilogfile\n";
+  print STDERR "Inputfile: $inputlist\n";
   print STDERR "Configuration file: $cfgfile\n";
   print STDERR "Decoder in use: $mosescmd\n";
-  if ($nbestflag) {
-    print STDERR "Nbest file: $orinbestfile\n"; 
-    print STDERR "Nbest size: $nbest\n";
-  }
   print STDERR "Number of jobs:$jobs\n";
-  if ($logflag) {
-    print STDERR "LogFile:$orilogfile\n";
-  }
+  print STDERR "Nbest list: $nbestlist\n" if ($nbestflag);
+  print STDERR "Output Search Graph: $searchgraphlist\n" if ($searchgraphflag);
+  print STDERR "LogFile:$logfile\n" if ($logflag);
   print STDERR "Qsub name: $qsubname\n";
   print STDERR "Queue parameters: $queueparameters\n";
   print STDERR "Inputtype: text\n" if $inputtype == 0;
@@ -169,23 +187,73 @@ sub print_parameters(){
 
 #get parameters for log file
 sub getLogParameters(){
-  $logflag=1 if $orilogfile;
+  if ($logfile){ $logflag=1; }
 }
 
-#get parameters for nbest computation from configuration file
+#get parameters for nbest computation (possibly from configuration file)
 sub getNbestParameters(){
-  if ($orinbestfile) {     $nbestflag=1;  }
-  else{
+  if (!$nbestlist){
     open (CFG, "$cfgfile");
     while (chomp($_=<CFG>)){
       if (/^\[n-best-list\]/){
-	chomp($orinbestfile=<CFG>);
-	chomp($nbest=<CFG>);
-	$nbestflag=1;
+	my $tmp;
+	while (chomp($tmp=<CFG>)){
+	  last if $tmp eq "" || $tmp=~/^\[/;
+	  $nbestlist .= "$tmp ";
+	}
 	last;
       }
     }
     close(CFG);
+  }
+
+  if ($nbestlist){
+     if ($oldnbestfile){
+        print STDERR "There is a conflict between NEW parameter -n-best-list and OBSOLETE parameter -n-best-file\n";
+        print STDERR "Please use only -nbest-list '<file> <N> [distinct]\n";
+        exit;
+     }
+  }
+  else{
+    if ($oldnbestfile){
+       print STDERR "You are using the OBSOLETE parameter -n-best-file\n";
+       print STDERR "Next time please use only -n-best-list '<file> <N> [distinct]\n";
+       $nbestlist="$oldnbestfile";
+       if ($oldnbest){ $nbestlist.=" $oldnbest"; }
+       else { $nbestlist.=" 1"; }
+    }
+  }
+
+  if ($nbestlist){
+    my @tmp=split(/[ \t]+/,$nbestlist);
+    @nbestlist = @tmp;
+
+    if ($nbestlist[0] eq '-'){ $nbestfile="nbest"; }
+    else{ chomp($nbestfile=`basename $nbestlist[0]`);     }
+    $nbestflag=1;
+  }
+}
+
+#get parameters for log file (possibly from configuration file)
+sub getSearchGraphParameters(){
+  if (!$searchgraphlist){
+    open (CFG, "$cfgfile");
+    while (chomp($_=<CFG>)){
+      if (/^\[output-search-graph\]/ || /^\[osg\]/){
+	my $tmp;
+	while (chomp($tmp=<CFG>)){
+	  last if $tmp eq "" || $tmp=~/^\[/;
+	  $searchgraphlist = "$tmp";
+	}
+	last;
+      }
+    }
+    close(CFG);
+  }
+  if ($searchgraphlist){
+    if ($searchgraphlist eq '-'){ $searchgraphfile="searchgraph"; }
+    else{ chomp($searchgraphfile=`basename $searchgraphlist`); }
+    $searchgraphflag=1;
   }
 }
 
@@ -198,14 +266,14 @@ version() if $version;
 usage() if $help;
 
 
-if (!defined $orifile || !defined $mosescmd || ! defined $cfgfile) {
+if (!defined $inputlist || !defined $mosescmd || ! defined $cfgfile) {
   print STDERR "Please specify -input-file, -decoder and -config\n";
   usage();
 }
 
 #checking if inputfile exists
-if (! -e ${orifile} ){
-  print STDERR "Inputfile ($orifile) does not exists\n";
+if (! -e ${inputlist} ){
+  print STDERR "Inputfile ($inputlist) does not exists\n";
   usage();
 }
 
@@ -238,7 +306,7 @@ my @idxlist=();
 
 if ($inputtype==0){ #text input
 #getting the number of input sentences (one sentence per line)
-  chomp($sentenceN=`wc -l ${orifile} | awk '{print \$1}' `);
+  chomp($sentenceN=`wc -l ${inputlist} | awk '{print \$1}' `);
 
 #Reducing the number of jobs if less sentences to translate
   if ($jobs>$sentenceN){ $jobs=$sentenceN; }
@@ -252,12 +320,12 @@ if ($inputtype==0){ #text input
     print STDERR "There are at most $splitN sentences per job\n";
   }
 
-  $cmd="split $decimal -a 2 -l $splitN $orifile ${testfile}.$splitpfx-";
+  $cmd="split $decimal -a 2 -l $splitN $inputlist ${inputfile}.$splitpfx-";
   safesystem("$cmd") or die;
 }
 elsif ($inputtype==1){ #confusion network input
   my $tmpfile="/tmp/cnsplit$$";
-  $cmd="cat $orifile | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' > $tmpfile";
+  $cmd="cat $inputlist | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' > $tmpfile";
   safesystem("$cmd") or die;
 
 #getting the number of input CNs
@@ -284,12 +352,12 @@ elsif ($inputtype==1){ #confusion network input
 
   foreach my $idx (@idxlist){
     $cmd="perl -pe 's/ _CNendline_ /\\n/g;s/ _CNendline_/\\n/g;'";
-    safesystem("cat $tmpfile$idx | $cmd > ${testfile}.$splitpfx$idx ; \\rm -f $tmpfile$idx;");
+    safesystem("cat $tmpfile$idx | $cmd > ${inputfile}.$splitpfx$idx ; \\rm -f $tmpfile$idx;");
   }
 }
 elsif ($inputtype==2){ #confusion network input
 #getting the number of input lattices (one lattice per line)
-  chomp($sentenceN=`wc -l ${orifile} | awk '{print \$1}' `);
+  chomp($sentenceN=`wc -l ${inputlist} | awk '{print \$1}' `);
 
 #Reducing the number of jobs if less lattices to translate
   if ($jobs>$sentenceN){ $jobs=$sentenceN; }
@@ -303,14 +371,14 @@ elsif ($inputtype==2){ #confusion network input
     print STDERR "There are at most $splitN lattices per job\n";
   }
 
-  $cmd="split $decimal -a 2 -l $splitN $orifile ${testfile}.$splitpfx-";
+  $cmd="split $decimal -a 2 -l $splitN $inputlist ${inputfile}.$splitpfx-";
   safesystem("$cmd") or die;
 }
 else{ #unknown input type
   die "INPUTTYPE:$inputtype is unknown!\n";
 }
 
-chomp(@idxlist=`ls ${testfile}.$splitpfx-*`);
+chomp(@idxlist=`ls ${inputfile}.$splitpfx-*`);
 grep(s/.+(\-\S+)$/$1/e,@idxlist);
 
 safesystem("mkdir -p $tmpdir") or die;
@@ -430,7 +498,10 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
 concatenate_1best();
 concatenate_logs() if $logflag;
 concatenate_nbest() if $nbestflag;  
+safesystem("cat nbest$$ >> /dev/stdout") if $nbestlist[0] eq '-';
 
+concatenate_searchgraph() if $searchgraphflag;  
+safesystem("cat searchgraph$$ >> /dev/stdout") if $searchgraphlist eq '-';
 
 remove_temporary_files();
 
@@ -445,16 +516,32 @@ sub preparing_script(){
     open (OUT, "> ${jobscript}${idx}.bash");
     print OUT $scriptheader;
     my $inputmethod = $feed_moses_via_stdin ? "<" : "-input-file";
-    if ($nbestflag){
-      print OUT "$mosescmd $mosesparameters -n-best-list $tmpdir/${nbestfile}.$splitpfx$idx $nbest $inputmethod ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
-      print OUT "echo exit status \$\?\n\n";
 
+    my $tmpnbestlist="";
+    if ($nbestflag){
+      $tmpnbestlist="$tmpdir/$nbestfile.$splitpfx$idx $nbestlist[1]";
+      $tmpnbestlist = "$tmpnbestlist $nbestlist[2]" if scalar(@nbestlist)==3;
+      $tmpnbestlist = "-n-best-list $tmpnbestlist";
+    }
+
+    my $tmpsearchgraphlist="";
+    if ($searchgraphflag){
+      $tmpsearchgraphlist="-output-search-graph $tmpdir/$searchgraphfile.$splitpfx$idx";
+    }
+
+    print OUT "$mosescmd $mosesparameters $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
+    print OUT "echo exit status \$\?\n\n";
+
+    if ($nbestflag){
       print OUT "\\mv -f $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
-    }else{
-      print OUT "$mosescmd $mosesparameters $inputmethod ${testfile}.$splitpfx$idx > $tmpdir/${testfile}.$splitpfx$idx.trans\n\n";
     }
-    print OUT "\\mv -f $tmpdir/${testfile}.$splitpfx$idx.trans .\n\n";
+    if ($searchgraphflag){
+      print OUT "\\mv -f $tmpdir/$searchgraphfile.$splitpfx$idx .\n\n";
+      print OUT "echo exit status \$\?\n\n";
+    }
+
+    print OUT "\\mv -f $tmpdir/${inputfile}.$splitpfx$idx.trans .\n\n";
     print OUT "echo exit status \$\?\n\n";
     close(OUT);
 
@@ -465,13 +552,60 @@ sub preparing_script(){
 
 
 
+sub concatenate_searchgraph(){
+  my $oldcode="";
+  my $newcode=-1;
+  my %inplength = ();
+  my $offset = 0;
+
+  my $outsearchgraph=$searchgraphlist;
+  if ($searchgraphlist eq '-'){ $outsearchgraph="searchgraph$$"; }
+
+  open (OUT, "> $outsearchgraph");
+  foreach my $idx (@idxlist){
+
+#computing the length of each input file
+    my @in=();
+    open (IN, "${inputfile}.${splitpfx}${idx}.trans");
+    @in=<IN>;
+    close(IN);
+    $inplength{$idx} = scalar(@in);
+
+    open (IN, "${searchgraphfile}.${splitpfx}${idx}");
+    while (<IN>){
+      my ($code,@extra)=split(/[ \t]+/,$_);
+      $code += $offset;
+      if ($code ne $oldcode){
+
+# if there is a jump between two consecutive codes
+# it means that an input sentence is not translated
+# fill this hole with a "fictitious" list of searchgraphs
+# comprising just one "_EMPTYSEARCHGRAPH_
+        while ($code - $oldcode > 1){
+           $oldcode++;
+           print OUT "$oldcode _EMPTYSEARCHGRAPH_\n";
+        }
+      }
+      $oldcode=$code;
+      print OUT join(" ",($oldcode,@extra));
+    }
+    close(IN);
+    $offset += $inplength{$idx};
+
+    while ($offset - $oldcode > 1){
+      $oldcode++;
+      print OUT "$oldcode _EMPTYSEARCHGRAPH_\n";
+    }
+  }
+  close(OUT);
+}
+
 sub concatenate_nbest(){
   my $oldcode="";
   my $newcode=-1;
   my %inplength = ();
   my $offset = 0;
  
-
 # get the list of feature and set a fictitious string with zero scores
   open (IN, "${nbestfile}.${splitpfx}$idxlist[0]");
   my $str = <IN>;
@@ -484,12 +618,15 @@ sub concatenate_nbest(){
   my $emptyfeaturescores = $featurescores;
   $emptyfeaturescores =~ s/[-0-9\.]+/0/g;
 
-  open (OUT, "> ${orinbestfile}");
+  my $outnbest=$nbestlist[0];
+  if ($nbestlist[0] eq '-'){ $outnbest="nbest$$"; }
+
+  open (OUT, "> $outnbest");
   foreach my $idx (@idxlist){
 
 #computing the length of each input file
     my @in=();
-    open (IN, "${testfile}.${splitpfx}${idx}.trans");
+    open (IN, "${inputfile}.${splitpfx}${idx}.trans");
     @in=<IN>;
     close(IN);
     $inplength{$idx} = scalar(@in);
@@ -526,7 +663,7 @@ sub concatenate_nbest(){
 sub concatenate_1best(){
   foreach my $idx (@idxlist){
     my @in=();
-    open (IN, "${testfile}.${splitpfx}${idx}.trans");
+    open (IN, "${inputfile}.${splitpfx}${idx}.trans");
     @in=<IN>;
     print STDOUT "@in";
     close(IN);
@@ -534,7 +671,7 @@ sub concatenate_1best(){
 }
 
 sub concatenate_logs(){
-  open (OUT, "> ${orilogfile}");
+  open (OUT, "> ${logfile}");
   foreach my $idx (@idxlist){
     my @in=();
     open (IN, "$qsubout$idx");
@@ -583,23 +720,23 @@ sub check_translation(){
   my @failed = ();
   foreach my $idx (@idx_todo){
     if ($inputtype==0){#text input
-      chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
+      chomp($inputN=`wc -l ${inputfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
     elsif ($inputtype==1){#confusion network input
-      chomp($inputN=`cat ${testfile}.$splitpfx$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l | cut -d' ' -f1 `);
+      chomp($inputN=`cat ${inputfile}.$splitpfx$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l | cut -d' ' -f1 `);
     }
     elsif ($inputtype==2){#lattice input
-      chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
+      chomp($inputN=`wc -l ${inputfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
     else{#unknown input
       die "INPUTTYPE:$inputtype is unknown!\n";
     }
-    chomp($outputN=`wc -l ${testfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
+    chomp($outputN=`wc -l ${inputfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
     
     if ($inputN != $outputN){
       print STDERR "Split ($idx) were not entirely translated\n";
       print STDERR "outputN=$outputN inputN=$inputN\n";
-      print STDERR "outputfile=${testfile}.$splitpfx$idx.trans inputfile=${testfile}.$splitpfx$idx\n";
+      print STDERR "outputfile=${inputfile}.$splitpfx$idx.trans inputfile=${inputfile}.$splitpfx$idx\n";
       push @failed,$idx;
     }
   }
@@ -612,24 +749,24 @@ sub check_translation_old_sge(){
   my $outputN;
   foreach my $idx (@idx_todo){
     if ($inputtype==0){#text input
-      chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
+      chomp($inputN=`wc -l ${inputfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
     elsif ($inputtype==1){#confusion network input
-      chomp($inputN=`cat ${testfile}.$splitpfx$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l |
+      chomp($inputN=`cat ${inputfile}.$splitpfx$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l |
  cut -d' ' -f1 `);
     }
     elsif ($inputtype==2){#lattice input
-      chomp($inputN=`wc -l ${testfile}.$splitpfx$idx | cut -d' ' -f1`);
+      chomp($inputN=`wc -l ${inputfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
     else{#unknown input
       die "INPUTTYPE:$inputtype is unknown!\n";
     }
-    chomp($outputN=`wc -l ${testfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
+    chomp($outputN=`wc -l ${inputfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
 
     if ($inputN != $outputN){
       print STDERR "Split ($idx) were not entirely translated\n";
       print STDERR "outputN=$outputN inputN=$inputN\n";
-      print STDERR "outputfile=${testfile}.$splitpfx$idx.trans inputfile=${testfile}.$splitpfx$idx\n";
+      print STDERR "outputfile=${inputfile}.$splitpfx$idx.trans inputfile=${inputfile}.$splitpfx$idx\n";
       return 1;
     }
   }
@@ -639,9 +776,10 @@ sub check_translation_old_sge(){
 sub remove_temporary_files(){
   #removing temporary files
   foreach my $idx (@idxlist){
-    unlink("${testfile}.${splitpfx}${idx}.trans");
-    unlink("${testfile}.${splitpfx}${idx}");
-    if ($nbestflag){      unlink("${nbestfile}.${splitpfx}${idx}");     }
+    unlink("${inputfile}.${splitpfx}${idx}.trans");
+    unlink("${inputfile}.${splitpfx}${idx}");
+    if ($nbestflag){ unlink("${nbestfile}.${splitpfx}${idx}"); }
+    if ($searchgraphflag){ unlink("${searchgraphfile}.${splitpfx}${idx}"); }
     unlink("${jobscript}${idx}.bash");
     unlink("${jobscript}${idx}.log");
     unlink("$qsubname.W.log");
@@ -649,6 +787,8 @@ sub remove_temporary_files(){
     unlink("$qsuberr$idx");
     rmdir("$tmpdir");
   }
+  if ($nbestflag && $nbestlist[0] eq '-'){ unlink("${nbestfile}$$"); };
+  if ($searchgraphflag  && $searchgraphlist eq '-'){ unlink("${searchgraphfile}$$"); };
 }
 
 sub safesystem {
