@@ -59,6 +59,10 @@ my $nbestfile=undef;
 my $oldnbestfile=undef;
 my $oldnbest=undef;
 my $nbestflag=0;
+my @wordgraphlist=();
+my $wordgraphlist=undef;
+my $wordgraphfile=undef;
+my $wordgraphflag=0;
 my $robust=1; # undef; # resubmit crashed jobs
 my $logfile="";
 my $logflag="";
@@ -87,6 +91,7 @@ sub init(){
              'n-best-file=s'=> \$oldnbestfile,
              'n-best-size=i'=> \$oldnbest,
 	     'output-search-graph|osg=s'=> \$searchgraphlist,
+             'output-word-graph|owg=s'=> \$wordgraphlist,
 	     'qsub-prefix=s'=> \$qsubname,
 	     'queue-parameters=s'=> \$queueparameters,
 	     'inputtype=i'=> \$inputtype,
@@ -97,12 +102,15 @@ sub init(){
   getNbestParameters();
 
   getSearchGraphParameters();
+
+  getWordGraphParameters();
   
   getLogParameters();
 
 #print_parameters();
 #print STDERR "nbestflag:$nbestflag\n";
 #print STDERR "searchgraphflag:$searchgraphflag\n";
+print STDERR "wordgraphflag:$wordgraphflag\n";
 #print STDERR "inputlist:$inputlist\n";
 
   chomp($inputfile=`basename $inputlist`) if defined($inputlist);
@@ -148,11 +156,14 @@ sub usage(){
   print STDERR "   -help this help\n";
   print STDERR "Moses options:\n";
   print STDERR "   -inputtype <0|1|2> 0 for text, 1 for confusion networks, 2 for lattices\n";
-  print STDERR "   -output-search-graph (osg): Output connected hypotheses of search into specified filename\n";
+  print STDERR "   -output-search-graph (osg) <file>: Output connected hypotheses of search into specified filename\n";
+  print STDERR "   -output-word-graph (osg) '<file> <0|1>': Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos\n";
+  print STDERR "   IMPORTANT NOTE: use single quote to group parameters of -output-word-graph\n";
+  print STDERR "                   This is different from standard moses\n";
   print STDERR "   -n-best-list '<file> <N> [distinct]' where\n";
   print STDERR "                <file>:   file where storing nbest lists\n";
   print STDERR "                <N>:      size of nbest lists\n";
-  print STDERR "                distinct: to activate generation of distinct nbest alternatives\n";
+  print STDERR "                distinct: (optional) to activate generation of distinct nbest alternatives\n";
   print STDERR "   IMPORTANT NOTE: use single quote to group parameters of -n-best-list\n";
   print STDERR "                   This is different from standard moses\n";
   print STDERR "   IMPORTANT NOTE: The following two parameters are now OBSOLETE, and they are no more supported\n";
@@ -175,6 +186,7 @@ sub print_parameters(){
   print STDERR "Number of jobs:$jobs\n";
   print STDERR "Nbest list: $nbestlist\n" if ($nbestflag);
   print STDERR "Output Search Graph: $searchgraphlist\n" if ($searchgraphflag);
+  print STDERR "Output Word Graph: $wordgraphlist\n" if ($wordgraphflag);
   print STDERR "LogFile:$logfile\n" if ($logflag);
   print STDERR "Qsub name: $qsubname\n";
   print STDERR "Queue parameters: $queueparameters\n";
@@ -234,7 +246,7 @@ sub getNbestParameters(){
   }
 }
 
-#get parameters for log file (possibly from configuration file)
+#get parameters for search graph computation (possibly from configuration file)
 sub getSearchGraphParameters(){
   if (!$searchgraphlist){
     open (CFG, "$cfgfile");
@@ -254,6 +266,32 @@ sub getSearchGraphParameters(){
     if ($searchgraphlist eq '-'){ $searchgraphfile="searchgraph"; }
     else{ chomp($searchgraphfile=`basename $searchgraphlist`); }
     $searchgraphflag=1;
+  }
+}
+
+#get parameters for word graph computation (possibly from configuration file)
+sub getWordGraphParameters(){
+  if (!$wordgraphlist){
+    open (CFG, "$cfgfile");
+    while (chomp($_=<CFG>)){
+      if (/^\[output-word-graph\]/ || /^\[owg\]/){
+        my $tmp;
+        while (chomp($tmp=<CFG>)){
+          last if $tmp eq "" || $tmp=~/^\[/;
+          $wordgraphlist .= "$tmp ";
+        }
+        last;
+      }
+    }
+    close(CFG);
+  }
+  if ($wordgraphlist){
+    my @tmp=split(/[ \t]+/,$wordgraphlist);
+    @wordgraphlist = @tmp;
+
+    if ($wordgraphlist[0] eq '-'){ $wordgraphfile="wordgraph"; }
+    else{ chomp($wordgraphfile=`basename $wordgraphlist[0]`);     }
+    $wordgraphflag=1;
   }
 }
 
@@ -503,6 +541,9 @@ safesystem("cat nbest$$ >> /dev/stdout") if $nbestlist[0] eq '-';
 concatenate_searchgraph() if $searchgraphflag;  
 safesystem("cat searchgraph$$ >> /dev/stdout") if $searchgraphlist eq '-';
 
+concatenate_wordgraph() if $wordgraphflag;  
+safesystem("cat wordgraph$$ >> /dev/stdout") if $wordgraphlist[0] eq '-';
+
 remove_temporary_files();
 
 
@@ -529,7 +570,12 @@ sub preparing_script(){
       $tmpsearchgraphlist="-output-search-graph $tmpdir/$searchgraphfile.$splitpfx$idx";
     }
 
-    print OUT "$mosescmd $mosesparameters $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
+    my $tmpwordgraphlist="";
+    if ($wordgraphflag){
+      $tmpwordgraphlist="-output-word-graph $tmpdir/$wordgraphfile.$splitpfx$idx $wordgraphlist[1]";
+    }
+
+    print OUT "$mosescmd $mosesparameters $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
     print OUT "echo exit status \$\?\n\n";
 
     if ($nbestflag){
@@ -537,7 +583,12 @@ sub preparing_script(){
       print OUT "echo exit status \$\?\n\n";
     }
     if ($searchgraphflag){
-      print OUT "\\mv -f $tmpdir/$searchgraphfile.$splitpfx$idx .\n\n";
+      print OUT "\\mv -f $tmpdir/${searchgraphfile}.$splitpfx$idx .\n\n";
+      print OUT "echo exit status \$\?\n\n";
+    }
+
+    if ($wordgraphflag){
+      print OUT "\\mv -f $tmpdir/${wordgraphfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }
 
@@ -550,6 +601,65 @@ sub preparing_script(){
   }
 }
 
+sub concatenate_wordgraph(){
+  my $oldcode="";
+  my $newcode=-1;
+  my %inplength = ();
+  my $offset = 0;
+
+  my $outwordgraph=$wordgraphlist[0];
+  if ($wordgraphlist[0] eq '-'){ $outwordgraph="wordgraph$$"; }
+
+  open (OUT, "> $outwordgraph");
+  foreach my $idx (@idxlist){
+
+#computing the length of each input file
+    my @in=();
+    open (IN, "${inputfile}.${splitpfx}${idx}.trans");
+    @in=<IN>;
+    close(IN);
+    $inplength{$idx} = scalar(@in);
+
+    open (IN, "${wordgraphfile}.${splitpfx}${idx}");
+    while (<IN>){
+
+      my $code="";
+      if (/^UTTERANCE=/){
+        ($code)=($_=~/^UTTERANCE=(\d+)/);
+     
+	print STDERR "code:$code offset:$offset\n"; 
+        $code += $offset;
+        if ($code ne $oldcode){
+
+# if there is a jump between two consecutive codes
+# it means that an input sentence is not translated
+# fill this hole with a "fictitious" list of wordgraphs
+# comprising just one "_EMPTYSEARCHGRAPH_
+          while ($code - $oldcode > 1){
+             $oldcode++;
+             print OUT "UTTERANCE=$oldcode\n";
+	print STDERR " to OUT -> code:$oldcode\n"; 
+             print OUT "_EMPTYWORDGRAPH_\n";
+          }
+        }
+      
+        $oldcode=$code;
+        print OUT "UTTERANCE=$oldcode\n";
+        next;
+      }
+      print OUT "$_";
+    }
+    close(IN);
+    $offset += $inplength{$idx};
+
+    while ($offset - $oldcode > 1){
+      $oldcode++;
+      print OUT "UTTERANCE=$oldcode\n";
+      print OUT "_EMPTYWORDGRAPH_\n";
+    }
+  }
+  close(OUT);
+}
 
 
 sub concatenate_searchgraph(){
@@ -780,6 +890,7 @@ sub remove_temporary_files(){
     unlink("${inputfile}.${splitpfx}${idx}");
     if ($nbestflag){ unlink("${nbestfile}.${splitpfx}${idx}"); }
     if ($searchgraphflag){ unlink("${searchgraphfile}.${splitpfx}${idx}"); }
+    if ($wordgraphflag){ unlink("${wordgraphfile}.${splitpfx}${idx}"); }
     unlink("${jobscript}${idx}.bash");
     unlink("${jobscript}${idx}.log");
     unlink("$qsubname.W.log");
@@ -789,6 +900,7 @@ sub remove_temporary_files(){
   }
   if ($nbestflag && $nbestlist[0] eq '-'){ unlink("${nbestfile}$$"); };
   if ($searchgraphflag  && $searchgraphlist eq '-'){ unlink("${searchgraphfile}$$"); };
+  if ($wordgraphflag  && $wordgraphlist eq '-'){ unlink("${wordgraphfile}$$"); };
 }
 
 sub safesystem {
