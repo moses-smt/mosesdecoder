@@ -303,8 +303,12 @@ bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase, const std::vect
 {
   const Phrase &phrase = static_cast<const Phrase&>(inputPhrase);
   
-  return IsCompatible(phrase, factorVec)
-        && inputPhrase.GetAlignmentPair().IsCompatible(GetAlignmentPair(), 0, 0);
+	bool ret = IsCompatible(phrase, factorVec);
+  
+	// don't compare alignments if input phrase taken directly from phrase table
+	return ret && (inputPhrase.GetSubRangeCount() <= 1 
+								|| inputPhrase.GetAlignmentPair().IsCompatible(GetAlignmentPair(), 0, 0)
+								);
 }
 
 bool TargetPhrase::IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const
