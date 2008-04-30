@@ -53,6 +53,8 @@ TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOpti
   return newTransOpt;
 }
 
+#include "IntraPhraseHypothesisStack.h"
+
 void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , TranslationOptionCollection *toc
@@ -64,6 +66,13 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
     return;
   }
 
+	const WordsRange &sourceRange = inputPartialTranslOpt.GetSourceWordsRange();
+	IntraPhraseHypothesisStack intraPhraseHypothesisStack(inputPartialTranslOpt
+																											, sourceRange
+																											, toc->GetSource()
+																											, GetPhraseDictionary());
+
+	/*
 	// create	trans option
 	ConcatenatedPhraseColl::const_iterator iterConcatePhrase;
 	for (iterConcatePhrase = m_concatenatedPhraseColl->begin(); iterConcatePhrase != m_concatenatedPhraseColl->end(); ++iterConcatePhrase)	
@@ -89,6 +98,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
       }
     }
 	}
+	*/
 }
 
 void DecodeStepTranslation::CreateTargetPhrases(
