@@ -404,6 +404,7 @@ void IOStream::OutputNBestList(const TrellisPathList &nBestList, long translatio
 		  }
     }
 		
+
 		// total						
     *m_nBestStream << "||| " << path.GetTotalScore();
     if (includeAlignment) {
