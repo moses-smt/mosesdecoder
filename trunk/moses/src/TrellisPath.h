@@ -56,7 +56,8 @@ public:
 		* which may change other hypo back from there
 		*/
 	TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypothesis *arc);
-	
+
+	//! get score for this path throught trellis
 	inline float GetTotalScore() const { return m_totalScore; }
 
 	/** list of each hypo/arcs in path. For anything other than the best hypo, it is not possible just to follow the
@@ -66,7 +67,7 @@ public:
 	{
 		return m_path;
 	}
-	
+
 	//! create a set of next best paths by wiggling 1 of the node at a time. 
 	void CreateDeviantPaths(TrellisPathCollection &pathColl) const;
 
@@ -74,7 +75,10 @@ public:
 	{
 		return m_scoreBreakdown;
 	}
-	
+
+	//! get target words range of the hypo within n-best trellis. not necessarily the same as hypo.GetCurrTargetWordsRange()
+	WordsRange GetTargetWordsRange(const Hypothesis &hypo) const;
+
 	Phrase GetTargetPhrase() const;
 	Phrase GetSurfacePhrase() const;
 	
