@@ -411,8 +411,8 @@ void IOStream::OutputNBestList(const TrellisPathList &nBestList, long translatio
 		for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
 		{
 			const Hypothesis &edge = *edges[currEdge];
-			WordsRange sourceRange = edge.GetCurrSourceWordsRange();
-			WordsRange targetRange = edge.GetCurrTargetWordsRange();
+			const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+			WordsRange targetRange = path.GetTargetWordsRange(edge);
 			*m_nBestStream << " " << sourceRange.GetStartPos();
 			if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
 			  *m_nBestStream << "-" << sourceRange.GetEndPos();

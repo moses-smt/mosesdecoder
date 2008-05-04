@@ -156,5 +156,26 @@ Phrase TrellisPath::GetSurfacePhrase() const
 	return ret;
 }
 
+WordsRange TrellisPath::GetTargetWordsRange(const Hypothesis &hypo) const
+{
+	size_t startPos = 0;
+	
+	for (int indEdge = (int) m_path.size() - 1 ; indEdge >= 0 ; --indEdge)
+	{
+		const Hypothesis *currHypo = m_path[indEdge];
+		size_t endPos = startPos + currHypo->GetCurrTargetLength() - 1;
+
+		if (currHypo == &hypo)
+		{
+			return WordsRange(startPos, endPos);
+		}
+		startPos = endPos + 1;
+	}
+
+	// have to give a hypo in the trellis path, but u didn't. 
+	assert(false);
+	return WordsRange(NOT_FOUND, NOT_FOUND);
+}
+
 TO_STRING_BODY(TrellisPath);
 
