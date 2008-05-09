@@ -68,6 +68,12 @@ public:
 		return (m_startPos == NOT_FOUND) ? 0 : m_endPos - m_startPos + 1;
 	}
 
+	inline void Shift(int shift)
+	{
+		m_startPos += shift;
+		m_endPos += shift;
+	}
+
 	//! transitive comparison
 	inline bool operator<(const WordsRange& x) const 
 	{

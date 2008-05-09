@@ -53,7 +53,7 @@ TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOpti
   return newTransOpt;
 }
 
-#include "IntraPhraseHypothesisStack.h"
+#include "IntraPhraseManager.h"
 
 void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
                               , PartialTranslOptColl &outputPartialTranslOptColl
@@ -67,10 +67,10 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
   }
 
 	const WordsRange &sourceRange = inputPartialTranslOpt.GetSourceWordsRange();
-	IntraPhraseHypothesisStack intraPhraseHypothesisStack(inputPartialTranslOpt
-																											, sourceRange
-																											, toc->GetSource()
-																											, GetPhraseDictionary());
+	IntraPhraseManager intraPhraseManager(inputPartialTranslOpt
+																			, sourceRange
+																			, toc->GetSource()
+																			, GetPhraseDictionary());
 
 	/*
 	// create	trans option

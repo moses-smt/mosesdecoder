@@ -4,32 +4,25 @@
 #include <set>
 #include <vector>
 #include "IntraPhraseTargetPhrase.h"
-#include "TranslationOption.h"
-#include "WordsRange.h"
-#include "InputType.h"
-#include "TargetPhraseCollection.h"
 
-class IntraPhraseHypothesisStack 
+class IntraPhraseHypothesisStack
 {
 private:
 	typedef std::set<IntraPhraseTargetPhrase> CollType;
 	CollType m_coll;
-
-	std::vector<std::vector<const TargetPhraseCollection*> > m_targetPhraseColl;
-	const WordsRange &m_sourceRange;
-
-	void Process();
-	
-	void SetTargetPhraseCollection(const WordsRange &sourceRange
-																, const InputType &source
-																, const PhraseDictionary &phraseDict);
-	void SetTargetPhraseCollection(size_t startPos
-																, size_t endPos
-																, const TargetPhraseCollection *targetPhraseCollection);
+	size_t m_maxSize;
 
 public:
-	IntraPhraseHypothesisStack(const TranslationOption &transOpt, const WordsRange &sourceRange
-													, const InputType &source, const PhraseDictionary &phraseDict);
+	// iter
+	typedef CollType::iterator iterator;
+	typedef CollType::const_iterator const_iterator;
+	const_iterator begin() const { return m_coll.begin(); }
+	const_iterator end() const { return m_coll.end(); }
+
+	IntraPhraseHypothesisStack(size_t maxSize);
+
+	void AddPrune(const IntraPhraseTargetPhrase &phrase);
+	void Process();
 
 };
 
