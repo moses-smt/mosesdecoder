@@ -132,6 +132,10 @@ public:
 	bool IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const;
   //! Used by translation step.
   bool IsCompatible(const TargetPhrase &inputPhrase, const std::vector<FactorType>& factorVec) const;
+	/*! used by intra-phrase creation
+	 *		start & endPos are pos of this obj
+	*/
+	bool IsCompatible(const TargetPhrase &inputPhrase, size_t startPos, size_t endPos) const;
 
 	size_t GetSubRangeCount() const
 	{ return m_subRangeCount; }

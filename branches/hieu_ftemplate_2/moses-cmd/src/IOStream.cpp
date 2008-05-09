@@ -371,21 +371,21 @@ void IOStream::OutputNBestList(const TrellisPathList &nBestList, long translatio
 		// total						
     *m_nBestStream << "||| " << path.GetTotalScore();
     if (includeAlignment) {
-		*m_nBestStream << " |||";
-		for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
-		{
-			const Hypothesis &edge = *edges[currEdge];
-			WordsRange sourceRange = edge.GetCurrSourceWordsRange();
-			WordsRange targetRange = edge.GetCurrTargetWordsRange();
-			*m_nBestStream << " " << sourceRange.GetStartPos();
-			if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
-			  *m_nBestStream << "-" << sourceRange.GetEndPos();
+			*m_nBestStream << " |||";
+			for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
+			{
+				const Hypothesis &edge = *edges[currEdge];
+				WordsRange sourceRange = edge.GetCurrSourceWordsRange();
+				WordsRange targetRange = edge.GetCurrTargetWordsRange();
+				*m_nBestStream << " " << sourceRange.GetStartPos();
+				if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
+					*m_nBestStream << "-" << sourceRange.GetEndPos();
+				}
+				*m_nBestStream << "=" << targetRange.GetStartPos();
+				if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
+					*m_nBestStream << "-" << targetRange.GetEndPos();
+				}
 			}
-			*m_nBestStream << "=" << targetRange.GetStartPos();
-			if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
-			  *m_nBestStream << "-" << targetRange.GetEndPos();
-			}
-		}
     }
     *m_nBestStream << endl;
 	}

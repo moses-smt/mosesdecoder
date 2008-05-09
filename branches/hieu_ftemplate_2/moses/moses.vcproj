@@ -371,6 +371,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\IntraPhraseManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\IntraPhraseTargetPhrase.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LanguageModel.cpp"
 				>
 			</File>
@@ -806,6 +814,10 @@
 			</File>
 			<File
 				RelativePath=".\src\IntraPhraseHypothesisStack.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\IntraPhraseManager.h"
 				>
 			</File>
 			<File

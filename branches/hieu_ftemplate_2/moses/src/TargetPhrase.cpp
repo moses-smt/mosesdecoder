@@ -274,6 +274,34 @@ void TargetPhrase::CreateAlignmentInfo(const string &sourceStr
 	m_alignmentPair.GetAlignmentPhrase(Input).AddUniformAlignmentElement(uniformAlignmentTarget);
 }
 
+bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase, size_t startPos, size_t endPos) const
+{
+	// size has to be the same or less
+	const size_t size = GetSize()
+							,checkSize = endPos - startPos + 1;
+	assert(checkSize >= inputPhrase.GetSize());
+
+	if (checkSize > size)
+		return false;
+
+	const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
+	size_t inputPos = 0;
+	for (size_t currPos = startPos ; currPos <= endPos ; currPos++)
+	{
+		for (unsigned int currFactor = 0 ; currFactor < maxNumFactors ; currFactor++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			const Factor *thisFactor 		= GetFactor(currPos, factorType)
+									,*inputFactor	= inputPhrase.GetFactor(inputPos, factorType);
+			if (thisFactor != NULL && inputFactor != NULL && thisFactor != inputFactor)
+				return false;
+		}
+		inputPos++;
+	}
+
+	// alignment has to be consistent
+	return inputPhrase.GetAlignmentPair().IsCompatible(GetAlignmentPair(), 0, checkSize);
+}
 
 bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase) const
 {
