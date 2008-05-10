@@ -20,18 +20,21 @@ IntraPhraseManager::IntraPhraseManager(const TranslationOption &transOpt
 	}
 
 	// initialise 1st stack
-	m_stackColl[0]->AddPrune(IntraPhraseTargetPhrase(sourceRange.GetNumWordsCovered()));
+	m_stackColl[0]->AddPrune(new IntraPhraseTargetPhrase(sourceRange.GetNumWordsCovered()));
+
+	cerr << "no. of stacks " << m_stackColl.size() << endl;
 
 	// process each stack
 	vector<IntraPhraseHypothesisStack*>::iterator iterStack;
 	for (iterStack = m_stackColl.begin() ; iterStack != m_stackColl.end() ; ++iterStack)
 	{
 		IntraPhraseHypothesisStack &stack = **iterStack;
+
 		// go through each stack
 		IntraPhraseHypothesisStack::const_iterator iterPhrase;
 		for (iterPhrase = stack.begin() ; iterPhrase != stack.end() ; ++iterPhrase)
 		{
-			const IntraPhraseTargetPhrase &intraPhraseTargetPhrase = *iterPhrase;
+			const IntraPhraseTargetPhrase &intraPhraseTargetPhrase = **iterPhrase;
 			ProcessOnePhrase(intraPhraseTargetPhrase);
 		}
 	}
@@ -50,7 +53,7 @@ void IntraPhraseManager::ProcessOnePhrase(const IntraPhraseTargetPhrase &intraPh
 			{ // expand phrase
 				const TargetPhraseCollection *targetPhraseCollection = GetTargetPhraseCollection(startPos, endPos);
 				if (targetPhraseCollection != NULL)
-					ExpandOnePhrase(WordsRange(startPos, endPos), intraPhraseTargetPhrase, *targetPhraseCollection);
+					ExpandOnePhrase(rangeShifted, intraPhraseTargetPhrase, *targetPhraseCollection);
 			}
 		}
 	}
@@ -61,37 +64,36 @@ void IntraPhraseManager::ExpandOnePhrase(
 										, const IntraPhraseTargetPhrase &intraPhraseTargetPhrase
 										, const TargetPhraseCollection &targetPhraseCollection)
 {
-	cerr << m_transOpt << endl;
+	const StaticData &staticData = StaticData::Instance();
 
 	TargetPhraseCollection::const_iterator iterPhrase;
 	for (iterPhrase = targetPhraseCollection.begin() ; iterPhrase != targetPhraseCollection.end() ; ++iterPhrase)
 	{
-		IntraPhraseTargetPhrase newIntraPhraseTargetPhrase(intraPhraseTargetPhrase);
-		cerr << newIntraPhraseTargetPhrase << endl;
+		IntraPhraseTargetPhrase *newIntraPhraseTargetPhrase = new IntraPhraseTargetPhrase(intraPhraseTargetPhrase);
 
 		const TargetPhrase &endPhrase = **iterPhrase;
-		newIntraPhraseTargetPhrase.Append(endSourceRange, endPhrase);
-		cerr << newIntraPhraseTargetPhrase << endl;
+		newIntraPhraseTargetPhrase->Append(endSourceRange, endPhrase);
 
 		// are the overlapping factors compatible ?
 		// is alignment compatible with previous trans opt ?
-		bool isComp  = m_transOpt.GetTargetPhrase().IsCompatible(newIntraPhraseTargetPhrase
+		bool isComp  = m_transOpt.GetTargetPhrase().IsCompatible(*newIntraPhraseTargetPhrase
 																														, 0
-																														, newIntraPhraseTargetPhrase.GetSize());
+																														, newIntraPhraseTargetPhrase->GetSize() - 1);
+		if (isComp)
+		{
+			// calc lm scores
+			// must check for correctness
+			float weightWP = staticData.GetWeightWordPenalty();
+			const LMList &lmList = staticData.GetAllLM();
+			newIntraPhraseTargetPhrase->RecalcLMScore(weightWP, lmList);
 
-		/*
-		isComp = m_transOpt.GetAlignmentPair().IsCompatible(
-																									newIntraPhraseTargetPhrase.GetAlignmentPair()
-																									, 0
-																									, 0);
-		*/
-
-		// calc lm scores
-		// must check for correctness
-		const StaticData &staticData = StaticData::Instance();
-		float weightWP = staticData.GetWeightWordPenalty();
-		const LMList &lmList = staticData.GetAllLM();
-		newIntraPhraseTargetPhrase.RecalcLMScore(weightWP, lmList);
+			size_t numWordsCovered = newIntraPhraseTargetPhrase->GetWordsBitmap().GetNumWordsCovered();
+			m_stackColl[numWordsCovered]->AddPrune(newIntraPhraseTargetPhrase);
+		}
+		else
+		{
+			delete newIntraPhraseTargetPhrase;
+		}
 	} // for (iterPhrase 
 }
 

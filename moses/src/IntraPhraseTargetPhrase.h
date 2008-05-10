@@ -13,5 +13,8 @@ public:
 
 	const WordsBitmap &GetWordsBitmap() const
 	{ return m_sourceCompleted; }
+
+	void Append(const WordsRange &sourceRange, const TargetPhrase &appendPhrase);
+
 };
 
