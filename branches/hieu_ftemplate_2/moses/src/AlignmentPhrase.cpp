@@ -50,7 +50,10 @@ AlignmentPhrase::~AlignmentPhrase()
 	RemoveAllInColl(m_collection);
 }
 
-bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t mergePosStart, size_t shiftPos) const 
+bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare
+																	 , size_t mergePosStart
+																	 , size_t shiftPos
+																	 , bool allowSourceNullAlign) const 
 {
 	const size_t compareSize = min(GetSize() - mergePosStart	, compare.GetSize());
 
@@ -62,6 +65,12 @@ bool AlignmentPhrase::IsCompatible(const AlignmentPhrase &compare, size_t mergeP
 		assert(posThis < GetSize());
 		
 		const AlignmentElement &alignThis = GetElement(posThis);
+		if (allowSourceNullAlign && alignThis.GetSize() == 0)
+		{
+			posThis++;
+			continue;
+		}
+
 		AlignmentElement alignCompare = compare.GetElement(posCompare);
 
 		// shift alignment

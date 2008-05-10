@@ -78,7 +78,8 @@ public:
 
 	bool IsCompatible(const AlignmentPair &compare
 									, size_t sourceStart
-									, size_t targetStart) const;
+									, size_t targetStart
+									, bool allowSourceNullAlign = false) const;
 
 	TO_STRING();
 };

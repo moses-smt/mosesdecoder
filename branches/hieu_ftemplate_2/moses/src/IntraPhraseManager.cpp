@@ -14,14 +14,16 @@ IntraPhraseManager::IntraPhraseManager(const TranslationOption &transOpt
 	SetTargetPhraseCollection(sourceRange, source, phraseDict);
 
 	// init all stack sizes
+	size_t tableLimit = phraseDict.GetTableLimit();
 	for (size_t indStack = 0 ; indStack < m_stackColl.size() ; ++indStack)
 	{
-		m_stackColl[indStack] = new IntraPhraseHypothesisStack(20);
+		m_stackColl[indStack] = new IntraPhraseHypothesisStack(tableLimit * 5);
 	}
 
 	// initialise 1st stack
 	m_stackColl[0]->AddPrune(new IntraPhraseTargetPhrase(sourceRange.GetNumWordsCovered()));
 
+	cerr << m_transOpt << endl;
 	cerr << "no. of stacks " << m_stackColl.size() << endl;
 
 	// process each stack
@@ -29,6 +31,7 @@ IntraPhraseManager::IntraPhraseManager(const TranslationOption &transOpt
 	for (iterStack = m_stackColl.begin() ; iterStack != m_stackColl.end() ; ++iterStack)
 	{
 		IntraPhraseHypothesisStack &stack = **iterStack;
+		cerr << "size " << stack.GetSize() << endl;
 
 		// go through each stack
 		IntraPhraseHypothesisStack::const_iterator iterPhrase;
@@ -78,7 +81,8 @@ void IntraPhraseManager::ExpandOnePhrase(
 		// is alignment compatible with previous trans opt ?
 		bool isComp  = m_transOpt.GetTargetPhrase().IsCompatible(*newIntraPhraseTargetPhrase
 																														, 0
-																														, newIntraPhraseTargetPhrase->GetSize() - 1);
+																														, newIntraPhraseTargetPhrase->GetSize() - 1
+																														, true);
 		if (isComp)
 		{
 			// calc lm scores
@@ -144,4 +148,8 @@ const TargetPhraseCollection *IntraPhraseManager::GetTargetPhraseCollection(size
 	return m_targetPhraseColl[startPos - startSource][endPos - startPos];
 }
 
+const IntraPhraseHypothesisStack &IntraPhraseManager::GetTargetPhraseCollection() const
+{
+	return *m_stackColl.back();
+}
 

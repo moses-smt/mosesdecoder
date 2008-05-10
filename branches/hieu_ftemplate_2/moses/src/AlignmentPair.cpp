@@ -51,13 +51,17 @@ bool AlignmentPair::IsCompletable(size_t decodeStepId
 
 bool AlignmentPair::IsCompatible(const AlignmentPair &compare
 																, size_t sourceStart
-																, size_t targetStart) const
+																, size_t targetStart
+																, bool allowSourceNullAlign) const
 {
+	// allowSourceNullAlign used by intra-phrase
+
 	// source
 	bool ret = GetAlignmentPhrase(Input).IsCompatible(
 							compare.GetAlignmentPhrase(Input)
 							, sourceStart
-							, targetStart);
+							, targetStart
+							, allowSourceNullAlign);
 
 	if (!ret)
 		return false;
