@@ -300,7 +300,7 @@ bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase, size_t startPos
 	}
 
 	// alignment has to be consistent
-	return inputPhrase.GetAlignmentPair().IsCompatible(GetAlignmentPair(), 0, checkSize);
+	return inputPhrase.GetAlignmentPair().IsCompatible(GetAlignmentPair(), 0, 0);
 }
 
 bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase) const
@@ -398,6 +398,9 @@ TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
+	if (tp.m_sourcePhrase)
+		os << *tp.m_sourcePhrase << " TO ";
+			
   os	<< static_cast<const Phrase&>(tp) 
 			<< ", " << tp.GetAlignmentPair()
 			<< ", pC=" << tp.m_transScore << ", c=" << tp.m_fullScore
