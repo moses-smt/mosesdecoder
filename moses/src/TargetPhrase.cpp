@@ -274,7 +274,10 @@ void TargetPhrase::CreateAlignmentInfo(const string &sourceStr
 	m_alignmentPair.GetAlignmentPhrase(Input).AddUniformAlignmentElement(uniformAlignmentTarget);
 }
 
-bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase, size_t startPos, size_t endPos) const
+bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase
+																, size_t startPos
+																, size_t endPos
+																, bool allowSourceNullAlign) const
 {
 	// size has to be the same or less
 	const size_t size = GetSize()
@@ -300,7 +303,9 @@ bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase, size_t startPos
 	}
 
 	// alignment has to be consistent
-	return inputPhrase.GetAlignmentPair().IsCompatible(GetAlignmentPair(), 0, 0);
+	return inputPhrase.GetAlignmentPair().IsCompatible(GetAlignmentPair()
+																										, 0, 0
+																										, allowSourceNullAlign);
 }
 
 bool TargetPhrase::IsCompatible(const TargetPhrase &inputPhrase) const

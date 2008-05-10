@@ -18,9 +18,9 @@ void IntraPhraseHypothesisStack::AddPrune(IntraPhraseTargetPhrase *phrase)
 {
 	m_coll.insert(phrase);
 
-	if (m_coll.size() > 10)
+	if (m_coll.size() > m_maxSize * 2)
 	{
-		PruneToSize(5);
+		PruneToSize(m_maxSize);
 	}
 }
 

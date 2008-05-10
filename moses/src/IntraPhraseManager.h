@@ -11,6 +11,7 @@ class TargetPhraseCollection;
 
 class IntraPhraseManager
 {
+protected:
 	std::vector<IntraPhraseHypothesisStack*> m_stackColl;
 	std::vector<std::vector<const TargetPhraseCollection*> > m_targetPhraseColl;
 	const TranslationOption &m_transOpt;
@@ -36,5 +37,6 @@ public:
 										, const PhraseDictionary &phraseDict);
 	~IntraPhraseManager();
 
+	const IntraPhraseHypothesisStack &GetTargetPhraseCollection() const;
 };
 

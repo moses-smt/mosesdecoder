@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PartialTranslOptColl.h"
 #include "FactorCollection.h"
 #include "TargetPhraseMatrix.h"
+#include "IntraPhraseManager.h"
 
 size_t DecodeStepTranslation::s_id = 0;
 
@@ -53,8 +54,6 @@ TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOpti
   return newTransOpt;
 }
 
-#include "IntraPhraseManager.h"
-
 void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , TranslationOptionCollection *toc
@@ -71,6 +70,18 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 																			, sourceRange
 																			, toc->GetSource()
 																			, GetPhraseDictionary());
+	const IntraPhraseHypothesisStack &phraseColl = intraPhraseManager.GetTargetPhraseCollection();
+	
+	IntraPhraseHypothesisStack::const_iterator iter;
+	for (iter = phraseColl.begin() ; iter != phraseColl.end() ; ++iter)
+	{
+		const IntraPhraseTargetPhrase &targetPhrase = **iter;
+    TranslationOption *newTransOpt = MergeTranslation(inputPartialTranslOpt, targetPhrase);
+		if (newTransOpt != NULL)
+    {			    	
+	    outputPartialTranslOptColl.Add(newTransOpt);
+    }
+	}
 
 	/*
 	// create	trans option

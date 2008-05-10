@@ -135,7 +135,10 @@ public:
 	/*! used by intra-phrase creation
 	 *		start & endPos are pos of this obj
 	*/
-	bool IsCompatible(const TargetPhrase &inputPhrase, size_t startPos, size_t endPos) const;
+	bool IsCompatible(const TargetPhrase &inputPhrase
+									, size_t startPos
+									, size_t endPos
+									, bool allowSourceNullAlign) const;
 
 	size_t GetSubRangeCount() const
 	{ return m_subRangeCount; }
