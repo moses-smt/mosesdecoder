@@ -49,14 +49,15 @@ void HypothesisStack::Detach(const HypothesisStack::iterator &iter)
 	// up the corresponding hypotheses set from the accessor.
 	Hypothesis *hypo = *iter;
 	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-	bitmap_iterator bitmap_iter = m_bitmapAccessor.find(bitmap);
+	bitmap_iterator b_iter = m_bitmapAccessor.find(bitmap);
 
 	// If the hypotheses set exists, find the given hypothesis
 	// and delete it from the set.
-	if(bitmap_iter != m_bitmapAccessor.end()) {
-		set_iterator set_iter = bitmap_iter->second.find(hypo);
-		if (set_iter != bitmap_iter->second.end()) {
-			bitmap_iter->second.erase(set_iter);
+	if(b_iter != m_bitmapAccessor.end()) {
+		_HSType *s_ptr = &b_iter->second;
+		set_iterator s_iter = s_ptr->find(hypo);
+		if (s_iter != s_ptr->end()) {
+			s_ptr->erase(s_iter);
 		}
 	}
 
@@ -78,19 +79,19 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 	if (ret.second) 
 	{ // equiv hypo doesn't exists
 		const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-		bitmap_iterator hyposet = m_bitmapAccessor.find(bitmap);
+		bitmap_iterator b_iter = m_bitmapAccessor.find(bitmap);
 
 		// If the hypotheses set does not yet exist, we create a new,
 		// empty hypotheses set and insert it for the given bitmap.
-		if (hyposet == m_bitmapAccessor.end()) {
+		if (b_iter == m_bitmapAccessor.end()) {
 			_HSType *newSet = new _HSType();
 			newSet->clear();
-			hyposet = m_bitmapAccessor.insert(make_pair(bitmap, *newSet)).first;
+			b_iter = m_bitmapAccessor.insert(make_pair(bitmap, *newSet)).first;
 		}
 
 		// We are guaranteed to have an iterator to our hypotheses
 		// set here and will insert the new hypothesis to it.
-		hyposet->second.insert(hypo);
+		b_iter->second.insert(hypo);
 		
 		VERBOSE(3,"added hyp to stack");
 	
