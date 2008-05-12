@@ -167,6 +167,11 @@ public:
     		return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
 	}
 
+	bool operator< (const WordsBitmap &compare) const
+	{
+		return Compare(compare) < 0;
+	}
+
 	inline size_t GetEdgeToTheLeftOf(size_t l) const
 	{
 		if (l == 0) return l;
