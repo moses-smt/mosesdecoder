@@ -36,8 +36,8 @@ HypothesisStack::HypothesisStack()
 	m_worstScore = -std::numeric_limits<float>::infinity();
 
 	// Create an empty bitmap accessor data structure.
-	BitmapAccessor =  CoverageHypothesesMap();
-	BitmapAccessor.clear();
+	m_bitmapAccessor =  CoverageHypothesesMap();
+	m_bitmapAccessor.clear();
 }
 
 /** remove all hypotheses from the collection */
@@ -54,6 +54,15 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 	std::pair<iterator, bool> ret = m_hypos.insert(hypo);
 	if (ret.second) 
 	{ // equiv hypo doesn't exists
+		const WordsBitmap &bitmap = hypo->GetWordsBitmap();
+		CoverageHypothesesMap::iterator covStackIter = m_bitmapAccessor.find(bitmap);
+		if(covStackIter == m_bitmapAccessor.end()) {
+			OrderedHypothesesSet *covStack = new OrderedHypothesesSet();
+			covStackIter = m_bitmapAccessor.insert(make_pair(bitmap, *covStack)).first;
+		};
+		
+		covStackIter->second.insert(hypo);
+		
 		VERBOSE(3,"added hyp to stack");
 	
 		// Update best score, if this hypothesis is new best
@@ -64,7 +73,7 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 			// this may also affect the worst score
 	        if ( m_bestScore + m_beamWidth > m_worstScore )
 	          m_worstScore = m_bestScore + m_beamWidth;
-					}
+		}
 	
 	    // Prune only if stack is twice as big as needed (lazy pruning)
 		VERBOSE(3,", now size " << m_hypos.size());
@@ -240,6 +249,20 @@ void HypothesisStack::CleanupArcList()
 		Hypothesis *mainHypo = *iter;
 		mainHypo->CleanupArcList();
 	}
+}
+
+//! remove hypothesis pointed to by iterator but don't delete the object
+void HypothesisStack::Detach(const HypothesisStack::iterator &iter)
+{
+	VERBOSE(3, "Detaching hypothesis " << *iter << std::endl);
+	Hypothesis *hypo = *iter;
+	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
+	CoverageHypothesesMap::iterator i = m_bitmapAccessor.find(bitmap);
+	if(i != m_bitmapAccessor.end()) {
+		i->second.erase(hypo);
+	} else
+		VERBOSE(3, "Detaching again!" << std::endl);
+	m_hypos.erase(iter);
 }
 
 TO_STRING_BODY(HypothesisStack);

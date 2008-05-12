@@ -85,28 +85,25 @@ protected:
 	size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
 	_HCType m_hypos; /**< contains hypotheses */
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
-
+	CoverageHypothesesMap m_bitmapAccessor; /**< Bitmap ordered data structure for cube pruning. */
+	
 	/** add hypothesis to stack. Prune if necessary. 
 	 * Returns false if equiv hypo exists in collection, otherwise returns true
 	 */
 	std::pair<HypothesisStack::iterator, bool> Add(Hypothesis *hypothesis);
 
 	//! remove hypothesis pointed to by iterator but don't delete the object
-	inline void Detach(const HypothesisStack::iterator &iter)
-	{
-		m_hypos.erase(iter);
-	}
+	void Detach(const HypothesisStack::iterator &iter);
+		
 	/** destroy all instances of Hypothesis in this collection */
 	void RemoveAll();
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
 	inline void Remove(const HypothesisStack::iterator &iter)
 	{
-		FREEHYPO(*iter);
+		Hypothesis *h = *iter;
 		Detach(iter);
+		FREEHYPO(h);
 	}
-
-	// Bitmap ordered data structure for cube pruning.
-	CoverageHypothesesMap BitmapAccessor;
 
 public:
 	//! iterators
