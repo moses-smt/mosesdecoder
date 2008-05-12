@@ -27,7 +27,7 @@ void CubePruningData::SaveTol(const WordsRange wr, const TranslationOptionList &
 
 void CubePruningData::DeleteData()
 {
-	cout << "Delete Cube Pruning data for this sentence!" << endl;
+//	cout << "Delete Cube Pruning data for this sentence!" << endl;
 	covVecs.clear();
 	tols.clear();
 }

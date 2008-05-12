@@ -107,9 +107,10 @@ void Manager::ProcessSentence()
 	m_top_k = staticData.GetTopK();
 	m_beamThreshold = staticData.GetBeamThreshold();
 	m_pruning_factor = staticData.GetPruningFactor();
-	cout << "m_top_k: " << m_top_k << endl; 
-	cout << "m_beamThreshold: " << m_beamThreshold << endl;
-	cout << "m_pruning_factor: " << m_pruning_factor << endl; 
+
+	cerr << "m_top_k: " << m_top_k << endl; 
+//		cerr << "m_beamThreshold: " << m_beamThreshold << endl;
+	cerr << "m_pruning_factor: " << m_pruning_factor << endl; 
 		
 	// create list of all possible translations
 	// this is only valid if:
@@ -343,7 +344,7 @@ void Manager::CubePruning(size_t stack)
   	WordsBitmap wb = (*cands_iter).first;
   	OrderedHypothesesSet cand = (*cands_iter).second;
   	IFVERBOSE(2) {
-  		cout << "CubePruning for coverage " << wb << "  within " << cand.size() << " grid(s)" << endl;
+  		cerr << "CubePruning for coverage " << wb << "  within " << cand.size() << " grid(s)" << endl;
   	}
 		
 		vector< Hypothesis*> coverageVec; 
@@ -371,7 +372,7 @@ void Manager::CubePruning(size_t stack)
   		
   		item = *(cand.begin());  		
 // 		  if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf  + m_beamThreshold) )
-			if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf * 1.2) )
+			if ( (best_score_in_buf < 0) && (item->GetTotalScore() < best_score_in_buf * m_pruning_factor) )
   		{
 // 			cout << "score is " << item->GetTotalScore() << " (best: " << best_score_in_buf << ").. break at buffer size " << buf.size() << endl;
   			break; 
@@ -382,7 +383,7 @@ void Manager::CubePruning(size_t stack)
   		coverageVec = cubePruningData.covVecs[ item->GetPreviousWordsBitmap() ];  		
   		tol = cubePruningData.tols[ item->GetPreviousSourceWordsRange() ];
   		  		
-  		// If the search is performed in more than one grid, the grids have to be differentiated by the coverage
+  		// If the search is performed in more than one grid, the grids have to be distinguished by the coverage
 	  	// on the left side of the grid.
 	    WordsBitmap grid_wb = (*coverageVec.begin())->GetWordsBitmap(); 
   	
