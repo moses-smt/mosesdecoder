@@ -53,11 +53,26 @@ public:
 	}
 };
 
+/** Order relation for hypothesis scores.  Taken from Eva Hasler's branch. */
+class HypothesisScoreOrderer
+{
+public:
+	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
+	{
+		// Get score so far
+		float scoreA = hypoA->GetTotalScore();
+		float scoreB = hypoB->GetTotalScore();
+		return (scoreA >= scoreB);
+	}
+};
+
 /** Stack for instances of Hypothesis, includes functions for pruning. */ 
 class HypothesisStack 
 {
 private:
 	typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
+	typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
+	typedef map< WordsBitmap, OrderedHypothesesSet > CoverageHypothesesMap;
 public:
 	typedef _HCType::iterator iterator;
 	typedef _HCType::const_iterator const_iterator;
@@ -89,6 +104,9 @@ protected:
 		FREEHYPO(*iter);
 		Detach(iter);
 	}
+
+	// Bitmap ordered data structure for cube pruning.
+	CoverageHypothesesMap BitmapAccessor;
 
 public:
 	//! iterators

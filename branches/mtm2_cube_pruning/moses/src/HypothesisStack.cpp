@@ -34,6 +34,10 @@ HypothesisStack::HypothesisStack()
 	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
 	m_worstScore = -std::numeric_limits<float>::infinity();
+
+	// Create an empty bitmap accessor data structure.
+	BitmapAccessor =  CoverageHypothesesMap();
+	BitmapAccessor.clear();
 }
 
 /** remove all hypotheses from the collection */
