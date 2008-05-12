@@ -36,8 +36,31 @@ HypothesisStack::HypothesisStack()
 	m_worstScore = -std::numeric_limits<float>::infinity();
 
 	// Create an empty bitmap accessor data structure.
-	m_bitmapAccessor =  CoverageHypothesesMap();
+	m_bitmapAccessor = _BMType();
 	m_bitmapAccessor.clear();
+}
+
+/** Remove hypothesis pointed to by iterator but don't delete the object. */
+void HypothesisStack::Detach(const HypothesisStack::iterator &iter)
+{
+	VERBOSE(3, "Detaching hypothesis " << *iter << std::endl);
+
+	// Determine the bitmap for the given hypothesis and look
+	// up the corresponding hypotheses set from the accessor.
+	Hypothesis *hypo = *iter;
+	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
+	bitmap_iterator bitmap_iter = m_bitmapAccessor.find(bitmap);
+
+	// If the hypotheses set exists, find the given hypothesis
+	// and delete it from the set.
+	if(bitmap_iter != m_bitmapAccessor.end()) {
+		set_iterator set_iter = bitmap_iter->second.find(hypo);
+		if (set_iter != bitmap_iter->second.end()) {
+			bitmap_iter->second.erase(set_iter);
+		}
+	}
+
+	m_hypos.erase(iter);
 }
 
 /** remove all hypotheses from the collection */
@@ -55,13 +78,19 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 	if (ret.second) 
 	{ // equiv hypo doesn't exists
 		const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-		CoverageHypothesesMap::iterator covStackIter = m_bitmapAccessor.find(bitmap);
-		if(covStackIter == m_bitmapAccessor.end()) {
-			OrderedHypothesesSet *covStack = new OrderedHypothesesSet();
-			covStackIter = m_bitmapAccessor.insert(make_pair(bitmap, *covStack)).first;
-		};
-		
-		covStackIter->second.insert(hypo);
+		bitmap_iterator hyposet = m_bitmapAccessor.find(bitmap);
+
+		// If the hypotheses set does not yet exist, we create a new,
+		// empty hypotheses set and insert it for the given bitmap.
+		if (hyposet == m_bitmapAccessor.end()) {
+			_HSType *newSet = new _HSType();
+			newSet->clear();
+			hyposet = m_bitmapAccessor.insert(make_pair(bitmap, *newSet)).first;
+		}
+
+		// We are guaranteed to have an iterator to our hypotheses
+		// set here and will insert the new hypothesis to it.
+		hyposet->second.insert(hypo);
 		
 		VERBOSE(3,"added hyp to stack");
 	
@@ -249,20 +278,6 @@ void HypothesisStack::CleanupArcList()
 		Hypothesis *mainHypo = *iter;
 		mainHypo->CleanupArcList();
 	}
-}
-
-//! remove hypothesis pointed to by iterator but don't delete the object
-void HypothesisStack::Detach(const HypothesisStack::iterator &iter)
-{
-	VERBOSE(3, "Detaching hypothesis " << *iter << std::endl);
-	Hypothesis *hypo = *iter;
-	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-	CoverageHypothesesMap::iterator i = m_bitmapAccessor.find(bitmap);
-	if(i != m_bitmapAccessor.end()) {
-		i->second.erase(hypo);
-	} else
-		VERBOSE(3, "Detaching again!" << std::endl);
-	m_hypos.erase(iter);
 }
 
 TO_STRING_BODY(HypothesisStack);

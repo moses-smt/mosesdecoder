@@ -71,11 +71,15 @@ class HypothesisStack
 {
 private:
 	typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
-	typedef set<Hypothesis*, HypothesisScoreOrderer > OrderedHypothesesSet;
-	typedef map< WordsBitmap, OrderedHypothesesSet > CoverageHypothesesMap;
+	typedef std::set< Hypothesis*, HypothesisScoreOrderer > _HSType;
+	typedef std::map< WordsBitmap, _HSType > _BMType;
 public:
 	typedef _HCType::iterator iterator;
 	typedef _HCType::const_iterator const_iterator;
+	typedef _HSType::iterator set_iterator;
+	typedef _HSType::const_iterator set_const_iterator;
+	typedef _BMType::iterator bitmap_iterator;
+	typedef _BMType::const_iterator bitmap_const_iterator;
 	friend std::ostream& operator<<(std::ostream&, const HypothesisStack&);
 
 protected:
@@ -85,7 +89,7 @@ protected:
 	size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
 	_HCType m_hypos; /**< contains hypotheses */
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
-	CoverageHypothesesMap m_bitmapAccessor; /**< Bitmap ordered data structure for cube pruning. */
+	_BMType m_bitmapAccessor; /**< Bitmap ordered data structure for cube pruning. */
 	
 	/** add hypothesis to stack. Prune if necessary. 
 	 * Returns false if equiv hypo exists in collection, otherwise returns true
