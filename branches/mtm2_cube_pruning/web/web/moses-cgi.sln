@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-cgi", "moses-cgi\moses-cgi.vcproj", "{5BBAC701-84F5-438E-8F54-B3391F451F2A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{13A41E11-BD00-4198-9A62-0C700BBA67B2} = {13A41E11-BD00-4198-9A62-0C700BBA67B2}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tokenizer", "..\tokenizer\tokenizer.vcproj", "{13A41E11-BD00-4198-9A62-0C700BBA67B2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5BBAC701-84F5-438E-8F54-B3391F451F2A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5BBAC701-84F5-438E-8F54-B3391F451F2A}.Debug|Win32.Build.0 = Debug|Win32
+		{5BBAC701-84F5-438E-8F54-B3391F451F2A}.Release|Win32.ActiveCfg = Release|Win32
+		{5BBAC701-84F5-438E-8F54-B3391F451F2A}.Release|Win32.Build.0 = Release|Win32
+		{13A41E11-BD00-4198-9A62-0C700BBA67B2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{13A41E11-BD00-4198-9A62-0C700BBA67B2}.Debug|Win32.Build.0 = Debug|Win32
+		{13A41E11-BD00-4198-9A62-0C700BBA67B2}.Release|Win32.ActiveCfg = Release|Win32
+		{13A41E11-BD00-4198-9A62-0C700BBA67B2}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
