@@ -287,6 +287,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CubePruningData.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DecodeGraph.cpp"
 				>
 			</File>
@@ -674,6 +678,10 @@
 			>
 			<File
 				RelativePath=".\src\ConfusionNet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CubePruningData.h"
 				>
 			</File>
 			<File
