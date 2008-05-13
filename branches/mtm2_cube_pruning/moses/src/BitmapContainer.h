@@ -12,6 +12,7 @@ typedef std::set< Hypothesis*, HypothesisScoreOrderer > OrderedHypothesisSet;
 typedef std::set< BackwardsEdge* > BackwardsEdgeSet;
 typedef std::pair< float, std::pair< int, int > > SquarePosition;
 
+// Allows to compare two square positions (coordinates) by the corresponding scores.
 class SquarePositionOrderer
 {
 	public:
@@ -23,6 +24,8 @@ class SquarePositionOrderer
 		}
 };
 
+// Encodes an edge pointing to a BitmapContainer and an associated priority queue
+// that contains the square scores and the corresponding square coordinates.
 class BackwardsEdge
 {
 	private:
@@ -37,10 +40,14 @@ class BackwardsEdge
 		~BackwardsEdge();
 
 		BitmapContainer *GetBitmapContainer();
-		void Enqueue(SquarePosition *chunk);
-		SquarePosition *Dequeue();
+		void Enqueue(int x, int y, float score);
+		SquarePosition Dequeue(bool keepValue=false);
 };
 
+
+// A BitmapContainer encodes an ordered set of hypotheses and a set of edges
+// pointing to the "generating" BitmapContainers.  This data logically belongs
+// to the bitmap coverage which is stored in m_bitmap.
 class BitmapContainer
 {
 	private:
@@ -53,6 +60,9 @@ class BitmapContainer
 
 	public:
 		BitmapContainer(const WordsBitmap &bitmap);
+		
+		// The destructor will also delete all the edges that are
+		// connected to this BitmapContainer.
 		~BitmapContainer();
 		
 		const WordsBitmap &GetWordsBitmap();
