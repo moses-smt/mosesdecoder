@@ -102,9 +102,11 @@ void Manager::ProcessSentence()
 		m_hypoStackColl[0].AddPrune(hypo);
 	}
 	
+	CreateForwardTodos(m_hypoStackColl.front());
+
 	// go through each stack
 	std::vector < HypothesisStack >::iterator iterStack;
-	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
+	for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
 
 //checked if elapsed time ran out of time with respect 
@@ -122,22 +124,116 @@ void Manager::ProcessSentence()
 		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
-		// go through each hypothesis on the stack and try to expand it
-		HypothesisStack::const_iterator iterHypo;
-		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
-			{
-				Hypothesis &hypothesis = **iterHypo;
-				ProcessOneHypothesis(hypothesis); // expand the hypothesis
-			}
-		// some logging
-		IFVERBOSE(2) { OutputHypoStackSize(); }
 
-		//This stack is fully expanded;
-		actual_hypoStack = &sourceHypoColl;
+
+		CreateForwardTodos(sourceHypoColl);
 	}
 
 	// some more logging
 	VERBOSE(2, staticData.GetSentenceStats());
+}
+
+void Manager::CreateForwardTodos(HypothesisStack &stack)
+{
+	const _BMType &bitmapAccessor = stack.GetBitmapAccessor();
+	_BMType::const_iterator iterAccessor;
+	size_t len = m_source.GetSize();
+
+	for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor)
+	{
+		const WordsBitmap &bitmap = iterAccessor->first;
+		const BitmapContainer &bitmapContainer = iterAccessor->second;
+
+		size_t startPos, endPos;
+		for (startPos = 0 ;startPos < len ; startPos++)
+		{
+			if (bitmap.GetValue(startPos))
+				continue;
+
+			// not yet covered
+			WordsRange applyRange(startPos, startPos);
+			if (CheckDistortion(bitmap, applyRange))
+			{ // apply range
+				CreateForwardTodos(bitmap, applyRange, bitmapContainer);
+			}
+
+			for (endPos = ++startPos ;endPos < len ; endPos++)
+			{
+				if (bitmap.GetValue(endPos))
+					continue;
+
+				WordsRange applyRange(startPos, endPos);
+				if (CheckDistortion(bitmap, applyRange))
+				{ // apply range
+					CreateForwardTodos(bitmap, applyRange, bitmapContainer);
+				}
+			}
+		}
+	}
+}
+
+void Manager::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, const BitmapContainer &bitmapContainer)
+{
+	WordsBitmap newBitmap = bitmap;
+	newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
+
+	size_t numCovered = newBitmap.GetNumWordsCovered();
+
+	m_hypoStackColl[numCovered].SetBitmapAccessor(newBitmap, range, bitmapContainer);
+}
+
+bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
+{
+	// since we check for reordering limits, its good to have that limit handy
+	int maxDistortion = StaticData::Instance().GetMaxDistortion();
+	bool isWordLattice = StaticData::Instance().GetInputType() == WordLatticeInput;
+
+	// no limit of reordering: only check for overlap
+	if (maxDistortion < 0)
+	{	
+		return true;
+	}
+
+	// if there are reordering limits, make sure it is not violated
+	// the coverage bitmap is handy here (and the position of the first gap)
+	const size_t	hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
+							, sourceSize			= m_source.GetSize();
+	
+	size_t startPos = range.GetStartPos();
+	size_t endPos = range.GetEndPos();
+  size_t maxSize = sourceSize - startPos;
+  size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+	maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+
+	// check for overlap
+  WordsRange extRange(startPos, endPos);
+	bool leftMostEdge = (hypoFirstGapPos == startPos);
+		
+	// any length extension is okay if starting at left-most edge
+	if (leftMostEdge)
+	{
+		return true;
+	}
+	// starting somewhere other than left-most edge, use caution
+	else
+	{
+		// the basic idea is this: we would like to translate a phrase starting
+		// from a position further right than the left-most open gap. The
+		// distortion penalty for the following phrase will be computed relative
+		// to the ending position of the current extension, so we ask now what
+		// its maximum value will be (which will always be the value of the
+		// hypothesis starting at the left-most edge).  If this vlaue is than
+		// the distortion limit, we don't allow this extension to be made.
+		WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
+		int required_distortion =
+			m_source.ComputeDistortionDistance(extRange, bestNextExtension);
+
+		if (required_distortion <= maxDistortion) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /** Find all translation options to expand one hypothesis, trigger expansion

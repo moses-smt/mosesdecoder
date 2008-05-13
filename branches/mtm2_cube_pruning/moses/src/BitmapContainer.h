@@ -2,11 +2,25 @@
 
 #include "WordsBitmap.h"
 #include "Hypothesis.h"
-#include "HypothesisStack.h"
 #include <queue>
+#include <set>
 
 class BitmapContainer;
 class BackwardsEdge;
+class Hypothesis;
+
+/** Order relation for hypothesis scores.  Taken from Eva Hasler's branch. */
+class HypothesisScoreOrderer
+{
+public:
+	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
+	{
+		// Get score so far
+		float scoreA = hypoA->GetTotalScore();
+		float scoreB = hypoB->GetTotalScore();
+		return (scoreA >= scoreB);
+	}
+};
 
 typedef std::set< Hypothesis*, HypothesisScoreOrderer > OrderedHypothesisSet;
 typedef std::set< BackwardsEdge* > BackwardsEdgeSet;

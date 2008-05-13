@@ -24,6 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <set>
 #include "Hypothesis.h"
+#include "BitmapContainer.h"
+
+typedef std::map<WordsBitmap, BitmapContainer> _BMType;
 
 /** defines less-than relation on hypotheses.
 * The particular order is not important for us, we need just to figure out
@@ -53,18 +56,6 @@ public:
 	}
 };
 
-/** Order relation for hypothesis scores.  Taken from Eva Hasler's branch. */
-class HypothesisScoreOrderer
-{
-public:
-	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
-	{
-		// Get score so far
-		float scoreA = hypoA->GetTotalScore();
-		float scoreB = hypoB->GetTotalScore();
-		return (scoreA >= scoreB);
-	}
-};
 
 /** Stack for instances of Hypothesis, includes functions for pruning. */ 
 class HypothesisStack 
@@ -77,6 +68,8 @@ public:
 	friend std::ostream& operator<<(std::ostream&, const HypothesisStack&);
 
 protected:
+	_BMType m_bitmapAccessor;
+	
 	float m_bestScore; /**< score of the best hypothesis in collection */
 	float m_worstScore; /**< score of the worse hypthesis in collection */
 	float m_beamWidth; /**< minimum score due to threashold pruning */
@@ -144,7 +137,12 @@ public:
 	{
 		return m_bestScore;
 	}
-	
+	const _BMType& GetBitmapAccessor() const
+	{ return m_bitmapAccessor; }
+	void SetBitmapAccessor(const WordsBitmap &newBitmap
+												, const WordsRange &range
+												, const BitmapContainer &bitmapContainer) const;
+
 	/** pruning, if too large.
 	 * Pruning algorithm: find a threshold and delete all hypothesis below it.
 	 * The threshold is chosen so that exactly newSize top items remain on the 

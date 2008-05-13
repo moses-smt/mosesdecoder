@@ -244,6 +244,14 @@ void HypothesisStack::CleanupArcList()
 	}
 }
 
+void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
+												, const WordsRange &range
+												, const BitmapContainer &bitmapContainer) const
+{
+
+}
+
+
 TO_STRING_BODY(HypothesisStack);
 
 
