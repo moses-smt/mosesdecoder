@@ -60,7 +60,7 @@ class BackwardsEdge
 
 		const BitmapContainer &GetBitmapContainer() const;
 		int GetDistortionPenalty();
-		void Enqueue(int x, int y, float score);
+		void Enqueue(int x, int y, Hypothesis *hypothesis);
 		SquarePosition Dequeue(bool keepValue=false);
 };
 

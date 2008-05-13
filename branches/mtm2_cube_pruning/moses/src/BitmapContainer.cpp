@@ -16,7 +16,7 @@ const SquarePosition
 BackwardsEdge::InvalidSquarePosition()
 {
 	if (BackwardsEdge::m_invalid == NULL) {
-		BackwardsEdge::m_invalid = new SquarePosition(0.f, make_pair(-1, -1));
+		BackwardsEdge::m_invalid = new SquarePosition(NULL, make_pair(-1, -1));
 	}
 
 	return *BackwardsEdge::m_invalid;
@@ -40,11 +40,11 @@ BackwardsEdge::GetBitmapContainer() const
 }
 
 void
-BackwardsEdge::Enqueue(int x, int y, float score)
+BackwardsEdge::Enqueue(int x, int y, Hypothesis *hypothesis)
 {
 	// We create a new square position object with the given values here.
 	SquarePosition *chunk = new SquarePosition();
-	chunk->first = score;
+	chunk->first = hypothesis;
 	chunk->second = make_pair(x, y);
 
 	// And put it into the priority queue.
