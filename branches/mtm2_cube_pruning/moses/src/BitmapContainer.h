@@ -1,9 +1,10 @@
 #pragma once
 
-#include "WordsBitmap.h"
-#include "Hypothesis.h"
 #include <queue>
 #include <set>
+#include "Hypothesis.h"
+#include "TypeDef.h"
+#include "WordsBitmap.h"
 
 class BitmapContainer;
 class BackwardsEdge;
@@ -47,13 +48,14 @@ class BackwardsEdge
 		const BitmapContainer &m_prevBitmapContainer;
 		_PQType m_queue;
 		static SquarePosition *m_invalid;
+		TranslationOptionList m_translations;
 		
 		BackwardsEdge();
 
 	public:
 		const SquarePosition InvalidSquarePosition();
-	
-		BackwardsEdge(const BitmapContainer &prevBitmapContainer);
+
+		BackwardsEdge(const BitmapContainer &prevBitmapContainer, TranslationOptionList translations);
 		~BackwardsEdge();
 
 		const BitmapContainer &GetBitmapContainer() const;

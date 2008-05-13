@@ -1,12 +1,14 @@
-#include "BitmapContainer.h"
+#include <algorithm>
 #include <utility>
+#include "BitmapContainer.h"
 
 SquarePosition *BackwardsEdge::m_invalid = NULL;
 
-BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer)
+BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer, TranslationOptionList translations)
   : m_prevBitmapContainer(prevBitmapContainer)
 	, m_queue()
 {
+	std::copy(translations.begin(), translations.end(), m_translations.begin());
 }
 
 const SquarePosition

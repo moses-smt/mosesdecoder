@@ -256,11 +256,15 @@ void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 												, const WordsRange &range
 												, const BitmapContainer &bitmapContainer)
 {
-	 BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap);
-	 m_bitmapAccessor[newBitmap] = newBitmapContainer;
+	BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap);
+	m_bitmapAccessor[newBitmap] = newBitmapContainer;
 
-	 BackwardsEdge *edge = new BackwardsEdge(bitmapContainer);
-	 newBitmapContainer->AddBackwardsEdge(edge);
+	// Generate correct k-best list of translation options here :)
+	TranslationOptionList foo;
+
+	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer, foo);
+
+	newBitmapContainer->AddBackwardsEdge(edge);
 }
 
 
