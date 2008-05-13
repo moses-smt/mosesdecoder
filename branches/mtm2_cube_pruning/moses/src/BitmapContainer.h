@@ -33,16 +33,18 @@ class BackwardsEdge
 		BitmapContainer *m_prev;
 		_PQType m_queue;
 		static SquarePosition *m_invalid;
+		int m_penalty;
 		
 		BackwardsEdge();
 
 	public:
 		const SquarePosition InvalidSquarePosition();
 	
-		BackwardsEdge(BitmapContainer *prev);
+		BackwardsEdge(BitmapContainer *prev, int penalty = 0);
 		~BackwardsEdge();
 
 		BitmapContainer *GetBitmapContainer();
+		int GetDistortionPenalty();
 		void Enqueue(int x, int y, float score);
 		SquarePosition Dequeue(bool keepValue=false);
 };
@@ -71,6 +73,8 @@ class BitmapContainer
 		const WordsBitmap &GetWordsBitmap();
 		const OrderedHypothesisSet &GetHypotheses();
 		const BackwardsEdgeSet &GetBackwardsEdges();
+		
+		// We will add GetKBest() here.
 
 		void AddHypothesis(Hypothesis *hypothesis);
 		void AddBackwardsEdge(BackwardsEdge *edge);
