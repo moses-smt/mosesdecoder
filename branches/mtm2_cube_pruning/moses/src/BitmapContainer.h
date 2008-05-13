@@ -32,10 +32,13 @@ class BackwardsEdge
 		typedef std::priority_queue< SquarePosition*, std::vector< SquarePosition* >, SquarePositionOrderer> _PQType;
 		BitmapContainer *m_prev;
 		_PQType m_queue;
+		static SquarePosition *m_invalid;
 		
 		BackwardsEdge();
 
 	public:
+		const SquarePosition InvalidSquarePosition();
+	
 		BackwardsEdge(BitmapContainer *prev);
 		~BackwardsEdge();
 

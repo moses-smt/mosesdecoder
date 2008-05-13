@@ -1,9 +1,21 @@
 #include "BitmapContainer.h"
 #include <utility>
 
+SquarePosition *BackwardsEdge::m_invalid = NULL;
+
 BackwardsEdge::BackwardsEdge(BitmapContainer *prev)
   : m_prev(prev), m_queue()
 {
+}
+
+const SquarePosition
+BackwardsEdge::InvalidSquarePosition()
+{
+	if (BackwardsEdge::m_invalid == NULL) {
+		BackwardsEdge::m_invalid = new SquarePosition(0.f, make_pair(-1, -1));
+	}
+
+	return *BackwardsEdge::m_invalid;
 }
 
 BackwardsEdge::~BackwardsEdge()
@@ -50,8 +62,8 @@ BackwardsEdge::Dequeue(bool keepValue)
 
 		return ret;
 	}
-
-	return NULL;
+	
+	return InvalidSquarePosition();
 }
 
 BitmapContainer::BitmapContainer(const WordsBitmap &bitmap)

@@ -34,33 +34,11 @@ HypothesisStack::HypothesisStack()
 	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
 	m_worstScore = -std::numeric_limits<float>::infinity();
-
-	// Create an empty bitmap accessor data structure.
-	m_bitmapAccessor = _BMType();
-	m_bitmapAccessor.clear();
 }
 
 /** Remove hypothesis pointed to by iterator but don't delete the object. */
 void HypothesisStack::Detach(const HypothesisStack::iterator &iter)
 {
-	VERBOSE(3, "Detaching hypothesis " << *iter << std::endl);
-
-	// Determine the bitmap for the given hypothesis and look
-	// up the corresponding hypotheses set from the accessor.
-	Hypothesis *hypo = *iter;
-	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-	bitmap_iterator b_iter = m_bitmapAccessor.find(bitmap);
-
-	// If the hypotheses set exists, find the given hypothesis
-	// and delete it from the set.
-	if(b_iter != m_bitmapAccessor.end()) {
-		_HSType *s_ptr = &b_iter->second;
-		set_iterator s_iter = s_ptr->find(hypo);
-		if (s_iter != s_ptr->end()) {
-			s_ptr->erase(s_iter);
-		}
-	}
-
 	m_hypos.erase(iter);
 }
 
@@ -78,21 +56,6 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 	std::pair<iterator, bool> ret = m_hypos.insert(hypo);
 	if (ret.second) 
 	{ // equiv hypo doesn't exists
-		const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-		bitmap_iterator b_iter = m_bitmapAccessor.find(bitmap);
-
-		// If the hypotheses set does not yet exist, we create a new,
-		// empty hypotheses set and insert it for the given bitmap.
-		if (b_iter == m_bitmapAccessor.end()) {
-			_HSType *newSet = new _HSType();
-			newSet->clear();
-			b_iter = m_bitmapAccessor.insert(make_pair(bitmap, *newSet)).first;
-		}
-
-		// We are guaranteed to have an iterator to our hypotheses
-		// set here and will insert the new hypothesis to it.
-		b_iter->second.insert(hypo);
-		
 		VERBOSE(3,"added hyp to stack");
 	
 		// Update best score, if this hypothesis is new best
