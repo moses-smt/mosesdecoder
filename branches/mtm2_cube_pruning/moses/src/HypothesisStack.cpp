@@ -259,7 +259,7 @@ void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 	 BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap);
 	 m_bitmapAccessor[newBitmap] = newBitmapContainer;
 
-	 BackwardsEdge *edge = new BackwardsEdge(&bitmapContainer);
+	 BackwardsEdge *edge = new BackwardsEdge(bitmapContainer);
 	 newBitmapContainer->AddBackwardsEdge(edge);
 }
 

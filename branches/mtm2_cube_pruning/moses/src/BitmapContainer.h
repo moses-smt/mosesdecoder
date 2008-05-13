@@ -44,7 +44,7 @@ class BackwardsEdge
 {
 	private:
 		typedef std::priority_queue< SquarePosition*, std::vector< SquarePosition* >, SquarePositionOrderer> _PQType;
-		const BitmapContainer *m_prev;
+		const BitmapContainer &m_prevBitmapContainer;
 		_PQType m_queue;
 		static SquarePosition *m_invalid;
 		
@@ -53,10 +53,10 @@ class BackwardsEdge
 	public:
 		const SquarePosition InvalidSquarePosition();
 	
-		BackwardsEdge(const BitmapContainer *prev);
+		BackwardsEdge(const BitmapContainer &prevBitmapContainer);
 		~BackwardsEdge();
 
-		const BitmapContainer *GetBitmapContainer() const;
+		const BitmapContainer &GetBitmapContainer() const;
 		int GetDistortionPenalty();
 		void Enqueue(int x, int y, float score);
 		SquarePosition Dequeue(bool keepValue=false);

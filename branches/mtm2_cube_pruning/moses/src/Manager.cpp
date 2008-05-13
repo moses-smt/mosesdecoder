@@ -135,7 +135,7 @@ void Manager::ProcessSentence()
 
 void Manager::CreateForwardTodos(HypothesisStack &stack)
 {
-9	const _BMType &bitmapAccessor = stack.GetBitmapAccessor();
+	const _BMType &bitmapAccessor = stack.GetBitmapAccessor();
 	_BMType::const_iterator iterAccessor;
 	size_t len = m_source.GetSize();
 

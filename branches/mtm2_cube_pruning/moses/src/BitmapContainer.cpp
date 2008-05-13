@@ -3,8 +3,8 @@
 
 SquarePosition *BackwardsEdge::m_invalid = NULL;
 
-BackwardsEdge::BackwardsEdge(const BitmapContainer *prev)
-  : m_prev(prev)
+BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer)
+  : m_prevBitmapContainer(prevBitmapContainer)
 	, m_queue()
 {
 }
@@ -30,10 +30,10 @@ BackwardsEdge::~BackwardsEdge()
 	}
 }
 
-const BitmapContainer*
+const BitmapContainer&
 BackwardsEdge::GetBitmapContainer() const
 {
-	return m_prev;
+	return m_prevBitmapContainer;
 }
 
 void
@@ -47,7 +47,6 @@ BackwardsEdge::Enqueue(int x, int y, float score)
 	// And put it into the priority queue.
 	m_queue.push(chunk);
 }
-
 
 SquarePosition
 BackwardsEdge::Dequeue(bool keepValue)
