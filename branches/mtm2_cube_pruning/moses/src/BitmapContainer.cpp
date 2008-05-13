@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <limits>
 #include <utility>
 #include "BitmapContainer.h"
 
