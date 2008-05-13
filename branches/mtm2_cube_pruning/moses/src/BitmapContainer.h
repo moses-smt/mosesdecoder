@@ -25,7 +25,7 @@ public:
 
 typedef std::set< Hypothesis*, HypothesisScoreOrderer > OrderedHypothesisSet;
 typedef std::set< BackwardsEdge* > BackwardsEdgeSet;
-typedef std::pair< float, std::pair< int, int > > SquarePosition;
+typedef std::pair< Hypothesis*, std::pair< int, int > > SquarePosition;
 
 // Allows to compare two square positions (coordinates) by the corresponding scores.
 class SquarePositionOrderer
@@ -33,8 +33,8 @@ class SquarePositionOrderer
 	public:
 		bool operator()(const SquarePosition* cellA, const SquarePosition* cellB) const
 		{
-			float scoreA = cellA->first;
-			float scoreB = cellB->first;
+			float scoreA = cellA->first->GetTotalScore();
+			float scoreB = cellB->first->GetTotalScore();
 			return (scoreA >= scoreB);
 		}
 };
