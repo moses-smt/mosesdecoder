@@ -99,7 +99,7 @@ void Manager::ProcessSentence()
 	// initial seed hypothesis: nothing translated, no words produced
 	{
 		Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
-		m_hypoStackColl[0].AddPrune(hypo);
+		m_hypoStackColl[0].AddInitial(hypo);
 	}
 	
 	CreateForwardTodos(m_hypoStackColl.front());
@@ -135,7 +135,7 @@ void Manager::ProcessSentence()
 
 void Manager::CreateForwardTodos(HypothesisStack &stack)
 {
-	const _BMType &bitmapAccessor = stack.GetBitmapAccessor();
+9	const _BMType &bitmapAccessor = stack.GetBitmapAccessor();
 	_BMType::const_iterator iterAccessor;
 	size_t len = m_source.GetSize();
 

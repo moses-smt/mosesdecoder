@@ -117,6 +117,8 @@ public:
 	*/
 	void AddPrune(Hypothesis *hypothesis);
 
+	void AddInitial(Hypothesis *hypo);
+
 	/** set maximum number of hypotheses in the collection
    * \param maxHypoStackSize maximum number (typical number: 100)
    */

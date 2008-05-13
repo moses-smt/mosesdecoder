@@ -139,6 +139,14 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 	}
 }
 
+void HypothesisStack::AddInitial(Hypothesis *hypo)
+{
+	std::pair<iterator, bool> addRet = Add(hypo); 
+	assert (addRet.second);
+	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
+	m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap);
+}
+
 void HypothesisStack::PruneToSize(size_t newSize)
 {
 	if (m_hypos.size() > newSize) // ok, if not over the limit
