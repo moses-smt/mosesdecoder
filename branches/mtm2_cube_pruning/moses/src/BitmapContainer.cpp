@@ -3,8 +3,9 @@
 
 SquarePosition *BackwardsEdge::m_invalid = NULL;
 
-BackwardsEdge::BackwardsEdge(BitmapContainer *prev, int penalty)
-  : m_prev(prev), m_queue(), m_penalty(penalty)
+BackwardsEdge::BackwardsEdge(const BitmapContainer *prev)
+  : m_prev(prev)
+	, m_queue()
 {
 }
 
@@ -29,16 +30,10 @@ BackwardsEdge::~BackwardsEdge()
 	}
 }
 
-BitmapContainer*
-BackwardsEdge::GetBitmapContainer()
+const BitmapContainer*
+BackwardsEdge::GetBitmapContainer() const
 {
 	return m_prev;
-}
-
-int
-BackwardsEdge::GetDistortionPenalty()
-{
-	return m_penalty;
 }
 
 void

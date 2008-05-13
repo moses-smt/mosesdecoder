@@ -246,9 +246,13 @@ void HypothesisStack::CleanupArcList()
 
 void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 												, const WordsRange &range
-												, const BitmapContainer &bitmapContainer) const
+												, const BitmapContainer &bitmapContainer)
 {
+	 BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap);
+	 m_bitmapAccessor[newBitmap] = newBitmapContainer;
 
+	 BackwardsEdge *edge = new BackwardsEdge(&bitmapContainer);
+	 newBitmapContainer->AddBackwardsEdge(edge);
 }
 
 

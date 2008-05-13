@@ -142,7 +142,7 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 	for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor)
 	{
 		const WordsBitmap &bitmap = iterAccessor->first;
-		const BitmapContainer &bitmapContainer = iterAccessor->second;
+		const BitmapContainer &bitmapContainer = *iterAccessor->second;
 
 		size_t startPos, endPos;
 		for (startPos = 0 ;startPos < len ; startPos++)

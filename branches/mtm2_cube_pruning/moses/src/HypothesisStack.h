@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "BitmapContainer.h"
 
-typedef std::map<WordsBitmap, BitmapContainer> _BMType;
+typedef std::map<WordsBitmap, BitmapContainer*> _BMType;
 
 /** defines less-than relation on hypotheses.
 * The particular order is not important for us, we need just to figure out
@@ -141,7 +141,7 @@ public:
 	{ return m_bitmapAccessor; }
 	void SetBitmapAccessor(const WordsBitmap &newBitmap
 												, const WordsRange &range
-												, const BitmapContainer &bitmapContainer) const;
+												, const BitmapContainer &bitmapContainer);
 
 	/** pruning, if too large.
 	 * Pruning algorithm: find a threshold and delete all hypothesis below it.
