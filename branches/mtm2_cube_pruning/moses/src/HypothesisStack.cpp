@@ -254,15 +254,13 @@ void HypothesisStack::CleanupArcList()
 
 void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 												, const WordsRange &range
-												, const BitmapContainer &bitmapContainer)
+												, const BitmapContainer &bitmapContainer
+												, const TranslationOptionList &transOptList)
 {
 	BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap);
 	m_bitmapAccessor[newBitmap] = newBitmapContainer;
 
-	// Generate correct k-best list of translation options here :)
-	TranslationOptionList foo;
-
-	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer, foo);
+	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer, transOptList);
 
 	newBitmapContainer->AddBackwardsEdge(edge);
 }

@@ -95,7 +95,7 @@ BitmapContainer::GetWordsBitmap()
 }
 
 const OrderedHypothesisSet&
-BitmapContainer::GetHypotheses()
+BitmapContainer::GetHypotheses() const
 {
 	return m_hypotheses;
 }

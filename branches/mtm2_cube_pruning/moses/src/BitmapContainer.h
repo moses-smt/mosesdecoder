@@ -86,7 +86,7 @@ class BitmapContainer
 		~BitmapContainer();
 		
 		const WordsBitmap &GetWordsBitmap();
-		const OrderedHypothesisSet &GetHypotheses();
+		const OrderedHypothesisSet &GetHypotheses() const;
 		const BackwardsEdgeSet &GetBackwardsEdges();
 		
 		// We will add GetKBest() here.

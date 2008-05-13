@@ -144,6 +144,11 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 		const WordsBitmap &bitmap = iterAccessor->first;
 		const BitmapContainer &bitmapContainer = *iterAccessor->second;
 
+		if (bitmapContainer.GetHypotheses().size() == 0)
+		{ // no hypothese to expand. don't bother doing it		
+			continue; 
+		}
+
 		size_t startPos, endPos;
 		for (startPos = 0 ;startPos < len ; startPos++)
 		{
@@ -178,8 +183,10 @@ void Manager::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &ra
 	newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
 
 	size_t numCovered = newBitmap.GetNumWordsCovered();
+	const TranslationOptionList &transOptList = m_transOptColl->GetTranslationOptionList(range);
 
-	m_hypoStackColl[numCovered].SetBitmapAccessor(newBitmap, range, bitmapContainer);
+	if (transOptList.size() > 0)
+		m_hypoStackColl[numCovered].SetBitmapAccessor(newBitmap, range, bitmapContainer, transOptList);
 }
 
 bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const

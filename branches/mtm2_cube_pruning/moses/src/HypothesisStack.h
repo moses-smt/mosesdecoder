@@ -143,7 +143,8 @@ public:
 	{ return m_bitmapAccessor; }
 	void SetBitmapAccessor(const WordsBitmap &newBitmap
 												, const WordsRange &range
-												, const BitmapContainer &bitmapContainer);
+												, const BitmapContainer &bitmapContainer
+												, const TranslationOptionList &transOptList);
 
 	/** pruning, if too large.
 	 * Pruning algorithm: find a threshold and delete all hypothesis below it.
