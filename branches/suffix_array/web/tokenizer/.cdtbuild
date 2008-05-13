@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 3.1.0?>
+
+<ManagedProjectBuildInfo>
+<project id="tokenizer.cdt.managedbuild.target.gnu.lib.1203596740" name="Static Library (Gnu)" projectType="cdt.managedbuild.target.gnu.lib">
+<configuration artifactExtension="a" artifactName="tokenizer" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.debug.1755653466" name="Debug" parent="cdt.managedbuild.config.gnu.lib.debug">
+<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.1286612993" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.289836113" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
+<option id="gnu.cpp.compiler.option.include.paths.1983383938" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="../../../moses/src"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.24782421" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.23066556" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1780182872" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug"/>
+<macros/>
+</toolChain>
+</configuration>
+<configuration artifactExtension="a" artifactName="tokenizer" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.lib.release.1718560777" name="Release" parent="cdt.managedbuild.config.gnu.lib.release">
+<toolChain id="cdt.managedbuild.toolchain.gnu.lib.release.122064821" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.lib.release">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.376358751" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.release">
+<option id="gnu.cpp.compiler.option.include.paths.636061972" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="../../../moses/src"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.release.1699797016" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.release"/>
+<tool id="cdt.managedbuild.tool.gnu.archiver.lib.release.2110850860" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.release"/>
+<tool id="cdt.managedbuild.tool.gnu.assembler.lib.release.533451793" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.release"/>
+<macros/>
+</toolChain>
+</configuration>
+</project>
+</ManagedProjectBuildInfo>
