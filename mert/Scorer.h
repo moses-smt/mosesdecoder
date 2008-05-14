@@ -1,35 +1,63 @@
 #ifndef __SCORER_H__
 #define __SCORER_H__
 
+#include <algorithm>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
-using namespace std;
+
+class ScoreData;
+class ScoreStats;
 
 class Scorer {
-	/**
-	  * Extract initial statistics from the nbestfile and write them to the stats
-      * file. For example, for bleu these are the ngram counts and length.
-	  **/
+	
 	public:
 		
-		Scorer(const string& statsfile): _statsfile(statsfile) {}
-		
-		virtual void prepare(const vector<string>& referencefiles, const string& nbestfile) {
-			//dummy impl
+		Scorer(const std::string& name): _name(name), _scoreData(0)  {}
+
+		const std::string& getName() const {return _name;}
+
+		/**
+		  * set the reference files. This must be called before prepareStats.
+		  **/
+		void setReferenceFiles(const std::vector<std::string>& referenceFiles) {
+			_referenceFiles.clear();
+			_referenceFiles.resize(referenceFiles.size());
+			std::copy(referenceFiles.begin(),referenceFiles.end(),_referenceFiles.begin());
 		}
-	/**
-	  * Calculate the score of the sentences corresponding to the list of candidate
-      * indices. Each index indicates the 1-best choice from the n-best list.
-	  **/
-		virtual float score(const vector<unsigned int>& candidates) {
-			//dummy impl
+		
+		/**
+		 * Process the given guessed text, corresponding to the given reference sindex
+         * and add the appropriate statistics to the entry.
+		**/
+		virtual void prepareStats(int sindex, const std::string& text, ScoreStats& entry) {
+			//std::cerr << text << std::endl;
+		}
+
+		/**
+		  * Set the score data, prior to scoring.
+		  **/
+		void setScoreData(ScoreData* scoreData) {
+			_scoreData = scoreData;
+		}
+
+		/**
+		  * Calculate the score of the sentences corresponding to the list of candidate
+		  * indices. Each index indicates the 1-best choice from the n-best list.
+		  **/
+		virtual float score(const std::vector<unsigned int>& candidates) {
+			if (!_scoreData) {
+				throw std::runtime_error("score data not loaded");
+			}
 			return 0;
 		}
 
-	protected:
-		string _statsfile;
+		private:
+			std::string _name;
+			std::vector<std::string> _referenceFiles;
+			ScoreData* _scoreData;
 
 };
 

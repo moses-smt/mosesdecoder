@@ -14,8 +14,7 @@
 ScoreData::ScoreData(Scorer& ptr):
 bufLen_(0), theScorer(&ptr)
 {
-	score_type = "BLEU4";
-//	score_type = theScorer.name();
+	score_type = theScorer->getName();
 };
 
 void ScoreData::savetxt(std::ofstream& outFile)
@@ -107,7 +106,7 @@ void ScoreData::loadnbest(const std::string &file)
  * theStatistics will contain the statistics (as a string)
  * coming from the actual Scorer
  */
-//		theStatistics = theScorer.getStatistics(sentence_index, theSentence);
+		theScorer->prepareStats(sentence_index, theSentence,entry);
 		entry.set(theStatistics);
 
 		add(entry,sentence_index);
