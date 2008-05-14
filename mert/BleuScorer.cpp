@@ -120,7 +120,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles) {
 
 
 void BleuScorer::prepareStats(int sid, const string& text, ScoreStats& entry) {
-        cerr << text << endl;
+        //cerr << text << endl;
         //dump_counts(*_refcounts[sid]);
 		if (sid >= _refcounts.size()) {
 			stringstream msg;
