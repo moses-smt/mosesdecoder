@@ -148,6 +148,10 @@
 		D39BA84E0B11FF0C0089AE6A /* NGramNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D39BA8470B11FF0C0089AE6A /* NGramNode.h */; };
 		E2B7C8F20DDA19190089EFE0 /* BitmapContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */; };
 		E2B7C9590DDB1AEF0089EFE0 /* BitmapContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */; };
+		E2B7CA720DDB3B5C0089EFE0 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2B7CA700DDB3B5C0089EFE0 /* FloydWarshall.cpp */; };
+		E2B7CA730DDB3B5C0089EFE0 /* FloydWarshall.h in Headers */ = {isa = PBXBuildFile; fileRef = E2B7CA710DDB3B5C0089EFE0 /* FloydWarshall.h */; };
+		E2B7CA760DDB3B700089EFE0 /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2B7CA740DDB3B700089EFE0 /* XmlOption.cpp */; };
+		E2B7CA770DDB3B700089EFE0 /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = E2B7CA750DDB3B700089EFE0 /* XmlOption.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildStyle section */
@@ -313,6 +317,10 @@
 		D39BA8470B11FF0C0089AE6A /* NGramNode.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = NGramNode.h; path = src/NGramNode.h; sourceTree = "<group>"; };
 		E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BitmapContainer.h; path = src/BitmapContainer.h; sourceTree = "<group>"; };
 		E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = BitmapContainer.cpp; path = src/BitmapContainer.cpp; sourceTree = "<group>"; };
+		E2B7CA700DDB3B5C0089EFE0 /* FloydWarshall.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FloydWarshall.cpp; path = src/FloydWarshall.cpp; sourceTree = "<group>"; };
+		E2B7CA710DDB3B5C0089EFE0 /* FloydWarshall.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FloydWarshall.h; path = src/FloydWarshall.h; sourceTree = "<group>"; };
+		E2B7CA740DDB3B700089EFE0 /* XmlOption.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = XmlOption.cpp; path = src/XmlOption.cpp; sourceTree = "<group>"; };
+		E2B7CA750DDB3B700089EFE0 /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = src/XmlOption.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -329,6 +337,10 @@
 		08FB7794FE84155DC02AAC07 /* moses */ = {
 			isa = PBXGroup;
 			children = (
+				E2B7CA740DDB3B700089EFE0 /* XmlOption.cpp */,
+				E2B7CA750DDB3B700089EFE0 /* XmlOption.h */,
+				E2B7CA700DDB3B5C0089EFE0 /* FloydWarshall.cpp */,
+				E2B7CA710DDB3B5C0089EFE0 /* FloydWarshall.h */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -584,6 +596,8 @@
 				0396E1B70C0B189200D95CFF /* WordLattice.h in Headers */,
 				037C639B0C8EBFB400584F2E /* DecodeGraph.h in Headers */,
 				E2B7C8F20DDA19190089EFE0 /* BitmapContainer.h in Headers */,
+				E2B7CA730DDB3B5C0089EFE0 /* FloydWarshall.h in Headers */,
+				E2B7CA770DDB3B700089EFE0 /* XmlOption.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -699,6 +713,8 @@
 				0396E1B60C0B189200D95CFF /* WordLattice.cpp in Sources */,
 				037C639A0C8EBFB400584F2E /* DecodeGraph.cpp in Sources */,
 				E2B7C9590DDB1AEF0089EFE0 /* BitmapContainer.cpp in Sources */,
+				E2B7CA720DDB3B5C0089EFE0 /* FloydWarshall.cpp in Sources */,
+				E2B7CA760DDB3B700089EFE0 /* XmlOption.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -785,18 +801,21 @@
 		0396E1910C0B186F00D95CFF /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
 			};
 			name = Development;
 		};
 		0396E1920C0B186F00D95CFF /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
 			};
 			name = Deployment;
 		};
 		0396E1930C0B186F00D95CFF /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
 			};
 			name = Default;
 		};

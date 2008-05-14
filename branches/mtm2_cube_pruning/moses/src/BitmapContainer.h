@@ -69,6 +69,7 @@ class BackwardsEdge
 		bool m_initialized;
 		const SquareMatrix &m_futurescore;
 		size_t m_kbest;
+		size_t m_xmax, m_ymax;
 
 		const TranslationOptionList &m_kbest_translations;
 		std::vector< Hypothesis* > m_kbest_hypotheses;

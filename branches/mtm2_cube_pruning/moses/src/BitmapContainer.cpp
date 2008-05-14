@@ -20,12 +20,13 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 {
 	// Copy hypotheses from ordered set to vector for faster access.
 	const OrderedHypothesisSet &hypotheses = m_prevBitmapContainer.GetHypotheses();
-	int k = std::min(m_kbest, hypotheses.size());
+	m_xmax = std::min(m_kbest, hypotheses.size());
+	m_ymax = std::min(m_kbest, translations.size());
 
-	m_kbest_hypotheses.resize(k);
+	m_kbest_hypotheses.resize(m_xmax);
 
 	OrderedHypothesisSet::const_iterator hypoEnd = hypotheses.begin();
-	for (size_t i=0; i<k; i++) 
+	for (size_t i=0; i<m_xmax; i++) 
 	{
 		m_kbest_hypotheses[i] = *hypoEnd;
 		hypoEnd++;
@@ -80,12 +81,12 @@ BackwardsEdge::PushSuccessors(int x, int y)
 {
 	Hypothesis *newHypo;
 	
-	if(!SeenPosition(x, y + 1)) {
+	if(y + 1 < m_ymax && !SeenPosition(x, y + 1)) {
 		newHypo = CreateHypothesis(*m_kbest_hypotheses[x], *m_kbest_translations[y + 1]);
 		if(newHypo != NULL)
 			Enqueue(x, y + 1, newHypo);
 	}
-	if(!SeenPosition(x + 1, y)) {
+	if(x + 1 < m_xmax && !SeenPosition(x + 1, y)) {
 		newHypo = CreateHypothesis(*m_kbest_hypotheses[x + 1], *m_kbest_translations[y]);
 		if(newHypo != NULL)
 			Enqueue(x + 1, y, newHypo);
