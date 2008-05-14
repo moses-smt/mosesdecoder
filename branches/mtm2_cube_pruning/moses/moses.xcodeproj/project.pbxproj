@@ -146,7 +146,6 @@
 		D39BA84C0B11FF0C0089AE6A /* NGramCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = D39BA8450B11FF0C0089AE6A /* NGramCollection.h */; };
 		D39BA84D0B11FF0C0089AE6A /* NGramNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D39BA8460B11FF0C0089AE6A /* NGramNode.cpp */; };
 		D39BA84E0B11FF0C0089AE6A /* NGramNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D39BA8470B11FF0C0089AE6A /* NGramNode.h */; };
-		E2B7C8F10DDA19190089EFE0 /* BitmapContainer2 in Sources */ = {isa = PBXBuildFile; fileRef = E2B7C8EF0DDA19190089EFE0 /* BitmapContainer2 */; };
 		E2B7C8F20DDA19190089EFE0 /* BitmapContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */; };
 		E2B7C9590DDB1AEF0089EFE0 /* BitmapContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */; };
 /* End PBXBuildFile section */
@@ -312,7 +311,6 @@
 		D39BA8450B11FF0C0089AE6A /* NGramCollection.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = NGramCollection.h; path = src/NGramCollection.h; sourceTree = "<group>"; };
 		D39BA8460B11FF0C0089AE6A /* NGramNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = NGramNode.cpp; path = src/NGramNode.cpp; sourceTree = "<group>"; };
 		D39BA8470B11FF0C0089AE6A /* NGramNode.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = NGramNode.h; path = src/NGramNode.h; sourceTree = "<group>"; };
-		E2B7C8EF0DDA19190089EFE0 /* BitmapContainer2 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = BitmapContainer2; path = src/BitmapContainer2; sourceTree = "<group>"; };
 		E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BitmapContainer.h; path = src/BitmapContainer.h; sourceTree = "<group>"; };
 		E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = BitmapContainer.cpp; path = src/BitmapContainer.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -420,7 +418,6 @@
 				1C8CFE4B0AD67A9700FA22E2 /* LMList.cpp */,
 				1C8CFE4C0AD67A9700FA22E2 /* LMList.h */,
 				1C8CFE4D0AD67A9700FA22E2 /* Manager.cpp */,
-				E2B7C8EF0DDA19190089EFE0 /* BitmapContainer2 */,
 				E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */,
 				E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */,
 				1C8CFE4E0AD67A9700FA22E2 /* Manager.h */,
@@ -701,7 +698,6 @@
 				0396E1B30C0B189200D95CFF /* TrellisPathCollection.cpp in Sources */,
 				0396E1B60C0B189200D95CFF /* WordLattice.cpp in Sources */,
 				037C639A0C8EBFB400584F2E /* DecodeGraph.cpp in Sources */,
-				E2B7C8F10DDA19190089EFE0 /* BitmapContainer2 in Sources */,
 				E2B7C9590DDB1AEF0089EFE0 /* BitmapContainer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

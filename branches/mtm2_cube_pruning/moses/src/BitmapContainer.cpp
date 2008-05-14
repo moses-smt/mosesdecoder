@@ -246,44 +246,56 @@ BitmapContainer::FindKBestHypotheses()
 	// 3. put the two successors of the hypothesis on the queue
 	//    - add lm scoring to both
 	// IMPORTANT: we assume that all scores in the queue are LM-SCORED
-	if(m_edges.empty())
-		return;
-	
-	BackwardsEdgeSet::iterator edgeIter;
-	BackwardsEdge *bestEdge = NULL;
-	float bestScore = -std::numeric_limits<float>::infinity();
-	for(edgeIter = m_edges.begin(); edgeIter != m_edges.end(); ++edgeIter) {
-		SquarePosition current = (*edgeIter)->Dequeue(true);
-		if(current.first->GetTotalScore() > bestScore) {
-			bestScore = current.first->GetTotalScore();
-			bestEdge = *edgeIter;
+	for(size_t i = 0; i < m_kbest; i++) {
+		if(m_edges.empty())
+			return;
+		
+		BackwardsEdgeSet::iterator edgeIter;
+		BackwardsEdge *bestEdge = NULL;
+		float bestScore = -std::numeric_limits<float>::infinity();
+		for(edgeIter = m_edges.begin(); edgeIter != m_edges.end(); ++edgeIter) {
+			SquarePosition current = (*edgeIter)->Dequeue(true);
+			
+			// if the priority queue is exhausted, remove the edge from the set
+			// and proceed with the next edge
+			if(current == (*edgeIter)->InvalidSquarePosition()) {
+				m_edges.erase(edgeIter);
+				continue;
+			}
+			
+			if(current.first->GetTotalScore() > bestScore) {
+				bestScore = current.first->GetTotalScore();
+				bestEdge = *edgeIter;
+			}
 		}
+		
+		// if all the queues were empty, return
+		if(bestEdge == NULL)
+			return;
+		
+		SquarePosition pos = bestEdge->Dequeue(false);
+		
+		Hypothesis *bestHypo = pos.first;
+		
+		/*
+		 // logging for the curious
+		 IFVERBOSE(3) {
+			 const StaticData &staticData = StaticData::Instance();
+			 bestHypo->PrintHypothesis(bestHypo
+									 , staticData.GetWeightDistortion()
+									 , staticData.GetWeightWordPenalty());
+		 }
+		*/
+		
+		// add to hypothesis stack
+		// size_t wordsTranslated = bestHypo->GetWordsBitmap().GetNumWordsCovered();	
+		m_stack.AddPrune(bestHypo);	
+		
+		// create new hypotheses for the two successors of the hypothesis just added
+		// and insert them into the priority queue
+		int x = pos.second.first;
+		int y = pos.second.second;
+		
+		bestEdge->PushSuccessors(x, y);
 	}
-	
-	assert(bestEdge != NULL);
-	
-	SquarePosition pos = bestEdge->Dequeue(false);
-	
-	Hypothesis *bestHypo = pos.first;
-	
-	/*
-	 // logging for the curious
-	 IFVERBOSE(3) {
-		 const StaticData &staticData = StaticData::Instance();
-		 bestHypo->PrintHypothesis(bestHypo
-								 , staticData.GetWeightDistortion()
-								 , staticData.GetWeightWordPenalty());
-	 }
-	*/
-	
-	// add to hypothesis stack
-	// size_t wordsTranslated = bestHypo->GetWordsBitmap().GetNumWordsCovered();	
-	m_stack.AddPrune(bestHypo);	
-	
-	// create new hypotheses for the two successors of the hypothesis just added
-	// and insert them into the priority queue
-	int x = pos.second.first;
-	int y = pos.second.second;
-	
-	bestEdge->PushSuccessors(x, y);
 }
