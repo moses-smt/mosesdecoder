@@ -24,9 +24,9 @@ float intersect (float b1,m1,b2,m2){
   return((b2-b1)/(m2-m1));
 }
 
-statscore Optimizer::LineOptimize(const point& start,point direction,point& best){
+statscore Optimizer::LineOptimize(const Point& start,Point direction,Point& best){
   direction.normalize();//we pass by value so changing is ok
-  // we are looking for the best point on the line y=start+x*direction
+  // we are looking for the best Point on the line y=start+x*direction
   vector< vector<float,unsigned> > onebest;
   float min_int=0.00001;
   multimap<float,unsigned> thresholdlist;
@@ -56,13 +56,13 @@ statscore Optimizer::LineOptimize(const point& start,point direction,point& best
 	  leftmost=it2;//this is the new reference
 	}
       }
-      /* Require that the intersection point be at least min_int
+      /* Require that the intersection Point be at least min_int
 	 to the right of the previous one. If not, we replace the
-	 previous intersection point with this one. Yes, it can even
-	 happen that the new intersection point is slightly to the
+	 previous intersection Point with this one. Yes, it can even
+	 happen that the new intersection Point is slightly to the
 	 left of the old one, because of numerical imprecision. We
-	 don't check that the new point is also min_interval to the
-	 right of the penultimate one. In that case, the points would
+	 don't check that the new Point is also min_interval to the
+	 right of the penultimate one. In that case, the Points would
 	 switch places in the sort, resulting in a bogus score for
 	 that inteval. */
 
@@ -92,16 +92,16 @@ do{
 };
 
 
-point SimpleOptimizer::run(const point& init){
+Point SimpleOptimizer::run(const Point& init){
   assert(dimension==init.size());
-  point cur=init;
+  Point cur=init;
   statscore prevscore=FLT_MAX;
   statscore bestscore=FLT_MAX;
   do{
-    point  best(dimension);
-    point  linebest(dimension);
+    Point  best(dimension);
+    Point  linebest(dimension);
     for(int d=0;d<dimension;d++){
-      point direction(dimension);
+      Point direction(dimension);
       direction[d]=1.0;
       statscore curscore=LineOptimize(cur,direction,linebest);//find the minimum on the line
       if(curscore<bestscore){
