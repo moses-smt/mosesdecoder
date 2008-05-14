@@ -184,9 +184,10 @@ void Manager::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &ra
 
 	size_t numCovered = newBitmap.GetNumWordsCovered();
 	const TranslationOptionList &transOptList = m_transOptColl->GetTranslationOptionList(range);
+	const SquareMatrix &futureScore = m_transOptColl->GetFutureScore();
 
 	if (transOptList.size() > 0)
-		m_hypoStackColl[numCovered].SetBitmapAccessor(newBitmap, range, bitmapContainer, transOptList);
+		m_hypoStackColl[numCovered].SetBitmapAccessor(newBitmap, range, bitmapContainer, futureScore, transOptList);
 }
 
 bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const

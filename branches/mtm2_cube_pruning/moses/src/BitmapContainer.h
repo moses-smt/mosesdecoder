@@ -3,6 +3,7 @@
 #include <queue>
 #include <set>
 #include "Hypothesis.h"
+#include "SquareMatrix.h"
 #include "TranslationOption.h"
 #include "TypeDef.h"
 #include "WordsBitmap.h"
@@ -65,6 +66,7 @@ class BackwardsEdge
 		_PQType m_queue;
 		static SquarePosition *m_invalid;
 		bool m_initialized;
+		const SquareMatrix &m_futurescore;
 		size_t m_kbest;
 
 		std::vector< TranslationOption* > m_kbest_translations;
@@ -75,7 +77,10 @@ class BackwardsEdge
 	public:
 		const SquarePosition InvalidSquarePosition();
 
-		BackwardsEdge(const BitmapContainer &prevBitmapContainer, const TranslationOptionList &translations, const size_t KBestCubePruning);
+		BackwardsEdge(const BitmapContainer &prevBitmapContainer
+					  , const TranslationOptionList &translations
+					  , const SquareMatrix &futureScore
+					  , const size_t KBestCubePruning);
 		~BackwardsEdge();
 
 		bool GetInitialized();

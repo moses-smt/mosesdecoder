@@ -263,12 +263,13 @@ void HypothesisStack::CleanupArcList()
 void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 												, const WordsRange &range
 												, const BitmapContainer &bitmapContainer
+												, const SquareMatrix &futureScore
 												, const TranslationOptionList &transOptList)
 {
 	BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap, *this);
 	m_bitmapAccessor[newBitmap] = newBitmapContainer;
 
-	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer, transOptList, m_kbestCubePruning);
+	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer, transOptList, futureScore, m_kbestCubePruning);
 
 	newBitmapContainer->AddBackwardsEdge(edge);
 }

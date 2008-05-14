@@ -8,10 +8,12 @@ SquarePosition *BackwardsEdge::m_invalid = NULL;
 
 BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
                              , const TranslationOptionList &translations
+							 , const SquareMatrix &futureScore
 							 , const size_t KBestCubePruning)
   : m_prevBitmapContainer(prevBitmapContainer)
 	, m_queue()
 	, m_initialized(false)
+	, m_futurescore(futureScore)
 	, m_kbest(KBestCubePruning)
 {
 	// We will copy the k best translation options from the translations

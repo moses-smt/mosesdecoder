@@ -162,6 +162,7 @@ public:
 	void SetBitmapAccessor(const WordsBitmap &newBitmap
 												, const WordsRange &range
 												, const BitmapContainer &bitmapContainer
+												, const SquareMatrix &futureScore
 												, const TranslationOptionList &transOptList);
 
 	/** pruning, if too large.
