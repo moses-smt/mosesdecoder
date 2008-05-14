@@ -15,27 +15,12 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 	, m_seenPosition(KBestCubePruning * KBestCubePruning, false)
 	, m_initialized(false)
 	, m_futurescore(futureScore)
-	, m_kbest(KBestCubePruning)	
+	, m_kbest(KBestCubePruning)
+	, m_kbest_translations(translations)
 {
-	// We will copy the k best translation options from the translations
-	// parameter and keep them in a std::vector to allow fast access.
-	// We will copy at most k translation options to the vector.
-	size_t k = std::min(m_kbest, translations.size());
-	
-	TranslationOptionList::const_iterator optionsEnd = translations.begin();
-	for (size_t i=0; i<k; i++) {
-		optionsEnd++;
-	}
-
-	// We reserve exactly as much space as we need to avoid resizing.
-	m_kbest_translations.reserve(k);
-	std::copy(translations.begin(), translations.begin() + k, m_kbest_translations.begin());
-
-	// We should also do this for the hypotheses that are attached to the BitmapContainer
-	// which this backwards edge points to :)  Same story: compute k, copy k hypotheses
-	// from the OrderedHypothesisSet in the BitmapContainer et voila...
+	// Copy hypotheses from ordered set to vector for faster access.
 	const OrderedHypothesisSet &hypotheses = m_prevBitmapContainer.GetHypotheses();
-	k = std::min(m_kbest, hypotheses.size());
+	int k = std::min(m_kbest, hypotheses.size());
 	
 	OrderedHypothesisSet::const_iterator hypoEnd = hypotheses.begin();
 	for (size_t i=0; i<k; i++) {

@@ -70,7 +70,7 @@ class BackwardsEdge
 		const SquareMatrix &m_futurescore;
 		size_t m_kbest;
 
-		std::vector< TranslationOption* > m_kbest_translations;
+		const TranslationOptionList &m_kbest_translations;
 		std::vector< Hypothesis* > m_kbest_hypotheses;
 		
 		BackwardsEdge();
