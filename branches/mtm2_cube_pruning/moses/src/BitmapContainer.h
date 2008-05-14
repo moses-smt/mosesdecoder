@@ -3,29 +3,44 @@
 #include <queue>
 #include <set>
 #include "Hypothesis.h"
+#include "TranslationOption.h"
 #include "TypeDef.h"
 #include "WordsBitmap.h"
 
 class BitmapContainer;
 class BackwardsEdge;
 class Hypothesis;
+class HypothesisScoreOrderer;
 
-/** Order relation for hypothesis scores.  Taken from Eva Hasler's branch. */
-class HypothesisScoreOrderer
-{
-public:
-	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
-	{
-		// Get score so far
-		float scoreA = hypoA->GetTotalScore();
-		float scoreB = hypoB->GetTotalScore();
-		return (scoreA >= scoreB);
-	}
-};
 
 typedef std::set< Hypothesis*, HypothesisScoreOrderer > OrderedHypothesisSet;
 typedef std::set< BackwardsEdge* > BackwardsEdgeSet;
 typedef std::pair< Hypothesis*, std::pair< int, int > > SquarePosition;
+
+
+/** Order relation for TranslationOption scores. */
+class TranslationOptionOrderer
+{
+	public:
+		bool operator()(const TranslationOption* optionA, const TranslationOption* optionB) const
+		{
+			float scoreA = optionA->GetFutureScore();
+			float scoreB = optionB->GetFutureScore();
+			return (scoreA >= scoreB);
+		}
+};
+
+/** Order relation for hypothesis scores.  Taken from Eva Hasler's branch. */
+class HypothesisScoreOrderer
+{
+	public:
+		bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
+		{
+			float scoreA = hypoA->GetTotalScore();
+			float scoreB = hypoB->GetTotalScore();
+			return (scoreA >= scoreB);
+		}
+};
 
 // Allows to compare two square positions (coordinates) by the corresponding scores.
 class SquarePositionOrderer
@@ -48,7 +63,9 @@ class BackwardsEdge
 		const BitmapContainer &m_prevBitmapContainer;
 		_PQType m_queue;
 		static SquarePosition *m_invalid;
-		TranslationOptionList m_translations;
+
+		std::vector< TranslationOption* > m_kbest_translations;
+		std::vector< Hypothesis* > m_kbest_hypotheses;
 		
 		BackwardsEdge();
 
@@ -63,7 +80,6 @@ class BackwardsEdge
 		void Enqueue(int x, int y, Hypothesis *hypothesis);
 		SquarePosition Dequeue(bool keepValue=false);
 };
-
 
 // A BitmapContainer encodes an ordered set of hypotheses and a set of edges
 // pointing to the "generating" BitmapContainers.  This data logically belongs

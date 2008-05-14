@@ -9,7 +9,35 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer, Transla
   : m_prevBitmapContainer(prevBitmapContainer)
 	, m_queue()
 {
-	std::copy(translations.begin(), translations.end(), m_translations.begin());
+	// QUESTION: can we expect our translation parameter to be NOT EMPTY? We should?!
+
+	// We will copy the k best translation options from the translations
+	// parameter and keep them in a std::vector to allow fast access.
+
+	// IMPORTANT! We ASSUME that the given TranslationOptionList object is already sorted!
+	// Hence it is the duty of the TranslationOptionCollection to keep this list sorted...
+
+	// We will copy either k options or less if the translations parameter does not include k.
+	//
+	// TODO: replace 0 by k-best constant!
+	//
+	int k = std::min(0, translation.size()); // WHERE do we get the k-best parameter?
+	
+	// We reserve exactly as much space as we need to avoid resizing.
+	m_kbest_translations.reserve(k);
+	std::copy(translations.begin(), translations.begin() + k, m_kbest_translations.begin());
+
+
+	// We should also do this for the hypotheses that are attached to the BitmapContainer
+	// which this backwards edge points to :)  Same story: compute k, copy k hypotheses
+	// from the OrderedHypothesisSet in the BitmapContainer and voila...
+	const OrderedHypothesisSet &hypotheses = m_prevBitmapContainer.GetHypotheses();
+	k = std::min(0, hypotheses.size());
+	
+	m_kbest_hypotheses.reserve(k);
+	std::copy(hypotheses.begin(), hypothesis.begin() + k, m_kbest_hypotheses.begin();
+	
+	// The BackwardsEdge now has ALL data it needs to perform cube pruning :)
 }
 
 const SquarePosition
