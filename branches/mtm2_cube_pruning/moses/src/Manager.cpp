@@ -118,6 +118,13 @@ void Manager::ProcessSentence()
 		}
 		HypothesisStack &sourceHypoColl = *iterStack;
 
+		_BMType::const_iterator bmIter;
+		const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
+		for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter)
+		{
+			bmIter->second->FindKBestHypotheses();
+		}
+		
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
 	        // VERBOSE("processing next stack at ");
