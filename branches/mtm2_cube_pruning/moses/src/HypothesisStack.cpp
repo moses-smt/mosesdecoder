@@ -70,7 +70,16 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 
 		// add to bitmap accessor
 		const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-		BitmapContainer *bmContainer = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
+		_BMType::iterator bcExists = m_bitmapAccessor.find(bitmap);
+		
+		BitmapContainer *bmContainer;
+		if (bcExists == m_bitmapAccessor.end()) {
+			bmContainer = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
+		}
+		else {
+			bmContainer = bcExists->second;
+		}
+		
 		bmContainer->AddHypothesis(hypo);
 		m_bitmapAccessor[bitmap] = bmContainer;
 

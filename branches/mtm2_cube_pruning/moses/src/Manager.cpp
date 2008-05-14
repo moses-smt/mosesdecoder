@@ -173,10 +173,10 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 				CreateForwardTodos(bitmap, applyRange, bitmapContainer);
 			}
 
-			for (endPos = ++startPos ;endPos < len ; endPos++)
+			for (endPos = startPos+1; endPos < len; endPos++)
 			{
 				if (bitmap.GetValue(endPos))
-					continue;
+					break;
 
 				WordsRange applyRange(startPos, endPos);
 				if (CheckDistortion(bitmap, applyRange))
