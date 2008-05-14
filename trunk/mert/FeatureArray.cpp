@@ -131,3 +131,9 @@ void FeatureArray::load(const std::string &file, bool bin)
 
 }
 
+void FeatureArray::merge(FeatureArray& e)
+{
+//dummy implementation
+	for (int i=0; i< e.size(); i++)
+		add(e.get(i));
+}
