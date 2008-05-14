@@ -1,54 +1,50 @@
 /*
- *  FeatureArray.h
+ *  ScoreData.h
  *  met - Minimum Error Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
  */
 
-#ifndef FEATURE_ARRAY_H
-#define FEATURE_ARRAY_H
-
-#define FEATURES_BEGIN "FEATURES_BEGIN_0"
-#define FEATURES_END "FEATURES_END_0"
+#ifndef SCORE_DATA_H
+#define SCORE_DATA_H
 
 using namespace std;
 
 #include <limits>
 #include <vector>
 #include <iostream>
-#include <fstream>
 
 #include "Util.h"
-#include "FeatureStats.h"
+#include "ScoreArray.h"
 
-class FeatureArray
+class ScoreData
 {
 protected:
-	vector<FeatureStats> array_;
+	vector<ScoreArray> array_;
 	
 private:
 	char databuf_[BUFSIZ];
 	size_t bufLen_;
-	size_t idx; // idx to identify the utterance, it can differ from the index inside the vector
 	
 public:
-	FeatureArray();
+	ScoreData();
 	
-	~FeatureArray(){};
+	~ScoreData(){};
 		
 	inline void clear() { array_.clear(); }
 	
-	inline size_t getIndex(){ return idx; }
-	inline void setIndex(size_t value){ idx=value; }
+	inline ScoreArray get(int i){ return array_.at(i); }
+	inline bool exists(int i){ return (i<array_.size())?true:false; }
 
-	inline FeatureStats get(int i){ return array_.at(i); }
-	void add(FeatureStats e){ array_.push_back(e); }
+	inline ScoreStats get(int i, int j){ return array_.at(i).get(j); }
+
+	void add(ScoreArray e){ array_.push_back(e); }
+	void add(ScoreStats e, int sent_idx);
 	
 	inline size_t size(){ return array_.size(); }
 	
 	inline size_t memsize(){ return bufLen_; }
-	
 
 	void savetxt(const std::string &file);
 	void savetxt(ofstream& outFile);
@@ -56,6 +52,8 @@ public:
 
 	void loadtxt(ifstream& inFile);
 	void loadtxt(const std::string &file);
+
+	void loadnbest(const std::string &file);
 
 };
 
