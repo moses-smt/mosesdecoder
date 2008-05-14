@@ -160,6 +160,7 @@ public:
 	const _BMType& GetBitmapAccessor() const
 	{ return m_bitmapAccessor; }
 	void SetBitmapAccessor(const WordsBitmap &newBitmap
+												, HypothesisStack &stack
 												, const WordsRange &range
 												, const BitmapContainer &bitmapContainer
 												, const SquareMatrix &futureScore

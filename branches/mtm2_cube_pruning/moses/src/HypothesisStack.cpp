@@ -265,12 +265,14 @@ void HypothesisStack::CleanupArcList()
 }
 
 void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
+												, HypothesisStack &stack
 												, const WordsRange &range
 												, const BitmapContainer &bitmapContainer
 												, const SquareMatrix &futureScore
 												, const TranslationOptionList &transOptList)
 {
-	BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap, *this, m_kbestCubePruning);
+	cerr << newBitmap << endl;
+	BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap, stack, m_kbestCubePruning);
 	m_bitmapAccessor[newBitmap] = newBitmapContainer;
 
 	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer, transOptList, futureScore, m_kbestCubePruning);

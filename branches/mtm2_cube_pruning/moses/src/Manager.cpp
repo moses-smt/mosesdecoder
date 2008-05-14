@@ -105,11 +105,11 @@ void Manager::ProcessSentence()
 	CreateForwardTodos(m_hypoStackColl.front());
 
 	// go through each stack
+	size_t stackNo = 1;
 	std::vector < HypothesisStack >::iterator iterStack;
 	for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
-
-//checked if elapsed time ran out of time with respect 
+		//checked if elapsed time ran out of time with respect 
 		double _elapsed_time = GetUserTime();
 		if (_elapsed_time > staticData.GetTimeoutThreshold()){
 	  	VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
@@ -134,6 +134,9 @@ void Manager::ProcessSentence()
 
 
 		CreateForwardTodos(sourceHypoColl);
+	
+		stackNo++;
+		cerr << stackNo << endl;
 	}
 
 	// some more logging
@@ -193,9 +196,10 @@ void Manager::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &ra
 	size_t numCovered = newBitmap.GetNumWordsCovered();
 	const TranslationOptionList &transOptList = m_transOptColl->GetTranslationOptionList(range);
 	const SquareMatrix &futureScore = m_transOptColl->GetFutureScore();
+	HypothesisStack &newStack = m_hypoStackColl[numCovered];
 
 	if (transOptList.size() > 0)
-		m_hypoStackColl[numCovered].SetBitmapAccessor(newBitmap, range, bitmapContainer, futureScore, transOptList);
+		m_hypoStackColl[numCovered].SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, futureScore, transOptList);
 }
 
 bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
