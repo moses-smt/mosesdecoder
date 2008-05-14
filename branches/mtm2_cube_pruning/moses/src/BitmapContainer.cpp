@@ -248,6 +248,7 @@ BitmapContainer::FindKBestHypotheses()
 			// and proceed with the next edge
 			if(current == (*edgeIter)->InvalidSquarePosition()) {
 				BackwardsEdgeSet::iterator deleteIter = edgeIter++;
+				delete *deleteIter;
 				m_edges.erase(deleteIter);
 				continue;
 			}
