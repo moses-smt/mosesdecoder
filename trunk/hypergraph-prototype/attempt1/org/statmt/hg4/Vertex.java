@@ -25,5 +25,8 @@ public class Vertex {
         }
 
 
+        public String toString() {
+        	return super.toString() + " inarcs=" + incomingArcs;
+        }
 
 }

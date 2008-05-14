@@ -12,5 +12,9 @@ public class Hyperarc {
         public Hyperarc(List<Vertex> tail) {
                 this.tail = tail;
         }
+        
+        public String toString() {
+        	return super.toString() + "  tail=" + tail;
+        }
 }
               
