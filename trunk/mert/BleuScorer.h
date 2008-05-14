@@ -27,7 +27,7 @@ enum BleuReferenceLengthStrategy { AVERAGE, SHORTEST, CLOSEST };
  **/
 class BleuScorer: public Scorer {
 	public:
-		BleuScorer() : Scorer("BLEU"), _preserveCase(false),_normalise(false),_refLengthStrategy(SHORTEST) {}
+		BleuScorer() : Scorer("BLEU"),_refLengthStrategy(SHORTEST) {}
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
 		virtual void prepareStats(int sid, const string& text, ScoreStats& entry);
 
@@ -41,8 +41,6 @@ class BleuScorer: public Scorer {
 		BleuScorer(const BleuScorer&);
 		BleuScorer& operator=(const BleuScorer&);
 				
-		typedef map<string,int> encodings_t;
-		typedef map<string,int>::iterator encodings_it;
 
 		//Used to construct the ngram map
 		struct CompareNgrams {
@@ -82,7 +80,6 @@ class BleuScorer: public Scorer {
 
 		typedef vector<counts_t*> refcounts_t;
 
-		void encode(const string& line, vector<int>& encoded);
 		size_t countNgrams(const string& line, counts_t& counts, unsigned int n);
         float bleu(const vector<int>& comps);
 
@@ -94,14 +91,11 @@ class BleuScorer: public Scorer {
 			}
 			cerr << endl;
 		} 
-		bool _preserveCase;
-		bool _normalise;
 		BleuReferenceLengthStrategy _refLengthStrategy;
 		
 		// data extracted from reference files
 		refcounts_t _refcounts;
 		vector<vector<size_t> > _reflengths;
-		encodings_t _encodings;
 };
 
 
