@@ -15,25 +15,24 @@ FeatureData::FeatureData():
 bufLen_(0)
 {};
 
-void FeatureData::savetxt(std::ofstream& outFile)
+void FeatureData::save(std::ofstream& outFile, bool bin)
 {
-        FeatureArray entry;
 	for (vector<FeatureArray>::iterator i = array_.begin(); i !=array_.end(); i++)
-		(*i).save(outFile);
+		(*i).save(outFile, bin);
 }
 
-void FeatureData::savetxt(const std::string &file)
+void FeatureData::save(const std::string &file, bool bin)
 {
 	TRACE_ERR("saving the array into " << file << std::endl);  
 
 	std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
 
-	savetxt(outFile);
+	save(outFile, bin);
 
 	outFile.close();
 }
 
-void FeatureData::loadtxt(ifstream& inFile)
+void FeatureData::load(ifstream& inFile)
 {
         FeatureArray entry;
 
@@ -48,23 +47,19 @@ void FeatureData::loadtxt(ifstream& inFile)
 			TRACE_ERR("no more data" << std::endl);
 			continue;
 		}
-		entry.save();
-
 		add(entry);
-		
-		savetxt();
 		iter++;
 	}
 }
 
 
-void FeatureData::loadtxt(const std::string &file)
+void FeatureData::load(const std::string &file)
 {
 	TRACE_ERR("loading data from " << file << std::endl);  
 
 	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
 
-	loadtxt(inFile);
+	load(inFile);
 
 	inFile.close();
 }
@@ -110,7 +105,16 @@ void FeatureData::loadnbest(const std::string &file)
 	inFile.close();
 }
 
-
+void FeatureData::add(FeatureArray& e){
+	if (e.getIndex() < size()){ // array at poistion e.getIndex() already exists
+		//enlarge array at position e.getIndex()
+		array_.at(e.getIndex()).merge(e);
+		setIndex();
+	}
+	else{
+		array_.push_back(e);
+	}
+}
 
 void FeatureData::add(FeatureStats e, int sent_idx){
 	if (exists(sent_idx)){
