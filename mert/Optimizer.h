@@ -36,11 +36,11 @@ class Optimizer{
   /**given a set of lambdas, get the nbest for each sentence*/
   vector<unsigned> Get1bests(const Point& param);
   /**given a set of nbests, get the Statistical score*/
-  statscore Getstatscore(vector<unsigned> nbests){scorer->score(nbests);};
+  statscore GetStatScore(vector<unsigned> nbests){scorer->score(nbests);};
   /**given a set of lambdas, get the total statistical score*/
-  statscore Getstatscore(const Point& param){return Getstatscore(Get1bests(param));};
+  statscore GetStatScore(const Point& param){return GetStatScore(Get1bests(param));};
   statscore LineOptimize(const Point& start,Point direction,Point& best);//Get the optimal Lambda and the best score in a particular direction from a given Point
-}
+};
 
 using namespace std;
 /**default basic  optimizer*/
@@ -49,7 +49,7 @@ private: float eps;
 public:
   SimpleOptimizer(unsigned dim,float _eps):Optimizer(dim),eps(_eps){};
   Point run(const Point& init);
-}
+};
 
 #endif
 

@@ -11,6 +11,8 @@ class Point: public std::vector<lambda>{
   Point(vector<lambda> init):vector<lambda>(init),score(numeric_limits<statscore>::max()){};
   void randomize(const std::vector<lambda>&min,const std::vector<lambda>& max);
   double operator*(FeatureStats&)const;//compute the feature function
+  Point operator+(const Point&)const;
+  Point operator*(float&)const;//compute the feature function
   void normalize();
 };
 
