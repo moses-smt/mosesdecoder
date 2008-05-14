@@ -63,6 +63,14 @@ void HypothesisStack::RemoveAll()
 pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 {
 	std::pair<iterator, bool> ret = m_hypos.insert(hypo);
+
+	// add to bitmap accessor
+	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
+	BitmapContainer *bmContainer = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
+	bmContainer->AddHypothesis(hypo);
+
+	m_bitmapAccessor[bitmap] = bmContainer;
+
 	if (ret.second) 
 	{ // equiv hypo doesn't exists
 		VERBOSE(3,"added hyp to stack");
@@ -152,11 +160,6 @@ void HypothesisStack::AddInitial(Hypothesis *hypo)
 {
 	std::pair<iterator, bool> addRet = Add(hypo); 
 	assert (addRet.second);
-	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-	BitmapContainer *bmContainer = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
-	bmContainer->AddHypothesis(hypo);
-
-	m_bitmapAccessor[bitmap] = bmContainer;
 }
 
 void HypothesisStack::PruneToSize(size_t newSize)
