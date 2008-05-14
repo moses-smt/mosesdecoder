@@ -29,7 +29,7 @@ float intersect (float m1, float b1,float m2,float b2){
 }
 
 statscore Optimizer::LineOptimize(const Point& origin,Point direction,Point& bestpoint){
-  
+
   direction.normalize();//we pass by value so changing is ok
   // we are looking for the best Point on the line y=Origin+x*direction
   float min_int=0.00001;
@@ -38,11 +38,11 @@ statscore Optimizer::LineOptimize(const Point& origin,Point direction,Point& bes
   
   thresholdlist.push_back(pair<float,vector<unsigned> >(MINFLOAT,vector<unsigned>()));
 
-  for(int S=0;S<N;S++){
+  for(int S=0;S<size();S++){
     //first we determine the translation with the best feature score for each sentence and each value of x
     multimap<float,unsigned> gradient;
     vector<float> f0;
-    for(unsigned j=0;j<FData[S].size();j++){
+    for(unsigned j=0;j<FData->get(S).size();j++){
       gradient.insert(pair<float,unsigned>(direction*(FData->get(S,j)),j));//gradient of the feature function for this particular target sentence
       f0[j]=origin*FData->get(S,j);//compute the feature function at the origin point
     }
@@ -152,7 +152,7 @@ statscore Optimizer::LineOptimize(const Point& origin,Point direction,Point& bes
   list<threshold>::iterator lit2;
   statscore bestscore=MINFLOAT;
   for(lit2=thresholdlist.begin();lit2!=thresholdlist.end();lit2){
-    assert(lit2->second.size()==N);
+    assert(lit2->second.size()==FData->size());
     statscore cur=GetStatScore(lit2->second);
     if(cur>bestscore){
       bestscore=cur;
@@ -168,7 +168,18 @@ statscore Optimizer::LineOptimize(const Point& origin,Point direction,Point& bes
 };
 
 
-Point SimpleOptimizer::run(const Point& init){
+Point Optimizer::Run(const Point& init){
+  if(!FData){
+    cerr<<"error trying to optimize without Feature loaded"<<endl;
+    exit(2);
+  }
+  if(!scorer){
+    cerr<<"error trying to optimize without a Scorer loaded"<<endl;
+    exit(2);
+  }
+  return TrueRun(init);
+}
+Point SimpleOptimizer::TrueRun(const Point& init){
   assert(dimension==init.size());
   Point cur=init;
   statscore prevscore=FLT_MAX;
