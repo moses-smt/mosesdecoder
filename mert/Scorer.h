@@ -9,23 +9,72 @@
 
 #include "ScoreData.h"
 
+using namespace std;
+
+typedef vector<pair<unsigned int, unsigned int> > diff_t;
+typedef vector<diff_t> diffs_t;
+typedef vector<unsigned int> candidates_t;
+typedef vector<float> scores_t;
+
 class ScoreStats;
 
+/**
+  * Superclass of all scorers and dummy implementation. In order to add a new
+  * scorer it should be sufficient to override prepareStats(), setReferenceFiles()
+  * and score()
+**/
 class Scorer {
 	
 	public:
 		
-		Scorer(const std::string& name): _name(name), _scoreData(0)  {}
+		Scorer(const string& name): _name(name), _scoreData(0)  {}
 
-		const std::string& getName() const {return _name;}
 
 		/**
 		  * set the reference files. This must be called before prepareStats.
 		  **/
-		void setReferenceFiles(const std::vector<std::string>& referenceFiles) {
+		virtual void setReferenceFiles(const vector<string>& referenceFiles) {
 			//do nothing
 		}
 
+
+		/**
+		 * Process the given guessed text, corresponding to the given reference sindex
+         * and add the appropriate statistics to the entry.
+		**/
+		virtual void prepareStats(int sindex, const string& text, ScoreStats& entry) {
+			//cerr << text << std::endl;
+		}
+
+        /**
+          * Score using each of the candidate index, then go through the diffs
+          * applying each in turn, and calculating a new score each time.
+          **/
+        virtual void score(const candidates_t& candidates, const diffs_t& diffs,
+                scores_t& scores) {
+            //dummy impl
+			if (!_scoreData) {
+				throw runtime_error("score data not loaded");
+			}
+            scores.push_back(0);
+            for (size_t i = 0; i < diffs.size(); ++i) {
+                scores.push_back(0);
+            }
+        }
+
+
+		/**
+		  * Calculate the score of the sentences corresponding to the list of candidate
+		  * indices. Each index indicates the 1-best choice from the n-best list.
+		  **/
+		float score(const candidates_t& candidates) {
+            diffs_t diffs;
+            scores_t scores;
+            score(candidates, diffs, scores);
+            return scores[0];
+		}
+
+		const string& getName() const {return _name;}
 
         size_t getReferenceSize() {
             if (_scoreData) {
@@ -34,13 +83,6 @@ class Scorer {
             return 0;
         }
 		
-		/**
-		 * Process the given guessed text, corresponding to the given reference sindex
-         * and add the appropriate statistics to the entry.
-		**/
-		virtual void prepareStats(int sindex, const std::string& text, ScoreStats& entry) {
-			//std::cerr << text << std::endl;
-		}
 
 		/**
 		  * Set the score data, prior to scoring.
@@ -49,23 +91,11 @@ class Scorer {
 			_scoreData = scoreData;
 		}
 
-		/**
-		  * Calculate the score of the sentences corresponding to the list of candidate
-		  * indices. Each index indicates the 1-best choice from the n-best list.
-		  **/
-		virtual float score(const std::vector<unsigned int>& candidates) {
-			if (!_scoreData) {
-				throw std::runtime_error("score data not loaded");
-			}
-			return 0;
-		}
-
-
 		protected:
 			ScoreData* _scoreData;
 
 		private:
-			std::string _name;
+			string _name;
 
 };
 
