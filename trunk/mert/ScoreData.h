@@ -17,7 +17,8 @@ using namespace std;
 
 #include "Util.h"
 #include "ScoreArray.h"
-#include "Scorer.h"
+
+class Scorer;
 
 class ScoreData
 {

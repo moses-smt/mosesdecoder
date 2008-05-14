@@ -120,6 +120,8 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles) {
 
 
 void BleuScorer::prepareStats(int sid, const string& text, ScoreStats& entry) {
+        cerr << text << endl;
+        //dump_counts(*_refcounts[sid]);
 		if (sid >= _refcounts.size()) {
 			stringstream msg;
 			msg << "Sentence id (" << sid << ") not found in reference set";
@@ -172,6 +174,41 @@ void BleuScorer::prepareStats(int sid, const string& text, ScoreStats& entry) {
 		//TRACE_ERR(sout.str() << endl);
 		string stats_str = sout.str();
 		entry.set(stats_str);
+}
+
+
+float BleuScorer::score(const std::vector<unsigned int>& candidates) {
+	if (!_scoreData) {
+		throw std::runtime_error("score data not loaded");
+	}
+	vector<int> comps(LENGTH*2+1);
+	for (size_t i = 0; i < candidates.size(); ++i) {
+		ScoreStats stats = _scoreData->get(i,candidates[i]);
+		if (stats.size() != comps.size()) {
+			stringstream msg;
+			msg << "Bleu statistics for (" << "," << candidates[i] << ") have incorrect "
+				<< "number of fields. Found: " << stats.size() << " Expected: " 
+				<< comps.size();
+			throw runtime_error(msg.str());
+		}
+		for (size_t k = 0; k < comps.size(); ++k) {
+			comps[k] += stats.get(k);	
+		}
+	}
+	float logbleu = 0.0;
+	for (int i = 0; i < LENGTH; ++i) {
+		if (comps[2*i] == 0) {
+			return 0.0;
+		}
+		logbleu += log(comps[2*i]) - log(comps[2*i+1]);
+		
+	}
+	logbleu /= LENGTH;
+	float brevity = 1.0 - (float)comps[LENGTH*2]/comps[1];//reflength divided by test length
+	if (brevity < 0.0) {
+		logbleu += brevity;
+	}
+	return exp(logbleu);
 }
 
 
