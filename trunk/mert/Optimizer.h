@@ -21,7 +21,7 @@ class Optimizer{
    Scorer * scorer; 
    FeatureData * FData; 
    /**number of lambda parameters*/ 
-  unsigned dimension;
+  const unsigned dimension;
   Optimizer(unsigned d):dimension(d),scorer(NULL),FData(NULL){};
   void SetScorer(Scorer *S);
   void SetFData(FeatureData *F);
@@ -29,10 +29,11 @@ class Optimizer{
     delete scorer;
     delete FData;
   }
-  /**Number of sentences in the tuning set*/
-  unsigned N;
-  /**main function that perform an optimization*/
-  virtual  Point run(const Point& init);
+  unsigned size(){return (FData?FData->size():0);}
+  /**Generic wrapper around TrueRun to check a few things. Non virtual*/
+  Point Run(const Point& init);
+/**main function that perform an optimization*/  
+  virtual  Point TrueRun(const Point& init);
   /**given a set of lambdas, get the nbest for each sentence*/
   vector<unsigned> Get1bests(const Point& param);
   /**given a set of nbests, get the Statistical score*/
@@ -48,7 +49,7 @@ class SimpleOptimizer: public Optimizer{
 private: float eps;
 public:
   SimpleOptimizer(unsigned dim,float _eps):Optimizer(dim),eps(_eps){};
-  Point run(const Point& init);
+  virtual Point TrueRun(const Point& init);
 };
 
 #endif
