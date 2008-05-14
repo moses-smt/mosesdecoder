@@ -27,8 +27,6 @@ void FeatureArray::savetxt(std::ofstream& outFile)
 
 void FeatureArray::savebin(std::ofstream& outFile)
 {
-        FeatureStats entry;
-
 	TRACE_ERR("binary saving is not yet implemented!" << std::endl);  
 
 /*
@@ -39,15 +37,21 @@ NOT YET IMPLEMENTED
 
 }
 
-void FeatureArray::savetxt(const std::string &file)
+
+void FeatureArray::save(std::ofstream& inFile, bool bin)
+{
+	(bin)?savebin(inFile):savetxt(inFile);
+}
+
+void FeatureArray::save(const std::string &file, bool bin)
 {
 	TRACE_ERR("saving the array into " << file << std::endl);  
 
 	std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
 
-        FeatureStats entry;
+	save(outFile);
 
-	savetxt(outFile);
+	outFile.close();
 }
 
 void FeatureArray::loadtxt(ifstream& inFile)
@@ -71,7 +75,11 @@ void FeatureArray::loadtxt(ifstream& inFile)
 
 	if (!stringBuf.empty()){         
 //		TRACE_ERR("Reading: " << stringBuf << std::endl); 
-		nextPound = getNextPound(stringBuf, substring);
+                if ((loc = stringBuf.find(FEATURES_TXT_BEGIN)) != 0){
+			TRACE_ERR("ERROR: FeatureArray::loadtxt(): Wrong header");
+			return;
+		}
+		nextPound = getNextPound(stringBuf, substring); 
 		nextPound = getNextPound(stringBuf, substring);
        	        idx = atoi(substring.c_str());
 		nextPound = getNextPound(stringBuf, substring);
@@ -90,20 +98,35 @@ void FeatureArray::loadtxt(ifstream& inFile)
 	std::getline(inFile, stringBuf);
 	if (!stringBuf.empty()){         
 //		TRACE_ERR("Reading: " << stringBuf << std::endl); 
-                if ((loc = stringBuf.find(FEATURES_END)) != 0){
+                if ((loc = stringBuf.find(FEATURES_TXT_END)) != 0){
 			TRACE_ERR("ERROR: FeatureArray::loadtxt(): Wrong footer");
 			return;
 		}
 	}
 }
 
-void FeatureArray::loadtxt(const std::string &file)
+void FeatureArray::loadbin(ifstream& inFile)
+{
+	TRACE_ERR("binary saving is not yet implemented!" << std::endl);  
+
+/*
+NOT YET IMPLEMENTED
+*/
+}
+
+void FeatureArray::load(ifstream& inFile, bool bin)
+{
+	(bin)?loadbin(inFile):loadtxt(inFile);
+}
+
+void FeatureArray::load(const std::string &file, bool bin)
 {
 	TRACE_ERR("loading data from " << file << std::endl);  
 
 	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
 
-	loadtxt(inFile);
+	load(inFile, bin);
+
 	inFile.close();
 
 }

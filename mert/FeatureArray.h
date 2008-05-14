@@ -53,12 +53,16 @@ public:
 	inline size_t memsize(){ return bufLen_; }
 	
 
-	void savetxt(const std::string &file);
 	void savetxt(ofstream& outFile);
-	inline void savetxt(){ savetxt("/dev/stdout"); }
+	void savebin(ofstream& outFile);
+	void save(ofstream& outFile, bool bin=false);
+	void save(const std::string &file, bool bin=false);
+	inline void save(bool bin=false){ save("/dev/stdout",bin); }
 
 	void loadtxt(ifstream& inFile);
-	void loadtxt(const std::string &file);
+	void loadbin(ifstream& inFile);
+	void load(ifstream& inFile, bool bin=false);
+	void load(const std::string &file, bool bin=false);
 
 };
 
