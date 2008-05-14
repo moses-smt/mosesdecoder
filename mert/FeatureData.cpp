@@ -90,10 +90,10 @@ void FeatureData::loadnbest(const std::string &file)
 
 //		TRACE_ERR("Reading: " << stringBuf << std::endl); 
 
-		nextPound = getNextPound(stringBuf, substring, "|||");
+		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
        	        sentence_index = atoi(substring.c_str());
-		nextPound = getNextPound(stringBuf, substring, "|||");
-		nextPound = getNextPound(stringBuf, substring, "|||");
+		nextPound = getNextPound(stringBuf, substring, "|||"); //second field
+		nextPound = getNextPound(stringBuf, substring, "|||"); //third field
 
 		entry.clear();
 		while (!substring.empty()){

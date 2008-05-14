@@ -31,6 +31,7 @@ private:
 	char databuf_[BUFSIZ];
 	size_t bufLen_;
 	int idx; // idx to identify the utterance, it can differ from the index inside the vector
+	std::string score_type;
 	
 public:
 	ScoreArray();
@@ -44,7 +45,10 @@ public:
 
 	inline ScoreStats get(int i){ return array_.at(i); }
 	void add(ScoreStats e){ array_.push_back(e); }
-	
+
+	inline std::string name(){ return score_type; };
+	inline std::string name(std::string &sctype){ return score_type = sctype; };
+
 	inline size_t size(){ return array_.size(); }
 	
 	inline size_t memsize(){ return bufLen_; }

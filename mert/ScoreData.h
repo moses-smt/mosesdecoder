@@ -17,6 +17,7 @@ using namespace std;
 
 #include "Util.h"
 #include "ScoreArray.h"
+#include "Scorer.h"
 
 class ScoreData
 {
@@ -26,9 +27,11 @@ protected:
 private:
 	char databuf_[BUFSIZ];
 	size_t bufLen_;
+	Scorer* theScorer;	
+	std::string score_type;
 	
 public:
-	ScoreData();
+	ScoreData(Scorer& sc);
 	
 	~ScoreData(){};
 		
@@ -38,6 +41,8 @@ public:
 	inline bool exists(int i){ return (i<array_.size())?true:false; }
 
 	inline ScoreStats get(int i, int j){ return array_.at(i).get(j); }
+	
+	inline std::string name(){ return score_type; };
 
 	void add(ScoreArray e){ array_.push_back(e); }
 	void add(ScoreStats e, int sent_idx);
