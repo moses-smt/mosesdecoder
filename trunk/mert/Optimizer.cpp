@@ -1,6 +1,7 @@
 #include <cassert>
 #include "Optimizer.h"
 #include <vector>
+#include<list>
 #include <cfloat>
 #include <iostream>
 
@@ -27,14 +28,14 @@ float intersect (float b1, float m1,float b2,float m2){
   return((b2-b1)/(m1-m2));
 }
 
-statscore Optimizer::LineOptimize(const Point& start,Point direction,Point& best){
+statscore Optimizer::LineOptimize(const Point& origin,Point direction,Point& bestpoint){
   
   direction.normalize();//we pass by value so changing is ok
-  // we are looking for the best Point on the line y=start+x*direction
+  // we are looking for the best Point on the line y=Origin+x*direction
   //vector< vector<float,unsigned> > onebest;
   float min_int=0.00001;
   typedef pair<float,vector<unsigned> > threshold;  
-  vector<threshold> thresholdlist;
+  list<threshold> thresholdlist;
   
   thresholdlist.push_back(pair<float,vector<unsigned> >(MINFLOAT,vector<unsigned>()));
 
@@ -44,7 +45,7 @@ statscore Optimizer::LineOptimize(const Point& start,Point direction,Point& best
     vector<float> f0;
     for(unsigned j=0;j<FData[i].size();j++){
       gradient.insert(pair<float,unsigned>(direction*(FData->get(i,j)),j));
-      f0[j]=start*FData->get(i).get(j);
+      f0[j]=origin*FData->get(i).get(j);
     }
    //now lets compute the 1best for each value of x
     
@@ -83,14 +84,51 @@ statscore Optimizer::LineOptimize(const Point& start,Point direction,Point& best
     }
     //we have the onebest list and the threshold for the current sentence.
     //now we update the thresholdlist: we add the new threshold and the  value of the onebest.
-    thresholdlist[0].second.push_back(onebest[0].second);//add the 1best for x=-inf to the corresponding threshold
-    unsigned curthres=1;
-    for(int t=1;t<onebest.size();){
-      for(int gt=curthres;gt<thresholdlist.size()&&onebest[t].first>thresholdlist[curthres].first;gt++){
-}
+    
+    list<pair<float,vector<unsigned> > >::iterator current=thresholdlist.begin();
+    current->second.push_back(onebest[0].second);//add the 1best for x=-inf to the corresponding threshold    
+    unsigned prev1best=onebest[0].second;
+    for(int t=1;t<onebest.size();t++){
+      float ref=onebest[t].first;
+      list<pair<float,vector<unsigned> > >::iterator lit;
+      for( lit=current;lit!=thresholdlist.end()&&ref>lit->first;lit++){
+	lit->second.push_back(prev1best);//whe update the threshold state with the 1best index for the current value
+      }
+      if(lit!=thresholdlist.end()&&lit->first==ref){
+	lit->second.push_back(onebest[t].second);//this threshold was already created by a previous sentence (unlikely)
+	current=lit;
+      }else{
+	//we have found where we must insert the threshold(before lit)
+	current=lit;//we will continue after that point
+	lit--;//We need to go back 1 to get the 1best vector
+	if(current!=thresholdlist.end())
+	  thresholdlist.insert(current,pair<float,vector<unsigned> >(ref,lit->second));//insert just before current(just after lit)
+	else
+	  thresholdlist.push_back(pair<float,vector<unsigned> >(ref,lit->second));//insert at the end of list
+	lit++;//now lit points on the point we just inserted
+	lit->second.push_back(onebest[t].second);
+	//we copy the 1bestlist from the threshold just before: nothing as changed.
+      }
+	prev1best=onebest[t].second;
+      }
     }
-  }
-   
+    //now the thresholdlsit is up to date: it contains a list of all the value where the function changed its value, along with the nbest list for the interval after each threshold
+    //last thing to do is compute the Stat score (ie BLEU) and find the minimum
+    list<pair<float,vector<unsigned> > >::iterator best;
+    statscore bestscore=MINFLOAT;
+    for(list<pair<float,vector<unsigned> > >::iterator lit2=thresholdlist.begin();lit2!=thresholdlist.end();lit2){
+      statscore cur=GetStatScore(lit2->second);
+      if(cur<bestscore){
+	bestscore=cur;
+	best=lit2;
+      }
+    }
+    
+    //finally! we manage to extract the best score and convert it to a point!
+    float bestx=best->first+min_int/2;//we dont want to stay exactly at the threshold where the function is discontinuous so we move just a little to the right
+    bestpoint=direction*bestx+origin;
+    bestpoint.score=bestscore;
+    return bestscore;  
 };
 
 
