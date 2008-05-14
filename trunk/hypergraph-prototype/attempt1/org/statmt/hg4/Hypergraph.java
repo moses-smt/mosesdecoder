@@ -3,6 +3,7 @@ package org.statmt.hg4;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Hypergraph {
@@ -49,12 +50,71 @@ public class Hypergraph {
         
     static class Rule extends Phrase {
     	public Rule(Phrase p) { super(p.d); }
+    	
+    	public String getTarget() {
+    		String r = "";
+    		for (int i =0; i<d.length; i++)
+    			r+=(i == 0 ? d[i] : " " + d[i]);
+    		return r;
+    	}
+    	
+    }
+    
+    static abstract class ArcVisitor {
+    	/**
+    	 * 
+    	 * @param h - the arc in question
+    	 * @param children - the results of applying transition to children
+    	 * @return application of the rule/value/etc associated with h to children
+    	 */
+    	public abstract Object transition(Hyperarc h, Object[] children);
+    }
+    
+    static class StringifyPB extends ArcVisitor {
+    	HashMap<Hyperarc, Rule> map;
+    	public StringifyPB(HashMap<Hyperarc, Rule> m) { map = m; }
+    	public Object transition(Hyperarc h, Object[] children) {
+    		Rule r = map.get(h);
+    		if (children.length > 0 && children[0] != null) {
+    			return (String)children[0] + " " + r.getTarget();
+    		} else return r.getTarget();
+    	}
+    }
+    
+    static abstract class Traverser {
+    	public abstract Object traverse(Vertex sink, ArcVisitor v);
+    }
+    
+    static class ViterbiTraverser extends Traverser {
+    	public Object traverse(Vertex vertex, ArcVisitor visitor) {
+    		if (vertex.incomingArcs == null) {
+    			return null;
+    		}
+       		// get best (first == best)
+    		Hyperarc arc = vertex.incomingArcs.get(0);
+    		List<Vertex> vs = arc.getTail();
+    		Object[] children = null;
+    		if (vs != null) {
+    			children = new Object[vs.size()];
+    			int c = 0;
+    			for (Vertex vc : vs) {
+    				children[c] = traverse(vc, visitor);
+    				c++;
+    			}
+    		}
+    		return visitor.transition(arc, children);
+    	}
+    }
+    
+    public static Object viterbi(Hypergraph g, ArcVisitor v) {
+    	Traverser t = new ViterbiTraverser();
+    	return t.traverse(g.sinkVertices.iterator().next(), v);
     }
               
     public static void main(String[] args) {
     	PTable pt = new PTable();
-    	pt.add(new Phrase("guten"), new Phrase("good"));
-    	pt.add(new Phrase("guten"), new Phrase("well"));
+     	pt.add(new Phrase("guten"), new Phrase("well"));
+        pt.add(new Phrase("guten"), new Phrase("good"));
     	pt.add(new Phrase("tag"), new Phrase("day"));
     	pt.add(new Phrase("tag"), new Phrase("hi"));
     	pt.add(new Phrase("guten tag"), new Phrase("hello"));
@@ -85,7 +145,7 @@ public class Hypergraph {
     					Rule r = new Rule(opt);
         				Hyperarc ext = new
     						Hyperarc(tail);
-        				int targetStack = c + r.size();
+        				int targetStack = e + 1;
         				ArrayList<Vertex> targetS =
         					stacks[targetStack];
         				if (targetS.size() == 0) {
@@ -93,12 +153,14 @@ public class Hypergraph {
         					hg.addNode(targetS.get(0));
         				}
         				hg.addLink(targetS.get(0), ext);
+        				rules.put(ext, r);
         					
         				System.out.println(ext + " r="+r + "  dest=" + targetStack);
     				}
     			}
     		}
     	}
-    	System.out.println(hg);
+    	Object r = viterbi(hg, new StringifyPB(rules));	
+    	System.out.println(r);
     }
 }
