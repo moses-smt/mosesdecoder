@@ -246,7 +246,7 @@ bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &r
 			m_source.ComputeDistortionDistance(range, bestNextExtension);
 
 		if (required_distortion <= maxDistortion) {
-			return false;
+			return true;
 		}
 	}
 
