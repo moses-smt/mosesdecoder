@@ -152,7 +152,10 @@ void HypothesisStack::AddInitial(Hypothesis *hypo)
 	std::pair<iterator, bool> addRet = Add(hypo); 
 	assert (addRet.second);
 	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-	m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
+	BitmapContainer *bmContainer = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
+	bmContainer->AddHypothesis(hypo);
+
+	m_bitmapAccessor[bitmap] = bmContainer;
 }
 
 void HypothesisStack::PruneToSize(size_t newSize)
