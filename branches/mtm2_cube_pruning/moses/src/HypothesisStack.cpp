@@ -45,9 +45,17 @@ void HypothesisStack::Detach(const HypothesisStack::iterator &iter)
 /** remove all hypotheses from the collection */
 void HypothesisStack::RemoveAll()
 {
+	// delete all hypos
 	while (m_hypos.begin() != m_hypos.end())
 	{
 		Remove(m_hypos.begin());
+	}
+
+	// delete all bitmap accessors;
+	_BMType::iterator iter;
+	for (iter = m_bitmapAccessor.begin(); iter != m_bitmapAccessor.end(); ++iter)
+	{
+		delete iter->second;
 	}
 }
 
