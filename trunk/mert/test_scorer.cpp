@@ -12,7 +12,9 @@ int main(int argc, char** argv) {
 	vector<string> references;
 	references.push_back("test_scorer_data/reference.txt");
 	//bs.prepare(references, "test-scorer-data/nbest.out");
-	Scorer scorer("test");
+	BleuScorer scorer;
+	scorer.setReferenceFiles(references);
 	ScoreData sd(scorer);
 	sd.loadnbest("test_scorer_data/nbest.out");
+	sd.savetxt();
 }

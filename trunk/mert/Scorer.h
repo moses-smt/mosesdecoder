@@ -23,9 +23,7 @@ class Scorer {
 		  * set the reference files. This must be called before prepareStats.
 		  **/
 		void setReferenceFiles(const std::vector<std::string>& referenceFiles) {
-			_referenceFiles.clear();
-			_referenceFiles.resize(referenceFiles.size());
-			std::copy(referenceFiles.begin(),referenceFiles.end(),_referenceFiles.begin());
+			//do nothing
 		}
 		
 		/**
@@ -54,10 +52,11 @@ class Scorer {
 			return 0;
 		}
 
+		protected:
+			ScoreData* _scoreData;
+
 		private:
 			std::string _name;
-			std::vector<std::string> _referenceFiles;
-			ScoreData* _scoreData;
 
 };
 
