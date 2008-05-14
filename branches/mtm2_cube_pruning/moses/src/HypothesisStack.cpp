@@ -64,17 +64,16 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 {
 	std::pair<iterator, bool> ret = m_hypos.insert(hypo);
 
-	// add to bitmap accessor
-	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-	BitmapContainer *bmContainer = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
-	bmContainer->AddHypothesis(hypo);
-
-	m_bitmapAccessor[bitmap] = bmContainer;
-
 	if (ret.second) 
 	{ // equiv hypo doesn't exists
 		VERBOSE(3,"added hyp to stack");
-	
+
+		// add to bitmap accessor
+		const WordsBitmap &bitmap = hypo->GetWordsBitmap();
+		BitmapContainer *bmContainer = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
+		bmContainer->AddHypothesis(hypo);
+		m_bitmapAccessor[bitmap] = bmContainer;
+
 		// Update best score, if this hypothesis is new best
 		if (hypo->GetTotalScore() > m_bestScore)
 		{
@@ -85,7 +84,7 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 	          m_worstScore = m_bestScore + m_beamWidth;
 		}
 	
-	    // Prune only if stack is twice as big as needed (lazy pruning)
+    // Prune only if stack is twice as big as needed (lazy pruning)
 		VERBOSE(3,", now size " << m_hypos.size());
 		if (m_hypos.size() > 2*m_maxHypoStackSize-1)
 		{
