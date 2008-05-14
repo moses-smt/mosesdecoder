@@ -306,7 +306,8 @@ void Hypothesis::CalcDistortionScore()
 	const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
 	float distortionScore = dsp->CalculateDistortionScore(
 			m_prevHypo->GetCurrSourceWordsRange(),
-			this->GetCurrSourceWordsRange()
+			this->GetCurrSourceWordsRange(),
+			m_prevHypo->GetWordsBitmap().GetFirstGapPos()
      );
 	m_scoreBreakdown.PlusEquals(dsp, distortionScore);
 }
@@ -372,11 +373,8 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 		m_futureScore += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
 	}
 
-	// add future costs for distortion model
-	if(StaticData::Instance().UseDistortionFutureCosts())
-		m_futureScore += m_sourceCompleted.GetFutureCosts( (int)m_currSourceWordsRange.GetEndPos() ) 
-											* StaticData::Instance().GetWeightDistortion();
-	
+	// you can't get future costs for distortion model anymore, because it is preloaded (see CalculateDistortionScore)
+	assert(!StaticData::Instance().UseDistortionFutureCosts());
 }
 
 const Hypothesis* Hypothesis::GetPrevHypo()const{

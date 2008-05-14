@@ -49,12 +49,6 @@ public:
 		return m_endPos;
 	}
 
-	//! distortion cost when phrase is moved from prevRange to this range
-	inline int CalcDistortion(const WordsRange &prevRange) const
-	{
-		int dist = (int)prevRange.GetEndPos() - (int)GetStartPos() + 1 ;
-		return abs(dist);
-	}
 	//! count of words translated
 	inline size_t GetNumWordsCovered() const
 	{
@@ -77,6 +71,18 @@ public:
 		return true;
 	}
 	
+	inline size_t GetNumWordsBetween(const WordsRange& x) const
+	{
+	  assert(!Overlap(x));
+
+	  if (x.m_endPos < m_startPos) {
+	    return m_startPos - x.m_endPos;
+	  }
+
+	  return x.m_startPos - m_endPos;
+	}
+
+
 	TO_STRING();
 };
 

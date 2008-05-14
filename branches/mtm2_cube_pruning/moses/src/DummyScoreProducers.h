@@ -13,7 +13,7 @@ class DistortionScoreProducer : public ScoreProducer {
 public:
 	DistortionScoreProducer(ScoreIndexManager &scoreIndexManager);
 
-	float CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr) const;
+	float CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
 
 	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerDescription() const;
