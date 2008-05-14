@@ -1,13 +1,13 @@
 OBJS= Util.o Timer.o Parameter.o \
 ScoreStats.o ScoreArray.o ScoreData.o \
-FeatureStats.o FeatureArray.o FeatureData.o Optimizer.o Point.o
+Optimizer.o FeatureStats.o FeatureArray.o FeatureData.o  Point.o BleuScorer.o
 
 CFLAGS=-O3 -DTRACE_ENABLE
 GCC=g++
 LDFLAGS=
 LDLIBS=-lm 
 
-all: main feature_extractor
+all: main feature_extractor test_scorer
 
 clean: 
 	rm -f *.o
@@ -19,5 +19,8 @@ feature_extractor: $(OBJS) feature_extractor.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 
 main: $(OBJS) main.cpp
+	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
+
+test_scorer: $(OBJS) test_scorer.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 
