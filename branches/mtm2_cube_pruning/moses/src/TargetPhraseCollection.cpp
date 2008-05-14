@@ -33,7 +33,7 @@ struct CompareTargetPhrase
  	}
 };
 
-void TargetPhraseCollection::Sort(size_t tableLimit)
+void TargetPhraseCollection::NthElement(size_t tableLimit)
 {
   vector<TargetPhrase*>::iterator 
   	iterMiddle = (tableLimit == 0 || m_collection.size() < tableLimit) ?m_collection.end() : m_collection.begin() + tableLimit;

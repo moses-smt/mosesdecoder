@@ -77,6 +77,9 @@ protected:
 	//! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 	void Prune();
 
+	//! sort all trans opt in each list for cube pruning */
+	void Sort();
+
 	//! list of trans opt for a particular span
 	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
 	{

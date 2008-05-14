@@ -35,6 +35,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+/** helper for pruning */
+bool CompareTranslationOption(const TranslationOption *a, const TranslationOption *b)
+{
+	return a->GetFutureScore() > b->GetFutureScore();
+}
+
 /** constructor; since translation options are indexed by coverage span, the corresponding data structure is initialized here 
 	* This fn should be called by inherited classes
 */
@@ -77,12 +83,6 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	}
 
 	RemoveAllInColl(m_unksrcs);
-}
-
-/** helper for pruning */
-bool CompareTranslationOption(const TranslationOption *a, const TranslationOption *b)
-{
-	return a->GetFutureScore() > b->GetFutureScore();
 }
 
 void TranslationOptionCollection::Prune()
@@ -360,12 +360,29 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 	// Prune
 	Prune();
 
+	Sort();
+
 	// future score matrix
 	CalcFutureScore();
 
 	// Cached lex reodering costs
 	CacheLexReordering();
 }
+
+void TranslationOptionCollection::Sort()
+{
+	size_t size = m_source.GetSize();
+	
+	for (size_t startPos = 0 ; startPos < size; ++startPos)
+	{
+		for (size_t endPos = startPos ; endPos <size; ++endPos)
+		{
+			TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
+			std::sort(transOptList.begin(), transOptList.end(), CompareTranslationOption);
+		}
+	}
+}
+
 
 /** create translation options that exactly cover a specific input span. 
  * Called by CreateTranslationOptions() and ProcessUnknownWord()

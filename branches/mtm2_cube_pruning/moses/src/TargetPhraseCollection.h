@@ -47,7 +47,7 @@ public:
 	}
 
 	//! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
-	void Sort(size_t tableLimit);
+	void NthElement(size_t tableLimit);
 
 	//! number of target phrases in this collection
 	size_t GetSize() const

@@ -39,7 +39,7 @@ void PhraseDictionaryNode::Sort(size_t tableLimit)
 	
 	// sort TargetPhraseCollection in this node
 	if (m_targetPhraseCollection != NULL)
-		m_targetPhraseCollection->Sort(tableLimit);
+		m_targetPhraseCollection->NthElement(tableLimit);
 }
 
 PhraseDictionaryNode *PhraseDictionaryNode::GetOrCreateChild(const Word &word)
