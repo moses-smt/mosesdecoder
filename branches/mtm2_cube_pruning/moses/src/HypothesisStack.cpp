@@ -34,7 +34,7 @@ HypothesisStack::HypothesisStack()
 	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
 	m_worstScore = -std::numeric_limits<float>::infinity();
-	m_kbestCubePruning = 100;
+	m_kbestCubePruning = 120;
 }
 
 /** Remove hypothesis pointed to by iterator but don't delete the object. */
@@ -283,12 +283,20 @@ void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 												, const TranslationOptionList &transOptList)
 {
 	cerr << newBitmap << endl;
-	BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap, stack, m_kbestCubePruning);
-	m_bitmapAccessor[newBitmap] = newBitmapContainer;
+
+	_BMType::iterator bcExists = m_bitmapAccessor.find(newBitmap);
+
+	BitmapContainer *bmContainer;
+	if (bcExists == m_bitmapAccessor.end()) {
+		bmContainer = new BitmapContainer(newBitmap, stack, m_kbestCubePruning);
+		m_bitmapAccessor[newBitmap] = bmContainer;
+	}
+	else {
+		bmContainer = bcExists->second;
+	}
 
 	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer, transOptList, futureScore, m_kbestCubePruning);
-
-	newBitmapContainer->AddBackwardsEdge(edge);
+	bmContainer->AddBackwardsEdge(edge);
 }
 
 
