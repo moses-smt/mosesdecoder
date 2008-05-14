@@ -3,14 +3,15 @@ package org.statmt.hg4;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
 public class Hypergraph {
 
-        Set<Vertex> sinkVertices; //
-        Set<Vertex> sourceVertices; //no children
+        Set<Vertex> sinkVertices = new HashSet<Vertex>(); //
+        Set<Vertex> sourceVertices = new HashSet<Vertex>(); //no children
 
         /**
          * active and passive edges
@@ -40,42 +41,58 @@ public class Hypergraph {
             }
             sourceVertices.remove(vertex);
     }
-
-        static class Phrase {
-        	String[] d;
-        	public Phrase(String ds) {
-        		d = ds.split("\\s+");
-        	}
-        	@Override
-        	public int hashCode() { return d.hashCode() * 37; }
-        	@Override
-        	public boolean equals(Object r) {
-        		Phrase p = (Phrase)r;
-        		if (p.d.length != this.d.length) return false;
-        		for (int i =0; i<d.length; i++)
-        			if (d[i].compareTo(p.d[i]) != 0) return false;
-        		return true;
-        	}
-        	public Phrase slice(int x, int y) {
-        		return null;
-        	}
-        }
         
-        static class PTable extends HashMap<Phrase,ArrayList<Phrase>> {
-        	public ArrayList<ArrayList<ArrayList<String[]>>> buildLattice(String sentence) {
-        		String[] words = sentence.split("\\s+");
-        		return null;
-        	}
-        }
+    static class Rule extends Phrase {
+    	public Rule(Phrase p) { super(p.d); }
+    }
+              
     public static void main(String[] args) {
-    	Vertex source = new Vertex(null);
-    	
- /*   	PPair p1 = new PPair("guten", "good");
-    	PPair p2 = new PPair("tag", "day");
-    	PPair p3 = new PPair("tag", "hi");
-    	PPair p4 = new PPair("guten", "well");
-    	PPair p5 = new PPair("guten tag", "good day");
-    	PPair p6 = new PPair("guten tag", "hello");*/
     	PTable pt = new PTable();
+    	pt.add(new Phrase("guten"), new Phrase("good"));
+    	pt.add(new Phrase("guten"), new Phrase("well"));
+    	pt.add(new Phrase("tag"), new Phrase("day"));
+    	pt.add(new Phrase("tag"), new Phrase("hi"));
+    	pt.add(new Phrase("guten tag"), new Phrase("hello"));
+    	pt.add(new Phrase("guten tag"), new Phrase("good day"));
+    	Phrase sent = new Phrase("guten tag");
+    	HashMap<Hyperarc, Rule> rules =
+    		new HashMap<Hyperarc, Rule>();
+    	ArrayList<ArrayList<ArrayList<Phrase>>> lattice =
+    		pt.buildLattice(sent);
+    	Vertex source = new Vertex(null);
+    	ArrayList<Vertex>[] stacks = new ArrayList[sent.size() + 1];
+    	for (int i = 0; i < stacks.length; i++)
+    		stacks[i] = new ArrayList<Vertex>();
+    	stacks[0].add(source);
+    	Hypergraph hg = new Hypergraph();
+    	hg.addNode(source);
+    	for (int i = 0; i < sent.size(); i++) {
+    		ArrayList<Vertex> shs = stacks[i];
+    		for (Vertex prevHyp : shs) {
+    			ArrayList<Vertex> tail = new ArrayList<Vertex>(1);
+    			tail.add(prevHyp);
+    			int c = i;
+    			for (int e = c; e < sent.size(); e++) {
+    				lattice.get(c);
+    				ArrayList<Phrase> opts = lattice.get(c).get(e-c);
+    				
+    				for (Phrase opt : opts) {
+    					Rule r = new Rule(opt);
+        				Hyperarc ext = new
+    						Hyperarc(tail);
+        				int targetStack = c + r.size();
+        				ArrayList<Vertex> targetS =
+        					stacks[targetStack];
+        				if (targetS.size() == 0) {
+        					targetS.add(new Vertex(new ArrayList<Hyperarc>()));
+        					hg.addNode(targetS.get(0));
+        				}
+        				targetS.get(0).addArc(ext);
+        					
+        				System.out.println(ext + " r="+r + "  dest=" + targetStack);
+    				}
+    			}
+    		}
+    	}
     }
 }
