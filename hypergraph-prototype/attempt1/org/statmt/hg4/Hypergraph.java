@@ -1,11 +1,8 @@
 package org.statmt.hg4;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Set;
 
 public class Hypergraph {
@@ -40,7 +37,15 @@ public class Hypergraph {
                     sinkVertices.remove(child);
             }
             sourceVertices.remove(vertex);
-    }
+        }
+        
+        public String toString() {
+        	String x = "HG\n  SRC="+sourceVertices + "\n SINK="+sinkVertices +"\n";
+        	for (Vertex v : sinkVertices) {
+        		x += "\n    V="+v;
+        	}
+        	return x;
+        }
         
     static class Rule extends Phrase {
     	public Rule(Phrase p) { super(p.d); }
@@ -87,12 +92,13 @@ public class Hypergraph {
         					targetS.add(new Vertex(new ArrayList<Hyperarc>()));
         					hg.addNode(targetS.get(0));
         				}
-        				targetS.get(0).addArc(ext);
+        				hg.addLink(targetS.get(0), ext);
         					
         				System.out.println(ext + " r="+r + "  dest=" + targetStack);
     				}
     			}
     		}
     	}
+    	System.out.println(hg);
     }
 }
