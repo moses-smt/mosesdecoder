@@ -149,6 +149,7 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 			continue; 
 		}
 
+		// check bitamp and range doesn't overlap
 		size_t startPos, endPos;
 		for (startPos = 0 ;startPos < len ; startPos++)
 		{
@@ -194,9 +195,8 @@ bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &r
 {
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
-	bool isWordLattice = StaticData::Instance().GetInputType() == WordLatticeInput;
 
-	// no limit of reordering: only check for overlap
+	// no limit of reordering: no prob
 	if (maxDistortion < 0)
 	{	
 		return true;
@@ -205,18 +205,16 @@ bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &r
 	// if there are reordering limits, make sure it is not violated
 	// the coverage bitmap is handy here (and the position of the first gap)
 	const size_t	hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
-							, sourceSize			= m_source.GetSize();
-	
-	size_t startPos = range.GetStartPos();
-	size_t endPos = range.GetEndPos();
+							, sourceSize			= m_source.GetSize()
+							, startPos				= range.GetStartPos()
+							, endPos					= range.GetEndPos();
+
+	// MAIN LOOP. go through each possible hypo
   size_t maxSize = sourceSize - startPos;
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-	maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+  maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
 
-	// check for overlap
-  WordsRange extRange(startPos, endPos);
-	bool leftMostEdge = (hypoFirstGapPos == startPos);
-		
+	bool leftMostEdge = (hypoFirstGapPos == startPos);			
 	// any length extension is okay if starting at left-most edge
 	if (leftMostEdge)
 	{
@@ -234,10 +232,10 @@ bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &r
 		// the distortion limit, we don't allow this extension to be made.
 		WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 		int required_distortion =
-			m_source.ComputeDistortionDistance(extRange, bestNextExtension);
+			m_source.ComputeDistortionDistance(range, bestNextExtension);
 
 		if (required_distortion <= maxDistortion) {
-			return true;
+			return false;
 		}
 	}
 
