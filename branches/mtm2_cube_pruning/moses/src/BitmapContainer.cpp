@@ -50,6 +50,7 @@ BackwardsEdge::~BackwardsEdge()
 	for (size_t q_iter = 0; q_iter < m_queue.size(); q_iter++)
 	{
 		SquarePosition *ret = m_queue.top();
+		delete ret->first;
 		delete ret;
 		m_queue.pop();
 	}
