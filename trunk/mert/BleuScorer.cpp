@@ -176,25 +176,7 @@ void BleuScorer::prepareStats(int sid, const string& text, ScoreStats& entry) {
 		entry.set(stats_str);
 }
 
-
-float BleuScorer::score(const std::vector<unsigned int>& candidates) {
-	if (!_scoreData) {
-		throw std::runtime_error("score data not loaded");
-	}
-	vector<int> comps(LENGTH*2+1);
-	for (size_t i = 0; i < candidates.size(); ++i) {
-		ScoreStats stats = _scoreData->get(i,candidates[i]);
-		if (stats.size() != comps.size()) {
-			stringstream msg;
-			msg << "Bleu statistics for (" << "," << candidates[i] << ") have incorrect "
-				<< "number of fields. Found: " << stats.size() << " Expected: " 
-				<< comps.size();
-			throw runtime_error(msg.str());
-		}
-		for (size_t k = 0; k < comps.size(); ++k) {
-			comps[k] += stats.get(k);	
-		}
-	}
+float BleuScorer::bleu(const vector<int>& comps) {
 	float logbleu = 0.0;
 	for (int i = 0; i < LENGTH; ++i) {
 		if (comps[2*i] == 0) {
@@ -209,6 +191,49 @@ float BleuScorer::score(const std::vector<unsigned int>& candidates) {
 		logbleu += brevity;
 	}
 	return exp(logbleu);
+}
+
+
+
+void  BleuScorer::score(const candidates_t& candidates, const diffs_t& diffs,
+            scores_t& scores) {
+	if (!_scoreData) {
+		throw runtime_error("score data not loaded");
+	}
+    //calculate the score for the candidates
+	vector<int> comps(LENGTH*2+1);
+	for (size_t i = 0; i < candidates.size(); ++i) {
+		ScoreStats stats = _scoreData->get(i,candidates[i]);
+		if (stats.size() != comps.size()) {
+			stringstream msg;
+			msg << "Bleu statistics for (" << "," << candidates[i] << ") have incorrect "
+				<< "number of fields. Found: " << stats.size() << " Expected: " 
+				<< comps.size();
+			throw runtime_error(msg.str());
+		}
+		for (size_t k = 0; k < comps.size(); ++k) {
+			comps[k] += stats.get(k);	
+		}
+	}
+    scores.push_back(bleu(comps));
+
+    candidates_t last_candidates(candidates);
+    //apply each of the diffs, and get new scores
+    for (size_t i = 0; i < diffs.size(); ++i) {
+        for (size_t j = 0; j < diffs[i].size(); ++j) {
+            size_t sid = diffs[i][j].first;
+            size_t nid = diffs[i][j].second;
+            size_t last_nid = last_candidates[sid];
+            for (size_t k  = 0; k < comps.size(); ++k) {
+                int diff = _scoreData->get(sid,nid).get(k)
+                    - _scoreData->get(sid,last_nid).get(k);
+                comps[k] += diff;
+            }
+            last_candidates[sid] = nid;
+        }
+        scores.push_back(bleu(comps));
+    }
+
 }
 
 

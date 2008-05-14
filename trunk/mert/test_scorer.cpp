@@ -12,25 +12,27 @@ int main(int argc, char** argv) {
 	vector<string> references;
 	references.push_back("test_scorer_data/reference.txt");
 	//bs.prepare(references, "test-scorer-data/nbest.out");
-	BleuScorer scorer;
-	scorer.setReferenceFiles(references);
-	ScoreData sd(scorer);
+	Scorer* scorer = new BleuScorer();;
+	scorer->setReferenceFiles(references);
+	ScoreData sd(*scorer);
 	sd.loadnbest("test_scorer_data/nbest.out");
 	//sd.savetxt();
 
-	//calculate a  bleu scores
-	scorer.setScoreData(&sd);
-	unsigned int index = 0;
-	vector<unsigned int> candidates;
+	//calculate two   bleu scores, nbest and a diff
+	scorer->setScoreData(&sd);
+	candidates_t candidates(sd.size());;
 	for (size_t i  = 0; i < sd.size(); ++i) {
-        sd.get(i,index).savetxt("/dev/stdout");
-		candidates.push_back(index++);
-		if (index == 10) {
-			index = 0;
-		}
+        sd.get(i,0).savetxt("/dev/stdout");
 	}
 
-	cout << "Bleu ";
-	float bleu = scorer.score(candidates);
-	cout << bleu << endl;
+    diffs_t diffs;
+    diff_t diff;
+    diff.push_back(make_pair(1,2));
+    diff.push_back(make_pair(7,8));
+    diffs.push_back(diff);
+    
+    scores_t scores;
+    scorer->score(candidates,diffs,scores);
+
+	cout << "Bleus: " << scores[0] << " " << scores[1] <<  endl;
 }

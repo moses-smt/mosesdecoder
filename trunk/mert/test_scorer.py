@@ -1,4 +1,4 @@
-#/usr/bin/python
+#!/usr/bin/python
 
 #
 # Calculate bleu score for test files using old (python) script
@@ -38,21 +38,30 @@ def main():
         tests[-1].append(text)
     nbest_fh.close()
 
-    # pick sentences to score with
-    index = 0
+    #  score with first best
     cookedtests = []
     for i  in range(len(tests)):
-        sentence = tests[i][index]
+        sentence = tests[i][0]
         cookedtest = (bleu.cook_test(sentence, cookedrefs[i]))
         stats = " ".join(["%d %d" % (c,g) for (c,g) in zip(cookedtest['correct'], cookedtest['guess'])])
         print " %s %d" % (stats ,cookedtest['reflen'])
         cookedtests.append(cookedtest)
-        index = index + 1
-        if index == 10:
-            index = 0
+    bleu1 = bleu.score_cooked(cookedtests)
 
-    bleu = bleu.score_cooked(cookedtests)
-    print "Bleu: ", bleu
+    # vary, and score again
+    cookedtests = []
+    for i in range(len(tests)):
+        sentence = tests[i][0]
+        if i == 7:
+            sentence = tests[i][8]
+        elif i == 1:
+            sentences = tests[i][2]
+        cookedtest = (bleu.cook_test(sentence, cookedrefs[i]))
+        cookedtests.append(cookedtest)
+    bleu2 = bleu.score_cooked(cookedtests)
+    
+
+    print "Bleus: ", bleu1,bleu2
     
 if __name__ == "__main__":
     main()

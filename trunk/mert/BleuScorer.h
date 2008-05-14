@@ -31,7 +31,8 @@ class BleuScorer: public Scorer {
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
 		virtual void prepareStats(int sid, const string& text, ScoreStats& entry);
 
-		virtual float score(const std::vector<unsigned int>& candidates);
+		virtual void score(const candidates_t& candidates, const diffs_t& diffs,
+            scores_t& scores);
 
 		static const int LENGTH;	
 		
@@ -83,6 +84,7 @@ class BleuScorer: public Scorer {
 
 		void encode(const string& line, vector<int>& encoded);
 		size_t countNgrams(const string& line, counts_t& counts, unsigned int n);
+        float bleu(const vector<int>& comps);
 
 		void dump_counts(counts_t& counts) {
 			for (counts_it i = counts.begin(); i != counts.end(); ++i) {
