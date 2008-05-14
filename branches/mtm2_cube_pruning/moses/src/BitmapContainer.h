@@ -11,6 +11,7 @@ class BitmapContainer;
 class BackwardsEdge;
 class Hypothesis;
 class HypothesisScoreOrderer;
+class HypothesisStack;
 
 
 typedef std::set< Hypothesis*, HypothesisScoreOrderer > OrderedHypothesisSet;
@@ -72,7 +73,7 @@ class BackwardsEdge
 	public:
 		const SquarePosition InvalidSquarePosition();
 
-		BackwardsEdge(const BitmapContainer &prevBitmapContainer, TranslationOptionList translations);
+		BackwardsEdge(const BitmapContainer &prevBitmapContainer, const TranslationOptionList &translations);
 		~BackwardsEdge();
 
 		const BitmapContainer &GetBitmapContainer() const;
@@ -90,12 +91,13 @@ class BitmapContainer
 		WordsBitmap m_bitmap;
 		OrderedHypothesisSet m_hypotheses;
 		BackwardsEdgeSet m_edges;
+		const HypothesisStack &m_stack;
 
 		// We always require a corresponding bitmap to be supplied.
 		BitmapContainer();
 
 	public:
-		BitmapContainer(const WordsBitmap &bitmap);
+		BitmapContainer(const WordsBitmap &bitmap, const HypothesisStack &stack);
 		
 		// The destructor will also delete all the edges that are
 		// connected to this BitmapContainer.

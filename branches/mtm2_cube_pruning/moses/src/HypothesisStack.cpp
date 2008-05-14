@@ -144,7 +144,7 @@ void HypothesisStack::AddInitial(Hypothesis *hypo)
 	std::pair<iterator, bool> addRet = Add(hypo); 
 	assert (addRet.second);
 	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-	m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap);
+	m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this);
 }
 
 void HypothesisStack::PruneToSize(size_t newSize)
@@ -257,7 +257,7 @@ void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 												, const BitmapContainer &bitmapContainer
 												, const TranslationOptionList &transOptList)
 {
-	BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap);
+	BitmapContainer *newBitmapContainer = new BitmapContainer(newBitmap, *this);
 	m_bitmapAccessor[newBitmap] = newBitmapContainer;
 
 	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer, transOptList);

@@ -2,10 +2,11 @@
 #include <limits>
 #include <utility>
 #include "BitmapContainer.h"
+#include "HypothesisStack.h"
 
 SquarePosition *BackwardsEdge::m_invalid = NULL;
 
-BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer, TranslationOptionList translations)
+BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer, const TranslationOptionList &translations)
   : m_prevBitmapContainer(prevBitmapContainer)
 	, m_queue()
 {
@@ -34,7 +35,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer, Transla
 	const OrderedHypothesisSet &hypotheses = m_prevBitmapContainer.GetHypotheses();
 	k = std::min(kBest, hypotheses.size());
 	
-	OrderedHypothesisSet::iterator hypoEnd = hypotheses.begin();
+	OrderedHypothesisSet::const_iterator hypoEnd = hypotheses.begin();
 	for (size_t i=0; i<k; i++) {
 		hypoEnd++;
 	}
@@ -103,8 +104,9 @@ BackwardsEdge::Dequeue(bool keepValue)
 	return InvalidSquarePosition();
 }
 
-BitmapContainer::BitmapContainer(const WordsBitmap &bitmap)
+BitmapContainer::BitmapContainer(const WordsBitmap &bitmap, const HypothesisStack &stack)
   : m_bitmap(bitmap)
+	, m_stack(stack)
 {
 	m_hypotheses = OrderedHypothesisSet();
 	m_edges = BackwardsEdgeSet();
