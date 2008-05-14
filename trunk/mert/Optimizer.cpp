@@ -6,6 +6,9 @@
 
 using namespace std;
 
+static const float MINFLOAT=numeric_limits<float>::min();
+static const float MAXFLOAT=numeric_limits<float>::max();
+
 void Optimizer::SetScorer(Scorer *S){
   if(scorer)
     delete scorer;
@@ -18,36 +21,42 @@ void Optimizer::SetFData(FeatureData *F){
   FData=F;
 };
 
-float intersect (float b1,m1,b2,m2){
+float intersect (float b1, float m1,float b2,float m2){
   if(m1==m2)
-    return numeric_limit<float>::max();
-  return((b2-b1)/(m2-m1));
+    return MAXFLOAT;
+  return((b2-b1)/(m1-m2));
 }
 
 statscore Optimizer::LineOptimize(const Point& start,Point direction,Point& best){
+  
   direction.normalize();//we pass by value so changing is ok
   // we are looking for the best Point on the line y=start+x*direction
-  vector< vector<float,unsigned> > onebest;
+  //vector< vector<float,unsigned> > onebest;
   float min_int=0.00001;
-  multimap<float,unsigned> thresholdlist;
+  typedef pair<float,vector<unsigned> > threshold;  
+  vector<threshold> thresholdlist;
+  
+  thresholdlist.push_back(pair<float,vector<unsigned> >(MINFLOAT,vector<unsigned>()));
+
   for(int i=0;i<N;i++){
     //first we determine the translation with the best feature score for each sentence and each value of x
     multimap<float,unsigned> gradient;
     vector<float> f0;
     for(unsigned j=0;j<FData[i].size();j++){
-      gradient.insert(pair<float,unsigned>(direction*FData->get(i).get(j),j));
+      gradient.insert(pair<float,unsigned>(direction*(FData->get(i,j)),j));
       f0[j]=start*FData->get(i).get(j);
     }
    //now lets compute the 1best for each value of x
     
-    unsigned lastindex=gradient.rbegin()->second;
+    
+    vector<pair<float,unsigned> > onebest;
+    onebest.push_back(pair<float,unsigned>(MINFLOAT,gradient.begin()->second));//first 1best is the lowest gradient.
 
-    onebest[i].push_back(pair<float,unsigned>(numeric_limit<float>::min(),gradient.begin()->second));//first 1best is the lowest gradient.
     for(multimap<float,unsigned>::iterator it=gradient.begin();it!=gradient.end();){
       map<float,unsigned>::iterator leftmost=it;
       float m=it->first;
       float b=f0[it->second];
-      leftmostx=onebest[i].rbegin()->first;
+      float leftmostx=onebest.back().first;
       for(multimap<float,unsigned>::iterator it2=it;it2!=gradient.end();it2++){
 	float curintersect=intersect(m,b,it2->first,f0[it2->second]);
 	if(curintersect<leftmostx){
@@ -66,28 +75,21 @@ statscore Optimizer::LineOptimize(const Point& start,Point direction,Point& best
 	 switch places in the sort, resulting in a bogus score for
 	 that inteval. */
 
-      if((leftmostx-onebest[i].rbegin()->first)<min_int)
-	onebest[i][onebest[i].size()-1]=pair<float,unsigned>(leftmostx,it2->second);
+      if((leftmostx-onebest.back().first)<min_int)
+	onebest.back()=pair<float,unsigned>(leftmostx,leftmost->second);//leftmost->first is theg gradient, we are interested in the value of the intersection
       else
-	onebest[i].push_back(pair<float,unsigned>(leftmostx,it2->second));
-      it=it2;
+	onebest.push_back(pair<float,unsigned>(leftmostx,leftmost->second));
+      it=leftmost;
+    }
+    //we have the onebest list and the threshold for the current sentence.
+    //now we update the thresholdlist: we add the new threshold and the  value of the onebest.
+    thresholdlist[0].second.push_back(onebest[0].second);//add the 1best for x=-inf to the corresponding threshold
+    unsigned curthres=1;
+    for(int t=1;t<onebest.size();){
+      for(int gt=curthres;gt<thresholdlist.size()&&onebest[t].first>thresholdlist[curthres].first;gt++){
+}
     }
   }
-//now we have a list of threshold and corresponding onebest. for each sentence.
-//now we will compute the stat score for each part of the line and extract the best (with respect to stat score)
- float curthreshold=numeric_limit<float>::min();
- 
-
- for(k=0;k<N;k++)
-   cur1best[k]=onebest[k]->second;
- statscore best=GetStatScore(cur1best); 
-do{
-  float smallestthreshold=curthreshold;
-  unsigned changeindex=N;
-  for(k=0;k<N;k++)
-    
- }while
-
    
 };
 
