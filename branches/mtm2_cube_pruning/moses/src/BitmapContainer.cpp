@@ -182,9 +182,12 @@ BackwardsEdge::SeenPosition(int x, int y)
 	return m_seenPosition[m_kbest * x + y];
 }
 
-BitmapContainer::BitmapContainer(const WordsBitmap &bitmap, HypothesisStack &stack)
+BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
+								 , HypothesisStack &stack
+								 , const size_t KBestCubePruning)
   : m_bitmap(bitmap)	
 	, m_stack(stack)
+	, m_kbest(KBestCubePruning)
 {
 	m_hypotheses = OrderedHypothesisSet();
 	m_edges = BackwardsEdgeSet();

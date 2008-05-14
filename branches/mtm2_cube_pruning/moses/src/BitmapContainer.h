@@ -109,13 +109,16 @@ class BitmapContainer
 		OrderedHypothesisSet m_hypotheses;
 		BackwardsEdgeSet m_edges;
 		HypothesisStack &m_stack;
+		size_t m_kbest;
 
 		// We always require a corresponding bitmap to be supplied.
 		BitmapContainer();
 		
 
 	public:
-		BitmapContainer(const WordsBitmap &bitmap, HypothesisStack &stack);
+		BitmapContainer(const WordsBitmap &bitmap
+						, HypothesisStack &stack
+						, const size_t KBestCubePruning);
 		
 		// The destructor will also delete all the edges that are
 		// connected to this BitmapContainer.
