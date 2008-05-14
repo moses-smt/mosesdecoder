@@ -80,9 +80,21 @@ public class Hypergraph {
     		} else return r.getTarget();
     	}
     }
+
+    static class StringifyPBWithPhraseMarkup extends ArcVisitor {
+    	HashMap<Hyperarc, Rule> map;
+    	public StringifyPBWithPhraseMarkup(HashMap<Hyperarc, Rule> m) { map = m; }
+    	public Object transition(Hyperarc h, Object[] children) {
+    		Rule r = map.get(h);
+    		if (children.length > 0 && children[0] != null) {
+    			return (String)children[0] + "|" + r.getTarget() + "|";
+    		} else return "|" + r.getTarget() + "|";
+    	}
+    }
+
     
     static abstract class Traverser {
-    	public abstract Object traverse(Vertex sink, ArcVisitor v);
+    	public abstract Object traverse(Vertex vertex, ArcVisitor v);
     }
     
     static class ViterbiTraverser extends Traverser {
@@ -160,7 +172,7 @@ public class Hypergraph {
     			}
     		}
     	}
-    	Object r = viterbi(hg, new StringifyPB(rules));	
-    	System.out.println(r);
+    	System.out.println(viterbi(hg, new StringifyPB(rules)));	
+    	System.out.println(viterbi(hg, new StringifyPBWithPhraseMarkup(rules)));	
     }
 }
