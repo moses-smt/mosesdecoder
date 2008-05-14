@@ -21,23 +21,29 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer, Transla
 	//
 	// TODO: replace 0 by k-best constant!
 	//
-	int k = std::min(0, translation.size()); // WHERE do we get the k-best parameter?
+	size_t kBest = 0; // Call this? staticData.GetKBestCubePruning()
+	size_t k = std::min(kBest, translations.size()); // WHERE do we get the k-best parameter?
 	
 	// We reserve exactly as much space as we need to avoid resizing.
 	m_kbest_translations.reserve(k);
 	std::copy(translations.begin(), translations.begin() + k, m_kbest_translations.begin());
 
-
 	// We should also do this for the hypotheses that are attached to the BitmapContainer
 	// which this backwards edge points to :)  Same story: compute k, copy k hypotheses
 	// from the OrderedHypothesisSet in the BitmapContainer and voila...
 	const OrderedHypothesisSet &hypotheses = m_prevBitmapContainer.GetHypotheses();
-	k = std::min(0, hypotheses.size());
+	k = std::min(kBest, hypotheses.size());
 	
+	OrderedHypothesisSet::iterator hypoEnd = hypotheses.begin();
+	for (size_t i=0; i<k; i++) {
+		hypoEnd++;
+	}
 	m_kbest_hypotheses.reserve(k);
-	std::copy(hypotheses.begin(), hypothesis.begin() + k, m_kbest_hypotheses.begin();
+	std::copy(hypotheses.begin(), hypoEnd, m_kbest_hypotheses.begin());
 	
 	// The BackwardsEdge now has ALL data it needs to perform cube pruning :)
+	
+	// Expand first (0, 0) hypothesis and put it into the queue.
 }
 
 const SquarePosition
