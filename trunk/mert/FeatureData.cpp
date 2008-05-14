@@ -19,7 +19,7 @@ void FeatureData::savetxt(std::ofstream& outFile)
 {
         FeatureArray entry;
 	for (vector<FeatureArray>::iterator i = array_.begin(); i !=array_.end(); i++)
-		(*i).savetxt(outFile);
+		(*i).save(outFile);
 }
 
 void FeatureData::savetxt(const std::string &file)
@@ -28,9 +28,9 @@ void FeatureData::savetxt(const std::string &file)
 
 	std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
 
-        FeatureStats entry;
-
 	savetxt(outFile);
+
+	outFile.close();
 }
 
 void FeatureData::loadtxt(ifstream& inFile)
@@ -42,13 +42,13 @@ void FeatureData::loadtxt(ifstream& inFile)
 		TRACE_ERR("iter " << iter << " size " << size() << std::endl);
 		
 		entry.clear();
-		entry.loadtxt(inFile);
+		entry.load(inFile);
 
 		if (entry.size() == 0){
 			TRACE_ERR("no more data" << std::endl);
 			continue;
 		}
-		entry.savetxt();
+		entry.save();
 
 		add(entry);
 		
@@ -103,7 +103,7 @@ void FeatureData::loadnbest(const std::string &file)
 				entry.add(ATOFST(subsubstring.c_str()));
 			}
 		}
-//		entry.savetxt();
+//		entry.save();
 		add(entry,sentence_index);
 	}
 
