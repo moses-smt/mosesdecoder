@@ -11,9 +11,12 @@
 #include "Util.h"
 
 
-ScoreData::ScoreData():
-bufLen_(0)
-{};
+ScoreData::ScoreData(Scorer& ptr):
+bufLen_(0), theScorer(&ptr)
+{
+	score_type = "BLEU4";
+//	score_type = theScorer.name();
+};
 
 void ScoreData::savetxt(std::ofstream& outFile)
 {
@@ -83,7 +86,7 @@ void ScoreData::loadnbest(const std::string &file)
 	while (!inFile.eof()){
 
 	        std::string substring, subsubstring, stringBuf;
-	        std::string theSentence;
+	        std::string theSentence, theStatistics;
         	std::string::size_type loc;
 
 		std::getline(inFile, stringBuf);
@@ -101,16 +104,12 @@ void ScoreData::loadnbest(const std::string &file)
 
 /* HERE IS THE SECTION TO COMPUTE STATISTICS FOR ERROR MEASURE
  * theSentence contains the translation 
- * append each statistic in the entry object
- * with a command like the following: 
- *
- * entry.add(value);
- *
+ * theStatistics will contain the statistics (as a string)
+ * coming from the actual Scorer
  */
+//		theStatistics = theScorer.getStatistics(sentence_index, theSentence);
+		entry.set(theStatistics);
 
-
-/* DO NOT MODIFY BELOW */
-//		entry.savetxt();
 		add(entry,sentence_index);
 	}
 

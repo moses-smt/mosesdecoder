@@ -38,7 +38,6 @@ void ScoreStats::set(std::string &theString)
         std::string::size_type loc;
 	int nextPound;
 	ScoreStatsType sc;
-//	TRACE_ERR("Decompounding string: " << theString << std::endl);      
 	while (!theString.empty()){         
 		nextPound = getNextPound(theString, substring);
 		sc = ATOSST(substring.c_str());
