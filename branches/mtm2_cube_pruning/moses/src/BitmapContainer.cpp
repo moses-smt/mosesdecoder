@@ -237,16 +237,18 @@ BitmapContainer::FindKBestHypotheses()
 		if(m_edges.empty())
 			return;
 		
-		BackwardsEdgeSet::iterator edgeIter;
+		BackwardsEdgeSet::iterator edgeIter = m_edges.begin();
 		BackwardsEdge *bestEdge = NULL;
 		float bestScore = -std::numeric_limits<float>::infinity();
-		for(edgeIter = m_edges.begin(); edgeIter != m_edges.end(); ++edgeIter) {
+		while (edgeIter != m_edges.end())
+		{
 			SquarePosition current = (*edgeIter)->Dequeue(true);
 			
 			// if the priority queue is exhausted, remove the edge from the set
 			// and proceed with the next edge
 			if(current == (*edgeIter)->InvalidSquarePosition()) {
-				m_edges.erase(edgeIter);
+				BackwardsEdgeSet::iterator deleteIter = edgeIter++;
+				m_edges.erase(deleteIter);
 				continue;
 			}
 			
@@ -254,6 +256,8 @@ BitmapContainer::FindKBestHypotheses()
 				bestScore = current.first->GetTotalScore();
 				bestEdge = *edgeIter;
 			}
+
+			++edgeIter;
 		}
 		
 		// if all the queues were empty, return
