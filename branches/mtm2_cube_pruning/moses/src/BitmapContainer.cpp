@@ -21,15 +21,16 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 	// Copy hypotheses from ordered set to vector for faster access.
 	const OrderedHypothesisSet &hypotheses = m_prevBitmapContainer.GetHypotheses();
 	int k = std::min(m_kbest, hypotheses.size());
-	
+
+	m_kbest_hypotheses.resize(k);
+
 	OrderedHypothesisSet::const_iterator hypoEnd = hypotheses.begin();
-	for (size_t i=0; i<k; i++) {
+	for (size_t i=0; i<k; i++) 
+	{
+		m_kbest_hypotheses[i] = *hypoEnd;
 		hypoEnd++;
 	}
 
-	// We reserve exactly as much space as we need to avoid resizing.
-	m_kbest_hypotheses.reserve(k);
-	std::copy(hypotheses.begin(), hypoEnd, m_kbest_hypotheses.begin());
 }
 
 const SquarePosition
