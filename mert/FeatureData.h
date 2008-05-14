@@ -35,12 +35,12 @@ public:
 		
 	inline void clear() { array_.clear(); }
 	
-	inline FeatureArray get(int i){ return array_.at(i); }
-	inline FeatureArray get(int i)const{ return array_.at(i); }
+	inline FeatureArray& get(int i){ return array_.at(i); }
+	inline const FeatureArray& get(int i)const{ return array_.at(i); }
 	inline bool exists(int i){ return (i<array_.size())?true:false; }
 
-	inline FeatureStats get(int i, int j){ return array_.at(i).get(j); }
-	inline FeatureStats get(int i, int j)const{ return array_.at(i).get(j); }
+	inline FeatureStats& get(int i, int j){ return array_.at(i).get(j); }
+	inline const FeatureStats&  get(int i, int j)const{ return array_.at(i).get(j); }
 	void add(FeatureArray e){ array_.push_back(e); }
 	void add(FeatureStats e, int sent_idx);
 	

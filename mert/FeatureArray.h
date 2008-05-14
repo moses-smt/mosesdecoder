@@ -44,8 +44,8 @@ public:
 	inline size_t getIndex(){ return idx; }
 	inline void setIndex(size_t value){ idx=value; }
 
-	inline FeatureStats get(int i){ return array_.at(i); }
-	inline FeatureStats get(int i)const{ return array_.at(i); }
+	inline FeatureStats&  get(int i){ return array_.at(i); }
+	inline const FeatureStats&  get(int i)const{ return array_.at(i); }
 	void add(FeatureStats e){ array_.push_back(e); }
 	
 	inline size_t size(){ return array_.size(); }
