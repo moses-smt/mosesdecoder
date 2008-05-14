@@ -63,7 +63,6 @@ protected:
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float
 		m_beamWidth,
-		m_kbestCubePruning,
 		m_weightDistortion, 
 		m_weightWordPenalty, 
 		m_wordDeletionWeight,
@@ -255,10 +254,6 @@ public:
 	float GetBeamWidth() const
 	{
 		return m_beamWidth;
-	}
-	int GetKBestCubePruning() const
-	{
-		return m_kbestCubePruning;
 	}
 	//! returns the total number of score components across all types, all factors
 	size_t GetTotalScoreComponents() const

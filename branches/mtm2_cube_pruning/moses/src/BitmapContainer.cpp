@@ -6,19 +6,20 @@
 
 SquarePosition *BackwardsEdge::m_invalid = NULL;
 
-BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer, const TranslationOptionList &translations)
+BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
+                             , const TranslationOptionList &translations
+							 , const size_t KBestCubePruning)
   : m_prevBitmapContainer(prevBitmapContainer)
 	, m_queue()
 	, m_initialized(false)
+	, m_kbest(KBestCubePruning)
 {
 	// We will copy the k best translation options from the translations
 	// parameter and keep them in a std::vector to allow fast access.
 	// We will copy at most k translation options to the vector.
-	const StaticData &staticData = StaticData::Instance();
-	size_t kBest = staticData.GetKBestCubePruning();
-	size_t k = std::min(kBest, translations.size());
+	size_t k = std::min(m_kbest, translations.size());
 	
-	TranslationOptionList::iterator optionsEnd = translations.begin();
+	TranslationOptionList::const_iterator optionsEnd = translations.begin();
 	for (size_t i=0; i<k; i++) {
 		optionsEnd++;
 	}
@@ -31,7 +32,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer, const T
 	// which this backwards edge points to :)  Same story: compute k, copy k hypotheses
 	// from the OrderedHypothesisSet in the BitmapContainer et voila...
 	const OrderedHypothesisSet &hypotheses = m_prevBitmapContainer.GetHypotheses();
-	k = std::min(kBest, hypotheses.size());
+	k = std::min(m_kbest, hypotheses.size());
 	
 	OrderedHypothesisSet::const_iterator hypoEnd = hypotheses.begin();
 	for (size_t i=0; i<k; i++) {

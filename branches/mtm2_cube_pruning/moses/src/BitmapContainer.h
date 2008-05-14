@@ -65,6 +65,7 @@ class BackwardsEdge
 		_PQType m_queue;
 		static SquarePosition *m_invalid;
 		bool m_initialized;
+		size_t m_kbest;
 
 		std::vector< TranslationOption* > m_kbest_translations;
 		std::vector< Hypothesis* > m_kbest_hypotheses;
@@ -74,7 +75,7 @@ class BackwardsEdge
 	public:
 		const SquarePosition InvalidSquarePosition();
 
-		BackwardsEdge(const BitmapContainer &prevBitmapContainer, const TranslationOptionList &translations);
+		BackwardsEdge(const BitmapContainer &prevBitmapContainer, const TranslationOptionList &translations, const size_t KBestCubePruning);
 		~BackwardsEdge();
 
 		bool GetInitialized();
