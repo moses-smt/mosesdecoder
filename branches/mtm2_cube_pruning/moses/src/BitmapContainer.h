@@ -64,6 +64,7 @@ class BackwardsEdge
 		const BitmapContainer &m_prevBitmapContainer;
 		_PQType m_queue;
 		static SquarePosition *m_invalid;
+		bool m_initialized;
 
 		std::vector< TranslationOption* > m_kbest_translations;
 		std::vector< Hypothesis* > m_kbest_hypotheses;
@@ -76,8 +77,13 @@ class BackwardsEdge
 		BackwardsEdge(const BitmapContainer &prevBitmapContainer, const TranslationOptionList &translations);
 		~BackwardsEdge();
 
+		bool GetInitialized();
+		void SetInitialized(bool initialized);
+		void Initialize(Hypothesis *hypothesis);
 		const BitmapContainer &GetBitmapContainer() const;
 		int GetDistortionPenalty();
+		bool Empty();
+		size_t Size();
 		void Enqueue(int x, int y, Hypothesis *hypothesis);
 		SquarePosition Dequeue(bool keepValue=false);
 };
