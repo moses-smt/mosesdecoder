@@ -81,9 +81,12 @@ BackwardsEdge::GetInitialized()
 }
 
 void
-BackwardsEdge::SetInitialized(bool initialized)
+BackwardsEdge::Initialize()
 {
-	m_initialized = initialized;
+	Hypothesis *expanded = CreateHypothesis(*m_kbest_hypotheses[0], *m_kbest_translations[0]);
+	Enqueue(0, 0, expanded);
+	m_seenPosition[0] = true;
+	m_initialized = true;
 }
 
 void
@@ -161,6 +164,10 @@ BackwardsEdge::Size()
 SquarePosition
 BackwardsEdge::Dequeue(bool keepValue)
 {
+	if (!m_initialized) {
+		Initialize();
+	}
+
 	// Return the topmost square position object from the priority queue.
 	// If keepValue is false (= default), this will remove the topmost object afterwards.
 	if (!m_queue.empty()) {

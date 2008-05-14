@@ -76,6 +76,7 @@ class BackwardsEdge
 		BackwardsEdge();
 
 		Hypothesis *CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt);
+		void Initialize();
 
 	public:
 		const SquarePosition InvalidSquarePosition();
@@ -87,8 +88,6 @@ class BackwardsEdge
 		~BackwardsEdge();
 
 		bool GetInitialized();
-		void SetInitialized(bool initialized);
-		void Initialize(Hypothesis *hypothesis);
 		const BitmapContainer &GetBitmapContainer() const;
 		int GetDistortionPenalty();
 		bool Empty();
