@@ -2,7 +2,7 @@ OBJS= Util.o Timer.o Parameter.o \
 ScoreStats.o ScoreArray.o ScoreData.o \
 FeatureStats.o FeatureArray.o FeatureData.o \
 BleuScorer.o \
-Point.o Optimizer.o
+Point.o
 
 CFLAGS=-O3 -DTRACE_ENABLE
 GCC=g++
