@@ -19,10 +19,24 @@ void FeatureArray::savetxt(std::ofstream& outFile)
 {
         FeatureStats entry;
 
-	outFile << FEATURES_BEGIN << " " << idx << " " << array_.size() << std::endl;
+	outFile << FEATURES_TXT_BEGIN << " " << idx << " " << array_.size() << std::endl;
 	for (vector<FeatureStats>::iterator i = array_.begin(); i !=array_.end(); i++)
 		(*i).savetxt(outFile);
-	outFile << FEATURES_END << std::endl;
+	outFile << FEATURES_TXT_END << std::endl;
+}
+
+void FeatureArray::savebin(std::ofstream& outFile)
+{
+        FeatureStats entry;
+
+	TRACE_ERR("binary saving is not yet implemented!" << std::endl);  
+
+/*
+NOT YET IMPLEMENTED
+*/
+	outFile << FEATURES_TXT_BEGIN << " " << idx << " " << array_.size() << std::endl;
+	outFile << FEATURES_BIN_END << std::endl;
+
 }
 
 void FeatureArray::savetxt(const std::string &file)
