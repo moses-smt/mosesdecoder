@@ -65,6 +65,7 @@ class BackwardsEdge
 		const BitmapContainer &m_prevBitmapContainer;
 		_PQType m_queue;
 		static SquarePosition *m_invalid;
+		std::vector< bool > m_seenPosition;
 		bool m_initialized;
 		const SquareMatrix &m_futurescore;
 		size_t m_kbest;
@@ -73,6 +74,8 @@ class BackwardsEdge
 		std::vector< Hypothesis* > m_kbest_hypotheses;
 		
 		BackwardsEdge();
+
+		Hypothesis *CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt);
 
 	public:
 		const SquarePosition InvalidSquarePosition();
@@ -90,8 +93,10 @@ class BackwardsEdge
 		int GetDistortionPenalty();
 		bool Empty();
 		size_t Size();
+		void PushSuccessors(int x, int y);
 		void Enqueue(int x, int y, Hypothesis *hypothesis);
 		SquarePosition Dequeue(bool keepValue=false);
+		bool SeenPosition(int x, int y);
 };
 
 // A BitmapContainer encodes an ordered set of hypotheses and a set of edges
@@ -103,13 +108,14 @@ class BitmapContainer
 		WordsBitmap m_bitmap;
 		OrderedHypothesisSet m_hypotheses;
 		BackwardsEdgeSet m_edges;
-		const HypothesisStack &m_stack;
+		HypothesisStack &m_stack;
 
 		// We always require a corresponding bitmap to be supplied.
 		BitmapContainer();
+		
 
 	public:
-		BitmapContainer(const WordsBitmap &bitmap, const HypothesisStack &stack);
+		BitmapContainer(const WordsBitmap &bitmap, HypothesisStack &stack);
 		
 		// The destructor will also delete all the edges that are
 		// connected to this BitmapContainer.
@@ -119,9 +125,8 @@ class BitmapContainer
 		const OrderedHypothesisSet &GetHypotheses() const;
 		const BackwardsEdgeSet &GetBackwardsEdges();
 		
-		// We will add GetKBest() here.
+		void FindKBestHypotheses();
 
 		void AddHypothesis(Hypothesis *hypothesis);
 		void AddBackwardsEdge(BackwardsEdge *edge);
-		void PruneHypotheses();
 };

@@ -84,11 +84,6 @@ protected:
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	clock_t m_start; /**< starting time, used for logging */
 	
-	// functions for creating hypotheses
-	void ProcessOneHypothesis(const Hypothesis &hypothesis);
-	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);
-	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
-
 	// logging
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
