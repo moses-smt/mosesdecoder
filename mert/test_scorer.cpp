@@ -16,5 +16,21 @@ int main(int argc, char** argv) {
 	scorer.setReferenceFiles(references);
 	ScoreData sd(scorer);
 	sd.loadnbest("test_scorer_data/nbest.out");
-	sd.savetxt();
+	//sd.savetxt();
+
+	//calculate a  bleu scores
+	scorer.setScoreData(&sd);
+	unsigned int index = 0;
+	vector<unsigned int> candidates;
+	for (size_t i  = 0; i < sd.size(); ++i) {
+        sd.get(i,index).savetxt("/dev/stdout");
+		candidates.push_back(index++);
+		if (index == 10) {
+			index = 0;
+		}
+	}
+
+	cout << "Bleu ";
+	float bleu = scorer.score(candidates);
+	cout << bleu << endl;
 }

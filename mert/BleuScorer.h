@@ -2,6 +2,7 @@
 #define __BLEUSCORER_H__
 
 #include <cctype>
+#include <cmath>
 #include <ctime>
 #include <stdexcept>
 #include <fstream>
@@ -14,10 +15,11 @@
 
 #include "Util.h"
 #include "Scorer.h"
+#include "ScoreData.h"
 
 using namespace std;
 
-enum BleuReferenceLength { AVERAGE, SHORTEST, CLOSEST };
+enum BleuReferenceLengthStrategy { AVERAGE, SHORTEST, CLOSEST };
 
 
 /**
@@ -29,12 +31,7 @@ class BleuScorer: public Scorer {
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
 		virtual void prepareStats(int sid, const string& text, ScoreStats& entry);
 
-		virtual float score(const std::vector<unsigned int>& candidates) {
-			if (!_scoreData) {
-				throw std::runtime_error("score data not loaded");
-			}
-			return 0;
-		}
+		virtual float score(const std::vector<unsigned int>& candidates);
 
 		static const int LENGTH;	
 		
@@ -97,7 +94,7 @@ class BleuScorer: public Scorer {
 		} 
 		bool _preserveCase;
 		bool _normalise;
-		BleuReferenceLength _refLengthStrategy;
+		BleuReferenceLengthStrategy _refLengthStrategy;
 		
 		// data extracted from reference files
 		refcounts_t _refcounts;

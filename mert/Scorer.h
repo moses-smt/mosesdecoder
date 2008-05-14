@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "ScoreData.h"
 
-class ScoreData;
 class ScoreStats;
 
 class Scorer {
@@ -25,6 +25,14 @@ class Scorer {
 		void setReferenceFiles(const std::vector<std::string>& referenceFiles) {
 			//do nothing
 		}
+
+
+        size_t getReferenceSize() {
+            if (_scoreData) {
+                return _scoreData->size();
+            }
+            return 0;
+        }
 		
 		/**
 		 * Process the given guessed text, corresponding to the given reference sindex
@@ -51,6 +59,7 @@ class Scorer {
 			}
 			return 0;
 		}
+
 
 		protected:
 			ScoreData* _scoreData;

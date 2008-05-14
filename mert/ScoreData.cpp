@@ -8,6 +8,7 @@
 
 #include <fstream>
 #include "ScoreData.h"
+#include "Scorer.h"
 #include "Util.h"
 
 
