@@ -114,14 +114,8 @@ BitmapContainer::BitmapContainer(const WordsBitmap &bitmap, const HypothesisStac
 
 BitmapContainer::~BitmapContainer()
 {
-	BackwardsEdgeSet::iterator e_iter;
-	for (e_iter = m_edges.begin(); e_iter != m_edges.end(); ++e_iter)
-	{
-		delete *e_iter;
-	}
-
+	RemoveAllInColl(m_edges);
 	m_hypotheses.clear();
-	m_edges.clear();
 }
 		
 const WordsBitmap&

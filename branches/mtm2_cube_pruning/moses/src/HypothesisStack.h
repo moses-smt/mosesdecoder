@@ -126,6 +126,12 @@ public:
 	{
 		m_maxHypoStackSize = maxHypoStackSize;
 	}
+
+	inline size_t GetMaxHypoStackSize() const
+	{
+		return m_maxHypoStackSize;
+	}
+
 	/** set beam threshold, hypotheses in the stack must not be worse than 
     * this factor times the best score to be allowed in the stack
 	 * \param beamThreshold minimum factor (typical number: 0.03)
