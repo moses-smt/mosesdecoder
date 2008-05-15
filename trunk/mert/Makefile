@@ -20,7 +20,6 @@ LDLIBS=-lm
 
 all: \
 mert \
-feature_extractor \
 extractor \
 test_scorer
 
