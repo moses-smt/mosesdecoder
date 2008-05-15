@@ -16,7 +16,7 @@ enum OptType{POWELL=0,NOPTIMIZER};//Add new optimizetr here
 
 string names[NOPTIMIZER]={string("powell")};
 
-Optimizer *BuildOptimizer(unsigned dim,vector<unsigned>to,vector<lambda>s,string type){
+Optimizer *BuildOptimizer(unsigned dim,vector<unsigned>to,vector<parameter_t>s,string type){
   int thetype;
   for(thetype=0;thetype<(int)NOPTIMIZER;thetype++)
     if(names[thetype]==type)
@@ -44,7 +44,7 @@ void Optimizer::SetFData(FeatureData *F){
   FData=F;
 };
 
-Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<lambda> start):scorer(NULL),FData(NULL){
+Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start):scorer(NULL),FData(NULL){
   //warning: the init vector is a full set of parameters, of dimension pdim!
   Point::pdim=Pd;
   assert(start.size()==Pd);
@@ -67,7 +67,7 @@ Optimizer::~Optimizer(){
   delete FData;
 }
 
-statscore Optimizer::GetStatScore(const Point& param)const{
+statscore_t Optimizer::GetStatScore(const Point& param)const{
   vector<unsigned> bests;
   Get1bests(param,bests);
   return GetStatScore(bests);
@@ -80,15 +80,15 @@ float intersect (float m1, float b1,float m2,float b2){
   return((b2-b1)/(m1-m2));
 }
 
-statscore Optimizer::LineOptimize(const Point& origin,const Point& direction,Point& bestpoint)const{
+statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,Point& bestpoint)const{
 
   // we are looking for the best Point on the line y=Origin+x*direction
-  float min_int=0.00001;
-  typedef pair<float,vector<unsigned> > threshold;  
+  float min_int=0.0001;
+  typedef pair<unsigned,unsigned> diff;//first the sentence that changes, second is the new 1best for this sentence
+  typedef pair<float,vector<diff> > threshold;  
   list<threshold> thresholdlist;
-  
-  thresholdlist.push_back(pair<float,vector<unsigned> >(MIN_FLOAT,vector<unsigned>()));
-
+  thresholdlist.push_back(threshold(MIN_FLOAT,vector<diff>()));
+  vector<unsigned> first1best;//the vector of nbrests for x=-inf
   for(int S=0;S<size();S++){
     //first we determine the translation with the best feature score for each sentence and each value of x
     multimap<float,unsigned> gradient;
@@ -97,7 +97,7 @@ statscore Optimizer::LineOptimize(const Point& origin,const Point& direction,Poi
       gradient.insert(pair<float,unsigned>(direction*(FData->get(S,j)),j));//gradient of the feature function for this particular target sentence
       f0[j]=origin*FData->get(S,j);//compute the feature function at the origin point
     }
-   //now lets compute the 1best for each value of x
+    //now lets compute the 1best for each value of x
     
     vector<pair<float,unsigned> > onebest;
     
@@ -151,68 +151,73 @@ statscore Optimizer::LineOptimize(const Point& origin,const Point& direction,Poi
     }
     //we have the onebest list and the threshold for the current sentence.
     //now we update the thresholdlist: we add the new threshold and the  value of the onebest.
-    
+
+    //add the 1best for x=-inf to the corresponding threshold
+    //    (this first threshold is the same for everybody)
+    first1best.push_back(onebest[0].second);  
+    assert(first1best.size()==S+1);
+
     list<threshold >::iterator current=thresholdlist.begin();
     list<threshold >::iterator lit;
   
-//add the 1best for x=-inf to the corresponding threshold
-//    (this first threshold is the same for everybody)
-    current->second.push_back(onebest[0].second);  
-    assert(current->second.size()==S+1);
+    
     unsigned prev1best=onebest[0].second;
     for(int t=1;t<onebest.size();t++){
       float ref=onebest[t].first;
-      
-      for( lit=current;lit!=thresholdlist.end()&&ref>lit->first;lit++){
-	lit->second.push_back(prev1best);//whe update the threshold state with the 1best index for the current value
-	assert(lit->second.size()==S+1);
+      for( lit=current;lit!=thresholdlist.end()&&ref>lit->first;lit++)
+	;
+      //we have found where we must insert the new threshold(before lit)
+      if(lit==thresholdlist.end()){
+	thresholdlist.push_back(threshold(ref,vector<diff>()));
+	lit--;
       }
-      if(lit!=thresholdlist.end()&&lit->first==ref){
-	lit->second.push_back(onebest[t].second);
-//this threshold was already created by a previous sentence (unlikely)
-//We do not need to insert a new threshold in the list
-	assert(lit->second.size()==S+1);
-	current=lit;
-      }else{
-	//we have found where we must insert the threshold(before lit)
-	current=lit;//we will continue after that point
-	lit--;//We need to go back 1 to get the 1best vector
-	//(ie we will use lit.second to initialize the new vector of 1best
-	if(current!=thresholdlist.end())//insert just before current(just after lit)
-	  thresholdlist.insert(current,pair<float,vector<unsigned> >(ref,lit->second));
-	else //insert at the end of list
-	  thresholdlist.push_back(pair<float,vector<unsigned> >(ref,lit->second));
-	lit++;//now lit points on the threshold we just inserted
-	lit->second.push_back(onebest[t].second);
-	assert(lit->second.size()==S+1);
-      }
+      else 
+	if(ref!=lit->first)//normal case
+	  lit=thresholdlist.insert(lit,threshold(ref,vector<diff>()));
+      //if ref==lit->first:unlikely (but this is the reason why we have a vector of diff); in that case the threshold is already created
+      //lit is at the right place now we add the diff pair
+      lit->second.push_back(diff(S,onebest[t].second));
+      current=lit;//we will continue after that point
+      current++;
       prev1best=onebest[t].second;
-      assert(current==thresholdlist.end() || current->second.size()==S);//current has not been updated yet
     }//loop on onebest.size()
-    //if the current last threshold in onebest is not the last in thresholdlist,
-    //we need to update the 1bestvector above this last threshold.
-
-    for(lit=current;lit!=thresholdlist.end();lit++){
-      lit->second.push_back(onebest.front().second);
-      assert(lit->second.size()==S+1);
-    }
   }//loop on S
-  //now the thresholdlist is up to date: it contains a list of all the lambdas where the function changed its value, along with the nbest list for the interval after each threshold
+  //now the thresholdlist is up to date: 
+  //it contains a list of all the parameter_ts where the function changed its value, along with the nbest list for the interval after each threshold
   //last thing to do is compute the Stat score (ie BLEU) and find the minimum
-  list<threshold>::iterator best;
-  list<threshold>::iterator lit2;
-  statscore bestscore=MIN_FLOAT;
-  for(lit2=thresholdlist.begin();lit2!=thresholdlist.end();lit2){
-    assert(lit2->second.size()==FData->size());
-    statscore cur=GetStatScore(lit2->second);
-    if(cur>bestscore){
-      bestscore=cur;
-      best=lit2;
+  
+  list<threshold>::iterator lit2=thresholdlist.begin();
+  ++lit2;
+  
+  vector<vector<diff> > diffs;
+  for(;lit2!=thresholdlist.end();lit2++)
+    diffs.push_back(lit2->second);
+  vector<statscore_t> scores=GetIncStatScore(first1best,diffs);
+  
+  lit2=thresholdlist.begin();
+  statscore_t bestscore=MIN_FLOAT;
+  float bestx;
+  assert(scores.size()==thresholdlist.size());//we skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best
+  for(int sc=0;sc!=scores.size();sc++,lit2++){
+//We move the list iterator and the vector index at the same time
+//because we need to get the value of lambda back from the list
+    if(scores[sc]>bestscore){
+      bestscore=scores[sc];
+      if(lit2!=thresholdlist.end()){
+	//we dont want to stay exactly at the threshold where the function is discontinuous so we move just a little to the right
+	bestx=lit2->first;
+	lit2++;
+	bestx+=lit2->first;
+	bestx/=2.0;
+	lit2--;
+      }else
+	bestx=lit2->first+0.001;
     }
   }
-    
-    //finally! we manage to extract the best score and convert it to a point!
-    float bestx=best->first+min_int/2;//we dont want to stay exactly at the threshold where the function is discontinuous so we move just a little to the right
+      
+    //finally! we manage to extract the best score;
+    //nowwe convert bestx  (position on the line) to a point!
+   
     bestpoint=direction*bestx+origin;
     bestpoint.score=bestscore;
     return bestscore;  
@@ -239,7 +244,7 @@ void  Optimizer::Get1bests(const Point& P,vector<unsigned>& bests)const{
   
 }
 
-statscore Optimizer::Run(Point& P)const{
+statscore_t Optimizer::Run(Point& P)const{
   if(!FData){
     cerr<<"error trying to optimize without Feature loaded"<<endl;
     exit(2);
@@ -248,21 +253,37 @@ statscore Optimizer::Run(Point& P)const{
     cerr<<"error trying to optimize without a Scorer loaded"<<endl;
     exit(2);
   }
-  statscore s=TrueRun(P);
+  statscore_t s=TrueRun(P);
   P.score=s;//just in case its not done in TrueRun
   return s;
 }
-statscore SimpleOptimizer::TrueRun(Point& P)const{
  
-  statscore prevscore=MAX_FLOAT;
-  statscore bestscore=MAX_FLOAT;
+
+vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst,vector<vector <pair<unsigned,unsigned> > > thediffs)const{
+  assert(scorer);
+
+  vector<statscore_t> theres;
+
+  scorer->score(thefirst,thediffs,theres);
+  return theres;
+};
+
+
+
+
+//---------------- code for the powell optimizer
+float SimpleOptimizer::eps=0.0001;
+statscore_t SimpleOptimizer::TrueRun(Point& P)const{
+ 
+  statscore_t prevscore=MAX_FLOAT;
+  statscore_t bestscore=MAX_FLOAT;
   do{
     Point  best;
     Point  linebest;
     for(int d=0;d<Point::getdim();d++){
       Point direction;
       direction[d]=1.0;
-      statscore curscore=LineOptimize(P,direction,linebest);//find the minimum on the line
+      statscore_t curscore=LineOptimize(P,direction,linebest);//find the minimum on the line
       if(curscore>bestscore){
 	bestscore=curscore;
 	best=linebest;

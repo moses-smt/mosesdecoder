@@ -8,18 +8,18 @@ vector<unsigned> Point::optindices;
 
 unsigned Point::dim=0;
 
-map<unsigned,lambda> Point::fixedweights;
+map<unsigned,statscore_t> Point::fixedweights;
   
 unsigned Point::pdim=0;
 unsigned Point::ncall=0;
 
-void Point::Randomize(const vector<lambda>& min,const vector<lambda>& max){
+void Point::Randomize(const parameters_t& min,const parameters_t& max){
   for (int i=0; i<size(); i++)
     operator[](i)= min[i] + (float)random()/RAND_MAX * (max[i]-min[i]);
 }
 
 void Point::Normalize(){
-  lambda norm=0.0;
+  parameter_t norm=0.0;
   for (int i=0; i<size(); i++)
     norm+= operator[](i)*operator[](i);
   if(norm!=0.0){
@@ -48,7 +48,7 @@ Point Point::operator+(const Point& p2)const{
   Point Res(*this);
   for(unsigned i=0;i<size();i++)
     Res[i]+=p2[i];
-  Res.score=numeric_limits<statscore>::max();
+  Res.score=numeric_limits<statscore_t>::max();
   return Res;
 };
 
@@ -56,20 +56,20 @@ Point Point::operator*(float l)const{
   Point Res(*this);
   for(unsigned i=0;i<size();i++)
     Res[i]*=l;
-  Res.score=numeric_limits<statscore>::max();
+  Res.score=numeric_limits<statscore_t>::max();
   return Res;
 };
 
  ostream& operator<<(ostream& o,const Point& P){
-   vector<lambda> w=P.GetAllWeights();
+   parameters_t w=P.GetAllWeights();
    for(int i=0;i<Point::pdim;i++)
      o<<w[i]<<' ';
    o<<endl;
    return o;
 };
 
-vector<lambda> Point::GetAllWeights()const{
-  vector<lambda> w;
+parameters_t Point::GetAllWeights()const{
+  parameters_t w;
   if(OptimizeAll()){
     w=*this;
   }else{

@@ -10,15 +10,12 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
+#include "Types.h"
 #include "ScoreData.h"
 
 using namespace std;
 
-typedef vector<pair<unsigned int, unsigned int> > diff_t;
-typedef vector<diff_t> diffs_t;
-typedef vector<unsigned int> candidates_t;
-typedef vector<float> scores_t;
+
 
 class ScoreStats;
 
@@ -54,7 +51,7 @@ class Scorer {
           * applying each in turn, and calculating a new score each time.
           **/
         virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-                scores_t& scores) {
+                statscores_t& scores) {
             //dummy impl
 			if (!_scoreData) {
 				throw runtime_error("score data not loaded");
@@ -72,7 +69,7 @@ class Scorer {
 		  **/
 		float score(const candidates_t& candidates) {
             diffs_t diffs;
-            scores_t scores;
+            statscores_t scores;
             score(candidates, diffs, scores);
             return scores[0];
 		}
@@ -146,11 +143,11 @@ class StatisticsBasedScorer : public Scorer {
     public:
         StatisticsBasedScorer(const string& name): Scorer(name) {}
         virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-                scores_t& scores);
+                statscores_t& scores);
 
     protected:
         //calculate the actual score
-        virtual float calculateScore(const vector<int>& totals) = 0;
+        virtual statscore_t calculateScore(const vector<int>& totals) = 0;
 
 };
 
