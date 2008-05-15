@@ -146,7 +146,7 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 {
 	const _BMType &bitmapAccessor = stack.GetBitmapAccessor();
 	_BMType::const_iterator iterAccessor;
-	size_t len = m_source.GetSize();
+	size_t size = m_source.GetSize();
 
 	stack.AddHypothesesToBitmapContainers();
 
@@ -162,7 +162,7 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 
 		// check bitamp and range doesn't overlap
 		size_t startPos, endPos;
-		for (startPos = 0 ;startPos < len ; startPos++)
+		for (startPos = 0 ;startPos < size ; startPos++)
 		{
 			if (bitmap.GetValue(startPos))
 				continue;
@@ -174,7 +174,7 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 				CreateForwardTodos(bitmap, applyRange, bitmapContainer);
 			}
 			
-			size_t maxSize = len - startPos;
+			size_t maxSize = size - startPos;
 			size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 			maxSize = std::min(maxSize, maxSizePhrase);
 
@@ -230,7 +230,7 @@ bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &r
 	// MAIN LOOP. go through each possible hypo
   size_t maxSize = sourceSize - startPos;
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-  maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+  maxSize = std::min(maxSize, maxSizePhrase);
 
 	bool leftMostEdge = (hypoFirstGapPos == startPos);			
 	// any length extension is okay if starting at left-most edge
