@@ -27,7 +27,7 @@ test_scorer
 clean: 
 	rm -f *.o
 
-%.o : %.cpp %.h
+%.o : %.cpp
 	$(GCC) -c $(CFLAGS) $< -o $@
 
 feature_extractor: $(OBJS) feature_extractor.cpp

@@ -1,4 +1,4 @@
-#include "BleuScorer.h"
+#include "Scorer.h"
 
 const int BleuScorer::LENGTH = 4;
 
