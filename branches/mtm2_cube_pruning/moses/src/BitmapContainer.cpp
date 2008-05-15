@@ -50,18 +50,36 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 		return;
 	}
 	
-	m_xmax = std::min(m_kbest, hypotheses.size());
 	m_ymax = std::min(m_kbest, translations.size());
 
-	m_kbest_hypotheses.resize(m_xmax);
+	m_kbest_hypotheses.resize(hypotheses.size());
 
-	OrderedHypothesisSet::const_iterator hypoEnd = hypotheses.begin();
-	for (size_t i=0; i<m_xmax; i++) 
+	// Fetch the things we need for distortion cost computation
+	int maxDistortion = StaticData::Instance().GetMaxDistortion();
+	const InputType *itype = StaticData::Instance().GetInput();
+	WordsRange transOptRange = translations[0]->GetSourceWordsRange();
+
+	m_xmax = 0;
+	OrderedHypothesisSet::const_iterator hypoIter = hypotheses.begin();
+	for (; m_xmax < m_kbest && hypoIter != hypotheses.end(); ++hypoIter) 
 	{
-		m_kbest_hypotheses[i] = *hypoEnd;
-		hypoEnd++;
+		// If the combination of this hypothesis and our translation
+		// options violates the distortion limit, discard the hypothesis,
+		// otherwise store it and increment m_xmax
+		
+		Hypothesis *current = *hypoIter;
+		if (maxDistortion == -1) 
+			m_kbest_hypotheses[m_xmax++] = current;
+		else {
+		  int distortionDistance = itype->ComputeDistortionDistance(current->GetCurrSourceWordsRange(),
+														  transOptRange);
+		  if (distortionDistance <= maxDistortion)
+			m_kbest_hypotheses[m_xmax++] = current;
+		}
 	}
-
+	
+	// Maybe the list has shrunk.
+	m_kbest_hypotheses.resize(m_xmax);
 }
 
 const SquarePosition
