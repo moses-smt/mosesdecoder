@@ -20,6 +20,15 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 {
 	// Copy hypotheses from ordered set to vector for faster access.
 	const OrderedHypothesisSet &hypotheses = m_prevBitmapContainer.GetHypotheses();
+	
+	// If either dimension is empty, we haven't got anything to do.
+	if(translations.size() == 0 || hypotheses.size() == 0) {
+		VERBOSE(3, "Empty cube on BackwardsEdge" << std::endl);
+		m_xmax = 0;
+		m_ymax = 0;
+		return;
+	}
+	
 	m_xmax = std::min(m_kbest, hypotheses.size());
 	m_ymax = std::min(m_kbest, translations.size());
 
@@ -71,6 +80,12 @@ BackwardsEdge::GetInitialized()
 void
 BackwardsEdge::Initialize()
 {
+	if(m_xmax == 0 || m_ymax == 0)
+	{
+		m_initialized = true;
+		return;
+	}
+	
 	Hypothesis *expanded = CreateHypothesis(*m_kbest_hypotheses[0], *m_kbest_translations[0]);
 	Enqueue(0, 0, expanded);
 	m_seenPosition[0] = true;
