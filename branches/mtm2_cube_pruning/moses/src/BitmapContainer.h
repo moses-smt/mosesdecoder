@@ -28,7 +28,19 @@ class HypothesisScoreOrderer
 		{
 			float scoreA = hypoA->GetTotalScore();
 			float scoreB = hypoB->GetTotalScore();
-			return (scoreA > scoreB);
+			
+			if (scoreA > scoreB)
+			{
+				return true;
+			}
+			else if (scoreA < scoreB)
+			{
+				return false;
+			}
+			else
+			{
+				return hypoA < hypoB;
+			}
 		}
 };
 
