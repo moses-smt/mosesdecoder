@@ -1,14 +1,16 @@
 #include <cassert>
-#include "Optimizer.h"
 #include <vector>
-#include<list>
+#include <limits>
+#include <list>
 #include <cfloat>
 #include <iostream>
 
+#include "Optimizer.h"
+
 using namespace std;
 
-static const float MINFLOAT=numeric_limits<float>::min();
-static const float MAXFLOAT=numeric_limits<float>::max();
+static const float MIN_FLOAT=numeric_limits<float>::min();
+static const float MAX_FLOAT=numeric_limits<float>::max();
 
 enum OptType{POWELL=0,NOPTIMIZER};//Add new optimizetr here
 
@@ -74,7 +76,7 @@ statscore Optimizer::GetStatScore(const Point& param)const{
 /**compute the intersection of 2 lines*/
 float intersect (float m1, float b1,float m2,float b2){
   if(m1==m2)
-    return MAXFLOAT;//parrallel lines
+    return MAX_FLOAT;//parrallel lines
   return((b2-b1)/(m1-m2));
 }
 
@@ -85,7 +87,7 @@ statscore Optimizer::LineOptimize(const Point& origin,const Point& direction,Poi
   typedef pair<float,vector<unsigned> > threshold;  
   list<threshold> thresholdlist;
   
-  thresholdlist.push_back(pair<float,vector<unsigned> >(MINFLOAT,vector<unsigned>()));
+  thresholdlist.push_back(pair<float,vector<unsigned> >(MIN_FLOAT,vector<unsigned>()));
 
   for(int S=0;S<size();S++){
     //first we determine the translation with the best feature score for each sentence and each value of x
@@ -111,7 +113,7 @@ statscore Optimizer::LineOptimize(const Point& origin,const Point& direction,Poi
 	index=it->second;//the highest line is the one with he highest f0
       }
     --it;//we went one step too far in the while loop
-    onebest.push_back(pair<float,unsigned>(MINFLOAT,index));//first 1best is the lowest gradient. 
+    onebest.push_back(pair<float,unsigned>(MIN_FLOAT,index));//first 1best is the lowest gradient. 
     //now we look for the intersections points indicating a change of 1 best
     //we use the fact that the function is convex, which means that the gradient can only go up   
     while(it!=gradient.end()){
@@ -199,7 +201,7 @@ statscore Optimizer::LineOptimize(const Point& origin,const Point& direction,Poi
   //last thing to do is compute the Stat score (ie BLEU) and find the minimum
   list<threshold>::iterator best;
   list<threshold>::iterator lit2;
-  statscore bestscore=MINFLOAT;
+  statscore bestscore=MIN_FLOAT;
   for(lit2=thresholdlist.begin();lit2!=thresholdlist.end();lit2){
     assert(lit2->second.size()==FData->size());
     statscore cur=GetStatScore(lit2->second);
@@ -222,7 +224,7 @@ void  Optimizer::Get1bests(const Point& P,vector<unsigned>& bests)const{
   bests.resize(size());
   
   for(unsigned i=0;i<size();i++){
-    float bestfs=MINFLOAT;
+    float bestfs=MIN_FLOAT;
     unsigned idx=0;
     unsigned j;
     for(j=0;j<FData->get(i).size();j++){
@@ -252,8 +254,8 @@ statscore Optimizer::Run(Point& P)const{
 }
 statscore SimpleOptimizer::TrueRun(Point& P)const{
  
-  statscore prevscore=MAXFLOAT;
-  statscore bestscore=MAXFLOAT;
+  statscore prevscore=MAX_FLOAT;
+  statscore bestscore=MAX_FLOAT;
   do{
     Point  best;
     Point  linebest;

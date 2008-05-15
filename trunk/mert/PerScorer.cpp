@@ -1,4 +1,4 @@
-#include "PerScorer.h"
+#include "Scorer.h"
 
 
 void PerScorer::setReferenceFiles(const vector<string>& referenceFiles) {

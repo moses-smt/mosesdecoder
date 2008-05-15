@@ -7,8 +7,6 @@ using namespace std;
 #include "Util.h"
 
 #include "Scorer.h"
-#include "BleuScorer.h"
-#include "PerScorer.h"
 #include "Data.h"
 
 int main (int argc, char * argv[]) {

@@ -1,7 +1,5 @@
 #include "Scorer.h"
 
-
-
 void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t& diffs,
             scores_t& scores) {
 	if (!_scoreData) {

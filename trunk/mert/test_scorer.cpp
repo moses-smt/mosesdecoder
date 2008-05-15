@@ -2,8 +2,7 @@
 #include <vector>
 
 #include "ScoreData.h"
-#include "BleuScorer.h"
-#include "PerScorer.h"
+#include "Scorer.h"
 
 using namespace std;
 
