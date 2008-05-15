@@ -40,7 +40,7 @@ class SquarePositionOrderer
 		{
 			float scoreA = cellA->first->GetTotalScore();
 			float scoreB = cellB->first->GetTotalScore();
-			return (scoreA >= scoreB);
+			return (scoreA > scoreB);
 		}
 };
 
