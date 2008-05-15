@@ -24,20 +24,25 @@ float min_interval = 1e-3;
 using namespace std;
 
 void usage(void) {
-  cerr<<"usage: mert -d <dimensions>"<<endl;
-  cerr<<"[-n retry ntimes]"<<endl;
-  cerr<<"[-o indexes to optimize]"<<endl;
-  cerr<<"[-t optimizer]"<<endl;
-  cerr<<"[-s scorer]"<<endl;
+  cerr<<"usage: mert -d <dimensions> (mandatory )"<<endl;
+  cerr<<"[-n retry ntimes (default 1)]"<<endl;
+  cerr<<"[-o\tthe indexes to optimize(default all)]"<<endl;
+  cerr<<"[-t\tthe optimizer(default Powell)]"<<endl;
+  cerr<<"[-sctype] the scorer type (default BLEU)"<<endl;
+  cerr<<"[-scfile] the scorer data file (default score.data)"<<endl;
+  cerr<<"[-ffile] the feature data file data file (default feature.data)"<<endl;
   exit(1);
 }
 
 static struct option long_options[] =
   {
     {"dim", 1, 0, 'd'},
-    {"only",1,0,'o'},
+    {"ntry",1,0,'n'},
+    {"optimize",1,0,'o'},
     {"type",1,0,'t'},
-    {"scorer",1,0,'s'},
+    {"sctype",1,0,'s'},
+    {"scfile",1,0,'S'},
+    {"ffile",1,0,'F'},
     {0, 0, 0, 0}
   };
 int option_index;
@@ -48,22 +53,30 @@ int main (int argc, char **argv) {
   int ntry=1;
   string type("powell");
   string scorertype("BLEU");
+  string scorerfile("statscore.data");
+  string featurefile("features.data");
   vector<unsigned> tooptimize;
   vector<parameter_t> start;
-  while (getopt_long (argc, argv, "d:n:o:t:s:", long_options, &option_index) != -1) {
+  while ((c=getopt_long (argc, argv, "d:n:t:s:S:F:", long_options, &option_index)) != -1) {
     switch (c) {
     case 'd':
       dim = strtol(optarg, NULL, 10);
+      cerr<<dim;
       break;
     case 'n':
       ntry=strtol(optarg, NULL, 10);
       break;
-    case 'o':
-      //TODO
     case 't':
       type=string(optarg);
+      break;
       case's':
 	scorertype=string(optarg);
+      break;
+    case 'S':
+      scorerfile=string(optarg);
+    case 'F':
+      featurefile=string(optarg);
+      break;
     default:
       usage();
     }
@@ -73,6 +86,7 @@ int main (int argc, char **argv) {
     for(i=0;i<dim;i++)
       tooptimize[i]=i;
   }
+  ScorerFactory SF;
   Optimizer *O;
   Scorer *TheScorer=NULL;;
   FeatureData *FD=NULL;
@@ -86,6 +100,12 @@ int main (int argc, char **argv) {
   Point bestP;
   //it make sense to know what parameter set where used to generate the nbest
   O=BuildOptimizer(dim,tooptimize,start,"powell");
+  
+  TheScorer=SF.getScorer(scorertype);
+  ScoreData *SD=new ScoreData(*TheScorer);
+  FD=new FeatureData();
+  FD->load(featurefile);
+  SD->load(scorerfile);
   O->SetScorer(TheScorer);
   O->SetFData(FD);
   Point min;//to: initialize

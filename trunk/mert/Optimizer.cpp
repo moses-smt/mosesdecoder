@@ -90,9 +90,11 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   thresholdlist.push_back(threshold(MIN_FLOAT,vector<diff>()));
   vector<unsigned> first1best;//the vector of nbrests for x=-inf
   for(int S=0;S<size();S++){
+    cerr<<"SENTENCE"<<S;
     //first we determine the translation with the best feature score for each sentence and each value of x
     multimap<float,unsigned> gradient;
     vector<float> f0;
+    f0.resize(size());
     for(unsigned j=0;j<FData->get(S).size();j++){
       gradient.insert(pair<float,unsigned>(direction*(FData->get(S,j)),j));//gradient of the feature function for this particular target sentence
       f0[j]=origin*FData->get(S,j);//compute the feature function at the origin point
@@ -111,19 +113,24 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
     while(it!=gradient.end()&&it->first==smallest){
       if(f0[it->second]>f0[index])
 	index=it->second;//the highest line is the one with he highest f0
-      }
+      it++;
+    }
     --it;//we went one step too far in the while loop
     onebest.push_back(pair<float,unsigned>(MIN_FLOAT,index));//first 1best is the lowest gradient. 
     //now we look for the intersections points indicating a change of 1 best
     //we use the fact that the function is convex, which means that the gradient can only go up   
+    int c=0;
     while(it!=gradient.end()){
+      cerr<<c++<<endl;
       map<float,unsigned>::iterator leftmost=it;
       float leftmostx=onebest.back().first;
       float m=it->first;
       float b=f0[it->second];
       multimap<float,unsigned>::iterator it2=it;
       it2++;
+      int d=0;
       for(;it2!=gradient.end();it2++){
+	//cerr<<"--"<<d++<<' '<<it2->first<<' '<<it2->second<<endl;
 	//look for all candidate with a gradient bigger than the current one and fond the one with the leftmost intersection
 	float curintersect=intersect(m,b,it2->first,f0[it2->second]);
 	if(curintersect<leftmostx){
@@ -147,7 +154,11 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
 	onebest.back()=pair<float,unsigned>(leftmostx,leftmost->second);//leftmost->first is the gradient, we are interested in the value of the intersection
       else //normal case: we add a new threshold
 	onebest.push_back(pair<float,unsigned>(leftmostx,leftmost->second));
-      it=leftmost;
+      if(it==leftmost)
+	it=gradient.end();
+      else
+	cerr<<"ok"<<endl;
+	it=leftmost;
     }
     //we have the onebest list and the threshold for the current sentence.
     //now we update the thresholdlist: we add the new threshold and the  value of the onebest.
@@ -251,6 +262,10 @@ statscore_t Optimizer::Run(Point& P)const{
   }
   if(!scorer){
     cerr<<"error trying to optimize without a Scorer loaded"<<endl;
+    exit(2);
+  }
+  if (scorer->getReferenceSize()!=FData->size()){
+    cerr<<"errror size mismatch between FeatureData and Scorer"<<endl;
     exit(2);
   }
   statscore_t s=TrueRun(P);
