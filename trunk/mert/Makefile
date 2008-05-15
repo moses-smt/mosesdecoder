@@ -3,9 +3,15 @@ ScoreStats.o ScoreArray.o ScoreData.o \
 FeatureStats.o FeatureArray.o FeatureData.o \
 Data.o \
 BleuScorer.o \
-Point.o
+Point.o \
+Optimizer.o
 
+ifndef DEBUG
 CFLAGS=-O3 -DTRACE_ENABLE
+else
+CFLAGS=-DTRACE_ENABLE -g 
+endif
+
 GCC=g++
 LDFLAGS=
 LDLIBS=-lm 

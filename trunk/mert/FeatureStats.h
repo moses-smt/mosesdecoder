@@ -43,6 +43,7 @@ public:
 	inline void clear() { array_.clear(); }
 	
 	inline FeatureStatsType get(int i){ return array_.at(i); }
+	inline FeatureStatsType get(int i)const{ return array_.at(i); }
 	
 	void set(std::string &theString);
 
@@ -80,6 +81,6 @@ public:
 
 };
 
-
 #endif
+
 
