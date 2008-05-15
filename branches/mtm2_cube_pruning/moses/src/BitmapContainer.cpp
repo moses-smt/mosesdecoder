@@ -215,6 +215,8 @@ BitmapContainer::GetBackwardsEdges()
 void
 BitmapContainer::AddHypothesis(Hypothesis *hypothesis)
 {
+	OrderedHypothesisSet::const_iterator iter = m_hypotheses.find(hypothesis);
+	assert(iter == m_hypotheses.end());
 	m_hypotheses.insert(hypothesis);
 }
 
@@ -222,13 +224,6 @@ void
 BitmapContainer::AddBackwardsEdge(BackwardsEdge *edge)
 {
 	m_edges.insert(edge);
-}
-
-void
-BitmapContainer::RemoveHypothesis(Hypothesis *hypothesis)
-{
-	assert(m_hypotheses.find(hypothesis) != m_hypotheses.end());
-	m_hypotheses.erase(hypothesis);
 }
 
 void

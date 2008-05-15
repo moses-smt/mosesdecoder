@@ -68,21 +68,6 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 	{ // equiv hypo doesn't exists
 		VERBOSE(3,"added hyp to stack");
 
-		// add to bitmap accessor
-		const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-		_BMType::iterator bcExists = m_bitmapAccessor.find(bitmap);
-		
-		BitmapContainer *bmContainer;
-		if (bcExists == m_bitmapAccessor.end()) {
-			bmContainer = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
-		}
-		else {
-			bmContainer = bcExists->second;
-		}
-		
-		bmContainer->AddHypothesis(hypo);
-		m_bitmapAccessor[bitmap] = bmContainer;
-
 		// Update best score, if this hypothesis is new best
 		if (hypo->GetTotalScore() > m_bestScore)
 		{
@@ -168,6 +153,9 @@ void HypothesisStack::AddInitial(Hypothesis *hypo)
 {
 	std::pair<iterator, bool> addRet = Add(hypo); 
 	assert (addRet.second);
+
+	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
+	m_bitmapAccessor[bitmap] = NULL;
 }
 
 void HypothesisStack::PruneToSize(size_t newSize)
@@ -319,13 +307,28 @@ std::ostream& operator<<(std::ostream& out, const HypothesisStack& hypoColl)
 
 void HypothesisStack::Remove(const HypothesisStack::iterator &iter)
 {
-	Hypothesis *h = *iter;
-
-	const WordsBitmap &bitmap = h->GetWordsBitmap();
-	BitmapContainer *bitmapContainer = m_bitmapAccessor[bitmap];
-	bitmapContainer->RemoveHypothesis(h);
-	
+	Hypothesis *h = *iter;	
 	Detach(iter);
 	FREEHYPO(h);
 }
 
+void
+HypothesisStack::AddHypothesesToBitmapContainers()
+{
+	HypothesisStack::const_iterator iter;
+	
+	_BMType::const_iterator containers;
+	for (containers = m_bitmapAccessor.begin(); containers != m_bitmapAccessor.end(); ++containers)
+	{
+		const WordsBitmap &bitmap = containers->first;
+		m_bitmapAccessor[bitmap] = new BitmapContainer(containers->first, *this, m_kbestCubePruning);
+	}
+
+	for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter)
+	{
+		Hypothesis *h = *iter;
+		const WordsBitmap &bitmap = h->GetWordsBitmap();
+		BitmapContainer *container = m_bitmapAccessor[bitmap];
+		container->AddHypothesis(h);
+	}
+}

@@ -152,6 +152,9 @@ public:
 	{
 		return m_bestScore;
 	}
+	
+	void AddHypothesesToBitmapContainers();
+	
 	const _BMType& GetBitmapAccessor() const
 	{ return m_bitmapAccessor; }
 	void SetBitmapAccessor(const WordsBitmap &newBitmap

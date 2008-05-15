@@ -132,7 +132,6 @@ void Manager::ProcessSentence()
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
 
-
 		CreateForwardTodos(sourceHypoColl);
 	
 		stackNo++;
@@ -148,6 +147,8 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 	const _BMType &bitmapAccessor = stack.GetBitmapAccessor();
 	_BMType::const_iterator iterAccessor;
 	size_t len = m_source.GetSize();
+
+	stack.AddHypothesesToBitmapContainers();
 
 	for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor)
 	{
@@ -199,7 +200,9 @@ void Manager::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &ra
 	HypothesisStack &newStack = m_hypoStackColl[numCovered];
 
 	if (transOptList.size() > 0)
+	{
 		m_hypoStackColl[numCovered].SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, futureScore, transOptList);
+	}
 }
 
 bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
