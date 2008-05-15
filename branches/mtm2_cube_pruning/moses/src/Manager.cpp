@@ -135,7 +135,6 @@ void Manager::ProcessSentence()
 		CreateForwardTodos(sourceHypoColl);
 	
 		stackNo++;
-		cerr << stackNo << endl;
 	}
 
 	// some more logging

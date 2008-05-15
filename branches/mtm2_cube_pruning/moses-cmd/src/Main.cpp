@@ -193,7 +193,9 @@ int main(int argc, char* argv[])
     
 		manager.CalcDecoderStatistics();    
 	}
-	
+	Phrase p(Output);
+	p.CreateFromString(staticData.GetOutputFactorOrder(), "hjhk ", "|");
+
 	delete ioStream;
 
 	IFVERBOSE(1)

@@ -92,21 +92,21 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 	return ret;
 }
 
-void HypothesisStack::AddPrune(Hypothesis *hypo)
+bool HypothesisStack::AddPrune(Hypothesis *hypo)
 { 
 	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
 	  StaticData::Instance().GetSentenceStats().AddDiscarded();
 	  VERBOSE(3,"discarded, too bad for stack" << std::endl);
 		FREEHYPO(hypo);		
-		return;
+		return false;
 	}
 
 	// over threshold, try to add to collection
 	std::pair<iterator, bool> addRet = Add(hypo); 
 	if (addRet.second)
 	{ // nothing found. add to collection
-		return;
+		return true;
   }
 
 	// equiv hypo exists, recombine with other hypo
@@ -133,9 +133,9 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 		{
 			iterExisting = m_hypos.find(hypo);
 			TRACE_ERR("Offending hypo = " << **iterExisting << endl);
-			abort();
+			assert(false);
 		}
-		return;
+		return added;
 	}
 	else
 	{ // already storing the best hypo. discard current hypo 
@@ -145,7 +145,7 @@ void HypothesisStack::AddPrune(Hypothesis *hypo)
 		} else {
 			FREEHYPO(hypo);				
 		}
-		return;
+		return false;
 	}
 }
 
@@ -270,8 +270,6 @@ void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 												, const SquareMatrix &futureScore
 												, const TranslationOptionList &transOptList)
 {
-	cerr << newBitmap << endl;
-
 	_BMType::iterator bcExists = m_bitmapAccessor.find(newBitmap);
 
 	BitmapContainer *bmContainer;

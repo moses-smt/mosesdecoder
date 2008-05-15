@@ -290,7 +290,9 @@ BitmapContainer::FindKBestHypotheses()
 	// 3. put the two successors of the hypothesis on the queue
 	//    - add lm scoring to both
 	// IMPORTANT: we assume that all scores in the queue are LM-SCORED
-	for(size_t i = 0; i < m_kbest; i++) {
+	size_t currBest = 0;
+	while (currBest < m_kbest)
+	{
 		if(m_edges.empty())
 			return;
 		
@@ -338,8 +340,10 @@ BitmapContainer::FindKBestHypotheses()
 		
 		// add to hypothesis stack
 		// size_t wordsTranslated = bestHypo->GetWordsBitmap().GetNumWordsCovered();	
-		m_stack.AddPrune(bestHypo);	
-		
+		bool added = m_stack.AddPrune(bestHypo);	
+		if (added)
+			++currBest;
+
 		// create new hypotheses for the two successors of the hypothesis just added
 		// and insert them into the priority queue
 		int x = pos.second.first;
