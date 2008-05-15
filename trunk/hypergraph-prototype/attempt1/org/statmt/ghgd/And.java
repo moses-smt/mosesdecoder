@@ -5,11 +5,11 @@ import java.util.ArrayList;
 public class And implements Comparable<And> {
 
 	Weight myWeight = null;
-	Axiom axiom = null;
+	Rule rule = null;
 	ArrayList<Or> children = null;
 	
-	public And(Axiom a, ArrayList<Or> ants, Weight w) {
-		axiom = a;
+	public And(Rule r, ArrayList<Or> ants, Weight w) {
+		rule = r;
 		children = ants;
 		myWeight = w;
 	}

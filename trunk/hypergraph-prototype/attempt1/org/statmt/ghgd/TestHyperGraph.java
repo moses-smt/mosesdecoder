@@ -14,8 +14,8 @@ public class TestHyperGraph {
 		PhrasePairRule p4 = new PhrasePairRule("tag", "hi", new FWeight(0.4f)); 
 		PhrasePairRule p5 = new PhrasePairRule("guten tag", "hello", new FWeight(0.2f)); 
 		PhrasePairRule p6 = new PhrasePairRule("guten tag", "good day", new FWeight(0.8f));
-		And d1 = new And(p1, null, p1.w);
-		And d2 = new And(p2, null, p2.w);
+		And d1 = new And(p1, new ArrayList(), p1.w);
+		And d2 = new And(p2, new ArrayList(), p2.w);
 		ArrayList<And> a1 = new ArrayList<And>(2);
 		a1.add(d1); a1.add(d2);
 		Weight w1 = d1.getWeight();
@@ -35,8 +35,8 @@ public class TestHyperGraph {
 		if (w1.compareTo(w2) < 0) best = w2; else best = w1;
 		Or c2 = new Or(a2, best);
 
-		And d5 = new And(p5, null, p5.w);
-		And d6 = new And(p6, null, p6.w);
+		And d5 = new And(p5, new ArrayList(), p5.w);
+		And d6 = new And(p6, new ArrayList(), p6.w);
 		ArrayList<And> a3 = new ArrayList<And>(2);
 		a3.add(d5); a3.add(d6);
 		w1 = d5.getWeight();
