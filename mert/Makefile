@@ -17,7 +17,7 @@ LDFLAGS=
 LDLIBS=-lm 
 
 all: \
-main \
+mert \
 feature_extractor \
 extractor \
 test_scorer
@@ -34,8 +34,8 @@ feature_extractor: $(OBJS) feature_extractor.cpp
 extractor: $(OBJS) extractor.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 
-#main: $(OBJS) main.cpp
-#	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
+main: $(OBJS) mert.cpp
+	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 
 test_scorer: $(OBJS) test_scorer.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
