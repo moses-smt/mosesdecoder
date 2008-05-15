@@ -12,12 +12,15 @@
 
 using namespace std;
 
-#include <vector>
-#include <map>
+#include <iterator>
 #include <iostream>
+#include <map>
+#include <sstream>
 #include <string>
+#include <vector>
 
 #include "Util.h"
+#include "Scorer.h"
 
 typedef std::vector<std::string>            PARAM_VEC;
 typedef std::map<std::string, PARAM_VEC >   PARAM_MAP;

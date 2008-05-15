@@ -30,9 +30,6 @@ clean:
 %.o : %.cpp
 	$(GCC) -c $(CFLAGS) $< -o $@
 
-feature_extractor: $(OBJS) feature_extractor.cpp
-	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
-
 extractor: $(OBJS) extractor.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 

@@ -66,19 +66,11 @@ int main (int argc, char * argv[]) {
 	timer.start("Starting...");
     Scorer* scorer = 0;
     const vector<string>& scorerType = parameter->GetParam("Score");
-    if (scorerType.size() > 0) {
-        if (scorerType[0] == "PER") {
-            scorer = new PerScorer();
-        } else if (scorerType[0] == "BLEU") {
-            scorer = new BleuScorer();
-        } else {
-            TRACE_ERR("Unknown scorer type " << scorerType[0] << endl);
-            return EXIT_FAILURE;
-        }
-    }
-    if (!scorer) {
-        //default
-        scorer = new BleuScorer();
+    ScorerFactory sfactory;
+    if (scorerType.size() ==  0) {
+        scorer = sfactory.getScorer(sfactory.getTypes()[0]);
+    } else {
+        scorer = sfactory.getScorer(scorerType[0]);
     }
 
     // Check consistency of reference
