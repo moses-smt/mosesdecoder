@@ -21,6 +21,7 @@ class Point:public vector<lambda>{
   static map<unsigned,lambda> fixedweights;
   /**total size of the parameter space; we have pdim=FixedWeight.size()+optinidices.size()*/
   static unsigned pdim;
+  static unsigned ncall;
  public:
   static unsigned getdim(){return dim;}
   static unsigned getpdim(){return pdim;}
