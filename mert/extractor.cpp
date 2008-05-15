@@ -44,7 +44,7 @@ int main (int argc, char * argv[]) {
 
 	bool binmode=false;
         if(parameter->GetParam("OutputBinaryMode").size()) 
-		if (Scan<bool>(parameter->GetParam("recover-input-path")[0])){
+		if (Scan<bool>(parameter->GetParam("OutputBinaryMode")[0])){
 			binmode = true;
 			TRACE_ERR("binary output mode is not yet implemented" << std::endl);
 			binmode = false;
