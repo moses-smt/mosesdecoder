@@ -4,7 +4,8 @@ FeatureStats.o FeatureArray.o FeatureData.o \
 Data.o \
 BleuScorer.o \
 Point.o \
-Optimizer.o
+Optimizer.o \
+PerScorer.o
 
 ifndef DEBUG
 CFLAGS=-O3 -DTRACE_ENABLE

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iterator>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -24,7 +25,7 @@ using namespace std;
  **/
 class PerScorer: public Scorer {
 	public:
-		PerScorer() : Scorer("PER"), _preserveCase(false) {}
+		PerScorer() : Scorer("PER") {}
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
 		virtual void prepareStats(int sid, const string& text, ScoreStats& entry);
 
@@ -32,20 +33,15 @@ class PerScorer: public Scorer {
             scores_t& scores);
 		
 	private:
+        float per(const vector<int>& comps) const;
+        
 		//no copy
 		PerScorer(const PerScorer&);
 		PerScorer& operator=(const PerScorer&);
 				
-		typedef map<string,int> encodings_t;
-		typedef map<string,int>::iterator encodings_it;
-		void encode(const string& line, vector<int>& encoded);
-
- 
-		bool _preserveCase;
-		
 		// data extracted from reference files
-		vector<vector<size_t> > _reflengths;
-		encodings_t _encodings;
+		vector<size_t> _reflengths;
+        vector<multiset<int> > _reftokens;
 };
 
 
