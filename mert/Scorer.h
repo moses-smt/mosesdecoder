@@ -260,7 +260,7 @@ class ScorerFactory {
             return types;
         }
 
-        Scorer* getScorer(string type) {
+        Scorer* getScorer(const string& type) {
             if (type == "BLEU") {
                 return new BleuScorer();
             } else if (type == "PER") {

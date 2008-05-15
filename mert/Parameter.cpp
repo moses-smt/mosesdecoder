@@ -20,7 +20,10 @@ Parameter::Parameter()
 	AddParam("OutputScoreStatistics", "e", "file for output score statistics");
 	AddParam("OutputBinaryMode", "f", "Binary mode for output files");
 	AddParam("Reference", "g", "Reference");
-	AddParam("Score", "s", "Score type (BLEU|PER)");
+    vector<string> stypes = ScorerFactory().getTypes();
+    stringstream stypes_options;
+    copy(stypes.begin(),stypes.end(),ostream_iterator<string>(stypes_options,"|"));
+	AddParam("Score", "s", "Score type (" + stypes_options.str() + ")");
 	AddParam("help", "h", "Print this help");
 };
 
