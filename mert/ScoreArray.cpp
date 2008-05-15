@@ -19,21 +19,39 @@ void ScoreArray::savetxt(std::ofstream& outFile)
 {
         ScoreStats entry;
 
-	outFile << SCORES_BEGIN << " " << idx << " " << array_.size() << std::endl;
+	outFile << SCORES_TXT_BEGIN << " " << idx << " " << array_.size() << std::endl;
 	for (vector<ScoreStats>::iterator i = array_.begin(); i !=array_.end(); i++)
 		(*i).savetxt(outFile);
-	outFile << SCORES_END << std::endl;
+	outFile << SCORES_TXT_END << std::endl;
 }
 
-void ScoreArray::savetxt(const std::string &file)
+void ScoreArray::savebin(std::ofstream& outFile)
 {
-	TRACE_ERR("saving the array into " << file << std::endl);  
+        TRACE_ERR("binary saving is not yet implemented!" << std::endl);  
 
-	std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
+/*
+NOT YET IMPLEMENTED
+*/
+        outFile << SCORES_BIN_BEGIN << " " << idx << " " << array_.size() << std::endl;
+        outFile << SCORES_BIN_END << std::endl;
 
-        ScoreStats entry;
+}
 
-	savetxt(outFile);
+
+void ScoreArray::save(std::ofstream& inFile, bool bin)
+{
+        (bin)?savebin(inFile):savetxt(inFile);
+}
+
+void ScoreArray::save(const std::string &file, bool bin)
+{
+        TRACE_ERR("saving the array into " << file << std::endl);  
+
+        std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
+
+        save(outFile);
+
+        outFile.close();
 }
 
 void ScoreArray::loadtxt(ifstream& inFile)
@@ -76,20 +94,33 @@ void ScoreArray::loadtxt(ifstream& inFile)
 	std::getline(inFile, stringBuf);
 	if (!stringBuf.empty()){         
 //		TRACE_ERR("Reading: " << stringBuf << std::endl); 
-                if ((loc = stringBuf.find(SCORES_END)) != 0){
+                if ((loc = stringBuf.find(SCORES_TXT_END)) != 0){
 			TRACE_ERR("ERROR: ScoreArray::loadtxt(): Wrong footer");
 			return;
 		}
 	}
 }
 
-void ScoreArray::loadtxt(const std::string &file)
+void ScoreArray::loadbin(ifstream& inFile)
+{
+        TRACE_ERR("binary saving is not yet implemented!" << std::endl);  
+
+/*
+NOT YET IMPLEMENTED
+*/
+}
+
+void ScoreArray::load(ifstream& inFile, bool bin)
+{
+        (bin)?loadbin(inFile):loadtxt(inFile);
+}
+
+void ScoreArray::load(const std::string &file , bool bin)
 {
 	TRACE_ERR("loading data from " << file << std::endl);  
 
 	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
 
-	loadtxt(inFile);
+	load(inFile, bin);
 	inFile.close();
-
 }

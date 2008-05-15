@@ -1,6 +1,7 @@
 OBJS= Util.o Timer.o Parameter.o \
 ScoreStats.o ScoreArray.o ScoreData.o \
 FeatureStats.o FeatureArray.o FeatureData.o \
+Data.o \
 BleuScorer.o \
 Point.o
 
@@ -9,8 +10,10 @@ GCC=g++
 LDFLAGS=
 LDLIBS=-lm 
 
-all: main \
+all: \
+main \
 feature_extractor \
+extractor \
 test_scorer
 
 clean: 
@@ -22,8 +25,11 @@ clean:
 feature_extractor: $(OBJS) feature_extractor.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 
-main: $(OBJS) main.cpp
+extractor: $(OBJS) extractor.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
+
+#main: $(OBJS) main.cpp
+#	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 
 test_scorer: $(OBJS) test_scorer.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
