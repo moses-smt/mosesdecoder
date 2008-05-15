@@ -10,6 +10,8 @@ using namespace std;
 static const float MINFLOAT=numeric_limits<float>::min();
 static const float MAXFLOAT=numeric_limits<float>::max();
 
+
+
 void Optimizer::SetScorer(Scorer *S){
   if(scorer)
     delete scorer;
@@ -22,15 +24,49 @@ void Optimizer::SetFData(FeatureData *F){
   FData=F;
 };
 
+Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<lambda> start):scorer(NULL),FData(NULL){
+  //warning: the init vector is a full set of parameters, of dimension pdim!
+  Point::pdim=Pd;
+  assert(start.size()==Pd);
+  Point::dim=i2O.size();
+  Point::optindices=i2O;
+  if(Point::pdim<Point::dim){
+    for(int i=0;i<Point::pdim;i++){
+      int j;
+      for(j=0;j<Point::dim;j++)
+	if(i==i2O[j])
+	  break;
+      if(j==Point::dim)//the index i wasnt found on optindices, it is a fixed index, we use the valu of hte start vector
+	Point::fixedweights[i]=start[i];
+      else
+	init[j]=start[i];//the starting point of the algorithm
+    }
+  }else{
+    init=start;
+  }
+  assert(init.GetAllWeights()==start);
+};
+
+Optimizer::~Optimizer(){
+  delete scorer;
+  delete FData;
+}
+
+statscore Optimizer::GetStatScore(const Point& param)const{
+  vector<unsigned> bests;
+  Get1bests(param,bests);
+  return GetStatScore(bests);
+};
+
+/**compute the intersection of 2 lines*/
 float intersect (float m1, float b1,float m2,float b2){
   if(m1==m2)
     return MAXFLOAT;//parrallel lines
   return((b2-b1)/(m1-m2));
 }
 
-statscore Optimizer::LineOptimize(const Point& origin,Point direction,Point& bestpoint){
+statscore Optimizer::LineOptimize(const Point& origin,const Point& direction,Point& bestpoint)const{
 
-  direction.normalize();//we pass by value so changing is ok
   // we are looking for the best Point on the line y=Origin+x*direction
   float min_int=0.00001;
   typedef pair<float,vector<unsigned> > threshold;  
@@ -167,8 +203,28 @@ statscore Optimizer::LineOptimize(const Point& origin,Point direction,Point& bes
     return bestscore;  
 };
 
+void  Optimizer::Get1bests(const Point& P,vector<unsigned>& bests)const{
+  assert(FData);
+  bests.clear();
+  bests.resize(size());
+  
+  for(unsigned i=0;i<size();i++){
+    float bestfs=MINFLOAT;
+    unsigned idx=0;
+    unsigned j;
+    for(j=0;j<FData->get(i).size();j++){
+      float curfs=P*FData->get(i,j);
+      if(curfs>bestfs){
+	bestfs=curfs;
+	idx=j;
+      }
+    }
+    bests[i]=idx;
+  }
+  
+}
 
-Point Optimizer::Run(const Point& init){
+Point Optimizer::Run()const{
   if(!FData){
     cerr<<"error trying to optimize without Feature loaded"<<endl;
     exit(2);
@@ -177,18 +233,17 @@ Point Optimizer::Run(const Point& init){
     cerr<<"error trying to optimize without a Scorer loaded"<<endl;
     exit(2);
   }
-  return TrueRun(init);
+  return TrueRun();
 }
-Point SimpleOptimizer::TrueRun(const Point& init){
-  assert(dimension==init.size());
+Point SimpleOptimizer::TrueRun()const{
   Point cur=init;
-  statscore prevscore=FLT_MAX;
-  statscore bestscore=FLT_MAX;
+  statscore prevscore=MAXFLOAT;
+  statscore bestscore=MAXFLOAT;
   do{
-    Point  best(dimension);
-    Point  linebest(dimension);
-    for(int d=0;d<dimension;d++){
-      Point direction(dimension);
+    Point  best;
+    Point  linebest;
+    for(int d=0;d<Point::getdim();d++){
+      Point direction;
       direction[d]=1.0;
       statscore curscore=LineOptimize(cur,direction,linebest);//find the minimum on the line
       if(curscore>bestscore){
