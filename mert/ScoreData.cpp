@@ -13,7 +13,7 @@
 
 
 ScoreData::ScoreData(Scorer& ptr):
-bufLen_(0), theScorer(&ptr)
+theScorer(&ptr)
 {
 	score_type = theScorer->getName();
 	TRACE_ERR("score_type:" << score_type << std::endl);
@@ -90,7 +90,7 @@ void ScoreData::loadnbest(const std::string &file)
 	while (!inFile.eof()){
 
 	        std::string substring, subsubstring, stringBuf;
-	        std::string theSentence, theStatistics;
+	        std::string theSentence;
         	std::string::size_type loc;
 
 		std::getline(inFile, stringBuf);
@@ -106,13 +106,7 @@ void ScoreData::loadnbest(const std::string &file)
 
 		entry.clear();
 
-/* HERE IS THE SECTION TO COMPUTE STATISTICS FOR ERROR MEASURE
- * theSentence contains the translation 
- * theStatistics will contain the statistics (as a string)
- * coming from the actual Scorer
- */
 		theScorer->prepareStats(sentence_index, theSentence,entry);
-		entry.set(theStatistics);
 
 		add(entry,sentence_index);
 	}
@@ -125,7 +119,6 @@ void ScoreData::loadnbest(const std::string &file)
 void ScoreData::add(ScoreStats e, int sent_idx){
 	if (exists(sent_idx)){
 		array_.at(sent_idx).add(e);
-		ScoreArray a=get(sent_idx);;
 	}
 	else{
 		ScoreArray a;

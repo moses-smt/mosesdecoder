@@ -28,8 +28,6 @@ protected:
 	vector<ScoreStatsType> array_;
 	
 private:
-	char databuf_[BUFSIZ];
-	size_t bufLen_;
 	
 public:
 	ScoreStats();
@@ -48,7 +46,6 @@ public:
 
 	inline size_t size(){ return array_.size(); }
 	
-	inline size_t memsize(){ return bufLen_; }
 
 	void savetxt(const std::string &file);
 	void savetxt(ofstream& outFile);
@@ -62,19 +59,6 @@ public:
 		for (vector<ScoreStatsType>::iterator i = array_.begin(); i != array_.end(); i++)
 			*i = 0;
 	}
-		
-	/*
-	 * Marshalls this classes data members into a single
-	 * contiguous memory location for the purpose of storing
-	 * the data in a database.
-	 */
-	char *getBuffer();	
-	
-	void setBuffer(char* buffer, size_t sz);
-	
-	int pack(char *buffer, size_t &bufferlen);
-
-	int unpack(char *buffer, size_t &bufferlen);
 
 };
 

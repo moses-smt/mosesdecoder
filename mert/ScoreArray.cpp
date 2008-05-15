@@ -11,8 +11,7 @@
 #include "Util.h"
 
 
-ScoreArray::ScoreArray():
-bufLen_(0),idx(0)
+ScoreArray::ScoreArray(): idx(0)
 {};
 
 void ScoreArray::savetxt(std::ofstream& outFile)

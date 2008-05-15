@@ -10,17 +10,14 @@
 #include "FeatureStats.h"
 
 
-FeatureStats::FeatureStats():
-bufLen_(0)
+FeatureStats::FeatureStats()
 {};
 
  FeatureStats::FeatureStats(const FeatureStats &stats):
-array_(stats.array_),
-bufLen_(0)
+array_(stats.array_)
 {};
 
-FeatureStats::FeatureStats(const size_t size):
-bufLen_(0)
+FeatureStats::FeatureStats(const size_t size)
 {
 	for(int i = 0; i < size; i++)
 		array_.push_back(0);
@@ -89,56 +86,8 @@ void FeatureStats::savetxt(std::ofstream& outFile)
 FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
 {
 	array_ = stats.array_;
-	bufLen_ = 0;
 		
 	return *this;		
-}
-
-void FeatureStats::setBuffer(char* buffer, size_t sz)
-{
-	memcpy(databuf_, (char *)buffer, sz);
-		
-	// Now pack the data into a single contiguous memory location for storage.
-	bufLen_ = 0;
-	
-	unpackVector(databuf_, bufLen_, array_);
-}
-
-/*
- * Marshalls this classes data members into a single
- * contiguous memory location for the purpose of storing
- * the data in a database.
- */
-char *FeatureStats::getBuffer()
-{
-	// Zero out the buffer
-	memset(databuf_, 0, BUFSIZ);
-		
-	// Now pack the data into a single contiguous memory location for storage.
-	bufLen_ = 0;
-
-	packVector(databuf_, bufLen_, array_);
-	return databuf_;
-}
-
-int FeatureStats::pack(char *buffer, size_t &bufferlen)
-{
-	getBuffer();
-	size_t size = packVariable(buffer, bufferlen, bufLen_);
-	memcpy(buffer + bufferlen, databuf_, bufLen_);
-	bufferlen += bufLen_;
-
-	return size + bufLen_;
-}
-
-int FeatureStats::unpack(char *buffer, size_t &bufferlen)
-{
-	size_t size = unpackVariable(buffer, bufferlen, bufLen_);
-	memcpy(databuf_, buffer + bufferlen, bufLen_);
-	bufferlen += bufLen_;
-	setBuffer(databuf_, bufLen_);
-	
-	return size + bufLen_;
 }
 
 
