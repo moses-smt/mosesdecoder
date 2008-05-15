@@ -17,7 +17,7 @@ theScorer(&ptr)
 {
 	score_type = theScorer->getName();
 	TRACE_ERR("score_type:" << score_type << std::endl);
-	
+	theScorer->setScoreData(this);//this is not dangerous: we dont use the this pointer in SetScoreData 	
 };
 
 void ScoreData::save(std::ofstream& outFile, bool bin)
