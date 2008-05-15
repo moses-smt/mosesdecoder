@@ -21,9 +21,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <queue>
 #include <set>
+#include <vector>
+
 #include "Hypothesis.h"
+#include "HypothesisStack.h"
 #include "SquareMatrix.h"
 #include "TranslationOption.h"
 #include "TypeDef.h"
@@ -34,14 +36,92 @@ class BackwardsEdge;
 class Hypothesis;
 class HypothesisScoreOrderer;
 class HypothesisStack;
-
+class HypothesisQueueItem;
+class QueueItemOrderer;
 
 typedef std::set< Hypothesis*, HypothesisScoreOrderer > OrderedHypothesisSet;
 typedef std::set< BackwardsEdge* > BackwardsEdgeSet;
-typedef std::pair< Hypothesis*, std::pair< int, int > > SquarePosition;
+typedef std::priority_queue< HypothesisQueueItem*, std::vector< HypothesisQueueItem* >, QueueItemOrderer> HypothesisQueue;
 
+////////////////////////////////////////////////////////////////////////////////
+// Hypothesis Priority Queue Code
+////////////////////////////////////////////////////////////////////////////////
 
-/** Order relation for hypothesis scores.  Taken from Eva Hasler's branch. */
+class HypothesisQueueItem
+{
+	private:
+		int m_hypothesis_pos, m_translation_pos;
+		Hypothesis *m_hypothesis;
+		BackwardsEdge *m_edge;
+
+		HypothesisQueueItem();
+
+	public:
+		HypothesisQueueItem(int hypothesis_pos
+												, int translation_pos
+												, Hypothesis *hypothesis
+												, BackwardsEdge *edge)
+		  : m_hypothesis_pos(hypothesis_pos)
+		  , m_translation_pos(translation_pos)
+		  , m_hypothesis(hypothesis)
+		  , m_edge(edge)
+		{
+		}
+		~HypothesisQueueItem()
+		{
+		}
+
+		int GetHypothesisPos()
+		{
+			return m_hypothesis_pos;
+		}
+		
+		int GetTranslationPos()
+		{
+			return m_translation_pos;
+		}
+
+		Hypothesis *GetHypothesis()
+		{
+			return m_hypothesis;
+		}
+
+		BackwardsEdge *GetBackwardsEdge()
+		{
+			return m_edge;
+		}
+};
+
+// Allows to compare two HypothesisQueueItem objects by the corresponding scores.
+class QueueItemOrderer
+{
+	public:
+		bool operator()(HypothesisQueueItem* itemA, HypothesisQueueItem* itemB) const
+		{
+			float scoreA = itemA->GetHypothesis()->GetTotalScore();
+			float scoreB = itemB->GetHypothesis()->GetTotalScore();
+
+			if (scoreA > scoreB)
+			{
+				return true;
+			}
+			else if (scoreA < scoreB)
+			{
+				return false;
+			}
+			else
+			{
+				return itemA < itemB;
+			}
+		}
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// Hypothesis Orderer Code
+////////////////////////////////////////////////////////////////////////////////
+// Allows to compare two Hypothesis objects by the corresponding scores.
+////////////////////////////////////////////////////////////////////////////////
+
 class HypothesisScoreOrderer
 {
 	public:
@@ -63,94 +143,94 @@ class HypothesisScoreOrderer
 				return hypoA < hypoB;
 			}
 		}
+
 };
 
-// Allows to compare two square positions (coordinates) by the corresponding scores.
-class SquarePositionOrderer
-{
-	public:
-		bool operator()(const SquarePosition* cellA, const SquarePosition* cellB) const
-		{
-			float scoreA = cellA->first->GetTotalScore();
-			float scoreB = cellB->first->GetTotalScore();
-			return (scoreA > scoreB);
-		}
-};
+////////////////////////////////////////////////////////////////////////////////
+// Backwards Edge Code
+////////////////////////////////////////////////////////////////////////////////
+// Encodes an edge pointing to a BitmapContainer.
+////////////////////////////////////////////////////////////////////////////////
 
-// Encodes an edge pointing to a BitmapContainer and an associated priority queue
-// that contains the square scores and the corresponding square coordinates.
 class BackwardsEdge
 {
 	private:
-		typedef std::priority_queue< SquarePosition*, std::vector< SquarePosition* >, SquarePositionOrderer> _PQType;
-		const BitmapContainer &m_prevBitmapContainer;
-		_PQType m_queue;
-		static SquarePosition *m_invalid;
-		std::vector< bool > m_seenPosition;
+		friend class BitmapContainer;
 		bool m_initialized;
-		const SquareMatrix &m_futurescore;
-		size_t m_kbest;
-		size_t m_xmax, m_ymax;
 
+		const BitmapContainer &m_prevBitmapContainer;
+		BitmapContainer &m_parent;
 		const TranslationOptionList &m_kbest_translations;
-		std::vector< Hypothesis* > m_kbest_hypotheses;
+		const SquareMatrix &m_futurescore;
+		size_t m_kbest, m_hypothesis_maxpos, m_translations_maxpos;
 		
+		std::vector< Hypothesis* > m_kbest_hypotheses;
+		std::set< int > m_seenPosition;
+
+		// We don't want to instantiate "empty" objects.
 		BackwardsEdge();
 
 		Hypothesis *CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt);
+		bool SeenPosition(int x, int y);
+
+	protected:
 		void Initialize();
 
 	public:
-		const SquarePosition InvalidSquarePosition();
-
 		BackwardsEdge(const BitmapContainer &prevBitmapContainer
-					  , const TranslationOptionList &translations
-					  , const SquareMatrix &futureScore
-					  , const size_t KBestCubePruning);
+									, BitmapContainer &parent
+									, const TranslationOptionList &translations
+									, const SquareMatrix &futureScore
+									, const size_t KBestCubePruning);
 		~BackwardsEdge();
 
 		bool GetInitialized();
 		const BitmapContainer &GetBitmapContainer() const;
 		int GetDistortionPenalty();
-		bool Empty();
-		size_t Size();
 		void PushSuccessors(int x, int y);
-		void Enqueue(int x, int y, Hypothesis *hypothesis);
-		SquarePosition Dequeue(bool keepValue=false);
-		bool SeenPosition(int x, int y);
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// Bitmap Container Code
+////////////////////////////////////////////////////////////////////////////////
 // A BitmapContainer encodes an ordered set of hypotheses and a set of edges
-// pointing to the "generating" BitmapContainers.  This data logically belongs
-// to the bitmap coverage which is stored in m_bitmap.
+// pointing to the "generating" BitmapContainers.  It also stores a priority
+// queue that contains expanded hypotheses from the connected edges.
+////////////////////////////////////////////////////////////////////////////////
+
 class BitmapContainer
 {
 	private:
 		WordsBitmap m_bitmap;
-		OrderedHypothesisSet m_hypotheses;
-		BackwardsEdgeSet m_edges;
 		HypothesisStack &m_stack;
 		size_t m_kbest;
+		OrderedHypothesisSet m_hypotheses;
+		BackwardsEdgeSet m_edges;
+		HypothesisQueue m_queue;
 
 		// We always require a corresponding bitmap to be supplied.
 		BitmapContainer();
-		
 
 	public:
 		BitmapContainer(const WordsBitmap &bitmap
-						, HypothesisStack &stack
-						, const size_t KBestCubePruning);
+										, HypothesisStack &stack
+										, const size_t KBestCubePruning);
 		
 		// The destructor will also delete all the edges that are
 		// connected to this BitmapContainer.
 		~BitmapContainer();
 		
+		void Enqueue(int hypothesis_pos, int translation_pos, Hypothesis *hypothesis, BackwardsEdge *edge);
+		HypothesisQueueItem *Dequeue(bool keepValue=false);
+		HypothesisQueueItem *Top();
+		size_t Size();
+		bool Empty();
+
 		const WordsBitmap &GetWordsBitmap();
 		const OrderedHypothesisSet &GetHypotheses() const;
 		const BackwardsEdgeSet &GetBackwardsEdges();
 		
 		void FindKBestHypotheses();
-
 		void AddHypothesis(Hypothesis *hypothesis);
 		void AddBackwardsEdge(BackwardsEdge *edge);
 };

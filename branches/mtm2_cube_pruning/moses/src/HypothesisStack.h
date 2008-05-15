@@ -22,9 +22,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <limits>
+#include <map>
 #include <set>
+
 #include "Hypothesis.h"
 #include "BitmapContainer.h"
+
+class BitmapContainer;
 
 typedef std::map<WordsBitmap, BitmapContainer*> _BMType;
 
@@ -69,7 +73,7 @@ public:
 
 protected:
 	_BMType m_bitmapAccessor;
-	
+
 	float m_bestScore; /**< score of the best hypothesis in collection */
 	float m_worstScore; /**< score of the worse hypthesis in collection */
 	float m_beamWidth; /**< minimum score due to threashold pruning */
@@ -156,13 +160,16 @@ public:
 	void AddHypothesesToBitmapContainers();
 	
 	const _BMType& GetBitmapAccessor() const
-	{ return m_bitmapAccessor; }
+	{
+		return m_bitmapAccessor;
+	}
+
 	void SetBitmapAccessor(const WordsBitmap &newBitmap
-												, HypothesisStack &stack
-												, const WordsRange &range
-												, const BitmapContainer &bitmapContainer
-												, const SquareMatrix &futureScore
-												, const TranslationOptionList &transOptList);
+						   , HypothesisStack &stack
+						   , const WordsRange &range
+						   , const BitmapContainer &bitmapContainer
+						   , const SquareMatrix &futureScore
+						   , const TranslationOptionList &transOptList);
 
 	/** pruning, if too large.
 	 * Pruning algorithm: find a threshold and delete all hypothesis below it.

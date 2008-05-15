@@ -22,22 +22,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <limits>
 #include <utility>
+
 #include "BitmapContainer.h"
 #include "HypothesisStack.h"
 
-SquarePosition *BackwardsEdge::m_invalid = NULL;
+////////////////////////////////////////////////////////////////////////////////
+// BackwardsEdge Code
+////////////////////////////////////////////////////////////////////////////////
 
 BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
+							 , BitmapContainer &parent
                              , const TranslationOptionList &translations
 							 , const SquareMatrix &futureScore
 							 , const size_t KBestCubePruning)
-  : m_prevBitmapContainer(prevBitmapContainer)
-	, m_queue()
-	, m_seenPosition(KBestCubePruning * KBestCubePruning, false)
-	, m_initialized(false)
-	, m_futurescore(futureScore)
-	, m_kbest(KBestCubePruning)
-	, m_kbest_translations(translations)
+  : m_initialized(false)
+  , m_prevBitmapContainer(prevBitmapContainer)
+  , m_parent(parent)
+  , m_kbest_translations(translations)
+  , m_futurescore(futureScore)
+  , m_kbest(KBestCubePruning)
+  , m_seenPosition()
 {
 	// Copy hypotheses from ordered set to vector for faster access.
 	const OrderedHypothesisSet &hypotheses = m_prevBitmapContainer.GetHypotheses();
@@ -45,116 +49,70 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 	// If either dimension is empty, we haven't got anything to do.
 	if(translations.size() == 0 || hypotheses.size() == 0) {
 		VERBOSE(3, "Empty cube on BackwardsEdge" << std::endl);
-		m_xmax = 0;
-		m_ymax = 0;
+		m_hypothesis_maxpos = 0;
+		m_translations_maxpos = 0;
 		return;
 	}
 	
-	m_ymax = std::min(m_kbest, translations.size());
-
+	m_hypothesis_maxpos = std::min(m_kbest, hypotheses.size());
+	m_translations_maxpos = std::min(m_kbest, translations.size());
 	m_kbest_hypotheses.resize(hypotheses.size());
 
-	// Fetch the things we need for distortion cost computation
+	// Fetch the things we need for distortion cost computation.
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 	const InputType *itype = StaticData::Instance().GetInput();
 	WordsRange transOptRange = translations[0]->GetSourceWordsRange();
 
-	m_xmax = 0;
+	m_hypothesis_maxpos = 0;
 	OrderedHypothesisSet::const_iterator hypoIter = hypotheses.begin();
-	for (; m_xmax < m_kbest && hypoIter != hypotheses.end(); ++hypoIter) 
+	for (; m_hypothesis_maxpos < m_kbest && hypoIter != hypotheses.end(); ++hypoIter)
 	{
 		// If the combination of this hypothesis and our translation
 		// options violates the distortion limit, discard the hypothesis,
-		// otherwise store it and increment m_xmax
-		
+		// otherwise store it and increment m_hypothesis_maxpos.		
 		Hypothesis *current = *hypoIter;
-		if (maxDistortion == -1) 
-			m_kbest_hypotheses[m_xmax++] = current;
-		else {
-		  int distortionDistance = itype->ComputeDistortionDistance(current->GetCurrSourceWordsRange(),
-														  transOptRange);
+
+		if (maxDistortion == -1)
+		{
+			m_kbest_hypotheses[m_hypothesis_maxpos++] = current;
+		}
+		else
+		{
+		  int distortionDistance = itype->ComputeDistortionDistance(current->GetCurrSourceWordsRange()
+																																, transOptRange);
 		  if (distortionDistance <= maxDistortion)
-			m_kbest_hypotheses[m_xmax++] = current;
+			{
+				m_kbest_hypotheses[m_hypothesis_maxpos++] = current;
+			}
 		}
 	}
 	
 	// Maybe the list has shrunk.
-	m_kbest_hypotheses.resize(m_xmax);
-}
-
-const SquarePosition
-BackwardsEdge::InvalidSquarePosition()
-{
-	if (BackwardsEdge::m_invalid == NULL) {
-		BackwardsEdge::m_invalid = new SquarePosition(NULL, make_pair(-1, -1));
-	}
-
-	return *BackwardsEdge::m_invalid;
+	m_kbest_hypotheses.resize(m_hypothesis_maxpos);
 }
 
 BackwardsEdge::~BackwardsEdge()
 {
-	// As we have created the square position objects we clean up now.
-	for (size_t q_iter = 0; q_iter < m_queue.size(); q_iter++)
-	{
-		SquarePosition *ret = m_queue.top();
-		FREEHYPO(ret->first);
-		delete ret;
-		m_queue.pop();
-	}
+	m_seenPosition.clear();
+	m_kbest_hypotheses.clear();
 }
 
-const BitmapContainer&
-BackwardsEdge::GetBitmapContainer() const
-{
-	return m_prevBitmapContainer;
-}
-
-bool
-BackwardsEdge::GetInitialized()
-{
-	return m_initialized;
-}
 
 void
 BackwardsEdge::Initialize()
 {
-	if(m_xmax == 0 || m_ymax == 0)
+	if(m_hypothesis_maxpos == 0 || m_translations_maxpos == 0)
 	{
 		m_initialized = true;
 		return;
 	}
-	
+
 	Hypothesis *expanded = CreateHypothesis(*m_kbest_hypotheses[0], *m_kbest_translations[0]);
-	Enqueue(0, 0, expanded);
-	m_seenPosition[0] = true;
+	m_parent.Enqueue(0, 0, expanded, this);
+	m_seenPosition.insert(0);
 	m_initialized = true;
 }
 
-void
-BackwardsEdge::PushSuccessors(int x, int y)
-{
-	Hypothesis *newHypo;
-	
-	if(y + 1 < m_ymax && !SeenPosition(x, y + 1)) {
-		newHypo = CreateHypothesis(*m_kbest_hypotheses[x], *m_kbest_translations[y + 1]);
-		if(newHypo != NULL)
-			Enqueue(x, y + 1, newHypo);
-	}
-	if(x + 1 < m_xmax && !SeenPosition(x + 1, y)) {
-		newHypo = CreateHypothesis(*m_kbest_hypotheses[x + 1], *m_kbest_translations[y]);
-		if(newHypo != NULL)
-			Enqueue(x + 1, y, newHypo);
-	}	
-}
-
-/**
-* Create one hypothesis with a translation option.
- * this involves initial creation and scoring
- * \param hypothesis hypothesis to be expanded upon
- * \param transOpt translation option (phrase translation) 
- *        that is applied to create the new hypothesis
- */
 Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
 	// create hypothesis and calculate all its scores
@@ -178,76 +136,138 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 	return newHypo;
 }
 
-void
-BackwardsEdge::Enqueue(int x, int y, Hypothesis *hypothesis)
-{
-	// We create a new square position object with the given values here.
-	SquarePosition *chunk = new SquarePosition();
-	chunk->first = hypothesis;
-	chunk->second = make_pair(x, y);
-
-	// And put it into the priority queue.
-	m_queue.push(chunk);
-	m_seenPosition[m_kbest * x + y] = true;
-}
-
-bool
-BackwardsEdge::Empty()
-{
-	return m_queue.empty();
-}
-
-size_t
-BackwardsEdge::Size()
-{
-	return m_queue.size();
-}
-
-SquarePosition
-BackwardsEdge::Dequeue(bool keepValue)
-{
-	if (!m_initialized) {
-		Initialize();
-	}
-
-	// Return the topmost square position object from the priority queue.
-	// If keepValue is false (= default), this will remove the topmost object afterwards.
-	if (!m_queue.empty()) {
-		SquarePosition ret = *(m_queue.top());
-
-		if (!keepValue) {
-			m_queue.pop();
-		}
-
-		return ret;
-	}
-	
-	return InvalidSquarePosition();
-}
-
 bool
 BackwardsEdge::SeenPosition(int x, int y)
 {
-	return m_seenPosition[m_kbest * x + y];
+	std::set< int >::iterator iter = m_seenPosition.find(m_kbest * x + y);
+	return (iter != m_seenPosition.end());
 }
 
+
+bool
+BackwardsEdge::GetInitialized()
+{
+	return m_initialized;
+}
+
+const BitmapContainer&
+BackwardsEdge::GetBitmapContainer() const
+{
+	return m_prevBitmapContainer;
+}
+
+void
+BackwardsEdge::PushSuccessors(int x, int y)
+{
+	Hypothesis *newHypo;
+	
+	if(y + 1 < m_translations_maxpos && !SeenPosition(x, y + 1)) {
+		newHypo = CreateHypothesis(*m_kbest_hypotheses[x], *m_kbest_translations[y + 1]);
+
+		if(newHypo != NULL)
+		{
+			m_parent.Enqueue(x, y + 1, newHypo, (BackwardsEdge*)this);
+			m_seenPosition.insert(m_kbest * x + y);
+		}
+	}
+
+	if(x + 1 < m_hypothesis_maxpos && !SeenPosition(x + 1, y)) {
+		newHypo = CreateHypothesis(*m_kbest_hypotheses[x + 1], *m_kbest_translations[y]);
+
+		if(newHypo != NULL)
+		{
+			m_parent.Enqueue(x + 1, y, newHypo, (BackwardsEdge*)this);
+			m_seenPosition.insert(m_kbest * x + y);
+		}
+	}	
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// BitmapContainer Code
+////////////////////////////////////////////////////////////////////////////////
+
 BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
-								 , HypothesisStack &stack
-								 , const size_t KBestCubePruning)
-  : m_bitmap(bitmap)	
-	, m_stack(stack)
-	, m_kbest(KBestCubePruning)
+																 , HypothesisStack &stack
+																 , const size_t KBestCubePruning)
+  : m_bitmap(bitmap)
+  , m_stack(stack)
+  , m_kbest(KBestCubePruning)
 {
 	m_hypotheses = OrderedHypothesisSet();
 	m_edges = BackwardsEdgeSet();
+	m_queue = HypothesisQueue();
 }
 
 BitmapContainer::~BitmapContainer()
 {
+	// As we have created the square position objects we clean up now.
+	for (size_t i=0; i<m_queue.size(); i++)
+	{
+		HypothesisQueueItem *ret = m_queue.top();
+		FREEHYPO(ret->GetHypothesis());
+		delete ret;
+		m_queue.pop();
+	}
+
+	// Delete all edges.
 	RemoveAllInColl(m_edges);
+
 	m_hypotheses.clear();
+	m_edges.clear();
 }
-		
+
+
+void
+BitmapContainer::Enqueue(int hypothesis_pos
+												 , int translation_pos
+												 , Hypothesis *hypothesis
+												 , BackwardsEdge *edge)
+{
+	HypothesisQueueItem *item = new HypothesisQueueItem(hypothesis_pos
+																										  , translation_pos
+																										  , hypothesis
+																											, edge);
+	m_queue.push(item);
+}
+
+HypothesisQueueItem*
+BitmapContainer::Dequeue(bool keepValue)
+{
+	if (!m_queue.empty())
+	{
+		HypothesisQueueItem *item = m_queue.top();
+
+		if (!keepValue)
+		{
+			m_queue.pop();
+		}
+
+		return item;
+	}
+
+	return NULL;
+}
+
+HypothesisQueueItem*
+BitmapContainer::Top()
+{
+	return m_queue.top();
+}
+
+size_t
+BitmapContainer::Size()
+{
+	return m_queue.size();
+}
+
+bool
+BitmapContainer::Empty()
+{
+	return m_queue.empty();
+}
+
+
 const WordsBitmap&
 BitmapContainer::GetWordsBitmap()
 {
@@ -283,72 +303,35 @@ BitmapContainer::AddBackwardsEdge(BackwardsEdge *edge)
 void
 BitmapContainer::FindKBestHypotheses()
 {
-	// find k best translation options
-	// repeat k times:
-	// 1. iterate over all edges
-	// 2. take best hypothesis, expand it
-	// 3. put the two successors of the hypothesis on the queue
-	//    - add lm scoring to both
-	// IMPORTANT: we assume that all scores in the queue are LM-SCORED
-	size_t currBest = 0;
-	while (currBest < m_kbest)
+	BackwardsEdgeSet::iterator iter;
+	for (iter = m_edges.begin(); iter != m_edges.end(); ++iter)
 	{
-		if(m_edges.empty())
-			return;
-		
-		BackwardsEdgeSet::iterator edgeIter = m_edges.begin();
-		BackwardsEdge *bestEdge = NULL;
-		float bestScore = -std::numeric_limits<float>::infinity();
-		while (edgeIter != m_edges.end())
+		BackwardsEdge *edge = *iter;
+		edge->Initialize();
+	}
+
+	for (size_t i=0; i<m_kbest; i++)
+	{
+		if (m_queue.empty())
 		{
-			SquarePosition current = (*edgeIter)->Dequeue(true);
-			
-			// if the priority queue is exhausted, remove the edge from the set
-			// and proceed with the next edge
-			if(current == (*edgeIter)->InvalidSquarePosition()) {
-				BackwardsEdgeSet::iterator deleteIter = edgeIter++;
-				delete *deleteIter;
-				m_edges.erase(deleteIter);
-				continue;
-			}
-			
-			if(current.first->GetTotalScore() > bestScore) {
-				bestScore = current.first->GetTotalScore();
-				bestEdge = *edgeIter;
-			}
-
-			++edgeIter;
-		}
-		
-		// if all the queues were empty, return
-		if(bestEdge == NULL)
 			return;
-		
-		SquarePosition pos = bestEdge->Dequeue(false);
-		
-		Hypothesis *bestHypo = pos.first;
-		
-		/*
-		 // logging for the curious
-		 IFVERBOSE(3) {
-			 const StaticData &staticData = StaticData::Instance();
-			 bestHypo->PrintHypothesis(bestHypo
-									 , staticData.GetWeightDistortion()
-									 , staticData.GetWeightWordPenalty());
-		 }
-		*/
-		
-		// add to hypothesis stack
-		// size_t wordsTranslated = bestHypo->GetWordsBitmap().GetNumWordsCovered();	
-		bool added = m_stack.AddPrune(bestHypo);	
-		if (added)
-			++currBest;
+		}
 
-		// create new hypotheses for the two successors of the hypothesis just added
-		// and insert them into the priority queue
-		int x = pos.second.first;
-		int y = pos.second.second;
-		
-		bestEdge->PushSuccessors(x, y);
+		// Get the currently best hypothesis from the queue.
+		HypothesisQueueItem *item = Dequeue();
+
+		// If the priority queue is exhausted, we are done and exit.
+		if (item == NULL)
+		{
+			return;
+		}
+
+		// Add best hypothesis to hypothesis stack.
+		m_stack.AddPrune(item->GetHypothesis());	
+
+		// Create new hypotheses for the two successors of the hypothesis just added.
+		int hypothesis_pos = item->GetHypothesisPos();
+		int translation_pos = item->GetTranslationPos();
+		item->GetBackwardsEdge()->PushSuccessors(hypothesis_pos, translation_pos);
 	}
 }
