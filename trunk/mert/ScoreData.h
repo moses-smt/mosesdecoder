@@ -43,8 +43,8 @@ public:
 	
 	inline std::string name(){ return score_type; };
 
-	void add(ScoreArray e){ array_.push_back(e); }
-	void add(ScoreStats e, int sent_idx);
+	void add(const ScoreArray& e){ array_.push_back(e); }
+	void add(const ScoreStats& e, int sent_idx);
 	
 	inline size_t size(){ return array_.size(); }
 	

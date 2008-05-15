@@ -44,7 +44,7 @@ public:
 	inline void setIndex(size_t value){ idx=value; }
 
 	inline ScoreStats get(int i){ return array_.at(i); }
-	void add(ScoreStats e){ array_.push_back(e); }
+	void add(const ScoreStats& e){ array_.push_back(e); }
 
 	inline std::string name(){ return score_type; };
 	inline std::string name(std::string &sctype){ return score_type = sctype; };

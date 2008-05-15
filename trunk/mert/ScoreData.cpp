@@ -116,7 +116,7 @@ void ScoreData::loadnbest(const std::string &file)
 
 
 
-void ScoreData::add(ScoreStats e, int sent_idx){
+void ScoreData::add(const ScoreStats& e, int sent_idx){
 	if (exists(sent_idx)){
 		array_.at(sent_idx).add(e);
 	}
