@@ -50,7 +50,7 @@ BackwardsEdge::~BackwardsEdge()
 	for (size_t q_iter = 0; q_iter < m_queue.size(); q_iter++)
 	{
 		SquarePosition *ret = m_queue.top();
-		delete ret->first;
+		FREEHYPO(ret->first);
 		delete ret;
 		m_queue.pop();
 	}
@@ -222,6 +222,13 @@ void
 BitmapContainer::AddBackwardsEdge(BackwardsEdge *edge)
 {
 	m_edges.insert(edge);
+}
+
+void
+BitmapContainer::RemoveHypothesis(Hypothesis *hypothesis)
+{
+	assert(m_hypotheses.find(hypothesis) != m_hypotheses.end());
+	m_hypotheses.erase(hypothesis);
 }
 
 void

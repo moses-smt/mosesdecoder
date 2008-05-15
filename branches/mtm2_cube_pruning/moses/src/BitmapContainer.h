@@ -132,4 +132,5 @@ class BitmapContainer
 
 		void AddHypothesis(Hypothesis *hypothesis);
 		void AddBackwardsEdge(BackwardsEdge *edge);
+		void RemoveHypothesis(Hypothesis *hypothesis);
 };
