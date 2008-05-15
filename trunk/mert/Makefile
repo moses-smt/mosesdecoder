@@ -34,7 +34,7 @@ feature_extractor: $(OBJS) feature_extractor.cpp
 extractor: $(OBJS) extractor.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 
-main: $(OBJS) mert.cpp
+mert: $(OBJS) mert.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 
 test_scorer: $(OBJS) test_scorer.cpp

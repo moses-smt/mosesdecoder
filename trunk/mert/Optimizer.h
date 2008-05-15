@@ -14,12 +14,11 @@ typedef float featurescore;
 
 
 using namespace std;
-/**virtual class*/
+/**abstract virtual class*/
 class Optimizer{
  protected:
    Scorer * scorer; //no accessor for them only child can use them 
-   FeatureData * FData;//no accessor for them only child can use them
-   Point init; 
+   FeatureData * FData;//no accessor for them only child can use them 
  public:
   Optimizer(unsigned Pd,vector<unsigned> i2O,vector<lambda> start);
   void SetScorer(Scorer *S);
@@ -28,9 +27,9 @@ class Optimizer{
 
   unsigned size()const{return (FData?FData->size():0);}
   /**Generic wrapper around TrueRun to check a few things. Non virtual*/
-  Point Run()const;
+  statscore Run(Point&)const;
 /**main function that perform an optimization*/  
-  virtual  Point TrueRun()const=0;
+  virtual  statscore TrueRun(Point&)const=0;
   /**given a set of lambdas, get the nbest for each sentence*/
   void Get1bests(const Point& param,vector<unsigned>& bests)const;
   /**given a set of nbests, get the Statistical score*/
@@ -47,9 +46,11 @@ class Optimizer{
 class SimpleOptimizer: public Optimizer{
 private: float eps;
 public:
-  SimpleOptimizer(unsigned dim,vector<unsigned> i2O,vector<lambda> start,float _eps):Optimizer(dim,i2O,start),eps(_eps){};
-  virtual Point TrueRun()const;
+  SimpleOptimizer(unsigned dim,vector<unsigned> i2O,vector<lambda> start):Optimizer(dim,i2O,start),eps(0.001){};
+  virtual statscore TrueRun(Point&)const;
 };
+
+Optimizer *BuildOptimizer(unsigned dim,vector<unsigned>tooptimize,vector<lambda>start,string type);
 
 #endif
 
