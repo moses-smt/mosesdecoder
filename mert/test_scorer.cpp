@@ -3,6 +3,7 @@
 
 #include "ScoreData.h"
 #include "BleuScorer.h"
+#include "PerScorer.h"
 
 using namespace std;
 
@@ -35,4 +36,20 @@ int main(int argc, char** argv) {
     scorer->score(candidates,diffs,scores);
 
 	cout << "Bleus: " << scores[0] << " " << scores[1] <<  endl;
+
+    //try the per
+    scorer = new PerScorer();
+    ScoreData psd(*scorer);
+    scorer->setReferenceFiles(references);
+
+	psd.loadnbest("test_scorer_data/nbest.out");
+	//sd.savetxt();
+
+	scorer->setScoreData(&psd);
+	for (size_t i  = 0; i < psd.size(); ++i) {
+        psd.get(i,0).savetxt("/dev/stdout");
+	}
+
+    cout << "PER: " << scorer->score(candidates) << endl;
+ 
 }

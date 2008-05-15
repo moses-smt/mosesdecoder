@@ -64,10 +64,13 @@ void ScoreData::load(ifstream& inFile)
 
 void ScoreData::load(const std::string &file)
 {
-	TRACE_ERR("loading data from " << file << std::endl);  
+	TRACE_ERR("loading score data from " << file << std::endl);  
 
 	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
 
+    if (!inFile) {
+        throw runtime_error("Unable to open score file: " + file);
+    }
 	load(inFile);
 
 	inFile.close();

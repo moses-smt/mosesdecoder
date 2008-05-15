@@ -15,9 +15,9 @@
 Data::Data(Scorer& ptr):
 bufLen_(0), theScorer(&ptr)
 {
-        score_type = (*theScorer).getName();
-	featdata=new FeatureData;
-	scoredata=new ScoreData(*theScorer);
+    score_type = (*theScorer).getName();
+    featdata=new FeatureData;
+    scoredata=new ScoreData(*theScorer);
 };
 
 void Data::loadnbest(const std::string &file)
@@ -31,6 +31,9 @@ void Data::loadnbest(const std::string &file)
 
 	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
 
+    if (!inFile) {
+        throw runtime_error("Unable to open: " + file);
+    }
 
 	while (!inFile.eof()){
 

@@ -41,6 +41,7 @@ protected:
 public:
 		Parameter();
 	bool LoadParam(int argc, char* argv[]);
+	bool isSet(string token) {return m_setting.find(token) != m_setting.end();}
 	void Explain();
 	
 	/** return a vector of strings holding the whitespace-delimited values on the ini-file line corresponding to the given parameter name */

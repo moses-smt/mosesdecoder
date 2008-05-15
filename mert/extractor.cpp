@@ -8,6 +8,7 @@ using namespace std;
 
 #include "Scorer.h"
 #include "BleuScorer.h"
+#include "PerScorer.h"
 #include "Data.h"
 
 int main (int argc, char * argv[]) {
@@ -19,6 +20,10 @@ int main (int argc, char * argv[]) {
                 parameter->Explain();
                 delete parameter;
                 return EXIT_FAILURE;            
+        }
+        if (parameter->isSet("help")) {
+            parameter->Explain();
+            return EXIT_SUCCESS;
         }
 
 	std::string NbestFile, InputFeatureFile, OutputFeatureFile, InputScoreFile, OutputScoreFile;
@@ -50,29 +55,56 @@ int main (int argc, char * argv[]) {
 
         vector<string> references;
         const vector<string> &tmpreferences = parameter->GetParam("Reference");
-        for(size_t i=0; i< tmpreferences.size(); i++) 
+        if (tmpreferences.size() == 0) {
+            cerr << "Error: No reference files specified" << endl;
+            return EXIT_FAILURE;
+        }
+        for(size_t i=0; i< tmpreferences.size(); i++)  {
                 references.push_back(Scan<string>(tmpreferences[i]));
+        }
 
 
 	Timer timer;
 	timer.start("Starting...");
+    Scorer* scorer = 0;
+    const vector<string>& scorerType = parameter->GetParam("Score");
+    if (scorerType.size() > 0) {
+        if (scorerType[0] == "PER") {
+            scorer = new PerScorer();
+        } else if (scorerType[0] == "BLEU") {
+            scorer = new BleuScorer();
+        } else {
+            TRACE_ERR("Unknown scorer type " << scorerType[0] << endl);
+            return EXIT_FAILURE;
+        }
+    }
+    if (!scorer) {
+        //default
+        scorer = new BleuScorer();
+    }
 
-        BleuScorer scorer;
-        scorer.setReferenceFiles(references);
-        ScoreData sd(scorer);
+    // Check consistency of reference
+	if (references.size() == 0) {
+		TRACE_ERR("Error: You must specify atleast one reference file" << std::endl);
+		return EXIT_FAILURE;
+     }
+     if (NbestFile.size() == 0) { 
+        TRACE_ERR("Error: No nbest file specified" << std::endl);
+        return EXIT_FAILURE;
+     }
+    
+    scorer->setReferenceFiles(references);
 
-	Data data(scorer);
+	Data data(*scorer);
 
-// Check consistency of reference
-	if (references.size() == 0){
-		TRACE_ERR("You must specify atleast one reference file" << std::endl);
-		return 1;
-	}
 
 // Check consistency of files
 	if ((!InputFeatureFile.empty() && InputScoreFile.empty()) ||
 	    (InputFeatureFile.empty() && !InputScoreFile.empty()))
+    {
 		TRACE_ERR("You must define both InputFeatureFile and InputScoreFile (or neither of two)" << std::endl);
+        return EXIT_FAILURE;
+    }
 
 // Load statistics
 	if (!InputFeatureFile.empty() && !InputScoreFile.empty())

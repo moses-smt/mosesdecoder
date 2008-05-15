@@ -20,8 +20,8 @@ Parameter::Parameter()
 	AddParam("OutputScoreStatistics", "e", "file for output score statistics");
 	AddParam("OutputBinaryMode", "f", "Binary mode for output files");
 	AddParam("Reference", "g", "Reference");
-	AddParam("Score", "h", "Score type");
-	AddParam("Help", "h", "Print this help");
+	AddParam("Score", "s", "Score type (BLEU|PER)");
+	AddParam("help", "h", "Print this help");
 };
 
 /** initialize a parameter, sub of constructor */
