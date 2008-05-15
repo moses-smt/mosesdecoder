@@ -10,6 +10,7 @@
 #include "FeatureData.h"
 #include "Optimizer.h"
 #include "getopt.h"
+#include "Types.h"
 #include <unistd.h>
 #include <cstdlib>
 #include <iostream>
@@ -48,7 +49,7 @@ int main (int argc, char **argv) {
   string type("powell");
   string scorertype("BLEU");
   vector<unsigned> tooptimize;
-  vector<lambda> start;
+  vector<parameter_t> start;
   while (getopt_long (argc, argv, "d:n:o:t:s:", long_options, &option_index) != -1) {
     switch (c) {
     case 'd':

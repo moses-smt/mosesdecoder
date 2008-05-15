@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     diff.push_back(make_pair(7,8));
     diffs.push_back(diff);
     
-    scores_t scores;
+    statscores_t scores;
     scorer->score(candidates,diffs,scores);
 
 	cout << "Bleus: " << scores[0] << " " << scores[1] <<  endl;
