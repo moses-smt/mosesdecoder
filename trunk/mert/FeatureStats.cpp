@@ -75,10 +75,8 @@ void FeatureStats::savetxt(const std::string &file)
 
 void FeatureStats::savetxt(std::ofstream& outFile)
 {
-
-	outFile << array_.at(0);
 	vector<FeatureStatsType>::iterator i = array_.begin();
-	outFile << " " << *i;
+	outFile << *i;
 	i++;
         while (i !=array_.end()){
 		outFile << " " << *i;

@@ -77,7 +77,7 @@ void ScoreStats::savetxt(std::ofstream& outFile)
 
 	//outFile << array_.at(0);
 	vector<ScoreStatsType>::iterator i = array_.begin();
-	outFile << " " << *i;
+	outFile << *i;
 	i++;
         while (i !=array_.end()){
 		outFile << " " << *i;

@@ -16,27 +16,32 @@ ScoreData::ScoreData(Scorer& ptr):
 bufLen_(0), theScorer(&ptr)
 {
 	score_type = theScorer->getName();
+	TRACE_ERR("score_type:" << score_type << std::endl);
+	
 };
 
-void ScoreData::savetxt(std::ofstream& outFile)
+void ScoreData::save(std::ofstream& outFile, bool bin)
 {
         ScoreArray entry;
 	for (vector<ScoreArray>::iterator i = array_.begin(); i !=array_.end(); i++)
-		(*i).savetxt(outFile);
+		(*i).save(outFile);
 }
 
-void ScoreData::savetxt(const std::string &file)
+void ScoreData::save(const std::string &file, bool bin)
 {
+	if (file.empty()) return;
 	TRACE_ERR("saving the array into " << file << std::endl);  
 
 	std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
 
         ScoreStats entry;
 
-	savetxt(outFile);
+	save(outFile, bin);
+
+	outFile.close();
 }
 
-void ScoreData::loadtxt(ifstream& inFile)
+void ScoreData::load(ifstream& inFile)
 {
         ScoreArray entry;
 
@@ -51,23 +56,19 @@ void ScoreData::loadtxt(ifstream& inFile)
 			TRACE_ERR("no more data" << std::endl);
 			continue;
 		}
-		entry.savetxt();
-
 		add(entry);
-		
-		savetxt();
 		iter++;
 	}
 }
 
 
-void ScoreData::loadtxt(const std::string &file)
+void ScoreData::load(const std::string &file)
 {
 	TRACE_ERR("loading data from " << file << std::endl);  
 
 	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
 
-	loadtxt(inFile);
+	load(inFile);
 
 	inFile.close();
 }

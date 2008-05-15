@@ -13,9 +13,14 @@ using namespace std;
 /** define allowed parameters */
 Parameter::Parameter() 
 {
-	AddParam("InputFile", "i", "Input file");
-	AddParam("Reference", "ref", "Reference");
-	AddParam("Score", "s", "Score");
+	AddParam("NbestFile", "a", "file of nbest");
+	AddParam("InputFeatureStatistics", "b", "file of input feature scores");
+	AddParam("InputScoreStatistics", "c", "file of input score statistics");
+	AddParam("OutputFeatureStatistics", "d", "file for output feature scores");
+	AddParam("OutputScoreStatistics", "e", "file for output score statistics");
+	AddParam("OutputBinaryMode", "f", "Binary mode for output files");
+	AddParam("Reference", "g", "Reference");
+	AddParam("Score", "h", "Score type");
 	AddParam("Help", "h", "Print this help");
 };
 
