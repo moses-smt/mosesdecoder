@@ -59,6 +59,13 @@ Point Point::operator*(float l)const{
   return Res;
 };
 
+ ostream& operator<<(ostream& o,const Point& P){
+   vector<lambda> w=P.GetAllWeights();
+   for(int i=0;i<Point::pdim;i++)
+     o<<w[i]<<' ';
+   o<<endl;
+   return o;
+};
 
 vector<lambda> Point::GetAllWeights()const{
   vector<lambda> w;

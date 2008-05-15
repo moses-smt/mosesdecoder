@@ -10,6 +10,24 @@ using namespace std;
 static const float MINFLOAT=numeric_limits<float>::min();
 static const float MAXFLOAT=numeric_limits<float>::max();
 
+enum OptType{POWELL=0,NOPTIMIZER};//Add new optimizetr here
+
+string names[NOPTIMIZER]={string("powell")};
+
+Optimizer *BuildOptimizer(unsigned dim,vector<unsigned>to,vector<lambda>s,string type){
+  int thetype;
+  for(thetype=0;thetype<(int)NOPTIMIZER;thetype++)
+    if(names[thetype]==type)
+      break;
+  switch((OptType)thetype){
+  case POWELL:
+    return new SimpleOptimizer(dim,to,s);
+  case NOPTIMIZER:
+    cerr<<"error unknwon optimizer"<<type<<endl;
+    return NULL;
+  }
+  return NULL;//Should nver go there
+};
 
 
 void Optimizer::SetScorer(Scorer *S){
@@ -38,13 +56,8 @@ Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<lambda> start):scor
 	  break;
       if(j==Point::dim)//the index i wasnt found on optindices, it is a fixed index, we use the valu of hte start vector
 	Point::fixedweights[i]=start[i];
-      else
-	init[j]=start[i];//the starting point of the algorithm
     }
-  }else{
-    init=start;
   }
-  assert(init.GetAllWeights()==start);
 };
 
 Optimizer::~Optimizer(){
@@ -224,7 +237,7 @@ void  Optimizer::Get1bests(const Point& P,vector<unsigned>& bests)const{
   
 }
 
-Point Optimizer::Run()const{
+statscore Optimizer::Run(Point& P)const{
   if(!FData){
     cerr<<"error trying to optimize without Feature loaded"<<endl;
     exit(2);
@@ -233,10 +246,12 @@ Point Optimizer::Run()const{
     cerr<<"error trying to optimize without a Scorer loaded"<<endl;
     exit(2);
   }
-  return TrueRun();
+  statscore s=TrueRun(P);
+  P.score=s;//just in case its not done in TrueRun
+  return s;
 }
-Point SimpleOptimizer::TrueRun()const{
-  Point cur=init;
+statscore SimpleOptimizer::TrueRun(Point& P)const{
+ 
   statscore prevscore=MAXFLOAT;
   statscore bestscore=MAXFLOAT;
   do{
@@ -245,13 +260,17 @@ Point SimpleOptimizer::TrueRun()const{
     for(int d=0;d<Point::getdim();d++){
       Point direction;
       direction[d]=1.0;
-      statscore curscore=LineOptimize(cur,direction,linebest);//find the minimum on the line
+      statscore curscore=LineOptimize(P,direction,linebest);//find the minimum on the line
       if(curscore>bestscore){
 	bestscore=curscore;
 	best=linebest;
       }
     }
-    cur=best;//update the current vector with the best points on all line tested
+    P=best;//update the current vector with the best points on all line tested
 }while(bestscore-prevscore<eps);
-  return cur;
+  return bestscore;
 }
+
+
+
+

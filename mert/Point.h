@@ -32,6 +32,8 @@ class Point:public vector<lambda>{
   double operator*(const FeatureStats&)const;//compute the feature function
   Point operator+(const Point&)const;
   Point operator*(float)const;
+  /**write the Whole featureweight to a stream (ie pdim float)*/
+  friend ostream& operator<<(ostream& o,const Point& P);
   void Normalize();
   /**return a vector of size pdim where all weights have been put*/
   vector<lambda> GetAllWeights()const;
