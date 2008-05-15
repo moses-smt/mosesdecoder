@@ -173,8 +173,12 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 			{ // apply range
 				CreateForwardTodos(bitmap, applyRange, bitmapContainer);
 			}
+			
+			size_t maxSize = len - startPos;
+			size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+			maxSize = std::min(maxSize, maxSizePhrase);
 
-			for (endPos = startPos+1; endPos < len; endPos++)
+			for (endPos = startPos+1; endPos < maxSize; endPos++)
 			{
 				if (bitmap.GetValue(endPos))
 					break;

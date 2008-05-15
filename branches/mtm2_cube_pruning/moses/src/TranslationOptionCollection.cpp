@@ -372,10 +372,13 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 void TranslationOptionCollection::Sort()
 {
 	size_t size = m_source.GetSize();
-	
 	for (size_t startPos = 0 ; startPos < size; ++startPos)
 	{
-		for (size_t endPos = startPos ; endPos <size; ++endPos)
+		size_t maxSize = size - startPos;
+		size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+		maxSize = std::min(maxSize, maxSizePhrase);
+	
+		for (size_t endPos = startPos ; endPos <maxSize; ++endPos)
 		{
 			TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
 			std::sort(transOptList.begin(), transOptList.end(), CompareTranslationOption);
