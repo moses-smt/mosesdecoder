@@ -21,7 +21,7 @@ class ScoreStats;
 /**
   * Superclass of all scorers and dummy implementation. In order to add a new
   * scorer it should be sufficient to override prepareStats(), setReferenceFiles()
-  * and score()
+  * and score() (or calculateScore()). 
 **/
 class Scorer {
 	
@@ -131,6 +131,23 @@ class Scorer {
 
 		private:
 			string _name;
+
+};
+
+
+/**
+  * Abstract base class for scorers that work by adding statistics across all 
+  * outout sentences, then apply some formula, e.g. bleu, per. **/
+class StatisticsBasedScorer : public Scorer {
+
+    public:
+        StatisticsBasedScorer(const string& name): Scorer(name) {}
+        virtual void score(const candidates_t& candidates, const diffs_t& diffs,
+                scores_t& scores);
+
+    protected:
+        //calculate the actual score
+        virtual float calculateScore(const vector<int>& totals) = 0;
 
 };
 

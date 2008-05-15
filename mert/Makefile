@@ -5,7 +5,8 @@ Data.o \
 BleuScorer.o \
 Point.o \
 Optimizer.o \
-PerScorer.o
+PerScorer.o \
+Scorer.o
 
 ifndef DEBUG
 CFLAGS=-O3 -DTRACE_ENABLE

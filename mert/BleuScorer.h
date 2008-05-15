@@ -25,16 +25,15 @@ enum BleuReferenceLengthStrategy { AVERAGE, SHORTEST, CLOSEST };
 /**
   * Bleu scoring
  **/
-class BleuScorer: public Scorer {
+class BleuScorer: public StatisticsBasedScorer {
 	public:
-		BleuScorer() : Scorer("BLEU"),_refLengthStrategy(SHORTEST) {}
+		BleuScorer() : StatisticsBasedScorer("BLEU"),_refLengthStrategy(SHORTEST) {}
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
 		virtual void prepareStats(int sid, const string& text, ScoreStats& entry);
-
-		virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-            scores_t& scores);
-
 		static const int LENGTH;	
+    
+    protected:
+        float calculateScore(const vector<int>& comps);
 		
 	private:
 		//no copy
@@ -81,7 +80,6 @@ class BleuScorer: public Scorer {
 		typedef vector<counts_t*> refcounts_t;
 
 		size_t countNgrams(const string& line, counts_t& counts, unsigned int n);
-        float bleu(const vector<int>& comps);
 
 		void dump_counts(counts_t& counts) {
 			for (counts_it i = counts.begin(); i != counts.end(); ++i) {

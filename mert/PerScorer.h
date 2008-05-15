@@ -23,17 +23,17 @@ using namespace std;
   * as 1 - (correct - max(0,output_length - ref_length)) / ref_length
   * In fact, we ignore the " 1 - " so that it can be maximised.
  **/
-class PerScorer: public Scorer {
+class PerScorer: public StatisticsBasedScorer {
 	public:
-		PerScorer() : Scorer("PER") {}
+		PerScorer() : StatisticsBasedScorer("PER") {}
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
 		virtual void prepareStats(int sid, const string& text, ScoreStats& entry);
 
-		virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-            scores_t& scores);
+    protected:
+        
+        virtual float calculateScore(const vector<int>& comps) ;
 		
 	private:
-        float per(const vector<int>& comps) const;
         
 		//no copy
 		PerScorer(const PerScorer&);
