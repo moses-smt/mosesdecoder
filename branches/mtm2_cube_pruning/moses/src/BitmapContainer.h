@@ -14,8 +14,8 @@ class Hypothesis;
 class HypothesisScoreOrderer;
 class HypothesisStack;
 
-
 typedef std::set< Hypothesis*, HypothesisScoreOrderer > OrderedHypothesisSet;
+//typedef std::set< Hypothesis*> OrderedHypothesisSet;
 typedef std::set< BackwardsEdge* > BackwardsEdgeSet;
 typedef std::pair< Hypothesis*, std::pair< int, int > > SquarePosition;
 
@@ -40,7 +40,7 @@ class HypothesisScoreOrderer
 		{
 			float scoreA = hypoA->GetTotalScore();
 			float scoreB = hypoB->GetTotalScore();
-			return (scoreA >= scoreB);
+			return (scoreA > scoreB);
 		}
 };
 

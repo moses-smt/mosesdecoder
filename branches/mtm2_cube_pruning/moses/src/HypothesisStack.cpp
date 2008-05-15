@@ -317,3 +317,15 @@ std::ostream& operator<<(std::ostream& out, const HypothesisStack& hypoColl)
 	return out;
 }
 
+void HypothesisStack::Remove(const HypothesisStack::iterator &iter)
+{
+	Hypothesis *h = *iter;
+
+	const WordsBitmap &bitmap = h->GetWordsBitmap();
+	BitmapContainer *bitmapContainer = m_bitmapAccessor[bitmap];
+	bitmapContainer->RemoveHypothesis(h);
+	
+	Detach(iter);
+	FREEHYPO(h);
+}
+

@@ -89,12 +89,7 @@ protected:
 	/** destroy all instances of Hypothesis in this collection */
 	void RemoveAll();
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
-	inline void Remove(const HypothesisStack::iterator &iter)
-	{
-		Hypothesis *h = *iter;
-		Detach(iter);
-		FREEHYPO(h);
-	}
+	inline void Remove(const HypothesisStack::iterator &iter);
 
 public:
 	//! iterators
