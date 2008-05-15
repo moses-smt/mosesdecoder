@@ -1,0 +1,14 @@
+cmd=../extractor
+#$cmd -NbestFile NBEST -Reference REF -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out
+$cmd -NbestFile NBEST -Reference REF.0 REF.1 REF.2 -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out
+
+cp FEATSTAT.out FEATSTAT.in
+cp SCORESTAT.out SCORESTAT.in
+$cmd -NbestFile NBEST -Reference REF.0 REF.1 REF.2 -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out -InputFeatureStatistics FEATSTAT.in -InputScoreStatistics SCORESTAT.in
+
+
+exit
+
+extractor -NbestFile NBEST -InputFeatureStatistics FEATSTAT.in -InputScoreStatistics SCORESTAT.in -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out -Reference ref -Score BLEU4 -OutputBinaryMode -Help
+
+extractor -NbestFile NBEST -InputFeatureStatistics FEATSTAT.in -InputScoreStatistics SCORESTAT.in -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out -Reference ref -Score BLEU4 -OutputBinaryMode -Help
