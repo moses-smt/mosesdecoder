@@ -14,23 +14,11 @@ class Hypothesis;
 class HypothesisScoreOrderer;
 class HypothesisStack;
 
+
 typedef std::set< Hypothesis*, HypothesisScoreOrderer > OrderedHypothesisSet;
-//typedef std::set< Hypothesis*> OrderedHypothesisSet;
 typedef std::set< BackwardsEdge* > BackwardsEdgeSet;
 typedef std::pair< Hypothesis*, std::pair< int, int > > SquarePosition;
 
-
-/** Order relation for TranslationOption scores. */
-class TranslationOptionOrderer
-{
-	public:
-		bool operator()(const TranslationOption* optionA, const TranslationOption* optionB) const
-		{
-			float scoreA = optionA->GetFutureScore();
-			float scoreB = optionB->GetFutureScore();
-			return (scoreA >= scoreB);
-		}
-};
 
 /** Order relation for hypothesis scores.  Taken from Eva Hasler's branch. */
 class HypothesisScoreOrderer
