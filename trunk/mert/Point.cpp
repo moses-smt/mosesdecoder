@@ -11,7 +11,7 @@ unsigned Point::dim=0;
 map<unsigned,lambda> Point::fixedweights;
   
 unsigned Point::pdim=0;
-
+unsigned Point::ncall=0;
 
 void Point::Randomize(const vector<lambda>& min,const vector<lambda>& max){
   for (int i=0; i<size(); i++)
@@ -30,6 +30,7 @@ void Point::Normalize(){
 }
 
 double Point::operator*(const FeatureStats& F)const{
+  ncall++;//to track performance
   double prod=0.0;
   if(OptimizeAll())
     for (unsigned i=0; i<size(); i++)

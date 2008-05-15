@@ -36,8 +36,7 @@ class Optimizer{
   statscore GetStatScore(const vector<unsigned>& nbests)const{scorer->score(nbests);};
   /**given a set of lambdas, get the total statistical score*/
   statscore GetStatScore(const Point& param)const;  
- vector<statscore> GetIncStatScore(vector<unsigned> ref,vector<vector <pair<unsigned,unsigned> > >)const;
-  
+  vector<statscore> GetIncStatScore(vector<unsigned> ref,vector<vector <pair<unsigned,unsigned> > >)const;
   statscore LineOptimize(const Point& start,const Point& direction,Point& best)const;//Get the optimal Lambda and the best score in a particular direction from a given Point
 };
 

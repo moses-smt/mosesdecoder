@@ -1,5 +1,5 @@
 /**
-\description The is the main for the new versionh of the mert algorithm develloppped during the 2nd MT marathon
+\description The is the main for the new version of the mert algorithm develloppped during the 2nd MT marathon
 */
 
 #include <limits>
@@ -23,7 +23,11 @@ float min_interval = 1e-3;
 using namespace std;
 
 void usage(void) {
-  cerr<<"usage: mert -d <dimensions> \n[-n] retry ntimes\n";
+  cerr<<"usage: mert -d <dimensions>"<<endl;
+  cerr<<"[-n retry ntimes]"<<endl;
+  cerr<<"[-o indexes to optimize]"<<endl;
+  cerr<<"[-t optimizer]"<<endl;
+  cerr<<"[-s scorer]"<<endl;
   exit(1);
 }
 
@@ -75,7 +79,7 @@ int main (int argc, char **argv) {
     usage();
   start.resize(dim);
   float score;
-  float best=numeric_limits<float>::max();
+  float best=numeric_limits<float>::min();
   float mean=0;
   float var=0;
   Point bestP;
