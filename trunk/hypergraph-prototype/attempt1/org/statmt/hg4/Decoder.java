@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.statmt.hg4.Hypergraph.Rule;
+
 public class Decoder {
 
 	static class GNode {
@@ -61,25 +63,33 @@ public class Decoder {
 			if (f1 == f2) return 0;
 			if (f1 < f2) return -1; else return 1;
 		}
-		
 	}
-	
+		
 	public static Hypergraph parse(Phrase sentence,
-			ExplorationAgenda expAgenda,
 			SearchStrategy ss,
-			Hypergraph dg) {
-		Map<Vertex,VertexState> v2smap =
-			new HashMap<Vertex, VertexState>();
+			Hypergraph dg,
+			Map<Vertex,VertexState> v2smap) {
+		ExplorationAgenda expAgenda = new ExplorationAgenda();
 		Map<VertexState, Vertex> s2vmap =
 			new HashMap<VertexState, Vertex>();
 		VertexSignatureCreator sigc = new DumbPBSignature();
+		Vertex start = new Vertex(null);
+		VertexState sst = new VertexState();
+		sst.put("PROB", new Float(0.0f));
+		sst.put("ACTIVE?", new Boolean(true));
+		sst.put("COVERAGE", new Coverage(sentence.size()));
+		v2smap.put(start, sst);
+		s2vmap.put(sst, start);
+		dg.addNode(start);
 		PBRanker pbr = new PBRanker(v2smap);
 		FinishingAgenda fa =
 			new FinishingAgenda(sigc, pbr);
-		while (!fa.isEmpty() && !expAgenda.isEmpty()) {
+		fa.add(start, v2smap);
+		while (!fa.isEmpty() || !expAgenda.isEmpty()) {
 			while (!expAgenda.isEmpty()) {
 				// p is a "traversal"
 				APPair p = expAgenda.nextVertex();
+				System.out.println("ExpAgenda: processing traversal " + p);
 				Hyperarc ha = new Hyperarc(p.asTail());
 			
 				// "edge" discovery
@@ -88,17 +98,41 @@ public class Decoder {
 				if (v == null) {
 					v = new Vertex(new ArrayList<Hyperarc>());
 					dg.addNode(v);
+					v2smap.put(v, newState);
 				}
 				dg.addLink(v, ha);
+				fa.add(v, v2smap);
 			}
-			VertexGroup vg = fa.peek();
-			Map<String, Object> sig = vg.getSignature();
-			Collection<Vertex> p = ss.retrieveCombinableVertices(sig, dg, sentence);
-			ss.generateTraversals(vg, p, expAgenda);
+			if (fa.peek() != null) {
+				VertexGroup vg = fa.poll();
+				System.out.println("FA: processing finishing vertex (group) " + vg);
+				Map<String, Object> sig = vg.getSignature();
+				System.out.println("  sig=" + sig);
+				Collection<Vertex> p = ss.retrieveCombinableVertices(sig, dg, sentence);
+				ss.generateTraversals(vg, p, expAgenda);
+			}
 		}
 		return dg;
 	}
 	
 	public static void main(String[] args) {
+		Phrase sentence = new Phrase("guten tag");
+	   	PTable pt = new PTable();
+     	pt.add(new Phrase("guten"), new Phrase("well"));
+        pt.add(new Phrase("guten"), new Phrase("good"));
+    	pt.add(new Phrase("tag"), new Phrase("day"));
+    	pt.add(new Phrase("tag"), new Phrase("hi"));
+    	pt.add(new Phrase("guten tag"), new Phrase("hello"));
+    	pt.add(new Phrase("guten tag"), new Phrase("good day"));
+    	ArrayList<ArrayList<ArrayList<Phrase>>> lattice =
+    		pt.buildLattice(sentence);
+    	Map<Vertex, VertexState> v2s = new HashMap<Vertex, VertexState>();
+    	Vertex source = new Vertex(null);
+    	Hypergraph hg = new Hypergraph();
+    	hg.addNode(source);
+
+		parse(sentence,
+			new DumbPBSearchPolicy(sentence, lattice, hg, v2s),
+			hg, v2s);
 	}
 }
