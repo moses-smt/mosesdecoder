@@ -83,13 +83,21 @@ protected:
 	//! list of trans opt for a particular span
 	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
 	{
-		assert(endPos-startPos < m_collection[startPos].size());
-		return m_collection[startPos][endPos - startPos];
+		size_t maxSize = endPos - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = std::min(maxSize, maxSizePhrase);
+
+		assert(maxSize < m_collection[startPos].size());
+		return m_collection[startPos][maxSize];
 	}
 	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const
 	{
-		assert(endPos-startPos < m_collection[startPos].size());
-	 	return m_collection[startPos][endPos - startPos];
+		size_t maxSize = endPos - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = std::min(maxSize, maxSizePhrase);
+
+		assert(maxSize < m_collection[startPos].size());
+	 	return m_collection[startPos][maxSize];
 	}
 	void Add(TranslationOption *translationOption);
 
