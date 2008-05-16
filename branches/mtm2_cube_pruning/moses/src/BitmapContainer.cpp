@@ -27,12 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisStack.h"
 #include "DummyScoreProducers.h"
 
-////////////////////////////////////////////////////////////////////////////////
-// Hypothesis Orderer Code
-////////////////////////////////////////////////////////////////////////////////
-// Allows to compare two Hypothesis objects by the corresponding scores.
-////////////////////////////////////////////////////////////////////////////////
-
 class HypothesisScoreOrdererWithDistortion
 {
 	public:
@@ -150,6 +144,9 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 //		std::cerr << *m_kbest_hypotheses[1] << std::endl;
 		assert(m_kbest_hypotheses[0]->GetTotalScore() >= m_kbest_hypotheses[1]->GetTotalScore());
 	}	
+
+	HypothesisScoreOrdererWithDistortion::transOptRange = &transOptRange;
+	std::sort(m_kbest_hypotheses.begin(), m_kbest_hypotheses.end(), HypothesisScoreOrdererWithDistortion());
 
 	m_hypothesis_maxpos = m_kbest_hypotheses.size();
 	m_translations_maxpos = m_kbest_translations.size();
