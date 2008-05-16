@@ -8,14 +8,14 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
-			this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, 
-			this list of conditions and the following disclaimer in the documentation 
-			and/or other materials provided with the distribution.
-    * Neither the name of the University of Edinburgh nor the names of its contributors 
-			may be used to endorse or promote products derived from this software 
-			without specific prior written permission.
+* Redistributions of source code must retain the above copyright notice, 
+this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, 
+this list of conditions and the following disclaimer in the documentation 
+and/or other materials provided with the distribution.
+* Neither the name of the University of Edinburgh nor the names of its contributors 
+may be used to endorse or promote products derived from this software 
+without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
@@ -48,53 +48,54 @@ class InputFileStream;
 class IOStream
 {
 protected:
-	long m_translationId;
+    long m_translationId;
 
-	const std::vector<FactorType>	&m_inputFactorOrder;
-	const std::vector<FactorType>	&m_outputFactorOrder;
-	const FactorMask							&m_inputFactorUsed;
-	std::ostream 									*m_nBestStream
-																,*m_outputWordGraphStream,*m_outputSearchGraphStream;
-	std::string										m_inputFilePath;
-	std::istream									*m_inputStream;
-	InputFileStream								*m_inputFile;
-	bool													m_surpressSingleBestOutput;
-	
-	void Initialization(const std::vector<FactorType>	&inputFactorOrder
-										, const std::vector<FactorType>			&outputFactorOrder
-										, const FactorMask							&inputFactorUsed
-										, size_t												nBestSize
-										, const std::string							&nBestFilePath);
+    const std::vector<FactorType>    &m_inputFactorOrder;
+    const std::vector<FactorType>    &m_outputFactorOrder;
+    const FactorMask                 &m_inputFactorUsed;
+    std::ostream                     *m_nBestStream
+                                     , *m_outputWordGraphStream
+                                     , *m_outputSearchGraphStream;
+    std::string                      m_inputFilePath;
+    std::istream                     *m_inputStream;
+    InputFileStream                  *m_inputFile;
+    bool                             m_surpressSingleBestOutput;
+
+    void Initialization(const std::vector<FactorType>                 &inputFactorOrder
+                        , const std::vector<FactorType>               &outputFactorOrder
+                        , const FactorMask                            &inputFactorUsed
+                        , size_t                                      nBestSize
+                        , const std::string                           &nBestFilePath);
 
 public:
-	IOStream(const std::vector<FactorType>	&inputFactorOrder
-		, const std::vector<FactorType>			&outputFactorOrder
-				, const FactorMask							&inputFactorUsed
-				, size_t												nBestSize
-				, const std::string							&nBestFilePath);
+    IOStream(const std::vector<FactorType> &inputFactorOrder
+        , const std::vector<FactorType>    &outputFactorOrder
+        , const FactorMask                 &inputFactorUsed
+        , size_t                           nBestSize
+        , const std::string                &nBestFilePath);
 
-	IOStream(const std::vector<FactorType>	&inputFactorOrder
-				, const std::vector<FactorType>	&outputFactorOrder
-				, const FactorMask							&inputFactorUsed
-				, size_t												nBestSize
-				, const std::string							&nBestFilePath
-		 , const std::string                                                     &infilePath);
-	~IOStream();
+    IOStream(const std::vector<FactorType> &inputFactorOrder
+        , const std::vector<FactorType>    &outputFactorOrder
+        , const FactorMask                 &inputFactorUsed
+        , size_t                           nBestSize
+        , const std::string                &nBestFilePath
+        , const std::string                &infilePath);
+    ~IOStream();
 
-	InputType* GetInput(InputType *inputType);
-	void OutputBestHypo(const Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-	void OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-	void OutputNBestList(const TrellisPathList &nBestList, long translationId);
-	void Backtrack(const Hypothesis *hypo);
+    InputType* GetInput(InputType *inputType);
+    void OutputBestHypo(const Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+    void OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+    void OutputNBestList(const TrellisPathList &nBestList, long translationId);
+    void Backtrack(const Hypothesis *hypo);
 
-	void ResetTranslationId() { m_translationId = 0; }
+    void ResetTranslationId() { m_translationId = 0; }
 
-	std::ostream &GetOutputWordGraphStream()
-	{
-		return *m_outputWordGraphStream;
-	}
-        std::ostream &GetOutputSearchGraphStream()
-	{
-	  return *m_outputSearchGraphStream;
-	}
+    std::ostream &GetOutputWordGraphStream()
+    {
+        return *m_outputWordGraphStream;
+    }
+    std::ostream &GetOutputSearchGraphStream()
+    {
+        return *m_outputSearchGraphStream;
+    }
 };
