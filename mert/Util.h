@@ -34,6 +34,9 @@ class FeatureStats;
 
 #define DELIMITER_SYMBOL " "
 
+int verboselevel();
+int setverboselevel(int v);
+
 int getNextPound(std::string &theString, std::string &substring, const std::string delimiter=DELIMITER_SYMBOL);
 
 template<typename T>

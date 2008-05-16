@@ -28,7 +28,7 @@ Optimizer *BuildOptimizer(unsigned dim,vector<unsigned>to,vector<parameter_t>s,s
     cerr<<"error unknwon optimizer"<<type<<endl;
     return NULL;
   }
-  return NULL;//Should nver go there
+  return NULL;//Should never go there
 };
 
 
@@ -90,11 +90,10 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   thresholdlist.push_back(threshold(MIN_FLOAT,vector<diff>()));
   vector<unsigned> first1best;//the vector of nbrests for x=-inf
   for(int S=0;S<size();S++){
-    cerr<<"SENTENCE"<<S;
     //first we determine the translation with the best feature score for each sentence and each value of x
     multimap<float,unsigned> gradient;
     vector<float> f0;
-    f0.resize(size());
+    f0.resize(FData->get(S).size());
     for(unsigned j=0;j<FData->get(S).size();j++){
       gradient.insert(pair<float,unsigned>(direction*(FData->get(S,j)),j));//gradient of the feature function for this particular target sentence
       f0[j]=origin*FData->get(S,j);//compute the feature function at the origin point
@@ -121,7 +120,6 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
     //we use the fact that the function is convex, which means that the gradient can only go up   
     int c=0;
     while(it!=gradient.end()){
-      cerr<<c++<<endl;
       map<float,unsigned>::iterator leftmost=it;
       float leftmostx=onebest.back().first;
       float m=it->first;
@@ -157,7 +155,6 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
       if(it==leftmost)
 	it=gradient.end();
       else
-	cerr<<"ok"<<endl;
 	it=leftmost;
     }
     //we have the onebest list and the threshold for the current sentence.
@@ -257,7 +254,7 @@ void  Optimizer::Get1bests(const Point& P,vector<unsigned>& bests)const{
 
 statscore_t Optimizer::Run(Point& P)const{
   if(!FData){
-    cerr<<"error trying to optimize without Feature loaded"<<endl;
+    cerr<<"error trying to optimize without Features loaded"<<endl;
     exit(2);
   }
   if(!scorer){
@@ -268,8 +265,12 @@ statscore_t Optimizer::Run(Point& P)const{
     cerr<<"errror size mismatch between FeatureData and Scorer"<<endl;
     exit(2);
   }
+  if(verboselevel()>1)
+    cerr<<"starting Point "<<P;
   statscore_t s=TrueRun(P);
   P.score=s;//just in case its not done in TrueRun
+  if (verboselevel()>1)
+    cerr<<"best found Point "<<P<<"score="<<s<<endl;
   return s;
 }
  
@@ -291,17 +292,28 @@ float SimpleOptimizer::eps=0.0001;
 statscore_t SimpleOptimizer::TrueRun(Point& P)const{
  
   statscore_t prevscore=MAX_FLOAT;
-  statscore_t bestscore=MAX_FLOAT;
+  statscore_t bestscore=MIN_FLOAT;
+  int nrun;
   do{
+    ++nrun;
+    if(verboselevel()>2)
+      cerr<<"last diff="<<bestscore-prevscore<<"nrun "<<nrun<<endl;
+    prevscore=bestscore;
+    
     Point  best;
     Point  linebest;
+    
     for(int d=0;d<Point::getdim();d++){
+      if(verboselevel()>3)
+	cerr<<"minimizing along direction"<<d<<endl;
       Point direction;
       direction[d]=1.0;
       statscore_t curscore=LineOptimize(P,direction,linebest);//find the minimum on the line
       if(curscore>bestscore){
 	bestscore=curscore;
 	best=linebest;
+      if(verboselevel()>3)
+	cerr<<"new best d"<<d<<" ("<<nrun<<")"<<endl;
       }
     }
     P=best;//update the current vector with the best points on all line tested

@@ -30,6 +30,7 @@ class Point:public parameters_t{
   Point():parameters_t(dim){};
   Point(parameters_t init):parameters_t(init){assert(init.size()==dim);};
   void Randomize(const parameters_t& min,const parameters_t& max);
+
   double operator*(const FeatureStats&)const;//compute the feature function
   Point operator+(const Point&)const;
   Point operator*(float)const;

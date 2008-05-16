@@ -8,6 +8,17 @@
 
 #include "Util.h"
 
+int verbose=0;
+
+int verboselevel(){
+  return verbose;
+}
+
+int setverboselevel(int v){
+  verbose=v;
+  return verbose;
+}
+
 int getNextPound(std::string &theString, std::string &substring, const std::string delimiter)
 {
         int pos = 0;
