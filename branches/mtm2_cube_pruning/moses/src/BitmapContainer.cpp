@@ -94,8 +94,8 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 
 	if (m_kbest_hypotheses.size() > 1)
 	{
-		std::cerr << *m_kbest_hypotheses[0] << std::endl;
-		std::cerr << *m_kbest_hypotheses[1] << std::endl;
+//		std::cerr << *m_kbest_hypotheses[0] << std::endl;
+//		std::cerr << *m_kbest_hypotheses[1] << std::endl;
 		assert(m_kbest_hypotheses[0]->GetTotalScore() >= m_kbest_hypotheses[1]->GetTotalScore());
 	}	
 
@@ -245,11 +245,11 @@ BitmapContainer::Enqueue(int hypothesis_pos
 																										  , translation_pos
 																										  , hypothesis
 																											, edge);
-	if (m_queue.size() > 0)
-		std::cerr << "OLD_TOP = " << m_queue.top()->GetHypothesis()->GetTotalScore() << std::endl;
+//	if (m_queue.size() > 0)
+//		std::cerr << "OLD_TOP = " << m_queue.top()->GetHypothesis()->GetTotalScore() << std::endl;
 	m_queue.push(item);
-	if (m_queue.size() > 1)
-		std::cerr << "NEW_TOP = " << m_queue.top()->GetHypothesis()->GetTotalScore() << std::endl;
+//	if (m_queue.size() > 1)
+//		std::cerr << "NEW_TOP = " << m_queue.top()->GetHypothesis()->GetTotalScore() << std::endl;
 }
 
 HypothesisQueueItem*
@@ -359,11 +359,12 @@ BitmapContainer::FindKBestHypotheses()
 
 		// If the priority queue is exhausted, we are done and should have exited
 		assert(item != NULL);
+		
 		if (!Empty())
 		{
 			HypothesisQueueItem *check = Dequeue(true);
-			std::cerr << *item->GetHypothesis() << std::endl;
-			std::cerr << *check->GetHypothesis() << std::endl;
+//			std::cerr << *item->GetHypothesis() << std::endl;
+//			std::cerr << *check->GetHypothesis() << std::endl;
 			assert(item->GetHypothesis()->GetTotalScore() >= check->GetHypothesis()->GetTotalScore());
 		}
 
