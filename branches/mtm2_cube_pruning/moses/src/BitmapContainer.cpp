@@ -351,7 +351,9 @@ BitmapContainer::FindKBestHypotheses()
 			stacked++;
 		}
 
-		TRACE_ERR("added flag is " << added << std::endl);
+		IFVERBOSE(3) {
+			TRACE_ERR("added flag is " << added << std::endl);
+		}
 
 		// Create new hypotheses for the two successors of the hypothesis just added.
 		int hypothesis_pos = item->GetHypothesisPos();
