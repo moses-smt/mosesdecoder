@@ -135,7 +135,7 @@ bool HypothesisStack::AddPrune(Hypothesis *hypo)
 			TRACE_ERR("Offending hypo = " << **iterExisting << endl);
 			assert(false);
 		}
-		return added;
+		return false;
 	}
 	else
 	{ // already storing the best hypo. discard current hypo 
