@@ -60,6 +60,8 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 			{
 				m_kbest_hypotheses.push_back(*iter);
 			}
+		m_hypothesis_maxpos = m_kbest_hypotheses.size();
+		m_translations_maxpos = m_kbest_translations.size();
 		return;
 	}
 
@@ -72,7 +74,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 		// initial position is not further into the sentence than the distortion limit.
 		if ((*iter)->GetWordsBitmap().GetNumWordsCovered() == 0)
 			{
-				if (transOptRange.GetStartPos() < maxDistortion)
+				if (transOptRange.GetStartPos() <= maxDistortion)
 					m_kbest_hypotheses.push_back(*iter);
 			}
 		else
