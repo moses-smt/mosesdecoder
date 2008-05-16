@@ -384,7 +384,14 @@ const Hypothesis* Hypothesis::GetPrevHypo()const{
 /**
  * print hypothesis information for pharaoh-style logging
  */
+
+// outdated, see below
 void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistortion*/, float /*weightWordPenalty*/) const
+{
+      PrintHypothesis();
+}
+
+void Hypothesis::PrintHypothesis() const
 {
   if (!m_prevHypo) { TRACE_ERR(endl << "NULL hypo" << endl); return; }
   TRACE_ERR(endl << "creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ");

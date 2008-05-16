@@ -335,7 +335,7 @@ BitmapContainer::FindKBestHypotheses()
 		// Get the currently best hypothesis from the queue.
 		HypothesisQueueItem *item = Dequeue();
 
-		// If the priority queue is exhausted, we are done and exit.
+		// If the priority queue is exhausted, we are done and should have exited
 		assert(item != NULL);
 
 		// Add best hypothesis to hypothesis stack.
@@ -343,6 +343,13 @@ BitmapContainer::FindKBestHypotheses()
 		if (added)
 		{
 			stacked++;
+		}
+
+		// Logging for the criminally insane
+		IFVERBOSE(3) {
+			const StaticData &staticData = StaticData::Instance();
+			item->GetHypothesis()->PrintHypothesis();
+			TRACE_ERR("added flag is " << added << std::endl);
 		}
 
 		// Create new hypotheses for the two successors of the hypothesis just added.
