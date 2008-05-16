@@ -50,6 +50,6 @@ public class Coverage implements Comparable {
 	
 	public int compareTo(Object o) {
         Coverage other = (Coverage) o;
-		return this.coverage.cardinality() - other.coverage.cardinality();
+		return other.coverage.cardinality() - this.coverage.cardinality();
 	}
 }
