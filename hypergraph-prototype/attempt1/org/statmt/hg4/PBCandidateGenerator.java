@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 
-public class PBCandidateGenerator extends CandidateGenerator {
+import org.statmt.hg4.Hypergraph.Rule;
+
+public class PBCandidateGenerator extends PassiveCandidateGenerator {
 
 	ArrayList<ArrayList<Vertex>> lattice;
 	
@@ -55,14 +57,24 @@ public class PBCandidateGenerator extends CandidateGenerator {
 	public Collection<Vertex> retrieveCominableNodesForActiveVertex(
 			Vertex activeVertex, Map<String, Object> vertexState,
 			Phrase sentence) {
-		int c = (Integer)vertexState.get("COVERAGE");
+		Coverage c = (Coverage)vertexState.get("COVERAGE");
+		
 		ArrayList<Vertex> transOpts = new ArrayList<Vertex>();
-		for (int e = c; e < sentence.size(); e++) {
-			Vertex opts = lattice.get(c).get(e-c);
-			transOpts.add(opts);
+		int gapStart = c.nextGap(0);
+		while (gapStart != -1) {
+			int gapEnd = c.nextCover(gapStart);
+			for (int e = gapStart; e < gapEnd && e < sentence.size(); e++) {
+				Vertex opts = lattice.get(gapStart).get(e-gapStart);
+				transOpts.add(opts);
+			}
+			gapStart = c.nextGap(gapEnd);
 		}
 		
 		return transOpts;
+	}
+	
+	public static void main(String[] args) {
+		
 	}
 
 }
