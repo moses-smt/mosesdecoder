@@ -164,7 +164,7 @@ public:
 		{
 			return (thisSize < compareSize) ? -1 : 1;
 		}
-    		return std::memcmp(m_bitmap, compare.m_bitmap, thisSize);
+    		return std::memcmp(m_bitmap, compare.m_bitmap, thisSize * sizeof(bool));
 	}
 
 	bool operator< (const WordsBitmap &compare) const
