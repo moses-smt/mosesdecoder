@@ -327,7 +327,11 @@ BitmapContainer::FindKBestHypotheses()
 		}
 
 		// Add best hypothesis to hypothesis stack.
-		m_stack.AddPrune(item->GetHypothesis());	
+		bool added = m_stack.AddPrune(item->GetHypothesis());	
+		if (added)
+		{
+			m_kbest++;
+		}
 
 		// Create new hypotheses for the two successors of the hypothesis just added.
 		int hypothesis_pos = item->GetHypothesisPos();
