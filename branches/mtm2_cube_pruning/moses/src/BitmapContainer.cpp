@@ -349,6 +349,9 @@ BitmapContainer::FindKBestHypotheses()
 		int hypothesis_pos = item->GetHypothesisPos();
 		int translation_pos = item->GetTranslationPos();
 		item->GetBackwardsEdge()->PushSuccessors(hypothesis_pos, translation_pos);
+
+		// We are done with the queue item, we delete it.
+		delete item;
 	}
 }
 
