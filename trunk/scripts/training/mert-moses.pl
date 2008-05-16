@@ -36,6 +36,10 @@
 # 13 Oct 2004 Use alternative decoders (DWC)
 # Original version by Philipp Koehn
 
+use FindBin qw($Bin);
+my $SCRIPTS_ROOTDIR = $Bin;
+$SCRIPTS_ROOTDIR =~ s/\/training$//;
+$SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
 # for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
 # of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
@@ -130,7 +134,6 @@ my $allow_unknown_lambdas = 0;
 my $allow_skipping_lambdas = 0;
 
 
-my $SCRIPTS_ROOTDIR = undef; # path to all tools (overriden by specific options)
 my $cmertdir = undef; # path to cmert directory
 my $pythonpath = undef; # path to python libraries needed by cmert
 my $filtercmd = undef; # path to filter-model-given-input.pl
@@ -264,13 +267,6 @@ if ($___INPUTTYPE == 2)
 }
 
 # Check validity of input parameters and set defaults if needed
-
-if (!defined $SCRIPTS_ROOTDIR) {
-  $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
-  die "Please set SCRIPTS_ROOTDIR or specify --rootdir" if !defined $SCRIPTS_ROOTDIR;
-}else{
-  $ENV{"SCRIPTS_ROOTDIR"}=$SCRIPTS_ROOTDIR;
-}
 
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 
@@ -676,7 +672,6 @@ while(1) {
  
   print STDERR "Starting cmert.\n";
   if (defined $___JOBS) {
-    $cmd="setenv SCRIPTS_ROOTDIR $SCRIPTS_ROOTDIR ; $cmd";
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=cmert.log -queue-parameter=\"$queue_flags\"") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
   } else {
     safesystem("$cmd 2> cmert.log") or die "Failed to run cmert";
