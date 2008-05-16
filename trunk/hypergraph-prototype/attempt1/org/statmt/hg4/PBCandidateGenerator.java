@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 public class PBCandidateGenerator extends PassiveCandidateGenerator {
 
-		
 	ArrayList<ArrayList<Vertex>> lattice;
 	
 	/**
@@ -46,6 +45,7 @@ public class PBCandidateGenerator extends PassiveCandidateGenerator {
 					passive.addArc(phraseRule);
 				}
 				latticeSpanStart.add(passive);
+				derivation.addNode(passive);
 			}
 			lattice.add(latticeSpanStart);
 		}
