@@ -356,7 +356,6 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
 	cerr<<"new best Point "<<best<<endl;
 	  }
       }
-      cerr << "BEST: " << best << endl;
     }
     P=best;//update the current vector with the best point on all line tested
     if(verboselevel()>3)
