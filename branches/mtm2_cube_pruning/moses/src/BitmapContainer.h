@@ -234,6 +234,7 @@ class BitmapContainer
 		void FindKBestHypotheses();
 		void AddHypothesis(Hypothesis *hypothesis);
 		void AddBackwardsEdge(BackwardsEdge *edge);
+		void SortHypotheses();
 };
 
 

@@ -344,3 +344,9 @@ BitmapContainer::FindKBestHypotheses()
 		item->GetBackwardsEdge()->PushSuccessors(hypothesis_pos, translation_pos);
 	}
 }
+
+void
+BitmapContainer::SortHypotheses()
+{
+	std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrderer());
+}

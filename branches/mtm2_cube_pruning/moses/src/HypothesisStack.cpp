@@ -281,6 +281,9 @@ void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 		bmContainer = bcExists->second;
 	}
 
+	// Sort the hypotheses inside the Bitmap Container as they are being used by now.
+	bitmapContainer.SortHypotheses();
+
 	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer
 																					, *bmContainer
 																					, transOptList
