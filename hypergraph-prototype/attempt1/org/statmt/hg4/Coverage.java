@@ -4,7 +4,12 @@ import java.util.BitSet;
 
 public class Coverage implements Comparable {
 	BitSet coverage;
+	int slen;
 	
+	public Coverage(int phraseSize) {
+		coverage = new BitSet(phraseSize);
+		slen = phraseSize;
+	}
 	/**
 	 * @param phraseSize
 	 * @param coverageStart
@@ -13,6 +18,7 @@ public class Coverage implements Comparable {
 	public Coverage(int phraseSize, int coverageStart, int coverageEnd) {
 		coverage = new BitSet(phraseSize);
 		coverage.set(coverageStart,coverageEnd,true);
+		slen = phraseSize;
 	}
 
 	/**
@@ -22,16 +28,20 @@ public class Coverage implements Comparable {
 	 */
 	public Coverage(Coverage a, Coverage b) {
 		assert(a.isCompatible(b));
+		slen = a.slen;
+		assert(a.slen == b.slen);
 		this.coverage = (BitSet)a.coverage.clone();
 		this.coverage.or(b.coverage);	
 	}
 	
 	public int size() {
-		return coverage.size();
+		return slen;
 	}
 	
 	public int nextGap(int fromIndex) {
-		return coverage.nextClearBit(fromIndex);		
+		int loc = coverage.nextClearBit(fromIndex);		
+		if (loc >= slen) return -1;
+		else return loc;
 	}
 	
 	public int nextCover(int fromIndex) {
@@ -44,16 +54,18 @@ public class Coverage implements Comparable {
 	 * @return
 	 */
 	public boolean isCompatible(Coverage other) {
-		assert(this.coverage.size() == other.coverage.size());
+		assert(this.slen == other.slen);
 		return !this.coverage.intersects(other.coverage);
 	}
 	
 	public boolean isAllCovered() { 
-		return coverage.cardinality() == coverage.size();
+		return coverage.cardinality() == slen;
 	}
 	
 	public int compareTo(Object o) {
         Coverage other = (Coverage) o;
 		return other.coverage.cardinality() - this.coverage.cardinality();
 	}
+	
+	public String toString() { return coverage.toString() + " size="+this.size(); }
 }

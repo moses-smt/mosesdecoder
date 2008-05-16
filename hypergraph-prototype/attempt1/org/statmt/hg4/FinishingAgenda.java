@@ -10,7 +10,8 @@ public class FinishingAgenda extends PriorityQueue<VertexGroup> {
 	private static final long serialVersionUID = 12142142L;
 	
 	Comparator<Vertex> vertexComp;
-	HashMap<Map<String,Object>, VertexGroup> groups;
+	HashMap<Map<String,Object>, VertexGroup> groups =
+		new HashMap<Map<String,Object>, VertexGroup>();
 	VertexSignatureCreator sigCreator;
 	
 	static class VertexGroupCompare implements Comparator<VertexGroup> {
@@ -34,6 +35,7 @@ public class FinishingAgenda extends PriorityQueue<VertexGroup> {
 	public void notifyBest(VertexGroup g, Vertex v) {
 		this.remove(g);
 		this.add(g);
+		System.out.println("Trying to add " + g + "\tv="+v);
 	}
 	
 	public void add(Vertex v, Map<Vertex, VertexState> v2s) {
