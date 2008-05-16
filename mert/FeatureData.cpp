@@ -38,7 +38,6 @@ void FeatureData::load(ifstream& inFile)
 
 	int iter=0;
 	while (!inFile.eof()){
-		TRACE_ERR("iter " << iter << " size " << size() << std::endl);
 		
 		entry.clear();
 		entry.load(inFile);
