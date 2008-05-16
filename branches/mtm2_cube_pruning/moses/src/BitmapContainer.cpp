@@ -91,8 +91,6 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 	// If either dimension is empty, we haven't got anything to do.
 	if(m_prevBitmapContainer.GetHypotheses().size() == 0 || m_kbest_translations.size() == 0) {
 		VERBOSE(3, "Empty cube on BackwardsEdge" << std::endl);
-		m_hypothesis_maxpos = 0;
-		m_translations_maxpos = 0;
 		return;
 	}
 
@@ -101,11 +99,9 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 
 	if (maxDistortion == -1) {
 		for (HypothesisSet::const_iterator iter = m_prevBitmapContainer.GetHypotheses().begin(); iter != m_prevBitmapContainer.GetHypotheses().end(); ++iter)
-			{
-				m_kbest_hypotheses.push_back(*iter);
-			}
-		m_hypothesis_maxpos = m_kbest_hypotheses.size();
-		m_translations_maxpos = m_kbest_translations.size();
+		{
+			m_kbest_hypotheses.push_back(*iter);
+		}
 		return;
 	}
 
@@ -147,10 +143,6 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 
 	HypothesisScoreOrdererWithDistortion::transOptRange = &transOptRange;
 	std::sort(m_kbest_hypotheses.begin(), m_kbest_hypotheses.end(), HypothesisScoreOrdererWithDistortion());
-
-	m_hypothesis_maxpos = m_kbest_hypotheses.size();
-	m_translations_maxpos = m_kbest_translations.size();
-
 }
 
 BackwardsEdge::~BackwardsEdge()
@@ -163,7 +155,7 @@ BackwardsEdge::~BackwardsEdge()
 void
 BackwardsEdge::Initialize()
 {
-	if(m_hypothesis_maxpos == 0 || m_translations_maxpos == 0)
+	if(m_kbest_hypotheses.size() == 0 || m_kbest_translations.size() == 0)
 	{
 		m_initialized = true;
 		return;
@@ -228,7 +220,7 @@ BackwardsEdge::PushSuccessors(int x, int y)
 {
 	Hypothesis *newHypo;
 	
-	if(y + 1 < m_translations_maxpos && !SeenPosition(x, y + 1)) {
+	if(y + 1 < m_kbest_translations.size() && !SeenPosition(x, y + 1)) {
 		newHypo = CreateHypothesis(*m_kbest_hypotheses[x], *m_kbest_translations[y + 1]);
 
 		if(newHypo != NULL)
@@ -238,7 +230,7 @@ BackwardsEdge::PushSuccessors(int x, int y)
 		}
 	}
 
-	if(x + 1 < m_hypothesis_maxpos && !SeenPosition(x + 1, y)) {
+	if(x + 1 < m_kbest_hypotheses.size() && !SeenPosition(x + 1, y)) {
 		newHypo = CreateHypothesis(*m_kbest_hypotheses[x + 1], *m_kbest_translations[y]);
 
 		if(newHypo != NULL)
