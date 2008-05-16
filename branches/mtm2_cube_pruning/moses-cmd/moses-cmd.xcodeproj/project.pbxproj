@@ -321,6 +321,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_OPTIMIZATION_LEVEL = 0;
+				LIBRARY_SEARCH_PATHS = /Users/ch/Documents/studium/liz/software/mt/moses/mosesdecoder/branches/mtm2_cube_pruning/moses/build/Development;
 			};
 			name = Development;
 		};
@@ -328,6 +329,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_OPTIMIZATION_LEVEL = 0;
+				LIBRARY_SEARCH_PATHS = /Users/ch/Documents/studium/liz/software/mt/moses/mosesdecoder/branches/mtm2_cube_pruning/moses/build/Development;
 			};
 			name = Deployment;
 		};
@@ -335,6 +337,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_OPTIMIZATION_LEVEL = 0;
+				LIBRARY_SEARCH_PATHS = /Users/ch/Documents/studium/liz/software/mt/moses/mosesdecoder/branches/mtm2_cube_pruning/moses/build/Development;
 			};
 			name = Default;
 		};
