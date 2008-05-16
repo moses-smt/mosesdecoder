@@ -43,81 +43,50 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   , m_kbest(kBestCubePruning)
   , m_seenPosition()
 {
-	// Copy hypotheses from ordered set to vector for faster access.
-	m_hypothesis_maxpos = m_prevBitmapContainer.GetHypotheses().size();
-	m_kbest_hypotheses.reserve(m_hypothesis_maxpos);
-//	std::copy(m_prevBitmapContainer.GetHypotheses().begin()
-	//					, m_prevBitmapContainer.GetHypotheses().end()
-		//				, m_kbest_hypotheses.begin());
-	
-	m_kbest_hypotheses.clear();
-	HypothesisSet::const_iterator iter;
-	for (iter = m_prevBitmapContainer.GetHypotheses().begin(); iter != m_prevBitmapContainer.GetHypotheses().end(); ++iter)
-	{
-		m_kbest_hypotheses.push_back(*iter);
-	}
 
-	std::cerr << m_kbest_translations.size() << std::endl;
-	std::cerr << "extSize = " << m_prevBitmapContainer.GetHypotheses().size() << std::endl;
-	std::cerr << "inSize  = " << m_kbest_hypotheses.size() << std::endl;
-	
 	// If either dimension is empty, we haven't got anything to do.
-	if(m_kbest_translations.size() == 0 || m_kbest_hypotheses.size() == 0) {
+	if(m_prevBitmapContainer.GetHypotheses().size() == 0 || m_kbest_translations.size() == 0) {
 		VERBOSE(3, "Empty cube on BackwardsEdge" << std::endl);
 		m_hypothesis_maxpos = 0;
 		m_translations_maxpos = 0;
 		return;
 	}
 
-	m_translations_maxpos = m_kbest_translations.size();
-	m_hypothesis_maxpos = m_kbest_hypotheses.size();
-
 	// Fetch the things we need for distortion cost computation.
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
-	const InputType *itype = StaticData::Instance().GetInput();
-	WordsRange transOptRange = translations[0]->GetSourceWordsRange();
 
-
-/* THIS IS NOT WORKING
-	// We now copy all the hypotheses to our local data structure.
-	m_hypothesis_maxpos = 0;
-	HypothesisSet::iterator hypoIter = m_kbest_hypotheses.begin();
-	while (hypoIter != m_kbest_hypotheses.end())
-	{
-		// If the combination of this hypothesis and our translation
-		// options violates the distortion limit, discard the hypothesis,
-		// otherwise store it and increment m_hypothesis_maxpos.		
-		Hypothesis *current = *hypoIter;
-
-		if (maxDistortion > -1)
-		{
-			// Special case: If this is the first hypothesis used to seed the search,
-			// it doesn't have a valid range, and we create the hypothesis, if the
-			// initial position is not further into the sentence than the distortion limit.
-			if (current->GetWordsBitmap().GetNumWordsCovered() == 0)
+	if (maxDistortion == -1) {
+		for (HypothesisSet::const_iterator iter = m_prevBitmapContainer.GetHypotheses().begin(); iter != m_prevBitmapContainer.GetHypotheses().end(); ++iter)
 			{
-				if (transOptRange.GetStartPos() > maxDistortion)
-				{
-					hypoIter = m_kbest_hypotheses.erase(hypoIter);
-					continue;
-				}
+				m_kbest_hypotheses.push_back(*iter);
 			}
-			else
+		return;
+	}
+
+	WordsRange transOptRange = translations[0]->GetSourceWordsRange();
+	const InputType *itype = StaticData::Instance().GetInput();
+
+	for (HypothesisSet::const_iterator iter = m_prevBitmapContainer.GetHypotheses().begin(); iter != m_prevBitmapContainer.GetHypotheses().end(); ++iter) {
+		// Special case: If this is the first hypothesis used to seed the search,
+		// it doesn't have a valid range, and we create the hypothesis, if the
+		// initial position is not further into the sentence than the distortion limit.
+		if ((*iter)->GetWordsBitmap().GetNumWordsCovered() == 0)
 			{
-				int distortionDistance = itype->ComputeDistortionDistance(current->GetCurrSourceWordsRange()
+				if (transOptRange.GetStartPos() < maxDistortion)
+					m_kbest_hypotheses.push_back(*iter);
+			}
+		else
+			{
+				int distortionDistance = itype->ComputeDistortionDistance((*iter)->GetCurrSourceWordsRange()
 																		, transOptRange);
 
-				if (distortionDistance > maxDistortion)
-				{
-					hypoIter = m_kbest_hypotheses.erase(hypoIter);
-					continue;
-				}
+				if (distortionDistance <= maxDistortion)
+					m_kbest_hypotheses.push_back(*iter);
 			}
-		}
-
-		++hypoIter;
 	}
-*/
+
+	m_hypothesis_maxpos = m_kbest_hypotheses.size();
+	m_translations_maxpos = m_kbest_translations.size();
 }
 
 BackwardsEdge::~BackwardsEdge()
