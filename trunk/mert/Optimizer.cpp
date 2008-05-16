@@ -289,7 +289,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
     
     for(int d=0;d<Point::getdim();d++){
       if(verboselevel()>3)
-	cerr<<"minimizing along direction"<<d<<endl;
+	cerr<<"minimizing along direction "<<d<<endl;
       Point direction;
       direction[d]=1.0;
       statscore_t curscore=LineOptimize(P,direction,linebest);//find the minimum on the line

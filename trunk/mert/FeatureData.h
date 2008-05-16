@@ -35,8 +35,20 @@ public:
 		
 	inline void clear() { array_.clear(); }
 	
-	inline FeatureArray& get(int i){ return array_.at(i); }
-	inline const FeatureArray& get(int i)const{ return array_.at(i); }
+	inline FeatureArray& get(int i){ 
+#ifdef DEBUG
+	  return array_.at(i); 
+#else
+	  return array_[i];
+#endif
+	}
+	inline const FeatureArray& get(int i)const{
+#ifdef DEBUG
+	  return array_.at(i); 
+#else
+	  return array_[i];
+#endif
+	}
 	inline bool exists(int i){ return (i<array_.size())?true:false; }
 
 	inline void setIndex(){ };
