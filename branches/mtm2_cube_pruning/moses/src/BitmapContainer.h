@@ -39,7 +39,7 @@ class HypothesisStack;
 class HypothesisQueueItem;
 class QueueItemOrderer;
 
-typedef std::set< Hypothesis*, HypothesisScoreOrderer > OrderedHypothesisSet;
+typedef std::vector< Hypothesis* > HypothesisSet;
 typedef std::set< BackwardsEdge* > BackwardsEdgeSet;
 typedef std::priority_queue< HypothesisQueueItem*, std::vector< HypothesisQueueItem* >, QueueItemOrderer> HypothesisQueue;
 
@@ -158,7 +158,7 @@ class BackwardsEdge
 		friend class BitmapContainer;
 		bool m_initialized;
 
-		const BitmapContainer &m_prevBitmapContainer;
+		BitmapContainer &m_prevBitmapContainer;
 		BitmapContainer &m_parent;
 		const TranslationOptionList &m_kbest_translations;
 		const SquareMatrix &m_futurescore;
@@ -177,7 +177,7 @@ class BackwardsEdge
 		void Initialize();
 
 	public:
-		BackwardsEdge(const BitmapContainer &prevBitmapContainer
+		BackwardsEdge(BitmapContainer &prevBitmapContainer
 									, BitmapContainer &parent
 									, const TranslationOptionList &translations
 									, const SquareMatrix &futureScore
@@ -204,7 +204,7 @@ class BitmapContainer
 		WordsBitmap m_bitmap;
 		HypothesisStack &m_stack;
 		size_t m_kbest;
-		OrderedHypothesisSet m_hypotheses;
+		HypothesisSet m_hypotheses;
 		BackwardsEdgeSet m_edges;
 		HypothesisQueue m_queue;
 
@@ -227,7 +227,8 @@ class BitmapContainer
 		bool Empty();
 
 		const WordsBitmap &GetWordsBitmap();
-		const OrderedHypothesisSet &GetHypotheses() const;
+		HypothesisSet &GetHypotheses();
+		size_t GetHypothesesSize() const;
 		const BackwardsEdgeSet &GetBackwardsEdges();
 		
 		void FindKBestHypotheses();

@@ -167,7 +167,7 @@ public:
 	void SetBitmapAccessor(const WordsBitmap &newBitmap
 						   , HypothesisStack &stack
 						   , const WordsRange &range
-						   , const BitmapContainer &bitmapContainer
+						   , BitmapContainer &bitmapContainer
 						   , const SquareMatrix &futureScore
 						   , const TranslationOptionList &transOptList);
 

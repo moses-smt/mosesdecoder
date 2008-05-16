@@ -30,9 +30,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // BackwardsEdge Code
 ////////////////////////////////////////////////////////////////////////////////
 
-BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
+BackwardsEdge::BackwardsEdge(BitmapContainer &prevBitmapContainer
 							 , BitmapContainer &parent
-                             , const TranslationOptionList &translations
+							 , const TranslationOptionList &translations
 							 , const SquareMatrix &futureScore
 							 , const size_t kBestCubePruning)
   : m_initialized(false)
@@ -44,51 +44,44 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   , m_seenPosition()
 {
 	// Copy hypotheses from ordered set to vector for faster access.
-	const OrderedHypothesisSet &hypotheses = m_prevBitmapContainer.GetHypotheses();
+	m_kbest_hypotheses = m_prevBitmapContainer.GetHypotheses();
 	
 	// If either dimension is empty, we haven't got anything to do.
-	if(translations.size() == 0 || hypotheses.size() == 0) {
+	if(m_kbest_translations.size() == 0 || m_kbest_hypotheses.size() == 0) {
 		VERBOSE(3, "Empty cube on BackwardsEdge" << std::endl);
 		m_hypothesis_maxpos = 0;
 		m_translations_maxpos = 0;
 		return;
 	}
-	
-	m_hypothesis_maxpos = std::min(m_kbest, hypotheses.size());
-	m_translations_maxpos = std::min(m_kbest, translations.size());
-	m_kbest_hypotheses.resize(hypotheses.size());
+
+	m_translations_maxpos = m_kbest_translations.size();
+	m_hypothesis_maxpos = m_kbest_hypotheses.size();
 
 	// Fetch the things we need for distortion cost computation.
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 	const InputType *itype = StaticData::Instance().GetInput();
 	WordsRange transOptRange = translations[0]->GetSourceWordsRange();
 
+	// We now copy all the hypotheses to our local data structure.
 	m_hypothesis_maxpos = 0;
-	OrderedHypothesisSet::const_iterator hypoIter = hypotheses.begin();
-	for (; m_hypothesis_maxpos < m_kbest && hypoIter != hypotheses.end(); ++hypoIter)
+	HypothesisSet::iterator hypoIter;
+	for (hypoIter = m_kbest_hypotheses.begin(); hypoIter != m_kbest_hypotheses.end(); ++hypoIter);
 	{
 		// If the combination of this hypothesis and our translation
 		// options violates the distortion limit, discard the hypothesis,
 		// otherwise store it and increment m_hypothesis_maxpos.		
 		Hypothesis *current = *hypoIter;
 
-		if (maxDistortion == -1)
-		{
-			m_kbest_hypotheses[m_hypothesis_maxpos++] = current;
-		}
-		else
+		if (maxDistortion > -1)
 		{
 		  int distortionDistance = itype->ComputeDistortionDistance(current->GetCurrSourceWordsRange()
 																																, transOptRange);
-		  if (distortionDistance <= maxDistortion)
+		  if (distortionDistance > maxDistortion)
 			{
-				m_kbest_hypotheses[m_hypothesis_maxpos++] = current;
+				m_kbest_hypotheses.erase(hypoIter);
 			}
 		}
 	}
-	
-	// Maybe the list has shrunk.
-	m_kbest_hypotheses.resize(m_hypothesis_maxpos);
 }
 
 BackwardsEdge::~BackwardsEdge()
@@ -194,7 +187,7 @@ BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
   , m_stack(stack)
   , m_kbest(KBestCubePruning)
 {
-	m_hypotheses = OrderedHypothesisSet();
+	m_hypotheses = HypothesisSet();
 	m_edges = BackwardsEdgeSet();
 	m_queue = HypothesisQueue();
 }
@@ -274,10 +267,16 @@ BitmapContainer::GetWordsBitmap()
 	return m_bitmap;
 }
 
-const OrderedHypothesisSet&
-BitmapContainer::GetHypotheses() const
+HypothesisSet&
+BitmapContainer::GetHypotheses()
 {
 	return m_hypotheses;
+}
+
+size_t
+BitmapContainer::GetHypothesesSize() const
+{
+	return m_hypotheses.size();
 }
 
 const BackwardsEdgeSet&
@@ -289,9 +288,17 @@ BitmapContainer::GetBackwardsEdges()
 void
 BitmapContainer::AddHypothesis(Hypothesis *hypothesis)
 {
-	OrderedHypothesisSet::const_iterator iter = m_hypotheses.find(hypothesis);
-	assert(iter == m_hypotheses.end());
-	m_hypotheses.insert(hypothesis);
+	bool itemExists = false;
+	HypothesisSet::const_iterator iter;
+	for (iter = m_hypotheses.begin(); iter != m_hypotheses.end(); ++iter)
+	{
+		if (*iter == hypothesis) {
+			itemExists = true;
+			break;
+		}
+	}
+	assert(itemExists == false);
+	m_hypotheses.push_back(hypothesis);
 }
 
 void

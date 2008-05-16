@@ -91,7 +91,7 @@ protected:
 	//! go thru all bitmaps in 1 stack & create backpointers to bitmaps in the stack
 	void CreateForwardTodos(HypothesisStack &stack);
 	//! create a back pointer to this bitmap, with edge that has this words range translation
-	void CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, const BitmapContainer &bitmapContainer);
+	void CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer);
 	bool CheckDistortion(const WordsBitmap &bitmap, const WordsRange &range) const;
 
 public:

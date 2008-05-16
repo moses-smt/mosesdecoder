@@ -152,9 +152,9 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 	for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor)
 	{
 		const WordsBitmap &bitmap = iterAccessor->first;
-		const BitmapContainer &bitmapContainer = *iterAccessor->second;
+		BitmapContainer &bitmapContainer = *iterAccessor->second;
 
-		if (bitmapContainer.GetHypotheses().size() == 0)
+		if (bitmapContainer.GetHypothesesSize() == 0)
 		{ // no hypothese to expand. don't bother doing it		
 			continue; 
 		}
@@ -192,7 +192,7 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 	}
 }
 
-void Manager::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, const BitmapContainer &bitmapContainer)
+void Manager::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer)
 {
 	WordsBitmap newBitmap = bitmap;
 	newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
