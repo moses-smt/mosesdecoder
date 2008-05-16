@@ -65,7 +65,6 @@ void FeatureArray::loadtxt(ifstream& inFile)
         std::string::size_type loc;
 
 
-	TRACE_ERR("starting loadtxt..." << std::endl);
 	std::getline(inFile, stringBuf);
 	if (stringBuf.empty()){
 		TRACE_ERR("ERROR: Empty string" << std::endl);
