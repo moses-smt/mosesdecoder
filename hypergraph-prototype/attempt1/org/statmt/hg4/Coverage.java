@@ -48,6 +48,10 @@ public class Coverage implements Comparable {
 		return !this.coverage.intersects(other.coverage);
 	}
 	
+	public boolean isAllCovered() { 
+		return coverage.cardinality() == coverage.size();
+	}
+	
 	public int compareTo(Object o) {
         Coverage other = (Coverage) o;
 		return other.coverage.cardinality() - this.coverage.cardinality();
