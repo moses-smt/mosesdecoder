@@ -102,27 +102,30 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
     onebest.push_back(pair<float,unsigned>(MIN_FLOAT,index));//first 1best is the lowest gradient. 
     //now we look for the intersections points indicating a change of 1 best
     //we use the fact that the function is convex, which means that the gradient can only go up   
-    int c=0;
     while(it!=gradient.end()){
       map<float,unsigned>::iterator leftmost=it;
-      float leftmostx=onebest.back().first;
       float m=it->first;
       float b=f0[it->second];
       multimap<float,unsigned>::iterator it2=it;
       it2++;
-      int d=0;
+      float leftmostx=MAX_FLOAT;
       for(;it2!=gradient.end();it2++){
 	//cerr<<"--"<<d++<<' '<<it2->first<<' '<<it2->second<<endl;
 	//look for all candidate with a gradient bigger than the current one and find the one with the leftmost intersection
 	float curintersect;
 	if(m!=it2->first){
 	  curintersect=intersect(m,b,it2->first,f0[it2->second]);
+          //cerr << "curintersect: " << curintersect << " leftmostx: " << leftmostx << endl;
 	  if(curintersect<leftmostx){
 	    //we have found and intersection to the left of the leftmost we had so far.
 	  leftmostx=curintersect;
 	  leftmost=it2;//this is the new reference
 	  }
 	}
+      }
+      if (leftmost == it) {
+          //we didn't find any more intersections
+          break;
       }
       //we have found the next intersection!
 
@@ -135,17 +138,22 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
 	 right of the penultimate one. In that case, the Points would
 	 switch places in the sort, resulting in a bogus score for
 	 that interval. */
-      if(abs(leftmostx-onebest.back().first)<min_int)
+      if(abs(leftmostx-onebest.back().first)<min_int) {
 	onebest.back()=pair<float,unsigned>(leftmostx,leftmost->second);//leftmost->first is the gradient, we are interested in the value of the intersection
-      else //normal case: we add a new threshold
+      } else { //normal case: we add a new threshold
 	onebest.push_back(pair<float,unsigned>(leftmostx,leftmost->second));
-      if(it==leftmost)
-	it=gradient.end();
-      else
-	it=leftmost;
+      }
+      it=leftmost;
     }
     //we have the onebest list and the threshold for the current sentence.
     //now we update the thresholdlist: we add the new threshold and the  value of the onebest.
+        /*
+        cerr << "Sentence: " << S << endl;
+        for (size_t i = 0; i < onebest.size(); ++i) {
+                cerr << "x: " << onebest[i].first << " i: " << onebest[i].second << " ";
+        }
+        cerr << endl;
+        */
 
     //add the 1best for x=-inf to the corresponding threshold
     //    (this first threshold is the same for everybody)
@@ -180,7 +188,17 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   //now the thresholdlist is up to date: 
   //it contains a list of all the parameter_ts where the function changed its value, along with the nbest list for the interval after each threshold
   //last thing to do is compute the Stat score (ie BLEU) and find the minimum
-  
+  /*
+  cerr << "Thresholds: " << endl;
+  for (list<threshold>::iterator i = thresholdlist.begin();
+        i != thresholdlist.end(); ++i) {
+        cerr << "x: " << i->first << " diffs";
+        for (size_t j = 0; j < i->second.size(); ++j) {
+            cerr << " " << i->second[j].first << "," << i->second[j].second;
+        }
+        cerr << endl;
+  }*/
+
   //  cerr<<"thesholdlist size"<<thresholdlist.size()<<endl;  
   list<threshold>::iterator lit2=thresholdlist.begin();
   ++lit2;
@@ -195,22 +213,42 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   float bestx=MIN_FLOAT;
   assert(scores.size()==thresholdlist.size());//we skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best
   for(int sc=0;sc!=scores.size();sc++){
-    lit2++;//We move the list iterator and the vector index at the same time
-    //because we need to get the value of lambda back from the list
-    //cerr<<lit2->first<<endl;
-    if(scores[sc]>bestscore){
-      bestscore=scores[sc];
-      if(lit2!=thresholdlist.end()){
-	//we dont want to stay exactly at the threshold where the function is discontinuous so we move just a little to the right
-	//but  we dont want to cross a threshold 
-	bestx=lit2->first;
-	lit2++;
-	if(lit2->first-bestx>0.0001)//distance to next threshold
-	  bestx+=0.0001;
-	lit2--;
-      }else
-	bestx=lit2->first+0.0001;
+    //cerr << "Threshold id: " << sc << " Score: " << scores[sc] << endl;
+    if (scores[sc] > bestscore) {
+        //This is the score for the interval [lit2->first, (lit2+1)->first]
+        //unless we're at the last score, when it's the score
+        //for the interval [lit2->first,+inf]
+        bestscore = scores[sc];
+
+        //if we're not in [-inf,x1] or [xn,+inf] then just take the value
+        //if x which splits the interval in half. For the rightmost interval,
+        //take x to be the last interval boundary + 0.1, and for the leftmost
+        //interval, take x to be the first interval boundary - 1000.
+        //These values are taken from cmert.
+        float leftx = lit2->first;
+        if (lit2 == thresholdlist.begin()) {
+            leftx = MIN_FLOAT;
+        }
+        ++lit2;
+        float rightx = MAX_FLOAT;
+        if (lit2 != thresholdlist.end()) {
+            rightx = lit2->first;
+        }
+        --lit2;
+         //cerr << "leftx: " << leftx << " rightx: " << rightx << endl;
+        if (leftx == MIN_FLOAT) {
+            bestx = rightx-1000;
+        } else if (rightx == MAX_FLOAT) {
+            bestx = leftx+0.1;
+        } else {
+            bestx = 0.5 * (rightx + leftx);
+        }
+        //cerr << "x = " << "set new bestx to: " << bestx << endl;
     }
+    ++lit2;
+
+    
+
   }
   if(abs(bestx)<0.00015){
     bestx=0.0;//the origin of the line is the best point!we put it back at 0 so we do not propagate rounding erros
@@ -288,6 +326,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
  
   statscore_t prevscore=0;
   statscore_t bestscore=MIN_FLOAT;
+  Point  best;
   int nrun=0;
   do{
     ++nrun;    
@@ -295,7 +334,6 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
       cerr<<"last diff="<<bestscore-prevscore<<"nrun "<<nrun<<endl;
     prevscore=bestscore;
     
-    Point  best;
     Point  linebest;
     
     for(int d=0;d<Point::getdim();d++){
@@ -318,6 +356,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
 	cerr<<"new best Point "<<best<<endl;
 	  }
       }
+      cerr << "BEST: " << best << endl;
     }
     P=best;//update the current vector with the best point on all line tested
     if(verboselevel()>3)
