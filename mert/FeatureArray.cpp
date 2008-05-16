@@ -11,8 +11,7 @@
 #include "Util.h"
 
 
-FeatureArray::FeatureArray():
-bufLen_(0),idx(0)
+FeatureArray::FeatureArray(): idx(0)
 {};
 
 void FeatureArray::savetxt(std::ofstream& outFile)

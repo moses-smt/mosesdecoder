@@ -11,9 +11,7 @@
 #include "Util.h"
 
 
-FeatureData::FeatureData():
-bufLen_(0)
-{};
+FeatureData::FeatureData() {};
 
 void FeatureData::save(std::ofstream& outFile, bool bin)
 {

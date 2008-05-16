@@ -16,6 +16,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include "Timer.h"
 #include "Util.h"
 
 
@@ -28,9 +29,9 @@ void usage(void) {
   cerr<<"[-n retry ntimes (default 1)]"<<endl;
   cerr<<"[-o\tthe indexes to optimize(default all)]"<<endl;
   cerr<<"[-t\tthe optimizer(default Powell)]"<<endl;
-  cerr<<"[--sctype] the scorer type (default BLEU)"<<endl;
-  cerr<<"[--scfile] the scorer data file (default score.data)"<<endl;
-  cerr<<"[--ffile] the feature data file data file (default feature.data)"<<endl;
+  cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
+  cerr<<"[--scfile|-S] the scorer data file (default score.data)"<<endl;
+  cerr<<"[--ffile|-F] the feature data file data file (default feature.data)"<<endl;
   cerr<<"[-v] verbose level"<<endl;
   exit(1);
 }
@@ -87,6 +88,10 @@ int main (int argc, char **argv) {
   }
   if (pdim < 0)
     usage();
+
+  Timer timer;
+  timer.start("Starting...");
+  
   if(tooptimize.empty()){
     tooptimize.resize(pdim);//We'll optimize on everything
     for(i=0;i<pdim;i++)
@@ -150,4 +155,5 @@ int main (int argc, char **argv) {
  cerr<<"best score"<<best<<endl;
  ofstream res("weights.txt");
  res<<bestP<<endl;
+ timer.stop("Stopping...");
 }

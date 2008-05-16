@@ -25,8 +25,6 @@ protected:
 	vector<int> idxmap_;
 	
 private:
-	char databuf_[BUFSIZ];
-	size_t bufLen_;
 	
 public:
 	FeatureData();
@@ -61,8 +59,6 @@ public:
 	
 	inline size_t size(){ return array_.size(); }
 	
-	inline size_t memsize(){ return bufLen_; }
-
 	void save(const std::string &file, bool bin=false);
 	void save(ofstream& outFile, bool bin=false);
 	inline void save(bool bin=false){ save("/dev/stdout", bin); }

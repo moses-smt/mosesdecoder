@@ -1,110 +1,154 @@
-
-using namespace std;
+/**
+ * Extract features and score statistics from nvest file, optionally merging with
+ * those from the previous iteration.
+ * Developed during the 2nd MT marathon.
+ **/
 
 #include <iostream>
-#include "Parameter.h"
+#include <string>
+#include <vector>
+
+#include <getopt.h>
+
+#include "Data.h"
+#include "Scorer.h"
 #include "Timer.h"
 #include "Util.h"
 
-#include "Scorer.h"
-#include "Data.h"
+using namespace std;
 
-int main (int argc, char * argv[]) {
+void usage() {
+  cerr<<"usage: extractor [options])"<<endl;
+  cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
+  cerr<<"[--reference|-r] comma separated list of reference files (default reference.txt)"<<endl;
+  cerr<<"[--binary|-b] use binary output format (defaults to text )"<<endl;
+  cerr<<"[--nbest|-n] the nbest file (default nbest.txt)"<<endl;
+  cerr<<"[--scfile|-S] the scorer data output file (default score.data)"<<endl;
+  cerr<<"[--ffile|-F] the feature data output file data file (default feature.data)"<<endl;
+  cerr<<"[--prev-ffile|-E] the previous feature data output file data file (default None)"<<endl;
+  cerr<<"[--prev-scfile|-R] the previous scorer data output file (default None)"<<endl;
+  cerr<<"[-v] verbose level"<<endl;
+  cerr<<"[--help|-h] print this message and exit"<<endl;
+  exit(1);
+}
 
-        // parse command line for parameters
-        Parameter *parameter = new Parameter();
-        if (!parameter->LoadParam(argc, argv))
-        {
-                parameter->Explain();
-                delete parameter;
-                return EXIT_FAILURE;            
+
+static struct option long_options[] =
+  {
+    {"sctype",required_argument,0,'s'},
+    {"reference",required_argument,0,'r'},
+    {"binary",no_argument,0,'b'},
+    {"nbest",required_argument,0,'n'},
+    {"scfile",required_argument,0,'S'},
+    {"ffile",required_argument,0,'F'},
+    {"prev-scfile",required_argument,0,'R'},
+    {"prev-ffile",required_argument,0,'E'},
+    {"verbose",required_argument,0,'v'},
+    {"help",no_argument,0,'h'},
+    {0, 0, 0, 0}
+  };
+int option_index;
+
+int main(int argc, char** argv) {
+    //defaults
+    string scorerType("BLEU");
+    string referenceFile("reference.txt");
+    string nbestFile("nbest.txt");
+    string scoreDataFile("score.data");
+    string featureDataFile("feature.data");
+    string prevScoreDataFile;
+    string prevFeatureDataFile;
+    bool binmode = false;
+    int verbosity = 0;
+    int c;
+    while ((c=getopt_long (argc,argv, "s:r:n:S:F:R:E:v:hb", long_options, &option_index)) != -1) {
+        switch(c) {
+            case 's':
+                scorerType = string(optarg);
+                break;
+            case 'r':
+                referenceFile = string(optarg);
+                break;
+            case 'b':
+                binmode = true;
+                break;
+            case 'n':
+                nbestFile = string(optarg);
+                break;
+            case 'S':
+                scoreDataFile = string(optarg);
+                break;
+            case 'F':
+                featureDataFile = string(optarg);
+                break;
+            case 'E':
+                prevFeatureDataFile = string(optarg);
+                break;
+            case 'R':
+                prevScoreDataFile = string(optarg);
+                break;
+            case 'v':
+                verbosity = atoi(optarg);
+                break;
+            default:
+                usage();
         }
-        if (parameter->isSet("help")) {
-            parameter->Explain();
-            return EXIT_SUCCESS;
-        }
-
-	std::string NbestFile, InputFeatureFile, OutputFeatureFile, InputScoreFile, OutputScoreFile;
-
-        // Read files
-        if(parameter->GetParam("NbestFile").size()) 
-                NbestFile = parameter->GetParam("NbestFile")[0];
-
-        if(parameter->GetParam("InputFeatureStatistics").size()) 
-                InputFeatureFile = parameter->GetParam("InputFeatureStatistics")[0];
-
-        if(parameter->GetParam("InputScoreStatistics").size()) 
-                InputScoreFile = parameter->GetParam("InputScoreStatistics")[0];
-
-        if(parameter->GetParam("OutputFeatureStatistics").size()) 
-                OutputFeatureFile = parameter->GetParam("OutputFeatureStatistics")[0];
-
-        if(parameter->GetParam("OutputScoreStatistics").size()) 
-                OutputScoreFile = parameter->GetParam("OutputScoreStatistics")[0];
-
-	bool binmode=false;
-        if(parameter->GetParam("OutputBinaryMode").size()) 
-		if (Scan<bool>(parameter->GetParam("OutputBinaryMode")[0])){
-			binmode = true;
-			TRACE_ERR("binary output mode is not yet implemented" << std::endl);
-			binmode = false;
-		}
-		
-
-        vector<string> references;
-        const vector<string> &tmpreferences = parameter->GetParam("Reference");
-        if (tmpreferences.size() == 0) {
-            cerr << "Error: No reference files specified" << endl;
-            return EXIT_FAILURE;
-        }
-        for(size_t i=0; i< tmpreferences.size(); i++)  {
-                references.push_back(Scan<string>(tmpreferences[i]));
-        }
-
-
-	Timer timer;
-	timer.start("Starting...");
-    Scorer* scorer = 0;
-    const vector<string>& scorerType = parameter->GetParam("Score");
-    ScorerFactory sfactory;
-    if (scorerType.size() ==  0) {
-        scorer = sfactory.getScorer(sfactory.getTypes()[0]);
-    } else {
-        scorer = sfactory.getScorer(scorerType[0]);
     }
 
-    // Check consistency of reference
-	if (references.size() == 0) {
-		TRACE_ERR("Error: You must specify atleast one reference file" << std::endl);
-		return EXIT_FAILURE;
-     }
-     if (NbestFile.size() == 0) { 
-        TRACE_ERR("Error: No nbest file specified" << std::endl);
+    if ((prevScoreDataFile.length() > 0 && prevFeatureDataFile.length() == 0)
+        || (prevScoreDataFile.length() == 0 && prevFeatureDataFile.length() > 0)) {
+        cerr << "Error: either previous score and feature files are both specified, or neither" << endl;
         return EXIT_FAILURE;
-     }
+    }
+
+    TRACE_ERR("Score statistics output: " << scoreDataFile << endl);
+    TRACE_ERR("Features output: " << featureDataFile << endl);
+
     
-    scorer->setReferenceFiles(references);
+    if (binmode) {
+        cerr << "Warning: binary mode not yet implemented" << endl;
+        binmode = false;
+    }
 
-	Data data(*scorer);
+    vector<string> referenceFiles;
+    size_t pos = 0;
+    while (pos != string::npos && pos < referenceFile.length()) {
+        size_t end = referenceFile.find(",",pos);
+        if (end == string::npos) {
+            referenceFiles.push_back(referenceFile.substr(pos));
+            pos = end;
+        } else {
+            referenceFiles.push_back(referenceFile.substr(pos,end-pos));
+            pos = end+1;
+        }
+        TRACE_ERR("Reference file: " << referenceFiles.back() << endl);
+    }
+
+    try {
+        TRACE_ERR("Scorer type: " << scorerType << endl);
+        ScorerFactory sfactory;
+        Scorer* scorer = sfactory.getScorer(scorerType);
+
+        Timer timer;
+        timer.start("Starting...");
+        
+        scorer->setReferenceFiles(referenceFiles);
+        Data data(*scorer);
+
+        if (prevScoreDataFile.length() > 0) {
+            //load old data
+            data.load(prevFeatureDataFile, prevScoreDataFile);
+        }
 
 
-// Check consistency of files
-	if ((!InputFeatureFile.empty() && InputScoreFile.empty()) ||
-	    (InputFeatureFile.empty() && !InputScoreFile.empty()))
-    {
-		TRACE_ERR("You must define both InputFeatureFile and InputScoreFile (or neither of two)" << std::endl);
+        data.loadnbest(nbestFile);
+
+        data.save(featureDataFile, scoreDataFile, binmode);
+        timer.stop("Stopping...");
+        return EXIT_SUCCESS;
+    } catch (const exception& e) {
+        cerr << "Exception: " << e.what() << endl;
         return EXIT_FAILURE;
     }
 
-// Load statistics
-	if (!InputFeatureFile.empty() && !InputScoreFile.empty())
-		data.load(InputFeatureFile, InputScoreFile);
-
-//Load nbestfile
-	data.loadnbest(NbestFile);
-
-	data.save(OutputFeatureFile, OutputScoreFile, binmode);
-
-	timer.stop("Stopping...");
-	return 0;
 }

@@ -49,7 +49,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles) {
 		TRACE_ERR("Loading reference from " << referenceFiles[i] << endl);
 		ifstream refin(referenceFiles[i].c_str());
 		if (!refin) {
-			throw runtime_error("Unable to open" + referenceFiles[i]);
+			throw runtime_error("Unable to open: " + referenceFiles[i]);
 		}
 		string line;
 		size_t sid = 0; //sentence counter

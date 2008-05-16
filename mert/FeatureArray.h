@@ -30,8 +30,6 @@ protected:
 	vector<FeatureStats> array_;
 	
 private:
-	char databuf_[BUFSIZ];
-	size_t bufLen_;
 	size_t idx; // idx to identify the utterance, it can differ from the index inside the vector
 	
 public:
@@ -51,8 +49,6 @@ public:
 	void merge(FeatureArray& e);
 
 	inline size_t size(){ return array_.size(); }
-	
-	inline size_t memsize(){ return bufLen_; }
 	
 
 	void savetxt(ofstream& outFile);

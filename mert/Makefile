@@ -1,4 +1,4 @@
-OBJS= Util.o Timer.o Parameter.o \
+OBJS= Util.o Timer.o \
 ScoreStats.o ScoreArray.o ScoreData.o \
 FeatureStats.o FeatureArray.o FeatureData.o \
 Data.o \
