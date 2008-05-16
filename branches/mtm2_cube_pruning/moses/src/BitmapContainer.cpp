@@ -74,11 +74,25 @@ BackwardsEdge::BackwardsEdge(BitmapContainer &prevBitmapContainer
 
 		if (maxDistortion > -1)
 		{
-		  int distortionDistance = itype->ComputeDistortionDistance(current->GetCurrSourceWordsRange()
-																																, transOptRange);
-		  if (distortionDistance > maxDistortion)
+			// Special case: If this is the first hypothesis used to seed the search,
+			// it doesn't have a valid range, and we create the hypothesis, if the
+			// initial position is not further into the sentence than the distortion limit.
+			if (current->GetCurrSourceWordsRange().GetStartPos() == NOT_FOUND)
 			{
-				m_kbest_hypotheses.erase(hypoIter);
+				if (transOptRange.GetStartPos() > maxDistortion)
+				{
+					m_kbest_hypotheses.erase(hypoIter);
+				}
+			}
+			else
+			{
+				int distortionDistance = itype->ComputeDistortionDistance(current->GetCurrSourceWordsRange()
+																		, transOptRange);
+
+				if (distortionDistance > maxDistortion)
+				{
+					m_kbest_hypotheses.erase(hypoIter);
+				}
 			}
 		}
 	}

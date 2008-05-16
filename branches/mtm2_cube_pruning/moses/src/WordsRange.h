@@ -32,19 +32,19 @@ class WordsRange
 {
 	friend std::ostream& operator << (std::ostream& out, const WordsRange& range);
 
-	int m_startPos, m_endPos;
+	size_t m_startPos, m_endPos;
 public:
-	inline WordsRange(int startPos, int endPos) : m_startPos(startPos), m_endPos(endPos) {}
+	inline WordsRange(size_t startPos, size_t endPos) : m_startPos(startPos), m_endPos(endPos) {}
 	inline WordsRange(const WordsRange &copy)
 	 : m_startPos(copy.GetStartPos())
 	 , m_endPos(copy.GetEndPos())
 	 {}
 	
-	inline int GetStartPos() const
+	inline size_t GetStartPos() const
 	{
 		return m_startPos;
 	}
-	inline int GetEndPos() const
+	inline size_t GetEndPos() const
 	{
 		return m_endPos;
 	}
