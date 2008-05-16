@@ -253,6 +253,9 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_maxPhraseLength = (m_parameter->GetParam("max-phrase-length").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("max-phrase-length")[0]) : DEFAULT_MAX_PHRASE_LENGTH;
 
+	m_cubePruningKBest = (m_parameter->GetParam("cube-pruning-k-best").size() > 0)
+				? Scan<size_t>(m_parameter->GetParam("cube-pruning-k-best")[0]) : m_maxHypoStackSize;
+
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH
 	SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );

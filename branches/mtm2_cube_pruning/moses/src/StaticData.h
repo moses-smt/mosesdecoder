@@ -130,6 +130,7 @@ protected:
 	bool m_outputWordGraph; //! whether to output word graph
         bool m_outputSearchGraph; //! whether to output search graph
 
+	size_t m_cubePruningKBest;
 	StaticData();
 
 	//! helper fn to set bool param from ini file/command line
@@ -242,6 +243,10 @@ public:
 	size_t GetMaxHypoStackSize() const
 	{
 		return m_maxHypoStackSize;
+	}
+	size_t GetCubePruningKBest() const
+	{
+		return m_cubePruningKBest;
 	}
 	size_t IsPathRecoveryEnabled() const
 	{

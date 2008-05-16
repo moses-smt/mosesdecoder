@@ -34,13 +34,13 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 							 , BitmapContainer &parent
                              , const TranslationOptionList &translations
 							 , const SquareMatrix &futureScore
-							 , const size_t KBestCubePruning)
+							 , const size_t kBestCubePruning)
   : m_initialized(false)
   , m_prevBitmapContainer(prevBitmapContainer)
   , m_parent(parent)
   , m_kbest_translations(translations)
   , m_futurescore(futureScore)
-  , m_kbest(KBestCubePruning)
+  , m_kbest(kBestCubePruning)
   , m_seenPosition()
 {
 	// Copy hypotheses from ordered set to vector for faster access.

@@ -181,7 +181,7 @@ class BackwardsEdge
 									, BitmapContainer &parent
 									, const TranslationOptionList &translations
 									, const SquareMatrix &futureScore
-									, const size_t KBestCubePruning);
+									, const size_t kBestCubePruning);
 		~BackwardsEdge();
 
 		bool GetInitialized();
