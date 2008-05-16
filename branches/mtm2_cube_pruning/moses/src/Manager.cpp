@@ -140,6 +140,8 @@ void Manager::ProcessSentence()
 		stackNo++;
 	}
 
+	PrintBitmapContainerGraph();
+
 	// some more logging
 	VERBOSE(2, staticData.GetSentenceStats());
 }
@@ -700,5 +702,20 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
       } // end if connected
     } // end for iterHypo
   } // end for iterStack 
+}
+
+void Manager::PrintBitmapContainerGraph()
+{
+	HypothesisStack &lastStack = *m_hypoStackColl.back();
+	const _BMType &bitmapAccessor = lastStack.GetBitmapAccessor();
+
+	_BMType::const_iterator iterAccessor;
+	for (iterAccessor = bitmapAccessor.begin(); iterAccessor != bitmapAccessor.end(); ++iterAccessor)
+	{
+		cerr << iterAccessor->first << endl;
+		BitmapContainer &container = *iterAccessor->second;
+
+	}
+
 }
 

@@ -87,6 +87,7 @@ protected:
 	// logging
 	void OutputHypoStack(int stack = -1);
 	void OutputHypoStackSize();
+	void PrintBitmapContainerGraph();
 
 	//! go thru all bitmaps in 1 stack & create backpointers to bitmaps in the stack
 	void CreateForwardTodos(HypothesisStack &stack);

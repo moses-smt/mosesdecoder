@@ -168,7 +168,7 @@ class BackwardsEdge
 		const SquareMatrix &m_futurescore;
 		size_t m_kbest, m_hypothesis_maxpos, m_translations_maxpos;
 		
-		std::vector< Hypothesis* > m_kbest_hypotheses;
+		std::vector< const Hypothesis* > m_kbest_hypotheses;
 		std::set< int > m_seenPosition;
 
 		// We don't want to instantiate "empty" objects.

@@ -25,6 +25,56 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "BitmapContainer.h"
 #include "HypothesisStack.h"
+#include "DummyScoreProducers.h"
+
+////////////////////////////////////////////////////////////////////////////////
+// Hypothesis Orderer Code
+////////////////////////////////////////////////////////////////////////////////
+// Allows to compare two Hypothesis objects by the corresponding scores.
+////////////////////////////////////////////////////////////////////////////////
+
+class HypothesisScoreOrdererWithDistortion
+{
+	public:
+		static const WordsRange *transOptRange; // TODO. HACK!!
+
+		bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
+		{
+			assert (transOptRange != NULL);
+
+			float weightDistortion = StaticData::Instance().GetWeightDistortion();
+			const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
+			float distortionScoreA = dsp->CalculateDistortionScore(
+										hypoA->GetCurrSourceWordsRange(),
+										*transOptRange,
+										hypoA->GetWordsBitmap().GetFirstGapPos()
+									 );
+			float distortionScoreB = dsp->CalculateDistortionScore(
+										hypoB->GetCurrSourceWordsRange(),
+										*transOptRange,
+										hypoB->GetWordsBitmap().GetFirstGapPos()
+									 );
+
+			float scoreA = hypoA->GetScore() + distortionScoreA * weightDistortion;
+			float scoreB = hypoB->GetScore() + distortionScoreB * weightDistortion;
+			
+			if (scoreA > scoreB)
+			{
+				return true;
+			}
+			else if (scoreA < scoreB)
+			{
+				return false;
+			}
+			else
+			{
+				return hypoA < hypoB;
+			}
+		}
+
+};
+
+const WordsRange *HypothesisScoreOrdererWithDistortion::transOptRange = NULL;
 
 ////////////////////////////////////////////////////////////////////////////////
 // BackwardsEdge Code
@@ -65,25 +115,27 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 		return;
 	}
 
-	WordsRange transOptRange = translations[0]->GetSourceWordsRange();
+	const WordsRange &transOptRange = translations[0]->GetSourceWordsRange();
 	const InputType *itype = StaticData::Instance().GetInput();
 
-	for (HypothesisSet::const_iterator iter = m_prevBitmapContainer.GetHypotheses().begin(); iter != m_prevBitmapContainer.GetHypotheses().end(); ++iter) {
+	for (HypothesisSet::const_iterator iterHypo = m_prevBitmapContainer.GetHypotheses().begin(); iterHypo != m_prevBitmapContainer.GetHypotheses().end(); ++iterHypo) 
+	{
+		const Hypothesis &hypo = **iterHypo;
 		// Special case: If this is the first hypothesis used to seed the search,
 		// it doesn't have a valid range, and we create the hypothesis, if the
 		// initial position is not further into the sentence than the distortion limit.
-		if ((*iter)->GetWordsBitmap().GetNumWordsCovered() == 0)
+		if (hypo.GetWordsBitmap().GetNumWordsCovered() == 0)
 			{
 				if (transOptRange.GetStartPos() <= maxDistortion)
-					m_kbest_hypotheses.push_back(*iter);
+					m_kbest_hypotheses.push_back(&hypo);
 			}
 		else
 			{
-				int distortionDistance = itype->ComputeDistortionDistance((*iter)->GetCurrSourceWordsRange()
+				int distortionDistance = itype->ComputeDistortionDistance(hypo.GetCurrSourceWordsRange()
 																		, transOptRange);
 
 				if (distortionDistance <= maxDistortion)
-					m_kbest_hypotheses.push_back(*iter);
+					m_kbest_hypotheses.push_back(&hypo);
 			}
 	}
 
@@ -101,6 +153,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 
 	m_hypothesis_maxpos = m_kbest_hypotheses.size();
 	m_translations_maxpos = m_kbest_translations.size();
+
 }
 
 BackwardsEdge::~BackwardsEdge()
