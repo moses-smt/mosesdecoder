@@ -2,6 +2,7 @@ package org.statmt.hg4;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,17 +50,32 @@ public class Decoder {
 		public GNode getRoot() { return root; } 
 	}
 	
+	static class PBRanker implements Comparator<Vertex> {
+		Map<Vertex,VertexState> v2s;
+		public PBRanker(Map<Vertex,VertexState> v2s) {
+			this.v2s = v2s;
+		}
+		public int compare(Vertex o1, Vertex o2) {
+			float f1 = (Float)v2s.get(o1).get("PROB");
+			float f2 = (Float)v2s.get(o2).get("PROB");
+			if (f1 == f2) return 0;
+			if (f1 < f2) return -1; else return 1;
+		}
+		
+	}
+	
 	public static Hypergraph parse(Phrase sentence,
 			ExplorationAgenda expAgenda,
-			SearchStrategy cg,
-			FundamentalRuleFunctor fr,
+			SearchStrategy ss,
 			Hypergraph dg) {
 		Map<Vertex,VertexState> v2smap =
 			new HashMap<Vertex, VertexState>();
 		Map<VertexState, Vertex> s2vmap =
 			new HashMap<VertexState, Vertex>();
-		VertexSignatureCreator sigc = null;
-		FinishingAgenda fa = new FinishingAgenda(sigc, null);
+		VertexSignatureCreator sigc = new DumbPBSignature();
+		PBRanker pbr = new PBRanker(v2smap);
+		FinishingAgenda fa =
+			new FinishingAgenda(sigc, pbr);
 		while (!fa.isEmpty() && !expAgenda.isEmpty()) {
 			while (!expAgenda.isEmpty()) {
 				// p is a "traversal"
@@ -67,7 +83,7 @@ public class Decoder {
 				Hyperarc ha = new Hyperarc(p.asTail());
 			
 				// "edge" discovery
-				VertexState newState = fr.apply(ha, v2smap);
+				VertexState newState = ss.applyFundamentalRule(ha, v2smap);
 				Vertex v = s2vmap.get(newState);
 				if (v == null) {
 					v = new Vertex(new ArrayList<Hyperarc>());
@@ -77,8 +93,8 @@ public class Decoder {
 			}
 			VertexGroup vg = fa.peek();
 			Map<String, Object> sig = vg.getSignature();
-			Collection<Vertex> p = cg.retrieveCombinableVertices(sig, dg, sentence);
-			cg.generateTraversals(vg, p, expAgenda);
+			Collection<Vertex> p = ss.retrieveCombinableVertices(sig, dg, sentence);
+			ss.generateTraversals(vg, p, expAgenda);
 		}
 		return dg;
 	}

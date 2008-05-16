@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class Hypergraph {
@@ -133,7 +132,6 @@ public class Hypergraph {
     	pt.add(new Phrase("guten tag"), new Phrase("hello"));
     	pt.add(new Phrase("guten tag"), new Phrase("good day"));
     	Phrase sent = new Phrase("guten tag");
-    	
     	HashMap<Hyperarc, Rule> rules =
     		new HashMap<Hyperarc, Rule>();
     	ArrayList<ArrayList<ArrayList<Phrase>>> lattice =
@@ -145,7 +143,6 @@ public class Hypergraph {
     	stacks[0].add(source);
     	Hypergraph hg = new Hypergraph();
     	hg.addNode(source);
-    	
     	for (int i = 0; i < sent.size(); i++) {
     		ArrayList<Vertex> shs = stacks[i];
     		for (Vertex prevHyp : shs) {
