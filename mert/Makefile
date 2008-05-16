@@ -11,7 +11,8 @@ Scorer.o
 ifndef DEBUG
 CFLAGS=-O3 -DTRACE_ENABLE
 else
-CFLAGS=-DTRACE_ENABLE -g 
+CFLAGS=-DTRACE_ENABLE -g -DDEBUG
+
 endif
 
 GCC=g++
