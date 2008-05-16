@@ -75,6 +75,30 @@ bool ReadInput(IOStream &ioStream, InputTypeEnum inputType, InputType*& source)
 	return (source ? true : false);
 }
 
+void ReadReferenceInput(std::string filepath, Phrase *reference)
+{
+    const int MAX_LENGTH = 65531;
+    const std::string DELIM = "|"; //ascii 124
+    char line[MAX_LENGTH];
+    const StaticData &staticData = StaticData::Instance();
+    vector<size_t> outputFactorOrder;
+
+    outputFactorOrder.push_back(0);
+
+    ifstream fin(filepath.c_str());
+
+    while( fin.getline(line, MAX_LENGTH) ) 
+    {
+        cout << "read line: " << line << endl;
+        Phrase p((Output);
+        
+        p.CreateFromString(outputFactorOrder, line, DELIM);
+        *reference = p;
+    }
+}
+//xxx sbp to call
+//xxx sbp Phrase referenceTranslation(Output);
+//xxx sbp ReadReferenceInput("test.txt", &referenceTranslation);
 
 int main(int argc, char* argv[])
 {
