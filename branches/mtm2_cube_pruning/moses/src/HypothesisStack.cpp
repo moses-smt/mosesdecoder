@@ -34,7 +34,7 @@ HypothesisStack::HypothesisStack()
 	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
 	m_worstScore = -std::numeric_limits<float>::infinity();
-	m_kbestCubePruning = 100;
+	m_kbestCubePruning = 25;
 }
 
 /** Remove hypothesis pointed to by iterator but don't delete the object. */

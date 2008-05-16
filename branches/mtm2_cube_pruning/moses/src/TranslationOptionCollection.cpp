@@ -54,7 +54,12 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& src, s
 	for (size_t startPos = 0 ; startPos < size ; ++startPos)
 	{
 		m_collection.push_back( vector< TranslationOptionList >() );
-		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+
+    size_t maxSize = size - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = std::min(maxSize, maxSizePhrase);
+
+		for (size_t endPos = 0 ; endPos < maxSize ; ++endPos)
 		{
 			m_collection[startPos].push_back( TranslationOptionList() );
 		}
@@ -67,9 +72,13 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	size_t size = m_source.GetSize();
 	for (size_t startPos = 0 ; startPos < size ; ++startPos)
 	{
-		for (size_t endPos = startPos ; endPos < size ; ++endPos)
+    size_t maxSize = size - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = std::min(maxSize, maxSizePhrase);
+
+		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
-			RemoveAllInColl(GetTranslationOptionList(startPos, endPos));
+		 RemoveAllInColl(GetTranslationOptionList(startPos, endPos));
 		}
 	}
 
@@ -78,21 +87,21 @@ TranslationOptionCollection::~TranslationOptionCollection()
 
 void TranslationOptionCollection::Prune()
 {	
-	size_t size = m_source.GetSize();
-	
 	// prune to max no. of trans opt
 	if (m_maxNoTransOptPerCoverage == 0)
 		return;
 
 	size_t total = 0;
 	size_t totalPruned = 0;
+
+	size_t size = m_source.GetSize();
 	for (size_t startPos = 0 ; startPos < size; ++startPos)
 	{
     size_t maxSize = size - startPos;
     size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
     maxSize = std::min(maxSize, maxSizePhrase);
 
-		for (size_t endPos = startPos ; endPos < maxSize ; ++endPos)
+		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
 			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
 			total += fullList.size();
@@ -243,11 +252,11 @@ void TranslationOptionCollection::CalcFutureScore()
   }
 
   // walk all the translation options and record the cheapest option for each span
-	for (size_t startPos = 0 ; startPos < m_source.GetSize() ; ++startPos)
+	for (size_t startPos = 0 ; startPos < size ; ++startPos)
 	{
     size_t maxSize = m_source.GetSize() - startPos;
     size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-    maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+    maxSize = std::min(maxSize, maxSizePhrase);
 
 		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
@@ -295,7 +304,7 @@ void TranslationOptionCollection::CalcFutureScore()
       {
         size_t maxSize = size - row;
         size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-        maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+        maxSize = std::min(maxSize, maxSizePhrase);
 
         for(size_t col=row; col<row+maxSize; col++)
         {
@@ -328,16 +337,17 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
 	// table loaded on initialization), generate TranslationOption objects
 	// for all phrases
+	size_t size = m_source.GetSize();
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
 	  const DecodeGraph &decodeStepList = *decodeStepVL[startVL];
-		for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
+		for (size_t startPos = 0 ; startPos < size; startPos++)
 		{
-      size_t maxSize = m_source.GetSize() - startPos;
+      size_t maxSize = size - startPos;
       size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
       maxSize = std::min(maxSize, maxSizePhrase);
 
-			for (size_t endPos = startPos ; endPos < maxSize ; endPos++)
+			for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++)
 			{
 				CreateTranslationOptionsForRange( decodeStepList, startPos, endPos, true);				
  			}
@@ -369,7 +379,7 @@ void TranslationOptionCollection::Sort()
 		size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 		maxSize = std::min(maxSize, maxSizePhrase);
 
-		for (size_t endPos = startPos ; endPos < maxSize; ++endPos)
+		for (size_t endPos = startPos ; endPos < startPos + maxSize; ++endPos)
 		{
 			TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
 			std::sort(transOptList.begin(), transOptList.end(), CompareTranslationOption);
@@ -544,7 +554,7 @@ inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollec
     size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
     maxSize = std::min(maxSize, maxSizePhrase);
 
-		for (size_t endPos = startPos ; endPos < maxSize ; ++endPos)
+		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
 			TranslationOptionList fullList = coll.GetTranslationOptionList(startPos, endPos);
 			size_t sizeFull = fullList.size();
@@ -570,15 +580,16 @@ void TranslationOptionCollection::CacheLexReordering()
 
 	std::vector<LexicalReordering*>::const_iterator iterLexreordering;
 
+	size_t size = m_source.GetSize();
 	for (iterLexreordering = lexReorderingModels.begin() ; iterLexreordering != lexReorderingModels.end() ; ++iterLexreordering)
 	{
 		LexicalReordering &lexreordering = **iterLexreordering;
 
-		for (size_t startPos = 0 ; startPos < m_source.GetSize() ; startPos++)
+		for (size_t startPos = 0 ; startPos < size ; startPos++)
 		{
-      size_t maxSize =  m_source.GetSize() - startPos;
+      size_t maxSize =  size - startPos;
       size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+      maxSize = std::min(maxSize, maxSizePhrase);
 
 			for (size_t endPos = startPos ; endPos < startPos + maxSize; endPos++)
 			{
