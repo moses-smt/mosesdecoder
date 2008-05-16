@@ -118,8 +118,8 @@ int main (int argc, char **argv) {
   O->SetScorer(TheScorer);
   O->SetFData(FD);
   Point P(start);//Generate from the full feature set. Warning: must ne done after Optimiezr initialiazation
-  Point bestP=P;  
   statscore_t best=O->Run(P);
+  Point bestP=P;  
   statscore_t mean=best;
   statscore_t var=best*best;
    
