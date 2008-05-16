@@ -4,7 +4,7 @@
 
 using namespace std;
 typedef float parameter_t;
-typedef vector<parameter_t> parameters_t;
+//typedef vector<parameter_t> parameters_t;confusing; use vector<parameter_t>
 
 typedef vector<pair<unsigned int, unsigned int> > diff_t;
 typedef vector<diff_t> diffs_t;
