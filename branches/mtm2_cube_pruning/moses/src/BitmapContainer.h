@@ -67,6 +67,7 @@ class HypothesisQueueItem
 		  , m_edge(edge)
 		{
 		}
+
 		~HypothesisQueueItem()
 		{
 		}

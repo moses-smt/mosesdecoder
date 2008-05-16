@@ -31,7 +31,6 @@ using namespace std;
 
 HypothesisStack::HypothesisStack()
 {
-	cerr << "NEW STACK" << this << endl;
 	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
 	m_worstScore = -std::numeric_limits<float>::infinity();
@@ -281,9 +280,6 @@ void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 	else {
 		bmContainer = bcExists->second;
 	}
-
-	// Sort the hypotheses inside the Bitmap Container as they are being used by now.
-	bitmapContainer.SortHypotheses();
 
 	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer
 																					, *bmContainer

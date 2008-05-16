@@ -117,12 +117,15 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 {
 	// create hypothesis and calculate all its scores
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+
+/*
 	// expand hypothesis further if transOpt was linked
 	for (std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
-		 iterLinked != transOpt.GetLinkedTransOpts().end(); iterLinked++) {
+		 iterLinked != transOpt.GetLinkedTransOpts().end(); ++iterLinked) {
 		const WordsBitmap hypoBitmap = newHypo->GetWordsBitmap();
 		if (hypoBitmap.Overlap((**iterLinked).GetSourceWordsRange())) {
 			// don't want to add a hypothesis that has some but not all of a linked TO set, so return
+			delete newHypo;
 			return NULL;
 		}
 		else
@@ -131,6 +134,8 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 			newHypo = newHypo->CreateNext(**iterLinked);
 		}
 	}
+*/
+
 	newHypo->CalcScore(m_futurescore);
 	
 	return newHypo;
@@ -194,8 +199,6 @@ BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
   , m_stack(stack)
   , m_kbest(KBestCubePruning)
 {
-	cerr << bitmap << endl;
-
 	m_hypotheses = HypothesisSet();
 	m_edges = BackwardsEdgeSet();
 	m_queue = HypothesisQueue();
@@ -204,7 +207,7 @@ BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
 BitmapContainer::~BitmapContainer()
 {
 	// As we have created the square position objects we clean up now.
-	for (size_t i=0; i<m_queue.size(); i++)
+	while (!m_queue.empty())
 	{
 		HypothesisQueueItem *ret = m_queue.top();
 		FREEHYPO(ret->GetHypothesis());

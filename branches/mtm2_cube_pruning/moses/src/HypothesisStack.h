@@ -104,9 +104,8 @@ public:
 	HypothesisStack();
 	~HypothesisStack()
 	{
-		std::cerr << "DELETE STACK" << this << std::endl;
-
 		RemoveAll();
+		m_bitmapAccessor.clear();
 	}
 
 	/** adds the hypo, but only if within thresholds (beamThr, stackSize).

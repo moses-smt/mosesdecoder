@@ -161,6 +161,9 @@ void Manager::CreateForwardTodos(HypothesisStack &stack)
 		{ // no hypothese to expand. don't bother doing it		
 			continue; 
 		}
+		
+		// Sort the hypotheses inside the Bitmap Container as they are being used by now.
+		bitmapContainer.SortHypotheses();
 
 		// check bitamp and range doesn't overlap
 		size_t startPos, endPos;

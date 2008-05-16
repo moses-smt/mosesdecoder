@@ -59,10 +59,10 @@ public:
 	}
 	//! deep copy
 	WordsBitmap(const WordsBitmap &copy)
-		:m_size		(copy.m_size)
+		:m_size	(copy.m_size)
 	{
 		m_bitmap = (bool*) malloc(sizeof(bool) * m_size);
-		for (size_t pos = 0 ; pos < m_size ; pos++)
+		for (size_t pos = 0 ; pos < copy.m_size ; pos++)
 		{
 			m_bitmap[pos] = copy.GetValue(pos);
 		}
