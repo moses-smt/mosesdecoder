@@ -13,7 +13,9 @@ map<unsigned,statscore_t> Point::fixedweights;
 unsigned Point::pdim=0;
 unsigned Point::ncall=0;
 
-void Point::Randomize(const parameters_t& min,const parameters_t& max){
+void Point::Randomize(const vector<parameter_t>& min,const vector<parameter_t>& max){
+  assert(min.size()==Point::dim);
+  assert(max.size()==Point::dim);
   for (int i=0; i<size(); i++)
     operator[](i)= min[i] + (float)random()/(float)RAND_MAX * (float)(max[i]-min[i]);
 }
@@ -28,6 +30,19 @@ void Point::Normalize(){
       operator[](i)/=norm;
   }
 }
+
+//Can initialize from a vector of dim or pdim
+Point::Point(const vector<parameter_t>& init):vector<parameter_t>(Point::dim){
+  if(init.size()==dim){
+    for (int i=0; i<Point::dim; i++)
+      operator[](i)=init[i];
+  }else{
+    assert(init.size()==pdim);
+    for (int i=0; i<Point::dim; i++)
+      operator[](i)=init[optindices[i]];
+  }
+};
+
 
 double Point::operator*(const FeatureStats& F)const{
   ncall++;//to track performance
@@ -61,15 +76,15 @@ Point Point::operator*(float l)const{
 };
 
  ostream& operator<<(ostream& o,const Point& P){
-   parameters_t w=P.GetAllWeights();
+   vector<parameter_t> w=P.GetAllWeights();
    for(int i=0;i<Point::pdim;i++)
      o<<w[i]<<' ';
    o<<endl;
    return o;
 };
 
-parameters_t Point::GetAllWeights()const{
-  parameters_t w;
+vector<parameter_t> Point::GetAllWeights()const{
+  vector<parameter_t> w;
   if(OptimizeAll()){
     w=*this;
   }else{

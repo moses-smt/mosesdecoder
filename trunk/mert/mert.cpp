@@ -37,7 +37,7 @@ void usage(void) {
 
 static struct option long_options[] =
   {
-    {"dim", 1, 0, 'd'},
+    {"pdim", 1, 0, 'd'},
     {"ntry",1,0,'n'},
     {"optimize",1,0,'o'},
     {"type",1,0,'t'},
@@ -50,8 +50,8 @@ static struct option long_options[] =
 int option_index;
 
 int main (int argc, char **argv) {
-  int c,dim,i;
-  dim=-1;
+  int c,pdim,i;
+  pdim=-1;
   int ntry=1;
   string type("powell");
   string scorertype("BLEU");
@@ -62,7 +62,7 @@ int main (int argc, char **argv) {
   while ((c=getopt_long (argc, argv, "d:n:t:s:S:F:v:", long_options, &option_index)) != -1) {
     switch (c) {
     case 'd':
-      dim = strtol(optarg, NULL, 10);
+      pdim = strtol(optarg, NULL, 10);
       break;
     case 'n':
       ntry=strtol(optarg, NULL, 10);
@@ -85,57 +85,68 @@ int main (int argc, char **argv) {
       usage();
     }
   }
-  if (dim < 0)
+  if (pdim < 0)
     usage();
-  if(tooptimize.empty()){//We'll optimize on everything
-    tooptimize.resize(dim);
-    for(i=0;i<dim;i++)
+  if(tooptimize.empty()){
+    tooptimize.resize(pdim);//We'll optimize on everything
+    for(i=0;i<pdim;i++)
       tooptimize[i]=i;
   }
+  ifstream opt("init.opt");
+  if(opt.fail()){
+    cerr<<"could not open init.opt"<<endl;
+    exit(3);
+  }
+  start.resize(pdim);//to do:read from file
+  int j;
+  for( j=0;j<pdim&&!opt.fail();j++)
+    opt>>start[j];
+  if(j<pdim){
+    cerr<<"error could not initialize start point with init.opt"<<endl;
+    exit(3);
+  }
+
+  opt.close();
+  //it make sense to know what parameter set were used to generate the nbest
   ScorerFactory SF;
-  Optimizer *O;
-  Scorer *TheScorer=NULL;;
-  FeatureData *FD=NULL;
-;
-  start.resize(dim);
-  float score;
-  float best=numeric_limits<float>::min();
-  float mean=0;
-  float var=0;
-  Point bestP;
-  //it make sense to know what parameter set where used to generate the nbest
-  O=BuildOptimizer(dim,tooptimize,start,"powell");
-  
-  TheScorer=SF.getScorer(scorertype);
+  Scorer *TheScorer=SF.getScorer(scorertype);
   ScoreData *SD=new ScoreData(*TheScorer);
-  FD=new FeatureData();
-  FD->load(featurefile);
   SD->load(scorerfile);
+  FeatureData *FD=new FeatureData();
+  FD->load(featurefile);
+  Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start,type);
   O->SetScorer(TheScorer);
   O->SetFData(FD);
-  Point min;//to: initialize
-  Point max;
-  //note: thos min and maw are the bound for the starting poitns of the algorithm, not strict bound on the result!
-  for(int d=0;d<Point::getdim();d++){
+  Point P(start);//Generate from the full feature set. Warning: must ne done after Optimiezr initialiazation
+  Point bestP=P;  
+  statscore_t best=O->Run(P);
+  statscore_t mean=best;
+  statscore_t var=best*best;
+   
+  vector<parameter_t> min(Point::getdim());
+  vector<parameter_t> max(Point::getdim());
+ 
+ for(int d=0;d<Point::getdim();d++){
     min[d]=0.0;
     max[d]=1.0;
   }
-  for(int i=0;i<ntry;i++){
-    Point P;
-    P.Randomize(min,max);
-    score=O->Run(P);
-    if(score>best){
-      best=score;
-      bestP=P;
-    }
-    mean+=score;
-    var+=(score*score);
+  //note: those mins and max are the bound for the starting points of the algorithm, not strict bound on the result!
+  
+ for(int i=1;i<ntry;i++){
+   P.Randomize(min,max);
+   statscore_t score=O->Run(P);
+   if(score>best){
+     best=score;
+     bestP=P;
   }
-  mean/=(float)ntry;
-  var/=(float)ntry;
-  var=sqrt(abs(var-mean*mean));
-  cerr<<"variance of the score (for "<<ntry<<" try):"<<var<<endl;
-  cerr<<"best score"<<best<<endl;
-  ofstream res("weights.txt");
-  res<<bestP<<endl;
+   mean+=score;
+   var+=(score*score);
+ }
+ mean/=(float)ntry;
+ var/=(float)ntry;
+ var=sqrt(abs(var-mean*mean));
+ cerr<<"variance of the score (for "<<ntry<<" try):"<<var<<endl;
+ cerr<<"best score"<<best<<endl;
+ ofstream res("weights.txt");
+ res<<bestP<<endl;
 }

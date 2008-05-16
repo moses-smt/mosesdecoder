@@ -20,7 +20,7 @@ class Optimizer{
    Scorer * scorer; //no accessor for them only child can use them 
    FeatureData * FData;//no accessor for them only child can use them 
  public:
-  Optimizer(unsigned Pd,vector<unsigned> i2O,parameters_t start);
+  Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start);
   void SetScorer(Scorer *S);
   void SetFData(FeatureData *F);
   virtual ~Optimizer();
@@ -46,11 +46,32 @@ class SimpleOptimizer: public Optimizer{
 private:
 static  float eps;
 public:
-  SimpleOptimizer(unsigned dim,vector<unsigned> i2O,parameters_t start):Optimizer(dim,i2O,start){};
+  SimpleOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start):Optimizer(dim,i2O,start){};
   virtual statscore_t  TrueRun(Point&)const;
 };
 
-Optimizer *BuildOptimizer(unsigned dim,vector<unsigned>tooptimize,parameters_t start,string type);
+class RandomOptimizer: public Optimizer{
+public:
+  RandomOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start):Optimizer(dim,i2O,start){};
+  virtual statscore_t  TrueRun(Point&)const;
+};
+
+
+
+class OptimizerFactory{
+ public:
+  // unsigned dim;
+  //Point Start;
+  static vector<string> GetTypeNames();
+  static Optimizer* BuildOptimizer(unsigned dim,vector<unsigned>tooptimize,vector<parameter_t> start,string type);
+ private:
+  enum OptType{POWELL=0,RANDOM,NOPTIMIZER};//Add new optimizer here BEFORE NOPTIMZER    
+  static OptType GetOType(string);
+  static vector<string> typenames;
+  static void SetTypeNames();
+  
+};
+
 
 #endif
 

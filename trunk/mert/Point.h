@@ -10,7 +10,7 @@ class Optimizer;
 
 /**class that handle the subset of the Feature weight on which we run the optimization*/
 
-class Point:public parameters_t{
+class Point:public vector<parameter_t>{
   friend class Optimizer;
  private:
   /**The indices over which we optimize*/
@@ -27,9 +27,9 @@ class Point:public parameters_t{
   static unsigned getpdim(){return pdim;}
   static bool OptimizeAll(){return fixedweights.empty();};
   statscore_t score;
-  Point():parameters_t(dim){};
-  Point(parameters_t init):parameters_t(init){assert(init.size()==dim);};
-  void Randomize(const parameters_t& min,const parameters_t& max);
+  Point():vector<parameter_t>(dim){};
+  Point(const vector<parameter_t>& init);
+  void Randomize(const vector<parameter_t>& min,const vector<parameter_t>& max);
 
   double operator*(const FeatureStats&)const;//compute the feature function
   Point operator+(const Point&)const;
@@ -37,8 +37,8 @@ class Point:public parameters_t{
   /**write the Whole featureweight to a stream (ie pdim float)*/
   friend ostream& operator<<(ostream& o,const Point& P);
   void Normalize();
-  /**return a vector of size pdim where all weights have been put*/
-  parameters_t GetAllWeights()const;
+  /**return a vector of size pdim where all weights have been put(including fixed ones)*/
+  vector<parameter_t> GetAllWeights()const;
 };
 
 #endif

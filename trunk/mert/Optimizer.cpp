@@ -12,24 +12,6 @@ using namespace std;
 static const float MIN_FLOAT=numeric_limits<float>::min();
 static const float MAX_FLOAT=numeric_limits<float>::max();
 
-enum OptType{POWELL=0,NOPTIMIZER};//Add new optimizetr here
-
-string names[NOPTIMIZER]={string("powell")};
-
-Optimizer *BuildOptimizer(unsigned dim,vector<unsigned>to,vector<parameter_t>s,string type){
-  int thetype;
-  for(thetype=0;thetype<(int)NOPTIMIZER;thetype++)
-    if(names[thetype]==type)
-      break;
-  switch((OptType)thetype){
-  case POWELL:
-    return new SimpleOptimizer(dim,to,s);
-  case NOPTIMIZER:
-    cerr<<"error unknwon optimizer"<<type<<endl;
-    return NULL;
-  }
-  return NULL;//Should never go there
-};
 
 
 void Optimizer::SetScorer(Scorer *S){
@@ -106,8 +88,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
     multimap<float,unsigned>::iterator it=gradient.begin();
     float smallest=it->first;//smallest gradient
     unsigned index=it->second;
-    float biggestf0=f0[index];
-    //several candidates can have the lowest slope (eg for word penalty where the gradient is an integer)
+    //several candidates can have the lowest slope (eg for word penalty where the gradient is an integer )
     it++;
     while(it!=gradient.end()&&it->first==smallest){
       if(f0[it->second]>f0[index])
@@ -129,7 +110,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
       int d=0;
       for(;it2!=gradient.end();it2++){
 	//cerr<<"--"<<d++<<' '<<it2->first<<' '<<it2->second<<endl;
-	//look for all candidate with a gradient bigger than the current one and fond the one with the leftmost intersection
+	//look for all candidate with a gradient bigger than the current one and find the one with the leftmost intersection
 	float curintersect=intersect(m,b,it2->first,f0[it2->second]);
 	if(curintersect<leftmostx){
 	  //we have found and intersection to the left of the leftmost we had so far.
@@ -148,7 +129,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
 	 right of the penultimate one. In that case, the Points would
 	 switch places in the sort, resulting in a bogus score for
 	 that interval. */
-      if((leftmostx-onebest.back().first)<min_int)
+      if(abs(leftmostx-onebest.back().first)<min_int)
 	onebest.back()=pair<float,unsigned>(leftmostx,leftmost->second);//leftmost->first is the gradient, we are interested in the value of the intersection
       else //normal case: we add a new threshold
 	onebest.push_back(pair<float,unsigned>(leftmostx,leftmost->second));
@@ -194,6 +175,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   //it contains a list of all the parameter_ts where the function changed its value, along with the nbest list for the interval after each threshold
   //last thing to do is compute the Stat score (ie BLEU) and find the minimum
   
+  //  cerr<<"thesholdlist size"<<thresholdlist.size()<<endl;  
   list<threshold>::iterator lit2=thresholdlist.begin();
   ++lit2;
   
@@ -204,31 +186,33 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   
   lit2=thresholdlist.begin();
   statscore_t bestscore=MIN_FLOAT;
-  float bestx;
+  float bestx=MIN_FLOAT;
   assert(scores.size()==thresholdlist.size());//we skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best
-  for(int sc=0;sc!=scores.size();sc++,lit2++){
-//We move the list iterator and the vector index at the same time
-//because we need to get the value of lambda back from the list
+  for(int sc=0;sc!=scores.size();sc++){
+    lit2++;//We move the list iterator and the vector index at the same time
+    //because we need to get the value of lambda back from the list
+    //cerr<<lit2->first<<endl;
     if(scores[sc]>bestscore){
       bestscore=scores[sc];
       if(lit2!=thresholdlist.end()){
 	//we dont want to stay exactly at the threshold where the function is discontinuous so we move just a little to the right
+	//but  we dont want to cross a threshold 
 	bestx=lit2->first;
 	lit2++;
-	bestx+=lit2->first;
-	bestx/=2.0;
+	if(lit2->first-bestx>0.0001)//distance to next threshold
+	  bestx+=0.0001;
 	lit2--;
       }else
-	bestx=lit2->first+0.001;
+	bestx=lit2->first+0.0001;
     }
   }
-      
-    //finally! we manage to extract the best score;
-    //nowwe convert bestx  (position on the line) to a point!
-   
-    bestpoint=direction*bestx+origin;
-    bestpoint.score=bestscore;
-    return bestscore;  
+  //finally! we manage to extract the best score;
+  //now we convert bestx  (position on the line) to a point!
+  if(verboselevel()>3)
+    cerr<<"end Lineopt, bestx="<<bestx<<endl;
+  bestpoint=direction*bestx+origin;
+  bestpoint.score=bestscore;
+  return bestscore;  
 };
 
 void  Optimizer::Get1bests(const Point& P,vector<unsigned>& bests)const{
@@ -293,7 +277,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
  
   statscore_t prevscore=MAX_FLOAT;
   statscore_t bestscore=MIN_FLOAT;
-  int nrun;
+  int nrun=0;
   do{
     ++nrun;
     if(verboselevel()>2)
@@ -312,15 +296,81 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
       if(curscore>bestscore){
 	bestscore=curscore;
 	best=linebest;
+	
       if(verboselevel()>3)
 	cerr<<"new best d"<<d<<" ("<<nrun<<")"<<endl;
       }
     }
     P=best;//update the current vector with the best points on all line tested
 }while(bestscore-prevscore<eps);
+  if(verboselevel()>2){
+    cerr<<"end Powell Algo, nrun="<<nrun<<endl;
+    cerr<<"last diff="<<bestscore-prevscore<<endl;
+}
   return bestscore;
 }
 
 
+/**RandomOptimizer to use as beaseline and test.\n
+Just return a random point*/
 
+statscore_t RandomOptimizer::TrueRun(Point& P)const{
+  vector<parameter_t> min(Point::getdim());
+  vector<parameter_t> max(Point::getdim());
+  for(int d=0;d<Point::getdim();d++){
+    min[d]=0.0;
+    max[d]=1.0;
+  }
+    P.Randomize(min,max);
+    statscore_t score=GetStatScore(P);
+    P.score=score;
+    return score;
+}
+//--------------------------------------
+vector<string> OptimizerFactory::typenames;
 
+void OptimizerFactory::SetTypeNames(){
+  if(typenames.empty()){
+    typenames.resize(NOPTIMIZER);
+    typenames[POWELL]="powell";
+    typenames[RANDOM]="random";
+    //add new type there
+      }
+}
+vector<string> OptimizerFactory::GetTypeNames(){
+  if(typenames.empty())
+    SetTypeNames();
+  return typenames;
+}
+
+OptimizerFactory::OptType OptimizerFactory::GetOType(string type){
+  int thetype;
+  if(typenames.empty())
+    SetTypeNames();
+  for(thetype=0;thetype<typenames.size();thetype++)
+    if(typenames[thetype]==type)
+      break;
+  return((OptType)thetype);
+};
+
+Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,vector<unsigned> i2o,vector<parameter_t> start,string type){
+
+  OptType T=GetOType(type);
+  if(T==NOPTIMIZER){
+    cerr<<"Error unknow Optimizer type "<<type<<endl;
+    cerr<<"Known Algorithm are:"<<endl;
+    int thetype;
+    for(thetype=0;thetype<typenames.size();thetype++)
+      cerr<<typenames[thetype]<<endl;
+    throw ("unknown Optimizer Type");
+  }
+  
+  switch((OptType)T){
+  case POWELL:
+    return new SimpleOptimizer(dim,i2o,start);
+    break;
+  case NOPTIMIZER:
+    cerr<<"error unknwon optimizer"<<type<<endl;
+    return NULL; 
+  }  
+}
