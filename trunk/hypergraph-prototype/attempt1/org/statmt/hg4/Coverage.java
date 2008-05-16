@@ -2,11 +2,10 @@ package org.statmt.hg4;
 
 import java.util.BitSet;
 
-public class Coverage {
+public class Coverage implements Comparable {
 	BitSet coverage;
 	
 	/**
-	 * 
 	 * @param phraseSize
 	 * @param coverageStart
 	 * @param coverageEnd (exclusive)
@@ -47,5 +46,10 @@ public class Coverage {
 	public boolean isCompatible(Coverage other) {
 		assert(this.coverage.size() == other.coverage.size());
 		return !this.coverage.intersects(other.coverage);
+	}
+	
+	public int compareTo(Object o) {
+        Coverage other = (Coverage) o;
+		return this.coverage.cardinality() - other.coverage.cardinality();
 	}
 }
