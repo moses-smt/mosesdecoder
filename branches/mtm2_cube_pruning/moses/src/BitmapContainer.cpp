@@ -310,7 +310,8 @@ BitmapContainer::FindKBestHypotheses()
 		edge->Initialize();
 	}
 
-	for (size_t i=0; i<m_kbest; i++)
+	size_t stacked = 0;
+	while (stacked < m_kbest)
 	{
 		if (m_queue.empty())
 		{
@@ -321,16 +322,13 @@ BitmapContainer::FindKBestHypotheses()
 		HypothesisQueueItem *item = Dequeue();
 
 		// If the priority queue is exhausted, we are done and exit.
-		if (item == NULL)
-		{
-			return;
-		}
+		assert(item != NULL);
 
 		// Add best hypothesis to hypothesis stack.
 		bool added = m_stack.AddPrune(item->GetHypothesis());	
 		if (added)
 		{
-			m_kbest++;
+			stacked++;
 		}
 
 		// Create new hypotheses for the two successors of the hypothesis just added.
