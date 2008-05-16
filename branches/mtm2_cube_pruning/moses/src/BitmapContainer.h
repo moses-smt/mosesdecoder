@@ -102,18 +102,20 @@ class QueueItemOrderer
 			float scoreA = itemA->GetHypothesis()->GetTotalScore();
 			float scoreB = itemB->GetHypothesis()->GetTotalScore();
 
-			if (scoreA < scoreB)
+			return (scoreA < scoreB);
+
+			/*
 			{
 				return true;
 			}
-			else if (scoreA > scoreB)
+			else if (scoreA < scoreB)
 			{
 				return false;
 			}
 			else
 			{
 				return itemA < itemB;
-			}
+			}*/
 		}
 };
 
@@ -131,18 +133,19 @@ class HypothesisScoreOrderer
 			float scoreA = hypoA->GetTotalScore();
 			float scoreB = hypoB->GetTotalScore();
 			
-			if (scoreA < scoreB)
+			return (scoreA > scoreB);
+			/*
 			{
 				return true;
 			}
-			else if (scoreA > scoreB)
+			else if (scoreA < scoreB)
 			{
 				return false;
 			}
 			else
 			{
 				return hypoA < hypoB;
-			}
+			}*/
 		}
 
 };
