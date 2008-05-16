@@ -78,7 +78,7 @@ protected:
 	size_t interrupted_flag;
 
 	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
-	std::vector < HypothesisStack > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */ 
+	std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */ 
 	// no of elements = no of words in source + 1
 	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */

@@ -194,6 +194,8 @@ BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
   , m_stack(stack)
   , m_kbest(KBestCubePruning)
 {
+	cerr << bitmap << endl;
+
 	m_hypotheses = HypothesisSet();
 	m_edges = BackwardsEdgeSet();
 	m_queue = HypothesisQueue();

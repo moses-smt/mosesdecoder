@@ -31,6 +31,7 @@ using namespace std;
 
 HypothesisStack::HypothesisStack()
 {
+	cerr << "NEW STACK" << this << endl;
 	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
 	m_worstScore = -std::numeric_limits<float>::infinity();
@@ -155,7 +156,7 @@ void HypothesisStack::AddInitial(Hypothesis *hypo)
 	assert (addRet.second);
 
 	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-	m_bitmapAccessor[bitmap] = NULL;
+	m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
 }
 
 void HypothesisStack::PruneToSize(size_t newSize)
@@ -321,14 +322,6 @@ void
 HypothesisStack::AddHypothesesToBitmapContainers()
 {
 	HypothesisStack::const_iterator iter;
-	
-	_BMType::const_iterator containers;
-	for (containers = m_bitmapAccessor.begin(); containers != m_bitmapAccessor.end(); ++containers)
-	{
-		const WordsBitmap &bitmap = containers->first;
-		m_bitmapAccessor[bitmap] = new BitmapContainer(containers->first, *this, m_kbestCubePruning);
-	}
-
 	for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter)
 	{
 		Hypothesis *h = *iter;

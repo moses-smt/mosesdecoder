@@ -58,16 +58,19 @@ Manager::Manager(InputType const& source)
 	staticData.InitializeBeforeSentenceProcessing(source);
 
 	std::vector < HypothesisStack >::iterator iterStack;
-	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
+	for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind)
 	{
-		HypothesisStack &sourceHypoColl = *iterStack;
-		sourceHypoColl.SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
-		sourceHypoColl.SetBeamWidth(staticData.GetBeamWidth());
+		HypothesisStack *sourceHypoColl = new HypothesisStack();
+		sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
+		sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
+
+		m_hypoStackColl[ind] = sourceHypoColl;
 	}
 }
 
 Manager::~Manager() 
 {
+	RemoveAllInColl(m_hypoStackColl);
   delete m_transOptColl;
 	StaticData::Instance().CleanUpAfterSentenceProcessing();      
 
@@ -99,14 +102,14 @@ void Manager::ProcessSentence()
 	// initial seed hypothesis: nothing translated, no words produced
 	{
 		Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
-		m_hypoStackColl[0].AddInitial(hypo);
+		m_hypoStackColl[0]->AddInitial(hypo);
 	}
 	
-	CreateForwardTodos(m_hypoStackColl.front());
+	CreateForwardTodos(*m_hypoStackColl.front());
 
 	// go through each stack
 	size_t stackNo = 1;
-	std::vector < HypothesisStack >::iterator iterStack;
+	std::vector < HypothesisStack* >::iterator iterStack;
 	for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
 		//checked if elapsed time ran out of time with respect 
@@ -116,7 +119,7 @@ void Manager::ProcessSentence()
 			interrupted_flag = 1;
 			return;
 		}
-		HypothesisStack &sourceHypoColl = *iterStack;
+		HypothesisStack &sourceHypoColl = **iterStack;
 
 		_BMType::const_iterator bmIter;
 		const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
@@ -200,11 +203,11 @@ void Manager::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &ra
 	size_t numCovered = newBitmap.GetNumWordsCovered();
 	const TranslationOptionList &transOptList = m_transOptColl->GetTranslationOptionList(range);
 	const SquareMatrix &futureScore = m_transOptColl->GetFutureScore();
-	HypothesisStack &newStack = m_hypoStackColl[numCovered];
+	HypothesisStack &newStack = *m_hypoStackColl[numCovered];
 
 	if (transOptList.size() > 0)
 	{
-		m_hypoStackColl[numCovered].SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, futureScore, transOptList);
+		m_hypoStackColl[numCovered]->SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, futureScore, transOptList);
 	}
 }
 
@@ -267,7 +270,7 @@ const Hypothesis *Manager::GetBestHypothesis() const
 {
 //	const HypothesisStack &hypoColl = m_hypoStackColl.back();
 	if (interrupted_flag == 0){
-  	const HypothesisStack &hypoColl = m_hypoStackColl.back();
+  	const HypothesisStack &hypoColl = *m_hypoStackColl.back();
 		return hypoColl.GetBestHypothesis();
 	}
 	else{
@@ -282,11 +285,11 @@ const Hypothesis *Manager::GetBestHypothesis() const
  */
 void Manager::OutputHypoStackSize()
 {
-	std::vector < HypothesisStack >::const_iterator iterStack = m_hypoStackColl.begin();
-	TRACE_ERR( "Stack sizes: " << (int)iterStack->size());
+	std::vector < HypothesisStack* >::const_iterator iterStack = m_hypoStackColl.begin();
+	TRACE_ERR( "Stack sizes: " << (int)(*iterStack)->size());
 	for (++iterStack; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
-		TRACE_ERR( ", " << (int)iterStack->size());
+		TRACE_ERR( ", " << (int)(*iterStack)->size());
 	}
 	TRACE_ERR( endl);
 }
@@ -304,10 +307,10 @@ void Manager::OutputHypoStack(int stack)
 	else
 	{ // all stacks
 		int i = 0;
-		vector < HypothesisStack >::iterator iterStack;
+		vector < HypothesisStack* >::iterator iterStack;
 		for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 		{
-			HypothesisStack &hypoColl = *iterStack;
+			HypothesisStack &hypoColl = **iterStack;
 			TRACE_ERR( "Stack " << i++ << ": " << endl << hypoColl << endl);
 		}
 	}
@@ -327,7 +330,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 	if (count <= 0)
 		return;
 
-	vector<const Hypothesis*> sortedPureHypo = m_hypoStackColl.back().GetSortedList();
+	vector<const Hypothesis*> sortedPureHypo = m_hypoStackColl.back()->GetSortedList();
 
 	if (sortedPureHypo.size() == 0)
 		return;
@@ -503,11 +506,11 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 
 	size_t linkId = 0;
 	size_t stackNo = 1;
-	std::vector < HypothesisStack >::const_iterator iterStack;
+	std::vector < HypothesisStack* >::const_iterator iterStack;
 	for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
 		cerr << endl << stackNo++ << endl;
-		const HypothesisStack &stack = *iterStack;
+		const HypothesisStack &stack = **iterStack;
 		HypothesisStack::const_iterator iterHypo;
 		for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
 		{
@@ -573,7 +576,7 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
   std::vector< const Hypothesis *> connectedList;
 
   // start with the ones in the final stack
-  const HypothesisStack &finalStack = m_hypoStackColl.back();
+  const HypothesisStack &finalStack = *m_hypoStackColl.back();
   HypothesisStack::const_iterator iterHypo;
   for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
   {
@@ -623,10 +626,10 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
   }
 
   // compete for best forward score of previous hypothesis
-  std::vector < HypothesisStack >::const_iterator iterStack;
+  std::vector < HypothesisStack* >::const_iterator iterStack;
   for (iterStack = --m_hypoStackColl.end() ; iterStack != m_hypoStackColl.begin() ; --iterStack)
   {
-    const HypothesisStack &stack = *iterStack;
+    const HypothesisStack &stack = **iterStack;
     HypothesisStack::const_iterator iterHypo;
     for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
     {
@@ -672,7 +675,7 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
   connected[ 0 ] = true;
   for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
   {
-    const HypothesisStack &stack = *iterStack;
+    const HypothesisStack &stack = **iterStack;
     HypothesisStack::const_iterator iterHypo;
     for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
     {

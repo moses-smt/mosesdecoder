@@ -104,6 +104,8 @@ public:
 	HypothesisStack();
 	~HypothesisStack()
 	{
+		std::cerr << "DELETE STACK" << this << std::endl;
+
 		RemoveAll();
 	}
 

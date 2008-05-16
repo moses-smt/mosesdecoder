@@ -210,7 +210,7 @@ class BitmapContainer
 
 		// We always require a corresponding bitmap to be supplied.
 		BitmapContainer();
-
+		BitmapContainer(const BitmapContainer &);
 	public:
 		BitmapContainer(const WordsBitmap &bitmap
 										, HypothesisStack &stack
