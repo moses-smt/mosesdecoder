@@ -1,10 +1,10 @@
 cmd=../extractor
 #$cmd -NbestFile NBEST -Reference REF -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out
-$cmd -NbestFile NBEST -Reference REF.0 REF.1 REF.2 -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out
+$cmd --nbest NBEST --reference REF.0,REF.1,REF.2 --ffile FEATSTAT.out --scfile SCORESTAT.out
 
 cp FEATSTAT.out FEATSTAT.in
 cp SCORESTAT.out SCORESTAT.in
-$cmd -NbestFile NBEST -Reference REF.0 REF.1 REF.2 -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out -InputFeatureStatistics FEATSTAT.in -InputScoreStatistics SCORESTAT.in
+$cmd -n NBEST -r REF.0,REF.1,REF.2 -F FEATSTAT.out -S SCORESTAT.out -E FEATSTAT.in -R SCORESTAT.in
 
 
 exit
