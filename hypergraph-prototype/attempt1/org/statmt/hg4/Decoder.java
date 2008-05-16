@@ -2,7 +2,6 @@ package org.statmt.hg4;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,10 +49,40 @@ public class Decoder {
 		public GNode getRoot() { return root; } 
 	}
 	
-
+	public static Hypergraph parse(Phrase sentence,
+			ExplorationAgenda expAgenda,
+			SearchStrategy cg,
+			FundamentalRuleFunctor fr,
+			Hypergraph dg) {
+		Map<Vertex,VertexState> v2smap =
+			new HashMap<Vertex, VertexState>();
+		Map<VertexState, Vertex> s2vmap =
+			new HashMap<VertexState, Vertex>();
+		VertexSignatureCreator sigc = null;
+		FinishingAgenda fa = new FinishingAgenda(sigc, null);
+		while (!fa.isEmpty() && !expAgenda.isEmpty()) {
+			while (!expAgenda.isEmpty()) {
+				// p is a "traversal"
+				APPair p = expAgenda.nextVertex();
+				Hyperarc ha = new Hyperarc(p.asTail());
+			
+				// "edge" discovery
+				VertexState newState = fr.apply(ha, v2smap);
+				Vertex v = s2vmap.get(newState);
+				if (v == null) {
+					v = new Vertex(new ArrayList<Hyperarc>());
+					dg.addNode(v);
+				}
+				dg.addLink(v, ha);
+			}
+			VertexGroup vg = fa.peek();
+			Map<String, Object> sig = vg.getSignature();
+			Collection<Vertex> p = cg.retrieveCombinableVertices(sig, dg, sentence);
+			cg.generateTraversals(vg, p, expAgenda);
+		}
+		return dg;
+	}
+	
 	public static void main(String[] args) {
-		SGrammar g = new SGrammar();
-		g.addRule("[X]", "der [X1] man", "the [X1] man");
-		g.addRule("[X]", "der", "the");
 	}
 }

@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 
-public class PBCandidateGenerator extends PassiveCandidateGenerator {
+public class PBCandidateGenerator extends CandidateGenerator {
 
 	ArrayList<ArrayList<Vertex>> lattice;
 	
