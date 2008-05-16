@@ -15,7 +15,7 @@ unsigned Point::ncall=0;
 
 void Point::Randomize(const parameters_t& min,const parameters_t& max){
   for (int i=0; i<size(); i++)
-    operator[](i)= min[i] + (float)random()/RAND_MAX * (max[i]-min[i]);
+    operator[](i)= min[i] + (float)random()/(float)RAND_MAX * (float)(max[i]-min[i]);
 }
 
 void Point::Normalize(){

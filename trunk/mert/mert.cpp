@@ -16,8 +16,8 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include "Util.h"
 
-int verbose = 2;
 
 float min_interval = 1e-3;
 
@@ -28,9 +28,10 @@ void usage(void) {
   cerr<<"[-n retry ntimes (default 1)]"<<endl;
   cerr<<"[-o\tthe indexes to optimize(default all)]"<<endl;
   cerr<<"[-t\tthe optimizer(default Powell)]"<<endl;
-  cerr<<"[-sctype] the scorer type (default BLEU)"<<endl;
-  cerr<<"[-scfile] the scorer data file (default score.data)"<<endl;
-  cerr<<"[-ffile] the feature data file data file (default feature.data)"<<endl;
+  cerr<<"[--sctype] the scorer type (default BLEU)"<<endl;
+  cerr<<"[--scfile] the scorer data file (default score.data)"<<endl;
+  cerr<<"[--ffile] the feature data file data file (default feature.data)"<<endl;
+  cerr<<"[-v] verbose level";
   exit(1);
 }
 
@@ -43,6 +44,7 @@ static struct option long_options[] =
     {"sctype",1,0,'s'},
     {"scfile",1,0,'S'},
     {"ffile",1,0,'F'},
+    {"verbose",1,0,'v'},
     {0, 0, 0, 0}
   };
 int option_index;
@@ -57,11 +59,10 @@ int main (int argc, char **argv) {
   string featurefile("features.data");
   vector<unsigned> tooptimize;
   vector<parameter_t> start;
-  while ((c=getopt_long (argc, argv, "d:n:t:s:S:F:", long_options, &option_index)) != -1) {
+  while ((c=getopt_long (argc, argv, "d:n:t:s:S:F:v:", long_options, &option_index)) != -1) {
     switch (c) {
     case 'd':
       dim = strtol(optarg, NULL, 10);
-      cerr<<dim;
       break;
     case 'n':
       ntry=strtol(optarg, NULL, 10);
@@ -77,10 +78,15 @@ int main (int argc, char **argv) {
     case 'F':
       featurefile=string(optarg);
       break;
+    case 'v':
+      setverboselevel(strtol(optarg,NULL,10));
+      break;
     default:
       usage();
     }
   }
+  if (dim < 0)
+    usage();
   if(tooptimize.empty()){//We'll optimize on everything
     tooptimize.resize(dim);
     for(i=0;i<dim;i++)
@@ -90,8 +96,7 @@ int main (int argc, char **argv) {
   Optimizer *O;
   Scorer *TheScorer=NULL;;
   FeatureData *FD=NULL;
-  if (dim < 0)
-    usage();
+;
   start.resize(dim);
   float score;
   float best=numeric_limits<float>::min();
@@ -110,6 +115,11 @@ int main (int argc, char **argv) {
   O->SetFData(FD);
   Point min;//to: initialize
   Point max;
+  //note: thos min and maw are the bound for the starting poitns of the algorithm, not strict bound on the result!
+  for(int d=0;d<Point::getdim();d++){
+    min[d]=0.0;
+    max[d]=1.0;
+  }
   for(int i=0;i<ntry;i++){
     Point P;
     P.Randomize(min,max);
@@ -123,8 +133,8 @@ int main (int argc, char **argv) {
   }
   mean/=(float)ntry;
   var/=(float)ntry;
-  var=sqrt(var);
-  cerr<<"variance of the score(for "<<ntry<<" try):"<<var<<endl;
+  var=sqrt(abs(var-mean*mean));
+  cerr<<"variance of the score (for "<<ntry<<" try):"<<var<<endl;
   cerr<<"best score"<<best<<endl;
   ofstream res("weights.txt");
   res<<bestP<<endl;
