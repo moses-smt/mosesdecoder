@@ -31,7 +31,7 @@ void usage(void) {
   cerr<<"[--sctype] the scorer type (default BLEU)"<<endl;
   cerr<<"[--scfile] the scorer data file (default score.data)"<<endl;
   cerr<<"[--ffile] the feature data file data file (default feature.data)"<<endl;
-  cerr<<"[-v] verbose level";
+  cerr<<"[-v] verbose level"<<endl;
   exit(1);
 }
 
@@ -145,7 +145,8 @@ int main (int argc, char **argv) {
  mean/=(float)ntry;
  var/=(float)ntry;
  var=sqrt(abs(var-mean*mean));
- cerr<<"variance of the score (for "<<ntry<<" try):"<<var<<endl;
+ if(ntry>1)
+   cerr<<"variance of the score (for "<<ntry<<" try):"<<var<<endl;
  cerr<<"best score"<<best<<endl;
  ofstream res("weights.txt");
  res<<bestP<<endl;

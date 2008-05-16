@@ -9,7 +9,7 @@
 
 using namespace std;
 
-static const float MIN_FLOAT=numeric_limits<float>::min();
+static const float MIN_FLOAT=-1.0*numeric_limits<float>::max();
 static const float MAX_FLOAT=numeric_limits<float>::max();
 
 
@@ -28,6 +28,7 @@ void Optimizer::SetFData(FeatureData *F){
 
 Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start):scorer(NULL),FData(NULL){
   //warning: the init vector is a full set of parameters, of dimension pdim!
+  
   Point::pdim=Pd;
   assert(start.size()==Pd);
   Point::dim=i2O.size();
@@ -91,6 +92,8 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
     //several candidates can have the lowest slope (eg for word penalty where the gradient is an integer )
     it++;
     while(it!=gradient.end()&&it->first==smallest){
+      //   cerr<<"ni"<<it->second<<endl;;
+      //cerr<<"fos"<<f0[it->second]<<" "<<f0[index]<<" "<<index<<endl;
       if(f0[it->second]>f0[index])
 	index=it->second;//the highest line is the one with he highest f0
       it++;
@@ -111,11 +114,14 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
       for(;it2!=gradient.end();it2++){
 	//cerr<<"--"<<d++<<' '<<it2->first<<' '<<it2->second<<endl;
 	//look for all candidate with a gradient bigger than the current one and find the one with the leftmost intersection
-	float curintersect=intersect(m,b,it2->first,f0[it2->second]);
-	if(curintersect<leftmostx){
-	  //we have found and intersection to the left of the leftmost we had so far.
+	float curintersect;
+	if(m!=it2->first){
+	  curintersect=intersect(m,b,it2->first,f0[it2->second]);
+	  if(curintersect<leftmostx){
+	    //we have found and intersection to the left of the leftmost we had so far.
 	  leftmostx=curintersect;
 	  leftmost=it2;//this is the new reference
+	  }
 	}
       }
       //we have found the next intersection!
@@ -206,11 +212,16 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
 	bestx=lit2->first+0.0001;
     }
   }
+  if(abs(bestx)<0.00015){
+    bestx=0.0;//the origin of the line is the best point!we put it back at 0 so we do not propagate rounding erros
   //finally! we manage to extract the best score;
   //now we convert bestx  (position on the line) to a point!
+    if(verboselevel()>4)
+      cerr<<"best point on line at origin"<<endl;
+  }
   if(verboselevel()>3)
     cerr<<"end Lineopt, bestx="<<bestx<<endl;
-  bestpoint=direction*bestx+origin;
+    bestpoint=direction*bestx+origin;
   bestpoint.score=bestscore;
   return bestscore;  
 };
@@ -275,12 +286,12 @@ vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst,vector<
 float SimpleOptimizer::eps=0.0001;
 statscore_t SimpleOptimizer::TrueRun(Point& P)const{
  
-  statscore_t prevscore=MAX_FLOAT;
+  statscore_t prevscore=0;
   statscore_t bestscore=MIN_FLOAT;
   int nrun=0;
   do{
-    ++nrun;
-    if(verboselevel()>2)
+    ++nrun;    
+    if(verboselevel()>2&&nrun>1)
       cerr<<"last diff="<<bestscore-prevscore<<"nrun "<<nrun<<endl;
     prevscore=bestscore;
     
@@ -288,24 +299,35 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
     Point  linebest;
     
     for(int d=0;d<Point::getdim();d++){
-      if(verboselevel()>3)
+      if(verboselevel()>4)
 	cerr<<"minimizing along direction "<<d<<endl;
       Point direction;
+      for(int i=0;i<Point::getdim();i++)
+	direction[i];
       direction[d]=1.0;
       statscore_t curscore=LineOptimize(P,direction,linebest);//find the minimum on the line
+      if(verboselevel()>5){
+	cerr<<"direction: "<<d<<" score="<<curscore<<endl;
+	cerr<<"\tPoint: "<<linebest<<endl;
+      }
       if(curscore>bestscore){
 	bestscore=curscore;
-	best=linebest;
-	
-      if(verboselevel()>3)
-	cerr<<"new best d"<<d<<" ("<<nrun<<")"<<endl;
+	best=linebest;	
+	if(verboselevel()>3){
+	cerr<<"new best dir:"<<d<<" ("<<nrun<<")"<<endl;
+	cerr<<"new best Point "<<best<<endl;
+	  }
       }
     }
-    P=best;//update the current vector with the best points on all line tested
-}while(bestscore-prevscore<eps);
+    P=best;//update the current vector with the best point on all line tested
+    if(verboselevel()>3)
+      cerr<<nrun<<"\t"<<P<<endl;
+}while(bestscore-prevscore>eps);
+
   if(verboselevel()>2){
     cerr<<"end Powell Algo, nrun="<<nrun<<endl;
     cerr<<"last diff="<<bestscore-prevscore<<endl;
+    cerr<<"\t"<<P<<endl;
 }
   return bestscore;
 }
