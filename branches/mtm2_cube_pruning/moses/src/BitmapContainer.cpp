@@ -338,6 +338,12 @@ BitmapContainer::FindKBestHypotheses()
 		// If the priority queue is exhausted, we are done and should have exited
 		assert(item != NULL);
 
+		// Logging for the criminally insane
+		IFVERBOSE(3) {
+			const StaticData &staticData = StaticData::Instance();
+			item->GetHypothesis()->PrintHypothesis();
+		}
+
 		// Add best hypothesis to hypothesis stack.
 		bool added = m_stack.AddPrune(item->GetHypothesis());	
 		if (added)
@@ -345,12 +351,7 @@ BitmapContainer::FindKBestHypotheses()
 			stacked++;
 		}
 
-		// Logging for the criminally insane
-		IFVERBOSE(3) {
-			const StaticData &staticData = StaticData::Instance();
-			item->GetHypothesis()->PrintHypothesis();
-			TRACE_ERR("added flag is " << added << std::endl);
-		}
+		TRACE_ERR("added flag is " << added << std::endl);
 
 		// Create new hypotheses for the two successors of the hypothesis just added.
 		int hypothesis_pos = item->GetHypothesisPos();
