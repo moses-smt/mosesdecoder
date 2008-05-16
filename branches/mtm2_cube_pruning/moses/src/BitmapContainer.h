@@ -158,7 +158,7 @@ class BackwardsEdge
 		friend class BitmapContainer;
 		bool m_initialized;
 
-		BitmapContainer &m_prevBitmapContainer;
+		const BitmapContainer &m_prevBitmapContainer;
 		BitmapContainer &m_parent;
 		const TranslationOptionList &m_kbest_translations;
 		const SquareMatrix &m_futurescore;
@@ -177,7 +177,7 @@ class BackwardsEdge
 		void Initialize();
 
 	public:
-		BackwardsEdge(BitmapContainer &prevBitmapContainer
+		BackwardsEdge(const BitmapContainer &prevBitmapContainer
 									, BitmapContainer &parent
 									, const TranslationOptionList &translations
 									, const SquareMatrix &futureScore
@@ -227,7 +227,7 @@ class BitmapContainer
 		bool Empty();
 
 		const WordsBitmap &GetWordsBitmap();
-		HypothesisSet &GetHypotheses();
+		const HypothesisSet &GetHypotheses() const;
 		size_t GetHypothesesSize() const;
 		const BackwardsEdgeSet &GetBackwardsEdges();
 		

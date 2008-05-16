@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // BackwardsEdge Code
 ////////////////////////////////////////////////////////////////////////////////
 
-BackwardsEdge::BackwardsEdge(BitmapContainer &prevBitmapContainer
+BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 							 , BitmapContainer &parent
 							 , const TranslationOptionList &translations
 							 , const SquareMatrix &futureScore
@@ -44,7 +44,22 @@ BackwardsEdge::BackwardsEdge(BitmapContainer &prevBitmapContainer
   , m_seenPosition()
 {
 	// Copy hypotheses from ordered set to vector for faster access.
-	m_kbest_hypotheses = m_prevBitmapContainer.GetHypotheses();
+	m_hypothesis_maxpos = m_prevBitmapContainer.GetHypotheses().size();
+	m_kbest_hypotheses.reserve(m_hypothesis_maxpos);
+//	std::copy(m_prevBitmapContainer.GetHypotheses().begin()
+	//					, m_prevBitmapContainer.GetHypotheses().end()
+		//				, m_kbest_hypotheses.begin());
+	
+	m_kbest_hypotheses.clear();
+	HypothesisSet::const_iterator iter;
+	for (iter = m_prevBitmapContainer.GetHypotheses().begin(); iter != m_prevBitmapContainer.GetHypotheses().end(); ++iter)
+	{
+		m_kbest_hypotheses.push_back(*iter);
+	}
+
+	std::cerr << m_kbest_translations.size() << std::endl;
+	std::cerr << "extSize = " << m_prevBitmapContainer.GetHypotheses().size() << std::endl;
+	std::cerr << "inSize  = " << m_kbest_hypotheses.size() << std::endl;
 	
 	// If either dimension is empty, we haven't got anything to do.
 	if(m_kbest_translations.size() == 0 || m_kbest_hypotheses.size() == 0) {
@@ -62,10 +77,12 @@ BackwardsEdge::BackwardsEdge(BitmapContainer &prevBitmapContainer
 	const InputType *itype = StaticData::Instance().GetInput();
 	WordsRange transOptRange = translations[0]->GetSourceWordsRange();
 
+
+/* THIS IS NOT WORKING
 	// We now copy all the hypotheses to our local data structure.
 	m_hypothesis_maxpos = 0;
-	HypothesisSet::iterator hypoIter;
-	for (hypoIter = m_kbest_hypotheses.begin(); hypoIter != m_kbest_hypotheses.end(); ++hypoIter);
+	HypothesisSet::iterator hypoIter = m_kbest_hypotheses.begin();
+	while (hypoIter != m_kbest_hypotheses.end())
 	{
 		// If the combination of this hypothesis and our translation
 		// options violates the distortion limit, discard the hypothesis,
@@ -77,11 +94,12 @@ BackwardsEdge::BackwardsEdge(BitmapContainer &prevBitmapContainer
 			// Special case: If this is the first hypothesis used to seed the search,
 			// it doesn't have a valid range, and we create the hypothesis, if the
 			// initial position is not further into the sentence than the distortion limit.
-			if (current->GetCurrSourceWordsRange().GetStartPos() == NOT_FOUND)
+			if (current->GetWordsBitmap().GetNumWordsCovered() == 0)
 			{
 				if (transOptRange.GetStartPos() > maxDistortion)
 				{
-					m_kbest_hypotheses.erase(hypoIter);
+					hypoIter = m_kbest_hypotheses.erase(hypoIter);
+					continue;
 				}
 			}
 			else
@@ -91,11 +109,15 @@ BackwardsEdge::BackwardsEdge(BitmapContainer &prevBitmapContainer
 
 				if (distortionDistance > maxDistortion)
 				{
-					m_kbest_hypotheses.erase(hypoIter);
+					hypoIter = m_kbest_hypotheses.erase(hypoIter);
+					continue;
 				}
 			}
 		}
+
+		++hypoIter;
 	}
+*/
 }
 
 BackwardsEdge::~BackwardsEdge()
@@ -281,8 +303,8 @@ BitmapContainer::GetWordsBitmap()
 	return m_bitmap;
 }
 
-HypothesisSet&
-BitmapContainer::GetHypotheses()
+const HypothesisSet&
+BitmapContainer::GetHypotheses() const
 {
 	return m_hypotheses;
 }
