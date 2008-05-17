@@ -33,7 +33,7 @@ class Optimizer{
   /**given a set of lambdas, get the nbest for each sentence*/
   void Get1bests(const Point& param,vector<unsigned>& bests)const;
   /**given a set of nbests, get the Statistical score*/
-  statscore_t  GetStatScore(const vector<unsigned>& nbests)const{scorer->score(nbests);};
+  statscore_t  GetStatScore(const vector<unsigned>& nbests)const{return scorer->score(nbests);};
   /**given a set of lambdas, get the total statistical score*/
   statscore_t  GetStatScore(const Point& param)const;  
   vector<statscore_t > GetIncStatScore(vector<unsigned> ref,vector<vector <pair<unsigned,unsigned> > >)const;
