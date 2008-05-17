@@ -108,7 +108,10 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 	const WordsRange &transOptRange = translations[0]->GetSourceWordsRange();
 	const InputType *itype = StaticData::Instance().GetInput();
 
-	for (HypothesisSet::const_iterator iterHypo = m_prevBitmapContainer.GetHypotheses().begin(); iterHypo != m_prevBitmapContainer.GetHypotheses().end(); ++iterHypo) 
+	HypothesisSet::const_iterator iterHypo = m_prevBitmapContainer.GetHypotheses().begin();
+	HypothesisSet::const_iterator iterEnd = m_prevBitmapContainer.GetHypotheses().end();
+
+	while (iterHypo != iterEnd)
 	{
 		const Hypothesis &hypo = **iterHypo;
 		// Special case: If this is the first hypothesis used to seed the search,
@@ -127,6 +130,8 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 				if (distortionDistance <= maxDistortion)
 					m_kbest_hypotheses.push_back(&hypo);
 			}
+	
+		++iterHypo;
 	}
 
 	if (m_kbest_translations.size() > 1)
@@ -136,8 +141,6 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 
 	if (m_kbest_hypotheses.size() > 1)
 	{
-//		std::cerr << *m_kbest_hypotheses[0] << std::endl;
-//		std::cerr << *m_kbest_hypotheses[1] << std::endl;
 		assert(m_kbest_hypotheses[0]->GetTotalScore() >= m_kbest_hypotheses[1]->GetTotalScore());
 	}	
 
@@ -172,10 +175,12 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 	// create hypothesis and calculate all its scores
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
 
-/*
 	// expand hypothesis further if transOpt was linked
-	for (std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
-		 iterLinked != transOpt.GetLinkedTransOpts().end(); ++iterLinked) {
+	std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
+	std::vector<TranslationOption*>::const_iterator iterEnd = transOpt.GetLinkedTransOpts().end();
+
+	while (iterLinked != iterEnd)
+	{
 		const WordsBitmap hypoBitmap = newHypo->GetWordsBitmap();
 		if (hypoBitmap.Overlap((**iterLinked).GetSourceWordsRange())) {
 			// don't want to add a hypothesis that has some but not all of a linked TO set, so return
@@ -187,8 +192,9 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 			newHypo->CalcScore(m_futurescore);
 			newHypo = newHypo->CreateNext(**iterLinked);
 		}
+
+		++iterLinked;
 	}
-*/
 
 	newHypo->CalcScore(m_futurescore);
 	
@@ -261,11 +267,13 @@ BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
 BitmapContainer::~BitmapContainer()
 {
 	// As we have created the square position objects we clean up now.
+	HypothesisQueueItem *item = NULL;
+
 	while (!m_queue.empty())
 	{
-		HypothesisQueueItem *ret = m_queue.top();
-		FREEHYPO(ret->GetHypothesis());
-		delete ret;
+		item = m_queue.top();
+		FREEHYPO(item->GetHypothesis());
+		delete item;
 		m_queue.pop();
 	}
 
@@ -287,11 +295,7 @@ BitmapContainer::Enqueue(int hypothesis_pos
 																										  , translation_pos
 																										  , hypothesis
 																											, edge);
-//	if (m_queue.size() > 0)
-//		std::cerr << "OLD_TOP = " << m_queue.top()->GetHypothesis()->GetTotalScore() << std::endl;
 	m_queue.push(item);
-//	if (m_queue.size() > 1)
-//		std::cerr << "NEW_TOP = " << m_queue.top()->GetHypothesis()->GetTotalScore() << std::endl;
 }
 
 HypothesisQueueItem*
@@ -359,13 +363,18 @@ void
 BitmapContainer::AddHypothesis(Hypothesis *hypothesis)
 {
 	bool itemExists = false;
-	HypothesisSet::const_iterator iter;
-	for (iter = m_hypotheses.begin(); iter != m_hypotheses.end(); ++iter)
+	HypothesisSet::const_iterator iter = m_hypotheses.begin();
+	HypothesisSet::const_iterator iterEnd = m_hypotheses.end();
+
+	// cfedermann: do we actually need this check?
+	while (iter != iterEnd)
 	{
 		if (*iter == hypothesis) {
 			itemExists = true;
 			break;
 		}
+
+		++iter;
 	}
 	assert(itemExists == false);
 	m_hypotheses.push_back(hypothesis);
@@ -380,14 +389,19 @@ BitmapContainer::AddBackwardsEdge(BackwardsEdge *edge)
 void
 BitmapContainer::FindKBestHypotheses()
 {
-	BackwardsEdgeSet::iterator iter;
-	for (iter = m_edges.begin(); iter != m_edges.end(); ++iter)
+	BackwardsEdgeSet::iterator iter = m_edges.begin();
+	BackwardsEdgeSet::iterator iterEnd = m_edges.end();
+
+	while (iter != iterEnd)
 	{
 		BackwardsEdge *edge = *iter;
 		edge->Initialize();
+
+		++iter;
 	}
 
 	size_t stacked = 0;
+	HypothesisQueueItem *item = NULL;
 	while (stacked < m_kbest)
 	{
 		if (m_queue.empty())
@@ -396,7 +410,7 @@ BitmapContainer::FindKBestHypotheses()
 		}
 
 		// Get the currently best hypothesis from the queue.
-		HypothesisQueueItem *item = Dequeue();
+		item = Dequeue();
 		
 
 		// If the priority queue is exhausted, we are done and should have exited
@@ -405,8 +419,6 @@ BitmapContainer::FindKBestHypotheses()
 		if (!Empty())
 		{
 			HypothesisQueueItem *check = Dequeue(true);
-//			std::cerr << *item->GetHypothesis() << std::endl;
-//			std::cerr << *check->GetHypothesis() << std::endl;
 			assert(item->GetHypothesis()->GetTotalScore() >= check->GetHypothesis()->GetTotalScore());
 		}
 
@@ -428,9 +440,7 @@ BitmapContainer::FindKBestHypotheses()
 		}
 
 		// Create new hypotheses for the two successors of the hypothesis just added.
-		int hypothesis_pos = item->GetHypothesisPos();
-		int translation_pos = item->GetTranslationPos();
-		item->GetBackwardsEdge()->PushSuccessors(hypothesis_pos, translation_pos);
+		item->GetBackwardsEdge()->PushSuccessors(item->GetHypothesisPos(), item->GetTranslationPos());
 
 		// We are done with the queue item, we delete it.
 		delete item;

@@ -84,7 +84,7 @@ Parameter::Parameter()
 	AddParam("output-word-graph", "owg", "Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos");
 	AddParam("time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
 	AddParam("output-search-graph", "osg", "Output connected hypotheses of search into specified filename");
-	AddParam("cube-pruning-k-best", "cbk", "How many hypotheses should be created for each coverages. (default = stack size)");
+	AddParam("cube-pruning-k-best", "cbk", "How many hypotheses should be created for each coverages. (default = 10)");
 }
 
 Parameter::~Parameter()
