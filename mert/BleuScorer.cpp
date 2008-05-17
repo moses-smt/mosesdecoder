@@ -148,6 +148,8 @@ void BleuScorer::prepareStats(int sid, const string& text, ScoreStats& entry) {
 }
 
 float BleuScorer::calculateScore(const vector<int>& comps) {
+    //cerr << "BLEU: ";
+    //copy(comps.begin(),comps.end(), ostream_iterator<int>(cerr," "));
 	float logbleu = 0.0;
 	for (int i = 0; i < LENGTH; ++i) {
 		if (comps[2*i] == 0) {
@@ -161,6 +163,7 @@ float BleuScorer::calculateScore(const vector<int>& comps) {
 	if (brevity < 0.0) {
 		logbleu += brevity;
 	}
+    //cerr << " " << exp(logbleu) << endl;
 	return exp(logbleu);
 }
 
