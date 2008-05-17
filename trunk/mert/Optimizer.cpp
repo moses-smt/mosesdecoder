@@ -53,7 +53,11 @@ Optimizer::~Optimizer(){
 statscore_t Optimizer::GetStatScore(const Point& param)const{
   vector<unsigned> bests;
   Get1bests(param,bests);
-  return GetStatScore(bests);
+  //cerr << "1BESTS: ";
+  //copy(bests.begin(),bests.end(),ostream_iterator<unsigned>(cerr," "));
+  statscore_t score = GetStatScore(bests);
+  //cerr << " score = " << score << endl;
+  return score;
 };
 
 /**compute the intersection of 2 lines*/
@@ -417,7 +421,7 @@ Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,vector<unsigned> i2o,ve
 
   OptType T=GetOType(type);
   if(T==NOPTIMIZER){
-    cerr<<"Error unknow Optimizer type "<<type<<endl;
+    cerr<<"Error: unknown Optimizer type "<<type<<endl;
     cerr<<"Known Algorithm are:"<<endl;
     int thetype;
     for(thetype=0;thetype<typenames.size();thetype++)
@@ -429,8 +433,11 @@ Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,vector<unsigned> i2o,ve
   case POWELL:
     return new SimpleOptimizer(dim,i2o,start);
     break;
-  case NOPTIMIZER:
-    cerr<<"error unknwon optimizer"<<type<<endl;
+  case RANDOM:
+    return new RandomOptimizer(dim,i2o,start);
+    break;
+  default:
+    cerr<<"Error: unknown optimizer"<<type<<endl;
     return NULL; 
   }  
 }

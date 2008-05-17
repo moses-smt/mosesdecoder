@@ -28,7 +28,7 @@ void usage(void) {
   cerr<<"usage: mert -d <dimensions> (mandatory )"<<endl;
   cerr<<"[-n retry ntimes (default 1)]"<<endl;
   cerr<<"[-o\tthe indexes to optimize(default all)]"<<endl;
-  cerr<<"[-t\tthe optimizer(default Powell)]"<<endl;
+  cerr<<"[-t\tthe optimizer(default powell)]"<<endl;
   cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
   cerr<<"[--scfile|-S] the scorer data file (default score.data)"<<endl;
   cerr<<"[--ffile|-F] the feature data file data file (default feature.data)"<<endl;
