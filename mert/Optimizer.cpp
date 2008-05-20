@@ -78,6 +78,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   vector<unsigned> first1best;//the vector of nbrests for x=-inf
   for(int S=0;S<size();S++){
     //first we determine the translation with the best feature score for each sentence and each value of x
+    //cerr << "Sentence " << S << endl;
     multimap<float,unsigned> gradient;
     vector<float> f0;
     f0.resize(FData->get(S).size());
@@ -89,21 +90,21 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
     
     vector<pair<float,unsigned> > onebest;
     
-    
     multimap<float,unsigned>::iterator it=gradient.begin();
     float smallest=it->first;//smallest gradient
-    unsigned index=it->second;
+    multimap<float,unsigned>::iterator highest_f0=gradient.begin();
+    
     //several candidates can have the lowest slope (eg for word penalty where the gradient is an integer )
     it++;
     while(it!=gradient.end()&&it->first==smallest){
       //   cerr<<"ni"<<it->second<<endl;;
       //cerr<<"fos"<<f0[it->second]<<" "<<f0[index]<<" "<<index<<endl;
-      if(f0[it->second]>f0[index])
-	index=it->second;//the highest line is the one with he highest f0
+      if(f0[it->second]>f0[highest_f0->second])
+	    highest_f0=it;;//the highest line is the one with he highest f0
       it++;
     }
-    --it;//we went one step too far in the while loop
-    onebest.push_back(pair<float,unsigned>(MIN_FLOAT,index));//first 1best is the lowest gradient. 
+    it = highest_f0;
+    onebest.push_back(pair<float,unsigned>(MIN_FLOAT,it->second));//first 1best is the lowest gradient. 
     //now we look for the intersections points indicating a change of 1 best
     //we use the fact that the function is convex, which means that the gradient can only go up   
     while(it!=gradient.end()){
@@ -146,18 +147,21 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
 	onebest.back()=pair<float,unsigned>(leftmostx,leftmost->second);//leftmost->first is the gradient, we are interested in the value of the intersection
       } else { //normal case: we add a new threshold
 	onebest.push_back(pair<float,unsigned>(leftmostx,leftmost->second));
+        //cerr << "Intersect: x " << leftmostx << endl;
       }
       it=leftmost;
     }
     //we have the onebest list and the threshold for the current sentence.
     //now we update the thresholdlist: we add the new threshold and the  value of the onebest.
-        /*
+        
+/*
         cerr << "Sentence: " << S << endl;
         for (size_t i = 0; i < onebest.size(); ++i) {
                 cerr << "x: " << onebest[i].first << " i: " << onebest[i].second << " ";
         }
         cerr << endl;
-        */
+*/
+        
 
     //add the 1best for x=-inf to the corresponding threshold
     //    (this first threshold is the same for everybody)
@@ -192,7 +196,8 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   //now the thresholdlist is up to date: 
   //it contains a list of all the parameter_ts where the function changed its value, along with the nbest list for the interval after each threshold
   //last thing to do is compute the Stat score (ie BLEU) and find the minimum
-  /*
+  
+/*
   cerr << "Thresholds: " << endl;
   for (list<threshold>::iterator i = thresholdlist.begin();
         i != thresholdlist.end(); ++i) {
@@ -201,7 +206,8 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
             cerr << " " << i->second[j].first << "," << i->second[j].second;
         }
         cerr << endl;
-  }*/
+  }
+*/
 
   //  cerr<<"thesholdlist size"<<thresholdlist.size()<<endl;  
   list<threshold>::iterator lit2=thresholdlist.begin();
@@ -217,7 +223,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   float bestx=MIN_FLOAT;
   assert(scores.size()==thresholdlist.size());//we skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best
   for(int sc=0;sc!=scores.size();sc++){
-    //cerr << "Threshold id: " << sc << " Score: " << scores[sc] << endl;
+    //cerr << "x=" << lit2->first << " => " << scores[sc] << endl;
     if (scores[sc] > bestscore) {
         //This is the score for the interval [lit2->first, (lit2+1)->first]
         //unless we're at the last score, when it's the score
@@ -239,7 +245,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
             rightx = lit2->first;
         }
         --lit2;
-         //cerr << "leftx: " << leftx << " rightx: " << rightx << endl;
+        //cerr << "leftx: " << leftx << " rightx: " << rightx << endl;
         if (leftx == MIN_FLOAT) {
             bestx = rightx-1000;
         } else if (rightx == MAX_FLOAT) {
