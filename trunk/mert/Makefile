@@ -5,8 +5,8 @@ Data.o \
 BleuScorer.o \
 Point.o \
 PerScorer.o \
-Scorer.o
-#Optimizer.o \
+Scorer.o \
+Optimizer.o \
 
 ifndef DEBUG
 CFLAGS=-O3 -DTRACE_ENABLE
@@ -21,9 +21,8 @@ LDLIBS=-lm -lz
 
 all: \
 extractor \
-prova-gz
-#test_scorer \
-#mert \
+test_scorer \
+mert \
 
 clean: 
 	rm -f *.o
@@ -38,8 +37,5 @@ mert: $(OBJS) mert.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 
 test_scorer: $(OBJS) test_scorer.cpp
-	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
-
-prova-gz: $(OBJS) prova-gz.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
 
