@@ -41,6 +41,9 @@ public:
 		
 	inline void clear() { scoredata->clear(); featdata->clear(); }
 	
+	ScoreData* getScoreData() { return scoredata; };
+	FeatureData* getFeatureData() { return featdata; };
+
 	void loadnbest(const std::string &file);
 
 

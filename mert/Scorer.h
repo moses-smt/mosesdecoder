@@ -87,8 +87,8 @@ class Scorer {
 		/**
 		  * Set the score data, prior to scoring.
 		  **/
-		void setScoreData(ScoreData* scoreData) {
-			_scoreData = scoreData;
+		void setScoreData(ScoreData* data) {
+			_scoreData = data;
 		}
 
 		protected:
