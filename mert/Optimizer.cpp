@@ -67,16 +67,36 @@ float intersect (float m1, float b1,float m2,float b2){
   return((b2-b1)/(m1-m2));
 }
 
+map<float,diff_t >::iterator AddThreshold(map<float,diff_t >& thresholdmap,float newt,pair<unsigned,unsigned> newdiff){
+  map<float,diff_t>::iterator it=thresholdmap.find(newt);
+  if(it!=thresholdmap.end()){
+    //the threshold already exists!! this is very unlikely
+    if(it->second.back().first==newdiff.first)
+      it->second.back().second=newdiff.second;//there was already a diff for this sentence, we change the 1 best;
+    else
+      it->second.push_back(newdiff);
+  }else{
+    //normal case
+    pair< map<float,diff_t >::iterator,bool > ins=thresholdmap.insert(threshold(newt,diff_t(1,newdiff)));
+    assert(ins.second);//we really inserted something
+    it=ins.first;
+  }
+  return it;
+};
+
+
 statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,Point& bestpoint)const{
 
-  // we are looking for the best Point on the line y=Origin+x*direction
+// we are looking for the best Point on the line y=Origin+x*direction
   float min_int=0.0001;
-  typedef pair<unsigned,unsigned> diff;//first the sentence that changes, second is the new 1best for this sentence
-  typedef pair<float,vector<diff> > threshold;  
-  list<threshold> thresholdlist;
-  thresholdlist.push_back(threshold(MIN_FLOAT,vector<diff>()));
-  vector<unsigned> first1best;//the vector of nbrests for x=-inf
+  //typedef pair<unsigned,unsigned> diff;//first the sentence that changes, second is the new 1best for this sentence
+  //list<threshold> thresholdlist;
+
+  map<float,diff_t> thresholdmap;
+  thresholdmap[MIN_FLOAT]=diff_t();
+  vector<unsigned> first1best;//the vector of nbests for x=-inf
   for(int S=0;S<size();S++){
+    map<float,diff_t >::iterator previnserted=thresholdmap.begin();
     //first we determine the translation with the best feature score for each sentence and each value of x
     //cerr << "Sentence " << S << endl;
     multimap<float,unsigned> gradient;
@@ -88,140 +108,107 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
     }
     //now lets compute the 1best for each value of x
     
-    vector<pair<float,unsigned> > onebest;
+    //    vector<pair<float,unsigned> > onebest;
     
-    multimap<float,unsigned>::iterator it=gradient.begin();
-    float smallest=it->first;//smallest gradient
+
+    multimap<float,unsigned>::iterator gradientit=gradient.begin();
     multimap<float,unsigned>::iterator highest_f0=gradient.begin();
-    
+  
+    float smallest=gradientit->first;//smallest gradient
     //several candidates can have the lowest slope (eg for word penalty where the gradient is an integer )
-    it++;
-    while(it!=gradient.end()&&it->first==smallest){
-      //   cerr<<"ni"<<it->second<<endl;;
-      //cerr<<"fos"<<f0[it->second]<<" "<<f0[index]<<" "<<index<<endl;
-      if(f0[it->second]>f0[highest_f0->second])
-	    highest_f0=it;;//the highest line is the one with he highest f0
-      it++;
+
+    gradientit++;
+    while(gradientit!=gradient.end()&&gradientit->first==smallest){
+      //   cerr<<"ni"<<gradientit->second<<endl;;
+      //cerr<<"fos"<<f0[gradientit->second]<<" "<<f0[index]<<" "<<index<<endl;
+      if(f0[gradientit->second]>f0[highest_f0->second])
+	   highest_f0=gradientit;//the highest line is the one with he highest f0
+      gradientit++;
     }
-    it = highest_f0;
-    onebest.push_back(pair<float,unsigned>(MIN_FLOAT,it->second));//first 1best is the lowest gradient. 
+    
+    gradientit = highest_f0;
+    first1best.push_back(gradientit->second); 
+
     //now we look for the intersections points indicating a change of 1 best
     //we use the fact that the function is convex, which means that the gradient can only go up   
-    while(it!=gradient.end()){
-      map<float,unsigned>::iterator leftmost=it;
-      float m=it->first;
-      float b=f0[it->second];
-      multimap<float,unsigned>::iterator it2=it;
-      it2++;
+    while(gradientit!=gradient.end()){
+      map<float,unsigned>::iterator leftmost=gradientit;
+      float m=gradientit->first;
+      float b=f0[gradientit->second];
+      multimap<float,unsigned>::iterator gradientit2=gradientit;
+      gradientit2++;
       float leftmostx=MAX_FLOAT;
-      for(;it2!=gradient.end();it2++){
-	//cerr<<"--"<<d++<<' '<<it2->first<<' '<<it2->second<<endl;
+      for(;gradientit2!=gradient.end();gradientit2++){
+	//cerr<<"--"<<d++<<' '<<gradientit2->first<<' '<<gradientit2->second<<endl;
 	//look for all candidate with a gradient bigger than the current one and find the one with the leftmost intersection
 	float curintersect;
-	if(m!=it2->first){
-	  curintersect=intersect(m,b,it2->first,f0[it2->second]);
+	if(m!=gradientit2->first){
+	  curintersect=intersect(m,b,gradientit2->first,f0[gradientit2->second]);
           //cerr << "curintersect: " << curintersect << " leftmostx: " << leftmostx << endl;
 	  if(curintersect<leftmostx){
-	    //we have found and intersection to the left of the leftmost we had so far.
+	    //we have found an intersection to the left of the leftmost we had so far.
 	  leftmostx=curintersect;
-	  leftmost=it2;//this is the new reference
+	  leftmost=gradientit2;//this is the new reference
 	  }
 	}
       }
-      if (leftmost == it) {
+      if (leftmost == gradientit) {
           //we didn't find any more intersections
-          break;
+	//the rightmost bestindex is the one with the highest slope.
+	assert(abs(leftmost->first-gradient.rbegin()->first)<0.0001);//they should be egal but there might be  
+	//a small difference due to rounding error
+	break;
       }
       //we have found the next intersection!
 
-      /* Require that the intersection Point be at least min_int
-	 to the right of the previous one. If not, we replace the
-	 previous intersection Point with this one. Yes, it can even
-	 happen that the new intersection Point is slightly to the
-	 left of the old one, because of numerical imprecision. We
-	 don't check that the new Point is also min_interval to the
-	 right of the penultimate one. In that case, the Points would
-	 switch places in the sort, resulting in a bogus score for
-	 that interval. */
-      if(abs(leftmostx-onebest.back().first)<min_int) {
-	onebest.back()=pair<float,unsigned>(leftmostx,leftmost->second);//leftmost->first is the gradient, we are interested in the value of the intersection
-      } else { //normal case: we add a new threshold
-	onebest.push_back(pair<float,unsigned>(leftmostx,leftmost->second));
-        //cerr << "Intersect: x " << leftmostx << endl;
-      }
-      it=leftmost;
-    }
-    //we have the onebest list and the threshold for the current sentence.
-    //now we update the thresholdlist: we add the new threshold and the  value of the onebest.
-        
-/*
-        cerr << "Sentence: " << S << endl;
-        for (size_t i = 0; i < onebest.size(); ++i) {
-                cerr << "x: " << onebest[i].first << " i: " << onebest[i].second << " ";
-        }
-        cerr << endl;
-*/
-        
+      pair<unsigned,unsigned> newd(S,leftmost->second);//new onebest for Sentence S is leftmost->second
 
-    //add the 1best for x=-inf to the corresponding threshold
-    //    (this first threshold is the same for everybody)
-    first1best.push_back(onebest[0].second);  
-    assert(first1best.size()==S+1);
-
-    list<threshold >::iterator current=thresholdlist.begin();
-    list<threshold >::iterator lit;
-  
-    
-    unsigned prev1best=onebest[0].second;
-    for(int t=1;t<onebest.size();t++){
-      float ref=onebest[t].first;
-      for( lit=current;lit!=thresholdlist.end()&&ref>lit->first;lit++)
-	;
-      //we have found where we must insert the new threshold(before lit)
-      if(lit==thresholdlist.end()){
-	thresholdlist.push_back(threshold(ref,vector<diff>()));
-	lit--;
+      if(leftmostx-previnserted->first<min_int){
+	/* Require that the intersection Point be at least min_int
+         to the right of the previous one(for this sentence). If not, we replace the
+         previous intersection Point with this one. Yes, it can even
+         happen that the new intersection Point is slightly to the
+         left of the old one, because of numerical imprecision.
+	 we do not check that we are to the right of the penultimate point also. it this happen the 1best the inteval will be wrong
+	*/
+	thresholdmap.insert(threshold(leftmostx,previnserted->second));//copy the diffs that were stored on previnserted
+	assert(  thresholdmap[leftmostx].back().first==newd.first);//the last sentence of current.second should be  S
+	thresholdmap[leftmostx].back()=newd;//replace last diff by the new one 
+	thresholdmap.erase(previnserted);//erase previous
+	previnserted=thresholdmap.find(leftmostx);
+      }else{//normal insertion process
+	previnserted=AddThreshold(thresholdmap,leftmostx,newd);
       }
-      else 
-	if(ref!=lit->first)//normal case
-	  lit=thresholdlist.insert(lit,threshold(ref,vector<diff>()));
-      //if ref==lit->first:unlikely (but this is the reason why we have a vector of diff); in that case the threshold is already created
-      //lit is at the right place now we add the diff pair
-      lit->second.push_back(diff(S,onebest[t].second));
-      current=lit;//we will continue after that point
-      current++;
-      prev1best=onebest[t].second;
-    }//loop on onebest.size()
-  }//loop on S
+      gradientit=leftmost;
+    }   //while(gradientit!=gradient.end()){
+  }  //loop on S
   //now the thresholdlist is up to date: 
   //it contains a list of all the parameter_ts where the function changed its value, along with the nbest list for the interval after each threshold
-  //last thing to do is compute the Stat score (ie BLEU) and find the minimum
   
-/*
-  cerr << "Thresholds: " << endl;
-  for (list<threshold>::iterator i = thresholdlist.begin();
-        i != thresholdlist.end(); ++i) {
-        cerr << "x: " << i->first << " diffs";
-        for (size_t j = 0; j < i->second.size(); ++j) {
-            cerr << " " << i->second[j].first << "," << i->second[j].second;
-        }
-        cerr << endl;
+  map<float,diff_t >::iterator thrit;
+  if(verboselevel()>5){
+    cerr << "Thresholds:(" <<thresholdmap.size()<<")"<< endl;
+    for (thrit = thresholdmap.begin();thrit!=thresholdmap.end();thrit++){
+      cerr << "x: " << thrit->first << " diffs";
+      for (size_t j = 0; j < thrit->second.size(); ++j) {
+	cerr << " " <<thrit->second[j].first << "," << thrit->second[j].second;
+      }
+      cerr << endl;
+    }
   }
-*/
-
-  //  cerr<<"thesholdlist size"<<thresholdlist.size()<<endl;  
-  list<threshold>::iterator lit2=thresholdlist.begin();
-  ++lit2;
   
-  vector<vector<diff> > diffs;
-  for(;lit2!=thresholdlist.end();lit2++)
-    diffs.push_back(lit2->second);
+  //last thing to do is compute the Stat score (ie BLEU) and find the minimum
+  thrit=thresholdmap.begin();
+  ++thrit;//first diff corrrespond to MIN_FLOAT and first1best
+  diffs_t diffs;
+  for(;thrit!=thresholdmap.end();thrit++)
+    diffs.push_back(thrit->second);
   vector<statscore_t> scores=GetIncStatScore(first1best,diffs);
   
-  lit2=thresholdlist.begin();
+  thrit=thresholdmap.begin();
   statscore_t bestscore=MIN_FLOAT;
   float bestx=MIN_FLOAT;
-  assert(scores.size()==thresholdlist.size());//we skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best
+  assert(scores.size()==thresholdmap.size());//we skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best
   for(int sc=0;sc!=scores.size();sc++){
     //cerr << "x=" << lit2->first << " => " << scores[sc] << endl;
     if (scores[sc] > bestscore) {
@@ -235,16 +222,16 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
         //take x to be the last interval boundary + 0.1, and for the leftmost
         //interval, take x to be the first interval boundary - 1000.
         //These values are taken from cmert.
-        float leftx = lit2->first;
-        if (lit2 == thresholdlist.begin()) {
+        float leftx = thrit->first;
+        if (thrit == thresholdmap.begin()) {
             leftx = MIN_FLOAT;
         }
-        ++lit2;
+        ++thrit;
         float rightx = MAX_FLOAT;
-        if (lit2 != thresholdlist.end()) {
-            rightx = lit2->first;
+        if (thrit != thresholdmap.end()) {
+            rightx = thrit->first;
         }
-        --lit2;
+        --thrit;
         //cerr << "leftx: " << leftx << " rightx: " << rightx << endl;
         if (leftx == MIN_FLOAT) {
             bestx = rightx-1000;
@@ -255,11 +242,9 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
         }
         //cerr << "x = " << "set new bestx to: " << bestx << endl;
     }
-    ++lit2;
-
-    
-
+    ++thrit;
   }
+
   if(abs(bestx)<0.00015){
     bestx=0.0;//the origin of the line is the best point!we put it back at 0 so we do not propagate rounding erros
   //finally! we manage to extract the best score;
@@ -269,10 +254,11 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   }
   if(verboselevel()>3)
     cerr<<"end Lineopt, bestx="<<bestx<<endl;
-    bestpoint=direction*bestx+origin;
+  bestpoint=direction*bestx+origin;
   bestpoint.score=bestscore;
   return bestscore;  
 };
+
 
 void  Optimizer::Get1bests(const Point& P,vector<unsigned>& bests)const{
   assert(FData);
