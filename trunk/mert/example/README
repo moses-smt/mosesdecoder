@@ -1,6 +1,13 @@
 cmd=../extractor
 #$cmd -NbestFile NBEST -Reference REF -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out
-$cmd --nbest NBEST --reference REF.0,REF.1,REF.2 --ffile FEATSTAT.out --scfile SCORESTAT.out
+
+#to read an nbest file; output is in text format
+$cmd --nbest NBEST --reference REF.0,REF.1,REF.2 --ffile FEATSTAT.out --scfile SCORESTAT.out --sctype BLEU4
+
+#to read a gzipped nbest file; output is in text format
+$cmd --nbest NBEST.gz --reference REF.0,REF.1,REF.2 --ffile FEATSTAT.out --scfile SCORESTAT.out --sctype BLEU4
+
+exit
 
 cp FEATSTAT.out FEATSTAT.in
 cp SCORESTAT.out SCORESTAT.in

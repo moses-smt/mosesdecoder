@@ -39,12 +39,16 @@ void FeatureData::load(ifstream& inFile)
 	int iter=0;
 	while (!inFile.eof()){
 		
+
+		if (!inFile.good()){
+			std::cerr << "ERROR FeatureData::load inFile.good()" << std::endl; 
+		}
+
 		entry.clear();
 		entry.load(inFile);
 
 		if (entry.size() == 0){
-			TRACE_ERR("no more data" << std::endl);
-			continue;
+			return;
 		}
 		add(entry);
 		iter++;
@@ -56,54 +60,16 @@ void FeatureData::load(const std::string &file)
 {
 	TRACE_ERR("loading data from " << file << std::endl);  
 
-	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
+	inputfilestream inFile(file); // matches a stream with a file. Opens the file
 
-	load(inFile);
-
-	inFile.close();
-}
-
-void FeatureData::loadnbest(const std::string &file)
-{
-	TRACE_ERR("loading nbest from " << file << std::endl);  
-
-	FeatureStats entry;
-        int sentence_index;
-	int nextPound;
-
-	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
-
-
-	while (!inFile.eof()){
-
-	        std::string substring, subsubstring, stringBuf;
-        	std::string::size_type loc;
-
-		std::getline(inFile, stringBuf);
-		if (stringBuf.empty()) continue;
-
-//		TRACE_ERR("Reading: " << stringBuf << std::endl); 
-
-		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
-       	        sentence_index = atoi(substring.c_str());
-		nextPound = getNextPound(stringBuf, substring, "|||"); //second field
-		nextPound = getNextPound(stringBuf, substring, "|||"); //third field
-
-		entry.clear();
-		while (!substring.empty()){
-//			TRACE_ERR("Decompounding: " << substring << std::endl); 
-			nextPound = getNextPound(substring, subsubstring);
-	                if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
-				entry.add(ATOFST(subsubstring.c_str()));
-			}
-		}
-//		entry.save();
-		add(entry,sentence_index);
+	if (!inFile) {
+        	throw runtime_error("Unable to open feature file: " + file);
 	}
 
+	load((ifstream&) inFile);
+
 	inFile.close();
 }
-
 void FeatureData::add(FeatureArray& e){
 	if (e.getIndex() < size()){ // array at poistion e.getIndex() already exists
 		//enlarge array at position e.getIndex()

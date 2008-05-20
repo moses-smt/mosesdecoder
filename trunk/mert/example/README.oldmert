@@ -6,15 +6,14 @@ for normtype in '' '-n' ; do
 for reflentype in '' '-a' '-s' '-e' ; do
 
 basename=OLDMERT${casetype}${normtype}${reflentype}
-#cat NBEST | $scorecmd ${casetype} ${normtype} ${reflentype} REF.0 REF.1 REF.2 ./$basename.
-cat NBEST NBEST | sort -mnk 1,1 | $scorecmd ${casetype} ${normtype} ${reflentype} REF.0 REF.1 REF.2 ./$basename.
+cat NBEST | $scorecmd ${casetype} ${normtype} ${reflentype} REF.0 REF.1 REF.2 ./$basename.
+#cat NBEST NBEST | sort -mnk 1,1 | $scorecmd ${casetype} ${normtype} ${reflentype} REF.0 REF.1 REF.2 ./$basename.
 cat ./$basename.feats.opt | cut -d' ' -f 16- > ./$basename.SCORESTAT.out
 cat ./$basename.feats.opt | cut -d' ' -f 1-15 > ./$basename.FEATSTAT.out
 
 echo comparing SCORESTAT.out and $basename.SCORESTAT.out
 cat SCORESTAT.out | sort | grep -v "^SCORE"> AAA$$
 cat $basename.SCORESTAT.out | sort >BBB$$
-#head -3 AAA$$ BBB$$
 cmp AAA$$ BBB$$
 
 echo comparing FEATSTAT.out and $basename.FEATSTAT.out

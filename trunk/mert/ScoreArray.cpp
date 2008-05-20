@@ -67,10 +67,9 @@ void ScoreArray::loadtxt(ifstream& inFile)
 
 	TRACE_ERR("starting loadtxt..." << std::endl);
 	std::getline(inFile, stringBuf);
-	if (stringBuf.empty()){
-		TRACE_ERR("ERROR: Empty string" << std::endl);
+	if (!inFile.good()){
 		return;
-	}         
+	}
 
 	if (!stringBuf.empty()){         
 //		TRACE_ERR("Reading: " << stringBuf << std::endl); 
@@ -116,10 +115,11 @@ void ScoreArray::load(ifstream& inFile, bool bin)
 
 void ScoreArray::load(const std::string &file , bool bin)
 {
-	TRACE_ERR("loading data from " << file << std::endl);  
+	TRACE_ERR("loading data from " << file << std::endl);   
 
-	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
+	inputfilestream inFile(file); // matches a stream with a file. Opens the file
 
-	load(inFile, bin);
+	load((ifstream&) inFile, bin);
+
 	inFile.close();
 }
