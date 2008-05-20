@@ -66,13 +66,12 @@ void FeatureArray::loadtxt(ifstream& inFile)
 
 
 	std::getline(inFile, stringBuf);
-	if (stringBuf.empty()){
-		TRACE_ERR("ERROR: Empty string" << std::endl);
+	if (!inFile.good()){
 		return;
-	}         
+	}
 
 	if (!stringBuf.empty()){         
-//		TRACE_ERR("Reading: " << stringBuf << std::endl); 
+		TRACE_ERR("Reading: " << stringBuf << std::endl); 
                 if ((loc = stringBuf.find(FEATURES_TXT_BEGIN)) != 0){
 			TRACE_ERR("ERROR: FeatureArray::loadtxt(): Wrong header");
 			return;
@@ -121,9 +120,9 @@ void FeatureArray::load(const std::string &file, bool bin)
 {
 	TRACE_ERR("loading data from " << file << std::endl);  
 
-	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
+	inputfilestream inFile(file); // matches a stream with a file. Opens the file
 
-	load(inFile, bin);
+	load((ifstream&) inFile, bin);
 
 	inFile.close();
 

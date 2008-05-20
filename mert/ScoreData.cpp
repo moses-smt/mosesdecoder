@@ -53,7 +53,6 @@ void ScoreData::load(ifstream& inFile)
 		entry.loadtxt(inFile);
 
 		if (entry.size() == 0){
-			TRACE_ERR("no more data" << std::endl);
 			continue;
 		}
 		add(entry);
@@ -64,57 +63,18 @@ void ScoreData::load(ifstream& inFile)
 
 void ScoreData::load(const std::string &file)
 {
-	TRACE_ERR("loading score data from " << file << std::endl);  
+	TRACE_ERR("loading score data from " << file << std::endl); 
 
-	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
+	inputfilestream inFile(file); // matches a stream with a file. Opens the file
 
-    if (!inFile) {
-        throw runtime_error("Unable to open score file: " + file);
-    }
-	load(inFile);
-
-	inFile.close();
-}
-
-void ScoreData::loadnbest(const std::string &file)
-{
-	TRACE_ERR("loading nbest from " << file << std::endl);  
-
-	ScoreStats entry;
-        int sentence_index;
-	int nextPound;
-
-	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
-
-
-	while (!inFile.eof()){
-
-	        std::string substring, subsubstring, stringBuf;
-	        std::string theSentence;
-        	std::string::size_type loc;
-
-		std::getline(inFile, stringBuf);
-		if (stringBuf.empty()) continue;
-
-//		TRACE_ERR("Reading: " << stringBuf << std::endl); 
-
-		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
-       	        sentence_index = atoi(substring.c_str());
-		nextPound = getNextPound(stringBuf, substring, "|||"); //second field
-		theSentence = substring;
-
-
-		entry.clear();
-
-		theScorer->prepareStats(sentence_index, theSentence,entry);
-
-		add(entry,sentence_index);
+	if (!inFile) {
+        	throw runtime_error("Unable to open score file: " + file);
 	}
 
+	load((ifstream&) inFile); 
+
 	inFile.close();
 }
-
-
 
 void ScoreData::add(const ScoreStats& e, int sent_idx){
 	if (exists(sent_idx)){

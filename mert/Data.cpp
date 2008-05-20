@@ -29,22 +29,17 @@ void Data::loadnbest(const std::string &file)
         int sentence_index;
 	int nextPound;
 
-	std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
+	inputfilestream inp(file); // matches a stream with a file. Opens the file
 
-    if (!inFile) {
-        throw runtime_error("Unable to open: " + file);
-    }
+	if (!inp.good())
+	        throw runtime_error("Unable to open: " + file);
 
-	while (!inFile.eof()){
+        std::string substring, subsubstring, stringBuf;
+	std::string theSentence;
+	std::string::size_type loc;
 
-	        std::string substring, subsubstring, stringBuf;
-                std::string theSentence;
-        	std::string::size_type loc;
-
-		std::getline(inFile, stringBuf);
+        while (getline(inp,stringBuf,'\n')){
 		if (stringBuf.empty()) continue;
-
-//		TRACE_ERR("Reading: " << stringBuf << std::endl); 
 
 		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
        	        sentence_index = atoi(substring.c_str());
@@ -53,19 +48,19 @@ void Data::loadnbest(const std::string &file)
                 theSentence = substring;
 
 // adding statistics for error measures
-                scoreentry.clear();
-                theScorer->prepareStats(sentence_index, theSentence,scoreentry);
-                scoredata->add(scoreentry,sentence_index);
-
+		featentry.clear();
+		scoreentry.clear();
+                theScorer->prepareStats(sentence_index, theSentence, scoreentry);
+                scoredata->add(scoreentry, sentence_index);
 
 		nextPound = getNextPound(stringBuf, substring, "|||"); //third field
 
 // adding features
-		featentry.clear();
-		scoreentry.clear();
 		while (!substring.empty()){
 //			TRACE_ERR("Decompounding: " << substring << std::endl); 
 			nextPound = getNextPound(substring, subsubstring);
+
+// string ending with ":" are skipped, because they are the names of the features
 	                if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
 				featentry.add(ATOFST(subsubstring.c_str()));
 			}
@@ -73,5 +68,5 @@ void Data::loadnbest(const std::string &file)
 		featdata->add(featentry,sentence_index);
 	}
 
-	inFile.close();
+	inp.close();
 }

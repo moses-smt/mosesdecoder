@@ -28,6 +28,7 @@ protected:
 private:
 	Scorer* theScorer;	
 	std::string score_type;
+	size_t number_of_scores;
 	
 public:
 	ScoreData(Scorer& sc);
@@ -46,6 +47,7 @@ public:
 	void add(const ScoreArray& e){ array_.push_back(e); }
 	void add(const ScoreStats& e, int sent_idx);
 	
+	inline size_t ScoreSize(){ return number_of_scores; }
 	inline size_t size(){ return array_.size(); }
 	
 	void save(const std::string &file, bool bin=false);
@@ -54,9 +56,6 @@ public:
 
 	void load(ifstream& inFile);
 	void load(const std::string &file);
-
-	void loadnbest(const std::string &file);
-
 };
 
 

@@ -23,6 +23,7 @@ class FeatureData
 protected:
 	vector<FeatureArray> array_;
 	vector<int> idxmap_;
+	size_t number_of_feature;
 	
 private:
 	
@@ -57,6 +58,7 @@ public:
 	void add(FeatureArray& e);
 	void add(FeatureStats e, int sent_idx);
 	
+	inline size_t FeatureSize(){ return number_of_feature; }
 	inline size_t size(){ return array_.size(); }
 	
 	void save(const std::string &file, bool bin=false);
@@ -65,8 +67,6 @@ public:
 
 	void load(ifstream& inFile);
 	void load(const std::string &file);
-
-	void loadnbest(const std::string &file);
 };
 
 

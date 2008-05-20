@@ -11,14 +11,20 @@
 
 using namespace std;
 
+#include <stdexcept>
 #include <limits>
 #define US_NOSET (numeric_limits<unsigned short>::max())
+
+#define MAX_LINE  1024
 
 #include <vector>
 #include <map>
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include <fstream>
+#include "gzfilebuf.h"
 
 #include "ScoreStats.h"
 #include "FeatureStats.h"
@@ -48,50 +54,30 @@ inline T Scan(const std::string &input)
 	 return ret;
 };
 
-template<typename T> 
-int packVariable(char *buffer, size_t &bufferlen, T theVariable)
+class inputfilestream : public std::istream
 {
-	size_t variable_size = sizeof(T);
-	memcpy(buffer + bufferlen, (char*) &theVariable, variable_size);
-	bufferlen += variable_size;
-	return variable_size;
+protected:
+        std::streambuf *m_streambuf;
+	bool _good;
+public:
+  
+        inputfilestream(const std::string &filePath);
+        ~inputfilestream();
+	bool good(){return _good;}
+        void close();
 };
 
-template<typename T> 
-int unpackVariable(char *buffer, size_t &bufferlen, T &theVariable)
+class outputfilestream : public std::ostream
 {
-	size_t variable_size = sizeof(T);
-	theVariable = *((T*)(buffer + bufferlen));
-	bufferlen += variable_size;
-	return variable_size;
-};
-
-template<typename T>
-int packVector(char *buffer, size_t &bufferlen, vector<T> theVector)
-{
-	int vector_size = packVariable(buffer, bufferlen, theVector.size());
-	
-	for (int i = 0; i < theVector.size(); i++)
-		vector_size += packVariable(buffer, bufferlen, theVector.at(i));		
-	
-	return vector_size;
-};
-
-template<typename T>
-int unpackVector(char *buffer, size_t &bufferlen, vector<T> &theVector)
-{
-	int vector_size;
-	int vector_memsize = unpackVariable(buffer, bufferlen, vector_size);
-	
-	theVector.clear();
-	T theVariable;
-	for (int i = 0; i < vector_size; i++)
-	{
-		vector_memsize += unpackVariable(buffer, bufferlen, theVariable);
-		theVector.push_back(theVariable);
-	}
-	
-	return vector_memsize;
+protected:
+        std::streambuf *m_streambuf;
+	bool _good;
+public:
+  
+        outputfilestream(const std::string &filePath);
+        ~outputfilestream();
+	bool good(){return _good;}
+        void close();
 };
 
 #endif
