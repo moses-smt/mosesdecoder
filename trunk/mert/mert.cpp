@@ -157,7 +157,7 @@ int main (int argc, char **argv) {
  var=sqrt(abs(var-mean*mean));
  if(ntry>1)
    cerr<<"variance of the score (for "<<ntry<<" try):"<<var<<endl;
- cerr<<"best score"<<best<<endl;
+ cerr<<"best score: "<<best<<endl;
  ofstream res("weights.txt");
  res<<bestP<<endl;
  timer.stop("Stopping...");
