@@ -79,7 +79,7 @@ Point Point::operator*(float l)const{
    vector<parameter_t> w=P.GetAllWeights();
    for(int i=0;i<Point::pdim;i++)
      o<<w[i]<<' ';
-   o<<endl;
+//   o<<endl;
    return o;
 };
 

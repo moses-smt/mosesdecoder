@@ -186,7 +186,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   //it contains a list of all the parameter_ts where the function changed its value, along with the nbest list for the interval after each threshold
   
   map<float,diff_t >::iterator thrit;
-  if(verboselevel()>5){
+  if(verboselevel()>6){
     cerr << "Thresholds:(" <<thresholdmap.size()<<")"<< endl;
     for (thrit = thresholdmap.begin();thrit!=thresholdmap.end();thrit++){
       cerr << "x: " << thrit->first << " diffs";
@@ -253,7 +253,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
       cerr<<"best point on line at origin"<<endl;
   }
   if(verboselevel()>3)
-    cerr<<"end Lineopt, bestx="<<bestx<<endl;
+//    cerr<<"end Lineopt, bestx="<<bestx<<endl;
   bestpoint=direction*bestx+origin;
   bestpoint.score=bestscore;
   return bestscore;  
@@ -291,15 +291,15 @@ statscore_t Optimizer::Run(Point& P)const{
     exit(2);
   }
   if (scorer->getReferenceSize()!=FData->size()){
-    cerr<<"errror size mismatch between FeatureData and Scorer"<<endl;
+    cerr<<"error size mismatch between FeatureData and Scorer"<<endl;
     exit(2);
   }
   if(verboselevel()>1)
-    cerr<<"starting Point "<<P;
+    cerr<<"starting point: "<< P;
   statscore_t s=TrueRun(P);
   P.score=s;//just in case its not done in TrueRun
   if (verboselevel()>1)
-    cerr<<"best found Point "<<P<<"score="<<s<<endl;
+    cerr<<"Best point: "<< P <<" => "<< s << endl;
   return s;
 }
  
@@ -327,22 +327,24 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
   do{
     ++nrun;    
     if(verboselevel()>2&&nrun>1)
-      cerr<<"last diff="<<bestscore-prevscore<<"nrun "<<nrun<<endl;
+      cerr<<"last diff="<<bestscore-prevscore<<" nrun "<<nrun<<endl;
     prevscore=bestscore;
     
     Point  linebest;
     
     for(int d=0;d<Point::getdim();d++){
-      if(verboselevel()>4)
-	cerr<<"minimizing along direction "<<d<<endl;
+      if(verboselevel()>4){
+//	cerr<<"minimizing along direction "<<d<<endl;
+	cerr<<"starting point: " << P << " => " << prevscore << endl;
+      }
       Point direction;
       for(int i=0;i<Point::getdim();i++)
 	direction[i];
       direction[d]=1.0;
       statscore_t curscore=LineOptimize(P,direction,linebest);//find the minimum on the line
       if(verboselevel()>5){
-	cerr<<"direction: "<<d<<" score="<<curscore<<endl;
-	cerr<<"\tPoint: "<<linebest<<endl;
+	cerr<<"direction: "<< d << endl;
+	cerr<<"\tending point: "<< linebest << " => " << curscore << endl;
       }
       if(curscore>bestscore){
 	bestscore=curscore;
