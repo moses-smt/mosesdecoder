@@ -2,7 +2,7 @@ package org.statmt.hg4;
 
 import java.util.BitSet;
 
-public class Coverage implements Comparable {
+public class Coverage implements Comparable<Coverage> {
 	BitSet coverage;
 	int slen;
 	
@@ -19,6 +19,7 @@ public class Coverage implements Comparable {
 		coverage = new BitSet(phraseSize);
 		coverage.set(coverageStart,coverageEnd,true);
 		slen = phraseSize;
+		System.out.println("C(" + phraseSize + "," + coverageStart + "," + coverageEnd +")");
 	}
 
 	/**
@@ -36,6 +37,17 @@ public class Coverage implements Comparable {
 	
 	public int size() {
 		return slen;
+	}
+	
+	@Override
+	public int hashCode() {
+		return 37 * slen + this.toString().hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		Coverage c = (Coverage)o;
+		return this.slen == c.slen && this.toString().equals(c.toString());
 	}
 	
 	public int nextGap(int fromIndex) {
@@ -62,8 +74,7 @@ public class Coverage implements Comparable {
 		return coverage.cardinality() == slen;
 	}
 	
-	public int compareTo(Object o) {
-        Coverage other = (Coverage) o;
+	public int compareTo(Coverage other) {
 		return other.coverage.cardinality() - this.coverage.cardinality();
 	}
 	

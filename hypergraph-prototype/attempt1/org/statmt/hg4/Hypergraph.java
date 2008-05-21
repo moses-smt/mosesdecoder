@@ -60,17 +60,7 @@ public class Hypergraph {
     	
     }
     
-    static abstract class ArcVisitor {
-    	/**
-    	 * 
-    	 * @param h - the arc in question
-    	 * @param children - the results of applying transition to children
-    	 * @return application of the rule/value/etc associated with h to children
-    	 */
-    	public abstract Object transition(Hyperarc h, Object[] children);
-    }
-    
-    static class StringifyPB extends ArcVisitor {
+    static class StringifyPB extends HyperarcVisitor {
     	HashMap<Hyperarc, Rule> map;
     	public StringifyPB(HashMap<Hyperarc, Rule> m) { map = m; }
     	public Object transition(Hyperarc h, Object[] children) {
@@ -81,7 +71,7 @@ public class Hypergraph {
     	}
     }
 
-    static class StringifyPBWithPhraseMarkup extends ArcVisitor {
+    static class StringifyPBWithPhraseMarkup extends HyperarcVisitor {
     	HashMap<Hyperarc, Rule> map;
     	public StringifyPBWithPhraseMarkup(HashMap<Hyperarc, Rule> m) { map = m; }
     	public Object transition(Hyperarc h, Object[] children) {
@@ -91,14 +81,9 @@ public class Hypergraph {
     		} else return "|" + r.getTarget() + "|";
     	}
     }
-
     
-    static abstract class Traverser {
-    	public abstract Object traverse(Vertex vertex, ArcVisitor v);
-    }
-    
-    static class ViterbiTraverser extends Traverser {
-    	public Object traverse(Vertex vertex, ArcVisitor visitor) {
+    static class ViterbiTraverser extends HypergraphTraverser {
+    	public Object traverse(Vertex vertex, HyperarcVisitor visitor) {
     		if (vertex.incomingArcs == null) {
     			return null;
     		}
@@ -118,8 +103,8 @@ public class Hypergraph {
     	}
     }
     
-    public static Object viterbi(Hypergraph g, ArcVisitor v) {
-    	Traverser t = new ViterbiTraverser();
+    public static Object viterbi(Hypergraph g, HyperarcVisitor v) {
+    	HypergraphTraverser t = new ViterbiTraverser();
     	return t.traverse(g.sinkVertices.iterator().next(), v);
     }
               

@@ -10,8 +10,8 @@ public class FinishingAgenda extends PriorityQueue<VertexGroup> {
 	private static final long serialVersionUID = 12142142L;
 	
 	Comparator<Vertex> vertexComp;
-	HashMap<Map<String,Object>, VertexGroup> groups =
-		new HashMap<Map<String,Object>, VertexGroup>();
+	HashMap<VertexSignature, VertexGroup> groups =
+		new HashMap<VertexSignature, VertexGroup>();
 	VertexSignatureCreator sigCreator;
 	
 	static class VertexGroupCompare implements Comparator<VertexGroup> {
@@ -21,7 +21,10 @@ public class FinishingAgenda extends PriorityQueue<VertexGroup> {
 			vertexComp = c;
 		}
 		public int compare(VertexGroup o1, VertexGroup o2) {
-			return vertexComp.compare(o1.peek(), o2.peek());
+			int vc = vertexComp.compare(o1.peek(), o2.peek());
+			if (vc == 0) {
+				return o1.getSignature().compareTo(o2.getSignature());
+			} else return vc;
 		}
 		
 	}
@@ -29,6 +32,7 @@ public class FinishingAgenda extends PriorityQueue<VertexGroup> {
 	public FinishingAgenda(VertexSignatureCreator c,
 			Comparator<Vertex> vertexRanker) {
 		super(5, new VertexGroupCompare(vertexRanker));
+		vertexComp = vertexRanker;
 		sigCreator = c;
 	}
 	
@@ -39,13 +43,22 @@ public class FinishingAgenda extends PriorityQueue<VertexGroup> {
 	}
 	
 	public void add(Vertex v, Map<Vertex, VertexState> v2s) {
-		Map<String, Object> sig = sigCreator.signature(v2s.get(v));
+		VertexSignature sig = sigCreator.signature(v2s.get(v));
 		VertexGroup g = groups.get(sig);
+		//System.out.println("@@@FA.add(" + sig +")\tHC="+sig.hashCode() + "  g=" + g);
 		if (g == null) {
 			g = new VertexGroup(this, vertexComp, sig);
 			groups.put(sig,g);
 		}
 		g.add(v);
+		System.out.println("FINSIHING.SIZE=" + this.size() + "\tVG.SIZE="+g.size() );
+	}
+	
+	@Override
+	public VertexGroup poll() {
+		VertexGroup g = super.poll();
+		groups.remove(g.getSignature());
+		return g;
 	}
 	
 }

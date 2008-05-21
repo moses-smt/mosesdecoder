@@ -6,8 +6,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.statmt.hg4.Hypergraph.Rule;
-
 public class Decoder {
 
 	static class GNode {
@@ -101,15 +99,20 @@ public class Decoder {
 					v2smap.put(v, newState);
 				}
 				dg.addLink(v, ha);
+				System.out.println("ADDING " + newState);
 				fa.add(v, v2smap);
 			}
 			if (fa.peek() != null) {
 				VertexGroup vg = fa.poll();
 				System.out.println("FA: processing finishing vertex (group) " + vg);
-				Map<String, Object> sig = vg.getSignature();
+				VertexSignature sig = vg.getSignature();
 				System.out.println("  sig=" + sig);
-				Collection<Vertex> p = ss.retrieveCombinableVertices(sig, dg, sentence);
-				ss.generateTraversals(vg, p, expAgenda);
+				if (vg.isActive()) {
+					Collection<Vertex> p = ss.retrieveCombinableVertices(sig, dg, sentence);
+					ss.generateTraversals(vg, p, expAgenda);
+				} else {
+					System.out.println("NOACT!!!");
+				}
 			}
 		}
 		return dg;

@@ -1,14 +1,12 @@
 package org.statmt.hg4;
 
-import java.util.Map;
-import java.util.HashMap;
-
 public class DumbPBSignature extends VertexSignatureCreator {
 
 	@Override
-	public Map<String, Object> signature(VertexState vs) {
-		HashMap<String, Object> res = new HashMap<String, Object>();
+	public VertexSignature signature(VertexState vs) {
+		VertexSignature res = new VertexSignature();
 		res.put("COVERAGE", vs.get("COVERAGE"));
+		res.put("ACTIVE?", vs.get("ACTIVE?"));
 		return res;
 	}
 

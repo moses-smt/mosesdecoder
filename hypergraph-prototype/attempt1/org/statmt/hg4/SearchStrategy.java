@@ -6,7 +6,7 @@ import java.util.Map;
 public abstract class SearchStrategy {
 	
 	public abstract Collection<Vertex> retrieveCombinableVertices(
-			Map<String, Object> signatureOfVertex,
+			VertexSignature signatureOfVertex,
 			Hypergraph derivationGraph,
 			Phrase sentence);
 	

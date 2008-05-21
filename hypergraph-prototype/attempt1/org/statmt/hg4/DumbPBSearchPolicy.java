@@ -3,9 +3,6 @@ package org.statmt.hg4;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.HashMap;
-
-import org.statmt.hg4.Hypergraph.Rule;
 
 public class DumbPBSearchPolicy extends SearchStrategy {
 
@@ -49,7 +46,7 @@ public class DumbPBSearchPolicy extends SearchStrategy {
 					//add arc info to hash
 					VertexState vs = new VertexState();
 					vs.put("E", trans);
-					vs.put("COVERAGE", new Coverage(l.size(), i, j));
+					vs.put("COVERAGE", new Coverage(l.size(), i, j + i));
 					vs.put("PROB", new Float(0.0f));
 					vs.put("ACTIVE?", new Boolean(false));
 
@@ -101,7 +98,7 @@ public class DumbPBSearchPolicy extends SearchStrategy {
 
 	@Override
 	public Collection<Vertex> retrieveCombinableVertices(
-			Map<String, Object> signatureOfVertex,
+			VertexSignature signatureOfVertex,
 			Hypergraph derivationGraph, Phrase sentence) {
 		Coverage c = (Coverage)signatureOfVertex.get("COVERAGE");
 		
