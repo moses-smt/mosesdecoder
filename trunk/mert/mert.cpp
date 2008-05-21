@@ -71,11 +71,12 @@ int main (int argc, char **argv) {
     case 't':
       type=string(optarg);
       break;
-      case's':
-	scorertype=string(optarg);
+    case's':
+      scorertype=string(optarg);
       break;
     case 'S':
       scorerfile=string(optarg);
+      break;
     case 'F':
       featurefile=string(optarg);
       break;
@@ -115,8 +116,12 @@ int main (int argc, char **argv) {
   //it make sense to know what parameter set were used to generate the nbest
   ScorerFactory SF;
   Scorer *TheScorer=SF.getScorer(scorertype);
+
+  cerr<<"Loading ScoreData from: "<< scorerfile  << endl;
   ScoreData *SD=new ScoreData(*TheScorer);
   SD->load(scorerfile);
+
+  cerr<<"Loading FeatureData from: "<< featurefile  << endl;
   FeatureData *FD=new FeatureData();
   FD->load(featurefile);
   Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start,type);
