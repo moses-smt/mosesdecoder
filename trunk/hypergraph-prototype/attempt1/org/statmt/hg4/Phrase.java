@@ -1,6 +1,8 @@
 package org.statmt.hg4;
 
-public class Phrase {
+import java.util.Arrays;
+
+public class Phrase implements Comparable<Phrase> {
    	String[] d;
 	public Phrase(String ds) {
 		d = ds.split("\\s+");
@@ -34,6 +36,9 @@ public class Phrase {
 		for (int i=0; i<d.length; i++) if (i==0) r+=d[i]; else r += " " + d[i];
 		r += ">";
 		return r;
+	}
+	public int compareTo(Phrase o) {
+		return this.toString().compareTo(o.toString());
 	}
 
 }
