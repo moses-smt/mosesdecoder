@@ -127,7 +127,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
     }
     
     gradientit = highest_f0;
-    first1best.push_back(gradientit->second); 
+    first1best.push_back(highest_f0->second); 
 
     //now we look for the intersections points indicating a change of 1 best
     //we use the fact that the function is convex, which means that the gradient can only go up   
@@ -172,7 +172,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
 	 we do not check that we are to the right of the penultimate point also. it this happen the 1best the inteval will be wrong
 	*/
 	thresholdmap.insert(threshold(leftmostx,previnserted->second));//copy the diffs that were stored on previnserted
-	assert(  thresholdmap[leftmostx].back().first==newd.first);//the last sentence of current.second should be  S
+	//assert(  thresholdmap[leftmostx].back().first==newd.first);//the last sentence of current.second should be  S
 	thresholdmap[leftmostx].back()=newd;//replace last diff by the new one 
 	thresholdmap.erase(previnserted);//erase previous
 	previnserted=thresholdmap.find(leftmostx);
@@ -210,7 +210,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   float bestx=MIN_FLOAT;
   assert(scores.size()==thresholdmap.size());//we skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best
   for(int sc=0;sc!=scores.size();sc++){
-    //cerr << "x=" << lit2->first << " => " << scores[sc] << endl;
+    //cerr << "x=" << thrit->first << " => " << scores[sc] << endl;
     if (scores[sc] > bestscore) {
         //This is the score for the interval [lit2->first, (lit2+1)->first]
         //unless we're at the last score, when it's the score
