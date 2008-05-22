@@ -171,11 +171,14 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
          left of the old one, because of numerical imprecision.
 	 we do not check that we are to the right of the penultimate point also. it this happen the 1best the inteval will be wrong
 	*/
-	thresholdmap.insert(threshold(leftmostx,previnserted->second));//copy the diffs that were stored on previnserted
-	//assert(  thresholdmap[leftmostx].back().first==newd.first);//the last sentence of current.second should be  S
+	thresholdmap[leftmostx] = previnserted->second;//copy the diffs that were stored on previnserted
+	assert(  thresholdmap[leftmostx].back().first==newd.first);//the last sentence of current.second should be  S
 	thresholdmap[leftmostx].back()=newd;//replace last diff by the new one 
-	thresholdmap.erase(previnserted);//erase previous
+    if (previnserted->first != leftmostx) {
+	    thresholdmap.erase(previnserted);//erase previous
+    }
 	previnserted=thresholdmap.find(leftmostx);
+    assert(previnserted != thresholdmap.end());
       }else{//normal insertion process
 	previnserted=AddThreshold(thresholdmap,leftmostx,newd);
       }
