@@ -32,7 +32,7 @@ void PerScorer::setReferenceFiles(const vector<string>& referenceFiles) {
 
 }
 
-void PerScorer::prepareStats(int sid, const string& text, ScoreStats& entry) {
+void PerScorer::prepareStats(unsigned int sid, const string& text, ScoreStats& entry) {
     if (sid >= _reflengths.size()) {
         stringstream msg;
         msg << "Sentence id (" << sid << ") not found in reference set";

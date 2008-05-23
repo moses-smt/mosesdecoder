@@ -28,8 +28,9 @@ class Scorer {
 	
 	public:
 		
-		Scorer(const string& name): _name(name), _scoreData(0),_preserveCase(false)  {}
-
+		Scorer(const string& name): _name(name), _scoreData(0),_preserveCase(false)  {};
+		virtual ~Scorer(){};
+	
 		/**
 		  * set the reference files. This must be called before prepareStats.
 		  **/
@@ -141,8 +142,9 @@ class Scorer {
 class StatisticsBasedScorer : public Scorer {
 
     public:
-        StatisticsBasedScorer(const string& name): Scorer(name) {}
-        virtual void score(const candidates_t& candidates, const diffs_t& diffs,
+  StatisticsBasedScorer(const string& name): Scorer(name) {}
+	~StatisticsBasedScorer(){};
+	virtual void score(const candidates_t& candidates, const diffs_t& diffs,
                 statscores_t& scores);
 
     protected:
@@ -162,7 +164,7 @@ class BleuScorer: public StatisticsBasedScorer {
 	public:
 		BleuScorer() : StatisticsBasedScorer("BLEU"),_refLengthStrategy(SHORTEST) {}
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
-		virtual void prepareStats(int sid, const string& text, ScoreStats& entry);
+		virtual void prepareStats(unsigned int sid, const string& text, ScoreStats& entry);
 		static const int LENGTH;	
     
     protected:
@@ -171,6 +173,7 @@ class BleuScorer: public StatisticsBasedScorer {
 	private:
 		//no copy
 		BleuScorer(const BleuScorer&);
+		~BleuScorer(){};
 		BleuScorer& operator=(const BleuScorer&);
 				
 
@@ -229,7 +232,7 @@ class PerScorer: public StatisticsBasedScorer {
 	public:
 		PerScorer() : StatisticsBasedScorer("PER") {}
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
-		virtual void prepareStats(int sid, const string& text, ScoreStats& entry);
+		virtual void prepareStats(unsigned int sid, const string& text, ScoreStats& entry);
 
     protected:
         
@@ -239,6 +242,7 @@ class PerScorer: public StatisticsBasedScorer {
         
 		//no copy
 		PerScorer(const PerScorer&);
+		~PerScorer(){};
 		PerScorer& operator=(const PerScorer&);
 				
 		// data extracted from reference files

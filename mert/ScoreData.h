@@ -38,7 +38,7 @@ public:
 	inline void clear() { array_.clear(); }
 	
 	inline ScoreArray get(int i){ return array_.at(i); }
-	inline bool exists(int i){ return (i<array_.size())?true:false; }
+	inline bool exists(unsigned int i){ return (i<array_.size())?true:false; }
 
 	inline ScoreStats get(int i, int j){ return array_.at(i).get(j); }
 	

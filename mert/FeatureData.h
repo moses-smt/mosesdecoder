@@ -48,7 +48,7 @@ public:
 	  return array_[i];
 #endif
 	}
-	inline bool exists(int i){ return (i<array_.size())?true:false; }
+	inline bool exists(unsigned int i){ return (i<array_.size())?true:false; }
 
 	inline void setIndex(){ };
 
