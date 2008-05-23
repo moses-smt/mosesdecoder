@@ -31,8 +31,9 @@ void usage(void) {
   cerr<<"[-t\tthe optimizer(default powell)]"<<endl;
   cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
   cerr<<"[--scfile|-S] the scorer data file (default score.data)"<<endl;
-  cerr<<"[--ffile|-F] the feature data file data file (default feature.data)"<<endl;
-  cerr<<"[-v] verbose level"<<endl;
+  cerr<<"[--ffile|-F] the feature data file (default feature.data)"<<endl;
+	cerr<<"[--ifile|-i] the starting point data file (default init.opt)"<<endl;
+	cerr<<"[-v] verbose level"<<endl;
   exit(1);
 }
 
@@ -45,7 +46,8 @@ static struct option long_options[] =
     {"sctype",1,0,'s'},
     {"scfile",1,0,'S'},
     {"ffile",1,0,'F'},
-    {"verbose",1,0,'v'},
+	  {"ifile",1,0,'i'},
+	  {"verbose",1,0,'v'},
     {0, 0, 0, 0}
   };
 int option_index;
@@ -58,7 +60,8 @@ int main (int argc, char **argv) {
   string scorertype("BLEU");
   string scorerfile("statscore.data");
   string featurefile("features.data");
-  vector<unsigned> tooptimize;
+  string initfile("init.opt");
+	vector<unsigned> tooptimize;
   vector<parameter_t> start;
   while ((c=getopt_long (argc, argv, "d:n:t:s:S:F:v:", long_options, &option_index)) != -1) {
     switch (c) {
@@ -80,6 +83,9 @@ int main (int argc, char **argv) {
     case 'F':
       featurefile=string(optarg);
       break;
+    case 'i':
+      initfile=string(optarg);
+      break;
     case 'v':
       setverboselevel(strtol(optarg,NULL,10));
       break;
@@ -98,9 +104,9 @@ int main (int argc, char **argv) {
     for(i=0;i<pdim;i++)
       tooptimize[i]=i;
   }
-  ifstream opt("init.opt");
+  ifstream opt(initfile.c_str());
   if(opt.fail()){
-    cerr<<"could not open init.opt"<<endl;
+    cerr<<"could not open initfile: " << initfile << endl;
     exit(3);
   }
   start.resize(pdim);//to do:read from file
@@ -108,7 +114,7 @@ int main (int argc, char **argv) {
   for( j=0;j<pdim&&!opt.fail();j++)
     opt>>start[j];
   if(j<pdim){
-    cerr<<"error could not initialize start point with init.opt"<<endl;
+    cerr<<"error could not initialize start point with " << initfile << endl;
     exit(3);
   }
 
@@ -136,7 +142,7 @@ int main (int argc, char **argv) {
   vector<parameter_t> min(Point::getdim());
   vector<parameter_t> max(Point::getdim());
  
- for(int d=0;d<Point::getdim();d++){
+ for(unsigned int d=0;d<Point::getdim();d++){
     min[d]=0.0;
     max[d]=1.0;
   }
@@ -158,6 +164,7 @@ int main (int argc, char **argv) {
  if(ntry>1)
    cerr<<"variance of the score (for "<<ntry<<" try):"<<var<<endl;
  cerr<<"best score: "<<best<<endl;
+ cerr << "Best point: " << bestP << " => " << best << endl;
  ofstream res("weights.txt");
  res<<bestP<<endl;
  timer.stop("Stopping...");

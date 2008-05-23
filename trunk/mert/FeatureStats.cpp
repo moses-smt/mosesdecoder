@@ -19,7 +19,7 @@ array_(stats.array_)
 
 FeatureStats::FeatureStats(const size_t size)
 {
-	for(int i = 0; i < size; i++)
+	for(unsigned int i = 0; i < size; i++)
 		array_.push_back(0);
 };
 
@@ -32,7 +32,7 @@ FeatureStats::FeatureStats(std::string &theString)
 void FeatureStats::set(std::string &theString)
 {
         std::string substring, stringBuf;
-        std::string::size_type loc;
+
 	int nextPound;
 	FeatureStatsType sc;
 //	TRACE_ERR("Decompounding string: " << theString << std::endl);      
@@ -79,7 +79,7 @@ void FeatureStats::savetxt(std::ofstream& outFile)
 		outFile << " " << *i;
 		i++;
 	}
-	outFile << std::endl;
+//	outFile << std::endl;
 }
 
 

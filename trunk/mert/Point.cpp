@@ -16,17 +16,17 @@ unsigned Point::ncall=0;
 void Point::Randomize(const vector<parameter_t>& min,const vector<parameter_t>& max){
   assert(min.size()==Point::dim);
   assert(max.size()==Point::dim);
-  for (int i=0; i<size(); i++)
+  for (unsigned int i=0; i<size(); i++)
     operator[](i)= min[i] + (float)random()/(float)RAND_MAX * (float)(max[i]-min[i]);
 }
 
 void Point::Normalize(){
   parameter_t norm=0.0;
-  for (int i=0; i<size(); i++)
+  for (unsigned int i=0; i<size(); i++)
     norm+= operator[](i)*operator[](i);
   if(norm!=0.0){
     norm=sqrt(norm);
-    for (int i=0; i<size(); i++)
+    for (unsigned int i=0; i<size(); i++)
       operator[](i)/=norm;
   }
 }
@@ -34,11 +34,11 @@ void Point::Normalize(){
 //Can initialize from a vector of dim or pdim
 Point::Point(const vector<parameter_t>& init):vector<parameter_t>(Point::dim){
   if(init.size()==dim){
-    for (int i=0; i<Point::dim; i++)
+    for (unsigned int i=0; i<Point::dim; i++)
       operator[](i)=init[i];
   }else{
     assert(init.size()==pdim);
-    for (int i=0; i<Point::dim; i++)
+    for (unsigned int i=0; i<Point::dim; i++)
       operator[](i)=init[optindices[i]];
   }
 };
@@ -77,10 +77,11 @@ Point Point::operator*(float l)const{
 
  ostream& operator<<(ostream& o,const Point& P){
    vector<parameter_t> w=P.GetAllWeights();
-   for(int i=0;i<Point::pdim;i++)
-     o<<w[i]<<' ';
-//   o<<endl;
-   return o;
+//	 o << "[" << Point::pdim << "] ";
+	 for(unsigned int i=0;i<Point::pdim;i++)
+     o << w[i] << " ";
+//	 o << "=> " << P.GetScore();
+	 return o;
 };
 
 vector<parameter_t> Point::GetAllWeights()const{
@@ -89,10 +90,10 @@ vector<parameter_t> Point::GetAllWeights()const{
     w=*this;
   }else{
     w.resize(pdim);
-    for (int i=0; i<size(); i++)
+    for (unsigned int i=0; i<size(); i++)
       w[optindices[i]]=operator[](i);
-    for(map<unsigned,float >::iterator it=fixedweights.begin();it!=fixedweights.end();it++)
-      w[it->first]=it->second;
+      for(map<unsigned,float >::iterator it=fixedweights.begin();it!=fixedweights.end();it++)
+        w[it->first]=it->second;
   }
   return w;
 };

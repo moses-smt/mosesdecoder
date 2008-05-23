@@ -22,7 +22,7 @@ int setverboselevel(int v){
 
 int getNextPound(std::string &theString, std::string &substring, const std::string delimiter)
 {
-        int pos = 0;
+        unsigned int pos = 0;
         
         //skip all occurrences of delimiter
         while ( pos == 0 )

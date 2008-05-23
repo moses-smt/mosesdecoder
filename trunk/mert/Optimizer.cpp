@@ -30,17 +30,18 @@ Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start)
   //warning: the init vector is a full set of parameters, of dimension pdim!
   
   Point::pdim=Pd;
+	
   assert(start.size()==Pd);
   Point::dim=i2O.size();
   Point::optindices=i2O;
-  if(Point::pdim<Point::dim){
-    for(int i=0;i<Point::pdim;i++){
-      int j;
+  if (Point::pdim<Point::dim){
+    for (unsigned int i=0;i<Point::pdim;i++){
+      unsigned int j;
       for(j=0;j<Point::dim;j++)
-	if(i==i2O[j])
-	  break;
+	    if (i==i2O[j])
+	       break;
       if(j==Point::dim)//the index i wasnt found on optindices, it is a fixed index, we use the valu of hte start vector
-	Point::fixedweights[i]=start[i];
+	    Point::fixedweights[i]=start[i];
     }
   }
 };
@@ -53,10 +54,9 @@ Optimizer::~Optimizer(){
 statscore_t Optimizer::GetStatScore(const Point& param)const{
   vector<unsigned> bests;
   Get1bests(param,bests);
-  //cerr << "1BESTS: ";
   //copy(bests.begin(),bests.end(),ostream_iterator<unsigned>(cerr," "));
   statscore_t score = GetStatScore(bests);
-  //cerr << " score = " << score << endl;
+  cerr << "1BESTS: " << param << " => " << score << endl;
   return score;
 };
 
@@ -91,11 +91,11 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   float min_int=0.0001;
   //typedef pair<unsigned,unsigned> diff;//first the sentence that changes, second is the new 1best for this sentence
   //list<threshold> thresholdlist;
-
+	
   map<float,diff_t> thresholdmap;
   thresholdmap[MIN_FLOAT]=diff_t();
   vector<unsigned> first1best;//the vector of nbests for x=-inf
-  for(int S=0;S<size();S++){
+  for(unsigned int S=0;S<size();S++){
     map<float,diff_t >::iterator previnserted=thresholdmap.begin();
     //first we determine the translation with the best feature score for each sentence and each value of x
     //cerr << "Sentence " << S << endl;
@@ -212,7 +212,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   statscore_t bestscore=MIN_FLOAT;
   float bestx=MIN_FLOAT;
   assert(scores.size()==thresholdmap.size());//we skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best
-  for(int sc=0;sc!=scores.size();sc++){
+  for(unsigned int sc=0;sc!=scores.size();sc++){
     //cerr << "x=" << thrit->first << " => " << scores[sc] << endl;
     if (scores[sc] > bestscore) {
         //This is the score for the interval [lit2->first, (lit2+1)->first]
@@ -297,8 +297,12 @@ statscore_t Optimizer::Run(Point& P)const{
     cerr<<"error size mismatch between FeatureData and Scorer"<<endl;
     exit(2);
   }
-  if(verboselevel()>1)
-    cerr<<"starting point: "<< P;
+
+	statscore_t score=GetStatScore(P);
+	P.score=score;
+  
+	if(verboselevel()>1)
+    cerr<<"starting point: "<< P << " => "<< P.score << endl;
   statscore_t s=TrueRun(P);
   P.score=s;//just in case its not done in TrueRun
   if (verboselevel()>1)
@@ -323,6 +327,9 @@ vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst,vector<
 float SimpleOptimizer::eps=0.0001;
 statscore_t SimpleOptimizer::TrueRun(Point& P)const{
  
+	
+	statscore_t score=GetStatScore(P);
+	
   statscore_t prevscore=0;
   statscore_t bestscore=MIN_FLOAT;
   Point  best;
@@ -335,13 +342,13 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
     
     Point  linebest;
     
-    for(int d=0;d<Point::getdim();d++){
+    for(unsigned int d=0;d<Point::getdim();d++){
       if(verboselevel()>4){
 //	cerr<<"minimizing along direction "<<d<<endl;
 	cerr<<"starting point: " << P << " => " << prevscore << endl;
       }
       Point direction;
-      for(int i=0;i<Point::getdim();i++)
+      for(unsigned int i=0;i<Point::getdim();i++)
 	direction[i];
       direction[d]=1.0;
       statscore_t curscore=LineOptimize(P,direction,linebest);//find the minimum on the line
@@ -378,7 +385,7 @@ Just return a random point*/
 statscore_t RandomOptimizer::TrueRun(Point& P)const{
   vector<parameter_t> min(Point::getdim());
   vector<parameter_t> max(Point::getdim());
-  for(int d=0;d<Point::getdim();d++){
+  for(unsigned int d=0;d<Point::getdim();d++){
     min[d]=0.0;
     max[d]=1.0;
   }
@@ -405,7 +412,7 @@ vector<string> OptimizerFactory::GetTypeNames(){
 }
 
 OptimizerFactory::OptType OptimizerFactory::GetOType(string type){
-  int thetype;
+  unsigned int thetype;
   if(typenames.empty())
     SetTypeNames();
   for(thetype=0;thetype<typenames.size();thetype++)
@@ -420,7 +427,7 @@ Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,vector<unsigned> i2o,ve
   if(T==NOPTIMIZER){
     cerr<<"Error: unknown Optimizer type "<<type<<endl;
     cerr<<"Known Algorithm are:"<<endl;
-    int thetype;
+    unsigned int thetype;
     for(thetype=0;thetype<typenames.size();thetype++)
       cerr<<typenames[thetype]<<endl;
     throw ("unknown Optimizer Type");

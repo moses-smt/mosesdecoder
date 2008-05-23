@@ -19,7 +19,7 @@ array_(stats.array_)
 
 ScoreStats::ScoreStats(const size_t size)
 {
-	for(int i = 0; i < size; i++)
+	for(unsigned int i = 0; i < size; i++)
 		array_.push_back(0);
 };
 
@@ -32,7 +32,7 @@ ScoreStats::ScoreStats(std::string &theString)
 void ScoreStats::set(std::string &theString)
 {
     std::string substring, stringBuf;
-    std::string::size_type loc;
+
 	int nextPound;
 	ScoreStatsType sc;
 	while (!theString.empty()){         

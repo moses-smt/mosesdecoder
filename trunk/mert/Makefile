@@ -9,9 +9,9 @@ Scorer.o \
 Optimizer.o \
 
 ifndef DEBUG
-CFLAGS=-O3 -DTRACE_ENABLE
+CFLAGS=-O3 -DTRACE_ENABLE -Wall
 else
-CFLAGS=-DTRACE_ENABLE -g -DDEBUG
+CFLAGS=-DTRACE_ENABLE -g -DDEBUG -Wall
 
 endif
 
