@@ -145,8 +145,10 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
 	if(m!=gradientit2->first){
 	  curintersect=intersect(m,b,gradientit2->first,f0[gradientit2->second]);
           //cerr << "curintersect: " << curintersect << " leftmostx: " << leftmostx << endl;
-	  if(curintersect<leftmostx){
+	  if(curintersect<=leftmostx){
 	    //we have found an intersection to the left of the leftmost we had so far.
+	    //we might have curintersect==leftmostx for example is 2 candidates are the same
+	    //in that case its better its better to update leftmost to gradientit2 to avoid some recomputing later
 	  leftmostx=curintersect;
 	  leftmost=gradientit2;//this is the new reference
 	  }
@@ -170,15 +172,33 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
          happen that the new intersection Point is slightly to the
          left of the old one, because of numerical imprecision.
 	 we do not check that we are to the right of the penultimate point also. it this happen the 1best the inteval will be wrong
+	  we are going to replace previnsert by the new one because we do not want to keep
+	  2 very close threshold: if the minima is there it could be an artifact
 	*/
-	thresholdmap[leftmostx] = previnserted->second;//copy the diffs that were stored on previnserted
-	assert(  thresholdmap[leftmostx].back().first==newd.first);//the last sentence of current.second should be  S
-	thresholdmap[leftmostx].back()=newd;//replace last diff by the new one 
-    if (previnserted->first != leftmostx) {
-	    thresholdmap.erase(previnserted);//erase previous
-    }
-	previnserted=thresholdmap.find(leftmostx);
-    assert(previnserted != thresholdmap.end());
+	map<float,diff_t>::iterator tit=thresholdmap.find(leftmostx);
+	if(tit==previnserted){
+	  //the threshold is the same as before can happen if 2 candidates are the same for example
+	  assert(previnserted->second.back().first==newd.first);
+	  previnserted->second.back()=newd;//just replace the 1 best fors sentence S
+	  //previnsert doesnt change
+	}else{
+
+	  if(tit==thresholdmap.end()){
+	    thresholdmap[leftmostx]=previnserted->second;//We keep the diffs at previnsert
+	    thresholdmap.erase(previnserted);//erase old previnsert
+	    previnserted=thresholdmap.find(leftmostx);//point previnsert to the new threshold
+	    previnserted->second.back()=newd;//we update the diff for sentence S
+	  }else{//threshold already exists but is not the previous one.
+	    //we append the diffs in previnsert to tit before destroying previnsert
+	    tit->second.insert(tit->second.end(),previnserted->second.begin(),previnserted->second.end());
+	    assert(tit->second.back().first==newd.first);
+	    tit->second.back()=newd;//change diff for sentence S
+	    thresholdmap.erase(previnserted);//erase old previnsert
+	    previnserted=tit;//point previnsert to the new threshold
+	  }
+	}
+
+	assert(previnserted != thresholdmap.end());
       }else{//normal insertion process
 	previnserted=AddThreshold(thresholdmap,leftmostx,newd);
       }
