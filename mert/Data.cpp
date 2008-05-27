@@ -23,52 +23,6 @@ theScorer(&ptr)
   scoredata=new ScoreData(*theScorer);
 };
 
-void Data::loadnamesfromnbest(const std::string &file)
-{
-	TRACE_ERR("loading names of features from nbest file " << file << std::endl);  
-	inputfilestream inp(file); // matches a stream with a file. Opens the file
-	
-	if (!inp.good())
-		throw runtime_error("Unable to open: " + file);
-	
-  std::string substring, subsubstring, stringBuf;
-	std::string::size_type loc;
-	
-	int nextPound;
-	
-  while (getline(inp,stringBuf,'\n')){
-		if (stringBuf.empty()) continue;
-		
-		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
-		nextPound = getNextPound(stringBuf, substring, "|||"); //second field
-		nextPound = getNextPound(stringBuf, substring, "|||"); //third field
-		
-		// adding features
-		std::string tmpname="";
-		size_t tmpidx=0;
-		while (!substring.empty()){
-//			TRACE_ERR("Decompounding: " << substring << std::endl); 
-			nextPound = getNextPound(substring, subsubstring);
-			
-			// string ending with ":" are skipped, because they are the names of the features
-			if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
-				featname2idx_[tmpname+"_"+stringify(tmpidx)]=idx2featname_.size();
-				idx2featname_[idx2featname_.size()]=tmpname+"_"+stringify(tmpidx);
-				tmpidx++;
-			}
-			else{
-				tmpidx=0;
-				tmpname=subsubstring.substr(0,subsubstring.size() - 1);
-			}
-		}
-    number_of_features=idx2featname_.size();
-		TRACE_ERR("number_of_features: " << number_of_features << std::endl); 
-		break;
-	}
-	
-	inp.close();
-}
-
 void Data::loadnbest(const std::string &file)
 {
 	TRACE_ERR("loading nbest from " << file << std::endl);  
@@ -90,7 +44,7 @@ void Data::loadnbest(const std::string &file)
   while (getline(inp,stringBuf,'\n')){
 		if (stringBuf.empty()) continue;
 
-		TRACE_ERR("stringBuf: " << stringBuf << std::endl); 
+//		TRACE_ERR("stringBuf: " << stringBuf << std::endl); 
 
 		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
     sentence_index = substring;
@@ -101,16 +55,36 @@ void Data::loadnbest(const std::string &file)
 // adding statistics for error measures
 		featentry.clear();
 		scoreentry.clear();
-		TRACE_ERR("theSentence: " << theSentence << std::endl); 
-		TRACE_ERR("sentence_index: " << sentence_index << std::endl); 
-		
 
 		theScorer->prepareStats(sentence_index, theSentence, scoreentry);
-		TRACE_ERR("scoreentry: " << scoreentry << std::endl); 
 		scoredata->add(scoreentry, sentence_index);
 				
 		nextPound = getNextPound(stringBuf, substring, "|||"); //third field
 
+		if (!existsFeatureNames()){
+		std::string stringsupport=substring;
+		// adding feature names
+		std::string tmpname="";
+		size_t tmpidx=0;
+		while (!stringsupport.empty()){
+//			TRACE_ERR("Decompounding: " << substring << std::endl); 
+			nextPound = getNextPound(stringsupport, subsubstring);
+			
+			// string ending with ":" are skipped, because they are the names of the features
+			if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
+				featname2idx_[tmpname+"_"+stringify(tmpidx)]=idx2featname_.size();
+				idx2featname_[idx2featname_.size()]=tmpname+"_"+stringify(tmpidx);
+				tmpidx++;
+			}
+			else{
+				tmpidx=0;
+				tmpname=subsubstring.substr(0,subsubstring.size() - 1);
+			}
+		}
+    number_of_features=idx2featname_.size();
+		TRACE_ERR("number_of_features: " << number_of_features << std::endl); 
+		}
+		
 // adding features
 		while (!substring.empty()){
 //			TRACE_ERR("Decompounding: " << substring << std::endl); 

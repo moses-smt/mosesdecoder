@@ -141,8 +141,6 @@ int main(int argc, char** argv) {
             data.load(prevFeatureDataFile, prevScoreDataFile);
         }
 
-				if (!data.existsFeatureNames())
-					data.loadnamesfromnbest(nbestFile);
 				data.loadnbest(nbestFile);
 								
         data.save(featureDataFile, scoreDataFile, binmode);

@@ -46,7 +46,6 @@ public:
 	FeatureData* getFeatureData() { return featdata; };
 
 	void loadnbest(const std::string &file);
-	void loadnamesfromnbest(const std::string &file);
 
   void load(const std::string &featfile,const std::string &scorefile){
 		featdata->load(featfile);

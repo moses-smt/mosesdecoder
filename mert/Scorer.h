@@ -43,13 +43,10 @@ class Scorer {
          * and add the appropriate statistics to the entry.
 		**/
 		virtual void prepareStats(size_t sindex, const string& text, ScoreStats& entry)
-		{
-			cerr << "SCORER:prepareStats(size_t sindex, const string& text, ScoreStats& entry)" << text << std::endl;
-		}
+		{}
 
 		virtual void prepareStats(const string& sindex, const string& text, ScoreStats& entry)
 		{
-			cerr << "SCORER:prepareStats(const string& sindex, const string& text, ScoreStats& entry)" << text << std::endl;
 			this->prepareStats((size_t) atoi(sindex.c_str()), text, entry);
 			//cerr << text << std::endl;
 		}
