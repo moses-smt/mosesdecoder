@@ -44,7 +44,7 @@ void ScoreStats::set(std::string &theString)
 
 void ScoreStats::loadtxt(std::ifstream& inFile)
 {
-        std::string theString;
+  std::string theString;
 	std::getline(inFile, theString);
 	set(theString);
 }
@@ -71,16 +71,7 @@ void ScoreStats::savetxt(const std::string &file)
 
 void ScoreStats::savetxt(std::ofstream& outFile)
 {
-
-	//outFile << array_.at(0);
-	vector<ScoreStatsType>::iterator i = array_.begin();
-	outFile << *i;
-	i++;
-        while (i !=array_.end()){
-		outFile << " " << *i;
-		i++;
-	}
-	outFile << std::endl;
+	outFile << *this;
 }
 
 
@@ -89,5 +80,13 @@ ScoreStats& ScoreStats::operator=(const ScoreStats &stats)
 	array_ = stats.array_;
 		
 	return *this;		
+}
+
+
+/**write the whole object to a stream*/
+ostream& operator<<(ostream& o, const ScoreStats& e){
+	for (scorestats_t::iterator i = e.getArray().begin(); i != e.getArray().end(); i++)
+		o << *i << " ";
+	return o;
 }
 

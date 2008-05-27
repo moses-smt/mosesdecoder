@@ -20,12 +20,14 @@ using namespace std;
 
 class FeatureData
 {
+	
 protected:
-	vector<FeatureArray> array_;
-	vector<int> idxmap_;
-	size_t number_of_feature;
+	featdata_t array_;
+	idx2name idx2arrayname_; //map from index to name of array
+	name2idx arrayname2idx_; //map from name to index of array
 	
 private:
+	size_t number_of_features;
 	
 public:
 	FeatureData();
@@ -34,32 +36,21 @@ public:
 		
 	inline void clear() { array_.clear(); }
 	
-	inline FeatureArray& get(int i){ 
-#ifdef DEBUG
-	  return array_.at(i); 
-#else
-	  return array_[i];
-#endif
-	}
-	inline const FeatureArray& get(int i)const{
-#ifdef DEBUG
-	  return array_.at(i); 
-#else
-	  return array_[i];
-#endif
-	}
-	inline bool exists(unsigned int i){ return (i<array_.size())?true:false; }
+	inline FeatureArray get(const std::string& idx){ return array_.at(getIndex(idx)); }
+	inline FeatureArray& get(size_t idx){ return array_.at(idx); }
+	inline const FeatureArray& get(size_t idx) const{ return array_.at(idx); }
 
-	inline void setIndex(){ };
+	inline bool exists(const std::string & sent_idx){	return exists(getIndex(sent_idx)); }
+	inline bool exists(int sent_idx){ return (sent_idx>-1 && sent_idx<(int) array_.size())?true:false; }
 
-	inline FeatureStats& get(int i, int j){ return array_.at(i).get(j); }
-	inline const FeatureStats&  get(int i, int j)const{ return array_.at(i).get(j); }
+	inline FeatureStats& get(size_t i, size_t j){ return array_.at(i).get(j); }
+	inline const FeatureStats&  get(size_t i, size_t j) const { return array_.at(i).get(j); }
 	
 	void add(FeatureArray& e);
-	void add(FeatureStats e, int sent_idx);
+	void add(FeatureStats& e, const std::string& sent_idx);
 	
-	inline size_t FeatureSize(){ return number_of_feature; }
 	inline size_t size(){ return array_.size(); }
+	inline size_t NumberOfFeatures(){ return number_of_features; }
 	
 	void save(const std::string &file, bool bin=false);
 	void save(ofstream& outFile, bool bin=false);
@@ -67,6 +58,24 @@ public:
 
 	void load(ifstream& inFile);
 	void load(const std::string &file);
+	
+	bool check_consistency();
+	void setIndex();
+	
+	inline int getIndex(const std::string& idx){
+		name2idx::iterator i = arrayname2idx_.find(idx);
+		if (i!=arrayname2idx_.end())
+			return i->second;
+		else
+			return -1;		
+  }
+	
+  inline std::string getIndex(size_t idx){
+		idx2name::iterator i = idx2arrayname_.find(idx);
+		if (i!=idx2arrayname_.end())
+			throw runtime_error("there is no entry at index " + idx);
+		return i->second;
+	}
 };
 
 

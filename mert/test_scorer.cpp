@@ -4,6 +4,7 @@
 #include "ScoreData.h"
 #include "Data.h"
 #include "Scorer.h"
+#include "ScorerFactory.h"
 
 using namespace std;
 

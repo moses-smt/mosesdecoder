@@ -20,15 +20,26 @@ void Point::Randomize(const vector<parameter_t>& min,const vector<parameter_t>& 
     operator[](i)= min[i] + (float)random()/(float)RAND_MAX * (float)(max[i]-min[i]);
 }
 
-void Point::Normalize(){
+void Point::NormalizeL2(){
   parameter_t norm=0.0;
   for (unsigned int i=0; i<size(); i++)
     norm+= operator[](i)*operator[](i);
-  if(norm!=0.0){
+		if(norm!=0.0){
     norm=sqrt(norm);
     for (unsigned int i=0; i<size(); i++)
       operator[](i)/=norm;
   }
+}
+
+
+void Point::NormalizeL1(){
+  parameter_t norm=0.0;
+  for (unsigned int i=0; i<size(); i++)
+    norm+= abs(operator[](i));
+		if(norm!=0.0){
+			for (unsigned int i=0; i<size(); i++)
+				operator[](i)/=norm;
+		}
 }
 
 //Can initialize from a vector of dim or pdim

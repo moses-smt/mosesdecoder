@@ -56,7 +56,6 @@ statscore_t Optimizer::GetStatScore(const Point& param)const{
   Get1bests(param,bests);
   //copy(bests.begin(),bests.end(),ostream_iterator<unsigned>(cerr," "));
   statscore_t score = GetStatScore(bests);
-  cerr << "1BESTS: " << param << " => " << score << endl;
   return score;
 };
 
@@ -275,9 +274,10 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
     if(verboselevel()>4)
       cerr<<"best point on line at origin"<<endl;
   }
-  if(verboselevel()>3)
+  if(verboselevel()>3){
 //    cerr<<"end Lineopt, bestx="<<bestx<<endl;
-  bestpoint=direction*bestx+origin;
+	}
+	bestpoint=direction*bestx+origin;
   bestpoint.score=bestscore;
   return bestscore;  
 };
@@ -321,12 +321,12 @@ statscore_t Optimizer::Run(Point& P)const{
 	statscore_t score=GetStatScore(P);
 	P.score=score;
   
-	if(verboselevel()>1)
-    cerr<<"starting point: "<< P << " => "<< P.score << endl;
+	if(verboselevel()>2)
+    cerr<<"Starting point: "<< P << " => "<< P.score << endl;
   statscore_t s=TrueRun(P);
   P.score=s;//just in case its not done in TrueRun
-  if (verboselevel()>1)
-    cerr<<"Best point: "<< P <<" => "<< s << endl;
+  if (verboselevel()>2)
+    cerr<<"Ending point: "<< P <<" => "<< s << endl;
   return s;
 }
  
@@ -347,9 +347,6 @@ vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst,vector<
 float SimpleOptimizer::eps=0.0001;
 statscore_t SimpleOptimizer::TrueRun(Point& P)const{
  
-	
-	statscore_t score=GetStatScore(P);
-	
   statscore_t prevscore=0;
   statscore_t bestscore=MIN_FLOAT;
   Point  best;

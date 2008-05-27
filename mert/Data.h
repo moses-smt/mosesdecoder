@@ -26,14 +26,15 @@ class Data
 protected:
 	ScoreData* scoredata;
 	FeatureData* featdata;
-	vector<int> idxmap_;
-	
+		
 private:
-	char databuf_[BUFSIZ];
-	size_t bufLen_;
-        Scorer* theScorer;       
-        std::string score_type;
-	
+  Scorer* theScorer;       
+  std::string score_type;
+	map<std::string, size_t> featname2idx_; //map from name to index of features
+	map<size_t, std::string> idx2featname_; //map from index to name of features
+	size_t number_of_features; //number of features 
+	size_t number_of_scores; //number of scores
+		
 public:
 	Data(Scorer& sc);
 	
@@ -45,18 +46,21 @@ public:
 	FeatureData* getFeatureData() { return featdata; };
 
 	void loadnbest(const std::string &file);
+	void loadnamesfromnbest(const std::string &file);
 
-
-        void load(const std::string &featfile,const std::string &scorefile){
+  void load(const std::string &featfile,const std::string &scorefile){
 		featdata->load(featfile);
-//		scoredata->load(scorefile);
 		scoredata->load(scorefile);
-}
+  }
+	
 	void save(const std::string &featfile,const std::string &scorefile, bool bin=false){
 		featdata->save(featfile, bin);
-//		scoredata->save(scorefile, bin);
-		scoredata->save(scorefile);
+		scoredata->save(scorefile,bin);
 	}
+
+	bool existsFeatureNames(){ return (idx2featname_.size() > 0)?true:false; };
+	std::string getFeatureName(size_t idx){ return idx2featname_[idx]; };
+  size_t getFeatureIndex(const std::string& name){ return featname2idx_[name]; };
 };
 
 

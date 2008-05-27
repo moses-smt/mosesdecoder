@@ -36,7 +36,9 @@ class Point:public vector<parameter_t>{
   Point operator*(float)const;
   /**write the Whole featureweight to a stream (ie pdim float)*/
   friend ostream& operator<<(ostream& o,const Point& P);
-  void Normalize();
+  void Normalize(){ NormalizeL2(); };
+  void NormalizeL2();
+  void NormalizeL1();
   /**return a vector of size pdim where all weights have been put(including fixed ones)*/
   vector<parameter_t> GetAllWeights()const;
   statscore_t GetScore()const { return score; };

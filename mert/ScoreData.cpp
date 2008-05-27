@@ -16,15 +16,14 @@ ScoreData::ScoreData(Scorer& ptr):
 theScorer(&ptr)
 {
 	score_type = theScorer->getName();
-	TRACE_ERR("score_type:" << score_type << std::endl);
 	theScorer->setScoreData(this);//this is not dangerous: we dont use the this pointer in SetScoreData 	
 };
 
 void ScoreData::save(std::ofstream& outFile, bool bin)
 {
-        ScoreArray entry;
-	for (vector<ScoreArray>::iterator i = array_.begin(); i !=array_.end(); i++)
-		(*i).save(outFile);
+	for (scoredata_t::iterator i = array_.begin(); i !=array_.end(); i++){
+		i->save(outFile, score_type);
+	}
 }
 
 void ScoreData::save(const std::string &file, bool bin)
@@ -34,7 +33,7 @@ void ScoreData::save(const std::string &file, bool bin)
 
 	std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
 
-        ScoreStats entry;
+  ScoreStats entry;
 
 	save(outFile, bin);
 
@@ -43,7 +42,7 @@ void ScoreData::save(const std::string &file, bool bin)
 
 void ScoreData::load(ifstream& inFile)
 {
-        ScoreArray entry;
+  ScoreArray entry;
 
 	int iter=0;
 	while (!inFile.eof()){
@@ -58,6 +57,8 @@ void ScoreData::load(ifstream& inFile)
 		add(entry);
 		iter++;
 	}
+	if (size()>0)
+		number_of_scores=get(0).NumberOfScores();
 }
 
 
@@ -76,14 +77,55 @@ void ScoreData::load(const std::string &file)
 	inFile.close();
 }
 
-void ScoreData::add(const ScoreStats& e, int sent_idx){
-	if (exists(sent_idx)){
-		array_.at(sent_idx).add(e);
+
+void ScoreData::add(ScoreArray& e){
+	if (exists(e.getIndex())){ // array at position e.getIndex() already exists
+														 //enlarge array at position e.getIndex()
+		size_t pos = getIndex(e.getIndex());
+		array_.at(pos).merge(e);
 	}
 	else{
-		ScoreArray a;
-		a.add(e);
-		a.setIndex(sent_idx);
-		add(a);
+		array_.push_back(e);
+		setIndex();
 	}
+}
+
+void ScoreData::add(const ScoreStats& e, const std::string& sent_idx){
+	if (exists(sent_idx)){ // array at position e.getIndex() already exists
+														 //enlarge array at position e.getIndex()
+		size_t pos = getIndex(sent_idx);
+			//		TRACE_ERR("Inserting in array " << sent_idx << std::endl); 
+			array_.at(pos).add(e);
+			//		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl); 
+		}
+		else{
+			//		TRACE_ERR("Creating a new entry in the array" << std::endl); 
+			ScoreArray a;
+			a.add(e);
+			a.setIndex(sent_idx);
+			add(a);
+			//		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl); 
+		}
  }
+
+
+bool ScoreData::check_consistency()
+{
+	if (array_.size() == 0)
+		return true;
+	
+	for (scoredata_t::iterator i = array_.begin(); i !=array_.end(); i++)
+		if (!i->check_consistency()) return false;
+	
+	return true;
+}
+
+void ScoreData::setIndex()
+{
+	size_t j=0;
+	for (scoredata_t::iterator i = array_.begin(); i !=array_.end(); i++){
+		idx2arrayname_[j]=i->getIndex();
+		arrayname2idx_[i->getIndex()]=j;
+		j++;
+	}
+}

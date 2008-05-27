@@ -11,16 +11,17 @@
 #include "Util.h"
 
 
-FeatureArray::FeatureArray(): idx(0)
+FeatureArray::FeatureArray(): idx("")
 {};
 
 void FeatureArray::savetxt(std::ofstream& outFile)
 {
-        FeatureStats entry;
 
 	outFile << FEATURES_TXT_BEGIN << " " << idx << " " << array_.size() << std::endl;
-	for (vector<FeatureStats>::iterator i = array_.begin(); i !=array_.end(); i++)
-		(*i).savetxt(outFile);
+	for (featarray_t::iterator i = array_.begin(); i !=array_.end(); i++){
+		i->savetxt(outFile);
+		outFile << std::endl;	
+	}
 	outFile << FEATURES_TXT_END << std::endl;
 }
 
@@ -55,14 +56,13 @@ void FeatureArray::save(const std::string &file, bool bin)
 
 void FeatureArray::loadtxt(ifstream& inFile)
 {
-        FeatureStats entry;
+	FeatureStats entry;
 
-        int sentence_index;
-        int number_of_entries;
+  int number_of_entries=0;
 	int nextPound;
 
-        std::string substring, stringBuf;
-        std::string::size_type loc;
+	std::string substring, stringBuf;
+  std::string::size_type loc;
 
 
 	std::getline(inFile, stringBuf);
@@ -78,16 +78,16 @@ void FeatureArray::loadtxt(ifstream& inFile)
 		}
 		nextPound = getNextPound(stringBuf, substring); 
 		nextPound = getNextPound(stringBuf, substring);
-       	        idx = atoi(substring.c_str());
+    idx = substring;
 		nextPound = getNextPound(stringBuf, substring);
-       	        number_of_entries = atoi(substring.c_str());
-//		TRACE_ERR("idx: " << idx " nbest: " << number_of_entries <<  std::endl);
+    number_of_entries = atoi(substring.c_str());
+		//		TRACE_ERR("idx: " << idx " nbest: " << number_of_entries <<  std::endl);
 	}
 
 	for (int i=0 ; i < number_of_entries; i++)
 	{
-                entry.clear();
-                std::getline(inFile, stringBuf);
+		entry.clear();
+    std::getline(inFile, stringBuf);
 		entry.set(stringBuf);
 		add(entry);
 	}
@@ -130,7 +130,24 @@ void FeatureArray::load(const std::string &file, bool bin)
 
 void FeatureArray::merge(FeatureArray& e)
 {
-//dummy implementation
-	for (unsigned int i=0; i< e.size(); i++)
+	//dummy implementation
+	for (size_t i=0; i<e.size(); i++)
 		add(e.get(i));
 }
+
+
+
+bool FeatureArray::check_consistency()
+{
+	size_t sz = NumberOfFeatures();
+	
+	if (sz == 0)
+		return true;
+	
+	for (featarray_t::iterator i=array_.begin(); i!=array_.end(); i++)
+		if (i->size()!=sz)
+			return false;
+	
+	return true;
+}
+

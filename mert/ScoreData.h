@@ -23,7 +23,9 @@ class Scorer;
 class ScoreData
 {
 protected:
-	vector<ScoreArray> array_;
+	scoredata_t array_;
+	idx2name idx2arrayname_; //map from index to name of array
+	name2idx arrayname2idx_; //map from name to index of array
 	
 private:
 	Scorer* theScorer;	
@@ -37,17 +39,23 @@ public:
 		
 	inline void clear() { array_.clear(); }
 	
-	inline ScoreArray get(int i){ return array_.at(i); }
-	inline bool exists(unsigned int i){ return (i<array_.size())?true:false; }
-
-	inline ScoreStats get(int i, int j){ return array_.at(i).get(j); }
+	inline ScoreArray get(const std::string& idx){ return array_.at(getIndex(idx)); }
+	inline ScoreArray& get(size_t idx){ return array_.at(idx); }
+	inline const ScoreArray& get(size_t idx) const { return array_.at(idx); }
 	
+	inline bool exists(const std::string & sent_idx){	return exists(getIndex(sent_idx)); }
+	inline bool exists(int sent_idx){ return (sent_idx>-1 && sent_idx<(int)array_.size())?true:false; }
+	
+	inline ScoreStats& get(size_t i, size_t j){ return array_.at(i).get(j); }
+	inline const ScoreStats&  get(size_t i, size_t j) const { return array_.at(i).get(j); }
+		
 	inline std::string name(){ return score_type; };
+	inline std::string name(std::string &sctype){ return score_type = sctype; };
 
-	void add(const ScoreArray& e){ array_.push_back(e); }
-	void add(const ScoreStats& e, int sent_idx);
+	void add(ScoreArray& e);
+	void add(const ScoreStats& e, const std::string& sent_idx);
 	
-	inline size_t ScoreSize(){ return number_of_scores; }
+	inline size_t NumberOfScores(){ return number_of_scores; }
 	inline size_t size(){ return array_.size(); }
 	
 	void save(const std::string &file, bool bin=false);
@@ -56,6 +64,23 @@ public:
 
 	void load(ifstream& inFile);
 	void load(const std::string &file);
+	
+	bool check_consistency();
+	void setIndex();
+	
+	inline int getIndex(const std::string& idx){
+		name2idx::iterator i = arrayname2idx_.find(idx);
+		if (i!=arrayname2idx_.end())
+			return i->second;
+		else
+			return -1;
+  }
+  inline std::string getIndex(size_t idx){
+		idx2name::iterator i = idx2arrayname_.find(idx);
+		if (i!=idx2arrayname_.end())
+			throw runtime_error("there is no entry at index " + idx);
+		return i->second;
+	}
 };
 
 

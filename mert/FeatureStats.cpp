@@ -13,7 +13,7 @@
 FeatureStats::FeatureStats()
 {};
 
- FeatureStats::FeatureStats(const FeatureStats &stats):
+FeatureStats::FeatureStats(const FeatureStats &stats):
 array_(stats.array_)
 {};
 
@@ -31,7 +31,7 @@ FeatureStats::FeatureStats(std::string &theString)
 
 void FeatureStats::set(std::string &theString)
 {
-        std::string substring, stringBuf;
+  std::string substring, stringBuf;
 
 	int nextPound;
 	FeatureStatsType sc;
@@ -45,7 +45,7 @@ void FeatureStats::set(std::string &theString)
 
 void FeatureStats::loadtxt(std::ifstream& inFile)
 {
-        std::string theString;
+  std::string theString;
 	std::getline(inFile, theString);
 	set(theString);
 }
@@ -72,14 +72,7 @@ void FeatureStats::savetxt(const std::string &file)
 
 void FeatureStats::savetxt(std::ofstream& outFile)
 {
-	vector<FeatureStatsType>::iterator i = array_.begin();
-	outFile << *i;
-	i++;
-        while (i !=array_.end()){
-		outFile << " " << *i;
-		i++;
-	}
-//	outFile << std::endl;
+	outFile << *this;
 }
 
 
@@ -91,3 +84,9 @@ FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
 }
 
 
+/**write the whole object to a stream*/
+ostream& operator<<(ostream& o, const FeatureStats& e){
+	for (featstats_t::iterator i = e.getArray().begin(); i != e.getArray().end(); i++)
+		o << *i << " ";
+	return o;
+}
