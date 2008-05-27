@@ -27,10 +27,10 @@ using namespace std;
 class FeatureArray
 {
 protected:
-	vector<FeatureStats> array_;
+	featarray_t array_;
 	
 private:
-	size_t idx; // idx to identify the utterance, it can differ from the index inside the vector
+	std::string idx; // idx to identify the utterance, it can differ from the index inside the vector
 	
 public:
 	FeatureArray();
@@ -39,17 +39,17 @@ public:
 		
 	inline void clear() { array_.clear(); }
 	
-	inline size_t getIndex(){ return idx; }
-	inline void setIndex(size_t value){ idx=value; }
+	inline std::string getIndex(){ return idx; }
+	inline void setIndex(const std::string & value){ idx=value; }
 
-	inline FeatureStats&  get(int i){ return array_.at(i); }
-	inline const FeatureStats&  get(int i)const{ return array_.at(i); }
+	inline FeatureStats&  get(size_t i){ return array_.at(i); }
+	inline const FeatureStats&  get(size_t i)const{ return array_.at(i); }
 	void add(FeatureStats e){ array_.push_back(e); }
 
 	void merge(FeatureArray& e);
 
 	inline size_t size(){ return array_.size(); }
-	
+	inline size_t NumberOfFeatures(){ return (array_.size()>0)?array_.at(0).size():0; }
 
 	void savetxt(ofstream& outFile);
 	void savebin(ofstream& outFile);
@@ -62,6 +62,7 @@ public:
 	void load(ifstream& inFile, bool bin=false);
 	void load(const std::string &file, bool bin=false);
 
+	bool check_consistency();
 };
 
 

@@ -13,12 +13,61 @@
 
 
 Data::Data(Scorer& ptr):
-bufLen_(0), theScorer(&ptr)
+theScorer(&ptr)
 {
-    score_type = (*theScorer).getName();
-    featdata=new FeatureData;
-    scoredata=new ScoreData(*theScorer);
+	score_type = (*theScorer).getName();
+	TRACE_ERR("Data::score_type " << score_type << std::endl);  
+	
+	TRACE_ERR("Data::Scorer type from Scorer: " << theScorer->getName() << endl);
+  featdata=new FeatureData;
+  scoredata=new ScoreData(*theScorer);
 };
+
+void Data::loadnamesfromnbest(const std::string &file)
+{
+	TRACE_ERR("loading names of features from nbest file " << file << std::endl);  
+	inputfilestream inp(file); // matches a stream with a file. Opens the file
+	
+	if (!inp.good())
+		throw runtime_error("Unable to open: " + file);
+	
+  std::string substring, subsubstring, stringBuf;
+	std::string::size_type loc;
+	
+	int nextPound;
+	
+  while (getline(inp,stringBuf,'\n')){
+		if (stringBuf.empty()) continue;
+		
+		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
+		nextPound = getNextPound(stringBuf, substring, "|||"); //second field
+		nextPound = getNextPound(stringBuf, substring, "|||"); //third field
+		
+		// adding features
+		std::string tmpname="";
+		size_t tmpidx=0;
+		while (!substring.empty()){
+//			TRACE_ERR("Decompounding: " << substring << std::endl); 
+			nextPound = getNextPound(substring, subsubstring);
+			
+			// string ending with ":" are skipped, because they are the names of the features
+			if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
+				featname2idx_[tmpname+"_"+stringify(tmpidx)]=idx2featname_.size();
+				idx2featname_[idx2featname_.size()]=tmpname+"_"+stringify(tmpidx);
+				tmpidx++;
+			}
+			else{
+				tmpidx=0;
+				tmpname=subsubstring.substr(0,subsubstring.size() - 1);
+			}
+		}
+    number_of_features=idx2featname_.size();
+		TRACE_ERR("number_of_features: " << number_of_features << std::endl); 
+		break;
+	}
+	
+	inp.close();
+}
 
 void Data::loadnbest(const std::string &file)
 {
@@ -26,7 +75,7 @@ void Data::loadnbest(const std::string &file)
 
 	FeatureStats featentry;
 	ScoreStats scoreentry;
-        int sentence_index;
+  std::string sentence_index;
 	int nextPound;
 
 	inputfilestream inp(file); // matches a stream with a file. Opens the file
@@ -34,25 +83,32 @@ void Data::loadnbest(const std::string &file)
 	if (!inp.good())
 	        throw runtime_error("Unable to open: " + file);
 
-        std::string substring, subsubstring, stringBuf;
+  std::string substring, subsubstring, stringBuf;
 	std::string theSentence;
 	std::string::size_type loc;
 
-        while (getline(inp,stringBuf,'\n')){
+  while (getline(inp,stringBuf,'\n')){
 		if (stringBuf.empty()) continue;
 
-		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
-       	        sentence_index = atoi(substring.c_str());
+		TRACE_ERR("stringBuf: " << stringBuf << std::endl); 
 
-                nextPound = getNextPound(stringBuf, substring, "|||"); //second field
-                theSentence = substring;
+		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
+    sentence_index = substring;
+
+    nextPound = getNextPound(stringBuf, substring, "|||"); //second field
+    theSentence = substring;
 
 // adding statistics for error measures
 		featentry.clear();
 		scoreentry.clear();
-                theScorer->prepareStats(sentence_index, theSentence, scoreentry);
-                scoredata->add(scoreentry, sentence_index);
+		TRACE_ERR("theSentence: " << theSentence << std::endl); 
+		TRACE_ERR("sentence_index: " << sentence_index << std::endl); 
+		
 
+		theScorer->prepareStats(sentence_index, theSentence, scoreentry);
+		TRACE_ERR("scoreentry: " << scoreentry << std::endl); 
+		scoredata->add(scoreentry, sentence_index);
+				
 		nextPound = getNextPound(stringBuf, substring, "|||"); //third field
 
 // adding features
@@ -61,7 +117,7 @@ void Data::loadnbest(const std::string &file)
 			nextPound = getNextPound(substring, subsubstring);
 
 // string ending with ":" are skipped, because they are the names of the features
-	                if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
+      if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
 				featentry.add(ATOFST(subsubstring.c_str()));
 			}
 		}

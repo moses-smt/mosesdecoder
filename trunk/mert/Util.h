@@ -26,6 +26,7 @@ using namespace std;
 #include <fstream>
 #include "gzfilebuf.h"
 
+#include "Types.h"
 #include "ScoreStats.h"
 #include "FeatureStats.h"
 
@@ -79,6 +80,15 @@ public:
 	bool good(){return _good;}
         void close();
 };
+
+template<typename T>
+inline std::string stringify(T x)
+{
+	std::ostringstream o;
+	if (!(o << x))
+		throw std::runtime_error("stringify(template<typename T>)");
+	return o.str();
+}
 
 #endif
 

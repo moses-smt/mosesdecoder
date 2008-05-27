@@ -1,7 +1,6 @@
-#include "Scorer.h"
+#include "BleuScorer.h"
 
 const int BleuScorer::LENGTH = 4;
-
 
 
 /**
@@ -90,9 +89,9 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles) {
 }
 
 
-void BleuScorer::prepareStats(unsigned int sid, const string& text, ScoreStats& entry) {
-        //cerr << text << endl;
-        //dump_counts(*_refcounts[sid]);
+void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry) {
+    //cerr << text << endl;
+   //dump_counts(*_refcounts[sid]);
 		if (sid >= _refcounts.size()) {
 			stringstream msg;
 			msg << "Sentence id (" << sid << ") not found in reference set";

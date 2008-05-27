@@ -10,59 +10,57 @@
 #include "ScoreArray.h"
 #include "Util.h"
 
-
-ScoreArray::ScoreArray(): idx(0)
+ScoreArray::ScoreArray(): idx("")
 {};
 
-void ScoreArray::savetxt(std::ofstream& outFile)
+void ScoreArray::savetxt(std::ofstream& outFile, const std::string& sctype)
 {
-        ScoreStats entry;
-
-	outFile << SCORES_TXT_BEGIN << " " << idx << " " << array_.size() << std::endl;
-	for (vector<ScoreStats>::iterator i = array_.begin(); i !=array_.end(); i++)
-		(*i).savetxt(outFile);
+	outFile << SCORES_TXT_BEGIN << " " << sctype << " " << idx << " " << array_.size() << std::endl;
+	for (scorearray_t::iterator i = array_.begin(); i !=array_.end(); i++){
+		i->savetxt(outFile);
+		outFile << std::endl;	
+	}
 	outFile << SCORES_TXT_END << std::endl;
 }
 
-void ScoreArray::savebin(std::ofstream& outFile)
+void ScoreArray::savebin(std::ofstream& outFile, const std::string& sctype)
 {
         TRACE_ERR("binary saving is not yet implemented!" << std::endl);  
 
 /*
 NOT YET IMPLEMENTED
 */
-        outFile << SCORES_BIN_BEGIN << " " << idx << " " << array_.size() << std::endl;
+        outFile << SCORES_BIN_BEGIN << " " << sctype << " " << idx << " " << array_.size() << std::endl;
         outFile << SCORES_BIN_END << std::endl;
 
 }
 
 
-void ScoreArray::save(std::ofstream& inFile, bool bin)
+void ScoreArray::save(std::ofstream& inFile, const std::string& sctype, bool bin)
 {
-        (bin)?savebin(inFile):savetxt(inFile);
+        (bin)?savebin(inFile, sctype):savetxt(inFile, sctype);
 }
 
-void ScoreArray::save(const std::string &file, bool bin)
+void ScoreArray::save(const std::string &file, const std::string& sctype, bool bin)
 {
         TRACE_ERR("saving the array into " << file << std::endl);  
 
         std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
 
-        save(outFile);
+        save(outFile, sctype, bin);
 
         outFile.close();
 }
 
 void ScoreArray::loadtxt(ifstream& inFile)
 {
-        ScoreStats entry;
+	ScoreStats entry;
 
-        int sentence_index;
-        int number_of_entries;
+  int number_of_entries=0;
 	int nextPound;
 
-        std::string substring, stringBuf, sentence_code = "";
-        std::string::size_type loc;
+  std::string substring, stringBuf, sentence_code = "";
+  std::string::size_type loc;
 
 
 	TRACE_ERR("starting loadtxt..." << std::endl);
@@ -75,16 +73,19 @@ void ScoreArray::loadtxt(ifstream& inFile)
 //		TRACE_ERR("Reading: " << stringBuf << std::endl); 
 		nextPound = getNextPound(stringBuf, substring);
 		nextPound = getNextPound(stringBuf, substring);
-       	        idx = atoi(substring.c_str());
+	  score_type = substring;
 		nextPound = getNextPound(stringBuf, substring);
-       	        number_of_entries = atoi(substring.c_str());
+	  idx = substring;
+		nextPound = getNextPound(stringBuf, substring);
+    number_of_entries = atoi(substring.c_str());
 //		TRACE_ERR("idx: " << idx " nbest: " << number_of_entries <<  std::endl);
+		/*PUT HERE A CONSISTENCY CHECK ABOUT THE FORMAT OF THE FILE*/
 	}
 
 	for (int i=0 ; i < number_of_entries; i++)
 	{
-                entry.clear();
-                std::getline(inFile, stringBuf);
+		entry.clear();
+    std::getline(inFile, stringBuf);
 		entry.set(stringBuf);
 		add(entry);
 	}
@@ -123,3 +124,26 @@ void ScoreArray::load(const std::string &file , bool bin)
 
 	inFile.close();
 }
+
+
+void ScoreArray::merge(ScoreArray& e)
+{
+	//dummy implementation
+	for (size_t i=0; i<e.size(); i++)
+		add(e.get(i));
+}
+
+bool ScoreArray::check_consistency()
+{
+	size_t sz = NumberOfScores();
+	
+	if (sz == 0)
+		return true;
+	
+	for (scorearray_t::iterator i=array_.begin(); i!=array_.end(); i++)
+		if (i->size()!=sz)
+			return false;
+	return true;
+}
+
+

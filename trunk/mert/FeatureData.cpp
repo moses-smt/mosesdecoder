@@ -11,12 +11,15 @@
 #include "Util.h"
 
 
+static const float MIN_FLOAT=-1.0*numeric_limits<float>::max();
+static const float MAX_FLOAT=numeric_limits<float>::max();
+
 FeatureData::FeatureData() {};
 
 void FeatureData::save(std::ofstream& outFile, bool bin)
 {
-	for (vector<FeatureArray>::iterator i = array_.begin(); i !=array_.end(); i++)
-		(*i).save(outFile, bin);
+	for (featdata_t::iterator i = array_.begin(); i !=array_.end(); i++)
+		i->save(outFile, bin);
 }
 
 void FeatureData::save(const std::string &file, bool bin)
@@ -34,7 +37,7 @@ void FeatureData::save(const std::string &file, bool bin)
 
 void FeatureData::load(ifstream& inFile)
 {
-        FeatureArray entry;
+  FeatureArray entry;
 
 	int iter=0;
 	while (!inFile.eof()){
@@ -53,6 +56,8 @@ void FeatureData::load(ifstream& inFile)
 		add(entry);
 		iter++;
 	}
+	if (size()>0)
+		number_of_features=get(0).NumberOfFeatures();
 }
 
 
@@ -70,31 +75,53 @@ void FeatureData::load(const std::string &file)
 
 	inFile.close();
 }
+
 void FeatureData::add(FeatureArray& e){
-	if (e.getIndex() < size()){ // array at poistion e.getIndex() already exists
-		//enlarge array at position e.getIndex()
-		array_.at(e.getIndex()).merge(e);
-		setIndex();
+	if (exists(e.getIndex())){ // array at position e.getIndex() already exists
+																				//enlarge array at position e.getIndex()
+		size_t pos = getIndex(e.getIndex());
+		array_.at(pos).merge(e);
 	}
 	else{
 		array_.push_back(e);
+		setIndex();
 	}
 }
 
-void FeatureData::add(FeatureStats e, int sent_idx){
-	if (exists(sent_idx)){
-//		TRACE_ERR("Inserting in array " << sent_idx << std::endl); 
-		array_.at(sent_idx).add(e);
-		FeatureArray a=get(sent_idx);;
-//		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl); 
+void FeatureData::add(FeatureStats& e, const std::string & sent_idx){
+	if (exists(sent_idx)){ // array at position e.getIndex() already exists
+														 //enlarge array at position e.getIndex()
+		size_t pos = getIndex(sent_idx);
+//		TRACE_ERR("Inserting " << e << " in array " << sent_idx << std::endl); 
+		array_.at(pos).add(e);
 	}
 	else{
-//		TRACE_ERR("Creating a new entry in the array" << std::endl); 
+//		TRACE_ERR("Creating a new entry in the array and inserting " << e << std::endl); 
 		FeatureArray a;
 		a.add(e);
 		a.setIndex(sent_idx);
 		add(a);
-//		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl); 
 	}
  }
+
+bool FeatureData::check_consistency()
+{
+	if (array_.size() == 0)
+		return true;
+	
+	for (featdata_t::iterator i = array_.begin(); i !=array_.end(); i++)
+		if (!i->check_consistency()) return false;
+
+	return true;
+}
+
+void FeatureData::setIndex()
+{
+	size_t j=0;
+	for (featdata_t::iterator i = array_.begin(); i !=array_.end(); i++){
+		idx2arrayname_[j]=(*i).getIndex();
+		arrayname2idx_[(*i).getIndex()] = j;
+		j++;
+	}
+}
 

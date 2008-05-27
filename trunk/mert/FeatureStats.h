@@ -17,21 +17,19 @@ using namespace std;
 
 #include "Util.h"
 
-typedef float FeatureStatsType;
-
 #define FEATURE_STATS_MIN (numeric_limits<FeatureStatsType>::min())
 #define ATOFST(str) ((FeatureStatsType) atof(str))
 
 class FeatureStats
 {
 protected:
-	vector<FeatureStatsType> array_;
+	featstats_t array_;
 	
 private:
 	
 public:
 	FeatureStats();
-        FeatureStats(const size_t size);
+	FeatureStats(const size_t size);
 	FeatureStats(const FeatureStats &stats);
 	FeatureStats(std::string &theString);
 	FeatureStats& operator=(const FeatureStats &stats);
@@ -40,8 +38,9 @@ public:
 		
 	inline void clear() { array_.clear(); }
 	
-	inline FeatureStatsType get(int i){ return array_.at(i); }
-	inline FeatureStatsType get(int i)const{ return array_.at(i); }
+	inline FeatureStatsType get(size_t i){ return array_.at(i); }
+	inline FeatureStatsType get(size_t i)const{ return array_.at(i); }
+	inline featstats_t getArray() const { return array_; }
 	
 	void set(std::string &theString);
 
@@ -58,11 +57,15 @@ public:
 
 	inline void reset()
 	{
-		for (vector<FeatureStatsType>::iterator i = array_.begin(); i != array_.end(); i++)
+		for (featstats_t::iterator i = array_.begin(); i != array_.end(); i++)
 			*i = 0;
 	}
 		
-	};
+	
+  /**write the whole object to a stream*/
+  friend ostream& operator<<(ostream& o, const FeatureStats& e);
+
+};
 
 #endif
 

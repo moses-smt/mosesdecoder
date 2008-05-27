@@ -1,21 +1,20 @@
-cmd=../extractor
-#$cmd -NbestFile NBEST -Reference REF -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out
+extractor=../extractor
+mert=../mert
+size=15
 
 #to read an nbest file; output is in text format
-$cmd --nbest NBEST --reference REF.0,REF.1,REF.2 --ffile FEATSTAT.out --scfile SCORESTAT.out --sctype BLEU4
+#$extractor --nbest NBEST --reference REF.0,REF.1,REF.2 --ffile FEATSTAT --scfile SCORESTAT --sctype BLEU
+$mert --ifile init.opt --scfile SCORESTAT --ffile FEATSTAT -d $size -verbose 4
+
+exit
+
 
 #to read a gzipped nbest file; output is in text format
-$cmd --nbest NBEST.gz --reference REF.0,REF.1,REF.2 --ffile FEATSTAT.out --scfile SCORESTAT.out --sctype BLEU4
+$extractor --nbest NBEST.gz --reference REF.0,REF.1,REF.2 --ffile FEATSTATgz --scfile SCORESTATgz --sctype BLEU
+gzip FEATSTATgz SCORESTATgz
+
+$extractor --nbest NBEST --reference REF.0,REF.1,REF.2 --prev-ffile FEATSTAT --prev-scfile SCORESTAT --ffile FEATSTAT2 --scfile SCORESTAT2 --sctype BLEU
+
+$extractor --nbest NBEST.gz --reference REF.0,REF.1,REF.2 --prev-ffile FEATSTATgz.gz --prev-scfile SCORESTATgz.gz --ffile FEATSTAT2gz --scfile SCORESTAT2gz --sctype BLEU
 
 exit
-
-cp FEATSTAT.out FEATSTAT.in
-cp SCORESTAT.out SCORESTAT.in
-$cmd -n NBEST -r REF.0,REF.1,REF.2 -F FEATSTAT.out -S SCORESTAT.out -E FEATSTAT.in -R SCORESTAT.in
-
-
-exit
-
-extractor -NbestFile NBEST -InputFeatureStatistics FEATSTAT.in -InputScoreStatistics SCORESTAT.in -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out -Reference ref -Score BLEU4 -OutputBinaryMode -Help
-
-extractor -NbestFile NBEST -InputFeatureStatistics FEATSTAT.in -InputScoreStatistics SCORESTAT.in -OutputFeatureStatistics FEATSTAT.out -OutputScoreStatistics SCORESTAT.out -Reference ref -Score BLEU4 -OutputBinaryMode -Help

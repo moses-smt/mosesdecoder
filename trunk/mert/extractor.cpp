@@ -12,6 +12,7 @@
 
 #include "Data.h"
 #include "Scorer.h"
+#include "ScorerFactory.h"
 #include "Timer.h"
 #include "Util.h"
 
@@ -126,23 +127,24 @@ int main(int argc, char** argv) {
 
     try {
         TRACE_ERR("Scorer type: " << scorerType << endl);
-        ScorerFactory sfactory;
+			  ScorerFactory sfactory;
         Scorer* scorer = sfactory.getScorer(scorerType);
-
+				
         Timer timer;
         timer.start("Starting...");
         
         scorer->setReferenceFiles(referenceFiles);
         Data data(*scorer);
-
-        if (prevScoreDataFile.length() > 0) {
+        
+				if (prevScoreDataFile.length() > 0) {
             //load old data
             data.load(prevFeatureDataFile, prevScoreDataFile);
         }
 
-
-        data.loadnbest(nbestFile);
-
+				if (!data.existsFeatureNames())
+					data.loadnamesfromnbest(nbestFile);
+				data.loadnbest(nbestFile);
+								
         data.save(featureDataFile, scoreDataFile, binmode);
         timer.stop("Stopping...");
         return EXIT_SUCCESS;

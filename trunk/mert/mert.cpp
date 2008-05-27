@@ -6,6 +6,7 @@
 #include "Data.h"
 #include "Point.h"
 #include "Scorer.h"
+#include "ScorerFactory.h"
 #include "ScoreData.h"
 #include "FeatureData.h"
 #include "Optimizer.h"
@@ -46,8 +47,8 @@ static struct option long_options[] =
     {"sctype",1,0,'s'},
     {"scfile",1,0,'S'},
     {"ffile",1,0,'F'},
-	  {"ifile",1,0,'i'},
-	  {"verbose",1,0,'v'},
+    {"ifile",1,0,'i'},
+    {"verbose",1,0,'v'},
     {0, 0, 0, 0}
   };
 int option_index;
@@ -123,17 +124,14 @@ int main (int argc, char **argv) {
   ScorerFactory SF;
   Scorer *TheScorer=SF.getScorer(scorertype);
 
-  cerr<<"Loading ScoreData from: "<< scorerfile  << endl;
-  ScoreData *SD=new ScoreData(*TheScorer);
-  SD->load(scorerfile);
+  cerr<<"Loading Data from: "<< scorerfile  << " and " << featurefile << endl;
+  Data D(*TheScorer);
+  D.load(featurefile, scorerfile);
 
-  cerr<<"Loading FeatureData from: "<< featurefile  << endl;
-  FeatureData *FD=new FeatureData();
-  FD->load(featurefile);
   Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start,type);
   O->SetScorer(TheScorer);
-  O->SetFData(FD);
-  Point P(start);//Generate from the full feature set. Warning: must ne done after Optimiezr initialiazation
+  O->SetFData(D.getFeatureData());
+  Point P(start);//Generate from the full feature set. Warning: must be done after Optimizer initialization
   statscore_t best=O->Run(P);
   Point bestP=P;  
   statscore_t mean=best;
@@ -161,11 +159,15 @@ int main (int argc, char **argv) {
  mean/=(float)ntry;
  var/=(float)ntry;
  var=sqrt(abs(var-mean*mean));
- if(ntry>1)
-   cerr<<"variance of the score (for "<<ntry<<" try):"<<var<<endl;
- cerr<<"best score: "<<best<<endl;
+ if (verboselevel()>1)
+	 cerr<<"best score: "<< best << " variance of the score (for "<<ntry<<" try): "<<var<<endl;
+
+ //L1-Normalization of the best Point
+ bestP.NormalizeL1();
+ 
  cerr << "Best point: " << bestP << " => " << best << endl;
  ofstream res("weights.txt");
  res<<bestP<<endl;
+ 
  timer.stop("Stopping...");
 }
