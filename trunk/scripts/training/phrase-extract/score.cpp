@@ -111,13 +111,14 @@ int main(int argc, char* argv[])
     char line[LINE_MAX_LENGTH];    
     SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n');
     //    if (fileCount>0)
-    if (extractFileP.eof()) break;
+    if (extractFileP.eof()) 
+			break;
     PhraseAlignment phrasePair;
     phrasePair.create( line, i );
     if (lastForeign >= 0 && lastForeign != phrasePair.foreign) {
       processPhrasePairs( phrasePairsWithSameF );
       for(int j=0;j<phrasePairsWithSameF.size();j++)
-	phrasePairsWithSameF[j].clear();
+				phrasePairsWithSameF[j].clear();
       phrasePairsWithSameF.clear();
       phraseTableE.clear();
       phraseTableF.clear();
@@ -249,18 +250,36 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
       phraseTableFile << "||| ";
 		}
  
-		// merge all alignments 
+		// phrase translation probability
+    phraseTableFile << ((double) i->second / (double) phrasePair.size());
+
+    // lexical translation probability
+    double lexScore = 1;
+    int null = vcbF.getWordID("NULL");
+    PhraseAlignment &current = phrasePair[ alignmentE[ i->first ] ];
+    for(int ei=0;ei<phraseE.size();ei++) { // all english words have to be explained
+      if (current.alignedToE[ ei ].size() == 0)
+				lexScore *= lexTable.ltable[ null ][ phraseE[ ei ] ]; // by NULL if neccessary
+      else {
+				double thisWordScore = 0;
+				for(int j=0;j<current.alignedToE[ ei ].size();j++) {
+					thisWordScore += lexTable.ltable[ phraseF[current.alignedToE[ ei ][ j ] ] ][ phraseE[ ei ] ];
+					//	  cout << "lex" << j << "(" << vcbE.getWord( phraseE[ ei ] ) << "|" << vcbF.getWord( phraseF[current.alignedToE[ ei ][ j ] ] ) << ")=" << lexTable.ltable[ phraseF[current.alignedToE[ ei ][ j ] ] ][ phraseE[ ei ] ] << " ";
+				}
+				lexScore *= thisWordScore / (double)current.alignedToE[ ei ].size();
+      }
+      //      cout << " => " << lexScore << endl;
+    }
+
+		phraseTableFile << " ||| ";
+
+		// alignment info
 		AlignmentPhrase alignementF(phraseF.size())
 										,alignementE(phraseE.size());
-
-		size_t numExamples = i->second;
-		for (size_t currExample = index ; currExample < index + numExamples ; ++currExample)
-		{
-			vector< vector<size_t> > &currAlignmentF	= phrasePair[currExample].alignedToF
-														,&currAlignmentE = phrasePair[currExample].alignedToE;
-			alignementF.Merge(currAlignmentF);
-			alignementE.Merge(currAlignmentE);
-		}
+		vector< vector<size_t> > &currAlignmentF	= current.alignedToF
+													,&currAlignmentE = current.alignedToE;
+		alignementF.Merge(currAlignmentF);
+		alignementE.Merge(currAlignmentE);
 
     if (! inverseFlag) 
 		{
@@ -274,27 +293,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
 			outputAlignment(alignementF);
 		}
 
-		// phrase translation probability
-    phraseTableFile << ((double) i->second / (double) phrasePair.size());
-
-    // lexical translation probability
-    double lexScore = 1;
-    int null = vcbF.getWordID("NULL");
-    PhraseAlignment &current = phrasePair[ alignmentE[ i->first ] ];
-    for(int ei=0;ei<phraseE.size();ei++) { // all english words have to be explained
-      if (current.alignedToE[ ei ].size() == 0)
-	lexScore *= lexTable.ltable[ null ][ phraseE[ ei ] ]; // by NULL if neccessary
-      else {
-	double thisWordScore = 0;
-	for(int j=0;j<current.alignedToE[ ei ].size();j++) {
-	  thisWordScore += lexTable.ltable[ phraseF[current.alignedToE[ ei ][ j ] ] ][ phraseE[ ei ] ];
-	  //	  cout << "lex" << j << "(" << vcbE.getWord( phraseE[ ei ] ) << "|" << vcbF.getWord( phraseF[current.alignedToE[ ei ][ j ] ] ) << ")=" << lexTable.ltable[ phraseF[current.alignedToE[ ei ][ j ] ] ][ phraseE[ ei ] ] << " ";
-	}
-	lexScore *= thisWordScore / (double)current.alignedToE[ ei ].size();
-      }
-      //      cout << " => " << lexScore << endl;
-    }
-    phraseTableFile << " " << lexScore;
+		phraseTableFile << " " << lexScore;
 
     // model 1 score
 
