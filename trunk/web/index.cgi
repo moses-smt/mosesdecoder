@@ -35,13 +35,8 @@ my $TRANSLATE_CGI = 'translate.cgi';
 # read CGI params
 
 my %params = %{{
-
-    # absolute URL of the page to translate. Will be passed on to translate.cgi
     url   => undef,
-
-    # ID of the frame we're currently printing
     frame => undef,
-
 }};
 
 my $cgi = new CGI;
@@ -51,17 +46,8 @@ foreach my $p (keys %params) {
         if (defined $cgi->param ($p));
 }
 
-# check that we have a URL and it's absolute
-die "No URL?" unless $params{url};
-$params{url} = "http://$params{url}" unless ($params{url} =~ m!^[a-z]+://!);
-
-# check frame ID param
-die "Invalid frame ID" if ($params{frame} && $params{frame} ne 'top');
-
 #------------------------------------------------------------------------------
 # print out
-
-my $URL = uri_escape ($params{url});
 
 print "Content-Type: text/html\n\n";
 
@@ -87,21 +73,29 @@ if (!$params{url}) {
         "    </form>\n" .
         "  </body>\n";
 
-} elsif (!$params{frame}) {
-    print
-        "  <frameset rows='30,*' border='1' frameborder='1'>\n" .
-        "    <frame src='$SELF_URL?frame=top&url=$URL'>\n" .
-        "    <frame src='$TRANSLATE_CGI?url=$URL'>\n" .
-        "  </frameset>\n";
-
 } else {
-    print
-        "  <script src='index.js'></script>\n" .
-        "  <body bgcolor='#ccCCcC' onload='startCount()'>\n" .
-        "    <b>Moses translation of\n" .
-        "    <a href='$params{url}' target='_top'>$params{url}</a></b>\n" .
-        "    <span id='status'></span>\n" .
-        "  </body>\n";
+
+    # check that we have a URL and it's absolute
+    $params{url} = "http://$params{url}"
+        unless ($params{url} =~ m!^[a-z]+://!);
+    my $URL = uri_escape ($params{url});
+
+    if (!$params{frame}) {
+        print
+            "  <frameset rows='30,*' border='1' frameborder='1'>\n" .
+            "    <frame src='$SELF_URL?frame=top&url=$URL'>\n" .
+            "    <frame src='$TRANSLATE_CGI?url=$URL'>\n" .
+            "  </frameset>\n";
+
+    } else {
+        print
+            "  <script src='index.js'></script>\n" .
+            "  <body bgcolor='#ccCCcC' onload='startCount()'>\n" .
+            "    <b>Moses translation of\n" .
+            "    <a href='$params{url}' target='_top'>$params{url}</a></b>\n" .
+            "    <span id='status'></span>\n" .
+            "  </body>\n";
+    }
 }
 
 print "</html>\n";
