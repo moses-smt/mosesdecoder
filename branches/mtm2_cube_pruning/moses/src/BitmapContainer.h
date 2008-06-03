@@ -176,6 +176,7 @@ class BackwardsEdge
 
 		Hypothesis *CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt);
 		bool SeenPosition(int x, int y);
+		void SetSeenPosition(int x, int y);
 
 	protected:
 		void Initialize();

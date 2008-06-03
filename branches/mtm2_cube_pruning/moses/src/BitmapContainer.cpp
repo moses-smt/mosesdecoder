@@ -204,8 +204,17 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 bool
 BackwardsEdge::SeenPosition(int x, int y)
 {
-	std::set< int >::iterator iter = m_seenPosition.find(m_kbest * x + y);
+  std::set< int >::iterator iter = m_seenPosition.find((x<<16) + y);
 	return (iter != m_seenPosition.end());
+}
+
+void
+BackwardsEdge::SetSeenPosition(int x, int y)
+{
+  assert(x < (1<<17));
+  assert(y < (1<<17));
+
+	m_seenPosition.insert((x<<16) + y);
 }
 
 
@@ -227,22 +236,20 @@ BackwardsEdge::PushSuccessors(int x, int y)
 	Hypothesis *newHypo;
 	
 	if(y + 1 < m_kbest_translations.size() && !SeenPosition(x, y + 1)) {
+		SetSeenPosition(x, y + 1);
 		newHypo = CreateHypothesis(*m_kbest_hypotheses[x], *m_kbest_translations[y + 1]);
-
 		if(newHypo != NULL)
 		{
 			m_parent.Enqueue(x, y + 1, newHypo, (BackwardsEdge*)this);
-			m_seenPosition.insert(m_kbest * x + y);
 		}
 	}
 
 	if(x + 1 < m_kbest_hypotheses.size() && !SeenPosition(x + 1, y)) {
+	  SetSeenPosition(x + 1, y);
 		newHypo = CreateHypothesis(*m_kbest_hypotheses[x + 1], *m_kbest_translations[y]);
-
 		if(newHypo != NULL)
 		{
 			m_parent.Enqueue(x + 1, y, newHypo, (BackwardsEdge*)this);
-			m_seenPosition.insert(m_kbest * x + y);
 		}
 	}	
 }
