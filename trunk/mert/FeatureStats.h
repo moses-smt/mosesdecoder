@@ -50,6 +50,7 @@ public:
 	
 	void savetxt(const std::string &file);
 	void savetxt(ofstream& outFile);
+	void savebin(ofstream& outFile);
 	inline void savetxt(){ savetxt("/dev/stdout"); }
 	
 	void loadtxt(ifstream& inFile);

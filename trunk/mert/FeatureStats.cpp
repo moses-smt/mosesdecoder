@@ -72,9 +72,15 @@ void FeatureStats::savetxt(const std::string &file)
 
 void FeatureStats::savetxt(std::ofstream& outFile)
 {
-	outFile << *this;
+	TRACE_ERR("saving the stats" << std::endl);  
+	outFile << this;
 }
 
+void FeatureStats::savebin(std::ofstream& outFile)
+{
+        outFile << "S|";
+        outFile << "|E";
+} 
 
 FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
 {

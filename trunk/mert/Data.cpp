@@ -29,7 +29,7 @@ void Data::loadnbest(const std::string &file)
 
 	FeatureStats featentry;
 	ScoreStats scoreentry;
-  std::string sentence_index;
+	std::string sentence_index;
 	int nextPound;
 
 	inputfilestream inp(file); // matches a stream with a file. Opens the file
@@ -37,20 +37,20 @@ void Data::loadnbest(const std::string &file)
 	if (!inp.good())
 	        throw runtime_error("Unable to open: " + file);
 
-  std::string substring, subsubstring, stringBuf;
+	std::string substring, subsubstring, stringBuf;
 	std::string theSentence;
 	std::string::size_type loc;
 
-  while (getline(inp,stringBuf,'\n')){
+	while (getline(inp,stringBuf,'\n')){
 		if (stringBuf.empty()) continue;
 
 //		TRACE_ERR("stringBuf: " << stringBuf << std::endl); 
 
 		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
-    sentence_index = substring;
+		sentence_index = substring;
 
-    nextPound = getNextPound(stringBuf, substring, "|||"); //second field
-    theSentence = substring;
+		nextPound = getNextPound(stringBuf, substring, "|||"); //second field
+		theSentence = substring;
 
 // adding statistics for error measures
 		featentry.clear();
@@ -81,7 +81,7 @@ void Data::loadnbest(const std::string &file)
 				tmpname=subsubstring.substr(0,subsubstring.size() - 1);
 			}
 		}
-    number_of_features=idx2featname_.size();
+		number_of_features=idx2featname_.size();
 		TRACE_ERR("number_of_features: " << number_of_features << std::endl); 
 		}
 		
