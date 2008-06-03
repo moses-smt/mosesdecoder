@@ -21,13 +21,13 @@ using namespace std;
 void usage() {
   cerr<<"usage: extractor [options])"<<endl;
   cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
-  cerr<<"[--reference|-r] comma separated list of reference files (default reference.txt)"<<endl;
-  cerr<<"[--binary|-b] use binary output format (defaults to text )"<<endl;
-  cerr<<"[--nbest|-n] the nbest file (default nbest.txt)"<<endl;
-  cerr<<"[--scfile|-S] the scorer data output file (default score.data)"<<endl;
-  cerr<<"[--ffile|-F] the feature data output file data file (default feature.data)"<<endl;
-  cerr<<"[--prev-ffile|-E] the previous feature data output file data file (default None)"<<endl;
-  cerr<<"[--prev-scfile|-R] the previous scorer data output file (default None)"<<endl;
+  cerr<<"[--reference|-r] comma separated list of reference files"<<endl;
+  cerr<<"[--binary|-b] use binary output format (default to text )"<<endl;
+  cerr<<"[--nbest|-n] the nbest file"<<endl;
+  cerr<<"[--scfile|-S] the scorer data output file"<<endl;
+  cerr<<"[--ffile|-F] the feature data output file"<<endl;
+cerr<<"[--prev-ffile|-E] comma separated list of previous feature data" <<endl;
+  cerr<<"[--prev-scfile|-R] comma separated list of previous scorer data"<<endl;
   cerr<<"[-v] verbose level"<<endl;
   cerr<<"[--help|-h] print this message and exit"<<endl;
   exit(1);
@@ -53,12 +53,12 @@ int option_index;
 int main(int argc, char** argv) {
     //defaults
     string scorerType("BLEU");
-    string referenceFile("reference.txt");
-    string nbestFile("nbest.txt");
-    string scoreDataFile("score.data");
-    string featureDataFile("feature.data");
-    string prevScoreDataFile;
-    string prevFeatureDataFile;
+    string referenceFile("");
+    string nbestFile("");
+    string scoreDataFile("");
+    string featureDataFile("");
+    string prevScoreDataFile("");
+    string prevFeatureDataFile("");
     bool binmode = false;
     int verbosity = 0;
     int c;
@@ -95,53 +95,91 @@ int main(int argc, char** argv) {
                 usage();
         }
     }
+    try {
 
-    if ((prevScoreDataFile.length() > 0 && prevFeatureDataFile.length() == 0)
-        || (prevScoreDataFile.length() == 0 && prevFeatureDataFile.length() > 0)) {
-        cerr << "Error: either previous score and feature files are both specified, or neither" << endl;
-        return EXIT_FAILURE;
+//check whether score statistics file is specified
+    if (scoreDataFile.length() == 0){
+	throw runtime_error("Error: output score statistics file is not specified");
     }
 
-    TRACE_ERR("Score statistics output: " << scoreDataFile << endl);
-    TRACE_ERR("Features output: " << featureDataFile << endl);
+//check wheter feature file is specified
+    if (featureDataFile.length() == 0){
+        throw runtime_error("Error: output feature file is not specified");
+    }
 
-    
+//check whether reference file is specified when nbest is specified
+    if ((nbestFile.length() > 0 && referenceFile.length() == 0)){
+        throw runtime_error("Error: reference file is not specified; you can not score the nbest");
+
+    }
+ 
     if (binmode) {
         cerr << "Warning: binary mode not yet implemented" << endl;
-        binmode = false;
+//        binmode = false;
+    }
+
+    vector<string> nbestFiles;
+    if (nbestFile.length() > 0){
+        std::string substring;
+        while (!nbestFile.empty()){
+                getNextPound(nbestFile, substring, ",");
+                nbestFiles.push_back(substring);
+        }
     }
 
     vector<string> referenceFiles;
-    size_t pos = 0;
-    while (pos != string::npos && pos < referenceFile.length()) {
-        size_t end = referenceFile.find(",",pos);
-        if (end == string::npos) {
-            referenceFiles.push_back(referenceFile.substr(pos));
-            pos = end;
-        } else {
-            referenceFiles.push_back(referenceFile.substr(pos,end-pos));
-            pos = end+1;
-        }
-        TRACE_ERR("Reference file: " << referenceFiles.back() << endl);
+    if (referenceFile.length() > 0){
+	std::string substring;
+	while (!referenceFile.empty()){
+		getNextPound(referenceFile, substring, ",");
+		referenceFiles.push_back(substring);
+	}
     }
 
-    try {
+    vector<string> prevScoreDataFiles;
+    if (prevScoreDataFile.length() > 0){
+        std::string substring;
+        while (!prevScoreDataFile.empty()){
+                getNextPound(prevScoreDataFile, substring, ",");
+                prevScoreDataFiles.push_back(substring);
+        }
+    }
+
+    vector<string> prevFeatureDataFiles;
+    if (prevFeatureDataFile.length() > 0){
+        std::string substring;
+        while (!prevFeatureDataFile.empty()){
+                getNextPound(prevFeatureDataFile, substring, ",");
+                prevFeatureDataFiles.push_back(substring);
+        }
+    }
+
+    if (prevScoreDataFiles.size() != prevFeatureDataFiles.size()){
+	throw runtime_error("Error: there is a different number of previous score and feature files");
+    }
+
         TRACE_ERR("Scorer type: " << scorerType << endl);
 			  ScorerFactory sfactory;
         Scorer* scorer = sfactory.getScorer(scorerType);
 				
         Timer timer;
         timer.start("Starting...");
-        
-        scorer->setReferenceFiles(referenceFiles);
+
+	//load references        
+        if (referenceFiles.size() > 0)
+		scorer->setReferenceFiles(referenceFiles);
+
         Data data(*scorer);
         
-				if (prevScoreDataFile.length() > 0) {
-            //load old data
-            data.load(prevFeatureDataFile, prevScoreDataFile);
+	//load old data
+	for (size_t i=0;i < prevScoreDataFiles.size(); i++){
+            data.load(prevFeatureDataFiles.at(i), prevScoreDataFiles.at(i));
         }
 
-				data.loadnbest(nbestFile);
+	//computing score statistics of each nbest file
+        for (size_t i=0;i < nbestFiles.size(); i++){
+            data.loadnbest(nbestFiles.at(i));
+        }
 								
         data.save(featureDataFile, scoreDataFile, binmode);
         timer.stop("Stopping...");

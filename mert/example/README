@@ -4,7 +4,12 @@ size=15
 
 #to read an nbest file; output is in text format
 #$extractor --nbest NBEST --reference REF.0,REF.1,REF.2 --ffile FEATSTAT --scfile SCORESTAT --sctype BLEU
-$mert --ifile init.opt --scfile SCORESTAT --ffile FEATSTAT -d $size -verbose 4
+#$extractor --reference REF.0,REF.1,REF.2 --ffile FEATSTAT.2 --scfile SCORESTAT.2 --sctype BLEU --prev-ffile FEATSTAT --prev-scfile SCORESTAT
+$extractor --ffile FEATSTAT.2 --scfile SCORESTAT.2 --sctype BLEU --prev-ffile FEATSTAT,FEATSTAT --prev-scfile SCORESTAT,SCORESTAT
+#$extractor --ffile FEATSTAT.2 --scfile SCORESTAT.2 --sctype BLEU --prev-ffile FEATSTAT --prev-scfile SCORESTAT
+
+
+#$mert --ifile init.opt --scfile SCORESTAT --ffile FEATSTAT -d $size -verbose 4
 
 exit
 

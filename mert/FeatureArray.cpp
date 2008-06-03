@@ -32,7 +32,12 @@ void FeatureArray::savebin(std::ofstream& outFile)
 /*
 NOT YET IMPLEMENTED
 */
-	outFile << FEATURES_TXT_BEGIN << " " << idx << " " << array_.size() << std::endl;
+	outFile << FEATURES_BIN_BEGIN << " " << idx << " " << array_.size() << std::endl;
+        for (featarray_t::iterator i = array_.begin(); i !=array_.end(); i++){
+                i->savebin(outFile);
+                outFile << std::endl;
+        }
+
 	outFile << FEATURES_BIN_END << std::endl;
 
 }

@@ -38,4 +38,3 @@ mert: $(OBJS) mert.cpp
 
 test_scorer: $(OBJS) test_scorer.cpp
 	$(GCC) $(CFLAGS) $(OBJS) $(LDLIBS) -o $@ $@.cpp
-
