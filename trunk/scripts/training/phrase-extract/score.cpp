@@ -284,13 +284,11 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
     if (! inverseFlag) 
 		{
 			outputAlignment(alignementF);
+ 			outputAlignment(alignementE);
 		}
-
-		outputAlignment(alignementE);
-
-    if ( inverseFlag) 
+		else
 		{
-			outputAlignment(alignementF);
+			phraseTableFile << "||| |||";
 		}
 
 		phraseTableFile << " " << lexScore;
