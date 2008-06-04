@@ -2,20 +2,18 @@
 
 use strict;
 use Getopt::Long "GetOptions";
-use FindBin qw($Bin);
 
 # Train Factored Phrase Model
-# (c) 2006-2008 Philipp Koehn
+# (c) 2006-2007 Philipp Koehn
 # with contributions from other JHU WS participants
 # Train a phrase model from a parallel corpus
+
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
-my $SCRIPTS_ROOTDIR = $Bin;
-$SCRIPTS_ROOTDIR =~ s/\/training$//;
-$SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_FILE,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,$_ALIGNMENT_FILE,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_GIZA_EXTENSION,$_REORDERING,$_REORDERING_SMOOTH,$_INPUT_FACTOR_MAX,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER,@_PHRASE_TABLE,@_REORDERING_TABLE,@_GENERATION_TABLE,$_CONFIG,$_DONT_ZIP,$_HMM_ALIGN,@_GENERATION_TYPE);
+my($_ROOT_DIR,$_CORPUS_DIR,$_GIZA_E2F,$_GIZA_F2E,$_MODEL_DIR,$_CORPUS,$_CORPUS_COMPRESSION,$_FIRST_STEP,$_LAST_STEP,$_F,$_E,$_MAX_PHRASE_LENGTH,$_LEXICAL_FILE,$_NO_LEXICAL_WEIGHTING,$_VERBOSE,$_ALIGNMENT,$_ALIGNMENT_FILE,@_LM,$_EXTRACT_FILE,$_GIZA_OPTION,$_HELP,$_PARTS,$_DIRECTION,$_ONLY_PRINT_GIZA,$_REORDERING,$_REORDERING_SMOOTH,$_INPUT_FACTOR_MAX,$_ALIGNMENT_FACTORS,$_TRANSLATION_FACTORS,$_REORDERING_FACTORS,$_GENERATION_FACTORS,$_DECODING_STEPS,$_PARALLEL, $SCRIPTS_ROOTDIR, $_FACTOR_DELIMITER,@_PHRASE_TABLE,@_REORDERING_TABLE,@_GENERATION_TABLE,$_CONFIG,$_DONT_ZIP,@_GENERATION_TYPE);
 
+$SCRIPTS_ROOTDIR="/voxgate/ssi/HermesTools/mosesdecoder.release20070624/scripts";
 my $debug = 0; # debug this script, do not delete any files in debug mode
 my $nodebug = 1; # no debug this script, delete any files
 
@@ -32,7 +30,6 @@ $_HELP = 1
 		       'e=s' => \$_E,
 		       'giza-e2f=s' => \$_GIZA_E2F,
 		       'giza-f2e=s' => \$_GIZA_F2E,
-		       'giza-extension=s' => \$_GIZA_EXTENSION,
 		       'max-phrase-length=i' => \$_MAX_PHRASE_LENGTH,
 		       'lexical-file=s' => \$_LEXICAL_FILE,
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
@@ -47,7 +44,6 @@ $_HELP = 1
 		       'parallel' => \$_PARALLEL,
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
-		       'hmm-align' => \$_HMM_ALIGN,
 		       'debug' => \$debug,
 		       'nodebug' => \$nodebug,
 		       'dont-zip' => \$_DONT_ZIP,
@@ -94,6 +90,10 @@ For more, please check manual or contact koehn\@inf.ed.ac.uk\n";
 my $___FACTOR_DELIMITER = $_FACTOR_DELIMITER;
 $___FACTOR_DELIMITER = '|' unless ($_FACTOR_DELIMITER);
 
+if (!defined $SCRIPTS_ROOTDIR) {
+  $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
+  die "Please set SCRIPTS_ROOTDIR or specify --scripts-root-dir" if !defined $SCRIPTS_ROOTDIR;
+}
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 
 # supporting binaries from other packages
@@ -122,10 +122,6 @@ my $___CORPUS_DIR  = $___ROOT_DIR."/corpus";
 $___CORPUS_DIR = $_CORPUS_DIR if $_CORPUS_DIR;
 die("use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1 && $_FIRST_STEP!=8);
 my $___CORPUS      = $_CORPUS;
-
-my $___GIZA_EXTENSION = 'A3.final';
-$___GIZA_EXTENSION = 'Ahmm.5' if $_HMM_ALIGN;
-$___GIZA_EXTENSION = $_GIZA_EXTENSION if $_GIZA_EXTENSION;
 
 my $___CORPUS_COMPRESSION = '';
 if ($_CORPUS_COMPRESSION) {
@@ -171,7 +167,7 @@ $___CONFIG = $_CONFIG if $_CONFIG;
 my $___DONT_ZIP = 0; 
 $_DONT_ZIP = $___DONT_ZIP unless $___DONT_ZIP;
 
-my $___MAX_PHRASE_LENGTH = 7;
+my $___MAX_PHRASE_LENGTH = 5;
 my $___LEXICAL_WEIGHTING = 1;
 my $___LEXICAL_FILE = $___MODEL_DIR."/lex";
 $___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
@@ -258,7 +254,7 @@ die("format for translation factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\"
   if defined $___TRANSLATION_FACTORS && $___TRANSLATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
 
 my $___REORDERING_FACTORS = undef;
-$___REORDERING_FACTORS = "0-0" if defined($_REORDERING); # single factor default
+$___REORDERING_FACTORS = "0-0" if defined($_REORDERING) && ! defined($_DECODING_STEPS); # single factor default
 $___REORDERING_FACTORS = $_REORDERING_FACTORS if defined($_REORDERING_FACTORS);
 die("format for reordering factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___REORDERING_FACTORS\n") 
   if defined $___REORDERING_FACTORS && $___REORDERING_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
@@ -374,7 +370,14 @@ sub reduce_factors {
     # }
     my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
 
-    *IN = open_or_zcat($full);
+    my $read = $full;
+    if ($full =~ /\.bz2$/) {
+        $read = "$BZCAT $full|";
+    } elsif ($full =~ /\.gz$/) {
+        $read = "$ZCAT $full|";
+    }
+    open(IN,$read) or die "Can't read $full ($read)";
+
     open(OUT,">".$reduced) or die "Can't write $reduced";
     my $nr = 0;
     while(<IN>) {
@@ -654,14 +657,6 @@ sub run_single_giza {
 	 CoocurrenceFile => "$dir/$f-$e.cooc",
 	 o => "$dir/$f-$e");
 
-    if ($_HMM_ALIGN) {
-    	$GizaDefaultOptions{m3} = 0;
-    	$GizaDefaultOptions{m4} = 0;
-	$GizaDefaultOptions{hmmiterations} = 5;
-	$GizaDefaultOptions{hmmdumpfrequency} = 5;
-	$GizaDefaultOptions{nodumps} = 0;
-    }
-
     if ($___GIZA_OPTION) {
 	foreach (split(/[ ,]+/,$___GIZA_OPTION)) {
 	    my ($option,$value) = split(/=/,$_,2);
@@ -678,17 +673,17 @@ sub run_single_giza {
     &run_single_snt2cooc($dir,$e,$f,$vcb_e,$vcb_f,$train) if $___PARTS == 1;
 
     print STDERR "(2.1b) running giza $f-$e @ ".`date`."$GIZA $GizaOptions\n";
-    if (-e "$dir/$f-$e.$___GIZA_EXTENSION.gz") {
-      print "  $dir/$f-$e.$___GIZA_EXTENSION.gz seems finished, reusing.\n";
+    if (-e "$dir/$f-$e.A3.final.gz") {
+      print "  $dir/$f-$e.A3.final.gz seems finished, reusing.\n";
       return;
     }
     print "$GIZA $GizaOptions\n";
     return if  $___ONLY_PRINT_GIZA;
     safesystem("$GIZA $GizaOptions");
-    die "Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
-      if ! -e "$dir/$f-$e.$___GIZA_EXTENSION";
-    safesystem("rm -f $dir/$f-$e.$___GIZA_EXTENSION.gz") or die;
-    safesystem("gzip $dir/$f-$e.$___GIZA_EXTENSION") or die;
+    die "Giza did not produce the output file $dir/$f-$e.A3.final. Is your corpus clean (reasonably-sized sentences)?"
+      if ! -e "$dir/$f-$e.A3.final";
+    safesystem("rm -f $dir/$f-$e.A3.final.gz") or die;
+    safesystem("gzip -f $dir/$f-$e.A3.final") or die;
 }
 
 sub run_single_snt2cooc {
@@ -706,26 +701,26 @@ sub word_align {
     print STDERR "(3) generate word alignment @ ".`date`;
     my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
     print STDERR "Combining forward and inverted alignment from files:\n";
-    print STDERR "  $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.{bz2,gz}\n";
-    print STDERR "  $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.{bz2,gz}\n";
+    print STDERR "  $___GIZA_F2E/$___F-$___E.A3.final.{bz2,gz}\n";
+    print STDERR "  $___GIZA_E2F/$___E-$___F.A3.final.{bz2,gz}\n";
 
     ### build arguments for giza2bal.pl
     my($__ALIGNMENT_CMD,$__ALIGNMENT_INV_CMD);
     
-    if (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2"){
-      $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2\"";
-    } elsif (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz") {
-      $__ALIGNMENT_CMD="\"$ZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz\"";
+    if (-e "$___GIZA_F2E/$___F-$___E.A3.final.bz2"){
+      $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.A3.final.bz2\"";
+    } elsif (-e "$___GIZA_F2E/$___F-$___E.A3.final.gz") {
+      $__ALIGNMENT_CMD="\"$ZCAT $___GIZA_F2E/$___F-$___E.A3.final.gz\"";
     } else {
-      die "Can't read $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.{bz2,gz}\n";
+      die "Can't read $___GIZA_F2E/$___F-$___E.A3.final.{bz2,gz}\n";
     }
   
-    if ( -e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2"){
-      $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2\"";
-    }elsif (-e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz"){
-      $__ALIGNMENT_INV_CMD="\"$ZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz\"";
+    if ( -e "$___GIZA_E2F/$___E-$___F.A3.final.bz2"){
+      $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.A3.final.bz2\"";
+    }elsif (-e "$___GIZA_E2F/$___E-$___F.A3.final.gz"){
+      $__ALIGNMENT_INV_CMD="\"$ZCAT $___GIZA_E2F/$___E-$___F.A3.final.gz\"";
     }else{
-      die "Can't read $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.{bz2,gz}\n\n";
+      die "Can't read $___GIZA_E2F/$___E-$___F.A3.final.{bz2,gz}\n\n";
     }
     
    safesystem("mkdir -p $___MODEL_DIR") or die;
@@ -890,7 +885,7 @@ sub extract_phrase {
     safesystem("$cmd") or die "Phrase extraction failed (missing input files?)";
     safesystem("cat $___EXTRACT_FILE.$factor.o.part* > $___EXTRACT_FILE.$factor.o") or die;
     safesystem("rm -f $___EXTRACT_FILE.$factor.o.gz") or die;
-    if (! $___DONT_ZIP) { safesystem("gzip $___EXTRACT_FILE.$factor.o") or die; }
+    if (! $___DONT_ZIP) { safesystem("gzip -f $___EXTRACT_FILE.$factor.o") or die; }
     if (! $debug) { safesystem("rm -f $___EXTRACT_FILE.$factor.o.part*") or die;}
     safesystem("cat $___EXTRACT_FILE.$factor.part* > $___EXTRACT_FILE.$factor") or die;
     if (! $debug) { safesystem("rm -f $___EXTRACT_FILE.$factor.part*") or die;}
@@ -923,9 +918,9 @@ sub score_phrase {
     safesystem("LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor > $___EXTRACT_FILE.$factor.sorted") or die;
     if (! $___DONT_ZIP) {
 	safesystem("rm -f $___EXTRACT_FILE.$factor.gz") or die;
-	safesystem("gzip $___EXTRACT_FILE.$factor") or die;
+	safesystem("gzip -f $___EXTRACT_FILE.$factor") or die;
 	safesystem("rm -f $___EXTRACT_FILE.$factor.sorted.gz") or die;
-	safesystem("gzip $___EXTRACT_FILE.$factor.sorted") or die;
+	safesystem("gzip -f $___EXTRACT_FILE.$factor.sorted") or die;
     }
 
     if (-e "$___EXTRACT_FILE.$factor.inv.gz") {
@@ -936,9 +931,9 @@ sub score_phrase {
     safesystem("LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor.inv > $___EXTRACT_FILE.$factor.inv.sorted") or die;
     if (! $___DONT_ZIP) {
 	safesystem("rm -f $___EXTRACT_FILE.$factor.inv.gz") or die;
-	safesystem("gzip $___EXTRACT_FILE.$factor.inv") or die;
+	safesystem("gzip -f $___EXTRACT_FILE.$factor.inv") or die;
 	safesystem("rm -f $___EXTRACT_FILE.$factor.inv.sorted.gz") or die;
-	safesystem("gzip $___EXTRACT_FILE.$factor.inv.sorted") or die;
+	safesystem("gzip -f $___EXTRACT_FILE.$factor.inv.sorted") or die;
     }
 
     for my $direction ("f2n","n2f") {
@@ -961,11 +956,11 @@ sub score_phrase {
 	safesystem("cat $ttable_file.half.$direction.part* > $ttable_file.half.$direction") or die;
 	if (! $debug){ safesystem("rm -f $ttable_file.half.$direction.part*") or die; }
     }
-    safesystem("gzip $ttable_file.half.f2n") or die;
+    safesystem("gzip -f $ttable_file.half.f2n") or die;
     print STDERR "(6.4) [$factor]  sorting inverse n2f table@ ".`date`;
     safesystem("LC_ALL=C sort -T $___MODEL_DIR $ttable_file.half.n2f > $ttable_file.half.n2f.sorted") or die;
-    safesystem("gzip $ttable_file.half.n2f") or die;
-    safesystem("gzip $ttable_file.half.n2f.sorted") or die;
+    safesystem("gzip -f $ttable_file.half.n2f") or die;
+    safesystem("gzip -f $ttable_file.half.n2f.sorted") or die;
     print STDERR "(6.5) [$factor]  consolidating the two halves @ ".`date`;
     open(F2N,"gunzip < $ttable_file.half.f2n.gz |")
       or die "Can't read $ttable_file.half.f2n.gz";
@@ -981,16 +976,16 @@ sub score_phrase {
 	my ($english, $foreign , $alignEnglish,  $alignForeign,  $p) = split(/ \|\|\| /,$n2f); chop($p);
 	my ($english2,$foreign2, $alignEnglish2, $alignForeign2, $p2) = split(/ \|\|\| /,$f2n); chop($p2);
 	if ($english ne $english2 
-		|| $foreign ne $foreign2
-		|| $alignEnglish ne $alignEnglish2
-		|| $alignForeign ne $alignForeign2)
+		|| $foreign ne $foreign2)
+#		|| $alignEnglish ne $alignEnglish2
+#		|| $alignForeign ne $alignForeign2)
 	{
 		print STDERR "mismatch line $i: ($english ne $english2 || $foreign ne $foreign2  || $alignEnglish ne $alignEnglish2 || $alignForeign ne $alignForeign2 )\n";
             $mismatch++;
             last if $mismatch > 10;
 	    next;
 	}
-	print TABLE "$english ||| $foreign ||| $alignEnglish ||| $alignForeign ||| $p $p2 2.718\n";
+	print TABLE "$english ||| $foreign ||| $alignEnglish2 ||| $alignForeign2 ||| $p $p2 2.718\n";
     }
     close(N2F);
     close(F2N);
@@ -998,7 +993,7 @@ sub score_phrase {
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die;}
     if (! $debug) { safesystem("rm -f $___EXTRACT_FILE*sorted*") or die;}
     safesystem("rm -f $ttable_file.gz") or die;
-    safesystem("gzip $ttable_file") or die;
+    safesystem("gzip -f $ttable_file") or die;
 }
 
 sub split_extract {
@@ -1100,7 +1095,7 @@ sub get_reordering {
     safesystem("LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor.o > $___EXTRACT_FILE.$factor.o.sorted") or die;
     if (! $___DONT_ZIP) {
 	safesystem("rm -f $___EXTRACT_FILE.$factor.o.gz") or die;
-	safesystem("gzip $___EXTRACT_FILE.$factor.o") or die;
+	safesystem("gzip -f $___EXTRACT_FILE.$factor.o") or die;
     }
 
     my $smooth = $___REORDERING_SMOOTH;
@@ -1142,21 +1137,21 @@ sub get_reordering {
     print STDERR "(7.2) building tables @ ".`date`;
     open(O,"$___EXTRACT_FILE.$factor.o.sorted")
       or die "Can't read $___EXTRACT_FILE.$factor.o.sorted";
-    open(OF,  "|gzip >".$$MODEL_FILE{"msd-f"}.".gz")
+    open(OF,  "|gzip -f >".$$MODEL_FILE{"msd-f"}.".gz")
 	if defined($REORDERING_MODEL{"msd-f"});
-    open(OFE, "|gzip >".$$MODEL_FILE{"msd-fe"}.".gz")
+    open(OFE, "|gzip -f >".$$MODEL_FILE{"msd-fe"}.".gz")
 	if defined($REORDERING_MODEL{"msd-fe"});
-    open(OBF, "|gzip >".$$MODEL_FILE{"msd-bidirectional-f"}.".gz")
+    open(OBF, "|gzip -f >".$$MODEL_FILE{"msd-bidirectional-f"}.".gz")
 	if defined($REORDERING_MODEL{"msd-bidirectional-f"});
-    open(OBFE,"|gzip >".$$MODEL_FILE{"msd-bidirectional-fe"}.".gz")
+    open(OBFE,"|gzip -f >".$$MODEL_FILE{"msd-bidirectional-fe"}.".gz")
 	if defined($REORDERING_MODEL{"msd-bidirectional-fe"});
-    open(MF,  "|gzip >".$$MODEL_FILE{"monotonicity-f"}.".gz")
+    open(MF,  "|gzip -f >".$$MODEL_FILE{"monotonicity-f"}.".gz")
 	if defined($REORDERING_MODEL{"monotonicity-f"});
-    open(MFE, "|gzip >".$$MODEL_FILE{"monotonicity-fe"}.".gz")
+    open(MFE, "|gzip -f >".$$MODEL_FILE{"monotonicity-fe"}.".gz")
 	if defined($REORDERING_MODEL{"monotonicity-fe"});
-    open(MBF, "|gzip >".$$MODEL_FILE{"monotonicity-bidirectional-f"}.".gz")
+    open(MBF, "|gzip -f >".$$MODEL_FILE{"monotonicity-bidirectional-f"}.".gz")
 	if defined($REORDERING_MODEL{"monotonicity-bidirectional-f"});
-    open(MBFE,"|gzip >".$$MODEL_FILE{"monotonicity-bidirectional-fe"}.".gz")
+    open(MBFE,"|gzip -f >".$$MODEL_FILE{"monotonicity-bidirectional-fe"}.".gz")
 	if defined($REORDERING_MODEL{"monotonicity-bidirectional-fe"});
 
     my $first = 1;
@@ -1221,14 +1216,14 @@ sub store_reordering_f {
     my $total_previous_f = $mono_previous_f+$swap_previous_f+$other_previous_f;
     my $total_following_f = $mono_following_f+$swap_following_f+$other_following_f;
     if(defined($REORDERING_MODEL{"msd-f"})) {
- 	printf OF ("%s ||| %g %g %g\n",
+ 	printf OF ("%s ||| %.5f %.5f %.5f\n",
 		   $f_current, 
 		   $mono_previous_f/$total_previous_f,
 		   $swap_previous_f/$total_previous_f,
 		   $other_previous_f/$total_previous_f);
     }
     if(defined($REORDERING_MODEL{"msd-bidirectional-f"})) {
-	printf OBF ("%s ||| %g %g %g %g %g %g\n",
+	printf OBF ("%s ||| %.5f %.5f %.5f %.5f %.5f %.5f\n",
 		    $f_current, 
 		    $mono_previous_f/$total_previous_f,
 		    $swap_previous_f/$total_previous_f,
@@ -1238,13 +1233,13 @@ sub store_reordering_f {
 		    $other_following_f/$total_following_f);
     }
     if(defined($REORDERING_MODEL{"monotonicity-f"})) {
-	printf MF ("%s ||| %g %g\n",
+	printf MF ("%s ||| %.5f %.5f\n",
 		  $f_current, 
 		   $mono_previous_f/$total_previous_f,
 		   ($swap_previous_f+$other_previous_f)/$total_previous_f);
     }
     if(defined($REORDERING_MODEL{"monotonicity-bidirectional-f"})) {
-	printf MBF ("%s ||| %g %g %g %g\n",
+	printf MBF ("%s ||| %.5f %.5f %.5f %.5f\n",
 		    $f_current, 
 		    $mono_previous_f/$total_previous_f,
 		    ($swap_previous_f+$other_previous_f)/$total_previous_f,
@@ -1258,14 +1253,14 @@ sub store_reordering_fe {
     my $total_following_fe = $mono_following_fe+$swap_following_fe+$other_following_fe;
     
     if(defined($REORDERING_MODEL{"msd-fe"})) {
- 	printf OFE ("%s ||| %s ||| %g %g %g\n",
+ 	printf OFE ("%s ||| %s ||| %.5f %.5f %.5f\n",
 		   $f_current, $e_current, 
 		   $mono_previous_fe/$total_previous_fe,
 		   $swap_previous_fe/$total_previous_fe,
 		   $other_previous_fe/$total_previous_fe);
     }
     if(defined($REORDERING_MODEL{"msd-bidirectional-fe"})) {
-	printf OBFE ("%s ||| %s ||| %g %g %g %g %g %g\n",
+	printf OBFE ("%s ||| %s ||| %.5f %.5f %.5f %.5f %.5f %.5f\n",
 		    $f_current, $e_current, 
 		    $mono_previous_fe/$total_previous_fe,
 		    $swap_previous_fe/$total_previous_fe,
@@ -1275,13 +1270,13 @@ sub store_reordering_fe {
 		    $other_following_fe/$total_following_fe);
     }
     if(defined($REORDERING_MODEL{"monotonicity-fe"})) {
-	printf MFE ("%s ||| %s ||| %g %g\n",
+	printf MFE ("%s ||| %s ||| %.5f %.5f\n",
 		   $f_current, $e_current, 
 		   $mono_previous_fe/$total_previous_fe,
 		   ($swap_previous_fe+$other_previous_fe)/$total_previous_fe);
     }
     if(defined($REORDERING_MODEL{"monotonicity-bidirectional-fe"})) {
-	printf MBFE ("%s ||| %s ||| %g %g %g %g\n",
+	printf MBFE ("%s ||| %s ||| %.5f %.5f %.5f %.5f\n",
 		    $f_current, $e_current, 
 		    $mono_previous_fe/$total_previous_fe,
 		    ($swap_previous_fe+$other_previous_fe)/$total_previous_fe,
@@ -1327,7 +1322,7 @@ sub get_generation {
     }
 
     my (%GENERATION,%GENERATION_TOTAL_SOURCE,%GENERATION_TOTAL_TARGET);
-    *E = open_or_zcat($___CORPUS.".".$___E.$___CORPUS_COMPRESSION);
+    open(E,$___CORPUS.".".$___E) or die "Can't read ".$___CORPUS.".".$___E;
     $alignment_id=0;
     while(<E>) {
 	chomp;
@@ -1369,7 +1364,7 @@ sub get_generation {
     }
     close(GEN);
     safesystem("rm -f $file.gz") or die;
-    safesystem("gzip $file") or die;
+    safesystem("gzip -f $file") or die;
 }
 
 ### (9) CREATE CONFIGURATION FILE
@@ -1594,17 +1589,4 @@ sub safesystem {
     print STDERR "Exit code: $exitcode\n" if $exitcode;
     return ! $exitcode;
   }
-}
-
-sub open_or_zcat {
-  my $fn = shift;
-  my $read = $fn;
-  if ($fn =~ /\.bz2$/) {
-      $read = "$BZCAT $fn|";
-  } elsif ($fn =~ /\.gz$/) {
-      $read = "$ZCAT $fn|";
-  }
-  my $hdl;
-  open($hdl,$read) or die "Can't read $fn ($read)";
-  return $hdl;
 }
