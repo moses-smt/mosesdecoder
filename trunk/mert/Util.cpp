@@ -29,7 +29,7 @@ int getNextPound(std::string &theString, std::string &substring, const std::stri
         {
                 if ((pos = theString.find(delimiter)) != std::string::npos){
                         substring.assign(theString, 0, pos);
-                        theString.assign(theString, pos + delimiter.size(), theString.size());
+                        theString.erase(0,pos + delimiter.size());
                 }
                 else{
                         substring.assign(theString);
