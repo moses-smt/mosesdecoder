@@ -250,9 +250,6 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
       phraseTableFile << "||| ";
 		}
  
-		// phrase translation probability
-    phraseTableFile << ((double) i->second / (double) phrasePair.size());
-
     // lexical translation probability
     double lexScore = 1;
     int null = vcbF.getWordID("NULL");
@@ -271,8 +268,6 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
       //      cout << " => " << lexScore << endl;
     }
 
-		phraseTableFile << " ||| ";
-
 		// alignment info
 		AlignmentPhrase alignementF(phraseF.size())
 										,alignementE(phraseE.size());
@@ -288,10 +283,12 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
 		}
 		else
 		{
-			phraseTableFile << "||| |||";
+			phraseTableFile << "BLANK ||| BLANK ||| ";
 		}
 
-		phraseTableFile << " " << lexScore;
+		// phrase translation probability
+    phraseTableFile << ((double) i->second / (double) phrasePair.size())
+										<< " " << lexScore;
 
     // model 1 score
 
