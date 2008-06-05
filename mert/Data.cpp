@@ -30,7 +30,6 @@ void Data::loadnbest(const std::string &file)
 	FeatureStats featentry;
 	ScoreStats scoreentry;
 	std::string sentence_index;
-	int nextPound;
 
 	inputfilestream inp(file); // matches a stream with a file. Opens the file
 
@@ -46,10 +45,10 @@ void Data::loadnbest(const std::string &file)
 
 //		TRACE_ERR("stringBuf: " << stringBuf << std::endl); 
 
-		nextPound = getNextPound(stringBuf, substring, "|||"); //first field
+		getNextPound(stringBuf, substring, "|||"); //first field
 		sentence_index = substring;
 
-		nextPound = getNextPound(stringBuf, substring, "|||"); //second field
+		getNextPound(stringBuf, substring, "|||"); //second field
 		theSentence = substring;
 
 // adding statistics for error measures
@@ -59,7 +58,7 @@ void Data::loadnbest(const std::string &file)
 		theScorer->prepareStats(sentence_index, theSentence, scoreentry);
 		scoredata->add(scoreentry, sentence_index);
 				
-		nextPound = getNextPound(stringBuf, substring, "|||"); //third field
+		getNextPound(stringBuf, substring, "|||"); //third field
 
 		if (!existsFeatureNames()){
 			std::string stringsupport=substring;
@@ -70,7 +69,7 @@ void Data::loadnbest(const std::string &file)
 			size_t tmpidx=0;
 			while (!stringsupport.empty()){
 				//			TRACE_ERR("Decompounding: " << substring << std::endl); 
-				nextPound = getNextPound(stringsupport, subsubstring);
+				getNextPound(stringsupport, subsubstring);
 				
 				// string ending with ":" are skipped, because they are the names of the features
 				if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
@@ -82,17 +81,14 @@ void Data::loadnbest(const std::string &file)
 					tmpname=subsubstring.substr(0,subsubstring.size() - 1);
 				}
 			}
-			
-			NumberOfFeatures(idx2featname_.size());
-			Features(features);
 		
-			setFeatureMap();
+			featdata->setFeatureMap(features);
 		}
 		
 // adding features
 		while (!substring.empty()){
 //			TRACE_ERR("Decompounding: " << substring << std::endl); 
-			nextPound = getNextPound(substring, subsubstring);
+			getNextPound(substring, subsubstring);
 
 // string ending with ":" are skipped, because they are the names of the features
       if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
@@ -103,16 +99,4 @@ void Data::loadnbest(const std::string &file)
 	}
 	
 	inp.close();
-}
-
-void Data::setFeatureMap()
-{
-	std::string substring, stringBuf;
-	stringBuf=Features();
-	while (!stringBuf.empty()){
-		getNextPound(stringBuf, substring);
-				
-		featname2idx_[substring]=idx2featname_.size();
-		idx2featname_[idx2featname_.size()]=substring;
-	}
 }

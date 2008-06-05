@@ -52,8 +52,7 @@ void FeatureData::load(ifstream& inFile)
 			break;
 
 		if (size() == 0){
-			number_of_features=entry.NumberOfFeatures();
-			features=entry.Features();
+			setFeatureMap(entry.Features());
 		}
 		add(entry);
 	}
@@ -123,6 +122,23 @@ void FeatureData::setIndex()
 		idx2arrayname_[j]=(*i).getIndex();
 		arrayname2idx_[(*i).getIndex()] = j;
 		j++;
+	}
+}
+
+
+void FeatureData::setFeatureMap(const std::string feat)
+{
+	number_of_features = 0;
+	features=feat;
+
+	std::string substring, stringBuf;
+	stringBuf=features;
+	while (!stringBuf.empty()){
+		getNextPound(stringBuf, substring);
+				
+		featname2idx_[substring]=idx2featname_.size();
+		idx2featname_[idx2featname_.size()]=substring;
+		number_of_features++;
 	}
 }
 

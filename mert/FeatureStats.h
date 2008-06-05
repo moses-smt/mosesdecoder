@@ -20,7 +20,7 @@ using namespace std;
 #define FEATURE_STATS_MIN (numeric_limits<FeatureStatsType>::min())
 #define ATOFST(str) ((FeatureStatsType) atof(str))
 
-#define bytes_ (entries_*sizeof(FeatureStatsType))
+#define featbytes_ (entries_*sizeof(FeatureStatsType))
 
 class FeatureStats
 {
@@ -42,7 +42,7 @@ public:
 	void expand();
 	void add(FeatureStatsType v);
 		
-	inline void clear() { memset((void*) array_,0,bytes_); }
+	inline void clear() { memset((void*) array_,0,featbytes_); }
 	
 	inline FeatureStatsType get(size_t i){ return array_[i]; }
 	inline FeatureStatsType get(size_t i)const{ return array_[i]; }
@@ -50,7 +50,7 @@ public:
 
 	void set(std::string &theString);
 
-	inline size_t bytes() const{ return bytes_; }
+	inline size_t bytes() const{ return featbytes_; }
 	inline size_t size() const{ return entries_; }
 	inline size_t available() const{ return available_; }
 	

@@ -113,11 +113,6 @@ int main(int argc, char** argv) {
 
     }
  
-    if (binmode) {
-        cerr << "Warning: binary mode not yet implemented" << endl;
-//        binmode = false;
-    }
-
     vector<string> nbestFiles;
     if (nbestFile.length() > 0){
         std::string substring;
@@ -129,20 +124,20 @@ int main(int argc, char** argv) {
 
     vector<string> referenceFiles;
     if (referenceFile.length() > 0){
-	std::string substring;
-	while (!referenceFile.empty()){
-		getNextPound(referenceFile, substring, ",");
-		referenceFiles.push_back(substring);
-	}
+			std::string substring;
+			while (!referenceFile.empty()){
+				getNextPound(referenceFile, substring, ",");
+				referenceFiles.push_back(substring);
+			}
     }
 
     vector<string> prevScoreDataFiles;
     if (prevScoreDataFile.length() > 0){
-        std::string substring;
-        while (!prevScoreDataFile.empty()){
-                getNextPound(prevScoreDataFile, substring, ",");
-                prevScoreDataFiles.push_back(substring);
-        }
+			std::string substring;
+			while (!prevScoreDataFile.empty()){
+				getNextPound(prevScoreDataFile, substring, ",");
+				prevScoreDataFiles.push_back(substring);
+			}
     }
 
     vector<string> prevFeatureDataFiles;
@@ -155,38 +150,47 @@ int main(int argc, char** argv) {
     }
 
     if (prevScoreDataFiles.size() != prevFeatureDataFiles.size()){
-	throw runtime_error("Error: there is a different number of previous score and feature files");
+			throw runtime_error("Error: there is a different number of previous score and feature files");
     }
 
-        TRACE_ERR("Scorer type: " << scorerType << endl);
-			  ScorerFactory sfactory;
-        Scorer* scorer = sfactory.getScorer(scorerType);
+		
+		if (binmode) cerr << "Binary write mode is selected" << endl;
+		else cerr << "Binary write mode is NOT selected" << endl;
+			
+		TRACE_ERR("Scorer type: " << scorerType << endl);
+		ScorerFactory sfactory;
+		Scorer* scorer = sfactory.getScorer(scorerType);
 				
-        Timer timer;
-        timer.start("Starting...");
+		Timer timer;
+		timer.start("Starting...");
 
-	//load references        
-        if (referenceFiles.size() > 0)
-		scorer->setReferenceFiles(referenceFiles);
+		//load references        
+		if (referenceFiles.size() > 0)
+			scorer->setReferenceFiles(referenceFiles);
 
-        Data data(*scorer);
-        
+		Data data(*scorer);
+		
 	//load old data
-	for (size_t i=0;i < prevScoreDataFiles.size(); i++){
-            data.load(prevFeatureDataFiles.at(i), prevScoreDataFiles.at(i));
-        }
+		for (size_t i=0;i < prevScoreDataFiles.size(); i++){
+			data.load(prevFeatureDataFiles.at(i), prevScoreDataFiles.at(i));
+		}
 
 	//computing score statistics of each nbest file
-        for (size_t i=0;i < nbestFiles.size(); i++){
-            data.loadnbest(nbestFiles.at(i));
-        }
+		for (size_t i=0;i < nbestFiles.size(); i++){
+			data.loadnbest(nbestFiles.at(i));
+		}
 								
-        data.save(featureDataFile, scoreDataFile, binmode);
-        timer.stop("Stopping...");
-        return EXIT_SUCCESS;
+		if (binmode)
+			cerr << "Binary write mode is selected" << endl;
+		else
+			cerr << "Binary write mode is NOT selected" << endl;
+			
+		data.save(featureDataFile, scoreDataFile, binmode);
+		timer.stop("Stopping...");
+		return EXIT_SUCCESS;
     } catch (const exception& e) {
-        cerr << "Exception: " << e.what() << endl;
-        return EXIT_FAILURE;
+			cerr << "Exception: " << e.what() << endl;
+			return EXIT_FAILURE;
     }
 
 }

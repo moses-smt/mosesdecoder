@@ -17,12 +17,14 @@ theScorer(&ptr)
 {
 	score_type = theScorer->getName();
 	theScorer->setScoreData(this);//this is not dangerous: we dont use the this pointer in SetScoreData 	
+	number_of_scores = theScorer->NumberOfScores();
+	TRACE_ERR("ScoreData: number_of_scores: " << number_of_scores << std::endl);  
 };
 
 void ScoreData::save(std::ofstream& outFile, bool bin)
 {
 	for (scoredata_t::iterator i = array_.begin(); i !=array_.end(); i++){
-		i->save(outFile, score_type);
+		i->save(outFile, score_type, bin);
 	}
 }
 
@@ -44,19 +46,20 @@ void ScoreData::load(ifstream& inFile)
 {
   ScoreArray entry;
 
-	int iter=0;
 	while (!inFile.eof()){
+		
+		if (!inFile.good()){
+			std::cerr << "ERROR ScoreData::load inFile.good()" << std::endl; 
+		}
+		
 		entry.clear();
-		entry.loadtxt(inFile);
+		entry.load(inFile);
 
 		if (entry.size() == 0){
-			continue;
+			break;
 		}
 		add(entry);
-		iter++;
 	}
-	if (size()>0)
-		number_of_scores=get(0).NumberOfScores();
 }
 
 
@@ -92,18 +95,19 @@ void ScoreData::add(const ScoreStats& e, const std::string& sent_idx){
 	if (exists(sent_idx)){ // array at position e.getIndex() already exists
 														 //enlarge array at position e.getIndex()
 		size_t pos = getIndex(sent_idx);
-			//		TRACE_ERR("Inserting in array " << sent_idx << std::endl); 
-			array_.at(pos).add(e);
-			//		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl); 
-		}
-		else{
-			//		TRACE_ERR("Creating a new entry in the array" << std::endl); 
-			ScoreArray a;
-			a.add(e);
-			a.setIndex(sent_idx);
-			add(a);
-			//		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl); 
-		}
+		//		TRACE_ERR("Inserting in array " << sent_idx << std::endl); 
+		array_.at(pos).add(e);
+		//		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl); 
+	}
+	else{
+		//		TRACE_ERR("Creating a new entry in the array" << std::endl); 
+		ScoreArray a;
+		a.NumberOfScores(number_of_scores);
+		a.add(e);
+		a.setIndex(sent_idx);
+		add(a);
+		//		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl); 
+	}
  }
 
 

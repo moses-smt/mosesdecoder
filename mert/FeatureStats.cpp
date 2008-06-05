@@ -29,7 +29,7 @@ FeatureStats::FeatureStats(const FeatureStats &stats)
 	available_ = stats.available();
 	entries_ = stats.size();
 	array_ = new FeatureStatsType[available_];
-	memcpy(array_,stats.getArray(),bytes_);
+	memcpy(array_,stats.getArray(),featbytes_);
 };
 
 FeatureStats::FeatureStats(const size_t size)
@@ -37,7 +37,7 @@ FeatureStats::FeatureStats(const size_t size)
 	available_ = size;
 	entries_ = size;
 	array_ = new FeatureStatsType[available_];
-	memset(array_,0,bytes_);
+	memset(array_,0,featbytes_);
 };
 
 
@@ -50,7 +50,7 @@ void FeatureStats::expand()
 {
 	available_*=2;
 	featstats_t t_ = new FeatureStatsType[available_];
-	memcpy(t_,array_,bytes_);
+	memcpy(t_,array_,featbytes_);
 	delete array_;
 	array_=t_;
 }
@@ -75,7 +75,7 @@ void FeatureStats::set(std::string &theString)
 
 void FeatureStats::loadbin(std::ifstream& inFile)
 {
-	inFile.read((char*) array_, bytes_);
+	inFile.read((char*) array_, featbytes_);
 } 
 
 void FeatureStats::loadtxt(std::ifstream& inFile)
@@ -113,7 +113,7 @@ void FeatureStats::savetxt(std::ofstream& outFile)
 
 void FeatureStats::savebin(std::ofstream& outFile)
 {
-	outFile.write((char*) array_, bytes_);
+	outFile.write((char*) array_, featbytes_);
 } 
 
 FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
@@ -122,7 +122,7 @@ FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
 	available_ = stats.available();
 	entries_ = stats.size();
 	array_ = new FeatureStatsType[available_];
-	memcpy(array_,stats.getArray(),bytes_);
+	memcpy(array_,stats.getArray(),featbytes_);
 		
 	return *this;		
 }
