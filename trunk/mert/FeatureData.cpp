@@ -39,9 +39,7 @@ void FeatureData::load(ifstream& inFile)
 {
   FeatureArray entry;
 
-	int iter=0;
 	while (!inFile.eof()){
-		
 
 		if (!inFile.good()){
 			std::cerr << "ERROR FeatureData::load inFile.good()" << std::endl; 
@@ -50,14 +48,15 @@ void FeatureData::load(ifstream& inFile)
 		entry.clear();
 		entry.load(inFile);
 
-		if (entry.size() == 0){
-			return;
+		if (entry.size() == 0)
+			break;
+
+		if (size() == 0){
+			number_of_features=entry.NumberOfFeatures();
+			features=entry.Features();
 		}
 		add(entry);
-		iter++;
 	}
-	if (size()>0)
-		number_of_features=get(0).NumberOfFeatures();
 }
 
 

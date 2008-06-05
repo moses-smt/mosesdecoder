@@ -54,6 +54,7 @@ public:
   void load(const std::string &featfile,const std::string &scorefile){
 		featdata->load(featfile);
 		scoredata->load(scorefile);
+		setFeatureMap();
   }
 	
 	void save(const std::string &featfile,const std::string &scorefile, bool bin=false){
@@ -62,8 +63,17 @@ public:
 	}
 
 	bool existsFeatureNames(){ return (idx2featname_.size() > 0)?true:false; };
-	std::string getFeatureName(size_t idx){ return idx2featname_[idx]; };
-  size_t getFeatureIndex(const std::string& name){ return featname2idx_[name]; };
+	std::string getFeatureName(size_t idx){
+		if (idx >= idx2featname_.size())
+			throw runtime_error("Error: you required the " + idx + "-th feature, but there are only " + (idx2featname_.size()) + " features");
+		return idx2featname_[idx];
+	};
+  size_t getFeatureIndex(const std::string& name){
+		if (featname2idx_.find(name)!=featname2idx_.end())
+			throw runtime_error("Error: feature is unknown");
+		return featname2idx_[name];
+	};
+  void setFeatureMap();
 };
 
 
