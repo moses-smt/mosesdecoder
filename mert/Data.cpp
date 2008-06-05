@@ -62,33 +62,31 @@ void Data::loadnbest(const std::string &file)
 		nextPound = getNextPound(stringBuf, substring, "|||"); //third field
 
 		if (!existsFeatureNames()){
-		std::string stringsupport=substring;
-		// adding feature names
-		std::string tmpname="";
-		size_t tmpidx=0;
-		while (!stringsupport.empty()){
-//			TRACE_ERR("Decompounding: " << substring << std::endl); 
-			nextPound = getNextPound(stringsupport, subsubstring);
-			
-			// string ending with ":" are skipped, because they are the names of the features
-			if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
-				featname2idx_[tmpname+"_"+stringify(tmpidx)]=idx2featname_.size();
-				idx2featname_[idx2featname_.size()]=tmpname+"_"+stringify(tmpidx);
-				tmpidx++;
-			}
-			else{
-				tmpidx=0;
-				tmpname=subsubstring.substr(0,subsubstring.size() - 1);
-			}
-		}
-		std::string features="";
-		for (size_t i=0; i<idx2featname_.size(); i++)
-			features+=idx2featname_[i]+" ";
+			std::string stringsupport=substring;
+			// adding feature names
+			std::string features="";
+			std::string tmpname="";
 
-		NumberOfFeatures(idx2featname_.size());
-		Features(features);
-		TRACE_ERR("number_of_features: " << NumberOfFeatures() << std::endl); 
-		TRACE_ERR("features: " << Features() << std::endl); 
+			size_t tmpidx=0;
+			while (!stringsupport.empty()){
+				//			TRACE_ERR("Decompounding: " << substring << std::endl); 
+				nextPound = getNextPound(stringsupport, subsubstring);
+				
+				// string ending with ":" are skipped, because they are the names of the features
+				if ((loc = subsubstring.find(":")) != subsubstring.length()-1){
+					features+=tmpname+"_"+stringify(tmpidx)+" ";
+					tmpidx++;
+				}
+				else{
+					tmpidx=0;
+					tmpname=subsubstring.substr(0,subsubstring.size() - 1);
+				}
+			}
+			
+			NumberOfFeatures(idx2featname_.size());
+			Features(features);
+		
+			setFeatureMap();
 		}
 		
 // adding features
@@ -103,6 +101,18 @@ void Data::loadnbest(const std::string &file)
 		}
 		featdata->add(featentry,sentence_index);
 	}
-
+	
 	inp.close();
+}
+
+void Data::setFeatureMap()
+{
+	std::string substring, stringBuf;
+	stringBuf=Features();
+	while (!stringBuf.empty()){
+		getNextPound(stringBuf, substring);
+				
+		featname2idx_[substring]=idx2featname_.size();
+		idx2featname_[idx2featname_.size()]=substring;
+	}
 }

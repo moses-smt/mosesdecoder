@@ -63,7 +63,6 @@ void ScoreArray::loadtxt(ifstream& inFile)
   std::string::size_type loc;
 
 
-	TRACE_ERR("starting loadtxt..." << std::endl);
 	std::getline(inFile, stringBuf);
 	if (!inFile.good()){
 		return;
@@ -93,7 +92,7 @@ void ScoreArray::loadtxt(ifstream& inFile)
 	std::getline(inFile, stringBuf);
 	if (!stringBuf.empty()){         
 //		TRACE_ERR("Reading: " << stringBuf << std::endl); 
-                if ((loc = stringBuf.find(SCORES_TXT_END)) != 0){
+		if ((loc = stringBuf.find(SCORES_TXT_END)) != 0){
 			TRACE_ERR("ERROR: ScoreArray::loadtxt(): Wrong footer");
 			return;
 		}
