@@ -32,7 +32,6 @@ private:
   std::string score_type;
 	map<std::string, size_t> featname2idx_; //map from name to index of features
 	map<size_t, std::string> idx2featname_; //map from index to name of features
-	size_t number_of_features; //number of features 
 	size_t number_of_scores; //number of scores
 		
 public:
@@ -44,6 +43,11 @@ public:
 	
 	ScoreData* getScoreData() { return scoredata; };
 	FeatureData* getFeatureData() { return featdata; };
+	
+	inline size_t NumberOfFeatures() const{ return featdata->NumberOfFeatures(); }
+	inline void NumberOfFeatures(size_t v){ featdata->NumberOfFeatures(v); }
+	inline std::string Features() const{ return featdata->Features(); }
+	inline void Features(const std::string f){ featdata->Features(f); }
 
 	void loadnbest(const std::string &file);
 

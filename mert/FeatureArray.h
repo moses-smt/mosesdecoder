@@ -28,6 +28,8 @@ class FeatureArray
 {
 protected:
 	featarray_t array_;
+	size_t number_of_features;
+	std::string features;
 	
 private:
 	std::string idx; // idx to identify the utterance, it can differ from the index inside the vector
@@ -49,19 +51,22 @@ public:
 	void merge(FeatureArray& e);
 
 	inline size_t size(){ return array_.size(); }
-	inline size_t NumberOfFeatures(){ return (array_.size()>0)?array_.at(0).size():0; }
-
+	inline size_t NumberOfFeatures() const{ return number_of_features; }
+	inline void NumberOfFeatures(size_t v){ number_of_features = v; }
+	inline std::string Features() const{ return features; }
+	inline void Features(const std::string f){ features = f; }
+	
 	void savetxt(ofstream& outFile);
 	void savebin(ofstream& outFile);
 	void save(ofstream& outFile, bool bin=false);
 	void save(const std::string &file, bool bin=false);
 	inline void save(bool bin=false){ save("/dev/stdout",bin); }
 
-	void loadtxt(ifstream& inFile);
-	void loadbin(ifstream& inFile);
-	void load(ifstream& inFile, bool bin=false);
-	void load(const std::string &file, bool bin=false);
-
+	void loadtxt(ifstream& inFile, size_t n);
+	void loadbin(ifstream& inFile, size_t n);
+	void load(ifstream& inFile);
+	void load(const std::string &file);
+	
 	bool check_consistency();
 };
 
