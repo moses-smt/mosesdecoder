@@ -53,7 +53,7 @@ void Data::loadnbest(const std::string &file)
 		theSentence = substring;
 
 // adding statistics for error measures
-		featentry.clear();
+		featentry.reset();
 		scoreentry.clear();
 
 		theScorer->prepareStats(sentence_index, theSentence, scoreentry);
@@ -81,8 +81,14 @@ void Data::loadnbest(const std::string &file)
 				tmpname=subsubstring.substr(0,subsubstring.size() - 1);
 			}
 		}
-		number_of_features=idx2featname_.size();
-		TRACE_ERR("number_of_features: " << number_of_features << std::endl); 
+		std::string features="";
+		for (size_t i=0; i<idx2featname_.size(); i++)
+			features+=idx2featname_[i]+" ";
+
+		NumberOfFeatures(idx2featname_.size());
+		Features(features);
+		TRACE_ERR("number_of_features: " << NumberOfFeatures() << std::endl); 
+		TRACE_ERR("features: " << Features() << std::endl); 
 		}
 		
 // adding features

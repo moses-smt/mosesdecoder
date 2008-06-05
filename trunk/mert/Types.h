@@ -24,7 +24,8 @@ typedef vector<statscore_t> statscores_t;
 
 
 typedef float FeatureStatsType;
-typedef vector<FeatureStatsType> featstats_t;
+typedef FeatureStatsType* featstats_t;
+//typedef vector<FeatureStatsType> featstats_t;
 typedef vector<FeatureStats> featarray_t;
 typedef vector<FeatureArray> featdata_t;
 

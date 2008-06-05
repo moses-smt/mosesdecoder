@@ -28,6 +28,7 @@ protected:
 	
 private:
 	size_t number_of_features;
+	std::string features;
 	
 public:
 	FeatureData();
@@ -50,7 +51,10 @@ public:
 	void add(FeatureStats& e, const std::string& sent_idx);
 	
 	inline size_t size(){ return array_.size(); }
-	inline size_t NumberOfFeatures(){ return number_of_features; }
+	inline size_t NumberOfFeatures() const{	return number_of_features; }
+	inline void NumberOfFeatures(size_t v){	number_of_features = v;	}
+	inline std::string Features() const{ return features; }
+	inline void Features(const std::string f){ features = f; }
 	
 	void save(const std::string &file, bool bin=false);
 	void save(ofstream& outFile, bool bin=false);

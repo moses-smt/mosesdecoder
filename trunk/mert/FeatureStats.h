@@ -20,13 +20,15 @@ using namespace std;
 #define FEATURE_STATS_MIN (numeric_limits<FeatureStatsType>::min())
 #define ATOFST(str) ((FeatureStatsType) atof(str))
 
+#define bytes_ (entries_*sizeof(FeatureStatsType))
+
 class FeatureStats
 {
-protected:
-	featstats_t array_;
-	
 private:
-	
+	featstats_t array2_;		
+	size_t entries_;
+	size_t available_;
+		
 public:
 	FeatureStats();
 	FeatureStats(const size_t size);
@@ -34,38 +36,37 @@ public:
 	FeatureStats(std::string &theString);
 	FeatureStats& operator=(const FeatureStats &stats);
 	
-	~FeatureStats(){};
+	~FeatureStats();
+	
+	bool isfull(){return (entries_ < available_)?0:1; }
+	void expand();
+	void add(FeatureStatsType v);
 		
-	inline void clear() { array_.clear(); }
+	inline void clear() { memset((void*) array2_,0,bytes_); }
 	
-	inline FeatureStatsType get(size_t i){ return array_.at(i); }
-	inline FeatureStatsType get(size_t i)const{ return array_.at(i); }
-	inline featstats_t getArray() const { return array_; }
-	
+	inline FeatureStatsType get(size_t i){ return array2_[i]; }
+	inline FeatureStatsType get(size_t i)const{ return array2_[i]; }
+	inline featstats_t getArray() const { return array2_; }
+
 	void set(std::string &theString);
 
-	void add(FeatureStatsType e){ array_.push_back(e); }
-
-	inline size_t size(){ return array_.size(); }
+	inline size_t bytes() const{ return bytes_; }
+	inline size_t size() const{ return entries_; }
+	inline size_t available() const{ return available_; }
 	
 	void savetxt(const std::string &file);
 	void savetxt(ofstream& outFile);
 	void savebin(ofstream& outFile);
 	inline void savetxt(){ savetxt("/dev/stdout"); }
 	
-	void loadtxt(ifstream& inFile);
 	void loadtxt(const std::string &file);
+	void loadtxt(ifstream& inFile);
+	void loadbin(ifstream& inFile);
 
-	inline void reset()
-	{
-		for (featstats_t::iterator i = array_.begin(); i != array_.end(); i++)
-			*i = 0;
-	}
-		
+	inline void reset(){ entries_ = 0; clear(); }
 	
   /**write the whole object to a stream*/
   friend ostream& operator<<(ostream& o, const FeatureStats& e);
-
 };
 
 #endif

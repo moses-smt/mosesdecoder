@@ -98,8 +98,10 @@ void FeatureData::add(FeatureStats& e, const std::string & sent_idx){
 	else{
 //		TRACE_ERR("Creating a new entry in the array and inserting " << e << std::endl); 
 		FeatureArray a;
-		a.add(e);
+		a.NumberOfFeatures(number_of_features);
+		a.Features(features);
 		a.setIndex(sent_idx);
+		a.add(e);
 		add(a);
 	}
  }
