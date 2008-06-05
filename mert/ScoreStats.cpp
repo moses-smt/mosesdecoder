@@ -85,7 +85,7 @@ ScoreStats& ScoreStats::operator=(const ScoreStats &stats)
 
 /**write the whole object to a stream*/
 ostream& operator<<(ostream& o, const ScoreStats& e){
-	for (scorestats_t::iterator i = e.getArray().begin(); i != e.getArray().end(); i++)
+	for (scorestats_t::const_iterator i = e.array_.begin(); i != e.array_.end(); i++)
 		o << *i << " ";
 	return o;
 }
