@@ -26,9 +26,13 @@ protected:
 	idx2name idx2arrayname_; //map from index to name of array
 	name2idx arrayname2idx_; //map from name to index of array
 	
+	
 private:
 	size_t number_of_features;
 	std::string features;
+
+	map<std::string, size_t> featname2idx_; //map from name to index of features
+	map<size_t, std::string> idx2featname_; //map from index to name of features
 	
 public:
 	FeatureData();
@@ -80,6 +84,23 @@ public:
 			throw runtime_error("there is no entry at index " + idx);
 		return i->second;
 	}
+	
+	
+	bool existsFeatureNames(){ return (idx2featname_.size() > 0)?true:false; };
+	
+	std::string getFeatureName(size_t idx){
+		if (idx >= idx2featname_.size())
+			throw runtime_error("Error: you required an too big index");
+		return idx2featname_[idx];
+	};
+	
+  size_t getFeatureIndex(const std::string& name){
+		if (featname2idx_.find(name)!=featname2idx_.end())
+			throw runtime_error("Error: feature is unknown");
+		return featname2idx_[name];
+	};
+	
+  void setFeatureMap(const std::string feat);
 };
 
 

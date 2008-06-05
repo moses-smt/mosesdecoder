@@ -28,10 +28,12 @@ class ScoreArray
 {
 protected:
 	scorearray_t array_;
+	std::string score_type;
+	size_t number_of_scores;
 	
 private:
 	std::string  idx; // idx to identify the utterance, it can differ from the index inside the vector
-	std::string score_type;
+
 	
 public:
 	ScoreArray();
@@ -52,22 +54,23 @@ public:
 
 	void merge(ScoreArray& e);
 
-	inline std::string name(){ return score_type; };
-	inline std::string name(std::string &sctype){ return score_type = sctype; };
+	inline std::string name() const{ return score_type; };
+	inline void name(std::string &sctype){ score_type = sctype; };
 
 	inline size_t size(){ return array_.size(); }
-	inline size_t NumberOfScores(){ return (array_.size()>0)?array_.at(0).size():0; }
+	inline size_t NumberOfScores() const{ return number_of_scores; }
+	inline void NumberOfScores(size_t v){ number_of_scores = v; }
 	
 	void savetxt(ofstream& outFile, const std::string& sctype);
 	void savebin(ofstream& outFile, const std::string& sctype);
 	void save(ofstream& outFile, const std::string& sctype, bool bin=false);
 	void save(const std::string &file, const std::string& sctype, bool bin=false);
 	inline void save(const std::string& sctype, bool bin=false){ save("/dev/stdout", sctype, bin); }
-
-	void loadtxt(ifstream& inFile);
-	void loadbin(ifstream& inFile);
-	void load(ifstream& inFile, bool bin=false);
-	void load(const std::string &file, bool bin=false);
+	
+	void loadtxt(ifstream& inFile, size_t n);
+	void loadbin(ifstream& inFile, size_t n);
+	void load(ifstream& inFile);
+	void load(const std::string &file);
 	
 	bool check_consistency();
 };

@@ -30,7 +30,12 @@ class Scorer {
 		
 	Scorer(const string& name): _name(name), _scoreData(0),_preserveCase(false){ cerr << "I AM A SCORER" << std::endl;};
 		virtual ~Scorer(){};
-	
+		
+		/**
+			* returns the number of statistics needed for the computation of the score
+			**/
+		virtual size_t NumberOfScores(){ cerr << "Scorer: 0" << endl; return 0; };
+		
 		/**
 		  * set the reference files. This must be called before prepareStats.
 		  **/
@@ -47,6 +52,8 @@ class Scorer {
 
 		virtual void prepareStats(const string& sindex, const string& text, ScoreStats& entry)
 		{
+			
+//			cerr << sindex << endl;
 			this->prepareStats((size_t) atoi(sindex.c_str()), text, entry);
 			//cerr << text << std::endl;
 		}

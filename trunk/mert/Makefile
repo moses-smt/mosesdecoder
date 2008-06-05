@@ -27,7 +27,7 @@ mert \
 clean: 
 	rm -f *.o
 
-%.o : %.cpp
+%.o : %.cpp %.h
 	$(GCC) -c $(CFLAGS) $< -o $@
 
 extractor: $(OBJS) extractor.cpp

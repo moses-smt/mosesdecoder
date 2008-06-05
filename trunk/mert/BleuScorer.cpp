@@ -90,8 +90,9 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles) {
 
 
 void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry) {
-    //cerr << text << endl;
-   //dump_counts(*_refcounts[sid]);
+//	cerr << text << endl;
+//	cerr << sid << endl;
+	//dump_counts(*_refcounts[sid]);
 		if (sid >= _refcounts.size()) {
 			stringstream msg;
 			msg << "Sentence id (" << sid << ") not found in reference set";

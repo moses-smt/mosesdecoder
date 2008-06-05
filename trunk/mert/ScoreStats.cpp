@@ -9,38 +9,73 @@
 #include <fstream>
 #include "ScoreStats.h"
 
+#define AVAILABLE_ 8;
+
 
 ScoreStats::ScoreStats()
-{};
+{
+	available_ = AVAILABLE_;
+	entries_ = 0;
+	array_ = new ScoreStatsType[available_];
+};
 
- ScoreStats::ScoreStats(const ScoreStats &stats):
-array_(stats.array_)
-{};
+ScoreStats::~ScoreStats()
+{
+	delete array_;
+};
+
+ ScoreStats::ScoreStats(const ScoreStats &stats)
+{
+	available_ = stats.available();
+	entries_ = stats.size();
+	array_ = new ScoreStatsType[available_];
+	memcpy(array_,stats.getArray(),scorebytes_);
+};
+
 
 ScoreStats::ScoreStats(const size_t size)
 {
-	for(unsigned int i = 0; i < size; i++)
-		array_.push_back(0);
+	available_ = size;
+	entries_ = size;
+	array_ = new ScoreStatsType[available_];
+	memset(array_,0,scorebytes_);
 };
-
 
 ScoreStats::ScoreStats(std::string &theString)
 {
 	set(theString);
 }
 
+void ScoreStats::expand()
+{
+	available_*=2;
+	scorestats_t t_ = new ScoreStatsType[available_];
+	memcpy(t_,array_,scorebytes_);
+	delete array_;
+	array_=t_;
+}
+
+void ScoreStats::add(ScoreStatsType v)
+{
+	if (isfull()) expand();
+	array_[entries_++]=v;
+}
+
 void ScoreStats::set(std::string &theString)
 {
-    std::string substring, stringBuf;
-
-	int nextPound;
-	ScoreStatsType sc;
+  std::string substring, stringBuf;
+	reset();
+	
 	while (!theString.empty()){         
-        nextPound = getNextPound(theString, substring);
-        sc = ATOSST(substring.c_str());
-        array_.push_back(sc);
+		getNextPound(theString, substring);
+		add(ATOSST(substring.c_str()));
 	}
 }
+
+void ScoreStats::loadbin(std::ifstream& inFile)
+{
+	inFile.read((char*) array_, scorebytes_);
+} 
 
 void ScoreStats::loadtxt(std::ifstream& inFile)
 {
@@ -74,10 +109,19 @@ void ScoreStats::savetxt(std::ofstream& outFile)
 	outFile << *this;
 }
 
+void ScoreStats::savebin(std::ofstream& outFile)
+{
+	outFile.write((char*) array_, scorebytes_);
+} 
+
 
 ScoreStats& ScoreStats::operator=(const ScoreStats &stats)
 {
-	array_ = stats.array_;
+	delete array_;
+	available_ = stats.available();
+	entries_ = stats.size();
+	array_ = new ScoreStatsType[available_];
+	memcpy(array_,stats.getArray(),scorebytes_);
 		
 	return *this;		
 }
@@ -85,8 +129,8 @@ ScoreStats& ScoreStats::operator=(const ScoreStats &stats)
 
 /**write the whole object to a stream*/
 ostream& operator<<(ostream& o, const ScoreStats& e){
-	for (scorestats_t::const_iterator i = e.array_.begin(); i != e.array_.end(); i++)
-		o << *i << " ";
+	for (size_t i=0; i< e.size(); i++)
+		o << e.get(i) << " ";
 	return o;
 }
 

@@ -28,6 +28,9 @@ class BleuScorer: public StatisticsBasedScorer {
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
 		virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
 		static const int LENGTH;	
+				
+		size_t NumberOfScores(){ cerr << "BleuScorer: " << (2 * LENGTH + 1) << endl; return (2 * LENGTH + 1); };
+		
 		
     protected:
         float calculateScore(const vector<int>& comps);
@@ -37,8 +40,6 @@ class BleuScorer: public StatisticsBasedScorer {
 		BleuScorer(const BleuScorer&);
 		~BleuScorer(){};
 		BleuScorer& operator=(const BleuScorer&);
-				
-
 		//Used to construct the ngram map
 		struct CompareNgrams {
 			int operator() (const vector<int>& a, const vector<int>& b) {

@@ -30,7 +30,8 @@ typedef vector<FeatureStats> featarray_t;
 typedef vector<FeatureArray> featdata_t;
 
 typedef int ScoreStatsType;
-typedef vector<ScoreStatsType> scorestats_t;
+typedef ScoreStatsType* scorestats_t;
+//typedef vector<ScoreStatsType> scorestats_t;
 typedef vector<ScoreStats> scorearray_t;
 typedef vector<ScoreArray> scoredata_t;
 

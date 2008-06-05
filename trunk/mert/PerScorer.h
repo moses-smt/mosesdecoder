@@ -31,6 +31,9 @@ class PerScorer: public StatisticsBasedScorer {
 		virtual void whoami() {
 			cerr << "I AM PerScorer" << std::endl;
 		}
+		
+		size_t NumberOfScores(){ cerr << "PerScorer: 3" << endl; return 3; };
+		
     protected:
         
         virtual float calculateScore(const vector<int>& comps) ;

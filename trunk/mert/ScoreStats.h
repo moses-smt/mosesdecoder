@@ -20,12 +20,14 @@ using namespace std;
 #define SCORE_STATS_MIN (numeric_limits<ScoreStatsType>::min())
 #define ATOSST(str) ((ScoreStatsType) atoi(str))
 
+#define scorebytes_ (entries_*sizeof(ScoreStatsType))
+
 class ScoreStats
 {
-protected:
-	scorestats_t array_;
-	
 private:
+	scorestats_t array_;		
+	size_t entries_;
+	size_t available_;
 	
 public:
 	ScoreStats();
@@ -34,30 +36,37 @@ public:
 	ScoreStats(std::string &theString);
 	ScoreStats& operator=(const ScoreStats &stats);
 	
-	~ScoreStats(){};
-		
-	inline void clear() { array_.clear(); }
+	~ScoreStats();
 	
-	inline ScoreStatsType get(size_t i){ return array_.at(i); }
-	inline ScoreStatsType get(size_t i)const{ return array_.at(i); }
+	bool isfull(){return (entries_ < available_)?0:1; }
+	void expand();
+	void add(ScoreStatsType v);
+		
+	inline void clear() { memset((void*) array_,0,scorebytes_); }
+	
+	inline ScoreStatsType get(size_t i){ return array_[i]; }
+	inline ScoreStatsType get(size_t i)const{ return array_[i]; }
 	inline scorestats_t getArray() const { return array_; }
 	
 	void set(std::string &theString);
 
-	inline size_t size(){ return array_.size(); }
-
+	inline size_t bytes() const{ return scorebytes_; }
+	inline size_t size() const{ return entries_; }
+	inline size_t available() const{ return available_; }
+	
 	void savetxt(const std::string &file);
 	void savetxt(ofstream& outFile);
+	void savebin(ofstream& outFile);
 	inline void savetxt(){ savetxt("/dev/stdout"); }
-	
-	void loadtxt(ifstream& inFile);
-	void loadtxt(const std::string &file);
 
-	inline void reset()
-	{
-		for (scorestats_t::iterator i = array_.begin(); i != array_.end(); i++)
-			*i = 0;
-	}
+	
+	
+	void loadtxt(const std::string &file);
+	void loadtxt(ifstream& inFile);
+	void loadbin(ifstream& inFile);
+	
+	
+	inline void reset(){ entries_ = 0; clear(); }
 
 	/**write the whole object to a stream*/
 	friend ostream& operator<<(ostream& o, const ScoreStats& e);
