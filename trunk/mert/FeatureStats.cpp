@@ -16,28 +16,28 @@ FeatureStats::FeatureStats()
 {
 	available_ = AVAILABLE_;
 	entries_ = 0;
-	array2_ = new FeatureStatsType[available_];
+	array_ = new FeatureStatsType[available_];
 };
 
 FeatureStats::~FeatureStats()
 {
-	delete array2_;
+	delete array_;
 };
 
 FeatureStats::FeatureStats(const FeatureStats &stats)
 {
 	available_ = stats.available();
 	entries_ = stats.size();
-	array2_ = new FeatureStatsType[available_];
-	memcpy(array2_,stats.getArray(),bytes_);
+	array_ = new FeatureStatsType[available_];
+	memcpy(array_,stats.getArray(),bytes_);
 };
 
 FeatureStats::FeatureStats(const size_t size)
 {
 	available_ = size;
 	entries_ = size;
-	array2_ = new FeatureStatsType[available_];
-	memset(array2_,0,bytes_);
+	array_ = new FeatureStatsType[available_];
+	memset(array_,0,bytes_);
 };
 
 
@@ -50,15 +50,15 @@ void FeatureStats::expand()
 {
 	available_*=2;
 	featstats_t t_ = new FeatureStatsType[available_];
-	memcpy(t_,array2_,bytes_);
-	delete array2_;
-	array2_=t_;
+	memcpy(t_,array_,bytes_);
+	delete array_;
+	array_=t_;
 }
 
 void FeatureStats::add(FeatureStatsType v)
 {
 	if (isfull()) expand();
-	array2_[entries_++]=v;
+	array_[entries_++]=v;
 }
 
 void FeatureStats::set(std::string &theString)
@@ -75,7 +75,7 @@ void FeatureStats::set(std::string &theString)
 
 void FeatureStats::loadbin(std::ifstream& inFile)
 {
-	inFile.read((char*) array2_, bytes_);
+	inFile.read((char*) array_, bytes_);
 } 
 
 void FeatureStats::loadtxt(std::ifstream& inFile)
@@ -113,16 +113,16 @@ void FeatureStats::savetxt(std::ofstream& outFile)
 
 void FeatureStats::savebin(std::ofstream& outFile)
 {
-	outFile.write((char*) array2_, bytes_);
+	outFile.write((char*) array_, bytes_);
 } 
 
 FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
 {
-	delete array2_;
+	delete array_;
 	available_ = stats.available();
 	entries_ = stats.size();
-	array2_ = new FeatureStatsType[available_];
-	memcpy(array2_,stats.getArray(),bytes_);
+	array_ = new FeatureStatsType[available_];
+	memcpy(array_,stats.getArray(),bytes_);
 		
 	return *this;		
 }

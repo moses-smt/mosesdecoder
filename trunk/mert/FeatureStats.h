@@ -25,7 +25,7 @@ using namespace std;
 class FeatureStats
 {
 private:
-	featstats_t array2_;		
+	featstats_t array_;		
 	size_t entries_;
 	size_t available_;
 		
@@ -42,11 +42,11 @@ public:
 	void expand();
 	void add(FeatureStatsType v);
 		
-	inline void clear() { memset((void*) array2_,0,bytes_); }
+	inline void clear() { memset((void*) array_,0,bytes_); }
 	
-	inline FeatureStatsType get(size_t i){ return array2_[i]; }
-	inline FeatureStatsType get(size_t i)const{ return array2_[i]; }
-	inline featstats_t getArray() const { return array2_; }
+	inline FeatureStatsType get(size_t i){ return array_[i]; }
+	inline FeatureStatsType get(size_t i)const{ return array_[i]; }
+	inline featstats_t getArray() const { return array_; }
 
 	void set(std::string &theString);
 
