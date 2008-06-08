@@ -17,11 +17,11 @@ my @tests = qw (
   basic-surface-binptable
   multi-factor-binptable
   nbest-multi-factor
-  lattice-distortion
+#  lattice-distortion
   lattice-surface
   lexicalized-reordering
   lexicalized-reordering-cn
-  xml-markup
+#  xml-markup
 );
 ############################################################
 #@tests=qw(lattice-distortion);
