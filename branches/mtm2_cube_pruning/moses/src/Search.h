@@ -7,6 +7,7 @@
 class HypothesisStack;
 class Hypothesis;
 class InputType;
+class TranslationOptionCollection;
 
 class Search
 {
@@ -16,6 +17,6 @@ public:
 	virtual void ProcessSentence() = 0;
 
 	// Factory
-	static Search *CreateSearch(const InputType &source, SearchAlgorithm searchAlgorithm);
+	static Search *CreateSearch(const InputType &source, SearchAlgorithm searchAlgorithm, const TranslationOptionCollection &transOptColl);
 };
 

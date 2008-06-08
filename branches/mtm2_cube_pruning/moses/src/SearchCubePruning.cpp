@@ -5,11 +5,11 @@
 #include "InputType.h"
 #include "TranslationOptionCollection.h"
 
-SearchCubePruning::SearchCubePruning(const InputType &source)
+SearchCubePruning::SearchCubePruning(const InputType &source, const TranslationOptionCollection &transOptColl)
 :m_source(source)
-, m_hypoStackColl(source.GetSize() + 1)
-,m_transOptColl(source.CreateTranslationOptionCollection())
+,m_hypoStackColl(source.GetSize() + 1)
 ,m_initialTargetPhrase(Output)
+,m_transOptColl(transOptColl)
 {
 	const StaticData &staticData = StaticData::Instance();
 
@@ -37,15 +37,6 @@ void SearchCubePruning::ProcessSentence()
 {	
 	const StaticData &staticData = StaticData::Instance();
 	staticData.ResetSentenceStats(m_source);
-	const vector <DecodeGraph*>
-			&decodeStepVL = staticData.GetDecodeStepVL();
-	
-	// create list of all possible translations
-	// this is only valid if:
-	//		1. generation of source sentence is not done 1st
-	//		2. initial hypothesis factors are given in the sentence
-	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
-	m_transOptColl->CreateTranslationOptions(decodeStepVL);
 
 	// initial seed hypothesis: nothing translated, no words produced
 	{
@@ -153,8 +144,8 @@ void SearchCubePruning::CreateForwardTodos(const WordsBitmap &bitmap, const Word
 	newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
 
 	size_t numCovered = newBitmap.GetNumWordsCovered();
-	const TranslationOptionList &transOptList = m_transOptColl->GetTranslationOptionList(range);
-	const SquareMatrix &futureScore = m_transOptColl->GetFutureScore();
+	const TranslationOptionList &transOptList = m_transOptColl.GetTranslationOptionList(range);
+	const SquareMatrix &futureScore = m_transOptColl.GetFutureScore();
 	HypothesisStack &newStack = *m_hypoStackColl[numCovered];
 
 	if (transOptList.size() > 0)

@@ -7,24 +7,32 @@
 static bool debug2 = false;
 #endif
 
-SearchNormal::SearchNormal(const InputType &source)
+SearchNormal::SearchNormal(const InputType &source, const TranslationOptionCollection &transOptColl)
 :m_source(source)
 ,m_hypoStackColl(source.GetSize() + 1)
 ,m_initialTargetPhrase(Output)
 ,m_start(clock())
 ,interrupted_flag(0)
+,m_transOptColl(transOptColl)
 {
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
 	staticData.InitializeBeforeSentenceProcessing(source);
 
-	std::vector < HypothesisStack* >::iterator iterStack;
-	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
+	std::vector < HypothesisStack >::iterator iterStack;
+	for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind)
 	{
-		HypothesisStack &sourceHypoColl = **iterStack;
-		sourceHypoColl.SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
-		sourceHypoColl.SetBeamWidth(staticData.GetBeamWidth());
+		HypothesisStack *sourceHypoColl = new HypothesisStack();
+		sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
+		sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
+
+		m_hypoStackColl[ind] = sourceHypoColl;
 	}
+}
+
+SearchNormal::~SearchNormal()
+{
+	RemoveAllInColl(m_hypoStackColl);
 }
 
 /**
@@ -112,7 +120,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 				{
 					ExpandAllHypotheses(hypothesis
-												, m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos)));
+												, m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos)));
 				}
 			}
 		}
@@ -195,7 +203,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			  if (debug2) { std::cerr << "Ext!\n"; StaticData::Instance().SetVerboseLevel(4); }
 #endif
 				ExpandAllHypotheses(hypothesis
-							,m_transOptColl->GetTranslationOptionList(extRange));
+							,m_transOptColl.GetTranslationOptionList(extRange));
 #ifdef DEBUGLATTICE
 			  StaticData::Instance().SetVerboseLevel(vl);
 #endif
@@ -216,7 +224,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 				if (required_distortion <= maxDistortion) {
 					ExpandAllHypotheses(hypothesis
-								,m_transOptColl->GetTranslationOptionList(extRange));
+								,m_transOptColl.GetTranslationOptionList(extRange));
 				}
 #ifdef DEBUGLATTICE
 				else
@@ -267,11 +275,11 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 		}
 		else
 		{
-			newHypo->CalcScore(m_transOptColl->GetFutureScore());
+			newHypo->CalcScore(m_transOptColl.GetFutureScore());
 			newHypo = newHypo->CreateNext(**iterLinked);
 		}
 	}
-	newHypo->CalcScore(m_transOptColl->GetFutureScore());
+	newHypo->CalcScore(m_transOptColl.GetFutureScore());
 	
 	// logging for the curious
 	IFVERBOSE(3) {

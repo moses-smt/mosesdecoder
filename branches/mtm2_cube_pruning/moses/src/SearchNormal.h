@@ -20,7 +20,7 @@ protected:
 	size_t interrupted_flag;
 	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
 	clock_t m_start; /**< starting time, used for logging */
-	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
+	const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
@@ -28,7 +28,7 @@ protected:
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
 
 public:
-	SearchNormal(const InputType &source);
+	SearchNormal(const InputType &source, const TranslationOptionCollection &transOptColl);
 	~SearchNormal();
 
 	void ProcessSentence();

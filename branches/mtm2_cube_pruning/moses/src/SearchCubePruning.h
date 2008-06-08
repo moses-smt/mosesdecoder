@@ -14,7 +14,7 @@ protected:
 		const InputType &m_source;
 		std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */ 
 	// no of elements = no of words in source + 1
-	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
+	const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 
 	//! go thru all bitmaps in 1 stack & create backpointers to bitmaps in the stack
@@ -26,7 +26,7 @@ protected:
 	void PrintBitmapContainerGraph();
 
 public:
-	SearchCubePruning(const InputType &source);
+	SearchCubePruning(const InputType &source, const TranslationOptionCollection &transOptColl);
 	~SearchCubePruning();
 
 	void ProcessSentence();

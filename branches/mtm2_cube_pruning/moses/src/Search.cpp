@@ -3,14 +3,14 @@
 #include "SearchNormal.h"
 #include "UserMessage.h"
 
-Search *Search::CreateSearch(const InputType &source, SearchAlgorithm searchAlgorithm)
+Search *Search::CreateSearch(const InputType &source, SearchAlgorithm searchAlgorithm, const TranslationOptionCollection &transOptColl)
 {
 	switch(searchAlgorithm)
 	{
 		case Normal:		
-			return new SearchNormal(source);
+			return new SearchNormal(source, transOptColl);
 		case CubePruning:
-			return new SearchCubePruning(source);
+			return new SearchCubePruning(source, transOptColl);
 		case CubeGrowing:
 			return NULL;
 		default:

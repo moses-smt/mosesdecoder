@@ -43,7 +43,7 @@ using namespace std;
 Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
 :m_source(source)
 ,m_transOptColl(source.CreateTranslationOptionCollection())
-,m_search(Search::CreateSearch(source, searchAlgorithm))
+,m_search(Search::CreateSearch(source, searchAlgorithm, *m_transOptColl))
 ,m_start(clock())
 ,interrupted_flag(0)
 {
