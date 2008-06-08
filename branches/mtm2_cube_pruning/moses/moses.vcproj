@@ -599,6 +599,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Search.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SearchCubePruning.cpp"
 				>
 			</File>

@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 
         VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 
-        Manager manager(*source);
+        Manager manager(*source, staticData.GetSearchAlgorithm());
         manager.ProcessSentence();
 
         if (staticData.GetOutputWordGraph())

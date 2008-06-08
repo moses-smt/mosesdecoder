@@ -40,14 +40,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-#undef DEBUGLATTICE
-#ifdef DEBUGLATTICE
-static bool debug2 = false;
-#endif
-
-Manager::Manager(InputType const& source)
+Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
 :m_source(source)
-,m_search(source)
+,m_transOptColl(source.CreateTranslationOptionCollection())
+,m_search(Search::CreateSearch(source, searchAlgorithm))
 ,m_start(clock())
 ,interrupted_flag(0)
 {
@@ -59,6 +55,8 @@ Manager::Manager(InputType const& source)
 Manager::~Manager() 
 {
   delete m_transOptColl;
+	delete m_search;
+
 	StaticData::Instance().CleanUpAfterSentenceProcessing();      
 
 	clock_t end = clock();
@@ -86,7 +84,7 @@ void Manager::ProcessSentence()
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
 	m_transOptColl->CreateTranslationOptions(decodeStepVL);
 
-	m_search.ProcessSentence();
+	m_search->ProcessSentence();
 }
 
 /**
@@ -103,7 +101,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 	if (count <= 0)
 		return;
 
-	const std::vector < HypothesisStack* > &hypoStackColl = m_search.GetHypothesisStacks();
+	const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
 
 	vector<const Hypothesis*> sortedPureHypo = hypoStackColl.back()->GetSortedList();
 
@@ -275,7 +273,7 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 	const StaticData &staticData = StaticData::Instance();
 	string fileName = staticData.GetParam("output-word-graph")[0];
 	bool outputNBest = Scan<bool>(staticData.GetParam("output-word-graph")[1]);
-	const std::vector < HypothesisStack* > &hypoStackColl = m_search.GetHypothesisStacks();
+	const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
 
 	outputWordGraphStream << "VERSION=1.0" << endl
 								<< "UTTERANCE=" << translationId << endl;
@@ -352,7 +350,7 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
   std::vector< const Hypothesis *> connectedList;
 
   // start with the ones in the final stack
-	const std::vector < HypothesisStack* > &hypoStackColl = m_search.GetHypothesisStacks();
+	const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
   const HypothesisStack &finalStack = *hypoStackColl.back();
   HypothesisStack::const_iterator iterHypo;
   for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
@@ -478,5 +476,5 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
 
 const Hypothesis *Manager::GetBestHypothesis() const
 {
-	return m_search.GetBestHypothesis();
+	return m_search->GetBestHypothesis();
 }

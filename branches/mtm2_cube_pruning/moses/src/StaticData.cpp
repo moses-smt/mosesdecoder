@@ -271,6 +271,11 @@ bool StaticData::LoadData(Parameter *parameter)
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
 	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;
 
+
+	// to cube or not to cube
+	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
+										(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
+
 	//default case
 	
 	if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;

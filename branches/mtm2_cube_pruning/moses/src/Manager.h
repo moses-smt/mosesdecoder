@@ -76,7 +76,7 @@ protected:
 	// data
 	InputType const& m_source; /**< source sentence to be translated */
 	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
-	SearchCubePruning m_search;
+	Search *m_search;
 
 	size_t interrupted_flag;
 
@@ -84,7 +84,7 @@ protected:
 	clock_t m_start; /**< starting time, used for logging */
 	
 public:
-	Manager(InputType const& source);
+	Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
 	~Manager();
 
 	void ProcessSentence();

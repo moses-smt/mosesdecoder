@@ -92,6 +92,7 @@ protected:
 	bool m_sourceStartPosMattersForRecombination;
 	bool m_recoverPath;
 
+	SearchAlgorithm m_searchAlgorithm;
 	InputTypeEnum m_inputType;
 	size_t m_numInputScores;
 
@@ -350,6 +351,7 @@ public:
 	//! Sets the global score vector weights for a given ScoreProducer.
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	InputTypeEnum GetInputType() const {return m_inputType;}
+	SearchAlgorithm GetSearchAlgorithm() const {return m_searchAlgorithm;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
 	const InputType* GetInput() const { return m_input; }
 	void InitializeBeforeSentenceProcessing(InputType const&) const;

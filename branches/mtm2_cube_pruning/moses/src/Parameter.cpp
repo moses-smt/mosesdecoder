@@ -85,6 +85,7 @@ Parameter::Parameter()
 	AddParam("time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
 	AddParam("output-search-graph", "osg", "Output connected hypotheses of search into specified filename");
 	AddParam("cube-pruning-k-best", "cbk", "How many hypotheses should be created for each coverages. (default = 10)");
+	AddParam("search-algorithm", "", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
 }
 
 Parameter::~Parameter()

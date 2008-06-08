@@ -136,16 +136,23 @@ enum InputTypeEnum
 
 enum XmlInputType
 {
-	XmlPassThrough = 0,
-	XmlIgnore = 1,
-	XmlExclusive = 2,
-	XmlInclusive = 3
+	XmlPassThrough	= 0,
+	XmlIgnore				= 1,
+	XmlExclusive		= 2,
+	XmlInclusive		= 3
 };
 
 enum DictionaryFind
 {	
-	Best
-	,All
+	Best		= 0
+	,All		= 1
+};
+
+enum SearchAlgorithm
+{	
+	Normal				= 0
+	,CubePruning	= 1
+	,CubeGrowing	= 2
 };
 
 // typedef
