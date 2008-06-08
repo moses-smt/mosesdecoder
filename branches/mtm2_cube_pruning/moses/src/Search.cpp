@@ -1,5 +1,6 @@
 
 #include "SearchCubePruning.h"
+#include "SearchNormal.h"
 #include "UserMessage.h"
 
 Search *Search::CreateSearch(const InputType &source, SearchAlgorithm searchAlgorithm)
@@ -7,7 +8,7 @@ Search *Search::CreateSearch(const InputType &source, SearchAlgorithm searchAlgo
 	switch(searchAlgorithm)
 	{
 		case Normal:		
-			return NULL;
+			return new SearchNormal(source);
 		case CubePruning:
 			return new SearchCubePruning(source);
 		case CubeGrowing:
