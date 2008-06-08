@@ -17,7 +17,6 @@ SearchNormal::SearchNormal(const InputType &source, const TranslationOptionColle
 {
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
-	staticData.InitializeBeforeSentenceProcessing(source);
 
 	std::vector < HypothesisStack >::iterator iterStack;
 	for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind)
