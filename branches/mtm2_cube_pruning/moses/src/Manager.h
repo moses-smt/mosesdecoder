@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TrellisPathList.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
+#include "SearchCubePruning.h"
 
 class TrellisPath;
 class TranslationOptionCollection;
@@ -74,27 +75,14 @@ class Manager
 protected:	
 	// data
 	InputType const& m_source; /**< source sentence to be translated */
+	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
+	SearchCubePruning m_search;
 
 	size_t interrupted_flag;
 
 	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
-	std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */ 
-	// no of elements = no of words in source + 1
-	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
-	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	clock_t m_start; /**< starting time, used for logging */
 	
-	// logging
-	void OutputHypoStack(int stack = -1);
-	void OutputHypoStackSize();
-	void PrintBitmapContainerGraph();
-
-	//! go thru all bitmaps in 1 stack & create backpointers to bitmaps in the stack
-	void CreateForwardTodos(HypothesisStack &stack);
-	//! create a back pointer to this bitmap, with edge that has this words range translation
-	void CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer);
-	bool CheckDistortion(const WordsBitmap &bitmap, const WordsRange &range) const;
-
 public:
 	Manager(InputType const& source);
 	~Manager();
@@ -105,7 +93,7 @@ public:
 	void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;
 	
 	void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
-        void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
 
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )

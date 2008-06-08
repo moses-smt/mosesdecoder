@@ -47,30 +47,17 @@ static bool debug2 = false;
 
 Manager::Manager(InputType const& source)
 :m_source(source)
-,m_hypoStackColl(source.GetSize() + 1)
-,m_transOptColl(source.CreateTranslationOptionCollection())
-,m_initialTargetPhrase(Output)
+,m_search(source)
 ,m_start(clock())
 ,interrupted_flag(0)
 {
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
 	staticData.InitializeBeforeSentenceProcessing(source);
-
-	std::vector < HypothesisStack >::iterator iterStack;
-	for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind)
-	{
-		HypothesisStack *sourceHypoColl = new HypothesisStack();
-		sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
-		sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
-
-		m_hypoStackColl[ind] = sourceHypoColl;
-	}
 }
 
 Manager::~Manager() 
 {
-	RemoveAllInColl(m_hypoStackColl);
   delete m_transOptColl;
 	StaticData::Instance().CleanUpAfterSentenceProcessing();      
 
@@ -86,7 +73,7 @@ Manager::~Manager()
  * hypotheses stack by stack, until the end of the sentence.
  */
 void Manager::ProcessSentence()
-{	
+{
 	const StaticData &staticData = StaticData::Instance();
 	staticData.ResetSentenceStats(m_source);
 	const vector <DecodeGraph*>
@@ -99,226 +86,7 @@ void Manager::ProcessSentence()
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
 	m_transOptColl->CreateTranslationOptions(decodeStepVL);
 
-	// initial seed hypothesis: nothing translated, no words produced
-	{
-		Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
-		m_hypoStackColl[0]->AddInitial(hypo);
-	}
-	
-	CreateForwardTodos(*m_hypoStackColl.front());
-
-	// go through each stack
-	size_t stackNo = 1;
-	std::vector < HypothesisStack* >::iterator iterStack;
-	for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
-	{
-		//checked if elapsed time ran out of time with respect 
-		double _elapsed_time = GetUserTime();
-		if (_elapsed_time > staticData.GetTimeoutThreshold()){
-	  	VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
-			interrupted_flag = 1;
-			return;
-		}
-		HypothesisStack &sourceHypoColl = **iterStack;
-
-		_BMType::const_iterator bmIter;
-		const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
-		for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter)
-		{
-			bmIter->second->FindKBestHypotheses();
-		}
-		
-		// the stack is pruned before processing (lazy pruning):
-		VERBOSE(3,"processing hypothesis from next stack");
-	        // VERBOSE("processing next stack at ");
-		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
-		VERBOSE(3,std::endl);
-		sourceHypoColl.CleanupArcList();
-
-		CreateForwardTodos(sourceHypoColl);
-	
-		stackNo++;
-	}
-
-	PrintBitmapContainerGraph();
-
-	// some more logging
-	VERBOSE(2, staticData.GetSentenceStats());
-}
-
-void Manager::CreateForwardTodos(HypothesisStack &stack)
-{
-	const _BMType &bitmapAccessor = stack.GetBitmapAccessor();
-	_BMType::const_iterator iterAccessor;
-	size_t size = m_source.GetSize();
-
-	stack.AddHypothesesToBitmapContainers();
-
-	for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor)
-	{
-		const WordsBitmap &bitmap = iterAccessor->first;
-		BitmapContainer &bitmapContainer = *iterAccessor->second;
-
-		if (bitmapContainer.GetHypothesesSize() == 0)
-		{ // no hypothese to expand. don't bother doing it		
-			continue; 
-		}
-		
-		// Sort the hypotheses inside the Bitmap Container as they are being used by now.
-		bitmapContainer.SortHypotheses();
-
-		// check bitamp and range doesn't overlap
-		size_t startPos, endPos;
-		for (startPos = 0 ;startPos < size ; startPos++)
-		{
-			if (bitmap.GetValue(startPos))
-				continue;
-
-			// not yet covered
-			WordsRange applyRange(startPos, startPos);
-			if (CheckDistortion(bitmap, applyRange))
-			{ // apply range
-				CreateForwardTodos(bitmap, applyRange, bitmapContainer);
-			}
-			
-			size_t maxSize = size - startPos;
-			size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-			maxSize = std::min(maxSize, maxSizePhrase);
-
-			for (endPos = startPos+1; endPos < startPos + maxSize; endPos++)
-			{
-				if (bitmap.GetValue(endPos))
-					break;
-
-				WordsRange applyRange(startPos, endPos);
-				if (CheckDistortion(bitmap, applyRange))
-				{ // apply range
-					CreateForwardTodos(bitmap, applyRange, bitmapContainer);
-				}
-			}
-		}
-	}
-}
-
-void Manager::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer)
-{
-	WordsBitmap newBitmap = bitmap;
-	newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
-
-	size_t numCovered = newBitmap.GetNumWordsCovered();
-	const TranslationOptionList &transOptList = m_transOptColl->GetTranslationOptionList(range);
-	const SquareMatrix &futureScore = m_transOptColl->GetFutureScore();
-	HypothesisStack &newStack = *m_hypoStackColl[numCovered];
-
-	if (transOptList.size() > 0)
-	{
-		m_hypoStackColl[numCovered]->SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, futureScore, transOptList);
-	}
-}
-
-bool Manager::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
-{
-	// since we check for reordering limits, its good to have that limit handy
-	int maxDistortion = StaticData::Instance().GetMaxDistortion();
-
-	// no limit of reordering: no prob
-	if (maxDistortion < 0)
-	{	
-		return true;
-	}
-
-	// if there are reordering limits, make sure it is not violated
-	// the coverage bitmap is handy here (and the position of the first gap)
-	const size_t	hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
-							, sourceSize			= m_source.GetSize()
-							, startPos				= range.GetStartPos()
-							, endPos					= range.GetEndPos();
-
-	// MAIN LOOP. go through each possible hypo
-  size_t maxSize = sourceSize - startPos;
-  size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-  maxSize = std::min(maxSize, maxSizePhrase);
-
-	bool leftMostEdge = (hypoFirstGapPos == startPos);			
-	// any length extension is okay if starting at left-most edge
-	if (leftMostEdge)
-	{
-		return true;
-	}
-	// starting somewhere other than left-most edge, use caution
-	else
-	{
-		// the basic idea is this: we would like to translate a phrase starting
-		// from a position further right than the left-most open gap. The
-		// distortion penalty for the following phrase will be computed relative
-		// to the ending position of the current extension, so we ask now what
-		// its maximum value will be (which will always be the value of the
-		// hypothesis starting at the left-most edge).  If this vlaue is than
-		// the distortion limit, we don't allow this extension to be made.
-		WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
-		int required_distortion =
-			m_source.ComputeDistortionDistance(range, bestNextExtension);
-
-		if (required_distortion <= maxDistortion) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-/**
- * Find best hypothesis on the last stack.
- * This is the end point of the best translation, which can be traced back from here
- */
-const Hypothesis *Manager::GetBestHypothesis() const
-{
-//	const HypothesisStack &hypoColl = m_hypoStackColl.back();
-	if (interrupted_flag == 0){
-  	const HypothesisStack &hypoColl = *m_hypoStackColl.back();
-		return hypoColl.GetBestHypothesis();
-	}
-	else{
-  	const HypothesisStack &hypoColl = *actual_hypoStack;
-		return hypoColl.GetBestHypothesis();
-	}
-}
-
-
-/**
- * Logging of hypothesis stack sizes
- */
-void Manager::OutputHypoStackSize()
-{
-	std::vector < HypothesisStack* >::const_iterator iterStack = m_hypoStackColl.begin();
-	TRACE_ERR( "Stack sizes: " << (int)(*iterStack)->size());
-	for (++iterStack; iterStack != m_hypoStackColl.end() ; ++iterStack)
-	{
-		TRACE_ERR( ", " << (int)(*iterStack)->size());
-	}
-	TRACE_ERR( endl);
-}
-
-/**
- * Logging of hypothesis stack contents
- * \param stack number of stack to be reported, report all stacks if 0 
- */
-void Manager::OutputHypoStack(int stack)
-{
-	if (stack >= 0)
-	{
-		TRACE_ERR( "Stack " << stack << ": " << endl << m_hypoStackColl[stack] << endl);
-	}
-	else
-	{ // all stacks
-		int i = 0;
-		vector < HypothesisStack* >::iterator iterStack;
-		for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
-		{
-			HypothesisStack &hypoColl = **iterStack;
-			TRACE_ERR( "Stack " << i++ << ": " << endl << hypoColl << endl);
-		}
-	}
+	m_search.ProcessSentence();
 }
 
 /**
@@ -335,7 +103,9 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 	if (count <= 0)
 		return;
 
-	vector<const Hypothesis*> sortedPureHypo = m_hypoStackColl.back()->GetSortedList();
+	const std::vector < HypothesisStack* > &hypoStackColl = m_search.GetHypothesisStacks();
+
+	vector<const Hypothesis*> sortedPureHypo = hypoStackColl.back()->GetSortedList();
 
 	if (sortedPureHypo.size() == 0)
 		return;
@@ -505,14 +275,15 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 	const StaticData &staticData = StaticData::Instance();
 	string fileName = staticData.GetParam("output-word-graph")[0];
 	bool outputNBest = Scan<bool>(staticData.GetParam("output-word-graph")[1]);
-	
+	const std::vector < HypothesisStack* > &hypoStackColl = m_search.GetHypothesisStacks();
+
 	outputWordGraphStream << "VERSION=1.0" << endl
 								<< "UTTERANCE=" << translationId << endl;
 
 	size_t linkId = 0;
 	size_t stackNo = 1;
 	std::vector < HypothesisStack* >::const_iterator iterStack;
-	for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
+	for (iterStack = ++hypoStackColl.begin() ; iterStack != hypoStackColl.end() ; ++iterStack)
 	{
 		cerr << endl << stackNo++ << endl;
 		const HypothesisStack &stack = **iterStack;
@@ -581,7 +352,8 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
   std::vector< const Hypothesis *> connectedList;
 
   // start with the ones in the final stack
-  const HypothesisStack &finalStack = *m_hypoStackColl.back();
+	const std::vector < HypothesisStack* > &hypoStackColl = m_search.GetHypothesisStacks();
+  const HypothesisStack &finalStack = *hypoStackColl.back();
   HypothesisStack::const_iterator iterHypo;
   for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
   {
@@ -632,7 +404,7 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
 
   // compete for best forward score of previous hypothesis
   std::vector < HypothesisStack* >::const_iterator iterStack;
-  for (iterStack = --m_hypoStackColl.end() ; iterStack != m_hypoStackColl.begin() ; --iterStack)
+  for (iterStack = --hypoStackColl.end() ; iterStack != hypoStackColl.begin() ; --iterStack)
   {
     const HypothesisStack &stack = **iterStack;
     HypothesisStack::const_iterator iterHypo;
@@ -678,7 +450,7 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
   // *** output all connected hypotheses *** //
   
   connected[ 0 ] = true;
-  for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
+  for (iterStack = hypoStackColl.begin() ; iterStack != hypoStackColl.end() ; ++iterStack)
   {
     const HypothesisStack &stack = **iterStack;
     HypothesisStack::const_iterator iterHypo;
@@ -704,18 +476,7 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
   } // end for iterStack 
 }
 
-void Manager::PrintBitmapContainerGraph()
+const Hypothesis *Manager::GetBestHypothesis() const
 {
-	HypothesisStack &lastStack = *m_hypoStackColl.back();
-	const _BMType &bitmapAccessor = lastStack.GetBitmapAccessor();
-
-	_BMType::const_iterator iterAccessor;
-	for (iterAccessor = bitmapAccessor.begin(); iterAccessor != bitmapAccessor.end(); ++iterAccessor)
-	{
-		cerr << iterAccessor->first << endl;
-		BitmapContainer &container = *iterAccessor->second;
-
-	}
-
+	return m_search.GetBestHypothesis();
 }
-

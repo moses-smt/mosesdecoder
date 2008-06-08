@@ -599,6 +599,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SearchCubePruning.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Sentence.cpp"
 				>
 			</File>
@@ -890,6 +894,14 @@
 			</File>
 			<File
 				RelativePath=".\src\ScoreProducer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Search.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SearchCubePruning.h"
 				>
 			</File>
 			<File
