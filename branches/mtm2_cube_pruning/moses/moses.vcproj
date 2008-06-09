@@ -343,6 +343,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\HypothesisStack.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\HypothesisStackCubePruning.cpp"
 				>
 			</File>

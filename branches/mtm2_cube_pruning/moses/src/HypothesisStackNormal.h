@@ -44,26 +44,11 @@ protected:
 	 */
 	std::pair<HypothesisStackNormal::iterator, bool> Add(Hypothesis *hypothesis);
 
-	//! remove hypothesis pointed to by iterator but don't delete the object
-	inline void Detach(const HypothesisStackNormal::iterator &iter)
-	{
-		m_hypos.erase(iter);
-	}
 	/** destroy all instances of Hypothesis in this collection */
 	void RemoveAll();
-	/** destroy Hypothesis pointed to by iterator (object pool version) */
-	inline void Remove(const HypothesisStackNormal::iterator &iter)
-	{
-		FREEHYPO(*iter);
-		Detach(iter);
-	}
 
 public:
 	HypothesisStackNormal();
-	~HypothesisStackNormal()
-	{
-		RemoveAll();
-	}
 
 	/** adds the hypo, but only if within thresholds (beamThr, stackSize).
 	*	This function will recombine hypotheses silently!  There is no record

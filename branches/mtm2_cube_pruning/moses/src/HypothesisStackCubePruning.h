@@ -52,14 +52,9 @@ protected:
 	 * Returns false if equiv hypo exists in collection, otherwise returns true
 	 */
 	std::pair<HypothesisStackCubePruning::iterator, bool> Add(Hypothesis *hypothesis);
-
-	//! remove hypothesis pointed to by iterator but don't delete the object
-	void Detach(const HypothesisStackCubePruning::iterator &iter);
 		
 	/** destroy all instances of Hypothesis in this collection */
 	void RemoveAll();
-	/** destroy Hypothesis pointed to by iterator (object pool version) */
-	inline void Remove(const HypothesisStackCubePruning::iterator &iter);
 
 public:
 	HypothesisStackCubePruning();

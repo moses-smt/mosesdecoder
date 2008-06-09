@@ -37,21 +37,9 @@ HypothesisStackCubePruning::HypothesisStackCubePruning()
 	m_kbestCubePruning = StaticData::Instance().GetCubePruningKBest();
 }
 
-/** Remove hypothesis pointed to by iterator but don't delete the object. */
-void HypothesisStackCubePruning::Detach(const HypothesisStackCubePruning::iterator &iter)
-{
-	m_hypos.erase(iter);
-}
-
 /** remove all hypotheses from the collection */
 void HypothesisStackCubePruning::RemoveAll()
 {
-	// delete all hypos
-	while (m_hypos.begin() != m_hypos.end())
-	{
-		Remove(m_hypos.begin());
-	}
-
 	// delete all bitmap accessors;
 	_BMType::iterator iter;
 	for (iter = m_bitmapAccessor.begin(); iter != m_bitmapAccessor.end(); ++iter)
@@ -305,13 +293,6 @@ std::ostream& operator<<(std::ostream& out, const HypothesisStackCubePruning& hy
 		
 	}
 	return out;
-}
-
-void HypothesisStackCubePruning::Remove(const HypothesisStackCubePruning::iterator &iter)
-{
-	Hypothesis *h = *iter;	
-	Detach(iter);
-	FREEHYPO(h);
 }
 
 void

@@ -2,8 +2,8 @@
 #pragma once
 
 #include <vector>
-
-class Hypothesis;
+#include <set>
+#include "Hypothesis.h"
 
 class HypothesisStack
 {
@@ -19,8 +19,15 @@ public:
 	const_iterator end() const { return m_hypos.end(); }
 	size_t size() const { return m_hypos.size(); }
 
+	virtual ~HypothesisStack();
 	virtual bool AddPrune(Hypothesis *hypothesis) = 0;
 	virtual const Hypothesis *GetBestHypothesis() const = 0;
 	virtual std::vector<const Hypothesis*> GetSortedList() const = 0;
+
+	//! remove hypothesis pointed to by iterator but don't delete the object
+	void Detach(const HypothesisStack::iterator &iter);
+	/** destroy Hypothesis pointed to by iterator (object pool version) */
+	inline void Remove(const HypothesisStack::iterator &iter);
+
 };
 
