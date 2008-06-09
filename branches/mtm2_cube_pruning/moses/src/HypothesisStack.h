@@ -25,9 +25,9 @@ public:
 	virtual std::vector<const Hypothesis*> GetSortedList() const = 0;
 
 	//! remove hypothesis pointed to by iterator but don't delete the object
-	void Detach(const HypothesisStack::iterator &iter);
+	virtual void Detach(const HypothesisStack::iterator &iter);
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
-	inline void Remove(const HypothesisStack::iterator &iter);
+	virtual void Remove(const HypothesisStack::iterator &iter);
 
 };
 
