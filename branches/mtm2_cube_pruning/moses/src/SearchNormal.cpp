@@ -18,10 +18,10 @@ SearchNormal::SearchNormal(const InputType &source, const TranslationOptionColle
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
 
-	std::vector < HypothesisStack >::iterator iterStack;
+	std::vector < HypothesisStackNormal >::iterator iterStack;
 	for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind)
 	{
-		HypothesisStack *sourceHypoColl = new HypothesisStack();
+		HypothesisStackNormal *sourceHypoColl = new HypothesisStackNormal();
 		sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
 		sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
 
@@ -52,7 +52,7 @@ void SearchNormal::ProcessSentence()
 	}
 	
 	// go through each stack
-	std::vector < HypothesisStack* >::iterator iterStack;
+	std::vector < HypothesisStackNormal* >::iterator iterStack;
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
 
@@ -63,7 +63,7 @@ void SearchNormal::ProcessSentence()
 			interrupted_flag = 1;
 			return;
 		}
-		HypothesisStack &sourceHypoColl = **iterStack;
+		HypothesisStackNormal &sourceHypoColl = **iterStack;
 
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
@@ -72,7 +72,7 @@ void SearchNormal::ProcessSentence()
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
 		// go through each hypothesis on the stack and try to expand it
-		HypothesisStack::const_iterator iterHypo;
+		HypothesisStackNormal::const_iterator iterHypo;
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
 			{
 				Hypothesis &hypothesis = **iterHypo;
@@ -293,7 +293,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 	m_hypoStackColl[wordsTranslated]->AddPrune(newHypo);
 }
 
-const std::vector < HypothesisStack* >& SearchNormal::GetHypothesisStacks() const
+const std::vector < HypothesisStackNormal* >& SearchNormal::GetHypothesisStacks() const
 {
 	return m_hypoStackColl;
 }
@@ -304,13 +304,13 @@ const std::vector < HypothesisStack* >& SearchNormal::GetHypothesisStacks() cons
  */
 const Hypothesis *SearchNormal::GetBestHypothesis() const
 {
-//	const HypothesisStack &hypoColl = m_hypoStackColl.back();
+//	const HypothesisStackNormal &hypoColl = m_hypoStackColl.back();
 	if (interrupted_flag == 0){
-  	const HypothesisStack &hypoColl = *m_hypoStackColl.back();
+  	const HypothesisStackNormal &hypoColl = *m_hypoStackColl.back();
 		return hypoColl.GetBestHypothesis();
 	}
 	else{
-  	const HypothesisStack &hypoColl = *actual_hypoStack;
+  	const HypothesisStackNormal &hypoColl = *actual_hypoStack;
 		return hypoColl.GetBestHypothesis();
 	}
 }
@@ -320,7 +320,7 @@ const Hypothesis *SearchNormal::GetBestHypothesis() const
  */
 void SearchNormal::OutputHypoStackSize()
 {
-	std::vector < HypothesisStack* >::const_iterator iterStack = m_hypoStackColl.begin();
+	std::vector < HypothesisStackNormal* >::const_iterator iterStack = m_hypoStackColl.begin();
 	TRACE_ERR( "Stack sizes: " << (int)(*iterStack)->size());
 	for (++iterStack; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{

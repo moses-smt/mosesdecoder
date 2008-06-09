@@ -22,14 +22,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <set>
 #include <queue>
-#include "HypothesisStack.h"
+#include "HypothesisStackCubePruning.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "StaticData.h"
 
 using namespace std;
 
-HypothesisStack::HypothesisStack()
+HypothesisStackCubePruning::HypothesisStackCubePruning()
 {
 	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
@@ -38,13 +38,13 @@ HypothesisStack::HypothesisStack()
 }
 
 /** Remove hypothesis pointed to by iterator but don't delete the object. */
-void HypothesisStack::Detach(const HypothesisStack::iterator &iter)
+void HypothesisStackCubePruning::Detach(const HypothesisStackCubePruning::iterator &iter)
 {
 	m_hypos.erase(iter);
 }
 
 /** remove all hypotheses from the collection */
-void HypothesisStack::RemoveAll()
+void HypothesisStackCubePruning::RemoveAll()
 {
 	// delete all hypos
 	while (m_hypos.begin() != m_hypos.end())
@@ -60,7 +60,7 @@ void HypothesisStack::RemoveAll()
 	}
 }
 
-pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
+pair<HypothesisStackCubePruning::iterator, bool> HypothesisStackCubePruning::Add(Hypothesis *hypo)
 {
 	std::pair<iterator, bool> ret = m_hypos.insert(hypo);
 
@@ -92,7 +92,7 @@ pair<HypothesisStack::iterator, bool> HypothesisStack::Add(Hypothesis *hypo)
 	return ret;
 }
 
-bool HypothesisStack::AddPrune(Hypothesis *hypo)
+bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 { 
 	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
@@ -149,7 +149,7 @@ bool HypothesisStack::AddPrune(Hypothesis *hypo)
 	}
 }
 
-void HypothesisStack::AddInitial(Hypothesis *hypo)
+void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
 {
 	std::pair<iterator, bool> addRet = Add(hypo); 
 	assert (addRet.second);
@@ -158,7 +158,7 @@ void HypothesisStack::AddInitial(Hypothesis *hypo)
 	m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
 }
 
-void HypothesisStack::PruneToSize(size_t newSize)
+void HypothesisStackCubePruning::PruneToSize(size_t newSize)
 {
 	if (m_hypos.size() > newSize) // ok, if not over the limit
 	{
@@ -223,7 +223,7 @@ void HypothesisStack::PruneToSize(size_t newSize)
 	}
 }
 
-const Hypothesis *HypothesisStack::GetBestHypothesis() const
+const Hypothesis *HypothesisStackCubePruning::GetBestHypothesis() const
 {
 	if (!m_hypos.empty())
 	{
@@ -240,7 +240,7 @@ const Hypothesis *HypothesisStack::GetBestHypothesis() const
 	return NULL;
 }
 
-vector<const Hypothesis*> HypothesisStack::GetSortedList() const
+vector<const Hypothesis*> HypothesisStackCubePruning::GetSortedList() const
 {
 	vector<const Hypothesis*> ret; ret.reserve(m_hypos.size());
 	std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(ret, ret.end()));
@@ -250,7 +250,7 @@ vector<const Hypothesis*> HypothesisStack::GetSortedList() const
 }
 
 
-void HypothesisStack::CleanupArcList()
+void HypothesisStackCubePruning::CleanupArcList()
 {
 	// only necessary if n-best calculations are enabled
 	if (!m_nBestIsEnabled) return;
@@ -263,8 +263,8 @@ void HypothesisStack::CleanupArcList()
 	}
 }
 
-void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
-												, HypothesisStack &stack
+void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
+												, HypothesisStackCubePruning &stack
 												, const WordsRange &range
 												, BitmapContainer &bitmapContainer
 												, const SquareMatrix &futureScore
@@ -290,13 +290,13 @@ void HypothesisStack::SetBitmapAccessor(const WordsBitmap &newBitmap
 }
 
 
-TO_STRING_BODY(HypothesisStack);
+TO_STRING_BODY(HypothesisStackCubePruning);
 
 
 // friend
-std::ostream& operator<<(std::ostream& out, const HypothesisStack& hypoColl)
+std::ostream& operator<<(std::ostream& out, const HypothesisStackCubePruning& hypoColl)
 {
-	HypothesisStack::const_iterator iter;
+	HypothesisStackCubePruning::const_iterator iter;
 	
 	for (iter = hypoColl.begin() ; iter != hypoColl.end() ; ++iter)
 	{
@@ -307,7 +307,7 @@ std::ostream& operator<<(std::ostream& out, const HypothesisStack& hypoColl)
 	return out;
 }
 
-void HypothesisStack::Remove(const HypothesisStack::iterator &iter)
+void HypothesisStackCubePruning::Remove(const HypothesisStackCubePruning::iterator &iter)
 {
 	Hypothesis *h = *iter;	
 	Detach(iter);
@@ -315,9 +315,9 @@ void HypothesisStack::Remove(const HypothesisStack::iterator &iter)
 }
 
 void
-HypothesisStack::AddHypothesesToBitmapContainers()
+HypothesisStackCubePruning::AddHypothesesToBitmapContainers()
 {
-	HypothesisStack::const_iterator iter;
+	HypothesisStackCubePruning::const_iterator iter;
 	for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter)
 	{
 		Hypothesis *h = *iter;

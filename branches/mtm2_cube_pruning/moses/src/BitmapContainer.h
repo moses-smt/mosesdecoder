@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 
 #include "Hypothesis.h"
-#include "HypothesisStack.h"
+#include "HypothesisStackCubePruning.h"
 #include "SquareMatrix.h"
 #include "TranslationOption.h"
 #include "TypeDef.h"
@@ -35,7 +35,7 @@ class BitmapContainer;
 class BackwardsEdge;
 class Hypothesis;
 class HypothesisScoreOrderer;
-class HypothesisStack;
+class HypothesisStackCubePruning;
 class HypothesisQueueItem;
 class QueueItemOrderer;
 
@@ -207,7 +207,7 @@ class BitmapContainer
 {
 	private:
 		WordsBitmap m_bitmap;
-		HypothesisStack &m_stack;
+		HypothesisStackCubePruning &m_stack;
 		size_t m_kbest;
 		HypothesisSet m_hypotheses;
 		BackwardsEdgeSet m_edges;
@@ -218,7 +218,7 @@ class BitmapContainer
 		BitmapContainer(const BitmapContainer &);
 	public:
 		BitmapContainer(const WordsBitmap &bitmap
-										, HypothesisStack &stack
+										, HypothesisStackCubePruning &stack
 										, const size_t KBestCubePruning);
 		
 		// The destructor will also delete all the edges that are

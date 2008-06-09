@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <map>
 #include <set>
-
 #include "Hypothesis.h"
 #include "BitmapContainer.h"
 
@@ -32,44 +31,15 @@ class BitmapContainer;
 
 typedef std::map<WordsBitmap, BitmapContainer*> _BMType;
 
-/** defines less-than relation on hypotheses.
-* The particular order is not important for us, we need just to figure out
-* which hypothesis are equal based on:
-*   the last n-1 target words are the same
-*   and the covers (source words translated) are the same
-*/
-class HypothesisRecombinationOrderer
-{
-public:
-	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
-	{
-		// Are the last (n-1) words the same on the target side (n for n-gram LM)?
-		int ret = hypoA->NGramCompare(*hypoB);
-//		int ret = hypoA->FastNGramCompare(*hypoB, m_NGramMaxOrder - 1);
-		if (ret != 0)
-		{
-			return (ret < 0);
-		}
-
-		// same last n-grams. compare source words translated
-		const WordsBitmap &bitmapA		= hypoA->GetWordsBitmap()
-			, &bitmapB	= hypoB->GetWordsBitmap();
-		ret = bitmapA.Compare(bitmapB);
-
-		return (ret < 0);
-	}
-};
-
-
 /** Stack for instances of Hypothesis, includes functions for pruning. */ 
-class HypothesisStack 
+class HypothesisStackCubePruning
 {
 private:
 	typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
 public:
 	typedef _HCType::iterator iterator;
 	typedef _HCType::const_iterator const_iterator;
-	friend std::ostream& operator<<(std::ostream&, const HypothesisStack&);
+	friend std::ostream& operator<<(std::ostream&, const HypothesisStackCubePruning&);
 
 protected:
 	_BMType m_bitmapAccessor;
@@ -85,15 +55,15 @@ protected:
 	/** add hypothesis to stack. Prune if necessary. 
 	 * Returns false if equiv hypo exists in collection, otherwise returns true
 	 */
-	std::pair<HypothesisStack::iterator, bool> Add(Hypothesis *hypothesis);
+	std::pair<HypothesisStackCubePruning::iterator, bool> Add(Hypothesis *hypothesis);
 
 	//! remove hypothesis pointed to by iterator but don't delete the object
-	void Detach(const HypothesisStack::iterator &iter);
+	void Detach(const HypothesisStackCubePruning::iterator &iter);
 		
 	/** destroy all instances of Hypothesis in this collection */
 	void RemoveAll();
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
-	inline void Remove(const HypothesisStack::iterator &iter);
+	inline void Remove(const HypothesisStackCubePruning::iterator &iter);
 
 public:
 	//! iterators
@@ -101,8 +71,8 @@ public:
 	const_iterator end() const { return m_hypos.end(); }
 	size_t size() const { return m_hypos.size(); }
 
-	HypothesisStack();
-	~HypothesisStack()
+	HypothesisStackCubePruning();
+	~HypothesisStackCubePruning()
 	{
 		RemoveAll();
 		m_bitmapAccessor.clear();
@@ -166,7 +136,7 @@ public:
 	}
 
 	void SetBitmapAccessor(const WordsBitmap &newBitmap
-						   , HypothesisStack &stack
+						   , HypothesisStackCubePruning &stack
 						   , const WordsRange &range
 						   , BitmapContainer &bitmapContainer
 						   , const SquareMatrix &futureScore

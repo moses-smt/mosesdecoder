@@ -343,7 +343,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HypothesisStack.cpp"
+				RelativePath=".\src\HypothesisStackCubePruning.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\HypothesisStackNormal.cpp"
 				>
 			</File>
 			<File
@@ -761,7 +765,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HypothesisStack.h"
+				RelativePath=".\src\HypothesisStackCubePruning.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\HypothesisStackNormal.h"
 				>
 			</File>
 			<File

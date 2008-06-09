@@ -285,3 +285,31 @@ struct CompareHypothesisTotalScore
 #else
 #define FREEHYPO(hypo) delete hypo
 #endif
+
+/** defines less-than relation on hypotheses.
+* The particular order is not important for us, we need just to figure out
+* which hypothesis are equal based on:
+*   the last n-1 target words are the same
+*   and the covers (source words translated) are the same
+*/
+class HypothesisRecombinationOrderer
+{
+public:
+	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
+	{
+		// Are the last (n-1) words the same on the target side (n for n-gram LM)?
+		int ret = hypoA->NGramCompare(*hypoB);
+//		int ret = hypoA->FastNGramCompare(*hypoB, m_NGramMaxOrder - 1);
+		if (ret != 0)
+		{
+			return (ret < 0);
+		}
+
+		// same last n-grams. compare source words translated
+		const WordsBitmap &bitmapA		= hypoA->GetWordsBitmap()
+			, &bitmapB	= hypoB->GetWordsBitmap();
+		ret = bitmapA.Compare(bitmapB);
+
+		return (ret < 0);
+	}
+};

@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "StaticData.h"
 #include "TranslationOption.h"
-#include "HypothesisStack.h"
 #include "TranslationOptionCollection.h"
 #include "TrellisPathList.h"
 #include "SquareMatrix.h"
