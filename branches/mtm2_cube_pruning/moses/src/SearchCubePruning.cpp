@@ -39,16 +39,15 @@ void SearchCubePruning::ProcessSentence()
 	staticData.ResetSentenceStats(m_source);
 
 	// initial seed hypothesis: nothing translated, no words produced
-	{
-		Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
-		m_hypoStackColl[0]->AddInitial(hypo);
-	}
-	
-	CreateForwardTodos(*m_hypoStackColl.front());
+	Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
+
+	HypothesisStackCubePruning &firstStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
+	firstStack.AddInitial(hypo);
+	CreateForwardTodos(firstStack);
 
 	// go through each stack
 	size_t stackNo = 1;
-	std::vector < HypothesisStackCubePruning* >::iterator iterStack;
+	std::vector < HypothesisStack* >::iterator iterStack;
 	for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
 		//checked if elapsed time ran out of time with respect 
@@ -57,7 +56,7 @@ void SearchCubePruning::ProcessSentence()
 	  	VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
 			return;
 		}
-		HypothesisStackCubePruning &sourceHypoColl = **iterStack;
+		HypothesisStackCubePruning &sourceHypoColl = *static_cast<HypothesisStackCubePruning*>(*iterStack);
 
 		_BMType::const_iterator bmIter;
 		const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
@@ -146,11 +145,11 @@ void SearchCubePruning::CreateForwardTodos(const WordsBitmap &bitmap, const Word
 	size_t numCovered = newBitmap.GetNumWordsCovered();
 	const TranslationOptionList &transOptList = m_transOptColl.GetTranslationOptionList(range);
 	const SquareMatrix &futureScore = m_transOptColl.GetFutureScore();
-	HypothesisStackCubePruning &newStack = *m_hypoStackColl[numCovered];
 
 	if (transOptList.size() > 0)
 	{
-		m_hypoStackColl[numCovered]->SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, futureScore, transOptList);
+		HypothesisStackCubePruning &newStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
+		newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, futureScore, transOptList);
 	}
 }
 
@@ -212,7 +211,7 @@ bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const Wor
 const Hypothesis *SearchCubePruning::GetBestHypothesis() const
 {
 	//	const HypothesisStackCubePruning &hypoColl = m_hypoStackColl.back();
- 	const HypothesisStackCubePruning &hypoColl = *m_hypoStackColl.back();
+ 	const HypothesisStack &hypoColl = *m_hypoStackColl.back();
 	return hypoColl.GetBestHypothesis();
 }
 
@@ -221,7 +220,7 @@ const Hypothesis *SearchCubePruning::GetBestHypothesis() const
  */
 void SearchCubePruning::OutputHypoStackSize()
 {
-	std::vector < HypothesisStackCubePruning* >::const_iterator iterStack = m_hypoStackColl.begin();
+	std::vector < HypothesisStack* >::const_iterator iterStack = m_hypoStackColl.begin();
 	TRACE_ERR( "Stack sizes: " << (int)(*iterStack)->size());
 	for (++iterStack; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
@@ -232,7 +231,7 @@ void SearchCubePruning::OutputHypoStackSize()
 
 void SearchCubePruning::PrintBitmapContainerGraph()
 {
-	HypothesisStackCubePruning &lastStack = *m_hypoStackColl.back();
+	HypothesisStackCubePruning &lastStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.back());
 	const _BMType &bitmapAccessor = lastStack.GetBitmapAccessor();
 
 	_BMType::const_iterator iterAccessor;
@@ -258,16 +257,16 @@ void SearchCubePruning::OutputHypoStack(int stack)
 	else
 	{ // all stacks
 		int i = 0;
-		vector < HypothesisStackCubePruning* >::iterator iterStack;
+		vector < HypothesisStack* >::iterator iterStack;
 		for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 		{
-			HypothesisStackCubePruning &hypoColl = **iterStack;
+			HypothesisStackCubePruning &hypoColl = *static_cast<HypothesisStackCubePruning*>(*iterStack);
 			TRACE_ERR( "Stack " << i++ << ": " << endl << hypoColl << endl);
 		}
 	}
 }
 
-const std::vector < HypothesisStackCubePruning* >& SearchCubePruning::GetHypothesisStacks() const
+const std::vector < HypothesisStack* >& SearchCubePruning::GetHypothesisStacks() const
 {
 	return m_hypoStackColl;
 }

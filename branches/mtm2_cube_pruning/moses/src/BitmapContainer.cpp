@@ -260,7 +260,7 @@ BackwardsEdge::PushSuccessors(int x, int y)
 ////////////////////////////////////////////////////////////////////////////////
 
 BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
-																 , HypothesisStack &stack
+																 , HypothesisStackCubePruning &stack
 																 , const size_t KBestCubePruning)
   : m_bitmap(bitmap)
   , m_stack(stack)

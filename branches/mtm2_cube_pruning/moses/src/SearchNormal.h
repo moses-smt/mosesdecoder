@@ -14,7 +14,7 @@ class SearchNormal: public Search
 {
 protected:
 		const InputType &m_source;
-		std::vector < HypothesisStackNormal* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */ 
+		std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */ 
 	// no of elements = no of words in source + 1
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	size_t interrupted_flag;
@@ -36,7 +36,7 @@ public:
 	void OutputHypoStackSize();
 	void OutputHypoStack(int stack);
 
-	virtual const std::vector < HypothesisStackNormal* >& GetHypothesisStacks() const;
+	virtual const std::vector < HypothesisStack* >& GetHypothesisStacks() const;
 	virtual const Hypothesis *GetBestHypothesis() const;
 };
 

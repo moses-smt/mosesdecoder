@@ -24,15 +24,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <set>
 #include "Hypothesis.h"
+#include "HypothesisStack.h"
 
 /** Stack for instances of Hypothesis, includes functions for pruning. */ 
-class HypothesisStackNormal
+class HypothesisStackNormal: public HypothesisStack
 {
-private:
-	typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
 public:
-	typedef _HCType::iterator iterator;
-	typedef _HCType::const_iterator const_iterator;
 	friend std::ostream& operator<<(std::ostream&, const HypothesisStackNormal&);
 
 protected:
@@ -40,7 +37,6 @@ protected:
 	float m_worstScore; /**< score of the worse hypthesis in collection */
 	float m_beamWidth; /**< minimum score due to threashold pruning */
 	size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
-	_HCType m_hypos; /**< contains hypotheses */
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
 	/** add hypothesis to stack. Prune if necessary. 
@@ -63,11 +59,6 @@ protected:
 	}
 
 public:
-	//! iterators
-	const_iterator begin() const { return m_hypos.begin(); }
-	const_iterator end() const { return m_hypos.end(); }
-	size_t size() const { return m_hypos.size(); }
-
 	HypothesisStackNormal();
 	~HypothesisStackNormal()
 	{
@@ -82,7 +73,7 @@ public:
 				Add()
 					AddNoPrune()
 	*/
-	void AddPrune(Hypothesis *hypothesis);
+	bool AddPrune(Hypothesis *hypothesis);
 
 	/** set maximum number of hypotheses in the collection
    * \param maxHypoStackSize maximum number (typical number: 100)

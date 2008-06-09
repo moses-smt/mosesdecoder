@@ -76,21 +76,21 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
 	return ret;
 }
 
-void HypothesisStackNormal::AddPrune(Hypothesis *hypo)
+bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 { 
 	if (hypo->GetTotalScore() < m_worstScore)
 	{ // really bad score. don't bother adding hypo into collection
 	  StaticData::Instance().GetSentenceStats().AddDiscarded();
 	  VERBOSE(3,"discarded, too bad for stack" << std::endl);
 		FREEHYPO(hypo);		
-		return;
+		return false;
 	}
 
 	// over threshold, try to add to collection
 	std::pair<iterator, bool> addRet = Add(hypo); 
 	if (addRet.second)
 	{ // nothing found. add to collection
-		return;
+		return true;
   }
 
 	// equiv hypo exists, recombine with other hypo
@@ -119,7 +119,7 @@ void HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 			TRACE_ERR("Offending hypo = " << **iterExisting << endl);
 			abort();
 		}
-		return;
+		return false;
 	}
 	else
 	{ // already storing the best hypo. discard current hypo 
@@ -129,7 +129,7 @@ void HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 		} else {
 			FREEHYPO(hypo);				
 		}
-		return;
+		return false;
 	}
 }
 

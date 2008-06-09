@@ -765,6 +765,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\HypothesisStack.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\HypothesisStackCubePruning.h"
 				>
 			</File>

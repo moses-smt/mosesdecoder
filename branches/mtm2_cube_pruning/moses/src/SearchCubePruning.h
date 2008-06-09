@@ -12,7 +12,7 @@ class SearchCubePruning: public Search
 {
 protected:
 		const InputType &m_source;
-		std::vector < HypothesisStackCubePruning* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */ 
+		std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */ 
 	// no of elements = no of words in source + 1
 	const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
@@ -34,7 +34,7 @@ public:
 	void OutputHypoStackSize();
 	void OutputHypoStack(int stack);
 
-	virtual const std::vector < HypothesisStackCubePruning* >& GetHypothesisStacks() const;
+	virtual const std::vector < HypothesisStack* >& GetHypothesisStacks() const;
 	virtual const Hypothesis *GetBestHypothesis() const;
 };
 
