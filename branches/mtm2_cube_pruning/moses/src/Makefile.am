@@ -17,6 +17,8 @@ libmoses_a_SOURCES = \
 	hash.cpp \
 	Hypothesis.cpp \
 	HypothesisStack.cpp \
+	HypothesisCubePruning.cpp \
+	HypothesisStackNormal.cpp \
 	InputType.cpp \
 	InputFileStream.cpp \
 	LMList.cpp \
@@ -46,6 +48,9 @@ libmoses_a_SOURCES = \
 	ScoreComponentCollection.cpp \
 	ScoreIndexManager.cpp \
 	ScoreProducer.cpp \
+	Search.cpp \
+	SearchCubePruning.cpp \
+	SearchNormal.cpp \
 	Sentence.cpp \
 	SentenceStats.cpp \
 	StaticData.cpp \
@@ -61,7 +66,8 @@ libmoses_a_SOURCES = \
 	WordsBitmap.cpp \
 	WordLattice.cpp \
 	WordsRange.cpp \
-	XmlOption.cpp
+	XmlOption.cpp \
+	
 
 
 if SRI_LM
