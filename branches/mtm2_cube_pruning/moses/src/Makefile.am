@@ -17,7 +17,7 @@ libmoses_a_SOURCES = \
 	hash.cpp \
 	Hypothesis.cpp \
 	HypothesisStack.cpp \
-	HypothesisCubePruning.cpp \
+	HypothesisStackCubePruning.cpp \
 	HypothesisStackNormal.cpp \
 	InputType.cpp \
 	InputFileStream.cpp \
@@ -66,7 +66,7 @@ libmoses_a_SOURCES = \
 	WordsBitmap.cpp \
 	WordLattice.cpp \
 	WordsRange.cpp \
-	XmlOption.cpp \
+	XmlOption.cpp 
 	
 
 
