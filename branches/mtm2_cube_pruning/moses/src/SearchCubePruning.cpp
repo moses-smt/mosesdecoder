@@ -5,6 +5,40 @@
 #include "InputType.h"
 #include "TranslationOptionCollection.h"
 
+class BitmapContainerOrderer
+{
+	public:
+		bool operator()(const BitmapContainer* A, const BitmapContainer* B) const
+		{
+			if (B->Empty()) {
+				if (A->Empty()) {
+					return A < B;
+				}
+				return false;
+			}
+			if (A->Empty()) {
+				return true;
+			}
+
+			// Compare the top hypothesis of each bitmap container using the TotalScore, which includes future cost
+			const float scoreA = A->Top()->GetHypothesis()->GetTotalScore();
+			const float scoreB = B->Top()->GetHypothesis()->GetTotalScore();
+			
+			if (scoreA < scoreB)
+			{
+				return true;
+			}
+			else if (scoreA > scoreB)
+			{
+				return false;
+			}
+			else
+			{
+				return A < B;
+			}
+		}
+};
+
 SearchCubePruning::SearchCubePruning(const InputType &source, const TranslationOptionCollection &transOptColl)
 :m_source(source)
 ,m_hypoStackColl(source.GetSize() + 1)
@@ -45,6 +79,12 @@ void SearchCubePruning::ProcessSentence()
 	firstStack.AddInitial(hypo);
 	CreateForwardTodos(firstStack);
 
+	const size_t PopLimit = StaticData::Instance().GetCubePruningPopLimit();
+	VERBOSE(3,"Cube Pruning pop limit is " << PopLimit << std::endl)
+
+	const size_t Diversity = StaticData::Instance().GetCubePruningDiversity();
+	VERBOSE(3,"Cube Pruning diversity is " << Diversity << std::endl)
+
 	// go through each stack
 	size_t stackNo = 1;
 	std::vector < HypothesisStack* >::iterator iterStack;
@@ -58,13 +98,39 @@ void SearchCubePruning::ProcessSentence()
 		}
 		HypothesisStackCubePruning &sourceHypoColl = *static_cast<HypothesisStackCubePruning*>(*iterStack);
 
+		// priority queue which has a single entry for each bitmap container, sorted by score of top hyp
+		std::priority_queue< BitmapContainer*, std::vector< BitmapContainer* >, BitmapContainerOrderer> BCQueue;
+
 		_BMType::const_iterator bmIter;
 		const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
+
 		for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter)
 		{
-			bmIter->second->FindKBestHypotheses();
+			bmIter->second->InitializeEdges();
+			BCQueue.push(bmIter->second);
+
+			// old algorithm
+			// bmIter->second->EnsureMinStackHyps(PopLimit);
 		}
 		
+		// main search loop, pop k best hyps
+		for (size_t numpops = 1; numpops <= PopLimit and !BCQueue.empty(); numpops++) {
+			BitmapContainer *bc = BCQueue.top();
+			BCQueue.pop();
+			bc->ProcessBestHypothesis();
+			if (!bc->Empty())
+				BCQueue.push(bc);
+		}
+
+		// ensure diversity, a minimum number of inserted hyps for each bitmap container; 
+    //    NOTE: diversity doesn't ensure they aren't pruned at some later point
+		if (Diversity > 0) {
+			for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter)
+				{
+					bmIter->second->EnsureMinStackHyps(Diversity);
+				}
+		}
+
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
 	        // VERBOSE("processing next stack at ");

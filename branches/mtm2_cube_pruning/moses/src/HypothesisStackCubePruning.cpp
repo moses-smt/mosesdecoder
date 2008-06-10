@@ -34,7 +34,6 @@ HypothesisStackCubePruning::HypothesisStackCubePruning()
 	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
 	m_worstScore = -std::numeric_limits<float>::infinity();
-	m_kbestCubePruning = StaticData::Instance().GetCubePruningKBest();
 }
 
 /** remove all hypotheses from the collection */
@@ -143,7 +142,7 @@ void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
 	assert (addRet.second);
 
 	const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-	m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this, m_kbestCubePruning);
+	m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this);
 }
 
 void HypothesisStackCubePruning::PruneToSize(size_t newSize)
@@ -262,7 +261,7 @@ void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
 
 	BitmapContainer *bmContainer;
 	if (bcExists == m_bitmapAccessor.end()) {
-		bmContainer = new BitmapContainer(newBitmap, stack, m_kbestCubePruning);
+		bmContainer = new BitmapContainer(newBitmap, stack);
 		m_bitmapAccessor[newBitmap] = bmContainer;
 	}
 	else {
@@ -272,8 +271,7 @@ void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
 	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer
 																					, *bmContainer
 																					, transOptList
-																					, futureScore
-																					, m_kbestCubePruning);
+																					, futureScore);
 	bmContainer->AddBackwardsEdge(edge);
 }
 

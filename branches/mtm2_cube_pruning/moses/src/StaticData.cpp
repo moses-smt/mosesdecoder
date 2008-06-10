@@ -252,8 +252,11 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_maxPhraseLength = (m_parameter->GetParam("max-phrase-length").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("max-phrase-length")[0]) : DEFAULT_MAX_PHRASE_LENGTH;
 
-	m_cubePruningKBest = (m_parameter->GetParam("cube-pruning-k-best").size() > 0)
-				? Scan<size_t>(m_parameter->GetParam("cube-pruning-k-best")[0]) : DEFAULT_CUBE_PRUNING_SIZE;
+	m_cubePruningPopLimit = (m_parameter->GetParam("cube-pruning-pop-limit").size() > 0)
+		    ? Scan<size_t>(m_parameter->GetParam("cube-pruning-pop-limit")[0]) : DEFAULT_CUBE_PRUNING_POP_LIMIT;
+
+	m_cubePruningDiversity = (m_parameter->GetParam("cube-pruning-diversity").size() > 0)
+		    ? Scan<size_t>(m_parameter->GetParam("cube-pruning-diversity")[0]) : DEFAULT_CUBE_PRUNING_DIVERSITY;
 
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH

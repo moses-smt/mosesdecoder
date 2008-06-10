@@ -40,7 +40,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
 #define MAX_NGRAM_SIZE  20
 
-const size_t DEFAULT_CUBE_PRUNING_SIZE = 10;
+const size_t DEFAULT_CUBE_PRUNING_POP_LIMIT = 1000;
+const size_t DEFAULT_CUBE_PRUNING_DIVERSITY = 0;
 const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 50;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;

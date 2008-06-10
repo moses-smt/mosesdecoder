@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class BitmapContainer;
 class BackwardsEdge;
 class Hypothesis;
-class HypothesisScoreOrderer;
 class HypothesisStackCubePruning;
 class HypothesisQueueItem;
 class QueueItemOrderer;
@@ -50,15 +49,15 @@ typedef std::priority_queue< HypothesisQueueItem*, std::vector< HypothesisQueueI
 class HypothesisQueueItem
 {
 	private:
-		int m_hypothesis_pos, m_translation_pos;
+		size_t m_hypothesis_pos, m_translation_pos;
 		Hypothesis *m_hypothesis;
 		BackwardsEdge *m_edge;
 
 		HypothesisQueueItem();
 
 	public:
-		HypothesisQueueItem(int hypothesis_pos
-												, int translation_pos
+		HypothesisQueueItem(const size_t hypothesis_pos
+												, const size_t translation_pos
 												, Hypothesis *hypothesis
 												, BackwardsEdge *edge)
 		  : m_hypothesis_pos(hypothesis_pos)
@@ -127,27 +126,26 @@ class QueueItemOrderer
 
 class HypothesisScoreOrderer
 {
-	public:
-		bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
-		{
+  public:
+	  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
+	  {
 			float scoreA = hypoA->GetTotalScore();
 			float scoreB = hypoB->GetTotalScore();
-			
+
 			return (scoreA > scoreB);
 			/*
 			{
 				return true;
 			}
 			else if (scoreA < scoreB)
-			{
-				return false;
-			}
+				{
+					return false;
+				}
 			else
-			{
-				return hypoA < hypoB;
-			}*/
-		}
-
+				{
+					return hypoA < hypoB;
+				}*/
+			}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -164,19 +162,18 @@ class BackwardsEdge
 
 		const BitmapContainer &m_prevBitmapContainer;
 		BitmapContainer &m_parent;
-		const TranslationOptionList &m_kbest_translations;
+		const TranslationOptionList &m_translations;
 		const SquareMatrix &m_futurescore;
-		size_t m_kbest;
 		
-		std::vector< const Hypothesis* > m_kbest_hypotheses;
+		std::vector< const Hypothesis* > m_hypotheses;
 		std::set< int > m_seenPosition;
 
 		// We don't want to instantiate "empty" objects.
 		BackwardsEdge();
 
 		Hypothesis *CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt);
-		bool SeenPosition(int x, int y);
-		void SetSeenPosition(int x, int y);
+		bool SeenPosition(const size_t x, const size_t y);
+		void SetSeenPosition(const size_t x, const size_t y);
 
 	protected:
 		void Initialize();
@@ -185,14 +182,13 @@ class BackwardsEdge
 		BackwardsEdge(const BitmapContainer &prevBitmapContainer
 									, BitmapContainer &parent
 									, const TranslationOptionList &translations
-									, const SquareMatrix &futureScore
-									, const size_t kBestCubePruning);
+									, const SquareMatrix &futureScore);
 		~BackwardsEdge();
 
 		bool GetInitialized();
 		const BitmapContainer &GetBitmapContainer() const;
 		int GetDistortionPenalty();
-		void PushSuccessors(int x, int y);
+		void PushSuccessors(const size_t x, const size_t y);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -207,19 +203,18 @@ class BitmapContainer
 {
 	private:
 		WordsBitmap m_bitmap;
-		HypothesisStackCubePruning &m_stack;
-		size_t m_kbest;
+	  HypothesisStackCubePruning &m_stack;
 		HypothesisSet m_hypotheses;
 		BackwardsEdgeSet m_edges;
 		HypothesisQueue m_queue;
+  	size_t m_numStackInsertions;
 
 		// We always require a corresponding bitmap to be supplied.
 		BitmapContainer();
 		BitmapContainer(const BitmapContainer &);
 	public:
 		BitmapContainer(const WordsBitmap &bitmap
-										, HypothesisStackCubePruning &stack
-										, const size_t KBestCubePruning);
+										, HypothesisStackCubePruning &stack);
 		
 		// The destructor will also delete all the edges that are
 		// connected to this BitmapContainer.
@@ -227,16 +222,18 @@ class BitmapContainer
 		
 		void Enqueue(int hypothesis_pos, int translation_pos, Hypothesis *hypothesis, BackwardsEdge *edge);
 		HypothesisQueueItem *Dequeue(bool keepValue=false);
-		HypothesisQueueItem *Top();
+		HypothesisQueueItem *Top() const;
 		size_t Size();
-		bool Empty();
+		bool Empty() const;
 
 		const WordsBitmap &GetWordsBitmap();
 		const HypothesisSet &GetHypotheses() const;
 		size_t GetHypothesesSize() const;
 		const BackwardsEdgeSet &GetBackwardsEdges();
 		
-		void FindKBestHypotheses();
+  	void InitializeEdges();
+		void ProcessBestHypothesis();
+  	void EnsureMinStackHyps(const size_t minNumHyps);
 		void AddHypothesis(Hypothesis *hypothesis);
 		void AddBackwardsEdge(BackwardsEdge *edge);
 		void SortHypotheses();
