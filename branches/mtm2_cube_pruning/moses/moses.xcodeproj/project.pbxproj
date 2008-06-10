@@ -146,6 +146,16 @@
 		D39BA84C0B11FF0C0089AE6A /* NGramCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = D39BA8450B11FF0C0089AE6A /* NGramCollection.h */; };
 		D39BA84D0B11FF0C0089AE6A /* NGramNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D39BA8460B11FF0C0089AE6A /* NGramNode.cpp */; };
 		D39BA84E0B11FF0C0089AE6A /* NGramNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D39BA8470B11FF0C0089AE6A /* NGramNode.h */; };
+		E21C110E0DFEE86B00ADAED0 /* HypothesisStackCubePruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E21C110A0DFEE86B00ADAED0 /* HypothesisStackCubePruning.cpp */; };
+		E21C110F0DFEE86B00ADAED0 /* HypothesisStackCubePruning.h in Headers */ = {isa = PBXBuildFile; fileRef = E21C110B0DFEE86B00ADAED0 /* HypothesisStackCubePruning.h */; };
+		E21C11100DFEE86B00ADAED0 /* HypothesisStackNormal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E21C110C0DFEE86B00ADAED0 /* HypothesisStackNormal.cpp */; };
+		E21C11110DFEE86B00ADAED0 /* HypothesisStackNormal.h in Headers */ = {isa = PBXBuildFile; fileRef = E21C110D0DFEE86B00ADAED0 /* HypothesisStackNormal.h */; };
+		E21C11180DFEE88800ADAED0 /* Search.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E21C11120DFEE88800ADAED0 /* Search.cpp */; };
+		E21C11190DFEE88800ADAED0 /* Search.h in Headers */ = {isa = PBXBuildFile; fileRef = E21C11130DFEE88800ADAED0 /* Search.h */; };
+		E21C111A0DFEE88800ADAED0 /* SearchCubePruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E21C11140DFEE88800ADAED0 /* SearchCubePruning.cpp */; };
+		E21C111B0DFEE88800ADAED0 /* SearchCubePruning.h in Headers */ = {isa = PBXBuildFile; fileRef = E21C11150DFEE88800ADAED0 /* SearchCubePruning.h */; };
+		E21C111C0DFEE88800ADAED0 /* SearchNormal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E21C11160DFEE88800ADAED0 /* SearchNormal.cpp */; };
+		E21C111D0DFEE88800ADAED0 /* SearchNormal.h in Headers */ = {isa = PBXBuildFile; fileRef = E21C11170DFEE88800ADAED0 /* SearchNormal.h */; };
 		E2B7C8F20DDA19190089EFE0 /* BitmapContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */; };
 		E2B7C9590DDB1AEF0089EFE0 /* BitmapContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */; };
 		E2B7CA720DDB3B5C0089EFE0 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2B7CA700DDB3B5C0089EFE0 /* FloydWarshall.cpp */; };
@@ -153,23 +163,6 @@
 		E2B7CA760DDB3B700089EFE0 /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2B7CA740DDB3B700089EFE0 /* XmlOption.cpp */; };
 		E2B7CA770DDB3B700089EFE0 /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = E2B7CA750DDB3B700089EFE0 /* XmlOption.h */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXBuildStyle section */
-		B2E6E2B40C0C3DE900DF24E5 /* Development */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-			};
-			name = Development;
-		};
-		B2E6E2B50C0C3DE900DF24E5 /* Deployment */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-			};
-			name = Deployment;
-		};
-/* End PBXBuildStyle section */
 
 /* Begin PBXFileReference section */
 		037C63980C8EBFB400584F2E /* DecodeGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeGraph.cpp; path = src/DecodeGraph.cpp; sourceTree = "<group>"; };
@@ -260,8 +253,6 @@
 		1C8CFE620AD67A9700FA22E2 /* PhraseDictionaryTree.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryTree.h; path = src/PhraseDictionaryTree.h; sourceTree = "<group>"; };
 		1C8CFE630AD67A9700FA22E2 /* PhraseDictionaryTreeAdaptor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTreeAdaptor.cpp; path = src/PhraseDictionaryTreeAdaptor.cpp; sourceTree = "<group>"; };
 		1C8CFE640AD67A9700FA22E2 /* PhraseDictionaryTreeAdaptor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryTreeAdaptor.h; path = src/PhraseDictionaryTreeAdaptor.h; sourceTree = "<group>"; };
-		1C8CFE650AD67A9700FA22E2 /* PhraseReference.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseReference.cpp; path = src/PhraseReference.cpp; sourceTree = "<group>"; };
-		1C8CFE660AD67A9700FA22E2 /* PhraseReference.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = PhraseReference.h; path = src/PhraseReference.h; sourceTree = "<group>"; };
 		1C8CFE670AD67A9700FA22E2 /* PrefixTree.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = PrefixTree.h; path = src/PrefixTree.h; sourceTree = "<group>"; };
 		1C8CFE680AD67A9700FA22E2 /* ScoreComponentCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ScoreComponentCollection.cpp; path = src/ScoreComponentCollection.cpp; sourceTree = "<group>"; };
 		1C8CFE690AD67A9700FA22E2 /* ScoreComponentCollection.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ScoreComponentCollection.h; path = src/ScoreComponentCollection.h; sourceTree = "<group>"; };
@@ -315,6 +306,16 @@
 		D39BA8450B11FF0C0089AE6A /* NGramCollection.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = NGramCollection.h; path = src/NGramCollection.h; sourceTree = "<group>"; };
 		D39BA8460B11FF0C0089AE6A /* NGramNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = NGramNode.cpp; path = src/NGramNode.cpp; sourceTree = "<group>"; };
 		D39BA8470B11FF0C0089AE6A /* NGramNode.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = NGramNode.h; path = src/NGramNode.h; sourceTree = "<group>"; };
+		E21C110A0DFEE86B00ADAED0 /* HypothesisStackCubePruning.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = HypothesisStackCubePruning.cpp; path = src/HypothesisStackCubePruning.cpp; sourceTree = "<group>"; };
+		E21C110B0DFEE86B00ADAED0 /* HypothesisStackCubePruning.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = HypothesisStackCubePruning.h; path = src/HypothesisStackCubePruning.h; sourceTree = "<group>"; };
+		E21C110C0DFEE86B00ADAED0 /* HypothesisStackNormal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = HypothesisStackNormal.cpp; path = src/HypothesisStackNormal.cpp; sourceTree = "<group>"; };
+		E21C110D0DFEE86B00ADAED0 /* HypothesisStackNormal.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = HypothesisStackNormal.h; path = src/HypothesisStackNormal.h; sourceTree = "<group>"; };
+		E21C11120DFEE88800ADAED0 /* Search.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Search.cpp; path = src/Search.cpp; sourceTree = "<group>"; };
+		E21C11130DFEE88800ADAED0 /* Search.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Search.h; path = src/Search.h; sourceTree = "<group>"; };
+		E21C11140DFEE88800ADAED0 /* SearchCubePruning.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = SearchCubePruning.cpp; path = src/SearchCubePruning.cpp; sourceTree = "<group>"; };
+		E21C11150DFEE88800ADAED0 /* SearchCubePruning.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SearchCubePruning.h; path = src/SearchCubePruning.h; sourceTree = "<group>"; };
+		E21C11160DFEE88800ADAED0 /* SearchNormal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = SearchNormal.cpp; path = src/SearchNormal.cpp; sourceTree = "<group>"; };
+		E21C11170DFEE88800ADAED0 /* SearchNormal.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SearchNormal.h; path = src/SearchNormal.h; sourceTree = "<group>"; };
 		E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BitmapContainer.h; path = src/BitmapContainer.h; sourceTree = "<group>"; };
 		E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = BitmapContainer.cpp; path = src/BitmapContainer.cpp; sourceTree = "<group>"; };
 		E2B7CA700DDB3B5C0089EFE0 /* FloydWarshall.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FloydWarshall.cpp; path = src/FloydWarshall.cpp; sourceTree = "<group>"; };
@@ -337,6 +338,16 @@
 		08FB7794FE84155DC02AAC07 /* moses */ = {
 			isa = PBXGroup;
 			children = (
+				E21C11120DFEE88800ADAED0 /* Search.cpp */,
+				E21C11130DFEE88800ADAED0 /* Search.h */,
+				E21C11140DFEE88800ADAED0 /* SearchCubePruning.cpp */,
+				E21C11150DFEE88800ADAED0 /* SearchCubePruning.h */,
+				E21C11160DFEE88800ADAED0 /* SearchNormal.cpp */,
+				E21C11170DFEE88800ADAED0 /* SearchNormal.h */,
+				E21C110A0DFEE86B00ADAED0 /* HypothesisStackCubePruning.cpp */,
+				E21C110B0DFEE86B00ADAED0 /* HypothesisStackCubePruning.h */,
+				E21C110C0DFEE86B00ADAED0 /* HypothesisStackNormal.cpp */,
+				E21C110D0DFEE86B00ADAED0 /* HypothesisStackNormal.h */,
 				E2B7CA740DDB3B700089EFE0 /* XmlOption.cpp */,
 				E2B7CA750DDB3B700089EFE0 /* XmlOption.h */,
 				E2B7CA700DDB3B5C0089EFE0 /* FloydWarshall.cpp */,
@@ -453,8 +464,6 @@
 				1C8CFE620AD67A9700FA22E2 /* PhraseDictionaryTree.h */,
 				1C8CFE630AD67A9700FA22E2 /* PhraseDictionaryTreeAdaptor.cpp */,
 				1C8CFE640AD67A9700FA22E2 /* PhraseDictionaryTreeAdaptor.h */,
-				1C8CFE650AD67A9700FA22E2 /* PhraseReference.cpp */,
-				1C8CFE660AD67A9700FA22E2 /* PhraseReference.h */,
 				1C8CFE670AD67A9700FA22E2 /* PrefixTree.h */,
 				1C8CFE680AD67A9700FA22E2 /* ScoreComponentCollection.cpp */,
 				1C8CFE690AD67A9700FA22E2 /* ScoreComponentCollection.h */,
@@ -598,6 +607,11 @@
 				E2B7C8F20DDA19190089EFE0 /* BitmapContainer.h in Headers */,
 				E2B7CA730DDB3B5C0089EFE0 /* FloydWarshall.h in Headers */,
 				E2B7CA770DDB3B700089EFE0 /* XmlOption.h in Headers */,
+				E21C110F0DFEE86B00ADAED0 /* HypothesisStackCubePruning.h in Headers */,
+				E21C11110DFEE86B00ADAED0 /* HypothesisStackNormal.h in Headers */,
+				E21C11190DFEE88800ADAED0 /* Search.h in Headers */,
+				E21C111B0DFEE88800ADAED0 /* SearchCubePruning.h in Headers */,
+				E21C111D0DFEE88800ADAED0 /* SearchNormal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -627,12 +641,6 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 0396E1900C0B186F00D95CFF /* Build configuration list for PBXProject "moses" */;
-			buildSettings = {
-			};
-			buildStyles = (
-				B2E6E2B40C0C3DE900DF24E5 /* Development */,
-				B2E6E2B50C0C3DE900DF24E5 /* Deployment */,
-			);
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* moses */;
 			projectDirPath = "";
@@ -715,6 +723,11 @@
 				E2B7C9590DDB1AEF0089EFE0 /* BitmapContainer.cpp in Sources */,
 				E2B7CA720DDB3B5C0089EFE0 /* FloydWarshall.cpp in Sources */,
 				E2B7CA760DDB3B700089EFE0 /* XmlOption.cpp in Sources */,
+				E21C110E0DFEE86B00ADAED0 /* HypothesisStackCubePruning.cpp in Sources */,
+				E21C11100DFEE86B00ADAED0 /* HypothesisStackNormal.cpp in Sources */,
+				E21C11180DFEE88800ADAED0 /* Search.cpp in Sources */,
+				E21C111A0DFEE88800ADAED0 /* SearchCubePruning.cpp in Sources */,
+				E21C111C0DFEE88800ADAED0 /* SearchNormal.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
