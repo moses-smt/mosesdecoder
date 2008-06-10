@@ -31,6 +31,7 @@ training/mbr/mbr
 training/filter-model-given-input.pl
 training/filter-and-binarize-model-given-input.pl
 training/mert-moses.pl
+training/mert-moses-new.pl
 training/phrase-extract/extract
 training/phrase-extract/score
 training/postprocess-lopar.perl
