@@ -434,7 +434,7 @@ BitmapContainer::InitializeEdges()
 void
 BitmapContainer::EnsureMinStackHyps(const size_t minNumHyps)
 {
-	while ((!Empty()) and m_numStackInsertions < minNumHyps)
+	while ((!Empty()) && m_numStackInsertions < minNumHyps)
 	{
 		ProcessBestHypothesis();
 	}

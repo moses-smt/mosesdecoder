@@ -114,7 +114,7 @@ void SearchCubePruning::ProcessSentence()
 		}
 		
 		// main search loop, pop k best hyps
-		for (size_t numpops = 1; numpops <= PopLimit and !BCQueue.empty(); numpops++) {
+		for (size_t numpops = 1; numpops <= PopLimit && !BCQueue.empty(); numpops++) {
 			BitmapContainer *bc = BCQueue.top();
 			BCQueue.pop();
 			bc->ProcessBestHypothesis();
