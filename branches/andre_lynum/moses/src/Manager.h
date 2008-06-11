@@ -87,8 +87,8 @@ protected:
 	
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
-	void ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);
-	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
+	bool ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList);
+	bool ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt);
 
 	// logging
 	void OutputHypoStack(int stack = -1);
@@ -105,4 +105,5 @@ public:
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
 	 */
 	void CalcDecoderStatistics() const;
+
 };

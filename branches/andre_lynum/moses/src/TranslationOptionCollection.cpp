@@ -164,7 +164,7 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGr
 				}
 		}
 	}
-		
+	/* SCORER need to disable this
 	bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
 	// create unknown words for 1 word coverage where we don't have any trans options
 	for (size_t pos = 0 ; pos < size ; ++pos)
@@ -173,6 +173,7 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGr
 		if (fullList.size() == 0 || alwaysCreateDirectTranslationOption)
 			ProcessUnknownWord(pos);
 	}
+	*/
 }
 
 /** special handling of ONE unknown words. Either add temporarily add word to translation table,

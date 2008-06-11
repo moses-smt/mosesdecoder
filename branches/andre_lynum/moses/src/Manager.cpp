@@ -109,7 +109,7 @@ void Manager::ProcessSentence()
 
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
-	        // VERBOSE("processing next stack at ");
+		// VERBOSE("processing next stack at ");
 		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
@@ -122,6 +122,7 @@ void Manager::ProcessSentence()
 			}
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
+
 	}
 
 	// some more logging
@@ -138,6 +139,7 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 	bool isWordLattice = StaticData::Instance().GetInputType() == WordLatticeInput;
+	bool expanded = false;
 
 	// no limit of reordering: only check for overlap
 	if (maxDistortion < 0)
@@ -148,17 +150,34 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 		for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 		{
-      size_t maxSize = sourceSize - startPos;
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+			size_t maxSize = sourceSize - startPos;
+			size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+			maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
 
 			for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 			{
 				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 				{
-					ExpandAllHypotheses(hypothesis
-												, m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos)));
+					
+					if (ExpandAllHypotheses(hypothesis,
+																	m_transOptColl->GetTranslationOptionList(WordsRange(startPos, endPos))))
+						expanded = true;
 				}
+			}
+		}
+
+		if (!expanded) {
+			WordsRange oldRange = hypothesis.GetCurrTargetWordsRange();
+			size_t newEnd = oldRange.GetEndPos() + 1;
+			const Phrase *transPhrase = StaticData::Instance().GetTranslatedPhrase();
+
+			if (newEnd < transPhrase->GetSize() - 1) { // problem here
+				// cout << "Skipping word at " <<  oldRange.GetEndPos() << " continuing from " << newEnd << endl;
+
+				hypothesis.SetCurrTargetWordsRange(WordsRange(oldRange.GetStartPos(),	newEnd));
+				hypothesis.IncrSkippedTransWords();
+				
+				ProcessOneHypothesis(hypothesis);
 			}
 		}
 
@@ -274,13 +293,18 @@ void Manager::ProcessOneHypothesis(const Hypothesis &hypothesis)
  * \param transOptList list of translation options to be applied
  */
 
-void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList)
+bool Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const TranslationOptionList &transOptList)
 {
 	TranslationOptionList::const_iterator iter;
+	bool expanded = false;
+	
 	for (iter = transOptList.begin() ; iter != transOptList.end() ; ++iter)
 	{
-		ExpandHypothesis(hypothesis, **iter);
+		if (ExpandHypothesis(hypothesis, **iter))
+			expanded = true;
 	}
+
+	return expanded;
 }
 
 /**
@@ -290,7 +314,8 @@ void Manager::ExpandAllHypotheses(const Hypothesis &hypothesis,const Translation
  * \param transOpt translation option (phrase translation) 
  *        that is applied to create the new hypothesis
  */
-void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
+// SCORER start
+bool Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
 	// create hypothesis and calculate all its scores
 #ifdef DEBUGLATTICE
@@ -310,20 +335,24 @@ void Manager::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOp
 	// add to hypothesis stack
 	size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();
 
-	// SCORER
 	// Only add hypothesises that agree with translation
 	if (SCORER_FILTER_HYPOS && StaticData::Instance().GetScoreFlag()) {
 	  const Phrase *transPhrase = StaticData::Instance().GetTranslatedPhrase();
 		
-	  if (newHypo->CompareHypothesisToPhrase(transPhrase, 0))
+	  if (newHypo->CompareHypothesisToPhrase(transPhrase, 0)) {
 	    m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
+			return true;
+		}
 		else {
 			VERBOSE(3, "Not Compatible with translation." << endl);
 			FREEHYPO(newHypo);
+			return false;
 		}
 	}
-	else
+	else {
 	  m_hypoStackColl[wordsTranslated].AddPrune(newHypo);
+		return true;
+	}
 	// SCORER end
 }
 
@@ -336,12 +365,13 @@ const Hypothesis *Manager::GetBestHypothesis() const
 	// SCORER start
 	// search all hypothesis stacks
 	const Hypothesis* bestHypo = NULL;
-
+	int i = 0;
+	
 	if (StaticData::Instance().GetScoreFlag()) {
 		// having trouble getting reverse iterators to work
 		std::vector<HypothesisStack>::const_iterator it = m_hypoStackColl.end();
 		it--;
-		for (;; it--) {
+		for (;;) {
 			const HypothesisStack &hypoColl = *it;
 			
 			if ((hypoColl.size() > 0) && (hypoColl.size() < 327685)) {// what constant is this ? 
@@ -349,12 +379,17 @@ const Hypothesis *Manager::GetBestHypothesis() const
 				if (bestHypo == NULL)
 					bestHypo = hypo;
 				else
-					if ((hypo->GetTotalScore() < 0.0) && (hypo->GetTotalScore() > bestHypo->GetTotalScore()))
+					if ((hypo->GetTotalScore() < 0.0) && 
+					    (hypo->GetTotalScore() > bestHypo->GetTotalScore()))
 						bestHypo = hypo;
 			}
 
-			if (it == m_hypoStackColl.begin()) break;
+			if ((it == m_hypoStackColl.begin()) || (bestHypo != NULL)) break;
+			i++;
+			it--;
 		}
+		
+		// cout << "Best hypo " << i << " from end." << endl;
 
 		return bestHypo;
 	}
@@ -505,3 +540,4 @@ void Manager::CalcDecoderStatistics() const
     }
   }
 }
+

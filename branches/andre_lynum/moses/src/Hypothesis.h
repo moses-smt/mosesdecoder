@@ -69,7 +69,7 @@ protected:
 	//it's a confusion network in the end???
 	InputType const&  m_sourceInput;
 	WordsRange				m_currSourceWordsRange; /**< source word positions of the last phrase that was used to create this hypothesis */
-	WordsRange        m_currTargetWordsRange; /**< target word positions of the last phrase that was used to create this hypothesis */
+	mutable WordsRange        m_currTargetWordsRange; /**< target word positions of the last phrase that was used to create this hypothesis */
   bool							m_wordDeleted;
 	float							m_totalScore;  /**< score so far */
 	float							m_futureScore; /**< estimated future cost to translate rest of sentence */
@@ -81,6 +81,7 @@ protected:
 
 	// SCORER start
 	float m_penalizedScore;
+	mutable size_t m_skippedTransWords;
 	// SCORER end
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
@@ -270,6 +271,14 @@ public:
 	float GetPenalizedScore() const {
 	  return m_penalizedScore;
 	}
+	// TODO release old WordsRange instance ???
+	void SetCurrTargetWordsRange(WordsRange range) const { m_currTargetWordsRange = range; }
+
+	size_t GetSkippedTransWords() const { return m_skippedTransWords; }
+	void SetSkippedTransWords(size_t val) const { m_skippedTransWords = val; }
+	void IncrSkippedTransWords() const { m_skippedTransWords++; }
+	size_t GetAllSkippedWords() const;
+	size_t GetTotalTargetSize() const;
 	// SCORER end
 };
 
