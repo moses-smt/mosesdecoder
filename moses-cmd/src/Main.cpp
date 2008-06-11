@@ -143,6 +143,7 @@ int main(int argc, char* argv[])
 			Phrase *transPhrase = new Phrase(trans->GetSubString(WordsRange(0, transSize)));
 			delete staticData.GetTranslatedPhrase();
 			staticData.SetTranslatedPhrase(transPhrase);
+			staticData.SetTranslationCoverage(0);
 		}
 
 		delete trans;

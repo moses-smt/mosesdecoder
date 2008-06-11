@@ -58,7 +58,10 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_arcList(NULL)
 	, m_id(0)
 	, m_lmstats(NULL)
+		// SCORER start
 	, m_penalizedScore(0)
+	, m_skippedTransWords(0)
+		// SCORER end
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
@@ -87,7 +90,10 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_arcList(NULL)
 	, m_id(s_HypothesesCreated++)
 	, m_lmstats(NULL)
+		// SCORER start
 	, m_penalizedScore(0)
+	, m_skippedTransWords(0)
+		// SCORER end
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -328,13 +334,19 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	CalcDistortionScore();
 	
 	// LANGUAGE MODEL COST
-	CalcLMScore(staticData.GetAllLM());
+	// SCORER start
+	if (!staticData.GetScoreFlag())
+		CalcLMScore(staticData.GetAllLM());
+	// SCORER end
 
 	// WORD PENALTY
 	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
 
 	// FUTURE COST
-	CalcFutureScore(futureScore);
+	// SCORER start
+	if (!staticData.GetScoreFlag())
+		CalcFutureScore(futureScore);
+	// SCORER end
 
 	
 	//LEXICAL REORDERING COST
@@ -528,23 +540,27 @@ const ScoreComponentCollection &Hypothesis::GetCachedReorderingScore() const
 // within the output positions covered by the hypothesis
 bool Hypothesis::CompareHypothesisToPhrase(const Phrase *inputPhrase, size_t wordsSoFar) const
 {
+	WordsRange targetRange = WordsRange(m_currTargetWordsRange.GetStartPos(),
+																		 m_currTargetWordsRange.GetEndPos() - m_skippedTransWords);
 	// Check that the hypothesis chain doesn't cover more words than is in the phrase
-	if ((wordsSoFar + m_targetPhrase.GetSize()) > inputPhrase->GetSize())
+	if ((wordsSoFar + m_targetPhrase.GetSize() + m_skippedTransWords) > inputPhrase->GetSize())
 		return false;
   // check for compatibility or if we're in the root hypothesis (better test for this ?)
-  if ((m_targetPhrase.GetSize() == 0) || inputPhrase->GetSubString(m_currTargetWordsRange).IsCompatible(m_targetPhrase)) {
+  if ((m_targetPhrase.GetSize() == 0) ||
+			inputPhrase->GetSubString(targetRange).IsCompatible(m_targetPhrase)) {
     // should follow the arclist too ???
     if (m_prevHypo == NULL)
       return true;
 
-    else if ((m_prevHypo != NULL) && m_prevHypo->CompareHypothesisToPhrase(inputPhrase, wordsSoFar + m_targetPhrase.GetSize()))
+    else if ((m_prevHypo != NULL) &&
+						 m_prevHypo->CompareHypothesisToPhrase(inputPhrase, wordsSoFar + m_targetPhrase.GetSize() + m_skippedTransWords))
       return true;
     
     else if ((m_arcList != NULL) && m_arcList->size() > 0) {
       for (ArcList::const_iterator it = m_arcList->begin(); it != m_arcList->end(); it++) {
 				Hypothesis *hypo = *it;
 
-				if (hypo->CompareHypothesisToPhrase(inputPhrase, wordsSoFar + m_targetPhrase.GetSize()))
+				if (hypo->CompareHypothesisToPhrase(inputPhrase, wordsSoFar + m_targetPhrase.GetSize() + m_skippedTransWords))
 					return true;
       }
     }
@@ -575,6 +591,20 @@ void Hypothesis::Penalize(size_t word_count) {
 
 size_t Hypothesis::SourceWordsNotCovered() const {
   return GetWordsBitmap().GetSize() - GetWordsBitmap().GetNumWordsCovered();
+}
+
+size_t Hypothesis::GetAllSkippedWords() const {
+	if (m_prevHypo == NULL)
+		return m_skippedTransWords;
+	else
+		return m_skippedTransWords + m_prevHypo->GetAllSkippedWords();
+}
+
+size_t Hypothesis::GetTotalTargetSize() const {
+	if (m_prevHypo == NULL)
+		return GetCurrTargetLength();
+	else
+		return GetCurrTargetLength() - m_skippedTransWords + m_prevHypo->GetTotalTargetSize();
 }
 
 // SCORER end

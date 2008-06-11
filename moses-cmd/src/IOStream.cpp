@@ -246,15 +246,18 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 // SCORER start
 void IOStream::OutputScore(const Hypothesis *hypo) {
 	Phrase *trans = StaticData::Instance().GetTranslatedPhrase();
+	size_t unkTransCount = trans->GetSize() - hypo->GetTotalTargetSize();
+	float penalizedScore = hypo->GetTotalScore() +
+		(StaticData::Instance().GetScorerWordPenalty() * (unkTransCount + hypo->SourceWordsNotCovered()));
 	VERBOSE(1, "Source: " << hypo->GetSourcePhrase() << endl);
 	VERBOSE(1, "Translation: " << *trans << endl);
 	VERBOSE(1, "Hypothesis: " << *hypo << endl);
 	VERBOSE(1, "Hypothesis score: " << hypo->GetTotalScore() << endl);
-	VERBOSE(1, "Penalized score:  " << hypo->GetPenalizedScore() << endl);
+	VERBOSE(1, "Penalized score:  " << penalizedScore << endl);
 	VERBOSE(1, "Source unknown word count: " << hypo->SourceWordsNotCovered() << endl);
-	VERBOSE(1, "Translation unknown word count: " << trans->GetSize() - hypo->GetSize() << endl);
-	cout << hypo->GetPenalizedScore() << " " << hypo->GetTotalScore() << " "
-			 << hypo->SourceWordsNotCovered() << " " << trans->GetSize() - hypo->GetSize() << endl ;
+	VERBOSE(1, "Translation unknown word count: " << unkTransCount << endl);
+	cout << penalizedScore << " " << hypo->GetTotalScore() << " "
+			 << hypo->SourceWordsNotCovered() << " " << unkTransCount << endl ;
 }
 // SCORER end
 

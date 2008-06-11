@@ -57,6 +57,7 @@ protected:
 	mutable Phrase *m_translatedPhrase;
 	// unaccounted word penalty
 	float m_scorerWordPenalty;
+	mutable int m_translationCoverage;
 	// SCORER end
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
@@ -387,5 +388,8 @@ public:
 	// Accessor for the scorer flag
 	const bool GetScoreFlag() const { return m_score; }
 	float GetScorerWordPenalty() const { return m_scorerWordPenalty; }
+	int GetTranslationCoverage() const { return m_translationCoverage; }
+	void SetTranslationCoverage(int x) const { m_translationCoverage = x; }
+	int AddTranslationCoverage(int x) const { return m_translationCoverage += x; }
 	// SCORER end
 };

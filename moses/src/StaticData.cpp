@@ -170,7 +170,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	  // the translation options are filtered
 	if (m_score) {
 	  m_useTransOptCache = false;
-		// m_isAlwaysCreateDirectTranslationOption = true;
+		m_isAlwaysCreateDirectTranslationOption = false;
+		m_maxDistortion = -1;
 	}
 	if (m_parameter->GetParam("scorePenalty").size() == 1) {
 		m_factorDelimiter = Scan<float>(m_parameter->GetParam("scorePenalty")[0]);
