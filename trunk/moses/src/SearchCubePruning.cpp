@@ -77,6 +77,8 @@ void SearchCubePruning::ProcessSentence()
 
 	HypothesisStackCubePruning &firstStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
 	firstStack.AddInitial(hypo);
+	// Call this here because the loop below starts at the second stack.
+	firstStack.CleanupArcList();
 	CreateForwardTodos(firstStack);
 
 	const size_t PopLimit = StaticData::Instance().GetCubePruningPopLimit();
