@@ -81,27 +81,48 @@ int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRa
 {
 
 #if 1
-  if (prev.GetStartPos() == NOT_FOUND) {
-    return distances[0][current.GetStartPos()+1] - 1;
-  } else if (prev.GetEndPos() > current.GetStartPos()) {
-    return distances[current.GetStartPos()][prev.GetEndPos()+1];
-  } else {
-    return distances[prev.GetEndPos()+1][current.GetStartPos()+1] - 1;
-  }
+	int result;
+	if (prev.GetStartPos() == NOT_FOUND) {
+		//TRACE_ERR("returning initial distance from 0 to " << (current.GetStartPos()+1) << " which is " << (distances[0][current.GetStartPos()+1] - 1) <<"\n");
+		result = distances[0][current.GetStartPos()+1] - 1;
+		if (result < 0 || result > 99999) {
+			TRACE_ERR("prev: " << prev << "\n current: " << current << "\n");
+			TRACE_ERR("A: got a weird distance from 0 to " << (current.GetStartPos()+1) << " of " << result << "\n");
+		}
+	} else if (prev.GetEndPos() > current.GetStartPos()) {
+		//TRACE_ERR("returning forward distance from "<< current.GetStartPos() << " to " << (prev.GetEndPos()+1) << " which is " << distances[current.GetStartPos()][prev.GetEndPos()+1] <<"\n");
+		result = distances[current.GetStartPos()][prev.GetEndPos()+1];
+		if (result < 0 || result > 99999) {
+			TRACE_ERR("prev: " << prev << "\n current: " << current << "\n");
+
+			TRACE_ERR("B: got a weird distance from "<< current.GetStartPos() << " to " << prev.GetEndPos()+1 << " of " << result << "\n");
+		}
+	} else if (prev.GetEndPos()+1 == current.GetStartPos()) {
+		return 0;
+	} else {
+		//TRACE_ERR("returning reverse distance from "<< (prev.GetEndPos()+1) << " to " << (current.GetStartPos()+1) << " which is " << (distances[prev.GetEndPos()+1][current.GetStartPos()+1] - 1) <<"\n");
+		result = distances[prev.GetEndPos() + 1][current.GetStartPos()] - 1;
+		if (result < 0 || result > 99999) {
+			TRACE_ERR("prev: " << prev << "\n current: " << current << "\n");
+
+			TRACE_ERR("C: got a weird distance from "<< prev.GetEndPos() << " to " << current.GetStartPos() << " of " << result << "\n");
+		}
+	}
+	return result;
 #else
-  int dist = 0;
-  if (prev.GetNumWordsCovered() == 0) {
-	  dist = current.GetStartPos();
+	int dist = 0;
+	if (prev.GetNumWordsCovered() == 0) {
+		dist = current.GetStartPos();
   } else {
 	  dist = (int)prev.GetEndPos() - (int)current.GetStartPos() + 1 ;
   }
-  return abs(dist);
+	return abs(dist);
 #endif
 }
 
 bool WordLattice::CanIGetFromAToB(size_t start, size_t end) const
 {
-//  std::cerr << "CanIgetFromAToB(" << start << "," << end << ")=" << distances[start][end] << std::endl;
-  return distances[start][end] < 100000;
+	//  std::cerr << "CanIgetFromAToB(" << start << "," << end << ")=" << distances[start][end] << std::endl;
+	return distances[start][end] < 100000;
 }
 
