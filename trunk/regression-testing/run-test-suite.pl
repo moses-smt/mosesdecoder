@@ -18,15 +18,14 @@ my @tests = qw (
   multi-factor-binptable
   nbest-multi-factor
   lattice-surface
+  lattice-distortion
   lexicalized-reordering
   lexicalized-reordering-cn
 );
 
-#  lattice-distortion
 #  xml-markup
 
 ############################################################
-#@tests=qw(lattice-distortion);
 use MosesRegressionTesting;
 use File::Temp qw ( tempfile );
 use POSIX qw ( strftime );

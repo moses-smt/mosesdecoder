@@ -71,12 +71,25 @@ public:
 	inline bool IsExtensionPossible(const WordsRange& prev, const WordsRange& current) const
 	{
 		//  return ComputeDistortionDistance(prev, current) < 100000;
-		size_t t = prev.GetEndPos()+1;
-		size_t l = current.GetEndPos()+1;
-		size_t r = l;
-		if (l<t) { r = t; } else { l = t; }
+		size_t t = prev.GetEndPos()+1;  // 2
+		size_t l = current.GetEndPos()+1;   //l=1
+		size_t r = l; 
+		if (l<t) { r = t; } else { l = t; }  //r=2
+		if (!CanIGetFromAToB(l,r)) return false;
+
+		// there's another check here: a current span may end at a place that previous could get to,
+		// but it may not *START* at a place it can get to. We'll also have to check if we're going left or right
+
+		r = current.GetStartPos();
+		l = prev.GetEndPos()+1; 
+		if (l == r) return true;
+		if (prev.GetEndPos() > current.GetStartPos()) {
+						r = prev.GetStartPos(); 
+						l = current.GetEndPos()+1; 
+						if (r == l) return true;
+		}
 		return CanIGetFromAToB(l,r);
-	}							
+	}
 
 	//! number of words in this sentence/confusion network
 	virtual size_t GetSize() const =0;
