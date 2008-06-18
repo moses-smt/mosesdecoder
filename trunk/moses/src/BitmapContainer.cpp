@@ -197,7 +197,7 @@ BackwardsEdge::Initialize()
 Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 {
 	// create hypothesis and calculate all its scores
-	Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+	Hypothesis *newHypo = hypothesis.CreateNext(transOpt, NULL); // TODO FIXME This is absolutely broken - don't pass null here
 
 	// expand hypothesis further if transOpt was linked
 	std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
@@ -214,7 +214,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 		else
 		{
 			newHypo->CalcScore(m_futurescore);
-			newHypo = newHypo->CreateNext(**iterLinked);
+			newHypo = newHypo->CreateNext(**iterLinked, NULL); // TODO FIXME This is absolutely broken - don't pass null here
 		}
 
 		++iterLinked;

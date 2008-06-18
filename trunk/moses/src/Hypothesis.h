@@ -102,7 +102,7 @@ public:
 	~Hypothesis();
 	
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
-	static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
+	static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Phrase* constraint);
 
 	static Hypothesis* Create(const WordsBitmap &initialCoverage);
 
@@ -110,7 +110,7 @@ public:
 	static Hypothesis* Create(InputType const& source, const TargetPhrase &emptyTarget);
 	
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
-	Hypothesis* CreateNext(const TranslationOption &transOpt) const;
+	Hypothesis* CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const;
 
 	void PrintHypothesis() const;
 	// outdated

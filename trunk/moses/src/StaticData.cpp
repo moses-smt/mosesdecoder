@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
+#include "InputFileStream.h"
 
 using namespace std;
 
@@ -108,6 +109,7 @@ bool StaticData::LoadData(Parameter *parameter)
 			m_recoverPath = false;
 		}
 	}
+
 
 	// factor delimiter
 	if (m_parameter->GetParam("factor-delimiter").size() > 0) {
@@ -272,6 +274,34 @@ bool StaticData::LoadData(Parameter *parameter)
   m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
 	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;
+
+
+
+	// Read in constraint decoding file, if provided
+	if(m_parameter->GetParam("constraint").size()) 
+		m_constraintFileName = m_parameter->GetParam("constraint")[0];		
+	
+	InputFileStream constraintFile(m_constraintFileName);
+	
+	
+	std::string line;
+	long sentenceID = 0; // I hope this is the right starting point! It might not be (ex: if sentenceID is 1-based)
+	
+	while (getline(constraintFile, line)) 
+	{
+		Phrase phrase(Output);
+		phrase.CreateFromString(GetOutputFactorOrder(), line, GetFactorDelimiter());
+		
+		m_constraints.insert(make_pair(sentenceID,phrase));
+		sentenceID++;
+	}
+	
+	/*
+	for (int i=0; i<constraints.size(); i++) 
+	{
+		
+	}
+*/
 
 
 	// to cube or not to cube
