@@ -3,6 +3,12 @@
 #include "SearchNormal.h"
 #include "UserMessage.h"
 
+Search::Search()
+{
+//	long sentenceID = m_source.GetTranslationId();
+//	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
+}
+
 Search *Search::CreateSearch(const InputType &source, SearchAlgorithm searchAlgorithm, const TranslationOptionCollection &transOptColl)
 {
 	switch(searchAlgorithm)

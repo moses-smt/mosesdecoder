@@ -143,22 +143,59 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
-Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
+Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const
 {
-	return Create(*this, transOpt);
+	return Create(*this, transOpt, constraint);
 }
 
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
-Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
+Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Phrase* constrainingPhrase)
 {
-#ifdef USE_HYPO_POOL
-	Hypothesis *ptr = s_objectPool.getPtr();
-	return new(ptr) Hypothesis(prevHypo, transOpt);
-#else
-	return new Hypothesis(prevHypo, transOpt);
-#endif
+
+	// This method contains code for constraint decoding, which is still in development
+	
+	bool createHypothesis = true;
+	
+	if (constrainingPhrase != NULL)
+	{
+		size_t oldSize = prevHypo.GetCurrTargetLength();
+		size_t constraintSize = constrainingPhrase->GetSize();
+		
+		
+		const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
+		size_t transOptSize = transOptPhrase.GetSize();
+		
+		if (oldSize + transOptSize <= constraintSize) 
+		{
+			WordsRange range(oldSize, oldSize + transOptSize);
+			//std::cout << "Range is " << oldSize << " to " << (oldSize + transOptSize) << "\n"; 
+			Phrase relevantConstraint = constrainingPhrase->GetSubString(range);
+			
+			if ( ! relevantConstraint.IsCompatible(transOptPhrase) )
+			{
+				createHypothesis = false;
+			}
+		}
+	}
+
+	
+	if (createHypothesis)
+	{
+
+		#ifdef USE_HYPO_POOL
+			Hypothesis *ptr = s_objectPool.getPtr();
+			return new(ptr) Hypothesis(prevHypo, transOpt);
+		#else
+			return new Hypothesis(prevHypo, transOpt);
+		#endif
+
+	}
+	else
+	{
+		return NULL;
+	}
 }
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase

@@ -18,6 +18,9 @@ SearchNormal::SearchNormal(const InputType &source, const TranslationOptionColle
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
 
+	long sentenceID = source.GetTranslationId();
+	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
+
 	std::vector < HypothesisStackNormal >::iterator iterStack;
 	for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind)
 	{
@@ -267,7 +270,8 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 #ifdef DEBUGLATTICE
 		if (debug2) { std::cerr << "::EXT: " << transOpt << "\n"; }
 #endif
-		Hypothesis *newHypo = hypothesis.CreateNext(transOpt);
+		Hypothesis *newHypo = hypothesis.CreateNext(transOpt, m_constraint); // TODO FIXME This is absolutely broken - don't pass null here
+
 		// expand hypothesis further if transOpt was linked
 		for (std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
 				iterLinked != transOpt.GetLinkedTransOpts().end(); iterLinked++) {
@@ -279,7 +283,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			else
 			{
 				newHypo->CalcScore(m_transOptColl.GetFutureScore());
-				newHypo = newHypo->CreateNext(**iterLinked);
+				newHypo = newHypo->CreateNext(**iterLinked, m_constraint); // TODO FIXME This is absolutely broken - don't pass null here
 			}
 		}
 		newHypo->CalcScore(m_transOptColl.GetFutureScore());

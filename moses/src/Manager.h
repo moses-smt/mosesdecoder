@@ -77,7 +77,7 @@ protected:
 	InputType const& m_source; /**< source sentence to be translated */
 	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	Search *m_search;
-
+	
 	size_t interrupted_flag;
 
 	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 

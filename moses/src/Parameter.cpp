@@ -87,6 +87,7 @@ Parameter::Parameter()
 	AddParam("cube-pruning-pop-limit", "cbp", "How many hypotheses should be popped for each stack. (default = 1000)");
 	AddParam("cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
 	AddParam("search-algorithm", "", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
+	AddParam("constraint","","Target sentence to produce");
 }
 
 Parameter::~Parameter()

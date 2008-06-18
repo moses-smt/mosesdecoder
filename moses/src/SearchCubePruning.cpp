@@ -47,6 +47,9 @@ SearchCubePruning::SearchCubePruning(const InputType &source, const TranslationO
 {
 	const StaticData &staticData = StaticData::Instance();
 
+	long sentenceID = source.GetTranslationId();
+	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
+
 	std::vector < HypothesisStackCubePruning >::iterator iterStack;
 	for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind)
 	{
