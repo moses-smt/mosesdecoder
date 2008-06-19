@@ -157,27 +157,49 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 	// This method contains code for constraint decoding, which is still in development
 	
 	bool createHypothesis = true;
+
+	size_t start = 1 + prevHypo.GetCurrTargetWordsRange().GetEndPos();//prevHypo.GetCurrTargetLength();
 	
+	//if (oldSize > 100000) start=0;
+	
+	const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
+	size_t transOptSize = transOptPhrase.GetSize();
+	
+	size_t endpoint = start + transOptSize - 1;
+	
+	//std::cerr << "SPAN (" << start << "-" << endpoint << ")" << std::endl;
+	 
 	if (constrainingPhrase != NULL)
 	{
-		size_t oldSize = prevHypo.GetCurrTargetLength();
+
 		size_t constraintSize = constrainingPhrase->GetSize();
 		
-		
-		const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
-		size_t transOptSize = transOptPhrase.GetSize();
-		
-		if (oldSize + transOptSize <= constraintSize) 
-		{
-			WordsRange range(oldSize, oldSize + transOptSize);
-			//std::cout << "Range is " << oldSize << " to " << (oldSize + transOptSize) << "\n"; 
+
+	
+		if (endpoint < constraintSize) 
+		{	//std::cerr << "" << start << " + " << transOptSize << " - 1 <= " << constraintSize << "  for translation option '" << transOpt.GetTargetPhrase() << "' from '" << *(transOpt.GetSourcePhrase()) << "'" << std::endl;
+
+			WordsRange range(start, endpoint);
+			//std::cout << "Range is " << start << " to " << (oldSize + transOptSize) << "\n"; 
 			Phrase relevantConstraint = constrainingPhrase->GetSubString(range);
 			
 			if ( ! relevantConstraint.IsCompatible(transOptPhrase) )
 			{
 				createHypothesis = false;
+				//std::cerr << "Returning NULL hypothesis when constraining phrase is (" << start << "-" << endpoint << ") '" << relevantConstraint << "' and phrase is '" << transOpt.GetTargetPhrase() << "'"<< std::endl;
+		
+			}
+			else
+			{
+				//std::cerr << "COMPATABLE CONSTRAINT!!!!!!!!!!!!!!!!!!!!!!!!!!! (" << start << "-" << endpoint << ") '" << relevantConstraint << "' and '" <<  transOpt.GetTargetPhrase() << "'" << std::endl;
 			}
 		}
+		else 
+		{
+			createHypothesis = false;
+			//std::cerr << "" << start << " + " << transOptSize << " <= " << constraintSize << "  for translation option " << transOpt.GetTargetPhrase() << std::endl;
+		}
+		
 	}
 
 	
@@ -196,6 +218,7 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 	{
 		return NULL;
 	}
+	
 }
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase

@@ -272,6 +272,8 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 #endif
 		Hypothesis *newHypo = hypothesis.CreateNext(transOpt, m_constraint); // TODO FIXME This is absolutely broken - don't pass null here
 
+		if (newHypo==NULL) return;
+
 		// expand hypothesis further if transOpt was linked
 		for (std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
 				iterLinked != transOpt.GetLinkedTransOpts().end(); iterLinked++) {
