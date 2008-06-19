@@ -289,8 +289,11 @@ bool StaticData::LoadData(Parameter *parameter)
 	
 	while (getline(constraintFile, line)) 
 	{
+		vector<string> vecStr = Tokenize<string>(line, "\t");
+		assert(vecStr.size() == 2);
+
 		Phrase phrase(Output);
-		phrase.CreateFromString(GetOutputFactorOrder(), line, GetFactorDelimiter());
+		phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
 		
 		m_constraints.insert(make_pair(sentenceID,phrase));
 		sentenceID++;
