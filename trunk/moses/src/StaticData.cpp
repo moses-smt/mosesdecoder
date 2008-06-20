@@ -289,12 +289,18 @@ bool StaticData::LoadData(Parameter *parameter)
 	
 	while (getline(constraintFile, line)) 
 	{
-		vector<string> vecStr = Tokenize<string>(line, "\t");
-		assert(vecStr.size() == 2);
-
-		Phrase phrase(Output);
-		phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
+		//vector<string> vecStr = Tokenize<string>(line, "\t");
+		//assert(vecStr.size() == 2);
+		//cout << "vec size == " << vecStr.size() << endl;
 		
+		Phrase phrase(Output);
+		//phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
+		phrase.CreateFromString(GetOutputFactorOrder(), line, GetFactorDelimiter());
+		
+		//std::istringstream i(vecStr[0]);
+		//assert(i >> sentenceID);
+		//cout << "Sentence read in with number " << sentenceID << " and sentence: '" << vecStr[1] << "'" << endl;
+
 		m_constraints.insert(make_pair(sentenceID,phrase));
 		sentenceID++;
 	}
