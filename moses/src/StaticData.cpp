@@ -285,33 +285,17 @@ bool StaticData::LoadData(Parameter *parameter)
 	
 	
 	std::string line;
-	long sentenceID = 0; // I hope this is the right starting point! It might not be (ex: if sentenceID is 1-based)
 	
 	while (getline(constraintFile, line)) 
 	{
-		//vector<string> vecStr = Tokenize<string>(line, "\t");
-		//assert(vecStr.size() == 2);
-		//cout << "vec size == " << vecStr.size() << endl;
-		
+		vector<string> vecStr = Tokenize(line, "\t");
+		assert(vecStr.size() == 2);
+
+		long sentenceID = Scan<long>(vecStr[0]);
 		Phrase phrase(Output);
-		//phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
-		phrase.CreateFromString(GetOutputFactorOrder(), line, GetFactorDelimiter());
-		
-		//std::istringstream i(vecStr[0]);
-		//assert(i >> sentenceID);
-		//cout << "Sentence read in with number " << sentenceID << " and sentence: '" << vecStr[1] << "'" << endl;
-
+		phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
 		m_constraints.insert(make_pair(sentenceID,phrase));
-		sentenceID++;
 	}
-	
-	/*
-	for (int i=0; i<constraints.size(); i++) 
-	{
-		
-	}
-*/
-
 
 	// to cube or not to cube
 	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
