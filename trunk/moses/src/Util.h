@@ -83,6 +83,13 @@ inline float Scan<float>(const std::string &input)
 	return (float) atof(input.c_str());
 }
 
+//! just return input
+template<>
+inline std::string Scan<std::string>(const std::string &input)
+{
+	return input;
+}
+
 //! Specialisation to understand yes/no y/n true/false 0/1
 template<>
 bool Scan<bool>(const std::string &input);
