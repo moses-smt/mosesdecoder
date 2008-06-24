@@ -21,6 +21,8 @@ using namespace std;
 void usage() {
   cerr<<"usage: extractor [options])"<<endl;
   cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
+  cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
+  cerr<<"\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc "<<endl;
   cerr<<"[--reference|-r] comma separated list of reference files"<<endl;
   cerr<<"[--binary|-b] use binary output format (default to text )"<<endl;
   cerr<<"[--nbest|-n] the nbest file"<<endl;
@@ -37,6 +39,7 @@ cerr<<"[--prev-ffile|-E] comma separated list of previous feature data" <<endl;
 static struct option long_options[] =
   {
     {"sctype",required_argument,0,'s'},
+    {"scconfig",required_argument,0,'c'},
     {"reference",required_argument,0,'r'},
     {"binary",no_argument,0,'b'},
     {"nbest",required_argument,0,'n'},
@@ -53,6 +56,7 @@ int option_index;
 int main(int argc, char** argv) {
     //defaults
     string scorerType("BLEU");
+    string scorerConfig("");
     string referenceFile("");
     string nbestFile("");
     string scoreDataFile("");
@@ -66,6 +70,9 @@ int main(int argc, char** argv) {
         switch(c) {
             case 's':
                 scorerType = string(optarg);
+                break;
+            case 'c':
+                scorerConfig = string(optarg);
                 break;
             case 'r':
                 referenceFile = string(optarg);
@@ -159,7 +166,7 @@ int main(int argc, char** argv) {
 			
 		TRACE_ERR("Scorer type: " << scorerType << endl);
 		ScorerFactory sfactory;
-		Scorer* scorer = sfactory.getScorer(scorerType);
+		Scorer* scorer = sfactory.getScorer(scorerType,scorerConfig);
 				
 		Timer timer;
 		timer.start("Starting...");

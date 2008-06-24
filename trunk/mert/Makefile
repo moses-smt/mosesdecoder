@@ -21,7 +21,6 @@ LDLIBS=-lm -lz
 
 all: \
 extractor \
-test_scorer \
 mert \
 
 clean: 

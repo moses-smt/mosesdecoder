@@ -27,11 +27,11 @@ class ScorerFactory {
             return types;
         }
 
-        Scorer* getScorer(const string& type) {
+        Scorer* getScorer(const string& type, const string& config = "") {
 						if (type == "BLEU") {
-							return (BleuScorer*) new BleuScorer();
+							return (BleuScorer*) new BleuScorer(config);
             } else if (type == "PER") {
-							return (PerScorer*) new PerScorer();
+							return (PerScorer*) new PerScorer(config);
             } else {
                 throw runtime_error("Unknown scorer type: " + type);
             }

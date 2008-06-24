@@ -103,18 +103,18 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 		vector<float> stats(LENGTH*2);;
 		size_t length = countNgrams(text,testcounts,LENGTH);
 		//dump_counts(testcounts);
-		if (_refLengthStrategy == SHORTEST) {
+		if (_refLengthStrategy == BLEU_SHORTEST) {
 			//cerr << reflengths.size() << " " << sid << endl;
 			int shortest = *min_element(_reflengths[sid].begin(),_reflengths[sid].end());
 			stats.push_back(shortest);
-		} else if (_refLengthStrategy == AVERAGE) {
+		} else if (_refLengthStrategy == BLEU_AVERAGE) {
 			int total = 0;
 			for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
 				total += _reflengths[sid][i];
 			}
 			float mean = (float)total/_reflengths[sid].size();
 			stats.push_back(mean);
-		} else if (_refLengthStrategy == CLOSEST)  {
+		} else if (_refLengthStrategy == BLEU_CLOSEST)  {
 			int min_diff = INT_MAX;
 			for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
 				int reflength = _reflengths[sid][i];

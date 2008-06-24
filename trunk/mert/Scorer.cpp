@@ -1,5 +1,29 @@
 #include "Scorer.h"
 
+//regularisation strategies
+static float score_min(const statscores_t& scores, size_t start, size_t end) {
+   float min = numeric_limits<float>::max(); 
+   for (size_t i = start; i < end; ++i) {
+       if (scores[i] < min) {
+           min = scores[i];
+       }
+   }
+   return min;
+}
+
+static float score_average(const statscores_t& scores, size_t start, size_t end) {
+    if ((end - start) < 1) {
+        //shouldn't happen
+        return 0;
+    }
+    float total = 0;
+    for (size_t j = start; j < end; ++j) {
+        total += scores[j];
+    }
+
+    return total / (end - start);
+}
+
 void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t& diffs,
             statscores_t& scores) {
 	if (!_scoreData) {
@@ -46,5 +70,28 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
         scores.push_back(calculateScore(totals));
     }
 
+    //regularisation. This can either be none, or the min or average as described in
+    //Cer, Jurafsky and Manning at WMT08
+    if (_regularisationStrategy == REG_NONE || _regularisationWindow <= 0) {
+        //no regularisation
+        return;
+    }
+
+    //window size specifies the +/- in each direction
+    statscores_t raw_scores(scores);//copy scores
+    for (size_t i = 0; i < scores.size(); ++i) {
+        size_t start = 0;
+        if (i >= _regularisationWindow) {
+            start = i - _regularisationWindow;
+        }
+        size_t end = min(scores.size(), i + _regularisationWindow+1);
+        if (_regularisationStrategy == REG_AVERAGE) {
+            scores[i] = score_average(raw_scores,start,end);
+        } else {
+            scores[i] = score_min(raw_scores,start,end);
+        }
+    }
 }
+
+
 
