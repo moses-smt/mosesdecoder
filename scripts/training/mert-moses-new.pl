@@ -113,8 +113,6 @@ my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
 my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
 
-# type of score to optimise TODO: make this configurable
-my $scorer_type = "BLEU";
 
 # set 1 if using with async decoder
 my $___ASYNC = 0; 
@@ -142,6 +140,7 @@ my $allow_skipping_lambdas = 0;
 
 
 my $mertdir = undef; # path to new mert directory
+my $mertargs = undef; # args to pass through to mert
 my $pythonpath = undef; # path to python libraries needed by cmert
 my $filtercmd = undef; # path to filter-model-given-input.pl
 my $SCORENBESTCMD = undef;
@@ -181,6 +180,7 @@ GetOptions(
   "allow-skipping-lambdas" => \$allow_skipping_lambdas,
   "verbose" => \$verbose,
   "mertdir=s" => \$mertdir,
+  "mertargs=s" => \$mertargs,
   "rootdir=s" => \$SCRIPTS_ROOTDIR,
   "pythonpath=s" => \$pythonpath,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
@@ -213,7 +213,7 @@ if ($___ASYNC) {
 print STDERR "After default: $queue_flags\n";
 
 if ($usage || !defined $___DEV_F || !defined$___DEV_E || !defined$___DECODER || !defined $___CONFIG) {
-  print STDERR "usage: mert-moses.pl input-text references decoder-executable decoder.ini
+  print STDERR "usage: mert-moses-new.pl input-text references decoder-executable decoder.ini
 Options:
   --working-dir=mert-dir ... where all the files are created
   --nbest=100 ... how big nbestlist to generate
@@ -241,6 +241,7 @@ Options:
   --filtercmd=STRING  ... path to filter-model-given-input.pl
   --rootdir=STRING  ... where do helpers reside (if not given explicitly)
   --mertdir=STRING ... path to new mert implementation
+  --mertargs=STRING ... extra args for mert, eg to specify scorer
   --pythonpath=STRING  ... where is python executable
   --scorenbestcmd=STRING  ... path to score-nbest.py
   --old-sge ... passed to moses-parallel, assume Sun Grid Engine < 6.0
@@ -295,6 +296,8 @@ my $mert_mert_cmd = "$mertdir/mert";
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
+
+$mertargs = "" if !defined $mertargs;
 
 my ($just_cmd_filtercmd,$x) = split(/ /,$filtercmd);
 die "Not executable: $just_cmd_filtercmd" if ! -x $just_cmd_filtercmd;
@@ -541,7 +544,7 @@ while(1) {
   print STDERR "Scoring the nbestlist.\n";
   my $feature_file = "run$run.features.dat";
   my $score_file = "run$run.scores.dat";
-  $cmd = "$mert_extract_cmd --sctype $scorer_type --scfile $score_file --ffile $feature_file  -r ".join(",", @references)." -n $nbest_file";
+  $cmd = "$mert_extract_cmd $mertargs --scfile $score_file --ffile $feature_file  -r ".join(",", @references)." -n $nbest_file";
   if (defined $prev_feature_file) {
       $cmd = $cmd." --prev-ffile $prev_feature_file";
   }
@@ -602,7 +605,7 @@ while(1) {
   my $DIM = scalar(@CURR); # number of lambdas
 
   # run mert
-  $cmd = "$mert_mert_cmd -d $DIM --sctype $scorer_type -n 20 --scfile $score_file --ffile $feature_file";
+  $cmd = "$mert_mert_cmd -d $DIM $mertargs -n 20 --scfile $score_file --ffile $feature_file";
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
   } else {

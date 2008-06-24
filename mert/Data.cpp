@@ -100,3 +100,4 @@ void Data::loadnbest(const std::string &file)
 	
 	inp.close();
 }
+

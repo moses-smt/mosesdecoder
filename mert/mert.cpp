@@ -31,10 +31,12 @@ void usage(void) {
   cerr<<"[-o\tthe indexes to optimize(default all)]"<<endl;
   cerr<<"[-t\tthe optimizer(default powell)]"<<endl;
   cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
+  cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
   cerr<<"[--scfile|-S] the scorer data file (default score.data)"<<endl;
   cerr<<"[--ffile|-F] the feature data file (default feature.data)"<<endl;
 	cerr<<"[--ifile|-i] the starting point data file (default init.opt)"<<endl;
 	cerr<<"[-v] verbose level"<<endl;
+  cerr<<"[--help|-h] print this message and exit"<<endl;
   exit(1);
 }
 
@@ -45,10 +47,12 @@ static struct option long_options[] =
     {"optimize",1,0,'o'},
     {"type",1,0,'t'},
     {"sctype",1,0,'s'},
+    {"scconfig",required_argument,0,'c'},
     {"scfile",1,0,'S'},
     {"ffile",1,0,'F'},
     {"ifile",1,0,'i'},
     {"verbose",1,0,'v'},
+    {"help",no_argument,0,'h'},
     {0, 0, 0, 0}
   };
 int option_index;
@@ -59,6 +63,7 @@ int main (int argc, char **argv) {
   int ntry=1;
   string type("powell");
   string scorertype("BLEU");
+  string scorerconfig("");
   string scorerfile("statscore.data");
   string featurefile("features.data");
   string initfile("init.opt");
@@ -77,6 +82,9 @@ int main (int argc, char **argv) {
       break;
     case's':
       scorertype=string(optarg);
+      break;
+    case 'c':
+      scorerconfig = string(optarg);
       break;
     case 'S':
       scorerfile=string(optarg);
@@ -122,7 +130,7 @@ int main (int argc, char **argv) {
   opt.close();
   //it make sense to know what parameter set were used to generate the nbest
   ScorerFactory SF;
-  Scorer *TheScorer=SF.getScorer(scorertype);
+  Scorer *TheScorer=SF.getScorer(scorertype,scorerconfig);
 
   cerr<<"Loading Data from: "<< scorerfile  << " and " << featurefile << endl;
   Data D(*TheScorer);
