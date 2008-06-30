@@ -760,7 +760,7 @@ sub make_link_absolute {
 
     # make it point back to us if it's a link
     if ($tag_name eq 'a') {
-        $attr_hash->{$attr_name} = 'frameset.cgi?url=' .
+        $attr_hash->{$attr_name} = 'index.cgi?url=' .
             uri_escape ($attr_hash->{$attr_name});
         $attr_hash->{target} = '_top';
     }
