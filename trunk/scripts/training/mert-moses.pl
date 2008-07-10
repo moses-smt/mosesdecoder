@@ -670,6 +670,9 @@ while(1) {
   my $DIM = scalar(@CURR); # number of lambdas
   my $cmd="$cmertcmd -d $DIM";
  
+  # remove previous cmert.log, if any, to avoid NFS race conditions
+  safesystem ("\\rm -f cmert.log weights.txt") or die;
+
   print STDERR "Starting cmert.\n";
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=cmert.log -queue-parameter=\"$queue_flags\"") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
