@@ -18,6 +18,12 @@ bool LanguageModelInternal::Load(const std::string &filePath
 																, size_t nGramOrder)
 {
 	assert(nGramOrder <= 3);
+	if (nGramOrder > 3)
+	{
+		UserMessage::Add("Can only do up to trigram. Aborting");
+		abort();
+	}
+
 	VERBOSE(1, "Loading Internal LM: " << filePath << endl);
 	
 	FactorCollection &factorCollection = FactorCollection::Instance();
