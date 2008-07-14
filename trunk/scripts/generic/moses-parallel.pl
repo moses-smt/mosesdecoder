@@ -550,8 +550,12 @@ remove_temporary_files();
 #script creation
 sub preparing_script(){
   foreach my $idx (@idxlist){
-    my $scriptheader="\#\! /bin/bash\n\n";
+    my $scriptheader="";
+    $scriptheader.="\#\! /bin/bash\n\n";
+      # !!! this is useless. qsub ignores the first line of the script.
+      # Pass '-S /bin/bash' to qsub instead.
     $scriptheader.="uname -a\n\n";
+    $scriptheader.="ulimit -c 0\n\n"; # avoid coredumps
     $scriptheader.="cd $workingdir\n\n";
 
     open (OUT, "> ${jobscript}${idx}.bash");
