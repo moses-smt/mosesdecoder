@@ -33,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iomanip>
 #include "TypeDef.h"
 #include "Util.h"
-#include "md5.h"
 #include "Timer.h"
 
 using namespace std;
@@ -71,34 +70,6 @@ void CreateTempFile(ofstream  &fileStream, string &filePath)
 	fileStream.open(filePath.c_str(), ofstream::out | ofstream::app);
 }
 
-string GetMD5Hash(const string &filePath)
-{
-	unsigned char buffer[16384], signature[16];
-	struct MD5Context md5c;
-
-	FILE *in;
-	if ((in = fopen(filePath.c_str(), "rb")) == NULL) 
-	{
-	  return "";
-	}
-
-	MD5Init(&md5c);
-	size_t j;
-  while ((j = fread(buffer, 1, sizeof buffer, in)) > 0) 
-	{
-		MD5Update(&md5c, buffer, (unsigned) j);
-  }
-	MD5Final(signature, &md5c);
-
-	std::stringstream stream("");
-	stream.setf(std::ios_base::hex,std::ios_base::basefield);
-	for (j = 0; j < sizeof signature; j++) 
-	{
-		stream << setw(2) << setfill('0') << (int) signature[j];
-  }
-
-	return stream.str();
-}
 
 const std::string ToLower(const std::string& str)
 {
