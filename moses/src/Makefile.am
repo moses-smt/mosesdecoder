@@ -33,7 +33,6 @@ libmoses_a_SOURCES = \
 	LexicalReordering.cpp \
 	LexicalReorderingTable.cpp \
 	Manager.cpp \
-	md5.cpp \
 	mempool.cpp \
 	PCNTools.cpp \
 	Parameter.cpp \
