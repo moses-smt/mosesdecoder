@@ -191,6 +191,7 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 	  cout << "i=" << i << " -> " << (*contextFactor[i])[factorType]->GetString() << "\n";
 #endif
 	  int lmId = GetLmID((*contextFactor[i])[factorType]->GetString());
+	  cerr << (*contextFactor[i])[factorType]->GetString() << " = " << lmId;
 	  m_lmtb_ng->pushc(lmId);
 	}
   
@@ -200,7 +201,8 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 		*len = 0;	
 	}
 
-	return TransformIRSTScore((float) m_lmtb->clprob(*m_lmtb_ng));
+	float prob = m_lmtb->clprob(*m_lmtb_ng);
+	return TransformIRSTScore(prob);
 }
 
 
