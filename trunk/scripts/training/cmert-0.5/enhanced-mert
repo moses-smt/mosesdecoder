@@ -6,6 +6,7 @@ echo "       perform cmert on a subset of the feature scores"
 echo "       the ratios among not activated weights are not modified"
 echo "       Parameters (*=optional):"
 echo "       -d: the number of original features"
+echo "       -rootdir: the scripts root dir"
 echo "       -activate (*): comma-separated (or blank-separated) list of the indexes of active features"
 echo "                      if not set, all features are optimized"
 echo "       -debug(*): debug information"
@@ -30,6 +31,7 @@ do
    case $1 in
       -help) help=1 ; shift 1 ; ;;
       -d) size=$2 ; shift 2 ; ;;
+      -rootdir) SCRIPTS_ROOTDIR=$2 ; shift 2 ; ;;
       -debug) debug="-debug"; shift 1 ; ;;
       -activate) activeflag=1 ; activefields=$2 ; shift 2 ; ;;
       *) shift $# ; ;;
