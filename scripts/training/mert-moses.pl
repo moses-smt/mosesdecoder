@@ -137,6 +137,7 @@ my $allow_skipping_lambdas = 0;
 my $cmertdir = undef; # path to cmert directory
 my $pythonpath = undef; # path to python libraries needed by cmert
 my $filtercmd = undef; # path to filter-model-given-input.pl
+my $filterfile = undef; 
 my $SCORENBESTCMD = undef;
 my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
@@ -177,6 +178,7 @@ GetOptions(
   "cmertdir=s" => \$cmertdir,
   "pythonpath=s" => \$pythonpath,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
+  "filterfile=s" => \$filterfile, # input to filtering script (useful for lattices/confnets)
   "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
@@ -232,6 +234,7 @@ Options:
                   length as effective reference length
   --nonorm ... Do not use text normalization
   --filtercmd=STRING  ... path to filter-model-given-input.pl
+  --filterfile=STRING  ... path to alternative to input-text for filtering model. useful for lattice decoding
   --rootdir=STRING  ... where do helpers reside (if not given explicitly)
   --cmertdir=STRING ... where is cmert installed
   --pythonpath=STRING  ... where is python executable
@@ -260,10 +263,14 @@ if ($___INPUTTYPE == 1)
   #$extra_lambdas_for_model -> {"I"} = 1; #Confusion network posterior
 }
 
-# update variables if input is lattice
+# update variables if input is lattice - handle like conf. net for now
 if ($___INPUTTYPE == 2)
 {
-# TODO
+    $ABBR_FULL_MAP = "$ABBR_FULL_MAP I=weight-i";
+    %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
+    %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
+
+    push @{$default_triples -> {"I"}}, [ 1.0, 0.0, 2.0 ];
 }
 
 # Check validity of input parameters and set defaults if needed
@@ -458,7 +465,9 @@ if ($continue) {
 if ($___FILTER_PHRASE_TABLE){
   # filter the phrase tables wih respect to input, use --decoder-flags
   print "filtering the phrase tables... ".`date`;
-  my $cmd = "$filtercmd ./filtered $___CONFIG $___DEV_F";
+  my $___FILTER_F  = $___DEV_F;
+  $___FILTER_F = $filterfile if (defined $filterfile);
+  my $cmd = "$filtercmd ./filtered $___CONFIG $___FILTER_F";  
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
       or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
@@ -602,7 +611,13 @@ while(1) {
 
     # keep a count of lines in nbests lists (alltogether)
     # if it did not increase since last iteration, we are DONE
-    open(IN,"cands.opt") or die "Can't read cands.opt";
+
+    #try to debug why we don't see these files
+    #sleep(60);
+    
+    my @dirlist = `ls -lt`;
+    my $dirlist_string = join(' ',@dirlist);    
+    open(IN,"cands.opt") or die "Can't read cands.opt, directory contents were $dirlist_string";
     while (<IN>) {
       chomp;
       my @flds = split / /;
@@ -668,7 +683,10 @@ while(1) {
   safesystem("\\cp -f init.opt run$run.init.opt") or die;
 
   my $DIM = scalar(@CURR); # number of lambdas
-  my $cmd="$cmertcmd -d $DIM";
+  my $cmd="$cmertcmd -d $DIM -rootdir $SCRIPTS_ROOTDIR";
+
+  # remove previous cmert.log, if any, to avoid NFS race conditions
+  safesystem ("\\rm -f cmert.log weights.txt") or die;
  
   # remove previous cmert.log, if any, to avoid NFS race conditions
   safesystem ("\\rm -f cmert.log weights.txt") or die;
@@ -682,11 +700,18 @@ while(1) {
   die "Optimization failed, file weights.txt does not exist or is empty"
     if ! -s "weights.txt";
 
+  
+  #try to debug why we don't see these files
+  #sleep(60);
+  
+  my @dirlist = `ls -lt`;
+  my $dirlist_string = join(' ',@dirlist);
+
   # backup copies
-  safesystem ("\\mv -f feats.opt run$run.feats.opt; gzip run$run.feats.opt; ") or die;
-  safesystem ("\\mv -f cands.opt run$run.cands.opt") or die;
-  safesystem ("\\cp -f cmert.log run$run.cmert.log") or die;
-  safesystem ("\\cp -f weights.txt run$run.weights.txt") or die; # this one is needed for restarts, too
+  safesystem ("\\mv -f feats.opt run$run.feats.opt; gzip run$run.feats.opt; ") or die "Can't mv and zip feats.opt, directory contents were $dirlist_string";
+  safesystem ("\\mv -f cands.opt run$run.cands.opt") or die "Can't mv cands.opt, directory contents were $dirlist_string";
+  safesystem ("\\cp -f cmert.log run$run.cmert.log") or die "Can't cp cmert.log, directory contents were $dirlist_string";
+  safesystem ("\\cp -f weights.txt run$run.weights.txt") or die "Can't cp weights.txt, directory contents were $dirlist_string"; # this one is needed for restarts, too
 
   if ($___ACTIVATE_FEATURES){
     safesystem ("\\mv -f reduced_feats.opt run$run.reduced_feats.opt ; gzip run$run.reduced_feats.opt") or die;
@@ -867,7 +892,7 @@ sub get_order_of_scores_from_nbestlist {
   foreach my $tok (split /\s+/, $scores) {
     if ($tok =~ /^([a-z][0-9a-z]*):/i) {
       $label = $1;
-    } elsif ($tok =~ /^-?[-0-9.e]+$/) {
+    } elsif ($tok =~ /^-?[-0-9.e\+]+$/) {
       # a score found, remember it
       die "Found a score but no label before it! Bad nbestlist '$fname_or_source'!"
         if !defined $label;
@@ -1092,7 +1117,8 @@ sub scan_config {
         my $needlambdas = defined $where_is_lambda_count{$section} ? $flds[$where_is_lambda_count{$section}] : 1;
 
         print STDERR "Config needs $needlambdas lambdas for $section (i.e. $shortname)\n" if $verbose;
-        if (!defined $___LAMBDA && (!defined $additional_triples->{$shortname} || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)) {
+#if (!defined $___LAMBDA && (!defined $additional_triples->{$shortname} || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)) {
+        if (!defined $___LAMBDA && (!defined $additional_triples->{$shortname})) {
           print STDERR "$inishortname:$nr:Your model $shortname needs $needlambdas weights but we define the default ranges for only "
             .scalar(@{$additional_triples->{$shortname}})." weights. Cannot use the default, you must supply lambdas by hand.\n";
           $error = 1;
@@ -1101,8 +1127,15 @@ sub scan_config {
 	    # note: table may use less parameters than the maximum number
 	    # of triples
 	    for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
+		#deal with case where needed lambdas are higher than size of additional triples defaults                             
+                my $safe_lambda=$lambda;
+
+                if ($safe_lambda >= scalar(@{$additional_triples->{$shortname}})) {
+                    $safe_lambda = scalar(@{$additional_triples->{$shortname}})-1;
+                    print STDERR "falling back to last default range for $shortname lambda $lambda, using range for $safe_lambda\n";
+                }
 		my ($start, $min, $max) 
-		    = @{${$additional_triples->{$shortname}}[$lambda]};
+		    = @{${$additional_triples->{$shortname}}[$safe_lambda]};
 		push @{$used_triples{$shortname}}, [$start, $min, $max];
 	    }
 	}

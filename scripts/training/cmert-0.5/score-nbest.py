@@ -71,7 +71,7 @@ if __name__ == "__main__":
     infile = sys.stdin
 
     # function that recognizes floats
-    re_float=re.compile(r'^-?[-0-9.e]+$')
+    re_float=re.compile(r'^-?[-0-9.e\+]+$')
     is_float=lambda(x):re_float.match(x)
 
     for line in infile:

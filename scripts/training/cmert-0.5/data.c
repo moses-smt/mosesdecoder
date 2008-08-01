@@ -75,7 +75,7 @@ data_t *read_data(void) {
       field++;
     }
     if (field != dim+comps_n) {
-      fprintf(stderr, "read_data(): wrong number of fields in line in feats.opt\n");
+      fprintf(stderr, "read_data(): wrong number of fields in line in feats.opt - expected %d + %d and found %d on line %d\n",dim,comps_n,field,cand_i);
       return NULL;
     }
     cand_i++;
