@@ -118,7 +118,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   m_lmtb->init_statecache();
   m_lmtb->init_lmtcaches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
 
-  m_lmtb->set_dictionary_upperbound(m_lmtb_dub);
+  m_lmtb->setlogOOVpenalty(m_lmtb_dub);
 
   return true;
 }
@@ -202,6 +202,14 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 	}
 
 	float prob = m_lmtb->clprob(*m_lmtb_ng);
+  
+  //apply OOV penalty if the n-gram starts with an OOV word 
+  //in a following version this will be integrated into the
+  //irstlm library
+  
+  if (*m_lmtb_ng->wordp(1) == m_lmtb->dict->oovcode())
+    prob-=m_lmtb->getlogOOVpenalty();
+  
 	return TransformIRSTScore(prob);
 }
 
