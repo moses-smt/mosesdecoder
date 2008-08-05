@@ -36,7 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "StaticData.h"
 
-class IOStream;
+class IOWrapper;
 
 int main(int argc, char* argv[]);
-IOStream *GetIODevice(const StaticData &staticData);
+IOWrapper *GetIODevice(const StaticData &staticData);

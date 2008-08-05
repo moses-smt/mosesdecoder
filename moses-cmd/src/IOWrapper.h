@@ -45,7 +45,7 @@ class Hypothesis;
 class TrellisPathList;
 class InputFileStream;
 
-class IOStream
+class IOWrapper
 {
 protected:
 	long m_translationId;
@@ -67,19 +67,19 @@ protected:
 										, const std::string							&nBestFilePath);
 
 public:
-	IOStream(const std::vector<FactorType>	&inputFactorOrder
+	IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 		, const std::vector<FactorType>			&outputFactorOrder
 				, const FactorMask							&inputFactorUsed
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath);
 
-	IOStream(const std::vector<FactorType>	&inputFactorOrder
+	IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 				, const std::vector<FactorType>	&outputFactorOrder
 				, const FactorMask							&inputFactorUsed
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath
 		 , const std::string                                                     &infilePath);
-	~IOStream();
+	~IOWrapper();
 
 	InputType* GetInput(InputType *inputType);
 	void OutputBestHypo(const Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
