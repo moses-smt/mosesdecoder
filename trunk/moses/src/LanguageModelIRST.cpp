@@ -203,12 +203,6 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 
 	float prob = m_lmtb->clprob(*m_lmtb_ng);
   
-  //apply OOV penalty if the n-gram starts with an OOV word 
-  //in a following version this will be integrated into the
-  //irstlm library
-  
-  if (*m_lmtb_ng->wordp(1) == m_lmtb->dict->oovcode())
-    prob-=m_lmtb->getlogOOVpenalty();
   
 	return TransformIRSTScore(prob);
 }
