@@ -118,7 +118,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   m_lmtb->init_statecache();
   m_lmtb->init_lmtcaches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
 
-  m_lmtb->setlogOOVpenalty(m_lmtb_dub);
+  if (m_lmtb_dub >0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
 
   return true;
 }
