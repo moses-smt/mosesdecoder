@@ -46,7 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Util.h"
 #include "TrellisPathList.h"
 #include "Timer.h"
-#include "IOStream.h"
+#include "IOWrapper.h"
 #include "Sentence.h"
 #include "ConfusionNet.h"
 #include "WordLattice.h"
@@ -62,14 +62,14 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
-bool ReadInput(IOStream &ioStream, InputTypeEnum inputType, InputType*& source) 
+bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source) 
 {
 	delete source;
 	switch(inputType)
 	{
-		case SentenceInput:         source = ioStream.GetInput(new Sentence(Input)); break;
-		case ConfusionNetworkInput: source = ioStream.GetInput(new ConfusionNet);    break;
-		case WordLatticeInput:      source = ioStream.GetInput(new WordLattice);     break;
+		case SentenceInput:         source = ioWrapper.GetInput(new Sentence(Input)); break;
+		case ConfusionNetworkInput: source = ioWrapper.GetInput(new ConfusionNet);    break;
+		case WordLatticeInput:      source = ioWrapper.GetInput(new WordLattice);     break;
 		default: TRACE_ERR("Unknown input type: " << inputType << "\n");
 	}
 	return (source ? true : false);
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// set up read/writing class
-	IOStream *ioStream = GetIODevice(staticData);
+	IOWrapper *ioWrapper = GetIODevice(staticData);
 
 	// check on weights
 	vector<float> weights = staticData.GetAllWeights();
@@ -120,13 +120,13 @@ int main(int argc, char* argv[])
 	  return EXIT_FAILURE;
 	}
 
-	if (ioStream == NULL)
+	if (ioWrapper == NULL)
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
 	InputType *source=0;
 	size_t lineCount = 0;
-	while(ReadInput(*ioStream,staticData.GetInputType(),source))
+	while(ReadInput(*ioWrapper,staticData.GetInputType(),source))
 	{
 			// note: source is only valid within this while loop!
 		IFVERBOSE(1)
@@ -138,14 +138,14 @@ int main(int argc, char* argv[])
 		manager.ProcessSentence();
 		
 		if (staticData.GetOutputWordGraph())
-			manager.GetWordGraph(source->GetTranslationId(), ioStream->GetOutputWordGraphStream());
+			manager.GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
 
                 if (staticData.GetOutputSearchGraph())
-		  manager.GetSearchGraph(source->GetTranslationId(), ioStream->GetOutputSearchGraphStream());
+		  manager.GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
 
 		// pick best translation (maximum a posteriori decoding)
 		if (! staticData.UseMBR()) {
-			ioStream->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
+			ioWrapper->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 						 staticData.GetReportSegmentation(), staticData.GetReportAllFactors());
 			IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
 			
@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
 			  	VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					TrellisPathList nBestList;
 					manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-					ioStream->OutputNBestList(nBestList, source->GetTranslationId());
+					ioWrapper->OutputNBestList(nBestList, source->GetTranslationId());
 					//RemoveAllInColl(nBestList);
 
 					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
 		      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
 		      IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
 		      std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
-		      ioStream->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
+		      ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
 					       staticData.GetReportSegmentation(),
 					       staticData.GetReportAllFactors());
 		      IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
 		manager.CalcDecoderStatistics();    
 	}
 	
-	delete ioStream;
+	delete ioWrapper;
 
 	IFVERBOSE(1)
 		PrintUserTime("End.");
@@ -207,9 +207,9 @@ int main(int argc, char* argv[])
 	#endif
 }
 
-IOStream *GetIODevice(const StaticData &staticData)
+IOWrapper *GetIODevice(const StaticData &staticData)
 {
-	IOStream *ioStream;
+	IOWrapper *ioWrapper;
 	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
 																,&outputFactorOrder = staticData.GetOutputFactorOrder();
 	FactorMask inputFactorUsed(inputFactorOrder);
@@ -220,7 +220,7 @@ IOStream *GetIODevice(const StaticData &staticData)
 	  VERBOSE(2,"IO from File" << endl);
 		string filePath = staticData.GetParam("input-file")[0];
 
-		ioStream = new IOStream(inputFactorOrder, outputFactorOrder, inputFactorUsed
+		ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath()
 																	, filePath);
@@ -228,14 +228,14 @@ IOStream *GetIODevice(const StaticData &staticData)
 	else
 	{
 	  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
-		ioStream = new IOStream(inputFactorOrder, outputFactorOrder, inputFactorUsed
+		ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath());
 	}
-	ioStream->ResetTranslationId();
+	ioWrapper->ResetTranslationId();
 
 	IFVERBOSE(1)
 		PrintUserTime("Created input-output object");
 
-	return ioStream;
+	return ioWrapper;
 }

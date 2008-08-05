@@ -35,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include "TypeDef.h"
 #include "Util.h"
-#include "IOStream.h"
+#include "IOWrapper.h"
 #include "Hypothesis.h"
 #include "WordsRange.h"
 #include "TrellisPathList.h"
@@ -45,7 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
-IOStream::IOStream(
+IOWrapper::IOWrapper(
 				const vector<FactorType>				&inputFactorOrder
 				, const vector<FactorType>			&outputFactorOrder
 				, const FactorMask							&inputFactorUsed
@@ -65,7 +65,7 @@ IOStream::IOStream(
 								, nBestSize, nBestFilePath);
 }
 
-IOStream::IOStream(const std::vector<FactorType>	&inputFactorOrder
+IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 						 , const std::vector<FactorType>	&outputFactorOrder
 							, const FactorMask							&inputFactorUsed
 							, size_t												nBestSize
@@ -87,7 +87,7 @@ IOStream::IOStream(const std::vector<FactorType>	&inputFactorOrder
 	m_inputStream = m_inputFile;
 }
 
-IOStream::~IOStream()
+IOWrapper::~IOWrapper()
 {
 	if (m_inputFile != NULL)
 		delete m_inputFile;
@@ -105,7 +105,7 @@ IOStream::~IOStream()
 	}
 }
 
-void IOStream::Initialization(const std::vector<FactorType>	&inputFactorOrder
+void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 														, const std::vector<FactorType>			&outputFactorOrder
 														, const FactorMask							&inputFactorUsed
 														, size_t												nBestSize
@@ -151,7 +151,7 @@ void IOStream::Initialization(const std::vector<FactorType>	&inputFactorOrder
 	}
 }
 
-InputType*IOStream::GetInput(InputType* inputType)
+InputType*IOWrapper::GetInput(InputType* inputType)
 {
 	if(inputType->Read(*m_inputStream, m_inputFactorOrder)) 
 	{
@@ -211,7 +211,7 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 	}
 }
 
-void IOStream::Backtrack(const Hypothesis *hypo){
+void IOWrapper::Backtrack(const Hypothesis *hypo){
 
 	if (hypo->GetPrevHypo() != NULL) {
 		VERBOSE(3,hypo->GetId() << " <= ");
@@ -219,7 +219,7 @@ void IOStream::Backtrack(const Hypothesis *hypo){
 	}
 }
 				
-void IOStream::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
 {
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
 			{
@@ -248,7 +248,7 @@ void OutputInput(std::ostream& os, const Hypothesis* hypo)
 		if (inp_phrases[i]) os << *inp_phrases[i];
 }
 
-void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
 {
 	if (hypo != NULL)
 	{
@@ -277,7 +277,7 @@ void IOStream::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bo
 	}
 }
 
-void IOStream::OutputNBestList(const TrellisPathList &nBestList, long translationId)
+void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId)
 {
 	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
 	bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
