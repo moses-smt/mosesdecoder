@@ -1049,7 +1049,7 @@ sub split_extract_gzipped {
     $unzippedfile =~ s/\.gz//;
     my $partfname = sprintf("%s.part%04d",$unzippedfile,0);
     open(PART,">$partfname") or die "Can't write $partfname";
-    open(EXTRACT,"zcat $file | ") or die "Can't read $file";
+    open(EXTRACT,"$ZCAT $file | ") or die "Can't read $file";
     while(<EXTRACT>) {
         if ($i>0 && $i % 10000000 == 0) {
             $split_when_possible = 1;
