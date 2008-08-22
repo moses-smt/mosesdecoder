@@ -305,6 +305,7 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 		if (labeledOutput)
 	    *m_nBestStream << "d: ";
 		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
+		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer2()) << " ";
 
 //		reordering
 		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();
