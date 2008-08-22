@@ -67,6 +67,7 @@ StaticData::StaticData()
 ,m_inputType(SentenceInput)
 ,m_numInputScores(0)
 ,m_distortionScoreProducer(0)
+,m_distortionScoreProducer2(0)
 ,m_wpProducer(0)
 ,m_useDistortionFutureCosts(false)
 ,m_isDetailedTranslationReportingEnabled(false) 
@@ -220,11 +221,14 @@ bool StaticData::LoadData(Parameter *parameter)
 	// score weights
 	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
 	m_weightDistortion				= Scan<float>(distortionWeights[0]);
+	m_weightDistortion2				= Scan<float>(distortionWeights[1]);
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
 	m_weightUnknownWord				= 1; // do we want to let mert decide weight for this ???
 
 	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightDistortion);
+	m_distortionScoreProducer2 = new DistortionScoreProducer(m_scoreIndexManager);
+	m_allWeights.push_back(m_weightDistortion2);
 
 	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightWordPenalty);
@@ -313,6 +317,7 @@ bool StaticData::LoadData(Parameter *parameter)
 		return false;
 	}
 	
+	if (!LoadLexicalDistortion()) return false;
 	if (!LoadLexicalReorderingModel()) return false;
 	if (!LoadLanguageModels()) return false;
 	if (!LoadGenerationTables()) return false;
@@ -364,6 +369,7 @@ StaticData::~StaticData()
 	
 	// small score producers
 	delete m_distortionScoreProducer;
+	delete m_distortionScoreProducer2;
 	delete m_wpProducer;
 	delete m_unknownWordPenaltyProducer;
 
@@ -383,7 +389,7 @@ bool StaticData::LoadLexicalReorderingModel()
   const vector<string> weightsStr = m_parameter.GetParam("weight-d");
   */
   std::vector<float>   weights;
-  size_t w = 1; //cur weight
+  size_t w = 2; //cur weight
   size_t f = 0; //cur file
   //get weights values
   std::cerr << "have " << fileStr.size() << " models\n";
@@ -915,5 +921,35 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const Phrase &s
 		return NULL;
 
 	return &(iter->second);
+}
+
+bool StaticData::LoadLexicalDistortion(){
+  std::string fileName = "/vox50/ssi/hardmeier/ldc.chi-eng/dist-table";
+                        // "/vox50/ssi/hardmeier/dist-table";
+                        // "/vox03/ssi/English-German/train/mtrain/europarl.doccase/model/ldc-pre-table.filtered";
+  if(!FileExists(fileName) && FileExists(fileName+".gz")){
+        fileName += ".gz";
+  }
+  InputFileStream file(fileName);
+  std::string line("");
+  std::cerr << "Loading distortion table into memory...";
+  while(!getline(file, line).eof()){
+    std::vector<std::string> tokens = TokenizeMultiCharSeparator(line, "|||");
+    std::pair< std::string,std::string > e = std::make_pair(tokens.at(0), tokens.at(1));
+
+    //last token are the probs
+    std::vector<float> p = Scan<float>(Tokenize(tokens.at(2)));
+    //sanity check: all lines must have equall number of probs
+    if((int)p.size() != 4){
+      TRACE_ERR( "found inconsistent number of probabilities... found " << p.size() << " expected 4" << std::endl);
+      exit(0);
+    }
+    //save it all into our map
+    float *entry = new float[4];
+    entry[0] = p[0]; entry[1] = p[1]; entry[2] = p[2]; entry[3] = p[3];
+    m_distortionTable[e] = entry;
+  }
+  std::cerr << "done.\n";
+  return true;
 }
 

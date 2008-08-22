@@ -20,16 +20,67 @@ std::string DistortionScoreProducer::GetScoreProducerDescription() const
 	return "distortion score";
 }
 
-//float DistortionScoreProducer::CalculateDistortionScoreOUTDATED(const WordsRange &prev, const WordsRange &curr) const
-//{
-//	return - (float) StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
-//}
+float beta_binomial(float p, float q, int x);
 
+float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr, float px, float qx) const
+{
+        // float p = px + 2.23;
+        float p = px + 2;
+        float q = qx + 2;
+
+        int x = StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
+        if(x < -6) x = -6;
+        if(x >  6) x =  6;
+        x += 6;
+
+        return beta_binomial(p, q, x);
+}
+
+float beta_binomial(float p, float q, int x)
+{
+        const long double n = 12.l;
+
+        long double n1 = lgammal(n + 1);
+        long double n2 = lgammal(q + n - x);
+        long double n3 = lgammal(x + p);
+        long double n4 = lgammal(p + q);
+        long double d1 = lgammal(x + 1);
+        long double d2 = lgammal(n - x + 1);
+        long double d3 = lgammal(p + q + n);
+        long double d4 = lgammal(p);
+        long double d5 = lgammal(q);
+
+        // std::cerr << n1 << " + " << n2 << " + " << n3 << " + " << n4 << std::endl;
+        // std::cerr << d1 << " + " << d2 << " + " << d3 << " + " << d4 << " + " << d5 << std::endl;
+
+        long double part1 = n1 + n4 - d3 - d4 - d5;
+        // std::cerr << part1 << std::endl;
+        long double part2 = n2 + n3 - d1 - d2;
+        // std::cerr << part2 << std::endl;
+
+        long double score = part1 + part2;
+        // std::cerr << "x: " << x << "   score: " << score << std::endl;
+
+        if(!finite(score)) {
+                std::cerr << p << " ; " << q << std::endl;
+                std::cerr << n1 << " + " << n2 << " + " << n3 << " + " << n4 << std::endl;
+                std::cerr << d1 << " + " << d2 << " + " << d3 << " + " << d4 << " + " << d5 << std::endl;
+                std::cerr << part1 << std::endl;
+                std::cerr << part2 << std::endl;
+                std::cerr << "x: " << x << "   score: " << score << std::endl;
+                assert(false);
+        }
+
+        return FloorScore((float) score);
+}
+
+/*** OLD CODE ***/
+#if 0
 float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
 {
   const int USE_OLD = 1;
   if (USE_OLD) {
-	return - (float) StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
+	return - abs((float) StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr));
   }
 
   // Pay distortion score as soon as possible, from Moore and Quirk MT Summit 2007
@@ -50,7 +101,7 @@ float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, 
 
   return (float) -2*(curr.GetNumWordsBetween(prev) + curr.GetNumWordsCovered());
 }
-
+#endif
 
 
 WordPenaltyProducer::WordPenaltyProducer(ScoreIndexManager &scoreIndexManager)

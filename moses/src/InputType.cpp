@@ -43,7 +43,7 @@ int InputType::ComputeDistortionDistance(const WordsRange& prev, const WordsRang
 	} else {
 	  dist = (int)prev.GetEndPos() - (int)current.GetStartPos() + 1 ;
 	}
-	return abs(dist);
+	return dist;
 }
 
 bool InputType::CanIGetFromAToB(size_t start, size_t end) const

@@ -226,7 +226,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 				// the distortion limit, we don't allow this extension to be made.
 				WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 				int required_distortion =
-					m_source.ComputeDistortionDistance(extRange, bestNextExtension);
+					abs(m_source.ComputeDistortionDistance(extRange, bestNextExtension));
 
 				if (required_distortion <= maxDistortion) {
 					ExpandAllHypotheses(hypothesis
