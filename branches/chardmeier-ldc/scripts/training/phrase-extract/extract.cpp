@@ -34,6 +34,15 @@ class SentenceAlignment {
   //  void clear() { delete(alignment); };
 };
 
+struct Phrase {
+  int startE, endE;
+  int startF, endF;
+};
+
+#define MAX_PHRASES_PER_SENTENCE 1000
+Phrase phrase[MAX_PHRASES_PER_SENTENCE];
+int nphrases;
+
 void extract( SentenceAlignment & );
 void addPhrase( SentenceAlignment &, int, int, int, int );
 vector<string> tokenize( char [] );
@@ -42,6 +51,7 @@ bool isAligned ( SentenceAlignment &, int, int );
 ofstream extractFile;
 ofstream extractFileInv;
 ofstream extractFileOrientation;
+ofstream distortionFile;
 int maxPhraseLength;
 int phraseCount = 0;
 char* fileNameExtract;
@@ -118,12 +128,15 @@ int main(int argc, char* argv[])
     extractFile.close();
     extractFileInv.close();
     if (orientationFlag) extractFileOrientation.close();
+    distortionFile.close();
   }
 }
  
 void extract( SentenceAlignment &sentence ) {
   int countE = sentence.english.size();
   int countF = sentence.foreign.size();
+
+  nphrases = 0;
 
   // check alignments for english phrase startE...endE
   for(int startE=0;startE<countE;startE++) {
@@ -175,11 +188,88 @@ void extract( SentenceAlignment &sentence ) {
       }
     }
   }
+
+  for(int i = 0; i < nphrases; i++) {
+    // cout << "phrase " << phrase[i].startE << "-" << phrase[i].endE <<
+    // 	" / " << phrase[i].startF << "-" << phrase[i].endF << endl;
+    int preDistortion = 1000, postDistortion = 1000;
+    int tgtPre = phrase[i].startE - 1;
+    int tgtPost = phrase[i].endE + 1;
+    for(int j = 0; j < nphrases; j++) {
+      if(j == i) continue;
+        // cout << "    phrase " << phrase[j].startE << "-" << phrase[j].endE <<
+	//     " / " << phrase[j].startF << "-" << phrase[j].endF << endl;
+        if(tgtPre == phrase[j].endE) {
+          int dst = phrase[i].startF - phrase[j].endF - 1;
+	  // cout << "        PRE  " << dst << endl;
+          if(abs(dst) < abs(preDistortion))
+            preDistortion = dst;
+        }
+        if(tgtPost == phrase[j].startE) {
+          int dst = phrase[j].startF - phrase[i].endF - 1;
+	  // cout << "        POST " << dst << endl;
+          if(abs(dst) < abs(postDistortion))
+            postDistortion = dst;
+        }
+    }
+    if(tgtPre == -1)
+      preDistortion = phrase[i].startF;
+    if(tgtPost >= countE)
+      postDistortion = countF - phrase[i].endF - 1;
+
+    // if there are no adjacent phrases, take the nearest alignment point
+    if(preDistortion == 1000) {
+      for(int j = 0; j < countF; j++) {
+        if(isAligned(sentence, tgtPre, j)) {
+          int dst = phrase[i].endF - j - 1;
+          if(abs(dst) < abs(preDistortion))
+            preDistortion = dst;
+        }
+      }
+    }
+    if(postDistortion == 1000) {
+      for(int j = 0; j < countF; j++) {
+        if(isAligned(sentence, tgtPost, j)) {
+          int dst = j - phrase[i].endF - 1;
+          if(abs(dst) < abs(postDistortion))
+            postDistortion = dst;
+        }
+      }
+    }
+
+    for(int fi=phrase[i].startF;fi<=phrase[i].endF;fi++) {
+      distortionFile << sentence.foreign[fi] << " ";
+    }
+    distortionFile << "||| ";
+
+    // english
+    for(int ei=phrase[i].startE;ei<=phrase[i].endE;ei++) {
+      distortionFile << sentence.english[ei] << " ";
+    }
+    distortionFile << "||| ";
+    if(preDistortion != 1000)
+      distortionFile << preDistortion << " ";
+    else
+      distortionFile << "-- ";
+    if(postDistortion != 1000)
+      distortionFile << postDistortion << endl;
+    else
+      distortionFile << "--" << endl;
+  }
+
 }
 
 void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF ) {
   // foreign
   // cout << "adding ( " << startF << "-" << endF << ", " << startE << "-" << endE << ")\n"; 
+
+ if(nphrases < MAX_PHRASES_PER_SENTENCE) {
+   phrase[nphrases].startE = startE;
+   phrase[nphrases].endE = endE;
+   phrase[nphrases].startF = startF;
+   phrase[nphrases].endF = endF;
+   nphrases++;
+ }
 
  if (onlyOutputSpanInfo) {
    cout << startF << " " << endF << " " << startE << " " << endE << endl;
@@ -190,15 +280,18 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
       extractFile.close();
       extractFileInv.close();
       if (orientationFlag) extractFileOrientation.close();
+      distortionFile.close();
     }
     char part[10];
     sprintf(part,".part%04d",phraseCount/10000000);
     string fileNameExtractPart = string(fileNameExtract) + part;
     string fileNameExtractInvPart = string(fileNameExtract) + ".inv" + part;
     string fileNameExtractOrientationPart = string(fileNameExtract) + ".o" + part;
+    string fileNameExtractDistortionPart = string(fileNameExtract) + ".dist" + part;
     extractFile.open(fileNameExtractPart.c_str());
     extractFileInv.open(fileNameExtractInvPart.c_str());
     if (orientationFlag) extractFileOrientation.open(fileNameExtractOrientationPart.c_str());
+    distortionFile.open(fileNameExtractDistortionPart.c_str());
   }
   phraseCount++;
 

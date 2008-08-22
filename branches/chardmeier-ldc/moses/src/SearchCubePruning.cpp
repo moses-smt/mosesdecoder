@@ -265,7 +265,7 @@ bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const Wor
 		// the distortion limit, we don't allow this extension to be made.
 		WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 		int required_distortion =
-			m_source.ComputeDistortionDistance(range, bestNextExtension);
+			abs(m_source.ComputeDistortionDistance(range, bestNextExtension));
 
 		if (required_distortion <= maxDistortion) {
 			return true;

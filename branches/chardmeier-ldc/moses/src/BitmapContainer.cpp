@@ -51,6 +51,7 @@ class HypothesisScoreOrdererNoDistortion
 		}
 };
 
+#if 0
 class HypothesisScoreOrdererWithDistortion
 {
 	public:
@@ -93,6 +94,7 @@ class HypothesisScoreOrdererWithDistortion
 };
 
 const WordsRange *HypothesisScoreOrdererWithDistortion::transOptRange = NULL;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // BackwardsEdge Code
@@ -146,8 +148,8 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 			}
 		else
 			{
-				int distortionDistance = itype->ComputeDistortionDistance(hypo.GetCurrSourceWordsRange()
-																		, transOptRange);
+				int distortionDistance = abs(itype->ComputeDistortionDistance(hypo.GetCurrSourceWordsRange()
+																		, transOptRange));
 
 				if (distortionDistance <= maxDistortion)
 					m_hypotheses.push_back(&hypo);
@@ -166,10 +168,12 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 		assert(m_hypotheses[0]->GetTotalScore() >= m_hypotheses[1]->GetTotalScore());
 	}	
 
+#if 0
 	HypothesisScoreOrdererWithDistortion::transOptRange = &transOptRange;
 	std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrdererWithDistortion());
-
-	// std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrdererNoDistortion());
+#else
+	std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrdererNoDistortion());
+#endif
 }
 
 BackwardsEdge::~BackwardsEdge()

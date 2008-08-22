@@ -48,10 +48,12 @@ class UnknownWordPenaltyProducer;
 class StaticData
 {
 private:
+	typedef std::map< std::pair< std::string,std::string >,float* > _DistortionMapType;
 	static StaticData									s_instance;
 protected:	
 
 	std::map<long,Phrase> m_constraints;
+	_DistortionMapType m_distortionTable;
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::vector <DecodeGraph*>		m_decodeStepVL;
@@ -66,6 +68,7 @@ protected:
 	float
 		m_beamWidth,
 		m_weightDistortion, 
+		m_weightDistortion2, 
 		m_weightWordPenalty, 
 		m_wordDeletionWeight,
 		m_weightUnknownWord;
@@ -103,6 +106,7 @@ protected:
 
 	mutable size_t m_verboseLevel;
 	DistortionScoreProducer *m_distortionScoreProducer;
+	DistortionScoreProducer *m_distortionScoreProducer2;
 	WordPenaltyProducer *m_wpProducer;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
@@ -388,6 +392,7 @@ public:
 		return m_allWeights;
 	}
 	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
+	const DistortionScoreProducer *GetDistortionScoreProducer2() const { return m_distortionScoreProducer2; }
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
 	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 
@@ -415,4 +420,18 @@ public:
 	}
 
 	const TranslationOptionList* FindTransOptListInCache(const Phrase &sourcePhrase) const;
+
+        const float* GetDistortionParameters(std::string s, std::string t) const {
+                _DistortionMapType::const_iterator i = m_distortionTable.find(std::make_pair(s,t));
+                if(i != m_distortionTable.end()) {
+                        // std::cerr << "found *" << s << "*: " << i->second.first << "/" << i->second.second << std::endl;
+                        return i->second;
+                } else {
+                        // std::cerr << "not found: *" << s << "*" << std::endl;
+                        static const float default_distortion[4] = {8.23, 8, 8.23, 8};
+                        return default_distortion;
+                }
+        }
+
+        bool LoadLexicalDistortion();
 };

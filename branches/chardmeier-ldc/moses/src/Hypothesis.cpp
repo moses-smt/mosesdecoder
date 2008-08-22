@@ -351,7 +351,30 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 }
 
 void Hypothesis::CalcDistortionScore()
+{
+        const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
+        const float* params_cur = StaticData::Instance().GetDistortionParameters(m_sourcePhrase->ToString(), m_targetPhrase.ToString());
+        float distortionScore = dsp->CalculateDistortionScore(
+                        m_prevHypo->GetCurrSourceWordsRange(),
+                        this->GetCurrSourceWordsRange(), params_cur[0], params_cur[1]
+     );
+        m_scoreBreakdown.PlusEquals(dsp, distortionScore);
 
+        if(m_prevHypo->m_prevHypo == NULL)
+                return;
+
+        const DistortionScoreProducer *dsp2 = StaticData::Instance().GetDistortionScoreProducer2();
+        const float* params_prev = StaticData::Instance().GetDistortionParameters(m_prevHypo->m_sourcePhrase->ToString(), m_prevHypo->m_targetPhrase.ToString());
+        float distortionScore2 = dsp2->CalculateDistortionScore(
+                        m_prevHypo->GetCurrSourceWordsRange(),
+                        this->GetCurrSourceWordsRange(), params_prev[2], params_prev[3]
+     );
+        m_scoreBreakdown.PlusEquals(dsp2, distortionScore2);
+}
+
+/*** OLD CODE ***/
+#if 0
+void Hypothesis::CalcDistortionScore()
 {
 	const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
 	float distortionScore = dsp->CalculateDistortionScore(
@@ -361,6 +384,20 @@ void Hypothesis::CalcDistortionScore()
      );
 	m_scoreBreakdown.PlusEquals(dsp, distortionScore);
 }
+#endif
+
+#ifdef VAR_DISTORTION_LIMIT
+int Hypothesis::CalcMaxDistortion()
+{
+#ifndef VAR_DISTORTION_LIMIT
+  return StaticData::Instance().GetMaxDistortion();
+#else
+  const float* params_cur = StaticData::Instance().GetDistortionParameters(m_sourcePhrase->ToString(), m_targetPhrase.ToString());
+
+#endif
+}
+#endif
+
 
 void Hypothesis::ResetScore()
 {
@@ -423,8 +460,15 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 		m_futureScore += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
 	}
 
+/*** OLD CODE - still in use for this version ***/
+#if 1
+  // add future costs for distortion model
+  if(StaticData::Instance().UseDistortionFutureCosts())
+          m_futureScore += m_sourceCompleted.GetFutureCosts( (int)m_currSourceWordsRange.GetEndPos() );
+#else
 	// you can't get future costs for distortion model anymore, because it is preloaded (see CalculateDistortionScore)
 	assert(!StaticData::Instance().UseDistortionFutureCosts());
+#endif
 }
 
 const Hypothesis* Hypothesis::GetPrevHypo()const{

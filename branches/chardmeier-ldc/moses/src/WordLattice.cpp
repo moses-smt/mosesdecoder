@@ -97,6 +97,7 @@ int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRa
 
 			TRACE_ERR("B: got a weird distance from "<< current.GetStartPos() << " to " << prev.GetEndPos()+1 << " of " << result << "\n");
 		}
+		result = -result;
 	} else if (prev.GetEndPos()+1 == current.GetStartPos()) {
 		return 0;
 	} else {
