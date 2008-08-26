@@ -182,7 +182,7 @@ public:
 	inline size_t GetEdgeToTheRightOf(size_t r) const
 	{
 		if (r+1 == m_size) return r;
-		while (r < m_size && !m_bitmap[r+1]) { ++r; }
+		while (r+1 < m_size && !m_bitmap[r+1]) { ++r; }
 		return r;
 	}
 
