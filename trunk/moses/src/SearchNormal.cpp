@@ -119,6 +119,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			{
 				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
 				{
+					//TODO: does this method include incompatible WordLattice hypotheses?
 					ExpandAllHypotheses(hypothesis
 							, m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos)));
 				}
@@ -140,20 +141,22 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 		size_t maxSize = sourceSize - startPos;
 		size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 #ifdef DEBUGLATTICE
-		const int INTEREST = 2;
+		const int INTEREST = 29;
 #endif
 		maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
 		size_t closestLeft = hypoBitmap.GetEdgeToTheLeftOf(startPos);
 		if (isWordLattice) {
 			// first question: is there a path from the closest translated word to the left
 			// of the hypothesized extension to the start of the hypothesized extension?
+			// long version: is there anything to our left? is it farther left than where we're starting anyway? can we get to it?
+				//closestLeft is exclusive: a value of 3 means 2 is covered, our arc is currently ENDING at 3 and can start at 3 implicitly
 			//if (closestLeft != startPos && closestLeft != 0 && ((startPos - closestLeft) != 1 && !m_source.CanIGetFromAToB(closestLeft+1, startPos+1))) {
-			if (closestLeft != startPos && closestLeft != 0 && ((startPos - closestLeft) != 0 && !m_source.CanIGetFromAToB(closestLeft, startPos))) {
+			//if (closestLeft != startPos && closestLeft != 0 && ((startPos - closestLeft) != 0 && !m_source.CanIGetFromAToB(closestLeft, startPos))) {
+			if (closestLeft != 0 && closestLeft != startPos && !m_source.CanIGetFromAToB(closestLeft, startPos)) {
 #ifdef DEBUGLATTICE
 				if (startPos == INTEREST) {
-					std::cerr << hypothesis <<"\n";
-					std::cerr << m_source.CanIGetFromAToB(closestLeft+1,startPos+1) << "\n";
-					std::cerr << "Die0: " << (closestLeft) << " " << startPos << "\n";
+					std::cerr << "Die0: hyp = " << hypothesis <<"\n";
+					std::cerr << "Die0: CanIGetFromAToB(" << (closestLeft) << "," << (startPos) << ") = " << m_source.CanIGetFromAToB(closestLeft,startPos) << "\n";
 				}
 #endif
 				continue;
@@ -167,21 +170,25 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			WordsRange extRange(startPos, endPos);
 #ifdef DEBUGLATTICE
 			//if (startPos == INTEREST) { std::cerr << "  (" << hypoFirstGapPos << ")-> wr: " << extRange << "\n"; }
-			bool interest = ((startPos == endPos) && (startPos == INTEREST)) || (startPos ==0 && endPos == 1);
+			bool interest = ((startPos == endPos) && (startPos == INTEREST));// || (startPos ==0 && endPos == 1);
 			bool debug = interest;
 			//(startPos > (INTEREST-8) && hypoFirstGapPos > 0 && startPos <= INTEREST && endPos >=INTEREST && endPos < (INTEREST+25) && hypoFirstGapPos == INTEREST);
-			debug2 = debug;
-			if (debug) { std::cerr << (startPos==INTEREST? "LOOK-->" : "") << "XP: " << hypothesis << "\next: " << extRange << "\n"; }
+			//debug2 = debug;
+			//if (debug) { std::cerr << (startPos==INTEREST? "LOOK-->" : "") << "XP: " << hypothesis << "\next: " << extRange << "\n"; }
 #endif
 			if (hypoBitmap.Overlap(extRange) ||
-					(isWordLattice && (!m_source.IsCoveragePossible(extRange) ||
-							   !m_source.IsExtensionPossible(hypothesis.GetCurrSourceWordsRange(), extRange))
+					(isWordLattice && !m_source.IsCoveragePossible(extRange) 
+						//||   !m_source.IsExtensionPossible(hypothesis.GetCurrSourceWordsRange(), extRange))
+						//isExtensionPossible is redundant. We just need to know 1. is it consistant? 2. can our end touch the next thing to the right.
 					)
 			   )
 			{
 #ifdef DEBUGLATTICE
-				if (debug) {
-					std::cerr << hypoBitmap.Overlap(extRange) << " " << m_source.IsCoveragePossible(extRange) << " " << m_source.IsExtensionPossible(hypothesis.GetCurrSourceWordsRange(), extRange)<< " Die1\n";
+				if (interest) {
+					//std::cerr << "Die1: hyp: " << hypothesis << "\n";
+					//std::cerr << "Die1: extRange: " << extRange << "\n";
+					//std::cerr << "Die1: currSrcRange: " << hypothesis.GetCurrSourceWordsRange() << "\n";
+					//std::cerr << "Die1: Overlap=" << hypoBitmap.Overlap(extRange) << " IsCoveragePossible=" << m_source.IsCoveragePossible(extRange) << " IsExtensionPossible=" << m_source.IsExtensionPossible(hypothesis.GetCurrSourceWordsRange(), extRange)<< "\n";
 				}
 #endif
 				continue;
@@ -189,10 +196,21 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			bool leftMostEdge = (hypoFirstGapPos == startPos);
 			size_t closestRight = hypoBitmap.GetEdgeToTheRightOf(endPos);	
 			// ask second question here:
+			// we already know we can get to our starting point from the closest thing to the left. We now ask the follow up:
+			// can we get from our end to the closest thing on the right?
+			// long version: is anything to our right? is it farther right than our (inclusive) end? can our end reach it?
+			// closest right definition: 
+			
 			if (isWordLattice) {
-				if (!leftMostEdge && closestRight != endPos && closestRight != sourceSize && !m_source.CanIGetFromAToB(endPos, closestRight + 1)) {
+				//if (!leftMostEdge && closestRight != endPos && closestRight != sourceSize && !m_source.CanIGetFromAToB(endPos, closestRight + 1)) {
+				if (closestRight != endPos && ((closestRight + 1) < sourceSize) && !m_source.CanIGetFromAToB(endPos, closestRight + 1)) {
 #ifdef DEBUGLATTICE
-					if (debug) { std::cerr << "Can't get to right edge (" << endPos << "," << closestRight << ")\n"; }
+					if (interest) { 
+						std::cerr << "Die2: hyp = " << hypothesis <<"\n";
+						std::cerr << "Die2: extRange = " << extRange <<"\n";
+						std::cerr << "Die2: CloseRight = " << closestRight <<"\n";
+						std::cerr << "Die2: CanIGetFromAToB(" << (endPos) << "," << (closestRight+1) << ") = " << m_source.CanIGetFromAToB(endPos,closestRight + 1) << "\n";
+					}
 #endif
 					continue;
 				}
@@ -204,7 +222,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 #ifdef DEBUGLATTICE
 				size_t vl = StaticData::Instance().GetVerboseLevel();
 				if (debug2) {
-					std::cerr << "Ext!\n";
+					//std::cerr << "Ext!\n";
 					StaticData::Instance().SetVerboseLevel(4);
 				}
 #endif
@@ -222,7 +240,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 				// distortion penalty for the following phrase will be computed relative
 				// to the ending position of the current extension, so we ask now what
 				// its maximum value will be (which will always be the value of the
-				// hypothesis starting at the left-most edge).  If this vlaue is than
+				// hypothesis starting at the left-most edge).  If this value is less than
 				// the distortion limit, we don't allow this extension to be made.
 				WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 				int required_distortion =
@@ -233,8 +251,12 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 							,m_transOptColl.GetTranslationOptionList(extRange));
 				}
 #ifdef DEBUGLATTICE
-				else
-					if (debug) { std::cerr << "Distortion violation\n"; }
+				else {
+					if (interest) { 
+						std::cerr << "Distortion violation\n"; 
+						std::cerr << (startPos==INTEREST? "VLOOK-->" : "") << "XP: " << hypothesis << "\next: " << extRange << "\n";
+					}
+				}
 #endif
 			}
 		}
