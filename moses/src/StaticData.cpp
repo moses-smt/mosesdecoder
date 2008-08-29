@@ -924,8 +924,10 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const Phrase &s
 }
 
 bool StaticData::LoadLexicalDistortion(){
-  std::string fileName = "/vox50/ssi/hardmeier/ldc.chi-eng/dist-table";
-                        // "/vox50/ssi/hardmeier/dist-table";
+  std::string fileName =
+                        // "/vox50/ssi/hardmeier/ldc.chi-eng/dist-table.dl12";
+                        // "/vox50/ssi/hardmeier/wdist-table";
+                        "/vox50/ssi/hardmeier/srcdist-table";
                         // "/vox03/ssi/English-German/train/mtrain/europarl.doccase/model/ldc-pre-table.filtered";
   if(!FileExists(fileName) && FileExists(fileName+".gz")){
         fileName += ".gz";
@@ -935,10 +937,15 @@ bool StaticData::LoadLexicalDistortion(){
   std::cerr << "Loading distortion table into memory...";
   while(!getline(file, line).eof()){
     std::vector<std::string> tokens = TokenizeMultiCharSeparator(line, "|||");
+#if !defined(CONDITION_ON_WORDS) && !defined(CONDITION_ON_SRCPHRASE)
     std::pair< std::string,std::string > e = std::make_pair(tokens.at(0), tokens.at(1));
 
     //last token are the probs
     std::vector<float> p = Scan<float>(Tokenize(tokens.at(2)));
+#else
+    std::pair< std::string,std::string > e = std::make_pair(tokens.at(0), "");
+    std::vector<float> p = Scan<float>(Tokenize(tokens.at(1)));
+#endif
     //sanity check: all lines must have equall number of probs
     if((int)p.size() != 4){
       TRACE_ERR( "found inconsistent number of probabilities... found " << p.size() << " expected 4" << std::endl);
