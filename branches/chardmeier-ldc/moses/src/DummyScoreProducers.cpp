@@ -22,6 +22,7 @@ std::string DistortionScoreProducer::GetScoreProducerDescription() const
 
 float beta_binomial(float p, float q, int x);
 
+#define DISTORTION_RANGE 6
 float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr, float px, float qx) const
 {
         // float p = px + 2.23;
@@ -29,16 +30,16 @@ float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, 
         float q = qx + 2;
 
         int x = StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
-        if(x < -6) x = -6;
-        if(x >  6) x =  6;
-        x += 6;
+        if(x < -DISTORTION_RANGE) x = -DISTORTION_RANGE;
+        if(x >  DISTORTION_RANGE) x =  DISTORTION_RANGE;
+        x += DISTORTION_RANGE;
 
         return beta_binomial(p, q, x);
 }
 
 float beta_binomial(float p, float q, int x)
 {
-        const long double n = 12.l;
+        const long double n = (long double) 2 * DISTORTION_RANGE;
 
         long double n1 = lgammal(n + 1);
         long double n2 = lgammal(q + n - x);

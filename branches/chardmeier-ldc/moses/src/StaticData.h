@@ -428,7 +428,8 @@ public:
                         return i->second;
                 } else {
                         // std::cerr << "not found: *" << s << "*" << std::endl;
-                        static const float default_distortion[4] = {8.23, 8, 8.23, 8};
+                        // static const float default_distortion[4] = {8.23, 8, 8.23, 8};
+                        static const float default_distortion[4] = {12, 12, 12, 12};
                         return default_distortion;
                 }
         }
