@@ -7,4 +7,4 @@ AC_LANG_CPLUSPLUS
 AC_PROG_CXX
 AM_PROG_LIBTOOL
 
-AC_OUTPUT(Makefile irstlm/Makefile irstlm/src/Makefile moses/Makefile moses/src/Makefile moses-cmd/Makefile moses-cmd/src/Makefile)
+AC_OUTPUT(Makefile irstlm/Makefile irstlm/src/Makefile moses/Makefile moses/src/Makefile moses-cmd/Makefile moses-cmd/src/Makefile misc/Makefile)
