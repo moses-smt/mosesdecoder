@@ -100,6 +100,13 @@ public:
 		s=w.GetString(m_input,false);
 	}
 
+	void ClearCache() const
+	{
+		for(size_t i=0;i<m_tgtColls.size();++i) 
+			delete m_tgtColls[i];
+		m_tgtColls.clear();
+	}
+
 	void CleanUp() 
 	{
 		assert(m_dict);

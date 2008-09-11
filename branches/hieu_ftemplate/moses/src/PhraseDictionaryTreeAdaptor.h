@@ -56,6 +56,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 
 	// clean up temporary memory etc.
 	void CleanUp();
+	void ClearCache() const;
 
 	void InitializeForInput(InputType const& source);
 

@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
+#include "PhraseDictionaryTreeAdaptor.h"
 
 using namespace std;
 
@@ -315,6 +316,18 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 		}
 	}
 
+	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
+	{
+		const DecodeGraph &decodeStepList = *decodeStepVL[startVL];
+		list <const DecodeStep* >::const_iterator iterStep;
+		for (iterStep = decodeStepList.begin(); iterStep != decodeStepList.end() ; ++iterStep) 
+		{
+			const DecodeStep &decodeStep = **iterStep;
+			const PhraseDictionaryTreeAdaptor &binPhraseDict = static_cast<const PhraseDictionaryTreeAdaptor&>(decodeStep.GetPhraseDictionary());
+			binPhraseDict.ClearCache();
+		}
+	}
+
 	VERBOSE(3,"Translation Option Collection\n " << *this << endl);
 	
 	ProcessUnknownWord(decodeStepVL);
@@ -381,7 +394,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
 																(m_source, *oldPtoc
 																, startPos, endPos, adhereTableLimit );
-
+			
 			// do rest of decode steps
 			int indexStep = 0;
 			for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 

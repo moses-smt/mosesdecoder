@@ -33,6 +33,12 @@ PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 	delete imp;
 }
 
+void PhraseDictionaryTreeAdaptor::ClearCache() const
+{
+	imp->ClearCache();
+}
+
+
 void PhraseDictionaryTreeAdaptor::CleanUp() 
 {
 	imp->CleanUp();
