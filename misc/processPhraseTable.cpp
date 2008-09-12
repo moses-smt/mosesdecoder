@@ -14,6 +14,7 @@
 #include "InputFileStream.h"
 #include "Timer.h"
 
+using namespace std;
 Timer timer;
 
 template<typename T>
@@ -36,6 +37,7 @@ inline bool existsFile(const std::string& filename) {
 
 int main(int argc,char **argv) {
 	std::string fto;size_t noScoreComponent=5;int cn=0;
+	bool aligninfo=false;
 	std::vector<std::pair<std::string,std::pair<char*,char*> > > ftts;
 	int verb=0;
 	for(int i=1;i<argc;++i) {
@@ -50,6 +52,7 @@ int main(int argc,char **argv) {
 		else if(s=="-out") fto=std::string(argv[++i]);
 		else if(s=="-cn") cn=1;
 		else if(s=="-irst") cn=2;
+		else if(s=="-alignment-info") aligninfo=true;
 		else if(s=="-v") verb=atoi(argv[++i]);
 		else if(s=="-h") 
 			{
@@ -58,7 +61,8 @@ int main(int argc,char **argv) {
 					"\t-ttable int int string   -- translation table file, use '-' for stdin\n"
 					"\t-out string      -- output file name prefix for binary ttable\n"
 					"\t-nscores int     -- number of scores in ttable\n"
-					"\nfunctions:\n"
+					"\t-alignment-info  -- include alignment info in the binary ttable (suffix \".wa\")\n"
+			"\nfunctions:\n"
 					"\t - convert ascii ttable in binary format\n"
 					"\t - if ttable is not read from stdin:\n"
 					"\t     treat each line as source phrase an print tgt candidates\n"
@@ -72,13 +76,26 @@ int main(int argc,char **argv) {
 			}
 	}
 	
+	
 	if(ftts.size()) {
-			std::cerr<<"processing ptree for\n";
+		
+		if(ftts.size()==1){
+			std::cerr<<"processing ptree for ";
+			PhraseDictionaryTree pdt(noScoreComponent);
+			
+			pdt.PrintWordAlignment(aligninfo);
 
-			if(ftts.size()==1 && ftts[0].first=="-") {
-				PhraseDictionaryTree pdt(noScoreComponent);
-				pdt.Create(std::cin,fto);}
-			else 
+			if (ftts[0].first=="-") {
+				std::cerr<< "stdin\n";
+				pdt.Create(std::cin,fto);
+			}
+			else{
+				std::cerr<< ftts[0].first << "\n";
+				InputFileStream in(ftts[0].first);
+				pdt.Create(in,fto);
+			}
+		}
+		else 
 				{
 #if 0
 					std::vector<PhraseDictionaryTree const*> pdicts;
@@ -103,6 +120,7 @@ int main(int argc,char **argv) {
 						}
 						std::cerr<<"reading bin ttable\n";
 						pdt.Read(prefix); 
+						
 					}
 					
 					std::cerr<<"processing stdin\n";
