@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
+#include <iostream>
 #include <cassert>
 #include <fstream>
 #include <sstream>
@@ -104,6 +105,17 @@ inline std::vector<T> Scan(const std::vector< std::string > &input)
 		output[i] = Scan<T>( input[i] );
 	}
 	return output;
+}
+
+/** replace all occurrences of todelStr in str with the string toaddStr */
+inline std::string Replace(const std::string& str,
+													 const std::string& todelStr,
+													 const std::string& toaddStr)
+{
+	size_t pos=0;
+	std::string newStr=str;	
+	while ((pos=newStr.find(todelStr,pos))!=std::string::npos){		newStr.replace(pos++,todelStr.size(),toaddStr);	}
+	return newStr;
 }
 
 /** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument. 
@@ -259,7 +271,6 @@ void RemoveAllInColl(COLL &coll)
 		delete (*iter);
 	}
 	coll.clear();
-
 }
 
 //! x-platform reference to temp folder

@@ -111,7 +111,10 @@ protected:
 	bool m_isDetailedTranslationReportingEnabled;
 	bool m_onlyDistinctNBest;
 	bool m_computeLMBackoffStats;
-
+	bool m_UseAlignmentInfo;
+	bool m_PrintAlignmentInfo;
+	bool m_PrintAlignmentInfoNbest;
+		
 	mutable std::auto_ptr<SentenceStats> m_sentenceStats;
 	std::string m_factorDelimiter; //! by default, |, but it can be changed
 	size_t m_maxFactorIdx[2];  //! number of factors on source and target side
@@ -392,6 +395,10 @@ public:
 	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 
 	bool UseDistortionFutureCosts() const {return m_useDistortionFutureCosts;}
+	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
+	void UseAlignmentInfo(bool a){ m_UseAlignmentInfo=a; };
+	bool PrintAlignmentInfo() const { return m_PrintAlignmentInfo; }
+	bool PrintAlignmentInfoInNbest() const {return m_PrintAlignmentInfoNbest;}
 	bool GetDistinctNBest() const {return m_onlyDistinctNBest;}
 	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }

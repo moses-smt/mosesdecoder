@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "TypeDef.h"
 #include "ScoreComponentCollection.h"
+#include "AlignmentPair.h"
 #include "StaticData.h"
 
 class PhraseDictionary;
@@ -56,7 +57,7 @@ class TranslationOption
 
 protected:
 
-	Phrase 							m_targetPhrase; /*< output phrase when using this translation option */
+	TargetPhrase 							m_targetPhrase; /*< output phrase when using this translation option */
 	Phrase				      *m_sourcePhrase; /*< input phrase translated by this */
 	const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
 	float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
@@ -97,7 +98,7 @@ public:
 	void MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToMerge);
 
 	/** returns target phrase */
-	inline const Phrase &GetTargetPhrase() const
+	inline const TargetPhrase &GetTargetPhrase() const
 	{
 		return m_targetPhrase;
 	}
@@ -172,7 +173,7 @@ public:
 
 	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
 	void CalcScore();
-
+	
 	void CacheReorderingProb(const LexicalReordering &lexreordering
 													, const Score &score);
 

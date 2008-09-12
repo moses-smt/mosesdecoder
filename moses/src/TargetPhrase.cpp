@@ -33,17 +33,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+bool TargetPhrase::wordalignflag=StaticData::Instance().UseAlignmentInfo();
+bool TargetPhrase::printalign=StaticData::Instance().PrintAlignmentInfo();
+
+//bool TargetPhrase::wordalignflag;
+//bool TargetPhrase::printalign;
+
 TargetPhrase::TargetPhrase(FactorDirection direction)
-	//:Phrase(direction), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
 	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
 {
+		wordalignflag=StaticData::Instance().UseAlignmentInfo();
+		printalign=StaticData::Instance().PrintAlignmentInfo();
 }
 
 void TargetPhrase::SetScore()
 { // used when creating translations of unknown words:
 	m_transScore = m_ngramScore = 0;	
-	//m_ngramScore = 0;	
 	m_fullScore = - StaticData::Instance().GetWeightWordPenalty();	
+}
+
+void TargetPhrase::SetAlignment()
+{
+	m_alignmentPair.SetIdentityAlignment();
 }
 
 void TargetPhrase::SetScore(float score) 
@@ -72,24 +83,24 @@ void TargetPhrase::SetScore(float score)
 	
 	//Now we have what we need to call the full SetScore method
 	SetScore(prod,scoreVector,weights,StaticData::Instance().GetWeightWordPenalty(),StaticData::Instance().GetAllLM());
-
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
-														const vector<float> &scoreVector, const vector<float> &weightT,
+														const Scores &scoreVector,
+														const vector<float> &weightT,
 														float weightWP, const LMList &languageModels)
 {
 	assert(weightT.size() == scoreVector.size());
 	// calc average score if non-best
-
+	
 	m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
 	m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
-
+	
   // Replicated from TranslationOptions.cpp
 	float totalFutureScore = 0;
 	float totalNgramScore  = 0;
 	float totalFullScore   = 0;
-
+	
 	LMList::const_iterator lmIter;
 	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
 	{
@@ -99,10 +110,10 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 		{ // contains factors used by this LM
 			const float weightLM = lm.GetWeight();
 			float fullScore, nGramScore;
-
+			
 			lm.CalcScore(*this, fullScore, nGramScore);
 			m_scoreBreakdown.Assign(&lm, nGramScore);
-
+			
 			// total LM score so far
 			totalNgramScore  += nGramScore * weightLM;
 			totalFullScore   += fullScore * weightLM;
@@ -110,9 +121,9 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 		}
 	}
   m_ngramScore = totalNgramScore;
-
+	
 	m_fullScore = m_transScore + totalFutureScore + totalFullScore
-							- (this->GetSize() * weightWP);	 // word penalty
+		- (this->GetSize() * weightWP);	 // word penalty
 }
 
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
@@ -158,11 +169,151 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 	return clone;
 }
 
+// helper functions
+void AddAlignmentElement(AlignmentPhraseInserter &inserter
+												 , const string &str
+												 , size_t phraseSize
+												 , size_t otherPhraseSize
+												 , list<size_t> &uniformAlignment)
+{
+	// input
+	vector<string> alignPhraseVector = Tokenize(str);
+	// from
+	// "(0) (3) (1,2)"
+	//              to
+	// "(0)" "(3)" "(1,2)"
+	assert (alignPhraseVector.size() == phraseSize) ;
+	
+	const size_t inputSize = alignPhraseVector.size();
+	for (size_t pos = 0 ; pos < inputSize ; ++pos)
+	{
+		string alignElementStr = alignPhraseVector[pos];
+		
+		//change "()" into "(-1)" for both source and target word-to-word alignments
+		size_t pos=0;
+		std::string emtpyAlignStr="()";
+		std::string replaceAlignStr="(-1)";
+		alignElementStr=Replace(alignElementStr,emtpyAlignStr,replaceAlignStr);
+		
+		//remove all "(" from both source and target word-to-word alignments
+		emtpyAlignStr="(";
+		replaceAlignStr="";
+		alignElementStr=Replace(alignElementStr,emtpyAlignStr,replaceAlignStr);
+		
+		//remove all ")" from both source and target word-to-word alignments
+		emtpyAlignStr=")";
+		replaceAlignStr="";
+		alignElementStr=Replace(alignElementStr,emtpyAlignStr,replaceAlignStr);
+		
+		AlignmentElement *alignElement = new AlignmentElement(Tokenize<AlignmentElementType>(alignElementStr, ","));
+		// "(1,2)"
+		//  to
+		// [1] [2]
+		if (alignElement->GetSize() == 0)
+		{ // no alignment info. add uniform alignment, ie. can be aligned to any word
+			alignElement->SetUniformAlignment(otherPhraseSize);
+			uniformAlignment.push_back(pos);
+		}
+		
+		**inserter = alignElement;
+		(*inserter)++;          
+	}
+}
+
+
+// helper functions
+void AddAlignmentElement(AlignmentPhraseInserter &inserter
+												 , const WordAlignments &wa
+												 , size_t phraseSize
+												 , size_t otherPhraseSize
+												 , list<size_t> &uniformAlignment)
+{
+	// from
+	// "(0) (3) (1,2)"
+	//              to
+	// "(0)" "(3)" "(1,2)"
+	assert (wa.size() == phraseSize) ;
+	
+	const size_t inputSize = wa.size();
+	for (size_t pos = 0 ; pos < inputSize ; ++pos)
+	{
+		string alignElementStr = wa[pos];
+		AlignmentElement *alignElement = new AlignmentElement(Tokenize<AlignmentElementType>(alignElementStr, ","));
+		// "(1,2)"
+		//  to
+		// [1] [2]
+		if (alignElement->GetSize() == 0)
+		{ // no alignment info. add uniform alignment, ie. can be aligned to any word
+			alignElement->SetUniformAlignment(otherPhraseSize);
+			uniformAlignment.push_back(pos);
+		}
+		
+		**inserter = alignElement;
+		(*inserter)++;          
+	}
+}
+
+void TargetPhrase::CreateAlignmentInfo(const WordAlignments &swa
+																			 , const WordAlignments &twa)
+{
+	AlignmentPhraseInserter sourceInserter = m_alignmentPair.GetInserter(Input);
+	AlignmentPhraseInserter targetInserter = m_alignmentPair.GetInserter(Output);
+	list<size_t> uniformAlignmentSource, uniformAlignmentTarget;
+	
+	if (!UseWordAlignment()){ //build uniform word-to-word alignment to fit the internal structure which requires their presence
+				std::string srcAlignStr,trgAlignStr;
+				UniformAlignment(srcAlignStr, m_sourcePhrase->GetSize(), GetSize());
+				UniformAlignment(trgAlignStr, GetSize(), m_sourcePhrase->GetSize());
+				CreateAlignmentInfo(srcAlignStr,trgAlignStr);
+	}				
+	else{
+		AddAlignmentElement(sourceInserter
+											, swa
+											, m_sourcePhrase->GetSize()
+											, GetSize()
+											, uniformAlignmentSource);
+		AddAlignmentElement(targetInserter
+											, twa
+											, GetSize()
+											, m_sourcePhrase->GetSize()
+											, uniformAlignmentTarget);
+	}
+	// propergate uniform alignments to other side
+//	m_alignmentPair.GetAlignmentPhrase(Output).AddUniformAlignmentElement(uniformAlignmentSource);
+//	m_alignmentPair.GetAlignmentPhrase(Input).AddUniformAlignmentElement(uniformAlignmentTarget);
+}
+
+
+
+void TargetPhrase::CreateAlignmentInfo(const string &sourceStr
+																			 , const string &targetStr)
+{
+	AlignmentPhraseInserter sourceInserter = m_alignmentPair.GetInserter(Input);
+	AlignmentPhraseInserter targetInserter = m_alignmentPair.GetInserter(Output);
+	list<size_t> uniformAlignmentSource, uniformAlignmentTarget;
+	
+	AddAlignmentElement(sourceInserter
+											, sourceStr
+											, m_sourcePhrase->GetSize()
+											, GetSize()
+											, uniformAlignmentSource);
+	AddAlignmentElement(targetInserter
+											, targetStr
+											, GetSize()
+											, m_sourcePhrase->GetSize()
+											, uniformAlignmentTarget);
+	// propergate uniform alignments to other side
+//	m_alignmentPair.GetAlignmentPhrase(Output).AddUniformAlignmentElement(uniformAlignmentSource);
+//	m_alignmentPair.GetAlignmentPhrase(Input).AddUniformAlignmentElement(uniformAlignmentTarget);
+}
+
 TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
-  os << static_cast<const Phrase&>(tp) << ", pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
-  //os << static_cast<const Phrase&>(tp) << ", c=" << tp.m_fullScore;
+  os << static_cast<const Phrase&>(tp);
+	os << ", pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
+	if (tp.PrintAlignmentInfo())
+		os << ", " << tp.GetAlignmentPair();
   return os;
 }

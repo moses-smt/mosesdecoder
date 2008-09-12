@@ -222,13 +222,16 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 		}
 
 		targetPhrase.SetScore();
-		targetPhrase.SetSourcePhrase(m_unksrc);
+		targetPhrase.SetSourcePhrase(m_unksrc);	
+		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation		
+		targetPhrase.CreateAlignmentInfo("(0)","(0)");
 		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);	
 	}
 	else 
 	{ // drop source word. create blank trans opt
 		TargetPhrase targetPhrase(Output);
 		targetPhrase.SetSourcePhrase(m_unksrc);
+		targetPhrase.SetAlignment();
 		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);
 	}
 
@@ -337,6 +340,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
 	// table loaded on initialization), generate TranslationOption objects
 	// for all phrases
+
 	size_t size = m_source.GetSize();
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
 	{
@@ -440,7 +444,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
 																(m_source, *oldPtoc
 																, startPos, endPos, adhereTableLimit );
-
+			
 			// do rest of decode steps
 			int indexStep = 0;
 			for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
@@ -503,12 +507,11 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		if (useCache) 
 			delete sourcePhrase;
 	} // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
-
+	
 	if ((StaticData::Instance().GetXmlInputType() != XmlPassThrough) && HasXmlOptionsOverlappingRange(startPos,endPos)) 
 	{
 		CreateXmlOptionsForRange(startPos, endPos);
 	} 
-
 }
 
 	/** Check if this range overlaps with any XML options. This doesn't need to be an exact match, only an overlap.

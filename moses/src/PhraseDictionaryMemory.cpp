@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
+#include "AlignmentPair.h"
 
 using namespace std;
 
@@ -45,7 +46,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 														          , float weightWP)
 {
 	const StaticData &staticData = StaticData::Instance();
-
+	
 	m_tableLimit = tableLimit;
 	m_filePath = filePath;
 
@@ -83,26 +84,41 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			stringstream strme;
 			strme << "Syntax error at " << filePath << ":" << line_num;
 			UserMessage::Add(strme.str());
-			return false;
+			abort();
 		}
 
-		bool isLHSEmpty = (tokens[1].find_first_not_of(" \t", 0) == string::npos);
+		string sourcePhraseString, targetPhraseString;
+		string scoreString;
+		string sourceAlignString, targetAlignString;
+
+		sourcePhraseString=tokens[0];
+		targetPhraseString=tokens[1];
+		if (numElement==3){
+			scoreString=tokens[2];
+		}
+		else{
+			sourceAlignString=tokens[2];
+			targetAlignString=tokens[3];
+			scoreString=tokens[4];
+		}
+		
+		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
 			TRACE_ERR( filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
 			continue;
 		}
 
 		const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-		if (tokens[0] != prevSourcePhrase)
-			phraseVector = Phrase::Parse(tokens[0], input, factorDelimiter);
+		if (sourcePhraseString != prevSourcePhrase)
+			phraseVector = Phrase::Parse(sourcePhraseString, input, factorDelimiter);
 
-		vector<float> scoreVector = Tokenize<float>(tokens[(numElement==3) ? 2 : 4]);
+		vector<float> scoreVector = Tokenize<float>(scoreString);
 		if (scoreVector.size() != m_numScoreComponent) 
 		{
 			stringstream strme;
 			strme << "Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
 			UserMessage::Add(strme.str());
-			return false;
+			abort();
 		}
 //		assert(scoreVector.size() == m_numScoreComponent);
 			
@@ -111,8 +127,27 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		sourcePhrase.CreateFromString( input, phraseVector);
 		//target
 		TargetPhrase targetPhrase(Output);
-		targetPhrase.CreateFromString( output, tokens[1], factorDelimiter);
-
+		targetPhrase.SetSourcePhrase(&sourcePhrase);
+		targetPhrase.CreateFromString( output, targetPhraseString, factorDelimiter);
+		
+		if (!staticData.UseAlignmentInfo()){
+      UniformAlignment(sourceAlignString, sourcePhrase.GetSize(), targetPhrase.GetSize());
+			UniformAlignment(targetAlignString, targetPhrase.GetSize(), sourcePhrase.GetSize());
+			/*
+			 EmptyAlignment(sourceAlignString, sourcePhrase.GetSize());
+			 EmptyAlignment(targetAlignString, targetPhrase.GetSize());
+			 */
+		}
+		else if (numElement==3){
+			stringstream strme;
+			strme << "You are using AlignmentInfo, but this info not available in the Phrase Table. Only " <<numElement<<" fields on line " << line_num;
+			UserMessage::Add(strme.str());
+			return false;
+		}
+		
+		// alignment info
+		targetPhrase.CreateAlignmentInfo(sourceAlignString, targetAlignString);
+		
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
 		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
