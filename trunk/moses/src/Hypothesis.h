@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "InputType.h"
 #include "ObjectPool.h"
+#include "AlignmentPair.h"
 
 class SquareMatrix;
 class StaticData;
@@ -61,7 +62,8 @@ protected:
 	static ObjectPool<Hypothesis> s_objectPool;
 	
 	const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
-	const Phrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
+//	const Phrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
+	const TargetPhrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
 	Phrase const*     m_sourcePhrase; /*! input sentence */
 	WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
 	//TODO: how to integrate this into confusion network framework; what if
@@ -76,6 +78,7 @@ protected:
 	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /*! relevant history for language model scoring -- used for recombination */
 	const Hypothesis 	*m_winningHypo;
 	ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
+	AlignmentPair     m_alignPair;
 	const TranslationOption *m_transOpt;
 
 	int m_id; /*! numeric ID of this hypothesis, used for logging */
@@ -117,7 +120,8 @@ public:
 	void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
 
 	/** return target phrase used to create this hypothesis */
-	const Phrase &GetCurrTargetPhrase() const
+//	const Phrase &GetCurrTargetPhrase() const
+	const TargetPhrase &GetCurrTargetPhrase() const
 	{
 		return m_targetPhrase;
 	}
@@ -211,14 +215,49 @@ public:
 	//		GenerateNGramCompareHash();
 	//		return _hash;
 	//	}
-
+	
+	
 	void ToStream(std::ostream& out) const
 	{
 		if (m_prevHypo != NULL)
 		{
 			m_prevHypo->ToStream(out);
 		}
-		out << GetCurrTargetPhrase();
+		out << (Phrase) GetCurrTargetPhrase();
+	}
+	
+	inline bool PrintAlignmentInfo() const{ return GetCurrTargetPhrase().PrintAlignmentInfo(); }
+	
+	void SourceAlignmentToStream(std::ostream& out) const
+	{
+		if (m_prevHypo != NULL)
+		{
+			m_prevHypo->SourceAlignmentToStream(out);
+			AlignmentPhrase alignSourcePhrase=GetCurrTargetPhrase().GetAlignmentPair().GetAlignmentPhrase(Input);
+			alignSourcePhrase.Shift(m_currTargetWordsRange.GetStartPos());
+			out << " ";
+ /*
+			out << "\nGetCurrTargetPhrase(): " << GetCurrTargetPhrase();
+			out << "\nm_currTargetWordsRange: " << m_currTargetWordsRange << "->";
+*/
+			alignSourcePhrase.print(out,m_currSourceWordsRange.GetStartPos());
+		}
+	}
+
+	void TargetAlignmentToStream(std::ostream& out) const
+	{
+		if (m_prevHypo != NULL)
+		{
+			m_prevHypo->TargetAlignmentToStream(out);
+			AlignmentPhrase alignTargetPhrase=GetCurrTargetPhrase().GetAlignmentPair().GetAlignmentPhrase(Output);
+			alignTargetPhrase.Shift(m_currSourceWordsRange.GetStartPos());
+			out << " ";
+/*
+			 out << "\nGetCurrTargetPhrase(): " << GetCurrTargetPhrase();
+			out << "\nm_currSourceWordsRange: " << m_currSourceWordsRange << "->";
+*/
+			alignTargetPhrase.print(out,m_currTargetWordsRange.GetStartPos());
+		}
 	}
 
 	TO_STRING();
@@ -246,6 +285,16 @@ public:
 	}
 	float GetTotalScore() const { return m_totalScore; }
 	float GetScore() const { return m_totalScore-m_futureScore; }
+	
+	
+	
+	//! vector of what source words were aligned to each target
+	const AlignmentPair &GetAlignmentPair() const
+	{
+		return m_alignPair;
+	}
+	//! target span that trans opt would populate if applied to this hypo. Used for alignment check
+	size_t GetNextStartPos(const TranslationOption &transOpt) const;
 	
 	std::vector<std::vector<unsigned int> > *GetLMStats() const
 	{

@@ -169,3 +169,11 @@ typedef uint32_t UINT32;
 class TranslationOption;
 typedef std::vector<TranslationOption*> TranslationOptionList;
 
+
+
+
+typedef std::vector<float> Scores;
+typedef std::vector<std::string> WordAlignments;
+
+typedef std::pair<std::vector<std::string const*>,Scores > StringTgtCand;
+typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;

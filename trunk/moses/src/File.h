@@ -31,8 +31,7 @@ static const OFF_T InvalidOffT=-1;
 //    these functions work only for bitwise read/write-able types
 
 template<typename T> inline size_t fWrite(FILE* f,const T& t) {
-  if(fwrite(&t,sizeof(t),1,f)!=1) {
-    TRACE_ERR("ERROR:: fwrite!\n");abort();}
+  if(fwrite(&t,sizeof(t),1,f)!=1) {TRACE_ERR("ERROR:: fwrite!\n");abort();}
   return sizeof(t);
 }
 
@@ -60,10 +59,37 @@ template<typename C> inline size_t fWriteVector(FILE* f,const C& v) {
 }
 
 template<typename C> inline void fReadVector(FILE* f, C& v) {
-  UINT32 s;fRead(f,s);v.resize(s);
+  UINT32 s;fRead(f,s);
+	v.resize(s);
   size_t r=fread(&(*v.begin()),sizeof(typename C::value_type),s,f);
-  if(r!=s) {
-    TRACE_ERR("ERROR: freadVec! "<<r<<" "<<s<<"\n");abort();}
+  if(r!=s) {TRACE_ERR("ERROR: freadVec! "<<r<<" "<<s<<"\n");abort();}
+}
+
+inline size_t fWriteString(FILE* f,const char* e, UINT32 s) {
+  size_t rv=fWrite(f,s);
+	if(fwrite(e,sizeof(char),s,f)!=s) {TRACE_ERR("ERROR:: fwrite!\n");abort();}
+	return rv+sizeof(char)*s;
+}
+
+inline void fReadString(FILE* f,std::string& e)  {
+	UINT32 s;fRead(f,s);
+	char* a=new char[s+1];
+  if(fread(a,sizeof(char),s,f)!=s) {TRACE_ERR("ERROR: fread!\n");abort();}
+	a[s]='\0';
+	e.assign(a);
+}
+
+inline size_t fWriteStringVector(FILE* f,const std::vector<std::string>& v) {
+  UINT32 s=v.size();
+  size_t totrv=fWrite(f,s);
+	for (size_t i=0;i<s;i++){		totrv+=fWriteString(f,v.at(i).c_str(),v.at(i).size());	}
+  return totrv;
+}
+
+inline void fReadStringVector(FILE* f, std::vector<std::string>& v) {
+  UINT32 s;fRead(f,s);v.resize(s);
+	
+	for (size_t i=0;i<s;i++){		fReadString(f,v.at(i));	}
 }
 
 inline OFF_T fTell(FILE* f) {return FTELLO(f);}

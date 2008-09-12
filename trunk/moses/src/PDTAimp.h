@@ -113,6 +113,7 @@ public:
 
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
 	{
+		cerr << "AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)" << endl;
 		assert(GetTargetPhraseCollection(source)==0);
 		
 		VERBOSE(2, "adding unk source phrase "<<source<<"\n");
@@ -131,6 +132,7 @@ public:
 	TargetPhraseCollection const* 
 	GetTargetPhraseCollection(Phrase const &src) const
 	{
+		
 		assert(m_dict);
 		if(src.GetSize()==0) return 0;
 
@@ -155,7 +157,10 @@ public:
 
 		// get target phrases in string representation
 		std::vector<StringTgtCand> cands;
-		m_dict->GetTargetCandidates(srcString,cands);
+		std::vector<StringWordAlignmentCand> swacands;
+		std::vector<StringWordAlignmentCand> twacands;
+//		m_dict->GetTargetCandidates(srcString,cands);
+		m_dict->GetTargetCandidates(srcString,cands,swacands,twacands);
 		if(cands.empty()) 
 		{
 			return 0;
@@ -166,36 +171,39 @@ public:
 
 		// convert into TargetPhrases
 		for(size_t i=0;i<cands.size();++i) 
-			{
-				TargetPhrase targetPhrase(Output);
-
-				StringTgtCand::first_type const& factorStrings=cands[i].first;
-				StringTgtCand::second_type const& probVector=cands[i].second;
-
-				std::vector<float> scoreVector(probVector.size());
-				std::transform(probVector.begin(),probVector.end(),scoreVector.begin(),
-											 TransformScore);
-				std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),
-											 FloorScore);
-				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector);
-				costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),
-																			 tCands.size()));
-				tCands.push_back(targetPhrase);
-			}
-
-		TargetPhraseCollection *rv=PruneTargetCandidates(tCands,costs);
-
+		{
+			TargetPhrase targetPhrase(Output);
+			
+			StringTgtCand::first_type const& factorStrings=cands[i].first;
+			StringTgtCand::second_type const& probVector=cands[i].second;
+			StringWordAlignmentCand::second_type const& swaVector=swacands[i].second;
+			StringWordAlignmentCand::second_type const& twaVector=twacands[i].second;
+			
+			std::vector<float> scoreVector(probVector.size());
+			std::transform(probVector.begin(),probVector.end(),scoreVector.begin(),
+										 TransformScore);
+			std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),
+										 FloorScore);
+			//				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,&src);
+			CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,swaVector,twaVector,&src);			costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),
+																		 tCands.size()));
+			tCands.push_back(targetPhrase);
+		}
+		
+		TargetPhraseCollection *rv;
+		rv=PruneTargetCandidates(tCands,costs);
 		if(rv->IsEmpty()) 
-			{
-				delete rv;
-				return 0;
-			} 
+		{
+			delete rv;
+			return 0;
+		} 
 		else 
-			{
-				if(useCache) piter.first->second=rv;
-				m_tgtColls.push_back(rv);
-				return rv;
-			}
+		{
+			if(useCache) piter.first->second=rv;
+			m_tgtColls.push_back(rv);
+			return rv;
+		}
+		
 	}
 
 
@@ -226,7 +234,14 @@ public:
 			m_dict->Create(in,filePath);
 		}
 		TRACE_ERR( "reading bin ttable\n");
-		m_dict->Read(filePath);
+//		m_dict->Read(filePath);
+		bool res=m_dict->Read(filePath);
+		if (!res) {
+			stringstream strme;
+			strme << "bin ttable was read in a wrong way\n";
+			UserMessage::Add(strme.str());
+			exit(1);
+		}
 	}
 
 	typedef PhraseDictionaryTree::PrefixPtr PPtr;
@@ -257,10 +272,33 @@ public:
 	};
 
 
-
+	
 	void CreateTargetPhrase(TargetPhrase& targetPhrase,
 													StringTgtCand::first_type const& factorStrings,
 													StringTgtCand::second_type const& scoreVector,
+													Phrase const* srcPtr=0) const
+	{
+		FactorCollection &factorCollection = FactorCollection::Instance();
+		
+		for(size_t k=0;k<factorStrings.size();++k) 
+		{
+			std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
+			Word& w=targetPhrase.AddWord();
+			for(size_t l=0;l<m_output.size();++l)
+				w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
+		}
+		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
+		targetPhrase.SetSourcePhrase(srcPtr);
+		
+//		targetPhrase.CreateAlignmentInfo("???", "???", 44);
+	}
+	
+	
+	void CreateTargetPhrase(TargetPhrase& targetPhrase,
+													StringTgtCand::first_type const& factorStrings,
+													StringTgtCand::second_type const& scoreVector,
+													StringWordAlignmentCand::second_type const& swaVector,
+													StringWordAlignmentCand::second_type const& twaVector,
 													Phrase const* srcPtr=0) const
 	{
 		FactorCollection &factorCollection = FactorCollection::Instance();
@@ -274,6 +312,8 @@ public:
 			}
 		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
+		
+		targetPhrase.CreateAlignmentInfo(swaVector, twaVector);
 	}
 
 

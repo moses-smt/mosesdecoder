@@ -134,8 +134,6 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 	if (staticData.GetOutputWordGraph())
 	{
 		string fileName = staticData.GetParam("output-word-graph")[0];
-		bool outputNBest = Scan<bool>(staticData.GetParam("output-word-graph")[1]);
-
 		std::ofstream *file = new std::ofstream;
 		m_outputWordGraphStream  = file;
 		file->open(fileName.c_str());
@@ -144,8 +142,8 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 	// search graph output
 	if (staticData.GetOutputSearchGraph())
 	{
-	  std::ofstream *file = new std::ofstream;
 	  string fileName = staticData.GetParam("output-search-graph")[0];
+	  std::ofstream *file = new std::ofstream;
 	  m_outputSearchGraphStream = file;
 	  file->open(fileName.c_str());
 	}
@@ -208,6 +206,48 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 			out << "|" << hypo->GetCurrSourceWordsRange().GetStartPos()
 			    << "-" << hypo->GetCurrSourceWordsRange().GetEndPos() << "| ";
 		}
+	}
+}
+
+void OutputWordAlignment(std::ostream &out, const TargetPhrase &phrase, size_t srcoffset, size_t trgoffset, FactorDirection direction)
+{
+	size_t size = phrase.GetSize();
+	if (size){
+		out << " ";
+		/*		out << phrase;
+		out << " ===> offset: (" << srcoffset << "," << trgoffset << ")";
+		out << " ===> size: (" << phrase.GetAlignmentPair().GetAlignmentPhrase(Input).GetSize() << "," 
+			<< phrase.GetAlignmentPair().GetAlignmentPhrase(Output).GetSize() << ") ===> ";
+*/
+		AlignmentPhrase alignphrase=phrase.GetAlignmentPair().GetAlignmentPhrase(direction);
+/*		alignphrase.print(out,0);
+		out << " ===> ";
+		//		out << alignphrase << " ===> ";
+*/
+		if (direction == Input){
+			alignphrase.Shift(trgoffset);
+			alignphrase.print(out,srcoffset);
+		}
+		else{
+			alignphrase.Shift(srcoffset);
+			alignphrase.print(out,trgoffset);
+		}
+/*
+ //		out << alignphrase << " ===> ";
+		out << "\n";
+*/
+	}
+}
+
+void OutputWordAlignment(std::ostream &out, const Hypothesis *hypo, FactorDirection direction)
+{
+	size_t srcoffset, trgoffset;
+	if ( hypo != NULL)
+	{
+		srcoffset=hypo->GetCurrSourceWordsRange().GetStartPos();
+		trgoffset=hypo->GetCurrTargetWordsRange().GetStartPos();
+		OutputWordAlignment(out, hypo->GetPrevHypo(),direction);
+		OutputWordAlignment(out, hypo->GetCurrTargetPhrase(), srcoffset, trgoffset, direction);
 	}
 }
 
@@ -281,6 +321,7 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 {
 	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
 	bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
+	bool includeWordAlignment = StaticData::Instance().PrintAlignmentInfoInNbest();
 	
 	TrellisPathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
@@ -404,28 +445,52 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 		  }
     }
 		
-
 		// total						
     *m_nBestStream << "||| " << path.GetTotalScore();
+		
+		//phrase-to-phrase alignment
     if (includeAlignment) {
-		*m_nBestStream << " |||";
-		for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
-		{
-			const Hypothesis &edge = *edges[currEdge];
-			const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
-			WordsRange targetRange = path.GetTargetWordsRange(edge);
-			*m_nBestStream << " " << sourceRange.GetStartPos();
-			if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
-			  *m_nBestStream << "-" << sourceRange.GetEndPos();
+			*m_nBestStream << " |||";
+			for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
+			{
+				const Hypothesis &edge = *edges[currEdge];
+				const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+				WordsRange targetRange = path.GetTargetWordsRange(edge);
+				*m_nBestStream << " " << sourceRange.GetStartPos();
+				if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
+					*m_nBestStream << "-" << sourceRange.GetEndPos();
+				}
+				*m_nBestStream << "=" << targetRange.GetStartPos();
+				if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
+					*m_nBestStream << "-" << targetRange.GetEndPos();
+				}
 			}
-			*m_nBestStream << "=" << targetRange.GetStartPos();
-			if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
-			  *m_nBestStream << "-" << targetRange.GetEndPos();
+    }
+		
+				
+		if (includeWordAlignment){			
+			//word-to-word alignment (source-to-target)
+			*m_nBestStream << " |||";
+			for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+			{
+				const Hypothesis &edge = *edges[currEdge];
+				WordsRange targetRange = path.GetTargetWordsRange(edge);
+				OutputWordAlignment(*m_nBestStream, edge.GetCurrTargetPhrase(),edge.GetCurrSourceWordsRange().GetStartPos(),targetRange.GetStartPos(), Input);
+			}
+
+			//word-to-word alignment (target-to-source)
+			*m_nBestStream << " |||";		
+			for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+			{
+				const Hypothesis &edge = *edges[currEdge];
+				WordsRange targetRange = path.GetTargetWordsRange(edge);
+				OutputWordAlignment(*m_nBestStream, edge.GetCurrTargetPhrase(),edge.GetCurrSourceWordsRange().GetStartPos(),targetRange.GetStartPos(), Output);
 			}
 		}
-    }
-    *m_nBestStream << endl;
+				
+		*m_nBestStream << endl;
 	}
+
 
 	*m_nBestStream<<std::flush;
 }

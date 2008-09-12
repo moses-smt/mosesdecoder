@@ -57,7 +57,8 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_languageModelStates(StaticData::Instance().GetLMSize(), LanguageModelSingleFactor::UnknownState)
 	, m_arcList(NULL)
 	, m_id(0)
-	, m_lmstats(NULL)
+  , m_lmstats(NULL)
+  , m_alignPair(source.GetSize())
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
@@ -85,7 +86,8 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_languageModelStates(prevHypo.m_languageModelStates)
 	, m_arcList(NULL)
 	, m_id(s_HypothesesCreated++)
-	, m_lmstats(NULL)
+  , m_lmstats(NULL)
+  , m_alignPair(prevHypo.m_alignPair)
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -462,7 +464,11 @@ void Hypothesis::PrintHypothesis() const
 	TRACE_ERR( "\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
 	TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "
 	  << *m_sourcePhrase <<endl);
-	TRACE_ERR( "\ttranslated as: "<<m_targetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
+	TRACE_ERR( "\ttranslated as: "<<(Phrase&) m_targetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
+	if (PrintAlignmentInfo()){
+		TRACE_ERR( "\tsource-target word alignment: "<< m_targetPhrase.GetAlignmentPair().GetAlignmentPhrase(Input) << endl); // <<" => source to target word-to-word alignment
+		TRACE_ERR( "\ttarget-source word alignment: "<< m_targetPhrase.GetAlignmentPair().GetAlignmentPhrase(Output) << endl); // <<" => target to source word-to-word alignment
+	}
 	if (m_wordDeleted) TRACE_ERR( "\tword deleted"<<endl); 
   //	TRACE_ERR( "\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
   //	TRACE_ERR( "\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
@@ -526,6 +532,16 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 	// scores
 	out << " [total=" << hypothesis.GetTotalScore() << "]";
 	out << " " << hypothesis.GetScoreBreakdown();
+	
+	// alignment
+	if (hypothesis.PrintAlignmentInfo()){
+		out << " [f2e:";
+		hypothesis.SourceAlignmentToStream(out);
+		out << "]";
+		out << " [e2f:";
+		hypothesis.TargetAlignmentToStream(out);
+		out << "]";
+	}
 	return out;
 }
 

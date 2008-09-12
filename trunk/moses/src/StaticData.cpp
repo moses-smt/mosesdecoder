@@ -115,7 +115,21 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (m_parameter->GetParam("factor-delimiter").size() > 0) {
 		m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
 	}
+	
+	//word-to-word alignment
+	SetBooleanParameter( &m_UseAlignmentInfo, "use-alignment-info", false );
+	SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
+	SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
 
+	if (!m_UseAlignmentInfo && m_PrintAlignmentInfo){
+		  TRACE_ERR("--print-alignment-info should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
+		m_PrintAlignmentInfo=false;
+	}
+	if (!m_UseAlignmentInfo && m_PrintAlignmentInfoNbest){
+		  TRACE_ERR("--print-alignment-info-in-n-best should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
+		m_PrintAlignmentInfoNbest=false;
+	}
+	
 	// n-best
 	if (m_parameter->GetParam("n-best-list").size() >= 2)
 	{
@@ -731,6 +745,7 @@ bool StaticData::LoadPhraseTables()
 			
 			IFVERBOSE(1)
 				PrintUserTime(string("Start loading PhraseTable ") + filePath);
+			std::cerr << "filePath: " << filePath << std::endl;
 			if (!FileExists(filePath+".binphr.idx"))
 			{	// memory phrase table
 				VERBOSE(2,"using standard phrase tables");

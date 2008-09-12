@@ -22,15 +22,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <vector>
+#include "TypeDef.h"
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
+#include "AlignmentPair.h"
 
 class LMList;
 class PhraseDictionary;
 class GenerationDictionary;
 class ScoreProducer;
 
-/** represents an entry on the target side of a phrase table (scores, translation)
+/** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
 class TargetPhrase: public Phrase
 {
@@ -39,11 +41,22 @@ protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 	//float m_ngramScore, m_fullScore;
 	ScoreComponentCollection m_scoreBreakdown;
+	AlignmentPair m_alignmentPair;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
+
+	static bool wordalignflag;
+	static bool printalign;
+	
 public:
-	TargetPhrase(FactorDirection direction=Output);
+		TargetPhrase(FactorDirection direction=Output);
+		~TargetPhrase(){};
+		
+	/** used by the unknown word handler.
+		* Set alignment to 0
+		*/
+	void SetAlignment();
 
 	//! used by the unknown word handler- these targets
 	//! don't have a translation score, so wp is the only thing used
@@ -62,13 +75,14 @@ public:
    * @param weightWP the weight of the word penalty
    *
    * @TODO should this be part of the constructor?  If not, add explanation why not.
-   */
+		*/
 	void SetScore(const ScoreProducer* translationScoreProducer,
-								const std::vector<float> &scoreVector,
+								const Scores &scoreVector,
 								const std::vector<float> &weightT,
 								float weightWP,
 								const LMList &languageModels);
 
+	
 	// used when creating translations of unknown words:
 	void ResetScore();
 	void SetWeights(const ScoreProducer*, const std::vector<float> &weightT);
@@ -103,6 +117,33 @@ public:
 	Phrase const* GetSourcePhrase() const 
 	{
 		return m_sourcePhrase;
+	}
+	AlignmentPair &GetAlignmentPair()
+	{
+		return m_alignmentPair;
+	}
+	const AlignmentPair &GetAlignmentPair() const
+	{
+		return m_alignmentPair;
+	}
+	
+	/** Parse the alignment info portion of phrase table string to create alignment info */
+	void CreateAlignmentInfo(const std::string &sourceStr
+													 , const std::string &targetStr);
+	void CreateAlignmentInfo(const WordAlignments &swa
+													 , const WordAlignments &twa);
+	
+	void UseWordAlignment(bool a){
+		wordalignflag=a;
+	};
+	bool UseWordAlignment() const {
+		return wordalignflag;
+	};
+	void PrintAlignmentInfo(bool a) {
+		printalign=a; 
+	}
+	bool PrintAlignmentInfo() const {
+		return printalign;
 	}
 
 	TO_STRING();

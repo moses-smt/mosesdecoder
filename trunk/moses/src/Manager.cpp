@@ -47,7 +47,6 @@ Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
 ,m_start(clock())
 ,interrupted_flag(0)
 {
-	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
 	staticData.InitializeBeforeSentenceProcessing(source);
 }
@@ -72,6 +71,7 @@ Manager::~Manager()
  */
 void Manager::ProcessSentence()
 {
+	//VERBOSE(2,"m_source:" << m_source <<"\n");
 	const StaticData &staticData = StaticData::Instance();
 	staticData.ResetSentenceStats(m_source);
 	const vector <DecodeGraph*>
@@ -83,7 +83,6 @@ void Manager::ProcessSentence()
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
 	m_transOptColl->CreateTranslationOptions(decodeStepVL);
-
 	m_search->ProcessSentence();
 }
 
@@ -199,23 +198,21 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 	const StaticData &staticData = StaticData::Instance();
 
 	const Hypothesis *prevHypo = hypo->GetPrevHypo();
-			const Phrase *sourcePhrase = hypo->GetSourcePhrase();
-			const Phrase &targetPhrase = hypo->GetCurrTargetPhrase();
 
 			
-			outputWordGraphStream << "J=" << linkId++
-						<< "\tS=" << prevHypo->GetId()
-						<< "\tE=" << hypo->GetId()
-						<< "\ta=";
+	outputWordGraphStream << "J=" << linkId++
+		<< "\tS=" << prevHypo->GetId()
+		<< "\tE=" << hypo->GetId()
+		<< "\ta=";
 
-			// phrase table scores
-			const std::vector<PhraseDictionary*> &phraseTables = staticData.GetPhraseDictionaries();
-			std::vector<PhraseDictionary*>::const_iterator iterPhraseTable;
-			for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable)
-			{
+	// phrase table scores
+	const std::vector<PhraseDictionary*> &phraseTables = staticData.GetPhraseDictionaries();
+	std::vector<PhraseDictionary*>::const_iterator iterPhraseTable;
+	for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable)
+	{
 				const PhraseDictionary *phraseTable = *iterPhraseTable;
 				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(phraseTable);
-
+				
 				outputWordGraphStream << scores[0];
 				vector<float>::const_iterator iterScore;
 				for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore)

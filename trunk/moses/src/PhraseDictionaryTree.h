@@ -8,11 +8,21 @@
 #include "TypeDef.h"
 #include "Dictionary.h"
 
+
+#include "PrefixTree.h"
+#include "File.h"
+#include "ObjectPool.h"
+#include "LVoc.h"
+#include "TypeDef.h"
+#include "Util.h"
+#include "StaticData.h"
+
 class Phrase;
 class Word;
 class ConfusionNet;
 
-typedef std::pair<std::vector<std::string const*>,std::vector<float> > StringTgtCand;
+
+typedef PrefixTreeF<LabelId,OFF_T> PTF;
 
 class PDTimp;
 class PPimp;
@@ -24,7 +34,14 @@ class PhraseDictionaryTree : public Dictionary {
 	PhraseDictionaryTree(const PhraseDictionaryTree&); //not implemented
 	void operator=(const PhraseDictionaryTree&); //not implemented
 public:
-	PhraseDictionaryTree(size_t numScoreComponent);
+		PhraseDictionaryTree(size_t numScoreComponent);
+	
+	void UseWordAlignment(bool a);
+	bool UseWordAlignment();
+	
+	void PrintWordAlignment(bool a);
+	bool PrintWordAlignment();
+	
 
 	virtual ~PhraseDictionaryTree();
 
@@ -48,10 +65,16 @@ public:
 	// print target candidates for a given phrase, mainly for debugging
 	void PrintTargetCandidates(const std::vector<std::string>& src,
 														 std::ostream& out) const;
-
+	
 	// get the target candidates for a given phrase
 	void GetTargetCandidates(const std::vector<std::string>& src,
 													 std::vector<StringTgtCand>& rv) const;
+	
+	// get the target candidates for a given phrase
+	void GetTargetCandidates(const std::vector<std::string>& src,
+													 std::vector<StringTgtCand>& rv,
+													 std::vector<StringWordAlignmentCand>& swa,
+													 std::vector<StringWordAlignmentCand>& twa) const;
 
 	/*****************************
 	 *   access to prefix tree   *
@@ -81,6 +104,10 @@ public:
 	// requirement: the pointer has to evaluate to true
 	void GetTargetCandidates(PrefixPtr p,
 													 std::vector<StringTgtCand>& rv) const;
+	void GetTargetCandidates(PrefixPtr p,
+													 std::vector<StringTgtCand>& rv,
+													 std::vector<StringWordAlignmentCand>& swa,
+													 std::vector<StringWordAlignmentCand>& twa) const;
 
 	// print target candidates for a given prefix pointer to a stream, mainly 
 	// for debugging
