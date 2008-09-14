@@ -190,7 +190,6 @@ void AddAlignmentElement(AlignmentPhraseInserter &inserter
 		string alignElementStr = alignPhraseVector[pos];
 		
 		//change "()" into "(-1)" for both source and target word-to-word alignments
-		size_t pos=0;
 		std::string emtpyAlignStr="()";
 		std::string replaceAlignStr="(-1)";
 		alignElementStr=Replace(alignElementStr,emtpyAlignStr,replaceAlignStr);
