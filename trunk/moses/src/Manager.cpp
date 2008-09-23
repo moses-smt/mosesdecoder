@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LMList.h"
 #include "TranslationOptionCollection.h"
 #include "DummyScoreProducers.h"
+#include "config.h"
 
 using namespace std;
 
@@ -336,18 +337,14 @@ void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream
 	outputSearchGraphStream << endl;
 }
 
-void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
-{
-  std::map < int, bool > connected;
-  std::map < int, int > forward;
-  std::map < int, double > forwardScore;
-
-  // *** find connected hypotheses ***
-
-  std::vector< const Hypothesis *> connectedList;
+void Manager::GetConnectedGraph(
+    std::map< int, bool >* pConnected,
+    std::vector< const Hypothesis* >* pConnectedList) const {
+  std::map < int, bool >& connected = *pConnected;
+  std::vector< const Hypothesis *>& connectedList = *pConnectedList;
 
   // start with the ones in the final stack
-	const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
+  const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
   const HypothesisStack &finalStack = *hypoStackColl.back();
   HypothesisStack::const_iterator iterHypo;
   for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
@@ -386,10 +383,24 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
       }
     }
   }
+}
+
+void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
+{
+  std::map < int, bool > connected;
+  std::map < int, int > forward;
+  std::map < int, double > forwardScore;
+
+  // *** find connected hypotheses ***
+  std::vector< const Hypothesis *> connectedList;
+  GetConnectedGraph(&connected, &connectedList);
 
   // ** compute best forward path for each hypothesis *** //
 
   // forward cost of hypotheses on final stack is 0
+  const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
+  const HypothesisStack &finalStack = *hypoStackColl.back();
+  HypothesisStack::const_iterator iterHypo;
   for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
   {
     const Hypothesis *hypo = *iterHypo;
