@@ -82,7 +82,10 @@ protected:
 
 	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
 	clock_t m_start; /**< starting time, used for logging */
-	
+	void GetConnectedGraph(
+		std::map< int, bool >* pConnected,
+		std::vector< const Hypothesis* >* pConnectedList) const;
+		
 public:
 	Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
 	~Manager();
