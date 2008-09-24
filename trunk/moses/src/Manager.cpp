@@ -37,7 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LMList.h"
 #include "TranslationOptionCollection.h"
 #include "DummyScoreProducers.h"
+#if HAVE_CONFIG_H
 #include "config.h"
+#endif
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
 #include "rule.pb.h"
