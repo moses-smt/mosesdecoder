@@ -701,5 +701,5 @@ GetTargetCandidates(PrefixPtr p,
 }
 
 std::string PhraseDictionaryTree::GetScoreProducerDescription() const{
-	return "Phrase dictionary tree";
+	return "PhraseDictionaryTree";
 }

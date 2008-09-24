@@ -125,6 +125,6 @@ size_t PhraseDictionaryTreeAdaptor::GetNumInputScores() const {
 
 std::string PhraseDictionaryTreeAdaptor::GetScoreProducerDescription() const
 {
-	return "Translation score, file=" + m_filePath;
+	return "PhraseModel";
 }
 
