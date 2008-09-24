@@ -38,6 +38,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "DummyScoreProducers.h"
 #include "config.h"
+#ifdef HAVE_PROTOBUF
+#include "hypergraph.pb.h"
+#include "rule.pb.h"
+#endif
 
 using namespace std;
 
@@ -384,6 +388,109 @@ void Manager::GetConnectedGraph(
     }
   }
 }
+
+#ifdef HAVE_PROTOBUF
+
+void SerializeEdgeInfo(const Hypothesis* hypo, hgmert::Hypergraph_Edge* edge) {
+	hgmert::Rule* rule = edge->mutable_rule();
+	hypo->GetCurrTargetPhrase().WriteToRulePB(rule);
+	const Hypothesis* prev = hypo->GetPrevHypo();
+	// if the feature values are empty, they default to 0
+	if (!prev) return;
+	// score breakdown is an aggregate (forward) quantity, but the exported
+	// graph object just wants the feature values on the edges
+	const ScoreComponentCollection& scores = hypo->GetScoreBreakdown();
+	const ScoreComponentCollection& pscores = prev->GetScoreBreakdown();
+	for (unsigned int i = 0; i < scores.size(); ++i)
+		edge->add_feature_values((scores[i] - pscores[i]) * -1.0);
+}
+
+hgmert::Hypergraph_Node* GetHGNode(
+		const Hypothesis* hypo,
+	  std::map< int, int>* i2hgnode,
+		hgmert::Hypergraph* hg,
+		int* hgNodeIdx) {
+	hgmert::Hypergraph_Node* hgnode;
+  std::map < int, int >::iterator idxi = i2hgnode->find(hypo->GetId());
+	if (idxi == i2hgnode->end()) {
+		*hgNodeIdx = ((*i2hgnode)[hypo->GetId()] = hg->nodes_size());
+		hgnode = hg->add_nodes();
+	} else {
+	 	*hgNodeIdx = idxi->second;
+		hgnode = hg->mutable_nodes(*hgNodeIdx);
+	}
+	return hgnode;
+}
+
+void Manager::SerializeSearchGraphPB(
+    long translationId,
+    std::ostream& outputStream) const {
+	using namespace hgmert;
+  std::map < int, bool > connected;
+  std::map < int, int > i2hgnode;
+  std::vector< const Hypothesis *> connectedList;
+	GetConnectedGraph(&connected, &connectedList);
+  connected[ 0 ] = true;
+  Hypergraph hg;
+	hg.set_is_sorted(false);
+	int num_feats = (*m_search->GetHypothesisStacks().back()->begin())->GetScoreBreakdown().size();
+	hg.set_num_features(num_feats);
+	StaticData::Instance().GetScoreIndexManager().SerializeFeatureNamesToPB(&hg);
+	Hypergraph_Node* goal = hg.add_nodes();  // idx=0 goal node must have idx 0
+	Hypergraph_Node* source = hg.add_nodes();  // idx=1
+	i2hgnode[-1] = 1; // source node
+  const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
+  const HypothesisStack &finalStack = *hypoStackColl.back();
+  for (std::vector < HypothesisStack* >::const_iterator iterStack = hypoStackColl.begin();
+	  iterStack != hypoStackColl.end() ; ++iterStack)
+  {
+    const HypothesisStack &stack = **iterStack;
+    HypothesisStack::const_iterator iterHypo;
+		
+    for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
+    {
+      const Hypothesis *hypo = *iterHypo;
+			bool is_goal = hypo->GetWordsBitmap().IsComplete();
+      if (connected.find( hypo->GetId() ) != connected.end())
+      {
+				int headNodeIdx;
+				Hypergraph_Node* headNode = GetHGNode(hypo, &i2hgnode, &hg, &headNodeIdx);
+				if (is_goal) {
+					Hypergraph_Edge* ge = hg.add_edges();
+					ge->set_head_node(0);  // goal
+					ge->add_tail_nodes(headNodeIdx);
+				  ge->mutable_rule()->add_trg_words("[X,1]");
+				}
+				Hypergraph_Edge* edge = hg.add_edges();
+				SerializeEdgeInfo(hypo, edge);
+				edge->set_head_node(headNodeIdx);
+				const Hypothesis* prev = hypo->GetPrevHypo();
+				int tailNodeIdx = 1; // source
+				if (prev)
+				  tailNodeIdx = i2hgnode.find(prev->GetId())->second;
+				edge->add_tail_nodes(tailNodeIdx);
+
+        const ArcList *arcList = hypo->GetArcList();
+        if (arcList != NULL)
+        {
+          ArcList::const_iterator iterArcList;
+          for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+          {
+            const Hypothesis *loserHypo = *iterArcList;
+						assert(connected[loserHypo->GetId()]);
+						Hypergraph_Edge* edge = hg.add_edges();
+						SerializeEdgeInfo(loserHypo, edge);
+						edge->set_head_node(headNodeIdx);
+						tailNodeIdx = i2hgnode.find(loserHypo->GetPrevHypo()->GetId())->second;
+						edge->add_tail_nodes(tailNodeIdx);
+          }
+        } // end if arcList empty
+      } // end if connected
+    } // end for iterHypo
+  } // end for iterStack
+	hg.SerializeToOstream(&outputStream);
+}
+#endif
 
 void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
 {

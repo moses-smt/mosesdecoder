@@ -5,6 +5,12 @@
 
 #include <iostream>
 #include <vector>
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef HAVE_PROTOBUF
+#include "hypergraph.pb.h"
+#endif
 
 class ScoreProducer;
 class ScoreComponentCollection;  // debugging only
@@ -21,6 +27,7 @@ public:
 
 	//! new score producer to manage. Producers must be inserted in the order they are created
 	void AddScoreProducer(const ScoreProducer* producer);
+	void InitFeatureNames();
 
 	//! starting score index for a particular score producer with scoreBookkeepingID
 	size_t GetBeginIndex(size_t scoreBookkeepingID) const { return m_begins[scoreBookkeepingID]; }
@@ -28,18 +35,21 @@ public:
 	size_t GetEndIndex(size_t scoreBookkeepingID) const { return m_ends[scoreBookkeepingID]; }
 	//! sum of all score components from every score producer
 	size_t GetTotalNumberOfScores() const { return m_last; }
-
 	//! ??? print unweighted scores of each ScoreManager to stream os
 	void Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const;
 	//! ??? print weighted scores of each ScoreManager to stream os
 	void Debug_PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scc, const std::vector<float>& weights) const;
-
+#ifdef HAVE_PROTOBUF
+	void SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const;
+#endif
+	void InitWeightVectorFromFile(const std::string& fnam, std::vector<float>* m_allWeights) const;
 private:
 	ScoreIndexManager(const ScoreIndexManager&); // don't implement
 
 	std::vector<size_t> m_begins;
 	std::vector<size_t> m_ends;
 	std::vector<const ScoreProducer*> m_producers; /**< all the score producers in this run */
+	std::vector<std::string> m_featureNames;
 	size_t m_last;
 };
 

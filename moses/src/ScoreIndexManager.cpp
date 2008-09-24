@@ -32,84 +32,83 @@ void ScoreIndexManager::Debug_PrintLabeledScores(std::ostream& os, const ScoreCo
 	Debug_PrintLabeledWeightedScores(os, scc, weights);
 }
 
-static std::string getFormat(float foo) 
-{
-  char buf[32];
-  sprintf(buf, "%.4f", foo);
-  return buf;
-}
-
 void ScoreIndexManager::Debug_PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scc, const std::vector<float>& weights) const
 {
-  size_t cur_i = 0;
-  size_t cur_scoreType = 0;
-  while (cur_i < m_last) {
-    bool first = true;
-		
+  assert(m_featureNames.size() == weights.size());
+  for (size_t i = 0; i < m_featureNames.size(); ++i)
+    os << m_featureNames[i] << "\t" << weights[i] << endl;
+}
+
+void ScoreIndexManager::InitFeatureNames() {
+	m_featureNames.clear();
+	size_t cur_i = 0;
+	size_t cur_scoreType = 0;
+	while (cur_i < m_last) {
 		size_t nis_idx = 0;
+		bool add_idx = (m_producers[cur_scoreType]->GetNumInputScores() > 1);
 		while (nis_idx < m_producers[cur_scoreType]->GetNumInputScores()){
-      os << "  " << getFormat(scc.m_scores[cur_i]) << "\t" << getFormat(scc.m_scores[cur_i] * weights[cur_i]) << "\t  " << (cur_i < 10 ? " " : "") << cur_i << " ";
-			if (first) {
-				os << m_producers[cur_scoreType]->GetScoreProducerDescription()
-				<< std::endl;
-				first = false;
-			} else {
-				os << "    \"         \"" << std::endl;
-			}
+			ostringstream os;
+			os << m_producers[cur_scoreType]->GetScoreProducerDescription();
+			if (add_idx)
+				os << '_' << (nis_idx+1);
+			m_featureNames.push_back(os.str());
 			nis_idx++;
 			cur_i++;
 		}
-		
-		first = true;
-    while (cur_i < m_ends[cur_scoreType]) {
-      os << "  " << getFormat(scc.m_scores[cur_i]) << "\t" << getFormat(scc.m_scores[cur_i] * weights[cur_i]) << "\t  " << (cur_i < 10 ? " " : "") << cur_i << " ";
-      if (first) {
-        os << m_producers[cur_scoreType]->GetScoreProducerDescription()
-				   << std::endl;
-        first = false;
-      } else {
-        os << "    \"         \"" << std::endl;
-      }
-      cur_i++;
-    }
-    cur_scoreType++;
-  }
+
+		int ind = 1;
+		add_idx = (m_ends[cur_scoreType] - cur_i > 1);
+		while (cur_i < m_ends[cur_scoreType]) {
+			ostringstream os;
+			os << m_producers[cur_scoreType]->GetScoreProducerDescription();
+			if (add_idx)
+				os << '_' << ind;
+			m_featureNames.push_back(os.str());
+			++cur_i;
+			++ind;
+		}
+		cur_scoreType++;
+	}
+}
+
+#ifdef HAVE_PROTOBUF
+void ScoreIndexManager::SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const {
+	for (size_t i = 0; i < m_featureNames.size(); ++i) {
+		hg->add_feature_names(m_featureNames[i]);
+	}
+}
+#endif
+
+void ScoreIndexManager::InitWeightVectorFromFile(const std::string& fnam, vector<float>* m_allWeights) const {
+	assert(m_allWeights->size() == m_featureNames.size());
+	ifstream in(fnam.c_str());
+	assert(in.good());
+	char buf[2000];
+	map<string, double> name2val;
+	while (!in.eof()) {
+		in.getline(buf, 2000);
+		if (strlen(buf) == 0) continue;
+		if (buf[0] == '#') continue;
+		istringstream is(buf);
+		string fname;
+		double val;
+		is >> fname >> val;
+		map<string, double>::iterator i = name2val.find(fname);
+		assert(i == name2val.end()); // duplicate weight name
+		name2val[fname] = val;
+	}
+	assert(m_allWeights->size() == m_featureNames.size());
+	for (size_t i = 0; i < m_featureNames.size(); ++i) {
+		map<string, double>::iterator iter = name2val.find(m_featureNames[i]);
+		assert(iter != name2val.end());
+		(*m_allWeights)[i] = iter->second;
+	}
 }
 
 std::ostream& operator<<(std::ostream& os, const ScoreIndexManager& sim)
 {
-	size_t cur_i = 0;
-	size_t cur_scoreType = 0;
-	while (cur_i < sim.m_last) {
-		bool first = true;
-
-		size_t nis_idx = 0;
-		while (nis_idx < sim.m_producers[cur_scoreType]->GetNumInputScores()){
-			os << "  " << (cur_i < 10 ? " " : "") << cur_i << " ";
-			if (first) {
-				os << sim.m_producers[cur_scoreType]->GetScoreProducerDescription()
-				   << std::endl;
-				first = false;
-			} else {
-				os << "    \"         \"" << std::endl;
-			}
-			nis_idx++;
-			cur_i++;
-		}
-
-		first = true;
-		while (cur_i < sim.m_ends[cur_scoreType]) {
-			os << "  " << (cur_i < 10 ? " " : "") << cur_i << " ";
-			if (first) {
-				os << sim.m_producers[cur_scoreType]->GetScoreProducerDescription()
-					 << std::endl;
-				first = false;
-			} else {
-				os << "    \"         \"" << std::endl;
-			}
-			cur_i++;
-		}
-		cur_scoreType++;
+	for (size_t i = 0; i < sim.m_featureNames.size(); ++i) {
+		os << sim.m_featureNames[i] << endl;
 	}
 	return os;
 }

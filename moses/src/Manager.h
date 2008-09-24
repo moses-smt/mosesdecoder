@@ -34,6 +34,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 #include "Search.h"
 #include "SearchCubePruning.h"
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 class TrellisPath;
 class TranslationOptionCollection;
@@ -94,9 +97,11 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 	const Hypothesis *GetActualBestHypothesis() const;
 	void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;
-	
 	void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
-  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+#ifdef HAVE_PROTOBUF
+	void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
+#endif
+	void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
 
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
