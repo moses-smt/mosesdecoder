@@ -71,7 +71,29 @@ libmoses_a_SOURCES = \
 	WordsRange.cpp \
 	XmlOption.cpp 
 	
+if PROTOBUF
+BUILT_SOURCES = \
+  rule.pb.h \
+  rule.pb.cc \
+  hypergraph.pb.h \
+  hypergraph.pb.cc
 
+CLEANFILES = $(BUILT_SOURCES)
+SUFFIXES = .proto
+
+rule.pb.cc: rule.proto
+	@PROTOC@ --cpp_out=. $<
+rule.pb.h: rule.proto
+	@PROTOC@ --cpp_out=. $<
+
+hypergraph.pb.cc: hypergraph.proto
+	@PROTOC@ --cpp_out=. $<			
+hypergraph.pb.h: hypergraph.proto
+	@PROTOC@ --cpp_out=. $<			
+
+libmoses_a_SOURCES += rule.pb.cc hypergraph.pb.cc
+
+endif
 
 if SRI_LM
 libmoses_a_SOURCES += LanguageModelSRI.cpp

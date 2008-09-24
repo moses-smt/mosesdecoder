@@ -33,6 +33,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LMList.h"
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
 //#include "UnknownWordHandler.h"
 
 class InputType;
@@ -138,6 +141,9 @@ protected:
 
 	bool m_outputWordGraph; //! whether to output word graph
         bool m_outputSearchGraph; //! whether to output search graph
+#ifdef HAVE_PROTOBUF
+	bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
+#endif
 
 	size_t m_cubePruningPopLimit;
 	size_t m_cubePruningDiversity;
@@ -365,8 +371,12 @@ public:
 		return m_nBestFilePath;
 	}
   	bool IsNBestEnabled() const {
-	  return (!m_nBestFilePath.empty()) || m_mbr || m_outputSearchGraph;
-  	}
+	  return (!m_nBestFilePath.empty()) || m_mbr || m_outputSearchGraph
+#ifdef HAVE_PROTOBUF
+	|| m_outputSearchGraphPB
+#endif
+		;
+	}
 	size_t GetNBestFactor() const
 	{
 		return m_nBestFactor;
@@ -411,7 +421,10 @@ public:
 	size_t GetTimeoutThreshold() const { return m_timeout_threshold; }
 	
 	size_t GetOutputSearchGraph() const { return m_outputSearchGraph; }
-		
+#ifdef HAVE_PROTOBUF
+	bool GetOutputSearchGraphPB() const { return m_outputSearchGraphPB; }
+#endif
+
 	XmlInputType GetXmlInputType() const { return m_xmlInputType; }
 
 	bool GetUseTransOptCache() const { return m_useTransOptCache; }

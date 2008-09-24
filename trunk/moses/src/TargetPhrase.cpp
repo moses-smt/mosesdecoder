@@ -52,6 +52,14 @@ void TargetPhrase::SetScore()
 	m_fullScore = - StaticData::Instance().GetWeightWordPenalty();	
 }
 
+#ifdef HAVE_PROTOBUF
+void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const {
+	pb->add_trg_words("[X,1]");
+	for (size_t pos = 0 ; pos < GetSize() ; pos++)
+		pb->add_trg_words(GetWord(pos)[0]->GetString());
+}
+#endif
+
 void TargetPhrase::SetAlignment()
 {
 	m_alignmentPair.SetIdentityAlignment();

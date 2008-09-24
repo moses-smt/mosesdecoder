@@ -55,9 +55,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
 #include "config.h"
-#else
-// those not using autoconf have to build MySQL support for now
-#  define USE_MYSQL 1
+#endif
+
+#ifdef HAVE_PROTOBUF
+#include "hypergraph.pb.h"
 #endif
 
 using namespace std;
@@ -78,6 +79,9 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 
 int main(int argc, char* argv[])
 {
+#ifdef HAVE_PROTOBUF
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+#endif
 	IFVERBOSE(1)
 	{
 		TRACE_ERR("command: ");
@@ -142,6 +146,17 @@ int main(int argc, char* argv[])
 
                 if (staticData.GetOutputSearchGraph())
 		  manager.GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
+
+#ifdef HAVE_PROTOBUF
+                if (staticData.GetOutputSearchGraphPB()) {
+			ostringstream sfn;
+			sfn << staticData.GetParam("output-search-graph-pb")[0] << '/' << source->GetTranslationId() << ".pb" << ends;
+			string fn = sfn.str();
+			VERBOSE(2, "Writing search graph to " << fn << endl);
+			fstream output(fn.c_str(), ios::trunc | ios::binary | ios::out);
+			manager.SerializeSearchGraphPB(source->GetTranslationId(), output);
+		}
+#endif
 
 		// pick best translation (maximum a posteriori decoding)
 		if (! staticData.UseMBR()) {

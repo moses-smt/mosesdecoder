@@ -170,6 +170,18 @@ bool StaticData::LoadData(Parameter *parameter)
 	}
         else
 	  m_outputSearchGraph = false;
+#ifdef HAVE_PROTOBUF
+	if (m_parameter->GetParam("output-search-graph-pb").size() > 0)
+	{
+	  if (m_parameter->GetParam("output-search-graph-pb").size() != 1) {
+	    UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-pb path"));
+	    return false;
+	  }	    
+	  m_outputSearchGraphPB = true;
+	}
+        else
+	  m_outputSearchGraphPB = false;
+#endif
 
 	// include feature names in the n-best list
 	SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
@@ -332,6 +344,16 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
 	if (!LoadMapping()) return false;
+
+  m_scoreIndexManager.InitFeatureNames();
+	if (m_parameter->GetParam("weight-file").size() > 0) {
+	  if (m_parameter->GetParam("weight-file").size() != 1) {
+	    UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
+	    return false;
+	  }
+		string fnam = m_parameter->GetParam("weight-file")[0];
+		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
+	}
 
 	return true;
 }
