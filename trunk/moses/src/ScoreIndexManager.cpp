@@ -100,7 +100,10 @@ void ScoreIndexManager::InitWeightVectorFromFile(const std::string& fnam, vector
 	assert(m_allWeights->size() == m_featureNames.size());
 	for (size_t i = 0; i < m_featureNames.size(); ++i) {
 		map<string, double>::iterator iter = name2val.find(m_featureNames[i]);
-		assert(iter != name2val.end());
+		if (iter == name2val.end()) {
+			cerr << "No weight found found for feature: " << m_featureNames[i] << endl;
+			abort();
+		}
 		(*m_allWeights)[i] = iter->second;
 	}
 }
