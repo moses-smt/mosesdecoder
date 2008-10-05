@@ -87,7 +87,7 @@ class LexicalMonotonicReordering : public LexicalReordering {
     return 2; 
   };
   virtual std::string GetScoreProducerDescription() const {
-    return "Monotonic Lexical Reordering Model";
+    return "MonotonicLexicalReorderingModel";
   };
   virtual int GetOrientationType(Hypothesis* currHypothesis) const;
 };
@@ -110,7 +110,7 @@ class LexicalOrientationReordering : public LexicalReordering {
     return 3; 
   }
   virtual std::string GetScoreProducerDescription() const {
-    return "Orientation Lexical Reordering Model";
+    return "OrientationLexicalReorderingModel";
   };
   virtual OrientationType GetOrientationType(Hypothesis* currHypothesis) const;
 };
@@ -133,7 +133,7 @@ class LexicalDirectionalReordering : public LexicalReordering {
     return 2; 
   };
   virtual std::string GetScoreProducerDescription() const {
-    return "Directional Lexical Reordering Model";
+    return "DirectionalLexicalReorderingModel";
   };
   virtual OrientationType GetOrientationType(Hypothesis* currHypothesis) const;
 };
