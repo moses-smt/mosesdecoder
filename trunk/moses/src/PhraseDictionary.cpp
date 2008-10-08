@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "InputType.h"
 
+namespace Moses
+{
 PhraseDictionary::PhraseDictionary(size_t numScoreComponent)
 	: Dictionary(numScoreComponent),m_tableLimit(0)
 {
@@ -47,3 +49,6 @@ size_t PhraseDictionary::GetNumScoreComponents() const
 {
 	return m_numScoreComponent;
 }
+
+}
+

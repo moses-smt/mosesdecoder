@@ -3,6 +3,9 @@
 
 #include "TranslationOptionCollection.h"
 
+namespace Moses
+{
+
 class ConfusionNet;
 
 class TranslationOptionCollectionConfusionNet : public TranslationOptionCollection {
@@ -12,3 +15,5 @@ class TranslationOptionCollectionConfusionNet : public TranslationOptionCollecti
 	void ProcessUnknownWord(		size_t sourcePos);
 
 };
+
+}

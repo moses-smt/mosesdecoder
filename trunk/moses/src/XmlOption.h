@@ -4,6 +4,9 @@
 #include <string>
 #include "InputType.h"
 
+namespace Moses
+{
+
 /** This struct is used for storing XML force translation data for a given range in the sentence
  */
 struct XmlOption {
@@ -20,5 +23,7 @@ struct XmlOption {
 };
 
 std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const InputType &source);
+
+}
 
 

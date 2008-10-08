@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 LanguageModel::LanguageModel(bool registerScore, ScoreIndexManager &scoreIndexManager) 
 {
 	if (registerScore)
@@ -91,5 +93,8 @@ LanguageModel::State LanguageModel::GetState(const std::vector<const Word*> &con
   if (!len) len = &dummy;
   GetValue(contextFactor,&state,len);
   return state;
+}
+
+
 }
 

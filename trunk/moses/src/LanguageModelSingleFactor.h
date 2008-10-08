@@ -24,6 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModel.h"
 #include "Phrase.h"
 
+namespace Moses
+{
+
 class FactorCollection;
 class Factor;
 
@@ -77,4 +80,6 @@ public:
 	}
 	std::string GetScoreProducerDescription() const;
 };
+
+}
 

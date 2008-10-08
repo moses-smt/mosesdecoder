@@ -13,7 +13,9 @@
 #include "StaticData.h"
 #include "Util.h"
 #include "mbr.h"
+
 using namespace std ;
+using namespace Moses;
 
 
 /* Input : 

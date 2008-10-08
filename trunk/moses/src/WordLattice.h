@@ -4,6 +4,9 @@
 #include <vector>
 #include "ConfusionNet.h"
 
+namespace Moses
+{
+
 /** General word lattice */
 class WordLattice: public ConfusionNet {
 private:
@@ -27,5 +30,7 @@ public:
 	 */
 	void GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const;
 };
+
+}
 
 #endif

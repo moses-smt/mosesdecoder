@@ -27,6 +27,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+namespace Moses
+{
+
 /** set of unique FactorTypes. Used to store what factor types are used in phrase tables etc
 */
 class FactorMask : public std::bitset<MAX_NUM_FACTORS>
@@ -45,3 +48,4 @@ public:
 	TO_STRING();
 };
 
+}

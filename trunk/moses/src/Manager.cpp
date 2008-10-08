@@ -47,6 +47,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
 :m_source(source)
 ,m_transOptColl(source.CreateTranslationOptionCollection())
@@ -595,3 +597,6 @@ const Hypothesis *Manager::GetBestHypothesis() const
 {
 	return m_search->GetBestHypothesis();
 }
+
+}
+

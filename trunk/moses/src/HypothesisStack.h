@@ -5,6 +5,9 @@
 #include <set>
 #include "Hypothesis.h"
 
+namespace Moses
+{
+
 class HypothesisStack
 {
 protected:
@@ -30,4 +33,6 @@ public:
 	virtual void Remove(const HypothesisStack::iterator &iter);
 
 };
+
+}
 

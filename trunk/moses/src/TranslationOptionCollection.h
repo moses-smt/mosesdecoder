@@ -29,6 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PartialTranslOptColl.h"
 #include "DecodeStep.h"
 
+namespace Moses
+{
+
 class LanguageModel;
 class FactorCollection;
 class PhraseDictionaryMemory;
@@ -143,5 +146,7 @@ public:
 
 	TO_STRING();		
 };
+
+}
 
 

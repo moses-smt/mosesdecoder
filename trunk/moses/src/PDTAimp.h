@@ -5,6 +5,9 @@
 
 #include "StaticData.h"  // needed for factor splitter
 
+namespace Moses
+{
+
 inline bool existsFile(const char* filePath) {
   struct stat mystat;
   return  (stat(filePath,&mystat)==0);
@@ -537,3 +540,4 @@ public:
 	size_t GetNumInputScores() const {return m_numInputScores;}
 };
 
+}

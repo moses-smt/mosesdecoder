@@ -31,6 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 GenerationDictionary::GenerationDictionary(size_t numFeatures, ScoreIndexManager &scoreIndexManager)
   : Dictionary(numFeatures)
 {
@@ -151,5 +153,8 @@ const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) con
 		ret = &iter->second;
 	}
 	return ret;
+}
+
+
 }
 

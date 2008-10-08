@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange
 																		, const TargetPhrase &targetPhrase
@@ -163,4 +165,7 @@ void TranslationOption::CacheReorderingProb(const LexicalReordering &lexreorderi
 {
 	m_reordering.Assign(&lexreordering, score);
 }
+
+}
+
 

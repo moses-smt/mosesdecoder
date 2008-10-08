@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "Util.h"
 
+namespace Moses
+{
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder) 
 {
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
@@ -117,3 +119,6 @@ std::string Sentence::ParseXmlTagAttribute(const std::string& tag,const std::str
 	}
 	return tag.substr(contentsStart,contentsEnd-contentsStart);
 }
+ 
+}
+

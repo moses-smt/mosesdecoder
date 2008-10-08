@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 AlignmentPhraseInserter AlignmentPair::GetInserter(FactorDirection direction)
 {
 	return (direction == Input) ? back_insert_iterator<AlignmentPhrase::CollectionType>(m_sourceAlign.GetVector())
@@ -94,4 +96,7 @@ std::ostream& operator<<(std::ostream &out, const AlignmentPair &alignmentPair)
 	out << " ";
 	return out;
 }
+
+}
+
 

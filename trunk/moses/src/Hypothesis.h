@@ -38,6 +38,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ObjectPool.h"
 #include "AlignmentPair.h"
 
+namespace Moses
+{
+
 class SquareMatrix;
 class StaticData;
 class TranslationOption;
@@ -362,3 +365,5 @@ public:
 		return (ret < 0);
 	}
 };
+
+}

@@ -11,6 +11,8 @@
 #include "ScoreProducer.h"
 #include "ScoreComponentCollection.h" // debugging
 
+namespace Moses
+{
 void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 {
 	// Producers must be inserted in the order they are created
@@ -114,5 +116,7 @@ std::ostream& operator<<(std::ostream& os, const ScoreIndexManager& sim)
 		os << sim.m_featureNames[i] << endl;
 	}
 	return os;
+}
+
 }
 

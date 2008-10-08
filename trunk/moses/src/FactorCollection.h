@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "Factor.h"
 
+namespace Moses
+{
+
 class LanguageModel;
 
 typedef std::set<Factor> FactorSet;
@@ -73,3 +76,5 @@ public:
 	
 };
 
+
+}

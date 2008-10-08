@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "Util.h"
 
+namespace Moses
+{
+
 //! a list of target phrases that is trsnalated from the same source phrase
 class TargetPhraseCollection
 {
@@ -66,5 +69,7 @@ public:
 	}
 	
 };
+
+}
 
 

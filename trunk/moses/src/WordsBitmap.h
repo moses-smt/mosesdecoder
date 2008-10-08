@@ -29,6 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "WordsRange.h"
 
+namespace Moses
+{
+
 /** vector of boolean used to represent whether a word has been translated or not
 */
 class WordsBitmap 
@@ -201,4 +204,6 @@ inline std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitma
 		out << (wordsBitmap.GetValue(i) ? 1 : 0);
 	}
 	return out;
+}
+
 }

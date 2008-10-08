@@ -34,6 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 /** define allowed parameters */
 Parameter::Parameter() 
 {
@@ -566,4 +568,7 @@ void Parameter::PrintCredit()
 	copy(everyone.begin(), everyone.end(), out);
 	cerr <<  endl << endl;
 }
+
+}
+
 

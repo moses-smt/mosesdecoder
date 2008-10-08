@@ -7,6 +7,9 @@
 #include "PhraseDictionaryMemory.h"
 #include "TargetPhraseCollection.h"
 
+namespace Moses
+{
+
 class Phrase;
 class PDTAimp;
 class WordsRange;
@@ -68,4 +71,6 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	size_t GetNumInputScores() const;
 	
 };
+
+}
 #endif

@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "NGramNode.h"
 
+namespace Moses
+{
+
 class Factor;
 
 typedef std::vector<const Factor*> FactorVector;
@@ -47,4 +50,6 @@ public:
 	const NGramNode *GetNGram(const Factor *factor) const;
 
 };
+
+}
 

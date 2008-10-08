@@ -37,6 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
 
+namespace Moses
+{
+
 namespace LanguageModelFactory
 {
 
@@ -120,3 +123,6 @@ namespace LanguageModelFactory
 	  return lm;
 	}
 }
+
+}
+

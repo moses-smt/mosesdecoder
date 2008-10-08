@@ -14,6 +14,9 @@
 #include "Sentence.h"
 #include "PrefixTreeMap.h"
 
+namespace Moses
+{
+
 class Phrase;
 class InputType;
 class ConfusionNet;
@@ -136,5 +139,7 @@ class LexicalReorderingTableTree : public LexicalReorderingTable {
   CacheType m_Cache;
   TableType m_Table;
 };
+
+}
 
 #endif //LEXICAL_REORDERING_TABLE_H

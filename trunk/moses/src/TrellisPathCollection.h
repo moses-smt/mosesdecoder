@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include "TrellisPath.h"
 
+namespace Moses
+{
+
 struct CompareTrellisPathCollection
 {
 	bool operator()(const TrellisPath* pathA, const TrellisPath* pathB) const
@@ -85,5 +88,7 @@ inline std::ostream& operator<<(std::ostream& out, const TrellisPathCollection& 
 		out << path << std::endl;
 	}
 	return out;
+}
+
 }
 

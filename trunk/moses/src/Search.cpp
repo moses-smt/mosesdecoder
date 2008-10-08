@@ -3,6 +3,8 @@
 #include "SearchNormal.h"
 #include "UserMessage.h"
 
+namespace Moses
+{
 Search::Search()
 {
 //	long sentenceID = m_source.GetTranslationId();
@@ -26,4 +28,7 @@ Search *Search::CreateSearch(const InputType &source, SearchAlgorithm searchAlgo
 	}
 
 }
+ 
+}
+
 

@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorTypeSet.h"
 #include "ScoreProducer.h"
 
+namespace Moses
+{
+
 /** Abstract class from which PhraseDictionary and GenerationDictionary
 	* are inherited.
 */
@@ -59,3 +62,5 @@ public:
 	// clean up temporary memory, called after processing each sentence
 	virtual void CleanUp();
 };
+
+}

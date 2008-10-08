@@ -4,6 +4,8 @@
 #include "Util.h"
 #include "FloydWarshall.h"
 
+namespace Moses
+{
 WordLattice::WordLattice() {}
 
 size_t WordLattice::GetColumnIncrement(size_t i, size_t j) const
@@ -124,5 +126,8 @@ bool WordLattice::CanIGetFromAToB(size_t start, size_t end) const
 {
 	//  std::cerr << "CanIgetFromAToB(" << start << "," << end << ")=" << distances[start][end] << std::endl;
 	return distances[start][end] < 100000;
+}
+
+
 }
 

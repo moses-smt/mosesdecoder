@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Vocab.h"
 #include "LanguageModelSingleFactor.h"
 
+namespace Moses
+{
+
 class Factor;
 class Phrase;
 class Ngram; // SRI forward decl
@@ -56,3 +59,5 @@ public:
   virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0, unsigned int* len = 0) const;
 };
 
+
+}

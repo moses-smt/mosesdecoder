@@ -9,6 +9,9 @@
 #define FILEPTR_H_
 #include "File.h"
 
+namespace Moses
+{
+
 // smart pointer for on-demand loading from file
 // requirement: T has a constructor T(FILE*)
 
@@ -45,4 +48,7 @@ public:
     if(f && pos!=InvalidOffT) {fSeek(f,pos); t=new T(f);}
   }
 };
+
+}
+
 #endif

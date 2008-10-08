@@ -21,6 +21,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "WordsBitmap.h"
 
+namespace Moses
+{
+
 TO_STRING_BODY(WordsBitmap);
 
 int WordsBitmap::GetFutureCosts(int lastPos) const 
@@ -54,5 +57,8 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
 	//	TRACE_ERR(sum<<"\n");
 
 	return sum;
+}
+
+
 }
 

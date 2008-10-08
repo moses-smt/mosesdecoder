@@ -25,7 +25,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+namespace Moses
+{
 DecodeGraph::~DecodeGraph()
 {
 	RemoveAllInColl(m_steps);
 }
+
+}
+

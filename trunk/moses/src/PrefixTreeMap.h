@@ -10,6 +10,8 @@
 #include "LVoc.h"
 #include "ObjectPool.h"
 
+namespace Moses
+{
 
 
 typedef PrefixTreeF<LabelId,OFF_T> PTF;
@@ -123,6 +125,8 @@ public: //low level
   std::vector<WordVoc*> m_Voc;
   ObjectPool<PPimp>     m_PtrPool; 
 };
+
+}
 
 #endif //PREFIX_TREE_MAP_H
 

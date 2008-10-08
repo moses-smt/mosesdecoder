@@ -5,6 +5,9 @@
 #include "TypeDef.h"
 #include "Phrase.h"
 
+namespace Moses
+{
+
 class HypothesisStack;
 class Hypothesis;
 class InputType;
@@ -29,3 +32,5 @@ protected:
 
 };
 
+
+}

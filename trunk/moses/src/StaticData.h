@@ -38,6 +38,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 //#include "UnknownWordHandler.h"
 
+namespace Moses
+{
+
 class InputType;
 class LexicalReordering;
 class PhraseDictionary;
@@ -436,3 +439,5 @@ public:
 
 	const TranslationOptionList* FindTransOptListInCache(const Phrase &sourcePhrase) const;
 };
+
+}

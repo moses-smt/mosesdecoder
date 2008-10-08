@@ -11,6 +11,8 @@
 #include "Sentence.h"
 #include "UserMessage.h"
 
+namespace Moses
+{
 struct CNStats {
 	size_t created,destr,read,colls,words;
 
@@ -206,4 +208,7 @@ ConfusionNet::CreateTranslationOptionCollection() const
 	assert(rv);
 	return rv;
 }
+
+}
+
 

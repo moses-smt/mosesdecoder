@@ -12,6 +12,9 @@
 #include "hypergraph.pb.h"
 #endif
 
+namespace Moses
+{
+
 class ScoreProducer;
 class ScoreComponentCollection;  // debugging only
 
@@ -52,5 +55,8 @@ private:
 	std::vector<std::string> m_featureNames;
 	size_t m_last;
 };
+
+
+}
 
 #endif

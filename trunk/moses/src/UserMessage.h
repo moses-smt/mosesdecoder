@@ -24,6 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <queue>
 
+namespace Moses
+{
+
 /** User warnings/error messages.
 	* Not the same as tracing messages, this should be usable even if Moses front-end if GUI
 */
@@ -45,4 +48,6 @@ public:
 	//! get all messages in queue. Each is on a separate line. Clear queue afterwards
 	static std::string GetQueue();
 };
+
+}
 

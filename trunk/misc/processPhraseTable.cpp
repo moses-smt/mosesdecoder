@@ -15,6 +15,8 @@
 #include "Timer.h"
 
 using namespace std;
+using namespace Moses;
+
 Timer timer;
 
 template<typename T>

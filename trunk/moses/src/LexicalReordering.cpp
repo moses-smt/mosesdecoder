@@ -1,6 +1,8 @@
 #include "LexicalReordering.h"
 #include "StaticData.h"
 
+namespace Moses
+{
 LexicalReordering::LexicalReordering(const std::string &filePath, 
 									 const std::vector<float>& weights, 
 									 Direction direction, 
@@ -247,3 +249,6 @@ Score LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const
 {
 	return m_Table->GetScore(f, e, Phrase(Output));
 }
+
+}
+

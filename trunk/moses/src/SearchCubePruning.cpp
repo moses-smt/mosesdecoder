@@ -5,6 +5,8 @@
 #include "InputType.h"
 #include "TranslationOptionCollection.h"
 
+namespace Moses
+{
 class BitmapContainerOrderer
 {
 	public:
@@ -341,3 +343,6 @@ const std::vector < HypothesisStack* >& SearchCubePruning::GetHypothesisStacks()
 {
 	return m_hypoStackColl;
 }
+ 
+}
+

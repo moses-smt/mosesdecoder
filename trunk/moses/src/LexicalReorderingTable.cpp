@@ -8,6 +8,8 @@
 #include "TargetPhrase.h"
 #include "TargetPhraseCollection.h"
 
+namespace Moses
+{
 /* 
  * local helper functions
  */
@@ -673,3 +675,6 @@ void LexicalReorderingTableTree::Cache(const ConfusionNet& input){
   }
 };
 */
+
+}
+

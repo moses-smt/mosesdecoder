@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisStackCubePruning.h"
 #include "DummyScoreProducers.h"
 
+namespace Moses
+{
 
 class HypothesisScoreOrdererNoDistortion
 {
@@ -488,3 +490,6 @@ BitmapContainer::SortHypotheses()
 {
 	std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrderer());
 }
+
+}
+

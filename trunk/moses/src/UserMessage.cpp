@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
+
 const size_t MAX_MSG_QUEUE = 5;
 
 bool UserMessage::m_toStderr	= true;
@@ -55,5 +58,8 @@ string UserMessage::GetQueue()
 	}
 	return strme.str();
 }
+
+}
+
 
 

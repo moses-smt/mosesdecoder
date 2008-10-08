@@ -29,7 +29,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <cmath>
 #include <limits>
+#include <map>
 #include "TypeDef.h"
+
+namespace Moses
+{
 
 /** Outputting debugging/verbose information to stderr.
  * Use TRACE_ENABLE flag to redirect tracing output into oblivion
@@ -300,6 +304,7 @@ void PrintUserTime(const std::string &message);
 double GetUserTime();
 
 // dump SGML parser for <seg> tags
-#include <map>
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line);
+
+}
 

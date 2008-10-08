@@ -31,6 +31,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "hash.h"
 
+namespace Moses
+{
+
 class FactorCollection;
 
 /** Represents a factor (word, POS, etc) on the E or F side
@@ -138,3 +141,5 @@ public:
 
 };
 
+
+}

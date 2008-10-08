@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "AlignmentElement.h"
 #include "Util.h"
 
+namespace Moses
+{
+
 void EmptyAlignment(std::string &Align, size_t Size);
 void UniformAlignment(std::string &Align, size_t fSize, size_t eSize);
 
@@ -98,6 +101,8 @@ public:
 
 	TO_STRING();									
 };
+
+}
 
 
 

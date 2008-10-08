@@ -8,6 +8,8 @@
 #include "FactorCollection.h"
 #include "LMList.h"
 
+namespace Moses
+{
 /** constructor; just initialize the base class */
 TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet(
 											const ConfusionNet &input
@@ -30,4 +32,7 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(
 	}
 		
 }
+
+}
+
 

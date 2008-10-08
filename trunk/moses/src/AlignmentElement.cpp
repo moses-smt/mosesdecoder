@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 AlignmentElement::AlignmentElement(const ContainerType &alignInfo)
 {
 	insert_iterator<ContainerType> insertIter( m_collection, m_collection.end() );
@@ -94,4 +96,7 @@ void AlignmentElement::SetUniformAlignment(size_t otherPhraseSize)
 }
 
 TO_STRING_BODY(AlignmentElement);
+
+}
+
 

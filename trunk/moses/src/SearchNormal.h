@@ -7,6 +7,9 @@
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
 
+namespace Moses
+{
+
 class InputType;
 class TranslationOptionCollection;
 
@@ -39,4 +42,6 @@ public:
 	virtual const std::vector < HypothesisStack* >& GetHypothesisStacks() const;
 	virtual const Hypothesis *GetBestHypothesis() const;
 };
+
+}
 

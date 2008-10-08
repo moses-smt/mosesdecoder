@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 TrellisPath::TrellisPath(const Hypothesis *hypo)
 :	m_prevEdgeChanged(NOT_FOUND)
 {
@@ -178,4 +180,7 @@ WordsRange TrellisPath::GetTargetWordsRange(const Hypothesis &hypo) const
 }
 
 TO_STRING_BODY(TrellisPath);
+
+
+}
 

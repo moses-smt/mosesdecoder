@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+namespace Moses
+{
+
 //! A square array of floats to store future costs
 class SquareMatrix
 {
@@ -72,4 +75,6 @@ inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
 	}
 	
 	return out;
+}
+
 }

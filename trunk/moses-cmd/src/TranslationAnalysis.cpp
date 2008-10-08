@@ -7,6 +7,8 @@
 #include "Hypothesis.h"
 #include "TranslationAnalysis.h"
 
+using namespace Moses;
+
 namespace TranslationAnalysis {
 
 void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)

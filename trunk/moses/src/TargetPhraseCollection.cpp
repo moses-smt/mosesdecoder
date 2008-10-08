@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 // helper for sort
 struct CompareTargetPhrase
 {
@@ -41,4 +43,7 @@ void TargetPhraseCollection::NthElement(size_t tableLimit)
 	//std::sort(m_collection.begin(), m_collection.end(), CompareTargetPhrase());
   std::nth_element(m_collection.begin(), iterMiddle, m_collection.end(), CompareTargetPhrase());
 }
+
+}
+
 

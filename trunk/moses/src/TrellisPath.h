@@ -27,6 +27,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "TypeDef.h"
 
+namespace Moses
+{
+
 class TrellisPathCollection;
 
 /** Encapsulate the set of hypotheses/arcs that goes from decoding 1 phrase to all the source phrases
@@ -102,4 +105,6 @@ inline std::ostream& operator<<(std::ostream& out, const TrellisPath& path)
 			<< std::endl;
 
 	return out;
+}
+
 }

@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "gzfilebuf.h"
 
+namespace Moses
+{
 InputFileStream::InputFileStream(const std::string &filePath)
 : std::istream(NULL)
 , m_streambuf(NULL)
@@ -46,5 +48,8 @@ InputFileStream::~InputFileStream()
 
 void InputFileStream::Close()
 {
+}
+
+
 }
 

@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+namespace Moses
+{
+
 /*** An unweighted collection of scores for a translation or step in a translation.
  *
  * In the factored phrase-based models that are implemented by moses, there are a set of
@@ -185,3 +188,5 @@ inline std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection
   return os << ">>";
 }
 
+
+}

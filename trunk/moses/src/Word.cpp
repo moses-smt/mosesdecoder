@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
+
 // static
 int Word::Compare(const Word &targetWord, const Word &sourceWord)
 {
@@ -101,3 +104,6 @@ ostream& operator<<(ostream& out, const Word& word)
 	out << strme.str() << " ";
 	return out;
 }
+
+}
+

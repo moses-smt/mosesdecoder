@@ -44,6 +44,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 static size_t CalcMax(size_t x, const vector<size_t>& y) {
   size_t max = x;
   for (vector<size_t>::const_iterator i=y.begin(); i != y.end(); ++i)
@@ -953,4 +955,7 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const Phrase &s
 
 	return &(iter->second);
 }
+
+}
+
 
