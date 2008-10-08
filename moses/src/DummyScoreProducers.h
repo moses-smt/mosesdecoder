@@ -5,6 +5,9 @@
 
 #include "ScoreProducer.h"
 
+namespace Moses
+{
+
 class WordsRange;
 
 /** Calculates Distortion scores
@@ -38,5 +41,7 @@ public:
 	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerDescription() const;
 };
+
+}
 
 #endif

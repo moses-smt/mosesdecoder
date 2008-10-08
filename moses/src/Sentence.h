@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "XmlOption.h"
 
+namespace Moses
+{
+
 class WordsRange;
 class PhraseDictionary;
 class TranslationOption;
@@ -90,4 +93,6 @@ class Sentence : public Phrase, public InputType
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
 };
 
+
+}
 

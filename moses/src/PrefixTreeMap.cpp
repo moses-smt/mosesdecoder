@@ -1,6 +1,8 @@
 #include "PrefixTreeMap.h"
 #include "TypeDef.h"
 
+namespace Moses
+{
 void GenericCandidate::readBin(FILE* f){
   m_PhraseList.clear();
   m_ScoreList.clear();
@@ -190,3 +192,6 @@ PPimp* PrefixTreeMap::Extend(PPimp* p, LabelId wi) {
   return 0; // should never get here, return invalid pointer 
   
 }
+
+}
+

@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "PhraseDictionaryMemory.h"
 
+namespace Moses
+{
 PhraseDictionaryNode::~PhraseDictionaryNode()
 {
 	delete m_targetPhraseCollection;
@@ -86,3 +88,6 @@ void PhraseDictionaryNode::SetWeightTransModel(const PhraseDictionaryMemory *phr
 	}
 
 }
+
+}
+

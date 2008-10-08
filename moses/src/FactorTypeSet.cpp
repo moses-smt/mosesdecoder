@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 FactorMask::FactorMask(const vector<FactorType> &factors)
 {
 	vector<FactorType>::const_iterator iter;
@@ -51,4 +53,7 @@ std::ostream& operator<<(std::ostream& out, const FactorMask& fm)
 
   return out;
 }
+
+}
+
 

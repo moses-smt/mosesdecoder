@@ -25,7 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-
+namespace Moses
+{
 
 void EmptyAlignment(string &Align, size_t Size)
 {
@@ -226,4 +227,7 @@ void AlignmentPhrase::print(std::ostream& out, size_t offset) const
 }
 
 TO_STRING_BODY(AlignmentPhrase);
+
+
+}
 

@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 bool TargetPhrase::wordalignflag=StaticData::Instance().UseAlignmentInfo();
 bool TargetPhrase::printalign=StaticData::Instance().PrintAlignmentInfo();
 
@@ -324,3 +326,6 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 		os << ", " << tp.GetAlignmentPair();
   return os;
 }
+
+}
+

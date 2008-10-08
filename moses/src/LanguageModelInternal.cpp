@@ -7,6 +7,8 @@
 
 using namespace std;
 
+namespace Moses
+{
 LanguageModelInternal::LanguageModelInternal(bool registerScore, ScoreIndexManager &scoreIndexManager)
 :LanguageModelSingleFactor(registerScore, scoreIndexManager)
 {
@@ -265,3 +267,6 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 	return FloorScore(score);
 
 }
+
+}
+

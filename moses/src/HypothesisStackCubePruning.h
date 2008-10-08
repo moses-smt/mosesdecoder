@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "BitmapContainer.h"
 #include "HypothesisStack.h"
 
+namespace Moses
+{
+
 class BitmapContainer;
 
 typedef std::map<WordsBitmap, BitmapContainer*> _BMType;
@@ -137,3 +140,5 @@ public:
 	
 	TO_STRING();
 };
+
+}

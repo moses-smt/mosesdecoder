@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+namespace Moses
+{
+
 /***
  * Efficient version of WordsBitmap for contiguous ranges
  */
@@ -86,3 +89,5 @@ public:
 	TO_STRING();
 };
 
+
+}

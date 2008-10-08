@@ -17,6 +17,9 @@
 #include "Util.h"
 #include "StaticData.h"
 
+namespace Moses
+{
+
 class Phrase;
 class Word;
 class ConfusionNet;
@@ -115,4 +118,6 @@ public:
 	std::string GetScoreProducerDescription() const;
 };
 
+
+}
 #endif /*PHRASEDICTIONARYTREE_H_*/

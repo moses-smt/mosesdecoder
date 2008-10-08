@@ -26,6 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "HypothesisStack.h"
 
+namespace Moses
+{
+
 /** Stack for instances of Hypothesis, includes functions for pruning. */ 
 class HypothesisStackNormal: public HypothesisStack
 {
@@ -101,3 +104,5 @@ public:
 	
 	TO_STRING();
 };
+
+}

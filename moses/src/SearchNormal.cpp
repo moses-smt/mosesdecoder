@@ -2,6 +2,8 @@
 #include "Timer.h"
 #include "SearchNormal.h"
 
+namespace Moses
+{
 #undef DEBUGLATTICE
 #ifdef DEBUGLATTICE
 static bool debug2 = false;
@@ -360,3 +362,6 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 		}
 		TRACE_ERR( endl);
 	}
+ 
+}
+

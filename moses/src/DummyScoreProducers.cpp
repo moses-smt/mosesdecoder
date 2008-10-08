@@ -5,6 +5,8 @@
 #include "DummyScoreProducers.h"
 #include "WordsRange.h"
 
+namespace Moses
+{
 DistortionScoreProducer::DistortionScoreProducer(ScoreIndexManager &scoreIndexManager)
 {
 	scoreIndexManager.AddScoreProducer(this);
@@ -82,4 +84,7 @@ std::string UnknownWordPenaltyProducer::GetScoreProducerDescription() const
 {
 	return "!UnknownWordPenalty";
 }
+
+}
+
 

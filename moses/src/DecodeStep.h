@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Dictionary.h"
 
+namespace Moses
+{
+
 class PhraseDictionary;
 class GenerationDictionary;
 class TranslationOption;
@@ -104,3 +107,5 @@ public:
 															, bool adhereTableLimit) const = 0;
 
 };
+
+}

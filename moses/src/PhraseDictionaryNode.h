@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "TargetPhraseCollection.h"
 
+namespace Moses
+{
+
 class PhraseDictionaryMemory;
 
 /** One node of the PhraseDictionaryMemory structure
@@ -75,3 +78,5 @@ public:
 	iterator begin() { return m_map.begin(); }
 	iterator end() { return m_map.end(); }
 };
+
+}

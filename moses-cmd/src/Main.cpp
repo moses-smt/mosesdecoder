@@ -62,6 +62,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 using namespace std;
+using namespace Moses;
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source) 
 {

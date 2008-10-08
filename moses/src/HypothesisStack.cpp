@@ -1,6 +1,8 @@
 
 #include "HypothesisStack.h"
 
+namespace Moses
+{
 HypothesisStack::~HypothesisStack()
 {
 	// delete all hypos
@@ -22,5 +24,8 @@ void HypothesisStack::Remove(const HypothesisStack::iterator &iter)
 	Hypothesis *h = *iter;	
 	Detach(iter);
 	FREEHYPO(h);
+}
+
+
 }
 

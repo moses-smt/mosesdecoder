@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Dictionary.h"
 #include "FactorTypeSet.h"
 
+namespace Moses
+{
 Dictionary::Dictionary(size_t numScoreComponent)
 	:m_numScoreComponent(numScoreComponent)
 {
@@ -30,4 +32,7 @@ Dictionary::Dictionary(size_t numScoreComponent)
 Dictionary::~Dictionary() {}
 
 void Dictionary::CleanUp() {}
+
+}
+
 

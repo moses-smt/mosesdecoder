@@ -14,6 +14,9 @@
 #include "FilePtr.h"
 #include "File.h"
 
+namespace Moses
+{
+
 template<typename T,typename D>
 class PrefixTreeSA {
 public:
@@ -267,4 +270,7 @@ public:
 
 };
 template<typename T,typename D> D PrefixTreeF<T,D>::def;
+
+}
+
 #endif

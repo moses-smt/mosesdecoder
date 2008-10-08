@@ -24,6 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "InputType.h"
 
+namespace Moses
+{
+
 InputType::InputType(long translationId) : m_translationId(translationId) {}
 InputType::~InputType() {}
 
@@ -50,4 +53,7 @@ bool InputType::CanIGetFromAToB(size_t start, size_t end) const
 {
   return true;
 }
+
+}
+
 

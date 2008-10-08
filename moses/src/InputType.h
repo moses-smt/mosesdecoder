@@ -27,6 +27,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "TargetPhraseCollection.h"
 
+namespace Moses
+{
+
 class WordsRange;
 class Factor;
 class PhraseDictionary;
@@ -114,4 +117,6 @@ public:
 };
 
 std::ostream& operator<<(std::ostream&,InputType const&);
+
+}
 

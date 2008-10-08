@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "StaticData.h"
 
+namespace Moses
+{
 DecodeStep::DecodeStep(Dictionary *ptr, const DecodeStep* prev)
 :m_ptr(ptr)
 {
@@ -58,4 +60,7 @@ const GenerationDictionary &DecodeStep::GetGenerationDictionary() const
 {
   return *static_cast<const GenerationDictionary*>(m_ptr);
 }
+
+}
+
 

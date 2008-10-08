@@ -29,6 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Dictionary.h"
 
+namespace Moses
+{
+
 class FactorCollection;
 
 typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
@@ -81,3 +84,5 @@ public:
 	const OutputWordCollection *FindWord(const Word &word) const;
 };
 
+
+}

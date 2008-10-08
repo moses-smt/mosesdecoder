@@ -23,6 +23,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "DecodeStep.h"
 
+namespace Moses
+{
+
 class GenerationDictionary;
 class Phrase;
 class ScoreComponentCollection;
@@ -51,3 +54,5 @@ private:
 
 };
 
+
+}

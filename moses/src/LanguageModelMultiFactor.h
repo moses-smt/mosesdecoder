@@ -27,6 +27,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "FactorTypeSet.h"
 
+namespace Moses
+{
+
 class Phrase;
 
 //! Abstract class for for multi factor LM 
@@ -51,3 +54,5 @@ public:
 	std::string GetScoreProducerDescription() const;	
 	bool Useable(const Phrase &phrase) const;	
 };
+
+}

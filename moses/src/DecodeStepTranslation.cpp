@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PartialTranslOptColl.h"
 #include "FactorCollection.h"
 
+namespace Moses
+{
 DecodeStepTranslation::DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev)
 : DecodeStep(dict, prev)
 {
@@ -123,5 +125,8 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 		VERBOSE(3,endl);
 	}
 }
+
+}
+
 
 

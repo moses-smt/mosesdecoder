@@ -37,6 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, const std::vector<FactorType> &output
 																			, const string &filePath
@@ -231,5 +233,8 @@ ostream& operator<<(ostream& out, const PhraseDictionaryMemory& phraseDict)
 		out << word;
 	}
 	return out;
+}
+
+
 }
 

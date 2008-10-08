@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 /** constructor; just initialize the base class */
 TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const &inputSentence, size_t maxNoTransOptPerCoverage) 
 	: TranslationOptionCollection(inputSentence, maxNoTransOptPerCoverage) {}
@@ -69,5 +71,8 @@ void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosit
 	}
 
 };
+
+}
+
 
 

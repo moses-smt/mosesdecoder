@@ -26,6 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "TypeDef.h"
 
+namespace Moses
+{
+
 typedef std::vector<std::string>						PARAM_VEC;
 typedef std::map<std::string, PARAM_VEC > 	PARAM_MAP;
 typedef std::map<std::string, bool>         PARAM_BOOL;
@@ -73,4 +76,6 @@ public:
 	}
 
 };
+
+}
 

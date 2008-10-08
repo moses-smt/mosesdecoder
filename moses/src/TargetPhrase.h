@@ -33,6 +33,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "rule.pb.h"
 #endif
 
+namespace Moses
+{
+
 class LMList;
 class PhraseDictionary;
 class GenerationDictionary;
@@ -160,4 +163,6 @@ public:
 };
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);
+
+}
 

@@ -5,6 +5,10 @@
 #include "Search.h"
 #include "HypothesisStackCubePruning.h"
 
+
+namespace Moses
+{
+
 class InputType;
 class TranslationOptionCollection;
 
@@ -38,3 +42,5 @@ public:
 	virtual const Hypothesis *GetBestHypothesis() const;
 };
 
+
+}

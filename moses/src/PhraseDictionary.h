@@ -31,6 +31,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Dictionary.h"
 #include "TargetPhraseCollection.h"
 
+namespace Moses
+{
+
 class StaticData;
 class InputType;
 class WordsRange;
@@ -68,3 +71,5 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
 	//! Create entry for translation of source to targetPhrase
 	virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
 };
+
+}

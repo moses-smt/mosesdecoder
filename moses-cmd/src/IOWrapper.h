@@ -38,54 +38,54 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include "TypeDef.h"
 #include "Sentence.h"
-
-class FactorMask;
-class FactorCollection;
-class Hypothesis;
-class TrellisPathList;
-class InputFileStream;
+#include "FactorTypeSet.h"
+#include "FactorCollection.h"
+#include "Hypothesis.h"
+#include "TrellisPathList.h"
+#include "InputFileStream.h"
+#include "InputType.h"
 
 class IOWrapper
 {
 protected:
 	long m_translationId;
 
-	const std::vector<FactorType>	&m_inputFactorOrder;
-	const std::vector<FactorType>	&m_outputFactorOrder;
-	const FactorMask							&m_inputFactorUsed;
+	const std::vector<Moses::FactorType>	&m_inputFactorOrder;
+	const std::vector<Moses::FactorType>	&m_outputFactorOrder;
+	const Moses::FactorMask							&m_inputFactorUsed;
 	std::ostream 									*m_nBestStream
 																,*m_outputWordGraphStream,*m_outputSearchGraphStream;
 	std::string										m_inputFilePath;
 	std::istream									*m_inputStream;
-	InputFileStream								*m_inputFile;
+	Moses::InputFileStream				*m_inputFile;
 	bool													m_surpressSingleBestOutput;
 	
-	void Initialization(const std::vector<FactorType>	&inputFactorOrder
-										, const std::vector<FactorType>			&outputFactorOrder
-										, const FactorMask							&inputFactorUsed
+	void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
+										, const std::vector<Moses::FactorType>			&outputFactorOrder
+										, const Moses::FactorMask							&inputFactorUsed
 										, size_t												nBestSize
 										, const std::string							&nBestFilePath);
 
 public:
-	IOWrapper(const std::vector<FactorType>	&inputFactorOrder
-		, const std::vector<FactorType>			&outputFactorOrder
-				, const FactorMask							&inputFactorUsed
+	IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
+		, const std::vector<Moses::FactorType>			&outputFactorOrder
+				, const Moses::FactorMask							&inputFactorUsed
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath);
 
-	IOWrapper(const std::vector<FactorType>	&inputFactorOrder
-				, const std::vector<FactorType>	&outputFactorOrder
-				, const FactorMask							&inputFactorUsed
+	IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
+				, const std::vector<Moses::FactorType>	&outputFactorOrder
+				, const Moses::FactorMask							&inputFactorUsed
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath
 		 , const std::string                                                     &infilePath);
 	~IOWrapper();
 
-	InputType* GetInput(InputType *inputType);
-	void OutputBestHypo(const Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-	void OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-	void OutputNBestList(const TrellisPathList &nBestList, long translationId);
-	void Backtrack(const Hypothesis *hypo);
+	Moses::InputType* GetInput(Moses::InputType *inputType);
+	void OutputBestHypo(const Moses::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+	void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+	void OutputNBestList(const Moses::TrellisPathList &nBestList, long translationId);
+	void Backtrack(const Moses::Hypothesis *hypo);
 
 	void ResetTranslationId() { m_translationId = 0; }
 

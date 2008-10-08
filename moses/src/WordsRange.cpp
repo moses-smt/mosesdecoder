@@ -19,6 +19,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "WordsRange.h"
 
+namespace Moses
+{
+
 TO_STRING_BODY(WordsRange);
 
 std::ostream& operator << (std::ostream& out, const WordsRange& range)
@@ -26,3 +29,6 @@ std::ostream& operator << (std::ostream& out, const WordsRange& range)
 	out << "[" << range.m_startPos << ".." << range.m_endPos << "]";
 	return out;
 }
+
+}
+

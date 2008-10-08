@@ -23,6 +23,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "DecodeStep.h"
 
+namespace Moses
+{
+
 class PhraseDictionary;
 class TargetPhrase;
 
@@ -56,3 +59,5 @@ private:
 	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;
 };
 
+
+}

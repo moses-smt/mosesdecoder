@@ -8,6 +8,8 @@
 #include <fstream>
 #include <string>
 
+namespace Moses
+{
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out,const std::vector<T>& x)
@@ -703,3 +705,6 @@ GetTargetCandidates(PrefixPtr p,
 std::string PhraseDictionaryTree::GetScoreProducerDescription() const{
 	return "PhraseDictionaryTree";
 }
+
+}
+

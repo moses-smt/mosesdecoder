@@ -1,5 +1,8 @@
 #include "TrellisPathCollection.h"
 
+namespace Moses
+{
+
 void TrellisPathCollection::Prune(size_t newSize)
 {
 	size_t currSize = m_collection.size(); 
@@ -25,4 +28,7 @@ void TrellisPathCollection::Prune(size_t newSize)
 	
 	m_collection.erase(iter, m_collection.end());
 }
+
+}
+
 

@@ -37,6 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
+
 //global variable
 Timer g_timer;
 
@@ -174,4 +177,7 @@ std::map<std::string, std::string> ProcessAndStripSGML(std::string &line)
 	}
 	return meta;
 }
+
+}
+
 

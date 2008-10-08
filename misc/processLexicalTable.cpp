@@ -5,6 +5,8 @@
 #include "InputFileStream.h"
 #include "LexicalReorderingTable.h"
 
+using namespace Moses;
+
 Timer timer;
 
 void printHelp(){

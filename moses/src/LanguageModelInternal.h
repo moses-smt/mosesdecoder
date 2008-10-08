@@ -4,6 +4,9 @@
 #include "LanguageModelSingleFactor.h"
 #include "NGramCollection.h"
 
+namespace Moses
+{
+
 /** Guaranteed cross-platform LM implementation designed to mimic LM used in regression tests
 */
 class LanguageModelInternal : public LanguageModelSingleFactor
@@ -32,4 +35,6 @@ public:
 												, State* finalState = 0
 												, unsigned int* len = 0) const;
 };
+
+}
 

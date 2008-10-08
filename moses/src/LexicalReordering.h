@@ -14,6 +14,9 @@
 
 #include "LexicalReorderingTable.h"
 
+namespace Moses
+{
+
 class Factor;
 class Phrase;
 class Hypothesis;
@@ -138,4 +141,6 @@ class LexicalDirectionalReordering : public LexicalReordering {
   virtual OrientationType GetOrientationType(Hypothesis* currHypothesis) const;
 };
 
+
+}
 //#endif //LEXICAL_REORDERING_H

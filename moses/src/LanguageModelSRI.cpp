@@ -35,6 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 LanguageModelSRI::LanguageModelSRI(bool registerScore, ScoreIndexManager &scoreIndexManager)
 :LanguageModelSingleFactor(registerScore, scoreIndexManager)
 , m_srilmVocab(0)
@@ -165,5 +167,8 @@ float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State
 	}
 	return ret;
 }
+
+}
+
 
 

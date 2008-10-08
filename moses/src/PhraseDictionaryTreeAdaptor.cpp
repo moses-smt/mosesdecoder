@@ -15,6 +15,8 @@
 #include "PDTAimp.h"
 #include "UserMessage.h"
 
+namespace Moses
+{
 /*************************************************************
 	function definitions of the interface class
 	virtually everything is forwarded to the implementation class
@@ -127,4 +129,7 @@ std::string PhraseDictionaryTreeAdaptor::GetScoreProducerDescription() const
 {
 	return "PhraseModel";
 }
+
+}
+
 

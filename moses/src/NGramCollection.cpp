@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "NGramCollection.h"
 #include "NGramNode.h"
 
+namespace Moses
+{
 NGramCollection::~NGramCollection()
 {
 	Collection::iterator iter;
@@ -59,4 +61,7 @@ const NGramNode *NGramCollection::GetNGram(const Factor *factor) const
 	Collection::const_iterator iter = m_collection.find(factor);
 	return (iter == m_collection.end()) ? NULL : (iter->second) ;
 }
+
+}
+
 

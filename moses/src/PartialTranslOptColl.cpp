@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PartialTranslOptColl.h"
 #include <algorithm>
 
+namespace Moses
+{
 /** constructor, intializes counters and thresholds */
 PartialTranslOptColl::PartialTranslOptColl()
 {
@@ -96,4 +98,7 @@ void PartialTranslOptColl::Prune()
 	m_list.resize(m_maxSize);
 	//	TRACE_ERR( "pruned to size " << m_list.size() << ", total pruned: " << m_totalPruned << std::endl);
 }
+
+}
+
 

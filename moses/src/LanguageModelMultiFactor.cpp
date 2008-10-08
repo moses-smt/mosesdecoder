@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelMultiFactor.h"
 #include "Phrase.h"
 
+namespace Moses
+{
 LanguageModelMultiFactor::LanguageModelMultiFactor(bool registerScore, ScoreIndexManager &scoreIndexManager)
 :LanguageModel(registerScore, scoreIndexManager)
 {}
@@ -49,3 +51,6 @@ bool LanguageModelMultiFactor::Useable(const Phrase &phrase) const
 	return  true;
 
 }
+
+}
+

@@ -31,6 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 Phrase::Phrase(const Phrase &copy)
 :m_direction(copy.m_direction)
 ,m_phraseSize(copy.m_phraseSize)
@@ -374,4 +376,7 @@ ostream& operator<<(ostream& out, const Phrase& phrase)
 	}
 	return out;
 }
+
+}
+
 

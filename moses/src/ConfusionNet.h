@@ -7,6 +7,9 @@
 #include "Word.h"
 #include "InputType.h"
 
+namespace Moses
+{
+
 class FactorCollection;
 class TranslationOptionCollection;
 class Sentence;
@@ -52,4 +55,8 @@ class ConfusionNet : public InputType {
 };
 
 std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn);
+
+
+}
+
 #endif

@@ -38,6 +38,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 unsigned int Hypothesis::s_HypothesesCreated = 0;
 
 #ifdef USE_HYPO_POOL
@@ -593,3 +595,6 @@ const ScoreComponentCollection &Hypothesis::GetCachedReorderingScore() const
 {
 	return m_transOpt->GetReorderingScore();
 }
+
+}
+

@@ -44,6 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "InputFileStream.h"
 
 using namespace std;
+using namespace Moses;
 
 IOWrapper::IOWrapper(
 				const vector<FactorType>				&inputFactorOrder

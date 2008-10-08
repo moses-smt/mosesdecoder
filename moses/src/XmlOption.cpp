@@ -28,7 +28,8 @@
 #include "StaticData.h"
 #include "TranslationOption.h"
 
-namespace {
+namespace Moses 
+{
 
 std::string ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName){
 	/*TODO deal with unescaping \"*/
@@ -90,7 +91,6 @@ inline std::vector<std::string> TokenizeXml(const std::string& str)
 	return tokens;
 }
 
-}
 
 std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const InputType &source) {
 	//parse XML markup in translation line
@@ -240,4 +240,4 @@ std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const 
 	return res;
 }
 
-
+}

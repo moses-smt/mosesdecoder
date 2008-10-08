@@ -6,6 +6,9 @@
 #include <iomanip>
 #include "Util.h"
 
+namespace Moses
+{
+
 class Timer
 {
  friend std::ostream& operator<<(std::ostream& os, Timer& t);
@@ -31,5 +34,7 @@ class Timer
   double get_elapsed_time();
 
 };
+
+}
 
 #endif // TIMER_H

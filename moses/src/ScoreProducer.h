@@ -6,6 +6,9 @@
 #include <string>
 #include <limits>
 
+namespace Moses
+{
+
 class ScoreIndexManager;
 
 /** to keep track of the various things that can produce a score,
@@ -45,5 +48,8 @@ public:
 	//! returns the number of scores gathered from the input (0 by default)
 	virtual size_t GetNumInputScores() const { return 0; };
 };
+
+
+}
 
 #endif

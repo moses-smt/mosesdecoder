@@ -30,6 +30,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "Util.h" //Join()
 
+namespace Moses
+{
+
 struct RecombinationInfo
 {
 	RecombinationInfo() {} //for std::vector
@@ -111,4 +114,6 @@ inline std::ostream& operator<<(std::ostream& os, const SentenceStats& ss)
             << "total source words = " << ss.GetTotalSourceWords() << std::endl
             << "     words deleted = " << ss.GetNumWordsDeleted() << " (" << Join(" ", ss.GetDeletedWords()) << ")" << std::endl
             << "    words inserted = " << ss.GetNumWordsInserted() << " (" << Join(" ", ss.GetInsertedWords()) << ")" << std::endl;
+}
+
 }

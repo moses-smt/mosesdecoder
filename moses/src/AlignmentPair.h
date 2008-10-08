@@ -27,6 +27,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "AlignmentPhrase.h"
 
+namespace Moses
+{
+
 typedef std::back_insert_iterator<AlignmentPhrase::CollectionType> AlignmentPhraseInserter;
 
 /** represent the alignment info between source and target phrase */
@@ -104,4 +107,6 @@ public:
 
 	TO_STRING();
 };
+
+}
 

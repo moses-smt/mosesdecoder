@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "FactorCollection.h"
 
+namespace Moses
+{
+
 /* Hacked up LM which skips any factor with string '---'
 * order of chunk hardcoded to 3 (m_realNGramOrder)
 */
@@ -118,5 +121,7 @@ public:
 		return ret;
 	}
 };
+
+}
 
 

@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
 // static variable init
 LanguageModelSingleFactor::State LanguageModelSingleFactor::UnknownState=0;
 
@@ -50,6 +52,9 @@ std::string LanguageModelSingleFactor::GetScoreProducerDescription() const
 	oss << "LM_" << GetNGramOrder() << "gram";
 	return oss.str();
 } 
+
+}
+
 
 
 

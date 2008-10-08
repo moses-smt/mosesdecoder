@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <vector>
 
+namespace Moses
+{
+
 #define PROJECT_NAME		"moses"
 
 #ifndef BOS_
@@ -177,3 +180,5 @@ typedef std::vector<std::string> WordAlignments;
 
 typedef std::pair<std::vector<std::string const*>,Scores > StringTgtCand;
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
+
+}

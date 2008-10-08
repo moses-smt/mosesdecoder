@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryNode.h"
 
+namespace Moses
+{
+
 /*** Implementation of a phrase table in a trie.  Looking up a phrase of
  * length n words requires n look-ups to find the TargetPhraseCollection.
  */
@@ -64,3 +67,4 @@ public:
 	
 };
 
+}

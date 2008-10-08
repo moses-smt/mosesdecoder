@@ -25,6 +25,8 @@ using std::cout;
 using std::endl;
 #include "SentenceStats.h"
 
+namespace Moses
+{
 /***
  * to be called after decoding a sentence
  */
@@ -44,3 +46,6 @@ void SentenceStats::AddDeletedWords(const Hypothesis& hypo)
 		m_deletedWords.push_back(hypo.GetSourcePhrase());
 	}
 }
+
+}
+

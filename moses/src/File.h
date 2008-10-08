@@ -14,6 +14,9 @@
 #include "TypeDef.h"
 #include "Util.h"
 
+namespace Moses
+{
+
 #ifdef WIN32
 #define OFF_T __int64 
 #define FTELLO(file) _ftelli64(file)
@@ -112,6 +115,8 @@ inline FILE* fOpen(const char* fn,const char* m) {
 	}
 }
 inline void fClose(FILE* f) {fclose(f);} // for consistent function names only
+
+}
 
 #endif
 

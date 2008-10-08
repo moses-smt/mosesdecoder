@@ -7,6 +7,9 @@
 #include <vector>
 #include "TypeDef.h"
 
+namespace Moses
+{
+
 class LanguageModel;
 class ScoreIndexManager;
 
@@ -25,5 +28,7 @@ namespace LanguageModelFactory {
 																		, int dub);
 	 
 };
+
+}
 
 #endif

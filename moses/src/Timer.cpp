@@ -4,6 +4,9 @@
 #include "Util.h"
 #include "Timer.h"
 
+namespace Moses
+{
+
 /***
  * Return the total time that the timer has been in the "running"
  * state since it was first "started" or last "restarted".  For
@@ -105,3 +108,6 @@ std::ostream& operator<<(std::ostream& os, Timer& t)
   os << (t.running ? t.elapsed_time() : 0);
   return os;
 }
+
+}
+
