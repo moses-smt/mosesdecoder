@@ -28,12 +28,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Vocab.h"
 #include "LanguageModelSingleFactor.h"
 
-namespace Moses
-{
-
 class Factor;
 class Phrase;
 class Ngram; // SRI forward decl
+
+namespace Moses
+{
 
 class LanguageModelSRI : public LanguageModelSingleFactor
 {

@@ -13,6 +13,9 @@
 #include "ConfusionNet.h"
 #include "WordsRange.h"
 #include "PhraseDictionaryTree.h"
+
+using namespace Moses;
+
 #if 0
 // Generates all tuples from  n indexes with ranges 0 to card[j]-1, respectively..
 // Input: number of indexes and  ranges: ranges[0] ... ranges[num_idx-1] 
