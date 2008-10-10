@@ -39,6 +39,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses
+{
+
 LanguageModelIRST::LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub)
 :LanguageModelSingleFactor(registerScore, scoreIndexManager)
 ,m_lmtb(0),m_lmtb_dub(dub)
@@ -224,5 +227,7 @@ void LanguageModelIRST::InitializeBeforeSentenceProcessing(){
 #ifdef TRACE_CACHE
  m_lmtb->sentence_id++;
 #endif
+}
+
 }
 
