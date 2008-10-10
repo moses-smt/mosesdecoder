@@ -37,6 +37,7 @@
 </option>
 <option id="gnu.cpp.link.option.paths.1718276622" superClass="gnu.cpp.link.option.paths" valueType="stringList">
 <listOptionValue builtIn="false" value="&quot;../../srilm/lib/cygwin&quot;"/>
+<listOptionValue builtIn="false" value="&quot;../../irstlm/lib/i686-redhat-linux-gnu&quot;"/>
 <listOptionValue builtIn="false" value="&quot;../../srilm/lib/i686&quot;"/>
 </option>
 <option id="gnu.cpp.link.option.userobjs.551693347" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
