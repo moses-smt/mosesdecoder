@@ -28,13 +28,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "LanguageModelSingleFactor.h"
 
-class Factor;
-class Phrase;
-
 class lmtable;  // irst lm table
 class lmmacro;  // irst lm for macro tags
 class ngram;
 
+namespace Moses
+{
+class Phrase;
+	
 /** Implementation of single factor LM using IRST's code.
 * This is the default LM for Moses and is available from the same sourceforge repository
 */
@@ -80,3 +81,6 @@ public:
 //m_lmtb->set_dictionary_upperbound(dub);
 };
 };
+
+}
+
