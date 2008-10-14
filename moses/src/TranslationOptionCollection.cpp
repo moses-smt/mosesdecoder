@@ -420,7 +420,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		  const WordsRange wordsRange(startPos, endPos);
 		  sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
 		  
-			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(*sourcePhrase);
+			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(decodeStepList, *sourcePhrase);
 			// is phrase in cache?
 			if (transOptList != NULL) {
 				skipTransOptCreation = true;
@@ -496,7 +496,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 						cachedTransOptList[i] = new TranslationOption(*cachedTransOptList[i]);
 					}
 	
-					StaticData::Instance().AddTransOptListToCache(*sourcePhrase, cachedTransOptList);
+					StaticData::Instance().AddTransOptListToCache(decodeStepList, *sourcePhrase, cachedTransOptList);
 				}				
 			}
 

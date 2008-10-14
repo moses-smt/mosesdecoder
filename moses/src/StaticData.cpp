@@ -391,7 +391,7 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_decodeStepVL);
 	
 	// delete trans opt
-	map<Phrase, std::vector<TranslationOption*> >::iterator iterCache;
+	map<std::pair<const DecodeGraph*, Phrase>, std::vector<TranslationOption*> >::iterator iterCache;
 	for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache)
 	{
 		TranslationOptionList &transOptList = iterCache->second;
@@ -946,14 +946,23 @@ void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::
     m_allWeights[i] = *weightIter++;
 }
 
-const TranslationOptionList* StaticData::FindTransOptListInCache(const Phrase &sourcePhrase) const
+const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
 {
-	std::map<Phrase, TranslationOptionList>::const_iterator iter
-			= m_transOptCache.find(sourcePhrase);
+	std::pair<const DecodeGraph*, Phrase> key(&decodeGraph, sourcePhrase);
+	
+	std::map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList>::const_iterator iter
+			= m_transOptCache.find(key);
 	if (iter == m_transOptCache.end())
 		return NULL;
 
 	return &(iter->second);
+}
+
+void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
+{
+	std::pair<const DecodeGraph*, Phrase> key(&decodeGraph, sourcePhrase);
+	
+	m_transOptCache[key] = transOptList;
 }
 
 }
