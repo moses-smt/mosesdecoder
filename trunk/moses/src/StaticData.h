@@ -136,7 +136,7 @@ protected:
 	size_t m_timeout_threshold; //! seconds after which time out is activated
 
 	bool m_useTransOptCache;
-	mutable std::map<Phrase, TranslationOptionList> m_transOptCache;
+	mutable std::map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList> m_transOptCache;
 
 	mutable const InputType* m_input;  //! holds reference to current sentence
 	bool m_isAlwaysCreateDirectTranslationOption;
@@ -432,12 +432,9 @@ public:
 
 	bool GetUseTransOptCache() const { return m_useTransOptCache; }
 
-	void AddTransOptListToCache(const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
-	{
-		m_transOptCache[sourcePhrase] = transOptList;
-	}
+	void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
 
-	const TranslationOptionList* FindTransOptListInCache(const Phrase &sourcePhrase) const;
+	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
 };
 
 }
