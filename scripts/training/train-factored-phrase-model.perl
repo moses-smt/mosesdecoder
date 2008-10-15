@@ -14,41 +14,41 @@ my $SCRIPTS_ROOTDIR = $Bin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_CORPUS,
+my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_CORPUS,
 $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH,
 $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_VERBOSE, $_ALIGNMENT,
-$_ALIGNMENT_FILE, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
+$_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
 $_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
 $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
 $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
 $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
-@_REORDERING_TABLE, @_GENERATION_TABLE, $_CONFIG, $_DONT_ZIP, $_HMM_ALIGN,
-@_GENERATION_TYPE);
+@_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP, $_HMM_ALIGN, $_CONFIG,
+$_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
-my $nodebug = 1; # no debug this script, delete any files
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR="/home/s0565741/terabyte/bin";
+my $BINDIR="";
 
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
 		       'bin-dir=s' => \$BINDIR, # allow to override default bindir path
 		       'corpus-dir=s' => \$_CORPUS_DIR,
 		       'corpus=s' => \$_CORPUS,
-                       'corpus-compression=s' => \$_CORPUS_COMPRESSION,
 		       'f=s' => \$_F,
 		       'e=s' => \$_E,
 		       'giza-e2f=s' => \$_GIZA_E2F,
 		       'giza-f2e=s' => \$_GIZA_F2E,
-		       'giza-extension=s' => \$_GIZA_EXTENSION,
 		       'max-phrase-length=i' => \$_MAX_PHRASE_LENGTH,
 		       'lexical-file=s' => \$_LEXICAL_FILE,
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
 		       'model-dir=s' => \$_MODEL_DIR,
+		       'temp-dir=s' => \$_TEMP_DIR,
+		       'file-limit' => \$_FILE_LIMIT,
 		       'extract-file=s' => \$_EXTRACT_FILE,
 		       'alignment=s' => \$_ALIGNMENT,
 		       'alignment-file=s' => \$_ALIGNMENT_FILE,
+		       'alignment-stem=s' => \$_ALIGNMENT_STEM,
 		       'verbose' => \$_VERBOSE,
 		       'first-step=i' => \$_FIRST_STEP,
 		       'last-step=i' => \$_LAST_STEP,
@@ -58,7 +58,6 @@ $_HELP = 1
 		       'help' => \$_HELP,
 		       'hmm-align' => \$_HMM_ALIGN,
 		       'debug' => \$debug,
-		       'nodebug' => \$nodebug,
 		       'dont-zip' => \$_DONT_ZIP,
 		       'parts=i' => \$_PARTS,
 		       'direction=i' => \$_DIRECTION,
@@ -76,11 +75,11 @@ $_HELP = 1
 		       'phrase-translation-table=s' => \@_PHRASE_TABLE,
 		       'generation-table=s' => \@_GENERATION_TABLE,
 		       'reordering-table=s' => \@_REORDERING_TABLE,
-                       'generation-type=s' => \@_GENERATION_TYPE,
-		       'config=s' => \$_CONFIG
+		       'generation-type=s' => \@_GENERATION_TYPE,
+		       'continue' => \$_CONTINUE,
+		       'proper-conditioning' => \$_PROPER_CONDITIONING,
+		       'config=s' => \$_CONFIG		       
                       );
-
-if ($nodebug){ $debug = 0; };
 
 if ($_HELP) {
     print "Train Phrase Model
@@ -122,14 +121,14 @@ my $BZCAT = "bzcat";
 
 # do a sanity check to make sure we can find the necessary binaries since
 # these are not installed by default
-die("Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless (-x $GIZA && -x $SNT2COOC && -x $MKCLS);
+die("ERROR: Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless (-x $GIZA && -x $SNT2COOC && -x $MKCLS);
 
 # set varibles to defaults or from options
 my $___ROOT_DIR = ".";
 $___ROOT_DIR = $_ROOT_DIR if $_ROOT_DIR;
 my $___CORPUS_DIR  = $___ROOT_DIR."/corpus";
 $___CORPUS_DIR = $_CORPUS_DIR if $_CORPUS_DIR;
-die("use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1 && $_FIRST_STEP!=8);
+die("ERROR: use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1 && $_FIRST_STEP!=8);
 my $___CORPUS      = $_CORPUS;
 
 my $___GIZA_EXTENSION = 'A3.final';
@@ -142,8 +141,8 @@ if ($_CORPUS_COMPRESSION) {
 }
 
 # foreign/English language extension
-die("use --f to specify foreign language") unless $_F;
-die("use --e to specify English language") unless $_E;
+die("ERROR: use --f to specify foreign language") unless $_F;
+die("ERROR: use --e to specify English language") unless $_E;
 my $___F = $_F;
 my $___E = $_E;
 
@@ -171,6 +170,8 @@ my $___MODEL_DIR = $___ROOT_DIR."/model";
 $___MODEL_DIR = $_MODEL_DIR if $_MODEL_DIR;
 my $___ALIGNMENT_FILE = "$___MODEL_DIR/aligned";
 $___ALIGNMENT_FILE = $_ALIGNMENT_FILE if $_ALIGNMENT_FILE;
+my $___ALIGNMENT_STEM = $___ALIGNMENT_FILE;
+$___ALIGNMENT_STEM = $_ALIGNMENT_STEM if $_ALIGNMENT_STEM;
 my $___EXTRACT_FILE = $___MODEL_DIR."/extract";
 $___EXTRACT_FILE = $_EXTRACT_FILE if $_EXTRACT_FILE;
 
@@ -179,6 +180,12 @@ $___CONFIG = $_CONFIG if $_CONFIG;
 
 my $___DONT_ZIP = 0; 
 $_DONT_ZIP = $___DONT_ZIP unless $___DONT_ZIP;
+
+my $___TEMP_DIR = $___MODEL_DIR;
+$___TEMP_DIR = $_TEMP_DIR if $_TEMP_DIR;
+
+my $___CONTINUE = 0; 
+$___CONTINUE = $_CONTINUE if $_CONTINUE;
 
 my $___MAX_PHRASE_LENGTH = 7;
 my $___LEXICAL_WEIGHTING = 1;
@@ -196,16 +203,15 @@ $___LAST_STEP =  $_LAST_STEP  if $_LAST_STEP;
 
 my @___LM = ();
 if ($___LAST_STEP == 9) {
-  die "use --lm factor:order:filename to specify at least one language model"
+  die "ERROR: use --lm factor:order:filename to specify at least one language model"
     if scalar @_LM == 0;
   foreach my $lm (@_LM) {
     my $type = 0; # default to srilm
     my ($f, $order, $filename);
     ($f, $order, $filename, $type) = split /:/, $lm, 4;
-    $type = 0 unless $type;
-    die "Wrong format of --lm. Expected: --lm factor:order:filename"
+    die "ERROR: Wrong format of --lm. Expected: --lm factor:order:filename"
       if $f !~ /^[0-9]+$/ || $order !~ /^[0-9]+$/ || !defined $filename;
-    die "Language model file not found or empty: $filename"
+    die "ERROR: Language model file not found or empty: $filename"
       if ! -s $filename;
     push @___LM, [ $f, $order, $filename, $type ];
   }
@@ -256,35 +262,36 @@ my ($mono_following_fe,$swap_following_fe,$other_following_fe);
 my ($f_current,$e_current);
 
 ### Factored translation models
+my $___NOT_FACTORED = 1;
 my $___ALIGNMENT_FACTORS = "0-0";
 $___ALIGNMENT_FACTORS = $_ALIGNMENT_FACTORS if defined($_ALIGNMENT_FACTORS);
-die("format for alignment factors is \"0-0\" or \"0,1,2-0,1\", you provided $___ALIGNMENT_FACTORS\n") if $___ALIGNMENT_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*$/;
+die("ERROR: format for alignment factors is \"0-0\" or \"0,1,2-0,1\", you provided $___ALIGNMENT_FACTORS\n") if $___ALIGNMENT_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*$/;
+$___NOT_FACTORED = 0 unless $___ALIGNMENT_FACTORS eq "0-0";
 
 my $___TRANSLATION_FACTORS = undef;
 $___TRANSLATION_FACTORS = "0-0" unless defined($_DECODING_STEPS); # single factor default
 $___TRANSLATION_FACTORS = $_TRANSLATION_FACTORS if defined($_TRANSLATION_FACTORS);
-die("format for translation factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___TRANSLATION_FACTORS\n") 
+die("ERROR: format for translation factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___TRANSLATION_FACTORS\n") 
   if defined $___TRANSLATION_FACTORS && $___TRANSLATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
+$___NOT_FACTORED = 0 unless $___TRANSLATION_FACTORS eq "0-0";
 
 my $___REORDERING_FACTORS = undef;
-$___REORDERING_FACTORS = "0-0" if defined($_REORDERING); # single factor default
+$___REORDERING_FACTORS = "0-0" if defined($_REORDERING) && ! defined($_DECODING_STEPS); # single factor default
 $___REORDERING_FACTORS = $_REORDERING_FACTORS if defined($_REORDERING_FACTORS);
-die("format for reordering factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___REORDERING_FACTORS\n") 
+die("ERROR: format for reordering factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___REORDERING_FACTORS\n") 
   if defined $___REORDERING_FACTORS && $___REORDERING_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
+$___NOT_FACTORED = 0 unless defined($_REORDERING) && $___REORDERING_FACTORS eq "0-0";
 
 my $___GENERATION_FACTORS = undef;
 $___GENERATION_FACTORS = $_GENERATION_FACTORS if defined($_GENERATION_FACTORS);
-die("format for generation factors is \"0-1\" or \"0-1+0-2\" or \"0-1+0,1-1,2\", you provided $___GENERATION_FACTORS\n") 
+die("ERROR: format for generation factors is \"0-1\" or \"0-1+0-2\" or \"0-1+0,1-1,2\", you provided $___GENERATION_FACTORS\n") 
   if defined $___GENERATION_FACTORS && $___GENERATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
+$___NOT_FACTORED = 0 if defined($___GENERATION_FACTORS);
 
 my $___DECODING_STEPS = "t0";
 $___DECODING_STEPS = $_DECODING_STEPS if defined($_DECODING_STEPS);
-die("format for decoding steps is \"t0,g0,t1,g1:t2\", you provided $___DECODING_STEPS\n") 
-  if defined $_DECODING_STEPS && $_DECODING_STEPS !~ /^[tg]\d+(,[tg]\d+)*(:[tg]\d+(,[tg]\d+)*)*$/;
-
-my ($factor,$factor_e,$factor_f);
-
-my $alignment_id;
+die("ERROR: format for decoding steps is \"t0,g0,t1,g1:t2\", you provided $___DECODING_STEPS\n") 
+  if defined $_DECODING_STEPS && $_DECODING_STEPS !~ /^[tg]\d+([,:][tg]\d+)*$/;
 
 ### MAIN
 
@@ -302,72 +309,92 @@ my $alignment_id;
 
 sub prepare {
     print STDERR "(1) preparing corpus @ ".`date`;
-    safesystem("mkdir -p $___CORPUS_DIR") or die;
-
+    safesystem("mkdir -p $___CORPUS_DIR") or die("ERROR: could not create corpus dir $___CORPUS_DIR");
+    
     print STDERR "(1.0) selecting factors @ ".`date`;
     my ($factor_f,$factor_e) = split(/\-/,$___ALIGNMENT_FACTORS);
-    my $corpus = $___CORPUS.".".$___ALIGNMENT_FACTORS;    
+    my $corpus = $___NOT_FACTORED ? $___CORPUS : $___CORPUS.".".$___ALIGNMENT_FACTORS;    
     if ($___NOFORK) {
-	&reduce_factors($___CORPUS.".".$___F.$___CORPUS_COMPRESSION,$corpus.".".$___F,$factor_f);
-	&reduce_factors($___CORPUS.".".$___E.$___CORPUS_COMPRESSION,$corpus.".".$___E,$factor_e);
-
+	if (! $___NOT_FACTORED) {
+	    &reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
+	    &reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
+	}
+	
 	&make_classes($corpus.".".$___F,$___VCB_F.".classes");
 	&make_classes($corpus.".".$___E,$___VCB_E.".classes");
-    
+	
 	my $VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
 	my $VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
-    
+	
 	&numberize_txt_file($VCB_F,$corpus.".".$___F,
-			$VCB_E,$corpus.".".$___E,
-			$___CORPUS_DIR."/$___F-$___E-int-train.snt");
-    
+			    $VCB_E,$corpus.".".$___E,
+			    $___CORPUS_DIR."/$___F-$___E-int-train.snt");
+	
 	&numberize_txt_file($VCB_E,$corpus.".".$___E,
-			$VCB_F,$corpus.".".$___F,
-			$___CORPUS_DIR."/$___E-$___F-int-train.snt");
-    } else {
+			    $VCB_F,$corpus.".".$___F,
+			    $___CORPUS_DIR."/$___E-$___F-int-train.snt");
+    } 
+    else {
 	print "Forking...\n";
-	my $pid = fork();
-	die "couldn't fork" unless defined $pid;
-	if (!$pid) {
-	    &reduce_factors($___CORPUS.".".$___F.$___CORPUS_COMPRESSION,$corpus.".".$___F,$factor_f);
-	    exit 0;
-	} else {
-	    &reduce_factors($___CORPUS.".".$___E.$___CORPUS_COMPRESSION,$corpus.".".$___E,$factor_e);
+	if (! $___NOT_FACTORED) {
+	    my $pid = fork();
+	    die "ERROR: couldn't fork" unless defined $pid;
+	    if (!$pid) {
+		&reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
+		exit 0;
+	    } 
+	    else {
+		&reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
+	    }
+	    printf "Waiting for second reduce_factors process...\n";
+	    waitpid($pid, 0);
 	}
-	printf "Waiting for second reduce_factors process...\n";
-	waitpid($pid, 0);
-	my $pid2 = 0;
-	$pid = fork();
-	die "couldn't fork" unless defined $pid;
+	my $pid = fork();
+	die "ERROR: couldn't fork" unless defined $pid;
 	if (!$pid) {
 	    &make_classes($corpus.".".$___F,$___VCB_F.".classes");
 	    exit 0;
 	} # parent
-	$pid2 = fork();
-	die "couldn't fork again" unless defined $pid2;
+	my $pid2 = fork();
+	die "ERROR: couldn't fork again" unless defined $pid2;
 	if (!$pid2) { #child
 	    &make_classes($corpus.".".$___E,$___VCB_E.".classes");
 	    exit 0;
 	}
-    
+	
 	my $VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
 	my $VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
-    
+	
 	&numberize_txt_file($VCB_F,$corpus.".".$___F,
-			$VCB_E,$corpus.".".$___E,
-			$___CORPUS_DIR."/$___F-$___E-int-train.snt");
+			    $VCB_E,$corpus.".".$___E,
+			    $___CORPUS_DIR."/$___F-$___E-int-train.snt");
     
 	&numberize_txt_file($VCB_E,$corpus.".".$___E,
-			$VCB_F,$corpus.".".$___F,
-			$___CORPUS_DIR."/$___E-$___F-int-train.snt");
+			    $VCB_F,$corpus.".".$___F,
+			    $___CORPUS_DIR."/$___E-$___F-int-train.snt");
 	printf "Waiting for mkcls processes to finish...\n";
 	waitpid($pid2, 0);
 	waitpid($pid, 0);
     }
 }
 
+sub open_compressed {
+    my ($file) = @_;
+    print "FILE: $file\n";
+
+    # add extensions, if necessary
+    $file = $file.".bz2" if ! -e $file && -e $file.".bz2";
+    $file = $file.".gz"  if ! -e $file && -e $file.".gz";
+   
+    # pipe zipped, if necessary
+    return "$BZCAT $file|" if $file =~ /\.bz2$/;
+    return "$ZCAT $file|"  if $file =~ /\.gz$/;    
+    return $file;
+}
+
 sub reduce_factors {
     my ($full,$reduced,$factors) = @_;
+
     print STDERR "(1.0.5) reducing factors to produce $reduced  @ ".`date`;
     while(-e $reduced.".lock") {
 	sleep(10);
@@ -384,7 +411,7 @@ sub reduce_factors {
     my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
 
     *IN = open_or_zcat($full);
-    open(OUT,">".$reduced) or die "Can't write $reduced";
+    open(OUT,">".$reduced) or die "ERROR: Can't write $reduced";
     my $nr = 0;
     while(<IN>) {
         $nr++;
@@ -402,7 +429,7 @@ sub reduce_factors {
               print OUT "|" unless $first_factor;
               $first_factor = 0;
               my $out = $FACTOR[$outfactor];
-              die "Couldn't find factor $outfactor in token \"$_\" in $full LINE $nr" if !defined $out;
+              die "ERROR: Couldn't find factor $outfactor in token \"$_\" in $full LINE $nr" if !defined $out;
               print OUT $out;
             }
 	    # for(my $factor=0;$factor<=$#FACTOR;$factor++) {
@@ -437,7 +464,7 @@ sub get_vocabulary {
     print STDERR "(1.2) creating vcb file $vcb @ ".`date`;
     
     my %WORD;
-    open(TXT,$corpus) or die "Can't read $corpus";
+    open(TXT,$corpus) or die "ERROR: Can't read $corpus";
     while(<TXT>) {
 	chop;
 	foreach (split) { $WORD{$_}++; }
@@ -451,7 +478,7 @@ sub get_vocabulary {
     }
     
     my %VCB;
-    open(VCB,">$vcb") or die "Can't write $vcb";
+    open(VCB,">$vcb") or die "ERROR: Can't write $vcb";
     print VCB "1\tUNK\t0\n";
     my $id=2;
     foreach (reverse sort @NUM) {
@@ -473,9 +500,9 @@ sub numberize_txt_file {
         print STDERR "  $out already in place, reusing\n";
         return;
     }
-    open(IN_DE,$in_de) or die "Can't read $in_de";
-    open(IN_EN,$in_en) or die "Can't read $in_en";
-    open(OUT,">$out") or die "Can't write $out";
+    open(IN_DE,$in_de) or die "ERROR: Can't read $in_de";
+    open(IN_EN,$in_en) or die "ERROR: Can't read $in_en";
+    open(OUT,">$out") or die "ERROR: Can't write $out";
     while(my $de = <IN_DE>) {
 	my $en = <IN_EN>;
 	print OUT "1\n";
@@ -519,7 +546,7 @@ sub run_giza {
     } else {
 	my $pid = fork();
 	if (!defined $pid) {
-	    die "Failed to fork";
+	    die "ERROR: Failed to fork";
 	}
 	if (!$pid) { # i'm the child
 	    &run_single_giza($___GIZA_F2E,$___E,$___F,
@@ -539,7 +566,7 @@ sub run_giza {
 sub run_giza_on_parts {
     print STDERR "(2) running giza on $___PARTS cooc parts @ ".`date`;
     my $size = `cat $___CORPUS_DIR/$___F-$___E-int-train.snt | wc -l`;
-    die "Failed to get number of lines in $___CORPUS_DIR/$___F-$___E-int-train.snt"
+    die "ERROR: Failed to get number of lines in $___CORPUS_DIR/$___F-$___E-int-train.snt"
       if $size == 0;
     
     if ($___DIRECTION == 1 || $___DIRECTION == 2 || $___NOFORK) {
@@ -555,7 +582,7 @@ sub run_giza_on_parts {
     } else {
 	my $pid = fork();
 	if (!defined $pid) {
-	    die "Failed to fork";
+	    die "ERROR: Failed to fork";
 	}
 	if (!$pid) { # i'm the child
 	    &run_single_giza_on_parts($___GIZA_F2E,$___E,$___F,
@@ -578,7 +605,7 @@ sub run_single_giza_on_parts {
     my $part = 0;
 
     # break up training data into parts
-    open(SNT,$train) or die "Can't read $train";
+    open(SNT,$train) or die "ERROR: Can't read $train";
     { 
 	my $i=0;
 	while(<SNT>) {
@@ -586,9 +613,9 @@ sub run_single_giza_on_parts {
 	    if ($i%3==1 && $part < ($___PARTS*$i)/$size && $part<$___PARTS) {
 		close(PART) if $part;
 		$part++;
-		safesystem("mkdir -p $___CORPUS_DIR/part$part") or die;
+		safesystem("mkdir -p $___CORPUS_DIR/part$part") or die("ERROR: could not create $___CORPUS_DIR/part$part");
 		open(PART,">$___CORPUS_DIR/part$part/$f-$e-int-train.snt")
-                   or die "Can't write $___CORPUS_DIR/part$part/$f-$e-int-train.snt";
+                   or die "ERROR: Can't write $___CORPUS_DIR/part$part/$f-$e-int-train.snt";
 	    }
 	    print PART $_;
 	}
@@ -602,10 +629,10 @@ sub run_single_giza_on_parts {
     }
 
     # merge parts
-    open(COOC,">$dir/$f-$e.cooc") or die "Can't write $dir/$f-$e.cooc";
+    open(COOC,">$dir/$f-$e.cooc") or die "ERROR: Can't write $dir/$f-$e.cooc";
     my(@PF,@CURRENT);
     for(my $i=1;$i<=$___PARTS;$i++) {
-	open($PF[$i],"$dir/part$i/$f-$e.cooc")or die "Can't read $dir/part$i/$f-$e.cooc";
+	open($PF[$i],"$dir/part$i/$f-$e.cooc")or die "ERROR: Can't read $dir/part$i/$f-$e.cooc";
 	my $pf = $PF[$i];
 	$CURRENT[$i] = <$pf>;
 	chop($CURRENT[$i]) if $CURRENT[$i];
@@ -664,12 +691,13 @@ sub run_single_giza {
 	 o => "$dir/$f-$e");
 
     if ($_HMM_ALIGN) {
-    	$GizaDefaultOptions{m3} = 0;
-    	$GizaDefaultOptions{m4} = 0;
-	$GizaDefaultOptions{hmmiterations} = 5;
-	$GizaDefaultOptions{hmmdumpfrequency} = 5;
-	$GizaDefaultOptions{nodumps} = 0;
+       $GizaDefaultOptions{m3} = 0;
+       $GizaDefaultOptions{m4} = 0;
+       $GizaDefaultOptions{hmmiterations} = 5;
+       $GizaDefaultOptions{hmmdumpfrequency} = 5;
+       $GizaDefaultOptions{nodumps} = 0;
     }
+
 
     if ($___GIZA_OPTION) {
 	foreach (split(/[ ,]+/,$___GIZA_OPTION)) {
@@ -687,6 +715,8 @@ sub run_single_giza {
     &run_single_snt2cooc($dir,$e,$f,$vcb_e,$vcb_f,$train) if $___PARTS == 1;
 
     print STDERR "(2.1b) running giza $f-$e @ ".`date`."$GIZA $GizaOptions\n";
+
+
     if (-e "$dir/$f-$e.$___GIZA_EXTENSION.gz") {
       print "  $dir/$f-$e.$___GIZA_EXTENSION.gz seems finished, reusing.\n";
       return;
@@ -694,7 +724,7 @@ sub run_single_giza {
     print "$GIZA $GizaOptions\n";
     return if  $___ONLY_PRINT_GIZA;
     safesystem("$GIZA $GizaOptions");
-    die "Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
+    die "ERROR: Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
       if ! -e "$dir/$f-$e.$___GIZA_EXTENSION";
     safesystem("rm -f $dir/$f-$e.$___GIZA_EXTENSION.gz") or die;
     safesystem("gzip $dir/$f-$e.$___GIZA_EXTENSION") or die;
@@ -703,9 +733,9 @@ sub run_single_giza {
 sub run_single_snt2cooc {
     my($dir,$e,$f,$vcb_e,$vcb_f,$train) = @_;
     print STDERR "(2.1a) running snt2cooc $f-$e @ ".`date`."\n";
-    safesystem("mkdir -p $dir") or die;
+    safesystem("mkdir -p $dir") or die("ERROR");
     print "$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc\n";
-    safesystem("$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc") or die;
+    safesystem("$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc") or die("ERROR");
 }
 
 ### (3) CREATE WORD ALIGNMENT FROM GIZA ALIGNMENTS
@@ -715,29 +745,29 @@ sub word_align {
     print STDERR "(3) generate word alignment @ ".`date`;
     my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
     print STDERR "Combining forward and inverted alignment from files:\n";
-    print STDERR "  $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.{bz2,gz}\n";
-    print STDERR "  $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.{bz2,gz}\n";
+    print STDERR "  $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.{bz2,gz}\n";
+    print STDERR "  $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.{bz2,gz}\n";
 
     ### build arguments for giza2bal.pl
     my($__ALIGNMENT_CMD,$__ALIGNMENT_INV_CMD);
     
-    if (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2"){
-      $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2\"";
-    } elsif (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz") {
-      $__ALIGNMENT_CMD="\"$ZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz\"";
+    if (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.bz2"){
+      $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.bz2\"";
+    } elsif (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.gz") {
+      $__ALIGNMENT_CMD="\"$ZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.gz\"";
     } else {
-      die "Can't read $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.{bz2,gz}\n";
+      die "ERROR: Can't read $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.{bz2,gz}\n";
     }
   
-    if ( -e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2"){
-      $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2\"";
-    }elsif (-e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz"){
-      $__ALIGNMENT_INV_CMD="\"$ZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz\"";
+    if ( -e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.bz2"){
+      $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.bz2\"";
+    }elsif (-e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.gz"){
+      $__ALIGNMENT_INV_CMD="\"$ZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.gz\"";
     }else{
-      die "Can't read $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.{bz2,gz}\n\n";
+      die "ERROR: Can't read $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.{bz2,gz}\n\n";
     }
     
-   safesystem("mkdir -p $___MODEL_DIR") or die;
+   safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
    
    #build arguments for symal
     my($__symal_a)="";
@@ -746,6 +776,7 @@ sub word_align {
     $__symal_a="grow" if $___ALIGNMENT=~ /grow/;
     $__symal_a="srctotgt" if $___ALIGNMENT=~ /srctotgt/;
     $__symal_a="tgttosrc" if $___ALIGNMENT=~ /tgttosrc/;
+ 
     
     my($__symal_d,$__symal_f,$__symal_b);
     ($__symal_d,$__symal_f,$__symal_b)=("no","no","no");
@@ -755,41 +786,57 @@ sub word_align {
     $__symal_b="yes" if $___ALIGNMENT=~ /final-and/;
     
     safesystem("$GIZA2BAL -d $__ALIGNMENT_INV_CMD -i $__ALIGNMENT_CMD |".
-	   "$SYMAL -alignment=\"$__symal_a\" -diagonal=\"$__symal_d\" ".
-	   "-final=\"$__symal_f\" -both=\"$__symal_b\" > ".
-	   "$___ALIGNMENT_FILE.$___ALIGNMENT") 
+	  "$SYMAL -alignment=\"$__symal_a\" -diagonal=\"$__symal_d\" ".
+	  "-final=\"$__symal_f\" -both=\"$__symal_b\" > ".
+	  "$___ALIGNMENT_FILE.$___ALIGNMENT") 
       ||
-	die "Can't generate symmetrized alignment file\n"
-
+       die "ERROR: Can't generate symmetrized alignment file\n"
+	
 }
 
 ### (4) BUILDING LEXICAL TRANSLATION TABLE
 
 sub get_lexical_factored {
     print STDERR "(4) generate lexical translation table $___TRANSLATION_FACTORS @ ".`date`;
-    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
-	$factor = $f;
-	($factor_f,$factor_e) = split(/\-/,$factor);
-	&reduce_factors($___CORPUS.".".$___F.$___CORPUS_COMPRESSION,
-			$___ALIGNMENT_FILE.".".$factor_f.".".$___F,
-			$factor_f);
-	&reduce_factors($___CORPUS.".".$___E.$___CORPUS_COMPRESSION,
-			$___ALIGNMENT_FILE.".".$factor_e.".".$___E,
-			$factor_e);
-	&get_lexical();
+    if ($___NOT_FACTORED) {
+	&get_lexical($___CORPUS.".".$___F,
+		     $___CORPUS.".".$___E,
+		     $___LEXICAL_FILE);
+    }
+    else {
+	foreach my $factor (split(/\+/,$___TRANSLATION_FACTORS)) {
+	    print STDERR "(4) [$factor] generate lexical translation table @ ".`date`;
+	    my ($factor_f,$factor_e) = split(/\-/,$factor);
+	    &reduce_factors($___CORPUS.".".$___F,
+			    $___ALIGNMENT_STEM.".".$factor_f.".".$___F,
+			    $factor_f);
+	    &reduce_factors($___CORPUS.".".$___E,
+			    $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
+			    $factor_e);
+	    &get_lexical($___ALIGNMENT_STEM.".".$factor_f.".".$___F,
+			 $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
+			 $___LEXICAL_FILE.".".$factor);
+	}
     }
 }
 
 sub get_lexical {
-    print STDERR "(4) [$factor] generate lexical translation table @ ".`date`;
-		my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
+    my ($alignment_file_f,$alignment_file_e,$lexical_file) = @_;
+    print STDERR "($alignment_file_f,$alignment_file_e,$lexical_file)\n";
+    my $alignment_file_a = $___ALIGNMENT_FILE.".".$___ALIGNMENT;
 
-    if (-e "$___LEXICAL_FILE.$factor.f2n" && -e "$___LEXICAL_FILE.$factor.n2f") {
-      print STDERR "  reusing: $___LEXICAL_FILE.$factor.f2n and $___LEXICAL_FILE.$factor.n2f\n";
+    my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
+
+    if (-e "$lexical_file.f2e" && -e "$lexical_file.e2f") {
+      print STDERR "  reusing: $lexical_file.f2e and $lexical_file.e2f\n";
       return;
     }
 
-		&open_alignment();
+    open(E,&open_compressed($alignment_file_e)) or die "ERROR: Can't read $alignment_file_e";
+    open(F,&open_compressed($alignment_file_f)) or die "ERROR: Can't read $alignment_file_f";
+    open(A,&open_compressed($alignment_file_a)) or die "ERROR: Can't read $alignment_file_a";
+
+    my $alignment_id = 0;
     while(my $e = <E>) {
         if (($alignment_id++ % 1000) == 0) { print STDERR "!"; }
         chomp($e);
@@ -801,19 +848,19 @@ sub get_lexical {
         my (%FOREIGN_ALIGNED,%ENGLISH_ALIGNED);
         foreach (split(/ /,$a)) {
             my ($fi,$ei) = split(/\-/);
-						if ($fi >= scalar(@FOREIGN) || $ei >= scalar(@ENGLISH)) {
-								print STDERR "alignment point ($fi,$ei) out of range (0-$#FOREIGN,0-$#ENGLISH) in line $alignment_id, ignoring\n";
-						}
-						else {
-								# local counts
-								$FOREIGN_ALIGNED{$fi}++;
-								$ENGLISH_ALIGNED{$ei}++;
-								
-								# global counts
-								$WORD_TRANSLATION{$FOREIGN[$fi]}{$ENGLISH[$ei]}++;
-								$TOTAL_FOREIGN{$FOREIGN[$fi]}++;
-								$TOTAL_ENGLISH{$ENGLISH[$ei]}++;
-						}
+	    if ($fi >= scalar(@FOREIGN) || $ei >= scalar(@ENGLISH)) {
+		print STDERR "alignment point ($fi,$ei) out of range (0-$#FOREIGN,0-$#ENGLISH) in line $alignment_id, ignoring\n";
+	    }
+	    else {
+		# local counts
+		$FOREIGN_ALIGNED{$fi}++;
+		$ENGLISH_ALIGNED{$ei}++;
+		
+		# global counts
+		$WORD_TRANSLATION{$FOREIGN[$fi]}{$ENGLISH[$ei]}++;
+		$TOTAL_FOREIGN{$FOREIGN[$fi]}++;
+		$TOTAL_ENGLISH{$ENGLISH[$ei]}++;
+	    }
         }
 
         # unaligned words
@@ -830,81 +877,98 @@ sub get_lexical {
           $TOTAL_ENGLISH{"NULL"}++;
         }
     }
-    &close_alignment();
-    &save_word_translation(\%WORD_TRANSLATION,\%TOTAL_FOREIGN,\%TOTAL_ENGLISH);
-}
-
-sub open_alignment {
-    open(E,"$___ALIGNMENT_FILE.$factor_e.$___E")
-      or die "Can't read $___ALIGNMENT_FILE.$factor_e.$___E";
-    open(F,"$___ALIGNMENT_FILE.$factor_f.$___F")
-      or die "Can't read $___ALIGNMENT_FILE.$factor_f.$___F";
-    open(A,"$___ALIGNMENT_FILE.$___ALIGNMENT")
-	or die "Can't read $___ALIGNMENT_FILE.$___ALIGNMENT";
-    $alignment_id=0;
-}
-
-sub close_alignment {
     print STDERR "\n";
     close(A);
     close(F);
     close(E);
-}
 
-sub save_word_translation {
-    my ($WORD_TRANSLATION,$TOTAL_FOREIGN,$TOTAL_ENGLISH) = @_;
-    open(F2E,">$___LEXICAL_FILE.$factor.f2n")
-      or die "Can't write $___LEXICAL_FILE.$factor.f2n";
-    open(E2F,">$___LEXICAL_FILE.$factor.n2f")
-      or die "Can't write $___LEXICAL_FILE.$factor.n2f";
-    foreach my $f (keys %{$WORD_TRANSLATION}) {
-	foreach my $e (keys %{$$WORD_TRANSLATION{$f}}) {
-	    printf F2E "%s %s %.7f\n",$e,$f,$$WORD_TRANSLATION{$f}{$e}/$$TOTAL_FOREIGN{$f};
-	    printf E2F "%s %s %.7f\n",$f,$e,$$WORD_TRANSLATION{$f}{$e}/$$TOTAL_ENGLISH{$e};
+    open(F2E,">$lexical_file.f2e") or die "ERROR: Can't write $lexical_file.f2e";
+    open(E2F,">$lexical_file.e2f") or die "ERROR: Can't write $lexical_file.e2f";
+
+    foreach my $f (keys %WORD_TRANSLATION) {
+	foreach my $e (keys %{$WORD_TRANSLATION{$f}}) {
+	    printf F2E "%s %s %.7f\n",$e,$f,$WORD_TRANSLATION{$f}{$e}/$TOTAL_FOREIGN{$f};
+	    printf E2F "%s %s %.7f\n",$f,$e,$WORD_TRANSLATION{$f}{$e}/$TOTAL_ENGLISH{$e};
 	}
     }
     close(E2F);
     close(F2E);
-    print STDERR "Saved: $___LEXICAL_FILE.$factor.f2n and $___LEXICAL_FILE.$factor.n2f\n";
+    print STDERR "Saved: $lexical_file.f2e and $lexical_file.e2f\n";
 }
 
 ### (5) PHRASE EXTRACTION
 
 sub extract_phrase_factored {
     print STDERR "(5) extract phrases @ ".`date`;
-    my %generated;
-    foreach my $f (split(/\+/,"$___TRANSLATION_FACTORS"
-                     .($REORDERING_LEXICAL ? "+$___REORDERING_FACTORS" : ""))) {
-        # we extract phrases for all translation steps and also for reordering factors (if lexicalized reordering is used)
-        next if $generated{$f};
-        $generated{$f} = 1;
-	$factor = $f;
-	($factor_f,$factor_e) = split(/\-/,$factor);
-
-	&reduce_factors($___CORPUS.".".$___F.$___CORPUS_COMPRESSION,
-			$___ALIGNMENT_FILE.".".$factor_f.".".$___F,
-			$factor_f);
-	&reduce_factors($___CORPUS.".".$___E.$___CORPUS_COMPRESSION,
-			$___ALIGNMENT_FILE.".".$factor_e.".".$___E,
-			$factor_e);
-
-	&extract_phrase();
+    if ($___NOT_FACTORED) {
+	&extract_phrase($___CORPUS.".".$___F,
+			$___CORPUS.".".$___E,
+			$___EXTRACT_FILE);
+    }
+    else {
+	my %ALREADY;
+	foreach my $factor (split(/\+/,"$___TRANSLATION_FACTORS"
+				  .($REORDERING_LEXICAL ? "+$___REORDERING_FACTORS" : ""))) {
+	    # we extract phrases for all translation steps and also for reordering factors (if lexicalized reordering is used)
+	    print STDERR "(5) [$factor] extract phrases @ ".`date`;
+	    next if $ALREADY{$factor};
+	    $ALREADY{$factor} = 1;
+	    my ($factor_f,$factor_e) = split(/\-/,$factor);
+	    
+	    &reduce_factors($___CORPUS.".".$___F,
+			    $___ALIGNMENT_STEM.".".$factor_f.".".$___F,
+			    $factor_f);
+	    &reduce_factors($___CORPUS.".".$___E,
+			    $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
+			    $factor_e);
+	    
+	    &extract_phrase($___ALIGNMENT_STEM.".".$factor_f.".".$___F,
+			    $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
+			    $___EXTRACT_FILE.".".$factor);
+	}
     }
 }
 
 sub extract_phrase {
-    print STDERR "(5) [$factor] extract phrases @ ".`date`;
-    my $cmd = "$PHRASE_EXTRACT $___ALIGNMENT_FILE.$factor_e.$___E $___ALIGNMENT_FILE.$factor_f.$___F $___ALIGNMENT_FILE.$___ALIGNMENT $___EXTRACT_FILE.$factor $___MAX_PHRASE_LENGTH orientation";
+    my ($alignment_file_f,$alignment_file_e,$extract_file) = @_;
+    my $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $___ALIGNMENT_FILE.$___ALIGNMENT $extract_file $___MAX_PHRASE_LENGTH";
+    $cmd .= " --NoFileLimit" unless $_FILE_LIMIT;
+    $cmd .= " --ProperConditioning" if $_PROPER_CONDITIONING;
+    $cmd .= " orientation" if $REORDERING_LEXICAL;
     print STDERR "$cmd\n";
-    safesystem("$cmd") or die "Phrase extraction failed (missing input files?)";
-    safesystem("cat $___EXTRACT_FILE.$factor.o.part* > $___EXTRACT_FILE.$factor.o") or die;
-    safesystem("rm -f $___EXTRACT_FILE.$factor.o.gz") or die;
-    if (! $___DONT_ZIP) { safesystem("gzip $___EXTRACT_FILE.$factor.o") or die; }
-    if (! $debug) { safesystem("rm -f $___EXTRACT_FILE.$factor.o.part*") or die;}
-    safesystem("cat $___EXTRACT_FILE.$factor.part* > $___EXTRACT_FILE.$factor") or die;
-    if (! $debug) { safesystem("rm -f $___EXTRACT_FILE.$factor.part*") or die;}
-    safesystem("cat $___EXTRACT_FILE.$factor.inv.part* > $___EXTRACT_FILE.$factor.inv") or die;
-    if (! $debug) { safesystem("rm -f $___EXTRACT_FILE.$factor.inv.part*") or die;}
+    safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
+    if (! $_FILE_LIMIT) {
+      if (! $___DONT_ZIP) { 
+        safesystem("gzip $extract_file.o") if -e "$extract_file.o";
+        safesystem("gzip $extract_file.inv") or die("ERROR");
+        safesystem("gzip $extract_file") or die("ERROR");
+      }
+    }
+    else {
+      if (-e "$extract_file.o.part0001") {
+	if (! $___DONT_ZIP) {
+          safesystem("cat $extract_file.o.part* | gzip > $extract_file.o.gz") or die("ERROR");
+        }
+        else {
+	  safesystem("cat $extract_file.o.part* > $extract_file.o") or die("ERROR");
+        }
+        if (! $debug) { safesystem("rm -f $extract_file.o.part*") or die("ERROR");}
+      }
+      if (! $___DONT_ZIP) {
+        safesystem("cat $extract_file.part* | gzip > $extract_file.gz") or die("ERROR");
+      }
+      else {
+	safesystem("cat $extract_file.part* > $extract_file") or die("ERROR");
+      }
+      if (! $debug) { safesystem("rm -f $extract_file.part*") or die("ERROR");}
+      if (! $___DONT_ZIP) {
+        safesystem("cat $extract_file.inv.part* | gzip > $extract_file.inv.gz") or die("ERROR");
+      }
+      else {
+        safesystem("cat $extract_file.inv.part* > $extract_file.inv") or die("ERROR");
+      }
+      if (! $debug) { safesystem("rm -f $extract_file.inv.part*") or die("ERROR");}
+    }
 }
 
 ### (6) PHRASE SCORING
@@ -912,83 +976,97 @@ sub extract_phrase {
 sub score_phrase_factored {
     print STDERR "(6) score phrases @ ".`date`;
     my @SPECIFIED_TABLE = @_PHRASE_TABLE;
-    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
-	$factor = $f;
-	($factor_f,$factor_e) = split(/\-/,$factor);
-	my $file = "$___MODEL_DIR/phrase-table.$factor";
+    if ($___NOT_FACTORED) {
+	my $file = "$___MODEL_DIR/phrase-table";
 	$file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-	&score_phrase($file);
+	&score_phrase($file,$___LEXICAL_FILE,$___EXTRACT_FILE);
+    }
+    else {
+	foreach my $factor (split(/\+/,$___TRANSLATION_FACTORS)) {
+	    print STDERR "(6) [$factor] score phrases @ ".`date`;
+	    my ($factor_f,$factor_e) = split(/\-/,$factor);
+	    my $file = "$___MODEL_DIR/phrase-table.$factor";
+	    $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+	    &score_phrase($file,$___LEXICAL_FILE.".".$factor,$___EXTRACT_FILE.".".$factor);
+	}
     }
 }
 
 sub score_phrase {
-    my ($ttable_file) = @_;
-    print STDERR "(6) [$factor] score phrases @ ".`date`;
-    if (-e "$___EXTRACT_FILE.$factor.gz") {
-      safesystem("gunzip < $___EXTRACT_FILE.$factor.gz > $___EXTRACT_FILE.$factor") or die;
-    }
-    print STDERR "(6.1) [$factor]  sorting @ ".`date`;
-    # print "LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor > $___EXTRACT_FILE.$factor.sorted\n";
-    safesystem("LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor > $___EXTRACT_FILE.$factor.sorted") or die;
-    if (! $___DONT_ZIP) {
-	safesystem("rm -f $___EXTRACT_FILE.$factor.gz") or die;
-	safesystem("gzip $___EXTRACT_FILE.$factor") or die;
-	safesystem("rm -f $___EXTRACT_FILE.$factor.sorted.gz") or die;
-	safesystem("gzip $___EXTRACT_FILE.$factor.sorted") or die;
-    }
+    my ($ttable_file,$lexical_file,$extract_file) = @_;
 
-    if (-e "$___EXTRACT_FILE.$factor.inv.gz") {
-       safesystem("gunzip < $___EXTRACT_FILE.$factor.inv.gz > $___EXTRACT_FILE.$factor.inv") or die;
-    }                                                                                                         
-    print STDERR "(6.2) [$factor]  sorting inv @ ".`date`;
-    # print "LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor.inv > $___EXTRACT_FILE.$factor.inv.sorted\n";
-    safesystem("LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor.inv > $___EXTRACT_FILE.$factor.inv.sorted") or die;
-    if (! $___DONT_ZIP) {
-	safesystem("rm -f $___EXTRACT_FILE.$factor.inv.gz") or die;
-	safesystem("gzip $___EXTRACT_FILE.$factor.inv") or die;
-	safesystem("rm -f $___EXTRACT_FILE.$factor.inv.sorted.gz") or die;
-	safesystem("gzip $___EXTRACT_FILE.$factor.inv.sorted") or die;
-    }
-
-    for my $direction ("f2n","n2f") {
-	print STDERR "(6.3) [$factor]  creating table half $ttable_file.half.$direction @ ".`date`;
-	my $extract = "$___EXTRACT_FILE.$factor.sorted";
-	#my $extract = "$___EXTRACT_FILE.$factor.sorted";
-	$extract = "$___EXTRACT_FILE.$factor.inv.sorted" if $direction eq "n2f";
-	#$extract = "$___EXTRACT_FILE.$factor.inv.sorted" if $direction eq "n2f";
+    my $substep = 1;
+    for my $direction ("f2e","e2f") {
+	next if $___CONTINUE && -e "$ttable_file.half.$direction";
+	next if $___CONTINUE && $direction eq "e2f" && -e "$ttable_file.half.e2f.sorted";
 	my $inverse = "";
-	$inverse = " inverse" if $direction eq "n2f";
-	my $part_count = &split_extract_gzipped("$extract.gz");
-	#my $part_count = &split_extract($extract);
-	for(my $i=0;$i<$part_count;$i++) {
-	    my $part = sprintf("%04d",$i);
-	    print "$PHRASE_SCORE $extract.part$part $___LEXICAL_FILE.$factor.$direction $ttable_file.half.$direction.part$part $inverse\n";
-	    safesystem("$PHRASE_SCORE $extract.part$part $___LEXICAL_FILE.$factor.$direction $ttable_file.half.$direction.part$part $inverse")
-              or die "Scoring of phrases failed";
-	    if (! $debug) { safesystem("rm $extract.part$part") or die;}
+        my $extract_filename = $extract_file;
+	if ($direction eq "e2f") {
+	    $inverse = " inverse";
+            $extract_filename = $extract_file.".inv";
+        }
+	my $extract = "$extract_filename.sorted";
+
+	if (!($___CONTINUE && -e "$extract_filename.sorted")) {
+	  # sorting
+    	  print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
+          if (-e "$extract_filename.gz") {
+      	    safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
+    	  }
+          else {
+            safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
+	  }
+        }
+
+	print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
+
+	if ($_FILE_LIMIT) {
+	    # splitting
+	    my $part_count = &split_extract($extract);
+	    if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
+
+	    # processing extract -> phrase-table-half
+	    for(my $i=0;$i<$part_count;$i++) {
+		my $part = sprintf("%04d",$i);
+		my $cmd = "$PHRASE_SCORE $extract.part$part $lexical_file.$direction $ttable_file.half.$direction.part$part $inverse";
+		print $cmd."\n";
+		safesystem($cmd) or die "ERROR: Scoring of phrases failed";
+		if (! $debug) { safesystem("rm $extract.part$part") or die("ERROR");}
+	    }
+	    safesystem("cat $ttable_file.half.$direction.part* >$ttable_file.half.$direction") or die("ERROR");
+	    if (! $debug) { safesystem("rm -f $ttable_file.half.$direction.part*") or die("ERROR"); }
 	}
-	safesystem("cat $ttable_file.half.$direction.part* > $ttable_file.half.$direction") or die;
-	if (! $debug){ safesystem("rm -f $ttable_file.half.$direction.part*") or die; }
+	else {
+	    my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
+	    print $cmd."\n";
+	    safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
+	    if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
+	}
     }
-    safesystem("gzip $ttable_file.half.f2n") or die;
-    print STDERR "(6.4) [$factor]  sorting inverse n2f table@ ".`date`;
-    safesystem("LC_ALL=C sort -T $___MODEL_DIR $ttable_file.half.n2f > $ttable_file.half.n2f.sorted") or die;
-    safesystem("gzip $ttable_file.half.n2f") or die;
-    safesystem("gzip $ttable_file.half.n2f.sorted") or die;
-    print STDERR "(6.5) [$factor]  consolidating the two halves @ ".`date`;
-    open(F2N,"gunzip < $ttable_file.half.f2n.gz |")
-      or die "Can't read $ttable_file.half.f2n.gz";
-    open(N2F,"gunzip < $ttable_file.half.n2f.sorted.gz |")
-      or die "Can't read $ttable_file.half.n2f.sorted.gz";
-    open(TABLE,">$ttable_file")
-      or die "Can't write $ttable_file";
+
+    # sorting inverse phrase-table-half to sync up with regular one
+    print STDERR "(6.5) sorting inverse e2f table@ ".`date`;
+    if (! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
+      safesystem("LC_ALL=C sort -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
+      if (! $debug) { safesystem("rm -f $ttable_file.half.e2f") or die("ERROR"); }
+    }
+
+    # merging the two halves
+    return if $___CONTINUE && -e "$ttable_file.gz";
+    print STDERR "(6.6)  consolidating the two halves @ ".`date`;
+    open(F2E,"$ttable_file.half.f2e")
+      or die "ERROR: Can't read $ttable_file.half.f2e";
+    open(E2F,"$ttable_file.half.e2f.sorted")
+      or die "ERROR: Can't read $ttable_file.half.e2f.sorted";
+    open(TABLE,"| gzip >$ttable_file.gz")
+      or die "ERROR: Can't write $ttable_file.gz";
     my $i=0;
     my $mismatch = 0;
-    while(my $f2n = <F2N>) {
+    while(my $f2e = <F2E>) {
 	$i++;
-	my $n2f = <N2F>;
-	my ($english, $foreign , $alignEnglish,  $alignForeign,  $p) = split(/ \|\|\| /,$n2f); chop($p);
-	my ($english2,$foreign2, $alignEnglish2, $alignForeign2, $p2) = split(/ \|\|\| /,$f2n); chop($p2);
+	my $e2f = <E2F>;
+	my ($english, $foreign , $alignEnglish,  $alignForeign,  $p) = split(/ \|\|\| /,$e2f); chop($p);
+	my ($english2,$foreign2, $alignEnglish2, $alignForeign2, $p2) = split(/ \|\|\| /,$f2e); chop($p2);
 	if ($english ne $english2 
 		|| $foreign ne $foreign2)
 	{
@@ -999,13 +1077,10 @@ sub score_phrase {
 	}
 	print TABLE "$english ||| $foreign ||| $alignEnglish2 ||| $alignForeign2 ||| $p $p2 2.718\n";
     }
-    close(N2F);
-    close(F2N);
-    die "There were mismatches! (printed only first 10)" if $mismatch;
-    if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die;}
-    if (! $debug) { safesystem("rm -f $___EXTRACT_FILE*sorted*") or die;}
-    safesystem("rm -f $ttable_file.gz") or die;
-    safesystem("gzip $ttable_file") or die;
+    close(E2F);
+    close(F2E);
+    die "ERROR: There were mismatches! (printed only first 10)" if $mismatch;
+    if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
 }
 
 sub split_extract {
@@ -1015,8 +1090,8 @@ sub split_extract {
     my $split_when_possible = 0;
     my ($first,$dummy);
     my $partfname = sprintf("%s.part%04d",$file,0);
-    open(PART,">$partfname") or die "Can't write $partfname";
-    open(EXTRACT,$file) or die "Can't read $file";
+    open(PART,">$partfname") or die "ERROR: Can't write $partfname";
+    open(EXTRACT,$file) or die "ERROR: Can't read $file";
     while(<EXTRACT>) {
 	if ($i>0 && $i % 10000000 == 0) {
 	    $split_when_possible = 1;
@@ -1027,7 +1102,7 @@ sub split_extract {
 	    if ($f ne $first) {
 		close(PART) if $i;
                 my $partfname = sprintf("%s.part%04d",$file,$part);
-		open(PART,">$partfname") or die "Can't write $partfname";
+		open(PART,">$partfname") or die "ERROR: Can't write $partfname";
 		$split_when_possible = 0;
 		$part++;
 	    }
@@ -1039,75 +1114,53 @@ sub split_extract {
     return $part;
 }
 
-sub split_extract_gzipped {
-    my ($file) = @_;
-    my $i=0;
-    my $part = 1;
-    my $split_when_possible = 0;
-    my ($first,$dummy,$unzippedfile);
-    $unzippedfile=$file;
-    $unzippedfile =~ s/\.gz//;
-    my $partfname = sprintf("%s.part%04d",$unzippedfile,0);
-    open(PART,">$partfname") or die "Can't write $partfname";
-    open(EXTRACT,"$ZCAT $file | ") or die "Can't read $file";
-    while(<EXTRACT>) {
-        if ($i>0 && $i % 10000000 == 0) {
-            $split_when_possible = 1;
-            ($first,$dummy) = split(/ \|\|\| /);
-        }
-        elsif ($split_when_possible) {
-            my ($f,$dummy) = split(/ \|\|\| /);
-            if ($f ne $first) {
-                close(PART) if $i;
-                my $partfname = sprintf("%s.part%04d",$unzippedfile,$part);
-                open(PART,">$partfname") or die "Can't write $partfname";
-                $split_when_possible = 0;
-                $part++;
-            }
-        }
-        print PART $_;
-        $i++;
-    }
-    close(EXTRACT);
-    return $part;
-}
 
 ### (7) LEARN REORDERING MODEL
 
 sub get_reordering_factored {
     print STDERR "(7) learn reordering model @ ".`date`;
     my @SPECIFIED_TABLE = @_REORDERING_TABLE;
+    my @TYPE = ("msd-f","msd-fe","msd-bidirectional-f","msd-bidirectional-fe","monotonicity-f","monotonicity-fe","monotonicity-bidirectional-f","monotonicity-bidirectional-fe");
     if ($REORDERING_LEXICAL) {
-      foreach my $f (split(/\+/,$___REORDERING_FACTORS)) {
-	  $factor = $f;
-	  ($factor_f,$factor_e) = split(/\-/,$factor);
-	  my %FILE;
-	  foreach my $type ("msd-f","msd-fe","msd-bidirectional-f","msd-bidirectional-fe","monotonicity-f","monotonicity-fe","monotonicity-bidirectional-f","monotonicity-bidirectional-fe") {
-	      if (defined($REORDERING_MODEL{$type})) {
-		  my $file = "$___MODEL_DIR/reordering-table.$type.$___REORDERING_SMOOTH.$factor";
-		  $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-		  $FILE{$type} = $file;
-	      }
-	  }
-	  &get_reordering(\%FILE);
-      }
-    } else {
-      print STDERR "  ... skipping this step, reordering is not lexicalized ...\n";
+	if ($___NOT_FACTORED) {
+	    my %FILE;
+	    foreach my $type (@TYPE) {
+		if (defined($REORDERING_MODEL{$type})) {
+		    my $file = "reordering-table.$type.$___REORDERING_SMOOTH";
+		    $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+		    $FILE{$type} = $file;
+		}
+	    }
+	    &get_reordering(\%FILE,$___EXTRACT_FILE);
+	}
+	else {
+	    foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
+		print STDERR "(7) [$factor] learn reordering model @ ".`date`;
+		my ($factor_f,$factor_e) = split(/\-/,$factor);
+		my %FILE;
+		foreach my $type (@TYPE) {
+		    if (defined($REORDERING_MODEL{$type})) {
+			my $file = "reordering-table.$type.$___REORDERING_SMOOTH.$factor";
+			$file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+			$FILE{$type} = $file;
+		    }
+		}
+		&get_reordering(\%FILE,"$___EXTRACT_FILE.$factor");
+	    }
+	}
+    } 
+    else {
+	print STDERR "  ... skipping this step, reordering is not lexicalized ...\n";
     }
 }
 
 sub get_reordering {
-    my ($MODEL_FILE) = @_;
-    print STDERR "(7) [$factor] learn reordering model @ ".`date`;
-    print STDERR "(7.1) [$factor] sorting extract.o @ ".`date`;
-    if (-e "$___EXTRACT_FILE.$factor.o.gz") {
-      safesystem("gunzip $___EXTRACT_FILE.$factor.o.gz") or die;
+    my ($MODEL_FILE,$extract_file) = @_;
+    if (-e "$extract_file.o.gz") {
+	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
     }
-    # print "LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor.o > $___EXTRACT_FILE.$factor.o.sorted\n";
-    safesystem("LC_ALL=C sort -T $___MODEL_DIR $___EXTRACT_FILE.$factor.o > $___EXTRACT_FILE.$factor.o.sorted") or die;
-    if (! $___DONT_ZIP) {
-	safesystem("rm -f $___EXTRACT_FILE.$factor.o.gz") or die;
-	safesystem("gzip $___EXTRACT_FILE.$factor.o") or die;
+    else {
+        safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_file.o > $extract_file.o.sorted") or die("ERROR");
     }
 
     my $smooth = $___REORDERING_SMOOTH;
@@ -1118,8 +1171,8 @@ sub get_reordering {
     if ($smooth =~ /(.+)u$/) {
 	$smooth = $1;
 	my $smooth_total = 0; 
-	open(O,"$___EXTRACT_FILE.$factor.o.sorted")
-          or die "Can't read $___EXTRACT_FILE.$factor.o.sorted";
+	open(O,"$extract_file.o.sorted")
+          or die "ERROR: Can't read $extract_file.o.sorted";
 	while(<O>) {
 	    chomp;
 	    my ($f,$e,$o) = split(/ \|\|\| /);
@@ -1147,8 +1200,8 @@ sub get_reordering {
     ($mono_following_fe,$swap_following_fe,$other_following_fe) = @REORDERING_SMOOTH_FOLLOWING;
 
     print STDERR "(7.2) building tables @ ".`date`;
-    open(O,"$___EXTRACT_FILE.$factor.o.sorted")
-      or die "Can't read $___EXTRACT_FILE.$factor.o.sorted";
+    open(O,"$extract_file.o.sorted")
+      or die "ERROR: Can't read $extract_file.o.sorted";
     open(OF,  "|gzip >".$$MODEL_FILE{"msd-f"}.".gz")
 	if defined($REORDERING_MODEL{"msd-f"});
     open(OFE, "|gzip >".$$MODEL_FILE{"msd-fe"}.".gz")
@@ -1221,21 +1274,21 @@ sub get_reordering {
     if (defined($REORDERING_MODEL{"fe"})) {
 	&store_reordering_fe();
     }
-    if (! $debug) { safesystem("rm $___EXTRACT_FILE.$factor.o.sorted") or die;}
+    if (! $debug) { safesystem("rm $extract_file.o.sorted") or die("ERROR");}
 }
 
 sub store_reordering_f {
     my $total_previous_f = $mono_previous_f+$swap_previous_f+$other_previous_f;
     my $total_following_f = $mono_following_f+$swap_following_f+$other_following_f;
     if(defined($REORDERING_MODEL{"msd-f"})) {
- 	printf OF ("%s ||| %g %g %g\n",
+      printf OF ("%s ||| %g %g %g\n",
 		   $f_current, 
 		   $mono_previous_f/$total_previous_f,
 		   $swap_previous_f/$total_previous_f,
 		   $other_previous_f/$total_previous_f);
     }
     if(defined($REORDERING_MODEL{"msd-bidirectional-f"})) {
-	printf OBF ("%s ||| %g %g %g %g %g %g\n",
+      printf OBF ("%s ||| %g %g %g %g %g %g\n",
 		    $f_current, 
 		    $mono_previous_f/$total_previous_f,
 		    $swap_previous_f/$total_previous_f,
@@ -1245,13 +1298,13 @@ sub store_reordering_f {
 		    $other_following_f/$total_following_f);
     }
     if(defined($REORDERING_MODEL{"monotonicity-f"})) {
-	printf MF ("%s ||| %g %g\n",
+      printf MF ("%s ||| %g %g\n",
 		  $f_current, 
 		   $mono_previous_f/$total_previous_f,
 		   ($swap_previous_f+$other_previous_f)/$total_previous_f);
     }
     if(defined($REORDERING_MODEL{"monotonicity-bidirectional-f"})) {
-	printf MBF ("%s ||| %g %g %g %g\n",
+      printf MBF ("%s ||| %g %g %g %g\n",
 		    $f_current, 
 		    $mono_previous_f/$total_previous_f,
 		    ($swap_previous_f+$other_previous_f)/$total_previous_f,
@@ -1265,14 +1318,14 @@ sub store_reordering_fe {
     my $total_following_fe = $mono_following_fe+$swap_following_fe+$other_following_fe;
     
     if(defined($REORDERING_MODEL{"msd-fe"})) {
- 	printf OFE ("%s ||| %s ||| %g %g %g\n",
+      printf OFE ("%s ||| %s ||| %g %g %g\n",
 		   $f_current, $e_current, 
 		   $mono_previous_fe/$total_previous_fe,
 		   $swap_previous_fe/$total_previous_fe,
 		   $other_previous_fe/$total_previous_fe);
     }
     if(defined($REORDERING_MODEL{"msd-bidirectional-fe"})) {
-	printf OBFE ("%s ||| %s ||| %g %g %g %g %g %g\n",
+      printf OBFE ("%s ||| %s ||| %g %g %g %g %g %g\n",
 		    $f_current, $e_current, 
 		    $mono_previous_fe/$total_previous_fe,
 		    $swap_previous_fe/$total_previous_fe,
@@ -1282,13 +1335,13 @@ sub store_reordering_fe {
 		    $other_following_fe/$total_following_fe);
     }
     if(defined($REORDERING_MODEL{"monotonicity-fe"})) {
-	printf MFE ("%s ||| %s ||| %g %g\n",
+      printf MFE ("%s ||| %s ||| %g %g\n",
 		   $f_current, $e_current, 
 		   $mono_previous_fe/$total_previous_fe,
 		   ($swap_previous_fe+$other_previous_fe)/$total_previous_fe);
     }
     if(defined($REORDERING_MODEL{"monotonicity-bidirectional-fe"})) {
-	printf MBFE ("%s ||| %s ||| %g %g %g %g\n",
+      printf MBFE ("%s ||| %s ||| %g %g %g %g\n",
 		    $f_current, $e_current, 
 		    $mono_previous_fe/$total_previous_fe,
 		    ($swap_previous_fe+$other_previous_fe)/$total_previous_fe,
@@ -1303,24 +1356,25 @@ my $factor_e_source;
 sub get_generation_factored {
     print STDERR "(8) learn generation model @ ".`date`;
     if (defined $___GENERATION_FACTORS) {
-      my @SPECIFIED_TABLE = @_GENERATION_TABLE;
-      my @TYPE = @_GENERATION_TYPE;
-      foreach my $f (split(/\+/,$___GENERATION_FACTORS)) {
-	$factor = $f;
-	($factor_e_source,$factor_e) = split(/\-/,$factor);
-	my $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-        my $type = "double";
-        $type = shift @TYPE if scalar @TYPE;
-	&get_generation($file,$type);
-      }
-    } else {
-      print STDERR "  no generation model requested, skipping step\n";
+	my @SPECIFIED_TABLE = @_GENERATION_TABLE;
+	my @TYPE = @_GENERATION_TYPE;
+	foreach my $factor (split(/\+/,$___GENERATION_FACTORS)) {
+	    my ($factor_e_source,$factor_e) = split(/\-/,$factor);
+	    my $file = "$___MODEL_DIR/generation.$factor";
+	    $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+	    my $type = "double";
+	    $type = shift @TYPE if scalar @TYPE;
+	    &get_generation($file,$type,$factor,$factor_e_source,$factor_e);
+	}
+    } 
+    else {
+	print STDERR "  no generation model requested, skipping step\n";
     }
 }
 
 sub get_generation {
+    my ($file,$type,$factor,$factor_e_source,$factor_e) = @_;
     print STDERR "(8) [$factor] generate generation table @ ".`date`;
-    my ($file,$type) = @_;
     $file = "$___MODEL_DIR/generation.$factor" unless $file;
     my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
 
@@ -1335,7 +1389,7 @@ sub get_generation {
 
     my (%GENERATION,%GENERATION_TOTAL_SOURCE,%GENERATION_TOTAL_TARGET);
     *E = open_or_zcat($___CORPUS.".".$___E.$___CORPUS_COMPRESSION);
-    $alignment_id=0;
+    open(E,$___CORPUS.".".$___E) or die "ERROR: Can't read ".$___CORPUS.".".$___E;
     while(<E>) {
 	chomp;
 	foreach (split) {
@@ -1362,8 +1416,7 @@ sub get_generation {
     } 
     close(E);
  
-	safesystem("mkdir -p $___MODEL_DIR") or die;
-    open(GEN,">$file") or die "Can't write $file";
+    open(GEN,">$file") or die "ERROR: Can't write $file";
     foreach my $source (keys %GENERATION) {
 	foreach my $target (keys %{$GENERATION{$source}}) {
 	    printf GEN ("%s %s %.7f ",$source,$target,
@@ -1375,8 +1428,8 @@ sub get_generation {
 	}
     }
     close(GEN);
-    safesystem("rm -f $file.gz") or die;
-    safesystem("gzip $file") or die;
+    safesystem("rm -f $file.gz") or die("ERROR");
+    safesystem("gzip $file") or die("ERROR");
 }
 
 ### (9) CREATE CONFIGURATION FILE
@@ -1388,7 +1441,7 @@ sub create_ini {
     &full_path(\$___VCB_E);
     &full_path(\$___VCB_F);
     `mkdir -p $___MODEL_DIR`;
-    open(INI,">$___CONFIG") or die("Can't write $___CONFIG");
+    open(INI,">$___CONFIG") or die("ERROR: Can't write $___CONFIG");
     print INI "#########################
 ### MOSES CONFIG FILE ###
 #########################
@@ -1407,22 +1460,22 @@ sub create_ini {
       $INPUT_FACTOR_MAX = $_INPUT_FACTOR_MAX if $_INPUT_FACTOR_MAX; # use specified, if exists
       for (my $c = 0; $c <= $INPUT_FACTOR_MAX; $c++) { print INI "$c\n"; }
     } else {
-      die "No translation steps defined, cannot prepare [input-factors] section\n";
+      die "ERROR: No translation steps defined, cannot prepare [input-factors] section\n";
     }
 
     my %stepsused;
     print INI "\n# mapping steps
 [mapping]\n";
-   my $steplist = 0;
-   foreach my $list (split(/:/,$___DECODING_STEPS)) {
-     foreach (split(/,/,$list)) {
+   my $path = 0;
+   foreach (split(/:/,$___DECODING_STEPS)) {
+     foreach (split(/,/,$_)) {
        s/t/T /g; 
        s/g/G /g;
        my ($type, $num) = split /\s+/;
        $stepsused{$type} = $num+1 if !defined $stepsused{$type} || $stepsused{$type} < $num+1;
-       print INI $steplist," ",$_,"\n";
+       print INI $path." ".$_."\n";
      }
-     $steplist++;
+     $path++;
    }
    print INI "\n# translation tables: source-factors, target-factors, number of scores, file 
 [ttable-file]\n";
@@ -1469,6 +1522,10 @@ print INI "\n# language models: type(srilm/irstlm), factors, order, file
 [lmodel-file]\n";
   foreach my $lm (@___LM) {
     my ($f, $o, $fn, $type) = @{$lm};
+    if ($fn !~ /^\//) {
+      my $path = `pwd`; chop($path);
+      $fn = $path."/".$fn;
+    }
     print INI "$type $f $o $fn\n";
   }
 
@@ -1476,9 +1533,10 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
 # 0 = all elements loaded
 [ttable-limit]
 20\n";
-  foreach(1..$num_of_ttables) {
+  foreach(2..$num_of_ttables) {
     print INI "0\n";
   }
+  print INI "\n";
 
   my $weight_d_count = 1;
   if ($___REORDERING ne "distance") {
@@ -1489,9 +1547,7 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
 	foreach my $r (keys %REORDERING_MODEL) {
 	    next if $r eq "fe" || $r eq "f";
-	    next if $r eq "distance" && $factor_i>0;
-	    if ($r eq "distance") { $weight_d_count++; } 
-	    else {
+	    next if $r eq "distance";
 		my $type = $r;
 		$r =~ s/-bidirectional/.bi/;
 		$r =~ s/-f/.f/;
@@ -1503,10 +1559,9 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
 		if ($r =~ /bi/) { $w *= 2; }
 		$weight_d_count += $w;
 
-                my $table_file = "$___MODEL_DIR/reordering-table.$type.$___REORDERING_SMOOTH.$factor.gz";
+                my $table_file = "$___MODEL_DIR/$r.$___REORDERING_SMOOTH.gz";
 		$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 		$file .= "$factor $type $w $table_file\n";
-	    }
 	}
         $factor_i++;
       }
@@ -1563,15 +1618,8 @@ print INI "\n# word penalty
 
 sub full_path {
     my ($PATH) = @_;
-$$PATH =~ s/\/nfsmnt//;
     return if $$PATH =~ /^\//;
-    
-    my $dir = `pawd 2>/dev/null`;
-	if(!$dir){$dir = `pwd`;}
-$PATH =~ s/\/nfsmnt//;
-	chomp $dir;
-	$$PATH = $dir."/".$$PATH;
-
+    $$PATH = `pwd`."/".$$PATH;
     $$PATH =~ s/[\r\n]//g;
     $$PATH =~ s/\/\.\//\//g;
     $$PATH =~ s/\/+/\//g;
@@ -1588,11 +1636,11 @@ sub safesystem {
   print STDERR "Executing: @_\n";
   system(@_);
   if ($? == -1) {
-      print STDERR "Failed to execute: @_\n  $!\n";
+      print STDERR "ERROR: Failed to execute: @_\n  $!\n";
       exit(1);
   }
   elsif ($? & 127) {
-      printf STDERR "Execution of: @_\n  died with signal %d, %s coredump\n",
+      printf STDERR "ERROR: Execution of: @_\n  died with signal %d, %s coredump\n",
           ($? & 127),  ($? & 128) ? 'with' : 'without';
       exit(1);
   }
