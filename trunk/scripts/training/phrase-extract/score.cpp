@@ -33,7 +33,7 @@ public:
   vector< vector<size_t> > alignedToE;
   vector< vector<size_t> > alignedToF;
   
-  void create( char*, int );
+  bool create( char*, int );
   void clear();
   bool equals( const PhraseAlignment& );
 };
@@ -56,10 +56,11 @@ LexicalTable lexTable;
 PhraseTable phraseTableE;
 PhraseTable phraseTableF;
 bool inverseFlag;
+int phrasePairBase = 0; // only used for "proper" conditioning
 
 int main(int argc, char* argv[]) 
 {
-  cerr << "PhraseScore v1.2.1, written by Philipp Koehn\n"
+  cerr << "PhraseScore v1.4 written by Philipp Koehn\n"
        << "phrase scoring methods for extracted phrases\n";
   time_t starttime = time(NULL);
 
@@ -75,9 +76,6 @@ int main(int argc, char* argv[])
     inverseFlag = true;
     cerr << "using inverse mode\n";
   }
-  //  char[] fileNameExtract& = "/data/nlp/koehn/europarl-v2/models/de-en/model/new-extract.sorted";
-  //  string fileNameLex = "/data/nlp/koehn/europarl-v2/models/de-en/model/lex.f2n";
-  //  string fileNamePhraseTable = "/data/nlp/koehn/europarl-v2/models/de-en/model/new-phrase-table-half.f2n";
 
   // lexical translation table
   lexTable.load( fileNameLex );
@@ -114,7 +112,7 @@ int main(int argc, char* argv[])
     if (extractFileP.eof()) 
 			break;
     PhraseAlignment phrasePair;
-    phrasePair.create( line, i );
+    bool isPhrasePair = phrasePair.create( line, i );
     if (lastForeign >= 0 && lastForeign != phrasePair.foreign) {
       processPhrasePairs( phrasePairsWithSameF );
       for(int j=0;j<phrasePairsWithSameF.size();j++)
@@ -124,9 +122,13 @@ int main(int argc, char* argv[])
       phraseTableF.clear();
       phrasePair.clear(); // process line again, since phrase tables flushed
       phrasePair.create( line, i ); 
+      phrasePairBase = 0;
     }
     lastForeign = phrasePair.foreign;
-    phrasePairsWithSameF.push_back( phrasePair );
+    if (isPhrasePair)
+      phrasePairsWithSameF.push_back( phrasePair );
+    else
+      phrasePairBase++;
   }
   processPhrasePairs( phrasePairsWithSameF );
   phraseTableFile.close();
@@ -154,6 +156,7 @@ void outputAlignment(const AlignmentPhrase &alignmentPhrase)
 }
 
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
+  if (phrasePair.size() == 0) return;
   map<int, int> countE;
   map<int, int> alignmentE;
   int totalCount = 0;
@@ -217,11 +220,9 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
     if (! inverseFlag) {
       for(int j=0;j<phraseF.size();j++)
 			{
-				//cerr << vcbF.getWord( phraseF[j] ) << " ";
 				phraseTableFile << vcbF.getWord( phraseF[j] );
 				phraseTableFile << " ";
 			}
-			//cerr << endl;
       phraseTableFile << "||| ";
 		}
 
@@ -229,24 +230,18 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
     PHRASE phraseE = phraseTableE.getPhrase( i->first );
 		for(int j=0;j<phraseE.size();j++)
 		{
-			//if ( vcbE.getWord( phraseE[j] ) == "herr")
-			//	cerr << "";
-			//cerr << vcbE.getWord( phraseE[j] ) << " ";
       phraseTableFile << vcbE.getWord( phraseE[j] );
 			phraseTableFile << " ";
 		}
-		//cerr << endl;
     phraseTableFile << "||| ";
 
     // foreign phrase (if inverse)
     if (inverseFlag) {
       for(int j=0;j<phraseF.size();j++)
 			{
-				//cerr << vcbF.getWord( phraseF[j] ) << " ";
 				phraseTableFile << vcbF.getWord( phraseF[j] );
 				phraseTableFile << " ";
 			}
-			//cerr << endl;
       phraseTableFile << "||| ";
 		}
  
@@ -287,8 +282,12 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
 		}
 
 		// phrase translation probability
-    phraseTableFile << ((double) i->second / (double) phrasePair.size())
-										<< " " << lexScore;
+    if (phrasePairBase > 0) // "proper" conditioning
+      phraseTableFile << ((double) i->second / (double) phrasePairBase);
+    else
+      phraseTableFile << ((double) i->second / (double) phrasePair.size());
+
+		phraseTableFile	<< " " << lexScore;
 
     // model 1 score
 
@@ -300,7 +299,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
   }
 }
 
-void PhraseAlignment::create( char line[], int lineID ) {
+bool PhraseAlignment::create( char line[], int lineID ) {
   vector< string > token = tokenize( line );
   int item = 1;
   PHRASE phraseF, phraseE;
@@ -332,6 +331,7 @@ void PhraseAlignment::create( char line[], int lineID ) {
       }
     }
   }
+  return (item>2); // real phrase pair, not just foreign phrase
 }
 
 void PhraseAlignment::clear() {

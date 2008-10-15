@@ -34,6 +34,7 @@ class SentenceAlignment {
   //  void clear() { delete(alignment); };
 };
 
+void extractBase( SentenceAlignment & );
 void extract( SentenceAlignment & );
 void addPhrase( SentenceAlignment &, int, int, int, int );
 vector<string> tokenize( char [] );
@@ -45,17 +46,20 @@ ofstream extractFileOrientation;
 int maxPhraseLength;
 int phraseCount = 0;
 char* fileNameExtract;
-bool orientationFlag;
-bool onlyOutputSpanInfo;
+bool orientationFlag = false;
+bool onlyOutputSpanInfo = false;
+bool noFileLimit = false;
+bool zipFiles = false;
+bool properConditioning = false;
 
 int main(int argc, char* argv[]) 
 {
-  cerr << "PhraseExtract v1.3.0, written by Philipp Koehn\n"
+  cerr << "PhraseExtract v1.4, written by Philipp Koehn\n"
        << "phrase extraction from an aligned parallel corpus\n";
   time_t starttime = time(NULL);
 
-  if (argc != 6 && argc != 7) {
-    cerr << "syntax: phrase-extract en de align extract max-length [orientation | --OnlyOutputSpanInfo]\n";
+  if (argc < 6) {
+    cerr << "syntax: phrase-extract en de align extract max-length [orientation | --OnlyOutputSpanInfo | --NoFileLimit | --ProperConditioning ]\n";
     exit(1);
   }
   char* &fileNameE = argv[1];
@@ -63,15 +67,28 @@ int main(int argc, char* argv[])
   char* &fileNameA = argv[3];
   fileNameExtract = argv[4];
   maxPhraseLength = atoi(argv[5]);
-  onlyOutputSpanInfo = argc == 7 && strcmp(argv[6],"--OnlyOutputSpanInfo") == 0; //az
-  if (onlyOutputSpanInfo) cerr << "Only outputting span info in format (starting from 0): SrcBegin SrcEnd TgtBegin TgtEnd\n"; //az
-  orientationFlag = (argc == 7 && !onlyOutputSpanInfo);
-  if (orientationFlag) cerr << "(also extracting orientation)\n";
-
-  //  string fileNameE = "/data/nlp/koehn/europarl-v2/models/de-en/model/aligned.en";
-  //  string fileNameF = "/data/nlp/koehn/europarl-v2/models/de-en/model/aligned.de";
-  //  string fileNameA = "/data/nlp/koehn/europarl-v2/models/de-en/model/aligned.grow-diag-final";
-
+  
+  for(int i=6;i<argc;i++) {
+    if (strcmp(argv[i],"--OnlyOutputSpanInfo") == 0) {
+      onlyOutputSpanInfo = true;
+    }
+    else if (strcmp(argv[i],"--NoFileLimit") == 0) {
+      noFileLimit = true;
+    }
+    else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
+      orientationFlag = true;
+    }
+    else if (strcmp(argv[i],"--ZipFiles") == 0) {
+      zipFiles = true;
+    }
+    else if (strcmp(argv[i],"--ProperConditioning") == 0) {
+      properConditioning = true;
+    }
+    else {
+      cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
+      exit(1);
+    }
+  }
   ifstream eFile;
   ifstream fFile;
   ifstream aFile;
@@ -82,8 +99,6 @@ int main(int argc, char* argv[])
   istream *fFileP = &fFile;
   istream *aFileP = &aFile;
   
-  // string fileNameExtract = "/data/nlp/koehn/europarl-v2/models/de-en/model/new-extract";
-
   int i=0;
   while(true) {
     i++;
@@ -105,8 +120,10 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
       
-    if (sentence.create( englishString, foreignString, alignmentString, i ))
+    if (sentence.create( englishString, foreignString, alignmentString, i )) {
       extract(sentence);
+      if (properConditioning) extractBase(sentence);
+    }
     if (onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
   }
 
@@ -121,6 +138,33 @@ int main(int argc, char* argv[])
   }
 }
  
+// if proper conditioning, we need the number of times a foreign phrase occured
+void extractBase( SentenceAlignment &sentence ) {
+  int countF = sentence.foreign.size();
+  for(int startF=0;startF<countF;startF++) {
+    for(int endF=startF;
+        (endF<countF && endF<startF+maxPhraseLength);
+        endF++) {
+      for(int fi=startF;fi<=endF;fi++) {
+	extractFile << sentence.foreign[fi] << " ";
+      }
+      extractFile << "|||" << endl;
+    }
+  }
+
+  int countE = sentence.english.size();
+  for(int startE=0;startE<countE;startE++) {
+    for(int endE=startE;
+        (endE<countE && endE<startE+maxPhraseLength);
+        endE++) {
+      for(int ei=startE;ei<=endE;ei++) {
+	extractFileInv << sentence.english[ei] << " ";
+      }
+      extractFileInv << "|||" << endl;
+    }
+  }
+}
+
 void extract( SentenceAlignment &sentence ) {
   int countE = sentence.english.size();
   int countF = sentence.foreign.size();
@@ -181,25 +225,41 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   // foreign
   // cout << "adding ( " << startF << "-" << endF << ", " << startE << "-" << endE << ")\n"; 
 
- if (onlyOutputSpanInfo) {
-   cout << startF << " " << endF << " " << startE << " " << endE << endl;
- } else {
+  if (onlyOutputSpanInfo) {
+    cout << startF << " " << endF << " " << startE << " " << endE << endl;
+    return;
+  } 
 
-  if (phraseCount % 10000000 == 0) {
-    if (phraseCount>0) {
+  // new file every 1e7 phrases
+  if (phraseCount % 10000000 == 0 // new file every 1e7 phrases
+      && (!noFileLimit || phraseCount == 0)) { // only new partial file, if file limit
+
+    // close old file
+    if (!noFileLimit && phraseCount>0) {
       extractFile.close();
       extractFileInv.close();
       if (orientationFlag) extractFileOrientation.close();
     }
+    
+    // construct file name
     char part[10];
-    sprintf(part,".part%04d",phraseCount/10000000);
+    if (noFileLimit)
+      part[0] = '\0';
+    else
+      sprintf(part,".part%04d",phraseCount/10000000);  
     string fileNameExtractPart = string(fileNameExtract) + part;
     string fileNameExtractInvPart = string(fileNameExtract) + ".inv" + part;
     string fileNameExtractOrientationPart = string(fileNameExtract) + ".o" + part;
+
+    
+    // open files
     extractFile.open(fileNameExtractPart.c_str());
     extractFileInv.open(fileNameExtractInvPart.c_str());
-    if (orientationFlag) extractFileOrientation.open(fileNameExtractOrientationPart.c_str());
+    if (orientationFlag) 
+      extractFileOrientation.open(fileNameExtractOrientationPart.c_str());
   }
+
+
   phraseCount++;
 
   for(int fi=startF;fi<=endF;fi++) {
@@ -258,7 +318,6 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   extractFile << "\n";
   extractFileInv << "\n";
   if (orientationFlag) extractFileOrientation << "\n";
- } // end: if (onlyOutputSpanInfo)
 }
   
 bool isAligned ( SentenceAlignment &sentence, int fi, int ei ) {
