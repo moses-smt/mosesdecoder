@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <stdio.h>
 #include <unistd.h>
+#include <cstring>
 
 using namespace std ;
 

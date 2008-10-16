@@ -3,6 +3,7 @@
 
 #include <streambuf>
 #include <zlib.h>
+#include <cstring>
 
 class gzfilebuf : public std::streambuf {
 public:
