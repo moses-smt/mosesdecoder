@@ -13,6 +13,7 @@ using namespace std;
 
 #include <stdexcept>
 #include <limits>
+
 #define US_NOSET (numeric_limits<unsigned short>::max())
 
 #define MAX_LINE  1024
@@ -22,6 +23,7 @@ using namespace std;
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cstring>
 
 #include <fstream>
 #include "gzfilebuf.h"

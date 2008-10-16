@@ -1,7 +1,8 @@
 #ifndef TYPE_H
 #define TYPE_H
-#include<vector>
+#include <vector>
 #include <map>
+#include <string>
 
 using namespace std;
 

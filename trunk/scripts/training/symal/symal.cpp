@@ -10,6 +10,7 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <cstring>
 #include "cmd.h"
 
 using namespace std;
