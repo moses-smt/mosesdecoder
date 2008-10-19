@@ -131,7 +131,7 @@ $___CORPUS_DIR = $_CORPUS_DIR if $_CORPUS_DIR;
 die("ERROR: use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1 && $_FIRST_STEP!=8);
 my $___CORPUS      = $_CORPUS;
 
-my $___GIZA_EXTENSION = 'A3.final';
+my $___GIZA_EXTENSION = 'A3';
 $___GIZA_EXTENSION = 'Ahmm.5' if $_HMM_ALIGN;
 $___GIZA_EXTENSION = $_GIZA_EXTENSION if $_GIZA_EXTENSION;
 
