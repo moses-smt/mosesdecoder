@@ -131,7 +131,7 @@ $___CORPUS_DIR = $_CORPUS_DIR if $_CORPUS_DIR;
 die("ERROR: use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1 && $_FIRST_STEP!=8);
 my $___CORPUS      = $_CORPUS;
 
-my $___GIZA_EXTENSION = 'A3';
+my $___GIZA_EXTENSION = 'A3.final';
 $___GIZA_EXTENSION = 'Ahmm.5' if $_HMM_ALIGN;
 $___GIZA_EXTENSION = $_GIZA_EXTENSION if $_GIZA_EXTENSION;
 
@@ -745,26 +745,26 @@ sub word_align {
     print STDERR "(3) generate word alignment @ ".`date`;
     my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
     print STDERR "Combining forward and inverted alignment from files:\n";
-    print STDERR "  $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.{bz2,gz}\n";
-    print STDERR "  $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.{bz2,gz}\n";
+    print STDERR "  $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.{bz2,gz}\n";
+    print STDERR "  $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.{bz2,gz}\n";
 
     ### build arguments for giza2bal.pl
     my($__ALIGNMENT_CMD,$__ALIGNMENT_INV_CMD);
     
-    if (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.bz2"){
-      $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.bz2\"";
-    } elsif (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.gz") {
-      $__ALIGNMENT_CMD="\"$ZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.gz\"";
+    if (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2"){
+      $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2\"";
+    } elsif (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz") {
+      $__ALIGNMENT_CMD="\"$ZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz\"";
     } else {
-      die "ERROR: Can't read $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.final.{bz2,gz}\n";
+      die "ERROR: Can't read $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.{bz2,gz}\n";
     }
   
-    if ( -e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.bz2"){
-      $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.bz2\"";
-    }elsif (-e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.gz"){
-      $__ALIGNMENT_INV_CMD="\"$ZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.gz\"";
+    if ( -e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2"){
+      $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2\"";
+    }elsif (-e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz"){
+      $__ALIGNMENT_INV_CMD="\"$ZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz\"";
     }else{
-      die "ERROR: Can't read $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.final.{bz2,gz}\n\n";
+      die "ERROR: Can't read $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.{bz2,gz}\n\n";
     }
     
    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
@@ -1485,7 +1485,7 @@ sub create_ini {
      $num_of_ttables++;
      my $ff = $f;
      $ff =~ s/\-/ /;
-     my $file = "$___MODEL_DIR/phrase-table.$f.gz";
+     my $file = "$___MODEL_DIR/phrase-table".($___NOT_FACTORED ? "" : ".$f").".gz";
      $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
      print INI "$ff 5 $file\n";
    }
