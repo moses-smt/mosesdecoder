@@ -21,7 +21,7 @@ my $MAX_NGRAMS_FOR_BLEU = 4;
 
 #checking cmdline argument consistency
 if (@ARGV < 3) {
-	print STDERR "Usage: ./compare-hypotheses-with-significance.pl hypothesis_1 hypothesis_2 reference_1 [ reference_2 ... ]\n";
+	print STDERR "Usage: ./bootstrap-hypothesis-difference-significance.pl hypothesis_1 hypothesis_2 reference_1 [ reference_2 ... ]\n";
 
 	unless ($ARGV[0] =~ /^(--help|-help|-h|-\?|\/\?|--usage|-usage)$/) {
 		die("\nERROR: not enough arguments");
@@ -86,8 +86,8 @@ for my $subSampleDiff (@subSampleBleuDiffArr) {
 
 my $result = ($count + 1) / $TIMES_TO_REPEAT_SUBSAMPLING;
 
-print "The null-hypothesis is that the second system is equivalent with the first one;\n";
-print "The p-value for that is $result\n";
+print "Assuming that essentially the same system generated the two hypothesis translations (null-hypothesis),\n";
+print "the probability of actually getting the second hypothesis translation as output (p-value) is: $result.\n";
 
 #####
 # read 2 hyp and 1 to \infty ref data files
