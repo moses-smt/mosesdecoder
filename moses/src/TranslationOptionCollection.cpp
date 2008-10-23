@@ -584,6 +584,7 @@ inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollec
 
 void TranslationOptionCollection::CacheLexReordering()
 {
+	std:cerr << "Caching lexical reordering..\n";
 	const std::vector<LexicalReordering*> &lexReorderingModels = StaticData::Instance().GetLexicalReorderModels();
 
 	std::vector<LexicalReordering*>::const_iterator iterLexreordering;
@@ -623,6 +624,7 @@ void TranslationOptionCollection::CacheLexReordering()
 
 void TranslationOptionCollection::CacheMaxentReordering()
 {
+	std:cerr << "Caching maxent reordering..\n";
 	const std::vector<MaxentReordering*> &maxentReorderingModels = StaticData::Instance().GetMaxentReorderModels();
 
 	std::vector<MaxentReordering*>::const_iterator iterMaxentreordering;
@@ -648,17 +650,44 @@ void TranslationOptionCollection::CacheMaxentReordering()
 					const Phrase *sourcePhrase = transOpt.GetSourcePhrase();
 					if (sourcePhrase)
 					{
-						cout << "sourcePhrase: " << sourcePhrase << "\n";
+						// Hand over f_context: previous one, two or zero source words
+						const Phrase *f_context = new Phrase(Input);
+						size_t start = transOpt.GetStartPos();
+						if(start > 1){
+							// get previous 2 source words as context
+							f_context = new Phrase( StaticData::Instance().GetInput()->GetSubString( WordsRange(start-2, start-1) ) );
+						}
+						else if (start > 0){
+							// get only previous source word as context
+							f_context = new Phrase( StaticData::Instance().GetInput()->GetSubString( WordsRange(start-1, start-1) ) );
+						}
+												
+						// cache score with context
 						Score score = maxentreordering.GetProb(*sourcePhrase
-																							, transOpt.GetTargetPhrase());
-						// TODO should have better handling of unknown reordering entries
-						if (!score.empty())
+																							, transOpt.GetTargetPhrase(), *f_context);
+						if (!score.empty()){
+							std::cerr << "caching score: " << score[0] << "\n";
+							// TODO: does the score have to be cached with the additional information 
+							// of the f_context?? or is that implicit in the translation option?
 							transOpt.CacheMaxentReorderingProb(maxentreordering, score);
+						}
+						// cache score without f_context if f_context is non-empty
+						if( f_context->GetSize() != 0 ){
+							Score score = maxentreordering.GetProb(*sourcePhrase
+																								, transOpt.GetTargetPhrase(), *f_context);
+							if (!score.empty()){
+								std::cerr << "caching score without context: " << score[0] << "\n";
+								// TODO: does the score have to be cached with the additional information 
+								// of the f_context?? or is that implicit in the translation option?
+								transOpt.CacheMaxentReorderingProb(maxentreordering, score);
+							}
+						}
 					}
 				}
 			}
 		}
 	}
+	std::cerr << "Caching for maxent reordering done!\n";
 }
 
 }
