@@ -5,7 +5,7 @@ namespace Moses
 {
 MaxentReordering::MaxentReordering(const std::string &filePath, 
 									 const std::vector<float>& weights, 
-									 Direction direction, 
+//									 Direction direction, 
 									 Condition condition, 
 									 std::vector< FactorType >& f_factors, 
 									 std::vector< FactorType >& e_factors)
@@ -17,17 +17,16 @@ MaxentReordering::MaxentReordering(const std::string &filePath,
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
   std::cerr << "weights: ";
   for(size_t w = 0; w < weights.size(); ++w){
-	std::cerr << weights[w] << " ";
+	  std::cerr << weights[w] << " ";
   }
   std::cerr << "\n";
-  m_Direction = DecodeDirection(direction);
+//  m_Direction = DecodeDirection(direction);
   m_Condition = DecodeCondition(condition);
     
-  //m_FactorsE = e_factors;
-  //m_FactorsF = f_factors;
-  //Todo:should check that
-  //- if condition contains e or c than e_factors non empty
-  //- if condition contains f f_factors non empty
+  // TODO: Condition for maxent: 
+  // (a) previous source words, source phrase, target phrase, jump: A 
+  // (b) conditions as (a) plus conditioning on previously translated words: B
+
   for(size_t i = 0; i < m_Condition.size(); ++i){
     switch(m_Condition[i]){
     case E:
@@ -58,13 +57,8 @@ MaxentReordering::MaxentReordering(const std::string &filePath,
       break;
     }
   }
-  if(weights.size() == m_Direction.size()){
-    m_OneScorePerDirection = true;
-	std::cerr << "Reordering types NOT individualy weighted!\n";
-  } else {
-	m_OneScorePerDirection = false;
-  }
-  m_Table = LexicalReorderingTable::LoadAvailable(filePath, m_FactorsF, m_FactorsE, m_FactorsC);
+
+  m_Table = MaxentReorderingTable::LoadAvailable(filePath, m_FactorsF, m_FactorsE, m_FactorsC);
 }
 
 MaxentReordering::~MaxentReordering(){
@@ -74,54 +68,35 @@ MaxentReordering::~MaxentReordering(){
 }
   
 std::vector<float> MaxentReordering::CalcScore(Hypothesis* hypothesis) const {
+	std::cerr << "calculate maxent score..\n"; 
+	// TODO: what is the size of this vector?
   std::vector<float> score(GetNumScoreComponents(), 0);
   std::vector<float> values;
 
-  //for every direction
-  for(size_t i = 0; i < m_Direction.size(); ++i){
-    //grab data
-    if(Forward == m_Direction[i]){
-      //relates to prev hypothesis as we dont know next phrase for current yet
-      //sanity check: is there a previous hypothesis?
-      if(0 == hypothesis->GetPrevHypo()->GetId()){
-				continue; //no score continue with next direction
-      }
-      //grab probs for prev hypothesis
-			const ScoreComponentCollection &reorderingScoreColl = 
-							hypothesis->GetPrevHypo()->GetCachedMaxentReorderingScore();
-			values = reorderingScoreColl.GetScoresForProducer(this);
-			/*
-      values = m_Table->GetScore((hypothesis->GetPrevHypo()->GetSourcePhrase()).GetSubString(hypothesis->GetPrevHypo()->GetCurrSourceWordsRange()),
-								 hypothesis->GetPrevHypo()->GetCurrTargetPhrase(),
-								 auxGetContext(hypothesis->GetPrevHypo()));
-			*/
-    }
-    if(Backward == m_Direction[i])
-		{
-			const ScoreComponentCollection &reorderingScoreColl = 
-				hypothesis->GetCachedMaxentReorderingScore();
-			values = reorderingScoreColl.GetScoresForProducer(this);
-			/*
-      values = m_Table->GetScore(hypothesis->GetSourcePhrase().GetSubString(hypothesis->GetCurrSourceWordsRange()),
-								 hypothesis->GetCurrTargetPhrase(),
-								 auxGetContext(hypothesis));
-								 */
-    }
-    
-    //add score
-    //sanity check: do we have any probs?
-	  assert(values.size() == (GetNumOrientationTypes() * m_Direction.size()));
-
-		OrientationType orientation = GetOrientationType(hypothesis); 
-    float value = values[orientation + i * GetNumOrientationTypes()];
-    if(m_OneScorePerDirection){ 
-      //one score per direction
-      score[i] = value;
-    } else {
-      //one score per direction and orientation
-      score[orientation + i * GetNumOrientationTypes()] = value; 
-    }
+  //grab data
+  //relates to prev hypothesis as we dont know next phrase for current yet
+  //sanity check: is there a previous hypothesis?
+  if(0 == hypothesis->GetPrevHypo()->GetId()){
+//	continue; //no score continue with next direction
   }
+  //grab probs for prev hypothesis
+	const ScoreComponentCollection &reorderingScoreColl = 
+		hypothesis->GetPrevHypo()->GetCachedMaxentReorderingScore();
+	values = reorderingScoreColl.GetScoresForProducer(this);
+    
+  //add score
+  //sanity check: right no. of probabilities? (i.e. 4?)
+  assert(values.size() == (GetNumOrientationTypes()));
+
+	// TODO: maxent model has different outcomes:
+	// 1 (RIGHT),2 (RIGHT_PLUS,3 (LEFT), 4 (LEFT_PLUS)
+	// need to get value for current jump.. what jump (in f) does the current phrase perform
+	// with respect to the previously translated phrase? 
+	OrientationType orientation = GetOrientationType(hypothesis); 
+	
+	// TODO: get maxent value for this orientation type 
+  float value = values[orientation];
+  score[0] = value;
   return score;
 }
 
@@ -170,18 +145,8 @@ std::vector<MaxentReordering::Condition> MaxentReordering::DecodeCondition(Maxen
   return result;
 }
 
-std::vector<MaxentReordering::Direction> MaxentReordering::DecodeDirection(MaxentReordering::Direction d){
-  std::vector<Direction> result;
-  if(Bidirectional == d){
-    result.push_back(Backward);
-    result.push_back(Forward);
-  } else {
-    result.push_back(d);
-  }
-  return result;
-}
 
-
+// TODO: maxent checks jump probability, not just orientation probability
 MaxentReordering::OrientationType MaxentOrientationReordering::GetOrientationType(Hypothesis* currHypothesis) const
 {
   const Hypothesis* prevHypothesis = currHypothesis->GetPrevHypo();
@@ -208,9 +173,10 @@ MaxentReordering::OrientationType MaxentOrientationReordering::GetOrientationTyp
 
 
 
-Score MaxentReordering::GetProb(const Phrase& f, const Phrase& e) const
+Score MaxentReordering::GetProb(const Phrase& f, const Phrase& e, const Phrase& f_context) const
 {
-	return m_Table->GetScore(f, e, Phrase(Output));
+	std::cerr << "GetProb()\n";
+	return m_Table->GetScore(f, e, Phrase(Output), f_context);
 }
 
 }

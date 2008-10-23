@@ -434,11 +434,12 @@ bool StaticData::LoadLexicalReorderingModel()
   //load all models
   for(size_t i = 0; i < fileStr.size(); ++i)
 	{
-		//std::cerr << "Model " << i << ":";
+//		std::cerr << "Model " << i << ":";
     //Todo: 'else' should be 'else if(...)' to check it is a lexical model...
     vector<string> spec = Tokenize<string>(fileStr[f], " ");
     ++f; //mark file as consumed
-    if(4 != spec.size()){
+    //if(4 != spec.size()){
+    if(spec.size() < 4){	// allow additional specification for maxent model
 			//wrong file specification string...
 			std::cerr << "Wrong Lexical Reordering Model Specification for model " << i << "!\n";
 			return false;
@@ -447,6 +448,7 @@ bool StaticData::LoadLexicalReorderingModel()
     //spec[1] = name
     //spec[2] = num weights
     //spec[3] = fileName
+    //spec[4] = number of maxent outcomes!
     //decode data into these
     vector<FactorType> input,output;
     LexicalReordering::Direction direction;
@@ -572,12 +574,8 @@ bool StaticData::LoadMaxentReorderingModel()
 {
   std::cerr << "Loading maxent distortion models (need to create own weight here)...\n";
   const vector<string> fileStr    = m_parameter->GetParam("distortion-file");
-  const vector<string> weightsStr = m_parameter->GetParam("weight-d");
-  /*old code
-  const vector<string> modelStr   = m_parameter.GetParam("distortion-type"); //TODO check name?
-  const vector<string> fileStr    = m_parameter.GetParam("distortion-file");
-  const vector<string> weightsStr = m_parameter.GetParam("weight-d");
-  */
+  const vector<string> weightsStr = m_parameter->GetParam("weight-m");
+
   std::vector<float>   weights;
   size_t w = 1; //cur weight
   size_t f = 0; //cur file
@@ -589,19 +587,24 @@ bool StaticData::LoadMaxentReorderingModel()
   //load all models
   for(size_t i = 0; i < fileStr.size(); ++i)
 	{
-		//std::cerr << "Model " << i << ":";
+		//std::cerr << "Model " << i << ": ";
     //Todo: 'else' should be 'else if(...)' to check it is a lexical model...
     vector<string> spec = Tokenize<string>(fileStr[f], " ");
     ++f; //mark file as consumed
-    if(4 != spec.size()){
+    //if(4 != spec.size()){
+    if(5 != spec.size()){
 			//wrong file specification string...
 			std::cerr << "Wrong Maxent Reordering Model Specification for model " << i << "!\n";
+			std:cerr << fileStr[f] << "\n";
 			return false;
     }
     //spec[0] = factor map
-    //spec[1] = name
-    //spec[2] = num weights
+    //spec[1] = name							// lexical reordering
+    //spec[2] = num weights       // lexical reordering
     //spec[3] = fileName
+    //spec[4] = condition for maxent (a or b)
+    //spec[5] = number of maxent outcomes
+    
     //decode data into these
     vector<FactorType> input,output;
     MaxentReordering::Direction direction;
@@ -623,102 +626,35 @@ bool StaticData::LoadMaxentReorderingModel()
 			//format error
 			return false;
     }
+    
     //decode name
     vector<string> params = Tokenize<string>(spec[1],"-");
     std::string type(ToLower(params[0]));
 		std::string dir;
 		std::string cond;
 
-		if(3 == params.size())
-		{
-			//name format is 'type'-'direction'-'condition'
-			dir  = ToLower(params[1]);
-			cond = ToLower(params[2]);
-		} 
-		else if(2 == params.size()) 
-		{
-			//assume name format is 'type'-'condition' with implicit unidirectional
-			std::cerr << "Warning: Maxent model type underspecified...assuming unidirectional in model " << i << "\n";
-			dir  = "unidirectional";
-			cond = ToLower(params[1]);
-		} 
-		else 
-		{
-			std::cerr << "Maxent model type underspecified for model " << i << "!\n";
-			return false;
-		}
-    
-		if(dir == "forward"){
-			direction = MaxentReordering::Forward;
-		 } 
-		else if(dir == "backward" || dir == "unidirectional" || dir == "uni")
-		{
-			direction = MaxentReordering::Backward; 
-		} 
-		else if(dir == "bidirectional" || dir == "bi") 
-		{
-			direction = MaxentReordering::Bidirectional;
-		}
-		else 
-		{
-			std::cerr << "Unknown direction declaration '" << dir << "'for maxent reordering model " << i << "\n";
-			return false;
-		}
-      
-		if(cond == "f"){
-			condition = MaxentReordering::F; 
-		}
-		else if(cond == "fe")
-		{
-			condition = MaxentReordering::FE; 
-		 } 
-		else if(cond == "fec")
-		{
-			condition = MaxentReordering::FEC;
-		} 
-		else 
-		{
-			std::cerr << "Unknown conditioning declaration '" << cond << "'for maxent reordering model " << i << "!\n";
-			return false;
-		}
+		// use source and target factors (??) 
+		condition = MaxentReordering::FE; 
 
 		//decode num weights (and fetch weight from array...)
 		std::vector<float> mweights;
-		numWeights = atoi(spec[2].c_str());
-		for(size_t k = 0; k < numWeights; ++k, ++w)
-		{
-			if(w >= weights.size()){
-				//error not enough weights...
-				std::cerr << "Maxent distortion model: Not enough weights, add to [weight-d]\n";
-				return false;
-			} else {
-				mweights.push_back(weights[w]);
+		numWeights = atoi(spec[4].c_str());
+		if(weights.size() < numWeights){
+			//error not enough weights...
+			std::cerr << "Maxent distortion model: Not enough weights, add to [weight-m]\n";
+			return false;
+		}
+		else{
+			for(size_t k = 0; k < numWeights; ++k)
+			{
+				mweights.push_back(weights[k]);
 			}
 		}
     
 		//decode filename
 		string filePath = spec[3];
-
-		//all ready load it (lex)
-		//std::cerr << type;
-		if("monotonicity" == type){
-			m_maxentReorderModels.push_back(new MaxentMonotonicReordering(filePath, mweights, direction, condition, input, output));
-		} 
-		else if("orientation" == type || "msd" == type)
-		{
-			m_maxentReorderModels.push_back(new MaxentOrientationReordering(filePath, mweights, direction, condition, input, output));
-		} 
-		else if("directional" == type)
-		{
-			m_maxentReorderModels.push_back(new MaxentDirectionalReordering(filePath, mweights, direction, condition, input, output));
-		} 
-		else 
-		{
-			//error unknown type!
-			std::cerr << " ...unknown type!\n";
-			return false;
-		}
-		//std::cerr << "\n";
+				
+		m_maxentReorderModels.push_back(new MaxentOrientationReordering(filePath, mweights, condition, input, output));
 	} 
   return true;
 }

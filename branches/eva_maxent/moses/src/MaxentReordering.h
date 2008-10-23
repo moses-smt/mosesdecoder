@@ -11,7 +11,7 @@
 #include "WordsRange.h"
 #include "ScoreProducer.h"
 
-#include "LexicalReorderingTable.h"
+#include "MaxentReorderingTable.h"
 
 namespace Moses
 {
@@ -31,7 +31,6 @@ class MaxentReordering : public ScoreProducer {
  public: //con- & destructors 
   MaxentReordering(const std::string &filePath, 
 		    const std::vector<float>& weights, 
-		    Direction direction, 
 		    Condition condition, 
 		    std::vector< FactorType >& f_factors, 
 		    std::vector< FactorType >& e_factors);
@@ -54,18 +53,17 @@ class MaxentReordering : public ScoreProducer {
     m_Table->InitializeForInput(i);
   }
 
-	Score GetProb(const Phrase& f, const Phrase& e) const;
+	Score GetProb(const Phrase& f, const Phrase& e, const Phrase& f_context) const;
   //helpers
   static std::vector<Condition> DecodeCondition(Condition c);
   static std::vector<Direction> DecodeDirection(Direction d);
  private:
   Phrase auxGetContext(const Hypothesis* hypothesis) const;
  private:
-  LexicalReorderingTable* m_Table;
+  MaxentReorderingTable* m_Table;
   size_t m_NumScoreComponents;
   std::vector< Direction > m_Direction;
   std::vector< Condition > m_Condition;
-  bool m_OneScorePerDirection;
   std::vector< FactorType > m_FactorsE, m_FactorsF, m_FactorsC;
   int m_MaxContextLength;
 };
@@ -77,16 +75,17 @@ class MaxentOrientationReordering : public MaxentReordering {
  public:
     MaxentOrientationReordering(const std::string &filePath, 
 			     const std::vector<float>& w, 
-			     Direction direction, 
 			     Condition condition, 
 			     std::vector< FactorType >& f_factors, 
 			     std::vector< FactorType >& e_factors)
-      : MaxentReordering(filePath, w, direction, condition, f_factors, e_factors){
+			: MaxentReordering(filePath, w, condition, f_factors, e_factors){
 	  std::cerr << "Created maxent orientation reordering\n";
   }
  public:
   virtual int GetNumOrientationTypes() const {
-    return 3; 
+//    return 3;
+		// give number of maxent outcomes
+		return 4; 
   }
   virtual std::string GetScoreProducerDescription() const {
     return "OrientationMaxentReorderingModel";
