@@ -2,21 +2,22 @@
 
 ###############################################
 # An implementation of paired bootstrap resampling for testing the statistical
-# significance of the difference between two systems from Koehn 2004 @ EMNLP
+# significance of the difference between two systems from (Koehn 2004 @ EMNLP)
 #
 # Usage: ./compare-hypotheses-with-significance.pl hypothesis_1 hypothesis_2 reference_1 [ reference_2 ... ]
 #
 # Author: Mark Fishel, fishel@ut.ee
+# 
+# 22.10: altered algorithm according to (Riezler and Maxwell 2005 @ MTSE'05), now computes p-value
 ###############################################
 
 use strict;
 
 #constants
 my $TIMES_TO_REPEAT_SUBSAMPLING = 1000;
-my $SUBSAMPLE_SIZE = 500; # if 0 then subsample size is equal to the whole set
+my $SUBSAMPLE_SIZE = 0; # if 0 then subsample size is equal to the whole set
 my $TMP_PREFIX = "/tmp/signigicance_test_file_";
 my $MAX_NGRAMS_FOR_BLEU = 4;
-my $DEBUG = 0;
 
 #checking cmdline argument consistency
 if (@ARGV < 3) {
@@ -29,14 +30,15 @@ if (@ARGV < 3) {
 	exit 1;
 }
 
-print "reading data; " . `date` if ($DEBUG);
+print "reading data; " . `date`;
 
 #read all data
 my $data = readAllData(@ARGV);
 
-my $secondWin = 0;
+#start comparing
+print "comparing hypotheses; " . `date`;
 
-print "comparing hypotheses; " . `date` if ($DEBUG);
+my @subSampleBleuDiffArr;
 
 #applying sampling
 for (1..$TIMES_TO_REPEAT_SUBSAMPLING) {
@@ -45,34 +47,47 @@ for (1..$TIMES_TO_REPEAT_SUBSAMPLING) {
 	my $bleu1 = getBleu($data->{refs}, $data->{hyp1}, $subSampleIndices);
 	my $bleu2 = getBleu($data->{refs}, $data->{hyp2}, $subSampleIndices);
 	
-	my $op;
-	
-	if ($bleu1 < $bleu2) {
-		$secondWin++;
-		$op = "worse than";
-	}
-	elsif ($bleu1 == $bleu2) {
-		$op = "equally good as";
-	}
-	else {
-		$op = "better than";
-	}
-	
-	print "$_: 1st ($bleu1) $op 2nd ($bleu2)\n" if ($DEBUG);
+	push @subSampleBleuDiffArr, abs($bleu2 - $bleu1);
 	
 	if ($_ % int($TIMES_TO_REPEAT_SUBSAMPLING / 100) == 0) {
-		print "$_ / $TIMES_TO_REPEAT_SUBSAMPLING\n";
+		print "$_ / $TIMES_TO_REPEAT_SUBSAMPLING " . `date`;
 	}
 }
 
-my $result = $secondWin / $TIMES_TO_REPEAT_SUBSAMPLING;
+#get subsample bleu difference mean
+my $averageSubSampleBleuDiff = 0;
 
-if ($result >= 0.5) {
-	print "The second system is better than the first one with " . (int(10000 * $result) / 100) . "% confidence; " . `date`;
+for my $subSampleDiff (@subSampleBleuDiffArr) {
+	$averageSubSampleBleuDiff += $subSampleDiff;
 }
-else {
-	print "The first system is better than the second one with " . (int(10000 * $result) / 100) . "% confidence; " . `date`;
+
+$averageSubSampleBleuDiff /= $TIMES_TO_REPEAT_SUBSAMPLING;
+
+print "average subsample bleu: $averageSubSampleBleuDiff " . `date`;
+
+#calculating p-value
+my $count = 0;
+
+my $realBleuDiff = abs(getBleu($data->{refs}, $data->{hyp2}) - getBleu($data->{refs}, $data->{hyp1}));
+
+for my $subSampleDiff (@subSampleBleuDiffArr) {
+#	my $op;
+	
+	if ($subSampleDiff - $averageSubSampleBleuDiff >= $realBleuDiff) {
+		$count++;
+#		$op = ">=";
+	}
+	else {
+#		$op = "< ";
+	}
+	
+#	print "$subSampleDiff - $averageSubSampleBleuDiff $op $realBleuDiff\n";
 }
+
+my $result = ($count + 1) / $TIMES_TO_REPEAT_SUBSAMPLING;
+
+print "The null-hypothesis is that the second system is equivalent with the first one;\n";
+print "The p-value for that is $result\n";
 
 #####
 # read 2 hyp and 1 to \infty ref data files
