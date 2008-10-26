@@ -1126,7 +1126,8 @@ sub get_reordering_factored {
 	    my %FILE;
 	    foreach my $type (@TYPE) {
 		if (defined($REORDERING_MODEL{$type})) {
-		    my $file = "reordering-table.$type.$___REORDERING_SMOOTH";
+		    my $file = "$___MODEL_DIR/reordering-table";
+                    $file .= ".$type" if (scalar keys %REORDERING_MODEL) > 2;
 		    $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 		    $FILE{$type} = $file;
 		}
@@ -1140,7 +1141,8 @@ sub get_reordering_factored {
 		my %FILE;
 		foreach my $type (@TYPE) {
 		    if (defined($REORDERING_MODEL{$type})) {
-			my $file = "reordering-table.$type.$___REORDERING_SMOOTH.$factor";
+			my $file = "$___MODEL_DIR/reordering-table.$factor";
+                        $file .= ".$type" if (scalar keys %REORDERING_MODEL) > 2;
 			$file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 			$FILE{$type} = $file;
 		    }
@@ -1526,6 +1528,7 @@ print INI "\n# language models: type(srilm/irstlm), factors, order, file
       my $path = `pwd`; chop($path);
       $fn = $path."/".$fn;
     }
+    $type = 0 unless $type;
     print INI "$type $f $o $fn\n";
   }
 
@@ -1545,22 +1548,20 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
  
     my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
-	foreach my $r (keys %REORDERING_MODEL) {
-	    next if $r eq "fe" || $r eq "f";
-	    next if $r eq "distance";
-		my $type = $r;
-		$r =~ s/-bidirectional/.bi/;
-		$r =~ s/-f/.f/;
-		$r =~ s/msd/msd-table.$factor/;
-		$r =~ s/monotonicity/monotonicity-table.$factor/;
-		
+	foreach my $type (keys %REORDERING_MODEL) {
+	    next if $type eq "fe" || $type eq "f";
+	    next if $type eq "distance";
 		my $w;
-		if ($r =~ /msd/) { $w = 3; } else { $w = 1; }
-		if ($r =~ /bi/) { $w *= 2; }
+		if ($type =~ /msd/) { $w = 3; } else { $w = 1; }
+		if ($type =~ /bi/) { $w *= 2; }
 		$weight_d_count += $w;
 
-                my $table_file = "$___MODEL_DIR/$r.$___REORDERING_SMOOTH.gz";
+	        my $table_file = "$___MODEL_DIR/reordering-table";
+	        $table_file .= ".$factor" unless $___NOT_FACTORED;
+                $table_file .= ".$type" if (scalar keys %REORDERING_MODEL) > 2;
+                $table_file .= ".gz";
 		$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+		$type =~ s/\-f/\-unidirectional\-f/ unless $type =~ /\-bi/;
 		$file .= "$factor $type $w $table_file\n";
 	}
         $factor_i++;
