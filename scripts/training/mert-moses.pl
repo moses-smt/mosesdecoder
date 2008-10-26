@@ -491,6 +491,7 @@ my $PARAMETERS;
 $PARAMETERS = $___DECODER_FLAGS;
 
 my $devbleu = undef;
+my $startbleu = undef;
 my $bestpoint = undef;
 my $run=$start_run-1;
 
@@ -506,7 +507,7 @@ while(1) {
   print "run $run start at ".`date`;
 
   # In case something dies later, we might wish to have a copy
-  create_config($___CONFIG, "./run$run.moses.ini", \%used_triples, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
+  create_config($___CONFIG, "./run$run.moses.ini", \%used_triples, $run, (defined$startbleu?$startbleu:"not-est."), (defined$devbleu?$devbleu:"not-est."));
 
 
   # skip if the user wanted
@@ -724,12 +725,16 @@ while(1) {
 
   $bestpoint = undef;
   $devbleu = undef;
+  $startbleu = undef;
   open(IN,"cmert.log") or die "Can't open cmert.log";
   while (<IN>) {
     if (/Best point:\s*([\s\d\.\-]+?)\s*=> ([\d\.]+)/) {
       $bestpoint = $1;
       $devbleu = $2;
       last;
+    }
+    elsif((! $startbleu) && /^starting.+=> ([\d\.]+)/) {
+      $startbleu = $1;
     }
   }
   close IN;
@@ -771,7 +776,7 @@ if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
 safesystem("\\cp -f init.opt run$run.init.opt") or die;
 safesystem("\\cp -f cmert.log run$run.cmert.log") or die;
 
-create_config($___CONFIG_BAK, "./moses.ini", \%used_triples, $run, $devbleu);
+create_config($___CONFIG_BAK, "./moses.ini", \%used_triples, $run, $startbleu, $devbleu);
 
 # just to be sure that we have the really last finished step marked
 open F, "> finished_step.txt" or die "Can't mark finished step";
@@ -910,6 +915,7 @@ sub create_config {
     my $outfn = shift; # where to save the config
     my $triples = shift; # the lambdas we should write
     my $iteration = shift;  # just for verbosity
+    my $bleu_started = shift; # just for verbosity
     my $bleu_achieved = shift; # just for verbosity
 
     my %P; # the hash of all parameters we wish to override
@@ -953,7 +959,7 @@ sub create_config {
     open(OUT,"> $outfn") or die "Can't write $outfn";
     print OUT "# MERT optimized configuration\n";
     print OUT "# decoder $___DECODER\n";
-    print OUT "# BLEU $bleu_achieved on dev $___DEV_F\n";
+    print OUT "# BLEU $bleu_started -> $bleu_achieved on dev $___DEV_F\n";
     print OUT "# We were before running iteration $iteration\n";
     print OUT "# finished ".`date`;
     my $line = <INI>;
