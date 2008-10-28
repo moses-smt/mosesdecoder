@@ -40,7 +40,7 @@ $AUTOMAKE || die "automake failed"
 
 echo
 echo "You should now be able to configure and build:"
-echo "   ./configure --with-srilm=/path/to/srilm"
+echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm]"
 echo "   make -j 4"
 echo
 
