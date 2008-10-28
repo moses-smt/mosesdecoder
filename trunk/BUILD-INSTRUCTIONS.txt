@@ -33,7 +33,7 @@ you DO NOT override the MACHINE_TYPE variable on the command line when
 you do so, as this can lead to problems locating the library.
 
  ./regenerate-makefiles.sh
- ./configure --with-srilm=/path/to/srilm
+ ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm]
 
 The resulting decoder binary will be moses-cmd/src/moses .
 
@@ -46,7 +46,7 @@ you DO NOT override the MACHINE_TYPE variable on the command line when
 you do so, as this can lead to problems locating the library.
 
  ./regenerate-makefiles.sh
- ./configure --with-irstlm=/path/to/irstlm
+ ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm]
 
 The resulting decoder binary will be moses-cmd/src/moses .
 
