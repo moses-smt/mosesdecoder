@@ -197,6 +197,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	// print all factors of output translations
 	SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
+	
+	// set default parameter for maxent reordering model
+	SetBooleanParameter( &m_maxent_reordering, "maxent-reordering", false );
 
 	// 
 	if (m_inputType == SentenceInput)
@@ -343,7 +346,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	}
 	
 	if (!LoadLexicalReorderingModel()) return false;
-	if (!LoadMaxentReorderingModel()) return false;
+	if( UseMaxentReordering() )
+		if (!LoadMaxentReorderingModel()) return false;
 	if (!LoadLanguageModels()) return false;
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
@@ -572,7 +576,7 @@ bool StaticData::LoadLexicalReorderingModel()
 
 bool StaticData::LoadMaxentReorderingModel()
 {
-  std::cerr << "Loading maxent distortion models (need to create own weight here)...\n";
+  std::cerr << "Loading maxent distortion models...\n";
   const vector<string> fileStr    = m_parameter->GetParam("distortion-file");
   const vector<string> weightsStr = m_parameter->GetParam("weight-m");
 

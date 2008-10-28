@@ -53,6 +53,7 @@ Parameter::Parameter()
 	AddParam("lmodel-dub", "dictionary upper bounds of language models");
 	AddParam("lmstats", "L", "(1/0) compute LM backoff statistics for each translation hypothesis");
 	AddParam("mapping", "description of decoding steps");
+	AddParam("maxent-reordering", "use additional maxent reordering model");
 	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
 	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
 	AddParam("max-phrase-length", "maximum phrase length (default 20)");
