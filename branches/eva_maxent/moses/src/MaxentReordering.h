@@ -46,7 +46,8 @@ class MaxentReordering : public ScoreProducer {
   };
   //new 
   virtual int             GetNumOrientationTypes() const = 0;
-  virtual OrientationType GetOrientationType(Hypothesis*) const = 0;
+  virtual vector<OrientationType> GetOrientationType(Hypothesis*) const = 0;
+//  virtual OrientationType GetOrientationType(Hypothesis*) const = 0;
   
   std::vector<float> CalcScore(Hypothesis* hypothesis) const;
   void InitializeForInput(const InputType& i){
@@ -54,6 +55,7 @@ class MaxentReordering : public ScoreProducer {
   }
 
 	Score GetProb(const Phrase& f, const Phrase& e, const Phrase& f_context) const;
+	
   //helpers
   static std::vector<Condition> DecodeCondition(Condition c);
   static std::vector<Direction> DecodeDirection(Direction d);
@@ -71,7 +73,7 @@ class MaxentReordering : public ScoreProducer {
 
 class MaxentOrientationReordering : public MaxentReordering {
  private:
-  enum {Monotone = 0, Swap = 1, Discontinuous = 2};
+  enum {RIGHT = 0, RIGHT_PLUS = 1, LEFT = 2, LEFT_PLUS = 3, LEFT_undef = 4, NONE = 5};
  public:
     MaxentOrientationReordering(const std::string &filePath, 
 			     const std::vector<float>& w, 
@@ -90,7 +92,9 @@ class MaxentOrientationReordering : public MaxentReordering {
   virtual std::string GetScoreProducerDescription() const {
     return "OrientationMaxentReorderingModel";
   };
-  virtual OrientationType GetOrientationType(Hypothesis* currHypothesis) const;
+  virtual std::vector<OrientationType> GetOrientationType(Hypothesis* currHypothesis) const;
+//  virtual OrientationType GetOrientationType(Hypothesis* currHypothesis) const;
+  MaxentReordering::OrientationType ReEvaluateWithNextPhraseInSource(Hypothesis* currHypothesis, const WordsRange currSourceWordsRange) const;
 };
 
 }

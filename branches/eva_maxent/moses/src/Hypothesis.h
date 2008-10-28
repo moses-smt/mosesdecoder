@@ -84,6 +84,7 @@ protected:
 	ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
 	AlignmentPair     m_alignPair;
 	const TranslationOption *m_transOpt;
+	const Hypothesis *m_nextHypothesis;
 
 	int m_id; /*! numeric ID of this hypothesis, used for logging */
 	std::vector<std::vector<unsigned int> >* m_lmstats; /*! Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
@@ -313,9 +314,17 @@ public:
 	const ScoreComponentCollection &GetCachedLexicalReorderingScore() const;
 	
 	const ScoreComponentCollection &GetCachedMaxentReorderingScore() const;
+	
+	const Hypothesis* GetHypoContainingPosition(size_t position)const;
+	
+	std::string GetCurrTargetSentence();
 
 	const TranslationOption &GetTranslationOption() const
 	{ return *m_transOpt; }
+	
+	void SetNextHypothesis(const Hypothesis *nextHypo);
+	
+	const Hypothesis *GetNextHypothesis() const;
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

@@ -121,7 +121,10 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis* hypothesis) const {
       //one score per direction and orientation
       score[orientation + i * GetNumOrientationTypes()] = value; 
     }
-  }
+  } 
+//  for(int i=0; i< score.size(); i++){
+//  	std::cerr << "lex score[" << i << "] = " << score[i] << "\n";
+//  }
   return score;
 }
 

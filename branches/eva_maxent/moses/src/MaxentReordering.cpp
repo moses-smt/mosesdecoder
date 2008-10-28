@@ -68,35 +68,78 @@ MaxentReordering::~MaxentReordering(){
 }
   
 std::vector<float> MaxentReordering::CalcScore(Hypothesis* hypothesis) const {
-	std::cerr << "calculate maxent score..\n"; 
-	// TODO: what is the size of this vector?
   std::vector<float> score(GetNumScoreComponents(), 0);
-  std::vector<float> values;
+  std::vector<float> values_curr, values_next;
+  bool nextHypoExists = false;
 
-  //grab data
-  //relates to prev hypothesis as we dont know next phrase for current yet
-  //sanity check: is there a previous hypothesis?
-  if(0 == hypothesis->GetPrevHypo()->GetId()){
-//	continue; //no score continue with next direction
-  }
-  //grab probs for prev hypothesis
-	const ScoreComponentCollection &reorderingScoreColl = 
-		hypothesis->GetPrevHypo()->GetCachedMaxentReorderingScore();
-	values = reorderingScoreColl.GetScoresForProducer(this);
-    
-  //add score
-  //sanity check: right no. of probabilities? (i.e. 4?)
-  assert(values.size() == (GetNumOrientationTypes()));
-
-	// TODO: maxent model has different outcomes:
-	// 1 (RIGHT),2 (RIGHT_PLUS,3 (LEFT), 4 (LEFT_PLUS)
+	// Maxent model has outcomes: RIGHT, RIGHT_PLUS, LEFT, LEFT_PLUS
+	// Defined orientation values:
+	// RIGHT = 0, RIGHT_PLUS = 1, LEFT = 2, LEFT_PLUS = 3, LEFT_undef = 4, NONE = 5
 	// need to get value for current jump.. what jump (in f) does the current phrase perform
-	// with respect to the previously translated phrase? 
-	OrientationType orientation = GetOrientationType(hypothesis); 
+	// with respect to the previous or next input phrase? 
+	vector<OrientationType> orientations = GetOrientationType(hypothesis); 
+	OrientationType orientation_curr = orientations[0];
+	OrientationType orientation_next = orientations[1];
 	
-	// TODO: get maxent value for this orientation type 
-  float value = values[orientation];
-  score[0] = value;
+	assert(orientation_curr != orientation_next);
+	assert(orientation_curr <= 5 && (orientation_next == 2 || orientation_next == 3 || orientation_next == 5) );
+	std::cerr << "Maxent orientation type (curr): " << orientation_curr << "\n";
+	std::cerr << "Maxent orientation type (next): " << orientation_next << "\n";
+	
+	// grab data for current hypothesis
+	const ScoreComponentCollection &reorderingScoreColl_curr = 
+		hypothesis->GetCachedMaxentReorderingScore();
+	values_curr = reorderingScoreColl_curr.GetScoresForProducer(this);
+	//sanity check: right no. of probabilities? (i.e. 4?)
+	assert(values_curr.size() == GetNumOrientationTypes());
+	
+	// try to grab data for next hypothesis
+	
+	const Hypothesis *nextHypo = hypothesis->GetNextHypothesis();
+	if(nextHypo != NULL){
+		const ScoreComponentCollection &reorderingScoreColl_next = 
+		  nextHypo->GetCachedMaxentReorderingScore();
+		values_next = reorderingScoreColl_next.GetScoresForProducer(this);
+		//sanity check: right no. of probabilities? (i.e. 4?)
+		assert(values_next.size() == GetNumOrientationTypes());
+		nextHypoExists = true;
+	}
+    
+  //add score	
+	float value_curr, value_next;
+	std::cerr << "Curr scores: " << values_curr[0] << " " << values_curr[1] << " " << values_curr[2] << " " << values_curr[3] << "\n";
+	if(orientation_curr < 4){
+  	value_curr = values_curr[orientation_curr];
+	} 
+  else if(orientation_curr == 4){ 
+  	// optimistic guess: use better one of the values for LEFT and LEFT_PLUS
+   	if(values_curr[2] >= values_curr[3]){
+   		value_curr = values_curr[2];
+   		orientation_curr = 2;
+   	}
+   	else{
+   		value_curr = values_curr[3];
+   		orientation_curr = 3;
+   	}
+  }  
+  std::cerr << "Maxent value (curr): " << value_curr << "\n";
+  if(orientation_curr < 5)
+  	score[orientation_curr] = value_curr;
+  
+  if(nextHypoExists){
+  	if(orientation_next != 5){
+	  	value_next = values_next[orientation_next];
+	  } 
+	  std::cerr << "Next scores: " << values_next[0] << " " << values_next[1] << " " << values_next[2] << " " << values_next[3] << "\n";
+	  std::cerr << "Maxent value (next): " << value_next << "\n";
+	  if(orientation_next < 5)
+    	score[orientation_next] = value_next;
+  }  
+  
+  for(int i=0; i< score.size(); i++){
+  	std::cerr << "maxent score[" << i << "] = " << score[i] << "\n";
+  }
+  std::cerr << "\n";
   return score;
 }
 
@@ -147,37 +190,141 @@ std::vector<MaxentReordering::Condition> MaxentReordering::DecodeCondition(Maxen
 
 
 // TODO: maxent checks jump probability, not just orientation probability
-MaxentReordering::OrientationType MaxentOrientationReordering::GetOrientationType(Hypothesis* currHypothesis) const
+std::vector< MaxentReordering::OrientationType> MaxentOrientationReordering::GetOrientationType(Hypothesis* currHypothesis) const
+//MaxentReordering::OrientationType MaxentOrientationReordering::GetOrientationType(Hypothesis* currHypothesis) const
 {
   const Hypothesis* prevHypothesis = currHypothesis->GetPrevHypo();
-  const WordsRange currWordsRange  = currHypothesis->GetCurrSourceWordsRange();
+  const WordsRange prevSourceWordsRange  = prevHypothesis->GetCurrSourceWordsRange();
+  const WordsRange currSourceWordsRange  = currHypothesis->GetCurrSourceWordsRange();
+  
+//  std::cerr << "\nhypo source: " << currHypothesis->GetSourcePhraseStringRep() <<  "  " << currHypothesis->GetCurrSourceWordsRange() << "\n";
+//  std::cerr << "hypo target: " << currHypothesis->GetTargetPhraseStringRep() <<  "  " << currHypothesis->GetCurrTargetWordsRange() << "\n";
+    
+  // save outcome for evaluation with previous and with next phrase in source sentence
+  std::vector< MaxentReordering::OrientationType> orientations;
+    
+  // If previous phrase in source sentence is TRANSLATED, we move to the right w.r.t. 
+  // that phrase; if it is NOT TRANSLATED yet, we know we move to the left w.r.t. that 
+  // phrase but we do not know yet how far we move.  
+  
   //check if there is a previous hypo 
   if(0 == prevHypothesis->GetId()){
-    if(0 == currWordsRange.GetStartPos()){
-      return Monotone;
+  	// NO HYPOTHESES YET!
+  	std::cerr << "there are no hypotheses yet..\n";
+    if(0 == currSourceWordsRange.GetStartPos()){
+      // translate at source position 0 (monotone -> right movement -> RIGHT)
+			orientations.push_back(RIGHT);
+			orientations.push_back(NONE);
+			return orientations;
     } else {
-      return Discontinuous;
+      // start translation from different position 
+      // (discontinuous -> left movement -> LEFT or LEFT_PLUS)
+			orientations.push_back(LEFT_undef);
+			orientations.push_back(NONE);
+      return orientations;
     }
   } else {
-	const WordsRange prevWordsRange  = prevHypothesis->GetCurrSourceWordsRange();
-
-    if(prevWordsRange.GetEndPos() == currWordsRange.GetStartPos()-1){
-      return Monotone;
-    } else if(prevWordsRange.GetStartPos() == currWordsRange.GetEndPos()+1) {
-      return Swap;
+  	// THERE ARE PREVIOUS HYPOTHESES!
+  	std::cerr << "there are hypotheses already..\n";
+ 	  const WordsRange prevWordsRange  = prevHypothesis->GetCurrSourceWordsRange();
+    if(prevWordsRange.GetEndPos() == currSourceWordsRange.GetStartPos()-1){
+    	// CASE 1: monotone right movement -> RIGHT 
+      const Hypothesis *previous = currHypothesis->GetHypoContainingPosition(currSourceWordsRange.GetStartPos()-1);
+    	assert( previous != NULL);
+    	size_t jump = currHypothesis->GetCurrTargetWordsRange().GetStartPos() - previous->GetCurrTargetWordsRange().GetEndPos();
+			std::cerr << "Jump RIGHT: " << jump << "\n\n";	
+			orientations.push_back(RIGHT);	
+			if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
+				orientations.push_back( ReEvaluateWithNextPhraseInSource(currHypothesis, currSourceWordsRange) );
+			}
+			else{
+				orientations.push_back(NONE);
+			}	
+			return orientations;
+    } else if( currSourceWordsRange.GetStartPos() != 0 && currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetStartPos()-1 )  ){
+    	// CASE 2: previous source word is translated but not in the previous hypothesis
+    	// farther right movement -> RIGHT_PLUS
+    	const Hypothesis *previous = currHypothesis->GetHypoContainingPosition(currSourceWordsRange.GetStartPos()-1);
+    	assert( previous != NULL);
+//    	std::cerr << "previous source: " << previous->GetSourcePhraseStringRep() << "  " << previous->GetCurrSourceWordsRange() << "\n";
+//    	std::cerr << "previous target: " << previous->GetTargetPhraseStringRep() << "  " << previous->GetCurrTargetWordsRange() << "\n";
+    	std::string target = currHypothesis->GetCurrTargetSentence();
+//			std::cerr << "target sentence: " << target << "\n";
+			size_t jump = currHypothesis->GetCurrTargetWordsRange().GetStartPos() - previous->GetCurrTargetWordsRange().GetEndPos();
+			std::cerr << "Jump RIGHT_PLUS: " << jump << "\n\n";
+    	orientations.push_back(RIGHT_PLUS);
+    	if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
+				orientations.push_back( ReEvaluateWithNextPhraseInSource(currHypothesis, currSourceWordsRange) );
+			}
+			else{
+				orientations.push_back(NONE);
+			}
+    	return orientations;
+    } else if( currSourceWordsRange.GetStartPos() == 0 ){
+    	// CASE 3: we are at position 0 in the source sentence..
+    	// right movement --> RIGHT or RIGHT_PLUS
+    	std::cerr << "Position 0..\n";
+    	if( currHypothesis->GetCurrTargetWordsRange().GetStartPos() > 0 ){
+    		std::cerr << "jump: " << currHypothesis->GetCurrTargetWordsRange().GetStartPos() + 1 << "\n\n";
+				orientations.push_back(RIGHT_PLUS);
+    	}
+    	else{
+    		std::cerr << "jump: " << currHypothesis->GetCurrTargetWordsRange().GetStartPos() + 1 << "\n\n";
+				orientations.push_back(RIGHT);
+    	}
+    	if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
+				orientations.push_back( ReEvaluateWithNextPhraseInSource(currHypothesis, currSourceWordsRange) );
+			}
+			else{
+				orientations.push_back(NONE);
+			}
+			return orientations;
     } else {
-      return Discontinuous;
-    }
+    	// CASE 4: Previous source word is not yet translated -> undefined left movement -> LEFT_undef
+    	std::cerr << "Previous word is not translated yet.. \n";
+    	
+    	// if next word is already translated, use ONLY the probability of this well-defined left jump
+    	// otherwise fallback to LEFT_undef and NONE
+    	if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
+				orientations.push_back(NONE);
+    		orientations.push_back( ReEvaluateWithNextPhraseInSource(currHypothesis, currSourceWordsRange) );
+			}
+			else{
+				orientations.push_back(LEFT_undef);
+				orientations.push_back(NONE);
+			}
+      return orientations;
+    } 
   }
 }
 
-
+MaxentReordering::OrientationType MaxentOrientationReordering::ReEvaluateWithNextPhraseInSource(Hypothesis* currHypothesis, const WordsRange currSourceWordsRange) const {
+	// Word to the right of current phrase is already translated, TODO: what to do? 
+  std::cerr << "Following word is already translated: backwards evaluation?\n";
+  const Hypothesis *next = currHypothesis->GetHypoContainingPosition( currSourceWordsRange.GetEndPos()+1 );
+  assert( next != NULL);
+  currHypothesis->SetNextHypothesis(next);
+//  std::cerr << "next source: " << next->GetSourcePhraseStringRep() << "  " << next->GetCurrSourceWordsRange() << "\n";
+//  std::cerr << "next target: " << next->GetTargetPhraseStringRep() << "  " << next->GetCurrTargetWordsRange() << "\n";
+  std::string target = currHypothesis->GetCurrTargetSentence();
+//  std::cerr << "target sentence: " << target << "\n";
+  int jump = next->GetCurrTargetWordsRange().GetEndPos() - currHypothesis->GetCurrTargetWordsRange().GetStartPos();
+  assert(jump <= -1);
+  if(jump == -1){
+		std::cerr << "Following phrase jump LEFT: " << jump << "\n\n";
+		return LEFT;
+  }
+	else{
+		std::cerr << "Following phrase jump LEFT_PLUS: " << jump << "\n\n";
+		return LEFT_PLUS;
+	}
+}
 
 Score MaxentReordering::GetProb(const Phrase& f, const Phrase& e, const Phrase& f_context) const
 {
-	std::cerr << "GetProb()\n";
 	return m_Table->GetScore(f, e, Phrase(Output), f_context);
 }
+
 
 }
 

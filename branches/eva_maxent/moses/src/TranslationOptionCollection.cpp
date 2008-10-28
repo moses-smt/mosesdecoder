@@ -651,7 +651,7 @@ void TranslationOptionCollection::CacheMaxentReordering()
 					if (sourcePhrase)
 					{
 						// Hand over f_context: previous one, two or zero source words
-						const Phrase *f_context = new Phrase(Input);
+						const Phrase *f_context;
 						size_t start = transOpt.GetStartPos();
 						if(start > 1){
 							// get previous 2 source words as context
@@ -661,24 +661,27 @@ void TranslationOptionCollection::CacheMaxentReordering()
 							// get only previous source word as context
 							f_context = new Phrase( StaticData::Instance().GetInput()->GetSubString( WordsRange(start-1, start-1) ) );
 						}
+						else
+							f_context = new Phrase(Input);
 												
 						// cache score with context
 						Score score = maxentreordering.GetProb(*sourcePhrase
 																							, transOpt.GetTargetPhrase(), *f_context);
+						
 						if (!score.empty()){
-							std::cerr << "caching score: " << score[0] << "\n";
-							// TODO: does the score have to be cached with the additional information 
-							// of the f_context?? or is that implicit in the translation option?
+							// f_context is implicit in the translation option
 							transOpt.CacheMaxentReorderingProb(maxentreordering, score);
+						}
+						else{
+//							std::cerr << "no score	..\n";
 						}
 						// cache score without f_context if f_context is non-empty
 						if( f_context->GetSize() != 0 ){
+							f_context = new Phrase(Input);
 							Score score = maxentreordering.GetProb(*sourcePhrase
 																								, transOpt.GetTargetPhrase(), *f_context);
 							if (!score.empty()){
-								std::cerr << "caching score without context: " << score[0] << "\n";
-								// TODO: does the score have to be cached with the additional information 
-								// of the f_context?? or is that implicit in the translation option?
+								// f_context is implicit in the translation option
 								transOpt.CacheMaxentReorderingProb(maxentreordering, score);
 							}
 						}

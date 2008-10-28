@@ -76,17 +76,20 @@ std::vector<float>  MaxentReorderingTableMemory::GetScore(const Phrase& f,
 														   const Phrase& c, const Phrase& f_context) {
   //rather complicated because of const can't use []... as [] might enter new things into std::map
   //also can't have to be careful with words range if c is empty can't use c.GetSize()-1 will underflow and be large
-  std::cerr << "GetScore()\n";
+//  std::cerr << "GetScore()\n";
   TableType::const_iterator r;
   std::string key;
   // table look up with f_context
   if(0 == c.GetSize()){
 		key = MakeKey(f,e,c,f_context);
-		std::cerr << "    make key: " << key << "\n";
 		r = m_Table.find(key);
 		if(m_Table.end() != r){
-//	  	return r->second;
-			
+//			std::cerr << "key found: " << key << "\n";
+	  	return r->second;			
+		}
+		else{
+			// TODO: how should this case be handled?
+//			std::cerr << "key not found in table\n";
 		}
   } else {
 		//right try from large to smaller context
@@ -119,20 +122,21 @@ std::string MaxentReorderingTableMemory::MakeKey(const Phrase& f,
 												   const Phrase& c,
 												   const Phrase& f_context) const {
   // keys for maxent don't include the complete phrases, but only the first two words
-  const Phrase *f_first2words = new Phrase(Input);
-  const Phrase *e_first2words = new Phrase(Input);
+  std::string f_first2words, e_first2words, f_cont;
   if(f.GetSize() > 1 )
-  	f_first2words = new Phrase(f.GetSubString( WordsRange(0,1) ));
+  	f_first2words = f.GetSubString( WordsRange(0,1) ).GetStringRep(m_FactorsF);
   else if(f.GetSize() > 0 )
-  	f_first2words = new Phrase(f.GetSubString( WordsRange(0,0) ));
+		f_first2words = f.GetSubString( WordsRange(0,1) ).GetStringRep(m_FactorsF);
   if(e.GetSize() > 1 )
-  	e_first2words = new Phrase(e.GetSubString( WordsRange(0,1) ));
+		e_first2words = e.GetSubString( WordsRange(0,1) ).GetStringRep(m_FactorsE);
   else if(e.GetSize() > 0 )
-  	e_first2words = new Phrase(e.GetSubString( WordsRange(0,0) ));
-  return MakeKey(maxent_auxClearString(f_first2words->GetStringRep(m_FactorsF)),
-				 maxent_auxClearString(e_first2words->GetStringRep(m_FactorsE)),
+		e_first2words = e.GetSubString( WordsRange(0,1) ).GetStringRep(m_FactorsE);
+  f_cont = f_context.GetStringRep(m_FactorsF);
+  delete &f_context;
+  	return MakeKey(maxent_auxClearString(f_first2words),
+				 maxent_auxClearString(e_first2words),
 				 maxent_auxClearString(c.GetStringRep(m_FactorsC)),
-				 maxent_auxClearString(f_context.GetStringRep(m_FactorsF)));
+				 maxent_auxClearString(f_cont));
 }
 
 std::string  MaxentReorderingTableMemory::MakeKey(const std::string& f, 

@@ -62,6 +62,7 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_id(0)
   , m_lmstats(NULL)
   , m_alignPair(source.GetSize())
+  , m_nextHypothesis(NULL)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
@@ -91,6 +92,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_id(s_HypothesesCreated++)
   , m_lmstats(NULL)
   , m_alignPair(prevHypo.m_alignPair)
+  , m_nextHypothesis(NULL)
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -110,6 +112,7 @@ Hypothesis::~Hypothesis()
 		for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter)
 		{
 			FREEHYPO(*iter);
+			std::cerr << "delete hypo..\n";
 		}
 		m_arcList->clear();
 
@@ -400,11 +403,13 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 		m_scoreBreakdown.PlusEquals(lexReorderModels[i], lexReorderModels[i]->CalcScore(this));
 	}
 	
-	//MAXENT REORDERING COST
-	const std::vector<MaxentReordering*> &maxentReorderModels = staticData.GetMaxentReorderModels();
-	for(unsigned int i = 0; i < maxentReorderModels.size(); i++)
-	{
-		m_scoreBreakdown.PlusEquals(maxentReorderModels[i], maxentReorderModels[i]->CalcScore(this));
+	if(staticData.UseMaxentReordering() ){
+		//MAXENT REORDERING COST
+		const std::vector<MaxentReordering*> &maxentReorderModels = staticData.GetMaxentReorderModels();
+		for(unsigned int i = 0; i < maxentReorderModels.size(); i++)
+		{
+			m_scoreBreakdown.PlusEquals(maxentReorderModels[i], maxentReorderModels[i]->CalcScore(this));
+		}
 	}
 
 	// TOTAL
@@ -607,6 +612,37 @@ const ScoreComponentCollection &Hypothesis::GetCachedLexicalReorderingScore() co
 const ScoreComponentCollection &Hypothesis::GetCachedMaxentReorderingScore() const
 {
 	return m_transOpt->GetMaxentReorderingScore();
+}
+
+// find the hypothesis that contains a certain source word position 
+const Hypothesis* Hypothesis::GetHypoContainingPosition(size_t position)const{
+	const Hypothesis *previous = m_prevHypo; 
+	WordsRange prevRange = previous->GetCurrSourceWordsRange();
+	const WordsRange *range = new WordsRange(position, position);
+	while( previous != NULL && !range->Overlap(prevRange) ){
+		previous = previous->GetPrevHypo();
+		prevRange = previous->GetCurrSourceWordsRange();
+	}
+	delete range;
+	return previous;
+}
+
+std::string Hypothesis::GetCurrTargetSentence(){
+	const Hypothesis *hypo = this; 
+	std::string tmp = "";
+	while( hypo != NULL ){
+		tmp = hypo->GetTargetPhraseStringRep() + " " + tmp; 
+		hypo = hypo->GetPrevHypo();
+	}
+	return tmp;
+}
+
+void Hypothesis::SetNextHypothesis(const Hypothesis *nextHypo) {
+	m_nextHypothesis = nextHypo;
+}
+
+const Hypothesis* Hypothesis::GetNextHypothesis() const {
+	return m_nextHypothesis;
 }
 
 }

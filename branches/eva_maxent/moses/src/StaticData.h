@@ -122,6 +122,7 @@ protected:
 	bool m_UseAlignmentInfo;
 	bool m_PrintAlignmentInfo;
 	bool m_PrintAlignmentInfoNbest;
+	bool m_maxent_reordering;
 		
 	mutable std::auto_ptr<SentenceStats> m_sentenceStats;
 	std::string m_factorDelimiter; //! by default, |, but it can be changed
@@ -369,6 +370,10 @@ public:
 	const std::vector<std::string> &GetDescription() const
 	{
 		return m_parameter->GetParam("description");
+	}
+	bool UseMaxentReordering() const
+	{
+		return m_maxent_reordering;
 	}
 
 	// for mert
