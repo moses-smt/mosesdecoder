@@ -26,7 +26,6 @@ using namespace std;
 class MaxentReordering : public ScoreProducer {
  public: //types & consts
   typedef int OrientationType; 
-  enum Direction {Forward, Backward, Bidirectional, Unidirectional = Backward};
   enum Condition {F,E,C,FE,FEC};
  public: //con- & destructors 
   MaxentReordering(const std::string &filePath, 
@@ -58,13 +57,11 @@ class MaxentReordering : public ScoreProducer {
 	
   //helpers
   static std::vector<Condition> DecodeCondition(Condition c);
-  static std::vector<Direction> DecodeDirection(Direction d);
  private:
   Phrase auxGetContext(const Hypothesis* hypothesis) const;
  private:
   MaxentReorderingTable* m_Table;
   size_t m_NumScoreComponents;
-  std::vector< Direction > m_Direction;
   std::vector< Condition > m_Condition;
   std::vector< FactorType > m_FactorsE, m_FactorsF, m_FactorsC;
   int m_MaxContextLength;

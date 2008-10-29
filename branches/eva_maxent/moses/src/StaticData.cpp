@@ -591,11 +591,8 @@ bool StaticData::LoadMaxentReorderingModel()
   //load all models
   for(size_t i = 0; i < fileStr.size(); ++i)
 	{
-		//std::cerr << "Model " << i << ": ";
-    //Todo: 'else' should be 'else if(...)' to check it is a lexical model...
     vector<string> spec = Tokenize<string>(fileStr[f], " ");
     ++f; //mark file as consumed
-    //if(4 != spec.size()){
     if(5 != spec.size()){
 			//wrong file specification string...
 			std::cerr << "Wrong Maxent Reordering Model Specification for model " << i << "!\n";
@@ -611,7 +608,6 @@ bool StaticData::LoadMaxentReorderingModel()
     
     //decode data into these
     vector<FactorType> input,output;
-    MaxentReordering::Direction direction;
     MaxentReordering::Condition condition;
     size_t numWeights;
     //decode factor map
@@ -637,7 +633,8 @@ bool StaticData::LoadMaxentReorderingModel()
 		std::string dir;
 		std::string cond;
 
-		// use source and target factors (??) 
+		// use source and target factors (word/pos)
+		// TODO: restrict to word and pos factors??
 		condition = MaxentReordering::FE; 
 
 		//decode num weights (and fetch weight from array...)
