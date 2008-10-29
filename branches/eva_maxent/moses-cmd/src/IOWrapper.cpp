@@ -348,12 +348,27 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 	    *m_nBestStream << "d: ";
 		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
 
-//		reordering
-		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();
-		if(rms.size() > 0)
+//	lexical	reordering
+		vector<LexicalReordering*> lex_rms = StaticData::Instance().GetLexicalReorderModels();
+		if(lex_rms.size() > 0)
 		{
 				vector<LexicalReordering*>::iterator iter;
-				for(iter = rms.begin(); iter != rms.end(); ++iter)
+				for(iter = lex_rms.begin(); iter != lex_rms.end(); ++iter)
+				{
+					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+					for (size_t j = 0; j<scores.size(); ++j) 
+					{
+				  		*m_nBestStream << scores[j] << " ";
+					}
+				}
+		}
+		
+		//	maxent reordering
+		vector<MaxentReordering*> maxent_rms = StaticData::Instance().GetMaxentReorderModels();
+		if(maxent_rms.size() > 0)
+		{
+				vector<MaxentReordering*>::iterator iter;
+				for(iter = maxent_rms.begin(); iter != maxent_rms.end(); ++iter)
 				{
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j) 
