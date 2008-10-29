@@ -651,7 +651,7 @@ void TranslationOptionCollection::CacheMaxentReordering()
 					if (sourcePhrase)
 					{
 						// Hand over f_context: previous one, two or zero source words
-						const Phrase *f_context;
+						const Phrase *f_context = NULL;
 						size_t start = transOpt.GetStartPos();
 						if(start > 1){
 							// get previous 2 source words as context
@@ -676,7 +676,9 @@ void TranslationOptionCollection::CacheMaxentReordering()
 //							std::cerr << "no score	..\n";
 						}
 						// cache score without f_context if f_context is non-empty
-						if( f_context->GetSize() != 0 ){
+						assert(f_context != NULL);
+						if( f_context->GetSize() > 0 ){
+							delete f_context;
 							f_context = new Phrase(Input);
 							Score score = maxentreordering.GetProb(*sourcePhrase
 																								, transOpt.GetTargetPhrase(), *f_context);
