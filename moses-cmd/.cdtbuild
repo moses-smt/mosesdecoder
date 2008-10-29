@@ -42,7 +42,7 @@
 </option>
 <option id="gnu.cpp.link.option.userobjs.551693347" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 <listOptionValue builtIn="false" value="&quot;../../moses/${ConfigName}/libmoses.a&quot;"/>
-<listOptionValue builtIn="false" value="&quot;../../irstlm/${ConfigName}/libirstlm.a&quot;"/>
+<listOptionValue builtIn="false" value="../../irstlm/lib/i686-redhat-linux-gnu/libirstlm.a"/>
 </option>
 <option id="gnu.cpp.link.option.flags.1995182231" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 </tool>
