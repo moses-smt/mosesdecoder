@@ -375,8 +375,10 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 	// Cached lex reodering costs
 	CacheLexReordering();
 	
-	// Cached maxent reodering costs
-	CacheMaxentReordering();
+	if( StaticData::Instance().UseMaxentReordering() ){
+		// Cached maxent reodering costs
+		CacheMaxentReordering();
+	}
 }
 
 void TranslationOptionCollection::Sort()
@@ -664,27 +666,46 @@ void TranslationOptionCollection::CacheMaxentReordering()
 						else
 							f_context = new Phrase(Input);
 												
-						// cache score with context
+						// get scores from reordering table (cache score with context)
 						Score score = maxentreordering.GetProb(*sourcePhrase
-																							, transOpt.GetTargetPhrase(), *f_context);
+																							, transOpt.GetTargetPhrase(), *f_context);					
+						delete f_context;
 						
 						if (!score.empty()){
 							// f_context is implicit in the translation option
 							transOpt.CacheMaxentReorderingProb(maxentreordering, score);
+							IFVERBOSE(2){
+									std::cerr << "caching scores:\n";
+									for(int i=0; i<score.size(); i++)
+										std::cerr << "score[" << i << "] = " << score[i] << "\n";
+								}
 						}
 						else{
-//							std::cerr << "no score	..\n";
-						}
-						// cache score without f_context if f_context is non-empty
-						assert(f_context != NULL);
-						if( f_context->GetSize() > 0 ){
-							delete f_context;
-							f_context = new Phrase(Input);
+							IFVERBOSE(2){
+								std::cerr << "no score for given context.. backing off to less feature templates..\n";
+							}
+							const Factor* factor = FactorCollection::Instance().AddFactor(Input, 0, "###");	
+							Word* word = new Word();
+							word->SetFactor(Input, factor);
+							vector< const Word* > wordVector;
+							wordVector.push_back(word);
+							f_context = new Phrase(Input, wordVector);
 							Score score = maxentreordering.GetProb(*sourcePhrase
 																								, transOpt.GetTargetPhrase(), *f_context);
+							delete f_context;
 							if (!score.empty()){
+								IFVERBOSE(2){
+									std::cerr << "received back-off score for TranslationOption:\n";
+									for(int i=0; i<score.size(); i++)
+										std::cerr << "score[" << i << "] = " << score[i] << "\n";
+								}
 								// f_context is implicit in the translation option
 								transOpt.CacheMaxentReorderingProb(maxentreordering, score);
+							}
+							else{
+								IFVERBOSE(2){
+									std::cerr << "still no score for this TranslationOption..\n";
+								}
 							}
 						}
 					}
@@ -692,7 +713,6 @@ void TranslationOptionCollection::CacheMaxentReordering()
 			}
 		}
 	}
-	std::cerr << "Caching for maxent reordering done!\n";
 }
 
 }
