@@ -5,28 +5,28 @@ Moses - factored phrase-based language decoder
 Copyright (c) 2006 University of Edinburgh
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
+    * Redistributions of source code must retain the above copyright notice,
 			this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, 
-			this list of conditions and the following disclaimer in the documentation 
+    * Redistributions in binary form must reproduce the above copyright notice,
+			this list of conditions and the following disclaimer in the documentation
 			and/or other materials provided with the distribution.
-    * Neither the name of the University of Edinburgh nor the names of its contributors 
-			may be used to endorse or promote products derived from this software 
+    * Neither the name of the University of Edinburgh nor the names of its contributors
+			may be used to endorse or promote products derived from this software
 			without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
-PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS 
-BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************/
 
@@ -64,7 +64,7 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 
-bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source) 
+bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
 {
 	delete source;
 	switch(inputType)
@@ -90,9 +90,9 @@ int main(int argc, char* argv[])
 		TRACE_ERR(endl);
 	}
 
-	cout.setf(std::ios::fixed); 
+	cout.setf(std::ios::fixed);
 	cout.precision(3);
-	cerr.setf(std::ios::fixed); 
+	cerr.setf(std::ios::fixed);
 	cerr.precision(3);
 
 	// load data structures
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 	{
 		parameter->Explain();
 		delete parameter;
-		return EXIT_FAILURE;		
+		return EXIT_FAILURE;
 	}
 
 	const StaticData &staticData = StaticData::Instance();
@@ -136,12 +136,12 @@ int main(int argc, char* argv[])
 			// note: source is only valid within this while loop!
 		IFVERBOSE(1)
 			ResetUserTime();
-			
+
     VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 
 		Manager manager(*source, staticData.GetSearchAlgorithm());
 		manager.ProcessSentence();
-		
+
 		if (staticData.GetOutputWordGraph())
 			manager.GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
 
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 			ioWrapper->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 						 staticData.GetReportSegmentation(), staticData.GetReportAllFactors());
 			IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
-			
+
 			// n-best
 			size_t nBestSize = staticData.GetNBestSize();
 			if (nBestSize > 0)
@@ -181,8 +181,8 @@ int main(int argc, char* argv[])
 		// consider top candidate translations to find minimum Bayes risk translation
 		else {
 		  size_t nBestSize = staticData.GetMBRSize();
-		  
-		  if (nBestSize <= 0) 
+
+		  if (nBestSize <= 0)
 		    {
 		      cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
 		      return EXIT_FAILURE;
@@ -199,17 +199,17 @@ int main(int argc, char* argv[])
 					       staticData.GetReportAllFactors());
 		      IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
 		    }
-		}	
-		 
+		}
+
 		if (staticData.IsDetailedTranslationReportingEnabled()) {
 		  TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
 		}
 
 		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
-    
-		manager.CalcDecoderStatistics();    
+
+		manager.CalcDecoderStatistics();
 	}
-	
+
 	delete ioWrapper;
 
 	IFVERBOSE(1)
