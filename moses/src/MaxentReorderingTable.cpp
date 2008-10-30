@@ -87,10 +87,6 @@ std::vector<float>  MaxentReorderingTableMemory::GetScore(const Phrase& f,
 //			std::cerr << "key found: " << key << "\n";
 	  	return r->second;			
 		}
-		else{
-			// TODO: how should this case be handled?
-//			std::cerr << "key not found in table\n";
-		}
   } else {
 		//right try from large to smaller context
 		for(size_t i = 0; i <= c.GetSize(); ++i){
@@ -132,11 +128,10 @@ std::string MaxentReorderingTableMemory::MakeKey(const Phrase& f,
   else if(e.GetSize() > 0 )
 		e_first2words = e.GetSubString( WordsRange(0,1) ).GetStringRep(m_FactorsE);
   f_cont = f_context.GetStringRep(m_FactorsF);
-  delete &f_context;
-  	return MakeKey(maxent_auxClearString(f_first2words),
-				 maxent_auxClearString(e_first2words),
-				 maxent_auxClearString(c.GetStringRep(m_FactorsC)),
-				 maxent_auxClearString(f_cont));
+  return MakeKey(maxent_auxClearString(f_first2words),
+			maxent_auxClearString(e_first2words),
+			maxent_auxClearString(c.GetStringRep(m_FactorsC)),
+			maxent_auxClearString(f_cont));
 }
 
 std::string  MaxentReorderingTableMemory::MakeKey(const std::string& f, 
@@ -208,14 +203,13 @@ void  MaxentReorderingTableMemory::LoadFromFile(const std::string& filePath){
       ++t;
     }
     // t points to lexicalized probabilities, skip them
-    
     ++t;	// now points to previous source context
     if(!m_FactorsF.empty()){
       //there should be something for c
       f_context = maxent_auxClearString(tokens.at(t));
     }
     
-    ++t;  // no points to maxent probabilities
+    ++t;  // now points to maxent probabilities
     // maxent probabilities
     std::vector<float> p = Scan<float>(Tokenize(tokens.at(t)));
     
@@ -232,11 +226,6 @@ void  MaxentReorderingTableMemory::LoadFromFile(const std::string& filePath){
     //save it all into our map
     // make table entry with f_context
     m_Table[MakeKey(f,e,c,f_context)] = p;
-    // make table entry without f_context, if f_context is non-empty
-    // table lookup without f_context, if the context is not-empty
-	  if(f_context != "" ){
-  		m_Table[MakeKey(f,e,c,"")] = p;
-  	}
   }
   std::cerr << "done.\n";
 }

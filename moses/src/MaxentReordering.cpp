@@ -20,7 +20,7 @@ MaxentReordering::MaxentReordering(const std::string &filePath,
   }
   std::cerr << "\n";
   m_Condition = DecodeCondition(condition);
-    
+  
   // TODO: Condition for maxent: 
   // (a) previous source words, source phrase, target phrase, jump: A 
   // (b) conditions as (a) plus conditioning on previously translated words: B
