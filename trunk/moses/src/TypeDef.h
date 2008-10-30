@@ -170,12 +170,6 @@ typedef size_t FactorType;
 typedef uint32_t UINT32;
 #endif
 
-class TranslationOption;
-typedef std::vector<TranslationOption*> TranslationOptionList;
-
-
-
-
 typedef std::vector<float> Scores;
 typedef std::vector<std::string> WordAlignments;
 

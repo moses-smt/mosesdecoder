@@ -635,6 +635,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TranslationOptionList.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TrellisPath.cpp"
 				>
 			</File>
@@ -958,6 +962,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionCollectionText.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationOptionList.h"
 				>
 			</File>
 			<File

@@ -32,6 +32,7 @@ namespace Moses
 {
 
 class BitmapContainer;
+class TranslationOptionList;
 
 typedef std::map<WordsBitmap, BitmapContainer*> _BMType;
 
