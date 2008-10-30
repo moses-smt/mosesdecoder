@@ -118,7 +118,7 @@ void TranslationOptionCollection::Prune()
 			// delete the rest
 			for (size_t i = m_maxNoTransOptPerCoverage ; i < fullList.size() ; ++i)
 			{
-				delete fullList[i];
+				delete fullList.Get(i);
 			}
 			fullList.resize(m_maxNoTransOptPerCoverage);
 		}
@@ -403,7 +403,7 @@ void TranslationOptionCollection::Sort()
  * \param adhereTableLimit whether phrase & generation table limits are adhered to
  */
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
-																													 const DecodeGraph &decodeStepList
+																													 const DecodeGraph &decodeGraph
 																													 , size_t startPos
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
@@ -420,7 +420,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		  const WordsRange wordsRange(startPos, endPos);
 		  sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
 		  
-			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(decodeStepList, *sourcePhrase);
+			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(decodeGraph, *sourcePhrase);
 			// is phrase in cache?
 			if (transOptList != NULL) {
 				skipTransOptCreation = true;
@@ -440,7 +440,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			size_t totalEarlyPruned = 0;
 			
 			// initial translation step
-			list <const DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
+			list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
 			const DecodeStep &decodeStep = **iterStep;
 
 			static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
@@ -449,7 +449,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			
 			// do rest of decode steps
 			int indexStep = 0;
-			for (++iterStep ; iterStep != decodeStepList.end() ; ++iterStep) 
+			for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) 
 			{
 				const DecodeStep &decodeStep = **iterStep;
 				PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
@@ -489,14 +489,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			{
 				if (partTransOptList.size() > 0)
 				{
-					vector<TranslationOption*> cachedTransOptList = GetTranslationOptionList(startPos, endPos);
-					vector<TranslationOption*>::iterator iterList;
-					for (size_t i = 0 ; i < cachedTransOptList.size() ; ++i)
-					{
-						cachedTransOptList[i] = new TranslationOption(*cachedTransOptList[i]);
-					}
-	
-					StaticData::Instance().AddTransOptListToCache(decodeStepList, *sourcePhrase, cachedTransOptList);
+					TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);	
+					StaticData::Instance().AddTransOptListToCache(decodeGraph, *sourcePhrase, transOptList);
 				}				
 			}
 
@@ -545,7 +539,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
 	const WordsRange &coverage = translationOption->GetSourceWordsRange();
-	m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].push_back(translationOption);
+	m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].Add(translationOption);
 }
 
 TO_STRING_BODY(TranslationOptionCollection);
@@ -565,7 +559,7 @@ inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollec
 			size_t sizeFull = fullList.size();
 		  for (size_t i = 0; i < sizeFull; i++) 
 			{
-			  out << *fullList[i] << std::endl;
+			  out << *fullList.Get(i) << std::endl;
 			}
 		}
 	}

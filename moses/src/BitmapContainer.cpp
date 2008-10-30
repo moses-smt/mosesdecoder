@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "BitmapContainer.h"
 #include "HypothesisStackCubePruning.h"
 #include "DummyScoreProducers.h"
+#include "TranslationOptionList.h"
 
 namespace Moses
 {
@@ -129,7 +130,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 		return;
 	}
 
-	const WordsRange &transOptRange = translations[0]->GetSourceWordsRange();
+	const WordsRange &transOptRange = translations.Get(0)->GetSourceWordsRange();
 	const InputType *itype = StaticData::Instance().GetInput();
 
 	HypothesisSet::const_iterator iterHypo = m_prevBitmapContainer.GetHypotheses().begin();
@@ -160,7 +161,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 
 	if (m_translations.size() > 1)
 	{
-		assert(m_translations[0]->GetFutureScore() >= m_translations[1]->GetFutureScore());
+		assert(m_translations.Get(0)->GetFutureScore() >= m_translations.Get(1)->GetFutureScore());
 	}
 
 	if (m_hypotheses.size() > 1)
@@ -190,7 +191,7 @@ BackwardsEdge::Initialize()
 		return;
 	}
 
-	Hypothesis *expanded = CreateHypothesis(*m_hypotheses[0], *m_translations[0]);
+	Hypothesis *expanded = CreateHypothesis(*m_hypotheses[0], *m_translations.Get(0));
 	m_parent.Enqueue(0, 0, expanded, this);
 	SetSeenPosition(0, 0);
 	m_initialized = true;
@@ -263,7 +264,7 @@ BackwardsEdge::PushSuccessors(const size_t x, const size_t y)
 	
 	if(y + 1 < m_translations.size() && !SeenPosition(x, y + 1)) {
 		SetSeenPosition(x, y + 1);
-		newHypo = CreateHypothesis(*m_hypotheses[x], *m_translations[y + 1]);
+		newHypo = CreateHypothesis(*m_hypotheses[x], *m_translations.Get(y + 1));
 		if(newHypo != NULL)
 		{
 			m_parent.Enqueue(x, y + 1, newHypo, (BackwardsEdge*)this);
@@ -272,7 +273,7 @@ BackwardsEdge::PushSuccessors(const size_t x, const size_t y)
 
 	if(x + 1 < m_hypotheses.size() && !SeenPosition(x + 1, y)) {
 	  SetSeenPosition(x + 1, y);
-		newHypo = CreateHypothesis(*m_hypotheses[x + 1], *m_translations[y]);
+		newHypo = CreateHypothesis(*m_hypotheses[x + 1], *m_translations.Get(y));
 		if(newHypo != NULL)
 		{
 			m_parent.Enqueue(x + 1, y, newHypo, (BackwardsEdge*)this);

@@ -63,6 +63,7 @@ libmoses_a_SOURCES = \
 	TranslationOptionCollection.cpp \
 	TranslationOptionCollectionText.cpp \
 	TranslationOptionCollectionConfusionNet.cpp \
+	TranslationOptionList.cpp \
 	UserMessage.cpp \
 	Util.cpp \
 	Word.cpp \

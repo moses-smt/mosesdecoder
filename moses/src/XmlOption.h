@@ -7,6 +7,8 @@
 namespace Moses
 {
 
+class TranslationOption;
+
 /** This struct is used for storing XML force translation data for a given range in the sentence
  */
 struct XmlOption {

@@ -385,21 +385,21 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
 StaticData::~StaticData()
 {
 	delete m_parameter;
+
 	RemoveAllInColl(m_phraseDictionary);
 	RemoveAllInColl(m_generationDictionary);
 	RemoveAllInColl(m_languageModel);
 	RemoveAllInColl(m_decodeStepVL);
-	
-	// delete trans opt
-	map<std::pair<const DecodeGraph*, Phrase>, std::vector<TranslationOption*> >::iterator iterCache;
-	for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache)
-	{
-		TranslationOptionList &transOptList = iterCache->second;
-		RemoveAllInColl(transOptList);
-	}
-
 	RemoveAllInColl(m_reorderModels);
 	
+	// delete trans opt
+	map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList* >::iterator iterCache;
+	for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache)
+	{
+		TranslationOptionList *transOptList = iterCache->second;
+		delete transOptList;
+	}
+
 	// small score producers
 	delete m_distortionScoreProducer;
 	delete m_wpProducer;
@@ -950,19 +950,18 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGra
 {
 	std::pair<const DecodeGraph*, Phrase> key(&decodeGraph, sourcePhrase);
 	
-	std::map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList>::const_iterator iter
+	std::map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList*>::const_iterator iter
 			= m_transOptCache.find(key);
 	if (iter == m_transOptCache.end())
 		return NULL;
 
-	return &(iter->second);
+	return iter->second;
 }
 
 void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
 {
-	std::pair<const DecodeGraph*, Phrase> key(&decodeGraph, sourcePhrase);
-	
-	m_transOptCache[key] = transOptList;
+		std::pair<const DecodeGraph*, Phrase> pair(&decodeGraph, sourcePhrase);
+		m_transOptCache[pair] = new TranslationOptionList(transOptList);
 }
 
 }

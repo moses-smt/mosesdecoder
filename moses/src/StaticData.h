@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LMList.h"
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
+#include "TranslationOptionList.h"
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -136,7 +138,7 @@ protected:
 	size_t m_timeout_threshold; //! seconds after which time out is activated
 
 	bool m_useTransOptCache;
-	mutable std::map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList> m_transOptCache;
+	mutable std::map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList*> m_transOptCache;
 
 	mutable const InputType* m_input;  //! holds reference to current sentence
 	bool m_isAlwaysCreateDirectTranslationOption;
