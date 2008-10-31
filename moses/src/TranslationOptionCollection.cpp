@@ -693,6 +693,7 @@ void TranslationOptionCollection::CacheMaxentReordering()
 							Score score = maxentreordering.GetProb(*sourcePhrase
 																								, transOpt.GetTargetPhrase(), *f_context);
 							delete f_context;
+							delete word;
 							if (!score.empty()){
 								IFVERBOSE(2){
 									std::cerr << "received back-off score for TranslationOption:\n";

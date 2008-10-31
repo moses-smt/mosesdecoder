@@ -196,9 +196,7 @@ std::vector<MaxentReordering::Condition> MaxentReordering::DecodeCondition(Maxen
 }
 
 
-// TODO: maxent checks jump probability, not just orientation probability
 std::vector< MaxentReordering::OrientationType> MaxentOrientationReordering::GetOrientationType(Hypothesis* currHypothesis) const
-//MaxentReordering::OrientationType MaxentOrientationReordering::GetOrientationType(Hypothesis* currHypothesis) const
 {
   const Hypothesis* prevHypothesis = currHypothesis->GetPrevHypo();
   const WordsRange prevSourceWordsRange  = prevHypothesis->GetCurrSourceWordsRange();
@@ -253,7 +251,8 @@ std::vector< MaxentReordering::OrientationType> MaxentOrientationReordering::Get
 				std::cerr << "Jump RIGHT: " << jump << "\n\n";
 			}	
 			orientations.push_back(RIGHT);	
-			if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
+			if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && 
+			      (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
 				orientations.push_back( ReEvaluateWithNextPhraseInSource(currHypothesis, currSourceWordsRange) );
 			}
 			else{
@@ -273,7 +272,8 @@ std::vector< MaxentReordering::OrientationType> MaxentOrientationReordering::Get
 				std::cerr << "Jump RIGHT_PLUS: " << jump << "\n\n";
 			}
     	orientations.push_back(RIGHT_PLUS);
-    	if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
+    	if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && 
+    	      (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
 				orientations.push_back( ReEvaluateWithNextPhraseInSource(currHypothesis, currSourceWordsRange) );
 			}
 			else{
@@ -298,7 +298,8 @@ std::vector< MaxentReordering::OrientationType> MaxentOrientationReordering::Get
     		}
 				orientations.push_back(RIGHT);
     	}
-    	if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
+    	if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && 
+    	      (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
 				orientations.push_back( ReEvaluateWithNextPhraseInSource(currHypothesis, currSourceWordsRange) );
 			}
 			else{
@@ -312,17 +313,18 @@ std::vector< MaxentReordering::OrientationType> MaxentOrientationReordering::Get
     	}    	
     	// if next word is already translated, use ONLY the probability of this well-defined left jump
     	// otherwise fallback to LEFT_undef and NONE
-    	if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
+    	if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && 
+    	      (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
 				orientations.push_back(NONE);
 				IFVERBOSE(2){
-      	std::cerr << "no jump w.r.t. previous words..\n"; 
-      }
+      		std::cerr << "no jump w.r.t. previous words..\n"; 
+      	}
     		orientations.push_back( ReEvaluateWithNextPhraseInSource(currHypothesis, currSourceWordsRange) );
 			}
 			else{
 				IFVERBOSE(2){
-      	std::cerr << "fallback: jump LEFT_undef\n"; 
-      }
+      		std::cerr << "fallback: jump LEFT_undef\n"; 
+      	}	
 				orientations.push_back(LEFT_undef);
 				orientations.push_back(NONE);
 			}
