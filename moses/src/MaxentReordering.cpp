@@ -79,12 +79,8 @@ std::vector<float> MaxentReordering::CalcScore(Hypothesis* hypothesis) const {
 	OrientationType orientation_curr = orientations[0];
 	OrientationType orientation_next = orientations[1];
 	
-	assert(orientation_curr != orientation_next);
-	assert(orientation_curr <= 5 && (orientation_next == 2 || orientation_next == 3 || orientation_next == 5) );
-	IFVERBOSE(2){
-		std::cerr << "Maxent orientation type (curr): " << orientation_curr << "\n";
-		std::cerr << "Maxent orientation type (next): " << orientation_next << "\n";
-	}
+	assert(orientation_curr == 0 || orientation_curr == 1 || orientation_curr == 4);
+	assert(orientation_next == 2 || orientation_next == 3 || orientation_next == 5);
 	
 	// grab data for current hypothesis
 	const ScoreComponentCollection &reorderingScoreColl_curr = 
@@ -104,17 +100,22 @@ std::vector<float> MaxentReordering::CalcScore(Hypothesis* hypothesis) const {
 		assert(values_next.size() == GetNumOrientationTypes());
 		nextHypoExists = true;
 	}
+	
+	IFVERBOSE(2){
+		std::cerr << "Maxent orientation type (curr, ID = " << hypothesis->GetId() << "): " << orientation_curr << "\n";
+		if(nextHypoExists)
+			std::cerr << "Maxent orientation type (next, ID = " << nextHypo->GetId() << "): " << orientation_next << "\n";
+		else
+			std::cerr << "Maxent orientation type (next, no ID): " << orientation_next << "\n";
+	}
     
   //add score	
 	float value_curr = 0.0, value_next = 0.0;
 	IFVERBOSE(2){
 		std::cerr << "Curr scores: " << values_curr[0] << " " << values_curr[1] << " " << values_curr[2] << " " << values_curr[3] << "\n";
 	}
-	if(orientation_curr < 4){
-  	value_curr = values_curr[orientation_curr];
-	} 
-  else if(orientation_curr == 4){ 
-  	// optimistic guess: use better one of the values for LEFT and LEFT_PLUS
+	if(orientation_curr == 4){	
+		// optimistic guess: use better one of the values for LEFT and LEFT_PLUS
    	if(values_curr[2] >= values_curr[3]){
    		value_curr = values_curr[2];
    		orientation_curr = 2;
@@ -123,23 +124,54 @@ std::vector<float> MaxentReordering::CalcScore(Hypothesis* hypothesis) const {
    		value_curr = values_curr[3];
    		orientation_curr = 3;
    	}
+  	
+	} 
+  else{  
+  	value_curr = values_curr[orientation_curr];
   }  
   IFVERBOSE(2){
   	std::cerr << "Maxent value (curr): " << value_curr << "\n";
 	}
-  if(orientation_curr < 5)
-  	score[orientation_curr] = value_curr;
+	// assign score of current hypothesis
+  score[orientation_curr] = value_curr;
   
   if(nextHypoExists){
   	if(orientation_next != 5){
-	  	value_next = values_next[orientation_next];
+//  		float diff = 0.0; 
+  		// If the actual score is the worse of the LEFT and LEFT_PLUS scores, add difference of scores.
+  		// In this case the optimistic guess has added the better score already.
+  		// Otherwise do nothing, because the optimistic score was correct
+  		
+//  		// TODO: only problem: If the optimistic guess was better than the actual score, it was added 
+//  		// with a different weight because of the different position (e.g. position 2 instead of 3). 
+  		if(orientation_next == 2)
+  			if(values_next[2] < values_next[3]){
+//  				// add difference of score, optimistic guess has added the better score already
+//  				diff = values_next[2] - values_next[3];
+  				// subtract optimistic score values_next[3] and add actual score values_next[2]
+  				score[3] -= values_next[3];
+  				// add score instead of assigning in case the current hypothesis uses the same slot
+	  			score[2] += values_next[2];
+  			}
+  		if(orientation_next == 3)
+  			if(values_next[3] < values_next[2]){
+//  				// add difference of score, optimistic guess has added the better score already
+//  				diff = values_next[3] - values_next[2];
+						// subtract optimistic score values_next[2] and add actual score values_next[3]
+					score[2] -= values_next[2];
+  				// add score instead of assigning in case the current hypothesis uses the same slot
+	  			score[3] += values_next[3];
+  			}
+  				
+//	  	value_next = diff;
+//	  	// add score instead of assigning in case the current hypothesis uses the same slot
+//	  	score[orientation_next] += value_next;
 	  } 
 	  IFVERBOSE(2){
 	  	std::cerr << "Next scores: " << values_next[0] << " " << values_next[1] << " " << values_next[2] << " " << values_next[3] << "\n";
 	  	std::cerr << "Maxent value (next): " << value_next << "\n";
 	  }
-	  if(orientation_next < 5)
-    	score[orientation_next] = value_next;
+    	
   }  
   IFVERBOSE(2){
   	for(int i=0; i< score.size(); i++){
@@ -310,22 +342,15 @@ std::vector< MaxentReordering::OrientationType> MaxentOrientationReordering::Get
     	// CASE 4: Previous source word is not yet translated -> undefined left movement -> LEFT_undef
     	IFVERBOSE(2){
     		std::cerr << "Previous word is not translated yet.. \n";
-    	}    	
-    	// if next word is already translated, use ONLY the probability of this well-defined left jump
-    	// otherwise fallback to LEFT_undef and NONE
+    		std::cerr << "fallback: jump LEFT_undef\n"; 
+    	}	
+			orientations.push_back(LEFT_undef);
+    	
     	if( (currHypothesis->GetWordsBitmap().GetSize() > currSourceWordsRange.GetEndPos()+1) && 
     	      (currHypothesis->GetWordsBitmap().GetValue( currSourceWordsRange.GetEndPos()+1 )) ){
-				orientations.push_back(NONE);
-				IFVERBOSE(2){
-      		std::cerr << "no jump w.r.t. previous words..\n"; 
-      	}
     		orientations.push_back( ReEvaluateWithNextPhraseInSource(currHypothesis, currSourceWordsRange) );
 			}
 			else{
-				IFVERBOSE(2){
-      		std::cerr << "fallback: jump LEFT_undef\n"; 
-      	}	
-				orientations.push_back(LEFT_undef);
 				orientations.push_back(NONE);
 			}
       return orientations;
@@ -336,7 +361,7 @@ std::vector< MaxentReordering::OrientationType> MaxentOrientationReordering::Get
 MaxentReordering::OrientationType MaxentOrientationReordering::ReEvaluateWithNextPhraseInSource(Hypothesis* currHypothesis, const WordsRange currSourceWordsRange) const {
 	// Word to the right of current phrase is already translated, TODO: what to do? 
   IFVERBOSE(2){
-  	std::cerr << "Following word is already translated: backwards evaluation?\n";
+  	std::cerr << "Following word is already translated: backwards evaluation\n";
   }
   const Hypothesis *next = currHypothesis->GetHypoContainingPosition( currSourceWordsRange.GetEndPos()+1 );
   assert( next != NULL);

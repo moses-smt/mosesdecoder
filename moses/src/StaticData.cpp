@@ -603,8 +603,7 @@ bool StaticData::LoadMaxentReorderingModel()
     //spec[1] = name							// lexical reordering
     //spec[2] = num weights       // lexical reordering
     //spec[3] = fileName
-    //spec[4] = condition for maxent (a or b)
-    //spec[5] = number of maxent outcomes
+    //spec[4] = num weights maxent
     
     //decode data into these
     vector<FactorType> input,output;
