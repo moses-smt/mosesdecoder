@@ -99,6 +99,33 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 	iterator &iterExisting = addRet.first;
 	Hypothesis *hypoExisting = *iterExisting;
 	assert(iterExisting != m_hypos.end());
+	 
+	 
+	const WordsRange currSourceWordsRange  = hypo->GetCurrSourceWordsRange();
+	const WordsRange existSourceWordsRange = hypoExisting->GetCurrSourceWordsRange();
+	
+	/**
+	 * 	if the two hypotheses differ in range and one of them follows a gap, do not recombine! May be needed for maxent scoring
+	 */
+	
+	if( StaticData::Instance().UseMaxentReordering()){
+		if( existSourceWordsRange.GetStartPos() != 0 && !(hypoExisting->GetWordsBitmap().GetValue( existSourceWordsRange.GetStartPos()-1)) ){	
+			if(currSourceWordsRange.GetNumWordsCovered() != existSourceWordsRange.GetNumWordsCovered()){
+				IFVERBOSE(2){
+					std::cerr << "Words ranges are different and existing hypo is following a gap --> do not recombine hypotheses..\n";
+				}
+				return true;
+			}
+		} 
+		else if( currSourceWordsRange.GetStartPos() != 0 && !(hypo->GetWordsBitmap().GetValue( currSourceWordsRange.GetStartPos()-1)) ){
+			if(currSourceWordsRange.GetNumWordsCovered() != existSourceWordsRange.GetNumWordsCovered()){
+				IFVERBOSE(2){
+					std::cerr << "Words ranges are different and new hypo is following a gap --> do not recombine hypotheses..\n";
+				}
+				return true;
+			}
+		}
+	}
 
 	StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 	
