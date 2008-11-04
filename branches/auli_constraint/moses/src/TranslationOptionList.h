@@ -29,8 +29,6 @@ protected:
 	TranslationOptionList(const TranslationOptionList &copy);
 	~TranslationOptionList();
 
-	void clear()
-	{ m_coll.clear(); }
 	void resize(size_t newSize)
 	{ m_coll.resize(newSize); }
 	size_t size() const

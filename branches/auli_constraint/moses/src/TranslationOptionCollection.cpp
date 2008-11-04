@@ -43,7 +43,7 @@ bool CompareTranslationOption(const TranslationOption *a, const TranslationOptio
 	return a->GetFutureScore() > b->GetFutureScore();
 }
 
-/** constructor; since translation options are indexed by coverage span, the corresponding data structure is initialized here 
+/** constructor; since translation options are indexed by coverage span, the corresponding data structure is initialized here
 	* This fn should be called by inherited classes
 */
 TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage)
@@ -71,24 +71,11 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& src, s
 /** destructor, clears out data structures */
 TranslationOptionCollection::~TranslationOptionCollection()
 {
-	size_t size = m_source.GetSize();
-	for (size_t startPos = 0 ; startPos < size ; ++startPos)
-	{
-    size_t maxSize = size - startPos;
-    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-    maxSize = std::min(maxSize, maxSizePhrase);
-
-		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
-		{
-		 RemoveAllInColl(GetTranslationOptionList(startPos, endPos));
-		}
-	}
-
 	RemoveAllInColl(m_unksrcs);
 }
 
 void TranslationOptionCollection::Prune()
-{	
+{
 	// prune to max no. of trans opt
 	if (m_maxNoTransOptPerCoverage == 0)
 		return;
@@ -109,12 +96,12 @@ void TranslationOptionCollection::Prune()
 			total += fullList.size();
 			if (fullList.size() <= m_maxNoTransOptPerCoverage)
 				continue;
-			
+
 			// sort in vector
 			nth_element(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
 
 			totalPruned += fullList.size() - m_maxNoTransOptPerCoverage;
-			
+
 			// delete the rest
 			for (size_t i = m_maxNoTransOptPerCoverage ; i < fullList.size() ; ++i)
 			{
@@ -133,7 +120,7 @@ void TranslationOptionCollection::Prune()
 *				2. using the handler ProcessUnknownWord()
 * Call this function once translation option collection has been filled with translation options
 *
-* This function calls for unknown words is complicated by the fact it must handle different input types. 
+* This function calls for unknown words is complicated by the fact it must handle different input types.
 * The call stack is
 *		Base::ProcessUnknownWord()
 *			Inherited::ProcessUnknownWord(position)
@@ -147,7 +134,7 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGr
 {
 	size_t size = m_source.GetSize();
 	// try to translation for coverage with no trans by expanding table limit
-	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
+	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++)
 	{
 	  const DecodeGraph &decodeStepList = *decodeStepVL[startVL];
 		for (size_t pos = 0 ; pos < size ; ++pos)
@@ -161,7 +148,7 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGr
 				}
 		}
 	}
-		
+
 	bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
 	// create unknown words for 1 word coverage where we don't have any trans options
 	for (size_t pos = 0 ; pos < size ; ++pos)
@@ -177,8 +164,8 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGr
 	* This function should be called by the ProcessOneUnknownWord() in the inherited class
 	* At the moment, this unknown word handler is a bit of a hack, if copies over each factor from source
 	* to target word, or uses the 'UNK' factor.
-	* Ideally, this function should be in a class which can be expanded upon, for example, 
-	* to create a morphologically aware handler. 
+	* Ideally, this function should be in a class which can be expanded upon, for example,
+	* to create a morphologically aware handler.
 	*
 	* \param sourceWord the unknown word
 	* \param sourcePos
@@ -196,26 +183,26 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 		const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
 		const string &s = f->GetString();
 		isDigit = s.find_first_of("0123456789");
-		if (isDigit == string::npos) 
+		if (isDigit == string::npos)
 			isDigit = 0;
-		else 
+		else
 			isDigit = 1;
 		// modify the starting bitmap
 	}
 	Phrase* m_unksrc = new Phrase(Input); m_unksrc->AddWord() = sourceWord;
 	m_unksrcs.push_back(m_unksrc);
-	
+
 	TranslationOption *transOpt;
 	if (! StaticData::Instance().GetDropUnknown() || isDigit)
 	{
 		// add to dictionary
 		TargetPhrase targetPhrase(Output);
 		Word &targetWord = targetPhrase.AddWord();
-					
+
 		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
-			
+
 			const Factor *sourceFactor = sourceWord[currFactor];
 			if (sourceFactor == NULL)
 				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
@@ -224,12 +211,12 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 		}
 
 		targetPhrase.SetScore();
-		targetPhrase.SetSourcePhrase(m_unksrc);	
-		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation		
+		targetPhrase.SetSourcePhrase(m_unksrc);
+		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation
 		targetPhrase.CreateAlignmentInfo("(0)","(0)");
-		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);	
+		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);
 	}
-	else 
+	else
 	{ // drop source word. create blank trans opt
 		TargetPhrase targetPhrase(Output);
 		targetPhrase.SetSourcePhrase(m_unksrc);
@@ -268,7 +255,7 @@ void TranslationOptionCollection::CalcFutureScore()
 			TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
 
 			TranslationOptionList::const_iterator iterTransOpt;
-			for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) 
+			for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt)
 			{
 				const TranslationOption &transOpt = **iterTransOpt;
 				float score = transOpt.GetFutureScore();
@@ -303,7 +290,7 @@ void TranslationOptionCollection::CalcFutureScore()
     }
 
 	IFVERBOSE(3)
-	{		
+	{
       int total = 0;
       for(size_t row=0; row<size; row++)
       {
@@ -337,14 +324,14 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param factorCollection input sentence with all factors
  */
 void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeGraph*> &decodeStepVL)
-{	
+{
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
 	// table loaded on initialization), generate TranslationOption objects
 	// for all phrases
 
 	size_t size = m_source.GetSize();
-	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++) 
+	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++)
 	{
 	  const DecodeGraph &decodeStepList = *decodeStepVL[startVL];
 		for (size_t startPos = 0 ; startPos < size; startPos++)
@@ -355,15 +342,15 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 
 			for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++)
 			{
-				CreateTranslationOptionsForRange( decodeStepList, startPos, endPos, true);				
+				CreateTranslationOptionsForRange( decodeStepList, startPos, endPos, true);
  			}
 		}
 	}
 
 	VERBOSE(3,"Translation Option Collection\n " << *this << endl);
-	
+
 	ProcessUnknownWord(decodeStepVL);
-	
+
 	// Prune
 	Prune();
 
@@ -394,12 +381,12 @@ void TranslationOptionCollection::Sort()
 }
 
 
-/** create translation options that exactly cover a specific input span. 
+/** create translation options that exactly cover a specific input span.
  * Called by CreateTranslationOptions() and ProcessUnknownWord()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  * \param startPos first position in input sentence
- * \param lastPos last position in input sentence 
+ * \param lastPos last position in input sentence
  * \param adhereTableLimit whether phrase & generation table limits are adhered to
  */
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
@@ -407,7 +394,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 , size_t startPos
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
-{	
+{
 	if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
 	{
 	  Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
@@ -415,11 +402,11 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		// consult persistent (cross-sentence) cache for stored translation options
 		bool skipTransOptCreation = false
 				, useCache = StaticData::Instance().GetUseTransOptCache();
-		if (useCache) 
+		if (useCache)
 		{
 		  const WordsRange wordsRange(startPos, endPos);
 		  sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
-		  
+
 			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(decodeGraph, *sourcePhrase);
 			// is phrase in cache?
 			if (transOptList != NULL) {
@@ -438,7 +425,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			// partial trans opt stored in here
 			PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
 			size_t totalEarlyPruned = 0;
-			
+
 			// initial translation step
 			list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
 			const DecodeStep &decodeStep = **iterStep;
@@ -446,10 +433,10 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
 																(m_source, *oldPtoc
 																, startPos, endPos, adhereTableLimit );
-			
+
 			// do rest of decode steps
 			int indexStep = 0;
-			for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) 
+			for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep)
 			{
 				const DecodeStep &decodeStep = **iterStep;
 				PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
@@ -471,7 +458,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 				delete oldPtoc;
 				oldPtoc = newPtoc;
 				indexStep++;
-			} // for (++iterStep 
+			} // for (++iterStep
 
 				// add to fully formed translation option list
 			PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
@@ -484,14 +471,14 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 				Add(transOpt);
 			}
 
-			// storing translation options in persistent cache (kept across sentences) 
-			if (useCache) 
+			// storing translation options in persistent cache (kept across sentences)
+			if (useCache)
 			{
 				if (partTransOptList.size() > 0)
 				{
-					TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);	
+					TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
 					StaticData::Instance().AddTransOptListToCache(decodeGraph, *sourcePhrase, transOptList);
-				}				
+				}
 			}
 
 			lastPartialTranslOptColl.DetachAll();
@@ -500,32 +487,32 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			// TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
 		} // if (!skipTransOptCreation)
 
-		if (useCache) 
+		if (useCache)
 			delete sourcePhrase;
 	} // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
-	
-	if ((StaticData::Instance().GetXmlInputType() != XmlPassThrough) && HasXmlOptionsOverlappingRange(startPos,endPos)) 
+
+	if ((StaticData::Instance().GetXmlInputType() != XmlPassThrough) && HasXmlOptionsOverlappingRange(startPos,endPos))
 	{
 		CreateXmlOptionsForRange(startPos, endPos);
-	} 
+	}
 }
 
 	/** Check if this range overlaps with any XML options. This doesn't need to be an exact match, only an overlap.
 	 * by default, we don't support XML options. subclasses need to override this function.
 	 * called by CreateTranslationOptionsForRange()
 	 * \param startPos first position in input sentence
-	 * \param lastPos last position in input sentence 
+	 * \param lastPos last position in input sentence
 	 * \param adhereTableLimit whether phrase & generation table limits are adhered to
 	 */
 	bool TranslationOptionCollection::HasXmlOptionsOverlappingRange(size_t, size_t) const {
 		return false;
-	
+
 	}
-	
+
 	/** Populates the current Collection with XML options exactly covering the range specified. Default implementation does nothing.
 	 * called by CreateTranslationOptionsForRange()
 	 * \param startPos first position in input sentence
-	 * \param lastPos last position in input sentence 
+	 * \param lastPos last position in input sentence
 	 */
 	 void TranslationOptionCollection::CreateXmlOptionsForRange(size_t, size_t) {
 		//not implemented for base class
@@ -557,13 +544,13 @@ inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollec
 		{
 			TranslationOptionList fullList = coll.GetTranslationOptionList(startPos, endPos);
 			size_t sizeFull = fullList.size();
-		  for (size_t i = 0; i < sizeFull; i++) 
+		  for (size_t i = 0; i < sizeFull; i++)
 			{
 			  out << *fullList.Get(i) << std::endl;
 			}
 		}
 	}
- 
+
   //std::vector< std::vector< TranslationOptionList > >::const_iterator i = coll.m_collection.begin();
 	//size_t j = 0;
 	//for (; i!=coll.m_collection.end(); ++i) {
@@ -592,9 +579,9 @@ void TranslationOptionCollection::CacheLexReordering()
 
 			for (size_t endPos = startPos ; endPos < startPos + maxSize; endPos++)
 			{
-				TranslationOptionList &transOptList = GetTranslationOptionList( startPos, endPos);				
+				TranslationOptionList &transOptList = GetTranslationOptionList( startPos, endPos);
 				TranslationOptionList::iterator iterTransOpt;
-				for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) 
+				for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt)
 				{
 					TranslationOption &transOpt = **iterTransOpt;
 					const Phrase *sourcePhrase = transOpt.GetSourcePhrase();
