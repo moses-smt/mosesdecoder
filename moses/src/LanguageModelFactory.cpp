@@ -32,6 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef LM_IRST
 #  include "LanguageModelIRST.h"
 #endif
+#ifdef LM_RAND
+#  include "LanguageModelRandLM.h"
+#endif
 
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
@@ -44,7 +47,7 @@ namespace LanguageModelFactory
 {
 
 	LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
-																		, const std::vector<FactorType> &factorTypes     
+																		, const std::vector<FactorType> &factorTypes
 																		, size_t nGramOrder
 																		, const std::string &languageModelFile
 																		, float weight
@@ -54,6 +57,13 @@ namespace LanguageModelFactory
 	  LanguageModel *lm = NULL;
 	  switch (lmImplementation)
 	  {
+		  case RandLM:
+			#ifdef LM_RAND
+			lm = new LanguageModelRandLM(true,
+						 scoreIndexManager);
+			#endif
+			break;
+
 	  	case SRI:
 				#ifdef LM_SRI
 				  lm = new LanguageModelSRI(true, scoreIndexManager);
@@ -94,7 +104,7 @@ namespace LanguageModelFactory
 			  #endif
 			  break;
 	  }
-	  
+
 	  if (lm == NULL)
 	  {
 	  	UserMessage::Add("Language model type unknown. Probably not compiled into library");
@@ -109,7 +119,7 @@ namespace LanguageModelFactory
 					delete lm;
 					lm = NULL;
 				}
-	  		break;	  	
+	  		break;
 	  	case MultiFactor:
   			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, weight, nGramOrder))
 				{
@@ -119,7 +129,7 @@ namespace LanguageModelFactory
   			break;
 	  	}
 	  }
-	  
+
 	  return lm;
 	}
 }

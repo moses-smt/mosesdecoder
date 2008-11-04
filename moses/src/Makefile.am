@@ -104,6 +104,10 @@ if IRST_LM
 libmoses_a_SOURCES += LanguageModelIRST.cpp
 endif
 
+if RAND_LM
+libmoses_a_SOURCES += LanguageModelRandLM.cpp
+endif
+
 if INTERNAL_LM
 libmoses_a_SOURCES += LanguageModelInternal.cpp \
 		      NGramCollection.cpp \
