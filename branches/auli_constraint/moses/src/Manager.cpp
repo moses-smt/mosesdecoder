@@ -60,12 +60,12 @@ Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
 	staticData.InitializeBeforeSentenceProcessing(source);
 }
 
-Manager::~Manager() 
+Manager::~Manager()
 {
   delete m_transOptColl;
 	delete m_search;
 
-	StaticData::Instance().CleanUpAfterSentenceProcessing();      
+	StaticData::Instance().CleanUpAfterSentenceProcessing();
 
 	clock_t end = clock();
 	float et = (end - m_start);
@@ -85,12 +85,16 @@ void Manager::ProcessSentence()
 	staticData.ResetSentenceStats(m_source);
 	const vector <DecodeGraph*>
 			&decodeStepVL = staticData.GetDecodeStepVL();
-	
+
+	long sentenceID = m_source.GetTranslationId();
+	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
+
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
+//	m_transOptColl->CreateTranslationOptions(decodeStepVL, m_constraint);
 	m_transOptColl->CreateTranslationOptions(decodeStepVL);
 	m_search->ProcessSentence();
 }
@@ -122,7 +126,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 
 	// add all pure paths
 	vector<const Hypothesis*>::const_iterator iterBestHypo;
-	for (iterBestHypo = sortedPureHypo.begin() 
+	for (iterBestHypo = sortedPureHypo.begin()
 			; iterBestHypo != sortedPureHypo.end()
 			; ++iterBestHypo)
 	{
@@ -142,16 +146,16 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 		if(onlyDistinct)
 		{
 			Phrase tgtPhrase = path->GetSurfacePhrase();
-			if (distinctHyps.insert(tgtPhrase).second) 
+			if (distinctHyps.insert(tgtPhrase).second)
         ret.Add(path);
 		}
-		else 
+		else
     {
 		  ret.Add(path);
     }
- 
+
 		// create deviations from current best
-		path->CreateDeviantPaths(contenders);		
+		path->CreateDeviantPaths(contenders);
 
 		if(onlyDistinct)
 		{
@@ -166,7 +170,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 	}
 }
 
-void Manager::CalcDecoderStatistics() const 
+void Manager::CalcDecoderStatistics() const
 {
   const Hypothesis *hypo = GetBestHypothesis();
 	if (hypo != NULL)
@@ -183,7 +187,7 @@ void Manager::CalcDecoderStatistics() const
 				buff2.insert(0,":");
 				buff2.insert(0,(hypo->GetCurrSourceWordsRange()).ToString());
 				buff2.insert(0,"[");
-				
+
 				hypo = hypo->GetPrevHypo();
 				while (hypo != NULL) {
 					//dont print out the empty final hypo
@@ -208,7 +212,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 
 	const Hypothesis *prevHypo = hypo->GetPrevHypo();
 
-			
+
 	outputWordGraphStream << "J=" << linkId++
 		<< "\tS=" << prevHypo->GetId()
 		<< "\tE=" << hypo->GetId()
@@ -221,7 +225,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 	{
 				const PhraseDictionary *phraseTable = *iterPhraseTable;
 				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(phraseTable);
-				
+
 				outputWordGraphStream << scores[0];
 				vector<float>::const_iterator iterScore;
 				for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore)
@@ -238,7 +242,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 			{
 				LanguageModel *lm = *iterLM;
 				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(lm);
-				
+
 				outputWordGraphStream << scores[0];
 				vector<float>::const_iterator iterScore;
 				for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore)
@@ -259,7 +263,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 			{
 				LexicalReordering *lexicalReordering = *iterLexOrdering;
 				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(lexicalReordering);
-				
+
 				outputWordGraphStream << scores[0];
 				vector<float>::const_iterator iterScore;
 				for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore)
@@ -296,7 +300,7 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 		{
 			const Hypothesis *hypo = *iterHypo;
 			OutputWordGraph(outputWordGraphStream, hypo, linkId);
-			
+
 			if (outputNBest)
 			{
 				const ArcList *arcList = hypo->GetArcList();
@@ -311,7 +315,7 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 				}
 			} //if (outputNBest)
 		} //for (iterHypo
-	} // for (iterStack 
+	} // for (iterStack
 }
 
 void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const Hypothesis *hypo, const Hypothesis *recombinationHypo, int forward, double fscore)
@@ -337,7 +341,7 @@ void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream
 
 	if (hypo->GetId() > 0)
 	{
-	  outputSearchGraphStream << " covered=" << hypo->GetCurrSourceWordsRange().GetStartPos() 
+	  outputSearchGraphStream << " covered=" << hypo->GetCurrSourceWordsRange().GetStartPos()
 				  << "-" << hypo->GetCurrSourceWordsRange().GetEndPos()
 				  << " out=" << hypo->GetCurrTargetPhrase();
 	}
@@ -450,7 +454,7 @@ void Manager::SerializeSearchGraphPB(
   {
     const HypothesisStack &stack = **iterStack;
     HypothesisStack::const_iterator iterHypo;
-		
+
     for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
     {
       const Hypothesis *hypo = *iterHypo;
@@ -558,14 +562,14 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
 	      forwardScore[ loserPrevHypo->GetId() ] = fscore;
 	      forward[ loserPrevHypo->GetId() ] = loserHypo->GetId();
 	    }
-	  } // end for arc list  
+	  } // end for arc list
 	} // end if arc list empty
       } // end if hypo connected
     } // end for hypo
   } // end for stack
 
   // *** output all connected hypotheses *** //
-  
+
   connected[ 0 ] = true;
   for (iterStack = hypoStackColl.begin() ; iterStack != hypoStackColl.end() ; ++iterStack)
   {
@@ -577,7 +581,7 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
       if (connected.find( hypo->GetId() ) != connected.end())
       {
 	OutputSearchGraph(translationId, outputSearchGraphStream, hypo, NULL, forward[ hypo->GetId() ], forwardScore[ hypo->GetId() ]);
-	
+
 	const ArcList *arcList = hypo->GetArcList();
 	if (arcList != NULL)
 	{
@@ -590,7 +594,7 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
 	} // end if arcList empty
       } // end if connected
     } // end for iterHypo
-  } // end for iterStack 
+  } // end for iterStack
 }
 
 const Hypothesis *Manager::GetBestHypothesis() const
