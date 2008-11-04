@@ -34,7 +34,7 @@ namespace Moses
 #ifndef BOS_
 #define BOS_ "<s>" //Beginning of sentence symbol
 #endif
-#ifndef EOS_ 
+#ifndef EOS_
 #define EOS_ "</s>" //End of sentence symbol
 #endif
 
@@ -55,7 +55,7 @@ const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_WIDTH				= 0.00001f;
 const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
-///////////////////////////////////////////////// 
+/////////////////////////////////////////////////
 // for those using autoconf/automake
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -72,10 +72,14 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #    define LM_IRST 1
 #  endif
 
-#endif
-///////////////////////////////////////////////// 
+#  ifdef HAVE_RANDLM
+#    define LM_RAND 1
+#  endif
 
-// enums. 
+#endif
+/////////////////////////////////////////////////
+
+// enums.
 // must be 0, 1, 2, ..., unless otherwise stated
 
 // can only be 2 at the moment
@@ -84,7 +88,7 @@ const int NUM_LANGUAGES = 2;
 const size_t MAX_NUM_FACTORS = 4;
 
 enum FactorDirection
-{	
+{
 	Input,			//! Source factors
 	Output			//! Target factors
 };
@@ -114,21 +118,23 @@ namespace DistortionOrientationType
 		{
 			Monotone, //distinguish only between monotone and non-monotone as possible orientations
 			Msd //further separate non-monotone into swapped and discontinuous
-		};	
+		};
 }
 
 enum LMType
-{	
+{
 	SingleFactor
 	,MultiFactor
 };
 enum LMImplementation
-{	
-	SRI				= 0 
-	,IRST			= 1
-	,Skip			= 2
+{
+	SRI			= 0
+	,IRST		= 1
+	,Skip		= 2
 	,Joint		= 3
 	,Internal	= 4
+	,RandLM 	= 5
+
 };
 
 
@@ -148,13 +154,13 @@ enum XmlInputType
 };
 
 enum DictionaryFind
-{	
+{
 	Best		= 0
 	,All		= 1
 };
 
 enum SearchAlgorithm
-{	
+{
 	Normal				= 0
 	,CubePruning	= 1
 	,CubeGrowing	= 2
