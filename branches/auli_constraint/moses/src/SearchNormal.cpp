@@ -341,7 +341,13 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 		//	const HypothesisStackNormal &hypoColl = m_hypoStackColl.back();
 		if (interrupted_flag == 0){
 			const HypothesisStackNormal &hypoColl = *static_cast<HypothesisStackNormal*>(m_hypoStackColl.back());
-			return hypoColl.GetBestHypothesis();
+			const Hypothesis *hypo = hypoColl.GetBestHypothesis();
+			
+			if (m_constraint != NULL && hypo != NULL && m_constraint->GetSize() != hypo->GetSize())
+				return NULL;
+			else
+				return hypo;
+
 		}
 		else{
 			const HypothesisStackNormal &hypoColl = *actual_hypoStack;
