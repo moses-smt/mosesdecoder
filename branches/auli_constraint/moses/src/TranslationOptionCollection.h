@@ -47,7 +47,7 @@ class Word;
  * all lead to the same decoding algorithm: hypotheses are expanded
  * by applying phrase translations, which can be precomputed.
  *
- * The precomputation of a collection of instances of such TranslationOption 
+ * The precomputation of a collection of instances of such TranslationOption
  * depends on the input condition, but they all are presented to
  * decoding algorithm in the same form, using this class.
  *
@@ -67,9 +67,9 @@ protected:
 	SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
 	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase???) */
 	std::vector<Phrase*> m_unksrcs;
-	
+
 	TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage);
-	
+
 	void CalcFutureScore();
 
 	//! Force a creation of a translation option where there are none for a particular source position.
@@ -119,18 +119,18 @@ public:
 
 	//! Create all possible translations from the phrase tables
 	virtual void CreateTranslationOptions(const std::vector <DecodeGraph*> &decodeStepVL);
-	//! Create translation options that exactly cover a specific input span. 
+	//! Create translation options that exactly cover a specific input span.
 	virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
 																			, size_t startPosition
 																			, size_t endPosition
 																			, bool adhereTableLimit);
-																			
+
 	//!Check if this range has XML options
 	virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
-	
+
 	//! Create xml-based translation options for the specific input span
 	virtual void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
-	
+
 
 	//! returns future cost matrix for sentence
 	inline virtual const SquareMatrix &GetFutureScore() const
@@ -144,7 +144,7 @@ public:
 		return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
 	}
 
-	TO_STRING();		
+	TO_STRING();
 };
 
 }

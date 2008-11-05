@@ -86,15 +86,11 @@ void Manager::ProcessSentence()
 	const vector <DecodeGraph*>
 			&decodeStepVL = staticData.GetDecodeStepVL();
 
-	long sentenceID = m_source.GetTranslationId();
-	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
-
 	// create list of all possible translations
 	// this is only valid if:
 	//		1. generation of source sentence is not done 1st
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
-//	m_transOptColl->CreateTranslationOptions(decodeStepVL, m_constraint);
 	m_transOptColl->CreateTranslationOptions(decodeStepVL);
 	m_search->ProcessSentence();
 }
