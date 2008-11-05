@@ -45,6 +45,7 @@ AC_ARG_ENABLE(optimization,
 AM_CONDITIONAL([INTERNAL_LM], false)
 AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
+AM_CONDITIONAL([RAND_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
 
 if test "x$with_protobuf" != 'xno'
@@ -102,7 +103,7 @@ then
     echo $ECHO_N "ELSE -> MY_ARCH=$MY_ARCH\n" >&6
   fi
 
-  MY_ARCH=`uname -m`
+  #MY_ARCH=`uname -m`
   LIB_IRSTLM="-lirstlm"
   LDFLAGS="$LDFLAGS -L${with_irstlm}/lib/${MY_ARCH}"
   LIBS="$LIBS $LIB_IRSTLM"
