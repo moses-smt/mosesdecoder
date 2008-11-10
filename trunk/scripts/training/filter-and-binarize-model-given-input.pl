@@ -53,10 +53,9 @@ if (-d $dir) {
 safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
 
 # get tables to be filtered (and modify config file)
-my (@TABLE,@TABLE_WEIGHTS,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%BINARIZABLE);
+my (@TABLE,@TABLE_WEIGHTS,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%BINARIZABLE,%TABLE_NUMBER);
 open(INI_OUT,">$dir/moses.ini") or die "Can't write $dir/moses.ini";
 open(INI,$config) or die "Can't read $config";
-my $ttable_iterator = 0;
 while(<INI>) {
     print INI_OUT $_;
     if (/ttable-file\]/) {
@@ -73,14 +72,13 @@ while(<INI>) {
 	push @TABLE_WEIGHTS,$weights;
 	$BINARIZABLE{$#TABLE}++;
 
-    	my $new_name = "$dir/phrase-table.$source_factor-$t-$ttable_iterator";
+    	my $new_name = "$dir/phrase-table.$source_factor-$t.".(++$TABLE_NUMBER{"$source_factor-$t"});
     	print INI_OUT "$source_factor $t $weights $new_name\n";
     	push @TABLE_NEW_NAME,$new_name;
 
     	$CONSIDER_FACTORS{$source_factor} = 1;
         print STDERR "Considering factor $source_factor\n";
     	push @TABLE_FACTORS, $source_factor;
-	$ttable_iterator++;
         }
     }
     elsif (/distortion-file/) {
@@ -119,6 +117,7 @@ my %PHRASE_USED;
 open(INPUT,$input) or die "Can't read $input";
 while(my $line = <INPUT>) {
     chomp($line);
+    $line =~ s/<[^>]>//g;
     my @WORD = split(/ +/,$line);
     for(my $i=0;$i<=$#WORD;$i++) {
         for(my $j=0;$j<$MAX_LENGTH && $j+$i<=$#WORD;$j++) {
@@ -177,8 +176,15 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     if ($BINARIZABLE{$i}) {
 	print STDERR "binarizing...";
 	my $cmd = "cat $new_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
-        print STDERR $cmd."\n";
+	print STDERR $cmd."\n";
 	print STDERR `$cmd`;
+    }
+    else {
+	print STDERR "binarizing...";
+        my $lexbin = $binarizer; $lexbin =~ s/PhraseTable/LexicalTable/;
+        my $cmd = "$lexbin -in $new_file -out $new_file";
+        print STDERR $cmd."\n";
+        print STDERR `$cmd`;
     }
 }
 
