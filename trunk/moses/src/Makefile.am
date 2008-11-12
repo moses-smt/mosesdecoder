@@ -28,6 +28,7 @@ libmoses_a_SOURCES = \
 	LVoc.cpp \
 	LanguageModel.cpp \
 	LanguageModelFactory.cpp \
+	LanguageModelInternal.cpp \
 	LanguageModelMultiFactor.cpp \
 	LanguageModelSingleFactor.cpp \
 	LanguageModelSkip.cpp \
@@ -37,6 +38,8 @@ libmoses_a_SOURCES = \
 	LexicalReorderingTable.cpp \
 	Manager.cpp \
 	mempool.cpp \
+	NGramCollection.cpp \
+	NGramNode.cpp \
 	PCNTools.cpp \
 	Parameter.cpp \
 	PartialTranslOptColl.cpp \
