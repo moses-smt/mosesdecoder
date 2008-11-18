@@ -61,7 +61,7 @@ void FeatureData::load(ifstream& inFile)
 
 void FeatureData::load(const std::string &file)
 {
-	TRACE_ERR("loading data from " << file << std::endl);  
+	TRACE_ERR("loading feature data from " << file << std::endl);  
 
 	inputfilestream inFile(file); // matches a stream with a file. Opens the file
 
