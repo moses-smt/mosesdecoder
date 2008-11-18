@@ -32,8 +32,8 @@ void usage(void) {
   cerr<<"[-t\tthe optimizer(default powell)]"<<endl;
   cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
   cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
-  cerr<<"[--scfile|-S] the scorer data file (default score.data)"<<endl;
-  cerr<<"[--ffile|-F] the feature data file (default feature.data)"<<endl;
+  cerr<<"[--scfile|-S] comma separated list of scorer data files (default score.data)"<<endl;
+  cerr<<"[--ffile|-F] comma separated list of feature data files (default feature.data)"<<endl;
 	cerr<<"[--ifile|-i] the starting point data file (default init.opt)"<<endl;
 	cerr<<"[-v] verbose level"<<endl;
   cerr<<"[--help|-h] print this message and exit"<<endl;
@@ -128,13 +128,39 @@ int main (int argc, char **argv) {
   }
 
   opt.close();
+
+  vector<string> ScoreDataFiles;
+  if (scorerfile.length() > 0){
+    std::string substring;
+    while (!scorerfile.empty()){
+      getNextPound(scorerfile, substring, ",");
+      ScoreDataFiles.push_back(substring);
+    }
+  }
+
+  vector<string> FeatureDataFiles;
+  if (featurefile.length() > 0){
+    std::string substring;
+    while (!featurefile.empty()){
+      getNextPound(featurefile, substring, ",");
+      FeatureDataFiles.push_back(substring);
+    }
+  }
+
+  if (ScoreDataFiles.size() != FeatureDataFiles.size()){
+    throw runtime_error("Error: there is a different number of previous score and feature files");
+  }
+
   //it make sense to know what parameter set were used to generate the nbest
   ScorerFactory SF;
   Scorer *TheScorer=SF.getScorer(scorertype,scorerconfig);
 
-  cerr<<"Loading Data from: "<< scorerfile  << " and " << featurefile << endl;
+  //load data
   Data D(*TheScorer);
-  D.load(featurefile, scorerfile);
+  for (size_t i=0;i < ScoreDataFiles.size(); i++){
+    cerr<<"Loading Data from: "<< ScoreDataFiles.at(i)  << " and " << FeatureDataFiles.at(i) << endl;
+    D.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
+  }
 
   Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start,type);
   O->SetScorer(TheScorer);

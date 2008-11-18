@@ -59,8 +59,8 @@ int main(int argc, char** argv) {
     string scorerConfig("");
     string referenceFile("");
     string nbestFile("");
-    string scoreDataFile("");
-    string featureDataFile("");
+    string scoreDataFile("statscore.data");
+    string featureDataFile("features.data");
     string prevScoreDataFile("");
     string prevFeatureDataFile("");
     bool binmode = false;

@@ -32,7 +32,6 @@ void ScoreArray::savebin(std::ofstream& outFile, const std::string& sctype)
 		i->savebin(outFile);
 	
 	outFile << SCORES_BIN_END << std::endl;
-	
 }
 
 void ScoreArray::save(std::ofstream& inFile, const std::string& sctype, bool bin)
