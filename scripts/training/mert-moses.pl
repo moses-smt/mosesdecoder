@@ -38,6 +38,7 @@
 
 use FindBin qw($Bin);
 use File::Basename;
+use File::Spec::Functions;
 my $SCRIPTS_ROOTDIR = $Bin;
 if ($SCRIPTS_ROOTDIR eq '') {
   $SCRIPTS_ROOTDIR = dirname(__FILE__);
@@ -1114,7 +1115,7 @@ sub scan_config {
       if (defined $fn && $fn !~ /^\s+$/) {
 	  print "checking weight-count for $section\n";
         # this is a filename! check it
-	if ($fn !~ /^\//) {
+	if (not file_name_is_absolute $fn) {
 	  $error = 1;
 	  print STDERR "$inishortname:$nr:Filename not absolute: $fn\n";
 	}
