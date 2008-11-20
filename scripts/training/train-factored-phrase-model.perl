@@ -3,6 +3,7 @@
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($Bin);
+use File::Basename;
 
 # Train Factored Phrase Model
 # (c) 2006-2008 Philipp Koehn
@@ -11,6 +12,9 @@ use FindBin qw($Bin);
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
 my $SCRIPTS_ROOTDIR = $Bin;
+if ($SCRIPTS_ROOTDIR eq '') {
+  $SCRIPTS_ROOTDIR = dirname(__FILE__);
+}
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
