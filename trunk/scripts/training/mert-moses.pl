@@ -37,9 +37,17 @@
 # Original version by Philipp Koehn
 
 use FindBin qw($Bin);
+use File::Basename;
 my $SCRIPTS_ROOTDIR = $Bin;
+if ($SCRIPTS_ROOTDIR eq '') {
+  $SCRIPTS_ROOTDIR = dirname(__FILE__);
+}
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
-$SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
+if (defined($ENV{"SCRIPTS_ROOTDIR"})) {
+  $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
+} else {
+  $ENV{"SCRIPTS_ROOTDIR"} = $SCRIPTS_ROOTDIR;
+}
 
 # for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
 # of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
