@@ -267,6 +267,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
 		Scan<int>(m_parameter->GetParam("distortion-limit")[0])
 		: -1;
+	SetBooleanParameter( &m_reorderingConstraint, "monotone-at-punctuation", false );
 	m_useDistortionFutureCosts = (m_parameter->GetParam("use-distortion-future-costs").size() > 0) 
 		? Scan<bool>(m_parameter->GetParam("use-distortion-future-costs")[0]) : false;
 	

@@ -61,6 +61,13 @@ SearchCubePruning::SearchCubePruning(const InputType &source, const TranslationO
 
 		m_hypoStackColl[ind] = sourceHypoColl;
 	}
+
+	// set additional reordering constraints, if specified
+	if (staticData.UseReorderingConstraint())
+	{
+		m_reorderingConstraint = new ReorderingConstraint( m_source.GetSize() );
+		m_reorderingConstraint->SetWall( m_source );
+	}
 }
 
 SearchCubePruning::~SearchCubePruning()
@@ -269,9 +276,21 @@ bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const Wor
 		int required_distortion =
 			m_source.ComputeDistortionDistance(range, bestNextExtension);
 
-		if (required_distortion <= maxDistortion) {
-			return true;
+		if (required_distortion > maxDistortion) {
+			return false;
 		}
+
+		// if reordering walls are used (--monotone-at-punctuation), check here if 
+		// there is a wall between the beginning of the gap and the end
+		// of this new phrase (jumping the wall). 
+		
+		if ( StaticData::Instance().UseReorderingConstraint() ) {
+		  if ( m_reorderingConstraint->ContainsWall( hypoFirstGapPos, endPos ) )
+		    return false;
+		}
+		
+		return true;
+
 	}
 
 	return false;

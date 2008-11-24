@@ -50,6 +50,7 @@ libmoses_a_SOURCES = \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
 	PrefixTreeMap.cpp \
+	ReorderingConstraint.cpp \
 	ScoreComponentCollection.cpp \
 	ScoreIndexManager.cpp \
 	ScoreProducer.cpp \

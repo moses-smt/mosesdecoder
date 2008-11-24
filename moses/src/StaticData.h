@@ -82,6 +82,7 @@ protected:
 									// do it differently from old pharaoh
 									// -ve	= no limit on distortion
 									// 0		= no disortion (monotone in old pharaoh)
+	bool m_reorderingConstraint; // use additional reordering constraints
 	size_t                              
 			m_maxHypoStackSize //hypothesis-stack size that triggers pruning
 			, m_nBestSize
@@ -293,6 +294,10 @@ public:
 	int GetMaxDistortion() const
 	{
 		return m_maxDistortion;
+	}
+	bool UseReorderingConstraint() const
+	{
+		return m_reorderingConstraint;
 	}
 	float GetBeamWidth() const
 	{
