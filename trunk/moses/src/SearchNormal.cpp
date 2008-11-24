@@ -32,6 +32,13 @@ SearchNormal::SearchNormal(const InputType &source, const TranslationOptionColle
 
 		m_hypoStackColl[ind] = sourceHypoColl;
 	}
+
+	// set additional reordering constraints, if specified
+	if (staticData.UseReorderingConstraint())
+	{
+		m_reorderingConstraint = new ReorderingConstraint( m_source.GetSize() );
+		m_reorderingConstraint->SetWall( m_source );
+	}
 }
 
 SearchNormal::~SearchNormal()
@@ -248,18 +255,27 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 				int required_distortion =
 					m_source.ComputeDistortionDistance(extRange, bestNextExtension);
 
-				if (required_distortion <= maxDistortion) {
-					ExpandAllHypotheses(hypothesis
-							,m_transOptColl.GetTranslationOptionList(extRange));
-				}
+				if (required_distortion > maxDistortion) {
 #ifdef DEBUGLATTICE
-				else {
 					if (interest) { 
 						std::cerr << "Distortion violation\n"; 
 						std::cerr << (startPos==INTEREST? "VLOOK-->" : "") << "XP: " << hypothesis << "\next: " << extRange << "\n";
 					}
-				}
 #endif
+					continue;
+				}
+
+				// if reordering walls are used (--monotone-at-punctuation), check here if 
+				// there is a wall between the beginning of the gap and the end
+				// of this new phrase (jumping the wall). 
+				if ( StaticData::Instance().UseReorderingConstraint() ) {
+				  if ( m_reorderingConstraint->ContainsWall( hypoFirstGapPos, endPos ) )
+				    continue;
+				}
+
+				ExpandAllHypotheses(hypothesis
+						    ,m_transOptColl.GetTranslationOptionList(extRange));
+
 			}
 		}
 		}
