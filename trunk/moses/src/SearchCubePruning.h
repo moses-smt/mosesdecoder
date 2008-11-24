@@ -4,7 +4,7 @@
 #include <vector>
 #include "Search.h"
 #include "HypothesisStackCubePruning.h"
-
+#include "ReorderingConstraint.h"
 
 namespace Moses
 {
@@ -20,6 +20,7 @@ protected:
 	// no of elements = no of words in source + 1
 	const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
+	ReorderingConstraint *m_reorderingConstraint; /**< positions in input sentence over which no reordering is allowed */
 
 	//! go thru all bitmaps in 1 stack & create backpointers to bitmaps in the stack
 	void CreateForwardTodos(HypothesisStackCubePruning &stack);
