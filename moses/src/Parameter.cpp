@@ -241,23 +241,19 @@ bool Parameter::Validate()
 		noErrorFlag = false;
 	}
 
-	if (m_setting["lmodel-file"].size() == 0)
+  if (m_setting["lmodel-dub"].size() > 0)
 	{
-		UserMessage::Add("No language model (lmodel-file)");
-		noErrorFlag = false;
-	}
-
-        if (m_setting["lmodel-dub"].size() > 0){
-	        if (m_setting["lmodel-file"].size() != m_setting["lmodel-dub"].size()){
-	                stringstream errorMsg("");
-        	        errorMsg << "Config and parameters specify "
-            			<< static_cast<int>(m_setting["lmodel-file"].size())
-                                << " language model files (lmodel-file), but "
-                                << static_cast<int>(m_setting["lmodel-dub"].size())
-                                                << " LM upperbounds (lmodel-dub)"
-						<< endl;
-                	UserMessage::Add(errorMsg.str());
-                	noErrorFlag = false;
+    if (m_setting["lmodel-file"].size() != m_setting["lmodel-dub"].size())
+		{
+			stringstream errorMsg("");
+			errorMsg << "Config and parameters specify "
+							<< static_cast<int>(m_setting["lmodel-file"].size())
+							<< " language model files (lmodel-file), but "
+							<< static_cast<int>(m_setting["lmodel-dub"].size())
+							<< " LM upperbounds (lmodel-dub)"
+							<< endl;
+  		UserMessage::Add(errorMsg.str());
+  		noErrorFlag = false;
 		}
 	}
 

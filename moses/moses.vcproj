@@ -567,6 +567,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ReorderingConstraint.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ScoreComponentCollection.cpp"
 				>
 			</File>
@@ -894,6 +898,10 @@
 			</File>
 			<File
 				RelativePath=".\src\PrefixTreeMap.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ReorderingConstraint.h"
 				>
 			</File>
 			<File
