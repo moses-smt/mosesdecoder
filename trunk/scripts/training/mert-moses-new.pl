@@ -628,7 +628,7 @@ while(1) {
   $devbleu = undef;
   open(IN,"$mert_logfile") or die "Can't open $mert_logfile";
   while (<IN>) {
-    if (/Best point:\s*([\s\d\.\-]+?)\s*=> ([\d\.]+)/) {
+    if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\d\.]+)/) {
       $bestpoint = $1;
       $devbleu = $2;
       last;
