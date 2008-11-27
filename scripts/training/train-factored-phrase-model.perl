@@ -938,12 +938,25 @@ sub extract_phrase_factored {
 
 sub extract_phrase {
     my ($alignment_file_f,$alignment_file_e,$extract_file) = @_;
-    my $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $___ALIGNMENT_FILE.$___ALIGNMENT $extract_file $___MAX_PHRASE_LENGTH";
+    my $alignment_file_a = $___ALIGNMENT_FILE.".".$___ALIGNMENT;
+    # Make sure the corpus exists in unzipped form
+    my @tempfiles = ();
+    foreach my $f ($alignment_file_e, $alignment_file_f, $alignment_file_a) {
+     if (! -e $f && -e $f.".gz") {
+       safesystem("gunzip < $f.gz > $f") or die("Failed to gunzip corpus $f");
+       push @tempfiles, "$f.gz";
+     }
+    }
+    my $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $___MAX_PHRASE_LENGTH";
     $cmd .= " --NoFileLimit" unless $_FILE_LIMIT;
     $cmd .= " --ProperConditioning" if $_PROPER_CONDITIONING;
     $cmd .= " orientation" if $REORDERING_LEXICAL;
+    map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
     safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
+    foreach my $f (@tempfiles) {
+      unlink $f;
+    }
     if (! $_FILE_LIMIT) {
       if (! $___DONT_ZIP) { 
         safesystem("gzip $extract_file.o") if -e "$extract_file.o";
