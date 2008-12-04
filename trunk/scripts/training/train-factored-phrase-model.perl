@@ -1411,7 +1411,6 @@ sub get_generation {
 
     my (%GENERATION,%GENERATION_TOTAL_SOURCE,%GENERATION_TOTAL_TARGET);
     *E = open_or_zcat($___CORPUS.".".$___E.$___CORPUS_COMPRESSION);
-    open(E,$___CORPUS.".".$___E) or die "ERROR: Can't read ".$___CORPUS.".".$___E;
     while(<E>) {
 	chomp;
 	foreach (split) {
@@ -1675,6 +1674,8 @@ sub safesystem {
 sub open_or_zcat {
   my $fn = shift;
   my $read = $fn;
+  $fn = $fn.".gz" if ! -e $fn && -e $fn.".gz";
+  $fn = $fn.".bz2" if ! -e $fn && -e $fn.".bz2";
   if ($fn =~ /\.bz2$/) {
       $read = "$BZCAT $fn|";
   } elsif ($fn =~ /\.gz$/) {
