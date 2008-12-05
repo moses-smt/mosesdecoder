@@ -22,7 +22,7 @@ using namespace std;
                     exit(1); \
                 } \
               }
-#define LINE_MAX_LENGTH 30000
+#define LINE_MAX_LENGTH 60000
 
 class SentenceAlignment {
  public:
