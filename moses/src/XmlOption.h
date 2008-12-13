@@ -2,7 +2,8 @@
 
 #include <vector>
 #include <string>
-#include "InputType.h"
+#include "WordsRange.h"
+#include "TargetPhrase.h"
 
 namespace Moses
 {
@@ -13,18 +14,15 @@ class TranslationOption;
  */
 struct XmlOption {
 
-	size_t startPos, endPos;
-	std::vector<std::string> targetPhrases;
-	std::vector<float> targetScores;
+	WordsRange range;
+	TargetPhrase targetPhrase;
+	std::vector<XmlOption*> linkedOptions;
 
-	XmlOption(int s, int e, std::string targetPhrase, float targetScore): startPos(s), endPos(e) {
-		targetPhrases.push_back(targetPhrase);
-		targetScores.push_back(targetScore);
-	}
+	XmlOption(const WordsRange &r, const TargetPhrase &tp): range(r), targetPhrase(tp), linkedOptions(0) {}
 
 };
 
-std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const InputType &source);
+bool ProcessAndStripXMLTags(std::string &line,std::vector<std::vector<XmlOption*> > &res);
 
 }
 

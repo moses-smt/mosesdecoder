@@ -26,7 +26,8 @@
 #include <iostream>
 #include "Util.h"
 #include "StaticData.h"
-#include "TranslationOption.h"
+#include "WordsRange.h"
+#include "TargetPhrase.h"
 
 namespace Moses 
 {
@@ -91,29 +92,37 @@ inline std::vector<std::string> TokenizeXml(const std::string& str)
 	return tokens;
 }
 
-
-std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const InputType &source) {
+/*TODO: we'd only have to return a vector of XML options if we dropped linking. 2-d vector
+ is so we can link things up afterwards. We can't create TranslationOptions as we
+ parse because we don't have the completed source parsed until after this function
+ removes all the markup from it (CreateFromString in Sentence::Read).
+ */
+bool ProcessAndStripXMLTags(std::string &line, std::vector<std::vector<XmlOption*> > &res) {
 	//parse XML markup in translation line
-	std::vector<TranslationOption*> res;
+	
+	if (line.find_first_of('<') == std::string::npos) { return true; }
+	
 	std::string rstr;
-	std::string linkedStr;
-	if (line.find_first_of('<') == std::string::npos) { return res; }
 	std::vector<std::string> xmlTokens = TokenizeXml(line);
 	std::string tagName = "";
 	std::string tagContents = "";
 	std::vector<std::string> altTexts;
 	std::vector<std::string> altProbs;
+	std::vector<XmlOption*> linkedOptions;
 	size_t tagStart=0;
 	size_t tagEnd=0;
 	size_t curWord=0;
 	int numUnary = 0;
 	bool doClose = false;
 	bool isLinked = false;
+	const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+	const std::string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
+
 	for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++)
 	{
 		if(!isXmlTag(xmlTokens[xmlTokenPos]))
 		{
-			//phrase, not tag
+			//phrase, not tag. token may contain many words
 			rstr += xmlTokens[xmlTokenPos];
 			curWord = Tokenize(rstr).size();
 		}
@@ -131,27 +140,27 @@ std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const 
 				tagContents = tag.substr(endOfName+1);
 			}
 			if (nextTagName == "linked") {
+				//just set a flag, don't try to process
+				if (tagName != "") {
+					TRACE_ERR("ERROR: tried to start linked XML tag while \""<< tagName <<"\" tag still open: " << line << endl);
+					return false;
+				}
+				if (linkedOptions.size()>0) {
+					TRACE_ERR("ERROR: tried to start second linked XML tag while linked still open: " << line << endl);
+					return false;
+				}
 				isLinked = true;
-				linkedStr = "";
+				isOpen = false;
 			}
 			else if (nextTagName == "/linked") {
 				isLinked = false;
-				// recurse to process linked tags
-				std::vector<TranslationOption*> tOptions = ProcessAndStripXMLTags(linkedStr, source);
-				// link them together
-				std::vector<TranslationOption*>::const_iterator iterTransOpts1;
-				std::vector<TranslationOption*>::const_iterator iterTransOpts2;
-				for (iterTransOpts1 = tOptions.begin(); iterTransOpts1 != tOptions.end(); iterTransOpts1++) {
-					for (iterTransOpts2 = tOptions.begin(); iterTransOpts2 != tOptions.end(); iterTransOpts2++) {
-						if (iterTransOpts1 != iterTransOpts2) {
-							(**iterTransOpts1).AddLinkedTransOpt(*iterTransOpts2);
-						}
-					}
-					res.push_back(*iterTransOpts1);
+				//can't be in an open tag when we stop linking
+				if (tagName != "") {
+					TRACE_ERR("ERROR: tried to close linked XML tag while \""<< tagName <<"\" tag still open: " << line << endl);
+					return false;
 				}
-			}
-			else if (isLinked) {
-				linkedStr += xmlTokens[xmlTokenPos];
+				res.push_back(linkedOptions);
+				linkedOptions.clear();
 			}
 			else if (isOpen)
 			{
@@ -165,18 +174,18 @@ std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const 
 					numUnary++;
 					if (span.empty()) {
 						TRACE_ERR("ERROR: unary tags must have a span attribute: " << line << endl);
-						return res;
+						return false;
 					}
 					std::vector<std::string> ij = Tokenize(span, ",");
 					if (ij.size() != 2) {
 						TRACE_ERR("ERROR: span tag must be of the form \"i,j\": " << line << endl);
-						return res;
+						return false;
 					}
 					tagStart = atoi(ij[0].c_str());
 					tagEnd = atoi(ij[1].c_str());
 					if (tagEnd < tagStart) {
 						TRACE_ERR("ERROR: span tag " << span << " invalid" << endl);
-						return res;
+						return false;
 					}
 					doClose = true;
 					VERBOSE(3,"XML TAG IS UNARY" << endl);
@@ -187,14 +196,14 @@ std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const 
 				VERBOSE(3,"XML TAG STARTS AT WORD: " << tagStart << endl);					
 				if (altTexts.size() != altProbs.size()) {
 					TRACE_ERR("ERROR: Unequal number of probabilities and translation alternatives: " << line << endl);
-					return res;
+					return false;
 				}
 			}
 			else if ((nextTagName.size() == 0) || (nextTagName.at(0) != '/') || (nextTagName.substr(1) != tagName)) 
 			{
 				//mismatched tag, abort!
 				TRACE_ERR("ERROR: tried to parse malformed XML with xml-input enabled: " << line << endl);
-				return res;
+				return false;
 			}
 			else {
 				doClose = true;
@@ -205,10 +214,7 @@ std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const 
 				VERBOSE(3,"XML TAG ENDS AT WORD: " << tagEnd << endl);
 				//store translation options into members
 
-				//TODO: deal with multiple XML options here
-
 				if (StaticData::Instance().GetXmlInputType() != XmlIgnore) {
-					const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 					for (size_t i=0; i<altTexts.size(); ++i) {
 						//only store options if we aren't ignoring them
 						//set default probability
@@ -217,15 +223,23 @@ std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const 
 						//Convert from prob to log-prob
 						float scoreValue = FloorScore(TransformScore(probValue));
 						
-						TargetPhrase targetPhrase(Output);
-						targetPhrase.CreateFromString(outputFactorOrder,altTexts[i],StaticData::Instance().GetFactorDelimiter());
-						targetPhrase.SetScore(scoreValue);
 						WordsRange range(tagStart,tagEnd);
+						TargetPhrase targetPhrase(Output);
+						targetPhrase.CreateFromString(outputFactorOrder,altTexts[i],factorDelimiter);
+						targetPhrase.SetScore(scoreValue);
 						
-						TranslationOption *option = new TranslationOption(range,targetPhrase,source);
+						XmlOption *option = new XmlOption(range,targetPhrase);
 						assert(option);
 						
-						res.push_back(option);
+						if (isLinked) {
+							//puch all linked items as one column in our list of xmloptions
+							linkedOptions.push_back(option);
+						} else {
+							//push one-item list (not linked to anything)
+							std::vector<XmlOption*> optList(0);
+							optList.push_back(option);
+							res.push_back(optList);
+						}
 					}
 				}
 				tagName= "";
@@ -237,7 +251,7 @@ std::vector<TranslationOption*> ProcessAndStripXMLTags(std::string& line, const 
 		}
 	}
 	line = rstr;
-	return res;
+	return true;
 }
 
 }
