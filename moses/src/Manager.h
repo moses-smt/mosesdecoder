@@ -84,10 +84,9 @@ protected:
 	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	Search *m_search;
 	
-	size_t interrupted_flag;
-
 	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
 	clock_t m_start; /**< starting time, used for logging */
+	size_t interrupted_flag;
 	void GetConnectedGraph(
 		std::map< int, bool >* pConnected,
 		std::vector< const Hypothesis* >* pConnectedList) const;

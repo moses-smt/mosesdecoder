@@ -119,8 +119,6 @@ public:
 	Hypothesis* CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const;
 
 	void PrintHypothesis() const;
-	// outdated
-	void PrintHypothesis(  const InputType &source, float weightDistortion, float weightWordPenalty) const;
 
 	/** return target phrase used to create this hypothesis */
 //	const Phrase &GetCurrTargetPhrase() const
@@ -151,6 +149,9 @@ public:
 	void ResetScore();
 
 	void CalcScore(const SquareMatrix &futureScore);
+
+  float CalcExpectedScore( const SquareMatrix &futureScore );
+  void CalcRemainingScore();
 
 	int GetId()const
 	{

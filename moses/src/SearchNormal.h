@@ -23,7 +23,6 @@ protected:
 	TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
 	size_t interrupted_flag;
 	HypothesisStackNormal* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
-	clock_t m_start; /**< starting time, used for logging */
 	const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	ReorderingConstraint *m_reorderingConstraint; /**< positions in input sentence over which no reordering is allowed */
 

@@ -107,6 +107,12 @@ public:
 		return m_bestScore;
 	}
 	
+	/** return worst score allowed for the stack */
+	inline float GetWorstScore() const
+	{
+		return m_worstScore;
+	}
+	
 	void AddHypothesesToBitmapContainers();
 	
 	const _BMType& GetBitmapAccessor() const

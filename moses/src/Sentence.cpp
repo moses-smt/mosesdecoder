@@ -69,7 +69,8 @@ TranslationOptionCollection*
 Sentence::CreateTranslationOptionCollection() const 
 {
 	size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
-	TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage);
+	float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
+	TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage, transOptThreshold);
 	assert(rv);
 	return rv;
 }

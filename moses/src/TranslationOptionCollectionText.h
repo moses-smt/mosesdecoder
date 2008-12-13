@@ -33,7 +33,7 @@ class TranslationOptionCollectionText : public TranslationOptionCollection {
  public:
 	void ProcessUnknownWord(		size_t sourcePos);
 	
-	TranslationOptionCollectionText(Sentence const& inputSentence, size_t maxNoTransOptPerCoverage);
+	TranslationOptionCollectionText(Sentence const& inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 	
 	bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
 	

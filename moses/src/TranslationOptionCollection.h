@@ -65,10 +65,11 @@ protected:
 	std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
 	InputType const			&m_source; /*< reference to the input */
 	SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
-	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span (phrase???) */
+	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
+	const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
 	std::vector<Phrase*> m_unksrcs;
 	
-	TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage);
+	TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 	
 	void CalcFutureScore();
 

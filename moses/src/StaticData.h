@@ -73,6 +73,8 @@ protected:
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float
 		m_beamWidth,
+		m_earlyDiscardingThreshold,
+		m_translationOptionThreshold,
 		m_weightDistortion, 
 		m_weightWordPenalty, 
 		m_wordDeletionWeight,
@@ -85,6 +87,7 @@ protected:
 	bool m_reorderingConstraint; // use additional reordering constraints
 	size_t                              
 			m_maxHypoStackSize //hypothesis-stack size that triggers pruning
+			, m_minHypoStackDiversity // minimum number of hypothesis in stack for each source word coverage
 			, m_nBestSize
 			, m_nBestFactor
 			, m_maxNoTransOptPerCoverage
@@ -116,7 +119,6 @@ protected:
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
-	bool m_useDistortionFutureCosts;
 	bool m_isDetailedTranslationReportingEnabled;
 	bool m_onlyDistinctNBest;
 	bool m_computeLMBackoffStats;
@@ -279,6 +281,10 @@ public:
 	{
 		return m_maxHypoStackSize;
 	}
+	size_t GetMinHypoStackDiversity() const
+	{
+		return m_minHypoStackDiversity;
+	}
 	size_t GetCubePruningPopLimit() const
 	{
 		return m_cubePruningPopLimit;
@@ -302,6 +308,18 @@ public:
 	float GetBeamWidth() const
 	{
 		return m_beamWidth;
+	}
+	float GetEarlyDiscardingThreshold() const
+	{
+		return m_earlyDiscardingThreshold;
+	}
+	bool UseEarlyDiscarding() const 
+	{
+		return m_earlyDiscardingThreshold != -numeric_limits<float>::infinity();
+	}
+	float GetTranslationOptionThreshold() const
+	{
+		return m_translationOptionThreshold;
 	}
 	//! returns the total number of score components across all types, all factors
 	size_t GetTotalScoreComponents() const
@@ -414,7 +432,6 @@ public:
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
 	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 
-	bool UseDistortionFutureCosts() const {return m_useDistortionFutureCosts;}
 	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
 	void UseAlignmentInfo(bool a){ m_UseAlignmentInfo=a; };
 	bool PrintAlignmentInfo() const { return m_PrintAlignmentInfo; }

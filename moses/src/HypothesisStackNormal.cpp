@@ -64,9 +64,14 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
 	          m_worstScore = m_bestScore + m_beamWidth;
 					}
 	
-	    // Prune only if stack is twice as big as needed (lazy pruning)
 		VERBOSE(3,", now size " << m_hypos.size());
-		if (m_hypos.size() > 2*m_maxHypoStackSize-1)
+
+		// prune only if stack is twice as big as needed (lazy pruning)
+		size_t toleratedSize = 2*m_maxHypoStackSize-1;
+		// add in room for stack diversity
+		if (m_minHypoStackDiversity)
+			toleratedSize += m_minHypoStackDiversity << StaticData::Instance().GetMaxDistortion();
+		if (m_hypos.size() > toleratedSize)
 		{
 			PruneToSize(m_maxHypoStackSize);
 		}
@@ -80,10 +85,13 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
 
 bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 { 
-	if (hypo->GetTotalScore() < m_worstScore)
-	{ // really bad score. don't bother adding hypo into collection
-	  StaticData::Instance().GetSentenceStats().AddDiscarded();
-	  VERBOSE(3,"discarded, too bad for stack" << std::endl);
+	// too bad for stack. don't bother adding hypo into collection
+	if (hypo->GetTotalScore() < m_worstScore
+	    && ! ( m_minHypoStackDiversity > 0
+	           && hypo->GetTotalScore() >= GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) )
+	{
+		StaticData::Instance().GetSentenceStats().AddDiscarded();
+		VERBOSE(3,"discarded, too bad for stack" << std::endl);
 		FREEHYPO(hypo);		
 		return false;
 	}
@@ -93,7 +101,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 	if (addRet.second)
 	{ // nothing found. add to collection
 		return true;
-  }
+	}
 
 	// equiv hypo exists, recombine with other hypo
 	iterator &iterExisting = addRet.first;
@@ -137,66 +145,82 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 
 void HypothesisStackNormal::PruneToSize(size_t newSize)
 {
-	if (m_hypos.size() > newSize) // ok, if not over the limit
-	{
-		priority_queue<float> bestScores;
-		
-		// push all scores to a heap
-		// (but never push scores below m_bestScore+m_beamWidth)
-		iterator iter = m_hypos.begin();
-		float score = 0;
-		while (iter != m_hypos.end())
-		{
-			Hypothesis *hypo = *iter;
-			score = hypo->GetTotalScore();
-			if (score > m_bestScore+m_beamWidth) 
-			{
-				bestScores.push(score);
-			}
-			++iter;
-    }
-		
-		// pop the top newSize scores (and ignore them, these are the scores of hyps that will remain)
-		//  ensure to never pop beyond heap size
-		size_t minNewSizeHeapSize = newSize > bestScores.size() ? bestScores.size() : newSize;
-		for (size_t i = 1 ; i < minNewSizeHeapSize ; i++)
-			bestScores.pop();
-				
-		// and remember the threshold
-		float scoreThreshold = bestScores.top();
-		
-		// delete all hypos under score threshold
-		iter = m_hypos.begin();
-		while (iter != m_hypos.end())
-		{
-			Hypothesis *hypo = *iter;
-			float score = hypo->GetTotalScore();
-			if (score < scoreThreshold)
-			{
-				iterator iterRemove = iter++;
-				Remove(iterRemove);
-				StaticData::Instance().GetSentenceStats().AddPruning();
-			}
-			else
-			{
-				++iter;
-			}
-		}
-		VERBOSE(3,", pruned to size " << size() << endl);
-		
-		IFVERBOSE(3) 
-		{
-			TRACE_ERR("stack now contains: ");
-			for(iter = m_hypos.begin(); iter != m_hypos.end(); iter++) 
-			{
-				Hypothesis *hypo = *iter;
-				TRACE_ERR( hypo->GetId() << " (" << hypo->GetTotalScore() << ") ");
-			}
-			TRACE_ERR( endl);
-		}
+	if ( size() <= newSize ) return; // ok, if not over the limit
 
-		// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack
-		m_worstScore = scoreThreshold;
+	// we need to store a temporary list of hypotheses
+	vector< Hypothesis* > hypos = GetSortedListNOTCONST();
+	bool* included = (bool*) malloc(sizeof(bool) * hypos.size());
+	for(size_t i=0; i<hypos.size(); i++) included[i] = false;
+
+	// clear out original set
+	for( iterator iter = m_hypos.begin(); iter != m_hypos.end(); ) 
+	{
+		iterator removeHyp = iter++;
+		Detach(removeHyp);
+	}
+
+	// add best hyps for each coverage according to minStackDiversity
+        if ( m_minHypoStackDiversity > 0 ) 
+	{
+		map< WordsBitmapID, size_t > diversityCount;
+		for(size_t i=0; i<hypos.size(); i++) 
+		{
+			Hypothesis *hyp = hypos[i];
+			WordsBitmapID coverage = hyp->GetWordsBitmap().GetID();;
+			if (diversityCount.find( coverage ) == diversityCount.end()) 
+				diversityCount[ coverage ] = 0;
+
+			if (diversityCount[ coverage ] < m_minHypoStackDiversity) 
+			{
+				m_hypos.insert( hyp );
+				included[i] = true;
+				diversityCount[ coverage ]++;
+				if (diversityCount[ coverage ] == m_minHypoStackDiversity)
+					SetWorstScoreForBitmap( coverage, hyp->GetTotalScore());
+			}
+		}
+	}
+
+	// only add more if stack not full after satisfying minStackDiversity
+	if ( size() < newSize ) {
+
+		// add best remaining hypotheses
+		for(size_t i=0; i<hypos.size() 
+		             && size() < newSize 
+		             && hypos[i]->GetTotalScore() > m_bestScore+m_beamWidth; i++)
+		{
+			if (! included[i]) 
+			{
+				m_hypos.insert( hypos[i] );
+				included[i] = true;
+				if (size() == newSize) 
+					m_worstScore = hypos[i]->GetTotalScore();
+			}
+		}
+	}
+
+	// delete hypotheses that have not been included
+	for(size_t i=0; i<hypos.size(); i++) 
+	{
+		if (! included[i])
+		{
+			FREEHYPO( hypos[i] );
+			StaticData::Instance().GetSentenceStats().AddPruning();
+		}
+	}
+	free(included);
+
+	// some reporting....
+	VERBOSE(3,", pruned to size " << size() << endl);
+	IFVERBOSE(3) 
+	{
+		TRACE_ERR("stack now contains: ");
+		for(iterator iter = m_hypos.begin(); iter != m_hypos.end(); iter++) 
+		{
+			Hypothesis *hypo = *iter;
+			TRACE_ERR( hypo->GetId() << " (" << hypo->GetTotalScore() << ") ");
+		}
+		TRACE_ERR( endl);
 	}
 }
 
@@ -226,6 +250,14 @@ vector<const Hypothesis*> HypothesisStackNormal::GetSortedList() const
 	return ret;
 }
 
+vector<Hypothesis*> HypothesisStackNormal::GetSortedListNOTCONST()
+{
+	vector<Hypothesis*> ret; ret.reserve(m_hypos.size());
+	std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(ret, ret.end()));
+	sort(ret.begin(), ret.end(), CompareHypothesisTotalScore());
+
+	return ret;
+}
 
 void HypothesisStackNormal::CleanupArcList()
 {

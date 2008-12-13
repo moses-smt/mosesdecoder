@@ -70,7 +70,6 @@ StaticData::StaticData()
 ,m_numInputScores(0)
 ,m_distortionScoreProducer(0)
 ,m_wpProducer(0)
-,m_useDistortionFutureCosts(false)
 ,m_isDetailedTranslationReportingEnabled(false) 
 ,m_onlyDistinctNBest(false)
 ,m_computeLMBackoffStats(false)
@@ -261,19 +260,37 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightUnknownWord);
 
-	// misc
-	m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
-				? Scan<size_t>(m_parameter->GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
+  // reordering constraints
 	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
 		Scan<int>(m_parameter->GetParam("distortion-limit")[0])
 		: -1;
 	SetBooleanParameter( &m_reorderingConstraint, "monotone-at-punctuation", false );
-	m_useDistortionFutureCosts = (m_parameter->GetParam("use-distortion-future-costs").size() > 0) 
-		? Scan<bool>(m_parameter->GetParam("use-distortion-future-costs")[0]) : false;
+
+	// settings for pruning
+	m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
+				? Scan<size_t>(m_parameter->GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
+  m_minHypoStackDiversity = 0;
+  if (m_parameter->GetParam("stack-diversity").size() > 0) {
+    if (m_maxDistortion > 15) {
+		  UserMessage::Add("stack diversity > 0 is not allowed for distortion limits larger than 15");
+		  return false;
+    }
+    if (m_inputType == WordLatticeInput) {
+      UserMessage::Add("stack diversity > 0 is not allowed for lattice input");
+      return false;
+    }
+    m_minHypoStackDiversity = Scan<size_t>(m_parameter->GetParam("stack-diversity")[0]);
+  }
 	
 	m_beamWidth = (m_parameter->GetParam("beam-threshold").size() > 0) ?
 		TransformScore(Scan<float>(m_parameter->GetParam("beam-threshold")[0]))
 		: TransformScore(DEFAULT_BEAM_WIDTH);
+  m_earlyDiscardingThreshold = (m_parameter->GetParam("early-discarding-threshold").size() > 0) ?
+    TransformScore(Scan<float>(m_parameter->GetParam("early-discarding-threshold")[0]))
+    : TransformScore(DEFAULT_EARLY_DISCARDING_THRESHOLD);
+  m_translationOptionThreshold = (m_parameter->GetParam("translation-option-threshold").size() > 0) ?
+    TransformScore(Scan<float>(m_parameter->GetParam("translation-option-threshold")[0]))
+    : TransformScore(DEFAULT_TRANSLATION_OPTION_THRESHOLD);
 
 	m_maxNoTransOptPerCoverage = (m_parameter->GetParam("max-trans-opt-per-coverage").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
@@ -717,7 +734,7 @@ bool StaticData::LoadPhraseTables()
 		
 		const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
 		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
-		
+
 		size_t index = 0;
 		size_t weightAllOffset = 0;
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 

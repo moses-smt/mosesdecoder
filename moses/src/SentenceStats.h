@@ -58,6 +58,13 @@ class SentenceStats
 		{
 			m_numHyposPruned = 0;
 			m_numHyposDiscarded = 0;
+			m_numHyposEarlyDiscarded = 0;
+			m_timeCollectOpts = 0;
+			m_timeBuildHyp = 0;
+			m_timeEstimateScore = 0;
+			m_timeCalcLM = 0;
+			m_timeOtherScore = 0;
+			m_timeStack = 0;
 			m_totalSourceWords = source.GetSize();
 			m_recombinationInfos.clear();
 			m_deletedWords.clear();
@@ -73,6 +80,13 @@ class SentenceStats
 		size_t GetNumHyposRecombined() const {return m_recombinationInfos.size();}
 		unsigned int GetNumHyposPruned() const {return m_numHyposPruned;}
 		unsigned int GetNumHyposDiscarded() const {return m_numHyposDiscarded;}
+		unsigned int GetNumHyposEarlyDiscarded() const {return m_numHyposEarlyDiscarded;}
+		float GetTimeCollectOpts() const { return m_timeCollectOpts/(float)CLOCKS_PER_SEC; }
+		float GetTimeBuildHyp() const { return m_timeBuildHyp/(float)CLOCKS_PER_SEC; }
+		float GetTimeCalcLM() const { return m_timeCalcLM/(float)CLOCKS_PER_SEC; }
+		float GetTimeEstimateScore() const { return m_timeEstimateScore/(float)CLOCKS_PER_SEC; }
+		float GetTimeOtherScore() const { return m_timeOtherScore/(float)CLOCKS_PER_SEC; }
+		float GetTimeStack() const { return m_timeStack/(float)CLOCKS_PER_SEC; }
 		size_t GetTotalSourceWords() const {return m_totalSourceWords;}
 		size_t GetNumWordsDeleted() const {return m_deletedWords.size();}
 		size_t GetNumWordsInserted() const {return m_insertedWords.size();}
@@ -85,7 +99,15 @@ class SentenceStats
 													betterHypo.GetTotalScore(), worseHypo.GetTotalScore()));
 		}
 		void AddPruning() {m_numHyposPruned++;}
+		void AddEarlyDiscarded() {m_numHyposEarlyDiscarded++;}
 		void AddDiscarded() {m_numHyposDiscarded++;}
+
+		void AddTimeCollectOpts( clock_t t ) { m_timeCollectOpts += t; }
+		void AddTimeBuildHyp( clock_t t ) { m_timeBuildHyp += t; }
+		void AddTimeCalcLM( clock_t t ) { m_timeCalcLM += t; }
+		void AddTimeEstimateScore( clock_t t ) { m_timeEstimateScore += t; }
+		void AddTimeOtherScore( clock_t t ) { m_timeOtherScore += t; }
+		void AddTimeStack( clock_t t ) { m_timeOtherScore += t; }
 		
 	protected:
 	
@@ -98,6 +120,13 @@ class SentenceStats
 		std::vector<RecombinationInfo> m_recombinationInfos;
 		unsigned int m_numHyposPruned;
 		unsigned int m_numHyposDiscarded;
+		unsigned int m_numHyposEarlyDiscarded;
+		clock_t m_timeCollectOpts;
+		clock_t m_timeBuildHyp;
+		clock_t m_timeEstimateScore;
+		clock_t m_timeCalcLM;
+		clock_t m_timeOtherScore;
+		clock_t m_timeStack;
 	
 		//words
 		size_t m_totalSourceWords;
@@ -107,10 +136,27 @@ class SentenceStats
 
 inline std::ostream& operator<<(std::ostream& os, const SentenceStats& ss)
 {
-  return os << "total hypotheses generated = " << ss.GetTotalHypos() << std::endl
-            << "         number recombined = " << ss.GetNumHyposRecombined() << std::endl
-            << "             number pruned = " << ss.GetNumHyposPruned() << std::endl
-            << "    number discarded early = " << ss.GetNumHyposDiscarded() << std::endl
+  float totalTime = ss.GetTimeCollectOpts() + ss.GetTimeBuildHyp() + ss.GetTimeEstimateScore() + ss.GetTimeCalcLM() + ss.GetTimeOtherScore() + ss.GetTimeStack();
+
+  return os << "total hypotheses considered = " << ss.GetTotalHypos() << std::endl
+            << "     number not fully built = " << ss.GetNumHyposEarlyDiscarded() << std::endl
+            << "           number discarded = " << ss.GetNumHyposDiscarded() << std::endl
+            << "          number recombined = " << ss.GetNumHyposRecombined() << std::endl
+            << "              number pruned = " << ss.GetNumHyposPruned() << std::endl
+
+            << "time to collect opts    " << ss.GetTimeCollectOpts()
+<< " (" << (100 * ss.GetTimeCollectOpts()/totalTime) << "%)" << std::endl
+	    << "        create hyps     " << ss.GetTimeBuildHyp()
+<< " (" << (100 * ss.GetTimeBuildHyp()/totalTime) << "%)" << std::endl
+            << "        estimate score  " << ss.GetTimeEstimateScore()
+<< " (" << (100 * ss.GetTimeEstimateScore()/totalTime) << "%)" << std::endl
+            << "        calc lm         " << ss.GetTimeCalcLM()
+<< " (" << (100 * ss.GetTimeCalcLM()/totalTime) << "%)" << std::endl
+            << "        other hyp score " << ss.GetTimeOtherScore()
+<< " (" << (100 * ss.GetTimeOtherScore()/totalTime) << "%)" << std::endl
+            << "        manage stacks   " << ss.GetTimeStack()
+<< " (" << (100 * ss.GetTimeStack()/totalTime) << "%)" << std::endl
+
             << "total source words = " << ss.GetTotalSourceWords() << std::endl
             << "     words deleted = " << ss.GetNumWordsDeleted() << " (" << Join(" ", ss.GetDeletedWords()) << ")" << std::endl
             << "    words inserted = " << ss.GetNumWordsInserted() << " (" << Join(" ", ss.GetInsertedWords()) << ")" << std::endl;

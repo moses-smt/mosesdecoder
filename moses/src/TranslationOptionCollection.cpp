@@ -46,10 +46,11 @@ bool CompareTranslationOption(const TranslationOption *a, const TranslationOptio
 /** constructor; since translation options are indexed by coverage span, the corresponding data structure is initialized here 
 	* This fn should be called by inherited classes
 */
-TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage)
+TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
 	: m_source(src)
 	,m_futureScore(src.GetSize())
 	,m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
+	,m_translationOptionThreshold(translationOptionThreshold)
 {
 	// create 2-d vector
 	size_t size = src.GetSize();
@@ -76,13 +77,15 @@ TranslationOptionCollection::~TranslationOptionCollection()
 
 void TranslationOptionCollection::Prune()
 {	
-	// prune to max no. of trans opt
-	if (m_maxNoTransOptPerCoverage == 0)
+	// quit, if max size, threshold
+	if (m_maxNoTransOptPerCoverage == 0 && m_translationOptionThreshold == -std::numeric_limits<float>::infinity())
 		return;
 
+	// bookkeeping for how many options used, pruned
 	size_t total = 0;
 	size_t totalPruned = 0;
 
+  // loop through all spans
 	size_t size = m_source.GetSize();
 	for (size_t startPos = 0 ; startPos < size; ++startPos)
 	{
@@ -92,24 +95,58 @@ void TranslationOptionCollection::Prune()
 
 		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
+      // consider list for a span
 			TranslationOptionList &fullList = GetTranslationOptionList(startPos, endPos);
 			total += fullList.size();
-			if (fullList.size() <= m_maxNoTransOptPerCoverage)
-				continue;
-			
-			// sort in vector
-			nth_element(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
 
-			totalPruned += fullList.size() - m_maxNoTransOptPerCoverage;
-			
-			// delete the rest
-			for (size_t i = m_maxNoTransOptPerCoverage ; i < fullList.size() ; ++i)
+			// size pruning
+			if (m_maxNoTransOptPerCoverage > 0 && 
+			    fullList.size() > m_maxNoTransOptPerCoverage)
 			{
-				delete fullList.Get(i);
-			}
-			fullList.resize(m_maxNoTransOptPerCoverage);
+			  // sort in vector
+			  nth_element(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
+			  totalPruned += fullList.size() - m_maxNoTransOptPerCoverage;
+			
+			  // delete the rest
+			  for (size_t i = m_maxNoTransOptPerCoverage ; i < fullList.size() ; ++i)
+			  {
+				  delete fullList.Get(i);
+			  }
+			  fullList.resize(m_maxNoTransOptPerCoverage);
+      }
+
+			// threshold pruning
+			if (fullList.size() > 1 && m_translationOptionThreshold != -std::numeric_limits<float>::infinity())
+			{
+				// first, find the best score
+				float bestScore = -std::numeric_limits<float>::infinity();
+				for (size_t i=0; i < fullList.size() ; ++i)
+				{
+					if (fullList.Get(i)->GetFutureScore() > bestScore)
+						bestScore = fullList.Get(i)->GetFutureScore();
+				}
+				//std::cerr << "best score for span " << startPos << "-" << endPos << " is " << bestScore << "\n";
+				// then, remove items that are worse than best score + threshold
+				for (size_t i=0; i < fullList.size() ; ++i)
+				{
+					if (fullList.Get(i)->GetFutureScore() < bestScore + m_translationOptionThreshold)
+					{
+						//std::cerr << "\tremoving item " << i << ", score " << fullList.Get(i)->GetFutureScore() << ": " << fullList.Get(i)->GetTargetPhrase() << "\n";
+						delete fullList.Get(i);
+						fullList.Remove(i);
+						total--;
+						totalPruned++;
+						i--;
+					}
+					//else
+					//{
+					//	std::cerr << "\tkeeping item " << i << ", score " << fullList.Get(i)->GetFutureScore() << ": " << fullList.Get(i)->GetTargetPhrase() << "\n";
+					//}
+				}
+			} // end of threshold pruning
 		}
-	}
+	} // end of loop through all spans
+
 	VERBOSE(2,"       Total translation options: " << total << std::endl
 		<< "Total translation options pruned: " << totalPruned << std::endl);
 }
