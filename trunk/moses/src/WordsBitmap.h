@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
+typedef unsigned long WordsBitmapID;
 
 /** vector of boolean used to represent whether a word has been translated or not
 */
@@ -193,7 +194,26 @@ public:
 	//! TODO - ??? no idea
 	int GetFutureCosts(int lastPos) const ;
 
-	TO_STRING();
+        //! converts bitmap into an integer ID: it consists of two parts: the first 16 bit are the pattern between the first gap and the last word-1, the second 16 bit are the number of filled positions. enforces a sentence length limit of 65535 and a max distortion of 16
+        WordsBitmapID GetID() const {
+                std::cerr << "GetID()\n";
+                assert(m_size < (1<<16));
+
+                size_t start = GetFirstGapPos();
+                if (start == NOT_FOUND) start = m_size; // nothing left
+
+                size_t end = GetLastPos();
+                if (end == NOT_FOUND) end = 0; // nothing translated yet
+
+                assert(end < start || end-start <= 16);
+                WordsBitmapID id = 0;
+                for(size_t pos = end; pos > start; pos--) {
+                        id = id*2 + (int) GetValue(pos);
+                }
+                return id + (1<<16) * start;
+        }
+
+        TO_STRING();
 };
 
 // friend 

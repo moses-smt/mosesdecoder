@@ -261,6 +261,7 @@ int Hypothesis::NGramCompare(const Hypothesis &compare) const
  */
 void Hypothesis::CalcLMScore(const LMList &languageModels)
 {
+  clock_t t = clock(); // track time
 	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
 	LMList::const_iterator iterLM;
 
@@ -272,7 +273,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 	size_t lmIdx = 0;
 
 	// already have LM scores from previous and trigram score of poss trans.
-	// just need trigram score of the words of the start of current phrase	
+	// just need n-gram score of the words of the start of current phrase	
 	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM,++lmIdx)
 	{
 		const LanguageModel &languageModel = **iterLM;
@@ -352,6 +353,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 		
 		m_scoreBreakdown.PlusEquals(&languageModel, lmScore);
 	}
+  StaticData::Instance().GetSentenceStats().AddTimeCalcLM( clock()-t );
 }
 
 void Hypothesis::CalcDistortionScore()
@@ -379,12 +381,14 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 {
 	const StaticData &staticData = StaticData::Instance();
 
-	// DISTORTION COST
-	CalcDistortionScore();
-	
 	// LANGUAGE MODEL COST
 	CalcLMScore(staticData.GetAllLM());
 
+  clock_t t = clock(); // track time excluding LM
+
+	// DISTORTION COST
+	CalcDistortionScore();
+	
 	// WORD PENALTY
 	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
 
@@ -401,6 +405,8 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+
+  StaticData::Instance().GetSentenceStats().AddTimeOtherScore( clock()-t );
 }
 
 void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
@@ -426,9 +432,58 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
 //		m_score[ScoreType::FutureScoreEnum] += futureScore[start][m_sourceCompleted.GetSize() - 1];
 		m_futureScore += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
 	}
+}
 
-	// you can't get future costs for distortion model anymore, because it is preloaded (see CalculateDistortionScore)
-	assert(!StaticData::Instance().UseDistortionFutureCosts());
+/** Calculates the expected score of extending this hypothesis with the
+ * specified translation option. Includes actual costs for everything 
+ * except for expensive actual language model score.
+ * This function is used by early discarding.
+ * /param transOpt - translation option being considered
+ */
+float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
+	const StaticData &staticData = StaticData::Instance();
+
+  clock_t t = clock(); // track time excluding LM
+
+	// DISTORTION COST
+	CalcDistortionScore();
+	
+	// LANGUAGE MODEL ESTIMATE (includes word penalty cost)
+  float estimatedLMScore = m_transOpt->GetFutureScore() - m_transOpt->GetScoreBreakdown().InnerProduct(staticData.GetAllWeights());
+
+	// FUTURE COST
+	CalcFutureScore(futureScore);
+
+	//LEXICAL REORDERING COST
+	const std::vector<LexicalReordering*> &reorderModels = staticData.GetReorderModels();
+	for(unsigned int i = 0; i < reorderModels.size(); i++)
+	{
+		m_scoreBreakdown.PlusEquals(reorderModels[i], reorderModels[i]->CalcScore(this));
+	}
+
+	// TOTAL
+  float total = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore + estimatedLMScore;
+
+  StaticData::Instance().GetSentenceStats().AddTimeEstimateScore( clock()-t );
+  return total;
+}
+
+void Hypothesis::CalcRemainingScore() 
+{
+	const StaticData &staticData = StaticData::Instance();
+
+	// LANGUAGE MODEL COST
+	CalcLMScore(staticData.GetAllLM());
+
+  clock_t t = clock(); // track time excluding LM
+
+	// WORD PENALTY
+	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
+
+	// TOTAL
+	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+
+  StaticData::Instance().GetSentenceStats().AddTimeOtherScore( clock()-t );
 }
 
 const Hypothesis* Hypothesis::GetPrevHypo()const{
@@ -438,13 +493,6 @@ const Hypothesis* Hypothesis::GetPrevHypo()const{
 /**
  * print hypothesis information for pharaoh-style logging
  */
-
-// outdated, see below
-void Hypothesis::PrintHypothesis(const InputType &source, float /*weightDistortion*/, float /*weightWordPenalty*/) const
-{
-      PrintHypothesis();
-}
-
 void Hypothesis::PrintHypothesis() const
 {
   if (!m_prevHypo) { TRACE_ERR(endl << "NULL hypo" << endl); return; }

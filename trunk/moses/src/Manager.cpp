@@ -80,18 +80,25 @@ Manager::~Manager()
  */
 void Manager::ProcessSentence()
 {
-	//VERBOSE(2,"m_source:" << m_source <<"\n");
+	// reset statistics
 	const StaticData &staticData = StaticData::Instance();
 	staticData.ResetSentenceStats(m_source);
+
+  // collect translation options for this sentence
 	const vector <DecodeGraph*>
 			&decodeStepVL = staticData.GetDecodeStepVL();
-
-	// create list of all possible translations
-	// this is only valid if:
-	//		1. generation of source sentence is not done 1st
-	//		2. initial hypothesis factors are given in the sentence
 	m_transOptColl->CreateTranslationOptions(decodeStepVL);
+
+  // some reporting on how long this took
+  clock_t gotOptions = clock();
+  float et = (gotOptions - m_start);
+  staticData.GetSentenceStats().AddTimeCollectOpts( gotOptions - m_start );
+  et /= (float)CLOCKS_PER_SEC;
+  VERBOSE(1, "Collecting options took " << et << " seconds" << endl);
+
+	// search for best translation with the specified algorithm
 	m_search->ProcessSentence();
+	VERBOSE(1, "Search took " << ((clock()-m_start)/(float)CLOCKS_PER_SEC) << " seconds" << endl);
 }
 
 /**

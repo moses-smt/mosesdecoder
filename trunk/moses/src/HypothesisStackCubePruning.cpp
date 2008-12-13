@@ -84,7 +84,7 @@ pair<HypothesisStackCubePruning::iterator, bool> HypothesisStackCubePruning::Add
 bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 { 
 	if (hypo->GetTotalScore() < m_worstScore)
-	{ // really bad score. don't bother adding hypo into collection
+	{ // too bad for stack. don't bother adding hypo into collection
 	  StaticData::Instance().GetSentenceStats().AddDiscarded();
 	  VERBOSE(3,"discarded, too bad for stack" << std::endl);
 		FREEHYPO(hypo);		

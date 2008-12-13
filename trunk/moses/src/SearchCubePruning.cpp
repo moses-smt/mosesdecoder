@@ -82,7 +82,6 @@ SearchCubePruning::~SearchCubePruning()
 void SearchCubePruning::ProcessSentence()
 {	
 	const StaticData &staticData = StaticData::Instance();
-	staticData.ResetSentenceStats(m_source);
 
 	// initial seed hypothesis: nothing translated, no words produced
 	Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
@@ -104,7 +103,7 @@ void SearchCubePruning::ProcessSentence()
 	std::vector < HypothesisStack* >::iterator iterStack;
 	for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
-		//checked if elapsed time ran out of time with respect 
+		// check if decoding ran out of time
 		double _elapsed_time = GetUserTime();
 		if (_elapsed_time > staticData.GetTimeoutThreshold()){
 	  	VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);

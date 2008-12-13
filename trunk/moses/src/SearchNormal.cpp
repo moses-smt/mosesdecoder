@@ -20,14 +20,16 @@ SearchNormal::SearchNormal(const InputType &source, const TranslationOptionColle
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
 
+	// only if constraint decoding (having to match a specified output)
 	long sentenceID = source.GetTranslationId();
 	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
 
+	// initialize the stacks: create data structure and set limits
 	std::vector < HypothesisStackNormal >::iterator iterStack;
 	for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind)
 	{
 		HypothesisStackNormal *sourceHypoColl = new HypothesisStackNormal();
-		sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
+		sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),staticData.GetMinHypoStackDiversity());
 		sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
 
 		m_hypoStackColl[ind] = sourceHypoColl;
@@ -53,9 +55,6 @@ SearchNormal::~SearchNormal()
 void SearchNormal::ProcessSentence()
 {	
 	const StaticData &staticData = StaticData::Instance();
-	staticData.ResetSentenceStats(m_source);
-	const vector <DecodeGraph*>
-		&decodeStepVL = staticData.GetDecodeStepVL();
 
 	// initial seed hypothesis: nothing translated, no words produced
 	Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
@@ -66,7 +65,7 @@ void SearchNormal::ProcessSentence()
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
 
-		//checked if elapsed time ran out of time with respect 
+		// check if decoding ran out of time 
 		double _elapsed_time = GetUserTime();
 		if (_elapsed_time > staticData.GetTimeoutThreshold()){
 			VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
@@ -78,9 +77,12 @@ void SearchNormal::ProcessSentence()
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
 		// VERBOSE("processing next stack at ");
+		float t = clock();
 		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
+		StaticData::Instance().GetSentenceStats().AddTimeStack( clock()-t );
+
 		// go through each hypothesis on the stack and try to expand it
 		HypothesisStackNormal::const_iterator iterHypo;
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
@@ -91,7 +93,7 @@ void SearchNormal::ProcessSentence()
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
 
-		//This stack is fully expanded;
+		// this stack is fully expanded;
 		actual_hypoStack = &sourceHypoColl;
 	}
 
@@ -306,11 +308,14 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	 */
 	void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 	{
+
 		// create hypothesis and calculate all its scores
 #ifdef DEBUGLATTICE
 		if (debug2) { std::cerr << "::EXT: " << transOpt << "\n"; }
 #endif
+		float t = clock();
 		Hypothesis *newHypo = hypothesis.CreateNext(transOpt, m_constraint); // TODO FIXME This is absolutely broken - don't pass null here
+		StaticData::Instance().GetSentenceStats().AddTimeBuildHyp( clock()-t );
 
 		if (newHypo==NULL) return;
 
@@ -328,19 +333,35 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 				newHypo = newHypo->CreateNext(**iterLinked, m_constraint); // TODO FIXME This is absolutely broken - don't pass null here
 			}
 		}
-		newHypo->CalcScore(m_transOptColl.GetFutureScore());
+
+		// early discarding: check if hypothesis is too bad to build
+		if (StaticData::Instance().UseEarlyDiscarding()) {
+			float expectedScore = newHypo->CalcExpectedScore( m_transOptColl.GetFutureScore() );
+			size_t wordsTranslated = hypothesis.GetWordsBitmap().GetNumWordsCovered() + transOpt.GetSize();
+			float allowedScore = m_hypoStackColl[wordsTranslated]->GetWorstScore() + StaticData::Instance().GetEarlyDiscardingThreshold();
+			if (expectedScore < allowedScore)
+			{
+				StaticData::Instance().GetSentenceStats().AddEarlyDiscarded();
+				FREEHYPO( newHypo );
+				return;
+			}
+			newHypo->CalcRemainingScore();
+		}
+		else {
+			// finalize build: compute scores
+			newHypo->CalcScore(m_transOptColl.GetFutureScore());
+		}
 
 		// logging for the curious
 		IFVERBOSE(3) {
-			const StaticData &staticData = StaticData::Instance();
-			newHypo->PrintHypothesis(m_source
-					, staticData.GetWeightDistortion()
-					, staticData.GetWeightWordPenalty());
+			newHypo->PrintHypothesis();
 		}
 
 		// add to hypothesis stack
 		size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
+		t = clock();
 		m_hypoStackColl[wordsTranslated]->AddPrune(newHypo);
+		StaticData::Instance().GetSentenceStats().AddTimeStack( clock()-t );
 	}
 
 	const std::vector < HypothesisStack* >& SearchNormal::GetHypothesisStacks() const

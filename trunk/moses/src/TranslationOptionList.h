@@ -39,6 +39,11 @@ protected:
 		assert(ind < m_coll.size());
 		return m_coll[ind];
 	}
+	void Remove( size_t ind )
+	{
+		assert(ind < m_coll.size());
+		m_coll.erase( m_coll.begin()+ind );
+	}
 	void Add(TranslationOption *transOpt)
 	{
 		m_coll.push_back(transOpt);
