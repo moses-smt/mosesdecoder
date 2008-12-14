@@ -92,7 +92,7 @@ void Manager::ProcessSentence()
   // some reporting on how long this took
   clock_t gotOptions = clock();
   float et = (gotOptions - m_start);
-  staticData.GetSentenceStats().AddTimeCollectOpts( gotOptions - m_start );
+  IFVERBOSE(2) { staticData.GetSentenceStats().AddTimeCollectOpts( gotOptions - m_start ); }
   et /= (float)CLOCKS_PER_SEC;
   VERBOSE(1, "Collecting options took " << et << " seconds" << endl);
 

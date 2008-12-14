@@ -45,6 +45,7 @@ SearchCubePruning::SearchCubePruning(const InputType &source, const TranslationO
 :m_source(source)
 ,m_hypoStackColl(source.GetSize() + 1)
 ,m_initialTargetPhrase(Output)
+,m_start(clock())
 ,m_transOptColl(transOptColl)
 {
 	const StaticData &staticData = StaticData::Instance();
@@ -159,7 +160,8 @@ void SearchCubePruning::ProcessSentence()
 	PrintBitmapContainerGraph();
 
 	// some more logging
-	VERBOSE(2, staticData.GetSentenceStats());
+	IFVERBOSE(2) { staticData.GetSentenceStats().SetTimeTotal( clock()-m_start ); }
+	VERBOSE(2, staticData.GetSentenceStats()); 
 }
 
 void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)

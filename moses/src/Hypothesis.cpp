@@ -261,9 +261,10 @@ int Hypothesis::NGramCompare(const Hypothesis &compare) const
  */
 void Hypothesis::CalcLMScore(const LMList &languageModels)
 {
-  clock_t t = clock(); // track time
-	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
 	LMList::const_iterator iterLM;
+	clock_t t=0;
+	IFVERBOSE(2) { t  = clock(); } // track time
+	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
 
 	// will be null if LM stats collection is disabled
 	if (StaticData::Instance().IsComputeLMBackoffStats()) {
@@ -353,7 +354,7 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 		
 		m_scoreBreakdown.PlusEquals(&languageModel, lmScore);
 	}
-  StaticData::Instance().GetSentenceStats().AddTimeCalcLM( clock()-t );
+	IFVERBOSE(2) { StaticData::Instance().GetSentenceStats().AddTimeCalcLM( clock()-t ); }
 }
 
 void Hypothesis::CalcDistortionScore()
@@ -380,11 +381,12 @@ void Hypothesis::ResetScore()
 void Hypothesis::CalcScore(const SquareMatrix &futureScore) 
 {
 	const StaticData &staticData = StaticData::Instance();
+	clock_t t=0; // used to track time
 
 	// LANGUAGE MODEL COST
 	CalcLMScore(staticData.GetAllLM());
 
-  clock_t t = clock(); // track time excluding LM
+	IFVERBOSE(2) { t = clock(); } // track time excluding LM
 
 	// DISTORTION COST
 	CalcDistortionScore();
@@ -406,7 +408,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
 
-  StaticData::Instance().GetSentenceStats().AddTimeOtherScore( clock()-t );
+	IFVERBOSE(2) { staticData.GetSentenceStats().AddTimeOtherScore( clock()-t ); }
 }
 
 void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
@@ -442,8 +444,8 @@ void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
  */
 float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
 	const StaticData &staticData = StaticData::Instance();
-
-  clock_t t = clock(); // track time excluding LM
+	clock_t t=0;
+	IFVERBOSE(2) { t = clock(); } // track time excluding LM
 
 	// DISTORTION COST
 	CalcDistortionScore();
@@ -464,18 +466,19 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
 	// TOTAL
   float total = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore + estimatedLMScore;
 
-  StaticData::Instance().GetSentenceStats().AddTimeEstimateScore( clock()-t );
+	IFVERBOSE(2) { staticData.GetSentenceStats().AddTimeEstimateScore( clock()-t ); }
   return total;
 }
 
 void Hypothesis::CalcRemainingScore() 
 {
 	const StaticData &staticData = StaticData::Instance();
+	clock_t t=0; // used to track time
 
 	// LANGUAGE MODEL COST
 	CalcLMScore(staticData.GetAllLM());
 
-  clock_t t = clock(); // track time excluding LM
+	IFVERBOSE(2) { t = clock(); } // track time excluding LM
 
 	// WORD PENALTY
 	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
@@ -483,7 +486,7 @@ void Hypothesis::CalcRemainingScore()
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
 
-  StaticData::Instance().GetSentenceStats().AddTimeOtherScore( clock()-t );
+	IFVERBOSE(2) { StaticData::Instance().GetSentenceStats().AddTimeOtherScore( clock()-t ); }
 }
 
 const Hypothesis* Hypothesis::GetPrevHypo()const{
