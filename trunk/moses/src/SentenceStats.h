@@ -59,6 +59,7 @@ class SentenceStats
 			m_numHyposPruned = 0;
 			m_numHyposDiscarded = 0;
 			m_numHyposEarlyDiscarded = 0;
+			m_numHyposNotBuilt = 0;
 			m_timeCollectOpts = 0;
 			m_timeBuildHyp = 0;
 			m_timeEstimateScore = 0;
@@ -76,17 +77,19 @@ class SentenceStats
 		 */
 		void CalcFinalStats(const Hypothesis& bestHypo);
 		
-		unsigned int GetTotalHypos() const {return Hypothesis::GetHypothesesCreated();}
+		unsigned int GetTotalHypos() const {return Hypothesis::GetHypothesesCreated() + m_numHyposNotBuilt; }
 		size_t GetNumHyposRecombined() const {return m_recombinationInfos.size();}
 		unsigned int GetNumHyposPruned() const {return m_numHyposPruned;}
 		unsigned int GetNumHyposDiscarded() const {return m_numHyposDiscarded;}
 		unsigned int GetNumHyposEarlyDiscarded() const {return m_numHyposEarlyDiscarded;}
+		unsigned int GetNumHyposNotBuilt() const {return m_numHyposNotBuilt;}
 		float GetTimeCollectOpts() const { return m_timeCollectOpts/(float)CLOCKS_PER_SEC; }
 		float GetTimeBuildHyp() const { return m_timeBuildHyp/(float)CLOCKS_PER_SEC; }
 		float GetTimeCalcLM() const { return m_timeCalcLM/(float)CLOCKS_PER_SEC; }
 		float GetTimeEstimateScore() const { return m_timeEstimateScore/(float)CLOCKS_PER_SEC; }
 		float GetTimeOtherScore() const { return m_timeOtherScore/(float)CLOCKS_PER_SEC; }
 		float GetTimeStack() const { return m_timeStack/(float)CLOCKS_PER_SEC; }
+		float GetTimeTotal() const { return m_timeTotal/(float)CLOCKS_PER_SEC; }
 		size_t GetTotalSourceWords() const {return m_totalSourceWords;}
 		size_t GetNumWordsDeleted() const {return m_deletedWords.size();}
 		size_t GetNumWordsInserted() const {return m_insertedWords.size();}
@@ -100,6 +103,7 @@ class SentenceStats
 		}
 		void AddPruning() {m_numHyposPruned++;}
 		void AddEarlyDiscarded() {m_numHyposEarlyDiscarded++;}
+		void AddNotBuilt() {m_numHyposNotBuilt++;}
 		void AddDiscarded() {m_numHyposDiscarded++;}
 
 		void AddTimeCollectOpts( clock_t t ) { m_timeCollectOpts += t; }
@@ -107,7 +111,8 @@ class SentenceStats
 		void AddTimeCalcLM( clock_t t ) { m_timeCalcLM += t; }
 		void AddTimeEstimateScore( clock_t t ) { m_timeEstimateScore += t; }
 		void AddTimeOtherScore( clock_t t ) { m_timeOtherScore += t; }
-		void AddTimeStack( clock_t t ) { m_timeOtherScore += t; }
+		void AddTimeStack( clock_t t ) { m_timeStack += t; }
+		void SetTimeTotal( clock_t t ) { m_timeTotal = t; }
 		
 	protected:
 	
@@ -121,12 +126,14 @@ class SentenceStats
 		unsigned int m_numHyposPruned;
 		unsigned int m_numHyposDiscarded;
 		unsigned int m_numHyposEarlyDiscarded;
+		unsigned int m_numHyposNotBuilt;
 		clock_t m_timeCollectOpts;
 		clock_t m_timeBuildHyp;
 		clock_t m_timeEstimateScore;
 		clock_t m_timeCalcLM;
 		clock_t m_timeOtherScore;
 		clock_t m_timeStack;
+		clock_t m_timeTotal;
 	
 		//words
 		size_t m_totalSourceWords;
@@ -136,26 +143,23 @@ class SentenceStats
 
 inline std::ostream& operator<<(std::ostream& os, const SentenceStats& ss)
 {
-  float totalTime = ss.GetTimeCollectOpts() + ss.GetTimeBuildHyp() + ss.GetTimeEstimateScore() + ss.GetTimeCalcLM() + ss.GetTimeOtherScore() + ss.GetTimeStack();
+  float totalTime = ss.GetTimeTotal();
+  float otherTime = totalTime - (ss.GetTimeCollectOpts() + ss.GetTimeBuildHyp() + ss.GetTimeEstimateScore() + ss.GetTimeCalcLM() + ss.GetTimeOtherScore() + ss.GetTimeStack());
 
   return os << "total hypotheses considered = " << ss.GetTotalHypos() << std::endl
-            << "     number not fully built = " << ss.GetNumHyposEarlyDiscarded() << std::endl
+            << "           number not built = " << ss.GetNumHyposNotBuilt() << std::endl
+            << "     number discarded early = " << ss.GetNumHyposEarlyDiscarded() << std::endl
             << "           number discarded = " << ss.GetNumHyposDiscarded() << std::endl
             << "          number recombined = " << ss.GetNumHyposRecombined() << std::endl
             << "              number pruned = " << ss.GetNumHyposPruned() << std::endl
 
-            << "time to collect opts    " << ss.GetTimeCollectOpts()
-<< " (" << (100 * ss.GetTimeCollectOpts()/totalTime) << "%)" << std::endl
-	    << "        create hyps     " << ss.GetTimeBuildHyp()
-<< " (" << (100 * ss.GetTimeBuildHyp()/totalTime) << "%)" << std::endl
-            << "        estimate score  " << ss.GetTimeEstimateScore()
-<< " (" << (100 * ss.GetTimeEstimateScore()/totalTime) << "%)" << std::endl
-            << "        calc lm         " << ss.GetTimeCalcLM()
-<< " (" << (100 * ss.GetTimeCalcLM()/totalTime) << "%)" << std::endl
-            << "        other hyp score " << ss.GetTimeOtherScore()
-<< " (" << (100 * ss.GetTimeOtherScore()/totalTime) << "%)" << std::endl
-            << "        manage stacks   " << ss.GetTimeStack()
-<< " (" << (100 * ss.GetTimeStack()/totalTime) << "%)" << std::endl
+            << "time to collect opts    " << ss.GetTimeCollectOpts()   << " (" << (int)(100 * ss.GetTimeCollectOpts()/totalTime) << "%)" << std::endl
+	    << "        create hyps     " << ss.GetTimeBuildHyp()      << " (" << (int)(100 * ss.GetTimeBuildHyp()/totalTime) << "%)" << std::endl
+            << "        estimate score  " << ss.GetTimeEstimateScore() << " (" << (int)(100 * ss.GetTimeEstimateScore()/totalTime) << "%)" << std::endl
+            << "        calc lm         " << ss.GetTimeCalcLM()        << " (" << (int)(100 * ss.GetTimeCalcLM()/totalTime) << "%)" << std::endl
+            << "        other hyp score " << ss.GetTimeOtherScore()    << " (" << (int)(100 * ss.GetTimeOtherScore()/totalTime) << "%)" << std::endl
+            << "        manage stacks   " << ss.GetTimeStack()         << " (" << (int)(100 * ss.GetTimeStack()/totalTime) << "%)" << std::endl
+            << "        other           " << otherTime                 << " (" << (int)(100 * otherTime/totalTime) << "%)" << std::endl
 
             << "total source words = " << ss.GetTotalSourceWords() << std::endl
             << "     words deleted = " << ss.GetNumWordsDeleted() << " (" << Join(" ", ss.GetDeletedWords()) << ")" << std::endl

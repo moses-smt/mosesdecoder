@@ -55,6 +55,8 @@ SearchNormal::~SearchNormal()
 void SearchNormal::ProcessSentence()
 {	
 	const StaticData &staticData = StaticData::Instance();
+	SentenceStats &stats = staticData.GetSentenceStats();
+	clock_t t=0; // used to track time for steps
 
 	// initial seed hypothesis: nothing translated, no words produced
 	Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
@@ -64,7 +66,6 @@ void SearchNormal::ProcessSentence()
 	std::vector < HypothesisStack* >::iterator iterStack;
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
-
 		// check if decoding ran out of time 
 		double _elapsed_time = GetUserTime();
 		if (_elapsed_time > staticData.GetTimeoutThreshold()){
@@ -76,12 +77,11 @@ void SearchNormal::ProcessSentence()
 
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
-		// VERBOSE("processing next stack at ");
-		float t = clock();
+		IFVERBOSE(2) { t = clock(); }
 		sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
-		StaticData::Instance().GetSentenceStats().AddTimeStack( clock()-t );
+		IFVERBOSE(2) { stats.AddTimeStack( clock()-t ); }
 
 		// go through each hypothesis on the stack and try to expand it
 		HypothesisStackNormal::const_iterator iterHypo;
@@ -98,6 +98,7 @@ void SearchNormal::ProcessSentence()
 	}
 
 	// some more logging
+	IFVERBOSE(2) { staticData.GetSentenceStats().SetTimeTotal( clock()-m_start ); }
 	VERBOSE(2, staticData.GetSentenceStats());
 }
 
@@ -308,48 +309,79 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	 */
 	void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
 	{
+		const StaticData &staticData = StaticData::Instance();
+		SentenceStats &stats = staticData.GetSentenceStats();
+		clock_t t=0; // used to track time for steps
 
-		// create hypothesis and calculate all its scores
 #ifdef DEBUGLATTICE
 		if (debug2) { std::cerr << "::EXT: " << transOpt << "\n"; }
 #endif
-		float t = clock();
-		Hypothesis *newHypo = hypothesis.CreateNext(transOpt, m_constraint); // TODO FIXME This is absolutely broken - don't pass null here
-		StaticData::Instance().GetSentenceStats().AddTimeBuildHyp( clock()-t );
-
-		if (newHypo==NULL) return;
+		Hypothesis *newHypo;
 
 		// expand hypothesis further if transOpt was linked
-		for (std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
-				iterLinked != transOpt.GetLinkedTransOpts().end(); iterLinked++) {
-			const WordsBitmap hypoBitmap = newHypo->GetWordsBitmap();
-			if (hypoBitmap.Overlap((**iterLinked).GetSourceWordsRange())) {
+		// this code will get nuked soon, it has many problems
+//		for (std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
+//				iterLinked != transOpt.GetLinkedTransOpts().end(); iterLinked++) {
+//			t = clock();
+//			newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+//			StaticData::Instance().GetSentenceStats().AddTimeBuildHyp( clock()-t );
+//			if (newHypo==NULL) return;
+//			const WordsBitmap hypoBitmap = newHypo->GetWordsBitmap();
+//			if (hypoBitmap.Overlap((**iterLinked).GetSourceWordsRange())) {
 				// don't want to add a hypothesis that has some but not all of a linked TO set, so return
-				return;
-			}
-			else
-			{
-				newHypo->CalcScore(m_transOptColl.GetFutureScore());
-				newHypo = newHypo->CreateNext(**iterLinked, m_constraint); // TODO FIXME This is absolutely broken - don't pass null here
-			}
-		}
+//				FREEHYPO( newHypo );
+//				return;
+//			}
+//			else
+//			{
+//				newHypo->CalcScore(m_transOptColl.GetFutureScore());
+//				newHypo = newHypo->CreateNext(**iterLinked, m_constraint); // TODO FIXME This is absolutely broken - don't pass null here
+//			}
+//		}
 
+		if (! staticData.UseEarlyDiscarding())
+		{
+			// simple build, no questions asked
+			IFVERBOSE(2) { t = clock(); }
+			newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+			IFVERBOSE(2) { stats.AddTimeBuildHyp( clock()-t ); }
+			if (newHypo==NULL) return;
+			newHypo->CalcScore(m_transOptColl.GetFutureScore());
+		}
+		else
 		// early discarding: check if hypothesis is too bad to build
-		if (StaticData::Instance().UseEarlyDiscarding()) {
-			float expectedScore = newHypo->CalcExpectedScore( m_transOptColl.GetFutureScore() );
+		// this idea is explained in (Moore&Quirk, MT Summit 2007)
+		{
+			// what is the worst possble score?
 			size_t wordsTranslated = hypothesis.GetWordsBitmap().GetNumWordsCovered() + transOpt.GetSize();
-			float allowedScore = m_hypoStackColl[wordsTranslated]->GetWorstScore() + StaticData::Instance().GetEarlyDiscardingThreshold();
+			float allowedScore = m_hypoStackColl[wordsTranslated]->GetWorstScore() + staticData.GetEarlyDiscardingThreshold();
+
+			// check if transOpt cost push it already below limit
+			float expectedScore = hypothesis.GetTotalScore() + transOpt.GetFutureScore();
 			if (expectedScore < allowedScore)
 			{
-				StaticData::Instance().GetSentenceStats().AddEarlyDiscarded();
+				IFVERBOSE(2) { stats.AddNotBuilt(); }
+				return;
+			}
+
+			// build the hypothesis without scoring
+			IFVERBOSE(2) { t = clock(); }
+			newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+			if (newHypo==NULL) return;
+			IFVERBOSE(2) { stats.AddTimeBuildHyp( clock()-t ); }
+	
+			// compute expected score (all but correct LM)
+			expectedScore = newHypo->CalcExpectedScore( m_transOptColl.GetFutureScore() );
+			// ... and check if that is below the limit
+			if (expectedScore < allowedScore)
+			{
+				IFVERBOSE(2) { stats.AddEarlyDiscarded(); }
 				FREEHYPO( newHypo );
 				return;
 			}
+
+			// ok, all is good, compute remaining scores
 			newHypo->CalcRemainingScore();
-		}
-		else {
-			// finalize build: compute scores
-			newHypo->CalcScore(m_transOptColl.GetFutureScore());
 		}
 
 		// logging for the curious
@@ -359,9 +391,9 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 		// add to hypothesis stack
 		size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
-		t = clock();
+		IFVERBOSE(2) { t = clock(); }
 		m_hypoStackColl[wordsTranslated]->AddPrune(newHypo);
-		StaticData::Instance().GetSentenceStats().AddTimeStack( clock()-t );
+		IFVERBOSE(2) { stats.AddTimeStack( clock()-t ); }
 	}
 
 	const std::vector < HypothesisStack* >& SearchNormal::GetHypothesisStacks() const
