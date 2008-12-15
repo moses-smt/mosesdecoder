@@ -34,13 +34,6 @@ SearchNormal::SearchNormal(const InputType &source, const TranslationOptionColle
 
 		m_hypoStackColl[ind] = sourceHypoColl;
 	}
-
-	// set additional reordering constraints, if specified
-	if (staticData.UseReorderingConstraint())
-	{
-		m_reorderingConstraint = new ReorderingConstraint( m_source.GetSize() );
-		m_reorderingConstraint->SetWall( m_source );
-	}
 }
 
 SearchNormal::~SearchNormal()
@@ -129,7 +122,10 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 			for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 			{
-				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)))
+				if (!hypoBitmap.Overlap(WordsRange(startPos, endPos)) || !m_source.GetReorderingConstraint().Check( hypoBitmap, startPos, endPos ) )
+				{
+				    continue;
+				}
 				{
 					//TODO: does this method include incompatible WordLattice hypotheses?
 					ExpandAllHypotheses(hypothesis
@@ -147,7 +143,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	const size_t	hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
 		, sourceSize			= m_source.GetSize();
 
-	// MAIN LOOP. go through each possible hypo
+	// MAIN LOOP. go through each possible range
 	for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 	{
 		size_t maxSize = sourceSize - startPos;
@@ -178,6 +174,12 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
+			// check if passes specified reordering constraints
+			// (set with -monotone-at-punctuation or xml)
+			if (!m_source.GetReorderingConstraint().Check( hypoBitmap, startPos, endPos ) )
+			{
+				continue;
+			}
 			// check for overlap
 			WordsRange extRange(startPos, endPos);
 #ifdef DEBUGLATTICE
@@ -268,14 +270,8 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 					continue;
 				}
 
-				// if reordering walls are used (--monotone-at-punctuation), check here if 
-				// there is a wall between the beginning of the gap and the end
-				// of this new phrase (jumping the wall). 
-				if ( StaticData::Instance().UseReorderingConstraint() ) {
-				  if ( m_reorderingConstraint->ContainsWall( hypoFirstGapPos, endPos ) )
-				    continue;
-				}
 
+				// everything is fine, we're good to go
 				ExpandAllHypotheses(hypothesis
 						    ,m_transOptColl.GetTranslationOptionList(extRange));
 

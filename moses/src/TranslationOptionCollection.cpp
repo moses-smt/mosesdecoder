@@ -543,7 +543,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	 */
 	bool TranslationOptionCollection::HasXmlOptionsOverlappingRange(size_t, size_t) const {
 		return false;
-	
+		//not implemented for base class
 	}
 	
 	/** Populates the current Collection with XML options exactly covering the range specified. Default implementation does nothing.

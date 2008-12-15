@@ -86,7 +86,6 @@ class Sentence : public Phrase, public InputType
 	//! populates vector argument with XML force translation options for the specific range passed
 	void GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const;
 
-
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
 	void Print(std::ostream& out) const;
 

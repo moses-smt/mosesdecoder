@@ -5,7 +5,6 @@
 #include "Search.h"
 #include "HypothesisStackNormal.h"
 #include "TranslationOptionCollection.h"
-#include "ReorderingConstraint.h"
 #include "Timer.h"
 
 namespace Moses
@@ -25,8 +24,6 @@ protected:
 	size_t interrupted_flag;
 	HypothesisStackNormal* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
 	const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
-	ReorderingConstraint *m_reorderingConstraint; /**< positions in input sentence over which no reordering is allowed */
-
 
 	// functions for creating hypotheses
 	void ProcessOneHypothesis(const Hypothesis &hypothesis);
