@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Phrase.h"
 #include "TargetPhraseCollection.h"
+#include "ReorderingConstraint.h"
 
 namespace Moses
 {
@@ -42,6 +43,7 @@ protected:
 	long m_translationId; 	//< contiguous Id
 	bool m_hasMetaData;
 	long m_segId;
+	ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
  
 public:
 
@@ -111,6 +113,12 @@ public:
 
 	//! return substring at a particular position. Only valid for Sentence class. TODO - get rid of this fn
 	virtual const Word& GetWord(size_t pos) const=0;
+
+	//! Returns the reordering constraints
+	const ReorderingConstraint& GetReorderingConstraint() const
+	{
+		return m_reorderingConstraint;
+	};
 
 	TO_STRING();
 	

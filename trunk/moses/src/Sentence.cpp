@@ -36,16 +36,19 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
 	if (getline(in, line, '\n').eof())	
 			return 0;
+	// remove extra spaces
 	line = Trim(line);
-  meta = ProcessAndStripSGML(line);
 
+	// if sentences is specified as "<seg id=1> ... </seg>", extract id
+  meta = ProcessAndStripSGML(line);
 	if (meta.find("id") != meta.end()) { this->SetTranslationId(atol(meta["id"].c_str())); }
 	
-	//parse XML markup in translation line
+	// parse XML markup in translation line
 	const StaticData &staticData = StaticData::Instance();
 	std::vector<std::vector<XmlOption*> > xmlOptionsList(0);
+	std::vector< size_t > xmlWalls;
 	if (staticData.GetXmlInputType() != XmlPassThrough) {
-		if (!ProcessAndStripXMLTags(line, xmlOptionsList)) {
+		if (!ProcessAndStripXMLTags(line, xmlOptionsList, m_reorderingConstraint, xmlWalls )) {
 			TRACE_ERR("Unable to parse XML in line " << line);
 			abort();
 		}			
@@ -107,6 +110,21 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 		}
 		
 	}	
+
+	m_reorderingConstraint.InitializeWalls( GetSize() );
+
+	// set reordering walls, if "-monotone-at-punction" is set
+	if (staticData.UseReorderingConstraint())
+	{
+		m_reorderingConstraint.SetMonotoneAtPunctuation( GetSubString( WordsRange(0,GetSize()-1 ) ) );
+	}
+
+	// set walls obtained from xml
+	for(size_t i=0; i<xmlWalls.size(); i++)
+		if( xmlWalls[i] < GetSize() ) // no buggy walls, please
+			m_reorderingConstraint.SetWall( xmlWalls[i], true );
+	m_reorderingConstraint.FinalizeWalls();
+
 	return 1;
 }
 

@@ -62,13 +62,6 @@ SearchCubePruning::SearchCubePruning(const InputType &source, const TranslationO
 
 		m_hypoStackColl[ind] = sourceHypoColl;
 	}
-
-	// set additional reordering constraints, if specified
-	if (staticData.UseReorderingConstraint())
-	{
-		m_reorderingConstraint = new ReorderingConstraint( m_source.GetSize() );
-		m_reorderingConstraint->SetWall( m_source );
-	}
 }
 
 SearchCubePruning::~SearchCubePruning()
@@ -239,23 +232,23 @@ bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const Wor
 	// since we check for reordering limits, its good to have that limit handy
 	int maxDistortion = StaticData::Instance().GetMaxDistortion();
 
-	// no limit of reordering: no prob
+	// if there are reordering limits, make sure it is not violated
+	// the coverage bitmap is handy here (and the position of the first gap)
+	const size_t	hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
+							, startPos				= range.GetStartPos()
+							, endPos					= range.GetEndPos();
+
+	// if reordering constraints are used (--monotone-at-punctuation or xml), check if passes all
+	if (! m_source.GetReorderingConstraint().Check( hypoBitmap, startPos, endPos ) )
+	{
+		return false;
+	}
+
+	// no limit of reordering: no problem
 	if (maxDistortion < 0)
 	{	
 		return true;
 	}
-
-	// if there are reordering limits, make sure it is not violated
-	// the coverage bitmap is handy here (and the position of the first gap)
-	const size_t	hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
-							, sourceSize			= m_source.GetSize()
-							, startPos				= range.GetStartPos()
-							, endPos					= range.GetEndPos();
-
-	// MAIN LOOP. go through each possible hypo
-  size_t maxSize = sourceSize - startPos;
-  size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-  maxSize = std::min(maxSize, maxSizePhrase);
 
 	bool leftMostEdge = (hypoFirstGapPos == startPos);			
 	// any length extension is okay if starting at left-most edge
@@ -264,37 +257,21 @@ bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const Wor
 		return true;
 	}
 	// starting somewhere other than left-most edge, use caution
-	else
-	{
-		// the basic idea is this: we would like to translate a phrase starting
-		// from a position further right than the left-most open gap. The
-		// distortion penalty for the following phrase will be computed relative
-		// to the ending position of the current extension, so we ask now what
-		// its maximum value will be (which will always be the value of the
-		// hypothesis starting at the left-most edge).  If this vlaue is than
-		// the distortion limit, we don't allow this extension to be made.
-		WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
-		int required_distortion =
-			m_source.ComputeDistortionDistance(range, bestNextExtension);
+	// the basic idea is this: we would like to translate a phrase starting
+	// from a position further right than the left-most open gap. The
+	// distortion penalty for the following phrase will be computed relative
+	// to the ending position of the current extension, so we ask now what
+	// its maximum value will be (which will always be the value of the
+	// hypothesis starting at the left-most edge).  If this vlaue is than
+	// the distortion limit, we don't allow this extension to be made.
+	WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
+	int required_distortion =
+		m_source.ComputeDistortionDistance(range, bestNextExtension);
 
-		if (required_distortion > maxDistortion) {
-			return false;
-		}
-
-		// if reordering walls are used (--monotone-at-punctuation), check here if 
-		// there is a wall between the beginning of the gap and the end
-		// of this new phrase (jumping the wall). 
-		
-		if ( StaticData::Instance().UseReorderingConstraint() ) {
-		  if ( m_reorderingConstraint->ContainsWall( hypoFirstGapPos, endPos ) )
-		    return false;
-		}
-		
-		return true;
-
+	if (required_distortion > maxDistortion) {
+		return false;
 	}
-
-	return false;
+	return true;
 }
 
 /**
@@ -332,7 +309,6 @@ void SearchCubePruning::PrintBitmapContainerGraph()
 	{
 		cerr << iterAccessor->first << endl;
 		BitmapContainer &container = *iterAccessor->second;
-
 	}
 
 }

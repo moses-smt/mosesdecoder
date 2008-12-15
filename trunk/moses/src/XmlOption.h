@@ -4,6 +4,7 @@
 #include <string>
 #include "WordsRange.h"
 #include "TargetPhrase.h"
+#include "ReorderingConstraint.h"
 
 namespace Moses
 {
@@ -22,7 +23,7 @@ struct XmlOption {
 
 };
 
-bool ProcessAndStripXMLTags(std::string &line,std::vector<std::vector<XmlOption*> > &res);
+bool ProcessAndStripXMLTags(std::string &line,std::vector<std::vector<XmlOption*> > &res, ReorderingConstraint &reorderingConstraint, std::vector< size_t > &walls );
 
 }
 
