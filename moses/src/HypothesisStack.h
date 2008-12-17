@@ -21,7 +21,7 @@ public:
 	const_iterator begin() const { return m_hypos.begin(); }
 	const_iterator end() const { return m_hypos.end(); }
 	size_t size() const { return m_hypos.size(); }
-	virtual inline float GetWorstScore() const = 0;
+	virtual inline float GetWorstScore() const { return -numeric_limits<float>::infinity(); };
 
 	virtual ~HypothesisStack();
 	virtual bool AddPrune(Hypothesis *hypothesis) = 0;

@@ -30,6 +30,35 @@ using namespace std;
 
 namespace Moses
 {
+
+float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap ) const
+{
+	const size_t notInGap= numeric_limits<size_t>::max();
+	size_t start = notInGap;
+	float futureScore = 0.0f;
+	for(size_t currPos = 0 ; currPos < bitmap.GetSize() ; currPos++)
+	{
+		// start of a new gap?
+		if(bitmap.GetValue(currPos) == 0 && start == notInGap)
+		{
+			start = currPos;
+		}
+		// end of a gap?
+		if(bitmap.GetValue(currPos) == 1 && start != notInGap)
+		{
+			futureScore += GetScore(start, currPos - 1);
+			start = notInGap;
+		}
+	}
+	// coverage ending with gap?
+	if (start != notInGap)
+	{
+		futureScore += GetScore(start, bitmap.GetSize() - 1);
+	}
+
+	return futureScore;
+}
+
 TO_STRING_BODY(SquareMatrix);
 
 }

@@ -621,15 +621,16 @@ void TranslationOptionCollection::CacheLexReordering()
 				for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) 
 				{
 					TranslationOption &transOpt = **iterTransOpt;
-					const Phrase *sourcePhrase = transOpt.GetSourcePhrase();
-					if (sourcePhrase)
-					{
-						Score score = lexreordering.GetProb(*sourcePhrase
+					Phrase sourcePhrase =  m_source.GetSubString(WordsRange(startPos,endPos));
+					//const Phrase *sourcePhrase = transOpt.GetSourcePhrase();
+					//if (sourcePhrase)
+					//{
+						Score score = lexreordering.GetProb(sourcePhrase
 																							, transOpt.GetTargetPhrase());
 						// TODO should have better handling of unknown reordering entries
 						if (!score.empty())
 							transOpt.CacheReorderingProb(lexreordering, score);
-					}
+					//}
 				}
 			}
 		}

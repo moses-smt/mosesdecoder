@@ -395,8 +395,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
 
 	// FUTURE COST
-	CalcFutureScore(futureScore);
-
+	m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 	
 	//LEXICAL REORDERING COST
 	const std::vector<LexicalReordering*> &reorderModels = staticData.GetReorderModels();
@@ -409,31 +408,6 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
 
 	IFVERBOSE(2) { staticData.GetSentenceStats().AddTimeOtherScore( clock()-t ); }
-}
-
-void Hypothesis::CalcFutureScore(const SquareMatrix &futureScore)
-{
-	const size_t maxSize= numeric_limits<size_t>::max();
-	size_t	start				= maxSize;
-	m_futureScore	= 0.0f;
-	for(size_t currPos = 0 ; currPos < m_sourceCompleted.GetSize() ; currPos++) 
-	{
-		if(m_sourceCompleted.GetValue(currPos) == 0 && start == maxSize)
-		{
-			start = currPos;
-		}
-		if(m_sourceCompleted.GetValue(currPos) == 1 && start != maxSize) 
-		{
-//			m_score[ScoreType::FutureScoreEnum] += futureScore[start][currPos - 1];
-			m_futureScore += futureScore.GetScore(start, currPos - 1);
-			start = maxSize;
-		}
-	}
-	if (start != maxSize)
-	{
-//		m_score[ScoreType::FutureScoreEnum] += futureScore[start][m_sourceCompleted.GetSize() - 1];
-		m_futureScore += futureScore.GetScore(start, m_sourceCompleted.GetSize() - 1);
-	}
 }
 
 /** Calculates the expected score of extending this hypothesis with the
@@ -454,7 +428,7 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
   float estimatedLMScore = m_transOpt->GetFutureScore() - m_transOpt->GetScoreBreakdown().InnerProduct(staticData.GetAllWeights());
 
 	// FUTURE COST
-	CalcFutureScore(futureScore);
+	m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 
 	//LEXICAL REORDERING COST
 	const std::vector<LexicalReordering*> &reorderModels = staticData.GetReorderModels();
