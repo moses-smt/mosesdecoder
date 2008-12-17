@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <string>
 #include <vector>
+#include <time.h>
 #include "Phrase.h"
 #include "Hypothesis.h"
 #include "TypeDef.h" //FactorArray
