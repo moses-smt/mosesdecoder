@@ -87,9 +87,6 @@ protected:
 	int m_id; /*! numeric ID of this hypothesis, used for logging */
 	std::vector<std::vector<unsigned int> >* m_lmstats; /*! Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
-
-	void CalcFutureScore(const SquareMatrix &futureScore);
-	//void CalcFutureScore(float futureScore[256][256]);
 	void CalcLMScore(const LMList &languageModels);
 	void CalcDistortionScore();
 	//TODO: add appropriate arguments to score calculator
@@ -173,6 +170,7 @@ public:
 
 	std::string GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const;
 	std::string GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const;
+	inline const TargetPhrase GetTargetPhrase() const { return m_targetPhrase; }
 	std::string GetSourcePhraseStringRep() const;
 	std::string GetTargetPhraseStringRep() const;
 

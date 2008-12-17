@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include "TypeDef.h"
 #include "Util.h"
+#include "WordsBitmap.h"
 
 namespace Moses
 {
@@ -61,6 +62,7 @@ public:
 	{
 		m_array[row * m_size + col] = value;
 	}
+	float CalcFutureScore( WordsBitmap const& ) const;
 	
 	TO_STRING();
 };

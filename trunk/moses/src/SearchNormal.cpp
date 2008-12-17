@@ -348,12 +348,21 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 		// early discarding: check if hypothesis is too bad to build
 		// this idea is explained in (Moore&Quirk, MT Summit 2007)
 		{
-			// what is the worst possble score?
+			// what is the worst possible score?
+
 			size_t wordsTranslated = hypothesis.GetWordsBitmap().GetNumWordsCovered() + transOpt.GetSize();
 			float allowedScore = m_hypoStackColl[wordsTranslated]->GetWorstScore() + staticData.GetEarlyDiscardingThreshold();
 
+			// expected score is based on score of current hypothesis
+			float expectedScore = hypothesis.GetScore();
+			// add new future cost estimate
+			WordsBitmap *newSourceCompleted = new WordsBitmap ( hypothesis.GetWordsBitmap() );
+			newSourceCompleted->SetValue(transOpt.GetSourceWordsRange().GetStartPos(), transOpt.GetSourceWordsRange().GetEndPos(), true);
+			expectedScore += m_transOptColl.GetFutureScore().CalcFutureScore( *newSourceCompleted );
+			delete(newSourceCompleted);
+			// add expected score of translation option
+			expectedScore += transOpt.GetFutureScore();
 			// check if transOpt cost push it already below limit
-			float expectedScore = hypothesis.GetTotalScore() + transOpt.GetFutureScore();
 			if (expectedScore < allowedScore)
 			{
 				IFVERBOSE(2) { stats.AddNotBuilt(); }
@@ -378,6 +387,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 			// ok, all is good, compute remaining scores
 			newHypo->CalcRemainingScore();
+
 		}
 
 		// logging for the curious
