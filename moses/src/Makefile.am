@@ -59,6 +59,7 @@ libmoses_a_SOURCES = \
 	SearchNormal.cpp \
 	Sentence.cpp \
 	SentenceStats.cpp \
+	SquareMatrix.cpp \
 	StaticData.cpp \
 	TargetPhrase.cpp \
 	TargetPhraseCollection.cpp \
