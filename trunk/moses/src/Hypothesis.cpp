@@ -438,10 +438,10 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
 	}
 
 	// TOTAL
-  float total = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore + estimatedLMScore;
+	float total = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore + estimatedLMScore;
 
 	IFVERBOSE(2) { staticData.GetSentenceStats().AddTimeEstimateScore( clock()-t ); }
-  return total;
+	return total;
 }
 
 void Hypothesis::CalcRemainingScore() 
