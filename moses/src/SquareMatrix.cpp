@@ -31,29 +31,91 @@ using namespace std;
 namespace Moses
 {
 
+/**
+ * Calculare future score estimate for a given coverage bitmap
+ *
+ * /param bitmap coverage bitmap
+ */
+
 float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap ) const
 {
 	const size_t notInGap= numeric_limits<size_t>::max();
-	size_t start = notInGap;
+	size_t startGap = notInGap;
 	float futureScore = 0.0f;
 	for(size_t currPos = 0 ; currPos < bitmap.GetSize() ; currPos++)
 	{
 		// start of a new gap?
-		if(bitmap.GetValue(currPos) == 0 && start == notInGap)
+		if(bitmap.GetValue(currPos) == false && startGap == notInGap)
 		{
-			start = currPos;
+			startGap = currPos;
 		}
 		// end of a gap?
-		if(bitmap.GetValue(currPos) == 1 && start != notInGap)
+		else if(bitmap.GetValue(currPos) == true && startGap != notInGap)
 		{
-			futureScore += GetScore(start, currPos - 1);
-			start = notInGap;
+			futureScore += GetScore(startGap, currPos - 1);
+			startGap = notInGap;
 		}
 	}
 	// coverage ending with gap?
-	if (start != notInGap)
+	if (startGap != notInGap)
 	{
-		futureScore += GetScore(start, bitmap.GetSize() - 1);
+		futureScore += GetScore(startGap, bitmap.GetSize() - 1);
+	}
+
+	return futureScore;
+}
+
+/**
+ * Calculare future score estimate for a given coverage bitmap
+ * and an additional span that is also covered. This function is used
+ * to compute future score estimates for hypotheses that we may want
+ * build, but first want to check.
+ *
+ * Note: this function is implemented a bit more complex than
+ * the basic one (w/o additional phrase) for speed reasons,
+ * which is probably overkill.
+ *
+ * /param bitmap coverage bitmap
+ * /param startPos start of the span that is added to the coverage
+ * /param endPos end of the span that is added to the coverage
+ */
+
+float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap, size_t startPos, size_t endPos ) const
+{
+	const size_t notInGap= numeric_limits<size_t>::max();
+	float futureScore = 0.0f;
+	size_t startGap = bitmap.GetFirstGapPos();
+	if (startGap == NOT_FOUND) return futureScore; // everything filled
+
+	// start loop at first gap
+	size_t startLoop = startGap+1;
+	if (startPos == startGap) // unless covered by phrase
+	{
+		startGap = notInGap;
+		startLoop = endPos+1; // -> postpone start
+	}
+
+	size_t lastCovered = bitmap.GetLastPos();
+	if (endPos > lastCovered || lastCovered == NOT_FOUND) lastCovered = endPos;
+
+	for(size_t currPos = startLoop; currPos <= lastCovered ; currPos++)
+	{
+		// start of a new gap?
+		if(startGap == notInGap && bitmap.GetValue(currPos) == false && (currPos < startPos || currPos > endPos))
+		{
+			startGap = currPos;
+		}
+		// end of a gap?
+		else if(startGap != notInGap && (bitmap.GetValue(currPos) == true || (startPos <= currPos && currPos <= endPos)))
+		{
+			futureScore += GetScore(startGap, currPos - 1);
+			startGap = notInGap;
+		}
+	}
+	// coverage ending with gap?
+	if (lastCovered != bitmap.GetSize() - 1)
+	{
+		futureScore += GetScore(lastCovered+1, bitmap.GetSize() - 1);
 	}
 
 	return futureScore;

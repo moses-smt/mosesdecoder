@@ -34,8 +34,8 @@ class SquareMatrix
 {
 	friend std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix);
 protected:
-	const size_t m_size;
-	float *m_array;
+	const size_t m_size; /**< length of the square (sentence length) */
+	float *m_array; /**< two-dimensional array to store floats */
 
 	SquareMatrix(); // not implemented
 	SquareMatrix(const SquareMatrix &copy); // not implemented
@@ -50,29 +50,33 @@ public:
 	{
 		free(m_array);
 	}
+	/** Returns length of the square: typically the sentence length */
 	inline size_t GetSize() const
 	{
 		return m_size;
 	}
-	inline float GetScore(size_t row, size_t col) const
+	/** Get a future cost score for a span */
+	inline float GetScore(size_t startPos, size_t endPos) const
 	{
-		return m_array[row * m_size + col];
+		return m_array[startPos * m_size + endPos];
 	}
-	inline void SetScore(size_t row, size_t col, float value)
+	/** Set a future cost score for a span */
+	inline void SetScore(size_t startPos, size_t endPos, float value)
 	{
-		m_array[row * m_size + col] = value;
+		m_array[startPos * m_size + endPos] = value;
 	}
 	float CalcFutureScore( WordsBitmap const& ) const;
+	float CalcFutureScore( WordsBitmap const&, size_t startPos, size_t endPos ) const;
 	
 	TO_STRING();
 };
 
 inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
 {
-	for (size_t col = 0 ; col < matrix.GetSize() ; col++)
+	for (size_t endPos = 0 ; endPos < matrix.GetSize() ; endPos++)
 	{
-		for (size_t row = 0 ; row < matrix.GetSize() ; row++)
-			out << matrix.GetScore(row, col) << " ";
+		for (size_t startPos = 0 ; startPos < matrix.GetSize() ; startPos++)
+			out << matrix.GetScore(startPos, endPos) << " ";
 		out << std::endl;
 	}
 	
