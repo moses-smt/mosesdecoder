@@ -155,6 +155,11 @@ my $efficient_scorenbest_flag = undef; # set to 1 to activate a time-efficient s
 my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to work on 
                                   # if undef work on all features
                                   # (others are fixed to the starting values)
+my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loading data (default =-1)
+                                  # -1 means all previous, i.e. from iteration 1
+                                  # 0 means no previous data, i.e. from actual iteration
+                                  # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
+                                  # and so on 
 
 use strict;
 use Getopt::Long;
@@ -193,6 +198,7 @@ GetOptions(
   "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
   "async=i" => \$___ASYNC, #whether script to be used with async decoder
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
+  "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -253,6 +259,12 @@ Options:
   --activate-features=STRING  ... comma-separated list of features to work on
                                   (if undef work on all features)
                                   # (others are fixed to the starting values)
+  --prev-aggregate-nbestlist=INT  ... number of previous step to consider when loading data (default =-1)
+                                      -1 means all previous, i.e. from iteration 1
+                                      0 means no previous data, i.e. from actual iteration
+                                      1 means 1 previous data , i.e. from the actual iteration and from the previous one
+                                      and so on 
+
 ";
   exit 1;
 }
@@ -298,6 +310,10 @@ die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
 
 $mertargs = "" if !defined $mertargs;
+my $mert_extract_args=$mertargs;
+my $mert_mert_args=$mertargs;
+$mert_mert_args =~ s/\-+(binary|b)\b//;
+
 
 my ($just_cmd_filtercmd,$x) = split(/ /,$filtercmd);
 die "Not executable: $just_cmd_filtercmd" if ! -x $just_cmd_filtercmd;
@@ -501,8 +517,6 @@ my $run=$start_run-1;
 my $oldallsorted = undef;
 my $allsorted = undef;
 
-my $prev_aggregate_nbl_size = -1;
-
 my $cmd;
 # features and scores from the last run.
 my $prev_feature_file=undef;
@@ -542,15 +556,14 @@ while(1) {
 
   # extract score statistics and features from the nbest lists
   print STDERR "Scoring the nbestlist.\n";
-  my $feature_file = "run$run.features.dat";
-  my $score_file = "run$run.scores.dat";
-  $cmd = "$mert_extract_cmd $mertargs --scfile $score_file --ffile $feature_file  -r ".join(",", @references)." -n $nbest_file";
-  if (defined $prev_feature_file) {
-      $cmd = $cmd." --prev-ffile $prev_feature_file";
-  }
-  if (defined $prev_score_file) {
-      $cmd = $cmd." --prev-scfile $prev_score_file";
-  }
+
+  my $base_feature_file = "features.dat";
+  my $base_score_file = "scores.dat";
+  my $feature_file = "run$run.${base_feature_file}";
+  my $score_file = "run$run.${base_score_file}";
+
+  $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file  -r ".join(",", @references)." -n $nbest_file";
+
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
       or die "Failed to submit extraction to queue (via $qsubwrapper)";
@@ -605,7 +618,21 @@ while(1) {
   my $DIM = scalar(@CURR); # number of lambdas
 
   # run mert
-  $cmd = "$mert_mert_cmd -d $DIM $mertargs -n 20 --scfile $score_file --ffile $feature_file";
+  $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args -n 20";
+
+  if (defined $prev_feature_file) {
+    $cmd = $cmd." --ffile $prev_feature_file,$feature_file";
+  }
+  else{
+    $cmd = $cmd." --ffile $feature_file";
+  }
+  if (defined $prev_score_file) {
+    $cmd = $cmd." --scfile $prev_score_file,$score_file";
+  }
+  else{
+    $cmd = $cmd." --scfile $score_file";
+  }
+
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
   } else {
@@ -616,19 +643,19 @@ while(1) {
 
 
  # backup copies
-  safesystem ("gzip $feature_file; ") or die;
-  safesystem ("gzip $score_file") or die;
+  safesystem ("\\cp -f extract.err run$run.extract.err") or die;
+  safesystem ("\\cp -f extract.out run$run.extract.out") or die;
   safesystem ("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
+  safesystem ("touch $mert_logfile run$run.$mert_logfile") or die;
   safesystem ("\\cp -f $weights_out_file run$run.$weights_out_file") or die; # this one is needed for restarts, too
 
- 
   print "run $run end at ".`date`;
 
   $bestpoint = undef;
   $devbleu = undef;
-  open(IN,"$mert_logfile") or die "Can't open $mert_logfile";
+  open(IN,"run$run.$mert_logfile") or die "Can't open run$run.$mert_logfile";
   while (<IN>) {
-    if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\d\.]+)/) {
+    if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
       $bestpoint = $1;
       $devbleu = $2;
       last;
@@ -664,10 +691,34 @@ while(1) {
     print STDERR "None of the weights changed more than $minimum_required_change_in_weights. Stopping.\n";
     last;
   }
-  
-  $prev_feature_file = $feature_file.".gz";
-  $prev_score_file = $score_file.".gz";
 
+  my $firstrun;
+  if ($prev_aggregate_nbl_size==-1){
+    $firstrun=1;
+  }
+  else{
+    $firstrun=$run-$prev_aggregate_nbl_size+1;
+    $firstrun=($firstrun>0)?$firstrun:1;
+  }
+  print "loading data from $firstrun to $run (prev_aggregate_nbl_size=$prev_aggregate_nbl_size)\n";
+  $prev_feature_file = undef;
+  $prev_score_file = undef;
+  for (my $i=$firstrun;$i<=$run;$i++){ 
+    if (defined $prev_feature_file){
+      $prev_feature_file = "${prev_feature_file},run${i}.${base_feature_file}";
+    }
+    else{
+      $prev_feature_file = "run${i}.${base_feature_file}";
+    }
+    if (defined $prev_score_file){
+      $prev_score_file = "${prev_score_file},run${i}.${base_score_file}";
+    }
+    else{
+      $prev_score_file = "run${i}.${base_score_file}";
+    }
+  }
+  print "loading data from $prev_feature_file\n";
+  print "loading data from $prev_score_file\n";
 }
 print "Training finished at ".`date`;
 
