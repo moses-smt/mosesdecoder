@@ -181,7 +181,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	  }	    
 	  m_outputSearchGraphPB = true;
 	}
-        else
+	else
 	  m_outputSearchGraphPB = false;
 #endif
 
@@ -201,6 +201,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (m_inputType == SentenceInput)
 	{
 		SetBooleanParameter( &m_useTransOptCache, "use-persistent-cache", true );
+		m_transOptCacheMaxSize = (m_parameter->GetParam("persistent-cache-size").size() > 0)
+					? Scan<size_t>(m_parameter->GetParam("persistent-cache-size")[0]) : DEFAULT_MAX_TRANS_OPT_CACHE_SIZE;
 	}
 	else
 	{
@@ -322,8 +324,6 @@ bool StaticData::LoadData(Parameter *parameter)
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
 	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;
 
-
-
 	// Read in constraint decoding file, if provided
 	if(m_parameter->GetParam("constraint").size()) 
 		m_constraintFileName = m_parameter->GetParam("constraint")[0];		
@@ -348,8 +348,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
 										(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
 
-	//default case
-	
+	// use of xml in input
 	if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
 	else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
 	else if (m_parameter->GetParam("xml-input")[0]=="inclusive") m_xmlInputType = XmlInclusive;
@@ -412,10 +411,10 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_reorderModels);
 	
 	// delete trans opt
-	map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList* >::iterator iterCache;
+	map<std::pair<const DecodeGraph*, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
 	for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache)
 	{
-		TranslationOptionList *transOptList = iterCache->second;
+		TranslationOptionList *transOptList = iterCache->second.first;
 		delete transOptList;
 	}
 
@@ -969,18 +968,53 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGra
 {
 	std::pair<const DecodeGraph*, Phrase> key(&decodeGraph, sourcePhrase);
 	
-	std::map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList*>::const_iterator iter
+	std::map<std::pair<const DecodeGraph*, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
 			= m_transOptCache.find(key);
 	if (iter == m_transOptCache.end())
 		return NULL;
+	iter->second.second = clock(); // update last used time
+	return iter->second.first;
+}
 
-	return iter->second;
+void StaticData::ReduceTransOptCache() const
+{
+	if (m_transOptCache.size() <= m_transOptCacheMaxSize) return; // not full
+	clock_t t = clock();
+	
+	// find cutoff for last used time
+	priority_queue< clock_t > lastUsedTimes;
+	std::map<std::pair<const DecodeGraph*, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
+	iter = m_transOptCache.begin();
+	while( iter != m_transOptCache.end() )
+	{
+		lastUsedTimes.push( iter->second.second );
+		iter++;
+	}
+	for( size_t i=0; i < lastUsedTimes.size()-m_transOptCacheMaxSize/2; i++ )
+		lastUsedTimes.pop();
+	clock_t cutoffLastUsedTime = lastUsedTimes.top();
+
+	// remove all old entries
+	iter = m_transOptCache.begin();
+	while( iter != m_transOptCache.end() )
+	{
+		if (iter->second.second < cutoffLastUsedTime)
+		{
+			std::map<std::pair<const DecodeGraph*, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
+			delete iterRemove->second.first;
+			m_transOptCache.erase(iterRemove);
+		}
+		else iter++;
+	}
+	VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
 }
 
 void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
 {
-		std::pair<const DecodeGraph*, Phrase> pair(&decodeGraph, sourcePhrase);
-		m_transOptCache[pair] = new TranslationOptionList(transOptList);
+	std::pair<const DecodeGraph*, Phrase> key(&decodeGraph, sourcePhrase);
+	TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
+	m_transOptCache[key] = make_pair( storedTransOptList, clock() );
+	ReduceTransOptCache();
 }
 
 }

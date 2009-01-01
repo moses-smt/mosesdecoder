@@ -194,25 +194,48 @@ public:
 	//! TODO - ??? no idea
 	int GetFutureCosts(int lastPos) const ;
 
-        //! converts bitmap into an integer ID: it consists of two parts: the first 16 bit are the pattern between the first gap and the last word-1, the second 16 bit are the number of filled positions. enforces a sentence length limit of 65535 and a max distortion of 16
-        WordsBitmapID GetID() const {
-                assert(m_size < (1<<16));
+	//! converts bitmap into an integer ID: it consists of two parts: the first 16 bit are the pattern between the first gap and the last word-1, the second 16 bit are the number of filled positions. enforces a sentence length limit of 65535 and a max distortion of 16
+	WordsBitmapID GetID() const {
+		assert(m_size < (1<<16));
 
-                size_t start = GetFirstGapPos();
-                if (start == NOT_FOUND) start = m_size; // nothing left
+		size_t start = GetFirstGapPos();
+		if (start == NOT_FOUND) start = m_size; // nothing left
 
-                size_t end = GetLastPos();
-                if (end == NOT_FOUND) end = 0; // nothing translated yet
+		size_t end = GetLastPos();
+		if (end == NOT_FOUND) end = 0; // nothing translated yet
 
-                assert(end < start || end-start <= 16);
-                WordsBitmapID id = 0;
-                for(size_t pos = end; pos > start; pos--) {
-                        id = id*2 + (int) GetValue(pos);
-                }
-                return id + (1<<16) * start;
-        }
+		assert(end < start || end-start <= 16);
+		WordsBitmapID id = 0;
+		for(size_t pos = end; pos > start; pos--) {
+			id = id*2 + (int) GetValue(pos);
+		}
+		return id + (1<<16) * start;
+	}
 
-        TO_STRING();
+	//! converts bitmap into an integer ID, with an additional span covered
+	WordsBitmapID GetIDPlus( size_t startPos, size_t endPos ) const {
+		assert(m_size < (1<<16));
+		
+		size_t start = GetFirstGapPos();
+		if (start == NOT_FOUND) start = m_size; // nothing left
+		
+		size_t end = GetLastPos();
+		if (end == NOT_FOUND) end = 0; // nothing translated yet
+		
+		if (start == startPos) start = endPos+1;
+		if (end < endPos) end = endPos;
+		
+		assert(end < start || end-start <= 16);
+		WordsBitmapID id = 0;
+		for(size_t pos = end; pos > start; pos--) {
+			id = id*2;
+			if (GetValue(pos) || (startPos<=pos && pos<=endPos))
+				id++;
+		}
+		return id + (1<<16) * start;
+	}
+
+	TO_STRING();
 };
 
 // friend 
