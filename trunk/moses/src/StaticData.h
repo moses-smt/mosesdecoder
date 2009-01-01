@@ -458,7 +458,7 @@ public:
 	bool GetUseTransOptCache() const { return m_useTransOptCache; }
 
 	void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
-	void StaticData::ReduceTransOptCache() const;
+	void ReduceTransOptCache() const;
 
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
 };
