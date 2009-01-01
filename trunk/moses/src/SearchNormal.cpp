@@ -288,8 +288,15 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 	{
 		// worst possible score may have changed -> recompute
 		size_t wordsTranslated = hypothesis.GetWordsBitmap().GetNumWordsCovered() + transOpt.GetSize();
-		float allowedScore = m_hypoStackColl[wordsTranslated]->GetWorstScore() + staticData.GetEarlyDiscardingThreshold();
-
+		float allowedScore = m_hypoStackColl[wordsTranslated]->GetWorstScore();
+		if (staticData.GetMinHypoStackDiversity())
+		{
+			WordsBitmapID id = hypothesis.GetWordsBitmap().GetIDPlus(transOpt.GetStartPos(), transOpt.GetEndPos());
+			float allowedScoreForBitmap = m_hypoStackColl[wordsTranslated]->GetWorstScoreForBitmap( id );
+			allowedScore = std::min( allowedScore, allowedScoreForBitmap );
+		}
+		allowedScore += staticData.GetEarlyDiscardingThreshold();
+		
 		// add expected score of translation option
 		expectedScore += transOpt.GetFutureScore();
 		// TRACE_ERR("EXPECTED diff: " << (newHypo->GetTotalScore()-expectedScore) << " (pre " << (newHypo->GetTotalScore()-expectedScorePre) << ") " << hypothesis.GetTargetPhrase() << " ... " << transOpt.GetTargetPhrase() << " [" << expectedScorePre << "," << expectedScore << "," << newHypo->GetTotalScore() << "]" << endl);

@@ -55,17 +55,20 @@ protected:
 	/** destroy all instances of Hypothesis in this collection */
 	void RemoveAll();
 
-	float GetWorstScoreForBitmap( const WordsBitmap &coverage ) {
-		WordsBitmapID id = coverage.GetID();
-		if (m_diversityWorstScore.find( id ) == m_diversityWorstScore.end())
-			return -numeric_limits<float>::infinity();
-		return m_diversityWorstScore[ id ];
-	}
 	void SetWorstScoreForBitmap( WordsBitmapID id, float worstScore ) {
 		m_diversityWorstScore[ id ] = worstScore;
 	}
 
 public:
+	float GetWorstScoreForBitmap( WordsBitmapID id ) {
+		if (m_diversityWorstScore.find( id ) == m_diversityWorstScore.end())
+			return -numeric_limits<float>::infinity();
+		return m_diversityWorstScore[ id ];
+	}
+	float GetWorstScoreForBitmap( const WordsBitmap &coverage ) {
+		return GetWorstScoreForBitmap( coverage.GetID() );
+	}
+
 	HypothesisStackNormal();
 
 	/** adds the hypo, but only if within thresholds (beamThr, stackSize).

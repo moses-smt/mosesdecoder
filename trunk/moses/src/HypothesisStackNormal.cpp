@@ -60,9 +60,15 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
 			VERBOSE(3,", best on stack");
 			m_bestScore = hypo->GetTotalScore();
 			// this may also affect the worst score
-	        if ( m_bestScore + m_beamWidth > m_worstScore )
-	          m_worstScore = m_bestScore + m_beamWidth;
-					}
+			if ( m_bestScore + m_beamWidth > m_worstScore )
+				m_worstScore = m_bestScore + m_beamWidth;
+		}
+		// update best/worst score for stack diversity 1
+		if ( m_minHypoStackDiversity == 1 && 
+		     hypo->GetTotalScore() > GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) )
+		{
+			SetWorstScoreForBitmap( hypo->GetWordsBitmap().GetID(), hypo->GetTotalScore() );
+		}
 	
 		VERBOSE(3,", now size " << m_hypos.size());
 
@@ -160,7 +166,7 @@ void HypothesisStackNormal::PruneToSize(size_t newSize)
 	}
 
 	// add best hyps for each coverage according to minStackDiversity
-        if ( m_minHypoStackDiversity > 0 ) 
+	if ( m_minHypoStackDiversity > 0 ) 
 	{
 		map< WordsBitmapID, size_t > diversityCount;
 		for(size_t i=0; i<hypos.size(); i++) 

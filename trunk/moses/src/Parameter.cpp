@@ -89,6 +89,7 @@ Parameter::Parameter()
 	AddParam("mbr-size", "number of translation candidates considered in MBR decoding (default 200)");
  	AddParam("mbr-scale", "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");
 	AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
+	AddParam("persistent-cache-size", "maximum size of cache for translation options (default 10,000 input phrases)");
 	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
 	AddParam("output-word-graph", "owg", "Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos");
 	AddParam("time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
