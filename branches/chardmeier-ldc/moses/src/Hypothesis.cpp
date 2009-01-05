@@ -352,43 +352,10 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 
 void Hypothesis::CalcDistortionScore()
 {
-        const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
-#if defined(CONDITION_ON_WORDS)
-        const float* params_cur = StaticData::Instance().GetDistortionParameters(m_sourcePhrase->GetWord(0).ToString(), "");
-#elif defined(CONDITION_ON_SRCPHRASE)
-        const float* params_cur = StaticData::Instance().GetDistortionParameters(m_sourcePhrase->ToString(), "");
-#else
-        const float* params_cur = StaticData::Instance().GetDistortionParameters(m_sourcePhrase->ToString(), m_targetPhrase.ToString());
-#endif
-        float distortionScore = dsp->CalculateDistortionScore(
-                        m_prevHypo->GetCurrSourceWordsRange(),
-                        this->GetCurrSourceWordsRange(), params_cur[0], params_cur[1]
-     );
-        m_scoreBreakdown.PlusEquals(dsp, distortionScore);
+	// temporarily disabled
+	return;
 
-        if(m_prevHypo->m_prevHypo == NULL)
-                return;
-
-        const DistortionScoreProducer *dsp2 = StaticData::Instance().GetDistortionScoreProducer2();
-#if defined(CONDITION_ON_WORDS)
-				const Phrase* prevSrcPhrase = m_prevHypo->m_sourcePhrase;
-        const float* params_prev = StaticData::Instance().GetDistortionParameters(prevSrcPhrase->GetWord(prevSrcPhrase->GetSize() - 1).ToString(), "");
-#elif defined(CONDITION_ON_SRCPHRASE)
-        const float* params_prev = StaticData::Instance().GetDistortionParameters(m_prevHypo->m_sourcePhrase->ToString(), "");
-#else
-        const float* params_prev = StaticData::Instance().GetDistortionParameters(m_prevHypo->m_sourcePhrase->ToString(), m_prevHypo->m_targetPhrase.ToString());
-#endif
-        float distortionScore2 = dsp2->CalculateDistortionScore(
-                        m_prevHypo->GetCurrSourceWordsRange(),
-                        this->GetCurrSourceWordsRange(), params_prev[2], params_prev[3]
-     );
-        m_scoreBreakdown.PlusEquals(dsp2, distortionScore2);
-}
-
-/*** OLD CODE ***/
 #if 0
-void Hypothesis::CalcDistortionScore()
-{
 	const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
 	float distortionScore = dsp->CalculateDistortionScore(
 			m_prevHypo->GetCurrSourceWordsRange(),
@@ -396,8 +363,8 @@ void Hypothesis::CalcDistortionScore()
 			m_prevHypo->GetWordsBitmap().GetFirstGapPos()
      );
 	m_scoreBreakdown.PlusEquals(dsp, distortionScore);
-}
 #endif
+}
 
 #ifdef VAR_DISTORTION_LIMIT
 int Hypothesis::CalcMaxDistortion()
@@ -437,8 +404,14 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	// FUTURE COST
 	CalcFutureScore(futureScore);
 
-	
-	//LEXICAL REORDERING COST
+	// LEXICAL DISTORTION COST
+	const std::vector<LexicalReordering*> &ldcModels = staticData.GetLexicalDistortionCostModels();
+	for(unsigned int i = 0; i < ldcModels.size(); i++)
+	{
+		m_scoreBreakdown.PlusEquals(ldcModels[i], ldcModels[i]->CalcScore(this));
+	}
+
+	// LEXICAL REORDERING COST
 	const std::vector<LexicalReordering*> &reorderModels = staticData.GetReorderModels();
 	for(unsigned int i = 0; i < reorderModels.size(); i++)
 	{

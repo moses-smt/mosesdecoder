@@ -75,6 +75,7 @@ Parameter::Parameter()
 	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words");	
 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
+	AddParam("lexical-distortion-cost", "source factors (0 if table independent of source), target factors, type, located of the lexicalised distortion cost models");
 	AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
  	AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
 	AddParam("mbr-size", "number of translation candidates considered in MBR decoding (default 200)");
@@ -291,7 +292,7 @@ bool Parameter::Validate()
 	  ext.push_back(".gz");
 		noErrorFlag = FilesExist("generation-file", 3, ext);
 	}
-	// distortion
+	// lexical reordering
 	if (noErrorFlag)
 	{
 	  std::vector<std::string> ext;
@@ -301,6 +302,14 @@ bool Parameter::Validate()
 	  //prefix tree format
 	  ext.push_back(".binlexr.idx");
 	  noErrorFlag = FilesExist("distortion-file", 3, ext);
+	}
+	if (noErrorFlag)
+	{
+	  std::vector<std::string> ext;
+	  //raw tables in either un compressed or compressed form
+	  ext.push_back("");
+	  ext.push_back(".gz");
+	  noErrorFlag = FilesExist("lexical-distortion-cost", 3, ext);
 	}
 	return noErrorFlag;
 }
