@@ -534,6 +534,78 @@ bool StaticData::LoadLexicalReorderingModel()
   return true;
 }
 
+bool StaticData::LoadLexicalDistortion() {
+  const vector<string> fileStr    = m_parameter->GetParam("lexical-distortion-cost");
+
+  for(size_t i = 0; i < fileStr.size(); ++i) {
+    vector<FactorType> input,output;
+    vector<string> spec = Tokenize<string>(fileStr[f], " ");
+    ++f; //mark file as consumed
+    if(4 != spec.size()) {
+      // wrong file specification string...
+      UserMessage::Add("Illegal specification for lexical distortion cost model " + i + "!");
+      return false;
+    }
+
+    // spec[0] = factor map
+    // spec[1] = pre/past/both
+    // spec[2] = type
+    // spec[3] = fileName
+
+    LexicalDistortionCost::Direction direction;
+    LexicalDistortionCost::Condition condition;
+
+    vector<string> inputfactors = Tokenize(spec[0],"-");
+    if(inputfactors.size() == 2) {
+      input  = Tokenize<FactorType>(inputfactors[0],",");
+      output = Tokenize<FactorType>(inputfactors[1],",");
+    } else if(inputfactors.size() == 1) {
+      // if there is only one side assume it is on e side... why?
+      output = Tokenize<FactorType>(inputfactors[0],",");
+    } else {
+      // format error
+      return false;
+    }
+
+    if(spec[1] == "forward")
+      direction = Forward;
+    else if(spec[1] == "backward")
+      direction = Backward;
+    else if(spec[1] == "bidirectional")
+      direction = Bidirectional;
+    else {
+      UserMessage::Add("Illegal specification of direction for lexical distortion cost model: " + spec[1]);
+      return false;
+    }
+
+    vector<string> params = Tokenize<string>(spec[2],"-");
+    if(params.size() != 3) {
+      UserMessage::Add("Illegal type specification for lexical distortion cost model: " + spec[2]);
+      return false;
+    }
+    std::string prior = params[0];
+    std::string distribution = params[1];
+
+    if(params[2] == "phrase")
+      condition = PhrasePair;
+    else if(params[2] == "word")
+      condition = Word;
+    else if(params[2] == "srcphrase")
+      condition = SourcePhrase;
+    else {
+      UserMessage::Add("Unknown condition in type specification for lexical distortion cost model: " + spec[2]);
+      return false;
+    }
+
+    std::string fileName = spec[3];
+
+    if(prior == "beta" && distribution == "binomial")
+      m_ldcModels.push_back(new LDCBetaBinomial(input, output, condition, fileName));
+  }
+
+  return true;
+}
+
 bool StaticData::LoadLanguageModels()
 {
 	if (m_parameter->GetParam("lmodel-file").size() > 0)
@@ -922,41 +994,3 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const Phrase &s
 
 	return &(iter->second);
 }
-
-bool StaticData::LoadLexicalDistortion(){
-  std::string fileName =
-                        // "/vox50/ssi/hardmeier/ldc.chi-eng/dist-table.dl12";
-                        // "/vox50/ssi/hardmeier/wdist-table";
-                        "/vox50/ssi/hardmeier/srcdist-table";
-                        // "/vox03/ssi/English-German/train/mtrain/europarl.doccase/model/ldc-pre-table.filtered";
-  if(!FileExists(fileName) && FileExists(fileName+".gz")){
-        fileName += ".gz";
-  }
-  InputFileStream file(fileName);
-  std::string line("");
-  std::cerr << "Loading distortion table into memory...";
-  while(!getline(file, line).eof()){
-    std::vector<std::string> tokens = TokenizeMultiCharSeparator(line, "|||");
-#if !defined(CONDITION_ON_WORDS) && !defined(CONDITION_ON_SRCPHRASE)
-    std::pair< std::string,std::string > e = std::make_pair(tokens.at(0), tokens.at(1));
-
-    //last token are the probs
-    std::vector<float> p = Scan<float>(Tokenize(tokens.at(2)));
-#else
-    std::pair< std::string,std::string > e = std::make_pair(tokens.at(0), "");
-    std::vector<float> p = Scan<float>(Tokenize(tokens.at(1)));
-#endif
-    //sanity check: all lines must have equall number of probs
-    if((int)p.size() != 4){
-      TRACE_ERR( "found inconsistent number of probabilities... found " << p.size() << " expected 4" << std::endl);
-      exit(0);
-    }
-    //save it all into our map
-    float *entry = new float[4];
-    entry[0] = p[0]; entry[1] = p[1]; entry[2] = p[2]; entry[3] = p[3];
-    m_distortionTable[e] = entry;
-  }
-  std::cerr << "done.\n";
-  return true;
-}
-

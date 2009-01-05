@@ -63,6 +63,7 @@ protected:
 	ScoreIndexManager				m_scoreIndexManager;
 	std::vector<float>			m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
+	std::vector<LexicalDistortionCost*>		m_ldcModels;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float
@@ -106,7 +107,6 @@ protected:
 
 	mutable size_t m_verboseLevel;
 	DistortionScoreProducer *m_distortionScoreProducer;
-	DistortionScoreProducer *m_distortionScoreProducer2;
 	WordPenaltyProducer *m_wpProducer;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
@@ -161,6 +161,7 @@ protected:
 	//! load decoding steps
 	bool LoadMapping();
 	bool LoadLexicalReorderingModel();
+        bool LoadLexicalDistortion();
 	
 public:
 
@@ -251,6 +252,10 @@ public:
 	const std::vector<LexicalReordering*> &GetReorderModels() const
 	{
 		return m_reorderModels;
+	}
+	const std::vector<LexicalDistortionCost*> &GetLexicalDistortionCostModels() const
+	{
+		return m_ldcModels;
 	}
 	float GetWeightDistortion() const
 	{
@@ -392,7 +397,6 @@ public:
 		return m_allWeights;
 	}
 	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
-	const DistortionScoreProducer *GetDistortionScoreProducer2() const { return m_distortionScoreProducer2; }
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
 	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 
@@ -421,8 +425,8 @@ public:
 
 	const TranslationOptionList* FindTransOptListInCache(const Phrase &sourcePhrase) const;
 
-        const float* GetDistortionParameters(std::string s, std::string t) const {
-                _DistortionMapType::const_iterator i = m_distortionTable.find(std::make_pair(s,t));
+        const float* GetDistortionParameters(std::string key) const {
+                _DistortionMapType::const_iterator i = m_distortionTable.find(key);
                 if(i != m_distortionTable.end()) {
                         // std::cerr << "found *" << s << "*: " << i->second.first << "/" << i->second.second << std::endl;
                         return i->second;
@@ -433,6 +437,4 @@ public:
                         return default_distortion;
                 }
         }
-
-        bool LoadLexicalDistortion();
 };
