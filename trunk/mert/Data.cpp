@@ -40,6 +40,7 @@ void Data::loadnbest(const std::string &file)
 	std::string theSentence;
 	std::string::size_type loc;
 
+
 	while (getline(inp,stringBuf,'\n')){
 		if (stringBuf.empty()) continue;
 
@@ -55,9 +56,11 @@ void Data::loadnbest(const std::string &file)
 		featentry.reset();
 		scoreentry.clear();
 
-		theScorer->prepareStats(sentence_index, theSentence, scoreentry);
+
+   	theScorer->prepareStats(sentence_index, theSentence, scoreentry);
+
 		scoredata->add(scoreentry, sentence_index);
-				
+
 		getNextPound(stringBuf, substring, "|||"); //third field
 
 		if (!existsFeatureNames()){

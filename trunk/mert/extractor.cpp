@@ -54,6 +54,15 @@ static struct option long_options[] =
 int option_index;
 
 int main(int argc, char** argv) {
+	
+	
+	ResetUserTime();
+	
+	/*
+	 Timer timer;
+	 timer.start("Starting...");
+	 */
+	
     //defaults
     string scorerType("BLEU");
     string scorerConfig("");
@@ -106,7 +115,7 @@ int main(int argc, char** argv) {
 
 //check whether score statistics file is specified
     if (scoreDataFile.length() == 0){
-	throw runtime_error("Error: output score statistics file is not specified");
+			throw runtime_error("Error: output score statistics file is not specified");
     }
 
 //check wheter feature file is specified
@@ -117,9 +126,9 @@ int main(int argc, char** argv) {
 //check whether reference file is specified when nbest is specified
     if ((nbestFile.length() > 0 && referenceFile.length() == 0)){
         throw runtime_error("Error: reference file is not specified; you can not score the nbest");
-
     }
  
+
     vector<string> nbestFiles;
     if (nbestFile.length() > 0){
         std::string substring;
@@ -167,33 +176,40 @@ int main(int argc, char** argv) {
 		TRACE_ERR("Scorer type: " << scorerType << endl);
 		ScorerFactory sfactory;
 		Scorer* scorer = sfactory.getScorer(scorerType,scorerConfig);
-				
-		Timer timer;
-		timer.start("Starting...");
-
+		
 		//load references        
 		if (referenceFiles.size() > 0)
 			scorer->setReferenceFiles(referenceFiles);
 
+		PrintUserTime("References loaded");
+		
 		Data data(*scorer);
 		
 	//load old data
 		for (size_t i=0;i < prevScoreDataFiles.size(); i++){
 			data.load(prevFeatureDataFiles.at(i), prevScoreDataFiles.at(i));
 		}
-
+		
+		PrintUserTime("Previous data loaded");
+		
 	//computing score statistics of each nbest file
 		for (size_t i=0;i < nbestFiles.size(); i++){
 			data.loadnbest(nbestFiles.at(i));
 		}
-								
+
+		PrintUserTime("Nbest entries loaded and scored");
+		
 		if (binmode)
 			cerr << "Binary write mode is selected" << endl;
 		else
 			cerr << "Binary write mode is NOT selected" << endl;
 			
 		data.save(featureDataFile, scoreDataFile, binmode);
-		timer.stop("Stopping...");
+		PrintUserTime("Stopping...");
+/*
+ timer.stop("Stopping...");
+		*/
+		
 		return EXIT_SUCCESS;
     } catch (const exception& e) {
 			cerr << "Exception: " << e.what() << endl;

@@ -9,6 +9,13 @@
 #include <stdexcept>
 #include "Util.h"
 
+#include "Timer.h"
+
+using namespace std;
+
+//global variable
+Timer g_timer;
+
 int verbose=0;
 
 int verboselevel(){
@@ -102,4 +109,19 @@ int swapbytes(char *p, int sz, int n)
 	return 0;
 
 };
+
+void ResetUserTime()
+{
+  g_timer.start();
+};
+
+void PrintUserTime(const std::string &message)
+{ 
+        g_timer.check(message.c_str());
+}
+
+double GetUserTime()
+{
+        return g_timer.get_elapsed_time();
+}
 

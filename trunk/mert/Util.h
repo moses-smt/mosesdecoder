@@ -92,5 +92,10 @@ inline std::string stringify(T x)
 	return o.str();
 }
 
+// Utilities to measure decoding time
+void ResetUserTime();
+void PrintUserTime(const std::string &message);
+double GetUserTime();
+
 #endif
 

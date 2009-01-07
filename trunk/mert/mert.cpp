@@ -58,6 +58,15 @@ static struct option long_options[] =
 int option_index;
 
 int main (int argc, char **argv) {
+	
+	
+	ResetUserTime();
+		
+	/*
+	 Timer timer;
+	 timer.start("Starting...");
+	*/
+	
   int c,pdim,i;
   pdim=-1;
   int ntry=1;
@@ -104,9 +113,6 @@ int main (int argc, char **argv) {
   }
   if (pdim < 0)
     usage();
-
-  Timer timer;
-  timer.start("Starting...");
   
   if(tooptimize.empty()){
     tooptimize.resize(pdim);//We'll optimize on everything
@@ -162,6 +168,9 @@ int main (int argc, char **argv) {
     D.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
   }
 
+	
+	PrintUserTime("Data loaded");
+	
   Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start,type);
   O->SetScorer(TheScorer);
   O->SetFData(D.getFeatureData());
@@ -170,7 +179,12 @@ int main (int argc, char **argv) {
   Point bestP=P;  
   statscore_t mean=best;
   statscore_t var=best*best;
-   
+
+	stringstream oss;
+  oss << "Try number 1";
+	 
+  PrintUserTime(oss.str());
+	
   vector<parameter_t> min(Point::getdim());
   vector<parameter_t> max(Point::getdim());
  
@@ -179,7 +193,8 @@ int main (int argc, char **argv) {
     max[d]=1.0;
   }
   //note: those mins and max are the bound for the starting points of the algorithm, not strict bound on the result!
-  
+ 
+ 
  for(int i=1;i<ntry;i++){
    P.Randomize(min,max);
    statscore_t score=O->Run(P);
@@ -189,6 +204,10 @@ int main (int argc, char **argv) {
   }
    mean+=score;
    var+=(score*score);
+	 
+	 oss.str(""); 
+	 oss << "Try number " << (i+1);
+	 PrintUserTime(oss.str());
  }
  mean/=(float)ntry;
  var/=(float)ntry;
@@ -203,5 +222,8 @@ int main (int argc, char **argv) {
  ofstream res("weights.txt");
  res<<bestP<<endl;
  
- timer.stop("Stopping...");
+ PrintUserTime("Stopping...");
+ /*
+	timer.stop("Stopping...");
+		*/
 }
