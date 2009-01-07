@@ -351,6 +351,13 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
   statscore_t bestscore=MIN_FLOAT;
   Point  best;
 	
+	//If P is already defined and provides a score
+  //we must improve over this score
+	if(P.score>bestscore){
+		bestscore=P.score;
+		best=P;
+	}
+	
   int nrun=0;
   do{
     ++nrun;    
