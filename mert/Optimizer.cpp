@@ -350,6 +350,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
   statscore_t prevscore=0;
   statscore_t bestscore=MIN_FLOAT;
   Point  best;
+	
   int nrun=0;
   do{
     ++nrun;    
@@ -361,32 +362,32 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
     
     for(unsigned int d=0;d<Point::getdim();d++){
       if(verboselevel()>4){
-//	cerr<<"minimizing along direction "<<d<<endl;
-	cerr<<"starting point: " << P << " => " << prevscore << endl;
+				//	cerr<<"minimizing along direction "<<d<<endl;
+				cerr<<"starting point: " << P << " => " << prevscore << endl;
       }
       Point direction;
       for(unsigned int i=0;i<Point::getdim();i++)
-	direction[i];
+				direction[i];
       direction[d]=1.0;
       statscore_t curscore=LineOptimize(P,direction,linebest);//find the minimum on the line
-      if(verboselevel()>5){
-	cerr<<"direction: "<< d << endl;
-	cerr<<"\tending point: "<< linebest << " => " << curscore << endl;
-      }
-      if(curscore>bestscore){
-	bestscore=curscore;
-	best=linebest;	
-	if(verboselevel()>3){
-	cerr<<"new best dir:"<<d<<" ("<<nrun<<")"<<endl;
-	cerr<<"new best Point "<<best<<endl;
-	  }
-      }
+				if(verboselevel()>5){
+					cerr<<"direction: "<< d << " => " << curscore << endl;
+					cerr<<"\tending point: "<< linebest << " => " << curscore << endl;
+				}
+				if(curscore>bestscore){
+					bestscore=curscore;
+					best=linebest;	
+					if(verboselevel()>3){
+						cerr<<"new best dir:"<<d<<" ("<<nrun<<")"<<endl;
+						cerr<<"new best Point "<<best<< " => " <<curscore<<endl;
+					}
+				}
     }
     P=best;//update the current vector with the best point on all line tested
-    if(verboselevel()>3)
-      cerr<<nrun<<"\t"<<P<<endl;
-}while(bestscore-prevscore>eps);
-
+			if(verboselevel()>3)
+				cerr<<nrun<<"\t"<<P<<endl;
+	}while(bestscore-prevscore>eps);
+	
   if(verboselevel()>2){
     cerr<<"end Powell Algo, nrun="<<nrun<<endl;
     cerr<<"last diff="<<bestscore-prevscore<<endl;
