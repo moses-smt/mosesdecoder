@@ -5,8 +5,8 @@ use strict;
 
 my $stem = $ARGV[0];
 if (!defined $stem) {
-  print STDERR "usage: multi-bleu.pl reference.filestem < hypothesis\n";
-  print STDERR "Reads the references from reference.filestem.0, reference.filestem.1, ...\n";
+  print STDERR "usage: multi-bleu.pl reference < hypothesis\n";
+  print STDERR "Reads the references from reference or reference0, reference1, ...\n";
   exit(1);
 }
 
