@@ -191,6 +191,12 @@ bool ReorderingConstraint::Check( const WordsBitmap &bitmap, size_t startPos, si
 		// * the phrase is in the zone (at least partially)
 		// * either zone is already active, or it becomes active now
 
+    // check, if we are setting us up for a dead end due to distortion limits
+		if (startPos != firstGapPos && endZone-firstGapPos >= StaticData::Instance().GetMaxDistortion()) {
+			VERBOSE(3," dead end due to distortion limit" << std::endl);
+			return false;
+		}
+
 		// let us check on phrases that are partially outside
 
 		// phrase overlaps at the beginning, always ok
