@@ -64,6 +64,7 @@ Parameter::Parameter()
 	AddParam("use-distortion-future-costs", "consider expected distortion cost in future cost estimation");
 	AddParam("verbose", "v", "verbosity level of the logging");
 	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
+	AddParam("weight-ldc", "ldc", "weights for lexical distortion models");
 	AddParam("weight-generation", "g", "weight(s) for generation components");
 	AddParam("weight-i", "I", "weight for word insertion");
 	AddParam("weight-l", "lm", "weight(s) for language models");
