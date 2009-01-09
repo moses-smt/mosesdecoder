@@ -3,9 +3,92 @@
 #include <cassert>
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
+#include "InputFileStream.h"
+#include "LexicalDistortionCost.h"
 #include "WordsRange.h"
 
-std::vector<float> LexicalDistortionCost::CalcScore(Hypothesis *h)
+LexicalDistortionCost::LexicalDistortionCost(const std::string &filePath,
+		Direction direction,
+		Condition condition,
+		std::vector< FactorType >& f_factors,
+		std::vector< FactorType >& e_factors) :
+	m_direction(direction), m_condition(condition),
+	m_srcfactors(f_factors), m_tgtfactors(e_factors),
+	m_defaultDistortion(4,12)
+{
+	LoadTable(filePath);
+}
+
+LexicalDistortionCost::~LexicalDistortionCost()
+{
+	for(_DistortionTableType::iterator i = m_distortionTableForward.begin(); i != m_distortionTableForward.end(); ++i)
+		delete i->second;
+	for(_DistortionTableType::iterator i = m_distortionTableBackward.begin(); i != m_distortionTableBackward.end(); ++i)
+		delete i->second;
+}
+
+bool LexicalDistortionCost::LoadTable(std::string fileName)
+{
+	if(!FileExists(fileName) && FileExists(fileName+".gz"))
+		fileName += ".gz";
+	InputFileStream file(fileName);
+	std::string line("");
+	std::cerr << "Loading distortion table into memory...";
+
+	assert(m_condition == Word || m_condition == SourcePhrase || m_condition == PhrasePair);
+	assert(m_direction == Forward || m_direction == Backward || m_direction == Bidirectional);
+	size_t nump = GetNumParameterSets() * GetNumParameters();
+	while(!getline(file, line).eof()) {
+		std::vector<std::string> tokens = TokenizeMultiCharSeparator(line, "|||");
+		std::string key;
+		std::vector<float> p;
+		if(m_condition == Word || m_condition == SourcePhrase) {
+			key = tokens.at(0) + " ||| " + tokens.at(1);
+			//last token are the probs
+			p = Scan<float>(Tokenize(tokens.at(2)));
+		} else if(m_condition == PhrasePair) {
+			key = tokens.at(0);
+			p = Scan<float>(Tokenize(tokens.at(1)));
+		}
+
+		if(p.size() != nump) {
+			TRACE_ERR( "found inconsistent number of parameters... found " << p.size()
+				<< " expected " << nump << std::endl);
+			return false;
+		}
+
+		if(m_direction == Forward)
+			m_distortionTableForward[key] = new std::vector<float>(p);
+		else if(m_direction == Backward)
+			m_distortionTableBackward[key] = new std::vector<float>(p);
+		else if(m_direction == Bidirectional) {
+			m_distortionTableForward[key] = new std::vector<float>(p.begin(), p.begin() + GetNumParameters());
+			m_distortionTableBackward[key] = new std::vector<float>(p.begin() + GetNumParameters(), p.end());
+		}
+	}
+	std::cerr << "done.\n";
+	return true;
+}
+
+const std::vector<float> *LexicalDistortionCost::GetDistortionParameters(std::string key, Direction dir) const
+{
+	assert(dir == Forward || dir == Backward);
+
+	const _DistortionTableType &tab = dir == Forward ? m_distortionTableForward : m_distortionTableBackward;
+
+	_DistortionTableType::const_iterator i = tab.find(key);
+	if(i != tab.end()) {
+		// std::cerr << "found *" << s << "*: " << i->second.first << "/" << i->second.second << std::endl;
+		return i->second;
+	} else {
+		// std::cerr << "not found: *" << s << "*" << std::endl;
+		// static const float default_distortion[4] = {8.23, 8, 8.23, 8};
+		// static const float default_distortion[4] = {12, 12, 12, 12};
+		return &m_defaultDistortion;
+	}
+}
+
+std::vector<float> LexicalDistortionCost::CalcScore(Hypothesis *h) const
 {
 	std::vector<float> scores;
 	std::string key;
@@ -14,77 +97,47 @@ std::vector<float> LexicalDistortionCost::CalcScore(Hypothesis *h)
 		if(m_condition == Word)
 			key = h->GetSourcePhrase()->GetWord(0).ToString();
 		else if(m_condition == SourcePhrase)
-			key = h->GetSourcePhraseStringRep();
+			key = h->GetSourcePhraseStringRep(m_srcfactors);
 		else if(m_condition == PhrasePair)
-			key = h->GetSourcePhraseStringRep() + " ||| " + h->GetTargetPhraseStringRep();
+			key = h->GetSourcePhraseStringRep(m_srcfactors) + " ||| " +
+				h->GetTargetPhraseStringRep(m_tgtfactors);
 
-		std::vector<float> params_cur = StaticData::Instance().GetDistortionParameters(key, Forward);
+		const std::vector<float> *params_cur = GetDistortionParameters(key, Forward);
 		scores.push_back(CalculateDistortionScore(
 			h->GetPrevHypo()->GetCurrSourceWordsRange(),
-			this->GetCurrSourceWordsRange(), params_cur);
+			h->GetCurrSourceWordsRange(), params_cur));
 	}
 
 	if(m_direction == Backward || m_direction == Bidirectional) {
 		if(h->GetPrevHypo()->GetPrevHypo() == NULL)
 			scores.push_back(.0f);
 		else {
+			assert(m_condition == Word || m_condition == SourcePhrase || m_condition == PhrasePair);
 			if(m_condition == Word) {
 				const Phrase* prevSrcPhrase = h->GetPrevHypo()->GetSourcePhrase();
 				key = prevSrcPhrase->GetWord(prevSrcPhrase->GetSize() - 1).ToString();
 			} else if(m_condition == SourcePhrase)
-				key = h->GetPrevHypo()->GetSourcePhraseStringRep();
+				key = h->GetPrevHypo()->GetSourcePhraseStringRep(m_srcfactors);
 			else if(m_condition == PhrasePair)
-				key = h->GetPrevHypo()->GetSourcePhraseStringRep() + " ||| " +
-					h->GetPrevHypo()->GetTargetPhraseStringRep());
+				key = h->GetPrevHypo()->GetSourcePhraseStringRep(m_srcfactors) + " ||| " +
+					h->GetPrevHypo()->GetTargetPhraseStringRep(m_tgtfactors);
 
-			std::vector<float> params_prev = StaticData::Instance().GetDistortionParameters(key, Backward);
+			const std::vector<float> *params_prev = GetDistortionParameters(key, Backward);
 			scores.push_back(CalculateDistortionScore(
 					h->GetPrevHypo()->GetCurrSourceWordsRange(),
-					this->GetCurrSourceWordsRange(), params_prev);
+					h->GetCurrSourceWordsRange(), params_prev));
 		}
 	}
 
 	return scores;
 }
 
-bool LexicalDistortionCost::LoadTable()
-{
-  if(!FileExists(fileName) && FileExists(fileName+".gz")){
-        fileName += ".gz";
-  }
-  InputFileStream file(fileName);
-  std::string line("");
-  std::cerr << "Loading distortion table into memory...";
-  while(!getline(file, line).eof()){
-    std::vector<std::string> tokens = TokenizeMultiCharSeparator(line, "|||");
-#if !defined(CONDITION_ON_WORDS) && !defined(CONDITION_ON_SRCPHRASE)
-    std::pair< std::string,std::string > e = std::make_pair(tokens.at(0), tokens.at(1));
-
-    //last token are the probs
-    std::vector<float> p = Scan<float>(Tokenize(tokens.at(2)));
-#else
-    std::pair< std::string,std::string > e = std::make_pair(tokens.at(0), "");
-    std::vector<float> p = Scan<float>(Tokenize(tokens.at(1)));
-#endif
-    //sanity check: all lines must have equall number of probs
-    if((int)p.size() != 4){
-      TRACE_ERR( "found inconsistent number of probabilities... found " << p.size() << " expected 4" << std::endl);
-      exit(0);
-    }
-    //save it all into our map
-    float *entry = new float[4];
-    entry[0] = p[0]; entry[1] = p[1]; entry[2] = p[2]; entry[3] = p[3];
-    m_distortionTable[e] = entry;
-  }
-  std::cerr << "done.\n";
-  return true;
-}
-
-float LDCBetaBinomial::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr, std::vector<float> params) const
+float LDCBetaBinomial::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr,
+	const std::vector<float> *params) const
 {
         // float p = px + 2.23;
-        float p = params[0] + 2;
-        float q = params[1] + 2;
+        float p = params->at(0) + 2;
+        float q = params->at(1) + 2;
 
         int x = StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
         if(x < -m_distortionRange) x = -m_distortionRange;

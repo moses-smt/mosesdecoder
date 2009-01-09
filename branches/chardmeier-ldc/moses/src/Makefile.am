@@ -30,6 +30,7 @@ libmoses_a_SOURCES = \
 	LanguageModelSkip.cpp \
 	TrellisPath.cpp \
 	TrellisPathCollection.cpp \
+	LexicalDistortionCost.cpp \
 	LexicalReordering.cpp \
 	LexicalReorderingTable.cpp \
 	Manager.cpp \
