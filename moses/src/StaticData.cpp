@@ -605,20 +605,23 @@ bool StaticData::LoadLexicalDistortion() {
 
     if(prior == "beta" && distribution == "binomial")
       newmodel = new LDCBetaBinomial(fileName, direction, condition, input, output);
-    else
-      assert(false);
-
-    m_ldcModels.push_back(newmodel);
-    m_scoreIndexManager.AddScoreProducer(newmodel);
+    else {
+      UserMessage::Add("Lexical distortion model type not implemented: " + spec[2]);
+      return false;
+    }
 
     std::vector<float> cur_weights;
-    for(size_t i = 0; i < newmodel->GetNumParameterSets() * newmodel->GetNumParameters(); i++, weightIdx++) {
+    for(size_t i = 0; i < newmodel->GetNumScoreComponents(); i++, weightIdx++) {
       if(weightIdx >= weights.size()) {
         UserMessage::Add("Insufficient number of lexical distortion model weights.");
+        delete newmodel;
         return false;
       }
       cur_weights.push_back(weights[weightIdx]);
     }
+
+    m_ldcModels.push_back(newmodel);
+    m_scoreIndexManager.AddScoreProducer(newmodel);
     SetWeightsForScoreProducer(newmodel, cur_weights);
   }
 
