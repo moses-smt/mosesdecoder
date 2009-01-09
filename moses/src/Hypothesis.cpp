@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "Util.h"
 #include "SquareMatrix.h"
+#include "LexicalDistortionCost.h"
 #include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
@@ -405,7 +406,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	CalcFutureScore(futureScore);
 
 	// LEXICAL DISTORTION COST
-	const std::vector<LexicalReordering*> &ldcModels = staticData.GetLexicalDistortionCostModels();
+	const std::vector<LexicalDistortionCost*> &ldcModels = staticData.GetLexicalDistortionCostModels();
 	for(unsigned int i = 0; i < ldcModels.size(); i++)
 	{
 		m_scoreBreakdown.PlusEquals(ldcModels[i], ldcModels[i]->CalcScore(this));

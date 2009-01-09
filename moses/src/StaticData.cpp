@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelSingleFactor.h"
 #include "LanguageModelMultiFactor.h"
 #include "LanguageModelFactory.h"
+#include "LexicalDistortionCost.h"
 #include "LexicalReordering.h"
 #include "SentenceStats.h"
 #include "PhraseDictionaryTreeAdaptor.h"
@@ -67,7 +68,6 @@ StaticData::StaticData()
 ,m_inputType(SentenceInput)
 ,m_numInputScores(0)
 ,m_distortionScoreProducer(0)
-,m_distortionScoreProducer2(0)
 ,m_wpProducer(0)
 ,m_useDistortionFutureCosts(false)
 ,m_isDetailedTranslationReportingEnabled(false) 
@@ -227,8 +227,6 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightDistortion);
-	m_distortionScoreProducer2 = new DistortionScoreProducer(m_scoreIndexManager);
-	m_allWeights.push_back(m_weightDistortion2);
 
 	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightWordPenalty);
@@ -369,7 +367,6 @@ StaticData::~StaticData()
 	
 	// small score producers
 	delete m_distortionScoreProducer;
-	delete m_distortionScoreProducer2;
 	delete m_wpProducer;
 	delete m_unknownWordPenaltyProducer;
 
@@ -539,11 +536,10 @@ bool StaticData::LoadLexicalDistortion() {
 
   for(size_t i = 0; i < fileStr.size(); ++i) {
     vector<FactorType> input,output;
-    vector<string> spec = Tokenize<string>(fileStr[f], " ");
-    ++f; //mark file as consumed
+    vector<string> spec = Tokenize<string>(fileStr[i], " ");
     if(4 != spec.size()) {
       // wrong file specification string...
-      UserMessage::Add("Illegal specification for lexical distortion cost model " + i + "!");
+      UserMessage::Add("Illegal specification for lexical distortion cost model");
       return false;
     }
 
@@ -568,11 +564,11 @@ bool StaticData::LoadLexicalDistortion() {
     }
 
     if(spec[1] == "forward")
-      direction = Forward;
+      direction = LexicalDistortionCost::Forward;
     else if(spec[1] == "backward")
-      direction = Backward;
+      direction = LexicalDistortionCost::Backward;
     else if(spec[1] == "bidirectional")
-      direction = Bidirectional;
+      direction = LexicalDistortionCost::Bidirectional;
     else {
       UserMessage::Add("Illegal specification of direction for lexical distortion cost model: " + spec[1]);
       return false;
@@ -587,11 +583,11 @@ bool StaticData::LoadLexicalDistortion() {
     std::string distribution = params[1];
 
     if(params[2] == "phrase")
-      condition = PhrasePair;
+      condition = LexicalDistortionCost::PhrasePair;
     else if(params[2] == "word")
-      condition = Word;
+      condition = LexicalDistortionCost::Word;
     else if(params[2] == "srcphrase")
-      condition = SourcePhrase;
+      condition = LexicalDistortionCost::SourcePhrase;
     else {
       UserMessage::Add("Unknown condition in type specification for lexical distortion cost model: " + spec[2]);
       return false;
@@ -600,7 +596,7 @@ bool StaticData::LoadLexicalDistortion() {
     std::string fileName = spec[3];
 
     if(prior == "beta" && distribution == "binomial")
-      m_ldcModels.push_back(new LDCBetaBinomial(input, output, condition, fileName));
+      m_ldcModels.push_back(new LDCBetaBinomial(fileName, direction, condition, input, output));
   }
 
   return true;
