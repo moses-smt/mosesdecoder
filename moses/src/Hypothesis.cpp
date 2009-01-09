@@ -353,10 +353,6 @@ void Hypothesis::CalcLMScore(const LMList &languageModels)
 
 void Hypothesis::CalcDistortionScore()
 {
-	// temporarily disabled
-	return;
-
-#if 0
 	const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
 	float distortionScore = dsp->CalculateDistortionScore(
 			m_prevHypo->GetCurrSourceWordsRange(),
@@ -364,7 +360,6 @@ void Hypothesis::CalcDistortionScore()
 			m_prevHypo->GetWordsBitmap().GetFirstGapPos()
      );
 	m_scoreBreakdown.PlusEquals(dsp, distortionScore);
-#endif
 }
 
 #ifdef VAR_DISTORTION_LIMIT

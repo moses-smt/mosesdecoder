@@ -385,7 +385,7 @@ bool StaticData::LoadLexicalReorderingModel()
   const vector<string> weightsStr = m_parameter.GetParam("weight-d");
   */
   std::vector<float>   weights;
-  size_t w = 2; //cur weight
+  size_t w = 1; //cur weight
   size_t f = 0; //cur file
   //get weights values
   std::cerr << "have " << fileStr.size() << " models\n";
