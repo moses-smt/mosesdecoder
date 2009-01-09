@@ -221,7 +221,6 @@ bool StaticData::LoadData(Parameter *parameter)
 	// score weights
 	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
 	m_weightDistortion				= Scan<float>(distortionWeights[0]);
-	m_weightDistortion2				= Scan<float>(distortionWeights[1]);
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
 	m_weightUnknownWord				= 1; // do we want to let mert decide weight for this ???
 
@@ -533,6 +532,13 @@ bool StaticData::LoadLexicalReorderingModel()
 
 bool StaticData::LoadLexicalDistortion() {
   const vector<string> fileStr    = m_parameter->GetParam("lexical-distortion-cost");
+  const vector<string> weightsStr = m_parameter->GetParam("weight-ldc");
+
+  std::vector<float> weights;
+  for(size_t j = 0; j < weightsStr.size(); ++j) {
+    weights.push_back(Scan<float>(weightsStr[j]));
+  }
+  size_t weightIdx = 0;
 
   for(size_t i = 0; i < fileStr.size(); ++i) {
     vector<FactorType> input,output;
@@ -595,8 +601,25 @@ bool StaticData::LoadLexicalDistortion() {
 
     std::string fileName = spec[3];
 
+    LexicalDistortionCost *newmodel;
+
     if(prior == "beta" && distribution == "binomial")
-      m_ldcModels.push_back(new LDCBetaBinomial(fileName, direction, condition, input, output));
+      newmodel = new LDCBetaBinomial(fileName, direction, condition, input, output);
+    else
+      assert(false);
+
+    m_ldcModels.push_back(newmodel);
+    m_scoreIndexManager.AddScoreProducer(newmodel);
+
+    std::vector<float> cur_weights;
+    for(size_t i = 0; i < newmodel->GetNumParameterSets() * newmodel->GetNumParameters(); i++, weightIdx++) {
+      if(weightIdx >= weights.size()) {
+        UserMessage::Add("Insufficient number of lexical distortion model weights.");
+        return false;
+      }
+      cur_weights.push_back(weights[weightIdx]);
+    }
+    SetWeightsForScoreProducer(newmodel, cur_weights);
   }
 
   return true;

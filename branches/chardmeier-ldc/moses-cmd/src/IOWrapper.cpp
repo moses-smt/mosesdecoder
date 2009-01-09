@@ -42,6 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
 #include "InputFileStream.h"
+#include "LexicalDistortionCost.h"
 
 using namespace std;
 
@@ -305,7 +306,6 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 		if (labeledOutput)
 	    *m_nBestStream << "d: ";
 		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
-		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer2()) << " ";
 
 //		reordering
 		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();
@@ -320,6 +320,23 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 				  		*m_nBestStream << scores[j] << " ";
 					}
 				}
+		}
+			
+		// lexical distortion cost
+		vector<LexicalDistortionCost*> ldcm = StaticData::Instance().GetLexicalDistortionCostModels();
+		if(ldcm.size() > 0)
+		{
+			if (labeledOutput) *m_nBestStream << "ldc: ";
+
+			vector<LexicalDistortionCost*>::iterator iter;
+			for(iter = ldcm.begin(); iter != ldcm.end(); ++iter)
+			{
+				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+				for (size_t j = 0; j<scores.size(); ++j) 
+				{
+			  		*m_nBestStream << scores[j] << " ";
+				}
+			}
 		}
 			
 		// lm

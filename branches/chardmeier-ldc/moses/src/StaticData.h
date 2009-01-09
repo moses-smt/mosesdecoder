@@ -49,12 +49,10 @@ class UnknownWordPenaltyProducer;
 class StaticData
 {
 private:
-	typedef std::map< std::pair< std::string,std::string >,float* > _DistortionMapType;
 	static StaticData									s_instance;
 protected:	
 
 	std::map<long,Phrase> m_constraints;
-	_DistortionMapType m_distortionTable;
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	std::vector <DecodeGraph*>		m_decodeStepVL;
@@ -70,7 +68,6 @@ protected:
 	float
 		m_beamWidth,
 		m_weightDistortion, 
-		m_weightDistortion2, 
 		m_weightWordPenalty, 
 		m_wordDeletionWeight,
 		m_weightUnknownWord;
