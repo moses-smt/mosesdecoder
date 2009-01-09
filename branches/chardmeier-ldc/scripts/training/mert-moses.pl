@@ -63,6 +63,8 @@ my $additional_triples = {
 	      [ 1.0, 0.0, 2.0 ],
 	      [ 1.0, 0.0, 2.0 ],
 	      [ 1.0, 0.0, 2.0 ] ],
+    "ldc" => [[ 1.0, 0.0, 2.0 ],    # lexical distortion cost model
+              [ 1.0, 0.0, 2.0 ] ],
     "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
     "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
 	      [ 1.0, 0.0, 2.0 ] ],
@@ -75,14 +77,14 @@ my $additional_triples = {
 
 # moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
 # uses ABBR names.
-my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation";
+my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation ldc=weight-ldc";
 my %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
 my %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
 
 # We parse moses.ini to figure out how many weights do we need to optimize.
 # For this, we must know the correspondence between options defining files
 # for models and options assigning weights to these models.
-my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g";
+my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g lexical-distortion-cost=ldc";
 my %TABLECONFIG2ABBR = map {split(/=/,$_,2)} split /\s+/, $TABLECONFIG_ABBR_MAP;
 
 # There are weights that do not correspond to any input file, they just increase the total number of lambdas we optimize
@@ -1064,6 +1066,7 @@ sub scan_config {
     "generation-file" => 3,
     "lmodel-file" => 3,
     "distortion-file" => 3,
+    "lexical-distortion-cost" => 4,
   );
   # by default, each line of each section means one lambda, but some sections
   # explicitly state a custom number of lambdas
@@ -1071,6 +1074,7 @@ sub scan_config {
     "ttable-file" => 2,
     "generation-file" => 2,
     "distortion-file" => 2,
+    "lexical-distortion-cost" => 1,
   );
   
   open INI, $ini or die "Can't read $ini";
