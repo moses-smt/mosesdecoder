@@ -11,10 +11,13 @@ LexicalDistortionCost::LexicalDistortionCost(const std::string &filePath,
 		Direction direction,
 		Condition condition,
 		std::vector< FactorType >& f_factors,
-		std::vector< FactorType >& e_factors) :
+		std::vector< FactorType >& e_factors,
+		size_t numParametersPerDirection) :
+        m_modelFileName(filePath),
 	m_direction(direction), m_condition(condition),
 	m_srcfactors(f_factors), m_tgtfactors(e_factors),
-	m_defaultDistortion(4,12)
+	m_defaultDistortion(4,12),
+	m_numParametersPerDirection(numParametersPerDirection)
 {
 	LoadTable(filePath);
 }
@@ -37,16 +40,16 @@ bool LexicalDistortionCost::LoadTable(std::string fileName)
 
 	assert(m_condition == Word || m_condition == SourcePhrase || m_condition == PhrasePair);
 	assert(m_direction == Forward || m_direction == Backward || m_direction == Bidirectional);
-	size_t nump = GetNumParameterSets() * GetNumParameters();
+	size_t nump = GetNumParameterSets() * GetNumParametersPerDirection();
 	while(!getline(file, line).eof()) {
 		std::vector<std::string> tokens = TokenizeMultiCharSeparator(line, "|||");
 		std::string key;
 		std::vector<float> p;
-		if(m_condition == Word || m_condition == SourcePhrase) {
+		if(m_condition == Word || m_condition == PhrasePair) {
 			key = tokens.at(0) + " ||| " + tokens.at(1);
 			//last token are the probs
 			p = Scan<float>(Tokenize(tokens.at(2)));
-		} else if(m_condition == PhrasePair) {
+		} else if(m_condition == SourcePhrase) {
 			key = tokens.at(0);
 			p = Scan<float>(Tokenize(tokens.at(1)));
 		}
@@ -62,8 +65,10 @@ bool LexicalDistortionCost::LoadTable(std::string fileName)
 		else if(m_direction == Backward)
 			m_distortionTableBackward[key] = new std::vector<float>(p);
 		else if(m_direction == Bidirectional) {
-			m_distortionTableForward[key] = new std::vector<float>(p.begin(), p.begin() + GetNumParameters());
-			m_distortionTableBackward[key] = new std::vector<float>(p.begin() + GetNumParameters(), p.end());
+			m_distortionTableForward[key] = new std::vector<float>(p.begin(),
+				p.begin() + GetNumParametersPerDirection());
+			m_distortionTableBackward[key] = new std::vector<float>(p.begin() + GetNumParametersPerDirection(),
+				p.end());
 		}
 	}
 	std::cerr << "done.\n";

@@ -18,26 +18,26 @@ class LexicalDistortionCost : public ScoreProducer {
  public: //types & consts
   enum Direction {Forward, Backward, Bidirectional, Unidirectional = Backward};
   enum Condition {PhrasePair, Word, SourcePhrase};
- public: //con- & destructors 
+ protected: //con- & destructors 
   LexicalDistortionCost(const std::string &filePath, 
-		    Direction direction, 
-		    Condition condition, 
-		    std::vector< FactorType >& f_factors, 
-		    std::vector< FactorType >& e_factors);
+				Direction direction, 
+				Condition condition, 
+				std::vector< FactorType >& f_factors, 
+				std::vector< FactorType >& e_factors,
+				size_t numParametersPerDirection);
+ public:
   virtual ~LexicalDistortionCost();
  public: //interface
-  //inherited
   virtual size_t GetNumScoreComponents() const {
     return GetNumParameterSets();
   };
   
-  virtual std::string GetScoreProducerDescription() const {
-    return "Generic Lexical Distortion Cost model... overwrite in subclass.";
-  };
-  //new 
+  virtual std::string GetScoreProducerDescription() const = 0;
 
   // number of parameters per direction
-  virtual size_t          GetNumParameters() const = 0;
+  size_t GetNumParametersPerDirection() const {
+    return m_numParametersPerDirection;
+  }
 
   size_t GetNumParameterSets() const {
     return m_direction == Bidirectional ? 2 : 1;
@@ -54,9 +54,11 @@ class LexicalDistortionCost : public ScoreProducer {
   //- static std::vector<Direction> DecodeDirection(Direction d);
 
  protected:
-  virtual float CalculateDistortionScore(	const WordsRange &prev,
+   virtual float CalculateDistortionScore(	const WordsRange &prev,
 						const WordsRange &curr,
 						const std::vector<float> *parameters) const = 0;
+   std::string m_modelFileName;
+
  private:
    const std::vector<float> *GetDistortionParameters(std::string key, Direction dir) const;
    bool LoadTable(std::string fileName);
@@ -67,8 +69,7 @@ class LexicalDistortionCost : public ScoreProducer {
    std::vector<FactorType> m_srcfactors, m_tgtfactors;
    _DistortionTableType m_distortionTableForward, m_distortionTableBackward;
    std::vector<float> m_defaultDistortion;
-
-  //- size_t m_NumScoreComponents;
+   size_t m_numParametersPerDirection;
 };
 
 class LDCBetaBinomial : public LexicalDistortionCost {
@@ -78,12 +79,12 @@ class LDCBetaBinomial : public LexicalDistortionCost {
 		    Condition condition, 
 		    std::vector< FactorType >& f_factors, 
 		    std::vector< FactorType >& e_factors)
-    : LexicalDistortionCost(filePath, direction, condition, f_factors, e_factors),
+    : LexicalDistortionCost(filePath, direction, condition, f_factors, e_factors, 2),
       m_distortionRange(6) {
-      UserMessage::Add("Created beta-binomial lexical distortion cost model");
+       VERBOSE(1, "Created beta-binomial lexical distortion cost model\n");
   }
   virtual std::string GetScoreProducerDescription() const {
-    return "Beta-Binomial lexical distortion cost model";
+    return "Beta-Binomial lexical distortion cost model, file=" + m_modelFileName;
   };
   virtual size_t GetNumParameters() const {
     return 2;
