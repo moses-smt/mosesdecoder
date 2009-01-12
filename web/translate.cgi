@@ -22,6 +22,7 @@ $|++;
 # 
 #  - if the document contains <a name='anchor'></a> it will be lost
 #  - don't insert spaces everywhere around soft tags
+#  - charset autodetection would be nice, but it's not trivial
 
 #------------------------------------------------------------------------------
 # includes
@@ -67,19 +68,20 @@ my @MOSES_ADDRESSES = map "localhost:90$_",
     qw/01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16/;
 
 
+# The tokenizer tries to adapt its rules depending on the language it's dealing
+# with, so we indicate that here.
+
+my $INPUT_LANG  = 'fr';
+my $OUTPUT_LANG = 'en';
+
+
 # In order to tokenize and detokenize strings in a way that stays consistent
 # with how it is done in the rest of the Moses system, we use the scripts that
 # come with Moses as external processes. These are the commands we must run to
 # start them.
-# 
-# Note that a small modification had to be done to these scripts, namely
-# adding $|++ to them to unbuffer IO streams, so that they start working
-# as soon as one line is given to them. If this could be done as a command
-# line option we could just include that option here and we wouldn't need
-# to modify the scripts. I'm not sure if that's possible though.
 
-my @TOKENIZER_CMD   = qw!/home/herves/moses/scripts/tokenizer.perl -l fr!;
-my @DETOKENIZER_CMD = qw!/home/herves/moses/scripts/detokenizer.perl -l fr!;
+my @TOKENIZER_CMD   = ('./bin/tokenizer.perl',   '-l', $INPUT_LANG);
+my @DETOKENIZER_CMD = ('./bin/detokenizer.perl', '-l', $OUTPUT_LANG);
 
 
 # We call 'soft tags' HTML tags whose presence is tolerated inside
