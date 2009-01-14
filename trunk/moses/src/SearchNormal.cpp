@@ -3,7 +3,7 @@
 
 namespace Moses
 {
-/** 
+/**
  * Organizing main function
  *
  * /param source input sentence
@@ -46,7 +46,7 @@ SearchNormal::~SearchNormal()
  * hypotheses stack by stack, until the end of the sentence.
  */
 void SearchNormal::ProcessSentence()
-{	
+{
 	const StaticData &staticData = StaticData::Instance();
 	SentenceStats &stats = staticData.GetSentenceStats();
 	clock_t t=0; // used to track time for steps
@@ -59,7 +59,7 @@ void SearchNormal::ProcessSentence()
 	std::vector < HypothesisStack* >::iterator iterStack;
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
 	{
-		// check if decoding ran out of time 
+		// check if decoding ran out of time
 		double _elapsed_time = GetUserTime();
 		if (_elapsed_time > staticData.GetTimeoutThreshold()){
 			VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
@@ -98,7 +98,7 @@ void SearchNormal::ProcessSentence()
 
 /** Find all translation options to expand one hypothesis, trigger expansion
  * this is mostly a check for overlap with already covered words, and for
- * violation of reordering limits. 
+ * violation of reordering limits.
  * \param hypothesis hypothesis to be expanded upon
  */
 void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
@@ -109,7 +109,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 	// no limit of reordering: only check for overlap
 	if (maxDistortion < 0)
-	{	
+	{
 		const WordsBitmap hypoBitmap	= hypothesis.GetWordsBitmap();
 		const size_t hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
 			, sourceSize			= m_source.GetSize();
@@ -126,16 +126,15 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 				    // there have to be translation options
 				if (m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos)).size() == 0 ||
 				    // no overlap with existing words
-				    !hypoBitmap.Overlap(WordsRange(startPos, endPos)) || 
+				    hypoBitmap.Overlap(WordsRange(startPos, endPos)) ||
 				    // specified reordering constraints (set with -monotone-at-punctuation or xml)
 				    !m_source.GetReorderingConstraint().Check( hypoBitmap, startPos, endPos ) )
 				{
-				    continue;
+					continue;
 				}
-				{
-					//TODO: does this method include incompatible WordLattice hypotheses?
-					ExpandAllHypotheses(hypothesis, startPos, endPos);
-				}
+
+				//TODO: does this method include incompatible WordLattice hypotheses?
+				ExpandAllHypotheses(hypothesis, startPos, endPos);
 			}
 		}
 
@@ -174,9 +173,9 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			    // no overlap with existing words
 			    hypoBitmap.Overlap(extRange) ||
 			    // specified reordering constraints (set with -monotone-at-punctuation or xml)
-			    !m_source.GetReorderingConstraint().Check( hypoBitmap, startPos, endPos ) || // 
+			    !m_source.GetReorderingConstraint().Check( hypoBitmap, startPos, endPos ) || //
 			    // connection in input word lattice
-			    (isWordLattice && !m_source.IsCoveragePossible(extRange))) 
+			    (isWordLattice && !m_source.IsCoveragePossible(extRange)))
 			{
 				continue;
 			}
@@ -187,8 +186,8 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			// long version: is anything to our right? is it farther right than our (inclusive) end? can our end reach it?
 			bool leftMostEdge = (hypoFirstGapPos == startPos);
 
-			// closest right definition: 
-			size_t closestRight = hypoBitmap.GetEdgeToTheRightOf(endPos);	
+			// closest right definition:
+			size_t closestRight = hypoBitmap.GetEdgeToTheRightOf(endPos);
 			if (isWordLattice) {
 				//if (!leftMostEdge && closestRight != endPos && closestRight != sourceSize && !m_source.CanIGetFromAToB(endPos, closestRight + 1)) {
 				if (closestRight != endPos && ((closestRight + 1) < sourceSize) && !m_source.CanIGetFromAToB(endPos, closestRight + 1)) {
@@ -241,7 +240,7 @@ void SearchNormal::ExpandAllHypotheses(const Hypothesis &hypothesis, size_t star
 	// this idea is explained in (Moore&Quirk, MT Summit 2007)
 	float expectedScore = 0.0f;
 	if (StaticData::Instance().UseEarlyDiscarding())
-	{	
+	{
 		// expected score is based on score of current hypothesis
 		expectedScore = hypothesis.GetScore();
 
@@ -262,12 +261,12 @@ void SearchNormal::ExpandAllHypotheses(const Hypothesis &hypothesis, size_t star
  * Expand one hypothesis with a translation option.
  * this involves initial creation, scoring and adding it to the proper stack
  * \param hypothesis hypothesis to be expanded upon
- * \param transOpt translation option (phrase translation) 
+ * \param transOpt translation option (phrase translation)
  *        that is applied to create the new hypothesis
- * \param expectedScore base score for early discarding 
+ * \param expectedScore base score for early discarding
  *        (base hypothesis score plus future score estimation)
  */
-void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt, float expectedScore) 
+void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt, float expectedScore)
 {
 	const StaticData &staticData = StaticData::Instance();
 	SentenceStats &stats = staticData.GetSentenceStats();
@@ -296,11 +295,11 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 			allowedScore = std::min( allowedScore, allowedScoreForBitmap );
 		}
 		allowedScore += staticData.GetEarlyDiscardingThreshold();
-		
+
 		// add expected score of translation option
 		expectedScore += transOpt.GetFutureScore();
 		// TRACE_ERR("EXPECTED diff: " << (newHypo->GetTotalScore()-expectedScore) << " (pre " << (newHypo->GetTotalScore()-expectedScorePre) << ") " << hypothesis.GetTargetPhrase() << " ... " << transOpt.GetTargetPhrase() << " [" << expectedScorePre << "," << expectedScore << "," << newHypo->GetTotalScore() << "]" << endl);
-		    
+
 		// check if transOpt score push it already below limit
 		if (expectedScore < allowedScore)
 		{
@@ -335,7 +334,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 	}
 
 	// add to hypothesis stack
-	size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();	
+	size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();
 	IFVERBOSE(2) { t = clock(); }
 	m_hypoStackColl[wordsTranslated]->AddPrune(newHypo);
 	IFVERBOSE(2) { stats.AddTimeStack( clock()-t ); }
