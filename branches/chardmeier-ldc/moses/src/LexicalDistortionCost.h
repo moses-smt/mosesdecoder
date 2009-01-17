@@ -62,14 +62,12 @@ class LexicalDistortionCost : public ScoreProducer {
    std::string m_modelFileName;
 
  private:
-   const std::vector<float> *GetDistortionParameters(std::string key, Direction dir) const;
-   bool LoadTable(std::string fileName);
+   const std::vector<float> GetDistortionParameters(const Phrase &src, const Phrase &tgt) const;
 
-   typedef std::map< std::string, const std::vector<float>* > _DistortionTableType;
+   LexicalReorderingTable *m_distortionTable;
    Direction m_direction;
    Condition m_condition;
    std::vector<FactorType> m_srcfactors, m_tgtfactors;
-   _DistortionTableType m_distortionTableForward, m_distortionTableBackward;
    std::vector<float> m_defaultDistortion;
    size_t m_numParametersPerDirection;
 };

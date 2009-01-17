@@ -310,6 +310,8 @@ bool Parameter::Validate()
 	  //raw tables in either un compressed or compressed form
 	  ext.push_back("");
 	  ext.push_back(".gz");
+	  //prefix tree format
+	  ext.push_back(".binlexr.idx");
 	  noErrorFlag = FilesExist("lexical-distortion-cost", 4, ext);
 	}
 	return noErrorFlag;
