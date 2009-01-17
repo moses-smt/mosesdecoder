@@ -69,6 +69,9 @@ protected:
 	ScoreComponentCollection	m_scoreBreakdown;
 	ScoreComponentCollection	m_reordering;
 
+	typedef std::map<const LexicalDistortionCost *,std::vector<float> > _DistortionCacheType;
+	_DistortionCacheType m_distortionCache;
+
 public:
 	/** constructor. Used by initial translation step */
 	TranslationOption(const WordsRange &wordsRange
@@ -170,11 +173,24 @@ public:
 		return m_reordering;
 	}
 
+	const Score &GetDistortionParamsForModel(const LexicalDistortionCost *ldc) const {
+		static std::vector<float> defaultParams(2, 2);
+
+		_DistortionCacheType::const_iterator it = m_distortionCache.find(ldc);
+		if(it != m_distortionCache.end())
+			return it->second;
+		else
+			return defaultParams;
+	}
+
 	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
 	void CalcScore();
 
-	void CacheReorderingProb(const LexicalReordering &lexreordering
-													, const Score &score);
+	void CacheReorderingProb(const LexicalReordering &lexReordering, const Score &score);
+
+	void CacheDistortionParameters(const LexicalDistortionCost *ldc, const Score &score) {
+		m_distortionCache[ldc] = score;
+	}
 
 	TO_STRING();
 };

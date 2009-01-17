@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
+#include "LexicalDistortionCost.h"
 
 using namespace std;
 
@@ -611,4 +612,38 @@ void TranslationOptionCollection::CacheLexReordering()
 			}
 		}
 	}
+
+	const std::vector<LexicalDistortionCost*> &ldcModels = StaticData::Instance().GetLexicalDistortionCostModels();
+
+	std::vector<LexicalDistortionCost*>::const_iterator iterLDC;
+	for (iterLDC = ldcModels.begin() ; iterLDC != ldcModels.end() ; ++iterLDC)
+	{
+		LexicalDistortionCost &ldc = **iterLDC;
+
+		for (size_t startPos = 0 ; startPos < size ; startPos++)
+		{
+		      size_t maxSize =  size - startPos;
+		      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+		      maxSize = std::min(maxSize, maxSizePhrase);
+
+			for (size_t endPos = startPos ; endPos < startPos + maxSize; endPos++)
+			{
+				TranslationOptionList &transOptList = GetTranslationOptionList( startPos, endPos);				
+				TranslationOptionList::iterator iterTransOpt;
+				for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) 
+				{
+					TranslationOption &transOpt = **iterTransOpt;
+					const Phrase *sourcePhrase = transOpt.GetSourcePhrase();
+					if (sourcePhrase)
+					{
+						Score score = ldc.GetProb(*sourcePhrase, transOpt.GetTargetPhrase());
+						// TODO should have better handling of unknown reordering entries
+						if (!score.empty())
+							transOpt.CacheDistortionParameters(&ldc, score);
+					}
+				}
+			}
+		}
+	}
+
 }
