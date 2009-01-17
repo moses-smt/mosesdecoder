@@ -188,8 +188,10 @@ void  LexicalReorderingTableMemory::LoadFromFile(const std::string& filePath){
       TRACE_ERR( "found inconsistent number of probabilities... found " << p.size() << " expected " << numScores << std::endl);
       exit(0);
     }
-    std::transform(p.begin(),p.end(),p.begin(),TransformScore);
-    std::transform(p.begin(),p.end(),p.begin(),FloorScore);
+    if(m_transformScores) {
+      std::transform(p.begin(),p.end(),p.begin(),TransformScore);
+      std::transform(p.begin(),p.end(),p.begin(),FloorScore);
+    }
     //save it all into our map
     m_Table[MakeKey(f,e,c)] = p;
   }
@@ -303,7 +305,8 @@ void LexicalReorderingTableTree::InitializeForInput(const InputType& input){
 };
  
 bool LexicalReorderingTableTree::Create(std::istream& inFile, 
-                                        const std::string& outFileName){
+                                        const std::string& outFileName,
+                                        bool transformScores){
   std::string line;
   //TRACE_ERR("Entering Create...\n");  
   std::string 
@@ -386,8 +389,10 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
       score.push_back(atof(w.c_str()));
     }
     //transform score now...
-    std::transform(score.begin(),score.end(),score.begin(),TransformScore);
-    std::transform(score.begin(),score.end(),score.begin(),FloorScore);
+    if(transformScores) {
+      std::transform(score.begin(),score.end(),score.begin(),TransformScore);
+      std::transform(score.begin(),score.end(),score.begin(),FloorScore);
+    }
     std::vector<Score> scores;
     scores.push_back(score);
     

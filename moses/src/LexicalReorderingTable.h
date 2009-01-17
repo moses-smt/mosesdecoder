@@ -25,8 +25,9 @@ typedef std::vector<FactorType> FactorList;
 
 class LexicalReorderingTable {
  public:
- LexicalReorderingTable(const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors)
-   : m_FactorsF(f_factors), m_FactorsE(e_factors), m_FactorsC(c_factors) {
+ LexicalReorderingTable(const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors,
+   bool transformScores = true)
+   : m_FactorsF(f_factors), m_FactorsE(e_factors), m_FactorsC(c_factors), m_transformScores(transformScores) {
   }
   virtual ~LexicalReorderingTable(){
   }
@@ -60,6 +61,7 @@ class LexicalReorderingTable {
   FactorList m_FactorsF;
   FactorList m_FactorsE;
   FactorList m_FactorsC;
+  bool m_transformScores;
 };
 
 class LexicalReorderingTableMemory : public LexicalReorderingTable {
@@ -114,7 +116,7 @@ class LexicalReorderingTableTree : public LexicalReorderingTable {
 	auxCacheForSrcPhrase(f);
   }
  public:
-  static bool Create(std::istream& inFile, const std::string& outFileName);
+  static bool Create(std::istream& inFile, const std::string& outFileName, bool transformScores = true);
  private:
   std::string MakeCacheKey(const Phrase& f, const Phrase& e) const;
   IPhrase     MakeTableKey(const Phrase& f, const Phrase& e) const;
