@@ -10,8 +10,9 @@ Timer timer;
 void printHelp(){
   std::cerr << "Usage:\n"
 	"options: \n"
-	"\t-in  string -- input table file name\n"
-	"\t-out string -- prefix of binary table files\n"
+	"\t-in  string  -- input table file name\n"
+	"\t-out string  -- prefix of binary table files\n"
+	"\t-notransform -- don't take logs of the parameters (used for lexical distortion cost tables only!)\n"
 	"If -in is not specified reads from stdin\n"
 	"\n"; 
 }
@@ -24,6 +25,7 @@ int main(int argc, char** argv){
 	printHelp();
 	return 1;
   }
+  bool transformScores = true;
   for(int i = 1; i < argc; ++i){
     std::string arg(argv[i]);
     if("-in" == arg && i+1 < argc){
@@ -32,6 +34,8 @@ int main(int argc, char** argv){
     } else if("-out" == arg && i+1 < argc){
       ++i;
       outFilePath = argv[i];
+    } else if("-notransform" == arg){
+      transformScores = false;
     } else {
       //somethings wrong... print help
 	  printHelp();
@@ -41,10 +45,10 @@ int main(int argc, char** argv){
   
   if(inFilePath.empty()){
 	std::cerr << "processing stdin to " << outFilePath << ".*\n";
-	return LexicalReorderingTableTree::Create(std::cin, outFilePath);
+	return LexicalReorderingTableTree::Create(std::cin, outFilePath, transformScores);
   } else {
 	std::cerr << "processing " << inFilePath<< " to " << outFilePath << ".*\n";
     InputFileStream file(inFilePath);
-    return LexicalReorderingTableTree::Create(file, outFilePath);
+    return LexicalReorderingTableTree::Create(file, outFilePath, transformScores);
   }
 }
