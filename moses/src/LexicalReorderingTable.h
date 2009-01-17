@@ -32,7 +32,7 @@ class LexicalReorderingTable {
   virtual ~LexicalReorderingTable(){
   }
  public:
-  static LexicalReorderingTable* LoadAvailable(const std::string& filePath, const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors);
+  static LexicalReorderingTable* LoadAvailable(const std::string& filePath, const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors, bool transformScores = true);
  public:
   virtual Score GetScore(const Phrase& f, const Phrase& e, const Phrase& c) = 0;
   virtual void InitializeForInput(const InputType&){
@@ -71,7 +71,8 @@ class LexicalReorderingTableMemory : public LexicalReorderingTable {
   LexicalReorderingTableMemory( const std::string& filePath,
 				const std::vector<FactorType>& f_factors, 
                                 const std::vector<FactorType>& e_factors,
-				const std::vector<FactorType>& c_factors);
+				const std::vector<FactorType>& c_factors,
+				bool transformScores = true);
   virtual ~LexicalReorderingTableMemory();
  public:
   virtual std::vector<float> GetScore(const Phrase& f, const Phrase& e, const Phrase& c);
@@ -92,7 +93,8 @@ class LexicalReorderingTableTree : public LexicalReorderingTable {
   LexicalReorderingTableTree(const std::string& filePath,
 							 const std::vector<FactorType>& f_factors, 
 							 const std::vector<FactorType>& e_factors,
-							 const std::vector<FactorType>& c_factors);
+							 const std::vector<FactorType>& c_factors,
+							 bool transformScores = true);
   ~LexicalReorderingTableTree();
  public:
   bool IsCacheEnabled() const {
