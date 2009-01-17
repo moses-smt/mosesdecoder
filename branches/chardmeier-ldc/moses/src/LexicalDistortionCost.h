@@ -48,6 +48,8 @@ class LexicalDistortionCost : public ScoreProducer {
 
   std::vector<float> CalcScore(Hypothesis* hypothesis) const;
 
+  std::vector<float> GetProb(const Phrase &src, const Phrase &tgt) const;
+
   //- Score GetProb(const Phrase& f, const Phrase& e) const;
   //helpers
   //- static std::vector<Condition> DecodeCondition(Condition c);

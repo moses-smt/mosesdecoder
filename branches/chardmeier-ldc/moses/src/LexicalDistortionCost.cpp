@@ -6,6 +6,7 @@
 #include "InputFileStream.h"
 #include "LexicalDistortionCost.h"
 #include "WordsRange.h"
+#include "TranslationOption.h"
 
 LexicalDistortionCost::LexicalDistortionCost(const std::string &filePath,
 		Direction direction,
@@ -96,45 +97,43 @@ const std::vector<float> *LexicalDistortionCost::GetDistortionParameters(std::st
 std::vector<float> LexicalDistortionCost::CalcScore(Hypothesis *h) const
 {
 	std::vector<float> scores;
-	std::string key;
 
 	if(m_direction == Forward || m_direction == Bidirectional) {
-		if(m_condition == Word)
-			key = h->GetSourcePhrase()->GetWord(0).ToString();
-		else if(m_condition == SourcePhrase)
-			key = h->GetSourcePhraseStringRep(m_srcfactors);
-		else if(m_condition == PhrasePair)
-			key = h->GetSourcePhraseStringRep(m_srcfactors) + " ||| " +
-				h->GetTargetPhraseStringRep(m_tgtfactors);
-
-		const std::vector<float> *params_cur = GetDistortionParameters(key, Forward);
+		std::vector<float> params_cur = h->GetTranslationOption().GetDistortionParamsForModel(this);
 		scores.push_back(CalculateDistortionScore(
 			h->GetPrevHypo()->GetCurrSourceWordsRange(),
-			h->GetCurrSourceWordsRange(), params_cur));
+			h->GetCurrSourceWordsRange(), &params_cur));
 	}
 
 	if(m_direction == Backward || m_direction == Bidirectional) {
 		if(h->GetPrevHypo()->GetPrevHypo() == NULL)
 			scores.push_back(.0f);
 		else {
-			assert(m_condition == Word || m_condition == SourcePhrase || m_condition == PhrasePair);
-			if(m_condition == Word) {
-				const Phrase* prevSrcPhrase = h->GetPrevHypo()->GetSourcePhrase();
-				key = prevSrcPhrase->GetWord(prevSrcPhrase->GetSize() - 1).ToString();
-			} else if(m_condition == SourcePhrase)
-				key = h->GetPrevHypo()->GetSourcePhraseStringRep(m_srcfactors);
-			else if(m_condition == PhrasePair)
-				key = h->GetPrevHypo()->GetSourcePhraseStringRep(m_srcfactors) + " ||| " +
-					h->GetPrevHypo()->GetTargetPhraseStringRep(m_tgtfactors);
-
-			const std::vector<float> *params_prev = GetDistortionParameters(key, Backward);
+			std::vector<float> params_prev = h->GetPrevHypo()->GetTranslationOption().GetDistortionParamsForModel(this);
 			scores.push_back(CalculateDistortionScore(
 					h->GetPrevHypo()->GetCurrSourceWordsRange(),
-					h->GetCurrSourceWordsRange(), params_prev));
+					h->GetCurrSourceWordsRange(), &params_prev));
 		}
 	}
 
 	return scores;
+}
+	
+std::vector<float> LexicalDistortionCost::GetProb(const Phrase &src, const Phrase &tgt) const {
+	std::string key;
+
+	assert(m_condition != Word); // doesn't properly use the first and last word right now
+
+	if(m_condition == Word)
+		key = src.GetWord(0).ToString();
+	else if(m_condition == SourcePhrase)
+		key = src.GetStringRep(m_srcfactors);
+	else if(m_condition == PhrasePair)
+		key = src.GetStringRep(m_srcfactors) + " ||| " + tgt.GetStringRep(m_tgtfactors);
+
+	const std::vector<float> *params = GetDistortionParameters(key, Forward);
+
+	return *params;
 }
 
 float LDCBetaBinomial::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr,
