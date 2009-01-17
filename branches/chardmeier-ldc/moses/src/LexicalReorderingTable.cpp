@@ -41,14 +41,14 @@ void auxAppend(IPhrase& head, const IPhrase& tail){
  * functions for LexicalReorderingTable
  */
 
-LexicalReorderingTable* LexicalReorderingTable::LoadAvailable(const std::string& filePath, const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors){
+LexicalReorderingTable* LexicalReorderingTable::LoadAvailable(const std::string& filePath, const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors, bool transformScores){
 	//decide use Tree or Memory table
 	if(FileExists(filePath+".binlexr.idx")){
 	  //there exists a binary version use that
-	  return new LexicalReorderingTableTree(filePath, f_factors, e_factors, c_factors);
+	  return new LexicalReorderingTableTree(filePath, f_factors, e_factors, c_factors, transformScores);
 	} else {
 	  //use plain memory
-	  return new LexicalReorderingTableMemory(filePath, f_factors, e_factors, c_factors);
+	  return new LexicalReorderingTableMemory(filePath, f_factors, e_factors, c_factors, transformScores);
 	}
   }
 
@@ -59,8 +59,9 @@ LexicalReorderingTableMemory::LexicalReorderingTableMemory(
 				const std::string& filePath,
 				const std::vector<FactorType>& f_factors, 
 				const std::vector<FactorType>& e_factors,
-				const std::vector<FactorType>& c_factors)
-  : LexicalReorderingTable(f_factors, e_factors, c_factors) 
+				const std::vector<FactorType>& c_factors,
+                                bool transformScores)
+  : LexicalReorderingTable(f_factors, e_factors, c_factors, transformScores) 
 {
   LoadFromFile(filePath);
 }
@@ -205,8 +206,9 @@ LexicalReorderingTableTree::LexicalReorderingTableTree(
 			    const std::string& filePath,
 			    const std::vector<FactorType>& f_factors, 
 				const std::vector<FactorType>& e_factors,
-			    const std::vector<FactorType>& c_factors)
-  : LexicalReorderingTable(f_factors, e_factors, c_factors) 
+			    const std::vector<FactorType>& c_factors,
+                            bool transformScores)
+  : LexicalReorderingTable(f_factors, e_factors, c_factors, transformScores) 
 {
   m_Table.Read(filePath+".binlexr"); 
 }
