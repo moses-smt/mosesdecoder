@@ -556,7 +556,6 @@ bool StaticData::LoadLexicalDistortion() {
     // spec[4] = fileName
 
     LexicalDistortionCost::Direction direction;
-    LexicalDistortionCost::Condition condition;
 
     vector<string> inputfactors = Tokenize(spec[0],"-");
     if(inputfactors.size() == 2) {
@@ -583,35 +582,13 @@ bool StaticData::LoadLexicalDistortion() {
       return false;
     }
 
-    vector<string> params = Tokenize<string>(spec[3],"-");
-    if(params.size() != 3) {
-      UserMessage::Add("Illegal type specification for lexical distortion cost model: " + spec[3]);
-      return false;
-    }
-    std::string prior = params[0];
-    std::string distribution = params[1];
-
-    if(params[2] == "phrase")
-      condition = LexicalDistortionCost::PhrasePair;
-    else if(params[2] == "word")
-      condition = LexicalDistortionCost::Word;
-    else if(params[2] == "srcphrase")
-      condition = LexicalDistortionCost::SourcePhrase;
-    else {
-      UserMessage::Add("Unknown condition in type specification for lexical distortion cost model: " + spec[3]);
-      return false;
-    }
-
+    std::string modelType = spec[3];
     std::string fileName = spec[4];
 
     LexicalDistortionCost *newmodel;
 
-    if(prior == "beta" && distribution == "binomial")
-      newmodel = new LDCBetaBinomial(fileName, direction, condition, input, output);
-    else {
-      UserMessage::Add("Lexical distortion model type not implemented: " + spec[3]);
-      return false;
-    }
+    newmodel = LexicalDistortionCost::CreateModel(modelType, fileName, direction, input, output);
+    if(newmodel == NULL) return false;
 
     if(nweights != newmodel->GetNumScoreComponents()) {
       UserMessage::Add("Specified incompatible number of weights for LDC model");

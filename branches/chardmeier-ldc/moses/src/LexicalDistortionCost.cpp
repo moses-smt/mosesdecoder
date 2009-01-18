@@ -8,6 +8,23 @@
 #include "WordsRange.h"
 #include "TranslationOption.h"
 
+
+LexicalDistortionCost *LexicalDistortionCost::CreateModel(const std::string &modelType,
+                                const std::string &filePath,
+                                Direction direction,
+                                std::vector< FactorType >& f_factors,
+                                std::vector< FactorType >& e_factors)
+{
+	if(modelType == "beta-binomial-phrase")
+		return new LDCBetaBinomial(filePath, direction, PhrasePair, f_factors, e_factors);
+	else if(modelType == "beta-geometric-phrase")
+		return new LDCBetaGeometric(filePath, direction, PhrasePair, f_factors, e_factors);
+	else {
+		UserMessage::Add("Lexical distortion model type not implemented: " + modelType);
+		return NULL;
+	}
+}
+
 LexicalDistortionCost::LexicalDistortionCost(const std::string &filePath,
 		Direction direction,
 		Condition condition,
@@ -17,7 +34,6 @@ LexicalDistortionCost::LexicalDistortionCost(const std::string &filePath,
         m_modelFileName(filePath),
 	m_direction(direction), m_condition(condition),
 	m_srcfactors(f_factors), m_tgtfactors(e_factors),
-	m_defaultDistortion(4,12),
 	m_numParametersPerDirection(numParametersPerDirection)
 {
 	m_distortionTable = LexicalReorderingTable::LoadAvailable(filePath, f_factors, e_factors, std::vector<FactorType>(), false);
@@ -31,7 +47,7 @@ LexicalDistortionCost::~LexicalDistortionCost()
 const std::vector<float> LexicalDistortionCost::GetDistortionParameters(const Phrase &src, const Phrase &tgt) const
 {
 	std::vector<float> params = m_distortionTable->GetScore(src, tgt, Phrase(Output));
-	if(params.size() == 0) return m_defaultDistortion;
+	if(params.size() == 0) return GetDefaultDistortion();
 
 	assert(params.size() == GetNumParameterSets() * GetNumParametersPerDirection());
 
@@ -123,4 +139,56 @@ float LDCBetaBinomial::beta_binomial(float p, float q, int x) const
         }
 
         return FloorScore((float) score);
+}
+
+std::vector<float> LDCBetaBinomial::GetDefaultDistortion() const
+{
+	return std::vector<float>(4, 12);
+}
+
+float LDCBetaGeometric::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr,
+	const std::vector<float> *params) const
+{
+	float p_dir = params->at(0);
+	float q_dir = params->at(1);
+	float p_pos = params->at(2);
+	float q_pos = params->at(3);
+	float p_neg = params->at(4);
+	float q_neg = params->at(5);
+
+	int distance = StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
+
+	float score = .0f;
+
+	if(distance >= 0) {
+		score += log(p_dir / (p_dir + q_dir));
+
+		int x = distance;
+		score += beta_geometric(p_pos, q_pos, x);
+	} else {
+		score += log(1.0f - p_dir / (p_dir + q_dir));
+
+		int x = -distance - 1;
+		score += beta_geometric(p_neg, q_neg, x);
+	}
+
+	assert(finite(score));
+	return FloorScore(score);
+}
+
+float LDCBetaGeometric::beta_geometric(float p, float q, int x) const
+{
+	assert(x >= 0);
+
+	float result = log(p);
+	for(int i = 0; i <= x - 1; i++)
+		result += log(q + i);
+	for(int i = 0; i <= x; i++)
+		result -= log(p + q + i);
+	return result;
+}
+
+std::vector<float> LDCBetaGeometric::GetDefaultDistortion() const
+{
+	return std::vector<float>(12, 2);
 }
