@@ -77,6 +77,7 @@ Parameter::Parameter()
 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
 	AddParam("lexical-distortion-cost", "source factors (0 if table independent of source), target factors, type, located of the lexicalised distortion cost models");
+	AddParam("ldc-priors", "prior parameters for lexical distortion cost models");
 	AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
  	AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
 	AddParam("mbr-size", "number of translation candidates considered in MBR decoding (default 200)");

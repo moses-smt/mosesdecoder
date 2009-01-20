@@ -540,6 +540,15 @@ bool StaticData::LoadLexicalDistortion() {
   }
   size_t weightIdx = 0;
 
+  std::vector<float> priors;
+  if(m_parameter->isParamSpecified("ldc-priors")) {
+    std::vector<std::string> priorStr = m_parameter->GetParam("ldc-priors");
+    for(size_t j = 0; j < priorStr.size(); ++j) {
+      priors.push_back(Scan<float>(priorStr[j]));
+    }
+  }
+  size_t priorIdx = 0;
+
   for(size_t i = 0; i < fileStr.size(); ++i) {
     vector<FactorType> input,output;
     vector<string> spec = Tokenize<string>(fileStr[i], " ");
@@ -604,6 +613,19 @@ bool StaticData::LoadLexicalDistortion() {
         return false;
       }
       cur_weights.push_back(weights[weightIdx]);
+    }
+
+    if(priors.size() > 0) {
+      std::vector<float> cur_prior;
+      for(size_t i = 0; i < newmodel->GetNumPriorParameters(); i++, priorIdx++) {
+        if(priorIdx >= priors.size()) {
+          UserMessage::Add("Insufficient number of prior parameters for lexical distortion models.");
+          delete newmodel;
+          return false;
+        }
+        cur_prior.push_back(priors[priorIdx]);
+      }
+      newmodel->SetPrior(cur_prior);
     }
 
     m_ldcModels.push_back(newmodel);
