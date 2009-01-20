@@ -40,6 +40,11 @@ class LexicalDistortionCost : public ScoreProducer {
   
   virtual std::string GetScoreProducerDescription() const = 0;
 
+  size_t GetNumPriorParameters() const {
+    // only one set of parameters, no matter how many directions!
+    return GetNumParametersPerDirection();
+  }
+
   // number of parameters per direction
   size_t GetNumParametersPerDirection() const {
     return m_numParametersPerDirection;
@@ -53,15 +58,28 @@ class LexicalDistortionCost : public ScoreProducer {
 
   std::vector<float> GetProb(const Phrase &src, const Phrase &tgt) const;
 
+  std::vector<float> GetPrior() const {
+    if(m_prior.size() > 0)
+      return m_prior;
+    else
+      return GetDefaultPrior();
+  }
+
+  void SetPrior(std::vector<float> prior) {
+    assert(prior.size() == GetNumParametersPerDirection());
+    m_prior = prior;
+  }
+
  protected:
    virtual float CalculateDistortionScore(	const WordsRange &prev,
 						const WordsRange &curr,
 						const std::vector<float> *parameters) const = 0;
 
-   virtual std::vector<float> GetDefaultDistortion() const = 0;
+   virtual std::vector<float> GetDefaultPrior() const = 0;
 
    std::string m_modelFileName;
 
+   std::vector<float> m_prior;
  private:
    const std::vector<float> GetDistortionParameters(const Phrase &src, const Phrase &tgt) const;
 
@@ -69,7 +87,6 @@ class LexicalDistortionCost : public ScoreProducer {
    Direction m_direction;
    Condition m_condition;
    std::vector<FactorType> m_srcfactors, m_tgtfactors;
-   std::vector<float> m_defaultDistortion;
    size_t m_numParametersPerDirection;
 };
 
@@ -77,12 +94,14 @@ class LDCBetaBinomial : public LexicalDistortionCost {
   friend class LexicalDistortionCost;
 
  protected:
+  static const size_t NUM_PARAMETERS = 2;
+
   LDCBetaBinomial(const std::string &filePath, 
 		    Direction direction, 
 		    Condition condition, 
 		    std::vector< FactorType >& f_factors, 
 		    std::vector< FactorType >& e_factors)
-    : LexicalDistortionCost(filePath, direction, condition, f_factors, e_factors, 2),
+    : LexicalDistortionCost(filePath, direction, condition, f_factors, e_factors, NUM_PARAMETERS),
       m_distortionRange(6) {
        VERBOSE(1, "Created beta-binomial lexical distortion cost model\n");
   }
@@ -91,17 +110,12 @@ class LDCBetaBinomial : public LexicalDistortionCost {
   virtual std::string GetScoreProducerDescription() const {
     return "Beta-Binomial lexical distortion cost model, file=" + m_modelFileName;
   };
-  virtual size_t GetNumParameters() const {
-    return 2;
-  }
-
  protected:
   virtual float CalculateDistortionScore(	const WordsRange &prev,
 						const WordsRange &curr,
 						const std::vector<float> *parameters) const;
 
-  virtual std::vector<float> GetDefaultDistortion() const;
-
+  virtual std::vector<float> GetDefaultPrior() const;
  private:
   float beta_binomial(float p, float q, int x) const;
   int m_distortionRange;
@@ -111,12 +125,14 @@ class LDCBetaGeometric : public LexicalDistortionCost {
   friend class LexicalDistortionCost;
 
  protected:
+  static const size_t NUM_PARAMETERS = 6;
+
   LDCBetaGeometric(const std::string &filePath, 
 		    Direction direction, 
 		    Condition condition, 
 		    std::vector< FactorType >& f_factors, 
 		    std::vector< FactorType >& e_factors)
-    : LexicalDistortionCost(filePath, direction, condition, f_factors, e_factors, 6) {
+    : LexicalDistortionCost(filePath, direction, condition, f_factors, e_factors, NUM_PARAMETERS) {
        VERBOSE(1, "Created beta-geometric lexical distortion cost model\n");
   }
 
@@ -124,17 +140,18 @@ class LDCBetaGeometric : public LexicalDistortionCost {
   virtual std::string GetScoreProducerDescription() const {
     return "Beta-Geometric lexical distortion cost model, file=" + m_modelFileName;
   };
+/*
   virtual size_t GetNumParameters() const {
     return 6;
   }
+*/
 
  protected:
   virtual float CalculateDistortionScore(	const WordsRange &prev,
 						const WordsRange &curr,
 						const std::vector<float> *parameters) const;
 
-  virtual std::vector<float> GetDefaultDistortion() const;
-
+  virtual std::vector<float> GetDefaultPrior() const;
  private:
   float beta_geometric(float p, float q, int x) const;
 };
