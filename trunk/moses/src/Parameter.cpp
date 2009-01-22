@@ -287,8 +287,8 @@ bool Parameter::Validate()
 		noErrorFlag = FilesExist("ttable-file", 3,ext);
 	}
 	// language model
-	if (noErrorFlag)
-		noErrorFlag = FilesExist("lmodel-file", 3);
+//	if (noErrorFlag)
+//		noErrorFlag = FilesExist("lmodel-file", 3);
 	// input file
 	if (noErrorFlag && m_setting["input-file"].size() == 1)
 	{

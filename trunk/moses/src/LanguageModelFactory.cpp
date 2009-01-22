@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
+#include "LanguageModelRemote.h"
 
 namespace Moses
 {
@@ -62,6 +63,9 @@ namespace LanguageModelFactory
 			lm = new LanguageModelRandLM(true,
 						 scoreIndexManager);
 			#endif
+			break;
+		  case Remote:
+			lm = new LanguageModelRemote(true,scoreIndexManager);
 			break;
 
 	  	case SRI:
@@ -116,6 +120,7 @@ namespace LanguageModelFactory
 	  	case SingleFactor:
 	  		if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorTypes[0], weight, nGramOrder))
 				{
+					cerr << "single factor model failed" << endl;
 					delete lm;
 					lm = NULL;
 				}
@@ -123,6 +128,7 @@ namespace LanguageModelFactory
 	  	case MultiFactor:
   			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, weight, nGramOrder))
 				{
+					cerr << "multi factor model failed" << endl;
 					delete lm;
 					lm = NULL;
 				}
