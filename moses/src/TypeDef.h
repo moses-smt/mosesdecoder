@@ -139,6 +139,7 @@ enum LMImplementation
 	,Joint		= 3
 	,Internal	= 4
 	,RandLM 	= 5
+	,Remote 	= 6
 
 };
 

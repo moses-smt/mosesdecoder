@@ -30,6 +30,7 @@ libmoses_a_SOURCES = \
 	LanguageModelFactory.cpp \
 	LanguageModelInternal.cpp \
 	LanguageModelMultiFactor.cpp \
+	LanguageModelRemote.cpp \
 	LanguageModelSingleFactor.cpp \
 	LanguageModelSkip.cpp \
 	TrellisPath.cpp \
