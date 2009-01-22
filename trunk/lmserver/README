@@ -1,6 +1,13 @@
 This software is based on pieces of the memcached server.
 
-The following was taken from their README:
+To start an LM server:
+
+  ./lmserver -x /tmp/moses-reg-test-data-2/lm/europarl.en.srilm.gz -o 3
+
+-o specifies the order, -x specifies the file.
+
+
+The following was taken from the memcached README:
 
 Dependencies:
 
