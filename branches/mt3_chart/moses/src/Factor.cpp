@@ -25,18 +25,20 @@ using namespace std;
 
 namespace Moses
 {
-Factor::Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, size_t id)
+Factor::Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, bool isNonTerminal, size_t id)
 ://m_direction(direction)
 //,m_factorType(factorType)
 m_ptrString(factorString)
 ,m_id(id)
+,m_isNonTerminal(isNonTerminal)
 {}
 
-Factor::Factor(FactorDirection direction, FactorType factorType, const std::string *factorString)
+Factor::Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, bool isNonTerminal)
 //:m_direction(direction)
 //,m_factorType(factorType)
 :m_ptrString(factorString)
 ,m_id(NOT_FOUND)
+,m_isNonTerminal(isNonTerminal)
 {}
 
 TO_STRING_BODY(Factor)

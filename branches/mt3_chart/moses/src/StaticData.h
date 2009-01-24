@@ -62,7 +62,7 @@ protected:
 	std::map<long,Phrase> m_constraints;
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
-	std::vector <DecodeGraph*>		m_decodeStepVL;
+	std::vector <DecodeGraph*>		m_decodeGraphList;
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
@@ -224,9 +224,9 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	const std::vector<DecodeGraph*> &GetDecodeStepVL() const
+	const std::vector<DecodeGraph*> &GetDecodeGraphList() const
 	{
-		return m_decodeStepVL;
+		return m_decodeGraphList;
 	}
 	
 	inline bool GetSourceStartPosMattersForRecombination() const

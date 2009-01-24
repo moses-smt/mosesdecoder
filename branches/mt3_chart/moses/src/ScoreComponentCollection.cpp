@@ -10,6 +10,12 @@ ScoreComponentCollection::ScoreComponentCollection()
   , m_sim(&StaticData::Instance().GetScoreIndexManager())
 {}
 
+float ScoreComponentCollection::GetWeightedScore() const
+{
+	float ret = InnerProduct(StaticData::Instance().GetAllWeights());
+	return ret;
+}
+
 }
 
 

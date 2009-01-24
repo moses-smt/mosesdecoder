@@ -68,6 +68,10 @@ public:
 	/** destructor */
 	virtual ~Phrase();
 
+	static std::vector< std::vector<std::string> > Parse(
+															const std::string &phraseString
+															, const std::string& factorDelimiter);
+
 	/** parse a string from phrase table or sentence input and create a 2D vector of strings
 	*	\param phraseString string to parse
 	*	\param factorOrder factors in the parse string. This argument is not fully used, only as a check to make ensure
@@ -136,6 +140,9 @@ public:
 		const Word &ptr = m_words[pos];
 		return ptr[factorType];
 	}
+
+	size_t GetNumTerminals() const;
+
 	inline void SetFactor(size_t pos, FactorType factorType, const Factor *factor)
 	{
 		Word &ptr = m_words[pos];
@@ -153,6 +160,9 @@ public:
 	{
     AddWord() = newWord;
   }
+
+	void PrependWord(const Word &newWord);
+
 	//! create new phrase class that is a substring of this phrase
 	Phrase GetSubString(const WordsRange &wordsRange) const;
 	
@@ -161,13 +171,19 @@ public:
   
 	TO_STRING();
 
+	int Compare(const Phrase &other) const;
+
 	/** transitive comparison between 2 phrases
 	*		used to insert & find phrase in dictionary
 	*/
-	bool operator< (const Phrase &compare) const;
-	
+	bool operator< (const Phrase &compare) const
+	{
+		return Compare(compare) < 0;
+	}
+
 	/** appends a phrase at the end of current phrase **/
 	void Append(const Phrase &endPhrase);
+
 };
 
 

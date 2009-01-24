@@ -41,6 +41,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
+#include "PhraseDictionaryOnDisk.h"
+#include "PhraseDictionaryGlueRule.h"
 
 using namespace std;
 
@@ -407,7 +409,7 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_phraseDictionary);
 	RemoveAllInColl(m_generationDictionary);
 	RemoveAllInColl(m_languageModel);
-	RemoveAllInColl(m_decodeStepVL);
+	RemoveAllInColl(m_decodeGraphList);
 	RemoveAllInColl(m_reorderModels);
 	
 	// delete trans opt
@@ -725,109 +727,149 @@ bool StaticData::LoadPhraseTables()
 
 	// language models must be loaded prior to loading phrase tables
 	assert(m_fLMsLoaded);
+  assert(m_parameter->GetParam("ttable-file").size() > 0);
+
 	// load phrase translation tables
-  if (m_parameter->GetParam("ttable-file").size() > 0)
+	// weights
+	vector<float> weightAll									= Scan<float>(m_parameter->GetParam("weight-t"));
+	vector<size_t> maxChartSpanAll					= Scan<size_t>(m_parameter->GetParam("max-chart-span"));
+	
+	const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
+	vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
+	
+	size_t index = 0;
+	size_t weightAllOffset = 0;
+	for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 	{
-		// weights
-		vector<float> weightAll									= Scan<float>(m_parameter->GetParam("weight-t"));
+		vector<string>                  token           = Tokenize(translationVector[currDict]);
+		//characteristics of the phrase table
+		assert(token.size() == 5);
+
+		PhraseTableImplementation impl = (PhraseTableImplementation) Scan<size_t>(token[0]);
+		vector<FactorType> input  = Tokenize<FactorType>(token[1], ",")
+											,output = Tokenize<FactorType>(token[2], ",");
+		m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
+		m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
+    m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
+		string filePath= token[4];
+		size_t numScoreComponent = Scan<size_t>(token[3]);
+
+		assert(weightAll.size() >= weightAllOffset + numScoreComponent);
+
+		// weights for this phrase dictionary
+		// first InputScores (if any), then translation scores
+		vector<float> weight;
+
+		if(currDict==0 && m_inputType)
+		{	// TODO. find what the assumptions made by confusion network about phrase table output which makes
+			// it only work with binrary file. This is a hack 	
+			m_numInputScores=m_parameter->GetParam("weight-i").size();
+			for(unsigned k=0;k<m_numInputScores;++k)
+				weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
+		}
+		else{
+			m_numInputScores=0;
+		}
 		
-		const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
-		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
+		for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
+			weight.push_back(weightAll[weightAllOffset + currScore]);			
+		
 
-		size_t index = 0;
-		size_t weightAllOffset = 0;
-		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
+		if(weight.size() - m_numInputScores != numScoreComponent) 
 		{
-			vector<string>                  token           = Tokenize(translationVector[currDict]);
-			//characteristics of the phrase table
-			vector<FactorType>      input           = Tokenize<FactorType>(token[0], ",")
-				,output = Tokenize<FactorType>(token[1], ",");
-			m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
-			m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
-      m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
-			string filePath= token[3];
-			size_t numScoreComponent = Scan<size_t>(token[2]);
+			stringstream strme;
+			strme << "Your phrase table has " << numScoreComponent
+						<< " scores, but you specified " << weight.size() << " weights!";
+			UserMessage::Add(strme.str());
+			return false;
+		}
+					
+		weightAllOffset += numScoreComponent;
+		numScoreComponent += m_numInputScores;
+					
+		assert(numScoreComponent==weight.size());
 
-			assert(weightAll.size() >= weightAllOffset + numScoreComponent);
+		std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
+		
+		IFVERBOSE(1)
+			PrintUserTime(string("Start loading PhraseTable ") + filePath);
+		std::cerr << "filePath: " << filePath << std::endl;
 
-			// weights for this phrase dictionary
-			// first InputScores (if any), then translation scores
-			vector<float> weight;
-
-			if(currDict==0 && m_inputType)
-			{	// TODO. find what the assumptions made by confusion network about phrase table output which makes
-				// it only work with binrary file. This is a hack 	
-				m_numInputScores=m_parameter->GetParam("weight-i").size();
-				for(unsigned k=0;k<m_numInputScores;++k)
-					weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
-			}
-			else{
-				m_numInputScores=0;
-			}
+		if (m_inputType != SentenceInput && impl != Binary)
+		{
+			UserMessage::Add("Must use binary phrase table for this input type");
+			return false;
+		}
 			
-			for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
-				weight.push_back(weightAll[weightAllOffset + currScore]);			
-			
-
-			if(weight.size() - m_numInputScores != numScoreComponent) 
+		if (impl == Memory)
+		{	// memory phrase table
+			VERBOSE(2,"using standard phrase tables");
+			PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent);
+			if (!pd->Load(input
+							 , output
+							 , filePath
+							 , weight
+							 , maxTargetPhrase[index]
+							 , GetAllLM()
+							 , GetWeightWordPenalty()))
 			{
-				stringstream strme;
-				strme << "Your phrase table has " << numScoreComponent
-							<< " scores, but you specified " << weight.size() << " weights!";
-				UserMessage::Add(strme.str());
+				delete pd;
 				return false;
 			}
-						
-			weightAllOffset += numScoreComponent;
-			numScoreComponent += m_numInputScores;
-						
-			assert(numScoreComponent==weight.size());
-
-			std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
-			
-			IFVERBOSE(1)
-				PrintUserTime(string("Start loading PhraseTable ") + filePath);
-			std::cerr << "filePath: " << filePath << std::endl;
-			if (!FileExists(filePath+".binphr.idx"))
-			{	// memory phrase table
-				VERBOSE(2,"using standard phrase tables");
-				if (m_inputType != SentenceInput)
-				{
-					UserMessage::Add("Must use binary phrase table for this input type");
-					return false;
-				}
-				
-				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent);
-				if (!pd->Load(input
-								 , output
-								 , filePath
-								 , weight
-								 , maxTargetPhrase[index]
-								 , GetAllLM()
-								 , GetWeightWordPenalty()))
-				{
-					delete pd;
-					return false;
-				}
-				m_phraseDictionary.push_back(pd);
-			}
-			else 
-			{ // binary phrase table
-				VERBOSE(1, "using binary phrase tables for idx "<<currDict<<"\n");
-				PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent,(currDict==0 ? m_numInputScores : 0));
-				if (!pd->Load(input,output,filePath,weight,
-									 maxTargetPhrase[index],
-									 GetAllLM(),
-									 GetWeightWordPenalty()))
-				{
-					delete pd;
-					return false;
-				}
-				m_phraseDictionary.push_back(pd);
-			}
-
-			index++;
+			m_phraseDictionary.push_back(pd);
 		}
+		else if (impl == Binary)
+		{ // binary phrase table
+			VERBOSE(1, "using binary phrase tables for idx "<<currDict<<"\n");
+			PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent
+																																		,(currDict==0 ? m_numInputScores : 0));
+			if (!pd->Load(input,output,filePath,weight,
+								 maxTargetPhrase[index],
+								 GetAllLM(),
+								 GetWeightWordPenalty()))
+			{
+				delete pd;
+				return false;
+			}
+			m_phraseDictionary.push_back(pd);
+		}
+		else if (impl == OnDisk)
+		{ // binary phrase table
+			VERBOSE(1, "using on-disk phrase tables for idx "<<currDict<<"\n");
+			PhraseDictionaryOnDisk *pd=new PhraseDictionaryOnDisk(numScoreComponent);
+			if (!pd->Load(input,output,filePath,weight,
+										 maxTargetPhrase[index])
+					)
+			{
+				delete pd;
+				return false;
+			}
+			m_phraseDictionary.push_back(pd);
+		}
+		else if (impl == GlueRule)
+		{ // binary phrase table
+			VERBOSE(1, "using glue rule phrase tables for idx "<<currDict<<"\n");
+			
+			PhraseDictionaryGlueRule *pd=new PhraseDictionaryGlueRule(numScoreComponent);
+			if (!pd->Load(input
+									, output
+									, weight
+									, maxTargetPhrase[index]
+									, GetAllLM()
+									, GetWeightWordPenalty()))
+			{
+				delete pd;
+				return false;
+			}
+			m_phraseDictionary.push_back(pd);
+		}
+		else
+		{
+			TRACE_ERR("unkknow phrase table type" << endl);
+			abort();
+		}
+
+		index++;
 	}
 	
 	IFVERBOSE(1)
@@ -839,27 +881,28 @@ bool StaticData::LoadMapping()
 {
 	// mapping
 	const vector<string> &mappingVector = m_parameter->GetParam("mapping");
+	const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
 	DecodeStep *prev = 0;
 	size_t previousVectorList = 0;
 	for(size_t i=0; i<mappingVector.size(); i++) 
 	{
 		vector<string>	token		= Tokenize(mappingVector[i]);
-		size_t vectorList;
+		size_t vectorListIndex;
 		DecodeType decodeType;
 		size_t index;
 		if (token.size() == 2) 
 		{
-		  vectorList = 0;
+		  vectorListIndex = 0;
 			decodeType = token[0] == "T" ? Translate : Generate;
 			index = Scan<size_t>(token[1]);
 		}
 		//Smoothing
 		else if (token.size() == 3) 
 		{
-		  vectorList = Scan<size_t>(token[0]);
-			//the vectorList index can only increment by one 
-			assert(vectorList == previousVectorList || vectorList == previousVectorList + 1);
-      if (vectorList > previousVectorList) 
+		  vectorListIndex = Scan<size_t>(token[0]);
+			//the vectorListIndex index can only increment by one 
+			assert(vectorListIndex == previousVectorList || vectorListIndex == previousVectorList + 1);
+      if (vectorListIndex > previousVectorList) 
       {
         prev = NULL;
       }
@@ -901,13 +944,15 @@ bool StaticData::LoadMapping()
 			break;
 		}
 		assert(decodeStep);
-		if (m_decodeStepVL.size() < vectorList + 1) 
+		if (m_decodeGraphList.size() < vectorListIndex + 1) 
 		{
-			m_decodeStepVL.push_back(new DecodeGraph());
+			size_t maxChartSpan = (vectorListIndex < maxChartSpans.size()) ? maxChartSpans[vectorListIndex] : DEFAULT_MAX_CHART_SPAN;
+			DecodeGraph *decodeGraph = new DecodeGraph(maxChartSpan);
+			m_decodeGraphList.push_back(decodeGraph);
 		}
-		m_decodeStepVL[vectorList]->Add(decodeStep);
+		m_decodeGraphList[vectorListIndex]->Add(decodeStep);
 		prev = decodeStep;
-		previousVectorList = vectorList;
+		previousVectorList = vectorListIndex;
 	}
 	
 	return true;
@@ -947,8 +992,7 @@ void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) const
 	{
 		LanguageModel &languageModel = **iterLM;
     languageModel.InitializeBeforeSentenceProcessing();
-	}
-  
+	} 
 }
 
 void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)

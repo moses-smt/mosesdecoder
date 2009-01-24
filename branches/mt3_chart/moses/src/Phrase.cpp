@@ -159,7 +159,54 @@ void Phrase::Append(const Phrase &endPhrase){
 	}
 }
 
-vector< vector<string> > Phrase::Parse(const std::string &phraseString, const std::vector<FactorType> &factorOrder, const std::string& factorDelimiter)
+void Phrase::PrependWord(const Word &newWord)
+{
+	AddWord();
+
+	// shift
+	for (size_t pos = GetSize() - 1; pos >= 1; --pos)
+	{
+		const Word &word = m_words[pos - 1];
+		m_words[pos] = word;
+	}
+
+	m_words[0] = newWord;
+}
+
+std::vector< std::vector<std::string> > Phrase::Parse(
+														const std::string &phraseString
+														, const std::string& factorDelimiter)
+{
+	bool isMultiCharDelimiter = factorDelimiter.size() > 1;
+	// parse
+	vector< vector<string> > phraseVector;
+	vector<string> annotatedWordVector = Tokenize(phraseString);
+	// KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none
+	//		to
+	// "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
+
+	for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() ; phrasePos++)
+	{
+		string &annotatedWord = annotatedWordVector[phrasePos];
+		vector<string> factorStrVector;
+		if (isMultiCharDelimiter) {
+			factorStrVector = TokenizeMultiCharSeparator(annotatedWord, factorDelimiter);
+		} else {
+			factorStrVector = Tokenize(annotatedWord, factorDelimiter);
+		}
+		// KOMMA|none
+		//    to
+		// "KOMMA" "none"
+		phraseVector.push_back(factorStrVector);
+	}
+	return phraseVector;
+
+}
+
+
+vector< vector<string> > Phrase::Parse(const std::string &phraseString
+																			 , const std::vector<FactorType> &factorOrder
+																			 , const std::string& factorDelimiter)
 {
 	bool isMultiCharDelimiter = factorDelimiter.size() > 1;
 	// parse
@@ -217,54 +264,6 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 {
 	vector< vector<string> > phraseVector = Parse(phraseString, factorOrder, factorDelimiter);
 	CreateFromString(factorOrder, phraseVector);
-}
-
-bool Phrase::operator < (const Phrase &compare) const
-{	
-#ifdef min
-#undef min
-#endif
-	size_t thisSize			= GetSize()
-				,compareSize	= compare.GetSize();
-
-	// decide by using length. quick decision
-	if (thisSize != compareSize)
-	{
-		return thisSize < compareSize;
-	}
-	else
-	{
-		size_t minSize = std::min( thisSize , compareSize );
-
-		const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
-		// taken from word.Compare()
-		for (size_t i = 0 ; i < maxNumFactors ; i++)
-		{
-			FactorType factorType = static_cast<FactorType>(i);
-
-			for (size_t currPos = 0 ; currPos < minSize ; currPos++)
-			{
-				const Factor *thisFactor		= GetFactor(currPos, factorType)
-										,*compareFactor	= compare.GetFactor(currPos, factorType);
-
-				if (thisFactor != NULL && compareFactor != NULL)
-				{
-					const int result = thisFactor->Compare(*compareFactor);
-					if (result == 0)
-					{
-						continue;
-					}
-					else 
-					{
-						return (result < 0);
-					}
-				}
-			}
-		}
-
-		// identical
-		return false;
-	}
 }
 
 bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
@@ -353,6 +352,43 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase, const std::vector<FactorTyp
 		}
 	}
 	return true;
+}
+
+int Phrase::Compare(const Phrase &other) const
+{
+#ifdef min
+#undef min
+#endif
+	size_t thisSize			= GetSize()
+				,compareSize	= other.GetSize();
+	if (thisSize != compareSize)
+	{
+		return (thisSize < compareSize) ? -1 : 1;
+	}
+
+	for (size_t pos = 0 ; pos < thisSize ; pos++)
+	{
+		const Word &thisWord	= GetWord(pos)
+							,&otherWord	= other.GetWord(pos);
+		int ret = Word::Compare(thisWord, otherWord);
+
+		if (ret != 0)
+			return ret;
+	}
+
+	return 0;
+}
+
+size_t Phrase::GetNumTerminals() const
+{
+	size_t ret = 0;
+
+	for (size_t pos = 0; pos < GetSize(); ++pos)
+	{
+		if (!GetWord(pos)[0]->IsNonTerminal())
+			ret++;
+	}
+	return ret;
 }
 
 void Phrase::InitializeMemPool()

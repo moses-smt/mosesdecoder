@@ -61,11 +61,12 @@ protected:
 	//FactorType				m_factorType;
 	const std::string	*m_ptrString;
 	const size_t			m_id;
+	const bool				m_isNonTerminal;
 
 	//! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
-	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, size_t id);
+	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, bool isNonTerminal, size_t id);
 	//! no id set. do not used to create new factors, only used for seeing if factor exists
-	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString);
+	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, bool isNonTerminal);
 	
 public:
 	//! returns whether this factor is part of the source ('Input') or target ('Output') language
@@ -87,6 +88,11 @@ public:
 	inline size_t GetId() const
 	{
 		return m_id;
+	}
+
+	inline bool IsNonTerminal() const
+	{
+		return m_isNonTerminal;
 	}
 
 	/*

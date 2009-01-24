@@ -299,6 +299,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ChartRule.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRuleCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConfusionNet.cpp"
 				>
 			</File>
@@ -511,7 +519,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryGlueRule.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionaryMemory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryMemoryChart.cpp"
 				>
 			</File>
 			<File
@@ -553,6 +569,14 @@
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryOnDisk.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryOnDiskChart.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionaryTree.cpp"
@@ -698,6 +722,14 @@
 			</File>
 			<File
 				RelativePath=".\src\BitmapContainer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRule.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRuleCollection.h"
 				>
 			</File>
 			<File
@@ -877,11 +909,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryGlueRule.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionaryMemory.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionaryNode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryOnDisk.h"
 				>
 			</File>
 			<File

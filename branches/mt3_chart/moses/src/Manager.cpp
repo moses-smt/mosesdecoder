@@ -86,7 +86,7 @@ void Manager::ProcessSentence()
 
   // collect translation options for this sentence
 	const vector <DecodeGraph*>
-			&decodeStepVL = staticData.GetDecodeStepVL();
+			&decodeStepVL = staticData.GetDecodeGraphList();
 	m_transOptColl->CreateTranslationOptions(decodeStepVL);
 
   // some reporting on how long this took

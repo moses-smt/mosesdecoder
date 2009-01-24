@@ -316,6 +316,37 @@ void TargetPhrase::CreateAlignmentInfo(const string &sourceStr
 //	m_alignmentPair.GetAlignmentPhrase(Input).AddUniformAlignmentElement(uniformAlignmentTarget);
 }
 
+// helper fn
+void InitializeAlignment(AlignmentPhrase &alignPhrase, size_t phraseSize)
+{
+	assert(alignPhrase.GetSize() == 0 || alignPhrase.GetSize() == phraseSize);
+
+	// make sure have enough elements
+	while (alignPhrase.GetSize() < phraseSize)
+		alignPhrase.Add(AlignmentElement());
+}
+
+void TargetPhrase::InitializeAlignment(size_t numSourceWordsPt)
+{
+	// source
+	AlignmentPhrase &alignSource = m_alignmentPair.GetAlignmentPhrase(Input);
+	Moses::InitializeAlignment(alignSource, numSourceWordsPt);
+
+	//target
+	AlignmentPhrase &alignTarget = m_alignmentPair.GetAlignmentPhrase(Output);
+	Moses::InitializeAlignment(alignTarget, GetSize());
+}
+
+void TargetPhrase::AddAlignment(const std::pair<size_t, size_t> &entry)
+{
+	//AlignmentElement *alignElement = new AlignmentElement(Tokenize<AlignmentElementType>(alignElementStr, ","));
+	AlignmentPhrase &alignSource = m_alignmentPair.GetAlignmentPhrase(Input);
+	AlignmentPhrase &alignTarget = m_alignmentPair.GetAlignmentPhrase(Output);
+
+	alignSource.GetElement(entry.first).Add(entry.second);
+	alignTarget.GetElement(entry.second).Add(entry.first);
+}
+
 TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
