@@ -117,7 +117,7 @@ my %PHRASE_USED;
 open(INPUT,$input) or die "Can't read $input";
 while(my $line = <INPUT>) {
     chomp($line);
-    $line =~ s/<[^>]>//g;
+    $line =~ s/<[^>]+>/ /g;
     my @WORD = split(/ +/,$line);
     for(my $i=0;$i<=$#WORD;$i++) {
         for(my $j=0;$j<$MAX_LENGTH && $j+$i<=$#WORD;$j++) {
