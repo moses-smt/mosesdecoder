@@ -51,6 +51,7 @@ const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 50;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
+const size_t DEFAULT_MAX_CHART_SPAN			= 10;
 const size_t ARRAY_SIZE_INCR					= 10; //amount by which a phrase gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_WIDTH				= 0.00001f;
@@ -143,6 +144,13 @@ enum LMImplementation
 
 };
 
+enum PhraseTableImplementation
+{
+	Memory		= 0
+	,Binary		= 1
+	,OnDisk		= 2
+	,GlueRule	= 3
+};
 
 enum InputTypeEnum
 {
@@ -187,5 +195,8 @@ typedef std::vector<std::string> WordAlignments;
 
 typedef std::pair<std::vector<std::string const*>,Scores > StringTgtCand;
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
+
+// chart decoder
+#define NON_TERMINAL_FACTOR	"[X]"
 
 }

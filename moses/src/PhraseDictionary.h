@@ -37,6 +37,7 @@ namespace Moses
 class StaticData;
 class InputType;
 class WordsRange;
+class ChartRuleCollection;
 
 /** abstract base class for phrase table classes
 */
@@ -70,6 +71,11 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
 	virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
 	//! Create entry for translation of source to targetPhrase
 	virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
+
+	virtual const ChartRuleCollection *GetChartRuleCollection(
+																				InputType const& src
+																				,WordsRange const& range
+																				,bool adhereTableLimit) const=0;
 };
 
 }

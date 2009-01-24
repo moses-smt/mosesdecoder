@@ -57,7 +57,7 @@ bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, 
 	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
 
 	FactorSet::const_iterator iterFactor;
-	Factor search(direction, factorType, ptrString); // id not used for searching
+	Factor search(direction, factorType, ptrString, false); // id not used for searching
 
 	iterFactor = m_collection.find(search);
 	return iterFactor != m_collection.end();

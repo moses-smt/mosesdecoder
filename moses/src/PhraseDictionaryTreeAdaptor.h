@@ -70,6 +70,14 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	
 	size_t GetNumInputScores() const;
 	
+	const ChartRuleCollection *GetChartRuleCollection(
+															InputType const& src
+															,WordsRange const& range
+															,bool adhereTableLimit) const
+	{
+		abort();
+		return NULL;
+	}
 };
 
 }

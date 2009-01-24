@@ -35,6 +35,7 @@ class DecodeGraph
 {
 protected:
 	std::list<const DecodeStep*> m_steps;
+	size_t m_maxChartSpan;
 
 public:
 	//! iterators
@@ -43,7 +44,16 @@ public:
 	const_iterator begin() const { return m_steps.begin(); }
 	const_iterator end() const { return m_steps.end(); }
 	
+	DecodeGraph(size_t maxChartSpan)
+		:m_maxChartSpan(maxChartSpan)
+	{}
+
 	~DecodeGraph();
+
+	size_t GetSize() const
+	{ return m_steps.size(); }
+	size_t GetMaxChartSpan() const
+	{ return m_maxChartSpan; }
 
 	//! Add another decode step to the graph
 	void Add(const DecodeStep *decodeStep)

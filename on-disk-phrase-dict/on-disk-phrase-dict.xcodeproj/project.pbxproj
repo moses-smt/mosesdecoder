@@ -1,0 +1,314 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1CF5A8E60F20BF8B008506A5 /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF5A8D50F20BF8B008506A5 /* Phrase.cpp */; };
+		1CF5A8E70F20BF8B008506A5 /* Phrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CF5A8D60F20BF8B008506A5 /* Phrase.h */; };
+		1CF5A8E80F20BF8B008506A5 /* SourcePhraseCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF5A8D70F20BF8B008506A5 /* SourcePhraseCollection.cpp */; };
+		1CF5A8E90F20BF8B008506A5 /* SourcePhraseCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CF5A8D80F20BF8B008506A5 /* SourcePhraseCollection.h */; };
+		1CF5A8EA0F20BF8B008506A5 /* SourcePhraseNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF5A8D90F20BF8B008506A5 /* SourcePhraseNode.cpp */; };
+		1CF5A8EB0F20BF8B008506A5 /* SourcePhraseNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CF5A8DA0F20BF8B008506A5 /* SourcePhraseNode.h */; };
+		1CF5A8EC0F20BF8B008506A5 /* TargetPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF5A8DB0F20BF8B008506A5 /* TargetPhrase.cpp */; };
+		1CF5A8ED0F20BF8B008506A5 /* TargetPhrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CF5A8DC0F20BF8B008506A5 /* TargetPhrase.h */; };
+		1CF5A8EE0F20BF8B008506A5 /* TargetPhraseCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF5A8DD0F20BF8B008506A5 /* TargetPhraseCollection.cpp */; };
+		1CF5A8EF0F20BF8B008506A5 /* TargetPhraseCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CF5A8DE0F20BF8B008506A5 /* TargetPhraseCollection.h */; };
+		1CF5A8F00F20BF8B008506A5 /* TargetPhraseList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF5A8DF0F20BF8B008506A5 /* TargetPhraseList.cpp */; };
+		1CF5A8F10F20BF8B008506A5 /* TargetPhraseList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CF5A8E00F20BF8B008506A5 /* TargetPhraseList.h */; };
+		1CF5A8F20F20BF8B008506A5 /* TypeDef.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CF5A8E10F20BF8B008506A5 /* TypeDef.h */; };
+		1CF5A8F30F20BF8B008506A5 /* Vocab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF5A8E20F20BF8B008506A5 /* Vocab.cpp */; };
+		1CF5A8F40F20BF8B008506A5 /* Vocab.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CF5A8E30F20BF8B008506A5 /* Vocab.h */; };
+		1CF5A8F50F20BF8B008506A5 /* Word.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF5A8E40F20BF8B008506A5 /* Word.cpp */; };
+		1CF5A8F60F20BF8B008506A5 /* Word.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CF5A8E50F20BF8B008506A5 /* Word.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1CF5A8D50F20BF8B008506A5 /* Phrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Phrase.cpp; path = src/Phrase.cpp; sourceTree = "<group>"; };
+		1CF5A8D60F20BF8B008506A5 /* Phrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Phrase.h; path = src/Phrase.h; sourceTree = "<group>"; };
+		1CF5A8D70F20BF8B008506A5 /* SourcePhraseCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourcePhraseCollection.cpp; path = src/SourcePhraseCollection.cpp; sourceTree = "<group>"; };
+		1CF5A8D80F20BF8B008506A5 /* SourcePhraseCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourcePhraseCollection.h; path = src/SourcePhraseCollection.h; sourceTree = "<group>"; };
+		1CF5A8D90F20BF8B008506A5 /* SourcePhraseNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourcePhraseNode.cpp; path = src/SourcePhraseNode.cpp; sourceTree = "<group>"; };
+		1CF5A8DA0F20BF8B008506A5 /* SourcePhraseNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourcePhraseNode.h; path = src/SourcePhraseNode.h; sourceTree = "<group>"; };
+		1CF5A8DB0F20BF8B008506A5 /* TargetPhrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhrase.cpp; path = src/TargetPhrase.cpp; sourceTree = "<group>"; };
+		1CF5A8DC0F20BF8B008506A5 /* TargetPhrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhrase.h; path = src/TargetPhrase.h; sourceTree = "<group>"; };
+		1CF5A8DD0F20BF8B008506A5 /* TargetPhraseCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhraseCollection.cpp; path = src/TargetPhraseCollection.cpp; sourceTree = "<group>"; };
+		1CF5A8DE0F20BF8B008506A5 /* TargetPhraseCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhraseCollection.h; path = src/TargetPhraseCollection.h; sourceTree = "<group>"; };
+		1CF5A8DF0F20BF8B008506A5 /* TargetPhraseList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhraseList.cpp; path = src/TargetPhraseList.cpp; sourceTree = "<group>"; };
+		1CF5A8E00F20BF8B008506A5 /* TargetPhraseList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhraseList.h; path = src/TargetPhraseList.h; sourceTree = "<group>"; };
+		1CF5A8E10F20BF8B008506A5 /* TypeDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TypeDef.h; path = src/TypeDef.h; sourceTree = "<group>"; };
+		1CF5A8E20F20BF8B008506A5 /* Vocab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vocab.cpp; path = src/Vocab.cpp; sourceTree = "<group>"; };
+		1CF5A8E30F20BF8B008506A5 /* Vocab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vocab.h; path = src/Vocab.h; sourceTree = "<group>"; };
+		1CF5A8E40F20BF8B008506A5 /* Word.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Word.cpp; path = src/Word.cpp; sourceTree = "<group>"; };
+		1CF5A8E50F20BF8B008506A5 /* Word.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Word.h; path = src/Word.h; sourceTree = "<group>"; };
+		D2AAC046055464E500DB518D /* libon-disk-phrase-dict.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libon-disk-phrase-dict.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D289987405E68DCB004EDB86 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* moses */ = {
+			isa = PBXGroup;
+			children = (
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6A0FF2B0290797F04C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = moses;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				1CF5A8D50F20BF8B008506A5 /* Phrase.cpp */,
+				1CF5A8D60F20BF8B008506A5 /* Phrase.h */,
+				1CF5A8D70F20BF8B008506A5 /* SourcePhraseCollection.cpp */,
+				1CF5A8D80F20BF8B008506A5 /* SourcePhraseCollection.h */,
+				1CF5A8D90F20BF8B008506A5 /* SourcePhraseNode.cpp */,
+				1CF5A8DA0F20BF8B008506A5 /* SourcePhraseNode.h */,
+				1CF5A8DB0F20BF8B008506A5 /* TargetPhrase.cpp */,
+				1CF5A8DC0F20BF8B008506A5 /* TargetPhrase.h */,
+				1CF5A8DD0F20BF8B008506A5 /* TargetPhraseCollection.cpp */,
+				1CF5A8DE0F20BF8B008506A5 /* TargetPhraseCollection.h */,
+				1CF5A8DF0F20BF8B008506A5 /* TargetPhraseList.cpp */,
+				1CF5A8E00F20BF8B008506A5 /* TargetPhraseList.h */,
+				1CF5A8E10F20BF8B008506A5 /* TypeDef.h */,
+				1CF5A8E20F20BF8B008506A5 /* Vocab.cpp */,
+				1CF5A8E30F20BF8B008506A5 /* Vocab.h */,
+				1CF5A8E40F20BF8B008506A5 /* Word.cpp */,
+				1CF5A8E50F20BF8B008506A5 /* Word.h */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2AAC046055464E500DB518D /* libon-disk-phrase-dict.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6A0FF2B0290797F04C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC043055464E500DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1CF5A8E70F20BF8B008506A5 /* Phrase.h in Headers */,
+				1CF5A8E90F20BF8B008506A5 /* SourcePhraseCollection.h in Headers */,
+				1CF5A8EB0F20BF8B008506A5 /* SourcePhraseNode.h in Headers */,
+				1CF5A8ED0F20BF8B008506A5 /* TargetPhrase.h in Headers */,
+				1CF5A8EF0F20BF8B008506A5 /* TargetPhraseCollection.h in Headers */,
+				1CF5A8F10F20BF8B008506A5 /* TargetPhraseList.h in Headers */,
+				1CF5A8F20F20BF8B008506A5 /* TypeDef.h in Headers */,
+				1CF5A8F40F20BF8B008506A5 /* Vocab.h in Headers */,
+				1CF5A8F60F20BF8B008506A5 /* Word.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC045055464E500DB518D /* on-disk-phrase-dict */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0396E18C0C0B186F00D95CFF /* Build configuration list for PBXNativeTarget "on-disk-phrase-dict" */;
+			buildPhases = (
+				D2AAC043055464E500DB518D /* Headers */,
+				D2AAC044055464E500DB518D /* Sources */,
+				D289987405E68DCB004EDB86 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "on-disk-phrase-dict";
+			productName = moses;
+			productReference = D2AAC046055464E500DB518D /* libon-disk-phrase-dict.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 0396E1900C0B186F00D95CFF /* Build configuration list for PBXProject "on-disk-phrase-dict" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* moses */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D2AAC045055464E500DB518D /* on-disk-phrase-dict */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC044055464E500DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1CF5A8E60F20BF8B008506A5 /* Phrase.cpp in Sources */,
+				1CF5A8E80F20BF8B008506A5 /* SourcePhraseCollection.cpp in Sources */,
+				1CF5A8EA0F20BF8B008506A5 /* SourcePhraseNode.cpp in Sources */,
+				1CF5A8EC0F20BF8B008506A5 /* TargetPhrase.cpp in Sources */,
+				1CF5A8EE0F20BF8B008506A5 /* TargetPhraseCollection.cpp in Sources */,
+				1CF5A8F00F20BF8B008506A5 /* TargetPhraseList.cpp in Sources */,
+				1CF5A8F30F20BF8B008506A5 /* Vocab.cpp in Sources */,
+				1CF5A8F50F20BF8B008506A5 /* Word.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0396E18D0C0B186F00D95CFF /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_IRST,
+					LM_SRI,
+					TRACE_ENABLE,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../irstlm/include,
+					../srilm/misc/src,
+					../srilm/dstruct/src,
+					../srilm/include,
+					../srilm/lm/src,
+				);
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
+				PREBINDING = NO;
+				PRODUCT_NAME = "on-disk-phrase-dict";
+				REZ_PREPROCESSOR_DEFINITIONS = "";
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		0396E18E0C0B186F00D95CFF /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_IRST,
+					LM_SRI,
+					TRACE_ENABLE,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../irstlm/include,
+					../srilm/misc/src,
+					../srilm/dstruct/src,
+					../srilm/include,
+					../srilm/lm/src,
+				);
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
+				PREBINDING = NO;
+				PRODUCT_NAME = "on-disk-phrase-dict";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		0396E18F0C0B186F00D95CFF /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "";
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
+				PREBINDING = NO;
+				PRODUCT_NAME = "on-disk-phrase-dict";
+			};
+			name = Default;
+		};
+		0396E1910C0B186F00D95CFF /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
+				VALID_ARCHS = i386;
+			};
+			name = Development;
+		};
+		0396E1920C0B186F00D95CFF /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
+			};
+			name = Deployment;
+		};
+		0396E1930C0B186F00D95CFF /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
+			};
+			name = Default;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0396E18C0C0B186F00D95CFF /* Build configuration list for PBXNativeTarget "on-disk-phrase-dict" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0396E18D0C0B186F00D95CFF /* Development */,
+				0396E18E0C0B186F00D95CFF /* Deployment */,
+				0396E18F0C0B186F00D95CFF /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		0396E1900C0B186F00D95CFF /* Build configuration list for PBXProject "on-disk-phrase-dict" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0396E1910C0B186F00D95CFF /* Development */,
+				0396E1920C0B186F00D95CFF /* Deployment */,
+				0396E1930C0B186F00D95CFF /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

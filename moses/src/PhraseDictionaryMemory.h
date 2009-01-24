@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryNode.h"
+#include "ChartRuleCollection.h"
 
 namespace Moses
 {
@@ -38,9 +39,18 @@ class PhraseDictionaryMemory : public PhraseDictionary
 
 protected:
 	PhraseDictionaryNode m_collection;
+	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
 
 	TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
 	
+	bool Load(const std::vector<FactorType> &input
+							, const std::vector<FactorType> &output
+							, std::istream &inStream
+							, const std::vector<float> &weight
+							, size_t tableLimit
+							, const LMList &languageModels
+					    , float weightWP);
+
 public:
 	PhraseDictionaryMemory(size_t numScoreComponent)
 		: MyBase(numScoreComponent)
@@ -65,6 +75,11 @@ public:
 	
 	TO_STRING();
 	
+	const ChartRuleCollection *GetChartRuleCollection(
+																	InputType const& src
+																	,WordsRange const& range
+																	,bool adhereTableLimit) const;
+	void CleanUp();
 };
 
 }

@@ -159,6 +159,11 @@ public:
 		return printalign;
 	}
 
+	void InitializeAlignment(size_t numSourceWordsPt);
+
+	void AddAlignment(const std::pair<size_t, size_t> &entry);
+		// giza++ style alignment format
+
 	TO_STRING();
 };
 
