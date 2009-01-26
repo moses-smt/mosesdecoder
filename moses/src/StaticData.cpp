@@ -333,15 +333,24 @@ bool StaticData::LoadData(Parameter *parameter)
 	
 	std::string line;
 	
+	long sentenceID = -1;
 	while (getline(constraintFile, line)) 
 	{
 		vector<string> vecStr = Tokenize(line, "\t");
-		assert(vecStr.size() == 2);
-
-		long sentenceID = Scan<long>(vecStr[0]);
-		Phrase phrase(Output);
-		phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
-		m_constraints.insert(make_pair(sentenceID,phrase));
+		
+		if (vecStr.size() == 1) {
+			sentenceID++;
+			Phrase phrase(Output);
+			phrase.CreateFromString(GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter());
+			m_constraints.insert(make_pair(sentenceID,phrase));
+		} else if (vecStr.size() == 2) {
+			sentenceID = Scan<long>(vecStr[0]);
+			Phrase phrase(Output);
+			phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
+			m_constraints.insert(make_pair(sentenceID,phrase));
+		} else {
+			assert(false);
+		}
 	}
 
 	// to cube or not to cube
