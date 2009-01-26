@@ -33,7 +33,6 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1022475428" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
 <option id="gnu.cpp.compiler.option.preprocessor.def.2071633498" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
-<listOptionValue builtIn="false" value="LM_RAND"/>
 <listOptionValue builtIn="false" value="LM_IRST"/>
 <listOptionValue builtIn="false" value="LM_INTERNAL"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
@@ -62,12 +61,16 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.149153117" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base"/>
 </toolChain>
 </folderInfo>
+<sourceEntries>
+<entry excluding="src/LanguageModelRandLM.cpp|src/LanguageModelRandLM.h" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+</sourceEntries>
 </configuration>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 <storageModule moduleId="scannerConfiguration"/>
+<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cconfiguration>
 <cconfiguration id="cdt.managedbuild.config.gnu.lib.release.875756117">
 <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.lib.release.875756117" moduleId="org.eclipse.cdt.core.settings" name="Release">
@@ -107,7 +110,6 @@
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.444585015" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
-<listOptionValue builtIn="false" value="LM_RAND"/>
 <listOptionValue builtIn="false" value="LM_IRST"/>
 <listOptionValue builtIn="false" value="LM_INTERNAL"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
@@ -129,12 +131,16 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1057349768" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base"/>
 </toolChain>
 </folderInfo>
+<sourceEntries>
+<entry excluding="src/LanguageModelRandLM.cpp|src/LanguageModelRandLM.h" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+</sourceEntries>
 </configuration>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 <storageModule moduleId="scannerConfiguration"/>
+<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cconfiguration>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
