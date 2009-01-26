@@ -103,7 +103,7 @@ bool LanguageModelInternal::Load(const std::string &filePath
 		}
 	}
 
-		// add to lookup vector in object
+	// add to lookup vector in object
 	m_lmIdLookup.resize(maxFactorId+1);
 	fill(m_lmIdLookup.begin(), m_lmIdLookup.end(), static_cast<const NGramNode*>(NULL));
 
