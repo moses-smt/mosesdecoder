@@ -37,7 +37,7 @@ using namespace std;
 namespace Moses
 {
 /** define allowed parameters */
-Parameter::Parameter() 
+Parameter::Parameter()
 {
 	AddParam("beam-threshold", "b", "threshold for threshold pruning");
 	AddParam("config", "f", "location of the configuration file");
@@ -76,11 +76,11 @@ Parameter::Parameter()
 	AddParam("weight-l", "lm", "weight(s) for language models");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
-	AddParam("weight-e", "e", "weight for word deletion"); 
+	AddParam("weight-e", "e", "weight for word deletion");
 	AddParam("weight-file", "wf", "file containing labeled weights");
 	AddParam("output-factors", "list if factors in the output");
 	AddParam("cache-path", "?");
-	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");	
+	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");
 	AddParam("monotone-at-punctuation", "mp", "do not reorder over punctuation");
 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
@@ -130,7 +130,7 @@ void Parameter::AddParam(const string &paramName, const string &abbrevName, cons
 /** print descriptions of all parameters */
 void Parameter::Explain() {
 	cerr << "Usage:" << endl;
-	for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++) 
+	for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++)
 	{
 		const string paramName = iterParam->first;
 		const string paramDescription = iterParam->second;
@@ -142,7 +142,7 @@ void Parameter::Explain() {
 	}
 }
 
-/** check whether an item on the command line is a switch or a value 
+/** check whether an item on the command line is a switch or a value
  * \param token token on the command line to checked **/
 
 bool Parameter::isOption(const char* token) {
@@ -162,11 +162,11 @@ bool Parameter::LoadParam(const string &filePath)
 }
 
 /** load all parameters from the configuration file and the command line switches */
-bool Parameter::LoadParam(int argc, char* argv[]) 
+bool Parameter::LoadParam(int argc, char* argv[])
 {
 	// config file (-f) arg mandatory
 	string configPath;
-	if ( (configPath = FindParam("-f", argc, argv)) == "" 
+	if ( (configPath = FindParam("-f", argc, argv)) == ""
 		&& (configPath = FindParam("-config", argc, argv)) == "")
 	{
 		PrintCredit();
@@ -182,16 +182,16 @@ bool Parameter::LoadParam(int argc, char* argv[])
 			return false;
 		}
 	}
-	
+
 	// overwrite parameters with values from switches
-	for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++) 
+	for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++)
 	{
 		const string paramName = iterParam->first;
 		OverwriteParam("-" + paramName, paramName, argc, argv);
 	}
 
 	// ... also shortcuts
-	for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin(); iterParam != m_abbreviation.end(); iterParam++) 
+	for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin(); iterParam != m_abbreviation.end(); iterParam++)
 	{
 		const string paramName = iterParam->first;
 		const string paramShortName = iterParam->second;
@@ -219,9 +219,9 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	{
 		if (isOption(argv[i]))
 			{
-				string paramSwitch = (string) argv[i];				
+				string paramSwitch = (string) argv[i];
 				string paramName = paramSwitch.substr(1);
-				if (m_valid.find(paramName) == m_valid.end()) 
+				if (m_valid.find(paramName) == m_valid.end())
 					{
 						UserMessage::Add("illegal switch: " + paramSwitch);
 						noErrorFlag = false;
@@ -234,7 +234,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 }
 
 /** check that parameter settings make sense */
-bool Parameter::Validate() 
+bool Parameter::Validate()
 {
 	bool noErrorFlag = true;
 
@@ -261,12 +261,12 @@ bool Parameter::Validate()
 		}
 	}
 
-	if (m_setting["lmodel-file"].size() != m_setting["weight-l"].size()) 
-	{	
+	if (m_setting["lmodel-file"].size() != m_setting["weight-l"].size())
+	{
 		stringstream errorMsg("");
 		errorMsg << "Config and parameters specify "
-            << static_cast<int>(m_setting["lmodel-file"].size()) 
-						<< " language model files (lmodel-file), but " 
+            << static_cast<int>(m_setting["lmodel-file"].size())
+						<< " language model files (lmodel-file), but "
 						<< static_cast<int>(m_setting["weight-l"].size())
 						<< " weights (weight-l)";
     errorMsg << endl << "You might be giving '-lmodel-file TYPE FACTOR ORDER FILENAME' but you should be giving these four as a single argument, i.e. '-lmodel-file \"TYPE FACTOR ORDER FILENAME\"'";
@@ -276,7 +276,8 @@ bool Parameter::Validate()
 
   // do files exist?
 	// phrase tables
-	if (noErrorFlag) 
+	/*
+	if (noErrorFlag)
 	{
 		std::vector<std::string> ext;
 		// standard phrase table extension (i.e. full name has to be specified)
@@ -285,8 +286,9 @@ bool Parameter::Validate()
 	  ext.push_back(".gz");
 		// alternative file extension for binary phrase table format:
 		ext.push_back(".binphr.idx");
-		noErrorFlag = FilesExist("ttable-file", 3,ext);
+		noErrorFlag = FilesExist("ttable-file", 4,ext);
 	}
+	*/
 	// language model
 //	if (noErrorFlag)
 //		noErrorFlag = FilesExist("lmodel-file", 3);
@@ -355,7 +357,7 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 				errorMsg << "File " << pathStr << " does not exist";
 				UserMessage::Add(errorMsg.str());
 				return false;
-			}		
+			}
 	}
 	return true;
 }
@@ -417,11 +419,11 @@ void Parameter::OverwriteParam(const string &paramSwitch, const string &paramNam
 
 
 /** read parameters from a configuration file */
-bool Parameter::ReadConfigFile( string filePath ) 
+bool Parameter::ReadConfigFile( string filePath )
 {
 	InputFileStream inFile(filePath);
 	string line, paramName;
-	while(getline(inFile, line)) 
+	while(getline(inFile, line))
 	{
 		// comments
 		size_t comPos = line.find_first_of("#");
@@ -430,7 +432,7 @@ bool Parameter::ReadConfigFile( string filePath )
 		// trim leading and trailing spaces/tabs
 		line = Trim(line);
 
-		if (line[0]=='[') 
+		if (line[0]=='[')
 		{ // new parameter
 			for (size_t currPos = 0 ; currPos < line.size() ; currPos++)
 			{
@@ -441,7 +443,7 @@ bool Parameter::ReadConfigFile( string filePath )
 				}
 			}
 		}
-    else if (line != "") 
+    else if (line != "")
 		{ // add value to parameter
 			m_setting[paramName].push_back(line);
 		}
@@ -541,7 +543,7 @@ void Parameter::PrintCredit()
 	everyone.push_back(Credit("Hieu Hoang", "http://www.hoang.co.uk/hieu/"
 													, "phd student at Edinburgh Uni. Original Moses developer"
 													, "general queries/ flames on Moses. Doing stuff on async factored translation, so anything on that as well"));
-	
+
 	sort(everyone.begin(), everyone.end());
 
 
