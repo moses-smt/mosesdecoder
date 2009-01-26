@@ -52,7 +52,7 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.888044188" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 <option id="gnu.cpp.link.option.libs.427302130" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="irstlm"/>
-<listOptionValue builtIn="false" value="randlm"/>
+<listOptionValue builtIn="false" value="on-disk-phrase-dict"/>
 <listOptionValue builtIn="false" value="pthread"/>
 <listOptionValue builtIn="false" value="z"/>
 <listOptionValue builtIn="false" value="lattice"/>
@@ -62,6 +62,7 @@
 </option>
 <option id="gnu.cpp.link.option.paths.1718276622" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="stringList">
 <listOptionValue builtIn="false" value="&quot;../../srilm/lib/cygwin&quot;"/>
+<listOptionValue builtIn="false" value="&quot;../../on-disk-phrase-dict/${ConfigName}/&quot;"/>
 <listOptionValue builtIn="false" value="&quot;../../irstlm/lib/i686-redhat-linux-gnu&quot;"/>
 <listOptionValue builtIn="false" value="&quot;../../srilm/lib/i686&quot;"/>
 <listOptionValue builtIn="false" value="&quot;../../randlm/lib&quot;"/>
@@ -118,7 +119,6 @@
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.542441515" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="LM_SRI"/>
-<listOptionValue builtIn="false" value="LM_RAND"/>
 <listOptionValue builtIn="false" value="LM_IRST"/>
 <listOptionValue builtIn="false" value="LM_INTERNAL"/>
 <listOptionValue builtIn="false" value="TRACE_ENABLE"/>
@@ -134,7 +134,7 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1153317521" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
 <option id="gnu.cpp.link.option.libs.1100640875" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="pthread"/>
-<listOptionValue builtIn="false" value="randlm"/>
+<listOptionValue builtIn="false" value="on-disk-phrase-dict"/>
 <listOptionValue builtIn="false" value="z"/>
 <listOptionValue builtIn="false" value="lattice"/>
 <listOptionValue builtIn="false" value="misc"/>
@@ -144,6 +144,7 @@
 </option>
 <option id="gnu.cpp.link.option.paths.724264639" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="stringList">
 <listOptionValue builtIn="false" value="&quot;../../srilm/lib/cygwin&quot;"/>
+<listOptionValue builtIn="false" value="&quot;../../on-disk-phrase-dict/${ConfigName}/&quot;"/>
 <listOptionValue builtIn="false" value="&quot;../../srilm/lib/i686&quot;"/>
 <listOptionValue builtIn="false" value="&quot;../../randlm/lib&quot;"/>
 <listOptionValue builtIn="false" value="&quot;../../irstlm/lib/i686-redhat-linux-gnu&quot;"/>
