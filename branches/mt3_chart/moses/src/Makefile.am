@@ -5,6 +5,8 @@ libmoses_a_SOURCES = \
 	AlignmentPhrase.cpp \
 	AlignmentPair.cpp \
 	BitmapContainer.cpp \
+	ChartRule.cpp \
+	ChartRuleCollection.cpp \
 	ConfusionNet.cpp \
 	DecodeGraph.cpp \
 	DecodeStep.cpp \
@@ -47,9 +49,13 @@ libmoses_a_SOURCES = \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
 	PhraseDictionaryMemory.cpp \
+	PhraseDictionaryMemoryChart.cpp \
 	PhraseDictionaryNode.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
+	PhraseDictionaryOnDisk.cpp \
+	PhraseDictionaryOnDiskChart.cpp \
+	PhraseDictionaryGlueRule.cpp \
 	PrefixTreeMap.cpp \
 	ReorderingConstraint.cpp \
 	ScoreComponentCollection.cpp \
@@ -77,7 +83,7 @@ libmoses_a_SOURCES = \
 	WordLattice.cpp \
 	WordsRange.cpp \
 	XmlOption.cpp 
-	
+
 if PROTOBUF
 BUILT_SOURCES = \
   rule.pb.h \
@@ -110,12 +116,10 @@ if IRST_LM
 libmoses_a_SOURCES += LanguageModelIRST.cpp
 endif
 
-if RAND_LM
-libmoses_a_SOURCES += LanguageModelRandLM.cpp
-endif
-
 if INTERNAL_LM
 libmoses_a_SOURCES += LanguageModelInternal.cpp \
 		      NGramCollection.cpp \
 		      NGramNode.cpp
 endif
+
+
