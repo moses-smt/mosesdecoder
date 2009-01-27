@@ -124,10 +124,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, float weightWP)
 {
 	const StaticData &staticData = StaticData::Instance();
-	
+
 	m_tableLimit = tableLimit;
 
-	//factors	
+	//factors
 	m_inputFactors = FactorMask(input);
 	m_outputFactors = FactorMask(output);
 	VERBOSE(2,"PhraseDictionaryMemory: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
@@ -140,18 +140,18 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	size_t count = 0;
   size_t line_num = 0;
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
-  
-	while(getline(inStream, line)) 
+
+	while(getline(inStream, line))
 	{
 		++line_num;
 		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
-		
-		if (numElement == NOT_FOUND) 
+
+		if (numElement == NOT_FOUND)
 		{ // init numElement
 			numElement = tokens.size();
 			assert(numElement == 4);
 		}
-			 
+
 		if (tokens.size() != numElement)
 		{
 			stringstream strme;
@@ -164,7 +164,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		string sourcePhraseString	=tokens[1]
 					, targetPhraseString=tokens[2]
 					, scoreString				=tokens[3];
-		
+
 		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
 			TRACE_ERR( m_filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
@@ -172,7 +172,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		}
 
 		vector<float> scoreVector = Tokenize<float>(scoreString);
-		if (scoreVector.size() != m_numScoreComponent) 
+		if (scoreVector.size() != m_numScoreComponent)
 		{
 			stringstream strme;
 			strme << "Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
@@ -190,7 +190,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		// source
 		Phrase sourcePhrase(Input);
 		sourcePhrase.CreateFromString( input, sourcePhraseVector);
-		
+
 		//target
 		TargetPhrase targetPhrase(Output);
 		targetPhrase.SetSourcePhrase(&sourcePhrase);
@@ -200,7 +200,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
-		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
+		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),NegateScore);
+
 		std::transform(scv.begin(),scv.end(),scv.begin(),FloorScore);
 		targetPhrase.SetScore(this, scv, weight, weightWP, languageModels);
 
@@ -218,7 +219,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 TargetPhraseCollection *PhraseDictionaryMemory::CreateTargetPhraseCollection(const Phrase &source)
 {
 	const size_t size = source.GetSize();
-	
+
 	PhraseDictionaryNode *currNode = &m_collection;
 	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
@@ -240,7 +241,7 @@ void PhraseDictionaryMemory::AddEquivPhrase(const Phrase &source, const TargetPh
 const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase &source) const
 { // exactly like CreateTargetPhraseCollection, but don't create
 	const size_t size = source.GetSize();
-	
+
 	const PhraseDictionaryNode *currNode = &m_collection;
 	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
@@ -281,7 +282,7 @@ TO_STRING_BODY(PhraseDictionaryMemory);
 ostream& operator<<(ostream& out, const PhraseDictionaryMemory& phraseDict)
 {
 	const PhraseDictionaryNode &coll = phraseDict.m_collection;
-	PhraseDictionaryNode::const_iterator iter;	
+	PhraseDictionaryNode::const_iterator iter;
 	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
 	{
 		const Word &word = (*iter).first;
