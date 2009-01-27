@@ -119,12 +119,12 @@ inline std::string Replace(const std::string& str,
 													 const std::string& toaddStr)
 {
 	size_t pos=0;
-	std::string newStr=str;	
+	std::string newStr=str;
 	while ((pos=newStr.find(todelStr,pos))!=std::string::npos){		newStr.replace(pos++,todelStr.size(),toaddStr);	}
 	return newStr;
 }
 
-/** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument. 
+/** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument.
 		The separator can only be 1 character long. The default delimiters are space or tab
 */
 inline std::vector<std::string> Tokenize(const std::string& str,
@@ -152,7 +152,7 @@ inline std::vector<std::string> Tokenize(const std::string& str,
 //! tokenise input string to vector of type T
 template<typename T>
 inline std::vector<T> Tokenize( const std::string &input
-															 , const std::string& delimiters = " \t") 
+															 , const std::string& delimiters = " \t")
 {
 	std::vector<std::string> stringVector = Tokenize(input, delimiters);
 	return Scan<T>( stringVector );
@@ -191,7 +191,7 @@ std::string Join(const std::string& delimiter, const std::vector<T>& items)
 	std::ostringstream outstr;
 	if(items.size() == 0) return "";
 	outstr << items[0];
-	for(unsigned int i = 1; i < items.size(); i++) 
+	for(unsigned int i = 1; i < items.size(); i++)
 		outstr << delimiter << items[i];
 	return outstr.str();
 }
@@ -202,15 +202,21 @@ inline float TransformScore(float prob)
 	return log(prob);
 }
 
-//! transform natural log score to prob. Not currently used 
+//! transform natural log score to prob. Not currently used
 inline float UntransformScore(float score)
 {
 	return exp(score);
 }
 
+//! transform natural log score to prob. Not currently used
+inline float NegateScore(float score)
+{
+	return -score;
+}
+
 //! irst number are in log 10, transform to natural log
 inline float TransformIRSTScore(float irstScore)
-{ 
+{
 	return irstScore * 2.30258509299405f;
 }
 
@@ -240,8 +246,8 @@ inline float UntransformSRIScore(float logNScore)
  * At least, that's what I think it does, fn is only 9 lines but can't figure out what it does.
  * Not sure whether give zens a medal for being a genius, or shoot him for writing unreadable code. Mabe both...
  */
-inline float CalcTranslationScore(const std::vector<float> &probVector, 
-																	const std::vector<float> &weightT) 
+inline float CalcTranslationScore(const std::vector<float> &probVector,
+																	const std::vector<float> &weightT)
 {
 	assert(weightT.size()==probVector.size());
 	float rv=0.0;
@@ -251,10 +257,10 @@ inline float CalcTranslationScore(const std::vector<float> &probVector,
 	return rv;
 }
 
-/** declaration of ToString() function to go in header for each class. 
- *	This function, as well as the operator<< fn for each class, is 
- *	for debugging purposes only. The output format is likely to change from 
- *	time-to-time as classes are updated so shouldn't be relied upon 
+/** declaration of ToString() function to go in header for each class.
+ *	This function, as well as the operator<< fn for each class, is
+ *	for debugging purposes only. The output format is likely to change from
+ *	time-to-time as classes are updated so shouldn't be relied upon
  *	for any decoding algorithm
 */
 #define TO_STRING()	 std::string ToString() const;
@@ -287,10 +293,10 @@ void CreateTempFile(std::ofstream  &fileStream, std::string &filePath);
 std::string GetMD5Hash(const std::string &filePath);
 
 //! save memory by getting rid of spare, unused elements in a collection
-template<typename T> 
-inline void ShrinkToFit(T& v) 
+template<typename T>
+inline void ShrinkToFit(T& v)
 {
-  if(v.capacity()>v.size()) 
+  if(v.capacity()>v.size())
   	T(v).swap(v);
   assert(v.capacity()==v.size());
 }
