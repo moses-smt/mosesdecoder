@@ -147,14 +147,28 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
-Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const
+Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
 {
-	return Create(*this, transOpt, constraint);
+	return Create(*this, transOpt);
 }
+//LS Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const
+//LS {
+//LS	return Create(*this, transOpt, constraint);
+//LS}
 
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
+Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
+{
+#ifdef USE_HYPO_POOL
+	Hypothesis *ptr = s_objectPool.getPtr();
+	return new(ptr) Hypothesis(prevHypo, transOpt);
+#else
+	return new Hypothesis(prevHypo, transOpt);
+#endif
+}
+/*LS	
 Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Phrase* constrainingPhrase)
 {
 
@@ -214,6 +228,8 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 	}
 	
 }
+*/
+	
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */

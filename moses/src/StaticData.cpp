@@ -330,9 +330,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	
 	InputFileStream constraintFile(m_constraintFileName);
 	
-	
+	// Read in constraints for constraint decoding
 	std::string line;
-	
 	long sentenceID = -1;
 	while (getline(constraintFile, line)) 
 	{
@@ -353,6 +352,10 @@ bool StaticData::LoadData(Parameter *parameter)
 		}
 	}
 
+	// Read in word error rate value for constraint decoding
+	m_WERLimit = (m_parameter->GetParam("WER-limit").size() > 0) ?
+	Scan<float>(m_parameter->GetParam("WER-limit")[0]) : 0.0f;
+	
 	// to cube or not to cube
 	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
 										(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;

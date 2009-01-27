@@ -59,6 +59,7 @@ private:
 	static StaticData									s_instance;
 protected:	
 
+	float m_WERLimit;
 	std::map<long,Phrase> m_constraints;
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
@@ -241,6 +242,10 @@ public:
 	{ 
 		return m_maxNoTransOptPerCoverage;
 	}
+	inline float GetWERLimit() const 
+	{ 
+		return m_WERLimit;
+	}	
 	inline size_t GetMaxNoPartTransOpt() const 
 	{ 
 		return m_maxNoPartTransOpt;

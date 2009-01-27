@@ -23,6 +23,7 @@ SearchNormal::SearchNormal(const InputType &source, const TranslationOptionColle
 	// only if constraint decoding (having to match a specified output)
 	long sentenceID = source.GetTranslationId();
 	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
+	m_WERLimit = staticData.GetWERLimit();
 
 	// initialize the stacks: create data structure and set limits
 	std::vector < HypothesisStackNormal >::iterator iterStack;
@@ -253,8 +254,75 @@ void SearchNormal::ExpandAllHypotheses(const Hypothesis &hypothesis, size_t star
 	TranslationOptionList::const_iterator iter;
 	for (iter = transOptList.begin() ; iter != transOptList.end() ; ++iter)
 	{
-		ExpandHypothesis(hypothesis, **iter, expectedScore);
+//LS		ExpandHypothesis(hypothesis, **iter, expectedScore);
+		if (m_constraint == NULL) {
+			ExpandHypothesis(hypothesis, **iter, expectedScore);
+		}
+		else if (m_constraint != NULL && m_WERLimit == 0.0f) {
+			if (isCompatibleWithConstraint(hypothesis, **iter) )
+			    ExpandHypothesis(hypothesis, **iter, expectedScore);
+			
+		} else {
+			float currConstraintWER = getCurrConstraintWER(hypothesis, **iter);
+			if (currConstraintWER <= m_WERLimit)
+				ExpandHypothesis(hypothesis, **iter, expectedScore);
+		}
 	}
+}
+
+/**
+ * Enforce constraint when appropriate
+ * \param hypothesis hypothesis to be expanded upon
+ * \param transOptList list of translation options to be applied
+ */
+
+bool SearchNormal::isCompatibleWithConstraint(const Hypothesis &hypothesis, 
+											  const TranslationOption &transOpt) 
+{
+	size_t constraintSize = m_constraint->GetSize();
+	size_t start = 1 + hypothesis.GetCurrTargetWordsRange().GetEndPos();
+	const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
+	size_t transOptSize = transOptPhrase.GetSize();
+	size_t endpoint = start + transOptSize - 1;
+	WordsRange range(start, endpoint);
+	
+	if (endpoint >= constraintSize)
+		return false;
+	else {
+		const Phrase &relevantConstraint = m_constraint->GetSubString(range);
+		if ( ! relevantConstraint.IsCompatible(transOptPhrase) )
+			return false;
+		else
+			return true;
+	}
+}
+	
+float SearchNormal::getCurrConstraintWER(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
+{
+	return 0;
+}
+	
+	
+float SearchNormal::computeEditDistance(const Phrase &hypPhrase, const Phrase &constraintPhrase) const
+{
+	const size_t len1 = hypPhrase.GetSize(), len2 = constraintPhrase.GetSize();
+	vector<vector<unsigned int> > d(len1 + 1, vector<unsigned int>(len2 + 1));
+	
+	for(int i = 0; i <= len1; ++i) d[i][0] = i;
+	for(int i = 0; i <= len2; ++i) d[0][i] = i;
+	
+	for(int i = 1; i <= len1; ++i)
+	{
+		for(int j = 1; j <= len2; ++j) {
+			WordsRange s1range(i-1, i-1);
+			WordsRange s2range(j-1, j-1);
+			int cost = hypPhrase.GetSubString(s1range).IsCompatible(constraintPhrase.GetSubString(s2range)) ? 0 : 1;
+			d[i][j] = std::min( std::min(d[i - 1][j] + 1,
+										 d[i][j - 1] + 1),
+							   d[i - 1][j - 1] + cost);
+		}
+	}
+	return d[len1][len2];
 }
 
 /**
@@ -277,7 +345,8 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 	{
 		// simple build, no questions asked
 		IFVERBOSE(2) { t = clock(); }
-		newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+//LS		newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+		newHypo = hypothesis.CreateNext(transOpt);
 		IFVERBOSE(2) { stats.AddTimeBuildHyp( clock()-t ); }
 		if (newHypo==NULL) return;
 		newHypo->CalcScore(m_transOptColl.GetFutureScore());
@@ -309,7 +378,8 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 
 		// build the hypothesis without scoring
 		IFVERBOSE(2) { t = clock(); }
-		newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+//LS		newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+		newHypo = hypothesis.CreateNext(transOpt);
 		if (newHypo==NULL) return;
 		IFVERBOSE(2) { stats.AddTimeBuildHyp( clock()-t ); }
 
@@ -351,6 +421,7 @@ const std::vector < HypothesisStack* >& SearchNormal::GetHypothesisStacks() cons
  */
 const Hypothesis *SearchNormal::GetBestHypothesis() const
 {
+/*LS
 	if (interrupted_flag == 0){
 		const HypothesisStackNormal &hypoColl = *static_cast<HypothesisStackNormal*>(m_hypoStackColl.back());
 		return hypoColl.GetBestHypothesis();
@@ -359,6 +430,55 @@ const Hypothesis *SearchNormal::GetBestHypothesis() const
 		const HypothesisStackNormal &hypoColl = *actual_hypoStack;
 		return hypoColl.GetBestHypothesis();
 	}
+*/
+
+	if (interrupted_flag == 0){
+		const HypothesisStackNormal &hypoColl = *static_cast<HypothesisStackNormal*>(m_hypoStackColl.back());
+		
+		if (m_constraint != NULL) {
+			HypothesisStackNormal::const_iterator iter;
+			
+			for (iter = hypoColl.begin() ; iter != hypoColl.end() ; ++iter)
+			{
+				const Hypothesis *hypo = *iter;
+				WordsRange range(0, m_constraint->GetSize() - 1);
+				Phrase constraint = m_constraint->GetSubString(range);
+				
+				if (hypo != NULL) {
+					TargetPhrase targetPhrase = TargetPhrase(hypo->GetCurrTargetPhrase());
+					hypo = hypo->GetPrevHypo();
+					while (hypo != NULL) {
+						TargetPhrase newTargetPhrase = TargetPhrase(hypo->GetCurrTargetPhrase());
+						newTargetPhrase.Append(targetPhrase);
+						targetPhrase = newTargetPhrase;
+						hypo = hypo->GetPrevHypo();
+					}
+					
+					if ( m_WERLimit != 0.0f ) { // is WER-constraint active?
+						VERBOSE(1, "constraint  : " << constraint << endl);
+						VERBOSE(1, "targetPhrase: " << targetPhrase << endl);
+						if (computeEditDistance(constraint, targetPhrase) <= m_WERLimit) {
+							VERBOSE(1, "TRUE" << endl);
+							return *iter;
+						} else {
+							VERBOSE(1, "FALSE" << endl);
+						}
+					} else {
+						if (constraint.IsCompatible(targetPhrase))
+							return *iter;
+					}
+				}
+			}
+			return NULL;
+		} else {
+			return hypoColl.GetBestHypothesis();
+		}
+	}
+	else{
+		const HypothesisStackNormal &hypoColl = *actual_hypoStack;
+		return hypoColl.GetBestHypothesis();
+	}
+	
 }
 
 /**
