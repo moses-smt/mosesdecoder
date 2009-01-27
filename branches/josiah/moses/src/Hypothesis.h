@@ -60,12 +60,16 @@ typedef std::vector<Hypothesis*> ArcList;
 class Hypothesis
 {
 	friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
+	friend class Sampler;
+	friend class Sample;
 
 protected:
 	static ObjectPool<Hypothesis> s_objectPool;
 	
 	const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
-//	const Phrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
+	Hypothesis* m_nextHypo; /*! backpointer to previous hypothesis (from which this one was created) */
+	Hypothesis* m_sourcePrevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
+	Hypothesis* m_sourceNextHypo; /*! backpointer to previous hypothesis (from which this one was created) */
 	const TargetPhrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
 	Phrase const*     m_sourcePhrase; /*! input sentence */
 	WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
