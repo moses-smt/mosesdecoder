@@ -17,6 +17,7 @@ libmoses_a_SOURCES = \
 	FactorTypeSet.cpp \
 	FloydWarshall.cpp \
 	GenerationDictionary.cpp \
+	Gibbler.cpp \
 	hash.cpp \
 	Hypothesis.cpp \
 	HypothesisStack.cpp \
