@@ -30,6 +30,10 @@ protected:
 	void ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos);
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt, float expectedScore);
 
+	bool SearchNormal::isCompatibleWithConstraint(const Hypothesis &hypothesis, const TranslationOption &transOpt);
+	float SearchNormal::getCurrConstraintWER(const Hypothesis &hypothesis, const TranslationOption &transOpt); 
+	float SearchNormal::computeEditDistance(const Phrase &hypPhrase, const Phrase &constraintPhrase) const;
+	
 public:
 	SearchNormal(const InputType &source, const TranslationOptionCollection &transOptColl);
 	~SearchNormal();
