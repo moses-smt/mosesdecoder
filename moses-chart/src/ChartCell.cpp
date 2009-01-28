@@ -36,6 +36,8 @@ ChartCell::ChartCell(size_t startPos, size_t endPos)
 	m_maxHypoStackSize = staticData.GetMaxHypoStackSize();
 	m_nBestIsEnabled = staticData.IsNBestEnabled();
 	m_worstScore = -std::numeric_limits<float>::infinity();
+	m_bestScore = -std::numeric_limits<float>::infinity();
+
 }
 
 ChartCell::~ChartCell()
@@ -194,12 +196,12 @@ void ChartCell::PruneToSize(size_t newSize)
 
 		// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack
 		m_worstScore = scoreThreshold;
-		
+
 		// desperation pruning
 		if (m_hypos.size() > newSize * 2)
 		{
 			std::vector<Hypothesis*> hyposOrdered;
-			
+
 			// sort hypos
 			std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(hyposOrdered, hyposOrdered.end()));
 			std::sort(hyposOrdered.begin(), hyposOrdered.end(), ChartHypothesisScoreOrderer());
@@ -253,7 +255,7 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 	// pluck things out of queue and add to hypo collection
 	const size_t popLimit = staticData.GetCubePruningPopLimit();
 
-	for (size_t numPops = 0; numPops < popLimit && !m_queueUnique.empty(); ++numPops) 
+	for (size_t numPops = 0; numPops < popLimit && !m_queueUnique.empty(); ++numPops)
 	{
 		QueueEntry *queueEntry = *m_queueUnique.begin();
 
