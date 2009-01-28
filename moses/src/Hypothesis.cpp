@@ -621,5 +621,11 @@ const ScoreComponentCollection &Hypothesis::GetCachedReorderingScore() const
 	return m_transOpt->GetReorderingScore();
 }
 
+void Hypothesis::GetTranslation(std::vector<const Factor*>* trans, const FactorType ft) const {
+	if (m_prevHypo) m_prevHypo->GetTranslation(trans, ft);
+	for (unsigned i = 0; i < m_targetPhrase.GetSize(); ++i)
+		trans->push_back(m_targetPhrase.GetFactor(i, ft));
+}
+
 }
 
