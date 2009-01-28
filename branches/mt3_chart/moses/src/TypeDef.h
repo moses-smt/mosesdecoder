@@ -150,6 +150,7 @@ enum PhraseTableImplementation
 	,Binary		= 1
 	,OnDisk		= 2
 	,GlueRule	= 3
+	,Joshua		= 4
 };
 
 enum InputTypeEnum

@@ -97,7 +97,7 @@ protected:
 	std::string
 		m_constraintFileName;	
 	
-	std::string									m_nBestFilePath;
+	std::string									m_nBestFilePath, m_joshuaPath;
 	bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
@@ -461,6 +461,9 @@ public:
 	void ReduceTransOptCache() const;
 
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
+
+	const std::string &GetJoshuaPath() const
+	{ return m_joshuaPath; }
 };
 
 }
