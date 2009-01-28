@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GibbsOperator.h"
+#include <map>
+
 
 namespace Moses {
 
