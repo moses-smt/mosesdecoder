@@ -312,6 +312,8 @@ public:
 		return s_HypothesesCreated;
 	}
 
+	void GetTranslation(std::vector<const Factor*>* trans, const FactorType ft) const;
+
 	const ScoreComponentCollection &GetCachedReorderingScore() const;
 
 	const TranslationOption &GetTranslationOption() const

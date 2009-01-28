@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GibbsOperator.h"
 #include <map>
-
+#include "GibbsOperator.h"
+#include "ScoreComponentCollection.h"
 
 namespace Moses {
 
@@ -17,6 +17,8 @@ class Sample {
 
   Hypothesis* source_head;
   Hypothesis* source_tail;
+
+  ScoreComponentCollection feature_values;
   
   std::map<size_t, Hypothesis*>  sourceIndexedHyps;
 
