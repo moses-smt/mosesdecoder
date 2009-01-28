@@ -26,9 +26,9 @@ class PhraseDictionaryJoshua : public PhraseDictionaryMemory
 
 protected:
 		std::string m_joshuaPath, m_sourcePath, m_targetPath, m_alignPath;
-		std::vector<FactorType> m_input, m_output;
 		std::vector<float> m_weight;
 		float m_weightWP;
+		std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
 
 		TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
 

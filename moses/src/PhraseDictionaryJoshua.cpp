@@ -85,8 +85,15 @@ bool PhraseDictionaryJoshua::Load(const std::vector<FactorType> &input
 								, float weightWP
 								, size_t tableLimit)
 {
-	m_input = input;
-	m_output = output;
+	m_tableLimit = tableLimit;
+
+	//factors
+	m_inputFactorsVec = input;
+	m_outputFactorsVec = output;
+
+	m_inputFactors = FactorMask(input);
+	m_outputFactors = FactorMask(output);
+
 	m_weight = weight;
 	m_weightWP = weightWP;
 
@@ -94,7 +101,6 @@ bool PhraseDictionaryJoshua::Load(const std::vector<FactorType> &input
 	m_sourcePath	= sourcePath;
 	m_targetPath	= targetPath;
 	m_alignPath		= alignPath;
-
 
 	return true;
 }
@@ -121,13 +127,10 @@ void PhraseDictionaryJoshua::InitializeForInput(InputType const &source)
 				<< " --maxPhraseLength=5"
 				<< " > filtered.txt";
 
-	cerr << strme.str();
-
 	system(strme.str().c_str());
 
-	bool b= FileExists("filtered.txt");
-	cerr << b << endl;
-
+	assert(FileExists("filtered.txt"));
+	
 	InputFileStream tempStream("filtered.txt");
 
 	size_t count = 0;
@@ -159,19 +162,19 @@ void PhraseDictionaryJoshua::InitializeForInput(InputType const &source)
 		assert(scoreVector.size() == m_numScoreComponent);
 
 		const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-		vector< vector<string> >	sourcePhraseVector = Phrase::Parse(sourcePhraseString, m_input, factorDelimiter)
-															,targetPhraseVector = Phrase::Parse(targetPhraseString, m_output, factorDelimiter);
+		vector< vector<string> >	sourcePhraseVector = Phrase::Parse(sourcePhraseString, m_inputFactorsVec, factorDelimiter)
+															,targetPhraseVector = Phrase::Parse(targetPhraseString, m_outputFactorsVec, factorDelimiter);
 		string sourceAlign, targetAlign;
 		TransformString(sourcePhraseVector, targetPhraseVector, sourceAlign, targetAlign);
 
 		// source
 		Phrase sourcePhrase(Input);
-		sourcePhrase.CreateFromString( m_input, sourcePhraseVector);
+		sourcePhrase.CreateFromString( m_inputFactorsVec, sourcePhraseVector);
 
 		//target
 		TargetPhrase targetPhrase(Output);
 		targetPhrase.SetSourcePhrase(&sourcePhrase);
-		targetPhrase.CreateFromString( m_output, targetPhraseVector);
+		targetPhrase.CreateFromString( m_outputFactorsVec, targetPhraseVector);
 
 		targetPhrase.CreateAlignmentInfo(sourceAlign, targetAlign);
 
@@ -191,6 +194,7 @@ void PhraseDictionaryJoshua::InitializeForInput(InputType const &source)
 	
 void PhraseDictionaryJoshua::SetWeightTransModel(const std::vector<float> &weightT)
 {
+	MyBase::SetWeightTransModel(weightT);
 }
 
 void PhraseDictionaryJoshua::CleanUp()
@@ -200,24 +204,12 @@ void PhraseDictionaryJoshua::CleanUp()
 
 const TargetPhraseCollection *PhraseDictionaryJoshua::GetTargetPhraseCollection(const Phrase& source) const
 {
-	const size_t size = source.GetSize();
-
-	const PhraseDictionaryNode *currNode = &m_collection;
-	for (size_t pos = 0 ; pos < size ; ++pos)
-	{
-		const Word& word = source.GetWord(pos);
-		currNode = currNode->GetChild(word);
-		if (currNode == NULL)
-			return NULL;
-	}
-
-	return currNode->GetTargetPhraseCollection();
+	return MyBase::GetTargetPhraseCollection(source);
 }
 
 void PhraseDictionaryJoshua::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
 {
-	TargetPhraseCollection &phraseColl = *CreateTargetPhraseCollection(source);
-	phraseColl.Add(new TargetPhrase(targetPhrase));
+	MyBase::AddEquivPhrase(source, targetPhrase);
 }
 
 TargetPhraseCollection *PhraseDictionaryJoshua::CreateTargetPhraseCollection(const Phrase &source)
