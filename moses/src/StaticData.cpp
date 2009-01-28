@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "PhraseDictionaryOnDisk.h"
 #include "PhraseDictionaryGlueRule.h"
+#include "PhraseDictionaryJoshua.h"
 
 using namespace std;
 
@@ -325,6 +326,9 @@ bool StaticData::LoadData(Parameter *parameter)
   m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
 	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;
+
+	if(m_parameter->GetParam("joshua-path").size()) 
+		m_joshuaPath = m_parameter->GetParam("joshua-path")[0];		
 
 	// Read in constraint decoding file, if provided
 	if(m_parameter->GetParam("constraint").size()) 
@@ -857,6 +861,19 @@ bool StaticData::LoadPhraseTables()
 									, maxTargetPhrase[index]
 									, GetAllLM()
 									, GetWeightWordPenalty()))
+			{
+				delete pd;
+				return false;
+			}
+			m_phraseDictionary.push_back(pd);
+		}
+		else if (impl == Joshua)
+		{ // binary phrase table
+			VERBOSE(1, "using on-disk phrase tables for idx "<<currDict<<"\n");
+			PhraseDictionaryJoshua *pd=new PhraseDictionaryJoshua(numScoreComponent);
+			if (!pd->Load(input,output,filePath,weight,
+										 maxTargetPhrase[index])
+					)
 			{
 				delete pd;
 				return false;

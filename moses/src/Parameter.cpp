@@ -105,6 +105,7 @@ Parameter::Parameter()
 	AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
+	AddParam("joshua-path", "root folder where joshua liives, for suffix array phrase table");
 }
 
 Parameter::~Parameter()
