@@ -18,6 +18,7 @@ libmoses_a_SOURCES = \
 	FloydWarshall.cpp \
 	GenerationDictionary.cpp \
 	Gibbler.cpp \
+	GibblerExpectedLossTraining.cpp \
 	GibbsOperator.cpp \
 	hash.cpp \
 	Hypothesis.cpp \

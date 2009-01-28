@@ -84,6 +84,16 @@ public:
 		for (size_t i=0; i<l; i++) { m_scores[i] += rhs.m_scores[i]; }  
 	}
 
+	void MultiplyEquals(const float f) {
+		const size_t l = m_scores.size();
+		for (size_t i=0; i<l; i++) { m_scores[i] *= f; }  
+	}
+
+	void DivideEquals(const float f) {
+		const size_t l = m_scores.size();
+		for (size_t i=0; i<l; i++) { m_scores[i] /= f; }  
+	}
+
   //! subtract the score in rhs
 	void MinusEquals(const ScoreComponentCollection& rhs)
 	{
