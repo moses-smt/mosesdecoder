@@ -31,7 +31,9 @@ protected:
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt, float expectedScore);
 
 	bool SearchNormal::isCompatibleWithConstraint(const Hypothesis &hypothesis, const TranslationOption &transOpt);
-	float SearchNormal::getCurrConstraintWER(const Hypothesis &hypothesis, const TranslationOption &transOpt); 
+//LS float SearchNormal::getCurrConstraintWER(const Hypothesis &hypothesis, const TranslationOption &transOpt); 
+	TargetPhrase* getCurrentTargetPhrase(const Hypothesis &hypothesis);
+	float SearchNormal::getCurrConstraintWER(TargetPhrase *targetphrase, const TranslationOption &transOpt);
 	float SearchNormal::computeEditDistance(const Phrase &hypPhrase, const Phrase &constraintPhrase) const;
 	
 public:

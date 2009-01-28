@@ -263,7 +263,11 @@ void SearchNormal::ExpandAllHypotheses(const Hypothesis &hypothesis, size_t star
 			    ExpandHypothesis(hypothesis, **iter, expectedScore);
 			
 		} else {
-			float currConstraintWER = getCurrConstraintWER(hypothesis, **iter);
+			TargetPhrase *curTarget = getCurrentTargetPhrase(hypothesis);
+//LS			float currConstraintWER = getCurrConstraintWER(hypothesis, **iter);
+			float currConstraintWER = getCurrConstraintWER(curTarget, **iter);
+			VERBOSE(1, "WER==" << currConstraintWER << " for \"" << static_cast<const Phrase&>(*curTarget) << "\"" << endl);
+			//printf("WER: %f  Limit: %f\n", currConstraintWER, m_WERLimit);
 			if (currConstraintWER <= m_WERLimit)
 				ExpandHypothesis(hypothesis, **iter, expectedScore);
 		}
@@ -297,9 +301,53 @@ bool SearchNormal::isCompatibleWithConstraint(const Hypothesis &hypothesis,
 	}
 }
 	
-float SearchNormal::getCurrConstraintWER(const Hypothesis &hypothesis, const TranslationOption &transOpt) 
+TargetPhrase *SearchNormal::getCurrentTargetPhrase(const Hypothesis &hypothesis) 
+{ 
+	// Rebuild Target String via recursing on previous hypothesis
+	const Hypothesis *hypo = &hypothesis;
+	std::vector<Phrase> target;
+	
+	while (hypo != NULL) {
+		target.push_back(hypo->GetCurrTargetPhrase());
+		hypo = hypo->GetPrevHypo();	
+	}
+	
+	TargetPhrase *targetphrase = new TargetPhrase();
+	
+	for (int i = target.size() - 1; i >= 0; i--) {
+		targetphrase->Append(target[i]);
+	}
+	
+	return targetphrase;
+}
+	
+float SearchNormal::getCurrConstraintWER(TargetPhrase *curTarget, 
+										 const TranslationOption &transOpt) 
 {
-	return 0;
+	
+	const size_t constraintSize = m_constraint->GetSize();
+	const TargetPhrase transOptPhrase = transOpt.GetTargetPhrase();
+	
+	
+	TargetPhrase newTarget = TargetPhrase(*curTarget);
+	newTarget.Append(transOptPhrase);
+	
+	size_t endpoint = newTarget.GetSize() - 1;
+	
+	// Account for target strings that are longer than the reference
+	if (endpoint >= constraintSize)
+		endpoint = constraintSize - 1;
+	
+	// Extract relevant constraint...
+	WordsRange range(0, endpoint);
+	const Phrase &relevantConstraint = m_constraint->GetSubString(range);
+	
+	
+	// Compute WER between reference and target string
+	float editDistance = computeEditDistance(relevantConstraint, newTarget);
+	VERBOSE(1, "WER==" << editDistance << " for \"" << static_cast<const Phrase&>(newTarget) << "\" with constraint \"" << relevantConstraint << "\"" << endl);
+	
+	return editDistance;
 }
 	
 	
