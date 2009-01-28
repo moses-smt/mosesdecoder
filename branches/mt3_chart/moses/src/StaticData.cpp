@@ -747,7 +747,6 @@ bool StaticData::LoadPhraseTables()
 	{
 		vector<string>                  token           = Tokenize(translationVector[currDict]);
 		//characteristics of the phrase table
-		assert(token.size() == 5);
 
 		PhraseTableImplementation impl = (PhraseTableImplementation) Scan<size_t>(token[0]);
 		vector<FactorType> input  = Tokenize<FactorType>(token[1], ",")
@@ -871,8 +870,14 @@ bool StaticData::LoadPhraseTables()
 		{ // binary phrase table
 			VERBOSE(1, "using on-disk phrase tables for idx "<<currDict<<"\n");
 			PhraseDictionaryJoshua *pd=new PhraseDictionaryJoshua(numScoreComponent);
-			if (!pd->Load(input,output,filePath,weight,
-										 maxTargetPhrase[index])
+			if (!pd->Load(input,output
+										,m_joshuaPath
+										,token[4]
+										,token[5]
+										,token[6]
+										,weight
+										,GetWeightWordPenalty()
+										,maxTargetPhrase[index])
 					)
 			{
 				delete pd;

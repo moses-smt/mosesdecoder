@@ -30,6 +30,13 @@ PhraseDictionaryNode::~PhraseDictionaryNode()
 	delete m_targetPhraseCollection;
 }
 
+void PhraseDictionaryNode::CleanUp()
+{
+	delete m_targetPhraseCollection;
+	m_targetPhraseCollection = NULL;
+	m_map.clear();
+}
+
 void PhraseDictionaryNode::Sort(size_t tableLimit)
 {
 	// recusively sort

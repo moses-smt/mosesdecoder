@@ -17,7 +17,10 @@ namespace MosesChart
 Manager::Manager(InputType const& source)
 :m_source(source)
 ,m_transOptColl(source)
-{}
+{
+	const StaticData &staticData = StaticData::Instance();
+	staticData.InitializeBeforeSentenceProcessing(source);
+}
 
 Manager::~Manager()
 {

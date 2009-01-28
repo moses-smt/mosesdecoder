@@ -41,7 +41,7 @@ using namespace std;
 namespace Moses
 {
 
-void TransformString(vector< vector<string> > &phraseVector
+inline void TransformString(vector< vector<string> > &phraseVector
 									 ,vector<pair<size_t, size_t> > &alignVector)
 {
 	assert(alignVector.size() == 0);
@@ -63,7 +63,7 @@ void TransformString(vector< vector<string> > &phraseVector
 	}
 }
 
-void TransformString(vector< vector<string> > &sourcePhraseVector
+inline void TransformString(vector< vector<string> > &sourcePhraseVector
 										 ,vector< vector<string> > &targetPhraseVector
 										 ,string &sourceAlign
 										 ,string &targetAlign)
