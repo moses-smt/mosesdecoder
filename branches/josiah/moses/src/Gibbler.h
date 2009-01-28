@@ -29,6 +29,9 @@ class Sample {
   const Hypothesis* GetSampleHypothesis() const {
     return source_head;
   }
+  const ScoreComponentCollection& GetFeatureValues() const {
+    return feature_values;
+  }
 };
 
 class Sampler {

@@ -64,9 +64,11 @@ GibblerExpectedLossCollector::GibblerExpectedLossCollector() :
 void GibblerExpectedLossCollector::collect(Sample& s) {
   ++n;  // increment total samples seen
   const Hypothesis* h = s.GetSampleHypothesis();
-  const float gain = g->ComputeGain(h, refs[sent_num]);
-  samples.push_back(make_pair(h->GetScoreBreakdown(), gain));
-  feature_expectations.PlusEquals(h->GetScoreBreakdown());
+  vector<const Factor*> trans;
+  h->GetTranslation(&trans, 0);
+  const float gain = g->ComputeGain(trans, refs[sent_num]);
+  samples.push_back(make_pair(s.GetFeatureValues(), gain));
+  feature_expectations.PlusEquals(s.GetFeatureValues());
 }
 
 ScoreComponentCollection GibblerExpectedLossCollector::ComputeGradient() {

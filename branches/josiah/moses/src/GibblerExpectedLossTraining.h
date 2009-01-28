@@ -10,7 +10,7 @@ namespace Moses {
 
 class GainFunction {
  public:
-  virtual float ComputeGain(const Hypothesis* hyp, const std::vector<Phrase>& refs) const = 0;
+  virtual float ComputeGain(const std::vector<const Factor*>& hyp, const std::vector<std::vector<const Factor*> >& refs) const = 0;
 };
 
 class GibblerExpectedLossCollector : public SampleCollector {
@@ -28,7 +28,7 @@ class GibblerExpectedLossCollector : public SampleCollector {
 
   const GainFunction* g;
   int sent_num;
-  std::vector<std::vector<Phrase> > refs;
+  std::vector<std::vector<std::vector<const Factor*> > > refs;
 };
 
 }
