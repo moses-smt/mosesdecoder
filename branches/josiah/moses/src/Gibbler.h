@@ -9,14 +9,19 @@ class TranslationOptionCollection;
 
 class Sample {
  private:
+  int source_size;
   Hypothesis* target_head;
   Hypothesis* target_tail;
 
   Hypothesis* source_head;
   Hypothesis* source_tail;
+  
+  std::map<size_t, Hypothesis*>  sourceIndexedHyps;
 
  public:
   Sample(Hypothesis* target_head);
+  int GetSourceSize() { return source_size; }
+  Hypothesis* GetHypAtSourceIndex(size_t ); 
 };
 
 class Sampler {

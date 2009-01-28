@@ -9,14 +9,20 @@ namespace Moses {
 
 Sample::Sample(Hypothesis* target_head) {
   
+  source_size = target_head->GetWordsBitmap().GetSize();
+  
   std::map<size_t, Hypothesis*> source_order;
-  
-  
   this->target_head = target_head;
   Hypothesis* next = NULL;
 
   for (Hypothesis* h = target_head; h; h = const_cast<Hypothesis*>(h->GetPrevHypo())) {
-    source_order[h->GetCurrSourceWordsRange().GetStartPos()] = h;
+    size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
+    size_t endPos = h->GetCurrSourceWordsRange().GetEndPos();
+
+    for (size_t i = startPos; i <= endPos; i++) {
+      sourceIndexedHyps[i] = h; 
+    } 
+    source_order[startPos] = h;
     this->target_tail = h;
     h->m_nextHypo = next;
     next = h;
@@ -36,7 +42,15 @@ Sample::Sample(Hypothesis* target_head) {
     prev = h;
   }
 }
-
+ 
+Hypothesis* Sample::GetHypAtSourceIndex(size_t i) {
+  std::map<size_t, Hypothesis*>::iterator it;
+  it = sourceIndexedHyps.find(i);
+  assert(it != sourceIndexedHyps.end());
+  return it->second;
+  
+}
+  
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
   size_t iterations = 5;
   vector<GibbsOperator*> operators;
