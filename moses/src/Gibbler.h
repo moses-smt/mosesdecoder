@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GibbsOperator.h"
+
 namespace Moses {
 
 class Hypothesis;
@@ -24,5 +26,21 @@ class Sampler {
   void Run(Hypothesis* starting, const TranslationOptionCollection* options);
 };
 
+/**
+  * Used by the operators to collect samples, for example to count ngrams, or just to print
+  * them out. 
+  **/
+class SampleCollector {
+  public:
+    virtual void collect(Sample& sample) = 0;
+};
+
+class PrintSampleCollector  : public virtual SampleCollector {
+  public:
+    virtual void collect(Sample& sample);
+};
+
 }
+
+
 
