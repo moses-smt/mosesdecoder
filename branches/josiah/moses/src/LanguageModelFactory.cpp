@@ -120,7 +120,7 @@ namespace LanguageModelFactory
 	  	case SingleFactor:
 	  		if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorTypes[0], weight, nGramOrder))
 				{
-					cerr << "single factor model failed" << endl;
+          std::cerr << "single factor model failed" << std::endl;
 					delete lm;
 					lm = NULL;
 				}
@@ -128,7 +128,7 @@ namespace LanguageModelFactory
 	  	case MultiFactor:
   			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, weight, nGramOrder))
 				{
-					cerr << "multi factor model failed" << endl;
+          std::cerr << "multi factor model failed" << std::endl;
 					delete lm;
 					lm = NULL;
 				}

@@ -23,7 +23,8 @@ class Sampler {
  private:
 
  public:
-  void Run(Hypothesis* starting, const TranslationOptionCollection* options);
+  void Run(Hypothesis* starting, const TranslationOptionCollection* options) ;
+
 };
 
 /**

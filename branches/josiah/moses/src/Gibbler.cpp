@@ -8,12 +8,32 @@ using namespace std;
 namespace Moses {
 
 Sample::Sample(Hypothesis* target_head) {
+  
+  std::map<size_t, Hypothesis*> source_order;
+  
+  
   this->target_head = target_head;
   Hypothesis* next = NULL;
+
   for (Hypothesis* h = target_head; h; h = const_cast<Hypothesis*>(h->GetPrevHypo())) {
+    source_order[h->GetCurrSourceWordsRange().GetStartPos()] = h;
     this->target_tail = h;
     h->m_nextHypo = next;
     next = h;
+  }
+  
+  std::map<size_t, Hypothesis*>::const_iterator source_it = source_order.begin();
+  Hypothesis* prev = NULL;
+  this->source_tail = source_it->second;
+  
+  
+  for (; source_it != source_order.end(); source_it++) {
+    Hypothesis *h = source_it->second;  
+    h->m_sourcePrevHypo = prev;
+    if (prev != NULL) 
+      prev->m_sourceNextHypo = h;
+    this->source_head = h;
+    prev = h;
   }
 }
 
