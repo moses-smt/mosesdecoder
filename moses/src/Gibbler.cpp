@@ -15,7 +15,7 @@ Sample::Sample(Hypothesis* target_head) {
   this->target_head = target_head;
   Hypothesis* next = NULL;
 
-  for (Hypothesis* h = target_head; h; h = const_cast<Hypothesis*>(h->GetPrevHypo())) {
+  for (Hypothesis* h = target_head; h->GetId() > 0; h = const_cast<Hypothesis*>(h->GetPrevHypo())) {
     size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
     size_t endPos = h->GetCurrSourceWordsRange().GetEndPos();
 
@@ -48,7 +48,6 @@ Hypothesis* Sample::GetHypAtSourceIndex(size_t i) {
   it = sourceIndexedHyps.find(i);
   assert(it != sourceIndexedHyps.end());
   return it->second;
-  
 }
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
