@@ -41,6 +41,7 @@ class PhraseDictionaryNode
 
 	// only these classes are allowed to instantiate this class
 	friend class PhraseDictionaryMemory;
+	friend class PhraseDictionaryJoshua;
 	friend class std::map<Word, PhraseDictionaryNode>;
 
 protected:
@@ -53,6 +54,7 @@ protected:
 public:
 	~PhraseDictionaryNode();
 
+	void CleanUp();
 	void Sort(size_t tableLimit);
 	PhraseDictionaryNode *GetOrCreateChild(const Word &word);
 	const PhraseDictionaryNode *GetChild(const Word &word) const;
