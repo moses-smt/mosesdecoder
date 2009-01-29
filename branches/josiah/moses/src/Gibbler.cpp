@@ -112,8 +112,13 @@ void Sample::AddNode(const TranslationOption& option)  {
 
   //Update source side map
   SetSourceIndexedHyps(&newHyp); 
-}  
   
+  UpdateFeatureValues(option.GetScoreBreakdown());
+}  
+
+void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
+  feature_values.PlusEquals(deltaFV);
+}  
   
 void Sample::CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   newHyp->m_prevHypo = currHyp->m_prevHypo;
