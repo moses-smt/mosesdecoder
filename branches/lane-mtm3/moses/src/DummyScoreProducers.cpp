@@ -7,6 +7,23 @@
 
 namespace Moses
 {
+
+WERScoreProducer::WERScoreProducer(ScoreIndexManager &scoreIndexManager)
+{
+	scoreIndexManager.AddScoreProducer(this);
+}
+
+std::string WERScoreProducer::GetScoreProducerDescription() const
+{
+	return "WERScoreProducer";
+}
+
+float WERScoreProducer::CalculateScore(const Phrase &phrase) const
+{
+
+	return 0;
+}
+
 DistortionScoreProducer::DistortionScoreProducer(ScoreIndexManager &scoreIndexManager)
 {
 	scoreIndexManager.AddScoreProducer(this);
