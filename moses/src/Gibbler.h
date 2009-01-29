@@ -26,7 +26,8 @@ class Sample {
   void SetSourceIndexedHyps(Hypothesis* h);
   void CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
   void CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
-
+  void UpdateFeatureValues(const ScoreComponentCollection& deltaFV);
+    
  public:
   Sample(Hypothesis* target_head);
   int GetSourceSize() { return source_size; }
