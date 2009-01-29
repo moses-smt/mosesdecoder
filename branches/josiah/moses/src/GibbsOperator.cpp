@@ -47,7 +47,8 @@ class TDelta {
       return m_score;
     }
     //apply to the sample
-    virtual void apply(Sample& sample) = 0;
+    virtual void apply(Sample& sample, TDelta* noChangeDelta) = 0;
+    const ScoreComponentCollection& getScores() {return m_scores;}
     virtual ~TDelta() {}
   protected:
     ScoreComponentCollection m_scores;
@@ -62,7 +63,14 @@ class SingleTDelta : public virtual TDelta {
   public:
      SingleTDelta (const Hypothesis* hypothesis,  const TranslationOption* option , const WordsRange& targetSegment) :
         m_option(option), m_targetSegment(targetSegment) {
-        m_scores = m_option->GetScoreBreakdown();
+        m_scores.PlusEquals(m_option->GetScoreBreakdown());
+        
+        //don't worry about reordering because they don't change
+        
+        //word penalty
+        float penalty = -m_targetSegment.GetNumWordsCovered();
+        m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
+        
         
         //translation scores are already there
         const vector<PhraseDictionary*>& translationModels = StaticData::Instance().GetPhraseDictionaries();
@@ -74,9 +82,9 @@ class SingleTDelta : public virtual TDelta {
           cout << endl;
         }
         
-        //don't worry about reordering because they don't change
         
-        //TODO: word penalty
+        
+        
         
         //language model scores
         const LMList& languageModels = StaticData::Instance().GetAllLM();
@@ -85,7 +93,7 @@ class SingleTDelta : public virtual TDelta {
           size_t order = lm->GetNGramOrder();
           int start = m_targetSegment.GetStartPos() - (order-1);
           int end = m_targetSegment.GetEndPos() + (order - 1);
-          cout << "LM for " << start << " to " << end << endl;
+          //cout << "LM for " << start << " to " << end << endl;
           //build up the context, possibly starting with before sentence indicators
           vector<const Word*> lmcontext;;
           int currPos = start;
@@ -97,6 +105,7 @@ class SingleTDelta : public virtual TDelta {
           const Hypothesis* currHypo = hypothesis;
           while (currHypo->GetCurrTargetWordsRange().GetStartPos() > currPos) {
             currHypo = currHypo->GetPrevHypo();
+            //cout << "currHypo " << currHypo << endl;
             assert (currHypo);
           }
           
@@ -116,7 +125,7 @@ class SingleTDelta : public virtual TDelta {
             }
             ++currPos;
           }
-          cout << "Target range " << m_targetSegment << endl;
+          //cout << "Target range " << m_targetSegment << endl;
           //cout << "Phrase for LM: " << phrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder()) << " size=" << 
             //phrase.GetSize() << endl;
             
@@ -146,16 +155,17 @@ class SingleTDelta : public virtual TDelta {
         
         //weight the scores
         const vector<float> weights = StaticData::Instance().GetAllWeights();
-        cout << " weights: ";
-        copy(weights.begin(), weights.end(), ostream_iterator<float>(cout," "));
-        cout << endl;
+        //cout << " weights: ";
+        //copy(weights.begin(), weights.end(), ostream_iterator<float>(cout," "));
+        //cout << endl;
         m_score = m_scores.InnerProduct(weights);
-        cout << "Calculated score as " << m_score << endl;
+        cout << "Total score is  " << m_score << endl;
         
      }
      
      //apply to the sample
-    virtual void apply(Sample& sample) {
+    virtual void apply(Sample& sample, TDelta* noChangeDelta) {
+      m_scores.MinusEquals(noChangeDelta->getScores());
       sample.ChangeTarget(*m_option,m_scores);
     };
   private:
@@ -172,7 +182,7 @@ class ContigTDelta: public virtual TDelta {
     ContigTDelta(const TranslationOption* option1, const TranslationOption* option2,
       const WordsRange& targetSegment) :
       m_option1(option1), m_option2(option2), m_targetSegment(targetSegment) {}
-      virtual void apply(Sample& sample) {
+      virtual void apply(Sample& sample, TDelta* noChangeDelta) {
       //TODO
       };
   private:
@@ -189,7 +199,7 @@ class DiscontigTDelta: public virtual TDelta {
     DiscontigTDelta(const TranslationOption* option1, const TranslationOption* option2,
       const WordsRange& targetSegment1, const WordsRange& targetSegment2 ) :
       m_option1(option1), m_option2(option2), m_targetSegment1(targetSegment1), m_targetSegment2(targetSegment2) {}
-      virtual void apply(Sample& sample) {
+      virtual void apply(Sample& sample, TDelta* noChangeDelta) {
       //TODO
       };
   private:
@@ -220,7 +230,7 @@ size_t GibbsOperator::getSample(const vector<double>& scores) {
   for (; position < scores.size() && sum < random; ++position) {
     sum = log_sum(sum,scores[position]);
   }
-   cout << "random: " << exp(random) <<  " sample: " << position << endl;
+   //cout << "random: " << exp(random) <<  " sample: " << position << endl;
   return position;
 }
 
@@ -298,12 +308,15 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     }
     cout << endl;
     
+    TDelta* noChangeDelta = NULL;
     vector<TDelta*> deltas;
     if (targetSegments.size() == 1) {
+      //FIXME: This is not correct, unless the source is not split already
+      noChangeDelta = new SingleTDelta(hypothesis,&(hypothesis->GetTranslationOption()),targetSegments[0]);
       //contiguous
       //case 1: no split
       const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
-      cout << "Options for : " << sourceSegment << " - " << options.size() << endl;
+      //cout << "Options for : " << sourceSegment << " - " << options.size() << endl;
       for (TranslationOptionList::const_iterator i = options.begin(); 
            i != options.end(); ++i) {
         //cout << "Source: " << *((*i)->GetSourcePhrase()) << " Target: " << ((*i)->GetTargetPhrase()) << endl;
@@ -333,6 +346,8 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       }
     } else {
       //discontiguous - FIXME This is almost the same as the split case above - combine
+      //FIXME: This does should take into account both target and source segments
+      noChangeDelta =  new SingleTDelta(hypothesis,&(hypothesis->GetTranslationOption()),targetSegments[0]);
       const TranslationOptionList&  options1 = 
         toc.GetTranslationOptionList(WordsRange(sourceSegment.GetStartPos(),splitIndex-1));
       const TranslationOptionList& options2 = 
@@ -349,7 +364,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       }
     }
     
-    cout << "Created " << deltas.size() << " delta(s)" << endl;
+    //cout << "Created " << deltas.size() << " delta(s)" << endl;
     
     //get the scores
     vector<double> scores;
@@ -359,12 +374,12 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     
     //randomly pick one of the deltas
     size_t chosen = getSample(scores);
-    copy(scores.begin(),scores.end(),ostream_iterator<double>(cout,","));
-    cout << endl;
-    cout << "**The chosen sample is " << chosen << endl;
+    //copy(scores.begin(),scores.end(),ostream_iterator<double>(cout,","));
+    //cout << endl;
+    //cout << "**The chosen sample is " << chosen << endl;
     
     //apply it to the sample
-    deltas[chosen]->apply(sample);
+    deltas[chosen]->apply(sample,noChangeDelta);
     
     
     //clean up

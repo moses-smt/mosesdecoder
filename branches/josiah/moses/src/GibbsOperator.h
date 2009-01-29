@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cassert>
 #include <cstdlib>
 
+#include "DummyScoreProducers.h"
 #include "Gibbler.h"
 #include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
