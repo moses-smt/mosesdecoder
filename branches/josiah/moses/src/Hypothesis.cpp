@@ -468,7 +468,7 @@ const Hypothesis* Hypothesis::GetPrevHypo()const{
 }
 
 const Hypothesis* Hypothesis::GetNextHypo() const {
-  return m_prevHypo;
+  return m_nextHypo;
 }
 
 /**

@@ -64,7 +64,7 @@ class SingleTDelta : public virtual TDelta {
         
         //translation scores are already there
         const vector<PhraseDictionary*>& translationModels = StaticData::Instance().GetPhraseDictionaries();
-        cout << "Got " << translationModels.size() << " dictionary(s)" << endl;
+        //cout << "Got " << translationModels.size() << " dictionary(s)" << endl;
         for (vector<PhraseDictionary*>::const_iterator i = translationModels.begin(); i != translationModels.end(); ++i) {
           vector<float> translationScores = m_scores.GetScoresForProducer(*i);
           cout << "Translation scores: ";
@@ -74,6 +74,8 @@ class SingleTDelta : public virtual TDelta {
         
         //don't worry about reordering because they don't change
         
+        //TODO: word penalty
+        
         //language model scores
         const LMList& languageModels = StaticData::Instance().GetAllLM();
         for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
@@ -82,11 +84,11 @@ class SingleTDelta : public virtual TDelta {
           int start = m_targetSegment.GetStartPos() - (order-1);
           int end = m_targetSegment.GetEndPos() + (order - 1);
           cout << "LM for " << start << " to " << end << endl;
-          //build up the phrase, possibly starting with before sentence indicators
-          Phrase phrase(Output);
+          //build up the context, possibly starting with before sentence indicators
+          vector<const Word*> lmcontext;;
           int currPos = start;
           for (; currPos < 0; ++currPos) {
-            phrase.AddWord(lm->GetSentenceStartArray());
+            lmcontext.push_back(&(lm->GetSentenceStartArray()));
           }
           
           //find the hypothesis which covers the target position curr
@@ -97,27 +99,54 @@ class SingleTDelta : public virtual TDelta {
           }
           
           //read words up to end
+          size_t eoscount = 0;
           while (currPos <= end) {
             while (currHypo && currPos > currHypo->GetCurrTargetWordsRange().GetEndPos()) {
               currHypo = currHypo->GetNextHypo();
             }
-            if (currHypo) {
-              cout << "Adding word at " << currPos << " for hypo starting at " << 
-                  currHypo->GetCurrTargetWordsRange().GetStartPos() << endl;
-              phrase.AddWord(currHypo->GetCurrWord(currPos - currHypo->GetCurrTargetWordsRange().GetStartPos()));
+            if (currPos >= m_targetSegment.GetStartPos() && currPos <= m_targetSegment.GetEndPos()) {
+              lmcontext.push_back(&(m_option->GetTargetPhrase().GetWord(currPos-m_targetSegment.GetStartPos())));
+            } else if (currHypo) {
+              lmcontext.push_back(&(currHypo->GetCurrWord(currPos - currHypo->GetCurrTargetWordsRange().GetStartPos())));
             } else {
-              phrase.AddWord(lm->GetSentenceEndArray());
+              lmcontext.push_back(&(lm->GetSentenceEndArray()));
+              ++eoscount;
             }
             ++currPos;
           }
           cout << "Target range " << m_targetSegment << endl;
-          cout << "Phrase for LM: " << phrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder()) << " size=" << 
-            phrase.GetSize() << endl;
+          //cout << "Phrase for LM: " << phrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder()) << " size=" << 
+            //phrase.GetSize() << endl;
+            
+          //calc lm score
+          cout << "LM context ";
+          for (size_t j = 0;  j < lmcontext.size(); ++j) {
+            cout << *(lmcontext[j]) << " ";
+          }
+          cout << endl;
+          double lmscore = 0;
+          vector<const Word*> ngram;
+          //remember to only include max of 1 eos marker
+          size_t maxend = min(lmcontext.size(), lmcontext.size() - (eoscount-1));
+          for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
+            ngram.clear();
+            for (size_t j = ngramstart; j < ngramstart+order && j < maxend; ++j) {
+              ngram.push_back(lmcontext[j]);
+              
+              
+            }
+            lmscore += lm->GetValue(ngram);
+          }
+          cout << "Language model score: " << lmscore << endl;
+          m_scores.Assign(lm,lmscore);
           
         }
         
         //weight the scores
         const vector<float> weights = StaticData::Instance().GetAllWeights();
+        cout << " weights: ";
+        copy(weights.begin(), weights.end(), ostream_iterator<float>(cout," "));
+        cout << endl;
         m_score = m_scores.InnerProduct(weights);
         cout << "Calculated score as " << m_score << endl;
         
@@ -174,7 +203,7 @@ size_t GibbsOperator::getSample(const vector<double>& scores) {
   
   //now figure out which sample
   sum = scores[0];
-  size_t position = 1;
+  size_t position = 0;
   for (; position < scores.size() && sum < random; ++position) {
     sum = log_sum(sum,scores[position]);
   }
@@ -182,8 +211,7 @@ size_t GibbsOperator::getSample(const vector<double>& scores) {
   return position;
 }
 
-void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionCollection& toc
-          , SampleCollector& collector) {
+void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionCollection& toc) {
   VERBOSE(2, "Running an iteration of the merge split operator" << endl);
   //get the size of the sentence
   //for each of the split points; do
@@ -317,11 +345,14 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     }
     
     //randomly pick one of the deltas
+    size_t chosen = getSample(scores);
+    copy(scores.begin(),scores.end(),ostream_iterator<double>(cout,","));
+    cout << endl;
+    cout << "**The chosen sample is " << chosen << endl;
     
     //apply it to the sample
 
-    //record the sample
-    collector.collect(sample);
+    
     
     //clean up
     for (size_t i = 0; i < deltas.size(); ++i) {

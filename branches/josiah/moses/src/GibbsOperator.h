@@ -39,8 +39,7 @@ namespace Moses {
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
           * TODO: Probably need some kind of collector object
           **/
-        virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc
-          , SampleCollector& collector) = 0;
+        virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc) = 0;
         virtual const string& name() const = 0;
         
      protected:
@@ -54,8 +53,7 @@ namespace Moses {
   class MergeSplitOperator : public virtual GibbsOperator {
     public:
         MergeSplitOperator() : m_name("merge-split") {}
-        virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc
-          , SampleCollector& collector);
+        virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
         virtual const string& name() const {return m_name;}
     
     private:
@@ -66,8 +64,7 @@ namespace Moses {
   class FlipOperator : public virtual GibbsOperator {
   public:
     FlipOperator() : m_name("flip") {}
-    virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc
-                             , SampleCollector& collector);
+    virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
     virtual const string& name() const {return m_name;}
     
   private:
