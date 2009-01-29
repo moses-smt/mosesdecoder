@@ -217,7 +217,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 		}
 		else
 		{
-			newHypo->CalcScore(m_futurescore);
+			newHypo->CalcScore(m_futurescore, NULL);
 			newHypo = newHypo->CreateNext(**iterLinked);
 //LS			newHypo = newHypo->CreateNext(**iterLinked, NULL); // TODO FIXME This is absolutely broken - don't pass null here
 		}
@@ -225,7 +225,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 		++iterLinked;
 	}
 
-	newHypo->CalcScore(m_futurescore);
+	newHypo->CalcScore(m_futurescore, NULL);
 	
 	return newHypo;
 }

@@ -18,10 +18,26 @@ std::string WERScoreProducer::GetScoreProducerDescription() const
 	return "WERScoreProducer";
 }
 
-float WERScoreProducer::CalculateScore(const Phrase &phrase) const
+float WERScoreProducer::CalculateScore(const Phrase &hypPhrase, const Phrase &constraintPhrase) const
 {
-
-	return 0;
+	const size_t len1 = hypPhrase.GetSize(), len2 = constraintPhrase.GetSize();
+	vector<vector<unsigned int> > d(len1 + 1, vector<unsigned int>(len2 + 1));
+	
+	for(int i = 0; i <= len1; ++i) d[i][0] = i;
+	for(int i = 0; i <= len2; ++i) d[0][i] = i;
+	
+	for(int i = 1; i <= len1; ++i)
+	{
+		for(int j = 1; j <= len2; ++j) {
+			WordsRange s1range(i-1, i-1);
+			WordsRange s2range(j-1, j-1);
+			int cost = hypPhrase.GetSubString(s1range).IsCompatible(constraintPhrase.GetSubString(s2range)) ? 0 : 1;
+			d[i][j] = std::min( std::min(d[i - 1][j] + 1,
+										 d[i][j - 1] + 1),
+							   d[i - 1][j - 1] + cost);
+		}
+	}
+	return d[len1][len2];
 }
 
 DistortionScoreProducer::DistortionScoreProducer(ScoreIndexManager &scoreIndexManager)

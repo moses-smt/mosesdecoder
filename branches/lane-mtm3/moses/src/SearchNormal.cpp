@@ -418,7 +418,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 		newHypo = hypothesis.CreateNext(transOpt);
 		IFVERBOSE(2) { stats.AddTimeBuildHyp( clock()-t ); }
 		if (newHypo==NULL) return;
-		newHypo->CalcScore(m_transOptColl.GetFutureScore());
+		newHypo->CalcScore(m_transOptColl.GetFutureScore(), m_constraint);
 	}
 	else
 	// early discarding: check if hypothesis is too bad to build
