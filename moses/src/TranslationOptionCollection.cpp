@@ -444,6 +444,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		  const WordsRange wordsRange(startPos, endPos);
 		  sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
 
+			cerr << *sourcePhrase << endl;
+
 			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(decodeGraph, *sourcePhrase);
 			// is phrase in cache?
 			if (transOptList != NULL) {

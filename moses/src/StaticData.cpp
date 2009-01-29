@@ -262,6 +262,9 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightUnknownWord);
 
+	m_WERScoreProducer = new WERScoreProducer(m_scoreIndexManager);
+	m_allWeights.push_back(1.0);
+
   // reordering constraints
 	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
 		Scan<int>(m_parameter->GetParam("distortion-limit")[0])
