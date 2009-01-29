@@ -371,9 +371,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore, const Phrase *constr
 
 	const WERScoreProducer *werProducer = staticData.GetWERScoreProducer();
 	float werScore = werProducer->CalculateScore(hypPhrase, *constraint);
-	m_scoreBreakdown.PlusEquals(werProducer, werScore);
-
-	cerr << m_scoreBreakdown.GetWeightedScore() << "   " << hypPhrase << endl;
+	m_scoreBreakdown.Assign(werProducer, werScore);
 
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
