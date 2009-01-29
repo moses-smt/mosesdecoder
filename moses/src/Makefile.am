@@ -56,6 +56,7 @@ libmoses_a_SOURCES = \
 	PhraseDictionaryOnDisk.cpp \
 	PhraseDictionaryOnDiskChart.cpp \
 	PhraseDictionaryGlueRule.cpp \
+	PhraseDictionaryJoshua.cpp \
 	PrefixTreeMap.cpp \
 	ReorderingConstraint.cpp \
 	ScoreComponentCollection.cpp \
