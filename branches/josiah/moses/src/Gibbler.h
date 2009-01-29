@@ -8,7 +8,9 @@ namespace Moses {
 
 class Hypothesis;
 class TranslationOptionCollection;
+class TranslationOption;
 
+  
 class Sample {
  private:
   int source_size;
@@ -21,6 +23,9 @@ class Sample {
   ScoreComponentCollection feature_values;
   
   std::map<size_t, Hypothesis*>  sourceIndexedHyps;
+  void SetSourceIndexedHyps(Hypothesis* h);
+  void CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
+  void CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
 
  public:
   Sample(Hypothesis* target_head);
@@ -32,6 +37,9 @@ class Sample {
   const ScoreComponentCollection& GetFeatureValues() const {
     return feature_values;
   }
+  void FlipNodes(size_t, size_t);
+  void AddNode(const TranslationOption&);
+  
 };
 
 class Sampler {
