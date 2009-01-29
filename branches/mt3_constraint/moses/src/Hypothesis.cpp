@@ -327,6 +327,15 @@ void Hypothesis::ResetScore()
 	m_futureScore = m_totalScore = 0.0f;
 }
 
+void GetRecursivePhrase(const Hypothesis *hypo, Phrase &phrase)
+{
+	if (hypo != NULL)
+	{
+		GetRecursivePhrase(hypo->GetPrevHypo(), phrase);
+		phrase.Append(hypo->GetCurrTargetPhrase());
+	}
+}
+
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
@@ -358,10 +367,13 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore, const Phrase *constr
 
 	// wer score
 	Phrase hypPhrase(Output);
+	GetRecursivePhrase(this, hypPhrase);
 
 	const WERScoreProducer *werProducer = staticData.GetWERScoreProducer();
 	float werScore = werProducer->CalculateScore(hypPhrase, *constraint);
 	m_scoreBreakdown.PlusEquals(werProducer, werScore);
+
+	cerr << m_scoreBreakdown.GetWeightedScore() << "   " << hypPhrase << endl;
 
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
