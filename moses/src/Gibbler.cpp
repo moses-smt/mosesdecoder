@@ -123,15 +123,27 @@ void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
 void Sample::CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   newHyp->m_prevHypo = currHyp->m_prevHypo;
   newHyp->m_nextHypo = currHyp->m_nextHypo;
-  const_cast<Hypothesis*>(currHyp->m_prevHypo)->m_nextHypo = newHyp;
-  currHyp->m_nextHypo->m_prevHypo = newHyp;
+  Hypothesis* currHypPrev = const_cast<Hypothesis*>(currHyp->m_prevHypo);
+  if (currHypPrev) {
+    currHypPrev->m_nextHypo = newHyp;
+  }
+  Hypothesis* currHypNext = currHyp->m_nextHypo;
+  if (currHypNext) {
+    currHypNext->m_prevHypo = newHyp;  
+  }
 }
 
 void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   newHyp->m_sourcePrevHypo = currHyp->m_sourcePrevHypo;
   newHyp->m_sourceNextHypo = currHyp->m_sourceNextHypo;
-  newHyp->m_sourcePrevHypo->m_sourceNextHypo = newHyp;
-  newHyp->m_sourceNextHypo->m_sourcePrevHypo = newHyp; 
+  Hypothesis* newHypSourcePrev = newHyp->m_sourcePrevHypo;
+  if (newHypSourcePrev) {
+    newHypSourcePrev->m_sourceNextHypo = newHyp;
+  }
+  Hypothesis* newHypSourceNext = newHyp->m_sourceNextHypo;
+  if (newHypSourceNext) {
+    newHypSourceNext->m_sourcePrevHypo = newHyp; 
+  }
 }
 
   
