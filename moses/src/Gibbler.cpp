@@ -138,14 +138,20 @@ void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
   size_t iterations = 5;
   vector<GibbsOperator*> operators;
+  vector<SampleCollector*> collectors;
+  collectors.push_back(new GibblerMaxTransDecoder());
+  collectors.push_back(new PrintSampleCollector());
   Sample sample(starting);
-  SampleCollector* collector = new GibblerMaxTransDecoder();
+  
   operators.push_back(new MergeSplitOperator());
   for (size_t i = 0; i < iterations; ++i) {
     cout << "Gibbs sampling iteration: " << i << endl;
     for (size_t j = 0; j < operators.size(); ++j) {
       cout << "Sampling with operator " << operators[j]->name() << endl;
-      operators[j]->doIteration(sample,*options,*collector);
+      operators[j]->doIteration(sample,*options);
+      for (size_t k = 0; k < collectors.size(); ++k) {
+        collectors[k]->collect(sample);
+      }
     }
   }
   
@@ -153,12 +159,15 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
   for (size_t i = 0; i < operators.size(); ++i) {
     delete operators[i];
   }
-  delete collector;
+  for (size_t i = 0; i < collectors.size(); ++i) {
+    delete collectors[i];
+  }
 
 }
 
 void PrintSampleCollector::collect(Sample& sample)  {
       cout << "Collected a sample" << endl;
+      cout << *(sample.GetSampleHypothesis()) << endl;
     }
 
 }
