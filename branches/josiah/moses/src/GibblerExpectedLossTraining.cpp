@@ -14,10 +14,10 @@ class BLEUScorerBase {
   Score* ScoreCandidate(const Phrase& hyp) const;
 
  protected:
-  virtual float ComputeRefLength(const vector<WordID>& hyp) const = 0;
+  virtual float ComputeRefLength(const vector<const Factor*>& hyp) const = 0;
  private:
   struct NGramCompare {
-    int operator() (const vector<WordID>& a, const vector<WordID>& b) {
+    int operator() (const vector<const Factor*>& a, const vector<const Factor*>& b) {
       size_t as = a.size();
       size_t bs = b.size();
       const size_t s = (as < bs ? as : bs);
@@ -29,10 +29,10 @@ class BLEUScorerBase {
       return as < bs;
     }
   };
-  typedef map<vector<WordID>, pair<int,int>, NGramCompare> NGramCountMap;
-  void CountRef(const vector<WordID>& ref) {
+  typedef map<vector<const Factor*>, pair<int,int>, NGramCompare> NGramCountMap;
+  void CountRef(const vector<const Factor*>& ref) {
     NGramCountMap tc;
-    vector<WordID> ngram(n_);
+    vector<const Factor*> ngram(n_);
     int s = ref.size();
     for (int j=0; j<s; ++j) {
       int remaining = s-j;
@@ -52,7 +52,7 @@ class BLEUScorerBase {
     }
   }
 
-  void ComputeNgramStats(const vector<WordID>& sent,
+  void ComputeNgramStats(const vector<const Factor*>& sent,
        valarray<int>* correct,
 GibblerExpectedLossCollector
 

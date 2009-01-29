@@ -19,6 +19,7 @@ libmoses_a_SOURCES = \
 	GenerationDictionary.cpp \
 	Gibbler.cpp \
 	GibblerExpectedLossTraining.cpp \
+	GibblerMaxTransDecoder.cpp \
 	GibbsOperator.cpp \
 	hash.cpp \
 	Hypothesis.cpp \
