@@ -212,7 +212,6 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LM_SRI,
-					LM_IRST,
 					TRACE_ENABLE,
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -237,7 +236,6 @@
 					"-loolm",
 					"-ldstruct",
 					"-lz",
-					"-lirstlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";

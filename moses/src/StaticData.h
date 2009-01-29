@@ -51,7 +51,6 @@ class DistortionScoreProducer;
 class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
-class WERScoreProducer;
 
 /** Contains global variables and contants */
 class StaticData
@@ -60,7 +59,7 @@ private:
 	static StaticData									s_instance;
 protected:	
 
-	float m_WERLimit;
+	mutable float m_WERLimit;
 	std::map<long,Phrase> m_constraints;
 	std::vector<PhraseDictionary*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
@@ -119,7 +118,6 @@ protected:
 	DistortionScoreProducer *m_distortionScoreProducer;
 	WordPenaltyProducer *m_wpProducer;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
-	WERScoreProducer *m_WERScoreProducer;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
 	bool m_isDetailedTranslationReportingEnabled;
@@ -247,6 +245,10 @@ public:
 	inline float GetWERLimit() const 
 	{ 
 		return m_WERLimit;
+	}	
+	inline void SetWERLimit(float limit) const 
+	{ 
+		m_WERLimit = limit;
 	}	
 	inline size_t GetMaxNoPartTransOpt() const 
 	{ 
@@ -439,7 +441,6 @@ public:
 	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
 	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
-	const WERScoreProducer *GetWERScoreProducer() const { return m_WERScoreProducer; }
 
 	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
 	void UseAlignmentInfo(bool a){ m_UseAlignmentInfo=a; };

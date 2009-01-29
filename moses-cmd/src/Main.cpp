@@ -138,15 +138,46 @@ int main(int argc, char* argv[])
 			ResetUserTime();
 
     VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
-
-		Manager manager(*source, staticData.GetSearchAlgorithm());
-		manager.ProcessSentence();
-
+		VERBOSE(1,"WER = " << staticData.GetWERLimit() << endl);
+		//staticData.SetWERLimit(1.0f);
+		
+		VERBOSE(1,"WER = " << staticData.GetWERLimit() << endl);
+		
+		Manager* manager; 
+		
+		if (staticData.GetWERLimit() < 0.0f) {
+		
+			float actualWERLimit = staticData.GetWERLimit();
+			
+		float limit = 0.0f;
+		bool redo = true;
+		do {
+			staticData.SetWERLimit(limit);
+			manager = new Manager(*source, staticData.GetSearchAlgorithm());
+		
+		//Manager manager(*source, staticData.GetSearchAlgorithm());
+		//manager.ProcessSentence();
+			manager->ProcessSentence();
+		//const Hypothesis* bestHyp = manager.GetBestHypothesis();
+			const Hypothesis* bestHyp = manager->GetBestHypothesis();
+			limit += 1.0f;
+			redo = (bestHyp==NULL);
+		} while (redo);
+			
+			staticData.SetWERLimit(actualWERLimit);
+		} else {
+			manager = new Manager(*source, staticData.GetSearchAlgorithm());
+			manager->ProcessSentence();
+		}
+		
+		
 		if (staticData.GetOutputWordGraph())
-			manager.GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
+//			manager.GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
+			manager->GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
 
                 if (staticData.GetOutputSearchGraph())
-		  manager.GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
+//		  manager.GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
+					manager->GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
 
 #ifdef HAVE_PROTOBUF
                 if (staticData.GetOutputSearchGraphPB()) {
@@ -155,13 +186,15 @@ int main(int argc, char* argv[])
 			string fn = sfn.str();
 			VERBOSE(2, "Writing search graph to " << fn << endl);
 			fstream output(fn.c_str(), ios::trunc | ios::binary | ios::out);
-			manager.SerializeSearchGraphPB(source->GetTranslationId(), output);
+			//manager.SerializeSearchGraphPB(source->GetTranslationId(), output);
+			manager->SerializeSearchGraphPB(source->GetTranslationId(), output);
 		}
 #endif
 
 		// pick best translation (maximum a posteriori decoding)
 		if (! staticData.UseMBR()) {
-			ioWrapper->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
+			//ioWrapper->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
+			ioWrapper->OutputBestHypo(manager->GetBestHypothesis(), source->GetTranslationId(),
 						 staticData.GetReportSegmentation(), staticData.GetReportAllFactors());
 			IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
 
@@ -171,7 +204,8 @@ int main(int argc, char* argv[])
 				{
 			  	VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					TrellisPathList nBestList;
-					manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
+					//manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
+					manager->CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
 					ioWrapper->OutputNBestList(nBestList, source->GetTranslationId());
 					//RemoveAllInColl(nBestList);
 
@@ -190,7 +224,8 @@ int main(int argc, char* argv[])
 		  else
 		    {
 		      TrellisPathList nBestList;
-		      manager.CalcNBest(nBestSize, nBestList,true);
+		      //manager.CalcNBest(nBestSize, nBestList,true);
+			  manager->CalcNBest(nBestSize, nBestList,true);
 		      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
 		      IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
 		      std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
@@ -202,14 +237,17 @@ int main(int argc, char* argv[])
 		}
 
 		if (staticData.IsDetailedTranslationReportingEnabled()) {
-		  TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
+		  //TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
+			TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager->GetBestHypothesis());
 		}
 
 		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
 
-		manager.CalcDecoderStatistics();
+		//manager.CalcDecoderStatistics();
+		manager->CalcDecoderStatistics();
+		delete manager;
 	}
-
+	
 	delete ioWrapper;
 
 	IFVERBOSE(1)
