@@ -46,6 +46,8 @@ class TDelta {
     double getScore() {
       return m_score;
     }
+    //apply to the sample
+    virtual void apply(Sample& sample) = 0;
     virtual ~TDelta() {}
   protected:
     ScoreComponentCollection m_scores;
@@ -151,6 +153,11 @@ class SingleTDelta : public virtual TDelta {
         cout << "Calculated score as " << m_score << endl;
         
      }
+     
+     //apply to the sample
+    virtual void apply(Sample& sample) {
+      sample.ChangeTarget(*m_option,m_scores);
+    };
   private:
     const TranslationOption* m_option;
     WordsRange m_targetSegment;
@@ -165,6 +172,9 @@ class ContigTDelta: public virtual TDelta {
     ContigTDelta(const TranslationOption* option1, const TranslationOption* option2,
       const WordsRange& targetSegment) :
       m_option1(option1), m_option2(option2), m_targetSegment(targetSegment) {}
+      virtual void apply(Sample& sample) {
+      //TODO
+      };
   private:
     const TranslationOption* m_option1;
     const TranslationOption* m_option2;
@@ -179,6 +189,9 @@ class DiscontigTDelta: public virtual TDelta {
     DiscontigTDelta(const TranslationOption* option1, const TranslationOption* option2,
       const WordsRange& targetSegment1, const WordsRange& targetSegment2 ) :
       m_option1(option1), m_option2(option2), m_targetSegment1(targetSegment1), m_targetSegment2(targetSegment2) {}
+      virtual void apply(Sample& sample) {
+      //TODO
+      };
   private:
     const TranslationOption* m_option1;
     const TranslationOption* m_option2;
@@ -351,7 +364,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     cout << "**The chosen sample is " << chosen << endl;
     
     //apply it to the sample
-
+    deltas[chosen]->apply(sample);
     
     
     //clean up
