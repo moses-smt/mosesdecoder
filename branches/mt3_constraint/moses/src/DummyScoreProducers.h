@@ -9,6 +9,21 @@ namespace Moses
 {
 
 class WordsRange;
+class Phrase;
+
+/** Calculates WER scores
+ */
+class WERScoreProducer : public ScoreProducer {
+public:
+	WERScoreProducer(ScoreIndexManager &scoreIndexManager);
+
+	float CalculateScore(const Phrase &hypPhrase, const Phrase &constraintPhrase) const;
+
+	size_t GetNumScoreComponents() const
+	{ return 1; }
+
+	std::string GetScoreProducerDescription() const;
+};
 
 /** Calculates Distortion scores
  */

@@ -277,10 +277,10 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 	{
 		// simple build, no questions asked
 		IFVERBOSE(2) { t = clock(); }
-		newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+		newHypo = hypothesis.CreateNext(transOpt);
 		IFVERBOSE(2) { stats.AddTimeBuildHyp( clock()-t ); }
 		if (newHypo==NULL) return;
-		newHypo->CalcScore(m_transOptColl.GetFutureScore());
+		newHypo->CalcScore(m_transOptColl.GetFutureScore(), m_constraint);
 	}
 	else
 	// early discarding: check if hypothesis is too bad to build
@@ -309,7 +309,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 
 		// build the hypothesis without scoring
 		IFVERBOSE(2) { t = clock(); }
-		newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+		newHypo = hypothesis.CreateNext(transOpt);
 		if (newHypo==NULL) return;
 		IFVERBOSE(2) { stats.AddTimeBuildHyp( clock()-t ); }
 

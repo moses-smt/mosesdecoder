@@ -147,71 +147,23 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
-Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const
+Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
 {
-	return Create(*this, transOpt, constraint);
+	return Create(*this, transOpt);
 }
 
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
-Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Phrase* constrainingPhrase)
+Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 {
+	#ifdef USE_HYPO_POOL
+		Hypothesis *ptr = s_objectPool.getPtr();
+		return new(ptr) Hypothesis(prevHypo, transOpt);
+	#else
+		return new Hypothesis(prevHypo, transOpt);
+	#endif
 
-	// This method includes code for constraint decoding
-	
-	bool createHypothesis = true;
-
-	if (constrainingPhrase != NULL)
-	{
-
-		size_t constraintSize = constrainingPhrase->GetSize();
-			
-		size_t start = 1 + prevHypo.GetCurrTargetWordsRange().GetEndPos();
-			
-		const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
-		size_t transOptSize = transOptPhrase.GetSize();
-		
-		size_t endpoint = start + transOptSize - 1;
-		
-
-		if (endpoint < constraintSize) 
-		{	
-			WordsRange range(start, endpoint);
-			Phrase relevantConstraint = constrainingPhrase->GetSubString(range);
-			
-			if ( ! relevantConstraint.IsCompatible(transOptPhrase) )
-			{
-				createHypothesis = false;
-				
-			}
-		}
-		else 
-		{
-			createHypothesis = false;
-		}
-		
-	}
-
-	
-	if (createHypothesis)
-	{
-
-		#ifdef USE_HYPO_POOL
-			Hypothesis *ptr = s_objectPool.getPtr();
-			return new(ptr) Hypothesis(prevHypo, transOpt);
-		#else
-			return new Hypothesis(prevHypo, transOpt);
-		#endif
-
-	}
-	else
-	{
-		// If the previous hypothesis plus the proposed translation option
-		//    fail to match the provided constraint,
-		//    return a null hypothesis.
-		return NULL;
-	}
 	
 }
 /***
@@ -378,7 +330,7 @@ void Hypothesis::ResetScore()
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::CalcScore(const SquareMatrix &futureScore) 
+void Hypothesis::CalcScore(const SquareMatrix &futureScore, const Phrase *constraint) 
 {
 	const StaticData &staticData = StaticData::Instance();
 	clock_t t=0; // used to track time
@@ -403,6 +355,13 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	{
 		m_scoreBreakdown.PlusEquals(reorderModels[i], reorderModels[i]->CalcScore(this));
 	}
+
+	// wer score
+	Phrase hypPhrase(Output);
+
+	const WERScoreProducer *werProducer = staticData.GetWERScoreProducer();
+	float werScore = werProducer->CalculateScore(hypPhrase, *constraint);
+	m_scoreBreakdown.PlusEquals(werProducer, werScore);
 
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
