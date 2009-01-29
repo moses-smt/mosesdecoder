@@ -394,7 +394,7 @@ void Hypothesis::ResetScore()
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::CalcScore(const SquareMatrix &futureScore) 
+void Hypothesis::CalcScore(const SquareMatrix &futureScore, const Phrase *constraint) 
 {
 	const StaticData &staticData = StaticData::Instance();
 	clock_t t=0; // used to track time
@@ -421,8 +421,10 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	}
 
 	// wer score
+	Phrase hypPhrase(Output);
+
 	const WERScoreProducer *werProducer = staticData.GetWERScoreProducer();
-	float werScore = werProducer->CalculateScore(???);
+	float werScore = werProducer->CalculateScore(hypPhrase, *constraint);
 	m_scoreBreakdown.PlusEquals(werProducer, werScore);
 	
 	// TOTAL

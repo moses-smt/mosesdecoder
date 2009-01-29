@@ -17,7 +17,7 @@ class WERScoreProducer : public ScoreProducer {
 public:
 	WERScoreProducer(ScoreIndexManager &scoreIndexManager);
 
-	float CalculateScore(const Phrase &phrase) const;
+	float CalculateScore(const Phrase &hypPhrase, const Phrase &constraintPhrase) const;
 
 	size_t GetNumScoreComponents() const
 	{ return 1; }

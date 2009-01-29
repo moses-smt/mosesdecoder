@@ -147,7 +147,7 @@ public:
 
 	void ResetScore();
 
-	void CalcScore(const SquareMatrix &futureScore);
+	void CalcScore(const SquareMatrix &futureScore, const Phrase *constraint);
 
   float CalcExpectedScore( const SquareMatrix &futureScore );
   void CalcRemainingScore();
