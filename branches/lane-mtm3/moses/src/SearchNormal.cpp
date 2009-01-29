@@ -24,6 +24,8 @@ SearchNormal::SearchNormal(const InputType &source, const TranslationOptionColle
 	long sentenceID = source.GetTranslationId();
 	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
 	m_WERLimit = staticData.GetWERLimit();
+	if (m_WERLimit < 0.0f) m_WERUnlimited = true;
+	else m_WERUnlimited = false;
 
 	// initialize the stacks: create data structure and set limits
 	std::vector < HypothesisStackNormal >::iterator iterStack;
@@ -48,14 +50,31 @@ SearchNormal::~SearchNormal()
  */
 void SearchNormal::ProcessSentence()
 {
+	if (m_constraint!=NULL && m_WERUnlimited) {
+		// If attempting constraint decoding with unlimited WER allowed,
+		//    keep increasing allowed WER until a result is obtained.
+		for (m_WERLimit=0; GetBestHypothesis()==NULL; m_WERLimit++) {
+			VERBOSE(1, "WER Limit = " << m_WERLimit << endl);
+			AttemptProcessSentence();
+		}
+		//VERBOSE(1, "WER Limit = " << m_WERLimit << "  GetBestHypothesis()==" << *GetBestHypothesis() << endl);
+	} else {
+		AttemptProcessSentence();
+	}
+
+}
+
+
+void SearchNormal::AttemptProcessSentence()
+{
 	const StaticData &staticData = StaticData::Instance();
 	SentenceStats &stats = staticData.GetSentenceStats();
 	clock_t t=0; // used to track time for steps
-
+	
 	// initial seed hypothesis: nothing translated, no words produced
 	Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
 	m_hypoStackColl[0]->AddPrune(hypo);
-
+	
 	// go through each stack
 	std::vector < HypothesisStack* >::iterator iterStack;
 	for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack)
@@ -68,7 +87,7 @@ void SearchNormal::ProcessSentence()
 			return;
 		}
 		HypothesisStackNormal &sourceHypoColl = *static_cast<HypothesisStackNormal*>(*iterStack);
-
+		
 		// the stack is pruned before processing (lazy pruning):
 		VERBOSE(3,"processing hypothesis from next stack");
 		IFVERBOSE(2) { t = clock(); }
@@ -76,7 +95,7 @@ void SearchNormal::ProcessSentence()
 		VERBOSE(3,std::endl);
 		sourceHypoColl.CleanupArcList();
 		IFVERBOSE(2) { stats.AddTimeStack( clock()-t ); }
-
+		
 		// go through each hypothesis on the stack and try to expand it
 		HypothesisStackNormal::const_iterator iterHypo;
 		for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo)
@@ -86,16 +105,16 @@ void SearchNormal::ProcessSentence()
 		}
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
-
+		
 		// this stack is fully expanded;
 		actual_hypoStack = &sourceHypoColl;
 	}
-
+	
 	// some more logging
 	IFVERBOSE(2) { staticData.GetSentenceStats().SetTimeTotal( clock()-m_start ); }
 	VERBOSE(2, staticData.GetSentenceStats());
 }
-
+	
 
 /** Find all translation options to expand one hypothesis, trigger expansion
  * this is mostly a check for overlap with already covered words, and for
@@ -266,7 +285,7 @@ void SearchNormal::ExpandAllHypotheses(const Hypothesis &hypothesis, size_t star
 			TargetPhrase *curTarget = getCurrentTargetPhrase(hypothesis);
 //LS			float currConstraintWER = getCurrConstraintWER(hypothesis, **iter);
 			float currConstraintWER = getCurrConstraintWER(curTarget, **iter);
-			VERBOSE(1, "WER==" << currConstraintWER << " for \"" << static_cast<const Phrase&>(*curTarget) << "\"" << endl);
+//LS			VERBOSE(1, "WER==" << currConstraintWER << " for \"" << static_cast<const Phrase&>(*curTarget) << "\"" << endl);
 			//printf("WER: %f  Limit: %f\n", currConstraintWER, m_WERLimit);
 			if (currConstraintWER <= m_WERLimit)
 				ExpandHypothesis(hypothesis, **iter, expectedScore);
@@ -340,14 +359,16 @@ float SearchNormal::getCurrConstraintWER(TargetPhrase *curTarget,
 	
 	// Extract relevant constraint...
 	WordsRange range(0, endpoint);
-	const Phrase &relevantConstraint = m_constraint->GetSubString(range);
+	//const Phrase &relevantConstraint = m_constraint->GetSubString(range);
 	
 	
 	// Compute WER between reference and target string
-	float editDistance = computeEditDistance(relevantConstraint, newTarget);
-	VERBOSE(1, "WER==" << editDistance << " for \"" << static_cast<const Phrase&>(newTarget) << "\" with constraint \"" << relevantConstraint << "\"" << endl);
+	//float editDistance = computeEditDistance(relevantConstraint, newTarget);
+	float editDistance = computeEditDistance(*m_constraint, newTarget);
+	float normalizedEditDistance = editDistance - (m_constraint->GetSize() - newTarget.GetSize());
+	//VERBOSE(1, "WER==" << normalizedEditDistance << "(" << editDistance << ") for \"" << static_cast<const Phrase&>(newTarget) << "\" with constraint \"" << *m_constraint << "\"" << endl);
 	
-	return editDistance;
+	return normalizedEditDistance;
 }
 	
 	
@@ -503,13 +524,13 @@ const Hypothesis *SearchNormal::GetBestHypothesis() const
 					}
 					
 					if ( m_WERLimit != 0.0f ) { // is WER-constraint active?
-						VERBOSE(1, "constraint  : " << constraint << endl);
-						VERBOSE(1, "targetPhrase: " << targetPhrase << endl);
+						//VERBOSE(1, "constraint  : " << constraint << endl);
+						//VERBOSE(1, "targetPhrase: " << targetPhrase << endl);
 						if (computeEditDistance(constraint, targetPhrase) <= m_WERLimit) {
-							VERBOSE(1, "TRUE" << endl);
+							//VERBOSE(1, "TRUE" << endl);
 							return *iter;
 						} else {
-							VERBOSE(1, "FALSE" << endl);
+							//VERBOSE(1, "FALSE" << endl);
 						}
 					} else {
 						if (constraint.IsCompatible(targetPhrase))
