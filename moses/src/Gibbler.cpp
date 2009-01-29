@@ -17,11 +17,7 @@ Sample::Sample(Hypothesis* target_head) {
 
   for (Hypothesis* h = target_head; h->GetId() > 0; h = const_cast<Hypothesis*>(h->GetPrevHypo())) {
     size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
-    size_t endPos = h->GetCurrSourceWordsRange().GetEndPos();
-
-    for (size_t i = startPos; i <= endPos; i++) {
-      sourceIndexedHyps[i] = h; 
-    } 
+    SetSourceIndexedHyps(h); 
     source_order[startPos] = h;
     this->target_tail = h;
     h->m_nextHypo = next;
@@ -49,6 +45,90 @@ Hypothesis* Sample::GetHypAtSourceIndex(size_t i) {
   assert(it != sourceIndexedHyps.end());
   return it->second;
 }
+
+void Sample::SetSourceIndexedHyps(Hypothesis* h) {
+  size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
+  size_t endPos = h->GetCurrSourceWordsRange().GetEndPos();
+  
+  for (size_t i = startPos; i <= endPos; i++) {
+    sourceIndexedHyps[i] = h; 
+  } 
+  
+}
+  
+//x and y are source side positions  
+void Sample::FlipNodes(size_t x, size_t y) {
+  assert (x != y);
+  Hypothesis* hyp1 = GetHypAtSourceIndex(x);
+  Hypothesis* hyp2 = GetHypAtSourceIndex(y);
+  
+  
+  WordsRange h1tgtCovered = hyp1->GetCurrTargetWordsRange();
+  WordsRange h2tgtCovered = hyp2->GetCurrTargetWordsRange();
+  
+  if (h1tgtCovered < h2tgtCovered) {
+    Hypothesis* hyp1_prevHypo = const_cast<Hypothesis*>(hyp1->m_prevHypo);
+    Hypothesis* hyp2_nextHypo = hyp2->m_nextHypo;
+    
+    hyp2->m_prevHypo = hyp1_prevHypo;
+    hyp2->m_nextHypo = hyp1;
+    if (hyp1_prevHypo != NULL) {
+      hyp1_prevHypo->m_nextHypo = hyp2;
+    }
+    
+    hyp1->m_prevHypo = hyp2;
+    hyp1->m_nextHypo = hyp2_nextHypo;
+    if (hyp2_nextHypo != NULL) {
+      hyp2_nextHypo->m_prevHypo = hyp1;
+    }
+  }
+  else {
+    Hypothesis* hyp1_nextHypo = hyp1->m_nextHypo;
+    Hypothesis* hyp2_prevHypo = const_cast<Hypothesis*>(hyp2->m_prevHypo);
+    
+    hyp2->m_prevHypo = hyp1;
+    hyp2->m_nextHypo = hyp1_nextHypo;
+    if (hyp1_nextHypo != NULL) {
+      hyp1_nextHypo->m_prevHypo = hyp2;
+    }
+    
+    hyp1->m_nextHypo = hyp2;
+    hyp1->m_prevHypo = hyp2_prevHypo;
+    if (hyp2_prevHypo != NULL) {
+      hyp2_prevHypo->m_nextHypo = hyp1;
+    }
+  }
+}
+  
+void Sample::AddNode(const TranslationOption& option)  {
+  size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
+  Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
+  
+  const Hypothesis& prevHyp = *currHyp->m_prevHypo;
+  Hypothesis newHyp(prevHyp, option);
+  
+  CopyTgtSidePtrs(currHyp, &newHyp);
+  CopySrcSidePtrs(currHyp, &newHyp);
+
+  //Update source side map
+  SetSourceIndexedHyps(&newHyp); 
+}  
+  
+  
+void Sample::CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
+  newHyp->m_prevHypo = currHyp->m_prevHypo;
+  newHyp->m_nextHypo = currHyp->m_nextHypo;
+  const_cast<Hypothesis*>(currHyp->m_prevHypo)->m_nextHypo = newHyp;
+  currHyp->m_nextHypo->m_prevHypo = newHyp;
+}
+
+void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
+  newHyp->m_sourcePrevHypo = currHyp->m_sourcePrevHypo;
+  newHyp->m_sourceNextHypo = currHyp->m_sourceNextHypo;
+  newHyp->m_sourcePrevHypo->m_sourceNextHypo = newHyp;
+  newHyp->m_sourceNextHypo->m_sourcePrevHypo = newHyp; 
+}
+
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
   size_t iterations = 5;
