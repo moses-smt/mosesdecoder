@@ -133,6 +133,8 @@
 		1C8CFF090AD67A9700FA22E2 /* WordsBitmap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8C0AD67A9700FA22E2 /* WordsBitmap.h */; };
 		1C8CFF0A0AD67A9700FA22E2 /* WordsRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFE8D0AD67A9700FA22E2 /* WordsRange.cpp */; };
 		1C8CFF0B0AD67A9700FA22E2 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */; };
+		3D5CBEEF0F2F683D004520C1 /* LanguageModelRemote.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D5CBEEB0F2F683D004520C1 /* LanguageModelRemote.cpp */; };
+		3D5CBEF00F2F683D004520C1 /* LanguageModelRemote.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D5CBEEC0F2F683D004520C1 /* LanguageModelRemote.h */; };
 		B219B8610E9382EE00EAB407 /* AlignmentElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B85B0E9382EE00EAB407 /* AlignmentElement.cpp */; };
 		B219B8620E9382EE00EAB407 /* AlignmentElement.h in Headers */ = {isa = PBXBuildFile; fileRef = B219B85C0E9382EE00EAB407 /* AlignmentElement.h */; };
 		B219B8630E9382EE00EAB407 /* AlignmentPair.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B85D0E9382EE00EAB407 /* AlignmentPair.cpp */; };
@@ -140,8 +142,6 @@
 		B219B8650E9382EE00EAB407 /* AlignmentPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B85F0E9382EE00EAB407 /* AlignmentPhrase.cpp */; };
 		B219B8660E9382EE00EAB407 /* AlignmentPhrase.h in Headers */ = {isa = PBXBuildFile; fileRef = B219B8600E9382EE00EAB407 /* AlignmentPhrase.h */; };
 		B219B8690E93836100EAB407 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8680E93836100EAB407 /* Timer.cpp */; };
-		B23821380EB73DCB007303C3 /* LanguageModelIRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23821360EB73DCB007303C3 /* LanguageModelIRST.cpp */; };
-		B23821390EB73DCB007303C3 /* LanguageModelIRST.h in Headers */ = {isa = PBXBuildFile; fileRef = B23821370EB73DCB007303C3 /* LanguageModelIRST.h */; };
 		B2639DEA0EF199D400A67519 /* ReorderingConstraint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2639DE60EF199D400A67519 /* ReorderingConstraint.cpp */; };
 		B2639DEB0EF199D400A67519 /* ReorderingConstraint.h in Headers */ = {isa = PBXBuildFile; fileRef = B2639DE70EF199D400A67519 /* ReorderingConstraint.h */; };
 		B2639DEC0EF199D400A67519 /* TranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2639DE80EF199D400A67519 /* TranslationOptionList.cpp */; };
@@ -302,6 +302,10 @@
 		1C8CFE8C0AD67A9700FA22E2 /* WordsBitmap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsBitmap.h; path = src/WordsBitmap.h; sourceTree = "<group>"; };
 		1C8CFE8D0AD67A9700FA22E2 /* WordsRange.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = WordsRange.cpp; path = src/WordsRange.cpp; sourceTree = "<group>"; };
 		1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = src/WordsRange.h; sourceTree = "<group>"; };
+		3D5CBEE90F2F683D004520C1 /* LanguageModelRandLM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelRandLM.cpp; path = src/LanguageModelRandLM.cpp; sourceTree = "<group>"; };
+		3D5CBEEA0F2F683D004520C1 /* LanguageModelRandLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelRandLM.h; path = src/LanguageModelRandLM.h; sourceTree = "<group>"; };
+		3D5CBEEB0F2F683D004520C1 /* LanguageModelRemote.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelRemote.cpp; path = src/LanguageModelRemote.cpp; sourceTree = "<group>"; };
+		3D5CBEEC0F2F683D004520C1 /* LanguageModelRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelRemote.h; path = src/LanguageModelRemote.h; sourceTree = "<group>"; };
 		B219B85B0E9382EE00EAB407 /* AlignmentElement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentElement.cpp; path = src/AlignmentElement.cpp; sourceTree = "<group>"; };
 		B219B85C0E9382EE00EAB407 /* AlignmentElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentElement.h; path = src/AlignmentElement.h; sourceTree = "<group>"; };
 		B219B85D0E9382EE00EAB407 /* AlignmentPair.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentPair.cpp; path = src/AlignmentPair.cpp; sourceTree = "<group>"; };
@@ -370,6 +374,10 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				3D5CBEE90F2F683D004520C1 /* LanguageModelRandLM.cpp */,
+				3D5CBEEA0F2F683D004520C1 /* LanguageModelRandLM.h */,
+				3D5CBEEB0F2F683D004520C1 /* LanguageModelRemote.cpp */,
+				3D5CBEEC0F2F683D004520C1 /* LanguageModelRemote.h */,
 				B2639DE60EF199D400A67519 /* ReorderingConstraint.cpp */,
 				B2639DE70EF199D400A67519 /* ReorderingConstraint.h */,
 				B2639DE80EF199D400A67519 /* TranslationOptionList.cpp */,
@@ -647,9 +655,9 @@
 				B219B8620E9382EE00EAB407 /* AlignmentElement.h in Headers */,
 				B219B8640E9382EE00EAB407 /* AlignmentPair.h in Headers */,
 				B219B8660E9382EE00EAB407 /* AlignmentPhrase.h in Headers */,
-				B23821390EB73DCB007303C3 /* LanguageModelIRST.h in Headers */,
 				B2639DEB0EF199D400A67519 /* ReorderingConstraint.h in Headers */,
 				B2639DED0EF199D400A67519 /* TranslationOptionList.h in Headers */,
+				3D5CBEF00F2F683D004520C1 /* LanguageModelRemote.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -771,9 +779,9 @@
 				B219B8630E9382EE00EAB407 /* AlignmentPair.cpp in Sources */,
 				B219B8650E9382EE00EAB407 /* AlignmentPhrase.cpp in Sources */,
 				B219B8690E93836100EAB407 /* Timer.cpp in Sources */,
-				B23821380EB73DCB007303C3 /* LanguageModelIRST.cpp in Sources */,
 				B2639DEA0EF199D400A67519 /* ReorderingConstraint.cpp in Sources */,
 				B2639DEC0EF199D400A67519 /* TranslationOptionList.cpp in Sources */,
+				3D5CBEEF0F2F683D004520C1 /* LanguageModelRemote.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -790,7 +798,6 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					LM_IRST,
 					LM_SRI,
 					TRACE_ENABLE,
 					"_FILE_OFFSET_BITS=64",
