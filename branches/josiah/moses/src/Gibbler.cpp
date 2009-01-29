@@ -2,6 +2,7 @@
 
 #include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
+#include "GibblerMaxTransDecoder.h"
 
 using namespace std;
 
@@ -40,8 +41,7 @@ Sample::Sample(Hypothesis* target_head) {
 }
  
 Hypothesis* Sample::GetHypAtSourceIndex(size_t i) {
-  std::map<size_t, Hypothesis*>::iterator it;
-  it = sourceIndexedHyps.find(i);
+  std::map<size_t, Hypothesis*>::iterator it = sourceIndexedHyps.find(i);
   assert(it != sourceIndexedHyps.end());
   return it->second;
 }
@@ -100,7 +100,7 @@ void Sample::FlipNodes(size_t x, size_t y) {
   }
 }
   
-void Sample::AddNode(const TranslationOption& option)  {
+void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
   
@@ -113,7 +113,7 @@ void Sample::AddNode(const TranslationOption& option)  {
   //Update source side map
   SetSourceIndexedHyps(&newHyp); 
   
-  UpdateFeatureValues(option.GetScoreBreakdown());
+  UpdateFeatureValues(deltaFV);
 }  
 
 void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
@@ -139,7 +139,7 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
   size_t iterations = 5;
   vector<GibbsOperator*> operators;
   Sample sample(starting);
-  SampleCollector* collector = new PrintSampleCollector();
+  SampleCollector* collector = new GibblerMaxTransDecoder();
   operators.push_back(new MergeSplitOperator());
   for (size_t i = 0; i < iterations; ++i) {
     cout << "Gibbs sampling iteration: " << i << endl;
