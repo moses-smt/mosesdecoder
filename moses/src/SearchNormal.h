@@ -36,6 +36,8 @@ protected:
 	float SearchNormal::getCurrConstraintWER(TargetPhrase *targetphrase, const TranslationOption &transOpt);
 	float SearchNormal::computeEditDistance(const Phrase &hypPhrase, const Phrase &constraintPhrase) const;
 	
+	void AttemptProcessSentence();
+	
 public:
 	SearchNormal(const InputType &source, const TranslationOptionCollection &transOptColl);
 	~SearchNormal();

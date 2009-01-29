@@ -29,6 +29,7 @@ public:
 protected:
 	
 	float m_WERLimit;
+	bool m_WERUnlimited;
 	const Phrase *m_constraint;
 
 };
