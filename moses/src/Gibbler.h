@@ -39,7 +39,7 @@ class Sample {
     return feature_values;
   }
   void FlipNodes(size_t, size_t);
-  void AddNode(const TranslationOption&);
+  void ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV); 
   
 };
 
