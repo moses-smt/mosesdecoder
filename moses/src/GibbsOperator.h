@@ -1,4 +1,3 @@
-// $Id: GibbsOperator.h 1964 2008-12-20 20:22:35Z phkoehn $
 // vim:tabstop=2
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -20,6 +19,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #pragma once
 
+#include <algorithm>
+#include <cassert>
+#include <cstdlib>
+
 #include "Gibbler.h"
 #include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
@@ -39,6 +42,12 @@ namespace Moses {
         virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc
           , SampleCollector& collector) = 0;
         virtual const string& name() const = 0;
+        
+     protected:
+        /**
+          * Pick random sample from given (un-normalised) log probabilities.
+          **/
+        size_t getSample(const std::vector<double>& scores);
   };
   
   
