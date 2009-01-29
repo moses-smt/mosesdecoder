@@ -20,6 +20,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <iostream>
 #include "LanguageModelFactory.h"
 #include "UserMessage.h"
 #include "TypeDef.h"
@@ -35,11 +36,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef LM_RAND
 #  include "LanguageModelRandLM.h"
 #endif
+#ifdef LM_REMOTE
+#	include "LanguageModelRemote.h"
+#endif
 
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
-#include "LanguageModelRemote.h"
 
 namespace Moses
 {
@@ -65,7 +68,9 @@ namespace LanguageModelFactory
 			#endif
 			break;
 		  case Remote:
+			#ifdef LM_REMOTE
 			lm = new LanguageModelRemote(true,scoreIndexManager);
+			#endif
 			break;
 
 	  	case SRI:
@@ -120,7 +125,7 @@ namespace LanguageModelFactory
 	  	case SingleFactor:
 	  		if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorTypes[0], weight, nGramOrder))
 				{
-					cerr << "single factor model failed" << endl;
+					std::cerr << "single factor model failed" << std::endl;
 					delete lm;
 					lm = NULL;
 				}
@@ -128,7 +133,7 @@ namespace LanguageModelFactory
 	  	case MultiFactor:
   			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, weight, nGramOrder))
 				{
-					cerr << "multi factor model failed" << endl;
+					std::cerr << "multi factor model failed" << std::endl;
 					delete lm;
 					lm = NULL;
 				}

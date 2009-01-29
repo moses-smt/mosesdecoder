@@ -420,6 +420,11 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 		m_scoreBreakdown.PlusEquals(reorderModels[i], reorderModels[i]->CalcScore(this));
 	}
 
+	// wer score
+	const WERScoreProducer *werProducer = staticData.GetWERScoreProducer();
+	float werScore = werProducer->CalculateScore(???);
+	m_scoreBreakdown.PlusEquals(werProducer, werScore);
+	
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
 
