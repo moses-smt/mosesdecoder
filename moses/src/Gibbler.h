@@ -30,6 +30,7 @@ class Sample {
   void CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
   void UpdateFeatureValues(const ScoreComponentCollection& deltaFV);
   void UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange);   
+  void UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *head);
  public:
   Sample(Hypothesis* target_head);
   ~Sample();
@@ -42,6 +43,7 @@ class Sample {
   const ScoreComponentCollection& GetFeatureValues() const {
     return feature_values;
   }
+  
   void FlipNodes(size_t, size_t);
   void ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV); 
   
