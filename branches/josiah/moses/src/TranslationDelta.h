@@ -38,10 +38,19 @@ class TranslationDelta {
   public:
     TranslationDelta(): m_score(-1e6) {}
   
-    //get the absolute score of this delta
+    /**
+      Get the absolute score of this delta
+      **/
     double getScore() { return m_score;}
-    //apply to the sample
+    /** 
+      * Apply to the sample
+      **/
     virtual void apply(Sample& sample) = 0;
+    /**
+      Compute the change in language model score by adding this target phrase
+      into the hypothesis at the given target position.
+      **/
+      void  addLanguageModelScore(const Hypothesis* hypothesis, const Phrase& targetPhrase);
     const ScoreComponentCollection& getScores() {return m_scores;}
     virtual ~TranslationDelta() {}
     
