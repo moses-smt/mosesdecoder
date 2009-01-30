@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <vector>
 #include "GibbsOperator.h"
 #include "ScoreComponentCollection.h"
 
@@ -21,15 +22,17 @@ class Sample {
   Hypothesis* source_tail;
 
   ScoreComponentCollection feature_values;
+  std::vector<Hypothesis*> cachedSampledHyps;
   
   std::map<size_t, Hypothesis*>  sourceIndexedHyps;
   void SetSourceIndexedHyps(Hypothesis* h);
   void CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
   void CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
   void UpdateFeatureValues(const ScoreComponentCollection& deltaFV);
-    
+  void UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange);   
  public:
   Sample(Hypothesis* target_head);
+  ~Sample();
   int GetSourceSize() { return source_size; }
   Hypothesis* GetHypAtSourceIndex(size_t );
   const Hypothesis* GetSampleHypothesis() const {

@@ -12,20 +12,25 @@ Sample::Sample(Hypothesis* target_head) {
   
   source_size = target_head->GetWordsBitmap().GetSize();
   
-  std::map<size_t, Hypothesis*> source_order;
+  std::map<int, Hypothesis*> source_order;
   this->target_head = target_head;
   Hypothesis* next = NULL;
 
-  for (Hypothesis* h = target_head; h->GetId() > 0; h = const_cast<Hypothesis*>(h->GetPrevHypo())) {
+  for (Hypothesis* h = target_head; h; h = const_cast<Hypothesis*>(h->GetPrevHypo())) {
     size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
     SetSourceIndexedHyps(h); 
-    source_order[startPos] = h;
+    if (h->GetPrevHypo()){
+      source_order[startPos] = h;  
+    }
+    else {
+      source_order[-1] = h;  
+    }
     this->target_tail = h;
     h->m_nextHypo = next;
     next = h;
   }
   
-  std::map<size_t, Hypothesis*>::const_iterator source_it = source_order.begin();
+  std::map<int, Hypothesis*>::const_iterator source_it = source_order.begin();
   Hypothesis* prev = NULL;
   this->source_tail = source_it->second;
   
@@ -40,6 +45,10 @@ Sample::Sample(Hypothesis* target_head) {
   }
 }
  
+Sample::~Sample() {
+  RemoveAllInColl(cachedSampledHyps);
+}  
+  
 Hypothesis* Sample::GetHypAtSourceIndex(size_t i) {
   std::map<size_t, Hypothesis*>::iterator it = sourceIndexedHyps.find(i);
   assert(it != sourceIndexedHyps.end());
@@ -47,6 +56,9 @@ Hypothesis* Sample::GetHypAtSourceIndex(size_t i) {
 }
 
 void Sample::SetSourceIndexedHyps(Hypothesis* h) {
+  if (!h->m_prevHypo)
+    return;
+  
   size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
   size_t endPos = h->GetCurrSourceWordsRange().GetEndPos();
   
@@ -104,16 +116,37 @@ void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentC
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
   
-  const Hypothesis& prevHyp = *currHyp->m_prevHypo;
-  Hypothesis newHyp(prevHyp, option);
   
-  CopyTgtSidePtrs(currHyp, &newHyp);
-  CopySrcSidePtrs(currHyp, &newHyp);
+  const Hypothesis& prevHyp = *currHyp->m_prevHypo;
+  Hypothesis *newHyp = new Hypothesis(prevHyp, option);
+  cachedSampledHyps.push_back(newHyp);
+  
+  CopyTgtSidePtrs(currHyp, newHyp);
+  CopySrcSidePtrs(currHyp, newHyp);
 
   //Update source side map
-  SetSourceIndexedHyps(&newHyp); 
+  SetSourceIndexedHyps(newHyp); 
+  
+  //Update target word ranges
+  int tgtSizeChange = static_cast<int> (option.GetTargetPhrase().GetSize()) - static_cast<int> (currHyp->GetTargetPhrase().GetSize());
+  if (tgtSizeChange != 0) {
+    cerr << "Updating tgt word range downstream" << endl;
+    UpdateTargetWordRange(newHyp, tgtSizeChange);  
+  }
   
   UpdateFeatureValues(deltaFV);
+}  
+
+void Sample::UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange) {
+  Hypothesis* nextHyp = const_cast<Hypothesis*>(hyp->GetNextHypo());
+  if (!nextHyp)
+    return;
+  
+  for (Hypothesis* h = nextHyp; h; h = const_cast<Hypothesis*>(h->GetNextHypo())){
+    WordsRange& range = h->GetCurrTargetWordsRange();
+    range.SetStartPos(range.GetStartPos()+tgtSizeChange);
+    range.SetEndPos(range.GetEndPos()+tgtSizeChange);
+  }
 }  
 
 void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {

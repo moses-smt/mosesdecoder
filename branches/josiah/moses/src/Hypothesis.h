@@ -141,6 +141,11 @@ public:
 		return m_currTargetWordsRange;
 	}
 	
+  inline  WordsRange &GetCurrTargetWordsRange() 
+	{
+		return m_currTargetWordsRange;
+	}
+  
 	/** output length of the translation option used to create this hypothesis */
 	size_t GetCurrTargetLength() const
 	{
