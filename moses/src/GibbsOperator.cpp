@@ -35,6 +35,13 @@ static double log_sum (double log_a, double log_b)
 }
 
 /**
+  Compute the change in language model score by adding this target phrase
+  into the hypothesis at the given target position.
+  **/
+static double getLanguageModelScoreDelta(Hypothesis* hypothesis, const Phrase& targetPhrase, const WordsRange& targetSegment) {
+}
+
+/**
   * This class hierarchy represents the possible changes in the translation effected
   * by the merge-split operator.
   **/
@@ -43,9 +50,7 @@ class TDelta {
     TDelta(): m_score(-1e6) {}
   
     
-    double getScore() {
-      return m_score;
-    }
+    double getScore() { return m_score;}
     //apply to the sample
     virtual void apply(Sample& sample, TDelta* noChangeDelta) = 0;
     const ScoreComponentCollection& getScores() {return m_scores;}
@@ -93,7 +98,9 @@ class SingleTDelta : public virtual TDelta {
           size_t order = lm->GetNGramOrder();
           int start = m_targetSegment.GetStartPos() - (order-1);
           int end = m_targetSegment.GetEndPos() + (order - 1);
-          //cout << "LM for " << start << " to " << end << endl;
+         // cout << "LM for " << start << " to " << end << endl;
+          //cout << "target phrase " << m_option->GetTargetPhrase() << endl;
+          //cout << "target segment " << m_targetSegment << endl;
           //build up the context, possibly starting with before sentence indicators
           vector<const Word*> lmcontext;;
           int currPos = start;
@@ -105,7 +112,7 @@ class SingleTDelta : public virtual TDelta {
           const Hypothesis* currHypo = hypothesis;
           while (currHypo->GetCurrTargetWordsRange().GetStartPos() > currPos) {
             currHypo = currHypo->GetPrevHypo();
-            //cout << "currHypo " << currHypo << endl;
+            //cout << "currHypo (prev)" << *currHypo << endl;
             assert (currHypo);
           }
           
@@ -114,13 +121,17 @@ class SingleTDelta : public virtual TDelta {
           while (currPos <= end) {
             while (currHypo && currPos > currHypo->GetCurrTargetWordsRange().GetEndPos()) {
               currHypo = currHypo->GetNextHypo();
+              
             }
             if (currPos >= m_targetSegment.GetStartPos() && currPos <= m_targetSegment.GetEndPos()) {
               lmcontext.push_back(&(m_option->GetTargetPhrase().GetWord(currPos-m_targetSegment.GetStartPos())));
+              //cout << "In target segment: " << *(lmcontext.back()) <<  endl;
             } else if (currHypo) {
               lmcontext.push_back(&(currHypo->GetCurrWord(currPos - currHypo->GetCurrTargetWordsRange().GetStartPos())));
+              //cout << "In hypo: " << *(lmcontext.back()) <<  endl;
             } else {
               lmcontext.push_back(&(lm->GetSentenceEndArray()));
+              //cout << "In eos: " << *(lmcontext.back()) <<  endl;
               ++eoscount;
             }
             ++currPos;
@@ -274,13 +285,16 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     //find out which source and target segments this split-merge operator should consider
     WordsRange sourceSegment = hypothesis->GetCurrSourceWordsRange();
     WordsRange targetSegment = hypothesis->GetCurrTargetWordsRange();
-    
+    bool isSplit = false;
     vector<WordsRange> targetSegments; //could be 1 or 2
     
     if (sourceSegment.GetStartPos() == splitIndex) {
       //we're at the left edge of this segment, so we need to add on the
-      //segment to the right.
+      //segment to the left.
+      isSplit = true;
       const Hypothesis* prev = hypothesis->GetPrevHypo();
+      assert(prev);
+      assert(prev->GetPrevHypo());
       WordsRange prevTargetSegment = prev->GetCurrTargetWordsRange();
       if (prevTargetSegment.GetEndPos() + 1 != targetSegment.GetStartPos()) {
         //targets discontiguous
@@ -299,20 +313,22 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     } else {
       targetSegments.push_back(targetSegment);
     }
-    cout << splitIndex << " ";
-    cout << "Source: " << sourceSegment << " ";
-    if (targetSegments.size() == 2) {
-      cout << "Discontiguous targets: " << targetSegments[0] << "," << targetSegments[1];
-    } else {
-      cout << "Target: " << targetSegments[0];
+    IFVERBOSE(3) {
+      VERBOSE(3,"Split index: " << splitIndex << " " << " IsSplit? " << isSplit << " ");
+      VERBOSE(3,"Source: " << sourceSegment << " ");
+      if (targetSegments.size() == 2) {
+        VERBOSE(3,"Discontiguous targets: " << targetSegments[0] << "," << targetSegments[1]);
+      } else {
+        VERBOSE(3,"Target: " << targetSegments[0]);
+      }
+      VERBOSE(3,endl);
     }
-    cout << endl;
     
-    TDelta* noChangeDelta = NULL;
+    TDelta* noChangeDelta = NULL; //the current translation scores, needs to be subtracted off the delta before applying
     vector<TDelta*> deltas;
     if (targetSegments.size() == 1) {
       //FIXME: This is not correct, unless the source is not split already
-      noChangeDelta = new SingleTDelta(hypothesis,&(hypothesis->GetTranslationOption()),targetSegments[0]);
+      noChangeDelta = new SingleTDelta(hypothesis,&(hypothesis->GetTranslationOption()),hypothesis->GetCurrTargetWordsRange());
       //contiguous
       //case 1: no split
       const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
@@ -320,8 +336,12 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       for (TranslationOptionList::const_iterator i = options.begin(); 
            i != options.end(); ++i) {
         //cout << "Source: " << *((*i)->GetSourcePhrase()) << " Target: " << ((*i)->GetTargetPhrase()) << endl;
-        TDelta* delta = new SingleTDelta(hypothesis, *i,targetSegments[0]);
-        deltas.push_back(delta);
+        
+        if (!isSplit) {
+          //FIXME: We don't deal with merges at the moment, only look at case where there is no split in the middle
+          TDelta* delta = new SingleTDelta(hypothesis, *i,targetSegments[0]);
+          deltas.push_back(delta);
+        }
      }
       
       //case 2: split
