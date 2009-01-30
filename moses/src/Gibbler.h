@@ -36,8 +36,9 @@ class Sample {
   int GetSourceSize() { return source_size; }
   Hypothesis* GetHypAtSourceIndex(size_t );
   const Hypothesis* GetSampleHypothesis() const {
-    return source_head;
+    return target_head;
   }
+  
   const ScoreComponentCollection& GetFeatureValues() const {
     return feature_values;
   }
