@@ -142,10 +142,7 @@ int main(int argc, char* argv[])
 
 		Manager manager(*source, staticData.GetSearchAlgorithm());
 		manager.ProcessSentence();
-		Sampler s;
-		s.Run(const_cast<Hypothesis*>(manager.GetBestHypothesis()),
-                      manager.GetTranslationOptionCollection());
-
+		
 		if (staticData.GetOutputWordGraph())
 			manager.GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
 
@@ -210,9 +207,14 @@ int main(int argc, char* argv[])
 		}
 
 		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
-
-		manager.CalcDecoderStatistics();
-	}
+    
+    manager.CalcDecoderStatistics();
+	  
+    Sampler s;
+		s.Run(const_cast<Hypothesis*>(manager.GetBestHypothesis()),
+          manager.GetTranslationOptionCollection());
+    
+  }
 
 	delete ioWrapper;
 
