@@ -69,6 +69,7 @@ libmoses_a_SOURCES = \
 	TargetPhrase.cpp \
 	TargetPhraseCollection.cpp \
 	Timer.cpp \
+	TranslationDelta.cpp \
 	TranslationOption.cpp \
 	TranslationOptionCollection.cpp \
 	TranslationOptionCollectionText.cpp \

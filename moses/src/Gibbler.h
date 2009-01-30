@@ -30,7 +30,7 @@ class Sample {
   void CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
   void UpdateFeatureValues(const ScoreComponentCollection& deltaFV);
   void UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange);   
-  void UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *head);
+  void UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head);
  public:
   Sample(Hypothesis* target_head);
   ~Sample();

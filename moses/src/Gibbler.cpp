@@ -115,14 +115,15 @@ void Sample::FlipNodes(size_t x, size_t y) {
 void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
-  
-  
+  //cout << "Start pos " << optionStartPos << " hypo " << *currHyp <<  " option: " << option <<  endl;
   const Hypothesis& prevHyp = *currHyp->m_prevHypo;
   Hypothesis *newHyp = new Hypothesis(prevHyp, option);
   cachedSampledHyps.push_back(newHyp);
   
+  //cout << "Target head " << target_head << endl;
   CopyTgtSidePtrs(currHyp, newHyp);
   CopySrcSidePtrs(currHyp, newHyp);
+  //cout << "Target head " << target_head << endl;
 
   //Update source side map
   SetSourceIndexedHyps(newHyp); 
@@ -152,7 +153,9 @@ void Sample::UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange) {
 }  
 
 void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
+  //cout << "Delta: " << deltaFV << endl;
   feature_values.PlusEquals(deltaFV);
+  //cout << "New FV " << feature_values << endl;
 }  
   
 void Sample::CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
@@ -170,7 +173,7 @@ void Sample::CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   UpdateHead(currHyp, newHyp, target_head);
 }
 
-void Sample::UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *head) {
+void Sample::UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head) {
   if (head == currHyp)
     head = newHyp;
 }
@@ -192,7 +195,7 @@ void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
 
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
-  size_t iterations = 5;
+  size_t iterations = 1000;
   vector<GibbsOperator*> operators;
   vector<SampleCollector*> collectors;
   collectors.push_back(new GibblerMaxTransDecoder());
@@ -222,8 +225,10 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
 }
 
 void PrintSampleCollector::collect(Sample& sample)  {
-      cout << "Collected a sample" << endl;
-      cout << *(sample.GetSampleHypothesis()) << endl;
+      //cout << *(sample.GetSampleHypothesis()) /*->GetTargetPhraseStringRep()*/ << endl;
+      cout << "Sampled hypothesis: \"";
+      sample.GetSampleHypothesis()->ToStream(cout);
+      cout << "\"" << "  " << "Feature values: " << sample.GetFeatureValues() << endl;
     }
 
 }
