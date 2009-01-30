@@ -8,7 +8,7 @@ using namespace std;
 
 namespace Moses {
 
-Sample::Sample(Hypothesis* target_head) {
+Sample::Sample(Hypothesis* target_head) : feature_values(target_head->GetScoreBreakdown()){
   
   source_size = target_head->GetWordsBitmap().GetSize();
   
