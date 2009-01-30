@@ -50,7 +50,8 @@ class TranslationDelta {
       Compute the change in language model score by adding this target phrase
       into the hypothesis at the given target position.
       **/
-      void  addLanguageModelScore(const Hypothesis* hypothesis, const Phrase& targetPhrase);
+      void  addLanguageModelScore(const Hypothesis* hypothesis, const Phrase& targetPhrase,
+            const WordsRange& targetSegment);
     const ScoreComponentCollection& getScores() {return m_scores;}
     virtual ~TranslationDelta() {}
     
