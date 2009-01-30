@@ -62,16 +62,6 @@ namespace Moses {
   
   };
   
-  class FlipOperator : public virtual GibbsOperator {
-  public:
-    FlipOperator() : m_name("flip") {}
-    virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
-    virtual const string& name() const {return m_name;}
-    
-  private:
-    string m_name;
-    
-  };
-
+ 
 }
 

@@ -137,6 +137,8 @@ void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentC
   UpdateFeatureValues(deltaFV);
 }  
 
+  
+  
 void Sample::UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange) {
   Hypothesis* nextHyp = const_cast<Hypothesis*>(hyp->GetNextHypo());
   if (!nextHyp)
@@ -164,8 +166,15 @@ void Sample::CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   if (currHypNext) {
     currHypNext->m_prevHypo = newHyp;  
   }
+  
+  UpdateHead(currHyp, newHyp, target_head);
 }
 
+void Sample::UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *head) {
+  if (head == currHyp)
+    head = newHyp;
+}
+  
 void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   newHyp->m_sourcePrevHypo = currHyp->m_sourcePrevHypo;
   newHyp->m_sourceNextHypo = currHyp->m_sourceNextHypo;
@@ -177,6 +186,8 @@ void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   if (newHypSourceNext) {
     newHypSourceNext->m_sourcePrevHypo = newHyp; 
   }
+
+  UpdateHead(currHyp, newHyp, source_head);
 }
 
   
