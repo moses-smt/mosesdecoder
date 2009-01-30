@@ -176,6 +176,8 @@ class SingleTDelta : public virtual TDelta {
      
      //apply to the sample
     virtual void apply(Sample& sample, TDelta* noChangeDelta) {
+      //cout << "RawDelta: " << m_scores << " NoChangeDelta " << noChangeDelta->getScores() << " segment " << m_targetSegment << endl;
+      //cout << *m_option << endl;
       m_scores.MinusEquals(noChangeDelta->getScores());
       sample.ChangeTarget(*m_option,m_scores);
     };
@@ -331,7 +333,9 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       noChangeDelta = new SingleTDelta(hypothesis,&(hypothesis->GetTranslationOption()),hypothesis->GetCurrTargetWordsRange());
       //contiguous
       //case 1: no split
+      //cout << "NO Split: source phrase '" << hypothesis->GetSourcePhraseStringRep() <<  "' segment " << sourceSegment << endl;
       const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
+      //cout << "Translations options count " << options.size() << endl;
       //cout << "Options for : " << sourceSegment << " - " << options.size() << endl;
       for (TranslationOptionList::const_iterator i = options.begin(); 
            i != options.end(); ++i) {
