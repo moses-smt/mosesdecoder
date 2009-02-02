@@ -39,10 +39,8 @@ static double log_sum (double log_a, double log_b)
   * Extract the target words in the sentence into a vector.
 **/
 static void getTargetWords(const Sample& sample, vector<Word>& words) {
-  const Hypothesis* currHypo = sample.GetSampleHypothesis(); //target head
-  while (currHypo->GetPrevHypo()) {
-    currHypo = currHypo->GetPrevHypo();
-  }
+  const Hypothesis* currHypo = sample.GetTargetTail(); //target tail
+  
   //we're now at the dummy hypo at the start of the sentence
   while ((currHypo = (currHypo->GetNextHypo()))) {
     TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
@@ -185,9 +183,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     
     
     //clean up
-    for (size_t i = 0; i < deltas.size(); ++i) {
-      delete deltas[i];
-    }
+    RemoveAllInColl(deltas);
     delete noChangeDelta;
   }
 }

@@ -3,6 +3,7 @@
 #include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
 #include "GibblerMaxTransDecoder.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -195,7 +196,7 @@ void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
 
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
-  size_t iterations = 5;
+  size_t iterations = StaticData::Instance().GetNumSamplingIterations();
   vector<GibbsOperator*> operators;
   vector<SampleCollector*> collectors;
   collectors.push_back(new GibblerMaxTransDecoder());
@@ -215,12 +216,8 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
   }
   
   
-  for (size_t i = 0; i < operators.size(); ++i) {
-    delete operators[i];
-  }
-  for (size_t i = 0; i < collectors.size(); ++i) {
-    delete collectors[i];
-  }
+  RemoveAllInColl(operators);
+  RemoveAllInColl(collectors);
 
 }
 
