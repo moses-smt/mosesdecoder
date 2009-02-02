@@ -27,71 +27,61 @@ namespace Moses {
   Compute the change in language model score by adding this target phrase
   into the hypothesis at the given target position.
   **/
-void  TranslationDelta::addLanguageModelScore(const Hypothesis* hypothesis, const Phrase& targetPhrase, const WordsRange& targetSegment) {
-    const LMList& languageModels = StaticData::Instance().GetAllLM();
-    for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
+void  TranslationDelta::addLanguageModelScore(const vector<Word>& targetWords, const Phrase& targetPhrase, const WordsRange& targetSegment) {
+  const LMList& languageModels = StaticData::Instance().GetAllLM();
+  for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
     LanguageModel* lm = *i;
     size_t order = lm->GetNGramOrder();
     vector<const Word*> lmcontext(targetPhrase.GetSize() + 2*(order-1));
     
+    int start = targetSegment.GetStartPos() - (order-1);
+    
     //fill in the pre-context
-    const Hypothesis* currHypo = hypothesis;
-    size_t currHypoPos = 0;
-    for (int currPos = order-2; currPos >= 0; --currPos) {
-      if (!currHypoPos && currHypo->GetPrevHypo()) {
-        //go back if we can
-        currHypo = currHypo->GetPrevHypo();
-        currHypoPos = currHypo->GetCurrTargetLength()-1;
+    size_t contextPos = 0;
+
+    for (size_t i = 0; i < order-1; ++i) {
+      if (start+(int)i < 0) {
+        lmcontext[contextPos++] = &(lm->GetSentenceStartArray());
       } else {
-        --currHypoPos;
-      }
-      if (currHypo->GetPrevHypo()) {
-        lmcontext[currPos] = &(currHypo->GetCurrTargetPhrase().GetWord(currHypoPos));
-      } else {
-        lmcontext[currPos] = &(lm->GetSentenceStartArray());
+        lmcontext[contextPos++] = &(targetWords[i+start]);
       }
     }
     
     //fill in the target phrase
     for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-      lmcontext[i + (order-1)] = &(targetPhrase.GetWord(i));
+      lmcontext[contextPos++] = &(targetPhrase.GetWord(i));
     }
     
     //fill in the postcontext
-    currHypo = hypothesis;
-    currHypoPos = currHypo->GetCurrTargetLength() - 1;
     size_t eoscount = 0;
-    //cout  << "Target phrase: " << targetPhrase <<  endl;
-    for (size_t currPos = targetPhrase.GetSize() + (order-1); currPos < lmcontext.size(); ++currPos) {
-      //cout << "currPos " << currPos << endl;
-      ++currHypoPos;
-      if (currHypo && currHypoPos >= currHypo->GetCurrTargetLength()) {
-        //next hypo
-        currHypo = currHypo->GetNextHypo();
-        currHypoPos = 0;
-      }
-      if (currHypo) {
-        assert(currHypo->GetCurrTargetLength());
-        lmcontext[currPos] = &(currHypo->GetCurrTargetPhrase().GetWord(currHypoPos));
+    for (size_t i = 0; i < order-1; ++i) {
+      size_t targetPos = i + targetSegment.GetEndPos() + 1;
+      if (targetPos >= targetWords.size()) {
+        lmcontext[contextPos++] = &(lm->GetSentenceEndArray());
+        ++eoscount;
       } else {
-         lmcontext[currPos] = &(lm->GetSentenceEndArray());
-         ++eoscount;
+        lmcontext[contextPos++] = &(targetWords[targetPos]);
       }
     }
     
-    //score lm
-    cout << "LM context ";
-    for (size_t j = 0;  j < lmcontext.size(); ++j) {
-      if (j == order-1) {
-        cout << "[ ";
+    //debug
+    IFVERBOSE(3) {
+      VERBOSE(3,"Segment: " << targetSegment << " phrase: " << targetPhrase << endl);
+      VERBOSE(3,"LM context ");
+      for (size_t j = 0;  j < lmcontext.size(); ++j) {
+        if (j == order-1) {
+          VERBOSE(3, "[ ");
+        }
+        if (j == (targetPhrase.GetSize() + (order-1))) {
+          VERBOSE(3,"] ");
+        }
+        VERBOSE(3,*(lmcontext[j]) << " ");
+        
       }
-      if (j == (targetPhrase.GetSize() + (order-1))) {
-        cout << "] ";
-      }
-      cout << *(lmcontext[j]) << " ";
-      
+      VERBOSE(3,endl);
     }
-    cout << endl;
+    
+    //score lm
     double lmscore = 0;
     vector<const Word*> ngram;
     //remember to only include max of 1 eos marker
@@ -103,9 +93,84 @@ void  TranslationDelta::addLanguageModelScore(const Hypothesis* hypothesis, cons
       }
       lmscore += lm->GetValue(ngram);
     }
-    cout << "Language model score: " << lmscore << endl; 
+    VERBOSE(2,"Language model score: " << lmscore << endl); 
     m_scores.Assign(lm,lmscore);
   }
 }
 
+
+TranslationUpdateDelta::TranslationUpdateDelta(const vector<Word>& targetWords,  const TranslationOption* option , 
+                                               const WordsRange& targetSegment) :
+    m_option(option)  {
+  //translation scores
+  m_scores.PlusEquals(m_option->GetScoreBreakdown());
+        
+  //don't worry about reordering because they don't change
+        
+  //word penalty
+  float penalty = -((int)targetSegment.GetNumWordsCovered());
+  m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
+        
+  IFVERBOSE(2) {
+    //translation scores are already there
+    const vector<PhraseDictionary*>& translationModels = StaticData::Instance().GetPhraseDictionaries();
+    //cout << "Got " << translationModels.size() << " dictionary(s)" << endl;
+    for (vector<PhraseDictionary*>::const_iterator i = translationModels.begin(); i != translationModels.end(); ++i) {
+      vector<float> translationScores = m_scores.GetScoresForProducer(*i);
+      VERBOSE(2,"Translation scores: ");
+      
+      for (size_t j = 0; j < translationScores.size(); ++j) {
+        VERBOSE(2,translationScores[j] << " ");
+      }
+      VERBOSE(2,endl);
+              
+      
+    }
+  }
+        
+  addLanguageModelScore(targetWords, m_option->GetTargetPhrase(), targetSegment);
+        
+  //weight the scores
+  const vector<float> weights = StaticData::Instance().GetAllWeights();
+        //cout << " weights: ";
+        //copy(weights.begin(), weights.end(), ostream_iterator<float>(cout," "));
+        //cout << endl;
+  m_score = m_scores.InnerProduct(weights);
+  VERBOSE(2, "Scores " << m_scores << endl);
+  VERBOSE(2,"Total score is  " << m_score << endl);  
 }
+
+void TranslationUpdateDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+  m_scores.MinusEquals(noChangeDelta.getScores());
+  sample.ChangeTarget(*m_option,m_scores);
+}
+
+
+MergeDelta::MergeDelta(const vector<Word>& targetWords, const TranslationOption* option, const WordsRange& targetSegment) {
+  //TODO
+}
+
+void MergeDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+  //TODO
+}
+
+PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(const vector<Word>& targetWords,
+   const TranslationOption* leftOption, const TranslationOption* rightOption, 
+   const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {
+     //TODO
+}
+
+void PairedTranslationUpdateDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+  //TODO
+}
+
+SplitDelta::SplitDelta(const vector<Word>& targetWords,
+    const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange& targetSegment) {
+ //TODO
+}
+
+void SplitDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+  //TODO
+}
+
+}//namespace

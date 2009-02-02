@@ -60,199 +60,6 @@ static void getTargetWords(const Sample& sample, vector<Word>& words) {
   }
 }
 
-/**
-  Compute the change in language model score by adding this target phrase
-  into the hypothesis at the given target position.
-  **/
-static void  addLanguageModelScoreDelta(ScoreComponentCollection& scores, 
-    const vector<Word>& targetWords, const Phrase& targetPhrase, const WordsRange& targetSegment) {
-    const LMList& languageModels = StaticData::Instance().GetAllLM();
-    for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
-    LanguageModel* lm = *i;
-    size_t order = lm->GetNGramOrder();
-    vector<const Word*> lmcontext(targetPhrase.GetSize() + 2*(order-1));
-    
-    int start = targetSegment.GetStartPos() - (order-1);
-    
-    //fill in the pre-context
-    size_t contextPos = 0;
-    for (size_t i = 0; i < order-1; ++i) {
-      if (start+(int)i < 0) {
-        lmcontext[contextPos++] = &(lm->GetSentenceStartArray());
-      } else {
-        lmcontext[contextPos++] = &(targetWords[i+start]);
-      }
-    }
-    
-    //fill in the target phrase
-    for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-      lmcontext[contextPos++] = &(targetPhrase.GetWord(i));
-    }
-    
-    //fill in the postcontext
-    size_t eoscount = 0;
-    for (size_t i = 0; i < order-1; ++i) {
-      size_t targetPos = i + targetSegment.GetEndPos() + 1;
-      if (targetPos >= targetWords.size()) {
-        lmcontext[contextPos++] = &(lm->GetSentenceEndArray());
-        ++eoscount;
-      } else {
-        lmcontext[contextPos++] = &(targetWords[targetPos]);
-      }
-    }
-    
-    //debug
-    IFVERBOSE(3) {
-      VERBOSE(3,"Segment: " << targetSegment << " phrase: " << targetPhrase << endl);
-      VERBOSE(3,"LM context ");
-      for (size_t j = 0;  j < lmcontext.size(); ++j) {
-        if (j == order-1) {
-          VERBOSE(3, "[ ");
-        }
-        if (j == (targetPhrase.GetSize() + (order-1))) {
-          VERBOSE(3,"] ");
-        }
-        VERBOSE(3,*(lmcontext[j]) << " ");
-        
-      }
-      VERBOSE(3,endl);
-    }
-    
-    //score lm
-    double lmscore = 0;
-    vector<const Word*> ngram;
-    //remember to only include max of 1 eos marker
-    size_t maxend = min(lmcontext.size(), lmcontext.size() - (eoscount-1));
-    for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
-      ngram.clear();
-      for (size_t j = ngramstart; j < ngramstart+order && j < maxend; ++j) {
-        ngram.push_back(lmcontext[j]);
-      }
-      lmscore += lm->GetValue(ngram);
-    }
-    VERBOSE(2,"Language model score: " << lmscore << endl); 
-    scores.Assign(lm,lmscore);
-  }
-}
-
-
-
-
-/**
-  * This class hierarchy represents the possible changes in the translation effected
-  * by the merge-split operator.
-  **/
-class TDelta {
-  public:
-    TDelta(): m_score(-1e6) {}
-  
-    
-    double getScore() { return m_score;}
-    //apply to the sample
-    virtual void apply(Sample& sample, TDelta* noChangeDelta) = 0;
-    const ScoreComponentCollection& getScores() {return m_scores;}
-    virtual ~TDelta() {}
-  protected:
-    ScoreComponentCollection m_scores;
-    double m_score;
-    
-};
- 
-/**
-  * A single phrase on source and target side.
-  **/
-class SingleTDelta : public virtual TDelta {
-  public:
-     SingleTDelta (const vector<Word>& targetWords,  const TranslationOption* option , const WordsRange& targetSegment) :
-        m_option(option), m_targetSegment(targetSegment) {
-        m_scores.PlusEquals(m_option->GetScoreBreakdown());
-        
-        //don't worry about reordering because they don't change
-        
-        //word penalty
-        float penalty = -((int)m_targetSegment.GetNumWordsCovered());
-        m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
-        
-        
-        //translation scores are already there
-        const vector<PhraseDictionary*>& translationModels = StaticData::Instance().GetPhraseDictionaries();
-        //cout << "Got " << translationModels.size() << " dictionary(s)" << endl;
-        for (vector<PhraseDictionary*>::const_iterator i = translationModels.begin(); i != translationModels.end(); ++i) {
-          vector<float> translationScores = m_scores.GetScoresForProducer(*i);
-          VERBOSE(2,"Translation scores: ");
-          IFVERBOSE(2) {
-            for (size_t j = 0; j < translationScores.size(); ++j) {
-              VERBOSE(2,translationScores[j] << " ");
-            }
-            VERBOSE(2,endl);
-            
-          }
-        }
-        
-        addLanguageModelScoreDelta(m_scores, targetWords, m_option->GetTargetPhrase(), m_targetSegment);
-        
-        //weight the scores
-        const vector<float> weights = StaticData::Instance().GetAllWeights();
-        //cout << " weights: ";
-        //copy(weights.begin(), weights.end(), ostream_iterator<float>(cout," "));
-        //cout << endl;
-        m_score = m_scores.InnerProduct(weights);
-        VERBOSE(2, "Scores " << m_scores << endl);
-        VERBOSE(2,"Total score is  " << m_score << endl);
-        
-     }
-     
-     //apply to the sample
-    virtual void apply(Sample& sample, TDelta* noChangeDelta) {
-      //cout << "RawDelta: " << m_scores << " NoChangeDelta " << noChangeDelta->getScores() << " segment " << m_targetSegment << endl;
-      //cout << *m_option << endl;
-      m_scores.MinusEquals(noChangeDelta->getScores());
-      sample.ChangeTarget(*m_option,m_scores);
-    };
-  private:
-    const TranslationOption* m_option;
-    WordsRange m_targetSegment;
-    
-};
-
-/**
-  * A pair of source phrase mapping to contigous pair on target side.
-  **/
-class ContigTDelta: public virtual TDelta {
-  public:
-    ContigTDelta(const TranslationOption* option1, const TranslationOption* option2,
-      const WordsRange& targetSegment) :
-      m_option1(option1), m_option2(option2), m_targetSegment(targetSegment) {}
-      virtual void apply(Sample& sample, TDelta* noChangeDelta) {
-      //TODO
-      };
-  private:
-    const TranslationOption* m_option1;
-    const TranslationOption* m_option2;
-    WordsRange m_targetSegment;
-};
-
-/**
-  * A pair of source phrases mapping to discontiguous pair on target side.
-**/
-class DiscontigTDelta: public virtual TDelta {
-  public:
-    DiscontigTDelta(const TranslationOption* option1, const TranslationOption* option2,
-      const WordsRange& targetSegment1, const WordsRange& targetSegment2 ) :
-      m_option1(option1), m_option2(option2), m_targetSegment1(targetSegment1), m_targetSegment2(targetSegment2) {}
-      virtual void apply(Sample& sample, TDelta* noChangeDelta) {
-      //TODO
-      };
-  private:
-    const TranslationOption* m_option1;
-    const TranslationOption* m_option2;
-    WordsRange m_targetSegment1;
-    WordsRange m_targetSegment2;
-};
-
-
-
-
 
 size_t GibbsOperator::getSample(const vector<double>& scores) {
   double sum = scores[0];
@@ -277,161 +84,111 @@ size_t GibbsOperator::getSample(const vector<double>& scores) {
 
 void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionCollection& toc) {
   VERBOSE(2, "Running an iteration of the merge split operator" << endl);
-  //get the size of the sentence
-  //for each of the split points; do
-  //  if the point is a segment split:
-  //    Get the two segments on either side
-  //    if these two segments map to discontiguous target side segments, then no sample
-  //      at this split point
-  //    Otherwise, get the two target segments mapped from the source segment
-  //. if the split point is not a segment split:
-  //    Get the target segment corresponding to this source segment
-  //  Given the source, and its related targets, generate all possible
-  //  translation options, and their scores, then take a sample, and update
-  //  the hypothesis.
-  //  To work out the score, we have a sequence of source words, which can either be split
-  //  at a particular point 
-  //  or combined. These map to some possible sequence of target words, same number
-  //  of segments as in source, possibly swapped, and translated arbitrarily?
- 
-  
 
   size_t sourceSize = sample.GetSourceSize();
-  vector<Word> targetWords; //need to calc lm scores
-  getTargetWords(sample,targetWords);
   for (size_t splitIndex = 1; splitIndex < sourceSize; ++splitIndex) {
+    vector<Word> targetWords; //needed to calc lm scores
+    getTargetWords(sample,targetWords);
     //NB splitIndex n refers to the position between word n-1 and word n. Words are zero indexed
     VERBOSE(3,"Sampling at source index " << splitIndex << endl);
     
     Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitIndex);
-    assert(hypothesis);
+    //the delta corresponding to the current translation scores, needs to be subtracted off the delta before applying
+    TranslationDelta* noChangeDelta = NULL; 
+    vector<TranslationDelta*> deltas;
     
     //find out which source and target segments this split-merge operator should consider
-    WordsRange sourceSegment = hypothesis->GetCurrSourceWordsRange();
-    WordsRange targetSegment = hypothesis->GetCurrTargetWordsRange();
-    bool isSplit = false;
-    vector<WordsRange> targetSegments; //could be 1 or 2
-    
-    if (sourceSegment.GetStartPos() == splitIndex) {
-      //we're at the left edge of this segment, so we need to add on the
-      //segment to the left.
-      isSplit = true;
+    //if we're at the left edge of a segment, then we're on a split
+    if (hypothesis->GetCurrSourceWordsRange().GetStartPos() == splitIndex) {
+      VERBOSE(3, "Existing split" << endl);
+      WordsRange rightSourceSegment = hypothesis->GetCurrSourceWordsRange();
+      WordsRange rightTargetSegment = hypothesis->GetCurrTargetWordsRange();
       const Hypothesis* prev = hypothesis->GetPrevHypo();
       assert(prev);
-      assert(prev->GetPrevHypo());
-      WordsRange prevTargetSegment = prev->GetCurrTargetWordsRange();
-      if (prevTargetSegment.GetEndPos() + 1 != targetSegment.GetStartPos()) {
-        //targets discontiguous
-        //NOTE: if the target segments are contiguous but in reverse order to 
-        //source segments, then they count as discontiguous
-        targetSegments.push_back(prevTargetSegment);
-        targetSegments.push_back(targetSegment);
-      } else {
-        //targets contiguous, create one big segment
-        targetSegment = WordsRange(prevTargetSegment.GetStartPos(),targetSegment.GetEndPos());
-        targetSegments.push_back(targetSegment);
-      } 
-     
-      //source segment should be prev and current combined
-      sourceSegment = WordsRange(prev->GetCurrSourceWordsRange().GetStartPos(),sourceSegment.GetEndPos());
-    } else {
-      targetSegments.push_back(targetSegment);
-    }
-    IFVERBOSE(3) {
-      VERBOSE(3,"Split index: " << splitIndex << " " << " IsSplit? " << isSplit << " ");
-      VERBOSE(3,"Source: " << sourceSegment << " ");
-      if (targetSegments.size() == 2) {
-        VERBOSE(3,"Discontiguous targets: " << targetSegments[0] << "," << targetSegments[1]);
-      } else {
-        VERBOSE(3,"Target: " << targetSegments[0]);
-      }
-      VERBOSE(3,endl);
-    }
-    
-    TDelta* noChangeDelta = NULL; //the current translation scores, needs to be subtracted off the delta before applying
-    vector<TDelta*> deltas;
-    if (targetSegments.size() == 1) {
-      //FIXME: This is not correct, unless the source is not split already
-      noChangeDelta = new SingleTDelta(targetWords,&(hypothesis->GetTranslationOption()),hypothesis->GetCurrTargetWordsRange());
-      //contiguous
-      //case 1: no split
-      //cout << "NO Split: source phrase '" << hypothesis->GetSourcePhraseStringRep() <<  "' segment " << sourceSegment << endl;
-      const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
-      //cout << "Translations options count " << options.size() << endl;
-      //cout << "Options for : " << sourceSegment << " - " << options.size() << endl;
-      for (TranslationOptionList::const_iterator i = options.begin(); 
-           i != options.end(); ++i) {
-        //cout << "Source: " << *((*i)->GetSourcePhrase()) << " Target: " << ((*i)->GetTargetPhrase()) << endl;
-        
-        if (!isSplit) {
-          //FIXME: We don't deal with merges at the moment, only look at case where there is no split in the middle
-          TDelta* delta = new SingleTDelta(targetWords, *i,targetSegments[0]);
+      WordsRange leftSourceSegment = prev->GetCurrSourceWordsRange();
+      WordsRange leftTargetSegment = prev->GetCurrTargetWordsRange();
+      noChangeDelta = new   PairedTranslationUpdateDelta(targetWords,&(prev->GetTranslationOption())
+          ,&(hypothesis->GetTranslationOption()),leftTargetSegment,rightTargetSegment);
+      if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos()) {
+        //contiguous on target side.
+        //Add MergeDeltas
+        WordsRange sourceSegment(leftSourceSegment.GetStartPos(), rightSourceSegment.GetEndPos());
+        WordsRange targetSegment(leftTargetSegment.GetStartPos(), rightTargetSegment.GetEndPos());
+        VERBOSE(3, "Creating merge deltas for merging source segments  " << leftSourceSegment << " with " <<
+              rightSourceSegment << " and target segments " << leftTargetSegment << " with " << rightTargetSegment  << endl);
+        const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
+        for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
+          TranslationDelta* delta = new MergeDelta(targetWords,*i,targetSegment);
           deltas.push_back(delta);
         }
-     }
-      
-      //case 2: split
-      const TranslationOptionList&  options1 = 
-        toc.GetTranslationOptionList(WordsRange(sourceSegment.GetStartPos(),splitIndex-1));
-      const TranslationOptionList& options2 = 
-        toc.GetTranslationOptionList(WordsRange(splitIndex,sourceSegment.GetEndPos()));
-      for (TranslationOptionList::const_iterator i1 = options1.begin(); 
-            i1 != options1.end(); ++i1) {
-         for (TranslationOptionList::const_iterator i2 = options2.begin(); 
-            i2 != options2.end(); ++i2) {
-              TDelta* delta = new ContigTDelta(*i1,*i2,targetSegments[0]);
-              deltas.push_back(delta);
-              //currently no reordering in this operator
-              //delta = new ContigTDelta(*i2,*i1,targetSegments[0]); //reordered
-              //deltas.push_back(delta);
-              //cout << **i << endl;
-              //cout << "Source: " << *((*i)->GetSourcePhrase()) << " Target: " << ((*i)->GetTargetPhrase()) << endl;
-              //cout << "Source: " << *((*i1)->GetSourcePhrase()) << "," << *((*i2)->GetSourcePhrase())<< 
-              //  " Target: " << ((*i1)->GetTargetPhrase()) <<  "," << ((*i2)->GetTargetPhrase()) << endl;
+      }
+      //Add PairedTranslationUpdateDeltas
+      VERBOSE(3, "Creating paired updates for source segments " << leftSourceSegment << " and " << rightSourceSegment <<
+          " and target segments " << leftTargetSegment << " and " << rightTargetSegment << endl);
+      const TranslationOptionList&  leftOptions = toc.GetTranslationOptionList(leftSourceSegment);
+      const TranslationOptionList&  rightOptions = toc.GetTranslationOptionList(rightSourceSegment);
+      for (TranslationOptionList::const_iterator ri = rightOptions.begin(); ri != rightOptions.end(); ++ri) {
+        for (TranslationOptionList::const_iterator li = leftOptions.begin(); li != leftOptions.end(); ++li) {
+          TranslationDelta* delta = new PairedTranslationUpdateDelta(targetWords, *li, *ri, leftTargetSegment, rightTargetSegment);
+          deltas.push_back(delta);
         }
       }
     } else {
-      //discontiguous - FIXME This is almost the same as the split case above - combine
-      //FIXME: This does should take into account both target and source segments
-      noChangeDelta =  new SingleTDelta(targetWords,&(hypothesis->GetTranslationOption()),targetSegments[0]);
-      const TranslationOptionList&  options1 = 
-        toc.GetTranslationOptionList(WordsRange(sourceSegment.GetStartPos(),splitIndex-1));
-      const TranslationOptionList& options2 = 
-        toc.GetTranslationOptionList(WordsRange(splitIndex,sourceSegment.GetEndPos()));
-      for (TranslationOptionList::const_iterator i1 = options1.begin(); 
-            i1 != options1.end(); ++i1) {
-         for (TranslationOptionList::const_iterator i2 = options2.begin(); 
-            i2 != options2.end(); ++i2) {
-              TDelta* delta = new DiscontigTDelta(*i1,*i2,targetSegments[0],targetSegments[1]);
-              deltas.push_back(delta);
-              //delta = new DiscontigTDelta(*i2,*i1,targetSegments[0],targetSegments[1]); //reordered
-              //deltas.push_back(delta);
-         }
+      VERBOSE(3, "No existing split" << endl);
+      WordsRange sourceSegment = hypothesis->GetCurrSourceWordsRange();
+      WordsRange targetSegment = hypothesis->GetCurrTargetWordsRange();
+      noChangeDelta = new TranslationUpdateDelta(targetWords,&(hypothesis->GetTranslationOption()),targetSegment);
+      //Add TranslationUpdateDeltas
+      const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
+      VERBOSE(3, "Creating simple deltas for source segment " << sourceSegment << " and target segment " << targetSegment  << endl);
+      for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
+        TranslationDelta* delta = new TranslationUpdateDelta(targetWords,*i,targetSegment);
+        deltas.push_back(delta);
       }
+
+      
+      //Add SplitDeltas
+      VERBOSE(3, "Adding deltas to split " << sourceSegment << " at " << splitIndex << endl);
+      WordsRange leftSourceSegment(sourceSegment.GetStartPos(),splitIndex-1);
+      WordsRange rightSourceSegment(splitIndex,sourceSegment.GetEndPos());
+      const TranslationOptionList&  leftOptions = toc.GetTranslationOptionList(leftSourceSegment);
+      const TranslationOptionList&  rightOptions = toc.GetTranslationOptionList(rightSourceSegment);
+      for (TranslationOptionList::const_iterator ri = rightOptions.begin(); ri != rightOptions.end(); ++ri) {
+        for (TranslationOptionList::const_iterator li = leftOptions.begin(); li != leftOptions.end(); ++li) {
+          TranslationDelta* delta = new SplitDelta(targetWords, *li, *ri, targetSegment);
+          deltas.push_back(delta);
+        }
+      }
+      
     }
     
-    //cout << "Created " << deltas.size() << " delta(s)" << endl;
+    
+    
+    VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
     
     //get the scores
     vector<double> scores;
-    for (vector<TDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
+    for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
       scores.push_back((**i).getScore());
     }
     
     //randomly pick one of the deltas
-    size_t chosen = getSample(scores);
-    //copy(scores.begin(),scores.end(),ostream_iterator<double>(cout,","));
-    //cout << endl;
-    //cout << "**The chosen sample is " << chosen << endl;
-    
-    //apply it to the sample
-    deltas[chosen]->apply(sample,noChangeDelta);
+    if (scores.size() > 0) {
+      size_t chosen = getSample(scores);
+      //copy(scores.begin(),scores.end(),ostream_iterator<double>(cout,","));
+      //cout << endl;
+      //cout << "**The chosen sample is " << chosen << endl;
+      
+      //apply it to the sample
+      deltas[chosen]->apply(sample,*noChangeDelta);
+    }
     
     
     //clean up
     for (size_t i = 0; i < deltas.size(); ++i) {
       delete deltas[i];
     }
+    delete noChangeDelta;
   }
 }
 

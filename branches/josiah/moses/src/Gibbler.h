@@ -64,11 +64,13 @@ class Sampler {
 class SampleCollector {
   public:
     virtual void collect(Sample& sample) = 0;
+    virtual ~SampleCollector() {}
 };
 
 class PrintSampleCollector  : public virtual SampleCollector {
   public:
     virtual void collect(Sample& sample);
+    virtual ~PrintSampleCollector() {}
 };
 
 }
