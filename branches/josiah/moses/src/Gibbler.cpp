@@ -44,6 +44,12 @@ Sample::Sample(Hypothesis* target_head) : feature_values(target_head->GetScoreBr
     this->source_head = h;
     prev = h;
   }
+  
+  this->source_head->m_sourceNextHypo = NULL;
+  this->target_head->m_nextHypo = NULL;
+  
+  this->source_tail->m_sourcePrevHypo = NULL;
+  this->target_tail->m_prevHypo = NULL;
 }
  
 Sample::~Sample() {
