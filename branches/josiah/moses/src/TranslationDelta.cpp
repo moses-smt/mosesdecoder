@@ -111,33 +111,15 @@ TranslationUpdateDelta::TranslationUpdateDelta(const vector<Word>& targetWords, 
   float penalty = -((int)targetSegment.GetNumWordsCovered());
   m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
         
-  IFVERBOSE(2) {
-    //translation scores are already there
-    const vector<PhraseDictionary*>& translationModels = StaticData::Instance().GetPhraseDictionaries();
-    //cout << "Got " << translationModels.size() << " dictionary(s)" << endl;
-    for (vector<PhraseDictionary*>::const_iterator i = translationModels.begin(); i != translationModels.end(); ++i) {
-      vector<float> translationScores = m_scores.GetScoresForProducer(*i);
-      VERBOSE(2,"Translation scores: ");
-      
-      for (size_t j = 0; j < translationScores.size(); ++j) {
-        VERBOSE(2,translationScores[j] << " ");
-      }
-      VERBOSE(2,endl);
-              
-      
-    }
-  }
         
   addLanguageModelScore(targetWords, m_option->GetTargetPhrase(), targetSegment);
         
   //weight the scores
   const vector<float> & weights = StaticData::Instance().GetAllWeights();
-        //cout << " weights: ";
-        //copy(weights.begin(), weights.end(), ostream_iterator<float>(cout," "));
-        //cout << endl;
   m_score = m_scores.InnerProduct(weights);
-  VERBOSE(2, "Scores " << m_scores << endl);
-  VERBOSE(2,"Total score is  " << m_score << endl);  
+  
+  VERBOSE(2, "TUD: Scores " << m_scores << endl);
+  VERBOSE(2,"TUD: Total score is  " << m_score << endl);  
 }
 
 void TranslationUpdateDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
@@ -156,12 +138,43 @@ void MergeDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
 
 PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(const vector<Word>& targetWords,
    const TranslationOption* leftOption, const TranslationOption* rightOption, 
-   const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {
-     //TODO
+   const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) :
+    m_leftOption(leftOption), m_rightOption(rightOption){
+     //translation scores
+     m_scores.PlusEquals(m_leftOption->GetScoreBreakdown());
+     m_scores.PlusEquals(m_rightOption->GetScoreBreakdown());
+        
+     //don't worry about reordering because they don't change
+        
+     //word penalty
+     float penalty = -((int)leftTargetSegment.GetNumWordsCovered()) - ((int)rightTargetSegment.GetNumWordsCovered());
+     m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
+     
+     //lm scores - treat as one large target segment, since the lmcontext may overlap, depending on the lm order
+     WordsRange targetSegment(leftTargetSegment.GetStartPos(), rightTargetSegment.GetEndPos());
+     Phrase targetPhrase(leftOption->GetTargetPhrase());
+     for (size_t i = leftTargetSegment.GetEndPos()+1; i < rightTargetSegment.GetStartPos()-1; ++i) {
+       targetPhrase.AddWord(targetWords[i]);
+     }
+     const Phrase& rightTargetPhrase = rightOption->GetTargetPhrase();
+     for (size_t i = 0; i < rightTargetPhrase.GetSize(); ++i) {
+       targetPhrase.AddWord(rightTargetPhrase.GetWord(i));
+     }
+     addLanguageModelScore(targetWords, targetPhrase, targetSegment);
+        
+    //weight the scores
+     const vector<float> & weights = StaticData::Instance().GetAllWeights();
+     m_score = m_scores.InnerProduct(weights);
+     
+     VERBOSE(2, "PTUD: Scores " << m_scores << endl);
+     VERBOSE(2,"PTUD: Total score is  " << m_score << endl);  
 }
 
 void PairedTranslationUpdateDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
-  //TODO
+  m_scores.MinusEquals(noChangeDelta.getScores());
+  sample.ChangeTarget(*m_leftOption,m_scores);
+  ScoreComponentCollection emptyScores;
+  sample.ChangeTarget(*m_rightOption,emptyScores);
 }
 
 SplitDelta::SplitDelta(const vector<Word>& targetWords,

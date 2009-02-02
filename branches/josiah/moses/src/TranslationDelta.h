@@ -38,7 +38,9 @@ class Sample;
   **/
 class TranslationDelta {
   public:
-    TranslationDelta(): m_score(-1e6) {}
+    TranslationDelta(): m_score(-1e6) {
+      
+    }
   
   /**
     Get the absolute score of this delta
@@ -105,8 +107,8 @@ class PairedTranslationUpdateDelta : public virtual TranslationDelta {
     virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
     
   private:
-    const TranslationOption* leftOption;
-    const TranslationOption* rightOption;
+    const TranslationOption* m_leftOption;
+    const TranslationOption* m_rightOption;
 };
 
 /**
@@ -119,8 +121,8 @@ class SplitDelta : public virtual TranslationDelta {
     virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
     
   private:
-    const TranslationOption* leftOption;
-    const TranslationOption* rightOption;
+    const TranslationOption* m_leftOption;
+    const TranslationOption* m_rightOption;
     
 };
 
@@ -136,8 +138,8 @@ class FlipDelta : public virtual TranslationDelta {
     virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
     
   private:
-    const TranslationOption* leftOption;
-    const TranslationOption* rightOption;
+    const TranslationOption* m_leftOption;
+    const TranslationOption* m_rightOption;
 };
 
 
