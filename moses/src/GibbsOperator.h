@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
+#include <iomanip>
 
 #include "DummyScoreProducers.h"
 #include "Gibbler.h"
@@ -40,7 +41,6 @@ namespace Moses {
     public:
         /**
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
-          * TODO: Probably need some kind of collector object
           **/
         virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc) = 0;
         virtual const string& name() const = 0;

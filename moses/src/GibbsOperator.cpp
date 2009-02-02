@@ -71,10 +71,13 @@ size_t GibbsOperator::getSample(const vector<double>& scores) {
   random = log(random);
   
   //now figure out which sample
-  sum = scores[0];
   size_t position = 0;
   for (; position < scores.size() && sum < random; ++position) {
-    sum = log_sum(sum,scores[position]);
+    if (position == 0) {
+      sum = scores[0];
+    } else {
+      sum = log_sum(sum,scores[position]);
+    }
   }
    //cout << "random: " << exp(random) <<  " sample: " << position << endl;
   return position;
