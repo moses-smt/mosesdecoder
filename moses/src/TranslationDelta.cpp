@@ -131,7 +131,7 @@ TranslationUpdateDelta::TranslationUpdateDelta(const vector<Word>& targetWords, 
   addLanguageModelScore(targetWords, m_option->GetTargetPhrase(), targetSegment);
         
   //weight the scores
-  const vector<float> weights = StaticData::Instance().GetAllWeights();
+  const vector<float> & weights = StaticData::Instance().GetAllWeights();
         //cout << " weights: ";
         //copy(weights.begin(), weights.end(), ostream_iterator<float>(cout," "));
         //cout << endl;
