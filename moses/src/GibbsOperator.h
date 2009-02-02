@@ -26,7 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DummyScoreProducers.h"
 #include "Gibbler.h"
 #include "Hypothesis.h"
+#include "TranslationDelta.h"
 #include "TranslationOptionCollection.h"
+#include "WordsRange.h"
 
 namespace Moses {
 
@@ -42,6 +44,7 @@ namespace Moses {
           **/
         virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc) = 0;
         virtual const string& name() const = 0;
+        virtual ~GibbsOperator() {}
         
      protected:
         /**
@@ -56,6 +59,7 @@ namespace Moses {
         MergeSplitOperator() : m_name("merge-split") {}
         virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
         virtual const string& name() const {return m_name;}
+        virtual ~MergeSplitOperator() {}
     
     private:
         string m_name;

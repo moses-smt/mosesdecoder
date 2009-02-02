@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses {
 
+class Sample;
+
 /**
   * This class hierarchy represents the possible changes in the translation effected
   * by the gibbs operators.
@@ -38,21 +40,21 @@ class TranslationDelta {
   public:
     TranslationDelta(): m_score(-1e6) {}
   
-    /**
-      Get the absolute score of this delta
-      **/
-    double getScore() { return m_score;}
-    /** 
-      * Apply to the sample
-      **/
-    virtual void apply(Sample& sample) = 0;
-    /**
-      Compute the change in language model score by adding this target phrase
-      into the hypothesis at the given target position.
-      **/
-      void  addLanguageModelScore(const Hypothesis* hypothesis, const Phrase& targetPhrase,
-            const WordsRange& targetSegment);
-    const ScoreComponentCollection& getScores() {return m_scores;}
+  /**
+    Get the absolute score of this delta
+    **/
+  double getScore() { return m_score;}
+  /** 
+    * Apply to the sample
+    **/
+  virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta) = 0;
+  /**
+    Compute the change in language model score by adding this target phrase
+    into the hypothesis at the given target position.
+    **/
+    void  addLanguageModelScore(const vector<Word>& targetWords, const Phrase& targetPhrase,
+          const WordsRange& targetSegment);
+    const ScoreComponentCollection& getScores() const {return m_scores;}
     virtual ~TranslationDelta() {}
     
   protected:
@@ -66,24 +68,78 @@ class TranslationDelta {
   **/
 class TranslationUpdateDelta : public virtual TranslationDelta {
   public:
-     TranslationUpdateDelta(const Hypothesis* hypothesis,  const TranslationOption* option , const WordsRange& targetSegment);
-     virtual void apply(Sample& sample);
+     TranslationUpdateDelta(const vector<Word>& targetWords,  const TranslationOption* option , const WordsRange& targetSegment);
+     virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
      
   private:
     const TranslationOption* m_option;
-    WordsRange m_targetSegment;
 };
 
-//TODO:
+/**
+  * An update that merges two source phrases and their corresponding target phrases.
+ **/
+class MergeDelta : public virtual TranslationDelta {
+  public: 
+    /**
+     * targetWords - the words in the current target sentence
+     * option - the source/target phrase to go into the merged segment
+     * targetSegment - the location of the target segment
+     **/
+    MergeDelta(const vector<Word>& targetWords, const TranslationOption* option, const WordsRange& targetSegment);
+    virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
+  
+  private:
+    const TranslationOption* m_option;
+  
+};
 
-// MergeDelta - merges two contiguous source phrases, and corresponding contiguous target phrases
+/**
+ * Like TranslationUpdateDelta, except that it updates a pair of source/target phrase pairs.
+**/
+class PairedTranslationUpdateDelta : public virtual TranslationDelta {
+  public: 
+    PairedTranslationUpdateDelta(const vector<Word>& targetWords,
+        const TranslationOption* leftOption, const TranslationOption* rightOption, 
+        const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
+    
+    virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
+    
+  private:
+    const TranslationOption* leftOption;
+    const TranslationOption* rightOption;
+};
 
-// PairedTranslationUpdatedDelta - like TranslationUpdateDelta, except updates a pair
+/**
+ * Updates the sample by splitting a source phrase and its corresponding target phrase, choosing new options.
+ **/
+class SplitDelta : public virtual TranslationDelta {
+  public:
+    SplitDelta(const vector<Word>& targetWords,
+               const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange& targetSegment);
+    virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
+    
+  private:
+    const TranslationOption* leftOption;
+    const TranslationOption* rightOption;
+    
+};
 
-// SplitDelta - Splits a source segment, and also target segment
+/**
+  * Switch the translations on the target side.
+ **/
+class FlipDelta : public virtual TranslationDelta {
+  public: 
+    FlipDelta(const vector<Word>& targetWords,
+                                 const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                 const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
+    
+    virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
+    
+  private:
+    const TranslationOption* leftOption;
+    const TranslationOption* rightOption;
+};
 
-// FlipDelta - Pair of source segments translates to pair of target segments. This delta just switches
-//  the order on the target side
 
 } //namespace
 
