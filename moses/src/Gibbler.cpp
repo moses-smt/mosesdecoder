@@ -147,23 +147,170 @@ void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentC
 
   
   
-void Sample::UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange) {
-  Hypothesis* nextHyp = const_cast<Hypothesis*>(hyp->GetNextHypo());
-  if (!nextHyp)
-    return;
   
-  for (Hypothesis* h = nextHyp; h; h = const_cast<Hypothesis*>(h->GetNextHypo())){
-    WordsRange& range = h->GetCurrTargetWordsRange();
-    range.SetStartPos(range.GetStartPos()+tgtSizeChange);
-    range.SetEndPos(range.GetEndPos()+tgtSizeChange);
+  
+void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
+  size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
+  size_t optionEndPos = option.GetSourceWordsRange().GetEndPos();
+  
+  Hypothesis *currStartHyp = GetHypAtSourceIndex(optionStartPos);
+  Hypothesis *currEndHyp = GetHypAtSourceIndex(optionEndPos);
+  
+  assert(currStartHyp != currEndHyp);
+  
+  //cout << "Start pos " << optionStartPos << " hypo " << *currHyp <<  " option: " << option <<  endl;
+  Hypothesis* prevHyp = NULL;
+  Hypothesis* newHyp = NULL;
+  
+  if (currStartHyp->GetCurrTargetWordsRange() < currEndHyp->GetCurrTargetWordsRange()) {
+    prevHyp = const_cast<Hypothesis*> (currStartHyp->m_prevHypo);
+    newHyp = new Hypothesis(*prevHyp, option);
+    
+    //Set the target ptrs
+    newHyp->m_prevHypo = prevHyp;
+    newHyp->m_nextHypo = currEndHyp->m_nextHypo;
+    if (prevHyp) {
+      prevHyp->m_nextHypo = newHyp;
+    }
+    Hypothesis* currHypNext = newHyp->m_nextHypo;
+    if (currHypNext) {
+      currHypNext->m_prevHypo = newHyp;  
+    }
+    UpdateHead(currStartHyp, newHyp, target_head);
+  } 
+  else {
+    prevHyp = const_cast<Hypothesis*> (currEndHyp->m_prevHypo);
+    newHyp = new Hypothesis(*prevHyp, option);
+    
+    //Set the target ptrs
+    newHyp->m_prevHypo = prevHyp;
+    newHyp->m_nextHypo = currStartHyp->m_nextHypo;
+    if (prevHyp) {
+      prevHyp->m_nextHypo = newHyp;
+    }
+    Hypothesis* currHypNext = newHyp->m_nextHypo;
+    if (currHypNext) {
+      currHypNext->m_prevHypo = newHyp;  
+    }
+    UpdateHead(currEndHyp, newHyp, target_head);
   }
+  
+  //Set the source ptrs
+  newHyp->m_sourcePrevHypo = currStartHyp->m_sourcePrevHypo;
+  newHyp->m_sourceNextHypo = currEndHyp->m_sourceNextHypo;
+  
+  Hypothesis* newHypSourcePrev = newHyp->m_sourcePrevHypo;
+  if (newHypSourcePrev) {
+    newHypSourcePrev->m_sourceNextHypo = newHyp;
+  }
+  
+  Hypothesis* newHypSourceNext = newHyp->m_sourceNextHypo;
+  if (newHypSourceNext) {
+    newHypSourceNext->m_sourcePrevHypo = newHyp; 
+  }
+  
+  UpdateHead(currEndHyp, newHyp, source_head);
+                    
+  //Update source side map
+  SetSourceIndexedHyps(newHyp); 
+  
+  //Update target word ranges
+  int newTgtSize = option.GetTargetPhrase().GetSize();
+  int prevTgtSize = currStartHyp->GetTargetPhrase().GetSize() + currEndHyp->GetTargetPhrase().GetSize();
+  int tgtSizeChange = newTgtSize - prevTgtSize;
+  if (tgtSizeChange != 0) {
+    cerr << "Updating tgt word range downstream" << endl;
+    UpdateTargetWordRange(newHyp, tgtSizeChange);  
+  }
+    
+  UpdateFeatureValues(deltaFV);
+  cachedSampledHyps.push_back(newHyp);                  
+}
+  
+  
+void Sample::SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const ScoreComponentCollection& deltaFV) {
+    
+  size_t optionStartPos = leftTgtOption.GetSourceWordsRange().GetStartPos();
+  Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
+  
+  //cout << "Start pos " << optionStartPos << " hypo " << *currHyp <<  " option: " << option <<  endl;
+  const Hypothesis& prevHyp = *currHyp->m_prevHypo;
+  Hypothesis *newLeftHyp = new Hypothesis(prevHyp, leftTgtOption);
+  cachedSampledHyps.push_back(newLeftHyp);
+  
+  Hypothesis *newRightHyp = new Hypothesis(*newLeftHyp, rightTgtOption);
+  cachedSampledHyps.push_back(newRightHyp);
+  
+  //cout << "Target head " << target_head << endl;
+  
+  //Update tgt ptrs
+  newLeftHyp->m_prevHypo = currHyp->m_prevHypo;
+  Hypothesis* currHypPrev = const_cast<Hypothesis*>(currHyp->m_prevHypo);
+  if (currHypPrev) {
+    currHypPrev->m_nextHypo = newLeftHyp;
+  }
+  newLeftHyp->m_nextHypo = newRightHyp;
+  newRightHyp->m_nextHypo = currHyp->m_nextHypo;
+  if (currHyp->m_nextHypo) {
+    currHyp->m_nextHypo->m_prevHypo = newRightHyp;  
+  }
+  
+  UpdateHead(currHyp, newRightHyp, target_head);
+  
+  
+  //Update src ptrs
+  if (newLeftHyp->GetCurrSourceWordsRange() < newRightHyp->GetCurrSourceWordsRange()) { //monotone
+    newLeftHyp->m_sourcePrevHypo = currHyp->m_sourcePrevHypo;
+    if (currHyp->m_sourcePrevHypo) {
+      currHyp->m_sourcePrevHypo->m_sourceNextHypo = newLeftHyp;
+    }
+    newLeftHyp->m_sourceNextHypo = newRightHyp;
+    
+    newRightHyp->m_sourcePrevHypo = newLeftHyp;
+    newRightHyp->m_sourceNextHypo = currHyp->m_sourceNextHypo;
+    if (currHyp->m_sourceNextHypo) {
+      currHyp->m_sourceNextHypo->m_sourcePrevHypo = newRightHyp;
+    }
+    
+    UpdateHead(currHyp, newRightHyp, source_head);
+    
+  }
+  else {
+    newRightHyp->m_sourcePrevHypo = currHyp->m_sourcePrevHypo;
+    if (currHyp->m_sourcePrevHypo) {
+      currHyp->m_sourcePrevHypo->m_sourceNextHypo = newRightHyp;
+    }
+    newRightHyp->m_sourceNextHypo = newLeftHyp;
+    
+    newLeftHyp->m_sourcePrevHypo = newRightHyp;
+    newLeftHyp->m_sourceNextHypo = currHyp->m_sourceNextHypo;
+    if (currHyp->m_sourceNextHypo) {
+      currHyp->m_sourceNextHypo->m_sourcePrevHypo = newLeftHyp;
+    }
+    
+    UpdateHead(currHyp, newLeftHyp, source_head);
+  }
+  
+  
+  //cout << "Target head " << target_head << endl;
+  
+  //Update source side map
+  SetSourceIndexedHyps(newLeftHyp); 
+  SetSourceIndexedHyps(newRightHyp); 
+  
+  //Update target word ranges
+  int prevTgtSize = currHyp->GetTargetPhrase().GetSize();
+  int newTgtSize = newLeftHyp->GetTargetPhrase().GetSize() + newRightHyp->GetTargetPhrase().GetSize();
+  int tgtSizeChange = newTgtSize - prevTgtSize;
+  if (tgtSizeChange != 0) {
+    cerr << "Updating tgt word range downstream" << endl;
+    UpdateTargetWordRange(newRightHyp, tgtSizeChange);  
+  }
+  
+  UpdateFeatureValues(deltaFV);
 }  
-
-void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
-  //cout << "Delta: " << deltaFV << endl;
-  feature_values.PlusEquals(deltaFV);
-  //cout << "New FV " << feature_values << endl;
-}  
+  
+  
   
 void Sample::CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   newHyp->m_prevHypo = currHyp->m_prevHypo;
@@ -180,10 +327,6 @@ void Sample::CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   UpdateHead(currHyp, newHyp, target_head);
 }
 
-void Sample::UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head) {
-  if (head == currHyp)
-    head = newHyp;
-}
   
 void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   newHyp->m_sourcePrevHypo = currHyp->m_sourcePrevHypo;
@@ -200,6 +343,29 @@ void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
   UpdateHead(currHyp, newHyp, source_head);
 }
 
+void Sample::UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head) {
+  if (head == currHyp)
+    head = newHyp;
+}
+  
+void Sample::UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange) {
+  Hypothesis* nextHyp = const_cast<Hypothesis*>(hyp->GetNextHypo());
+  if (!nextHyp)
+    return;
+    
+  for (Hypothesis* h = nextHyp; h; h = const_cast<Hypothesis*>(h->GetNextHypo())){
+    WordsRange& range = h->GetCurrTargetWordsRange();
+    range.SetStartPos(range.GetStartPos()+tgtSizeChange);
+    range.SetEndPos(range.GetEndPos()+tgtSizeChange);
+  }
+}  
+  
+void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
+  //cout << "Delta: " << deltaFV << endl;
+  feature_values.PlusEquals(deltaFV);
+  //cout << "New FV " << feature_values << endl;
+}  
+  
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
   size_t iterations = StaticData::Instance().GetNumSamplingIterations();
