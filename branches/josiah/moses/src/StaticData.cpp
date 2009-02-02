@@ -308,6 +308,10 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	m_cubePruningDiversity = (m_parameter->GetParam("cube-pruning-diversity").size() > 0)
 		    ? Scan<size_t>(m_parameter->GetParam("cube-pruning-diversity")[0]) : DEFAULT_CUBE_PRUNING_DIVERSITY;
+  
+  
+  m_numSamplingIters = (m_parameter->GetParam("num-gibbler-iterations").size() > 0)
+  ? Scan<size_t>(m_parameter->GetParam("num-gibbler-iterations")[0]) : DEFAULT_SAMPLING_ITERATIONS;
 
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH

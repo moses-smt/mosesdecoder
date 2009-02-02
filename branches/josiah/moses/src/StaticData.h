@@ -156,6 +156,10 @@ protected:
 
 	size_t m_cubePruningPopLimit;
 	size_t m_cubePruningDiversity;
+  
+  //The Gibbler variables
+  size_t m_numSamplingIters; //number of iterations of sampler to run
+  
 	StaticData();
 
 	//! helper fn to set bool param from ini file/command line
@@ -461,6 +465,8 @@ public:
 	void ReduceTransOptCache() const;
 
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
+  
+  size_t GetNumSamplingIterations() const { return m_numSamplingIters;} ;
 };
 
 }

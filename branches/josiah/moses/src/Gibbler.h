@@ -40,6 +40,10 @@ class Sample {
     return target_head;
   }
   
+  const Hypothesis* GetTargetTail() const {
+    return target_tail;
+  }
+  
   const ScoreComponentCollection& GetFeatureValues() const {
     return feature_values;
   }
