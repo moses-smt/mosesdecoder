@@ -50,7 +50,8 @@ class Sample {
   
   void FlipNodes(size_t, size_t);
   void ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV); 
-  
+  void MergeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV);
+  void SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const ScoreComponentCollection& deltaFV); 
 };
 
 class Sampler {
