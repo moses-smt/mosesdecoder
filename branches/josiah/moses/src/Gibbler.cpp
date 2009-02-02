@@ -195,7 +195,7 @@ void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
 
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
-  size_t iterations = 1000;
+  size_t iterations = 5;
   vector<GibbsOperator*> operators;
   vector<SampleCollector*> collectors;
   collectors.push_back(new GibblerMaxTransDecoder());

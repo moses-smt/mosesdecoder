@@ -34,76 +34,91 @@ static double log_sum (double log_a, double log_b)
 	return ( v );
 }
 
+
+/**
+  * Extract the target words in the sentence into a vector.
+**/
+static void getTargetWords(const Sample& sample, vector<Word>& words) {
+  const Hypothesis* currHypo = sample.GetSampleHypothesis(); //target head
+  while (currHypo->GetPrevHypo()) {
+    currHypo = currHypo->GetPrevHypo();
+  }
+  //we're now at the dummy hypo at the start of the sentence
+  while ((currHypo = (currHypo->GetNextHypo()))) {
+    TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
+    for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
+      words.push_back(targetPhrase.GetWord(i));
+    }
+  }
+  
+  IFVERBOSE(2) {
+    VERBOSE(2,"Sentence: ");
+    for (size_t i = 0; i < words.size(); ++i) {
+      VERBOSE(2,words[i] << " ");
+    }
+    VERBOSE(2,endl);
+  }
+}
+
 /**
   Compute the change in language model score by adding this target phrase
   into the hypothesis at the given target position.
   **/
 static void  addLanguageModelScoreDelta(ScoreComponentCollection& scores, 
-    const Hypothesis* hypothesis, const Phrase& targetPhrase, const WordsRange& targetSegment) {
+    const vector<Word>& targetWords, const Phrase& targetPhrase, const WordsRange& targetSegment) {
     const LMList& languageModels = StaticData::Instance().GetAllLM();
     for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
     LanguageModel* lm = *i;
     size_t order = lm->GetNGramOrder();
     vector<const Word*> lmcontext(targetPhrase.GetSize() + 2*(order-1));
     
+    int start = targetSegment.GetStartPos() - (order-1);
+    
     //fill in the pre-context
-    const Hypothesis* currHypo = hypothesis;
-    size_t currHypoPos = 0;
-    for (int currPos = order-2; currPos >= 0; --currPos) {
-      if (!currHypoPos && currHypo->GetPrevHypo()) {
-        //go back if we can
-        currHypo = currHypo->GetPrevHypo();
-        currHypoPos = currHypo->GetCurrTargetLength()-1;
+    size_t contextPos = 0;
+    for (size_t i = 0; i < order-1; ++i) {
+      if (start+(int)i < 0) {
+        lmcontext[contextPos++] = &(lm->GetSentenceStartArray());
       } else {
-        --currHypoPos;
-      }
-      if (currHypo->GetPrevHypo()) {
-        lmcontext[currPos] = &(currHypo->GetCurrTargetPhrase().GetWord(currHypoPos));
-      } else {
-        lmcontext[currPos] = &(lm->GetSentenceStartArray());
+        lmcontext[contextPos++] = &(targetWords[i+start]);
       }
     }
     
     //fill in the target phrase
     for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-      lmcontext[i + (order-1)] = &(targetPhrase.GetWord(i));
+      lmcontext[contextPos++] = &(targetPhrase.GetWord(i));
     }
     
     //fill in the postcontext
-    currHypo = hypothesis;
-    currHypoPos = currHypo->GetCurrTargetLength() - 1;
     size_t eoscount = 0;
-    //cout  << "Target phrase: " << targetPhrase <<  endl;
-    for (size_t currPos = targetPhrase.GetSize() + (order-1); currPos < lmcontext.size(); ++currPos) {
-      //cout << "currPos " << currPos << endl;
-      ++currHypoPos;
-      if (currHypo && currHypoPos >= currHypo->GetCurrTargetLength()) {
-        //next hypo
-        currHypo = currHypo->GetNextHypo();
-        currHypoPos = 0;
-      }
-      if (currHypo) {
-        assert(currHypo->GetCurrTargetLength());
-        lmcontext[currPos] = &(currHypo->GetCurrTargetPhrase().GetWord(currHypoPos));
+    for (size_t i = 0; i < order-1; ++i) {
+      size_t targetPos = i + targetSegment.GetEndPos() + 1;
+      if (targetPos >= targetWords.size()) {
+        lmcontext[contextPos++] = &(lm->GetSentenceEndArray());
+        ++eoscount;
       } else {
-         lmcontext[currPos] = &(lm->GetSentenceEndArray());
-         ++eoscount;
+        lmcontext[contextPos++] = &(targetWords[targetPos]);
       }
     }
     
-    //score lm
-    cout << "LM context ";
-    for (size_t j = 0;  j < lmcontext.size(); ++j) {
-      if (j == order-1) {
-        cout << "[ ";
+    //debug
+    IFVERBOSE(3) {
+      VERBOSE(3,"Segment: " << targetSegment << " phrase: " << targetPhrase << endl);
+      VERBOSE(3,"LM context ");
+      for (size_t j = 0;  j < lmcontext.size(); ++j) {
+        if (j == order-1) {
+          VERBOSE(3, "[ ");
+        }
+        if (j == (targetPhrase.GetSize() + (order-1))) {
+          VERBOSE(3,"] ");
+        }
+        VERBOSE(3,*(lmcontext[j]) << " ");
+        
       }
-      if (j == (targetPhrase.GetSize() + (order-1))) {
-        cout << "] ";
-      }
-      cout << *(lmcontext[j]) << " ";
-      
+      VERBOSE(3,endl);
     }
-    cout << endl;
+    
+    //score lm
     double lmscore = 0;
     vector<const Word*> ngram;
     //remember to only include max of 1 eos marker
@@ -115,7 +130,7 @@ static void  addLanguageModelScoreDelta(ScoreComponentCollection& scores,
       }
       lmscore += lm->GetValue(ngram);
     }
-    cout << "Language model score: " << lmscore << endl; 
+    VERBOSE(2,"Language model score: " << lmscore << endl); 
     scores.Assign(lm,lmscore);
   }
 }
@@ -148,14 +163,14 @@ class TDelta {
   **/
 class SingleTDelta : public virtual TDelta {
   public:
-     SingleTDelta (const Hypothesis* hypothesis,  const TranslationOption* option , const WordsRange& targetSegment) :
+     SingleTDelta (const vector<Word>& targetWords,  const TranslationOption* option , const WordsRange& targetSegment) :
         m_option(option), m_targetSegment(targetSegment) {
         m_scores.PlusEquals(m_option->GetScoreBreakdown());
         
         //don't worry about reordering because they don't change
         
         //word penalty
-        float penalty = -m_targetSegment.GetNumWordsCovered();
+        float penalty = -((int)m_targetSegment.GetNumWordsCovered());
         m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
         
         
@@ -164,89 +179,17 @@ class SingleTDelta : public virtual TDelta {
         //cout << "Got " << translationModels.size() << " dictionary(s)" << endl;
         for (vector<PhraseDictionary*>::const_iterator i = translationModels.begin(); i != translationModels.end(); ++i) {
           vector<float> translationScores = m_scores.GetScoresForProducer(*i);
-          cout << "Translation scores: ";
-          copy(translationScores.begin(), translationScores.end(), ostream_iterator<float>(cout,","));
-          cout << endl;
+          VERBOSE(2,"Translation scores: ");
+          IFVERBOSE(2) {
+            for (size_t j = 0; j < translationScores.size(); ++j) {
+              VERBOSE(2,translationScores[j] << " ");
+            }
+            VERBOSE(2,endl);
+            
+          }
         }
         
-        addLanguageModelScoreDelta(m_scores, hypothesis, m_option->GetTargetPhrase(), m_targetSegment);
-        
-        
-        
-        
-        
-//         //language model scores
-//         const LMList& languageModels = StaticData::Instance().GetAllLM();
-//         for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
-//           LanguageModel* lm = *i;
-//           size_t order = lm->GetNGramOrder();
-//           int start = m_targetSegment.GetStartPos() - (order-1);
-//           int end = m_targetSegment.GetEndPos() + (order - 1);
-//          // cout << "LM for " << start << " to " << end << endl;
-//           //cout << "target phrase " << m_option->GetTargetPhrase() << endl;
-//           //cout << "target segment " << m_targetSegment << endl;
-//           //build up the context, possibly starting with before sentence indicators
-//           vector<const Word*> lmcontext;;
-//           int currPos = start;
-//           for (; currPos < 0; ++currPos) {
-//             lmcontext.push_back(&(lm->GetSentenceStartArray()));
-//           }
-//           
-//           //find the hypothesis which covers the target position curr
-//           const Hypothesis* currHypo = hypothesis;
-//           while (currHypo->GetCurrTargetWordsRange().GetStartPos() > currPos) {
-//             currHypo = currHypo->GetPrevHypo();
-//             //cout << "currHypo (prev)" << *currHypo << endl;
-//             assert (currHypo);
-//           }
-//           
-//           //read words up to end
-//           size_t eoscount = 0;
-//           while (currPos <= end) {
-//             while (currHypo && currPos > currHypo->GetCurrTargetWordsRange().GetEndPos()) {
-//               currHypo = currHypo->GetNextHypo();
-//               
-//             }
-//             if (currPos >= m_targetSegment.GetStartPos() && currPos <= m_targetSegment.GetEndPos()) {
-//               lmcontext.push_back(&(m_option->GetTargetPhrase().GetWord(currPos-m_targetSegment.GetStartPos())));
-//               //cout << "In target segment: " << *(lmcontext.back()) <<  endl;
-//             } else if (currHypo) {
-//               lmcontext.push_back(&(currHypo->GetCurrWord(currPos - currHypo->GetCurrTargetWordsRange().GetStartPos())));
-//               //cout << "In hypo: " << *(lmcontext.back()) <<  endl;
-//             } else {
-//               lmcontext.push_back(&(lm->GetSentenceEndArray()));
-//               //cout << "In eos: " << *(lmcontext.back()) <<  endl;
-//               ++eoscount;
-//             }
-//             ++currPos;
-//           }
-//           //cout << "Target range " << m_targetSegment << endl;
-//           //cout << "Phrase for LM: " << phrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder()) << " size=" << 
-//             //phrase.GetSize() << endl;
-//             
-//           //calc lm score
-//           cout << "LM context ";
-//           for (size_t j = 0;  j < lmcontext.size(); ++j) {
-//             cout << *(lmcontext[j]) << " ";
-//           }
-//           cout << endl;
-//           double lmscore = 0;
-//           vector<const Word*> ngram;
-//           //remember to only include max of 1 eos marker
-//           size_t maxend = min(lmcontext.size(), lmcontext.size() - (eoscount-1));
-//           for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
-//             ngram.clear();
-//             for (size_t j = ngramstart; j < ngramstart+order && j < maxend; ++j) {
-//               ngram.push_back(lmcontext[j]);
-//               
-//               
-//             }
-//             lmscore += lm->GetValue(ngram);
-//           }
-//           cout << "Language model score: " << lmscore << endl;
-//           m_scores.Assign(lm,lmscore);
-//           
-//         }
+        addLanguageModelScoreDelta(m_scores, targetWords, m_option->GetTargetPhrase(), m_targetSegment);
         
         //weight the scores
         const vector<float> weights = StaticData::Instance().GetAllWeights();
@@ -254,7 +197,8 @@ class SingleTDelta : public virtual TDelta {
         //copy(weights.begin(), weights.end(), ostream_iterator<float>(cout," "));
         //cout << endl;
         m_score = m_scores.InnerProduct(weights);
-        cout << "Total score is  " << m_score << endl;
+        VERBOSE(2, "Scores " << m_scores << endl);
+        VERBOSE(2,"Total score is  " << m_score << endl);
         
      }
      
@@ -351,16 +295,10 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
   //  of segments as in source, possibly swapped, and translated arbitrarily?
  
   
-//   vector<double> probs;
-//   probs.push_back(log(0.5));
-//   probs.push_back(log(0.25));
-//   probs.push_back(log(0.25));
-//   probs.push_back(log(1.0));
-//   for (size_t i = 0; i < 1000; ++i) {
-//     getSample(probs);
-//   }
-  //cout << RAND_MAX << endl;
+
   size_t sourceSize = sample.GetSourceSize();
+  vector<Word> targetWords; //need to calc lm scores
+  getTargetWords(sample,targetWords);
   for (size_t splitIndex = 1; splitIndex < sourceSize; ++splitIndex) {
     //NB splitIndex n refers to the position between word n-1 and word n. Words are zero indexed
     VERBOSE(3,"Sampling at source index " << splitIndex << endl);
@@ -414,7 +352,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     vector<TDelta*> deltas;
     if (targetSegments.size() == 1) {
       //FIXME: This is not correct, unless the source is not split already
-      noChangeDelta = new SingleTDelta(hypothesis,&(hypothesis->GetTranslationOption()),hypothesis->GetCurrTargetWordsRange());
+      noChangeDelta = new SingleTDelta(targetWords,&(hypothesis->GetTranslationOption()),hypothesis->GetCurrTargetWordsRange());
       //contiguous
       //case 1: no split
       //cout << "NO Split: source phrase '" << hypothesis->GetSourcePhraseStringRep() <<  "' segment " << sourceSegment << endl;
@@ -427,7 +365,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
         
         if (!isSplit) {
           //FIXME: We don't deal with merges at the moment, only look at case where there is no split in the middle
-          TDelta* delta = new SingleTDelta(hypothesis, *i,targetSegments[0]);
+          TDelta* delta = new SingleTDelta(targetWords, *i,targetSegments[0]);
           deltas.push_back(delta);
         }
      }
@@ -455,7 +393,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     } else {
       //discontiguous - FIXME This is almost the same as the split case above - combine
       //FIXME: This does should take into account both target and source segments
-      noChangeDelta =  new SingleTDelta(hypothesis,&(hypothesis->GetTranslationOption()),targetSegments[0]);
+      noChangeDelta =  new SingleTDelta(targetWords,&(hypothesis->GetTranslationOption()),targetSegments[0]);
       const TranslationOptionList&  options1 = 
         toc.GetTranslationOptionList(WordsRange(sourceSegment.GetStartPos(),splitIndex-1));
       const TranslationOptionList& options2 = 
