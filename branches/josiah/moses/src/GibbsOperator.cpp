@@ -71,16 +71,13 @@ size_t GibbsOperator::getSample(const vector<double>& scores) {
   random = log(random);
   
   //now figure out which sample
-  size_t position = 0;
+  size_t position = 1;
+  sum = scores[0];
   for (; position < scores.size() && sum < random; ++position) {
-    if (position == 0) {
-      sum = scores[0];
-    } else {
-      sum = log_sum(sum,scores[position]);
-    }
+    sum = log_sum(sum,scores[position]);
   }
    //cout << "random: " << exp(random) <<  " sample: " << position << endl;
-  return position;
+  return position-1;
 }
 
 void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionCollection& toc) {
@@ -176,12 +173,19 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     //randomly pick one of the deltas
     if (scores.size() > 0) {
       size_t chosen = getSample(scores);
-      //copy(scores.begin(),scores.end(),ostream_iterator<double>(cout,","));
-      //cout << endl;
-      //cout << "**The chosen sample is " << chosen << endl;
+      IFVERBOSE(4) {
+        VERBOSE(4,"Scores: ");
+        for (size_t i = 0; i < scores.size(); ++i) {
+          VERBOSE(4,scores[i] << ",");
+        }
+        VERBOSE(4,endl);
+      }
+      VERBOSE(3,"The chosen sample is " << chosen << endl);
       
       //apply it to the sample
       deltas[chosen]->apply(sample,*noChangeDelta);
+      
+      VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
     }
     
     

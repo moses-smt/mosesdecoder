@@ -377,9 +377,9 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
   
   operators.push_back(new MergeSplitOperator());
   for (size_t i = 0; i < iterations; ++i) {
-    cout << "Gibbs sampling iteration: " << i << endl;
+    VERBOSE(1,"Gibbs sampling iteration: " << i << endl);
     for (size_t j = 0; j < operators.size(); ++j) {
-      cout << "Sampling with operator " << operators[j]->name() << endl;
+      VERBOSE(1,"Sampling with operator " << operators[j]->name() << endl);
       operators[j]->doIteration(sample,*options);
       for (size_t k = 0; k < collectors.size(); ++k) {
         collectors[k]->collect(sample);
