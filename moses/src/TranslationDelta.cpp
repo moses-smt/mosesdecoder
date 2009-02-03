@@ -105,7 +105,7 @@ void TranslationDelta::initScoresSingleUpdate(const vector<Word>& targetWords, c
   //don't worry about reordering because they don't change
         
   //word penalty
-  float penalty = -((int)targetSegment.GetNumWordsCovered());
+  float penalty = -((int)option->GetTargetPhrase().GetSize());
   m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
         
         
@@ -128,7 +128,7 @@ void TranslationDelta::initScoresPairedUpdate(const vector<Word>& targetWords, c
   //don't worry about reordering because they don't change
   
   //word penalty
-  float penalty = -((int)targetSegment.GetNumWordsCovered());
+  float penalty = -((int)leftOption->GetTargetPhrase().GetSize()) -((int)rightOption->GetTargetPhrase().GetSize());
   m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
   
   addLanguageModelScore(targetWords, targetPhrase, targetSegment);

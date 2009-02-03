@@ -471,6 +471,14 @@ const Hypothesis* Hypothesis::GetNextHypo() const {
   return m_nextHypo;
 }
 
+const Hypothesis* Hypothesis::GetSourcePrevHypo()const{
+  return m_sourcePrevHypo;
+}
+
+const Hypothesis* Hypothesis::GetSourceNextHypo() const {
+  return m_sourceNextHypo;
+}
+
 /**
  * print hypothesis information for pharaoh-style logging
  */
