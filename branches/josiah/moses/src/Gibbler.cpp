@@ -76,16 +76,16 @@ void Sample::SetSourceIndexedHyps(Hypothesis* h) {
 }
   
 //x and y are source side positions  
-void Sample::FlipNodes(size_t x, size_t y) {
+void Sample::FlipNodes(size_t x, size_t y, const ScoreComponentCollection& deltaFV) {
   assert (x != y);
   Hypothesis* hyp1 = GetHypAtSourceIndex(x);
   Hypothesis* hyp2 = GetHypAtSourceIndex(y);
   
-  
-  WordsRange h1tgtCovered = hyp1->GetCurrTargetWordsRange();
-  WordsRange h2tgtCovered = hyp2->GetCurrTargetWordsRange();
+  WordsRange& h1tgtCovered = hyp1->GetCurrTargetWordsRange();
+  WordsRange& h2tgtCovered = hyp2->GetCurrTargetWordsRange();
   
   if (h1tgtCovered < h2tgtCovered) {
+    //Updating the target pointers, src ptrs don't change
     Hypothesis* hyp1_prevHypo = const_cast<Hypothesis*>(hyp1->m_prevHypo);
     Hypothesis* hyp2_nextHypo = hyp2->m_nextHypo;
     
@@ -100,8 +100,13 @@ void Sample::FlipNodes(size_t x, size_t y) {
     if (hyp2_nextHypo != NULL) {
       hyp2_nextHypo->m_prevHypo = hyp1;
     }
+    
+    UpdateHead(hyp2, hyp1, target_head);
+    //Update target word range
+    UpdateAdjacentTgtWordRanges(hyp1_prevHypo, hyp2, hyp1);
   }
   else {
+    //Updating the target pointers, src ptrs don't change
     Hypothesis* hyp1_nextHypo = hyp1->m_nextHypo;
     Hypothesis* hyp2_prevHypo = const_cast<Hypothesis*>(hyp2->m_prevHypo);
     
@@ -116,8 +121,27 @@ void Sample::FlipNodes(size_t x, size_t y) {
     if (hyp2_prevHypo != NULL) {
       hyp2_prevHypo->m_nextHypo = hyp1;
     }
+    
+    UpdateHead(hyp1, hyp2, target_head);
+    //Update target word range
+    UpdateAdjacentTgtWordRanges(hyp2_prevHypo, hyp2, hyp1);
   }
+  
+  UpdateFeatureValues(deltaFV);
 }
+  
+void Sample::UpdateAdjacentTgtWordRanges(Hypothesis *prevHyp, Hypothesis *nextTgtHyp, Hypothesis *adjTgtHyp) {
+    
+  const WordsRange & prevHypoTgtRange = prevHyp->GetCurrTargetWordsRange();
+  WordsRange & nextTgtHypRange = nextTgtHyp->GetCurrTargetWordsRange();
+  WordsRange & adjTgtHypRange = adjTgtHyp->GetCurrTargetWordsRange();
+  
+  nextTgtHypRange.SetStartPos(prevHypoTgtRange.GetEndPos() + 1);
+  nextTgtHypRange.SetEndPos(prevHypoTgtRange.GetEndPos() +  nextTgtHyp->GetCurrTargetPhrase().GetSize());
+
+  adjTgtHypRange.SetStartPos(nextTgtHypRange.GetEndPos() + 1);
+  adjTgtHypRange.SetEndPos(nextTgtHypRange.GetEndPos() + adjTgtHyp->GetCurrTargetPhrase().GetSize());
+}  
   
 void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
@@ -145,10 +169,6 @@ void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentC
   UpdateFeatureValues(deltaFV);
 }  
 
-  
-  
-  
-  
 void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
   size_t optionEndPos = option.GetSourceWordsRange().GetEndPos();
@@ -386,7 +406,6 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
       }
     }
   }
-  
   
   RemoveAllInColl(operators);
   RemoveAllInColl(collectors);

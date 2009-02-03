@@ -31,6 +31,8 @@ class Sample {
   void UpdateFeatureValues(const ScoreComponentCollection& deltaFV);
   void UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange);   
   void UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head);
+  void UpdateAdjacentTgtWordRanges(Hypothesis *prevHyp, Hypothesis *nextTgtHyp, Hypothesis *adjTgtHyp);
+  
  public:
   Sample(Hypothesis* target_head);
   ~Sample();
@@ -48,10 +50,11 @@ class Sample {
     return feature_values;
   }
   
-  void FlipNodes(size_t, size_t);
+  void FlipNodes(size_t x, size_t y, const ScoreComponentCollection& deltaFV) ;
   void ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV); 
   void MergeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV);
   void SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const ScoreComponentCollection& deltaFV); 
+  
 };
 
 class Sampler {
