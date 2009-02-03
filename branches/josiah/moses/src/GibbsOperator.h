@@ -39,11 +39,12 @@ namespace Moses {
   /** Abstract base class for gibbs operators **/
   class GibbsOperator {
     public:
+      GibbsOperator(const string& name) : m_name(name) {}
         /**
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
           **/
         virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc) = 0;
-        virtual const string& name() const = 0;
+        const string& name() const {return m_name;}
         virtual ~GibbsOperator() {}
         
      protected:
@@ -51,19 +52,32 @@ namespace Moses {
           * Pick random sample from given (un-normalised) log probabilities.
           **/
         size_t getSample(const std::vector<double>& scores);
+        string m_name;
   };
   
-  
+  /**
+    * Operator that keeps ordering constant, but visits each (internal) source word boundary, and 
+    * merge or split the segment(s) at that boundary, and update the translation.
+    **/
   class MergeSplitOperator : public virtual GibbsOperator {
     public:
-        MergeSplitOperator() : m_name("merge-split") {}
+        MergeSplitOperator() : GibbsOperator("merge-split") {}
         virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
-        virtual const string& name() const {return m_name;}
         virtual ~MergeSplitOperator() {}
     
     private:
-        string m_name;
+        
   
+  };
+  
+  /**
+    * Operator which may update any translation option, but may not change segmentation or ordering.
+    **/
+  class TranslationSwapOperator : public virtual GibbsOperator {
+    public:
+      TranslationSwapOperator() : GibbsOperator("translation-swap") {}
+      virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
+      virtual ~TranslationSwapOperator() {}
   };
   
  
