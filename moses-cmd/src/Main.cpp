@@ -137,35 +137,41 @@ int main(int argc, char* argv[])
 		IFVERBOSE(1)
 			ResetUserTime();
 
-    VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
+		VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 		VERBOSE(1,"WER = " << staticData.GetWERLimit() << endl);
 		//staticData.SetWERLimit(1.0f);
 		
 		VERBOSE(1,"WER = " << staticData.GetWERLimit() << endl);
 		
-		Manager* manager; 
+		Manager* manager = NULL; 
 		
 		if (staticData.GetWERLimit() < 0.0f) {
 		
+			// Remember what the actual WER limit was set to
 			float actualWERLimit = staticData.GetWERLimit();
 			
-		float limit = 0.0f;
-		bool redo = true;
-		do {
-			staticData.SetWERLimit(limit);
-			manager = new Manager(*source, staticData.GetSearchAlgorithm());
+			float limit = 0.0f;
+			bool redo = true;
+
+			do {
+				VERBOSE(1, "Translating with WER limit of " << limit << endl);
+				staticData.SetWERLimit(limit);
+				if (manager != NULL) delete manager;
+				manager = new Manager(*source, staticData.GetSearchAlgorithm());
 		
-		//Manager manager(*source, staticData.GetSearchAlgorithm());
-		//manager.ProcessSentence();
-			manager->ProcessSentence();
-		//const Hypothesis* bestHyp = manager.GetBestHypothesis();
-			const Hypothesis* bestHyp = manager->GetBestHypothesis();
-			limit += 1.0f;
-			redo = (bestHyp==NULL);
-		} while (redo);
+				//Manager manager(*source, staticData.GetSearchAlgorithm());
+				//manager.ProcessSentence();
+				manager->ProcessSentence();
+				//const Hypothesis* bestHyp = manager.GetBestHypothesis();
+				const Hypothesis* bestHyp = manager->GetBestHypothesis();
+				limit += 1.0f;
+				redo = (bestHyp==NULL);
+			} while (redo);
 			
+			// Reset the WER limit for the next sentence
 			staticData.SetWERLimit(actualWERLimit);
 		} else {
+			VERBOSE(1, "Translating with WER limit of " << staticData.GetWERLimit() << endl);
 			manager = new Manager(*source, staticData.GetSearchAlgorithm());
 			manager->ProcessSentence();
 		}

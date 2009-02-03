@@ -148,6 +148,10 @@ public:
 	void ResetScore();
 
 	void CalcScore(const SquareMatrix &futureScore);
+	
+	inline void IncrementTotalScore(float increment) {
+		m_totalScore += increment;
+	}
 
   float CalcExpectedScore( const SquareMatrix &futureScore );
   void CalcRemainingScore();
