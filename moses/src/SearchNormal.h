@@ -30,11 +30,11 @@ protected:
 	void ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos);
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt, float expectedScore);
 
-	bool SearchNormal::isCompatibleWithConstraint(const Hypothesis &hypothesis, const TranslationOption &transOpt);
+	bool isCompatibleWithConstraint(const Hypothesis &hypothesis, const TranslationOption &transOpt);
 //LS float SearchNormal::getCurrConstraintWER(const Hypothesis &hypothesis, const TranslationOption &transOpt); 
 	TargetPhrase* getCurrentTargetPhrase(const Hypothesis &hypothesis);
-	float SearchNormal::getCurrConstraintWER(TargetPhrase *targetphrase, const TranslationOption &transOpt);
-	float SearchNormal::computeEditDistance(const Phrase &hypPhrase, const Phrase &constraintPhrase) const;
+	float getCurrConstraintWER(TargetPhrase *targetphrase, const TranslationOption &transOpt);
+	float computeEditDistance(const Phrase &hypPhrase, const Phrase &constraintPhrase) const;
 	
 	void AttemptProcessSentence();
 	
