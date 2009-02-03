@@ -50,16 +50,26 @@ class TranslationDelta {
     * Apply to the sample
     **/
   virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta) = 0;
-  /**
-    Compute the change in language model score by adding this target phrase
-    into the hypothesis at the given target position.
-    **/
-    void  addLanguageModelScore(const vector<Word>& targetWords, const Phrase& targetPhrase,
-          const WordsRange& targetSegment);
+   
     const ScoreComponentCollection& getScores() const {return m_scores;}
     virtual ~TranslationDelta() {}
     
   protected:
+    /**
+      Compute the change in language model score by adding this target phrase
+      into the hypothesis at the given target position.
+     **/
+    void  addLanguageModelScore(const vector<Word>& targetWords, const Phrase& targetPhrase,
+                                const WordsRange& targetSegment);
+    /**
+      * Initialise the scores for the case where only one source-target pair needs to be considered.
+     **/
+    void initScoresSingleUpdate(const vector<Word>& targetWords, const TranslationOption* option, const WordsRange& targetSegment);
+    /**
+     * Initialise the scores for the case where two source-target pairs need to be considered.
+     **/
+    void initScoresPairedUpdate(const vector<Word>& targetWords, const TranslationOption* leftOption,
+                                const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
     ScoreComponentCollection m_scores;
     double m_score;
     
