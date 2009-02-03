@@ -101,8 +101,9 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       VERBOSE(3, "Existing split" << endl);
       WordsRange rightSourceSegment = hypothesis->GetCurrSourceWordsRange();
       WordsRange rightTargetSegment = hypothesis->GetCurrTargetWordsRange();
-      const Hypothesis* prev = hypothesis->GetPrevHypo();
+      const Hypothesis* prev = hypothesis->GetSourcePrevHypo();
       assert(prev);
+      assert(prev->GetSourcePrevHypo()); //must be a valid hypo
       WordsRange leftSourceSegment = prev->GetCurrSourceWordsRange();
       WordsRange leftTargetSegment = prev->GetCurrTargetWordsRange();
       noChangeDelta = new   PairedTranslationUpdateDelta(targetWords,&(prev->GetTranslationOption())

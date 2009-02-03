@@ -166,6 +166,8 @@ public:
 
 	const Hypothesis* GetPrevHypo() const;
 	const Hypothesis* GetNextHypo() const;
+  const Hypothesis* GetSourcePrevHypo() const;
+  const Hypothesis* GetSourceNextHypo() const;
 
 	/** length of the partial translation (from the start of the sentence) */
 	inline size_t GetSize() const
