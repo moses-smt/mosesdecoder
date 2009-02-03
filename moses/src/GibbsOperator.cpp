@@ -81,7 +81,7 @@ size_t GibbsOperator::getSample(const vector<double>& scores) {
 }
 
 void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionCollection& toc) {
-  VERBOSE(2, "Running an iteration of the merge split operator" << endl);
+  
 
   size_t sourceSize = sample.GetSourceSize();
   for (size_t splitIndex = 1; splitIndex < sourceSize; ++splitIndex) {
@@ -193,6 +193,52 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
     //clean up
     RemoveAllInColl(deltas);
     delete noChangeDelta;
+  }
+}
+
+void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptionCollection& toc) {
+  const Hypothesis* currHypo = sample.GetHypAtSourceIndex(0);
+  //Iterate in source order
+  while (currHypo) {
+    vector<Word> targetWords; //needed to calc lm scores
+    getTargetWords(sample,targetWords);
+    const WordsRange& targetSegment = currHypo->GetCurrTargetWordsRange();
+    const WordsRange& sourceSegment = currHypo->GetCurrSourceWordsRange();
+    VERBOSE(3, "Considering source segment " << sourceSegment << " and target segment " << targetSegment << endl); 
+    TranslationUpdateDelta noChangeDelta(targetWords,&(currHypo->GetTranslationOption()),targetSegment);
+    vector<TranslationDelta*> deltas;
+    
+    const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
+    for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
+      TranslationDelta* delta = new TranslationUpdateDelta(targetWords,*i,targetSegment);
+      deltas.push_back(delta);
+    }
+    
+    //get the scores
+    vector<double> scores;
+    for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
+      scores.push_back((**i).getScore());
+    }
+    
+   //randomly pick one of the deltas
+   if (scores.size() > 0) {
+   size_t chosen = getSample(scores);
+   IFVERBOSE(4) {
+    VERBOSE(4,"Scores: ");
+    for (size_t i = 0; i < scores.size(); ++i) {
+      VERBOSE(4,scores[i] << ",");
+    }
+    VERBOSE(4,endl);
+    }
+    VERBOSE(3,"The chosen sample is " << chosen << endl);
+    
+    //apply it to the sample
+    deltas[chosen]->apply(sample,noChangeDelta);
+   }
+    
+    
+    
+    currHypo = currHypo->GetSourceNextHypo();
   }
 }
 

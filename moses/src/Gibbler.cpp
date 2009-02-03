@@ -396,14 +396,15 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
   Sample sample(starting);
   
   operators.push_back(new MergeSplitOperator());
+  operators.push_back(new TranslationSwapOperator());
   for (size_t i = 0; i < iterations; ++i) {
     VERBOSE(1,"Gibbs sampling iteration: " << i << endl);
     for (size_t j = 0; j < operators.size(); ++j) {
       VERBOSE(1,"Sampling with operator " << operators[j]->name() << endl);
       operators[j]->doIteration(sample,*options);
-      for (size_t k = 0; k < collectors.size(); ++k) {
-        collectors[k]->collect(sample);
-      }
+    }
+    for (size_t k = 0; k < collectors.size(); ++k) {
+      collectors[k]->collect(sample);
     }
   }
   
