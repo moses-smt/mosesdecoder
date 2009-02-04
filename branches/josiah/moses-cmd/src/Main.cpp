@@ -211,6 +211,7 @@ int main(int argc, char* argv[])
     manager.CalcDecoderStatistics();
 	  
     Sampler s;
+    s.init();
 		s.Run(const_cast<Hypothesis*>(manager.GetBestHypothesis()),
           manager.GetTranslationOptionCollection());
     
