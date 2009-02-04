@@ -387,31 +387,27 @@ void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
 }  
   
   
-void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
-  size_t iterations = StaticData::Instance().GetNumSamplingIterations();
-  vector<GibbsOperator*> operators;
-  vector<SampleCollector*> collectors;
-  collectors.push_back(new GibblerMaxTransDecoder());
-  collectors.push_back(new PrintSampleCollector());
-  Sample sample(starting);
+void Sampler::init() {
+  m_collectors.push_back(new PrintSampleCollector());
+  m_operators.push_back(new MergeSplitOperator());
+  m_operators.push_back(new TranslationSwapOperator());
+  m_operators.push_back(new FlipOperator());
+  m_iterations = StaticData::Instance().GetNumSamplingIterations();
+}
   
-  //operators.push_back(new MergeSplitOperator());
-//  operators.push_back(new TranslationSwapOperator());
-  operators.push_back(new FlipOperator());
-  for (size_t i = 0; i < iterations; ++i) {
+void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
+  
+  Sample sample(starting);
+  for (size_t i = 0; i < m_iterations; ++i) {
     VERBOSE(1,"Gibbs sampling iteration: " << i << endl);
-    for (size_t j = 0; j < operators.size(); ++j) {
-      VERBOSE(1,"Sampling with operator " << operators[j]->name() << endl);
-      operators[j]->doIteration(sample,*options);
+    for (size_t j = 0; j < m_operators.size(); ++j) {
+      VERBOSE(1,"Sampling with operator " << m_operators[j]->name() << endl);
+      m_operators[j]->doIteration(sample,*options);
     }
-    for (size_t k = 0; k < collectors.size(); ++k) {
-      collectors[k]->collect(sample);
+    for (size_t k = 0; k < m_collectors.size(); ++k) {
+      m_collectors[k]->collect(sample);
     }
   }
-  
-  RemoveAllInColl(operators);
-  RemoveAllInColl(collectors);
-
 }
 
 void PrintSampleCollector::collect(Sample& sample)  {
@@ -420,5 +416,9 @@ void PrintSampleCollector::collect(Sample& sample)  {
       sample.GetSampleHypothesis()->ToStream(cout);
       cout << "\"" << "  " << "Feature values: " << sample.GetFeatureValues() << endl;
     }
+    
+    
 
 }
+
+

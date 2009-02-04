@@ -7,6 +7,7 @@
 
 namespace Moses {
 
+class GibbsOperator;
 class Hypothesis;
 class TranslationOptionCollection;
 class TranslationOption;
@@ -57,18 +58,10 @@ class Sample {
   
 };
 
-class Sampler {
- private:
-
- public:
-  void Run(Hypothesis* starting, const TranslationOptionCollection* options) ;
-
-};
-
 /**
-  * Used by the operators to collect samples, for example to count ngrams, or just to print
-  * them out. 
-  **/
+ * Used by the operators to collect samples, for example to count ngrams, or just to print
+ * them out. 
+ **/
 class SampleCollector {
   public:
     virtual void collect(Sample& sample) = 0;
@@ -80,6 +73,29 @@ class PrintSampleCollector  : public virtual SampleCollector {
     virtual void collect(Sample& sample);
     virtual ~PrintSampleCollector() {}
 };
+
+class Sampler {
+ private:
+   std::vector<SampleCollector*> m_collectors;
+   std::vector<GibbsOperator*> m_operators;
+   size_t m_iterations;
+
+ public:
+  Sampler(): m_iterations(10) {}
+  void Run(Hypothesis* starting, const TranslationOptionCollection* options) ;
+  void AddOperator(GibbsOperator* o) {m_operators.push_back(o);}
+  void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
+  void SetIterations(size_t iterations) {m_iterations = iterations;}
+  
+  //Add standard set of operators and print collector
+  void init();
+  
+  ~Sampler() {RemoveAllInColl(m_operators);RemoveAllInColl(m_collectors);}
+  
+
+};
+
+
 
 }
 
