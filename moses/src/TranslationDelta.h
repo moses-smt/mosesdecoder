@@ -142,14 +142,14 @@ class SplitDelta : public virtual TranslationDelta {
 class FlipDelta : public virtual TranslationDelta {
   public: 
     FlipDelta(const vector<Word>& targetWords,
-                                 const TranslationOption* leftOption, const TranslationOption* rightOption, 
-                                 const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
+                                 const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
+                                 const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, float distortion);
     
     virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
     
   private:
-    const TranslationOption* m_leftOption;
-    const TranslationOption* m_rightOption;
+    const TranslationOption* m_leftTgtOption;
+    const TranslationOption* m_rightTgtOption;
 };
 
 
