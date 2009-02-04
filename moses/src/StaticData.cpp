@@ -796,10 +796,14 @@ bool StaticData::LoadPhraseTables()
 			
 			IFVERBOSE(1)
 				PrintUserTime(string("Start loading PhraseTable ") + filePath);
-			std::cerr << "filePath: " << filePath << std::endl;
+			VERBOSE(1,"filePath: " << filePath << endl);
 			if (!FileExists(filePath+".binphr.idx"))
 			{	// memory phrase table
-				VERBOSE(2,"using standard phrase tables");
+				VERBOSE(2,"using standard phrase tables" << endl);
+                if (!FileExists(filePath) && FileExists(filePath + ".gz")) {
+                    filePath += ".gz";
+                    VERBOSE(2,"Using gzipped file" << endl);
+                }
 				if (m_inputType != SentenceInput)
 				{
 					UserMessage::Add("Must use binary phrase table for this input type");
