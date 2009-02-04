@@ -395,8 +395,9 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
   collectors.push_back(new PrintSampleCollector());
   Sample sample(starting);
   
-  operators.push_back(new MergeSplitOperator());
-  operators.push_back(new TranslationSwapOperator());
+  //operators.push_back(new MergeSplitOperator());
+//  operators.push_back(new TranslationSwapOperator());
+  operators.push_back(new FlipOperator());
   for (size_t i = 0; i < iterations; ++i) {
     VERBOSE(1,"Gibbs sampling iteration: " << i << endl);
     for (size_t j = 0; j < operators.size(); ++j) {

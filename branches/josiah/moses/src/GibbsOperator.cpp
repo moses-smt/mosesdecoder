@@ -242,7 +242,152 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
   }
 }
 
-  
+bool FlipOperator::CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTgtHypo, float & totalDistortion){
+  totalDistortion = 0;  
+  bool validSwap = true;
+  //linear distortion
+  const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
+  //Calculate distortion for leftmost target 
+  //who is proposed new leftmost's predecessor?   
+  Hypothesis *leftPrevHypo = const_cast<Hypothesis*>(rightTgtHypo->GetPrevHypo());      
+  float distortionScore = dsp->CalculateDistortionScore(
+                                                        leftPrevHypo->GetCurrSourceWordsRange(),
+                                                        leftTgtHypo->GetCurrSourceWordsRange(),
+                                                        leftPrevHypo->GetWordsBitmap().GetFirstGapPos()
+                                                        );
+    
+  if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
+    validSwap = false;
+    return validSwap;
+  }
+    
+  totalDistortion += distortionScore;
+    
+  //Calculate distortion from leftmost target to right target
+  distortionScore = dsp->CalculateDistortionScore(
+                                                  leftTgtHypo->GetCurrSourceWordsRange(),
+                                                  rightTgtHypo->GetCurrSourceWordsRange(),
+                                                  leftTgtHypo->GetWordsBitmap().GetFirstGapPos()
+                                                  );  
+    
+  if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
+    validSwap = false;
+    return validSwap;
+  }
+    
+  totalDistortion += distortionScore;
+    
+  //Calculate distortion from rightmost target to its successor
+  Hypothesis *rightNextHypo = const_cast<Hypothesis*> (leftTgtHypo->GetNextHypo());  
+    
+  if (rightNextHypo) {
+    distortionScore = dsp->CalculateDistortionScore(
+                                                    rightTgtHypo->GetCurrSourceWordsRange(),
+                                                    rightNextHypo->GetCurrSourceWordsRange(),
+                                                    rightTgtHypo->GetWordsBitmap().GetFirstGapPos()
+                                                    );  
+      
+    if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
+      validSwap = false;
+      return validSwap;
+    }
+      
+    totalDistortion += distortionScore;
+  }
+    
+  return validSwap;
+}
+
+//For now, we only flip phrase pairs adjacent on the source and on the target
+void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection& toc) {
+  VERBOSE(2, "Running an iteration of the flip operator" << endl);
+    
+  size_t sourceSize = sample.GetSourceSize();
+  for (size_t splitIndex = 1; splitIndex < sourceSize; ++splitIndex) {
+    vector<Word> targetWords; //needed to calc lm scores
+    getTargetWords(sample,targetWords);
+    //NB splitIndex n refers to the position between word n-1 and word n. Words are zero indexed
+    VERBOSE(3,"Sampling at source index " << splitIndex << endl);
+      
+    Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitIndex);
+    //the delta corresponding to the current translation scores, needs to be subtracted off the delta before applying
+    TranslationDelta* noChangeDelta = NULL; 
+    vector<TranslationDelta*> deltas;
+      
+    //find out which source and target segments this flip operator should consider
+    //if we're at the left edge of a segment, then we're on a split
+    if (hypothesis->GetCurrSourceWordsRange().GetStartPos() == splitIndex) {
+      VERBOSE(3, "Existing split" << endl);
+      WordsRange rightSourceSegment = hypothesis->GetCurrSourceWordsRange();
+      WordsRange rightTargetSegment = hypothesis->GetCurrTargetWordsRange();
+      const Hypothesis* prev = hypothesis->GetSourcePrevHypo();
+      assert(prev);
+      WordsRange leftSourceSegment = prev->GetCurrSourceWordsRange();
+      WordsRange leftTargetSegment = prev->GetCurrTargetWordsRange();
+        
+      if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos() ) {
+        //contiguous on source and target side, flipping would make this a swap
+        //would this be a valid reordering if we flipped?
+        //int distortion =  StaticData::Instance().GetInput()->ComputeDistortionDistance(rightSourceSegment, leftSourceSegment);
+        float totalDistortion = 0;
+        bool isValidSwap = CheckValidReordering(hypothesis,prev, totalDistortion); 
+        if (isValidSwap) {//yes
+          TranslationDelta* delta = new FlipDelta(targetWords, hypothesis, 
+                                                    prev, rightTargetSegment,leftTargetSegment, totalDistortion);
+          deltas.push_back(delta);          
+        }
+          
+        CheckValidReordering(prev,hypothesis, totalDistortion); 
+        noChangeDelta = new   FlipDelta(targetWords, prev, 
+                                          hypothesis, leftTargetSegment,rightTargetSegment, totalDistortion);
+          
+      }
+      else if (leftTargetSegment.GetStartPos()  ==  rightTargetSegment.GetEndPos() + 1) {
+        //swapped on source and target side, flipping would make this monotone
+        float totalDistortion = 0;
+        bool isValidSwap = CheckValidReordering(prev,hypothesis, totalDistortion);        
+        if (isValidSwap) {//yes
+          TranslationDelta* delta = new FlipDelta(targetWords, prev, 
+                                                    hypothesis, leftTargetSegment,rightTargetSegment, totalDistortion);
+          deltas.push_back(delta);
+        }  
+          
+        CheckValidReordering(hypothesis,prev, totalDistortion);        
+        noChangeDelta = new FlipDelta(targetWords, hypothesis,
+                                        prev, rightTargetSegment,leftTargetSegment, totalDistortion);
+      }
+        
+      VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
+        
+      //get the scores
+      vector<double> scores;
+      for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
+        scores.push_back((**i).getScore());
+      }
+        
+      //randomly pick one of the deltas
+      if (scores.size() > 0) {
+        size_t chosen = getSample(scores);
+        IFVERBOSE(4) {
+          VERBOSE(4,"Scores: ");
+          for (size_t i = 0; i < scores.size(); ++i) {
+            VERBOSE(4,scores[i] << ",");
+          }
+          VERBOSE(4,endl);
+        }
+        VERBOSE(3,"The chosen sample is " << chosen << endl);
+          
+        //apply it to the sample
+        deltas[chosen]->apply(sample,*noChangeDelta);
+          
+        VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
+      }
+    }
+    //clean up
+    RemoveAllInColl(deltas);
+    delete noChangeDelta;
+  }
+}  
   
   
 }//namespace

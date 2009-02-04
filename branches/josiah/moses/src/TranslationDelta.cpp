@@ -206,5 +206,47 @@ void SplitDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
   m_scores.MinusEquals(noChangeDelta.getScores());
   sample.SplitTarget(*m_leftOption,*m_rightOption,m_scores);
 }
+  
+void FlipDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+  m_scores.MinusEquals(noChangeDelta.getScores());
+  sample.FlipNodes(m_leftTgtOption->GetSourceWordsRange().GetStartPos(), m_rightTgtOption->GetSourceWordsRange().GetStartPos(), m_scores);
+}
 
+    
+FlipDelta::FlipDelta(const vector<Word>& targetWords,  const Hypothesis* leftTgtHypo , 
+                         const Hypothesis* rightTgtHypo,  const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, float totalDistortion ) :
+    m_leftTgtOption(&leftTgtHypo->GetTranslationOption()), m_rightTgtOption(&rightTgtHypo->GetTranslationOption())  {
+    
+    //translation scores
+    m_scores.PlusEquals(m_leftTgtOption->GetScoreBreakdown());
+    m_scores.PlusEquals(m_rightTgtOption->GetScoreBreakdown());
+    
+    //word penalty
+    float penalty = -((int) leftTargetSegment.GetNumWordsCovered());
+    m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
+    penalty = -((int) rightTargetSegment.GetNumWordsCovered());
+    m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
+    
+    //LM
+    WordsRange targetSegment = leftTargetSegment;
+    targetSegment.SetStartPos(min(leftTargetSegment.GetStartPos(),rightTargetSegment.GetStartPos()) );
+    targetSegment.SetEndPos(min(leftTargetSegment.GetEndPos(), rightTargetSegment.GetStartPos()) );
+    
+    Phrase targetPhrase(m_leftTgtOption->GetTargetPhrase());
+    targetPhrase.Append(m_rightTgtOption->GetTargetPhrase());
+    
+    addLanguageModelScore(targetWords, targetPhrase, targetSegment);
+    
+    //linear distortion
+    const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
+    m_scores.PlusEquals(dsp, totalDistortion);      
+      
+    //weight the scores
+    const vector<float> & weights = StaticData::Instance().GetAllWeights();
+    m_score = m_scores.InnerProduct(weights);
+    
+    VERBOSE(2, "TUD: Scores " << m_scores << endl);
+    VERBOSE(2,"TUD: Total score is  " << m_score << endl);  
+  }  
+  
 }//namespace

@@ -80,6 +80,21 @@ namespace Moses {
       virtual ~TranslationSwapOperator() {}
   };
   
+  /**
+   * Operator which performs local reordering provided both source segments and target segments are contiguous, and that the swaps
+   * will not violate the reordering constraints of the model
+   **/
+  class FlipOperator : public virtual GibbsOperator {
+  public:
+    FlipOperator() : GibbsOperator("flip") {}
+    virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
+    virtual const string& name() const {return m_name;}
+    virtual ~FlipOperator() {}
+    
+  private:
+    string m_name;
+    bool CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTtgtHypo, float & totalDistortion);
+  };
  
 }
 
