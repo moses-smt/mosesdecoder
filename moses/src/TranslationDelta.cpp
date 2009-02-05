@@ -209,28 +209,27 @@ void SplitDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
   
 void FlipDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
   m_scores.MinusEquals(noChangeDelta.getScores());
-  sample.FlipNodes(m_leftTgtOption->GetSourceWordsRange().GetStartPos(), m_rightTgtOption->GetSourceWordsRange().GetStartPos(), m_scores);
+  //sample.FlipNodes(m_leftTgtOption->GetSourceWordsRange().GetStartPos(), m_rightTgtOption->GetSourceWordsRange().GetStartPos(), m_scores);
+  sample.FlipNodes(*m_leftTgtOption, *m_rightTgtOption, m_prevTgtHypo, m_nextTgtHypo, m_scores);
 }
 
     
-FlipDelta::FlipDelta(const vector<Word>& targetWords,  const Hypothesis* leftTgtHypo , 
-                         const Hypothesis* rightTgtHypo,  const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, float totalDistortion ) :
-    m_leftTgtOption(&leftTgtHypo->GetTranslationOption()), m_rightTgtOption(&rightTgtHypo->GetTranslationOption())  {
+FlipDelta::FlipDelta(const vector<Word>& targetWords,  const TranslationOption* leftTgtOption , 
+                         const TranslationOption* rightTgtOption,  const Hypothesis* prevTgtHypo, const Hypothesis* nextTgtHypo, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, float totalDistortion ) :
+    m_leftTgtOption(leftTgtOption), m_rightTgtOption(rightTgtOption), m_prevTgtHypo(const_cast<Hypothesis*> (prevTgtHypo)), m_nextTgtHypo(const_cast<Hypothesis*> (nextTgtHypo))  {
     
     //translation scores
     m_scores.PlusEquals(m_leftTgtOption->GetScoreBreakdown());
     m_scores.PlusEquals(m_rightTgtOption->GetScoreBreakdown());
     
     //word penalty
-    float penalty = -((int) leftTargetSegment.GetNumWordsCovered());
-    m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
-    penalty = -((int) rightTargetSegment.GetNumWordsCovered());
+    float penalty = -((int) m_leftTgtOption->GetTargetPhrase().GetSize() + (int) m_rightTgtOption->GetTargetPhrase().GetSize());
     m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
     
     //LM
     WordsRange targetSegment = leftTargetSegment;
     targetSegment.SetStartPos(min(leftTargetSegment.GetStartPos(),rightTargetSegment.GetStartPos()) );
-    targetSegment.SetEndPos(min(leftTargetSegment.GetEndPos(), rightTargetSegment.GetStartPos()) );
+    targetSegment.SetEndPos(max(leftTargetSegment.GetEndPos(), rightTargetSegment.GetEndPos()) );
     
     Phrase targetPhrase(m_leftTgtOption->GetTargetPhrase());
     targetPhrase.Append(m_rightTgtOption->GetTargetPhrase());
