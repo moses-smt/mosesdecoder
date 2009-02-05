@@ -76,8 +76,7 @@ protected:
 	//! Force a creation of a translation option where there are none for a particular source position.
 	void ProcessUnknownWord(const std::vector <DecodeGraph*> &decodeStepVL);
 	//! special handling of ONE unknown words.
-	virtual void ProcessOneUnknownWord(const Word &sourceWord
-																		 , size_t sourcePos, size_t length = 1);
+	virtual void ProcessOneUnknownWord(const Word &sourceWord, size_t sourcePos, size_t length = 1, const Scores *inputScores = NULL);
 	//! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 	void Prune();
 

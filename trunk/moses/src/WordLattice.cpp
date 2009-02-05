@@ -17,8 +17,14 @@ void WordLattice::Print(std::ostream& out) const {
 	out<<"word lattice: "<<data.size()<<"\n";
 	for(size_t i=0;i<data.size();++i) {
 		out<<i<<" -- ";
-		for(size_t j=0;j<data[i].size();++j)
-			out<<"("<<data[i][j].first.ToString()<<", "<<data[i][j].second<<", " << GetColumnIncrement(i,j) << ") ";
+		for(size_t j=0;j<data[i].size();++j) {
+			out<<"("<<data[i][j].first.ToString()<<", ";
+			for(std::vector<float>::const_iterator scoreIterator = data[i][j].second.begin();scoreIterator<data[i][j].second.end();scoreIterator++) {
+				out<<*scoreIterator<<", ";
+			}
+			out << GetColumnIncrement(i,j) << ") ";
+		}
+
 		out<<"\n";
 	}
 	out<<"\n\n";
@@ -31,6 +37,12 @@ int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrde
 	if(!getline(in,line)) return 0;
 	std::map<std::string, std::string> meta=ProcessAndStripSGML(line);
 	if (meta.find("id") != meta.end()) { this->SetTranslationId(atol(meta["id"].c_str())); }
+	size_t numLinkParams = StaticData::Instance().GetNumLinkParams();
+	size_t numLinkWeights = StaticData::Instance().GetNumInputScores();
+	
+	//when we have one more weight than params, we add a word count feature
+	bool addRealWordCount = ((numLinkParams + 1) == numLinkWeights);
+
 	PCN::CN cn = PCN::parsePCN(line);
 	data.resize(cn.size());
 	next_nodes.resize(cn.size());
@@ -41,10 +53,34 @@ int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrde
 		next_nodes[i].resize(col.size());
 		for (size_t j=0;j<col.size();++j) {
 			PCN::CNAlt& alt = col[j];
-			if (alt.first.second < 0.0f) { TRACE_ERR("WARN: neg probability: " << alt.first.second); alt.first.second = 0.0f; }
-			if (alt.first.second > 1.0f) { TRACE_ERR("WARN: probability > 1: " << alt.first.second); alt.first.second = 1.0f; }
-			data[i][j].second = std::max(static_cast<float>(log(alt.first.second)), LOWEST_SCORE);
-			//data[i][j].second = std::max(static_cast<float>((alt.first.second)), LOWEST_SCORE);
+			
+			
+			//check for correct number of link parameters
+			if (alt.first.second.size() != numLinkParams) {
+				TRACE_ERR("ERROR: need " << numLinkParams << " link parameters, found " << alt.first.second.size() << " while reading column " << i << " from " << line << "\n");
+				return false;
+			}
+			
+			//check each element for bounds
+			std::vector<float>::iterator probsIterator;
+			data[i][j].second = std::vector<float>(0);
+			for(probsIterator = alt.first.second.begin(); probsIterator < alt.first.second.end(); probsIterator++) {
+				if (*probsIterator < 0.0f) { 
+				  TRACE_ERR("WARN: neg probability: " << *probsIterator << "\n"); 
+				  //*probsIterator = 0.0f;
+				}
+				if (*probsIterator > 1.0f) { 
+				  TRACE_ERR("WARN: probability > 1: " << *probsIterator << "\n"); 
+				  //*probsIterator = 1.0f;
+				}
+				data[i][j].second.push_back(std::max(static_cast<float>(log(*probsIterator)), LOWEST_SCORE));
+			}
+			//store 'real' word count in last feature if we have one more weight than we do arc scores and not epsilon
+			if (addRealWordCount) {
+				//only add count if not epsilon
+				float value = (alt.first.first=="" || alt.first.first==EPSILON) ? 0.0f : -1.0f;
+				data[i][j].second.push_back(value);
+			}
 			String2Word(alt.first.first,data[i][j].first,factorOrder);
 			next_nodes[i][j] = alt.second;
 		}

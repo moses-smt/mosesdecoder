@@ -188,8 +188,8 @@ public:
 			std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),
 										 FloorScore);
 			//				CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,&src);
-			CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,swaVector,twaVector,&src);			costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),
-																		 tCands.size()));
+			CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,swaVector,twaVector,&src);
+			costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
 			tCands.push_back(targetPhrase);
 		}
 		
@@ -253,22 +253,25 @@ public:
 	struct State {
 		PPtr ptr;
 		Range range;
-		float score;
-		Position realWords;
+		std::vector<float> scores;
 		Phrase src;
 
-		State() : range(0,0),score(0.0),realWords(0),src(Input) {}
-		State(Position b,Position e,const PPtr& v,float sc=0.0,Position rw=0) 
-			: ptr(v),range(b,e),score(sc),realWords(rw),src(Input) {}
-		State(Range const& r,const PPtr& v,float sc=0.0,Position rw=0) 
-			: ptr(v),range(r),score(sc),realWords(rw),src(Input) {}
+		State() : range(0,0),scores(0),src(Input) {}
+		State(Position b,Position e,const PPtr& v,const std::vector<float>& sv=std::vector<float>(0)) 
+			: ptr(v),range(b,e),scores(sv),src(Input) {}
+		State(Range const& r,const PPtr& v,const std::vector<float>& sv=std::vector<float>(0)) 
+			: ptr(v),range(r),scores(sv),src(Input) {}
 
 		Position begin() const {return range.first;}
 		Position end() const {return range.second;}
-		float GetScore() const {return score;}
+		std::vector<float> GetScores() const {return scores;}
 
 		friend std::ostream& operator<<(std::ostream& out,State const& s) {
-			out<<" R=("<<s.begin()<<","<<s.end()<<"),SC=("<<s.GetScore()<<","<<s.realWords<<")";
+			out<<" R=("<<s.begin()<<","<<s.end()<<"),";
+			for(std::vector<float>::const_iterator scoreIterator = s.GetScores().begin();scoreIterator<s.GetScores().end();scoreIterator++) {
+				out<<", "<<*scoreIterator;
+			}
+			out<<")";
 			return out;
 		}
 
@@ -396,8 +399,8 @@ public:
 		std::map<Range,E2Costs> cov2cand;
 		std::vector<State> stack;
 		for(Position i=0 ; i < srcSize ; ++i) 
-			stack.push_back(State(i, i, m_dict->GetRoot()));
-
+			stack.push_back(State(i, i, m_dict->GetRoot(), std::vector<float>(m_numInputScores,0.0)));
+					
 		while(!stack.empty()) 
 			{
 				State curr(stack.back());
@@ -413,25 +416,40 @@ public:
 						Factors2String(w,s);
 						bool isEpsilon=(s=="" || s==EPSILON);
 						
+						//assert that we have the right number of link params in this CN option
+						assert(currCol[colidx].second.size() >= m_numInputScores);
+						
 						// do not start with epsilon (except at first position)
 						if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue; 
 
 						// At a given node in the prefix tree, look to see if w defines an edge to
 						// another node (Extend).  Stay at the same node if w==EPSILON
 						PPtr nextP = (isEpsilon ? curr.ptr : m_dict->Extend(curr.ptr,s));
-						unsigned newRealWords=curr.realWords + (isEpsilon ? 0 : 1);
-
+						
 						if(nextP) // w is a word that should be considered
 							{
 								Range newRange(curr.begin(),curr.end()+src.GetColumnIncrement(curr.end(),colidx));
-								float newScore=curr.GetScore()+currCol[colidx].second;  // CN score
+								
+								//add together the link scores from the current state and the new arc
+								std::vector<float> newInputScores(m_numInputScores,0.0);
+								std::transform(currCol[colidx].second.begin(), currCol[colidx].second.end(),
+												curr.GetScores().begin(),
+												newInputScores.begin(),
+												std::plus<float>());
+								
 								Phrase newSrc(curr.src);
 								if(!isEpsilon) newSrc.AddWord(w);
-								if(newRange.second<srcSize && newScore>LOWEST_SCORE)
+								
+								//we need to sum up link weights (excluding realWordCount, which isn't in numLinkParams)
+								//if the sum is too low, then we won't expand this.
+								//TODO: dodgy! shouldn't we consider weights here? what about zero-weight params?
+								float inputScoreSum = std::accumulate(newInputScores.begin(),newInputScores.begin()+m_numInputScores,0.0);
+							
+								if(newRange.second<srcSize && inputScoreSum>LOWEST_SCORE)
 									{
 									  // if there is more room to grow, add a new state onto the queue
 										// to be explored that represents [begin, curEnd+)
-										stack.push_back(State(newRange,nextP,newScore,newRealWords));
+										stack.push_back(State(newRange,nextP,newInputScores));
 										stack.back().src=newSrc;
 									}
 
@@ -451,23 +469,24 @@ public:
 										E2Costs& e2costs=cov2cand[newRange];
 										Phrase const* srcPtr=uniqSrcPhr(newSrc);
 										for(size_t i=0;i<tcands.size();++i)
-										{
-											std::vector<float> nscores(tcands[i].second.size()+m_numInputScores,0.0);
-											switch(m_numInputScores)
-											{
-												case 2: nscores[1]= -1.0f * newRealWords; // do not use -newRealWords ! -- RZ
-												case 1: nscores[0]= newScore;
-												case 0: break;
-												default:
-													TRACE_ERR("ERROR: too many model scaling factors for input weights 'weight-i' : "<<m_numInputScores<<"\n");
-													abort();
-											}
+										{											
+											//put input scores in first - already logged, just drop in directly
+											std::vector<float> nscores(newInputScores);
+											
+											//resize to include phrase table scores
+											nscores.resize(m_numInputScores+tcands[i].second.size(),0.0f);
+											
+											//put in phrase table scores, logging as we insert
 											std::transform(tcands[i].second.begin(),tcands[i].second.end(),nscores.begin() + m_numInputScores,TransformScore);
 											
 											assert(nscores.size()==m_weights.size());
+											
+											//tally up
 											float score=std::inner_product(nscores.begin(), nscores.end(), m_weights.begin(), 0.0f);
 
+											//count word penalty
 											score-=tcands[i].first.size() * m_weightWP;
+											
 											std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].first,TScores()));
 											
 											if(p.second) ++distinctE;

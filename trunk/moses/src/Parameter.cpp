@@ -46,7 +46,7 @@ Parameter::Parameter()
 	AddParam("generation-file", "location and properties of the generation table");
 	AddParam("input-factors", "list of factors in the input");
 	AddParam("input-file", "i", "location of the input file to be translated");
-	AddParam("inputtype", "text (0) or confusion network (1)");
+	AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
 	AddParam("labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
 	AddParam("include-alignment-in-n-best", "include word alignment in the n-best list. default is false");
 	AddParam("lmodel-file", "location and properties of the language models");
@@ -72,10 +72,11 @@ Parameter::Parameter()
 	AddParam("verbose", "v", "verbosity level of the logging");
 	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
 	AddParam("weight-generation", "g", "weight(s) for generation components");
-	AddParam("weight-i", "I", "weight for word insertion");
+	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
 	AddParam("weight-l", "lm", "weight(s) for language models");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
+	AddParam("weight-u", "u", "weight for unknown word penalty");
 	AddParam("weight-e", "e", "weight for word deletion"); 
 	AddParam("weight-file", "wf", "file containing labeled weights");
 	AddParam("output-factors", "list if factors in the output");
@@ -104,6 +105,7 @@ Parameter::Parameter()
 	AddParam("use-alignment-info", "Use word-to-word alignment: actually it is only used to output the word-to-word alignment. Word-to-word alignments are taken from the phrase table if any. Default is false.");
 	AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
+	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
 }
 
 Parameter::~Parameter()

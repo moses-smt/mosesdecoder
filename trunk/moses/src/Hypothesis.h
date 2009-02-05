@@ -356,6 +356,8 @@ public:
 			return (ret < 0);
 		}
 
+		
+		//TODO: is this check redundant? NGramCompare already calls wordbitmap.comare.
 		// same last n-grams. compare source words translated
 		const WordsBitmap &bitmapA		= hypoA->GetWordsBitmap()
 			, &bitmapB	= hypoB->GetWordsBitmap();

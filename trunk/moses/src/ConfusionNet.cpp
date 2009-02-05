@@ -112,25 +112,42 @@ bool ConfusionNet::ReadFormat0(std::istream& in,
 {
 	Clear();
 	std::string line;
+	size_t numLinkParams = StaticData::Instance().GetNumLinkParams();
+	size_t numLinkWeights = StaticData::Instance().GetNumInputScores();
+	bool addRealWordCount = ((numLinkParams + 1) == numLinkWeights);
+
 	while(getline(in,line)) {
 		std::istringstream is(line);
-		std::string word;double prob;
+		std::string word;
+		
 		Column col;
-		while(is>>word>>prob) {
+		while(is>>word) {
 			Word w;
 			String2Word(word,w,factorOrder);
-			if(prob<0.0) 
-				{
-					VERBOSE(1, "WARN: negative prob: "<<prob<<" ->set to 0.0\n");
-					prob=0.0;
+			std::vector<float> probs(numLinkWeights,0.0);
+			for(size_t i=0;i<numLinkParams;i++) {
+				double prob;
+				if (!(is>>prob)) {
+					TRACE_ERR("ERROR: unable to parse CN input - bad link probability, or wrong number of scores\n");
+					return false;
 				}
-			else if (prob>1.0)
-				{
-					VERBOSE(1, "WARN: prob > 1.0 : "<<prob<<" -> set to 1.0\n");
-					prob=1.0;
-				}
-			col.push_back(std::make_pair(w,std::max(static_cast<float>(log(prob)),
-																							LOWEST_SCORE)));
+				if(prob<0.0) 
+					{
+						VERBOSE(1, "WARN: negative prob: "<<prob<<" ->set to 0.0\n");
+						prob=0.0;
+					}
+				else if (prob>1.0)
+					{
+						VERBOSE(1, "WARN: prob > 1.0 : "<<prob<<" -> set to 1.0\n");
+						prob=1.0;
+					}
+				probs[i] = (std::max(static_cast<float>(log(prob)),LOWEST_SCORE));
+			
+			}
+			//store 'real' word count in last feature if we have one more weight than we do arc scores and not epsilon
+			if (addRealWordCount && word!=EPSILON && word!="")
+				probs[numLinkParams] = -1.0;
+			col.push_back(std::make_pair(w,probs));
 		}
 		if(col.size()) {
 			data.push_back(col);
@@ -157,10 +174,12 @@ bool ConfusionNet::ReadFormat1(std::istream& in,
 		data[i].resize(s);
 		for(size_t j=0;j<s;++j)
 			if(is>>word>>prob) {
-				data[i][j].second = (float) log(prob); 
-				if(data[i][j].second<0) {
-					VERBOSE(1, "WARN: neg costs: "<<data[i][j].second<<" -> set to 0\n");
-					data[i][j].second=0.0;}
+				//TODO: we are only reading one prob from this input format, should read many... but this function is unused anyway. -JS
+				data[i][j].second = std::vector<float> (1);
+				data[i][j].second.push_back((float) log(prob)); 
+				if(data[i][j].second[0]<0) {
+					VERBOSE(1, "WARN: neg costs: "<<data[i][j].second[0]<<" -> set to 0\n");
+					data[i][j].second[0]=0.0;}
 				String2Word(word,data[i][j].first,factorOrder);
 			} else return 0;
 	}
@@ -171,8 +190,13 @@ void ConfusionNet::Print(std::ostream& out) const {
 	out<<"conf net: "<<data.size()<<"\n";
 	for(size_t i=0;i<data.size();++i) {
 		out<<i<<" -- ";
-		for(size_t j=0;j<data[i].size();++j)
-			out<<"("<<data[i][j].first.ToString()<<", "<<data[i][j].second<<") ";
+		for(size_t j=0;j<data[i].size();++j) {
+			out<<"("<<data[i][j].first.ToString()<<", ";
+			for(std::vector<float>::const_iterator scoreIterator = data[i][j].second.begin();scoreIterator<data[i][j].second.end();scoreIterator++) {
+				out<<", "<<*scoreIterator;
+			}
+			out<<") ";
+		}
 		out<<"\n";
 	}
 	out<<"\n\n";
@@ -181,7 +205,7 @@ void ConfusionNet::Print(std::ostream& out) const {
 Phrase ConfusionNet::GetSubString(const WordsRange&) const {
 	TRACE_ERR("ERROR: call to ConfusionNet::GetSubString\n");
 	abort();
-	return Phrase(Input);
+	//return Phrase(Input);
 }
 
 std::string ConfusionNet::GetStringRep(const vector<FactorType> factorsToPrint) const{ //not well defined yet

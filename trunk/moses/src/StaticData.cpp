@@ -76,6 +76,7 @@ StaticData::StaticData()
 ,m_factorDelimiter("|") // default delimiter between factors
 ,m_isAlwaysCreateDirectTranslationOption(false)
 ,m_sourceStartPosMattersForRecombination(false)
+,m_numLinkParams(1)
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -251,7 +252,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
 	m_weightDistortion				= Scan<float>(distortionWeights[0]);
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
-	m_weightUnknownWord				= 1; // do we want to let mert decide weight for this ???
+	m_weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
 
 	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightDistortion);
@@ -766,30 +767,50 @@ bool StaticData::LoadPhraseTables()
 			if(currDict==0 && m_inputType)
 			{	// TODO. find what the assumptions made by confusion network about phrase table output which makes
 				// it only work with binrary file. This is a hack 	
+				
 				m_numInputScores=m_parameter->GetParam("weight-i").size();
 				for(unsigned k=0;k<m_numInputScores;++k)
-					weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
+					weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));					
+				
+				if(m_parameter->GetParam("link-param-count").size()) 
+					m_numLinkParams = Scan<size_t>(m_parameter->GetParam("link-param-count")[0]);
+				
+				//print some info about this interaction:
+					if (m_numLinkParams == m_numInputScores) {
+						VERBOSE(1,"specified equal numbers of link parameters and insertion weights, not using non-epsilon 'real' word link count.\n");
+					} else if ((m_numLinkParams + 1) == m_numInputScores) {
+						VERBOSE(1,"WARN: "<< m_numInputScores << " insertion weights found and only "<< m_numLinkParams << " link parameters specified, applying non-epsilon 'real' word link count for last feature weight.\n");
+					} else {
+						stringstream strme;
+						strme << "You specified " << m_numInputScores
+									<< " input weights (weight-i), but you specified " << m_numLinkParams << " link parameters (link-param-count)!";
+						UserMessage::Add(strme.str());
+						return false;
+					}
+					
 			}
-			else{
+			if (!m_inputType){
 				m_numInputScores=0;
 			}
+			//this number changes depending on what phrase table we're talking about: only 0 has the weights on it
+			size_t tableInputScores = (currDict == 0 ? m_numInputScores : 0);
 			
 			for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
 				weight.push_back(weightAll[weightAllOffset + currScore]);			
 			
 
-			if(weight.size() - m_numInputScores != numScoreComponent) 
+			if(weight.size() - tableInputScores != numScoreComponent) 
 			{
 				stringstream strme;
 				strme << "Your phrase table has " << numScoreComponent
-							<< " scores, but you specified " << weight.size() << " weights!";
+							<< " scores, but you specified " << (weight.size() - tableInputScores) << " weights!";
 				UserMessage::Add(strme.str());
 				return false;
 			}
 						
 			weightAllOffset += numScoreComponent;
-			numScoreComponent += m_numInputScores;
-						
+			numScoreComponent += tableInputScores;
+			
 			assert(numScoreComponent==weight.size());
 
 			std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));

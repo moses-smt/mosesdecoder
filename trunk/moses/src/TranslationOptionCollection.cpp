@@ -206,61 +206,75 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGr
 	*
 	* \param sourceWord the unknown word
 	* \param sourcePos
-	* \param factorCollection input sentence with all factors
+	* \param length length covered by this word (may be > 1 for lattice input)
+	* \param inputScores a set of scores associated with unknown word (input scores from latties/CNs)
  */
-void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
-																														size_t sourcePos, size_t length)
+void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,size_t sourcePos, size_t length, const Scores *inputScores)
+
 {
 	// unknown word, add as trans opt
 	FactorCollection &factorCollection = FactorCollection::Instance();
 
 	size_t isDigit = 0;
+	
+	const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
+	const string &s = f->GetString();
+	bool isEpsilon = (s=="" || s==EPSILON);
 	if (StaticData::Instance().GetDropUnknown())
 	{
-		const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-		const string &s = f->GetString();
+
+
 		isDigit = s.find_first_of("0123456789");
-		if (isDigit == string::npos)
+		if (isDigit == string::npos) 
 			isDigit = 0;
-		else
+		else 
 			isDigit = 1;
 		// modify the starting bitmap
 	}
+	
 	Phrase* m_unksrc = new Phrase(Input); m_unksrc->AddWord() = sourceWord;
 	m_unksrcs.push_back(m_unksrc);
 
 	TranslationOption *transOpt;
-	if (! StaticData::Instance().GetDropUnknown() || isDigit)
+	TargetPhrase targetPhrase(Output);
+	targetPhrase.SetSourcePhrase(m_unksrc);
+	if (inputScores != NULL) {
+		targetPhrase.SetScore(*inputScores);
+	} else {
+		targetPhrase.SetScore();
+	}
+	
+	if (!(StaticData::Instance().GetDropUnknown() || isEpsilon) || isDigit)
 	{
 		// add to dictionary
-		TargetPhrase targetPhrase(Output);
-		Word &targetWord = targetPhrase.AddWord();
 
+		Word &targetWord = targetPhrase.AddWord();
+					
 		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
-
+			
 			const Factor *sourceFactor = sourceWord[currFactor];
 			if (sourceFactor == NULL)
 				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
 			else
 				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
 		}
+		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation		
 
-		targetPhrase.SetScore();
-		targetPhrase.SetSourcePhrase(m_unksrc);
-		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation
+
+
 		targetPhrase.CreateAlignmentInfo("(0)","(0)");
-		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);
+		
 	}
-	else
-	{ // drop source word. create blank trans opt
-		TargetPhrase targetPhrase(Output);
-		targetPhrase.SetSourcePhrase(m_unksrc);
-		targetPhrase.SetAlignment();
-		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);
-	}
+	else 
+	{ 
+		// drop source word. create blank trans opt
 
+		targetPhrase.SetAlignment();
+
+	}
+	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);	
 	transOpt->CalcScore();
 	Add(transOpt);
 }
