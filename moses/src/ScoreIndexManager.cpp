@@ -50,7 +50,8 @@ void ScoreIndexManager::InitFeatureNames() {
 		bool add_idx = (m_producers[cur_scoreType]->GetNumInputScores() > 1);
 		while (nis_idx < m_producers[cur_scoreType]->GetNumInputScores()){
 			ostringstream os;
-			os << m_producers[cur_scoreType]->GetScoreProducerDescription();
+			//distinguish these from other scores with _InputScore
+			os << m_producers[cur_scoreType]->GetScoreProducerDescription() << "_InputScore";
 			if (add_idx)
 				os << '_' << (nis_idx+1);
 			m_featureNames.push_back(os.str());

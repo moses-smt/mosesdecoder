@@ -95,6 +95,31 @@ void TargetPhrase::SetScore(float score)
 	SetScore(prod,scoreVector,weights,StaticData::Instance().GetWeightWordPenalty(),StaticData::Instance().GetAllLM());
 }
 
+/**
+ * used for setting scores for unknown words with input link features (lattice/conf. nets)
+ * \param scoreVector input scores 
+ */
+void TargetPhrase::SetScore(const Scores &scoreVector) 
+{
+	//we use an existing score producer to figure out information for score setting (number of scores and weights)
+	ScoreProducer* prod = StaticData::Instance().GetPhraseDictionaries()[0];
+
+	//get the weight list
+	unsigned int id = prod->GetScoreBookkeepingID();
+	const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
+	size_t beginIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(id);
+	size_t endIndex = StaticData::Instance().GetScoreIndexManager().GetEndIndex(id);
+	vector<float> weights;
+	std::copy(allWeights.begin() +beginIndex, allWeights.begin() + endIndex,std::back_inserter(weights));
+	
+	//expand the input weight vector
+	assert(scoreVector.size() <= prod->GetNumScoreComponents());
+	Scores sizedScoreVector = scoreVector;
+	sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
+
+	SetScore(prod,sizedScoreVector,weights,StaticData::Instance().GetWeightWordPenalty(),StaticData::Instance().GetAllLM());
+}
+
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 														const Scores &scoreVector,
 														const vector<float> &weightT,

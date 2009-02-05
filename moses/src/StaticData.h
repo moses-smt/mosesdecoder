@@ -92,7 +92,8 @@ protected:
 			, m_nBestFactor
 			, m_maxNoTransOptPerCoverage
 			, m_maxNoPartTransOpt
-			, m_maxPhraseLength;
+			, m_maxPhraseLength
+			, m_numLinkParams;
 	
 	std::string
 		m_constraintFileName;	
@@ -274,6 +275,10 @@ public:
 	{
 		return m_weightWordPenalty;
 	}
+	float GetWeightUnknownWord() const
+	{
+		return m_weightUnknownWord;
+	}
 	bool IsWordDeletionEnabled() const
 	{
 		return m_wordDeletionEnabled;
@@ -384,6 +389,10 @@ public:
 	bool NBestIncludesAlignment() const
 	{
 		return m_nBestIncludesAlignment;
+	}
+	size_t GetNumLinkParams() const 
+	{
+			return m_numLinkParams;
 	}
 	const std::vector<std::string> &GetDescription() const
 	{

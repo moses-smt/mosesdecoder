@@ -32,6 +32,7 @@ using namespace std;
 
 namespace Moses
 {
+
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange
 																		, const TargetPhrase &targetPhrase
@@ -78,6 +79,9 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 	else
 	{ // TODO lex reordering with confusion network
 		m_sourcePhrase = new Phrase(*targetPhrase.GetSourcePhrase());
+		//the target phrase from a confusion network/lattice has input scores that we want to keep
+		m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
+
 	}
 }
 

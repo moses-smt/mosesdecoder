@@ -28,7 +28,7 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(
 	ConfusionNet::Column const& coll=source.GetColumn(sourcePos);
 	size_t j=0;
 	for(ConfusionNet::Column::const_iterator i=coll.begin();i!=coll.end();++i) {
-		ProcessOneUnknownWord(i->first ,sourcePos, source.GetColumnIncrement(sourcePos, j++));
+		ProcessOneUnknownWord(i->first ,sourcePos, source.GetColumnIncrement(sourcePos, j++),&(i->second));
 	}
 		
 }

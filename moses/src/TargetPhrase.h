@@ -74,6 +74,10 @@ public:
 	//!Set score for Sentence XML target options
 	void SetScore(float score);
 	
+	//! Set score for unknown words with input weights
+	void SetScore(const Scores &scoreVector); 
+
+	
 	/*** Called immediately after creation to initialize scores.
    *
    * @param translationScoreProducer The PhraseDictionaryMemory that this TargetPhrase is contained by.

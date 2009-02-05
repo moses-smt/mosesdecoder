@@ -16,7 +16,7 @@ class Sentence;
 
 class ConfusionNet : public InputType {
  public: 
-	typedef std::vector<std::pair<Word,float> > Column;
+	typedef std::vector<std::pair<Word,std::vector<float> > > Column;
 
  protected:
 	std::vector<Column> data;

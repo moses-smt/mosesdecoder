@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
   */
 namespace PCN {
 
-  typedef std::pair<std::pair<std::string, float>, size_t> CNAlt;
+  typedef std::pair<std::pair<std::string, std::vector<float> >, size_t> CNAlt;
   typedef std::vector<CNAlt> CNCol;
   typedef std::vector<CNCol> CN;
 

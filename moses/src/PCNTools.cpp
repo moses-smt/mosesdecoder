@@ -68,17 +68,22 @@ CNAlt getCNAlt(const std::string& in, int &c)
 	std::string word = getEscapedString(in,c);
 	if (get(in,c++) != ',') { std::cerr << "PCN/PLF parse error: expected , after string\n"; return CNAlt(); } // throw "expected , after string";
 	size_t cnNext = 1;
-	float prob = getFloat(in,c);
-	if (get(in,c) == ',') {  // WORD LATTICE
-	  c++;
-	  int colIncr = getInt(in,c);
-	  if (colIncr < 1) { colIncr = 1; //WARN
-	  }
-	  cnNext = (size_t)colIncr;
+	std::vector<float> probs;
+	probs.push_back(getFloat(in,c));
+	while (get(in,c) == ',') {
+		c++;
+		float val = getFloat(in,c);
+		probs.push_back(val);
+	}
+	//if we read more than one prob, this was a lattice, last item was column increment
+	if (probs.size()>1) {
+		cnNext = static_cast<size_t>(probs.back());
+		probs.pop_back();
+		if (cnNext < 1) { ; std::cerr << "PCN/PLF parse error: bad link length at last element of cn alt block\n"; return CNAlt(); } //throw "bad link length"
 	}
 	if (get(in,c++) != ')') { std::cerr << "PCN/PLF parse error: expected ) at end of cn alt block\n"; return CNAlt(); } // throw "expected )";
 	eatws(in,c);
-	return CNAlt(std::pair<std::string, float>(word,prob), cnNext);
+	return CNAlt(std::pair<std::string, std::vector<float> >(word,probs), cnNext);
 }
 
 // parse (('foo', 0.23), ('bar', 0.77))
