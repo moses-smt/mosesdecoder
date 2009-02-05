@@ -80,16 +80,23 @@ void Sample::GetTargetWords(vector<Word>& words) {
   
 Hypothesis* Sample::GetHypAtSourceIndex(size_t i) {
   std::map<size_t, Hypothesis*>::iterator it = sourceIndexedHyps.find(i);
-  assert(it != sourceIndexedHyps.end());
+  if (it == sourceIndexedHyps.end())
+    return NULL;
   return it->second;
 }
 
 void Sample::SetSourceIndexedHyps(Hypothesis* h) {
-  if (!h->m_prevHypo)
-    return;
+  //if (!h->m_prevHypo)
+//    return;
   
   size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
   size_t endPos = h->GetCurrSourceWordsRange().GetEndPos();
+  
+  if (startPos + 1 == 0 ) {
+    sourceIndexedHyps[startPos] = h; 
+    return;
+  }
+    
   
   for (size_t i = startPos; i <= endPos; i++) {
     sourceIndexedHyps[i] = h; 
@@ -98,59 +105,111 @@ void Sample::SetSourceIndexedHyps(Hypothesis* h) {
 }
   
 //x and y are source side positions  
-void Sample::FlipNodes(size_t x, size_t y, const ScoreComponentCollection& deltaFV) {
-  assert (x != y);
-  Hypothesis* hyp1 = GetHypAtSourceIndex(x);
-  Hypothesis* hyp2 = GetHypAtSourceIndex(y);
+void Sample::FlipNodes(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption, Hypothesis* m_prevTgtHypo, Hypothesis* m_nextTgtHypo, const ScoreComponentCollection& deltaFV) {
   
-  WordsRange& h1tgtCovered = hyp1->GetCurrTargetWordsRange();
-  WordsRange& h2tgtCovered = hyp2->GetCurrTargetWordsRange();
+  Hypothesis *newLeftHypo = new Hypothesis(*m_prevTgtHypo, leftTgtOption);
+  Hypothesis *newRightHypo = new Hypothesis(*newLeftHypo, rightTgtOption);
+
+  m_prevTgtHypo->m_nextHypo = newLeftHypo;
+  newLeftHypo->m_nextHypo = newRightHypo;
+  newRightHypo->m_nextHypo = m_nextTgtHypo;
+  if (m_nextTgtHypo)
+    m_nextTgtHypo->m_prevHypo = newRightHypo;
   
-  if (h1tgtCovered < h2tgtCovered) {
-    //Updating the target pointers, src ptrs don't change
-    Hypothesis* hyp1_prevHypo = const_cast<Hypothesis*>(hyp1->m_prevHypo);
-    Hypothesis* hyp2_nextHypo = hyp2->m_nextHypo;
-    
-    hyp2->m_prevHypo = hyp1_prevHypo;
-    hyp2->m_nextHypo = hyp1;
-    if (hyp1_prevHypo != NULL) {
-      hyp1_prevHypo->m_nextHypo = hyp2;
-    }
-    
-    hyp1->m_prevHypo = hyp2;
-    hyp1->m_nextHypo = hyp2_nextHypo;
-    if (hyp2_nextHypo != NULL) {
-      hyp2_nextHypo->m_prevHypo = hyp1;
-    }
-    
-    UpdateHead(hyp2, hyp1, target_head);
-    //Update target word range
-    UpdateAdjacentTgtWordRanges(hyp1_prevHypo, hyp2, hyp1);
+  Hypothesis *oldLeftHypo = GetHypAtSourceIndex(newLeftHypo->GetCurrSourceWordsRange().GetStartPos());
+  Hypothesis *oldRightHypo = GetHypAtSourceIndex(newRightHypo->GetCurrSourceWordsRange().GetStartPos());
+  
+  SetSourceIndexedHyps(newLeftHypo);
+  SetSourceIndexedHyps(newRightHypo);
+  
+  Hypothesis* newLeftSourcePrevHypo = GetHypAtSourceIndex(newLeftHypo->GetCurrSourceWordsRange().GetStartPos() - 1 );
+  newLeftHypo->m_sourcePrevHypo = newLeftSourcePrevHypo;
+  if (newLeftSourcePrevHypo) {
+    newLeftSourcePrevHypo->m_sourceNextHypo = newLeftHypo;
   }
-  else {
-    //Updating the target pointers, src ptrs don't change
-    Hypothesis* hyp1_nextHypo = hyp1->m_nextHypo;
-    Hypothesis* hyp2_prevHypo = const_cast<Hypothesis*>(hyp2->m_prevHypo);
-    
-    hyp2->m_prevHypo = hyp1;
-    hyp2->m_nextHypo = hyp1_nextHypo;
-    if (hyp1_nextHypo != NULL) {
-      hyp1_nextHypo->m_prevHypo = hyp2;
-    }
-    
-    hyp1->m_nextHypo = hyp2;
-    hyp1->m_prevHypo = hyp2_prevHypo;
-    if (hyp2_prevHypo != NULL) {
-      hyp2_prevHypo->m_nextHypo = hyp1;
-    }
-    
-    UpdateHead(hyp1, hyp2, target_head);
-    //Update target word range
-    UpdateAdjacentTgtWordRanges(hyp2_prevHypo, hyp2, hyp1);
+  
+  Hypothesis* newLeftSourceNextHypo = GetHypAtSourceIndex(newLeftHypo->GetCurrSourceWordsRange().GetEndPos() + 1 );
+  newLeftHypo->m_sourceNextHypo = newLeftSourceNextHypo;
+  if (newLeftSourceNextHypo) {
+    newLeftSourceNextHypo->m_sourcePrevHypo = newLeftHypo;
   }
+  
+  Hypothesis* newRightSourcePrevHypo = GetHypAtSourceIndex(newRightHypo->GetCurrSourceWordsRange().GetStartPos() - 1 );
+  newRightHypo->m_sourcePrevHypo = newRightSourcePrevHypo;
+  if (newRightSourcePrevHypo) {
+    newRightSourcePrevHypo->m_sourceNextHypo = newRightHypo;
+  }
+  
+  Hypothesis* newRightSourceNextHypo = GetHypAtSourceIndex(newRightHypo->GetCurrSourceWordsRange().GetEndPos() + 1 );
+  newRightHypo->m_sourceNextHypo = newRightSourceNextHypo;
+  if (newRightSourceNextHypo) {
+    newRightSourceNextHypo->m_sourcePrevHypo = newRightHypo;
+  }
+  
+  UpdateHead(oldLeftHypo, newLeftHypo, source_head);
+  UpdateHead(oldRightHypo, newRightHypo, source_head);
+  
+  UpdateHead(oldLeftHypo, newRightHypo, target_head);
+  UpdateHead(oldRightHypo, newRightHypo, target_head);
   
   UpdateFeatureValues(deltaFV);
 }
+  
+  
+//x and y are source side positions  
+//void Sample::FlipNodes(size_t x, size_t y, const ScoreComponentCollection& deltaFV) {
+//  assert (x != y);
+//  Hypothesis* hyp1 = GetHypAtSourceIndex(x);
+//  Hypothesis* hyp2 = GetHypAtSourceIndex(y);
+//    
+//  WordsRange& h1tgtCovered = hyp1->GetCurrTargetWordsRange();
+//    WordsRange& h2tgtCovered = hyp2->GetCurrTargetWordsRange();
+//    
+//    if (h1tgtCovered < h2tgtCovered) {
+//      //Updating the target pointers, src ptrs don't change
+//      Hypothesis* hyp1_prevHypo = const_cast<Hypothesis*>(hyp1->m_prevHypo);
+//      Hypothesis* hyp2_nextHypo = hyp2->m_nextHypo;
+//      
+//      hyp2->m_prevHypo = hyp1_prevHypo;
+//      hyp2->m_nextHypo = hyp1;
+//      if (hyp1_prevHypo != NULL) {
+//        hyp1_prevHypo->m_nextHypo = hyp2;
+//      }
+//      
+//      hyp1->m_prevHypo = hyp2;
+//      hyp1->m_nextHypo = hyp2_nextHypo;
+//      if (hyp2_nextHypo != NULL) {
+//        hyp2_nextHypo->m_prevHypo = hyp1;
+//      }
+//      
+//      UpdateHead(hyp2, hyp1, target_head);
+//      //Update target word range
+//      UpdateAdjacentTgtWordRanges(hyp1_prevHypo, hyp2, hyp1);
+//    }
+//    else {
+//      //Updating the target pointers, src ptrs don't change
+//      Hypothesis* hyp1_nextHypo = hyp1->m_nextHypo;
+//      Hypothesis* hyp2_prevHypo = const_cast<Hypothesis*>(hyp2->m_prevHypo);
+//      
+//      hyp2->m_prevHypo = hyp1;
+//      hyp2->m_nextHypo = hyp1_nextHypo;
+//      if (hyp1_nextHypo != NULL) {
+//        hyp1_nextHypo->m_prevHypo = hyp2;
+//      }
+//      
+//      hyp1->m_nextHypo = hyp2;
+//      hyp1->m_prevHypo = hyp2_prevHypo;
+//      if (hyp2_prevHypo != NULL) {
+//        hyp2_prevHypo->m_nextHypo = hyp1;
+//      }
+//      
+//      UpdateHead(hyp1, hyp2, target_head);
+//      //Update target word range
+//      UpdateAdjacentTgtWordRanges(hyp2_prevHypo, hyp1, hyp2);
+//    }
+//    
+//    UpdateFeatureValues(deltaFV);
+//  }
   
 void Sample::UpdateAdjacentTgtWordRanges(Hypothesis *prevHyp, Hypothesis *nextTgtHyp, Hypothesis *adjTgtHyp) {
     
@@ -420,6 +479,10 @@ void Sampler::init() {
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
   
   Sample sample(starting);
+  
+  operators.push_back(new MergeSplitOperator());
+  operators.push_back(new TranslationSwapOperator());
+  operators.push_back(new FlipOperator());
   for (size_t i = 0; i < m_iterations; ++i) {
     VERBOSE(1,"Gibbs sampling iteration: " << i << endl);
     for (size_t j = 0; j < m_operators.size(); ++j) {
