@@ -50,6 +50,9 @@ if (defined($ENV{"SCRIPTS_ROOTDIR"})) {
   $ENV{"SCRIPTS_ROOTDIR"} = $SCRIPTS_ROOTDIR;
 }
 
+# utilities
+my $ZCAT = "gzip -cd";
+
 # for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
 # of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
 # but the translation model has currently 5 features
@@ -135,6 +138,8 @@ my $___NONORM = 0;
 
 # set 0 if input type is text, set 1 if input type is confusion network
 my $___INPUTTYPE = 0; 
+#input weights for CNs and Lattices: don't have a direct ini file counter, so specified here
+my $___INPUTWEIGHTS = 1;
 
 # set 1 if using with async decoder
 my $___ASYNC = 0; 
@@ -166,6 +171,7 @@ GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
   "input=s" => \$___DEV_F,
   "inputtype=i" => \$___INPUTTYPE,
+  "inputweights=i" => \$___INPUTWEIGHTS,
   "refs=s" => \$___DEV_E,
   "decoder=s" => \$___DECODER,
   "config=s" => \$___CONFIG,
@@ -250,6 +256,8 @@ Options:
   --scorenbestcmd=STRING  ... path to score-nbest.py
   --old-sge ... passed to moses-parallel, assume Sun Grid Engine < 6.0
   --inputtype=[0|1|2] ... Handle different input types (0 for text, 1 for confusion network, 2 for lattices, default is 0)
+  --inputweights=N ... For confusion networks and lattices, number of weights to optimize for weight-i 
+                       (must supply -link-param-count N to decoder-flags if N != 1 for decoder to deal with this correctly)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
   --efficient_scorenbest_flag ... activate a time-efficient scoring of nbest lists
@@ -261,26 +269,23 @@ Options:
   exit 1;
 }
 
-# update variables if input is confusion network
-if ($___INPUTTYPE == 1)
+# update default variables if input is confusion network or lattice
+if ($___INPUTTYPE == 1 || $___INPUTTYPE == 2)
 {
   $ABBR_FULL_MAP = "$ABBR_FULL_MAP I=weight-i";
   %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
   %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
-
-  push @{$default_triples -> {"I"}}, [ 1.0, 0.0, 2.0 ];
-  #$extra_lambdas_for_model -> {"I"} = 1; #Confusion network posterior
+  
+  my @my_array;
+  
+  for(my $i=0 ; $i < $___INPUTWEIGHTS ; $i++) 
+	{
+		push @my_array, [ 1.0, 0.0, 2.0 ];
+	}
+	push @{$default_triples -> {"I"}}, @my_array;
+	
 }
 
-# update variables if input is lattice - handle like conf. net for now
-if ($___INPUTTYPE == 2)
-{
-    $ABBR_FULL_MAP = "$ABBR_FULL_MAP I=weight-i";
-    %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
-    %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
-
-    push @{$default_triples -> {"I"}}, [ 1.0, 0.0, 2.0 ];
-}
 
 # Check validity of input parameters and set defaults if needed
 
@@ -558,7 +563,7 @@ while(1) {
   my $aggregate_nbl_size=0;
   if (defined $obo_scorenbest) {
     # Faster scoring method, never rescore previous iterations
-    my $cmd = "zcat run$run.best*.out.gz | $obo_scorenbest ".join(" ", @references);
+    my $cmd = "$ZCAT run$run.best*.out.gz | $obo_scorenbest ".join(" ", @references);
     my $targetfile = "run$run.feats";
     if (defined $___JOBS) {
       safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=$targetfile -stderr=run$run.scorenbest.err")

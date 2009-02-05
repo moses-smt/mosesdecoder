@@ -11,6 +11,10 @@ use Getopt::Long;
 use IO::File;
 use File::Basename;
 
+# utilities
+my $ZCAT = "gzip -cd";
+my $BZCAT = "bzcat";
+
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
@@ -109,9 +113,9 @@ sub my_open {
   my $ft = `file $f`;
   # file might not recognize some files!
   if ($f =~ /\.gz$/ || $ft =~ /gzip compressed data/) {
-    $opn = "zcat $f |";
+    $opn = "$ZCAT $f |";
   } elsif ($f =~ /\.bz2$/ || $ft =~ /bzip2 compressed data/) {
-    $opn = "bzcat $f |";
+    $opn = "$BZCAT $f |";
   } else {
     $opn = "$f";
   }
