@@ -10,6 +10,10 @@
 use strict;
 
 my $MAX_LENGTH = 10;
+
+# utilities
+my $ZCAT = "gzip -cd";
+
 # consider phrases in input up to this length
 # in other words, all phrase-tables will be truncated at least to 10 words per
 # phrase
@@ -149,9 +153,9 @@ for(my $i=0;$i<=$#TABLE;$i++) {
 
     my $openstring;
     if ($file !~ /\.gz$/ && -e "$file.gz") {
-      $openstring = "zcat $file.gz |";
+      $openstring = "$ZCAT $file.gz |";
     } elsif ($file =~ /\.gz$/) {
-      $openstring = "zcat $file |";
+      $openstring = "$ZCAT $file |";
     } else {
       $openstring = "< $file";
     }
