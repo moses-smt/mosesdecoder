@@ -172,17 +172,27 @@ PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(const vector<Word>& t
     //For lm-scores treat as one large target segment, since the lmcontext may overlap, depending on the lm order
       
     WordsRange targetSegment(min(leftTargetSegment.GetStartPos(), rightTargetSegment.GetStartPos()), max(leftTargetSegment.GetEndPos(), rightTargetSegment.GetEndPos()));
-    Phrase targetPhrase(leftOption->GetTargetPhrase());
-    assert(leftTargetSegment.GetEndPos() < rightTargetSegment.GetStartPos());
-    //include potential words between the two target segments
-    for (size_t i = leftTargetSegment.GetEndPos()+1; i < rightTargetSegment.GetStartPos(); ++i) {
-      targetPhrase.AddWord(targetWords[i]);
+    
+    Phrase *targetPhrase;  
+    if (leftTargetSegment < rightTargetSegment) {
+      targetPhrase = new Phrase(leftOption->GetTargetPhrase());
+      //include potential words between the two target segments
+      for (size_t i = leftTargetSegment.GetEndPos()+1; i < rightTargetSegment.GetStartPos(); ++i) {
+        targetPhrase->AddWord(targetWords[i]);
+      }
+      targetPhrase->Append(rightOption->GetTargetPhrase());                    
     }
-    const Phrase& rightTargetPhrase = rightOption->GetTargetPhrase();
-    for (size_t i = 0; i < rightTargetPhrase.GetSize(); ++i) {
-      targetPhrase.AddWord(rightTargetPhrase.GetWord(i));
+    else {
+      targetPhrase = new Phrase(rightOption->GetTargetPhrase());
+      //include potential words between the two target segments
+      for (size_t i = rightTargetSegment.GetEndPos()+1; i < leftTargetSegment.GetStartPos(); ++i) {
+        targetPhrase->AddWord(targetWords[i]);
+      }
+      targetPhrase->Append(leftOption->GetTargetPhrase());
     }
-    initScoresPairedUpdate(targetWords,leftOption,rightOption,targetSegment,targetPhrase);
+      
+      
+    initScoresPairedUpdate(targetWords,leftOption,rightOption,targetSegment,*targetPhrase);
 }
 
 void PairedTranslationUpdateDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
