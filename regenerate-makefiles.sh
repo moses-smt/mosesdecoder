@@ -32,7 +32,7 @@ fi
 
 
 echo "Calling $ACLOCAL..."
-$ACLOCAL || die "aclocal failed"
+$ACLOCAL -I m4 || die "aclocal failed"
 echo "Calling $AUTOCONF..."
 $AUTOCONF || die "autoconf failed"
 echo "Calling $AUTOMAKE..."

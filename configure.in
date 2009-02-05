@@ -7,6 +7,7 @@ AC_PROG_CXX
 AC_LANG_CPLUSPLUS
 AC_PROG_RANLIB
 #AM_PROG_LIBTOOL
+AX_BOOST_BASE([1.32.0])
 
 AC_ARG_WITH(protobuf,
             [AC_HELP_STRING([--with-protobuf=PATH], [(optional) path to Google protobuf])],
@@ -47,6 +48,7 @@ AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
 AM_CONDITIONAL([RAND_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
+
 
 if test "x$with_protobuf" != 'xno'
 then
@@ -131,4 +133,4 @@ fi
 
 LIBS="$LIBS -lz"
 
-AC_OUTPUT(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile)
+AC_OUTPUT(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile josiah/Makefile)
