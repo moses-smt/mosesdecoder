@@ -35,28 +35,6 @@ static double log_sum (double log_a, double log_b)
 }
 
 
-/**
-  * Extract the target words in the sentence into a vector.
-**/
-static void getTargetWords(const Sample& sample, vector<Word>& words) {
-  const Hypothesis* currHypo = sample.GetTargetTail(); //target tail
-  
-  //we're now at the dummy hypo at the start of the sentence
-  while ((currHypo = (currHypo->GetNextHypo()))) {
-    TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
-    for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-      words.push_back(targetPhrase.GetWord(i));
-    }
-  }
-  
-  IFVERBOSE(2) {
-    VERBOSE(2,"Sentence: ");
-    for (size_t i = 0; i < words.size(); ++i) {
-      VERBOSE(2,words[i] << " ");
-    }
-    VERBOSE(2,endl);
-  }
-}
 
 
 size_t GibbsOperator::getSample(const vector<double>& scores) {
@@ -86,7 +64,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
   size_t sourceSize = sample.GetSourceSize();
   for (size_t splitIndex = 1; splitIndex < sourceSize; ++splitIndex) {
     vector<Word> targetWords; //needed to calc lm scores
-    getTargetWords(sample,targetWords);
+    sample.GetTargetWords(targetWords);
     //NB splitIndex n refers to the position between word n-1 and word n. Words are zero indexed
     VERBOSE(3,"Sampling at source index " << splitIndex << endl);
     
@@ -201,7 +179,7 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
   //Iterate in source order
   while (currHypo) {
     vector<Word> targetWords; //needed to calc lm scores
-    getTargetWords(sample,targetWords);
+    sample.GetTargetWords(targetWords);
     const WordsRange& targetSegment = currHypo->GetCurrTargetWordsRange();
     const WordsRange& sourceSegment = currHypo->GetCurrSourceWordsRange();
     VERBOSE(3, "Considering source segment " << sourceSegment << " and target segment " << targetSegment << endl); 
@@ -305,7 +283,7 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
   size_t sourceSize = sample.GetSourceSize();
   for (size_t splitIndex = 1; splitIndex < sourceSize; ++splitIndex) {
     vector<Word> targetWords; //needed to calc lm scores
-    getTargetWords(sample,targetWords);
+    sample.GetTargetWords(targetWords);
     //NB splitIndex n refers to the position between word n-1 and word n. Words are zero indexed
     VERBOSE(3,"Sampling at source index " << splitIndex << endl);
       

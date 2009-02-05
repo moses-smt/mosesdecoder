@@ -11,6 +11,7 @@ class GibbsOperator;
 class Hypothesis;
 class TranslationOptionCollection;
 class TranslationOption;
+class Word;
 
   
 class Sample {
@@ -54,7 +55,8 @@ class Sample {
   void FlipNodes(size_t x, size_t y, const ScoreComponentCollection& deltaFV) ;
   void ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV); 
   void MergeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV);
-  void SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const ScoreComponentCollection& deltaFV); 
+  void SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const ScoreComponentCollection& deltaFV);
+  void GetTargetWords(std::vector<Word>& words);
   
 };
 
