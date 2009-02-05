@@ -170,7 +170,8 @@ PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(const vector<Word>& t
    const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) :
     m_leftOption(leftOption), m_rightOption(rightOption){
     //For lm-scores treat as one large target segment, since the lmcontext may overlap, depending on the lm order
-    WordsRange targetSegment(leftTargetSegment.GetStartPos(), rightTargetSegment.GetEndPos());
+      
+    WordsRange targetSegment(min(leftTargetSegment.GetStartPos(), rightTargetSegment.GetStartPos()), max(leftTargetSegment.GetEndPos(), rightTargetSegment.GetEndPos()));
     Phrase targetPhrase(leftOption->GetTargetPhrase());
     assert(leftTargetSegment.GetEndPos() < rightTargetSegment.GetStartPos());
     //include potential words between the two target segments
