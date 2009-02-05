@@ -54,7 +54,29 @@ Sample::Sample(Hypothesis* target_head) : feature_values(target_head->GetScoreBr
  
 Sample::~Sample() {
   RemoveAllInColl(cachedSampledHyps);
-}  
+}
+
+
+void Sample::GetTargetWords(vector<Word>& words) {
+  const Hypothesis* currHypo = GetTargetTail(); //target tail
+  
+  //we're now at the dummy hypo at the start of the sentence
+  while ((currHypo = (currHypo->GetNextHypo()))) {
+    TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
+    for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
+      words.push_back(targetPhrase.GetWord(i));
+    }
+  }
+  
+  IFVERBOSE(2) {
+    VERBOSE(2,"Sentence: ");
+    for (size_t i = 0; i < words.size(); ++i) {
+      VERBOSE(2,words[i] << " ");
+    }
+    VERBOSE(2,endl);
+  }
+}
+
   
 Hypothesis* Sample::GetHypAtSourceIndex(size_t i) {
   std::map<size_t, Hypothesis*>::iterator it = sourceIndexedHyps.find(i);
