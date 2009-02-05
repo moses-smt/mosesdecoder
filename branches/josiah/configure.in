@@ -8,6 +8,8 @@ AC_LANG_CPLUSPLUS
 AC_PROG_RANLIB
 #AM_PROG_LIBTOOL
 AX_BOOST_BASE([1.32.0])
+AX_BOOST_PROGRAM_OPTIONS
+
 
 AC_ARG_WITH(protobuf,
             [AC_HELP_STRING([--with-protobuf=PATH], [(optional) path to Google protobuf])],

@@ -3,6 +3,9 @@
 /* define if the Boost library is available */
 #undef HAVE_BOOST
 
+/* define if the Boost::PROGRAM_OPTIONS library is available */
+#undef HAVE_BOOST_PROGRAM_OPTIONS
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 

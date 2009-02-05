@@ -39,9 +39,9 @@ namespace Josiah {
     static int BASE_ARGC = 4;
     Parameter* params = new Parameter();
     char ** mosesargv = new char*[BASE_ARGC + argc];
-    mosesargv[0] = "-f";
+    mosesargv[0] = strToChar("-f");
     mosesargv[1] = strToChar(inifile);
-    mosesargv[2] = "-v";
+    mosesargv[2] = strToChar("-v");
     stringstream dbgin;
     dbgin << debuglevel;
     mosesargv[3] = strToChar(dbgin.str());
@@ -51,8 +51,9 @@ namespace Josiah {
     }
     params->LoadParam(BASE_ARGC + argc,mosesargv);
     StaticData::LoadDataStatic(params);
-    delete mosesargv[1];
-    delete mosesargv[3];
+    for (int i = 0; i < BASE_ARGC; ++i) {
+      delete mosesargv[i];
+    }
     delete mosesargv;
   }
   
@@ -65,8 +66,6 @@ namespace Josiah {
       //the sentence
       Sentence sentence(Input);
       stringstream in(source + "\n");
-      //in << "\n";
-      cout << in.str() << endl;
       const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
       sentence.Read(in,inputFactorOrder);
   
