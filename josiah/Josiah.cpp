@@ -42,7 +42,8 @@ int main(int argc, char** argv) {
   int debug;
   string inputfile;
   string mosesini;
-
+  bool decode;
+  bool help;
 #if 0
   vector<string> refs;
   refs.push_back("export of high-tech products in guangdong in first two months this year reached 3.76 billion us dollars");
@@ -54,14 +55,14 @@ int main(int argc, char** argv) {
   GainFunction::ConvertStringToFactorArray("guangdong's new high export technology comes near on $ 3.76 million in two months of this year first", &fv);
   cerr << sb.ComputeGain(fv) << endl;
 #endif
-  
   po::options_description desc("Allowed options");
   desc.add_options()
-        ("help", "Print this help message and exit")
+        ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
         ("config,f",po::value<string>(&mosesini),"Moses ini file")
         ("iterations,s", po::value<int>(&iterations)->default_value(5), "Number of sampling iterations")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
-        ("dumpmd",po::value<int>(&topn)->default_value(20),"Dump the top n derivations to stdout")
+        ("nbest,n",po::value<int>(&topn)->default_value(20),"Dump the top n derivations to stdout")
+        ("decode,d",po::value( &decode )->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
         ("verbosity,v", po::value<int>(&debug)->default_value(0), "Verbosity level");
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -70,13 +71,13 @@ int main(int argc, char** argv) {
             options(cmdline_options).run(), vm);
   po::notify(vm);
 
-  if (vm.count("help")) {
+  if (help) {
       std::cout << "Usage: " + string(argv[0]) +  " -f mosesini-file [options]" << std::endl;
       std::cout << desc << std::endl;
       return 0;
   }
   
-  if (!vm.count("config")) {
+  if (mosesini.empty()) {
       cerr << "Error: No moses ini file specified" << endl;
       return 1;
   }
@@ -86,7 +87,7 @@ int main(int argc, char** argv) {
   Decoder* decoder = new MosesDecoder();
 
   
-  if (!vm.count("input-file")) {
+  if (inputfile.empty()) {
     VERBOSE(1,"Warning: No input file specified, using toy dataset" << endl);
   }
 
@@ -125,6 +126,9 @@ int main(int argc, char** argv) {
       vector<DerivationProbability> derivations;
       collector->getTopN(topn,derivations);
       for (size_t i = 0; i < derivations.size(); ++i) {
+        Derivation d = *(derivations[i].first);
+        cout << d << endl;
+        
         cout  << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
       }
     }

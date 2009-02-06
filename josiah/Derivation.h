@@ -44,13 +44,11 @@ namespace Josiah {
       bool operator<(const Derivation& other) const;
       
       struct PhraseAlignment {
-      
+        //since these are stored in target order, no need to retain the source Segment
         Moses::WordsRange _sourceSegment;
-        Moses::WordsRange _targetSegment;
         Moses::Phrase _target;
-        PhraseAlignment(const Moses::WordsRange& sourceSegment, 
-          const Moses::WordsRange& targetSegment, const Moses::Phrase& target)
-          : _sourceSegment(sourceSegment), _targetSegment(targetSegment),_target(target) {}
+        PhraseAlignment(const Moses::WordsRange& sourceSegment,const Moses::Phrase& target)
+          : _sourceSegment(sourceSegment),_target(target) {}
         bool operator<(const PhraseAlignment& other) const;
       };
       
@@ -71,9 +69,9 @@ namespace Josiah {
   
   typedef std::pair<const Derivation*,float> DerivationProbability;
   
-  struct DerivationProbLessThan :  public std::binary_function<const DerivationProbability,const DerivationProbability,bool>{
+  struct DerivationProbGreaterThan :  public std::binary_function<const DerivationProbability,const DerivationProbability,bool>{
     bool operator()(const DerivationProbability& d1, const DerivationProbability& d2) const {
-        return d1.second < d2.second; 
+        return d1.second > d2.second; 
        }
   };
   
