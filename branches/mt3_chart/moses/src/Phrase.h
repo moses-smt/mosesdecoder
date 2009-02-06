@@ -68,6 +68,10 @@ public:
 	/** destructor */
 	virtual ~Phrase();
 
+	void Parse(std::vector< std::vector<std::string> > &output
+														, const std::string &phraseString
+														, const std::string& factorDelimiter);
+
 	static std::vector< std::vector<std::string> > Parse(
 															const std::string &phraseString
 															, const std::string& factorDelimiter);
@@ -82,6 +86,13 @@ public:
 																const std::string &phraseString
 																, const std::vector<FactorType> &factorOrder
 																, const std::string& factorDelimiter);
+
+	// speeded up version of above
+	static void Parse(std::vector< std::vector<std::string> > &output
+									, const std::string &phraseString
+									, const std::vector<FactorType> &factorOrder
+									, const std::string& factorDelimiter);
+
 	/** Fills phrase with words from 2D string vector
 		* \param factorOrder factor types of each element in 2D string vector
 		* \param phraseVector 2D string vector

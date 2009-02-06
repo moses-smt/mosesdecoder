@@ -239,6 +239,45 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 	return phraseVector;
 }
 
+
+void Phrase::Parse(vector< vector<string> > &output
+									, const std::string &phraseString
+									, const std::vector<FactorType> &factorOrder
+									, const std::string& factorDelimiter)
+{
+	bool isMultiCharDelimiter = factorDelimiter.size() > 1;
+	// parse
+	vector<string> annotatedWordVector;
+	Tokenize(annotatedWordVector, phraseString);
+	// KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none 
+	//		to
+	// "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
+
+	for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() ; phrasePos++)
+	{
+		string &annotatedWord = annotatedWordVector[phrasePos];
+		vector<string> factorStrVector;
+		if (isMultiCharDelimiter) 
+		{
+			factorStrVector = TokenizeMultiCharSeparator(annotatedWord, factorDelimiter);
+		} 
+		else 
+		{
+			Tokenize(factorStrVector, annotatedWord, factorDelimiter);
+		}
+		// KOMMA|none
+		//    to
+		// "KOMMA" "none"
+		if (factorStrVector.size() != factorOrder.size()) {
+			TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance().GetCurrentInputPosition() <<*/ std::endl
+			          << "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
+								<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
+			abort();
+		}
+		output.push_back(factorStrVector);
+	}
+}
+
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const vector< vector<string> > &phraseVector)
 {

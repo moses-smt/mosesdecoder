@@ -97,7 +97,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	// data from file
 	InputFileStream inFile(filePath);
 	return Load(input, output, inFile, weight, tableLimit, languageModels, weightWP);
-
 }
 
 
@@ -167,8 +166,11 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		assert(scoreVector.size() == m_numScoreComponent);
 
 		const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-		vector< vector<string> >	sourcePhraseVector = Phrase::Parse(sourcePhraseString, input, factorDelimiter)
-															,targetPhraseVector = Phrase::Parse(targetPhraseString, output, factorDelimiter);
+		vector< vector<string> >	sourcePhraseVector, targetPhraseVector;
+		
+		Phrase::Parse(sourcePhraseVector, sourcePhraseString, input, factorDelimiter);
+		Phrase::Parse(targetPhraseVector, targetPhraseString, output, factorDelimiter);
+		
 		list<pair<size_t,size_t> > alignmentInfo;
 		TransformString(sourcePhraseVector, targetPhraseVector, alignmentInfo);
 

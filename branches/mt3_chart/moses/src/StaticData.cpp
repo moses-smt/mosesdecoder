@@ -907,6 +907,7 @@ bool StaticData::LoadPhraseTables()
 	IFVERBOSE(1)
 		PrintUserTime("Finished loading phrase tables");
 
+	PrintUserTime("exiting");
 	exit(0);
 	return true;
 }
