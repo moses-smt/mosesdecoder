@@ -6,11 +6,16 @@
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
 
-namespace Moses {
+using namespace Moses;
+
+namespace Josiah {
 
 class GainFunction {
  public:
-  virtual float ComputeGain(const std::vector<const Factor*>& hyp, const std::vector<std::vector<const Factor*> >& refs) const = 0;
+  virtual ~GainFunction();
+  virtual float ComputeGain(const std::vector<const Factor*>& hyp) const = 0;
+
+  static void ConvertStringToFactorArray(const std::string& str, std::vector<const Factor*>* out);
 };
 
 class GibblerExpectedLossCollector : public SampleCollector {
