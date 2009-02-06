@@ -18,6 +18,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "processPhraseTable", "misc\
 		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF} = {8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-cmd", "josiah\joshiah.vcproj", "{1D351AE3-D6AE-46CA-9930-9D94EBC2D14D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -58,6 +60,14 @@ Global
 		{AA230564-6DF1-4662-9BF9-7AD73DE53B76}.Release|Win32.Build.0 = Release|Win32
 		{AA230564-6DF1-4662-9BF9-7AD73DE53B76}.Release-withSRILM|Win32.ActiveCfg = Release-withSRILM|Win32
 		{AA230564-6DF1-4662-9BF9-7AD73DE53B76}.Release-withSRILM|Win32.Build.0 = Release-withSRILM|Win32
+		{1D351AE3-D6AE-46CA-9930-9D94EBC2D14D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1D351AE3-D6AE-46CA-9930-9D94EBC2D14D}.Debug|Win32.Build.0 = Debug|Win32
+		{1D351AE3-D6AE-46CA-9930-9D94EBC2D14D}.Debug-withSRILM|Win32.ActiveCfg = Debug-withSRILM|Win32
+		{1D351AE3-D6AE-46CA-9930-9D94EBC2D14D}.Debug-withSRILM|Win32.Build.0 = Debug-withSRILM|Win32
+		{1D351AE3-D6AE-46CA-9930-9D94EBC2D14D}.Release|Win32.ActiveCfg = Release|Win32
+		{1D351AE3-D6AE-46CA-9930-9D94EBC2D14D}.Release|Win32.Build.0 = Release|Win32
+		{1D351AE3-D6AE-46CA-9930-9D94EBC2D14D}.Release-withSRILM|Win32.ActiveCfg = Release-withSRILM|Win32
+		{1D351AE3-D6AE-46CA-9930-9D94EBC2D14D}.Release-withSRILM|Win32.Build.0 = Release-withSRILM|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
