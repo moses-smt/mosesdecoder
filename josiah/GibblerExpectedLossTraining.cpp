@@ -1,62 +1,22 @@
 #include "GibblerExpectedLossTraining.h"
 
+#include "Phrase.h"
+
 using namespace std;
 
-namespace Moses {
+namespace Josiah {
 
-#if 0
-class BLEUScorerBase {
- public:
-  BLEUScorerBase(const std::vector<Phrase>& references,
-             bool case_sensitive,
-             int n
-             );
-  Score* ScoreCandidate(const Phrase& hyp) const;
+void GainFunction::ConvertStringToFactorArray(const std::string& str, std::vector<const Factor*>* out) {
+  Phrase phrase(Output);
+  vector<FactorType> ft(1, 0);
+  phrase.CreateFromString(ft, str, "|");
+  out->resize(phrase.GetSize());
+  FactorType type = ft.front();
+  for (unsigned i = 0; i < phrase.GetSize(); ++i)
+    (*out)[i] = phrase.GetFactor(i, type);
+}
 
- protected:
-  virtual float ComputeRefLength(const vector<const Factor*>& hyp) const = 0;
- private:
-  struct NGramCompare {
-    int operator() (const vector<const Factor*>& a, const vector<const Factor*>& b) {
-      size_t as = a.size();
-      size_t bs = b.size();
-      const size_t s = (as < bs ? as : bs);
-      for (size_t i = 0; i < s; ++i) {
-         int d = a[i] - b[i];
-         if (d < 0) return true;
-	 if (d > 0) return false;
-      }
-      return as < bs;
-    }
-  };
-  typedef map<vector<const Factor*>, pair<int,int>, NGramCompare> NGramCountMap;
-  void CountRef(const vector<const Factor*>& ref) {
-    NGramCountMap tc;
-    vector<const Factor*> ngram(n_);
-    int s = ref.size();
-    for (int j=0; j<s; ++j) {
-      int remaining = s-j;
-      int k = (n_ < remaining ? n_ : remaining);
-      ngram.clear();
-      for (int i=1; i<=k; ++i) {
-        int l = s-i;
-        int c = 0;
-	ngram.push_back(ref[j + i - 1]);
-        tc[ngram].first++;
-      }
-    }
-    for (NGramCountMap::iterator i = tc.begin(); i != tc.end(); ++i) {
-      pair<int,int>& p = ngrams_[i->first];
-      if (p.first < i->second.first)
-        p = i->second;
-    }
-  }
-
-  void ComputeNgramStats(const vector<const Factor*>& sent,
-       valarray<int>* correct,
-GibblerExpectedLossCollector
-
-#endif
+GainFunction::~GainFunction() {}
 
 GibblerExpectedLossCollector::GibblerExpectedLossCollector() :
   g(NULL), sent_num(0) {}
@@ -66,7 +26,7 @@ void GibblerExpectedLossCollector::collect(Sample& s) {
   const Hypothesis* h = s.GetSampleHypothesis();
   vector<const Factor*> trans;
   h->GetTranslation(&trans, 0);
-  const float gain = g->ComputeGain(trans, refs[sent_num]);
+  const float gain = g->ComputeGain(trans);
   samples.push_back(make_pair(s.GetFeatureValues(), gain));
   feature_expectations.PlusEquals(s.GetFeatureValues());
 }

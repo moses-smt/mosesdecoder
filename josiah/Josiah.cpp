@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Derivation.h"
 #include "Gibbler.h"
 #include "GibbsOperator.h"
+#include "SentenceBleu.h"
 
 using namespace std;
 using namespace Josiah;
@@ -41,6 +42,18 @@ int main(int argc, char** argv) {
   int debug;
   string inputfile;
   string mosesini;
+
+#if 0
+  vector<string> refs;
+  refs.push_back("export of high-tech products in guangdong in first two months this year reached 3.76 billion us dollars");
+  refs.push_back("guangdong's export of new high technology products amounts to us $ 3.76 billion in first two months of this year");
+  refs.push_back("guangdong exports us $ 3.76 billion worth of high technology products in the first two months of this year");
+  refs.push_back("in the first 2 months this year , the export volume of new hi-tech products in guangdong province reached 3.76 billion us dollars .");
+  SentenceBLEU sb(4, refs);
+  vector<const Factor*> fv;
+  GainFunction::ConvertStringToFactorArray("guangdong's new high export technology comes near on $ 3.76 million in two months of this year first", &fv);
+  cerr << sb.ComputeGain(fv) << endl;
+#endif
   
   po::options_description desc("Allowed options");
   desc.add_options()
