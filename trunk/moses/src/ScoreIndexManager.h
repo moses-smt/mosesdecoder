@@ -17,6 +17,8 @@ namespace Moses
 
 class ScoreProducer;
 class ScoreComponentCollection;  // debugging only
+class StatefulFeatureFunction;
+class StatelessFeatureFunction;
 
 /** Keep track of scores and score producers. Each score producer is reserved contiguous set of slots
 	* to put their score components. All the score components are arranged in a vector with no gaps.
@@ -46,12 +48,17 @@ public:
 	void SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const;
 #endif
 	void InitWeightVectorFromFile(const std::string& fnam, std::vector<float>* m_allWeights) const;
+	const std::vector<const ScoreProducer*>& GetFeatureFunctions() const { return m_producers; }
+	const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() const { return m_stateful; }
+	const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() const { return m_stateless; }
 private:
 	ScoreIndexManager(const ScoreIndexManager&); // don't implement
 
 	std::vector<size_t> m_begins;
 	std::vector<size_t> m_ends;
 	std::vector<const ScoreProducer*> m_producers; /**< all the score producers in this run */
+	std::vector<const StatefulFeatureFunction*> m_stateful; /**< all the score producers in this run */
+	std::vector<const StatelessFeatureFunction*> m_stateless; /**< all the score producers in this run */
 	std::vector<std::string> m_featureNames;
 	size_t m_last;
 };

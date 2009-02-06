@@ -106,6 +106,19 @@ public:
 		}  
 	}
 
+	//! Add scores from a single ScoreProducer only
+	//! The length of scores must be equal to the number of score components
+	//! produced by sp
+	void PlusEquals(const ScoreProducer* sp, const ScoreComponentCollection& scores)
+	{
+		size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
+		const size_t end = m_sim->GetEndIndex(sp->GetScoreBookkeepingID());
+		for (; i < end; ++i)
+		{
+			m_scores[i] += scores.m_scores[i];
+		}  
+	}
+
 	//! Special version PlusEquals(ScoreProducer, vector<float>)
 	//! to add the score from a single ScoreProducer that produces
 	//! a single value

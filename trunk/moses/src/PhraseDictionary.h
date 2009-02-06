@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "Dictionary.h"
 #include "TargetPhraseCollection.h"
+#include "FeatureFunction.h"
 
 namespace Moses
 {
@@ -40,7 +41,7 @@ class WordsRange;
 
 /** abstract base class for phrase table classes
 */
-class PhraseDictionary : public Dictionary, public ScoreProducer
+class PhraseDictionary : public Dictionary, public StatelessFeatureFunction
 {
  protected:
 	size_t m_tableLimit;
@@ -53,11 +54,17 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
 	DecodeType GetDecodeType() const	{	return Translate;	}
 	//! table limit number. 
 	size_t GetTableLimit() const { return m_tableLimit; }
-	
+
 	//! Overriden by load on demand phrase tables classes to load data for each input
 	virtual void InitializeForInput(InputType const &/*source*/) {}
 	std::string GetScoreProducerDescription() const;
 	size_t GetNumScoreComponents() const;
+
+	size_t GetNumInputScores() const;
+
+	virtual bool ComputeValueInTranslationOption() const;
+
+
 
 	/** set/change translation weights and recalc weighted score for each translation. 
 		* TODO This may be redundant now we use ScoreCollection

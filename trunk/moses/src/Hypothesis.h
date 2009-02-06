@@ -46,6 +46,7 @@ class StaticData;
 class TranslationOption;
 class WordsRange;
 class Hypothesis;
+class FFState;
 
 typedef std::vector<Hypothesis*> ArcList;
 
@@ -78,18 +79,14 @@ protected:
 	float							m_totalScore;  /*! score so far */
 	float							m_futureScore; /*! estimated future cost to translate rest of sentence */
 	ScoreComponentCollection m_scoreBreakdown; /*! detailed score break-down by components (for instance language model, word penalty, etc) */
-	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /*! relevant history for language model scoring -- used for recombination */
+	std::vector<const FFState*> m_ffStates;
 	const Hypothesis 	*m_winningHypo;
 	ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
 	AlignmentPair     m_alignPair;
 	const TranslationOption *m_transOpt;
 
 	int m_id; /*! numeric ID of this hypothesis, used for logging */
-	std::vector<std::vector<unsigned int> >* m_lmstats; /*! Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
-	void CalcLMScore(const LMList &languageModels);
-	void CalcDistortionScore();
-	//TODO: add appropriate arguments to score calculator
 
 	/*! used by initial seeding of the translation process */
 	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
@@ -138,7 +135,7 @@ public:
 	}
 	
 	/** output length of the translation option used to create this hypothesis */
-	size_t GetCurrTargetLength() const
+	inline size_t GetCurrTargetLength() const
 	{
 		return m_currTargetWordsRange.GetNumWordsCovered();
 	}
@@ -209,15 +206,11 @@ public:
 		return m_sourceCompleted;
 	}
 
-	int NGramCompare(const Hypothesis &compare) const;
+	inline bool IsSourceCompleted() const {
+		return m_sourceCompleted.IsComplete();
+	}
 
-	//	inline size_t hash() const
-	//	{
-	//		if (_hash_computed) return _hash;
-	//		GenerateNGramCompareHash();
-	//		return _hash;
-	//	}
-	
+	int RecombineCompare(const Hypothesis &compare) const;
 	
 	void ToStream(std::ostream& out) const
 	{
@@ -298,10 +291,7 @@ public:
 	//! target span that trans opt would populate if applied to this hypo. Used for alignment check
 	size_t GetNextStartPos(const TranslationOption &transOpt) const;
 	
-	std::vector<std::vector<unsigned int> > *GetLMStats() const
-	{
-		return m_lmstats;
-	}
+	std::vector<std::vector<unsigned int> > *GetLMStats() const { return NULL; }
 
 	static unsigned int GetHypothesesCreated()
 	{
@@ -348,22 +338,7 @@ class HypothesisRecombinationOrderer
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
 	{
-		// Are the last (n-1) words the same on the target side (n for n-gram LM)?
-		int ret = hypoA->NGramCompare(*hypoB);
-//		int ret = hypoA->FastNGramCompare(*hypoB, m_NGramMaxOrder - 1);
-		if (ret != 0)
-		{
-			return (ret < 0);
-		}
-
-		
-		//TODO: is this check redundant? NGramCompare already calls wordbitmap.comare.
-		// same last n-grams. compare source words translated
-		const WordsBitmap &bitmapA		= hypoA->GetWordsBitmap()
-			, &bitmapB	= hypoB->GetWordsBitmap();
-		ret = bitmapA.Compare(bitmapB);
-
-		return (ret < 0);
+		return hypoA->RecombineCompare(*hypoB) < 0;
 	}
 };
 

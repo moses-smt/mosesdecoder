@@ -17,10 +17,18 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 {
 	// Producers must be inserted in the order they are created
 	const_cast<ScoreProducer*>(sp)->CreateScoreBookkeepingID();
-  assert(m_begins.size() == (sp->GetScoreBookkeepingID()));
+	assert(m_begins.size() == (sp->GetScoreBookkeepingID()));
   
 	m_producers.push_back(sp);
-  m_begins.push_back(m_last);
+	if (sp->IsStateless()) {
+		const StatelessFeatureFunction* ff = static_cast<const StatelessFeatureFunction*>(sp);
+		if (!ff->ComputeValueInTranslationOption())
+			m_stateless.push_back(ff);
+	} else {
+		m_stateful.push_back(static_cast<const StatefulFeatureFunction*>(sp));
+	}
+
+	m_begins.push_back(m_last);
 	size_t numScoreCompsProduced = sp->GetNumScoreComponents();
 	assert(numScoreCompsProduced > 0);
 	m_last += numScoreCompsProduced;
@@ -50,8 +58,7 @@ void ScoreIndexManager::InitFeatureNames() {
 		bool add_idx = (m_producers[cur_scoreType]->GetNumInputScores() > 1);
 		while (nis_idx < m_producers[cur_scoreType]->GetNumInputScores()){
 			ostringstream os;
-			//distinguish these from other scores with _InputScore
-			os << m_producers[cur_scoreType]->GetScoreProducerDescription() << "_InputScore";
+			os << m_producers[cur_scoreType]->GetScoreProducerDescription();
 			if (add_idx)
 				os << '_' << (nis_idx+1);
 			m_featureNames.push_back(os.str());
@@ -116,6 +123,7 @@ std::ostream& operator<<(std::ostream& os, const ScoreIndexManager& sim)
 	for (size_t i = 0; i < sim.m_featureNames.size(); ++i) {
 		os << sim.m_featureNames[i] << endl;
 	}
+	os << "Stateless: " << sim.m_stateless.size() << "\tStateful: " << sim.m_stateful.size() << endl;
 	return os;
 }
 

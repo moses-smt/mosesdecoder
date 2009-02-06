@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <vector>
 #include <algorithm>
+
+#include "FFState.h"
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "DummyScoreProducers.h"
@@ -56,16 +58,18 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
-	, m_languageModelStates(StaticData::Instance().GetLMSize(), LanguageModelSingleFactor::UnknownState)
+	, m_ffStates(StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions().size())
 	, m_arcList(NULL)
 	, m_id(0)
-  , m_lmstats(NULL)
   , m_alignPair(source.GetSize())
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
 	s_HypothesesCreated = 1;
-	ResetScore();	
+	ResetScore();
+	const vector<const StatefulFeatureFunction*>& ffs = StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions();
+	for (unsigned i = 0; i < ffs.size(); ++i)
+	  m_ffStates[i] = ffs[i]->EmptyHypothesisState();
 }
 
 /***
@@ -73,8 +77,8 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
  */
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: m_prevHypo(&prevHypo)
-	, m_transOpt(&transOpt)
 	, m_targetPhrase(transOpt.GetTargetPhrase())
+	, m_transOpt(&transOpt)
 	, m_sourcePhrase(transOpt.GetSourcePhrase())
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_sourceInput						(prevHypo.m_sourceInput)
@@ -84,11 +88,10 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_wordDeleted(false)
 	,	m_totalScore(0.0f)
 	,	m_futureScore(0.0f)
+	, m_ffStates(prevHypo.m_ffStates.size())
 	, m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
-	, m_languageModelStates(prevHypo.m_languageModelStates)
 	, m_arcList(NULL)
 	, m_id(s_HypothesesCreated++)
-  , m_lmstats(NULL)
   , m_alignPair(prevHypo.m_alignPair)
 {
 	// assert that we are not extending our hypothesis by retranslating something
@@ -98,11 +101,13 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	//_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
-	m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
 }
 
 Hypothesis::~Hypothesis()
 {
+	for (unsigned i = 0; i < m_ffStates.size(); ++i)
+		delete m_ffStates[i];
+
 	if (m_arcList) 
 	{
 		ArcList::iterator iter;
@@ -114,8 +119,6 @@ Hypothesis::~Hypothesis()
 
 		delete m_arcList;
 		m_arcList = NULL;
-
-		delete m_lmstats; m_lmstats = NULL;
 	}
 }
 
@@ -233,140 +236,24 @@ Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &em
     keep an ordered list of hypotheses. This makes recombination
     much quicker. 
 */
-int Hypothesis::NGramCompare(const Hypothesis &compare) const
+int Hypothesis::RecombineCompare(const Hypothesis &compare) const
 { // -1 = this < compare
 	// +1 = this > compare
 	// 0	= this ==compare
-	if (m_languageModelStates < compare.m_languageModelStates) return -1;
-	if (m_languageModelStates > compare.m_languageModelStates) return 1;
+	int comp = m_sourceCompleted.Compare(compare.m_sourceCompleted);
+	if (comp != 0)
+		return comp;
 
-	int compareBitmap = m_sourceCompleted.Compare(compare.m_sourceCompleted);
-	if (compareBitmap != 0)
-		return compareBitmap;
-	if (m_currSourceWordsRange.GetEndPos() < compare.m_currSourceWordsRange.GetEndPos()) return -1;
-	if (m_currSourceWordsRange.GetEndPos() > compare.m_currSourceWordsRange.GetEndPos()) return 1;
-	if (! StaticData::Instance().GetSourceStartPosMattersForRecombination()) return 0;
-	if (m_currSourceWordsRange.GetStartPos() < compare.m_currSourceWordsRange.GetStartPos()) return -1;
-	if (m_currSourceWordsRange.GetStartPos() > compare.m_currSourceWordsRange.GetStartPos()) return 1;
-	return 0;
-}
-
-/** Calculates the overall language model score by combining the scores
- * of language models generated for each of the factors.  Because the factors
- * represent a variety of tag sets, and because factors with smaller tag sets 
- * (such as POS instead of words) allow us to calculate richer statistics, we
- * allow a different length of n-gram to be specified for each factor.
- * /param lmListInitial todo - describe this parameter 
- * /param lmListEnd todo - describe this parameter
- */
-void Hypothesis::CalcLMScore(const LMList &languageModels)
-{
-	LMList::const_iterator iterLM;
-	clock_t t=0;
-	IFVERBOSE(2) { t  = clock(); } // track time
-	const size_t startPos	= m_currTargetWordsRange.GetStartPos();
-
-	// will be null if LM stats collection is disabled
-	if (StaticData::Instance().IsComputeLMBackoffStats()) {
-		m_lmstats = new vector<vector<unsigned int> >(languageModels.size(), vector<unsigned int>(0));
-	}
-
-	size_t lmIdx = 0;
-
-	// already have LM scores from previous and trigram score of poss trans.
-	// just need n-gram score of the words of the start of current phrase	
-	for (iterLM = languageModels.begin() ; iterLM != languageModels.end() ; ++iterLM,++lmIdx)
-	{
-		const LanguageModel &languageModel = **iterLM;
-		size_t nGramOrder			= languageModel.GetNGramOrder();
-		size_t currEndPos			= m_currTargetWordsRange.GetEndPos();
-		float lmScore;
-		size_t nLmCallCount = 0;
-
-		if(m_currTargetWordsRange.GetNumWordsCovered() == 0) {
-			lmScore = 0; //the score associated with dropping source words is not part of the language model
-		} else { //non-empty target phrase
-			if (m_lmstats)
-				(*m_lmstats)[lmIdx].resize(m_currTargetWordsRange.GetNumWordsCovered(), 0);
-
-			// 1st n-gram
-			vector<const Word*> contextFactor(nGramOrder);
-			size_t index = 0;
-			for (int currPos = (int) startPos - (int) nGramOrder + 1 ; currPos <= (int) startPos ; currPos++)
-			{
-				if (currPos >= 0)
-					contextFactor[index++] = &GetWord(currPos);
-				else			
-					contextFactor[index++] = &languageModel.GetSentenceStartArray();
-			}
-			lmScore	= languageModel.GetValue(contextFactor);
-			if (m_lmstats) { languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]); }
-			//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;
-
-			// main loop
-			size_t endPos = std::min(startPos + nGramOrder - 2
-															, currEndPos);
-			for (size_t currPos = startPos + 1 ; currPos <= endPos ; currPos++)
-			{
-				// shift all args down 1 place
-				for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
-					contextFactor[i] = contextFactor[i + 1];
-	
-				// add last factor
-				contextFactor.back() = &GetWord(currPos);
-
-				lmScore	+= languageModel.GetValue(contextFactor);
-				if (m_lmstats) 
-					languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]);
-				//cout<<"context factor: "<<languageModel.GetValue(contextFactor)<<endl;		
-			}
-
-			// end of sentence
-			if (m_sourceCompleted.IsComplete())
-			{
-				const size_t size = GetSize();
-				contextFactor.back() = &languageModel.GetSentenceEndArray();
-	
-				for (size_t i = 0 ; i < nGramOrder - 1 ; i ++)
-				{
-					int currPos = (int)(size - nGramOrder + i + 1);
-					if (currPos < 0)
-						contextFactor[i] = &languageModel.GetSentenceStartArray();
-					else
-						contextFactor[i] = &GetWord((size_t)currPos);
-				}
-				if (m_lmstats) {
-					(*m_lmstats)[lmIdx].resize((*m_lmstats)[lmIdx].size() + 1); // extra space for the last call
-					lmScore += languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx], &(*m_lmstats)[lmIdx][nLmCallCount++]);
-				} else
-					lmScore	+= languageModel.GetValue(contextFactor, &m_languageModelStates[lmIdx]);
-			} else {
-				for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
-					for (size_t i = 0 ; i < nGramOrder - 1 ; i++)
-						contextFactor[i] = contextFactor[i + 1];
-					contextFactor.back() = &GetWord(currPos);
-					if (m_lmstats)
-						languageModel.GetState(contextFactor, &(*m_lmstats)[lmIdx][nLmCallCount++]);
-				}
-				m_languageModelStates[lmIdx]=languageModel.GetState(contextFactor);
-			}
+	for (unsigned i = 0; i < m_ffStates.size(); ++i) {
+		if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL) {
+			comp = m_ffStates[i] - compare.m_ffStates[i];
+		} else {
+		  comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
 		}
-		
-		m_scoreBreakdown.PlusEquals(&languageModel, lmScore);
+		if (comp != 0) return comp;
 	}
-	IFVERBOSE(2) { StaticData::Instance().GetSentenceStats().AddTimeCalcLM( clock()-t ); }
-}
 
-void Hypothesis::CalcDistortionScore()
-
-{
-	const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
-	float distortionScore = dsp->CalculateDistortionScore(
-			m_prevHypo->GetCurrSourceWordsRange(),
-			this->GetCurrSourceWordsRange(),
-			m_prevHypo->GetWordsBitmap().GetFirstGapPos()
-     );
-	m_scoreBreakdown.PlusEquals(dsp, distortionScore);
+	return 0;
 }
 
 void Hypothesis::ResetScore()
@@ -380,30 +267,35 @@ void Hypothesis::ResetScore()
  */
 void Hypothesis::CalcScore(const SquareMatrix &futureScore) 
 {
+  // some stateless score producers cache their values in the translation
+	// option: add these here
+	m_scoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
+
 	const StaticData &staticData = StaticData::Instance();
 	clock_t t=0; // used to track time
 
-	// LANGUAGE MODEL COST
-	CalcLMScore(staticData.GetAllLM());
+  // compute values of stateless feature functions that were not
+  // cached in the translation option-- there is no principled distinction
+	const vector<const StatelessFeatureFunction*>& sfs =
+	  staticData.GetScoreIndexManager().GetStatelessFeatureFunctions();
+	for (unsigned i = 0; i < sfs.size(); ++i) {
+    sfs[i]->Evaluate(m_targetPhrase, &m_scoreBreakdown);
+	}
+
+	const vector<const StatefulFeatureFunction*>& ffs =
+	  staticData.GetScoreIndexManager().GetStatefulFeatureFunctions();
+	for (unsigned i = 0; i < ffs.size(); ++i) {
+		m_ffStates[i] = ffs[i]->Evaluate(
+			*this,
+			m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
+			&m_scoreBreakdown);
+	}
 
 	IFVERBOSE(2) { t = clock(); } // track time excluding LM
-
-	// DISTORTION COST
-	CalcDistortionScore();
-	
-	// WORD PENALTY
-	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
 
 	// FUTURE COST
 	m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 	
-	//LEXICAL REORDERING COST
-	const std::vector<LexicalReordering*> &reorderModels = staticData.GetReorderModels();
-	for(unsigned int i = 0; i < reorderModels.size(); i++)
-	{
-		m_scoreBreakdown.PlusEquals(reorderModels[i], reorderModels[i]->CalcScore(this));
-	}
-
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
 
@@ -421,8 +313,8 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
 	clock_t t=0;
 	IFVERBOSE(2) { t = clock(); } // track time excluding LM
 
-	// DISTORTION COST
-	CalcDistortionScore();
+  assert(!"Need to add code to get the distortion scores");
+	//CalcDistortionScore();
 	
 	// LANGUAGE MODEL ESTIMATE (includes word penalty cost)
   float estimatedLMScore = m_transOpt->GetFutureScore() - m_transOpt->GetScoreBreakdown().InnerProduct(staticData.GetAllWeights());
@@ -450,7 +342,8 @@ void Hypothesis::CalcRemainingScore()
 	clock_t t=0; // used to track time
 
 	// LANGUAGE MODEL COST
-	CalcLMScore(staticData.GetAllLM());
+  assert(!"Need to add code to get the LM score(s)");
+	//CalcLMScore(staticData.GetAllLM());
 
 	IFVERBOSE(2) { t = clock(); } // track time excluding LM
 

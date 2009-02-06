@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Factor.h"
 #include "TypeDef.h"
 #include "Util.h"
-#include "ScoreProducer.h"
+#include "FeatureFunction.h"
 #include "Word.h"
 
 namespace Moses
@@ -37,7 +37,7 @@ class Factor;
 class Phrase;
 
 //! Abstract base class which represent a language model on a contiguous phrase
-class LanguageModel : public ScoreProducer
+class LanguageModel : public StatefulFeatureFunction
 {
 protected:	
 	float				m_weight; //! scoring weight. Shouldn't this now be superceded by ScoreProducer???
@@ -122,9 +122,17 @@ public:
 	
 	virtual std::string GetScoreProducerDescription() const = 0;
   
-  //! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
-  virtual void InitializeBeforeSentenceProcessing(){};
-  virtual void CleanUpAfterSentenceProcessing() {};  
+	//! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
+	virtual void InitializeBeforeSentenceProcessing(){};
+	virtual void CleanUpAfterSentenceProcessing() {};
+
+	virtual const FFState* EmptyHypothesisState() const;
+
+  virtual FFState* Evaluate(
+    const Hypothesis& cur_hypo,
+    const FFState* prev_state,
+    ScoreComponentCollection* accumulator) const;
+
 };
 
 }

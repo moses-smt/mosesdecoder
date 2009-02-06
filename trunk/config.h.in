@@ -12,6 +12,9 @@
 /* flag for protobuf */
 #undef HAVE_PROTOBUF
 
+/* flag for RandLM */
+#undef HAVE_RANDLM
+
 /* flag for SRILM */
 #undef HAVE_SRILM
 

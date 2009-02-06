@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <sstream>
 
+#include "FFState.h"
 #include "LanguageModel.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -95,6 +96,88 @@ LanguageModel::State LanguageModel::GetState(const std::vector<const Word*> &con
   return state;
 }
 
+struct LMState : public FFState {
+	const void* lmstate;
+	LMState(const void* lms) { lmstate = lms; }
+	virtual int Compare(const FFState& o) const {
+		const LMState& other = static_cast<const LMState&>(o);
+		if (other.lmstate > lmstate) return 1;
+		else if (other.lmstate < lmstate) return -1;
+		return 0;
+	}
+};
 
+const FFState* LanguageModel::EmptyHypothesisState() const {
+	return new LMState(NULL);
 }
 
+FFState* LanguageModel::Evaluate(
+    const Hypothesis& hypo,
+    const FFState* ps,
+    ScoreComponentCollection* out) const {
+	clock_t t=0;
+	IFVERBOSE(2) { t  = clock(); } // track time
+	const void* prevlm = ps ? (static_cast<const LMState *>(ps)->lmstate) : NULL;
+	LMState* res = new LMState(prevlm);
+	if (hypo.GetCurrTargetLength() == 0)
+		return res;
+	const size_t currEndPos = hypo.GetCurrTargetWordsRange().GetEndPos();
+	const size_t startPos = hypo.GetCurrTargetWordsRange().GetStartPos();
+
+	// 1st n-gram
+	vector<const Word*> contextFactor(m_nGramOrder);
+	size_t index = 0;
+	for (int currPos = (int) startPos - (int) m_nGramOrder + 1 ; currPos <= (int) startPos ; currPos++)
+	{
+		if (currPos >= 0)
+			contextFactor[index++] = &hypo.GetWord(currPos);
+		else			
+			contextFactor[index++] = &GetSentenceStartArray();
+	}
+	float lmScore	= GetValue(contextFactor);
+	//cout<<"context factor: "<<GetValue(contextFactor)<<endl;
+
+	// main loop
+	size_t endPos = std::min(startPos + m_nGramOrder - 2
+			, currEndPos);
+	for (size_t currPos = startPos + 1 ; currPos <= endPos ; currPos++)
+	{
+		// shift all args down 1 place
+		for (size_t i = 0 ; i < m_nGramOrder - 1 ; i++)
+			contextFactor[i] = contextFactor[i + 1];
+
+		// add last factor
+		contextFactor.back() = &hypo.GetWord(currPos);
+
+		lmScore	+= GetValue(contextFactor);
+	}
+
+	// end of sentence
+	if (hypo.IsSourceCompleted())
+	{
+		const size_t size = hypo.GetSize();
+		contextFactor.back() = &GetSentenceEndArray();
+
+		for (size_t i = 0 ; i < m_nGramOrder - 1 ; i ++)
+		{
+			int currPos = (int)(size - m_nGramOrder + i + 1);
+			if (currPos < 0)
+				contextFactor[i] = &GetSentenceStartArray();
+			else
+				contextFactor[i] = &hypo.GetWord((size_t)currPos);
+		}
+		lmScore	+= GetValue(contextFactor, &res->lmstate);
+	} else {
+		for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
+			for (size_t i = 0 ; i < m_nGramOrder - 1 ; i++)
+				contextFactor[i] = contextFactor[i + 1];
+			contextFactor.back() = &hypo.GetWord(currPos);
+		}
+		res->lmstate = GetState(contextFactor);
+	}
+	out->PlusEquals(this, lmScore);
+	IFVERBOSE(2) { StaticData::Instance().GetSentenceStats().AddTimeCalcLM( clock()-t ); }
+	return res;
+}
+
+}

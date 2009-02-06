@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "TypeDef.h"
 #include "Dictionary.h"
+#include "FeatureFunction.h"
 
 namespace Moses
 {
@@ -40,7 +41,7 @@ typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
 
 /** Implementation of a generation table in a trie.  
  */
-class GenerationDictionary : public Dictionary, public ScoreProducer
+class GenerationDictionary : public Dictionary, public StatelessFeatureFunction
 {
 	typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
 protected:
@@ -82,6 +83,7 @@ public:
 	*	Or NULL if the input word isn't found. The search function used is the WordComparer functor
 	*/
 	const OutputWordCollection *FindWord(const Word &word) const;
+	virtual bool ComputeValueInTranslationOption() const;
 };
 
 
