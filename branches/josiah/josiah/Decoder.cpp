@@ -52,9 +52,9 @@ namespace Josiah {
     params->LoadParam(BASE_ARGC + argc,mosesargv);
     StaticData::LoadDataStatic(params);
     for (int i = 0; i < BASE_ARGC; ++i) {
-      delete mosesargv[i];
+      delete[] mosesargv[i];
     }
-    delete mosesargv;
+    delete[] mosesargv;
   }
   
   MosesDecoder::MosesDecoder() : m_searcher(NULL) {}

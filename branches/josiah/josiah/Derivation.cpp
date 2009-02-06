@@ -27,8 +27,6 @@ namespace Josiah {
   bool Derivation::PhraseAlignment::operator<(const PhraseAlignment& other) const {
   if (_sourceSegment < other._sourceSegment) return true;
   if (other._sourceSegment < _sourceSegment) return false;
-  if (_targetSegment < other._targetSegment) return true;
-  if (other._targetSegment < _targetSegment) return false;
   return _target < other._target;
   }
 
@@ -40,8 +38,7 @@ namespace Josiah {
     while ((currHypo = (currHypo->GetNextHypo()))) {
       TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
       m_alignments.push_back(
-        PhraseAlignment(currHypo->GetCurrSourceWordsRange(), currHypo->GetCurrTargetWordsRange(),
-          Phrase(targetPhrase)));
+        PhraseAlignment(currHypo->GetCurrSourceWordsRange(), Phrase(targetPhrase)));
     }
     
     const vector<float> & weights = StaticData::Instance().GetAllWeights();
@@ -81,11 +78,18 @@ namespace Josiah {
       float probability = (float)i->second/m_n;
       derivations.push_back(DerivationProbability(&(i->first),probability));
     }
-    DerivationProbLessThan comparator;
-    sort(derivations.begin(),derivations.end(),not2(comparator));
+    DerivationProbGreaterThan comparator;
+    /*for (size_t i = 0; i < derivations.size(); ++i) {
+      const Derivation* d = derivations[i].first;
+      float probability = derivations[i].second;
+      cout << *d << endl;
+      cout << probability << endl;
+  }*/
+    sort(derivations.begin(),derivations.end(),comparator);
     while (derivations.size() > n) {
       derivations.pop_back();
     }
+    //cout << derivations.size() << endl;
   }
 
 }//namespace
