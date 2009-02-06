@@ -250,14 +250,14 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 		targetPhrase.SetScore();
 		targetPhrase.SetSourcePhrase(m_unksrc);
 		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation
-		targetPhrase.CreateAlignmentInfo("(0)","(0)");
+		//targetPhrase.CreateAlignmentInfo("(0)","(0)");
 		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);
 	}
 	else
 	{ // drop source word. create blank trans opt
 		TargetPhrase targetPhrase(Output);
 		targetPhrase.SetSourcePhrase(m_unksrc);
-		targetPhrase.SetAlignment();
+		// TODO targetPhrase.SetAlignment();
 		transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);
 	}
 

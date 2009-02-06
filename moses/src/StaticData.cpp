@@ -354,6 +354,11 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
 										(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
 
+	if (m_parameter->GetParam("input-file").size() > 0)
+	{
+		LoadInputSentences(m_parameter->GetParam("input-file")[0]);
+	}
+
 	// use of xml in input
 	if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
 	else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
@@ -382,6 +387,11 @@ bool StaticData::LoadData(Parameter *parameter)
 	}
 
 	return true;
+}
+
+void StaticData::LoadInputSentences(const std::string &inputPath)
+{
+	//Input
 }
 
 void StaticData::SetBooleanParameter( bool *parameter, string parameterName, bool defaultValue ) 
@@ -896,6 +906,8 @@ bool StaticData::LoadPhraseTables()
 	
 	IFVERBOSE(1)
 		PrintUserTime("Finished loading phrase tables");
+
+	exit(0);
 	return true;
 }
 

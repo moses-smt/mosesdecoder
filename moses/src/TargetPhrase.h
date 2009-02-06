@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
-#include "AlignmentPair.h"
+#include "AlignmentInfo.h"
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -50,7 +50,7 @@ protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 	//float m_ngramScore, m_fullScore;
 	ScoreComponentCollection m_scoreBreakdown;
-	AlignmentPair m_alignmentPair;
+	AlignmentInfo m_alignmentInfo;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
@@ -65,7 +65,7 @@ public:
 	/** used by the unknown word handler.
 		* Set alignment to 0
 		*/
-	void SetAlignment();
+	//void SetAlignment();
 
 	//! used by the unknown word handler- these targets
 	//! don't have a translation score, so wp is the only thing used
@@ -131,20 +131,17 @@ public:
 	{
 		return m_sourcePhrase;
 	}
-	AlignmentPair &GetAlignmentPair()
+	AlignmentInfo &GetAlignmentInfo()
 	{
-		return m_alignmentPair;
+		return m_alignmentInfo;
 	}
-	const AlignmentPair &GetAlignmentPair() const
+	const AlignmentInfo &GetAlignmentInfo() const
 	{
-		return m_alignmentPair;
+		return m_alignmentInfo;
 	}
 	
 	/** Parse the alignment info portion of phrase table string to create alignment info */
-	void CreateAlignmentInfo(const std::string &sourceStr
-													 , const std::string &targetStr);
-	void CreateAlignmentInfo(const WordAlignments &swa
-													 , const WordAlignments &twa);
+	void CreateAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentList);
 	
 	void UseWordAlignment(bool a){
 		wordalignflag=a;
@@ -159,10 +156,11 @@ public:
 		return printalign;
 	}
 
-	void InitializeAlignment(size_t numSourceWordsPt);
-
-	void AddAlignment(const std::pair<size_t, size_t> &entry);
-		// giza++ style alignment format
+	// giza++ style alignment format
+	void AddAlignment(const std::pair<size_t, size_t> &entry)
+	{
+		m_alignmentInfo.AddAlignment(entry);
+	}
 
 	TO_STRING();
 };

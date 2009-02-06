@@ -13,6 +13,7 @@ ChartRule::ChartRule(const TargetPhrase &targetPhrase, const std::vector<WordsCo
 ,m_wordsConsumed(wordsConsumed)
 ,m_wordsConsumedTargetOrder(targetPhrase.GetSize(), NOT_FOUND)
 {
+	/* TODO
 	const AlignmentPhrase &sourceAlign = m_targetPhrase.GetAlignmentPair().GetAlignmentPhrase(Input);
 	assert(m_wordsConsumed.size() == sourceAlign.GetSize());
 
@@ -30,6 +31,7 @@ ChartRule::ChartRule(const TargetPhrase &targetPhrase, const std::vector<WordsCo
 			nonTermInd++;
 		}
 	}
+	*/
 }
 
 }

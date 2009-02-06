@@ -212,7 +212,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		targetPhrase->SetScore();
 		targetPhrase->SetSourcePhrase(m_unksrc);
 		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation
-		targetPhrase->CreateAlignmentInfo("(0)","(0)");
+		//TODO targetPhrase->CreateAlignmentInfo("(0)","(0)");
 
 		// words consumed
 		std::vector<WordsConsumed> *wordsConsumed = new std::vector<WordsConsumed>();
@@ -233,7 +233,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		TargetPhrase *targetPhrase = new TargetPhrase(Output);
 		m_cacheTargetPhrase.push_back(targetPhrase);
 		targetPhrase->SetSourcePhrase(m_unksrc);
-		targetPhrase->SetAlignment();
+		//TODO targetPhrase->SetAlignment();
 
 		// words consumed
 		std::vector<WordsConsumed> *wordsConsumed = new std::vector<WordsConsumed>;

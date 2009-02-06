@@ -210,48 +210,6 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 	}
 }
 
-void OutputWordAlignment(std::ostream &out, const TargetPhrase &phrase, size_t srcoffset, size_t trgoffset, FactorDirection direction)
-{
-	size_t size = phrase.GetSize();
-	if (size){
-		out << " ";
-		/*		out << phrase;
-		out << " ===> offset: (" << srcoffset << "," << trgoffset << ")";
-		out << " ===> size: (" << phrase.GetAlignmentPair().GetAlignmentPhrase(Input).GetSize() << "," 
-			<< phrase.GetAlignmentPair().GetAlignmentPhrase(Output).GetSize() << ") ===> ";
-*/
-		AlignmentPhrase alignphrase=phrase.GetAlignmentPair().GetAlignmentPhrase(direction);
-/*		alignphrase.print(out,0);
-		out << " ===> ";
-		//		out << alignphrase << " ===> ";
-*/
-		if (direction == Input){
-			alignphrase.Shift(trgoffset);
-			alignphrase.print(out,srcoffset);
-		}
-		else{
-			alignphrase.Shift(srcoffset);
-			alignphrase.print(out,trgoffset);
-		}
-/*
- //		out << alignphrase << " ===> ";
-		out << "\n";
-*/
-	}
-}
-
-void OutputWordAlignment(std::ostream &out, const Hypothesis *hypo, FactorDirection direction)
-{
-	size_t srcoffset, trgoffset;
-	if ( hypo != NULL)
-	{
-		srcoffset=hypo->GetCurrSourceWordsRange().GetStartPos();
-		trgoffset=hypo->GetCurrTargetWordsRange().GetStartPos();
-		OutputWordAlignment(out, hypo->GetPrevHypo(),direction);
-		OutputWordAlignment(out, hypo->GetCurrTargetPhrase(), srcoffset, trgoffset, direction);
-	}
-}
-
 void IOWrapper::Backtrack(const Hypothesis *hypo){
 
 	if (hypo->GetPrevHypo() != NULL) {
@@ -467,28 +425,7 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 				}
 			}
     }
-		
-				
-		if (includeWordAlignment){			
-			//word-to-word alignment (source-to-target)
-			*m_nBestStream << " |||";
-			for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
-			{
-				const Hypothesis &edge = *edges[currEdge];
-				WordsRange targetRange = path.GetTargetWordsRange(edge);
-				OutputWordAlignment(*m_nBestStream, edge.GetCurrTargetPhrase(),edge.GetCurrSourceWordsRange().GetStartPos(),targetRange.GetStartPos(), Input);
-			}
-
-			//word-to-word alignment (target-to-source)
-			*m_nBestStream << " |||";		
-			for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
-			{
-				const Hypothesis &edge = *edges[currEdge];
-				WordsRange targetRange = path.GetTargetWordsRange(edge);
-				OutputWordAlignment(*m_nBestStream, edge.GetCurrTargetPhrase(),edge.GetCurrSourceWordsRange().GetStartPos(),targetRange.GetStartPos(), Output);
-			}
-		}
-				
+						
 		*m_nBestStream << endl;
 	}
 

@@ -62,11 +62,6 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const {
 }
 #endif
 
-void TargetPhrase::SetAlignment()
-{
-	m_alignmentPair.SetIdentityAlignment();
-}
-
 void TargetPhrase::SetScore(float score) 
 {
 	//we use an existing score producer to figure out information for score setting (number of scores and weights)
@@ -262,89 +257,9 @@ void AddAlignmentElement(AlignmentPhraseInserter &inserter
 	}
 }
 
-void TargetPhrase::CreateAlignmentInfo(const WordAlignments &swa
-																			 , const WordAlignments &twa)
+void TargetPhrase::CreateAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentList)
 {
-	AlignmentPhraseInserter sourceInserter = m_alignmentPair.GetInserter(Input);
-	AlignmentPhraseInserter targetInserter = m_alignmentPair.GetInserter(Output);
-	list<size_t> uniformAlignmentSource, uniformAlignmentTarget;
-	
-	if (!UseWordAlignment()){ //build uniform word-to-word alignment to fit the internal structure which requires their presence
-				std::string srcAlignStr,trgAlignStr;
-				UniformAlignment(srcAlignStr, m_sourcePhrase->GetSize(), GetSize());
-				UniformAlignment(trgAlignStr, GetSize(), m_sourcePhrase->GetSize());
-				CreateAlignmentInfo(srcAlignStr,trgAlignStr);
-	}				
-	else{
-		AddAlignmentElement(sourceInserter
-											, swa
-											, m_sourcePhrase->GetSize()
-											, GetSize()
-											, uniformAlignmentSource);
-		AddAlignmentElement(targetInserter
-											, twa
-											, GetSize()
-											, m_sourcePhrase->GetSize()
-											, uniformAlignmentTarget);
-	}
-	// propergate uniform alignments to other side
-//	m_alignmentPair.GetAlignmentPhrase(Output).AddUniformAlignmentElement(uniformAlignmentSource);
-//	m_alignmentPair.GetAlignmentPhrase(Input).AddUniformAlignmentElement(uniformAlignmentTarget);
-}
-
-
-
-void TargetPhrase::CreateAlignmentInfo(const string &sourceStr
-																			 , const string &targetStr)
-{
-	AlignmentPhraseInserter sourceInserter = m_alignmentPair.GetInserter(Input);
-	AlignmentPhraseInserter targetInserter = m_alignmentPair.GetInserter(Output);
-	list<size_t> uniformAlignmentSource, uniformAlignmentTarget;
-	
-	AddAlignmentElement(sourceInserter
-											, sourceStr
-											, m_sourcePhrase->GetSize()
-											, GetSize()
-											, uniformAlignmentSource);
-	AddAlignmentElement(targetInserter
-											, targetStr
-											, GetSize()
-											, m_sourcePhrase->GetSize()
-											, uniformAlignmentTarget);
-	// propergate uniform alignments to other side
-//	m_alignmentPair.GetAlignmentPhrase(Output).AddUniformAlignmentElement(uniformAlignmentSource);
-//	m_alignmentPair.GetAlignmentPhrase(Input).AddUniformAlignmentElement(uniformAlignmentTarget);
-}
-
-// helper fn
-void InitializeAlignment(AlignmentPhrase &alignPhrase, size_t phraseSize)
-{
-	assert(alignPhrase.GetSize() == 0 || alignPhrase.GetSize() == phraseSize);
-
-	// make sure have enough elements
-	while (alignPhrase.GetSize() < phraseSize)
-		alignPhrase.Add(AlignmentElement());
-}
-
-void TargetPhrase::InitializeAlignment(size_t numSourceWordsPt)
-{
-	// source
-	AlignmentPhrase &alignSource = m_alignmentPair.GetAlignmentPhrase(Input);
-	Moses::InitializeAlignment(alignSource, numSourceWordsPt);
-
-	//target
-	AlignmentPhrase &alignTarget = m_alignmentPair.GetAlignmentPhrase(Output);
-	Moses::InitializeAlignment(alignTarget, GetSize());
-}
-
-void TargetPhrase::AddAlignment(const std::pair<size_t, size_t> &entry)
-{
-	//AlignmentElement *alignElement = new AlignmentElement(Tokenize<AlignmentElementType>(alignElementStr, ","));
-	AlignmentPhrase &alignSource = m_alignmentPair.GetAlignmentPhrase(Input);
-	AlignmentPhrase &alignTarget = m_alignmentPair.GetAlignmentPhrase(Output);
-
-	alignSource.GetElement(entry.first).Add(entry.second);
-	alignTarget.GetElement(entry.second).Add(entry.first);
+	m_alignmentInfo.AddAlignment(alignmentList);	
 }
 
 TO_STRING_BODY(TargetPhrase);
@@ -353,8 +268,6 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
   os << static_cast<const Phrase&>(tp);
 	os << ", pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
-	if (tp.PrintAlignmentInfo())
-		os << ", " << tp.GetAlignmentPair();
   return os;
 }
 

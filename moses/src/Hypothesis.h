@@ -228,40 +228,6 @@ public:
 		out << (Phrase) GetCurrTargetPhrase();
 	}
 	
-	inline bool PrintAlignmentInfo() const{ return GetCurrTargetPhrase().PrintAlignmentInfo(); }
-	
-	void SourceAlignmentToStream(std::ostream& out) const
-	{
-		if (m_prevHypo != NULL)
-		{
-			m_prevHypo->SourceAlignmentToStream(out);
-			AlignmentPhrase alignSourcePhrase=GetCurrTargetPhrase().GetAlignmentPair().GetAlignmentPhrase(Input);
-			alignSourcePhrase.Shift(m_currTargetWordsRange.GetStartPos());
-			out << " ";
- /*
-			out << "\nGetCurrTargetPhrase(): " << GetCurrTargetPhrase();
-			out << "\nm_currTargetWordsRange: " << m_currTargetWordsRange << "->";
-*/
-			alignSourcePhrase.print(out,m_currSourceWordsRange.GetStartPos());
-		}
-	}
-
-	void TargetAlignmentToStream(std::ostream& out) const
-	{
-		if (m_prevHypo != NULL)
-		{
-			m_prevHypo->TargetAlignmentToStream(out);
-			AlignmentPhrase alignTargetPhrase=GetCurrTargetPhrase().GetAlignmentPair().GetAlignmentPhrase(Output);
-			alignTargetPhrase.Shift(m_currSourceWordsRange.GetStartPos());
-			out << " ";
-/*
-			 out << "\nGetCurrTargetPhrase(): " << GetCurrTargetPhrase();
-			out << "\nm_currSourceWordsRange: " << m_currSourceWordsRange << "->";
-*/
-			alignTargetPhrase.print(out,m_currTargetWordsRange.GetStartPos());
-		}
-	}
-
 	TO_STRING();
 
 	inline void SetWinningHypo(const Hypothesis *hypo)

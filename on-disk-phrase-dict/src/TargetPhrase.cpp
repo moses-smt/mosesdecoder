@@ -88,7 +88,6 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 	ret->SetScore(&phraseDict, m_scores, weightT, weightWP, lmList);
 
 	// alignments
-	ret->InitializeAlignment(numSourceWordsPt);
 	for (size_t ind = 0; ind < m_align.size(); ++ind)
 	{
 		const std::pair<size_t, size_t> &entry = m_align[ind];
