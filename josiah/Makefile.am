@@ -1,5 +1,10 @@
 bin_PROGRAMS = josiah
-josiah_SOURCES = Derivation.cpp Decoder.cpp Josiah.cpp
+josiah_SOURCES = Derivation.cpp Decoder.cpp Josiah.cpp \
+        Gibbler.cpp \
+        GibblerExpectedLossTraining.cpp \
+        GibblerMaxTransDecoder.cpp \
+        GibbsOperator.cpp
+
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -DUSE_HYPO_POOL -I$(top_srcdir)/moses/src $(BOOST_CPPFLAGS)
 
 #josiah_LDFLAGS = -static
