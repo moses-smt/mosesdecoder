@@ -257,9 +257,9 @@ void AddAlignmentElement(AlignmentPhraseInserter &inserter
 	}
 }
 
-void TargetPhrase::CreateAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentList)
+void TargetPhrase::CreateAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo)
 {
-	m_alignmentInfo.AddAlignment(alignmentList);	
+	m_alignmentInfo.AddAlignment(alignmentInfo);	
 }
 
 TO_STRING_BODY(TargetPhrase);

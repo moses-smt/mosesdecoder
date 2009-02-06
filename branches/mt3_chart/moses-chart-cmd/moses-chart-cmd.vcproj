@@ -136,6 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="/fixed:no"
 				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)$(ConfigurationName)\moses-chart.lib&quot; zlib.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"

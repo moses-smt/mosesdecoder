@@ -41,22 +41,28 @@ using namespace std;
 namespace Moses
 {
 
-inline void TransformString(vector< vector<string> > &phraseVector
-									 ,vector<pair<size_t, size_t> > &alignVector)
-{
-	assert(alignVector.size() == 0);
+inline void StoreAlign(vector<size_t> &align, size_t ind, size_t pos)
+{ 
+	if (ind >= align.size())
+	{
+		align.resize(ind + 1);
+	}
+	align[ind] = pos;
+}
 
-	// source
+inline void TransformString(vector< vector<string> > &phraseVector
+										 ,vector<size_t> &align)
+{
 	for (size_t pos = 0 ; pos < phraseVector.size() ; ++pos)
 	{
+		assert(phraseVector[pos].size() == 1);
+
 		string &str = phraseVector[pos][0];
 		if (str.size() > 3 && str.substr(0, 3) == "[X,")
 		{ // non-term
 			string indStr = str.substr(3, str.size() - 4);
 			size_t indAlign = Scan<size_t>(indStr) - 1;
-
-			pair<size_t, size_t> alignPair(pos, indAlign);
-			alignVector.push_back(alignPair);
+			StoreAlign(align, indAlign, pos);
 
 			str = "[X]";
 		}
@@ -65,37 +71,17 @@ inline void TransformString(vector< vector<string> > &phraseVector
 
 inline void TransformString(vector< vector<string> > &sourcePhraseVector
 										 ,vector< vector<string> > &targetPhraseVector
-										 ,string &sourceAlign
-										 ,string &targetAlign)
+										 ,list<pair<size_t,size_t> > &alignmentInfo)
 {
-	vector<string>  sourceAlignVec(sourcePhraseVector.size(), "()");
-	vector<string>  targetAlignVec(targetPhraseVector.size(), "()");
+	vector<size_t> sourceAlign, targetAlign;
+	TransformString(sourcePhraseVector, sourceAlign);
+	TransformString(targetPhraseVector, targetAlign);
 
-	vector<pair<size_t, size_t> > sourceNonTerm, targetNonTerm;
-
-	TransformString(sourcePhraseVector, sourceNonTerm);
-	TransformString(targetPhraseVector, targetNonTerm);
-
-	for (size_t ind = 0 ; ind < sourceNonTerm.size() ; ++ind)
+	assert(sourceAlign.size() == targetAlign.size());
+	for (size_t ind = 0; ind < targetAlign.size(); ++ind)
 	{
-		size_t sourcePos	= sourceNonTerm[ind].first
-					,targetInd	= sourceNonTerm[ind].second;
-		size_t targetPos	= targetNonTerm[targetInd].first;
-
-		sourceAlignVec[sourcePos] = "(" + SPrint(targetPos) + ")";
-		targetAlignVec[targetPos] = "(" + SPrint(sourcePos) + ")";
-	}
-
-	// concate string
-	stringstream strme("");
-	for (size_t ind = 0 ; ind < sourceAlignVec.size() ; ++ind)
-		strme << sourceAlignVec[ind] << " ";
-	sourceAlign = strme.str();
-
-	strme.str("");
-	for (size_t ind = 0 ; ind < targetAlignVec.size() ; ++ind)
-		strme << targetAlignVec[ind] << " ";
-	targetAlign = strme.str();
+		alignmentInfo.push_back(pair<size_t,size_t>(sourceAlign[ind], targetAlign[ind]));
+	}	
 }
 
 bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
@@ -183,8 +169,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 		vector< vector<string> >	sourcePhraseVector = Phrase::Parse(sourcePhraseString, input, factorDelimiter)
 															,targetPhraseVector = Phrase::Parse(targetPhraseString, output, factorDelimiter);
-		string sourceAlign, targetAlign;
-		TransformString(sourcePhraseVector, targetPhraseVector, sourceAlign, targetAlign);
+		list<pair<size_t,size_t> > alignmentInfo;
+		TransformString(sourcePhraseVector, targetPhraseVector, alignmentInfo);
 
 		// source
 		Phrase sourcePhrase(Input);
@@ -195,7 +181,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		targetPhrase->SetSourcePhrase(&sourcePhrase);
 		targetPhrase->CreateFromString( output, targetPhraseVector);
 
-		//targetPhrase->CreateAlignmentInfo(sourceAlign, targetAlign);
+		targetPhrase->CreateAlignmentInfo(alignmentInfo);
 
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
