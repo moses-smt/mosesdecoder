@@ -240,7 +240,7 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString
 }
 
 
-void Phrase::Parse(vector< vector<string> > &output
+void Phrase::Parse(vector< vector<string>* > &output
 									, const std::string &phraseString
 									, const std::vector<FactorType> &factorOrder
 									, const std::string& factorDelimiter)
@@ -256,22 +256,22 @@ void Phrase::Parse(vector< vector<string> > &output
 	for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() ; phrasePos++)
 	{
 		string &annotatedWord = annotatedWordVector[phrasePos];
-		vector<string> factorStrVector;
+		vector<string> *factorStrVector = new vector<string>();
 		if (isMultiCharDelimiter) 
 		{
-			factorStrVector = TokenizeMultiCharSeparator(annotatedWord, factorDelimiter);
+			*factorStrVector = TokenizeMultiCharSeparator(annotatedWord, factorDelimiter);
 		} 
 		else 
 		{
-			Tokenize(factorStrVector, annotatedWord, factorDelimiter);
+			Tokenize(*factorStrVector, annotatedWord, factorDelimiter);
 		}
 		// KOMMA|none
 		//    to
 		// "KOMMA" "none"
-		if (factorStrVector.size() != factorOrder.size()) {
+		if (factorStrVector->size() != factorOrder.size()) {
 			TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance().GetCurrentInputPosition() <<*/ std::endl
 			          << "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
-								<< "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
+								<< "  but instead received input with " << factorStrVector->size() << " factor(s).\n");
 			abort();
 		}
 		output.push_back(factorStrVector);
@@ -291,6 +291,25 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 		{
 			FactorType factorType = factorOrder[currFactorIndex];
 			const string &factorStr = phraseVector[phrasePos][currFactorIndex];
+			const Factor *factor = factorCollection.AddFactor(m_direction, factorType, factorStr); 
+			word[factorType] = factor;
+		}
+	}
+}
+
+void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
+															, const vector< vector<string>* > &phraseVector)
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
+	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
+	{
+		// add word this phrase
+		Word &word = AddWord();
+		for (size_t currFactorIndex= 0 ; currFactorIndex < factorOrder.size() ; currFactorIndex++)
+		{
+			FactorType factorType = factorOrder[currFactorIndex];
+			const string &factorStr = (*phraseVector[phrasePos])[currFactorIndex];
 			const Factor *factor = factorCollection.AddFactor(m_direction, factorType, factorStr); 
 			word[factorType] = factor;
 		}
