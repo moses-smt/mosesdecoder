@@ -141,7 +141,7 @@ public:
 	}
 	
 	/** Parse the alignment info portion of phrase table string to create alignment info */
-	void CreateAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentList);
+	void CreateAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo);
 	
 	void UseWordAlignment(bool a){
 		wordalignflag=a;
