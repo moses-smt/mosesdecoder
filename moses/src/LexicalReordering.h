@@ -11,6 +11,7 @@
 #include "Util.h"
 #include "WordsRange.h"
 #include "ScoreProducer.h"
+#include "FeatureFunction.h"
 
 #include "LexicalReorderingTable.h"
 
@@ -24,7 +25,7 @@ class InputType;
 
 using namespace std;
 
-class LexicalReordering : public ScoreProducer {
+class LexicalReordering : public StatefulFeatureFunction {
  public: //types & consts
   typedef int OrientationType; 
   enum Direction {Forward, Backward, Bidirectional, Unidirectional = Backward};
@@ -42,7 +43,14 @@ class LexicalReordering : public ScoreProducer {
   virtual size_t GetNumScoreComponents() const {
     return m_NumScoreComponents; 
   };
-  
+
+  virtual FFState* Evaluate(
+    const Hypothesis& cur_hypo,
+    const FFState* prev_state,
+    ScoreComponentCollection* accumulator) const;
+
+  const FFState* EmptyHypothesisState() const;
+
   virtual std::string GetScoreProducerDescription() const {
     return "Generic Lexical Reordering Model... overwrite in subclass.";
   };
@@ -55,7 +63,7 @@ class LexicalReordering : public ScoreProducer {
     m_Table->InitializeForInput(i);
   }
 
-	Score GetProb(const Phrase& f, const Phrase& e) const;
+  Score GetProb(const Phrase& f, const Phrase& e) const;
   //helpers
   static std::vector<Condition> DecodeCondition(Condition c);
   static std::vector<Direction> DecodeDirection(Direction d);

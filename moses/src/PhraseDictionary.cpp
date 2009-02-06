@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "StaticData.h"
 #include "InputType.h"
+#include "TranslationOption.h"
 
 namespace Moses
 {
@@ -48,6 +49,12 @@ std::string PhraseDictionary::GetScoreProducerDescription() const
 size_t PhraseDictionary::GetNumScoreComponents() const
 {
 	return m_numScoreComponent;
+}
+
+size_t PhraseDictionary::GetNumInputScores() const { return 0;}
+
+bool PhraseDictionary::ComputeValueInTranslationOption() const {
+	return true;
 }
 
 }

@@ -250,5 +250,20 @@ Score LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const
 	return m_Table->GetScore(f, e, Phrase(Output));
 }
 
+FFState* LexicalReordering::Evaluate(
+		const Hypothesis& hypo,
+		const FFState* prev_state,
+		ScoreComponentCollection* out) const {
+	out->PlusEquals(this, CalcScore(const_cast<Hypothesis*>(&hypo)));
+
+	//TODO need to return proper state, calc score should not use previous
+	//hypothesis, it should use the state.
+	return NULL;
+}
+
+const FFState* LexicalReordering::EmptyHypothesisState() const {
+  return NULL;
+}
+
 }
 

@@ -16,6 +16,6 @@ ScoreProducer::ScoreProducer()
 {
   m_scoreBookkeepingId = UNASSIGNED;
 }
- 
+
 }
 

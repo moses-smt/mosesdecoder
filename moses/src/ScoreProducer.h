@@ -9,7 +9,10 @@
 namespace Moses
 {
 
+class Hypothesis;
+class ScoreComponentCollection;
 class ScoreIndexManager;
+class FFState;
 
 /** to keep track of the various things that can produce a score,
  * we use this evil implementation-inheritance to give them each
@@ -47,6 +50,9 @@ public:
 
 	//! returns the number of scores gathered from the input (0 by default)
 	virtual size_t GetNumInputScores() const { return 0; };
+
+	virtual bool IsStateless() const = 0;
+
 };
 
 
