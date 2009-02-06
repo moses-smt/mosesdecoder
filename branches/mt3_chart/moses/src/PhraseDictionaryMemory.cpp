@@ -50,14 +50,14 @@ inline void StoreAlign(vector<size_t> &align, size_t ind, size_t pos)
 	align[ind] = pos;
 }
 
-inline void TransformString(vector< vector<string> > &phraseVector
+inline void TransformString(vector< vector<string>* > &phraseVector
 										 ,vector<size_t> &align)
 {
 	for (size_t pos = 0 ; pos < phraseVector.size() ; ++pos)
 	{
-		assert(phraseVector[pos].size() == 1);
+		assert(phraseVector[pos]->size() == 1);
 
-		string &str = phraseVector[pos][0];
+		string &str = (*phraseVector[pos])[0];
 		if (str.size() > 3 && str.substr(0, 3) == "[X,")
 		{ // non-term
 			string indStr = str.substr(3, str.size() - 4);
@@ -69,8 +69,8 @@ inline void TransformString(vector< vector<string> > &phraseVector
 	}
 }
 
-inline void TransformString(vector< vector<string> > &sourcePhraseVector
-										 ,vector< vector<string> > &targetPhraseVector
+inline void TransformString(vector< vector<string>* > &sourcePhraseVector
+										 ,vector< vector<string>* > &targetPhraseVector
 										 ,list<pair<size_t,size_t> > &alignmentInfo)
 {
 	vector<size_t> sourceAlign, targetAlign;
@@ -166,7 +166,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		assert(scoreVector.size() == m_numScoreComponent);
 
 		const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-		vector< vector<string> >	sourcePhraseVector, targetPhraseVector;
+		vector< vector<string>* >	sourcePhraseVector, targetPhraseVector;
 		
 		Phrase::Parse(sourcePhraseVector, sourcePhraseString, input, factorDelimiter);
 		Phrase::Parse(targetPhraseVector, targetPhraseString, output, factorDelimiter);
@@ -185,6 +185,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 		targetPhrase->CreateAlignmentInfo(alignmentInfo);
 
+		// remove strings
+		RemoveAllInColl(sourcePhraseVector);
+		RemoveAllInColl(targetPhraseVector);
+
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
 		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),NegateScore);
@@ -193,6 +197,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		targetPhrase->SetScore(this, scv, weight, weightWP, languageModels);
 
 		AddEquivPhrase(sourcePhrase, targetPhrase);
+
 
 		if (count % 10000 == 0)
 			cerr << count << " " << line << endl;

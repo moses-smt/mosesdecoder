@@ -88,7 +88,7 @@ public:
 																, const std::string& factorDelimiter);
 
 	// speeded up version of above
-	static void Parse(std::vector< std::vector<std::string> > &output
+	static void Parse(std::vector< std::vector<std::string>* > &output
 									, const std::string &phraseString
 									, const std::vector<FactorType> &factorOrder
 									, const std::string& factorDelimiter);
@@ -104,6 +104,10 @@ public:
 		* \param phraseString formatted input string to parse
 		*	\param factorDelimiter delimiter, as used by Parse()
 	*/
+
+	void CreateFromString(const std::vector<FactorType> &factorOrder
+              , const std::vector< std::vector<std::string>* > &phraseVector);
+
 	void CreateFromString(const std::vector<FactorType> &factorOrder
 											, const std::string &phraseString
 											, const std::string &factorDelimiter);
