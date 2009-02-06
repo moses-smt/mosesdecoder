@@ -86,11 +86,11 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       WordsRange leftTargetSegment = prev->GetCurrTargetWordsRange();
       noChangeDelta = new   PairedTranslationUpdateDelta(targetWords,&(prev->GetTranslationOption())
           ,&(hypothesis->GetTranslationOption()),leftTargetSegment,rightTargetSegment);
-      if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos()  || rightTargetSegment.GetEndPos() + 1 ==  leftTargetSegment.GetStartPos() ) {
+      if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos()) {
         //contiguous on target side.
         //Add MergeDeltas
         WordsRange sourceSegment(leftSourceSegment.GetStartPos(), rightSourceSegment.GetEndPos());
-        WordsRange targetSegment(min(leftTargetSegment.GetStartPos(), rightTargetSegment.GetStartPos()), max(leftTargetSegment.GetEndPos(), rightTargetSegment.GetEndPos()));
+        WordsRange targetSegment(leftTargetSegment.GetStartPos(), rightTargetSegment.GetEndPos());
         VERBOSE(3, "Creating merge deltas for merging source segments  " << leftSourceSegment << " with " <<
               rightSourceSegment << " and target segments " << leftTargetSegment << " with " << rightTargetSegment  << endl);
         const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);

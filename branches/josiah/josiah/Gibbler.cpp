@@ -243,7 +243,7 @@ void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentC
   //Update target word ranges
   int tgtSizeChange = static_cast<int> (option.GetTargetPhrase().GetSize()) - static_cast<int> (currHyp->GetTargetPhrase().GetSize());
   if (tgtSizeChange != 0) {
-    cerr << "Updating tgt word range downstream" << endl;
+    VERBOSE(2,"Updating tgt word range downstream" << endl);
     UpdateTargetWordRange(newHyp, tgtSizeChange);  
   }
   
@@ -320,7 +320,7 @@ void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCo
   int prevTgtSize = currStartHyp->GetTargetPhrase().GetSize() + currEndHyp->GetTargetPhrase().GetSize();
   int tgtSizeChange = newTgtSize - prevTgtSize;
   if (tgtSizeChange != 0) {
-    cerr << "Updating tgt word range downstream" << endl;
+    VERBOSE(2,"Updating tgt word range downstream" << endl);
     UpdateTargetWordRange(newHyp, tgtSizeChange);  
   }
     
@@ -404,7 +404,7 @@ void Sample::SplitTarget(const TranslationOption& leftTgtOption, const Translati
   int newTgtSize = newLeftHyp->GetTargetPhrase().GetSize() + newRightHyp->GetTargetPhrase().GetSize();
   int tgtSizeChange = newTgtSize - prevTgtSize;
   if (tgtSizeChange != 0) {
-    cerr << "Updating tgt word range downstream" << endl;
+    VERBOSE(2,"Updating tgt word range downstream" << endl);
     UpdateTargetWordRange(newRightHyp, tgtSizeChange);  
   }
   
