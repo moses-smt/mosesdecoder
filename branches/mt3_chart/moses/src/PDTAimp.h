@@ -3,7 +3,10 @@
 
 #pragma once
 
+#include <sys/stat.h>
 #include "StaticData.h"  // needed for factor splitter
+#include "PhraseDictionaryTree.h"
+#include "UniqueObject.h"
 
 namespace Moses
 {
@@ -114,7 +117,7 @@ public:
 		uniqSrcPhr.clear();
 	}
 
-	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
+	void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase) 
 	{
 		cerr << "AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)" << endl;
 		assert(GetTargetPhraseCollection(source)==0);
@@ -125,7 +128,7 @@ public:
 		if(p.second || p.first->second==0) 
 			{
 				TargetPhraseCollection *ptr=new TargetPhraseCollection;
-				ptr->Add(new TargetPhrase(targetPhrase));
+				ptr->Add(targetPhrase);
 				p.first->second=ptr;
 				m_tgtColls.push_back(ptr);
 			}
@@ -316,7 +319,7 @@ public:
 		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
 		
-		targetPhrase.CreateAlignmentInfo(swaVector, twaVector);
+		// TODO targetPhrase.CreateAlignmentInfo(swaVector, twaVector);
 	}
 
 

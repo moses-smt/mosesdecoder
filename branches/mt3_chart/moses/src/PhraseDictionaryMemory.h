@@ -41,7 +41,10 @@ protected:
 	PhraseDictionaryNode m_collection;
 	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
 
-	TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
+	Phrase									m_prevSource;
+	TargetPhraseCollection	*m_prevPhraseColl;
+
+	TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const Phrase &source);
 	
 	bool Load(const std::vector<FactorType> &input
 							, const std::vector<FactorType> &output
@@ -54,6 +57,8 @@ protected:
 public:
 	PhraseDictionaryMemory(size_t numScoreComponent)
 		: MyBase(numScoreComponent)
+		, m_prevSource(Input)
+		, m_prevPhraseColl(NULL)
 	{
 	}
 	virtual ~PhraseDictionaryMemory();
@@ -68,7 +73,7 @@ public:
 	
 	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 
-	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
+	void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase);
 
 	// for mert
 	void SetWeightTransModel(const std::vector<float> &weightT);

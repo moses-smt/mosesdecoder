@@ -123,8 +123,9 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 																			, const LMList &languageModels
 																			, float weightWP)
 {
-	const StaticData &staticData = StaticData::Instance();
+	PrintUserTime("Start loading tm");
 
+	const StaticData &staticData = StaticData::Instance();
 	m_tableLimit = tableLimit;
 
 	//factors
@@ -138,12 +139,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 	string line;
 	size_t count = 0;
-  size_t line_num = 0;
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
 
 	while(getline(inStream, line))
 	{
-		++line_num;
 		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
 
 		if (numElement == NOT_FOUND)
@@ -155,7 +154,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		if (tokens.size() != numElement)
 		{
 			stringstream strme;
-			strme << "Syntax error at " << m_filePath << ":" << line_num;
+			strme << "Syntax error at " << m_filePath << ":" << count;
 			UserMessage::Add(strme.str());
 			abort();
 		}
@@ -167,7 +166,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
-			TRACE_ERR( m_filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
+			TRACE_ERR( m_filePath << ":" << count << ": pt entry contains empty target, skipping\n");
 			continue;
 		}
 
@@ -175,7 +174,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		if (scoreVector.size() != m_numScoreComponent)
 		{
 			stringstream strme;
-			strme << "Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
+			strme << "Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_numScoreComponent<<") of score components on line " << count;
 			UserMessage::Add(strme.str());
 			abort();
 		}
@@ -192,31 +191,38 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		sourcePhrase.CreateFromString( input, sourcePhraseVector);
 
 		//target
-		TargetPhrase targetPhrase(Output);
-		targetPhrase.SetSourcePhrase(&sourcePhrase);
-		targetPhrase.CreateFromString( output, targetPhraseVector);
+		TargetPhrase *targetPhrase = new TargetPhrase(Output);
+		targetPhrase->SetSourcePhrase(&sourcePhrase);
+		targetPhrase->CreateFromString( output, targetPhraseVector);
 
-		targetPhrase.CreateAlignmentInfo(sourceAlign, targetAlign);
+		//targetPhrase->CreateAlignmentInfo(sourceAlign, targetAlign);
 
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
 		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),NegateScore);
 
 		std::transform(scv.begin(),scv.end(),scv.begin(),FloorScore);
-		targetPhrase.SetScore(this, scv, weight, weightWP, languageModels);
+		targetPhrase->SetScore(this, scv, weight, weightWP, languageModels);
 
 		AddEquivPhrase(sourcePhrase, targetPhrase);
+
+		if (count % 10000 == 0)
+			cerr << count << " " << line << endl;
 
 		count++;
 	}
 
+	PrintUserTime("Finished loading tm");
+
 	// sort each target phrase collection
 	m_collection.Sort(m_tableLimit);
+
+	PrintUserTime("Finished sorting tm");
 
 	return true;
 }
 
-TargetPhraseCollection *PhraseDictionaryMemory::CreateTargetPhraseCollection(const Phrase &source)
+TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollection(const Phrase &source)
 {
 	const size_t size = source.GetSize();
 
@@ -225,17 +231,24 @@ TargetPhraseCollection *PhraseDictionaryMemory::CreateTargetPhraseCollection(con
 	{
 		const Word& word = source.GetWord(pos);
 		currNode = currNode->GetOrCreateChild(word);
-		if (currNode == NULL)
-			return NULL;
+		assert(currNode != NULL);
 	}
 
-	return currNode->CreateTargetPhraseCollection();
+	return currNode->GetOrCreateTargetPhraseCollection();
 }
 
-void PhraseDictionaryMemory::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
+void PhraseDictionaryMemory::AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)
 {
-	TargetPhraseCollection &phraseColl = *CreateTargetPhraseCollection(source);
-	phraseColl.Add(new TargetPhrase(targetPhrase));
+	if (m_prevPhraseColl != NULL && source.Compare(m_prevSource) == 0)
+	{ // same source, already have node
+	}
+	else
+	{
+		m_prevPhraseColl = &GetOrCreateTargetPhraseCollection(source);
+		m_prevSource = source;
+	}
+
+	m_prevPhraseColl->Add(targetPhrase);
 }
 
 const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase &source) const

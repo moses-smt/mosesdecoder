@@ -70,7 +70,7 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
 	//! find list of translations that can translates a portion of src. Used by confusion network decoding
 	virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
 	//! Create entry for translation of source to targetPhrase
-	virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
+	virtual void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)=0;
 
 	virtual const ChartRuleCollection *GetChartRuleCollection(
 																				InputType const& src

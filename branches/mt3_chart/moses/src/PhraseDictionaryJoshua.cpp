@@ -172,18 +172,18 @@ void PhraseDictionaryJoshua::InitializeForInput(InputType const &source)
 		sourcePhrase.CreateFromString( m_inputFactorsVec, sourcePhraseVector);
 
 		//target
-		TargetPhrase targetPhrase(Output);
-		targetPhrase.SetSourcePhrase(&sourcePhrase);
-		targetPhrase.CreateFromString( m_outputFactorsVec, targetPhraseVector);
+		TargetPhrase *targetPhrase = new TargetPhrase(Output);
+		targetPhrase->SetSourcePhrase(&sourcePhrase);
+		targetPhrase->CreateFromString( m_outputFactorsVec, targetPhraseVector);
 
-		targetPhrase.CreateAlignmentInfo(sourceAlign, targetAlign);
+		//targetPhrase->CreateAlignmentInfo(sourceAlign, targetAlign);
 
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
 		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),NegateScore);
 
 		std::transform(scv.begin(),scv.end(),scv.begin(),FloorScore);
-		targetPhrase.SetScore(this, scv, m_weight, m_weightWP, languageModels);
+		targetPhrase->SetScore(this, scv, m_weight, m_weightWP, languageModels);
 
 		AddEquivPhrase(sourcePhrase, targetPhrase);
 
@@ -207,14 +207,14 @@ const TargetPhraseCollection *PhraseDictionaryJoshua::GetTargetPhraseCollection(
 	return MyBase::GetTargetPhraseCollection(source);
 }
 
-void PhraseDictionaryJoshua::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
+void PhraseDictionaryJoshua::AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)
 {
 	MyBase::AddEquivPhrase(source, targetPhrase);
 }
 
-TargetPhraseCollection *PhraseDictionaryJoshua::CreateTargetPhraseCollection(const Phrase &source)
+TargetPhraseCollection &PhraseDictionaryJoshua::GetOrCreateTargetPhraseCollection(const Phrase &source)
 {
-	return MyBase::CreateTargetPhraseCollection(source);
+	return MyBase::GetOrCreateTargetPhraseCollection(source);
 }
 
 const ChartRuleCollection *PhraseDictionaryJoshua::GetChartRuleCollection(

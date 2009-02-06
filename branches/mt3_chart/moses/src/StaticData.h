@@ -94,10 +94,9 @@ protected:
 			, m_maxNoPartTransOpt
 			, m_maxPhraseLength;
 	
+	std::vector<Phrase>		m_inputSentences;
 	std::string
-		m_constraintFileName;	
-	
-	std::string									m_nBestFilePath, m_joshuaPath;
+		m_constraintFileName, m_nBestFilePath, m_joshuaPath;
 	bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
@@ -176,6 +175,8 @@ protected:
 	bool LoadMapping();
 	bool LoadLexicalReorderingModel();
 	
+	void LoadInputSentences(const std::string &inputPath);
+
 public:
 
 	bool IsAlwaysCreateDirectTranslationOption() const {

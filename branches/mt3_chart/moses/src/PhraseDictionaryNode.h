@@ -62,11 +62,11 @@ public:
 	{
 		return m_targetPhraseCollection;
 	}
-	TargetPhraseCollection *CreateTargetPhraseCollection()
+	TargetPhraseCollection &GetOrCreateTargetPhraseCollection()
 	{
 		if (m_targetPhraseCollection == NULL)
 			m_targetPhraseCollection = new TargetPhraseCollection();
-		return m_targetPhraseCollection;
+		return *m_targetPhraseCollection;
 	}
 	// for mert
 	void SetWeightTransModel(const PhraseDictionaryMemory *phraseDictionary

@@ -106,7 +106,7 @@ SetWeightTransModel(const std::vector<float> &weightT)
 }
 
 void PhraseDictionaryTreeAdaptor::
-AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
+AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase) 
 {
 	imp->AddEquivPhrase(source,targetPhrase);
 }

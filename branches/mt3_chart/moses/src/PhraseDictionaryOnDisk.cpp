@@ -218,7 +218,7 @@ long PhraseDictionaryOnDisk::SearchNode(long offset, const MosesOnDiskPt::Word &
 }
 
 //! Create entry for translation of source to targetPhrase
-void PhraseDictionaryOnDisk::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
+void PhraseDictionaryOnDisk::AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)
 {
 }
 

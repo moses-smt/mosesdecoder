@@ -64,7 +64,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	void SetWeightTransModel(const std::vector<float> &weightT);
 
 	// this function can be only used for UNKNOWN source phrases
-	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
+	void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase);
 		
 	std::string GetScoreProducerDescription() const;
 	
