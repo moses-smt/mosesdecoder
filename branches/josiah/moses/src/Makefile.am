@@ -17,10 +17,6 @@ libmoses_a_SOURCES = \
 	FactorTypeSet.cpp \
 	FloydWarshall.cpp \
 	GenerationDictionary.cpp \
-	Gibbler.cpp \
-	GibblerExpectedLossTraining.cpp \
-	GibblerMaxTransDecoder.cpp \
-	GibbsOperator.cpp \
 	hash.cpp \
 	Hypothesis.cpp \
 	HypothesisStack.cpp \
@@ -69,7 +65,6 @@ libmoses_a_SOURCES = \
 	TargetPhrase.cpp \
 	TargetPhraseCollection.cpp \
 	Timer.cpp \
-	TranslationDelta.cpp \
 	TranslationOption.cpp \
 	TranslationOptionCollection.cpp \
 	TranslationOptionCollectionText.cpp \

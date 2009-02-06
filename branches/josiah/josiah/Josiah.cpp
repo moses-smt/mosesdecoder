@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
       return 1;
     }
   } else {
-    in = new istringstream(string("das ist recht gut , afrika"));
+    in = new istringstream(string("das parlament will das auf zweierlei weise tun ."));
   }
   
   size_t lineno = 0;
