@@ -10,30 +10,20 @@ using namespace Moses;
 
 namespace Josiah {
 
-class GainFunction {
- public:
-  virtual ~GainFunction();
-  virtual float ComputeGain(const std::vector<const Factor*>& hyp) const = 0;
-
-  static void ConvertStringToFactorArray(const std::string& str, std::vector<const Factor*>* out);
-};
+class GainFunction;
 
 class GibblerExpectedLossCollector : public SampleCollector {
  public:
-  GibblerExpectedLossCollector();
+  GibblerExpectedLossCollector(const GainFunction& f) : g(f), n(0) {}
   virtual void collect(Sample& sample);
-  void SetCurrentSentenceNumber(int n) { sent_num = n; }
-  ScoreComponentCollection ComputeGradient();
+
+  void UpdateGradient(ScoreComponentCollection* gradient);
 
  private:
+  const GainFunction& g;
   int n;
-  ScoreComponentCollection gradient;
   std::list<std::pair<ScoreComponentCollection, float> > samples;
   ScoreComponentCollection feature_expectations;
-
-  const GainFunction* g;
-  int sent_num;
-  std::vector<std::vector<std::vector<const Factor*> > > refs;
 };
 
 }

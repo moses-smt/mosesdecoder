@@ -93,9 +93,6 @@ class Sampler {
   //Add standard set of operators and print collector
   void init();
   
-  ~Sampler() {RemoveAllInColl(m_operators);RemoveAllInColl(m_collectors);}
-  
-
 };
 
 
