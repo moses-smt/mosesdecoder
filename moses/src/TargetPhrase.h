@@ -59,7 +59,7 @@ protected:
 	static bool printalign;
 	
 public:
-		TargetPhrase(FactorDirection direction=Output);
+		TargetPhrase(FactorDirection direction, size_t reserveSize = ARRAY_SIZE_INCR);
 		~TargetPhrase(){};
 		
 	/** used by the unknown word handler.
