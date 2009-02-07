@@ -179,6 +179,7 @@ enum SearchAlgorithm
 	Normal				= 0
 	,CubePruning	= 1
 	,CubeGrowing	= 2
+	,ChartDecoding= 3
 };
 
 // typedef

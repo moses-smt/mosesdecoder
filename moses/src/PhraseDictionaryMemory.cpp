@@ -203,12 +203,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		count++;
 	}
 
-	PrintUserTime("Finished loading tm");
-
 	// sort each target phrase collection
 	m_collection.Sort(m_tableLimit);
-
-	PrintUserTime("Finished sorting tm");
 
 	return true;
 }

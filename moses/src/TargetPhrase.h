@@ -91,6 +91,8 @@ public:
 								float weightWP,
 								const LMList &languageModels);
 
+	// used by for unknwoen word proc in chart decoding
+	void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
 	
 	// used when creating translations of unknown words:
 	void ResetScore();

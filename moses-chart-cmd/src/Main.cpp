@@ -108,6 +108,8 @@ int main(int argc, char* argv[])
 	if (!StaticData::LoadDataStatic(parameter))
 		return EXIT_FAILURE;
 
+	assert(staticData.GetSearchAlgorithm() == ChartDecoding);
+
 	// set up read/writing class
 	IOWrapper *ioWrapper = GetIODevice(staticData);
 
