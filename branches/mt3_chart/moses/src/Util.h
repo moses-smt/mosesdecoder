@@ -175,7 +175,8 @@ template<typename T>
 inline std::vector<T> Tokenize( const std::string &input
 															 , const std::string& delimiters = " \t")
 {
-	std::vector<std::string> stringVector = Tokenize(input, delimiters);
+	std::vector<std::string> stringVector;
+	Tokenize(stringVector, input, delimiters);
 	return Scan<T>( stringVector );
 }
 
