@@ -127,7 +127,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 	while(getline(inStream, line))
 	{
-		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
+		vector<string> tokens;
+		TokenizeMultiCharSeparator(tokens, line , "|||" );
 
 		if (numElement == NOT_FOUND)
 		{ // init numElement
@@ -178,7 +179,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		sourcePhrase.CreateFromString( input, sourcePhraseVector);
 
 		//target
-		TargetPhrase *targetPhrase = new TargetPhrase(Output);
+		TargetPhrase *targetPhrase = new TargetPhrase(Output, targetPhraseVector.size());
 		targetPhrase->SetSourcePhrase(&sourcePhrase);
 		targetPhrase->CreateFromString( output, targetPhraseVector);
 
@@ -239,7 +240,7 @@ void PhraseDictionaryMemory::AddEquivPhrase(const Phrase &source, TargetPhrase *
 		m_prevPhraseColl = &GetOrCreateTargetPhraseCollection(source);
 		m_prevSource = source;
 	}
-
+	assert(m_prevPhraseColl != NULL);
 	m_prevPhraseColl->Add(targetPhrase);
 }
 

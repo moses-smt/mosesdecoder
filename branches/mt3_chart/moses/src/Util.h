@@ -203,6 +203,27 @@ inline std::vector<std::string> TokenizeMultiCharSeparator(
 	return tokens;
 }
 
+// speeded up version of above
+inline void TokenizeMultiCharSeparator(std::vector<std::string> &output
+																				,const std::string& str
+																				,const std::string& separator)
+{
+	size_t pos = 0;
+	// Find first "non-delimiter".
+	std::string::size_type nextPos     = str.find(separator, pos);
+
+	while (nextPos != std::string::npos)
+	{
+		// Found a token, add it to the vector.
+		output.push_back(str.substr(pos, nextPos - pos));
+		// Skip delimiters.  Note the "not_of"
+		pos = nextPos + separator.size();
+		// Find next "non-delimiter"
+		nextPos	= str.find(separator, pos);
+	}
+	output.push_back(str.substr(pos, nextPos - pos));
+}
+
 /**
  * Convert vector of type T to string
  */
