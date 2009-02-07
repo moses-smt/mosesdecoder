@@ -1,7 +1,6 @@
 
 #include "ChartRule.h"
 #include "TargetPhrase.h"
-#include "AlignmentPair.h"
 
 using namespace std;
 

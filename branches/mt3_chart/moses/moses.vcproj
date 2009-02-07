@@ -284,19 +284,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\AlignmentElement.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\AlignmentInfo.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AlignmentPair.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AlignmentPhrase.cpp"
 				>
 			</File>
 			<File
@@ -718,19 +706,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\AlignmentElement.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\AlignmentInfo.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AlignmentPair.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AlignmentPhrase.h"
 				>
 			</File>
 			<File

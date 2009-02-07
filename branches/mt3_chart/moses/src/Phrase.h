@@ -38,15 +38,12 @@ namespace Moses
 class Phrase
 {
 	friend std::ostream& operator<<(std::ostream&, const Phrase&);
- private:
+private:
 
 	FactorDirection				m_direction;  /** Reusing Direction enum to really mean which language
 																					Input = Source, Output = Target. 
 																					Not really used, but nice to know for debugging purposes
 																			*/
-	size_t								m_phraseSize; //number of words
-	size_t								m_arraySize;	/** current size of vector m_words. This number is equal or bigger
-																					than m_phraseSize. Used for faster allocation of m_word */
 	std::vector<Word>			m_words;
 
 public:
@@ -137,7 +134,7 @@ public:
 	//! number of words
 	inline size_t GetSize() const
 	{
-		return m_phraseSize;
+		return m_words.size();
 	}
 
 	//! word at a particular position

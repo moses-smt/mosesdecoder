@@ -35,41 +35,31 @@ namespace Moses
 {
 Phrase::Phrase(const Phrase &copy)
 :m_direction(copy.m_direction)
-,m_phraseSize(copy.m_phraseSize)
-,m_arraySize(copy.m_arraySize)
 ,m_words(copy.m_words)
 {
 }
 
-Phrase& Phrase::operator=(const Phrase& x) 
+Phrase& Phrase::operator=(const Phrase &copy)
 {
-	if(this!=&x)
-		{
-
-			m_direction=x.m_direction;
-			m_phraseSize=x.m_phraseSize;
-			m_arraySize=x.m_arraySize;
-
-			m_words = x.m_words;
-		}
+	if(this != &copy)
+	{
+		m_direction	= copy.m_direction;
+		m_words			= copy.m_words;
+	}
 	return *this;
 }
 
 
 Phrase::Phrase(FactorDirection direction, size_t reserveSize)
-	: m_direction(direction)
-	, m_phraseSize(0)
-	, m_arraySize(reserveSize)
-	, m_words(reserveSize)
+: m_direction(direction)
 {
+	m_words.reserve(reserveSize);
 }
 
 Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
 :m_direction(direction)
-,m_phraseSize(0)
-,m_arraySize(ARRAY_SIZE_INCR)
-,m_words(ARRAY_SIZE_INCR)
 {
+	m_words.reserve(mergeWords.size());
 	for (size_t currPos = 0 ; currPos < mergeWords.size() ; currPos++)
 	{
 		AddWord(*mergeWords[currPos]);
@@ -143,13 +133,8 @@ std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 
 Word &Phrase::AddWord()
 {
-	if ((m_phraseSize+1) % ARRAY_SIZE_INCR == 0)
-	{ // need to expand array
-		m_arraySize += ARRAY_SIZE_INCR;
-		m_words.resize(m_arraySize);
-	}
-
-	return m_words[m_phraseSize++];
+	m_words.push_back(Word());
+	return m_words.back();
 }
 
 void Phrase::Append(const Phrase &endPhrase){
