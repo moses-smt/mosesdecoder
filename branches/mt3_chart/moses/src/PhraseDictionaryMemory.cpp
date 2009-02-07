@@ -175,7 +175,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		TransformString(sourcePhraseVector, targetPhraseVector, alignmentInfo);
 
 		// source
-		Phrase sourcePhrase(Input);
+		Phrase sourcePhrase(Input, sourcePhraseVector.size());
 		sourcePhrase.CreateFromString( input, sourcePhraseVector);
 
 		//target

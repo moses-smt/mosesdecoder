@@ -56,11 +56,11 @@ Phrase& Phrase::operator=(const Phrase& x)
 }
 
 
-Phrase::Phrase(FactorDirection direction)
+Phrase::Phrase(FactorDirection direction, size_t reserveSize)
 	: m_direction(direction)
 	, m_phraseSize(0)
-	, m_arraySize(ARRAY_SIZE_INCR)
-	, m_words(ARRAY_SIZE_INCR)
+	, m_arraySize(reserveSize)
+	, m_words(reserveSize)
 {
 }
 

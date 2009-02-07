@@ -61,7 +61,7 @@ public:
 	/** create empty phrase 
 	* \param direction = language (Input = Source, Output = Target)
 	*/
-	Phrase(FactorDirection direction);
+	Phrase(FactorDirection direction, size_t reserveSize = ARRAY_SIZE_INCR);
 	/** create phrase from vectors of words	*/
 	Phrase(FactorDirection direction, const std::vector< const Word* > &mergeWords);
 
