@@ -1,6 +1,7 @@
 
 #include "ChartRule.h"
 #include "TargetPhrase.h"
+#include "AlignmentInfo.h"
 
 using namespace std;
 
@@ -12,26 +13,22 @@ ChartRule::ChartRule(const TargetPhrase &targetPhrase, const std::vector<WordsCo
 ,m_wordsConsumed(wordsConsumed)
 ,m_wordsConsumedTargetOrder(targetPhrase.GetSize(), NOT_FOUND)
 {
-	/* TODO
-	const AlignmentPhrase &sourceAlign = m_targetPhrase.GetAlignmentPair().GetAlignmentPhrase(Input);
-	assert(m_wordsConsumed.size() == sourceAlign.GetSize());
+	const AlignmentInfo &alignInfo = m_targetPhrase.GetAlignmentInfo();
 
 	size_t nonTermInd = 0;
-	for (size_t sourcePos = 0; sourcePos < m_wordsConsumed.size(); ++sourcePos)
+	AlignmentInfo::const_iterator iter;
+	for (iter = alignInfo.begin(); iter != alignInfo.end(); ++iter)
 	{
+		// just for assert
+		size_t sourcePos = iter->first;
 		const WordsConsumed &wordsConsumed = m_wordsConsumed[sourcePos];
-		if (wordsConsumed.IsNonTerminal())
-		{
-			const AlignmentElement &alignElement = sourceAlign.GetElement(sourcePos);
-			assert(alignElement.GetSize() == 1);
+		assert(wordsConsumed.IsNonTerminal());
 
-			size_t targetPos = *alignElement.GetCollection().begin();
-			m_wordsConsumedTargetOrder[targetPos] = nonTermInd;
-			nonTermInd++;
-		}
+		size_t targetPos = iter->second;
+		m_wordsConsumedTargetOrder[targetPos] = nonTermInd;
+		nonTermInd++;
 	}
-	*/
 }
 
-}
+} // namespace
 
