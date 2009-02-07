@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include "GibblerExpectedLossTraining.h"
+#include "GainFunction.h"
 
 namespace Josiah {
 
