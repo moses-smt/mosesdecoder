@@ -136,6 +136,13 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 		- (this->GetSize() * weightWP);	 // word penalty
 }
 
+void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)
+{ // used when creating translations of unknown words (chart decoding)
+	m_scoreBreakdown.Assign(producer, scoreVector);
+	m_transScore = m_ngramScore = 0;	
+	m_fullScore = m_scoreBreakdown.GetWeightedScore();
+}
+
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
 {
 	// calling this function in case of confusion net input is undefined

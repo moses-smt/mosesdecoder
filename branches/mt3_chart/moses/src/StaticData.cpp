@@ -115,12 +115,15 @@ bool StaticData::LoadData(Parameter *parameter)
 		}
 	}
 
-
 	// factor delimiter
 	if (m_parameter->GetParam("factor-delimiter").size() > 0) {
 		m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
 	}
-	
+
+	// to cube or not to cube
+	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
+										(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
+
 	//word-to-word alignment
 	SetBooleanParameter( &m_UseAlignmentInfo, "use-alignment-info", false );
 	SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
@@ -250,20 +253,29 @@ bool StaticData::LoadData(Parameter *parameter)
 	  m_isDetailedTranslationReportingEnabled = true;
 	}
 
-	// score weights
-	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
-	m_weightDistortion				= Scan<float>(distortionWeights[0]);
+	// don't do these for chart decoding
+	if (GetSearchAlgorithm() != ChartDecoding)
+	{
+		const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
+		m_weightDistortion				= Scan<float>(distortionWeights[0]);
+
+		m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
+		m_allWeights.push_back(m_weightDistortion);
+
+		m_weightUnknownWord				= 1; // do we want to let mert decide weight for this ???
+		m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
+		m_allWeights.push_back(m_weightUnknownWord);
+	}
+	else
+	{
+		m_weightUnknownWord				= 0;
+		m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
+		m_allWeights.push_back(m_weightUnknownWord);
+	}
+
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
-	m_weightUnknownWord				= 1; // do we want to let mert decide weight for this ???
-
-	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
-	m_allWeights.push_back(m_weightDistortion);
-
 	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightWordPenalty);
-
-	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
-	m_allWeights.push_back(m_weightUnknownWord);
 
   // reordering constraints
 	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
@@ -349,10 +361,6 @@ bool StaticData::LoadData(Parameter *parameter)
 		phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
 		m_constraints.insert(make_pair(sentenceID,phrase));
 	}
-
-	// to cube or not to cube
-	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
-										(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
 
 	if (m_parameter->GetParam("input-file").size() > 0)
 	{

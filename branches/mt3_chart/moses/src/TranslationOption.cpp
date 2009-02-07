@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LMList.h"
 #include "StaticData.h"
 #include "InputType.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 
@@ -63,12 +64,10 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 , m_futureScore(0)
 {
 	const UnknownWordPenaltyProducer *up = StaticData::Instance().GetUnknownWordPenaltyProducer();
-  if (up) {
-		const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
-		vector<float> score(1);
-		score[0] = FloorScore(-numeric_limits<float>::infinity());
-		m_scoreBreakdown.Assign(scoreProducer, score);
-	}
+  assert(up);
+	vector<float> score(1);
+	score[0] = FloorScore(-numeric_limits<float>::infinity());
+	m_scoreBreakdown.Assign(up, score);
 
 	if (inputType.GetType() == SentenceInput)
 	{

@@ -6,6 +6,7 @@
 #include "../../moses/src/StaticData.h"
 #include "../../moses/src/DecodeStep.h"
 #include "../../moses/src/ChartRuleCollection.h"
+#include "../../moses/src/DummyScoreProducers.h"
 
 using namespace std;
 using namespace Moses;
@@ -174,9 +175,12 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 {
 	// unknown word, add as trans opt
 	FactorCollection &factorCollection = FactorCollection::Instance();
+	const StaticData &staticData = StaticData::Instance();
+	const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
+	vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
 
 	size_t isDigit = 0;
-	if (StaticData::Instance().GetDropUnknown())
+	if (staticData.GetDropUnknown())
 	{
 		const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
 		const string &s = f->GetString();
@@ -191,10 +195,11 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 	m_unksrcs.push_back(m_unksrc);
 
 	TranslationOption *transOpt;
-	if (! StaticData::Instance().GetDropUnknown() || isDigit)
+	if (! staticData.GetDropUnknown() || isDigit)
 	{
 		// add to dictionary
 		TargetPhrase *targetPhrase = new TargetPhrase(Output);
+
 		m_cacheTargetPhrase.push_back(targetPhrase);
 		Word &targetWord = targetPhrase->AddWord();
 
@@ -210,9 +215,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		}
 
 		targetPhrase->SetScore();
+		targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
 		targetPhrase->SetSourcePhrase(m_unksrc);
-		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation
-		//TODO targetPhrase->CreateAlignmentInfo("(0)","(0)");
 
 		// words consumed
 		std::vector<WordsConsumed> *wordsConsumed = new std::vector<WordsConsumed>();
@@ -233,7 +237,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		TargetPhrase *targetPhrase = new TargetPhrase(Output);
 		m_cacheTargetPhrase.push_back(targetPhrase);
 		targetPhrase->SetSourcePhrase(m_unksrc);
-		//TODO targetPhrase->SetAlignment();
+		targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
 
 		// words consumed
 		std::vector<WordsConsumed> *wordsConsumed = new std::vector<WordsConsumed>;
