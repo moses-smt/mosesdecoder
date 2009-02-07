@@ -33,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
-#include "AlignmentPair.h"
 #include "ChartRuleCollection.h"
 
 using namespace std;
