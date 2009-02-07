@@ -141,14 +141,14 @@ int main(int argc, char** argv) {
     //configure the sampler
     Sampler sampler;
     DerivationCollector collector;
-    GibblerExpectedLossCollector c2(g[lineno]);
+    GibblerExpectedLossCollector* c2 = expected_loss_training ? new GibblerExpectedLossCollector(g[lineno]) : NULL;
     MergeSplitOperator mso;
     TranslationSwapOperator tso;
     sampler.AddOperator(&mso);
     sampler.AddOperator(&tso);
     //sampler.AddOperator(new FlipOperator());
     if (expected_loss_training)
-      sampler.AddCollector(&c2);
+      sampler.AddCollector(c2);
     else
       sampler.AddCollector(&collector);
     sampler.SetIterations(iterations);
@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
     sampler.Run(hypothesis,toc);
 
     if (expected_loss_training) {
-      c2.UpdateGradient(&gradient);
+      c2->UpdateGradient(&gradient);
       cerr << "Gradient: " << gradient << endl;
     } else {
       if (topn > 0) {
@@ -173,6 +173,7 @@ int main(int argc, char** argv) {
         }
       }
     }
+    delete c2;
     ++lineno;
   }
   
