@@ -172,17 +172,20 @@ void Hypothesis::CalcScore()
 	size_t wordCount = m_targetPhrase.GetNumTerminals();
 	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) wordCount);
 
-	CalcLMScore();
+	float retFullScore, retNGramScore;
+	CalcLMScore(retFullScore, retNGramScore);
 
-	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights());
+	m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }
 
-void Hypothesis::CalcLMScore()
+void Hypothesis::CalcLMScore(float &retFullScore, float &retNGramScore)
 {
 	Phrase outPhrase = GetOutputPhrase();
+	cerr << outPhrase << endl;
 
-	float retFullScore = 0, retNGramScore = 0;
-	StaticData::Instance().GetAllLM().CalcScore(outPhrase, retFullScore, retNGramScore, &m_scoreBreakdown);
+	retFullScore = 0;
+	retNGramScore = 0;
+	StaticData::Instance().GetAllLM().CalcScore(outPhrase, retFullScore, retNGramScore, &m_scoreBreakdown, false);
 }
 
 void Hypothesis::AddArc(Hypothesis *loserHypo)

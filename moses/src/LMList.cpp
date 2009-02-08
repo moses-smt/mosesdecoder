@@ -28,7 +28,11 @@ using namespace std;
 
 namespace Moses
 {
-void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreComponentCollection* breakdown) const
+void LMList::CalcScore(const Phrase &phrase
+											 , float &retFullScore
+											 , float &retNGramScore
+											 , ScoreComponentCollection* breakdown
+											 , bool useNGramScore) const
 { 
 	const_iterator lmIter;
 	for (lmIter = begin(); lmIter != end(); ++lmIter)
@@ -44,7 +48,7 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 
 		lm.CalcScore(phrase, fullScore, nGramScore);
 
-		breakdown->Assign(&lm, nGramScore);  // I'm not sure why += doesn't work here- it should be 0.0 right?
+		breakdown->Assign(&lm, useNGramScore? nGramScore : fullScore);  // I'm not sure why += doesn't work here- it should be 0.0 right?
 		retFullScore   += fullScore * weightLM;
 		retNGramScore	+= nGramScore * weightLM;
 	}	

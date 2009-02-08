@@ -38,7 +38,7 @@ protected:
 	size_t GetPrefix(Moses::Phrase &ret, size_t size) const;
 	size_t GetSuffix(Moses::Phrase &ret, size_t size) const;
 
-	void CalcLMScore();
+	void CalcLMScore(float &retFullScore, float &retNGramScore);
 
 public:
 	Hypothesis(const QueueEntry &queueEntry);
