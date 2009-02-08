@@ -315,7 +315,8 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
       WordsRange leftSourceSegment = prev->GetCurrSourceWordsRange();
       WordsRange leftTargetSegment = prev->GetCurrTargetWordsRange();
         
-      if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos() ) {
+      //if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos() ) {
+      if (leftTargetSegment <  rightTargetSegment ) {
         //contiguous on source and target side, flipping would make this a swap
         //would this be a valid reordering if we flipped?
         float totalDistortion = 0;
@@ -331,7 +332,8 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
                                           &(hypothesis->GetTranslationOption()), prev->GetPrevHypo(), hypothesis->GetNextHypo(),leftTargetSegment,rightTargetSegment, totalDistortion); 
           
       }
-      else if (leftTargetSegment.GetStartPos()  ==  rightTargetSegment.GetEndPos() + 1) {
+      //else if (leftTargetSegment.GetStartPos()  ==  rightTargetSegment.GetEndPos() + 1) {
+      else {
         //swapped on source and target side, flipping would make this monotone
         float totalDistortion = 0;
         bool isValidSwap = CheckValidReordering(prev,hypothesis, hypothesis->GetPrevHypo(), prev->GetNextHypo(), totalDistortion);        

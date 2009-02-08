@@ -106,22 +106,63 @@ void Sample::SetSourceIndexedHyps(Hypothesis* h) {
   
 //x and y are source side positions  
 void Sample::FlipNodes(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption, Hypothesis* m_prevTgtHypo, Hypothesis* m_nextTgtHypo, const ScoreComponentCollection& deltaFV) {
+  bool tgtSideContiguous = false; 
+  Hypothesis *oldLeftHypo = GetHypAtSourceIndex(leftTgtOption.GetSourceWordsRange().GetStartPos());
+  Hypothesis *oldRightHypo = GetHypAtSourceIndex(rightTgtOption.GetSourceWordsRange().GetStartPos());
   
+  //created the new left most tgt
   Hypothesis *newLeftHypo = new Hypothesis(*m_prevTgtHypo, leftTgtOption);
-  Hypothesis *newRightHypo = new Hypothesis(*newLeftHypo, rightTgtOption);
-
+  SetSourceIndexedHyps(newLeftHypo);
   m_prevTgtHypo->m_nextHypo = newLeftHypo;
-  newLeftHypo->m_nextHypo = newRightHypo;
+  
+  //creating the one that goes to the right
+  //find its target side predecessor
+  Hypothesis *tgtSidePredecessor = const_cast<Hypothesis*>(oldLeftHypo->GetPrevHypo());
+   //If the flip is contiguous on the target side, then the predecessor is the flipped one 
+  if (tgtSidePredecessor->GetCurrSourceWordsRange() == rightTgtOption.GetSourceWordsRange()) {
+   tgtSidePredecessor = newLeftHypo;
+   tgtSideContiguous = true;
+  }
+
+  //update the target word ranges of the ones in between
+  if (!tgtSideContiguous) {
+    size_t startTgtPos = newLeftHypo->GetCurrTargetWordsRange().GetEndPos();
+    for (Hypothesis *h = const_cast<Hypothesis*>(oldRightHypo->GetNextHypo()); h != oldLeftHypo ; h = const_cast<Hypothesis*>(h->GetNextHypo())) {
+     WordsRange& range = h->GetCurrTargetWordsRange();
+     size_t size = range.GetNumWordsCovered();
+     range.SetStartPos(startTgtPos+1);
+     range.SetEndPos(startTgtPos+size);
+     startTgtPos += size;
+    }
+  }
+
+  //now create the one that goes on the right 
+  //clear the bitmap of the predecessor
+  WordsBitmap & predWordBitmap = tgtSidePredecessor->GetWordsBitmap();
+  predWordBitmap.SetValue(rightTgtOption.GetSourceWordsRange().GetStartPos(), rightTgtOption.GetSourceWordsRange().GetEndPos(), false);
+
+  Hypothesis *newRightHypo = new Hypothesis(*tgtSidePredecessor, rightTgtOption);
+  SetSourceIndexedHyps(newRightHypo);
   newRightHypo->m_nextHypo = m_nextTgtHypo;
   if (m_nextTgtHypo)
     m_nextTgtHypo->m_prevHypo = newRightHypo;
+  if(tgtSidePredecessor) {
+    tgtSidePredecessor->m_nextHypo = newRightHypo;   
+  }
+
+  //update the target side sample pointers now 
+  if  (tgtSideContiguous) {
+    newLeftHypo->m_nextHypo = newRightHypo;
+  } 
+  else {
+    Hypothesis *leftHypoTgtSideSuccessor = const_cast<Hypothesis*>(oldRightHypo->GetNextHypo());
+    newLeftHypo->m_nextHypo = leftHypoTgtSideSuccessor;
+    if (leftHypoTgtSideSuccessor) {
+      leftHypoTgtSideSuccessor->m_prevHypo = newLeftHypo;
+    }
+  }
   
-  Hypothesis *oldLeftHypo = GetHypAtSourceIndex(newLeftHypo->GetCurrSourceWordsRange().GetStartPos());
-  Hypothesis *oldRightHypo = GetHypAtSourceIndex(newRightHypo->GetCurrSourceWordsRange().GetStartPos());
-  
-  SetSourceIndexedHyps(newLeftHypo);
-  SetSourceIndexedHyps(newRightHypo);
-  
+  //update the source side sample pointers now 
   Hypothesis* newLeftSourcePrevHypo = GetHypAtSourceIndex(newLeftHypo->GetCurrSourceWordsRange().GetStartPos() - 1 );
   newLeftHypo->m_sourcePrevHypo = newLeftSourcePrevHypo;
   if (newLeftSourcePrevHypo) {
@@ -156,60 +197,6 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
 }
   
   
-//x and y are source side positions  
-//void Sample::FlipNodes(size_t x, size_t y, const ScoreComponentCollection& deltaFV) {
-//  assert (x != y);
-//  Hypothesis* hyp1 = GetHypAtSourceIndex(x);
-//  Hypothesis* hyp2 = GetHypAtSourceIndex(y);
-//    
-//  WordsRange& h1tgtCovered = hyp1->GetCurrTargetWordsRange();
-//    WordsRange& h2tgtCovered = hyp2->GetCurrTargetWordsRange();
-//    
-//    if (h1tgtCovered < h2tgtCovered) {
-//      //Updating the target pointers, src ptrs don't change
-//      Hypothesis* hyp1_prevHypo = const_cast<Hypothesis*>(hyp1->m_prevHypo);
-//      Hypothesis* hyp2_nextHypo = hyp2->m_nextHypo;
-//      
-//      hyp2->m_prevHypo = hyp1_prevHypo;
-//      hyp2->m_nextHypo = hyp1;
-//      if (hyp1_prevHypo != NULL) {
-//        hyp1_prevHypo->m_nextHypo = hyp2;
-//      }
-//      
-//      hyp1->m_prevHypo = hyp2;
-//      hyp1->m_nextHypo = hyp2_nextHypo;
-//      if (hyp2_nextHypo != NULL) {
-//        hyp2_nextHypo->m_prevHypo = hyp1;
-//      }
-//      
-//      UpdateHead(hyp2, hyp1, target_head);
-//      //Update target word range
-//      UpdateAdjacentTgtWordRanges(hyp1_prevHypo, hyp2, hyp1);
-//    }
-//    else {
-//      //Updating the target pointers, src ptrs don't change
-//      Hypothesis* hyp1_nextHypo = hyp1->m_nextHypo;
-//      Hypothesis* hyp2_prevHypo = const_cast<Hypothesis*>(hyp2->m_prevHypo);
-//      
-//      hyp2->m_prevHypo = hyp1;
-//      hyp2->m_nextHypo = hyp1_nextHypo;
-//      if (hyp1_nextHypo != NULL) {
-//        hyp1_nextHypo->m_prevHypo = hyp2;
-//      }
-//      
-//      hyp1->m_nextHypo = hyp2;
-//      hyp1->m_prevHypo = hyp2_prevHypo;
-//      if (hyp2_prevHypo != NULL) {
-//        hyp2_prevHypo->m_nextHypo = hyp1;
-//      }
-//      
-//      UpdateHead(hyp1, hyp2, target_head);
-//      //Update target word range
-//      UpdateAdjacentTgtWordRanges(hyp2_prevHypo, hyp1, hyp2);
-//    }
-//    
-//    UpdateFeatureValues(deltaFV);
-//  }
   
 void Sample::UpdateAdjacentTgtWordRanges(Hypothesis *prevHyp, Hypothesis *nextTgtHyp, Hypothesis *adjTgtHyp) {
     
