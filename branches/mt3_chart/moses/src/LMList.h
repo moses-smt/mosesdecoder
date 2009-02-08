@@ -15,7 +15,11 @@ class ScoreComponentCollection;
 class LMList : public std::list < LanguageModel* >	
 {
 public:
-	void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreComponentCollection* breakdown) const;
+	void CalcScore(const Phrase &phrase
+								, float &retFullScore
+								, float &retNGramScore
+								, ScoreComponentCollection* breakdown
+								, bool useNGramScore) const;
 
 };
 

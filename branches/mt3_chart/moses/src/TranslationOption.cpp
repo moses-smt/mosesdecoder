@@ -139,7 +139,7 @@ void TranslationOption::CalcScore()
 
 	const LMList &allLM = StaticData::Instance().GetAllLM();
 
-	allLM.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, &m_scoreBreakdown);
+	allLM.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, &m_scoreBreakdown, true);
 
 	size_t phraseSize = GetTargetPhrase().GetSize();
 	// future score

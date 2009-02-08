@@ -25,11 +25,40 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
 #include "Util.h"
+#include "FactorCollection.h"
 
 namespace Moses
 {
+
+void InitStartEndWord(Word &word, bool start)
+{
+	const StaticData &staticData = StaticData::Instance();
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
+	const std::vector<FactorType> &factors = staticData.GetInputFactorOrder();
+	for (size_t ind = 0; ind < factors.size(); ++ind)
+	{
+		FactorType factorType = factors[ind];
+
+		const Factor *factor;
+		if (start)
+		{
+			factor = factorCollection.AddFactor(Input, factorType, BOS_);
+		}
+		else
+		{
+			factor = factorCollection.AddFactor(Input, factorType, EOS_);
+		}
+		
+		word.SetFactor(factorType, factor);
+
+	}
+}
+
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder) 
 {
+	const StaticData &staticData = StaticData::Instance();
+
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	std::string line;
 	std::map<std::string, std::string> meta;
@@ -44,7 +73,6 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	if (meta.find("id") != meta.end()) { this->SetTranslationId(atol(meta["id"].c_str())); }
 	
 	// parse XML markup in translation line
-	const StaticData &staticData = StaticData::Instance();
 	std::vector<std::vector<XmlOption*> > xmlOptionsList(0);
 	std::vector< size_t > xmlWalls;
 	if (staticData.GetXmlInputType() != XmlPassThrough) {
@@ -53,8 +81,21 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 			abort();
 		}			
 	}
+
+	if (staticData.GetSearchAlgorithm() == ChartDecoding)
+	{
+		Word &start = AddWord();
+		InitStartEndWord(start, true);
+	}
+
 	Phrase::CreateFromString(factorOrder, line, factorDelimiter);
-	
+
+	if (staticData.GetSearchAlgorithm() == ChartDecoding)
+	{
+		Word &end = AddWord();
+		InitStartEndWord(end, false);
+	}
+
 	//now that we have final word positions in phrase (from CreateFromString),
 	//we can make input phrase objects to go with our XmlOptions and create TranslationOptions
 	
