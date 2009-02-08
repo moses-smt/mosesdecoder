@@ -243,7 +243,20 @@ FlipDelta::FlipDelta(const vector<Word>& targetWords,  const TranslationOption* 
     targetSegment.SetEndPos(max(leftTargetSegment.GetEndPos(), rightTargetSegment.GetEndPos()) );
     
     Phrase targetPhrase(m_leftTgtOption->GetTargetPhrase());
+
+    if (leftTargetSegment < rightTargetSegment) {
+       for (size_t i =leftTargetSegment.GetEndPos()+1 ; i < rightTargetSegment.GetStartPos(); ++i) {
+        targetPhrase.AddWord(targetWords[i]);
+       }
+    }
+    else {
+       for (size_t i =rightTargetSegment.GetEndPos()+1 ; i < leftTargetSegment.GetStartPos(); ++i) {
+        targetPhrase.AddWord(targetWords[i]);
+       }
+    } 
+    //include potential words between the two target segments
     targetPhrase.Append(m_rightTgtOption->GetTargetPhrase());
+
     
     addLanguageModelScore(targetWords, targetPhrase, targetSegment);
     
