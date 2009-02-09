@@ -111,6 +111,7 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
   Hypothesis *oldRightHypo = GetHypAtSourceIndex(rightTgtOption.GetSourceWordsRange().GetStartPos());
   
   //created the new left most tgt
+  UpdateCoverageVector(*m_prevTgtHypo,leftTgtOption);
   Hypothesis *newLeftHypo = new Hypothesis(*m_prevTgtHypo, leftTgtOption);
   SetSourceIndexedHyps(newLeftHypo);
   m_prevTgtHypo->m_nextHypo = newLeftHypo;
@@ -138,9 +139,9 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
 
   //now create the one that goes on the right 
   //clear the bitmap of the predecessor
-  WordsBitmap & predWordBitmap = tgtSidePredecessor->GetWordsBitmap();
-  predWordBitmap.SetValue(rightTgtOption.GetSourceWordsRange().GetStartPos(), rightTgtOption.GetSourceWordsRange().GetEndPos(), false);
-
+  //WordsBitmap & predWordBitmap = tgtSidePredecessor->GetWordsBitmap();
+  //predWordBitmap.SetValue(rightTgtOption.GetSourceWordsRange().GetStartPos(), rightTgtOption.GetSourceWordsRange().GetEndPos(), false);
+  UpdateCoverageVector(*tgtSidePredecessor, rightTgtOption);
   Hypothesis *newRightHypo = new Hypothesis(*tgtSidePredecessor, rightTgtOption);
   SetSourceIndexedHyps(newRightHypo);
   newRightHypo->m_nextHypo = m_nextTgtHypo;
@@ -215,7 +216,8 @@ void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentC
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
   //cout << "Start pos " << optionStartPos << " hypo " << *currHyp <<  " option: " << option <<  endl;
-  const Hypothesis& prevHyp = *currHyp->m_prevHypo;
+  Hypothesis& prevHyp = *(const_cast<Hypothesis*>(currHyp->m_prevHypo));
+  UpdateCoverageVector(prevHyp, option);
   Hypothesis *newHyp = new Hypothesis(prevHyp, option);
   cachedSampledHyps.push_back(newHyp);
   
@@ -252,6 +254,7 @@ void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCo
   
   if (currStartHyp->GetCurrTargetWordsRange() < currEndHyp->GetCurrTargetWordsRange()) {
     prevHyp = const_cast<Hypothesis*> (currStartHyp->m_prevHypo);
+    UpdateCoverageVector(*prevHyp, option);
     newHyp = new Hypothesis(*prevHyp, option);
     
     //Set the target ptrs
@@ -268,6 +271,7 @@ void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCo
   } 
   else {
     prevHyp = const_cast<Hypothesis*> (currEndHyp->m_prevHypo);
+    UpdateCoverageVector(*prevHyp, option);
     newHyp = new Hypothesis(*prevHyp, option);
     
     //Set the target ptrs
@@ -322,10 +326,12 @@ void Sample::SplitTarget(const TranslationOption& leftTgtOption, const Translati
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
   
   //cout << "Start pos " << optionStartPos << " hypo " << *currHyp <<  " option: " << option <<  endl;
-  const Hypothesis& prevHyp = *currHyp->m_prevHypo;
+  Hypothesis& prevHyp = *(const_cast<Hypothesis*>(currHyp->m_prevHypo));
+  UpdateCoverageVector(prevHyp, leftTgtOption);
   Hypothesis *newLeftHyp = new Hypothesis(prevHyp, leftTgtOption);
   cachedSampledHyps.push_back(newLeftHyp);
   
+  UpdateCoverageVector(*newLeftHyp, rightTgtOption);
   Hypothesis *newRightHyp = new Hypothesis(*newLeftHyp, rightTgtOption);
   cachedSampledHyps.push_back(newRightHyp);
   
@@ -453,7 +459,15 @@ void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
   feature_values.PlusEquals(deltaFV);
   //cout << "New FV " << feature_values << endl;
 }  
-  
+
+//update  the bitmap of the predecessor
+void Sample::UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& option) {
+ size_t startPos = option.GetSourceWordsRange().GetStartPos();
+ size_t endPos = option.GetSourceWordsRange().GetEndPos();
+
+ WordsBitmap & wordBitmap = hyp.GetWordsBitmap();
+ wordBitmap.SetValue(startPos, endPos, false);
+} 
   
 void Sampler::init() {
   m_collectors.push_back(new PrintSampleCollector());
