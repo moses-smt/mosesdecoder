@@ -143,10 +143,11 @@ int main(int argc, char** argv) {
     DerivationCollector collector;
     GibblerExpectedLossCollector* c2 = expected_loss_training ? new GibblerExpectedLossCollector(g[lineno]) : NULL;
     MergeSplitOperator mso;
+    FlipOperator fo;
     TranslationSwapOperator tso;
     sampler.AddOperator(&mso);
     sampler.AddOperator(&tso);
-    sampler.AddOperator(new FlipOperator());
+    sampler.AddOperator(&fo);
     if (expected_loss_training)
       sampler.AddCollector(c2);
     else

@@ -57,7 +57,6 @@ namespace Josiah {
     delete[] mosesargv;
   }
   
-  MosesDecoder::MosesDecoder() : m_searcher(NULL) {}
   
   void MosesDecoder::decode(const std::string& source, Hypothesis*& bestHypo, TranslationOptionCollection*& toc) {
      
@@ -72,17 +71,17 @@ namespace Josiah {
       //the searcher
       staticData.ResetSentenceStats(sentence);
       staticData.InitializeBeforeSentenceProcessing(sentence);
-      toc  =sentence.CreateTranslationOptionCollection();
+      m_toc.reset(sentence.CreateTranslationOptionCollection());
       const vector <DecodeGraph*>
             &decodeStepVL = staticData.GetDecodeStepVL();
-      toc->CreateTranslationOptions(decodeStepVL);
+      m_toc->CreateTranslationOptions(decodeStepVL);
       
-      delete m_searcher;
-      m_searcher = new SearchNormal(sentence,*toc);
+      m_searcher.reset(new SearchNormal(sentence,*m_toc));
       m_searcher->ProcessSentence();
   
       //get hypo
       bestHypo = const_cast<Hypothesis*>(m_searcher->GetBestHypothesis());
+      toc = m_toc.get();
   }
 
 }
