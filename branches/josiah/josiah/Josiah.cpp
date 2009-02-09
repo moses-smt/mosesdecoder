@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceBleu.h"
 #include "GainFunction.h"
 #include "GibblerExpectedLossTraining.h"
+#include "Timer.h"
 
 #if 0
   vector<string> refs;
@@ -46,6 +47,7 @@ using namespace std;
 using namespace Josiah;
 using namespace Moses;
 namespace po = boost::program_options;
+
 
 void LoadReferences(const vector<string>& ref_files, GainFunctionVector* g) {
   assert(ref_files.size() > 0);
@@ -68,7 +70,20 @@ void LoadReferences(const vector<string>& ref_files, GainFunctionVector* g) {
 }
 
 /**
-  * Output probabilities of derivations or translations of a given set of source sentences.
+  * Wrap moses timer to give a way to no-op it.
+**/
+class GibbsTimer {
+  public:
+    GibbsTimer() : m_doTiming(false) {}
+    void on() {m_doTiming = true; m_timer.start("TIME: Starting timer");}
+    void check(const string& msg) {if (m_doTiming) m_timer.check(string("TIME:" + msg).c_str());}
+  private:
+    Timer m_timer;
+    bool m_doTiming;
+} timer;
+
+/**
+  * Main for Josiah - the Gibbs sampler for moses.
  **/
 int main(int argc, char** argv) {
   int iterations;
@@ -79,16 +94,18 @@ int main(int argc, char** argv) {
   bool decode;
   bool help;
   bool expected_loss_training;
+  bool do_timing;
   vector<string> ref_files;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
         ("config,f",po::value<string>(&mosesini),"Moses ini file")
+        ("verbosity,v", po::value<int>(&debug)->default_value(0), "Verbosity level")
+        ("timing,m", po::value(&do_timing)->zero_tokens()->default_value(false), "Display timing information.")
         ("iterations,s", po::value<int>(&iterations)->default_value(5), "Number of sampling iterations")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
         ("nbest,n",po::value<int>(&topn)->default_value(0),"Dump the top n derivations to stdout")
         ("decode,d",po::value( &decode )->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
-        ("verbosity,v", po::value<int>(&debug)->default_value(0), "Verbosity level")
         ("elt,t", po::value(&expected_loss_training)->zero_tokens()->default_value(false), "Train to minimize expected loss")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training");
   po::options_description cmdline_options;
@@ -109,9 +126,12 @@ int main(int argc, char** argv) {
       return 1;
   }
   
-    //set up moses
+  if (do_timing) {
+    timer.on();
+  }
+   //set up moses
   initMoses(mosesini,debug);
-  Decoder* decoder = new MosesDecoder();
+  auto_ptr<Decoder> decoder(new MosesDecoder());
 
   GainFunctionVector g;
   if (ref_files.size() > 0) LoadReferences(ref_files, &g);
@@ -120,19 +140,20 @@ int main(int argc, char** argv) {
     VERBOSE(1,"Warning: No input file specified, using toy dataset" << endl);
   }
 
-  istream* in = NULL;
+  auto_ptr<istream> in;
   if (inputfile.size()) {
-    in = new ifstream(inputfile.c_str());
+    in.reset(new ifstream(inputfile.c_str()));
     if (! *in) {
       cerr << "Error: Failed to open input file: " + inputfile << endl;
       return 1;
     }
   } else {
-    in = new istringstream(string("das parlament will das auf zweierlei weise tun ."));
+    in.reset(new istringstream(string("das parlament will das auf zweierlei weise tun .")));
   }
   
   size_t lineno = 0;
   ScoreComponentCollection gradient;
+  timer.check("Processing input file");
   while (*in) {
     string line;
     getline(*in,line);
@@ -141,7 +162,7 @@ int main(int argc, char** argv) {
     //configure the sampler
     Sampler sampler;
     DerivationCollector collector;
-    GibblerExpectedLossCollector* c2 = expected_loss_training ? new GibblerExpectedLossCollector(g[lineno]) : NULL;
+    auto_ptr<GibblerExpectedLossCollector> c2(expected_loss_training ? new GibblerExpectedLossCollector(g[lineno]) : NULL);
     MergeSplitOperator mso;
     FlipOperator fo;
     TranslationSwapOperator tso;
@@ -149,15 +170,21 @@ int main(int argc, char** argv) {
     sampler.AddOperator(&tso);
     sampler.AddOperator(&fo);
     if (expected_loss_training)
-      sampler.AddCollector(c2);
+      sampler.AddCollector(c2.get());
     else
       sampler.AddCollector(&collector);
     sampler.SetIterations(iterations);
     
     TranslationOptionCollection* toc;
     Hypothesis* hypothesis;
+    timer.check("Running decoder");
+
     decoder->decode(line,hypothesis,toc);
+    timer.check("Running sampler");
+
     sampler.Run(hypothesis,toc);
+    timer.check("Outputting results");
+
 
     if (expected_loss_training) {
       c2->UpdateGradient(&gradient);
@@ -177,10 +204,6 @@ int main(int argc, char** argv) {
         }
       }
     }
-    delete c2;
     ++lineno;
   }
-  
-  delete in;
-  delete decoder;
 }
