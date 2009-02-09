@@ -39,6 +39,9 @@ namespace Josiah {
       TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
       m_alignments.push_back(
         PhraseAlignment(currHypo->GetCurrSourceWordsRange(), Phrase(targetPhrase)));
+      for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
+        m_targetWords.push_back(targetPhrase.GetWord(i).GetFactor(0)->GetString());
+      }
     }
     
     const vector<float> & weights = StaticData::Instance().GetAllWeights();

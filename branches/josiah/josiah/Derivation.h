@@ -38,7 +38,7 @@ namespace Josiah {
   class Derivation {
     public:
       Derivation(const Moses::Sample& sample);
-      const std::vector<std::string>& getTargetSentence() const;
+      const std::vector<std::string>& getTargetSentence() const {return m_targetWords;}
       const Moses::ScoreComponentCollection& getFeatureValues() const {return m_featureValues;}
       float getScore() const {return m_score;}
       bool operator<(const Derivation& other) const;
@@ -59,6 +59,7 @@ namespace Josiah {
       std::vector<PhraseAlignment> m_alignments; //in target order
       Moses::ScoreComponentCollection m_featureValues;
       float m_score;
+      std::vector<std::string> m_targetWords;
   };
   
   struct DerivationLessThan {

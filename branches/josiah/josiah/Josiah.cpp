@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
         ("config,f",po::value<string>(&mosesini),"Moses ini file")
         ("iterations,s", po::value<int>(&iterations)->default_value(5), "Number of sampling iterations")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
-        ("nbest,n",po::value<int>(&topn)->default_value(20),"Dump the top n derivations to stdout")
+        ("nbest,n",po::value<int>(&topn)->default_value(0),"Dump the top n derivations to stdout")
         ("decode,d",po::value( &decode )->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
         ("verbosity,v", po::value<int>(&debug)->default_value(0), "Verbosity level")
         ("elt,t", po::value(&expected_loss_training)->zero_tokens()->default_value(false), "Train to minimize expected loss")
@@ -162,14 +162,17 @@ int main(int argc, char** argv) {
       c2->UpdateGradient(&gradient);
       cerr << "Gradient: " << gradient << endl;
     } else {
-      if (topn > 0) {
+      if (topn > 0 || decode) {
         vector<DerivationProbability> derivations;
-        collector.getTopN(topn,derivations);
-        for (size_t i = 0; i < derivations.size(); ++i) {
+        collector.getTopN(max(topn,1),derivations);
+        for (int i = 0; i < topn; ++i) {
           Derivation d = *(derivations[i].first);
-          cout << d << endl;
-        
           cout  << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
+        }
+        if (decode) {
+          const vector<string>& sentence = derivations[0].first->getTargetSentence();
+          copy(sentence.begin(),sentence.end(),ostream_iterator<string>(cout," "));
+          cout << endl;
         }
       }
     }
