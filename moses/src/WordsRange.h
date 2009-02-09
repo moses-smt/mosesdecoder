@@ -94,6 +94,14 @@ public:
 	  return x.m_startPos - m_endPos;
 	}
 
+        //Whether two ranges are equal or not
+	inline bool operator==(const WordsRange& x) const 
+	{
+		return  
+		   m_startPos==x.m_startPos && m_endPos==x.m_endPos;
+	}
+
+
 
 	TO_STRING();
 };
