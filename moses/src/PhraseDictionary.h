@@ -50,11 +50,13 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
  public:
 	PhraseDictionary(size_t numScoreComponent);
 	virtual ~PhraseDictionary();
-	
+
 	DecodeType GetDecodeType() const	{	return Translate;	}
 	//! table limit number. 
 	size_t GetTableLimit() const { return m_tableLimit; }
-	
+
+	virtual PhraseTableImplementation GetPhraseTableImplementation() const = 0;
+
 	//! Overriden by load on demand phrase tables classes to load data for each input
 	virtual void InitializeForInput(InputType const &/*source*/) {}
 	std::string GetScoreProducerDescription() const;

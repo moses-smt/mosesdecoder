@@ -25,6 +25,9 @@ public:
 	~PhraseDictionaryGlueRule()
 	{}
 
+	PhraseTableImplementation GetPhraseTableImplementation() const
+	{ return GlueRule; }
+
 	bool Load(const std::vector<FactorType> &input
 					, const std::vector<FactorType> &output
 					, const std::vector<float> &weight

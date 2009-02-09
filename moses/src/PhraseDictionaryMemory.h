@@ -63,6 +63,9 @@ public:
 	}
 	virtual ~PhraseDictionaryMemory();
 
+	PhraseTableImplementation GetPhraseTableImplementation() const
+	{ return Memory; }
+
 	bool Load(const std::vector<FactorType> &input
 								, const std::vector<FactorType> &output
 								, const std::string &filePath

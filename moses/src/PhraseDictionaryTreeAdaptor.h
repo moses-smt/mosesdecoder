@@ -39,6 +39,9 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	void EnableCache();
 	void DisableCache();
 
+	PhraseTableImplementation GetPhraseTableImplementation() const
+	{ return Binary; }
+
 	// initialize ...
 	bool Load(const std::vector<FactorType> &input
 							, const std::vector<FactorType> &output

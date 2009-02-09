@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
+#include "FactorCollection.h"
 
 using namespace std;
 
@@ -34,6 +35,9 @@ void LMList::CalcScore(const Phrase &phrase
 											 , ScoreComponentCollection* breakdown
 											 , bool useNGramScore) const
 { 
+	cerr << phrase << endl;
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
 	const_iterator lmIter;
 	for (lmIter = begin(); lmIter != end(); ++lmIter)
 	{

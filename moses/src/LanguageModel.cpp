@@ -52,6 +52,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
 														, float &fullScore
 														, float &ngramScore) const
 {
+
 	fullScore	= 0;
 	ngramScore	= 0;
 
@@ -62,7 +63,15 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	// start of sentence
 	for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
 	{
-		contextFactor.push_back(&phrase.GetWord(currPos));		
+		const Word &word = phrase.GetWord(currPos);
+		contextFactor.push_back(&word);
+
+		if (word == GetSentenceStartArray())
+		{ // don't include prob for <s>
+			assert(currPos == 0);
+			continue;
+		}
+
 		fullScore += GetValue(contextFactor);
 	}
 	
