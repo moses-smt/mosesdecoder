@@ -196,15 +196,13 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		if (GetPhraseTableImplementation() == GlueRule)
 		{
 			targetPhrase->SetScoreChart(this, scoreVector, weight, languageModels, false);
-			cerr << count << " " << *targetPhrase << " " << targetPhrase->GetScoreBreakdown() << endl;
 		}
 		else
 		{
 			targetPhrase->SetScoreChart(this, scoreVector, weight, languageModels, true);
 		}
+
 		AddEquivPhrase(sourcePhrase, targetPhrase);
-
-
 
 		count++;
 	}

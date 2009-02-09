@@ -164,13 +164,9 @@ void Hypothesis::CalcScore()
 		m_scoreBreakdown.PlusEquals(scoreBreakdown);
 	}
 
-	// translation models
+	// translation models & word penalty
 	const ScoreComponentCollection &scoreBreakdown = m_targetPhrase.GetScoreBreakdown();
 	m_scoreBreakdown.PlusEquals(scoreBreakdown);
-
-	// word penalty
-	size_t wordCount = m_targetPhrase.GetNumTerminals();
-	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) wordCount);
 
 	float retFullScore, retNGramScore;
 	CalcLMScore(retFullScore, retNGramScore);

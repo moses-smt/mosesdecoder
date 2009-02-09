@@ -95,7 +95,7 @@ public:
 														,const Scores &scoreVector
 														,const std::vector<float> &weightT
 														,const LMList &languageModels
-														,bool includeWordPenalty);
+														,bool calcWordPenalty);
 
 	// used by for unknwoen word proc in chart decoding
 	void SetScore(const ScoreProducer* producer, const Scores &scoreVector);

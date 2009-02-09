@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreIndexManager.h"
 #include "LMList.h"
 #include "ScoreComponentCollection.h"
+#include "DummyScoreProducers.h"
 #include "Util.h"
 
 using namespace std;
@@ -140,11 +141,13 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 														const Scores &scoreVector
 														,const vector<float> &weightT
 														,const LMList &languageModels
-														,bool includeWordPenalty)
+														,bool calcWordPenalty)
 {
+	const StaticData &staticData = StaticData::Instance();
+
 	assert(weightT.size() == scoreVector.size());
-	// calc average score if non-best
-	
+
+	// calc average score if non-best	
 	m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
 	m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
 	
@@ -169,10 +172,15 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 			// total LM score so far
 			totalNgramScore  += nGramScore * weightLM;
 			totalFullScore   += fullScore * weightLM;
-			
 		}
 	}
 
+	// word penalty
+	if (calcWordPenalty)
+	{
+		size_t wordCount = GetNumTerminals();
+		m_scoreBreakdown.Assign(staticData.GetWordPenaltyProducer(), - (float) wordCount);
+	}
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)
