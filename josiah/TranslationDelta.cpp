@@ -173,9 +173,9 @@ PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(const vector<Word>& t
       
     WordsRange targetSegment(min(leftTargetSegment.GetStartPos(), rightTargetSegment.GetStartPos()), max(leftTargetSegment.GetEndPos(), rightTargetSegment.GetEndPos()));
     
-    Phrase *targetPhrase;  
+    auto_ptr<Phrase> targetPhrase; 
     if (leftTargetSegment < rightTargetSegment) {
-      targetPhrase = new Phrase(leftOption->GetTargetPhrase());
+      targetPhrase = auto_ptr<Phrase>(new Phrase(leftOption->GetTargetPhrase()));
       //include potential words between the two target segments
       for (size_t i = leftTargetSegment.GetEndPos()+1; i < rightTargetSegment.GetStartPos(); ++i) {
         targetPhrase->AddWord(targetWords[i]);
@@ -183,7 +183,7 @@ PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(const vector<Word>& t
       targetPhrase->Append(rightOption->GetTargetPhrase());                    
     }
     else {
-      targetPhrase = new Phrase(rightOption->GetTargetPhrase());
+      targetPhrase = auto_ptr<Phrase>(new Phrase(rightOption->GetTargetPhrase()));
       //include potential words between the two target segments
       for (size_t i = rightTargetSegment.GetEndPos()+1; i < leftTargetSegment.GetStartPos(); ++i) {
         targetPhrase->AddWord(targetWords[i]);
@@ -268,8 +268,8 @@ FlipDelta::FlipDelta(const vector<Word>& targetWords,  const TranslationOption* 
     const vector<float> & weights = StaticData::Instance().GetAllWeights();
     m_score = m_scores.InnerProduct(weights);
     
-    VERBOSE(2, "TUD: Scores " << m_scores << endl);
-    VERBOSE(2,"TUD: Total score is  " << m_score << endl);  
+    VERBOSE(2, "Flip delta: Scores " << m_scores << endl);
+    VERBOSE(2,"Flip delta: Total score is  " << m_score << endl);  
   }  
   
 }//namespace

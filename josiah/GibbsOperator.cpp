@@ -224,10 +224,9 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
     //apply it to the sample
     deltas[chosen]->apply(sample,noChangeDelta);
    }
-    
-    
-    
     currHypo = currHypo->GetSourceNextHypo();
+    
+    RemoveAllInColl(deltas);
   }
 }
 

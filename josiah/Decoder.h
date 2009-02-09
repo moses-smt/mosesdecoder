@@ -54,12 +54,13 @@ class Decoder {
 
 class MosesDecoder : public virtual Decoder {
   public:
-    MosesDecoder();
+    MosesDecoder() {}
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc);
-    virtual ~MosesDecoder(){delete m_searcher;}
+    virtual ~MosesDecoder(){}
   
   private:
-    Moses::SearchNormal* m_searcher;
+    std::auto_ptr<Moses::SearchNormal> m_searcher;
+    std::auto_ptr<Moses::TranslationOptionCollection> m_toc;
 };
 
 
