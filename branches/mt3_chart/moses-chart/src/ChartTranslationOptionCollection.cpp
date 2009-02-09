@@ -85,6 +85,12 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	TranslationOptionList &translationOptionList = GetTranslationOptionList(startPos, endPos);
 	const PhraseDictionary &phraseDictionary = decodeStep.GetPhraseDictionary();
 
+	if ((startPos == 0 || endPos == m_source.GetSize() - 1)
+			&& phraseDictionary.GetPhraseTableImplementation() != GlueRule)
+	{ // only allow glue rule to process <s> & </s>
+		return;
+	}
+
 	const ChartRuleCollection *charTargetPhraseCollection = phraseDictionary.GetChartRuleCollection(m_source, wordsRange, adhereTableLimit);
 	assert(charTargetPhraseCollection != NULL);
 

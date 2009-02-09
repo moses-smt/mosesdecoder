@@ -181,7 +181,7 @@ void Hypothesis::CalcScore()
 void Hypothesis::CalcLMScore(float &retFullScore, float &retNGramScore)
 {
 	Phrase outPhrase = GetOutputPhrase();
-	cerr << outPhrase << endl;
+	//cerr << outPhrase << endl;
 
 	retFullScore = 0;
 	retNGramScore = 0;

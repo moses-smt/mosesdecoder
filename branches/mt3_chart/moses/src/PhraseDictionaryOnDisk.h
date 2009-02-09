@@ -46,6 +46,9 @@ public:
 	{}
 	virtual ~PhraseDictionaryOnDisk();
 
+	PhraseTableImplementation GetPhraseTableImplementation() const
+	{ return OnDisk; }
+
 	bool Load(const std::vector<FactorType> &input
 								, const std::vector<FactorType> &output
 								, const std::string &filePath

@@ -196,9 +196,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 		AddEquivPhrase(sourcePhrase, targetPhrase);
 
-
-		if (count % 10000 == 0)
-			cerr << count << " " << line << endl;
+		if (GetPhraseTableImplementation() == GlueRule)
+			cerr << count << " " << *targetPhrase << " " << targetPhrase->GetScoreBreakdown() << endl;
 
 		count++;
 	}
