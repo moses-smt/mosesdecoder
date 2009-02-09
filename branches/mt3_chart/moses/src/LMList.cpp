@@ -35,7 +35,6 @@ void LMList::CalcScore(const Phrase &phrase
 											 , ScoreComponentCollection* breakdown
 											 , bool useNGramScore) const
 { 
-	cerr << phrase << endl;
 	FactorCollection &factorCollection = FactorCollection::Instance();
 
 	const_iterator lmIter;

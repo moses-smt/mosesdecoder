@@ -91,6 +91,12 @@ public:
 								float weightWP,
 								const LMList &languageModels);
 
+	void SetScoreChart(const ScoreProducer* translationScoreProducer
+														,const Scores &scoreVector
+														,const std::vector<float> &weightT
+														,const LMList &languageModels
+														,bool includeWordPenalty);
+
 	// used by for unknwoen word proc in chart decoding
 	void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
 	
