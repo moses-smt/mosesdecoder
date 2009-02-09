@@ -9,7 +9,7 @@ binmode(STDOUT, ":utf8");
 
 # apply switches
 my $MODEL;
-die("truecase.perl --model recaser < in > out")
+die("truecase.perl --model truecaser < in > out")
     unless &GetOptions('model=s' => \$MODEL);
 
 my (%BEST,%KNOWN);
