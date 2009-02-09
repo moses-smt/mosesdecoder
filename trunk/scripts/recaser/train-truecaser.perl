@@ -9,7 +9,7 @@ binmode(STDOUT, ":utf8");
 
 # apply switches
 my ($MODEL,$CORPUS);
-die("train-recaser.perl --model recaser --corpus cased")
+die("train-truecaser.perl --model truecaser --corpus cased")
     unless &GetOptions('corpus=s' => \$CORPUS,
                        'model=s' => \$MODEL) && defined($CORPUS) && defined($MODEL);
 my %CASING;
