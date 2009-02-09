@@ -221,6 +221,12 @@ public:
 		return m_sourceCompleted;
 	}
 
+
+  inline WordsBitmap &GetWordsBitmap() 
+	{
+		return m_sourceCompleted;
+	}
+
 	int NGramCompare(const Hypothesis &compare) const;
 
 	//	inline size_t hash() const

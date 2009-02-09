@@ -30,6 +30,7 @@ std::string DistortionScoreProducer::GetScoreProducerDescription() const
 float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
 {
   const int USE_OLD = 1;
+
   if (USE_OLD) {
 	return - (float) StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
   }
