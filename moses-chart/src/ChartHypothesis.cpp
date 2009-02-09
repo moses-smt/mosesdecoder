@@ -181,8 +181,7 @@ void Hypothesis::CalcScore()
 void Hypothesis::CalcLMScore(float &retFullScore, float &retNGramScore)
 {
 	Phrase outPhrase = GetOutputPhrase();
-	//cerr << outPhrase << endl;
-
+	
 	retFullScore = 0;
 	retNGramScore = 0;
 	StaticData::Instance().GetAllLM().CalcScore(outPhrase, retFullScore, retNGramScore, &m_scoreBreakdown, false);

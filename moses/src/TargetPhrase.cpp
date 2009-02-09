@@ -136,6 +136,45 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 		- (this->GetSize() * weightWP);	 // word penalty
 }
 
+void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
+														const Scores &scoreVector
+														,const vector<float> &weightT
+														,const LMList &languageModels
+														,bool includeWordPenalty)
+{
+	assert(weightT.size() == scoreVector.size());
+	// calc average score if non-best
+	
+	m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
+	m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
+	
+  // Replicated from TranslationOptions.cpp
+	float totalFutureScore = 0;
+	float totalNgramScore  = 0;
+	float totalFullScore   = 0;
+	
+	LMList::const_iterator lmIter;
+	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
+	{
+		const LanguageModel &lm = **lmIter;
+		
+		if (lm.Useable(*this))
+		{ // contains factors used by this LM
+			const float weightLM = lm.GetWeight();
+			float fullScore, nGramScore;
+			
+			lm.CalcScore(*this, fullScore, nGramScore);
+			m_scoreBreakdown.Assign(&lm, nGramScore);
+			
+			// total LM score so far
+			totalNgramScore  += nGramScore * weightLM;
+			totalFullScore   += fullScore * weightLM;
+			
+		}
+	}
+
+}
+
 void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)
 { // used when creating translations of unknown words (chart decoding)
 	m_scoreBreakdown.Assign(producer, scoreVector);
