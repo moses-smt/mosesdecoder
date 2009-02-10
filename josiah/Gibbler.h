@@ -35,7 +35,7 @@ class Sample {
   void UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head);
   void UpdateAdjacentTgtWordRanges(Hypothesis *prevHyp, Hypothesis *nextTgtHyp, Hypothesis *adjTgtHyp);
   void UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& option) ;  
-  Hypothesis* CreateHypothesis(const Hypothesis& prevTarget, const TranslationOption& option);
+  Hypothesis* CreateHypothesis( Hypothesis& prevTarget, const TranslationOption& option);
  public:
   Sample(Hypothesis* target_head);
   ~Sample();

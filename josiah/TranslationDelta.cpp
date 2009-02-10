@@ -255,6 +255,7 @@ FlipDelta::FlipDelta(const vector<Word>& targetWords,  const TranslationOption* 
        }
     } 
     //include potential words between the two target segments
+
     targetPhrase.Append(m_rightTgtOption->GetTargetPhrase());
 
     

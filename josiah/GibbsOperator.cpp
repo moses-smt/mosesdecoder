@@ -314,8 +314,10 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
       WordsRange leftSourceSegment = prev->GetCurrSourceWordsRange();
       WordsRange leftTargetSegment = prev->GetCurrTargetWordsRange();
         
+
       //if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos() ) {
       if (leftTargetSegment <  rightTargetSegment ) {
+
         //contiguous on source and target side, flipping would make this a swap
         //would this be a valid reordering if we flipped?
         float totalDistortion = 0;
