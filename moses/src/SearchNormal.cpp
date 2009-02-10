@@ -344,7 +344,7 @@ bool SearchNormal::isCompatibleWithConstraint(const Hypothesis &hypothesis,
 	size_t transOptSize = transOptPhrase.GetSize();
 	
 	if (transOptSize==0) {
-		VERBOSE(2, "Empty transOpt IS COMPATIBLE with constraint \"" <<  *m_constraint << "\"" << endl);
+		VERBOSE(4, "Empty transOpt IS COMPATIBLE with constraint \"" <<  *m_constraint << "\"" << endl);
 		return true;
 	}
 	size_t endpoint = start + transOptSize - 1;
@@ -353,15 +353,15 @@ bool SearchNormal::isCompatibleWithConstraint(const Hypothesis &hypothesis,
 	WordsRange range(start, endpoint);
 	
 	if (endpoint >= constraintSize) {
-		VERBOSE(2, "Appending \"" << transOptPhrase << "\" after \"" << static_cast<const Phrase&>(hypothesis.GetTargetPhrase()) << "\" (start=" << start << ", endpoint=" << endpoint << ", transOptSize=" << transOptSize << ") would be too long for constraint \"" <<  *m_constraint << "\"" << endl);
+		VERBOSE(4, "Appending \"" << transOptPhrase << "\" after \"" << static_cast<const Phrase&>(hypothesis.GetTargetPhrase()) << "\" (start=" << start << ", endpoint=" << endpoint << ", transOptSize=" << transOptSize << ") would be too long for constraint \"" <<  *m_constraint << "\"" << endl);
 		return false;
 	} else {
 		const Phrase &relevantConstraint = m_constraint->GetSubString(range);
 		if ( ! relevantConstraint.IsCompatible(transOptPhrase) ) {
-			VERBOSE(2, "\"" << transOptPhrase << "\" is incompatible with \"" <<  relevantConstraint << "\" (" << start << "-" << endpoint << ")" << endl);
+			VERBOSE(4, "\"" << transOptPhrase << "\" is incompatible with \"" <<  relevantConstraint << "\" (" << start << "-" << endpoint << ")" << endl);
 			return false;
 		} else {
-			VERBOSE(2, "\"" << transOptPhrase << "\" IS COMPATBILE with \"" <<  relevantConstraint << "\"" << endl);
+			VERBOSE(4, "\"" << transOptPhrase << "\" IS COMPATBILE with \"" <<  relevantConstraint << "\"" << endl);
 			return true;
 		}
 	}
