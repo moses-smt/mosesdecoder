@@ -13,8 +13,8 @@
 		1C8CFF4E0AD68D3600FA22E2 /* Main.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF460AD68D3600FA22E2 /* Main.h */; };
 		1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */; };
 		1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */; };
-		B219B8540E93812700EAB407 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
 		B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8560E9381AC00EAB407 /* IOWrapper.cpp */; };
+		B2AB78D30F40BCE50044FDAF /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AB78D20F40BCE50044FDAF /* libmoses.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +60,7 @@
 		8DD76F6C0486A84900D96B5E /* moses-cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "moses-cmd"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B219B8560E9381AC00EAB407 /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOWrapper.cpp; path = src/IOWrapper.cpp; sourceTree = "<group>"; };
 		B219B8570E9381AC00EAB407 /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOWrapper.h; path = src/IOWrapper.h; sourceTree = "<group>"; };
+		B2AB78D20F40BCE50044FDAF /* libmoses.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmoses.a; path = ../moses/build/Development/libmoses.a; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,7 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B219B8540E93812700EAB407 /* libmoses.a in Frameworks */,
+				B2AB78D30F40BCE50044FDAF /* libmoses.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +86,7 @@
 		08FB7794FE84155DC02AAC07 /* moses-cmd */ = {
 			isa = PBXGroup;
 			children = (
+				B2AB78D20F40BCE50044FDAF /* libmoses.a */,
 				03306D5F0C0B240B00CA1311 /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
@@ -230,7 +232,9 @@
 					"../irstlm/lib/i386-apple-darwin9.0/",
 					"../moses/build//**",
 					../srilm/lib/macosx,
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../moses/build/Development\"";
 				OTHER_LDFLAGS = (
 					"-lflm",
 					"-lmisc",
@@ -272,7 +276,9 @@
 					"../irstlm/lib/i386-apple-darwin9.0/",
 					"../moses/build//**",
 					../srilm/lib/macosx,
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../moses/build/Development\"";
 				OTHER_LDFLAGS = (
 					"-lflm",
 					"-lmisc",
@@ -295,7 +301,11 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INSTALL_PATH = "$(HOME)/bin";
-				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../moses/build/Development\"";
 				OTHER_LDFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
