@@ -200,7 +200,9 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
   UpdateHead(oldLeftHypo, newRightHypo, target_head);
   UpdateHead(oldRightHypo, newRightHypo, target_head);
   
+  
   UpdateFeatureValues(deltaFV);
+  
 }
   
   
