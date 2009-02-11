@@ -28,19 +28,14 @@ class Sample {
   
   std::map<size_t, Hypothesis*>  sourceIndexedHyps;
   void SetSourceIndexedHyps(Hypothesis* h);
-  //void CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
-  //void CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
+  void CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
+  void CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp);
   void UpdateFeatureValues(const ScoreComponentCollection& deltaFV);
   void UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange);   
   void UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head);
-  //void UpdateAdjacentTgtWordRanges(Hypothesis *prevHyp, Hypothesis *nextTgtHyp, Hypothesis *adjTgtHyp);
+  void UpdateAdjacentTgtWordRanges(Hypothesis *prevHyp, Hypothesis *nextTgtHyp, Hypothesis *adjTgtHyp);
   void UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& option) ;  
   Hypothesis* CreateHypothesis( Hypothesis& prevTarget, const TranslationOption& option);
-  
-  void SetTgtNextHypo(Hypothesis* currNextHypo, Hypothesis*  newHyp);
-  void SetSrcPrevHypo(Hypothesis*  newHyp, Hypothesis* srcPrevHypo ) ;
-  
-  
  public:
   Sample(Hypothesis* target_head);
   ~Sample();
@@ -96,11 +91,15 @@ class Sampler {
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
   void SetIterations(size_t iterations) {m_iterations = iterations;}
   
+  //Add standard set of operators and print collector
+  void init();
+  
 };
 
 
 
 }
+
 
 
 
