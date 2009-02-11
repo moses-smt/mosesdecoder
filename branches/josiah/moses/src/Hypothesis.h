@@ -244,7 +244,7 @@ public:
 			m_prevHypo->ToStream(out);
 		}
 		out << (Phrase) GetCurrTargetPhrase();
-	}
+  }
 	
 	inline bool PrintAlignmentInfo() const{ return GetCurrTargetPhrase().PrintAlignmentInfo(); }
 	
