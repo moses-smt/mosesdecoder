@@ -60,6 +60,7 @@ Sample::~Sample() {
 Hypothesis* Sample::CreateHypothesis(Hypothesis& prevTarget, const TranslationOption& option) {
   UpdateCoverageVector(prevTarget, option);
   Hypothesis* hypo = new Hypothesis(prevTarget,option);
+  prevTarget.m_nextHypo = hypo;
   cachedSampledHyps.push_back(hypo);
   return hypo;
 }
@@ -94,9 +95,6 @@ Hypothesis* Sample::GetHypAtSourceIndex(size_t i) {
 }
 
 void Sample::SetSourceIndexedHyps(Hypothesis* h) {
-  //if (!h->m_prevHypo)
-//    return;
-  
   size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
   size_t endPos = h->GetCurrSourceWordsRange().GetEndPos();
   
@@ -105,23 +103,21 @@ void Sample::SetSourceIndexedHyps(Hypothesis* h) {
     return;
   }
     
-  
   for (size_t i = startPos; i <= endPos; i++) {
     sourceIndexedHyps[i] = h; 
   } 
   
 }
   
-//x and y are source side positions  
 void Sample::FlipNodes(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption, Hypothesis* m_prevTgtHypo, Hypothesis* m_nextTgtHypo, const ScoreComponentCollection& deltaFV) {
   bool tgtSideContiguous = false; 
+  
   Hypothesis *oldLeftHypo = GetHypAtSourceIndex(leftTgtOption.GetSourceWordsRange().GetStartPos());
   Hypothesis *oldRightHypo = GetHypAtSourceIndex(rightTgtOption.GetSourceWordsRange().GetStartPos());
   
-  //created the new left most tgt
+  //created the new leftmost tgt
   Hypothesis *newLeftHypo = CreateHypothesis(*m_prevTgtHypo, leftTgtOption);
   SetSourceIndexedHyps(newLeftHypo);
-  m_prevTgtHypo->m_nextHypo = newLeftHypo;
   
   //creating the one that goes to the right
   //find its target side predecessor
@@ -150,12 +146,8 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
   //predWordBitmap.SetValue(rightTgtOption.GetSourceWordsRange().GetStartPos(), rightTgtOption.GetSourceWordsRange().GetEndPos(), false);
   Hypothesis *newRightHypo = CreateHypothesis(*tgtSidePredecessor, rightTgtOption);
   SetSourceIndexedHyps(newRightHypo);
-  newRightHypo->m_nextHypo = m_nextTgtHypo;
-  if (m_nextTgtHypo)
-    m_nextTgtHypo->m_prevHypo = newRightHypo;
-  if(tgtSidePredecessor) {
-    tgtSidePredecessor->m_nextHypo = newRightHypo;   
-  }
+  SetTgtNextHypo(m_nextTgtHypo, newRightHypo);
+  
 
   //update the target side sample pointers now 
   if  (tgtSideContiguous) {
@@ -171,28 +163,16 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
   
   //update the source side sample pointers now 
   Hypothesis* newLeftSourcePrevHypo = GetHypAtSourceIndex(newLeftHypo->GetCurrSourceWordsRange().GetStartPos() - 1 );
-  newLeftHypo->m_sourcePrevHypo = newLeftSourcePrevHypo;
-  if (newLeftSourcePrevHypo) {
-    newLeftSourcePrevHypo->m_sourceNextHypo = newLeftHypo;
-  }
+  Hypothesis* newLeftSourceNextHypo = GetHypAtSourceIndex(newLeftHypo->GetCurrSourceWordsRange().GetStartPos() + 1 );
   
-  Hypothesis* newLeftSourceNextHypo = GetHypAtSourceIndex(newLeftHypo->GetCurrSourceWordsRange().GetEndPos() + 1 );
-  newLeftHypo->m_sourceNextHypo = newLeftSourceNextHypo;
-  if (newLeftSourceNextHypo) {
-    newLeftSourceNextHypo->m_sourcePrevHypo = newLeftHypo;
-  }
+  SetSrcPrevHypo(newLeftHypo, newLeftSourcePrevHypo);
+  SetSrcPrevHypo(newLeftSourceNextHypo, newLeftHypo);
   
-  Hypothesis* newRightSourcePrevHypo = GetHypAtSourceIndex(newRightHypo->GetCurrSourceWordsRange().GetStartPos() - 1 );
-  newRightHypo->m_sourcePrevHypo = newRightSourcePrevHypo;
-  if (newRightSourcePrevHypo) {
-    newRightSourcePrevHypo->m_sourceNextHypo = newRightHypo;
-  }
-  
+  Hypothesis* newRightSourcePrevHypo = GetHypAtSourceIndex(newRightHypo->GetCurrSourceWordsRange().GetEndPos() - 1 );
   Hypothesis* newRightSourceNextHypo = GetHypAtSourceIndex(newRightHypo->GetCurrSourceWordsRange().GetEndPos() + 1 );
-  newRightHypo->m_sourceNextHypo = newRightSourceNextHypo;
-  if (newRightSourceNextHypo) {
-    newRightSourceNextHypo->m_sourcePrevHypo = newRightHypo;
-  }
+  
+  SetSrcPrevHypo(newRightHypo, newRightSourcePrevHypo);
+  SetSrcPrevHypo(newRightSourceNextHypo, newRightHypo);
   
   UpdateHead(oldLeftHypo, newLeftHypo, source_head);
   UpdateHead(oldRightHypo, newRightHypo, source_head);
@@ -205,33 +185,21 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
   
 }
   
-  
-  
-void Sample::UpdateAdjacentTgtWordRanges(Hypothesis *prevHyp, Hypothesis *nextTgtHyp, Hypothesis *adjTgtHyp) {
-    
-  const WordsRange & prevHypoTgtRange = prevHyp->GetCurrTargetWordsRange();
-  WordsRange & nextTgtHypRange = nextTgtHyp->GetCurrTargetWordsRange();
-  WordsRange & adjTgtHypRange = adjTgtHyp->GetCurrTargetWordsRange();
-  
-  nextTgtHypRange.SetStartPos(prevHypoTgtRange.GetEndPos() + 1);
-  nextTgtHypRange.SetEndPos(prevHypoTgtRange.GetEndPos() +  nextTgtHyp->GetCurrTargetPhrase().GetSize());
-
-  adjTgtHypRange.SetStartPos(nextTgtHypRange.GetEndPos() + 1);
-  adjTgtHypRange.SetEndPos(nextTgtHypRange.GetEndPos() + adjTgtHyp->GetCurrTargetPhrase().GetSize());
-}  
-  
 void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
-  //cout << "Start pos " << optionStartPos << " hypo " << *currHyp <<  " option: " << option <<  endl;
+  
   Hypothesis& prevHyp = *(const_cast<Hypothesis*>(currHyp->m_prevHypo));
   Hypothesis *newHyp = CreateHypothesis(prevHyp, option);
+  SetTgtNextHypo(currHyp->m_nextHypo, newHyp);
   
-  //cout << "Target head " << target_head << endl;
-  CopyTgtSidePtrs(currHyp, newHyp);
-  CopySrcSidePtrs(currHyp, newHyp);
-  //cout << "Target head " << target_head << endl;
-
+  UpdateHead(currHyp, newHyp, target_head);
+  
+  SetSrcPrevHypo(newHyp, currHyp->m_sourcePrevHypo);
+  SetSrcPrevHypo(currHyp->m_sourceNextHypo, newHyp);
+  
+  UpdateHead(currHyp, newHyp, source_head);
+  
   //Update source side map
   SetSourceIndexedHyps(newHyp); 
   
@@ -254,56 +222,27 @@ void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCo
   
   assert(currStartHyp != currEndHyp);
   
-  //cout << "Start pos " << optionStartPos << " hypo " << *currHyp <<  " option: " << option <<  endl;
   Hypothesis* prevHyp = NULL;
   Hypothesis* newHyp = NULL;
   
   if (currStartHyp->GetCurrTargetWordsRange() < currEndHyp->GetCurrTargetWordsRange()) {
     prevHyp = const_cast<Hypothesis*> (currStartHyp->m_prevHypo);
     newHyp = CreateHypothesis(*prevHyp, option);
-    
     //Set the target ptrs
-    newHyp->m_prevHypo = prevHyp;
-    newHyp->m_nextHypo = currEndHyp->m_nextHypo;
-    if (prevHyp) {
-      prevHyp->m_nextHypo = newHyp;
-    }
-    Hypothesis* currHypNext = newHyp->m_nextHypo;
-    if (currHypNext) {
-      currHypNext->m_prevHypo = newHyp;  
-    }
-    UpdateHead(currStartHyp, newHyp, target_head);
+    SetTgtNextHypo(currEndHyp->m_nextHypo, newHyp);
+    UpdateHead(currEndHyp, newHyp, target_head);
   } 
   else {
     prevHyp = const_cast<Hypothesis*> (currEndHyp->m_prevHypo);
     newHyp = CreateHypothesis(*prevHyp, option);
-    
     //Set the target ptrs
-    newHyp->m_prevHypo = prevHyp;
-    newHyp->m_nextHypo = currStartHyp->m_nextHypo;
-    if (prevHyp) {
-      prevHyp->m_nextHypo = newHyp;
-    }
-    Hypothesis* currHypNext = newHyp->m_nextHypo;
-    if (currHypNext) {
-      currHypNext->m_prevHypo = newHyp;  
-    }
-    UpdateHead(currEndHyp, newHyp, target_head);
+    SetTgtNextHypo(currStartHyp->m_nextHypo, newHyp);
+    UpdateHead(currStartHyp, newHyp, target_head);
   }
   
   //Set the source ptrs
-  newHyp->m_sourcePrevHypo = currStartHyp->m_sourcePrevHypo;
-  newHyp->m_sourceNextHypo = currEndHyp->m_sourceNextHypo;
-  
-  Hypothesis* newHypSourcePrev = newHyp->m_sourcePrevHypo;
-  if (newHypSourcePrev) {
-    newHypSourcePrev->m_sourceNextHypo = newHyp;
-  }
-  
-  Hypothesis* newHypSourceNext = newHyp->m_sourceNextHypo;
-  if (newHypSourceNext) {
-    newHypSourceNext->m_sourcePrevHypo = newHyp; 
-  }
+  SetSrcPrevHypo(newHyp, currStartHyp->m_sourcePrevHypo);
+  SetSrcPrevHypo(currEndHyp->m_sourceNextHypo, newHyp);
   
   UpdateHead(currEndHyp, newHyp, source_head);
                     
@@ -324,69 +263,26 @@ void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCo
   
   
 void Sample::SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const ScoreComponentCollection& deltaFV) {
-    
+  cout << "Applying split" << endl;
   size_t optionStartPos = leftTgtOption.GetSourceWordsRange().GetStartPos();
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
   
-  //cout << "Start pos " << optionStartPos << " hypo " << *currHyp <<  " option: " << option <<  endl;
   Hypothesis& prevHyp = *(const_cast<Hypothesis*>(currHyp->m_prevHypo));
   Hypothesis *newLeftHyp = CreateHypothesis(prevHyp, leftTgtOption);
-  
   Hypothesis *newRightHyp = CreateHypothesis(*newLeftHyp, rightTgtOption);
   
-  //cout << "Target head " << target_head << endl;
-  
   //Update tgt ptrs
-  newLeftHyp->m_prevHypo = currHyp->m_prevHypo;
-  Hypothesis* currHypPrev = const_cast<Hypothesis*>(currHyp->m_prevHypo);
-  if (currHypPrev) {
-    currHypPrev->m_nextHypo = newLeftHyp;
-  }
-  newLeftHyp->m_nextHypo = newRightHyp;
-  newRightHyp->m_nextHypo = currHyp->m_nextHypo;
-  if (currHyp->m_nextHypo) {
-    currHyp->m_nextHypo->m_prevHypo = newRightHyp;  
-  }
-  
+  SetTgtNextHypo(currHyp->m_nextHypo, newRightHyp);
   UpdateHead(currHyp, newRightHyp, target_head);
   
   
   //Update src ptrs
-  if (newLeftHyp->GetCurrSourceWordsRange() < newRightHyp->GetCurrSourceWordsRange()) { //monotone
-    newLeftHyp->m_sourcePrevHypo = currHyp->m_sourcePrevHypo;
-    if (currHyp->m_sourcePrevHypo) {
-      currHyp->m_sourcePrevHypo->m_sourceNextHypo = newLeftHyp;
-    }
-    newLeftHyp->m_sourceNextHypo = newRightHyp;
+  assert (newLeftHyp->GetCurrSourceWordsRange() < newRightHyp->GetCurrSourceWordsRange()); //monotone  
+  SetSrcPrevHypo(newLeftHyp, currHyp->m_sourcePrevHypo);
+  SetSrcPrevHypo(newRightHyp, newLeftHyp);
+  SetSrcPrevHypo(currHyp->m_sourceNextHypo, newRightHyp);  
+  UpdateHead(currHyp, newRightHyp, source_head);
     
-    newRightHyp->m_sourcePrevHypo = newLeftHyp;
-    newRightHyp->m_sourceNextHypo = currHyp->m_sourceNextHypo;
-    if (currHyp->m_sourceNextHypo) {
-      currHyp->m_sourceNextHypo->m_sourcePrevHypo = newRightHyp;
-    }
-    
-    UpdateHead(currHyp, newRightHyp, source_head);
-    
-  }
-  else {
-    newRightHyp->m_sourcePrevHypo = currHyp->m_sourcePrevHypo;
-    if (currHyp->m_sourcePrevHypo) {
-      currHyp->m_sourcePrevHypo->m_sourceNextHypo = newRightHyp;
-    }
-    newRightHyp->m_sourceNextHypo = newLeftHyp;
-    
-    newLeftHyp->m_sourcePrevHypo = newRightHyp;
-    newLeftHyp->m_sourceNextHypo = currHyp->m_sourceNextHypo;
-    if (currHyp->m_sourceNextHypo) {
-      currHyp->m_sourceNextHypo->m_sourcePrevHypo = newLeftHyp;
-    }
-    
-    UpdateHead(currHyp, newLeftHyp, source_head);
-  }
-  
-  
-  //cout << "Target head " << target_head << endl;
-  
   //Update source side map
   SetSourceIndexedHyps(newLeftHyp); 
   SetSourceIndexedHyps(newRightHyp); 
@@ -403,39 +299,26 @@ void Sample::SplitTarget(const TranslationOption& leftTgtOption, const Translati
   UpdateFeatureValues(deltaFV);
 }  
   
-  
-  
-void Sample::CopyTgtSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
-  newHyp->m_prevHypo = currHyp->m_prevHypo;
-  newHyp->m_nextHypo = currHyp->m_nextHypo;
-  Hypothesis* currHypPrev = const_cast<Hypothesis*>(currHyp->m_prevHypo);
-  if (currHypPrev) {
-    currHypPrev->m_nextHypo = newHyp;
+void Sample::SetTgtNextHypo(Hypothesis* currNextHypo, Hypothesis*  newHyp) {
+  if (newHyp) {
+    newHyp->m_nextHypo = currNextHypo;  
   }
-  Hypothesis* currHypNext = currHyp->m_nextHypo;
-  if (currHypNext) {
-    currHypNext->m_prevHypo = newHyp;  
+    
+  if (currNextHypo) {
+    currNextHypo->m_prevHypo = newHyp;  
   }
-  
-  UpdateHead(currHyp, newHyp, target_head);
 }
-
   
-void Sample::CopySrcSidePtrs(Hypothesis* currHyp, Hypothesis* newHyp){
-  newHyp->m_sourcePrevHypo = currHyp->m_sourcePrevHypo;
-  newHyp->m_sourceNextHypo = currHyp->m_sourceNextHypo;
-  Hypothesis* newHypSourcePrev = newHyp->m_sourcePrevHypo;
-  if (newHypSourcePrev) {
-    newHypSourcePrev->m_sourceNextHypo = newHyp;
+void Sample::SetSrcPrevHypo(Hypothesis*  newHyp, Hypothesis* srcPrevHypo ) {
+  if (newHyp) {
+    newHyp->m_sourcePrevHypo = srcPrevHypo; 
   }
-  Hypothesis* newHypSourceNext = newHyp->m_sourceNextHypo;
-  if (newHypSourceNext) {
-    newHypSourceNext->m_sourcePrevHypo = newHyp; 
+    
+  if (srcPrevHypo) {
+    srcPrevHypo->m_sourceNextHypo = newHyp;  
   }
-
-  UpdateHead(currHyp, newHyp, source_head);
 }
-
+  
 void Sample::UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head) {
   if (head == currHyp)
     head = newHyp;
@@ -454,9 +337,7 @@ void Sample::UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange) {
 }  
   
 void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
-  //cout << "Delta: " << deltaFV << endl;
   feature_values.PlusEquals(deltaFV);
-  //cout << "New FV " << feature_values << endl;
 }  
 
 //update  the bitmap of the predecessor
@@ -467,14 +348,6 @@ void Sample::UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& opti
  WordsBitmap & wordBitmap = hyp.GetWordsBitmap();
  wordBitmap.SetValue(startPos, endPos, false);
 } 
-  
-void Sampler::init() {
-  m_collectors.push_back(new PrintSampleCollector());
-  m_operators.push_back(new MergeSplitOperator());
-  m_operators.push_back(new TranslationSwapOperator());
-  m_operators.push_back(new FlipOperator());
-  m_iterations = StaticData::Instance().GetNumSamplingIterations();
-}
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
   
@@ -498,9 +371,6 @@ void PrintSampleCollector::collect(Sample& sample)  {
       sample.GetSampleHypothesis()->ToStream(cout);
       cout << "\"" << "  " << "Feature values: " << sample.GetFeatureValues() << endl;
     }
-    
-    
-
 }
 
 

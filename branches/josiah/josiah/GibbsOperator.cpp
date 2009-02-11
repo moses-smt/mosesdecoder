@@ -359,7 +359,7 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
         CheckValidReordering(prev,hypothesis, prev->GetPrevHypo(), prev->GetNextHypo(), hypothesis->GetPrevHypo(),  hypothesis->GetNextHypo(), totalDistortion); 
         noChangeDelta = new   FlipDelta(targetWords, &(prev->GetTranslationOption()), 
                                           &(hypothesis->GetTranslationOption()), prev->GetPrevHypo(), hypothesis->GetNextHypo() ,leftTargetSegment,rightTargetSegment, totalDistortion); 
-          
+        deltas.push_back(noChangeDelta);   
       }
       //else if (leftTargetSegment.GetStartPos()  ==  rightTargetSegment.GetEndPos() + 1) {
       else {
@@ -388,6 +388,7 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
         CheckValidReordering(hypothesis,prev, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), prev->GetPrevHypo(), prev->GetNextHypo(), totalDistortion);        
         noChangeDelta = new FlipDelta(targetWords,&(hypothesis->GetTranslationOption()), 
                                       &(prev->GetTranslationOption()), hypothesis->GetPrevHypo(), prev->GetNextHypo(), rightTargetSegment,leftTargetSegment, totalDistortion);
+        deltas.push_back(noChangeDelta); 
       }
         
       VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
@@ -411,14 +412,15 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
         VERBOSE(3,"The chosen sample is " << chosen << endl);
           
         //apply it to the sample
-        deltas[chosen]->apply(sample,*noChangeDelta);
-          
+        if (deltas[chosen] != noChangeDelta) {
+          deltas[chosen]->apply(sample,*noChangeDelta);  
+        }
+        
         VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
       }
     }
     //clean up
     RemoveAllInColl(deltas);
-    delete noChangeDelta;
   }
 }  
   
