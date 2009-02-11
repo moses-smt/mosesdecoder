@@ -197,7 +197,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 	const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
 	const WordPenaltyProducer *wordPenaltyProducer = staticData.GetWordPenaltyProducer();
 	vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
-	vector<float> wordPenaltyScore(1, 0.434294482);
+	vector<float> wordPenaltyScore(1, -0.434294482);
 
 	size_t isDigit = 0;
 	if (staticData.GetDropUnknown())
