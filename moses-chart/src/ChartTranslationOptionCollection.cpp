@@ -99,6 +99,18 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	{
 		const ChartRule &rule = **iterTargetPhrase;
 		TranslationOption *transOpt = new TranslationOption(wordsRange, rule, m_source);
+	
+		stringstream strme("");
+		strme << *transOpt;
+		string toFind = "the goal of gene scientists is ";
+		size_t pos = toFind.find(strme.str());
+
+		//cerr << *transOpt << endl;
+		if (pos == 0)
+		{
+			cerr << *transOpt << endl;
+		}
+
 		translationOptionList.Add(transOpt);
 	}
 
@@ -183,7 +195,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 	FactorCollection &factorCollection = FactorCollection::Instance();
 	const StaticData &staticData = StaticData::Instance();
 	const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
+	const WordPenaltyProducer *wordPenaltyProducer = staticData.GetWordPenaltyProducer();
 	vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
+	vector<float> wordPenaltyScore(1, 0.434294482);
 
 	size_t isDigit = 0;
 	if (staticData.GetDropUnknown())
@@ -222,6 +236,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 
 		targetPhrase->SetScore();
 		targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
+		targetPhrase->SetScore(wordPenaltyProducer, wordPenaltyScore);
 		targetPhrase->SetSourcePhrase(m_unksrc);
 
 		// words consumed
