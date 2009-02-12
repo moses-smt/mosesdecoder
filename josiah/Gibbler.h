@@ -84,14 +84,14 @@ class Sampler {
    std::vector<SampleCollector*> m_collectors;
    std::vector<GibbsOperator*> m_operators;
    size_t m_iterations;
-
+   size_t m_burninIts;
  public:
   Sampler(): m_iterations(10) {}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options) ;
   void AddOperator(GibbsOperator* o) {m_operators.push_back(o);}
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
   void SetIterations(size_t iterations) {m_iterations = iterations;}
-  
+  void SetBurnIn(size_t burnin_its) {m_burninIts = burnin_its;}
 };
 
 

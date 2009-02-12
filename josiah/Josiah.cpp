@@ -89,6 +89,7 @@ int main(int argc, char** argv) {
   int iterations;
   int topn;
   int debug;
+  int burning_its;
   string inputfile;
   string mosesini;
   bool decode;
@@ -103,6 +104,7 @@ int main(int argc, char** argv) {
         ("verbosity,v", po::value<int>(&debug)->default_value(0), "Verbosity level")
         ("timing,m", po::value(&do_timing)->zero_tokens()->default_value(false), "Display timing information.")
         ("iterations,s", po::value<int>(&iterations)->default_value(5), "Number of sampling iterations")
+        ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
         ("nbest,n",po::value<int>(&topn)->default_value(0),"Dump the top n derivations to stdout")
         ("decode,d",po::value( &decode )->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
@@ -174,6 +176,7 @@ int main(int argc, char** argv) {
     else
       sampler.AddCollector(&collector);
     sampler.SetIterations(iterations);
+    sampler.SetBurnIn(burning_its);
     
     TranslationOptionCollection* toc;
     Hypothesis* hypothesis;
