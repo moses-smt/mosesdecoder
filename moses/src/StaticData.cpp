@@ -136,6 +136,10 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (m_parameter->GetParam("n-best-list").size() >= 2)
 	{
 		m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
+    if (m_nBestFilePath == "-") {
+      TRACE_ERR("ERROR: Please use STDOUT as the filename to indicate that the n-best list should\nbe written to STDOUT.\n");
+      return false;
+    }
 		m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
 		m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 && m_parameter->GetParam("n-best-list")[2]=="distinct");
   }
