@@ -3,7 +3,7 @@ Re-implementation of Johnson et al. (2007)'s phrasetable filtering strategy.
 This implementation relies on Joy Zhang's SALM Suffix Array toolkit. It is
 available here:
 
-  http://projectile.is.cs.cmu.edu/research/public/tools/salm/salm.htm
+  http://projectile.sv.cmu.edu/research/public/tools/salm/salm.htm
 
 --Chris Dyer <redpony@umd.edu>
 
