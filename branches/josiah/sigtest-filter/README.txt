@@ -26,7 +26,7 @@ USAGE INSTRUCTIONS
 
    FILTER-VALUE is the -log prob threshold described in Johnson et al.
      (2007)'s paper.  It may be either 'a+e', 'a-e', or a positive real
-     value.
+     value. 'a+e' is a good setting- it filters out <1,1,1> phrase pairs.
 
 3. Run with no options to see more use-cases.
 
