@@ -119,9 +119,10 @@ public:
 	{
 		m_weight = weight;
 	}
-	
-	virtual std::string GetScoreProducerDescription() const = 0;
-  
+
+	std::string GetScoreProducerDescription() const
+	{return "LanguageModel";	}
+
   //! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
   virtual void InitializeBeforeSentenceProcessing(){};
   virtual void CleanUpAfterSentenceProcessing() {};  

@@ -18,7 +18,7 @@ bool PhraseDictionaryGlueRule::Load(const std::vector<FactorType> &input
 																	, float weightWP)
 {
 	std::stringstream stream("");
-	stream << "[X] ||| [X,1] [X,2] ||| [X,1] [X,2] ||| 0\n"
+	stream << "[X] ||| [X,1] [X,2] ||| [X,1] [X,2] ||| 100\n"
 				<<	"[X] ||| <s> ||| <s> ||| 0\n"
 				<<	"[X] ||| </s> ||| </s> ||| 0\n";
 

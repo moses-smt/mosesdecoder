@@ -28,6 +28,13 @@ public:
 	{ return m_rule; }
 	const Moses::WordsRange &GetSourceWordsRange() const
 	{ return m_wordsRange; }
+
+	/** return estimate of total cost of this option */
+	inline float GetTotalScore() const 	 
+	{ 	 
+		return m_rule.GetTargetPhrase().GetFutureScore(); 	 
+	}
+
 };
 
 }

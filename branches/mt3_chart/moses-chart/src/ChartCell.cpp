@@ -228,6 +228,20 @@ void ChartCell::Detach(const HCType::iterator &iter)
 void ChartCell::Remove(const HCType::iterator &iter)
 {
 	Hypothesis *h = *iter;
+
+	/*
+	stringstream strme("");
+	strme << h->GetOutputPhrase();
+	string toFind = "the goal of gene scientists is ";
+	size_t pos = toFind.find(strme.str());
+
+	if (pos == 0)
+	{
+		cerr << pos << " " << strme.str() << *h << endl;
+		cerr << *this << endl;
+	}
+	*/
+
 	Detach(iter);
 	delete h;
 }
@@ -309,5 +323,18 @@ void ChartCell::ExpandQueueEntry(const QueueEntry &queueEntry)
 	queueEntry.CreateDeviants(*this);
 }
 
+std::ostream& operator<<(std::ostream &out, const ChartCell &cell)
+{
+	ChartCell::HCType::const_iterator iter;
+	for (iter = cell.m_hypos.begin(); iter != cell.m_hypos.end(); ++iter)
+	{
+		const Hypothesis &hypo = **iter;
+		out << hypo << endl;
+	}
+
+	return out;
 }
+
+} // namespace
+
 

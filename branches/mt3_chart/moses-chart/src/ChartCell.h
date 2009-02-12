@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <set>
 #include <queue>
 #include <map>
@@ -48,6 +49,8 @@ public:
 
 class ChartCell
 {
+	friend std::ostream& operator<<(std::ostream&, const ChartCell&);
+
 protected:
 	typedef std::set<Hypothesis*, ChartHypothesisRecombinationOrderer> HCType;
 	HCType m_hypos;

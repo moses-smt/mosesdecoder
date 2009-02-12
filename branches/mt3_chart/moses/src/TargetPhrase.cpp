@@ -179,8 +179,10 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 	if (calcWordPenalty)
 	{
 		size_t wordCount = GetNumTerminals();
-		m_scoreBreakdown.Assign(staticData.GetWordPenaltyProducer(), - (float) wordCount);
+		m_scoreBreakdown.Assign(staticData.GetWordPenaltyProducer(), - (float) wordCount * 0.434294482);
 	}
+
+	m_fullScore = m_scoreBreakdown.GetWeightedScore();
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)

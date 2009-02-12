@@ -265,7 +265,7 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 		const MosesChart::TrellisPath &path = **iter;
 		Moses::Phrase outputPhrase = path.GetOutputPhrase();
 
-		//cerr << endl << path << endl;
+		cout << endl << path << endl;
 
 		// print the surface factor of the translation
 		*m_nBestStream << translationId << " ||| ";

@@ -29,7 +29,7 @@ TranslationOption::~TranslationOption()
 // friend
 ostream& operator<<(ostream& out, const TranslationOption& transOpt)
 {
-	out << transOpt.GetChartRule().GetTargetPhrase();
+	out << transOpt.GetTotalScore() << " " << transOpt.GetChartRule().GetTargetPhrase();
 	return out;
 }
 
