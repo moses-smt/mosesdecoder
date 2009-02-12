@@ -1,8 +1,17 @@
 /**
-\description The is the main for the new version of the mert algorithm develloppped during the 2nd MT marathon
+\description The is the main for the new version of the mert algorithm developed during the 2nd MT marathon
 */
 
 #include <limits>
+#include <unistd.h>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <ctime>
+
+#include <getopt.h>
+
 #include "Data.h"
 #include "Point.h"
 #include "Scorer.h"
@@ -10,13 +19,7 @@
 #include "ScoreData.h"
 #include "FeatureData.h"
 #include "Optimizer.h"
-#include "getopt.h"
 #include "Types.h"
-#include <unistd.h>
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
-#include <cmath>
 #include "Timer.h"
 #include "Util.h"
 
@@ -30,6 +33,7 @@ void usage(void) {
   cerr<<"[-n retry ntimes (default 1)]"<<endl;
   cerr<<"[-o\tthe indexes to optimize(default all)]"<<endl;
   cerr<<"[-t\tthe optimizer(default powell)]"<<endl;
+  cerr<<"[-r\tthe random seed (defaults to system clock)"<<endl;
   cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
   cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
   cerr<<"[--scfile|-S] comma separated list of scorer data files (default score.data)"<<endl;
@@ -44,6 +48,7 @@ static struct option long_options[] =
   {
     {"pdim", 1, 0, 'd'},
     {"ntry",1,0,'n'},
+    {"rseed",required_argument,0,'r'},
     {"optimize",1,0,'o'},
     {"type",1,0,'t'},
     {"sctype",1,0,'s'},
@@ -70,6 +75,8 @@ int main (int argc, char **argv) {
   int c,pdim,i;
   pdim=-1;
   int ntry=1;
+  int seed=0;
+  bool hasSeed = false;
   string type("powell");
   string scorertype("BLEU");
   string scorerconfig("");
@@ -78,13 +85,17 @@ int main (int argc, char **argv) {
   string initfile("init.opt");
 	vector<unsigned> tooptimize;
   vector<parameter_t> start;
-  while ((c=getopt_long (argc, argv, "d:n:t:s:S:F:v:", long_options, &option_index)) != -1) {
+  while ((c=getopt_long (argc, argv, "r:d:n:t:s:S:F:v:", long_options, &option_index)) != -1) {
     switch (c) {
     case 'd':
       pdim = strtol(optarg, NULL, 10);
       break;
     case 'n':
       ntry=strtol(optarg, NULL, 10);
+      break;
+    case 'r':
+      seed=strtol(optarg, NULL, 10);
+      hasSeed = true;
       break;
     case 't':
       type=string(optarg);
@@ -113,6 +124,14 @@ int main (int argc, char **argv) {
   }
   if (pdim < 0)
     usage();
+
+  if (hasSeed) {
+      cerr << "Seeding random numbers with " << seed << endl;
+      srand(seed);
+  } else {
+      cerr << "Seeding random numbers with system clock " << endl;
+      srand(time(NULL));
+  }
   
   if(tooptimize.empty()){
     tooptimize.resize(pdim);//We'll optimize on everything
