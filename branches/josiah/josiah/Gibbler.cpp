@@ -128,7 +128,6 @@ void Sample::SetSrcPrevHypo(Hypothesis* newHyp, Hypothesis* srcPrevHypo) {
   }
 }  
   
-//x and y are source side positions  
 void Sample::FlipNodes(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption, Hypothesis* m_prevTgtHypo, Hypothesis* m_nextTgtHypo, const ScoreComponentCollection& deltaFV) {
   bool tgtSideContiguous = false; 
   Hypothesis *oldRightHypo = GetHypAtSourceIndex(leftTgtOption.GetSourceWordsRange().GetStartPos()); //this one used to be on the right
@@ -314,6 +313,15 @@ void Sample::UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& opti
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
   Sample sample(starting);
+  
+  for (size_t i = 0; i < m_burninIts; ++i) {
+    VERBOSE(1,"Gibbs burnin iteration: " << i << endl);
+    for (size_t j = 0; j < m_operators.size(); ++j) {
+      VERBOSE(1,"Sampling with operator " << m_operators[j]->name() << endl);
+      m_operators[j]->doIteration(sample,*options);
+    }
+  }
+  
   for (size_t i = 0; i < m_iterations; ++i) {
     VERBOSE(1,"Gibbs sampling iteration: " << i << endl);
     for (size_t j = 0; j < m_operators.size(); ++j) {
