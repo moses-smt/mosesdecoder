@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
+#include <deque>
+
+#include <boost/unordered_map.hpp>
 
 #include "DummyScoreProducers.h"
 #include "Gibbler.h"
@@ -31,6 +34,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses {
 
 class Sample;
+
+/* 
+ * An MRU cache
+**/
+class LanguageModelCache {
+  public:
+    LanguageModelCache(LanguageModel* languageModel, int maxSize=10000) :
+      m_languageModel(languageModel), m_maxSize(maxSize) {}
+    float GetValue(const std::vector<const Word*>& ngram);
+    
+  private:
+    LanguageModel* m_languageModel;
+    int m_maxSize;
+    //current entries
+    typedef std::pair<std::vector<const Word*>,float> Entry;
+    typedef std::list<Entry> EntryList;
+    typedef EntryList::iterator EntryListIterator;
+    std::list<Entry> m_entries;
+    //pointers into the entry list
+    typedef boost::unordered_map<vector<const Word*>, EntryListIterator*> ListPointerMap;
+    ListPointerMap m_listPointers;
+};
 
 /**
   * This class hierarchy represents the possible changes in the translation effected
@@ -72,6 +97,9 @@ class TranslationDelta {
                                 const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
     ScoreComponentCollection m_scores;
     double m_score;
+    
+  private:
+    static std::map<LanguageModel*,LanguageModelCache> m_cache;
     
 };
  
