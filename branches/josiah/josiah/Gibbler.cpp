@@ -317,7 +317,7 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
   for (size_t i = 0; i < m_burninIts; ++i) {
     VERBOSE(1,"Gibbs burnin iteration: " << i << endl);
     for (size_t j = 0; j < m_operators.size(); ++j) {
-      VERBOSE(1,"Sampling with operator " << m_operators[j]->name() << endl);
+      VERBOSE(2,"Sampling with operator " << m_operators[j]->name() << endl);
       m_operators[j]->doIteration(sample,*options);
     }
   }
@@ -325,7 +325,7 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
   for (size_t i = 0; i < m_iterations; ++i) {
     VERBOSE(1,"Gibbs sampling iteration: " << i << endl);
     for (size_t j = 0; j < m_operators.size(); ++j) {
-      VERBOSE(1,"Sampling with operator " << m_operators[j]->name() << endl);
+      VERBOSE(2,"Sampling with operator " << m_operators[j]->name() << endl);
       m_operators[j]->doIteration(sample,*options);
     }
     for (size_t k = 0; k < m_collectors.size(); ++k) {
