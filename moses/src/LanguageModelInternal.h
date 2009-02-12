@@ -34,6 +34,9 @@ public:
 	float GetValue(const std::vector<const Word*> &contextFactor
 												, State* finalState = 0
 												, unsigned int* len = 0) const;
+
+	std::string GetScoreProducerDescription() const
+	{return "LanguageModelInternal";	}
 };
 
 }

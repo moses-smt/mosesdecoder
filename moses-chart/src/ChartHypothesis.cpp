@@ -217,12 +217,21 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 	hypo.CreateOutputPhrase(outPhrase);
 
 	// words bitmap
-	out << hypo.GetId()
-		<< " " << hypo.GetScoreBreakDown().GetWeightedScore()
+	out << " " << outPhrase
+			<< " " << hypo.GetId()
+			<< " " << hypo.GetTotalScore() 
 			<< " " << hypo.m_currSourceWordsRange
-			<< " " << hypo.m_targetPhrase
-			<< " " << outPhrase;
-
+			<< " " << hypo.m_targetPhrase;
+			
+/*
+	out << endl;
+	std::vector<const Hypothesis*>::const_iterator iter;
+	for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter)
+	{
+		const Hypothesis &prevHypo = **iter;
+		out << "*    " << prevHypo << endl;
+	}
+*/
 
 	return out;
 }

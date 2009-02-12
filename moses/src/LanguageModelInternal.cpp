@@ -265,7 +265,6 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 	}
 
 	return FloorScore(score);
-
 }
 
 }

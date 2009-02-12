@@ -25,7 +25,10 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	assert(numScoreCompsProduced > 0);
 	m_last += numScoreCompsProduced;
 	m_ends.push_back(m_last);
-	VERBOSE(2,"Added ScoreProducer(" << sp << "): id=" << sp->GetScoreBookkeepingID() << std::endl);
+
+	VERBOSE(1,"Added " << sp->GetScoreBookkeepingID() 
+						<< " " << sp->GetScoreProducerDescription()
+						<< " " << m_begins.back() << "-" << m_ends.back()-1 << std::endl);
 }
 
 void ScoreIndexManager::Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const

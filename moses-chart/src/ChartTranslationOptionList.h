@@ -3,14 +3,24 @@
 
 #include <vector>
 #include "../../moses/src/WordsRange.h"
+#include "ChartTranslationOption.h"
 
 namespace MosesChart
 {
 
-class TranslationOption;
+class ChartTranslationOptionOrderer
+{
+public:
+	bool operator()(const TranslationOption* transOptA, const TranslationOption* transOptB) const
+	{
+		return transOptA->GetTotalScore() > transOptB->GetTotalScore();
+	}
+};
 
 class TranslationOptionList
 {
+	friend std::ostream& operator<<(std::ostream&, const TranslationOptionList&);
+
 protected:
 	typedef std::vector<TranslationOption*> CollType;
 	CollType m_coll;
@@ -35,6 +45,9 @@ public:
 	const Moses::WordsRange GetSourceRange() const
 	{ return m_range;	}
 	void Add(TranslationOption *transOpt);
+
+	void Sort();
+
 };
 
 }

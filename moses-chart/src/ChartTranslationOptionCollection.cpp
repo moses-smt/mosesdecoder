@@ -68,7 +68,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const std::vector <De
 
 	Sort();
 
-
+	cerr << GetTranslationOptionList(1, 5) << endl;
 }
 
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
@@ -295,7 +295,19 @@ void TranslationOptionCollection::Prune()
 //! sort all trans opt in each list for cube pruning */
 void TranslationOptionCollection::Sort()
 {
+	std::vector< std::vector< TranslationOptionList > >::iterator iterOuter;
+	for (iterOuter = m_collection.begin(); iterOuter != m_collection.end(); ++iterOuter)
+	{
+		std::vector< TranslationOptionList > &vecTransOptList = *iterOuter;
 
+		std::vector< TranslationOptionList >::iterator iterInner;
+		for (iterInner = vecTransOptList.begin(); iterInner != vecTransOptList.end(); ++iterInner)
+		{
+			TranslationOptionList &list = *iterInner;
+			list.Sort();
+		}
+
+	}
 }
 
 

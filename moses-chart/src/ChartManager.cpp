@@ -65,6 +65,11 @@ void Manager::ProcessSentence()
 			cell->PruneToSize(cell->GetMaxHypoStackSize());
 			cell->SortHypotheses();
 
+			if (startPos == 1 && width == 5)
+			{
+				cerr << *cell << endl;
+			}
+
 			TRACE_ERR(range << " = " << cell->GetSize() << endl);
 
 			m_hypoStackColl[range] = cell;
