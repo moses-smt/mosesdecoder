@@ -22,6 +22,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 namespace Moses {
+  
+  
+  std::map<LanguageModel*,LanguageModelCache> TranslationDelta::m_cache;
+  
+  float LanguageModelCache::GetValue(const std::vector<const Word*>& ngram) {
+    EntryListIterator* entryListIter = m_listPointers[ngram];
+    float score;
+    if (!entryListIter) {
+      //cache miss
+      if ((int)m_listPointers.size() >= m_maxSize) {
+        //too many entries
+        Entry lruEntry = m_entries.back();
+        m_entries.pop_back();
+        delete m_listPointers[lruEntry.first];
+        m_listPointers.erase(lruEntry.first);
+      }
+      score = m_languageModel->GetValue(ngram);
+      m_entries.push_front(Entry(ngram,score));
+      entryListIter = new EntryListIterator();
+      *entryListIter = m_entries.begin();
+      m_listPointers[ngram] = entryListIter;
+    } else {
+      //cache hit
+      Entry entry  = *(*entryListIter);
+      m_entries.erase(*entryListIter);
+      m_entries.push_front(entry);
+      *entryListIter = m_entries.begin();
+      score = entry.second;
+    } 
+    return score;
+  }
 
 /**
   Compute the change in language model score by adding this target phrase
@@ -31,6 +62,11 @@ void  TranslationDelta::addLanguageModelScore(const vector<Word>& targetWords, c
   const LMList& languageModels = StaticData::Instance().GetAllLM();
   for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
     LanguageModel* lm = *i;
+    /*
+    map<LanguageModel*,LanguageModelCache>::iterator lmci = m_cache.find(lm);
+    if (lmci == m_cache.end()) {
+      m_cache.insert(pair<LanguageModel*,LanguageModelCache>(lm,LanguageModelCache(lm)));
+    }*/
     size_t order = lm->GetNGramOrder();
     vector<const Word*> lmcontext(targetPhrase.GetSize() + 2*(order-1));
     
@@ -92,6 +128,9 @@ void  TranslationDelta::addLanguageModelScore(const vector<Word>& targetWords, c
         ngram.push_back(lmcontext[j]);
       }
       lmscore += lm->GetValue(ngram);
+      //cache disabled for now
+      //lmscore += m_cache.find(lm)->second.GetValue(ngram);
+      
     }
     VERBOSE(2,"Language model score: " << lmscore << endl); 
     m_scores.Assign(lm,lmscore);
@@ -219,9 +258,12 @@ void SplitDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
 }
   
 void FlipDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+  //cout << "Applying " << m_prevTgtHypo->GetNextHypo()->GetCurrTargetWordsRange() << " and " <<
+  //    m_nextTgtHypo->GetPrevHypo()->GetCurrTargetWordsRange() << endl;
   m_scores.MinusEquals(noChangeDelta.getScores());
   //sample.FlipNodes(m_leftTgtOption->GetSourceWordsRange().GetStartPos(), m_rightTgtOption->GetSourceWordsRange().GetStartPos(), m_scores);
   sample.FlipNodes(*m_leftTgtOption, *m_rightTgtOption, m_prevTgtHypo, m_nextTgtHypo, m_scores);
+  //cout << "Applied " << endl;
 }
 
     
@@ -255,7 +297,6 @@ FlipDelta::FlipDelta(const vector<Word>& targetWords,  const TranslationOption* 
        }
     } 
     //include potential words between the two target segments
-
     targetPhrase.Append(m_rightTgtOption->GetTargetPhrase());
 
     
