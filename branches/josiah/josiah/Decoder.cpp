@@ -61,6 +61,9 @@ namespace Josiah {
   void MosesDecoder::decode(const std::string& source, Hypothesis*& bestHypo, TranslationOptionCollection*& toc) {
      
       const StaticData &staticData = StaticData::Instance();
+
+      //clean up previous sentence
+      staticData.CleanUpAfterSentenceProcessing();
   
       //the sentence
       Sentence sentence(Input);
