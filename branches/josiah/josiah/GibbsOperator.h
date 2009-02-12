@@ -22,7 +22,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
+#include <ctime>
 #include <iomanip>
+
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
 
 #include "DummyScoreProducers.h"
 #include "Gibbler.h"
@@ -35,6 +40,30 @@ namespace Moses {
 
   class Sample;
   class SampleCollector;
+  
+  typedef boost::mt19937 base_generator_type;
+  
+  /**
+    * Wraps the random number generation and enables seeding.
+    **/
+  class RandomNumberGenerator {
+    //mersenne twister - and why not?
+    
+    
+    public:
+      RandomNumberGenerator();
+      double next() {return m_random();}
+      void setSeed(uint32_t seed){
+          m_generator.seed(seed);
+          cerr << "Setting random seed to " << seed << endl;
+      }
+      
+    private:
+      boost::uniform_real<> m_dist; 
+      base_generator_type m_generator;
+      boost::variate_generator<base_generator_type&, boost::uniform_real<> > m_random;
+      
+  };
 
   /** Abstract base class for gibbs operators **/
   class GibbsOperator {
@@ -47,12 +76,18 @@ namespace Moses {
         const string& name() const {return m_name;}
         virtual ~GibbsOperator() {}
         
+        static void setRandomSeed(uint32_t seed) {m_random.setSeed(seed);}
+        
      protected:
         /**
           * Pick random sample from given (un-normalised) log probabilities.
           **/
         size_t getSample(const std::vector<double>& scores);
         string m_name;
+        
+    private:
+      static RandomNumberGenerator m_random;
+      
   };
   
   /**
