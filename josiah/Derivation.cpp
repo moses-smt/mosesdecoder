@@ -57,9 +57,9 @@ namespace Josiah {
 
   ostream& operator<<(ostream& out, const Derivation& d) {
     //FIXME: Just print the target sentence and feature values for now
-    out << "Target: <<";
+    out << "Target: << ";
     for (size_t i = 0; i < d.m_alignments.size(); ++i) {
-      out << d.m_alignments[i]._target << " " ;
+      out << d.m_alignments[i]._target ;
     }
     out << ">> Feature values: ";
     out << d.m_featureValues;
