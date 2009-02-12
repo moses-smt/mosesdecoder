@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
       if (topn > 0 || decode) {
         vector<DerivationProbability> derivations;
         collector.getTopN(max(topn,1),derivations);
-        for (int i = 0; i < topn; ++i) {
+        for (int i = 0; i < derivations.size() ; ++i) {  
           Derivation d = *(derivations[i].first);
           cout  << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
         }
