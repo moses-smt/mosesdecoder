@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceBleu.h"
 #include "GainFunction.h"
 #include "GibblerExpectedLossTraining.h"
+#include "GibblerMaxTransDecoder.h"
 #include "Timer.h"
 
 #if 0
@@ -93,6 +94,7 @@ int main(int argc, char** argv) {
   string inputfile;
   string mosesini;
   bool decode;
+  bool translate;
   bool help;
   bool expected_loss_training;
   bool do_timing;
@@ -108,8 +110,9 @@ int main(int argc, char** argv) {
         ("iterations,s", po::value<int>(&iterations)->default_value(5), "Number of sampling iterations")
         ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
-        ("nbest,n",po::value<int>(&topn)->default_value(0),"Dump the top n derivations to stdout")
-        ("decode,d",po::value( &decode )->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
+        ("nbest-drv,n",po::value<int>(&topn)->default_value(0),"Write the top n derivations to stdout")
+        ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
+        ("decode-translation,l",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
         ("elt,t", po::value(&expected_loss_training)->zero_tokens()->default_value(false), "Train to minimize expected loss")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training");
   po::options_description cmdline_options;
@@ -170,18 +173,29 @@ int main(int argc, char** argv) {
 
     //configure the sampler
     Sampler sampler;
-    DerivationCollector collector;
-    auto_ptr<GibblerExpectedLossCollector> c2(expected_loss_training ? new GibblerExpectedLossCollector(g[lineno]) : NULL);
+    auto_ptr<DerivationCollector> derivationCollector;
+    auto_ptr<GibblerExpectedLossCollector> elCollector;
+    auto_ptr<GibblerMaxTransDecoder> transCollector;
+    if (expected_loss_training) {
+      elCollector.reset(new GibblerExpectedLossCollector(g[lineno]));
+      sampler.AddCollector(elCollector.get());
+    }
+    if (decode || topn > 0) {
+      derivationCollector.reset(new DerivationCollector());
+      sampler.AddCollector(derivationCollector.get());
+    }
+    if (translate) {
+      transCollector.reset(new GibblerMaxTransDecoder());
+      sampler.AddCollector(transCollector.get() );
+    }
+    
     MergeSplitOperator mso;
     FlipOperator fo;
     TranslationSwapOperator tso;
     sampler.AddOperator(&mso);
     sampler.AddOperator(&tso);
     sampler.AddOperator(&fo);
-    if (expected_loss_training)
-      sampler.AddCollector(c2.get());
-    else
-      sampler.AddCollector(&collector);
+    
     sampler.SetIterations(iterations);
     sampler.SetBurnIn(burning_its);
     
@@ -197,12 +211,12 @@ int main(int argc, char** argv) {
 
 
     if (expected_loss_training) {
-      c2->UpdateGradient(&gradient);
+      elCollector->UpdateGradient(&gradient);
       cerr << "Gradient: " << gradient << endl;
     } else {
-      if (topn > 0 || decode) {
+      if (derivationCollector.get()) {
         vector<DerivationProbability> derivations;
-        collector.getTopN(max(topn,1),derivations);
+        derivationCollector->getTopN(max(topn,1),derivations);
         for (size_t i = 0; i < derivations.size() ; ++i) {  
           Derivation d = *(derivations[i].first);
           cout  << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
@@ -212,6 +226,13 @@ int main(int argc, char** argv) {
           copy(sentence.begin(),sentence.end(),ostream_iterator<string>(cout," "));
           cout << endl;
         }
+      }
+      if (transCollector.get()) {
+        vector<const Factor*> sentence = transCollector->Max();
+        for (size_t i = 0; i < sentence.size(); ++i) {
+          cout << *sentence[i] << " ";
+        }
+        cout << endl;
       }
     }
     ++lineno;
