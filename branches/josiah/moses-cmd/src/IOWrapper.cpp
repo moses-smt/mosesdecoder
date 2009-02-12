@@ -118,7 +118,7 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 	m_surpressSingleBestOutput = false;
 	if (nBestSize > 0)
 	{
-		if (nBestFilePath == "-")
+		if (nBestFilePath == "STDOUT")
 		{
 			m_nBestStream = &std::cout;
 			m_surpressSingleBestOutput = true;

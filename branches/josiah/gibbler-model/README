@@ -1,0 +1,5 @@
+The posterior distribution in this directory was generated as follows:
+
+echo 'A B C' | ./moses-cmd/src/moses -f gibbler-model/moses.ini -n-best-list test.nbest 1000 -v 2 ; ./gibbler-model/compute-exact-posteriors.pl test.nbest > ABC.posteriors
+
+
