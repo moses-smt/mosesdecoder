@@ -96,12 +96,14 @@ int main(int argc, char** argv) {
   bool help;
   bool expected_loss_training;
   bool do_timing;
+  uint32_t seed;
   vector<string> ref_files;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
         ("config,f",po::value<string>(&mosesini),"Moses ini file")
         ("verbosity,v", po::value<int>(&debug)->default_value(0), "Verbosity level")
+        ("random-seed,e", po::value<uint32_t>(&seed), "Random seed")
         ("timing,m", po::value(&do_timing)->zero_tokens()->default_value(false), "Display timing information.")
         ("iterations,s", po::value<int>(&iterations)->default_value(5), "Number of sampling iterations")
         ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
@@ -131,6 +133,11 @@ int main(int argc, char** argv) {
   if (do_timing) {
     timer.on();
   }
+  
+  if (vm.count("random-seed")) {
+    GibbsOperator::setRandomSeed(seed);
+  }      
+      
    //set up moses
   initMoses(mosesini,debug);
   auto_ptr<Decoder> decoder(new MosesDecoder());
@@ -196,7 +203,7 @@ int main(int argc, char** argv) {
       if (topn > 0 || decode) {
         vector<DerivationProbability> derivations;
         collector.getTopN(max(topn,1),derivations);
-        for (int i = 0; i < derivations.size() ; ++i) {  
+        for (size_t i = 0; i < derivations.size() ; ++i) {  
           Derivation d = *(derivations[i].first);
           cout  << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
         }

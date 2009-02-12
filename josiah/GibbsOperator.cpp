@@ -22,7 +22,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 namespace Moses {
-
+  
+  RandomNumberGenerator::RandomNumberGenerator() :m_dist(0,1), m_generator(), m_random(m_generator,m_dist) {
+    uint32_t seed;
+    std::ifstream r("/dev/urandom");
+    if (r) {
+      r.read((char*)&seed,sizeof(uint32_t));
+    }
+    if (r.fail() || !r) {
+      std::cerr << "Warning: could not read from /dev/urandom. Seeding from clock" << std::endl;
+      seed = time(NULL);
+    }
+    std::cerr << "Seeding random number sequence to " << seed << endl;
+    m_generator.seed(seed);
+  }
+  
+  RandomNumberGenerator GibbsOperator::m_random;
+  
 static double log_sum (double log_a, double log_b)
 {
 	double v;
@@ -54,7 +70,7 @@ size_t GibbsOperator::getSample(const vector<double>& scores) {
   }
   
   //random number between 0 and exp(sum)
-  double random = exp(sum) * (double)rand() / RAND_MAX;
+  double random = exp(sum) * m_random.next();//(double)rand() / RAND_MAX;
  
   random = log(random);
   
@@ -234,7 +250,7 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
 bool FlipOperator::CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTgtHypo, const Hypothesis* leftTgtPrevHypo, const Hypothesis* leftTgtNextHypo, const Hypothesis* rightTgtPrevHypo, const Hypothesis* rightTgtNextHypo, float & totalDistortion){
   totalDistortion = 0;
   //linear distortion
-  const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
+  //const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
   //Calculate distortion for leftmost target 
   //who is proposed new leftmost's predecessor?   
 //  Hypothesis *leftPrevHypo = const_cast<Hypothesis*>(rightTgtHypo->GetPrevHypo());      
@@ -302,8 +318,8 @@ bool FlipOperator::CheckValidReordering(const Hypothesis* leftTgtHypo, const Hyp
   return true;
 }
 
-//For now, we only flip phrase pairs adjacent on the source and on the target
-void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection& toc) {
+//For now, we only flip phrase pairs adjacent on the source 
+void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection&) {
   VERBOSE(2, "Running an iteration of the flip operator" << endl);
     
   size_t sourceSize = sample.GetSourceSize();
