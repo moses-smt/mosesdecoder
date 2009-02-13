@@ -228,7 +228,7 @@ int main(int argc, char** argv) {
       if (derivationCollector.get()) {
         vector<DerivationProbability> derivations;
         derivationCollector->getTopN(max(topn,1),derivations);
-        for (size_t i = 0; i < derivations.size() ; ++i) {  
+        for (size_t i = 0; i < topn && i < derivations.size() ; ++i) {  
           Derivation d = *(derivations[i].first);
           cout  << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
         }
