@@ -41,6 +41,9 @@ protected:
 	void CalcLMScore(float &retFullScore, float &retNGramScore);
 
 public:
+	static void ResetHypoCount()
+	{ s_HypothesesCreated = 0; }
+
 	Hypothesis(const QueueEntry &queueEntry);
 	~Hypothesis();
 

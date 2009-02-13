@@ -182,7 +182,7 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 		m_scoreBreakdown.Assign(staticData.GetWordPenaltyProducer(), - (float) wordCount * 0.434294482);
 	}
 
-	m_fullScore = m_scoreBreakdown.GetWeightedScore();
+	m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore;
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)

@@ -20,7 +20,6 @@ public:
 								, float &retNGramScore
 								, ScoreComponentCollection* breakdown
 								, bool useNGramScore) const;
-
 };
 
 }
