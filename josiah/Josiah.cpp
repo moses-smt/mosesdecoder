@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GainFunction.h"
 #include "GibblerExpectedLossTraining.h"
 #include "GibblerMaxTransDecoder.h"
+#include "MBRDecoder.h"
 #include "Timer.h"
 #include "StaticData.h"
 
@@ -92,12 +93,14 @@ int main(int argc, char** argv) {
   int topn;
   int debug;
   int burning_its;
+  int mbr_size;
   string inputfile;
   string mosesini;
   bool decode;
   bool translate;
   bool help;
   bool expected_loss_gradient;
+  bool mbr_decoding;
   bool do_timing;
   uint32_t seed;
   int lineno;
@@ -117,6 +120,8 @@ int main(int argc, char** argv) {
         ("decode-translation,l",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
         ("line-number,L", po::value(&lineno)->default_value(0), "Starting reference number")
         ("elg,g", po::value(&expected_loss_gradient)->zero_tokens()->default_value(false), "Computed the gradient with respect to expected loss")
+        ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
+        ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training");
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -185,6 +190,8 @@ int main(int argc, char** argv) {
     auto_ptr<DerivationCollector> derivationCollector;
     auto_ptr<GibblerExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;
+    auto_ptr<MBRDecoder> mbrCollector;
+    
     if (expected_loss_gradient) {
       elCollector.reset(new GibblerExpectedLossCollector(g[lineno]));
       sampler.AddCollector(elCollector.get());
@@ -196,6 +203,10 @@ int main(int argc, char** argv) {
     if (translate) {
       transCollector.reset(new GibblerMaxTransDecoder());
       sampler.AddCollector(transCollector.get() );
+    }
+    if (mbr_decoding) {
+      mbrCollector.reset(new MBRDecoder(mbr_size));
+      sampler.AddCollector(mbrCollector.get() );
     }
     
     MergeSplitOperator mso;
@@ -224,7 +235,15 @@ int main(int argc, char** argv) {
       elCollector->UpdateGradient(&gradient);
       cerr << "expected loss gradient: " << endl;
       cout << gradient << endl;
-    } else {
+    } 
+    else if (mbr_decoding) {
+      vector<const Factor*> sentence = mbrCollector->Max();
+      for (size_t i = 0; i < sentence.size(); ++i) {
+        cout << *sentence[i] << " ";
+      }
+      cout << endl;
+    }
+    else {
       if (derivationCollector.get()) {
         vector<DerivationProbability> derivations;
         derivationCollector->getTopN(max(topn,1),derivations);

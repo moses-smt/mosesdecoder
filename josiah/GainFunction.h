@@ -12,7 +12,8 @@ class GainFunction {
  public:
   virtual ~GainFunction();
   virtual float ComputeGain(const std::vector<const Moses::Factor*>& hyp) const = 0;
-
+  virtual float ComputeGain(const GainFunction& hyp) const = 0;
+  virtual int GetType() const {return 0;}
   static void ConvertStringToFactorArray(const std::string& str, std::vector<const Moses::Factor*>* out);
 };
 
