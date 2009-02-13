@@ -52,6 +52,8 @@ protected:
 	 */
 	LanguageModel(bool registerScore, ScoreIndexManager &scoreIndexManager);
 
+	void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
+
 public:
 	/* Returned from LM implementations which points at the state used. For example, if a trigram score was requested
 	 * but the LM backed off to using the trigram, the State pointer will point to the bigram.

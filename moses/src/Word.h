@@ -77,6 +77,9 @@ public:
 		m_factorArray[factorType] = factor;
 	}
 
+	inline bool IsNonTerminal() const 
+	{	return m_factorArray[0]->IsNonTerminal();	}
+
 	/** add the factors from sourceWord into this representation,
 	 * NULL elements in sourceWord will be skipped */
 	void Merge(const Word &sourceWord);
