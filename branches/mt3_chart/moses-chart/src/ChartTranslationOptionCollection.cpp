@@ -67,8 +67,6 @@ void TranslationOptionCollection::CreateTranslationOptions(const std::vector <De
 	Prune();
 
 	Sort();
-
-	cerr << GetTranslationOptionList(1, 5) << endl;
 }
 
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
@@ -104,12 +102,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		strme << *transOpt;
 		string toFind = "the goal of gene scientists is ";
 		size_t pos = toFind.find(strme.str());
-
-		//cerr << *transOpt << endl;
-		if (pos == 0)
-		{
-			cerr << *transOpt << endl;
-		}
 
 		translationOptionList.Add(transOpt);
 	}
