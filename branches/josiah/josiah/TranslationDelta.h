@@ -24,7 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdlib>
 #include <deque>
 
+#ifdef LM_CACHE
 #include <boost/unordered_map.hpp>
+#endif
 
 #include "DummyScoreProducers.h"
 #include "Gibbler.h"
@@ -35,6 +37,7 @@ namespace Moses {
 
 class Sample;
 
+#ifdef LM_CACHE
 /* 
  * An MRU cache
 **/
@@ -56,6 +59,7 @@ class LanguageModelCache {
     typedef boost::unordered_map<vector<const Word*>, EntryListIterator*> ListPointerMap;
     ListPointerMap m_listPointers;
 };
+#endif
 
 /**
   * This class hierarchy represents the possible changes in the translation effected
@@ -99,8 +103,9 @@ class TranslationDelta {
     double m_score;
     
   private:
+#ifdef LM_CACHE
     static std::map<LanguageModel*,LanguageModelCache> m_cache;
-    
+#endif    
 };
  
 /**
