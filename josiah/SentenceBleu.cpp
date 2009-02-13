@@ -44,6 +44,8 @@ void SentenceBLEU::CountRef(const vector<const Factor*>& ref) {
 }
 
 float SentenceBLEU::ComputeGain(const vector<const Factor*>& sent) const {
+  for (NGramCountMap::iterator i = ngrams_.begin(); i != ngrams_.end(); ++i)
+    i->second.second = 0;
   vector<const Factor*> ngram(n_);
   valarray<int> hyp(n_);
   valarray<int> correct(n_);
