@@ -461,6 +461,8 @@ public:
 
 	bool GetUseTransOptCache() const { return m_useTransOptCache; }
 
+	void InitWeightsFromFile(const string& filename);
+
 	void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
 	void ReduceTransOptCache() const;
 

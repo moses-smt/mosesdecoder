@@ -389,10 +389,14 @@ bool StaticData::LoadData(Parameter *parameter)
 	    return false;
 	  }
 		string fnam = m_parameter->GetParam("weight-file")[0];
-		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
+    InitWeightsFromFile(fnam);
 	}
 
 	return true;
+}
+
+void StaticData::InitWeightsFromFile(const string& filename) {
+  m_scoreIndexManager.InitWeightVectorFromFile(filename, &m_allWeights);
 }
 
 void StaticData::SetBooleanParameter( bool *parameter, string parameterName, bool defaultValue ) 

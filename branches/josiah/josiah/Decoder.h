@@ -48,7 +48,8 @@ void initMoses(const std::string& inifile, int debuglevel, int argc=0, char** ar
 class Decoder {
   public:
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc) = 0;
-    virtual ~Decoder(){}
+    virtual void GetFeatureNames(std::vector<std::string>* featureNames) const = 0;
+    virtual ~Decoder();
 
 };
 
@@ -56,8 +57,8 @@ class MosesDecoder : public virtual Decoder {
   public:
     MosesDecoder() {}
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc);
-    virtual ~MosesDecoder(){}
-  
+    virtual void GetFeatureNames(std::vector<std::string>* featureNames) const;
+ 
   private:
     std::auto_ptr<Moses::SearchNormal> m_searcher;
     std::auto_ptr<Moses::TranslationOptionCollection> m_toc;

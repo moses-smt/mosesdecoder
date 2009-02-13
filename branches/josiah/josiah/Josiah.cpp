@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GibblerExpectedLossTraining.h"
 #include "GibblerMaxTransDecoder.h"
 #include "Timer.h"
+#include "StaticData.h"
 
 #if 0
   vector<string> refs;
@@ -96,9 +97,10 @@ int main(int argc, char** argv) {
   bool decode;
   bool translate;
   bool help;
-  bool expected_loss_training;
+  bool expected_loss_gradient;
   bool do_timing;
   uint32_t seed;
+  int lineno;
   vector<string> ref_files;
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -113,7 +115,8 @@ int main(int argc, char** argv) {
         ("nbest-drv,n",po::value<int>(&topn)->default_value(0),"Write the top n derivations to stdout")
         ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
         ("decode-translation,l",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
-        ("elt,t", po::value(&expected_loss_training)->zero_tokens()->default_value(false), "Train to minimize expected loss")
+        ("line-number,L", po::value(&lineno)->default_value(0), "Starting reference number")
+        ("elg,g", po::value(&expected_loss_gradient)->zero_tokens()->default_value(false), "Computed the gradient with respect to expected loss")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training");
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -162,9 +165,15 @@ int main(int argc, char** argv) {
   } else {
     in.reset(new istringstream(string("das parlament will das auf zweierlei weise tun .")));
   }
-  
-  size_t lineno = 0;
-  ScoreComponentCollection gradient;
+  if (expected_loss_gradient) {
+    vector<string> featureNames;
+    decoder->GetFeatureNames(&featureNames);
+    for (size_t i = 0; i < featureNames.size(); ++i) {
+      cout << (i == 0 ? "" : " ") << featureNames[i];
+    }
+    cout << endl << flush;
+  }
+   
   timer.check("Processing input file");
   while (*in) {
     string line;
@@ -176,7 +185,7 @@ int main(int argc, char** argv) {
     auto_ptr<DerivationCollector> derivationCollector;
     auto_ptr<GibblerExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;
-    if (expected_loss_training) {
+    if (expected_loss_gradient) {
       elCollector.reset(new GibblerExpectedLossCollector(g[lineno]));
       sampler.AddCollector(elCollector.get());
     }
@@ -210,9 +219,11 @@ int main(int argc, char** argv) {
     timer.check("Outputting results");
 
 
-    if (expected_loss_training) {
+    if (expected_loss_gradient) {
+      ScoreComponentCollection gradient;
       elCollector->UpdateGradient(&gradient);
-      cerr << "Gradient: " << gradient << endl;
+      cerr << "expected loss gradient: " << endl;
+      cout << gradient << endl;
     } else {
       if (derivationCollector.get()) {
         vector<DerivationProbability> derivations;

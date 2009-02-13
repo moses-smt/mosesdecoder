@@ -25,6 +25,8 @@ using namespace Moses;
 
 namespace Josiah {
 
+  Decoder::~Decoder() {}
+
   /**
     * Allocates a char* and copies string into it.
   **/
@@ -85,6 +87,14 @@ namespace Josiah {
       //get hypo
       bestHypo = const_cast<Hypothesis*>(m_searcher->GetBestHypothesis());
       toc = m_toc.get();
+  }
+
+  void MosesDecoder::GetFeatureNames(std::vector<std::string>* featureNames) const {
+    const StaticData &staticData = StaticData::Instance();
+    const ScoreIndexManager& sim = staticData.GetScoreIndexManager();
+    featureNames->resize(sim.GetTotalNumberOfScores());
+    for (size_t i = 0; i < featureNames->size(); ++i)
+      (*featureNames)[i] = sim.GetFeatureName(i);
   }
 
 }
