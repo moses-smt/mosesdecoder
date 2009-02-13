@@ -23,7 +23,7 @@ using namespace std;
 
 namespace Moses {
   
-  
+#ifdef LM_CACHE  
   std::map<LanguageModel*,LanguageModelCache> TranslationDelta::m_cache;
   
   float LanguageModelCache::GetValue(const std::vector<const Word*>& ngram) {
@@ -53,6 +53,7 @@ namespace Moses {
     } 
     return score;
   }
+#endif
 
 /**
   Compute the change in language model score by adding this target phrase
