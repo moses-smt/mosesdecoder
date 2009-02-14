@@ -40,7 +40,7 @@ namespace Josiah {
  * other command line arguments. This must be called, even if the moses decoder is not being used, as the
  * sampler requires the moses tables.
  **/
-void initMoses(const std::string& inifile, int debuglevel, int argc=0, char** argv=NULL);
+void initMoses(const std::string& inifile, const std::string& weightfile, int debuglevel, int argc=0, char** argv=NULL);
 
 /**
   * Wrapper around any decoder. Notice the moses specific return values!
@@ -49,6 +49,8 @@ class Decoder {
   public:
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc) = 0;
     virtual void GetFeatureNames(std::vector<std::string>* featureNames) const = 0;
+    virtual void GetFeatureWeights(std::vector<float>* weights) const = 0;
+    virtual void SetFeatureWeights(const std::vector<float>& weights) = 0;
     virtual ~Decoder();
 
 };
@@ -58,6 +60,8 @@ class MosesDecoder : public virtual Decoder {
     MosesDecoder() {}
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc);
     virtual void GetFeatureNames(std::vector<std::string>* featureNames) const;
+    virtual void GetFeatureWeights(std::vector<float>* weights) const;
+    virtual void SetFeatureWeights(const std::vector<float>& weights);
  
   private:
     std::auto_ptr<Moses::SearchNormal> m_searcher;

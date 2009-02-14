@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
+#include "ScoreComponentCollection.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -432,6 +433,13 @@ public:
 	const std::vector<float>& GetAllWeights() const
 	{
 		return m_allWeights;
+	}
+	void SetAllWeights(const std::vector<float>& weights) {
+		assert(m_allWeights.size() == weights.size());
+		m_allWeights = weights;
+	}
+	const ScoreComponentCollection GetWeights() const {
+		return ScoreComponentCollection(m_allWeights);
 	}
 	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
