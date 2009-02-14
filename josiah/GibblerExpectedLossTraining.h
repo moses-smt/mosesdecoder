@@ -17,7 +17,8 @@ class GibblerExpectedLossCollector : public SampleCollector {
   GibblerExpectedLossCollector(const GainFunction& f) : g(f), n(0) {}
   virtual void collect(Sample& sample);
 
-  void UpdateGradient(ScoreComponentCollection* gradient);
+  // returns the expected gain
+  float UpdateGradient(ScoreComponentCollection* gradient);
 
  private:
   const GainFunction& g;

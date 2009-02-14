@@ -90,7 +90,7 @@ class GibbsTimer {
  **/
 int main(int argc, char** argv) {
   int iterations;
-  int topn;
+  unsigned int topn;
   int debug;
   int burning_its;
   int mbr_size;
@@ -99,11 +99,14 @@ int main(int argc, char** argv) {
   bool decode;
   bool translate;
   bool help;
-  bool expected_loss_gradient;
+  bool expected_sbleu;
+  bool expected_sbleu_gradient;
   bool mbr_decoding;
   bool do_timing;
+  bool training_mode;
   uint32_t seed;
   int lineno;
+  string weightfile;
   vector<string> ref_files;
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -115,11 +118,14 @@ int main(int argc, char** argv) {
         ("iterations,s", po::value<int>(&iterations)->default_value(5), "Number of sampling iterations")
         ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
-        ("nbest-drv,n",po::value<int>(&topn)->default_value(0),"Write the top n derivations to stdout")
+        ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
+	("weightfile,w",po::value<string>(&weightfile),"Weight file")
         ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
-        ("decode-translation,l",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
-        ("line-number,L", po::value(&lineno)->default_value(0), "Starting reference number")
-        ("elg,g", po::value(&expected_loss_gradient)->zero_tokens()->default_value(false), "Computed the gradient with respect to expected loss")
+        ("decode-translation,t",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
+        ("training-mode,T",po::value(&training_mode)->default_value(false),"In training mode, read all sentences into memory from the input-file, then read line numbers and configuration from STDIN")
+        ("line-number,L", po::value(&lineno)->default_value(0), "Starting reference/line number")
+        ("xbleu,x", po::value(&expected_sbleu)->zero_tokens()->default_value(false), "Compute the expected sentence BLEU")
+        ("gradient,g", po::value(&expected_sbleu_gradient)->zero_tokens()->default_value(false), "Compute the gradient with respect to expected sentence BLEU")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training");
@@ -135,6 +141,8 @@ int main(int argc, char** argv) {
       std::cout << desc << std::endl;
       return 0;
   }
+  bool print_exp_sbleu = expected_sbleu;
+  if (expected_sbleu_gradient) expected_sbleu = true;
 
   if (mosesini.empty()) {
       cerr << "Error: No moses ini file specified" << endl;
@@ -150,7 +158,7 @@ int main(int argc, char** argv) {
   }      
       
    //set up moses
-  initMoses(mosesini,debug);
+  initMoses(mosesini,weightfile,debug);
   auto_ptr<Decoder> decoder(new MosesDecoder());
 
   GainFunctionVector g;
@@ -170,7 +178,7 @@ int main(int argc, char** argv) {
   } else {
     in.reset(new istringstream(string("das parlament will das auf zweierlei weise tun .")));
   }
-  if (expected_loss_gradient) {
+  if (expected_sbleu_gradient) {
     vector<string> featureNames;
     decoder->GetFeatureNames(&featureNames);
     for (size_t i = 0; i < featureNames.size(); ++i) {
@@ -184,7 +192,6 @@ int main(int argc, char** argv) {
     string line;
     getline(*in,line);
     if (line.empty()) continue;
-
     //configure the sampler
     Sampler sampler;
     auto_ptr<DerivationCollector> derivationCollector;
@@ -192,7 +199,7 @@ int main(int argc, char** argv) {
     auto_ptr<GibblerMaxTransDecoder> transCollector;
     auto_ptr<MBRDecoder> mbrCollector;
     
-    if (expected_loss_gradient) {
+    if (expected_sbleu) {
       elCollector.reset(new GibblerExpectedLossCollector(g[lineno]));
       sampler.AddCollector(elCollector.get());
     }
@@ -229,41 +236,52 @@ int main(int argc, char** argv) {
     sampler.Run(hypothesis,toc);
     timer.check("Outputting results");
 
-
-    if (expected_loss_gradient) {
+    if (expected_sbleu) {
       ScoreComponentCollection gradient;
-      elCollector->UpdateGradient(&gradient);
-      cerr << "expected loss gradient: " << endl;
-      cout << gradient << endl;
-    } 
-    else if (mbr_decoding) {
+      float exp_gain = elCollector->UpdateGradient(&gradient);
+      (print_exp_sbleu ? cout : cerr) << "Expected sentence BLEU: " << exp_gain << endl;
+      if (expected_sbleu_gradient) {
+        cerr << "expected loss gradient: " << endl;
+        cout << gradient << endl;
+
+        /////////// STOCHASTIC GRAD DESCENT TEST CODE ////
+        vector<float> w;
+        decoder->GetFeatureWeights(&w);
+        ScoreComponentCollection weights(w);
+        const float eta = 0.6;
+        gradient.MultiplyEquals(eta);
+        weights.PlusEquals(gradient);
+        cerr << "NEW WEIGHTS: " << weights << endl;
+        decoder->SetFeatureWeights(weights.data());
+        /////////// STOCHASTIC GRAD DESCENT TEST CODE ////
+      }
+    }
+    if (mbr_decoding) {
       vector<const Factor*> sentence = mbrCollector->Max();
+      for (size_t i = 0; i < sentence.size(); ++i) {
+        cout << (i > 0 ? " " : "") << *sentence[i];
+      }
+      cout << endl;
+    }
+    if (derivationCollector.get()) {
+      vector<DerivationProbability> derivations;
+      derivationCollector->getTopN(max(topn,1u),derivations);
+      for (size_t i = 0; i < topn && i < derivations.size() ; ++i) {  
+        Derivation d = *(derivations[i].first);
+        cout  << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
+      }
+      if (decode) {
+        const vector<string>& sentence = derivations[0].first->getTargetSentence();
+        copy(sentence.begin(),sentence.end(),ostream_iterator<string>(cout," "));
+        cout << endl;
+      }
+    }
+    if (transCollector.get()) {
+      vector<const Factor*> sentence = transCollector->Max();
       for (size_t i = 0; i < sentence.size(); ++i) {
         cout << *sentence[i] << " ";
       }
       cout << endl;
-    }
-    else {
-      if (derivationCollector.get()) {
-        vector<DerivationProbability> derivations;
-        derivationCollector->getTopN(max(topn,1),derivations);
-        for (size_t i = 0; i < topn && i < derivations.size() ; ++i) {  
-          Derivation d = *(derivations[i].first);
-          cout  << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
-        }
-        if (decode) {
-          const vector<string>& sentence = derivations[0].first->getTargetSentence();
-          copy(sentence.begin(),sentence.end(),ostream_iterator<string>(cout," "));
-          cout << endl;
-        }
-      }
-      if (transCollector.get()) {
-        vector<const Factor*> sentence = transCollector->Max();
-        for (size_t i = 0; i < sentence.size(); ++i) {
-          cout << *sentence[i] << " ";
-        }
-        cout << endl;
-      }
     }
     ++lineno;
   }

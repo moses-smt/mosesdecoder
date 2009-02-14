@@ -36,8 +36,8 @@ class MBRDecoder : public SampleCollector {
 
  private:
   GainFunctionVector g;
-  int n;
   int mbrSize;
+  int n;
   __gnu_cxx::hash_map<std::vector<const Factor*>, int> samples;
   int sent_num;
 };

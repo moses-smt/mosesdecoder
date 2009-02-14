@@ -314,24 +314,31 @@ void Sample::UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& opti
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
   Sample sample(starting);
   
+  bool f = false;
   for (size_t i = 0; i < m_burninIts; ++i) {
-    VERBOSE(1,"Gibbs burnin iteration: " << i << endl);
+    if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true;}
+    if ((i+1) % 400 == 0) { VERBOSE(1,endl); f=false;}
+    VERBOSE(2,"Gibbs burnin iteration: " << i << endl);
     for (size_t j = 0; j < m_operators.size(); ++j) {
-      VERBOSE(2,"Sampling with operator " << m_operators[j]->name() << endl);
+      VERBOSE(3,"Sampling with operator " << m_operators[j]->name() << endl);
       m_operators[j]->doIteration(sample,*options);
     }
   }
+  if (f) VERBOSE(1,endl);
   
   for (size_t i = 0; i < m_iterations; ++i) {
-    VERBOSE(1,"Gibbs sampling iteration: " << i << endl);
+    if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true; }
+    if ((i+1) % 400 == 0) { VERBOSE(1,endl); f=false;}
+    VERBOSE(2,"Gibbs sampling iteration: " << i << endl);
     for (size_t j = 0; j < m_operators.size(); ++j) {
-      VERBOSE(2,"Sampling with operator " << m_operators[j]->name() << endl);
+      VERBOSE(3,"Sampling with operator " << m_operators[j]->name() << endl);
       m_operators[j]->doIteration(sample,*options);
     }
     for (size_t k = 0; k < m_collectors.size(); ++k) {
       m_collectors[k]->collect(sample);
     }
   }
+  if (f) VERBOSE(1,endl);
 }
 
 void PrintSampleCollector::collect(Sample& sample)  {

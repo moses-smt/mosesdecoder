@@ -60,6 +60,10 @@ public:
   //! Create a new score collection with all values set to 0.0
 	ScoreComponentCollection();
 
+	explicit ScoreComponentCollection(const std::vector<float>& scores)
+	: m_scores(scores)
+	, m_sim(NULL) {}
+
   //! Clone a score collection
 	ScoreComponentCollection(const ScoreComponentCollection& rhs)
 	: m_scores(rhs.m_scores)
@@ -67,6 +71,7 @@ public:
 	{}
 
 	inline size_t size() const { return m_scores.size(); }
+	inline const std::vector<float>& data() const { return m_scores; }
 	const float& operator[](size_t x) const { return m_scores[x]; }
 
   //! Set all values to 0.0

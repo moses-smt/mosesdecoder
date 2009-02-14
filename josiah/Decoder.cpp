@@ -37,7 +37,7 @@ namespace Josiah {
   }
     
   
-  void initMoses(const string& inifile, int debuglevel, int argc, char** argv) {
+  void initMoses(const string& inifile, const std::string& weightfile, int debuglevel, int argc, char** argv) {
     static int BASE_ARGC = 4;
     Parameter* params = new Parameter();
     char ** mosesargv = new char*[BASE_ARGC + argc];
@@ -57,6 +57,8 @@ namespace Josiah {
       delete[] mosesargv[i];
     }
     delete[] mosesargv;
+    if (!weightfile.empty())
+      const_cast<StaticData&>(StaticData::Instance()).InitWeightsFromFile(weightfile);
   }
   
   
@@ -97,4 +99,12 @@ namespace Josiah {
       (*featureNames)[i] = sim.GetFeatureName(i);
   }
 
+  void MosesDecoder::GetFeatureWeights(std::vector<float>* weights) const {
+    const StaticData &staticData = StaticData::Instance();
+    *weights = staticData.GetAllWeights();
+  }
+
+  void MosesDecoder::SetFeatureWeights(const std::vector<float>& weights) {
+    const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
+  }
 }

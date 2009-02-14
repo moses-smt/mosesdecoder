@@ -98,6 +98,7 @@ void ScoreIndexManager::InitWeightVectorFromFile(const std::string& fnam, vector
 		map<string, double>::iterator i = name2val.find(fname);
 		assert(i == name2val.end()); // duplicate weight name
 		name2val[fname] = val;
+		VERBOSE(1,"weight: " << fname << " = " << val << std::endl);
 	}
 	assert(m_allWeights->size() == m_featureNames.size());
 	for (size_t i = 0; i < m_featureNames.size(); ++i) {
