@@ -38,41 +38,43 @@ vector<const Factor*> MBRDecoder::Max() {
     VERBOSE(1, i->first << "\t" << ToString(*i->second) << endl);
   
   //Posterior probs computed using the whole evidence set
-  //MBR decoding using configurable size
-  int topN = 0;
+  //MBR decoding outer loop using configurable size
   vector<pair<const vector<const Factor*>*, float> > topNTranslations;
   
   for (i = sorted.begin(); i != sorted.end(); ++i) {
     topNTranslations.push_back(make_pair(i->second, i->first));
-    //Calc the sufficient statistics for the translation
-    g.push_back(new SentenceBLEU(4,*i->second));
-    if (topN == mbrSize)
-      break;
-    ++topN;
+    g.push_back(new SentenceBLEU(4,*i->second)); //Calc the sufficient statistics for the translation
   }
   
+  //Main MBR computation done here
   float bleu(0.0), weightedLoss(0.0), weightedLossCumul(0.0), minMBRLoss(100000);
   vector<float> mbrLoss;
   int minMBRLossIdx(-1);
-  
-  //Main MBR computation done here
-  for(size_t i = 0; i < topNTranslations.size(); ++i) {
+  mbrSize = min(mbrSize, (int) topNTranslations.size());
+
+  //Outer loop using only the top #mbrSize samples 
+  for(size_t i = 0; i < mbrSize; ++i) {
     weightedLossCumul = 0.0;
     const GainFunction& gf = g[i];
-    for(size_t j = 0; j < topNTranslations.size(); ++j) {
+    VERBOSE(2, "Reference " << ToString(*topNTranslations[i].first) << endl);
+    for(size_t j = 0; j < topNTranslations.size(); ++j) {//Inner loop using all samples
       if (i != j) {
         bleu = gf.ComputeGain(g[j]);
+        VERBOSE(2, "Hypothesis " << ToString(*topNTranslations[j].first) << endl);
         weightedLoss = (1- bleu) * topNTranslations[j].second;
+        VERBOSE(2, "Bleu " << bleu << ", prob " <<  topNTranslations[j].second << ", weightedLoss : " << weightedLoss << endl);
         weightedLossCumul += weightedLoss;
         if (weightedLossCumul > minMBRLoss)
           break;
       }
-    }  
+    }
+    VERBOSE(2, "Bayes risk for cand " << i << " " <<  weightedLossCumul << endl);
     if (weightedLossCumul < minMBRLoss){
       minMBRLoss = weightedLossCumul;
       minMBRLossIdx = i;
     }
   }
+  VERBOSE(2, "Minimum Bayes risk cand is " <<  minMBRLossIdx << " with risk " << minMBRLoss << endl);
   
   return *(topNTranslations[minMBRLossIdx].first);
 }
