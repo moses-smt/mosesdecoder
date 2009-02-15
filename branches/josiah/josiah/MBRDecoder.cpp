@@ -30,12 +30,14 @@ vector<const Factor*> MBRDecoder::Max() {
   hash_map<vector<const Factor*>, int>::const_iterator ci;
   multimap<float, const vector<const Factor*>*,greater<float> > sorted;
   const float nf = n;
+  
   for (ci = samples.begin(); ci != samples.end(); ++ci) {
     sorted.insert(make_pair<float, const vector<const Factor*>*>(static_cast<float>(ci->second) / nf, &ci->first));
   }
+  
   multimap<float, const vector<const Factor*>*>::iterator i;
   for (i = sorted.begin(); i != sorted.end(); ++i)
-    VERBOSE(1, i->first << "\t" << ToString(*i->second) << endl);
+    VERBOSE(2, i->first << "\t" << ToString(*i->second) << endl);
   
   //Posterior probs computed using the whole evidence set
   //MBR decoding outer loop using configurable size
