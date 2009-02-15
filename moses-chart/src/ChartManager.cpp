@@ -47,6 +47,7 @@ void Manager::ProcessSentence()
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
 	m_transOptColl.CreateTranslationOptions(decodeGraphList);
 
+	TRACE_ERR(m_transOptColl.GetTranslationOptionList(WordsRange(1, 5)) << endl);
 	TRACE_ERR("Decoding: " << endl);
 	Hypothesis::ResetHypoCount();
 
