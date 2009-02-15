@@ -21,6 +21,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iomanip>
 #include <fstream>
 
+#define MPI_ENABLED
+#ifdef MPI_ENABLED
+#include <mpi.h>
+#endif
+
 #include <boost/program_options.hpp>
 
 #include "Decoder.h"
@@ -85,10 +90,126 @@ class GibbsTimer {
     bool m_doTiming;
 } timer;
 
+struct InputSource {
+  virtual bool HasMore() const = 0;
+  virtual void GetSentence(string* sentence, int* lineno) = 0;
+  virtual ~InputSource() {}
+};
+
+struct StreamInputSource : public InputSource {
+  string next;
+  istream& in;
+  StreamInputSource(istream& is) : in(is) { getline(in, next); }
+  virtual bool HasMore() const {
+    return !in.eof();
+  }
+  virtual void GetSentence(string* sentence, int* lineno) {
+    (void) lineno;
+    sentence->swap(next);
+    getline(in, next);
+  }
+};
+
+struct ExpectedBleuTrainer : public InputSource {
+  ExpectedBleuTrainer(int r, int s, int bsize, vector<string>* sents)
+    : rank(r), size(s), batch_size(bsize), iteration(), corpus(), keep_going(true), order(batch_size) {
+    if (rank >= batch_size) keep_going = false;
+    corpus.swap(*sents);
+    int esize = min(batch_size, size);
+    //cerr << "esize: " << esize << endl;
+    int sents_per_batch = batch_size / esize;
+    cur = cur_start = sents_per_batch * rank;
+    //cerr << "sents_per_batch: " << sents_per_batch << endl;
+    cur_end = min((int)corpus.size(), sents_per_batch * (rank + 1));
+    cerr << rank << "/" << size << ": cur_start=" << cur_start << "  cur_end=" << cur_end << endl;
+    tlc = 0;
+    ReserveNextBatch();
+  }
+  int rank, size, batch_size;
+  int iteration;
+  int cur, cur_start;
+  int cur_end;
+  vector<string> corpus;
+  bool keep_going;
+  ScoreComponentCollection gradient;
+  vector<int> order;
+  int tlc;
+  // right now, just goes through in order, should do something
+  // random
+  void ReserveNextBatch() {
+    if (rank == 0) {
+      for (unsigned int i = 0; i < order.size(); ++i, ++tlc)
+        order[i] = tlc % corpus.size();
+    } 
+#ifdef MPI_ENABLED
+    if (MPI_SUCCESS != MPI_Bcast(&order[0], order.size(), MPI_INT, 0, MPI_COMM_WORLD))
+      MPI_Abort(MPI_COMM_WORLD,1);
+#endif
+  }
+  virtual bool HasMore() const {
+    return keep_going;
+  }
+  virtual void GetSentence(string* sentence, int* lineno) {
+    assert(static_cast<unsigned int>(cur) < order.size());
+    if (lineno) *lineno = order[cur];
+    *sentence = corpus[order[cur++]];
+  }
+  void IncorporateGradient(const ScoreComponentCollection& grad, Decoder* decoder) {
+    cerr << rank << ":" << cur-1 << "  " << grad << endl;
+    gradient.PlusEquals(grad);
+
+    if (cur == cur_end) {
+      vector<float> w;
+      decoder->GetFeatureWeights(&w);
+      ScoreComponentCollection weights(w);
+      vector<float> rcv_grad(w.size());
+      assert(gradient.data().size() == w.size());
+#ifdef MPI_ENABLED
+      if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&gradient.data()[0]), &rcv_grad[0], w.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+#else
+      rcv_grad = gradient.data();
+#endif
+      ScoreComponentCollection g(rcv_grad);
+      if (rank == 0) {
+//        cerr << "GR:" << gradient << endl;
+        cerr << " G:" << g << endl;
+        const float eta = 0.6;
+        g.MultiplyEquals(eta);
+        g.DivideEquals(batch_size);
+        weights.PlusEquals(g);
+        cerr << "NEW WEIGHTS: " << weights << endl;
+      }
+#ifdef MPI_ENABLED
+      if (MPI_SUCCESS != MPI_Bcast(const_cast<float*>(&weights.data()[0]), weights.data().size(), MPI_FLOAT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+      ReserveNextBatch();
+      if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+#endif
+      decoder->SetFeatureWeights(weights.data());
+      cur = cur_start;
+      gradient.ZeroAll();
+
+      // TODO-- add convergence criteria!!
+      static int cc = 0;
+      ++cc;
+      if (cc == 4) keep_going = false;
+    }
+  }
+};
+
+
 /**
   * Main for Josiah - the Gibbs sampler for moses.
  **/
 int main(int argc, char** argv) {
+  int rank = 0, size = 1;
+#ifdef MPI_ENABLED
+  MPI_Init(&argc,&argv);
+  MPI_Comm comm = MPI_COMM_WORLD;
+  MPI_Comm_rank(comm,&rank);
+  MPI_Comm_size(comm,&size);
+  cerr << "MPI rank: " << rank << endl;
+  cerr << "MPI size: " << size << endl;
+#endif
   int iterations;
   unsigned int topn;
   int debug;
@@ -101,9 +222,11 @@ int main(int argc, char** argv) {
   bool help;
   bool expected_sbleu;
   bool expected_sbleu_gradient;
+  bool expected_sbleu_training;
+  unsigned training_batch_size;
   bool mbr_decoding;
   bool do_timing;
-  bool training_mode;
+  bool show_features;
   uint32_t seed;
   int lineno;
   string weightfile;
@@ -119,13 +242,15 @@ int main(int argc, char** argv) {
         ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
         ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
-	("weightfile,w",po::value<string>(&weightfile),"Weight file")
+	("show-features,F",po::value<bool>(&show_features)->zero_tokens()->default_value(false),"Show features and then exit")
+	("weights,w",po::value<string>(&weightfile),"Weight file")
         ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
         ("decode-translation,t",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
-        ("training-mode,T",po::value(&training_mode)->default_value(false),"In training mode, read all sentences into memory from the input-file, then read line numbers and configuration from STDIN")
         ("line-number,L", po::value(&lineno)->default_value(0), "Starting reference/line number")
         ("xbleu,x", po::value(&expected_sbleu)->zero_tokens()->default_value(false), "Compute the expected sentence BLEU")
         ("gradient,g", po::value(&expected_sbleu_gradient)->zero_tokens()->default_value(false), "Compute the gradient with respect to expected sentence BLEU")
+        ("expected-bleu-training,T", po::value(&expected_sbleu_training)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU")
+        ("training-batch-size,S", po::value(&training_batch_size)->default_value(0), "Batch size to use during xpected bleu training, 0 = full corpus")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training");
@@ -153,14 +278,27 @@ int main(int argc, char** argv) {
     timer.on();
   }
   
-  if (vm.count("random-seed")) {
-    GibbsOperator::setRandomSeed(seed);
-  }      
-      
    //set up moses
   initMoses(mosesini,weightfile,debug);
   auto_ptr<Decoder> decoder(new MosesDecoder());
 
+  vector<string> featureNames;
+  decoder->GetFeatureNames(&featureNames);
+
+  // may be invoked just to get a features list
+  if (show_features) {
+    for (size_t i = 0; i < featureNames.size(); ++i)
+      cout << featureNames[i] << endl;
+#ifdef MPI_ENABLED
+    MPI_Finalize();
+#endif
+    return 0;
+  }
+
+  if (vm.count("random-seed")) {
+    GibbsOperator::setRandomSeed(seed);
+  }      
+      
   GainFunctionVector g;
   if (ref_files.size() > 0) LoadReferences(ref_files, &g);
   
@@ -169,29 +307,43 @@ int main(int argc, char** argv) {
   }
 
   auto_ptr<istream> in;
-  if (inputfile.size()) {
-    in.reset(new ifstream(inputfile.c_str()));
-    if (! *in) {
-      cerr << "Error: Failed to open input file: " + inputfile << endl;
-      return 1;
+  auto_ptr<InputSource> input;
+  ExpectedBleuTrainer* trainer = NULL;
+  if (expected_sbleu_training) {
+    vector<string> input_lines;
+    ifstream infiles(inputfile.c_str());
+    assert (infiles);
+    while(infiles) {
+      string line;
+      getline(infiles, line);
+      if (line.empty() && infiles.eof()) break;
+      assert(!line.empty());
+      input_lines.push_back(line);
     }
+    VERBOSE(1, "Loaded " << input_lines.size() << " lines in training mode" << endl);
+    if (!training_batch_size || training_batch_size > input_lines.size())
+      training_batch_size = input_lines.size();
+    trainer = new ExpectedBleuTrainer(rank, size, training_batch_size, &input_lines);
+    input.reset(trainer);
   } else {
-    in.reset(new istringstream(string("das parlament will das auf zweierlei weise tun .")));
-  }
-  if (expected_sbleu_gradient) {
-    vector<string> featureNames;
-    decoder->GetFeatureNames(&featureNames);
-    for (size_t i = 0; i < featureNames.size(); ++i) {
-      cout << (i == 0 ? "" : " ") << featureNames[i];
+    if (inputfile.size()) {
+      in.reset(new ifstream(inputfile.c_str()));
+      if (! *in) {
+        cerr << "Error: Failed to open input file: " + inputfile << endl;
+        return 1;
+      }
+    } else {
+      in.reset(new istringstream(string("das parlament will das auf zweierlei weise tun .")));
     }
-    cout << endl << flush;
+    input.reset(new StreamInputSource(*in));
   }
    
   timer.check("Processing input file");
-  while (*in) {
+  while (input->HasMore()) {
     string line;
-    getline(*in,line);
-    if (line.empty()) continue;
+    input->GetSentence(&line, &lineno);
+    assert(!line.empty());
+    cerr << line << endl;
     //configure the sampler
     Sampler sampler;
     auto_ptr<DerivationCollector> derivationCollector;
@@ -239,21 +391,12 @@ int main(int argc, char** argv) {
     if (expected_sbleu) {
       ScoreComponentCollection gradient;
       float exp_gain = elCollector->UpdateGradient(&gradient);
-      (print_exp_sbleu ? cout : cerr) << "Expected sentence BLEU: " << exp_gain << endl;
+      (print_exp_sbleu ? cout : cerr) << '(' << lineno << ") Expected sentence BLEU: " << exp_gain << endl;
       if (expected_sbleu_gradient) {
-        cerr << "expected loss gradient: " << endl;
-        cout << gradient << endl;
-
-        /////////// STOCHASTIC GRAD DESCENT TEST CODE ////
-        vector<float> w;
-        decoder->GetFeatureWeights(&w);
-        ScoreComponentCollection weights(w);
-        const float eta = 0.6;
-        gradient.MultiplyEquals(eta);
-        weights.PlusEquals(gradient);
-        cerr << "NEW WEIGHTS: " << weights << endl;
-        decoder->SetFeatureWeights(weights.data());
-        /////////// STOCHASTIC GRAD DESCENT TEST CODE ////
+        VERBOSE(1, "expected loss gradient: " << endl);
+        cout << gradient << endl << flush;
+        if (trainer)
+          trainer->IncorporateGradient(gradient, decoder.get());
       }
     }
     if (mbr_decoding) {
@@ -261,7 +404,7 @@ int main(int argc, char** argv) {
       for (size_t i = 0; i < sentence.size(); ++i) {
         cout << (i > 0 ? " " : "") << *sentence[i];
       }
-      cout << endl;
+      cout << endl << flush;
     }
     if (derivationCollector.get()) {
       vector<DerivationProbability> derivations;
@@ -273,16 +416,20 @@ int main(int argc, char** argv) {
       if (decode) {
         const vector<string>& sentence = derivations[0].first->getTargetSentence();
         copy(sentence.begin(),sentence.end(),ostream_iterator<string>(cout," "));
-        cout << endl;
+        cout << endl << flush;
       }
     }
     if (transCollector.get()) {
       vector<const Factor*> sentence = transCollector->Max();
       for (size_t i = 0; i < sentence.size(); ++i) {
-        cout << *sentence[i] << " ";
+        cout << (i > 0 ? " " : "") << *sentence[i];
       }
-      cout << endl;
+      cout << endl << flush;
     }
     ++lineno;
   }
+#ifdef MPI_ENABLED
+  MPI_Finalize();
+#endif
+  return 0;
 }
