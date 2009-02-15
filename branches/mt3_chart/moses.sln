@@ -26,6 +26,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "on-disk-phrase-dict", "on-d
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "on-disk-phrase-dict-create", "on-disk-phrase-dict-create\on-disk-phrase-dict-create.vcproj", "{A842A5B9-A84E-4F75-B8F9-0B701CA9B222}"
 	ProjectSection(ProjectDependencies) = postProject
+		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF} = {8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}
 		{65ACFC97-737B-43B2-AB6D-70100AB48118} = {65ACFC97-737B-43B2-AB6D-70100AB48118}
 	EndProjectSection
 EndProject
@@ -33,8 +34,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-chart", "moses-chart\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-chart-cmd", "moses-chart-cmd\moses-chart-cmd.vcproj", "{E8856362-EB59-472F-94DD-254341261648}"
 	ProjectSection(ProjectDependencies) = postProject
-		{EC659133-88F2-417D-904F-314C543EA70F} = {EC659133-88F2-417D-904F-314C543EA70F}
 		{65ACFC97-737B-43B2-AB6D-70100AB48118} = {65ACFC97-737B-43B2-AB6D-70100AB48118}
+		{EC659133-88F2-417D-904F-314C543EA70F} = {EC659133-88F2-417D-904F-314C543EA70F}
 	EndProjectSection
 EndProject
 Global
