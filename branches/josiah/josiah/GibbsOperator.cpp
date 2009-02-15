@@ -210,13 +210,19 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
     const WordsRange& targetSegment = currHypo->GetCurrTargetWordsRange();
     const WordsRange& sourceSegment = currHypo->GetCurrSourceWordsRange();
     VERBOSE(3, "Considering source segment " << sourceSegment << " and target segment " << targetSegment << endl); 
-    TranslationUpdateDelta noChangeDelta(targetWords,&(currHypo->GetTranslationOption()),targetSegment);
+    
     vector<TranslationDelta*> deltas;
+    const TranslationOption* noChangeOption = &(currHypo->GetTranslationOption());
+    TranslationDelta* noChangeDelta = new TranslationUpdateDelta(targetWords,noChangeOption,targetSegment);
+    deltas.push_back(noChangeDelta);
+    
     
     const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
     for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-      TranslationDelta* delta = new TranslationUpdateDelta(targetWords,*i,targetSegment);
-      deltas.push_back(delta);
+      if (*i != noChangeOption) {
+        TranslationDelta* delta = new TranslationUpdateDelta(targetWords,*i,targetSegment);
+        deltas.push_back(delta);  
+      }
     }
     
     //get the scores
@@ -238,11 +244,13 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
     VERBOSE(3,"The chosen sample is " << chosen << endl);
     
     //apply it to the sample
-    deltas[chosen]->apply(sample,noChangeDelta);
+    if (deltas[chosen] !=  noChangeDelta);{
+      deltas[chosen]->apply(sample,*noChangeDelta);     
+    }
    }
-    currHypo = currHypo->GetSourceNextHypo();
+   currHypo = currHypo->GetSourceNextHypo();
     
-    RemoveAllInColl(deltas);
+   RemoveAllInColl(deltas);
   }
 }
 
