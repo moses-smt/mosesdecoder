@@ -43,6 +43,8 @@ protected:
 public:
 	static void ResetHypoCount()
 	{ s_HypothesesCreated = 0; }
+	static unsigned int GetHypoCount()
+	{ return s_HypothesesCreated; }
 
 	Hypothesis(const QueueEntry &queueEntry);
 	~Hypothesis();

@@ -46,9 +46,9 @@ void Manager::ProcessSentence()
 	//		2. initial hypothesis factors are given in the sentence
 	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
 	m_transOptColl.CreateTranslationOptions(decodeGraphList);
-	TRACE_ERR(m_transOptColl << endl);
 
 	TRACE_ERR("Decoding: " << endl);
+	Hypothesis::ResetHypoCount();
 
 	// MAIN LOOP
 	size_t size = m_source.GetSize();
@@ -70,6 +70,8 @@ void Manager::ProcessSentence()
 			m_hypoStackColl[range] = cell;
 		}
 	}
+
+	cerr << "Num of hypo = " << Hypothesis::GetHypoCount() << endl;
 }
 
 const Hypothesis *Manager::GetBestHypothesis() const

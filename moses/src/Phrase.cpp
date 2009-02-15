@@ -267,6 +267,7 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const vector< vector<string> > &phraseVector)
 {
 	FactorCollection &factorCollection = FactorCollection::Instance();
+	m_arity = 0;
 
 	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
 	{
@@ -279,6 +280,9 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 			const Factor *factor = factorCollection.AddFactor(m_direction, factorType, factorStr); 
 			word[factorType] = factor;
 		}
+
+		if (word.IsNonTerminal())
+			m_arity++;
 	}
 }
 
@@ -286,6 +290,7 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const vector< vector<string>* > &phraseVector)
 {
 	FactorCollection &factorCollection = FactorCollection::Instance();
+	m_arity = 0;
 
 	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
 	{
@@ -298,6 +303,10 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 			const Factor *factor = factorCollection.AddFactor(m_direction, factorType, factorStr); 
 			word[factorType] = factor;
 		}
+		
+		if (word.IsNonTerminal())
+			m_arity++;
+
 	}
 }
 

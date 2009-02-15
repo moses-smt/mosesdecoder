@@ -45,6 +45,7 @@ private:
 																					Not really used, but nice to know for debugging purposes
 																			*/
 	std::vector<Word>			m_words;
+	size_t m_arity;
 
 public:
 	/** No longer does anything as not using mem pool for Phrase class anymore */
@@ -195,6 +196,9 @@ public:
 
 	/** appends a phrase at the end of current phrase **/
 	void Append(const Phrase &endPhrase);
+
+	size_t GetArity() const
+	{ return m_arity; }
 
 };
 
