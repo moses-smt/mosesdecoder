@@ -33,6 +33,7 @@ class MBRDecoder : public SampleCollector {
   MBRDecoder(int size) : mbrSize(size), n(0) {};
   virtual void collect(Sample& sample);
   virtual std::vector<const Factor*> Max();
+  void SetMBRSize(int size) { mbrSize = size;}
 
  private:
   GainFunctionVector g;
