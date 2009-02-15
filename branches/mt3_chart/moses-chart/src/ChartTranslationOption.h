@@ -30,6 +30,12 @@ public:
 	{ return m_wordsRange; }
 
 	/** return estimate of total cost of this option */
+	inline size_t GetArity() const 	 
+	{ 	 
+		return m_rule.GetTargetPhrase().GetArity(); 	 
+	}
+
+	/** return estimate of total cost of this option */
 	inline float GetTotalScore() const 	 
 	{ 	 
 		return m_rule.GetTargetPhrase().GetFutureScore(); 	 

@@ -185,6 +185,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 		targetPhrase->CreateAlignmentInfo(alignmentInfo);
 
+		assert(sourcePhrase.GetArity() == targetPhrase->GetArity());
+
 		// remove strings
 		RemoveAllInColl(sourcePhraseVector);
 		RemoveAllInColl(targetPhraseVector);
