@@ -16,6 +16,12 @@ class SentenceBLEU : public GainFunction {
   int GetType() const { return 1;}
   float ComputeGain(const std::vector<const Factor*>& hyp) const;
   float ComputeGain(const GainFunction& hyp) const;
+  float GetAverageReferenceLength() const {
+    float t = 0;
+    for (unsigned i = 0; i < lengths_.size(); ++i)
+      t += lengths_[i];
+    return t /= lengths_.size();
+  }
   
   int GetLength() const {
     assert (lengths_.size());

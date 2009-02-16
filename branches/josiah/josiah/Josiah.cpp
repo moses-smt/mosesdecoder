@@ -130,7 +130,9 @@ struct ExpectedBleuTrainer : public InputSource {
       dist(0, sents->size() - 1),
       draw(rng, dist),
       randomize_batches(randomize),
-      optimizer(o) {
+      optimizer(o),
+      total_ref_len(),
+      total_exp_len() {
     if (rank >= batch_size) keep_going = false;
     corpus.swap(*sents);
     int esize = min(batch_size, size);
@@ -159,6 +161,8 @@ struct ExpectedBleuTrainer : public InputSource {
   boost::variate_generator<boost::mt19937, boost::uniform_smallint<int> > draw;
   bool randomize_batches;
   Optimizer* optimizer;
+  float total_ref_len;
+  float total_exp_len;
   int tlc;
   // right now, just goes through in order, should do something
   // random
@@ -185,10 +189,16 @@ struct ExpectedBleuTrainer : public InputSource {
     if (lineno) *lineno = order[cur];
     *sentence = corpus[order[cur++]];
   }
-  void IncorporateGradient(const float exp_gain, const ScoreComponentCollection& grad, Decoder* decoder) {
-    cerr << rank << ":" << cur-1 << "  " << grad << endl;
+  void IncorporateGradient(
+       const float trans_len,
+       const float ref_len,
+       const float exp_gain,
+       const ScoreComponentCollection& grad,
+       Decoder* decoder) {
     gradient.PlusEquals(grad);
     total_exp_gain += exp_gain;
+    total_ref_len += ref_len;
+    total_exp_len += trans_len;
 
     if (cur == cur_end) {
       vector<float> w;
@@ -196,19 +206,24 @@ struct ExpectedBleuTrainer : public InputSource {
       ScoreComponentCollection weights(w);
       vector<float> rcv_grad(w.size());
       assert(gradient.data().size() == w.size());
-      float tg = 0;
+      float tg = 0, trl = 0, tel = 0;
 #ifdef MPI_ENABLED
       if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&gradient.data()[0]), &rcv_grad[0], w.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
       if (MPI_SUCCESS != MPI_Reduce(&total_exp_gain, &tg, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+      if (MPI_SUCCESS != MPI_Reduce(&total_ref_len, &trl, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+      if (MPI_SUCCESS != MPI_Reduce(&total_exp_len, &tel, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
 #else
       rcv_grad = gradient.data();
       tg = total_exp_gain;
+      trl = total_ref_len;
+      tel = total_exp_len;
 #endif
       ScoreComponentCollection g(rcv_grad);
       if (rank == 0) {
         tg /= batch_size;
         g.DivideEquals(batch_size);
-        cout << "TOTAL EXPECTED GAIN: " << tg << " (batch size = " << batch_size << ")\n";
+        cerr << "TOTAL EXPECTED GAIN: " << tg << " (batch size = " << batch_size << ")\n";
+        cerr << "EXPECTED LENGTH / REF LENGTH: " << tel << '/' << trl << " (" << (tel / trl) << ")\n";
         optimizer->Optimize(tg, weights, g, &weights);
         weights.PlusEquals(g);
       }
@@ -221,6 +236,8 @@ struct ExpectedBleuTrainer : public InputSource {
       cur = cur_start;
       gradient.ZeroAll();
       total_exp_gain = 0;
+      total_exp_len = 0;
+      total_ref_len = 0;
       if (optimizer->HasConverged()) keep_going = false;
     }
   }
@@ -352,7 +369,13 @@ int main(int argc, char** argv) {
 
   auto_ptr<istream> in;
   auto_ptr<InputSource> input;
-  auto_ptr<Optimizer> optimizer(new DumbStochasticGradientDescent(0.75, max_training_iterations));
+  //auto_ptr<Optimizer> optimizer(new DumbStochasticGradientDescent(0.75, max_training_iterations));
+  auto_ptr<Optimizer> optimizer(
+    new ExponentiatedGradientDescent(
+      ScoreComponentCollection(weights.size(), 1.0f),  // eta
+      1.2f,  // mu, meta learning rate
+      0.1f,   // minimal step scaling factor
+      max_training_iterations));
   ExpectedBleuTrainer* trainer = NULL;
   if (expected_sbleu_training) {
     vector<string> input_lines;
@@ -388,7 +411,6 @@ int main(int argc, char** argv) {
     string line;
     input->GetSentence(&line, &lineno);
     assert(!line.empty());
-    cerr << line << endl;
     //configure the sampler
     Sampler sampler;
     auto_ptr<DerivationCollector> derivationCollector;
@@ -435,14 +457,17 @@ int main(int argc, char** argv) {
 
     if (expected_sbleu) {
       ScoreComponentCollection gradient;
-      const float exp_gain = elCollector->UpdateGradient(&gradient);
-      (print_exp_sbleu ? cout : cerr) << '(' << lineno << ") Expected sentence BLEU: " << exp_gain << endl;
-      if (expected_sbleu_gradient) {
-        VERBOSE(1, "expected loss gradient: " << endl);
-        cout << gradient << endl << flush;
-      }
+      float exp_trans_len = 0;
+      const float exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len);
+      (print_exp_sbleu ? cout : cerr) << '(' << lineno << ") Expected sentence BLEU: " << exp_gain << endl
+                                      << "    Expected length: " << exp_trans_len << endl;
       if (trainer)
-        trainer->IncorporateGradient(exp_gain, gradient, decoder.get());
+        trainer->IncorporateGradient(
+           exp_trans_len,
+           g[lineno].GetAverageReferenceLength(),
+           exp_gain,
+           gradient,
+           decoder.get());
     }
     if (mbr_decoding) {
       vector<const Factor*> sentence = mbrCollector->Max();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <utility>
 
 #include "Gibbler.h"
@@ -14,15 +15,16 @@ class GainFunction;
 
 class GibblerExpectedLossCollector : public SampleCollector {
  public:
-  GibblerExpectedLossCollector(const GainFunction& f) : g(f), n(0) {}
+  GibblerExpectedLossCollector(const GainFunction& f) : g(f), n(), tot_len() {}
   virtual void collect(Sample& sample);
 
-  // returns the expected gain
-  float UpdateGradient(ScoreComponentCollection* gradient);
+  // returns the expected gain and expected sentence length
+  float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len);
 
  private:
   const GainFunction& g;
   int n;
+  size_t tot_len;
   std::list<std::pair<ScoreComponentCollection, float> > samples;
   ScoreComponentCollection feature_expectations;
 };

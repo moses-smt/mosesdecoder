@@ -59,6 +59,9 @@ private:
 public:
   //! Create a new score collection with all values set to 0.0
 	ScoreComponentCollection();
+	explicit ScoreComponentCollection(size_t size, const float v = 0.0f)
+	: m_scores(size, v)
+	, m_sim(NULL) {}
 
 	explicit ScoreComponentCollection(const std::vector<float>& scores)
 	: m_scores(scores)
@@ -73,6 +76,7 @@ public:
 	inline size_t size() const { return m_scores.size(); }
 	inline const std::vector<float>& data() const { return m_scores; }
 	const float& operator[](size_t x) const { return m_scores[x]; }
+	float& operator[](size_t x) { return m_scores[x]; }
 
   //! Set all values to 0.0
 	void ZeroAll()
@@ -92,6 +96,12 @@ public:
 	void MultiplyEquals(const float f) {
 		const size_t l = m_scores.size();
 		for (size_t i=0; i<l; i++) { m_scores[i] *= f; }  
+	}
+
+	void MultiplyEquals(const ScoreComponentCollection& rhs) {
+		assert(m_scores.size() >= rhs.m_scores.size());
+		const size_t l = m_scores.size();
+		for (size_t i=0; i<l; i++) { m_scores[i] *= rhs.m_scores[i]; }  
 	}
 
 	void DivideEquals(const float f) {

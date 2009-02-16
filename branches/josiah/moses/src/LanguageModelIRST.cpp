@@ -61,7 +61,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 			     size_t nGramOrder)
 {
   char *SepString = " \t\n";
-  cerr << "In LanguageModelIRST::Load: nGramOrder = " << nGramOrder << "\n";
+  VERBOSE(1, "In LanguageModelIRST::Load: nGramOrder = " << nGramOrder << "\n");
 
   FactorCollection &factorCollection = FactorCollection::Instance();
 
@@ -78,10 +78,10 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 
   if (filenames) {
     // case LMfile + MAPfile: create an object of lmmacro class and load both LM file and map
-    cerr << "Loading LM file + MAP\n";
+    VERBOSE(1, "Loading LM file + MAP\n");
     m_mapFilePath = strsep(&filenames, SepString);
     if (!FileExists(m_mapFilePath)) {
-      cerr << "ERROR: Map file <" << m_mapFilePath << "> does not exist\n";
+      VERBOSE(1, "ERROR: Map file <" << m_mapFilePath << "> does not exist\n");
       return false;
     }
     InputFileStream inpMap(m_mapFilePath);
@@ -90,7 +90,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 
   } else {
     // case (standard) LMfile only: create an object of lmtable
-    cerr << "Loading LM file (no MAP)\n";
+    VERBOSE(1, "Loading LM file (no MAP)\n");
     m_lmtb  = (lmtable *)new lmtable;
 
   // Load the (possibly binary) model
