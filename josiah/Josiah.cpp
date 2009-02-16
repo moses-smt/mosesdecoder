@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iomanip>
 #include <fstream>
 
-#define MPI_ENABLED
+//#define MPI_ENABLED
 #ifdef MPI_ENABLED
 #include <mpi.h>
 #endif
@@ -112,7 +112,7 @@ struct StreamInputSource : public InputSource {
 
 struct ExpectedBleuTrainer : public InputSource {
   ExpectedBleuTrainer(int r, int s, int bsize, vector<string>* sents)
-    : rank(r), size(s), batch_size(bsize), iteration(), corpus(), keep_going(true), order(batch_size) {
+    : rank(r), size(s), batch_size(bsize), iteration(), corpus(), keep_going(true), total_exp_gain(), order(batch_size) {
     if (rank >= batch_size) keep_going = false;
     corpus.swap(*sents);
     int esize = min(batch_size, size);
@@ -131,6 +131,7 @@ struct ExpectedBleuTrainer : public InputSource {
   int cur_end;
   vector<string> corpus;
   bool keep_going;
+  float total_exp_gain;
   ScoreComponentCollection gradient;
   vector<int> order;
   int tlc;
@@ -154,9 +155,10 @@ struct ExpectedBleuTrainer : public InputSource {
     if (lineno) *lineno = order[cur];
     *sentence = corpus[order[cur++]];
   }
-  void IncorporateGradient(const ScoreComponentCollection& grad, Decoder* decoder) {
+  void IncorporateGradient(const float exp_gain, const ScoreComponentCollection& grad, Decoder* decoder) {
     cerr << rank << ":" << cur-1 << "  " << grad << endl;
     gradient.PlusEquals(grad);
+    total_exp_gain += exp_gain;
 
     if (cur == cur_end) {
       vector<float> w;
@@ -164,14 +166,17 @@ struct ExpectedBleuTrainer : public InputSource {
       ScoreComponentCollection weights(w);
       vector<float> rcv_grad(w.size());
       assert(gradient.data().size() == w.size());
+      double tg = 0;
 #ifdef MPI_ENABLED
       if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&gradient.data()[0]), &rcv_grad[0], w.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+      if (MPI_SUCCESS != MPI_Reduce(&total_exp_gain, &tg, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
 #else
       rcv_grad = gradient.data();
+      tg = total_exp_gain;
 #endif
       ScoreComponentCollection g(rcv_grad);
       if (rank == 0) {
-//        cerr << "GR:" << gradient << endl;
+        cout << "TOTAL EXPECTED GAIN: " << (tg / batch_size) << " (batch size = " << batch_size << ")\n";
         cerr << " G:" << g << endl;
         const float eta = 0.6;
         g.MultiplyEquals(eta);
@@ -187,6 +192,7 @@ struct ExpectedBleuTrainer : public InputSource {
       decoder->SetFeatureWeights(weights.data());
       cur = cur_start;
       gradient.ZeroAll();
+      total_exp_gain = 0;
 
       // TODO-- add convergence criteria!!
       static int cc = 0;
@@ -390,14 +396,14 @@ int main(int argc, char** argv) {
 
     if (expected_sbleu) {
       ScoreComponentCollection gradient;
-      float exp_gain = elCollector->UpdateGradient(&gradient);
+      const float exp_gain = elCollector->UpdateGradient(&gradient);
       (print_exp_sbleu ? cout : cerr) << '(' << lineno << ") Expected sentence BLEU: " << exp_gain << endl;
       if (expected_sbleu_gradient) {
         VERBOSE(1, "expected loss gradient: " << endl);
         cout << gradient << endl << flush;
-        if (trainer)
-          trainer->IncorporateGradient(gradient, decoder.get());
       }
+      if (trainer)
+        trainer->IncorporateGradient(exp_gain, gradient, decoder.get());
     }
     if (mbr_decoding) {
       vector<const Factor*> sentence = mbrCollector->Max();
