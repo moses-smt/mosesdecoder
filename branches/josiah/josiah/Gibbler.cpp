@@ -67,21 +67,22 @@ Hypothesis* Sample::CreateHypothesis(Hypothesis& prevTarget, const TranslationOp
 }
 
 
-void Sample::GetTargetWords(vector<Word>& words) {
+void Sample::UpdateTargetWords()  {
+  m_targetWords.clear();
   const Hypothesis* currHypo = GetTargetTail(); //target tail
   
   //we're now at the dummy hypo at the start of the sentence
   while ((currHypo = (currHypo->GetNextHypo()))) {
     TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
     for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-      words.push_back(targetPhrase.GetWord(i));
+      m_targetWords.push_back(targetPhrase.GetWord(i));
     }
   }
   
   IFVERBOSE(2) {
     VERBOSE(2,"Sentence: ");
-    for (size_t i = 0; i < words.size(); ++i) {
-      VERBOSE(2,words[i] << " ");
+    for (size_t i = 0; i < m_targetWords.size(); ++i) {
+      VERBOSE(2,m_targetWords[i] << " ");
     }
     VERBOSE(2,endl);
   }
@@ -183,6 +184,7 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
   UpdateHead(oldLeftHypo, newRightHypo, target_head);
   
   UpdateFeatureValues(deltaFV);
+  UpdateTargetWords();
 }
   
 void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
@@ -205,6 +207,7 @@ void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentC
   }
   
   UpdateFeatureValues(deltaFV);
+  UpdateTargetWords();
 }  
 
 void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
@@ -249,6 +252,7 @@ void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCo
   }
     
   UpdateFeatureValues(deltaFV);
+  UpdateTargetWords();
 }
   
 void Sample::SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const ScoreComponentCollection& deltaFV) {
@@ -279,6 +283,7 @@ void Sample::SplitTarget(const TranslationOption& leftTgtOption, const Translati
   }
   
   UpdateFeatureValues(deltaFV);
+  UpdateTargetWords();
 }  
   
 void Sample::UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head) {

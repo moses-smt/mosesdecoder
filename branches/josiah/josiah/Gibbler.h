@@ -2,6 +2,8 @@
 
 #include <map>
 #include <vector>
+
+#include "FeatureFunction.h"
 #include "GibbsOperator.h"
 #include "ScoreComponentCollection.h"
 
@@ -12,10 +14,13 @@ class Hypothesis;
 class TranslationOptionCollection;
 class TranslationOption;
 class Word;
+class FeatureFunction;
 
   
 class Sample {
  private:
+  std::vector<Word> m_targetWords;
+  std::vector<FeatureFunction*> m_featureFunctions;
   int source_size;
   Hypothesis* target_head;
   Hypothesis* target_tail;
@@ -36,6 +41,7 @@ class Sample {
   
   void SetTgtNextHypo(Hypothesis*  newHyp, Hypothesis* currNextHypo);
   void SetSrcPrevHypo(Hypothesis*  newHyp, Hypothesis* srcPrevHypo);
+  void UpdateTargetWords();
   
  public:
   Sample(Hypothesis* target_head);
@@ -59,7 +65,12 @@ class Sample {
   void ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV); 
   void MergeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV);
   void SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const ScoreComponentCollection& deltaFV);
-  void GetTargetWords(std::vector<Word>& words);
+  /** Words in the current target */
+  const std::vector<Word>& GetTargetWords() const
+  {return m_targetWords;}
+  /** Extra feature functions - not including moses ones */
+  const std::vector<FeatureFunction*>& GetFeatureFunctions() const
+  {return m_featureFunctions;}
   
 };
 

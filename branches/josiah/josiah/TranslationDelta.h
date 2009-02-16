@@ -67,7 +67,7 @@ class LanguageModelCache {
   **/
 class TranslationDelta {
   public:
-    TranslationDelta(): m_score(-1e6) {
+    TranslationDelta(Sample& sample): m_score(-1e6), m_sample(sample) {
       
     }
   
@@ -78,9 +78,10 @@ class TranslationDelta {
   /** 
     * Apply to the sample
     **/
-  virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta) = 0;
+  virtual void apply(const TranslationDelta& noChangeDelta) = 0;
    
     const ScoreComponentCollection& getScores() const {return m_scores;}
+    Sample& getSample() const {return m_sample;}
     virtual ~TranslationDelta() {}
     
   protected:
@@ -88,16 +89,15 @@ class TranslationDelta {
       Compute the change in language model score by adding this target phrase
       into the hypothesis at the given target position.
      **/
-    void  addLanguageModelScore(const vector<Word>& targetWords, const Phrase& targetPhrase,
-                                const WordsRange& targetSegment);
+    void  addLanguageModelScore(const Phrase& targetPhrase,const WordsRange& targetSegment);
     /**
       * Initialise the scores for the case where only one source-target pair needs to be considered.
      **/
-    void initScoresSingleUpdate(const vector<Word>& targetWords, const TranslationOption* option, const WordsRange& targetSegment);
+    void initScoresSingleUpdate(const TranslationOption* option, const WordsRange& targetSegment);
     /**
      * Initialise the scores for the case where two source-target pairs need to be considered.
      **/
-    void initScoresPairedUpdate(const vector<Word>& targetWords, const TranslationOption* leftOption,
+    void initScoresPairedUpdate(const TranslationOption* leftOption,
                                 const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
     ScoreComponentCollection m_scores;
     double m_score;
@@ -105,7 +105,8 @@ class TranslationDelta {
   private:
 #ifdef LM_CACHE
     static std::map<LanguageModel*,LanguageModelCache> m_cache;
-#endif    
+#endif
+    Sample& m_sample;
 };
  
 /**
@@ -113,8 +114,8 @@ class TranslationDelta {
   **/
 class TranslationUpdateDelta : public virtual TranslationDelta {
   public:
-     TranslationUpdateDelta(const vector<Word>& targetWords,  const TranslationOption* option , const WordsRange& targetSegment);
-     virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
+     TranslationUpdateDelta(Sample& sample, const TranslationOption* option , const WordsRange& targetSegment);
+     virtual void apply(const TranslationDelta& noChangeDelta);
      
   private:
     const TranslationOption* m_option;
@@ -130,8 +131,8 @@ class MergeDelta : public virtual TranslationDelta {
      * option - the source/target phrase to go into the merged segment
      * targetSegment - the location of the target segment
      **/
-    MergeDelta(const vector<Word>& targetWords, const TranslationOption* option, const WordsRange& targetSegment);
-    virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
+    MergeDelta(Sample& sample, const TranslationOption* option, const WordsRange& targetSegment);
+    virtual void apply(const TranslationDelta& noChangeDelta);
   
   private:
     const TranslationOption* m_option;
@@ -143,11 +144,11 @@ class MergeDelta : public virtual TranslationDelta {
 **/
 class PairedTranslationUpdateDelta : public virtual TranslationDelta {
   public: 
-    PairedTranslationUpdateDelta(const vector<Word>& targetWords,
+    PairedTranslationUpdateDelta(Sample& sample,
         const TranslationOption* leftOption, const TranslationOption* rightOption, 
         const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
     
-    virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
+    virtual void apply(const TranslationDelta& noChangeDelta);
     
   private:
     const TranslationOption* m_leftOption;
@@ -159,9 +160,8 @@ class PairedTranslationUpdateDelta : public virtual TranslationDelta {
  **/
 class SplitDelta : public virtual TranslationDelta {
   public:
-    SplitDelta(const vector<Word>& targetWords,
-               const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange& targetSegment);
-    virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
+    SplitDelta(Sample& sample, const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange& targetSegment);
+    virtual void apply(const TranslationDelta& noChangeDelta);
     
   private:
     const TranslationOption* m_leftOption;
@@ -174,11 +174,11 @@ class SplitDelta : public virtual TranslationDelta {
  **/
 class FlipDelta : public virtual TranslationDelta {
   public: 
-    FlipDelta(const vector<Word>& targetWords,
-                                 const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
+    FlipDelta(Sample& sample, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
+              const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                                  const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, float distortion);
     
-    virtual void apply(Sample& sample, const TranslationDelta& noChangeDelta);
+    virtual void apply(const TranslationDelta& noChangeDelta);
     
   private:
     const TranslationOption* m_leftTgtOption;
