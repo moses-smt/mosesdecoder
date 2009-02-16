@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Moses { class ScoreComponentCollection; }
+#include "ScoreComponentCollection.h"
 
 namespace Josiah {
 
@@ -42,7 +42,6 @@ struct Optimizer {
 
 class DumbStochasticGradientDescent : public Optimizer {
  public:
-  DumbStochasticGradientDescent() : Optimizer(8), eta_(0.75f) {}
   DumbStochasticGradientDescent(float eta, int max_iters) :
     Optimizer(max_iters), eta_(eta) {}
 
@@ -54,7 +53,31 @@ class DumbStochasticGradientDescent : public Optimizer {
 
  private:
   float eta_;
-  int max_iterations_;
+};
+
+// see N. Schraudolph (1999) Local Gain Adaptation in Stochastic Gradient
+// Descent, Technical Report IDSIA-09-99, p. 2.
+// No, this isn't stochastic metadescent, but EGD is described there too
+class ExponentiatedGradientDescent : public Optimizer {
+ public:
+  ExponentiatedGradientDescent(const Moses::ScoreComponentCollection& eta,
+      float mu, float min_multiplier, int max_iters) :
+    Optimizer(max_iters), eta_(eta), mu_(mu), min_multiplier_(min_multiplier), prev_g_(eta) {
+    prev_g_.ZeroAll();
+  }
+
+  virtual void OptimizeImpl(
+     float f,
+     const Moses::ScoreComponentCollection& x,
+     const Moses::ScoreComponentCollection& gradient,
+     Moses::ScoreComponentCollection* new_x);
+
+ private:
+  Moses::ScoreComponentCollection eta_;
+  const float mu_;
+  const float min_multiplier_;
+  Moses::ScoreComponentCollection prev_g_;
 };
 
 }
+

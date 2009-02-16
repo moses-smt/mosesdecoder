@@ -17,6 +17,8 @@ void Optimizer::Optimize(
      const ScoreComponentCollection& gradient,
      ScoreComponentCollection* new_x) {
   assert(new_x);
+  assert(x.size() == gradient.size());
+  assert(x.size() == new_x->size());
   ++iteration_;
   cerr << "OPTIMIZER ITERATION #" << iteration_ << endl;
   cerr << "  GRADIENT: " << gradient << endl;
@@ -40,6 +42,23 @@ void DumbStochasticGradientDescent::OptimizeImpl(
   g.MultiplyEquals(eta_);
   *new_x = x;
   new_x->PlusEquals(g);
+}
+
+void ExponentiatedGradientDescent::OptimizeImpl(
+     float f,
+     const ScoreComponentCollection& x,
+     const ScoreComponentCollection& gradient,
+     ScoreComponentCollection* new_x) {
+  (void) f;
+  assert(x.size() == eta_.size());
+  for (unsigned i = 0; i < eta_.size(); ++i) {
+    eta_[i] = eta_[i] * max(min_multiplier_, 1.0f + mu_ * gradient[i] * (eta_[i] * prev_g_[i]));
+  }
+  cerr << "ETA: " << eta_ << endl;
+  *new_x = gradient;
+  new_x->MultiplyEquals(eta_);
+  new_x->PlusEquals(x);
+  prev_g_ = gradient;
 }
 
 }
