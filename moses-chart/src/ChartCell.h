@@ -60,7 +60,6 @@ protected:
 	std::set<QueueEntry*, QueueEntryOrderer> m_queueUnique;
 
 	float m_bestScore; /**< score of the best hypothesis in collection */
-	float m_worstScore; /**< score of the worse hypthesis in collection */
 	float m_beamWidth; /**< minimum score due to threashold pruning */
 	size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
@@ -85,6 +84,9 @@ public:
 	{
 		return m_maxHypoStackSize;
 	}
+
+	float GetThreshold() const
+	{ return m_bestScore + m_beamWidth; }
 
 	const std::vector<const Hypothesis*> &GetSortedHypotheses() const
 	{ return m_hyposOrdered; }

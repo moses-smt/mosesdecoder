@@ -35,9 +35,7 @@ ChartCell::ChartCell(size_t startPos, size_t endPos)
 	m_beamWidth = staticData.GetBeamWidth();
 	m_maxHypoStackSize = staticData.GetMaxHypoStackSize();
 	m_nBestIsEnabled = staticData.IsNBestEnabled();
-	m_worstScore = -std::numeric_limits<float>::infinity();
 	m_bestScore = -std::numeric_limits<float>::infinity();
-
 }
 
 ChartCell::~ChartCell()
@@ -47,7 +45,7 @@ ChartCell::~ChartCell()
 
 bool ChartCell::AddHypothesis(Hypothesis *hypo)
 {
-	if (hypo->GetTotalScore() < m_worstScore)
+	if (hypo->GetTotalScore() < m_bestScore + m_beamWidth)
 	{ // really bad score. don't bother adding hypo into collection
 	  StaticData::Instance().GetSentenceStats().AddDiscarded();
 	  VERBOSE(3,"discarded, too bad for stack" << std::endl);
@@ -114,10 +112,7 @@ pair<ChartCell::HCType::iterator, bool> ChartCell::Add(Hypothesis *hypo)
 		{
 			VERBOSE(3,", best on stack");
 			m_bestScore = hypo->GetTotalScore();
-			// this may also affect the worst score
-	        if ( m_bestScore + m_beamWidth > m_worstScore )
-	          m_worstScore = m_bestScore + m_beamWidth;
-					}
+		}
 
 	    // Prune only if stack is twice as big as needed (lazy pruning)
 		VERBOSE(3,", now size " << m_hypos.size());
@@ -193,9 +188,6 @@ void ChartCell::PruneToSize(size_t newSize)
 			}
 			TRACE_ERR( endl);
 		}
-
-		// set the worstScore, so that newly generated hypotheses will not be added if worse than the worst in the stack
-		m_worstScore = scoreThreshold;
 
 		// desperation pruning
 		if (m_hypos.size() > newSize * 2)
