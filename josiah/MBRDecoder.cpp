@@ -55,12 +55,12 @@ vector<const Factor*> MBRDecoder::Max() {
   mbrSize = min(mbrSize, (int) topNTranslations.size());
 
   //Outer loop using only the top #mbrSize samples 
-  for(size_t i = 0; i < mbrSize; ++i) {
+  for(int i = 0; i < mbrSize; ++i) {
     weightedLossCumul = 0.0;
     const GainFunction& gf = g[i];
     VERBOSE(2, "Reference " << ToString(*topNTranslations[i].first) << endl);
     for(size_t j = 0; j < topNTranslations.size(); ++j) {//Inner loop using all samples
-      if (i != j) {
+      if (static_cast<size_t>(i) != j) {
         bleu = gf.ComputeGain(g[j]);
         VERBOSE(2, "Hypothesis " << ToString(*topNTranslations[j].first) << endl);
         weightedLoss = (1- bleu) * topNTranslations[j].second;
