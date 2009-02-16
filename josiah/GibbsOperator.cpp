@@ -89,8 +89,6 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
 
   size_t sourceSize = sample.GetSourceSize();
   for (size_t splitIndex = 1; splitIndex < sourceSize; ++splitIndex) {
-    vector<Word> targetWords; //needed to calc lm scores
-    sample.GetTargetWords(targetWords);
     //NB splitIndex n refers to the position between word n-1 and word n. Words are zero indexed
     VERBOSE(3,"Sampling at source index " << splitIndex << endl);
     
@@ -110,7 +108,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       assert(prev->GetSourcePrevHypo()); //must be a valid hypo
       WordsRange leftSourceSegment = prev->GetCurrSourceWordsRange();
       WordsRange leftTargetSegment = prev->GetCurrTargetWordsRange();
-      noChangeDelta = new   PairedTranslationUpdateDelta(targetWords,&(prev->GetTranslationOption())
+      noChangeDelta = new   PairedTranslationUpdateDelta(sample,&(prev->GetTranslationOption())
           ,&(hypothesis->GetTranslationOption()),leftTargetSegment,rightTargetSegment);
       if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos()) {
         //contiguous on target side.
@@ -121,7 +119,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
               rightSourceSegment << " and target segments " << leftTargetSegment << " with " << rightTargetSegment  << endl);
         const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
         for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-          TranslationDelta* delta = new MergeDelta(targetWords,*i,targetSegment);
+          TranslationDelta* delta = new MergeDelta(sample,*i,targetSegment);
           deltas.push_back(delta);
         }
       }
@@ -133,7 +131,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       const TranslationOptionList&  rightOptions = toc.GetTranslationOptionList(rightSourceSegment);
       for (TranslationOptionList::const_iterator ri = rightOptions.begin(); ri != rightOptions.end(); ++ri) {
         for (TranslationOptionList::const_iterator li = leftOptions.begin(); li != leftOptions.end(); ++li) {
-          TranslationDelta* delta = new PairedTranslationUpdateDelta(targetWords, *li, *ri, leftTargetSegment, rightTargetSegment);
+          TranslationDelta* delta = new PairedTranslationUpdateDelta(sample,*li, *ri, leftTargetSegment, rightTargetSegment);
           deltas.push_back(delta);
         }
       }
@@ -141,12 +139,12 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       VERBOSE(3, "No existing split" << endl);
       WordsRange sourceSegment = hypothesis->GetCurrSourceWordsRange();
       WordsRange targetSegment = hypothesis->GetCurrTargetWordsRange();
-      noChangeDelta = new TranslationUpdateDelta(targetWords,&(hypothesis->GetTranslationOption()),targetSegment);
+      noChangeDelta = new TranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption()),targetSegment);
       //Add TranslationUpdateDeltas
       const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
       VERBOSE(3, "Creating simple deltas for source segment " << sourceSegment << " and target segment " << targetSegment  << endl);
       for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-        TranslationDelta* delta = new TranslationUpdateDelta(targetWords,*i,targetSegment);
+        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,targetSegment);
         deltas.push_back(delta);
       }
 
@@ -159,7 +157,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       const TranslationOptionList&  rightOptions = toc.GetTranslationOptionList(rightSourceSegment);
       for (TranslationOptionList::const_iterator ri = rightOptions.begin(); ri != rightOptions.end(); ++ri) {
         for (TranslationOptionList::const_iterator li = leftOptions.begin(); li != leftOptions.end(); ++li) {
-          TranslationDelta* delta = new SplitDelta(targetWords, *li, *ri, targetSegment);
+          TranslationDelta* delta = new SplitDelta(sample, *li, *ri, targetSegment);
           deltas.push_back(delta);
         }
       }
@@ -189,7 +187,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       VERBOSE(3,"The chosen sample is " << chosen << endl);
       
       //apply it to the sample
-      deltas[chosen]->apply(sample,*noChangeDelta);
+      deltas[chosen]->apply(*noChangeDelta);
       
       VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
     }
@@ -205,22 +203,20 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
   const Hypothesis* currHypo = sample.GetHypAtSourceIndex(0);
   //Iterate in source order
   while (currHypo) {
-    vector<Word> targetWords; //needed to calc lm scores
-    sample.GetTargetWords(targetWords);
     const WordsRange& targetSegment = currHypo->GetCurrTargetWordsRange();
     const WordsRange& sourceSegment = currHypo->GetCurrSourceWordsRange();
     VERBOSE(3, "Considering source segment " << sourceSegment << " and target segment " << targetSegment << endl); 
     
     vector<TranslationDelta*> deltas;
     const TranslationOption* noChangeOption = &(currHypo->GetTranslationOption());
-    TranslationDelta* noChangeDelta = new TranslationUpdateDelta(targetWords,noChangeOption,targetSegment);
+    TranslationDelta* noChangeDelta = new TranslationUpdateDelta(sample,noChangeOption,targetSegment);
     deltas.push_back(noChangeDelta);
     
     
     const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
     for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
       if (*i != noChangeOption) {
-        TranslationDelta* delta = new TranslationUpdateDelta(targetWords,*i,targetSegment);
+        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,targetSegment);
         deltas.push_back(delta);  
       }
     }
@@ -245,7 +241,7 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
     
     //apply it to the sample
     if (deltas[chosen] !=  noChangeDelta);{
-      deltas[chosen]->apply(sample,*noChangeDelta);     
+      deltas[chosen]->apply(*noChangeDelta);     
     }
    }
    currHypo = currHypo->GetSourceNextHypo();
@@ -332,8 +328,6 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
     
   size_t sourceSize = sample.GetSourceSize();
   for (size_t splitIndex = 1; splitIndex < sourceSize; ++splitIndex) {
-    vector<Word> targetWords; //needed to calc lm scores
-    sample.GetTargetWords(targetWords);
     //NB splitIndex n refers to the position between word n-1 and word n. Words are zero indexed
     VERBOSE(3,"Sampling at source index " << splitIndex << endl);
       
@@ -375,13 +369,13 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
  
         bool isValidSwap = CheckValidReordering(hypothesis,prev, prev->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, hypothesis->GetNextHypo(), totalDistortion); 
         if (isValidSwap) {//yes
-          TranslationDelta* delta = new FlipDelta(targetWords, &(hypothesis->GetTranslationOption()), 
+          TranslationDelta* delta = new FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
                                                     &(prev->GetTranslationOption()),  prev->GetPrevHypo(), hypothesis->GetNextHypo(), rightTargetSegment,leftTargetSegment, totalDistortion);
           deltas.push_back(delta);          
         }
           
         CheckValidReordering(prev,hypothesis, prev->GetPrevHypo(), prev->GetNextHypo(), hypothesis->GetPrevHypo(),  hypothesis->GetNextHypo(), totalDistortion); 
-        noChangeDelta = new   FlipDelta(targetWords, &(prev->GetTranslationOption()), 
+        noChangeDelta = new   FlipDelta(sample, &(prev->GetTranslationOption()), 
                                           &(hypothesis->GetTranslationOption()), prev->GetPrevHypo(), hypothesis->GetNextHypo() ,leftTargetSegment,rightTargetSegment, totalDistortion); 
         deltas.push_back(noChangeDelta);   
       }
@@ -404,13 +398,13 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
         
         bool isValidSwap = CheckValidReordering(prev,hypothesis, hypothesis->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, prev->GetNextHypo(), totalDistortion);        
         if (isValidSwap) {//yes
-          TranslationDelta* delta = new FlipDelta(targetWords, &(prev->GetTranslationOption()), 
+          TranslationDelta* delta = new FlipDelta(sample, &(prev->GetTranslationOption()), 
                                                   &(hypothesis->GetTranslationOption()),  hypothesis->GetPrevHypo(), prev->GetNextHypo(), leftTargetSegment,rightTargetSegment, totalDistortion);
           deltas.push_back(delta);
         }  
           
         CheckValidReordering(hypothesis,prev, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), prev->GetPrevHypo(), prev->GetNextHypo(), totalDistortion);        
-        noChangeDelta = new FlipDelta(targetWords,&(hypothesis->GetTranslationOption()), 
+        noChangeDelta = new FlipDelta(sample,&(hypothesis->GetTranslationOption()), 
                                       &(prev->GetTranslationOption()), hypothesis->GetPrevHypo(), prev->GetNextHypo(), rightTargetSegment,leftTargetSegment, totalDistortion);
         deltas.push_back(noChangeDelta); 
       }
@@ -437,7 +431,7 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
           
         //apply it to the sample
         if (deltas[chosen] != noChangeDelta) {
-          deltas[chosen]->apply(sample,*noChangeDelta);  
+          deltas[chosen]->apply(*noChangeDelta);  
         }
         
         VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);

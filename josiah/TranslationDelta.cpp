@@ -59,7 +59,7 @@ namespace Moses {
   Compute the change in language model score by adding this target phrase
   into the hypothesis at the given target position.
   **/
-void  TranslationDelta::addLanguageModelScore(const vector<Word>& targetWords, const Phrase& targetPhrase, const WordsRange& targetSegment) {
+void  TranslationDelta::addLanguageModelScore(const Phrase& targetPhrase, const WordsRange& targetSegment) {
   const LMList& languageModels = StaticData::Instance().GetAllLM();
   for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
     LanguageModel* lm = *i;
@@ -80,7 +80,7 @@ void  TranslationDelta::addLanguageModelScore(const vector<Word>& targetWords, c
       if (start+(int)i < 0) {
         lmcontext[contextPos++] = &(lm->GetSentenceStartArray());
       } else {
-        lmcontext[contextPos++] = &(targetWords[i+start]);
+        lmcontext[contextPos++] = &(getSample().GetTargetWords()[i+start]);
       }
     }
     
@@ -93,11 +93,11 @@ void  TranslationDelta::addLanguageModelScore(const vector<Word>& targetWords, c
     size_t eoscount = 0;
     for (size_t i = 0; i < order-1; ++i) {
       size_t targetPos = i + targetSegment.GetEndPos() + 1;
-      if (targetPos >= targetWords.size()) {
+      if (targetPos >= getSample().GetTargetWords().size()) {
         lmcontext[contextPos++] = &(lm->GetSentenceEndArray());
         ++eoscount;
       } else {
-        lmcontext[contextPos++] = &(targetWords[targetPos]);
+        lmcontext[contextPos++] = &(getSample().GetTargetWords()[targetPos]);
       }
     }
     
@@ -138,7 +138,7 @@ void  TranslationDelta::addLanguageModelScore(const vector<Word>& targetWords, c
   }
 }
 
-void TranslationDelta::initScoresSingleUpdate(const vector<Word>& targetWords, const TranslationOption* option, const WordsRange& targetSegment) {
+void TranslationDelta::initScoresSingleUpdate(const TranslationOption* option, const WordsRange& targetSegment) {
   //translation scores
   m_scores.PlusEquals(option->GetScoreBreakdown());
         
@@ -149,7 +149,7 @@ void TranslationDelta::initScoresSingleUpdate(const vector<Word>& targetWords, c
   m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
         
         
-  addLanguageModelScore(targetWords, option->GetTargetPhrase(), targetSegment);
+  addLanguageModelScore(option->GetTargetPhrase(), targetSegment);
         
   //weight the scores
   const vector<float> & weights = StaticData::Instance().GetAllWeights();
@@ -159,7 +159,7 @@ void TranslationDelta::initScoresSingleUpdate(const vector<Word>& targetWords, c
   VERBOSE(2,"Single Update: Total score is  " << m_score << endl);  
 }
 
-void TranslationDelta::initScoresPairedUpdate(const vector<Word>& targetWords, const TranslationOption* leftOption,
+void TranslationDelta::initScoresPairedUpdate(const TranslationOption* leftOption,
       const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) {
   //translation scores
   m_scores.PlusEquals(leftOption->GetScoreBreakdown());
@@ -171,7 +171,7 @@ void TranslationDelta::initScoresPairedUpdate(const vector<Word>& targetWords, c
   float penalty = -((int)leftOption->GetTargetPhrase().GetSize()) -((int)rightOption->GetTargetPhrase().GetSize());
   m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
   
-  addLanguageModelScore(targetWords, targetPhrase, targetSegment);
+  addLanguageModelScore(targetPhrase, targetSegment);
   
   //weight the scores
   const vector<float> & weights = StaticData::Instance().GetAllWeights();
@@ -183,31 +183,30 @@ void TranslationDelta::initScoresPairedUpdate(const vector<Word>& targetWords, c
 }
 
 
-TranslationUpdateDelta::TranslationUpdateDelta(const vector<Word>& targetWords,  const TranslationOption* option , 
-                                               const WordsRange& targetSegment) :
-    m_option(option)  {
-  initScoresSingleUpdate(targetWords,option,targetSegment);
+TranslationUpdateDelta::TranslationUpdateDelta(Sample& sample, const TranslationOption* option ,const WordsRange& targetSegment) :
+    TranslationDelta(sample),  m_option(option)  {
+  initScoresSingleUpdate(option,targetSegment);
 }
 
-void TranslationUpdateDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+void TranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
   m_scores.MinusEquals(noChangeDelta.getScores());
-  sample.ChangeTarget(*m_option,m_scores);
+  getSample().ChangeTarget(*m_option,m_scores);
 }
 
 
-MergeDelta::MergeDelta(const vector<Word>& targetWords, const TranslationOption* option, const WordsRange& targetSegment) :
-    m_option(option) {
-  initScoresSingleUpdate(targetWords,option,targetSegment);
+MergeDelta::MergeDelta(Sample& sample, const TranslationOption* option, const WordsRange& targetSegment) :
+    TranslationDelta(sample),  m_option(option) {
+  initScoresSingleUpdate(option,targetSegment);
 }
 
-void MergeDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+void MergeDelta::apply(const TranslationDelta& noChangeDelta) {
   m_scores.MinusEquals(noChangeDelta.getScores());
-  sample.MergeTarget(*m_option,m_scores);
+  getSample().MergeTarget(*m_option,m_scores);
 }
 
-PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(const vector<Word>& targetWords,
+PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(Sample& sample,
    const TranslationOption* leftOption, const TranslationOption* rightOption, 
-   const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) :
+   const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) : TranslationDelta(sample),
     m_leftOption(leftOption), m_rightOption(rightOption){
     //For lm-scores treat as one large target segment, since the lmcontext may overlap, depending on the lm order
       
@@ -218,7 +217,7 @@ PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(const vector<Word>& t
       targetPhrase = auto_ptr<Phrase>(new Phrase(leftOption->GetTargetPhrase()));
       //include potential words between the two target segments
       for (size_t i = leftTargetSegment.GetEndPos()+1; i < rightTargetSegment.GetStartPos(); ++i) {
-        targetPhrase->AddWord(targetWords[i]);
+        targetPhrase->AddWord(getSample().GetTargetWords()[i]);
       }
       targetPhrase->Append(rightOption->GetTargetPhrase());                    
     }
@@ -226,50 +225,51 @@ PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(const vector<Word>& t
       targetPhrase = auto_ptr<Phrase>(new Phrase(rightOption->GetTargetPhrase()));
       //include potential words between the two target segments
       for (size_t i = rightTargetSegment.GetEndPos()+1; i < leftTargetSegment.GetStartPos(); ++i) {
-        targetPhrase->AddWord(targetWords[i]);
+        targetPhrase->AddWord(getSample().GetTargetWords()[i]);
       }
       targetPhrase->Append(leftOption->GetTargetPhrase());
     }
       
       
-    initScoresPairedUpdate(targetWords,leftOption,rightOption,targetSegment,*targetPhrase);
+    initScoresPairedUpdate(leftOption,rightOption,targetSegment,*targetPhrase);
 }
 
-void PairedTranslationUpdateDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+void PairedTranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
   m_scores.MinusEquals(noChangeDelta.getScores());
-  sample.ChangeTarget(*m_leftOption,m_scores);
+  getSample().ChangeTarget(*m_leftOption,m_scores);
   ScoreComponentCollection emptyScores;
-  sample.ChangeTarget(*m_rightOption,emptyScores);
+  getSample().ChangeTarget(*m_rightOption,emptyScores);
 }
 
-SplitDelta::SplitDelta(const vector<Word>& targetWords,
-                       const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange& targetSegment) :
+SplitDelta::SplitDelta(Sample& sample, const TranslationOption* leftOption, 
+                       const TranslationOption* rightOption, const WordsRange& targetSegment) : TranslationDelta(sample),
     m_leftOption(leftOption), m_rightOption(rightOption) {
   Phrase targetPhrase (leftOption->GetTargetPhrase());
   const Phrase& rightTargetPhrase = rightOption->GetTargetPhrase();
   for (size_t i = 0; i < rightTargetPhrase.GetSize(); ++i) {
     targetPhrase.AddWord(rightTargetPhrase.GetWord(i));
   }
-  initScoresPairedUpdate(targetWords,leftOption,rightOption,targetSegment,targetPhrase);
+  initScoresPairedUpdate(leftOption,rightOption,targetSegment,targetPhrase);
 }
 
-void SplitDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+void SplitDelta::apply(const TranslationDelta& noChangeDelta) {
   m_scores.MinusEquals(noChangeDelta.getScores());
-  sample.SplitTarget(*m_leftOption,*m_rightOption,m_scores);
+  getSample().SplitTarget(*m_leftOption,*m_rightOption,m_scores);
 }
   
-void FlipDelta::apply(Sample& sample, const TranslationDelta& noChangeDelta) {
+void FlipDelta::apply(const TranslationDelta& noChangeDelta) {
   //cout << "Applying " << m_prevTgtHypo->GetNextHypo()->GetCurrTargetWordsRange() << " and " <<
   //    m_nextTgtHypo->GetPrevHypo()->GetCurrTargetWordsRange() << endl;
   m_scores.MinusEquals(noChangeDelta.getScores());
   //sample.FlipNodes(m_leftTgtOption->GetSourceWordsRange().GetStartPos(), m_rightTgtOption->GetSourceWordsRange().GetStartPos(), m_scores);
-  sample.FlipNodes(*m_leftTgtOption, *m_rightTgtOption, m_prevTgtHypo, m_nextTgtHypo, m_scores);
+  getSample().FlipNodes(*m_leftTgtOption, *m_rightTgtOption, m_prevTgtHypo, m_nextTgtHypo, m_scores);
   //cout << "Applied " << endl;
 }
 
     
-FlipDelta::FlipDelta(const vector<Word>& targetWords,  const TranslationOption* leftTgtOption , 
+FlipDelta::FlipDelta(Sample& sample, const TranslationOption* leftTgtOption , 
                          const TranslationOption* rightTgtOption,  const Hypothesis* prevTgtHypo, const Hypothesis* nextTgtHypo, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, float totalDistortion ) :
+    TranslationDelta(sample),
     m_leftTgtOption(leftTgtOption), m_rightTgtOption(rightTgtOption), m_prevTgtHypo(const_cast<Hypothesis*> (prevTgtHypo)), m_nextTgtHypo(const_cast<Hypothesis*> (nextTgtHypo))  {
     
     //translation scores
@@ -289,23 +289,25 @@ FlipDelta::FlipDelta(const vector<Word>& targetWords,  const TranslationOption* 
 
     if (leftTargetSegment < rightTargetSegment) {
        for (size_t i =leftTargetSegment.GetEndPos()+1 ; i < rightTargetSegment.GetStartPos(); ++i) {
-        targetPhrase.AddWord(targetWords[i]);
+         targetPhrase.AddWord(getSample().GetTargetWords()[i]);
        }
     }
     else {
        for (size_t i =rightTargetSegment.GetEndPos()+1 ; i < leftTargetSegment.GetStartPos(); ++i) {
-        targetPhrase.AddWord(targetWords[i]);
+         targetPhrase.AddWord(getSample().GetTargetWords()[i]);
        }
     } 
     //include potential words between the two target segments
     targetPhrase.Append(m_rightTgtOption->GetTargetPhrase());
 
     
-    addLanguageModelScore(targetWords, targetPhrase, targetSegment);
+    addLanguageModelScore(targetPhrase, targetSegment);
     
     //linear distortion
     const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
-    m_scores.PlusEquals(dsp, totalDistortion);      
+    m_scores.PlusEquals(dsp, totalDistortion);
+    
+    //extra scores
       
     //weight the scores
     const vector<float> & weights = StaticData::Instance().GetAllWeights();
