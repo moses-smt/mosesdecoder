@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iomanip>
 #include <fstream>
 
-//#define MPI_ENABLED
+#define MPI_ENABLED
 #ifdef MPI_ENABLED
 #include <mpi.h>
 #endif
@@ -166,7 +166,7 @@ struct ExpectedBleuTrainer : public InputSource {
       ScoreComponentCollection weights(w);
       vector<float> rcv_grad(w.size());
       assert(gradient.data().size() == w.size());
-      double tg = 0;
+      float tg = 0;
 #ifdef MPI_ENABLED
       if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&gradient.data()[0]), &rcv_grad[0], w.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
       if (MPI_SUCCESS != MPI_Reduce(&total_exp_gain, &tg, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
@@ -178,7 +178,7 @@ struct ExpectedBleuTrainer : public InputSource {
       if (rank == 0) {
         cout << "TOTAL EXPECTED GAIN: " << (tg / batch_size) << " (batch size = " << batch_size << ")\n";
         cerr << " G:" << g << endl;
-        const float eta = 0.6;
+        const float eta = 0.75;
         g.MultiplyEquals(eta);
         g.DivideEquals(batch_size);
         weights.PlusEquals(g);
@@ -197,7 +197,7 @@ struct ExpectedBleuTrainer : public InputSource {
       // TODO-- add convergence criteria!!
       static int cc = 0;
       ++cc;
-      if (cc == 4) keep_going = false;
+      if (cc == 16) keep_going = false;
     }
   }
 };
