@@ -56,14 +56,29 @@ QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)
 
 void QueueEntry::CreateDeviants(ChartCell &currCell) const
 {
+	float threshold = currCell.GetThreshold();
+	float transOptScore = m_transOpt.GetTotalScore();
+
+	if (transOptScore != 0)
+		cerr << transOptScore << " " << m_transOpt << endl;
+
 	for (size_t ind = 0; ind < m_childEntries.size(); ind++)
 	{
 		const ChildEntry &childEntry = m_childEntries[ind];
 
 		if (childEntry.GetPos() + 1 < childEntry.GetChildCell().GetSize())
 		{
-			QueueEntry *newEntry = new QueueEntry(*this, ind);
-			currCell.AddQueueEntry(newEntry);
+			const Hypothesis *hypo = childEntry.GetChildCell().GetSortedHypotheses()[childEntry.GetPos() + 1];
+			float combinedScore = transOptScore + hypo->GetTotalScore();
+
+			if (hypo->GetTotalScore() != 0)
+				cerr << hypo->GetTotalScore() << " " << *hypo << endl;
+
+			if (combinedScore > threshold)
+			{
+				QueueEntry *newEntry = new QueueEntry(*this, ind);
+				currCell.AddQueueEntry(newEntry);
+			}
 		}
 	}
 }
