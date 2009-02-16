@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <mpi.h>
 #endif
 
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_smallint.hpp>
 #include <boost/program_options.hpp>
 
 #include "Decoder.h"
@@ -41,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "MBRDecoder.h"
 #include "Timer.h"
 #include "StaticData.h"
+#include "Optimizer.h"
 
 #if 0
   vector<string> refs;
@@ -112,9 +115,22 @@ struct StreamInputSource : public InputSource {
   }
 };
 
+
 struct ExpectedBleuTrainer : public InputSource {
-  ExpectedBleuTrainer(int r, int s, int bsize, vector<string>* sents)
-    : rank(r), size(s), batch_size(bsize), iteration(), corpus(), keep_going(true), total_exp_gain(), order(batch_size) {
+  ExpectedBleuTrainer(int r, int s, int bsize, vector<string>* sents, unsigned int rseed, bool randomize, Optimizer* o)
+    : rank(r),
+      size(s),
+      batch_size(bsize),
+      iteration(),
+      corpus(),
+      keep_going(true),
+      total_exp_gain(),
+      order(batch_size),
+      rng(rseed),
+      dist(0, sents->size() - 1),
+      draw(rng, dist),
+      randomize_batches(randomize),
+      optimizer(o) {
     if (rank >= batch_size) keep_going = false;
     corpus.swap(*sents);
     int esize = min(batch_size, size);
@@ -123,7 +139,9 @@ struct ExpectedBleuTrainer : public InputSource {
     cur = cur_start = sents_per_batch * rank;
     //cerr << "sents_per_batch: " << sents_per_batch << endl;
     cur_end = min((int)corpus.size(), sents_per_batch * (rank + 1));
+    if (rank == size - 1) cur_end = batch_size;
     cerr << rank << "/" << size << ": cur_start=" << cur_start << "  cur_end=" << cur_end << endl;
+    assert(cur_end >= cur_start);
     tlc = 0;
     ReserveNextBatch();
   }
@@ -136,13 +154,23 @@ struct ExpectedBleuTrainer : public InputSource {
   float total_exp_gain;
   ScoreComponentCollection gradient;
   vector<int> order;
+  boost::mt19937 rng;
+  boost::uniform_smallint<int> dist;
+  boost::variate_generator<boost::mt19937, boost::uniform_smallint<int> > draw;
+  bool randomize_batches;
+  Optimizer* optimizer;
   int tlc;
   // right now, just goes through in order, should do something
   // random
   void ReserveNextBatch() {
     if (rank == 0) {
-      for (unsigned int i = 0; i < order.size(); ++i, ++tlc)
-        order[i] = tlc % corpus.size();
+      if (randomize_batches) {
+        for (unsigned int i = 0; i < order.size(); ++i, ++tlc)
+          order[i] = draw();
+      } else {
+        for (unsigned int i = 0; i < order.size(); ++i, ++tlc)
+          order[i] = tlc % corpus.size();
+      }
     } 
 #ifdef MPI_ENABLED
     if (MPI_SUCCESS != MPI_Bcast(&order[0], order.size(), MPI_INT, 0, MPI_COMM_WORLD))
@@ -178,13 +206,11 @@ struct ExpectedBleuTrainer : public InputSource {
 #endif
       ScoreComponentCollection g(rcv_grad);
       if (rank == 0) {
-        cout << "TOTAL EXPECTED GAIN: " << (tg / batch_size) << " (batch size = " << batch_size << ")\n";
-        cerr << " G:" << g << endl;
-        const float eta = 0.75;
-        g.MultiplyEquals(eta);
+        tg /= batch_size;
         g.DivideEquals(batch_size);
+        cout << "TOTAL EXPECTED GAIN: " << tg << " (batch size = " << batch_size << ")\n";
+        optimizer->Optimize(tg, weights, g, &weights);
         weights.PlusEquals(g);
-        cerr << "NEW WEIGHTS: " << weights << endl;
       }
 #ifdef MPI_ENABLED
       if (MPI_SUCCESS != MPI_Bcast(const_cast<float*>(&weights.data()[0]), weights.data().size(), MPI_FLOAT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
@@ -195,11 +221,7 @@ struct ExpectedBleuTrainer : public InputSource {
       cur = cur_start;
       gradient.ZeroAll();
       total_exp_gain = 0;
-
-      // TODO-- add convergence criteria!!
-      static int cc = 0;
-      ++cc;
-      if (cc == 16) keep_going = false;
+      if (optimizer->HasConverged()) keep_going = false;
     }
   }
 };
@@ -235,8 +257,10 @@ int main(int argc, char** argv) {
   bool mbr_decoding;
   bool do_timing;
   bool show_features;
+  int max_training_iterations;
   uint32_t seed;
   int lineno;
+  bool randomize;
   float scalefactor;
   string weightfile;
   vector<string> ref_files;
@@ -259,7 +283,9 @@ int main(int argc, char** argv) {
         ("line-number,L", po::value(&lineno)->default_value(0), "Starting reference/line number")
         ("xbleu,x", po::value(&expected_sbleu)->zero_tokens()->default_value(false), "Compute the expected sentence BLEU")
         ("gradient,g", po::value(&expected_sbleu_gradient)->zero_tokens()->default_value(false), "Compute the gradient with respect to expected sentence BLEU")
+        ("randomize-batches,R", po::value(&randomize)->zero_tokens()->default_value(false), "Randomize training batches")
         ("expected-bleu-training,T", po::value(&expected_sbleu_training)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU")
+        ("max-training-iterations,M", po::value(&max_training_iterations)->default_value(30), "Maximum training iterations")
         ("training-batch-size,S", po::value(&training_batch_size)->default_value(0), "Batch size to use during xpected bleu training, 0 = full corpus")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
@@ -326,6 +352,7 @@ int main(int argc, char** argv) {
 
   auto_ptr<istream> in;
   auto_ptr<InputSource> input;
+  auto_ptr<Optimizer> optimizer(new DumbStochasticGradientDescent(0.75, max_training_iterations));
   ExpectedBleuTrainer* trainer = NULL;
   if (expected_sbleu_training) {
     vector<string> input_lines;
@@ -341,7 +368,7 @@ int main(int argc, char** argv) {
     VERBOSE(1, "Loaded " << input_lines.size() << " lines in training mode" << endl);
     if (!training_batch_size || training_batch_size > input_lines.size())
       training_batch_size = input_lines.size();
-    trainer = new ExpectedBleuTrainer(rank, size, training_batch_size, &input_lines);
+    trainer = new ExpectedBleuTrainer(rank, size, training_batch_size, &input_lines, seed, randomize, optimizer.get());
     input.reset(trainer);
   } else {
     if (inputfile.size()) {

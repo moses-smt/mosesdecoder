@@ -1,5 +1,6 @@
 bin_PROGRAMS = josiah
 josiah_SOURCES = Derivation.cpp Decoder.cpp Josiah.cpp \
+	Optimizer.cpp \
 	GainFunction.cpp \
 	MBRDecoder.cpp \
         Gibbler.cpp \
