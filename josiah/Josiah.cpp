@@ -17,6 +17,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <algorithm>
+#include <functional>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -235,6 +237,7 @@ int main(int argc, char** argv) {
   bool show_features;
   uint32_t seed;
   int lineno;
+  float scalefactor;
   string weightfile;
   vector<string> ref_files;
   po::options_description desc("Allowed options");
@@ -246,6 +249,7 @@ int main(int argc, char** argv) {
         ("timing,m", po::value(&do_timing)->zero_tokens()->default_value(false), "Display timing information.")
         ("iterations,s", po::value<int>(&iterations)->default_value(5), "Number of sampling iterations")
         ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
+        ("scale-factor,c", po::value<float>(&scalefactor)->default_value(1.0), "Scale factor for model weights.")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
         ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
 	("show-features,F",po::value<bool>(&show_features)->zero_tokens()->default_value(false),"Show features and then exit")
@@ -300,6 +304,14 @@ int main(int argc, char** argv) {
 #endif
     return 0;
   }
+  
+  //scale model weights
+  vector<float> weights = StaticData::Instance().GetAllWeights();
+  transform(weights.begin(),weights.end(),weights.begin(),bind2nd(multiplies<float>(),scalefactor));
+  const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
+  VERBOSE(1,"Scaled weights by factor of " << scalefactor << endl);
+  
+  
 
   if (vm.count("random-seed")) {
     GibbsOperator::setRandomSeed(seed);
@@ -339,7 +351,7 @@ int main(int argc, char** argv) {
         return 1;
       }
     } else {
-      in.reset(new istringstream(string("das parlament will das auf zweierlei weise tun .")));
+      in.reset(new istringstream(string("das parlament will das auf zweierlei weise tun .\n")));
     }
     input.reset(new StreamInputSource(*in));
   }
