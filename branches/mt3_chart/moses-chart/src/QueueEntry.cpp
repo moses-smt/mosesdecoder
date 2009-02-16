@@ -39,9 +39,11 @@ QueueEntry::QueueEntry(const TranslationOption &transOpt
 			}
 
 			ChildEntry childEntry(0, childCell);
-			m_childEntries.insert(m_childEntries.end(), childEntry);
+			m_childEntries.push_back(childEntry);
 		}
 	}
+
+	CalcScore();
 
 	isOK = true;
 }
@@ -52,15 +54,13 @@ QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)
 {
 	ChildEntry &childEntry = m_childEntries[childEntryIncr];
 	childEntry.IncrementPos();
+
+	CalcScore();
 }
 
 void QueueEntry::CreateDeviants(ChartCell &currCell) const
 {
 	float threshold = currCell.GetThreshold();
-	float transOptScore = m_transOpt.GetTotalScore();
-
-	if (transOptScore != 0)
-		cerr << transOptScore << " " << m_transOpt << endl;
 
 	for (size_t ind = 0; ind < m_childEntries.size(); ind++)
 	{
@@ -68,19 +68,29 @@ void QueueEntry::CreateDeviants(ChartCell &currCell) const
 
 		if (childEntry.GetPos() + 1 < childEntry.GetChildCell().GetSize())
 		{
-			const Hypothesis *hypo = childEntry.GetChildCell().GetSortedHypotheses()[childEntry.GetPos() + 1];
-			float combinedScore = transOptScore + hypo->GetTotalScore();
-
-			if (hypo->GetTotalScore() != 0)
-				cerr << hypo->GetTotalScore() << " " << *hypo << endl;
-
-			if (combinedScore > threshold)
+			QueueEntry *newEntry = new QueueEntry(*this, ind);
+			if (newEntry->m_combinedScore > threshold)
 			{
-				QueueEntry *newEntry = new QueueEntry(*this, ind);
 				currCell.AddQueueEntry(newEntry);
+			}
+			else
+			{
+				delete newEntry;
 			}
 		}
 	}
+}
+
+void QueueEntry::CalcScore()
+{
+	m_combinedScore = m_transOpt.GetTotalScore();
+	for (size_t ind = 0; ind < m_childEntries.size(); ind++)
+	{
+		const ChildEntry &childEntry = m_childEntries[ind];
+		const Hypothesis *hypo = childEntry.GetChildCell().GetSortedHypotheses()[childEntry.GetPos()];
+		m_combinedScore += hypo->GetTotalScore();
+	}
+
 }
 
 }
