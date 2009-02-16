@@ -3,6 +3,7 @@
 #include <iostream>
 #include "ChartTranslationOptionList.h"
 #include "../../moses/src/Util.h"
+#include "../../moses/src/StaticData.h"
 
 using namespace Moses;
 using namespace std;
@@ -23,19 +24,22 @@ void TranslationOptionList::Add(TranslationOption *transOpt)
 void TranslationOptionList::Sort()
 {
 	// backoff to least arity
-	size_t minArity = 999;
+	float scoreThreshold = -std::numeric_limits<float>::infinity();
 	CollType::const_iterator iter;
 	for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
 	{
 		const TranslationOption *transOpt = *iter;
-		size_t arity = transOpt->GetArity();
-		minArity = (arity < minArity) ? arity : minArity;
+		float score = transOpt->GetTotalScore();
+		scoreThreshold = (score > scoreThreshold) ? score : scoreThreshold;
 	}
+
+	scoreThreshold += StaticData::Instance().GetTranslationOptionThreshold();
+
 	size_t ind = 0;
 	while (ind < m_coll.size())
 	{
 		const TranslationOption *transOpt = m_coll[ind];
-		if (transOpt->GetArity() > minArity)
+		if (transOpt->GetTotalScore() < scoreThreshold)
 		{
 			delete transOpt;
 			m_coll.erase(m_coll.begin() + ind);

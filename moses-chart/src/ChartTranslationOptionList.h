@@ -13,10 +13,12 @@ class ChartTranslationOptionOrderer
 public:
 	bool operator()(const TranslationOption* transOptA, const TranslationOption* transOptB) const
 	{
+		/*
 		if (transOptA->GetArity() != transOptB->GetArity())
 		{
 			return transOptA->GetArity() < transOptB->GetArity();
 		}
+		*/
 		return transOptA->GetTotalScore() > transOptB->GetTotalScore();
 	}
 };
