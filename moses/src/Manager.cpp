@@ -60,6 +60,17 @@ Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
 	staticData.InitializeBeforeSentenceProcessing(source);
 }
 
+Manager::Manager(vector<InputType const*> *sources, SearchAlgorithm searchAlgorithm)
+	:m_source(*((*sources)[0]))
+	,m_transOptColl(((*sources)[0])->CreateTranslationOptionCollection())
+	,m_search(Search::CreateSearch((*((*sources)[0])), searchAlgorithm, *m_transOptColl))
+	,m_start(clock())
+	,interrupted_flag(0)
+{
+	const StaticData &staticData = StaticData::Instance();
+	staticData.InitializeBeforeSentenceProcessing(*((*sources)[0]));
+}
+	
 Manager::~Manager() 
 {
   delete m_transOptColl;

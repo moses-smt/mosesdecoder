@@ -93,6 +93,8 @@ protected:
 		
 public:
 	Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
+	//Manager(vector<InputType*> const& sources, SearchAlgorithm searchAlgorithm);
+	Manager(vector<InputType const*> *sources, SearchAlgorithm searchAlgorithm);
 	~Manager();
 
 	void ProcessSentence();

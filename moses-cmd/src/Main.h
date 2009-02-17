@@ -40,3 +40,4 @@ class IOWrapper;
 
 int main(int argc, char* argv[]);
 IOWrapper *GetIODevice(const Moses::StaticData &staticData);
+IOWrapper *GetIODevice(const Moses::StaticData &staticData, unsigned int input);
