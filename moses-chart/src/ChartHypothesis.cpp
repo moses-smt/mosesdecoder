@@ -138,15 +138,23 @@ size_t Hypothesis::GetSuffix(Phrase &ret, size_t size) const
 int Hypothesis::LMContextCompare(const Hypothesis &other) const
 {
 	// prefix
-	int ret = GetPrefix().Compare(other.GetPrefix());
-	if (ret != 0)
-		return ret;
+	if (m_currSourceWordsRange.GetStartPos() > 0)
+	{
+		int ret = GetPrefix().Compare(other.GetPrefix());
+		if (ret != 0)
+			return ret;
+	}
 
 	// suffix
-	ret = GetSuffix().Compare(other.GetSuffix());
-	if (ret != 0)
-		return ret;
+	size_t inputSize = StaticData::Instance().GetInput()->GetSize();
+	if (m_currSourceWordsRange.GetEndPos() < inputSize - 1)
+	{
+		int ret = GetSuffix().Compare(other.GetSuffix());
+		if (ret != 0)
+			return ret;
+	}
 
+	// they're the same
 	return 0;
 }
 
