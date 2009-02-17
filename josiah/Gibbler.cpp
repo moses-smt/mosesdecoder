@@ -50,6 +50,8 @@ Sample::Sample(Hypothesis* target_head) : feature_values(target_head->GetScoreBr
   
   this->source_tail->m_sourcePrevHypo = NULL;
   this->target_tail->m_prevHypo = NULL;
+  
+  UpdateTargetWords();
 }
  
 Sample::~Sample() {
