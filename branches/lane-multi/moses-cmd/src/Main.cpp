@@ -64,7 +64,7 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 
-bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
+bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, const InputType*& source)
 {
 	delete source;
 	switch(inputType)
@@ -76,6 +76,35 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 	}
 	return (source ? true : false);
 }
+
+//void foobar(vector<InputType const*> *sources)
+//{
+//	InputType const& m_source = *((*sources)[0]);
+//	TranslationOptionCollection *m_transOptColl = ((*sources)[0])->CreateTranslationOptionCollection();
+//	
+//	const InputType &source = *((*sources)[0]);
+//	
+//	InputType const& s = *((*sources)[0]);
+//}
+
+bool ReadInputs(vector<IOWrapper*> *ioWrappers, InputTypeEnum inputType, vector<const InputType*> *sources)
+{
+	//VERBOSE(1, "ioWrappers.size() == " << ioWrappers->size() << endl);
+	//VERBOSE(1, "source.size() == " << source->size() << endl);
+	assert(ioWrappers->size() == sources->size());
+	bool success = true;
+	
+	for (int i=0; i<ioWrappers->size(); i++) {
+		IOWrapper* ioWrapper = (*ioWrappers)[i];
+		success = ReadInput(*ioWrapper, inputType, (*sources)[i]);
+		if (!success)
+			return false;
+	}
+	//foobar(sources);
+	
+	return success;
+}
+
 
 
 int main(int argc, char* argv[])
@@ -109,7 +138,20 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// set up read/writing class
-	IOWrapper *ioWrapper = GetIODevice(staticData);
+	int numInputs = staticData.GetParam("input-file").size();
+	//const InputType** sourcesArray = (const InputType**) malloc(sizeof(InputType*)*numInputs);
+
+	
+	vector<IOWrapper*> *ioWrappers = new vector<IOWrapper*>(numInputs);
+	vector<const InputType*> *sources = new vector<const InputType*>(numInputs);
+	//IOWrapper *ioWrapper = GetIODevice(staticData);
+	for (int i=0; i<numInputs; i++) {
+		//IOWrapper *wrapper = GetIODevice(staticData, i);
+		//ioWrappers->push_back(wrapper);
+		//sourcesArray[i] = NULL;
+		(*ioWrappers)[i] = GetIODevice(staticData, i);
+		(*sources)[i] = NULL;
+	}
 
 	// check on weights
 	vector<float> weights = staticData.GetAllWeights();
@@ -125,19 +167,24 @@ int main(int argc, char* argv[])
 	  return EXIT_FAILURE;
 	}
 
-	if (ioWrapper == NULL)
+	//if (ioWrapper == NULL)
+	if (ioWrappers==NULL || ioWrappers->size() <= 0)
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
-	InputType *source=0;
+	//InputType *source=0;
+	
 	size_t lineCount = 0;
-	while(ReadInput(*ioWrapper,staticData.GetInputType(),source))
+	while(ReadInputs(ioWrappers,staticData.GetInputType(),sources))
 	{
-			// note: source is only valid within this while loop!
+		// note: source is only valid within this while loop!
 		IFVERBOSE(1)
 			ResetUserTime();
 
-		VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
+		VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << (*sources)[0]);
+		for (int i=1; i<numInputs; i++) {
+			VERBOSE(2,"  ...and(" << lineCount << "): " << (*sources)[i]);	
+		}
 		VERBOSE(1,"WER = " << staticData.GetWERLimit() << endl);
 		//staticData.SetWERLimit(1.0f);
 		
@@ -157,7 +204,8 @@ int main(int argc, char* argv[])
 				VERBOSE(1, "Translating with WER limit of " << limit << endl);
 				staticData.SetWERLimit(limit);
 				if (manager != NULL) delete manager;
-				manager = new Manager(*source, staticData.GetSearchAlgorithm());
+				//manager = new Manager(*source, staticData.GetSearchAlgorithm());
+				manager = new Manager(*(*sources)[0], staticData.GetSearchAlgorithm());
 		
 				//Manager manager(*source, staticData.GetSearchAlgorithm());
 				//manager.ProcessSentence();
@@ -172,21 +220,29 @@ int main(int argc, char* argv[])
 			staticData.SetWERLimit(actualWERLimit);
 		} else {
 			VERBOSE(1, "Translating with WER limit of " << staticData.GetWERLimit() << endl);
-			manager = new Manager(*source, staticData.GetSearchAlgorithm());
+			//manager = new Manager(*source, staticData.GetSearchAlgorithm());
+			
+			manager = new Manager(*(*sources)[0], staticData.GetSearchAlgorithm());
 			manager->ProcessSentence();
 		}
 		
 		
-		if (staticData.GetOutputWordGraph())
-//			manager.GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
-			manager->GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
-
-                if (staticData.GetOutputSearchGraph())
+		if (staticData.GetOutputWordGraph()) {
+			for (int i=0; i<numInputs; i++) {
+			//			manager.GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
+				manager->GetWordGraph((*sources)[i]->GetTranslationId(), (*ioWrappers)[i]->GetOutputWordGraphStream());
+			}
+		}
+		
+		if (staticData.GetOutputSearchGraph()) {
+			for (int i=0; i<numInputs; i++) {
 //		  manager.GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
-					manager->GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
-
+				manager->GetSearchGraph((*sources)[i]->GetTranslationId(), (*ioWrappers)[i]->GetOutputSearchGraphStream());
+			}
+		}
+	
 #ifdef HAVE_PROTOBUF
-                if (staticData.GetOutputSearchGraphPB()) {
+		if (staticData.GetOutputSearchGraphPB()) {
 			ostringstream sfn;
 			sfn << staticData.GetParam("output-search-graph-pb")[0] << '/' << source->GetTranslationId() << ".pb" << ends;
 			string fn = sfn.str();
@@ -200,7 +256,7 @@ int main(int argc, char* argv[])
 		// pick best translation (maximum a posteriori decoding)
 		if (! staticData.UseMBR()) {
 			//ioWrapper->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
-			ioWrapper->OutputBestHypo(manager->GetBestHypothesis(), source->GetTranslationId(),
+			(*ioWrappers)[0]->OutputBestHypo(manager->GetBestHypothesis(), (*sources)[0]->GetTranslationId(),
 						 staticData.GetReportSegmentation(), staticData.GetReportAllFactors());
 			IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
 
@@ -212,7 +268,7 @@ int main(int argc, char* argv[])
 					TrellisPathList nBestList;
 					//manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
 					manager->CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-					ioWrapper->OutputNBestList(nBestList, source->GetTranslationId());
+					(*ioWrappers)[0]->OutputNBestList(nBestList, (*sources)[0]->GetTranslationId());
 					//RemoveAllInColl(nBestList);
 
 					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
@@ -235,7 +291,7 @@ int main(int argc, char* argv[])
 		      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
 		      IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
 		      std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
-		      ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
+		      ((*ioWrappers)[0])->OutputBestHypo(mbrBestHypo, (*sources)[0]->GetTranslationId(),
 					       staticData.GetReportSegmentation(),
 					       staticData.GetReportAllFactors());
 		      IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
@@ -254,8 +310,13 @@ int main(int argc, char* argv[])
 		delete manager;
 	}
 	
-	delete ioWrapper;
-
+	//delete ioWrapper;
+	
+	for (int i=0; i<numInputs; i++) {
+		delete (*ioWrappers)[i];
+	}
+	delete ioWrappers;
+	
 	IFVERBOSE(1)
 		PrintUserTime("End.");
 
@@ -267,7 +328,14 @@ int main(int argc, char* argv[])
 	#endif
 }
 
+
+
 IOWrapper *GetIODevice(const StaticData &staticData)
+{
+	return GetIODevice(staticData, 0);
+}
+
+IOWrapper *GetIODevice(const StaticData &staticData, unsigned int input)
 {
 	IOWrapper *ioWrapper;
 	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
@@ -275,22 +343,29 @@ IOWrapper *GetIODevice(const StaticData &staticData)
 	FactorMask inputFactorUsed(inputFactorOrder);
 
 	// io
-	if (staticData.GetParam("input-file").size() == 1)
+	int numInputs = staticData.GetParam("input-file").size();
+	if (numInputs <= 0)
+	{
+		VERBOSE(1,"IO from STDOUT/STDIN" << endl);
+		ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+								  , staticData.GetNBestSize()
+								  , staticData.GetNBestFilePath());
+	}
+	else if (input < numInputs)
 	{
 	  VERBOSE(2,"IO from File" << endl);
-		string filePath = staticData.GetParam("input-file")[0];
+		string filePath = staticData.GetParam("input-file")[input];
 
 		ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath()
 																	, filePath);
 	}
-	else
+	else 
 	{
-	  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
-		ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-																	, staticData.GetNBestSize()
-																	, staticData.GetNBestFilePath());
+		TRACE_ERR("ERROR: " << numInputs << " input files, but input number " << input << " requested" << std::endl);
+		assert(false);
+		return NULL;
 	}
 	ioWrapper->ResetTranslationId();
 
