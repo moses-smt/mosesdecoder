@@ -49,27 +49,38 @@ using namespace std;
 
 namespace Moses
 {
-Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
-:m_source(source)
-,m_transOptColl(source.CreateTranslationOptionCollection())
-,m_search(Search::CreateSearch(source, searchAlgorithm, *m_transOptColl))
-,m_start(clock())
-,interrupted_flag(0)
-{
-	const StaticData &staticData = StaticData::Instance();
-	staticData.InitializeBeforeSentenceProcessing(source);
-}
+//Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
+//:m_source(source)
+//,m_transOptColl(source.CreateTranslationOptionCollection())
+//,m_search(Search::CreateSearch(source, searchAlgorithm, *m_transOptColl))
+//,m_start(clock())
+//,interrupted_flag(0)
+//{
+//	const StaticData &staticData = StaticData::Instance();
+//	staticData.InitializeBeforeSentenceProcessing(source);
+//}
+
+//Manager::Manager(vector<InputType const*> *sources, SearchAlgorithm searchAlgorithm)
+//	:m_source(*((*sources)[0]))
+//	,m_transOptColl(((*sources)[0])->CreateTranslationOptionCollection())
+//	,m_search(Search::CreateSearch((*((*sources)[0])), searchAlgorithm, *m_transOptColl))
+//	,m_start(clock())
+//	,interrupted_flag(0)
+//{
+//	const StaticData &staticData = StaticData::Instance();
+//	staticData.InitializeBeforeSentenceProcessing(*((*sources)[0]));
+//}
 
 Manager::Manager(vector<InputType const*> *sources, SearchAlgorithm searchAlgorithm)
-	:m_source(*((*sources)[0]))
+	:m_sources(sources)
 	,m_transOptColl(((*sources)[0])->CreateTranslationOptionCollection())
 	,m_search(Search::CreateSearch((*((*sources)[0])), searchAlgorithm, *m_transOptColl))
 	,m_start(clock())
 	,interrupted_flag(0)
-{
-	const StaticData &staticData = StaticData::Instance();
-	staticData.InitializeBeforeSentenceProcessing(*((*sources)[0]));
-}
+	{
+		const StaticData &staticData = StaticData::Instance();
+		staticData.InitializeBeforeSentenceProcessing(*((*sources)[0]));
+	}
 	
 Manager::~Manager() 
 {
@@ -93,7 +104,10 @@ void Manager::ProcessSentence()
 {
 	// reset statistics
 	const StaticData &staticData = StaticData::Instance();
-	staticData.ResetSentenceStats(m_source);
+	for (int i=0; i<m_sources->size(); i++) {
+		staticData.ResetSentenceStats(*((*m_sources)[i]));
+	//staticData.ResetSentenceStats(m_source);
+	}
 
   // collect translation options for this sentence
 	const vector <DecodeGraph*>
