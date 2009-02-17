@@ -51,21 +51,24 @@ class Decoder {
     virtual void GetFeatureNames(std::vector<std::string>* featureNames) const = 0;
     virtual void GetFeatureWeights(std::vector<float>* weights) const = 0;
     virtual void SetFeatureWeights(const std::vector<float>& weights) = 0;
+    virtual void SetMonotone(bool isMonotone) = 0;
     virtual ~Decoder();
 
 };
 
 class MosesDecoder : public virtual Decoder {
   public:
-    MosesDecoder() {}
+    MosesDecoder() : m_isMonotone(false) {}
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc);
     virtual void GetFeatureNames(std::vector<std::string>* featureNames) const;
     virtual void GetFeatureWeights(std::vector<float>* weights) const;
     virtual void SetFeatureWeights(const std::vector<float>& weights);
+    virtual void SetMonotone(bool isMonotone);
  
   private:
     std::auto_ptr<Moses::SearchNormal> m_searcher;
     std::auto_ptr<Moses::TranslationOptionCollection> m_toc;
+    bool m_isMonotone;
 };
 
 

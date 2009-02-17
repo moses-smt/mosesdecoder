@@ -74,6 +74,12 @@ namespace Josiah {
       stringstream in(source + "\n");
       const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
       sentence.Read(in,inputFactorOrder);
+      
+      //monotone
+      int distortionLimit = staticData.GetMaxDistortion();
+      if (m_isMonotone) {
+        const_cast<StaticData&>(staticData).SetMaxDistortion(0);
+      }
   
       //the searcher
       staticData.ResetSentenceStats(sentence);
@@ -89,6 +95,8 @@ namespace Josiah {
       //get hypo
       bestHypo = const_cast<Hypothesis*>(m_searcher->GetBestHypothesis());
       toc = m_toc.get();
+      
+      const_cast<StaticData&>(staticData).SetMaxDistortion(distortionLimit);
   }
 
   void MosesDecoder::GetFeatureNames(std::vector<std::string>* featureNames) const {
@@ -106,5 +114,9 @@ namespace Josiah {
 
   void MosesDecoder::SetFeatureWeights(const std::vector<float>& weights) {
     const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
+  }
+  
+  void MosesDecoder::SetMonotone(bool isMonotone) {
+    m_isMonotone = isMonotone;
   }
 }
