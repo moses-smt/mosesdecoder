@@ -73,25 +73,35 @@ void Sample::UpdateTargetWords()  {
   m_targetWords.clear();
   const Hypothesis* currHypo = GetTargetTail(); //target tail
   
+  
+  IFVERBOSE(2) {
+    VERBOSE(2,"Sentence: ");
+  }
+  
   //we're now at the dummy hypo at the start of the sentence
   while ((currHypo = (currHypo->GetNextHypo()))) {
     TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
     for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
       m_targetWords.push_back(targetPhrase.GetWord(i));
+      IFVERBOSE(2) {
+        VERBOSE(2,targetPhrase.GetWord(i) << " ");  
+      }  
+    }
+    IFVERBOSE(2) {
+      if (currHypo->GetCurrTargetPhrase().GetSize() > 0) {
+        VERBOSE(2, "|" << currHypo->GetCurrSourceWordsRange().GetStartPos()
+                << "-" << currHypo->GetCurrSourceWordsRange().GetEndPos() << "| ");    
+      }
     }
   }
-  
   IFVERBOSE(2) {
-    VERBOSE(2,"Sentence: ");
-    for (size_t i = 0; i < m_targetWords.size(); ++i) {
-      VERBOSE(2,m_targetWords[i] << " ");
-    }
     VERBOSE(2,endl);
   }
+  
 }
 
   
-Hypothesis* Sample::GetHypAtSourceIndex(size_t i) {
+Hypothesis* Sample::GetHypAtSourceIndex(size_t i)  {
   std::map<size_t, Hypothesis*>::iterator it = sourceIndexedHyps.find(i);
   if (it == sourceIndexedHyps.end())
     return NULL;

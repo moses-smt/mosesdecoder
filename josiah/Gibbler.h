@@ -46,8 +46,8 @@ class Sample {
  public:
   Sample(Hypothesis* target_head);
   ~Sample();
-  int GetSourceSize() { return source_size; }
-  Hypothesis* GetHypAtSourceIndex(size_t );
+  int GetSourceSize() const { return source_size; }
+  Hypothesis* GetHypAtSourceIndex(size_t ) ;
   const Hypothesis* GetSampleHypothesis() const {
     return target_head;
   }
