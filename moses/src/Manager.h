@@ -82,7 +82,8 @@ protected:
 	// data
 	//InputType const& m_source; /**< source sentence to be translated */
 	vector<InputType const*> *m_sources; /**< source sentence to be translated */
-	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
+	//TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
+	vector<TranslationOptionCollection*> *m_transOptColls; /**< pre-computed list of translation options for the phrases in this sentence */
 	Search *m_search;
 	
 	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 

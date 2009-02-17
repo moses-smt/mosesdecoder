@@ -71,10 +71,33 @@ namespace Moses
 //	staticData.InitializeBeforeSentenceProcessing(*((*sources)[0]));
 //}
 
+vector<TranslationOptionCollection*> * getTranslationOptionCollections(vector<InputType const*> *sources)
+{
+	vector<TranslationOptionCollection*> * collections = new vector<TranslationOptionCollection*>(sources->size());
+	
+	for (int i=0; i<sources->size(); i++) {
+		//TranslationOptionCollection* coll = (*sources)[i]->CreateTranslationOptionCollection();
+		(*collections)[i] =  (*sources)[i]->CreateTranslationOptionCollection();
+	}
+	
+	return collections;
+}
+
+	//Manager::Manager(vector<InputType const*> *sources, SearchAlgorithm searchAlgorithm)
+//	:m_sources(sources)
+//	,m_transOptColl(((*sources)[0])->CreateTranslationOptionCollection())
+//	,m_search(Search::CreateSearch((*((*sources)[0])), searchAlgorithm, *m_transOptColl))
+//	,m_start(clock())
+//	,interrupted_flag(0)
+//	{
+//		const StaticData &staticData = StaticData::Instance();
+//		staticData.InitializeBeforeSentenceProcessing(*((*sources)[0]));
+//	}
+	
 Manager::Manager(vector<InputType const*> *sources, SearchAlgorithm searchAlgorithm)
 	:m_sources(sources)
-	,m_transOptColl(((*sources)[0])->CreateTranslationOptionCollection())
-	,m_search(Search::CreateSearch((*((*sources)[0])), searchAlgorithm, *m_transOptColl))
+	,m_transOptColls(getTranslationOptionCollections(sources))
+	,m_search(Search::CreateSearch((*((*sources)[0])), searchAlgorithm, (*(*m_transOptColls)[0])))
 	,m_start(clock())
 	,interrupted_flag(0)
 	{
@@ -84,7 +107,7 @@ Manager::Manager(vector<InputType const*> *sources, SearchAlgorithm searchAlgori
 	
 Manager::~Manager() 
 {
-  delete m_transOptColl;
+  delete m_transOptColls;
 	delete m_search;
 
 	StaticData::Instance().CleanUpAfterSentenceProcessing();      
@@ -112,7 +135,8 @@ void Manager::ProcessSentence()
   // collect translation options for this sentence
 	const vector <DecodeGraph*>
 			&decodeStepVL = staticData.GetDecodeStepVL();
-	m_transOptColl->CreateTranslationOptions(decodeStepVL);
+	//m_transOptColl->CreateTranslationOptions(decodeStepVL);
+	((*m_transOptColls)[0])->CreateTranslationOptions(decodeStepVL);
 
   // some reporting on how long this took
   clock_t gotOptions = clock();
