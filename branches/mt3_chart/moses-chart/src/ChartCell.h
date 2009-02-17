@@ -17,7 +17,7 @@ class TranslationOptionCollection;
 class TranslationOptionList;
 class TranslationOption;
 
-class ChartHypothesisRecombinationOrderer
+class HypothesisRecombinationOrderer
 {
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
@@ -52,7 +52,7 @@ class ChartCell
 	friend std::ostream& operator<<(std::ostream&, const ChartCell&);
 
 protected:
-	typedef std::set<Hypothesis*, ChartHypothesisRecombinationOrderer> HCType;
+	typedef std::set<Hypothesis*, HypothesisRecombinationOrderer> HCType;
 	HCType m_hypos;
 	std::vector<const Hypothesis*> m_hyposOrdered;
 

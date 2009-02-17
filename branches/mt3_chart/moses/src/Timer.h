@@ -4,7 +4,6 @@
 #include <ctime>
 #include <iostream>
 #include <iomanip>
-#include "Util.h"
 
 namespace Moses
 {
