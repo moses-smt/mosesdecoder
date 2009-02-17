@@ -205,8 +205,9 @@ int main(int argc, char* argv[])
 				staticData.SetWERLimit(limit);
 				if (manager != NULL) delete manager;
 				//manager = new Manager(*source, staticData.GetSearchAlgorithm());
-				manager = new Manager(*(*sources)[0], staticData.GetSearchAlgorithm());
-		
+				//manager = new Manager(*(*sources)[0], staticData.GetSearchAlgorithm());
+				manager = new Manager(sources, staticData.GetSearchAlgorithm());
+				
 				//Manager manager(*source, staticData.GetSearchAlgorithm());
 				//manager.ProcessSentence();
 				manager->ProcessSentence();
@@ -222,7 +223,8 @@ int main(int argc, char* argv[])
 			VERBOSE(1, "Translating with WER limit of " << staticData.GetWERLimit() << endl);
 			//manager = new Manager(*source, staticData.GetSearchAlgorithm());
 			
-			manager = new Manager(*(*sources)[0], staticData.GetSearchAlgorithm());
+			//manager = new Manager(*(*sources)[0], staticData.GetSearchAlgorithm());
+			manager = new Manager(sources, staticData.GetSearchAlgorithm());
 			manager->ProcessSentence();
 		}
 		
