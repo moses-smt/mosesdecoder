@@ -344,17 +344,17 @@ void Sample::DeleteFromCache(Hypothesis *hyp) {
     *it = NULL;
   }
   
-  if (cachedSampledHyps.size() > 10000) {
-    //cerr << "b4 clearing cache size " << cachedSampledHyps.size() << endl;
-    vector<Hypothesis*> temp;
-    for (it = cachedSampledHyps.begin(); it != cachedSampledHyps.end(); ++it) {
-      if (*it != NULL) {
-        temp.push_back(*it);
-      }
-    }
-    temp.swap(cachedSampledHyps);
-    //cerr << "after clearing cache size " << cachedSampledHyps.size() << endl;
-  }
+  //if (cachedSampledHyps.size() > 10000) {
+//    //cerr << "b4 clearing cache size " << cachedSampledHyps.size() << endl;
+//    vector<Hypothesis*> temp;
+//    for (it = cachedSampledHyps.begin(); it != cachedSampledHyps.end(); ++it) {
+//      if (*it != NULL) {
+//        temp.push_back(*it);
+//      }
+//    }
+//    temp.swap(cachedSampledHyps);
+//    //cerr << "after clearing cache size " << cachedSampledHyps.size() << endl;
+//  }
   
 }
   
