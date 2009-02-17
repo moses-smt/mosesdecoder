@@ -281,6 +281,7 @@ int main(int argc, char** argv) {
   float scalefactor;
   string weightfile;
   vector<string> ref_files;
+  bool decode_monotone;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -291,6 +292,7 @@ int main(int argc, char** argv) {
         ("iterations,s", po::value<int>(&iterations)->default_value(5), "Number of sampling iterations")
         ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
         ("scale-factor,c", po::value<float>(&scalefactor)->default_value(1.0), "Scale factor for model weights.")
+        ("decode-monotone", po::value(&decode_monotone)->zero_tokens()->default_value(false), "Run the initial decoding monotone.")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
         ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
 	("show-features,F",po::value<bool>(&show_features)->zero_tokens()->default_value(false),"Show features and then exit")
@@ -337,6 +339,7 @@ int main(int argc, char** argv) {
 
   vector<string> featureNames;
   decoder->GetFeatureNames(&featureNames);
+  
 
   // may be invoked just to get a features list
   if (show_features) {
@@ -346,6 +349,10 @@ int main(int argc, char** argv) {
     MPI_Finalize();
 #endif
     return 0;
+  }
+  
+  if (decode_monotone) {
+    decoder->SetMonotone(true);
   }
   
   //scale model weights

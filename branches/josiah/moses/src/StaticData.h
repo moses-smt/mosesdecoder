@@ -307,6 +307,9 @@ public:
 	{
 		return m_maxDistortion;
 	}
+  void SetMaxDistortion(int distortion) {
+    m_maxDistortion = distortion;
+  }
 	bool UseReorderingConstraint() const
 	{
 		return m_reorderingConstraint;
