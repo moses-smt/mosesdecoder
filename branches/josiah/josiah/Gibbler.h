@@ -42,7 +42,7 @@ class Sample {
   void SetTgtNextHypo(Hypothesis*  newHyp, Hypothesis* currNextHypo);
   void SetSrcPrevHypo(Hypothesis*  newHyp, Hypothesis* srcPrevHypo);
   void UpdateTargetWords();
-  
+  void DeleteFromCache(Hypothesis *hyp);
  public:
   Sample(Hypothesis* target_head);
   ~Sample();

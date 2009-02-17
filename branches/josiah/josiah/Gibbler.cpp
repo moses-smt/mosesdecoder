@@ -197,6 +197,10 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
   
   UpdateFeatureValues(deltaFV);
   UpdateTargetWords();
+  
+  DeleteFromCache(oldRightHypo);
+  DeleteFromCache(oldLeftHypo);
+  
 }
   
 void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
@@ -218,6 +222,7 @@ void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentC
     UpdateTargetWordRange(newHyp, tgtSizeChange);  
   }
   
+  DeleteFromCache(currHyp);
   UpdateFeatureValues(deltaFV);
   UpdateTargetWords();
 }  
@@ -262,7 +267,10 @@ void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCo
   if (tgtSizeChange != 0) {
     UpdateTargetWordRange(newHyp, tgtSizeChange);  
   }
-    
+  
+  DeleteFromCache(currStartHyp);
+  DeleteFromCache(currEndHyp);
+  
   UpdateFeatureValues(deltaFV);
   UpdateTargetWords();
 }
@@ -294,6 +302,7 @@ void Sample::SplitTarget(const TranslationOption& leftTgtOption, const Translati
     UpdateTargetWordRange(newRightHyp, tgtSizeChange);  
   }
   
+  DeleteFromCache(currHyp);
   UpdateFeatureValues(deltaFV);
   UpdateTargetWords();
 }  
@@ -327,6 +336,14 @@ void Sample::UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& opti
  WordsBitmap & wordBitmap = hyp.GetWordsBitmap();
  wordBitmap.SetValue(startPos, endPos, false);
 } 
+  
+void Sample::DeleteFromCache(Hypothesis *hyp) {
+  vector<Hypothesis*>::iterator it = find(cachedSampledHyps.begin(), cachedSampledHyps.end(), hyp);
+  if (it != cachedSampledHyps.end()){
+    delete *it;
+    *it = NULL;
+  }
+}
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
   Sample sample(starting);
