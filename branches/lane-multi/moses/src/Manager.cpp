@@ -76,7 +76,6 @@ vector<TranslationOptionCollection*> * getTranslationOptionCollections(vector<In
 	vector<TranslationOptionCollection*> * collections = new vector<TranslationOptionCollection*>(sources->size());
 	
 	for (int i=0; i<sources->size(); i++) {
-		//TranslationOptionCollection* coll = (*sources)[i]->CreateTranslationOptionCollection();
 		(*collections)[i] =  (*sources)[i]->CreateTranslationOptionCollection();
 	}
 	
@@ -97,7 +96,8 @@ vector<TranslationOptionCollection*> * getTranslationOptionCollections(vector<In
 Manager::Manager(vector<InputType const*> *sources, SearchAlgorithm searchAlgorithm)
 	:m_sources(sources)
 	,m_transOptColls(getTranslationOptionCollections(sources))
-	,m_search(Search::CreateSearch((*((*sources)[0])), searchAlgorithm, (*(*m_transOptColls)[0])))
+	//,m_search(Search::CreateSearch((*((*sources)[0])), searchAlgorithm, (*(*m_transOptColls)[0])))
+	,m_search(Search::CreateSearch(sources, searchAlgorithm, m_transOptColls))
 	,m_start(clock())
 	,interrupted_flag(0)
 	{
@@ -107,7 +107,10 @@ Manager::Manager(vector<InputType const*> *sources, SearchAlgorithm searchAlgori
 	
 Manager::~Manager() 
 {
-  delete m_transOptColls;
+	for (int i=0; i<m_transOptColls->size(); i++) {
+		delete (*m_transOptColls)[i];
+	}
+	delete m_transOptColls;
 	delete m_search;
 
 	StaticData::Instance().CleanUpAfterSentenceProcessing();      
