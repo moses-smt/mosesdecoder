@@ -339,6 +339,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FeatureFunction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FFState.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FloydWarshall.cpp"
 				>
 			</File>
@@ -738,6 +746,14 @@
 			</File>
 			<File
 				RelativePath=".\src\FactorTypeSet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FeatureFunction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FFState.h"
 				>
 			</File>
 			<File
