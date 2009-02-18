@@ -29,7 +29,8 @@ QueueEntry::QueueEntry(const TranslationOption &transOpt
 		if (consumed.IsNonTerminal())
 		{ // non-term
 			const WordsRange &childRange = consumed.GetWordsRange();
-			ChartCellCollection::const_iterator iterCell = allChartCells.find(childRange);
+			ChartCellSignature signature(childRange);
+			ChartCellCollection::const_iterator iterCell = allChartCells.find(signature);
 			assert(iterCell != allChartCells.end());
 
 			const ChartCell &childCell = *iterCell->second;

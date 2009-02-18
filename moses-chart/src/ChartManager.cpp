@@ -24,7 +24,7 @@ Manager::Manager(InputType const& source)
 
 Manager::~Manager()
 {
-	map<WordsRange, ChartCell*>::iterator iter;
+	ChartCellCollection::iterator iter;
 	for (iter = m_hypoStackColl.begin(); iter != m_hypoStackColl.end(); ++iter)
 		delete iter->second;
 
@@ -59,16 +59,15 @@ void Manager::ProcessSentence()
 		{
 			size_t endPos = startPos + width - 1;
 			WordsRange range(startPos, endPos);
+			ChartCellSignature signature(range);
+			ChartCell *cell = m_hypoStackColl.GetOrCreate(signature);
 
-			ChartCell *cell = new ChartCell(startPos, endPos);
 			cell->ProcessSentence(m_transOptColl.GetTranslationOptionList(range)
 														,m_hypoStackColl);
 			cell->PruneToSize(cell->GetMaxHypoStackSize());
 			cell->SortHypotheses();
 
 			TRACE_ERR(range << " = " << cell->GetSize() << endl);
-
-			m_hypoStackColl.Set(range, cell);
 		}
 	}
 
@@ -84,12 +83,10 @@ const Hypothesis *Manager::GetBestHypothesis() const
 	else
 	{
 		WordsRange range(0, size-1);
-		std::map<WordsRange, ChartCell*>::const_iterator iterCell = m_hypoStackColl.find(range);
-
-		assert(iterCell != m_hypoStackColl.end());
-
-		const ChartCell &childCell = *iterCell->second;
-		const std::vector<const Hypothesis*> &sortedHypos = childCell.GetSortedHypotheses();
+		ChartCellSignature signature(range);
+			
+		const ChartCell &lastCell = *m_hypoStackColl.Get(signature);
+		const std::vector<const Hypothesis*> &sortedHypos = lastCell.GetSortedHypotheses();
 
 		return (sortedHypos.size() > 0) ? sortedHypos[0] : NULL;
 	}
@@ -102,10 +99,9 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 		return;
 
 	WordsRange range(0, size-1);
-	std::map<WordsRange, ChartCell*>::const_iterator iterCell = m_hypoStackColl.find(range);
-	assert(iterCell != m_hypoStackColl.end());
-
-	const ChartCell &lastCell = *iterCell->second;
+	ChartCellSignature signature(range);
+		
+	const ChartCell &lastCell = *m_hypoStackColl.Get(signature);
 
 	vector<const Hypothesis*> sortedPureHypo = lastCell.GetSortedHypotheses();
 	if (sortedPureHypo.size() == 0)
