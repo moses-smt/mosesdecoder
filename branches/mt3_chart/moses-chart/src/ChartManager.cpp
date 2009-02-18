@@ -68,7 +68,7 @@ void Manager::ProcessSentence()
 
 			TRACE_ERR(range << " = " << cell->GetSize() << endl);
 
-			m_hypoStackColl[range] = cell;
+			m_hypoStackColl.Set(range, cell);
 		}
 	}
 

@@ -14,6 +14,7 @@ class TranslationOptionCollection;
 class TranslationOptionList;
 class TranslationOption;
 class ChartCell;
+class ChartCellCollection;
 class QueueEntry;
 
 class ChildEntry
@@ -49,7 +50,7 @@ protected:
 
 public:
 	QueueEntry(const TranslationOption &transOpt
-						, const std::map<Moses::WordsRange, ChartCell*> &allChartCells
+						, const ChartCellCollection &allChartCells
 						, bool &isOK);
 	const TranslationOption &GetTranslationOption() const
 	{ return m_transOpt; }

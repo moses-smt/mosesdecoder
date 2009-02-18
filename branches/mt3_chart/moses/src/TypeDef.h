@@ -28,6 +28,31 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
+/////////////////////////////////////////////////
+// for those using autoconf/automake
+#if HAVE_CONFIG_H
+#include "config.h"
+
+#define TRACE_ENABLE 1		// REMOVE after we figure this out
+
+#define LM_INTERNAL 1
+
+#  ifdef HAVE_SRILM
+#    define LM_SRI 1
+#  else
+#    undef LM_SRI
+#  endif
+
+#  ifdef HAVE_IRSTLM
+#    define LM_IRST 1
+#  endif
+
+#  ifdef HAVE_RANDLM
+#    define LM_RAND 1
+#  endif
+
+#endif
+/////////////////////////////////////////////////
 
 #define PROJECT_NAME		"moses"
 
@@ -59,39 +84,13 @@ const float DEFAULT_EARLY_DISCARDING_THRESHOLD		= 0.0f;
 const float DEFAULT_TRANSLATION_OPTION_THRESHOLD	= 0.0f;
 const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
-/////////////////////////////////////////////////
-// for those using autoconf/automake
-#if HAVE_CONFIG_H
-#include "config.h"
-
-#define TRACE_ENABLE 1		// REMOVE after we figure this out
-
-#define LM_INTERNAL 1
-
-#  ifdef HAVE_SRILM
-#    define LM_SRI 1
-#  else
-#    undef LM_SRI
-#  endif
-
-#  ifdef HAVE_IRSTLM
-#    define LM_IRST 1
-#  endif
-
-#  ifdef HAVE_RANDLM
-#    define LM_RAND 1
-#  endif
-
-#endif
-/////////////////////////////////////////////////
-
 // enums.
 // must be 0, 1, 2, ..., unless otherwise stated
 
 // can only be 2 at the moment
 const int NUM_LANGUAGES = 2;
 
-const size_t MAX_NUM_FACTORS = 1;
+const size_t MAX_NUM_FACTORS = 2;
 
 enum FactorDirection
 {
