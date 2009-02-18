@@ -63,7 +63,7 @@ Hypothesis* Sample::CreateHypothesis(Hypothesis& prevTarget, const TranslationOp
   UpdateCoverageVector(prevTarget, option);
   Hypothesis* hypo = new Hypothesis(prevTarget,option);
   prevTarget.m_nextHypo = hypo;
-  cachedSampledHyps.push_back(hypo);
+  cachedSampledHyps.insert(hypo);
   SetSourceIndexedHyps(hypo); 
   return hypo;
 }
@@ -338,12 +338,11 @@ void Sample::UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& opti
 } 
   
 void Sample::DeleteFromCache(Hypothesis *hyp) {
-  return;
-  //vector<Hypothesis*>::iterator it = find(cachedSampledHyps.begin(), cachedSampledHyps.end(), hyp);
-//  if (it != cachedSampledHyps.end()){
-//    delete *it;
-//    *it = NULL;
-//  }
+  set<Hypothesis*>::iterator it = find(cachedSampledHyps.begin(), cachedSampledHyps.end(), hyp);
+  if (it != cachedSampledHyps.end()){
+    delete *it;
+    cachedSampledHyps.erase(it);
+  }
 }
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
