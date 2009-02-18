@@ -202,6 +202,7 @@ void ConfusionNet::Print(std::ostream& out) const {
 	out<<"\n\n";
 }
 
+#pragma warning(disable:4716)
 Phrase ConfusionNet::GetSubString(const WordsRange&) const {
 	TRACE_ERR("ERROR: call to ConfusionNet::GetSubString\n");
 	abort();
