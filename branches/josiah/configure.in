@@ -3,9 +3,25 @@ AM_CONFIG_HEADER(config.h)
 
 AM_INIT_AUTOMAKE(moses, 0.1)
 
+
+ac_have_mpi=no
+AC_ARG_WITH(mpi,
+            AC_HELP_STRING([--with-mpi],
+                       [Force compilation with MPI]),
+        [ if test $withval != no ; then
+            ac_have_mpi=yes
+          fi ] )
+if test $ac_have_mpi = yes ; then
+  AC_PATH_PROG(CXX, mpic++, none)
+  if test  $CXX = none ; then
+    AC_MSG_ERROR([Cannot locate MPI compiler drivers])
+  fi
+  AC_DEFINE(MPI_ENABLED,1,[Define if compiling with MPI.])
+  CPPFLAGS="$CPPFLAGS -DMPI_ENABLED"
+fi
+
 AC_PROG_CXX
 AC_LANG_CPLUSPLUS
-AC_CHECK_HEADER(mpi.h,[CPPFLAGS="$CPPFLAGS -DMPI_ENABLED"])
 AC_PROG_RANLIB
 #AM_PROG_LIBTOOL
 AX_BOOST_BASE([1.37.0])
@@ -51,6 +67,14 @@ AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
 AM_CONDITIONAL([RAND_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
+
+if test $ac_have_mpi = yes ; then
+      AC_CHECK_HEADER(mpi.h)
+      if test "x$ac_cv_header_mpi_h" == 'xno'
+      then
+        AC_MSG_ERROR([Cannot locate MPI header])
+      fi
+fi
 
 if test "x$with_protobuf" != 'xno'
 then
