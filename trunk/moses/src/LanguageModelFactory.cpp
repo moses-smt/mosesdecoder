@@ -20,6 +20,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <iostream>
 #include "LanguageModelFactory.h"
 #include "UserMessage.h"
 #include "TypeDef.h"
@@ -35,11 +36,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef LM_RAND
 #  include "LanguageModelRandLM.h"
 #endif
+#ifdef LM_REMOTE
+#	include "LanguageModelRemote.h"
+#endif
 
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
-#include "LanguageModelRemote.h"
+
+using namespace std;
 
 namespace Moses
 {
@@ -65,7 +70,9 @@ namespace LanguageModelFactory
 			#endif
 			break;
 		  case Remote:
+			#ifdef LM_REMOTE
 			lm = new LanguageModelRemote(true,scoreIndexManager);
+			#endif
 			break;
 
 	  	case SRI:

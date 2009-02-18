@@ -66,6 +66,7 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #define TRACE_ENABLE 1		// REMOVE after we figure this out
 
 #define LM_INTERNAL 1
+#define LM_REMOTE 1
 
 #  ifdef HAVE_SRILM
 #    define LM_SRI 1
