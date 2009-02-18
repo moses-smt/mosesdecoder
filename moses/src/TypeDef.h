@@ -170,6 +170,7 @@ enum SearchAlgorithm
 	Normal				= 0
 	,CubePruning	= 1
 	,CubeGrowing	= 2
+	,Multi          = 3
 };
 
 // typedef

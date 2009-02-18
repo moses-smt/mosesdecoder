@@ -24,8 +24,10 @@ public:
 	{}
 
 	// Factory
-	static Search *CreateSearch(const InputType &source, SearchAlgorithm searchAlgorithm, const TranslationOptionCollection &transOptColl);
-
+	//static Search *CreateSearch(const InputType &source, SearchAlgorithm searchAlgorithm, const TranslationOptionCollection &transOptColl);
+	
+	static Search *CreateSearch(std::vector< InputType const* > *sources, SearchAlgorithm searchAlgorithm, std::vector< TranslationOptionCollection* > *tranOptColls);
+	
 protected:
 	
 	float m_WERLimit;

@@ -133,6 +133,8 @@
 		1C8CFF090AD67A9700FA22E2 /* WordsBitmap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8C0AD67A9700FA22E2 /* WordsBitmap.h */; };
 		1C8CFF0A0AD67A9700FA22E2 /* WordsRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFE8D0AD67A9700FA22E2 /* WordsRange.cpp */; };
 		1C8CFF0B0AD67A9700FA22E2 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */; };
+		3D0200CF0F4C58E6007FCB1D /* SearchMulti.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0200CD0F4C58E6007FCB1D /* SearchMulti.h */; };
+		3D0200D00F4C58E6007FCB1D /* SearchMulti.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0200CE0F4C58E6007FCB1D /* SearchMulti.cpp */; };
 		3D5CBEEF0F2F683D004520C1 /* LanguageModelRemote.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D5CBEEB0F2F683D004520C1 /* LanguageModelRemote.cpp */; };
 		3D5CBEF00F2F683D004520C1 /* LanguageModelRemote.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D5CBEEC0F2F683D004520C1 /* LanguageModelRemote.h */; };
 		B219B8610E9382EE00EAB407 /* AlignmentElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B85B0E9382EE00EAB407 /* AlignmentElement.cpp */; };
@@ -302,6 +304,8 @@
 		1C8CFE8C0AD67A9700FA22E2 /* WordsBitmap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsBitmap.h; path = src/WordsBitmap.h; sourceTree = "<group>"; };
 		1C8CFE8D0AD67A9700FA22E2 /* WordsRange.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = WordsRange.cpp; path = src/WordsRange.cpp; sourceTree = "<group>"; };
 		1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = src/WordsRange.h; sourceTree = "<group>"; };
+		3D0200CD0F4C58E6007FCB1D /* SearchMulti.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchMulti.h; sourceTree = "<group>"; };
+		3D0200CE0F4C58E6007FCB1D /* SearchMulti.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SearchMulti.cpp; sourceTree = "<group>"; };
 		3D5CBEE90F2F683D004520C1 /* LanguageModelRandLM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelRandLM.cpp; path = src/LanguageModelRandLM.cpp; sourceTree = "<group>"; };
 		3D5CBEEA0F2F683D004520C1 /* LanguageModelRandLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelRandLM.h; path = src/LanguageModelRandLM.h; sourceTree = "<group>"; };
 		3D5CBEEB0F2F683D004520C1 /* LanguageModelRemote.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelRemote.cpp; path = src/LanguageModelRemote.cpp; sourceTree = "<group>"; };
@@ -411,6 +415,8 @@
 				E21C11150DFEE88800ADAED0 /* SearchCubePruning.h */,
 				E21C11160DFEE88800ADAED0 /* SearchNormal.cpp */,
 				E21C11170DFEE88800ADAED0 /* SearchNormal.h */,
+				3D0200CE0F4C58E6007FCB1D /* SearchMulti.cpp */,
+				3D0200CD0F4C58E6007FCB1D /* SearchMulti.h */,
 				E21C110A0DFEE86B00ADAED0 /* HypothesisStackCubePruning.cpp */,
 				E21C110B0DFEE86B00ADAED0 /* HypothesisStackCubePruning.h */,
 				E21C110C0DFEE86B00ADAED0 /* HypothesisStackNormal.cpp */,
@@ -658,6 +664,7 @@
 				B2639DEB0EF199D400A67519 /* ReorderingConstraint.h in Headers */,
 				B2639DED0EF199D400A67519 /* TranslationOptionList.h in Headers */,
 				3D5CBEF00F2F683D004520C1 /* LanguageModelRemote.h in Headers */,
+				3D0200CF0F4C58E6007FCB1D /* SearchMulti.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -782,6 +789,7 @@
 				B2639DEA0EF199D400A67519 /* ReorderingConstraint.cpp in Sources */,
 				B2639DEC0EF199D400A67519 /* TranslationOptionList.cpp in Sources */,
 				3D5CBEEF0F2F683D004520C1 /* LanguageModelRemote.cpp in Sources */,
+				3D0200D00F4C58E6007FCB1D /* SearchMulti.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
