@@ -29,7 +29,7 @@ class Sample {
   Hypothesis* source_tail;
 
   ScoreComponentCollection feature_values;
-  std::vector<Hypothesis*> cachedSampledHyps;
+  std::set<Hypothesis*> cachedSampledHyps;
   
   std::map<size_t, Hypothesis*>  sourceIndexedHyps;
   void SetSourceIndexedHyps(Hypothesis* h);

@@ -221,6 +221,9 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
       }
     }
     
+    //advance thru the linked list now, before currHypo gets invalidated
+    currHypo = currHypo->GetSourceNextHypo();
+    
     //get the scores
     vector<double> scores;
     for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
@@ -238,13 +241,13 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
     VERBOSE(4,endl);
     }
     VERBOSE(3,"The chosen sample is " << chosen << endl);
-    
+   
+     
     //apply it to the sample
     if (deltas[chosen] !=  noChangeDelta);{
       deltas[chosen]->apply(*noChangeDelta);     
     }
    }
-   currHypo = currHypo->GetSourceNextHypo();
     
    RemoveAllInColl(deltas);
   }
