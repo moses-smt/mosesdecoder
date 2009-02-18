@@ -4,6 +4,7 @@
 #include <vector>
 #include "ChartCell.h"
 #include "ChartTranslationOptionCollection.h"
+#include "ChartCellCollection.h"
 #include "../../moses/src/InputType.h"
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/TrellisPathList.h"
@@ -18,7 +19,7 @@ class Manager
 {
 protected:
 	Moses::InputType const& m_source; /**< source sentence to be translated */
-	std::map<Moses::WordsRange, ChartCell*> m_hypoStackColl;
+	ChartCellCollection m_hypoStackColl;
 	TranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 
 public:

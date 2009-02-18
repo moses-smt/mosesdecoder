@@ -4,6 +4,7 @@
 #include "ChartTranslationOption.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOptionCollection.h"
+#include "ChartCellCollection.h"
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/ChartRule.h"
 
@@ -14,7 +15,7 @@ namespace MosesChart
 {
 
 QueueEntry::QueueEntry(const TranslationOption &transOpt
-											 , const std::map<WordsRange, ChartCell*> &allChartCells
+											 , const ChartCellCollection &allChartCells
 											 , bool &isOK)
 :m_transOpt(transOpt)
 {
@@ -28,7 +29,7 @@ QueueEntry::QueueEntry(const TranslationOption &transOpt
 		if (consumed.IsNonTerminal())
 		{ // non-term
 			const WordsRange &childRange = consumed.GetWordsRange();
-			std::map<WordsRange, ChartCell*>::const_iterator iterCell = allChartCells.find(childRange);
+			ChartCellCollection::const_iterator iterCell = allChartCells.find(childRange);
 			assert(iterCell != allChartCells.end());
 
 			const ChartCell &childCell = *iterCell->second;

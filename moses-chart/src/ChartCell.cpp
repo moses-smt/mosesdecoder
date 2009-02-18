@@ -3,6 +3,7 @@
 #include "ChartCell.h"
 #include "ChartTranslationOptionCollection.h"
 #include "ChartTranslationOption.h"
+#include "ChartCellCollection.h"
 #include "QueueEntry.h"
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/Util.h"
@@ -239,7 +240,7 @@ void ChartCell::Remove(const HCType::iterator &iter)
 }
 
 void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
-																, const std::map<WordsRange, ChartCell*> &allChartCells)
+																, const ChartCellCollection &allChartCells)
 {
 	const StaticData &staticData = StaticData::Instance();
 

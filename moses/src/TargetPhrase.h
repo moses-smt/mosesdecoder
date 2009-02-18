@@ -54,6 +54,7 @@ protected:
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
+	Word m_headWord;
 
 	static bool wordalignflag;
 	static bool printalign;

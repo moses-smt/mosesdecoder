@@ -16,6 +16,7 @@ namespace MosesChart
 class TranslationOptionCollection;
 class TranslationOptionList;
 class TranslationOption;
+class ChartCellCollection;
 
 class HypothesisRecombinationOrderer
 {
@@ -77,7 +78,7 @@ public:
 	~ChartCell();
 
 	void ProcessSentence(const TranslationOptionList &transOptList
-											,const std::map<Moses::WordsRange, ChartCell*> &allChartCells);
+											,const ChartCellCollection &allChartCells);
 	size_t GetSize() const
 	{ return m_hyposOrdered.size(); }
 	size_t GetMaxHypoStackSize() const
