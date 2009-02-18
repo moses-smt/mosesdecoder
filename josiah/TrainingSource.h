@@ -15,12 +15,13 @@ namespace Josiah {
 class Decoder;
 class Optimizer;
 
-struct ExpectedBleuTrainer : public InputSource {
+class ExpectedBleuTrainer : public InputSource {
+ public:
   ExpectedBleuTrainer(
-    int r,
-    int s,
-    int bsize,
-    std::vector<std::string>* sents,
+    int r,      // MPI rank, or 0 if not MPI
+    int s,      // MPI size, or 1 if not MPI
+    int bsize,  // batch size
+    std::vector<std::string>* sents,  // development corpus
     unsigned int rseed,
     bool randomize,
     Optimizer* o);
@@ -34,6 +35,7 @@ struct ExpectedBleuTrainer : public InputSource {
        const Moses::ScoreComponentCollection& grad,
        Decoder* decoder);
 
+ private:
   int rank, size, batch_size;
   int iteration;
   int cur, cur_start;
