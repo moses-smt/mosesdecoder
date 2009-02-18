@@ -1,16 +1,16 @@
 AC_INIT(moses/src)
-
 AM_CONFIG_HEADER(config.h)
+
 AM_INIT_AUTOMAKE(moses, 0.1)
 
 AC_PROG_CXX
 AC_LANG_CPLUSPLUS
+AC_CHECK_HEADER(mpi.h,[CPPFLAGS="$CPPFLAGS -DMPI_ENABLED"])
 AC_PROG_RANLIB
 #AM_PROG_LIBTOOL
 AX_BOOST_BASE([1.37.0])
 #AX_BOOST_BASE
 AX_BOOST_PROGRAM_OPTIONS
-
 
 AC_ARG_WITH(protobuf,
             [AC_HELP_STRING([--with-protobuf=PATH], [(optional) path to Google protobuf])],
@@ -51,7 +51,6 @@ AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
 AM_CONDITIONAL([RAND_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
-
 
 if test "x$with_protobuf" != 'xno'
 then

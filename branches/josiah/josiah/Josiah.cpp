@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iomanip>
 #include <fstream>
 
-#define MPI_ENABLED
 #ifdef MPI_ENABLED
 #include <mpi.h>
 #endif

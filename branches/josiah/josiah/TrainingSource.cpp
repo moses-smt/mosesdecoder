@@ -1,6 +1,9 @@
 #include "TrainingSource.h"
 
+#ifdef MPI_ENABLED
 #include <mpi.h>
+#endif
+
 #include <cassert>
 
 #include "Optimizer.h"

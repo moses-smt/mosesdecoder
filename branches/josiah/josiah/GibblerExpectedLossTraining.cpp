@@ -14,7 +14,7 @@ void GibblerExpectedLossCollector::collect(Sample& s) {
   h->GetTranslation(&trans, 0);
   const float gain = g.ComputeGain(trans);
   tot_len += trans.size();
-  //VERBOSE(1, gain << "\tFeatures=" << s.GetFeatureValues() << endl);
+  VERBOSE(2, gain << "\tFeatures=" << s.GetFeatureValues() << endl);
   samples.push_back(make_pair(s.GetFeatureValues(), gain));
   feature_expectations.PlusEquals(s.GetFeatureValues());
 }
