@@ -190,6 +190,7 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
       deltas[chosen]->apply(*noChangeDelta);
       
       VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
+      VERBOSE(2,"Sample fvs " << sample.GetFeatureValues() << endl);
     }
     
     
@@ -241,12 +242,15 @@ void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptio
     VERBOSE(4,endl);
     }
     VERBOSE(3,"The chosen sample is " << chosen << endl);
-   
+    
      
     //apply it to the sample
     if (deltas[chosen] !=  noChangeDelta);{
       deltas[chosen]->apply(*noChangeDelta);     
     }
+     VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
+     VERBOSE(2,"Sample fvs " << sample.GetFeatureValues() << endl);
+ 
    }
     
    RemoveAllInColl(deltas);
@@ -344,7 +348,7 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
     
   for (int i = 0; i < splitPoints.size(); ++i) {
     for (int j = i+1; j < splitPoints.size(); ++j) {//let's just look at the source side successors  
-      VERBOSE(2, "Flipping phrases at pos" << splitPoints[i] << " and "  << splitPoints[j] << endl);
+      VERBOSE(2, "Forward Flipping phrases at pos" << splitPoints[i] << " and "  << splitPoints[j] << endl);
       
       Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitPoints[i]);
       WordsRange thisSourceSegment = hypothesis->GetCurrSourceWordsRange();
@@ -381,8 +385,10 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
         if (isValidSwap) {//yes
           TranslationDelta* delta = new FlipDelta(sample, &(followingHyp->GetTranslationOption()), 
                                                   &(hypothesis->GetTranslationOption()),  hypothesis->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment,thisTargetSegment, totalDistortion);
-          deltas.push_back(delta);          
-          CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), followingHyp->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
+          deltas.push_back(delta);
+          
+          CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
+          
           noChangeDelta = new   FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
                                         &(followingHyp->GetTranslationOption()), hypothesis->GetPrevHypo(), followingHyp->GetNextHypo() ,thisTargetSegment,followingTargetSegment, totalDistortion); 
           deltas.push_back(noChangeDelta);   
@@ -402,12 +408,12 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
           newLeftNextHypo = const_cast<Hypothesis*>(followingHyp->GetNextHypo());
           newRightPrevHypo = const_cast<Hypothesis*>(hypothesis->GetPrevHypo());
         }
-        
         bool isValidSwap = CheckValidReordering(hypothesis, followingHyp, followingHyp->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, hypothesis->GetNextHypo(), totalDistortion);        
         if (isValidSwap) {//yes
           TranslationDelta* delta = new FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
                                                   &(followingHyp->GetTranslationOption()),  followingHyp->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment,followingTargetSegment, totalDistortion);
           deltas.push_back(delta);
+          
           
           CheckValidReordering(followingHyp,hypothesis, followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
           noChangeDelta = new FlipDelta(sample,&(followingHyp->GetTranslationOption()), 
@@ -442,13 +448,15 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
         }
         
         VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
+        VERBOSE(2,"Sample fvs " << sample.GetFeatureValues() << endl);
+
       }
       
       //clean up
       RemoveAllInColl(deltas);
     }
     for (int j = i-1; j >= 0; --j) {//let's just look at the source side successors  
-      VERBOSE(2, "Flipping phrases at pos" << splitPoints[j] << " and "  << splitPoints[i] << endl);
+      VERBOSE(2, "Backward Flipping phrases at pos" << splitPoints[j] << " and "  << splitPoints[i] << endl);
       Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitPoints[j]);
       WordsRange thisSourceSegment = hypothesis->GetCurrSourceWordsRange();
       WordsRange thisTargetSegment = hypothesis->GetCurrTargetWordsRange();
@@ -486,7 +494,7 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
                                                   &(hypothesis->GetTranslationOption()),  hypothesis->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment,thisTargetSegment, totalDistortion);
           deltas.push_back(delta);          
         
-          CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), followingHyp->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
+          CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
           noChangeDelta = new   FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
                                         &(followingHyp->GetTranslationOption()), hypothesis->GetPrevHypo(), followingHyp->GetNextHypo() ,thisTargetSegment,followingTargetSegment, totalDistortion); 
           deltas.push_back(noChangeDelta);   
@@ -546,6 +554,8 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
         }
         
         VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
+        VERBOSE(2,"Sample fvs " << sample.GetFeatureValues() << endl);
+
       }
       
       //clean up

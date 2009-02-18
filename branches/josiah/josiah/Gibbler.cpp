@@ -98,6 +98,9 @@ void Sample::UpdateTargetWords()  {
     VERBOSE(2,endl);
   }
   
+  IFVERBOSE(2) {
+    VERBOSE(2,"FVs: " << feature_values << endl);
+  }
 }
 
   
@@ -201,7 +204,32 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
   DeleteFromCache(oldRightHypo);
   DeleteFromCache(oldLeftHypo);
   
+  //Sanity check
+  IFVERBOSE(2) {
+    float totalDistortion(0.0);
+    for (Hypothesis* h = target_tail; h; h = const_cast<Hypothesis*>(h->GetNextHypo())) {
+      Hypothesis *next = const_cast<Hypothesis*>(h->GetNextHypo());
+      if (next) {
+        totalDistortion += ComputeDistortionDistance(h->GetCurrSourceWordsRange(), next->GetCurrSourceWordsRange());   
+      }
+      else {
+        break;
+      }
+    }
+    VERBOSE(2, "Total distortion for this sample " << totalDistortion << endl);
+  } 
 }
+
+  float Sample::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) 
+  {
+    int dist = 0;
+    if (prev.GetNumWordsCovered() == 0) {
+      dist = current.GetStartPos();
+    } else {
+      dist = (int)prev.GetEndPos() - (int)current.GetStartPos() + 1 ;
+    }
+    return - (float) abs(dist);
+  }  
   
 void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();

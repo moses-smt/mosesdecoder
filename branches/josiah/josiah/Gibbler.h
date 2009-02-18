@@ -43,6 +43,7 @@ class Sample {
   void SetSrcPrevHypo(Hypothesis*  newHyp, Hypothesis* srcPrevHypo);
   void UpdateTargetWords();
   void DeleteFromCache(Hypothesis *hyp);
+  float ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) ;
  public:
   Sample(Hypothesis* target_head);
   ~Sample();
