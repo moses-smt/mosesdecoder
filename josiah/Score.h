@@ -23,49 +23,72 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 
+#include "FeatureFunction.h"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
 
 namespace Josiah {
 
+
+class FeatureRegistry;
+
+
+//TODO: Could be templated
+class NamedValues {
+  public:
+    const float& operator[](const std::string& name) const;
+    float& operator[](const std::string& name);
+    
+  private:
+    static float s_default;
+    std::map<std::string,float> m_namedValues;
+};
+
 /**
  * Set of weights, including the moses weights.
  **/
-  class WeightVector {
+  class WeightVector : public NamedValues{
     public:
       WeightVector();
-      float getWeight(const std::string& name) const;
-      void setScore(const std::string& name, float value);
-      std::vector<float> getWeights();
+      /** All weights */
+      std::vector<float> getAllWeights() const;
+      const std::vector<float>& getMosesWeights() const;
       
-      friend std::ostream& operator<<(std::ostream&, const WeightVector&);
+      //friend std::ostream& operator<<(std::ostream&, const WeightVector&);
+      
+    private:
       
   };
+  
+  std::ostream& operator<<(std::ostream&, const WeightVector&);
 
 
   /**
     * Set of scores, including the moses scores.
    **/
-  class ScoreVector {
+  class ScoreVector : public NamedValues{
     
     public:
-      ScoreVector(const Moses::ScoreComponentCollection& mosesScores);
+      ScoreVector(const Moses::ScoreComponentCollection& mosesScores) :
+        m_mosesScores(mosesScores) {}
+      //Creates a zero vector
+      ScoreVector() {}
+      /** All scores */
+      std::vector<float> getAllScores() const;
+      Moses::ScoreComponentCollection getMosesScores() const {return m_mosesScores;}
+      Moses::ScoreComponentCollection& getMosesScores()  {return m_mosesScores;}
+      ScoreVector operator+(const ScoreVector& rhs) const;
+      ScoreVector operator-(const ScoreVector& rhs) const;
+      void operator+=(const ScoreVector& rhs);
+      void operator-=(const ScoreVector& rhs);
+      /** Inner product */
+      float operator*(const WeightVector& weights) const;
       
-      float getScore(const std::string& name) const;
-      void setScore(const std::string& name, float value);
-      std::vector<float> getScores();
-      Moses::ScoreComponentCollection& getMosesScores();
-      ScoreVector operator+(const ScoreVector rhs) const;
-      void operator+=(const ScoreVector rhs);
-      float innerProduct(const WeightVector& weights);
-      
-      friend std::ostream& operator<<(std::ostream&, const ScoreVector&);
-    
-    
     private:
-      std::map<std::string,float> m_scores;
+      Moses::ScoreComponentCollection m_mosesScores;
   };
   
+  std::ostream& operator<<(std::ostream&, const ScoreVector&);
   
 
 
