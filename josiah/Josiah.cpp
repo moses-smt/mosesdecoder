@@ -114,6 +114,7 @@ int main(int argc, char** argv) {
   int burning_its;
   int mbr_size;
   string inputfile;
+  string outputfile;
   string mosesini;
   bool decode;
   bool translate;
@@ -130,6 +131,8 @@ int main(int argc, char** argv) {
   int lineno;
   bool randomize;
   float scalefactor;
+  float eta;
+  float mu;
   string weightfile;
   vector<string> ref_files;
   bool decode_monotone;
@@ -145,6 +148,7 @@ int main(int argc, char** argv) {
         ("scale-factor,c", po::value<float>(&scalefactor)->default_value(1.0), "Scale factor for model weights.")
         ("decode-monotone", po::value(&decode_monotone)->zero_tokens()->default_value(false), "Run the initial decoding monotone.")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
+        ("output-file-prefix,o",po::value<string>(&outputfile),"Output file prefix for translations, MBR output, etc")
         ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
 	("show-features,F",po::value<bool>(&show_features)->zero_tokens()->default_value(false),"Show features and then exit")
 	("weights,w",po::value<string>(&weightfile),"Weight file")
@@ -157,6 +161,8 @@ int main(int argc, char** argv) {
         ("expected-bleu-training,T", po::value(&expected_sbleu_training)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU")
         ("max-training-iterations,M", po::value(&max_training_iterations)->default_value(30), "Maximum training iterations")
         ("training-batch-size,S", po::value(&training_batch_size)->default_value(0), "Batch size to use during xpected bleu training, 0 = full corpus")
+        ("eta", po::value<float>(&eta)->default_value(1.0f), "Default learning rate for SGD")
+        ("mu", po::value<float>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training");
@@ -172,7 +178,6 @@ int main(int argc, char** argv) {
       std::cout << desc << std::endl;
       return 0;
   }
-  bool print_exp_sbleu = expected_sbleu;
   if (expected_sbleu_gradient) expected_sbleu = true;
 
   if (mosesini.empty()) {
@@ -215,7 +220,7 @@ int main(int argc, char** argv) {
   
 
   if (vm.count("random-seed")) {
-    GibbsOperator::setRandomSeed(seed);
+    GibbsOperator::setRandomSeed(seed + rank);
   }      
       
   GainFunctionVector g;
@@ -225,13 +230,20 @@ int main(int argc, char** argv) {
     VERBOSE(1,"Warning: No input file specified, using toy dataset" << endl);
   }
 
+  ostream* out = &cout;
+  if (!outputfile.empty()) {
+    ostringstream os;
+    os << outputfile << '.' << rank << "_of_" << size;
+    VERBOSE(1, "Writing output to: " << os.str() << endl);
+    out = new ofstream(os.str().c_str());
+  }
   auto_ptr<istream> in;
   auto_ptr<InputSource> input;
   //auto_ptr<Optimizer> optimizer(new DumbStochasticGradientDescent(0.75, max_training_iterations));
   auto_ptr<Optimizer> optimizer(
     new ExponentiatedGradientDescent(
-      ScoreComponentCollection(weights.size(), 1.0f),  // eta
-      1.2f,  // mu, meta learning rate
+      ScoreComponentCollection(weights.size(), eta),
+      mu,
       0.1f,   // minimal step scaling factor
       max_training_iterations));
   ExpectedBleuTrainer* trainer = NULL;
@@ -317,8 +329,8 @@ int main(int argc, char** argv) {
       ScoreComponentCollection gradient;
       float exp_trans_len = 0;
       const float exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len);
-      (print_exp_sbleu ? cout : cerr) << '(' << lineno << ") Expected sentence BLEU: " << exp_gain << endl
-                                      << "    Expected length: " << exp_trans_len << endl;
+      (*out) << '(' << lineno << ") Expected sentence BLEU: " << exp_gain 
+             << "   \tExpected length: " << exp_trans_len << endl;
       if (trainer)
         trainer->IncorporateGradient(
            exp_trans_len,
@@ -330,34 +342,37 @@ int main(int argc, char** argv) {
     if (mbr_decoding) {
       vector<const Factor*> sentence = mbrCollector->Max();
       for (size_t i = 0; i < sentence.size(); ++i) {
-        cout << (i > 0 ? " " : "") << *sentence[i];
+        (*out) << (i > 0 ? " " : "") << *sentence[i];
       }
-      cout << endl << flush;
+      (*out) << endl << flush;
     }
     if (derivationCollector.get()) {
       vector<DerivationProbability> derivations;
       derivationCollector->getTopN(max(topn,1u),derivations);
       for (size_t i = 0; i < topn && i < derivations.size() ; ++i) {  
         Derivation d = *(derivations[i].first);
-        cout  << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
+        (*out) << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
       }
       if (decode) {
         const vector<string>& sentence = derivations[0].first->getTargetSentence();
-        copy(sentence.begin(),sentence.end(),ostream_iterator<string>(cout," "));
-        cout << endl << flush;
+        copy(sentence.begin(),sentence.end(),ostream_iterator<string>(*out," "));
+        (*out) << endl << flush;
       }
     }
     if (transCollector.get()) {
       vector<const Factor*> sentence = transCollector->Max();
       for (size_t i = 0; i < sentence.size(); ++i) {
-        cout << (i > 0 ? " " : "") << *sentence[i];
+        (*out) << (i > 0 ? " " : "") << *sentence[i];
       }
-      cout << endl << flush;
+      (*out) << endl << flush;
     }
     ++lineno;
   }
 #ifdef MPI_ENABLED
   MPI_Finalize();
 #endif
+  (*out) << flush;
+  if (!outputfile.empty())
+    delete out;
   return 0;
 }
