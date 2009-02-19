@@ -129,6 +129,7 @@ int main(int argc, char** argv) {
   int max_training_iterations;
   uint32_t seed;
   int lineno;
+  int periodic_decode;
   bool randomize;
   float scalefactor;
   float eta;
@@ -154,6 +155,7 @@ int main(int argc, char** argv) {
 	("weights,w",po::value<string>(&weightfile),"Weight file")
         ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
         ("decode-translation,t",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
+        ("periodic-derivation,p",po::value(&periodic_decode)->default_value(0), "Periodically write the max derivation to stderr")
         ("line-number,L", po::value(&lineno)->default_value(0), "Starting reference/line number")
         ("xbleu,x", po::value(&expected_sbleu)->zero_tokens()->default_value(false), "Compute the expected sentence BLEU")
         ("gradient,g", po::value(&expected_sbleu_gradient)->zero_tokens()->default_value(false), "Compute the gradient with respect to expected sentence BLEU")
@@ -292,8 +294,10 @@ int main(int argc, char** argv) {
       elCollector.reset(new GibblerExpectedLossCollector(g[lineno]));
       sampler.AddCollector(elCollector.get());
     }
-    if (decode || topn > 0) {
-      derivationCollector.reset(new DerivationCollector());
+    if (decode || topn > 0 || periodic_decode > 0) {
+      DerivationCollector* collector = new DerivationCollector();
+      collector->setPeriodicDecode(periodic_decode);
+      derivationCollector.reset(collector);
       sampler.AddCollector(derivationCollector.get());
     }
     if (translate) {
