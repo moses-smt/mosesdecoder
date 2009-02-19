@@ -71,7 +71,8 @@ namespace Josiah {
   
   void DerivationCollector::collect(Sample& sample) {
     VERBOSE(1,"Collected: " << *sample.GetSampleHypothesis() << endl); 
-    
+    ++m_counts[Derivation(sample)];
+    ++m_n;
     if (m_pd > 0 && m_n > 0 && m_n%m_pd == 0) {
       vector<DerivationProbability> derivations;
       getTopN(1,derivations);
@@ -80,8 +81,7 @@ namespace Josiah {
             " " << *(derivations[0].first) << endl;
       }
     }
-    ++m_counts[Derivation(sample)];
-    ++m_n;
+    
   }
   
   void DerivationCollector::getTopN(size_t n, vector<DerivationProbability>& derivations) {
