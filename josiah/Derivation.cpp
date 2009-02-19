@@ -70,7 +70,16 @@ namespace Josiah {
   
   
   void DerivationCollector::collect(Sample& sample) {
-    VERBOSE(1,"Collected: " << *sample.GetSampleHypothesis() << endl);
+    VERBOSE(1,"Collected: " << *sample.GetSampleHypothesis() << endl); 
+    
+    if (m_pd > 0 && m_n > 0 && m_n%m_pd == 0) {
+      vector<DerivationProbability> derivations;
+      getTopN(1,derivations);
+      if (derivations.size()) {
+        cerr << "MaxDecode(" << m_n << "): " <<  std::setprecision(8) << derivations[0].second << " " << derivations[0].second*m_n <<
+            " " << *(derivations[0].first) << endl;
+      }
+    }
     ++m_counts[Derivation(sample)];
     ++m_n;
   }
