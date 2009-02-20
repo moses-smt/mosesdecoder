@@ -56,10 +56,10 @@ namespace Josiah {
   }
 
   ostream& operator<<(ostream& out, const Derivation& d) {
-    //FIXME: Just print the target sentence and feature values for now
     out << "Target: << ";
     for (size_t i = 0; i < d.m_alignments.size(); ++i) {
-      out << d.m_alignments[i]._target ;
+      out << d.m_alignments[i]._target;
+      out << d.m_alignments[i]._sourceSegment << " ";
     }
     out << ">> Feature values: ";
     out << d.m_featureValues;
@@ -121,7 +121,13 @@ namespace Josiah {
     }
     
     for (multimap<size_t,string>::const_iterator i = sortedCounts.begin(); i != sortedCounts.end(); ++i) {
-      out << i->first << " " << i->second << endl;
+      out << "COUNT: " <<  i->first << " TRANS:" << i->second << endl;
+      if (i->first > 1) {
+        for (set<Derivation>::const_iterator j = m_derivByTrans[i->second].begin(); 
+            j != m_derivByTrans[i->second].end(); ++j) {
+              out << *j << endl;
+        }
+      }
     }
     
   }
