@@ -138,6 +138,8 @@ int main(int argc, char** argv) {
   string weightfile;
   vector<string> ref_files;
   bool decode_monotone;
+  bool decode_zero_weights;
+  bool decode_nolm;
   bool collect_dbyt;
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -150,6 +152,8 @@ int main(int argc, char** argv) {
         ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
         ("scale-factor,c", po::value<float>(&scalefactor)->default_value(1.0), "Scale factor for model weights.")
         ("decode-monotone", po::value(&decode_monotone)->zero_tokens()->default_value(false), "Run the initial decoding monotone.")
+      ("decode-nolm", po::value(&decode_nolm)->zero_tokens()->default_value(false), "Run the initial decoding without an lm.")
+      ("decode-zero-weights", po::value(&decode_zero_weights)->zero_tokens()->default_value(false), "Run the initial decoding with weights set to zero.")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
         ("output-file-prefix,o",po::value<string>(&outputfile),"Output file prefix for translations, MBR output, etc")
         ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
@@ -221,6 +225,14 @@ int main(int argc, char** argv) {
   
   if (decode_monotone) {
     decoder->SetMonotone(true);
+  }
+  
+  if (decode_zero_weights) {
+    decoder->SetZeroWeights(true);
+  }
+  
+  if (decode_nolm) {
+    decoder->SetNoLM(true);
   }
   
   //scale model weights
