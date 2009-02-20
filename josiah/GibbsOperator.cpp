@@ -346,8 +346,8 @@ void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection
   CollectAllSplitPoints(sample, splitPoints);  //collect all split points for this sample
   
     
-  for (int i = 0; i < splitPoints.size(); ++i) {
-    for (int j = i+1; j < splitPoints.size(); ++j) {//let's just look at the source side successors  
+  for (unsigned int i = 0; i < splitPoints.size(); ++i) {
+    for (unsigned int j = i+1; j < splitPoints.size(); ++j) {//let's just look at the source side successors  
       VERBOSE(2, "Forward Flipping phrases at pos" << splitPoints[i] << " and "  << splitPoints[j] << endl);
       
       Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitPoints[i]);

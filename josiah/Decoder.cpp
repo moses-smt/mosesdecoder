@@ -62,7 +62,7 @@ namespace Josiah {
   }
   
   
-  void MosesDecoder::decode(const std::string& source, Hypothesis*& bestHypo, TranslationOptionCollection*& toc) {
+  void MosesDecoder::decode(const std::string& source, Hypothesis*& bestHypo, TranslationOptionCollection*& toc, std::vector<Word>& sent_vector) {
      
       const StaticData &staticData = StaticData::Instance();
 
@@ -74,7 +74,7 @@ namespace Josiah {
       stringstream in(source + "\n");
       const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
       sentence.Read(in,inputFactorOrder);
-      
+      for (size_t i=0; i<sentence.GetSize(); ++i){ sent_vector.push_back(sentence.GetWord(i)); } 
       //monotone
       int distortionLimit = staticData.GetMaxDistortion();
       if (m_isMonotone) {

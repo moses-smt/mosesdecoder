@@ -1,5 +1,6 @@
 #include "Gibbler.h"
 
+#include "FeatureFunction.h"
 #include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
 #include "GibblerMaxTransDecoder.h"
@@ -9,9 +10,14 @@ using namespace std;
 
 namespace Moses {
 
-Sample::Sample(Hypothesis* target_head) : feature_values(target_head->GetScoreBreakdown()){
-  
-  source_size = target_head->GetWordsBitmap().GetSize();
+void compute_extra_fv(const Sample& s, const Josiah::feature_vector& features, std::vector<float>& values){
+  for (Josiah::feature_vector::const_iterator i=features.begin(); i!=features.end(); ++i){
+    values.push_back((*i)->computeScore(s));
+  }
+}
+
+Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const Josiah::feature_vector& extra_features) : 
+  m_sourceWords(source), feature_values(target_head->GetScoreBreakdown()), _extra_features(extra_features){ 
   
   std::map<int, Hypothesis*> source_order;
   this->target_head = target_head;
@@ -52,6 +58,7 @@ Sample::Sample(Hypothesis* target_head) : feature_values(target_head->GetScoreBr
   this->target_tail->m_prevHypo = NULL;
   
   UpdateTargetWords();
+  compute_extra_fv(*this, _extra_features, _extra_feature_values);
 }
  
 Sample::~Sample() {
@@ -373,8 +380,8 @@ void Sample::DeleteFromCache(Hypothesis *hyp) {
   }
 }
   
-void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options) {
-  Sample sample(starting);
+void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options, const std::vector<Word>& source, const Josiah::feature_vector& extra_fv) {
+  Sample sample(starting,source,extra_fv);
   
   bool f = false;
   for (size_t i = 0; i < m_burninIts; ++i) {
