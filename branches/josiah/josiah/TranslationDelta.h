@@ -22,10 +22,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
-#include <deque>
+#include <utility>
 
 #ifdef LM_CACHE
-#include <boost/unordered_map.hpp>
+#include <ext/hash_map>
 #endif
 
 #include "DummyScoreProducers.h"
@@ -33,6 +33,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
 #include "FeatureFunction.h"
+
+#ifdef LM_CACHE
+namespace __gnu_cxx {
+  template<> struct hash<std::vector<const Moses::Word*> > {
+    inline size_t operator()(const std::vector<const Moses::Word*>& p) const {
+      static const int primes[] = {8933, 8941, 8951, 8963, 8969, 8971, 8999, 9001, 9007, 9011};
+      size_t h = 0;
+      for (unsigned i = 0; i < p.size(); ++i)
+        h += reinterpret_cast<size_t>(p[i]) * primes[i % 10];
+      return h;
+    }
+  };
+}
+#endif
 
 namespace Moses {
 
@@ -44,7 +58,7 @@ class Sample;
 **/
 class LanguageModelCache {
   public:
-    LanguageModelCache(LanguageModel* languageModel, int maxSize=10000) :
+    LanguageModelCache(LanguageModel* languageModel, int maxSize=100000) :
       m_languageModel(languageModel), m_maxSize(maxSize) {}
     float GetValue(const std::vector<const Word*>& ngram);
     
@@ -57,7 +71,7 @@ class LanguageModelCache {
     typedef EntryList::iterator EntryListIterator;
     std::list<Entry> m_entries;
     //pointers into the entry list
-    typedef boost::unordered_map<vector<const Word*>, EntryListIterator*> ListPointerMap;
+    typedef __gnu_cxx::hash_map<vector<const Word*>, EntryListIterator*> ListPointerMap;
     ListPointerMap m_listPointers;
 };
 #endif
