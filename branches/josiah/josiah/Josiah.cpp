@@ -271,6 +271,7 @@ int main(int argc, char** argv) {
     VERBOSE(1, "Loaded " << input_lines.size() << " lines in training mode" << endl);
     if (!training_batch_size || training_batch_size > input_lines.size())
       training_batch_size = input_lines.size();
+    VERBOSE(1, "Batch size: " << training_batch_size << endl);
     trainer = new ExpectedBleuTrainer(rank, size, training_batch_size, &input_lines, seed, randomize, optimizer.get());
     input.reset(trainer);
   } else {

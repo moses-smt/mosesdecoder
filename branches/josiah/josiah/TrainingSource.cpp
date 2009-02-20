@@ -69,7 +69,7 @@ void ExpectedBleuTrainer::ReserveNextBatch() {
   }
 
 bool ExpectedBleuTrainer::HasMore() const {
-  return keep_going;
+  return keep_going && (cur < cur_end);
 }
 
 void ExpectedBleuTrainer::GetSentence(string* sentence, int* lineno) {
@@ -115,11 +115,15 @@ void ExpectedBleuTrainer::IncorporateGradient(
       cerr << "EXPECTED LENGTH / REF LENGTH: " << tel << '/' << trl << " (" << (tel / trl) << ")\n";
       optimizer->Optimize(tg, weights, g, &weights);
       weights.PlusEquals(g);
+      if (optimizer->HasConverged()) keep_going = false;
     }
 #ifdef MPI_ENABLED
+    int kg = keep_going;
     if (MPI_SUCCESS != MPI_Bcast(const_cast<float*>(&weights.data()[0]), weights.data().size(), MPI_FLOAT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    if (MPI_SUCCESS != MPI_Bcast(&kg, 1, MPI_INT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     ReserveNextBatch();
     if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    keep_going = kg;
 #endif
     decoder->SetFeatureWeights(weights.data());
     cur = cur_start;
@@ -127,7 +131,6 @@ void ExpectedBleuTrainer::IncorporateGradient(
     total_exp_gain = 0;
     total_exp_len = 0;
     total_ref_len = 0;
-    if (optimizer->HasConverged()) keep_going = false;
   }
 }
 
