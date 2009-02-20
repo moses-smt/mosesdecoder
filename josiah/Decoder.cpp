@@ -68,6 +68,25 @@ namespace Josiah {
 
       //clean up previous sentence
       staticData.CleanUpAfterSentenceProcessing();
+      
+      //maybe ignore lm
+      const LMList& languageModels = StaticData::Instance().GetAllLM();
+      vector<float> prevFeatureWeights;
+      GetFeatureWeights(&prevFeatureWeights);
+      if (m_useZeroWeights) {
+        vector<float> newFeatureWeights = prevFeatureWeights; //copy
+        fill(newFeatureWeights.begin(),newFeatureWeights.end(),0);
+        SetFeatureWeights(newFeatureWeights);
+      } else if (m_useNoLM) {
+        vector<float> newFeatureWeights = prevFeatureWeights; //copy
+        for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
+          LanguageModel* lm = *i;
+          const ScoreIndexManager& siManager = StaticData::Instance().GetScoreIndexManager();
+          size_t lmindex = siManager.GetBeginIndex(lm->GetScoreBookkeepingID());
+          newFeatureWeights[lmindex] = 0;
+        }
+        SetFeatureWeights(newFeatureWeights);
+      }
   
       //the sentence
       Sentence sentence(Input);
@@ -94,9 +113,11 @@ namespace Josiah {
   
       //get hypo
       bestHypo = const_cast<Hypothesis*>(m_searcher->GetBestHypothesis());
+      cerr << "Moses hypothesis: " << *bestHypo << endl;
       toc = m_toc.get();
       
       const_cast<StaticData&>(staticData).SetMaxDistortion(distortionLimit);
+      SetFeatureWeights(prevFeatureWeights);
   }
 
   void MosesDecoder::GetFeatureNames(std::vector<std::string>* featureNames) const {
@@ -116,7 +137,4 @@ namespace Josiah {
     const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
   }
   
-  void MosesDecoder::SetMonotone(bool isMonotone) {
-    m_isMonotone = isMonotone;
-  }
 }
