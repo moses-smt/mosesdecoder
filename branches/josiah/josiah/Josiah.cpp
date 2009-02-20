@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GibblerExpectedLossTraining.h"
 #include "GibblerMaxTransDecoder.h"
 #include "MBRDecoder.h"
+#include "Model1.h"
 #include "Timer.h"
 #include "StaticData.h"
 #include "Optimizer.h"
@@ -167,13 +168,20 @@ int main(int argc, char** argv) {
         ("mu", po::value<float>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
-        ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training");
+        ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
+        ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features");
   po::options_description cmdline_options;
   cmdline_options.add(desc);
   po::variables_map vm;
   po::store(po::command_line_parser(argc,argv).
             options(cmdline_options).run(), vm);
   po::notify(vm);
+
+  feature_vector extra_features; 
+  if (!vm["extra-feature-config"].empty()){
+    configure_features_from_file(vm["extra-feature-config"].as<std::string>(), extra_features);
+  }
+  std::cerr << "Using " << extra_features.size() << " extra features" << std::endl;
 
   if (help) {
       std::cout << "Usage: " + string(argv[0]) +  " -f mosesini-file [options]" << std::endl;
@@ -323,10 +331,11 @@ int main(int argc, char** argv) {
     Hypothesis* hypothesis;
     timer.check("Running decoder");
 
-    decoder->decode(line,hypothesis,toc);
+    std::vector<Word> source;
+    decoder->decode(line,hypothesis,toc,source);
     timer.check("Running sampler");
 
-    sampler.Run(hypothesis,toc);
+    sampler.Run(hypothesis,toc,source,extra_features);
     timer.check("Outputting results");
 
     if (expected_sbleu) {

@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Gibbler.h"
 #include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
+#include "FeatureFunction.h"
 
 namespace Moses {
 
@@ -81,6 +82,7 @@ class TranslationDelta {
   virtual void apply(const TranslationDelta& noChangeDelta) = 0;
    
     const ScoreComponentCollection& getScores() const {return m_scores;}
+    const std::vector<float>& extra_feature_values() const { return _extra_feature_values; }
     Sample& getSample() const {return m_sample;}
     virtual ~TranslationDelta() {}
     
@@ -93,13 +95,14 @@ class TranslationDelta {
     /**
       * Initialise the scores for the case where only one source-target pair needs to be considered.
      **/
-    void initScoresSingleUpdate(const TranslationOption* option, const WordsRange& targetSegment);
+    void initScoresSingleUpdate(const Sample&, const TranslationOption* option, const WordsRange& targetSegment);
     /**
      * Initialise the scores for the case where two source-target pairs need to be considered.
      **/
-    void initScoresPairedUpdate(const TranslationOption* leftOption,
+    void initScoresPairedUpdate(const Sample&, const TranslationOption* leftOption,
                                 const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
     ScoreComponentCollection m_scores;
+    std::vector<float> _extra_feature_values;
     double m_score;
     
   private:

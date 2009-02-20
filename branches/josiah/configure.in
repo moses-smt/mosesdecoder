@@ -27,6 +27,7 @@ AC_PROG_RANLIB
 AX_BOOST_BASE([1.37.0])
 #AX_BOOST_BASE
 AX_BOOST_PROGRAM_OPTIONS
+AX_BOOST_SERIALIZATION
 
 AC_ARG_WITH(protobuf,
             [AC_HELP_STRING([--with-protobuf=PATH], [(optional) path to Google protobuf])],

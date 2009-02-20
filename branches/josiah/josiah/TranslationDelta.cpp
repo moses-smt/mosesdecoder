@@ -17,7 +17,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <boost/lambda/lambda.hpp>
 #include "TranslationDelta.h"
+#include "FeatureFunction.h"
+#include "Gibbler.h"
 
 using namespace std;
 
@@ -138,7 +141,7 @@ void  TranslationDelta::addLanguageModelScore(const Phrase& targetPhrase, const 
   }
 }
 
-void TranslationDelta::initScoresSingleUpdate(const TranslationOption* option, const WordsRange& targetSegment) {
+void TranslationDelta::initScoresSingleUpdate(const Sample& s, const TranslationOption* option, const WordsRange& targetSegment) {
   //translation scores
   m_scores.PlusEquals(option->GetScoreBreakdown());
         
@@ -151,15 +154,26 @@ void TranslationDelta::initScoresSingleUpdate(const TranslationOption* option, c
         
   addLanguageModelScore(option->GetTargetPhrase(), targetSegment);
         
+  // extra features
+  _extra_feature_values.clear();
+  typedef Josiah::feature_vector fv;
+  for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i)
+    _extra_feature_values.push_back((*i)->getSingleUpdateScore(s, option, targetSegment));
+
   //weight the scores
   const vector<float> & weights = StaticData::Instance().GetAllWeights();
   m_score = m_scores.InnerProduct(weights);
   
   VERBOSE(2, "Single Update: Scores " << m_scores << endl);
+  IFVERBOSE(2){
+    std::cerr << "Single Update: extra scores ";
+    std::for_each(_extra_feature_values.begin(), _extra_feature_values.end(), std::cerr << boost::lambda::_1 << " ");
+    std::cerr << std::endl; 
+  }
   VERBOSE(2,"Single Update: Total score is  " << m_score << endl);  
 }
 
-void TranslationDelta::initScoresPairedUpdate(const TranslationOption* leftOption,
+void TranslationDelta::initScoresPairedUpdate(const Sample& s, const TranslationOption* leftOption,
       const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) {
   //translation scores
   m_scores.PlusEquals(leftOption->GetScoreBreakdown());
@@ -172,12 +186,23 @@ void TranslationDelta::initScoresPairedUpdate(const TranslationOption* leftOptio
   m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
   
   addLanguageModelScore(targetPhrase, targetSegment);
-  
+
+  // extra features
+  _extra_feature_values.clear();
+  typedef Josiah::feature_vector fv;
+  for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i)
+    _extra_feature_values.push_back((*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase));
+
   //weight the scores
   const vector<float> & weights = StaticData::Instance().GetAllWeights();
   m_score = m_scores.InnerProduct(weights);
 
   VERBOSE(2, "Paired Update: Scores " << m_scores << endl);
+  IFVERBOSE(2){
+    std::cerr << "Single Update: extra scores ";
+    std::for_each(_extra_feature_values.begin(), _extra_feature_values.end(), std::cerr << boost::lambda::_1 << " ");
+    std::cerr << std::endl; 
+  }
   VERBOSE(2,"Paired Update: Total score is  " << m_score << endl);  
 
 }
@@ -185,7 +210,7 @@ void TranslationDelta::initScoresPairedUpdate(const TranslationOption* leftOptio
 
 TranslationUpdateDelta::TranslationUpdateDelta(Sample& sample, const TranslationOption* option ,const WordsRange& targetSegment) :
     TranslationDelta(sample),  m_option(option)  {
-  initScoresSingleUpdate(option,targetSegment);
+  initScoresSingleUpdate(sample, option,targetSegment);
 }
 
 void TranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
@@ -196,7 +221,7 @@ void TranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
 
 MergeDelta::MergeDelta(Sample& sample, const TranslationOption* option, const WordsRange& targetSegment) :
     TranslationDelta(sample),  m_option(option) {
-  initScoresSingleUpdate(option,targetSegment);
+  initScoresSingleUpdate(sample, option,targetSegment);
 }
 
 void MergeDelta::apply(const TranslationDelta& noChangeDelta) {
@@ -231,7 +256,7 @@ PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(Sample& sample,
     }
       
       
-    initScoresPairedUpdate(leftOption,rightOption,targetSegment,*targetPhrase);
+    initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,*targetPhrase);
 }
 
 void PairedTranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
@@ -249,7 +274,7 @@ SplitDelta::SplitDelta(Sample& sample, const TranslationOption* leftOption,
   for (size_t i = 0; i < rightTargetPhrase.GetSize(); ++i) {
     targetPhrase.AddWord(rightTargetPhrase.GetWord(i));
   }
-  initScoresPairedUpdate(leftOption,rightOption,targetSegment,targetPhrase);
+  initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,targetPhrase);
 }
 
 void SplitDelta::apply(const TranslationDelta& noChangeDelta) {
@@ -307,7 +332,7 @@ FlipDelta::FlipDelta(Sample& sample, const TranslationOption* leftTgtOption ,
     const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
     m_scores.PlusEquals(dsp, totalDistortion);
     
-    //extra scores
+    //TODO: extra scores
       
     //weight the scores
     const vector<float> & weights = StaticData::Instance().GetAllWeights();

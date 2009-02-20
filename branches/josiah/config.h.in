@@ -6,6 +6,9 @@
 /* define if the Boost::PROGRAM_OPTIONS library is available */
 #undef HAVE_BOOST_PROGRAM_OPTIONS
 
+/* define if the Boost::Serialization library is available */
+#undef HAVE_BOOST_SERIALIZATION
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 

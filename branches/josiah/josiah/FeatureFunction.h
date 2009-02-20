@@ -19,11 +19,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include "Gibbler.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/program_options.hpp>
 #include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
 
 using namespace Moses;
+namespace po = boost::program_options;
 
 namespace Moses {
   class Sample;
@@ -31,39 +33,33 @@ namespace Moses {
 
 namespace Josiah {
   
-  
-  
-  
+/**
+  * Base class for any state information required by a FeatureFunction.
+  * For sampling, state is any information that the FeatureFunction deems
+  * useful for computing updates efficiently. 
+  * Since the Sample never actually needs to know anything about the 
+  * FeatureState, it contains no useful members.
+ **/
+class FeatureState {}; 
 
 /**
   * Base class for Gibbler feature functions.
  **/
 class FeatureFunction {
   public:
-    FeatureFunction(Sample& sample) :
-      m_sample(sample) {}
-    /** Score for the sample */
-    virtual float getScore() = 0;
+    /** Compute full score of a sample from scratch **/
+    virtual float computeScore(const Sample& sample) = 0;
     /** Change in score when updating one segment */
-    virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) = 0;
+    virtual float getSingleUpdateScore(const Sample& sample, const TranslationOption* option, const WordsRange& targetSegment) = 0;
     /** Change in score when updating two segments **/
-    virtual float getPairedUpdateScore(const TranslationOption* leftOption,
+    virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
                                const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) = 0;
     /** Change in score when flipping */
-    virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
+    virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                              const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                              const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) = 0;
     virtual std::string getName() = 0;
-    virtual ~FeatureFunction() {}
-    
-  protected:
-    Sample& getSample() {return m_sample;}
-    
-    
-  private:
-    Sample& m_sample;
-    
-    
+    virtual ~FeatureFunction() = 0;
 };
 
 /**
@@ -71,14 +67,14 @@ class FeatureFunction {
  **/
 class DummyFeatureFunction : public FeatureFunction {
   public:
-    DummyFeatureFunction(Sample& sample) : FeatureFunction(sample) {}
-    virtual float getScore() {return 1;}
-    virtual float getSingleUpdateScore(const TranslationOption*, const WordsRange&)
+    virtual bool isStateful() { return false; }
+    virtual float computeScore(const Sample& sample) { return 1; }
+    virtual float getSingleUpdateScore(const Sample&, const TranslationOption*, const WordsRange&)
       {return 2;}
-    virtual float getPairedUpdateScore(const TranslationOption*,
+    virtual float getPairedUpdateScore(const Sample&, const TranslationOption*,
                                       const TranslationOption*, const WordsRange&, const Phrase&)
     {return 3;}
-    virtual float getFlipUpdateScore(const TranslationOption*, const TranslationOption*, 
+    virtual float getFlipUpdateScore(const Sample&, const TranslationOption*, const TranslationOption*, 
                                     const Hypothesis*, const Hypothesis*, 
                                     const WordsRange&, const WordsRange&)
     {return 4;}
@@ -86,6 +82,9 @@ class DummyFeatureFunction : public FeatureFunction {
     virtual ~DummyFeatureFunction() {}
 };
 
+typedef boost::shared_ptr<FeatureFunction> feature_handle;
+typedef std::vector<feature_handle> feature_vector;
+void configure_features_from_file(const std::string& filename, feature_vector& fv); 
 
 /**
  * Singleton which stores and creates the Gibbler feature functions.
@@ -107,8 +106,6 @@ class FeatureRegistry {
     FeatureRegistry();
     FeatureRegistry(const FeatureRegistry&);
     FeatureRegistry operator=(const FeatureRegistry&);
-    
-  
 };
 
 } //namespace

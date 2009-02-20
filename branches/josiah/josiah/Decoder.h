@@ -47,7 +47,7 @@ void initMoses(const std::string& inifile, const std::string& weightfile, int de
   **/
 class Decoder {
   public:
-    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc) = 0;
+    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc, std::vector<Moses::Word>& sent) = 0;
     virtual void GetFeatureNames(std::vector<std::string>* featureNames) const = 0;
     virtual void GetFeatureWeights(std::vector<float>* weights) const = 0;
     virtual void SetFeatureWeights(const std::vector<float>& weights) = 0;
@@ -59,7 +59,7 @@ class Decoder {
 class MosesDecoder : public virtual Decoder {
   public:
     MosesDecoder() : m_isMonotone(false) {}
-    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc);
+    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc, std::vector<Moses::Word>& sent);
     virtual void GetFeatureNames(std::vector<std::string>* featureNames) const;
     virtual void GetFeatureWeights(std::vector<float>* weights) const;
     virtual void SetFeatureWeights(const std::vector<float>& weights);
