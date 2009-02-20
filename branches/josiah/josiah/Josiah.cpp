@@ -138,6 +138,7 @@ int main(int argc, char** argv) {
   string weightfile;
   vector<string> ref_files;
   bool decode_monotone;
+  bool collect_dbyt;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -157,6 +158,7 @@ int main(int argc, char** argv) {
         ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
         ("decode-translation,t",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
         ("periodic-derivation,p",po::value(&periodic_decode)->default_value(0), "Periodically write the max derivation to stderr")
+        ("collect-dbyt",po::value(&collect_dbyt)->zero_tokens()->default_value(false), "Collect derivations per translation")
         ("line-number,L", po::value(&lineno)->default_value(0), "Starting reference/line number")
         ("xbleu,x", po::value(&expected_sbleu)->zero_tokens()->default_value(false), "Compute the expected sentence BLEU")
         ("gradient,g", po::value(&expected_sbleu_gradient)->zero_tokens()->default_value(false), "Compute the gradient with respect to expected sentence BLEU")
@@ -306,6 +308,7 @@ int main(int argc, char** argv) {
     if (decode || topn > 0 || periodic_decode > 0) {
       DerivationCollector* collector = new DerivationCollector();
       collector->setPeriodicDecode(periodic_decode);
+      collector->setCollectDerivationsByTranslation(collect_dbyt);
       derivationCollector.reset(collector);
       sampler.AddCollector(derivationCollector.get());
     }
@@ -371,6 +374,10 @@ int main(int argc, char** argv) {
         const vector<string>& sentence = derivations[0].first->getTargetSentence();
         copy(sentence.begin(),sentence.end(),ostream_iterator<string>(*out," "));
         (*out) << endl << flush;
+        
+      }
+      if (collect_dbyt) {
+        derivationCollector->outputDerivationsByTranslation(std::cerr);
       }
     }
     if (transCollector.get()) {

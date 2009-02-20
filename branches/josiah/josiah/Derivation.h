@@ -80,17 +80,21 @@ namespace Josiah {
 
   class DerivationCollector: public virtual Moses::SampleCollector {
     public:
-      DerivationCollector(): m_n(0),m_pd(0) {}
+      DerivationCollector(): m_n(0),m_pd(0) ,m_collectDerivByTrans(false){}
       void collect(Moses::Sample& sample);
       /** Top n in descending order. */
       void getTopN(size_t n, std::vector<DerivationProbability>& derivations);
       /** Write max periodically to stderr */
       void setPeriodicDecode(int pd) {m_pd = pd;}
+      void setCollectDerivationsByTranslation(bool dbyt) {m_collectDerivByTrans = dbyt;}
+      void outputDerivationsByTranslation(std::ostream& out);
       
     private:
       std::map<Derivation,size_t> m_counts;
+      std::map<std::string,std::set<Derivation> > m_derivByTrans;
       size_t m_n;
       int m_pd;
+      bool m_collectDerivByTrans;
   };
 
 } //namespace
