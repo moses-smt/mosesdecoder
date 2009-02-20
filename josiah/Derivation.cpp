@@ -72,6 +72,14 @@ namespace Josiah {
   void DerivationCollector::collect(Sample& sample) {
     VERBOSE(1,"Collected: " << *sample.GetSampleHypothesis() << endl); 
     ++m_counts[Derivation(sample)];
+    if (m_collectDerivByTrans) {
+      //derivations per translation
+      Derivation d(sample);
+      ostringstream os;
+      const vector<string>& sentence = d.getTargetSentence();
+      copy(sentence.begin(),sentence.end(),ostream_iterator<string>(os," "));
+      m_derivByTrans[os.str()].insert(d);
+    }
     ++m_n;
     if (m_pd > 0 && m_n > 0 && m_n%m_pd == 0) {
       vector<DerivationProbability> derivations;
@@ -102,6 +110,20 @@ namespace Josiah {
       derivations.pop_back();
     }
     //cout << derivations.size() << endl;
+  }
+  
+  void DerivationCollector::outputDerivationsByTranslation(ostream& out) {
+    out << "Derivations per translation" << endl;
+    multimap<size_t,string,greater<size_t> > sortedCounts;
+    for (map<string, set<Derivation> >::const_iterator i = m_derivByTrans.begin();
+         i != m_derivByTrans.end(); ++i) {
+           sortedCounts.insert(pair<size_t,string>(i->second.size(),i->first));
+    }
+    
+    for (multimap<size_t,string>::const_iterator i = sortedCounts.begin(); i != sortedCounts.end(); ++i) {
+      out << i->first << " " << i->second << endl;
+    }
+    
   }
 
 }//namespace
