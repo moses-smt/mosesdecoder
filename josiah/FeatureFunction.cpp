@@ -63,14 +63,19 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
   po::store(po::parse_config_file(in,desc,true), vm);
   if (!vm["model1.pef_column"].empty() || !vm["model1.pfe_column"].empty()){
     boost::shared_ptr<external_model1_table> ptable;
+    boost::shared_ptr<moses_factor_to_vocab_id> p_evocab_mapper;
+    boost::shared_ptr<moses_factor_to_vocab_id> p_fvocab_mapper;
     if (vm["model1.table"].empty())
       throw std::runtime_error("Requesting Model 1 features, but no Model 1 table given");
-    else
+    else {
       ptable.reset(new external_model1_table(vm["model1.table"].as<std::string>()));
+      p_fvocab_mapper.reset(new moses_factor_to_vocab_id(ptable->f_vocab(), Moses::Input, 0, Moses::FactorCollection::Instance())); 
+      p_evocab_mapper.reset(new moses_factor_to_vocab_id(ptable->e_vocab(), Moses::Output, 0, Moses::FactorCollection::Instance())); 
+    }
     if (!vm["model1.pef_column"].empty())
-      fv.push_back(feature_handle(new model1(ptable)));
+      fv.push_back(feature_handle(new model1(ptable, p_fvocab_mapper, p_evocab_mapper)));
     if (!vm["model1.pfe_column"].empty())
-      fv.push_back(feature_handle(new model1_inverse(ptable))); 
+      fv.push_back(feature_handle(new model1_inverse(ptable, p_fvocab_mapper, p_evocab_mapper))); 
   }
   in.close();
 }

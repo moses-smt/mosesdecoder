@@ -8,11 +8,32 @@
 #include <boost/iterator/filter_iterator.hpp>
 #include "FilePtr.h"
 #include "FeatureFunction.h"
+#include "Factor.h"
 
 namespace Josiah {
 
 // map between ids and strings
 typedef boost::bimap<int,std::string> vocabulary;
+
+// functors to efficiently map moses factor ids to vocabulary ids
+class moses_factor_to_vocab_id : public std::unary_function<Moses::Word, int> {
+public:
+  // initialize functor with the vocabulary to map to, and all of the Moses
+  // stuff.  This precomputes a mapping so that we never have to check strings
+  // at runtime. 
+  moses_factor_to_vocab_id(const vocabulary& v, const Moses::FactorDirection d,
+    const Moses::FactorType t, Moses::FactorCollection& c);
+  // return the vocab's id for a Moses::Word object  
+  inline int operator() (const Moses::Word& w) const {
+    if (_vocab_id.size() <= w[0]->GetId())
+      return -1;
+    return _vocab_id[w[0]->GetId()]; 
+  }
+private:
+  std::vector<int> _vocab_id;  
+};
+
+
 
 // a fixed-size array of scores
 struct m1_scores : public boost::array<float,2> {
@@ -67,11 +88,13 @@ private:
   vocabulary _e_vocab;
   std::vector<Moses::FilePtr<external_m1_node> > _table;
   FILE* _f;
-  typedef std::set<int> cache;
+  
+  typedef std::set<int> cache; // track which smart pointers are in memory
   cache _cache;
 
+  // init helper function: create list of smart pointers from list of offsets
   typedef std::vector<OFF_T>::iterator offit;
-  void _init_table(const offit& begin, const offit& end){
+  inline void _init_table(const offit& begin, const offit& end){
     for (offit i=begin; i!=end; ++i)
       _table.push_back(Moses::FilePtr<external_m1_node>(_f,*i));
   }
@@ -79,10 +102,13 @@ private:
 
 
 
+typedef boost::shared_ptr<external_model1_table> model1_table_handle;
+typedef boost::shared_ptr<moses_factor_to_vocab_id> vocab_mapper_handle;
+
 /// feature p(e|f)
 class model1 : public FeatureFunction {
 public:
-  explicit model1(boost::shared_ptr<external_model1_table> table);
+  model1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
   /** Compute full score of a sample from scratch **/
   virtual float computeScore(const Sample& sample);
   /** Change in score when updating one segment */
@@ -114,7 +140,9 @@ private:
   }
   inline const vocabulary& e_vocab() { return _ptable->e_vocab(); }
   inline const vocabulary& f_vocab() { return _ptable->f_vocab(); }
-  boost::shared_ptr<external_model1_table> _ptable;
+  model1_table_handle _ptable;
+  vocab_mapper_handle _pfmap;
+  vocab_mapper_handle _pemap;
 };
 
 
@@ -122,7 +150,7 @@ private:
 /// feature p(f|e)
 class model1_inverse : public FeatureFunction {
 public:
-  explicit model1_inverse(boost::shared_ptr<external_model1_table> table);
+  model1_inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
   /** Compute full score of a sample from scratch **/
   virtual float computeScore(const Sample& sample);
   /** Change in score when updating one segment */
@@ -139,22 +167,33 @@ private:
   // used by score() below; n.b. unknown words are assigned an id of -1
   struct is_known{ bool operator()(int x){ return x==-1 ? false : true; } };
 
-  template <typename fwrange>
-  float score(const fwrange& f, const fwrange& e){ 
+  // main scoring logic for a f phrase, e phrase
+  template <typename fwiter1, typename fwiter2>
+  float score(const fwiter1& f_begin, const fwiter1& f_end, const fwiter2& e_begin, const fwiter2& e_end){ 
+    typedef boost::filter_iterator<is_known, fwiter1> known_iter1;
+    typedef boost::filter_iterator<is_known, fwiter2> known_iter2;
     float total =0.0;
-    typedef boost::filter_iterator<is_known, typename fwrange::const_iterator> iter;
-    for(iter i(e.begin()); i!=iter(e.end()); ++i){ 
-      float sum = 0.0;
-      for(iter j(f.begin()); j!=iter(f.end()); ++j){
-        sum += _ptable->score(*j, *i, 1);
+    for(known_iter2 i(e_begin, e_end); i!=known_iter2(e_end, e_end); ++i){ 
+      if (_word_cache.find(*i) != _word_cache.end()) {
+        total += _word_cache[*i];
+      } else {
+        float sum = 0.0;
+        for(known_iter1 j(f_begin); j!=known_iter1(f_end); ++j){
+          sum += _ptable->score(*j, *i, 1);
+        }
+        _word_cache[*i] = -log(sum);
+        total += _word_cache[*i];
       }
-      total -= log(sum);
     }
     return total; // what happens if total == 0?
   }
-  inline const vocabulary& e_vocab() { return _ptable->e_vocab(); }
-  inline const vocabulary& f_vocab() { return _ptable->f_vocab(); }
-  boost::shared_ptr<external_model1_table> _ptable;
+
+  model1_table_handle _ptable; // data
+  vocab_mapper_handle _pfmap; // maps foreign Moses::Word objects to vocab ids
+  vocab_mapper_handle _pemap; // maps english Moses::Word objects to vocab ids
+  std::map<int,float> _word_cache; // cached columns for target words
+  std::map<const TranslationOption*,float> _option_cache; // cached scores for entire target phrases
+  std::vector<int> _sentence_cache; // cached internal rep of source sentence
 };
 
 } // namespace Josiah
