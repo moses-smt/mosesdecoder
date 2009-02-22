@@ -168,6 +168,16 @@ public:
 	
 	/** appends a phrase at the end of current phrase **/
 	void Append(const Phrase &endPhrase);
+
+
+  // iterator stuff: make it possible to use Phrase with STL algorithms
+  // that way you don't have to write specialized wrappers for EVERY SINGLE ACCESS!! WOW!!
+  typedef std::vector<Word>::iterator iterator;
+  typedef std::vector<Word>::const_iterator const_iterator;
+  inline iterator begin() { return m_words.begin(); }
+  inline const_iterator begin() const { return m_words.begin(); }
+  inline iterator end() { return m_words.end(); }
+  inline const_iterator end() const { return m_words.begin()+GetSize(); }
 };
 
 
