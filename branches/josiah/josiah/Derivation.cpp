@@ -70,8 +70,10 @@ namespace Josiah {
   
   
   void DerivationCollector::collect(Sample& sample) {
-    VERBOSE(1,"Collected: " << *sample.GetSampleHypothesis() << endl); 
     ++m_counts[Derivation(sample)];
+    IFVERBOSE(1) {
+      VERBOSE(1,"Collected: " << Derivation(sample) << endl);
+    }
     if (m_collectDerivByTrans) {
       //derivations per translation
       Derivation d(sample);
