@@ -72,35 +72,37 @@ void  TranslationDelta::addLanguageModelScore(const Phrase& targetPhrase, const 
       m_cache.insert(pair<LanguageModel*,LanguageModelCache>(lm,LanguageModelCache(lm)));
     }*/
     size_t order = lm->GetNGramOrder();
-    vector<const Word*> lmcontext(targetPhrase.GetSize() + 2*(order-1));
+    vector<const Word*> lmcontext;
+    lmcontext.reserve(targetPhrase.GetSize() + 2*(order-1));
     
     int start = targetSegment.GetStartPos() - (order-1);
     
     //fill in the pre-context
-    size_t contextPos = 0;
 
     for (size_t i = 0; i < order-1; ++i) {
       if (start+(int)i < 0) {
-        lmcontext[contextPos++] = &(lm->GetSentenceStartArray());
+        //if (start + (int)i == -1) {
+          lmcontext.push_back(&(lm->GetSentenceStartArray()));
+        //}
       } else {
-        lmcontext[contextPos++] = &(getSample().GetTargetWords()[i+start]);
+        lmcontext.push_back(&(getSample().GetTargetWords()[i+start]));
       }
     }
     
     //fill in the target phrase
     for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-      lmcontext[contextPos++] = &(targetPhrase.GetWord(i));
+      lmcontext.push_back(&(targetPhrase.GetWord(i)));
     }
     
     //fill in the postcontext
-    size_t eoscount = 0;
     for (size_t i = 0; i < order-1; ++i) {
       size_t targetPos = i + targetSegment.GetEndPos() + 1;
       if (targetPos >= getSample().GetTargetWords().size()) {
-        lmcontext[contextPos++] = &(lm->GetSentenceEndArray());
-        ++eoscount;
+        if (targetPos == getSample().GetTargetWords().size()) {
+          lmcontext.push_back(&(lm->GetSentenceEndArray()));
+        }
       } else {
-        lmcontext[contextPos++] = &(getSample().GetTargetWords()[targetPos]);
+        lmcontext.push_back(&(getSample().GetTargetWords()[targetPos]));
       }
     }
     
@@ -110,10 +112,10 @@ void  TranslationDelta::addLanguageModelScore(const Phrase& targetPhrase, const 
       VERBOSE(3,"LM context ");
       for (size_t j = 0;  j < lmcontext.size(); ++j) {
         if (j == order-1) {
-          VERBOSE(3, "[ ");
+          //VERBOSE(3, "[ ");
         }
         if (j == (targetPhrase.GetSize() + (order-1))) {
-          VERBOSE(3,"] ");
+          //VERBOSE(3,"] ");
         }
         VERBOSE(3,*(lmcontext[j]) << " ");
         
@@ -124,14 +126,15 @@ void  TranslationDelta::addLanguageModelScore(const Phrase& targetPhrase, const 
     //score lm
     double lmscore = 0;
     vector<const Word*> ngram;
-    //remember to only include max of 1 eos marker
-    size_t maxend = min(lmcontext.size(), lmcontext.size() - (eoscount-1));
     for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
       ngram.clear();
-      for (size_t j = ngramstart; j < ngramstart+order && j < maxend; ++j) {
+      //cerr << "ngram: ";
+      for (size_t j = ngramstart; j < ngramstart+order; ++j) {
         ngram.push_back(lmcontext[j]);
+        //cerr << *lmcontext[j] << " ";
       }
       lmscore += lm->GetValue(ngram);
+      //cerr << lm->GetValue(ngram)/log(10) << endl;
       //cache disabled for now
       //lmscore += m_cache.find(lm)->second.GetValue(ngram);
       
