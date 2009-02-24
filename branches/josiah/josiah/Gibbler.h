@@ -9,6 +9,7 @@
 
 namespace Moses {
 
+class AnnealingSchedule;
 class GibbsOperator;
 class Hypothesis;
 class TranslationOptionCollection;
@@ -99,12 +100,14 @@ class Sampler {
    std::vector<GibbsOperator*> m_operators;
    size_t m_iterations;
    size_t m_burninIts;
+   const AnnealingSchedule* m_as;
  public:
-  Sampler(): m_iterations(10) {}
+  Sampler(): m_iterations(10), m_as(NULL) {}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
     const std::vector<Word>& source, const Josiah::feature_vector& extra_fv) ;
   void AddOperator(GibbsOperator* o) {m_operators.push_back(o);}
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
+  void SetAnnealingSchedule(const AnnealingSchedule* as) {m_as = as;}
   void SetIterations(size_t iterations) {m_iterations = iterations;}
   void SetBurnIn(size_t burnin_its) {m_burninIts = burnin_its;}
 };

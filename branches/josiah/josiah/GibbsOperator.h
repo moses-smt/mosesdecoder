@@ -68,7 +68,7 @@ namespace Moses {
   /** Abstract base class for gibbs operators **/
   class GibbsOperator {
     public:
-      GibbsOperator(const string& name) : m_name(name) {}
+      GibbsOperator(const string& name) : m_name(name), T(1) {}
         /**
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
           **/
@@ -77,6 +77,8 @@ namespace Moses {
         virtual ~GibbsOperator() {}
         
         static void setRandomSeed(uint32_t seed) {m_random.setSeed(seed);}
+				void SetAnnealingTemperature(const double t) { assert(t >= 1.0); T = t; }
+				void Quench() { T = 1.0; }
         
      protected:
         /**
@@ -84,6 +86,7 @@ namespace Moses {
           **/
         size_t getSample(const std::vector<double>& scores);
         string m_name;
+				double T;  // annealing temperature
         
     private:
       static RandomNumberGenerator m_random;

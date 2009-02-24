@@ -5,6 +5,7 @@
 #include "TranslationOptionCollection.h"
 #include "GibblerMaxTransDecoder.h"
 #include "StaticData.h"
+#include "AnnealingSchedule.h"
 
 using namespace std;
 
@@ -390,10 +391,16 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
     VERBOSE(2,"Gibbs burnin iteration: " << i << endl);
     for (size_t j = 0; j < m_operators.size(); ++j) {
       VERBOSE(3,"Sampling with operator " << m_operators[j]->name() << endl);
+      if (m_as)
+        m_operators[j]->SetAnnealingTemperature(m_as->GetTemperatureAtTime(i));
       m_operators[j]->doIteration(sample,*options);
     }
   }
   if (f) VERBOSE(1,endl);
+  if (m_as) {
+    for (size_t j = 0; j < m_operators.size(); ++j)
+      m_operators[j]->Quench();
+  }
   
   for (size_t i = 0; i < m_iterations; ++i) {
     if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true; }

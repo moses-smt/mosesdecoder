@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <boost/program_options.hpp>
 
+#include "AnnealingSchedule.h"
 #include "Decoder.h"
 #include "Derivation.h"
 #include "Gibbler.h"
@@ -141,6 +142,7 @@ int main(int argc, char** argv) {
   bool decode_zero_weights;
   bool decode_nolm;
   bool collect_dbyt;
+  bool anneal;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -170,7 +172,8 @@ int main(int argc, char** argv) {
         ("expected-bleu-training,T", po::value(&expected_sbleu_training)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU")
         ("max-training-iterations,M", po::value(&max_training_iterations)->default_value(30), "Maximum training iterations")
         ("training-batch-size,S", po::value(&training_batch_size)->default_value(0), "Batch size to use during xpected bleu training, 0 = full corpus")
-        ("eta", po::value<float>(&eta)->default_value(1.0f), "Default learning rate for SGD")
+	("anneal,a", po::value(&anneal)->default_value(false)->zero_tokens(), "Use annealing during the burn in period")
+        ("eta", po::value<float>(&eta)->default_value(1.0f), "Default learning rate for SGD/EGD")
         ("mu", po::value<float>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
@@ -301,6 +304,12 @@ int main(int argc, char** argv) {
     input.reset(new StreamInputSource(*in));
   }
    
+  auto_ptr<AnnealingSchedule> annealingSchedule;
+  if (anneal) {
+    const float max_temp = 5;
+    annealingSchedule.reset(new LinearAnnealingSchedule(burning_its, max_temp));
+  }
+    
   timer.check("Processing input file");
   while (input->HasMore()) {
     string line;
@@ -308,11 +317,11 @@ int main(int argc, char** argv) {
     assert(!line.empty());
     //configure the sampler
     Sampler sampler;
+    sampler.SetAnnealingSchedule(annealingSchedule.get());
     auto_ptr<DerivationCollector> derivationCollector;
     auto_ptr<GibblerExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;
     auto_ptr<MBRDecoder> mbrCollector;
-    
     if (expected_sbleu) {
       elCollector.reset(new GibblerExpectedLossCollector(g[lineno]));
       sampler.AddCollector(elCollector.get());
