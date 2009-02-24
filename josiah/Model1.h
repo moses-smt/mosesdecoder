@@ -126,25 +126,35 @@ private:
   // used by score() below; n.b. unknown words are assigned an id of -1
   struct is_known{ bool operator()(int x){ return x==-1 ? false : true; } };
 
-  template <typename fwrange>
-  float score(const fwrange& f, const fwrange& e){ 
-    float total =0.0;
-    typedef boost::filter_iterator<is_known, typename fwrange::const_iterator> iter;
-    for(iter i(f.begin()); i!=iter(f.end()); ++i){ 
+  // compute the sums associated with each source word as a vector
+  template <typename fwiter1, typename fwiter2, typename outputiter>
+  void _compute_inner_sums(const fwiter1& f_begin, const fwiter1& f_end, 
+    const fwiter2& e_begin, const fwiter2& e_end, outputiter result){ 
+
+    typedef boost::filter_iterator<is_known, fwiter1> known_iter1;
+    typedef boost::filter_iterator<is_known, fwiter2> known_iter2;
+    for(known_iter1 j(f_begin, f_end); j!=known_iter1(f_end, f_end); ++j){
       float sum = 0.0;
-      for(iter j(e.begin()); j!=iter(e.end()); ++j){
-        sum += _ptable->score(*i, *j, 0);
+      for(known_iter2 i(e_begin, e_end); i!=known_iter2(e_end, e_end); ++i){ 
+        sum += _ptable->score(*j, *i, 0);
       }
-      total -= log(sum);
+      *result= sum;
+      result++;
     }
-    return total; // what happens if total == 0?
   }
+  
+  void clear_cache_on_change(const Sample&);
+
   inline const vocabulary& e_vocab() { return _ptable->e_vocab(); }
   inline const vocabulary& f_vocab() { return _ptable->f_vocab(); }
   model1_table_handle _ptable;
   vocab_mapper_handle _pfmap;
   vocab_mapper_handle _pemap;
   FeatureFunctionScoreProducer m_sp;
+  std::vector<int> _sentence_cache; // cached internal rep of source sentence
+  std::vector<float> _sums_cache; // cache of inner sums
+  std::vector<float> _tmp_sums; // resized once for each input, to avoid constant reallocation
+  float _score_cache;
 };
 
 

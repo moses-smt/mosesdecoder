@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <functional>
 #include <fstream>
+#include <numeric>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/bind.hpp>
@@ -12,6 +13,18 @@
 #include "Gibbler.h"
 
 namespace Josiah {
+
+moses_factor_to_vocab_id::moses_factor_to_vocab_id(const vocabulary& v, 
+  const Moses::FactorDirection d, const Moses::FactorType t, 
+  Moses::FactorCollection& c){
+
+  for (vocabulary::const_iterator i = v.begin(); i!=v.end(); ++i){
+    size_t factor_id = c.AddFactor(d, t, i->right)->GetId(); 
+    if (_vocab_id.size() <= factor_id)
+      _vocab_id.resize(factor_id+1, -1);
+    _vocab_id[factor_id] = i->left;
+  }
+}  
 
 external_m1_node::external_m1_node(){}
 
@@ -103,120 +116,94 @@ model1::model1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper
    const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(&m_sp,w);
  }
 
-moses_factor_to_vocab_id::moses_factor_to_vocab_id(const vocabulary& v, 
-  const Moses::FactorDirection d, const Moses::FactorType t, 
-  Moses::FactorCollection& c){
-
-  for (vocabulary::const_iterator i = v.begin(); i!=v.end(); ++i){
-    size_t factor_id = c.AddFactor(d, t, i->right)->GetId(); 
-    if (_vocab_id.size() <= factor_id)
-      _vocab_id.resize(factor_id+1, -1);
-    _vocab_id[factor_id] = i->left;
-  }
+template <typename C>
+void moses_words_to_ids(const moses_factor_to_vocab_id& func, const C& origin, 
+  std::vector<int>::iterator dest){
+  
+  std::transform(origin.begin(), origin.end(), dest, func);
 }
 
-//// we need a half dozen helper utilities to unravel Moses::Word...
-//inline const std::string& 
-//moses_word_to_string(const Moses::Word& w){ return w[0]->GetString(); } // n.b. doesn't work with factors
-//
-//inline int string_to_id(const std::string& s, const vocabulary& v){
-//  if (v.right.find(s) == v.right.end()) 
-//    return -1;
-//  else
-//    return v.right.find(s)->second;
-//}
-//
-//int moses_word_to_id(const Moses::Word& w, const vocabulary& v){
-//  return string_to_id(moses_word_to_string(w), v);
-//}
-//
-//// generate a vector of ids from a vector of words
-//typedef std::vector<Moses::Word> moses_words;
-//inline void moses_words_to_ids(const moses_words::const_iterator& source_begin, 
-//  const moses_words::const_iterator& source_end,
-//  const vocabulary& v, std::vector<int>& target){
-//  target.resize(std::distance(source_begin, source_end));
-//  std::transform(source_begin, source_end, target.begin(),
-//    boost::bind(moses_word_to_id, _1, v));
-//
-//}
-//
-//inline void moses_words_to_ids(const moses_words& source,
-//  const vocabulary& v, std::vector<int>& target){
-//  return moses_words_to_ids(source.begin(), source.end(), v, target);
-//}
-//
-//// Moses::Phrase needs some help too..
-//inline const moses_words& 
-//moses_phrase_to_words(const Moses::Phrase& source, moses_words& target){
-//  for (size_t i=0; i<source.GetSize(); ++i){ 
-//   target.push_back(source.GetWord(i)); 
-//  } 
-//  return target;
-//}
-//
-//inline const void moses_phrase_to_ids(const Moses::Phrase& source,
-//  const vocabulary& v, std::vector<int>& target){
-//  moses_words words;
-//  moses_words_to_ids(moses_phrase_to_words(source, words), v, target);
-//}
-//// ... and now we can do some actual work...
+void model1::clear_cache_on_change(const Sample& s){
+  _sentence_cache.clear();
+  _sums_cache.clear();
+
+  _sentence_cache.resize(s.GetSourceWords().size());
+  moses_words_to_ids(*_pfmap, s.GetSourceWords(), _sentence_cache.begin());
+
+  // _sums_cache operates only over known source words
+  typedef boost::filter_iterator<is_known, std::vector<int>::iterator> known_iter;
+  for (known_iter i(_sentence_cache.begin(), _sentence_cache.end());
+    i != known_iter(_sentence_cache.end(), _sentence_cache.end()); ++i)
+    _sums_cache.push_back(0.0);
+  _tmp_sums.resize(_sums_cache.size());
+
+  _ptable->gc();
+}
+
+// functor that takes the log of its argument;
+// used in logspace product computations of model1
+struct to_log{ 
+  float operator()(float x) const { return log(x); } 
+  typedef float result_type;
+  typedef float argument_type;
+};
+typedef boost::transform_iterator<to_log,std::vector<float>::iterator> log_iter;
 
 float model1::computeScore(const Sample& sample){
-//  std::vector<int> f, e;
-//  moses_words_to_ids(sample.GetSourceWords(), f_vocab(), f);
-//  moses_words_to_ids(sample.GetTargetWords(), e_vocab(), e);
-//  return score(f, e);
-  return 0.0;
+  // this function really serves multiple purposes --
+  // 1. clear/initialize any sentence-related caching
+  clear_cache_on_change(sample);
+
+  // 2. compute sums in each column
+  _compute_inner_sums(_sentence_cache.begin(), _sentence_cache.end(),
+    boost::make_transform_iterator(sample.GetTargetWords().begin(), *_pemap),
+    boost::make_transform_iterator(sample.GetTargetWords().end(), *_pemap),
+    _sums_cache.begin());
+
+  // 3. compute product of sums in logspace
+  _score_cache = std::accumulate(log_iter(_sums_cache.begin()),  
+    log_iter(_sums_cache.end()), 0.0);
+  return _score_cache;
 }
 
 float model1::getSingleUpdateScore(const Sample& sample, 
   const TranslationOption* option, const WordsRange& targetSegment){
-//  // because this score is a product of sums, and because changing a target 
-//  // word changes elements of each sum, I don't know of any efficient way to calculate the
-//  // delta unless some state information is kept between calculations.  Therefore this
-//  // baseline computation works by calculating the difference between the scores of
-//  // the sentence both with and without the modified words.  However, this is obviously
-//  // slow, requiring O(2nm) computations.
-//  std::vector<int> f, e, e_new_phr, e_with_phr, e_without_phr;
-//
-//  moses_words_to_ids(sample.GetSourceWords(), f_vocab(), f);
-//  moses_words_to_ids(sample.GetTargetWords(), e_vocab(), e);
-//  moses_phrase_to_ids(option->GetTargetPhrase(), e_vocab(), e_new_phr);
-//
-//  e_with_phr.insert(e_with_phr.end(), e.begin(), e.begin()+targetSegment.GetStartPos());
-//  e_with_phr.insert(e_with_phr.end(), e_new_phr.begin(), e_new_phr.end());
-//  e_with_phr.insert(e_with_phr.end(), e.begin()+targetSegment.GetEndPos()+1, e.end());
-//  
-//  e_without_phr.insert(e_without_phr.end(), e.begin(), e.begin()+targetSegment.GetStartPos());
-//  e_without_phr.insert(e_without_phr.end(), e.begin()+targetSegment.GetEndPos()+1, e.end());
-//
-//  return score(f, e_with_phr) - score(f, e_without_phr);
-  return 0.0;
+
+  _compute_inner_sums(_sentence_cache.begin(), _sentence_cache.end(),
+    boost::make_transform_iterator(option->GetTargetPhrase().begin(), *_pemap),
+    boost::make_transform_iterator(option->GetTargetPhrase().end(), *_pemap),
+    _tmp_sums.begin());
+
+  // compute change in sums
+  std::transform(_sums_cache.begin(), _sums_cache.end(), _tmp_sums.begin(),
+    _tmp_sums.begin(), std::minus<float>());
+
+  return _score_cache - std::accumulate(log_iter(_tmp_sums.begin()),
+    log_iter(_tmp_sums.end()), 0.0);
 }
 
 float model1::getPairedUpdateScore(const Sample& sample, 
   const TranslationOption* leftOption, const TranslationOption* rightOption, 
   const WordsRange& targetSegment, const Phrase& targetPhrase){
-  // see comment under getSingleUpdateScore re: complexity.
-//  std::vector<int> f, e, e_new_phr_left, e_new_phr_right, e_with_phr, e_without_phr;
-//
-//  // TODO: this function and above have some obvious refactoring to do
-//  moses_words_to_ids(sample.GetSourceWords(), f_vocab(), f);
-//  moses_words_to_ids(sample.GetTargetWords(), e_vocab(), e);
-//  moses_phrase_to_ids(leftOption->GetTargetPhrase(), e_vocab(), e_new_phr_left);
-//  moses_phrase_to_ids(rightOption->GetTargetPhrase(), e_vocab(), e_new_phr_right);
-//
-//  e_with_phr.insert(e_with_phr.end(), e.begin(), e.begin()+targetSegment.GetStartPos());
-//  e_with_phr.insert(e_with_phr.end(), e_new_phr_left.begin(), e_new_phr_left.end());
-//  e_with_phr.insert(e_with_phr.end(), e_new_phr_right.begin(), e_new_phr_right.end());
-//  e_with_phr.insert(e_with_phr.end(), e.begin()+targetSegment.GetEndPos()+1, e.end());
-//  
-//  e_without_phr.insert(e_without_phr.end(), e.begin(), e.begin()+targetSegment.GetStartPos());
-//  e_without_phr.insert(e_without_phr.end(), e.begin()+targetSegment.GetEndPos()+1, e.end());
-//
-//  return score(f, e_with_phr) - score(f, e_without_phr);
-  return 0.0;
+  // populate a vector with the e words we are to remove
+  std::vector<int> e(std::distance(leftOption->GetTargetPhrase().begin(), leftOption->GetTargetPhrase().end())+
+    std::distance(rightOption->GetTargetPhrase().begin(), rightOption->GetTargetPhrase().end()));
+  
+  moses_words_to_ids(*_pfmap, leftOption->GetTargetPhrase(), e.begin());
+  moses_words_to_ids(*_pfmap, rightOption->GetTargetPhrase(), 
+    e.begin()+std::distance(leftOption->GetTargetPhrase().begin(), leftOption->GetTargetPhrase().end()));
+
+  _compute_inner_sums(_sentence_cache.begin(), _sentence_cache.end(),
+    e.begin(), e.end(), _tmp_sums.begin());
+
+  // compute change in sums
+  std::transform(_sums_cache.begin(), _sums_cache.end(), _tmp_sums.begin(),
+    _tmp_sums.begin(), std::minus<float>());
+
+  return _score_cache - std::accumulate(log_iter(_tmp_sums.begin()),
+    log_iter(_tmp_sums.end()), 0.0);
+
+  return 0.0; 
 }
 
 float model1::getFlipUpdateScore(const Sample& s, 
@@ -237,17 +224,12 @@ _pemap(emap),m_sp(const_cast<ScoreIndexManager&>(StaticData::Instance().GetScore
 }
 
 
-template <typename C>
-void moses_words_to_ids(const moses_factor_to_vocab_id& func, const C& origin, std::vector<int>& dest){
-  dest.resize(std::distance(origin.begin(), origin.end()));
-  std::transform(origin.begin(), origin.end(), dest.begin(), func);
-}
-
 void model1_inverse::clear_cache_on_change(const Sample& s){
   _word_cache.clear();
   _option_cache.clear();
   _sentence_cache.clear();
-  moses_words_to_ids(*_pfmap, s.GetSourceWords(), _sentence_cache);
+  _sentence_cache.resize(s.GetSourceWords().size());
+  moses_words_to_ids(*_pfmap, s.GetSourceWords(), _sentence_cache.begin());
   _ptable->gc();
 }
 
@@ -260,7 +242,6 @@ float model1_inverse::computeScore(const Sample& sample){
   return score(_sentence_cache.begin(), _sentence_cache.end(), 
     boost::make_transform_iterator(sample.GetTargetWords().begin(), *_pemap),
     boost::make_transform_iterator(sample.GetTargetWords().end(), *_pemap));
-  return 0; 
 }
 
 float model1_inverse::getSingleUpdateScore(const Sample& sample, 
