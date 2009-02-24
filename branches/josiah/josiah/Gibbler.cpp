@@ -12,9 +12,11 @@ using namespace std;
 namespace Moses {
 
 void compute_extra_fv(const Sample& s, const Josiah::feature_vector& features, std::vector<float>& values){
-  for (Josiah::feature_vector::const_iterator i=features.begin(); i!=features.end(); ++i){
-    values.push_back((*i)->computeScore(s));
-  }
+  //for (Josiah::feature_vector::const_iterator i=features.begin(); i!=features.end(); ++i){
+    //values.push_back((*i)->computeScore(s));
+    //float score = (*i)->computeScore(s);
+    //feature_values.Assign((*i)->getScoreProducer(),score);
+  //}
 }
 
 Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const Josiah::feature_vector& extra_features) : 
@@ -59,7 +61,12 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
   this->target_tail->m_prevHypo = NULL;
   
   UpdateTargetWords();
-  compute_extra_fv(*this, _extra_features, _extra_feature_values);
+  for (Josiah::feature_vector::const_iterator i=_extra_features.begin(); i!=_extra_features.end(); ++i){
+    //values.push_back((*i)->computeScore(s));
+    float score = (*i)->computeScore(*this);
+    feature_values.Assign((*i)->getScoreProducer(),score);
+  }
+  //compute_extra_fv(*this, _extra_features, _extra_feature_values);
 }
  
 Sample::~Sample() {

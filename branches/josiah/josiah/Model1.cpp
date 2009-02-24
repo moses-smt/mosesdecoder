@@ -97,7 +97,11 @@ const vocabulary& external_model1_table::f_vocab() const { return _f_vocab; }
 const vocabulary& external_model1_table::e_vocab() const { return _e_vocab; }
 
 model1::model1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
-  _ptable(table), _pfmap(fmap), _pemap(emap) {}
+    _ptable(table), _pfmap(fmap), _pemap(emap),
+ m_sp(const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()),"Model1") {
+   vector<float> w(1);
+   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(&m_sp,w);
+ }
 
 moses_factor_to_vocab_id::moses_factor_to_vocab_id(const vocabulary& v, 
   const Moses::FactorDirection d, const Moses::FactorType t, 
@@ -226,7 +230,11 @@ float model1::getFlipUpdateScore(const Sample& s,
 std::string model1::getName() { return "Model 1 -- p(e|f)"; }
 
 model1_inverse::model1_inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
-  _ptable(table), _pfmap(fmap), _pemap(emap) {}
+    _ptable(table), _pfmap(fmap),
+_pemap(emap),m_sp(const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()),"Model1Inverse") {
+  vector<float> w(1);
+  const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(&m_sp,w);
+}
 
 
 template <typename C>

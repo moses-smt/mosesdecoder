@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options.hpp>
 #include "Hypothesis.h"
+#include "ScoreProducer.h"
 #include "TranslationOptionCollection.h"
 
 using namespace Moses;
@@ -29,6 +30,8 @@ namespace po = boost::program_options;
 
 namespace Moses {
   class Sample;
+  class ScoreProducer;
+  class ScoreIndexManager;
 }
 
 namespace Josiah {
@@ -40,7 +43,24 @@ namespace Josiah {
   * Since the Sample never actually needs to know anything about the 
   * FeatureState, it contains no useful members.
  **/
-class FeatureState {}; 
+class FeatureState {};
+
+/**
+ * FIXME: Temporary hack to get moses to manager our feature functions.
+ **/
+class FeatureFunctionScoreProducer : public ScoreProducer {
+  
+  public:
+  
+    FeatureFunctionScoreProducer(Moses::ScoreIndexManager& scoreIndexManager, const std::string& name);
+  
+    size_t GetNumScoreComponents() const;
+    std::string GetScoreProducerDescription() const;
+  
+  private:
+    std::string m_name;
+  
+};
 
 /**
   * Base class for Gibbler feature functions.
@@ -59,6 +79,7 @@ class FeatureFunction {
                              const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                              const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) = 0;
     virtual std::string getName() = 0;
+    virtual const Moses::ScoreProducer* getScoreProducer() const = 0;
     virtual ~FeatureFunction() = 0;
 };
 
@@ -79,8 +100,11 @@ class DummyFeatureFunction : public FeatureFunction {
                                     const WordsRange&, const WordsRange&)
     {return 4;}
     virtual std::string getName() {return "dummy";}
+    virtual const Moses::ScoreProducer* getScoreProducer() const {return NULL;} //FIXME
     virtual ~DummyFeatureFunction() {}
 };
+
+
 
 typedef boost::shared_ptr<FeatureFunction> feature_handle;
 typedef std::vector<feature_handle> feature_vector;

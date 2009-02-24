@@ -79,5 +79,22 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
   }
   in.close();
 }
+
+
+
+FeatureFunctionScoreProducer::FeatureFunctionScoreProducer( Moses::ScoreIndexManager& scoreIndexManager, const std::string & name ) :
+    m_name(name){
+  scoreIndexManager.AddScoreProducer(this);
+}
+
+
+
+size_t FeatureFunctionScoreProducer::GetNumScoreComponents() const {
+  return 1;
+}
+
+string FeatureFunctionScoreProducer::GetScoreProducerDescription() const {
+  return m_name;
+} 
  
-} //namespace
+}//namespace

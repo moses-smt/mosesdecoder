@@ -121,6 +121,7 @@ public:
                            const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                            const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
   virtual std::string getName();
+  virtual const Moses::ScoreProducer* getScoreProducer()  const {return &m_sp;}
 private:
   // used by score() below; n.b. unknown words are assigned an id of -1
   struct is_known{ bool operator()(int x){ return x==-1 ? false : true; } };
@@ -143,6 +144,7 @@ private:
   model1_table_handle _ptable;
   vocab_mapper_handle _pfmap;
   vocab_mapper_handle _pemap;
+  FeatureFunctionScoreProducer m_sp;
 };
 
 
@@ -163,6 +165,7 @@ public:
                            const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                            const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
   virtual std::string getName();
+  virtual const Moses::ScoreProducer* getScoreProducer() const {return &m_sp;}
 private:
   // used by score() below; n.b. unknown words are assigned an id of -1
   struct is_known{ bool operator()(int x){ return x==-1 ? false : true; } };
@@ -194,6 +197,7 @@ private:
   std::map<int,float> _word_cache; // cached columns for target words
   std::map<const TranslationOption*,float> _option_cache; // cached scores for entire target phrases
   std::vector<int> _sentence_cache; // cached internal rep of source sentence
+  FeatureFunctionScoreProducer m_sp;
 };
 
 } // namespace Josiah
