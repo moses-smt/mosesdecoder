@@ -160,8 +160,11 @@ void TranslationDelta::initScoresSingleUpdate(const Sample& s, const Translation
   // extra features
   _extra_feature_values.clear();
   typedef Josiah::feature_vector fv;
-  for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i)
-    _extra_feature_values.push_back((*i)->getSingleUpdateScore(s, option, targetSegment));
+  for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
+    //_extra_feature_values.push_back((*i)->getSingleUpdateScore(s, option, targetSegment));
+    float feature_score = (*i)->getSingleUpdateScore(s, option, targetSegment);
+    m_scores.Assign((*i)->getScoreProducer(),feature_score);
+  }
 
   //weight the scores
   const vector<float> & weights = StaticData::Instance().GetAllWeights();
@@ -193,8 +196,11 @@ void TranslationDelta::initScoresPairedUpdate(const Sample& s, const Translation
   // extra features
   _extra_feature_values.clear();
   typedef Josiah::feature_vector fv;
-  for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i)
-    _extra_feature_values.push_back((*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase));
+  for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
+    //_extra_feature_values.push_back((*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase));
+    float feature_score = (*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase);
+    m_scores.Assign((*i)->getScoreProducer(),feature_score);
+  }
 
   //weight the scores
   const vector<float> & weights = StaticData::Instance().GetAllWeights();
@@ -335,7 +341,7 @@ FlipDelta::FlipDelta(Sample& sample, const TranslationOption* leftTgtOption ,
     const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
     m_scores.PlusEquals(dsp, totalDistortion);
     
-    //TODO: extra scores
+    //TODO: extra feature scores
       
     //weight the scores
     const vector<float> & weights = StaticData::Instance().GetAllWeights();
