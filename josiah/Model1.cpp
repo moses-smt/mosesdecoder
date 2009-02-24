@@ -243,13 +243,19 @@ void moses_words_to_ids(const moses_factor_to_vocab_id& func, const C& origin, s
   std::transform(origin.begin(), origin.end(), dest.begin(), func);
 }
 
-float model1_inverse::computeScore(const Sample& sample){
-  // this function really serves two purposes --
-  // 1. clear/initialize any sentence-related caching
+void model1_inverse::clear_cache_on_change(const Sample& s){
   _word_cache.clear();
   _option_cache.clear();
   _sentence_cache.clear();
-  moses_words_to_ids(*_pfmap, sample.GetSourceWords(), _sentence_cache);
+  moses_words_to_ids(*_pfmap, s.GetSourceWords(), _sentence_cache);
+  _ptable->gc();
+}
+
+float model1_inverse::computeScore(const Sample& sample){
+  // this function really serves two purposes --
+  // 1. clear/initialize any sentence-related caching
+  clear_cache_on_change(sample);
+
   // 2. perform the actual computation
   return score(_sentence_cache.begin(), _sentence_cache.end(), 
     boost::make_transform_iterator(sample.GetTargetWords().begin(), *_pemap),

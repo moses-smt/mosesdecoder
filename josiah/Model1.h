@@ -189,6 +189,8 @@ private:
     return total; // what happens if total == 0?
   }
 
+  void clear_cache_on_change(const Sample& s);
+
   model1_table_handle _ptable; // data
   vocab_mapper_handle _pfmap; // maps foreign Moses::Word objects to vocab ids
   vocab_mapper_handle _pemap; // maps english Moses::Word objects to vocab ids
