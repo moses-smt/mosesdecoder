@@ -12,8 +12,8 @@ LinearAnnealingSchedule::LinearAnnealingSchedule(int len, float max_temp) :
 }
 
 float LinearAnnealingSchedule::GetTemperatureAtTime(int time) const {
-  const float temp = (starting_temp -
-    (static_cast<float>(time) * (starting_temp - 1.0f)) / static_cast<float>(GetLength()));
+  const float temp = max(1.0f, (starting_temp -
+    (static_cast<float>(time) * (starting_temp - 0.5f)) / static_cast<float>(GetLength())));
   VERBOSE(3, "Time " << time << ": temp=" << temp << endl);
   return temp;
 }
