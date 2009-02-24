@@ -143,6 +143,7 @@ int main(int argc, char** argv) {
   bool decode_nolm;
   bool collect_dbyt;
   bool anneal;
+  float max_temp;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -173,6 +174,7 @@ int main(int argc, char** argv) {
         ("max-training-iterations,M", po::value(&max_training_iterations)->default_value(30), "Maximum training iterations")
         ("training-batch-size,S", po::value(&training_batch_size)->default_value(0), "Batch size to use during xpected bleu training, 0 = full corpus")
 	("anneal,a", po::value(&anneal)->default_value(false)->zero_tokens(), "Use annealing during the burn in period")
+	("max-temp", po::value<float>(&max_temp)->default_value(4.0), "Annealing maximum temperature")
         ("eta", po::value<float>(&eta)->default_value(1.0f), "Default learning rate for SGD/EGD")
         ("mu", po::value<float>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
@@ -306,7 +308,6 @@ int main(int argc, char** argv) {
    
   auto_ptr<AnnealingSchedule> annealingSchedule;
   if (anneal) {
-    const float max_temp = 5;
     annealingSchedule.reset(new LinearAnnealingSchedule(burning_its, max_temp));
   }
     
