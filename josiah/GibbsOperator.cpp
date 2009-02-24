@@ -64,9 +64,10 @@ static float ComputeDistortionDistance(const WordsRange& prev, const WordsRange&
 
 
 size_t GibbsOperator::getSample(const vector<double>& scores) {
-  double sum = scores[0];
+  const double annealing_factor = 1.0 / T;
+  double sum = scores[0] * annealing_factor;
   for (size_t i = 1; i < scores.size(); ++i) {
-    sum = log_sum(sum,scores[i]);
+    sum = log_sum(sum,scores[i] * annealing_factor);
   }
   
   //random number between 0 and exp(sum)
@@ -76,17 +77,17 @@ size_t GibbsOperator::getSample(const vector<double>& scores) {
   
   //now figure out which sample
   size_t position = 1;
-  sum = scores[0];
+  sum = scores[0] * annealing_factor;
   for (; position < scores.size() && sum < random; ++position) {
-    sum = log_sum(sum,scores[position]);
+    sum = log_sum(sum,scores[position] * annealing_factor);
   }
    //cout << "random: " << exp(random) <<  " sample: " << position << endl;
   return position-1;
 }
 
-void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionCollection& toc) {
-  
-
+void MergeSplitOperator::doIteration(
+    Sample& sample,
+    const TranslationOptionCollection& toc) {
   size_t sourceSize = sample.GetSourceSize();
   for (size_t splitIndex = 1; splitIndex < sourceSize; ++splitIndex) {
     //NB splitIndex n refers to the position between word n-1 and word n. Words are zero indexed
@@ -200,7 +201,9 @@ void MergeSplitOperator::doIteration(Sample& sample, const TranslationOptionColl
   }
 }
 
-void TranslationSwapOperator::doIteration(Sample& sample, const TranslationOptionCollection& toc) {
+void TranslationSwapOperator::doIteration(
+    Sample& sample,
+    const TranslationOptionCollection& toc) {
   const Hypothesis* currHypo = sample.GetHypAtSourceIndex(0);
   //Iterate in source order
   while (currHypo) {
@@ -340,7 +343,9 @@ void FlipOperator::CollectAllSplitPoints(Sample& sample, vector<int> &splitPoint
 }
   
   
-void FlipOperator::doIteration(Sample& sample, const TranslationOptionCollection&) {
+void FlipOperator::doIteration(
+    Sample& sample,
+    const TranslationOptionCollection&) {
   VERBOSE(2, "Running an iteration of the flip operator" << endl);
   vector <int> splitPoints;
   CollectAllSplitPoints(sample, splitPoints);  //collect all split points for this sample

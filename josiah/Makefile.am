@@ -1,5 +1,6 @@
 bin_PROGRAMS = josiah m1
 josiah_SOURCES = Derivation.cpp \
+	AnnealingSchedule.cpp \
 	Decoder.cpp \
 	InputSource.cpp \
 	TrainingSource.cpp \
