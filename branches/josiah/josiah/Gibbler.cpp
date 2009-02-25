@@ -89,8 +89,8 @@ void Sample::UpdateTargetWords()  {
   const Hypothesis* currHypo = GetTargetTail(); //target tail
   
   
-  IFVERBOSE(2) {
-    VERBOSE(2,"Sentence: ");
+  IFVERBOSE(1) {
+    VERBOSE(1,"Sentence: ");
   }
   
   //we're now at the dummy hypo at the start of the sentence
@@ -98,23 +98,23 @@ void Sample::UpdateTargetWords()  {
     TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
     for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
       m_targetWords.push_back(targetPhrase.GetWord(i));
-      IFVERBOSE(2) {
-        VERBOSE(2,targetPhrase.GetWord(i) << " ");  
+      IFVERBOSE(1) {
+        VERBOSE(1,targetPhrase.GetWord(i) << " ");  
       }  
     }
-    IFVERBOSE(2) {
+    IFVERBOSE(1) {
       if (currHypo->GetCurrTargetPhrase().GetSize() > 0) {
-        VERBOSE(2, "|" << currHypo->GetCurrSourceWordsRange().GetStartPos()
+        VERBOSE(1, "|" << currHypo->GetCurrSourceWordsRange().GetStartPos()
                 << "-" << currHypo->GetCurrSourceWordsRange().GetEndPos() << "| ");    
       }
     }
   }
-  IFVERBOSE(2) {
-    VERBOSE(2,endl);
+  IFVERBOSE(1) {
+    VERBOSE(1,endl);
   }
   
-  IFVERBOSE(2) {
-    VERBOSE(2,"FVs: " << feature_values << endl);
+  IFVERBOSE(1) {
+    VERBOSE(1,"FVs: " << feature_values << endl);
   }
 }
 

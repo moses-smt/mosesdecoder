@@ -384,6 +384,7 @@ int main(int argc, char** argv) {
         (*out) << (i > 0 ? " " : "") << *sentence[i];
       }
       (*out) << endl << flush;
+      timer.check("Outputting MBR");
     }
     if (derivationCollector.get()) {
       vector<DerivationProbability> derivations;

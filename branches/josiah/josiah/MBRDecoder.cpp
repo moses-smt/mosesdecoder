@@ -48,12 +48,17 @@ vector<const Factor*> MBRDecoder::Max() {
     g.push_back(new SentenceBLEU(4,*i->second)); //Calc the sufficient statistics for the translation
   }
   
+  vector<pair<const vector<const Factor*>*, float> >::iterator it;
+  for (it = topNTranslations.begin(); it != topNTranslations.end(); ++it)
+    VERBOSE(1,  ToString(*it->first) << endl);
+  
   //Main MBR computation done here
   float bleu(0.0), weightedLoss(0.0), weightedLossCumul(0.0), minMBRLoss(100000);
   vector<float> mbrLoss;
   int minMBRLossIdx(-1);
   mbrSize = min(mbrSize, (int) topNTranslations.size());
-
+  cerr << "MBR SIZE " << mbrSize << ", all Translations Size " << topNTranslations.size() << endl;
+  
   //Outer loop using only the top #mbrSize samples 
   for(int i = 0; i < mbrSize; ++i) {
     weightedLossCumul = 0.0;
