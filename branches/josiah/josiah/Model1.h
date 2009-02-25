@@ -105,6 +105,11 @@ private:
 typedef boost::shared_ptr<external_model1_table> model1_table_handle;
 typedef boost::shared_ptr<moses_factor_to_vocab_id> vocab_mapper_handle;
 
+// minimum value of any inner sum in the Model 1 feature computation
+const float MODEL1_SUM_FLOOR = 0.0001;
+
+
+
 /// feature p(e|f)
 class model1 : public FeatureFunction {
 public:
@@ -192,11 +197,11 @@ private:
         for(known_iter1 j(f_begin, f_end); j!=known_iter1(f_end, f_end); ++j){
           sum += _ptable->score(*j, *i, 1);
         }
-        _word_cache[*i] = log(sum);
+        _word_cache[*i] = log(std::max(sum,MODEL1_SUM_FLOOR));
       }
       total += _word_cache[*i];
     }
-    return total; // what happens if total == 0?
+    return total; 
   }
 
   void clear_cache_on_change(const Sample& s);

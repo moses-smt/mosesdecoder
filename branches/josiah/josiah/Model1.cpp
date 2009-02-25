@@ -143,7 +143,7 @@ void model1::clear_cache_on_change(const Sample& s){
 // functor that takes the log of its argument;
 // used in logspace product computations of model1
 struct to_log{ 
-  float operator()(float x) const { return log(x); } 
+  float operator()(float x) const { return log(std::max(x,MODEL1_SUM_FLOOR)); } 
   typedef float result_type;
   typedef float argument_type;
 };
@@ -202,8 +202,6 @@ float model1::getPairedUpdateScore(const Sample& sample,
 
   return _score_cache - std::accumulate(log_iter(_tmp_sums.begin()),
     log_iter(_tmp_sums.end()), 0.0);
-
-  return 0.0; 
 }
 
 float model1::getFlipUpdateScore(const Sample& s, 
