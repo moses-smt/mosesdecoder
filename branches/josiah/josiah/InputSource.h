@@ -12,7 +12,6 @@ struct InputSource {
 };
 
 struct StreamInputSource : public InputSource {
-  std::string next;
   std::istream& in;
   StreamInputSource(std::istream& is);
   virtual bool HasMore() const;
