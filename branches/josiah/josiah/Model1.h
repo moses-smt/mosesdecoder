@@ -192,7 +192,7 @@ private:
         for(known_iter1 j(f_begin, f_end); j!=known_iter1(f_end, f_end); ++j){
           sum += _ptable->score(*j, *i, 1);
         }
-        _word_cache[*i] = -log(sum);
+        _word_cache[*i] = log(sum);
       }
       total += _word_cache[*i];
     }
