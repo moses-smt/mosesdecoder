@@ -8,17 +8,15 @@ namespace Josiah {
 InputSource::~InputSource() {}
 
 StreamInputSource::StreamInputSource(std::istream& is) : in(is) {
-  std::getline(in, next);
 }
 
 bool StreamInputSource::HasMore() const {
-  return !in.eof();
+  return (in);
 }
 
 void StreamInputSource::GetSentence(std::string* sentence, int* lineno) {
   (void) lineno;
-  sentence->swap(next);
-  std::getline(in, next);
+  std::getline(in, *sentence);
 };
 
 }

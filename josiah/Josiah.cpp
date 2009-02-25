@@ -257,10 +257,6 @@ int main(int argc, char** argv) {
   GainFunctionVector g;
   if (ref_files.size() > 0) LoadReferences(ref_files, &g);
   
-  if (inputfile.empty()) {
-    VERBOSE(1,"Warning: No input file specified, using toy dataset" << endl);
-  }
-
   ostream* out = &cout;
   if (!outputfile.empty()) {
     ostringstream os;
@@ -302,10 +298,10 @@ int main(int argc, char** argv) {
         cerr << "Error: Failed to open input file: " + inputfile << endl;
         return 1;
       }
+      input.reset(new StreamInputSource(*in));
     } else {
-      in.reset(new istringstream(string("das parlament will das auf zweierlei weise tun .\n")));
+      input.reset(new StreamInputSource(cin));
     }
-    input.reset(new StreamInputSource(*in));
   }
    
   auto_ptr<AnnealingSchedule> annealingSchedule;
@@ -317,7 +313,10 @@ int main(int argc, char** argv) {
   while (input->HasMore()) {
     string line;
     input->GetSentence(&line, &lineno);
-    assert(!line.empty());
+    if (line.empty()) {
+      if (!input->HasMore()) continue;
+      assert(!"I don't like empty lines");
+    }
     //configure the sampler
     Sampler sampler;
     sampler.SetAnnealingSchedule(annealingSchedule.get());
