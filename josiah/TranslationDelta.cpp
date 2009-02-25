@@ -223,6 +223,7 @@ TranslationUpdateDelta::TranslationUpdateDelta(Sample& sample, const Translation
 }
 
 void TranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
+  VERBOSE(1, "Applying Translation Update Delta" << endl);
   m_scores.MinusEquals(noChangeDelta.getScores());
   getSample().ChangeTarget(*m_option,m_scores);
 }
@@ -234,6 +235,7 @@ MergeDelta::MergeDelta(Sample& sample, const TranslationOption* option, const Wo
 }
 
 void MergeDelta::apply(const TranslationDelta& noChangeDelta) {
+  VERBOSE(1, "Applying MergeDelta" << endl);
   m_scores.MinusEquals(noChangeDelta.getScores());
   getSample().MergeTarget(*m_option,m_scores);
 }
@@ -269,6 +271,7 @@ PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(Sample& sample,
 }
 
 void PairedTranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
+  VERBOSE(1, "Applying Paired  Translation Update Delta" << endl);
   m_scores.MinusEquals(noChangeDelta.getScores());
   getSample().ChangeTarget(*m_leftOption,m_scores);
   ScoreComponentCollection emptyScores;
@@ -294,6 +297,7 @@ void SplitDelta::apply(const TranslationDelta& noChangeDelta) {
 void FlipDelta::apply(const TranslationDelta& noChangeDelta) {
   //cout << "Applying " << m_prevTgtHypo->GetNextHypo()->GetCurrTargetWordsRange() << " and " <<
   //    m_nextTgtHypo->GetPrevHypo()->GetCurrTargetWordsRange() << endl;
+  VERBOSE(1, "Applying Flip Delta" << endl);
   m_scores.MinusEquals(noChangeDelta.getScores());
   //sample.FlipNodes(m_leftTgtOption->GetSourceWordsRange().GetStartPos(), m_rightTgtOption->GetSourceWordsRange().GetStartPos(), m_scores);
   getSample().FlipNodes(*m_leftTgtOption, *m_rightTgtOption, m_prevTgtHypo, m_nextTgtHypo, m_scores);
