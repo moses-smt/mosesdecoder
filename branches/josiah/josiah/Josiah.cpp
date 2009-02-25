@@ -143,6 +143,7 @@ int main(int argc, char** argv) {
   bool decode_nolm;
   bool collect_dbyt;
   bool anneal;
+  unsigned int reheatings;
   float max_temp;
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -173,6 +174,7 @@ int main(int argc, char** argv) {
         ("expected-bleu-training,T", po::value(&expected_sbleu_training)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU")
         ("max-training-iterations,M", po::value(&max_training_iterations)->default_value(30), "Maximum training iterations")
         ("training-batch-size,S", po::value(&training_batch_size)->default_value(0), "Batch size to use during xpected bleu training, 0 = full corpus")
+	("reheatings", po::value<unsigned int>(&reheatings)->default_value(1), "Number of times to reheat the sampler")
 	("anneal,a", po::value(&anneal)->default_value(false)->zero_tokens(), "Use annealing during the burn in period")
 	("max-temp", po::value<float>(&max_temp)->default_value(4.0), "Annealing maximum temperature")
         ("eta", po::value<float>(&eta)->default_value(1.0f), "Default learning rate for SGD/EGD")
@@ -319,6 +321,8 @@ int main(int argc, char** argv) {
     //configure the sampler
     Sampler sampler;
     sampler.SetAnnealingSchedule(annealingSchedule.get());
+    cerr << "Reheatings: " << reheatings << endl;
+    sampler.SetReheatings(reheatings);
     auto_ptr<DerivationCollector> derivationCollector;
     auto_ptr<GibblerExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;

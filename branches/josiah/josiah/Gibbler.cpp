@@ -392,36 +392,37 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
   Sample sample(starting,source,extra_fv);
   
   bool f = false;
-  for (size_t i = 0; i < m_burninIts; ++i) {
-    if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true;}
-    if ((i+1) % 400 == 0) { VERBOSE(1,endl); f=false;}
-    VERBOSE(2,"Gibbs burnin iteration: " << i << endl);
-    for (size_t j = 0; j < m_operators.size(); ++j) {
-      VERBOSE(3,"Sampling with operator " << m_operators[j]->name() << endl);
-      if (m_as)
-        m_operators[j]->SetAnnealingTemperature(m_as->GetTemperatureAtTime(i));
-      m_operators[j]->doIteration(sample,*options);
+  for (size_t k = 0; k < m_reheatings; ++k) {
+    for (size_t i = 0; i < m_burninIts; ++i) {
+      if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true;}
+      if ((i+1) % 400 == 0) { VERBOSE(1,endl); f=false;}
+      VERBOSE(2,"Gibbs burnin iteration: " << i << endl);
+      for (size_t j = 0; j < m_operators.size(); ++j) {
+        VERBOSE(3,"Sampling with operator " << m_operators[j]->name() << endl);
+        if (m_as)
+          m_operators[j]->SetAnnealingTemperature(m_as->GetTemperatureAtTime(i));
+        m_operators[j]->doIteration(sample,*options);
+      }
     }
-  }
-  if (f) VERBOSE(1,endl);
-  if (m_as) {
-    for (size_t j = 0; j < m_operators.size(); ++j)
-      m_operators[j]->Quench();
-  }
+    if (f) VERBOSE(1,endl);
+    if (m_as) {
+      for (size_t j = 0; j < m_operators.size(); ++j)
+        m_operators[j]->Quench();
+    }
   
-  for (size_t i = 0; i < m_iterations; ++i) {
-    if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true; }
-    if ((i+1) % 400 == 0) { VERBOSE(1,endl); f=false;}
-    VERBOSE(2,"Gibbs sampling iteration: " << i << endl);
-    for (size_t j = 0; j < m_operators.size(); ++j) {
-      VERBOSE(3,"Sampling with operator " << m_operators[j]->name() << endl);
-      m_operators[j]->doIteration(sample,*options);
+    for (size_t i = 0; i < m_iterations; ++i) {
+      if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true; }
+      if ((i+1) % 400 == 0) { VERBOSE(1,endl); f=false;}
+      VERBOSE(2,"Gibbs sampling iteration: " << i << endl);
+      for (size_t j = 0; j < m_operators.size(); ++j) {
+        VERBOSE(3,"Sampling with operator " << m_operators[j]->name() << endl);
+        m_operators[j]->doIteration(sample,*options);
+      }
+      for (size_t j = 0; j < m_collectors.size(); ++j)
+        m_collectors[j]->collect(sample);
     }
-    for (size_t k = 0; k < m_collectors.size(); ++k) {
-      m_collectors[k]->collect(sample);
-    }
+    if (f) VERBOSE(1,endl);
   }
-  if (f) VERBOSE(1,endl);
 }
 
 void PrintSampleCollector::collect(Sample& sample)  {
