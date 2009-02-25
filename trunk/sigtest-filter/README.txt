@@ -3,8 +3,8 @@ Re-implementation of Johnson et al. (2007)'s phrasetable filtering strategy.
 This implementation relies on Joy Zhang's SALM Suffix Array toolkit. It is
 available here:
 
-  http://projectile.is.cs.cmu.edu/research/public/tools/salm/salm.htm
-
+  http://projectile.sv.cmu.edu/research/public/tools/salm/salm.htm
+  
 --Chris Dyer <redpony@umd.edu>
 
 BUILD INSTRUCTIONS
@@ -26,7 +26,7 @@ USAGE INSTRUCTIONS
 
    FILTER-VALUE is the -log prob threshold described in Johnson et al.
      (2007)'s paper.  It may be either 'a+e', 'a-e', or a positive real
-     value.
+     value. 'a+e' is a good setting- it filters out <1,1,1> phrase pairs.
 
 3. Run with no options to see more use-cases.
 
