@@ -112,7 +112,7 @@ my $___LAMBDA = undef; # string specifying the seed weights and boundaries of al
 my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
 my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
-
+my $___PREDICTABLE_SEEDS = 0;
 
 # set 1 if using with async decoder
 my $___ASYNC = 0; 
@@ -194,12 +194,15 @@ GetOptions(
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
   "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
+  "predictable-seeds" => \$___PREDICTABLE_SEEDS, # allow (disallow) switch on/off reseeding of random restarts
   "obo-scorenbest=s" => \$obo_scorenbest, # see above
   "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
   "async=i" => \$___ASYNC, #whether script to be used with async decoder
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
 ) or exit(1);
+
+print "Predict $___PREDICTABLE_SEEDS\n";
 
 # the 4 required parameters can be supplied on the command line directly
 # or using the --options
@@ -254,6 +257,7 @@ Options:
   --inputtype=[0|1|2] ... Handle different input types (0 for text, 1 for confusion network, 2 for lattices, default is 0)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
+  --predictable-seeds ... provide predictable seeds to mert so that random restarts are the same on every run
   --efficient_scorenbest_flag ... activate a time-efficient scoring of nbest lists
                                   (this method is more memory-consumptive)
   --activate-features=STRING  ... comma-separated list of features to work on
@@ -619,6 +623,10 @@ while(1) {
 
   # run mert
   $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args -n 20";
+  if ($___PREDICTABLE_SEEDS) {
+      my $seed = $run * 1000;
+      $cmd = $cmd." -r $seed";
+  }
 
   if (defined $prev_feature_file) {
     $cmd = $cmd." --ffile $prev_feature_file,$feature_file";
