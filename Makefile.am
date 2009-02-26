@@ -3,4 +3,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 # order is important here: build moses before moses-cmd
-SUBDIRS = moses/src moses-cmd/src misc
+if WITH_MERT
+    MERT = mert
+endif
+SUBDIRS = moses/src moses-cmd/src misc $(MERT)
