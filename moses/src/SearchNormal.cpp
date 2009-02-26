@@ -150,6 +150,9 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	// MAIN LOOP. go through each possible range
 	for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 	{
+		int lastEnd = static_cast<int>(hypothesis.GetCurrSourceWordsRange().GetEndPos());
+		if (startPos != 0 && (static_cast<int>(startPos) - lastEnd) > maxDistortion)
+			continue;
 		size_t maxSize = sourceSize - startPos;
 		size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 		maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
