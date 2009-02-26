@@ -129,6 +129,16 @@ then
   AM_CONDITIONAL([RAND_LM], true)
 fi
 
+
+
+AM_CONDITIONAL([WITH_MERT],false)
+AC_CHECK_HEADERS([getopt.h],
+            [AM_CONDITIONAL([WITH_MERT],true)],
+            [AC_MSG_WARN([Cannot find getopt.h - disabling new mert])])
+
 LIBS="$LIBS -lz"
 
-AC_OUTPUT(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile)
+
+AC_CONFIG_FILES(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile mert/Makefile)
+
+AC_OUTPUT()
