@@ -14,14 +14,22 @@ Optimizer::~Optimizer() {}
 void Optimizer::Optimize(
      float f,
      const ScoreComponentCollection x,
-     const ScoreComponentCollection& gradient,
+     const ScoreComponentCollection& gr,
      ScoreComponentCollection* new_x) {
   assert(new_x);
-  assert(x.size() == gradient.size());
+  assert(x.size() == gr.size());
   assert(x.size() == new_x->size());
   ++iteration_;
+  ScoreComponentCollection gradient = gr;
+  if (use_gaussian_prior_) {
+    assert(means_.size() == gradient.size());
+    for (size_t i = 0; i < gradient.size(); ++i)
+      gradient[i] -= (x[i] - means_[i]) / variance_;
+  }
   cerr << "OPTIMIZER ITERATION #" << iteration_ << endl;
-  cerr << "  GRADIENT: " << gradient << endl;
+  cerr << "  GRADIENT: " << gr << endl;
+  if (use_gaussian_prior_)
+    cerr << "P-GRADIENT: " << gradient << endl;
   OptimizeImpl(f, x, gradient, new_x);
   cerr << "NEW VALUES: " << *new_x << endl;
   if (HasConverged()) {

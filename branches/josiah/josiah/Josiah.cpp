@@ -145,6 +145,8 @@ int main(int argc, char** argv) {
   bool anneal;
   unsigned int reheatings;
   float max_temp;
+  float prior_variance;
+  vector<float> prior_mean;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -171,6 +173,8 @@ int main(int argc, char** argv) {
         ("xbleu,x", po::value(&expected_sbleu)->zero_tokens()->default_value(false), "Compute the expected sentence BLEU")
         ("gradient,g", po::value(&expected_sbleu_gradient)->zero_tokens()->default_value(false), "Compute the gradient with respect to expected sentence BLEU")
         ("randomize-batches,R", po::value(&randomize)->zero_tokens()->default_value(false), "Randomize training batches")
+        ("gaussian-prior-variance", po::value<float>(&prior_variance)->default_value(0.0f), "Gaussian prior variance (0 for no prior)")
+        ("gaussian-prior-mean,P", po::value<vector<float> >(&prior_mean), "Gaussian prior means")
         ("expected-bleu-training,T", po::value(&expected_sbleu_training)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU")
         ("max-training-iterations,M", po::value(&max_training_iterations)->default_value(30), "Maximum training iterations")
         ("training-batch-size,S", po::value(&training_batch_size)->default_value(0), "Batch size to use during xpected bleu training, 0 = full corpus")
@@ -273,6 +277,13 @@ int main(int argc, char** argv) {
       mu,
       0.1f,   // minimal step scaling factor
       max_training_iterations));
+  if (prior_variance != 0.0f) {
+    assert(prior_variance > 0);
+    std::cerr << "Using Gaussian prior: \\sigma^2=" << prior_variance << endl;
+    for (size_t i = 0; i < prior_mean.size(); ++i)
+      std::cerr << "  \\mu_" << i << " = " << prior_mean[i] << endl;
+    optimizer->SetUseGaussianPrior(prior_mean, prior_variance);
+  }
   ExpectedBleuTrainer* trainer = NULL;
   if (expected_sbleu_training) {
     vector<string> input_lines;
