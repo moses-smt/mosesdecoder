@@ -1,13 +1,24 @@
 #pragma once
 
+#include <vector>
 #include "ScoreComponentCollection.h"
 
 namespace Josiah {
 
 struct Optimizer {
   Optimizer(int max_iterations) 
-    : iteration_(0), converged_(false), max_iterations_(max_iterations) {}
+    : iteration_(0),
+      converged_(false),
+      max_iterations_(max_iterations),
+      use_gaussian_prior_(false) {}
   virtual ~Optimizer();
+
+  void SetUseGaussianPrior(const std::vector<float>& means,
+                           const float variance) {
+    use_gaussian_prior_ = true;
+    means_ = means;
+    variance_ = variance;
+  }
 
   void Optimize(
      float f, // if known
@@ -38,6 +49,9 @@ struct Optimizer {
   int iteration_;
   bool converged_;
   int max_iterations_;
+  bool use_gaussian_prior_;
+  std::vector<float> means_;      // for gaussian prior
+  float variance_;                // for gaussian prior
 };
 
 class DumbStochasticGradientDescent : public Optimizer {

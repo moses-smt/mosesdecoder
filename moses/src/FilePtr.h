@@ -34,12 +34,12 @@ public:
   operator Ptr () {load();return t;}
 
   const T& operator* () const {load();return *t;}
-  const Ptr operator->() const {load();return t;}
-  operator const Ptr  () const {load();return t;}
+  Ptr operator->() const {load();return t;}
+  operator Ptr  () const {load();return t;}
 
   // direct access to pointer, use with care!
   Ptr getPtr() {return t;}
-  const Ptr getPtr() const {return t;}
+  Ptr getPtr() const {return t;}
 
   operator bool() const {return (f && pos!=InvalidOffT);}
 
