@@ -63,25 +63,41 @@ static float ComputeDistortionDistance(const WordsRange& prev, const WordsRange&
 
 
 
-size_t GibbsOperator::getSample(const vector<double>& scores) {
+size_t GibbsOperator::getSample(vector<double>& scores) {
+  //do annealling
+  //copy(scores.begin(),scores.end(),ostream_iterator<double>(cerr," "));
+  //cerr << endl;
   const double annealing_factor = 1.0 / T;
-  double sum = scores[0] * annealing_factor;
+  transform(scores.begin(),scores.end(),scores.begin(),bind2nd(multiplies<double>(),annealing_factor));
+
+  //normalise
+  double sum = scores[0];
   for (size_t i = 1; i < scores.size(); ++i) {
-    sum = log_sum(sum,scores[i] * annealing_factor);
+    sum = log_sum(sum,scores[i]);
   }
+  transform(scores.begin(),scores.end(),scores.begin(),bind2nd(minus<double>(),sum));
+
+  //copy(scores.begin(),scores.end(),ostream_iterator<double>(cerr," "));
+  //cerr << endl;
+  //for (size_t i = 0; i < scores.size(); ++i) {
+  //    cerr << exp(scores[i]) << ",";
+  //}
+  //cerr << endl;
   
-  //random number between 0 and exp(sum)
-  double random = exp(sum) * m_random.next();//(double)rand() / RAND_MAX;
+  //random number between 0 and 1
+  double random =  m_random.next();//(double)rand() / RAND_MAX;
+  //cerr << "Random number " << random << endl;
  
   random = log(random);
   
   //now figure out which sample
   size_t position = 1;
-  sum = scores[0] * annealing_factor;
+  sum = scores[0];
   for (; position < scores.size() && sum < random; ++position) {
-    sum = log_sum(sum,scores[position] * annealing_factor);
+    sum = log_sum(sum,scores[position]);
   }
    //cout << "random: " << exp(random) <<  " sample: " << position << endl;
+  //cerr << "Sample: " << position-1 << endl;
   return position-1;
 }
 
@@ -129,13 +145,16 @@ void MergeSplitOperator::doIteration(
       VERBOSE(3, "Creating paired updates for source segments " << leftSourceSegment << " and " << rightSourceSegment <<
           " and target segments " << leftTargetSegment << " and " << rightTargetSegment << endl);
       const TranslationOptionList&  leftOptions = toc.GetTranslationOptionList(leftSourceSegment);
+      //cerr << "Got " << leftOptions.size() << " options for " << leftSourceSegment << endl;
       const TranslationOptionList&  rightOptions = toc.GetTranslationOptionList(rightSourceSegment);
+      //cerr << "Got " << rightOptions.size() << " options for " << rightSourceSegment << endl;
       for (TranslationOptionList::const_iterator ri = rightOptions.begin(); ri != rightOptions.end(); ++ri) {
         for (TranslationOptionList::const_iterator li = leftOptions.begin(); li != leftOptions.end(); ++li) {
           TranslationDelta* delta = new PairedTranslationUpdateDelta(sample,*li, *ri, leftTargetSegment, rightTargetSegment);
           deltas.push_back(delta);
         }
       }
+      //cerr << "Added " << ds << " deltas" << endl;
     } else {
       VERBOSE(3, "No existing split" << endl);
       WordsRange sourceSegment = hypothesis->GetCurrSourceWordsRange();
@@ -143,11 +162,13 @@ void MergeSplitOperator::doIteration(
       noChangeDelta = new TranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption()),targetSegment);
       //Add TranslationUpdateDeltas
       const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
+      //cerr << "Got " << options.size() << " options for " << sourceSegment << endl;
       VERBOSE(3, "Creating simple deltas for source segment " << sourceSegment << " and target segment " << targetSegment  << endl);
       for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
         TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,targetSegment);
         deltas.push_back(delta);
       }
+      //cerr << "Added " << ds << " deltas" << endl;
 
       
       //Add SplitDeltas

@@ -84,7 +84,7 @@ namespace Moses {
         /**
           * Pick random sample from given (un-normalised) log probabilities.
           **/
-        size_t getSample(const std::vector<double>& scores);
+        size_t getSample(std::vector<double>& scores);
         string m_name;
 				double T;  // annealing temperature
         
