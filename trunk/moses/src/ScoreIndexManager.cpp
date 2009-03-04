@@ -18,7 +18,7 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	// Producers must be inserted in the order they are created
 	const_cast<ScoreProducer*>(sp)->CreateScoreBookkeepingID();
 	assert(m_begins.size() == (sp->GetScoreBookkeepingID()));
-  
+
 	m_producers.push_back(sp);
 	if (sp->IsStateless()) {
 		const StatelessFeatureFunction* ff = static_cast<const StatelessFeatureFunction*>(sp);
@@ -33,9 +33,10 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	assert(numScoreCompsProduced > 0);
 	m_last += numScoreCompsProduced;
 	m_ends.push_back(m_last);
-	VERBOSE(1,"Added ScoreProducer(" << sp->GetScoreBookkeepingID() 
-						<< " " << sp->GetScoreProducerDescription() 
+	/*VERBOSE(1,"Added ScoreProducer(" << sp->GetScoreBookkeepingID()
+						<< " " << sp->GetScoreProducerDescription()
 						<< ") index=" << m_begins.back() << "-" << m_ends.back()-1 << std::endl);
+	*/
 }
 
 void ScoreIndexManager::Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const
