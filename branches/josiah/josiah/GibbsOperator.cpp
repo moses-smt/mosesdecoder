@@ -63,10 +63,23 @@ static float ComputeDistortionDistance(const WordsRange& prev, const WordsRange&
 
 
 
-size_t GibbsOperator::getSample(vector<double>& scores) {
+void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta) {
+  if (deltas.empty()) return;
+  //get the scores
+  vector<double> scores;
+  for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
+    scores.push_back((**i).getScore());
+  }
+  
+  IFVERBOSE(4) {
+    VERBOSE(4,"Scores: ");
+    for (size_t i = 0; i < scores.size(); ++i) {
+      VERBOSE(4,scores[i] << ",");
+    }
+    VERBOSE(4,endl);
+  }
+  
   //do annealling
-  //copy(scores.begin(),scores.end(),ostream_iterator<double>(cerr," "));
-  //cerr << endl;
   const double annealing_factor = 1.0 / T;
   transform(scores.begin(),scores.end(),scores.begin(),bind2nd(multiplies<double>(),annealing_factor));
 
@@ -76,17 +89,8 @@ size_t GibbsOperator::getSample(vector<double>& scores) {
     sum = log_sum(sum,scores[i]);
   }
   transform(scores.begin(),scores.end(),scores.begin(),bind2nd(minus<double>(),sum));
-
-  //copy(scores.begin(),scores.end(),ostream_iterator<double>(cerr," "));
-  //cerr << endl;
-  //for (size_t i = 0; i < scores.size(); ++i) {
-  //    cerr << exp(scores[i]) << ",";
-  //}
-  //cerr << endl;
-  
   //random number between 0 and 1
   double random =  m_random.next();//(double)rand() / RAND_MAX;
-  //cerr << "Random number " << random << endl;
  
   random = log(random);
   
@@ -96,9 +100,14 @@ size_t GibbsOperator::getSample(vector<double>& scores) {
   for (; position < scores.size() && sum < random; ++position) {
     sum = log_sum(sum,scores[position]);
   }
-   //cout << "random: " << exp(random) <<  " sample: " << position << endl;
-  //cerr << "Sample: " << position-1 << endl;
-  return position-1;
+   
+  size_t chosen =  position-1;
+  VERBOSE(3,"The chosen sample is " << chosen << endl);
+    
+    //apply it to the sample
+  if (deltas[chosen] != noChangeDelta) {
+    deltas[chosen]->apply(*noChangeDelta);
+  }
 }
 
 void MergeSplitOperator::doIteration(
@@ -189,31 +198,9 @@ void MergeSplitOperator::doIteration(
     
     
     VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
+    doSample(deltas, noChangeDelta);
     
-    //get the scores
-    vector<double> scores;
-    for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
-      scores.push_back((**i).getScore());
-    }
     
-    //randomly pick one of the deltas
-    if (scores.size() > 0) {
-      size_t chosen = getSample(scores);
-      IFVERBOSE(4) {
-        VERBOSE(4,"Scores: ");
-        for (size_t i = 0; i < scores.size(); ++i) {
-          VERBOSE(4,scores[i] << ",");
-        }
-        VERBOSE(4,endl);
-      }
-      VERBOSE(3,"The chosen sample is " << chosen << endl);
-      
-      //apply it to the sample
-      deltas[chosen]->apply(*noChangeDelta);
-      
-      VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
-      VERBOSE(2,"Sample fvs " << sample.GetFeatureValues() << endl);
-    }
     
     
     //clean up
@@ -249,35 +236,9 @@ void TranslationSwapOperator::doIteration(
     //advance thru the linked list now, before currHypo gets invalidated
     currHypo = currHypo->GetSourceNextHypo();
     
-    //get the scores
-    vector<double> scores;
-    for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
-      scores.push_back((**i).getScore());
-    }
+    doSample(deltas, noChangeDelta);
     
-   //randomly pick one of the deltas
-   if (scores.size() > 0) {
-   size_t chosen = getSample(scores);
-   IFVERBOSE(4) {
-    VERBOSE(4,"Scores: ");
-    for (size_t i = 0; i < scores.size(); ++i) {
-      VERBOSE(4,scores[i] << ",");
-    }
-    VERBOSE(4,endl);
-    }
-    VERBOSE(3,"The chosen sample is " << chosen << endl);
-    
-     
-    //apply it to the sample
-    if (deltas[chosen] !=  noChangeDelta);{
-      deltas[chosen]->apply(*noChangeDelta);     
-    }
-     VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
-     VERBOSE(2,"Sample fvs " << sample.GetFeatureValues() << endl);
- 
-   }
-    
-   RemoveAllInColl(deltas);
+    RemoveAllInColl(deltas);
   }
 }
 
@@ -450,33 +411,7 @@ void FlipOperator::doIteration(
       
       VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
       
-      //get the scores
-      vector<double> scores;
-      for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
-        scores.push_back((**i).getScore());
-      }
-      
-      //randomly pick one of the deltas
-      if (scores.size() > 0) {
-        size_t chosen = getSample(scores);
-        IFVERBOSE(4) {
-          VERBOSE(4,"Scores: ");
-          for (size_t i = 0; i < scores.size(); ++i) {
-            VERBOSE(4,scores[i] << ",");
-          }
-          VERBOSE(4,endl);
-        }
-        VERBOSE(3,"The chosen sample is " << chosen << endl);
-        
-        //apply it to the sample
-        if (deltas[chosen] != noChangeDelta) {
-          deltas[chosen]->apply(*noChangeDelta);  
-        }
-        
-        VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
-        VERBOSE(2,"Sample fvs " << sample.GetFeatureValues() << endl);
-
-      }
+      doSample(deltas, noChangeDelta);
       
       //clean up
       RemoveAllInColl(deltas);
@@ -556,33 +491,7 @@ void FlipOperator::doIteration(
       
       VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
       
-      //get the scores
-      vector<double> scores;
-      for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
-        scores.push_back((**i).getScore());
-      }
-      
-      //randomly pick one of the deltas
-      if (scores.size() > 0) {
-        size_t chosen = getSample(scores);
-        IFVERBOSE(4) {
-          VERBOSE(4,"Scores: ");
-          for (size_t i = 0; i < scores.size(); ++i) {
-            VERBOSE(4,scores[i] << ",");
-          }
-          VERBOSE(4,endl);
-        }
-        VERBOSE(3,"The chosen sample is " << chosen << endl);
-        
-        //apply it to the sample
-        if (deltas[chosen] != noChangeDelta) {
-          deltas[chosen]->apply(*noChangeDelta);  
-        }
-        
-        VERBOSE(2,"Updated to " << *sample.GetSampleHypothesis() << endl);
-        VERBOSE(2,"Sample fvs " << sample.GetFeatureValues() << endl);
-
-      }
+      doSample(deltas, noChangeDelta);
       
       //clean up
       RemoveAllInColl(deltas);
