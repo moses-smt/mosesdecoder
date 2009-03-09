@@ -40,6 +40,7 @@ namespace Moses {
 
   class Sample;
   class SampleCollector;
+  class TranslationDelta;
   
   typedef boost::mt19937 base_generator_type;
   
@@ -82,9 +83,10 @@ namespace Moses {
         
      protected:
         /**
-          * Pick random sample from given (un-normalised) log probabilities.
+          * Randomly select and apply one of the translation deltas.
           **/
-        size_t getSample(std::vector<double>& scores);
+        void doSample(std::vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta);
+        
         string m_name;
 				double T;  // annealing temperature
         
