@@ -80,14 +80,17 @@ namespace Josiah {
 
   class DerivationCollector: public virtual Moses::SampleCollector {
     public:
-      DerivationCollector(): m_n(0),m_pd(0) ,m_collectDerivByTrans(false){}
+      DerivationCollector(): m_n(0),m_pd(0) ,m_collectDerivByTrans(false), m_outputMaxChange(false), m_maxDerivation(NULL) {}
       void collect(Moses::Sample& sample);
       /** Top n in descending order. */
       void getTopN(size_t n, std::vector<DerivationProbability>& derivations);
       /** Write max periodically to stderr */
       void setPeriodicDecode(int pd) {m_pd = pd;}
+      /** Write the max derivation every time it changes */
+      void setOutputMaxChange(bool outputMaxChange) {m_outputMaxChange = outputMaxChange;}
       void setCollectDerivationsByTranslation(bool dbyt) {m_collectDerivByTrans = dbyt;}
       void outputDerivationsByTranslation(std::ostream& out);
+      void outputDerivationProbability(const DerivationProbability& dp, std::ostream& out);
       
     private:
       std::map<Derivation,size_t> m_counts;
@@ -95,6 +98,8 @@ namespace Josiah {
       size_t m_n;
       int m_pd;
       bool m_collectDerivByTrans;
+      bool m_outputMaxChange;
+      const Derivation* m_maxDerivation;
   };
 
 } //namespace

@@ -29,11 +29,16 @@ class GibblerMaxTransDecoder : public SampleCollector {
   GibblerMaxTransDecoder();
   virtual void collect(Sample& sample);
   virtual std::vector<const Factor*> Max();
+  /** Output the max translation whenever it changes */
+  void setOutputMaxChange(bool outputMaxChange){m_outputMaxChange = outputMaxChange;}
 
  private:
   int n;
   __gnu_cxx::hash_map<std::vector<const Factor*>, int> samples;
   int sent_num;
+  
+  bool m_outputMaxChange;
+  std::vector<const Factor*> m_maxTranslation;
 };
 
 }
