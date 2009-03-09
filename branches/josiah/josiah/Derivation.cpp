@@ -68,6 +68,11 @@ namespace Josiah {
     return out;
   }
   
+  void DerivationCollector::outputDerivationProbability(const DerivationProbability& dp, std::ostream& out) {
+    out << std::setprecision(8) << dp.second << " " << dp.second*m_n <<" " << *(dp.first);
+  }
+  
+  
   
   void DerivationCollector::collect(Sample& sample) {
     ++m_counts[Derivation(sample)];
@@ -87,9 +92,22 @@ namespace Josiah {
       vector<DerivationProbability> derivations;
       getTopN(1,derivations);
       if (derivations.size()) {
-        cerr << "MaxDecode(" << m_n << "): " <<  std::setprecision(8) << derivations[0].second << " " << derivations[0].second*m_n <<
-            " " << *(derivations[0].first) << endl;
+        cerr << "MaxDecode(" << m_n << "): ";
+        outputDerivationProbability(derivations[0],cerr);
+        cerr << endl;
       }
+    }
+    
+    if (m_outputMaxChange) {
+      vector<DerivationProbability> derivations;
+      getTopN(1,derivations);
+      const Derivation* newmax = derivations[0].first;
+      if (m_maxDerivation == NULL || *m_maxDerivation < *newmax || *newmax < *m_maxDerivation) {
+        cerr << "NewMaxDeriv(" << m_n << ")";
+        outputDerivationProbability(derivations[0],cerr);
+        cerr << endl;
+        m_maxDerivation = newmax;
+      } 
     }
     
   }

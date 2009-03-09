@@ -8,7 +8,16 @@ using namespace std;
 
 namespace Moses {
 
-GibblerMaxTransDecoder::GibblerMaxTransDecoder() : n(0) {}
+  GibblerMaxTransDecoder::GibblerMaxTransDecoder() : n(0), m_outputMaxChange(false) {}
+
+
+
+string ToString(const vector<const Factor*>& ws) {
+  ostringstream os;
+  for (vector<const Factor*>::const_iterator i = ws.begin(); i != ws.end(); ++i)
+    os << (*i)->GetString() << " ";
+  return os.str();
+}
 
 void GibblerMaxTransDecoder::collect(Sample& sample) {
   ++n;
@@ -16,13 +25,16 @@ void GibblerMaxTransDecoder::collect(Sample& sample) {
   vector<const Factor*> trans;
   h->GetTranslation(&trans, 0);
   ++samples[trans];
-}
-
-string ToString(const vector<const Factor*>& ws) {
-  ostringstream os;
-  for (vector<const Factor*>::const_iterator i = ws.begin(); i != ws.end(); ++i)
-    os << (*i)->GetString() << " ";
-  return os.str();
+  
+  if (m_outputMaxChange) {
+    vector<const Factor*> newmax = Max();
+    if (newmax != m_maxTranslation) {
+      m_maxTranslation = newmax;
+      cerr << "NewMaxTrans(" << n << ") ";
+      cerr << ToString(m_maxTranslation);
+      cerr << endl;
+    }
+  }
 }
 
 vector<const Factor*> GibblerMaxTransDecoder::Max() {

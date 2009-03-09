@@ -131,7 +131,6 @@ int main(int argc, char** argv) {
   int max_training_iterations;
   uint32_t seed;
   int lineno;
-  int periodic_decode;
   bool randomize;
   float scalefactor;
   float eta;
@@ -141,7 +140,9 @@ int main(int argc, char** argv) {
   bool decode_monotone;
   bool decode_zero_weights;
   bool decode_nolm;
+  int periodic_decode;
   bool collect_dbyt;
+  bool output_max_change;
   bool anneal;
   unsigned int reheatings;
   float max_temp;
@@ -168,6 +169,7 @@ int main(int argc, char** argv) {
         ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
         ("decode-translation,t",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
         ("periodic-derivation,p",po::value(&periodic_decode)->default_value(0), "Periodically write the max derivation to stderr")
+      ("max-change", po::value(&output_max_change)->zero_tokens()->default_value(false), "Whenever the max deriv or max trans changes, write it to stderr")
         ("collect-dbyt",po::value(&collect_dbyt)->zero_tokens()->default_value(false), "Collect derivations per translation")
         ("line-number,L", po::value(&lineno)->default_value(0), "Starting reference/line number")
         ("xbleu,x", po::value(&expected_sbleu)->zero_tokens()->default_value(false), "Compute the expected sentence BLEU")
@@ -345,11 +347,13 @@ int main(int argc, char** argv) {
       DerivationCollector* collector = new DerivationCollector();
       collector->setPeriodicDecode(periodic_decode);
       collector->setCollectDerivationsByTranslation(collect_dbyt);
+      collector->setOutputMaxChange(output_max_change);
       derivationCollector.reset(collector);
       sampler.AddCollector(derivationCollector.get());
     }
     if (translate) {
       transCollector.reset(new GibblerMaxTransDecoder());
+      transCollector->setOutputMaxChange(output_max_change);
       sampler.AddCollector(transCollector.get() );
     }
     if (mbr_decoding) {
@@ -405,7 +409,9 @@ int main(int argc, char** argv) {
       derivationCollector->getTopN(max(topn,1u),derivations);
       for (size_t i = 0; i < topn && i < derivations.size() ; ++i) {  
         Derivation d = *(derivations[i].first);
-        (*out) << lineno << " "  << std::setprecision(8) << derivations[i].second << " " << *(derivations[i].first) << endl;
+        cerr << "NBEST: " << lineno << " ";
+        derivationCollector->outputDerivationProbability(derivations[i],cerr);
+        cerr << endl;
       }
       if (decode) {
         const vector<string>& sentence = derivations[0].first->getTargetSentence();
