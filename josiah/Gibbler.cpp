@@ -95,7 +95,7 @@ void Sample::UpdateTargetWords()  {
   
   //we're now at the dummy hypo at the start of the sentence
   while ((currHypo = (currHypo->GetNextHypo()))) {
-    TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
+    const TargetPhrase& targetPhrase = currHypo->GetTargetPhrase();
     for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
       m_targetWords.push_back(targetPhrase.GetWord(i));
       IFVERBOSE(2) {
