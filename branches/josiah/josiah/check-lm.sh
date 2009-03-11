@@ -13,8 +13,8 @@ fi
 input=$1
 out=$2
 
-ngram=/home/bhaddow/statmt/srilm/bin/i686/ngram
-lm=/afs/inf.ed.ac.uk/group/bhaddow/models/de-en-tuning-mert/europarl.lm.2
+ngram=/Users/abhishekarun/PhD/srilm/bin/macosx/ngram
+lm=/Users/abhishekarun/PhD/mt-marathon-2009/models/europarl.lm.gz
 
 if [ `basename $input .gz` == `basename $input` ]; then
     catcmd=cat

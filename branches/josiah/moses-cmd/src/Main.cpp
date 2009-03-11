@@ -197,7 +197,8 @@ int main(int argc, char* argv[])
 		      ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
 					       staticData.GetReportSegmentation(),
 					       staticData.GetReportAllFactors());
-		      IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
+		      
+          IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
 		    }
 		}
 

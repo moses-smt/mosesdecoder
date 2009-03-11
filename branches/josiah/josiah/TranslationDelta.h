@@ -106,6 +106,14 @@ class TranslationDelta {
       into the hypothesis at the given target position.
      **/
     void  addLanguageModelScore(const Phrase& targetPhrase,const WordsRange& targetSegment);
+  
+    void  addSingleOptionLanguageModelScore(const TranslationOption* option, const WordsRange& targetSegment);
+  
+    void  addPairedOptionLanguageModelScore(const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
+  
+    void  addContiguousPairedOptionLMScore(const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange* leftSegment, const WordsRange* rightTargetSegment);
+  
+    void  addDiscontiguousPairedOptionLMScore(const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange* leftSegment, const WordsRange* rightTargetSegment);
     /**
       * Initialise the scores for the case where only one source-target pair needs to be considered.
      **/
@@ -114,7 +122,12 @@ class TranslationDelta {
      * Initialise the scores for the case where two source-target pairs need to be considered.
      **/
     void initScoresPairedUpdate(const Sample&, const TranslationOption* leftOption,
-                                const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
+                                const TranslationOption* rightOption, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment){
+      ; 
+    }
+  
+  void initScoresPairedUpdate(const Sample&, const TranslationOption* leftOption,
+                              const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
     ScoreComponentCollection m_scores;
     std::vector<float> _extra_feature_values;
     double m_score;

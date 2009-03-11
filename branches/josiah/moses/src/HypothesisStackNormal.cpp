@@ -121,6 +121,8 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 	if (hypo->GetTotalScore() > hypoExisting->GetTotalScore())
 	{ // incoming hypo is better than the one we have
 		VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
+    
+    hypo->UpdateSpans(hypoExisting);
 		if (m_nBestIsEnabled) {
 			hypo->AddArc(hypoExisting);
 			Detach(iterExisting);
@@ -140,7 +142,9 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 	else
 	{ // already storing the best hypo. discard current hypo 
 	  VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
-		if (m_nBestIsEnabled) {
+		
+    hypoExisting->UpdateSpans(hypo);
+    if (m_nBestIsEnabled) {
 			hypoExisting->AddArc(hypo);
 		} else {
 			FREEHYPO(hypo);				
@@ -232,6 +236,8 @@ void HypothesisStackNormal::PruneToSize(size_t newSize)
 
 const Hypothesis *HypothesisStackNormal::GetBestHypothesis() const
 {
+  
+  unsigned long totalSpans = 0;
 	if (!m_hypos.empty())
 	{
 		const_iterator iter = m_hypos.begin();
@@ -239,10 +245,12 @@ const Hypothesis *HypothesisStackNormal::GetBestHypothesis() const
 		while (++iter != m_hypos.end())
 		{
 			Hypothesis *hypo = *iter;
+      totalSpans += hypo->GetNumSpans();
 			if (hypo->GetTotalScore() > bestHypo->GetTotalScore())
 				bestHypo = hypo;
 		}
-		return bestHypo;
+    VERBOSE(0, "Total number of completed hyps considered " << totalSpans << endl);
+  	return bestHypo;
 	}
 	return NULL;
 }
