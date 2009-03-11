@@ -89,6 +89,8 @@ protected:
 	const TranslationOption *m_transOpt;
 
 	int m_id; /*! numeric ID of this hypothesis, used for logging */
+  unsigned long m_numSpans; /*! number of hyps, that is including recombined ones, this hyp spans*/
+  
 	std::vector<std::vector<unsigned int> >* m_lmstats; /*! Statistics: (see IsComputeLMBackoffStats() in StaticData.h */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 	void CalcLMScore(const LMList &languageModels);
@@ -332,6 +334,15 @@ public:
 
 	const TranslationOption &GetTranslationOption() const
 	{ return *m_transOpt; }
+  
+  
+  void UpdateSpans(Hypothesis *loserHypo) {
+    m_numSpans += loserHypo->m_numSpans;
+  }
+  
+  unsigned long GetNumSpans() {
+    return m_numSpans;
+  }
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

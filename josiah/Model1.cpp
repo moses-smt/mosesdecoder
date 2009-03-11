@@ -184,7 +184,7 @@ float model1::getSingleUpdateScore(const Sample& sample,
 
 float model1::getPairedUpdateScore(const Sample& sample, 
   const TranslationOption* leftOption, const TranslationOption* rightOption, 
-  const WordsRange& targetSegment, const Phrase& targetPhrase){
+  const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment){
   // populate a vector with the e words we are to remove
   std::vector<int> e(std::distance(leftOption->GetTargetPhrase().begin(), leftOption->GetTargetPhrase().end())+
     std::distance(rightOption->GetTargetPhrase().begin(), rightOption->GetTargetPhrase().end()));
@@ -204,6 +204,28 @@ float model1::getPairedUpdateScore(const Sample& sample,
     log_iter(_tmp_sums.end()), 0.0);
 }
 
+float model1::getPairedUpdateScore(const Sample& sample, 
+                                     const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                     const WordsRange& targetSegment, const Phrase& targetPhrase){
+  // populate a vector with the e words we are to remove
+  std::vector<int> e(std::distance(leftOption->GetTargetPhrase().begin(), leftOption->GetTargetPhrase().end())+
+                     std::distance(rightOption->GetTargetPhrase().begin(), rightOption->GetTargetPhrase().end()));
+    
+  moses_words_to_ids(*_pfmap, leftOption->GetTargetPhrase(), e.begin());
+  moses_words_to_ids(*_pfmap, rightOption->GetTargetPhrase(), 
+                       e.begin()+std::distance(leftOption->GetTargetPhrase().begin(), leftOption->GetTargetPhrase().end()));
+    
+  _compute_inner_sums(_sentence_cache.begin(), _sentence_cache.end(),
+                        e.begin(), e.end(), _tmp_sums.begin());
+    
+  // compute change in sums
+  std::transform(_sums_cache.begin(), _sums_cache.end(), _tmp_sums.begin(),
+                   _tmp_sums.begin(), std::minus<float>());
+    
+  return _score_cache - std::accumulate(log_iter(_tmp_sums.begin()),
+                                          log_iter(_tmp_sums.end()), 0.0);
+}
+  
 float model1::getFlipUpdateScore(const Sample& s, 
   const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
   const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
@@ -253,11 +275,22 @@ float model1_inverse::getSingleUpdateScore(const Sample& sample,
 
 float model1_inverse::getPairedUpdateScore(const Sample& sample, 
   const TranslationOption* leftOption, const TranslationOption* rightOption, 
-  const WordsRange& targetSegment, const Phrase& targetPhrase){
+  const WordsRange& leftTargetSegment,   const WordsRange& rightTargetSegment){
+  WordsRange targetSegment(min(leftTargetSegment.GetStartPos(), rightTargetSegment.GetStartPos()),max(leftTargetSegment.GetEndPos(), rightTargetSegment.GetEndPos()));
+  
   return getSingleUpdateScore(sample, leftOption, targetSegment) +
          getSingleUpdateScore(sample, rightOption, targetSegment);
 }
 
+float model1_inverse::getPairedUpdateScore(const Sample& sample, 
+                                             const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                             const WordsRange& targetSegment,   const Phrase& targetPhrase){
+    
+  return getSingleUpdateScore(sample, leftOption, targetSegment) +
+  getSingleUpdateScore(sample, rightOption, targetSegment);
+}  
+  
+  
 float model1_inverse::getFlipUpdateScore(const Sample& s, 
   const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
   const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 

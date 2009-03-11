@@ -1,5 +1,5 @@
 #include "Gibbler.h"
-
+#include "Derivation.h"
 #include "FeatureFunction.h"
 #include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
@@ -67,6 +67,8 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
     feature_values.Assign((*i)->getScoreProducer(),score);
   }
   //compute_extra_fv(*this, _extra_features, _extra_feature_values);
+    
+    //cerr << "Initial Moses hyp : " << Josiah::Derivation(*this) << endl;  
 }
  
 Sample::~Sample() {
@@ -220,7 +222,7 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
   DeleteFromCache(oldLeftHypo);
   
   //Sanity check
-  IFVERBOSE(2) {
+  IFVERBOSE(4) {
     float totalDistortion(0.0);
     for (Hypothesis* h = target_tail; h; h = const_cast<Hypothesis*>(h->GetNextHypo())) {
       Hypothesis *next = const_cast<Hypothesis*>(h->GetNextHypo());
@@ -231,8 +233,9 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
         break;
       }
     }
-    VERBOSE(2, "Total distortion for this sample " << totalDistortion << endl);
+    VERBOSE(4, "Total distortion for this sample " << totalDistortion << endl);
   } 
+  
 }
 
   float Sample::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) 

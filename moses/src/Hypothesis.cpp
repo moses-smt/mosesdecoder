@@ -60,7 +60,8 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_arcList(NULL)
 	, m_id(0)
   , m_lmstats(NULL)
-//  , m_alignPair(source.GetSize())
+  , m_numSpans(1)
+  //  , m_alignPair(source.GetSize())
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
@@ -89,6 +90,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_arcList(NULL)
 	, m_id(s_HypothesesCreated++)
   , m_lmstats(NULL)
+  , m_numSpans(prevHypo.m_numSpans)
 //  , m_alignPair(prevHypo.m_alignPair)
 {
 	// assert that we are not extending our hypothesis by retranslating something

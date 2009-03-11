@@ -74,6 +74,8 @@ class FeatureFunction {
     /** Change in score when updating two segments **/
     virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
                                const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) = 0;
+    virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
+                                     const TranslationOption* rightOption, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) = 0;
     /** Change in score when flipping */
     virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                              const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
@@ -95,6 +97,9 @@ class DummyFeatureFunction : public FeatureFunction {
     virtual float getPairedUpdateScore(const Sample&, const TranslationOption*,
                                       const TranslationOption*, const WordsRange&, const Phrase&)
     {return 3;}
+    virtual float getPairedUpdateScore(const Sample&, const TranslationOption*,
+                                     const TranslationOption*, const WordsRange&, const WordsRange&)
+    {return 5;}
     virtual float getFlipUpdateScore(const Sample&, const TranslationOption*, const TranslationOption*, 
                                     const Hypothesis*, const Hypothesis*, 
                                     const WordsRange&, const WordsRange&)
