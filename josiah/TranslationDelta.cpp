@@ -415,366 +415,365 @@ FlipDelta::FlipDelta(Sample& sample, const TranslationOption* leftTgtOption ,
   TranslationDelta(sample),
   m_leftTgtOption(leftTgtOption), m_rightTgtOption(rightTgtOption), m_prevTgtHypo(const_cast<Hypothesis*> (prevTgtHypo)), m_nextTgtHypo(const_cast<Hypothesis*> (nextTgtHypo))  {
     
-    //translation scores
-    m_scores.PlusEquals(m_leftTgtOption->GetScoreBreakdown());
-    m_scores.PlusEquals(m_rightTgtOption->GetScoreBreakdown());
+  //translation scores
+  m_scores.PlusEquals(m_leftTgtOption->GetScoreBreakdown());
+  m_scores.PlusEquals(m_rightTgtOption->GetScoreBreakdown());
     
-    //word penalty
-    float penalty = -((int) m_leftTgtOption->GetTargetPhrase().GetSize() + (int) m_rightTgtOption->GetTargetPhrase().GetSize());
-    m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
+  //word penalty
+  float penalty = -((int) m_leftTgtOption->GetTargetPhrase().GetSize() + (int) m_rightTgtOption->GetTargetPhrase().GetSize());
+  m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
     
-    addPairedOptionLanguageModelScore(m_leftTgtOption, m_rightTgtOption, leftTargetSegment, rightTargetSegment);
+  addPairedOptionLanguageModelScore(m_leftTgtOption, m_rightTgtOption, leftTargetSegment, rightTargetSegment);
     
-    //linear distortion
-    const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
-    m_scores.PlusEquals(dsp, totalDistortion);
+  //linear distortion
+  const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
+  m_scores.PlusEquals(dsp, totalDistortion);
     
-    //TODO: extra feature scores
+  //TODO: extra feature scores
     
-    //weight the scores
-    const vector<float> & weights = StaticData::Instance().GetAllWeights();
-    m_score = m_scores.InnerProduct(weights);
+  //weight the scores
+  const vector<float> & weights = StaticData::Instance().GetAllWeights();
+  m_score = m_scores.InnerProduct(weights);
     
-    VERBOSE(2, "Flip delta: Scores " << m_scores << endl);
-    VERBOSE(2,"Flip delta: Total score is  " << m_score << endl);  
-  }  
+  VERBOSE(2, "Flip delta: Scores " << m_scores << endl);
+  VERBOSE(2,"Flip delta: Total score is  " << m_score << endl);  
+}  
   
-  void  TranslationDelta::addContiguousPairedOptionLMScore(const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange* leftSegment, const WordsRange* rightTargetSegment) {
-    //Create the segment
-    WordsRange targetSegment = *leftSegment;
-    targetSegment.SetEndPos(rightTargetSegment->GetEndPos());
+void  TranslationDelta::addContiguousPairedOptionLMScore(const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange* leftSegment, const WordsRange* rightTargetSegment) {
+  //Create the segment
+  WordsRange targetSegment = *leftSegment;
+  targetSegment.SetEndPos(rightTargetSegment->GetEndPos());
     
-    //create the phrase
-    Phrase targetPhrase(leftOption->GetTargetPhrase());
-    targetPhrase.Append(rightOption->GetTargetPhrase());
+  //create the phrase
+  Phrase targetPhrase(leftOption->GetTargetPhrase());
+  targetPhrase.Append(rightOption->GetTargetPhrase());
     
-    //set the indices for start and end positions
-    size_t leftStartPos(0);
-    size_t leftEndPos(leftOption->GetTargetPhrase().GetSize()); 
-    size_t rightStartPos(leftEndPos);
-    size_t rightEndPos(targetPhrase.GetSize());
+  //set the indices for start and end positions
+  size_t leftStartPos(0);
+  size_t leftEndPos(leftOption->GetTargetPhrase().GetSize()); 
+  size_t rightStartPos(leftEndPos);
+  size_t rightEndPos(targetPhrase.GetSize());
     
-    //LM
-    const LMList& languageModels = StaticData::Instance().GetAllLM();
+  //LM
+  const LMList& languageModels = StaticData::Instance().GetAllLM();
     
-    for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
-      LanguageModel* lm = *i;
-      /*
-       map<LanguageModel*,LanguageModelCache>::iterator lmci = m_cache.find(lm);
-       if (lmci == m_cache.end()) {
-       m_cache.insert(pair<LanguageModel*,LanguageModelCache>(lm,LanguageModelCache(lm)));
-       }*/
-      size_t order = lm->GetNGramOrder();
-      vector<const Word*> lmcontext;
-      lmcontext.reserve(targetPhrase.GetSize() + 2*(order-1));
+  for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
+    LanguageModel* lm = *i;
+    /*
+     map<LanguageModel*,LanguageModelCache>::iterator lmci = m_cache.find(lm);
+     if (lmci == m_cache.end()) {
+     m_cache.insert(pair<LanguageModel*,LanguageModelCache>(lm,LanguageModelCache(lm)));
+     }*/
+    size_t order = lm->GetNGramOrder();
+    vector<const Word*> lmcontext;
+    lmcontext.reserve(targetPhrase.GetSize() + 2*(order-1));
       
-      int start = targetSegment.GetStartPos() - (order-1);
+    int start = targetSegment.GetStartPos() - (order-1);
       
-      //fill in the pre-context
-      for (size_t i = 0; i < order-1; ++i) {
-        if (start+(int)i < 0) {
-          lmcontext.push_back(&(lm->GetSentenceStartArray()));
-        } else {
-          lmcontext.push_back(&(getSample().GetTargetWords()[i+start]));
+    //fill in the pre-context
+    for (size_t i = 0; i < order-1; ++i) {
+      if (start+(int)i < 0) {
+        lmcontext.push_back(&(lm->GetSentenceStartArray()));
+      } else {
+        lmcontext.push_back(&(getSample().GetTargetWords()[i+start]));
+      }
+    }
+      
+    //Offset the indices by pre-context size
+    leftStartPos += lmcontext.size();
+    leftEndPos += lmcontext.size();
+    rightStartPos += lmcontext.size();
+    rightEndPos += lmcontext.size();
+      
+    //fill in the target phrase
+    for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
+      lmcontext.push_back(&(targetPhrase.GetWord(i)));
+    }
+      
+    //fill in the postcontext
+    for (size_t i = 0; i < order-1; ++i) {
+      size_t targetPos = i + targetSegment.GetEndPos() + 1;
+      if (targetPos >= getSample().GetTargetWords().size()) {
+        if (targetPos == getSample().GetTargetWords().size()) {
+          lmcontext.push_back(&(lm->GetSentenceEndArray()));
         }
+      } else {
+        lmcontext.push_back(&(getSample().GetTargetWords()[targetPos]));
       }
-      
-      //Offset the indices by pre-context size
-      leftStartPos += lmcontext.size();
-      leftEndPos += lmcontext.size();
-      rightStartPos += lmcontext.size();
-      rightEndPos += lmcontext.size();
-      
-      //fill in the target phrase
-      for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-        lmcontext.push_back(&(targetPhrase.GetWord(i)));
-      }
-      
-      //fill in the postcontext
-      for (size_t i = 0; i < order-1; ++i) {
-        size_t targetPos = i + targetSegment.GetEndPos() + 1;
-        if (targetPos >= getSample().GetTargetWords().size()) {
-          if (targetPos == getSample().GetTargetWords().size()) {
-            lmcontext.push_back(&(lm->GetSentenceEndArray()));
-          }
-        } else {
-          lmcontext.push_back(&(getSample().GetTargetWords()[targetPos]));
-        }
-      }
+    }
       
       //debug
-      IFVERBOSE(2) {
-        VERBOSE(2,"Segment: " << targetSegment << " phrase: " << targetPhrase << endl);
-        VERBOSE(2,"LM context ");
-        for (size_t j = 0;  j < lmcontext.size(); ++j) {
-          if (j == order-1) {
-            //VERBOSE(3, "[ ");
-          }
-          if (j == (targetPhrase.GetSize() + (order-1))) {
-            //VERBOSE(3,"] ");
-          }
-          VERBOSE(2,*(lmcontext[j]) << " ");
-          
+    IFVERBOSE(2) {
+      VERBOSE(2,"Segment: " << targetSegment << " phrase: " << targetPhrase << endl);
+      VERBOSE(2,"LM context ");
+      for (size_t j = 0;  j < lmcontext.size(); ++j) {
+        if (j == order-1) {
+          //VERBOSE(3, "[ ");
         }
-        VERBOSE(2,endl);
-      }
-      
-      //score lm
-      double lmscore = 0;
-      vector<const Word*> ngram;
-      bool useLeftOptionCacheLM(false), useRightOptionCacheLM(false) ;
-      for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
-        if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
-          useLeftOptionCacheLM = true;
-          VERBOSE(2, "In flip, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
+        if (j == (targetPhrase.GetSize() + (order-1))) {
+          //VERBOSE(3,"] ");
         }
-        else if (ngramstart >= rightStartPos && ngramstart + order - 1 < rightEndPos) {
-          useRightOptionCacheLM = true;
-          VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
-        }
-        else {
-          ngram.clear();
-          //cerr << "ngram: ";
-          for (size_t j = ngramstart; j < ngramstart+order; ++j) {
-            ngram.push_back(lmcontext[j]);
-            //cerr << *lmcontext[j] << " ";
-          }
-          lmscore += lm->GetValue(ngram);
-          //cerr << lm->GetValue(ngram)/log(10) << endl;
-          //cache disabled for now
-          //lmscore += m_cache.find(lm)->second.GetValue(ngram);
-        }
+        VERBOSE(2,*(lmcontext[j]) << " ");
       }
-      
-      if (useLeftOptionCacheLM) {
-        const ScoreComponentCollection & sc = leftOption->GetScoreBreakdown();
-        lmscore += sc.GetScoreForProducer(lm);
-      }
-      
-      if (useRightOptionCacheLM) {
-        const ScoreComponentCollection & sc = rightOption->GetScoreBreakdown();
-        lmscore += sc.GetScoreForProducer(lm);
-      }
-      
-      VERBOSE(2,"Language model score: " << lmscore << endl);
-      m_scores.Assign(lm,lmscore);
+      VERBOSE(2,endl);
     }
+      
+    //score lm
+    double lmscore = 0;
+    vector<const Word*> ngram;
+    bool useLeftOptionCacheLM(false), useRightOptionCacheLM(false) ;
+    for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
+      if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
+        useLeftOptionCacheLM = true;
+        VERBOSE(2, "In flip, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
+      }
+      else if (ngramstart >= rightStartPos && ngramstart + order - 1 < rightEndPos) {
+        useRightOptionCacheLM = true;
+        VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
+      }
+      else {
+        ngram.clear();
+        //cerr << "ngram: ";
+        for (size_t j = ngramstart; j < ngramstart+order; ++j) {
+          ngram.push_back(lmcontext[j]);
+          //cerr << *lmcontext[j] << " ";
+        }
+        lmscore += lm->GetValue(ngram);
+        //cerr << lm->GetValue(ngram)/log(10) << endl;
+        //cache disabled for now
+        //lmscore += m_cache.find(lm)->second.GetValue(ngram);
+      }
+    }
+      
+    if (useLeftOptionCacheLM) {
+      const ScoreComponentCollection & sc = leftOption->GetScoreBreakdown();
+      lmscore += sc.GetScoreForProducer(lm);
+    }
+      
+    if (useRightOptionCacheLM) {
+      const ScoreComponentCollection & sc = rightOption->GetScoreBreakdown();
+      lmscore += sc.GetScoreForProducer(lm);
+    }
+      
+    VERBOSE(2,"Language model score: " << lmscore << endl);
+    m_scores.Assign(lm,lmscore);
   }
+}
   
   
-  void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange* leftSegment, const WordsRange* rightSegment) {
-    //LM
-    const LMList& languageModels = StaticData::Instance().GetAllLM();
-    const Phrase& leftTgtPhrase = leftOption->GetTargetPhrase();
-    const Phrase& rightTgtPhrase = rightOption->GetTargetPhrase();
+void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange* leftSegment, const WordsRange* rightSegment) {
+  //LM
+  const LMList& languageModels = StaticData::Instance().GetAllLM();
+  const Phrase& leftTgtPhrase = leftOption->GetTargetPhrase();
+  const Phrase& rightTgtPhrase = rightOption->GetTargetPhrase();
     
-    for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
-      LanguageModel* lm = *i;
-      /*
-       map<LanguageModel*,LanguageModelCache>::iterator lmci = m_cache.find(lm);
-       if (lmci == m_cache.end()) {
+  for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
+    LanguageModel* lm = *i;
+    /*
+     map<LanguageModel*,LanguageModelCache>::iterator lmci = m_cache.find(lm);
+     if (lmci == m_cache.end()) {
        m_cache.insert(pair<LanguageModel*,LanguageModelCache>(lm,LanguageModelCache(lm)));
-       }*/
-      size_t order = lm->GetNGramOrder();
-      vector<const Word*> lmcontext;
-      lmcontext.reserve(max(leftTgtPhrase.GetSize(), rightTgtPhrase.GetSize()) + 2*(order-1));
+     }*/
+    size_t order = lm->GetNGramOrder();
+    vector<const Word*> lmcontext;
+    lmcontext.reserve(max(leftTgtPhrase.GetSize(), rightTgtPhrase.GetSize()) + 2*(order-1));
       
-      int start = leftSegment->GetStartPos() - (order-1);
+    int start = leftSegment->GetStartPos() - (order-1);
       
-      //fill in the pre-context
-      for (size_t i = 0; i < order-1; ++i) {
-        if (start+(int)i < 0) {
-          lmcontext.push_back(&(lm->GetSentenceStartArray()));
-        } else {
-          lmcontext.push_back(&(getSample().GetTargetWords()[i+start]));
-        }
+    //fill in the pre-context
+    for (size_t i = 0; i < order-1; ++i) {
+      if (start+(int)i < 0) {
+        lmcontext.push_back(&(lm->GetSentenceStartArray()));
+      } else {
+        lmcontext.push_back(&(getSample().GetTargetWords()[i+start]));
       }
+    }
       
-      size_t leftStartPos = lmcontext.size();
+    size_t leftStartPos = lmcontext.size();
       
-      //fill in the target phrase
-      for (size_t i = 0; i < leftTgtPhrase.GetSize(); ++i) {
-        lmcontext.push_back(&(leftTgtPhrase.GetWord(i)));
+    //fill in the target phrase
+    for (size_t i = 0; i < leftTgtPhrase.GetSize(); ++i) {
+      lmcontext.push_back(&(leftTgtPhrase.GetWord(i)));
+    }
+      
+    size_t leftEndPos = lmcontext.size();      
+      
+    //fill in the postcontext needed for leftmost phrase
+      
+    //First get words from phrases in between, then from right phrase, then words past right phrase, then end of sentence
+    size_t gapSize = rightSegment->GetStartPos() - leftSegment->GetEndPos() - 1;
+    size_t leftSegmentEndPos = leftSegment->GetEndPos();
+      
+    for (size_t i = 0; i < order - 1; i++) {
+      if (i < gapSize) {
+        lmcontext.push_back(&(getSample().GetTargetWords()[leftSegmentEndPos + i + 1]));    
       }
-      
-      size_t leftEndPos = lmcontext.size();      
-      
-      //fill in the postcontext needed for leftmost phrase
-      
-      //First get words from phrases in between, then from right phrase, then words past right phrase, then end of sentence
-      size_t gapSize = rightSegment->GetStartPos() - leftSegment->GetEndPos() - 1;
-      size_t leftSegmentEndPos = leftSegment->GetEndPos();
-      
-      for (size_t i = 0; i < order - 1; i++) {
-        if (i < gapSize) {
-          lmcontext.push_back(&(getSample().GetTargetWords()[leftSegmentEndPos + i + 1]));    
-        }
-        else if (i - gapSize < rightTgtPhrase.GetSize() ) {
-          lmcontext.push_back(&(rightTgtPhrase.GetWord(i- gapSize)));  
-        }
-        else if (i - gapSize - rightTgtPhrase.GetSize() + rightSegment->GetEndPos() + 1 < getSample().GetTargetWords().size() ) {
-          lmcontext.push_back(&(getSample().GetTargetWords()[(i - gapSize - rightTgtPhrase.GetSize() + rightSegment->GetEndPos()  + 1)]));  
-        }
-        else {
-          lmcontext.push_back(&(lm->GetSentenceEndArray()));
-          break;
-        }
+      else if (i - gapSize < rightTgtPhrase.GetSize() ) {
+        lmcontext.push_back(&(rightTgtPhrase.GetWord(i- gapSize)));  
       }
-      
-      
-      VERBOSE(2,"Left LM Context : "); 
-      for (int i = 0; i < lmcontext.size(); i++) {
-        VERBOSE(2,*lmcontext[i] << " ");
+      else if (i - gapSize - rightTgtPhrase.GetSize() + rightSegment->GetEndPos() + 1 < getSample().GetTargetWords().size() ) {
+        lmcontext.push_back(&(getSample().GetTargetWords()[(i - gapSize - rightTgtPhrase.GetSize() + rightSegment->GetEndPos()  + 1)]));  
       }
-      VERBOSE(2, endl);
-      
-      //score lm
-      double lmscore = 0;
-      vector<const Word*> ngram;
-      bool useLeftOptionCacheLM(false), useRightOptionCacheLM(false) ;
-      for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
-        if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
-          useLeftOptionCacheLM = true;
-          VERBOSE(2, "In flip, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
-        }  
-        //else if (ngramstart >= rightStartPos && ngramstart + order - 1 < rightEndPos) {
-        //          useRightOptionCacheLM = true;
-        //          VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
-        //        }
-        else {
-          ngram.clear();
-          cerr << "ngram: ";
-          for (size_t j = ngramstart; j < ngramstart+order; ++j) {
-            ngram.push_back(lmcontext[j]);
-            cerr << *lmcontext[j] << " ";
-          }
-          lmscore += lm->GetValue(ngram);
-          cerr << lm->GetValue(ngram)/log(10) << endl;
-          //cache disabled for now
-          //lmscore += m_cache.find(lm)->second.GetValue(ngram);  
-        }  
+      else {
+        lmcontext.push_back(&(lm->GetSentenceEndArray()));
+        break;
       }
+    }
       
-      if (useLeftOptionCacheLM) {
-        const ScoreComponentCollection & sc = leftOption->GetScoreBreakdown();
-        lmscore += sc.GetScoreForProducer(lm);
-      }
       
-      VERBOSE(2,"Left option Language model score: " << lmscore << endl); 
+    VERBOSE(2,"Left LM Context : "); 
+    for (int i = 0; i < lmcontext.size(); i++) {
+      VERBOSE(2,*lmcontext[i] << " ");
+    }
+    VERBOSE(2, endl);
       
-      //Now for the right target phrase
-      lmcontext.clear();
-      
-      //Fill in the pre-context
-      size_t i = 0;
-      if (order <= gapSize) { //no risk of ngram overlaps with left phrase post context
-        i = order -1;
-      }
-      else {//how far back should we go
-        i = gapSize;
-      }
-      for ( ; i > 0 ; --i) {
-        if (i > gapSize + leftTgtPhrase.GetSize() + leftSegment->GetStartPos()) {                      
-          lmcontext.push_back(&(lm->GetSentenceStartArray()));
-        }
-        else if (i > gapSize + leftTgtPhrase.GetSize()) {
-          lmcontext.push_back(&(getSample().GetTargetWords()[ leftSegment->GetStartPos()  -  (i - (gapSize + leftTgtPhrase.GetSize())) ]));
-        }                      
-        else if ( i > gapSize) {
-          lmcontext.push_back(&(leftTgtPhrase.GetWord(leftTgtPhrase.GetSize() - (i - gapSize))));
-        }
-        else {
-          lmcontext.push_back(&(getSample().GetTargetWords()[ leftSegment->GetEndPos() + gapSize - i + 1 ]));
-        }
+    //score lm
+    double lmscore = 0;
+    vector<const Word*> ngram;
+    bool useLeftOptionCacheLM(false), useRightOptionCacheLM(false) ;
+    for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
+      if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
+        useLeftOptionCacheLM = true;
+        VERBOSE(2, "In flip, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
       }  
-      
-      //Fill in right target phrase
-      size_t rightStartPos = lmcontext.size();
-      
-      //fill in the target phrase
-      for (size_t i = 0; i < rightTgtPhrase.GetSize(); ++i) {
-        lmcontext.push_back(&(rightTgtPhrase.GetWord(i)));
-      }
-      
-      size_t rightEndPos = lmcontext.size();      
-      
-      //Fill in post context
-      for (size_t i = 0; i < order-1; ++i) {
-        if ( i + rightSegment->GetEndPos() + 1 < getSample().GetTargetWords().size() ) {
-          lmcontext.push_back(&(getSample().GetTargetWords()[i + rightSegment->GetEndPos() + 1]));         
+      //else if (ngramstart >= rightStartPos && ngramstart + order - 1 < rightEndPos) {
+      //          useRightOptionCacheLM = true;
+      //          VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
+      //        }
+      else {
+        ngram.clear();
+        cerr << "ngram: ";
+        for (size_t j = ngramstart; j < ngramstart+order; ++j) {
+          ngram.push_back(lmcontext[j]);
+          cerr << *lmcontext[j] << " ";
         }
-        else { 
-          lmcontext.push_back(&(lm->GetSentenceEndArray()));
-          break;
-        }
+        lmscore += lm->GetValue(ngram);
+        cerr << lm->GetValue(ngram)/log(10) << endl;
+        //cache disabled for now
+        //lmscore += m_cache.find(lm)->second.GetValue(ngram);  
       }  
+    }
       
-      VERBOSE(2,"Right LM Context : "); 
-      for (int i = 0; i < lmcontext.size(); i++) {
-        VERBOSE(2,*lmcontext[i] << " ");
-      }
-      VERBOSE(2, endl);
+    if (useLeftOptionCacheLM) {
+      const ScoreComponentCollection & sc = leftOption->GetScoreBreakdown();
+      lmscore += sc.GetScoreForProducer(lm);
+    }
       
-      //useLeftOptionCacheLM = false;
-      useRightOptionCacheLM = false;
+    VERBOSE(2,"Left option Language model score: " << lmscore << endl); 
       
-      size_t maxNgram = max(lmcontext.size() - (order -1), static_cast<size_t>(1));
-      for (size_t ngramstart = 0; ngramstart < maxNgram; ++ngramstart) {
-        //        if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
-        //          useLeftOptionCacheLM = true;
-        //          VERBOSE(2, "In flip, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
-        //        }  
-        if (ngramstart >= rightStartPos && ngramstart + order - 1 < rightEndPos) {
-          useRightOptionCacheLM = true;
-          VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
-        }
-        else {
-          ngram.clear();
-          cerr << "ngram: ";
-          for (size_t j = ngramstart; j < ngramstart+order; ++j) {
-            if (j >=  lmcontext.size())
-              break;
-            ngram.push_back(lmcontext[j]);
-            cerr << *lmcontext[j] << " ";
-          }
-          lmscore += lm->GetValue(ngram);
-          cerr << lm->GetValue(ngram)/log(10) << endl;
-          //cache disabled for now
-          //lmscore += m_cache.find(lm)->second.GetValue(ngram);  
-        }  
-      }
+    //Now for the right target phrase
+    lmcontext.clear();
       
-      if (useRightOptionCacheLM) {
-        const ScoreComponentCollection & sc = rightOption->GetScoreBreakdown();
-        lmscore += sc.GetScoreForProducer(lm);
-      }
-      
-      
-      VERBOSE(2,"Language model score: " << lmscore << endl); 
-      m_scores.Assign(lm,lmscore);   
+    //Fill in the pre-context
+    size_t i = 0;
+    if (order <= gapSize) { //no risk of ngram overlaps with left phrase post context
+      i = order -1;
+    }
+    else {//how far back should we go
+      i = gapSize;
     }
     
+    for ( ; i > 0 ; --i) {
+      if (i > gapSize + leftTgtPhrase.GetSize() + leftSegment->GetStartPos()) {                      
+        lmcontext.push_back(&(lm->GetSentenceStartArray()));
+      }
+      else if (i > gapSize + leftTgtPhrase.GetSize()) {
+        lmcontext.push_back(&(getSample().GetTargetWords()[ leftSegment->GetStartPos()  -  (i - (gapSize + leftTgtPhrase.GetSize())) ]));
+      }                      
+      else if ( i > gapSize) {
+        lmcontext.push_back(&(leftTgtPhrase.GetWord(leftTgtPhrase.GetSize() - (i - gapSize))));
+      }
+      else {
+        lmcontext.push_back(&(getSample().GetTargetWords()[ leftSegment->GetEndPos() + gapSize - i + 1 ]));
+      }
+    }  
+      
+    //Fill in right target phrase
+    size_t rightStartPos = lmcontext.size();
+      
+    //fill in the target phrase
+    for (size_t i = 0; i < rightTgtPhrase.GetSize(); ++i) {
+      lmcontext.push_back(&(rightTgtPhrase.GetWord(i)));
+    }
+      
+    size_t rightEndPos = lmcontext.size();      
+      
+    //Fill in post context
+    for (size_t i = 0; i < order-1; ++i) {
+      if ( i + rightSegment->GetEndPos() + 1 < getSample().GetTargetWords().size() ) {
+        lmcontext.push_back(&(getSample().GetTargetWords()[i + rightSegment->GetEndPos() + 1]));         
+      }
+      else { 
+        lmcontext.push_back(&(lm->GetSentenceEndArray()));
+        break;
+      }
+    }  
+      
+    VERBOSE(2,"Right LM Context : "); 
+    for (int i = 0; i < lmcontext.size(); i++) {
+      VERBOSE(2,*lmcontext[i] << " ");
+    }
+    VERBOSE(2, endl);
+      
+    //useLeftOptionCacheLM = false;
+    useRightOptionCacheLM = false;
+      
+    //size_t maxNgram = max(lmcontext.size() - (order -1), static_cast<size_t>(1)); 
+    size_t maxNgram = lmcontext.size() - (order -1);
+    assert (maxNgram > 0);
+      
+    for (size_t ngramstart = 0; ngramstart < maxNgram; ++ngramstart) {
+      //        if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
+      //          useLeftOptionCacheLM = true;
+      //          VERBOSE(2, "In flip, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
+      //        }  
+      if (ngramstart >= rightStartPos && ngramstart + order - 1 < rightEndPos) {
+        useRightOptionCacheLM = true;
+        VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
+      }
+      else {
+        ngram.clear();
+        cerr << "ngram: ";
+        for (size_t j = ngramstart; j < ngramstart+order; ++j) {
+          //if (j >=  lmcontext.size())
+          //break;
+          ngram.push_back(lmcontext[j]);
+          cerr << *lmcontext[j] << " ";
+        }
+        lmscore += lm->GetValue(ngram);
+        cerr << lm->GetValue(ngram)/log(10) << endl;
+        //cache disabled for now
+        //lmscore += m_cache.find(lm)->second.GetValue(ngram);  
+      }  
+    }
+      
+    if (useRightOptionCacheLM) {
+      const ScoreComponentCollection & sc = rightOption->GetScoreBreakdown();
+      lmscore += sc.GetScoreForProducer(lm);
+    }
+      
+      
+    VERBOSE(2,"Language model score: " << lmscore << endl); 
+    m_scores.Assign(lm,lmscore);   
   }
+}
   
-  void  TranslationDelta::addPairedOptionLanguageModelScore(const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {
+void  TranslationDelta::addPairedOptionLanguageModelScore(const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {
     
-    WordsRange* leftSegment = const_cast<WordsRange*> (&leftTargetSegment);
-    WordsRange* rightSegment = const_cast<WordsRange*> (&rightTargetSegment);
+  WordsRange* leftSegment = const_cast<WordsRange*> (&leftTargetSegment);
+  WordsRange* rightSegment = const_cast<WordsRange*> (&rightTargetSegment);
     
-    if (rightTargetSegment < leftTargetSegment) {
-      leftSegment = const_cast<WordsRange*> (&rightTargetSegment);
-      rightSegment = const_cast<WordsRange*>(&leftTargetSegment);
-    }
-    
-    VERBOSE(2,"Left segment :" << *leftSegment << endl);
-    VERBOSE(2,"Right segment :" << *rightSegment << endl);
-    
-    bool contiguous =  (leftSegment->GetEndPos() + 1 ==  rightSegment->GetStartPos()) ;
-    
-    if (contiguous)
-      addContiguousPairedOptionLMScore(leftOption, rightOption, leftSegment, rightSegment);
-    else
-      addDiscontiguousPairedOptionLMScore(leftOption, rightOption, leftSegment, rightSegment);
+  if (rightTargetSegment < leftTargetSegment) {
+    leftSegment = const_cast<WordsRange*> (&rightTargetSegment);
+    rightSegment = const_cast<WordsRange*>(&leftTargetSegment);
   }
+    
+  bool contiguous =  (leftSegment->GetEndPos() + 1 ==  rightSegment->GetStartPos()) ;
+    
+  if (contiguous)
+    addContiguousPairedOptionLMScore(leftOption, rightOption, leftSegment, rightSegment);
+  else
+    addDiscontiguousPairedOptionLMScore(leftOption, rightOption, leftSegment, rightSegment);
+}
   
 }//namespace
