@@ -91,7 +91,7 @@ void ExpectedBleuTrainer::IncorporateGradient(
 
   if (cur == cur_end) {
     vector<float> w;
-    decoder->GetFeatureWeights(&w);
+    GetFeatureWeights(&w);
     ScoreComponentCollection weights(w);
     vector<float> rcv_grad(w.size());
     assert(gradient.data().size() == w.size());
@@ -125,7 +125,7 @@ void ExpectedBleuTrainer::IncorporateGradient(
     if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     keep_going = kg;
 #endif
-    decoder->SetFeatureWeights(weights.data());
+    SetFeatureWeights(weights.data());
     cur = cur_start;
     gradient.ZeroAll();
     total_exp_gain = 0;
