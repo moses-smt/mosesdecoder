@@ -108,7 +108,7 @@ namespace Josiah {
             &decodeStepVL = staticData.GetDecodeStepVL();
       m_toc->CreateTranslationOptions(decodeStepVL);
       
-      m_searcher.reset(new SearchNormal(sentence,*m_toc));
+      m_searcher.reset(createSearch(sentence,*m_toc));
       m_searcher->ProcessSentence();
   
       //get hypo
@@ -119,8 +119,12 @@ namespace Josiah {
       const_cast<StaticData&>(staticData).SetMaxDistortion(distortionLimit);
       SetFeatureWeights(prevFeatureWeights);
   }
+  
+  Search* MosesDecoder::createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc) {
+    return new SearchNormal(sentence,toc);
+  }
 
-  void MosesDecoder::GetFeatureNames(std::vector<std::string>* featureNames) const {
+  void GetFeatureNames(std::vector<std::string>* featureNames) {
     const StaticData &staticData = StaticData::Instance();
     const ScoreIndexManager& sim = staticData.GetScoreIndexManager();
     featureNames->resize(sim.GetTotalNumberOfScores());
@@ -128,13 +132,19 @@ namespace Josiah {
       (*featureNames)[i] = sim.GetFeatureName(i);
   }
 
-  void MosesDecoder::GetFeatureWeights(std::vector<float>* weights) const {
+  void GetFeatureWeights(std::vector<float>* weights){
     const StaticData &staticData = StaticData::Instance();
     *weights = staticData.GetAllWeights();
   }
 
-  void MosesDecoder::SetFeatureWeights(const std::vector<float>& weights) {
+  void SetFeatureWeights(const std::vector<float>& weights) {
     const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
   }
+  
+  Search* RandomDecoder::createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc) {
+    return new SearchRandom(sentence,toc);
+  }
+  
+ 
   
 }

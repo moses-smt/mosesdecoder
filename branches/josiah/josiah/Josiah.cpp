@@ -140,6 +140,7 @@ int main(int argc, char** argv) {
   bool decode_monotone;
   bool decode_zero_weights;
   bool decode_nolm;
+  bool decode_random;
   int periodic_decode;
   bool collect_dbyt;
   bool output_max_change;
@@ -161,6 +162,7 @@ int main(int argc, char** argv) {
         ("decode-monotone", po::value(&decode_monotone)->zero_tokens()->default_value(false), "Run the initial decoding monotone.")
       ("decode-nolm", po::value(&decode_nolm)->zero_tokens()->default_value(false), "Run the initial decoding without an lm.")
       ("decode-zero-weights", po::value(&decode_zero_weights)->zero_tokens()->default_value(false), "Run the initial decoding with weights set to zero.")
+      ("decode-random", po::value(&decode_random)->zero_tokens()->default_value(false), "Use the random decoder.")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
         ("output-file-prefix,o",po::value<string>(&outputfile),"Output file prefix for translations, MBR output, etc")
         ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
@@ -220,10 +222,23 @@ int main(int argc, char** argv) {
   
    //set up moses
   initMoses(mosesini,weightfile,debug);
-  auto_ptr<Decoder> decoder(new MosesDecoder());
+  auto_ptr<Decoder> decoder;
+  if (decode_random) {
+    if (decode_monotone || decode_zero_weights || decode_nolm) {
+      cerr << "Error:: Random decoder cannot be used with any other options." << endl;
+#ifdef MPI_ENABLED
+      MPI_Finalize();
+#endif
+      return -1;
+    }
+    decoder.reset(new RandomDecoder());
+  } else {
+    decoder.reset(new MosesDecoder());
+  }
+  
 
   vector<string> featureNames;
-  decoder->GetFeatureNames(&featureNames);
+  GetFeatureNames(&featureNames);
   
 
   // may be invoked just to get a features list
@@ -235,6 +250,8 @@ int main(int argc, char** argv) {
 #endif
     return 0;
   }
+  
+  
   
   if (decode_monotone) {
     decoder->SetMonotone(true);
@@ -257,7 +274,7 @@ int main(int argc, char** argv) {
   
 
   if (vm.count("random-seed")) {
-    GibbsOperator::setRandomSeed(seed + rank);
+    RandomNumberGenerator::instance().setSeed(seed + rank);
   }      
       
   GainFunctionVector g;

@@ -52,7 +52,7 @@ namespace Moses {
     
     
     public:
-      RandomNumberGenerator();
+      static RandomNumberGenerator& instance() {return s_instance;}
       double next() {return m_random();}
       void setSeed(uint32_t seed){
           m_generator.seed(seed);
@@ -60,6 +60,8 @@ namespace Moses {
       }
       
     private:
+      static RandomNumberGenerator s_instance;
+      RandomNumberGenerator();
       boost::uniform_real<> m_dist; 
       base_generator_type m_generator;
       boost::variate_generator<base_generator_type&, boost::uniform_real<> > m_random;
@@ -76,8 +78,7 @@ namespace Moses {
         virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc) = 0;
         const string& name() const {return m_name;}
         virtual ~GibbsOperator() {}
-        
-        static void setRandomSeed(uint32_t seed) {m_random.setSeed(seed);}
+       
 				void SetAnnealingTemperature(const double t) { assert(t >= 1.0); T = t; }
 				void Quench() { T = 1.0; }
         

@@ -37,7 +37,7 @@ namespace Moses {
     m_generator.seed(seed);
   }
   
-  RandomNumberGenerator GibbsOperator::m_random;
+  RandomNumberGenerator RandomNumberGenerator::s_instance;
   
 static double log_sum (double log_a, double log_b)
 {
@@ -90,7 +90,7 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
   }
   transform(scores.begin(),scores.end(),scores.begin(),bind2nd(minus<double>(),sum));
   //random number between 0 and 1
-  double random =  m_random.next();//(double)rand() / RAND_MAX;
+  double random =  RandomNumberGenerator::instance().next();//(double)rand() / RAND_MAX;
  
   random = log(random);
   

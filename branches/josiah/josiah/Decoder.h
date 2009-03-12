@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Parameter.h"
 #include "Sentence.h"
 #include "SearchNormal.h"
+#include "SearchRandom.h"
 #include "StaticData.h"
 #include "TranslationOptionCollectionText.h"
 
@@ -42,6 +43,11 @@ namespace Josiah {
  **/
 void initMoses(const std::string& inifile, const std::string& weightfile, int debuglevel, int argc=0, char** argv=NULL);
 
+//Convenience methods for accessing the moses global data structures
+void GetFeatureNames(std::vector<std::string>* featureNames);
+void GetFeatureWeights(std::vector<float>* weights);
+void SetFeatureWeights(const std::vector<float>& weights);
+
 /**
   * Wrapper around any decoder. Notice the moses specific return values!
   **/
@@ -49,9 +55,6 @@ class Decoder {
   public:
     Decoder(): m_isMonotone(false), m_useNoLM(false), m_useZeroWeights(false) {}
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc, std::vector<Moses::Word>& sent) = 0;
-    virtual void GetFeatureNames(std::vector<std::string>* featureNames) const = 0;
-    virtual void GetFeatureWeights(std::vector<float>* weights) const = 0;
-    virtual void SetFeatureWeights(const std::vector<float>& weights) = 0;
     virtual void SetMonotone(bool isMonotone) {m_isMonotone = isMonotone;}
     virtual void SetNoLM(bool useNoLM) {m_useNoLM = useNoLM;}
     virtual void SetZeroWeights(bool useZeroWeights) {m_useZeroWeights = useZeroWeights;}
@@ -63,20 +66,31 @@ class Decoder {
     bool m_useZeroWeights;
 
 };
-
+/**
+  * Wraps moses decoder.
+ **/
 class MosesDecoder : public virtual Decoder {
   public:
     MosesDecoder()  {}
-    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc, std::vector<Moses::Word>& sent);
-    virtual void GetFeatureNames(std::vector<std::string>* featureNames) const;
-    virtual void GetFeatureWeights(std::vector<float>* weights) const;
-    virtual void SetFeatureWeights(const std::vector<float>& weights);
- 
+    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc,  
+                        std::vector<Moses::Word>& sent);
+    virtual Moses::Search* createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc);
+     
   private:
-    std::auto_ptr<Moses::SearchNormal> m_searcher;
+    std::auto_ptr<Moses::Search> m_searcher;
     std::auto_ptr<Moses::TranslationOptionCollection> m_toc;
 };
 
 
+/**
+  * Creates random hypotheses.
+ **/
+class RandomDecoder : public virtual MosesDecoder {
+  public:
+    RandomDecoder()  {}
+    virtual Moses::Search* createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc);
+    
+  private:
+};
 } //namespace
 
