@@ -260,8 +260,7 @@ void MergeDelta::apply(const TranslationDelta& noChangeDelta) {
 PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(Sample& sample,
    const TranslationOption* leftOption, const TranslationOption* rightOption, 
    const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) : TranslationDelta(sample){
-
-  //initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,*targetPhrase);
+//    initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,*targetPhrase);
       
   if (leftTargetSegment < rightTargetSegment) {
     m_leftOption = leftOption;
@@ -371,16 +370,10 @@ void SplitDelta::apply(const TranslationDelta& noChangeDelta) {
 }
   
 void FlipDelta::apply(const TranslationDelta& noChangeDelta) {
-  //cout << "Applying " << m_prevTgtHypo->GetNextHypo()->GetCurrTargetWordsRange() << " and " <<
-  //    m_nextTgtHypo->GetPrevHypo()->GetCurrTargetWordsRange() << endl;
   VERBOSE(3, "Applying Flip Delta" << endl);
   m_scores.MinusEquals(noChangeDelta.getScores());
-  //sample.FlipNodes(m_leftTgtOption->GetSourceWordsRange().GetStartPos(), m_rightTgtOption->GetSourceWordsRange().GetStartPos(), m_scores);
   getSample().FlipNodes(*m_leftTgtOption, *m_rightTgtOption, m_prevTgtHypo, m_nextTgtHypo, m_scores);
-  //cout << "Applied " << endl;
 }
-
- 
 
 FlipDelta::FlipDelta(Sample& sample, const TranslationOption* leftTgtOption , 
                        const TranslationOption* rightTgtOption,  const Hypothesis* prevTgtHypo, const Hypothesis* nextTgtHypo, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, float totalDistortion ) :
@@ -560,30 +553,37 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
       }
     }
       
-    size_t leftStartPos = lmcontext.size();
+    size_t leftStartPos(lmcontext.size()); // to track option's cached LM Score
       
     //fill in the target phrase
     for (size_t i = 0; i < leftTgtPhrase.GetSize(); ++i) {
       lmcontext.push_back(&(leftTgtPhrase.GetWord(i)));
     }
       
-    size_t leftEndPos = lmcontext.size();      
-      
+    // to track option's cached LM Score
+    size_t leftEndPos(lmcontext.size());      
+    size_t rightStartPos(0), rightEndPos(0);
+    
+    
     //fill in the postcontext needed for leftmost phrase
-      
     //First get words from phrases in between, then from right phrase, then words past right phrase, then end of sentence
     size_t gapSize = rightSegment->GetStartPos() - leftSegment->GetEndPos() - 1;
     size_t leftSegmentEndPos = leftSegment->GetEndPos();
       
     for (size_t i = 0; i < order - 1; i++) {
-      if (i < gapSize) {
+      int rightOffset = i - gapSize;
+      if (rightOffset < 0) {
         lmcontext.push_back(&(getSample().GetTargetWords()[leftSegmentEndPos + i + 1]));    
       }
-      else if (i - gapSize < rightTgtPhrase.GetSize() ) {
-        lmcontext.push_back(&(rightTgtPhrase.GetWord(i- gapSize)));  
+      else if (rightOffset < rightTgtPhrase.GetSize() ) {
+        if (rightOffset == 0) {
+          rightStartPos = lmcontext.size();
+        }
+        lmcontext.push_back(&(rightTgtPhrase.GetWord(rightOffset)));
+        rightEndPos = lmcontext.size();
       }
-      else if (i - gapSize - rightTgtPhrase.GetSize() + rightSegment->GetEndPos() + 1 < getSample().GetTargetWords().size() ) {
-        lmcontext.push_back(&(getSample().GetTargetWords()[(i - gapSize - rightTgtPhrase.GetSize() + rightSegment->GetEndPos()  + 1)]));  
+      else if (rightOffset - rightTgtPhrase.GetSize() + rightSegment->GetEndPos() + 1 < getSample().GetTargetWords().size() ) {
+        lmcontext.push_back(&(getSample().GetTargetWords()[(rightOffset - rightTgtPhrase.GetSize() + rightSegment->GetEndPos()  + 1)]));  
       }
       else {
         lmcontext.push_back(&(lm->GetSentenceEndArray()));
@@ -603,15 +603,16 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
     vector<const Word*> ngram(order);
     size_t ngramCtr;
     bool useLeftOptionCacheLM(false), useRightOptionCacheLM(false) ;
+    
     for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
       if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
         useLeftOptionCacheLM = true;
-        VERBOSE(2, "In flip, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
+        VERBOSE(2, "In flip, Left LM Context, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
       }  
-      //else if (ngramstart >= rightStartPos && ngramstart + order - 1 < rightEndPos) {
-      //          useRightOptionCacheLM = true;
-      //          VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
-      //        }
+      else if (ngramstart >= rightStartPos && ngramstart + order - 1 < rightEndPos) {
+        useRightOptionCacheLM = true;
+        VERBOSE(2, "In flip, Left LM Context, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
+      }
       else {
         ngramCtr =0;
         //cerr << "ngram: ";
@@ -635,40 +636,50 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
       
     //Now for the right target phrase
     lmcontext.clear();
-      
+    //Reset the indices
+    leftStartPos = 0;
+    leftEndPos = 0;
+    rightStartPos = 0;
+    rightEndPos = 0;
+    
     //Fill in the pre-context
     size_t i = 0;
     if (order <= gapSize) { //no risk of ngram overlaps with left phrase post context
       i = order -1;
     }
-    else {//how far back should we go
+    else {//how far back can we go
       i = gapSize;
     }
     
+    size_t leftOffset = gapSize + leftTgtPhrase.GetSize();
     for ( ; i > 0 ; --i) {
-      if (i > gapSize + leftTgtPhrase.GetSize() + leftSegment->GetStartPos()) {                      
+      if (i > leftOffset + leftSegment->GetStartPos()) {                      
         lmcontext.push_back(&(lm->GetSentenceStartArray()));
       }
-      else if (i > gapSize + leftTgtPhrase.GetSize()) {
-        lmcontext.push_back(&(getSample().GetTargetWords()[ leftSegment->GetStartPos()  -  (i - (gapSize + leftTgtPhrase.GetSize())) ]));
+      else if (i > leftOffset) {
+        lmcontext.push_back(&(getSample().GetTargetWords()[leftOffset - i + leftSegment->GetStartPos() ]));
       }                      
       else if ( i > gapSize) {
-        lmcontext.push_back(&(leftTgtPhrase.GetWord(leftTgtPhrase.GetSize() - (i - gapSize))));
+        if (i - gapSize == 1){
+          leftStartPos = lmcontext.size();
+        }
+        lmcontext.push_back(&(leftTgtPhrase.GetWord(leftOffset - i)));
+        leftEndPos = lmcontext.size();
       }
       else {
-        lmcontext.push_back(&(getSample().GetTargetWords()[ leftSegment->GetEndPos() + gapSize - i + 1 ]));
+        lmcontext.push_back(&(getSample().GetTargetWords()[leftSegment->GetEndPos() + gapSize - i + 1 ]));
       }
     }  
       
     //Fill in right target phrase
-    size_t rightStartPos = lmcontext.size();
+    rightStartPos = lmcontext.size();
       
     //fill in the target phrase
     for (size_t i = 0; i < rightTgtPhrase.GetSize(); ++i) {
       lmcontext.push_back(&(rightTgtPhrase.GetWord(i)));
     }
       
-    size_t rightEndPos = lmcontext.size();      
+    rightEndPos = lmcontext.size();      
       
     //Fill in post context
     for (size_t i = 0; i < order-1; ++i) {
@@ -695,13 +706,13 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
     //assert (maxNgram > 0);
       
     for (size_t ngramstart = 0; ngramstart < maxNgram; ++ngramstart) {
-      //        if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
-      //          useLeftOptionCacheLM = true;
-      //          VERBOSE(2, "In flip, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
-      //        }  
+      if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
+         useLeftOptionCacheLM = true;
+         VERBOSE(2, "In flip, Right LM Context, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
+      }  
       if (ngramstart >= rightStartPos && ngramstart + order - 1 < rightEndPos) {
         useRightOptionCacheLM = true;
-        VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
+        VERBOSE(2, "In flip, Right LM Context, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
       }
       else {
         ngramCtr = 0;
