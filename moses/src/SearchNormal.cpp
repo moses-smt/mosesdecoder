@@ -116,9 +116,6 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 
 		for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 		{
-			int lastEnd = static_cast<int>(hypothesis.GetCurrSourceWordsRange().GetEndPos());
-			if (startPos != 0 && (static_cast<int>(startPos) - lastEnd - 1) > maxDistortion)
-				continue;
 			size_t maxSize = sourceSize - startPos;
 			size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 			maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
@@ -153,6 +150,11 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	// MAIN LOOP. go through each possible range
 	for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 	{
+		int lastEnd = static_cast<int>(hypothesis.GetCurrSourceWordsRange().GetEndPos());
+		if (startPos != 0 && (static_cast<int>(startPos) - lastEnd - 1) > maxDistortion) {
+//			cerr << "sp=" << startPos << " le=" << lastEnd << "  X=" << (static_cast<int>(startPos) - lastEnd - 1) << " MD:=" << maxDistortion << endl;
+			continue;
+		}
 		size_t maxSize = sourceSize - startPos;
 		size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 		maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
