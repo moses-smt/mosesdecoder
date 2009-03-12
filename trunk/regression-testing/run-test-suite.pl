@@ -22,7 +22,6 @@ my @tests = qw (
   lexicalized-reordering
   lexicalized-reordering-cn
 );
-
 #  xml-markup
 
 ############################################################

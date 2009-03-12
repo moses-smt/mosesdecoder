@@ -431,27 +431,30 @@ public:
 								Range newRange(curr.begin(),curr.end()+src.GetColumnIncrement(curr.end(),colidx));
 								
 								//add together the link scores from the current state and the new arc
+								float inputScoreSum = 0;
 								std::vector<float> newInputScores(m_numInputScores,0.0);
-								std::transform(currCol[colidx].second.begin(), currCol[colidx].second.end(),
+								if (m_numInputScores) {
+									std::transform(currCol[colidx].second.begin(), currCol[colidx].second.end(),
 												curr.GetScores().begin(),
 												newInputScores.begin(),
 												std::plus<float>());
 								
+								
+									//we need to sum up link weights (excluding realWordCount, which isn't in numLinkParams)
+									//if the sum is too low, then we won't expand this.
+									//TODO: dodgy! shouldn't we consider weights here? what about zero-weight params?
+									inputScoreSum = std::accumulate(newInputScores.begin(),newInputScores.begin()+m_numInputScores,0.0);
+								}
+							
 								Phrase newSrc(curr.src);
 								if(!isEpsilon) newSrc.AddWord(w);
-								
-								//we need to sum up link weights (excluding realWordCount, which isn't in numLinkParams)
-								//if the sum is too low, then we won't expand this.
-								//TODO: dodgy! shouldn't we consider weights here? what about zero-weight params?
-								float inputScoreSum = std::accumulate(newInputScores.begin(),newInputScores.begin()+m_numInputScores,0.0);
-							
 								if(newRange.second<srcSize && inputScoreSum>LOWEST_SCORE)
-									{
+								{
 									  // if there is more room to grow, add a new state onto the queue
-										// to be explored that represents [begin, curEnd+)
-										stack.push_back(State(newRange,nextP,newInputScores));
-										stack.back().src=newSrc;
-									}
+									// to be explored that represents [begin, curEnd+)
+									stack.push_back(State(newRange,nextP,newInputScores));
+									stack.back().src=newSrc;
+								}
 
 								std::vector<StringTgtCand> tcands;
 								// now, look up the target candidates (aprx. TargetPhraseCollection) for
