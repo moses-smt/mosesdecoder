@@ -58,94 +58,8 @@ namespace Moses {
   }
 #endif
 
-/**
-  Compute the change in language model score by adding this target phrase
-  into the hypothesis at the given target position.
-  **/
-void  TranslationDelta::addLanguageModelScore(const Phrase& targetPhrase, const WordsRange& targetSegment) {
-  const LMList& languageModels = StaticData::Instance().GetAllLM();
-  for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
-    LanguageModel* lm = *i;
-    /*
-    map<LanguageModel*,LanguageModelCache>::iterator lmci = m_cache.find(lm);
-    if (lmci == m_cache.end()) {
-      m_cache.insert(pair<LanguageModel*,LanguageModelCache>(lm,LanguageModelCache(lm)));
-    }*/
-    size_t order = lm->GetNGramOrder();
-    vector<const Word*> lmcontext;
-    lmcontext.reserve(targetPhrase.GetSize() + 2*(order-1));
-    
-    int start = targetSegment.GetStartPos() - (order-1);
-    
-    //fill in the pre-context
 
-    for (size_t i = 0; i < order-1; ++i) {
-      if (start+(int)i < 0) {
-        //if (start + (int)i == -1) {
-          lmcontext.push_back(&(lm->GetSentenceStartArray()));
-        //}
-      } else {
-        lmcontext.push_back(&(getSample().GetTargetWords()[i+start]));
-      }
-    }
-    
-    //fill in the target phrase
-    for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-      lmcontext.push_back(&(targetPhrase.GetWord(i)));
-    }
-    
-    //fill in the postcontext
-    for (size_t i = 0; i < order-1; ++i) {
-      size_t targetPos = i + targetSegment.GetEndPos() + 1;
-      if (targetPos >= getSample().GetTargetWords().size()) {
-        if (targetPos == getSample().GetTargetWords().size()) {
-          lmcontext.push_back(&(lm->GetSentenceEndArray()));
-        }
-      } else {
-        lmcontext.push_back(&(getSample().GetTargetWords()[targetPos]));
-      }
-    }
-    
-    //debug
-    IFVERBOSE(3) {
-      VERBOSE(3,"Segment: " << targetSegment << " phrase: " << targetPhrase << endl);
-      VERBOSE(3,"LM context ");
-      for (size_t j = 0;  j < lmcontext.size(); ++j) {
-        if (j == order-1) {
-          //VERBOSE(3, "[ ");
-        }
-        if (j == (targetPhrase.GetSize() + (order-1))) {
-          //VERBOSE(3,"] ");
-        }
-        VERBOSE(3,*(lmcontext[j]) << " ");
-        
-      }
-      VERBOSE(3,endl);
-    }
-    
-    //score lm
-    double lmscore = 0;
-    vector<const Word*> ngram;
-    for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
-      ngram.clear();
-      //cerr << "ngram: ";
-      for (size_t j = ngramstart; j < ngramstart+order; ++j) {
-        ngram.push_back(lmcontext[j]);
-        //cerr << *lmcontext[j] << " ";
-      }
-      lmscore += lm->GetValue(ngram);
-      //cerr << lm->GetValue(ngram)/log(10) << endl;
-      //cache disabled for now
-      //lmscore += m_cache.find(lm)->second.GetValue(ngram);
-      
-    }
-    VERBOSE(2,"Language model score: " << lmscore << endl); 
-    m_scores.Assign(lm,lmscore);
-  }
-}
-
-  
-/**
+  /**
    Compute the change in language model score by adding this target phrase
    into the hypothesis at the given target position.
  **/
@@ -217,18 +131,19 @@ void  TranslationDelta::addSingleOptionLanguageModelScore(const TranslationOptio
       
     //score lm
     double lmscore = 0;
-    vector<const Word*> ngram;
+    vector<const Word*> ngram(order);
     bool useOptionCachedLMScore = false;
+    size_t ngramCtr;
+    
     for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
       if (ngramstart >= startOption && ngramstart + order - 1 < endOption) {
-        //VERBOSE(2, "Using cached option LM score for " << option->GetTargetPhrase() << endl;)
         useOptionCachedLMScore = true;
       }  
       else {
-        ngram.clear();
         //cerr << "ngram: ";
+        ngramCtr = 0;
         for (size_t j = ngramstart; j < ngramstart+order; ++j) {
-          ngram.push_back(lmcontext[j]);
+          ngram[ngramCtr++] = lmcontext[j];
           //cerr << *lmcontext[j] << " ";
         }
         lmscore += lm->GetValue(ngram);
@@ -259,13 +174,11 @@ void TranslationDelta::initScoresSingleUpdate(const Sample& s, const Translation
   m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
         
   addSingleOptionLanguageModelScore(option, targetSegment); //let's do this here itself for now
-  //addLanguageModelScore(option->GetTargetPhrase(), targetSegment); //let's do this here itself for now
   
   // extra features
   _extra_feature_values.clear();
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
-    //_extra_feature_values.push_back((*i)->getSingleUpdateScore(s, option, targetSegment));
     float feature_score = (*i)->getSingleUpdateScore(s, option, targetSegment);
     m_scores.Assign((*i)->getScoreProducer(),feature_score);
   }
@@ -295,7 +208,7 @@ void TranslationDelta::initScoresPairedUpdate(const Sample& s, const Translation
   float penalty = -((int)leftOption->GetTargetPhrase().GetSize()) -((int)rightOption->GetTargetPhrase().GetSize());
   m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
   
-  addLanguageModelScore(targetPhrase, targetSegment);
+  //addLanguageModelScore(targetPhrase, targetSegment);
 
   // extra features
   _extra_feature_values.clear();
@@ -346,32 +259,57 @@ void MergeDelta::apply(const TranslationDelta& noChangeDelta) {
 
 PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(Sample& sample,
    const TranslationOption* leftOption, const TranslationOption* rightOption, 
-   const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) : TranslationDelta(sample),
-    m_leftOption(leftOption), m_rightOption(rightOption){
-    //For lm-scores treat as one large target segment, since the lmcontext may overlap, depending on the lm order
+   const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) : TranslationDelta(sample){
+
+  //initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,*targetPhrase);
       
-    WordsRange targetSegment(min(leftTargetSegment.GetStartPos(), rightTargetSegment.GetStartPos()), max(leftTargetSegment.GetEndPos(), rightTargetSegment.GetEndPos()));
-    
-    auto_ptr<Phrase> targetPhrase; 
-    if (leftTargetSegment < rightTargetSegment) {
-      targetPhrase = auto_ptr<Phrase>(new Phrase(leftOption->GetTargetPhrase()));
-      //include potential words between the two target segments
-      for (size_t i = leftTargetSegment.GetEndPos()+1; i < rightTargetSegment.GetStartPos(); ++i) {
-        targetPhrase->AddWord(getSample().GetTargetWords()[i]);
-      }
-      targetPhrase->Append(rightOption->GetTargetPhrase());                    
-    }
-    else {
-      targetPhrase = auto_ptr<Phrase>(new Phrase(rightOption->GetTargetPhrase()));
-      //include potential words between the two target segments
-      for (size_t i = rightTargetSegment.GetEndPos()+1; i < leftTargetSegment.GetStartPos(); ++i) {
-        targetPhrase->AddWord(getSample().GetTargetWords()[i]);
-      }
-      targetPhrase->Append(leftOption->GetTargetPhrase());
-    }
+  if (leftTargetSegment < rightTargetSegment) {
+    m_leftOption = leftOption;
+    m_rightOption = rightOption;  
+  }
+  else {
+    m_leftOption = rightOption;
+    m_rightOption = leftOption;  
+  }
+  
+  //translation scores
+  m_scores.PlusEquals(m_leftOption->GetScoreBreakdown());
+  m_scores.PlusEquals(m_rightOption->GetScoreBreakdown());
       
+  //don't worry about reordering because they don't change
       
-    initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,*targetPhrase);
+  //word penalty
+  float penalty = -((int)m_leftOption->GetTargetPhrase().GetSize()) -((int)m_rightOption->GetTargetPhrase().GetSize());
+  m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
+      
+  //addLanguageModelScore(targetPhrase, targetSegment);
+  VERBOSE(2, "Left Target phrase: " << m_leftOption->GetTargetPhrase() << endl;)
+  VERBOSE(2, "Right Target phrase: " << m_rightOption->GetTargetPhrase() << endl;)
+  VERBOSE(2, "Left Target segment: " << leftTargetSegment << endl;)    
+  VERBOSE(2, "Right Target segment: " << rightTargetSegment << endl;)    
+  addPairedOptionLanguageModelScore(m_leftOption, m_rightOption, leftTargetSegment, rightTargetSegment);
+      
+  // extra features
+  _extra_feature_values.clear();
+  typedef Josiah::feature_vector fv;
+  for (fv::const_iterator i=sample.extra_features().begin(); i<sample.extra_features().end(); ++i) {
+    //_extra_feature_values.push_back((*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase));
+    //float feature_score = (*i)->getPairedUpdateScore(sample, leftOption, rightOption, targetSegment, targetPhrase);
+    float feature_score = (*i)->getPairedUpdateScore(sample, m_leftOption, m_rightOption, leftTargetSegment, rightTargetSegment);
+    m_scores.Assign((*i)->getScoreProducer(),feature_score);
+  }
+      
+   //weight the scores
+  const vector<float> & weights = StaticData::Instance().GetAllWeights();
+  m_score = m_scores.InnerProduct(weights);
+      
+  VERBOSE(2, "Paired Update: Scores " << m_scores << endl);
+  IFVERBOSE(2){
+     std::cerr << "Single Update: extra scores ";
+     std::for_each(_extra_feature_values.begin(), _extra_feature_values.end(), std::cerr << boost::lambda::_1 << " ");
+     std::cerr << std::endl; 
+  }
+  VERBOSE(2,"Paired Update: Total score is  " << m_score << endl);  
 }
 
 void PairedTranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
@@ -385,12 +323,46 @@ void PairedTranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) 
 SplitDelta::SplitDelta(Sample& sample, const TranslationOption* leftOption, 
                        const TranslationOption* rightOption, const WordsRange& targetSegment) : TranslationDelta(sample),
     m_leftOption(leftOption), m_rightOption(rightOption) {
+  
   Phrase targetPhrase (leftOption->GetTargetPhrase());
-  const Phrase& rightTargetPhrase = rightOption->GetTargetPhrase();
-  for (size_t i = 0; i < rightTargetPhrase.GetSize(); ++i) {
-    targetPhrase.AddWord(rightTargetPhrase.GetWord(i));
+  targetPhrase.Append(rightOption->GetTargetPhrase());    
+  
+  //initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,targetPhrase);
+      
+  //translation scores
+  m_scores.PlusEquals(leftOption->GetScoreBreakdown());
+  m_scores.PlusEquals(rightOption->GetScoreBreakdown());
+      
+  //don't worry about reordering because they don't change
+      
+  //word penalty
+  float penalty = -((int)leftOption->GetTargetPhrase().GetSize()) -((int)rightOption->GetTargetPhrase().GetSize());
+  m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
+  
+  VERBOSE(2, "Target phrase: " << targetPhrase << endl;)
+  VERBOSE(2, "Target segment: " << targetSegment << endl;)    
+  //addLanguageModelScore(targetPhrase, targetSegment);
+  addContiguousPairedOptionLMScore(leftOption, rightOption, &targetSegment, &targetSegment);    
+  // extra features
+  _extra_feature_values.clear();
+  typedef Josiah::feature_vector fv;
+  for (fv::const_iterator i=sample.extra_features().begin(); i<sample.extra_features().end(); ++i) {
+      //_extra_feature_values.push_back((*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase));
+      float feature_score = (*i)->getPairedUpdateScore(sample, leftOption, rightOption, targetSegment, targetPhrase);
+      m_scores.Assign((*i)->getScoreProducer(),feature_score);
   }
-  initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,targetPhrase);
+      
+  //weight the scores
+  const vector<float> & weights = StaticData::Instance().GetAllWeights();
+  m_score = m_scores.InnerProduct(weights);
+      
+  VERBOSE(2, "Split Delta Update: Scores " << m_scores << endl);
+  IFVERBOSE(2){
+      std::cerr << "Split Delta Update: extra scores ";
+      std::for_each(_extra_feature_values.begin(), _extra_feature_values.end(), std::cerr << boost::lambda::_1 << " ");
+      std::cerr << std::endl; 
+  }
+  VERBOSE(2,"Split Delta Update: Total score is  " << m_score << endl);     
 }
 
 void SplitDelta::apply(const TranslationDelta& noChangeDelta) {
@@ -520,22 +492,21 @@ void  TranslationDelta::addContiguousPairedOptionLMScore(const TranslationOption
       
     //score lm
     double lmscore = 0;
-    vector<const Word*> ngram;
+    vector<const Word*> ngram(order);
     bool useLeftOptionCacheLM(false), useRightOptionCacheLM(false) ;
+    size_t ngramCtr;
     for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
       if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
         useLeftOptionCacheLM = true;
-        VERBOSE(2, "In flip, Using cached option LM score for left Option: " << leftOption->GetTargetPhrase() << endl;)
       }
       else if (ngramstart >= rightStartPos && ngramstart + order - 1 < rightEndPos) {
         useRightOptionCacheLM = true;
-        VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
       }
       else {
-        ngram.clear();
+        ngramCtr = 0;
         //cerr << "ngram: ";
         for (size_t j = ngramstart; j < ngramstart+order; ++j) {
-          ngram.push_back(lmcontext[j]);
+          ngram[ngramCtr++] = lmcontext[j];
           //cerr << *lmcontext[j] << " ";
         }
         lmscore += lm->GetValue(ngram);
@@ -629,7 +600,8 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
       
     //score lm
     double lmscore = 0;
-    vector<const Word*> ngram;
+    vector<const Word*> ngram(order);
+    size_t ngramCtr;
     bool useLeftOptionCacheLM(false), useRightOptionCacheLM(false) ;
     for (size_t ngramstart = 0; ngramstart < lmcontext.size() - (order -1); ++ngramstart) {
       if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
@@ -641,14 +613,14 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
       //          VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
       //        }
       else {
-        ngram.clear();
-        cerr << "ngram: ";
+        ngramCtr =0;
+        //cerr << "ngram: ";
         for (size_t j = ngramstart; j < ngramstart+order; ++j) {
-          ngram.push_back(lmcontext[j]);
-          cerr << *lmcontext[j] << " ";
+          ngram[ngramCtr++] =lmcontext[j];
+          //cerr << *lmcontext[j] << " ";
         }
         lmscore += lm->GetValue(ngram);
-        cerr << lm->GetValue(ngram)/log(10) << endl;
+        //cerr << lm->GetValue(ngram)/log(10) << endl;
         //cache disabled for now
         //lmscore += m_cache.find(lm)->second.GetValue(ngram);  
       }  
@@ -720,7 +692,7 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
       
     //size_t maxNgram = max(lmcontext.size() - (order -1), static_cast<size_t>(1)); 
     size_t maxNgram = lmcontext.size() - (order -1);
-    assert (maxNgram > 0);
+    //assert (maxNgram > 0);
       
     for (size_t ngramstart = 0; ngramstart < maxNgram; ++ngramstart) {
       //        if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
@@ -732,16 +704,14 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
         VERBOSE(2, "In flip, Using cached option LM score for right Option: " << rightOption->GetTargetPhrase() << endl;)
       }
       else {
-        ngram.clear();
-        cerr << "ngram: ";
+        ngramCtr = 0;
+        //cerr << "ngram: ";
         for (size_t j = ngramstart; j < ngramstart+order; ++j) {
-          //if (j >=  lmcontext.size())
-          //break;
-          ngram.push_back(lmcontext[j]);
-          cerr << *lmcontext[j] << " ";
+          ngram[ngramCtr++] = lmcontext[j]; 
+          //cerr << *lmcontext[j] << " ";
         }
         lmscore += lm->GetValue(ngram);
-        cerr << lm->GetValue(ngram)/log(10) << endl;
+        //cerr << lm->GetValue(ngram)/log(10) << endl;
         //cache disabled for now
         //lmscore += m_cache.find(lm)->second.GetValue(ngram);  
       }  
