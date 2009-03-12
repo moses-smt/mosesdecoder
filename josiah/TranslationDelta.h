@@ -105,8 +105,7 @@ class TranslationDelta {
       Compute the change in language model score by adding this target phrase
       into the hypothesis at the given target position.
      **/
-    //void  addLanguageModelScore(const Phrase& targetPhrase,const WordsRange& targetSegment);
-  
+    
     void  addSingleOptionLanguageModelScore(const TranslationOption* option, const WordsRange& targetSegment);
   
     void  addPairedOptionLanguageModelScore(const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
@@ -128,6 +127,8 @@ class TranslationDelta {
   
   void initScoresPairedUpdate(const Sample&, const TranslationOption* leftOption,
                               const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
+  
+  void updateWeightedScore();
     ScoreComponentCollection m_scores;
     std::vector<float> _extra_feature_values;
     double m_score;

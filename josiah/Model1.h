@@ -120,8 +120,6 @@ public:
   virtual float getSingleUpdateScore(const Sample& sample, const TranslationOption* option, const WordsRange& targetSegment);
   /** Change in score when updating two segments **/
   virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
-                             const TranslationOption* rightOption, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
-  virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
                                      const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
   /** Change in score when flipping */
   virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
@@ -175,8 +173,6 @@ public:
   /** Change in score when updating one segment */
   virtual float getSingleUpdateScore(const Sample& sample, const TranslationOption* option, const WordsRange& targetSegment);
   /** Change in score when updating two segments **/
-  virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
-                             const TranslationOption* rightOption, const WordsRange& leftTargetSegment,  const WordsRange& rightTargetSegment);
   virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
                                      const TranslationOption* rightOption, const WordsRange& targetSegment,  const Phrase& targetPhrase);
   /** Change in score when flipping */
