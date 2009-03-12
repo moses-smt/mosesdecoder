@@ -76,6 +76,7 @@ class FeatureFunction {
                                const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) = 0;
     virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
                                      const TranslationOption* rightOption, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) = 0;
+    
     /** Change in score when flipping */
     virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                              const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
