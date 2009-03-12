@@ -196,20 +196,21 @@ void TranslationDelta::initScoresSingleUpdate(const Sample& s, const Translation
   VERBOSE(2,"Single Update: Total score is  " << m_score << endl);  
 }
 
+  
+
 void TranslationDelta::initScoresPairedUpdate(const Sample& s, const TranslationOption* leftOption,
-      const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) {
+                                                const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) {
   //translation scores
   m_scores.PlusEquals(leftOption->GetScoreBreakdown());
   m_scores.PlusEquals(rightOption->GetScoreBreakdown());
-  
+    
   //don't worry about reordering because they don't change
-  
+    
   //word penalty
   float penalty = -((int)leftOption->GetTargetPhrase().GetSize()) -((int)rightOption->GetTargetPhrase().GetSize());
   m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
-  
-  //addLanguageModelScore(targetPhrase, targetSegment);
-
+    
+    
   // extra features
   _extra_feature_values.clear();
   typedef Josiah::feature_vector fv;
@@ -218,21 +219,8 @@ void TranslationDelta::initScoresPairedUpdate(const Sample& s, const Translation
     float feature_score = (*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase);
     m_scores.Assign((*i)->getScoreProducer(),feature_score);
   }
-
-  //weight the scores
-  const vector<float> & weights = StaticData::Instance().GetAllWeights();
-  m_score = m_scores.InnerProduct(weights);
-
-  VERBOSE(2, "Paired Update: Scores " << m_scores << endl);
-  IFVERBOSE(2){
-    std::cerr << "Single Update: extra scores ";
-    std::for_each(_extra_feature_values.begin(), _extra_feature_values.end(), std::cerr << boost::lambda::_1 << " ");
-    std::cerr << std::endl; 
-  }
-  VERBOSE(2,"Paired Update: Total score is  " << m_score << endl);  
-
-}
-
+}  
+  
 
 TranslationUpdateDelta::TranslationUpdateDelta(Sample& sample, const TranslationOption* option ,const WordsRange& targetSegment) :
     TranslationDelta(sample),  m_option(option)  {
@@ -260,57 +248,59 @@ void MergeDelta::apply(const TranslationDelta& noChangeDelta) {
 PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(Sample& sample,
    const TranslationOption* leftOption, const TranslationOption* rightOption, 
    const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) : TranslationDelta(sample){
-//    initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,*targetPhrase);
-      
+    
+  WordsRange targetSegment(leftTargetSegment.GetStartPos(),rightTargetSegment.GetEndPos());
+  auto_ptr<Phrase> targetPhrase;
+  
   if (leftTargetSegment < rightTargetSegment) {
     m_leftOption = leftOption;
-    m_rightOption = rightOption;  
+    m_rightOption = rightOption;
+    targetPhrase = auto_ptr<Phrase>(new Phrase(leftOption->GetTargetPhrase()));
+    //include potential words between the two target segments
+    for (size_t i = leftTargetSegment.GetEndPos()+1; i < rightTargetSegment.GetStartPos(); ++i) {
+      targetPhrase->AddWord(getSample().GetTargetWords()[i]);
+    }
+    targetPhrase->Append(rightOption->GetTargetPhrase());
+    
   }
   else {
     m_leftOption = rightOption;
     m_rightOption = leftOption;  
+    targetSegment.SetStartPos(rightTargetSegment.GetStartPos());  
+    targetSegment.SetEndPos(leftTargetSegment.GetEndPos());    
+    targetPhrase = auto_ptr<Phrase>(new Phrase(rightOption->GetTargetPhrase()));
+    //include potential words between the two target segments
+    for (size_t i = rightTargetSegment.GetEndPos()+1; i < leftTargetSegment.GetStartPos(); ++i) {
+      targetPhrase->AddWord(getSample().GetTargetWords()[i]);
+    }
+    targetPhrase->Append(leftOption->GetTargetPhrase());
   }
   
-  //translation scores
-  m_scores.PlusEquals(m_leftOption->GetScoreBreakdown());
-  m_scores.PlusEquals(m_rightOption->GetScoreBreakdown());
-      
-  //don't worry about reordering because they don't change
-      
-  //word penalty
-  float penalty = -((int)m_leftOption->GetTargetPhrase().GetSize()) -((int)m_rightOption->GetTargetPhrase().GetSize());
-  m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
-      
-  //addLanguageModelScore(targetPhrase, targetSegment);
   VERBOSE(2, "Left Target phrase: " << m_leftOption->GetTargetPhrase() << endl;)
   VERBOSE(2, "Right Target phrase: " << m_rightOption->GetTargetPhrase() << endl;)
   VERBOSE(2, "Left Target segment: " << leftTargetSegment << endl;)    
   VERBOSE(2, "Right Target segment: " << rightTargetSegment << endl;)    
+  
+  initScoresPairedUpdate(sample, m_leftOption,m_rightOption, targetSegment,*targetPhrase);
   addPairedOptionLanguageModelScore(m_leftOption, m_rightOption, leftTargetSegment, rightTargetSegment);
-      
-  // extra features
-  _extra_feature_values.clear();
-  typedef Josiah::feature_vector fv;
-  for (fv::const_iterator i=sample.extra_features().begin(); i<sample.extra_features().end(); ++i) {
-    //_extra_feature_values.push_back((*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase));
-    //float feature_score = (*i)->getPairedUpdateScore(sample, leftOption, rightOption, targetSegment, targetPhrase);
-    float feature_score = (*i)->getPairedUpdateScore(sample, m_leftOption, m_rightOption, leftTargetSegment, rightTargetSegment);
-    m_scores.Assign((*i)->getScoreProducer(),feature_score);
-  }
-      
-   //weight the scores
-  const vector<float> & weights = StaticData::Instance().GetAllWeights();
-  m_score = m_scores.InnerProduct(weights);
-      
-  VERBOSE(2, "Paired Update: Scores " << m_scores << endl);
-  IFVERBOSE(2){
-     std::cerr << "Single Update: extra scores ";
-     std::for_each(_extra_feature_values.begin(), _extra_feature_values.end(), std::cerr << boost::lambda::_1 << " ");
-     std::cerr << std::endl; 
-  }
-  VERBOSE(2,"Paired Update: Total score is  " << m_score << endl);  
+  updateWeightedScore();
+  
 }
 
+void TranslationDelta::updateWeightedScore() {
+  //weight the scores
+  const vector<float> & weights = StaticData::Instance().GetAllWeights();
+  m_score = m_scores.InnerProduct(weights);
+  
+  VERBOSE(2, "Scores " << m_scores << endl);
+  IFVERBOSE(2){
+    std::cerr << "Extra scores ";
+    std::for_each(_extra_feature_values.begin(), _extra_feature_values.end(), std::cerr << boost::lambda::_1 << " ");
+    std::cerr << std::endl; 
+  }
+  VERBOSE(2,"Total score is  " << m_score << endl);      
+}
+    
 void PairedTranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
   VERBOSE(3, "Applying Paired  Translation Update Delta" << endl);
   m_scores.MinusEquals(noChangeDelta.getScores());
@@ -326,42 +316,12 @@ SplitDelta::SplitDelta(Sample& sample, const TranslationOption* leftOption,
   Phrase targetPhrase (leftOption->GetTargetPhrase());
   targetPhrase.Append(rightOption->GetTargetPhrase());    
   
-  //initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,targetPhrase);
-      
-  //translation scores
-  m_scores.PlusEquals(leftOption->GetScoreBreakdown());
-  m_scores.PlusEquals(rightOption->GetScoreBreakdown());
-      
-  //don't worry about reordering because they don't change
-      
-  //word penalty
-  float penalty = -((int)leftOption->GetTargetPhrase().GetSize()) -((int)rightOption->GetTargetPhrase().GetSize());
-  m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
-  
   VERBOSE(2, "Target phrase: " << targetPhrase << endl;)
   VERBOSE(2, "Target segment: " << targetSegment << endl;)    
-  //addLanguageModelScore(targetPhrase, targetSegment);
+  
+  initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,targetPhrase);        
   addContiguousPairedOptionLMScore(leftOption, rightOption, &targetSegment, &targetSegment);    
-  // extra features
-  _extra_feature_values.clear();
-  typedef Josiah::feature_vector fv;
-  for (fv::const_iterator i=sample.extra_features().begin(); i<sample.extra_features().end(); ++i) {
-      //_extra_feature_values.push_back((*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase));
-      float feature_score = (*i)->getPairedUpdateScore(sample, leftOption, rightOption, targetSegment, targetPhrase);
-      m_scores.Assign((*i)->getScoreProducer(),feature_score);
-  }
-      
-  //weight the scores
-  const vector<float> & weights = StaticData::Instance().GetAllWeights();
-  m_score = m_scores.InnerProduct(weights);
-      
-  VERBOSE(2, "Split Delta Update: Scores " << m_scores << endl);
-  IFVERBOSE(2){
-      std::cerr << "Split Delta Update: extra scores ";
-      std::for_each(_extra_feature_values.begin(), _extra_feature_values.end(), std::cerr << boost::lambda::_1 << " ");
-      std::cerr << std::endl; 
-  }
-  VERBOSE(2,"Split Delta Update: Total score is  " << m_score << endl);     
+  updateWeightedScore();
 }
 
 void SplitDelta::apply(const TranslationDelta& noChangeDelta) {
