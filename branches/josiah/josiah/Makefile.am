@@ -21,7 +21,7 @@ josiah_SOURCES = Derivation.cpp \
 
 m1_SOURCES = Model1.cpp FeatureFunction.cpp m1.cpp
 
-AM_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -I$(top_srcdir)/moses/src $(BOOST_CPPFLAGS)
+AM_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DUSE_HYPO_POOL -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -I$(top_srcdir)/moses/src $(BOOST_CPPFLAGS)
 
 josiah_LDADD = -L$(top_srcdir)/moses/src -lmoses $(BOOST_LDFLAGS)  $(BOOST_SERIALIZATION_LIB) $(BOOST_PROGRAM_OPTIONS_LIB)
 josiah_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a
