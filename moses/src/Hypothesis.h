@@ -120,7 +120,7 @@ public:
     s_objectPool.freeObject(hypo);
   }
 #else
-  static void Delete(Hypothesis *hypo)º
+  static void Delete(Hypothesis *hypo)
   {
     delete hypo;
   }
