@@ -87,7 +87,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 	{ // too bad for stack. don't bother adding hypo into collection
 	  StaticData::Instance().GetSentenceStats().AddDiscarded();
 	  VERBOSE(3,"discarded, too bad for stack" << std::endl);
-		FREEHYPO(hypo);		
+		Hypothesis::Delete(hypo);		
 		return false;
 	}
 
@@ -132,7 +132,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 		if (m_nBestIsEnabled) {
 			hypoExisting->AddArc(hypo);
 		} else {
-			FREEHYPO(hypo);				
+			Hypothesis::Delete(hypo);				
 		}
 		return false;
 	}

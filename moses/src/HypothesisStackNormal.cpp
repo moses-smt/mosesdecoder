@@ -98,7 +98,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 	{
 		StaticData::Instance().GetSentenceStats().AddDiscarded();
 		VERBOSE(3,"discarded, too bad for stack" << std::endl);
-		FREEHYPO(hypo);		
+		Hypothesis::Delete(hypo);		
 		return false;
 	}
 
@@ -147,7 +147,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
     if (m_nBestIsEnabled) {
 			hypoExisting->AddArc(hypo);
 		} else {
-			FREEHYPO(hypo);				
+			Hypothesis::Delete(hypo);				
 		}
 		return false;
 	}
@@ -214,7 +214,7 @@ void HypothesisStackNormal::PruneToSize(size_t newSize)
 	{
 		if (! included[i])
 		{
-			FREEHYPO( hypos[i] );
+			Hypothesis::Delete( hypos[i] );
 			StaticData::Instance().GetSentenceStats().AddPruning();
 		}
 	}

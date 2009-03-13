@@ -97,7 +97,7 @@ protected:
 	void CalcDistortionScore();
 	//TODO: add appropriate arguments to score calculator
 
-	/*! used by initial seeding of the translation process */
+	/*! used by initial seeding of the translation process */	
 	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
 	/*! used when creating a new hypothesis using a translation option (phrase translation) */
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
@@ -108,6 +108,24 @@ public:
 		return s_objectPool;
 	}
 
+#ifdef USE_HYPO_POOL
+  void *operator new(size_t num_bytes)
+  {
+    void *ptr = s_objectPool.getPtr();
+    return ptr;
+  }
+  
+  static void Delete(Hypothesis *hypo)
+  {
+    s_objectPool.freeObject(hypo);
+  }
+#else
+  static void Delete(Hypothesis *hypo)º
+  {
+    delete hypo;
+  }
+#endif
+  
 	~Hypothesis();
 	
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
@@ -355,18 +373,6 @@ struct CompareHypothesisTotalScore
 		return hypo1->GetTotalScore() > hypo2->GetTotalScore();
 	}
 };
-
-#ifdef USE_HYPO_POOL
-
-#define FREEHYPO(hypo) \
-{ \
-	ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool(); \
-	pool.freeObject(hypo); \
-} \
-
-#else
-#define FREEHYPO(hypo) delete hypo
-#endif
 
 /** defines less-than relation on hypotheses.
 * The particular order is not important for us, we need just to figure out

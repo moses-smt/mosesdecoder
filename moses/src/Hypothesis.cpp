@@ -110,7 +110,7 @@ Hypothesis::~Hypothesis()
 		ArcList::iterator iter;
 		for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter)
 		{
-			FREEHYPO(*iter);
+			Delete(*iter);
 		}
 		m_arcList->clear();
 
@@ -198,13 +198,8 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 	
 	if (createHypothesis)
 	{
-
-		#ifdef USE_HYPO_POOL
-			Hypothesis *ptr = s_objectPool.getPtr();
-			return new(ptr) Hypothesis(prevHypo, transOpt);
-		#else
 			return new Hypothesis(prevHypo, transOpt);
-		#endif
+
 
 	}
 	else
@@ -222,12 +217,7 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 
 Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &emptyTarget)
 {
-#ifdef USE_HYPO_POOL
-	Hypothesis *ptr = s_objectPool.getPtr();
-	return new(ptr) Hypothesis(m_source, emptyTarget);
-#else
 	return new Hypothesis(m_source, emptyTarget);
-#endif
 }
 
 /** check, if two hypothesis can be recombined.
@@ -546,7 +536,7 @@ void Hypothesis::CleanupArcList()
 		for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter)
 		{
 			Hypothesis *arc = *iter;
-			FREEHYPO(arc);
+			Delete(arc);
 		}
 		m_arcList->erase(m_arcList->begin() + nBestSize
 										, m_arcList->end());
