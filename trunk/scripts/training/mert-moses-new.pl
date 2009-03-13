@@ -1066,7 +1066,7 @@ sub scan_config {
 	  $error = 1;
 	  print STDERR "$inishortname:$nr:Filename not absolute: $fn\n";
 	}
-	if (! -s $fn && ! -s "$fn.gz" && ! -s "$fn.binphr.idx") {
+	if (! -s $fn && ! -s "$fn.gz" && ! -s "$fn.binphr.idx" && ! -s "$fn.binlexr.idx" ) {
 	  $error = 1;
 	  print STDERR "$inishortname:$nr:File does not exist or empty: $fn\n";
 	}
