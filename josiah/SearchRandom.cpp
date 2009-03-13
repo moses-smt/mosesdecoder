@@ -386,7 +386,7 @@ void SearchRandom::OutputHypoStackSize()
     {
       StaticData::Instance().GetSentenceStats().AddDiscarded();
       VERBOSE(3,"discarded, too bad for stack" << std::endl);
-      FREEHYPO(hypo);   
+      Moses::Hypothesis::Delete(hypo);   
       return false;
     }
 
@@ -435,7 +435,7 @@ void SearchRandom::OutputHypoStackSize()
       if (m_nBestIsEnabled) {
         hypoExisting->AddArc(hypo);
       } else {
-        FREEHYPO(hypo);       
+        Moses::Hypothesis::Delete(hypo);       
       }
       return false;
     }
@@ -502,7 +502,7 @@ void SearchRandom::OutputHypoStackSize()
     {
       if (! included[i])
       {
-        FREEHYPO( hypos[i] );
+        Moses::Hypothesis::Delete( hypos[i] );
         StaticData::Instance().GetSentenceStats().AddPruning();
       }
     }
