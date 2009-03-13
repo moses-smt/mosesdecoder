@@ -72,7 +72,13 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
 }
  
 Sample::~Sample() {
-  RemoveAllInColl(cachedSampledHyps);
+  for (set<Hypothesis*>::const_iterator iter = cachedSampledHyps.begin() ; iter != cachedSampledHyps.end() ; ++iter)
+	{
+    Hypothesis::Delete (*iter);
+	}
+	cachedSampledHyps.clear();
+  
+  //RemoveAllInColl(cachedSampledHyps);
 }
 
 
@@ -386,7 +392,7 @@ void Sample::UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& opti
 void Sample::DeleteFromCache(Hypothesis *hyp) {
   set<Hypothesis*>::iterator it = find(cachedSampledHyps.begin(), cachedSampledHyps.end(), hyp);
   if (it != cachedSampledHyps.end()){
-    delete *it;
+    Hypothesis::Delete(*it);
     cachedSampledHyps.erase(it);
   }
 }
