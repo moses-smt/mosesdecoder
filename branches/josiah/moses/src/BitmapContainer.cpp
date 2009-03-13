@@ -305,7 +305,7 @@ BitmapContainer::~BitmapContainer()
 	while (!m_queue.empty())
 	{
 		item = m_queue.top();
-		FREEHYPO(item->GetHypothesis());
+		Hypothesis::Delete(item->GetHypothesis());
 		delete item;
 		m_queue.pop();
 	}

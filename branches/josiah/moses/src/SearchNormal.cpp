@@ -322,7 +322,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 		if (expectedScore < allowedScore)
 		{
 			IFVERBOSE(2) { stats.AddEarlyDiscarded(); }
-			FREEHYPO( newHypo );
+			Hypothesis::Delete( newHypo );
 			return;
 		}
 
