@@ -82,6 +82,7 @@ class LanguageModelCache {
   **/
 class TranslationDelta {
   public:
+    static long lmcalls;
     TranslationDelta(Sample& sample): m_score(-1e6), m_sample(sample) {
       
     }
