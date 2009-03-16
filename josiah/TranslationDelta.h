@@ -97,7 +97,6 @@ class TranslationDelta {
   virtual void apply(const TranslationDelta& noChangeDelta) = 0;
    
     const ScoreComponentCollection& getScores() const {return m_scores;}
-    const std::vector<float>& extra_feature_values() const { return _extra_feature_values; }
     Sample& getSample() const {return m_sample;}
     virtual ~TranslationDelta() {}
     
@@ -131,7 +130,6 @@ class TranslationDelta {
   
   void updateWeightedScore();
     ScoreComponentCollection m_scores;
-    std::vector<float> _extra_feature_values;
     double m_score;
     
   private:

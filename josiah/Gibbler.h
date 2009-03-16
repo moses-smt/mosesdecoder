@@ -30,8 +30,7 @@ class Sample {
   Hypothesis* source_tail;
 
   ScoreComponentCollection feature_values;
-  const Josiah::feature_vector& _extra_features;
-  std::vector<float> _extra_feature_values;
+  Josiah::feature_vector _extra_features;
 
   std::set<Hypothesis*> cachedSampledHyps;
   
@@ -64,8 +63,10 @@ class Sample {
   const ScoreComponentCollection& GetFeatureValues() const {
     return feature_values;
   }
-  const Josiah::feature_vector& extra_features() const { return _extra_features; }
-  const std::vector<float>& extra_feature_values() const { return _extra_feature_values; }
+  
+  const Josiah::feature_vector& extra_features() const {
+    return _extra_features; 
+  }
 
   void FlipNodes(size_t x, size_t y, const ScoreComponentCollection& deltaFV) ;
   void FlipNodes(const TranslationOption& , const TranslationOption&, Hypothesis* , Hypothesis* , const ScoreComponentCollection& deltaFV);

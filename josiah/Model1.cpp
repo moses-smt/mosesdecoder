@@ -110,11 +110,7 @@ const vocabulary& external_model1_table::f_vocab() const { return _f_vocab; }
 const vocabulary& external_model1_table::e_vocab() const { return _e_vocab; }
 
 model1::model1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
-    _ptable(table), _pfmap(fmap), _pemap(emap),
- m_sp(const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()),"Model1") {
-   vector<float> w(1);
-   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(&m_sp,w);
- }
+    FeatureFunction("Model1"),_ptable(table), _pfmap(fmap), _pemap(emap) {}
 
 template <typename C>
 void moses_words_to_ids(const moses_factor_to_vocab_id& func, const C& origin, 
@@ -213,14 +209,10 @@ float model1::getFlipUpdateScore(const Sample& s,
   return 0.0;
 }
 
-std::string model1::getName() { return "Model 1 -- p(e|f)"; }
 
 model1_inverse::model1_inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
-    _ptable(table), _pfmap(fmap),
-_pemap(emap),m_sp(const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()),"Model1Inverse") {
-  vector<float> w(1);
-  const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(&m_sp,w);
-}
+    FeatureFunction("Model1Inverse"),
+ _ptable(table), _pfmap(fmap), _pemap(emap) {}
 
 
 void model1_inverse::clear_cache_on_change(const Sample& s){
@@ -269,7 +261,5 @@ float model1_inverse::getFlipUpdateScore(const Sample& s,
   // nothing needed to do here, target words don't change.
   return 0.0;
 }
-
-std::string model1_inverse::getName() { return "Model 1 inverse -- p(f|e)"; }
 
 } // namespace Josiah

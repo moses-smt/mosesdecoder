@@ -20,7 +20,7 @@ void compute_extra_fv(const Sample& s, const Josiah::feature_vector& features, s
 }
 
 Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const Josiah::feature_vector& extra_features) : 
-  m_sourceWords(source), feature_values(target_head->GetScoreBreakdown()), _extra_features(extra_features){ 
+    m_sourceWords(source), feature_values(target_head->GetScoreBreakdown()),  _extra_features(extra_features){ 
   
   std::map<int, Hypothesis*> source_order;
   this->target_head = target_head;
@@ -64,21 +64,12 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
   for (Josiah::feature_vector::const_iterator i=_extra_features.begin(); i!=_extra_features.end(); ++i){
     //values.push_back((*i)->computeScore(s));
     float score = (*i)->computeScore(*this);
-    feature_values.Assign((*i)->getScoreProducer(),score);
+    feature_values.Assign(&((*i)->getScoreProducer()),score);
   }
-  //compute_extra_fv(*this, _extra_features, _extra_feature_values);
-    
-    //cerr << "Initial Moses hyp : " << Josiah::Derivation(*this) << endl;  
 }
  
 Sample::~Sample() {
-  for (set<Hypothesis*>::const_iterator iter = cachedSampledHyps.begin() ; iter != cachedSampledHyps.end() ; ++iter)
-	{
-    Hypothesis::Delete (*iter);
-	}
-	cachedSampledHyps.clear();
-  
-  //RemoveAllInColl(cachedSampledHyps);
+  RemoveAllInColl(cachedSampledHyps);
 }
 
 
@@ -392,7 +383,7 @@ void Sample::UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& opti
 void Sample::DeleteFromCache(Hypothesis *hyp) {
   set<Hypothesis*>::iterator it = find(cachedSampledHyps.begin(), cachedSampledHyps.end(), hyp);
   if (it != cachedSampledHyps.end()){
-    Hypothesis::Delete(*it);
+    delete *it;
     cachedSampledHyps.erase(it);
   }
 }

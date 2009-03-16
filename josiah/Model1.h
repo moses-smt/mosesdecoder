@@ -125,8 +125,6 @@ public:
   virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                            const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                            const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
-  virtual std::string getName();
-  virtual const Moses::ScoreProducer* getScoreProducer()  const {return &m_sp;}
 private:
   // used by score() below; n.b. unknown words are assigned an id of -1
   struct is_known{ bool operator()(int x){ return x==-1 ? false : true; } };
@@ -155,7 +153,6 @@ private:
   model1_table_handle _ptable;
   vocab_mapper_handle _pfmap;
   vocab_mapper_handle _pemap;
-  FeatureFunctionScoreProducer m_sp;
   std::vector<int> _sentence_cache; // cached internal rep of source sentence
   std::vector<float> _sums_cache; // cache of inner sums
   std::vector<float> _tmp_sums; // resized once for each input, to avoid constant reallocation
@@ -179,8 +176,6 @@ public:
   virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                            const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                            const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
-  virtual std::string getName();
-  virtual const Moses::ScoreProducer* getScoreProducer() const {return &m_sp;}
 private:
   // used by score() below; n.b. unknown words are assigned an id of -1
   struct is_known{ bool operator()(int x){ return x==-1 ? false : true; } };
@@ -212,7 +207,6 @@ private:
   std::map<int,float> _word_cache; // cached columns for target words
   std::map<const TranslationOption*,float> _option_cache; // cached scores for entire target phrases
   std::vector<int> _sentence_cache; // cached internal rep of source sentence
-  FeatureFunctionScoreProducer m_sp;
 };
 
 } // namespace Josiah
