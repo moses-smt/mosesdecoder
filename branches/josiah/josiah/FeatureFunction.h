@@ -46,13 +46,14 @@ namespace Josiah {
 class FeatureState {};
 
 /**
- * FIXME: Temporary hack to get moses to manager our feature functions.
+ * Used to  get moses to manage our feature functions.
  **/
 class FeatureFunctionScoreProducer : public ScoreProducer {
   
   public:
   
-    FeatureFunctionScoreProducer(Moses::ScoreIndexManager& scoreIndexManager, const std::string& name);
+    FeatureFunctionScoreProducer(const std::string& name);
+    
   
     size_t GetNumScoreComponents() const;
     std::string GetScoreProducerDescription() const;
@@ -67,6 +68,8 @@ class FeatureFunctionScoreProducer : public ScoreProducer {
  **/
 class FeatureFunction {
   public:
+    FeatureFunction(const std::string& name) :
+      m_scoreProducer(name) {}
     /** Compute full score of a sample from scratch **/
     virtual float computeScore(const Sample& sample) = 0;
     /** Change in score when updating one segment */
@@ -79,31 +82,15 @@ class FeatureFunction {
     virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                              const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                              const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) = 0;
-    virtual std::string getName() = 0;
-    virtual const Moses::ScoreProducer* getScoreProducer() const = 0;
+    const Moses::ScoreProducer& getScoreProducer() const {return m_scoreProducer;}
     virtual ~FeatureFunction() = 0;
+  
+  private:
+    FeatureFunctionScoreProducer m_scoreProducer;
+    
 };
 
-/**
- * For testing.
- **/
-class DummyFeatureFunction : public FeatureFunction {
-  public:
-    virtual bool isStateful() { return false; }
-    virtual float computeScore(const Sample& sample) { return 1; }
-    virtual float getSingleUpdateScore(const Sample&, const TranslationOption*, const WordsRange&)
-      {return 2;}
-    virtual float getPairedUpdateScore(const Sample&, const TranslationOption*,
-                                      const TranslationOption*, const WordsRange&, const Phrase&)
-    {return 3;}
-    virtual float getFlipUpdateScore(const Sample&, const TranslationOption*, const TranslationOption*, 
-                                    const Hypothesis*, const Hypothesis*, 
-                                    const WordsRange&, const WordsRange&)
-    {return 4;}
-    virtual std::string getName() {return "dummy";}
-    virtual const Moses::ScoreProducer* getScoreProducer() const {return NULL;} //FIXME
-    virtual ~DummyFeatureFunction() {}
-};
+
 
 
 
@@ -111,26 +98,6 @@ typedef boost::shared_ptr<FeatureFunction> feature_handle;
 typedef std::vector<feature_handle> feature_vector;
 void configure_features_from_file(const std::string& filename, feature_vector& fv); 
 
-/**
- * Singleton which stores and creates the Gibbler feature functions.
- * TODO: Needs some way of configuring.
- **/
-class FeatureRegistry {
-  public:
-    /** The singleton */
-    static const FeatureRegistry* instance();
-    /** The names of the features currently in use*/
-    const std::vector<string>& getFeatureNames() const;
-    /** Create a set of features for this sample. These are heap-allocated. */
-    void createFeatures(Sample& sample, std::vector<FeatureFunction*> features);
-  
-  private:
-    std::vector<std::string> m_names;
-    static auto_ptr<FeatureRegistry> s_instance;
-    
-    FeatureRegistry();
-    FeatureRegistry(const FeatureRegistry&);
-    FeatureRegistry operator=(const FeatureRegistry&);
-};
+
 
 } //namespace

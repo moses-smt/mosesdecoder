@@ -25,28 +25,7 @@ namespace Josiah {
 
 FeatureFunction::~FeatureFunction(){} // n.b. is pure virtual, must be empty
 
-auto_ptr<FeatureRegistry> FeatureRegistry::s_instance;
 
-const FeatureRegistry* FeatureRegistry::instance() {
-  if (!s_instance.get()) {
-    s_instance.reset(new FeatureRegistry());
-  }
-  return s_instance.get();
-}
-
-FeatureRegistry::FeatureRegistry() {
-  m_names.push_back("dummy");
-}
-
-
-const std::vector<string>& FeatureRegistry::getFeatureNames() const {
-  return m_names;
-}
-
-
-void FeatureRegistry::createFeatures(Sample& sample, std::vector<FeatureFunction*> features) {
-  features.push_back(new DummyFeatureFunction());
-}
 
 void configure_features_from_file(const std::string& filename, feature_vector& fv){
   std::cerr << "Reading extra features from " << filename << std::endl;
@@ -82,9 +61,11 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
 
 
 
-FeatureFunctionScoreProducer::FeatureFunctionScoreProducer( Moses::ScoreIndexManager& scoreIndexManager, const std::string & name ) :
-    m_name(name){
-  scoreIndexManager.AddScoreProducer(this);
+FeatureFunctionScoreProducer::FeatureFunctionScoreProducer(const std::string & name ) :m_name(name){
+  StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
+  const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
+  vector<float> w(1); //default weight of 0
+  staticData.SetWeightsForScoreProducer(this,w);
 }
 
 

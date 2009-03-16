@@ -179,11 +179,10 @@ void TranslationDelta::initScoresSingleUpdate(const Sample& s, const Translation
   addSingleOptionLanguageModelScore(option, targetSegment); //let's do this here itself for now
   
   // extra features
-  _extra_feature_values.clear();
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
     float feature_score = (*i)->getSingleUpdateScore(s, option, targetSegment);
-    m_scores.Assign((*i)->getScoreProducer(),feature_score);
+    m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
   }
 
   //weight the scores
@@ -191,11 +190,6 @@ void TranslationDelta::initScoresSingleUpdate(const Sample& s, const Translation
   m_score = m_scores.InnerProduct(weights);
   
   VERBOSE(2, "Single Update: Scores " << m_scores << endl);
-  IFVERBOSE(2){
-    std::cerr << "Single Update: extra scores ";
-    std::for_each(_extra_feature_values.begin(), _extra_feature_values.end(), std::cerr << boost::lambda::_1 << " ");
-    std::cerr << std::endl; 
-  }
   VERBOSE(2,"Single Update: Total score is  " << m_score << endl);  
 }
 
@@ -215,12 +209,10 @@ void TranslationDelta::initScoresPairedUpdate(const Sample& s, const Translation
     
     
   // extra features
-  _extra_feature_values.clear();
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
-    //_extra_feature_values.push_back((*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase));
     float feature_score = (*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase);
-    m_scores.Assign((*i)->getScoreProducer(),feature_score);
+    m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
   }
 }  
   
@@ -296,11 +288,6 @@ void TranslationDelta::updateWeightedScore() {
   m_score = m_scores.InnerProduct(weights);
   
   VERBOSE(2, "Scores " << m_scores << endl);
-  IFVERBOSE(2){
-    std::cerr << "Extra scores ";
-    std::for_each(_extra_feature_values.begin(), _extra_feature_values.end(), std::cerr << boost::lambda::_1 << " ");
-    std::cerr << std::endl; 
-  }
   VERBOSE(2,"Total score is  " << m_score << endl);      
 }
     
@@ -357,7 +344,13 @@ FlipDelta::FlipDelta(Sample& sample, const TranslationOption* leftTgtOption ,
   const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
   m_scores.PlusEquals(dsp, totalDistortion);
     
-  //TODO: extra feature scores
+  // extra features
+  typedef Josiah::feature_vector fv;
+  for (fv::const_iterator i=sample.extra_features().begin(); i<sample.extra_features().end(); ++i) {
+    float feature_score = (*i)->getFlipUpdateScore(sample, leftTgtOption, rightTgtOption, 
+      prevTgtHypo, nextTgtHypo,leftTargetSegment, rightTargetSegment);
+    m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
+  }
     
   //weight the scores
   const vector<float> & weights = StaticData::Instance().GetAllWeights();
