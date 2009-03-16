@@ -58,6 +58,8 @@ namespace Moses {
   }
 #endif
 
+long TranslationDelta::lmcalls = 0;
+
 
   /**
    Compute the change in language model score by adding this target phrase
@@ -147,6 +149,7 @@ void  TranslationDelta::addSingleOptionLanguageModelScore(const TranslationOptio
           //cerr << *lmcontext[j] << " ";
         }
         lmscore += lm->GetValue(ngram);
+        ++lmcalls;
         //cerr << lm->GetValue(ngram)/log(10) << endl;
         //cache disabled for now
         //lmscore += m_cache.find(lm)->second.GetValue(ngram);  
@@ -463,6 +466,7 @@ void  TranslationDelta::addContiguousPairedOptionLMScore(const TranslationOption
           //cerr << *lmcontext[j] << " ";
         }
         lmscore += lm->GetValue(ngram);
+        ++lmcalls;
         //cerr << lm->GetValue(ngram)/log(10) << endl;
         //cache disabled for now
         //lmscore += m_cache.find(lm)->second.GetValue(ngram);
@@ -581,6 +585,7 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
           //cerr << *lmcontext[j] << " ";
         }
         lmscore += lm->GetValue(ngram);
+        ++lmcalls;
         //cerr << lm->GetValue(ngram)/log(10) << endl;
         //cache disabled for now
         //lmscore += m_cache.find(lm)->second.GetValue(ngram);  
@@ -682,6 +687,7 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
           //cerr << *lmcontext[j] << " ";
         }
         lmscore += lm->GetValue(ngram);
+        ++lmcalls;
         //cerr << lm->GetValue(ngram)/log(10) << endl;
         //cache disabled for now
         //lmscore += m_cache.find(lm)->second.GetValue(ngram);  

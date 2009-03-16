@@ -396,7 +396,9 @@ int main(int argc, char** argv) {
     decoder->decode(line,hypothesis,toc,source);
     timer.check("Running sampler");
 
+    TranslationDelta::lmcalls = 0;
     sampler.Run(hypothesis,toc,source,extra_features);
+    VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
 
     if (expected_sbleu) {
