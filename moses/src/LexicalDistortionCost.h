@@ -131,20 +131,16 @@ class LDCBetaGeometric : public LexicalDistortionCost {
 		    Direction direction, 
 		    Condition condition, 
 		    std::vector< FactorType >& f_factors, 
-		    std::vector< FactorType >& e_factors)
-    : LexicalDistortionCost(filePath, direction, condition, f_factors, e_factors, NUM_PARAMETERS) {
-       VERBOSE(1, "Created beta-geometric lexical distortion cost model\n");
+		    std::vector< FactorType >& e_factors,
+                    size_t numParameters = NUM_PARAMETERS)
+    : LexicalDistortionCost(filePath, direction, condition, f_factors, e_factors, numParameters) {
+       VERBOSE(1, "Created beta-geometric lexical distortion cost model or subclass\n");
   }
 
  public:
   virtual std::string GetScoreProducerDescription() const {
     return "Beta-Geometric lexical distortion cost model, file=" + m_modelFileName;
   };
-/*
-  virtual size_t GetNumParameters() const {
-    return 6;
-  }
-*/
 
  protected:
   virtual float CalculateDistortionScore(	const WordsRange &prev,
@@ -152,6 +148,61 @@ class LDCBetaGeometric : public LexicalDistortionCost {
 						const std::vector<float> *parameters) const;
 
   virtual std::vector<float> GetDefaultPrior() const;
- private:
+
   float beta_geometric(float p, float q, int x) const;
+};
+
+class LDC3BetaGeometric : public LDCBetaGeometric {
+  friend class LexicalDistortionCost;
+
+ protected:
+  static const size_t NUM_PARAMETERS = 7;
+
+  LDC3BetaGeometric(const std::string &filePath, 
+		    Direction direction, 
+		    Condition condition, 
+		    std::vector< FactorType >& f_factors, 
+		    std::vector< FactorType >& e_factors)
+    : LDCBetaGeometric(filePath, direction, condition, f_factors, e_factors, NUM_PARAMETERS) {
+       VERBOSE(1, "Created 3-way beta-geometric lexical distortion cost model\n");
+  }
+
+ public:
+  virtual std::string GetScoreProducerDescription() const {
+    return "3-way Beta-Geometric lexical distortion cost model, file=" + m_modelFileName;
+  };
+
+ protected:
+  virtual float CalculateDistortionScore(	const WordsRange &prev,
+						const WordsRange &curr,
+						const std::vector<float> *parameters) const;
+
+  virtual std::vector<float> GetDefaultPrior() const;
+};
+
+class LDCDirichletMultinomial : public LexicalDistortionCost {
+  friend class LexicalDistortionCost;
+
+ protected:
+  static const size_t NUM_PARAMETERS = 23;
+
+  LDCDirichletMultinomial(const std::string &filePath, 
+		    Direction direction, 
+		    Condition condition, 
+		    std::vector< FactorType >& f_factors, 
+		    std::vector< FactorType >& e_factors)
+    : LexicalDistortionCost(filePath, direction, condition, f_factors, e_factors, NUM_PARAMETERS) {
+       VERBOSE(1, "Created Dirichlet-Multinomial lexical distortion cost model\n");
+  }
+
+ public:
+  virtual std::string GetScoreProducerDescription() const {
+    return "Dirichlet-Multinomial lexical distortion cost model, file=" + m_modelFileName;
+  };
+ protected:
+  virtual float CalculateDistortionScore(	const WordsRange &prev,
+						const WordsRange &curr,
+						const std::vector<float> *parameters) const;
+
+  virtual std::vector<float> GetDefaultPrior() const;
 };

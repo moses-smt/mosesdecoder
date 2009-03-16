@@ -20,6 +20,10 @@ LexicalDistortionCost *LexicalDistortionCost::CreateModel(const std::string &mod
 		return new LDCBetaBinomial(filePath, direction, PhrasePair, f_factors, e_factors);
 	else if(modelType == "beta-geometric-phrase")
 		return new LDCBetaGeometric(filePath, direction, PhrasePair, f_factors, e_factors);
+	else if(modelType == "3way-beta-geometric-phrase")
+		return new LDC3BetaGeometric(filePath, direction, PhrasePair, f_factors, e_factors);
+	else if(modelType == "dirichlet-multinomial")
+		return new LDCDirichletMultinomial(filePath, direction, PhrasePair, f_factors, e_factors);
 	else {
 		UserMessage::Add("Lexical distortion model type not implemented: " + modelType);
 		return NULL;
@@ -204,3 +208,109 @@ std::vector<float> LDCBetaGeometric::GetDefaultPrior() const
 {
 	return std::vector<float>(12, 2);
 }
+
+/******** LDC3BetaGeometric ************/
+
+float LDC3BetaGeometric::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr,
+	const std::vector<float> *params) const
+{
+	const std::vector<float> &prior = GetPrior();
+
+	float alpha_dir_neg = params->at(0) + prior[0];
+	float alpha_dir_none = params->at(1) + prior[1];
+	float alpha_dir_pos = params->at(2) + prior[2];
+
+	float log_alpha_total = log(alpha_dir_neg + alpha_dir_none + alpha_dir_pos);
+
+	float p_dir_neg = log(alpha_dir_neg) - log_alpha_total;
+	float p_dir_none = log(alpha_dir_none) - log_alpha_total;
+	float p_dir_pos = log(alpha_dir_pos) - log_alpha_total;
+
+	float p_pos = params->at(3) + prior[3];
+	float q_pos = params->at(4) + prior[4];
+	float p_neg = params->at(5) + prior[5];
+	float q_neg = params->at(6) + prior[6];
+
+	int distance = StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
+
+	float score = .0f;
+
+	if(distance == 0) {
+		score = p_dir_none;
+	} else if(distance > 0) {
+		score += p_dir_pos;
+
+		int x = distance - 1;
+		score += beta_geometric(p_pos, q_pos, x);
+	} else if(distance < 0) {
+		score += p_dir_neg;
+
+		int x = -distance - 1;
+		score += beta_geometric(p_neg, q_neg, x);
+	}
+
+	assert(finite(score));
+	return FloorScore(score);
+}
+
+std::vector<float> LDC3BetaGeometric::GetDefaultPrior() const
+{
+	std::vector<float> prior(7);
+
+	prior.push_back(.015);
+	prior.push_back(.06);
+	prior.push_back(.023);
+
+	prior.push_back(2);
+	prior.push_back(2);
+	prior.push_back(2);
+	prior.push_back(2);
+
+	return prior;
+}
+
+/******** LDCDirichletMultinomial ************/
+
+float LDCDirichletMultinomial::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr,
+	const std::vector<float> *params) const
+{
+	const std::vector<float> &prior = GetPrior();
+
+	int nullidx = (NUM_PARAMETERS - 1) / 2;
+
+	int distance = StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
+
+	int index = distance + nullidx;
+	if(index < 0)
+		index = 0;
+	if(index >= NUM_PARAMETERS)
+		index = NUM_PARAMETERS - 1;
+	
+	float total = .0f;
+	for(int i = 0; i < NUM_PARAMETERS; i++)
+		total += params->at(i) + prior[i];
+
+	float score = (params->at(index) + prior[index]) / total;
+
+	assert(finite(score));
+	return FloorScore(score);
+}
+
+std::vector<float> LDCDirichletMultinomial::GetDefaultPrior() const
+{
+	std::vector<float> prior(NUM_PARAMETERS);
+
+	int nullidx = (NUM_PARAMETERS - 1) / 2;
+
+	float p = 1.0f;
+	prior[nullidx] = p;
+
+	for(int i = 1; i <= nullidx; i++) {
+		p *= .5;
+		prior[nullidx + i] = prior[nullidx - i] = p;
+	}
+
+	return prior;
+}
+
+
