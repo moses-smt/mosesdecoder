@@ -122,7 +122,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 	{ // incoming hypo is better than the one we have
 		VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
     
-    hypo->UpdateSpans(hypoExisting);
+    //hypo->UpdateSpans(hypoExisting);
 		if (m_nBestIsEnabled) {
 			hypo->AddArc(hypoExisting);
 			Detach(iterExisting);
@@ -249,7 +249,7 @@ const Hypothesis *HypothesisStackNormal::GetBestHypothesis() const
 			if (hypo->GetTotalScore() > bestHypo->GetTotalScore())
 				bestHypo = hypo;
 		}
-    VERBOSE(0, "Total number of completed hyps considered " << totalSpans << endl);
+    //VERBOSE(0, "Total number of completed hyps considered " << totalSpans << endl);
   	return bestHypo;
 	}
 	return NULL;
