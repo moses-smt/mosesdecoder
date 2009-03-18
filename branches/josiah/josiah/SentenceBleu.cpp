@@ -86,7 +86,7 @@ float SentenceBLEU::ComputeGain(const GainFunction& hyp) const {
   assert(hyp.GetType() == this->GetType());
   const NGramCountMap& hyp_ngrams = static_cast<const SentenceBLEU&>(hyp).GetNgrams();
 
-  return CalcScore(ngrams_, hyp_ngrams, static_cast<const SentenceBLEU&>(hyp).GetLength());
+  return CalcScore(ngrams_, hyp_ngrams, static_cast<const SentenceBLEU&>(hyp).GetAverageReferenceLength());
 }  
 
 float SentenceBLEU::CalcBleu(const valarray<int> & hyp, const valarray<int> & correct, float ref_len, float hyp_len) const{
