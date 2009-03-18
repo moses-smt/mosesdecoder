@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include <boost/program_options.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "AnnealingSchedule.h"
 #include "Decoder.h"
@@ -60,6 +62,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 using namespace Josiah;
 using namespace Moses;
+using boost::lexical_cast;
+using boost::bad_lexical_cast;
+using boost::split;
+using boost::is_any_of;
 namespace po = boost::program_options;
 
 
@@ -110,7 +116,7 @@ int main(int argc, char** argv) {
   cerr << "MPI rank: " << rank << endl; 
   cerr << "MPI size: " << size << endl;
 #endif
-  int iterations;
+  string stopperConfig;
   unsigned int topn;
   int debug;
   int burning_its;
@@ -156,7 +162,8 @@ int main(int argc, char** argv) {
         ("verbosity,v", po::value<int>(&debug)->default_value(0), "Verbosity level")
         ("random-seed,e", po::value<uint32_t>(&seed), "Random seed")
         ("timing,m", po::value(&do_timing)->zero_tokens()->default_value(false), "Display timing information.")
-        ("iterations,s", po::value<int>(&iterations)->default_value(5), "Number of sampling iterations")
+      ("iterations,s", po::value<string>(&stopperConfig)->default_value("5"), 
+       "Sampler stopping criterion (eg number of iterations)")
         ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
         ("scale-factor,c", po::value<float>(&scalefactor)->default_value(1.0), "Scale factor for model weights.")
         ("decode-monotone", po::value(&decode_monotone)->zero_tokens()->default_value(false), "Run the initial decoding monotone.")
@@ -385,7 +392,53 @@ int main(int argc, char** argv) {
     sampler.AddOperator(&tso);
     sampler.AddOperator(&fo);
     
-    sampler.SetIterations(iterations);
+    //sampler stopping strategy; TODO: push parsing of config into StoppingStrategy ctor ?
+    auto_ptr<StopStrategy> stopper;
+    try {
+      size_t iterations = lexical_cast<size_t>(stopperConfig);
+      stopper.reset(new CountStopStrategy(iterations));
+    } catch (bad_lexical_cast&) {/* do nothing*/}
+    
+    if (!stopper.get()) {
+      //non-numeric. Try to pass the config string.
+      static string maxderiv = "maxderiv:";
+      bool useMaxderiv = false;
+      static string maxtrans = "maxtrans:";
+      bool useMaxtrans = false;
+      if (stopperConfig.find(maxderiv) == 0) useMaxderiv = true;
+      if (stopperConfig.find(maxtrans) == 0) useMaxtrans = true;
+      if (useMaxderiv || useMaxtrans) {
+        //format is (maxtrans|maxderiv):<miniters>:<maxiters>:<maxcount>
+        std::vector<std::string> fields;
+        boost::split(fields, stopperConfig, boost::is_any_of(":"));
+        if (fields.size() == 4) {
+          size_t miniters =  lexical_cast<size_t>(fields[1]);
+          size_t maxiters =  lexical_cast<size_t>(fields[2]);
+          size_t maxcount =  lexical_cast<size_t>(fields[3]);
+          if (useMaxderiv) {
+            if (!derivationCollector.get()) {
+              cerr << "Error: Need to be collecting derivations to use this stop strategy" << endl;
+              exit (1);
+            }
+            stopper.reset(new MaxCountStopStrategy(miniters, maxiters, maxcount, derivationCollector.get()));
+          }
+          if (useMaxtrans) {
+            if (!transCollector.get()) {
+              cerr << "Error: Need to be collecting translations to use this stop strategy" << endl;
+              exit (1);
+            }
+            stopper.reset(new MaxCountStopStrategy(miniters, maxiters, maxcount, transCollector.get()));
+          }
+        }
+      }
+    }
+    
+    if (!stopper.get()) {
+      cerr << "Error: unable to parse stopper config string '" << stopperConfig << "'" << endl;
+      exit(1);
+    }
+    
+    sampler.SetStopper(stopper.get());
     sampler.SetBurnIn(burning_its);
     
     TranslationOptionCollection* toc;
@@ -443,7 +496,9 @@ int main(int argc, char** argv) {
       }
     }
     if (transCollector.get()) {
-      vector<const Factor*> sentence = transCollector->Max();
+      vector<const Factor*> sentence;
+      size_t count;
+      transCollector->Max(sentence,count);
       for (size_t i = 0; i < sentence.size(); ++i) {
         (*out) << (i > 0 ? " " : "") << *sentence[i];
       }

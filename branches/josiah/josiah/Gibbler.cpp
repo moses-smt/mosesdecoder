@@ -410,7 +410,8 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
         m_operators[j]->Quench();
     }
   
-    for (size_t i = 0; i < m_iterations; ++i) {
+    size_t i = 0;
+    while(true) {
       if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true; }
       if ((i+1) % 400 == 0) { VERBOSE(1,endl); f=false;}
       VERBOSE(2,"Gibbs sampling iteration: " << i << endl);
@@ -420,8 +421,13 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
       }
       for (size_t j = 0; j < m_collectors.size(); ++j)
         m_collectors[j]->collect(sample);
+      ++i;
+      if (m_stopper->ShouldStop(i)) {
+        break;
+      }
     }
     if (f) VERBOSE(1,endl);
+    
   }
 }
 
@@ -429,6 +435,16 @@ void PrintSampleCollector::collect(Sample& sample)  {
   cout << "Sampled hypothesis: \"";
   sample.GetSampleHypothesis()->ToStream(cout);
   cout << "\"" << "  " << "Feature values: " << sample.GetFeatureValues() << endl;
+}
+
+
+bool MaxCountStopStrategy::ShouldStop(size_t iterations) {
+  if (iterations < m_minIterations) return false;
+  if (iterations >= m_maxIterations) return true;
+  vector<const Factor*> translation;
+  size_t count;
+  m_maxCollector->Max(translation,count);
+  return (count >= m_maxCount);
 }
 
 }

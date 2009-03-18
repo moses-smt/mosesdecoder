@@ -41,6 +41,7 @@ namespace Josiah {
       const std::vector<std::string>& getTargetSentence() const {return m_targetWords;}
       const Moses::ScoreComponentCollection& getFeatureValues() const {return m_featureValues;}
       float getScore() const {return m_score;}
+      void getTargetFactors(std::vector<const Factor*>& sentence) const;
       bool operator<(const Derivation& other) const;
       
       struct PhraseAlignment {
@@ -78,12 +79,13 @@ namespace Josiah {
   
   std::ostream& operator<<(std::ostream&, const Derivation&);
 
-  class DerivationCollector: public virtual Moses::SampleCollector {
+  class DerivationCollector: public virtual Moses::MaxCollector {
     public:
       DerivationCollector(): m_n(0),m_pd(0) ,m_collectDerivByTrans(false), m_outputMaxChange(false), m_maxDerivation(NULL) {}
       void collect(Moses::Sample& sample);
       /** Top n in descending order. */
       void getTopN(size_t n, std::vector<DerivationProbability>& derivations);
+      virtual void Max(std::vector<const Moses::Factor*>& translation, size_t& count);
       /** Write max periodically to stderr */
       void setPeriodicDecode(int pd) {m_pd = pd;}
       /** Write the max derivation every time it changes */

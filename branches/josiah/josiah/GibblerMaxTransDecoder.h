@@ -24,11 +24,11 @@ namespace __gnu_cxx {
 
 namespace Moses {
 
-class GibblerMaxTransDecoder : public SampleCollector {
+class GibblerMaxTransDecoder : public virtual MaxCollector {
  public:
   GibblerMaxTransDecoder();
   virtual void collect(Sample& sample);
-  virtual std::vector<const Factor*> Max();
+  virtual  void Max(std::vector<const Factor*>&, size_t& count);
   /** Output the max translation whenever it changes */
   void setOutputMaxChange(bool outputMaxChange){m_outputMaxChange = outputMaxChange;}
 
