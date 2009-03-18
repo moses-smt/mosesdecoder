@@ -17,6 +17,7 @@ class TranslationOption;
 class Word;
 class FeatureFunction;
 
+
   
 class Sample {
  private:
@@ -79,6 +80,8 @@ class Sample {
   /** Extra feature functions - not including moses ones */
 };
 
+
+
 /**
  * Used by the operators to collect samples, for example to count ngrams, or just to print
  * them out. 
@@ -95,6 +98,54 @@ class PrintSampleCollector  : public virtual SampleCollector {
     virtual ~PrintSampleCollector() {}
 };
 
+/**
+  * Collector that looks for a max (eg translation, derivation).
+ **/
+class MaxCollector : public virtual SampleCollector {
+  public:
+    virtual void Max(std::vector<const Factor*>& translation, size_t& count) = 0;
+};
+
+/**
+ * Used to specify when the sampler should stop.
+ **/
+class StopStrategy {
+  public:
+    virtual bool ShouldStop(size_t iterations) = 0;
+    virtual ~StopStrategy() {}
+};
+
+/**
+ * Simplest sampler stop strategy, just uses the number of iterations.
+ **/
+class CountStopStrategy : public virtual StopStrategy {
+  public:
+    CountStopStrategy(size_t max): m_max(max) {}
+    virtual bool ShouldStop(size_t iterations) {return iterations >= m_max;}
+    virtual ~CountStopStrategy() {}
+  
+  private:
+    size_t m_max;
+};
+
+/**
+ * Stop strategy which uses the count of the max (trans or deriv) to determine 
+ * when to stop.
+ **/
+class MaxCountStopStrategy : public virtual StopStrategy {
+  public:
+    MaxCountStopStrategy(size_t minIterations, size_t maxIterations, size_t maxCount,  MaxCollector* maxCollector)
+  : m_minIterations(minIterations), m_maxIterations(maxIterations),m_maxCount(maxCount), m_maxCollector(maxCollector) {}
+    virtual bool ShouldStop(size_t iterations);
+    virtual ~MaxCountStopStrategy() {}
+    
+  private:
+    size_t m_minIterations;
+    size_t m_maxIterations;
+    size_t m_maxCount;
+    MaxCollector* m_maxCollector;
+};
+
 class Sampler {
  private:
    std::vector<SampleCollector*> m_collectors;
@@ -103,6 +154,7 @@ class Sampler {
    size_t m_burninIts;
    size_t m_reheatings;
    const AnnealingSchedule* m_as;
+   StopStrategy* m_stopper;
  public:
   Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL) {}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
@@ -110,7 +162,7 @@ class Sampler {
   void AddOperator(GibbsOperator* o) {m_operators.push_back(o);}
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
   void SetAnnealingSchedule(const AnnealingSchedule* as) {m_as = as;}
-  void SetIterations(size_t iterations) {m_iterations = iterations;}
+  void SetStopper(StopStrategy* stopper) {m_stopper = stopper;}
   void SetReheatings(size_t r) {m_reheatings = r;}
   void SetBurnIn(size_t burnin_its) {m_burninIts = burnin_its;}
 };

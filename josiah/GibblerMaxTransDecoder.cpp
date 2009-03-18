@@ -27,7 +27,9 @@ void GibblerMaxTransDecoder::collect(Sample& sample) {
   ++samples[trans];
   
   if (m_outputMaxChange) {
-    vector<const Factor*> newmax = Max();
+    vector<const Factor*> newmax;
+    size_t count;
+    Max(newmax,count);
     if (newmax != m_maxTranslation) {
       m_maxTranslation = newmax;
       cerr << "NewMaxTrans(" << n << ") ";
@@ -37,7 +39,7 @@ void GibblerMaxTransDecoder::collect(Sample& sample) {
   }
 }
 
-vector<const Factor*> GibblerMaxTransDecoder::Max() {
+void GibblerMaxTransDecoder::Max(std::vector<const Factor*>& translation, size_t& count) {
   hash_map<vector<const Factor*>, int>::const_iterator ci;
   multimap<float, const vector<const Factor*>*,greater<float> > sorted;
   const float nf = n;
@@ -47,7 +49,10 @@ vector<const Factor*> GibblerMaxTransDecoder::Max() {
   multimap<float, const vector<const Factor*>*>::iterator i;
   for (i = sorted.begin(); i != sorted.end(); ++i)
     VERBOSE(1, i->first << "\t" << ToString(*i->second) << endl);
-  return *sorted.begin()->second;
+  const vector<const Factor*>* max = sorted.begin()->second;
+  translation.insert(translation.end(), max->begin(), max->end());
+  count = (size_t)samples[*max];
+  
 }
 
 }

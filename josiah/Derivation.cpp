@@ -54,6 +54,15 @@ namespace Josiah {
     bool result = m_alignments < other.m_alignments;
     return result;
   }
+  
+  void Derivation::getTargetFactors(std::vector<const Factor*>& sentence) const {
+    for (vector<PhraseAlignment>::const_iterator i = m_alignments.begin(); i != m_alignments.end(); ++i) {
+      const Phrase& targetPhrase = i->_target;
+      for (size_t j = 0; j < targetPhrase.GetSize(); ++j) {
+        sentence.push_back(targetPhrase.GetFactor(j,0));
+      }
+    }
+  }
 
   ostream& operator<<(ostream& out, const Derivation& d) {
     out << "Target: << ";
@@ -130,6 +139,13 @@ namespace Josiah {
       derivations.pop_back();
     }
     //cout << derivations.size() << endl;
+  }
+  
+  void DerivationCollector::Max(std::vector<const Factor*>& translation, size_t& count) {
+    vector<DerivationProbability> derivations;
+    getTopN(1,derivations);
+    count = m_counts[*(derivations[0].first)];
+    derivations[0].first->getTargetFactors(translation);
   }
   
   void DerivationCollector::outputDerivationsByTranslation(ostream& out) {
