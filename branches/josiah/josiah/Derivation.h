@@ -90,6 +90,7 @@ namespace Josiah {
       void setPeriodicDecode(int pd) {m_pd = pd;}
       /** Write the max derivation every time it changes */
       void setOutputMaxChange(bool outputMaxChange) {m_outputMaxChange = outputMaxChange;}
+      virtual void getCounts(vector<size_t>& counts) const;
       void setCollectDerivationsByTranslation(bool dbyt) {m_collectDerivByTrans = dbyt;}
       void outputDerivationsByTranslation(std::ostream& out);
       void outputDerivationProbability(const DerivationProbability& dp, std::ostream& out);

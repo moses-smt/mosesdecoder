@@ -477,6 +477,7 @@ int main(int argc, char** argv) {
       timer.check("Outputting MBR");
     }
     if (derivationCollector.get()) {
+      cerr << "DerivEntropy " << derivationCollector->getEntropy() << endl;
       vector<DerivationProbability> derivations;
       derivationCollector->getTopN(max(topn,1u),derivations);
       for (size_t i = 0; i < topn && i < derivations.size() ; ++i) {  
@@ -489,13 +490,13 @@ int main(int argc, char** argv) {
         const vector<string>& sentence = derivations[0].first->getTargetSentence();
         copy(sentence.begin(),sentence.end(),ostream_iterator<string>(*out," "));
         (*out) << endl << flush;
-        
       }
       if (collect_dbyt) {
         derivationCollector->outputDerivationsByTranslation(std::cerr);
       }
     }
     if (transCollector.get()) {
+      cerr << "TransEntropy " << transCollector->getEntropy() << endl;
       vector<const Factor*> sentence;
       size_t count;
       transCollector->Max(sentence,count);

@@ -103,7 +103,12 @@ class PrintSampleCollector  : public virtual SampleCollector {
  **/
 class MaxCollector : public virtual SampleCollector {
   public:
+    /** The sentence at the argmax */
     virtual void Max(std::vector<const Factor*>& translation, size_t& count) = 0;
+    /** All counts of samples */
+    virtual void getCounts(vector<size_t>& counts) const = 0;
+    float getEntropy() const;
+    
 };
 
 /**

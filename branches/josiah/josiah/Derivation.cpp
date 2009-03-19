@@ -101,9 +101,10 @@ namespace Josiah {
       vector<DerivationProbability> derivations;
       getTopN(1,derivations);
       if (derivations.size()) {
-        cerr << "MaxDecode(" << m_n << "): ";
+        cerr << "MaxDeriv(" << m_n << "): ";
         outputDerivationProbability(derivations[0],cerr);
         cerr << endl;
+        cerr << "DerivEntropy(" << m_n << "): " << getEntropy() << endl;
       }
     }
     
@@ -167,5 +168,14 @@ namespace Josiah {
     }
     
   }
+  
 
-}//namespace
+  void Josiah::DerivationCollector::getCounts( vector< size_t > & counts ) const
+  {
+    for (map<Derivation,size_t>::const_iterator i = m_counts.begin(); i != m_counts.end(); ++i) {
+      counts.push_back(i->second);
+    }
+  }
+
+}
+//namespace
