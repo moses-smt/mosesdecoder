@@ -447,5 +447,19 @@ bool MaxCountStopStrategy::ShouldStop(size_t iterations) {
   return (count >= m_maxCount);
 }
 
+float MaxCollector::getEntropy( ) const {
+  vector<size_t> counts;
+  getCounts(counts);
+  size_t N = accumulate(counts.begin(),counts.end(),0);
+  float entropy;
+  for (vector<size_t>::iterator i = counts.begin(); i != counts.end(); ++i) {
+    float n = (float)*i;
+    entropy -= n/N*log(n/N);
+  }
+  return entropy;
 }
+
+}
+
+
 

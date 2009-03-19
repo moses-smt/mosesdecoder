@@ -31,6 +31,7 @@ class GibblerMaxTransDecoder : public virtual MaxCollector {
   virtual  void Max(std::vector<const Factor*>&, size_t& count);
   /** Output the max translation whenever it changes */
   void setOutputMaxChange(bool outputMaxChange){m_outputMaxChange = outputMaxChange;}
+  virtual void getCounts(std::vector<size_t>& counts) const;
 
  private:
   int n;

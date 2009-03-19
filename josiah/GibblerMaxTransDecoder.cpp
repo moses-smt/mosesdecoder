@@ -55,4 +55,14 @@ void GibblerMaxTransDecoder::Max(std::vector<const Factor*>& translation, size_t
   
 }
 
+void Moses::GibblerMaxTransDecoder::getCounts( std::vector< size_t > & counts ) const
+{
+  hash_map<vector<const Factor*>, int>::const_iterator ci;
+  for (ci = samples.begin(); ci != samples.end(); ++ci) {
+    counts.push_back((size_t)ci->second);
+  }
 }
+
+}
+
+
