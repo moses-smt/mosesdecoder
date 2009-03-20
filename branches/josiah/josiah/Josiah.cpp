@@ -372,8 +372,10 @@ int main(int argc, char** argv) {
   }
 
   auto_ptr<QuenchingSchedule> quenchingSchedule;
+  auto_ptr<AnnealingSchedule> detAnnealingSchedule;
   if (expected_sbleu_da) {
     quenchingSchedule.reset(new ExponentialQuenchingSchedule(start_temp_quench, stop_temp_quench, quenching_ratio));
+    detAnnealingSchedule.reset(new ExponentialAnnealingSchedule(start_temp_expda, stop_temp_expda, anneal_ratio_da));
   }
   
   int initialQuenchingIteration = -1;
@@ -404,14 +406,13 @@ int main(int argc, char** argv) {
       sampler.AddCollector(elCollector.get());
       //Set the annealing temperature
       int it = optimizer->GetIteration();
-      ExponentialAnnealingSchedule expAnnealingSchedule(start_temp_expda, stop_temp_expda, anneal_ratio_da);
-      float temp = expAnnealingSchedule.GetTemperatureAtTime(it);
+      float temp = detAnnealingSchedule->GetTemperatureAtTime(it);
       
       GibblerAnnealedExpectedLossCollector* annealedELCollector = static_cast<GibblerAnnealedExpectedLossCollector*>(elCollector.get());
       annealedELCollector->SetTemperature(temp);
       cerr << "Annealing temperature " << annealedELCollector->GetTemperature() << endl;
       
-      if (temp == expAnnealingSchedule.GetFloorTemp()) {//Time to start quenching
+      if (temp == (static_cast<ExponentialAnnealingSchedule*>(detAnnealingSchedule.get()))->GetFloorTemp()) {//Time to start quenching
         if (initialQuenchingIteration == -1) //The iteration from which we start quenching
           initialQuenchingIteration = it;
         float quenchTemp = quenchingSchedule->GetTemperatureAtTime(it - initialQuenchingIteration + 1) ;
