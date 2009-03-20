@@ -36,18 +36,17 @@ float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollect
     ScoreComponentCollection d = derivation.getFeatureValues();
     const float gain = si->second;
     size_t count = m_counts[derivation];
-    
-    float entropy_factor = -temperature * (log (static_cast<float>(count) / n) + 1) ;
+    const float prob = static_cast<float>(count) / n ;
+    float entropy_factor = -temperature * (log (prob) + 1) ;
     d.MinusEquals(feature_expectations);
-    d.DivideEquals(n);
-    d.MultiplyEquals(gain+entropy_factor);
-    exp_gain += gain;
+    d.MultiplyEquals(prob * (gain+entropy_factor));
+    exp_gain += gain * prob;
     grad.PlusEquals(d);
+    cerr << "Plain Expected gain " << exp_gain << endl;
   }
   
   gradient->PlusEquals(grad);
   
-  exp_gain /= static_cast<double>(n);
   float entropy = ComputeEntropy();
   exp_gain += entropy * temperature;
   
