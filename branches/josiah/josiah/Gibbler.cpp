@@ -419,8 +419,10 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
         VERBOSE(3,"Sampling with operator " << m_operators[j]->name() << endl);
         m_operators[j]->doIteration(sample,*options);
       }
-      for (size_t j = 0; j < m_collectors.size(); ++j)
+      for (size_t j = 0; j < m_collectors.size(); ++j) {
+        m_operators[j]->SetAnnealingTemperature(m_quenchTemp);
         m_collectors[j]->collect(sample);
+      }
       ++i;
       if (m_stopper->ShouldStop(i)) {
         break;

@@ -16,7 +16,9 @@ josiah_SOURCES = Derivation.cpp \
 	TranslationDelta.cpp \
 	SentenceBleu.cpp \
     FeatureFunction.cpp \
-    SearchRandom.cpp
+    SearchRandom.cpp \
+    QuenchingSchedule.cpp \
+    GibblerAnnealedExpectedLossTrainer.cpp
 
 m1_SOURCES = Model1.cpp FeatureFunction.cpp m1.cpp
 

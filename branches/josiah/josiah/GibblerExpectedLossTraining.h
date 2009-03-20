@@ -13,20 +13,33 @@ namespace Josiah {
 
 class GainFunction;
 
-class GibblerExpectedLossCollector : public SampleCollector {
+class ExpectedLossCollector : public SampleCollector {
+  public:
+    ExpectedLossCollector(const GainFunction& f) : g(f), n(), tot_len() {}
+    virtual ~ExpectedLossCollector() {}
+    virtual void collect(Sample& sample) = 0;
+    // returns the expected gain and expected sentence length
+    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len) = 0;
+    
+    
+  protected:
+    const GainFunction& g;
+    int n;
+    size_t tot_len;
+    ScoreComponentCollection feature_expectations;
+};
+  
+  
+  
+class GibblerExpectedLossCollector : public ExpectedLossCollector {
  public:
-  GibblerExpectedLossCollector(const GainFunction& f) : g(f), n(), tot_len() {}
+  GibblerExpectedLossCollector(const GainFunction& f) : ExpectedLossCollector(f) {}
   virtual void collect(Sample& sample);
-
   // returns the expected gain and expected sentence length
-  float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len);
-
+  virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len);
+  
  private:
-  const GainFunction& g;
-  int n;
-  size_t tot_len;
   std::list<std::pair<ScoreComponentCollection, float> > samples;
-  ScoreComponentCollection feature_expectations;
 };
 
 }

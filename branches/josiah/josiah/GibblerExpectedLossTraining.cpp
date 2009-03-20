@@ -38,9 +38,9 @@ float GibblerExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gra
   if (exp_len)
     *exp_len = static_cast<float>(tot_len) / n;
 
+
   gradient->PlusEquals(grad);
   return exp_gain;
 }
-
 }
 

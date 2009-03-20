@@ -159,14 +159,17 @@ class Sampler {
    size_t m_burninIts;
    size_t m_reheatings;
    const AnnealingSchedule* m_as;
+   float m_quenchTemp;
    StopStrategy* m_stopper;
  public:
-  Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL) {}
+  Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0) {}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
     const std::vector<Word>& source, const Josiah::feature_vector& extra_fv) ;
   void AddOperator(GibbsOperator* o) {m_operators.push_back(o);}
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
   void SetAnnealingSchedule(const AnnealingSchedule* as) {m_as = as;}
+  void SetQuenchingTemperature(float temp) {m_quenchTemp = temp;}
+  void SetIterations(size_t iterations) {m_iterations = iterations;}
   void SetStopper(StopStrategy* stopper) {m_stopper = stopper;}
   void SetReheatings(size_t r) {m_reheatings = r;}
   void SetBurnIn(size_t burnin_its) {m_burninIts = burnin_its;}
