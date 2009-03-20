@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/algorithm/string.hpp>
 
 #include "AnnealingSchedule.h"
+#include "QuenchingSchedule.h"
 #include "Decoder.h"
 #include "Derivation.h"
 #include "Gibbler.h"
@@ -41,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceBleu.h"
 #include "GainFunction.h"
 #include "GibblerExpectedLossTraining.h"
+#include "GibblerAnnealedExpectedLossTrainer.h"
 #include "GibblerMaxTransDecoder.h"
 #include "MBRDecoder.h"
 #include "Model1.h"
@@ -127,7 +129,7 @@ int main(int argc, char** argv) {
   bool decode;
   bool translate;
   bool help;
-  bool expected_sbleu;
+  bool expected_sbleu = false;
   bool expected_sbleu_gradient;
   bool expected_sbleu_training;
   unsigned training_batch_size;
@@ -155,6 +157,14 @@ int main(int argc, char** argv) {
   float max_temp;
   float prior_variance;
   vector<float> prior_mean;
+  bool expected_sbleu_da;
+  float start_temp_quench;
+  float stop_temp_quench;
+  float start_temp_expda;
+  float stop_temp_expda;  
+  float quenching_ratio;
+  float anneal_ratio_da;
+  
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -197,7 +207,15 @@ int main(int argc, char** argv) {
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
-        ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features");
+        ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
+        ("expected-bleu-deterministic-annealing-training,D", po::value(&expected_sbleu_da)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU using deterministic annealing")   
+        ("initial-quenching-temp", po::value<float>(&start_temp_quench)->default_value(1.0f), "Initial quenching temperature")
+        ("final-quenching-temp", po::value<float>(&stop_temp_quench)->default_value(200.0f), "Final quenching temperature")
+        ("quenching-ratio,Q", po::value<float>(&quenching_ratio)->default_value(2.0f), "Quenching ratio")
+   ("initial-det-anneal-temp", po::value<float>(&start_temp_expda)->default_value(1000.0f), "Initial deterministic annealing entropy temperature")
+   ("final-det-anneal-temp", po::value<float>(&stop_temp_expda)->default_value(0.001f), "Final deterministic annealing entropy temperature")
+  ("det-annealing-ratio,A", po::value<float>(&anneal_ratio_da)->default_value(0.5f), "Deterministc annealing ratio");
+  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
   po::variables_map vm;
@@ -216,8 +234,15 @@ int main(int argc, char** argv) {
       std::cout << desc << std::endl;
       return 0;
   }
-  if (expected_sbleu_gradient) expected_sbleu = true;
 
+  if (expected_sbleu_training && expected_sbleu_da) {
+    std::cerr << "Incorrect usage: Cannot do both expected bleu training and expected bleu deterministic annealing training" << std::endl;
+    return 0;
+  }
+  
+  expected_sbleu = false;
+  if (expected_sbleu_gradient == true && expected_sbleu_da == false) expected_sbleu = true;
+  
   if (mosesini.empty()) {
       cerr << "Error: No moses ini file specified" << endl;
       return 1;
@@ -311,7 +336,7 @@ int main(int argc, char** argv) {
     optimizer->SetUseGaussianPrior(prior_mean, prior_variance);
   }
   ExpectedBleuTrainer* trainer = NULL;
-  if (expected_sbleu_training) {
+  if (expected_sbleu_training || expected_sbleu_da) {
     vector<string> input_lines;
     ifstream infiles(inputfile.c_str());
     assert (infiles);
@@ -343,9 +368,16 @@ int main(int argc, char** argv) {
    
   auto_ptr<AnnealingSchedule> annealingSchedule;
   if (anneal) {
-    annealingSchedule.reset(new LinearAnnealingSchedule(burning_its, max_temp));
+    annealingSchedule.reset(new LinearAnnealingSchedule(burning_its, max_temp));  
   }
-    
+
+  auto_ptr<QuenchingSchedule> quenchingSchedule;
+  if (expected_sbleu_da) {
+    quenchingSchedule.reset(new ExponentialQuenchingSchedule(start_temp_quench, stop_temp_quench, quenching_ratio));
+  }
+  
+  int initialQuenchingIteration = -1;
+
   timer.check("Processing input file");
   while (input->HasMore()) {
     string line;
@@ -357,15 +389,43 @@ int main(int argc, char** argv) {
     //configure the sampler
     Sampler sampler;
     sampler.SetAnnealingSchedule(annealingSchedule.get());
-    cerr << "Reheatings: " << reheatings << endl;
+    VERBOSE(2,"Reheatings: " << reheatings << endl);
     sampler.SetReheatings(reheatings);
     auto_ptr<DerivationCollector> derivationCollector;
-    auto_ptr<GibblerExpectedLossCollector> elCollector;
+    auto_ptr<ExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;
     auto_ptr<MBRDecoder> mbrCollector;
     if (expected_sbleu) {
       elCollector.reset(new GibblerExpectedLossCollector(g[lineno]));
       sampler.AddCollector(elCollector.get());
+    }
+    else if (expected_sbleu_da) {
+      elCollector.reset(new GibblerAnnealedExpectedLossCollector(g[lineno]));
+      sampler.AddCollector(elCollector.get());
+      //Set the annealing temperature
+      int it = optimizer->GetIteration();
+      ExponentialAnnealingSchedule expAnnealingSchedule(start_temp_expda, stop_temp_expda, anneal_ratio_da);
+      float temp = expAnnealingSchedule.GetTemperatureAtTime(it);
+      
+      GibblerAnnealedExpectedLossCollector* annealedELCollector = static_cast<GibblerAnnealedExpectedLossCollector*>(elCollector.get());
+      annealedELCollector->SetTemperature(temp);
+      cerr << "Annealing temperature " << annealedELCollector->GetTemperature() << endl;
+      
+      if (temp == expAnnealingSchedule.GetFloorTemp()) {//Time to start quenching
+        if (initialQuenchingIteration == -1) //The iteration from which we start quenching
+          initialQuenchingIteration = it;
+        float quenchTemp = quenchingSchedule->GetTemperatureAtTime(it - initialQuenchingIteration + 1) ;
+        cerr << "Quenching temp " <<  quenchTemp << endl;
+        sampler.SetQuenchingTemperature(quenchTemp);
+        if (quenchTemp >= stop_temp_quench) {
+          break;
+        }
+      }
+      else {//Use initial temperature
+        sampler.SetQuenchingTemperature(start_temp_quench);
+        cerr << "Quenching temp " <<  start_temp_quench << endl;
+      }
+      
     }
     if (decode || topn > 0 || periodic_decode > 0) {
       DerivationCollector* collector = new DerivationCollector();
@@ -440,9 +500,9 @@ int main(int argc, char** argv) {
     
     sampler.SetStopper(stopper.get());
     sampler.SetBurnIn(burning_its);
-    
-    TranslationOptionCollection* toc;
     Hypothesis* hypothesis;
+    TranslationOptionCollection* toc;
+
     timer.check("Running decoder");
 
     std::vector<Word> source;
@@ -454,7 +514,7 @@ int main(int argc, char** argv) {
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
 
-    if (expected_sbleu) {
+    if (expected_sbleu || expected_sbleu_da) {
       ScoreComponentCollection gradient;
       float exp_trans_len = 0;
       const float exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len);
