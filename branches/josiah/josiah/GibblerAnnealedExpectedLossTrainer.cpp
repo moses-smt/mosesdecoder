@@ -42,7 +42,6 @@ float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollect
     d.MultiplyEquals(prob * (gain+entropy_factor));
     exp_gain += gain * prob;
     grad.PlusEquals(d);
-    cerr << "Plain Expected gain " << exp_gain << endl;
   }
   
   gradient->PlusEquals(grad);
