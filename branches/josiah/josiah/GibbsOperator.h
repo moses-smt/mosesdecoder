@@ -79,7 +79,7 @@ namespace Moses {
         const string& name() const {return m_name;}
         virtual ~GibbsOperator() {}
        
-				void SetAnnealingTemperature(const double t) { assert(t >= 1.0); T = t; }
+				void SetAnnealingTemperature(const double t) { T = t; }
 				void Quench() { T = 1.0; }
         
      protected:
