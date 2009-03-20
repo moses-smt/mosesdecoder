@@ -119,11 +119,14 @@ void ExpectedBleuTrainer::IncorporateGradient(
     }
 #ifdef MPI_ENABLED
     int kg = keep_going;
+    int iteration = optimizer->GetIteration();
     if (MPI_SUCCESS != MPI_Bcast(const_cast<float*>(&weights.data()[0]), weights.data().size(), MPI_FLOAT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Bcast(&kg, 1, MPI_INT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    if (MPI_SUCCESS != MPI_Bcast(&iteration, 1, MPI_INT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     ReserveNextBatch();
     if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     keep_going = kg;
+    optimizer->SetIteration(iteration);
 #endif
     SetFeatureWeights(weights.data());
     cur = cur_start;

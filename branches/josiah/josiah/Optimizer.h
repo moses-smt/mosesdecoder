@@ -34,6 +34,10 @@ struct Optimizer {
     return iteration_;
   }
 
+  void SetIteration(int iteration) { 
+    iteration_ = iteration;
+  }
+
  protected:
   virtual void OptimizeImpl(
      float f, // if known
