@@ -89,13 +89,37 @@ class ExponentiatedGradientDescent : public Optimizer {
      const Moses::ScoreComponentCollection& x,
      const Moses::ScoreComponentCollection& gradient,
      Moses::ScoreComponentCollection* new_x);
-
- private:
+ 
+ 
+  
+ protected:
   Moses::ScoreComponentCollection eta_;
   const float mu_;
   const float min_multiplier_;
   Moses::ScoreComponentCollection prev_g_;
 };
 
+class MetaNormalizedExponentiatedGradientDescent : public ExponentiatedGradientDescent {
+ public:
+  MetaNormalizedExponentiatedGradientDescent(const Moses::ScoreComponentCollection& eta,
+                                 float mu, float min_multiplier, float gamma, int max_iters) :
+  ExponentiatedGradientDescent(eta, mu, min_multiplier, max_iters), v_(eta), gamma_(gamma) {
+    std::cerr << " MetaNormalizedExponentiatedGradientDescent, gamma : " << gamma << std::endl;
+    v_.ZeroAll();
+  }
+    
+    
+  virtual void OptimizeImpl(
+                              float f,
+                              const Moses::ScoreComponentCollection& x,
+                              const Moses::ScoreComponentCollection& gradient,
+                              Moses::ScoreComponentCollection* new_x);
+    
+  private:
+    Moses::ScoreComponentCollection v_;
+    float gamma_;
+  };
+  
+  
 }
 

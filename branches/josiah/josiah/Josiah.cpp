@@ -164,6 +164,8 @@ int main(int argc, char** argv) {
   float stop_temp_expda;  
   float quenching_ratio;
   float anneal_ratio_da;
+  float gamma;
+  bool use_metanormalized_egd;
   
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -204,10 +206,12 @@ int main(int argc, char** argv) {
 	("max-temp", po::value<float>(&max_temp)->default_value(4.0), "Annealing maximum temperature")
         ("eta", po::value<float>(&eta)->default_value(1.0f), "Default learning rate for SGD/EGD")
         ("mu", po::value<float>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
+        ("gamma", po::value<float>(&gamma)->default_value(0.9f), "Smoothing parameter for Metanormalized EGD ")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
         ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
+        ("use-metanormalized-egd,N", po::value(&use_metanormalized_egd)->zero_tokens()->default_value(false), "Use metanormalized EGD")
         ("expected-bleu-deterministic-annealing-training,D", po::value(&expected_sbleu_da)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU using deterministic annealing")   
         ("initial-quenching-temp", po::value<float>(&start_temp_quench)->default_value(1.0f), "Initial quenching temperature")
         ("final-quenching-temp", po::value<float>(&stop_temp_quench)->default_value(200.0f), "Final quenching temperature")
@@ -322,12 +326,23 @@ int main(int argc, char** argv) {
   auto_ptr<istream> in;
   auto_ptr<InputSource> input;
   //auto_ptr<Optimizer> optimizer(new DumbStochasticGradientDescent(0.75, max_training_iterations));
-  auto_ptr<Optimizer> optimizer(
-    new ExponentiatedGradientDescent(
-      ScoreComponentCollection(weights.size(), eta),
-      mu,
-      0.1f,   // minimal step scaling factor
-      max_training_iterations));
+  
+  auto_ptr<Optimizer> optimizer;
+  if (use_metanormalized_egd) {
+    optimizer.reset(new MetaNormalizedExponentiatedGradientDescent(
+                                                             ScoreComponentCollection(weights.size(), eta),
+                                                             mu,
+                                                             0.1f,   // minimal step scaling factor
+                                                             gamma,                                       
+                                                             max_training_iterations));
+  }
+  else {
+    optimizer.reset(new ExponentiatedGradientDescent(
+                                                                   ScoreComponentCollection(weights.size(), eta),
+                                                                   mu,
+                                                                   0.1f,   // minimal step scaling factor
+                                                                   max_training_iterations));
+  }
   if (prior_variance != 0.0f) {
     assert(prior_variance > 0);
     std::cerr << "Using Gaussian prior: \\sigma^2=" << prior_variance << endl;

@@ -45,6 +45,7 @@ float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollect
   }
   
   gradient->PlusEquals(grad);
+  cerr << "Gradient: " <<  grad << endl;
   
   float entropy = ComputeEntropy();
   exp_gain += entropy * temperature;

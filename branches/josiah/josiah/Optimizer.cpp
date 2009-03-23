@@ -27,6 +27,7 @@ void Optimizer::Optimize(
       gradient[i] -= (x[i] - means_[i]) / variance_;
   }
   cerr << "OPTIMIZER ITERATION #" << iteration_ << endl;
+  cerr << "  CURR VALUES: " << x << endl;
   cerr << "  GRADIENT: " << gr << endl;
   if (use_gaussian_prior_)
     cerr << "P-GRADIENT: " << gradient << endl;
@@ -66,8 +67,37 @@ void ExponentiatedGradientDescent::OptimizeImpl(
   *new_x = gradient;
   new_x->MultiplyEquals(eta_);
   new_x->PlusEquals(x);
+  cerr << "New x: " << *new_x << endl;
   prev_g_ = gradient;
 }
 
+  void MetaNormalizedExponentiatedGradientDescent::OptimizeImpl(
+                                                  float f,
+                                                  const ScoreComponentCollection& x,
+                                                  const ScoreComponentCollection& gradient,
+                                                  ScoreComponentCollection* new_x) {
+    (void) f;
+    assert(x.size() == eta_.size());
+    assert(x.size() == v_.size());
+    
+    cerr << "Curr x: " << x << endl;
+    for (unsigned i = 0; i < v_.size(); ++i) {
+      v_[i] = gamma_ * v_[i] + ((1 - gamma_) * gradient[i] * gradient[i]);  
+    }
+    
+    for (unsigned i = 0; i < eta_.size(); ++i) {
+      eta_[i] = eta_[i] * max(min_multiplier_, 1.0f + ((mu_ * gradient[i] *  prev_g_[i])/ v_[i]));
+    }
+    cerr << "ETA: " << eta_ << endl;
+    *new_x = gradient;
+    new_x->MultiplyEquals(eta_);
+    cerr << "Gradient * ETA: " << *new_x << endl;
+    new_x->PlusEquals(x);
+    cerr << "New x: " << *new_x << endl;
+
+    prev_g_ = gradient;
+  }
+  
+  
 }
 
