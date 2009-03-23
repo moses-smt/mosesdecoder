@@ -114,7 +114,6 @@ void ExpectedBleuTrainer::IncorporateGradient(
       cerr << "TOTAL EXPECTED GAIN: " << tg << " (batch size = " << batch_size << ")\n";
       cerr << "EXPECTED LENGTH / REF LENGTH: " << tel << '/' << trl << " (" << (tel / trl) << ")\n";
       optimizer->Optimize(tg, weights, g, &weights);
-      weights.PlusEquals(g);
       if (optimizer->HasConverged()) keep_going = false;
     }
 #ifdef MPI_ENABLED

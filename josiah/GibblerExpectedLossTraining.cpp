@@ -35,6 +35,9 @@ float GibblerExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gra
   }
   exp_gain /= static_cast<double>(n);
   grad.DivideEquals(n);
+
+  cerr << "Gradient: " << grad << endl;
+  cerr << "Exp gain:  " << exp_gain << endl;
   if (exp_len)
     *exp_len = static_cast<float>(tot_len) / n;
 
