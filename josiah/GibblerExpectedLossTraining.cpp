@@ -20,9 +20,8 @@ void ExpectedLossCollector::collect(Sample& s) {
 
 float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len) {
   
-  //retrieve importance weights
-  vector<float> importanceWeights;
-  getImportanceWeights(importanceWeights);
+
+  const vector<float>& importanceWeights =  getImportanceWeights();
   
   ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
   

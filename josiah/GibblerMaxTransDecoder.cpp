@@ -12,21 +12,25 @@ namespace Josiah
 
 
   template<class M>
-  void MaxCollector<M>::getDistribution(map<M,float>& p) const
+  void MaxCollector<M>::getDistribution(map<const M*,float>& p) const
   {
-    vector<float> importanceWeights;
-    getImportanceWeights(importanceWeights);
-    //cerr << "Imp weights; ";
-    //copy(importanceWeights.begin(), importanceWeights.end(), ostream_iterator<float>(cerr," "));
-    //cerr << endl;
+    const vector<float>& importanceWeights =  getImportanceWeights();
+    const M* prev = NULL;
     for (typename multimap<M,size_t>::const_iterator i = m_samples.begin(); i != m_samples.end(); ++i) {
+      //NB This works because iteration through a multimap is in key order
       size_t index = i->second;
-      p[i->first] += importanceWeights[index];
+      const M* curr = &(i->first);
+      if (prev == NULL || *prev < *curr) {
+        p[curr] = importanceWeights[index];
+        prev = curr;
+      }  else {
+        p[prev] += importanceWeights[index];
+      }
     }
     IFVERBOSE(1) {
       float total = 0;
       VERBOSE(1, "Distribution: ");
-      for (typename map<M,float>::const_iterator i = p.begin(); i != p.end(); ++i) {
+      for (typename map<const M*,float>::const_iterator i = p.begin(); i != p.end(); ++i) {
         VERBOSE(1,i->second << " ");
         total += i->second;
       }
@@ -37,11 +41,11 @@ namespace Josiah
   template<class M>
   float MaxCollector<M>::getEntropy() const
   {
-    map<M, float> p;
+    map<const M*, float> p;
     getDistribution(p);
     float entropy = 0;
     //cerr << "Entropy: ";
-    for (typename map<M,float>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
+    for (typename map<const M*,float>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
       //cerr << pi->second << " ";
       entropy -= pi->second*log(pi->second);
     }
@@ -60,6 +64,44 @@ namespace Josiah
       const M* MaxCollector<M>::getSample(size_t index) const 
   {
     return m_sampleList.at(index);
+  }
+  
+  template<class M>
+      pair<const M*,float> MaxCollector<M>::getMax() const 
+  {
+    const M* argmax = NULL;
+    float max = 0;
+    map<const M*,float> p;
+    getDistribution(p);
+    for (typename map<const M*,float>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
+      if (pi->second > max) {
+        max = pi->second;
+        argmax = pi->first;
+      }
+    }
+    
+    return pair<const M*,float>(argmax,max);
+  }
+  
+  template<class M>
+  struct ProbGreaterThan :  public std::binary_function<const pair<const M*,float>&,const pair<const M*,float>&,bool>{
+    bool operator()(const pair<const M*,float>& d1, const pair<const M*,float>& d2) const {
+      return d1.second > d2.second; 
+    }
+  };
+  
+  template<class M>
+      void MaxCollector<M>::getNbest(vector<pair<const M*, float> >& nbest, size_t n) const 
+  {
+    map<const M*,float> p;
+    getDistribution(p);
+    nbest.assign(p.begin(),p.end());
+    ProbGreaterThan<M> comparator;
+
+    stable_sort(nbest.begin(),nbest.end(),comparator);
+    while (nbest.size() > n) {
+      nbest.pop_back();
+    }
   }
 
   template class MaxCollector<Josiah::Derivation>;

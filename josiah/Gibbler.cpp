@@ -468,14 +468,13 @@ void SampleCollector::addSample( Sample & sample, float importanceWeight ) {
     m_totalImportanceWeight = log_sum(m_totalImportanceWeight,importanceWeight);
   }
   m_importanceWeights.push_back(importanceWeight);
+  //renormalise
+  m_normalisedImportanceWeights.push_back(0);
+  for (size_t i = 0; i < m_importanceWeights.size(); ++i) {
+    m_normalisedImportanceWeights[i] = exp(m_importanceWeights[i] - m_totalImportanceWeight);
+  }
   collect(sample);
   ++m_n;
-}
-
-void SampleCollector::getImportanceWeights(vector<float>& weights) const {
-  for (vector<float>::const_iterator i = m_importanceWeights.begin(); i!= m_importanceWeights.end(); ++i) {
-    weights.push_back(exp(*i - m_totalImportanceWeight));
-  }
 }
 
  

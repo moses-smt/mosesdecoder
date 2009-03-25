@@ -12,8 +12,7 @@ void DerivationCollector::outputDerivationProbability(const DerivationProbabilit
   
   
   void DerivationCollector::collect(Sample& sample) {
-    ++m_counts[Derivation(sample)];
-    collectSample(Derivation(sample)); //FIXME This should be the only collection
+    collectSample(Derivation(sample)); 
     IFVERBOSE(1) {
       VERBOSE(1,"Collected: " << Derivation(sample) << endl);
     }
@@ -27,23 +26,21 @@ void DerivationCollector::outputDerivationProbability(const DerivationProbabilit
     }
     ++m_n;
     if (m_pd > 0 && m_n > 0 && m_n%m_pd == 0) {
-      vector<DerivationProbability> derivations;
-      getTopN(1,derivations);
-      if (derivations.size()) {
+      pair<const Derivation*,float> max = getMax();
+      if (max.first) {
         cerr << "MaxDeriv(" << m_n << "): ";
-        outputDerivationProbability(derivations[0],cerr);
+        outputDerivationProbability(max,cerr);
         cerr << endl;
         cerr << "DerivEntropy(" << m_n << "): " << getEntropy() << endl;
       }
     }
     
     if (m_outputMaxChange) {
-      vector<DerivationProbability> derivations;
-      getTopN(1,derivations);
-      const Derivation* newmax = derivations[0].first;
+      pair<const Derivation*,float> max = getMax();
+      const Derivation* newmax = max.first;
       if (m_maxDerivation == NULL || *m_maxDerivation < *newmax || *newmax < *m_maxDerivation) {
         cerr << "NewMaxDeriv(" << m_n << ")";
-        outputDerivationProbability(derivations[0],cerr);
+        outputDerivationProbability(max,cerr);
         cerr << endl;
         m_maxDerivation = newmax;
       } 
@@ -51,32 +48,9 @@ void DerivationCollector::outputDerivationProbability(const DerivationProbabilit
     
   }
   
-  void DerivationCollector::getTopN(size_t n, vector<DerivationProbability>& derivations) {
-    derivations.clear();
-    for (map<Derivation,size_t>::iterator i = m_counts.begin(); i != m_counts.end(); ++i) {
-      float probability = (float)i->second/m_n;
-      derivations.push_back(DerivationProbability(&(i->first),probability));
-    }
-    DerivationProbGreaterThan comparator;
-    /*for (size_t i = 0; i < derivations.size(); ++i) {
-    const Derivation* d = derivations[i].first;
-    float probability = derivations[i].second;
-    cout << *d << endl;
-    cout << probability << endl;
-  }*/
-    sort(derivations.begin(),derivations.end(),comparator);
-    while (derivations.size() > n) {
-      derivations.pop_back();
-    }
-    //cout << derivations.size() << endl;
-  }
   
-  void DerivationCollector::Max(std::vector<const Factor*>& translation, size_t& count) {
-    vector<DerivationProbability> derivations;
-    getTopN(1,derivations);
-    count = m_counts[*(derivations[0].first)];
-    derivations[0].first->getTargetFactors(translation);
-  }
+  
+  
   
   void DerivationCollector::outputDerivationsByTranslation(ostream& out) {
     out << "Derivations per translation" << endl;
@@ -96,15 +70,5 @@ void DerivationCollector::outputDerivationProbability(const DerivationProbabilit
            }
          }
     
-  }
-  
-
-  void Josiah::DerivationCollector::getCounts( vector< size_t > & counts ) const
-  {
-    for (map<Derivation,size_t>::const_iterator i = m_counts.begin(); i != m_counts.end(); ++i) {
-      counts.push_back(i->second);
-    }
-  }
-  
-  
+  }  
 }
