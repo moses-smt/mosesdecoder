@@ -23,7 +23,7 @@ float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollect
 float GibblerAnnealedExpectedLossCollector::getRegularisationGradientFactor(size_t i) {
   double temperature = GetTemperature();
   const Derivation* d = m_derivationCollector.getSample(i);
-  float prob =  m_p[*d];
+  float prob =  m_p[d];
   return -temperature * (log (prob) + 1) ;
 }
 

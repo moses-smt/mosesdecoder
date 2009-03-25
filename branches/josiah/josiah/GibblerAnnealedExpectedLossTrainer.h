@@ -34,7 +34,7 @@ namespace Josiah {
     DerivationCollector m_derivationCollector;
     
     //cache the distribution during gradient calculation
-    std::map<Derivation,float> m_p;
+    std::map<const Derivation*,float> m_p;
   };
   
 }

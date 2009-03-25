@@ -40,12 +40,12 @@ template <class M>
     public:
       /** Should be called to report that an example of M was found in the sample*/
       void collectSample(const M&);
-      /** The sentence at the argmax */
-      virtual void Max(Translation& translation, size_t& count) = 0;
-      /** All counts of samples*/
-      virtual void getCounts(std::vector<size_t>& counts) const = 0;
+      /**argmax and max*/
+      pair<const M*,float> getMax() const;
+      /** n-best list*/
+      void getNbest(vector<pair<const M*, float> >& nbest, size_t n) const;
       /**Estimate of the probability distribution */
-      void getDistribution(map<M,float>& p) const;
+      void getDistribution(map<const M*,float>& p) const;
       /** The sample at a given index.*/
       const M* getSample(size_t index) const;
       float getEntropy() const;
@@ -94,9 +94,8 @@ class GibblerMaxTransDecoder : public virtual MaxCollector<Translation> {
          virtual bool ShouldStop(size_t iterations) {
            if (iterations < m_minIterations) return false;
            if (iterations >= m_maxIterations) return true;
-           vector<const Factor*> translation;
-           size_t count;
-           m_maxCollector->Max(translation,count);
+           pair<const M*, float> max = m_maxCollector->getMax();
+           size_t count = (size_t)(max.second * m_maxCollector->N() +0.5);
            return (count >= m_maxCount);
          }
          virtual ~MaxCountStopStrategy() {}

@@ -554,16 +554,17 @@ int main(int argc, char** argv) {
     }
     if (derivationCollector.get()) {
       cerr << "DerivEntropy " << derivationCollector->getEntropy() << endl;
-      vector<DerivationProbability> derivations;
-      derivationCollector->getTopN(max(topn,1u),derivations);
-      for (size_t i = 0; i < topn && i < derivations.size() ; ++i) {  
-        Derivation d = *(derivations[i].first);
+      vector<pair<const Derivation*, float> > nbest;
+      derivationCollector->getNbest(nbest,max(topn,1u));
+      for (size_t i = 0; i < topn && i < nbest.size() ; ++i) {  
+        //const Derivation d = *(nbest[i].first);
         cerr << "NBEST: " << lineno << " ";
-        derivationCollector->outputDerivationProbability(derivations[i],cerr);
+        derivationCollector->outputDerivationProbability(nbest[i],cerr);
         cerr << endl;
       }
       if (decode) {
-        const vector<string>& sentence = derivations[0].first->getTargetSentence();
+        pair<const Derivation*, float> max = derivationCollector->getMax();
+        const vector<string>& sentence = max.first->getTargetSentence();
         copy(sentence.begin(),sentence.end(),ostream_iterator<string>(*out," "));
         (*out) << endl << flush;
       }

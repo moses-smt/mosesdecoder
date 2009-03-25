@@ -77,11 +77,7 @@ namespace Josiah {
   
   typedef std::pair<const Derivation*,float> DerivationProbability;
   
-  struct DerivationProbGreaterThan :  public std::binary_function<const DerivationProbability,const DerivationProbability,bool>{
-    bool operator()(const DerivationProbability& d1, const DerivationProbability& d2) const {
-        return d1.second > d2.second; 
-       }
-  };
+  
   
   std::ostream& operator<<(std::ostream&, const Derivation&);
   
