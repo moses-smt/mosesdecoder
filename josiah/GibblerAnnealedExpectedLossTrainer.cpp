@@ -9,22 +9,31 @@ using namespace std;
 namespace Josiah {
   
 void GibblerAnnealedExpectedLossCollector::collect(Sample& s) {
-  ++n;  // increment total samples seen
-  const Hypothesis* h = s.GetSampleHypothesis();
-  vector<const Factor*> trans;
-  h->GetTranslation(&trans, 0);
-  const float gain = g.ComputeGain(trans);
-  tot_len += trans.size();
-  VERBOSE(2,"Gain " <<  gain << "\tFeatures=" << s.GetFeatureValues() << endl);
-  feature_expectations.PlusEquals(s.GetFeatureValues());
-  ++m_counts[Derivation(s)];
-  m_gain[Derivation(s)] = gain;
+  ExpectedLossCollector::collect(s);
+  m_derivationCollector.collect(s);
+}
+
+float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient, float* exp_len) {
+  //the distribution is fetched here so that it only has to be done once during gradient calculation
+  m_p.clear();
+  m_derivationCollector.getDistribution(m_p);
+  return ExpectedLossCollector::UpdateGradient(gradient,exp_len);
+}
+
+float GibblerAnnealedExpectedLossCollector::getRegularisationGradientFactor(size_t i) {
+  double temperature = GetTemperature();
+  const Derivation* d = m_derivationCollector.getSample(i);
+  float prob =  m_p[*d];
+  return -temperature * (log (prob) + 1) ;
+}
+
+float GibblerAnnealedExpectedLossCollector:: getRegularisation() {
+  return m_derivationCollector.getEntropy();
 }
   
-float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,
+/*float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,
                                                              float *exp_len)  {
-
-  feature_expectations.DivideEquals(n);
+  ScoreComponentCollection feature_expectations = getFeatureExpectations();
   ScoreComponentCollection grad = feature_expectations; grad.ZeroAll();
   map<Derivation, float>::iterator si;
   
@@ -36,7 +45,7 @@ float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollect
     ScoreComponentCollection d = derivation.getFeatureValues();
     const float gain = si->second;
     size_t count = m_counts[derivation];
-    const float prob = static_cast<float>(count) / n ;
+    const float prob = static_cast<float>(count) / N() ;
     float entropy_factor = -temperature * (log (prob) + 1) ;
     d.MinusEquals(feature_expectations);
     d.MultiplyEquals(prob * (gain+entropy_factor));
@@ -51,7 +60,7 @@ float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollect
   exp_gain += entropy * temperature;
   
   if (exp_len)
-    *exp_len = static_cast<float>(tot_len) / n;
+    *exp_len = static_cast<float>(tot_len) / N();
     
   return exp_gain;
 }
@@ -60,13 +69,13 @@ float GibblerAnnealedExpectedLossCollector::ComputeEntropy() {
   map<Derivation, size_t>::const_iterator ci;    
   float entropy= 0;
   for (ci = m_counts.begin(); ci != m_counts.end(); ++ci) {
-    float prob = static_cast<float>(ci->second) / n ;
+    float prob = static_cast<float>(ci->second) / N() ;
     entropy -= prob * log(prob);
   }
   cerr << "Entropy is " << entropy << endl; 
-  if (entropy <0 || entropy > log(n + 1e-2)) cerr << "entropy is negative or above upper bound, must be wrong; " << entropy << endl;
+  if (entropy <0 || entropy > log(N() + 1e-2)) cerr << "entropy is negative or above upper bound, must be wrong; " << entropy << endl;
   return entropy;  
-}  
+}  */
   
 
 }

@@ -15,31 +15,26 @@ class GainFunction;
 
 class ExpectedLossCollector : public SampleCollector {
   public:
-    ExpectedLossCollector(const GainFunction& f) : g(f), n(), tot_len() {}
+    ExpectedLossCollector(const GainFunction& f) :   g(f) {}
     virtual ~ExpectedLossCollector() {}
-    virtual void collect(Sample& sample) = 0;
+    virtual void collect(Sample& sample);
     // returns the expected gain and expected sentence length
-    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len) = 0;
-    
+    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len);
+  
     
   protected:
+    ScoreComponentCollection getFeatureExpectations(const vector<float>& importanceWeights) const;
+    /** Hooks for adding, eg, entropy regularisation. The first is added in to the gradient, the second to the objective.*/
+    virtual float getRegularisationGradientFactor(size_t i) {return 0;}
+    virtual float getRegularisation() {return 0;}
+  
+  private:
+    std::vector<ScoreComponentCollection> m_featureVectors;
+    std::vector<float> m_gains;
+    std::vector<size_t> m_lengths;
     const GainFunction& g;
-    int n;
-    size_t tot_len;
-    ScoreComponentCollection feature_expectations;
-};
   
-  
-  
-class GibblerExpectedLossCollector : public ExpectedLossCollector {
- public:
-  GibblerExpectedLossCollector(const GainFunction& f) : ExpectedLossCollector(f) {}
-  virtual void collect(Sample& sample);
-  // returns the expected gain and expected sentence length
-  virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len);
-  
- private:
-  std::list<std::pair<ScoreComponentCollection, float> > samples;
+ 
 };
 
 }

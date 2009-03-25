@@ -9,7 +9,7 @@ using namespace std;
 
 namespace Josiah {
 
-void MBRDecoder::collect(Sample& sample) {
+  void MBRDecoder::collect(Sample& sample) {
   ++n;
   const Hypothesis* h = sample.GetSampleHypothesis();
   vector<const Factor*> trans;
@@ -17,12 +17,6 @@ void MBRDecoder::collect(Sample& sample) {
   ++samples[trans];
 }
   
-string ToString(const vector<const Factor*>& ws) {
-    ostringstream os;
-    for (vector<const Factor*>::const_iterator i = ws.begin(); i != ws.end(); ++i)
-      os << (*i)->GetString() << " ";
-    return os.str();
-}
   
 
 vector<const Factor*> MBRDecoder::Max() {

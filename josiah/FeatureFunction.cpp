@@ -34,12 +34,15 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
   // each feature, have features populate options / read variable maps /
   // populate feature_vector using static functions.
   po::options_description desc;
+  bool useApproxPef = false;
   desc.add_options()
     ("model1.table", "Model 1 table")
     ("model1.pef_column", "Column containing p(e|f) score")
-    ("model1.pfe_column", "Column containing p(f|e) score");
+    ("model1.pfe_column", "Column containing p(f|e) score")
+      ("model1.approx_pef",po::value<bool>(&useApproxPef)->default_value(false), "Approximate the p(e|f), and use importance sampling");
   po::variables_map vm;
   po::store(po::parse_config_file(in,desc,true), vm);
+  notify(vm);
   if (!vm["model1.pef_column"].empty() || !vm["model1.pfe_column"].empty()){
     boost::shared_ptr<external_model1_table> ptable;
     boost::shared_ptr<moses_factor_to_vocab_id> p_evocab_mapper;
@@ -51,8 +54,14 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
       p_fvocab_mapper.reset(new moses_factor_to_vocab_id(ptable->f_vocab(), Moses::Input, 0, Moses::FactorCollection::Instance())); 
       p_evocab_mapper.reset(new moses_factor_to_vocab_id(ptable->e_vocab(), Moses::Output, 0, Moses::FactorCollection::Instance())); 
     }
-    if (!vm["model1.pef_column"].empty())
-      fv.push_back(feature_handle(new model1(ptable, p_fvocab_mapper, p_evocab_mapper)));
+    if (!vm["model1.pef_column"].empty()) {
+      if (useApproxPef) {
+        cerr << "Using approximation for model1" << endl;
+        fv.push_back(feature_handle(new ApproximateModel1(ptable, p_fvocab_mapper, p_evocab_mapper)));
+      } else {
+        fv.push_back(feature_handle(new model1(ptable, p_fvocab_mapper, p_evocab_mapper)));
+      }
+    }
     if (!vm["model1.pfe_column"].empty())
       fv.push_back(feature_handle(new model1_inverse(ptable, p_fvocab_mapper, p_evocab_mapper))); 
   }

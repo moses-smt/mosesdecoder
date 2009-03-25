@@ -262,4 +262,12 @@ float model1_inverse::getFlipUpdateScore(const Sample& s,
   return 0.0;
 }
 
+ApproximateModel1::ApproximateModel1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
+    model1(table,fmap,emap){}
+    
+float ApproximateModel1::getImportanceWeight(const Sample& sample) {
+  //since the "approximation" is to return 0, this is just the true score
+  return model1::computeScore(sample);
+}
+
 } // namespace Josiah

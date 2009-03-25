@@ -209,4 +209,27 @@ private:
   std::vector<int> _sentence_cache; // cached internal rep of source sentence
 };
 
+/**
+  * Approximation of model1 for importance sampling.
+ **/
+class ApproximateModel1 : public model1 {
+  public:
+    ApproximateModel1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
+    /** Compute full score of a sample from scratch **/
+    virtual float computeScore(const Sample& sample) {return 0;}
+    /** Change in score when updating one segment */
+    virtual float getImportanceWeight(const Sample& sample);
+    virtual float getSingleUpdateScore(const Sample& sample, const TranslationOption* option, const WordsRange& targetSegment) 
+      {return 0;}
+    /** Change in score when updating two segments **/
+    virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
+                                       const TranslationOption* rightOption, const WordsRange& targetSegment,  const Phrase& targetPhrase) {return 0;}
+    /** Change in score when flipping */
+    virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
+                                     const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
+                                     const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {return 0;}
+    
+    
+};
+
 } // namespace Josiah

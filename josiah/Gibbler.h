@@ -16,6 +16,7 @@ class TranslationOptionCollection;
 class TranslationOption;
 class Word;
 class FeatureFunction;
+class Sampler;
 
 
   
@@ -77,7 +78,8 @@ class Sample {
   /** Words in the current target */
   const std::vector<Word>& GetTargetWords() const { return m_targetWords; }
   const std::vector<Word>& GetSourceWords() const { return m_sourceWords; } 
-  /** Extra feature functions - not including moses ones */
+  
+  friend class Sampler;
 };
 
 
@@ -88,8 +90,25 @@ class Sample {
  **/
 class SampleCollector {
   public:
-    virtual void collect(Sample& sample) = 0;
+    SampleCollector(): m_totalImportanceWeight(0), m_n(0)  {}
+    virtual void addSample(Sample& sample, float importanceWeight);
     virtual ~SampleCollector() {}
+  
+  protected:
+    /** The actual collection.*/
+    virtual void collect(Sample& sample) = 0;
+    /** The log of the total importance weight */
+    float getTotalImportanceWeight() const {return m_totalImportanceWeight;}
+    /** Number of samples */
+    size_t N() const {return m_n;}
+    /** Normalised importance weights  - in probability space*/
+    void getImportanceWeights(std::vector<float>& weights) const;
+    
+    
+  private:
+    float m_totalImportanceWeight;
+    std::vector<float> m_importanceWeights;
+    size_t m_n;
 };
 
 class PrintSampleCollector  : public virtual SampleCollector {
@@ -98,18 +117,7 @@ class PrintSampleCollector  : public virtual SampleCollector {
     virtual ~PrintSampleCollector() {}
 };
 
-/**
-  * Collector that looks for a max (eg translation, derivation).
- **/
-class MaxCollector : public virtual SampleCollector {
-  public:
-    /** The sentence at the argmax */
-    virtual void Max(std::vector<const Factor*>& translation, size_t& count) = 0;
-    /** All counts of samples */
-    virtual void getCounts(vector<size_t>& counts) const = 0;
-    float getEntropy() const;
-    
-};
+
 
 /**
  * Used to specify when the sampler should stop.
@@ -133,23 +141,8 @@ class CountStopStrategy : public virtual StopStrategy {
     size_t m_max;
 };
 
-/**
- * Stop strategy which uses the count of the max (trans or deriv) to determine 
- * when to stop.
- **/
-class MaxCountStopStrategy : public virtual StopStrategy {
-  public:
-    MaxCountStopStrategy(size_t minIterations, size_t maxIterations, size_t maxCount,  MaxCollector* maxCollector)
-  : m_minIterations(minIterations), m_maxIterations(maxIterations),m_maxCount(maxCount), m_maxCollector(maxCollector) {}
-    virtual bool ShouldStop(size_t iterations);
-    virtual ~MaxCountStopStrategy() {}
-    
-  private:
-    size_t m_minIterations;
-    size_t m_maxIterations;
-    size_t m_maxCount;
-    MaxCollector* m_maxCollector;
-};
+
+
 
 class Sampler {
  private:
@@ -178,6 +171,7 @@ class Sampler {
 
 
 }
+
 
 
 

@@ -8,6 +8,7 @@
 #include "ScoreComponentCollection.h"
 #include "Derivation.h"
 #include "GibblerExpectedLossTraining.h"
+#include "GibblerMaxDerivDecoder.h"
 #include "Phrase.h"
 
 using namespace Moses;
@@ -21,16 +22,19 @@ namespace Josiah {
     GibblerAnnealedExpectedLossCollector(const GainFunction& f) :  ExpectedLossCollector(f) {}
     
     virtual void collect(Sample& sample);
-    // returns the expected gain and expected sentence length
-    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len);
     float ComputeEntropy();
     float GetTemperature() { return m_temp;}
     void SetTemperature(float temp) {m_temp = temp;} 
+    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len);
+    virtual float getRegularisationGradientFactor(size_t i);
+    virtual float getRegularisation();
     
   private:
     float m_temp;
-    std::map<Derivation,size_t> m_counts;
-    std::map<Derivation,float> m_gain;
+    DerivationCollector m_derivationCollector;
+    
+    //cache the distribution during gradient calculation
+    std::map<Derivation,float> m_p;
   };
   
 }

@@ -7,43 +7,65 @@ using namespace std;
 
 namespace Josiah {
 
-void GibblerExpectedLossCollector::collect(Sample& s) {
-  ++n;  // increment total samples seen
+void ExpectedLossCollector::collect(Sample& s) {
   const Hypothesis* h = s.GetSampleHypothesis();
   vector<const Factor*> trans;
   h->GetTranslation(&trans, 0);
   const float gain = g.ComputeGain(trans);
-  tot_len += trans.size();
+  m_lengths.push_back(trans.size());
   VERBOSE(2, gain << "\tFeatures=" << s.GetFeatureValues() << endl);
-  samples.push_back(make_pair(s.GetFeatureValues(), gain));
-  feature_expectations.PlusEquals(s.GetFeatureValues());
+  m_gains.push_back(gain);
+  m_featureVectors.push_back(s.GetFeatureValues());
 }
 
-float GibblerExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,
-    float *exp_len) {
-  feature_expectations.DivideEquals(n);
-  ScoreComponentCollection grad = feature_expectations; grad.ZeroAll();
-  list<pair<ScoreComponentCollection, float> >::iterator si;
+float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len) {
+  
+  //retrieve importance weights
+  vector<float> importanceWeights;
+  getImportanceWeights(importanceWeights);
+  
+  ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
+  
+  //gradient computation
+  ScoreComponentCollection grad;
   double exp_gain = 0;
-  for (si = samples.begin(); si != samples.end(); ++si) {
-    ScoreComponentCollection d = si->first;
-    const float gain = si->second;
-    d.MinusEquals(feature_expectations);
-    d.MultiplyEquals(gain);
-    exp_gain += gain;
-    grad.PlusEquals(d);
+  for (size_t i = 0; i < N(); ++i) {
+    ScoreComponentCollection fv = m_featureVectors[i];
+    const float gain = m_gains[i];
+    fv.MinusEquals(feature_expectations);
+    fv.MultiplyEquals(gain + getRegularisationGradientFactor(i));
+    exp_gain += gain*importanceWeights[i];
+    fv.MultiplyEquals(importanceWeights[i]);
+    grad.PlusEquals(fv);
   }
-  exp_gain /= static_cast<double>(n);
-  grad.DivideEquals(n);
+  
+  exp_gain += getRegularisation();
 
   cerr << "Gradient: " << grad << endl;
   cerr << "Exp gain:  " << exp_gain << endl;
-  if (exp_len)
-    *exp_len = static_cast<float>(tot_len) / n;
-
-
+  
   gradient->PlusEquals(grad);
+  //expected length
+  if (exp_len) {
+    exp_len = 0;
+    for (size_t i = 0; i < N(); ++i) {
+      *exp_len += importanceWeights[i] * m_lengths[i];
+    }
+  }
+
   return exp_gain;
 }
+
+ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations(const vector<float>& importanceWeights) const {
+  ScoreComponentCollection feature_expectations;
+  for (size_t i = 0; i < m_featureVectors.size(); ++i) {
+    ScoreComponentCollection fv = m_featureVectors[i];
+    fv.MultiplyEquals(importanceWeights[i]);
+    feature_expectations.PlusEquals(fv);
+  }
+  return feature_expectations;
+}
+
+
 }
 

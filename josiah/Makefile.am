@@ -10,6 +10,7 @@ josiah_SOURCES = Derivation.cpp \
 	MBRDecoder.cpp \
         Gibbler.cpp \
         GibblerExpectedLossTraining.cpp \
+        GibblerMaxDerivDecoder.cpp \
         GibblerMaxTransDecoder.cpp \
         GibbsOperator.cpp \
 	Model1.cpp \
