@@ -419,10 +419,30 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
         VERBOSE(3,"Sampling with operator " << m_operators[j]->name() << endl);
         m_operators[j]->doIteration(sample,*options);
       }
+      //importance weight
+      float totalImpWeight = 0;
+      ScoreComponentCollection deltaFV;
+      for (Josiah::feature_vector::const_iterator j = sample.extra_features().begin(); j != sample.extra_features().end(); ++j) {
+        float score = (*j)->getImportanceWeight(sample);
+        const ScoreProducer& sp = (*j)->getScoreProducer();
+        const StaticData& staticData = StaticData::Instance();
+        const ScoreIndexManager& sim = staticData.GetScoreIndexManager();
+        float scoreWeight = StaticData::Instance().GetAllWeights()[sim.GetBeginIndex(sp.GetScoreBookkeepingID())];
+        VERBOSE(2, "Score producer: " << sp.GetScoreProducerDescription() << " Weight: " << scoreWeight << endl)
+        totalImpWeight += scoreWeight*score;
+        //set the weight in the sample  
+        deltaFV.Assign(&sp,score); //This is the correct delta, as true_score = importance_weight+importance_score (in log space)
+      }
+      VERBOSE(1, "Unnormalised importance weight: " << totalImpWeight << endl);
+      sample.UpdateFeatureValues(deltaFV);
       for (size_t j = 0; j < m_collectors.size(); ++j) {
         m_operators[j]->SetAnnealingTemperature(m_quenchTemp);
-        m_collectors[j]->collect(sample);
+        m_collectors[j]->addSample(sample,totalImpWeight);
       }
+      //set sample back to be the importance score
+      ScoreComponentCollection minusDeltaFV;
+      minusDeltaFV.MinusEquals(deltaFV);
+      sample.UpdateFeatureValues(minusDeltaFV);
       ++i;
       if (m_stopper->ShouldStop(i)) {
         break;
@@ -440,28 +460,24 @@ void PrintSampleCollector::collect(Sample& sample)  {
 }
 
 
-bool MaxCountStopStrategy::ShouldStop(size_t iterations) {
-  if (iterations < m_minIterations) return false;
-  if (iterations >= m_maxIterations) return true;
-  vector<const Factor*> translation;
-  size_t count;
-  m_maxCollector->Max(translation,count);
-  return (count >= m_maxCount);
-}
 
-float MaxCollector::getEntropy( ) const {
-  vector<size_t> counts;
-  getCounts(counts);
-  size_t N = accumulate(counts.begin(),counts.end(),0);
-  float entropy;
-  for (vector<size_t>::iterator i = counts.begin(); i != counts.end(); ++i) {
-    float n = (float)*i;
-    entropy -= n/N*log(n/N);
+void SampleCollector::addSample( Sample & sample, float importanceWeight ) {
+  if (m_importanceWeights.empty()) {
+    m_totalImportanceWeight = importanceWeight;
+  } else {
+    m_totalImportanceWeight = log_sum(m_totalImportanceWeight,importanceWeight);
   }
-  return entropy;
+  m_importanceWeights.push_back(importanceWeight);
+  collect(sample);
+  ++m_n;
 }
 
+void SampleCollector::getImportanceWeights(vector<float>& weights) const {
+  for (vector<float>::const_iterator i = m_importanceWeights.begin(); i!= m_importanceWeights.end(); ++i) {
+    weights.push_back(exp(*i - m_totalImportanceWeight));
+  }
 }
 
-
+ 
+}
 

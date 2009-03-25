@@ -72,6 +72,9 @@ class FeatureFunction {
       m_scoreProducer(name) {}
     /** Compute full score of a sample from scratch **/
     virtual float computeScore(const Sample& sample) = 0;
+    /** Compute the log of the importance weight. This is log(true score) - log (importance score). The computeScore()
+     *  method returns the importance score, as do all the getXXScore() methods. **/
+    virtual float getImportanceWeight(const Sample& sample) {return 0;}
     /** Change in score when updating one segment */
     virtual float getSingleUpdateScore(const Sample& sample, const TranslationOption* option, const WordsRange& targetSegment) = 0;
     /** Change in score when updating two segments **/

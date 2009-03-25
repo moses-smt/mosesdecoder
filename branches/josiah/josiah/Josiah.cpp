@@ -413,7 +413,7 @@ int main(int argc, char** argv) {
     auto_ptr<GibblerMaxTransDecoder> transCollector;
     auto_ptr<MBRDecoder> mbrCollector;
     if (expected_sbleu) {
-      elCollector.reset(new GibblerExpectedLossCollector(g[lineno]));
+      elCollector.reset(new ExpectedLossCollector(g[lineno]));
       sampler.AddCollector(elCollector.get());
     }
     else if (expected_sbleu_da) {
@@ -496,14 +496,14 @@ int main(int argc, char** argv) {
               cerr << "Error: Need to be collecting derivations to use this stop strategy" << endl;
               exit (1);
             }
-            stopper.reset(new MaxCountStopStrategy(miniters, maxiters, maxcount, derivationCollector.get()));
+            stopper.reset(new MaxCountStopStrategy<Derivation>(miniters, maxiters, maxcount, derivationCollector.get()));
           }
           if (useMaxtrans) {
             if (!transCollector.get()) {
               cerr << "Error: Need to be collecting translations to use this stop strategy" << endl;
               exit (1);
             }
-            stopper.reset(new MaxCountStopStrategy(miniters, maxiters, maxcount, transCollector.get()));
+            stopper.reset(new MaxCountStopStrategy<Translation>(miniters, maxiters, maxcount, transCollector.get()));
           }
         }
       }

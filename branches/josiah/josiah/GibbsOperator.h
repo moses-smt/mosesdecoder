@@ -39,10 +39,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses {
 
   class Sample;
-  class SampleCollector;
   class TranslationDelta;
   
   typedef boost::mt19937 base_generator_type;
+  
+  
+  template<class T>
+      T log_sum (T log_a, T log_b)
+  {
+    T v;
+    if (log_a < log_b) {
+      v = log_b+log ( 1 + exp ( log_a-log_b ));
+    } else {
+      v = log_a+log ( 1 + exp ( log_b-log_a ));
+    }
+    return ( v );
+  }
   
   /**
     * Wraps the random number generation and enables seeding.
