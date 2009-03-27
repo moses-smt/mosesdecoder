@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
   int lineno;
   bool randomize;
   float scalefactor;
-  float eta;
+  vector<float> eta;
   float mu;
   string weightfile;
   vector<string> ref_files;
@@ -157,8 +157,9 @@ int main(int argc, char** argv) {
   float max_temp;
   float prior_variance;
   vector<float> prior_mean;
+  vector<float> prev_gradient;
   bool expected_sbleu_da;
-  float start_temp_quench;
+  float start_temp_quench; 
   float stop_temp_quench;
   float start_temp_expda;
   float stop_temp_expda;  
@@ -166,7 +167,7 @@ int main(int argc, char** argv) {
   float anneal_ratio_da;
   float gamma;
   bool use_metanormalized_egd;
-  
+  int optimizerFreq; 
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -204,7 +205,8 @@ int main(int argc, char** argv) {
 	("reheatings", po::value<unsigned int>(&reheatings)->default_value(1), "Number of times to reheat the sampler")
 	("anneal,a", po::value(&anneal)->default_value(false)->zero_tokens(), "Use annealing during the burn in period")
 	("max-temp", po::value<float>(&max_temp)->default_value(4.0), "Annealing maximum temperature")
-        ("eta", po::value<float>(&eta)->default_value(1.0f), "Default learning rate for SGD/EGD")
+        ("eta", po::value<vector<float> >(&eta), "Default learning rate for SGD/EGD")
+        ("prev-gradient", po::value<vector<float> >(&prev_gradient), "Previous gradient for restarting SGD/EGD")
         ("mu", po::value<float>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
         ("gamma", po::value<float>(&gamma)->default_value(0.9f), "Smoothing parameter for Metanormalized EGD ")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
@@ -213,6 +215,7 @@ int main(int argc, char** argv) {
         ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
         ("use-metanormalized-egd,N", po::value(&use_metanormalized_egd)->zero_tokens()->default_value(false), "Use metanormalized EGD")
         ("expected-bleu-deterministic-annealing-training,D", po::value(&expected_sbleu_da)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU using deterministic annealing")   
+        ("optimizer-freq", po::value<int>(&optimizerFreq)->default_value(1),"Number of optimization to perform at given temperature")
         ("initial-quenching-temp", po::value<float>(&start_temp_quench)->default_value(1.0f), "Initial quenching temperature")
         ("final-quenching-temp", po::value<float>(&stop_temp_quench)->default_value(200.0f), "Final quenching temperature")
         ("quenching-ratio,Q", po::value<float>(&quenching_ratio)->default_value(2.0f), "Quenching ratio")
@@ -251,6 +254,8 @@ int main(int argc, char** argv) {
       cerr << "Error: No moses ini file specified" << endl;
       return 1;
   }
+  cerr << "optimizer freq " << optimizerFreq << endl;
+  assert(optimizerFreq != 0);
   
   if (do_timing) {
     timer.on();
@@ -325,23 +330,28 @@ int main(int argc, char** argv) {
   }
   auto_ptr<istream> in;
   auto_ptr<InputSource> input;
-  //auto_ptr<Optimizer> optimizer(new DumbStochasticGradientDescent(0.75, max_training_iterations));
   
   auto_ptr<Optimizer> optimizer;
+
+  eta.resize(weights.size());
+  prev_gradient.resize(weights.size());
+
   if (use_metanormalized_egd) {
     optimizer.reset(new MetaNormalizedExponentiatedGradientDescent(
-                                                             ScoreComponentCollection(weights.size(), eta),
+                                                             ScoreComponentCollection(eta),
                                                              mu,
                                                              0.1f,   // minimal step scaling factor
                                                              gamma,                                       
-                                                             max_training_iterations));
+                                                             max_training_iterations,
+                                                             ScoreComponentCollection(prev_gradient)));
   }
   else {
     optimizer.reset(new ExponentiatedGradientDescent(
-                                                                   ScoreComponentCollection(weights.size(), eta),
+                                                                   ScoreComponentCollection(eta),
                                                                    mu,
                                                                    0.1f,   // minimal step scaling factor
-                                                                   max_training_iterations));
+                                                                   max_training_iterations,
+                                                                   ScoreComponentCollection(prev_gradient)));
   }
   if (prior_variance != 0.0f) {
     assert(prior_variance > 0);
@@ -420,7 +430,7 @@ int main(int argc, char** argv) {
       elCollector.reset(new GibblerAnnealedExpectedLossCollector(g[lineno]));
       sampler.AddCollector(elCollector.get());
       //Set the annealing temperature
-      int it = optimizer->GetIteration();
+      int it = optimizer->GetIteration() / optimizerFreq  ;
       float temp = detAnnealingSchedule->GetTemperatureAtTime(it);
       
       GibblerAnnealedExpectedLossCollector* annealedELCollector = static_cast<GibblerAnnealedExpectedLossCollector*>(elCollector.get());
@@ -430,7 +440,7 @@ int main(int argc, char** argv) {
       if (temp == (static_cast<ExponentialAnnealingSchedule*>(detAnnealingSchedule.get()))->GetFloorTemp()) {//Time to start quenching
         if (initialQuenchingIteration == -1) //The iteration from which we start quenching
           initialQuenchingIteration = it;
-        float quenchTemp = quenchingSchedule->GetTemperatureAtTime(it - initialQuenchingIteration + 1) ;
+        float quenchTemp = quenchingSchedule->GetTemperatureAtTime((it - initialQuenchingIteration + 1)/ optimizerFreq) ;
         cerr << "Quenching temp " <<  quenchTemp << endl;
         sampler.SetQuenchingTemperature(quenchTemp);
         if (quenchTemp >= stop_temp_quench) {
