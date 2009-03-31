@@ -46,6 +46,7 @@ template <class M>
       void getNbest(vector<pair<const M*, float> >& nbest, size_t n) const;
       /**Estimate of the probability distribution */
       void getDistribution(map<const M*,float>& p) const;
+      
       /** The sample at a given index.*/
       const M* getSample(size_t index) const;
       float getEntropy() const;

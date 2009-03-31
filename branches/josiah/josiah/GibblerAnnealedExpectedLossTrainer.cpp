@@ -9,6 +9,7 @@ using namespace std;
 namespace Josiah {
   
 void GibblerAnnealedExpectedLossCollector::collect(Sample& s) {
+  cerr << "Collecting : " << s << endl;
   ExpectedLossCollector::collect(s);
   m_derivationCollector.collect(s);
 }
@@ -16,6 +17,8 @@ void GibblerAnnealedExpectedLossCollector::collect(Sample& s) {
 float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient, float* exp_len) {
   //the distribution is fetched here so that it only has to be done once during gradient calculation
   m_p.clear();
+  const vector<float>& importanceWeights =  getImportanceWeights();
+  m_derivationCollector.setImportanceWeights(importanceWeights);
   m_derivationCollector.getDistribution(m_p);
   return ExpectedLossCollector::UpdateGradient(gradient,exp_len);
 }
@@ -28,8 +31,12 @@ float GibblerAnnealedExpectedLossCollector::getRegularisationGradientFactor(size
 }
 
 float GibblerAnnealedExpectedLossCollector:: getRegularisation() {
-  return m_derivationCollector.getEntropy();
+  
+  return GetTemperature() * m_derivationCollector.getEntropy();
 }
+
+  
+  
   
 /*float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,
                                                              float *exp_len)  {
@@ -40,6 +47,7 @@ float GibblerAnnealedExpectedLossCollector:: getRegularisation() {
   double exp_gain = 0;
   double temperature = GetTemperature();
   
+  
   for (si = m_gain.begin(); si != m_gain.end(); ++si) {
     const Derivation& derivation = si->first;
     ScoreComponentCollection d = derivation.getFeatureValues();
@@ -48,7 +56,7 @@ float GibblerAnnealedExpectedLossCollector:: getRegularisation() {
     const float prob = static_cast<float>(count) / N() ;
     float entropy_factor = -temperature * (log (prob) + 1) ;
     d.MinusEquals(feature_expectations);
-    d.MultiplyEquals(prob * (gain+entropy_factor));
+    d.MultiplyEquals(m_quenchTemp * prob * (gain+entropy_factor));
     exp_gain += gain * prob;
     grad.PlusEquals(d);
   }

@@ -11,13 +11,27 @@ namespace Josiah {
 
 Optimizer::~Optimizer() {}
 
+  
 void Optimizer::Optimize(
      float f,
      const ScoreComponentCollection x,
      const ScoreComponentCollection& gr,
      ScoreComponentCollection* new_x) {
+ 
+  ScoreComponentCollection hessianV = gr;
+  hessianV.ZeroAll();
+  Optimize(f,x,gr,hessianV, new_x);
+}  
+void Optimizer::Optimize(
+     float f,
+     const ScoreComponentCollection x,
+     const ScoreComponentCollection& gr,
+     const ScoreComponentCollection& hessianV,                    
+     ScoreComponentCollection* new_x
+     ) {
   assert(new_x);
   assert(x.size() == gr.size());
+  assert(x.size() == hessianV.size()); 
   assert(x.size() == new_x->size());
   ++iteration_;
   ScoreComponentCollection gradient = gr;
@@ -31,7 +45,7 @@ void Optimizer::Optimize(
   cerr << "  GRADIENT: " << gr << endl;
   if (use_gaussian_prior_)
     cerr << "P-GRADIENT: " << gradient << endl;
-  OptimizeImpl(f, x, gradient, new_x);
+  OptimizeImpl(f, x, gradient, hessianV, new_x);
   cerr << "NEW VALUES: " << *new_x << endl;
   if (HasConverged()) {
     cerr << "OPTIMIZER CONVERGED IN " << iteration_ << " ITERATIONS.\n";
@@ -45,6 +59,7 @@ void DumbStochasticGradientDescent::OptimizeImpl(
      float f,
      const ScoreComponentCollection& x,
      const ScoreComponentCollection& gradient,
+     const ScoreComponentCollection& hessianV, 
      ScoreComponentCollection* new_x) {
   (void) f;  // don't care about the function value!
   ScoreComponentCollection g = gradient;
@@ -57,6 +72,7 @@ void ExponentiatedGradientDescent::OptimizeImpl(
      float f,
      const ScoreComponentCollection& x,
      const ScoreComponentCollection& gradient,
+     const ScoreComponentCollection& hessianV,                                           
      ScoreComponentCollection* new_x) {
   (void) f;
   assert(x.size() == eta_.size());
@@ -71,33 +87,65 @@ void ExponentiatedGradientDescent::OptimizeImpl(
   prev_g_ = gradient;
 }
 
-  void MetaNormalizedExponentiatedGradientDescent::OptimizeImpl(
-                                                  float f,
-                                                  const ScoreComponentCollection& x,
-                                                  const ScoreComponentCollection& gradient,
-                                                  ScoreComponentCollection* new_x) {
-    (void) f;
-    assert(x.size() == eta_.size());
-    assert(x.size() == v_.size());
+void MetaNormalizedExponentiatedGradientDescent::OptimizeImpl(
+     float f,
+     const ScoreComponentCollection& x,
+     const ScoreComponentCollection& gradient,
+     const ScoreComponentCollection& hessianV,              
+     ScoreComponentCollection* new_x) {
+  
+  (void) f;
+  assert(x.size() == eta_.size());
+  assert(x.size() == v_.size());
     
-    cerr << "Curr x: " << x << endl;
-    for (unsigned i = 0; i < v_.size(); ++i) {
-      v_[i] = gamma_ * v_[i] + ((1 - gamma_) * gradient[i] * gradient[i]);  
-    }
+  cerr << "Curr x: " << x << endl;
+  for (unsigned i = 0; i < v_.size(); ++i) {
+    v_[i] = gamma_ * v_[i] + ((1 - gamma_) * gradient[i] * gradient[i]);  
+  }
     
-    for (unsigned i = 0; i < eta_.size(); ++i) {
-      eta_[i] = eta_[i] * max(min_multiplier_, 1.0f + ((mu_ * gradient[i] *  prev_g_[i])/ v_[i]));
-    }
-    cerr << "ETA: " << eta_ << endl;
-    *new_x = gradient;
-    new_x->MultiplyEquals(eta_);
-    cerr << "Gradient * ETA: " << *new_x << endl;
-    new_x->PlusEquals(x);
-    cerr << "New x: " << *new_x << endl;
-
-    prev_g_ = gradient;
+  for (unsigned i = 0; i < eta_.size(); ++i) {
+    eta_[i] = eta_[i] * max(min_multiplier_, 1.0f + ((mu_ * gradient[i] *  prev_g_[i])/ v_[i]));
   }
   
+  cerr << "ETA: " << eta_ << endl;
+  *new_x = gradient;
+  new_x->MultiplyEquals(eta_);
+  cerr << "Gradient * ETA: " << *new_x << endl;
+  new_x->PlusEquals(x);
+  cerr << "New x: " << *new_x << endl;
+  prev_g_ = gradient;
+}
+  
+void StochasticMetaDescent::OptimizeImpl(
+     float f,
+     const ScoreComponentCollection& x,
+     const ScoreComponentCollection& gradient,
+     const ScoreComponentCollection& hessianV,
+     ScoreComponentCollection* new_x) {
+  (void) f;
+  assert(x.size() == eta_.size());
+  assert(x.size() == v_.size());
+    
+  cerr << "Curr x: " << x << endl;
+    
+  for (unsigned i = 0; i < v_.size(); ++i) {
+    v_[i] = lambda_ * v_[i]  - (eta_[i] * (gradient[i] + lambda_ * hessianV[i]));  
+  }
+    
+  for (unsigned i = 0; i < eta_.size(); ++i) {
+    eta_[i] = eta_[i] * max(min_multiplier_, 1.0f - (mu_ * gradient[i] *  v_[i]));
+  }
+    
+  cerr << "ETA: " << eta_ << endl;
+  *new_x = gradient;
+  new_x->MultiplyEquals(eta_);
+  new_x->MultiplyEquals(-1.0f);
+  cerr << "-Gradient * ETA: " << *new_x << endl;
+  new_x->PlusEquals(x);
+  cerr << "New x: " << *new_x << endl;
+    
+  prev_g_ = gradient;
+}
   
 }
 

@@ -34,6 +34,13 @@ class ExpectedBleuTrainer : public InputSource {
        const float exp_gain,
        const Moses::ScoreComponentCollection& grad,
        Decoder* decoder);
+  void IncorporateGradient(
+                           const float trans_len,
+                           const float ref_len,
+                           const float exp_gain,
+                           const Moses::ScoreComponentCollection& grad,
+                           Decoder* decoder, 
+                           const Moses::ScoreComponentCollection& hessianV);
 
  private:
   int rank, size, batch_size;
@@ -44,6 +51,7 @@ class ExpectedBleuTrainer : public InputSource {
   bool keep_going;
   float total_exp_gain;
   Moses::ScoreComponentCollection gradient;
+  Moses::ScoreComponentCollection hessianV_;
   std::vector<int> order;
   boost::mt19937 rng;
   boost::uniform_smallint<int> dist;

@@ -95,6 +95,7 @@ class SampleCollector {
     /** Number of samples */
     size_t N() const {return m_n;}
     virtual ~SampleCollector() {}
+    void setImportanceWeights(const std::vector<float>& importanceWeights) {m_normalisedImportanceWeights = importanceWeights;}
   
   protected:
     /** The actual collection.*/
