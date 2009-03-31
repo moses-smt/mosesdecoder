@@ -79,12 +79,27 @@ void ExpectedBleuTrainer::GetSentence(string* sentence, int* lineno) {
 }
 
 void ExpectedBleuTrainer::IncorporateGradient(
+                                                const float trans_len,
+                                                const float ref_len,
+                                                const float exp_gain,
+                                                const ScoreComponentCollection& grad,
+                                              Decoder* decoder) {
+  ScoreComponentCollection hessianV = grad;
+  hessianV.ZeroAll();
+  IncorporateGradient(trans_len, ref_len, exp_gain, grad, decoder, hessianV);
+} 
+                                                
+  
+  
+void ExpectedBleuTrainer::IncorporateGradient(
        const float trans_len,
        const float ref_len,
        const float exp_gain,
        const ScoreComponentCollection& grad,
-       Decoder* decoder) {
+       Decoder* decoder, 
+       const ScoreComponentCollection& hessianV) {
   gradient.PlusEquals(grad);
+  hessianV_.PlusEquals(hessianV);
   total_exp_gain += exp_gain;
   total_ref_len += ref_len;
   total_exp_len += trans_len;
@@ -94,31 +109,38 @@ void ExpectedBleuTrainer::IncorporateGradient(
     GetFeatureWeights(&w);
     ScoreComponentCollection weights(w);
     vector<float> rcv_grad(w.size());
+    vector<float> rcv_hessianV(w.size());
     assert(gradient.data().size() == w.size());
+    assert(hessianV_.data().size() == w.size());
     float tg = 0, trl = 0, tel = 0;
 #ifdef MPI_ENABLED
     if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&gradient.data()[0]), &rcv_grad[0], w.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&hessianV_.data()[0]), &rcv_hessianV[0], w.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Reduce(&total_exp_gain, &tg, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Reduce(&total_ref_len, &trl, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Reduce(&total_exp_len, &tel, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
 #else
     rcv_grad = gradient.data();
+    rcv_hessianV = hessianV_.data();
     tg = total_exp_gain;
     trl = total_ref_len;
     tel = total_exp_len;
 #endif
     ScoreComponentCollection g(rcv_grad);
+    ScoreComponentCollection hessV(rcv_hessianV);
     if (rank == 0) {
       tg /= batch_size;
       g.DivideEquals(batch_size);
+      hessV.DivideEquals(batch_size);
       cerr << "TOTAL EXPECTED GAIN: " << tg << " (batch size = " << batch_size << ")\n";
       cerr << "EXPECTED LENGTH / REF LENGTH: " << tel << '/' << trl << " (" << (tel / trl) << ")\n";
-      optimizer->Optimize(tg, weights, g, &weights);
+      optimizer->Optimize(tg, weights, g, hessV, &weights);
       if (optimizer->HasConverged()) keep_going = false;
     }
 #ifdef MPI_ENABLED
     int kg = keep_going;
     int iteration = optimizer->GetIteration();
+    
     if (MPI_SUCCESS != MPI_Bcast(const_cast<float*>(&weights.data()[0]), weights.data().size(), MPI_FLOAT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Bcast(&kg, 1, MPI_INT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Bcast(&iteration, 1, MPI_INT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);

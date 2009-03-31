@@ -31,13 +31,13 @@ namespace Josiah
       float total = 0;
       VERBOSE(1, "Distribution: ");
       for (typename map<const M*,float>::const_iterator i = p.begin(); i != p.end(); ++i) {
-        VERBOSE(1,i->second << " ");
+        VERBOSE(1, i->first << "{ " << *i->first << " }: " <<  i->second << " " << endl;);
         total += i->second;
       }
       VERBOSE(1, endl << "Total = " << total << endl);
     }
   }
-
+  
   template<class M>
   float MaxCollector<M>::getEntropy() const
   {
@@ -50,14 +50,15 @@ namespace Josiah
       entropy -= pi->second*log(pi->second);
     }
     //cerr << endl;
+    cerr << "Entropy : " << entropy << endl;
     return entropy;
   }
 
   template<class M>
   void MaxCollector<M>::collectSample( const M &m)
   {
-    m_samples.insert(pair<M,size_t>(m,N()));
-    m_sampleList.push_back(&m);
+    typename multimap<M,size_t>::const_iterator i = m_samples.insert(pair<M,size_t>(m,N()));
+    m_sampleList.push_back(&(i->first));
   }
   
   template<class M>

@@ -25,6 +25,13 @@ struct Optimizer {
      const Moses::ScoreComponentCollection x,  // not ref! don't change!
      const Moses::ScoreComponentCollection& gradient,
      Moses::ScoreComponentCollection* new_x);
+  
+  void Optimize(
+     float f, // if known
+     const Moses::ScoreComponentCollection x,  // not ref! don't change!
+     const Moses::ScoreComponentCollection& gradient,
+     const Moses::ScoreComponentCollection& hessianV,
+     Moses::ScoreComponentCollection* new_x);
 
   bool HasConverged() const {
     return converged_;
@@ -39,12 +46,15 @@ struct Optimizer {
   }
 
  protected:
+  
   virtual void OptimizeImpl(
      float f, // if known
      const Moses::ScoreComponentCollection& x,
      const Moses::ScoreComponentCollection& gradient,
+     const Moses::ScoreComponentCollection& hessianV,
      Moses::ScoreComponentCollection* new_x) = 0;
-
+  
+  
   void SetHasConverged(bool converged = true) {
     converged_ = converged;
   }
@@ -67,6 +77,7 @@ class DumbStochasticGradientDescent : public Optimizer {
      float f,
      const Moses::ScoreComponentCollection& x,
      const Moses::ScoreComponentCollection& gradient,
+     const Moses::ScoreComponentCollection& hessianV,
      Moses::ScoreComponentCollection* new_x);
 
  private:
@@ -89,11 +100,12 @@ class ExponentiatedGradientDescent : public Optimizer {
   void SetEta(const Moses::ScoreComponentCollection& eta) { eta_ = eta;}
   
   virtual void OptimizeImpl(
-     float f,
-     const Moses::ScoreComponentCollection& x,
-     const Moses::ScoreComponentCollection& gradient,
-     Moses::ScoreComponentCollection* new_x);
- 
+                            float f,
+                            const Moses::ScoreComponentCollection& x,
+                            const Moses::ScoreComponentCollection& gradient,
+                            const Moses::ScoreComponentCollection& hessianV,
+                            Moses::ScoreComponentCollection* new_x);
+  
  
   
  protected:
@@ -114,16 +126,43 @@ class MetaNormalizedExponentiatedGradientDescent : public ExponentiatedGradientD
     
     
   virtual void OptimizeImpl(
-                              float f,
-                              const Moses::ScoreComponentCollection& x,
-                              const Moses::ScoreComponentCollection& gradient,
-                              Moses::ScoreComponentCollection* new_x);
+                            float f,
+                            const Moses::ScoreComponentCollection& x,
+                            const Moses::ScoreComponentCollection& gradient,
+                            const Moses::ScoreComponentCollection& hessianV,
+                            Moses::ScoreComponentCollection* new_x);
+  
     
   private:
     Moses::ScoreComponentCollection v_;
     float gamma_;
   };
   
-  
+  class StochasticMetaDescent : public ExponentiatedGradientDescent {
+  public:
+    StochasticMetaDescent(const Moses::ScoreComponentCollection& eta,
+                                               float mu, float min_multiplier, float lambda, int max_iters, const Moses::ScoreComponentCollection& prev_gradient) :
+    ExponentiatedGradientDescent(eta, mu, min_multiplier, max_iters, prev_gradient), v_(eta), lambda_(lambda) {
+      std::cerr << " SMD " << std::endl;
+      v_.ZeroAll();
+    }
+    
+    const Moses::ScoreComponentCollection& GetV() {
+      return v_;
+    }
+    
+    virtual void OptimizeImpl(
+                              float f,
+                              const Moses::ScoreComponentCollection& x,
+                              const Moses::ScoreComponentCollection& gradient,
+                              const Moses::ScoreComponentCollection& hessianV,
+                              Moses::ScoreComponentCollection* new_x);
+    
+    
+  private:
+    Moses::ScoreComponentCollection v_;
+    float lambda_;
+    
+  };  
 }
 

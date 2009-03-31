@@ -166,8 +166,10 @@ int main(int argc, char** argv) {
   float quenching_ratio;
   float anneal_ratio_da;
   float gamma;
+  float lambda;
   bool use_metanormalized_egd;
   int optimizerFreq; 
+  bool SMD;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -209,11 +211,13 @@ int main(int argc, char** argv) {
         ("prev-gradient", po::value<vector<float> >(&prev_gradient), "Previous gradient for restarting SGD/EGD")
         ("mu", po::value<float>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
         ("gamma", po::value<float>(&gamma)->default_value(0.9f), "Smoothing parameter for Metanormalized EGD ")
+        ("lambda", po::value<float>(&lambda)->default_value(1.0f), "Smoothing parameter for SMD ")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
         ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
         ("use-metanormalized-egd,N", po::value(&use_metanormalized_egd)->zero_tokens()->default_value(false), "Use metanormalized EGD")
+        ("use-SMD", po::value(&SMD)->zero_tokens()->default_value(false), "Train using SMD") 
         ("expected-bleu-deterministic-annealing-training,D", po::value(&expected_sbleu_da)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU using deterministic annealing")   
         ("optimizer-freq", po::value<int>(&optimizerFreq)->default_value(1),"Number of optimization to perform at given temperature")
         ("initial-quenching-temp", po::value<float>(&start_temp_quench)->default_value(1.0f), "Initial quenching temperature")
@@ -344,6 +348,15 @@ int main(int argc, char** argv) {
                                                              gamma,                                       
                                                              max_training_iterations,
                                                              ScoreComponentCollection(prev_gradient)));
+  }
+  else if (SMD) {
+    optimizer.reset(new StochasticMetaDescent(
+                                                                   ScoreComponentCollection(eta),
+                                                                   mu,
+                                                                   0.5f,   // minimal step scaling factor
+                                                                   lambda,                                       
+                                                                   max_training_iterations,
+                                                                   ScoreComponentCollection(prev_gradient)));
   }
   else {
     optimizer.reset(new ExponentiatedGradientDescent(
@@ -542,8 +555,14 @@ int main(int argc, char** argv) {
 
     if (expected_sbleu || expected_sbleu_da) {
       ScoreComponentCollection gradient;
+      ScoreComponentCollection hessianV;
       float exp_trans_len = 0;
       const float exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len);
+      
+      if (SMD) {
+        const ScoreComponentCollection& v =  static_cast<StochasticMetaDescent*>(optimizer.get())->GetV();
+        elCollector->UpdateHessianVProduct(&hessianV, v);
+      }
       (*out) << '(' << lineno << ") Expected sentence BLEU: " << exp_gain 
              << "   \tExpected length: " << exp_trans_len << endl;
       if (trainer)
@@ -552,7 +571,8 @@ int main(int argc, char** argv) {
            g[lineno].GetAverageReferenceLength(),
            exp_gain,
            gradient,
-           decoder.get());
+           decoder.get(), 
+           hessianV);
     }
     if (mbr_decoding) {
       vector<const Factor*> sentence = mbrCollector->Max();
