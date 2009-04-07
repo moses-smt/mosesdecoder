@@ -8,12 +8,6 @@ using namespace std;
 
 namespace Josiah {
   
-void GibblerAnnealedExpectedLossCollector::collect(Sample& s) {
-  cerr << "Collecting : " << s << endl;
-  ExpectedLossCollector::collect(s);
-  m_derivationCollector.collect(s);
-}
-
 float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient, float* exp_len) {
   //the distribution is fetched here so that it only has to be done once during gradient calculation
   m_p.clear();
