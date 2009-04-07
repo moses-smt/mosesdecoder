@@ -55,9 +55,9 @@ template <class M>
    
     private:
       //maps the sample to the indices at which it was found.
-      std::multimap<M,size_t> m_samples;
+      std::map<M,std::vector<size_t> > m_samples;
       //maps indices to samples
-      vector<const M*> m_sampleList;
+      std::vector<const M*> m_sampleList;
   
 };
 

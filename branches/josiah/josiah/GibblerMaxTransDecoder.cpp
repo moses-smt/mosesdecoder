@@ -16,15 +16,10 @@ namespace Josiah
   {
     const vector<float>& importanceWeights =  getImportanceWeights();
     const M* prev = NULL;
-    for (typename multimap<M,size_t>::const_iterator i = m_samples.begin(); i != m_samples.end(); ++i) {
-      //NB This works because iteration through a multimap is in key order
-      size_t index = i->second;
-      const M* curr = &(i->first);
-      if (prev == NULL || *prev < *curr) {
-        p[curr] = importanceWeights[index];
-        prev = curr;
-      }  else {
-        p[prev] += importanceWeights[index];
+    for (typename map<M,vector<size_t> >::const_iterator i = m_samples.begin(); i != m_samples.end(); ++i) {
+      const M* sample = &(i->first);
+      for (vector<size_t>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
+        p[sample] += importanceWeights[*j];
       }
     }
     IFVERBOSE(1) {
@@ -50,14 +45,15 @@ namespace Josiah
       entropy -= pi->second*log(pi->second);
     }
     //cerr << endl;
-    cerr << "Entropy : " << entropy << endl;
+    //cerr << "Entropy : " << entropy << endl;
     return entropy;
   }
 
   template<class M>
   void MaxCollector<M>::collectSample( const M &m)
   {
-    typename multimap<M,size_t>::const_iterator i = m_samples.insert(pair<M,size_t>(m,N()));
+    m_samples[m].push_back(N());
+    typename multimap<M,vector<size_t> >::const_iterator i = m_samples.find(m);
     m_sampleList.push_back(&(i->first));
   }
   
