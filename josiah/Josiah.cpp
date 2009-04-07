@@ -440,7 +440,7 @@ int main(int argc, char** argv) {
       sampler.AddCollector(elCollector.get());
     }
     else if (expected_sbleu_da) {
-      elCollector.reset(new GibblerAnnealedExpectedLossCollector(g[lineno]));
+      elCollector.reset(new GibblerAnnealedExpectedLossCollector(g[lineno],sampler));
       sampler.AddCollector(elCollector.get());
       //Set the annealing temperature
       int it = optimizer->GetIteration() / optimizerFreq  ;
