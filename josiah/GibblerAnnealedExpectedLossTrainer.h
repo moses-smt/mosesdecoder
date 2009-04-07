@@ -24,7 +24,6 @@ namespace Josiah {
         sampler.AddCollector(&m_derivationCollector);
       }
     
-    virtual void collect(Sample& sample);
     float ComputeEntropy();
     float GetTemperature() { return m_temp;}
     void SetTemperature(float temp) {m_temp = temp;} 
