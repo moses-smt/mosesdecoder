@@ -1,0 +1,439 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 44;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B218AB390F8BBF29000E5EB9 /* AnnealingSchedule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */; };
+		B218AB3A0F8BBF29000E5EB9 /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB110F8BBF29000E5EB9 /* Decoder.cpp */; };
+		B218AB3B0F8BBF29000E5EB9 /* Derivation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB130F8BBF29000E5EB9 /* Derivation.cpp */; };
+		B218AB3C0F8BBF29000E5EB9 /* FeatureFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB150F8BBF29000E5EB9 /* FeatureFunction.cpp */; };
+		B218AB3D0F8BBF29000E5EB9 /* GainFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB170F8BBF29000E5EB9 /* GainFunction.cpp */; };
+		B218AB3E0F8BBF29000E5EB9 /* Gibbler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB190F8BBF29000E5EB9 /* Gibbler.cpp */; };
+		B218AB3F0F8BBF29000E5EB9 /* GibblerAnnealedExpectedLossTrainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB1B0F8BBF29000E5EB9 /* GibblerAnnealedExpectedLossTrainer.cpp */; };
+		B218AB400F8BBF29000E5EB9 /* GibblerExpectedLossTraining.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB1D0F8BBF29000E5EB9 /* GibblerExpectedLossTraining.cpp */; };
+		B218AB410F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB1F0F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.cpp */; };
+		B218AB420F8BBF29000E5EB9 /* GibblerMaxTransDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB210F8BBF29000E5EB9 /* GibblerMaxTransDecoder.cpp */; };
+		B218AB430F8BBF29000E5EB9 /* GibbsOperator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB230F8BBF29000E5EB9 /* GibbsOperator.cpp */; };
+		B218AB440F8BBF29000E5EB9 /* InputSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB250F8BBF29000E5EB9 /* InputSource.cpp */; };
+		B218AB450F8BBF29000E5EB9 /* Josiah.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB280F8BBF29000E5EB9 /* Josiah.cpp */; };
+		B218AB460F8BBF29000E5EB9 /* MBRDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB290F8BBF29000E5EB9 /* MBRDecoder.cpp */; };
+		B218AB470F8BBF29000E5EB9 /* Model1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB2B0F8BBF29000E5EB9 /* Model1.cpp */; };
+		B218AB480F8BBF29000E5EB9 /* Optimizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB2D0F8BBF29000E5EB9 /* Optimizer.cpp */; };
+		B218AB490F8BBF29000E5EB9 /* QuenchingSchedule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB2F0F8BBF29000E5EB9 /* QuenchingSchedule.cpp */; };
+		B218AB4A0F8BBF29000E5EB9 /* SearchRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB310F8BBF29000E5EB9 /* SearchRandom.cpp */; };
+		B218AB4B0F8BBF29000E5EB9 /* SentenceBleu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB330F8BBF29000E5EB9 /* SentenceBleu.cpp */; };
+		B218AB4C0F8BBF29000E5EB9 /* TrainingSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB350F8BBF29000E5EB9 /* TrainingSource.cpp */; };
+		B218AB4D0F8BBF29000E5EB9 /* TranslationDelta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B25B2A430F8CAAF700485047 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D /* libmoses.a */;
+			remoteInfo = moses;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8DD76F690486A84900D96B5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AnnealingSchedule.cpp; sourceTree = "<group>"; };
+		B218AAFF0F8BBF29000E5EB9 /* AnnealingSchedule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnnealingSchedule.h; sourceTree = "<group>"; };
+		B218AB110F8BBF29000E5EB9 /* Decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decoder.cpp; sourceTree = "<group>"; };
+		B218AB120F8BBF29000E5EB9 /* Decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decoder.h; sourceTree = "<group>"; };
+		B218AB130F8BBF29000E5EB9 /* Derivation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Derivation.cpp; sourceTree = "<group>"; };
+		B218AB140F8BBF29000E5EB9 /* Derivation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Derivation.h; sourceTree = "<group>"; };
+		B218AB150F8BBF29000E5EB9 /* FeatureFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FeatureFunction.cpp; sourceTree = "<group>"; };
+		B218AB160F8BBF29000E5EB9 /* FeatureFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeatureFunction.h; sourceTree = "<group>"; };
+		B218AB170F8BBF29000E5EB9 /* GainFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GainFunction.cpp; sourceTree = "<group>"; };
+		B218AB180F8BBF29000E5EB9 /* GainFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GainFunction.h; sourceTree = "<group>"; };
+		B218AB190F8BBF29000E5EB9 /* Gibbler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Gibbler.cpp; sourceTree = "<group>"; };
+		B218AB1A0F8BBF29000E5EB9 /* Gibbler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gibbler.h; sourceTree = "<group>"; };
+		B218AB1B0F8BBF29000E5EB9 /* GibblerAnnealedExpectedLossTrainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GibblerAnnealedExpectedLossTrainer.cpp; sourceTree = "<group>"; };
+		B218AB1C0F8BBF29000E5EB9 /* GibblerAnnealedExpectedLossTrainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GibblerAnnealedExpectedLossTrainer.h; sourceTree = "<group>"; };
+		B218AB1D0F8BBF29000E5EB9 /* GibblerExpectedLossTraining.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GibblerExpectedLossTraining.cpp; sourceTree = "<group>"; };
+		B218AB1E0F8BBF29000E5EB9 /* GibblerExpectedLossTraining.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GibblerExpectedLossTraining.h; sourceTree = "<group>"; };
+		B218AB1F0F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GibblerMaxDerivDecoder.cpp; sourceTree = "<group>"; };
+		B218AB200F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GibblerMaxDerivDecoder.h; sourceTree = "<group>"; };
+		B218AB210F8BBF29000E5EB9 /* GibblerMaxTransDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GibblerMaxTransDecoder.cpp; sourceTree = "<group>"; };
+		B218AB220F8BBF29000E5EB9 /* GibblerMaxTransDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GibblerMaxTransDecoder.h; sourceTree = "<group>"; };
+		B218AB230F8BBF29000E5EB9 /* GibbsOperator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GibbsOperator.cpp; sourceTree = "<group>"; };
+		B218AB240F8BBF29000E5EB9 /* GibbsOperator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GibbsOperator.h; sourceTree = "<group>"; };
+		B218AB250F8BBF29000E5EB9 /* InputSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputSource.cpp; sourceTree = "<group>"; };
+		B218AB260F8BBF29000E5EB9 /* InputSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputSource.h; sourceTree = "<group>"; };
+		B218AB280F8BBF29000E5EB9 /* Josiah.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Josiah.cpp; sourceTree = "<group>"; };
+		B218AB290F8BBF29000E5EB9 /* MBRDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MBRDecoder.cpp; sourceTree = "<group>"; };
+		B218AB2A0F8BBF29000E5EB9 /* MBRDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBRDecoder.h; sourceTree = "<group>"; };
+		B218AB2B0F8BBF29000E5EB9 /* Model1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Model1.cpp; sourceTree = "<group>"; };
+		B218AB2C0F8BBF29000E5EB9 /* Model1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Model1.h; sourceTree = "<group>"; };
+		B218AB2D0F8BBF29000E5EB9 /* Optimizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Optimizer.cpp; sourceTree = "<group>"; };
+		B218AB2E0F8BBF29000E5EB9 /* Optimizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Optimizer.h; sourceTree = "<group>"; };
+		B218AB2F0F8BBF29000E5EB9 /* QuenchingSchedule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QuenchingSchedule.cpp; sourceTree = "<group>"; };
+		B218AB300F8BBF29000E5EB9 /* QuenchingSchedule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuenchingSchedule.h; sourceTree = "<group>"; };
+		B218AB310F8BBF29000E5EB9 /* SearchRandom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SearchRandom.cpp; sourceTree = "<group>"; };
+		B218AB320F8BBF29000E5EB9 /* SearchRandom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchRandom.h; sourceTree = "<group>"; };
+		B218AB330F8BBF29000E5EB9 /* SentenceBleu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SentenceBleu.cpp; sourceTree = "<group>"; };
+		B218AB340F8BBF29000E5EB9 /* SentenceBleu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SentenceBleu.h; sourceTree = "<group>"; };
+		B218AB350F8BBF29000E5EB9 /* TrainingSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TrainingSource.cpp; sourceTree = "<group>"; };
+		B218AB360F8BBF29000E5EB9 /* TrainingSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrainingSource.h; sourceTree = "<group>"; };
+		B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TranslationDelta.cpp; sourceTree = "<group>"; };
+		B218AB380F8BBF29000E5EB9 /* TranslationDelta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TranslationDelta.h; sourceTree = "<group>"; };
+		B25B29F80F8CA15100485047 /* josiah */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = josiah; sourceTree = BUILT_PRODUCTS_DIR; };
+		B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76F660486A84900D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* josiah */ = {
+			isa = PBXGroup;
+			children = (
+				B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6859E8C029090F304C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = josiah;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */,
+				B218AAFF0F8BBF29000E5EB9 /* AnnealingSchedule.h */,
+				B218AB000F8BBF29000E5EB9 /* build */,
+				B218AB110F8BBF29000E5EB9 /* Decoder.cpp */,
+				B218AB120F8BBF29000E5EB9 /* Decoder.h */,
+				B218AB130F8BBF29000E5EB9 /* Derivation.cpp */,
+				B218AB140F8BBF29000E5EB9 /* Derivation.h */,
+				B218AB150F8BBF29000E5EB9 /* FeatureFunction.cpp */,
+				B218AB160F8BBF29000E5EB9 /* FeatureFunction.h */,
+				B218AB170F8BBF29000E5EB9 /* GainFunction.cpp */,
+				B218AB180F8BBF29000E5EB9 /* GainFunction.h */,
+				B218AB190F8BBF29000E5EB9 /* Gibbler.cpp */,
+				B218AB1A0F8BBF29000E5EB9 /* Gibbler.h */,
+				B218AB1B0F8BBF29000E5EB9 /* GibblerAnnealedExpectedLossTrainer.cpp */,
+				B218AB1C0F8BBF29000E5EB9 /* GibblerAnnealedExpectedLossTrainer.h */,
+				B218AB1D0F8BBF29000E5EB9 /* GibblerExpectedLossTraining.cpp */,
+				B218AB1E0F8BBF29000E5EB9 /* GibblerExpectedLossTraining.h */,
+				B218AB1F0F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.cpp */,
+				B218AB200F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.h */,
+				B218AB210F8BBF29000E5EB9 /* GibblerMaxTransDecoder.cpp */,
+				B218AB220F8BBF29000E5EB9 /* GibblerMaxTransDecoder.h */,
+				B218AB230F8BBF29000E5EB9 /* GibbsOperator.cpp */,
+				B218AB240F8BBF29000E5EB9 /* GibbsOperator.h */,
+				B218AB250F8BBF29000E5EB9 /* InputSource.cpp */,
+				B218AB260F8BBF29000E5EB9 /* InputSource.h */,
+				B218AB280F8BBF29000E5EB9 /* Josiah.cpp */,
+				B218AB290F8BBF29000E5EB9 /* MBRDecoder.cpp */,
+				B218AB2A0F8BBF29000E5EB9 /* MBRDecoder.h */,
+				B218AB2B0F8BBF29000E5EB9 /* Model1.cpp */,
+				B218AB2C0F8BBF29000E5EB9 /* Model1.h */,
+				B218AB2D0F8BBF29000E5EB9 /* Optimizer.cpp */,
+				B218AB2E0F8BBF29000E5EB9 /* Optimizer.h */,
+				B218AB2F0F8BBF29000E5EB9 /* QuenchingSchedule.cpp */,
+				B218AB300F8BBF29000E5EB9 /* QuenchingSchedule.h */,
+				B218AB310F8BBF29000E5EB9 /* SearchRandom.cpp */,
+				B218AB320F8BBF29000E5EB9 /* SearchRandom.h */,
+				B218AB330F8BBF29000E5EB9 /* SentenceBleu.cpp */,
+				B218AB340F8BBF29000E5EB9 /* SentenceBleu.h */,
+				B218AB350F8BBF29000E5EB9 /* TrainingSource.cpp */,
+				B218AB360F8BBF29000E5EB9 /* TrainingSource.h */,
+				B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */,
+				B218AB380F8BBF29000E5EB9 /* TranslationDelta.h */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B25B29F80F8CA15100485047 /* josiah */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B218AB000F8BBF29000E5EB9 /* build */ = {
+			isa = PBXGroup;
+			children = (
+				B218AB010F8BBF29000E5EB9 /* josiah.build */,
+			);
+			path = build;
+			sourceTree = "<group>";
+		};
+		B218AB010F8BBF29000E5EB9 /* josiah.build */ = {
+			isa = PBXGroup;
+			children = (
+				B218AB020F8BBF29000E5EB9 /* josiah.pbxindex */,
+			);
+			path = josiah.build;
+			sourceTree = "<group>";
+		};
+		B218AB020F8BBF29000E5EB9 /* josiah.pbxindex */ = {
+			isa = PBXGroup;
+			children = (
+				B218AB0B0F8BBF29000E5EB9 /* strings.pbxstrings */,
+			);
+			path = josiah.pbxindex;
+			sourceTree = "<group>";
+		};
+		B218AB0B0F8BBF29000E5EB9 /* strings.pbxstrings */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = strings.pbxstrings;
+			sourceTree = "<group>";
+		};
+		B25B2A400F8CAAF700485047 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B25B2A440F8CAAF700485047 /* libmoses.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6859E8C029090F304C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76F620486A84900D96B5E /* josiah */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "josiah" */;
+			buildPhases = (
+				8DD76F640486A84900D96B5E /* Sources */,
+				8DD76F660486A84900D96B5E /* Frameworks */,
+				8DD76F690486A84900D96B5E /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = josiah;
+			productInstallPath = "$(HOME)/bin";
+			productName = josiah;
+			productReference = B25B29F80F8CA15100485047 /* josiah */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "josiah" */;
+			compatibilityVersion = "Xcode 3.0";
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* josiah */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = B25B2A400F8CAAF700485047 /* Products */;
+					ProjectRef = B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				8DD76F620486A84900D96B5E /* josiah */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		B25B2A440F8CAAF700485047 /* libmoses.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmoses.a;
+			remoteRef = B25B2A430F8CAAF700485047 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76F640486A84900D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B218AB390F8BBF29000E5EB9 /* AnnealingSchedule.cpp in Sources */,
+				B218AB3A0F8BBF29000E5EB9 /* Decoder.cpp in Sources */,
+				B218AB3B0F8BBF29000E5EB9 /* Derivation.cpp in Sources */,
+				B218AB3C0F8BBF29000E5EB9 /* FeatureFunction.cpp in Sources */,
+				B218AB3D0F8BBF29000E5EB9 /* GainFunction.cpp in Sources */,
+				B218AB3E0F8BBF29000E5EB9 /* Gibbler.cpp in Sources */,
+				B218AB3F0F8BBF29000E5EB9 /* GibblerAnnealedExpectedLossTrainer.cpp in Sources */,
+				B218AB400F8BBF29000E5EB9 /* GibblerExpectedLossTraining.cpp in Sources */,
+				B218AB410F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.cpp in Sources */,
+				B218AB420F8BBF29000E5EB9 /* GibblerMaxTransDecoder.cpp in Sources */,
+				B218AB430F8BBF29000E5EB9 /* GibbsOperator.cpp in Sources */,
+				B218AB440F8BBF29000E5EB9 /* InputSource.cpp in Sources */,
+				B218AB450F8BBF29000E5EB9 /* Josiah.cpp in Sources */,
+				B218AB460F8BBF29000E5EB9 /* MBRDecoder.cpp in Sources */,
+				B218AB470F8BBF29000E5EB9 /* Model1.cpp in Sources */,
+				B218AB480F8BBF29000E5EB9 /* Optimizer.cpp in Sources */,
+				B218AB490F8BBF29000E5EB9 /* QuenchingSchedule.cpp in Sources */,
+				B218AB4A0F8BBF29000E5EB9 /* SearchRandom.cpp in Sources */,
+				B218AB4B0F8BBF29000E5EB9 /* SentenceBleu.cpp in Sources */,
+				B218AB4C0F8BBF29000E5EB9 /* TrainingSource.cpp in Sources */,
+				B218AB4D0F8BBF29000E5EB9 /* TranslationDelta.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB923208733DC60010E9CD /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_GLIBCXX_DEBUG=1",
+					LM_IRST,
+					LM_SRI,
+					"_GLIBCXX_DEBUG_PEDANTIC=1",
+				);
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/include/boost-1_37",
+					../moses/src,
+				);
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"../irstlm/lib/i386-apple-darwin9.0",
+					../srilm/lib/macosx,
+					../moses/build/Development,
+				);
+				OTHER_LDFLAGS = (
+					"-lboost_program_options-xgcc40-mt",
+					"-lboost_serialization-xgcc40-mt",
+					"-lmoses",
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+				);
+				PRODUCT_NAME = josiah;
+				VALID_ARCHS = i386;
+				ZERO_LINK = YES;
+			};
+			name = Development;
+		};
+		1DEB923308733DC60010E9CD /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_32_BIT)";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_SRI,
+					LM_IRST,
+				);
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/include/boost-1_37",
+					../moses/src,
+				);
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					../moses/build/Deployment,
+					"../irstlm/lib/i386-apple-darwin9.0",
+					../srilm/lib/macosx,
+				);
+				OTHER_LDFLAGS = (
+					"-lboost_program_options-xgcc40-mt",
+					"-lboost_serialization-xgcc40-mt",
+					"-lmoses",
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+				);
+				PRODUCT_NAME = josiah;
+				VALID_ARCHS = i386;
+			};
+			name = Deployment;
+		};
+		1DEB923608733DC60010E9CD /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../moses/src;
+				PREBINDING = NO;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+			};
+			name = Development;
+		};
+		1DEB923708733DC60010E9CD /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../moses/src;
+				PREBINDING = NO;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+			};
+			name = Deployment;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "josiah" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923208733DC60010E9CD /* Development */,
+				1DEB923308733DC60010E9CD /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Deployment;
+		};
+		1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "josiah" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923608733DC60010E9CD /* Development */,
+				1DEB923708733DC60010E9CD /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Deployment;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

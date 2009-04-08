@@ -1,0 +1,277 @@
+// !$*UTF8*$!
+{
+	08FB7793FE84155DC02AAC07 /* Project object */ = {
+		activeArchitecture = i386;
+		activeBuildConfigurationName = Deployment;
+		activeExecutable = B25B29F90F8CA15100485047 /* josiah */;
+		activeTarget = 8DD76F620486A84900D96B5E /* josiah */;
+		addToTargets = (
+			8DD76F620486A84900D96B5E /* josiah */,
+		);
+		codeSenseManager = B218AAFC0F8BBEEA000E5EB9 /* Code sense */;
+		executables = (
+			B25B29F90F8CA15100485047 /* josiah */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					743,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					703,
+					60,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 260874577;
+			PBXWorkspaceStateSaveDate = 260874577;
+		};
+		perUserProjectItems = {
+			B25B2A020F8CA35300485047 /* PBXTextBookmark */ = B25B2A020F8CA35300485047 /* PBXTextBookmark */;
+			B25B2A030F8CA35300485047 /* PBXTextBookmark */ = B25B2A030F8CA35300485047 /* PBXTextBookmark */;
+			B25B2A3D0F8CAACF00485047 /* PBXTextBookmark */ = B25B2A3D0F8CAACF00485047 /* PBXTextBookmark */;
+			B25B2A3E0F8CAACF00485047 /* PBXTextBookmark */ = B25B2A3E0F8CAACF00485047 /* PBXTextBookmark */;
+			B25B2A470F8CACCD00485047 /* PBXTextBookmark */ = B25B2A470F8CACCD00485047 /* PBXTextBookmark */;
+			B25B2A480F8CACCD00485047 /* PBXTextBookmark */ = B25B2A480F8CACCD00485047 /* PBXTextBookmark */;
+			B25B2A510F8CB0A600485047 /* PBXTextBookmark */ = B25B2A510F8CB0A600485047 /* PBXTextBookmark */;
+			B25B2A520F8CB0A600485047 /* PBXTextBookmark */ = B25B2A520F8CB0A600485047 /* PBXTextBookmark */;
+			B25B2A530F8CB0A600485047 /* PBXTextBookmark */ = B25B2A530F8CB0A600485047 /* PBXTextBookmark */;
+			B25B2A540F8CB0A600485047 /* PBXTextBookmark */ = B25B2A540F8CB0A600485047 /* PBXTextBookmark */;
+			B25B2A690F8CB7EA00485047 /* PBXTextBookmark */ = B25B2A690F8CB7EA00485047 /* PBXTextBookmark */;
+			B25B2A6A0F8CB7EA00485047 /* PBXTextBookmark */ = B25B2A6A0F8CB7EA00485047 /* PBXTextBookmark */;
+			B25B2A6C0F8CB8DA00485047 /* PBXTextBookmark */ = B25B2A6C0F8CB8DA00485047 /* PBXTextBookmark */;
+		};
+		sourceControlManager = B218AAFB0F8BBEEA000E5EB9 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	8DD76F620486A84900D96B5E /* josiah */ = {
+		activeExec = 0;
+		executables = (
+			B25B29F90F8CA15100485047 /* josiah */,
+		);
+	};
+	B218AAFB0F8BBEEA000E5EB9 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+	};
+	B218AAFC0F8BBEEA000E5EB9 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {858, 574}}";
+			sepNavSelRange = "{32, 24}";
+			sepNavVisRange = "{0, 646}";
+		};
+	};
+	B218AB1F0F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1372, 1050}}";
+			sepNavSelRange = "{2010, 0}";
+			sepNavVisRange = "{1547, 887}";
+		};
+	};
+	B218AB210F8BBF29000E5EB9 /* GibblerMaxTransDecoder.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1372, 2422}}";
+			sepNavSelRange = "{1581, 0}";
+			sepNavVisRange = "{1317, 496}";
+			sepNavWindowFrame = "{{414, 4}, {1409, 874}}";
+		};
+	};
+	B218AB220F8BBF29000E5EB9 /* GibblerMaxTransDecoder.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1350, 1694}}";
+			sepNavSelRange = "{1640, 50}";
+			sepNavVisRange = "{677, 1830}";
+		};
+	};
+	B218AB240F8BBF29000E5EB9 /* GibbsOperator.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {858, 2184}}";
+			sepNavSelRange = "{1077, 34}";
+			sepNavVisRange = "{673, 606}";
+		};
+	};
+	B25B29F90F8CA15100485047 /* josiah */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = josiah;
+		sourceDirectories = (
+		);
+	};
+	B25B2A020F8CA35300485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: StaticData.h: No such file or directory";
+		fRef = B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */;
+		rLen = 1;
+		rLoc = 2;
+		rType = 1;
+	};
+	B25B2A030F8CA35300485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */;
+		name = "AnnealingSchedule.cpp: 3";
+		rLen = 24;
+		rLoc = 32;
+		rType = 0;
+		vrLen = 430;
+		vrLoc = 0;
+	};
+	B25B2A3D0F8CAACF00485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: StaticData.h: No such file or directory";
+		fRef = B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */;
+		rLen = 1;
+		rLoc = 2;
+		rType = 1;
+	};
+	B25B2A3E0F8CAACF00485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */;
+		name = "AnnealingSchedule.cpp: 3";
+		rLen = 24;
+		rLoc = 32;
+		rType = 0;
+		vrLen = 430;
+		vrLoc = 0;
+	};
+	B25B2A470F8CACCD00485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: boost/random/mersenne_twister.hpp: No such file or directory";
+		fRef = B218AB240F8BBF29000E5EB9 /* GibbsOperator.h */;
+		rLen = 1;
+		rLoc = 27;
+		rType = 1;
+	};
+	B25B2A480F8CACCD00485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = B218AB240F8BBF29000E5EB9 /* GibbsOperator.h */;
+		name = "GibbsOperator.h: 28";
+		rLen = 34;
+		rLoc = 1077;
+		rType = 0;
+		vrLen = 606;
+		vrLoc = 673;
+	};
+	B25B2A510F8CB0A600485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = B218AB1F0F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.cpp */;
+		name = "GibblerMaxDerivDecoder.cpp: 54";
+		rLen = 0;
+		rLoc = 1549;
+		rType = 0;
+		vrLen = 1062;
+		vrLoc = 1362;
+	};
+	B25B2A520F8CB0A600485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: conversion from '__gnu_debug::_Safe_iterator<std::_Rb_tree_iterator<std::pair<const Josiah::Derivation, __gnu_debug_def::vector<Moses::FactorType, std::allocator<__gnu_norm::_Bit_type> > > >, __gnu_debug_def::map<Josiah::Derivation, __gnu_debug_def::vector<Moses::FactorType, std::allocator<__gnu_norm::_Bit_type> >, std::less<Josiah::Derivation>, std::allocator<std::pair<const Josiah::Derivation, __gnu_debug_def::vector<Moses::FactorType, std::allocator<__gnu_norm::_Bit_type> > > > > >' to non-scalar type '__gnu_debug::_Safe_iterator<std::_Rb_tree_const_iterator<std::pair<const Josiah::Derivation, __gnu_debug_def::vector<Moses::FactorType, std::allocator<__gnu_norm::_Bit_type> > > >, __gnu_debug_def::multimap<Josiah::Derivation, __gnu_debug_def::vector<Moses::FactorType, std::allocator<__gnu_norm::_Bit_type> >, std::less<Josiah::Derivation>, std::allocator<std::pair<const Josiah::Derivation, __gnu_debug_def::vector<Moses::FactorType, std::allocator<__gnu_norm::_Bit_type> > > > > >' requested";
+		fRef = B218AB210F8BBF29000E5EB9 /* GibblerMaxTransDecoder.cpp */;
+		rLen = 1;
+		rLoc = 55;
+		rType = 1;
+	};
+	B25B2A530F8CB0A600485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = B218AB1F0F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.cpp */;
+		name = "GibblerMaxDerivDecoder.cpp: 54";
+		rLen = 0;
+		rLoc = 1549;
+		rType = 0;
+		vrLen = 1062;
+		vrLoc = 1362;
+	};
+	B25B2A540F8CB0A600485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = B218AB210F8BBF29000E5EB9 /* GibblerMaxTransDecoder.cpp */;
+		name = "GibblerMaxTransDecoder.cpp: 61";
+		rLen = 0;
+		rLoc = 1747;
+		rType = 0;
+		vrLen = 565;
+		vrLoc = 1083;
+	};
+	B25B2A690F8CB7EA00485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = B218AB220F8BBF29000E5EB9 /* GibblerMaxTransDecoder.h */;
+		rLen = 1;
+		rLoc = 57;
+		rType = 1;
+	};
+	B25B2A6A0F8CB7EA00485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = B218AB220F8BBF29000E5EB9 /* GibblerMaxTransDecoder.h */;
+		name = "GibblerMaxTransDecoder.h: 58";
+		rLen = 50;
+		rLoc = 1640;
+		rType = 0;
+		vrLen = 1830;
+		vrLoc = 677;
+	};
+	B25B2A6C0F8CB8DA00485047 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = B218AB220F8BBF29000E5EB9 /* GibblerMaxTransDecoder.h */;
+		name = "GibblerMaxTransDecoder.h: 58";
+		rLen = 50;
+		rLoc = 1640;
+		rType = 0;
+		vrLen = 1830;
+		vrLoc = 677;
+	};
+}
