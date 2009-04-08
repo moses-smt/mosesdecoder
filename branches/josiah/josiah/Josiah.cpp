@@ -575,10 +575,8 @@ int main(int argc, char** argv) {
            hessianV);
     }
     if (mbr_decoding) {
-      vector<const Factor*> sentence = mbrCollector->Max();
-      for (size_t i = 0; i < sentence.size(); ++i) {
-        (*out) << (i > 0 ? " " : "") << *sentence[i];
-      }
+      pair<const Translation*,float> maxtrans = mbrCollector->getMax();
+      (*out) << *maxtrans.first;
       (*out) << endl << flush;
       timer.check("Outputting MBR");
     }
