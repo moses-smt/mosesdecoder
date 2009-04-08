@@ -53,7 +53,7 @@ namespace Josiah
   void MaxCollector<M>::collectSample( const M &m)
   {
     m_samples[m].push_back(N());
-    typename multimap<M,vector<size_t> >::const_iterator i = m_samples.find(m);
+    typename map<M,vector<size_t> >::const_iterator i = m_samples.find(m);
     m_sampleList.push_back(&(i->first));
   }
   
@@ -151,7 +151,7 @@ namespace Josiah
     for (ci = samples.begin(); ci != samples.end(); ++ci) {
       sorted.insert(make_pair<float, const vector<const Factor*>*>(static_cast<float>(ci->second) / nf, &ci->first));
     }
-    multimap<float, const vector<const Factor*>*>::iterator i;
+    multimap<float, const vector<const Factor*>*,greater<float> >::iterator i;
     for (i = sorted.begin(); i != sorted.end(); ++i)
       VERBOSE(1, i->first << "\t" << ToString(*i->second) << endl);
     const vector<const Factor*>* max = sorted.begin()->second;

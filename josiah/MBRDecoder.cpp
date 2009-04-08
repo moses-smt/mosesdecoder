@@ -29,7 +29,7 @@ vector<const Factor*> MBRDecoder::Max() {
     sorted.insert(make_pair<float, const vector<const Factor*>*>(static_cast<float>(ci->second) / nf, &ci->first));
   }
   
-  multimap<float, const vector<const Factor*>*>::iterator i;
+  multimap<float, const vector<const Factor*>*,greater<float> >::iterator i;
   for (i = sorted.begin(); i != sorted.end(); ++i)
     VERBOSE(2, i->first << "\t" << ToString(*i->second) << endl);
   
