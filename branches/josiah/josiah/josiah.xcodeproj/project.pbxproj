@@ -28,6 +28,7 @@
 		B218AB4B0F8BBF29000E5EB9 /* SentenceBleu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB330F8BBF29000E5EB9 /* SentenceBleu.cpp */; };
 		B218AB4C0F8BBF29000E5EB9 /* TrainingSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB350F8BBF29000E5EB9 /* TrainingSource.cpp */; };
 		B218AB4D0F8BBF29000E5EB9 /* TranslationDelta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */; };
+		B25B2AE50F8CDB6D00485047 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B25B2AE40F8CDB6D00485047 /* libmoses.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,7 +36,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libmoses.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = moses;
+		};
+		B25B2A8B0F8CD86900485047 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = moses;
 		};
 /* End PBXContainerItemProxy section */
@@ -96,6 +104,7 @@
 		B218AB380F8BBF29000E5EB9 /* TranslationDelta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TranslationDelta.h; sourceTree = "<group>"; };
 		B25B29F80F8CA15100485047 /* josiah */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = josiah; sourceTree = BUILT_PRODUCTS_DIR; };
 		B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
+		B25B2AE40F8CDB6D00485047 /* libmoses.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmoses.a; path = ../moses/build/Development/libmoses.a; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +112,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B25B2AE50F8CDB6D00485047 /* libmoses.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +122,7 @@
 		08FB7794FE84155DC02AAC07 /* josiah */ = {
 			isa = PBXGroup;
 			children = (
+				B25B2AE40F8CDB6D00485047 /* libmoses.a */,
 				B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
@@ -125,7 +136,6 @@
 			children = (
 				B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */,
 				B218AAFF0F8BBF29000E5EB9 /* AnnealingSchedule.h */,
-				B218AB000F8BBF29000E5EB9 /* build */,
 				B218AB110F8BBF29000E5EB9 /* Decoder.cpp */,
 				B218AB120F8BBF29000E5EB9 /* Decoder.h */,
 				B218AB130F8BBF29000E5EB9 /* Derivation.cpp */,
@@ -177,37 +187,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B218AB000F8BBF29000E5EB9 /* build */ = {
-			isa = PBXGroup;
-			children = (
-				B218AB010F8BBF29000E5EB9 /* josiah.build */,
-			);
-			path = build;
-			sourceTree = "<group>";
-		};
-		B218AB010F8BBF29000E5EB9 /* josiah.build */ = {
-			isa = PBXGroup;
-			children = (
-				B218AB020F8BBF29000E5EB9 /* josiah.pbxindex */,
-			);
-			path = josiah.build;
-			sourceTree = "<group>";
-		};
-		B218AB020F8BBF29000E5EB9 /* josiah.pbxindex */ = {
-			isa = PBXGroup;
-			children = (
-				B218AB0B0F8BBF29000E5EB9 /* strings.pbxstrings */,
-			);
-			path = josiah.pbxindex;
-			sourceTree = "<group>";
-		};
-		B218AB0B0F8BBF29000E5EB9 /* strings.pbxstrings */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = strings.pbxstrings;
-			sourceTree = "<group>";
-		};
 		B25B2A400F8CAAF700485047 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -237,6 +216,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				B25B2A8C0F8CD86900485047 /* PBXTargetDependency */,
 			);
 			name = josiah;
 			productInstallPath = "$(HOME)/bin";
@@ -308,6 +288,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		B25B2A8C0F8CD86900485047 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = moses;
+			targetProxy = B25B2A8B0F8CD86900485047 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		1DEB923208733DC60010E9CD /* Development */ = {
 			isa = XCBuildConfiguration;
@@ -318,10 +306,8 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"_GLIBCXX_DEBUG=1",
 					LM_IRST,
 					LM_SRI,
-					"_GLIBCXX_DEBUG_PEDANTIC=1",
 				);
 				HEADER_SEARCH_PATHS = (
 					"/usr/local/include/boost-1_37",
@@ -332,6 +318,8 @@
 					"../irstlm/lib/i386-apple-darwin9.0",
 					../srilm/lib/macosx,
 					../moses/build/Development,
+					/usr/local/lib,
+					"\"$(SRCROOT)/../moses/build/Development\"",
 				);
 				OTHER_LDFLAGS = (
 					"-lboost_program_options-xgcc40-mt",
@@ -369,6 +357,7 @@
 					../moses/build/Deployment,
 					"../irstlm/lib/i386-apple-darwin9.0",
 					../srilm/lib/macosx,
+					"\"$(SRCROOT)/../moses/build/Development\"",
 				);
 				OTHER_LDFLAGS = (
 					"-lboost_program_options-xgcc40-mt",
