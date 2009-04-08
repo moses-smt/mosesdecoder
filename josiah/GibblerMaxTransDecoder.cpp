@@ -55,6 +55,16 @@ namespace Josiah
     m_samples[m].push_back(N());
     typename map<M,vector<size_t> >::const_iterator i = m_samples.find(m);
     m_sampleList.push_back(&(i->first));
+    
+    if (m_outputMaxChange) {
+      pair<const M*,float> max = getMax();
+      if (max.first != m_max) {
+        m_max = max.first;
+        cerr << "NewMax" << m_name << "(" << N() << ") ";
+        cerr << *m_max;
+        cerr << endl;
+      }
+    }
   }
   
   template<class M>
@@ -104,8 +114,6 @@ namespace Josiah
   template class MaxCollector<Josiah::Derivation>;
   template class MaxCollector<Josiah::Translation>;
 
-  GibblerMaxTransDecoder::GibblerMaxTransDecoder() : n(0), m_outputMaxChange(false) {}
-
 
 
   string ToString(const Translation& ws)
@@ -124,52 +132,13 @@ namespace Josiah
 
   void GibblerMaxTransDecoder::collect(Sample& sample)
   {
-    ++n;
     const Hypothesis* h = sample.GetSampleHypothesis();
     vector<const Factor*> trans;
     h->GetTranslation(&trans, 0);
-    ++samples[trans];
+    collectSample(trans);
 
-    if (m_outputMaxChange) {
-      Translation newmax;
-      size_t count;
-      Max(newmax,count);
-      if (newmax != m_maxTranslation) {
-        m_maxTranslation = newmax;
-        cerr << "NewMaxTrans(" << n << ") ";
-        cerr << ToString(m_maxTranslation);
-        cerr << endl;
-      }
-    }
+    
   }
-
-  void GibblerMaxTransDecoder::Max(std::vector<const Factor*>& translation, size_t& count)
-  {
-    hash_map<vector<const Factor*>, int>::const_iterator ci;
-    multimap<float, const vector<const Factor*>*,greater<float> > sorted;
-    const float nf = n;
-    for (ci = samples.begin(); ci != samples.end(); ++ci) {
-      sorted.insert(make_pair<float, const vector<const Factor*>*>(static_cast<float>(ci->second) / nf, &ci->first));
-    }
-    multimap<float, const vector<const Factor*>*,greater<float> >::iterator i;
-    for (i = sorted.begin(); i != sorted.end(); ++i)
-      VERBOSE(1, i->first << "\t" << ToString(*i->second) << endl);
-    const vector<const Factor*>* max = sorted.begin()->second;
-    translation.insert(translation.end(), max->begin(), max->end());
-    count = (size_t)samples[*max];
-
-  }
-
-  void GibblerMaxTransDecoder::getCounts( std::vector< size_t > & counts ) const
-  {
-    hash_map<vector<const Factor*>, int>::const_iterator ci;
-    for (ci = samples.begin(); ci != samples.end(); ++ci) {
-      counts.push_back((size_t)ci->second);
-    }
-  }
-
-
-
 }
 
 

@@ -6,7 +6,7 @@ using namespace std;
 namespace Josiah {
 
 void DerivationCollector::outputDerivationProbability(const DerivationProbability& dp, std::ostream& out) {
-  out << std::setprecision(8) << dp.second << " " << dp.second*m_n <<" " << *(dp.first);
+  out << std::setprecision(8) << dp.second << " " << dp.second*N() <<" " << *(dp.first);
 }
   
   
@@ -24,28 +24,16 @@ void DerivationCollector::outputDerivationProbability(const DerivationProbabilit
       copy(sentence.begin(),sentence.end(),ostream_iterator<string>(os," "));
       m_derivByTrans[os.str()].insert(d);
     }
-    ++m_n;
-    if (m_pd > 0 && m_n > 0 && m_n%m_pd == 0) {
+    size_t n = N() + 1;
+    if (m_pd > 0 && n > 0 && n%m_pd == 0) {
       pair<const Derivation*,float> max = getMax();
       if (max.first) {
-        cerr << "MaxDeriv(" << m_n << "): ";
+        cerr << "MaxDeriv(" << n << "): ";
         outputDerivationProbability(max,cerr);
         cerr << endl;
-        cerr << "DerivEntropy(" << m_n << "): " << getEntropy() << endl;
+        cerr << "DerivEntropy(" << n << "): " << getEntropy() << endl;
       }
     }
-    
-    if (m_outputMaxChange) {
-      pair<const Derivation*,float> max = getMax();
-      const Derivation* newmax = max.first;
-      if (m_maxDerivation == NULL || *m_maxDerivation < *newmax || *newmax < *m_maxDerivation) {
-        cerr << "NewMaxDeriv(" << m_n << ")";
-        outputDerivationProbability(max,cerr);
-        cerr << endl;
-        m_maxDerivation = newmax;
-      } 
-    }
-    
   }
   
   

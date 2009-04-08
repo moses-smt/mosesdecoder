@@ -604,12 +604,8 @@ int main(int argc, char** argv) {
     }
     if (transCollector.get()) {
       cerr << "TransEntropy " << transCollector->getEntropy() << endl;
-      vector<const Factor*> sentence;
-      size_t count;
-      transCollector->Max(sentence,count);
-      for (size_t i = 0; i < sentence.size(); ++i) {
-        (*out) << (i > 0 ? " " : "") << *sentence[i];
-      }
+      pair<const Translation*,float> maxtrans = transCollector->getMax();
+      (*out) << *maxtrans.first;
       (*out) << endl << flush;
     }
     ++lineno;
