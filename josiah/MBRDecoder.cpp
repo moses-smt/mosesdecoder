@@ -4,45 +4,39 @@
 #include <map>
 #include "SentenceBleu.h"
 
-using namespace __gnu_cxx;
 using namespace std;
 
 namespace Josiah {
 
-  void MBRDecoder::collect(Sample& sample) {
-  ++n;
-  const Hypothesis* h = sample.GetSampleHypothesis();
-  vector<const Factor*> trans;
-  h->GetTranslation(&trans, 0);
-  ++samples[trans];
-}
   
   
 
-vector<const Factor*> MBRDecoder::Max() {
-  //sort the translations by their probability
-  hash_map<vector<const Factor*>, int>::const_iterator ci;
-  multimap<float, const vector<const Factor*>*,greater<float> > sorted;
-  const float nf = n;
+ pair<const Translation*,float> MBRDecoder::getMax() {
+  map<const Translation*, float> p;
+  getDistribution(p);
   
-  for (ci = samples.begin(); ci != samples.end(); ++ci) {
-    sorted.insert(make_pair<float, const vector<const Factor*>*>(static_cast<float>(ci->second) / nf, &ci->first));
+  //sort the translations by their probability
+  map<const Translation*, float>::const_iterator ci;
+  multimap<float, const Translation*,greater<float> > sorted;
+  
+  for (ci = p.begin(); ci != p.end(); ++ci) {
+    sorted.insert(make_pair<float, const Translation*>(ci->second, ci->first));
   }
   
-  multimap<float, const vector<const Factor*>*,greater<float> >::iterator i;
+  multimap<float, const Translation*,greater<float> >::iterator i;
   for (i = sorted.begin(); i != sorted.end(); ++i)
     VERBOSE(2, i->first << "\t" << ToString(*i->second) << endl);
   
   //Posterior probs computed using the whole evidence set
   //MBR decoding outer loop using configurable size
-  vector<pair<const vector<const Factor*>*, float> > topNTranslations;
+  vector<pair<const Translation*, float> > topNTranslations;
   
   for (i = sorted.begin(); i != sorted.end(); ++i) {
     topNTranslations.push_back(make_pair(i->second, i->first));
     g.push_back(new SentenceBLEU(4,*i->second)); //Calc the sufficient statistics for the translation
   }
   
-  vector<pair<const vector<const Factor*>*, float> >::iterator it;
+  vector<pair<const Translation*, float> >::iterator it;
   for (it = topNTranslations.begin(); it != topNTranslations.end(); ++it)
     VERBOSE(1,  ToString(*it->first) << endl);
   
@@ -77,7 +71,7 @@ vector<const Factor*> MBRDecoder::Max() {
   }
   VERBOSE(2, "Minimum Bayes risk cand is " <<  minMBRLossIdx << " with risk " << minMBRLoss << endl);
   
-  return *(topNTranslations[minMBRLossIdx].first);
+  return topNTranslations[minMBRLossIdx];
 }
 
 }

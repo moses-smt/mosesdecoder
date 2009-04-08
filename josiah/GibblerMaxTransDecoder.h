@@ -29,7 +29,7 @@ template <class M>
       /** Should be called to report that an example of M was found in the sample*/
       void collectSample(const M&);
       /**argmax and max*/
-      pair<const M*,float> getMax() const;
+      virtual pair<const M*,float> getMax() const;
       /** n-best list*/
       void getNbest(vector<pair<const M*, float> >& nbest, size_t n) const;
       /**Estimate of the probability distribution */
