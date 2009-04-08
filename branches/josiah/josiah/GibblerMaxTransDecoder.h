@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <utility>
-#include <ext/hash_map>
 #include <map>
 
 #include "Derivation.h"
@@ -13,18 +12,6 @@
 namespace Moses { 
   class Factor;
   class SampleCollector;
-}
-
-namespace __gnu_cxx {
-  template<> struct hash<std::vector<const Moses::Factor*> > {
-    inline size_t operator()(const std::vector<const Moses::Factor*>& p) const {
-      static const int primes[] = {8933, 8941, 8951, 8963, 8969, 8971, 8999, 9001, 9007, 9011};
-      size_t h = 0;
-      for (unsigned i = 0; i < p.size(); ++i)
-        h += reinterpret_cast<size_t>(p[i]) * primes[i % 10];
-      return h;
-    }
-  };
 }
 
 namespace Josiah {
@@ -38,6 +25,7 @@ namespace Josiah {
 template <class M>
     class MaxCollector : public virtual Moses::SampleCollector {
     public:
+      MaxCollector<M>(const std::string& name) : m_name(name), m_outputMaxChange(false) {}
       /** Should be called to report that an example of M was found in the sample*/
       void collectSample(const M&);
       /**argmax and max*/
@@ -46,7 +34,8 @@ template <class M>
       void getNbest(vector<pair<const M*, float> >& nbest, size_t n) const;
       /**Estimate of the probability distribution */
       void getDistribution(map<const M*,float>& p) const;
-      
+      /** Output the max  whenever it changes */
+      void setOutputMaxChange(bool outputMaxChange){m_outputMaxChange = outputMaxChange;}
       /** The sample at a given index.*/
       const M* getSample(size_t index) const;
       float getEntropy() const;
@@ -58,6 +47,11 @@ template <class M>
       std::map<M,std::vector<size_t> > m_samples;
       //maps indices to samples
       std::vector<const M*> m_sampleList;
+      //used for debug messages
+      std::string m_name;
+      //output when max changes?
+      bool m_outputMaxChange;
+      const M* m_max;
   
 };
 
@@ -65,22 +59,11 @@ string ToString(const Translation& ws);
 
 class GibblerMaxTransDecoder : public virtual MaxCollector<Translation> {
  public:
-  GibblerMaxTransDecoder();
+   GibblerMaxTransDecoder() : MaxCollector<Translation>("Trans") {}
   virtual void collect(Sample& sample);
-  virtual  void Max(Translation&, size_t& count);
-  /** Output the max translation whenever it changes */
-  void setOutputMaxChange(bool outputMaxChange){m_outputMaxChange = outputMaxChange;}
-  virtual void getCounts(std::vector<size_t>& counts) const;
-  
   virtual ~GibblerMaxTransDecoder(){}
 
  private:
-  int n;
-  __gnu_cxx::hash_map<std::vector<const Factor*>, int> samples;
-  int sent_num;
-  
-  bool m_outputMaxChange;
-  Translation m_maxTranslation;
 };
 
 /**
