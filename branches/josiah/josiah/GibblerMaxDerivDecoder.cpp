@@ -60,7 +60,7 @@ void DerivationCollector::outputDerivationProbability(const DerivationProbabilit
            sortedCounts.insert(pair<size_t,string>(i->second.size(),i->first));
          }
     
-         for (multimap<size_t,string>::const_iterator i = sortedCounts.begin(); i != sortedCounts.end(); ++i) {
+         for (multimap<size_t,string, greater<size_t> >::const_iterator i = sortedCounts.begin(); i != sortedCounts.end(); ++i) {
            out << "COUNT: " <<  i->first << " TRANS:" << i->second << endl;
            if (i->first > 1) {
              for (set<Derivation>::const_iterator j = m_derivByTrans[i->second].begin(); 
