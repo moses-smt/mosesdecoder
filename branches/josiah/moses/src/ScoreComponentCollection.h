@@ -169,6 +169,15 @@ public:
 		return std::inner_product(m_scores.begin(), m_scores.end(), rhs.begin(), 0.0f);
 	}
 	
+  //! Used to find the weighted total of scores.  rhs should contain a vector of weights
+  //! of the same length as the number of scores.
+	float InnerProduct(const ScoreComponentCollection& rhs) const
+	{
+    assert(m_scores.size() == rhs.m_scores.size());
+		return std::inner_product(m_scores.begin(), m_scores.end(), rhs.m_scores.begin(), 0.0f);
+	}
+  
+  
 	float PartialInnerProduct(const ScoreProducer* sp, const std::vector<float>& rhs) const
 	{
 		std::vector<float> lhs = GetScoresForProducer(sp);
