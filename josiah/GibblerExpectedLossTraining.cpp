@@ -57,7 +57,6 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
 
   
 void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v) {
-  /* 
   const vector<float>& importanceWeights =  getImportanceWeights();
   ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
 
@@ -94,7 +93,7 @@ void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hess
     fv.MultiplyEquals(gain + getRegularisationGradientFactor(i));
     hessian->PlusEquals(fv);
   }
-  */
+
 }  
   
 ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations(const vector<float>& importanceWeights) const {
