@@ -21,7 +21,7 @@ void ExpectedLossCollector::collect(Sample& s) {
 float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len) {
   
 
-  const vector<float>& importanceWeights =  getImportanceWeights();
+  const vector<double>& importanceWeights =  getImportanceWeights();
   
   ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
   
@@ -57,7 +57,7 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
 
   
 void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v) {
-  const vector<float>& importanceWeights =  getImportanceWeights();
+  const vector<double>& importanceWeights =  getImportanceWeights();
   ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
 
   float expectedVF = 0;
@@ -96,7 +96,7 @@ void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hess
 
 }  
   
-ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations(const vector<float>& importanceWeights) const {
+ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations(const vector<double>& importanceWeights) const {
   ScoreComponentCollection feature_expectations;
   for (size_t i = 0; i < m_featureVectors.size(); ++i) {
     ScoreComponentCollection fv = m_featureVectors[i];

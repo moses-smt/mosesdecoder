@@ -12,11 +12,11 @@ namespace Josiah {
   
 
  pair<const Translation*,float> MBRDecoder::getMax() {
-  map<const Translation*, float> p;
+  map<const Translation*, double> p;
   getDistribution(p);
   
   //sort the translations by their probability
-  map<const Translation*, float>::const_iterator ci;
+  map<const Translation*, double>::const_iterator ci;
   multimap<float, const Translation*,greater<float> > sorted;
   
   for (ci = p.begin(); ci != p.end(); ++ci) {

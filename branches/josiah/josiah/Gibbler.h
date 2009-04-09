@@ -91,7 +91,7 @@ class Sample {
 class SampleCollector {
   public:
     SampleCollector(): m_totalImportanceWeight(0), m_n(0)  {}
-    virtual void addSample(Sample& sample, float importanceWeight);
+    virtual void addSample(Sample& sample, double importanceWeight);
     /** Number of samples */
     size_t N() const {return m_n;}
     virtual ~SampleCollector() {}
@@ -102,13 +102,13 @@ class SampleCollector {
     /** The log of the total importance weight */
     float getTotalImportanceWeight() const {return m_totalImportanceWeight;}
     /** Normalised importance weights  - in probability space*/
-    const std::vector<float>& getImportanceWeights() const {return m_normalisedImportanceWeights;}
+    const std::vector<double>& getImportanceWeights() const {return m_normalisedImportanceWeights;}
     
     
   private:
-    float m_totalImportanceWeight; //normalisation factor
-    std::vector<float> m_importanceWeights; //unnormalised weights, in log space
-    std::vector<float> m_normalisedImportanceWeights; //normalised, in prob space
+    double m_totalImportanceWeight; //normalisation factor
+    std::vector<double> m_importanceWeights; //unnormalised weights, in log space
+    std::vector<double> m_normalisedImportanceWeights; //normalised, in prob space
     size_t m_n;
 };
 

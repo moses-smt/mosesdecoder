@@ -23,7 +23,7 @@ class ExpectedLossCollector : public SampleCollector {
     virtual void UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v);
     
   protected:
-    ScoreComponentCollection getFeatureExpectations(const vector<float>& importanceWeights) const;
+    ScoreComponentCollection getFeatureExpectations(const vector<double>& importanceWeights) const;
     /** Hooks for adding, eg, entropy regularisation. The first is added in to the gradient, the second to the objective.*/
     virtual float getRegularisationGradientFactor(size_t i) {return 0;}
     virtual float getRegularisation() {return 0;}

@@ -12,9 +12,9 @@ namespace Josiah
 
 
   template<class M>
-  void MaxCollector<M>::getDistribution(map<const M*,float>& p) const
+  void MaxCollector<M>::getDistribution(map<const M*,double>& p) const
   {
-    const vector<float>& importanceWeights =  getImportanceWeights();
+    const vector<double>& importanceWeights =  getImportanceWeights();
     const M* prev = NULL;
     for (typename map<M,vector<size_t> >::const_iterator i = m_samples.begin(); i != m_samples.end(); ++i) {
       const M* sample = &(i->first);
@@ -25,7 +25,7 @@ namespace Josiah
     IFVERBOSE(1) {
       float total = 0;
       VERBOSE(1, "Distribution: ");
-      for (typename map<const M*,float>::const_iterator i = p.begin(); i != p.end(); ++i) {
+      for (typename map<const M*,double>::const_iterator i = p.begin(); i != p.end(); ++i) {
         VERBOSE(1, i->first << "{ " << *i->first << " }: " <<  i->second << " " << endl;);
         total += i->second;
       }
@@ -36,11 +36,11 @@ namespace Josiah
   template<class M>
   float MaxCollector<M>::getEntropy() const
   {
-    map<const M*, float> p;
+    map<const M*, double> p;
     getDistribution(p);
     float entropy = 0;
     //cerr << "Entropy: ";
-    for (typename map<const M*,float>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
+    for (typename map<const M*,double>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
       //cerr << pi->second << " ";
       entropy -= pi->second*log(pi->second);
     }
@@ -78,9 +78,9 @@ namespace Josiah
   {
     const M* argmax = NULL;
     float max = 0;
-    map<const M*,float> p;
+    map<const M*,double> p;
     getDistribution(p);
-    for (typename map<const M*,float>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
+    for (typename map<const M*,double>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
       if (pi->second > max) {
         max = pi->second;
         argmax = pi->first;
@@ -100,7 +100,7 @@ namespace Josiah
   template<class M>
       void MaxCollector<M>::getNbest(vector<pair<const M*, float> >& nbest, size_t n) const 
   {
-    map<const M*,float> p;
+    map<const M*,double> p;
     getDistribution(p);
     nbest.assign(p.begin(),p.end());
     ProbGreaterThan<M> comparator;
