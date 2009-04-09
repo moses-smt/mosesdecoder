@@ -417,7 +417,7 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
       VERBOSE(2,"Gibbs sampling iteration: " << i << endl);
       for (size_t j = 0; j < m_operators.size(); ++j) {
         VERBOSE(3,"Sampling with operator " << m_operators[j]->name() << endl);
-        m_operators[j]->SetAnnealingTemperature(m_quenchTemp);
+        m_operators[j]->SetAnnealingTemperature(1.0/m_quenchTemp); //because of the way annealing temp gets used.
         m_operators[j]->doIteration(sample,*options);
       }
       //importance weight
