@@ -421,14 +421,14 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
         m_operators[j]->doIteration(sample,*options);
       }
       //importance weight
-      float totalImpWeight = 0;
+      double totalImpWeight = 0;
       ScoreComponentCollection deltaFV;
       for (Josiah::feature_vector::const_iterator j = sample.extra_features().begin(); j != sample.extra_features().end(); ++j) {
-        float score = (*j)->getImportanceWeight(sample);
+        double score = (*j)->getImportanceWeight(sample);
         const ScoreProducer& sp = (*j)->getScoreProducer();
         const StaticData& staticData = StaticData::Instance();
         const ScoreIndexManager& sim = staticData.GetScoreIndexManager();
-        float scoreWeight = StaticData::Instance().GetAllWeights()[sim.GetBeginIndex(sp.GetScoreBookkeepingID())];
+        double scoreWeight = StaticData::Instance().GetAllWeights()[sim.GetBeginIndex(sp.GetScoreBookkeepingID())];
         VERBOSE(2, "Score producer: " << sp.GetScoreProducerDescription() << " Weight: " << scoreWeight << endl)
         totalImpWeight += scoreWeight*score;
         //set the weight in the sample  
@@ -461,7 +461,7 @@ void PrintSampleCollector::collect(Sample& sample)  {
 
 
 
-void SampleCollector::addSample( Sample & sample, float importanceWeight ) {
+void SampleCollector::addSample( Sample & sample, double importanceWeight ) {
   if (m_importanceWeights.empty()) {
     m_totalImportanceWeight = importanceWeight;
   } else {

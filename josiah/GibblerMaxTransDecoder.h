@@ -33,7 +33,7 @@ template <class M>
       /** n-best list*/
       void getNbest(vector<pair<const M*, float> >& nbest, size_t n) const;
       /**Estimate of the probability distribution */
-      void getDistribution(map<const M*,float>& p) const;
+      void getDistribution(map<const M*,double>& p) const;
       /** Output the max  whenever it changes */
       void setOutputMaxChange(bool outputMaxChange){m_outputMaxChange = outputMaxChange;}
       /** The sample at a given index.*/
