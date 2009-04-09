@@ -24,6 +24,8 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
   const vector<double>& importanceWeights =  getImportanceWeights();
   
   ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
+
+  //cerr << "FEXP: " << feature_expectations << endl;
   
   //gradient computation
   ScoreComponentCollection grad;
@@ -97,13 +99,22 @@ void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hess
 }  
   
 ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations(const vector<double>& importanceWeights) const {
-  ScoreComponentCollection feature_expectations;
+  //do calculation at double precision to try to maintain accuracy
+  vector<double> sum(StaticData::Instance().GetTotalScoreComponents());
   for (size_t i = 0; i < m_featureVectors.size(); ++i) {
     ScoreComponentCollection fv = m_featureVectors[i];
-    fv.MultiplyEquals(importanceWeights[i]);
-    feature_expectations.PlusEquals(fv);
+    for (size_t j = 0; j < fv.size(); ++j) {
+        sum[j] += fv[j]*importanceWeights[i];
+    }
+    //cerr << "fexp: ";// << feature_expectations << endl;
+    //copy(sum.begin(),sum.end(),ostream_iterator<double>(cerr," "));
+    //cerr << endl;
   }
-  return feature_expectations;
+  vector<float> truncatedSum(sum.size());
+  for (size_t i = 0; i < sum.size(); ++i) {
+      truncatedSum[i] = static_cast<float>(sum[i]);
+  }
+  return ScoreComponentCollection(truncatedSum);
 }
 
 
