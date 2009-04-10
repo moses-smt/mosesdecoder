@@ -127,11 +127,14 @@ void StochasticMetaDescent::OptimizeImpl(
   assert(x.size() == v_.size());
     
   cerr << "Curr x: " << x << endl;
+  cerr << "Curr HessianV: " << hessianV << endl;
     
   for (unsigned i = 0; i < v_.size(); ++i) {
     v_[i] = lambda_ * v_[i]  - (eta_[i] * (gradient[i] + lambda_ * hessianV[i]));  
   }
-    
+
+  cerr << "V: " << v_ << endl;
+  
   for (unsigned i = 0; i < eta_.size(); ++i) {
     eta_[i] = eta_[i] * max(min_multiplier_, 1.0f - (mu_ * gradient[i] *  v_[i]));
   }
@@ -139,8 +142,7 @@ void StochasticMetaDescent::OptimizeImpl(
   cerr << "ETA: " << eta_ << endl;
   *new_x = gradient;
   new_x->MultiplyEquals(eta_);
-  new_x->MultiplyEquals(-1.0f);
-  cerr << "-Gradient * ETA: " << *new_x << endl;
+  cerr << "Gradient * ETA: " << *new_x << endl;
   new_x->PlusEquals(x);
   cerr << "New x: " << *new_x << endl;
     
