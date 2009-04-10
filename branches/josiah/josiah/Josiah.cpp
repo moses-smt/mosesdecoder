@@ -453,7 +453,7 @@ int main(int argc, char** argv) {
       if (temp == (static_cast<ExponentialAnnealingSchedule*>(detAnnealingSchedule.get()))->GetFloorTemp()) {//Time to start quenching
         if (initialQuenchingIteration == -1) //The iteration from which we start quenching
           initialQuenchingIteration = it;
-        float quenchTemp = quenchingSchedule->GetTemperatureAtTime((it - initialQuenchingIteration + 1)/ optimizerFreq) ;
+        float quenchTemp = quenchingSchedule->GetTemperatureAtTime(it - initialQuenchingIteration + 1) ;
         cerr << "Quenching temp " <<  quenchTemp << endl;
         sampler.SetQuenchingTemperature(quenchTemp);
         if (quenchTemp >= stop_temp_quench) {
@@ -462,7 +462,7 @@ int main(int argc, char** argv) {
       }
       else {//Use initial temperature
         sampler.SetQuenchingTemperature(start_temp_quench);
-        cerr << "Quenching temp " <<  start_temp_quench << endl;
+        cerr << "Using start quench temp " <<  start_temp_quench << endl;
       }
       
     }
