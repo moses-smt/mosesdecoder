@@ -18,7 +18,7 @@ namespace Josiah {
       void setPeriodicDecode(int pd) {m_pd = pd;}
       void setCollectDerivationsByTranslation(bool dbyt) {m_collectDerivByTrans = dbyt;}
       void outputDerivationsByTranslation(std::ostream& out);
-      void outputDerivationProbability(const DerivationProbability& dp, std::ostream& out);
+      void outputDerivationProbability(const DerivationProbability& dp,size_t n, std::ostream& out);
         
     private:
       std::map<std::string,std::set<Derivation> > m_derivByTrans;

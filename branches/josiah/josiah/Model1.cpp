@@ -270,4 +270,12 @@ float ApproximateModel1::getImportanceWeight(const Sample& sample) {
   return model1::computeScore(sample);
 }
 
+ApproximateModel1Inverse::ApproximateModel1Inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
+    model1_inverse(table,fmap,emap){}
+    
+float ApproximateModel1Inverse::getImportanceWeight(const Sample& sample) {
+  //since the "approximation" is to return 0, this is just the true score
+  return model1_inverse::computeScore(sample);
+}
+
 } // namespace Josiah

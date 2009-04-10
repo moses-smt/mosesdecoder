@@ -587,7 +587,7 @@ int main(int argc, char** argv) {
       for (size_t i = 0; i < topn && i < nbest.size() ; ++i) {  
         //const Derivation d = *(nbest[i].first);
         cerr << "NBEST: " << lineno << " ";
-        derivationCollector->outputDerivationProbability(nbest[i],cerr);
+        derivationCollector->outputDerivationProbability(nbest[i],derivationCollector->N(),cerr);
         cerr << endl;
       }
       if (decode) {
