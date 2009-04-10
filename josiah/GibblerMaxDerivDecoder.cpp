@@ -5,8 +5,8 @@ using namespace std;
 
 namespace Josiah {
 
-void DerivationCollector::outputDerivationProbability(const DerivationProbability& dp, std::ostream& out) {
-  out << std::setprecision(8) << dp.second << " " << dp.second*N() <<" " << *(dp.first);
+  void DerivationCollector::outputDerivationProbability(const DerivationProbability& dp,size_t n,  std::ostream& out) {
+  out << std::setprecision(8) << dp.second << " " << dp.second*n <<" " << *(dp.first);
 }
   
   
@@ -29,7 +29,7 @@ void DerivationCollector::outputDerivationProbability(const DerivationProbabilit
       pair<const Derivation*,float> max = getMax();
       if (max.first) {
         cerr << "MaxDeriv(" << n << "): ";
-        outputDerivationProbability(max,cerr);
+        outputDerivationProbability(max,n,cerr);
         cerr << endl;
         cerr << "DerivEntropy(" << n << "): " << getEntropy() << endl;
       }

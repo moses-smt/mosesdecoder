@@ -35,11 +35,13 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
   // populate feature_vector using static functions.
   po::options_description desc;
   bool useApproxPef = false;
+  bool useApproxPfe = false;
   desc.add_options()
     ("model1.table", "Model 1 table")
     ("model1.pef_column", "Column containing p(e|f) score")
     ("model1.pfe_column", "Column containing p(f|e) score")
-      ("model1.approx_pef",po::value<bool>(&useApproxPef)->default_value(false), "Approximate the p(e|f), and use importance sampling");
+    ("model1.approx_pef",po::value<bool>(&useApproxPef)->default_value(false), "Approximate the p(e|f), and use importance sampling")
+    ("model1.approx_pfe",po::value<bool>(&useApproxPfe)->default_value(false), "Approximate the p(f|e), and use importance sampling");
   po::variables_map vm;
   po::store(po::parse_config_file(in,desc,true), vm);
   notify(vm);
@@ -62,8 +64,14 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
         fv.push_back(feature_handle(new model1(ptable, p_fvocab_mapper, p_evocab_mapper)));
       }
     }
-    if (!vm["model1.pfe_column"].empty())
-      fv.push_back(feature_handle(new model1_inverse(ptable, p_fvocab_mapper, p_evocab_mapper))); 
+    if (!vm["model1.pfe_column"].empty()) {
+      if (useApproxPfe) {
+        cerr << "Using approximation for model1 inverse" << endl;
+        fv.push_back(feature_handle(new ApproximateModel1Inverse(ptable, p_fvocab_mapper, p_evocab_mapper)));
+      } else {
+        fv.push_back(feature_handle(new model1_inverse(ptable, p_fvocab_mapper, p_evocab_mapper)));
+      }
+    }
   }
   in.close();
 }
