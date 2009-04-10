@@ -69,6 +69,7 @@ void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hess
   //Calculate the expectation of v * f
   for (size_t i = 0; i < N(); ++i) {
     ScoreComponentCollection fv = m_featureVectors[i];
+    fv.MultiplyEquals(importanceWeights[i]);
     expectedVF += fv.InnerProduct(v);
   }
   
@@ -78,6 +79,7 @@ void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hess
     float vf = fv.InnerProduct(v);
     vf -=expectedVF;
     fv.MultiplyEquals(vf);
+    fv.MultiplyEquals(importanceWeights[i]);
     expected_FVF.PlusEquals(fv);   
   }
   
