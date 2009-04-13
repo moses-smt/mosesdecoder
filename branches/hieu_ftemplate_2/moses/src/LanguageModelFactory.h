@@ -21,7 +21,8 @@ namespace LanguageModelFactory {
 																		, size_t nGramOrder
 																		, const std::string &languageModelFile
 																		, float weight
-																		, ScoreIndexManager &scoreIndexManager);
+																		, ScoreIndexManager &scoreIndexManager
+, int dub);
 	 
 };
 

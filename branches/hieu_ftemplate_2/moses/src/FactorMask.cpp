@@ -1,4 +1,4 @@
-// $Id: FactorMask.cpp 736 2006-08-14 22:37:24Z hieuhoang1972 $
+// $Id: FactorMask.cpp 552 2009-01-09 14:05:34Z hieu $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -28,7 +28,8 @@ FactorMask::FactorMask(const vector<FactorType> &factors)
 	vector<FactorType>::const_iterator iter;
 	for (iter = factors.begin() ; iter != factors.end() ; ++iter)
 	{
-		this->set(*iter);
+		FactorType t = *iter;
+		this->set(t);
 	}
 }
 

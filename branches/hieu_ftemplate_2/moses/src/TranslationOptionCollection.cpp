@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <algorithm>
+#include <list>
 #include "TranslationOptionCollection.h"
 #include "Sentence.h"
 #include "DecodeStep.h"
@@ -32,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
+#include "UnknownWordHandler.h"
 
 using namespace std;
 
@@ -150,9 +152,10 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 {
 	// unknown word, add as trans opt
 	FactorCollection &factorCollection = FactorCollection::Instance();
+	const StaticData &staticData = StaticData::Instance();
 
 	size_t isDigit = 0;
-	if (StaticData::Instance().GetDropUnknown())
+	if (staticData.GetDropUnknown())
 	{
 		const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
 		const string &s = f->GetString();
@@ -167,27 +170,41 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,
 	unksrc->AddWord() = sourceWord;
 	m_unksrcs.push_back(unksrc);
 	
-	if (! StaticData::Instance().GetDropUnknown() || isDigit)
+	if (! staticData.GetDropUnknown() || isDigit)
 	{
 		// add to dictionary
 		TargetPhrase targetPhrase(Output);
 		Word &targetWord = targetPhrase.AddWord();
 					
-		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+		for (unsigned int targetFactorType = 0 ; targetFactorType < MAX_NUM_FACTORS ; targetFactorType++)
 		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-			
-			const Factor *sourceFactor = sourceWord[currFactor];
-			if (sourceFactor == NULL)
-				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
-			else
-				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
-		}
+			const UnknownWordHandler &unknownWordHandler = staticData.GetUnkwownWordHandler(targetFactorType);
+			const Factor *sourceFactor = sourceWord[targetFactorType];
 
-		targetPhrase.SetScore();
-		targetPhrase.SetSourcePhrase(unksrc);
-		TranslationOption transOpt(0, WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source);	
-		Add(transOpt);
+			const list<UnknownWordScorePair> &unknownPairList = unknownWordHandler.GetUnknownWord(sourceWord);
+
+			list<UnknownWordScorePair>::const_iterator iterList;
+			for (iterList = unknownPairList.begin(); iterList != unknownPairList.end(); ++iterList)
+			{
+				const UnknownWordScorePair &unknownPair = *iterList;
+				const Factor *targetFactor = unknownPair.first;
+
+				// hack. need to do proper cartiseian product
+				if (targetFactorType < MAX_NUM_FACTORS - 1)
+					targetWord[targetFactorType] = targetFactor;
+				else
+				{
+					TargetPhrase targetPhraseOutput(targetPhrase);
+					targetPhraseOutput.GetWord(0)[targetFactorType] = targetFactor;
+
+					targetPhraseOutput.SetScore();
+					targetPhraseOutput.SetSourcePhrase(unksrc);
+					TranslationOption transOpt(0, WordsRange(sourcePos, sourcePos + length - 1), targetPhraseOutput, m_source);	
+					Add(transOpt);
+
+				}
+			}
+		}
 	}
 	else 
 	{ // drop source word. create blank trans opt
@@ -343,7 +360,13 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
 {	
-	if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
+	const StaticData &staticData = StaticData::Instance();
+	size_t trainingCount = GetTranslationOptionList(startPos, endPos).GetTrainingCount();
+	int threshold = staticData.GetBackoffThreshold();
+	if (threshold > 0 && trainingCount >= threshold)
+		return;
+
+	if ((staticData.GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
 	{
 	  Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 	  const WordsRange wordsRange(startPos, endPos);
@@ -355,7 +378,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		{
 		  sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
 		  
-			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(*sourcePhrase);
+			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(decodeStepList, *sourcePhrase);
 			// is phrase in cache?
 			if (transOptList != NULL) {
 				skipTransOptCreation = true;
@@ -378,9 +401,21 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			list <const DecodeStep* >::const_iterator iterStep = decodeStepList.begin();
 			const DecodeStep &decodeStep = **iterStep;
 
+			const TargetPhraseCollection *mustKeepPhrases = NULL;
+			if (decodeStepList.GetSize()>1)
+			{ // hack. make sure target phrases from next decode step is retained
+				list <const DecodeStep* >::const_iterator iterNextStep = iterStep;
+				const DecodeStep &decodeStep = **(++iterNextStep);
+				assert(decodeStep.GetDecodeType() == Translate);
+				const PhraseDictionary &phraseDict = decodeStep.GetPhraseDictionary();
+				mustKeepPhrases = phraseDict.GetTargetPhraseCollection(m_source, WordsRange(startPos, endPos)); 
+			}
+
 			static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
 																(m_source, *oldPtoc
-																, startPos, endPos, adhereTableLimit );
+																, startPos, endPos, adhereTableLimit
+																, mustKeepPhrases
+																, decodeStepList);
 
 			// do rest of decode steps
 			int indexStep = 0;
@@ -388,30 +423,31 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			{
 				const DecodeStep &decodeStep = **iterStep;
 
-				// cache target phrase for translation steps
-				ConcatenatedPhraseColl concatenatedPhraseColl;
-				if (decodeStep.GetDecodeType() == Translate && oldPtoc->GetSize() > 0)
-				{	
-					const DecodeStepTranslation &translateStep = static_cast<const DecodeStepTranslation&>(decodeStep);
-					translateStep.CreateTargetPhrases(concatenatedPhraseColl
-																						, wordsRange
-																						, this
-																						, adhereTableLimit);
-					translateStep.SetTargetPhraseCollection(concatenatedPhraseColl);
-				}
-
 				PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 
 				// go thru each intermediate trans opt just created
 				const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
 				vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
-				for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
+
+				if (decodeStep.GetDecodeType() == Translate)
 				{
-					TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
-					decodeStep.Process(inputPartialTranslOpt
-																		 , *newPtoc
-																		 , this
-																		 , adhereTableLimit);
+					const DecodeStepTranslation &transStep = static_cast<const DecodeStepTranslation&>(decodeStep);
+					transStep.Process(wordsRange
+														, partTransOptList
+														, *newPtoc
+														, this
+														, adhereTableLimit);
+				}
+				else
+				{
+					for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
+					{
+						TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
+						decodeStep.Process(inputPartialTranslOpt
+																			 , *newPtoc
+																			 , this
+																			 , adhereTableLimit);
+					}
 				}
 				// last but 1 partial trans not required anymore
 				totalEarlyPruned += newPtoc->GetPrunedCount();
@@ -437,7 +473,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 				if (partTransOptList.size() > 0)
 				{
 					TranslationOptionList &cachedTransOptList = GetTranslationOptionList(startPos, endPos);	
-					StaticData::Instance().AddTransOptListToCache(*sourcePhrase, cachedTransOptList);
+					StaticData::Instance().AddTransOptListToCache(decodeStepList, *sourcePhrase, cachedTransOptList);
 				}				
 			}
 

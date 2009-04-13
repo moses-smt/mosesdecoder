@@ -46,7 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Util.h"
 #include "TrellisPathList.h"
 #include "Timer.h"
-#include "IOStream.h"
+#include "IOWrapper.h"
 #include "Sentence.h"
 #include "ConfusionNet.h"
 #include "WordLattice.h"
@@ -62,7 +62,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
-bool ReadInput(IOStream &ioStream, InputTypeEnum inputType, InputType*& source) 
+bool ReadInput(IOWrapper &ioStream, InputTypeEnum inputType, InputType*& source) 
 {
 	delete source;
 	switch(inputType)
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// set up read/writing class
-	IOStream *ioStream = GetIODevice(staticData);
+	IOWrapper *ioStream = GetIODevice(staticData);
 
 	// check on weights
 	vector<float> weights = staticData.GetAllWeights();
@@ -200,9 +200,9 @@ int main(int argc, char* argv[])
 	#endif
 }
 
-IOStream *GetIODevice(const StaticData &staticData)
+IOWrapper *GetIODevice(const StaticData &staticData)
 {
-	IOStream *ioStream;
+	IOWrapper *ioStream;
 	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
 																,&outputFactorOrder = staticData.GetOutputFactorOrder();
 	FactorMask inputFactorUsed(inputFactorOrder);
@@ -213,7 +213,7 @@ IOStream *GetIODevice(const StaticData &staticData)
 	  VERBOSE(2,"IO from File" << endl);
 		string filePath = staticData.GetParam("input-file")[0];
 
-		ioStream = new IOStream(inputFactorOrder, outputFactorOrder, inputFactorUsed
+		ioStream = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath()
 																	, filePath);
@@ -221,7 +221,7 @@ IOStream *GetIODevice(const StaticData &staticData)
 	else
 	{
 	  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
-		ioStream = new IOStream(inputFactorOrder, outputFactorOrder, inputFactorUsed
+		ioStream = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
 																	, staticData.GetNBestSize()
 																	, staticData.GetNBestFilePath());
 	}

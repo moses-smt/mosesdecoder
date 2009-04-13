@@ -80,7 +80,12 @@ Parameter::Parameter()
 	AddParam("use-persistent-cache", "cache translation options across sentences (default=true)");
 	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
 	AddParam("use-alignment-info", "Do we use alignment info from phrase table (1), or use just uniform alignment (0). Default is 1");
-	AddParam("num-subranges", "Max number of subranges that a phrase decoded by the 1st step can be split up into. 0=no limit. Default is 3");
+	AddParam("num-subranges", "Min/max number of subranges that a phrase decoded by the 1st step can be split up into. Default is -1 1000");
+	AddParam("unknown-factor", "How to translate unknown factors. [source]-[target] [file in noisy channel format]");
+	AddParam("backoff-threshold", "How may example in 1st pt before 2nd pt not processed. default is -1 (alway process 2nd pt)");
+	AddParam("intra-phrase-stack-size-multiple", "How big is intra-phrase stack, relative to normal stack. Default is 50");
+	AddParam("overlap-trans-opt", "What to do when trans opt create same target phrases. 0=keep (default), 1=keep only highest score. 2=merge, 3=backoff (specify threshold on next line)");
+	
 }
 
 Parameter::~Parameter()

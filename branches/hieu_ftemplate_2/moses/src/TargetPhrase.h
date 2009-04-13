@@ -42,6 +42,7 @@ protected:
 	ScoreComponentCollection m_scoreBreakdown;
 	AlignmentPair						m_alignmentPair;
 	size_t m_subRangeCount;
+	size_t m_trainingCount, m_sumTargetCount, m_sumSourceCount;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
@@ -142,6 +143,10 @@ public:
 
 	size_t GetSubRangeCount() const
 	{ return m_subRangeCount; }
+	size_t GetTrainingCount() const
+	{ return m_trainingCount; }
+	void SetTrainingCounts(size_t trainingCount, size_t sumTargetCount, size_t sumSourceCount);
+
 	TO_STRING();
 };
 

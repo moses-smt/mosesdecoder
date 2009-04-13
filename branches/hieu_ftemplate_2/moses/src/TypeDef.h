@@ -47,7 +47,8 @@ const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
 const size_t ARRAY_SIZE_INCR					= 5; //amount by which a phrase gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_WIDTH				= 0.00001f;
-const size_t DEFAULT_VERBOSE_LEVEL = 1;
+const size_t DEFAULT_VERBOSE_LEVEL		= 1;
+const float DEFAULT_INTRA_PHRASE_STACK_SIZE_MULTIPLE = 50.0f;
 
 ///////////////////////////////////////////////// 
 // for those using autoconf/automake
@@ -123,6 +124,7 @@ enum LMImplementation
 	,Skip			= 2
 	,Joint		= 3
 	,Internal	= 4
+	,NoBackoff= 5
 };
 
 
@@ -151,6 +153,28 @@ enum DecoderType
 {	
 	MAP
 	,MBR
+};
+
+
+enum OverlapTransOpt
+{	
+	KeepAll									= 0
+	/*
+	,KeepHighest						= 1
+	,MergeScore							= 2
+	*/
+	,BackoffGraph						= 3
+	/*
+	,WeightedGraph					= 4
+	,WeightedGraphSmoothed	= 5
+	,BackoffLength					= 6
+	,Smoothed								= 7
+	,WeightedBinarySmoothed = 8
+	,SoftBackoffLength			= 9
+	,SoftBackoffLengthSlope	= 10
+	,SoftBackoffLengthSlopeMax	= 11
+	,SmoothedInterpolateLex	= 12
+	*/
 };
 
 // typedef

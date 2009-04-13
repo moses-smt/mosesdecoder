@@ -52,7 +52,7 @@ protected:
 public:
 	~PhraseDictionaryNode();
 
-	void Sort(size_t tableLimit);
+	void Prune(size_t tableLimit);
 	PhraseDictionaryNode *GetOrCreateChild(const Word &word);
 	const PhraseDictionaryNode *GetChild(const Word &word) const;
 	const TargetPhraseCollection *GetTargetPhraseCollection() const

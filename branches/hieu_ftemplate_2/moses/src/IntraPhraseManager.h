@@ -14,8 +14,8 @@ class IntraPhraseManager
 protected:
 	std::vector<IntraPhraseHypothesisStack*> m_stackColl;
 	std::vector<std::vector<const TargetPhraseCollection*> > m_targetPhraseColl;
-	const TranslationOption &m_transOpt;
 	const WordsRange &m_sourceRange;
+	const size_t m_tableLimit;
 
 	void SetTargetPhraseCollection(const WordsRange &sourceRange
 																, const InputType &source
@@ -25,13 +25,22 @@ protected:
 																, const TargetPhraseCollection *targetPhraseCollection);
 	const TargetPhraseCollection *GetTargetPhraseCollection(size_t startPos
 																												, size_t endPos) const;
-	void ProcessOnePhrase(const IntraPhraseTargetPhrase &intraPhraseTargetPhrase);
+	void ProcessAllStacks(bool adhereTableLimit, size_t maxSegmentCount);
+	void ProcessAllStacks(bool adhereTableLimit
+											, const WordsRange &sourceRange
+											, const std::vector<TranslationOption*> &transOptList);
+	void ProcessOnePhrase(const IntraPhraseTargetPhrase &intraPhraseTargetPhrase
+											, bool adhereTableLimit
+											, size_t maxSegmentCount);
 	void ExpandOnePhrase(const WordsRange &endSourceRange
 											, const IntraPhraseTargetPhrase &intraPhraseTargetPhrase
-											, const TargetPhraseCollection &targetPhraseCollection);
-
+											, const TargetPhraseCollection &targetPhraseCollection
+											, bool adhereTableLimit
+											, size_t maxSegmentCount);
+	void ClearAllStacks();
+	
 public:
-	IntraPhraseManager(const TranslationOption &transOpt
+	IntraPhraseManager(const std::vector<TranslationOption*> &transOptList
 										, const WordsRange &sourceRange
 										, const InputType &source
 										, const PhraseDictionary &phraseDict);

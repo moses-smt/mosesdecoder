@@ -4,6 +4,7 @@
 #include "Util.h"
 
 TranslationOptionList::TranslationOptionList(const TranslationOptionList &copy)
+:m_trainingCount(0)
 {
 	TranslationOptionList::const_iterator iter;
 	for (iter = copy.begin(); iter != copy.end(); ++iter)
@@ -48,27 +49,68 @@ void TranslationOptionList::Prune(size_t maxNoTransOptPerCoverage)
 
 void TranslationOptionList::Add(TranslationOption &transOpt)
 {
-	UniqueTargetPhrase::iterator iterUniquePhrase;
-	iterUniquePhrase = m_uniqueTargetPhrase.find(transOpt.GetTargetPhrase());
-	if (iterUniquePhrase == m_uniqueTargetPhrase.end())
-	{ // not there yet. just add
-		TranslationOption *newTransOpt = new TranslationOption(transOpt);
-		m_coll.push_back(newTransOpt);
-		m_uniqueTargetPhrase[transOpt.GetTargetPhrase()] = m_coll.size() - 1;
+	const StaticData &staticData = StaticData::Instance();
+	OverlapTransOpt overlapTransOpt = staticData.GetOverlapTransOpt();
+
+	bool add;
+	switch (overlapTransOpt)
+	{
+		case KeepAll:
+			add = true;
+			break;
+		case BackoffGraph:
+		{ // only process 2nd decode graph if count of 1st is less than threshold
+			size_t decodeGraphId = transOpt.GetDecodeGraphId();
+			if (decodeGraphId == 0)
+			{ // trans opt is for unknown word or the first decode graph
+				m_trainingCount += transOpt.GetTrainingCount();
+				add = true;
+			}
+			else
+			{ // 2nd graph
+				size_t backoffThreshold = staticData.GetBackoffThreshold();
+				if (m_trainingCount > backoffThreshold)
+				{ // already have enought from prev decode graph, delete trans opt
+					add = false;
+				}
+				else
+				{
+					add = true;
+				}
+			}
+
+			break;
+		}
+
+		default:
+			abort();
+
 	}
-	else
-	{ // already there. clear out lowest scoring trans opt
-		size_t transOptInd = iterUniquePhrase->second;
-		TranslationOption *origTransOpt = m_coll[transOptInd];
-		if (origTransOpt->GetFutureScore() < transOpt.GetFutureScore())
-		{ // replace with new
+
+	if (add)
+	{
+		UniqueTargetPhrase::iterator iterUniquePhrase;
+		iterUniquePhrase = m_uniqueTargetPhrase.find(transOpt.GetTargetPhrase());
+		if (iterUniquePhrase == m_uniqueTargetPhrase.end())
+		{ // not there yet. just add
 			TranslationOption *newTransOpt = new TranslationOption(transOpt);
-			m_coll[transOptInd] = newTransOpt;
-			delete origTransOpt;
+			m_coll.push_back(newTransOpt);
+			m_uniqueTargetPhrase[transOpt.GetTargetPhrase()] = m_coll.size() - 1;
 		}
 		else
-		{ //keep original
+		{ // already there. clear out lowest scoring trans opt
+			size_t transOptInd = iterUniquePhrase->second;
+			TranslationOption *origTransOpt = m_coll[transOptInd];
+			if (origTransOpt->GetFutureScore() < transOpt.GetFutureScore())
+			{ // replace with new
+				TranslationOption *newTransOpt = new TranslationOption(transOpt);
+				m_coll[transOptInd] = newTransOpt;
+				delete origTransOpt;
+			}
+			else
+			{ //keep original
 
+			}
 		}
 	}
 }

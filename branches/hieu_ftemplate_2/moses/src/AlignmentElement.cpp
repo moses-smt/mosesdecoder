@@ -1,4 +1,4 @@
-// $Id: AlignmentElement.cpp 170 2007-10-30 16:40:54Z hieu $
+// $Id: AlignmentElement.cpp 552 2009-01-09 14:05:34Z hieu $
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh

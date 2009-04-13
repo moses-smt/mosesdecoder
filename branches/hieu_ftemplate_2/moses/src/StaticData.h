@@ -44,6 +44,7 @@ class DistortionScoreProducer;
 class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+class UnknownWordHandler;
 
 /** Contains global variables and contants */
 class StaticData
@@ -62,6 +63,9 @@ protected:
 	std::vector<LexicalReordering*>                   m_reorderModels;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
+	std::vector<UnknownWordHandler*>                   m_unknownWordHandlers;
+		// indexed but target factors
+
 	float
 		m_beamWidth,
 		m_weightDistortion, 
@@ -73,6 +77,7 @@ protected:
 									// do it differently from old pharaoh
 									// -ve	= no limit on distortion
 									// 0		= no disortion (monotone in old pharaoh)
+
 	size_t                              
 			m_maxHypoStackSize //hypothesis-stack size that triggers pruning
 			, m_nBestSize
@@ -96,7 +101,9 @@ protected:
 	bool m_useAlignmentInfo;
 
 	InputTypeEnum m_inputType;
-	size_t m_numInputScores, m_numSubRanges;
+	size_t m_numInputScores, m_backOffThreshold;
+	vector<size_t> m_numSubRanges;
+	OverlapTransOpt m_overlapTransOpt;
 
 	mutable size_t m_verboseLevel;
 	DistortionScoreProducer *m_distortionScoreProducer;
@@ -108,6 +115,7 @@ protected:
 	bool m_isDetailedTranslationReportingEnabled;
 	bool m_onlyDistinctNBest;
 	bool m_computeLMBackoffStats;
+	float m_intraStackSizeMultiple;
 
 	mutable std::auto_ptr<SentenceStats> m_sentenceStats;
 	std::string m_factorDelimiter; //! by default, |, but it can be changed
@@ -119,7 +127,7 @@ protected:
   DecoderType m_decoderType; //! MAP or MBR decoder
 
 	bool m_useTransOptCache;
-	mutable std::map<Phrase, TranslationOptionList*> m_transOptCache;
+	mutable std::map< std::pair<const DecodeGraph*, Phrase> , TranslationOptionList*> m_transOptCache;
 
   float m_mbrScale; //! Scaling factor for computing marginal probability of candidate translation
 	mutable const InputType* m_input;  //! holds reference to current sentence
@@ -129,6 +137,22 @@ protected:
 
 	//! helper fn to set bool param from ini file/command line
 	void SetBooleanParameter(bool *paramter, string parameterName, bool defaultValue);
+
+	template<typename T>
+	void SetParameter(T &parameter, string parameterName, const T &defaultValue)
+	{
+		// default value if nothing is specified
+		if (! m_parameter->isParamSpecified( parameterName ) )
+		{
+			parameter = defaultValue;
+			return;
+		}
+
+		if (m_parameter->GetParam( parameterName ).size() == 1) 
+		{
+			parameter = Scan<T>( m_parameter->GetParam( parameterName )[0]);
+		}
+	}
 
 	/***
 	 * load all language models as specified in ini file
@@ -144,7 +168,8 @@ protected:
 	//! load decoding steps
 	bool LoadMapping();
 	bool LoadLexicalReorderingModel();
-	
+	bool LoadUnknownWordHandlers();
+
 public:
 
 	bool IsAlwaysCreateDirectTranslationOption() const {
@@ -362,16 +387,28 @@ public:
 	DecoderType GetDecoderType() const {return m_decoderType;}
 	float GetMBRScale() const {return m_mbrScale;}
 	bool UseAlignmentInfo() const {return m_useAlignmentInfo;}
-	size_t GetMaxNumSubRanges() const {return m_numSubRanges;}
+	std::vector<size_t> GetNumSubRanges() const {return m_numSubRanges;}
 	XmlInputType GetXmlInputType() const { return m_xmlInputType; }
 
 	bool GetUseTransOptCache() const { return m_useTransOptCache; }
-	void AddTransOptListToCache(const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
+	void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
 
 	std::string GetCachePath() const
  	{
  		return m_cachePath;
  	}
+	const UnknownWordHandler &GetUnkwownWordHandler(size_t factor) const 
+	{ return *m_unknownWordHandlers[factor];}
 
-	const TranslationOptionList* FindTransOptListInCache(const Phrase &sourcePhrase) const;
+	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
+
+	float GetIntraStackSizeMultiple() const 
+	{ return m_intraStackSizeMultiple; }
+
+	OverlapTransOpt GetOverlapTransOpt() const
+	{ return m_overlapTransOpt; }
+
+	size_t GetBackoffThreshold() const 
+	{ return m_backOffThreshold; }
+
 };

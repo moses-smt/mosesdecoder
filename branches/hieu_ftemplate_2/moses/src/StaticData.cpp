@@ -46,6 +46,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "PhraseList.h"
 #include "PrefixPhraseCollection.h"
+#include "UnknownWordHandlerVerbatim.h"
+#include "UnknownWordHandlerLookup.h"
 
 using namespace std;
 
@@ -81,6 +83,7 @@ StaticData::StaticData()
 ,m_factorDelimiter("|") // default delimiter between factors
 ,m_isAlwaysCreateDirectTranslationOption(true)
 ,m_cachePath (GetTempFolder())
+,m_unknownWordHandlers (MAX_NUM_FACTORS, NULL)
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -126,8 +129,18 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_useAlignmentInfo = (m_parameter->GetParam("use-alignment-info").size()>0) 
 				? Scan<bool>(m_parameter->GetParam("use-alignment-info")[0]) : true;
 
-	m_numSubRanges = (m_parameter->GetParam("num-subranges").size()>0) 
-				? Scan<size_t>(m_parameter->GetParam("num-subranges")[0]) : 3;
+	m_numSubRanges.resize(2);
+	if (m_parameter->GetParam("num-subranges").size()>0)
+	{
+		assert(m_parameter->GetParam("num-subranges").size() == 2);
+		m_numSubRanges[0] = Scan<size_t>(m_parameter->GetParam("num-subranges")[0]);
+		m_numSubRanges[1] = Scan<size_t>(m_parameter->GetParam("num-subranges")[1]);
+	}
+	else
+	{
+		m_numSubRanges[0] = 0;
+		m_numSubRanges[1] = 1000;
+	}
 
 	// n-best
 	if (m_parameter->GetParam("n-best-list").size() >= 2)
@@ -164,6 +177,10 @@ bool StaticData::LoadData(Parameter *parameter)
 	// print all factors of output translations
 	SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
 
+	SetParameter<float>(m_intraStackSizeMultiple
+							, "intra-phrase-stack-size-multiple"
+							, DEFAULT_INTRA_PHRASE_STACK_SIZE_MULTIPLE);
+		
 	// 
 	if (m_inputType == SentenceInput)
 	{
@@ -249,6 +266,20 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_maxPhraseLength = (m_parameter->GetParam("max-phrase-length").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("max-phrase-length")[0]) : DEFAULT_MAX_PHRASE_LENGTH;
 
+	m_overlapTransOpt = (m_parameter->GetParam("overlap-trans-opt").size() > 0)
+		    ? (OverlapTransOpt) Scan<size_t>(m_parameter->GetParam("overlap-trans-opt")[0]) : KeepAll;
+
+	switch (m_overlapTransOpt)
+	{
+		case BackoffGraph:
+		{
+			assert(m_parameter->GetParam("overlap-trans-opt").size() == 2);
+			m_backOffThreshold = Scan<size_t>(m_parameter->GetParam("overlap-trans-opt")[1]);
+			break;
+		}
+	}
+
+
 	// Unknown Word Processing -- wade
 	//TODO replace this w/general word dropping -- EVH
 	SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
@@ -256,7 +287,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_decoderType = (DecoderType) ((m_parameter->GetParam("decoder-type").size() > 0) ? Scan<int>(m_parameter->GetParam("decoder-type")[0]) : 0);
 	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0)
 				? Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
-	
+
 	//default case
 	
 	if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
@@ -274,6 +305,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
 	if (!LoadMapping()) return false;
+	if (!LoadUnknownWordHandlers()) return false;
 
 	return true;
 }
@@ -335,8 +367,9 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_languageModel);
 	RemoveAllInColl(m_decodeStepVL);
 	RemoveAllInColl(m_reorderModels);
-	
-	std::map<Phrase, TranslationOptionList*>::iterator iterCache;
+	RemoveAllInColl(m_unknownWordHandlers);
+
+	std::map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList*>::iterator iterCache;
 	for (iterCache = m_transOptCache.begin(); iterCache != m_transOptCache.end(); ++iterCache)
 	{
 		TranslationOptionList *transOptList = iterCache->second;
@@ -522,6 +555,13 @@ bool StaticData::LoadLanguageModels()
 			m_allWeights.push_back(weightAll[i]);
 		}
 
+		// dictionary upper-bounds fo all IRST LMs
+		vector<int> LMdub = Scan<int>(m_parameter->GetParam("lmodel-dub"));
+		if (m_parameter->GetParam("lmodel-dub").size() == 0){
+			for(size_t i=0; i<m_parameter->GetParam("lmodel-file").size(); i++)
+				LMdub.push_back(0);
+		}
+
 	  // initialize n-gram order for each factor. populated only by factored lm
 		const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
 
@@ -559,7 +599,8 @@ bool StaticData::LoadLanguageModels()
                                    								, nGramOrder
 																									, languageModelFile
 																									, weightAll[i]
-																									, m_scoreIndexManager);
+																									, m_scoreIndexManager
+							, LMdub[i]);
       if (lm == NULL) 
       {
       	UserMessage::Add("no LM created. We probably don't have it compiled");
@@ -880,6 +921,33 @@ bool StaticData::LoadMapping()
 	return true;
 }
 
+bool StaticData::LoadUnknownWordHandlers()
+{
+	const PARAM_VEC &params = m_parameter->GetParam("unknown-factor");
+
+	PARAM_VEC::const_iterator iter;
+	for (iter = params.begin(); iter != params.end(); ++iter)
+	{
+		const string &line = *iter;
+		vector<string>	token		= Tokenize(line);
+		vector<FactorType> factors = Tokenize<FactorType>(token[0], "-");
+		UnknownWordHandlerLookup *handler = new UnknownWordHandlerLookup(factors[0], factors[1], token[1]);
+		m_unknownWordHandlers[ factors[1] ] = handler;
+	}
+
+	// use default handler for other factors everything else
+	for (size_t factorType = 0; factorType < MAX_NUM_FACTORS; ++factorType)
+	{
+		if (m_unknownWordHandlers[factorType] == NULL)
+		{
+			UnknownWordHandlerVerbatim *handler = new UnknownWordHandlerVerbatim(factorType, factorType);
+			m_unknownWordHandlers[factorType] = handler;
+		}
+	}
+	
+	return true;
+}
+
 void StaticData::CleanUpAfterSentenceProcessing() const
 {
 	for(size_t i=0;i<m_phraseDictionary.size();++i)
@@ -931,17 +999,20 @@ void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::
     m_allWeights[i] = *weightIter++;
 }
 
-const TranslationOptionList* StaticData::FindTransOptListInCache(const Phrase &sourcePhrase) const
+const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
 {
-	std::map<Phrase, TranslationOptionList*>::const_iterator iter
-			= m_transOptCache.find(sourcePhrase);
+	std::pair<const DecodeGraph*, Phrase> pair(&decodeGraph, sourcePhrase);
+
+	std::map<std::pair<const DecodeGraph*, Phrase>, TranslationOptionList*>::const_iterator iter
+			= m_transOptCache.find(pair);
 	if (iter == m_transOptCache.end())
 		return NULL;
 
 	return iter->second;
 }
 
-void StaticData::AddTransOptListToCache(const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
+void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
 {
-	m_transOptCache[sourcePhrase] = new TranslationOptionList(transOptList);
+		std::pair<const DecodeGraph*, Phrase> pair(&decodeGraph, sourcePhrase);
+		m_transOptCache[pair] = new TranslationOptionList(transOptList);
 }

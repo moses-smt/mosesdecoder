@@ -17,7 +17,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
@@ -81,7 +81,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
@@ -295,10 +295,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ConcatenatedPhrase.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ConfusionNet.cpp"
 				>
 			</File>
@@ -336,6 +332,10 @@
 			</File>
 			<File
 				RelativePath=".\src\FactorMask.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\File.cpp"
 				>
 			</File>
 			<File
@@ -389,40 +389,24 @@
 			<File
 				RelativePath=".\src\LanguageModelInternal.cpp"
 				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelIRST.cpp"
+				>
 				<FileConfiguration
 					Name="Debug|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-withSRILM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug-withSRILM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 					/>
 				</FileConfiguration>
 			</File>
@@ -463,6 +447,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\LanguageNoBackoff.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LexicalReordering.cpp"
 				>
 			</File>
@@ -485,42 +473,6 @@
 			<File
 				RelativePath=".\src\md5.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-withSRILM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug-withSRILM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\mempool.cpp"
@@ -561,42 +513,6 @@
 			<File
 				RelativePath=".\src\PhraseDictionaryNode.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-withSRILM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug-withSRILM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionaryTree.cpp"
@@ -655,10 +571,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\TargetPhraseMatrix.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\TranslationOption.cpp"
 				>
 			</File>
@@ -684,6 +596,18 @@
 			</File>
 			<File
 				RelativePath=".\src\TrellisPathCollection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnknownWordHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnknownWordHandlerLookup.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnknownWordHandlerVerbatim.cpp"
 				>
 			</File>
 			<File
@@ -733,10 +657,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ConcatenatedPhrase.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ConfusionNet.h"
 				>
 			</File>
@@ -782,6 +702,10 @@
 			</File>
 			<File
 				RelativePath=".\src\FilePtr.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FloydWarshall.h"
 				>
 			</File>
 			<File
@@ -837,6 +761,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LanguageModelIRST.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LanguageModelJoint.h"
 				>
 			</File>
@@ -854,6 +782,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelSRI.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageNoBackoff.h"
 				>
 			</File>
 			<File
@@ -989,10 +921,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\TargetPhraseMatrix.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Timer.h"
 				>
 			</File>
@@ -1030,6 +958,22 @@
 			</File>
 			<File
 				RelativePath=".\src\TypeDef.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UniqueObject.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnknownWordHandler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnknownWordHandlerLookup.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnknownWordHandlerVerbatim.h"
 				>
 			</File>
 			<File

@@ -1,11 +1,13 @@
 
 #include <queue>
 #include "IntraPhraseHypothesisStack.h"
+#include "StaticData.h"
 
 using namespace std;
 
-IntraPhraseHypothesisStack::IntraPhraseHypothesisStack(size_t maxSize)
+IntraPhraseHypothesisStack::IntraPhraseHypothesisStack(size_t maxSize, bool isLastStack)
 :m_maxSize(maxSize)
+,m_isLastStack(isLastStack)
 {
 }
 
@@ -16,6 +18,16 @@ IntraPhraseHypothesisStack::~IntraPhraseHypothesisStack()
 
 void IntraPhraseHypothesisStack::AddPrune(IntraPhraseTargetPhrase *phrase)
 {
+	if (m_isLastStack)
+	{ // need to sync phrases for last stack
+		phrase->ClearOverlongTransOpts();
+		if (phrase->GetTranslationOptionList().size() == 0)
+		{ // not a valid phrase for final stack
+			delete phrase;
+			return;
+		}
+	}
+
 	m_coll.insert(phrase);
 
 	if (m_coll.size() > m_maxSize * 2)
@@ -67,6 +79,45 @@ void IntraPhraseHypothesisStack::PruneToSize(size_t newSize)
 			}
 		}
 	}
+}
+
+void IntraPhraseHypothesisStack::RemoveSelectedPhrases()
+{
+	const StaticData &staticData = StaticData::Instance();
+	size_t minSubRangeCount = staticData.GetNumSubRanges()[0]
+				,maxSubRangeCount = numeric_limits<size_t>::max();
+
+	// find minimum
+	IntraPhraseHypothesisStack::iterator iterStack;
+
+	for (iterStack = begin() ; iterStack != end() ; ++iterStack)
+	{
+		IntraPhraseTargetPhrase &phrase = **iterStack;
+		size_t subRangeCount = phrase.GetSubRangeCount();
+
+		maxSubRangeCount = std::min(maxSubRangeCount, subRangeCount);
+	}
+
+	maxSubRangeCount = std::min(maxSubRangeCount, staticData.GetNumSubRanges()[1]);
+
+	// delete any phrase with more than min segments
+	iterStack = begin();
+	while (iterStack != end())
+	{
+		IntraPhraseTargetPhrase &phrase = **iterStack;
+		size_t subRangeCount = phrase.GetSubRangeCount();
+
+		if (subRangeCount >maxSubRangeCount || subRangeCount < minSubRangeCount)
+		{
+			IntraPhraseHypothesisStack::iterator iterDelete = iterStack++;
+			Remove(iterDelete);
+		}
+		else
+		{
+			++iterStack;
+		}
+	}
+
 }
 
 

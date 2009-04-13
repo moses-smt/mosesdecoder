@@ -101,10 +101,12 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
 				targetPhrase.SetScore(m_xmlOptionsList[i].targetScores[j]);
 				WordsRange range(m_xmlOptionsList[i].startPos,m_xmlOptionsList[i].endPos);
 				
+				abort();
+				/*
 				TranslationOption *option = new TranslationOption(range,targetPhrase,*this, 0); // not sure what decode step it should be
 				assert(option);
 				list.push_back(option);
-
+				*/
 			}
 		}
 	}
