@@ -60,7 +60,8 @@ protected:
 	Phrase				      *m_sourcePhrase; /*< input phrase translated by this */
 	const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
 	float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
-	
+	size_t							m_decodeGraphId;
+
 	std::vector<size_t> m_subRangeCount;
 
 	//! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
@@ -78,7 +79,8 @@ public:
 	TranslationOption(const WordsRange &wordsRange
 									, const TargetPhrase &targetPhrase
 									, const InputType &inputType
-									, size_t decodeStepId);
+									, size_t decodeStepId
+									, const DecodeGraph &decodeGraph);
 
 	/** constructor. Used to create trans opt from unknown word */
 	TranslationOption(int
@@ -181,6 +183,12 @@ public:
 
 	size_t GetSubRangeCount(size_t decodeStepId) const
 	{ return m_subRangeCount[decodeStepId]; }
+
+	size_t GetTrainingCount() const
+	{ return m_targetPhrase.GetTrainingCount(); }
+
+	size_t GetDecodeGraphId() const
+	{ return m_decodeGraphId; }
 
 	TO_STRING();
 };

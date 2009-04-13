@@ -39,9 +39,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-LanguageModelIRST::LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager)
+LanguageModelIRST::LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub)
 :LanguageModelSingleFactor(registerScore, scoreIndexManager)
-,m_lmtb(0)
+,m_lmtb(0),m_lmtb_dub(dub)
 {
 }
 
@@ -118,6 +118,8 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   m_lmtb->init_statecache();
   m_lmtb->init_lmtcaches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
 
+  if (m_lmtb_dub >0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
+
   return true;
 }
 
@@ -189,6 +191,7 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 	  cout << "i=" << i << " -> " << (*contextFactor[i])[factorType]->GetString() << "\n";
 #endif
 	  int lmId = GetLmID((*contextFactor[i])[factorType]->GetString());
+	  //	  cerr << (*contextFactor[i])[factorType]->GetString() << " = " << lmId;
 	  m_lmtb_ng->pushc(lmId);
 	}
   
@@ -198,7 +201,10 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 		*len = 0;	
 	}
 
-	return TransformIRSTScore((float) m_lmtb->clprob(*m_lmtb_ng));
+	float prob = m_lmtb->clprob(*m_lmtb_ng);
+  
+  
+	return TransformIRSTScore(prob);
 }
 
 

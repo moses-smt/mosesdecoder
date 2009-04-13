@@ -1,4 +1,4 @@
-// $Id: TranslationOptionCollection.cpp 1429 2007-07-20 13:03:12Z hieuhoang1972 $
+// $Id: DecodeGraph.cpp 552 2009-01-09 14:05:34Z hieu $
 // vim:tabstop=2
 
 /***********************************************************************
@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStep.h"
 #include "TypeDef.h"
 #include "Util.h"
+
+size_t DecodeGraph::s_id = 0;
 
 DecodeGraph::~DecodeGraph()
 {

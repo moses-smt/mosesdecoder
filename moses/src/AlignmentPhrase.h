@@ -1,4 +1,4 @@
-// $Id: AlignmentPhrase.h 87 2007-09-10 23:17:43Z hieu $
+// $Id: AlignmentPhrase.h 552 2009-01-09 14:05:34Z hieu $
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh

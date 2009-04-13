@@ -13,6 +13,7 @@ class TranslationOptionList
 protected:
 	typedef std::vector<TranslationOption*> CollType;
 	CollType m_coll;
+	size_t m_trainingCount;
 
 	typedef std::map<Phrase, size_t> UniqueTargetPhrase;
 	UniqueTargetPhrase m_uniqueTargetPhrase;
@@ -27,12 +28,16 @@ public:
 	iterator end() { return m_coll.end(); }
 
 	TranslationOptionList()
+		:m_trainingCount(0)
 	{}
 	TranslationOptionList(const TranslationOptionList &copy);
 	~TranslationOptionList();
 
 	size_t GetSize() const
 	{ return m_coll.size(); }
+	size_t GetTrainingCount() const 
+	{ return m_trainingCount; }
+
 	void Add(TranslationOption &transOpt);
 	void Prune(size_t maxNoTransOptPerCoverage);
 };

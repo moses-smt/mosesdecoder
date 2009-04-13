@@ -1,4 +1,4 @@
-// $Id: TranslationOptionCollection.cpp 1429 2007-07-20 13:03:12Z hieuhoang1972 $
+// $Id: DecodeGraph.h 552 2009-01-09 14:05:34Z hieu $
 // vim:tabstop=2
 
 /***********************************************************************
@@ -31,6 +31,9 @@ class DecodeGraph
 {
 protected:
 	std::list<const DecodeStep*> m_steps;
+	static size_t s_id;
+	
+	size_t m_id;
 
 public:
 	//! iterators
@@ -39,11 +42,21 @@ public:
 	const_iterator begin() const { return m_steps.begin(); }
 	const_iterator end() const { return m_steps.end(); }
 	
+	DecodeGraph()
+	:m_id(s_id++)
+	{}
+
 	~DecodeGraph();
 
 	void Add(const DecodeStep *decodeStep)
 	{
 		m_steps.push_back(decodeStep);
 	}
+	
+	size_t GetSize() const
+	{	return m_steps.size(); }
+	size_t GetId() const
+	{ return m_id; }
+
 };
 

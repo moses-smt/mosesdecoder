@@ -88,7 +88,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		++line_num;
 
 		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
-		if (tokens.size() != 5)
+		if (tokens.size() < 5)
 		{
 			stringstream strme;
 			strme << "Syntax error at " << filePath << ":" << line_num;
@@ -155,13 +155,17 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		std::transform(scv.begin(),scv.end(),scv.begin(),FloorScore);
 		targetPhrase.SetScore(this, scv, weight, weightWP, languageModels);
 
+		// training counts
+		vector<size_t> trainingCounts = Tokenize<size_t>(tokens[5]);
+		targetPhrase.SetTrainingCounts(trainingCounts[0], trainingCounts[1], trainingCounts[2]);
+
 		AddEquivPhrase(sourcePhrase, targetPhrase);
 
 		count++;
 	}
 
 	// sort each target phrase collection
-	m_collection.Sort(m_tableLimit);
+	m_collection.Prune(m_tableLimit);
 
 	// move temp file to hash file
 	if (filter)

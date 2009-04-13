@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #  include "LanguageModelIRST.h"
 #endif
 
+#include "LanguageNoBackoff.h"
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
@@ -45,7 +46,8 @@ namespace LanguageModelFactory
 																		, size_t nGramOrder
 																		, const std::string &languageModelFile
 																		, float weight
-																		, ScoreIndexManager &scoreIndexManager)
+																		, ScoreIndexManager &scoreIndexManager
+, int dub)
 	{
 	  LanguageModel *lm = NULL;
 	  switch (lmImplementation)
@@ -59,7 +61,7 @@ namespace LanguageModelFactory
 			  break;
 			case IRST:
 				#ifdef LM_IRST
-	     		lm = new LanguageModelIRST(true, scoreIndexManager);
+	     		lm = new LanguageModelIRST(true, scoreIndexManager, dub);
 			  #endif
 				break;
 			case Skip:
@@ -88,6 +90,9 @@ namespace LanguageModelFactory
 				#ifdef LM_INTERNAL
 					lm = new LanguageModelInternal(true, scoreIndexManager);
 			  #endif
+			  break;
+	  	case NoBackoff:
+					lm = new LanguageNoBackoff(true, scoreIndexManager);
 			  break;
 	  }
 	  

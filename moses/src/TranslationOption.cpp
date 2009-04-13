@@ -35,11 +35,14 @@ using namespace std;
 TranslationOption::TranslationOption(const WordsRange &wordsRange
 																		, const TargetPhrase &targetPhrase
 																		, const InputType &inputType
-																		, size_t decodeStepId)
+																		, size_t decodeStepId
+																		, const DecodeGraph &decodeGraph)
 : m_targetPhrase(targetPhrase)
 , m_sourceWordsRange(wordsRange)
 , m_subRangeCount(DecodeStepTranslation::GetNumTransStep(), 0)
 {
+	m_decodeGraphId = decodeGraph.GetId();
+
 	// set score
 	m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 

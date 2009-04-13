@@ -37,6 +37,7 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
 	//:Phrase(direction), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
 	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
 	,m_subRangeCount(0)
+	,m_trainingCount(1)
 {
 }
 
@@ -397,6 +398,13 @@ void TargetPhrase::SetAlignment(const std::vector<std::string> &alignStrVec, Fac
 	CreateAlignmentInfo(otherAlignStr, alignStr, m_sourcePhrase->GetSize());
 	assert(alignStrVec.size() == alignmentPhrase.GetSize());
 
+}
+
+void TargetPhrase::SetTrainingCounts(size_t trainingCount, size_t sumTargetCount, size_t sumSourceCount)
+{ 
+	m_trainingCount		= trainingCount;
+	m_sumTargetCount	= sumTargetCount;
+	m_sumSourceCount	= sumSourceCount;
 }
 
 TO_STRING_BODY(TargetPhrase);

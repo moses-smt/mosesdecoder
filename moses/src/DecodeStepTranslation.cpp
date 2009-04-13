@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "PartialTranslOptColl.h"
 #include "FactorCollection.h"
-#include "TargetPhraseMatrix.h"
 #include "IntraPhraseManager.h"
 
 size_t DecodeStepTranslation::s_id = 0;
@@ -59,14 +58,27 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const
 {
+	assert(false);
+}
+
+void DecodeStepTranslation::Process(const WordsRange &sourceRange
+															, const std::vector<TranslationOption*> &inputPartialTranslOptList
+                              , PartialTranslOptColl &outputPartialTranslOptColl
+                              , TranslationOptionCollection *toc
+                              , bool adhereTableLimit) const
+{
+	if (inputPartialTranslOptList.size() == 0)
+		return;
+
+	/* TODO - put back in
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
   { // word deletion
     outputPartialTranslOptColl.Add(new TranslationOption(inputPartialTranslOpt));
     return;
   }
+	*/
 
-	const WordsRange &sourceRange = inputPartialTranslOpt.GetSourceWordsRange();
-	IntraPhraseManager intraPhraseManager(inputPartialTranslOpt
+	IntraPhraseManager intraPhraseManager(inputPartialTranslOptList
 																			, sourceRange
 																			, toc->GetSource()
 																			, GetPhraseDictionary());
@@ -76,75 +88,26 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 	for (iter = phraseColl.begin() ; iter != phraseColl.end() ; ++iter)
 	{
 		const IntraPhraseTargetPhrase &targetPhrase = **iter;
-    TranslationOption *newTransOpt = MergeTranslation(inputPartialTranslOpt, targetPhrase);
-		if (newTransOpt != NULL)
-    {			    	
-	    outputPartialTranslOptColl.Add(newTransOpt);
-    }
-	}
+		const std::vector<TranslationOption*> &transOptList = targetPhrase.GetTranslationOptionList();
 
-	/*
-	// create	trans option
-	ConcatenatedPhraseColl::const_iterator iterConcatePhrase;
-	for (iterConcatePhrase = m_concatenatedPhraseColl->begin(); iterConcatePhrase != m_concatenatedPhraseColl->end(); ++iterConcatePhrase)	
-  {
-		const ConcatenatedPhrase &concatePhrase = *iterConcatePhrase;
-    
-    if (concatePhrase.GetPhraseSize() == inputPartialTranslOpt.GetTargetPhrase().GetSize())
-    { // same size
-      // create all possible perm of this concate phrase
-      const TargetPhraseCollection &targetPhraseColl
-                = concatePhrase.CreateTargetPhrases();
-
-      TargetPhraseCollection::const_iterator iterTargetPhrase;
-      for (iterTargetPhrase = targetPhraseColl.begin(); iterTargetPhrase != targetPhraseColl.end(); ++iterTargetPhrase)
-      {
-        const TargetPhrase &targetPhrase = **iterTargetPhrase;
-        
-        TranslationOption *newTransOpt = MergeTranslation(inputPartialTranslOpt, targetPhrase);
-        if (newTransOpt != NULL)
-		    {			    	
-			    outputPartialTranslOptColl.Add(newTransOpt);
-		    }
-      }
-    }
-	}
-	*/
-}
-
-void DecodeStepTranslation::CreateTargetPhrases(
-																ConcatenatedPhraseColl &concatenatedPhraseColl
-															, const WordsRange &sourceWordsRange
-                              , TranslationOptionCollection *toc
-                              , bool adhereTableLimit) const
-{
-  const PhraseDictionary &phraseDictionary  = GetPhraseDictionary();
-	const size_t tableLimit = phraseDictionary.GetTableLimit();
-	const size_t sourceSize = sourceWordsRange.GetNumWordsCovered();
-
-	TargetPhraseMatrix targetPhraseMatrix(sourceSize);
-	
-	size_t sourceStartPos = sourceWordsRange.GetStartPos();
-
-	// grab all the sub range trans
-	for (size_t startPos = sourceStartPos; startPos <= sourceWordsRange.GetEndPos(); ++startPos)
-	{
-		for (size_t endPos = startPos; endPos <= sourceWordsRange.GetEndPos(); ++endPos)
-		{
-			WordsRange subRange(startPos, endPos);
-		  const TargetPhraseCollection *phraseColl= phraseDictionary.GetTargetPhraseCollection(toc->GetSource(),subRange);
-			targetPhraseMatrix.Add(startPos - sourceStartPos, endPos - sourceStartPos, phraseColl);
+		std::vector<TranslationOption*>::const_iterator iterTransOptList;
+		for (iterTransOptList = transOptList.begin() ; iterTransOptList != transOptList.end() ; ++iterTransOptList)
+		{	
+			const TranslationOption &transOpt = **iterTransOptList;
+			
+			TranslationOption *newTransOpt = MergeTranslation(transOpt, targetPhrase);
+			assert(newTransOpt != NULL);
+			outputPartialTranslOptColl.Add(newTransOpt);
 		}
 	}
-
-	// concatenate target phrase together
-	targetPhraseMatrix.CreateConcatenatedPhraseList(concatenatedPhraseColl, tableLimit, adhereTableLimit);
 }
 
 void DecodeStepTranslation::ProcessInitialTranslation(
 															const InputType &source
 															,PartialTranslOptColl &outputPartialTranslOptColl
-															, size_t startPos, size_t endPos, bool adhereTableLimit) const
+															, size_t startPos, size_t endPos, bool adhereTableLimit
+															, const TargetPhraseCollection *mustKeepPhrases
+															, const DecodeGraph &decodeGraph) const
 {
 	const PhraseDictionary &phraseDictionary = GetPhraseDictionary();
 	const size_t tableLimit = phraseDictionary.GetTableLimit();
@@ -153,7 +116,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(source,wordsRange); 
 
 	if (phraseColl != NULL)
-	{		
+	{
 		VERBOSE(3,"[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
 			
 		TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
@@ -162,7 +125,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 		for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase)
 		{
 			const TargetPhrase	&targetPhrase = **iterTargetPhrase;
-			outputPartialTranslOptColl.AddNoPrune ( new TranslationOption(wordsRange, targetPhrase, source, 0) );
+			outputPartialTranslOptColl.AddNoPrune ( new TranslationOption(wordsRange, targetPhrase, source, 0, decodeGraph) );
 			
 			VERBOSE(3,"\t" << targetPhrase << "\n");
 		}

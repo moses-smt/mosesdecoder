@@ -23,11 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "DecodeStep.h"
 #include "WordsRange.h"
-#include "ConcatenatedPhrase.h"
 
 class PhraseDictionary;
 class TargetPhrase;
 class TargetPhraseCollection;
+class DecodeGraph;
 
 class DecodeStepTranslation : public DecodeStep
 {
@@ -49,14 +49,11 @@ public:
 											, PartialTranslOptColl &outputPartialTranslOptColl
 											, TranslationOptionCollection *toc
 											, bool adhereTableLimit) const;
-
-	void CreateTargetPhrases(ConcatenatedPhraseColl &concatenatedPhraseColl
-															, const WordsRange &sourceWordsRange
-                              , TranslationOptionCollection *toc
-                              , bool adhereTableLimit) const;
-
-	void SetTargetPhraseCollection(ConcatenatedPhraseColl &concatenatedPhraseColl) const
-	{ m_concatenatedPhraseColl = &concatenatedPhraseColl; }
+	void Process(const WordsRange &sourceRange
+											, const std::vector<TranslationOption*> &inputPartialTranslOptList
+                      , PartialTranslOptColl &outputPartialTranslOptColl
+                      , TranslationOptionCollection *toc
+                      , bool adhereTableLimit) const;
 
 	/** initialize list of partial translation options by applying the first translation step 
 	* Ideally, this function should be in DecodeStepTranslation class
@@ -64,7 +61,9 @@ public:
 	void ProcessInitialTranslation(
 															const InputType &source
 															, PartialTranslOptColl &outputPartialTranslOptColl
-															, size_t startPos, size_t endPos, bool adhereTableLimit) const;
+															, size_t startPos, size_t endPos, bool adhereTableLimit
+															, const TargetPhraseCollection *mustKeepPhrases
+															, const DecodeGraph &decodeGraph) const;
 private:
 	static size_t s_id;
 	size_t m_id;
@@ -72,7 +71,5 @@ private:
 		This function runs IsCompatible() to ensure the two can be merged
 	*/
 	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;
-
-	mutable ConcatenatedPhraseColl *m_concatenatedPhraseColl;
 };
 
