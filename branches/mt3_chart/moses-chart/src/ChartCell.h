@@ -51,11 +51,15 @@ public:
 class ChartCell
 {
 	friend std::ostream& operator<<(std::ostream&, const ChartCell&);
+public:
 
 protected:
 	typedef std::set<Hypothesis*, HypothesisRecombinationOrderer> HCType;
 	HCType m_hypos;
-	std::vector<const Hypothesis*> m_hyposOrdered;
+
+	std::map<Moses::Word, OrderHypos> m_hyposOrdered;
+	std::vector<Moses::Word> m_headWords;
+	const Hypothesis *m_bestHypo;
 
 	Moses::WordsRange m_coverage;
 	std::set<QueueEntry*, QueueEntryOrderer> m_queueUnique;
@@ -80,7 +84,7 @@ public:
 	void ProcessSentence(const TranslationOptionList &transOptList
 											,const ChartCellCollection &allChartCells);
 	size_t GetSize() const
-	{ return m_hyposOrdered.size(); }
+	{ return m_hypos.size(); } 
 	size_t GetMaxHypoStackSize() const
 	{
 		return m_maxHypoStackSize;
@@ -89,8 +93,7 @@ public:
 	float GetThreshold() const
 	{ return m_bestScore + m_beamWidth; }
 
-	const std::vector<const Hypothesis*> &GetSortedHypotheses() const
-	{ return m_hyposOrdered; }
+	const OrderHypos &GetSortedHypotheses(const Moses::Word &headWord) const;
 	void AddQueueEntry(QueueEntry *queueEntry);
 	bool AddHypothesis(Hypothesis *hypo);
 
@@ -101,6 +104,15 @@ public:
 	void Detach(const HCType::iterator &iter);
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
 	void Remove(const HCType::iterator &iter);
+
+	const Hypothesis *GetBestHypothesis() const
+	{ return m_bestHypo; }
+
+	bool HeadwordExists(const Moses::Word &headWord) const;
+	const std::vector<Moses::Word> &GetHeadwords() const
+	{ return m_headWords; }
+
+	void CleanupArcList();
 
 	//! transitive comparison used for adding objects into set
 	inline bool operator<(const ChartCell &compare) const

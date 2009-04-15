@@ -171,6 +171,10 @@ public:
 		m_alignmentInfo.AddAlignment(entry);
 	}
 
+	void SetHeadWord(const Word &headWord);
+	const Word &GetHeadWord() const
+	{ return m_headWord; }
+
 	TO_STRING();
 };
 

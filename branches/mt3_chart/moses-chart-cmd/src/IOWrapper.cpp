@@ -5,28 +5,28 @@ Moses - factored phrase-based language decoder
 Copyright (c) 2006 University of Edinburgh
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice, 
+    * Redistributions of source code must retain the above copyright notice,
 			this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, 
-			this list of conditions and the following disclaimer in the documentation 
+    * Redistributions in binary form must reproduce the above copyright notice,
+			this list of conditions and the following disclaimer in the documentation
 			and/or other materials provided with the distribution.
-    * Neither the name of the University of Edinburgh nor the names of its contributors 
-			may be used to endorse or promote products derived from this software 
+    * Neither the name of the University of Edinburgh nor the names of its contributors
+			may be used to endorse or promote products derived from this software
 			without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
-PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS 
-BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************/
 
@@ -67,8 +67,8 @@ IOWrapper::IOWrapper(
 		{
 			m_nBestStream = &std::cout;
 			m_surpressSingleBestOutput = true;
-		} 
-		else 
+		}
+		else
 		{
 			std::ofstream *nBestFile = new std::ofstream;
 			m_nBestStream = nBestFile;
@@ -99,8 +99,8 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 		{
 			m_nBestStream = &std::cout;
 			m_surpressSingleBestOutput = true;
-		} 
-		else 
+		}
+		else
 		{
 			std::ofstream *nBestFile = new std::ofstream;
 			m_nBestStream = nBestFile;
@@ -121,14 +121,14 @@ IOWrapper::~IOWrapper()
 
 InputType*IOWrapper::GetInput(InputType* inputType)
 {
-	if(inputType->Read(*m_inputStream, m_inputFactorOrder)) 
+	if(inputType->Read(*m_inputStream, m_inputFactorOrder))
 	{
 		if (long x = inputType->GetTranslationId()) { if (x>=m_translationId) m_translationId = x+1; }
 		else inputType->SetTranslationId(m_translationId++);
-		  
+
 		return inputType;
 	}
-	else 
+	else
 	{
 		delete inputType;
 		return NULL;
@@ -141,18 +141,18 @@ InputType*IOWrapper::GetInput(InputType* inputType)
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
 	assert(outputFactorOrder.size() > 0);
-	if (reportAllFactors == true) 
+	if (reportAllFactors == true)
 	{
 		out << phrase;
-	} 
-	else 
+	}
+	else
 	{
 		size_t size = phrase.GetSize();
 		for (size_t pos = 0 ; pos < size ; pos++)
 		{
 			const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
 			out << *factor;
-			
+
 			for (size_t i = 1 ; i < outputFactorOrder.size() ; i++)
 			{
 				const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
@@ -168,7 +168,6 @@ void OutputSurface(std::ostream &out, const MosesChart::Hypothesis *hypo, const 
 {
 	if ( hypo != NULL)
 	{
-		cerr << *hypo << endl;
 		//OutputSurface(out, hypo->GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
 
 		const vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
@@ -196,7 +195,7 @@ void IOWrapper::Backtrack(const MosesChart::Hypothesis *hypo)
 		Backtrack(prevHypo);
 	}
 }
-				
+
 void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
 {
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
@@ -204,7 +203,7 @@ void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, l
 				const Factor *factor = mbrBestHypo[i];
 				cout << *factor << " ";
 			}
-}													 
+}
 /*
 void OutputInput(std::vector<const Phrase*>& map, const MosesChart::Hypothesis* hypo)
 {
@@ -241,6 +240,12 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long /*transl
 			}
 			Phrase outPhrase(Output);
 			hypo->CreateOutputPhrase(outPhrase);
+
+			// delete 1st & last
+			assert(outPhrase.GetSize() >= 2);
+			outPhrase.RemoveWord(0);
+			outPhrase.RemoveWord(outPhrase.GetSize() - 1);
+
 			cout << outPhrase << endl;
 		}
 	}
@@ -258,14 +263,17 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 {
 	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
 	bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
-	
+
 	MosesChart::TrellisPathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
 	{
 		const MosesChart::TrellisPath &path = **iter;
 		Moses::Phrase outputPhrase = path.GetOutputPhrase();
 
-		cout << endl << path << endl;
+		// delete 1st & last
+		assert(outputPhrase.GetSize() >= 2);
+		outputPhrase.RemoveWord(0);
+		outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
 
 		// print the surface factor of the translation
 		*m_nBestStream << translationId << " ||| ";
@@ -275,7 +283,7 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 		// print the scores in a hardwired order
     // before each model type, the corresponding command-line-like name must be emitted
     // MERT script relies on this
-			
+
 		// lm
 		const LMList& lml = StaticData::Instance().GetAllLM();
     if (lml.size() > 0) {
@@ -288,7 +296,7 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
     }
 
 		// translation components
-		if (StaticData::Instance().GetInputType()==SentenceInput){  
+		if (StaticData::Instance().GetInputType()==SentenceInput){
 			// translation components	for text input
 			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
@@ -297,37 +305,37 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 				vector<PhraseDictionary*>::iterator iter;
 				for (iter = pds.begin(); iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-					for (size_t j = 0; j<scores.size(); ++j) 
+					for (size_t j = 0; j<scores.size(); ++j)
 						*m_nBestStream << scores[j] << " ";
 				}
 			}
 		}
-		else{		
+		else{
 			// translation components for Confusion Network input
 			// first translation component has GetNumInputScores() scores from the input Confusion Network
 			// at the beginning of the vector
 			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				vector<PhraseDictionary*>::iterator iter;
-				
+
 				iter = pds.begin();
 				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-					
+
 				size_t pd_numinputscore = (*iter)->GetNumInputScores();
 
 				if (pd_numinputscore){
-					
+
 					if (labeledOutput)
 						*m_nBestStream << "I: ";
 
 					for (size_t j = 0; j < pd_numinputscore; ++j)
 						*m_nBestStream << scores[j] << " ";
 				}
-					
-					
+
+
 				for (iter = pds.begin() ; iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-					
+
 					size_t pd_numinputscore = (*iter)->GetNumInputScores();
 
 					if (iter == pds.begin() && labeledOutput)
@@ -337,14 +345,14 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 				}
 			}
 		}
-		
-		
-		
+
+
+
 		// word penalty
 		if (labeledOutput)
 	    *m_nBestStream << "w: ";
 		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetWordPenaltyProducer()) << " ";
-		
+
 		// generation
 		vector<GenerationDictionary*> gds = StaticData::Instance().GetGenerationDictionaries();
     if (gds.size() > 0) {
@@ -358,8 +366,8 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 			  }
 		  }
     }
-		
-		// total						
+
+		// total
     *m_nBestStream << "||| " << path.GetTotalScore();
 
 		/*

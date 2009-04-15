@@ -73,7 +73,6 @@ void CreateTempFile(ofstream  &fileStream, string &filePath)
 	fileStream.open(filePath.c_str(), ofstream::out | ofstream::app);
 }
 
-
 const std::string ToLower(const std::string& str)
 {
 	std::string lc(str);

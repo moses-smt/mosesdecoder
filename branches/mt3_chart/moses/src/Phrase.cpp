@@ -137,8 +137,9 @@ Word &Phrase::AddWord()
 	return m_words.back();
 }
 
-void Phrase::Append(const Phrase &endPhrase){
-	
+void Phrase::Append(const Phrase &endPhrase)
+{
+	m_words.reserve(m_words.size() + endPhrase.GetSize());
 	for (size_t i = 0; i < endPhrase.GetSize();i++){
 		AddWord(endPhrase.GetWord(i));	
 	}
@@ -271,16 +272,11 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 
 	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
 	{
+		const vector<string> &wordVec = phraseVector[phrasePos];
 		// add word this phrase
 		Word &word = AddWord();
-		for (size_t currFactorIndex= 0 ; currFactorIndex < factorOrder.size() ; currFactorIndex++)
-		{
-			FactorType factorType = factorOrder[currFactorIndex];
-			const string &factorStr = phraseVector[phrasePos][currFactorIndex];
-			const Factor *factor = factorCollection.AddFactor(m_direction, factorType, factorStr); 
-			word[factorType] = factor;
-		}
-
+		word.CreateFromString(m_direction, factorOrder, wordVec);
+		
 		if (word.IsNonTerminal())
 			m_arity++;
 	}
@@ -289,24 +285,17 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const vector< vector<string>* > &phraseVector)
 {
-	FactorCollection &factorCollection = FactorCollection::Instance();
 	m_arity = 0;
 
 	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
 	{
+		const vector<string> &wordVec = *phraseVector[phrasePos];
 		// add word this phrase
 		Word &word = AddWord();
-		for (size_t currFactorIndex= 0 ; currFactorIndex < factorOrder.size() ; currFactorIndex++)
-		{
-			FactorType factorType = factorOrder[currFactorIndex];
-			const string &factorStr = (*phraseVector[phrasePos])[currFactorIndex];
-			const Factor *factor = factorCollection.AddFactor(m_direction, factorType, factorStr); 
-			word[factorType] = factor;
-		}
+		word.CreateFromString(m_direction, factorOrder, wordVec);
 		
 		if (word.IsNonTerminal())
 			m_arity++;
-
 	}
 }
 
@@ -437,7 +426,7 @@ size_t Phrase::GetNumTerminals() const
 
 	for (size_t pos = 0; pos < GetSize(); ++pos)
 	{
-		if (!GetWord(pos)[0]->IsNonTerminal())
+		if (!GetWord(pos).IsNonTerminal())
 			ret++;
 	}
 	return ret;

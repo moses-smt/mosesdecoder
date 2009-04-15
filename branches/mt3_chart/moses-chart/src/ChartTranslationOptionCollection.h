@@ -11,22 +11,26 @@ namespace Moses
 	class DecodeGraph;
 	class Word;
 	class ChartRule;
-	class WordsConsumed;
+	class WordConsumed;
 };
 
 namespace MosesChart
 {
+class ChartCellCollection;
 
 class TranslationOptionCollection
 {
 	friend std::ostream& operator<<(std::ostream&, const TranslationOptionCollection&);
 protected:
 	const Moses::InputType		&m_source;
+	const std::vector<Moses::DecodeGraph*> &m_decodeGraphList;
+	const ChartCellCollection &m_hypoStackColl;
+
 	std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
 	std::vector<Moses::Phrase*> m_unksrcs;
 	std::list<Moses::ChartRule*> m_cacheChartRule;
 	std::list<Moses::TargetPhrase*> m_cacheTargetPhrase;
-	std::list<std::vector<Moses::WordsConsumed>* > m_cachedWordsConsumed;
+	std::list<std::vector<Moses::WordConsumed*>* > m_cachedWordsConsumed;
 
 	virtual void CreateTranslationOptionsForRange(const Moses::DecodeGraph &decodeStepList
 																			, size_t startPosition
@@ -40,8 +44,7 @@ protected:
 	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
 	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
 
-	//! Force a creation of a translation option where there are none for a particular source position.
-	void ProcessUnknownWord(const std::vector <Moses::DecodeGraph*> &decodeGraphList);
+	void ProcessUnknownWord(size_t startPos, size_t endPos);
 
 	// taken from TranslationOptionCollectionText.
 	void ProcessUnknownWord(size_t sourcePos);
@@ -49,16 +52,21 @@ protected:
 	//! special handling of ONE unknown words.
 	virtual void ProcessOneUnknownWord(const Moses::Word &sourceWord
 																		 , size_t sourcePos, size_t length = 1);
+	
 	//! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
-	void Prune();
+	void Prune(size_t startPos, size_t endPos);
 
 	//! sort all trans opt in each list for cube pruning */
-	void Sort();
+	void Sort(size_t startPos, size_t endPos);
 
 public:
-	TranslationOptionCollection(Moses::InputType const& source);
+	TranslationOptionCollection(Moses::InputType const& source
+														, const std::vector<Moses::DecodeGraph*> &decodeGraphList
+														, const ChartCellCollection &hypoStackColl);
 	virtual ~TranslationOptionCollection();
-	virtual void CreateTranslationOptions(const std::vector <Moses::DecodeGraph*> &decodeGraphList);
+	//virtual void CreateTranslationOptions(const std::vector <Moses::DecodeGraph*> &decodeGraphList);
+	void CreateTranslationOptionsForRange(size_t startPos
+																			, size_t endPos);
 
 	const TranslationOptionList &GetTranslationOptionList(const Moses::WordsRange &range) const
 	{

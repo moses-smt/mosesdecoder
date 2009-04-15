@@ -16,44 +16,54 @@ using namespace Moses;
 
 namespace MosesChart
 {
-
 unsigned int Hypothesis::s_HypothesesCreated = 0;
+
+#ifdef USE_HYPO_POOL
+	ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
+#endif
 
 Hypothesis::Hypothesis(const QueueEntry &queueEntry)
 :m_targetPhrase(queueEntry.GetTranslationOption().GetChartRule().GetTargetPhrase())
 ,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetChartRule().GetWordsConsumedTargetOrder())
 ,m_id(++s_HypothesesCreated)
 ,m_currSourceWordsRange(queueEntry.GetTranslationOption().GetSourceWordsRange())
-,m_contextPrefix(Output)
-,m_contextSuffix(Output)
+,m_contextPrefix(Output, StaticData::Instance().GetAllLM().GetMaxNGramOrder())
+,m_contextSuffix(Output, StaticData::Instance().GetAllLM().GetMaxNGramOrder())
 ,m_arcList(NULL)
 {
 	assert(m_targetPhrase.GetSize() == m_wordsConsumedTargetOrder.size());
 
-	const std::vector<ChildEntry> &childEntries = queueEntry.GetChildEntries();
+	const std::vector<ChildEntry*> &childEntries = queueEntry.GetChildEntries();
 
-	vector<ChildEntry>::const_iterator iter;
+	m_numTargetTerminals = m_targetPhrase.GetNumTerminals();
+
+	vector<ChildEntry*>::const_iterator iter;
 	for (iter = childEntries.begin(); iter != childEntries.end(); ++iter)
 	{
-		const ChildEntry &childEntry = *iter;
+		const ChildEntry &childEntry = **iter;
+		const Moses::Word &headWord = childEntry.GetHeadWord();
 		size_t pos = childEntry.GetPos();
-		const Hypothesis *prevHypo = childEntry.GetChildCell().GetSortedHypotheses()[pos];
+		const Hypothesis *prevHypo = childEntry.GetOrderHypos()[pos];
+
+		m_numTargetTerminals += prevHypo->GetNumTargetTerminals();
 
 		m_prevHypos.push_back(prevHypo);
 	}
 
-	GetPrefix(m_contextPrefix, 2);
-	GetSuffix(m_contextSuffix, 2);
+	size_t maxNGram = StaticData::Instance().GetAllLM().GetMaxNGramOrder();
+	CalcPrefix(m_contextPrefix, maxNGram - 1);
+	CalcSuffix(m_contextSuffix, maxNGram - 1);
 }
 
 Hypothesis::~Hypothesis()
 {
-	if (m_arcList) 
+	if (m_arcList)
 	{
 		ArcList::iterator iter;
 		for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter)
 		{
-			FREEHYPO(*iter);
+			Hypothesis *hypo = *iter;
+			Delete(hypo);
 		}
 		m_arcList->clear();
 
@@ -66,7 +76,7 @@ void Hypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 	for (size_t pos = 0; pos < m_targetPhrase.GetSize(); ++pos)
 	{
 		const Word &word = m_targetPhrase.GetWord(pos);
-		if (word.GetFactor(0)->IsNonTerminal())
+		if (word.IsNonTerminal())
 		{ // non-term. fill out with prev hypo
 			size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
 			const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
@@ -86,16 +96,16 @@ Phrase Hypothesis::GetOutputPhrase() const
 	return outPhrase;
 }
 
-size_t Hypothesis::GetPrefix(Phrase &ret, size_t size) const
+size_t Hypothesis::CalcPrefix(Phrase &ret, size_t size) const
 {
 	for (size_t pos = 0; pos < m_targetPhrase.GetSize(); ++pos)
 	{
 		const Word &word = m_targetPhrase.GetWord(pos);
-		if (word.GetFactor(0)->IsNonTerminal())
+		if (word.IsNonTerminal())
 		{
 			size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
 			const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
-			size = prevHypo->GetPrefix(ret, size);
+			size = prevHypo->CalcPrefix(ret, size);
 		}
 		else
 		{
@@ -110,29 +120,49 @@ size_t Hypothesis::GetPrefix(Phrase &ret, size_t size) const
 	return size;
 }
 
-size_t Hypothesis::GetSuffix(Phrase &ret, size_t size) const
+size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
 {
-	for (int pos = (int) m_targetPhrase.GetSize() - 1; pos >= 0 ; --pos)
-	{
-		const Word &word = m_targetPhrase.GetWord(pos);
+	assert(m_contextPrefix.GetSize() <= m_numTargetTerminals);
 
-		if (word.GetFactor(0)->IsNonTerminal())
+	if (m_contextPrefix.GetSize() == m_numTargetTerminals)
+	{ // small hypo. the prefix will contains the whole hypo
+		size_t maxCount = min(m_contextPrefix.GetSize(), size)
+					, pos			= m_contextPrefix.GetSize() - 1;
+
+		for (size_t ind = 0; ind < maxCount; ++ind)
 		{
-			size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
-			const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
-			size = prevHypo->GetSuffix(ret, size);
-		}
-		else
-		{
-			ret.PrependWord(m_targetPhrase.GetWord(pos));
-			size--;
+			const Word &word = m_contextPrefix.GetWord(pos);
+			ret.PrependWord(word);
+			--pos;
 		}
 
-		if (size==0)
-			break;
+		size -= maxCount;
+		return size;
 	}
+	else
+	{
+		for (int pos = (int) m_targetPhrase.GetSize() - 1; pos >= 0 ; --pos)
+		{
+			const Word &word = m_targetPhrase.GetWord(pos);
 
-	return size;
+			if (word.IsNonTerminal())
+			{
+				size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
+				const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
+				size = prevHypo->CalcSuffix(ret, size);
+			}
+			else
+			{
+				ret.PrependWord(m_targetPhrase.GetWord(pos));
+				size--;
+			}
+
+			if (size==0)
+				break;
+		}
+
+		return size;
+	}
 }
 
 int Hypothesis::LMContextCompare(const Hypothesis &other) const
@@ -176,19 +206,93 @@ void Hypothesis::CalcScore()
 	const ScoreComponentCollection &scoreBreakdown = m_targetPhrase.GetScoreBreakdown();
 	m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
-	float retFullScore, retNGramScore;
-	CalcLMScore(retFullScore, retNGramScore);
+	CalcLMScore();
 
 	m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }
 
-void Hypothesis::CalcLMScore(float &retFullScore, float &retNGramScore)
+void Hypothesis::CalcLMScore()
 {
+	assert(m_lmNGram.GetWeightedScore() == 0);
+
+	m_scoreBreakdown.ZeroAllLM();
+
+	const LMList &lmList = StaticData::Instance().GetAllLM();
+	Phrase outPhrase(Output); // = GetOutputPhrase();
+	bool calcNow = false, firstPhrase = true;
+
+	for (size_t targetPhrasePos = 0; targetPhrasePos < m_targetPhrase.GetSize(); ++targetPhrasePos)
+	{
+		const Word &targetWord = m_targetPhrase.GetWord(targetPhrasePos);
+		if (!targetWord.IsNonTerminal())
+		{ // just a word, add to phrase for lm scoring
+			outPhrase.AddWord(targetWord);
+		}
+		else
+		{
+			size_t nonTermInd = m_wordsConsumedTargetOrder[targetPhrasePos];
+			const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
+			size_t numTargetTerminals = prevHypo->GetNumTargetTerminals();
+
+			if (numTargetTerminals >= lmList.GetMaxNGramOrder() - 1)
+			{ // large hypo (for trigram lm, another hypo equal or over 2 words). just take the prefix & suffix
+				m_lmNGram.PlusEqualsAllLM(prevHypo->m_lmNGram);
+
+				// calc & add overlapping lm scores
+				// prefix
+				outPhrase.Append(prevHypo->GetPrefix());
+				calcNow = true;
+			}
+			else
+			{ // small hypo (for trigram lm, 1-word hypos).
+				// add target phrase to temp phrase and continue, but don't score yet
+				outPhrase.Append(prevHypo->GetPrefix());
+			}
+
+			if (calcNow)
+			{
+				if (targetPhrasePos == 0 && numTargetTerminals >= lmList.GetMaxNGramOrder() - 1)
+				{ // get from other prev hypo. faster
+					m_lmPrefix.Assign(prevHypo->m_lmPrefix);
+					m_lmNGram.Assign(prevHypo->m_lmNGram);
+				}
+				else
+				{ // calc
+					lmList.CalcScore(outPhrase
+													, m_lmNGram
+													, (firstPhrase) ? &m_lmPrefix : NULL);
+				}
+
+				// create new phrase from suffix. score later when appended with next words
+				outPhrase.Clear();
+				outPhrase.Append(prevHypo->GetSuffix());
+
+				firstPhrase = false;
+				calcNow = false;
+			}
+		} // if (!targetWord.IsNonTerminal())
+	} // for (size_t targetPhrasePos
+
+	lmList.CalcScore(outPhrase
+									, m_lmNGram
+									, (firstPhrase) ? &m_lmPrefix : NULL);
+
+	m_scoreBreakdown.PlusEqualsAllLM(m_lmPrefix);
+	m_scoreBreakdown.PlusEqualsAllLM(m_lmNGram);
+
+/*
+	// lazy way. keep for comparison
 	Phrase outPhrase = GetOutputPhrase();
-	
-	retFullScore = 0;
-	retNGramScore = 0;
-	StaticData::Instance().GetAllLM().CalcScore(outPhrase, retFullScore, retNGramScore, &m_scoreBreakdown, false);
+//	cerr << outPhrase << " ";
+
+	float retFullScore, retNGramScore;
+	StaticData::Instance().GetAllLM().CalcScore(outPhrase
+																						, retFullScore
+																						, retNGramScore
+																						, m_scoreBreakdown
+																						, &m_lmNGram
+																						, false);
+*/
 }
 
 void Hypothesis::AddArc(Hypothesis *loserHypo)
@@ -216,6 +320,57 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 	m_arcList->push_back(loserHypo);
 }
 
+// sorting helper
+struct CompareChartHypothesisTotalScore
+{
+	bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const
+	{
+		return hypo1->GetTotalScore() > hypo2->GetTotalScore();
+	}
+};
+
+void Hypothesis::CleanupArcList()
+{
+	// point this hypo's main hypo to itself
+	SetWinningHypo(this);
+
+	if (!m_arcList) return;
+
+	/* keep only number of arcs we need to create all n-best paths.
+	 * However, may not be enough if only unique candidates are needed,
+	 * so we'll keep all of arc list if nedd distinct n-best list
+	 */
+	const StaticData &staticData = StaticData::Instance();
+	size_t nBestSize = staticData.GetNBestSize();
+	bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph();
+
+	if (!distinctNBest && m_arcList->size() > nBestSize * 5)
+	{ // prune arc list only if there too many arcs
+		nth_element(m_arcList->begin()
+							, m_arcList->begin() + nBestSize - 1
+							, m_arcList->end()
+							, CompareChartHypothesisTotalScore());
+		
+		// delete bad ones
+		ArcList::iterator iter;
+		for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter)
+		{
+			Hypothesis *arc = *iter;
+			Hypothesis::Delete(arc);
+		}
+		m_arcList->erase(m_arcList->begin() + nBestSize
+										, m_arcList->end());
+	}
+
+	// set all arc's main hypo variable to this hypo
+	ArcList::iterator iter = m_arcList->begin();
+	for (; iter != m_arcList->end() ; ++iter)
+	{
+		Hypothesis *arc = *iter;
+		arc->SetWinningHypo(this);
+	}
+}
+
 TO_STRING_BODY(Hypothesis)
 
 // friend
@@ -227,10 +382,10 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 	// words bitmap
 	out << " " << outPhrase
 			<< " " << hypo.GetId()
-			<< " " << hypo.GetTotalScore() 
+			<< " " << hypo.GetTotalScore()
 			<< " " << hypo.m_currSourceWordsRange
 			<< " " << hypo.m_targetPhrase;
-			
+
 /*
 	out << endl;
 	std::vector<const Hypothesis*>::const_iterator iter;

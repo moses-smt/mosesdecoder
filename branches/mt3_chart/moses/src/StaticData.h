@@ -71,6 +71,9 @@ protected:
 	std::vector<LexicalReordering*>                   m_reorderModels;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
+	std::set<std::string>		m_nonTerminals;
+	std::string							m_defaultNonTerminals;
+
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
@@ -155,6 +158,7 @@ protected:
 
 	size_t m_cubePruningPopLimit;
 	size_t m_cubePruningDiversity;
+	size_t m_ruleLimit;
 	StaticData();
 
 	//! helper fn to set bool param from ini file/command line
@@ -176,6 +180,8 @@ protected:
 	bool LoadLexicalReorderingModel();
 	
 	void LoadInputSentences(const std::string &inputPath);
+
+	void LoadNonTerminals();
 
 public:
 
@@ -465,6 +471,13 @@ public:
 
 	const std::string &GetJoshuaPath() const
 	{ return m_joshuaPath; }
+
+	bool IsNonTerminal(const std::string symbol) const;
+	const std::string &GetDefaultNonTerminal() const
+	{ return m_defaultNonTerminals; 
+	}
+	size_t GetRuleLimit() const
+	{ return m_ruleLimit; }
 };
 
 }

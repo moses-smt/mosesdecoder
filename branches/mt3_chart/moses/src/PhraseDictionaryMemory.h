@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
+class ProcessedRuleStack;
 
 /*** Implementation of a phrase table in a trie.  Looking up a phrase of
  * length n words requires n look-ups to find the TargetPhraseCollection.
@@ -40,12 +41,13 @@ class PhraseDictionaryMemory : public PhraseDictionary
 protected:
 	PhraseDictionaryNode m_collection;
 	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
+	mutable std::vector<ProcessedRuleStack*>	m_runningNodesVec;
 
 	Phrase									m_prevSource;
 	TargetPhraseCollection	*m_prevPhraseColl;
 
 	TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const Phrase &source);
-	
+
 	bool Load(const std::vector<FactorType> &input
 							, const std::vector<FactorType> &output
 							, std::istream &inStream
@@ -73,20 +75,23 @@ public:
 								, size_t tableLimit
 								, const LMList &languageModels
 						    , float weightWP);
-	
+
 	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 
-	void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase);
+	void AddEquivPhrase(TargetPhraseCollection	&targetPhraseColl, TargetPhrase *targetPhrase);
 
 	// for mert
 	void SetWeightTransModel(const std::vector<float> &weightT);
-	
+
 	TO_STRING();
-	
+
+	void InitializeForInput(const InputType& i);
+
 	const ChartRuleCollection *GetChartRuleCollection(
 																	InputType const& src
 																	,WordsRange const& range
-																	,bool adhereTableLimit) const;
+																	,bool adhereTableLimit
+																	,const CellCollection &cellColl) const;
 	void CleanUp();
 };
 

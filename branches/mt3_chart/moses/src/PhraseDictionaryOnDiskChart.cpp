@@ -5,6 +5,7 @@
 #include "InputType.h"
 #include "FactorCollection.h"
 #include "StaticData.h"
+#include "WordConsumed.h"
 #include "../../on-disk-phrase-dict/src/SourcePhraseNode.h"
 #include "../../on-disk-phrase-dict/src/TargetPhraseList.h"
 
@@ -13,24 +14,24 @@ using namespace std;
 namespace Moses
 {
 
-class ProcessedRule
+class ProcessedRuleOnDisk
 {
 protected:
 	MosesOnDiskPt::SourcePhraseNode m_lastNode;
-	vector<WordsConsumed> m_wordsConsumed;
+	vector<WordConsumed*> m_wordsConsumed;
 public:
-	ProcessedRule(const MosesOnDiskPt::SourcePhraseNode &lastNode)
+	ProcessedRuleOnDisk(const MosesOnDiskPt::SourcePhraseNode &lastNode)
 		:m_lastNode(lastNode)
 	{}
-	ProcessedRule(const ProcessedRule &prevProcessedRule, const MosesOnDiskPt::SourcePhraseNode &lastNode)
+	ProcessedRuleOnDisk(const ProcessedRuleOnDisk &prevProcessedRule, const MosesOnDiskPt::SourcePhraseNode &lastNode)
 		:m_lastNode(lastNode)
 		,m_wordsConsumed(prevProcessedRule.m_wordsConsumed)
 	{}
-	ProcessedRule(const ProcessedRule &prevProcessedRule)
+	ProcessedRuleOnDisk(const ProcessedRuleOnDisk &prevProcessedRule)
 		:m_lastNode(prevProcessedRule.m_lastNode)
 		,m_wordsConsumed(prevProcessedRule.m_wordsConsumed)
 	{}
-	ProcessedRule& operator=(const ProcessedRule &copy)
+	ProcessedRuleOnDisk& operator=(const ProcessedRuleOnDisk &copy)
 	{
 		if(this != &copy)
 		{
@@ -42,24 +43,24 @@ public:
 
 	const MosesOnDiskPt::SourcePhraseNode &GetLastNode() const
 	{ return m_lastNode; }
-	const vector<WordsConsumed> &GetWordsConsumed() const
+	const vector<WordConsumed*> &GetWordsConsumed() const
 	{ return m_wordsConsumed; }
 	bool IsCurrNonTerminal() const
 	{
-		return m_wordsConsumed.empty() ? false : m_wordsConsumed.back().IsNonTerminal();
+		return m_wordsConsumed.empty() ? false : m_wordsConsumed.back()->IsNonTerminal();
 	}
 
-	void AddConsume(size_t pos, bool isNonTerminal)
+	void AddConsume(size_t pos, const Word &sourceWord)
 	{
-		m_wordsConsumed.push_back(WordsConsumed(WordsRange(pos, pos), isNonTerminal));
+		m_wordsConsumed.push_back(new WordConsumed(pos, pos, sourceWord, NULL));
 	}
 	void ExtendConsume(size_t pos)
 	{
-		WordsRange &range = m_wordsConsumed.back().GetWordsRange();
+		WordsRange &range = m_wordsConsumed.back()->GetWordsRange();
 		range.SetEndPos(range.GetEndPos() + 1);
 	}
 /*
-	inline int Compare(const ProcessedRule &compare) const
+	inline int Compare(const ProcessedRuleOnDisk &compare) const
 	{
 		if (m_lastNode < compare.m_lastNode)
 			return -1;
@@ -68,17 +69,20 @@ public:
 
 		return m_wordsConsumed < compare.m_wordsConsumed;
 	}
-	inline bool operator<(const ProcessedRule &compare) const
+	inline bool operator<(const ProcessedRuleOnDisk &compare) const
 	{
 		return Compare(compare) < 0;
 	}
 */
 };
 
+#define NON_TERMINAL_FACTOR	"X"
+
 const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(
 																		InputType const& src
 																		,WordsRange const& range
-																		,bool adhereTableLimit) const
+																		,bool adhereTableLimit
+																		,const CellCollection &cellColl) const
 {
 	const StaticData &staticData = StaticData::Instance();
 	float weightWP = staticData.GetWeightWordPenalty();
@@ -99,14 +103,14 @@ const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(
 	MosesOnDiskPt::VocabId vocabIdNonTerm = m_vocabLookup.find(NON_TERMINAL_FACTOR)->second;
 	MosesOnDiskPt::Word nonTermWord(m_inputFactorsVec.size(), vocabIdNonTerm);
 
-	vector<	vector<ProcessedRule> > runningNodes(range.GetNumWordsCovered()+1);
-	runningNodes[0].push_back(ProcessedRule(*m_initNode));
+	vector<	vector<ProcessedRuleOnDisk> > runningNodes(range.GetNumWordsCovered()+1);
+	runningNodes[0].push_back(ProcessedRuleOnDisk(*m_initNode));
 
 	// MAIN LOOP. create list of nodes of target phrases
 	size_t relPos = 0;
 	for (size_t absPos = range.GetStartPos(); absPos <= range.GetEndPos(); ++absPos)
 	{
-		vector<ProcessedRule>
+		vector<ProcessedRuleOnDisk>
 					&todoNodes = runningNodes[relPos]
 					,&doneNodes	= runningNodes[relPos+1];
 
@@ -115,10 +119,10 @@ const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(
 		MosesOnDiskPt::Word searchWord(m_inputFactorsVec.size());
 		bool validSearchWord = searchWord.ConvertFromMoses(m_inputFactorsVec, origWord, m_vocabLookup);
 
-		vector<ProcessedRule>::iterator iterNode;
+		vector<ProcessedRuleOnDisk>::iterator iterNode;
 		for (iterNode = todoNodes.begin(); iterNode != todoNodes.end(); ++iterNode)
 		{
-			ProcessedRule &prevProcessedRule = *iterNode;
+			ProcessedRuleOnDisk &prevProcessedRule = *iterNode;
 			const MosesOnDiskPt::SourcePhraseNode &todoNode = prevProcessedRule.GetLastNode();
 
 			if (validSearchWord)
@@ -130,8 +134,9 @@ const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(
 
 				if (node != NULL)
 				{
-					ProcessedRule processedRule(prevProcessedRule, *node);
-					processedRule.AddConsume(absPos, false);
+					const Word sourceWord; // TODO
+					ProcessedRuleOnDisk processedRule(prevProcessedRule, *node);
+					processedRule.AddConsume(absPos, sourceWord);
 					doneNodes.push_back(processedRule);
 					delete node;
 				}
@@ -144,15 +149,16 @@ const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(
 																	,m_inputFactorsVec);
 			if (node != NULL)
 			{
-				ProcessedRule processedRule(prevProcessedRule, *node);
-				processedRule.AddConsume(absPos, true);
+				const Word sourceWord; // TODO
+				ProcessedRuleOnDisk processedRule(prevProcessedRule, *node);
+				processedRule.AddConsume(absPos, sourceWord);
 				doneNodes.push_back(processedRule);
 				delete node;
 			}
 			// add prev non-term too
 			if (prevProcessedRule.IsCurrNonTerminal())
 			{
-				ProcessedRule processedRule(prevProcessedRule);
+				ProcessedRuleOnDisk processedRule(prevProcessedRule);
 				processedRule.ExtendConsume(absPos);
 				doneNodes.push_back(processedRule);
 			}
@@ -164,14 +170,14 @@ const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(
 	// return list of target phrases
 	const size_t tableLimit = GetTableLimit();
 
-	vector<ProcessedRule> &nodes = runningNodes.back();
+	vector<ProcessedRuleOnDisk> &nodes = runningNodes.back();
 
-	vector<ProcessedRule>::iterator iterNode;
+	vector<ProcessedRuleOnDisk>::iterator iterNode;
 	for (iterNode = nodes.begin(); iterNode != nodes.end(); ++iterNode)
 	{
 		// get target phrase coll from disk
 		const MosesOnDiskPt::SourcePhraseNode &node = iterNode->GetLastNode();
-		const vector<WordsConsumed> &wordsConsumed = iterNode->GetWordsConsumed();
+		const vector<WordConsumed*> &wordsConsumed = iterNode->GetWordsConsumed();
 		const MosesOnDiskPt::TargetPhraseList *targetPhraseCollectionDisk
 							= node.GetTargetPhraseCollection(m_inputFactorsVec
 																							,m_outputFactorsVec
@@ -200,7 +206,8 @@ const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(
 		}
 		targetPhraseCollection->Prune(adhereTableLimit, tableLimit);
 
-		ret->Add(*targetPhraseCollection, wordsConsumed, adhereTableLimit, tableLimit);
+		assert(wordsConsumed.size());
+		ret->Add(*targetPhraseCollection, *wordsConsumed.back(), adhereTableLimit, tableLimit);
 
 		m_cache.push_back(targetPhraseCollection);
 		//delete targetPhraseCollection;

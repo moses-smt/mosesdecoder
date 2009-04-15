@@ -68,19 +68,19 @@ bool LanguageModelSRI::Load(const std::string &filePath
 	m_srilmModel->read(file);
 
 	// LM can be ok, just outputs warnings
-	CreateFactors();		
+	CreateFactors();
   m_unknownId = m_srilmVocab->unkIndex();
-  
+
   return true;
 }
 
 void LanguageModelSRI::CreateFactors()
 { // add factors which have srilm id
 	FactorCollection &factorCollection = FactorCollection::Instance();
-	
+
 	std::map<size_t, VocabIndex> lmIdMap;
 	size_t maxFactorId = 0; // to create lookup vector later on
-	
+
 	VocabString str;
 	VocabIter iter(*m_srilmVocab);
 	while ( (str = iter.next()) != NULL)
@@ -90,24 +90,24 @@ void LanguageModelSRI::CreateFactors()
 		lmIdMap[factorId] = lmId;
 		maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	}
-	
+
 	size_t factorId;
-	
+
 	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
 	factorId = m_sentenceStart->GetId();
 	lmIdMap[factorId] = GetLmID(BOS_);
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	m_sentenceStartArray[m_factorType] = m_sentenceStart;
-	
+
 	m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
 	factorId = m_sentenceEnd->GetId();
 	lmIdMap[factorId] = GetLmID(EOS_);
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	m_sentenceEndArray[m_factorType] = m_sentenceEnd;
-	
+
 	// add to lookup vector in object
 	m_lmIdLookup.resize(maxFactorId+1);
-	
+
 	fill(m_lmIdLookup.begin(), m_lmIdLookup.end(), m_unknownId);
 
 	map<size_t, VocabIndex>::iterator iterMap;
@@ -130,7 +130,7 @@ VocabIndex LanguageModelSRI::GetLmID( const Factor *factor ) const
 float LanguageModelSRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 {
 	float p = m_srilmModel->wordProb( wordId, context );
-	return FloorScore(TransformSRIScore(p));  // log10->log
+	return FloorScore(TransformLMScore(p));  // log10->log
 }
 
 float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State* finalState, unsigned int *len) const
@@ -142,7 +142,7 @@ float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State
 		finalState = NULL;
 		return 0;
 	}
-		
+
 	// set up context
 	VocabIndex context[MAX_NGRAM_SIZE];
 	for (size_t i = 0 ; i < count - 1 ; i++)
@@ -150,7 +150,7 @@ float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State
 		context[i] =  GetLmID((*contextFactor[count-2-i])[factorType]);
 	}
 	context[count-1] = Vocab_None;
-	
+
 	assert((*contextFactor[count-1])[factorType] != NULL);
 	// call sri lm fn
 	VocabIndex lmId= GetLmID((*contextFactor[count-1])[factorType]);

@@ -1,5 +1,4 @@
-
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <assert.h>
 #include <sstream>
 #include "PhraseDictionaryJoshua.h"
@@ -109,89 +108,68 @@ void PhraseDictionaryJoshua::InitializeForInput(InputType const &source)
 {
 	assert(source.GetType() == SentenceInput);
 
-	const StaticData &staticData = StaticData::Instance();
-	const LMList &languageModels = staticData.GetAllLM();
+	// temp file with current sentence
+	std::ofstream sourceSentenceFileStrme;
+	string sourceSentenceFilePath;
+	CreateTempFile(sourceSentenceFileStrme, sourceSentenceFilePath);
 
-	std::ofstream tempFile("temp.txt");
-	tempFile << source;
-	tempFile.close();
+	// write out only factors needed by pt
+	for (size_t pos = 0; pos < source.GetSize(); ++pos)
+	{
+		const Word &word = source.GetWord(pos);
 
+		// 0th factor
+		const Factor *factor = word.GetFactor(m_inputFactorsVec[0]);
+		sourceSentenceFileStrme << factor->GetString();
+		for (size_t factorInd = 1; factorInd < m_inputFactorsVec.size(); ++factorInd)
+		{
+			factor = word.GetFactor(m_inputFactorsVec[factorInd]);
+			sourceSentenceFileStrme << "|" << factor->GetString();
+		}
+		sourceSentenceFileStrme << " ";
+	}
+	sourceSentenceFileStrme << endl;
+	sourceSentenceFileStrme.close();
+
+	// filtered output file
+	std::ofstream filteredFileStrme;
+	string filteredFilePath;
+	CreateTempFile(filteredFileStrme, filteredFilePath);
+	filteredFileStrme.close();
+
+	// call java
 	stringstream strme;
-	strme << string("java -Xmx512m -cp \"") 
-				<< m_joshuaPath 
+	strme << string("java -Xmx512m -cp \"")
+				<< m_joshuaPath
 				<< "\" joshua.sarray.ExtractRules"
 				<< " --source=" + m_sourcePath
 				<< " --target=" + m_targetPath
 				<< " --alignments=" + m_alignPath
-				<< " --test=temp.txt" 
+				<< " --test=" << sourceSentenceFilePath
 				<< " --maxPhraseLength=5"
-				<< " > filtered.txt";
+				<< " > " << filteredFilePath;
+	cerr << strme.str() << endl;
 
 	system(strme.str().c_str());
 
-	assert(FileExists("filtered.txt"));
-	
-	InputFileStream tempStream("filtered.txt");
+	DeleteFile(sourceSentenceFilePath);
 
-	size_t count = 0;
-	string line;
-	while(getline(tempStream, line))
-	{
-		vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
-		assert(tokens.size() == 4);
+	// read in filtered pt as normal
+	assert(FileExists(filteredFilePath));
+	assert(m_collection.GetSize() == 0);
+	const StaticData &staticData = StaticData::Instance();
+	const LMList &languageModels = staticData.GetAllLM();
 
-		assert(Trim(tokens[0]) == "[X]");
-		string sourcePhraseString	=tokens[1]
-					, targetPhraseString=tokens[2]
-					, scoreString				=tokens[3];
+	InputFileStream inFile(filteredFilePath);
+	MyBase::Load(m_inputFactorsVec, m_outputFactorsVec
+			, inFile, m_weight, m_tableLimit
+			, languageModels, m_weightWP);
 
-		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
-		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
-			TRACE_ERR( "line " << count << ": pt entry contains empty target, skipping\n");
-			continue;
-		}
+	DeleteFile(filteredFilePath);
 
-		vector<float> scoreVector = Tokenize<float>(scoreString);
-		if (scoreVector.size() != m_numScoreComponent)
-		{
-			stringstream strme;
-			strme << "Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_numScoreComponent<<") of score components on line " << count;
-			UserMessage::Add(strme.str());
-			abort();
-		}
-		assert(scoreVector.size() == m_numScoreComponent);
-
-		const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-		vector< vector<string> >	sourcePhraseVector = Phrase::Parse(sourcePhraseString, m_inputFactorsVec, factorDelimiter)
-															,targetPhraseVector = Phrase::Parse(targetPhraseString, m_outputFactorsVec, factorDelimiter);
-		string sourceAlign, targetAlign;
-		TransformString(sourcePhraseVector, targetPhraseVector, sourceAlign, targetAlign);
-
-		// source
-		Phrase sourcePhrase(Input);
-		sourcePhrase.CreateFromString( m_inputFactorsVec, sourcePhraseVector);
-
-		//target
-		TargetPhrase *targetPhrase = new TargetPhrase(Output);
-		targetPhrase->SetSourcePhrase(&sourcePhrase);
-		targetPhrase->CreateFromString( m_outputFactorsVec, targetPhraseVector);
-
-		//targetPhrase->CreateAlignmentInfo(sourceAlign, targetAlign);
-
-		// component score, for n-best output
-		std::vector<float> scv(scoreVector.size());
-		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),NegateScore);
-
-		std::transform(scv.begin(),scv.end(),scv.begin(),FloorScore);
-		targetPhrase->SetScore(this, scv, m_weight, m_weightWP, languageModels);
-
-		AddEquivPhrase(sourcePhrase, targetPhrase);
-
-		count++;
-	}
-
+	MyBase::InitializeForInput(source);
 }
-	
+
 void PhraseDictionaryJoshua::SetWeightTransModel(const std::vector<float> &weightT)
 {
 	MyBase::SetWeightTransModel(weightT);
@@ -200,16 +178,12 @@ void PhraseDictionaryJoshua::SetWeightTransModel(const std::vector<float> &weigh
 void PhraseDictionaryJoshua::CleanUp()
 {
 	m_collection.CleanUp();
+	MyBase::CleanUp();
 }
 
 const TargetPhraseCollection *PhraseDictionaryJoshua::GetTargetPhraseCollection(const Phrase& source) const
 {
 	return MyBase::GetTargetPhraseCollection(source);
-}
-
-void PhraseDictionaryJoshua::AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)
-{
-	MyBase::AddEquivPhrase(source, targetPhrase);
 }
 
 TargetPhraseCollection &PhraseDictionaryJoshua::GetOrCreateTargetPhraseCollection(const Phrase &source)
@@ -220,9 +194,10 @@ TargetPhraseCollection &PhraseDictionaryJoshua::GetOrCreateTargetPhraseCollectio
 const ChartRuleCollection *PhraseDictionaryJoshua::GetChartRuleCollection(
 																				InputType const& src
 																				,WordsRange const& range
-																				,bool adhereTableLimit) const
+																				,bool adhereTableLimit
+																				,const CellCollection &cellColl) const
 {
-	return MyBase::GetChartRuleCollection(src, range, adhereTableLimit);
+	return MyBase::GetChartRuleCollection(src, range, adhereTableLimit, cellColl);
 }
 
 

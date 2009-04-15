@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsRange.h"
 #include "UserMessage.h"
 #include "ChartRuleCollection.h"
+#include "DotChart.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ namespace Moses
 {
 
 inline void StoreAlign(vector<size_t> &align, size_t ind, size_t pos)
-{ 
+{
 	if (ind >= align.size())
 	{
 		align.resize(ind + 1);
@@ -57,30 +58,15 @@ inline void TransformString(vector< vector<string>* > &phraseVector
 		assert(phraseVector[pos]->size() == 1);
 
 		string &str = (*phraseVector[pos])[0];
-		if (str.size() > 3 && str.substr(0, 3) == "[X,")
+		if (str.size() > 3 && str.substr(0, 1) == "[" && str.substr(2, 1) == ",")
 		{ // non-term
 			string indStr = str.substr(3, str.size() - 4);
 			size_t indAlign = Scan<size_t>(indStr) - 1;
 			StoreAlign(align, indAlign, pos);
 
-			str = "[X]";
+			str = str.substr(1, 1);
 		}
 	}
-}
-
-inline void TransformString(vector< vector<string>* > &sourcePhraseVector
-										 ,vector< vector<string>* > &targetPhraseVector
-										 ,list<pair<size_t,size_t> > &alignmentInfo)
-{
-	vector<size_t> sourceAlign, targetAlign;
-	TransformString(sourcePhraseVector, sourceAlign);
-	TransformString(targetPhraseVector, targetAlign);
-
-	assert(sourceAlign.size() == targetAlign.size());
-	for (size_t ind = 0; ind < targetAlign.size(); ++ind)
-	{
-		alignmentInfo.push_back(pair<size_t,size_t>(sourceAlign[ind], targetAlign[ind]));
-	}	
 }
 
 bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
@@ -92,6 +78,11 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 														          , float weightWP)
 {
 	m_filePath = filePath;
+	m_tableLimit = tableLimit;
+
+	//factors
+	m_inputFactors = FactorMask(input);
+	m_outputFactors = FactorMask(output);
 
 	// data from file
 	InputFileStream inFile(filePath);
@@ -110,24 +101,28 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	PrintUserTime("Start loading tm");
 
 	const StaticData &staticData = StaticData::Instance();
-	m_tableLimit = tableLimit;
+	const std::string& factorDelimiter = staticData.GetFactorDelimiter();
 
-	//factors
-	m_inputFactors = FactorMask(input);
-	m_outputFactors = FactorMask(output);
 	VERBOSE(2,"PhraseDictionaryMemory: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
-
-	// create hash file if necessary
-	ofstream tempFile;
-	string tempFilePath;
 
 	string line;
 	size_t count = 0;
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
 
+	// cache
+	TargetPhraseCollection	*prevPhraseColl = NULL;
+	vector<size_t> sourceAlign;
+	string prevSourcePhraseString;
+
+	vector<string> tokens;
+	vector<float> scoreVector;
+	vector< vector<string>* >	sourcePhraseVector;
+	vector< vector<string>* >	targetPhraseVector;
+	list<pair<size_t,size_t> > alignmentInfo;
+
 	while(getline(inStream, line))
 	{
-		vector<string> tokens;
+		tokens.clear();
 		TokenizeMultiCharSeparator(tokens, line , "|||" );
 
 		if (numElement == NOT_FOUND)
@@ -144,10 +139,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			abort();
 		}
 
-		assert(Trim(tokens[0]) == "[X]");
-		string sourcePhraseString	=tokens[1]
-					, targetPhraseString=tokens[2]
-					, scoreString				=tokens[3];
+		string &headString					= tokens[0]
+					, &sourcePhraseString	= tokens[1]
+					, &targetPhraseString	= tokens[2]
+					, &scoreString				= tokens[3];
 
 		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
@@ -155,7 +150,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			continue;
 		}
 
-		vector<float> scoreVector = Tokenize<float>(scoreString);
+		scoreVector.clear();
+		Tokenize<float>(scoreVector, scoreString);
 		if (scoreVector.size() != m_numScoreComponent)
 		{
 			stringstream strme;
@@ -165,30 +161,60 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		}
 		assert(scoreVector.size() == m_numScoreComponent);
 
-		const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-		vector< vector<string>* >	sourcePhraseVector, targetPhraseVector;
-		
-		Phrase::Parse(sourcePhraseVector, sourcePhraseString, input, factorDelimiter);
+		if (prevSourcePhraseString == sourcePhraseString)
+		{ // same source, use cached source phrase & target phrase coll
+			// do nothing
+		}
+		else
+		{ // parse source & find pt node
+			prevSourcePhraseString = sourcePhraseString;
+
+			// parse
+			sourcePhraseVector.clear();
+			Phrase::Parse(sourcePhraseVector, sourcePhraseString, input, factorDelimiter);
+
+			// align info
+			sourceAlign.clear();
+			TransformString(sourcePhraseVector, sourceAlign);
+
+			// create phrase obj
+			Phrase sourcePhrase(Input, sourcePhraseVector.size());
+			sourcePhrase.CreateFromString( input, sourcePhraseVector);
+
+			prevPhraseColl = &GetOrCreateTargetPhraseCollection(sourcePhrase);
+
+			RemoveAllInColl(sourcePhraseVector);
+		}
+
+		// parse target phrase
+		targetPhraseVector.clear();
 		Phrase::Parse(targetPhraseVector, targetPhraseString, output, factorDelimiter);
-		
-		list<pair<size_t,size_t> > alignmentInfo;
-		TransformString(sourcePhraseVector, targetPhraseVector, alignmentInfo);
 
-		// source
-		Phrase sourcePhrase(Input, sourcePhraseVector.size());
-		sourcePhrase.CreateFromString( input, sourcePhraseVector);
+		// alignment
+		alignmentInfo.clear();
+		vector<size_t> targetAlign;
+		TransformString(targetPhraseVector, targetAlign);
 
-		//target
+		assert(sourceAlign.size() == targetAlign.size());
+		for (size_t ind = 0; ind < targetAlign.size(); ++ind)
+		{
+			alignmentInfo.push_back(pair<size_t,size_t>(sourceAlign[ind], targetAlign[ind]));
+		}
+
+		// head word
+		headString = headString.substr(1, headString.size() - 2);
+		Word headWord;
+		headWord.CreateFromString(Input, input,headString);
+
+		// create target phrase obj
 		TargetPhrase *targetPhrase = new TargetPhrase(Output, targetPhraseVector.size());
-		targetPhrase->SetSourcePhrase(&sourcePhrase);
+		//targetPhrase->SetSourcePhrase(sourcePhrase); // TODO not valid
 		targetPhrase->CreateFromString( output, targetPhraseVector);
 
 		targetPhrase->CreateAlignmentInfo(alignmentInfo);
-
-		assert(sourcePhrase.GetArity() == targetPhrase->GetArity());
+		targetPhrase->SetHeadWord(headWord);
 
 		// remove strings
-		RemoveAllInColl(sourcePhraseVector);
 		RemoveAllInColl(targetPhraseVector);
 
 		// component score, for n-best output
@@ -204,10 +230,12 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			targetPhrase->SetScoreChart(this, scoreVector, weight, languageModels, true);
 		}
 
-		AddEquivPhrase(sourcePhrase, targetPhrase);
+		AddEquivPhrase(*prevPhraseColl, targetPhrase);
 
 		count++;
 	}
+
+	// cleanup cache
 
 	// sort each target phrase collection
 	m_collection.Sort(m_tableLimit);
@@ -230,18 +258,9 @@ TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollectio
 	return currNode->GetOrCreateTargetPhraseCollection();
 }
 
-void PhraseDictionaryMemory::AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)
+void PhraseDictionaryMemory::AddEquivPhrase(TargetPhraseCollection	&targetPhraseColl, TargetPhrase *targetPhrase)
 {
-	if (m_prevPhraseColl != NULL && source.Compare(m_prevSource) == 0)
-	{ // same source, already have node
-	}
-	else
-	{
-		m_prevPhraseColl = &GetOrCreateTargetPhraseCollection(source);
-		m_prevSource = source;
-	}
-	assert(m_prevPhraseColl != NULL);
-	m_prevPhraseColl->Add(targetPhrase);
+	targetPhraseColl.Add(targetPhrase);
 }
 
 const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase &source) const
@@ -258,6 +277,23 @@ const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(
 	}
 
 	return currNode->GetTargetPhraseCollection();
+}
+
+void PhraseDictionaryMemory::InitializeForInput(const InputType& input)
+{
+	assert(m_runningNodesVec.size() == 0);
+	size_t sourceSize = input.GetSize();
+	m_runningNodesVec.resize(sourceSize);
+
+	for (size_t ind = 0; ind < m_runningNodesVec.size(); ++ind)
+	{
+		ProcessedRule *initProcessedRule = new ProcessedRule(m_collection);
+
+		ProcessedRuleStack *processedStack = new ProcessedRuleStack(sourceSize - ind + 1);
+		processedStack->Add(0, initProcessedRule); // init rule. stores the top node in tree
+
+		m_runningNodesVec[ind] = processedStack;
+	}
 }
 
 PhraseDictionaryMemory::~PhraseDictionaryMemory()
@@ -279,7 +315,16 @@ void PhraseDictionaryMemory::SetWeightTransModel(const vector<float> &weightT)
 
 void PhraseDictionaryMemory::CleanUp()
 {
-	RemoveAllInColl(m_chartTargetPhraseColl);
+	//RemoveAllInColl(m_chartTargetPhraseColl);
+	std::vector<ChartRuleCollection*>::iterator iter;
+	for (iter = m_chartTargetPhraseColl.begin(); iter != m_chartTargetPhraseColl.end(); ++iter)
+	{
+		ChartRuleCollection *item = *iter;
+		ChartRuleCollection::Delete(item);
+	}
+	m_chartTargetPhraseColl.clear();
+
+	RemoveAllInColl(m_runningNodesVec);
 }
 
 TO_STRING_BODY(PhraseDictionaryMemory);

@@ -23,7 +23,8 @@ void TranslationOptionList::Add(TranslationOption *transOpt)
 
 void TranslationOptionList::Sort()
 {
-	// backoff to least arity
+	// keep only those over best + threshold
+
 	float scoreThreshold = -std::numeric_limits<float>::infinity();
 	CollType::const_iterator iter;
 	for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)

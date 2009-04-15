@@ -16,18 +16,6 @@ using namespace Moses;
 namespace MosesChart
 {
 
-/*
-class QueueEntryOrderer
-{
-public:
-	bool operator()(const QueueEntry* hypoA, const QueueEntry* hypoB) const
-	{
-
-		return true;
-	}
-};
-*/
-
 ChartCell::ChartCell(size_t startPos, size_t endPos)
 :m_coverage(startPos, endPos)
 {
@@ -41,7 +29,21 @@ ChartCell::ChartCell(size_t startPos, size_t endPos)
 
 ChartCell::~ChartCell()
 {
-	Moses::RemoveAllInColl(m_hypos);
+	HCType::iterator iter;
+	for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter)
+	{
+		Hypothesis *hypo = *iter;
+		Hypothesis::Delete(hypo);
+	}
+	//Moses::RemoveAllInColl(m_hypos);
+}
+
+const OrderHypos &ChartCell::GetSortedHypotheses(const Moses::Word &headWord) const
+{
+	std::map<Moses::Word, std::vector<const Hypothesis*> >::const_iterator 
+			iter = m_hyposOrdered.find(headWord);
+	assert(iter != m_hyposOrdered.end());
+	return iter->second;
 }
 
 bool ChartCell::AddHypothesis(Hypothesis *hypo)
@@ -50,7 +52,7 @@ bool ChartCell::AddHypothesis(Hypothesis *hypo)
 	{ // really bad score. don't bother adding hypo into collection
 	  StaticData::Instance().GetSentenceStats().AddDiscarded();
 	  VERBOSE(3,"discarded, too bad for stack" << std::endl);
-		FREEHYPO(hypo);
+		Hypothesis::Delete(hypo);
 		return false;
 	}
 
@@ -95,7 +97,7 @@ bool ChartCell::AddHypothesis(Hypothesis *hypo)
 		if (m_nBestIsEnabled) {
 			hypoExisting->AddArc(hypo);
 		} else {
-			FREEHYPO(hypo);
+			Hypothesis::Delete(hypo);
 		}
 		return false;
 	}
@@ -132,7 +134,7 @@ pair<ChartCell::HCType::iterator, bool> ChartCell::Add(Hypothesis *hypo)
 
 void ChartCell::PruneToSize(size_t newSize)
 {
-	if (m_hypos.size() > newSize) // ok, if not over the limit
+	if (GetSize() > newSize) // ok, if not over the limit
 	{
 		priority_queue<float> bestScores;
 
@@ -177,7 +179,7 @@ void ChartCell::PruneToSize(size_t newSize)
 				++iter;
 			}
 		}
-		VERBOSE(3,", pruned to size " << GetSize() << endl);
+		VERBOSE(3,", pruned to size " << m_hypos.size() << endl);
 
 		IFVERBOSE(3)
 		{
@@ -236,7 +238,7 @@ void ChartCell::Remove(const HCType::iterator &iter)
 	*/
 
 	Detach(iter);
-	delete h;
+	Hypothesis::Delete(h);
 }
 
 void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
@@ -286,9 +288,37 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 
 void ChartCell::SortHypotheses()
 {
-	// done everything for this cell. order hypos
-	std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(m_hyposOrdered, m_hyposOrdered.end()));
-	std::sort(m_hyposOrdered.begin(), m_hyposOrdered.end(), ChartHypothesisScoreOrderer());
+	if (m_hypos.size() == 0)
+	{
+		m_bestHypo = NULL;
+	}
+	else
+	{
+		// done everything for this cell. 
+		// sort
+		std::vector<const Hypothesis*> hyposOrdered;
+		std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(hyposOrdered, hyposOrdered.end()));
+		std::sort(hyposOrdered.begin(), hyposOrdered.end(), ChartHypothesisScoreOrderer());
+		m_bestHypo = hyposOrdered.front();
+
+		// put into buckets according to headwords
+		std::vector<const Hypothesis*>::iterator iter;
+		for (iter = hyposOrdered.begin(); iter != hyposOrdered.end(); ++iter)
+		{
+			const Hypothesis *hypo = *iter;
+			const Word &headWord = hypo->GetHeadWord();
+			std::vector<const Hypothesis*> &vec = m_hyposOrdered[headWord];
+			vec.push_back(hypo);
+		}
+		assert(m_hyposOrdered.size() == 1); // TODO
+
+		// create list of headwords
+		std::map<Moses::Word, OrderHypos>::const_iterator iterMap;
+		for (iterMap = m_hyposOrdered.begin(); iterMap != m_hyposOrdered.end(); ++iterMap)
+		{
+			m_headWords.push_back(iterMap->first);
+		}
+	}
 }
 
 void ChartCell::RemoveQueueEntry(QueueEntry *queueEntry)
@@ -314,6 +344,26 @@ void ChartCell::AddQueueEntry(QueueEntry *queueEntry)
 void ChartCell::ExpandQueueEntry(const QueueEntry &queueEntry)
 {
 	queueEntry.CreateDeviants(*this);
+}
+
+bool ChartCell::HeadwordExists(const Moses::Word &headWord) const
+{
+	std::map<Moses::Word, OrderHypos>::const_iterator iter;
+	iter = m_hyposOrdered.find(headWord);
+	return (iter != m_hyposOrdered.end());
+}
+
+void ChartCell::CleanupArcList()
+{
+	// only necessary if n-best calculations are enabled
+	if (!m_nBestIsEnabled) return;
+
+	HCType::iterator iter;
+	for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter)
+	{
+		Hypothesis *mainHypo = *iter;
+		mainHypo->CleanupArcList();
+	}
 }
 
 std::ostream& operator<<(std::ostream &out, const ChartCell &cell)

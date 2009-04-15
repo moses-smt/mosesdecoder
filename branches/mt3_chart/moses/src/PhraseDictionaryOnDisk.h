@@ -66,7 +66,8 @@ public:
 	virtual const ChartRuleCollection *GetChartRuleCollection(
 																					InputType const& src
 																					,WordsRange const& range
-																					,bool adhereTableLimit) const;
+																					,bool adhereTableLimit
+																					,const CellCollection &cellColl) const;
 
 	void CleanUp();
 

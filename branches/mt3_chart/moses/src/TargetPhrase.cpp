@@ -56,8 +56,8 @@ TargetPhrase::TargetPhrase(FactorDirection direction, size_t reserveSize)
 
 void TargetPhrase::SetScore()
 { // used when creating translations of unknown words:
-	m_transScore = m_ngramScore = 0;	
-	m_fullScore = - StaticData::Instance().GetWeightWordPenalty();	
+	m_transScore = m_ngramScore = 0;
+	m_fullScore = - StaticData::Instance().GetWeightWordPenalty();
 }
 
 #ifdef HAVE_PROTOBUF
@@ -68,15 +68,15 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const {
 }
 #endif
 
-void TargetPhrase::SetScore(float score) 
+void TargetPhrase::SetScore(float score)
 {
 	//we use an existing score producer to figure out information for score setting (number of scores and weights)
 	//TODO: is this a good idea?
 	ScoreProducer* prod = StaticData::Instance().GetPhraseDictionaries()[0];
-	
+
 	//get the weight list
 	unsigned int id = prod->GetScoreBookkeepingID();
-	
+
 	const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
 
 	size_t beginIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(id);
@@ -85,13 +85,13 @@ void TargetPhrase::SetScore(float score)
 	vector<float> weights;
 
 	std::copy(allWeights.begin() +beginIndex, allWeights.begin() + endIndex,std::back_inserter(weights));
-	
-	//find out how many items are in the score vector for this producer	
+
+	//find out how many items are in the score vector for this producer
 	size_t numScores = prod->GetNumScoreComponents();
 
 	//divide up the score among all of the score vectors
 	vector <float> scoreVector(numScores,score/numScores);
-	
+
 	//Now we have what we need to call the full SetScore method
 	SetScore(prod,scoreVector,weights,StaticData::Instance().GetWeightWordPenalty(),StaticData::Instance().GetAllLM());
 }
@@ -103,36 +103,36 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 {
 	assert(weightT.size() == scoreVector.size());
 	// calc average score if non-best
-	
+
 	m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
 	m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
-	
+
   // Replicated from TranslationOptions.cpp
 	float totalFutureScore = 0;
 	float totalNgramScore  = 0;
 	float totalFullScore   = 0;
-	
+
 	LMList::const_iterator lmIter;
 	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
 	{
 		const LanguageModel &lm = **lmIter;
-		
+
 		if (lm.Useable(*this))
 		{ // contains factors used by this LM
 			const float weightLM = lm.GetWeight();
 			float fullScore, nGramScore;
-			
+
 			lm.CalcScore(*this, fullScore, nGramScore);
 			m_scoreBreakdown.Assign(&lm, nGramScore);
-			
+
 			// total LM score so far
 			totalNgramScore  += nGramScore * weightLM;
 			totalFullScore   += fullScore * weightLM;
-			
+
 		}
 	}
   m_ngramScore = totalNgramScore;
-	
+
 	m_fullScore = m_transScore + totalFutureScore + totalFullScore
 		- (this->GetSize() * weightWP);	 // word penalty
 }
@@ -147,28 +147,28 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 
 	assert(weightT.size() == scoreVector.size());
 
-	// calc average score if non-best	
+	// calc average score if non-best
 	m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
 	m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
-	
+
   // Replicated from TranslationOptions.cpp
 	float totalFutureScore = 0;
 	float totalNgramScore  = 0;
 	float totalFullScore   = 0;
-	
+
 	LMList::const_iterator lmIter;
 	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
 	{
 		const LanguageModel &lm = **lmIter;
-		
+
 		if (lm.Useable(*this))
 		{ // contains factors used by this LM
 			const float weightLM = lm.GetWeight();
 			float fullScore, nGramScore;
-			
+
 			lm.CalcScore(*this, fullScore, nGramScore);
 			m_scoreBreakdown.Assign(&lm, nGramScore);
-			
+
 			// total LM score so far
 			totalNgramScore  += nGramScore * weightLM;
 			totalFullScore   += fullScore * weightLM;
@@ -188,17 +188,17 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)
 { // used when creating translations of unknown words (chart decoding)
 	m_scoreBreakdown.Assign(producer, scoreVector);
-	m_transScore = m_ngramScore = 0;	
+	m_transScore = m_ngramScore = 0;
 	m_fullScore = m_scoreBreakdown.GetWeightedScore();
 }
 
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
 {
 	// calling this function in case of confusion net input is undefined
-	assert(StaticData::Instance().GetInputType()==SentenceInput); 
-	
-	/* one way to fix this, you have to make sure the weightT contains (in 
-     addition to the usual phrase translation scaling factors) the input 
+	assert(StaticData::Instance().GetInputType()==SentenceInput);
+
+	/* one way to fix this, you have to make sure the weightT contains (in
+     addition to the usual phrase translation scaling factors) the input
      weight factor as last element
 	*/
 
@@ -228,7 +228,7 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 		const Word &inputWord	= inputPhrase.GetWord(currPos);
 		Word &cloneWord = clone->GetWord(currPos);
 		cloneWord.Merge(inputWord);
-		
+
 		currWord++;
 	}
 
@@ -237,7 +237,12 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 
 void TargetPhrase::CreateAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo)
 {
-	m_alignmentInfo.AddAlignment(alignmentInfo);	
+	m_alignmentInfo.AddAlignment(alignmentInfo);
+}
+
+void TargetPhrase::SetHeadWord(const Word &headWord)
+{
+	m_headWord = headWord;
 }
 
 TO_STRING_BODY(TargetPhrase);
@@ -246,7 +251,8 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
   os << static_cast<const Phrase&>(tp) << ", "
 		<< tp.GetAlignmentInfo() << ","
-		<< " pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
+		<< " fullScore=" << tp.m_fullScore << " "
+		<< tp.GetScoreBreakdown();
   return os;
 }
 

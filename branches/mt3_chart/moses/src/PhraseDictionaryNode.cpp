@@ -58,7 +58,15 @@ PhraseDictionaryNode *PhraseDictionaryNode::GetOrCreateChild(const Word &word)
 		return &iter->second;	// found it
 
 	// can't find node. create a new 1
-	return &(m_map[word] = PhraseDictionaryNode());
+	std::pair <NodeMap::iterator,bool> insResult; 
+	insResult = m_map.insert( std::make_pair(word, PhraseDictionaryNode()) );
+	assert(insResult.second);
+
+	iter = insResult.first;
+	PhraseDictionaryNode &ret = iter->second;
+	ret.SetSourceWord(iter->first);
+	//ret.SetSourceWord(word);
+	return &ret;
 }
 
 const PhraseDictionaryNode *PhraseDictionaryNode::GetChild(const Word &word) const

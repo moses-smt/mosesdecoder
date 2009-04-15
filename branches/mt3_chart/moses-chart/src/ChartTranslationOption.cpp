@@ -3,6 +3,7 @@
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/InputType.h"
 #include "../../moses/src/ChartRule.h"
+#include "../../moses/src/WordConsumed.h"
 
 using namespace std;
 using namespace Moses;
@@ -11,13 +12,12 @@ namespace MosesChart
 {
 
 TranslationOption::TranslationOption(const WordsRange &wordsRange
-								, const ChartRule &rule
-								, const InputType &inputType)
+								, const ChartRule &rule)
 :m_rule(rule)
 ,m_wordsRange(wordsRange)
 {
-	assert(wordsRange.GetStartPos() == rule.GetWordsConsumed().front().GetWordsRange().GetStartPos());
-	assert(wordsRange.GetEndPos() == rule.GetWordsConsumed().back().GetWordsRange().GetEndPos());
+	//assert(wordsRange.GetStartPos() == rule.GetWordsConsumed().front()->GetWordsRange().GetStartPos());
+	assert(wordsRange.GetEndPos() == rule.GetLastWordConsumed().GetWordsRange().GetEndPos());
 }
 
 TranslationOption::~TranslationOption()
@@ -25,11 +25,11 @@ TranslationOption::~TranslationOption()
 
 }
 
-
 // friend
 ostream& operator<<(ostream& out, const TranslationOption& transOpt)
 {
-	out << transOpt.GetTotalScore() << " " << transOpt.GetChartRule().GetTargetPhrase();
+	out << transOpt.GetChartRule().GetTargetPhrase() << " "
+			<< transOpt.GetChartRule().GetTargetPhrase().GetScoreBreakdown();
 	return out;
 }
 

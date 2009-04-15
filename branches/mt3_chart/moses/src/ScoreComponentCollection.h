@@ -75,6 +75,8 @@ public:
 		for (std::vector<float>::iterator i=m_scores.begin(); i!=m_scores.end(); ++i)
 			*i = 0.0f;
 	}
+	void ZeroAllLM();
+	void PlusEqualsAllLM(const ScoreComponentCollection& rhs);
 
   //! add the score in rhs
 	void PlusEquals(const ScoreComponentCollection& rhs)
@@ -114,6 +116,11 @@ public:
 		assert(1 == sp->GetNumScoreComponents());
 		const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
 		m_scores[i] += score;
+	}
+
+	void Assign(const ScoreComponentCollection &copy)
+	{
+		m_scores =  copy.m_scores;
 	}
 
 	void Assign(const ScoreProducer* sp, const std::vector<float>& scores)

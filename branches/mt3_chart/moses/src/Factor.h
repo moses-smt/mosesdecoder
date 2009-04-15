@@ -59,14 +59,14 @@ protected:
 
 	//FactorDirection		m_direction;
 	//FactorType				m_factorType;
-	const std::string	*m_ptrString;
+	const std::string	m_ptrString;
 	const size_t			m_id;
 	const bool				m_isNonTerminal;
 
 	//! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
-	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, bool isNonTerminal, size_t id);
+	Factor(FactorDirection direction, FactorType factorType, const std::string &factorString, bool isNonTerminal, size_t id);
 	//! no id set. do not used to create new factors, only used for seeing if factor exists
-	Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, bool isNonTerminal);
+	Factor(FactorDirection direction, FactorType factorType, const std::string &factorString, bool isNonTerminal);
 	
 public:
 	//! returns whether this factor is part of the source ('Input') or target ('Output') language
@@ -82,7 +82,7 @@ public:
 	//! original string representation of the factor
 	inline const std::string &GetString() const
 	{
-		return *m_ptrString;
+		return m_ptrString;
 	}
 	//! contiguous ID
 	inline size_t GetId() const
@@ -137,11 +137,13 @@ public:
 		return Compare(compare) < 0;
 	}
 
-	// quick equality comparison. Not used
+	// for hash set
 	inline bool operator==(const Factor &compare) const
 	{ 
-		return this == &compare;
+		return Compare(compare) == 0;
 	}
+	
+
 
 	TO_STRING();
 

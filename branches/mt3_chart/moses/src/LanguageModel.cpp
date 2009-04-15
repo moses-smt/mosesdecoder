@@ -83,7 +83,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
 		const Word &word = phrase.GetWord(currPos);
 
 		if (word.IsNonTerminal())
-		{ // do nothing. reset ngram
+		{ // do nothing. reset ngram. needed to score targbet phrases during pt loading in chart decoding
 			contextFactor.clear();
 		}
 		else
@@ -102,6 +102,46 @@ void LanguageModel::CalcScore(const Phrase &phrase
 				if (contextFactor.size() == m_nGramOrder)
 					ngramScore += partScore;
 			}
+		}
+
+		currPos++;
+	}
+}
+
+void LanguageModel::CalcScore2(const Phrase &phrase
+							, float &beginningBitsOnly
+							, float &ngramScore) const
+{
+
+	beginningBitsOnly	= 0;
+	ngramScore	= 0;
+
+	size_t phraseSize = phrase.GetSize();
+
+	vector<const Word*> contextFactor;
+	contextFactor.reserve(m_nGramOrder);
+
+	size_t currPos = 0;
+	while (currPos < phraseSize)
+	{
+		const Word &word = phrase.GetWord(currPos);
+		assert(!word.IsNonTerminal());
+
+		ShiftOrPush(contextFactor, word);
+		assert(contextFactor.size() <= m_nGramOrder);
+
+		if (word == GetSentenceStartArray())
+		{ // do nothing, don't include prob for <s> unigram
+			assert(currPos == 0);
+		}
+		else
+		{
+			float partScore = GetValue(contextFactor);
+
+			if (contextFactor.size() == m_nGramOrder)
+				ngramScore += partScore;
+			else
+				beginningBitsOnly += partScore;
 		}
 
 		currPos++;

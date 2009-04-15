@@ -38,6 +38,7 @@ class StaticData;
 class InputType;
 class WordsRange;
 class ChartRuleCollection;
+class CellCollection;
 
 /** abstract base class for phrase table classes
 */
@@ -71,13 +72,12 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
 	virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
 	//! find list of translations that can translates a portion of src. Used by confusion network decoding
 	virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
-	//! Create entry for translation of source to targetPhrase
-	virtual void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)=0;
 
 	virtual const ChartRuleCollection *GetChartRuleCollection(
 																				InputType const& src
 																				,WordsRange const& range
-																				,bool adhereTableLimit) const=0;
+																				,bool adhereTableLimit
+																				,const CellCollection &cellColl) const=0;
 };
 
 }

@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
+#include <queue>
 #include <vector>
 #include <list>
 #include <set>
@@ -28,19 +29,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "Util.h"
 #include "TargetPhraseCollection.h"
+#include "ObjectPool.h"
 
 namespace Moses
 {
-
 //! a list of target phrases that is trsnalated from the same source phrase
 class ChartRuleCollection
 {
 	friend std::ostream& operator<<(std::ostream&, const ChartRuleCollection&);
 
 protected:
+#ifdef USE_HYPO_POOL
+		static ObjectPool<ChartRuleCollection> s_objectPool;
+#endif
 	std::vector<ChartRule*> m_collection;
-	std::set<std::vector<WordsConsumed> > m_wordsConsumed;
-
+	float m_scoreThreshold;
 public:	
 	// iters
 	typedef std::vector<ChartRule*>::iterator iterator;
@@ -50,7 +53,26 @@ public:
 	iterator end() { return m_collection.end(); }
 	const_iterator begin() const { return m_collection.begin(); }
 	const_iterator end() const { return m_collection.end(); }
-	
+
+#ifdef USE_HYPO_POOL
+	void *operator new(size_t num_bytes)
+	{
+		void *ptr = s_objectPool.getPtr();
+		return ptr;
+	}
+
+	static void Delete(ChartRuleCollection *obj)
+	{
+		s_objectPool.freeObject(obj);
+	}
+#else
+	static void Delete(ChartRuleCollection *obj)
+	{
+		delete obj;
+	}
+#endif
+
+	ChartRuleCollection();
 	~ChartRuleCollection();
 
 	const ChartRule &Get(size_t ind) const
@@ -59,7 +81,7 @@ public:
 	}
 
 	//! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
-	void Sort(size_t tableLimit);
+//	void Sort(size_t tableLimit);
 
 	//! number of target phrases in this collection
 	size_t GetSize() const
@@ -73,11 +95,11 @@ public:
 	}	
 
 	void Add(const Moses::TargetPhraseCollection &targetPhraseCollection
-					, const std::vector<WordsConsumed> &wordsConsumed
-					, bool adhereTableLimit
+					, const WordConsumed &wordConsumed
+					, bool ruleLimit
 					, size_t tableLimit);
 	
-	void Prune(size_t tableLimit);
+	void CreateChartRules(size_t ruleLimit);
 };
 
 }

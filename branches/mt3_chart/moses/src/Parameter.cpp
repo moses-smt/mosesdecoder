@@ -106,6 +106,8 @@ Parameter::Parameter()
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
 	AddParam("joshua-path", "root folder where joshua liives, for suffix array phrase table");
+	AddParam("non-terminals", "list of non-term symbols, space separated");
+	AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
 }
 
 Parameter::~Parameter()

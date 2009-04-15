@@ -7,13 +7,14 @@
 #include "../../moses/src/ScoreComponentCollection.h"
 #include "../../moses/src/Phrase.h"
 #include "../../moses/src/TargetPhrase.h"
+#include "../../moses/src/ObjectPool.h"
 
 namespace MosesChart
 {
-
 class QueueEntry;
 class Hypothesis;
 
+typedef std::vector<const Hypothesis*> OrderHypos; // for chart cell
 typedef std::vector<Hypothesis*> ArcList;
 
 class Hypothesis
@@ -21,30 +22,60 @@ class Hypothesis
 	friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
 
 protected:
+
+#ifdef USE_HYPO_POOL
+		static ObjectPool<Hypothesis> s_objectPool;
+#endif
+
 	static unsigned int s_HypothesesCreated;
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	const Moses::TargetPhrase	&m_targetPhrase; /**< target phrase being created at the current decoding step */
 	Moses::Phrase m_contextPrefix, m_contextSuffix;
-	std::vector<size_t> m_wordsConsumedTargetOrder;
+	const std::vector<size_t> &m_wordsConsumedTargetOrder; // same size as target phrase ?
 	Moses::WordsRange					m_currSourceWordsRange;
-	Moses::ScoreComponentCollection m_scoreBreakdown; /*! detailed score break-down by components (for instance language model, word penalty, etc) */
+	Moses::ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
+																	,m_lmNGram
+																	,m_lmPrefix;
 	float m_totalScore;
+	size_t m_numTargetTerminals;
 
 	ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
+	const Hypothesis 	*m_winningHypo;
 
 	std::vector<const Hypothesis*> m_prevHypos;
 
-	size_t GetPrefix(Moses::Phrase &ret, size_t size) const;
-	size_t GetSuffix(Moses::Phrase &ret, size_t size) const;
+	size_t CalcPrefix(Moses::Phrase &ret, size_t size) const;
+	size_t CalcSuffix(Moses::Phrase &ret, size_t size) const;
 
-	void CalcLMScore(float &retFullScore, float &retNGramScore);
+	void CalcLMScore();
+
+	Hypothesis(); // not implemented
+	Hypothesis(const Hypothesis &copy); // not implemented
 
 public:
 	static void ResetHypoCount()
 	{ s_HypothesesCreated = 0; }
 	static unsigned int GetHypoCount()
 	{ return s_HypothesesCreated; }
+
+#ifdef USE_HYPO_POOL
+	void *operator new(size_t num_bytes)
+	{
+		void *ptr = s_objectPool.getPtr();
+		return ptr;
+	}
+
+	static void Delete(Hypothesis *hypo)
+	{
+		s_objectPool.freeObject(hypo);
+	}
+#else
+	static void Delete(Hypothesis *hypo)
+	{
+		delete hypo;
+	}
+#endif
 
 	Hypothesis(const QueueEntry &queueEntry);
 	~Hypothesis();
@@ -73,6 +104,11 @@ public:
 	void CalcScore();
 
 	void AddArc(Hypothesis *loserHypo);
+	void CleanupArcList();
+	void SetWinningHypo(const Hypothesis *hypo)
+	{
+		m_winningHypo = hypo;
+	}
 
 	const Moses::ScoreComponentCollection &GetScoreBreakDown() const
 	{ return m_scoreBreakdown; }
@@ -88,9 +124,17 @@ public:
 		return m_wordsConsumedTargetOrder[pos]; 
 	}
 
+	const Moses::Word &GetHeadWord() const
+	{ return m_targetPhrase.GetHeadWord(); }
+
+	size_t GetNumTargetTerminals() const
+	{ 
+		return m_numTargetTerminals;
+	}
+
 	TO_STRING();
 
-};
+}; // class Hypothesis
 
 }
 

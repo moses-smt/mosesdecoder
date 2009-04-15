@@ -47,9 +47,11 @@ class PhraseDictionaryNode
 protected:
 	NodeMap m_map;
 	TargetPhraseCollection *m_targetPhraseCollection;
+	const Word *m_sourceWord;
 
 	PhraseDictionaryNode()
 		:m_targetPhraseCollection(NULL)
+		,m_sourceWord(NULL)
 	{}
 public:
 	~PhraseDictionaryNode();
@@ -68,9 +70,17 @@ public:
 			m_targetPhraseCollection = new TargetPhraseCollection();
 		return *m_targetPhraseCollection;
 	}
+	size_t GetSize() const
+	{ return m_map.size(); }
+
 	// for mert
 	void SetWeightTransModel(const PhraseDictionaryMemory *phraseDictionary
 													, const std::vector<float> &weightT);
+
+	const Word &GetSourceWord() const
+	{ return *m_sourceWord; }
+	void SetSourceWord(const Word &sourceWord)
+	{ m_sourceWord = &sourceWord; }
 
 	// iterators
 	typedef NodeMap::iterator iterator;
