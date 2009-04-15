@@ -2,6 +2,7 @@ lib_LIBRARIES = libmoses-chart.a
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES 
 libmoses_chart_a_SOURCES = \
 	ChartCell.cpp \
+	ChartCellCollection.cpp \
 	ChartHypothesis.cpp \
 	ChartManager.cpp \
 	ChartTranslationOption.cpp \

@@ -1,141 +1,112 @@
 
 #include "PhraseDictionaryMemory.h"
-#include "PhraseDictionaryNode.h"
 #include "FactorCollection.h"
 #include "InputType.h"
 #include "ChartRuleCollection.h"
+#include "CellCollection.h"
+#include "DotChart.h"
+#include "StaticData.h"
 
 using namespace std;
 using namespace Moses;
 
-
-class ProcessedRule
-{
-protected:
-	const PhraseDictionaryNode *m_lastNode;
-	vector<WordsConsumed> m_wordsConsumed;
-public:
-	ProcessedRule(const PhraseDictionaryNode *lastNode)
-		:m_lastNode(lastNode)
-	{}
-	ProcessedRule(const ProcessedRule &prevProcessedRule, const PhraseDictionaryNode *lastNode)
-		:m_lastNode(lastNode)
-		,m_wordsConsumed(prevProcessedRule.m_wordsConsumed)
-	{}
-	ProcessedRule(const ProcessedRule &prevProcessedRule)
-		:m_lastNode(prevProcessedRule.m_lastNode)
-		,m_wordsConsumed(prevProcessedRule.m_wordsConsumed)
-	{}
-	const PhraseDictionaryNode &GetLastNode() const
-	{ return *m_lastNode; }
-	const vector<WordsConsumed> &GetWordsConsumed() const
-	{ return m_wordsConsumed; }
-	bool IsCurrNonTerminal() const
-	{
-		return m_wordsConsumed.empty() ? false : m_wordsConsumed.back().IsNonTerminal();
-	}
-
-	void AddConsume(size_t pos, bool isNonTerminal)
-	{
-		m_wordsConsumed.push_back(WordsConsumed(WordsRange(pos, pos), isNonTerminal));
-	}
-	void ExtendConsume(size_t pos)
-	{
-		WordsRange &range = m_wordsConsumed.back().GetWordsRange();
-		range.SetEndPos(range.GetEndPos() + 1);
-	}
-/*
-	inline int Compare(const ProcessedRule &compare) const
-	{
-		if (m_lastNode < compare.m_lastNode)
-			return -1;
-		if (m_lastNode > compare.m_lastNode)
-			return 1;
-
-		return m_wordsConsumed < compare.m_wordsConsumed;
-	}
-	inline bool operator<(const ProcessedRule &compare) const
-	{
-		return Compare(compare) < 0;
-	}
-*/
-};
-
 const ChartRuleCollection *PhraseDictionaryMemory::GetChartRuleCollection(
 																	InputType const& src
 																	,WordsRange const& range
-																	,bool adhereTableLimit) const
+																	,bool adhereTableLimit
+																	,const CellCollection &cellColl) const
 {
 	ChartRuleCollection *ret = new ChartRuleCollection();
 	m_chartTargetPhraseColl.push_back(ret);
 
-	FactorCollection &factorCollection = FactorCollection::Instance();
-	const Factor *nonTermFactor = factorCollection.AddFactor(Input, m_inputFactors[0], NON_TERMINAL_FACTOR);
-	Word nonTermWord;
-
-	assert(m_inputFactors[0] == true);
-	nonTermWord.SetFactor(0, nonTermFactor);
-
-	vector<	vector<ProcessedRule> > runningNodes(range.GetNumWordsCovered()+1);
-	runningNodes[0].push_back(ProcessedRule(&m_collection));
+	size_t relEndPos = range.GetEndPos() - range.GetStartPos();
+	size_t absEndPos = range.GetEndPos();
 
 	// MAIN LOOP. create list of nodes of target phrases
-	size_t relPos = 0;
-	for (size_t absPos = range.GetStartPos(); absPos <= range.GetEndPos(); ++absPos)
+	ProcessedRuleStack &runningNodes = *m_runningNodesVec[range.GetStartPos()];
+
+	const ProcessedRuleStack::SavedNodeColl &savedNodeColl = runningNodes.GetSavedNodeColl();
+	for (size_t ind = 0; ind < savedNodeColl.size(); ++ind)
 	{
-		vector<ProcessedRule>
-					&todoNodes = runningNodes[relPos]
-					,&doneNodes	= runningNodes[relPos+1];
+		const SavedNode &savedNode = *savedNodeColl[ind];
+		const ProcessedRule &prevProcessedRule = savedNode.GetProcessedRule();
+		const PhraseDictionaryNode &prevNode = prevProcessedRule.GetLastNode();
+		const WordConsumed *prevWordConsumed = prevProcessedRule.GetLastWordConsumed();
+		size_t startPos = (prevWordConsumed == NULL) ? range.GetStartPos() : prevWordConsumed->GetWordsRange().GetEndPos() + 1;
 
-		vector<ProcessedRule>::iterator iterNode;
-		for (iterNode = todoNodes.begin(); iterNode != todoNodes.end(); ++iterNode)
+		// search for terminal symbol
+		if (startPos == absEndPos)
 		{
-			ProcessedRule &prevProcessedRule = *iterNode;
-			const PhraseDictionaryNode &todoNode = prevProcessedRule.GetLastNode();
-
-			const PhraseDictionaryNode *node = todoNode.GetChild(src.GetWord(absPos));
+			const Word &sourceWord = src.GetWord(absEndPos);
+			const PhraseDictionaryNode *node = prevNode.GetChild(sourceWord);
 			if (node != NULL)
 			{
-				ProcessedRule processedRule(prevProcessedRule, node);
-				processedRule.AddConsume(absPos, false);
-				doneNodes.push_back(processedRule);
-			}
-
-			// search for X (non terminals)
-			node = todoNode.GetChild(nonTermWord);
-			if (node != NULL)
-			{
-				ProcessedRule processedRule(prevProcessedRule, node);
-				processedRule.AddConsume(absPos, true);
-				doneNodes.push_back(processedRule);
-			}
-			// add prev non-term too
-			if (prevProcessedRule.IsCurrNonTerminal())
-			{
-				ProcessedRule processedRule(prevProcessedRule);
-				processedRule.ExtendConsume(absPos);
-				doneNodes.push_back(processedRule);
+				const Word &sourceWord = node->GetSourceWord();
+				WordConsumed *newWordConsumed = new WordConsumed(absEndPos, absEndPos
+																													, sourceWord
+																													, prevWordConsumed);
+				ProcessedRule *processedRule = new ProcessedRule(*node, newWordConsumed);
+				runningNodes.Add(relEndPos+1, processedRule);
 			}
 		}
 
-		relPos++;
+		// search for non-terminals
+		size_t endPos, stackInd;
+		if (startPos > absEndPos)
+			continue;
+		else if (startPos == range.GetStartPos() && range.GetEndPos() > range.GetStartPos())
+		{ // start.
+			endPos = absEndPos - 1;
+			stackInd = relEndPos;
+		}
+		else
+		{
+			endPos = absEndPos;
+			stackInd = relEndPos + 1;
+		}
+
+		// get headwords in this span from chart
+		const vector<Word> &headWords = cellColl.GetHeadwords(WordsRange(startPos, endPos));
+		vector<Word>::const_iterator iterHeadWords;
+
+		// go thru each headword & see if in phrase table
+		for (iterHeadWords = headWords.begin(); iterHeadWords != headWords.end(); ++iterHeadWords)
+		{
+			const Word &headWord = *iterHeadWords;
+			const PhraseDictionaryNode *node = prevNode.GetChild(headWord);
+			if (node != NULL)
+			{
+				const Word &sourceWord = node->GetSourceWord();
+				WordConsumed *newWordConsumed = new WordConsumed(startPos, endPos
+																													, headWord
+																													, prevWordConsumed);
+
+				ProcessedRule *processedRule = new ProcessedRule(*node, newWordConsumed);
+				runningNodes.Add(stackInd, processedRule);
+			}
+		} // for (iterHeadWords
 	}
 
 	// return list of target phrases
-	vector<ProcessedRule> &nodes = runningNodes.back();
+	const ProcessedRuleColl &nodes = runningNodes.Get(relEndPos + 1);
 
-	vector<ProcessedRule>::iterator iterNode;
+	size_t rulesLimit = StaticData::Instance().GetRuleLimit();
+	ProcessedRuleColl::const_iterator iterNode;
 	for (iterNode = nodes.begin(); iterNode != nodes.end(); ++iterNode)
 	{
-		const PhraseDictionaryNode &node = iterNode->GetLastNode();
-		const vector<WordsConsumed> &wordsConsumed = iterNode->GetWordsConsumed();
+		const ProcessedRule &processedRule = **iterNode;
+		const PhraseDictionaryNode &node = processedRule.GetLastNode();
+		const WordConsumed *wordConsumed = processedRule.GetLastWordConsumed();
+		assert(wordConsumed);
+
 		const TargetPhraseCollection *targetPhraseCollection = node.GetTargetPhraseCollection();
 
 		if (targetPhraseCollection != NULL)
 		{
-			ret->Add(*targetPhraseCollection, wordsConsumed, adhereTableLimit, GetTableLimit());
+			ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
 		}
 	}
+	ret->CreateChartRules(rulesLimit);
 
 	return ret;
 }

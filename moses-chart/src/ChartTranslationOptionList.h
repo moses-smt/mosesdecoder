@@ -48,7 +48,7 @@ public:
 
 	size_t GetSize() const
 	{ return m_coll.size();	}
-	const Moses::WordsRange GetSourceRange() const
+	const Moses::WordsRange &GetSourceRange() const
 	{ return m_range;	}
 	void Add(TranslationOption *transOpt);
 

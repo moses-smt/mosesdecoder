@@ -2,11 +2,13 @@
 #include <cassert>
 #include "ChartTranslationOptionCollection.h"
 #include "ChartTranslationOption.h"
+#include "ChartCellCollection.h"
 #include "../../moses/src/InputType.h"
 #include "../../moses/src/StaticData.h"
 #include "../../moses/src/DecodeStep.h"
 #include "../../moses/src/ChartRuleCollection.h"
 #include "../../moses/src/DummyScoreProducers.h"
+#include "../../moses/src/WordConsumed.h"
 
 using namespace std;
 using namespace Moses;
@@ -14,8 +16,12 @@ using namespace Moses;
 namespace MosesChart
 {
 
-TranslationOptionCollection::TranslationOptionCollection(InputType const& source)
+TranslationOptionCollection::TranslationOptionCollection(InputType const& source
+																											, const std::vector<DecodeGraph*> &decodeGraphList
+																											, const ChartCellCollection &hypoStackColl)
 :m_source(source)
+,m_decodeGraphList(decodeGraphList)
+,m_hypoStackColl(hypoStackColl)
 {
 	// create 2-d vector
 	size_t size = source.GetSize();
@@ -35,39 +41,64 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	RemoveAllInColl(m_unksrcs);
 	RemoveAllInColl(m_cacheChartRule);
 	RemoveAllInColl(m_cacheTargetPhrase);
+
+	std::list<std::vector<Moses::WordConsumed*>* >::iterator iterOuter;
+	for (iterOuter = m_cachedWordsConsumed.begin(); iterOuter != m_cachedWordsConsumed.end(); ++iterOuter)
+	{
+		std::vector<Moses::WordConsumed*> &inner = **iterOuter;
+		RemoveAllInColl(inner);
+	}
+
 	RemoveAllInColl(m_cachedWordsConsumed);
 
 }
 
-void TranslationOptionCollection::CreateTranslationOptions(const std::vector <DecodeGraph*> &decodeGraphList)
+void TranslationOptionCollection::CreateTranslationOptionsForRange(
+																			size_t startPos
+																		, size_t endPos)
 {
-	TRACE_ERR("Creating trans opt" << endl);
-	size_t size = m_source.GetSize();
-
 	std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
-	for (iterDecodeGraph = decodeGraphList.begin(); iterDecodeGraph != decodeGraphList.end(); ++iterDecodeGraph)
+	for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph)
 	{
 		const DecodeGraph &decodeGraph = **iterDecodeGraph;
-		size_t maxChartSpan = decodeGraph.GetMaxChartSpan();
+		CreateTranslationOptionsForRange(decodeGraph, startPos, endPos, true);
+	}
 
-		for (size_t startPos = 0 ; startPos < size ; startPos++)
+	ProcessUnknownWord(startPos, endPos);
+
+	Prune(startPos, endPos);
+
+	Sort(startPos, endPos);
+}
+
+//! Force a creation of a translation option where there are none for a particular source position.
+void TranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_t endPos)
+{
+	if (startPos != endPos)
+	{ // only for 1 word phrases
+		return;
+	}
+
+	TranslationOptionList &fullList = GetTranslationOptionList(startPos, startPos);
+
+	// try to translation for coverage with no trans by expanding table limit
+	std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
+	for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph)
+	{
+		const DecodeGraph &decodeGraph = **iterDecodeGraph;
+		size_t numTransOpt = fullList.GetSize();
+		if (numTransOpt == 0)
 		{
-			size_t maxEndPos = (maxChartSpan == 0) ? size : std::min(size, startPos + maxChartSpan);
-
-			for (size_t endPos = startPos ; endPos < maxEndPos ; endPos++)
-			{
-				CreateTranslationOptionsForRange(decodeGraph, startPos, endPos, true);
-			}
+			CreateTranslationOptionsForRange(decodeGraph, startPos, startPos, false);
 		}
 	}
 
-	ProcessUnknownWord(decodeGraphList);
-
-	// Prune
-	Prune();
-
-	Sort();
+	bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
+	// create unknown words for 1 word coverage where we don't have any trans options
+	if (fullList.GetSize() == 0 || alwaysCreateDirectTranslationOption)
+		ProcessUnknownWord(startPos);
 }
+
 
 void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 const DecodeGraph &decodeGraph
@@ -78,35 +109,26 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	assert(decodeGraph.GetSize() == 1);
 	const DecodeStep &decodeStep = **decodeGraph.begin();
 
-  const WordsRange wordsRange(startPos, endPos);
+	// get wordsrange that doesn't go away until after sentence processing
+	const WordsRange &wordsRange = GetTranslationOptionList(startPos, endPos).GetSourceRange();
 
 	TranslationOptionList &translationOptionList = GetTranslationOptionList(startPos, endPos);
 	const PhraseDictionary &phraseDictionary = decodeStep.GetPhraseDictionary();
 
-	if ((startPos == 0 || endPos == m_source.GetSize() - 1)
-			&& phraseDictionary.GetPhraseTableImplementation() != GlueRule)
-	{ // only allow glue rule to process <s> & </s>
-		return;
-	}
-
-	const ChartRuleCollection *charTargetPhraseCollection = phraseDictionary.GetChartRuleCollection(m_source, wordsRange, adhereTableLimit);
-	assert(charTargetPhraseCollection != NULL);
+	const ChartRuleCollection *chartRuleCollection = phraseDictionary.GetChartRuleCollection(
+																															m_source
+																															, wordsRange
+																															, adhereTableLimit
+																															, m_hypoStackColl);
+	assert(chartRuleCollection != NULL);
 
 	ChartRuleCollection::const_iterator iterTargetPhrase;
-	for (iterTargetPhrase = charTargetPhraseCollection->begin(); iterTargetPhrase != charTargetPhraseCollection->end(); ++iterTargetPhrase)
+	for (iterTargetPhrase = chartRuleCollection->begin(); iterTargetPhrase != chartRuleCollection->end(); ++iterTargetPhrase)
 	{
 		const ChartRule &rule = **iterTargetPhrase;
-		TranslationOption *transOpt = new TranslationOption(wordsRange, rule, m_source);
-	
-		stringstream strme("");
-		strme << *transOpt;
-		string toFind = "the goal of gene scientists is ";
-		size_t pos = toFind.find(strme.str());
-
+		TranslationOption *transOpt = new TranslationOption(wordsRange, rule);
 		translationOptionList.Add(transOpt);
 	}
-
-	//delete charTargetPhraseCollection;
 }
 
 TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
@@ -139,37 +161,6 @@ std::ostream& operator<<(std::ostream &out, const TranslationOptionCollection &c
 
 
 	return out;
-}
-
-//! Force a creation of a translation option where there are none for a particular source position.
-void TranslationOptionCollection::ProcessUnknownWord(const std::vector <Moses::DecodeGraph*> &decodeGraphList)
-{
-	size_t size = m_source.GetSize();
-	// try to translation for coverage with no trans by expanding table limit
-	for (size_t startVL = 0 ; startVL < decodeGraphList.size() ; startVL++)
-	{
-	  const DecodeGraph &decodeStepList = *decodeGraphList[startVL];
-		for (size_t pos = 0 ; pos < size ; ++pos)
-		{
-				TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
-				size_t numTransOpt = fullList.GetSize();
-				if (numTransOpt == 0)
-				{
-					CreateTranslationOptionsForRange(decodeStepList
-																				, pos, pos, false);
-				}
-		}
-	}
-
-	bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
-	// create unknown words for 1 word coverage where we don't have any trans options
-	for (size_t pos = 0 ; pos < size ; ++pos)
-	{
-		TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
-		if (fullList.GetSize() == 0 || alwaysCreateDirectTranslationOption)
-			ProcessUnknownWord(pos);
-	}
-
 }
 
 // taken from TranslationOptionCollectionText.
@@ -215,6 +206,10 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		m_cacheTargetPhrase.push_back(targetPhrase);
 		Word &targetWord = targetPhrase->AddWord();
 
+		// headword
+		Word headWord(true);
+		const string &defaultNonTerm = staticData.GetDefaultNonTerminal();
+
 		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
 		{
 			FactorType factorType = static_cast<FactorType>(currFactor);
@@ -224,26 +219,34 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
 			else
 				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
+
+			// headword -- hack
+			sourceFactor = factorCollection.AddFactor(Input, factorType, defaultNonTerm);
+			headWord.SetFactor(factorType, sourceFactor);
 		}
 
 		targetPhrase->SetScore();
 		targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
 		targetPhrase->SetScore(wordPenaltyProducer, wordPenaltyScore);
 		targetPhrase->SetSourcePhrase(m_unksrc);
+		targetPhrase->SetHeadWord(headWord);
+		assert(headWord.GetFactor(0) != NULL);
+
 
 		// words consumed
-		std::vector<WordsConsumed> *wordsConsumed = new std::vector<WordsConsumed>();
+		std::vector<WordConsumed*> *wordsConsumed = new std::vector<WordConsumed*>();
 		m_cachedWordsConsumed.push_back(wordsConsumed);
-		wordsConsumed->push_back(WordsConsumed(Moses::WordsRange(sourcePos, sourcePos), false));
+		wordsConsumed->push_back(new WordConsumed(sourcePos, sourcePos, sourceWord, NULL));
 
 		// chart rule
+		assert(wordsConsumed->size());
 		ChartRule *chartRule = new ChartRule(*targetPhrase
-																				, *wordsConsumed);
+																				, *wordsConsumed->back());
+		chartRule->CreateNonTermIndex();
 		m_cacheChartRule.push_back(chartRule);
 
 		transOpt = new TranslationOption(Moses::WordsRange(sourcePos, sourcePos)
-																	, *chartRule
-																	, m_source);
+																	, *chartRule);
 	}
 	else
 	{ // drop source word. create blank trans opt
@@ -253,18 +256,19 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
 
 		// words consumed
-		std::vector<WordsConsumed> *wordsConsumed = new std::vector<WordsConsumed>;
+		std::vector<WordConsumed*> *wordsConsumed = new std::vector<WordConsumed*>;
 		m_cachedWordsConsumed.push_back(wordsConsumed);
-		wordsConsumed->push_back(WordsConsumed(Moses::WordsRange(sourcePos, sourcePos), false));
+		wordsConsumed->push_back(new WordConsumed(sourcePos, sourcePos, sourceWord, NULL));
 
 		// chart rule
+		assert(wordsConsumed->size());
 		ChartRule *chartRule = new ChartRule(*targetPhrase
-																				, *wordsConsumed);
+																				, *wordsConsumed->back());
+		chartRule->CreateNonTermIndex();
 		m_cacheChartRule.push_back(chartRule);
 
 		transOpt = new TranslationOption(Moses::WordsRange(sourcePos, sourcePos)
-															, *chartRule
-															, m_source);
+															, *chartRule);
 	}
 
 	//transOpt->CalcScore();
@@ -279,27 +283,16 @@ void TranslationOptionCollection::Add(TranslationOption *transOpt, size_t pos)
 }
 
 //! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
-void TranslationOptionCollection::Prune()
+void TranslationOptionCollection::Prune(size_t startPos, size_t endPos)
 {
 
 }
 
 //! sort all trans opt in each list for cube pruning */
-void TranslationOptionCollection::Sort()
+void TranslationOptionCollection::Sort(size_t startPos, size_t endPos)
 {
-	std::vector< std::vector< TranslationOptionList > >::iterator iterOuter;
-	for (iterOuter = m_collection.begin(); iterOuter != m_collection.end(); ++iterOuter)
-	{
-		std::vector< TranslationOptionList > &vecTransOptList = *iterOuter;
-
-		std::vector< TranslationOptionList >::iterator iterInner;
-		for (iterInner = vecTransOptList.begin(); iterInner != vecTransOptList.end(); ++iterInner)
-		{
-			TranslationOptionList &list = *iterInner;
-			list.Sort();
-		}
-
-	}
+	TranslationOptionList &list = GetTranslationOptionList(startPos, endPos);
+	list.Sort();
 }
 
 

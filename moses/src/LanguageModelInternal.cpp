@@ -27,7 +27,7 @@ bool LanguageModelInternal::Load(const std::string &filePath
 	}
 
 	VERBOSE(1, "Loading Internal LM: " << filePath << endl);
-	
+
 	FactorCollection &factorCollection = FactorCollection::Instance();
 
 	m_filePath		= filePath;
@@ -48,12 +48,12 @@ bool LanguageModelInternal::Load(const std::string &filePath
 	InputFileStream 	inFile(filePath);
 
 	// to create lookup vector later on
-	size_t maxFactorId = 0; 
+	size_t maxFactorId = 0;
 	map<size_t, const NGramNode*> lmIdMap;
 
 	string line;
 	int lineNo = 0;
-	
+
 	while( !getline(inFile, line, '\n').eof())
 	{
 		lineNo++;
@@ -74,7 +74,7 @@ bool LanguageModelInternal::Load(const std::string &filePath
 				{
 					factor = factorCollection.AddFactor(Output, m_factorType, factorStr[currFactor]);
 					nGram = ngramColl->GetOrCreateNGram(factor);
-	
+
 					ngramColl = nGram->GetNGramColl();
 
 				}
@@ -88,11 +88,11 @@ bool LanguageModelInternal::Load(const std::string &filePath
 				lmIdMap[factorId] = rootNGram;
 				//factorCollection.SetFactorLmId(factor, rootNGram);
 
-				float score = TransformSRIScore(Scan<float>(tokens[0]));
+				float score = TransformLMScore(Scan<float>(tokens[0]));
 				nGram->SetScore( score );
 				if (tokens.size() == 3)
 				{
-					float logBackOff = TransformSRIScore(Scan<float>(tokens[2]));
+					float logBackOff = TransformLMScore(Scan<float>(tokens[2]));
 					nGram->SetLogBackOff( logBackOff );
 				}
 				else
@@ -172,7 +172,7 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 		{ // something unigram
 			if (finalState != NULL)
 				*finalState = static_cast<const void*>(nGram[1]);
-			
+
 			nGram[0]	= GetLmID(factor0);
 			if (nGram[0] == NULL)
 			{ // stops at unigram
@@ -214,7 +214,7 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 		{ // something unigram
 			if (finalState != NULL)
 				*finalState = static_cast<const void*>(nGram[2]);
-			
+
 			nGram[1]	= GetLmID(factor1);
 			if (nGram[1] == NULL)
 			{ // stops at unigram
@@ -230,8 +230,8 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 				else
 				{ // unigram bigram
 					score = nGram[2]->GetScore() + nGram[1]->GetLogBackOff() + nGram[0]->GetLogBackOff();
-				}	
-			}			
+				}
+			}
 		}
 		else
 		{ // trigram, or something bigram
@@ -246,7 +246,7 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
 			{
 				if (finalState != NULL)
 					*finalState = static_cast<const void*>(nGram[1]);
-				
+
 				score			= nGram[1]->GetScore();
 				nGram[1]	= nGram[1]->GetRootNGram();
 				nGram[0]	= nGram[1]->GetNGram(factor0);

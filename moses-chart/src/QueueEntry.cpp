@@ -7,6 +7,8 @@
 #include "ChartCellCollection.h"
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/ChartRule.h"
+#include "../../moses/src/Util.h"
+#include "../../moses/src/WordConsumed.h"
 
 using namespace std;
 using namespace Moses;
@@ -20,44 +22,66 @@ QueueEntry::QueueEntry(const TranslationOption &transOpt
 :m_transOpt(transOpt)
 {
 	isOK = false;
-	const vector<WordsConsumed> &wordsConsumed = transOpt.GetChartRule().GetWordsConsumed();
 
-	vector<WordsConsumed>::const_iterator iter;
-	for (iter = wordsConsumed.begin(); iter != wordsConsumed.end(); ++iter)
-	{
-		const WordsConsumed &consumed = *iter;
-		if (consumed.IsNonTerminal())
-		{ // non-term
-			const WordsRange &childRange = consumed.GetWordsRange();
-			ChartCellSignature signature(childRange);
-			ChartCellCollection::const_iterator iterCell = allChartCells.find(signature);
-			assert(iterCell != allChartCells.end());
+	const WordConsumed *wordsConsumed = &transOpt.GetChartRule().GetLastWordConsumed();
+	isOK = CreateChildEntry(wordsConsumed, allChartCells);
 
-			const ChartCell &childCell = *iterCell->second;
+	if (isOK)
+		CalcScore();
+}
 
-			if (childCell.GetSortedHypotheses().size() == 0)
-			{ // can't create hypo out of this. child cell is empty
-				return;
-			}
+bool QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells)
+{
+	bool ret;
+	// recursvile do the 1st first
+	const WordConsumed *prevWordsConsumed = wordsConsumed->GetPrevWordsConsumed();
+	if (prevWordsConsumed)
+		ret = CreateChildEntry(prevWordsConsumed, allChartCells);
+	else
+		ret = true;
 
-			ChildEntry childEntry(0, childCell);
-			m_childEntries.push_back(childEntry);
+	if (ret && wordsConsumed->IsNonTerminal())
+	{ // non-term
+		const WordsRange &childRange = wordsConsumed->GetWordsRange();
+		const ChartCell &childCell = allChartCells.Get(childRange);
+		const Word &headWord = wordsConsumed->GetSourceWord();
+
+		if (childCell.GetSortedHypotheses(headWord).size() == 0)
+		{ // can't create hypo out of this. child cell is empty
+			return false;
 		}
+
+		const Moses::Word &nonTerm = wordsConsumed->GetSourceWord();
+		assert(nonTerm.IsNonTerminal());
+		ChildEntry *childEntry = new ChildEntry(0, childCell.GetSortedHypotheses(nonTerm), nonTerm);
+		m_childEntries.push_back(childEntry);
 	}
 
-	CalcScore();
-
-	isOK = true;
+	return ret;
 }
 
 QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)
 :m_transOpt(copy.m_transOpt)
-,m_childEntries(copy.m_childEntries)
 {
-	ChildEntry &childEntry = m_childEntries[childEntryIncr];
+	// deep copy of child entries
+	//m_childEntries(copy.m_childEntries)
+	std::vector<ChildEntry*>::const_iterator iter;
+	for (iter = copy.m_childEntries.begin(); iter != copy.m_childEntries.end(); ++iter)
+	{
+		const ChildEntry &origEntry = **iter;
+		ChildEntry *newEntry = new ChildEntry(origEntry);
+		m_childEntries.push_back(newEntry);
+	}
+
+	ChildEntry &childEntry = *m_childEntries[childEntryIncr];
 	childEntry.IncrementPos();
 
 	CalcScore();
+}
+
+QueueEntry::~QueueEntry()
+{
+	Moses::RemoveAllInColl(m_childEntries);
 }
 
 void QueueEntry::CreateDeviants(ChartCell &currCell) const
@@ -66,9 +90,9 @@ void QueueEntry::CreateDeviants(ChartCell &currCell) const
 
 	for (size_t ind = 0; ind < m_childEntries.size(); ind++)
 	{
-		const ChildEntry &childEntry = m_childEntries[ind];
+		const ChildEntry &childEntry = *m_childEntries[ind];
 
-		if (childEntry.GetPos() + 1 < childEntry.GetChildCell().GetSize())
+		if (childEntry.GetPos() + 1 < childEntry.GetOrderHypos().size())
 		{
 			QueueEntry *newEntry = new QueueEntry(*this, ind);
 			if (newEntry->m_combinedScore > threshold)
@@ -88,8 +112,10 @@ void QueueEntry::CalcScore()
 	m_combinedScore = m_transOpt.GetTotalScore();
 	for (size_t ind = 0; ind < m_childEntries.size(); ind++)
 	{
-		const ChildEntry &childEntry = m_childEntries[ind];
-		const Hypothesis *hypo = childEntry.GetChildCell().GetSortedHypotheses()[childEntry.GetPos()];
+		const ChildEntry &childEntry = *m_childEntries[ind];
+		const Word &headWord = childEntry.GetHeadWord();
+
+		const Hypothesis *hypo = childEntry.GetOrderHypos()[childEntry.GetPos()];
 		m_combinedScore += hypo->GetTotalScore();
 	}
 

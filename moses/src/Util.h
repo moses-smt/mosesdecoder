@@ -57,6 +57,10 @@ namespace Moses
 #define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
 
+//! delete white spaces at beginning and end of string
+const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
+const std::string ToLower(const std::string& str);
+
 //! get string representation of any object/variable, as long as it can pipe to a stream
 template<typename T>
 inline std::string SPrint(const T &input)
@@ -111,6 +115,17 @@ inline std::vector<T> Scan(const std::vector< std::string > &input)
 		output[i] = Scan<T>( input[i] );
 	}
 	return output;
+}
+
+//! speeded up version of above
+template<typename T>
+inline void Scan(std::vector<T> &output, const std::vector< std::string > &input)
+{
+	output.resize(input.size());
+	for (size_t i = 0 ; i < input.size() ; i++)
+	{
+		output[i] = Scan<T>( input[i] );
+	}
 }
 
 /** replace all occurrences of todelStr in str with the string toaddStr */
@@ -180,6 +195,17 @@ inline std::vector<T> Tokenize( const std::string &input
 	return Scan<T>( stringVector );
 }
 
+// speeded up version of above
+template<typename T>
+inline void Tokenize( std::vector<T> &output
+															 , const std::string &input
+															 , const std::string& delimiters = " \t")
+{
+	std::vector<std::string> stringVector;
+	Tokenize(stringVector, input, delimiters);
+	return Scan<T>(output, stringVector );
+}
+
 inline std::vector<std::string> TokenizeMultiCharSeparator(
 																				const std::string& str,
 																				const std::string& separator)
@@ -216,13 +242,13 @@ inline void TokenizeMultiCharSeparator(std::vector<std::string> &output
 	while (nextPos != std::string::npos)
 	{
 		// Found a token, add it to the vector.
-		output.push_back(str.substr(pos, nextPos - pos));
+		output.push_back(Trim(str.substr(pos, nextPos - pos)));
 		// Skip delimiters.  Note the "not_of"
 		pos = nextPos + separator.size();
 		// Find next "non-delimiter"
 		nextPos	= str.find(separator, pos);
 	}
-	output.push_back(str.substr(pos, nextPos - pos));
+	output.push_back(Trim(str.substr(pos, nextPos - pos)));
 }
 
 /**
@@ -257,13 +283,13 @@ inline float NegateScore(float score)
 	return -score;
 }
 
-//! irst number are in log 10, transform to natural log
-inline float TransformIRSTScore(float irstScore)
+//! LM number are in log 10, transform to natural log
+inline float TransformLMScore(float oldScore)
 {
-	return irstScore; // * 2.30258509299405f;
+	return oldScore; // * 2.30258509299405f;
 }
 
-inline float UntransformIRSTScore(float logNScore)
+inline float UntransformLMScore(float logNScore)
 { // opposite of above
 	return logNScore; // / 2.30258509299405f;
 }
@@ -272,17 +298,6 @@ inline float UntransformIRSTScore(float logNScore)
 inline float FloorScore(float logScore)
 {
 	return (std::max)(logScore , LOWEST_SCORE);
-}
-
-//! Should SRI & IRST transform functions be merged ???
-inline float TransformSRIScore(float sriScore)
-{
-	return sriScore; // * 2.30258509299405f;
-}
-
-inline float UntransformSRIScore(float logNScore)
-{ // opposite of above
-	return logNScore; // / 2.30258509299405f;
 }
 
 /** convert prob vector to log prob and calc inner product with weight vector.
@@ -332,6 +347,11 @@ void RemoveAllInColl(COLL &coll)
 std::string GetTempFolder();
 //! Create temp file and return output stream and full file path as arguments
 void CreateTempFile(std::ofstream  &fileStream, std::string &filePath);
+inline bool DeleteFile(const std::string &filePath)
+{
+		return remove(filePath.c_str()) == 0;
+}
+
 //! MD5 hash of a file
 std::string GetMD5Hash(const std::string &filePath);
 
@@ -345,9 +365,6 @@ inline void ShrinkToFit(T& v)
 }
 
 bool FileExists(const std::string& filePath);
-//! delete white spaces at beginning and end of string
-const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
-const std::string ToLower(const std::string& str);
 
 // A couple of utilities to measure decoding time
 void ResetUserTime();

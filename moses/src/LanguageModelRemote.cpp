@@ -14,7 +14,7 @@ namespace Moses {
 const Factor* LanguageModelRemote::BOS = NULL;
 const Factor* LanguageModelRemote::EOS = (LanguageModelRemote::BOS + 1);
 
-LanguageModelRemote::LanguageModelRemote(bool registerScore, ScoreIndexManager &scoreIndexManager) 
+LanguageModelRemote::LanguageModelRemote(bool registerScore, ScoreIndexManager &scoreIndexManager)
 :LanguageModelSingleFactor(registerScore, scoreIndexManager)
 {
 }
@@ -22,7 +22,7 @@ LanguageModelRemote::LanguageModelRemote(bool registerScore, ScoreIndexManager &
 bool LanguageModelRemote::Load(const std::string &filePath
                                         , FactorType factorType
                                         , float weight
-                                        , size_t nGramOrder) 
+                                        , size_t nGramOrder)
 {
         m_factorType    = factorType;
         m_weight                        = weight;
@@ -72,7 +72,7 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
   size_t max = m_nGramOrder;
   const FactorType factor = GetFactorType();
   if (max > count) max = count;
- 
+
   Cache* cur = &m_cache;
   int pc = static_cast<int>(count) - 1;
   for (int i = 0; i < pc; ++i) {
@@ -123,7 +123,7 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
         read(sock, &res[cnt], 6-cnt);
       }
   }
-  cur->prob = FloorScore(TransformSRIScore(*reinterpret_cast<float*>(res)));
+  cur->prob = FloorScore(TransformLMScore(*reinterpret_cast<float*>(res)));
   if (finalState) {
     *finalState = cur->boState;
     if (len) *len = m_nGramOrder;
@@ -133,7 +133,7 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
 
 LanguageModelRemote::~LanguageModelRemote() {
   // Step 8 When finished send all lingering transmissions and close the connection
-  close(sock); 
+  close(sock);
 }
 
 }

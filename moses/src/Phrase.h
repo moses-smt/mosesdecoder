@@ -197,6 +197,17 @@ public:
 	/** appends a phrase at the end of current phrase **/
 	void Append(const Phrase &endPhrase);
 
+	/** appends a phrase at the end of current phrase **/
+	void Clear()
+	{
+		m_words.clear();
+	}
+	void RemoveWord(size_t pos)
+	{
+		assert(pos < m_words.size());
+		m_words.erase(m_words.begin() + pos);
+	}
+
 	size_t GetArity() const
 	{ return m_arity; }
 

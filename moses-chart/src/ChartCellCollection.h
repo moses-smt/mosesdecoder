@@ -2,52 +2,44 @@
 
 #include "ChartCell.h"
 #include "../../moses/src/WordsRange.h"
+#include "../../moses/src/CellCollection.h"
+
+namespace Moses
+{
+class InputType;
+}
 
 namespace MosesChart
 {
 
-class ChartCellSignature
+class ChartCellCollection : public Moses::CellCollection
 {
+public:
+	typedef std::vector<ChartCell*> InnerCollType;
+	typedef std::vector<InnerCollType> OuterCollType;
+
 protected:
-	Moses::WordsRange m_coverage;
+	OuterCollType m_hypoStackColl;
 
 public:
-	explicit ChartCellSignature(const Moses::WordsRange &coverage)
-		:m_coverage(coverage)
-	{}
+	ChartCellCollection(const Moses::InputType &input);
+	~ChartCellCollection();
 
-	const Moses::WordsRange &GetCoverage() const
-	{ return m_coverage; }
-
-	//! transitive comparison used for adding objects into set
-	inline bool operator<(const ChartCellSignature &compare) const
+	ChartCell &Get(const Moses::WordsRange &coverage)
 	{
-		return m_coverage < compare.m_coverage;
+		return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
+	}
+	const ChartCell &Get(const Moses::WordsRange &coverage) const
+	{
+		return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
+	}
+	
+	const std::vector<Moses::Word> &GetHeadwords(const Moses::WordsRange &coverage) const
+	{
+		const ChartCell &cell = Get(coverage);
+		return cell.GetHeadwords();
 	}
 
-};
-
-class ChartCellCollection
-{
-public:
-	typedef std::map<ChartCellSignature, ChartCell*> CollType;
-	typedef CollType::iterator iterator;
-	typedef CollType::const_iterator const_iterator;
-
-protected:
-	CollType m_hypoStackColl;
-
-public:
-	const_iterator begin() const { return m_hypoStackColl.begin(); }
-	const_iterator end() const { return m_hypoStackColl.end(); }
-	iterator begin() { return m_hypoStackColl.begin(); }
-	iterator end() { return m_hypoStackColl.end(); }
-	const_iterator find(const ChartCellSignature &signature) const
-	{ return m_hypoStackColl.find(signature); }
-
-	const ChartCell *Get(const ChartCellSignature &signature) const;
-	ChartCell *GetOrCreate(const ChartCellSignature &signature);
-	
 };
 
 }

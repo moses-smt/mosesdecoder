@@ -90,7 +90,7 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 // can only be 2 at the moment
 const int NUM_LANGUAGES = 2;
 
-const size_t MAX_NUM_FACTORS = 2;
+const size_t MAX_NUM_FACTORS = 4;
 
 enum FactorDirection
 {
@@ -197,7 +197,5 @@ typedef std::vector<std::string> WordAlignments;
 typedef std::pair<std::vector<std::string const*>,Scores > StringTgtCand;
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
 
-// chart decoder
-#define NON_TERMINAL_FACTOR	"[X]"
-
 }
+

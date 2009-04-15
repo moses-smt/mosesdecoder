@@ -84,6 +84,11 @@ public:
 	void CalcScore(const Phrase &phrase
 							, float &fullScore
 							, float &ngramScore) const;
+
+	void CalcScore2(const Phrase &phrase
+							, float &beginningBitsOnly
+							, float &ngramScore) const;
+
 	/* get score of n-gram. n-gram should not be bigger than m_nGramOrder
 	 * Specific implementation can return State and len data to be used in hypothesis pruning
 	 * \param contextFactor n-gram to be scored

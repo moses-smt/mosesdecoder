@@ -11,6 +11,7 @@ libmoses_a_SOURCES = \
 	DecodeStepGeneration.cpp \
 	DecodeStepTranslation.cpp \
 	Dictionary.cpp \
+	DotChart.cpp \
 	DummyScoreProducers.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \

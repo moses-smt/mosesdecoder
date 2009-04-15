@@ -55,8 +55,8 @@ LanguageModelIRST::~LanguageModelIRST()
 }
 
 
-bool LanguageModelIRST::Load(const std::string &filePath, 
-			     FactorType factorType, 
+bool LanguageModelIRST::Load(const std::string &filePath,
+			     FactorType factorType,
 			     float weight,
 			     size_t nGramOrder)
 {
@@ -99,9 +99,9 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 #else
     if (m_filePath.compare(m_filePath.size()-3,3,".mm")==0)
       m_lmtb->load(inp,m_filePath.c_str(),NULL,1);
-    else 
+    else
       m_lmtb->load(inp,m_filePath.c_str(),NULL,0);
-#endif  
+#endif
 
   }
 
@@ -131,7 +131,7 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 	// code copied & paste from SRI LM class. should do template function
 	std::map<size_t, int> lmIdMap;
 	size_t maxFactorId = 0; // to create lookup vector later on
-	
+
 	dict_entry *entry;
 	dictionary_iter iter(m_lmtb->getDict()); // at the level of micro tags
 	while ( (entry = iter.next()) != NULL)
@@ -140,9 +140,9 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 		lmIdMap[factorId] = entry->code;
 		maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	}
-	
+
 	size_t factorId;
-	
+
 	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
 	factorId = m_sentenceStart->GetId();
 	m_lmtb_sentenceStart=lmIdMap[factorId] = GetLmID(BOS_);
@@ -154,10 +154,10 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 	m_lmtb_sentenceEnd=lmIdMap[factorId] = GetLmID(EOS_);
 	maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
 	m_sentenceEndArray[m_factorType] = m_sentenceEnd;
-	
+
 	// add to lookup vector in object
 	m_lmIdLookup.resize(maxFactorId+1);
-	
+
 	fill(m_lmIdLookup.begin(), m_lmIdLookup.end(), m_unknownId);
 
 	map<size_t, int>::iterator iterMap;
@@ -165,8 +165,8 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 	{
 		m_lmIdLookup[iterMap->first] = iterMap->second;
 	}
-  
-  
+
+
 }
 
 int LanguageModelIRST::GetLmID( const std::string &str ) const
@@ -182,10 +182,10 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 
 	// set up context
 	size_t count = contextFactor.size();
-    
+
 	m_lmtb_ng->size=0;
 	if (count< (size_t)(m_lmtb_size-1)) m_lmtb_ng->pushc(m_lmtb_sentenceEnd);
-	if (count< (size_t)m_lmtb_size) m_lmtb_ng->pushc(m_lmtb_sentenceStart);  
+	if (count< (size_t)m_lmtb_size) m_lmtb_ng->pushc(m_lmtb_sentenceStart);
 
 	for (size_t i = 0 ; i < count ; i++)
 	{
@@ -197,29 +197,29 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 	  //	  cerr << (*contextFactor[i])[factorType]->GetString() << " = " << lmId;
 	  m_lmtb_ng->pushc(lmId);
 	}
-  
-	if (finalState){        
-		*finalState=(State *)m_lmtb->cmaxsuffptr(*m_lmtb_ng);	
+
+	if (finalState){
+		*finalState=(State *)m_lmtb->cmaxsuffptr(*m_lmtb_ng);
 		// back off stats not currently available
-		*len = 0;	
+		*len = 0;
 	}
 
 	float prob = m_lmtb->clprob(*m_lmtb_ng);
-  
-  
-	return TransformIRSTScore(prob);
+
+
+	return TransformLMScore(prob);
 }
 
 
 void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
   TRACE_ERR( "reset caches\n");
-  m_lmtb->reset_caches(); 
+  m_lmtb->reset_caches();
 
 #ifndef WIN32
   TRACE_ERR( "reset mmap\n");
   m_lmtb->reset_mmap();
 #endif
-  
+
 }
 
 void LanguageModelIRST::InitializeBeforeSentenceProcessing(){

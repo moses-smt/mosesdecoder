@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libdb47d.lib &quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; zlib.lib &quot;$(SolutionDir)$(ConfigurationName)\on-disk-phrase-dict.lib&quot;"
+				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; zlib.lib &quot;$(SolutionDir)$(ConfigurationName)\on-disk-phrase-dict.lib&quot;"
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames="libcmtd"
 				GenerateDebugInformation="true"
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libdb47d.lib &quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; zlib.lib &quot;$(SolutionDir)$(ConfigurationName)\on-disk-phrase-dict.lib&quot;"
+				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; zlib.lib &quot;$(SolutionDir)$(ConfigurationName)\on-disk-phrase-dict.lib&quot;"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"

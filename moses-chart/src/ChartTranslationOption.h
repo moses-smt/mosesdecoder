@@ -15,12 +15,11 @@ class TranslationOption
 	friend std::ostream& operator<<(std::ostream& out, const TranslationOption &transOpt);
 
 protected:
-	const Moses::ChartRule &m_rule; /*< output phrase when using this translation option */
-	Moses::WordsRange			m_wordsRange;
+	const Moses::ChartRule	&m_rule; /*< output phrase when using this translation option */
+	const Moses::WordsRange	&m_wordsRange;
 public:
 	TranslationOption(const Moses::WordsRange &wordsRange
-									, const Moses::ChartRule &chartRule
-									, const Moses::InputType &inputType);
+									, const Moses::ChartRule &chartRule);
 
 	~TranslationOption();
 

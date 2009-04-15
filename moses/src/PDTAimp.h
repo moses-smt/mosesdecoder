@@ -6,7 +6,9 @@
 #include <sys/stat.h>
 #include "StaticData.h"  // needed for factor splitter
 #include "PhraseDictionaryTree.h"
+#include "PhraseDictionaryTreeAdaptor.h"
 #include "UniqueObject.h"
+#include "InputFileStream.h"
 
 namespace Moses
 {
@@ -16,7 +18,7 @@ inline bool existsFile(const char* filePath) {
   return  (stat(filePath,&mystat)==0);
 }
 
-double addLogScale(double x,double y) 
+double addLogScale(double x,double y)
 {
 	if(x>y) return addLogScale(y,x); else return x+log(1.0+exp(y-x));
 }
@@ -26,16 +28,16 @@ double Exp(double x)
 	return exp(x);
 }
 
-class PDTAimp 
+class PDTAimp
 {
 	// only these classes are allowed to instantiate this class
 	friend class PhraseDictionaryTreeAdaptor;
-	
+
 protected:
-	PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis) 
+	PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis)
 		: m_languageModels(0),m_weightWP(0.0),m_dict(0),
 			m_obj(p),useCache(1),m_numInputScores(nis),totalE(0),distinctE(0) {}
-	
+
 public:
 	std::vector<float> m_weights;
 	LMList const* m_languageModels;
@@ -59,7 +61,7 @@ public:
 	std::vector<size_t> path1Best,pathExplored;
 	std::vector<double> pathCN;
 
-	~PDTAimp() 
+	~PDTAimp()
 	{
 		CleanUp();
 		delete m_dict;
@@ -74,11 +76,11 @@ public:
 
 				TRACE_ERR("\npath statistics\n");
 
-				if(path1Best.size()) 
+				if(path1Best.size())
 					{
 						TRACE_ERR("1-best:        ");
 						std::copy(path1Best.begin()+1,path1Best.end(),
-											std::ostream_iterator<size_t>(std::cerr," \t")); 
+											std::ostream_iterator<size_t>(std::cerr," \t"));
 						TRACE_ERR("\n");
 					}
 				if(pathCN.size())
@@ -87,26 +89,26 @@ public:
 						std::transform(pathCN.begin()+1
 													,pathCN.end()
 													,std::ostream_iterator<double>(std::cerr," \t")
-													,Exp); 
+													,Exp);
 						TRACE_ERR("\n");
 					}
 				if(pathExplored.size())
 					{
 						TRACE_ERR("CN (explored): ");
 						std::copy(pathExplored.begin()+1,pathExplored.end(),
-											std::ostream_iterator<size_t>(std::cerr," \t")); 
+											std::ostream_iterator<size_t>(std::cerr," \t"));
 						TRACE_ERR("\n");
 					}
 			}
 
 	}
 
-	void Factors2String(Word const& w,std::string& s) const 
+	void Factors2String(Word const& w,std::string& s) const
 	{
 		s=w.GetString(m_input,false);
 	}
 
-	void CleanUp() 
+	void CleanUp()
 	{
 		assert(m_dict);
 		m_dict->FreeMemory();
@@ -117,15 +119,15 @@ public:
 		uniqSrcPhr.clear();
 	}
 
-	void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase) 
+	void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)
 	{
 		cerr << "AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)" << endl;
 		assert(GetTargetPhraseCollection(source)==0);
-		
+
 		VERBOSE(2, "adding unk source phrase "<<source<<"\n");
 		std::pair<MapSrc2Tgt::iterator,bool> p
 			=m_cache.insert(std::make_pair(source,static_cast<TargetPhraseCollection const*>(0)));
-		if(p.second || p.first->second==0) 
+		if(p.second || p.first->second==0)
 			{
 				TargetPhraseCollection *ptr=new TargetPhraseCollection;
 				ptr->Add(targetPhrase);
@@ -135,20 +137,20 @@ public:
 		else VERBOSE(2, "WARNING: you added an already existing phrase!\n");
 	}
 
-	TargetPhraseCollection const* 
+	TargetPhraseCollection const*
 	GetTargetPhraseCollection(Phrase const &src) const
 	{
-		
+
 		assert(m_dict);
 		if(src.GetSize()==0) return 0;
 
 		std::pair<MapSrc2Tgt::iterator,bool> piter;
-		if(useCache) 
+		if(useCache)
 			{
 				piter=m_cache.insert(std::make_pair(src,static_cast<TargetPhraseCollection const*>(0)));
 				if(!piter.second) return piter.first->second;
 			}
-		else if (m_cache.size()) 
+		else if (m_cache.size())
 			{
 				MapSrc2Tgt::const_iterator i=m_cache.find(src);
 				return (i!=m_cache.end() ? i->second : 0);
@@ -167,24 +169,24 @@ public:
 		std::vector<StringWordAlignmentCand> twacands;
 //		m_dict->GetTargetCandidates(srcString,cands);
 		m_dict->GetTargetCandidates(srcString,cands,swacands,twacands);
-		if(cands.empty()) 
+		if(cands.empty())
 		{
 			return 0;
 		}
-			
+
 		std::vector<TargetPhrase> tCands;tCands.reserve(cands.size());
 		std::vector<std::pair<float,size_t> > costs;costs.reserve(cands.size());
 
 		// convert into TargetPhrases
-		for(size_t i=0;i<cands.size();++i) 
+		for(size_t i=0;i<cands.size();++i)
 		{
 			TargetPhrase targetPhrase(Output);
-			
+
 			StringTgtCand::first_type const& factorStrings=cands[i].first;
 			StringTgtCand::second_type const& probVector=cands[i].second;
 			StringWordAlignmentCand::second_type const& swaVector=swacands[i].second;
 			StringWordAlignmentCand::second_type const& twaVector=twacands[i].second;
-			
+
 			std::vector<float> scoreVector(probVector.size());
 			std::transform(probVector.begin(),probVector.end(),scoreVector.begin(),
 										 TransformScore);
@@ -195,21 +197,21 @@ public:
 																		 tCands.size()));
 			tCands.push_back(targetPhrase);
 		}
-		
+
 		TargetPhraseCollection *rv;
 		rv=PruneTargetCandidates(tCands,costs);
-		if(rv->IsEmpty()) 
+		if(rv->IsEmpty())
 		{
 			delete rv;
 			return 0;
-		} 
-		else 
+		}
+		else
 		{
 			if(useCache) piter.first->second=rv;
 			m_tgtColls.push_back(rv);
 			return rv;
 		}
-		
+
 	}
 
 
@@ -223,7 +225,7 @@ public:
 							)
 	{
 
-		// set my members	
+		// set my members
 		m_dict=new PhraseDictionaryTree(weight.size()-m_numInputScores);
 		m_input=input;
 		m_output=output;
@@ -261,9 +263,9 @@ public:
 		Phrase src;
 
 		State() : range(0,0),score(0.0),realWords(0),src(Input) {}
-		State(Position b,Position e,const PPtr& v,float sc=0.0,Position rw=0) 
+		State(Position b,Position e,const PPtr& v,float sc=0.0,Position rw=0)
 			: ptr(v),range(b,e),score(sc),realWords(rw),src(Input) {}
-		State(Range const& r,const PPtr& v,float sc=0.0,Position rw=0) 
+		State(Range const& r,const PPtr& v,float sc=0.0,Position rw=0)
 			: ptr(v),range(r),score(sc),realWords(rw),src(Input) {}
 
 		Position begin() const {return range.first;}
@@ -278,15 +280,15 @@ public:
 	};
 
 
-	
+
 	void CreateTargetPhrase(TargetPhrase& targetPhrase,
 													StringTgtCand::first_type const& factorStrings,
 													StringTgtCand::second_type const& scoreVector,
 													Phrase const* srcPtr=0) const
 	{
 		FactorCollection &factorCollection = FactorCollection::Instance();
-		
-		for(size_t k=0;k<factorStrings.size();++k) 
+
+		for(size_t k=0;k<factorStrings.size();++k)
 		{
 			std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
 			Word& w=targetPhrase.AddWord();
@@ -295,11 +297,11 @@ public:
 		}
 		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
-		
+
 //		targetPhrase.CreateAlignmentInfo("???", "???", 44);
 	}
-	
-	
+
+
 	void CreateTargetPhrase(TargetPhrase& targetPhrase,
 													StringTgtCand::first_type const& factorStrings,
 													StringTgtCand::second_type const& scoreVector,
@@ -309,7 +311,7 @@ public:
 	{
 		FactorCollection &factorCollection = FactorCollection::Instance();
 
-		for(size_t k=0;k<factorStrings.size();++k) 
+		for(size_t k=0;k<factorStrings.size();++k)
 			{
 				std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
 				Word& w=targetPhrase.AddWord();
@@ -318,28 +320,28 @@ public:
 			}
 		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
-		
+
 		// TODO targetPhrase.CreateAlignmentInfo(swaVector, twaVector);
 	}
 
 
 	TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,
-																								std::vector<std::pair<float,size_t> >& costs) const 
+																								std::vector<std::pair<float,size_t> >& costs) const
 	{
 		// convert into TargetPhraseCollection
 		TargetPhraseCollection *rv=new TargetPhraseCollection;
 
 		// set limit to tableLimit or actual size, whatever is smaller
-		std::vector<std::pair<float,size_t> >::iterator nth = 
+		std::vector<std::pair<float,size_t> >::iterator nth =
 		  costs.begin() + ((m_obj->m_tableLimit>0 && // 0 indicates no limit
-				    m_obj->m_tableLimit < costs.size()) ? 
+				    m_obj->m_tableLimit < costs.size()) ?
 				   m_obj->m_tableLimit : costs.size());
 
 		// find the nth phrase according to future cost
 		std::nth_element(costs.begin(),nth ,costs.end());
 
 		// add n top phrases to the return list
-		for(std::vector<std::pair<float,size_t> >::iterator 
+		for(std::vector<std::pair<float,size_t> >::iterator
 		      it = costs.begin(); it != nth; ++it)
 		  rv->Add(new TargetPhrase(tCands[it->second]));
 
@@ -355,7 +357,7 @@ public:
 		TScores() : total(0.0),src(0) {}
 	};
 
-	void CacheSource(ConfusionNet const& src) 
+	void CacheSource(ConfusionNet const& src)
 	{
 		assert(m_dict);
 		const size_t srcSize=src.GetSize();
@@ -376,13 +378,13 @@ public:
 
 		// update global statistics
 		if(pathCN.size()<=srcSize) pathCN.resize(srcSize+1,-1.0);
-		for(size_t len=1;len<=srcSize;++len) 
+		for(size_t len=1;len<=srcSize;++len)
 			pathCN[len]=pathCN[len]>=0.0 ? addLogScale(pathCN[len],exPathsD[len]) : exPathsD[len];
 
 		if(path1Best.size()<=srcSize) path1Best.resize(srcSize+1,0);
 		for(size_t len=1;len<=srcSize;++len) path1Best[len]+=srcSize-len+1;
 
-		
+
 		if (StaticData::Instance().GetVerboseLevel() >= 2 && exPathsD.size())
 			{
 				TRACE_ERR("path stats for current CN: \nCN (full):     ");
@@ -398,14 +400,14 @@ public:
 
 		std::map<Range,E2Costs> cov2cand;
 		std::vector<State> stack;
-		for(Position i=0 ; i < srcSize ; ++i) 
+		for(Position i=0 ; i < srcSize ; ++i)
 			stack.push_back(State(i, i, m_dict->GetRoot()));
 
-		while(!stack.empty()) 
+		while(!stack.empty())
 			{
 				State curr(stack.back());
 				stack.pop_back();
-		
+
 				assert(curr.end()<srcSize);
 				const ConfusionNet::Column &currCol=src[curr.end()];
 				// in a given column, loop over all possibilities
@@ -415,9 +417,9 @@ public:
 						std::string s;
 						Factors2String(w,s);
 						bool isEpsilon=(s=="" || s==EPSILON);
-						
+
 						// do not start with epsilon (except at first position)
-						if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue; 
+						if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue;
 
 						// At a given node in the prefix tree, look to see if w defines an edge to
 						// another node (Extend).  Stay at the same node if w==EPSILON
@@ -443,13 +445,13 @@ public:
 								// the current path through the CN
 								m_dict->GetTargetCandidates(nextP,tcands);
 
-								if(newRange.second>=exploredPaths.size()+newRange.first) 
+								if(newRange.second>=exploredPaths.size()+newRange.first)
 									exploredPaths.resize(newRange.second-newRange.first+1,0);
 								++exploredPaths[newRange.second-newRange.first];
-	
+
 								totalE+=tcands.size();
 
-								if(tcands.size()) 
+								if(tcands.size())
 									{
 										E2Costs& e2costs=cov2cand[newRange];
 										Phrase const* srcPtr=uniqSrcPhr(newSrc);
@@ -466,15 +468,15 @@ public:
 													abort();
 											}
 											std::transform(tcands[i].second.begin(),tcands[i].second.end(),nscores.begin() + m_numInputScores,TransformScore);
-											
+
 											assert(nscores.size()==m_weights.size());
 											float score=std::inner_product(nscores.begin(), nscores.end(), m_weights.begin(), 0.0f);
 
 											score-=tcands[i].first.size() * m_weightWP;
 											std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].first,TScores()));
-											
+
 											if(p.second) ++distinctE;
-											
+
 											TScores & scores=p.first->second;
 											if(p.second || scores.total<score)
 											{
@@ -486,18 +488,18 @@ public:
 									}
 							}
 					}
-			} // end while(!stack.empty()) 
+			} // end while(!stack.empty())
 
 
 		if (StaticData::Instance().GetVerboseLevel() >= 2 && exploredPaths.size())
 			{
 				TRACE_ERR("CN (explored): ");
 				std::copy(exploredPaths.begin()+1,exploredPaths.end(),
-									std::ostream_iterator<size_t>(std::cerr," ")); 
+									std::ostream_iterator<size_t>(std::cerr," "));
 				TRACE_ERR("\n");
 			}
 
-		if(pathExplored.size()<exploredPaths.size()) 
+		if(pathExplored.size()<exploredPaths.size())
 			pathExplored.resize(exploredPaths.size(),0);
 		for(size_t len=1;len<=srcSize;++len)
 			pathExplored[len]+=exploredPaths[len];
@@ -527,7 +529,7 @@ public:
 
 				TargetPhraseCollection *rv=PruneTargetCandidates(tCands,costs);
 
-				if(rv->IsEmpty()) 
+				if(rv->IsEmpty())
 					delete rv;
 				else
 					{
@@ -538,8 +540,8 @@ public:
 		// free memory
 		m_dict->FreeMemory();
 	}
-	
-	
+
+
 	size_t GetNumInputScores() const {return m_numInputScores;}
 };
 

@@ -83,7 +83,7 @@ Moses::Phrase TrellisNode::GetOutputPhrase() const
 	for (size_t pos = 0; pos < currTargetPhrase.GetSize(); ++pos)
 	{
 		const Moses::Word &word = currTargetPhrase.GetWord(pos);
-		if (word.GetFactor(0)->IsNonTerminal())
+		if (word.IsNonTerminal())
 		{ // non-term. fill out with prev hypo
 			size_t nonTermInd = m_hypo->GetWordsConsumedTargetOrder(pos);
 			const TrellisNode &childNode = GetChild(nonTermInd);

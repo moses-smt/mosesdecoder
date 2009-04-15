@@ -16,6 +16,27 @@ float ScoreComponentCollection::GetWeightedScore() const
 	return ret;
 }
 
+void ScoreComponentCollection::ZeroAllLM()
+{
+	const LMList &lmList = StaticData::Instance().GetAllLM();
+	
+	for (size_t ind = lmList.GetMinIndex(); ind <= lmList.GetMaxIndex(); ++ind)
+	{
+		m_scores[ind] = 0;
+	}
+}
+
+void ScoreComponentCollection::PlusEqualsAllLM(const ScoreComponentCollection& rhs)
+{
+	const LMList &lmList = StaticData::Instance().GetAllLM();
+	
+	for (size_t ind = lmList.GetMinIndex(); ind <= lmList.GetMaxIndex(); ++ind)
+	{
+		m_scores[ind] += rhs.m_scores[ind];
+	}
+
+}
+
 }
 
 

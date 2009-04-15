@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "FactorCollection.h"
 #include "LanguageModel.h"
+#include "StaticData.h"
 #include "Util.h"
 
 using namespace std;
@@ -53,13 +54,9 @@ void FactorCollection::LoadVocab(FactorDirection direction, FactorType factorTyp
 
 bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, const string &factorString)
 {
-	// find string id
-	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
+	Factor search(direction, factorType, factorString, false); // id not used for searching
 
-	FactorSet::const_iterator iterFactor;
-	Factor search(direction, factorType, ptrString, false); // id not used for searching
-
-	iterFactor = m_collection.find(search);
+	FactorSet::const_iterator iterFactor = m_collection.find(search);
 	return iterFactor != m_collection.end();
 }
 
@@ -67,11 +64,11 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
 																				, FactorType 			factorType
 																				, const string 		&factorString)
 {
-	bool isNonTerminal = factorString.substr(0,5).compare(NON_TERMINAL_FACTOR) == 0;
+	const StaticData &staticData = StaticData::Instance();
+	bool isNonTerminal = staticData.IsNonTerminal(factorString);
 
 	// find string id
-	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
-	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, ptrString, isNonTerminal, m_factorId) );
+	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, factorString, isNonTerminal, m_factorId) );
 	if (ret.second)
 		++m_factorId; // new factor, make sure next new factor has diffrernt id
 		

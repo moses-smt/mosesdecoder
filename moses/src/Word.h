@@ -45,16 +45,20 @@ protected:
 	typedef const Factor * FactorArray[MAX_NUM_FACTORS];
 
 	FactorArray m_factorArray; /**< set of factors */
+	bool m_isNonTerminal;
 
 public:
 	/** deep copy */
 	Word(const Word &copy) {
 		std::memcpy(m_factorArray, copy.m_factorArray, sizeof(FactorArray));
+		m_isNonTerminal = copy.m_isNonTerminal;
 	}
 
 	/** empty word */
-	Word() {
+	Word(bool isNonTerminal = false)
+	{
 		std::memset(m_factorArray, 0, sizeof(FactorArray));
+		m_isNonTerminal = isNonTerminal;
 	}
 
 	~Word() {}
@@ -78,11 +82,18 @@ public:
 	}
 
 	inline bool IsNonTerminal() const 
-	{	return m_factorArray[0]->IsNonTerminal();	}
+	{	return m_isNonTerminal;	}
 
 	/** add the factors from sourceWord into this representation,
 	 * NULL elements in sourceWord will be skipped */
 	void Merge(const Word &sourceWord);
+
+	void CreateFromString(FactorDirection direction
+											, const std::vector<FactorType> &factorOrder
+											, const std::string &str);
+	void CreateFromString(FactorDirection direction
+											, const std::vector<FactorType> &factorOrder
+											, const std::vector<std::string> &wordVec);
 
 	/** get string representation of list of factors. Used by PDTimp so supposed 
 	* to be invariant to changes in format of debuggin output, therefore, doesn't 

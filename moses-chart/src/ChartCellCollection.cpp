@@ -1,30 +1,36 @@
 
 #include "ChartCellCollection.h"
+#include "../../moses/src/InputType.h"
+#include "../../moses/src/WordsRange.h"
 
 namespace MosesChart
 {
-
-const ChartCell *ChartCellCollection::Get(const ChartCellSignature &signature) const
+ChartCellCollection::ChartCellCollection(const Moses::InputType &input)
+:m_hypoStackColl(input.GetSize())
 {
-	const_iterator iter = m_hypoStackColl.find(signature);
-	assert(iter != m_hypoStackColl.end());
-	return iter->second;
+	size_t size = input.GetSize();
+	for (size_t startPos = 0; startPos < size; ++startPos)
+	{
+		InnerCollType &inner = m_hypoStackColl[startPos];
+		inner.resize(size - startPos);
+
+		size_t ind = 0;
+		for (size_t endPos = startPos ; endPos < size; ++endPos)
+		{
+			ChartCell *cell = new ChartCell(startPos, endPos);
+			inner[ind] = cell;
+			++ind;
+		}
+	}
 }
 
-ChartCell *ChartCellCollection::GetOrCreate(const ChartCellSignature &signature)
+ChartCellCollection::~ChartCellCollection()
 {
-	const_iterator iter = m_hypoStackColl.find(signature);
-	if (iter == m_hypoStackColl.end())
+	OuterCollType::iterator iter;
+	for (iter = m_hypoStackColl.begin(); iter != m_hypoStackColl.end(); ++iter)
 	{
-		ChartCell *cell = new ChartCell(signature.GetCoverage().GetStartPos()
-																	, signature.GetCoverage().GetEndPos());
-
-		m_hypoStackColl[signature] = cell;
-		return cell;
-	}
-	else
-	{
-		return iter->second;
+		InnerCollType &inner = *iter;
+		Moses::RemoveAllInColl(inner);
 	}
 }
 

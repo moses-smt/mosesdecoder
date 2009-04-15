@@ -16,7 +16,8 @@ namespace MosesChart
 
 Manager::Manager(InputType const& source)
 :m_source(source)
-,m_transOptColl(source)
+,m_hypoStackColl(source)
+,m_transOptColl(source, StaticData::Instance().GetDecodeGraphList(), m_hypoStackColl)
 {
 	const StaticData &staticData = StaticData::Instance();
 	staticData.InitializeBeforeSentenceProcessing(source);
@@ -24,10 +25,6 @@ Manager::Manager(InputType const& source)
 
 Manager::~Manager()
 {
-	ChartCellCollection::iterator iter;
-	for (iter = m_hypoStackColl.begin(); iter != m_hypoStackColl.end(); ++iter)
-		delete iter->second;
-
 	StaticData::Instance().CleanUpAfterSentenceProcessing();
 }
 
@@ -37,19 +34,9 @@ void Manager::ProcessSentence()
 
 	const StaticData &staticData = StaticData::Instance();
 	staticData.ResetSentenceStats(m_source);
-	const vector <DecodeGraph*>
-			&decodeGraphList = staticData.GetDecodeGraphList();
 
-		// create list of all possible translations
-	// this is only valid if:
-	//		1. generation of source sentence is not done 1st
-	//		2. initial hypothesis factors are given in the sentence
-	//CreateTranslationOptions(m_source, phraseDictionary, lmListInitial);
-	m_transOptColl.CreateTranslationOptions(decodeGraphList);
-
-	TRACE_ERR(m_transOptColl.GetTranslationOptionList(WordsRange(1, 2)) << endl);
 	TRACE_ERR("Decoding: " << endl);
-	Hypothesis::ResetHypoCount();
+	//Hypothesis::ResetHypoCount();
 
 	// MAIN LOOP
 	size_t size = m_source.GetSize();
@@ -58,16 +45,21 @@ void Manager::ProcessSentence()
 		for (size_t startPos = 0; startPos <= size-width; ++startPos)
 		{
 			size_t endPos = startPos + width - 1;
+
+			// create trans opt
+			m_transOptColl.CreateTranslationOptionsForRange(startPos, endPos);
+
+			// decode
 			WordsRange range(startPos, endPos);
-			ChartCellSignature signature(range);
-			ChartCell *cell = m_hypoStackColl.GetOrCreate(signature);
+			ChartCell &cell = m_hypoStackColl.Get(range);
 
-			cell->ProcessSentence(m_transOptColl.GetTranslationOptionList(range)
+			cell.ProcessSentence(m_transOptColl.GetTranslationOptionList(range)
 														,m_hypoStackColl);
-			cell->PruneToSize(cell->GetMaxHypoStackSize());
-			cell->SortHypotheses();
+			cell.PruneToSize(cell.GetMaxHypoStackSize());
+			cell.CleanupArcList();
+			cell.SortHypotheses();
 
-			TRACE_ERR(range << " = " << cell->GetSize() << endl);
+			TRACE_ERR(range << " = " << cell.GetSize() << endl);
 		}
 	}
 
@@ -83,12 +75,8 @@ const Hypothesis *Manager::GetBestHypothesis() const
 	else
 	{
 		WordsRange range(0, size-1);
-		ChartCellSignature signature(range);
-			
-		const ChartCell &lastCell = *m_hypoStackColl.Get(signature);
-		const std::vector<const Hypothesis*> &sortedHypos = lastCell.GetSortedHypotheses();
-
-		return (sortedHypos.size() > 0) ? sortedHypos[0] : NULL;
+		const ChartCell &lastCell = m_hypoStackColl.Get(range);
+		return lastCell.GetBestHypothesis();
 	}
 }
 
@@ -97,30 +85,22 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 	size_t size = m_source.GetSize();
 	if (count == 0 || size == 0)
 		return;
-
-	WordsRange range(0, size-1);
-	ChartCellSignature signature(range);
-		
-	const ChartCell &lastCell = *m_hypoStackColl.Get(signature);
-
-	vector<const Hypothesis*> sortedPureHypo = lastCell.GetSortedHypotheses();
-	if (sortedPureHypo.size() == 0)
-		return;
-
+	
 	TrellisPathCollection contenders;
-
 	set<Phrase> distinctHyps;
 
 	// add all pure paths
-	vector<const Hypothesis*>::const_iterator iterBestHypo;
-	for (iterBestHypo = sortedPureHypo.begin() 
-			; iterBestHypo != sortedPureHypo.end()
-			; ++iterBestHypo)
-	{
-		const Hypothesis *hypo = *iterBestHypo;
-		MosesChart::TrellisPath *purePath = new TrellisPath(hypo);
-		contenders.Add(purePath);
+	WordsRange range(0, size-1);
+	const ChartCell &lastCell = m_hypoStackColl.Get(range);
+	const Hypothesis *hypo = lastCell.GetBestHypothesis();
+	
+	if (hypo == NULL)
+	{ // no hypothesis
+		return;
 	}
+
+	MosesChart::TrellisPath *purePath = new TrellisPath(hypo);
+	contenders.Add(purePath);
 
 	// factor defines stopping point for distinct n-best list if too many candidates identical
 	size_t nBestFactor = StaticData::Instance().GetNBestFactor();

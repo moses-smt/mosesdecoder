@@ -6,6 +6,13 @@
 #include <queue>
 #include <set>
 #include "../../moses/src/WordsRange.h"
+#include "../../moses/src/Word.h"
+#include "ChartHypothesis.h"
+
+namespace Moses
+{
+	class WordConsumed;
+};
 
 namespace MosesChart
 {
@@ -21,30 +28,36 @@ class ChildEntry
 {
 protected:
 	size_t m_pos;
-	const ChartCell *m_childCell;
+	const OrderHypos &m_orderedHypos;
+	const Moses::Word &m_headWord;
 
 public:
-	ChildEntry(size_t pos, const ChartCell &childCell)
+	ChildEntry(size_t pos, const OrderHypos &orderedHypos, const Moses::Word &headWord)
 		:m_pos(pos)
-		,m_childCell(&childCell)
+		,m_orderedHypos(orderedHypos)
+		,m_headWord(headWord)
 	{}
 	size_t GetPos() const
 	{ return m_pos; }
+	const OrderHypos &GetOrderHypos() const
+	{ return m_orderedHypos; }
 	size_t IncrementPos()
 	{ return m_pos++; }
-	const ChartCell &GetChildCell() const
-	{ return *m_childCell; }
+	const Moses::Word &GetHeadWord() const
+	{ return m_headWord; }
+
 };
 
 class QueueEntry
 {
 protected:
 	const TranslationOption &m_transOpt;
-	std::vector<ChildEntry> m_childEntries;
+	std::vector<ChildEntry*> m_childEntries;
 
 	float m_combinedScore;
 
 	QueueEntry(const QueueEntry &copy, size_t childEntryIncr);
+	bool CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells);
 
 	void CalcScore();
 
@@ -52,9 +65,11 @@ public:
 	QueueEntry(const TranslationOption &transOpt
 						, const ChartCellCollection &allChartCells
 						, bool &isOK);
+	~QueueEntry();
+
 	const TranslationOption &GetTranslationOption() const
 	{ return m_transOpt; }
-	const std::vector<ChildEntry> &GetChildEntries() const
+	const std::vector<ChildEntry*> &GetChildEntries() const
 	{ return m_childEntries; }
 	float GetCombinedScore() const
 	{ return m_combinedScore; }
