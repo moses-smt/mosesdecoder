@@ -7,7 +7,6 @@ josiah_SOURCES = Derivation.cpp \
 	Josiah.cpp \
 	Optimizer.cpp \
 	GainFunction.cpp \
-	MBRDecoder.cpp \
         Gibbler.cpp \
         GibblerExpectedLossTraining.cpp \
         GibblerMaxDerivDecoder.cpp \

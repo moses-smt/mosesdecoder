@@ -44,7 +44,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GibblerExpectedLossTraining.h"
 #include "GibblerAnnealedExpectedLossTrainer.h"
 #include "GibblerMaxTransDecoder.h"
-#include "MBRDecoder.h"
 #include "Model1.h"
 #include "Timer.h"
 #include "StaticData.h"
@@ -434,7 +433,6 @@ int main(int argc, char** argv) {
     auto_ptr<DerivationCollector> derivationCollector;
     auto_ptr<ExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;
-    auto_ptr<MBRDecoder> mbrCollector;
     if (expected_sbleu) {
       elCollector.reset(new ExpectedLossCollector(g[lineno]));
       sampler.AddCollector(elCollector.get());
@@ -474,14 +472,10 @@ int main(int argc, char** argv) {
       derivationCollector.reset(collector);
       sampler.AddCollector(derivationCollector.get());
     }
-    if (translate) {
+    if (translate || mbr_decoding) {
       transCollector.reset(new GibblerMaxTransDecoder());
       transCollector->setOutputMaxChange(output_max_change);
       sampler.AddCollector(transCollector.get() );
-    }
-    if (mbr_decoding) {
-      mbrCollector.reset(new MBRDecoder(mbr_size));
-      sampler.AddCollector(mbrCollector.get() );
     }
     
     MergeSplitOperator mso;
@@ -574,12 +568,6 @@ int main(int argc, char** argv) {
            decoder.get(), 
            hessianV);
     }
-    if (mbr_decoding) {
-      pair<const Translation*,float> maxtrans = mbrCollector->getMax();
-      (*out) << *maxtrans.first;
-      (*out) << endl << flush;
-      timer.check("Outputting MBR");
-    }
     if (derivationCollector.get()) {
       cerr << "DerivEntropy " << derivationCollector->getEntropy() << endl;
       vector<pair<const Derivation*, float> > nbest;
@@ -600,9 +588,14 @@ int main(int argc, char** argv) {
         derivationCollector->outputDerivationsByTranslation(std::cerr);
       }
     }
-    if (transCollector.get()) {
+    if (translate) {
       cerr << "TransEntropy " << transCollector->getEntropy() << endl;
       pair<const Translation*,float> maxtrans = transCollector->getMax();
+      (*out) << *maxtrans.first;
+      (*out) << endl << flush;
+    }
+    if (mbr_decoding) {
+      pair<const Translation*,float> maxtrans = transCollector->getMbr(mbr_size);
       (*out) << *maxtrans.first;
       (*out) << endl << flush;
     }
