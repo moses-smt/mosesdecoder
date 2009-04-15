@@ -16,6 +16,7 @@ void ExpectedLossCollector::collect(Sample& s) {
   VERBOSE(2, gain << "\tFeatures=" << s.GetFeatureValues() << endl);
   m_gains.push_back(gain);
   m_featureVectors.push_back(s.GetFeatureValues());
+  MPI_VERBOSE(2,"Sample: " << Derivation(s) << endl) 
 }
 
 float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len) {
@@ -25,20 +26,26 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
   
   ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
 
-  //cerr << "FEXP: " << feature_expectations << endl;
+  MPI_VERBOSE(1,"FEXP: " << feature_expectations << endl)
   
   //gradient computation
   ScoreComponentCollection grad;
   double exp_gain = 0;
   for (size_t i = 0; i < N(); ++i) {
     ScoreComponentCollection fv = m_featureVectors[i];
+    MPI_VERBOSE(2,"FV: " << fv)
     const float gain = m_gains[i];
     fv.MinusEquals(feature_expectations);
+    MPI_VERBOSE(2,"DIFF: " << fv)
     fv.MultiplyEquals(gain + getRegularisationGradientFactor(i));
+    MPI_VERBOSE(2,"GAIN: " << gain << " RF: " << getRegularisationGradientFactor(i) << " IF: " << importanceWeights[i] << endl)
     exp_gain += gain*importanceWeights[i];
     fv.MultiplyEquals(importanceWeights[i]);
+    MPI_VERBOSE(2,"WEIGHTED: " << fv << endl)
     grad.PlusEquals(fv);
+    MPI_VERBOSE(2,"grad: " << grad << endl)
   }
+  MPI_VERBOSE(1,"Gradient: " << grad << endl)
 
   cerr << "Gradient: " << grad << endl;
   cerr << "Exp gain without reg term :  " << exp_gain << endl;

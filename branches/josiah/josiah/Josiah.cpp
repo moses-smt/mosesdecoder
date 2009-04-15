@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GibblerExpectedLossTraining.h"
 #include "GibblerAnnealedExpectedLossTrainer.h"
 #include "GibblerMaxTransDecoder.h"
+#include "MpiDebug.h"
 #include "Model1.h"
 #include "Timer.h"
 #include "StaticData.h"
@@ -120,6 +121,8 @@ int main(int argc, char** argv) {
   string stopperConfig;
   unsigned int topn;
   int debug;
+  int mpidebug;
+  string mpidebugfile;
   int burning_its;
   int mbr_size;
   string inputfile;
@@ -174,6 +177,8 @@ int main(int argc, char** argv) {
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
         ("config,f",po::value<string>(&mosesini),"Moses ini file")
         ("verbosity,v", po::value<int>(&debug)->default_value(0), "Verbosity level")
+        ("mpi-debug", po::value<int>(&MpiDebug::verbosity)->default_value(0), "Verbosity level for debugging messages used in mpi.")
+        ("mpi-debug-file", po::value<string>(&mpidebugfile), "Debug file stem for use by mpi processes")
         ("random-seed,e", po::value<uint32_t>(&seed), "Random seed")
         ("timing,m", po::value(&do_timing)->zero_tokens()->default_value(false), "Display timing information.")
       ("iterations,s", po::value<string>(&stopperConfig)->default_value("5"), 
@@ -256,6 +261,10 @@ int main(int argc, char** argv) {
   if (mosesini.empty()) {
       cerr << "Error: No moses ini file specified" << endl;
       return 1;
+  }
+
+  if (mpidebugfile.length()) {
+      MpiDebug::init(mpidebugfile,rank);
   }
   cerr << "optimizer freq " << optimizerFreq << endl;
   assert(optimizerFreq != 0);
