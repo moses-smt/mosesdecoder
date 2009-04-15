@@ -12,6 +12,7 @@ josiah_SOURCES = Derivation.cpp \
         GibblerMaxDerivDecoder.cpp \
         GibblerMaxTransDecoder.cpp \
         GibbsOperator.cpp \
+    MpiDebug.cpp \
 	Model1.cpp \
 	TranslationDelta.cpp \
 	SentenceBleu.cpp \

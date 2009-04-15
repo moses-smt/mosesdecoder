@@ -3,7 +3,9 @@
 #include <map>
 #include <utility>
 
+#include "Derivation.h"
 #include "Gibbler.h"
+#include "MpiDebug.h"
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
 
