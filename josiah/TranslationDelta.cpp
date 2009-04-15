@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <boost/lambda/lambda.hpp>
 #include "TranslationDelta.h"
+#include "Derivation.h"
 #include "FeatureFunction.h"
 #include "Gibbler.h"
 
@@ -487,14 +488,13 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
   const LMList& languageModels = StaticData::Instance().GetAllLM();
   const Phrase& leftTgtPhrase = leftOption->GetTargetPhrase();
   const Phrase& rightTgtPhrase = rightOption->GetTargetPhrase();
-    
+ 
+  VERBOSE(2, "Sample : " << Josiah::Derivation(m_sample) << endl);
+  VERBOSE(2, *leftSegment << " " << *rightSegment << endl); 
+
   for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
     LanguageModel* lm = *i;
-    /*
-     map<LanguageModel*,LanguageModelCache>::iterator lmci = m_cache.find(lm);
-     if (lmci == m_cache.end()) {
-       m_cache.insert(pair<LanguageModel*,LanguageModelCache>(lm,LanguageModelCache(lm)));
-     }*/
+    
     size_t order = lm->GetNGramOrder();
     vector<const Word*> lmcontext;
     lmcontext.reserve(max(leftTgtPhrase.GetSize(), rightTgtPhrase.GetSize()) + 2*(order-1));
@@ -554,7 +554,7 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
       VERBOSE(2,*lmcontext[i] << " ");
     }
     VERBOSE(2, endl);
-      
+ 
     //score lm
     double lmscore = 0;
     vector<const Word*> ngram(order);
@@ -608,8 +608,9 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
     else {//how far back can we go
       i = gapSize;
     }
-    
+ 
     size_t leftOffset = gapSize + leftTgtPhrase.GetSize();
+
     for ( ; i > 0 ; --i) {
       if (i > leftOffset + leftSegment->GetStartPos()) {                      
         lmcontext.push_back(&(lm->GetSentenceStartArray()));
@@ -656,13 +657,20 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
     }
     VERBOSE(2, endl);
       
-    //useLeftOptionCacheLM = false;
     useRightOptionCacheLM = false;
-      
-    //size_t maxNgram = max(lmcontext.size() - (order -1), static_cast<size_t>(1)); 
+    
+    if ((int) lmcontext.size() - (int) (order -1) < 0 ) {//The left LM context completely subsumes the right LM Context, we're done
+      VERBOSE(2,"Language model score: " << lmscore << endl); 
+       m_scores.Assign(lm,lmscore);   
+       return;
+    }
+
     size_t maxNgram = lmcontext.size() - (order -1);
-    //assert (maxNgram > 0);
-      
+   
+    
+    /* cerr << "LM Context  :" << lmcontext.size() << endl; 
+     cerr << "order :" << order << endl; 
+     cerr << "Max ngram :" << maxNgram << endl; */
     for (size_t ngramstart = 0; ngramstart < maxNgram; ++ngramstart) {
       if (ngramstart >= leftStartPos && ngramstart + order - 1 < leftEndPos) {
          useLeftOptionCacheLM = true;
@@ -679,6 +687,7 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
           ngram[ngramCtr++] = lmcontext[j]; 
           //cerr << *lmcontext[j] << " ";
         }
+        //cerr << endl;
         lmscore += lm->GetValue(ngram);
         ++lmcalls;
         //cerr << lm->GetValue(ngram)/log(10) << endl;
