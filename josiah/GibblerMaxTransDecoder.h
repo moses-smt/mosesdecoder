@@ -1,10 +1,13 @@
 #pragma once
 
+#include <algorithm>
 #include <vector>
 #include <utility>
 #include <map>
 
 #include "Derivation.h"
+#include "GainFunction.h"
+#include "SentenceBleu.h"
 #include "Gibbler.h"
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
@@ -30,7 +33,7 @@ template <class M>
       void collectSample(const M&);
       /**argmax and max*/
       virtual pair<const M*,float> getMax() const;
-      /** n-best list*/
+      /** n-best list. Set n=0 to get all translations*/
       void getNbest(vector<pair<const M*, float> >& nbest, size_t n) const;
       /**Estimate of the probability distribution */
       void getDistribution(map<const M*,double>& p) const;
@@ -59,8 +62,10 @@ string ToString(const Translation& ws);
 
 class GibblerMaxTransDecoder : public virtual MaxCollector<Translation> {
  public:
-   GibblerMaxTransDecoder() : MaxCollector<Translation>("Trans") {}
+  GibblerMaxTransDecoder() : MaxCollector<Translation>("Trans") {}
   virtual void collect(Sample& sample);
+  /** Do mbr decoding */
+  pair<const Translation*,float> getMbr(size_t mbrSize) const;
   virtual ~GibblerMaxTransDecoder(){}
 
  private:
