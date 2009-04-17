@@ -157,6 +157,7 @@ private:
   std::vector<float> _sums_cache; // cache of inner sums
   std::vector<float> _tmp_sums; // resized once for each input, to avoid constant reallocation
   float _score_cache;
+  std::vector<Word> _sourceWords;
 };
 
 
@@ -207,6 +208,7 @@ private:
   std::map<int,float> _word_cache; // cached columns for target words
   std::map<const TranslationOption*,float> _option_cache; // cached scores for entire target phrases
   std::vector<int> _sentence_cache; // cached internal rep of source sentence
+  std::vector<Word> _sourceWords;
 };
 
 /**
