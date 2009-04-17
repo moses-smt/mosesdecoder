@@ -120,6 +120,14 @@ void moses_words_to_ids(const moses_factor_to_vocab_id& func, const C& origin,
 }
 
 void model1::clear_cache_on_change(const Sample& s){
+  if (_sourceWords == s.GetSourceWords()) {
+   //cerr << "Curr sample, not clearing" << endl;
+   return;
+  }
+  //cerr << "Clearing cache on change" << endl;
+  
+  _sourceWords = s.GetSourceWords();
+
   _sentence_cache.clear();
   _sums_cache.clear();
 
@@ -216,6 +224,10 @@ model1_inverse::model1_inverse(model1_table_handle table, vocab_mapper_handle fm
 
 
 void model1_inverse::clear_cache_on_change(const Sample& s){
+  if (_sourceWords == s.GetSourceWords())
+   return;
+  _sourceWords = s.GetSourceWords();
+
   _word_cache.clear();
   _option_cache.clear();
   _sentence_cache.clear();
