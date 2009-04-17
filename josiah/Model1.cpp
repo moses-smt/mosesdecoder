@@ -5,12 +5,15 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/bind.hpp>
+#include <boost/foreach.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include "File.h" 
 #include "Model1.h"
 #include "Gibbler.h"
+
+#define foreach BOOST_FOREACH 
 
 namespace Josiah {
 
@@ -112,34 +115,30 @@ const vocabulary& external_model1_table::e_vocab() const { return _e_vocab; }
 model1::model1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
     FeatureFunction("Model1"),_ptable(table), _pfmap(fmap), _pemap(emap) {}
 
-template <typename C>
-void moses_words_to_ids(const moses_factor_to_vocab_id& func, const C& origin, 
-  std::vector<int>::iterator dest){
+template <typename ForwardRange, typename BackInsertIterator>
+void _moses_words_to_ids(const moses_factor_to_vocab_id& func, 
+  const ForwardRange& origin, const BackInsertIterator& dest){
   
-  std::transform(origin.begin(), origin.end(), dest, func);
+  std::vector<int> unfiltered_ids;
+  std::transform(origin.begin(), origin.end(), 
+    std::back_inserter(unfiltered_ids), func);
+  std::remove_copy_if(unfiltered_ids.begin(), unfiltered_ids.end(),
+    dest, is_unknown());  
 }
 
 void model1::clear_cache_on_change(const Sample& s){
-  if (_sourceWords == s.GetSourceWords()) {
-   //cerr << "Curr sample, not clearing" << endl;
+  if (_source_words == s.GetSourceWords()) 
    return;
-  }
-  //cerr << "Clearing cache on change" << endl;
   
-  _sourceWords = s.GetSourceWords();
+  _source_words = s.GetSourceWords();
 
-  _sentence_cache.clear();
-  _sums_cache.clear();
-
-  _sentence_cache.resize(s.GetSourceWords().size());
-  moses_words_to_ids(*_pfmap, s.GetSourceWords(), _sentence_cache.begin());
+  _source_word_ids.clear();
+  _moses_words_to_ids(*_pfmap, s.GetSourceWords(), 
+    std::back_inserter(_source_word_ids));
 
   // _sums_cache operates only over known source words
-  typedef boost::filter_iterator<is_known, std::vector<int>::iterator> known_iter;
-  for (known_iter i(_sentence_cache.begin(), _sentence_cache.end());
-    i != known_iter(_sentence_cache.end(), _sentence_cache.end()); ++i)
-    _sums_cache.push_back(0.0);
-  _tmp_sums.resize(_sums_cache.size());
+  _sums.clear();
+  _sums.insert(_sums.end(), _source_word_ids.size(), 0.0);
 
   _ptable->gc();
 }
@@ -158,55 +157,34 @@ float model1::computeScore(const Sample& sample){
   // 1. clear/initialize any sentence-related caching
   clear_cache_on_change(sample);
 
-  // 2. compute sums in each column
-  _compute_inner_sums(_sentence_cache.begin(), _sentence_cache.end(),
-    boost::make_transform_iterator(sample.GetTargetWords().begin(), *_pemap),
-    boost::make_transform_iterator(sample.GetTargetWords().end(), *_pemap),
-    _sums_cache.begin());
+  // 2. feature computation
+  // convert target words to ids
+  std::vector<int> target_word_ids;
+  _moses_words_to_ids(*_pemap, sample.GetTargetWords(),  
+    std::back_inserter(target_word_ids));
 
-  // 3. compute product of sums in logspace
-  _score_cache = std::accumulate(log_iter(_sums_cache.begin()),  
-    log_iter(_sums_cache.end()), 0.0);
-  return _score_cache;
+  // compute sums in each column
+  _compute_inner_sums(_source_word_ids.begin(), _source_word_ids.end(),
+    target_word_ids.begin(), target_word_ids.end(),
+    _sums.begin());
+
+  // compute product of sums in logspace
+  return std::accumulate(log_iter(_sums.begin()),  
+    log_iter(_sums.end()), 0.0);
 }
 
 float model1::getSingleUpdateScore(const Sample& sample, 
   const TranslationOption* option, const WordsRange& targetSegment){
-
-  _compute_inner_sums(_sentence_cache.begin(), _sentence_cache.end(),
-    boost::make_transform_iterator(option->GetTargetPhrase().begin(), *_pemap),
-    boost::make_transform_iterator(option->GetTargetPhrase().end(), *_pemap),
-    _tmp_sums.begin());
-
-  // compute change in sums
-  std::transform(_sums_cache.begin(), _sums_cache.end(), _tmp_sums.begin(),
-    _tmp_sums.begin(), std::minus<float>());
-
-  return _score_cache - std::accumulate(log_iter(_tmp_sums.begin()),
-    log_iter(_tmp_sums.end()), 0.0);
+  assert(!"Do not call model1::getSingleUpdateScore");
+  return 0.0;
 }
 
 
 float model1::getPairedUpdateScore(const Sample& sample, 
                                      const TranslationOption* leftOption, const TranslationOption* rightOption, 
                                      const WordsRange& targetSegment, const Phrase& targetPhrase){
-  // populate a vector with the e words we are to remove
-  std::vector<int> e(std::distance(leftOption->GetTargetPhrase().begin(), leftOption->GetTargetPhrase().end())+
-                     std::distance(rightOption->GetTargetPhrase().begin(), rightOption->GetTargetPhrase().end()));
-    
-  moses_words_to_ids(*_pfmap, leftOption->GetTargetPhrase(), e.begin());
-  moses_words_to_ids(*_pfmap, rightOption->GetTargetPhrase(), 
-                       e.begin()+std::distance(leftOption->GetTargetPhrase().begin(), leftOption->GetTargetPhrase().end()));
-    
-  _compute_inner_sums(_sentence_cache.begin(), _sentence_cache.end(),
-                        e.begin(), e.end(), _tmp_sums.begin());
-    
-  // compute change in sums
-  std::transform(_sums_cache.begin(), _sums_cache.end(), _tmp_sums.begin(),
-                   _tmp_sums.begin(), std::minus<float>());
-    
-  return _score_cache - std::accumulate(log_iter(_tmp_sums.begin()),
-                                          log_iter(_tmp_sums.end()), 0.0);
+  assert(!"Do not call model1::getPairedUpdateScore");
+  return 0.0;
 }
   
 float model1::getFlipUpdateScore(const Sample& s, 
@@ -231,8 +209,8 @@ void model1_inverse::clear_cache_on_change(const Sample& s){
   _word_cache.clear();
   _option_cache.clear();
   _sentence_cache.clear();
-  _sentence_cache.resize(s.GetSourceWords().size());
-  moses_words_to_ids(*_pfmap, s.GetSourceWords(), _sentence_cache.begin());
+  _moses_words_to_ids(*_pfmap, s.GetSourceWords(), 
+    std::back_inserter(_sentence_cache));
   _ptable->gc();
 }
 
