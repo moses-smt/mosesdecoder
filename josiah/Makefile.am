@@ -14,6 +14,7 @@ josiah_SOURCES = Derivation.cpp \
         GibbsOperator.cpp \
     MpiDebug.cpp \
 	Model1.cpp \
+    Pos.cpp \
 	TranslationDelta.cpp \
 	SentenceBleu.cpp \
     FeatureFunction.cpp \
@@ -21,7 +22,7 @@ josiah_SOURCES = Derivation.cpp \
     QuenchingSchedule.cpp \
     GibblerAnnealedExpectedLossTrainer.cpp
 
-m1_SOURCES = Model1.cpp FeatureFunction.cpp m1.cpp
+m1_SOURCES = Model1.cpp Pos.cpp FeatureFunction.cpp m1.cpp
 
 AM_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -I$(top_srcdir)/moses/src $(BOOST_CPPFLAGS)
 
