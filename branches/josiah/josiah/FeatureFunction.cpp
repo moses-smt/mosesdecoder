@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <fstream>
 #include "FeatureFunction.h"
 #include "Model1.h"
+#include "Pos.h"
 
 namespace Josiah {
 
@@ -36,12 +37,14 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
   po::options_description desc;
   bool useApproxPef = false;
   bool useApproxPfe = false;
+  bool useVerbDiff = false;
   desc.add_options()
     ("model1.table", "Model 1 table")
     ("model1.pef_column", "Column containing p(e|f) score")
     ("model1.pfe_column", "Column containing p(f|e) score")
     ("model1.approx_pef",po::value<bool>(&useApproxPef)->default_value(false), "Approximate the p(e|f), and use importance sampling")
-    ("model1.approx_pfe",po::value<bool>(&useApproxPfe)->default_value(false), "Approximate the p(f|e), and use importance sampling");
+    ("model1.approx_pfe",po::value<bool>(&useApproxPfe)->default_value(false), "Approximate the p(f|e), and use importance sampling")
+      ("pos.verbdiff", po::value<bool>(&useVerbDiff)->default_value(false), "Verb difference feature");
   po::variables_map vm;
   po::store(po::parse_config_file(in,desc,true), vm);
   notify(vm);
@@ -72,6 +75,11 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
         fv.push_back(feature_handle(new model1_inverse(ptable, p_fvocab_mapper, p_evocab_mapper)));
       }
     }
+    
+  }
+  if (useVerbDiff) {
+      //FIXME: Should be configurable
+    fv.push_back(feature_handle(new VerbDifferenceFeature(1,1)));
   }
   in.close();
 }

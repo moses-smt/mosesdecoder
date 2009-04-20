@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreProducer.h"
 #include "TranslationOptionCollection.h"
 
+
 using namespace Moses;
 namespace po = boost::program_options;
 
