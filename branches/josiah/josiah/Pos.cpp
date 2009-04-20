@@ -67,8 +67,8 @@ float Josiah::PosFeatureFunction::computeScore(const Sample & sample) {
   TagSequence targetTags;
   getPosTags(sample.GetSourceWords(), m_sourceTags, m_sourceFactorType);
   getPosTags(sample.GetTargetWords(), targetTags, m_targetFactorType);
-  cerr << "Source " << m_sourceTags << endl;
-  cerr << "Target " << targetTags << endl;
+  //cerr << "Source " << m_sourceTags << endl;
+  //cerr << "Target " << targetTags << endl;
   return computeScore(m_sourceTags, targetTags);
 }
 
