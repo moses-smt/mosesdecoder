@@ -176,13 +176,11 @@ private:
   // main scoring logic for a f phrase, e phrase
   template <typename fwiter1, typename fwiter2>
   float score(const fwiter1& f_begin, const fwiter1& f_end, const fwiter2& e_begin, const fwiter2& e_end){ 
-    typedef boost::filter_iterator<is_known, fwiter1> known_iter1;
-    typedef boost::filter_iterator<is_known, fwiter2> known_iter2;
     float total =0.0;
-    for(known_iter2 i(e_begin, e_end); i!=known_iter2(e_end, e_end); ++i){ 
+    for(fwiter2 i=e_begin; i!=e_end; ++i){ 
       if (_word_cache.find(*i) == _word_cache.end()) {
         float sum = 0.0;
-        for(known_iter1 j(f_begin, f_end); j!=known_iter1(f_end, f_end); ++j){
+        for(fwiter1 j=f_begin; j!=f_end; ++j){
           sum += _ptable->score(*j, *i, 1);
         }
         _word_cache[*i] = log(std::max(sum,MODEL1_SUM_FLOOR));

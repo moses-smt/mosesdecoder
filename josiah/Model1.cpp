@@ -220,17 +220,22 @@ float model1_inverse::computeScore(const Sample& sample){
   clear_cache_on_change(sample);
 
   // 2. perform the actual computation
+  std::vector<int> target_words;
+  _moses_words_to_ids(*_pemap, sample.GetTargetWords(),
+    std::back_inserter(target_words));
   return score(_sentence_cache.begin(), _sentence_cache.end(), 
-    boost::make_transform_iterator(sample.GetTargetWords().begin(), *_pemap),
-    boost::make_transform_iterator(sample.GetTargetWords().end(), *_pemap));
+    target_words.begin(), target_words.end());
 }
 
 float model1_inverse::getSingleUpdateScore(const Sample& sample, 
   const TranslationOption* option, const WordsRange& targetSegment){
-  if (_option_cache.find(option) == _option_cache.end()) 
+  if (_option_cache.find(option) == _option_cache.end()) {
+    std::vector<int> target_words;
+    _moses_words_to_ids(*_pemap, option->GetTargetPhrase(),
+      std::back_inserter(target_words));
     _option_cache[option] = score(_sentence_cache.begin(), _sentence_cache.end(),
-    boost::make_transform_iterator(option->GetTargetPhrase().begin(), *_pemap),
-    boost::make_transform_iterator(option->GetTargetPhrase().end(), *_pemap));
+      target_words.begin(), target_words.end());
+  }    
   return _option_cache[option];    
 }
 
