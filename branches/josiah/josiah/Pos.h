@@ -59,9 +59,9 @@ class PosFeatureFunction : public  FeatureFunction {
                                        const std::pair<Moses::WordsRange,Moses::WordsRange>& targetSegments) const = 0;
     
     /** Tags currently in this segment*/
-    TagSequence getCurrentTargetTags(const Sample& s, const WordsRange& targetSegment) const;
+    void getCurrentTargetTags(const Sample& s, const WordsRange& targetSegment, TagSequence& tags) const;
     /** All tags */
-    TagSequence getCurrentTargetTags(const Sample& s) const;
+    void getCurrentTargetTags(const Sample& s, TagSequence& tags) const;
     
     /** Compute full score of a sample from scratch **/
     virtual float computeScore(const Moses::Sample& sample);

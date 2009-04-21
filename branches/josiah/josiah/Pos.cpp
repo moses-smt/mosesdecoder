@@ -100,20 +100,17 @@ float Josiah::PosFeatureFunction::getFlipUpdateScore( const Sample & s, const Tr
 }
 
 
-TagSequence Josiah::PosFeatureFunction::getCurrentTargetTags(const Sample & s, const WordsRange & targetSegment ) const 
+void Josiah::PosFeatureFunction::getCurrentTargetTags(const Sample & s, const WordsRange & targetSegment, TagSequence& tags)
+     const 
 {
   vector<Word> segmentWords;
   getSegmentWords(s.GetTargetWords(), targetSegment, segmentWords);
-  TagSequence tags;
   getPosTags(segmentWords,tags, m_targetFactorType);
-  return tags;
 }
 
-TagSequence Josiah::PosFeatureFunction::getCurrentTargetTags(const Sample & s ) const
+void Josiah::PosFeatureFunction::getCurrentTargetTags(const Sample & s, TagSequence& tags) const
 {
-  TagSequence tags;
   getPosTags(s.GetTargetWords(), tags, m_targetFactorType);
-  return tags;
 }
 
 bool Josiah::SourceVerbPredicate::operator ( )( const Factor * tag )
@@ -148,7 +145,8 @@ float Josiah::VerbDifferenceFeature::getSingleUpdateScore(const Moses::Sample& s
     const TagSequence& newTargetTags) const
 {
   TargetVerbPredicate tvp;
-  TagSequence oldTargetTags = getCurrentTargetTags(s, targetSegment);
+  TagSequence oldTargetTags;
+  getCurrentTargetTags(s, targetSegment, oldTargetTags);
   int oldTargetVerbs = (int)count_if(oldTargetTags.begin(), oldTargetTags.end(), tvp);
   int newTargetVerbs = (int)count_if(newTargetTags.begin(), newTargetTags.end(), tvp);
   //cerr << "SingleUpdate: new " << newTargetVerbs << " old " << oldTargetVerbs << endl;
