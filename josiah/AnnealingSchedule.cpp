@@ -18,9 +18,9 @@ float LinearAnnealingSchedule::GetTemperatureAtTime(int time) const {
   return temp;
 }
 
-ExponentialAnnealingSchedule::ExponentialAnnealingSchedule(float start_temp, float stop_temp, float ratio) :
-  AnnealingSchedule(0), m_startTemp(start_temp), m_stopTemp(stop_temp), m_ratio (ratio) , m_floorTemp(0.0f){
-    VERBOSE(2, "Created ExponentialAnnealingSchedule:\n  starting temp=" << start_temp << ", stopping temp=" << stop_temp << ", ratio: " << ratio << endl);
+ExponentialAnnealingSchedule::ExponentialAnnealingSchedule(float start_temp, float stop_temp, float floor_temp, float ratio) :
+  AnnealingSchedule(0), m_startTemp(start_temp), m_stopTemp(stop_temp), m_floorTemp(floor_temp) , m_ratio (ratio){
+    VERBOSE(2, "Created ExponentialAnnealingSchedule:\n  starting temp=" << start_temp << ", stopping temp=" << stop_temp << ", floor temp=" << m_floorTemp << ", ratio: " << ratio << endl);
 }
 
 float ExponentialAnnealingSchedule::GetTemperatureAtTime(int time) const {
