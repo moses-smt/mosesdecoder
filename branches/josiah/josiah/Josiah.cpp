@@ -165,6 +165,7 @@ int main(int argc, char** argv) {
   float stop_temp_quench;
   float start_temp_expda;
   float stop_temp_expda;  
+  float floor_temp_expda;  
   float quenching_ratio;
   float anneal_ratio_da;
   float gamma;
@@ -229,6 +230,7 @@ int main(int argc, char** argv) {
         ("quenching-ratio,Q", po::value<float>(&quenching_ratio)->default_value(2.0f), "Quenching ratio")
    ("initial-det-anneal-temp", po::value<float>(&start_temp_expda)->default_value(1000.0f), "Initial deterministic annealing entropy temperature")
    ("final-det-anneal-temp", po::value<float>(&stop_temp_expda)->default_value(0.001f), "Final deterministic annealing entropy temperature")
+   ("floor-temp", po::value<float>(&floor_temp_expda)->default_value(0.0f), "Floor temperature for det annealing")
   ("det-annealing-ratio,A", po::value<float>(&anneal_ratio_da)->default_value(0.5f), "Deterministc annealing ratio");
   
   po::options_description cmdline_options;
@@ -421,7 +423,7 @@ int main(int argc, char** argv) {
   auto_ptr<AnnealingSchedule> detAnnealingSchedule;
   if (expected_sbleu_da) {
     quenchingSchedule.reset(new ExponentialQuenchingSchedule(start_temp_quench, stop_temp_quench, quenching_ratio));
-    detAnnealingSchedule.reset(new ExponentialAnnealingSchedule(start_temp_expda, stop_temp_expda, anneal_ratio_da));
+    detAnnealingSchedule.reset(new ExponentialAnnealingSchedule(start_temp_expda, stop_temp_expda, floor_temp_expda, anneal_ratio_da));
   }
   
   int initialQuenchingIteration = -1;
