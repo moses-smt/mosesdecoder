@@ -1,57 +1,19 @@
 // $Id$
 
 #include <cstdio>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
 #include <cstring>
+#include <sstream>
+#include "extract.h"
+
+#ifdef WIN32
+// Include Visual Leak Detector
+//#include <vld.h>
+#endif
 
 using namespace std;
-
-#define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) { \
-                _IS.getline(_LINE, _SIZE, _DELIM); \
-                if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear(); \
-                if (_IS.gcount() == _SIZE-1) { \
-                  cerr << "Line too long! Buffer overflow. Delete lines >=" \
-                    << _SIZE << " chars or raise LINE_MAX_LENGTH in phrase-extract/extract.cpp" \
-                    << endl; \
-                    exit(1); \
-                } \
-              }
-#define LINE_MAX_LENGTH 60000
-
-class SentenceAlignment {
- public:
-  vector<string> english;
-  vector<string> foreign;
-  vector<int> alignedCountF;
-  vector< vector<int> > alignedToE;
-
-  int create( char[], char[], char[], int );
-  //  void clear() { delete(alignment); };
-};
-
-void extractBase( SentenceAlignment & );
-void extract( SentenceAlignment & );
-void addPhrase( SentenceAlignment &, int, int, int, int );
-vector<string> tokenize( char [] );
-bool isAligned ( SentenceAlignment &, int, int );
-
-ofstream extractFile;
-ofstream extractFileInv;
-ofstream extractFileOrientation;
-int maxPhraseLength;
-int phraseCount = 0;
-char* fileNameExtract;
-bool orientationFlag = false;
-bool onlyOutputSpanInfo = false;
-bool noFileLimit = false;
-bool zipFiles = false;
-bool properConditioning = false;
 
 int main(int argc, char* argv[]) 
 {
@@ -60,7 +22,8 @@ int main(int argc, char* argv[])
   time_t starttime = time(NULL);
 
   if (argc < 6) {
-    cerr << "syntax: phrase-extract en de align extract max-length [orientation | --OnlyOutputSpanInfo | --NoFileLimit | --ProperConditioning ]\n";
+    cerr << "syntax: phrase-extract en de align extract max-length [maxNonTerm nonTermFirstWord nonTermConsec]"
+					<< " [orientation | --OnlyOutputSpanInfo | --NoFileLimit | --ProperConditioning ]\n";
     exit(1);
   }
   char* &fileNameE = argv[1];
@@ -68,8 +31,18 @@ int main(int argc, char* argv[])
   char* &fileNameA = argv[3];
   fileNameExtract = argv[4];
   maxPhraseLength = atoi(argv[5]);
-  
-  for(int i=6;i<argc;i++) {
+
+	int optionInd = 6;
+	if (argc > 6 && (string(argv[6]).size() < 2 || string(argv[6]).substr(2) != "--"))
+	{ // hiero extraction
+		maxNonTerm = atoi(argv[6]);
+		nonTermFirstWord = atoi(argv[7]);
+		nonTermConsec = atoi(argv[8]);
+
+		optionInd = 9;
+	}
+
+  for(int i=optionInd;i<argc;i++) {
     if (strcmp(argv[i],"--OnlyOutputSpanInfo") == 0) {
       onlyOutputSpanInfo = true;
     }
@@ -167,70 +140,256 @@ void extractBase( SentenceAlignment &sentence ) {
 }
 
 void extract( SentenceAlignment &sentence ) {
-  int countE = sentence.english.size();
-  int countF = sentence.foreign.size();
+	int countE = sentence.english.size();
+	int countF = sentence.foreign.size();
 
-  // check alignments for english phrase startE...endE
-  for(int startE=0;startE<countE;startE++) {
-    for(int endE=startE;
-	(endE<countE && endE<startE+maxPhraseLength);
-	endE++) {
-      
-      int minF = 9999;
-      int maxF = -1;
-      vector< int > usedF = sentence.alignedCountF;
-      for(int ei=startE;ei<=endE;ei++) {
-	for(int i=0;i<sentence.alignedToE[ei].size();i++) {
-	  int fi = sentence.alignedToE[ei][i];
-	  // cout << "point (" << fi << ", " << ei << ")\n";
-	  if (fi<minF) { minF = fi; }
-	  if (fi>maxF) { maxF = fi; }
-	  usedF[ fi ]--;
+	// for creating hiero phrases
+	PhraseExist phraseExist(countF);
+
+	// check alignments for english phrase startE...endE
+	for(int startE=0;startE<countE;startE++) {
+		for(int endE=startE;
+				(endE<countE && endE<startE+maxPhraseLength);
+				endE++) {
+			
+			int minF = 9999;
+			int maxF = -1;
+			vector< int > usedF = sentence.alignedCountF;
+			for(int ei=startE;ei<=endE;ei++) {
+				for(int i=0;i<sentence.alignedToE[ei].size();i++) {
+					int fi = sentence.alignedToE[ei][i];
+					// cout << "point (" << fi << ", " << ei << ")\n";
+					if (fi<minF) { minF = fi; }
+					if (fi>maxF) { maxF = fi; }
+					usedF[ fi ]--;
+				}
+			}
+			
+			// cout << "f projected ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n"; 
+
+			if (maxF >= 0 && // aligned to any foreign words at all
+					maxF-minF < maxPhraseLength) { // foreign phrase within limits
+				
+				// check if foreign words are aligned to out of bound english words
+				bool out_of_bounds = false;
+				for(int fi=minF;fi<=maxF && !out_of_bounds;fi++)
+				if (usedF[fi]>0) {
+					// cout << "ouf of bounds: " << fi << "\n";
+					out_of_bounds = true;
+				}
+				
+				// cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n"; 
+				if (!out_of_bounds)
+				{
+					// start point of foreign phrase may retreat over unaligned
+					for(int startF=minF;
+							(startF>=0 &&
+								startF>maxF-maxPhraseLength && // within length limit
+								(startF==minF || sentence.alignedCountF[startF]==0)); // unaligned
+							startF--)
+					{
+						// end point of foreign phrase may advance over unaligned
+						for(int endF=maxF;
+								(endF<countF && endF<startF+maxPhraseLength && // within length limit
+								(endF==maxF || sentence.alignedCountF[endF]==0)); // unaligned
+								endF++) 
+						{
+							addPhrase(sentence,startE,endE,startF,endF, phraseExist);
+							phraseExist.Add(startE, endE, startF, endF);
+						}
+					}
+				} // if (!out_of_bounds)
+			}
+		}
 	}
-      }
-      
-      // cout << "f projected ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n"; 
 
-      if (maxF >= 0 && // aligned to any foreign words at all
-	  maxF-minF < maxPhraseLength) { // foreign phrase within limits
-	
-	// check if foreign words are aligned to out of bound english words
-	bool out_of_bounds = false;
-	for(int fi=minF;fi<=maxF && !out_of_bounds;fi++)
-	  if (usedF[fi]>0) {
-	    // cout << "ouf of bounds: " << fi << "\n";
-	    out_of_bounds = true;
-	  }
-	
-	// cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n"; 
-	if (!out_of_bounds)
-	  // start point of foreign phrase may retreat over unaligned
-	  for(int startF=minF;
-	      (startF>=0 &&
-	       startF>maxF-maxPhraseLength && // within length limit
-	       (startF==minF || sentence.alignedCountF[startF]==0)); // unaligned
-	      startF--)
-	    // end point of foreign phrase may advance over unaligned
-	    for(int endF=maxF;
-		(endF<countF && 
-		 endF<startF+maxPhraseLength && // within length limit
-		 (endF==maxF || sentence.alignedCountF[endF]==0)); // unaligned
-		endF++) 
-	      addPhrase(sentence,startE,endE,startF,endF);
-      }
-    }
-  }
+	// hiero phrase
+	for(int startF=0;startF<countF;startF++) 
+	{
+		for(int endF=startF; endF<countF; endF++) 
+		{
+			const HoleList &targetHoles = phraseExist.GetTargetHoles(startF, endF);
+			
+			HoleList::const_iterator iter;
+			for (iter = targetHoles.begin(); iter != targetHoles.end(); ++iter)
+			{
+				const Hole &targetHole = *iter;
+				HoleCollection holeColl;
+				int initStartF = nonTermFirstWord ? startF : startF + 1;
+
+				addHieroPhrase(sentence, targetHole.GetStart(), targetHole.GetEnd()
+											, startF, endF, phraseExist, holeColl, 0, initStartF);
+			}
+		}
+	}
 }
 
-void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF ) {
-  // foreign
-  // cout << "adding ( " << startF << "-" << endF << ", " << startE << "-" << endE << ")\n"; 
+void printSourceHieroPhrase(SentenceAlignment &sentence, int startE, int endE, int startF, int endF 
+							 , HoleCollection &holeColl, ostream &stream)
+{
+	HoleList::iterator iterHoleList = holeColl.GetSourceHoles().begin();
+	assert(iterHoleList != holeColl.GetSourceHoles().end());
 
-  if (onlyOutputSpanInfo) {
-    cout << startF << " " << endF << " " << startE << " " << endE << endl;
-    return;
-  } 
+	int outPos = 0;
+  for(int currPos = startF; currPos <= endF; currPos++) 
+	{
+		bool isHole = false;
+		if (iterHoleList != holeColl.GetSourceHoles().end())
+		{
+			const Hole &hole = *iterHoleList;
+			isHole = hole.GetStart() == currPos;
+		}
 
+		if (isHole)
+		{
+			stream << "[X] ";
+
+			Hole &hole = *iterHoleList;
+			currPos = hole.GetEnd();
+			hole.SetPos(outPos);
+
+			++iterHoleList;
+		}
+		else
+		{
+			stream << sentence.foreign[currPos] << " ";
+		}
+
+		outPos++;
+	}
+
+	assert(iterHoleList == holeColl.GetSourceHoles().end());
+}
+
+
+void printTargetHieroPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF 
+							 , HoleCollection &holeColl, ostream &stream)
+{
+	vector<Hole*>::iterator iterHoleList = holeColl.GetSortedTargetHoles().begin();
+	assert(iterHoleList != holeColl.GetSortedTargetHoles().end());
+
+	int outPos = 0;
+  for(int currPos = startE; currPos <= endE; currPos++) 
+	{
+		bool isHole = false;
+		if (iterHoleList != holeColl.GetSortedTargetHoles().end())
+		{
+			const Hole &hole = **iterHoleList;
+			isHole = hole.GetStart() == currPos;
+		}
+
+		if (isHole)
+		{
+			stream << "[X] ";
+
+			Hole &hole = **iterHoleList;
+			currPos = hole.GetEnd();
+			hole.SetPos(outPos);
+
+			++iterHoleList;
+		}
+		else
+		{
+			stream << sentence.english[currPos] << " ";
+		}
+
+		outPos++;
+	}
+
+	assert(iterHoleList == holeColl.GetSortedTargetHoles().end());
+}
+
+void printAlignment(HoleCollection &holeColl)
+{
+	HoleList::const_iterator iterSource, iterTarget;
+	iterTarget = holeColl.GetTargetHoles().begin();
+	for (iterSource = holeColl.GetSourceHoles().begin(); iterSource != holeColl.GetSourceHoles().end(); ++iterSource)
+	{
+		extractFile << iterSource->GetPos() << "-" << iterTarget->GetPos() << " ";
+		extractFileInv << iterTarget->GetPos() << "-" << iterSource->GetPos() << " ";
+		++iterTarget;
+	}
+
+	assert(iterTarget == holeColl.GetTargetHoles().end());
+}
+
+void printHieroPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF 
+							 , HoleCollection &holeColl)
+{
+	openFiles();
+	phraseCount++;
+
+	stringstream sourceStream, targetStream;
+
+	// source
+	printSourceHieroPhrase(sentence, startE, endE, startF, endF, holeColl, sourceStream);
+	
+	// target
+	holeColl.SortTargetHoles();
+	printTargetHieroPhrase(sentence, startE, endE, startF, endF, holeColl, targetStream);
+
+	// output to file
+	extractFile << sourceStream.str() << "||| " << targetStream.str() << "||| ";
+	extractFileInv << targetStream.str() << "||| " << sourceStream.str() << "||| ";
+
+	// alignment
+	printAlignment(holeColl);
+
+	extractFile << endl;
+	extractFileInv << endl;
+}
+
+void addHieroPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF 
+							 , PhraseExist &phraseExist, const HoleCollection &holeColl, int numHoles, int initStartF)
+{
+	if (numHoles >= maxNonTerm)
+		return;
+
+	for (int startHoleF = initStartF; startHoleF <= endF; ++startHoleF)
+	{
+		for (int endHoleF = startHoleF; endHoleF <= endF; ++endHoleF)
+		{
+			// except the whole span
+			if (startHoleF == startF && endHoleF == endF)
+				continue;
+
+			// does a phrase cover this source span. if it does, then there should be corresponding target span
+			// a list of them actually, just in case phrase heuristic is slack
+			const HoleList &targetHoles = phraseExist.GetTargetHoles(startHoleF, endHoleF);
+
+			// search for hole
+			HoleList::const_iterator iterTargetHoles;
+			for (iterTargetHoles = targetHoles.begin(); iterTargetHoles != targetHoles.end(); ++iterTargetHoles)
+			{
+				const Hole &targetHole = *iterTargetHoles;
+
+				// hole must be subphrase of the phrase
+				if (startE > targetHole.GetStart() || endE <  targetHole.GetEnd())
+					continue;
+
+				// make sure target side doesn't overlap with another hole
+				if (holeColl.OverlapTarget(targetHole))
+					continue;
+
+				HoleCollection copyHoleColl(holeColl);
+				copyHoleColl.Add(targetHole.GetStart(), targetHole.GetEnd(), startHoleF, endHoleF);
+
+				// print out this 1
+				printHieroPhrase(sentence, startE, endE, startF, endF, copyHoleColl);
+
+				// recursively search for next hole
+				int nextInitStartF = nonTermConsec ? endHoleF + 1 : endHoleF + 2;
+				addHieroPhrase(sentence, startE, endE, startF, endF 
+											, phraseExist, copyHoleColl, numHoles + 1, nextInitStartF);
+
+				// loop continue to extend search for another hole in same phrase
+			}
+		}
+	}
+}
+
+void openFiles()
+{
   // new file every 1e7 phrases
   if (phraseCount % 10000000 == 0 // new file every 1e7 phrases
       && (!noFileLimit || phraseCount == 0)) { // only new partial file, if file limit
@@ -259,7 +418,19 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
     if (orientationFlag) 
       extractFileOrientation.open(fileNameExtractOrientationPart.c_str());
   }
+}
 
+void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF 
+							 , PhraseExist &phraseExist) 
+{
+  // foreign
+  // cout << "adding ( " << startF << "-" << endF << ", " << startE << "-" << endE << ")\n"; 
+
+  if (onlyOutputSpanInfo) {
+    cout << startF << " " << endF << " " << startE << " " << endE << endl;
+    return;
+  } 
+	openFiles();
 
   phraseCount++;
 
