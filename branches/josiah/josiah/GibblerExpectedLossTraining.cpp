@@ -14,7 +14,9 @@ void ExpectedLossCollector::collect(Sample& s) {
   const float gain = g.ComputeGain(trans);
   m_lengths.push_back(trans.size());
   VERBOSE(2, gain << "\tFeatures=" << s.GetFeatureValues() << endl);
+  //VERBOSE(0, "Collected : Target " << s << ", gain " << gain << "\tFeatures=" << s.GetFeatureValues() << endl);
   m_gains.push_back(gain);
+//  m_samples.push_back(Derivation(s));
   m_featureVectors.push_back(s.GetFeatureValues());
   MPI_VERBOSE(2,"Sample: " << Derivation(s) << endl) 
 }
@@ -40,6 +42,7 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
     fv.MultiplyEquals(gain + getRegularisationGradientFactor(i));
     MPI_VERBOSE(2,"GAIN: " << gain << " RF: " << getRegularisationGradientFactor(i) << " IF: " << importanceWeights[i] << endl)
     exp_gain += gain*importanceWeights[i];
+    //VERBOSE(0, "Sample=" << m_samples[i] << ", gain: " << gain << ", imp weights: " << importanceWeights[i] << endl);
     fv.MultiplyEquals(importanceWeights[i]);
     MPI_VERBOSE(2,"WEIGHTED: " << fv << endl)
     grad.PlusEquals(fv);

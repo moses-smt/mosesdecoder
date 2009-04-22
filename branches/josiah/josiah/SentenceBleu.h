@@ -3,18 +3,19 @@
 #include <map>
 #include <vector>
 #include <valarray>
-#include "GibblerExpectedLossTraining.h"
+//#include "GibblerExpectedLossTraining.h"
 #include "GainFunction.h"
+#include "Factor.h"
 
 namespace Josiah {
 
 class SentenceBLEU : public GainFunction {
  public:
   SentenceBLEU(int n, const std::vector<std::string>& refs);
-  SentenceBLEU(int n, const vector<const Factor*> & ref);
+  SentenceBLEU(int n, const std::vector<const Moses::Factor*> & ref);
     
   int GetType() const { return 1;}
-  float ComputeGain(const std::vector<const Factor*>& hyp) const;
+  float ComputeGain(const std::vector<const Moses::Factor*>& hyp) const;
   float ComputeGain(const GainFunction& hyp) const;
   float GetAverageReferenceLength() const {
     float t = 0;
@@ -30,7 +31,7 @@ class SentenceBLEU : public GainFunction {
   
  private:
   struct NGramCompare {
-    int operator() (const vector<const Factor*>& a, const vector<const Factor*>& b) {
+    int operator() (const std::vector<const Moses::Factor*>& a, const std::vector<const Moses::Factor*>& b) {
       const size_t as = a.size();
       const size_t bs = b.size();
       const size_t s = (as < bs ? as : bs);
@@ -42,15 +43,15 @@ class SentenceBLEU : public GainFunction {
       return as < bs;
     }
   };
-  typedef std::map<std::vector<const Factor*>, std::pair<int,int>, NGramCompare> NGramCountMap;
+  typedef std::map<std::vector<const Moses::Factor*>, std::pair<int,int>, NGramCompare> NGramCountMap;
 
-  void CountRef(const vector<const Factor*>& ref, NGramCountMap&) const;
+  void CountRef(const std::vector<const Moses::Factor*>& ref, NGramCountMap&) const;
 
   inline int GetClosestLength(int hl) const {
     if (lengths_.size() == 1) return lengths_[0];
     int bestd = 2000000;
     int bl = -1;
-    for (vector<int>::const_iterator ci = lengths_.begin(); ci != lengths_.end(); ++ci) {
+    for (std::vector<int>::const_iterator ci = lengths_.begin(); ci != lengths_.end(); ++ci) {
       int cl = *ci;
       if (abs(cl - hl) < bestd) {
         bestd = abs(cl - hl);
@@ -61,7 +62,7 @@ class SentenceBLEU : public GainFunction {
   }
 
   float CalcScore(const NGramCountMap & refNgrams, const NGramCountMap & hypNgrams, int hypLen) const ;
-  float CalcBleu(const valarray<int> & hyp, const valarray<int> & correct, float ref_len, float hyp_len) const;
+  float CalcBleu(const std::valarray<int> & hyp, const std::valarray<int> & correct, float ref_len, float hyp_len) const;
   
   const NGramCountMap& GetNgrams() const {
     return ngrams_;

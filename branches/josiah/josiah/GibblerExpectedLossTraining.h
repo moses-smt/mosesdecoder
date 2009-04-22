@@ -14,6 +14,7 @@ using namespace Moses;
 namespace Josiah {
 
 class GainFunction;
+//class Derivation;
 
 class ExpectedLossCollector : public SampleCollector {
   public:
@@ -34,6 +35,7 @@ class ExpectedLossCollector : public SampleCollector {
     std::vector<ScoreComponentCollection> m_featureVectors;
     std::vector<float> m_gains;
     std::vector<size_t> m_lengths;
+//    std::vector<Derivation> m_samples;
     const GainFunction& g;
   
  
