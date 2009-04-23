@@ -102,7 +102,7 @@ class FeatureFunction {
 
 typedef boost::shared_ptr<FeatureFunction> feature_handle;
 typedef std::vector<feature_handle> feature_vector;
-void configure_features_from_file(const std::string& filename, feature_vector& fv); 
+
 
 
 
