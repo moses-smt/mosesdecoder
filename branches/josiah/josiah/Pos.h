@@ -58,8 +58,7 @@ class PosFeatureFunction : public  FeatureFunction {
     virtual float getFlipUpdateScore(const std::pair<Moses::WordsRange,Moses::WordsRange>& sourceSegments,
                                        const std::pair<Moses::WordsRange,Moses::WordsRange>& targetSegments) const = 0;
     
-    /** Tags currently in this segment*/
-    void getCurrentTargetTags(const WordsRange& targetSegment, TagSequence& tags) const;
+
     /** All tags */
     void getCurrentTargetTags(TagSequence& tags) const;
     

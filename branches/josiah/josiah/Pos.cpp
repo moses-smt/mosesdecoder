@@ -100,13 +100,7 @@ float Josiah::PosFeatureFunction::getFlipUpdateScore(const TranslationOption * l
 }
 
 
-void Josiah::PosFeatureFunction::getCurrentTargetTags(const WordsRange & targetSegment, TagSequence& tags)
-     const 
-{
-  vector<Word> segmentWords;
-  getSegmentWords(m_sample->GetTargetWords(), targetSegment, segmentWords);
-  getPosTags(segmentWords,tags, m_targetFactorType);
-}
+
 
 void Josiah::PosFeatureFunction::getCurrentTargetTags(TagSequence& tags) const
 {
@@ -145,12 +139,9 @@ float Josiah::VerbDifferenceFeature::getSingleUpdateScore(
     const TagSequence& newTargetTags) const
 {
   TargetVerbPredicate tvp;
-  TagSequence oldTargetTags;
-  getCurrentTargetTags(targetSegment, oldTargetTags);
-  int oldTargetVerbs = (int)count_if(oldTargetTags.begin(), oldTargetTags.end(), tvp);
-  int newTargetVerbs = (int)count_if(newTargetTags.begin(), newTargetTags.end(), tvp);
+  int targetVerbs = (int)count_if(newTargetTags.begin(), newTargetTags.end(), tvp);
   //cerr << "SingleUpdate: new " << newTargetVerbs << " old " << oldTargetVerbs << endl;
-  return newTargetVerbs - oldTargetVerbs;
+  return targetVerbs;
 }
 
 }
