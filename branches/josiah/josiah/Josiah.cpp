@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "AnnealingSchedule.h"
 #include "QuenchingSchedule.h"
 #include "Decoder.h"
+#include "Dependency.h"
 #include "Derivation.h"
 #include "Gibbler.h"
 #include "InputSource.h"
@@ -46,6 +47,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GibblerMaxTransDecoder.h"
 #include "MpiDebug.h"
 #include "Model1.h"
+#include "Pos.h"
 #include "Timer.h"
 #include "StaticData.h"
 #include "Optimizer.h"
@@ -103,6 +105,71 @@ class GibbsTimer {
     Timer m_timer;
     bool m_doTiming;
 } timer;
+
+void configure_features_from_file(const std::string& filename, feature_vector& fv){
+  std::cerr << "Reading extra features from " << filename << std::endl;
+  std::ifstream in(filename.c_str());
+  // todo: instead of having this function know about all required options of
+  // each feature, have features populate options / read variable maps /
+  // populate feature_vector using static functions.
+  po::options_description desc;
+  bool useApproxPef = false;
+  bool useApproxPfe = false;
+  bool useVerbDiff = false;
+  bool useCherry = false;
+  size_t dependencyFactor;
+  desc.add_options()
+      ("model1.table", "Model 1 table")
+      ("model1.pef_column", "Column containing p(e|f) score")
+      ("model1.pfe_column", "Column containing p(f|e) score")
+      ("model1.approx_pef",po::value<bool>(&useApproxPef)->default_value(false), "Approximate the p(e|f), and use importance sampling")
+      ("model1.approx_pfe",po::value<bool>(&useApproxPfe)->default_value(false), "Approximate the p(f|e), and use importance sampling")
+      ("pos.verbdiff", po::value<bool>(&useVerbDiff)->default_value(false), "Verb difference feature")
+      ("dependency.cherry", po::value<bool>(&useCherry)->default_value(false), "Use Colin Cherry's syntactic cohesiveness feature")
+      ("dependency.factor", po::value<size_t>(&dependencyFactor)->default_value(1), "Factor representing the dependency tree");
+  po::variables_map vm;
+  po::store(po::parse_config_file(in,desc,true), vm);
+  notify(vm);
+  if (!vm["model1.pef_column"].empty() || !vm["model1.pfe_column"].empty()){
+    boost::shared_ptr<external_model1_table> ptable;
+    boost::shared_ptr<moses_factor_to_vocab_id> p_evocab_mapper;
+    boost::shared_ptr<moses_factor_to_vocab_id> p_fvocab_mapper;
+    if (vm["model1.table"].empty())
+      throw std::runtime_error("Requesting Model 1 features, but no Model 1 table given");
+    else {
+      ptable.reset(new external_model1_table(vm["model1.table"].as<std::string>()));
+      p_fvocab_mapper.reset(new moses_factor_to_vocab_id(ptable->f_vocab(), Moses::Input, 0, Moses::FactorCollection::Instance())); 
+      p_evocab_mapper.reset(new moses_factor_to_vocab_id(ptable->e_vocab(), Moses::Output, 0, Moses::FactorCollection::Instance())); 
+    }
+    if (!vm["model1.pef_column"].empty()) {
+      if (useApproxPef) {
+        cerr << "Using approximation for model1" << endl;
+        fv.push_back(feature_handle(new ApproximateModel1(ptable, p_fvocab_mapper, p_evocab_mapper)));
+      } else {
+        fv.push_back(feature_handle(new model1(ptable, p_fvocab_mapper, p_evocab_mapper)));
+      }
+    }
+    if (!vm["model1.pfe_column"].empty()) {
+      if (useApproxPfe) {
+        cerr << "Using approximation for model1 inverse" << endl;
+        fv.push_back(feature_handle(new ApproximateModel1Inverse(ptable, p_fvocab_mapper, p_evocab_mapper)));
+      } else {
+        fv.push_back(feature_handle(new model1_inverse(ptable, p_fvocab_mapper, p_evocab_mapper)));
+      }
+    }
+    
+  }
+  if (useVerbDiff) {
+      //FIXME: Should be configurable
+    fv.push_back(feature_handle(new VerbDifferenceFeature(1,1)));
+  }
+  if (useCherry) {
+    fv.push_back(feature_handle(new CherrySyntacticCohesionFeature(dependencyFactor)));
+  }
+  in.close();
+}
+
+
 
 
 /**

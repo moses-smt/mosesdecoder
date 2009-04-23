@@ -52,6 +52,11 @@ class CherrySyntacticCohesionFeature : public FeatureFunction {
     virtual void init(const Sample& sample) {
       m_sourceTree.reset(new DependencyTree(sample.GetSourceWords(), m_parentFactor));
       cerr << "New Tree: " << *(m_sourceTree.get()) << endl;
+      for (size_t parent = 0; parent < m_sourceTree->getLength(); ++parent) {
+        for (size_t child = 0; child < m_sourceTree->getLength(); ++child) {
+          cerr << "parent " << parent << " child " << child << " covers " << m_sourceTree->covers(parent,child) << endl;
+        }
+      }
     }
     /** Compute full score of a sample from scratch **/
     virtual float computeScore();
