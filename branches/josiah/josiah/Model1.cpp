@@ -272,4 +272,8 @@ float ApproximateModel1Inverse::getImportanceWeight() {
   return model1_inverse::computeScore();
 }
 
+  
+  
+  
+  
 } // namespace Josiah

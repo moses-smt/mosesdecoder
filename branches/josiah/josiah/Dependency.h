@@ -38,6 +38,7 @@ class DependencyTree {
     bool covers(size_t parent, size_t child) const;
     /** length of sentence */
     size_t getLength() const {return m_parents.size();}
+    const set<size_t> & getChildren(size_t parent) const { return m_spans[parent];} 
     
   private:
     std::vector<int> m_parents;
@@ -51,10 +52,11 @@ class CherrySyntacticCohesionFeature : public FeatureFunction {
     /** Initialise with new sample */
     virtual void init(const Sample& sample) {
       m_sourceTree.reset(new DependencyTree(sample.GetSourceWords(), m_parentFactor));
-      cerr << "New Tree: " << *(m_sourceTree.get()) << endl;
+      m_sample = &sample;
+      //cerr << "New Tree: " << *(m_sourceTree.get()) << endl;
       for (size_t parent = 0; parent < m_sourceTree->getLength(); ++parent) {
         for (size_t child = 0; child < m_sourceTree->getLength(); ++child) {
-          cerr << "parent " << parent << " child " << child << " covers " << m_sourceTree->covers(parent,child) << endl;
+          //cerr << "parent " << parent << " child " << child << " covers " << m_sourceTree->covers(parent,child) << endl;
         }
       }
     }
@@ -76,7 +78,10 @@ class CherrySyntacticCohesionFeature : public FeatureFunction {
   private:
     auto_ptr<DependencyTree> m_sourceTree;
     Moses::FactorType m_parentFactor; //which factor is the parent index?
-    
+    const Sample* m_sample;
+    float getInterruptionCount(const TranslationOption* option, const WordsRange& targetSegment, size_t f);
+    bool  notAllWordsCoveredByTree(const TranslationOption* option, size_t parent);
+    bool  isInterrupting(Hypothesis* hyp, const WordsRange& targetSegment);
 };
 
 }
