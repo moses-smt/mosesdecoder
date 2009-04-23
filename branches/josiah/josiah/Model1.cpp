@@ -113,7 +113,7 @@ const vocabulary& external_model1_table::f_vocab() const { return _f_vocab; }
 const vocabulary& external_model1_table::e_vocab() const { return _e_vocab; }
 
 model1::model1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
-    FeatureFunction("Model1"),_ptable(table), _pfmap(fmap), _pemap(emap) {}
+    FeatureFunction("Model1"),_ptable(table), _pfmap(fmap), _pemap(emap), _sample(NULL) {}
 
 template <typename ForwardRange, typename BackInsertIterator>
 void _moses_words_to_ids(const moses_factor_to_vocab_id& func, 
@@ -126,9 +126,12 @@ void _moses_words_to_ids(const moses_factor_to_vocab_id& func,
     dest, is_unknown());  
 }
 
-void model1::clear_cache_on_change(const Sample& s){
-  if (_source_words == s.GetSourceWords()) 
-   return;
+void model1::init(const Sample& sample) {
+  _sample = &sample;
+  clear_cache(sample);
+}
+
+void model1::clear_cache(const Sample& s){
   
   _source_words = s.GetSourceWords();
 
@@ -152,15 +155,11 @@ struct to_log{
 };
 typedef boost::transform_iterator<to_log,std::vector<float>::iterator> log_iter;
 
-float model1::computeScore(const Sample& sample){
-  // this function really serves multiple purposes --
-  // 1. clear/initialize any sentence-related caching
-  clear_cache_on_change(sample);
-
+float model1::computeScore(){
   // 2. feature computation
   // convert target words to ids
   std::vector<int> target_word_ids;
-  _moses_words_to_ids(*_pemap, sample.GetTargetWords(),  
+  _moses_words_to_ids(*_pemap, _sample->GetTargetWords(),  
     std::back_inserter(target_word_ids));
 
   // compute sums in each column
@@ -173,21 +172,21 @@ float model1::computeScore(const Sample& sample){
     log_iter(_sums.end()), 0.0);
 }
 
-float model1::getSingleUpdateScore(const Sample& sample, 
+float model1::getSingleUpdateScore(
   const TranslationOption* option, const WordsRange& targetSegment){
   assert(!"Do not call model1::getSingleUpdateScore");
   return 0.0;
 }
 
 
-float model1::getPairedUpdateScore(const Sample& sample, 
+float model1::getPairedUpdateScore( 
                                      const TranslationOption* leftOption, const TranslationOption* rightOption, 
                                      const WordsRange& targetSegment, const Phrase& targetPhrase){
   assert(!"Do not call model1::getPairedUpdateScore");
   return 0.0;
 }
   
-float model1::getFlipUpdateScore(const Sample& s, 
+float model1::getFlipUpdateScore( 
   const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
   const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
   const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment){
@@ -198,12 +197,14 @@ float model1::getFlipUpdateScore(const Sample& s,
 
 model1_inverse::model1_inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
     FeatureFunction("Model1Inverse"),
- _ptable(table), _pfmap(fmap), _pemap(emap) {}
+ _ptable(table), _pfmap(fmap), _pemap(emap), _sample(NULL) {}
 
-
-void model1_inverse::clear_cache_on_change(const Sample& s){
-  if (_sourceWords == s.GetSourceWords())
-   return;
+ void model1_inverse::init(const Sample& sample) {
+   _sample = &sample;
+   clear_cache(sample);
+ }
+ 
+void model1_inverse::clear_cache(const Sample& s){
   _sourceWords = s.GetSourceWords();
 
   _word_cache.clear();
@@ -214,20 +215,18 @@ void model1_inverse::clear_cache_on_change(const Sample& s){
   _ptable->gc();
 }
 
-float model1_inverse::computeScore(const Sample& sample){
-  // this function really serves two purposes --
-  // 1. clear/initialize any sentence-related caching
-  clear_cache_on_change(sample);
+float model1_inverse::computeScore(){
+  
 
   // 2. perform the actual computation
   std::vector<int> target_words;
-  _moses_words_to_ids(*_pemap, sample.GetTargetWords(),
+  _moses_words_to_ids(*_pemap, _sample->GetTargetWords(),
     std::back_inserter(target_words));
   return score(_sentence_cache.begin(), _sentence_cache.end(), 
     target_words.begin(), target_words.end());
 }
 
-float model1_inverse::getSingleUpdateScore(const Sample& sample, 
+float model1_inverse::getSingleUpdateScore( 
   const TranslationOption* option, const WordsRange& targetSegment){
   if (_option_cache.find(option) == _option_cache.end()) {
     std::vector<int> target_words;
@@ -240,16 +239,16 @@ float model1_inverse::getSingleUpdateScore(const Sample& sample,
 }
 
 
-float model1_inverse::getPairedUpdateScore(const Sample& sample, 
+float model1_inverse::getPairedUpdateScore(
                                              const TranslationOption* leftOption, const TranslationOption* rightOption, 
                                              const WordsRange& targetSegment,   const Phrase& targetPhrase){
     
-  return getSingleUpdateScore(sample, leftOption, targetSegment) +
-  getSingleUpdateScore(sample, rightOption, targetSegment);
+  return getSingleUpdateScore(leftOption, targetSegment) +
+  getSingleUpdateScore(rightOption, targetSegment);
 }  
   
   
-float model1_inverse::getFlipUpdateScore(const Sample& s, 
+float model1_inverse::getFlipUpdateScore(
   const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
   const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
   const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment){
@@ -260,17 +259,17 @@ float model1_inverse::getFlipUpdateScore(const Sample& s,
 ApproximateModel1::ApproximateModel1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
     model1(table,fmap,emap){}
     
-float ApproximateModel1::getImportanceWeight(const Sample& sample) {
+float ApproximateModel1::getImportanceWeight() {
   //since the "approximation" is to return 0, this is just the true score
-  return model1::computeScore(sample);
+  return model1::computeScore();
 }
 
 ApproximateModel1Inverse::ApproximateModel1Inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
     model1_inverse(table,fmap,emap){}
     
-float ApproximateModel1Inverse::getImportanceWeight(const Sample& sample) {
+float ApproximateModel1Inverse::getImportanceWeight() {
   //since the "approximation" is to return 0, this is just the true score
-  return model1_inverse::computeScore(sample);
+  return model1_inverse::computeScore();
 }
 
 } // namespace Josiah

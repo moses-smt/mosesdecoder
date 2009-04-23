@@ -51,28 +51,30 @@ class PosFeatureFunction : public  FeatureFunction {
     /** Full score of sample*/
     virtual float computeScore(const TagSequence& sourceTags, const TagSequence& targetTags) const = 0;
     /**Change in score when updating one segment*/
-    virtual float getSingleUpdateScore(const Moses::Sample& s,
+    virtual float getSingleUpdateScore(
                                        const Moses::WordsRange& sourceSegment, const Moses::WordsRange& targetSegment, 
                                        const TagSequence& newTargetTags) const = 0;
     /**Change in score when flipping two segments*/
-    virtual float getFlipUpdateScore( const Moses::Sample& s, const std::pair<Moses::WordsRange,Moses::WordsRange>& sourceSegments,
+    virtual float getFlipUpdateScore(const std::pair<Moses::WordsRange,Moses::WordsRange>& sourceSegments,
                                        const std::pair<Moses::WordsRange,Moses::WordsRange>& targetSegments) const = 0;
     
     /** Tags currently in this segment*/
-    void getCurrentTargetTags(const Sample& s, const WordsRange& targetSegment, TagSequence& tags) const;
+    void getCurrentTargetTags(const WordsRange& targetSegment, TagSequence& tags) const;
     /** All tags */
-    void getCurrentTargetTags(const Sample& s, TagSequence& tags) const;
+    void getCurrentTargetTags(TagSequence& tags) const;
     
+    /** Initialise */
+    virtual void init(const Moses::Sample& sample) {m_sample = &sample;}
     /** Compute full score of a sample from scratch **/
-    virtual float computeScore(const Moses::Sample& sample);
+    virtual float computeScore();
     /** Change in score when updating one segment */
-    virtual float getSingleUpdateScore(const Moses::Sample& sample, const Moses::TranslationOption* option, const Moses::WordsRange& targetSegment);
+    virtual float getSingleUpdateScore(const Moses::TranslationOption* option, const Moses::WordsRange& targetSegment);
     /** Change in score when updating two segments **/
-    virtual float getPairedUpdateScore(const Moses::Sample& s, const TranslationOption* leftOption,
+    virtual float getPairedUpdateScore(const TranslationOption* leftOption,
                                        const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
     
     /** Change in score when flipping */
-    virtual float getFlipUpdateScore(const Moses::Sample& s, const Moses::TranslationOption* leftTgtOption, 
+    virtual float getFlipUpdateScore(const Moses::TranslationOption* leftTgtOption, 
                                      const Moses::TranslationOption* rightTgtOption, 
                                      const Moses::Hypothesis* leftTgtHyp, const Moses::Hypothesis* rightTgtHyp, 
                                      const Moses::WordsRange& leftTargetSegment, const Moses::WordsRange& rightTargetSegment);
@@ -85,6 +87,7 @@ class PosFeatureFunction : public  FeatureFunction {
     TagSequence m_sourceTags;
     FactorType m_sourceFactorType;
     FactorType m_targetFactorType;
+    const Moses::Sample* m_sample;
 };
 
 
@@ -108,10 +111,10 @@ class VerbDifferenceFeature: public  PosFeatureFunction {
 
   
     virtual float computeScore(const TagSequence& sourceTags, const TagSequence& targetTags) const;
-    virtual float getSingleUpdateScore (const Moses::Sample& s, 
+    virtual float getSingleUpdateScore ( 
           const Moses::WordsRange& sourceSegment, const Moses::WordsRange& targetSegment, 
           const TagSequence& newTargetTags) const;
-    virtual float getFlipUpdateScore(const Moses::Sample& s, const std::pair<Moses::WordsRange,Moses::WordsRange>& sourceSegments,
+    virtual float getFlipUpdateScore(const std::pair<Moses::WordsRange,Moses::WordsRange>& sourceSegments,
                                      const std::pair<Moses::WordsRange,Moses::WordsRange>& targetSegments) const
           {return 0;} //flipping can't change the verb difference
     

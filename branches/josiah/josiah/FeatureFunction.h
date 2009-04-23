@@ -71,19 +71,21 @@ class FeatureFunction {
   public:
     FeatureFunction(const std::string& name) :
       m_scoreProducer(name) {}
+    /** Initialise with new sample */
+    virtual void init(const Sample& sample) = 0;
     /** Compute full score of a sample from scratch **/
-    virtual float computeScore(const Sample& sample) = 0;
+    virtual float computeScore() = 0;
     /** Compute the log of the importance weight. This is log(true score) - log (importance score). The computeScore()
      *  method returns the importance score, as do all the getXXScore() methods. **/
-    virtual float getImportanceWeight(const Sample& sample) {return 0;}
-    /** Change in score when updating one segment */
-    virtual float getSingleUpdateScore(const Sample& sample, const TranslationOption* option, const WordsRange& targetSegment) = 0;
-    /** Change in score when updating two segments **/
-    virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
+    virtual float getImportanceWeight() {return 0;}
+    /** Score due to one segment */
+    virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) = 0;
+    /** Score due to two segments **/
+    virtual float getPairedUpdateScore(const TranslationOption* leftOption,
                                const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) = 0;
     
-    /** Change in score when flipping */
-    virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
+    /** Score due to flip */
+    virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                              const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                              const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) = 0;
     const Moses::ScoreProducer& getScoreProducer() const {return m_scoreProducer;}

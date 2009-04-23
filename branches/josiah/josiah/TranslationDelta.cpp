@@ -182,7 +182,7 @@ void TranslationDelta::initScoresSingleUpdate(const Sample& s, const Translation
   // extra features
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
-    float feature_score = (*i)->getSingleUpdateScore(s, option, targetSegment);
+    float feature_score = (*i)->getSingleUpdateScore(option, targetSegment);
     m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
   }
 
@@ -212,7 +212,7 @@ void TranslationDelta::initScoresPairedUpdate(const Sample& s, const Translation
   // extra features
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
-    float feature_score = (*i)->getPairedUpdateScore(s, leftOption, rightOption, targetSegment, targetPhrase);
+    float feature_score = (*i)->getPairedUpdateScore(leftOption, rightOption, targetSegment, targetPhrase);
     m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
   }
 }  
@@ -348,7 +348,7 @@ FlipDelta::FlipDelta(Sample& sample, const TranslationOption* leftTgtOption ,
   // extra features
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=sample.extra_features().begin(); i<sample.extra_features().end(); ++i) {
-    float feature_score = (*i)->getFlipUpdateScore(sample, leftTgtOption, rightTgtOption, 
+    float feature_score = (*i)->getFlipUpdateScore(leftTgtOption, rightTgtOption, 
       prevTgtHypo, nextTgtHypo,leftTargetSegment, rightTargetSegment);
     m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
   }

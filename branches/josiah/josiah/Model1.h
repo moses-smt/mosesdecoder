@@ -116,15 +116,16 @@ struct is_unknown{ bool operator()(int x){ return x==-1 ? true : false; } };
 class model1 : public FeatureFunction {
 public:
   model1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
+  virtual void init(const Sample& sample);
   /** Compute full score of a sample from scratch **/
-  virtual float computeScore(const Sample& sample);
+  virtual float computeScore();
   /** Change in score when updating one segment */
-  virtual float getSingleUpdateScore(const Sample& sample, const TranslationOption* option, const WordsRange& targetSegment);
+  virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment);
   /** Change in score when updating two segments **/
-  virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
+  virtual float getPairedUpdateScore(const TranslationOption* leftOption,
                                      const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
   /** Change in score when flipping */
-  virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
+  virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                            const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                            const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
 private:
@@ -142,7 +143,7 @@ private:
     }
   }
   
-  void clear_cache_on_change(const Sample&);
+  void clear_cache(const Sample&);
 
   inline const vocabulary& e_vocab() { return _ptable->e_vocab(); }
   inline const vocabulary& f_vocab() { return _ptable->f_vocab(); }
@@ -152,6 +153,7 @@ private:
   std::vector<int> _source_word_ids; // cached internal rep of source sentence
   std::vector<float> _sums; // cache of inner sums
   std::vector<Moses::Word> _source_words;
+  const Sample* _sample;
 };
 
 
@@ -160,15 +162,16 @@ private:
 class model1_inverse : public FeatureFunction {
 public:
   model1_inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
+  virtual void init(const Sample& sample);
   /** Compute full score of a sample from scratch **/
-  virtual float computeScore(const Sample& sample);
+  virtual float computeScore();
   /** Change in score when updating one segment */
-  virtual float getSingleUpdateScore(const Sample& sample, const TranslationOption* option, const WordsRange& targetSegment);
+  virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment);
   /** Change in score when updating two segments **/
-  virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
+  virtual float getPairedUpdateScore(const TranslationOption* leftOption,
                                      const TranslationOption* rightOption, const WordsRange& targetSegment,  const Phrase& targetPhrase);
   /** Change in score when flipping */
-  virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
+  virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                            const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                            const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
 private:
@@ -190,7 +193,7 @@ private:
     return total; 
   }
 
-  void clear_cache_on_change(const Sample& s);
+  void clear_cache(const Sample& s);
 
   model1_table_handle _ptable; // data
   vocab_mapper_handle _pfmap; // maps foreign Moses::Word objects to vocab ids
@@ -199,6 +202,7 @@ private:
   std::map<const TranslationOption*,float> _option_cache; // cached scores for entire target phrases
   std::vector<int> _sentence_cache; // cached internal rep of source sentence
   std::vector<Word> _sourceWords;
+  const Sample* _sample;
 };
 
 /**
@@ -208,16 +212,16 @@ class ApproximateModel1 : public model1 {
   public:
     ApproximateModel1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
     /** Compute full score of a sample from scratch **/
-    virtual float computeScore(const Sample& sample) {return 0;}
+    virtual float computeScore() {return 0;}
     /** Change in score when updating one segment */
-    virtual float getImportanceWeight(const Sample& sample);
-    virtual float getSingleUpdateScore(const Sample& sample, const TranslationOption* option, const WordsRange& targetSegment) 
+    virtual float getImportanceWeight();
+    virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) 
       {return 0;}
     /** Change in score when updating two segments **/
-    virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
+    virtual float getPairedUpdateScore(const TranslationOption* leftOption,
                                        const TranslationOption* rightOption, const WordsRange& targetSegment,  const Phrase& targetPhrase) {return 0;}
     /** Change in score when flipping */
-    virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
+    virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                                      const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                                      const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {return 0;}
     
@@ -231,16 +235,16 @@ class ApproximateModel1Inverse : public model1_inverse {
   public:
     ApproximateModel1Inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
     /** Compute full score of a sample from scratch **/
-    virtual float computeScore(const Sample& sample) {return 0;}
+    virtual float computeScore() {return 0;}
     /** Change in score when updating one segment */
-    virtual float getImportanceWeight(const Sample& sample);
-    virtual float getSingleUpdateScore(const Sample& sample, const TranslationOption* option, const WordsRange& targetSegment) 
+    virtual float getImportanceWeight();
+    virtual float getSingleUpdateScore( const TranslationOption* option, const WordsRange& targetSegment) 
     {return 0;}
     /** Change in score when updating two segments **/
-    virtual float getPairedUpdateScore(const Sample& s, const TranslationOption* leftOption,
+    virtual float getPairedUpdateScore(const TranslationOption* leftOption,
                                        const TranslationOption* rightOption, const WordsRange& targetSegment,  const Phrase& targetPhrase) {return 0;}
     /** Change in score when flipping */
-    virtual float getFlipUpdateScore(const Sample& s, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
+    virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                                      const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                                      const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {return 0;}
     
