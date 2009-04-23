@@ -20,7 +20,6 @@
 		B218AB430F8BBF29000E5EB9 /* GibbsOperator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB230F8BBF29000E5EB9 /* GibbsOperator.cpp */; };
 		B218AB440F8BBF29000E5EB9 /* InputSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB250F8BBF29000E5EB9 /* InputSource.cpp */; };
 		B218AB450F8BBF29000E5EB9 /* Josiah.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB280F8BBF29000E5EB9 /* Josiah.cpp */; };
-		B218AB460F8BBF29000E5EB9 /* MBRDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB290F8BBF29000E5EB9 /* MBRDecoder.cpp */; };
 		B218AB470F8BBF29000E5EB9 /* Model1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB2B0F8BBF29000E5EB9 /* Model1.cpp */; };
 		B218AB480F8BBF29000E5EB9 /* Optimizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB2D0F8BBF29000E5EB9 /* Optimizer.cpp */; };
 		B218AB490F8BBF29000E5EB9 /* QuenchingSchedule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB2F0F8BBF29000E5EB9 /* QuenchingSchedule.cpp */; };
@@ -29,6 +28,9 @@
 		B218AB4C0F8BBF29000E5EB9 /* TrainingSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB350F8BBF29000E5EB9 /* TrainingSource.cpp */; };
 		B218AB4D0F8BBF29000E5EB9 /* TranslationDelta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */; };
 		B25B2AE50F8CDB6D00485047 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B25B2AE40F8CDB6D00485047 /* libmoses.a */; };
+		B26B75EA0F9F8D3A00A06B31 /* Pos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75E80F9F8D3A00A06B31 /* Pos.cpp */; };
+		B26B75F40FA0A5CC00A06B31 /* Dependency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */; };
+		B2A748890F976BCD00A5DE76 /* MpiDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,8 +88,6 @@
 		B218AB250F8BBF29000E5EB9 /* InputSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputSource.cpp; sourceTree = "<group>"; };
 		B218AB260F8BBF29000E5EB9 /* InputSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputSource.h; sourceTree = "<group>"; };
 		B218AB280F8BBF29000E5EB9 /* Josiah.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Josiah.cpp; sourceTree = "<group>"; };
-		B218AB290F8BBF29000E5EB9 /* MBRDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MBRDecoder.cpp; sourceTree = "<group>"; };
-		B218AB2A0F8BBF29000E5EB9 /* MBRDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBRDecoder.h; sourceTree = "<group>"; };
 		B218AB2B0F8BBF29000E5EB9 /* Model1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Model1.cpp; sourceTree = "<group>"; };
 		B218AB2C0F8BBF29000E5EB9 /* Model1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Model1.h; sourceTree = "<group>"; };
 		B218AB2D0F8BBF29000E5EB9 /* Optimizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Optimizer.cpp; sourceTree = "<group>"; };
@@ -105,6 +105,12 @@
 		B25B29F80F8CA15100485047 /* josiah */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = josiah; sourceTree = BUILT_PRODUCTS_DIR; };
 		B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
 		B25B2AE40F8CDB6D00485047 /* libmoses.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmoses.a; path = ../moses/build/Development/libmoses.a; sourceTree = SOURCE_ROOT; };
+		B26B75E80F9F8D3A00A06B31 /* Pos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Pos.cpp; sourceTree = "<group>"; };
+		B26B75E90F9F8D3A00A06B31 /* Pos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pos.h; sourceTree = "<group>"; };
+		B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dependency.cpp; sourceTree = "<group>"; };
+		B26B75F30FA0A5CC00A06B31 /* Dependency.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dependency.h; sourceTree = "<group>"; };
+		B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MpiDebug.cpp; sourceTree = "<group>"; };
+		B2A748880F976BCD00A5DE76 /* MpiDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MpiDebug.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +140,12 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */,
+				B26B75F30FA0A5CC00A06B31 /* Dependency.h */,
+				B26B75E80F9F8D3A00A06B31 /* Pos.cpp */,
+				B26B75E90F9F8D3A00A06B31 /* Pos.h */,
+				B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */,
+				B2A748880F976BCD00A5DE76 /* MpiDebug.h */,
 				B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */,
 				B218AAFF0F8BBF29000E5EB9 /* AnnealingSchedule.h */,
 				B218AB110F8BBF29000E5EB9 /* Decoder.cpp */,
@@ -159,8 +171,6 @@
 				B218AB250F8BBF29000E5EB9 /* InputSource.cpp */,
 				B218AB260F8BBF29000E5EB9 /* InputSource.h */,
 				B218AB280F8BBF29000E5EB9 /* Josiah.cpp */,
-				B218AB290F8BBF29000E5EB9 /* MBRDecoder.cpp */,
-				B218AB2A0F8BBF29000E5EB9 /* MBRDecoder.h */,
 				B218AB2B0F8BBF29000E5EB9 /* Model1.cpp */,
 				B218AB2C0F8BBF29000E5EB9 /* Model1.h */,
 				B218AB2D0F8BBF29000E5EB9 /* Optimizer.cpp */,
@@ -275,7 +285,6 @@
 				B218AB430F8BBF29000E5EB9 /* GibbsOperator.cpp in Sources */,
 				B218AB440F8BBF29000E5EB9 /* InputSource.cpp in Sources */,
 				B218AB450F8BBF29000E5EB9 /* Josiah.cpp in Sources */,
-				B218AB460F8BBF29000E5EB9 /* MBRDecoder.cpp in Sources */,
 				B218AB470F8BBF29000E5EB9 /* Model1.cpp in Sources */,
 				B218AB480F8BBF29000E5EB9 /* Optimizer.cpp in Sources */,
 				B218AB490F8BBF29000E5EB9 /* QuenchingSchedule.cpp in Sources */,
@@ -283,6 +292,9 @@
 				B218AB4B0F8BBF29000E5EB9 /* SentenceBleu.cpp in Sources */,
 				B218AB4C0F8BBF29000E5EB9 /* TrainingSource.cpp in Sources */,
 				B218AB4D0F8BBF29000E5EB9 /* TranslationDelta.cpp in Sources */,
+				B2A748890F976BCD00A5DE76 /* MpiDebug.cpp in Sources */,
+				B26B75EA0F9F8D3A00A06B31 /* Pos.cpp in Sources */,
+				B26B75F40FA0A5CC00A06B31 /* Dependency.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

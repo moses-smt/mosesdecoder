@@ -73,6 +73,12 @@ public:
 		return (m_startPos<x.m_startPos 
 						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
 	}
+  
+  //! transitive comparison
+	inline bool operator>(const WordsRange& x) const 
+	{
+		return ! (*this < x);
+	}
 	
 	// Whether two word ranges overlap or not
 	inline bool Overlap(const WordsRange& x) const

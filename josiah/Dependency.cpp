@@ -46,6 +46,7 @@ DependencyTree::DependencyTree(const vector<Word>& words, FactorType parentFacto
   m_spans.resize(words.size());
   for (size_t i = 0; i < m_parents.size(); ++i) {
     addChildren(tree,i,m_spans[i]);
+    m_spans[i].insert(i); // the head covers itself
   }
   
 }
@@ -75,9 +76,38 @@ bool DependencyTree::covers(size_t parent, size_t descendent) const {
   return m_spans[parent].count(descendent);
 }
 
-float CherrySyntacticCohesionFeature::computeScore() {return 0;}
+float CherrySyntacticCohesionFeature::computeScore() {
+  float interruptionCount = 0.0;
+  Hypothesis *prev = NULL;
+  for (Hypothesis* h = const_cast<Hypothesis*>(const_cast<Sample*>(m_sample)->GetTargetTail()); h; h = const_cast<Hypothesis*>(h->GetNextHypo())) {
+    if (prev && h->GetCurrSourceWordsRange().GetStartPos() > 0) {
+      interruptionCount += getSingleUpdateScore(&(h->GetTranslationOption()), h->GetCurrTargetWordsRange());
+    } 
+    prev = h;
+  }
+  return interruptionCount;
+}
 /** Score due to  one segment */
-float CherrySyntacticCohesionFeature::getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) {return 0;}
+
+float CherrySyntacticCohesionFeature::getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) {
+  float interruptionCnt = 0.0;
+  
+  size_t prevTgtIndex = targetSegment.GetStartPos() -1 ;
+  Hypothesis *prevTgt = const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(prevTgtIndex); // the prev hyp on the tgt side
+  if (!prevTgt) { //dummy hyp at start of sent, no cohesion violation
+    return 0.0;
+  }
+  
+  size_t f_L =  prevTgt->GetCurrSourceWordsRange().GetStartPos(); 
+  size_t f_R =  prevTgt->GetCurrSourceWordsRange().GetEndPos();
+  
+  interruptionCnt = getInterruptionCount(option, targetSegment, f_L);
+  if (interruptionCnt == 0 && f_L != f_R)
+    interruptionCnt = getInterruptionCount(option, targetSegment, f_R);  
+  
+  return interruptionCnt;
+}
+
 /** Score due to two segments **/
 float CherrySyntacticCohesionFeature::getPairedUpdateScore(const TranslationOption* leftOption,
     const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) {return 0;}
@@ -87,4 +117,40 @@ float CherrySyntacticCohesionFeature::getFlipUpdateScore(const TranslationOption
                                      const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
                                      const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {return 0;}
 
+  /**Helper method */
+float CherrySyntacticCohesionFeature::getInterruptionCount(const TranslationOption *option, const WordsRange& targetSegment, size_t f) {
+  size_t r_prime = f;
+  size_t r = NOT_FOUND;
+    
+  while (notAllWordsCoveredByTree(option, r_prime)) {
+    r = r_prime;
+    r_prime = m_sourceTree->getParent(r_prime);
+  }
+    
+  if (r == NOT_FOUND)
+    return 0.0; 
+    
+  const set<size_t> & children = m_sourceTree->getChildren(r);
+  for (set<size_t>::const_iterator it = children.begin(); it != children.end(); ++it) {
+    size_t child = *it;
+    Hypothesis* hyp = const_cast<Sample*>(m_sample)->GetHypAtSourceIndex(child);
+    if (isInterrupting(hyp, targetSegment)) {
+      return 1.0;
+    }
+  }
+  return 0.0;
+}  
+  
+bool CherrySyntacticCohesionFeature::isInterrupting(Hypothesis* hyp, const WordsRange& targetSegment) {
+  return hyp->GetCurrTargetWordsRange() > targetSegment;    
+}  
+  
+bool CherrySyntacticCohesionFeature::notAllWordsCoveredByTree(const TranslationOption* option, size_t parent) {
+  for (size_t s = option->GetStartPos(); s <= option->GetEndPos(); ++s) {
+    if (!m_sourceTree->covers(parent, s))
+      return true;
+  }
+  return false;       
+}
+  
 }
