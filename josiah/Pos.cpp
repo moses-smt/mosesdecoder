@@ -62,55 +62,55 @@ static void getSegmentWords(const vector<Word>& words, const WordsRange& segment
 
 
 
-float Josiah::PosFeatureFunction::computeScore(const Sample & sample) {
+float Josiah::PosFeatureFunction::computeScore() {
   m_sourceTags.clear();
   TagSequence targetTags;
-  getPosTags(sample.GetSourceWords(), m_sourceTags, m_sourceFactorType);
-  getPosTags(sample.GetTargetWords(), targetTags, m_targetFactorType);
+  getPosTags(m_sample->GetSourceWords(), m_sourceTags, m_sourceFactorType);
+  getPosTags(m_sample->GetTargetWords(), targetTags, m_targetFactorType);
   //cerr << "Source " << m_sourceTags << endl;
   //cerr << "Target " << targetTags << endl;
   return computeScore(m_sourceTags, targetTags);
 }
 
-float Josiah::PosFeatureFunction::getSingleUpdateScore( const Sample & s, const TranslationOption * option, const WordsRange & targetSegment )
+float Josiah::PosFeatureFunction::getSingleUpdateScore(const TranslationOption * option, const WordsRange & targetSegment )
 {
   const WordsRange& sourceSegment = option->GetSourceWordsRange();
   TagSequence newTargetTags;
   getPosTags(option->GetTargetPhrase(), newTargetTags, m_targetFactorType);
-  return getSingleUpdateScore(s, sourceSegment,targetSegment, newTargetTags);
+  return getSingleUpdateScore(sourceSegment,targetSegment, newTargetTags);
 }
 
-float Josiah::PosFeatureFunction::getPairedUpdateScore( const Sample & s, const TranslationOption * leftOption, const TranslationOption * rightOption, const WordsRange & targetSegment, const Phrase & targetPhrase )
+float Josiah::PosFeatureFunction::getPairedUpdateScore(const TranslationOption * leftOption, const TranslationOption * rightOption, const WordsRange & targetSegment, const Phrase & targetPhrase )
 {
   //just treat this as one segment
   WordsRange sourceSegment(leftOption->GetStartPos(), rightOption->GetEndPos());
   TagSequence newTargetTags;
   getPosTags(targetPhrase, newTargetTags, m_targetFactorType);
-  return getSingleUpdateScore(s, sourceSegment, targetSegment, newTargetTags);
+  return getSingleUpdateScore(sourceSegment, targetSegment, newTargetTags);
 }
 
 
 
-float Josiah::PosFeatureFunction::getFlipUpdateScore( const Sample & s, const TranslationOption * leftTgtOption, const TranslationOption * rightTgtOption, const Hypothesis * leftTgtHyp, const Hypothesis * rightTgtHyp, const WordsRange & leftTargetSegment, const WordsRange & rightTargetSegment )
+float Josiah::PosFeatureFunction::getFlipUpdateScore(const TranslationOption * leftTgtOption, const TranslationOption * rightTgtOption, const Hypothesis * leftTgtHyp, const Hypothesis * rightTgtHyp, const WordsRange & leftTargetSegment, const WordsRange & rightTargetSegment )
 {
   pair<WordsRange,WordsRange> sourceSegments(leftTgtOption->GetSourceWordsRange(), rightTgtOption->GetSourceWordsRange());
   pair<WordsRange,WordsRange> targetSegments(leftTargetSegment, rightTargetSegment);
   
-  return getFlipUpdateScore(s, sourceSegments, targetSegments);
+  return getFlipUpdateScore(sourceSegments, targetSegments);
 }
 
 
-void Josiah::PosFeatureFunction::getCurrentTargetTags(const Sample & s, const WordsRange & targetSegment, TagSequence& tags)
+void Josiah::PosFeatureFunction::getCurrentTargetTags(const WordsRange & targetSegment, TagSequence& tags)
      const 
 {
   vector<Word> segmentWords;
-  getSegmentWords(s.GetTargetWords(), targetSegment, segmentWords);
+  getSegmentWords(m_sample->GetTargetWords(), targetSegment, segmentWords);
   getPosTags(segmentWords,tags, m_targetFactorType);
 }
 
-void Josiah::PosFeatureFunction::getCurrentTargetTags(const Sample & s, TagSequence& tags) const
+void Josiah::PosFeatureFunction::getCurrentTargetTags(TagSequence& tags) const
 {
-  getPosTags(s.GetTargetWords(), tags, m_targetFactorType);
+  getPosTags(m_sample->GetTargetWords(), tags, m_targetFactorType);
 }
 
 bool Josiah::SourceVerbPredicate::operator ( )( const Factor * tag )
@@ -140,13 +140,13 @@ float Josiah::VerbDifferenceFeature::computeScore( const TagSequence & sourceTag
   return targetVerbs - sourceVerbs;
 }
 
-float Josiah::VerbDifferenceFeature::getSingleUpdateScore(const Moses::Sample& s, 
+float Josiah::VerbDifferenceFeature::getSingleUpdateScore(
     const Moses::WordsRange& sourceSegment, const Moses::WordsRange& targetSegment, 
     const TagSequence& newTargetTags) const
 {
   TargetVerbPredicate tvp;
   TagSequence oldTargetTags;
-  getCurrentTargetTags(s, targetSegment, oldTargetTags);
+  getCurrentTargetTags(targetSegment, oldTargetTags);
   int oldTargetVerbs = (int)count_if(oldTargetTags.begin(), oldTargetTags.end(), tvp);
   int newTargetVerbs = (int)count_if(newTargetTags.begin(), newTargetTags.end(), tvp);
   //cerr << "SingleUpdate: new " << newTargetVerbs << " old " << oldTargetVerbs << endl;

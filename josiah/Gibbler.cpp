@@ -11,13 +11,7 @@ using namespace std;
 
 namespace Moses {
 
-void compute_extra_fv(const Sample& s, const Josiah::feature_vector& features, std::vector<float>& values){
-  //for (Josiah::feature_vector::const_iterator i=features.begin(); i!=features.end(); ++i){
-    //values.push_back((*i)->computeScore(s));
-    //float score = (*i)->computeScore(s);
-    //feature_values.Assign((*i)->getScoreProducer(),score);
-  //}
-}
+
 
 Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const Josiah::feature_vector& extra_features) : 
     m_sourceWords(source), feature_values(target_head->GetScoreBreakdown()),  _extra_features(extra_features){ 
@@ -63,7 +57,8 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
   UpdateTargetWords();
   for (Josiah::feature_vector::const_iterator i=_extra_features.begin(); i!=_extra_features.end(); ++i){
     //values.push_back((*i)->computeScore(s));
-    float score = (*i)->computeScore(*this);
+    (*i)->init(*this); // tell the feature that we have a new sample
+    float score = (*i)->computeScore();
     feature_values.Assign(&((*i)->getScoreProducer()),score);
   }
 }
@@ -446,7 +441,7 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
       double totalImpWeight = 0;
       ScoreComponentCollection deltaFV;
       for (Josiah::feature_vector::const_iterator j = sample.extra_features().begin(); j != sample.extra_features().end(); ++j) {
-        double score = (*j)->getImportanceWeight(sample);
+        double score = (*j)->getImportanceWeight();
         const ScoreProducer& sp = (*j)->getScoreProducer();
         const StaticData& staticData = StaticData::Instance();
         const ScoreIndexManager& sim = staticData.GetScoreIndexManager();

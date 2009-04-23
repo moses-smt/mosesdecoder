@@ -2,6 +2,7 @@ bin_PROGRAMS = josiah m1
 josiah_SOURCES = Derivation.cpp \
 	AnnealingSchedule.cpp \
 	Decoder.cpp \
+    Dependency.cpp \
 	InputSource.cpp \
 	TrainingSource.cpp \
 	Josiah.cpp \
