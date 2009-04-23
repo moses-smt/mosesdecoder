@@ -28,7 +28,7 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
 
   for (Hypothesis* h = target_head; h; h = const_cast<Hypothesis*>(h->GetPrevHypo())) {
     size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
-    SetSourceIndexedHyps(h); 
+    SetSourceIndexedHyps(h); SetTgtIndexedHyps(h); 
     if (h->GetPrevHypo()){
       source_order[startPos] = h;  
     }
@@ -78,7 +78,8 @@ Hypothesis* Sample::CreateHypothesis(Hypothesis& prevTarget, const TranslationOp
   Hypothesis* hypo = new Hypothesis(prevTarget,option);
   prevTarget.m_nextHypo = hypo;
   cachedSampledHyps.insert(hypo);
-  SetSourceIndexedHyps(hypo); 
+  SetSourceIndexedHyps(hypo);
+  SetTgtIndexedHyps(hypo);
   return hypo;
 }
 
@@ -125,6 +126,14 @@ Hypothesis* Sample::GetHypAtSourceIndex(size_t i)  {
   return it->second;
 }
 
+Hypothesis* Sample::GetHypAtTgtIndex(size_t i)  {
+  std::map<size_t, Hypothesis*>::iterator it = tgtIndexedHyps.find(i);
+  if (it == tgtIndexedHyps.end())
+    return NULL;
+  return it->second;
+}
+  
+  
 void Sample::SetSourceIndexedHyps(Hypothesis* h) {
   
   size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
@@ -137,6 +146,19 @@ void Sample::SetSourceIndexedHyps(Hypothesis* h) {
     sourceIndexedHyps[i] = h; 
   } 
 }
+  
+void Sample::SetTgtIndexedHyps(Hypothesis* h) {
+  size_t startPos = h->GetCurrTargetWordsRange().GetStartPos();
+  size_t endPos = h->GetCurrTargetWordsRange().GetEndPos();
+  if (startPos + 1 == 0 ) {
+    tgtIndexedHyps[startPos] = h; 
+    return;
+  }
+  for (size_t i = startPos; i <= endPos; i++) {
+    tgtIndexedHyps[i] = h; 
+  } 
+}
+  
   
 void Sample::SetTgtNextHypo(Hypothesis* newHyp, Hypothesis* currNextHypo) {
   if (newHyp) {
