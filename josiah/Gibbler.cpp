@@ -111,6 +111,7 @@ void Sample::UpdateTargetWords()  {
   IFVERBOSE(2) {
     VERBOSE(2,"FVs: " << feature_values << endl);
   }
+  cerr << "Length of target string is now " << m_targetWords.size() << endl; 
 }
 
   
@@ -123,8 +124,11 @@ Hypothesis* Sample::GetHypAtSourceIndex(size_t i)  {
 
 Hypothesis* Sample::GetHypAtTgtIndex(size_t i)  {
   std::map<size_t, Hypothesis*>::iterator it = tgtIndexedHyps.find(i);
-  if (it == tgtIndexedHyps.end())
+  if (it == tgtIndexedHyps.end()){
+    cerr << "In tgt words, Can't find this " << i << endl;
     return NULL;
+  }
+    
   return it->second;
 }
   
