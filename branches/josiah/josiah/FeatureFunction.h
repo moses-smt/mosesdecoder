@@ -80,9 +80,10 @@ class FeatureFunction {
     virtual float getImportanceWeight() {return 0;}
     /** Score due to one segment */
     virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) = 0;
-    /** Score due to two segments **/
-    virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                               const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) = 0;
+    /** Score due to two segments. The left and right refer to the source positions. If this is from a split then the
+    target segments coincide. **/
+    virtual float getPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+       const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, const Phrase& targetPhrase) = 0;
     
     /** Score due to flip */
     virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 

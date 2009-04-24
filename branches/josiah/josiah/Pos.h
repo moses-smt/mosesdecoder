@@ -70,7 +70,8 @@ class PosFeatureFunction : public  FeatureFunction {
     virtual float getSingleUpdateScore(const Moses::TranslationOption* option, const Moses::WordsRange& targetSegment);
     /** Change in score when updating two segments **/
     virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                       const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
+                                       const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
+                                       const WordsRange& rightTargetSegment, const Phrase& targetPhrase);
     
     /** Change in score when flipping */
     virtual float getFlipUpdateScore(const Moses::TranslationOption* leftTgtOption, 
