@@ -80,6 +80,7 @@ class CherrySyntacticCohesionFeature : public FeatureFunction {
     auto_ptr<DependencyTree> m_sourceTree;
     Moses::FactorType m_parentFactor; //which factor is the parent index?
     const Sample* m_sample;
+    float getInterruptions(const WordsRange& prevSourceRange, const TranslationOption *option, const WordsRange& targetSegment);
     float getInterruptionCount(const TranslationOption* option, const WordsRange& targetSegment, size_t f);
     bool  notAllWordsCoveredByTree(const TranslationOption* option, size_t parent);
     bool  isInterrupting(Hypothesis* hyp, const WordsRange& targetSegment);
