@@ -106,7 +106,7 @@ typedef boost::shared_ptr<external_model1_table> model1_table_handle;
 typedef boost::shared_ptr<moses_factor_to_vocab_id> vocab_mapper_handle;
 
 // minimum value of any inner sum in the Model 1 feature computation
-const float MODEL1_SUM_FLOOR = 0.0001;
+const float MODEL1_SUM_FLOOR = 0.0000000001; // n.b. Och et al. 2004 use 10^{-40}
 
 // n.b. unknown words are assigned an id of -1
 struct is_known{ bool operator()(int x){ return x==-1 ? false : true; } };
@@ -135,11 +135,10 @@ private:
   void _compute_inner_sums(const fwiter1& f_begin, const fwiter1& f_end, 
     const fwiter2& e_begin, const fwiter2& e_end, outputiter result){ 
     for(fwiter1 i = f_begin; i!=f_end; ++i){
-      float sum = 0.0;
+      *result = _ptable->score(*i, 0, 1);
       for(fwiter2 j = e_begin; j!=e_end; ++j){ 
-        sum += _ptable->score(*i, *j, 0);
+        *result += _ptable->score(*i, *j, 1);
       }
-      *result= sum;
       result++;
     }
   }
@@ -181,12 +180,12 @@ private:
   // main scoring logic for a f phrase, e phrase
   template <typename fwiter1, typename fwiter2>
   float score(const fwiter1& f_begin, const fwiter1& f_end, const fwiter2& e_begin, const fwiter2& e_end){ 
-    float total =0.0;
+    float total = -std::distance(e_begin, e_end)*log(std::distance(f_begin,f_end)+1);
     for(fwiter2 i=e_begin; i!=e_end; ++i){ 
       if (_word_cache.find(*i) == _word_cache.end()) {
-        float sum = 0.0;
+        float sum = _ptable->score(0, *i, 0);;
         for(fwiter1 j=f_begin; j!=f_end; ++j){
-          sum += _ptable->score(*j, *i, 1);
+          sum += _ptable->score(*j, *i, 0);
         }
         _word_cache[*i] = log(std::max(sum,MODEL1_SUM_FLOOR));
       }

@@ -169,7 +169,7 @@ float model1::computeScore(){
 
   // compute product of sums in logspace
   return std::accumulate(log_iter(_sums.begin()),  
-    log_iter(_sums.end()), 0.0);
+    log_iter(_sums.end()), -(_source_word_ids.size()*log(target_word_ids.size()+1)));
 }
 
 float model1::getSingleUpdateScore(
@@ -217,8 +217,6 @@ void model1_inverse::clear_cache(const Sample& s){
 }
 
 float model1_inverse::computeScore(){
-  
-
   // 2. perform the actual computation
   std::vector<int> target_words;
   _moses_words_to_ids(*_pemap, _sample->GetTargetWords(),
