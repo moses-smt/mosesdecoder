@@ -87,38 +87,100 @@ float CherrySyntacticCohesionFeature::computeScore() {
   }
   return interruptionCount;
 }
-/** Score due to  one segment */
 
-float CherrySyntacticCohesionFeature::getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) {
-  float interruptionCnt = 0.0;
+/** Score due to flip */
+float CherrySyntacticCohesionFeature::getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
+                                                           const Hypothesis* leftTgtHypPred, const Hypothesis* rightTgtHypSucc, 
+                                                           const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {
+  float interruptionCnt = 0.0;                                            
+    
+  //Let's sort out the order of the segments
+  WordsRange* leftSegment = const_cast<WordsRange*> (&leftTargetSegment);
+  WordsRange* rightSegment = const_cast<WordsRange*> (&rightTargetSegment);
+    
+  if (rightTargetSegment < leftTargetSegment) {
+    leftSegment = const_cast<WordsRange*> (&rightTargetSegment);
+    rightSegment = const_cast<WordsRange*>(&leftTargetSegment);
+  }
+    
+  //Left tgt option and its predecessor
+  if (leftTgtHypPred) {
+    interruptionCnt +=  getInterruptions(leftTgtHypPred->GetCurrSourceWordsRange(), leftTgtOption, *leftSegment);  
+  }
+    
+  //Right tgt option and its successor
+  if (rightTgtHypSucc) {
+    interruptionCnt +=  getInterruptions(rightTgtOption->GetSourceWordsRange()  ,&(rightTgtHypSucc->GetTranslationOption()), rightTgtHypSucc->GetCurrTargetWordsRange());    
+  }
+    
+  //Are the options contiguous on the target side?
+  bool contiguous = (leftSegment->GetEndPos() + 1 == rightSegment->GetStartPos()) ;
+    
+  if (contiguous) {
+    interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), rightTgtOption, *rightSegment);  
+  }
+  else {
+    //Left tgt option and its successor
+    Hypothesis* leftTgtSuccessorHyp = const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(leftTargetSegment.GetEndPos()+1);
+    if (leftTgtSuccessorHyp) {
+      interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), &(leftTgtSuccessorHyp->GetTranslationOption()), leftTgtSuccessorHyp->GetCurrTargetWordsRange());  
+    }
+      
+    //Right tgt option and its predecessor
+    Hypothesis* rightTgtPredecessorHyp = const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(rightTargetSegment.GetStartPos()-1);
+      
+    if (rightTgtPredecessorHyp) {
+      interruptionCnt +=  getInterruptions(rightTgtPredecessorHyp->GetCurrSourceWordsRange(), rightTgtOption, *rightSegment);
+    }  
+  }
+    
+  return interruptionCnt; 
+}
   
+  /** Score due to  one segment */
+
+//NB : Target Segment is the old one  
+float CherrySyntacticCohesionFeature::getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) {
   size_t prevTgtIndex = targetSegment.GetStartPos() -1 ;
   Hypothesis *prevTgt = const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(prevTgtIndex); // the prev hyp on the tgt side
   if (!prevTgt) { //dummy hyp at start of sent, no cohesion violation
     return 0.0;
   }
-  
-  size_t f_L =  prevTgt->GetCurrSourceWordsRange().GetStartPos(); 
-  size_t f_R =  prevTgt->GetCurrSourceWordsRange().GetEndPos();
-  
-  interruptionCnt = getInterruptionCount(option, targetSegment, f_L);
-  if (interruptionCnt == 0 && f_L != f_R)
-    interruptionCnt = getInterruptionCount(option, targetSegment, f_R);  
-  
-  return interruptionCnt;
+  return getInterruptions(prevTgt->GetCurrSourceWordsRange(), option, targetSegment);
 }
+
+
 
 /** Score due to two segments **/
 float CherrySyntacticCohesionFeature::getPairedUpdateScore(const TranslationOption* leftOption,
     const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
-    const WordsRange& rightTargetSegment,  const Phrase& targetPhrase) {return 0;}
+    const WordsRange& rightTargetSegment,  const Phrase& targetPhrase) {
 
-/** Score due to flip */
-float CherrySyntacticCohesionFeature::getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-                                     const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
-                                     const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {return 0;}
+  return 0.0; 
 
-  /**Helper method */
+
+
+
+
+
+}
+
+
+
+/**Helper method */
+float CherrySyntacticCohesionFeature::getInterruptions(const WordsRange& prevSourceRange, const TranslationOption *option, const WordsRange& targetSegment) {
+  float interruptionCnt = 0.0;
+  size_t f_L =  prevSourceRange.GetStartPos(); 
+  size_t f_R =  prevSourceRange.GetEndPos();
+    
+  interruptionCnt = getInterruptionCount(option, targetSegment, f_L);
+  if (interruptionCnt == 0 && f_L != f_R)
+    interruptionCnt = getInterruptionCount(option, targetSegment, f_R);  
+    
+  return interruptionCnt;
+  
+}  
+  
 float CherrySyntacticCohesionFeature::getInterruptionCount(const TranslationOption *option, const WordsRange& targetSegment, size_t f) {
   size_t r_prime = f;
   size_t r = NOT_FOUND;
@@ -153,5 +215,5 @@ bool CherrySyntacticCohesionFeature::notAllWordsCoveredByTree(const TranslationO
   }
   return false;       
 }
-  
+
 }
