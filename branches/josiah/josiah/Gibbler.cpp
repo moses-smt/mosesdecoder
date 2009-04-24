@@ -74,7 +74,7 @@ Hypothesis* Sample::CreateHypothesis(Hypothesis& prevTarget, const TranslationOp
   prevTarget.m_nextHypo = hypo;
   cachedSampledHyps.insert(hypo);
   SetSourceIndexedHyps(hypo);
-  SetTgtIndexedHyps(hypo);
+  //SetTgtIndexedHyps(hypo);
   return hypo;
 }
 
