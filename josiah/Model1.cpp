@@ -181,7 +181,8 @@ float model1::getSingleUpdateScore(
 
 float model1::getPairedUpdateScore( 
                                      const TranslationOption* leftOption, const TranslationOption* rightOption, 
-                                     const WordsRange& targetSegment, const Phrase& targetPhrase){
+                                     const WordsRange& leftTargetSegment, 
+                                     const WordsRange& rightTargetSegment, const Phrase& targetPhrase){
   assert(!"Do not call model1::getPairedUpdateScore");
   return 0.0;
 }
@@ -241,10 +242,11 @@ float model1_inverse::getSingleUpdateScore(
 
 float model1_inverse::getPairedUpdateScore(
                                              const TranslationOption* leftOption, const TranslationOption* rightOption, 
-                                             const WordsRange& targetSegment,   const Phrase& targetPhrase){
+                                             const WordsRange& leftTargetSegment, 
+                                             const WordsRange& rightTargetSegment,   const Phrase& targetPhrase){
     
-  return getSingleUpdateScore(leftOption, targetSegment) +
-  getSingleUpdateScore(rightOption, targetSegment);
+  return getSingleUpdateScore(leftOption, leftTargetSegment) +
+  getSingleUpdateScore(rightOption, rightTargetSegment);
 }  
   
   

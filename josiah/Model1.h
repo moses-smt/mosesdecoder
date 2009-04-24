@@ -123,7 +123,8 @@ public:
   virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment);
   /** Change in score when updating two segments **/
   virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                     const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
+                                     const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
+                                     const WordsRange& rightTargetSegment, const Phrase& targetPhrase);
   /** Change in score when flipping */
   virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                            const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
@@ -169,7 +170,8 @@ public:
   virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment);
   /** Change in score when updating two segments **/
   virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                     const TranslationOption* rightOption, const WordsRange& targetSegment,  const Phrase& targetPhrase);
+                                     const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
+                                     const WordsRange& rightTargetSegment,   const Phrase& targetPhrase);
   /** Change in score when flipping */
   virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                            const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
@@ -219,7 +221,8 @@ class ApproximateModel1 : public model1 {
       {return 0;}
     /** Change in score when updating two segments **/
     virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                       const TranslationOption* rightOption, const WordsRange& targetSegment,  const Phrase& targetPhrase) {return 0;}
+                                       const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
+                                       const WordsRange& rightTargetSegment,   const Phrase& targetPhrase) {return 0;}
     /** Change in score when flipping */
     virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                                      const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
@@ -242,7 +245,8 @@ class ApproximateModel1Inverse : public model1_inverse {
     {return 0;}
     /** Change in score when updating two segments **/
     virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                       const TranslationOption* rightOption, const WordsRange& targetSegment,  const Phrase& targetPhrase) {return 0;}
+                                       const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
+                                       const WordsRange& rightTargetSegment,   const Phrase& targetPhrase) {return 0;}
     /** Change in score when flipping */
     virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
                                      const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 

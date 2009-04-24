@@ -66,7 +66,8 @@ class CherrySyntacticCohesionFeature : public FeatureFunction {
     virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment);
     /** Score due to two segments **/
     virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                       const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
+                                       const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
+                                       const WordsRange& rightTargetSegment,  const Phrase& targetPhrase);
     
     /** Score due to flip */
     virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 

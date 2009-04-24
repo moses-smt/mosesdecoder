@@ -195,9 +195,10 @@ void TranslationDelta::initScoresSingleUpdate(const Sample& s, const Translation
 }
 
   
-
+//Note that left and right refer to the source order, and the WordsRanges refer to positions in the existing target hypothesis
 void TranslationDelta::initScoresPairedUpdate(const Sample& s, const TranslationOption* leftOption,
-                                                const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) {
+                                              const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
+                                              const WordsRange& rightTargetSegment,  const Phrase& targetPhrase) {
   //translation scores
   m_scores.PlusEquals(leftOption->GetScoreBreakdown());
   m_scores.PlusEquals(rightOption->GetScoreBreakdown());
@@ -212,7 +213,7 @@ void TranslationDelta::initScoresPairedUpdate(const Sample& s, const Translation
   // extra features
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
-    float feature_score = (*i)->getPairedUpdateScore(leftOption, rightOption, targetSegment, targetPhrase);
+    float feature_score = (*i)->getPairedUpdateScore(leftOption, rightOption, leftTargetSegment, rightTargetSegment, targetPhrase);
     m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
   }
 }  
@@ -277,7 +278,7 @@ PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(Sample& sample,
   VERBOSE(2, "Left Target segment: " << leftTargetSegment << endl;)    
   VERBOSE(2, "Right Target segment: " << rightTargetSegment << endl;)    
   
-  initScoresPairedUpdate(sample, m_leftOption,m_rightOption, targetSegment,*targetPhrase);
+  initScoresPairedUpdate(sample, m_leftOption,m_rightOption, leftTargetSegment, rightTargetSegment, *targetPhrase);
   addPairedOptionLanguageModelScore(m_leftOption, m_rightOption, leftTargetSegment, rightTargetSegment);
   updateWeightedScore();
   
@@ -310,7 +311,7 @@ SplitDelta::SplitDelta(Sample& sample, const TranslationOption* leftOption,
   VERBOSE(2, "Target phrase: " << targetPhrase << endl;)
   VERBOSE(2, "Target segment: " << targetSegment << endl;)    
   
-  initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,targetPhrase);        
+  initScoresPairedUpdate(sample, leftOption,rightOption,targetSegment,targetSegment,targetPhrase);        
   addContiguousPairedOptionLMScore(leftOption, rightOption, &targetSegment, &targetSegment);    
   updateWeightedScore();
 }

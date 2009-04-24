@@ -80,11 +80,19 @@ float Josiah::PosFeatureFunction::getSingleUpdateScore(const TranslationOption *
   return getSingleUpdateScore(sourceSegment,targetSegment, newTargetTags);
 }
 
-float Josiah::PosFeatureFunction::getPairedUpdateScore(const TranslationOption * leftOption, const TranslationOption * rightOption, const WordsRange & targetSegment, const Phrase & targetPhrase )
+float Josiah::PosFeatureFunction::getPairedUpdateScore(const TranslationOption * leftOption, const TranslationOption * rightOption, const WordsRange& leftTargetSegment, 
+    const WordsRange& rightTargetSegment, const Phrase & targetPhrase )
 {
   //just treat this as one segment
   WordsRange sourceSegment(leftOption->GetStartPos(), rightOption->GetEndPos());
   TagSequence newTargetTags;
+  size_t start = leftTargetSegment.GetStartPos();
+  size_t end = rightTargetSegment.GetEndPos();
+  if (start > end) {
+    start = rightTargetSegment.GetStartPos();
+    end = leftTargetSegment.GetEndPos();
+  }
+  WordsRange targetSegment(start,end);
   getPosTags(targetPhrase, newTargetTags, m_targetFactorType);
   return getSingleUpdateScore(sourceSegment, targetSegment, newTargetTags);
 }

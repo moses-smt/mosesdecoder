@@ -121,12 +121,8 @@ class TranslationDelta {
      * Initialise the scores for the case where two source-target pairs need to be considered.
      **/
     void initScoresPairedUpdate(const Sample&, const TranslationOption* leftOption,
-                                const TranslationOption* rightOption, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment){
-      ; 
-    }
-  
-  void initScoresPairedUpdate(const Sample&, const TranslationOption* leftOption,
-                              const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase);
+                              const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
+                              const WordsRange& rightTargetSegment,  const Phrase& targetPhrase);
   
   void updateWeightedScore();
     ScoreComponentCollection m_scores;

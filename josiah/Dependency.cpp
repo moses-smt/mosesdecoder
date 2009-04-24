@@ -110,7 +110,8 @@ float CherrySyntacticCohesionFeature::getSingleUpdateScore(const TranslationOpti
 
 /** Score due to two segments **/
 float CherrySyntacticCohesionFeature::getPairedUpdateScore(const TranslationOption* leftOption,
-    const TranslationOption* rightOption, const WordsRange& targetSegment, const Phrase& targetPhrase) {return 0;}
+    const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
+    const WordsRange& rightTargetSegment,  const Phrase& targetPhrase) {return 0;}
 
 /** Score due to flip */
 float CherrySyntacticCohesionFeature::getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
