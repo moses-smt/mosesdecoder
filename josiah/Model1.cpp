@@ -172,28 +172,25 @@ float model1::computeScore(){
     log_iter(_sums.end()), -(_source_word_ids.size()*log(target_word_ids.size()+1)));
 }
 
-float model1::getSingleUpdateScore(
-  const TranslationOption* option, const WordsRange& targetSegment){
+float model1::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap){
   assert(!"Do not call model1::getSingleUpdateScore");
   return 0.0;
 }
 
 
-float model1::getPairedUpdateScore( 
-                                     const TranslationOption* leftOption, const TranslationOption* rightOption, 
-                                     const WordsRange& leftTargetSegment, 
-                                     const WordsRange& rightTargetSegment, const Phrase& targetPhrase){
-  assert(!"Do not call model1::getPairedUpdateScore");
+float model1::getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                             const TargetGap& gap){
+  assert(!"Do not call model1::getDiscontiguousPairedUpdateScore");
+  return 0.0;
+}
+
+float model1::getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                             const TargetGap& leftGap, const TargetGap& rightGap){
+  assert(!"Do not call model1::getContiguousPairedUpdateScore");
   return 0.0;
 }
   
-float model1::getFlipUpdateScore( 
-  const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-  const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
-  const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment){
-  // nothing needed to do here, target words don't change.
-  return 0.0;
-}
+
 
 
 model1_inverse::model1_inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
@@ -225,8 +222,7 @@ float model1_inverse::computeScore(){
     target_words.begin(), target_words.end());
 }
 
-float model1_inverse::getSingleUpdateScore( 
-  const TranslationOption* option, const WordsRange& targetSegment){
+float model1_inverse::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {
   if (_option_cache.find(option) == _option_cache.end()) {
     std::vector<int> target_words;
     _moses_words_to_ids(*_pemap, option->GetTargetPhrase(),
@@ -238,23 +234,22 @@ float model1_inverse::getSingleUpdateScore(
 }
 
 
-float model1_inverse::getPairedUpdateScore(
-                                             const TranslationOption* leftOption, const TranslationOption* rightOption, 
-                                             const WordsRange& leftTargetSegment, 
-                                             const WordsRange& rightTargetSegment,   const Phrase& targetPhrase){
+float model1_inverse::getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+    const TargetGap& gap) {
     
-  return getSingleUpdateScore(leftOption, leftTargetSegment) +
-  getSingleUpdateScore(rightOption, rightTargetSegment);
+  return getSingleUpdateScore(leftOption, gap) +
+    getSingleUpdateScore(rightOption, gap);
+}
+
+float model1_inverse::getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+    const TargetGap& leftGap, const TargetGap& rightGap) {
+    
+      return getSingleUpdateScore(leftOption, leftGap) +
+          getSingleUpdateScore(rightOption, rightGap);
 }  
   
   
-float model1_inverse::getFlipUpdateScore(
-  const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-  const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
-  const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment){
-  // nothing needed to do here, target words don't change.
-  return 0.0;
-}
+
 
 ApproximateModel1::ApproximateModel1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
     model1(table,fmap,emap){}

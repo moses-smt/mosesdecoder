@@ -77,7 +77,9 @@ bool DependencyTree::covers(size_t parent, size_t descendent) const {
 }
 
 float CherrySyntacticCohesionFeature::computeScore() {
-  float interruptionCount = 0.0;
+  //TODO
+  return 0.0;
+  /*float interruptionCount = 0.0;
   Hypothesis *prev = NULL;
   for (Hypothesis* h = const_cast<Hypothesis*>(const_cast<Sample*>(m_sample)->GetTargetTail()); h; h = const_cast<Hypothesis*>(h->GetNextHypo())) {
     if (prev && h->GetCurrSourceWordsRange().GetStartPos() > 0) {
@@ -86,42 +88,37 @@ float CherrySyntacticCohesionFeature::computeScore() {
     prev = h;
   }
   cerr << "In compute score, interr cnt = " << interruptionCount << endl;
-  return interruptionCount;
+  return interruptionCount;*/
 }
   
 /** Score due to  one segment */
   
 //NB : Target Segment is the old one  
-float CherrySyntacticCohesionFeature::getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) {
-  size_t startPos = targetSegment.GetStartPos();
-  if (startPos == 0)
-    return 0.0;
-  
-  size_t prevTgtIndex = startPos -1 ;
-  Hypothesis *prevTgt = const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(prevTgtIndex); // the prev hyp on the tgt side
-  if (!prevTgt) { //dummy hyp at start of sent, no cohesion violation
+float CherrySyntacticCohesionFeature::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {
+  const Hypothesis* prevTgt = gap.leftHyp;
+  if (!prevTgt->GetPrevHypo()) { //dummy hyp at start of sent, no cohesion violation
     return 0.0;
   }
   
-  float interruptionCnt =  getInterruptions(prevTgt->GetCurrSourceWordsRange(), option, targetSegment);
+  float interruptionCnt =  getInterruptions(prevTgt->GetCurrSourceWordsRange(), option, gap.segment);
   cerr << "In single upd, int cnt " << interruptionCnt << endl;
   return interruptionCnt;
 }  
 
 /** Score due to flip */
-float CherrySyntacticCohesionFeature::getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-                                                           const Hypothesis* leftTgtHypPred, const Hypothesis* rightTgtHypSucc, 
-                                                           const WordsRange& leftSegment, const WordsRange& rightSegment) {
+float CherrySyntacticCohesionFeature::getFlipUpdateScore(
+    const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption,
+    const TargetGap& leftGap, const TargetGap& rightGap) {
   float interruptionCnt = 0.0;                                            
     
   //Let's sort out the order of the segments
-  WordsRange* leftTgtSegment = const_cast<WordsRange*> (&leftSegment);
-  WordsRange* rightTgtSegment = const_cast<WordsRange*> (&rightSegment);
-    
-  if (rightSegment < leftSegment) {
-    leftTgtSegment = const_cast<WordsRange*> (&rightSegment);
-    rightTgtSegment = const_cast<WordsRange*>(&leftSegment);
-  }
+  WordsRange* leftTgtSegment = const_cast<WordsRange*> (&leftGap.segment);
+  WordsRange* rightTgtSegment = const_cast<WordsRange*> (&rightGap.segment);
+  assert(leftTgtSegment < rightTgtSegment); //should already be in target order!
+  
+  const Hypothesis* leftTgtHypPred = leftGap.leftHyp;
+  const Hypothesis* rightTgtHypSucc = rightGap.rightHyp;
+  
     
   //Left tgt option and its predecessor
   if (leftTgtHypPred && leftTgtHypPred->GetPrevHypo()) {
@@ -158,11 +155,12 @@ float CherrySyntacticCohesionFeature::getFlipUpdateScore(const TranslationOption
 }
   
 /** Score due to two segments **/
-float CherrySyntacticCohesionFeature::getPairedUpdateScore(const TranslationOption* leftOption,
-    const TranslationOption* rightOption, const WordsRange& leftSegment, 
-    const WordsRange& rightSegment,  const Phrase& targetPhrase) {
+float CherrySyntacticCohesionFeature::getContiguousPairedUpdateScore(
+    const TranslationOption* leftOption,const TranslationOption* rightOption, 
+    const TargetGap& gap) {
+      return 0.0;
   
-  float interruptionCnt = 0.0;
+  /*float interruptionCnt = 0.0;
   bool split = false;
   
   //Order the options and segments by tgt order instead of src order
@@ -218,8 +216,15 @@ float CherrySyntacticCohesionFeature::getPairedUpdateScore(const TranslationOpti
     }  
   }
   cerr << "In paired update, interr cnt = " << interruptionCnt << endl; 
-  return interruptionCnt; 
+  return interruptionCnt; */
 }
+
+float CherrySyntacticCohesionFeature::getDiscontiguousPairedUpdateScore(
+    const TranslationOption* leftOption,const TranslationOption* rightOption, 
+    const TargetGap& leftGap, const TargetGap& rightGap) {
+      //TODO
+      return 0.0;
+    }
 
 
 

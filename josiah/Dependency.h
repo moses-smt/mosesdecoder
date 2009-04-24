@@ -63,16 +63,16 @@ class CherrySyntacticCohesionFeature : public FeatureFunction {
     /** Compute full score of a sample from scratch **/
     virtual float computeScore();
     /** Score due to  one segment */
-    virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment);
+    virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap);
     /** Score due to two segments **/
-    virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                       const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
-                                       const WordsRange& rightTargetSegment,  const Phrase& targetPhrase);
+    virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                       const TargetGap& gap);
+    virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+        const TargetGap& leftGap, const TargetGap& rightGap);
     
     /** Score due to flip */
-    virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-                                     const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
-                                     const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
+    virtual float getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                     const TargetGap& leftGap, const TargetGap& rightGap);
     
     virtual ~CherrySyntacticCohesionFeature() {}
   
