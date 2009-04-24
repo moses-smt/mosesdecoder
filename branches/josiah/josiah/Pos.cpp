@@ -72,37 +72,41 @@ float Josiah::PosFeatureFunction::computeScore() {
   return computeScore(m_sourceTags, targetTags);
 }
 
-float Josiah::PosFeatureFunction::getSingleUpdateScore(const TranslationOption * option, const WordsRange & targetSegment )
+float Josiah::PosFeatureFunction::getSingleUpdateScore(const Moses::TranslationOption* option, const TargetGap& gap)
 {
   const WordsRange& sourceSegment = option->GetSourceWordsRange();
   TagSequence newTargetTags;
   getPosTags(option->GetTargetPhrase(), newTargetTags, m_targetFactorType);
-  return getSingleUpdateScore(sourceSegment,targetSegment, newTargetTags);
+  return getSingleUpdateScore(sourceSegment,gap.segment, newTargetTags);
 }
 
-float Josiah::PosFeatureFunction::getPairedUpdateScore(const TranslationOption * leftOption, const TranslationOption * rightOption, const WordsRange& leftTargetSegment, 
-    const WordsRange& rightTargetSegment, const Phrase & targetPhrase )
+float Josiah::PosFeatureFunction::getContiguousPairedUpdateScore
+    (const TranslationOption * leftOption, const TranslationOption * rightOption, const TargetGap& gap)
 {
   //just treat this as one segment
-  WordsRange sourceSegment(leftOption->GetStartPos(), rightOption->GetEndPos());
+  WordsRange sourceSegment(min(leftOption->GetStartPos(),rightOption->GetStartPos()),
+                           max(leftOption->GetEndPos(), rightOption->GetEndPos()));
   TagSequence newTargetTags;
-  size_t start = leftTargetSegment.GetStartPos();
-  size_t end = rightTargetSegment.GetEndPos();
-  if (start > end) {
-    start = rightTargetSegment.GetStartPos();
-    end = leftTargetSegment.GetEndPos();
-  }
-  WordsRange targetSegment(start,end);
+  Phrase targetPhrase = leftOption->GetTargetPhrase();
+  targetPhrase.Append(rightOption->GetTargetPhrase());
   getPosTags(targetPhrase, newTargetTags, m_targetFactorType);
-  return getSingleUpdateScore(sourceSegment, targetSegment, newTargetTags);
+  return getSingleUpdateScore(sourceSegment, gap.segment, newTargetTags);
+}
+
+float Josiah::PosFeatureFunction::getDiscontiguousPairedUpdateScore
+    (const TranslationOption * leftOption, const TranslationOption * rightOption,
+    const TargetGap& leftGap, const TargetGap& rightGap) {
+      //treat as two gaps
+      return getSingleUpdateScore(leftOption,leftGap) + getSingleUpdateScore(rightOption,rightGap);
+
 }
 
 
-
-float Josiah::PosFeatureFunction::getFlipUpdateScore(const TranslationOption * leftTgtOption, const TranslationOption * rightTgtOption, const Hypothesis * leftTgtHyp, const Hypothesis * rightTgtHyp, const WordsRange & leftTargetSegment, const WordsRange & rightTargetSegment )
+float Josiah::PosFeatureFunction::getFlipUpdateScore(const TranslationOption * leftOption, const TranslationOption * rightOption,
+    const TargetGap& leftGap, const TargetGap& rightGap)
 {
-  pair<WordsRange,WordsRange> sourceSegments(leftTgtOption->GetSourceWordsRange(), rightTgtOption->GetSourceWordsRange());
-  pair<WordsRange,WordsRange> targetSegments(leftTargetSegment, rightTargetSegment);
+  pair<WordsRange,WordsRange> sourceSegments(leftOption->GetSourceWordsRange(), rightOption->GetSourceWordsRange());
+  pair<WordsRange,WordsRange> targetSegments(leftGap.segment, rightGap.segment);
   
   return getFlipUpdateScore(sourceSegments, targetSegments);
 }

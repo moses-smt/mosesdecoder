@@ -46,6 +46,21 @@ namespace Josiah {
  **/
 class FeatureState {};
 
+
+/**
+* Represents a gap in the target sentence. During score computation, this is used to specify where the proposed
+* TranslationOptions are to be placed. The left and right hypothesis are to the left and to the right in target order.
+**/
+struct TargetGap {
+  TargetGap(const Hypothesis* lh, const Hypothesis* rh, const WordsRange& s) :
+      leftHyp(lh), rightHyp(rh), segment(s) {
+  }
+  
+  const Hypothesis* leftHyp;
+  const Hypothesis* rightHyp;
+  WordsRange segment;
+};
+
 /**
  * Used to  get moses to manage our feature functions.
  **/
@@ -79,16 +94,16 @@ class FeatureFunction {
      *  method returns the importance score, as do all the getXXScore() methods. **/
     virtual float getImportanceWeight() {return 0;}
     /** Score due to one segment */
-    virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) = 0;
-    /** Score due to two segments. The left and right refer to the source positions. If this is from a split then the
-    target segments coincide. **/
-    virtual float getPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-       const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, const Phrase& targetPhrase) = 0;
+    virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) = 0;
+    /** Score due to two segments. The left and right refer to the target positions.**/
+    virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+       const TargetGap& gap) = 0;
+    virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+        const TargetGap& leftGap, const TargetGap& rightGap) = 0;
     
-    /** Score due to flip */
-    virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-                             const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
-                             const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) = 0;
+    /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
+    virtual float getFlipUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+                                     const TargetGap& leftGap, const TargetGap& rightGap) = 0;
     const Moses::ScoreProducer& getScoreProducer() const {return m_scoreProducer;}
     virtual ~FeatureFunction() = 0;
   

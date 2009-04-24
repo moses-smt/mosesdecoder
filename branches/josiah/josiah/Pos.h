@@ -51,10 +51,9 @@ class PosFeatureFunction : public  FeatureFunction {
     /** Full score of sample*/
     virtual float computeScore(const TagSequence& sourceTags, const TagSequence& targetTags) const = 0;
     /**Change in score when updating one segment*/
-    virtual float getSingleUpdateScore(
-                                       const Moses::WordsRange& sourceSegment, const Moses::WordsRange& targetSegment, 
+    virtual float getSingleUpdateScore(const Moses::WordsRange& sourceSegment, const Moses::WordsRange& targetSegment, 
                                        const TagSequence& newTargetTags) const = 0;
-    /**Change in score when flipping two segments*/
+    /**Change in score when flipping two segments. Note that both pairs are in target order */
     virtual float getFlipUpdateScore(const std::pair<Moses::WordsRange,Moses::WordsRange>& sourceSegments,
                                        const std::pair<Moses::WordsRange,Moses::WordsRange>& targetSegments) const = 0;
     
@@ -67,17 +66,16 @@ class PosFeatureFunction : public  FeatureFunction {
     /** Compute full score of a sample from scratch **/
     virtual float computeScore();
     /** Change in score when updating one segment */
-    virtual float getSingleUpdateScore(const Moses::TranslationOption* option, const Moses::WordsRange& targetSegment);
+    virtual float getSingleUpdateScore(const Moses::TranslationOption* option, const TargetGap& gap);
     /** Change in score when updating two segments **/
-    virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                       const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
-                                       const WordsRange& rightTargetSegment, const Phrase& targetPhrase);
+    virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+        const TargetGap& gap);
+    virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+        const TargetGap& leftGap, const TargetGap& rightGap);
     
     /** Change in score when flipping */
-    virtual float getFlipUpdateScore(const Moses::TranslationOption* leftTgtOption, 
-                                     const Moses::TranslationOption* rightTgtOption, 
-                                     const Moses::Hypothesis* leftTgtHyp, const Moses::Hypothesis* rightTgtHyp, 
-                                     const Moses::WordsRange& leftTargetSegment, const Moses::WordsRange& rightTargetSegment);
+    virtual float getFlipUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+                                     const TargetGap& leftGap, const TargetGap& rightGap);
     virtual ~PosFeatureFunction() {}
     
   protected:

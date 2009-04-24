@@ -119,16 +119,17 @@ public:
   virtual void init(const Sample& sample);
   /** Compute full score of a sample from scratch **/
   virtual float computeScore();
-  /** Change in score when updating one segment */
-  virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment);
+  /** Compute full score of a sample from scratch **/
+  virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap);
   /** Change in score when updating two segments **/
-  virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                     const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
-                                     const WordsRange& rightTargetSegment, const Phrase& targetPhrase);
+  virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                               const TargetGap& gap);
+  virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+      const TargetGap& leftGap, const TargetGap& rightGap);
   /** Change in score when flipping */
-  virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-                           const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
-                           const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
+  virtual float getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                   const TargetGap& leftGap, const TargetGap& rightGap) {return 0;}
+  
 private:
   // compute the sums associated with each source word as a vector
   template <typename fwiter1, typename fwiter2, typename outputiter>
@@ -166,15 +167,15 @@ public:
   /** Compute full score of a sample from scratch **/
   virtual float computeScore();
   /** Change in score when updating one segment */
-  virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment);
+  virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap);
   /** Change in score when updating two segments **/
-  virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                     const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
-                                     const WordsRange& rightTargetSegment,   const Phrase& targetPhrase);
+  virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                     const TargetGap& gap);
+  virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                               const TargetGap& leftGap, const TargetGap& rightGap);
   /** Change in score when flipping */
-  virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-                           const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
-                           const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
+  virtual float getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                   const TargetGap& leftGap, const TargetGap& rightGap) {return 0;}
 private:
 
   // main scoring logic for a f phrase, e phrase
@@ -216,16 +217,15 @@ class ApproximateModel1 : public model1 {
     virtual float computeScore() {return 0;}
     /** Change in score when updating one segment */
     virtual float getImportanceWeight();
-    virtual float getSingleUpdateScore(const TranslationOption* option, const WordsRange& targetSegment) 
-      {return 0;}
+    virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {return 0;}
     /** Change in score when updating two segments **/
-    virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                       const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
-                                       const WordsRange& rightTargetSegment,   const Phrase& targetPhrase) {return 0;}
+    virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+        const TargetGap& gap){return 0;}
+    virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+        const TargetGap& leftGap, const TargetGap& rightGap){return 0;}
     /** Change in score when flipping */
-    virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-                                     const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
-                                     const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {return 0;}
+    virtual float getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                     const TargetGap& leftGap, const TargetGap& rightGap){return 0;}
     
     
 };
@@ -240,16 +240,15 @@ class ApproximateModel1Inverse : public model1_inverse {
     virtual float computeScore() {return 0;}
     /** Change in score when updating one segment */
     virtual float getImportanceWeight();
-    virtual float getSingleUpdateScore( const TranslationOption* option, const WordsRange& targetSegment) 
-    {return 0;}
+    virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {return 0;}
     /** Change in score when updating two segments **/
-    virtual float getPairedUpdateScore(const TranslationOption* leftOption,
-                                       const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
-                                       const WordsRange& rightTargetSegment,   const Phrase& targetPhrase) {return 0;}
+    virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+        const TargetGap& gap){return 0;}
+    virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+        const TargetGap& leftGap, const TargetGap& rightGap){return 0;}
     /** Change in score when flipping */
-    virtual float getFlipUpdateScore(const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-                                     const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
-                                     const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment) {return 0;}
+    virtual float getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                     const TargetGap& leftGap, const TargetGap& rightGap){return 0;}
     
     
 };
