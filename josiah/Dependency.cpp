@@ -95,7 +95,7 @@ float CherrySyntacticCohesionFeature::computeScore() {
   
 //NB : Target Segment is the old one  
 float CherrySyntacticCohesionFeature::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {
-  const Hypothesis* prevTgt = gap.leftHyp;
+  const Hypothesis* prevTgt = gap.leftHypo;
   if (!prevTgt->GetPrevHypo()) { //dummy hyp at start of sent, no cohesion violation
     return 0.0;
   }
@@ -116,8 +116,8 @@ float CherrySyntacticCohesionFeature::getFlipUpdateScore(
   WordsRange* rightTgtSegment = const_cast<WordsRange*> (&rightGap.segment);
   assert(leftTgtSegment < rightTgtSegment); //should already be in target order!
   
-  const Hypothesis* leftTgtHypPred = leftGap.leftHyp;
-  const Hypothesis* rightTgtHypSucc = rightGap.rightHyp;
+  const Hypothesis* leftTgtHypPred = leftGap.leftHypo;
+  const Hypothesis* rightTgtHypSucc = rightGap.rightHypo;
   
     
   //Left tgt option and its predecessor

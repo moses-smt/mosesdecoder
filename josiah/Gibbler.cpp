@@ -111,7 +111,6 @@ void Sample::UpdateTargetWords()  {
   IFVERBOSE(2) {
     VERBOSE(2,"FVs: " << feature_values << endl);
   }
-  cerr << "Length of target string is now " << m_targetWords.size() << endl; 
 }
 
   

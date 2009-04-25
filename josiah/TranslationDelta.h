@@ -101,6 +101,8 @@ class TranslationDelta {
     virtual ~TranslationDelta() {}
     
   protected:
+  
+    //FIXME: The four LM scoring methods should be merged with the three scoring methods for other features.
     /**
       Compute the change in language model score by adding this target phrase
       into the hypothesis at the given target position.
@@ -116,13 +118,19 @@ class TranslationDelta {
     /**
       * Initialise the scores for the case where only one source-target pair needs to be considered.
      **/
-    void initScoresSingleUpdate(const Sample&, const TranslationOption* option, const WordsRange& targetSegment);
+    void initScoresSingleUpdate(const Sample&, const TranslationOption* option, const Josiah::TargetGap& gap);
     /**
-     * Initialise the scores for the case where two source-target pairs need to be considered.
+     * Initialise the scores for the case where two (target contiguous) source-target pairs need to be considered.
+     * Note that left and right refers to the target order.
      **/
-    void initScoresPairedUpdate(const Sample&, const TranslationOption* leftOption,
-                              const TranslationOption* rightOption, const WordsRange& leftTargetSegment, 
-                              const WordsRange& rightTargetSegment,  const Phrase& targetPhrase);
+    void initScoresContiguousPairedUpdate(const Sample&, const TranslationOption* leftOption,
+                              const TranslationOption* rightOption, const Josiah::TargetGap& gap);
+    
+    /** Discontiguous version of above. */
+    void initScoresDiscontiguousPairedUpdate(const Sample&, const TranslationOption* leftOption,
+                              const TranslationOption* rightOption, const Josiah::TargetGap& leftGap, 
+                              const Josiah::TargetGap& rightGap);
+                              
   
   void updateWeightedScore();
     ScoreComponentCollection m_scores;
@@ -140,7 +148,7 @@ class TranslationDelta {
   **/
 class TranslationUpdateDelta : public virtual TranslationDelta {
   public:
-     TranslationUpdateDelta(Sample& sample, const TranslationOption* option , const WordsRange& targetSegment);
+     TranslationUpdateDelta(Sample& sample, const TranslationOption* option , const Josiah::TargetGap& gap);
      virtual void apply(const TranslationDelta& noChangeDelta);
      
   private:
@@ -157,7 +165,7 @@ class MergeDelta : public virtual TranslationDelta {
      * option - the source/target phrase to go into the merged segment
      * targetSegment - the location of the target segment
      **/
-    MergeDelta(Sample& sample, const TranslationOption* option, const WordsRange& targetSegment);
+    MergeDelta(Sample& sample, const TranslationOption* option, const Josiah::TargetGap& gap);
     virtual void apply(const TranslationDelta& noChangeDelta);
   
   private:
@@ -170,9 +178,10 @@ class MergeDelta : public virtual TranslationDelta {
 **/
 class PairedTranslationUpdateDelta : public virtual TranslationDelta {
   public: 
+    /** Options and gaps in target order */
     PairedTranslationUpdateDelta(Sample& sample,
         const TranslationOption* leftOption, const TranslationOption* rightOption, 
-        const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment);
+        const Josiah::TargetGap& leftGap, const Josiah::TargetGap& rightGap);
     
     virtual void apply(const TranslationDelta& noChangeDelta);
     
@@ -186,7 +195,9 @@ class PairedTranslationUpdateDelta : public virtual TranslationDelta {
  **/
 class SplitDelta : public virtual TranslationDelta {
   public:
-    SplitDelta(Sample& sample, const TranslationOption* leftOption, const TranslationOption* rightOption, const WordsRange& targetSegment);
+    /** Options and gaps in target order */
+    SplitDelta(Sample& sample, const TranslationOption* leftOption, const TranslationOption* rightOption, 
+    const Josiah::TargetGap& gap);
     virtual void apply(const TranslationDelta& noChangeDelta);
     
   private:
@@ -200,9 +211,9 @@ class SplitDelta : public virtual TranslationDelta {
  **/
 class FlipDelta : public virtual TranslationDelta {
   public: 
+    /**  Options and gaps in target order */
     FlipDelta(Sample& sample, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-              const Hypothesis* leftTgtHyp, const Hypothesis* rightTgtHyp, 
-                                 const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, float distortion);
+              const Josiah::TargetGap& leftGap, const Josiah::TargetGap& rightGap, float distortion);
     
     virtual void apply(const TranslationDelta& noChangeDelta);
     
