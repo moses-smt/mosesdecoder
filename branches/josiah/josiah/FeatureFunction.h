@@ -50,14 +50,18 @@ class FeatureState {};
 /**
 * Represents a gap in the target sentence. During score computation, this is used to specify where the proposed
 * TranslationOptions are to be placed. The left and right hypothesis are to the left and to the right in target order.
+* Note that the leftHypo could be the null hypo (if at start) and the rightHypo could be a null pointer (if at end).
 **/
 struct TargetGap {
   TargetGap(const Hypothesis* lh, const Hypothesis* rh, const WordsRange& s) :
-      leftHyp(lh), rightHyp(rh), segment(s) {
+      leftHypo(lh), rightHypo(rh), segment(s) {
+      //check that they're in target order.
+      assert(!lh->GetPrevHypo() || lh->GetCurrTargetWordsRange() < s);
+      assert(!rh || s < rh->GetCurrTargetWordsRange());
   }
   
-  const Hypothesis* leftHyp;
-  const Hypothesis* rightHyp;
+  const Hypothesis* leftHypo;
+  const Hypothesis* rightHypo;
   WordsRange segment;
 };
 

@@ -125,32 +125,53 @@ void MergeSplitOperator::doIteration(
       assert(prev->GetSourcePrevHypo()); //must be a valid hypo
       WordsRange leftSourceSegment = prev->GetCurrSourceWordsRange();
       WordsRange leftTargetSegment = prev->GetCurrTargetWordsRange();
-      noChangeDelta = new   PairedTranslationUpdateDelta(sample,&(prev->GetTranslationOption())
-          ,&(hypothesis->GetTranslationOption()),leftTargetSegment,rightTargetSegment);
       if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos()) {
         //contiguous on target side.
+        //In this case source and target order are the same
         //Add MergeDeltas
         WordsRange sourceSegment(leftSourceSegment.GetStartPos(), rightSourceSegment.GetEndPos());
         WordsRange targetSegment(leftTargetSegment.GetStartPos(), rightTargetSegment.GetEndPos());
+        TargetGap gap(prev->GetPrevHypo(), hypothesis->GetNextHypo(), targetSegment);
         VERBOSE(3, "Creating merge deltas for merging source segments  " << leftSourceSegment << " with " <<
               rightSourceSegment << " and target segments " << leftTargetSegment << " with " << rightTargetSegment  << endl);
         const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
         for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-          TranslationDelta* delta = new MergeDelta(sample,*i,targetSegment);
+          TranslationDelta* delta = new MergeDelta(sample,*i,gap);
           deltas.push_back(delta);
         }
       }
-           
+      //make sure that the 'left' and 'right' refer to the target order
+      const TranslationOptionList* leftOptions = NULL;
+      const TranslationOptionList* rightOptions = NULL;
+      auto_ptr<TargetGap> leftGap;
+      auto_ptr<TargetGap> rightGap;
+      if (leftTargetSegment < rightTargetSegment) {
+        //source and target order same
+        leftOptions = &(toc.GetTranslationOptionList(leftSourceSegment));
+        rightOptions = &(toc.GetTranslationOptionList(rightSourceSegment));
+        leftGap.reset(new TargetGap(prev->GetPrevHypo(), prev->GetNextHypo(), prev->GetCurrTargetWordsRange()));
+        rightGap.reset(new TargetGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), 
+              hypothesis->GetCurrTargetWordsRange()));
+        noChangeDelta = new   PairedTranslationUpdateDelta(sample,&(prev->GetTranslationOption())
+          ,&(hypothesis->GetTranslationOption()),*leftGap, *rightGap);
+        
+      } else {
+        //target in opposite order to source
+        leftOptions = &(toc.GetTranslationOptionList(rightSourceSegment));
+        rightOptions = &(toc.GetTranslationOptionList(leftSourceSegment));
+        leftGap.reset(new TargetGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), 
+              hypothesis->GetCurrTargetWordsRange()));
+        rightGap.reset(new TargetGap(prev->GetPrevHypo(), prev->GetNextHypo(), prev->GetCurrTargetWordsRange()));
+        noChangeDelta = new   PairedTranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption())
+          ,&(prev->GetTranslationOption()),*leftGap, *rightGap);
+      }
+      
+
       //Add PairedTranslationUpdateDeltas
-      VERBOSE(3, "Creating paired updates for source segments " << leftSourceSegment << " and " << rightSourceSegment <<
-          " and target segments " << leftTargetSegment << " and " << rightTargetSegment << endl);
-      const TranslationOptionList&  leftOptions = toc.GetTranslationOptionList(leftSourceSegment);
-      //cerr << "Got " << leftOptions.size() << " options for " << leftSourceSegment << endl;
-      const TranslationOptionList&  rightOptions = toc.GetTranslationOptionList(rightSourceSegment);
-      //cerr << "Got " << rightOptions.size() << " options for " << rightSourceSegment << endl;
-      for (TranslationOptionList::const_iterator ri = rightOptions.begin(); ri != rightOptions.end(); ++ri) {
-        for (TranslationOptionList::const_iterator li = leftOptions.begin(); li != leftOptions.end(); ++li) {
-          TranslationDelta* delta = new PairedTranslationUpdateDelta(sample,*li, *ri, leftTargetSegment, rightTargetSegment);
+      
+      for (TranslationOptionList::const_iterator ri = rightOptions->begin(); ri != rightOptions->end(); ++ri) {
+        for (TranslationOptionList::const_iterator li = leftOptions->begin(); li != leftOptions->end(); ++li) {
+          TranslationDelta* delta = new PairedTranslationUpdateDelta(sample,*li, *ri, *leftGap, *rightGap);
           deltas.push_back(delta);
         }
       }
@@ -158,14 +179,15 @@ void MergeSplitOperator::doIteration(
     } else {
       VERBOSE(3, "No existing split" << endl);
       WordsRange sourceSegment = hypothesis->GetCurrSourceWordsRange();
-      WordsRange targetSegment = hypothesis->GetCurrTargetWordsRange();
-      noChangeDelta = new TranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption()),targetSegment);
+      TargetGap gap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), hypothesis->GetCurrTargetWordsRange());
+      noChangeDelta = new TranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption()),gap);
       //Add TranslationUpdateDeltas
       const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
       //cerr << "Got " << options.size() << " options for " << sourceSegment << endl;
-      VERBOSE(3, "Creating simple deltas for source segment " << sourceSegment << " and target segment " << targetSegment  << endl);
+      VERBOSE(3, "Creating simple deltas for source segment " << sourceSegment << " and target segment " <<gap.segment
+            << endl);
       for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,targetSegment);
+        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,gap);
         deltas.push_back(delta);
       }
       //cerr << "Added " << ds << " deltas" << endl;
@@ -173,13 +195,14 @@ void MergeSplitOperator::doIteration(
       
       //Add SplitDeltas
       VERBOSE(3, "Adding deltas to split " << sourceSegment << " at " << splitIndex << endl);
+      //Note no reordering in split
       WordsRange leftSourceSegment(sourceSegment.GetStartPos(),splitIndex-1);
       WordsRange rightSourceSegment(splitIndex,sourceSegment.GetEndPos());
       const TranslationOptionList&  leftOptions = toc.GetTranslationOptionList(leftSourceSegment);
       const TranslationOptionList&  rightOptions = toc.GetTranslationOptionList(rightSourceSegment);
       for (TranslationOptionList::const_iterator ri = rightOptions.begin(); ri != rightOptions.end(); ++ri) {
         for (TranslationOptionList::const_iterator li = leftOptions.begin(); li != leftOptions.end(); ++li) {
-          TranslationDelta* delta = new SplitDelta(sample, *li, *ri, targetSegment);
+          TranslationDelta* delta = new SplitDelta(sample, *li, *ri, gap);
           deltas.push_back(delta);
         }
       }
@@ -206,20 +229,20 @@ void TranslationSwapOperator::doIteration(
   const Hypothesis* currHypo = sample.GetHypAtSourceIndex(0);
   //Iterate in source order
   while (currHypo) {
-    const WordsRange& targetSegment = currHypo->GetCurrTargetWordsRange();
+    TargetGap gap(currHypo->GetPrevHypo(), currHypo->GetNextHypo(), currHypo->GetCurrTargetWordsRange());
     const WordsRange& sourceSegment = currHypo->GetCurrSourceWordsRange();
-    VERBOSE(3, "Considering source segment " << sourceSegment << " and target segment " << targetSegment << endl); 
+    VERBOSE(3, "Considering source segment " << sourceSegment << " and target segment " << gap.segment << endl); 
     
     vector<TranslationDelta*> deltas;
     const TranslationOption* noChangeOption = &(currHypo->GetTranslationOption());
-    TranslationDelta* noChangeDelta = new TranslationUpdateDelta(sample,noChangeOption,targetSegment);
+    TranslationDelta* noChangeDelta = new TranslationUpdateDelta(sample,noChangeOption,gap);
     deltas.push_back(noChangeDelta);
     
     
     const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
     for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
       if (*i != noChangeOption) {
-        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,targetSegment);
+        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,gap);
         deltas.push_back(delta);  
       }
     }
@@ -343,6 +366,7 @@ void FlipOperator::doIteration(
       
       
       if (thisTargetSegment <  followingTargetSegment ) {
+        //source and target order are the same
         bool contiguous = (thisTargetSegment.GetEndPos() + 1 ==  followingTargetSegment.GetStartPos());
         
         /*contiguous on target side, flipping would make this a swap
@@ -361,14 +385,18 @@ void FlipOperator::doIteration(
         
         bool isValidSwap = CheckValidReordering(followingHyp, hypothesis, hypothesis->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, followingHyp->GetNextHypo(), totalDistortion);
         if (isValidSwap) {//yes
+          TargetGap leftGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
+          TargetGap rightGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
           TranslationDelta* delta = new FlipDelta(sample, &(followingHyp->GetTranslationOption()), 
-                                                  &(hypothesis->GetTranslationOption()),  hypothesis->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment,thisTargetSegment, totalDistortion);
+                                                  &(hypothesis->GetTranslationOption()), 
+                                                  leftGap, rightGap, totalDistortion);
           deltas.push_back(delta);
           
           CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
           
           noChangeDelta = new   FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                        &(followingHyp->GetTranslationOption()), hypothesis->GetPrevHypo(), followingHyp->GetNextHypo() ,thisTargetSegment,followingTargetSegment, totalDistortion); 
+                                        &(followingHyp->GetTranslationOption()), leftGap, rightGap,
+                                          totalDistortion); 
           deltas.push_back(noChangeDelta);   
         }  
       }
@@ -388,14 +416,19 @@ void FlipOperator::doIteration(
         }
         bool isValidSwap = CheckValidReordering(hypothesis, followingHyp, followingHyp->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, hypothesis->GetNextHypo(), totalDistortion);        
         if (isValidSwap) {//yes
+          TargetGap leftGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
+          TargetGap rightGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
+          
+          
           TranslationDelta* delta = new FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                                  &(followingHyp->GetTranslationOption()),  followingHyp->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment,followingTargetSegment, totalDistortion);
+                                                  &(followingHyp->GetTranslationOption()),  leftGap, rightGap,
+                                                   totalDistortion);
           deltas.push_back(delta);
           
           
           CheckValidReordering(followingHyp,hypothesis, followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
           noChangeDelta = new FlipDelta(sample,&(followingHyp->GetTranslationOption()), 
-                                      &(hypothesis->GetTranslationOption()), followingHyp->GetPrevHypo(), hypothesis->GetNextHypo(), followingTargetSegment,thisTargetSegment, totalDistortion);
+                                      &(hypothesis->GetTranslationOption()), leftGap, rightGap, totalDistortion);
           deltas.push_back(noChangeDelta); 
         }  
       }
@@ -442,13 +475,16 @@ void FlipOperator::doIteration(
         
         bool isValidSwap = CheckValidReordering(followingHyp, hypothesis, hypothesis->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, followingHyp->GetNextHypo(), totalDistortion);
         if (isValidSwap) {//yes
+          TargetGap leftGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
+          TargetGap rightGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
           TranslationDelta* delta = new FlipDelta(sample, &(followingHyp->GetTranslationOption()), 
-                                                  &(hypothesis->GetTranslationOption()),  hypothesis->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment,thisTargetSegment, totalDistortion);
+                                                  &(hypothesis->GetTranslationOption()),  leftGap, rightGap,
+                                                   totalDistortion);
           deltas.push_back(delta);          
         
           CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
           noChangeDelta = new   FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                        &(followingHyp->GetTranslationOption()), hypothesis->GetPrevHypo(), followingHyp->GetNextHypo() ,thisTargetSegment,followingTargetSegment, totalDistortion); 
+                                        &(followingHyp->GetTranslationOption()),leftGap, rightGap, totalDistortion); 
           deltas.push_back(noChangeDelta);   
         }  
       }
@@ -469,13 +505,16 @@ void FlipOperator::doIteration(
         
         bool isValidSwap = CheckValidReordering(hypothesis, followingHyp, followingHyp->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, hypothesis->GetNextHypo(), totalDistortion);        
         if (isValidSwap) {//yes
+          TargetGap rightGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
+          TargetGap leftGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
           TranslationDelta* delta = new FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                                  &(followingHyp->GetTranslationOption()),  followingHyp->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment,followingTargetSegment, totalDistortion);
+                                                  &(followingHyp->GetTranslationOption()),   leftGap, rightGap,
+                                                   totalDistortion);
           deltas.push_back(delta);
           
           CheckValidReordering(followingHyp,hypothesis, followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
           noChangeDelta = new FlipDelta(sample,&(followingHyp->GetTranslationOption()), 
-                                      &(hypothesis->GetTranslationOption()), followingHyp->GetPrevHypo(), hypothesis->GetNextHypo(), followingTargetSegment,thisTargetSegment, totalDistortion);
+                                      &(hypothesis->GetTranslationOption()),  leftGap, rightGap, totalDistortion);
           deltas.push_back(noChangeDelta); 
         }  
       }
