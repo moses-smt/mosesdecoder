@@ -491,7 +491,8 @@ void SampleCollector::addSample( Sample & sample, double importanceWeight ) {
   //renormalise
   m_normalisedImportanceWeights.push_back(0);
   for (size_t i = 0; i < m_importanceWeights.size(); ++i) {
-    m_normalisedImportanceWeights[i] = exp(m_importanceWeights[i] - m_totalImportanceWeight);
+    double logNormalisedWeight = max(-100.0, m_importanceWeights[i] - m_totalImportanceWeight);
+    m_normalisedImportanceWeights[i] = exp(logNormalisedWeight);
   }
   collect(sample);
   ++m_n;
