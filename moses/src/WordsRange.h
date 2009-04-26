@@ -77,7 +77,8 @@ public:
   //! transitive comparison
 	inline bool operator>(const WordsRange& x) const 
 	{
-		return ! (*this < x);
+		return (m_startPos > x.m_startPos 
+                   || (m_startPos==x.m_startPos && m_endPos > x.m_endPos));
 	}
 	
 	// Whether two word ranges overlap or not
@@ -107,7 +108,12 @@ public:
 		   m_startPos==x.m_startPos && m_endPos==x.m_endPos;
 	}
 
-
+  //Whether two ranges are equal or not
+	inline bool operator!=(const WordsRange& x) const 
+	{
+		return  
+    m_startPos!=x.m_startPos || m_endPos!=x.m_endPos;
+	} 
 
 	TO_STRING();
 };
