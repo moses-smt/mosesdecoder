@@ -37,10 +37,8 @@ class Sample {
   std::set<Hypothesis*> cachedSampledHyps;
   
   std::map<size_t, Hypothesis*>  sourceIndexedHyps;
-  std::map<size_t, Hypothesis*>  tgtIndexedHyps;
   
   void SetSourceIndexedHyps(Hypothesis* h);
-  void SetTgtIndexedHyps(Hypothesis* h);
   void UpdateFeatureValues(const ScoreComponentCollection& deltaFV);
   void UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange);   
   void UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head);
@@ -57,7 +55,6 @@ class Sample {
   ~Sample();
   int GetSourceSize() const { return m_sourceWords.size(); }
   Hypothesis* GetHypAtSourceIndex(size_t ) ;
-  Hypothesis* GetHypAtTgtIndex(size_t ) ;
   const Hypothesis* GetSampleHypothesis() const {
     return target_head;
   }

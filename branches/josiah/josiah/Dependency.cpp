@@ -77,18 +77,15 @@ bool DependencyTree::covers(size_t parent, size_t descendent) const {
 }
 
 float CherrySyntacticCohesionFeature::computeScore() {
-  //TODO
-  return 0.0;
-  /*float interruptionCount = 0.0;
-  Hypothesis *prev = NULL;
-  for (Hypothesis* h = const_cast<Hypothesis*>(const_cast<Sample*>(m_sample)->GetTargetTail()); h; h = const_cast<Hypothesis*>(h->GetNextHypo())) {
-    if (prev && h->GetCurrSourceWordsRange().GetStartPos() > 0) {
-      interruptionCount += getSingleUpdateScore(&(h->GetTranslationOption()), h->GetCurrTargetWordsRange());
-    } 
+  float interruptionCount = 0.0;
+  Hypothesis *prev = const_cast<Hypothesis*>(const_cast<Sample*>(m_sample)->GetTargetTail()->GetNextHypo()); //first hypo in tgt order
+  
+  for (Hypothesis* h =  const_cast<Hypothesis*>(prev->GetNextHypo()); h; h = const_cast<Hypothesis*>(h->GetNextHypo())) {
+    interruptionCount += getInterruptions(prev->GetCurrSourceWordsRange(), &(h->GetTranslationOption()), h->GetCurrTargetWordsRange());
     prev = h;
   }
-  cerr << "In compute score, interr cnt = " << interruptionCount << endl;
-  return interruptionCount;*/
+  VERBOSE(2, "In compute score, interr cnt = " << interruptionCount << endl);
+  return interruptionCount;
 }
   
 /** Score due to  one segment */
@@ -101,7 +98,7 @@ float CherrySyntacticCohesionFeature::getSingleUpdateScore(const TranslationOpti
   }
   
   float interruptionCnt =  getInterruptions(prevTgt->GetCurrSourceWordsRange(), option, gap.segment);
-  cerr << "In single upd, int cnt " << interruptionCnt << endl;
+  VERBOSE(2,  "In single upd, int cnt " << interruptionCnt << endl);
   return interruptionCnt;
 }  
 
@@ -114,12 +111,12 @@ float CherrySyntacticCohesionFeature::getFlipUpdateScore(
   //Let's sort out the order of the segments
   WordsRange* leftTgtSegment = const_cast<WordsRange*> (&leftGap.segment);
   WordsRange* rightTgtSegment = const_cast<WordsRange*> (&rightGap.segment);
-  assert(leftTgtSegment < rightTgtSegment); //should already be in target order!
+  
+  assert(*leftTgtSegment < *rightTgtSegment); //should already be in target order!
   
   const Hypothesis* leftTgtHypPred = leftGap.leftHypo;
   const Hypothesis* rightTgtHypSucc = rightGap.rightHypo;
   
-    
   //Left tgt option and its predecessor
   if (leftTgtHypPred && leftTgtHypPred->GetPrevHypo()) {
     interruptionCnt +=  getInterruptions(leftTgtHypPred->GetCurrSourceWordsRange(), leftTgtOption, *leftTgtSegment);  
@@ -138,93 +135,90 @@ float CherrySyntacticCohesionFeature::getFlipUpdateScore(
   }
   else {
     //Left tgt option and its successor
-    Hypothesis* leftTgtSuccessorHyp = const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(leftTgtSegment->GetEndPos()+1);
+    const Hypothesis* leftTgtSuccessorHyp = leftGap.rightHypo;
     if (leftTgtSuccessorHyp) {
       interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), &(leftTgtSuccessorHyp->GetTranslationOption()), leftTgtSuccessorHyp->GetCurrTargetWordsRange());  
     }
       
     //Right tgt option and its predecessor
-    Hypothesis* rightTgtPredecessorHyp = const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(rightTgtSegment->GetStartPos()-1);
+    const Hypothesis* rightTgtPredecessorHyp = rightGap.leftHypo;
       
     if (rightTgtPredecessorHyp) {
       interruptionCnt +=  getInterruptions(rightTgtPredecessorHyp->GetCurrSourceWordsRange(), rightTgtOption, *rightTgtSegment);
     }  
   }
-  cerr << "In flip, interr cnt = " << interruptionCnt << endl;  
+  VERBOSE(2, "In flip, interr cnt = " << interruptionCnt << endl);  
   return interruptionCnt; 
 }
   
 /** Score due to two segments **/
 float CherrySyntacticCohesionFeature::getContiguousPairedUpdateScore(
-    const TranslationOption* leftOption,const TranslationOption* rightOption, 
+    const TranslationOption* leftTgtOption,const TranslationOption* rightTgtOption, 
     const TargetGap& gap) {
-      return 0.0;
   
-  /*float interruptionCnt = 0.0;
-  bool split = false;
+  float interruptionCnt = 0.0;
   
-  //Order the options and segments by tgt order instead of src order
-  TranslationOption* leftTgtOption = const_cast<TranslationOption*>(leftOption);
-  TranslationOption* rightTgtOption = const_cast<TranslationOption*>(rightOption);
-  WordsRange* leftTgtSegment = const_cast<WordsRange*> (&leftSegment);
-  WordsRange* rightTgtSegment = const_cast<WordsRange*> (&rightSegment);
+  const Hypothesis*  leftTgtHypPred = gap.leftHypo;
+  const Hypothesis*  rightTgtHypSucc = gap.rightHypo;
   
-  if (rightSegment == leftSegment) { //we're dealing with split options
-    split = true;  
-  }   
-  else if (rightSegment < leftSegment) {
-    leftTgtSegment = const_cast<WordsRange*> (&rightSegment);
-    rightTgtSegment = const_cast<WordsRange*>(&leftSegment);
-    leftTgtOption = const_cast<TranslationOption*>(rightOption);
-    rightTgtOption = const_cast<TranslationOption*>(leftOption);
+  //Left tgt option and its predecessor
+  if (gap.segment.GetStartPos() > 0) {
+    if (leftTgtHypPred) {
+      interruptionCnt +=  getInterruptions(leftTgtHypPred->GetCurrSourceWordsRange(), leftTgtOption, gap.segment);  
+    }  
+  } 
+  
+  //Right tgt option and its successor
+  if (rightTgtHypSucc) {
+    interruptionCnt +=  getInterruptions(rightTgtOption->GetSourceWordsRange()  ,&(rightTgtHypSucc->GetTranslationOption()), rightTgtHypSucc->GetCurrTargetWordsRange());    
   }
+  
+  interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), rightTgtOption, gap.segment);  
+  
+  VERBOSE(2, "In paired update, interr cnt = " << interruptionCnt << endl); 
+  return interruptionCnt; 
+}
+
+float CherrySyntacticCohesionFeature::getDiscontiguousPairedUpdateScore(
+    const TranslationOption* leftTgtOption,const TranslationOption* rightTgtOption, 
+    const TargetGap& leftGap, const TargetGap& rightGap) {
+  
+  float interruptionCnt = 0.0;
+  
+  WordsRange* leftTgtSegment = const_cast<WordsRange*> (&leftGap.segment);
+  WordsRange* rightTgtSegment = const_cast<WordsRange*> (&rightGap.segment);
+  assert(*leftTgtSegment < *rightTgtSegment); //should already be in target order!
+  
+  const Hypothesis*  leftTgtHypPred = leftGap.leftHypo;
+  const Hypothesis*  leftTgtSuccessorHyp = leftGap.rightHypo;
+  const Hypothesis*  rightTgtPredecessorHyp = rightGap.leftHypo;
+  const Hypothesis*  rightTgtHypSucc = rightGap.rightHypo;
   
   //Left tgt option and its predecessor
   if (leftTgtSegment->GetStartPos() > 0) {
-    Hypothesis*  leftTgtHypPred =  const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(leftTgtSegment->GetStartPos()-1);
     if (leftTgtHypPred) {
       interruptionCnt +=  getInterruptions(leftTgtHypPred->GetCurrSourceWordsRange(), leftTgtOption, *leftTgtSegment);  
     }  
   } 
   
-  
-  
   //Right tgt option and its successor
-  Hypothesis*  rightTgtHypSucc =  const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(rightTgtSegment->GetEndPos()+1);
   if (rightTgtHypSucc) {
     interruptionCnt +=  getInterruptions(rightTgtOption->GetSourceWordsRange()  ,&(rightTgtHypSucc->GetTranslationOption()), rightTgtHypSucc->GetCurrTargetWordsRange());    
   }
   
-  //Are the options contiguous on the target side?
-  bool contiguous = (leftTgtSegment->GetEndPos() + 1 == rightTgtSegment->GetStartPos()) || split;
+  //Left tgt option and its successor
+  if (leftTgtSuccessorHyp) {
+    interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), &(leftTgtSuccessorHyp->GetTranslationOption()), leftTgtSuccessorHyp->GetCurrTargetWordsRange());  
+  }
+    
+  //Right tgt option and its predecessor
+  if (rightTgtPredecessorHyp) {
+    interruptionCnt +=  getInterruptions(rightTgtPredecessorHyp->GetCurrSourceWordsRange(), rightTgtOption, *rightTgtSegment);
+  }  
   
-  if (contiguous) {
-    interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), rightTgtOption, *rightTgtSegment);  
-  }
-  else {
-    //Left tgt option and its successor
-    Hypothesis* leftTgtSuccessorHyp = const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(leftTgtSegment->GetEndPos()+1);
-    if (leftTgtSuccessorHyp) {
-      interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), &(leftTgtSuccessorHyp->GetTranslationOption()), leftTgtSuccessorHyp->GetCurrTargetWordsRange());  
-    }
-    
-    //Right tgt option and its predecessor
-    Hypothesis* rightTgtPredecessorHyp = const_cast<Sample*>(m_sample)->GetHypAtTgtIndex(rightTgtSegment->GetStartPos()-1);
-    
-    if (rightTgtPredecessorHyp) {
-      interruptionCnt +=  getInterruptions(rightTgtPredecessorHyp->GetCurrSourceWordsRange(), rightTgtOption, *rightTgtSegment);
-    }  
-  }
-  cerr << "In paired update, interr cnt = " << interruptionCnt << endl; 
-  return interruptionCnt; */
+  VERBOSE(2, "In paired update, interr cnt = " << interruptionCnt << endl); 
+  return interruptionCnt; 
 }
-
-float CherrySyntacticCohesionFeature::getDiscontiguousPairedUpdateScore(
-    const TranslationOption* leftOption,const TranslationOption* rightOption, 
-    const TargetGap& leftGap, const TargetGap& rightGap) {
-      //TODO
-      return 0.0;
-    }
 
 
 
