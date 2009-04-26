@@ -22,7 +22,7 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
 
   for (Hypothesis* h = target_head; h; h = const_cast<Hypothesis*>(h->GetPrevHypo())) {
     size_t startPos = h->GetCurrSourceWordsRange().GetStartPos();
-    SetSourceIndexedHyps(h); SetTgtIndexedHyps(h); 
+    SetSourceIndexedHyps(h); 
     if (h->GetPrevHypo()){
       source_order[startPos] = h;  
     }
@@ -120,17 +120,7 @@ Hypothesis* Sample::GetHypAtSourceIndex(size_t i)  {
     return NULL;
   return it->second;
 }
-
-Hypothesis* Sample::GetHypAtTgtIndex(size_t i)  {
-  std::map<size_t, Hypothesis*>::iterator it = tgtIndexedHyps.find(i);
-  if (it == tgtIndexedHyps.end()){
-    cerr << "In tgt words, Can't find this " << i << endl;
-    return NULL;
-  }
-    
-  return it->second;
-}
-  
+ 
   
 void Sample::SetSourceIndexedHyps(Hypothesis* h) {
   
@@ -142,18 +132,6 @@ void Sample::SetSourceIndexedHyps(Hypothesis* h) {
   }
   for (size_t i = startPos; i <= endPos; i++) {
     sourceIndexedHyps[i] = h; 
-  } 
-}
-  
-void Sample::SetTgtIndexedHyps(Hypothesis* h) {
-  size_t startPos = h->GetCurrTargetWordsRange().GetStartPos();
-  size_t endPos = h->GetCurrTargetWordsRange().GetEndPos();
-  if (startPos + 1 == 0 ) {
-    tgtIndexedHyps[startPos] = h; 
-    return;
-  }
-  for (size_t i = startPos; i <= endPos; i++) {
-    tgtIndexedHyps[i] = h; 
   } 
 }
   
