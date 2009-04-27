@@ -107,6 +107,7 @@ typedef boost::shared_ptr<moses_factor_to_vocab_id> vocab_mapper_handle;
 
 // minimum value of any inner sum in the Model 1 feature computation
 const float MODEL1_SUM_FLOOR = 0.0000000001; // n.b. Och et al. 2004 use 10^{-40}
+const float MODEL1_LOG_FLOOR = -10000; 
 
 // n.b. unknown words are assigned an id of -1
 struct is_known{ bool operator()(int x){ return x==-1 ? false : true; } };
@@ -130,34 +131,68 @@ public:
   virtual float getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
                                    const TargetGap& leftGap, const TargetGap& rightGap) {return 0;}
   
-private:
+protected:
   // compute the sums associated with each source word as a vector
   template <typename fwiter1, typename fwiter2, typename outputiter>
   void _compute_inner_sums(const fwiter1& f_begin, const fwiter1& f_end, 
     const fwiter2& e_begin, const fwiter2& e_end, outputiter result){ 
     for(fwiter1 i = f_begin; i!=f_end; ++i){
       *result = _ptable->score(*i, 0, 1);
+      //cerr << "result with " << *i << " and 0 = " << *result << endl; 
       for(fwiter2 j = e_begin; j!=e_end; ++j){ 
         *result += _ptable->score(*i, *j, 1);
+        //cerr << "result with " << *i << " and " << *j << " = "  << _ptable->score(*i, *j, 1) << endl; 
       }
       result++;
     }
   }
   
-  void clear_cache(const Sample&);
-
   inline const vocabulary& e_vocab() { return _ptable->e_vocab(); }
   inline const vocabulary& f_vocab() { return _ptable->f_vocab(); }
   model1_table_handle _ptable;
   vocab_mapper_handle _pfmap;
   vocab_mapper_handle _pemap;
+  const Sample* _sample;
+
+private:
+  void clear_cache(const Sample&);
   std::vector<int> _source_word_ids; // cached internal rep of source sentence
   std::vector<float> _sums; // cache of inner sums
   std::vector<Moses::Word> _source_words;
-  const Sample* _sample;
 };
 
+/**
+  * Approximation of model1 for importance sampling.
+ **/
+class ApproximateModel1 : public model1 {
+  public:
+    ApproximateModel1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
+    virtual void init(const Sample& sample);
+    /** Compute full score of a sample from scratch **/
+  virtual float computeScore();
+    /** Change in score when updating one segment */
+    virtual float getImportanceWeight();
+  virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap);
+    /** Change in score when updating two segments **/
+    virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
+                                                 const TargetGap& gap);
+    virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
+                                                    const TargetGap& leftGap, const TargetGap& rightGap);
+    /** Change in score when flipping */
+    virtual float getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
+                                     const TargetGap& leftGap, const TargetGap& rightGap){return 0;}
+  private:
 
+    std::map<const TranslationOption*,float> _option_cache; // cached scores for entire target phrases
+
+    float getSingleUpdateScore(const TranslationOption* option, const WordsRange& segment);
+    void clear_cache(const Sample& s);
+
+    std::vector<int> _source_word_ids; // cached internal rep of source sentence
+    std::vector<float> _sums; // cache of inner sums
+    std::vector<Moses::Word> _source_words;
+    //const Sample* _sample;
+};
 
 /// feature p(f|e)
 class model1_inverse : public FeatureFunction {
@@ -205,29 +240,6 @@ private:
   std::vector<int> _sentence_cache; // cached internal rep of source sentence
   std::vector<Word> _sourceWords;
   const Sample* _sample;
-};
-
-/**
-  * Approximation of model1 for importance sampling.
- **/
-class ApproximateModel1 : public model1 {
-  public:
-    ApproximateModel1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
-    /** Compute full score of a sample from scratch **/
-    virtual float computeScore() {return 0;}
-    /** Change in score when updating one segment */
-    virtual float getImportanceWeight();
-    virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {return 0;}
-    /** Change in score when updating two segments **/
-    virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
-        const TargetGap& gap){return 0;}
-    virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
-        const TargetGap& leftGap, const TargetGap& rightGap){return 0;}
-    /** Change in score when flipping */
-    virtual float getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
-                                     const TargetGap& leftGap, const TargetGap& rightGap){return 0;}
-    
-    
 };
 
 /**

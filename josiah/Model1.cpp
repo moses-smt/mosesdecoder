@@ -126,13 +126,23 @@ void _moses_words_to_ids(const moses_factor_to_vocab_id& func,
     dest, is_unknown());  
 }
 
+template <typename ForwardRange, typename BackInsertIterator>
+void _moses_words_to_ids_unfiltered(const moses_factor_to_vocab_id& func, 
+  const ForwardRange& origin, const BackInsertIterator& dest){
+  
+  std::vector<int> unfiltered_ids;
+  std::transform(origin.begin(), origin.end(), 
+    std::back_inserter(unfiltered_ids), func);
+  std::copy (unfiltered_ids.begin (), unfiltered_ids.end (), dest);
+}
+
+
 void model1::init(const Sample& sample) {
   _sample = &sample;
   clear_cache(sample);
 }
 
 void model1::clear_cache(const Sample& s){
-  
   _source_words = s.GetSourceWords();
 
   _source_word_ids.clear();
@@ -248,16 +258,95 @@ float model1_inverse::getDiscontiguousPairedUpdateScore(const TranslationOption*
           getSingleUpdateScore(rightOption, rightGap);
 }  
   
-  
-
-
 ApproximateModel1::ApproximateModel1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
     model1(table,fmap,emap){}
-    
+
+void ApproximateModel1::init(const Sample& sample) {
+  model1::init(sample);
+  clear_cache(sample);
+}
+
+   
+void ApproximateModel1::clear_cache(const Sample& s) {
+  _source_words = s.GetSourceWords();
+  
+  _source_word_ids.clear();
+  _moses_words_to_ids_unfiltered(*_pfmap, s.GetSourceWords(),
+    std::back_inserter(_source_word_ids));
+
+  _option_cache.clear();
+  // _sums_cache operates only over known source words
+  _sums.clear();
+  _sums.insert(_sums.end(), _source_word_ids.size(), 0.0);
+ 
+  _ptable->gc();
+
+}
+  
 float ApproximateModel1::getImportanceWeight() {
   //since the "approximation" is to return 0, this is just the true score
-  return model1::computeScore();
+  return model1::computeScore() - computeScore();
 }
+  
+  
+float ApproximateModel1::computeScore() {
+  float score = 0.0;
+  //cerr << "AM1, In compute score" << endl;
+  for (Hypothesis* h =  const_cast<Hypothesis*>(const_cast<Sample*>(_sample)->GetTargetTail()->GetNextHypo()); h; h = const_cast<Hypothesis*>(h->GetNextHypo())) {
+    score += getSingleUpdateScore(&(h->GetTranslationOption()), h->GetCurrTargetWordsRange());
+  }
+  return score;
+}
+
+float ApproximateModel1::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap){
+  return getSingleUpdateScore(option,gap.segment);
+}  
+  
+float ApproximateModel1::getSingleUpdateScore(const TranslationOption* option, const WordsRange& segment){
+  /*cerr << "Score for option " << *(option->GetSourcePhrase()) << " to " << option->GetTargetPhrase() << " = " ;
+  cerr <<  "Option start pos " <<  option->GetStartPos() << ", End pos " << option->GetEndPos() << endl;
+  cerr << "Source words ids size = " << _source_word_ids.size() << endl;*/
+  if (_option_cache.find(option) == _option_cache.end()) {
+    std::vector<int> target_word_ids;
+    _moses_words_to_ids_unfiltered(*_pemap, option->GetTargetPhrase(), std::back_inserter(target_word_ids));
+
+    if (_source_word_ids[option->GetStartPos()] == -1 ) {
+      _option_cache[option] = MODEL1_LOG_FLOOR;
+    }
+    else { 
+     vector<float> sums(option->GetEndPos() - option->GetStartPos() + 1);
+      _compute_inner_sums(_source_word_ids.begin() + option->GetStartPos(), _source_word_ids.begin() + option->GetEndPos() + 1,
+                        target_word_ids.begin(), target_word_ids.end(),
+                        sums.begin());
+      /*cerr << "Sums " ;
+      for (size_t i = 0; i < sums.size(); ++i)
+       cerr << sums[i] << " ";
+      cerr << endl; */
+    
+      // compute product of sums in logspace
+      _option_cache[option] = std::accumulate(log_iter(sums.begin()),  
+                         log_iter(sums.end()), 0.0);
+    }
+  }
+  //cerr << "Score " << _option_cache[option] << endl;
+  return _option_cache[option];
+}
+  
+  
+float ApproximateModel1::getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                               const TargetGap& gap){
+  //cerr << "In get cont score " << endl;
+  return getSingleUpdateScore(leftOption, gap) +
+  getSingleUpdateScore(rightOption, gap);  
+}
+  
+float ApproximateModel1::getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                                  const TargetGap& leftGap, const TargetGap& rightGap){
+  //cerr << "In get discont score " << endl;
+  return getSingleUpdateScore(leftOption, leftGap) +
+  getSingleUpdateScore(rightOption, rightGap);
+}  
+  
 
 ApproximateModel1Inverse::ApproximateModel1Inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
     model1_inverse(table,fmap,emap){}

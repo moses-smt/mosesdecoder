@@ -432,7 +432,7 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
         //set the weight in the sample  
         deltaFV.Assign(&sp,score); //This is the correct delta, as true_score = importance_weight+importance_score (in log space)
       }
-      VERBOSE(1, "Unnormalised importance weight: " << totalImpWeight << endl);
+      VERBOSE(2, "Unnormalised importance weight: " << totalImpWeight << endl);
       sample.UpdateFeatureValues(deltaFV);
       for (size_t j = 0; j < m_collectors.size(); ++j) {
         m_collectors[j]->addSample(sample,totalImpWeight);
