@@ -10,8 +10,9 @@ using namespace std;
 
 namespace Josiah {
 
-SentenceBLEU::SentenceBLEU(int n, const std::vector<std::string>& refs) :
- n_(n) {
+#define  BP_DENUM_HACK 100
+SentenceBLEU::SentenceBLEU(int n, const std::vector<std::string>& refs, float bp_scale, bool denum_hack) :
+ n_(n) , _bp_scale(bp_scale),  _use_bp_denum_hack(denum_hack) {
   for (vector<string>::const_iterator ci = refs.begin();
      ci != refs.end(); ++ci) {
     vector<const Factor*> fv;
@@ -21,8 +22,8 @@ SentenceBLEU::SentenceBLEU(int n, const std::vector<std::string>& refs) :
   }
 }
 
-SentenceBLEU::SentenceBLEU(int n, const vector<const Factor*> & ref) :
-  n_(n) {
+SentenceBLEU::SentenceBLEU(int n, const vector<const Factor*> & ref, float bp_scale, bool denum_hack) :
+  n_(n) , _bp_scale(bp_scale),  _use_bp_denum_hack(denum_hack) {
   lengths_.push_back(ref.size());
   CountRef(ref, ngrams_);
 }  
@@ -102,9 +103,16 @@ float SentenceBLEU::CalcBleu(const valarray<int> & hyp, const valarray<int> & co
   }
   log_bleu /= static_cast<float>(count);
   float lbp = 0.0;
+  
+  float bp_denum = hyp_len;
+  
+  if (_use_bp_denum_hack)
+    bp_denum = BP_DENUM_HACK;
+  
+  
   if (hyp_len < ref_len)
-    lbp = (hyp_len - ref_len) / hyp_len;
-  log_bleu += lbp;
+    lbp = (hyp_len - ref_len) / bp_denum;
+  log_bleu += lbp * _bp_scale;
   return exp(log_bleu);
 }  
   

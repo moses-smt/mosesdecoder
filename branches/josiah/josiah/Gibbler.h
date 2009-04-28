@@ -70,7 +70,7 @@ class Sample {
   const Josiah::feature_vector& extra_features() const {
     return _extra_features; 
   }
-
+  
   void FlipNodes(size_t x, size_t y, const ScoreComponentCollection& deltaFV) ;
   void FlipNodes(const TranslationOption& , const TranslationOption&, Hypothesis* , Hypothesis* , const ScoreComponentCollection& deltaFV);
   void ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV); 
