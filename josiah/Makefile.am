@@ -16,6 +16,7 @@ josiah_SOURCES = Derivation.cpp \
     MpiDebug.cpp \
 	Model1.cpp \
     Pos.cpp \
+    SourceToTargetRatio.cpp \
 	TranslationDelta.cpp \
 	SentenceBleu.cpp \
     FeatureFunction.cpp \

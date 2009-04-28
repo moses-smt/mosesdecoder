@@ -48,6 +48,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "MpiDebug.h"
 #include "Model1.h"
 #include "Pos.h"
+#include "SourceToTargetRatio.h"
 #include "Timer.h"
 #include "StaticData.h"
 #include "Optimizer.h"
@@ -117,6 +118,7 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
   bool useApproxPfe = false;
   bool useVerbDiff = false;
   bool useCherry = false;
+  bool useSrcTgtRatio = false;
   size_t dependencyFactor;
   desc.add_options()
       ("model1.table", "Model 1 table")
@@ -126,7 +128,9 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
       ("model1.approx_pfe",po::value<bool>(&useApproxPfe)->default_value(false), "Approximate the p(f|e), and use importance sampling")
       ("pos.verbdiff", po::value<bool>(&useVerbDiff)->default_value(false), "Verb difference feature")
       ("dependency.cherry", po::value<bool>(&useCherry)->default_value(false), "Use Colin Cherry's syntactic cohesiveness feature")
-      ("dependency.factor", po::value<size_t>(&dependencyFactor)->default_value(1), "Factor representing the dependency tree");
+      ("dependency.factor", po::value<size_t>(&dependencyFactor)->default_value(1), "Factor representing the dependency tree")
+      ("srctgtratio.useFeat", po::value<bool>(&useSrcTgtRatio)->default_value(false), "Use source length to target length ratio feature");
+  
   po::variables_map vm;
   po::store(po::parse_config_file(in,desc,true), vm);
   notify(vm);
@@ -165,6 +169,9 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
   }
   if (useCherry) {
     fv.push_back(feature_handle(new CherrySyntacticCohesionFeature(dependencyFactor)));
+  }
+  if (useSrcTgtRatio) {
+    fv.push_back(feature_handle(new SourceToTargetRatio));
   }
   in.close();
 }
