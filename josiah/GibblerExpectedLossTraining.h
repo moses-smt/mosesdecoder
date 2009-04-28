@@ -22,7 +22,7 @@ class ExpectedLossCollector : public SampleCollector {
     virtual ~ExpectedLossCollector() {}
     virtual void collect(Sample& sample);
     // returns the expected gain and expected sentence length
-    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len);
+    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float* unreg_gain);
     virtual void UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v);
     
   protected:

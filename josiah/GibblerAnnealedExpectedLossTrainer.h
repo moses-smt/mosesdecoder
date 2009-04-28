@@ -27,7 +27,7 @@ namespace Josiah {
     float ComputeEntropy();
     float GetTemperature() { return m_temp;}
     void SetTemperature(float temp) {m_temp = temp;} 
-    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len);
+    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float * unreg_exp_gain);
     virtual float getRegularisationGradientFactor(size_t i);
     virtual float getRegularisation();
     
