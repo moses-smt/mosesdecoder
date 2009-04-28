@@ -404,7 +404,7 @@ int main(int argc, char** argv) {
   }      
       
   GainFunctionVector g;
-  if (ref_files.size() > 0) LoadReferences(ref_files, &g, brev_penalty_scaling_factor, use_bp_denum_hack);
+  if (ref_files.size() > 0) LoadReferences(ref_files, &g, brev_penalty_scaling_factor, hack_bp_denum);
   
   ostream* out = &cout;
   if (!outputfile.empty()) {
