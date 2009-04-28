@@ -629,7 +629,8 @@ int main(int argc, char** argv) {
       ScoreComponentCollection gradient;
       ScoreComponentCollection hessianV;
       float exp_trans_len = 0;
-      const float exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len);
+      float unreg_exp_gain = 0;
+      const float exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len, &unreg_exp_gain);
       
       if (SMD) {
         const ScoreComponentCollection& v =  static_cast<StochasticMetaDescent*>(optimizer.get())->GetV();
@@ -642,6 +643,7 @@ int main(int argc, char** argv) {
            exp_trans_len,
            g[lineno].GetAverageReferenceLength(),
            exp_gain,
+           unreg_exp_gain,
            gradient,
            decoder.get(), 
            hessianV);

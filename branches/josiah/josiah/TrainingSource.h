@@ -32,12 +32,14 @@ class ExpectedBleuTrainer : public InputSource {
        const float trans_len,
        const float ref_len,
        const float exp_gain,
+       const float unreg_exp_gain,
        const Moses::ScoreComponentCollection& grad,
        Decoder* decoder);
   void IncorporateGradient(
                            const float trans_len,
                            const float ref_len,
                            const float exp_gain,
+                           const float unreg_exp_gain,
                            const Moses::ScoreComponentCollection& grad,
                            Decoder* decoder, 
                            const Moses::ScoreComponentCollection& hessianV);
@@ -50,6 +52,7 @@ class ExpectedBleuTrainer : public InputSource {
   std::vector<std::string> corpus;
   bool keep_going;
   float total_exp_gain;
+  float total_unreg_exp_gain;
   Moses::ScoreComponentCollection gradient;
   Moses::ScoreComponentCollection hessianV_;
   std::vector<int> order;

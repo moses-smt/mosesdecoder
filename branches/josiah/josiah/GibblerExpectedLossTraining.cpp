@@ -21,7 +21,7 @@ void ExpectedLossCollector::collect(Sample& s) {
   MPI_VERBOSE(2,"Sample: " << Derivation(s) << endl) 
 }
 
-float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len) {
+float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain) {
   
 
   const vector<double>& importanceWeights =  getImportanceWeights();
@@ -52,6 +52,7 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
 
   cerr << "Gradient: " << grad << endl;
   cerr << "Exp gain without reg term :  " << exp_gain << endl;
+  *unreg_exp_gain = exp_gain;
   exp_gain += getRegularisation();
   cerr << "Exp gain with reg term:  " << exp_gain << endl;
   
