@@ -73,7 +73,7 @@ using boost::is_any_of;
 namespace po = boost::program_options;
 
 
-void LoadReferences(const vector<string>& ref_files, GainFunctionVector* g) {
+void LoadReferences(const vector<string>& ref_files, GainFunctionVector* g, float bp_scale = 1.0, bool use_bp_denum_hack = false) {
   assert(ref_files.size() > 0);
   vector<ifstream*> ifs(ref_files.size(), NULL);
   for (unsigned i = 0; i < ref_files.size(); ++i) {
@@ -87,7 +87,7 @@ void LoadReferences(const vector<string>& ref_files, GainFunctionVector* g) {
       getline(*ifs[i], refs[i]);
     }
     if (refs[0].empty() && ifs[0]->eof()) break;
-    g->push_back(new SentenceBLEU(4, refs));
+    g->push_back(new SentenceBLEU(4, refs, bp_scale, use_bp_denum_hack));
   }
   for (unsigned i=0; i < ifs.size(); ++i) delete ifs[i];
   cerr << "Loaded reference translations for " << g->size() << " sentences." << endl;
@@ -240,6 +240,8 @@ int main(int argc, char** argv) {
   bool use_metanormalized_egd;
   int optimizerFreq; 
   bool SMD;
+  float brev_penalty_scaling_factor;
+  bool hack_bp_denum;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -298,7 +300,9 @@ int main(int argc, char** argv) {
    ("initial-det-anneal-temp", po::value<float>(&start_temp_expda)->default_value(1000.0f), "Initial deterministic annealing entropy temperature")
    ("final-det-anneal-temp", po::value<float>(&stop_temp_expda)->default_value(0.001f), "Final deterministic annealing entropy temperature")
    ("floor-temp", po::value<float>(&floor_temp_expda)->default_value(0.0f), "Floor temperature for det annealing")
-  ("det-annealing-ratio,A", po::value<float>(&anneal_ratio_da)->default_value(0.5f), "Deterministc annealing ratio");
+  ("det-annealing-ratio,A", po::value<float>(&anneal_ratio_da)->default_value(0.5f), "Deterministc annealing ratio")
+  ("hack-bp-denum,H", po::value(&hack_bp_denum)->default_value(false), "Use a predefined scalar as denum in BP computation")
+  ("bp-scale,B", po::value<float>(&brev_penalty_scaling_factor)->default_value(1.0f), "Scaling factor for sent level brevity penalty for BLEU - default is 1.0");
   
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -400,7 +404,7 @@ int main(int argc, char** argv) {
   }      
       
   GainFunctionVector g;
-  if (ref_files.size() > 0) LoadReferences(ref_files, &g);
+  if (ref_files.size() > 0) LoadReferences(ref_files, &g, brev_penalty_scaling_factor, use_bp_denum_hack);
   
   ostream* out = &cout;
   if (!outputfile.empty()) {

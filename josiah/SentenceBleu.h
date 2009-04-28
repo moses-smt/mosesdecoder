@@ -11,8 +11,8 @@ namespace Josiah {
 
 class SentenceBLEU : public GainFunction {
  public:
-  SentenceBLEU(int n, const std::vector<std::string>& refs);
-  SentenceBLEU(int n, const std::vector<const Moses::Factor*> & ref);
+  SentenceBLEU(int n, const std::vector<std::string>& refs, float bp_scale = 1.0, bool use_bp_denum_hack = false);
+  SentenceBLEU(int n, const std::vector<const Moses::Factor*> & ref, float bp_scale = 1.0, bool use_bp_denum_hack= false);
     
   int GetType() const { return 1;}
   float ComputeGain(const std::vector<const Moses::Factor*>& hyp) const;
@@ -71,6 +71,8 @@ class SentenceBLEU : public GainFunction {
   std::vector<int> lengths_;
   mutable NGramCountMap ngrams_;
   int n_;
+  float _bp_scale;
+  bool _use_bp_denum_hack;
 };
 
 };
