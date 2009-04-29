@@ -30,22 +30,22 @@ namespace Josiah {
     m_src_len = m_sample->GetSourceSize();
   }
   float Josiah::SourceToTargetRatio::computeScore() {
-    return (float) m_src_len /(float) m_sample->GetTargetWords().size();
+    return 1.0 - ((float) m_src_len /(float) m_sample->GetTargetWords().size());
   }
   /** Score due to  one segment */
   float Josiah::SourceToTargetRatio::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {
-    return (float) m_src_len / (float) (m_sample->GetTargetWords().size() + option->GetTargetPhrase().GetSize() - gap.segment.GetNumWordsCovered());
+    return 1.0 - ((float) m_src_len / (float) (m_sample->GetTargetWords().size() + option->GetTargetPhrase().GetSize() - gap.segment.GetNumWordsCovered()));
   }
   /** Score due to two segments **/
   float Josiah::SourceToTargetRatio::getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
                                                const TargetGap& gap) {
-    return (float) m_src_len /(float)  (m_sample->GetTargetWords().size() + leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize() - gap.segment.GetNumWordsCovered());
+    return 1.0 - ((float) m_src_len /(float)  (m_sample->GetTargetWords().size() + leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize() - gap.segment.GetNumWordsCovered()));
   }
   
   float Josiah::SourceToTargetRatio::getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
                                                   const TargetGap& leftGap, const TargetGap& rightGap) {
-    return (float) m_src_len /(float)  (m_sample->GetTargetWords().size() + leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize() -
-                        (leftGap.segment.GetNumWordsCovered() + rightGap.segment.GetNumWordsCovered() )) ;
+    return 1.0 - ((float) m_src_len /(float)  (m_sample->GetTargetWords().size() + leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize() -
+                        (leftGap.segment.GetNumWordsCovered() + rightGap.segment.GetNumWordsCovered() )) ) ;
   }
   
   /** Score due to flip */
