@@ -33,7 +33,7 @@ static void addChildren(vector<set<size_t> >& tree, size_t parent, set<size_t>& 
   
 DependencyTree::DependencyTree(const vector<Word>& words, FactorType parentFactor) {
   vector<set<size_t> > tree(words.size()); // map parents to their immediate children
-  size_t root = -1;
+  int root = -1;
   for (size_t child = 0; child < words.size(); ++child) {
     int parent = atoi(words[child][parentFactor]->GetString().c_str());
     if (parent < 0) {
