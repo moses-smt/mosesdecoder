@@ -13,7 +13,7 @@ namespace Josiah {
   class DerivationCollector: public virtual MaxCollector<Derivation> {
     public:
       DerivationCollector(): MaxCollector<Derivation>("Deriv"),  m_pd(0) ,m_collectDerivByTrans(false) {}
-      void collect(Moses::Sample& sample);
+      void collect(Sample& sample);
       /** Write max periodically to stderr */
       void setPeriodicDecode(int pd) {m_pd = pd;}
       void setCollectDerivationsByTranslation(bool dbyt) {m_collectDerivByTrans = dbyt;}

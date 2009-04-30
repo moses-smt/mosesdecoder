@@ -20,8 +20,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GibbsOperator.h"
 
 using namespace std;
+using namespace Moses;
 
-namespace Moses {
+namespace Josiah {
   
   RandomNumberGenerator::RandomNumberGenerator() :m_dist(0,1), m_generator(), m_random(m_generator,m_dist) {
     uint32_t seed;

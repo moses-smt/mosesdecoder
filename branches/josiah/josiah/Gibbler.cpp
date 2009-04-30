@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace Moses {
+namespace Josiah {
 
 
 
@@ -30,7 +30,7 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
       source_order[-1] = h;  
     }
     this->target_tail = h;
-    h->m_nextHypo = next;
+    h->SetNextHypo(next);
     next = h;
   }
   
@@ -41,18 +41,18 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
   
   for (; source_it != source_order.end(); source_it++) {
     Hypothesis *h = source_it->second;  
-    h->m_sourcePrevHypo = prev;
+    h->SetSourcePrevHypo(prev);
     if (prev != NULL) 
-      prev->m_sourceNextHypo = h;
+      prev->SetSourceNextHypo(h);
     this->source_head = h;
     prev = h;
   }
   
-  this->source_head->m_sourceNextHypo = NULL;
-  this->target_head->m_nextHypo = NULL;
+  this->source_head->SetSourceNextHypo(NULL);
+  this->target_head->SetNextHypo(NULL);
   
-  this->source_tail->m_sourcePrevHypo = NULL;
-  this->target_tail->m_prevHypo = NULL;
+  this->source_tail->SetSourcePrevHypo(NULL);
+  this->target_tail->SetPrevHypo(NULL);
   
   UpdateTargetWords();
   for (Josiah::feature_vector::const_iterator i=_extra_features.begin(); i!=_extra_features.end(); ++i){
@@ -70,8 +70,9 @@ Sample::~Sample() {
 
 Hypothesis* Sample::CreateHypothesis(Hypothesis& prevTarget, const TranslationOption& option) {
   UpdateCoverageVector(prevTarget, option);
-  Hypothesis* hypo = new Hypothesis(prevTarget,option);
-  prevTarget.m_nextHypo = hypo;
+  
+  Hypothesis* hypo = Hypothesis::Create(prevTarget, option, NULL);
+  prevTarget.SetNextHypo(hypo);
   cachedSampledHyps.insert(hypo);
   SetSourceIndexedHyps(hypo);
   //SetTgtIndexedHyps(hypo);
@@ -138,21 +139,21 @@ void Sample::SetSourceIndexedHyps(Hypothesis* h) {
   
 void Sample::SetTgtNextHypo(Hypothesis* newHyp, Hypothesis* currNextHypo) {
   if (newHyp) {
-    newHyp->m_nextHypo = currNextHypo;  
+    newHyp->SetNextHypo(currNextHypo);  
   }
     
   if (currNextHypo) {
-    currNextHypo->m_prevHypo = newHyp;  
+    currNextHypo->SetPrevHypo(newHyp);  
   }
 }
   
 void Sample::SetSrcPrevHypo(Hypothesis* newHyp, Hypothesis* srcPrevHypo) {
   if (newHyp) {
-    newHyp->m_sourcePrevHypo = srcPrevHypo; 
+    newHyp->SetSourcePrevHypo(srcPrevHypo); 
   }
     
   if (srcPrevHypo) {
-    srcPrevHypo->m_sourceNextHypo = newHyp;  
+    srcPrevHypo->SetSourceNextHypo(newHyp);  
   }
 }  
   
@@ -247,14 +248,14 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
 void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
-  Hypothesis& prevHyp = *(const_cast<Hypothesis*>(currHyp->m_prevHypo));
+  Hypothesis& prevHyp = *(const_cast<Hypothesis*>(currHyp->GetPrevHypo()));
 
   Hypothesis *newHyp = CreateHypothesis(prevHyp, option);
-  SetTgtNextHypo(newHyp, currHyp->m_nextHypo);
+  SetTgtNextHypo(newHyp, const_cast<Hypothesis*>(currHyp->GetNextHypo()));
   UpdateHead(currHyp, newHyp, target_head);
   
-  SetSrcPrevHypo(newHyp, currHyp->m_sourcePrevHypo);
-  SetSrcPrevHypo(currHyp->m_sourceNextHypo, newHyp);
+  SetSrcPrevHypo(newHyp, const_cast<Hypothesis*>(currHyp->GetSourcePrevHypo()));
+  SetSrcPrevHypo(const_cast<Hypothesis*>(currHyp->GetSourceNextHypo()), newHyp);
   UpdateHead(currHyp, newHyp, source_head);
   
   //Update target word ranges
@@ -281,24 +282,24 @@ void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCo
   Hypothesis* newHyp = NULL;
   
   if (currStartHyp->GetCurrTargetWordsRange() < currEndHyp->GetCurrTargetWordsRange()) {
-    prevHyp = const_cast<Hypothesis*> (currStartHyp->m_prevHypo);
+    prevHyp = const_cast<Hypothesis*> (currStartHyp->GetPrevHypo());
     newHyp = CreateHypothesis(*prevHyp, option);
     
     //Set the target ptrs
-    SetTgtNextHypo(newHyp, currEndHyp->m_nextHypo);
+    SetTgtNextHypo(newHyp, const_cast<Hypothesis*>(currEndHyp->GetNextHypo()));
     UpdateHead(currEndHyp, newHyp, target_head);
   } 
   else {
-    prevHyp = const_cast<Hypothesis*> (currEndHyp->m_prevHypo);
+    prevHyp = const_cast<Hypothesis*> (currEndHyp->GetPrevHypo());
     newHyp = CreateHypothesis(*prevHyp, option);
     
-    SetTgtNextHypo(newHyp, currStartHyp->m_nextHypo);
+    SetTgtNextHypo(newHyp, const_cast<Hypothesis*>(currStartHyp->GetNextHypo()));
     UpdateHead(currStartHyp, newHyp, target_head);
   }
   
   //Set the source ptrs
-  SetSrcPrevHypo(newHyp, currStartHyp->m_sourcePrevHypo);
-  SetSrcPrevHypo(currEndHyp->m_sourceNextHypo, newHyp);
+  SetSrcPrevHypo(newHyp, const_cast<Hypothesis*>(currStartHyp->GetSourcePrevHypo()));
+  SetSrcPrevHypo(const_cast<Hypothesis*>(currEndHyp->GetSourceNextHypo()), newHyp);
   UpdateHead(currEndHyp, newHyp, source_head);
                     
   //Update target word ranges
@@ -320,19 +321,19 @@ void Sample::SplitTarget(const TranslationOption& leftTgtOption, const Translati
   size_t optionStartPos = leftTgtOption.GetSourceWordsRange().GetStartPos();
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
   
-  Hypothesis& prevHyp = *(const_cast<Hypothesis*>(currHyp->m_prevHypo));
+  Hypothesis& prevHyp = *(const_cast<Hypothesis*>(currHyp->GetPrevHypo()));
   Hypothesis *newLeftHyp = CreateHypothesis(prevHyp, leftTgtOption);
   Hypothesis *newRightHyp = CreateHypothesis(*newLeftHyp, rightTgtOption);
   
   //Update tgt ptrs
-  SetTgtNextHypo(newRightHyp, currHyp->m_nextHypo);
+  SetTgtNextHypo(newRightHyp, const_cast<Hypothesis*>(currHyp->GetNextHypo()));
   UpdateHead(currHyp, newRightHyp, target_head);
   
   //Update src ptrs
   assert (newLeftHyp->GetCurrSourceWordsRange() < newRightHyp->GetCurrSourceWordsRange()); //monotone  
-  SetSrcPrevHypo(newLeftHyp, currHyp->m_sourcePrevHypo);
+  SetSrcPrevHypo(newLeftHyp, const_cast<Hypothesis*>(currHyp->GetSourcePrevHypo()));
   SetSrcPrevHypo(newRightHyp, newLeftHyp);
-  SetSrcPrevHypo(currHyp->m_sourceNextHypo, newRightHyp); 
+  SetSrcPrevHypo(const_cast<Hypothesis*>(currHyp->GetSourceNextHypo()), newRightHyp); 
   UpdateHead(currHyp, newRightHyp, source_head);
     
   //Update target word ranges

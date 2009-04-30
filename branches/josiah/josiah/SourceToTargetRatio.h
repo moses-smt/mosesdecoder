@@ -27,17 +27,16 @@
 #include "FeatureFunction.h"
 #include "Gibbler.h"
 
-namespace Moses {
-  class Sample;
-};
 
 namespace Josiah {
+
+class Sample;
   
 class SourceToTargetRatio: public FeatureFunction {
 public:
   SourceToTargetRatio() : FeatureFunction("SourceToTargetRatio") {}
   /** Initialise with new sample */
-  virtual void init(const Moses::Sample& sample);      
+  virtual void init(const Sample& sample);      
   virtual float computeScore();
   /** Score due to  one segment */
   virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) ;
@@ -54,7 +53,7 @@ public:
   
   virtual ~SourceToTargetRatio() {}
 private:
-  const Moses::Sample* m_sample;
+  const Sample* m_sample;
   size_t m_src_len;
 };
 

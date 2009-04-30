@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsRange.h"
 
 
-
+using namespace Moses;
 
 namespace Josiah {
 
@@ -43,18 +43,18 @@ namespace Josiah {
   **/
   class Derivation {
     public:
-      Derivation(const Moses::Sample& sample);
+      Derivation(const Sample& sample);
       const std::vector<std::string>& getTargetSentence() const {return m_targetWords;}
-      const Moses::ScoreComponentCollection& getFeatureValues() const {return m_featureValues;}
+      const ScoreComponentCollection& getFeatureValues() const {return m_featureValues;}
       float getScore() const {return m_score;}
       void getTargetFactors(std::vector<const Factor*>& sentence) const;
       bool operator<(const Derivation& other) const;
       
       struct PhraseAlignment {
         //since these are stored in target order, no need to retain the source Segment
-        Moses::WordsRange _sourceSegment;
-        Moses::Phrase _target;
-        PhraseAlignment(const Moses::WordsRange& sourceSegment,const Moses::Phrase& target)
+        WordsRange _sourceSegment;
+        Phrase _target;
+        PhraseAlignment(const WordsRange& sourceSegment,const Phrase& target)
           : _sourceSegment(sourceSegment),_target(target) {}
         bool operator<(const PhraseAlignment& other) const;
       };
@@ -64,7 +64,7 @@ namespace Josiah {
       
     private:
       std::vector<PhraseAlignment> m_alignments; //in target order
-      Moses::ScoreComponentCollection m_featureValues;
+      ScoreComponentCollection m_featureValues;
       float m_score;
       std::vector<std::string> m_targetWords;
   };

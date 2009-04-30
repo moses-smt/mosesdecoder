@@ -48,7 +48,7 @@ namespace __gnu_cxx {
 }
 #endif
 
-namespace Moses {
+namespace Josiah {
 
 class Sample;
 

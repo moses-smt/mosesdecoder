@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Moses {
+namespace Josiah {
 
 class AnnealingSchedule {
  public:

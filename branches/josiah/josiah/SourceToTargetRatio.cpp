@@ -25,7 +25,7 @@ using namespace Moses;
 
 namespace Josiah {
  
-  void Josiah::SourceToTargetRatio::init(const Moses::Sample& sample) {
+  void Josiah::SourceToTargetRatio::init(const Sample& sample) {
     m_sample = &sample;
     m_src_len = m_sample->GetSourceSize();
   }

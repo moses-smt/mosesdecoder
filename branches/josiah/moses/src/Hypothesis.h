@@ -60,8 +60,8 @@ typedef std::vector<Hypothesis*> ArcList;
 class Hypothesis
 {
 	friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
-	friend class Sampler;
-	friend class Sample;
+//	friend class Sampler;
+//	friend class Sample;
 
 protected:
 	static ObjectPool<Hypothesis> s_objectPool;
@@ -188,6 +188,22 @@ public:
 	const Hypothesis* GetNextHypo() const;
   const Hypothesis* GetSourcePrevHypo() const;
   const Hypothesis* GetSourceNextHypo() const;
+  
+  void SetNextHypo(Hypothesis *next) {
+    m_nextHypo = next;
+  }
+  
+  void SetPrevHypo(Hypothesis *prev) {
+    m_prevHypo = prev;
+  }
+  
+  void SetSourceNextHypo(Hypothesis *next) {
+    m_sourceNextHypo = next;
+  }
+  
+  void SetSourcePrevHypo(Hypothesis *prev) {
+    m_sourcePrevHypo = prev;
+  }
 
 	/** length of the partial translation (from the start of the sentence) */
 	inline size_t GetSize() const

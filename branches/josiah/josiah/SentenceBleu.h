@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 #include <valarray>
-//#include "GibblerExpectedLossTraining.h"
 #include "GainFunction.h"
 #include "Factor.h"
 

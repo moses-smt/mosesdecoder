@@ -5,7 +5,6 @@
 
 using namespace __gnu_cxx;
 using namespace std;
-using namespace Josiah;
 
 namespace Josiah
 {
