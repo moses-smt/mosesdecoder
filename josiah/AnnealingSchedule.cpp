@@ -1,8 +1,9 @@
 #include "AnnealingSchedule.h"
-
 #include "StaticData.h"
 
-namespace Moses {
+using namespace Moses;
+
+namespace Josiah {
 
 AnnealingSchedule::~AnnealingSchedule() {}
 

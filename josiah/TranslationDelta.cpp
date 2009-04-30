@@ -24,9 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Gibbler.h"
 
 using namespace std;
-using namespace Josiah;
 
-namespace Moses {
+namespace Josiah {
   
 #ifdef LM_CACHE  
   std::map<LanguageModel*,LanguageModelCache> TranslationDelta::m_cache;

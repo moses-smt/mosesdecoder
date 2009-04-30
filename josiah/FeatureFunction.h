@@ -24,19 +24,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "ScoreProducer.h"
 #include "TranslationOptionCollection.h"
+//#include "Gibbler.h"
 
 
 using namespace Moses;
 namespace po = boost::program_options;
 
 namespace Moses {
-  class Sample;
   class ScoreProducer;
   class ScoreIndexManager;
 }
 
+
 namespace Josiah {
-  
+
+  class Sample;
 /**
   * Base class for any state information required by a FeatureFunction.
   * For sampling, state is any information that the FeatureFunction deems

@@ -27,15 +27,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FeatureFunction.h"
 #include "Gibbler.h"
 
-namespace Moses {
-  class Sample;
-};
 
 namespace Josiah {
 
   typedef std::vector<const Moses::Factor*> TagSequence;
 
-
+  class Sample;
 
 /**
   * Abstract base class for feature functions which use source/target pos tags.
@@ -62,7 +59,7 @@ class PosFeatureFunction : public  FeatureFunction {
     void getCurrentTargetTags(TagSequence& tags) const;
     
     /** Initialise */
-    virtual void init(const Moses::Sample& sample) {m_sample = &sample;}
+    virtual void init(const Sample& sample) {m_sample = &sample;}
     /** Compute full score of a sample from scratch **/
     virtual float computeScore();
     /** Change in score when updating one segment */
@@ -85,7 +82,7 @@ class PosFeatureFunction : public  FeatureFunction {
     TagSequence m_sourceTags;
     FactorType m_sourceFactorType;
     FactorType m_targetFactorType;
-    const Moses::Sample* m_sample;
+    const Sample* m_sample;
 };
 
 

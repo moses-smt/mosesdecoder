@@ -8,13 +8,17 @@
 #include "ScoreComponentCollection.h"
 
 namespace Moses {
-
-class AnnealingSchedule;
-class GibbsOperator;
 class Hypothesis;
 class TranslationOptionCollection;
 class TranslationOption;
 class Word;
+}
+
+using namespace Moses;
+namespace Josiah {
+
+class AnnealingSchedule;
+class GibbsOperator;
 class FeatureFunction;
 class Sampler;
 
@@ -32,7 +36,7 @@ class Sample {
   Hypothesis* source_tail;
 
   ScoreComponentCollection feature_values;
-  Josiah::feature_vector _extra_features;
+  feature_vector _extra_features;
 
   std::set<Hypothesis*> cachedSampledHyps;
   
@@ -51,7 +55,7 @@ class Sample {
   void DeleteFromCache(Hypothesis *hyp);
   float ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) ;
  public:
-  Sample(Hypothesis* target_head, const std::vector<Word>& source, const Josiah::feature_vector& extra_features);
+  Sample(Hypothesis* target_head, const std::vector<Word>& source, const feature_vector& extra_features);
   ~Sample();
   int GetSourceSize() const { return m_sourceWords.size(); }
   Hypothesis* GetHypAtSourceIndex(size_t ) ;
@@ -67,7 +71,7 @@ class Sample {
     return feature_values;
   }
   
-  const Josiah::feature_vector& extra_features() const {
+  const feature_vector& extra_features() const {
     return _extra_features; 
   }
   
@@ -159,7 +163,7 @@ class Sampler {
  public:
   Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0) {}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
-    const std::vector<Word>& source, const Josiah::feature_vector& extra_fv) ;
+    const std::vector<Word>& source, const feature_vector& extra_fv) ;
   void AddOperator(GibbsOperator* o) {m_operators.push_back(o);}
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
   void SetAnnealingSchedule(const AnnealingSchedule* as) {m_as = as;}

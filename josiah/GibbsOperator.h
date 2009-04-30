@@ -37,9 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "WordsRange.h"
 
-using namespace Josiah;
+using namespace Moses;
 
-namespace Moses {
+namespace Josiah {
 
   class Sample;
   class TranslationDelta;

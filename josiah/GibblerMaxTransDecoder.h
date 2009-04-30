@@ -17,6 +17,8 @@ namespace Moses {
   class SampleCollector;
 }
 
+using namespace Moses;
+
 namespace Josiah {
   
  typedef std::vector<const Moses::Factor*> Translation;
@@ -26,7 +28,7 @@ namespace Josiah {
    * Collector that looks for a max (eg translation, derivation).
    **/
 template <class M>
-    class MaxCollector : public virtual Moses::SampleCollector {
+    class MaxCollector : public virtual SampleCollector {
     public:
       MaxCollector<M>(const std::string& name) : m_name(name), m_outputMaxChange(false) {}
       /** Should be called to report that an example of M was found in the sample*/
@@ -76,7 +78,7 @@ class GibblerMaxTransDecoder : public virtual MaxCollector<Translation> {
  * when to stop.
  **/
  template<class M>
-     class MaxCountStopStrategy : public virtual Moses::StopStrategy {
+     class MaxCountStopStrategy : public virtual StopStrategy {
        public:
          MaxCountStopStrategy(size_t minIterations, size_t maxIterations, size_t maxCount,  MaxCollector<M>* maxCollector)
          : m_minIterations(minIterations), m_maxIterations(maxIterations),m_maxCount(maxCount), m_maxCollector(maxCollector) {}
