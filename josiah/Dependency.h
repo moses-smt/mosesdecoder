@@ -46,20 +46,35 @@ class DependencyTree {
 };
 ostream& operator<<(ostream& out, const DependencyTree& t);
 
-class CherrySyntacticCohesionFeature : public FeatureFunction {
+class DependencyFeature: public FeatureFunction {
   public:
-    CherrySyntacticCohesionFeature(Moses::FactorType parentFactor): FeatureFunction("Cherry"), m_parentFactor(parentFactor) {}
-    /** Initialise with new sample */
-    virtual void init(const Sample& sample) {
-      m_sourceTree.reset(new DependencyTree(sample.GetSourceWords(), m_parentFactor));
-      m_sample = &sample;
+    
+  DependencyFeature(const std::string& name, Moses::FactorType parentFactor):
+      FeatureFunction(name), m_parentFactor(parentFactor), m_sample(NULL) {}
+  
+  /** Initialise with new sample */
+  virtual void init(const Sample& sample) {
+    m_sourceTree.reset(new DependencyTree(sample.GetSourceWords(), m_parentFactor));
+    m_sample = &sample;
       //cerr << "New Tree: " << *(m_sourceTree.get()) << endl;
-      for (size_t parent = 0; parent < m_sourceTree->getLength(); ++parent) {
-        for (size_t child = 0; child < m_sourceTree->getLength(); ++child) {
+    for (size_t parent = 0; parent < m_sourceTree->getLength(); ++parent) {
+      for (size_t child = 0; child < m_sourceTree->getLength(); ++child) {
           //cerr << "parent " << parent << " child " << child << " covers " << m_sourceTree->covers(parent,child) << endl;
-        }
       }
     }
+  }
+  
+  protected:
+    auto_ptr<DependencyTree> m_sourceTree;
+    Moses::FactorType m_parentFactor; //which factor is the parent index?
+    const Sample* m_sample;
+
+};
+
+class CherrySyntacticCohesionFeature : public DependencyFeature {
+  public:
+    CherrySyntacticCohesionFeature(Moses::FactorType parentFactor): DependencyFeature("Cherry",parentFactor) {}
+    
     /** Compute full score of a sample from scratch **/
     virtual float computeScore();
     /** Score due to  one segment */
@@ -77,9 +92,6 @@ class CherrySyntacticCohesionFeature : public FeatureFunction {
     virtual ~CherrySyntacticCohesionFeature() {}
   
   private:
-    auto_ptr<DependencyTree> m_sourceTree;
-    Moses::FactorType m_parentFactor; //which factor is the parent index?
-    const Sample* m_sample;
     float getInterruptions(const WordsRange& prevSourceRange, const TranslationOption *option, const WordsRange& targetSegment);
     float getInterruptionCount(const TranslationOption* option, const WordsRange& targetSegment, size_t f);
     bool  notAllWordsCoveredByTree(const TranslationOption* option, size_t parent);
