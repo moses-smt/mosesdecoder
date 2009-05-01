@@ -94,6 +94,8 @@ class FeatureFunction {
       m_scoreProducer(name) {}
     /** Initialise with new sample */
     virtual void init(const Sample& sample) = 0;
+    /** Update the target words.*/
+    virtual void updateTarget(){/*do nothing*/}
     /** Compute full score of a sample from scratch **/
     virtual float computeScore() = 0;
     /** Compute the log of the importance weight. This is log(true score) - log (importance score). The computeScore()
