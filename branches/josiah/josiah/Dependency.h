@@ -19,8 +19,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
+#include <climits>
 #include <set>
 #include <vector>
+
+#include <boost/multi_array.hpp>
 
 #include "Factor.h"
 
@@ -62,15 +65,18 @@ class DependencyFeature: public FeatureFunction {
           //cerr << "parent " << parent << " child " << child << " covers " << m_sourceTree->covers(parent,child) << endl;
       }
     }
+    updateTarget();
   }
   
   protected:
     auto_ptr<DependencyTree> m_sourceTree;
     Moses::FactorType m_parentFactor; //which factor is the parent index?
     const Sample* m_sample;
-
 };
 
+/**
+  * Feature based on Colin Cherry's Soft Syntactic Constraint (ACL 2008).
+ **/
 class CherrySyntacticCohesionFeature : public DependencyFeature {
   public:
     CherrySyntacticCohesionFeature(Moses::FactorType parentFactor): DependencyFeature("Cherry",parentFactor) {}
@@ -97,5 +103,43 @@ class CherrySyntacticCohesionFeature : public DependencyFeature {
     bool  notAllWordsCoveredByTree(const TranslationOption* option, size_t parent);
     bool  isInterrupting(Hypothesis* hyp, const WordsRange& targetSegment);
 };
+
+
+/**
+  * Feature which measures distortion using distance in the dependency tree.
+ **/
+class DependencyDistortionFeature : public DependencyFeature {
+  public:
+  
+  DependencyDistortionFeature(Moses::FactorType parentFactor): DependencyFeature("DependencyDistortion",parentFactor) {}
+  
+  virtual void init(const Sample& sample);
+  
+  /** Compute full score of a sample from scratch **/
+  virtual float computeScore();
+  /** Score due to  one segment */
+  virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap);
+  /** Score due to two segments **/
+  virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                               const TargetGap& gap);
+  virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+      const TargetGap& leftGap, const TargetGap& rightGap);
+    
+  /** Score due to flip */
+  virtual float getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+                                   const TargetGap& leftGap, const TargetGap& rightGap);
+  
+  virtual ~DependencyDistortionFeature() {}
+  
+  private:
+    //the distance in the dependency tree between any given pair of source words
+    typedef boost::multi_array<size_t, 2> size_matrix_t;
+    size_matrix_t m_distances;
+    
+    /** Compute dependency distortion between two target adjacent source-ranges */
+    size_t getDistortionDistance(const WordsRange& leftRange, const WordsRange& rightRange);
+
+};
+
 
 }

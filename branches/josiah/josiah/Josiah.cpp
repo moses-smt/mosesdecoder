@@ -118,6 +118,7 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
   bool useApproxPfe = false;
   bool useVerbDiff = false;
   bool useCherry = false;
+  bool useDepDist = false;
   bool useSrcTgtRatio = false;
   size_t dependencyFactor;
   desc.add_options()
@@ -128,6 +129,7 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
       ("model1.approx_pfe",po::value<bool>(&useApproxPfe)->default_value(false), "Approximate the p(f|e), and use importance sampling")
       ("pos.verbdiff", po::value<bool>(&useVerbDiff)->default_value(false), "Verb difference feature")
       ("dependency.cherry", po::value<bool>(&useCherry)->default_value(false), "Use Colin Cherry's syntactic cohesiveness feature")
+      ("dependency.distortion", po::value<bool>(&useDepDist)->default_value(false), "Use the dependency distortion feature")
       ("dependency.factor", po::value<size_t>(&dependencyFactor)->default_value(1), "Factor representing the dependency tree")
       ("srctgtratio.useFeat", po::value<bool>(&useSrcTgtRatio)->default_value(false), "Use source length to target length ratio feature");
   
@@ -172,6 +174,9 @@ void configure_features_from_file(const std::string& filename, feature_vector& f
   }
   if (useSrcTgtRatio) {
     fv.push_back(feature_handle(new SourceToTargetRatio));
+  }
+  if (useDepDist) {
+    fv.push_back(feature_handle(new DependencyDistortionFeature(dependencyFactor)));
   }
   in.close();
 }

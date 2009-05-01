@@ -54,13 +54,14 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
   this->source_tail->SetSourcePrevHypo(NULL);
   this->target_tail->SetPrevHypo(NULL);
   
-  UpdateTargetWords();
+  
   for (Josiah::feature_vector::const_iterator i=_extra_features.begin(); i!=_extra_features.end(); ++i){
     //values.push_back((*i)->computeScore(s));
     (*i)->init(*this); // tell the feature that we have a new sample
     float score = (*i)->computeScore();
     feature_values.Assign(&((*i)->getScoreProducer()),score);
   }
+  UpdateTargetWords();
 }
  
 Sample::~Sample() {
@@ -111,6 +112,10 @@ void Sample::UpdateTargetWords()  {
   
   IFVERBOSE(2) {
     VERBOSE(2,"FVs: " << feature_values << endl);
+  }
+  //Inform the extra features that the target words have changed
+  for (Josiah::feature_vector::const_iterator i=_extra_features.begin(); i!=_extra_features.end(); ++i){
+    (*i)->updateTarget();
   }
 }
 
@@ -429,10 +434,12 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
         const ScoreIndexManager& sim = staticData.GetScoreIndexManager();
         double scoreWeight = StaticData::Instance().GetAllWeights()[sim.GetBeginIndex(sp.GetScoreBookkeepingID())];
         VERBOSE(2, "Score producer: " << sp.GetScoreProducerDescription() << " Weight: " << scoreWeight << endl)
+            cerr << "Feature score: " << (*j)->computeScore() << endl;;
         totalImpWeight += scoreWeight*score;
         //set the weight in the sample  
         deltaFV.Assign(&sp,score); //This is the correct delta, as true_score = importance_weight+importance_score (in log space)
       }
+      cerr << "FV: " << Derivation(sample) << endl;
       VERBOSE(2, "Unnormalised importance weight: " << totalImpWeight << endl);
       sample.UpdateFeatureValues(deltaFV);
       for (size_t j = 0; j < m_collectors.size(); ++j) {

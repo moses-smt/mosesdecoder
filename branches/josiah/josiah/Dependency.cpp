@@ -19,6 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "Dependency.h"
 
+#include "Derivation.h"
+
 using namespace Moses;
 using namespace std;
 
@@ -269,6 +271,126 @@ bool CherrySyntacticCohesionFeature::notAllWordsCoveredByTree(const TranslationO
       return true;
   }
   return false;       
+}
+
+//new sample
+void DependencyDistortionFeature::init(const Sample& sample) {
+  DependencyFeature::init(sample);
+  size_t sourceSize = m_sample->GetSourceSize();
+  size_matrix_t::extent_gen extents;
+  m_distances.resize(extents[sourceSize][sourceSize]);
+  
+  //Use Floyd-Warshall to compute all the distances
+  
+  //Initialise with  the (undirected) tree structure
+  for (size_t i = 0; i < sourceSize; ++i) {
+    size_t iparent = (size_t)m_sourceTree->getParent(i);
+    for (size_t j = 0; j < sourceSize; ++j) {
+      size_t jparent = (size_t)m_sourceTree->getParent(j);
+      if (i == j) {
+        m_distances[i][j] = 0;
+      } else if (iparent == j || jparent == i) {
+        m_distances[i][j] = 1;
+      } else {
+        m_distances[i][j] = sourceSize*2; //no path - infinity
+      }
+    }
+  } 
+  //run algorithm
+  for (size_t k = 0; k < sourceSize; ++k) {
+    for (size_t i = 0; i < sourceSize; ++i) {
+      for (size_t j = 0; j < sourceSize; ++j) {
+        m_distances[i][j] = min(m_distances[i][j], m_distances[i][k] + m_distances[k][j]);
+        
+      }
+    }
+  }
+  
+  /*for (size_t i = 0; i < sourceSize; ++i) {
+    for (size_t j = 0; j < sourceSize; ++j) {
+      cerr << "p[" << i << "][" << j << "] = " << m_distances[i][j] << " ";
+    }
+    cerr << endl;
+}*/
+  
+}
+
+
+size_t DependencyDistortionFeature::getDistortionDistance(const WordsRange& leftRange, const WordsRange& rightRange) {
+  size_t leftSourcePos = leftRange.GetEndPos();
+  size_t rightSourcePos = rightRange.GetStartPos();
+  return m_distances[leftSourcePos][rightSourcePos] - 1;
+}
+
+
+/** Compute full score of a sample from scratch **/
+float DependencyDistortionFeature::computeScore() {
+  //
+  // The score for each pair of adjacent target phrases is the tree distance of the corresponding edge source words
+  //
+  float score = 0;
+  const Hypothesis* currHypo = m_sample->GetTargetTail();
+  while ((currHypo = (currHypo->GetNextHypo()))) {
+    const Hypothesis* nextHypo = currHypo->GetNextHypo();
+    if (nextHypo) {
+      score += getDistortionDistance(currHypo->GetCurrSourceWordsRange(),nextHypo->GetCurrSourceWordsRange());
+    }
+  }
+  return score;
+}
+
+/** Score due to  one segment */
+float DependencyDistortionFeature::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {
+  float score = 0;
+  if (gap.leftHypo->GetPrevHypo()) {
+    score += getDistortionDistance(gap.leftHypo->GetCurrSourceWordsRange(), option->GetSourceWordsRange());
+  }
+  if (gap.rightHypo) {
+    score += getDistortionDistance(option->GetSourceWordsRange(), gap.rightHypo->GetCurrSourceWordsRange());
+  }
+  return score;
+}
+
+/** Score due to two segments **/
+float DependencyDistortionFeature::getContiguousPairedUpdateScore
+    (const TranslationOption* leftOption, const TranslationOption* rightOption,  const TargetGap& gap) {
+  float score = 0;
+  if (gap.leftHypo->GetPrevHypo()) {
+    score += getDistortionDistance(gap.leftHypo->GetCurrSourceWordsRange(), leftOption->GetSourceWordsRange());
+  }
+  score += getDistortionDistance(leftOption->GetSourceWordsRange(), rightOption->GetSourceWordsRange());
+  if (gap.rightHypo) {
+    score += getDistortionDistance(rightOption->GetSourceWordsRange(), gap.rightHypo->GetCurrSourceWordsRange());
+  }
+  return score;
+}
+
+
+float DependencyDistortionFeature::getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 
+    const TargetGap& leftGap, const TargetGap& rightGap) {
+      return getSingleUpdateScore(leftOption,leftGap) + getSingleUpdateScore(rightOption,rightGap);
+}
+  
+/** Score due to flip */
+float DependencyDistortionFeature::getFlipUpdateScore(
+    const TranslationOption* leftOption, const TranslationOption* rightOption, 
+    const TargetGap& leftGap, const TargetGap& rightGap) {
+  float score = 0;
+  if (leftGap.leftHypo->GetPrevHypo()) {
+    score += getDistortionDistance(leftGap.leftHypo->GetCurrSourceWordsRange(), leftOption->GetSourceWordsRange());
+  }
+  bool contiguous = (leftGap.segment.GetEndPos() + 1 == rightGap.segment.GetStartPos());
+  if (contiguous) {
+    score += getDistortionDistance(leftOption->GetSourceWordsRange(), rightOption->GetSourceWordsRange());
+  } else {
+    score += getDistortionDistance(leftOption->GetSourceWordsRange(),leftGap.rightHypo->GetCurrSourceWordsRange());
+    score += getDistortionDistance(rightGap.leftHypo->GetCurrSourceWordsRange(), rightOption->GetSourceWordsRange());
+  }
+  if (rightGap.rightHypo) {
+    score += getDistortionDistance(rightOption->GetSourceWordsRange(), rightGap.rightHypo->GetCurrSourceWordsRange());
+  }
+  
+  return score;
 }
 
 }
