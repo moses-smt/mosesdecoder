@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <vector>
+#include <climits>
 #include "Factor.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -86,11 +87,14 @@ public:
 	 * Specific implementation can return State and len data to be used in hypothesis pruning
 	 * \param contextFactor n-gram to be scored
 	 * \param finalState state used by LM. Return arg
-	 * \param len ???
+	 * \param len the length of the context used by the LM or the constant InvalidContextLength
 	 */
 	virtual float GetValue(const std::vector<const Word*> &contextFactor
 												, State* finalState = 0
 												, unsigned int* len = 0) const = 0;
+
+	static const unsigned int InvalidContextLength = UINT_MAX;
+
 	//! get State for a particular n-gram
 	State GetState(const std::vector<const Word*> &contextFactor, unsigned int* len = 0) const;
 
