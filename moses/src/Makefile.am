@@ -31,6 +31,7 @@ libmoses_a_SOURCES = \
 	LanguageModel.cpp \
 	LanguageModelFactory.cpp \
 	LanguageModelInternal.cpp \
+	LanguageModelInterpolated.cpp \
 	LanguageModelMultiFactor.cpp \
 	LanguageModelRemote.cpp \
 	LanguageModelSingleFactor.cpp \

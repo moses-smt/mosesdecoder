@@ -41,6 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "LanguageModelInternal.h"
+#include "LanguageModelInterpolated.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
 
@@ -51,67 +52,63 @@ namespace Moses
 
 namespace LanguageModelFactory
 {
-
-	LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
-																		, const std::vector<FactorType> &factorTypes
-																		, size_t nGramOrder
-																		, const std::string &languageModelFile
-																		, float weight
-																		, ScoreIndexManager &scoreIndexManager
-																		, int dub)
+	LanguageModel* CreateLanguageModel(LMImplementation lmImplementation,
+		const std::vector<FactorType> &factorTypes, size_t nGramOrder,
+		const std::string &languageModelFile, float weight,
+		ScoreIndexManager &scoreIndexManager, int dub, bool registerLM)
 	{
 	  LanguageModel *lm = NULL;
 	  switch (lmImplementation)
 	  {
 		  case RandLM:
 			#ifdef LM_RAND
-			lm = new LanguageModelRandLM(true,
+			lm = new LanguageModelRandLM(registerLM,
 						 scoreIndexManager);
 			#endif
 			break;
 		  case Remote:
 			#ifdef LM_REMOTE
-			lm = new LanguageModelRemote(true,scoreIndexManager);
+			lm = new LanguageModelRemote(registerLM,scoreIndexManager);
 			#endif
+			break;
+
+		case Interpolated:
+			lm = new LanguageModelInterpolated(registerLM, scoreIndexManager, dub);
 			break;
 
 	  	case SRI:
 				#ifdef LM_SRI
-				  lm = new LanguageModelSRI(true, scoreIndexManager);
+				  lm = new LanguageModelSRI(registerLM, scoreIndexManager);
 				#elif LM_INTERNAL
-					lm = new LanguageModelInternal(true, scoreIndexManager);
+					lm = new LanguageModelInternal(registerLM, scoreIndexManager);
 			  #endif
 			  break;
 			case IRST:
 				#ifdef LM_IRST
-	     		lm = new LanguageModelIRST(true, scoreIndexManager, dub);
+	     		lm = new LanguageModelIRST(registerLM, scoreIndexManager, dub);
 			  #endif
 				break;
 			case Skip:
 				#ifdef LM_SRI
-	     		lm = new LanguageModelSkip(new LanguageModelSRI(false, scoreIndexManager)
-																		, true
-																		, scoreIndexManager);
+	     		lm = new LanguageModelSkip(new LanguageModelSRI(false, scoreIndexManager),
+				registerLM, scoreIndexManager);
 				#elif LM_INTERNAL
-     			lm = new LanguageModelSkip(new LanguageModelInternal(false, scoreIndexManager)
-																		, true
-																		, scoreIndexManager);
+     			lm = new LanguageModelSkip(new LanguageModelInternal(false, scoreIndexManager),
+				registerLM, scoreIndexManager);
 				#endif
 				break;
 			case Joint:
 				#ifdef LM_SRI
-	     		lm = new LanguageModelJoint(new LanguageModelSRI(false, scoreIndexManager)
-	     															, true
-	     															, scoreIndexManager);
+	     		lm = new LanguageModelJoint(new LanguageModelSRI(false, scoreIndexManager),
+				registerLM, scoreIndexManager);
 				#elif LM_INTERNAL
-	     		lm = new LanguageModelJoint(new LanguageModelInternal(false, scoreIndexManager)
-																		, true
-																		, scoreIndexManager);
+	     		lm = new LanguageModelJoint(new LanguageModelInternal(false, scoreIndexManager),
+				registerLM, scoreIndexManager);
 				#endif
 				break;
 	  	case Internal:
 				#ifdef LM_INTERNAL
-					lm = new LanguageModelInternal(true, scoreIndexManager);
+					lm = new LanguageModelInternal(registerLM, scoreIndexManager);
 			  #endif
 			  break;
 	  }
