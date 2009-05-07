@@ -44,7 +44,7 @@ struct Optimizer {
   void SetIteration(int iteration) { 
     iteration_ = iteration;
   }
-
+  
  protected:
   
   virtual void OptimizeImpl(
@@ -66,6 +66,7 @@ struct Optimizer {
   bool use_gaussian_prior_;
   std::vector<float> means_;      // for gaussian prior
   float variance_;                // for gaussian prior
+  
 };
 
 class DumbStochasticGradientDescent : public Optimizer {
@@ -98,6 +99,20 @@ class ExponentiatedGradientDescent : public Optimizer {
 
   void SetPreviousGradient(const Moses::ScoreComponentCollection& prev_g) { prev_g_ = prev_g;}
   void SetEta(const Moses::ScoreComponentCollection& eta) { eta_ = eta;}
+  
+  void ResizePreviousGradient() { 
+    std::vector<float> grad(prev_g_.size() -1);
+    std::copy(prev_g_.data().begin(),prev_g_.data().end()-1, grad.begin());
+    Moses::ScoreComponentCollection prev_g(grad);
+    prev_g_ = prev_g;
+  }
+  
+  void ResizeEta() { 
+    std::vector<float> eta(eta_.size() -1);
+    std::copy(eta_.data().begin(), eta_.data().end()-1, eta.begin());
+    Moses::ScoreComponentCollection _eta(eta);
+    eta_ = _eta;
+  }
   
   virtual void OptimizeImpl(
                             float f,

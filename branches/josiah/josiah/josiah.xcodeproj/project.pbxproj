@@ -30,6 +30,7 @@
 		B25B2AE50F8CDB6D00485047 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B25B2AE40F8CDB6D00485047 /* libmoses.a */; };
 		B26B75EA0F9F8D3A00A06B31 /* Pos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75E80F9F8D3A00A06B31 /* Pos.cpp */; };
 		B26B75F40FA0A5CC00A06B31 /* Dependency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */; };
+		B26FFFC50FA7BAF40098700F /* SourceToTargetRatio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26FFFC40FA7BAF40098700F /* SourceToTargetRatio.cpp */; };
 		B2A748890F976BCD00A5DE76 /* MpiDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */; };
 /* End PBXBuildFile section */
 
@@ -109,6 +110,8 @@
 		B26B75E90F9F8D3A00A06B31 /* Pos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pos.h; sourceTree = "<group>"; };
 		B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dependency.cpp; sourceTree = "<group>"; };
 		B26B75F30FA0A5CC00A06B31 /* Dependency.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dependency.h; sourceTree = "<group>"; };
+		B26FFFC30FA7BAF40098700F /* SourceToTargetRatio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SourceToTargetRatio.h; sourceTree = "<group>"; };
+		B26FFFC40FA7BAF40098700F /* SourceToTargetRatio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SourceToTargetRatio.cpp; sourceTree = "<group>"; };
 		B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MpiDebug.cpp; sourceTree = "<group>"; };
 		B2A748880F976BCD00A5DE76 /* MpiDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MpiDebug.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -140,6 +143,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B26FFFC30FA7BAF40098700F /* SourceToTargetRatio.h */,
+				B26FFFC40FA7BAF40098700F /* SourceToTargetRatio.cpp */,
 				B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */,
 				B26B75F30FA0A5CC00A06B31 /* Dependency.h */,
 				B26B75E80F9F8D3A00A06B31 /* Pos.cpp */,
@@ -295,6 +300,7 @@
 				B2A748890F976BCD00A5DE76 /* MpiDebug.cpp in Sources */,
 				B26B75EA0F9F8D3A00A06B31 /* Pos.cpp in Sources */,
 				B26B75F40FA0A5CC00A06B31 /* Dependency.cpp in Sources */,
+				B26FFFC50FA7BAF40098700F /* SourceToTargetRatio.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

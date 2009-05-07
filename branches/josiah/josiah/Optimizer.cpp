@@ -86,7 +86,7 @@ void ExponentiatedGradientDescent::OptimizeImpl(
   cerr << "New x: " << *new_x << endl;
   prev_g_ = gradient;
 }
-
+  
 void MetaNormalizedExponentiatedGradientDescent::OptimizeImpl(
      float f,
      const ScoreComponentCollection& x,

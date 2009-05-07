@@ -46,7 +46,9 @@ void initMoses(const std::string& inifile, const std::string& weightfile, int de
 //Convenience methods for accessing the moses global data structures
 void GetFeatureNames(std::vector<std::string>* featureNames);
 void GetFeatureWeights(std::vector<float>* weights);
-void SetFeatureWeights(const std::vector<float>& weights);
+void SetFeatureWeights(const std::vector<float>& weights, bool compute_scale_gradient = false);
+//inline float GetCurrQuenchingTemp() { return quenching_temp;}
+//void SetQuenchingTemp(const std::vector<float>& weights);
 
 /**
   * Wrapper around any decoder. Notice the moses specific return values!

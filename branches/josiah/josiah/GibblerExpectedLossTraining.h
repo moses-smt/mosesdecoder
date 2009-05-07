@@ -25,11 +25,13 @@ class ExpectedLossCollector : public SampleCollector {
     virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float* unreg_gain);
     virtual void UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v);
     
+    
   protected:
     ScoreComponentCollection getFeatureExpectations(const vector<double>& importanceWeights) const;
     /** Hooks for adding, eg, entropy regularisation. The first is added in to the gradient, the second to the objective.*/
     virtual float getRegularisationGradientFactor(size_t i) {return 0;}
     virtual float getRegularisation() {return 0;}
+    virtual bool ComputeScaleGradient() {return false;}
   
   private:
     std::vector<ScoreComponentCollection> m_featureVectors;
@@ -37,8 +39,8 @@ class ExpectedLossCollector : public SampleCollector {
     std::vector<size_t> m_lengths;
 //    std::vector<Derivation> m_samples;
     const GainFunction& g;
+    
   
- 
 };
 
 }

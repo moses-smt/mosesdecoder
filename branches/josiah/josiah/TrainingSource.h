@@ -43,6 +43,8 @@ class ExpectedBleuTrainer : public InputSource {
                            const Moses::ScoreComponentCollection& grad,
                            Decoder* decoder, 
                            const Moses::ScoreComponentCollection& hessianV);
+  void SetComputeScaleGradient(bool scale_gradient) {compute_scale_gradient = scale_gradient;}
+  float GetCurrQuenchingTemp() {return quenching_temp;}
 
  private:
   int rank, size, batch_size;
@@ -55,6 +57,8 @@ class ExpectedBleuTrainer : public InputSource {
   float total_unreg_exp_gain;
   Moses::ScoreComponentCollection gradient;
   Moses::ScoreComponentCollection hessianV_;
+  float scaling_gradient;
+  float scaling_hessianV;
   std::vector<int> order;
   boost::mt19937 rng;
   boost::uniform_smallint<int> dist;
@@ -64,6 +68,8 @@ class ExpectedBleuTrainer : public InputSource {
   float total_ref_len;
   float total_exp_len;
   int tlc;
+  bool compute_scale_gradient;
+  float quenching_temp;
 };
 
 }

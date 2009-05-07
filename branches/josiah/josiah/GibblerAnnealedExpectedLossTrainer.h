@@ -22,6 +22,7 @@ namespace Josiah {
     GibblerAnnealedExpectedLossCollector(const GainFunction& f, Sampler& sampler) 
       :  ExpectedLossCollector(f) {
         sampler.AddCollector(&m_derivationCollector);
+        m_computeScaleGradient = false;
       }
     
     float ComputeEntropy();
@@ -30,6 +31,9 @@ namespace Josiah {
     virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float * unreg_exp_gain);
     virtual float getRegularisationGradientFactor(size_t i);
     virtual float getRegularisation();
+    void SetComputeScaleGradient(bool compute) {m_computeScaleGradient = compute;}
+    virtual bool ComputeScaleGradient() {return m_computeScaleGradient;}
+
     
   private:
     float m_temp;
@@ -37,6 +41,10 @@ namespace Josiah {
     
     //cache the distribution during gradient calculation
     std::map<const Derivation*,double> m_p;
+    
+    //whether to compute the scaling gradient
+    bool m_computeScaleGradient;
+    
   };
   
 }

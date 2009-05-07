@@ -36,7 +36,10 @@ ExpectedBleuTrainer::ExpectedBleuTrainer(
       randomize_batches(randomize),
       optimizer(o),
       total_ref_len(),
-      total_exp_len() {
+      total_exp_len(), 
+      quenching_temp(), 
+      scaling_gradient(),
+      scaling_hessianV() {
   if (rank >= batch_size) keep_going = false;
   corpus.swap(*sents);
   int esize = min(batch_size, size);
@@ -85,8 +88,7 @@ void ExpectedBleuTrainer::IncorporateGradient(
                                                 const float unreg_exp_gain,
                                                 const ScoreComponentCollection& grad,
                                               Decoder* decoder) {
-  ScoreComponentCollection hessianV = grad;
-  hessianV.ZeroAll();
+  ScoreComponentCollection hessianV;
   IncorporateGradient(trans_len, ref_len, exp_gain, unreg_exp_gain, grad, decoder, hessianV);
 } 
                                                 
@@ -100,8 +102,27 @@ void ExpectedBleuTrainer::IncorporateGradient(
        const ScoreComponentCollection& grad,
        Decoder* decoder, 
        const ScoreComponentCollection& hessianV) {
-  gradient.PlusEquals(grad);
-  hessianV_.PlusEquals(hessianV);
+
+  if (compute_scale_gradient) {
+    size_t size = grad.data().size() -1;
+    vector <float>  _grad(size); 
+    vector <float>  _hessianV(size);
+    
+    copy(grad.data().begin(),grad.data().end()-1,_grad.begin());
+    copy(hessianV.data().begin(),hessianV.data().end()-1,_hessianV.begin());
+    ScoreComponentCollection thisGrad(_grad);
+    ScoreComponentCollection thisHessianV(_hessianV);
+    
+    scaling_gradient += grad.data()[size];
+    scaling_hessianV += hessianV.data()[size];
+    gradient.PlusEquals(thisGrad);
+    hessianV_.PlusEquals(thisHessianV);  
+  }
+  else {
+    gradient.PlusEquals(grad);
+    hessianV_.PlusEquals(hessianV);  
+  }
+  
   total_exp_gain += exp_gain;
   total_unreg_exp_gain += unreg_exp_gain;
   total_ref_len += ref_len;
@@ -110,12 +131,18 @@ void ExpectedBleuTrainer::IncorporateGradient(
   if (cur == cur_end) {
     vector<float> w;
     GetFeatureWeights(&w);
-    ScoreComponentCollection weights(w);
+    
     vector<float> rcv_grad(w.size());
     vector<float> rcv_hessianV(w.size());
     assert(gradient.data().size() == w.size());
     assert(hessianV_.data().size() == w.size());
-    float tg = 0, trl = 0, tel = 0, tgunreg = 0;
+    
+    if (compute_scale_gradient) {
+      w.push_back(quenching_temp);
+    }
+    ScoreComponentCollection weights(w);
+    
+    float tg = 0, trl = 0, tel = 0, tgunreg = 0, tscalinggr= 0, tscalingHV = 0;
 #ifdef MPI_ENABLED
     if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&gradient.data()[0]), &rcv_grad[0], w.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&hessianV_.data()[0]), &rcv_hessianV[0], w.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
@@ -123,6 +150,9 @@ void ExpectedBleuTrainer::IncorporateGradient(
     if (MPI_SUCCESS != MPI_Reduce(&total_unreg_exp_gain, &tgunreg, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Reduce(&total_ref_len, &trl, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Reduce(&total_exp_len, &tel, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    if (MPI_SUCCESS != MPI_Reduce(&scaling_gradient, &tscalinggr, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    if (MPI_SUCCESS != MPI_Reduce(&scaling_hessianV, &tscalingHV, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    
 #else
     rcv_grad = gradient.data();
     rcv_hessianV = hessianV_.data();
@@ -130,9 +160,19 @@ void ExpectedBleuTrainer::IncorporateGradient(
     tgunreg = total_exp_gain;
     trl = total_ref_len;
     tel = total_exp_len;
+    tscalinggr = scaling_gradient;
+    tscalingHV = scaling_hessianV;
 #endif
+
+    if (compute_scale_gradient) {
+      rcv_grad.push_back(tscalinggr);
+      rcv_hessianV.push_back(tscalingHV);
+    }
+     
     ScoreComponentCollection g(rcv_grad);
     ScoreComponentCollection hessV(rcv_hessianV);
+
+    
     if (rank == 0) {
       tg /= batch_size;
       tgunreg /= batch_size;
@@ -156,13 +196,21 @@ void ExpectedBleuTrainer::IncorporateGradient(
     keep_going = kg;
     optimizer->SetIteration(iteration);
 #endif
-    SetFeatureWeights(weights.data());
+    SetFeatureWeights(weights.data(), compute_scale_gradient);
+    if (compute_scale_gradient) {
+      quenching_temp = weights.data()[weights.data().size() - 1];
+    }
+    
     cur = cur_start;
     gradient.ZeroAll();
+    hessianV_.ZeroAll();
+    scaling_gradient = 0;
+    scaling_hessianV = 0;
     total_exp_gain = 0;
     total_unreg_exp_gain = 0;
     total_exp_len = 0;
     total_ref_len = 0;
+    
   }
 }
 

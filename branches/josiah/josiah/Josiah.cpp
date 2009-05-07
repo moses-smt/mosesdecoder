@@ -254,6 +254,7 @@ int main(int argc, char** argv) {
   bool SMD;
   float brev_penalty_scaling_factor;
   bool hack_bp_denum;
+  bool optimize_quench_temp;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -314,7 +315,8 @@ int main(int argc, char** argv) {
    ("floor-temp", po::value<float>(&floor_temp_expda)->default_value(0.0f), "Floor temperature for det annealing")
   ("det-annealing-ratio,A", po::value<float>(&anneal_ratio_da)->default_value(0.5f), "Deterministc annealing ratio")
   ("hack-bp-denum,H", po::value(&hack_bp_denum)->default_value(false), "Use a predefined scalar as denum in BP computation")
-  ("bp-scale,B", po::value<float>(&brev_penalty_scaling_factor)->default_value(1.0f), "Scaling factor for sent level brevity penalty for BLEU - default is 1.0");
+  ("bp-scale,B", po::value<float>(&brev_penalty_scaling_factor)->default_value(1.0f), "Scaling factor for sent level brevity penalty for BLEU - default is 1.0")
+  ("optimize-quench-temp", po::value(&optimize_quench_temp)->zero_tokens()->default_value(false), "Optimizing quenching temp during annealing");
   
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -430,7 +432,14 @@ int main(int argc, char** argv) {
   
   auto_ptr<Optimizer> optimizer;
 
-  eta.resize(weights.size());
+  if (optimize_quench_temp) {
+   eta.resize(weights.size()+1);  
+  }
+  else {
+   eta.resize(weights.size());   
+  }
+  
+  
   prev_gradient.resize(weights.size());
 
   if (use_metanormalized_egd) {
@@ -542,21 +551,46 @@ int main(int argc, char** argv) {
       annealedELCollector->SetTemperature(temp);
       cerr << "Annealing temperature " << annealedELCollector->GetTemperature() << endl;
       
+      if (optimizer->GetIteration() == 0) {
+        sampler.SetQuenchingTemperature(start_temp_quench);  
+      }
+      else {
+        sampler.SetQuenchingTemperature(trainer->GetCurrQuenchingTemp());  
+      }
+      
+      //Do compute scaling gradient when cooling
+      if (optimize_quench_temp) {
+        annealedELCollector->SetComputeScaleGradient(true);
+        trainer->SetComputeScaleGradient(true);  
+      }
+      
+      
       if (temp == (static_cast<ExponentialAnnealingSchedule*>(detAnnealingSchedule.get()))->GetFloorTemp()) {//Time to start quenching
-        if (initialQuenchingIteration == -1) //The iteration from which we start quenching
+        if (initialQuenchingIteration == -1) {//The iteration from which we start quenching          
           initialQuenchingIteration = it;
-        float quenchTemp = quenchingSchedule->GetTemperatureAtTime(it - initialQuenchingIteration + 1) ;
+          //Do not optimize quenching temp when quenching
+          annealedELCollector->SetComputeScaleGradient(false);
+          trainer->SetComputeScaleGradient(false);
+          //Resize optimizer's fields
+          if (optimize_quench_temp) {
+            static_cast<ExponentiatedGradientDescent*>(optimizer.get())->ResizeEta();
+            static_cast<ExponentiatedGradientDescent*>(optimizer.get())->ResizePreviousGradient();
+          }
+        } 
+          
+        float quenchTemp = start_temp_quench;
+        if (optimize_quench_temp) { 
+          quenchTemp = trainer->GetCurrQuenchingTemp();
+        }  
+        assert (quenchTemp > 0);
+        
+        quenchTemp *= quenchingSchedule->GetTemperatureAtTime(it - initialQuenchingIteration + 1) ;
         cerr << "Quenching temp " <<  quenchTemp << endl;
         sampler.SetQuenchingTemperature(quenchTemp);
         if (quenchTemp >= stop_temp_quench) {
           break;
         }
       }
-      else {//Use initial temperature
-        sampler.SetQuenchingTemperature(start_temp_quench);
-        cerr << "Using start quench temp " <<  start_temp_quench << endl;
-      }
-      
     }
     if (decode || topn > 0 || periodic_decode > 0) {
       DerivationCollector* collector = new DerivationCollector();
@@ -642,8 +676,16 @@ int main(int argc, char** argv) {
     timer.check("Outputting results");
 
     if (expected_sbleu || expected_sbleu_da) {
-      ScoreComponentCollection gradient;
-      ScoreComponentCollection hessianV;
+      size_t numFeatures = weights.size();
+      if (expected_sbleu_da) {
+        GibblerAnnealedExpectedLossCollector* annealedELCollector = static_cast<GibblerAnnealedExpectedLossCollector*>(elCollector.get());
+        if (annealedELCollector->ComputeScaleGradient()){
+          numFeatures += 1;
+        }
+      }
+      
+      ScoreComponentCollection gradient(numFeatures);
+      ScoreComponentCollection hessianV(numFeatures);
       float exp_trans_len = 0;
       float unreg_exp_gain = 0;
       const float exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len, &unreg_exp_gain);

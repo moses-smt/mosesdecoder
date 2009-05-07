@@ -2,6 +2,7 @@
 
 #include "GainFunction.h"
 #include "Hypothesis.h"
+#include "Decoder.h"
 
 using namespace std;
 
@@ -30,8 +31,13 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
 
   MPI_VERBOSE(1,"FEXP: " << feature_expectations << endl)
   
+  vector<float> w;
+  GetFeatureWeights(&w);
+  float exp_score = feature_expectations.InnerProduct(w);
+  float scaling_gradient = 0.0;
+  
   //gradient computation
-  ScoreComponentCollection grad;
+  ScoreComponentCollection grad(gradient->size());
   double exp_gain = 0;
   for (size_t i = 0; i < N(); ++i) {
     ScoreComponentCollection fv = m_featureVectors[i];
@@ -47,6 +53,10 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
     MPI_VERBOSE(2,"WEIGHTED: " << fv << endl)
     grad.PlusEquals(fv);
     MPI_VERBOSE(2,"grad: " << grad << endl)
+    if (ComputeScaleGradient()) {
+      scaling_gradient +=  (gain + getRegularisationGradientFactor(i)) * (m_featureVectors[i].InnerProduct(w) - exp_score) * importanceWeights[i] ;
+    }
+      
   }
   MPI_VERBOSE(1,"Gradient: " << grad << endl)
 
@@ -56,7 +66,16 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
   exp_gain += getRegularisation();
   cerr << "Exp gain with reg term:  " << exp_gain << endl;
   
+  if (ComputeScaleGradient()) {
+    cerr << "Scaling gradient:  " << scaling_gradient << endl;
+    vector<float> scaling_gradient_vec(gradient->size());
+    scaling_gradient_vec[gradient->size()-1] = scaling_gradient;
+    ScoreComponentCollection sc(scaling_gradient_vec);
+    grad.PlusEquals(sc);
+  }
+  
   gradient->PlusEquals(grad);
+  
   //expected length
   if (exp_len) {
     *exp_len = 0;
@@ -129,6 +148,7 @@ ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations(const vec
   }
   return ScoreComponentCollection(truncatedSum);
 }
+
 
 
 }
