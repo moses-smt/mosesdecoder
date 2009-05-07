@@ -134,13 +134,22 @@ namespace Josiah {
 
   void GetFeatureWeights(std::vector<float>* weights){
     const StaticData &staticData = StaticData::Instance();
-    *weights = staticData.GetAllWeights();
+    *weights = staticData.GetAllWeights();  
   }
 
-  void SetFeatureWeights(const std::vector<float>& weights) {
-    const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
+  void SetFeatureWeights(const std::vector<float>& weights, bool computeScaleGradient ) {
+    if (computeScaleGradient) {
+      vector<float> featWeights(weights.size() -1);
+      copy(weights.begin(), weights.end() - 1, featWeights.begin()); 
+      const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(featWeights);   
+      //SetQuenchingTemp(weights);
+    }
+    else {
+      const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);  
+    }
   }
   
+
   Search* RandomDecoder::createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc) {
     return new SearchRandom(sentence,toc);
   }
