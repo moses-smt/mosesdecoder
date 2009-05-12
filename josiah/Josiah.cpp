@@ -255,6 +255,8 @@ int main(int argc, char** argv) {
   float brev_penalty_scaling_factor;
   bool hack_bp_denum;
   bool optimize_quench_temp;
+  int weight_dump_freq;
+  string weight_dump_stem;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -316,7 +318,9 @@ int main(int argc, char** argv) {
   ("det-annealing-ratio,A", po::value<float>(&anneal_ratio_da)->default_value(0.5f), "Deterministc annealing ratio")
   ("hack-bp-denum,H", po::value(&hack_bp_denum)->default_value(false), "Use a predefined scalar as denum in BP computation")
   ("bp-scale,B", po::value<float>(&brev_penalty_scaling_factor)->default_value(1.0f), "Scaling factor for sent level brevity penalty for BLEU - default is 1.0")
-  ("optimize-quench-temp", po::value(&optimize_quench_temp)->zero_tokens()->default_value(false), "Optimizing quenching temp during annealing");
+  ("optimize-quench-temp", po::value(&optimize_quench_temp)->zero_tokens()->default_value(false), "Optimizing quenching temp during annealing")
+      ("weight-dump-freq", po::value<int>(&weight_dump_freq)->default_value(0), "Frequency to dump weight files during training"),
+  ("weight-dump-stem", po::value<string>(&weight_dump_stem)->default_value("weights"), "Stem of filename to use for dumping weights");
   
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -377,14 +381,11 @@ int main(int argc, char** argv) {
   }
   
 
-  vector<string> featureNames;
-  GetFeatureNames(&featureNames);
   
 
   // may be invoked just to get a features list
   if (show_features) {
-    for (size_t i = 0; i < featureNames.size(); ++i)
-      cout << featureNames[i] << endl;
+    OutputWeights(cout);
 #ifdef MPI_ENABLED
     MPI_Finalize();
 #endif
@@ -491,7 +492,8 @@ int main(int argc, char** argv) {
     if (!training_batch_size || training_batch_size > input_lines.size())
       training_batch_size = input_lines.size();
     VERBOSE(1, "Batch size: " << training_batch_size << endl);
-    trainer = new ExpectedBleuTrainer(rank, size, training_batch_size, &input_lines, seed, randomize, optimizer.get());
+    trainer = new ExpectedBleuTrainer(rank, size, training_batch_size, &input_lines, seed, randomize, optimizer.get(),     
+                                      weight_dump_freq, weight_dump_stem);
     input.reset(trainer);
   } else {
     if (inputfile.size()) {
