@@ -24,7 +24,9 @@ class ExpectedBleuTrainer : public InputSource {
     std::vector<std::string>* sents,  // development corpus
     unsigned int rseed,
     bool randomize,
-    Optimizer* o);
+    Optimizer* o,
+    int wt_dump_freq,
+    std::string wt_dump_stem);
   void ReserveNextBatch();
   virtual bool HasMore() const;
   virtual void GetSentence(std::string* sentence, int* lineno);
@@ -70,6 +72,8 @@ class ExpectedBleuTrainer : public InputSource {
   int tlc;
   bool compute_scale_gradient;
   float quenching_temp;
+  int weight_dump_freq;
+  std::string weight_dump_stem;
 };
 
 }

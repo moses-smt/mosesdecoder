@@ -21,7 +21,9 @@ ExpectedBleuTrainer::ExpectedBleuTrainer(
   vector<string>* sents,
   unsigned int rseed,
   bool randomize,
-  Optimizer* o)
+  Optimizer* o,
+  int wt_dump_freq,
+  std::string wt_dump_stem)
     : rank(r),
       size(s),
       batch_size(bsize),
@@ -29,6 +31,8 @@ ExpectedBleuTrainer::ExpectedBleuTrainer(
       corpus(),
       keep_going(true),
       total_exp_gain(),
+      scaling_gradient(),
+      scaling_hessianV(),
       order(batch_size),
       rng(rseed),
       dist(0, sents->size() - 1),
@@ -36,10 +40,10 @@ ExpectedBleuTrainer::ExpectedBleuTrainer(
       randomize_batches(randomize),
       optimizer(o),
       total_ref_len(),
-      total_exp_len(), 
+      total_exp_len(),
       quenching_temp(), 
-      scaling_gradient(),
-      scaling_hessianV() {
+      weight_dump_freq(wt_dump_freq),
+      weight_dump_stem(wt_dump_stem){
   if (rank >= batch_size) keep_going = false;
   corpus.swap(*sents);
   int esize = min(batch_size, size);
@@ -210,6 +214,22 @@ void ExpectedBleuTrainer::IncorporateGradient(
     total_unreg_exp_gain = 0;
     total_exp_len = 0;
     total_ref_len = 0;
+    
+    if (rank == 0 && iteration > 0 && (iteration % weight_dump_freq) == 0) {
+      stringstream s;
+      s << weight_dump_stem;
+      s << "_";
+      s << iteration;
+      string weight_file = s.str();
+      cerr << "DUMPING WEIGHTS TO " << weight_file << endl;
+      ofstream out(weight_file.c_str());
+      if (out) {
+        OutputWeights(out);
+        out.close();
+      }  else {
+        cerr << "FAILED TO DUMP WEIGHTS" << endl;
+      }
+    }
     
   }
 }

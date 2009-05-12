@@ -149,6 +149,17 @@ namespace Josiah {
     }
   }
   
+  void OutputWeights(std::ostream& out) {
+    vector<string> names;
+    GetFeatureNames(&names);
+    vector<float> weights;
+    GetFeatureWeights(&weights);
+    assert(names.size() == weights.size());
+    for (size_t i = 0; i < weights.size(); ++i) {
+      out << names[i] << " " << weights[i] << endl;
+    }
+  }
+  
 
   Search* RandomDecoder::createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc) {
     return new SearchRandom(sentence,toc);
