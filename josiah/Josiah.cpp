@@ -319,7 +319,7 @@ int main(int argc, char** argv) {
   ("hack-bp-denum,H", po::value(&hack_bp_denum)->default_value(false), "Use a predefined scalar as denum in BP computation")
   ("bp-scale,B", po::value<float>(&brev_penalty_scaling_factor)->default_value(1.0f), "Scaling factor for sent level brevity penalty for BLEU - default is 1.0")
   ("optimize-quench-temp", po::value(&optimize_quench_temp)->zero_tokens()->default_value(false), "Optimizing quenching temp during annealing")
-      ("weight-dump-freq", po::value<int>(&weight_dump_freq)->default_value(0), "Frequency to dump weight files during training"),
+      ("weight-dump-freq", po::value<int>(&weight_dump_freq)->default_value(0), "Frequency to dump weight files during training")
   ("weight-dump-stem", po::value<string>(&weight_dump_stem)->default_value("weights"), "Stem of filename to use for dumping weights");
   
   po::options_description cmdline_options;

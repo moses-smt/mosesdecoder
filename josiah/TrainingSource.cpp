@@ -215,19 +215,19 @@ void ExpectedBleuTrainer::IncorporateGradient(
     total_exp_len = 0;
     total_ref_len = 0;
     
-    if (rank == 0 && iteration > 0 && (iteration % weight_dump_freq) == 0) {
+    if (weight_dump_freq > 0 && rank == 0 && iteration > 0 && (iteration % weight_dump_freq) == 0) {
       stringstream s;
       s << weight_dump_stem;
       s << "_";
       s << iteration;
       string weight_file = s.str();
-      cerr << "DUMPING WEIGHTS TO " << weight_file << endl;
+      cerr << "Dumping weights to  " << weight_file << endl;
       ofstream out(weight_file.c_str());
       if (out) {
         OutputWeights(out);
         out.close();
       }  else {
-        cerr << "FAILED TO DUMP WEIGHTS" << endl;
+        cerr << "Failed to dump weights" << endl;
       }
     }
     
