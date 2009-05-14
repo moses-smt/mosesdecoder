@@ -58,9 +58,6 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
     }
       
   }
-  MPI_VERBOSE(1,"Gradient: " << grad << endl)
-
-  cerr << "Gradient: " << grad << endl;
   cerr << "Exp gain without reg term :  " << exp_gain << endl;
   *unreg_exp_gain = exp_gain;
   exp_gain += getRegularisation();
@@ -75,6 +72,9 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
   }
   
   gradient->PlusEquals(grad);
+  MPI_VERBOSE(1,"Gradient: " << grad << endl)
+
+  cerr << "Gradient: " << grad << endl;
   
   //expected length
   if (exp_len) {

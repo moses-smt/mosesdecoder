@@ -83,10 +83,11 @@ float CherrySyntacticCohesionFeature::computeScore() {
   Hypothesis *prev = const_cast<Hypothesis*>(const_cast<Sample*>(m_sample)->GetTargetTail()->GetNextHypo()); //first hypo in tgt order
   
   for (Hypothesis* h =  const_cast<Hypothesis*>(prev->GetNextHypo()); h; h = const_cast<Hypothesis*>(h->GetNextHypo())) {
-    interruptionCount += getInterruptions(prev->GetCurrSourceWordsRange(), &(h->GetTranslationOption()), h->GetCurrTargetWordsRange());
+    Context context = { &(prev->GetCurrSourceWordsRange()), &(h->GetCurrSourceWordsRange()), &(prev->GetCurrTargetWordsRange()), &(h->GetCurrTargetWordsRange())  };
+    interruptionCount += getInterruptions(prev->GetCurrSourceWordsRange(), &(h->GetTranslationOption()), h->GetCurrTargetWordsRange(), context);
     prev = h;
   }
-  VERBOSE(2, "In compute score, interr cnt = " << interruptionCount << endl);
+  VERBOSE(2,"In compute score, interr cnt = " << interruptionCount << endl);
   return interruptionCount;
 }
   
@@ -98,9 +99,9 @@ float CherrySyntacticCohesionFeature::getSingleUpdateScore(const TranslationOpti
   if (!prevTgt->GetPrevHypo()) { //dummy hyp at start of sent, no cohesion violation
     return 0.0;
   }
-  
-  float interruptionCnt =  getInterruptions(prevTgt->GetCurrSourceWordsRange(), option, gap.segment);
-  VERBOSE(2,  "In single upd, int cnt " << interruptionCnt << endl);
+  Context context = { &(prevTgt->GetCurrSourceWordsRange()), &(option->GetSourceWordsRange()), &(prevTgt->GetCurrTargetWordsRange()), &(gap.segment)  };
+  float interruptionCnt =  getInterruptions(prevTgt->GetCurrSourceWordsRange(), option, gap.segment, context);
+  VERBOSE(2, "In single upd, int cnt " << interruptionCnt << endl);
   return interruptionCnt;
 }  
 
@@ -119,37 +120,53 @@ float CherrySyntacticCohesionFeature::getFlipUpdateScore(
   const Hypothesis* leftTgtHypPred = leftGap.leftHypo;
   const Hypothesis* rightTgtHypSucc = rightGap.rightHypo;
   
+  Context context = { &(leftTgtOption->GetSourceWordsRange()), &(rightTgtOption->GetSourceWordsRange()), leftTgtSegment, rightTgtSegment };
+  
   //Left tgt option and its predecessor
   if (leftTgtHypPred && leftTgtHypPred->GetPrevHypo()) {
-    interruptionCnt +=  getInterruptions(leftTgtHypPred->GetCurrSourceWordsRange(), leftTgtOption, *leftTgtSegment);  
+    interruptionCnt +=  getInterruptions(leftTgtHypPred->GetCurrSourceWordsRange(), leftTgtOption, *leftTgtSegment, context);  
   }
     
   //Right tgt option and its successor
   if (rightTgtHypSucc) {
-    interruptionCnt +=  getInterruptions(rightTgtOption->GetSourceWordsRange()  ,&(rightTgtHypSucc->GetTranslationOption()), rightTgtHypSucc->GetCurrTargetWordsRange());    
+    interruptionCnt +=  getInterruptions(rightTgtOption->GetSourceWordsRange()  ,&(rightTgtHypSucc->GetTranslationOption()), rightTgtHypSucc->GetCurrTargetWordsRange(), context);    
   }
     
   //Are the options contiguous on the target side?
   bool contiguous = (leftTgtSegment->GetEndPos() + 1 == rightTgtSegment->GetStartPos()) ;
     
   if (contiguous) {
-    interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), rightTgtOption, *rightTgtSegment);  
+    interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), rightTgtOption, *rightTgtSegment, context);  
   }
   else {
     //Left tgt option and its successor
     const Hypothesis* leftTgtSuccessorHyp = leftGap.rightHypo;
     if (leftTgtSuccessorHyp) {
-      interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), &(leftTgtSuccessorHyp->GetTranslationOption()), leftTgtSuccessorHyp->GetCurrTargetWordsRange());  
+      interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), &(leftTgtSuccessorHyp->GetTranslationOption()), leftTgtSuccessorHyp->GetCurrTargetWordsRange(), context );  
     }
-      
+    
     //Right tgt option and its predecessor
     const Hypothesis* rightTgtPredecessorHyp = rightGap.leftHypo;
-      
     if (rightTgtPredecessorHyp) {
-      interruptionCnt +=  getInterruptions(rightTgtPredecessorHyp->GetCurrSourceWordsRange(), rightTgtOption, *rightTgtSegment);
-    }  
+      interruptionCnt +=  getInterruptions(rightTgtPredecessorHyp->GetCurrSourceWordsRange(), rightTgtOption, *rightTgtSegment, context);
+    }
+    
+    //Everything in between
+    if (leftTgtSuccessorHyp != rightTgtPredecessorHyp) {
+      TranslationOption *prevOption =  const_cast<TranslationOption*>(&(leftTgtSuccessorHyp->GetTranslationOption()));
+      for (Hypothesis *hyp = const_cast<Hypothesis*>(leftTgtSuccessorHyp->GetNextHypo()); ; hyp = const_cast<Hypothesis*>(hyp->GetNextHypo())) {
+        if (hyp) {
+          interruptionCnt +=  getInterruptions(prevOption->GetSourceWordsRange(), &(hyp->GetTranslationOption()), hyp->GetCurrTargetWordsRange(), context);  
+          prevOption = const_cast<TranslationOption*>(&(hyp->GetTranslationOption()));
+        }
+        if (hyp == rightGap.leftHypo) {
+          break;
+        }
+      }  
+    }
+        
   }
-  VERBOSE(2, "In flip, interr cnt = " << interruptionCnt << endl);  
+  VERBOSE (2, "In flip, interr cnt = " << interruptionCnt << endl);  
   return interruptionCnt; 
 }
   
@@ -163,19 +180,20 @@ float CherrySyntacticCohesionFeature::getContiguousPairedUpdateScore(
   const Hypothesis*  leftTgtHypPred = gap.leftHypo;
   const Hypothesis*  rightTgtHypSucc = gap.rightHypo;
   
+  Context context = { &(leftTgtOption->GetSourceWordsRange()), &(rightTgtOption->GetSourceWordsRange()), &(gap.segment), &(gap.segment)  };
   //Left tgt option and its predecessor
   if (gap.segment.GetStartPos() > 0) {
     if (leftTgtHypPred) {
-      interruptionCnt +=  getInterruptions(leftTgtHypPred->GetCurrSourceWordsRange(), leftTgtOption, gap.segment);  
+      interruptionCnt +=  getInterruptions(leftTgtHypPred->GetCurrSourceWordsRange(), leftTgtOption, gap.segment, context);  
     }  
   } 
   
   //Right tgt option and its successor
   if (rightTgtHypSucc) {
-    interruptionCnt +=  getInterruptions(rightTgtOption->GetSourceWordsRange()  ,&(rightTgtHypSucc->GetTranslationOption()), rightTgtHypSucc->GetCurrTargetWordsRange());    
+    interruptionCnt +=  getInterruptions(rightTgtOption->GetSourceWordsRange()  ,&(rightTgtHypSucc->GetTranslationOption()), rightTgtHypSucc->GetCurrTargetWordsRange(), context);    
   }
   
-  interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), rightTgtOption, gap.segment);  
+  interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), rightTgtOption, gap.segment, context);  
   
   VERBOSE(2, "In paired update, interr cnt = " << interruptionCnt << endl); 
   return interruptionCnt; 
@@ -184,7 +202,6 @@ float CherrySyntacticCohesionFeature::getContiguousPairedUpdateScore(
 float CherrySyntacticCohesionFeature::getDiscontiguousPairedUpdateScore(
     const TranslationOption* leftTgtOption,const TranslationOption* rightTgtOption, 
     const TargetGap& leftGap, const TargetGap& rightGap) {
-  
   float interruptionCnt = 0.0;
   
   WordsRange* leftTgtSegment = const_cast<WordsRange*> (&leftGap.segment);
@@ -196,49 +213,66 @@ float CherrySyntacticCohesionFeature::getDiscontiguousPairedUpdateScore(
   const Hypothesis*  rightTgtPredecessorHyp = rightGap.leftHypo;
   const Hypothesis*  rightTgtHypSucc = rightGap.rightHypo;
   
+  Context context = { &(leftTgtOption->GetSourceWordsRange()), &(rightTgtOption->GetSourceWordsRange()), leftTgtSegment, rightTgtSegment };
+  
   //Left tgt option and its predecessor
   if (leftTgtSegment->GetStartPos() > 0) {
     if (leftTgtHypPred) {
-      interruptionCnt +=  getInterruptions(leftTgtHypPred->GetCurrSourceWordsRange(), leftTgtOption, *leftTgtSegment);  
+      interruptionCnt +=  getInterruptions(leftTgtHypPred->GetCurrSourceWordsRange(), leftTgtOption, *leftTgtSegment, context);  
     }  
   } 
   
   //Right tgt option and its successor
   if (rightTgtHypSucc) {
-    interruptionCnt +=  getInterruptions(rightTgtOption->GetSourceWordsRange()  ,&(rightTgtHypSucc->GetTranslationOption()), rightTgtHypSucc->GetCurrTargetWordsRange());    
+    interruptionCnt +=  getInterruptions(rightTgtOption->GetSourceWordsRange()  ,&(rightTgtHypSucc->GetTranslationOption()), rightTgtHypSucc->GetCurrTargetWordsRange(), context);    
   }
   
   //Left tgt option and its successor
   if (leftTgtSuccessorHyp) {
-    interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), &(leftTgtSuccessorHyp->GetTranslationOption()), leftTgtSuccessorHyp->GetCurrTargetWordsRange());  
+    interruptionCnt +=  getInterruptions(leftTgtOption->GetSourceWordsRange(), &(leftTgtSuccessorHyp->GetTranslationOption()), leftTgtSuccessorHyp->GetCurrTargetWordsRange(), context);  
   }
     
   //Right tgt option and its predecessor
   if (rightTgtPredecessorHyp) {
-    interruptionCnt +=  getInterruptions(rightTgtPredecessorHyp->GetCurrSourceWordsRange(), rightTgtOption, *rightTgtSegment);
-  }  
+    interruptionCnt +=  getInterruptions(rightTgtPredecessorHyp->GetCurrSourceWordsRange(), rightTgtOption, *rightTgtSegment, context);
+  }
   
-  VERBOSE(2, "In paired update, interr cnt = " << interruptionCnt << endl); 
+  //Everything in between
+  if (leftTgtSuccessorHyp != rightTgtPredecessorHyp) {
+    TranslationOption *prevOption =  const_cast<TranslationOption*>(&(leftTgtSuccessorHyp->GetTranslationOption()));
+    for (Hypothesis *hyp = const_cast<Hypothesis*>(leftTgtSuccessorHyp->GetNextHypo()); ; hyp = const_cast<Hypothesis*>(hyp->GetNextHypo())) {
+      if (hyp) {
+        interruptionCnt +=  getInterruptions(prevOption->GetSourceWordsRange(), &(hyp->GetTranslationOption()), hyp->GetCurrTargetWordsRange(), context);  
+        prevOption = const_cast<TranslationOption*>(&(hyp->GetTranslationOption()));
+      }
+      if (hyp == rightGap.leftHypo) {
+        break;
+      }
+    }  
+  }
+  
+  
+  VERBOSE (2,  "In paired update, interr cnt = " << interruptionCnt << endl); 
   return interruptionCnt; 
 }
 
 
 
 /**Helper method */
-float CherrySyntacticCohesionFeature::getInterruptions(const WordsRange& prevSourceRange, const TranslationOption *option, const WordsRange& targetSegment) {
+float CherrySyntacticCohesionFeature::getInterruptions(const WordsRange& prevSourceRange, const TranslationOption *option, const WordsRange& targetSegment, const Context& context) {
   float interruptionCnt = 0.0;
   size_t f_L =  prevSourceRange.GetStartPos(); 
   size_t f_R =  prevSourceRange.GetEndPos();
     
-  interruptionCnt = getInterruptionCount(option, targetSegment, f_L);
+  interruptionCnt = getInterruptionCount(option, targetSegment, f_L, context);
   if (interruptionCnt == 0 && f_L != f_R)
-    interruptionCnt = getInterruptionCount(option, targetSegment, f_R);  
+    interruptionCnt = getInterruptionCount(option, targetSegment, f_R, context);  
     
   return interruptionCnt;
   
 }  
   
-float CherrySyntacticCohesionFeature::getInterruptionCount(const TranslationOption *option, const WordsRange& targetSegment, size_t f) {
+float CherrySyntacticCohesionFeature::getInterruptionCount(const TranslationOption *option, const WordsRange& targetSegment, size_t f, const Context& context) {
   size_t r_prime = f;
   size_t r = NOT_FOUND;
     
@@ -253,16 +287,27 @@ float CherrySyntacticCohesionFeature::getInterruptionCount(const TranslationOpti
   const set<size_t> & children = m_sourceTree->getChildren(r);
   for (set<size_t>::const_iterator it = children.begin(); it != children.end(); ++it) {
     size_t child = *it;
-    Hypothesis* hyp = const_cast<Sample*>(m_sample)->GetHypAtSourceIndex(child);
-    if (isInterrupting(hyp, targetSegment)) {
+    const WordsRange* otherSegment; 
+    if (context.leftSrcRange->covers(child)) {
+      otherSegment = context.leftTgtRange  ;
+    }
+    else if (context.rightSrcRange->covers(child)) {
+      otherSegment = context.rightTgtRange  ;
+    }
+    else {
+      Hypothesis* hyp = const_cast<Sample*>(m_sample)->GetHypAtSourceIndex(child);
+      otherSegment = &(hyp->GetCurrTargetWordsRange());
+    }
+    
+    if (isInterrupting(*otherSegment, targetSegment)) {
       return 1.0;
     }
   }
   return 0.0;
 }  
   
-bool CherrySyntacticCohesionFeature::isInterrupting(Hypothesis* hyp, const WordsRange& targetSegment) {
-  return hyp->GetCurrTargetWordsRange() > targetSegment;    
+bool CherrySyntacticCohesionFeature::isInterrupting(const WordsRange& otherSegment, const WordsRange& targetSegment) {
+  return otherSegment > targetSegment;    
 }  
   
 bool CherrySyntacticCohesionFeature::notAllWordsCoveredByTree(const TranslationOption* option, size_t parent) {
