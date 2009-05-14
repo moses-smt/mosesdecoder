@@ -98,10 +98,17 @@ class CherrySyntacticCohesionFeature : public DependencyFeature {
     virtual ~CherrySyntacticCohesionFeature() {}
   
   private:
-    float getInterruptions(const WordsRange& prevSourceRange, const TranslationOption *option, const WordsRange& targetSegment);
-    float getInterruptionCount(const TranslationOption* option, const WordsRange& targetSegment, size_t f);
+    struct Context {
+      const WordsRange* leftSrcRange, *rightSrcRange;
+      const WordsRange* leftTgtRange, *rightTgtRange;
+    } ;
+  
+    float getInterruptions(const WordsRange& prevSourceRange, const TranslationOption *option, const WordsRange& targetSegment, const Context &);
+    float getInterruptionCount(const TranslationOption* option, const WordsRange& targetSegment, size_t f, const Context &);
     bool  notAllWordsCoveredByTree(const TranslationOption* option, size_t parent);
-    bool  isInterrupting(Hypothesis* hyp, const WordsRange& targetSegment);
+    bool  isInterrupting(const WordsRange& otherSegment, const WordsRange& targetSegment);
+    
+   
 };
 
 
@@ -141,5 +148,6 @@ class DependencyDistortionFeature : public DependencyFeature {
 
 };
 
+  
 
 }
