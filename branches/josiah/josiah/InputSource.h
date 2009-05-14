@@ -1,7 +1,10 @@
 #pragma once
 
+#include <stdexcept>
 #include <string>
-#include <istream>
+#include <vector>
+#include <iostream>
+#include <fstream>
 
 namespace Josiah {
 
@@ -16,6 +19,23 @@ struct StreamInputSource : public InputSource {
   StreamInputSource(std::istream& is);
   virtual bool HasMore() const;
   virtual void GetSentence(std::string* sentence, int* lineno);
+};
+
+
+/**
+ * Splits a file into batches.
+ **/
+class BatchedFileInputSource : public InputSource {
+    public:
+        BatchedFileInputSource(
+            const std::string& filename, int rank, int size);
+
+        virtual bool HasMore() const;
+        virtual void GetSentence(std::string* sentence, int* lineno);
+
+    private:
+        std::vector<std::string> m_lines;
+        size_t m_next;
 };
 
 }

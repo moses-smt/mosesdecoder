@@ -498,12 +498,7 @@ int main(int argc, char** argv) {
     input.reset(trainer);
   } else {
     if (inputfile.size()) {
-      in.reset(new ifstream(inputfile.c_str()));
-      if (! *in) {
-        cerr << "Error: Failed to open input file: " + inputfile << endl;
-        return 1;
-      }
-      input.reset(new StreamInputSource(*in));
+      input.reset(new BatchedFileInputSource(inputfile,rank,size));
     } else {
       input.reset(new StreamInputSource(cin));
     }
