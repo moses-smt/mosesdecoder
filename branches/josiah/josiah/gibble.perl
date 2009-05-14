@@ -4,27 +4,27 @@ use strict;
 #eddie specific
 use lib "/exports/informatics/inf_iccs_smt/perl/lib/perl5/site_perl";
 use Config::Simple;
+use Getopt::Long "GetOptions";
 
-if ($#ARGV != 0) {
-    print STDERR "Usage: perl gibble.perl <config-file>\n";
-    exit 1;
-}
+my ($config_file,$execute);
+die("gibble.perl -config config-file [-exec]")
+    unless  &GetOptions('config=s' => \$config_file,
+        'exec' => \$execute);
 
-
-my $config_file = $ARGV[0];
 my $config = new Config::Simple($config_file) || 
     die "Error: unable to read config file \"$config_file\"";
 
 
 #required global parameters
 my $name = &param_required("general.name");
-my $josiah_home_dir = &param_required("general.josiah-home");
+my $josiah = &param_required("general.josiah");
 my $weights_file = &param_required("general.weights-file");
 
 #optional globals
 my $queue = &param("general.queue", "inf_iccs_smt");
 
 &check_exists ("weights file", $weights_file);
+&check_exists("josiah executable", $josiah);
 my $nweights=`wc -l $weights_file`;
 
 #
@@ -61,8 +61,10 @@ my $extra_args = &param("train.extra-args");
 
 #test configuration
 my $test_freq = &param("test.frequency",0);
-my ($test_input_file, $test_reference_file,$test_ini_file);
+my ($test_input_file, $test_reference_file,$test_ini_file,$bleu_script);
 if ($test_freq) {
+    $bleu_script  = &param_required("test.bleu");
+    &check_exists("multi-bleu script", $bleu_script);
     $test_input_file = &param_required("test.input-file");
     $test_reference_file = &param_required("test.reference-file");
     &check_exists ("test input file", $test_input_file);
@@ -88,10 +90,15 @@ my $train_err = $train_script . ".err";
 open TRAIN, ">$train_script_file" || die "Unable to open \"$train_script_file\" for writing";
 
 &header(*TRAIN,$job_name,$working_dir,$jobs,$hours,$train_out,$train_err);
-print TRAIN "mpirun -np \$NSLOTS $josiah_home_dir/josiah/josiah \\\n";
+print TRAIN "mpirun -np \$NSLOTS $josiah \\\n";
 print TRAIN "-f $moses_ini_file \\\n";
 print TRAIN "-i $input_file \\\n";
-my @refs = split /,/, $reference_files;
+my @refs;
+if (ref($reference_files) eq 'ARRAY') {
+    @refs = @$reference_files;
+} else {
+    @refs = glob $reference_files;
+}
 for my $ref (@refs) {
     &check_exists("train ref file",  $ref);
     print TRAIN "-r $ref ";
@@ -115,6 +122,11 @@ print TRAIN $extra_args;
 
 print TRAIN "\n";
 close TRAIN;
+
+if (! $execute) {
+    print "Written train file: $train_script_file\n";
+    exit 0;
+}
 
 #submit the training job
 my $qsub_result = `qsub -P $queue $train_script_file`;
@@ -147,6 +159,7 @@ while(1) {
     my $burnin = &param("test.burnin",100);
     my $reheatings = &param("test.reheatings",2);
     my $mbr_size = &param("test.mbr-size",1000);
+    my $extra_args = &param("test.extra_args");
 
     #file names
     my $test_script_file = $working_dir . "/" . $test_script . ".$train_iteration.sh"; 
@@ -160,7 +173,7 @@ while(1) {
     }
 
     &header(*TEST,$job_name,$working_dir,$jobs,$hours,$test_out,$test_err);
-    print TEST "mpirun -np \$NSLOTS $josiah_home_dir/josiah/josiah \\\n";
+    print TEST "mpirun -np \$NSLOTS $josiah \\\n";
     print TEST "-f $test_ini_file \\\n";
     print TEST "-i $test_input_file \\\n";
     print TEST "-o $output_file \\\n";
@@ -172,9 +185,9 @@ while(1) {
     print TEST "--decode-random ";
     print TEST "-w $new_weight_file ";
     print TEST "--mbr --mbr-size $mbr_size ";
+    print TEST $extra_args;
     print TEST "\n";
 
-    my $bleu_script = "$josiah_home_dir/scripts/generic/multi-bleu.perl";
     print TEST "cat $output_file*_of_* > $output_file\n";
     print TEST "echo \"Max Derivation\"\n";
     print TEST  "perl -e '\$deriv=0; while(<>) {print if (\$deriv%3) == 0; ++\$deriv;}' $output_file  | $bleu_script $test_reference_file\n";
@@ -202,7 +215,7 @@ sub param {
     my ($key,$default) = @_;
     my $value = $config->param($key);
     $value = $default if !$value;
-    $value = join $value if (ref($value) eq 'ARRAY');
+    #$value = join $value if (ref($value) eq 'ARRAY');
     return $value;
 }
 
@@ -210,7 +223,7 @@ sub param_required {
     my ($key) = @_;
     my $value = $config->param($key);
     die "Error: required parameter \"$key\" was missing" if (!defined($value));
-    $value = join $value if (ref($value) eq 'ARRAY');
+    #$value = join $value if (ref($value) eq 'ARRAY');
     return $value;
 }
 
