@@ -424,7 +424,8 @@ int main(int argc, char** argv) {
   ostream* out = &cout;
   if (!outputfile.empty()) {
     ostringstream os;
-    os << outputfile << '.' << rank << "_of_" << size;
+    os << setfill('0');
+    os << outputfile << '.' << setw(3) << rank << "_of_" << size;
     VERBOSE(1, "Writing output to: " << os.str() << endl);
     out = new ofstream(os.str().c_str());
   }
