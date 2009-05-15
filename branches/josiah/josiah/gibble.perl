@@ -189,6 +189,7 @@ while(1) {
     print TEST "\n";
 
     print TEST "cat $output_file*_of_* > $output_file\n";
+    print TEST "rm -f $output_file*_of_*\n";
     print TEST "echo \"Max Derivation\"\n";
     print TEST  "perl -e '\$deriv=0; while(<>) {print if (\$deriv%3) == 0; ++\$deriv;}' $output_file  | $bleu_script $test_reference_file\n";
     print TEST "echo \"Max Translation\"\n";
