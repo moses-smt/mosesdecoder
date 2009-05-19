@@ -167,7 +167,7 @@ class Sampler {
   void AddOperator(GibbsOperator* o) {m_operators.push_back(o);}
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
   void SetAnnealingSchedule(const AnnealingSchedule* as) {m_as = as;}
-  void SetQuenchingTemperature(float temp) {m_quenchTemp = temp;}
+  void SetQuenchingTemperature(float temp) {cerr << "Setting quench temp to " << temp << endl; m_quenchTemp = temp;}
   void SetIterations(size_t iterations) {m_iterations = iterations;}
   void SetStopper(StopStrategy* stopper) {m_stopper = stopper;}
   void SetReheatings(size_t r) {m_reheatings = r;}
