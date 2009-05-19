@@ -2,6 +2,7 @@
 #include <numeric>
 #include <vector>
 #include "Factor.h"
+#include "FactorCollection.h"
 #include "TypeDef.h"
 #include "InputFileStream.h"
 #include "LanguageModelFactory.h"
@@ -17,6 +18,11 @@ LanguageModelInterpolated::~LanguageModelInterpolated() {
 
 bool LanguageModelInterpolated::Load(const std::string &filePath, FactorType factorType,
 	float weight, size_t nGramOrder) {
+
+	m_filePath = filePath;
+	m_factorType = factorType;
+	m_weight = weight;
+	m_nGramOrder = nGramOrder;
 
 	InputFileStream lmConf(filePath);
 	std::string line;
@@ -56,6 +62,14 @@ bool LanguageModelInterpolated::Load(const std::string &filePath, FactorType fac
 			weight, m_scoreIndexManager, m_dub, false));
 	}
 
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
+        m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
+        m_sentenceStartArray[m_factorType] = m_sentenceStart;
+
+        m_sentenceEnd = factorCollection.AddFactor(Output, m_factorType, EOS_);
+        m_sentenceEndArray[m_factorType] = m_sentenceEnd;
+	
 	return true;
 }
 
