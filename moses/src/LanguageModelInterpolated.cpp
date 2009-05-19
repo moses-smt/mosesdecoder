@@ -87,7 +87,7 @@ float LanguageModelInterpolated::GetValue(const std::vector<const Word*> &contex
 		// length of the context that was used!
 		assert(ml != InvalidContextLength);
 
-		if(ml > newLen) {
+		if(ml > newLen || i == 0) {
 			newLen = ml;
 			if(finalState) *finalState = currentState;
 		}
