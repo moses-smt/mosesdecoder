@@ -549,7 +549,7 @@ int main(int argc, char** argv) {
       annealedELCollector->SetTemperature(temp);
       cerr << "Annealing temperature " << annealedELCollector->GetTemperature() << endl;
       
-      if (optimizer->GetIteration() == 0) {
+      if (optimizer->GetIteration() == 0 || !optimize_quench_temp) {
         sampler.SetQuenchingTemperature(start_temp_quench);  
       }
       else {
