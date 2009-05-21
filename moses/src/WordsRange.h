@@ -115,6 +115,8 @@ public:
     m_startPos!=x.m_startPos || m_endPos!=x.m_endPos;
 	} 
 
+    inline bool covers(size_t x) const { return x >= m_startPos && x <= m_endPos; }
+    
 	TO_STRING();
 };
 
