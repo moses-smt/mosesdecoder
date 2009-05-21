@@ -110,6 +110,9 @@ class GibbsTimer {
 void configure_features_from_file(const std::string& filename, feature_vector& fv){
   std::cerr << "Reading extra features from " << filename << std::endl;
   std::ifstream in(filename.c_str());
+  if (!in) {
+    throw std::runtime_error("Unable to open feature configuration file");
+  }
   // todo: instead of having this function know about all required options of
   // each feature, have features populate options / read variable maps /
   // populate feature_vector using static functions.
