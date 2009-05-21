@@ -26,6 +26,10 @@ my $queue = &param("general.queue", "inf_iccs_smt");
 &check_exists ("weights file", $weights_file);
 &check_exists("josiah executable", $josiah);
 my $nweights=`wc -l $weights_file`;
+my $feature_file = &param("general.features");
+if ($feature_file) {
+     &check_exists("feature file ", $feature_file);
+}
 
 #
 # Create the training script
@@ -48,8 +52,6 @@ my $reference_files = &param_required("train.reference-files");
 &check_exists ("train input file", $input_file);
 
 #optional training parameters
-my $feature_file = &param("train.feature-file");
-&check_exists ("feature file", $feature_file) if $feature_file;
 my $samples = &param("train.samples",2000);
 my $burnin = &param("train.burnin", 100);
 my $reheatings = &param("train.reheatings",2);
@@ -177,6 +179,9 @@ while(1) {
     print TEST "-f $test_ini_file \\\n";
     print TEST "-i $test_input_file \\\n";
     print TEST "-o $output_file \\\n";
+    if ($feature_file) {
+        print TEST "-X $feature_file \\\n";
+    }
 
     print TEST "-s $samples -d -t -m -b $burnin ";
     if ($reheatings) {
