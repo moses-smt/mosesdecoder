@@ -98,4 +98,14 @@ float LanguageModelInterpolated::GetValue(const std::vector<const Word*> &contex
 	return TransformScore(std::inner_product(m_weights.begin(), m_weights.end(), partialScores.begin(), .0f));
 }
 
+void LanguageModelInterpolated::InitializeBeforeSentenceProcessing() const {
+	for(size_t i = 0; i < m_languageModels.size(); i++)
+		m_languageModels[i]->InitializeBeforeSentenceProcessing();
+}
+
+void LanguageModelInterpolated::CleanUpAfterSentenceProcessing() const {
+	for(size_t i = 0; i < m_languageModels.size(); i++)
+		m_languageModels[i]->CleanUpAfterSentenceProcessing();
+}
+
 }
