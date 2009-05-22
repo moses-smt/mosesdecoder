@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 #include "Factor.h"
+#include "InputType.h"
 #include "TypeDef.h"
 #include "Vocab.h"
 #include "LanguageModelSingleFactor.h"
@@ -51,6 +52,9 @@ public:
 
 	virtual float GetValue(const std::vector<const Word*> &contextFactor,
 			State* finalState = 0, unsigned int* len = 0) const;
+
+	virtual void InitializeBeforeSentenceProcessing() const;
+	virtual void CleanUpAfterSentenceProcessing() const;
 };
 
 
