@@ -438,7 +438,8 @@ int main(int argc, char** argv) {
   auto_ptr<Optimizer> optimizer;
 
   if (optimize_quench_temp) {
-   eta.resize(weights.size()+1);  
+   eta.resize(weights.size()+1); 
+   eta[eta.size()-1] = eta[0]; //Set quenching eta 
   }
   else {
    eta.resize(weights.size());   
