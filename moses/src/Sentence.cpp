@@ -148,7 +148,7 @@ bool Sentence::XmlOverlap(size_t startPos, size_t endPos) const {
 		{
 			if (pos < m_xmlCoverageMap.size() && m_xmlCoverageMap[pos]) {
 				return true;
-				}
+			}
 		}
 		return false;
 }

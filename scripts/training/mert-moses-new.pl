@@ -73,18 +73,19 @@ my $additional_triples = {
 	      [ 0.3, 0.0, 0.5 ],
 	      [ 0.2, 0.0, 0.5 ],
 	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
+    "lex"=> [ [ 0.1, 0.0, 0.2 ] ],  # global lexical model
 };
 
 # moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
 # uses ABBR names.
-my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation";
+my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation lex=weight-lex";
 my %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
 my %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
 
 # We parse moses.ini to figure out how many weights do we need to optimize.
 # For this, we must know the correspondence between options defining files
 # for models and options assigning weights to these models.
-my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g";
+my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g global-lexical-file=lex";
 my %TABLECONFIG2ABBR = map {split(/=/,$_,2)} split /\s+/, $TABLECONFIG_ABBR_MAP;
 
 # There are weights that do not correspond to any input file, they just increase the total number of lambdas we optimize
@@ -415,6 +416,7 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
 || $___DECODER_FLAGS =~ /(^|\s)-(distortion-file) /
 || $___DECODER_FLAGS =~ /(^|\s)-(generation-file) /
 || $___DECODER_FLAGS =~ /(^|\s)-(lmodel-file) /
+|| $___DECODER_FLAGS =~ /(^|\s)-(global-lexical-file) /
 ) {
   die "It is forbidden to supply any of -config, -ttable-file, -distortion-file, -generation-file or -lmodel-file in the --decoder-flags.\nPlease use only the --config option to give the config file that lists all the supplementary files.";
 }
@@ -1026,6 +1028,7 @@ sub scan_config {
     "generation-file" => 3,
     "lmodel-file" => 3,
     "distortion-file" => 3,
+    "global-lexical-file" => 1,
   );
   # by default, each line of each section means one lambda, but some sections
   # explicitly state a custom number of lambdas
@@ -1055,6 +1058,7 @@ sub scan_config {
       $defined_steps{$1}++ if /^([TG])/ || /^\d+ ([TG])/;
     }
     if (defined $section && defined $where_is_filename{$section}) {
+      print "$section -> $where_is_filename{$section}\n";
       # this ini section is relevant to lambdas
       chomp;
       my @flds = split / +/;

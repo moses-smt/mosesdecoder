@@ -44,6 +44,7 @@ Parameter::Parameter()
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
 	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
 	AddParam("generation-file", "location and properties of the generation table");
+	AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
 	AddParam("input-factors", "list of factors in the input");
 	AddParam("input-file", "i", "location of the input file to be translated");
 	AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
@@ -74,6 +75,7 @@ Parameter::Parameter()
 	AddParam("weight-generation", "g", "weight(s) for generation components");
 	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
 	AddParam("weight-l", "lm", "weight(s) for language models");
+	AddParam("weight-lex", "lex", "weight for global lexical model");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");

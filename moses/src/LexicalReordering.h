@@ -54,6 +54,11 @@ class LexicalReordering : public StatefulFeatureFunction {
   virtual std::string GetScoreProducerDescription() const {
     return "Generic Lexical Reordering Model... overwrite in subclass.";
   };
+
+  std::string GetScoreProducerWeightShortName() const {
+	return "d";
+  };
+
   //new 
   virtual int             GetNumOrientationTypes() const = 0;
   virtual OrientationType GetOrientationType(Hypothesis*) const = 0;
