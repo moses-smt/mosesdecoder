@@ -54,14 +54,17 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
   this->source_tail->SetSourcePrevHypo(NULL);
   this->target_tail->SetPrevHypo(NULL);
   
-  
   for (Josiah::feature_vector::const_iterator i=_extra_features.begin(); i!=_extra_features.end(); ++i){
-    //values.push_back((*i)->computeScore(s));
     (*i)->init(*this); // tell the feature that we have a new sample
+  }
+  
+  UpdateTargetWords();
+      
+  for (Josiah::feature_vector::const_iterator i=_extra_features.begin(); i!=_extra_features.end(); ++i){
     float score = (*i)->computeScore();
     feature_values.Assign(&((*i)->getScoreProducer()),score);
   }
-  UpdateTargetWords();
+      
 }
  
 Sample::~Sample() {
