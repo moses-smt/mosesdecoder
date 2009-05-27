@@ -28,8 +28,10 @@ namespace Josiah {
   void Josiah::SourceToTargetRatio::init(const Sample& sample) {
     m_sample = &sample;
     m_src_len = m_sample->GetSourceSize();
+    cerr << "Source len " << m_src_len << endl;
   }
   float Josiah::SourceToTargetRatio::computeScore() {
+    cerr << "In compute Score, source len " << m_src_len << " , tgt size " << m_sample->GetTargetWords().size() << endl; 
     return 1.0 - ((float) m_src_len /(float) m_sample->GetTargetWords().size());
   }
   /** Score due to  one segment */

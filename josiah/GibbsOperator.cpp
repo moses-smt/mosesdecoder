@@ -72,7 +72,7 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
   }
   
   //do annealling
-  const double annealing_factor = 1.0 / T;
+  const double annealing_factor =  1.0 / T; 
   transform(scores.begin(),scores.end(),scores.begin(),bind2nd(multiplies<double>(),annealing_factor));
 
   //normalise
