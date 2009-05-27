@@ -9,10 +9,10 @@ OBJS=Main.o NBest.o Hypo.o Tools.o ParameterNBest.o
 CFLAGS=-I$(MOSES_INC)
 
 nbest-tool: $(OBJS)
-	c++ -o nbest $(OBJS) -L$(LIB_DIR) $(LIBS)
+	$(CXX) -o nbest $(OBJS) -L$(LIB_DIR) $(LIBS)
 
 %.o: %.cpp
-	g++ $(CFLAGS) -o $@ -c $<
+	$(CXX) $(CFLAGS) -o $@ -c $<
 
 clean:
 	-rm $(OBJS) nbest
