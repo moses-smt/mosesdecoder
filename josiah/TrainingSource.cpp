@@ -125,10 +125,6 @@ void ExpectedBleuTrainer::IncorporateGradient(
     assert(gradient.data().size() == w.size());
     assert(hessianV_.data().size() == w.size());
     
-    if (compute_scale_gradient) {
-      w.push_back(quenching_temp);
-    }
-    ScoreComponentCollection weights(w);
     
     float tg = 0, trl = 0, tel = 0, tgunreg = 0, tscalinggr= 0, tscalingHV = 0;
 #ifdef MPI_ENABLED
@@ -153,13 +149,14 @@ void ExpectedBleuTrainer::IncorporateGradient(
 #endif
 
     if (compute_scale_gradient) {
+      w.push_back(quenching_temp);
       rcv_grad.push_back(tscalinggr);
       rcv_hessianV.push_back(tscalingHV);
     }
-     
+
+    ScoreComponentCollection weights(w);
     ScoreComponentCollection g(rcv_grad);
     ScoreComponentCollection hessV(rcv_hessianV);
-
     
     if (rank == 0) {
       tg /= batch_size;
