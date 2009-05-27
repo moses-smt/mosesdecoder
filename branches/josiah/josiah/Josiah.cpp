@@ -556,16 +556,6 @@ int main(int argc, char** argv) {
       if (optimizer->GetIteration() == 0 || !optimize_quench_temp) {
         sampler.SetQuenchingTemperature(start_temp_quench);  
       }
-      else {
-        sampler.SetQuenchingTemperature(trainer->GetCurrQuenchingTemp());  
-      }
-      
-      //Do compute scaling gradient when cooling
-      if (optimize_quench_temp) {
-        annealedELCollector->SetComputeScaleGradient(true);
-        trainer->SetComputeScaleGradient(true);  
-      }
-      
       
       if (temp == (static_cast<ExponentialAnnealingSchedule*>(detAnnealingSchedule.get()))->GetFloorTemp()) {//Time to start quenching
         if (initialQuenchingIteration == -1) {//The iteration from which we start quenching          
@@ -586,11 +576,19 @@ int main(int argc, char** argv) {
         }  
         assert (quenchTemp > 0);
         
-        quenchTemp *= quenchingSchedule->GetTemperatureAtTime(it - initialQuenchingIteration + 1) ;
-        cerr << "Quenching temp " <<  quenchTemp << endl;
+        quenchTemp *= quenchingSchedule->GetTemperatureAtTime(it - initialQuenchingIteration) ;
         sampler.SetQuenchingTemperature(quenchTemp);
         if (quenchTemp >= stop_temp_quench) {
           break;
+        }
+      }
+      else {
+        //Do compute scaling gradient when cooling
+        if (optimize_quench_temp) {
+          if (optimizer->GetIteration() > 0) 
+            sampler.SetQuenchingTemperature(trainer->GetCurrQuenchingTemp());  
+          annealedELCollector->SetComputeScaleGradient(true);
+          trainer->SetComputeScaleGradient(true);  
         }
       }
     }
@@ -678,19 +676,20 @@ int main(int argc, char** argv) {
     timer.check("Outputting results");
 
     if (expected_sbleu || expected_sbleu_da) {
-      size_t numFeatures = weights.size();
-      if (expected_sbleu_da) {
-        GibblerAnnealedExpectedLossCollector* annealedELCollector = static_cast<GibblerAnnealedExpectedLossCollector*>(elCollector.get());
-        if (annealedELCollector->ComputeScaleGradient()){
-          numFeatures += 1;
-        }
-      }
+//      size_t numFeatures = weights.size();
+//      if (expected_sbleu_da) {
+//        GibblerAnnealedExpectedLossCollector* annealedELCollector = static_cast<GibblerAnnealedExpectedLossCollector*>(elCollector.get());
+//        if (annealedELCollector->ComputeScaleGradient()){
+//          numFeatures += 1;
+//        }
+//      }
       
-      ScoreComponentCollection gradient(numFeatures);
-      ScoreComponentCollection hessianV(numFeatures);
+      ScoreComponentCollection gradient;
+      ScoreComponentCollection hessianV;
       float exp_trans_len = 0;
       float unreg_exp_gain = 0;
-      const float exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len, &unreg_exp_gain);
+      float scaling_gradient = 0;
+      const float exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len, &unreg_exp_gain, &scaling_gradient);
       
       if (SMD) {
         const ScoreComponentCollection& v =  static_cast<StochasticMetaDescent*>(optimizer.get())->GetV();
@@ -706,7 +705,8 @@ int main(int argc, char** argv) {
            unreg_exp_gain,
            gradient,
            decoder.get(), 
-           hessianV);
+           hessianV, 
+           scaling_gradient);
     }
     if (derivationCollector.get()) {
       cerr << "DerivEntropy " << derivationCollector->getEntropy() << endl;

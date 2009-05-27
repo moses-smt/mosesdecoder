@@ -22,7 +22,7 @@ void ExpectedLossCollector::collect(Sample& s) {
   MPI_VERBOSE(2,"Sample: " << Derivation(s) << endl) 
 }
 
-float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain) {
+float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain, float *scaling_gradient) {
   
 
   const vector<double>& importanceWeights =  getImportanceWeights();
@@ -34,10 +34,10 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
   vector<float> w;
   GetFeatureWeights(&w);
   float exp_score = feature_expectations.InnerProduct(w);
-  float scaling_gradient = 0.0;
+  *scaling_gradient = 0.0;
   
   //gradient computation
-  ScoreComponentCollection grad(gradient->size());
+  ScoreComponentCollection grad;
   double exp_gain = 0;
   for (size_t i = 0; i < N(); ++i) {
     ScoreComponentCollection fv = m_featureVectors[i];
@@ -54,7 +54,7 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
     grad.PlusEquals(fv);
     MPI_VERBOSE(2,"grad: " << grad << endl)
     if (ComputeScaleGradient()) {
-      scaling_gradient +=  (gain + getRegularisationGradientFactor(i)) * (m_featureVectors[i].InnerProduct(w) - exp_score) * importanceWeights[i] ;
+      *scaling_gradient +=  (gain + getRegularisationGradientFactor(i)) * (m_featureVectors[i].InnerProduct(w) - exp_score) * importanceWeights[i] ;
     }
       
   }
@@ -62,14 +62,6 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
   *unreg_exp_gain = exp_gain;
   exp_gain += getRegularisation();
   cerr << "Exp gain with reg term:  " << exp_gain << endl;
-  
-  if (ComputeScaleGradient()) {
-    cerr << "Scaling gradient:  " << scaling_gradient << endl;
-    vector<float> scaling_gradient_vec(gradient->size());
-    scaling_gradient_vec[gradient->size()-1] = scaling_gradient;
-    ScoreComponentCollection sc(scaling_gradient_vec);
-    grad.PlusEquals(sc);
-  }
   
   gradient->PlusEquals(grad);
   MPI_VERBOSE(1,"Gradient: " << grad << endl)

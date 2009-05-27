@@ -142,7 +142,6 @@ namespace Josiah {
       vector<float> featWeights(weights.size() -1);
       copy(weights.begin(), weights.end() - 1, featWeights.begin()); 
       const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(featWeights);   
-      //SetQuenchingTemp(weights);
     }
     else {
       const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);  

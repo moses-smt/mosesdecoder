@@ -31,8 +31,8 @@ ExpectedBleuTrainer::ExpectedBleuTrainer(
       corpus(),
       keep_going(true),
       total_exp_gain(),
-      scaling_gradient(),
-      scaling_hessianV(),
+      total_scaling_gradient(),
+      total_scaling_hessianV(),
       order(batch_size),
       rng(rseed),
       dist(0, sents->size() - 1),
@@ -91,9 +91,9 @@ void ExpectedBleuTrainer::IncorporateGradient(
                                                 const float exp_gain,
                                                 const float unreg_exp_gain,
                                                 const ScoreComponentCollection& grad,
-                                              Decoder* decoder) {
+                                              Decoder* decoder, const float scaling_gradient) {
   ScoreComponentCollection hessianV;
-  IncorporateGradient(trans_len, ref_len, exp_gain, unreg_exp_gain, grad, decoder, hessianV);
+  IncorporateGradient(trans_len, ref_len, exp_gain, unreg_exp_gain, grad, decoder, hessianV, scaling_gradient);
 } 
                                                 
   
@@ -105,33 +105,17 @@ void ExpectedBleuTrainer::IncorporateGradient(
        const float unreg_exp_gain,
        const ScoreComponentCollection& grad,
        Decoder* decoder, 
-       const ScoreComponentCollection& hessianV) {
+       const ScoreComponentCollection& hessianV, const float scaling_gradient) {
 
-  if (compute_scale_gradient) {
-    size_t size = grad.data().size() -1;
-    vector <float>  _grad(size); 
-    vector <float>  _hessianV(size);
-    
-    copy(grad.data().begin(),grad.data().end()-1,_grad.begin());
-    copy(hessianV.data().begin(),hessianV.data().end()-1,_hessianV.begin());
-    ScoreComponentCollection thisGrad(_grad);
-    ScoreComponentCollection thisHessianV(_hessianV);
-    
-    scaling_gradient += grad.data()[size];
-    scaling_hessianV += hessianV.data()[size];
-    gradient.PlusEquals(thisGrad);
-    hessianV_.PlusEquals(thisHessianV);  
-  }
-  else {
-    gradient.PlusEquals(grad);
-    hessianV_.PlusEquals(hessianV);  
-  }
-  
+  gradient.PlusEquals(grad);
+  hessianV_.PlusEquals(hessianV);  
   total_exp_gain += exp_gain;
   total_unreg_exp_gain += unreg_exp_gain;
   total_ref_len += ref_len;
   total_exp_len += trans_len;
-
+  total_scaling_gradient += scaling_gradient;
+  total_scaling_hessianV += 0; //TODO, compute scaling hessianV
+  
   if (cur == cur_end) {
     vector<float> w;
     GetFeatureWeights(&w);
@@ -154,8 +138,8 @@ void ExpectedBleuTrainer::IncorporateGradient(
     if (MPI_SUCCESS != MPI_Reduce(&total_unreg_exp_gain, &tgunreg, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Reduce(&total_ref_len, &trl, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Reduce(&total_exp_len, &tel, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
-    if (MPI_SUCCESS != MPI_Reduce(&scaling_gradient, &tscalinggr, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
-    if (MPI_SUCCESS != MPI_Reduce(&scaling_hessianV, &tscalingHV, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    if (MPI_SUCCESS != MPI_Reduce(&total_scaling_gradient, &tscalinggr, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    if (MPI_SUCCESS != MPI_Reduce(&total_scaling_hessianV, &tscalingHV, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     
 #else
     rcv_grad = gradient.data();
@@ -164,8 +148,8 @@ void ExpectedBleuTrainer::IncorporateGradient(
     tgunreg = total_exp_gain;
     trl = total_ref_len;
     tel = total_exp_len;
-    tscalinggr = scaling_gradient;
-    tscalingHV = scaling_hessianV;
+    tscalinggr = total_scaling_gradient;
+    tscalingHV = total_scaling_hessianV;
 #endif
 
     if (compute_scale_gradient) {
@@ -208,8 +192,8 @@ void ExpectedBleuTrainer::IncorporateGradient(
     cur = cur_start;
     gradient.ZeroAll();
     hessianV_.ZeroAll();
-    scaling_gradient = 0;
-    scaling_hessianV = 0;
+    total_scaling_gradient = 0;
+    total_scaling_hessianV = 0;
     total_exp_gain = 0;
     total_unreg_exp_gain = 0;
     total_exp_len = 0;

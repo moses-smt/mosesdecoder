@@ -36,7 +36,7 @@ class ExpectedBleuTrainer : public InputSource {
        const float exp_gain,
        const float unreg_exp_gain,
        const Moses::ScoreComponentCollection& grad,
-       Decoder* decoder);
+       Decoder* decoder, const float scaling_gradient);
   void IncorporateGradient(
                            const float trans_len,
                            const float ref_len,
@@ -44,7 +44,8 @@ class ExpectedBleuTrainer : public InputSource {
                            const float unreg_exp_gain,
                            const Moses::ScoreComponentCollection& grad,
                            Decoder* decoder, 
-                           const Moses::ScoreComponentCollection& hessianV);
+                           const Moses::ScoreComponentCollection& hessianV,
+                           const float scaling_gradient);
   void SetComputeScaleGradient(bool scale_gradient) {compute_scale_gradient = scale_gradient;}
   float GetCurrQuenchingTemp() {return quenching_temp;}
 
@@ -55,12 +56,9 @@ class ExpectedBleuTrainer : public InputSource {
   int cur_end;
   std::vector<std::string> corpus;
   bool keep_going;
-  float total_exp_gain;
-  float total_unreg_exp_gain;
   Moses::ScoreComponentCollection gradient;
   Moses::ScoreComponentCollection hessianV_;
-  float scaling_gradient;
-  float scaling_hessianV;
+  
   std::vector<int> order;
   boost::mt19937 rng;
   boost::uniform_smallint<int> dist;
@@ -69,6 +67,11 @@ class ExpectedBleuTrainer : public InputSource {
   Optimizer* optimizer;
   float total_ref_len;
   float total_exp_len;
+  float total_scaling_gradient;
+  float total_scaling_hessianV;
+  float total_exp_gain;
+  float total_unreg_exp_gain;
+  
   int tlc;
   bool compute_scale_gradient;
   float quenching_temp;
