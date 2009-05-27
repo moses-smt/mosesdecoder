@@ -7,4 +7,4 @@ all: filter-pt score-paraphrases
 
 filter-pt: filter-pt.cpp
 	./check-install $(SALMDIR)
-	g++ -O6 $(INC) $(OBJS) -o filter-pt filter-pt.cpp
+	$(CXX) -O6 $(INC) $(OBJS) -o filter-pt filter-pt.cpp
