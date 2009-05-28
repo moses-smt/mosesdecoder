@@ -14,6 +14,26 @@ die("gibble.perl -config config-file [-exec]")
 my $config = new Config::Simple($config_file) || 
     die "Error: unable to read config file \"$config_file\"";
 
+#substitution
+foreach my $key ($config->param) {
+    my $value = $config->param($key);
+    while ($value =~ m/(.*?)\$\{(.*?)\}(.*)/) {
+        my $sub = $config->param($2);
+        if (! $sub) {
+            #try in this scope
+            my $scope = (split /\./, $key)[0];
+            $sub = $config->param($scope . "." . $2);
+        }
+        if (! $sub) {
+            #then general
+            $sub = $config->param("general." . $2);
+        }
+        $value = $1 . $sub . $3;
+    }
+    print STDERR "$key => "; print STDERR $value; print STDERR "\n";
+    $config->param($key,$value);
+}
+
 
 #required global parameters
 my $name = &param_required("general.name");
@@ -227,7 +247,7 @@ sub param {
 
 sub param_required {
     my ($key) = @_;
-    my $value = $config->param($key);
+    my $value = &param($key);
     die "Error: required parameter \"$key\" was missing" if (!defined($value));
     #$value = join $value if (ref($value) eq 'ARRAY');
     return $value;
