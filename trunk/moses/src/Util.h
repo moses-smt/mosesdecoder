@@ -196,7 +196,7 @@ std::string Join(const std::string& delimiter, const std::vector<T>& items)
 	return outstr.str();
 }
 
-//! transform prob to natural log score
+	//! transform prob to natural log score
 inline float TransformScore(float prob)
 {
 	return log(prob);
