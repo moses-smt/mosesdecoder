@@ -183,6 +183,15 @@ std::string Sentence::ParseXmlTagAttribute(const std::string& tag,const std::str
 	}
 	return tag.substr(contentsStart,contentsEnd-contentsStart);
 }
+
+void Sentence::CreateFromString(const std::vector<FactorType> &factorOrder
+											, const std::string &phraseString
+											, const std::string &factorDelimiter)
+{
+	Phrase::CreateFromString(factorOrder, phraseString, factorDelimiter);
+}
+
+	
  
 }
 
