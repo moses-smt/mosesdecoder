@@ -108,6 +108,7 @@ Parameter::Parameter()
 	AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
+	AddParam("description","","Source language, target language, description");
 }
 
 Parameter::~Parameter()
@@ -163,7 +164,7 @@ bool Parameter::LoadParam(const string &filePath)
 	const char *argv[] = {"executable", "-f", filePath.c_str() };
 	return LoadParam(3, (char**) argv);
 }
-
+	
 /** load all parameters from the configuration file and the command line switches */
 bool Parameter::LoadParam(int argc, char* argv[]) 
 {
