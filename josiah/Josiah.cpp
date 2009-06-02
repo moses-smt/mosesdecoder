@@ -212,6 +212,8 @@ int main(int argc, char** argv) {
   string mosesini;
   bool decode;
   bool translate;
+  bool translation_distro;
+  bool derivation_distro;
   bool help;
   bool expected_sbleu = false;
   bool expected_sbleu_gradient;
@@ -284,6 +286,8 @@ int main(int argc, char** argv) {
 	("weights,w",po::value<string>(&weightfile),"Weight file")
         ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
         ("decode-translation,t",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
+      ("distro-derivation", po::value(&derivation_distro)->zero_tokens()->default_value(false), "Print derivation probability distribution")
+      ("distro-translation", po::value(&translation_distro)->zero_tokens()->default_value(false), "Print translation probability distribution")
         ("periodic-derivation,p",po::value(&periodic_decode)->default_value(0), "Periodically write the max derivation to stderr")
       ("max-change", po::value(&output_max_change)->zero_tokens()->default_value(false), "Whenever the max deriv or max trans changes, write it to stderr")
         ("collect-dbyt",po::value(&collect_dbyt)->zero_tokens()->default_value(false), "Collect derivations per translation")
@@ -348,6 +352,9 @@ int main(int argc, char** argv) {
     std::cerr << "Incorrect usage: Cannot do both expected bleu training and expected bleu deterministic annealing training" << std::endl;
     return 0;
   }
+  
+  if (translation_distro) translate = true;
+  if (derivation_distro) decode = true;
   
   expected_sbleu = false;
   if (expected_sbleu_gradient == true && expected_sbleu_da == false) expected_sbleu = true;
@@ -726,6 +733,12 @@ int main(int argc, char** argv) {
       }
       if (collect_dbyt) {
         derivationCollector->outputDerivationsByTranslation(std::cerr);
+        
+      }
+      if (derivation_distro) {
+        std::cout << "BEGIN: derivation probability distribution" << std::endl;
+        derivationCollector->printDistribution(std::cout);
+        std::cout << "END: derivation probability distribution" << std::endl;
       }
     }
     if (translate) {
@@ -733,6 +746,11 @@ int main(int argc, char** argv) {
       pair<const Translation*,float> maxtrans = transCollector->getMax();
       (*out) << *maxtrans.first;
       (*out) << endl << flush;
+      if (translation_distro) {
+        std::cout << "BEGIN: translation probability distribution" << std::endl;
+        transCollector->printDistribution(std::cout);
+        std::cout << "END: translation probability distribution" << std::endl;
+      }
     }
     if (mbr_decoding) {
       pair<const Translation*,float> maxtrans = transCollector->getMbr(mbr_size);
