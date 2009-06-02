@@ -33,6 +33,16 @@ namespace Josiah
   }
   
   template<class M>
+  void MaxCollector<M>::printDistribution(ostream& out) const
+  {
+    map<const M*, double> p;
+    getDistribution(p);
+    for (typename map<const M*,double>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
+      out << pi->second << "|||" << *(pi->first) << endl;
+    }
+  }
+  
+  template<class M>
   float MaxCollector<M>::getEntropy() const
   {
     map<const M*, double> p;
@@ -188,7 +198,11 @@ namespace Josiah
   
     return topNTranslations[minMBRLossIdx];
   }
+  
+  
 }
+
+
 
 
 

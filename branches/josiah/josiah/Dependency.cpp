@@ -288,16 +288,16 @@ float CherrySyntacticCohesionFeature::getInterruptionCount(const TranslationOpti
   for (set<size_t>::const_iterator it = children.begin(); it != children.end(); ++it) {
     size_t child = *it;
     const WordsRange* otherSegment; 
-    if (context.leftSrcRange->covers(child)) {
+    /*if (context.leftSrcRange->covers(child)) {
       otherSegment = context.leftTgtRange  ;
     }
     else if (context.rightSrcRange->covers(child)) {
       otherSegment = context.rightTgtRange  ;
-    }
+  }
     else {
       Hypothesis* hyp = const_cast<Sample*>(m_sample)->GetHypAtSourceIndex(child);
       otherSegment = &(hyp->GetCurrTargetWordsRange());
-    }
+  }*/
     
     if (isInterrupting(*otherSegment, targetSegment)) {
       return 1.0;
