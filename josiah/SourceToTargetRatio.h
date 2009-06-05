@@ -32,9 +32,9 @@ namespace Josiah {
 
 class Sample;
   
-class SourceToTargetRatio: public FeatureFunction {
+class SourceToTargetRatio: public SingleValuedFeatureFunction {
 public:
-  SourceToTargetRatio() : FeatureFunction("SourceToTargetRatio") {}
+  SourceToTargetRatio() : SingleValuedFeatureFunction("SourceToTargetRatio") {}
   /** Initialise with new sample */
   virtual void init(const Sample& sample);      
   virtual float computeScore();
