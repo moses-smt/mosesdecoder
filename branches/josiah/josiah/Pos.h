@@ -37,10 +37,10 @@ namespace Josiah {
 /**
   * Abstract base class for feature functions which use source/target pos tags.
   **/
-class PosFeatureFunction : public  FeatureFunction {
+class PosFeatureFunction : public  SingleValuedFeatureFunction {
   public:
     PosFeatureFunction(const std::string& name, Moses::FactorType sourceFactorType, Moses::FactorType targetFactorType) 
-        : FeatureFunction(name), m_sourceFactorType(sourceFactorType), m_targetFactorType(targetFactorType) {
+        : SingleValuedFeatureFunction(name), m_sourceFactorType(sourceFactorType), m_targetFactorType(targetFactorType) {
       //assert(targetFactorType < StaticData::Instance().GetMaxNumFactors(Output));
       //assert(sourceFactorType < StaticData::Instance().GetMaxNumFactors(Input));
     }

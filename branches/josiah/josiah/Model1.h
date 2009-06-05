@@ -114,7 +114,7 @@ struct is_known{ bool operator()(int x){ return x==-1 ? false : true; } };
 struct is_unknown{ bool operator()(int x){ return x==-1 ? true : false; } };
 
 /// feature p(e|f)
-class model1 : public FeatureFunction {
+class model1 : public SingleValuedFeatureFunction {
 public:
   model1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
   virtual void init(const Sample& sample);
@@ -195,7 +195,7 @@ class ApproximateModel1 : public model1 {
 };
 
 /// feature p(f|e)
-class model1_inverse : public FeatureFunction {
+class model1_inverse : public SingleValuedFeatureFunction {
 public:
   model1_inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap);
   virtual void init(const Sample& sample);

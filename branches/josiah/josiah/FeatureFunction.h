@@ -90,17 +90,67 @@ class FeatureFunctionScoreProducer : public ScoreProducer {
  **/
 class FeatureFunction {
   public:
-    FeatureFunction(const std::string& name) :
-      m_scoreProducer(name) {}
+    FeatureFunction(const string& name) : m_scoreProducer(name) {}
     /** Initialise with new sample */
-    virtual void init(const Sample& sample) = 0;
+    virtual void init(const Sample& sample) {/* do nothing */};
     /** Update the target words.*/
     virtual void updateTarget(){/*do nothing*/}
-    /** Compute full score of a sample from scratch **/
-    virtual float computeScore() = 0;
-    /** Compute the log of the importance weight. This is log(true score) - log (importance score). The computeScore()
-     *  method returns the importance score, as do all the getXXScore() methods. **/
+    /** Insert the log of the importance weight. This is log(true score) - log (approximate score). The assignScore()
+     *  method inserts the approximate, as do all the doXXXUpdate() methods. **/
+    virtual void assignImportanceScore(ScoreComponentCollection& scores) = 0;
+    
+    /** Assign the total score of this feature on the current hypo */
+    virtual void assignScore(ScoreComponentCollection& scores) = 0;
+    
+    /** Score due to one segment */
+    virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, ScoreComponentCollection& scores) = 0;
+    /** Score due to two segments. The left and right refer to the target positions.**/
+    virtual void doContiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+        const TargetGap& gap, ScoreComponentCollection& scores) = 0;
+    virtual void doDiscontiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+        const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores) = 0;
+    
+    /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
+    virtual void doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+                                     const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores) = 0;
+    
+    virtual ~FeatureFunction() = 0;
+    
+  protected:
+    const Moses::ScoreProducer& getScoreProducer() const {return m_scoreProducer;}
+    
+  private:
+    FeatureFunctionScoreProducer m_scoreProducer;
+    
+};
+
+/** 
+  * A feature function with a single value
+  **/
+class SingleValuedFeatureFunction: public FeatureFunction {
+  public:
+    SingleValuedFeatureFunction(const std::string& name) :
+      FeatureFunction(name) {}
+    virtual void assignImportanceScore(ScoreComponentCollection& scores)
+      {scores.Assign(&getScoreProducer(),getImportanceWeight());}
+    virtual void assignScore(ScoreComponentCollection& scores)
+      {scores.Assign(&getScoreProducer(), computeScore());}
+    virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, ScoreComponentCollection& scores)
+      {scores.Assign(&getScoreProducer(), getSingleUpdateScore(option,gap));}
+    virtual void doContiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+                                          const TargetGap& gap, ScoreComponentCollection& scores)
+    {scores.Assign(&getScoreProducer(), getContiguousPairedUpdateScore(leftOption,rightOption,gap));}
+    virtual void doDiscontiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+                                             const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores)
+    {scores.Assign(&getScoreProducer(), getDiscontiguousPairedUpdateScore(leftOption,rightOption,leftGap,rightGap));}
+    /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
+    virtual void doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+                              const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores)
+    {scores.Assign(&getScoreProducer(), getFlipUpdateScore(leftOption,rightOption,leftGap,rightGap));}
+    
+  protected:
     virtual float getImportanceWeight() {return 0;}
+    virtual float computeScore() = 0;
     /** Score due to one segment */
     virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) = 0;
     /** Score due to two segments. The left and right refer to the target positions.**/
@@ -112,11 +162,9 @@ class FeatureFunction {
     /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
     virtual float getFlipUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
                                      const TargetGap& leftGap, const TargetGap& rightGap) = 0;
-    const Moses::ScoreProducer& getScoreProducer() const {return m_scoreProducer;}
-    virtual ~FeatureFunction() = 0;
+    
+    virtual ~SingleValuedFeatureFunction() {}
   
-  private:
-    FeatureFunctionScoreProducer m_scoreProducer;
     
 };
 

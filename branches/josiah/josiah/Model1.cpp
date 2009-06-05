@@ -113,7 +113,7 @@ const vocabulary& external_model1_table::f_vocab() const { return _f_vocab; }
 const vocabulary& external_model1_table::e_vocab() const { return _e_vocab; }
 
 model1::model1(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
-    FeatureFunction("Model1"),_ptable(table), _pfmap(fmap), _pemap(emap), _sample(NULL) {}
+    SingleValuedFeatureFunction("Model1"),_ptable(table), _pfmap(fmap), _pemap(emap), _sample(NULL) {}
 
 template <typename ForwardRange, typename BackInsertIterator>
 void _moses_words_to_ids(const moses_factor_to_vocab_id& func, 
@@ -204,7 +204,7 @@ float model1::getDiscontiguousPairedUpdateScore(const TranslationOption* leftOpt
 
 
 model1_inverse::model1_inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
-    FeatureFunction("Model1Inverse"),
+    SingleValuedFeatureFunction("Model1Inverse"),
  _ptable(table), _pfmap(fmap), _pemap(emap), _sample(NULL) {}
 
  void model1_inverse::init(const Sample& sample) {

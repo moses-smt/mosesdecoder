@@ -49,11 +49,11 @@ class DependencyTree {
 };
 ostream& operator<<(ostream& out, const DependencyTree& t);
 
-class DependencyFeature: public FeatureFunction {
+class DependencyFeature: public SingleValuedFeatureFunction {
   public:
     
   DependencyFeature(const std::string& name, Moses::FactorType parentFactor):
-      FeatureFunction(name), m_parentFactor(parentFactor), m_sample(NULL) {}
+      SingleValuedFeatureFunction(name), m_parentFactor(parentFactor), m_sample(NULL) {}
   
   /** Initialise with new sample */
   virtual void init(const Sample& sample) {

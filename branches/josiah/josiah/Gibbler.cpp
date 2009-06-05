@@ -61,8 +61,7 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
   UpdateTargetWords();
       
   for (Josiah::feature_vector::const_iterator i=_extra_features.begin(); i!=_extra_features.end(); ++i){
-    float score = (*i)->computeScore();
-    feature_values.Assign(&((*i)->getScoreProducer()),score);
+    (*i)->assignScore(feature_values);
   }
       
 }
@@ -427,28 +426,26 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
         m_operators[j]->SetAnnealingTemperature(1.0/m_quenchTemp); //because of the way annealing temp gets used.
         m_operators[j]->doIteration(sample,*options);
       }
+      //currently feature_values contains the approx scores. The true score = imp score + approx score
       //importance weight
-      double totalImpWeight = 0;
-      ScoreComponentCollection deltaFV;
+      ScoreComponentCollection importanceScores;
       for (Josiah::feature_vector::const_iterator j = sample.extra_features().begin(); j != sample.extra_features().end(); ++j) {
-        double score = (*j)->getImportanceWeight();
-        const ScoreProducer& sp = (*j)->getScoreProducer();
-        const StaticData& staticData = StaticData::Instance();
-        const ScoreIndexManager& sim = staticData.GetScoreIndexManager();
-        double scoreWeight = StaticData::Instance().GetAllWeights()[sim.GetBeginIndex(sp.GetScoreBookkeepingID())];
-        VERBOSE(2, "Score producer: " << sp.GetScoreProducerDescription() << " Weight: " << scoreWeight << endl)
-        totalImpWeight += scoreWeight*score;
-        //set the weight in the sample  
-        deltaFV.Assign(&sp,score); //This is the correct delta, as true_score = importance_weight+importance_score (in log space)
+        (*j)->assignImportanceScore(importanceScores);
       }
-      VERBOSE(2, "Unnormalised importance weight: " << totalImpWeight << endl);
-      sample.UpdateFeatureValues(deltaFV);
+      const vector<float> & weights = StaticData::Instance().GetAllWeights();
+      //copy(weights.begin(), weights.end(), ostream_iterator<float>(cerr," "));
+      //cerr << endl;
+      float importanceWeight  = importanceScores.InnerProduct(weights);
+      VERBOSE(1, "Importance scores: " << importanceScores << endl);
+      VERBOSE(1, "Total importance weight: " << importanceWeight << endl);
+      
+      sample.UpdateFeatureValues(importanceScores);
       for (size_t j = 0; j < m_collectors.size(); ++j) {
-        m_collectors[j]->addSample(sample,totalImpWeight);
+        m_collectors[j]->addSample(sample,importanceWeight);
       }
-      //set sample back to be the importance score
+      //set sample back to be the approx score
       ScoreComponentCollection minusDeltaFV;
-      minusDeltaFV.MinusEquals(deltaFV);
+      minusDeltaFV.MinusEquals(importanceScores);
       sample.UpdateFeatureValues(minusDeltaFV);
       ++i;
       if (m_stopper->ShouldStop(i)) {

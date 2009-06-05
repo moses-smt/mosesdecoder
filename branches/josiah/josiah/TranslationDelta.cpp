@@ -182,8 +182,7 @@ void TranslationDelta::initScoresSingleUpdate(const Sample& s, const Translation
   // extra features
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
-    float feature_score = (*i)->getSingleUpdateScore(option, gap);
-    m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
+    (*i)->doSingleUpdate(option,gap,m_scores);
   }
 
   //weight the scores
@@ -212,8 +211,7 @@ void TranslationDelta::initScoresContiguousPairedUpdate(const Sample& s, const T
   // extra features
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
-    float feature_score = (*i)->getContiguousPairedUpdateScore(leftOption, rightOption, gap);
-    m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
+    (*i)->doContiguousPairedUpdate(leftOption,rightOption,gap,m_scores);
   }
 }
 
@@ -234,8 +232,7 @@ void TranslationDelta::initScoresDiscontiguousPairedUpdate(const Sample& s, cons
    // extra features
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=s.extra_features().begin(); i<s.extra_features().end(); ++i) {
-    float feature_score = (*i)->getDiscontiguousPairedUpdateScore(leftOption, rightOption, leftGap, rightGap);
-    m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
+    (*i)->doDiscontiguousPairedUpdate(leftOption, rightOption, leftGap, rightGap,m_scores);
    }
 
 
@@ -356,8 +353,7 @@ FlipDelta::FlipDelta(Sample& sample,
   // extra features
   typedef Josiah::feature_vector fv;
   for (fv::const_iterator i=sample.extra_features().begin(); i<sample.extra_features().end(); ++i) {
-    float feature_score = (*i)->getFlipUpdateScore(leftTgtOption, rightTgtOption, leftGap, rightGap);
-    m_scores.Assign(&((*i)->getScoreProducer()),feature_score);
+    (*i)->doFlipUpdate(leftTgtOption, rightTgtOption, leftGap, rightGap,m_scores);
   }
     
   //weight the scores
