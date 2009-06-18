@@ -37,14 +37,21 @@ foreach my $key ($config->param) {
 
 #required global parameters
 my $name = &param_required("general.name");
-my $josiah = &param_required("general.josiah");
 my $weights_file = &param_required("general.weights-file");
+
+my $josiah = &param("general.josiah");
+my $josiah_train = &param("train.josiah",$josiah);
+my $josiah_test = &param("test.josiah",$josiah);
+die "Error: No josiah trainer specified" if (! $josiah_train);
+die "Error: No josiah tester specified" if (! $josiah_test);
+
 
 #optional globals
 my $queue = &param("general.queue", "inf_iccs_smt");
 
 &check_exists ("weights file", $weights_file);
-&check_exists("josiah executable", $josiah);
+&check_exists("josiah train executable", $josiah_train);
+&check_exists("josiah test executable", $josiah_test);
 my $nweights=`wc -l $weights_file`;
 my $feature_file = &param("general.features");
 if ($feature_file) {
@@ -112,7 +119,7 @@ my $train_err = $train_script . ".err";
 open TRAIN, ">$train_script_file" || die "Unable to open \"$train_script_file\" for writing";
 
 &header(*TRAIN,$job_name,$working_dir,$jobs,$hours,$train_out,$train_err);
-print TRAIN "mpirun -np \$NSLOTS $josiah \\\n";
+print TRAIN "mpirun -np \$NSLOTS $josiah_train \\\n";
 print TRAIN "-f $moses_ini_file \\\n";
 print TRAIN "-i $input_file \\\n";
 my @refs;
@@ -195,7 +202,7 @@ while(1) {
     }
 
     &header(*TEST,$job_name,$working_dir,$jobs,$hours,$test_out,$test_err);
-    print TEST "mpirun -np \$NSLOTS $josiah \\\n";
+    print TEST "mpirun -np \$NSLOTS $josiah_test \\\n";
     print TEST "-f $test_ini_file \\\n";
     print TEST "-i $test_input_file \\\n";
     print TEST "-o $output_file \\\n";
