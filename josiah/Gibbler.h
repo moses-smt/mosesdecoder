@@ -84,6 +84,7 @@ class Sample {
   const std::vector<Word>& GetTargetWords() const { return m_targetWords; }
   const std::vector<Word>& GetSourceWords() const { return m_sourceWords; } 
   
+  int GetTargetLength()  { return m_targetWords.size(); }
   friend class Sampler;
 };
 
@@ -100,7 +101,12 @@ class SampleCollector {
     /** Number of samples */
     size_t N() const {return m_n;}
     virtual ~SampleCollector() {}
-  
+    void reset() {
+      m_totalImportanceWeight = 0;
+      m_n = 0;
+      m_importanceWeights.clear();
+      m_normalisedImportanceWeights.clear();
+    }
   protected:
     /** The actual collection.*/
     virtual void collect(Sample& sample) = 0;

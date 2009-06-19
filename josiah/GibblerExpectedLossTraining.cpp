@@ -12,7 +12,7 @@ void ExpectedLossCollector::collect(Sample& s) {
   const Hypothesis* h = s.GetSampleHypothesis();
   vector<const Factor*> trans;
   h->GetTranslation(&trans, 0);
-  const float gain = g.ComputeGain(trans);
+  const float gain = g[0]->ComputeGain(trans);
   m_lengths.push_back(trans.size());
   VERBOSE(2, gain << "\tFeatures=" << s.GetFeatureValues() << endl);
   //VERBOSE(0, "Collected : Target " << s << ", gain " << gain << "\tFeatures=" << s.GetFeatureValues() << endl);

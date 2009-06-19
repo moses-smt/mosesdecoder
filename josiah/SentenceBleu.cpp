@@ -58,30 +58,38 @@ float SentenceBLEU::ComputeGain(const vector<const Factor*>& sent) const {
   
   return CalcScore(ngrams_, sentNgrams, sent.size());
 }
-  
-float SentenceBLEU::CalcScore(const NGramCountMap & refNgrams, const NGramCountMap & hypNgrams, int hypLen) const {
-  
-  valarray<int> hyp(n_);
-  valarray<int> correct(n_);
- 
-  float ref_len = GetClosestLength(hypLen);
-  
-  for (NGramCountMap::const_iterator hypIt = hypNgrams.begin();
-       hypIt != hypNgrams.end(); ++hypIt)
-  {
-    NGramCountMap::iterator refIt = ngrams_.find(hypIt->first);
-    
-    if(refIt != refNgrams.end())
-    {
-      correct[hypIt->first.size() - 1] += min(refIt->second.first, hypIt->second.first); 
-    }
-    
-    hyp[hypIt->first.size() - 1] += hypIt->second.first;
-  }
-  
-  return CalcBleu(hyp, correct, ref_len, (float) hypLen);
+
+void SentenceBLEU::GetSufficientStats(const vector<const Factor*>& sent, SufficientStats* stats) const {
+  NGramCountMap sentNgrams;
+  CountRef(sent, sentNgrams);
+  CalcSufficientStats(ngrams_, sentNgrams, sent.size(), *(static_cast<BleuSufficientStats*>(stats)));
 }
   
+  
+float SentenceBLEU::CalcScore(const NGramCountMap & refNgrams, const NGramCountMap & hypNgrams, int hypLen) const {
+  BleuSufficientStats stats(n_);
+  CalcSufficientStats(refNgrams, hypNgrams, hypLen, stats);
+  return CalcBleu(stats, true, _use_bp_denum_hack, _bp_scale);
+}
+  
+void SentenceBLEU::CalcSufficientStats(const NGramCountMap & refNgrams, const NGramCountMap & hypNgrams, int hypLen, BleuSufficientStats &stats) const {
+    
+  stats.ref_len = GetClosestLength(hypLen);
+  stats.hyp_len = hypLen;
+    
+  for (NGramCountMap::const_iterator hypIt = hypNgrams.begin();
+         hypIt != hypNgrams.end(); ++hypIt) {
+
+    NGramCountMap::iterator refIt = ngrams_.find(hypIt->first);
+      
+    if(refIt != refNgrams.end())  {
+      stats.correct[hypIt->first.size() - 1] += min(refIt->second.first, hypIt->second.first); 
+    }
+      
+    stats.hyp[hypIt->first.size() - 1] += hypIt->second.first;
+  }
+  //cerr << stats << endl;
+}
   
 float SentenceBLEU::ComputeGain(const GainFunction& hyp) const {
   assert(hyp.GetType() == this->GetType());
@@ -90,29 +98,35 @@ float SentenceBLEU::ComputeGain(const GainFunction& hyp) const {
   return CalcScore(ngrams_, hyp_ngrams, static_cast<const SentenceBLEU&>(hyp).GetAverageReferenceLength());
 }  
 
-float SentenceBLEU::CalcBleu(const valarray<int> & hyp, const valarray<int> & correct, float ref_len, float hyp_len) const{
-    
+
+float SentenceBLEU::CalcBleu(const BleuSufficientStats & stats, bool smooth, bool _use_bp_denum_hack, float _bp_scale) {
+  assert(stats.correct.size() ==  stats.hyp.size());
+  
+  float smoothing_constant = 0.0;
+  if (smooth)
+    smoothing_constant = SMOOTHING_CONSTANT;
+  
   float log_bleu = 0;
   int count = 0;
-  for (int i = 0; i < n_; ++i) {
-    if (true || hyp[i] > 0) {
-      float lprec = log(0.01 + correct[i]) - log(0.01 + hyp[i]);
+  for (int i = 0; i < stats.correct.size() ; ++i) {
+    if (true || stats.hyp[i] > 0) {
+      float lprec = log(smoothing_constant + stats.correct[i]) - log(smoothing_constant + stats.hyp[i]);
       log_bleu += lprec;
       ++count;
     }
   }
   log_bleu /= static_cast<float>(count);
   float lbp = 0.0;
-  
-  float bp_denum = hyp_len;
-  
+    
+  float bp_denum = stats.hyp_len;
+    
   if (_use_bp_denum_hack)
     bp_denum = BP_DENUM_HACK;
-  
-  
-  if (hyp_len < ref_len)
-    lbp = (hyp_len - ref_len) / bp_denum;
+    
+  if (stats.hyp_len < stats.ref_len)
+    lbp = (stats.hyp_len - stats.ref_len) / bp_denum;
   log_bleu += lbp * _bp_scale;
+  
   return exp(log_bleu);
 }  
   

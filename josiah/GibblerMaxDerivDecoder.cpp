@@ -9,7 +9,10 @@ namespace Josiah {
   out << std::setprecision(8) << dp.second << " " << dp.second*n <<" " << *(dp.first);
 }
   
-  
+  void DerivationCollector::reset() {
+    MaxCollector<Derivation>::reset();
+    m_derivByTrans.clear();
+  }
   
   void DerivationCollector::collect(Sample& sample) {
     collectSample(Derivation(sample)); 
