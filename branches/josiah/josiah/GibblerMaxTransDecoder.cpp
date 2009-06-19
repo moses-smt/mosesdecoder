@@ -9,7 +9,14 @@ using namespace std;
 namespace Josiah
 {
 
-
+  template<class M>
+  void MaxCollector<M>::reset() 
+  {
+    m_samples.clear();
+    m_sampleList.clear();
+    SampleCollector::reset();
+  }
+  
   template<class M>
   void MaxCollector<M>::getDistribution(map<const M*,double>& p) const
   {

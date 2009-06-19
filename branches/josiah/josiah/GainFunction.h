@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include "SufficientStats.h"
 
 namespace Moses { class Factor; }
 
@@ -15,6 +16,7 @@ class GainFunction {
   virtual float ComputeGain(const GainFunction& hyp) const = 0;
   virtual float GetAverageReferenceLength() const = 0;
   virtual int GetType() const {return 0;}
+  virtual void GetSufficientStats(const std::vector<const Moses::Factor*>& hyp, SufficientStats*) const = 0;
   static void ConvertStringToFactorArray(const std::string& str, std::vector<const Moses::Factor*>* out);
 };
 

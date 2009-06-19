@@ -46,8 +46,17 @@ class ExpectedBleuTrainer : public InputSource {
                            Decoder* decoder, 
                            const Moses::ScoreComponentCollection& hessianV,
                            const float scaling_gradient);
+  void IncorporateCorpusGradient(
+                                                      const float trans_len,
+                                 const float ref_len,
+                                                      const float exp_gain,
+                                                      const float unreg_exp_gain,
+                                 const Moses::ScoreComponentCollection& grad,
+                                 Decoder* decoder, const float scaling_gradient) ;
   void SetComputeScaleGradient(bool scale_gradient) {compute_scale_gradient = scale_gradient;}
   float GetCurrQuenchingTemp() {return quenching_temp;}
+  int GetCurr() { return cur;}
+  int GetCurrEnd() { return cur_end;}
 
  private:
   int rank, size, batch_size;

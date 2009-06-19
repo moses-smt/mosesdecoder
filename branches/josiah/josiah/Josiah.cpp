@@ -546,11 +546,11 @@ int main(int argc, char** argv) {
     auto_ptr<ExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;
     if (expected_sbleu) {
-      elCollector.reset(new ExpectedLossCollector(g[lineno]));
+      elCollector.reset(new ExpectedLossCollector(&(g[lineno])));
       sampler.AddCollector(elCollector.get());
     }
     else if (expected_sbleu_da) {
-      elCollector.reset(new GibblerAnnealedExpectedLossCollector(g[lineno],sampler));
+      elCollector.reset(new GibblerAnnealedExpectedLossCollector(&(g[lineno]), sampler));
       sampler.AddCollector(elCollector.get());
       //Set the annealing temperature
       int it = optimizer->GetIteration() / optimizerFreq  ;

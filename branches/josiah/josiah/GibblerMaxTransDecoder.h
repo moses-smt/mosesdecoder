@@ -46,6 +46,7 @@ template <class M>
       /** The sample at a given index.*/
       const M* getSample(size_t index) const;
       float getEntropy() const;
+      void reset();
       
       virtual ~MaxCollector<M>(){}
    

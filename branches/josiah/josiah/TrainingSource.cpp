@@ -215,5 +215,62 @@ void ExpectedBleuTrainer::IncorporateGradient(
   }
 }
 
+  void ExpectedBleuTrainer::IncorporateCorpusGradient(
+                                                const float trans_len,
+                                                const float ref_len,      
+                                                const float exp_gain,
+                                                const float unreg_exp_gain,
+                                                const ScoreComponentCollection& grad,
+                                                Decoder* decoder, const float scaling_gradient) {
+    
+    if (cur == cur_end) {
+      vector<float> w;
+      GetFeatureWeights(&w);
+   
+      ScoreComponentCollection weights(w);
+      ScoreComponentCollection hessV;
+      
+      if (rank == 0) {
+        cerr << "TOTAL EXPECTED GAIN: " << exp_gain << " (batch size = " << batch_size << ")\n";
+        cerr << "TOTAL UNREGULARIZED EXPECTED GAIN: " << unreg_exp_gain << " (batch size = " << batch_size << ")\n";
+        cerr << "EXPECTED LENGTH / REF LENGTH: " << trans_len << '/' << ref_len << " (" << (trans_len / ref_len) << ")\n";
+        optimizer->Optimize(exp_gain, weights, grad, hessV, &weights);
+        if (optimizer->HasConverged()) keep_going = false;
+      }
+#ifdef MPI_ENABLED
+      int kg = keep_going;
+      int iteration = optimizer->GetIteration();
+      
+      if (MPI_SUCCESS != MPI_Bcast(const_cast<float*>(&weights.data()[0]), weights.data().size(), MPI_FLOAT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+      if (MPI_SUCCESS != MPI_Bcast(&kg, 1, MPI_INT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+      if (MPI_SUCCESS != MPI_Bcast(&iteration, 1, MPI_INT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+      ReserveNextBatch();
+      if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+      keep_going = kg;
+      optimizer->SetIteration(iteration);
+#endif
+      SetFeatureWeights(weights.data(), compute_scale_gradient);
+      
+      
+      cur = cur_start;
+      
+      if (weight_dump_freq > 0 && rank == 0 && iteration > 0 && (iteration % weight_dump_freq) == 0) {
+        stringstream s;
+        s << weight_dump_stem;
+        s << "_";
+        s << iteration;
+        string weight_file = s.str();
+        cerr << "Dumping weights to  " << weight_file << endl;
+        ofstream out(weight_file.c_str());
+        if (out) {
+          OutputWeights(out);
+          out.close();
+        }  else {
+          cerr << "Failed to dump weights" << endl;
+        }
+      }
+      
+    }
+  }  
 }
 

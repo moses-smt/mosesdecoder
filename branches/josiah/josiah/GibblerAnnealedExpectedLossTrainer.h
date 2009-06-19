@@ -19,7 +19,7 @@ namespace Josiah {
   
   class GibblerAnnealedExpectedLossCollector : public ExpectedLossCollector {
   public:
-    GibblerAnnealedExpectedLossCollector(const GainFunction& f, Sampler& sampler) 
+    GibblerAnnealedExpectedLossCollector(const GainFunction* f, Sampler& sampler) 
       :  ExpectedLossCollector(f) {
         sampler.AddCollector(&m_derivationCollector);
         m_computeScaleGradient = false;
