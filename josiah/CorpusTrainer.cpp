@@ -541,6 +541,8 @@ int main(int argc, char** argv) {
   size_t iterations;
   try {
     iterations = lexical_cast<size_t>(stopperConfig);
+    if (iterations < num_samples)
+      iterations = num_samples;
     stopper.reset(new CountStopStrategy(iterations)); 
   } catch (bad_lexical_cast&) {/* do nothing*/}
   
