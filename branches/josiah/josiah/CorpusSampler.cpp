@@ -182,7 +182,7 @@ float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,
   if (exp_len) {
     *exp_len = 0;
     for (size_t i = 0; i < m_featureVectors.size(); ++i) {
-      *exp_len += importanceWeights[i] * m_lengths[i];
+      *exp_len += m_lengths[i];
     }
   }
   
