@@ -179,13 +179,21 @@ float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,
   cerr << "Gradient: " << grad << endl;
   
   //expected length
-  if (exp_len) {
+ /* if (exp_len) {
     *exp_len = 0;
     for (size_t i = 0; i < m_featureVectors.size(); ++i) {
       *exp_len += m_lengths[i];
     }
-  }
-  
+  }*/
+ if (exp_len) {
+    *exp_len = 0;
+    //for (size_t i = 0; i < m_featureVectors.size(); ++i) {
+//      *exp_len += m_lengths[i];
+//    }
+    for (size_t j = 0; j < m_sufficientStats.size(); ++j) {
+      *exp_len += m_sufficientStats[j].hyp_len;
+    }
+  } 
   return exp_gain;
 }
   
