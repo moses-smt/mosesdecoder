@@ -7,6 +7,7 @@
 #include "InputFileStream.h"
 #include "LanguageModelFactory.h"
 #include "LanguageModelInterpolated.h"
+#include "StaticData.h"
 #include "UserMessage.h"
 #include "Util.h"
 
@@ -80,8 +81,24 @@ float LanguageModelInterpolated::GetValue(const std::vector<const Word*> &contex
 	unsigned int newLen = 0, ml = 0;
 	State currentState;
 
+	// IFVERBOSE(2) {
+	//	std::vector<const Word*>::const_iterator x;
+	//	std::cerr << contextFactor.size() << " ";
+	//	for(x = contextFactor.begin(); x != contextFactor.end(); ++x)
+	//		std::cerr << **x;
+	//	std::cerr << std::endl;
+	// }
+
+	int stateIdx = -1;
 	for(size_t i = 0; i < m_languageModels.size(); i++) {
 		partialScores.push_back(UntransformScore(m_languageModels[i]->GetValue(contextFactor, &currentState, &ml)));
+
+		// IFVERBOSE(2) {
+		// 	std::cerr << "LMhistory " << i << " " << ml;
+		// 	if(ml > contextFactor.size())
+		// 		std::cerr << " !!";
+		// 	std::cerr << std::endl;
+		// }
 
 		// This class can only be used with language models that correctly return the
 		// length of the context that was used!
@@ -89,21 +106,27 @@ float LanguageModelInterpolated::GetValue(const std::vector<const Word*> &contex
 
 		if(ml > newLen || i == 0) {
 			newLen = ml;
+			stateIdx = i;
 			if(finalState) *finalState = currentState;
 		}
+
+		// IFVERBOSE(2) { std::cerr << partialScores.back() << " [" << ml << "] -\t"; }
 	}
 
 	if(len) *len = newLen;
 
-	return TransformScore(std::inner_product(m_weights.begin(), m_weights.end(), partialScores.begin(), .0f));
+	float totalscore = std::inner_product(m_weights.begin(), m_weights.end(), partialScores.begin(), .0f);
+	// IFVERBOSE(2) { std::cerr << totalscore << "\tState: " << stateIdx << std::endl; }
+
+	return TransformScore(totalscore);
 }
 
-void LanguageModelInterpolated::InitializeBeforeSentenceProcessing() const {
+void LanguageModelInterpolated::InitializeBeforeSentenceProcessing() {
 	for(size_t i = 0; i < m_languageModels.size(); i++)
 		m_languageModels[i]->InitializeBeforeSentenceProcessing();
 }
 
-void LanguageModelInterpolated::CleanUpAfterSentenceProcessing() const {
+void LanguageModelInterpolated::CleanUpAfterSentenceProcessing() {
 	for(size_t i = 0; i < m_languageModels.size(); i++)
 		m_languageModels[i]->CleanUpAfterSentenceProcessing();
 }

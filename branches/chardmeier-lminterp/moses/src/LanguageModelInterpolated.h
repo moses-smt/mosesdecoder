@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Factor.h"
 #include "InputType.h"
 #include "TypeDef.h"
-#include "Vocab.h"
 #include "LanguageModelSingleFactor.h"
 
 namespace Moses
@@ -53,8 +52,12 @@ public:
 	virtual float GetValue(const std::vector<const Word*> &contextFactor,
 			State* finalState = 0, unsigned int* len = 0) const;
 
-	virtual void InitializeBeforeSentenceProcessing() const;
-	virtual void CleanUpAfterSentenceProcessing() const;
+	virtual void InitializeBeforeSentenceProcessing();
+	virtual void CleanUpAfterSentenceProcessing();
+
+	std::string GetScoreProducerDescription() const {
+		return "Interpolated Language Model";
+	}
 };
 
 
