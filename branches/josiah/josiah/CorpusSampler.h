@@ -24,7 +24,7 @@ namespace Josiah {
   class CorpusSamplerCollector : public ExpectedLossCollector {
   public:
     CorpusSamplerCollector(int samples, Sampler &sampler) 
-    :  m_samples(samples), ExpectedLossCollector() {
+    :  m_samples(samples), m_numSents(0), ExpectedLossCollector() {
       sampler.AddCollector(&m_derivationCollector);
       m_featureVectors.resize(m_samples);
       m_lengths.resize(m_samples);
@@ -32,14 +32,18 @@ namespace Josiah {
     }
     virtual ~CorpusSamplerCollector() {}
     virtual void collect(Sample& sample);
-    void resample(int);
+    virtual void resample(int);
     virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float * unreg_exp_gain, float *scaling_gradient);
     virtual void UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v) {}
- #ifdef MPI_ENABLED  
-    void AggregateSamples(int);
+#ifdef MPI_ENABLED  
+    virtual void AggregateSamples(int);
 #endif
-    void reset();   
+    virtual void reset();   
     float getReferenceLength();
+    virtual void setRegularisationGradientFactor(std::map<const Derivation*,double>& m_p) {}
+    virtual void setRegularisation(std::map<const Derivation*,double>& m_p) {}
+    virtual ScoreComponentCollection getRegularisationGradientFactor() {return ScoreComponentCollection();}
+    virtual float getRegularisation() {return 0.0;}
     
   private:
     std::vector<ScoreComponentCollection> m_featureVectors;
@@ -49,7 +53,11 @@ namespace Josiah {
     DerivationCollector m_derivationCollector;
     const int m_samples;
     ScoreComponentCollection getFeatureExpectations(const vector<double>& importanceWeights) const;
-
+    int m_numSents;
+    int GetNumSents() { return m_numSents;}
+  protected:   
+    void AggregateSuffStats(int);    
+    
   };
   
 }

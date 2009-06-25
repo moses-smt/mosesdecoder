@@ -43,6 +43,7 @@
 #include "SentenceBleu.h"
 #include "GainFunction.h"
 #include "CorpusSampler.h"
+#include "CorpusSamplerAnnealed.h"
 #include "GibblerMaxTransDecoder.h"
 #include "MpiDebug.h"
 #include "Model1.h"
@@ -259,13 +260,14 @@ int main(int argc, char** argv) {
   bool SMD;
   float brev_penalty_scaling_factor;
   bool hack_bp_denum;
-  bool optimize_quench_temp;
+  bool runFaster;
   int weight_dump_freq;
   string weight_dump_stem;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
   ("config,f",po::value<string>(&mosesini),"Moses ini file")
+  ("collectAll",po::value(&runFaster)->zero_tokens()->default_value(false),"Collect sample after each operator iteration")
   ("verbosity,v", po::value<int>(&debug)->default_value(0), "Verbosity level")
   ("mpi-debug", po::value<int>(&MpiDebug::verbosity)->default_value(0), "Verbosity level for debugging messages used in mpi.")
   ("mpi-debug-file", po::value<string>(&mpidebugfile), "Debug file stem for use by mpi processes")
@@ -324,7 +326,6 @@ int main(int argc, char** argv) {
   ("det-annealing-ratio,A", po::value<float>(&anneal_ratio_da)->default_value(0.5f), "Deterministc annealing ratio")
   ("hack-bp-denum,H", po::value(&hack_bp_denum)->default_value(false), "Use a predefined scalar as denum in BP computation")
   ("bp-scale,B", po::value<float>(&brev_penalty_scaling_factor)->default_value(1.0f), "Scaling factor for sent level brevity penalty for BLEU - default is 1.0")
-  ("optimize-quench-temp", po::value(&optimize_quench_temp)->zero_tokens()->default_value(false), "Optimizing quenching temp during annealing")
   ("weight-dump-freq", po::value<int>(&weight_dump_freq)->default_value(0), "Frequency to dump weight files during training")
   ("weight-dump-stem", po::value<string>(&weight_dump_stem)->default_value("weights"), "Stem of filename to use for dumping weights");
   
@@ -443,13 +444,8 @@ int main(int argc, char** argv) {
   
   auto_ptr<Optimizer> optimizer;
   
-  if (optimize_quench_temp) {
-    eta.resize(weights.size()+1); 
-    eta[eta.size()-1] = eta[0]; //Set quenching eta 
-  }
-  else {
-    eta.resize(weights.size());   
-  }
+  eta.resize(weights.size());   
+  
   
   
   prev_gradient.resize(weights.size());
@@ -558,6 +554,10 @@ int main(int argc, char** argv) {
     elCollector.reset(new CorpusSamplerCollector(num_samples, sampler));
     sampler.AddCollector(elCollector.get());
   }
+  else if (expected_cbleu_da) {
+    elCollector.reset(new CorpusSamplerAnnealedCollector(num_samples, sampler));
+    sampler.AddCollector(elCollector.get());
+  }
   
   timer.check("Processing input file");
   int sentCtr = 0;
@@ -570,6 +570,38 @@ int main(int argc, char** argv) {
     }
     
     elCollector->addGainFunction(&(g[lineno]));
+    //Set the annealing temperature
+    if (expected_cbleu_da) {
+      int it = optimizer->GetIteration() / optimizerFreq  ;
+      float temp = detAnnealingSchedule->GetTemperatureAtTime(it);
+      
+      CorpusSamplerAnnealedCollector* annealedELCollector = static_cast<CorpusSamplerAnnealedCollector*>(elCollector.get());
+      annealedELCollector->SetTemperature(temp);
+      cerr << "Annealing temperature " << annealedELCollector->GetTemperature() << endl;
+      
+      if (optimizer->GetIteration() == 0 ) {
+        sampler.SetQuenchingTemperature(start_temp_quench);  
+      }
+      
+      if (temp == (static_cast<ExponentialAnnealingSchedule*>(detAnnealingSchedule.get()))->GetFloorTemp()) {//Time to start quenching
+        if (initialQuenchingIteration == -1) {//The iteration from which we start quenching          
+          initialQuenchingIteration = it;
+          //Do not optimize quenching temp when quenching
+          trainer->SetComputeScaleGradient(false);
+        } 
+        
+        float quenchTemp = start_temp_quench;
+          
+        assert (quenchTemp > 0);
+        
+        quenchTemp *= quenchingSchedule->GetTemperatureAtTime(it - initialQuenchingIteration) ;
+        sampler.SetQuenchingTemperature(quenchTemp);
+        if (quenchTemp >= stop_temp_quench) {
+          break;
+        }
+      }
+    }
+    
     Hypothesis* hypothesis;
     TranslationOptionCollection* toc;
     
@@ -580,7 +612,13 @@ int main(int argc, char** argv) {
     timer.check("Running sampler");
     
     TranslationDelta::lmcalls = 0;
-    sampler.Run(hypothesis,toc,source,extra_features);
+    if (runFaster) {
+      sampler.RunCollectAll(hypothesis,toc,source,extra_features);
+    }
+    else {
+      sampler.Run(hypothesis,toc,source,extra_features);  
+    }
+    
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
     
