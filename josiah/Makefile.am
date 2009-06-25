@@ -50,6 +50,7 @@ corpustrainer_SOURCES = Derivation.cpp \
     SearchRandom.cpp \
     QuenchingSchedule.cpp \
     CorpusSampler.cpp \
+    CorpusSamplerAnnealed.cpp \
     CorpusTrainer.cpp 
    
 

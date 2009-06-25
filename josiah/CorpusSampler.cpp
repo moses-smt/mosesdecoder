@@ -19,7 +19,7 @@ void CorpusSamplerCollector::collect(Sample& s) {
 
 //Resample based on derivation distribution
 void CorpusSamplerCollector::resample(int sent) {
-  std::map<const Derivation*,double> m_p;
+  std::map<const Derivation*,double> m_p, m_resampled_p;
   m_derivationCollector.getDistribution(m_p); //fetch the distribution
     
   //copy it to a vector, will be easier for further processing
@@ -59,6 +59,7 @@ void CorpusSamplerCollector::resample(int sent) {
       
     //Store chosen derivation's feature values and length
     const Derivation* chosenDeriv = derivations[chosen]; 
+    m_resampled_p[chosenDeriv] += 1.0/m_samples;
     MPI_VERBOSE(2, "Chosen deriv " << *chosenDeriv << endl)
     MPI_VERBOSE(2, "Chosen deriv size" << chosenDeriv->getTargetSentence().size() << endl)
     
@@ -78,14 +79,26 @@ void CorpusSamplerCollector::resample(int sent) {
     MPI_VERBOSE(2, "Stats : " << m_sufficientStats.at(j) << endl)
     delete stats;
   }    
-   
+  
+  setRegularisation(m_resampled_p);
+  setRegularisationGradientFactor(m_resampled_p);
+  
   MPI_VERBOSE(2,"Finished resampling " << endl)
   //Now reset the derivation collector
   m_derivationCollector.reset();
+  m_numSents++;
+  
 }
 
+  
+  
 #ifdef MPI_ENABLED    
+  
 void CorpusSamplerCollector::AggregateSamples(int rank) {
+  AggregateSuffStats(rank);
+}
+   
+void CorpusSamplerCollector::AggregateSuffStats(int rank) {
   /*what do we need to store?
   1. Feature Vectors
   2. Lengths
@@ -94,16 +107,25 @@ void CorpusSamplerCollector::AggregateSamples(int rank) {
   vector  <int>  lengths (m_lengths.size());
   vector< float  > featsVecs, recFeatsVecs;
   vector< float  > suffStats, recSuffStats;
-
+  int numSents;
+  
   //Reduce length
   if (MPI_SUCCESS != MPI_Reduce(const_cast<int*>(&m_lengths[0]), &lengths[0], m_lengths.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+
+  //Reduce numSents
+  if (MPI_SUCCESS != MPI_Reduce(&m_numSents, &numSents, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
   
+  //Reduce feature vectors and sufficient stats
+  //MPI can't handle vector of vectors, so first concatenate elements together
+  
+  //Concatenate feature vectors
   for (size_t i = 0; i < m_featureVectors.size(); ++i) {
     for (size_t j = 0; j < m_featureVectors[i].size(); ++j) {
       featsVecs.push_back(m_featureVectors[i][j]);
     }
   }
-
+  
+  //Concatenate sufficient stats 
   for (size_t i = 0; i < m_sufficientStats.size(); ++i) {
     vector < float > bleuStats = m_sufficientStats[i].data();
     for (size_t j = 0; j < bleuStats.size(); ++j) {
@@ -116,10 +138,14 @@ void CorpusSamplerCollector::AggregateSamples(int rank) {
     recSuffStats.resize(suffStats.size());
   }
 
+  //Reduce FVs and SStats
   if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&featsVecs[0]), &recFeatsVecs[0], featsVecs.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
   if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&suffStats[0]), &recSuffStats[0], suffStats.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
 
+  
+  //Unpack FVs and SStats, 
   if (rank == 0 ) {  
+    //FVs
     size_t numFeats = recFeatsVecs.size() /  m_featureVectors.size();
     m_featureVectors.clear();
 
@@ -129,6 +155,7 @@ void CorpusSamplerCollector::AggregateSamples(int rank) {
       m_featureVectors.push_back(feats);   
     }
 
+    //Suff Stats
     size_t sizeStats = recSuffStats.size() /  m_sufficientStats.size();
     m_sufficientStats.clear();
     
@@ -137,6 +164,10 @@ void CorpusSamplerCollector::AggregateSamples(int rank) {
       BleuSufficientStats stats(_stats);
       m_sufficientStats.push_back(stats);
     }
+    
+    //Transfer lengths back
+    m_lengths = lengths;
+    m_numSents = numSents;
   }
 }
 #endif
@@ -155,22 +186,26 @@ float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,
   for (size_t i = 0; i < m_featureVectors.size() ; ++i) {
     ScoreComponentCollection fv = m_featureVectors[i];
     MPI_VERBOSE(2,"FV: " << fv)
-    //cerr << "Sufficient stats for sample " << i << " : " <<  m_sufficientStats[i] << endl;
     gain = SentenceBLEU::CalcBleu(m_sufficientStats[i], false);
     fv.MinusEquals(feature_expectations);
     MPI_VERBOSE(2,"DIFF: " << fv)
-    fv.MultiplyEquals(gain + getRegularisationGradientFactor(i));
-    MPI_VERBOSE(2,"GAIN: " << gain << " RF: " << getRegularisationGradientFactor(i)  << endl)
+    fv.MultiplyEquals(gain);
+    MPI_VERBOSE(2,"GAIN: " << gain  << endl)
     exp_gain += gain*importanceWeights[i];
     fv.MultiplyEquals(importanceWeights[i]);
-    //VERBOSE(0, "Sample=" << m_samples[i] << ", gain: " << gain << ", imp weights: " << importanceWeights[i] << endl);
     grad.PlusEquals(fv);
     MPI_VERBOSE(2,"grad: " << grad << endl)
   }
   
+  cerr << "Gradient without reg " << grad << endl;
+  ScoreComponentCollection regularizationGrad = getRegularisationGradientFactor();
+  regularizationGrad.DivideEquals(GetNumSents());
+  grad.PlusEquals(regularizationGrad);
+  
+  
   cerr << "Exp gain without reg term :  " << exp_gain << endl;
   *unreg_exp_gain = exp_gain;
-  exp_gain += getRegularisation();
+  exp_gain += getRegularisation()/GetNumSents();
   cerr << "Exp gain with reg term:  " << exp_gain << endl;
   
   gradient->PlusEquals(grad);
@@ -179,17 +214,8 @@ float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,
   cerr << "Gradient: " << grad << endl;
   
   //expected length
- /* if (exp_len) {
-    *exp_len = 0;
-    for (size_t i = 0; i < m_featureVectors.size(); ++i) {
-      *exp_len += m_lengths[i];
-    }
-  }*/
  if (exp_len) {
     *exp_len = 0;
-    //for (size_t i = 0; i < m_featureVectors.size(); ++i) {
-//      *exp_len += m_lengths[i];
-//    }
     for (size_t j = 0; j < m_sufficientStats.size(); ++j) {
       *exp_len += m_sufficientStats[j].hyp_len;
     }
@@ -217,6 +243,7 @@ void CorpusSamplerCollector::reset() {
   m_featureVectors.clear(); m_featureVectors.resize(m_samples);
   m_lengths.clear(); m_lengths.resize(m_samples);
   m_sufficientStats.clear(); m_sufficientStats.resize(m_samples);
+  m_numSents = 0;
 }
   
 float CorpusSamplerCollector::getReferenceLength() {
