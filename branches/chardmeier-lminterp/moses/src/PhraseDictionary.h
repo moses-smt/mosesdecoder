@@ -58,6 +58,10 @@ class PhraseDictionary : public Dictionary, public StatelessFeatureFunction
 	//! Overriden by load on demand phrase tables classes to load data for each input
 	virtual void InitializeForInput(InputType const &/*source*/) {}
 	std::string GetScoreProducerDescription() const;
+	std::string GetScoreProducerWeightShortName() const
+	{
+		return "tm";
+	}
 	size_t GetNumScoreComponents() const;
 
 	size_t GetNumInputScores() const;

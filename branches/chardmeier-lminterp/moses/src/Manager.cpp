@@ -62,7 +62,7 @@ Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
 
 Manager::~Manager() 
 {
-  delete m_transOptColl;
+	delete m_transOptColl;
 	delete m_search;
 
 	StaticData::Instance().CleanUpAfterSentenceProcessing();      

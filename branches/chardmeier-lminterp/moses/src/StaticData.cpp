@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelMultiFactor.h"
 #include "LanguageModelFactory.h"
 #include "LexicalReordering.h"
+#include "GlobalLexicalModel.h"
 #include "SentenceStats.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "UserMessage.h"
@@ -263,7 +264,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightUnknownWord);
 
-  // reordering constraints
+	// reordering constraints
 	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
 		Scan<int>(m_parameter->GetParam("distortion-limit")[0])
 		: -1;
@@ -272,28 +273,28 @@ bool StaticData::LoadData(Parameter *parameter)
 	// settings for pruning
 	m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
-  m_minHypoStackDiversity = 0;
-  if (m_parameter->GetParam("stack-diversity").size() > 0) {
-    if (m_maxDistortion > 15) {
-		  UserMessage::Add("stack diversity > 0 is not allowed for distortion limits larger than 15");
-		  return false;
-    }
-    if (m_inputType == WordLatticeInput) {
-      UserMessage::Add("stack diversity > 0 is not allowed for lattice input");
-      return false;
-    }
-    m_minHypoStackDiversity = Scan<size_t>(m_parameter->GetParam("stack-diversity")[0]);
-  }
+	m_minHypoStackDiversity = 0;
+	if (m_parameter->GetParam("stack-diversity").size() > 0) {
+		if (m_maxDistortion > 15) {
+			UserMessage::Add("stack diversity > 0 is not allowed for distortion limits larger than 15");
+			return false;
+		}
+		if (m_inputType == WordLatticeInput) {
+			UserMessage::Add("stack diversity > 0 is not allowed for lattice input");
+			return false;
+		}
+		m_minHypoStackDiversity = Scan<size_t>(m_parameter->GetParam("stack-diversity")[0]);
+	}
 	
 	m_beamWidth = (m_parameter->GetParam("beam-threshold").size() > 0) ?
 		TransformScore(Scan<float>(m_parameter->GetParam("beam-threshold")[0]))
 		: TransformScore(DEFAULT_BEAM_WIDTH);
-  m_earlyDiscardingThreshold = (m_parameter->GetParam("early-discarding-threshold").size() > 0) ?
-    TransformScore(Scan<float>(m_parameter->GetParam("early-discarding-threshold")[0]))
-    : TransformScore(DEFAULT_EARLY_DISCARDING_THRESHOLD);
-  m_translationOptionThreshold = (m_parameter->GetParam("translation-option-threshold").size() > 0) ?
-    TransformScore(Scan<float>(m_parameter->GetParam("translation-option-threshold")[0]))
-    : TransformScore(DEFAULT_TRANSLATION_OPTION_THRESHOLD);
+	m_earlyDiscardingThreshold = (m_parameter->GetParam("early-discarding-threshold").size() > 0) ?
+		TransformScore(Scan<float>(m_parameter->GetParam("early-discarding-threshold")[0]))
+		: TransformScore(DEFAULT_EARLY_DISCARDING_THRESHOLD);
+	m_translationOptionThreshold = (m_parameter->GetParam("translation-option-threshold").size() > 0) ?
+		TransformScore(Scan<float>(m_parameter->GetParam("translation-option-threshold")[0]))
+		: TransformScore(DEFAULT_TRANSLATION_OPTION_THRESHOLD);
 
 	m_maxNoTransOptPerCoverage = (m_parameter->GetParam("max-trans-opt-per-coverage").size() > 0)
 				? Scan<size_t>(m_parameter->GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
@@ -310,8 +311,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_cubePruningDiversity = (m_parameter->GetParam("cube-pruning-diversity").size() > 0)
 		    ? Scan<size_t>(m_parameter->GetParam("cube-pruning-diversity")[0]) : DEFAULT_CUBE_PRUNING_DIVERSITY;
 
-	// Unknown Word Processing -- wade
-	//TODO replace this w/general word dropping -- EVH
+	// unknown word processing
 	SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 	  
 	// minimum Bayes risk decoding
@@ -321,7 +321,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0) ?
 	  Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
 
-  m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
+	m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
 	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;
 
@@ -374,13 +374,14 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
 	if (!LoadMapping()) return false;
+	if (!LoadGlobalLexicalModel()) return false;
 
-  m_scoreIndexManager.InitFeatureNames();
+	m_scoreIndexManager.InitFeatureNames();
 	if (m_parameter->GetParam("weight-file").size() > 0) {
-	  if (m_parameter->GetParam("weight-file").size() != 1) {
-	    UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
-	    return false;
-	  }
+		if (m_parameter->GetParam("weight-file").size() != 1) {
+			UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
+			return false;
+		}
 		string fnam = m_parameter->GetParam("weight-file")[0];
 		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
 	}
@@ -419,6 +420,7 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_languageModel);
 	RemoveAllInColl(m_decodeStepVL);
 	RemoveAllInColl(m_reorderModels);
+	RemoveAllInColl(m_globalLexicalModels);
 	
 	// delete trans opt
 	map<std::pair<const DecodeGraph*, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
@@ -443,11 +445,7 @@ bool StaticData::LoadLexicalReorderingModel()
   std::cerr << "Loading lexical distortion models...\n";
   const vector<string> fileStr    = m_parameter->GetParam("distortion-file");
   const vector<string> weightsStr = m_parameter->GetParam("weight-d");
-  /*old code
-  const vector<string> modelStr   = m_parameter.GetParam("distortion-type"); //TODO check name?
-  const vector<string> fileStr    = m_parameter.GetParam("distortion-file");
-  const vector<string> weightsStr = m_parameter.GetParam("weight-d");
-  */
+
   std::vector<float>   weights;
   size_t w = 1; //cur weight
   size_t f = 0; //cur file
@@ -459,8 +457,6 @@ bool StaticData::LoadLexicalReorderingModel()
   //load all models
   for(size_t i = 0; i < fileStr.size(); ++i)
 	{
-		//std::cerr << "Model " << i << ":";
-    //Todo: 'else' should be 'else if(...)' to check it is a lexical model...
     vector<string> spec = Tokenize<string>(fileStr[f], " ");
     ++f; //mark file as consumed
     if(4 != spec.size()){
@@ -592,6 +588,39 @@ bool StaticData::LoadLexicalReorderingModel()
 
 	} 
   return true;
+}
+
+bool StaticData::LoadGlobalLexicalModel()
+{
+	const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-lex"));
+	const vector<string> &file = m_parameter->GetParam("global-lexical-file");
+
+	if (weight.size() != file.size())
+	{
+		std::cerr << "number of weights and models for the global lexical model does not match ("
+		  << weight.size() << " != " << file.size() << ")" << std::endl;
+		return false;
+	}
+
+	for (size_t i = 0; i < weight.size(); i++ )
+	{
+		vector<string> spec = Tokenize<string>(file[i], " ");
+		if ( spec.size() != 2 )
+		{
+			std::cerr << "wrong global lexical model specification: " << file[i] << endl;
+			return false;
+		}
+		vector< string > factors = Tokenize(spec[0],"-");
+		if ( factors.size() != 2 )
+		{
+			std::cerr << "wrong factor definition for global lexical model: " << spec[0] << endl;
+			return false;
+		}
+		vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
+		vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
+		m_globalLexicalModels.push_back( new GlobalLexicalModel( spec[1], weight[i], inputFactors, outputFactors ) );
+	}
+	return true;
 }
 
 bool StaticData::LoadLanguageModels()
@@ -968,21 +997,23 @@ void StaticData::CleanUpAfterSentenceProcessing() const
     binary format is used) */
 void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) const
 {
-  m_input = &in;
-  for(size_t i=0;i<m_phraseDictionary.size();++i) {
-	m_phraseDictionary[i]->InitializeForInput(in);
-  }
-  for(size_t j=0;j<m_reorderModels.size();++j){
-	m_reorderModels[j]->InitializeForInput(in);
-  }
-  //something LMs could do before translating a sentence
-  LMList::const_iterator iterLM;
+	m_input = &in;
+	for(size_t i=0;i<m_phraseDictionary.size();++i) {
+		m_phraseDictionary[i]->InitializeForInput(in);
+	}
+	for(size_t i=0;i<m_reorderModels.size();++i) {
+		m_reorderModels[i]->InitializeForInput(in);
+	}
+	for(size_t i=0;i<m_globalLexicalModels.size();++i) {
+		m_globalLexicalModels[i]->InitializeForInput((Sentence const&)in);
+	}
+	//something LMs could do before translating a sentence
+	LMList::const_iterator iterLM;
 	for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
 	{
 		LanguageModel &languageModel = **iterLM;
-    languageModel.InitializeBeforeSentenceProcessing();
+		languageModel.InitializeBeforeSentenceProcessing();
 	}
-  
 }
 
 void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)

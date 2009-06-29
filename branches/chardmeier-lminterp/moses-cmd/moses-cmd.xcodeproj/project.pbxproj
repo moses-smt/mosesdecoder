@@ -201,7 +201,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		03306D3C0C0B23F200CA1311 /* Development */ = {
+		03306D3C0C0B23F200CA1311 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -243,9 +243,9 @@
 				PRODUCT_NAME = "moses-cmd";
 				ZERO_LINK = NO;
 			};
-			name = Development;
+			name = Debug;
 		};
-		03306D3D0C0B23F200CA1311 /* Deployment */ = {
+		03306D3D0C0B23F200CA1311 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -285,7 +285,7 @@
 				PRODUCT_NAME = "moses-cmd";
 				ZERO_LINK = NO;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		03306D3E0C0B23F200CA1311 /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -302,19 +302,19 @@
 			};
 			name = Default;
 		};
-		03306D400C0B23F200CA1311 /* Development */ = {
+		03306D400C0B23F200CA1311 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH)";
 				VALID_ARCHS = i386;
 			};
-			name = Development;
+			name = Debug;
 		};
-		03306D410C0B23F200CA1311 /* Deployment */ = {
+		03306D410C0B23F200CA1311 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			};
-			name = Deployment;
+			name = Release;
 		};
 		03306D420C0B23F200CA1311 /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -328,8 +328,8 @@
 		03306D3B0C0B23F200CA1311 /* Build configuration list for PBXNativeTarget "moses-cmd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				03306D3C0C0B23F200CA1311 /* Development */,
-				03306D3D0C0B23F200CA1311 /* Deployment */,
+				03306D3C0C0B23F200CA1311 /* Debug */,
+				03306D3D0C0B23F200CA1311 /* Release */,
 				03306D3E0C0B23F200CA1311 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -338,8 +338,8 @@
 		03306D3F0C0B23F200CA1311 /* Build configuration list for PBXProject "moses-cmd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				03306D400C0B23F200CA1311 /* Development */,
-				03306D410C0B23F200CA1311 /* Deployment */,
+				03306D400C0B23F200CA1311 /* Debug */,
+				03306D410C0B23F200CA1311 /* Release */,
 				03306D420C0B23F200CA1311 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;

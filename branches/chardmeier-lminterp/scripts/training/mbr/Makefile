@@ -1,5 +1,3 @@
-CC=g++
-OBJS=mbr.o 
 CXXFLAGS=-O3
 LDFLAGS=
 LDLIBS= 
@@ -10,7 +8,7 @@ clean:
 	rm -f *.o
 
 mert: $(OBJS)
-	gcc $(OBJS) $(LDLIBS) -o $@
+	$(G++) $(OBJS) $(LDLIBS) -o $@
 
 mert_p: $(OBJS)
-	gcc $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
+	$(G++) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@

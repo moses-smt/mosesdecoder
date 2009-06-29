@@ -19,6 +19,7 @@ libmoses_a_SOURCES = \
 	FFState.cpp \
 	FloydWarshall.cpp \
 	GenerationDictionary.cpp \
+	GlobalLexicalModel.cpp \
 	hash.cpp \
 	Hypothesis.cpp \
 	HypothesisStack.cpp \

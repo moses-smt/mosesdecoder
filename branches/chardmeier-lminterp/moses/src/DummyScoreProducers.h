@@ -20,6 +20,7 @@ public:
 
 	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerDescription() const;
+	std::string GetScoreProducerWeightShortName() const;
 	size_t GetNumInputScores() const;
 
 	virtual const FFState* EmptyHypothesisState() const;
@@ -40,6 +41,7 @@ public:
 
 	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerDescription() const;
+	std::string GetScoreProducerWeightShortName() const;
 	size_t GetNumInputScores() const;
 
 	virtual void Evaluate(
@@ -55,6 +57,7 @@ public:
 
 	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerDescription() const;
+	std::string GetScoreProducerWeightShortName() const;
 	size_t GetNumInputScores() const;
 
 	virtual bool ComputeValueInTranslationOption() const;

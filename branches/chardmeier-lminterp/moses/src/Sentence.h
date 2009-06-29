@@ -90,6 +90,11 @@ class Sentence : public Phrase, public InputType
 	void Print(std::ostream& out) const;
 
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
+	
+	void CreateFromString(const std::vector<FactorType> &factorOrder
+												, const std::string &phraseString
+												, const std::string &factorDelimiter);
+	
 };
 
 

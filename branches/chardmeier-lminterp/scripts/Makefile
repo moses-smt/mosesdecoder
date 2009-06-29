@@ -31,7 +31,7 @@ SUBDIRS=cmert-0.5 phrase-extract symal mbr
 compile:
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS); do \
-	  cd training/$$subdir/ && make || exit 1; \
+	  $(MAKE) -C training/$$subdir || exit 1; \
 	  echo "### Compiler $$subdir"; \
 	  cd $$pwd; \
 	done
@@ -40,7 +40,7 @@ compile:
 clean:
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS); do \
-	  cd training/$$subdir/ && make clean || exit 1; \
+	  $(MAKE) -C training/$$subdir clean || exit 1; \
 	  echo "### Compiler $$subdir"; \
 	  cd $$pwd; \
 	done

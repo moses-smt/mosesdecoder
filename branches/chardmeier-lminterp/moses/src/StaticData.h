@@ -45,6 +45,7 @@ namespace Moses
 
 class InputType;
 class LexicalReordering;
+class GlobalLexicalModel;
 class PhraseDictionary;
 class GenerationDictionary;
 class DistortionScoreProducer;
@@ -69,6 +70,7 @@ protected:
 	ScoreIndexManager				m_scoreIndexManager;
 	std::vector<float>			m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
+	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float
@@ -176,6 +178,7 @@ protected:
 	//! load decoding steps
 	bool LoadMapping();
 	bool LoadLexicalReorderingModel();
+	bool LoadGlobalLexicalModel();
 	
 public:
 

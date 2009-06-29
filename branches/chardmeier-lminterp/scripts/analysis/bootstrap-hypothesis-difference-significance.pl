@@ -39,6 +39,8 @@ my $data = readAllData(@ARGV);
 print "comparing hypotheses; " . `date`;
 
 my @subSampleBleuDiffArr;
+my @subSampleBleu1Arr;
+my @subSampleBleu2Arr;
 
 #applying sampling
 for (1..$TIMES_TO_REPEAT_SUBSAMPLING) {
@@ -48,6 +50,8 @@ for (1..$TIMES_TO_REPEAT_SUBSAMPLING) {
 	my $bleu2 = getBleu($data->{refs}, $data->{hyp2}, $subSampleIndices);
 	
 	push @subSampleBleuDiffArr, abs($bleu2 - $bleu1);
+	push @subSampleBleu1Arr, $bleu1;
+	push @subSampleBleu2Arr, $bleu2;
 	
 	if ($_ % int($TIMES_TO_REPEAT_SUBSAMPLING / 100) == 0) {
 		print "$_ / $TIMES_TO_REPEAT_SUBSAMPLING " . `date`;
@@ -87,7 +91,13 @@ for my $subSampleDiff (@subSampleBleuDiffArr) {
 my $result = ($count + 1) / $TIMES_TO_REPEAT_SUBSAMPLING;
 
 print "Assuming that essentially the same system generated the two hypothesis translations (null-hypothesis),\n";
-print "the probability of actually getting the second hypothesis translation as output (p-value) is: $result.\n";
+print "the probability of actually getting them (p-value) is: $result.\n";
+
+my @sorted1 = sort @subSampleBleu1Arr;
+my @sorted2 = sort @subSampleBleu2Arr;
+
+print "95% confidence interval for hypothesis 1: " . $sorted1[25] . " -- " . $sorted1[924] . "\n";
+print "95% confidence interval for hypothesis 2: " . $sorted2[25] . " -- " . $sorted2[924] . "\n";
 
 #####
 # read 2 hyp and 1 to \infty ref data files
