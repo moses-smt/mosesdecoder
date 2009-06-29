@@ -67,6 +67,10 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 		
 	std::string GetScoreProducerDescription() const;
+	std::string GetScoreProducerWeightShortName() const
+	{
+		return "tm";
+	}
 	
 	size_t GetNumInputScores() const;
 	

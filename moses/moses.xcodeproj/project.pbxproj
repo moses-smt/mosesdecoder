@@ -26,6 +26,10 @@
 		0396E1B50C0B189200D95CFF /* TrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 0396E1A40C0B189200D95CFF /* TrellisPathList.h */; };
 		0396E1B60C0B189200D95CFF /* WordLattice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0396E1A50C0B189200D95CFF /* WordLattice.cpp */; };
 		0396E1B70C0B189200D95CFF /* WordLattice.h in Headers */ = {isa = PBXBuildFile; fileRef = 0396E1A60C0B189200D95CFF /* WordLattice.h */; };
+		1C5009BF0FB9E09700DFD24F /* FeatureFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C5009BB0FB9E09700DFD24F /* FeatureFunction.cpp */; };
+		1C5009C00FB9E09700DFD24F /* FeatureFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C5009BC0FB9E09700DFD24F /* FeatureFunction.h */; };
+		1C5009C10FB9E09700DFD24F /* FFState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C5009BD0FB9E09700DFD24F /* FFState.cpp */; };
+		1C5009C20FB9E09700DFD24F /* FFState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C5009BE0FB9E09700DFD24F /* FFState.h */; };
 		1C8CFE8F0AD67A9700FA22E2 /* ConfusionNet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFE120AD67A9600FA22E2 /* ConfusionNet.cpp */; };
 		1C8CFE900AD67A9700FA22E2 /* ConfusionNet.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE130AD67A9600FA22E2 /* ConfusionNet.h */; };
 		1C8CFE910AD67A9700FA22E2 /* DecodeStep.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFE140AD67A9600FA22E2 /* DecodeStep.cpp */; };
@@ -133,6 +137,8 @@
 		1C8CFF090AD67A9700FA22E2 /* WordsBitmap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8C0AD67A9700FA22E2 /* WordsBitmap.h */; };
 		1C8CFF0A0AD67A9700FA22E2 /* WordsRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFE8D0AD67A9700FA22E2 /* WordsRange.cpp */; };
 		1C8CFF0B0AD67A9700FA22E2 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */; };
+		1CB459EA0FD2DFEC000030BE /* GlobalLexicalModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CB459E80FD2DFEC000030BE /* GlobalLexicalModel.cpp */; };
+		1CB459EB0FD2DFEC000030BE /* GlobalLexicalModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CB459E90FD2DFEC000030BE /* GlobalLexicalModel.h */; };
 		B219B8610E9382EE00EAB407 /* AlignmentElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B85B0E9382EE00EAB407 /* AlignmentElement.cpp */; };
 		B219B8620E9382EE00EAB407 /* AlignmentElement.h in Headers */ = {isa = PBXBuildFile; fileRef = B219B85C0E9382EE00EAB407 /* AlignmentElement.h */; };
 		B219B8630E9382EE00EAB407 /* AlignmentPair.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B85D0E9382EE00EAB407 /* AlignmentPair.cpp */; };
@@ -195,6 +201,10 @@
 		0396E1A40C0B189200D95CFF /* TrellisPathList.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TrellisPathList.h; path = src/TrellisPathList.h; sourceTree = "<group>"; };
 		0396E1A50C0B189200D95CFF /* WordLattice.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = WordLattice.cpp; path = src/WordLattice.cpp; sourceTree = "<group>"; };
 		0396E1A60C0B189200D95CFF /* WordLattice.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordLattice.h; path = src/WordLattice.h; sourceTree = "<group>"; };
+		1C5009BB0FB9E09700DFD24F /* FeatureFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FeatureFunction.cpp; path = src/FeatureFunction.cpp; sourceTree = "<group>"; };
+		1C5009BC0FB9E09700DFD24F /* FeatureFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureFunction.h; path = src/FeatureFunction.h; sourceTree = "<group>"; };
+		1C5009BD0FB9E09700DFD24F /* FFState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFState.cpp; path = src/FFState.cpp; sourceTree = "<group>"; };
+		1C5009BE0FB9E09700DFD24F /* FFState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FFState.h; path = src/FFState.h; sourceTree = "<group>"; };
 		1C8CFE120AD67A9600FA22E2 /* ConfusionNet.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ConfusionNet.cpp; path = src/ConfusionNet.cpp; sourceTree = "<group>"; };
 		1C8CFE130AD67A9600FA22E2 /* ConfusionNet.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ConfusionNet.h; path = src/ConfusionNet.h; sourceTree = "<group>"; };
 		1C8CFE140AD67A9600FA22E2 /* DecodeStep.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeStep.cpp; path = src/DecodeStep.cpp; sourceTree = "<group>"; };
@@ -302,6 +312,8 @@
 		1C8CFE8C0AD67A9700FA22E2 /* WordsBitmap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsBitmap.h; path = src/WordsBitmap.h; sourceTree = "<group>"; };
 		1C8CFE8D0AD67A9700FA22E2 /* WordsRange.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = WordsRange.cpp; path = src/WordsRange.cpp; sourceTree = "<group>"; };
 		1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = src/WordsRange.h; sourceTree = "<group>"; };
+		1CB459E80FD2DFEC000030BE /* GlobalLexicalModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GlobalLexicalModel.cpp; path = src/GlobalLexicalModel.cpp; sourceTree = "<group>"; };
+		1CB459E90FD2DFEC000030BE /* GlobalLexicalModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalLexicalModel.h; path = src/GlobalLexicalModel.h; sourceTree = "<group>"; };
 		B219B85B0E9382EE00EAB407 /* AlignmentElement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentElement.cpp; path = src/AlignmentElement.cpp; sourceTree = "<group>"; };
 		B219B85C0E9382EE00EAB407 /* AlignmentElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentElement.h; path = src/AlignmentElement.h; sourceTree = "<group>"; };
 		B219B85D0E9382EE00EAB407 /* AlignmentPair.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentPair.cpp; path = src/AlignmentPair.cpp; sourceTree = "<group>"; };
@@ -370,6 +382,12 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1CB459E80FD2DFEC000030BE /* GlobalLexicalModel.cpp */,
+				1CB459E90FD2DFEC000030BE /* GlobalLexicalModel.h */,
+				1C5009BB0FB9E09700DFD24F /* FeatureFunction.cpp */,
+				1C5009BC0FB9E09700DFD24F /* FeatureFunction.h */,
+				1C5009BD0FB9E09700DFD24F /* FFState.cpp */,
+				1C5009BE0FB9E09700DFD24F /* FFState.h */,
 				B2639DE60EF199D400A67519 /* ReorderingConstraint.cpp */,
 				B2639DE70EF199D400A67519 /* ReorderingConstraint.h */,
 				B2639DE80EF199D400A67519 /* TranslationOptionList.cpp */,
@@ -650,6 +668,9 @@
 				B23821390EB73DCB007303C3 /* LanguageModelIRST.h in Headers */,
 				B2639DEB0EF199D400A67519 /* ReorderingConstraint.h in Headers */,
 				B2639DED0EF199D400A67519 /* TranslationOptionList.h in Headers */,
+				1C5009C00FB9E09700DFD24F /* FeatureFunction.h in Headers */,
+				1C5009C20FB9E09700DFD24F /* FFState.h in Headers */,
+				1CB459EB0FD2DFEC000030BE /* GlobalLexicalModel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -774,13 +795,16 @@
 				B23821380EB73DCB007303C3 /* LanguageModelIRST.cpp in Sources */,
 				B2639DEA0EF199D400A67519 /* ReorderingConstraint.cpp in Sources */,
 				B2639DEC0EF199D400A67519 /* TranslationOptionList.cpp in Sources */,
+				1C5009BF0FB9E09700DFD24F /* FeatureFunction.cpp in Sources */,
+				1C5009C10FB9E09700DFD24F /* FFState.cpp in Sources */,
+				1CB459EA0FD2DFEC000030BE /* GlobalLexicalModel.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		0396E18D0C0B186F00D95CFF /* Development */ = {
+		0396E18D0C0B186F00D95CFF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -812,9 +836,9 @@
 				REZ_PREPROCESSOR_DEFINITIONS = "";
 				ZERO_LINK = NO;
 			};
-			name = Development;
+			name = Debug;
 		};
-		0396E18E0C0B186F00D95CFF /* Deployment */ = {
+		0396E18E0C0B186F00D95CFF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -843,7 +867,7 @@
 				PRODUCT_NAME = moses;
 				ZERO_LINK = NO;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		0396E18F0C0B186F00D95CFF /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -861,20 +885,20 @@
 			};
 			name = Default;
 		};
-		0396E1910C0B186F00D95CFF /* Development */ = {
+		0396E1910C0B186F00D95CFF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_OPTIMIZATION_LEVEL = 0;
 				VALID_ARCHS = i386;
 			};
-			name = Development;
+			name = Debug;
 		};
-		0396E1920C0B186F00D95CFF /* Deployment */ = {
+		0396E1920C0B186F00D95CFF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_OPTIMIZATION_LEVEL = 0;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		0396E1930C0B186F00D95CFF /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -889,8 +913,8 @@
 		0396E18C0C0B186F00D95CFF /* Build configuration list for PBXNativeTarget "moses" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0396E18D0C0B186F00D95CFF /* Development */,
-				0396E18E0C0B186F00D95CFF /* Deployment */,
+				0396E18D0C0B186F00D95CFF /* Debug */,
+				0396E18E0C0B186F00D95CFF /* Release */,
 				0396E18F0C0B186F00D95CFF /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -899,8 +923,8 @@
 		0396E1900C0B186F00D95CFF /* Build configuration list for PBXProject "moses" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0396E1910C0B186F00D95CFF /* Development */,
-				0396E1920C0B186F00D95CFF /* Deployment */,
+				0396E1910C0B186F00D95CFF /* Debug */,
+				0396E1920C0B186F00D95CFF /* Release */,
 				0396E1930C0B186F00D95CFF /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;

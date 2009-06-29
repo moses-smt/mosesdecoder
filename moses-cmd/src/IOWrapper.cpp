@@ -320,9 +320,10 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 
 void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId)
 {
-	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
-	bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
-	bool includeWordAlignment = StaticData::Instance().PrintAlignmentInfoInNbest();
+	const StaticData &staticData = StaticData::Instance();
+	bool labeledOutput = staticData.IsLabeledNBestList();
+	bool includeAlignment = staticData.NBestIncludesAlignment();
+	bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
 	
 	TrellisPathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
@@ -337,55 +338,88 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 			const Hypothesis &edge = *edges[currEdge];
 			OutputSurface(*m_nBestStream, edge.GetCurrTargetPhrase(), m_outputFactorOrder, false); // false for not reporting all factors
 		}
-		*m_nBestStream << " ||| ";
+		*m_nBestStream << " |||";
+
+		std::string lastName = "";
+		const vector<const StatefulFeatureFunction*>& sff =
+			staticData.GetScoreIndexManager().GetStatefulFeatureFunctions();
+		for( size_t i=0; i<sff.size(); i++ )
+		{
+			if( labeledOutput && lastName != sff[i]->GetScoreProducerWeightShortName() )
+			{
+				lastName = sff[i]->GetScoreProducerWeightShortName();
+				*m_nBestStream << " " << lastName << ":";
+			}
+			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( sff[i] );
+			for (size_t j = 0; j<scores.size(); ++j) 
+			{
+		  		*m_nBestStream << " " << scores[j];
+			}
+		}
+
+		const vector<const StatelessFeatureFunction*>& slf =
+			staticData.GetScoreIndexManager().GetStatelessFeatureFunctions();
+		for( size_t i=0; i<slf.size(); i++ )
+		{
+			if( labeledOutput && lastName != slf[i]->GetScoreProducerWeightShortName() )
+			{
+				lastName = slf[i]->GetScoreProducerWeightShortName();
+				*m_nBestStream << " " << lastName << ":";
+			}
+			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( slf[i] );
+			for (size_t j = 0; j<scores.size(); ++j) 
+			{
+		  		*m_nBestStream << " " << scores[j];
+			}
+		}
 
 		// print the scores in a hardwired order
     // before each model type, the corresponding command-line-like name must be emitted
     // MERT script relies on this
 
 		// basic distortion
-		if (labeledOutput)
-	    *m_nBestStream << "d: ";
-		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
+//		if (labeledOutput)
+//	    *m_nBestStream << "d: ";
+//		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
 
 //		reordering
-		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();
-		if(rms.size() > 0)
-		{
-				vector<LexicalReordering*>::iterator iter;
-				for(iter = rms.begin(); iter != rms.end(); ++iter)
-				{
-					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-					for (size_t j = 0; j<scores.size(); ++j) 
-					{
-				  		*m_nBestStream << scores[j] << " ";
-					}
-				}
-		}
-			
-		// lm
-		const LMList& lml = StaticData::Instance().GetAllLM();
-    if (lml.size() > 0) {
-			if (labeledOutput)
-	      *m_nBestStream << "lm: ";
-		  LMList::const_iterator lmi = lml.begin();
-		  for (; lmi != lml.end(); ++lmi) {
-			  *m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
-		  }
-    }
-
+//		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();
+//		if(rms.size() > 0)
+//		{
+//				vector<LexicalReordering*>::iterator iter;
+//				for(iter = rms.begin(); iter != rms.end(); ++iter)
+//				{
+//					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+//					for (size_t j = 0; j<scores.size(); ++j) 
+//					{
+//				  		*m_nBestStream << scores[j] << " ";
+//					}
+//				}
+//		}
+//			
+//		// lm
+//		const LMList& lml = StaticData::Instance().GetAllLM();
+//		if (lml.size() > 0) {
+//			if (labeledOutput)
+//				*m_nBestStream << "lm: ";
+//		  LMList::const_iterator lmi = lml.begin();
+//		  for (; lmi != lml.end(); ++lmi) {
+//			  *m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
+//		  }
+//		}
+//
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){  
 			// translation components	for text input
 			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
-					*m_nBestStream << "tm: ";
+					*m_nBestStream << " tm:";
 				vector<PhraseDictionary*>::iterator iter;
 				for (iter = pds.begin(); iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j) 
-						*m_nBestStream << scores[j] << " ";
+						*m_nBestStream << " " << scores[j];
 				}
 			}
 		}
@@ -405,10 +439,10 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 				if (pd_numinputscore){
 					
 					if (labeledOutput)
-						*m_nBestStream << "I: ";
+						*m_nBestStream << " I:";
 
 					for (size_t j = 0; j < pd_numinputscore; ++j)
-						*m_nBestStream << scores[j] << " ";
+						*m_nBestStream << " " << scores[j];
 				}
 					
 					
@@ -418,39 +452,32 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 					size_t pd_numinputscore = (*iter)->GetNumInputScores();
 
 					if (iter == pds.begin() && labeledOutput)
-						*m_nBestStream << "tm: ";
+						*m_nBestStream << " tm:";
 					for (size_t j = pd_numinputscore; j < scores.size() ; ++j)
-						*m_nBestStream << scores[j] << " ";
+						*m_nBestStream << " " << scores[j];
 				}
 			}
 		}
 		
-		
-		
-		// word penalty
-		if (labeledOutput)
-	    *m_nBestStream << "w: ";
-		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetWordPenaltyProducer()) << " ";
-		
 		// generation
 		vector<GenerationDictionary*> gds = StaticData::Instance().GetGenerationDictionaries();
-    if (gds.size() > 0) {
+		if (gds.size() > 0) {
 			if (labeledOutput)
-	      *m_nBestStream << "g: ";
-		  vector<GenerationDictionary*>::iterator iter;
-		  for (iter = gds.begin(); iter != gds.end(); ++iter) {
-			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-			  for (size_t j = 0; j<scores.size(); j++) {
-				  *m_nBestStream << scores[j] << " ";
-			  }
-		  }
-    }
+				*m_nBestStream << " g: ";
+			vector<GenerationDictionary*>::iterator iter;
+			for (iter = gds.begin(); iter != gds.end(); ++iter) {
+				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+				for (size_t j = 0; j<scores.size(); j++) {
+					*m_nBestStream << scores[j] << " ";
+				}
+			}
+		}
 		
 		// total						
-    *m_nBestStream << "||| " << path.GetTotalScore();
+		*m_nBestStream << " ||| " << path.GetTotalScore();
 		
 		//phrase-to-phrase alignment
-    if (includeAlignment) {
+		if (includeAlignment) {
 			*m_nBestStream << " |||";
 			for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
 			{

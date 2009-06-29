@@ -44,6 +44,7 @@ Parameter::Parameter()
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
 	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
 	AddParam("generation-file", "location and properties of the generation table");
+	AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
 	AddParam("input-factors", "list of factors in the input");
 	AddParam("input-file", "i", "location of the input file to be translated");
 	AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
@@ -74,6 +75,7 @@ Parameter::Parameter()
 	AddParam("weight-generation", "g", "weight(s) for generation components");
 	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
 	AddParam("weight-l", "lm", "weight(s) for language models");
+	AddParam("weight-lex", "lex", "weight for global lexical model");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");
@@ -106,6 +108,7 @@ Parameter::Parameter()
 	AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
+	AddParam("description","","Source language, target language, description");
 }
 
 Parameter::~Parameter()
@@ -161,7 +164,7 @@ bool Parameter::LoadParam(const string &filePath)
 	const char *argv[] = {"executable", "-f", filePath.c_str() };
 	return LoadParam(3, (char**) argv);
 }
-
+	
 /** load all parameters from the configuration file and the command line switches */
 bool Parameter::LoadParam(int argc, char* argv[]) 
 {
