@@ -129,7 +129,7 @@ protected:
 	bool m_PrintAlignmentInfo;
 	bool m_PrintAlignmentInfoNbest;
 		
-	mutable std::auto_ptr<SentenceStats> m_sentenceStats;
+	
 	std::string m_factorDelimiter; //! by default, |, but it can be changed
 	size_t m_maxFactorIdx[2];  //! number of factors on source and target side
 	size_t m_maxNumFactors;  //! max number of factors on both source and target sides
@@ -147,7 +147,6 @@ protected:
 	mutable std::map<std::pair<const DecodeGraph*, Phrase>, pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
 	size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
 
-	mutable const InputType* m_input;  //! holds reference to current sentence
 	bool m_isAlwaysCreateDirectTranslationOption;
 	//! constructor. only the 1 static variable can be created
 
@@ -381,10 +380,7 @@ public:
 	{
 		return m_isDetailedTranslationReportingEnabled;
 	}
-	void ResetSentenceStats(const InputType& source) const
-	{
-		m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
-	}
+	
 	bool IsLabeledNBestList() const
 	{
 		return m_labeledNBestList;
@@ -430,13 +426,9 @@ public:
 	InputTypeEnum GetInputType() const {return m_inputType;}
 	SearchAlgorithm GetSearchAlgorithm() const {return m_searchAlgorithm;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
-	const InputType* GetInput() const { return m_input; }
 	void InitializeBeforeSentenceProcessing(InputType const&) const;
 	void CleanUpAfterSentenceProcessing() const;
-	SentenceStats& GetSentenceStats() const
-	{
-		return *m_sentenceStats;
-	}
+	
 	const std::vector<float>& GetAllWeights() const
 	{
 		return m_allWeights;

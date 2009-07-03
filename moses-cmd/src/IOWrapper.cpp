@@ -282,7 +282,7 @@ void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
 
 void OutputInput(std::ostream& os, const Hypothesis* hypo)
 {
-	size_t len = StaticData::Instance().GetInput()->GetSize();
+	size_t len = hypo->GetInput().GetSize();
 	std::vector<const Phrase*> inp_phrases(len, 0);
 	OutputInput(inp_phrases, hypo);
 	for (size_t i=0; i<len; ++i)

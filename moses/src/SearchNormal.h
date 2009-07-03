@@ -10,6 +10,7 @@
 namespace Moses
 {
 
+class Manager;
 class InputType;
 class TranslationOptionCollection;
 
@@ -31,7 +32,7 @@ protected:
 	void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt, float expectedScore);
 
 public:
-	SearchNormal(const InputType &source, const TranslationOptionCollection &transOptColl);
+	SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);
 	~SearchNormal();
 
 	void ProcessSentence();

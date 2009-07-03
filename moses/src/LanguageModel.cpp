@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModel.h"
 #include "TypeDef.h"
 #include "Util.h"
+#include "Manager.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
 #include "StaticData.h"
@@ -176,7 +177,7 @@ FFState* LanguageModel::Evaluate(
 		res->lmstate = GetState(contextFactor);
 	}
 	out->PlusEquals(this, lmScore);
-	IFVERBOSE(2) { StaticData::Instance().GetSentenceStats().AddTimeCalcLM( clock()-t ); }
+  IFVERBOSE(2) { hypo.GetManager().GetSentenceStats().AddTimeCalcLM( clock()-t ); }
 	return res;
 }
 
