@@ -26,12 +26,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "StaticData.h"
+#include "Manager.h"
 
 using namespace std;
 
 namespace Moses
 {
-HypothesisStackNormal::HypothesisStackNormal()
+HypothesisStackNormal::HypothesisStackNormal(Manager& manager) :
+    HypothesisStack(manager)
 {
 	m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
 	m_bestScore = -std::numeric_limits<float>::infinity();
@@ -96,7 +98,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 	    && ! ( m_minHypoStackDiversity > 0
 	           && hypo->GetTotalScore() >= GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) )
 	{
-		StaticData::Instance().GetSentenceStats().AddDiscarded();
+		m_manager.GetSentenceStats().AddDiscarded();
 		VERBOSE(3,"discarded, too bad for stack" << std::endl);
 		FREEHYPO(hypo);		
 		return false;
@@ -114,7 +116,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 	Hypothesis *hypoExisting = *iterExisting;
 	assert(iterExisting != m_hypos.end());
 
-	StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
+	m_manager.GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 	
 	// found existing hypo with same target ending.
 	// keep the best 1
@@ -211,7 +213,7 @@ void HypothesisStackNormal::PruneToSize(size_t newSize)
 		if (! included[i])
 		{
 			FREEHYPO( hypos[i] );
-			StaticData::Instance().GetSentenceStats().AddPruning();
+			m_manager.GetSentenceStats().AddPruning();
 		}
 	}
 	free(included);

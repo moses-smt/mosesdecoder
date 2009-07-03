@@ -66,11 +66,13 @@ class HypothesisScoreOrdererWithDistortion
 			const float weightDistortion = StaticData::Instance().GetWeightDistortion();
 			const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
 			const float distortionScoreA = dsp->CalculateDistortionScore(
+                    *hypoA,
 										hypoA->GetCurrSourceWordsRange(),
 										*transOptRange,
 										hypoA->GetWordsBitmap().GetFirstGapPos()
 									 );
 			const float distortionScoreB = dsp->CalculateDistortionScore(
+                    *hypoB,
 										hypoB->GetCurrSourceWordsRange(),
 										*transOptRange,
 										hypoB->GetWordsBitmap().GetFirstGapPos()
@@ -131,7 +133,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 	}
 
 	const WordsRange &transOptRange = translations.Get(0)->GetSourceWordsRange();
-	const InputType *itype = StaticData::Instance().GetInput();
+  const InputType& itype = m_hypotheses.at(0)->GetInput();
 
 	HypothesisSet::const_iterator iterHypo = m_prevBitmapContainer.GetHypotheses().begin();
 	HypothesisSet::const_iterator iterEnd = m_prevBitmapContainer.GetHypotheses().end();
@@ -149,7 +151,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 			}
 		else
 			{
-				int distortionDistance = itype->ComputeDistortionDistance(hypo.GetCurrSourceWordsRange()
+				int distortionDistance = itype.ComputeDistortionDistance(hypo.GetCurrSourceWordsRange()
 																		, transOptRange);
 
 				if (distortionDistance <= maxDistortion)

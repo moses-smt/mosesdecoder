@@ -69,7 +69,7 @@ public:
 		return GetWorstScoreForBitmap( coverage.GetID() );
 	}
 
-	HypothesisStackNormal();
+	HypothesisStackNormal(Manager& manager);
 
 	/** adds the hypo, but only if within thresholds (beamThr, stackSize).
 	*	This function will recombine hypotheses silently!  There is no record

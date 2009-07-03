@@ -47,6 +47,7 @@ class TranslationOption;
 class WordsRange;
 class Hypothesis;
 class FFState;
+class Manager;
 
 typedef std::vector<Hypothesis*> ArcList;
 
@@ -84,12 +85,13 @@ protected:
 	ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
 	AlignmentPair     m_alignPair;
 	const TranslationOption *m_transOpt;
+  Manager& m_manager;
 
 	int m_id; /*! numeric ID of this hypothesis, used for logging */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 
 	/*! used by initial seeding of the translation process */
-	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
+	Hypothesis(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget);
 	/*! used when creating a new hypothesis using a translation option (phrase translation) */
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
@@ -104,15 +106,17 @@ public:
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
 	static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Phrase* constraint);
 
-	static Hypothesis* Create(const WordsBitmap &initialCoverage);
+	static Hypothesis* Create(Manager& manager, const WordsBitmap &initialCoverage);
 
 	/** return the subclass of Hypothesis most appropriate to the given target phrase */
-	static Hypothesis* Create(InputType const& source, const TargetPhrase &emptyTarget);
+	static Hypothesis* Create(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget);
 	
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
 	Hypothesis* CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const;
 
 	void PrintHypothesis() const;
+  
+  const InputType& GetInput() const {return m_sourceInput;}
 
 	/** return target phrase used to create this hypothesis */
 //	const Phrase &GetCurrTargetPhrase() const
@@ -133,6 +137,11 @@ public:
 	{
 		return m_currTargetWordsRange;
 	}
+  
+  Manager& GetManager() const 
+  {
+    return m_manager;
+  }
 	
 	/** output length of the translation option used to create this hypothesis */
 	inline size_t GetCurrTargetLength() const
