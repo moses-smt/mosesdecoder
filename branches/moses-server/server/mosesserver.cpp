@@ -21,39 +21,29 @@ public:
         // signature and help strings are documentation -- the client
         // can query this information with a system.methodSignature and
         // system.methodHelp RPC.
-        this->_signature = "s:s";
+        this->_signature = "S:S";
         this->_help = "Does translation";
     }
+
+    typedef std::map<std::string, xmlrpc_c::value> params_t;
+
     void
     execute(xmlrpc_c::paramList const& paramList,
             xmlrpc_c::value *   const  retvalP) {
         
-        const string  source(paramList.getString(0));
-        cerr << "Input: " << source << endl;
+        const params_t params = paramList.getStruct(0);
         paramList.verifyEnd(1);
+        params_t::const_iterator si = params.find("text");
+        if (si == params.end()) {
+            throw xmlrpc_c::fault(
+                "Missing source text", 
+                xmlrpc_c::fault::CODE_PARSE);
+        }
+        const string source(
+            (xmlrpc_c::value_string(si->second)));
 
-        /*
-        const StaticData &staticData = StaticData::Instance();
-        //TODO Cleanup without messing with caches
-        staticData.CleanUpAfterSentenceProcessing();
+        cerr << "Input: " << source << endl;
 
-        Sentence sentence(Input);
-        stringstream in(source + "\n");
-        const vector<FactorType> &inputFactorOrder = 
-            staticData.GetInputFactorOrder();
-        sentence.Read(in,inputFactorOrder);
-        //FIXME: global ops
-        staticData.ResetSentenceStats(sentence);
-        staticData.InitializeBeforeSentenceProcessing(sentence); 
-        auto_ptr<TranslationOptionCollection>
-            toc(sentence.CreateTranslationOptionCollection());
-        const vector<DecodeGraph*>& decodeStepVL =
-            staticData.GetDecodeStepVL();
-        toc->CreateTranslationOptions(decodeStepVL);
-        auto_ptr<Search> searcher(new SearchNormal(sentence,*toc));
-        searcher->ProcessSentence();
-        const Hypothesis* hypo = searcher->GetBestHypothesis();
-        */
         const StaticData &staticData = StaticData::Instance();
         Sentence sentence(Input);
         const vector<FactorType> &inputFactorOrder = 
@@ -67,7 +57,12 @@ public:
         stringstream out;
         outputHypo(out,hypo);
 
-        *retvalP = xmlrpc_c::value_string(out.str());
+        map<string, xmlrpc_c::value> retData;
+        pair<string, xmlrpc_c::value> 
+            text("text", xmlrpc_c::value_string(out.str()));
+        retData.insert(text);
+        
+        *retvalP = xmlrpc_c::value_struct(retData);
 
     }
 
@@ -87,66 +82,62 @@ public:
 
 
 int main(int argc, char** argv) {
-    try {
 
-        //Extract port and log, send other args to moses
-        char** mosesargv = new char*[argc];
-        int mosesargc = 0;
-        int port = 8080;
-        const char* logfile = "/dev/null";
+    //Extract port and log, send other args to moses
+    char** mosesargv = new char*[argc];
+    int mosesargc = 0;
+    int port = 8080;
+    const char* logfile = "/dev/null";
 
-        for (int i = 0; i < argc; ++i) {
-            if (!strcmp(argv[i],"--server-port")) {
-                ++i;
-                if (i >= argc) {
-                    cerr << "Error: Missing argument to --server-port" << endl;
-                    exit(1);
-                } else {
-                    port = atoi(argv[i]);
-                }
-            } else if (!strcmp(argv[i],"--server-log")) {
-                ++i;
-                if (i >= argc) {
-                    cerr << "Error: Missing argument to --server-log" << endl;
-                    exit(1);
-                } else {
-                    logfile = argv[i];
-                }
+    for (int i = 0; i < argc; ++i) {
+        if (!strcmp(argv[i],"--server-port")) {
+            ++i;
+            if (i >= argc) {
+                cerr << "Error: Missing argument to --server-port" << endl;
+                exit(1);
             } else {
-                mosesargv[i] = new char[strlen(argv[i])+1];
-                strcpy(mosesargv[i],argv[i]);
-                ++mosesargc;
+                port = atoi(argv[i]);
             }
+        } else if (!strcmp(argv[i],"--server-log")) {
+            ++i;
+            if (i >= argc) {
+                cerr << "Error: Missing argument to --server-log" << endl;
+                exit(1);
+            } else {
+                logfile = argv[i];
+            }
+        } else {
+            mosesargv[mosesargc] = new char[strlen(argv[i])+1];
+            strcpy(mosesargv[mosesargc],argv[i]);
+            ++mosesargc;
         }
-
-        Parameter* params = new Parameter();
-        if (!params->LoadParam(mosesargc,mosesargv)) {
-            params->Explain();
-            exit(1);
-        }
-        if (!StaticData::LoadDataStatic(params)) {
-            exit(1);
-        }
-       
-    
-        xmlrpc_c::registry myRegistry;
-
-        xmlrpc_c::methodPtr const translator(new Translator);
-
-        myRegistry.addMethod("translate", translator);
-        
-        xmlrpc_c::serverAbyss myAbyssServer(
-            myRegistry,
-            port,              // TCP port on which to listen
-            logfile  
-            );
-        
-        cerr << "Listening on port " << port << endl;
-        myAbyssServer.run();
-        // xmlrpc_c::serverAbyss.run() never returns
-        assert(false);
-    } catch (exception const& e) {
-        cerr << "Something failed.  " << e.what() << endl;
     }
+
+    Parameter* params = new Parameter();
+    if (!params->LoadParam(mosesargc,mosesargv)) {
+        params->Explain();
+        exit(1);
+    }
+    if (!StaticData::LoadDataStatic(params)) {
+        exit(1);
+    }
+   
+
+    xmlrpc_c::registry myRegistry;
+
+    xmlrpc_c::methodPtr const translator(new Translator);
+
+    myRegistry.addMethod("translate", translator);
+    
+    xmlrpc_c::serverAbyss myAbyssServer(
+        myRegistry,
+        port,              // TCP port on which to listen
+        logfile  
+        );
+    
+    cerr << "Listening on port " << port << endl;
+    myAbyssServer.run();
+    // xmlrpc_c::serverAbyss.run() never returns
+    assert(false);
     return 0;
 }
