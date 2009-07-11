@@ -246,6 +246,8 @@ int main(int argc, char** argv) {
   bool perceptron, mira;
   float perceptron_lr;
   int epochs;
+  bool expected_sbleu = false;
+  bool expected_sbleu_gradient;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -292,7 +294,9 @@ int main(int argc, char** argv) {
   ("mira", po::value(&mira)->zero_tokens()->default_value(false), "Use mira learner")
   ("perc-lr", po::value<float>(&perceptron_lr)->default_value(1.0f), "Perceptron learning rate")
   ("epochs", po::value<int>(&epochs)->default_value(1), "Number of training epochs")
-  ;
+  ("xbleu,x", po::value(&expected_sbleu)->zero_tokens()->default_value(false), "Compute the expected sentence BLEU")
+  ("gradient,g", po::value(&expected_sbleu_gradient)->zero_tokens()->default_value(false), "Compute the gradient with respect to expected sentence BLEU");
+  
   
   po::options_description cmdline_options;
   cmdline_options.add(desc);
