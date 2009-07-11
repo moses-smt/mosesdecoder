@@ -27,11 +27,59 @@
 		B218AB4B0F8BBF29000E5EB9 /* SentenceBleu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB330F8BBF29000E5EB9 /* SentenceBleu.cpp */; };
 		B218AB4C0F8BBF29000E5EB9 /* TrainingSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB350F8BBF29000E5EB9 /* TrainingSource.cpp */; };
 		B218AB4D0F8BBF29000E5EB9 /* TranslationDelta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */; };
+		B2386CC30FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2386CC20FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp */; };
 		B25B2AE50F8CDB6D00485047 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B25B2AE40F8CDB6D00485047 /* libmoses.a */; };
 		B26B75EA0F9F8D3A00A06B31 /* Pos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75E80F9F8D3A00A06B31 /* Pos.cpp */; };
 		B26B75F40FA0A5CC00A06B31 /* Dependency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */; };
 		B26FFFC50FA7BAF40098700F /* SourceToTargetRatio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26FFFC40FA7BAF40098700F /* SourceToTargetRatio.cpp */; };
+		B27348110FE559030059868D /* AnnealingSchedule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */; };
+		B27348120FE559030059868D /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB110F8BBF29000E5EB9 /* Decoder.cpp */; };
+		B27348130FE559030059868D /* Derivation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB130F8BBF29000E5EB9 /* Derivation.cpp */; };
+		B27348140FE559030059868D /* FeatureFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB150F8BBF29000E5EB9 /* FeatureFunction.cpp */; };
+		B27348150FE559030059868D /* GainFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB170F8BBF29000E5EB9 /* GainFunction.cpp */; };
+		B27348160FE559030059868D /* Gibbler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB190F8BBF29000E5EB9 /* Gibbler.cpp */; };
+		B27348180FE559030059868D /* GibblerExpectedLossTraining.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB1D0F8BBF29000E5EB9 /* GibblerExpectedLossTraining.cpp */; };
+		B27348190FE559030059868D /* GibblerMaxDerivDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB1F0F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.cpp */; };
+		B273481A0FE559030059868D /* GibblerMaxTransDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB210F8BBF29000E5EB9 /* GibblerMaxTransDecoder.cpp */; };
+		B273481B0FE559030059868D /* GibbsOperator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB230F8BBF29000E5EB9 /* GibbsOperator.cpp */; };
+		B273481C0FE559030059868D /* InputSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB250F8BBF29000E5EB9 /* InputSource.cpp */; };
+		B273481E0FE559030059868D /* Model1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB2B0F8BBF29000E5EB9 /* Model1.cpp */; };
+		B273481F0FE559030059868D /* Optimizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB2D0F8BBF29000E5EB9 /* Optimizer.cpp */; };
+		B27348200FE559030059868D /* QuenchingSchedule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB2F0F8BBF29000E5EB9 /* QuenchingSchedule.cpp */; };
+		B27348210FE559030059868D /* SearchRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB310F8BBF29000E5EB9 /* SearchRandom.cpp */; };
+		B27348220FE559030059868D /* SentenceBleu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB330F8BBF29000E5EB9 /* SentenceBleu.cpp */; };
+		B27348230FE559030059868D /* TrainingSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB350F8BBF29000E5EB9 /* TrainingSource.cpp */; };
+		B27348240FE559030059868D /* TranslationDelta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */; };
+		B27348250FE559030059868D /* MpiDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */; };
+		B27348260FE559030059868D /* Pos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75E80F9F8D3A00A06B31 /* Pos.cpp */; };
+		B27348270FE559030059868D /* Dependency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */; };
+		B27348280FE559030059868D /* SourceToTargetRatio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26FFFC40FA7BAF40098700F /* SourceToTargetRatio.cpp */; };
+		B27348290FE559030059868D /* CorpusSampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21212610FDEFB7500B07445 /* CorpusSampler.cpp */; };
+		B273482B0FE559030059868D /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B25B2AE40F8CDB6D00485047 /* libmoses.a */; };
+		B27348330FE5597A0059868D /* CorpusTrainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B27348320FE5597A0059868D /* CorpusTrainer.cpp */; };
 		B2A748890F976BCD00A5DE76 /* MpiDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */; };
+		B2CAFFCA1004F4CF00BADAF6 /* SampleRank.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F94C170FF52AB900998793 /* SampleRank.cpp */; };
+		B2E1C311100655D600039083 /* OnlineLearnerTrainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2E1C310100655D600039083 /* OnlineLearnerTrainer.cpp */; };
+		B2F94C1C0FF52AE700998793 /* AnnealingSchedule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */; };
+		B2F94C1D0FF52AE700998793 /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB110F8BBF29000E5EB9 /* Decoder.cpp */; };
+		B2F94C1E0FF52AE700998793 /* Derivation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB130F8BBF29000E5EB9 /* Derivation.cpp */; };
+		B2F94C1F0FF52AE700998793 /* FeatureFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB150F8BBF29000E5EB9 /* FeatureFunction.cpp */; };
+		B2F94C200FF52AE700998793 /* GainFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB170F8BBF29000E5EB9 /* GainFunction.cpp */; };
+		B2F94C210FF52AE700998793 /* Gibbler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB190F8BBF29000E5EB9 /* Gibbler.cpp */; };
+		B2F94C240FF52AE700998793 /* GibblerMaxDerivDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB1F0F8BBF29000E5EB9 /* GibblerMaxDerivDecoder.cpp */; };
+		B2F94C250FF52AE700998793 /* GibblerMaxTransDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB210F8BBF29000E5EB9 /* GibblerMaxTransDecoder.cpp */; };
+		B2F94C260FF52AE700998793 /* GibbsOperator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB230F8BBF29000E5EB9 /* GibbsOperator.cpp */; };
+		B2F94C270FF52AE700998793 /* InputSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB250F8BBF29000E5EB9 /* InputSource.cpp */; };
+		B2F94C290FF52AE700998793 /* Model1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB2B0F8BBF29000E5EB9 /* Model1.cpp */; };
+		B2F94C2C0FF52AE700998793 /* SearchRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB310F8BBF29000E5EB9 /* SearchRandom.cpp */; };
+		B2F94C2D0FF52AE700998793 /* SentenceBleu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB330F8BBF29000E5EB9 /* SentenceBleu.cpp */; };
+		B2F94C2F0FF52AE700998793 /* TranslationDelta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */; };
+		B2F94C300FF52AE700998793 /* MpiDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */; };
+		B2F94C310FF52AE700998793 /* Pos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75E80F9F8D3A00A06B31 /* Pos.cpp */; };
+		B2F94C320FF52AE700998793 /* Dependency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */; };
+		B2F94C330FF52AE700998793 /* SourceToTargetRatio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26FFFC40FA7BAF40098700F /* SourceToTargetRatio.cpp */; };
+		B2F94C350FF52AE700998793 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B25B2AE40F8CDB6D00485047 /* libmoses.a */; };
+		B2F94C610FF5393800998793 /* OnlineLearner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F94C600FF5393800998793 /* OnlineLearner.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +91,20 @@
 			remoteInfo = moses;
 		};
 		B25B2A8B0F8CD86900485047 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = moses;
+		};
+		B273480F0FE559030059868D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = moses;
+		};
+		B2F94C1A0FF52AE700998793 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */;
 			proxyType = 1;
@@ -61,9 +123,30 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		B273482C0FE559030059868D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		B2F94C360FF52AE700998793 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B200AD150FE3B261007F6B2E /* SufficientStats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SufficientStats.h; sourceTree = "<group>"; };
+		B21212600FDEFB7500B07445 /* CorpusSampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CorpusSampler.h; sourceTree = "<group>"; };
+		B21212610FDEFB7500B07445 /* CorpusSampler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CorpusSampler.cpp; sourceTree = "<group>"; };
 		B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AnnealingSchedule.cpp; sourceTree = "<group>"; };
 		B218AAFF0F8BBF29000E5EB9 /* AnnealingSchedule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnnealingSchedule.h; sourceTree = "<group>"; };
 		B218AB110F8BBF29000E5EB9 /* Decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decoder.cpp; sourceTree = "<group>"; };
@@ -103,6 +186,8 @@
 		B218AB360F8BBF29000E5EB9 /* TrainingSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrainingSource.h; sourceTree = "<group>"; };
 		B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TranslationDelta.cpp; sourceTree = "<group>"; };
 		B218AB380F8BBF29000E5EB9 /* TranslationDelta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TranslationDelta.h; sourceTree = "<group>"; };
+		B2386CC20FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CorpusSamplerAnnealed.cpp; sourceTree = "<group>"; };
+		B2386CC40FEF9C3B00B871B9 /* CorpusSamplerAnnealed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CorpusSamplerAnnealed.h; sourceTree = "<group>"; };
 		B25B29F80F8CA15100485047 /* josiah */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = josiah; sourceTree = BUILT_PRODUCTS_DIR; };
 		B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
 		B25B2AE40F8CDB6D00485047 /* libmoses.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmoses.a; path = ../moses/build/Development/libmoses.a; sourceTree = SOURCE_ROOT; };
@@ -112,8 +197,17 @@
 		B26B75F30FA0A5CC00A06B31 /* Dependency.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dependency.h; sourceTree = "<group>"; };
 		B26FFFC30FA7BAF40098700F /* SourceToTargetRatio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SourceToTargetRatio.h; sourceTree = "<group>"; };
 		B26FFFC40FA7BAF40098700F /* SourceToTargetRatio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SourceToTargetRatio.cpp; sourceTree = "<group>"; };
+		B27348300FE559030059868D /* corpustrainer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = corpustrainer; sourceTree = BUILT_PRODUCTS_DIR; };
+		B27348320FE5597A0059868D /* CorpusTrainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CorpusTrainer.cpp; sourceTree = "<group>"; };
 		B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MpiDebug.cpp; sourceTree = "<group>"; };
 		B2A748880F976BCD00A5DE76 /* MpiDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MpiDebug.h; sourceTree = "<group>"; };
+		B2CAFFC81004F42800BADAF6 /* SampleRank.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleRank.h; sourceTree = "<group>"; };
+		B2E1C30F100655D600039083 /* OnlineLearnerTrainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OnlineLearnerTrainer.h; sourceTree = "<group>"; };
+		B2E1C310100655D600039083 /* OnlineLearnerTrainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OnlineLearnerTrainer.cpp; sourceTree = "<group>"; };
+		B2F94C170FF52AB900998793 /* SampleRank.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SampleRank.cpp; sourceTree = "<group>"; };
+		B2F94C3A0FF52AE700998793 /* samplerank */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = samplerank; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2F94C5F0FF5393800998793 /* OnlineLearner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OnlineLearner.h; sourceTree = "<group>"; };
+		B2F94C600FF5393800998793 /* OnlineLearner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OnlineLearner.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,12 +219,29 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B273482A0FE559030059868D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B273482B0FE559030059868D /* libmoses.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2F94C340FF52AE700998793 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2F94C350FF52AE700998793 /* libmoses.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		08FB7794FE84155DC02AAC07 /* josiah */ = {
 			isa = PBXGroup;
 			children = (
+				B2CAFFC81004F42800BADAF6 /* SampleRank.h */,
 				B25B2AE40F8CDB6D00485047 /* libmoses.a */,
 				B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
@@ -143,6 +254,11 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B2386CC40FEF9C3B00B871B9 /* CorpusSamplerAnnealed.h */,
+				B2386CC20FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp */,
+				B27348320FE5597A0059868D /* CorpusTrainer.cpp */,
+				B21212600FDEFB7500B07445 /* CorpusSampler.h */,
+				B21212610FDEFB7500B07445 /* CorpusSampler.cpp */,
 				B26FFFC30FA7BAF40098700F /* SourceToTargetRatio.h */,
 				B26FFFC40FA7BAF40098700F /* SourceToTargetRatio.cpp */,
 				B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */,
@@ -190,6 +306,12 @@
 				B218AB360F8BBF29000E5EB9 /* TrainingSource.h */,
 				B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */,
 				B218AB380F8BBF29000E5EB9 /* TranslationDelta.h */,
+				B200AD150FE3B261007F6B2E /* SufficientStats.h */,
+				B2F94C170FF52AB900998793 /* SampleRank.cpp */,
+				B2F94C5F0FF5393800998793 /* OnlineLearner.h */,
+				B2F94C600FF5393800998793 /* OnlineLearner.cpp */,
+				B2E1C30F100655D600039083 /* OnlineLearnerTrainer.h */,
+				B2E1C310100655D600039083 /* OnlineLearnerTrainer.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -198,6 +320,8 @@
 			isa = PBXGroup;
 			children = (
 				B25B29F80F8CA15100485047 /* josiah */,
+				B27348300FE559030059868D /* corpustrainer */,
+				B2F94C3A0FF52AE700998793 /* samplerank */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -239,6 +363,44 @@
 			productReference = B25B29F80F8CA15100485047 /* josiah */;
 			productType = "com.apple.product-type.tool";
 		};
+		B273480D0FE559030059868D /* corpustrainer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B273482D0FE559030059868D /* Build configuration list for PBXNativeTarget "corpustrainer" */;
+			buildPhases = (
+				B27348100FE559030059868D /* Sources */,
+				B273482A0FE559030059868D /* Frameworks */,
+				B273482C0FE559030059868D /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B273480E0FE559030059868D /* PBXTargetDependency */,
+			);
+			name = corpustrainer;
+			productInstallPath = "$(HOME)/bin";
+			productName = josiah;
+			productReference = B27348300FE559030059868D /* corpustrainer */;
+			productType = "com.apple.product-type.tool";
+		};
+		B2F94C180FF52AE700998793 /* samplerank */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B2F94C370FF52AE700998793 /* Build configuration list for PBXNativeTarget "samplerank" */;
+			buildPhases = (
+				B2F94C1B0FF52AE700998793 /* Sources */,
+				B2F94C340FF52AE700998793 /* Frameworks */,
+				B2F94C360FF52AE700998793 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B2F94C190FF52AE700998793 /* PBXTargetDependency */,
+			);
+			name = samplerank;
+			productInstallPath = "$(HOME)/bin";
+			productName = josiah;
+			productReference = B2F94C3A0FF52AE700998793 /* samplerank */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -258,6 +420,8 @@
 			projectRoot = "";
 			targets = (
 				8DD76F620486A84900D96B5E /* josiah */,
+				B273480D0FE559030059868D /* corpustrainer */,
+				B2F94C180FF52AE700998793 /* samplerank */,
 			);
 		};
 /* End PBXProject section */
@@ -304,6 +468,66 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B27348100FE559030059868D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B27348110FE559030059868D /* AnnealingSchedule.cpp in Sources */,
+				B27348120FE559030059868D /* Decoder.cpp in Sources */,
+				B27348130FE559030059868D /* Derivation.cpp in Sources */,
+				B27348140FE559030059868D /* FeatureFunction.cpp in Sources */,
+				B27348150FE559030059868D /* GainFunction.cpp in Sources */,
+				B27348160FE559030059868D /* Gibbler.cpp in Sources */,
+				B27348180FE559030059868D /* GibblerExpectedLossTraining.cpp in Sources */,
+				B27348190FE559030059868D /* GibblerMaxDerivDecoder.cpp in Sources */,
+				B273481A0FE559030059868D /* GibblerMaxTransDecoder.cpp in Sources */,
+				B273481B0FE559030059868D /* GibbsOperator.cpp in Sources */,
+				B273481C0FE559030059868D /* InputSource.cpp in Sources */,
+				B273481E0FE559030059868D /* Model1.cpp in Sources */,
+				B273481F0FE559030059868D /* Optimizer.cpp in Sources */,
+				B27348200FE559030059868D /* QuenchingSchedule.cpp in Sources */,
+				B27348210FE559030059868D /* SearchRandom.cpp in Sources */,
+				B27348220FE559030059868D /* SentenceBleu.cpp in Sources */,
+				B27348230FE559030059868D /* TrainingSource.cpp in Sources */,
+				B27348240FE559030059868D /* TranslationDelta.cpp in Sources */,
+				B27348250FE559030059868D /* MpiDebug.cpp in Sources */,
+				B27348260FE559030059868D /* Pos.cpp in Sources */,
+				B27348270FE559030059868D /* Dependency.cpp in Sources */,
+				B27348280FE559030059868D /* SourceToTargetRatio.cpp in Sources */,
+				B27348290FE559030059868D /* CorpusSampler.cpp in Sources */,
+				B27348330FE5597A0059868D /* CorpusTrainer.cpp in Sources */,
+				B2386CC30FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2F94C1B0FF52AE700998793 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2CAFFCA1004F4CF00BADAF6 /* SampleRank.cpp in Sources */,
+				B2F94C1C0FF52AE700998793 /* AnnealingSchedule.cpp in Sources */,
+				B2F94C1D0FF52AE700998793 /* Decoder.cpp in Sources */,
+				B2F94C1E0FF52AE700998793 /* Derivation.cpp in Sources */,
+				B2F94C1F0FF52AE700998793 /* FeatureFunction.cpp in Sources */,
+				B2F94C200FF52AE700998793 /* GainFunction.cpp in Sources */,
+				B2F94C210FF52AE700998793 /* Gibbler.cpp in Sources */,
+				B2F94C240FF52AE700998793 /* GibblerMaxDerivDecoder.cpp in Sources */,
+				B2F94C250FF52AE700998793 /* GibblerMaxTransDecoder.cpp in Sources */,
+				B2F94C260FF52AE700998793 /* GibbsOperator.cpp in Sources */,
+				B2F94C270FF52AE700998793 /* InputSource.cpp in Sources */,
+				B2F94C290FF52AE700998793 /* Model1.cpp in Sources */,
+				B2F94C2C0FF52AE700998793 /* SearchRandom.cpp in Sources */,
+				B2F94C2D0FF52AE700998793 /* SentenceBleu.cpp in Sources */,
+				B2F94C2F0FF52AE700998793 /* TranslationDelta.cpp in Sources */,
+				B2F94C300FF52AE700998793 /* MpiDebug.cpp in Sources */,
+				B2F94C310FF52AE700998793 /* Pos.cpp in Sources */,
+				B2F94C320FF52AE700998793 /* Dependency.cpp in Sources */,
+				B2F94C330FF52AE700998793 /* SourceToTargetRatio.cpp in Sources */,
+				B2F94C610FF5393800998793 /* OnlineLearner.cpp in Sources */,
+				B2E1C311100655D600039083 /* OnlineLearnerTrainer.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -311,6 +535,16 @@
 			isa = PBXTargetDependency;
 			name = moses;
 			targetProxy = B25B2A8B0F8CD86900485047 /* PBXContainerItemProxy */;
+		};
+		B273480E0FE559030059868D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = moses;
+			targetProxy = B273480F0FE559030059868D /* PBXContainerItemProxy */;
+		};
+		B2F94C190FF52AE700998793 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = moses;
+			targetProxy = B2F94C1A0FF52AE700998793 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -419,6 +653,162 @@
 			};
 			name = Deployment;
 		};
+		B273482E0FE559030059868D /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_IRST,
+					LM_SRI,
+				);
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/include/boost-1_37",
+					../moses/src,
+				);
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"../irstlm/lib/i386-apple-darwin9.0",
+					../srilm/lib/macosx,
+					../moses/build/Development,
+					/usr/local/lib,
+					"\\\"$(SRCROOT)/../moses/build/Development\\\"",
+				);
+				OTHER_LDFLAGS = (
+					"-lboost_program_options-xgcc40-mt",
+					"-lboost_serialization-xgcc40-mt",
+					"-lmoses",
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+				);
+				PRODUCT_NAME = corpustrainer;
+				VALID_ARCHS = i386;
+				ZERO_LINK = YES;
+			};
+			name = Development;
+		};
+		B273482F0FE559030059868D /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_32_BIT)";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_SRI,
+					LM_IRST,
+				);
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/include/boost-1_37",
+					../moses/src,
+				);
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					../moses/build/Deployment,
+					"../irstlm/lib/i386-apple-darwin9.0",
+					../srilm/lib/macosx,
+					"\\\"$(SRCROOT)/../moses/build/Development\\\"",
+				);
+				OTHER_LDFLAGS = (
+					"-lboost_program_options-xgcc40-mt",
+					"-lboost_serialization-xgcc40-mt",
+					"-lmoses",
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+				);
+				PRODUCT_NAME = josiah;
+				VALID_ARCHS = i386;
+			};
+			name = Deployment;
+		};
+		B2F94C380FF52AE700998793 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_IRST,
+					LM_SRI,
+				);
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/include/boost-1_37",
+					../moses/src,
+				);
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"../irstlm/lib/i386-apple-darwin9.0",
+					../srilm/lib/macosx,
+					../moses/build/Development,
+					/usr/local/lib,
+					"\\\"$(SRCROOT)/../moses/build/Development\\\"",
+				);
+				OTHER_LDFLAGS = (
+					"-lboost_program_options-xgcc40-mt",
+					"-lboost_serialization-xgcc40-mt",
+					"-lmoses",
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+				);
+				PRODUCT_NAME = samplerank;
+				VALID_ARCHS = i386;
+				ZERO_LINK = YES;
+			};
+			name = Development;
+		};
+		B2F94C390FF52AE700998793 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_32_BIT)";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_SRI,
+					LM_IRST,
+				);
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/include/boost-1_37",
+					../moses/src,
+				);
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					../moses/build/Deployment,
+					"../irstlm/lib/i386-apple-darwin9.0",
+					../srilm/lib/macosx,
+					"\\\"$(SRCROOT)/../moses/build/Development\\\"",
+				);
+				OTHER_LDFLAGS = (
+					"-lboost_program_options-xgcc40-mt",
+					"-lboost_serialization-xgcc40-mt",
+					"-lmoses",
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+				);
+				PRODUCT_NAME = josiah;
+				VALID_ARCHS = i386;
+			};
+			name = Deployment;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -436,6 +826,24 @@
 			buildConfigurations = (
 				1DEB923608733DC60010E9CD /* Development */,
 				1DEB923708733DC60010E9CD /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Deployment;
+		};
+		B273482D0FE559030059868D /* Build configuration list for PBXNativeTarget "corpustrainer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B273482E0FE559030059868D /* Development */,
+				B273482F0FE559030059868D /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Deployment;
+		};
+		B2F94C370FF52AE700998793 /* Build configuration list for PBXNativeTarget "samplerank" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2F94C380FF52AE700998793 /* Development */,
+				B2F94C390FF52AE700998793 /* Deployment */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Deployment;

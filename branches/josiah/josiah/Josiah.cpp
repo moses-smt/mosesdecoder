@@ -262,6 +262,7 @@ int main(int argc, char** argv) {
   bool optimize_quench_temp;
   int weight_dump_freq;
   string weight_dump_stem;
+  bool sampleRank;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -533,6 +534,7 @@ int main(int argc, char** argv) {
   while (input->HasMore()) {
     string line;
     input->GetSentence(&line, &lineno);
+    cerr << "line : " << line << endl;
     if (line.empty()) {
       if (!input->HasMore()) continue;
       assert(!"I don't like empty lines");

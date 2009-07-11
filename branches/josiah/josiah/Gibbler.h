@@ -7,6 +7,7 @@
 #include "GibbsOperator.h"
 #include "ScoreComponentCollection.h"
 
+
 namespace Moses {
 class Hypothesis;
 class TranslationOptionCollection;
@@ -21,7 +22,7 @@ class AnnealingSchedule;
 class GibbsOperator;
 class FeatureFunction;
 class Sampler;
-
+class OnlineLearner;
 
   
 class Sample {
@@ -166,13 +167,14 @@ class Sampler {
    const AnnealingSchedule* m_as;
    float m_quenchTemp;
    StopStrategy* m_stopper;
+   OnlineLearner* m_onlineLearner;
  public:
   Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0) {}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
     const std::vector<Word>& source, const feature_vector& extra_fv) ;
   void RunCollectAll(Hypothesis* starting, const TranslationOptionCollection* options, 
            const std::vector<Word>& source, const feature_vector& extra_fv) ;
-  void AddOperator(GibbsOperator* o) {m_operators.push_back(o);}
+  void AddOperator(GibbsOperator* o);
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
   void SetAnnealingSchedule(const AnnealingSchedule* as) {m_as = as;}
   void SetQuenchingTemperature(float temp) {cerr << "Setting quench temp to " << temp << endl; m_quenchTemp = temp;}
@@ -180,6 +182,8 @@ class Sampler {
   void SetStopper(StopStrategy* stopper) {m_stopper = stopper;}
   void SetReheatings(size_t r) {m_reheatings = r;}
   void SetBurnIn(size_t burnin_its) {m_burninIts = burnin_its;}
+  void AddOnlineLearner(OnlineLearner* learner) {m_onlineLearner = learner;}
+  OnlineLearner* GetOnlineLearner()  {return m_onlineLearner;}
 };
 
 

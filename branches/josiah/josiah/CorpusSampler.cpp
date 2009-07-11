@@ -31,13 +31,22 @@ void CorpusSamplerCollector::resample(int sent) {
     scores.push_back(it->second);
   }
   
+  //Printing out distribution
+
+  IFVERBOSE(2) {
+    for (size_t i = 0; i < derivations.size();++i) {
+      cerr << *derivations[i] << " has score " << scores[i] <<endl;
+    }  
+  }
+  
+  
   double sum = scores[0];
   for (size_t i = 1; i < scores.size(); ++i) {
     sum = log_sum(sum,scores[i]);
   }
   
   transform(scores.begin(),scores.end(),scores.begin(),bind2nd(minus<double>(),sum));
-  MPI_VERBOSE(2,"Starting resampling " << endl)
+  
   
   //now sample from this
   for (int j = 0; j < m_samples; ++j) {
@@ -80,10 +89,16 @@ void CorpusSamplerCollector::resample(int sent) {
     delete stats;
   }    
   
-  setRegularisation(m_resampled_p);
-  setRegularisationGradientFactor(m_resampled_p);
+  IFVERBOSE(2) {
+  cerr << "After resampling, distribution is : " << endl;
+  for (map<const Derivation*,double>::iterator it = m_resampled_p.begin(); it != m_resampled_p.end(); ++it) {
+    cerr << *(it->first) << "has score " << it->second << endl;
+  }
+  }
   
-  MPI_VERBOSE(2,"Finished resampling " << endl)
+  setRegularisation(m_p);
+  setRegularisationGradientFactor(m_p);
+  
   //Now reset the derivation collector
   m_derivationCollector.reset();
   m_numSents++;

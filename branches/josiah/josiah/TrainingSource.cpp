@@ -215,7 +215,7 @@ void ExpectedBleuTrainer::IncorporateGradient(
   }
 }
 
-  void ExpectedBleuTrainer::IncorporateCorpusGradient(
+void ExpectedBleuTrainer::IncorporateCorpusGradient(
                                                 const float trans_len,
                                                 const float ref_len,      
                                                 const float exp_gain,
@@ -272,5 +272,6 @@ void ExpectedBleuTrainer::IncorporateGradient(
       
     }
   }  
+  
 }
 

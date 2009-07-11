@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
 #include "FeatureFunction.h"
+#include "GainFunction.h"
 
 #ifdef LM_CACHE
 namespace __gnu_cxx {
@@ -83,7 +84,7 @@ class LanguageModelCache {
 class TranslationDelta {
   public:
     static long lmcalls;
-    TranslationDelta(Sample& sample): m_score(-1e6), m_sample(sample) {
+    TranslationDelta(Sample& sample, const GainFunction* gf): m_score(-1e6), m_gain(-1.0), m_sample(sample), m_gf(gf) {
       
     }
   
@@ -91,6 +92,10 @@ class TranslationDelta {
     Get the absolute score of this delta
     **/
   double getScore() { return m_score;}
+  /**
+   Get the absolute score of this delta
+   **/
+  double getGain() { return m_gain;}
   /** 
     * Apply to the sample
     **/
@@ -99,6 +104,7 @@ class TranslationDelta {
     const ScoreComponentCollection& getScores() const {return m_scores;}
     Sample& getSample() const {return m_sample;}
     virtual ~TranslationDelta() {}
+    void updateWeightedScore();
     
   protected:
   
@@ -132,15 +138,16 @@ class TranslationDelta {
                               const Josiah::TargetGap& rightGap);
                               
   
-  void updateWeightedScore();
     ScoreComponentCollection m_scores;
     double m_score;
+    double m_gain;
     
   private:
 #ifdef LM_CACHE
     static std::map<LanguageModel*,LanguageModelCache> m_cache;
 #endif
     Sample& m_sample;
+    const GainFunction* m_gf;
 };
  
 /**
@@ -148,7 +155,7 @@ class TranslationDelta {
   **/
 class TranslationUpdateDelta : public virtual TranslationDelta {
   public:
-     TranslationUpdateDelta(Sample& sample, const TranslationOption* option , const Josiah::TargetGap& gap);
+     TranslationUpdateDelta(Sample& sample, const TranslationOption* option , const Josiah::TargetGap& gap, const GainFunction* gf);
      virtual void apply(const TranslationDelta& noChangeDelta);
      
   private:
@@ -165,7 +172,7 @@ class MergeDelta : public virtual TranslationDelta {
      * option - the source/target phrase to go into the merged segment
      * targetSegment - the location of the target segment
      **/
-    MergeDelta(Sample& sample, const TranslationOption* option, const Josiah::TargetGap& gap);
+    MergeDelta(Sample& sample, const TranslationOption* option, const Josiah::TargetGap& gap, const GainFunction* gf);
     virtual void apply(const TranslationDelta& noChangeDelta);
   
   private:
@@ -181,7 +188,7 @@ class PairedTranslationUpdateDelta : public virtual TranslationDelta {
     /** Options and gaps in target order */
     PairedTranslationUpdateDelta(Sample& sample,
         const TranslationOption* leftOption, const TranslationOption* rightOption, 
-        const Josiah::TargetGap& leftGap, const Josiah::TargetGap& rightGap);
+        const Josiah::TargetGap& leftGap, const Josiah::TargetGap& rightGap, const GainFunction* gf);
     
     virtual void apply(const TranslationDelta& noChangeDelta);
     
@@ -197,7 +204,7 @@ class SplitDelta : public virtual TranslationDelta {
   public:
     /** Options and gaps in target order */
     SplitDelta(Sample& sample, const TranslationOption* leftOption, const TranslationOption* rightOption, 
-    const Josiah::TargetGap& gap);
+    const Josiah::TargetGap& gap, const GainFunction* gf);
     virtual void apply(const TranslationDelta& noChangeDelta);
     
   private:
@@ -213,7 +220,7 @@ class FlipDelta : public virtual TranslationDelta {
   public: 
     /**  Options and gaps in target order */
     FlipDelta(Sample& sample, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-              const Josiah::TargetGap& leftGap, const Josiah::TargetGap& rightGap, float distortion);
+              const Josiah::TargetGap& leftGap, const Josiah::TargetGap& rightGap, float distortion, const GainFunction* gf);
     
     virtual void apply(const TranslationDelta& noChangeDelta);
     
