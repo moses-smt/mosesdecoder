@@ -16,18 +16,20 @@ namespace Josiah {
       //void setAveraging(bool averaging) { m_averaging = averaging; }
       const ScoreComponentCollection& GetCurrWeights() { return m_currWeights; }
       ScoreComponentCollection GetAveragedWeights() ;
+      virtual ~OnlineLearner() {}
     protected:
-      std::string m_name;
-      size_t m_iteration;
       //bool m_averaging;
       ScoreComponentCollection m_currWeights;
       ScoreComponentCollection m_cumulWeights;
+      std::string m_name;
+      size_t m_iteration;
   };
 
   class PerceptronLearner : public OnlineLearner {
     public :
     PerceptronLearner(const ScoreComponentCollection& initWeights, const std::string& name, float learning_rate = 1.0) : OnlineLearner(initWeights, name), m_learning_rate(learning_rate) {}
     virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target);
+    virtual ~PerceptronLearner() {}
     private:
       float m_learning_rate;
   };
@@ -36,6 +38,7 @@ namespace Josiah {
     public :
     MiraLearner(const ScoreComponentCollection& initWeights, const std::string& name, float learning_rate = 1.0) : OnlineLearner(initWeights, name), m_learning_rate(learning_rate) {}
     virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target);
+    virtual ~MiraLearner() {}
     private:
       float m_learning_rate;
       std::vector<float> hildreth ( const std::vector<ScoreComponentCollection>& a, const std::vector<float>& b );
