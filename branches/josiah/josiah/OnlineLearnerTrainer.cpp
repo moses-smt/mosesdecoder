@@ -66,7 +66,6 @@ namespace Josiah {
         for (unsigned int i = 0; i < order.size(); ++i, ++tlc)
           order[i] = tlc % corpus.size();
       }
-      batch_ctr++;
     } 
 #ifdef MPI_ENABLED
     if (MPI_SUCCESS != MPI_Bcast(&order[0], order.size(), MPI_INT, 0, MPI_COMM_WORLD))
@@ -89,7 +88,10 @@ namespace Josiah {
         cerr << "Failed to dump weights" << endl;
       }
     }
-    
+   
+    if (rank == 0) {
+      batch_ctr++;
+    } 
   }
   
   bool OnlineLearnerTrainer::HasMore() const {
