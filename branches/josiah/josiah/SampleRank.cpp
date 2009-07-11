@@ -218,13 +218,10 @@ int main(int argc, char** argv) {
   
   bool do_timing;
   bool show_features;
-  int max_training_iterations;
   uint32_t seed;
   int lineno;
   bool randomize;
   float scalefactor;
-  vector<float> eta;
-  float mu;
   string weightfile;
   vector<string> ref_files;
   bool decode_monotone;
@@ -246,8 +243,6 @@ int main(int argc, char** argv) {
   bool perceptron, mira;
   float perceptron_lr;
   int epochs;
-  bool expected_sbleu = false;
-  bool expected_sbleu_gradient;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -293,9 +288,7 @@ int main(int argc, char** argv) {
   ("perceptron", po::value(&perceptron)->zero_tokens()->default_value(false), "Use perceptron learner")
   ("mira", po::value(&mira)->zero_tokens()->default_value(false), "Use mira learner")
   ("perc-lr", po::value<float>(&perceptron_lr)->default_value(1.0f), "Perceptron learning rate")
-  ("epochs", po::value<int>(&epochs)->default_value(1), "Number of training epochs")
-  ("xbleu,x", po::value(&expected_sbleu)->zero_tokens()->default_value(false), "Compute the expected sentence BLEU")
-  ("gradient,g", po::value(&expected_sbleu_gradient)->zero_tokens()->default_value(false), "Compute the gradient with respect to expected sentence BLEU");
+  ("epochs", po::value<int>(&epochs)->default_value(1), "Number of training epochs");
   
   
   po::options_description cmdline_options;
