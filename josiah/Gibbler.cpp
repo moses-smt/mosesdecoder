@@ -393,6 +393,11 @@ void Sample::DeleteFromCache(Hypothesis *hyp) {
     cachedSampledHyps.erase(it);
   }
 }
+
+void Sampler::AddOperator(GibbsOperator* o) {
+  o->SetSampler(this); 
+  m_operators.push_back(o); 
+}
   
 void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options, const std::vector<Word>& source, const Josiah::feature_vector& extra_fv) {
   Sample sample(starting,source,extra_fv);
@@ -407,6 +412,7 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
         VERBOSE(2,"Sampling with operator " << m_operators[j]->name() << endl);
         if (m_as)
           m_operators[j]->SetAnnealingTemperature(m_as->GetTemperatureAtTime(i));
+        m_operators[j]->disableGainFunction(); // do not compute gains during burn-in
         m_operators[j]->doIteration(sample,*options);
       }
     }
@@ -416,6 +422,9 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
         m_operators[j]->Quench();
     }
   
+    for (size_t j = 0; j < m_operators.size(); ++j)
+      m_operators[j]->enableGainFunction();
+    
     size_t i = 0;
     while(true) {
       if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true; }

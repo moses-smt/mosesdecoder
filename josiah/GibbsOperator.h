@@ -43,6 +43,8 @@ namespace Josiah {
 
   class Sample;
   class TranslationDelta;
+  class GainFunction;
+  class Sampler;
   
   typedef boost::mt19937 base_generator_type;
   
@@ -86,7 +88,7 @@ namespace Josiah {
   /** Abstract base class for gibbs operators **/
   class GibbsOperator {
     public:
-      GibbsOperator(const string& name) : m_name(name), T(1) {}
+      GibbsOperator(const string& name) : m_name(name), T(1), m_gf(NULL) {}
         /**
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
           **/
@@ -96,7 +98,20 @@ namespace Josiah {
        
 				void SetAnnealingTemperature(const double t) { T = t; }
 				void Quench() { T = 1.0; }
-        
+        void SetGainFunction(const GainFunction *gf) {m_gf = gf;}
+        const GainFunction* GetGainFunction() {return m_gf;}
+        int chooseTargetAssignment(const vector<TranslationDelta*>& deltas);
+        void SetSampler(Sampler* sampler) {m_sampler = sampler;}
+        Sampler* GetSampler()  {return m_sampler;}
+        void disableGainFunction() {
+          m_gf_bk = m_gf;
+          m_gf = NULL;
+        }
+        void enableGainFunction() {
+          m_gf = m_gf_bk;
+          m_gf_bk = NULL;
+        }
+    
      protected:
         /**
           * Randomly select and apply one of the translation deltas.
@@ -108,7 +123,10 @@ namespace Josiah {
         
     private:
       static RandomNumberGenerator m_random;
-      
+      const GainFunction* m_gf;
+      const GainFunction* m_gf_bk;
+    
+      Sampler* m_sampler;
   };
   
   /**
@@ -120,10 +138,6 @@ namespace Josiah {
         MergeSplitOperator() : GibbsOperator("merge-split") {}
         virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
         virtual ~MergeSplitOperator() {}
-    
-    private:
-        
-  
   };
   
   /**

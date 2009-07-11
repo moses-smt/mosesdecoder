@@ -48,6 +48,7 @@ void GetFeatureNames(std::vector<std::string>* featureNames);
 void GetFeatureWeights(std::vector<float>* weights);
 void SetFeatureWeights(const std::vector<float>& weights, bool compute_scale_gradient = false);
 void OutputWeights(std::ostream& out);
+void OutputWeights(const std::vector<float>& weights, std::ostream& out);
 //inline float GetCurrQuenchingTemp() { return quenching_temp;}
 //void SetQuenchingTemp(const std::vector<float>& weights);
 

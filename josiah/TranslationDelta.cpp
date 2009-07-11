@@ -70,6 +70,26 @@ void  TranslationDelta::addSingleOptionLanguageModelScore(const TranslationOptio
   const Phrase& targetPhrase = option->GetTargetPhrase();
   const LMList& languageModels = StaticData::Instance().GetAllLM();
   
+  if (m_gf) {
+    vector<const Factor*> newSentence;
+    size_t start = targetSegment.GetStartPos();
+    for (size_t i = 0; i < start; ++i) {
+      const Factor* factor =getSample().GetTargetWords()[i][0]; 
+      newSentence.push_back(factor);
+    }
+    //fill in the target phrase
+    for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
+      newSentence.push_back(targetPhrase.GetWord(i)[0]);
+    }
+    //fill in the end of the sentence
+    size_t end = targetSegment.GetEndPos() + 1;
+    for (size_t i = end; i < getSample().GetTargetWords().size(); ++i) {
+      newSentence.push_back(getSample().GetTargetWords()[i][0]);
+    }
+    m_gain = m_gf->ComputeGain(newSentence);
+    //cerr << "Gain " << m_gain << endl;
+  }
+  
   
   for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
     LanguageModel* lm = *i;
@@ -237,10 +257,9 @@ void TranslationDelta::initScoresDiscontiguousPairedUpdate(const Sample& s, cons
 
 
 }
-  
-
-TranslationUpdateDelta::TranslationUpdateDelta(Sample& sample, const TranslationOption* option ,const TargetGap& gap) :
-    TranslationDelta(sample),  m_option(option)  {
+ 
+TranslationUpdateDelta::TranslationUpdateDelta(Sample& sample, const TranslationOption* option ,const TargetGap& gap, const GainFunction* gf) :
+    TranslationDelta(sample, gf),  m_option(option) {
   initScoresSingleUpdate(sample, option,gap);
 }
 
@@ -251,8 +270,8 @@ void TranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
 }
 
 
-MergeDelta::MergeDelta(Sample& sample, const TranslationOption* option, const TargetGap& gap) :
-    TranslationDelta(sample),  m_option(option) {
+MergeDelta::MergeDelta(Sample& sample, const TranslationOption* option, const TargetGap& gap, const GainFunction* gf) :
+    TranslationDelta(sample, gf),  m_option(option) {
   initScoresSingleUpdate(sample, option,gap);
 }
 
@@ -264,7 +283,7 @@ void MergeDelta::apply(const TranslationDelta& noChangeDelta) {
 
 PairedTranslationUpdateDelta::PairedTranslationUpdateDelta(Sample& sample,
    const TranslationOption* leftOption, const TranslationOption* rightOption, 
-   const TargetGap& leftGap, const TargetGap& rightGap) : TranslationDelta(sample), m_leftOption(leftOption),
+   const TargetGap& leftGap, const TargetGap& rightGap, const GainFunction* gf) : TranslationDelta(sample, gf), m_leftOption(leftOption),
     m_rightOption(rightOption) {
    
   VERBOSE(2, "Left Target phrase: " << leftOption->GetTargetPhrase() << endl);
@@ -303,8 +322,8 @@ void PairedTranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) 
 }
 
 SplitDelta::SplitDelta(Sample& sample, const TranslationOption* leftOption, 
-                       const TranslationOption* rightOption, const TargetGap& gap) : TranslationDelta(sample),
-    m_leftOption(leftOption), m_rightOption(rightOption) {
+                       const TranslationOption* rightOption, const TargetGap& gap, const GainFunction* gf) : TranslationDelta(sample, gf),
+    m_leftOption(leftOption), m_rightOption(rightOption){
   
   
   VERBOSE(2, "Target phrase: " << leftOption->GetTargetPhrase() << " " << rightOption->GetTargetPhrase() << endl);
@@ -328,9 +347,9 @@ void FlipDelta::apply(const TranslationDelta& noChangeDelta) {
 
 FlipDelta::FlipDelta(Sample& sample, 
       const TranslationOption* leftTgtOption ,const TranslationOption* rightTgtOption,
-      const TargetGap& leftGap, const TargetGap& rightGap, float totalDistortion) :
+      const TargetGap& leftGap, const TargetGap& rightGap, float totalDistortion, const GainFunction* gf) :
  //     const Hypothesis* prevTgtHypo, const Hypothesis* nextTgtHypo, const WordsRange& leftTargetSegment, const WordsRange& rightTargetSegment, float totalDistortion ) :
-  TranslationDelta(sample),
+  TranslationDelta(sample, gf),
   m_leftTgtOption(leftTgtOption), m_rightTgtOption(rightTgtOption), 
       m_prevTgtHypo(const_cast<Hypothesis*> (leftGap.leftHypo)), m_nextTgtHypo(const_cast<Hypothesis*> (rightGap.rightHypo))
         {
@@ -378,7 +397,27 @@ void  TranslationDelta::addContiguousPairedOptionLMScore(const TranslationOption
   size_t leftEndPos(leftOption->GetTargetPhrase().GetSize()); 
   size_t rightStartPos(leftEndPos);
   size_t rightEndPos(targetPhrase.GetSize());
-    
+  
+  if (m_gf) {
+    vector<const Factor*> newSentence;
+    size_t start = targetSegment.GetStartPos();
+    for (size_t i = 0; i < start; ++i) {
+      newSentence.push_back(getSample().GetTargetWords()[i][0]);
+    }
+    //fill in the target phrase
+    for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
+      newSentence.push_back(targetPhrase.GetWord(i)[0]);
+    }
+    //fill in the end of the sentence
+    size_t end = targetSegment.GetEndPos() + 1;
+    for (size_t i = end; i < getSample().GetTargetWords().size(); ++i) {
+      newSentence.push_back(getSample().GetTargetWords()[i][0]);
+    }
+    m_gain = m_gf->ComputeGain(newSentence);
+    //cerr << "Gain " << m_gain << endl;
+  }
+  
+  
   //LM
   const LMList& languageModels = StaticData::Instance().GetAllLM();
     
@@ -494,7 +533,33 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
  
   VERBOSE(2, "Sample : " << Josiah::Derivation(m_sample) << endl);
   VERBOSE(2, *leftSegment << " " << *rightSegment << endl); 
-
+  
+  if (m_gf) {
+    vector<const Factor*> newSentence;
+    size_t start = leftSegment->GetStartPos();
+    for (size_t i = 0; i < start; ++i) {
+      newSentence.push_back(getSample().GetTargetWords()[i][0]);
+    }
+    //fill in the left target phrase
+    for (size_t i = 0; i < leftTgtPhrase.GetSize(); ++i) {
+      newSentence.push_back(leftTgtPhrase.GetWord(i)[0]);
+    }
+    for (size_t i = leftSegment->GetEndPos()+ 1 ; i < rightSegment->GetStartPos(); ++i) {
+      newSentence.push_back(getSample().GetTargetWords()[i][0]);
+    }
+    //fill in the right target phrase
+    for (size_t i = 0; i < rightTgtPhrase.GetSize(); ++i) {
+      newSentence.push_back(rightTgtPhrase.GetWord(i)[0]);
+    }
+    //fill in the end of the sentence
+    size_t end = rightSegment->GetEndPos() + 1;
+    for (size_t i = end; i < getSample().GetTargetWords().size(); ++i) {
+      newSentence.push_back(getSample().GetTargetWords()[i][0]);
+    }
+    m_gain = m_gf->ComputeGain(newSentence); 
+        //cerr << "Gain " << m_gain << endl;
+  }
+  
   for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
     LanguageModel* lm = *i;
     

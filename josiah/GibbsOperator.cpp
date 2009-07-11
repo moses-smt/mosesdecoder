@@ -18,6 +18,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include "GibbsOperator.h"
+#include "OnlineLearner.h"
 
 using namespace std;
 using namespace Moses;
@@ -53,13 +54,27 @@ static float ComputeDistortionDistance(const WordsRange& prev, const WordsRange&
   return - (float) abs(dist);
 }
 
-
+int GibbsOperator::chooseTargetAssignment(const vector<TranslationDelta*>& deltas) {
+  //Only do best neighbour for the moment
+  float bestGain = -1;
+  int bestGainIndex = -1;
+  for (vector<TranslationDelta*>::const_iterator i = deltas.begin(); i != deltas.end(); ++i) {
+    if ((*i)->getGain() > bestGain) {
+      bestGain = (*i)->getGain();
+      bestGainIndex = i - deltas.begin();
+    }
+  }
+  
+  return bestGainIndex;
+}  
 
 void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta) {
   if (deltas.empty()) return;
+  
   //get the scores
   vector<double> scores;
   for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
+    //cerr << "Score " <<  (**i).getScore() << " FV : " << (**i).getScores() << endl;
     scores.push_back((**i).getScore());
   }
   
@@ -95,11 +110,39 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
    
   size_t chosen =  position-1;
   VERBOSE(3,"The chosen sample is " << chosen << endl);
+  
+  bool error = false;
+  if (m_gf) {
+    float chosenScore = deltas[chosen]->getScore();
+    float noChangeScore = noChangeDelta->getScore();
+    float chosenGain = deltas[chosen]->getGain();
+    float noChangeGain = noChangeDelta->getGain();
     
-    //apply it to the sample
+    if (chosenScore > noChangeScore && chosenGain < noChangeGain  ||
+        chosenScore < noChangeScore && chosenGain > noChangeGain ) {
+      error = true;
+      //cerr << "There is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl;
+//      cerr << "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl;
+    }
+    else {
+      //cerr << "There is no error because chosen sol has model score" <<  chosenScore << " and gain " << chosenGain << endl;
+//      cerr << "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl;
+    }
+      
+    int target;
+    if (error) {
+      target = chooseTargetAssignment(deltas);
+      //cerr << "Best neighbour has gain " << deltas[target]->getGain() << endl;
+      GetSampler()->GetOnlineLearner()->doUpdate(noChangeDelta, deltas[target]);//deltas[target], noChangeDelta
+    }
+  }    
+  
+  //apply it to the sample
   if (deltas[chosen] != noChangeDelta) {
     deltas[chosen]->apply(*noChangeDelta);
   }
+  
+  
 }
 
 void MergeSplitOperator::doIteration(
@@ -137,7 +180,7 @@ void MergeSplitOperator::doIteration(
               rightSourceSegment << " and target segments " << leftTargetSegment << " with " << rightTargetSegment  << endl);
         const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
         for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-          TranslationDelta* delta = new MergeDelta(sample,*i,gap);
+          TranslationDelta* delta = new MergeDelta(sample,*i,gap, GetGainFunction());
           deltas.push_back(delta);
         }
       }
@@ -154,7 +197,7 @@ void MergeSplitOperator::doIteration(
         rightGap.reset(new TargetGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), 
               hypothesis->GetCurrTargetWordsRange()));
         noChangeDelta = new   PairedTranslationUpdateDelta(sample,&(prev->GetTranslationOption())
-          ,&(hypothesis->GetTranslationOption()),*leftGap, *rightGap);
+          ,&(hypothesis->GetTranslationOption()),*leftGap, *rightGap, GetGainFunction());
         
       } else {
         //target in opposite order to source
@@ -164,7 +207,7 @@ void MergeSplitOperator::doIteration(
               hypothesis->GetCurrTargetWordsRange()));
         rightGap.reset(new TargetGap(prev->GetPrevHypo(), prev->GetNextHypo(), prev->GetCurrTargetWordsRange()));
         noChangeDelta = new   PairedTranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption())
-          ,&(prev->GetTranslationOption()),*leftGap, *rightGap);
+          ,&(prev->GetTranslationOption()),*leftGap, *rightGap, GetGainFunction());
       }
       
 
@@ -172,7 +215,7 @@ void MergeSplitOperator::doIteration(
       
       for (TranslationOptionList::const_iterator ri = rightOptions->begin(); ri != rightOptions->end(); ++ri) {
         for (TranslationOptionList::const_iterator li = leftOptions->begin(); li != leftOptions->end(); ++li) {
-          TranslationDelta* delta = new PairedTranslationUpdateDelta(sample,*li, *ri, *leftGap, *rightGap);
+          TranslationDelta* delta = new PairedTranslationUpdateDelta(sample,*li, *ri, *leftGap, *rightGap, GetGainFunction());
           deltas.push_back(delta);
         }
       }
@@ -181,14 +224,14 @@ void MergeSplitOperator::doIteration(
       VERBOSE(3, "No existing split" << endl);
       WordsRange sourceSegment = hypothesis->GetCurrSourceWordsRange();
       TargetGap gap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), hypothesis->GetCurrTargetWordsRange());
-      noChangeDelta = new TranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption()),gap);
+      noChangeDelta = new TranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption()),gap, GetGainFunction());
       //Add TranslationUpdateDeltas
       const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
       //cerr << "Got " << options.size() << " options for " << sourceSegment << endl;
       VERBOSE(3, "Creating simple deltas for source segment " << sourceSegment << " and target segment " <<gap.segment
             << endl);
       for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,gap);
+        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,gap, GetGainFunction());
         deltas.push_back(delta);
       }
       //cerr << "Added " << ds << " deltas" << endl;
@@ -203,7 +246,7 @@ void MergeSplitOperator::doIteration(
       const TranslationOptionList&  rightOptions = toc.GetTranslationOptionList(rightSourceSegment);
       for (TranslationOptionList::const_iterator ri = rightOptions.begin(); ri != rightOptions.end(); ++ri) {
         for (TranslationOptionList::const_iterator li = leftOptions.begin(); li != leftOptions.end(); ++li) {
-          TranslationDelta* delta = new SplitDelta(sample, *li, *ri, gap);
+          TranslationDelta* delta = new SplitDelta(sample, *li, *ri, gap, GetGainFunction());
           deltas.push_back(delta);
         }
       }
@@ -236,14 +279,14 @@ void TranslationSwapOperator::doIteration(
     
     vector<TranslationDelta*> deltas;
     const TranslationOption* noChangeOption = &(currHypo->GetTranslationOption());
-    TranslationDelta* noChangeDelta = new TranslationUpdateDelta(sample,noChangeOption,gap);
+    TranslationDelta* noChangeDelta = new TranslationUpdateDelta(sample,noChangeOption,gap, GetGainFunction());
     deltas.push_back(noChangeDelta);
     
     
     const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
     for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
       if (*i != noChangeOption) {
-        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,gap);
+        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,gap, GetGainFunction());
         deltas.push_back(delta);  
       }
     }
@@ -390,15 +433,16 @@ void FlipOperator::doIteration(
           TargetGap rightGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
           TranslationDelta* delta = new FlipDelta(sample, &(followingHyp->GetTranslationOption()), 
                                                   &(hypothesis->GetTranslationOption()), 
-                                                  leftGap, rightGap, totalDistortion);
+                                                  leftGap, rightGap, totalDistortion, GetGainFunction());
           deltas.push_back(delta);
           
           CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
           
           noChangeDelta = new   FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
                                         &(followingHyp->GetTranslationOption()), leftGap, rightGap,
-                                          totalDistortion); 
+                                          totalDistortion, GetGainFunction()); 
           deltas.push_back(noChangeDelta);   
+          
         }  
       }
       else {
@@ -423,13 +467,13 @@ void FlipOperator::doIteration(
           
           TranslationDelta* delta = new FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
                                                   &(followingHyp->GetTranslationOption()),  leftGap, rightGap,
-                                                   totalDistortion);
+                                                   totalDistortion, GetGainFunction());
           deltas.push_back(delta);
           
           
           CheckValidReordering(followingHyp,hypothesis, followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
           noChangeDelta = new FlipDelta(sample,&(followingHyp->GetTranslationOption()), 
-                                      &(hypothesis->GetTranslationOption()), leftGap, rightGap, totalDistortion);
+                                      &(hypothesis->GetTranslationOption()), leftGap, rightGap, totalDistortion, GetGainFunction());
           deltas.push_back(noChangeDelta); 
         }  
       }
@@ -480,12 +524,12 @@ void FlipOperator::doIteration(
           TargetGap rightGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
           TranslationDelta* delta = new FlipDelta(sample, &(followingHyp->GetTranslationOption()), 
                                                   &(hypothesis->GetTranslationOption()),  leftGap, rightGap,
-                                                   totalDistortion);
+                                                   totalDistortion, GetGainFunction());
           deltas.push_back(delta);          
         
           CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
           noChangeDelta = new   FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                        &(followingHyp->GetTranslationOption()),leftGap, rightGap, totalDistortion); 
+                                        &(followingHyp->GetTranslationOption()),leftGap, rightGap, totalDistortion, GetGainFunction()); 
           deltas.push_back(noChangeDelta);   
         }  
       }
@@ -510,12 +554,12 @@ void FlipOperator::doIteration(
           TargetGap leftGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
           TranslationDelta* delta = new FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
                                                   &(followingHyp->GetTranslationOption()),   leftGap, rightGap,
-                                                   totalDistortion);
+                                                   totalDistortion, GetGainFunction());
           deltas.push_back(delta);
           
           CheckValidReordering(followingHyp,hypothesis, followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
           noChangeDelta = new FlipDelta(sample,&(followingHyp->GetTranslationOption()), 
-                                      &(hypothesis->GetTranslationOption()),  leftGap, rightGap, totalDistortion);
+                                      &(hypothesis->GetTranslationOption()),  leftGap, rightGap, totalDistortion, GetGainFunction());
           deltas.push_back(noChangeDelta); 
         }  
       }
