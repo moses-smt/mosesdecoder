@@ -31,11 +31,11 @@ class BleuSufficientStats : public SufficientStats {
       hyp.resize(n_); correct.resize(n_);
       
       for (; i < n_ ; ++i) {
-        hyp[i] = data[i];
+        hyp[i] = (int) data[i];
       }
       
       for (; i < 2*n_ ; ++i) {
-        correct[i-n_] = data[i];
+        correct[i-n_] = (int) data[i];
       }
       
       hyp_len = data[2*n_];

@@ -72,7 +72,7 @@ namespace Josiah {
   
   vector<float> MiraLearner::hildreth (const vector<ScoreComponentCollection>& a, const vector<float>& b) {
     
-    int i;
+    size_t i;
     int max_iter = 10000;
     float eps = 0.00000001;
     float zero = 0.000000000001;
@@ -83,7 +83,7 @@ namespace Josiah {
     
     float max_kkt = -1e100;
     
-    int K = b.size();
+    size_t K = b.size();
     
     float A[K][K];
     bool is_computed[K];

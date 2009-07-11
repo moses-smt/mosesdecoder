@@ -95,7 +95,7 @@ float SentenceBLEU::ComputeGain(const GainFunction& hyp) const {
   assert(hyp.GetType() == this->GetType());
   const NGramCountMap& hyp_ngrams = static_cast<const SentenceBLEU&>(hyp).GetNgrams();
 
-  return CalcScore(ngrams_, hyp_ngrams, static_cast<const SentenceBLEU&>(hyp).GetAverageReferenceLength());
+  return CalcScore(ngrams_, hyp_ngrams, (int) static_cast<const SentenceBLEU&>(hyp).GetAverageReferenceLength());
 }  
 
 
@@ -108,7 +108,7 @@ float SentenceBLEU::CalcBleu(const BleuSufficientStats & stats, bool smooth, boo
   
   float log_bleu = 0;
   int count = 0;
-  for (int i = 0; i < stats.correct.size() ; ++i) {
+  for (size_t i = 0; i < stats.correct.size() ; ++i) {
     if (true || stats.hyp[i] > 0) {
       float lprec = log(smoothing_constant + stats.correct[i]) - log(smoothing_constant + stats.hyp[i]);
       log_bleu += lprec;

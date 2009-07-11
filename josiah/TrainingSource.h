@@ -76,10 +76,10 @@ class ExpectedBleuTrainer : public InputSource {
   Optimizer* optimizer;
   float total_ref_len;
   float total_exp_len;
-  float total_scaling_gradient;
-  float total_scaling_hessianV;
   float total_exp_gain;
   float total_unreg_exp_gain;
+  float total_scaling_gradient;
+  float total_scaling_hessianV;
   
   int tlc;
   bool compute_scale_gradient;

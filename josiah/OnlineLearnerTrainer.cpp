@@ -31,15 +31,15 @@ namespace Josiah {
   batch_size(bsize),
   max_sents(maxSents),
   corpus(),
+  keep_going(true),
   order(batch_size),
   rng(rseed),
-  keep_going(true),
   dist(0, sents->size() - 1),
   draw(rng, dist),
   randomize_batches(randomize),
-  batch_ctr(0),
   weight_dump_freq(wt_dump_freq),
   weight_dump_stem(wt_dump_stem), 
+  batch_ctr(0),
   m_learner(learner){
     if (rank >= batch_size) keep_going = false;
     corpus.swap(*sents);
