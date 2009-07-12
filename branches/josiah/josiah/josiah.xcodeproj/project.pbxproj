@@ -201,7 +201,6 @@
 		B27348320FE5597A0059868D /* CorpusTrainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CorpusTrainer.cpp; sourceTree = "<group>"; };
 		B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MpiDebug.cpp; sourceTree = "<group>"; };
 		B2A748880F976BCD00A5DE76 /* MpiDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MpiDebug.h; sourceTree = "<group>"; };
-		B2CAFFC81004F42800BADAF6 /* SampleRank.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleRank.h; sourceTree = "<group>"; };
 		B2E1C30F100655D600039083 /* OnlineLearnerTrainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OnlineLearnerTrainer.h; sourceTree = "<group>"; };
 		B2E1C310100655D600039083 /* OnlineLearnerTrainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OnlineLearnerTrainer.cpp; sourceTree = "<group>"; };
 		B2F94C170FF52AB900998793 /* SampleRank.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SampleRank.cpp; sourceTree = "<group>"; };
@@ -241,7 +240,6 @@
 		08FB7794FE84155DC02AAC07 /* josiah */ = {
 			isa = PBXGroup;
 			children = (
-				B2CAFFC81004F42800BADAF6 /* SampleRank.h */,
 				B25B2AE40F8CDB6D00485047 /* libmoses.a */,
 				B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,

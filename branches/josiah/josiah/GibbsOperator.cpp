@@ -111,31 +111,8 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
   size_t chosen =  position-1;
   VERBOSE(3,"The chosen sample is " << chosen << endl);
   
-  bool error = false;
-  if (m_gf) {
-    float chosenScore = deltas[chosen]->getScore();
-    float noChangeScore = noChangeDelta->getScore();
-    float chosenGain = deltas[chosen]->getGain();
-    float noChangeGain = noChangeDelta->getGain();
-    
-    if (chosenScore > noChangeScore && chosenGain < noChangeGain  ||
-        chosenScore < noChangeScore && chosenGain > noChangeGain ) {
-      error = true;
-      VERBOSE(1, "There is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl);
-      VERBOSE(1, "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl);
-    }
-    else {
-      VERBOSE(1, "There is no error because chosen sol has model score" <<  chosenScore << " and gain " << chosenGain << endl);
-      VERBOSE(1, "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl);
-    }
-      
-    int target;
-    if (error) {
-      target = chooseTargetAssignment(deltas);
-      VERBOSE(1, "Best neighbour has gain " << deltas[target]->getGain() << endl);
-      GetSampler()->GetOnlineLearner()->doUpdate(noChangeDelta, deltas[target]);//deltas[target], noChangeDelta
-    }
-  }    
+  if (m_gf)
+    doOnlineLearning(deltas, noChangeDelta, chosen);
   
   //apply it to the sample
   if (deltas[chosen] != noChangeDelta) {
@@ -145,6 +122,33 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
   
 }
 
+void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen) {
+  bool error = false;
+  
+  float chosenScore = deltas[chosen]->getScore();
+  float noChangeScore = noChangeDelta->getScore();
+  float chosenGain = deltas[chosen]->getGain();
+  float noChangeGain = noChangeDelta->getGain();
+    
+  if (chosenScore > noChangeScore && chosenGain < noChangeGain  ||
+        chosenScore < noChangeScore && chosenGain > noChangeGain ) {
+    error = true;
+    VERBOSE(1, "There is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl);
+    VERBOSE(1, "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl);
+  }
+  else {
+    VERBOSE(1, "There is no error because chosen sol has model score" <<  chosenScore << " and gain " << chosenGain << endl);
+    VERBOSE(1, "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl);
+  }
+    
+  int target;
+  if (error) {
+    target = chooseTargetAssignment(deltas);
+    VERBOSE(1, "Best neighbour has gain " << deltas[target]->getGain() << endl);
+    GetSampler()->GetOnlineLearner()->doUpdate(noChangeDelta, deltas[target]);//deltas[target], noChangeDelta
+  }
+}
+  
 void MergeSplitOperator::doIteration(
     Sample& sample,
     const TranslationOptionCollection& toc) {
