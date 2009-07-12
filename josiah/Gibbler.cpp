@@ -404,6 +404,11 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
   
   bool f = false;
   for (size_t k = 0; k < m_reheatings; ++k) {
+    if (m_burninIts) {
+     for (size_t j = 0; j < m_operators.size(); ++j) {
+       m_operators[j]->disableGainFunction(); // do not compute gains during burn-in
+     } 
+    }
     for (size_t i = 0; i < m_burninIts; ++i) {
       if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true;}
       if ((i+1) % 400 == 0) { VERBOSE(1,endl); f=false;}
@@ -412,7 +417,6 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
         VERBOSE(2,"Sampling with operator " << m_operators[j]->name() << endl);
         if (m_as)
           m_operators[j]->SetAnnealingTemperature(m_as->GetTemperatureAtTime(i));
-        m_operators[j]->disableGainFunction(); // do not compute gains during burn-in
         m_operators[j]->doIteration(sample,*options);
       }
     }
@@ -445,8 +449,8 @@ void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* optio
       //copy(weights.begin(), weights.end(), ostream_iterator<float>(cerr," "));
       //cerr << endl;
       float importanceWeight  = importanceScores.InnerProduct(weights);
-      VERBOSE(1, "Importance scores: " << importanceScores << endl);
-      VERBOSE(1, "Total importance weight: " << importanceWeight << endl);
+      VERBOSE(2, "Importance scores: " << importanceScores << endl);
+      VERBOSE(2, "Total importance weight: " << importanceWeight << endl);
       
       sample.UpdateFeatureValues(importanceScores);
       for (size_t j = 0; j < m_collectors.size(); ++j) {
@@ -508,8 +512,8 @@ void Sampler::RunCollectAll(Hypothesis* starting, const TranslationOptionCollect
           //copy(weights.begin(), weights.end(), ostream_iterator<float>(cerr," "));
           //cerr << endl;
           float importanceWeight  = importanceScores.InnerProduct(weights);
-          VERBOSE(1, "Importance scores: " << importanceScores << endl);
-          VERBOSE(1, "Total importance weight: " << importanceWeight << endl);
+          VERBOSE(2, "Importance scores: " << importanceScores << endl);
+          VERBOSE(2, "Total importance weight: " << importanceWeight << endl);
           
           sample.UpdateFeatureValues(importanceScores);
           for (size_t j = 0; j < m_collectors.size(); ++j) {

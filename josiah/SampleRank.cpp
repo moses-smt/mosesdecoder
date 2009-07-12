@@ -390,6 +390,7 @@ int main(int argc, char** argv) {
   if (!outputfile.empty()) {
     ostringstream os;
     os << setfill('0');
+
     os << outputfile << '.' << setw(3) << rank << "_of_" << size;
     VERBOSE(1, "Writing output to: " << os.str() << endl);
     out = new ofstream(os.str().c_str());
@@ -409,12 +410,7 @@ int main(int argc, char** argv) {
   MergeSplitOperator mso;
   FlipOperator fo;
   TranslationSwapOperator tso;
-  if (sampleRank) {
-    mso.SetGainFunction(&g[lineno]);
-    tso.SetGainFunction(&g[lineno]);
-    fo.SetGainFunction(&g[lineno]);
-  }
-  
+    
   sampler.AddOperator(&mso);
   sampler.AddOperator(&tso);
   sampler.AddOperator(&fo);
@@ -489,6 +485,15 @@ int main(int argc, char** argv) {
     timer.check("Running sampler");
     
     TranslationDelta::lmcalls = 0;
+
+    if (sampleRank) {
+     mso.SetGainFunction(&g[lineno]);
+     tso.SetGainFunction(&g[lineno]);
+     fo.SetGainFunction(&g[lineno]);
+    }
+
+
+
     sampler.Run(hypothesis,toc,source,extra_features);
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");

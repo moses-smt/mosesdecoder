@@ -59,15 +59,17 @@ namespace Josiah {
     m_cumulWeights.PlusEquals(m_currWeights);
     m_iteration++;
     const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
-    
-    //if (doMira) {
-//      //Sanity check
-//      curr->updateWeightedScore();
-//      target->updateWeightedScore();
-//      
-//      cerr << "Target score - curr score " << target->getScore() - curr->getScore() << endl;
-//      cerr << "Target gain - curr gain " << target->getGain() - curr->getGain() << endl;
-//    }
+   
+    IFVERBOSE(1) { 
+    if (doMira) {
+      //Sanity check
+      curr->updateWeightedScore();
+      target->updateWeightedScore();
+      
+     cerr << "Target score - curr score " << target->getScore() - curr->getScore() << endl;
+      cerr << "Target gain - curr gain " << target->getGain() - curr->getGain() << endl;
+    }
+    }
   }
   
   vector<float> MiraLearner::hildreth (const vector<ScoreComponentCollection>& a, const vector<float>& b) {
