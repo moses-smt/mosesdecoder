@@ -106,12 +106,15 @@ namespace Josiah {
         void disableGainFunction() {
           m_gf_bk = m_gf;
           m_gf = NULL;
+          std::cerr << "Disable gf : " << m_gf << endl;
+          std::cerr << "Disable gf_bk : " << m_gf_bk << endl;
         }
         void enableGainFunction() {
           m_gf = m_gf_bk;
           m_gf_bk = NULL;
+          std::cerr << "Enable gf : " << m_gf << endl;
         }
-    
+        void doOnlineLearning(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen);
      protected:
         /**
           * Randomly select and apply one of the translation deltas.
