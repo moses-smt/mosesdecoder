@@ -121,18 +121,18 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
     if (chosenScore > noChangeScore && chosenGain < noChangeGain  ||
         chosenScore < noChangeScore && chosenGain > noChangeGain ) {
       error = true;
-      //cerr << "There is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl;
-//      cerr << "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl;
+      VERBOSE(1, "There is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl);
+      VERBOSE(1, "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl);
     }
     else {
-      //cerr << "There is no error because chosen sol has model score" <<  chosenScore << " and gain " << chosenGain << endl;
-//      cerr << "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl;
+      VERBOSE(1, "There is no error because chosen sol has model score" <<  chosenScore << " and gain " << chosenGain << endl);
+      VERBOSE(1, "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl);
     }
       
     int target;
     if (error) {
       target = chooseTargetAssignment(deltas);
-      //cerr << "Best neighbour has gain " << deltas[target]->getGain() << endl;
+      VERBOSE(1, "Best neighbour has gain " << deltas[target]->getGain() << endl);
       GetSampler()->GetOnlineLearner()->doUpdate(noChangeDelta, deltas[target]);//deltas[target], noChangeDelta
     }
   }    
