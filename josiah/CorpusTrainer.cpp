@@ -52,6 +52,7 @@
 #include "Timer.h"
 #include "StaticData.h"
 #include "Optimizer.h"
+#include "SampleAcceptor.h"
 
 #if 0
 vector<string> refs;
@@ -263,6 +264,8 @@ int main(int argc, char** argv) {
   bool runFaster;
   int weight_dump_freq;
   string weight_dump_stem;
+  bool greedy, fixedTemp;
+  float fixed_temperature;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -327,7 +330,10 @@ int main(int argc, char** argv) {
   ("hack-bp-denum,H", po::value(&hack_bp_denum)->default_value(false), "Use a predefined scalar as denum in BP computation")
   ("bp-scale,B", po::value<float>(&brev_penalty_scaling_factor)->default_value(1.0f), "Scaling factor for sent level brevity penalty for BLEU - default is 1.0")
   ("weight-dump-freq", po::value<int>(&weight_dump_freq)->default_value(0), "Frequency to dump weight files during training")
-  ("weight-dump-stem", po::value<string>(&weight_dump_stem)->default_value("weights"), "Stem of filename to use for dumping weights");
+  ("weight-dump-stem", po::value<string>(&weight_dump_stem)->default_value("weights"), "Stem of filename to use for dumping weights")
+  ("greedy", po::value(&greedy)->default_value(false), "Greedy sample acceptor")
+  ("fixed-temp-accept", po::value(&fixedTemp)->default_value(false), "Fixed temperature sample acceptor")
+  ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor");;
   
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -532,6 +538,19 @@ int main(int argc, char** argv) {
   sampler.AddOperator(&tso);
   sampler.AddOperator(&fo);
   
+  //Acceptor
+  auto_ptr<SampleAcceptor> acceptor;
+  if (greedy || fixed_temperature == 0) {
+    acceptor.reset(new GreedyAcceptor());
+  }
+  else if (fixedTemp){
+    acceptor.reset(new FixedTempAcceptor(fixed_temperature));
+  }
+  else {
+    acceptor.reset(new RegularAcceptor);
+  }
+  
+  
   //sampler stopping strategy; TODO: push parsing of config into StoppingStrategy ctor ?
   auto_ptr<StopStrategy> stopper;
   size_t iterations;
@@ -613,10 +632,10 @@ int main(int argc, char** argv) {
     
     TranslationDelta::lmcalls = 0;
     if (runFaster) {
-      sampler.RunCollectAll(hypothesis,toc,source,extra_features);
+      //sampler.RunCollectAll(hypothesis,toc,source,extra_features);
     }
     else {
-      sampler.Run(hypothesis,toc,source,extra_features);  
+      sampler.Run(hypothesis,toc,source,extra_features, acceptor.get());  
     }
     
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);

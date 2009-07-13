@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include "GibbsOperator.h"
 #include "OnlineLearner.h"
+#include "SampleAcceptor.h"
 
 using namespace std;
 using namespace Moses;
@@ -53,7 +54,17 @@ static float ComputeDistortionDistance(const WordsRange& prev, const WordsRange&
   }
   return - (float) abs(dist);
 }
+  
+void GibbsOperator::SetAnnealingTemperature(const double t) {
+  m_acceptor = new FixedTempAcceptor(t);    
+}  
 
+void GibbsOperator::Quench() {
+  delete m_acceptor;
+  m_acceptor = NULL;    
+}  
+  
+  
 int GibbsOperator::chooseTargetAssignment(const vector<TranslationDelta*>& deltas) {
   //Only do best neighbour for the moment
   float bestGain = -1;
@@ -67,49 +78,11 @@ int GibbsOperator::chooseTargetAssignment(const vector<TranslationDelta*>& delta
   
   return bestGainIndex;
 }  
-
+  
 void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta) {
   if (deltas.empty()) return;
   
-  //get the scores
-  vector<double> scores;
-  for (vector<TranslationDelta*>::iterator i = deltas.begin(); i != deltas.end(); ++i) {
-    //cerr << "Score " <<  (**i).getScore() << " FV : " << (**i).getScores() << endl;
-    scores.push_back((**i).getScore());
-  }
-  
-  IFVERBOSE(4) {
-    VERBOSE(4,"Scores: ");
-    for (size_t i = 0; i < scores.size(); ++i) {
-      VERBOSE(4,scores[i] << ",");
-    }
-    VERBOSE(4,endl);
-  }
-  
-  //do annealling
-  const double annealing_factor =  1.0 / T; 
-  transform(scores.begin(),scores.end(),scores.begin(),bind2nd(multiplies<double>(),annealing_factor));
-
-  //normalise
-  double sum = scores[0];
-  for (size_t i = 1; i < scores.size(); ++i) {
-    sum = log_sum(sum,scores[i]);
-  }
-  transform(scores.begin(),scores.end(),scores.begin(),bind2nd(minus<double>(),sum));
-  //random number between 0 and 1
-  double random =  RandomNumberGenerator::instance().next();//(double)rand() / RAND_MAX;
- 
-  random = log(random);
-  
-  //now figure out which sample
-  size_t position = 1;
-  sum = scores[0];
-  for (; position < scores.size() && sum < random; ++position) {
-    sum = log_sum(sum,scores[position]);
-  }
-   
-  size_t chosen =  position-1;
-  VERBOSE(3,"The chosen sample is " << chosen << endl);
+  size_t chosen = m_acceptor->choose(deltas);
   
   if (m_gf)
     doOnlineLearning(deltas, noChangeDelta, chosen);
@@ -122,6 +95,7 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
   
 }
 
+  
 void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen) {
   bool error = false;
   

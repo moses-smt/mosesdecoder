@@ -27,6 +27,9 @@
 		B218AB4B0F8BBF29000E5EB9 /* SentenceBleu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB330F8BBF29000E5EB9 /* SentenceBleu.cpp */; };
 		B218AB4C0F8BBF29000E5EB9 /* TrainingSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB350F8BBF29000E5EB9 /* TrainingSource.cpp */; };
 		B218AB4D0F8BBF29000E5EB9 /* TranslationDelta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */; };
+		B2283BD9100B33610012E6B5 /* SampleAcceptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2283BD8100B33610012E6B5 /* SampleAcceptor.cpp */; };
+		B2283BDA100B33610012E6B5 /* SampleAcceptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2283BD8100B33610012E6B5 /* SampleAcceptor.cpp */; };
+		B2283BDB100B33610012E6B5 /* SampleAcceptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2283BD8100B33610012E6B5 /* SampleAcceptor.cpp */; };
 		B2386CC30FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2386CC20FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp */; };
 		B25B2AE50F8CDB6D00485047 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B25B2AE40F8CDB6D00485047 /* libmoses.a */; };
 		B26B75EA0F9F8D3A00A06B31 /* Pos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75E80F9F8D3A00A06B31 /* Pos.cpp */; };
@@ -186,6 +189,8 @@
 		B218AB360F8BBF29000E5EB9 /* TrainingSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrainingSource.h; sourceTree = "<group>"; };
 		B218AB370F8BBF29000E5EB9 /* TranslationDelta.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TranslationDelta.cpp; sourceTree = "<group>"; };
 		B218AB380F8BBF29000E5EB9 /* TranslationDelta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TranslationDelta.h; sourceTree = "<group>"; };
+		B2283BD7100B33610012E6B5 /* SampleAcceptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleAcceptor.h; sourceTree = "<group>"; };
+		B2283BD8100B33610012E6B5 /* SampleAcceptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SampleAcceptor.cpp; sourceTree = "<group>"; };
 		B2386CC20FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CorpusSamplerAnnealed.cpp; sourceTree = "<group>"; };
 		B2386CC40FEF9C3B00B871B9 /* CorpusSamplerAnnealed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CorpusSamplerAnnealed.h; sourceTree = "<group>"; };
 		B25B29F80F8CA15100485047 /* josiah */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = josiah; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -252,6 +257,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B2283BD7100B33610012E6B5 /* SampleAcceptor.h */,
+				B2283BD8100B33610012E6B5 /* SampleAcceptor.cpp */,
 				B2386CC40FEF9C3B00B871B9 /* CorpusSamplerAnnealed.h */,
 				B2386CC20FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp */,
 				B27348320FE5597A0059868D /* CorpusTrainer.cpp */,
@@ -463,6 +470,7 @@
 				B26B75EA0F9F8D3A00A06B31 /* Pos.cpp in Sources */,
 				B26B75F40FA0A5CC00A06B31 /* Dependency.cpp in Sources */,
 				B26FFFC50FA7BAF40098700F /* SourceToTargetRatio.cpp in Sources */,
+				B2283BDA100B33610012E6B5 /* SampleAcceptor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -495,6 +503,7 @@
 				B27348290FE559030059868D /* CorpusSampler.cpp in Sources */,
 				B27348330FE5597A0059868D /* CorpusTrainer.cpp in Sources */,
 				B2386CC30FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp in Sources */,
+				B2283BDB100B33610012E6B5 /* SampleAcceptor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,6 +532,7 @@
 				B2F94C330FF52AE700998793 /* SourceToTargetRatio.cpp in Sources */,
 				B2F94C610FF5393800998793 /* OnlineLearner.cpp in Sources */,
 				B2E1C311100655D600039083 /* OnlineLearnerTrainer.cpp in Sources */,
+				B2283BD9100B33610012E6B5 /* SampleAcceptor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

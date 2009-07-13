@@ -52,6 +52,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Timer.h"
 #include "StaticData.h"
 #include "Optimizer.h"
+#include "SampleAcceptor.h"
 
 #if 0
   vector<string> refs;
@@ -262,7 +263,8 @@ int main(int argc, char** argv) {
   bool optimize_quench_temp;
   int weight_dump_freq;
   string weight_dump_stem;
-  bool sampleRank;
+  bool greedy, fixedTemp;
+  float fixed_temperature;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -328,7 +330,10 @@ int main(int argc, char** argv) {
   ("bp-scale,B", po::value<float>(&brev_penalty_scaling_factor)->default_value(1.0f), "Scaling factor for sent level brevity penalty for BLEU - default is 1.0")
   ("optimize-quench-temp", po::value(&optimize_quench_temp)->zero_tokens()->default_value(false), "Optimizing quenching temp during annealing")
       ("weight-dump-freq", po::value<int>(&weight_dump_freq)->default_value(0), "Frequency to dump weight files during training")
-  ("weight-dump-stem", po::value<string>(&weight_dump_stem)->default_value("weights"), "Stem of filename to use for dumping weights");
+  ("weight-dump-stem", po::value<string>(&weight_dump_stem)->default_value("weights"), "Stem of filename to use for dumping weights")
+  ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
+  ("fixed-temp-accept", po::value(&fixedTemp)->zero_tokens()->default_value(false), "Fixed temperature sample acceptor")
+  ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor");
   
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -622,6 +627,19 @@ int main(int argc, char** argv) {
     sampler.AddOperator(&tso);
     sampler.AddOperator(&fo);
     
+    //Acceptor
+    auto_ptr<SampleAcceptor> acceptor;
+    if (greedy || fixed_temperature == 0) {
+      acceptor.reset(new GreedyAcceptor());
+    }
+    else if (fixedTemp){
+      acceptor.reset(new FixedTempAcceptor(fixed_temperature));
+    }
+    else {
+      acceptor.reset(new RegularAcceptor);
+    }
+    
+    
     //sampler stopping strategy; TODO: push parsing of config into StoppingStrategy ctor ?
     auto_ptr<StopStrategy> stopper;
     try {
@@ -680,7 +698,7 @@ int main(int argc, char** argv) {
     timer.check("Running sampler");
 
     TranslationDelta::lmcalls = 0;
-    sampler.Run(hypothesis,toc,source,extra_features);
+    sampler.Run(hypothesis,toc,source,extra_features, acceptor.get());
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
 

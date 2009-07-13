@@ -50,6 +50,7 @@
 #include "Timer.h"
 #include "StaticData.h"
 #include "OnlineLearner.h"
+#include "SampleAcceptor.h"
 
 #if 0
 vector<string> refs;
@@ -243,6 +244,8 @@ int main(int argc, char** argv) {
   bool perceptron, mira;
   float perceptron_lr;
   int epochs;
+  bool greedy, fixedTemp;
+  float fixed_temperature;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -288,7 +291,10 @@ int main(int argc, char** argv) {
   ("perceptron", po::value(&perceptron)->zero_tokens()->default_value(false), "Use perceptron learner")
   ("mira", po::value(&mira)->zero_tokens()->default_value(false), "Use mira learner")
   ("perc-lr", po::value<float>(&perceptron_lr)->default_value(1.0f), "Perceptron learning rate")
-  ("epochs", po::value<int>(&epochs)->default_value(1), "Number of training epochs");
+  ("epochs", po::value<int>(&epochs)->default_value(1), "Number of training epochs")
+  ("greedy", po::value(&greedy)->default_value(false), "Greedy sample acceptor")
+  ("fixed-temp-accept", po::value(&fixedTemp)->default_value(false), "Fixed temperature sample acceptor")
+  ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor");
   
   
   po::options_description cmdline_options;
@@ -415,6 +421,18 @@ int main(int argc, char** argv) {
   sampler.AddOperator(&tso);
   sampler.AddOperator(&fo);
   
+  //Acceptor
+  auto_ptr<SampleAcceptor> acceptor;
+  if (greedy || fixed_temperature == 0) {
+    acceptor.reset(new GreedyAcceptor());
+  }
+  else if (fixedTemp){
+    acceptor.reset(new FixedTempAcceptor(fixed_temperature));
+  }
+  else {
+    acceptor.reset(new RegularAcceptor);
+  }
+  
   
   //Add the learner
   auto_ptr<OnlineLearner> onlineLearner;
@@ -492,9 +510,7 @@ int main(int argc, char** argv) {
      fo.SetGainFunction(&g[lineno]);
     }
 
-
-
-    sampler.Run(hypothesis,toc,source,extra_features);
+    sampler.Run(hypothesis,toc,source,extra_features,acceptor.get());
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
     cerr << "Curr Weights : " << StaticData::Instance().GetWeights() << endl;
