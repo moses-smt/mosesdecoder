@@ -296,7 +296,6 @@ int main(int argc, char** argv) {
   ("fixed-temp-accept", po::value(&fixedTemp)->default_value(false), "Fixed temperature sample acceptor")
   ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor");
   
-  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
   po::variables_map vm;
