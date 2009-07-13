@@ -45,6 +45,7 @@ namespace Josiah {
   class TranslationDelta;
   class GainFunction;
   class Sampler;
+  class SampleAcceptor;
   
   typedef boost::mt19937 base_generator_type;
   
@@ -88,7 +89,7 @@ namespace Josiah {
   /** Abstract base class for gibbs operators **/
   class GibbsOperator {
     public:
-      GibbsOperator(const string& name) : m_name(name), T(1), m_gf(NULL) {}
+    GibbsOperator(const string& name) : m_name(name), T(1), m_gf(NULL) {}
         /**
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
           **/
@@ -96,8 +97,8 @@ namespace Josiah {
         const string& name() const {return m_name;}
         virtual ~GibbsOperator() {}
        
-				void SetAnnealingTemperature(const double t) { T = t; }
-				void Quench() { T = 1.0; }
+        void SetAnnealingTemperature(const double t);
+        void Quench() ;
         void SetGainFunction(const GainFunction *gf) {m_gf = gf;}
         const GainFunction* GetGainFunction() {return m_gf;}
         int chooseTargetAssignment(const vector<TranslationDelta*>& deltas);
@@ -106,15 +107,13 @@ namespace Josiah {
         void disableGainFunction() {
           m_gf_bk = m_gf;
           m_gf = NULL;
-          std::cerr << "Disable gf : " << m_gf << endl;
-          std::cerr << "Disable gf_bk : " << m_gf_bk << endl;
         }
         void enableGainFunction() {
           m_gf = m_gf_bk;
           m_gf_bk = NULL;
-          std::cerr << "Enable gf : " << m_gf << endl;
         }
         void doOnlineLearning(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen);
+        void addSampleAcceptor(SampleAcceptor* acceptor) { m_acceptor = acceptor;}
      protected:
         /**
           * Randomly select and apply one of the translation deltas.
@@ -128,7 +127,7 @@ namespace Josiah {
       static RandomNumberGenerator m_random;
       const GainFunction* m_gf;
       const GainFunction* m_gf_bk;
-    
+      SampleAcceptor* m_acceptor;
       Sampler* m_sampler;
   };
   
