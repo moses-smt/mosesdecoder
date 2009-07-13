@@ -331,10 +331,10 @@ int main(int argc, char** argv) {
   ("optimize-quench-temp", po::value(&optimize_quench_temp)->zero_tokens()->default_value(false), "Optimizing quenching temp during annealing")
       ("weight-dump-freq", po::value<int>(&weight_dump_freq)->default_value(0), "Frequency to dump weight files during training")
   ("weight-dump-stem", po::value<string>(&weight_dump_stem)->default_value("weights"), "Stem of filename to use for dumping weights")
-  ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
+ ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
   ("fixed-temp-accept", po::value(&fixedTemp)->zero_tokens()->default_value(false), "Fixed temperature sample acceptor")
   ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor");
-  
+ 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
   po::variables_map vm;

@@ -292,10 +292,10 @@ int main(int argc, char** argv) {
   ("mira", po::value(&mira)->zero_tokens()->default_value(false), "Use mira learner")
   ("perc-lr", po::value<float>(&perceptron_lr)->default_value(1.0f), "Perceptron learning rate")
   ("epochs", po::value<int>(&epochs)->default_value(1), "Number of training epochs")
-  ("greedy", po::value(&greedy)->default_value(false), "Greedy sample acceptor")
-  ("fixed-temp-accept", po::value(&fixedTemp)->default_value(false), "Fixed temperature sample acceptor")
+ ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
+  ("fixed-temp-accept", po::value(&fixedTemp)->zero_tokens()->default_value(false), "Fixed temperature sample acceptor")
   ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor");
-  
+ 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
   po::variables_map vm;
