@@ -22,6 +22,7 @@ josiah_SOURCES = Derivation.cpp \
     FeatureFunction.cpp \
     SearchRandom.cpp \
     QuenchingSchedule.cpp \
+    SampleAcceptor.cpp \
     GibblerAnnealedExpectedLossTrainer.cpp 
 
 
@@ -51,6 +52,7 @@ corpustrainer_SOURCES = Derivation.cpp \
     QuenchingSchedule.cpp \
     CorpusSampler.cpp \
     CorpusSamplerAnnealed.cpp \
+    SampleAcceptor.cpp \
     CorpusTrainer.cpp 
    
 
@@ -75,6 +77,7 @@ samplerank_SOURCES = Derivation.cpp \
     QuenchingSchedule.cpp \
     SampleRank.cpp \
     OnlineLearner.cpp \
+    SampleAcceptor.cpp \
     OnlineLearnerTrainer.cpp 
    
 
