@@ -45,3 +45,5 @@ public:
   size_t maxScore(const vector<TranslationDelta*>& deltas);
 };
 }
+
+
