@@ -91,11 +91,11 @@ class TranslationDelta {
   /**
     Get the absolute score of this delta
     **/
-  double getScore() { return m_score;}
+  double getScore() const { return m_score;}
   /**
    Get the absolute score of this delta
    **/
-  double getGain() { return m_gain;}
+  double getGain() const { return m_gain;}
   /** 
     * Apply to the sample
     **/

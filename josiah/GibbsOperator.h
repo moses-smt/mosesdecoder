@@ -46,6 +46,7 @@ namespace Josiah {
   class GainFunction;
   class Sampler;
   class SampleAcceptor;
+  class TargetAssigner;
   
   typedef boost::mt19937 base_generator_type;
   
@@ -114,6 +115,7 @@ namespace Josiah {
         }
         void doOnlineLearning(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen);
         void addSampleAcceptor(SampleAcceptor* acceptor) { m_acceptor = acceptor;}
+        void addTargetAssigner(TargetAssigner* assigner) { m_assigner = assigner;}
      protected:
         /**
           * Randomly select and apply one of the translation deltas.
@@ -128,6 +130,7 @@ namespace Josiah {
       const GainFunction* m_gf;
       const GainFunction* m_gf_bk;
       SampleAcceptor* m_acceptor;
+      TargetAssigner* m_assigner;
       Sampler* m_sampler;
   };
   

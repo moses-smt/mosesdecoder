@@ -44,6 +44,26 @@ public:
   virtual size_t choose(const std::vector<TranslationDelta*>& deltas) ;
   size_t maxScore(const vector<TranslationDelta*>& deltas);
 };
+  
+class TargetAssigner {
+public:
+  TargetAssigner(){}
+  virtual ~TargetAssigner(){}
+  size_t virtual getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta) = 0;
+};
+
+class BestNeighbourTgtAssigner : public TargetAssigner {
+public:
+  BestNeighbourTgtAssigner(){}
+  virtual ~BestNeighbourTgtAssigner(){}
+  size_t virtual getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta);
+};
+
+class ClosestBestNeighbourTgtAssigner : public TargetAssigner {
+public:
+  ClosestBestNeighbourTgtAssigner(){}
+  virtual ~ClosestBestNeighbourTgtAssigner(){}
+  size_t virtual getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta);
+};
+  
 }
-
-

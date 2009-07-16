@@ -65,20 +65,6 @@ void GibbsOperator::Quench() {
 }  
   
   
-int GibbsOperator::chooseTargetAssignment(const vector<TranslationDelta*>& deltas) {
-  //Only do best neighbour for the moment
-  float bestGain = -1;
-  int bestGainIndex = -1;
-  for (vector<TranslationDelta*>::const_iterator i = deltas.begin(); i != deltas.end(); ++i) {
-    if ((*i)->getGain() > bestGain) {
-      bestGain = (*i)->getGain();
-      bestGainIndex = i - deltas.begin();
-    }
-  }
-  
-  return bestGainIndex;
-}  
-  
 void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta) {
   if (deltas.empty()) return;
   
@@ -107,20 +93,28 @@ void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, Translat
   if (chosenScore > noChangeScore && chosenGain < noChangeGain  ||
         chosenScore < noChangeScore && chosenGain > noChangeGain ) {
     error = true;
-    VERBOSE(1, "There is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl);
-    VERBOSE(1, "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl);
+    IFVERBOSE(1) {
+      cerr << "There is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl;
+      cerr << "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl;  
+    }
   }
   else {
-    VERBOSE(1, "There is no error because chosen sol has model score" <<  chosenScore << " and gain " << chosenGain << endl);
-    VERBOSE(1, "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl);
+    IFVERBOSE(1) {
+      cerr << "There is no error because chosen sol has model score" <<  chosenScore << " and gain " << chosenGain << endl;
+      cerr << "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl;
+    }
   }
     
   int target;
   if (error) {
-    target = chooseTargetAssignment(deltas);
-    VERBOSE(1, "Best neighbour has gain " << deltas[target]->getGain() << endl);
-    GetSampler()->GetOnlineLearner()->doUpdate(noChangeDelta, deltas[target]);//deltas[target], noChangeDelta
+    target = m_assigner->getTarget(deltas, noChangeDelta);
+    if (target > -1 ) {
+      cerr << "Hill-climbed gain function to gain = " << deltas[target]->getGain() << endl;
+      GetSampler()->GetOnlineLearner()->doUpdate(noChangeDelta, deltas[target]);//deltas[target], noChangeDelta  
+    }
+    
   }
+  
 }
   
 void MergeSplitOperator::doIteration(

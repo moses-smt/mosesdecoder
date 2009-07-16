@@ -89,4 +89,48 @@ size_t GreedyAcceptor::maxScore(const vector<TranslationDelta*>& deltas) {
   return best;
 }
 
+size_t BestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta) {
+  //Only do best neighbour for the moment
+  float bestGain = -1;
+  int bestGainIndex = -1;
+  for (vector<TranslationDelta*>::const_iterator i = deltas.begin(); i != deltas.end(); ++i) {
+    if ((*i)->getGain() > bestGain) {
+      bestGain = (*i)->getGain();
+      bestGainIndex = i - deltas.begin();
+    }
+  }
+  IFVERBOSE(1) {
+    if (bestGainIndex > -1) {
+      cerr << "best nbr has score " << deltas[bestGainIndex]->getScore() << " and gain " << deltas[bestGainIndex]->getGain() << endl;
+      cerr << "No change has score " << noChangeDelta->getScore() << " and gain " << noChangeDelta->getGain() << endl;    
+    }
+  }
+  return bestGainIndex;
+}
+
+size_t ClosestBestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta) {
+  //Only do best neighbour for the moment
+  float minScoreDiff = 10e10;
+  int closestBestNbr = -1;
+  float noChangeGain = noChangeDelta->getGain();
+  float noChangeScore = noChangeDelta->getScore(); 
+  for (vector<TranslationDelta*>::const_iterator i = deltas.begin(); i != deltas.end(); ++i) {
+    if ((*i)->getGain() > noChangeGain ) {
+      float scoreDiff = noChangeScore -  (*i)->getScore();
+      if (scoreDiff < minScoreDiff) {
+        minScoreDiff = scoreDiff;
+        closestBestNbr = i - deltas.begin();
+      }
+    }
+  }
+  
+  IFVERBOSE(1) {
+    if(closestBestNbr > -1) {
+      cerr << "Closest best nbr has score " << deltas[closestBestNbr]->getScore() << " and gain " << deltas[closestBestNbr]->getGain() << endl;
+      cerr << "No change has score " << noChangeDelta->getScore() << " and gain " << noChangeDelta->getGain() << endl;     
+    } 
+  }
+  return closestBestNbr;
+}
+  
 }
