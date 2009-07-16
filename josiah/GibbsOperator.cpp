@@ -115,7 +115,9 @@ void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, Translat
     cerr << "Hill-climbed gain function to gain = " << deltas[target]->getGain() << endl;
     GetSampler()->GetOnlineLearner()->doUpdate(deltas[chosen], deltas[target]);//deltas[target], noChangeDelta  
   }
-  
+  else {
+    GetSampler()->GetOnlineLearner()->UpdateCumul();//deltas[target], noChangeDelta  
+  }
 }
   
 void MergeSplitOperator::doIteration(

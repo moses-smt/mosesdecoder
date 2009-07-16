@@ -525,11 +525,15 @@ int main(int argc, char** argv) {
      fo.SetGainFunction(&g[lineno]);
     }
 
+    //Reset the online learner stats
+    sampler.GetOnlineLearner()->reset();
     sampler.Run(hypothesis,toc,source,extra_features,acceptor.get());
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
+    cerr << "Performed " << sampler.GetOnlineLearner()->GetNumUpdates() << " updates for this sentence" << endl;
     cerr << "Curr Weights : " << StaticData::Instance().GetWeights() << endl;
-  
+
+    
     ++lineno;
     
     if (trainer && trainer->GetCurr() == trainer->GetCurrEnd()) {
