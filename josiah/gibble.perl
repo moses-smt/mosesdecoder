@@ -145,7 +145,13 @@ if ($reheatings) {
     print TRAIN "-a --reheatings $reheatings ";
 }
 print TRAIN "--optimizer-freq $optimisations ";
-print TRAIN "--eta $eta " x $nweights;
+if (ref($eta)) {
+    for my $e (@$eta) {
+        print TRAIN "--eta $e ";
+    }
+} else {
+    print TRAIN "--eta $eta " x $nweights;
+}
 print TRAIN "--mu $mu ";
 print TRAIN $extra_args;
 
