@@ -19,15 +19,20 @@ namespace Josiah {
     return averagedWgts; 
   }
   
+  void OnlineLearner::UpdateCumul() { 
+    m_cumulWeights.PlusEquals(m_currWeights);
+    m_iteration++;
+  }
+  
   void PerceptronLearner::doUpdate(TranslationDelta* curr, TranslationDelta* target) {
     //Do update if target gain is better than curr gain
     if (target->getGain() > curr->getGain()) {
       m_currWeights.MinusEquals(curr->getScores());
       m_currWeights.PlusEquals(target->getScores());  
+      m_numUpdates++;
     }
-
-    m_cumulWeights.PlusEquals(m_currWeights);
-    m_iteration++;
+     
+    UpdateCumul();
     //cerr << "Curr Weights : " << m_currWeights << endl;
     const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
   }
@@ -36,7 +41,7 @@ namespace Josiah {
     
     vector<float> b;
     float scoreDiff = target->getScore() - curr->getScore();
-    float gainDiff = (target->getGain() - curr->getGain()) * 100; //%BLEU
+    float gainDiff = target->getGain() - curr->getGain(); //%BLEU
     
     bool doMira = false;
     if (scoreDiff < gainDiff) { //MIRA Constraints not satisfied, run MIRA
@@ -53,6 +58,7 @@ namespace Josiah {
         ScoreComponentCollection dist = distance[k];
         dist.MultiplyEquals(alpha[k]);
         m_currWeights.PlusEquals(dist);
+        m_numUpdates++;
       }
     }
     else {
@@ -63,8 +69,7 @@ namespace Josiah {
       }  
     }
     
-    m_cumulWeights.PlusEquals(m_currWeights);
-    m_iteration++;
+    UpdateCumul();
     const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
    
     IFVERBOSE(1) { 

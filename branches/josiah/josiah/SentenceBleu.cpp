@@ -127,7 +127,7 @@ float SentenceBLEU::CalcBleu(const BleuSufficientStats & stats, bool smooth, boo
     lbp = (stats.hyp_len - stats.ref_len) / bp_denum;
   log_bleu += lbp * _bp_scale;
   
-  return exp(log_bleu);
+  return (100 * exp(log_bleu));
 }  
   
 }
