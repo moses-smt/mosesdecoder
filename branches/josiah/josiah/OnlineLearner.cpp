@@ -36,7 +36,7 @@ namespace Josiah {
     
     vector<float> b;
     float scoreDiff = target->getScore() - curr->getScore();
-    float gainDiff = target->getGain() - curr->getGain();
+    float gainDiff = (target->getGain() - curr->getGain()) * 100; //%BLEU
     
     bool doMira = false;
     if (scoreDiff < gainDiff) { //MIRA Constraints not satisfied, run MIRA
@@ -54,6 +54,13 @@ namespace Josiah {
         dist.MultiplyEquals(alpha[k]);
         m_currWeights.PlusEquals(dist);
       }
+    }
+    else {
+      IFVERBOSE(1) { 
+        cerr << "Not doing updates cos constraints already satisified" << endl;
+        cerr << "Target score" << target->getScore() << ", curr score " << curr->getScore() << endl;
+        cerr << "Target gain" << target->getGain() << ", curr gain " << curr->getGain() << endl;
+      }  
     }
     
     m_cumulWeights.PlusEquals(m_currWeights);

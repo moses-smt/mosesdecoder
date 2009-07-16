@@ -87,7 +87,11 @@ void  TranslationDelta::addSingleOptionLanguageModelScore(const TranslationOptio
       newSentence.push_back(getSample().GetTargetWords()[i][0]);
     }
     m_gain = m_gf->ComputeGain(newSentence);
-    //cerr << "Gain " << m_gain << endl;
+    
+    IFVERBOSE(2) {
+      cerr << "Sentence: "<< newSentence << endl;
+      cerr << "Gain " << m_gain << endl;
+    }
   }
   
   
@@ -414,7 +418,10 @@ void  TranslationDelta::addContiguousPairedOptionLMScore(const TranslationOption
       newSentence.push_back(getSample().GetTargetWords()[i][0]);
     }
     m_gain = m_gf->ComputeGain(newSentence);
-    //cerr << "Gain " << m_gain << endl;
+    IFVERBOSE(2) {
+      cerr << "Sentence: "<< newSentence << endl;
+      cerr << "Gain " << m_gain << endl;
+    }
   }
   
   
@@ -557,7 +564,12 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
       newSentence.push_back(getSample().GetTargetWords()[i][0]);
     }
     m_gain = m_gf->ComputeGain(newSentence); 
-        //cerr << "Gain " << m_gain << endl;
+    
+    IFVERBOSE(2) {
+      cerr << "Sentence: "<< newSentence << endl;
+      cerr << "Gain " << m_gain << endl;
+    }
+    
   }
   
   for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {

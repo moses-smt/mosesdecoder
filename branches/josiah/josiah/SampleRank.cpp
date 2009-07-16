@@ -246,6 +246,7 @@ int main(int argc, char** argv) {
   int epochs;
   bool greedy, fixedTemp;
   float fixed_temperature;
+  bool closestBestNeighbour;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -292,9 +293,10 @@ int main(int argc, char** argv) {
   ("mira", po::value(&mira)->zero_tokens()->default_value(false), "Use mira learner")
   ("perc-lr", po::value<float>(&perceptron_lr)->default_value(1.0f), "Perceptron learning rate")
   ("epochs", po::value<int>(&epochs)->default_value(1), "Number of training epochs")
- ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
+  ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
   ("fixed-temp-accept", po::value(&fixedTemp)->zero_tokens()->default_value(false), "Fixed temperature sample acceptor")
-  ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor");
+  ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor")
+  ("closest-best-neighbour", po::value(&closestBestNeighbour)->zero_tokens()->default_value(false), "Closest best neighbour");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -431,6 +433,20 @@ int main(int argc, char** argv) {
   else {
     acceptor.reset(new RegularAcceptor);
   }
+  
+  //Target Assigner
+  auto_ptr<TargetAssigner> tgtAssigner;
+  if (closestBestNeighbour) {
+    tgtAssigner.reset(new ClosestBestNeighbourTgtAssigner());
+  }
+  else {
+    tgtAssigner.reset(new BestNeighbourTgtAssigner());
+  }
+  
+  mso.addTargetAssigner(tgtAssigner.get());
+  fo.addTargetAssigner(tgtAssigner.get());
+  tso.addTargetAssigner(tgtAssigner.get());
+  
   
   
   //Add the learner
