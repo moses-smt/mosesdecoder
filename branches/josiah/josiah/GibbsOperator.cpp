@@ -86,33 +86,34 @@ void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, Translat
   bool error = false;
   
   float chosenScore = deltas[chosen]->getScore();
-  float noChangeScore = noChangeDelta->getScore();
   float chosenGain = deltas[chosen]->getGain();
-  float noChangeGain = noChangeDelta->getGain();
+  
+  int target = m_assigner->getTarget(deltas, noChangeDelta);
+  
+  if (target == -1)
+    return;
+  
+  float targetScore = deltas[target]->getScore();
+  float targetGain = deltas[target]->getGain();
     
-  if (chosenScore > noChangeScore && chosenGain < noChangeGain  ||
-        chosenScore < noChangeScore && chosenGain > noChangeGain ) {
+  if (chosenScore > targetScore && chosenGain < targetGain  ||
+        chosenScore < targetScore && chosenGain > targetGain ) {
     error = true;
     IFVERBOSE(1) {
       cerr << "There is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl;
-      cerr << "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl;  
+      cerr << "while target sol has model score " <<  targetScore << " and gain " << targetGain << endl;  
     }
   }
   else {
     IFVERBOSE(1) {
       cerr << "There is no error because chosen sol has model score" <<  chosenScore << " and gain " << chosenGain << endl;
-      cerr << "while current sol has model score " <<  noChangeScore << " and gain " << noChangeGain << endl;
+      cerr << "while target sol has model score " <<  targetScore << " and gain " << targetGain << endl;
     }
   }
     
-  int target;
   if (error) {
-    target = m_assigner->getTarget(deltas, noChangeDelta);
-    if (target > -1 ) {
-      cerr << "Hill-climbed gain function to gain = " << deltas[target]->getGain() << endl;
-      GetSampler()->GetOnlineLearner()->doUpdate(noChangeDelta, deltas[target]);//deltas[target], noChangeDelta  
-    }
-    
+    cerr << "Hill-climbed gain function to gain = " << deltas[target]->getGain() << endl;
+    GetSampler()->GetOnlineLearner()->doUpdate(deltas[chosen], deltas[target]);//deltas[target], noChangeDelta  
   }
   
 }
