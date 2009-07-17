@@ -60,6 +60,7 @@ public:
         map<string, xmlrpc_c::value> retData;
         pair<string, xmlrpc_c::value> 
             text("text", xmlrpc_c::value_string(out.str()));
+        cerr << "Output: " << out.str() << endl;
         retData.insert(text);
         
         *retvalP = xmlrpc_c::value_struct(retData);
