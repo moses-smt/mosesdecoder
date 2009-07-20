@@ -6,6 +6,9 @@
 #include <map>
 #include <string>
 #include <iostream>
+
+#include <boost/thread/tss.hpp>
+
 //moses dependencies:
 #include "TypeDef.h"
 #include "Phrase.h"
@@ -106,7 +109,9 @@ class LexicalReorderingTableTree : public LexicalReorderingTable {
     m_UseCache = false;
   };
   void ClearCache(){
-	m_Cache.clear();
+    if (m_UseCache) {
+	   m_Cache.clear();
+    }   
   };
 
   virtual std::vector<float> GetScore(const Phrase& f, const Phrase& e, const Phrase& c);
@@ -130,12 +135,13 @@ class LexicalReorderingTableTree : public LexicalReorderingTable {
  private:
   //typedef LexicalReorderingCand          CandType;
   typedef std::map< std::string, Candidates > CacheType;
-  typedef PrefixTreeMap        TableType;
+  typedef boost::thread_specific_ptr<PrefixTreeMap>        TableType;
   
   static const int SourceVocId = 0;
   static const int TargetVocId = 1;
 
   bool      m_UseCache;
+  std::string m_FilePath;
   CacheType m_Cache;
   TableType m_Table;
 };

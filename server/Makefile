@@ -16,7 +16,7 @@ CPPFLAGS=-I../moses/src $(shell $(XMLRPC_C_CONFIG) abyss-server --cflags) -g -Wa
 
 GCC=g++
 #LDFLAGS=$(shell $(XMLRPC_C_CONFIG) abyss-server --ldflags)
-LDLIBS=-L../moses/src -L/home/bhaddow/protobuf/lib -L/home/bhaddow/statmt/srilm//lib/i686 -L/home/bhaddow/statmt/irstlm//lib/i686-redhat-linux-gnu -lmoses -lprotobuf -loolm -ldstruct -lmisc -lirstlm -Bstatic $(shell $(XMLRPC_C_CONFIG) c++2 abyss-server --libs) -Bdynamic  -lm -lz 
+LDLIBS=-L../moses/src -L/home/bhaddow/protobuf/lib -L/home/bhaddow/statmt/srilm//lib/i686 -L/home/bhaddow/statmt/irstlm//lib/i686-redhat-linux-gnu -lmoses -lprotobuf -loolm -ldstruct -lmisc -lirstlm  -lboost_thread  -Bstatic $(shell $(XMLRPC_C_CONFIG) c++2 abyss-server --libs) -Bdynamic  -lm -lz 
 
 all: \
 mosesserver

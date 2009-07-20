@@ -1,5 +1,11 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
+/* define if the Boost library is available */
+#undef HAVE_BOOST
+
+/* define if the Boost::Thread library is available */
+#undef HAVE_BOOST_THREAD
+
 /* Define to 1 if you have the <getopt.h> header file. */
 #undef HAVE_GETOPT_H
 
