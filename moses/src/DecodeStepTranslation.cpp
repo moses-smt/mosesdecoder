@@ -114,7 +114,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 			if(StaticData::Instance().GetInputType() == SentenceInput)
 				TRACE_ERR("[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
 			else
-				TRACE_ERR("[" << startPos << "-" << endPos << std::endl << "]");
+				TRACE_ERR("[" << startPos << "-" << endPos << "]" << std::endl);
 		}
 			
 		TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
