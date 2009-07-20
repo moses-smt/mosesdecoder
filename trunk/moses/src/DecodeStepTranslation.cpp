@@ -110,7 +110,12 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 
 	if (phraseColl != NULL)
 	{
-		VERBOSE(3,"[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
+		IFVERBOSE(3) {
+			if(StaticData::Instance().GetInputType() == SentenceInput)
+				TRACE_ERR("[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
+			else
+				TRACE_ERR("[" << startPos << "-" << endPos << std::endl << "]");
+		}
 			
 		TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
 		iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
