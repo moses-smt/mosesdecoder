@@ -46,7 +46,7 @@ namespace Moses
 class InputType;
 class LexicalReordering;
 class GlobalLexicalModel;
-class PhraseDictionary;
+class PhraseDictionaryFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class WordPenaltyProducer;
@@ -61,9 +61,8 @@ private:
 protected:	
 
 	std::map<long,Phrase> m_constraints;
-	std::vector<PhraseDictionary*>	m_phraseDictionary;
+	std::vector<PhraseDictionaryFeature*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
-	std::vector <DecodeGraph*>		m_decodeStepVL;
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
@@ -175,7 +174,6 @@ protected:
 	//! load all generation tables as specified in ini file
 	bool LoadGenerationTables();
 	//! load decoding steps
-	bool LoadMapping();
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
 	
@@ -227,10 +225,7 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	const std::vector<DecodeGraph*> &GetDecodeStepVL() const
-	{
-		return m_decodeStepVL;
-	}
+	std::vector<DecodeGraph*> GetDecodeStepVL(const InputType& source) const;
 	
 	inline bool GetSourceStartPosMattersForRecombination() const
 	{ 
@@ -351,7 +346,7 @@ public:
 	{
 		return m_phraseDictionary.size();
 	}
-	const std::vector<PhraseDictionary*> &GetPhraseDictionaries() const
+	const std::vector<PhraseDictionaryFeature*> &GetPhraseDictionaries() const
 	{
 		return m_phraseDictionary;
 	}

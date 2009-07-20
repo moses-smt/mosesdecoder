@@ -293,7 +293,7 @@ public:
 			for(size_t l=0;l<m_output.size();++l)
 				w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
 		}
-		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
+		targetPhrase.SetScore(m_obj->GetFeature(), scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
 		
 //		targetPhrase.CreateAlignmentInfo("???", "???", 44);
@@ -316,7 +316,7 @@ public:
 				for(size_t l=0;l<m_output.size();++l)
 					w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
 			}
-		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
+		targetPhrase.SetScore(m_obj->GetFeature(), scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
 		
 		targetPhrase.CreateAlignmentInfo(swaVector, twaVector);

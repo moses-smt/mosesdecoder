@@ -85,8 +85,8 @@ void Manager::ProcessSentence()
 	ResetSentenceStats(m_source);
 
   // collect translation options for this sentence
-	const vector <DecodeGraph*>
-			&decodeStepVL = staticData.GetDecodeStepVL();
+    vector <DecodeGraph*>
+			decodeStepVL = staticData.GetDecodeStepVL(m_source);
 	m_transOptColl->CreateTranslationOptions(decodeStepVL);
 
   // some reporting on how long this took
@@ -99,6 +99,7 @@ void Manager::ProcessSentence()
 	// search for best translation with the specified algorithm
 	m_search->ProcessSentence();
 	VERBOSE(1, "Search took " << ((clock()-m_start)/(float)CLOCKS_PER_SEC) << " seconds" << endl);
+    RemoveAllInColl(decodeStepVL);  
 }
 
 /**
@@ -221,11 +222,11 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 		<< "\ta=";
 
 	// phrase table scores
-	const std::vector<PhraseDictionary*> &phraseTables = staticData.GetPhraseDictionaries();
-	std::vector<PhraseDictionary*>::const_iterator iterPhraseTable;
+	const std::vector<PhraseDictionaryFeature*> &phraseTables = staticData.GetPhraseDictionaries();
+	std::vector<PhraseDictionaryFeature*>::const_iterator iterPhraseTable;
 	for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable)
 	{
-				const PhraseDictionary *phraseTable = *iterPhraseTable;
+				const PhraseDictionaryFeature *phraseTable = *iterPhraseTable;
 				vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(phraseTable);
 				
 				outputWordGraphStream << scores[0];

@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <list>
 #include <vector>
 #include <string>
+#include "shared_ptr.hpp"
 #include "Phrase.h"
 #include "TargetPhrase.h"
 #include "Dictionary.h"
@@ -39,24 +40,58 @@ class StaticData;
 class InputType;
 class WordsRange;
 
-/** abstract base class for phrase table classes
-*/
-class PhraseDictionary : public Dictionary, public StatelessFeatureFunction
+class PhraseDictionaryFeature;
+/**
+  * Abstract base class for phrase dictionaries (tables).
+  **/
+class PhraseDictionary: public Dictionary {
+  public: 
+    PhraseDictionary(size_t numScoreComponent, const PhraseDictionaryFeature* feature): 
+        Dictionary(numScoreComponent), m_tableLimit(0), m_feature(feature) {}
+    //! table limit number. 
+    size_t GetTableLimit() const { return m_tableLimit; }
+    DecodeType GetDecodeType() const    {   return Translate;   }
+    const PhraseDictionaryFeature* GetFeature() const;
+    /** set/change translation weights and recalc weighted score for each translation. 
+        * TODO This may be redundant now we use ScoreCollection
+    */
+    virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
+
+    //! find list of translations that can translates src. Only for phrase input
+    virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
+    //! find list of translations that can translates a portion of src. Used by confusion network decoding
+    virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
+    //! Create entry for translation of source to targetPhrase
+    virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
+    
+    
+  protected:
+    size_t m_tableLimit;
+    const PhraseDictionaryFeature* m_feature;
+};
+
+typedef boost::shared_ptr<PhraseDictionary> PhraseDictionaryHandle;
+
+/**
+ * Represents a feature derived from a phrase table.
+ */
+class PhraseDictionaryFeature :  public StatelessFeatureFunction
 {
- protected:
-	size_t m_tableLimit;
-	std::string m_filePath;    // just for debugging purposes
+ 
 
  public:
-	PhraseDictionary(size_t numScoreComponent);
-	virtual ~PhraseDictionary();
+	PhraseDictionaryFeature(  size_t numScoreComponent
+                            , unsigned numInputScores
+                            , const std::vector<FactorType> &input
+                            , const std::vector<FactorType> &output
+                            , const std::string &filePath
+                            , const std::vector<float> &weight
+                            , size_t tableLimit);
+                            
+	virtual ~PhraseDictionaryFeature();
 	
-	DecodeType GetDecodeType() const	{	return Translate;	}
-	//! table limit number. 
-	size_t GetTableLimit() const { return m_tableLimit; }
+    virtual bool ComputeValueInTranslationOption() const; 
 
-	//! Overriden by load on demand phrase tables classes to load data for each input
-	virtual void InitializeForInput(InputType const &/*source*/) {}
 	std::string GetScoreProducerDescription() const;
 	std::string GetScoreProducerWeightShortName() const
 	{
@@ -66,21 +101,21 @@ class PhraseDictionary : public Dictionary, public StatelessFeatureFunction
 
 	size_t GetNumInputScores() const;
 
-	virtual bool ComputeValueInTranslationOption() const;
+	PhraseDictionaryHandle GetDictionary(const InputType& source) const;
+    
+ private:
+    size_t m_numScoreComponent;
+    unsigned m_numInputScores;
+    std::vector<FactorType> m_input;
+    std::vector<FactorType> m_output;
+    std::string m_filePath;
+    std::vector<float> m_weight;
+    size_t m_tableLimit;
+    PhraseDictionaryHandle m_dictionary;
+    
 
-
-
-	/** set/change translation weights and recalc weighted score for each translation. 
-		* TODO This may be redundant now we use ScoreCollection
-	*/
-	virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
-
-	//! find list of translations that can translates src. Only for phrase input
-	virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
-	//! find list of translations that can translates a portion of src. Used by confusion network decoding
-	virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
-	//! Create entry for translation of source to targetPhrase
-	virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
 };
+
+
 
 }

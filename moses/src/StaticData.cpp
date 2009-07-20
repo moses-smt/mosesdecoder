@@ -373,7 +373,6 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadLanguageModels()) return false;
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
-	if (!LoadMapping()) return false;
 	if (!LoadGlobalLexicalModel()) return false;
 
 	m_scoreIndexManager.InitFeatureNames();
@@ -418,7 +417,6 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_phraseDictionary);
 	RemoveAllInColl(m_generationDictionary);
 	RemoveAllInColl(m_languageModel);
-	RemoveAllInColl(m_decodeStepVL);
 	RemoveAllInColl(m_reorderModels);
 	RemoveAllInColl(m_globalLexicalModels);
 	
@@ -847,47 +845,21 @@ bool StaticData::LoadPhraseTables()
 			IFVERBOSE(1)
 				PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			VERBOSE(1,"filePath: " << filePath << endl);
-			if (!FileExists(filePath+".binphr.idx"))
-			{	// memory phrase table
-				VERBOSE(2,"using standard phrase tables" << endl);
-                if (!FileExists(filePath) && FileExists(filePath + ".gz")) {
-                    filePath += ".gz";
-                    VERBOSE(2,"Using gzipped file" << endl);
-                }
-				if (m_inputType != SentenceInput)
-				{
-					UserMessage::Add("Must use binary phrase table for this input type");
-					return false;
-				}
-				
-				PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent);
-				if (!pd->Load(input
-								 , output
-								 , filePath
-								 , weight
-								 , maxTargetPhrase[index]
-								 , GetAllLM()
-								 , GetWeightWordPenalty()))
-				{
-					delete pd;
-					return false;
-				}
-				m_phraseDictionary.push_back(pd);
-			}
-			else 
-			{ // binary phrase table
-				VERBOSE(1, "using binary phrase tables for idx "<<currDict<<"\n");
-				PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent,(currDict==0 ? m_numInputScores : 0));
-				if (!pd->Load(input,output,filePath,weight,
-									 maxTargetPhrase[index],
-									 GetAllLM(),
-									 GetWeightWordPenalty()))
-				{
-					delete pd;
-					return false;
-				}
-				m_phraseDictionary.push_back(pd);
-			}
+            
+            PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
+                  numScoreComponent
+                ,  (currDict==0 ? m_numInputScores : 0)
+                , input
+                , output
+                , filePath
+                , weight
+                , maxTargetPhrase[index]);
+                
+             m_phraseDictionary.push_back(pdf);
+                
+                
+            
+			
 
 			index++;
 		}
@@ -898,8 +870,9 @@ bool StaticData::LoadPhraseTables()
 	return true;
 }
 
-bool StaticData::LoadMapping()
+vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 {
+    vector<DecodeGraph*> decodeStepVL;
 	// mapping
 	const vector<string> &mappingVector = m_parameter->GetParam("mapping");
 	DecodeStep *prev = 0;
@@ -932,7 +905,7 @@ bool StaticData::LoadMapping()
 		else 
 		{
 			UserMessage::Add("Malformed mapping!");
-			return false;
+			assert(false);
 		}
 		
 		DecodeStep* decodeStep = 0;
@@ -944,9 +917,9 @@ bool StaticData::LoadMapping()
 						strme << "No phrase dictionary with index "
 									<< index << " available!";
 						UserMessage::Add(strme.str());
-						return false;
+						assert(false);
 					}
-				decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev);
+				decodeStep = new DecodeStepTranslation(m_phraseDictionary[index]->GetDictionary(source), prev);
 			break;
 			case Generate:
 				if(index>=m_generationDictionary.size())
@@ -955,7 +928,7 @@ bool StaticData::LoadMapping()
 						strme << "No generation dictionary with index "
 									<< index << " available!";
 						UserMessage::Add(strme.str());
-						return false;
+						assert(false);
 					}
 				decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev);
 			break;
@@ -964,22 +937,20 @@ bool StaticData::LoadMapping()
 			break;
 		}
 		assert(decodeStep);
-		if (m_decodeStepVL.size() < vectorList + 1) 
+		if (decodeStepVL.size() < vectorList + 1) 
 		{
-			m_decodeStepVL.push_back(new DecodeGraph());
+			decodeStepVL.push_back(new DecodeGraph());
 		}
-		m_decodeStepVL[vectorList]->Add(decodeStep);
+		decodeStepVL[vectorList]->Add(decodeStep);
 		prev = decodeStep;
 		previousVectorList = vectorList;
 	}
 	
-	return true;
+	return decodeStepVL;
 }
 
 void StaticData::CleanUpAfterSentenceProcessing() const
 {
-	for(size_t i=0;i<m_phraseDictionary.size();++i)
-		m_phraseDictionary[i]->CleanUp();
 	for(size_t i=0;i<m_generationDictionary.size();++i)
 		m_generationDictionary[i]->CleanUp();
   
@@ -997,9 +968,6 @@ void StaticData::CleanUpAfterSentenceProcessing() const
     binary format is used) */
 void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) const
 {
-	for(size_t i=0;i<m_phraseDictionary.size();++i) {
-		m_phraseDictionary[i]->InitializeForInput(in);
-	}
 	for(size_t i=0;i<m_reorderModels.size();++i) {
 		m_reorderModels[i]->InitializeForInput(in);
 	}
