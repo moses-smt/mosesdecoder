@@ -115,6 +115,13 @@ FFState* LanguageModel::Evaluate(
     const Hypothesis& hypo,
     const FFState* ps,
     ScoreComponentCollection* out) const {
+	// In this function, we only compute the LM scores of n-grams that overlap a
+	// phrase boundary. Phrase-internal scores are taken directly from the
+	// translation option. In the unigram case, there is no overlap, so we don't
+	// need to do anything.
+	if(m_nGramOrder <= 1)
+		return NULL;
+
 	clock_t t=0;
 	IFVERBOSE(2) { t  = clock(); } // track time
 	const void* prevlm = ps ? (static_cast<const LMState *>(ps)->lmstate) : NULL;
