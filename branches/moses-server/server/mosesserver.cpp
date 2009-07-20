@@ -85,7 +85,7 @@ public:
 int main(int argc, char** argv) {
 
     //Extract port and log, send other args to moses
-    char** mosesargv = new char*[argc];
+    char** mosesargv = new char*[argc+2];
     int mosesargc = 0;
     int port = 8080;
     const char* logfile = "/dev/null";
@@ -113,6 +113,9 @@ int main(int argc, char** argv) {
             ++mosesargc;
         }
     }
+    //disable the translation options cache as it's not threadsafe
+    mosesargv[mosesargc++] = "-use-persistent-cache"; 
+    mosesargv[mosesargc++] = "false"; 
 
     Parameter* params = new Parameter();
     if (!params->LoadParam(mosesargc,mosesargv)) {
@@ -120,6 +123,10 @@ int main(int argc, char** argv) {
         exit(1);
     }
     if (!StaticData::LoadDataStatic(params)) {
+        exit(1);
+    }
+    if (StaticData::Instance().GetUseTransOptCache()) {
+        cerr << "Error: Cannot use translation options cache in server." << endl;
         exit(1);
     }
    
