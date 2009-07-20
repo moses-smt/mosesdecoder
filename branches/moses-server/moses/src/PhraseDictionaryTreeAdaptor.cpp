@@ -23,8 +23,9 @@ namespace Moses
 *************************************************************/
 
 PhraseDictionaryTreeAdaptor::
-PhraseDictionaryTreeAdaptor(size_t numScoreComponent,unsigned numInputScores)
-	: MyBase(numScoreComponent),imp(new PDTAimp(this,numInputScores)) {}
+PhraseDictionaryTreeAdaptor(size_t numScoreComponent, unsigned numInputScores, const PhraseDictionaryFeature* feature)
+	: PhraseDictionary(numScoreComponent,feature), imp(new PDTAimp(this,numInputScores)) {
+}
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor() 
 {
@@ -32,21 +33,6 @@ PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 	delete imp;
 }
 
-void PhraseDictionaryTreeAdaptor::CleanUp() 
-{
-	imp->CleanUp();
-	MyBase::CleanUp();
-}
-
-void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
-{
-	// caching only required for confusion net
-	if(ConfusionNet const* cn=dynamic_cast<ConfusionNet const*>(&source))
-		imp->CacheSource(*cn);
-	//else if(Sentence const* s=dynamic_cast<Sentence const*>(&source))
-	// following removed by phi, not helpful
-	//	imp->CacheSource(ConfusionNet(*s));
-}
 
 bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 																				 , const std::vector<FactorType> &output
@@ -55,7 +41,7 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 																				 , size_t tableLimit
 																				 , const LMList &languageModels
 																				 , float weightWP
-																				 )
+                                                                                 , const InputType& source)
 {
 	if(m_numScoreComponent!=weight.size()) {
 		stringstream strme;
@@ -64,7 +50,6 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 		UserMessage::Add(strme.str());
 		return false;
 	}
-	m_filePath = filePath;
 
 	// set Dictionary members
 	m_inputFactors = FactorMask(input);
@@ -76,6 +61,9 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 
 	imp->Create(input,output,filePath,
 							weight,languageModels,weightWP);
+    // caching only required for confusion net
+    if(ConfusionNet const* cn=dynamic_cast<ConfusionNet const*>(&source))
+        imp->CacheSource(*cn);                     
 	return true;
 }
 

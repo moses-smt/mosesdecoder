@@ -50,7 +50,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	const StaticData &staticData = StaticData::Instance();
 	
 	m_tableLimit = tableLimit;
-	m_filePath = filePath;
 
 	//factors	
 	m_inputFactors = FactorMask(input);
@@ -147,7 +146,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		std::vector<float> scv(scoreVector.size());
 		std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
 		std::transform(scv.begin(),scv.end(),scv.begin(),FloorScore);
-		targetPhrase.SetScore(this, scv, weight, weightWP, languageModels);
+		targetPhrase.SetScore(m_feature, scv, weight, weightWP, languageModels);
 
 		AddEquivPhrase(sourcePhrase, targetPhrase);
 

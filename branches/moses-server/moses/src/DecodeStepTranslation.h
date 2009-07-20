@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include "DecodeStep.h"
+#include "PhraseDictionary.h"
 
 namespace Moses
 {
@@ -34,7 +35,7 @@ class DecodeStepTranslation : public DecodeStep
 {
 public:
 	DecodeStepTranslation(); //! not implemented
-	DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev);
+	DecodeStepTranslation(PhraseDictionaryHandle dict, const DecodeStep* prev);
 
   //! returns phrase table (dictionary) for translation step 
   const PhraseDictionary &GetPhraseDictionary() const;
@@ -57,6 +58,7 @@ private:
 		This function runs IsCompatible() to ensure the two can be merged
 	*/
 	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;
+    PhraseDictionaryHandle m_phraseDictionary;   
 };
 
 
