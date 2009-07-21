@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 #include <iostream>
+
+#include <boost/thread/mutex.hpp>
+
 #include "TypeDef.h"
 #include "Dictionary.h"
 
