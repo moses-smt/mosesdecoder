@@ -7,7 +7,8 @@
 #include "Gibbler.h"
 #include "MpiDebug.h"
 #include "ScoreComponentCollection.h"
-#include "Phrase.h"
+#include "StaticData.h"
+#include "SampleCollector.h"
 
 using namespace Moses;
 

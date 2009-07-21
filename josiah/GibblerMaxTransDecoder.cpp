@@ -1,4 +1,9 @@
 #include "GibblerMaxTransDecoder.h"
+#include "Derivation.h"
+#include "GainFunction.h"
+#include "SentenceBleu.h"
+#include "StaticData.h"
+#include "Gibbler.h"
 
 #include <sstream>
 #include <map>
@@ -21,7 +26,7 @@ namespace Josiah
   void MaxCollector<M>::getDistribution(map<const M*,double>& p) const
   {
     const vector<double>& importanceWeights =  getImportanceWeights();
-    const M* prev = NULL;
+    
     for (typename map<M,vector<size_t> >::const_iterator i = m_samples.begin(); i != m_samples.end(); ++i) {
       const M* sample = &(i->first);
       for (vector<size_t>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {

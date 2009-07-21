@@ -9,8 +9,9 @@
 #include "HypothesisStackNormal.h"
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
+#include "WordsBitmap.h"
 
-#include "GibbsOperator.h"
+//#include "GibbsOperator.h"
 
 namespace Josiah
 {
@@ -28,12 +29,12 @@ namespace Josiah
     protected:
       float m_bestScore; /**< score of the best hypothesis in collection */
       float m_worstScore; /**< score of the worse hypothesis in collection */
-      map<Moses::WordsBitmapID, float > m_diversityWorstScore; /**< score of worst hypothesis for particular source word coverage */
+      std::map<Moses::WordsBitmapID, float > m_diversityWorstScore; /**< score of worst hypothesis for particular source word coverage */
       float m_beamWidth; /**< minimum score due to threashold pruning */
       size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
       size_t m_minHypoStackDiversity; /**< minimum number of hypothesis with different source word coverage */
       bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
-      map<const Hypothesis*, float> m_scores;
+    std::map<const Moses::Hypothesis*, float> m_scores;
 
     /** add hypothesis to stack. Prune if necessary. 
       * Returns false if equiv hypo exists in collection, otherwise returns true
@@ -47,23 +48,23 @@ namespace Josiah
         m_diversityWorstScore[ id ] = worstScore;
       }
       
-      float GetTotalScore(const Hypothesis* hypo);
-      float GetTotalScore(const Hypothesis* hypo) const;
+      float GetTotalScore(const Moses::Hypothesis* hypo);
+      float GetTotalScore(const Moses::Hypothesis* hypo) const;
       // sorting helper
       struct CompareHypothesisTotalScore
       {
         HypothesisStackRandom* m_parent;
         CompareHypothesisTotalScore(HypothesisStackRandom* parent) {m_parent = parent;}
-        bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const
+        bool operator()(const Moses::Hypothesis* hypo1, const Moses::Hypothesis* hypo2) const
         {
           return m_parent->GetTotalScore(hypo1) > m_parent->GetTotalScore(hypo2);
         }
       };
 
     public:
-      float GetWorstScoreForBitmap( WordsBitmapID id ) {
+    float GetWorstScoreForBitmap( Moses::WordsBitmapID id ) {
         if (m_diversityWorstScore.find( id ) == m_diversityWorstScore.end())
-          return -numeric_limits<float>::infinity();
+          return -std::numeric_limits<float>::infinity();
         return m_diversityWorstScore[ id ];
       }
       float GetWorstScoreForBitmap( const Moses::WordsBitmap &coverage ) {

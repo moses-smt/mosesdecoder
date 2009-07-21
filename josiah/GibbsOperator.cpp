@@ -20,6 +20,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GibbsOperator.h"
 #include "OnlineLearner.h"
 #include "SampleAcceptor.h"
+#include "TranslationDelta.h"
+#include "Gibbler.h"
+#include "Sampler.h"
 
 using namespace std;
 using namespace Moses;
@@ -78,7 +81,6 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
     deltas[chosen]->apply(*noChangeDelta);
   }
   
-  
 }
 
   
@@ -87,6 +89,9 @@ void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, Translat
   
   float chosenScore = deltas[chosen]->getScore();
   float chosenGain = deltas[chosen]->getGain();
+
+  if (m_useApproxDocBleu)
+    m_sampler->UpdateGainFunctionStats(deltas[chosen]->getGainSufficientStats());
   
   int target = m_assigner->getTarget(deltas, noChangeDelta);
   
@@ -95,7 +100,7 @@ void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, Translat
   
   float targetScore = deltas[target]->getScore();
   float targetGain = deltas[target]->getGain();
-    
+  
   if (chosenScore > targetScore && chosenGain < targetGain  ||
         chosenScore < targetScore && chosenGain > targetGain ) {
     error = true;

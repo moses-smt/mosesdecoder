@@ -7,7 +7,9 @@
 #include "Factor.h"
 #include "SufficientStats.h"
 
+
 namespace Josiah {
+
 
 #define SMOOTHING_CONSTANT  0.01
 class SentenceBLEU : public GainFunction {
@@ -56,10 +58,12 @@ private:
   int n_;
   float _bp_scale;
   bool _use_bp_denum_hack;
+  static BleuDefaultSmoothingSufficientStats m_currentSmoothing;
+  int m_src_len;
   
  public:
-  SentenceBLEU(int n, const std::vector<std::string>& refs, float bp_scale = 1.0, bool use_bp_denum_hack = false);
-  SentenceBLEU(int n, const std::vector<const Moses::Factor*> & ref, float bp_scale = 1.0, bool use_bp_denum_hack= false);
+  SentenceBLEU(int n, const std::vector<std::string>& refs, const std::string & src, float bp_scale = 1.0, bool use_bp_denum_hack = false);
+  SentenceBLEU(int n, const std::vector<const Moses::Factor*> & ref, int src_len = 0, float bp_scale = 1.0, bool use_bp_denum_hack= false);
     
   int GetType() const { return 1;}
   float ComputeGain(const std::vector<const Moses::Factor*>& hyp) const;
@@ -78,8 +82,15 @@ private:
   void CalcSufficientStats(const NGramCountMap & refNgrams, const NGramCountMap & hypNgrams, int hypLen, BleuSufficientStats &stats) const;  
   virtual void GetSufficientStats(const std::vector<const Moses::Factor*>& sent, SufficientStats* stats) const;
   static float CalcBleu(const BleuSufficientStats & stats, bool smooth = true, bool _use_bp_denum_hack = false, float _bp_scale = 1.0);
+  static float CalcBleu(const BleuSufficientStats & stats, const BleuSufficientStats& smoothing_stats);
+  
+  static SufficientStats* GetCurrentSmoothing() {
+    return &m_currentSmoothing;
+  };
+  
+  static void UpdateSmoothing(SufficientStats* smooth);
+  
  };
   
-  
-};
+}
 

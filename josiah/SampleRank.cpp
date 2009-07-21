@@ -34,7 +34,6 @@
 #include "AnnealingSchedule.h"
 #include "QuenchingSchedule.h"
 #include "Decoder.h"
-#include "Dependency.h"
 #include "Derivation.h"
 #include "Gibbler.h"
 #include "InputSource.h"
@@ -44,13 +43,14 @@
 #include "GainFunction.h"
 #include "GibblerMaxTransDecoder.h"
 #include "MpiDebug.h"
-#include "Model1.h"
-#include "Pos.h"
-#include "SourceToTargetRatio.h"
 #include "Timer.h"
 #include "StaticData.h"
 #include "OnlineLearner.h"
 #include "SampleAcceptor.h"
+#include "TranslationDelta.h"
+#include "Sampler.h"
+#include "StopStrategy.h"
+#include "Utils.h"
 
 #if 0
 vector<string> refs;
@@ -72,120 +72,6 @@ using boost::split;
 using boost::is_any_of;
 namespace po = boost::program_options;
 
-
-void LoadReferences(const vector<string>& ref_files, GainFunctionVector* g, float bp_scale = 1.0, bool use_bp_denum_hack = false) {
-  assert(ref_files.size() > 0);
-  vector<ifstream*> ifs(ref_files.size(), NULL);
-  for (unsigned i = 0; i < ref_files.size(); ++i) {
-    cerr << "Reference " << (i+1) << ": " << ref_files[i] << endl;
-    ifs[i] = new ifstream(ref_files[i].c_str());
-    assert(ifs[i]->good());
-  }
-  while(!ifs[0]->eof()) {
-    vector<string> refs(ref_files.size());
-    for (unsigned int i = 0; i < refs.size(); ++i) {
-      getline(*ifs[i], refs[i]);
-    }
-    if (refs[0].empty() && ifs[0]->eof()) break;
-    g->push_back(new SentenceBLEU(4, refs, bp_scale, use_bp_denum_hack));
-  }
-  for (unsigned i=0; i < ifs.size(); ++i) delete ifs[i];
-  cerr << "Loaded reference translations for " << g->size() << " sentences." << endl;
-}
-
-/**
- * Wrap moses timer to give a way to no-op it.
- **/
-class GibbsTimer {
-public:
-  GibbsTimer() : m_doTiming(false) {}
-  void on() {m_doTiming = true; m_timer.start("TIME: Starting timer");}
-  void check(const string& msg) {if (m_doTiming) m_timer.check(string("TIME:" + msg).c_str());}
-private:
-  Timer m_timer;
-  bool m_doTiming;
-} timer;
-
-void configure_features_from_file(const std::string& filename, feature_vector& fv){
-  std::cerr << "Reading extra features from " << filename << std::endl;
-  std::ifstream in(filename.c_str());
-  if (!in) {
-    throw std::runtime_error("Unable to open feature configuration file");
-  }
-  // todo: instead of having this function know about all required options of
-  // each feature, have features populate options / read variable maps /
-  // populate feature_vector using static functions.
-  po::options_description desc;
-  bool useApproxPef = false;
-  bool useApproxPfe = false;
-  bool useVerbDiff = false;
-  bool useCherry = false;
-  bool useDepDist = false;
-  bool useSrcTgtRatio = false;
-  size_t dependencyFactor;
-  desc.add_options()
-  ("model1.table", "Model 1 table")
-  ("model1.pef_column", "Column containing p(e|f) score")
-  ("model1.pfe_column", "Column containing p(f|e) score")
-  ("model1.approx_pef",po::value<bool>(&useApproxPef)->default_value(false), "Approximate the p(e|f), and use importance sampling")
-  ("model1.approx_pfe",po::value<bool>(&useApproxPfe)->default_value(false), "Approximate the p(f|e), and use importance sampling")
-  ("pos.verbdiff", po::value<bool>(&useVerbDiff)->default_value(false), "Verb difference feature")
-  ("dependency.cherry", po::value<bool>(&useCherry)->default_value(false), "Use Colin Cherry's syntactic cohesiveness feature")
-  ("dependency.distortion", po::value<bool>(&useDepDist)->default_value(false), "Use the dependency distortion feature")
-  ("dependency.factor", po::value<size_t>(&dependencyFactor)->default_value(1), "Factor representing the dependency tree")
-  ("srctgtratio.useFeat", po::value<bool>(&useSrcTgtRatio)->default_value(false), "Use source length to target length ratio feature");
-  
-  po::variables_map vm;
-  po::store(po::parse_config_file(in,desc,true), vm);
-  notify(vm);
-  if (!vm["model1.pef_column"].empty() || !vm["model1.pfe_column"].empty()){
-    boost::shared_ptr<external_model1_table> ptable;
-    boost::shared_ptr<moses_factor_to_vocab_id> p_evocab_mapper;
-    boost::shared_ptr<moses_factor_to_vocab_id> p_fvocab_mapper;
-    if (vm["model1.table"].empty())
-      throw std::runtime_error("Requesting Model 1 features, but no Model 1 table given");
-    else {
-      ptable.reset(new external_model1_table(vm["model1.table"].as<std::string>()));
-      p_fvocab_mapper.reset(new moses_factor_to_vocab_id(ptable->f_vocab(), Moses::Input, 0, Moses::FactorCollection::Instance())); 
-      p_evocab_mapper.reset(new moses_factor_to_vocab_id(ptable->e_vocab(), Moses::Output, 0, Moses::FactorCollection::Instance())); 
-    }
-    if (!vm["model1.pef_column"].empty()) {
-      if (useApproxPef) {
-        cerr << "Using approximation for model1" << endl;
-        fv.push_back(feature_handle(new ApproximateModel1(ptable, p_fvocab_mapper, p_evocab_mapper)));
-      } else {
-        fv.push_back(feature_handle(new model1(ptable, p_fvocab_mapper, p_evocab_mapper)));
-      }
-    }
-    if (!vm["model1.pfe_column"].empty()) {
-      if (useApproxPfe) {
-        cerr << "Using approximation for model1 inverse" << endl;
-        fv.push_back(feature_handle(new ApproximateModel1Inverse(ptable, p_fvocab_mapper, p_evocab_mapper)));
-      } else {
-        fv.push_back(feature_handle(new model1_inverse(ptable, p_fvocab_mapper, p_evocab_mapper)));
-      }
-    }
-    
-  }
-  if (useVerbDiff) {
-    //FIXME: Should be configurable
-    fv.push_back(feature_handle(new VerbDifferenceFeature(1,1)));
-  }
-  if (useCherry) {
-    fv.push_back(feature_handle(new CherrySyntacticCohesionFeature(dependencyFactor)));
-  }
-  if (useSrcTgtRatio) {
-    fv.push_back(feature_handle(new SourceToTargetRatio));
-  }
-  if (useDepDist) {
-    fv.push_back(feature_handle(new DependencyDistortionFeature(dependencyFactor)));
-  }
-  in.close();
-}
-
-
-
-
 /**
  * Main for Josiah - the Gibbs sampler for moses.
  **/
@@ -199,6 +85,7 @@ int main(int argc, char** argv) {
   cerr << "MPI rank: " << rank << endl; 
   cerr << "MPI size: " << size << endl;
 #endif
+  GibbsTimer timer;
   string stopperConfig;
   unsigned int topn;
   int debug;
@@ -246,7 +133,8 @@ int main(int argc, char** argv) {
   int epochs;
   bool greedy, fixedTemp;
   float fixed_temperature;
-  bool closestBestNeighbour;
+  bool closestBestNeighbour, chiangBestNeighbour;
+  bool approxDocBleu;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -296,7 +184,9 @@ int main(int argc, char** argv) {
   ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
   ("fixed-temp-accept", po::value(&fixedTemp)->zero_tokens()->default_value(false), "Fixed temperature sample acceptor")
   ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor")
-  ("closest-best-neighbour", po::value(&closestBestNeighbour)->zero_tokens()->default_value(false), "Closest best neighbour");
+  ("closest-best-neighbour", po::value(&closestBestNeighbour)->zero_tokens()->default_value(false), "Closest best neighbour")
+  ("chiang-best-neighbour", po::value(&chiangBestNeighbour)->zero_tokens()->default_value(false), "Chiang best neighbour")
+  ("approx-doc-bleu", po::value(&approxDocBleu)->zero_tokens()->default_value(false), "Compute approx doc bleu as gain");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -391,7 +281,7 @@ int main(int argc, char** argv) {
   }      
   
   GainFunctionVector g;
-  if (ref_files.size() > 0) LoadReferences(ref_files, &g, brev_penalty_scaling_factor, hack_bp_denum);
+  if (ref_files.size() > 0) LoadReferences(ref_files, inputfile, &g, brev_penalty_scaling_factor, hack_bp_denum);
   
   ostream* out = &cout;
   if (!outputfile.empty()) {
@@ -413,6 +303,7 @@ int main(int argc, char** argv) {
   VERBOSE(2,"Reheatings: " << reheatings << endl);
   sampler.SetReheatings(reheatings);
   
+  
   //configure the sampler
   MergeSplitOperator mso;
   FlipOperator fo;
@@ -421,6 +312,12 @@ int main(int argc, char** argv) {
   sampler.AddOperator(&mso);
   sampler.AddOperator(&tso);
   sampler.AddOperator(&fo);
+  
+  if (approxDocBleu) {
+    mso.UseApproxDocBleu(true); 
+    tso.UseApproxDocBleu(true); 
+    fo.UseApproxDocBleu(true); 
+  }
   
   //Acceptor
   auto_ptr<SampleAcceptor> acceptor;
@@ -438,6 +335,9 @@ int main(int argc, char** argv) {
   auto_ptr<TargetAssigner> tgtAssigner;
   if (closestBestNeighbour) {
     tgtAssigner.reset(new ClosestBestNeighbourTgtAssigner());
+  }
+  else if (chiangBestNeighbour) {
+    tgtAssigner.reset(new ChiangBestNeighbourTgtAssigner());
   }
   else {
     tgtAssigner.reset(new BestNeighbourTgtAssigner());
@@ -500,6 +400,7 @@ int main(int argc, char** argv) {
   input.reset(trainer);
   
   timer.check("Processing input file");
+  int ctr = 0;
   while (input->HasMore()) {
     string line;
     input->GetSentence(&line, &lineno);
@@ -520,9 +421,13 @@ int main(int argc, char** argv) {
     TranslationDelta::lmcalls = 0;
 
     if (sampleRank) {
-     mso.SetGainFunction(&g[lineno]);
-     tso.SetGainFunction(&g[lineno]);
-     fo.SetGainFunction(&g[lineno]);
+      if (approxDocBleu && ctr > 0) {
+        SentenceBLEU::UpdateSmoothing(sampler.GetSentenceGainFunctionStats());
+      }
+      
+      mso.SetGainFunction(&g[lineno]);
+      tso.SetGainFunction(&g[lineno]);
+      fo.SetGainFunction(&g[lineno]);
     }
 
     //Reset the online learner stats
@@ -535,7 +440,7 @@ int main(int argc, char** argv) {
 
     
     ++lineno;
-    
+    ++ctr;
     if (trainer && trainer->GetCurr() == trainer->GetCurrEnd()) {
       trainer->ReserveNextBatch();
     }

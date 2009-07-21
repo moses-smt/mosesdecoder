@@ -24,6 +24,11 @@ josiah_SOURCES = Derivation.cpp \
     QuenchingSchedule.cpp \
     SampleAcceptor.cpp \
     OnlineLearner.cpp \
+    Sampler.cpp \
+    SampleCollector.cpp \
+    StopStrategy.cpp \
+    Utils.cpp \
+    SufficientStats.cpp \
     GibblerAnnealedExpectedLossTrainer.cpp 
 
 
@@ -54,6 +59,11 @@ corpustrainer_SOURCES = Derivation.cpp \
     CorpusSampler.cpp \
     CorpusSamplerAnnealed.cpp \
     SampleAcceptor.cpp \
+     Sampler.cpp \
+    SampleCollector.cpp \
+    StopStrategy.cpp \
+    Utils.cpp \
+    SufficientStats.cpp \
     OnlineLearner.cpp \
     CorpusTrainer.cpp 
    
@@ -79,7 +89,12 @@ samplerank_SOURCES = Derivation.cpp \
     QuenchingSchedule.cpp \
     SampleRank.cpp \
     OnlineLearner.cpp \
-    SampleAcceptor.cpp \
+      Sampler.cpp \
+    SampleCollector.cpp \
+    StopStrategy.cpp \
+    Utils.cpp \
+    SufficientStats.cpp \
+   SampleAcceptor.cpp \
     OnlineLearnerTrainer.cpp 
    
 

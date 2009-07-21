@@ -10,9 +10,12 @@ using namespace std;
 
 namespace Josiah {
 
+
+BleuDefaultSmoothingSufficientStats SentenceBLEU::m_currentSmoothing;   
+  
 #define  BP_DENUM_HACK 100
-SentenceBLEU::SentenceBLEU(int n, const std::vector<std::string>& refs, float bp_scale, bool denum_hack) :
- n_(n) , _bp_scale(bp_scale),  _use_bp_denum_hack(denum_hack) {
+SentenceBLEU::SentenceBLEU(int n, const std::vector<std::string>& refs, const std::string & src, float bp_scale, bool denum_hack) :
+ n_(n), _bp_scale(bp_scale),  _use_bp_denum_hack(denum_hack) {
   for (vector<string>::const_iterator ci = refs.begin();
      ci != refs.end(); ++ci) {
     vector<const Factor*> fv;
@@ -20,12 +23,16 @@ SentenceBLEU::SentenceBLEU(int n, const std::vector<std::string>& refs, float bp
     lengths_.push_back(fv.size());
     CountRef(fv, ngrams_);
   }
+  vector<const Factor*> fv;
+  GainFunction::ConvertStringToFactorArray(src, &fv);
+  m_src_len = fv.size(); 
 }
 
-SentenceBLEU::SentenceBLEU(int n, const vector<const Factor*> & ref, float bp_scale, bool denum_hack) :
-  n_(n) , _bp_scale(bp_scale),  _use_bp_denum_hack(denum_hack) {
+SentenceBLEU::SentenceBLEU(int n, const vector<const Factor*> & ref, int src_len, float bp_scale, bool denum_hack) :
+  n_(n) , m_src_len(src_len), _bp_scale(bp_scale),  _use_bp_denum_hack(denum_hack) {
   lengths_.push_back(ref.size());
   CountRef(ref, ngrams_);
+    
 }  
   
   
@@ -88,6 +95,7 @@ void SentenceBLEU::CalcSufficientStats(const NGramCountMap & refNgrams, const NG
       
     stats.hyp[hypIt->first.size() - 1] += hypIt->second.first;
   }
+  stats.src_len = m_src_len;
   //cerr << stats << endl;
 }
   
@@ -127,8 +135,46 @@ float SentenceBLEU::CalcBleu(const BleuSufficientStats & stats, bool smooth, boo
     lbp = (stats.hyp_len - stats.ref_len) / bp_denum;
   log_bleu += lbp * _bp_scale;
   
-  return (100 * exp(log_bleu));
+  return exp(log_bleu);
+}  
+
+float SentenceBLEU::CalcBleu(const BleuSufficientStats & stats, const BleuSufficientStats& smooth) {
+  assert(stats.correct.size() ==  stats.hyp.size());
+  
+  float log_bleu = 0;
+  int count = 0;
+  for (size_t i = 0; i < stats.correct.size() ; ++i) {
+    if (true || stats.hyp[i] > 0) {
+      float lprec = log(smooth.correct[i] + stats.correct[i]) - log(smooth.hyp[i] + stats.hyp[i]);
+      log_bleu += lprec;
+      ++count;
+    }
+  }
+  
+  log_bleu /= static_cast<float>(count);
+  float lbp = 0.0;
+    
+  float hyp_len = stats.hyp_len + smooth.hyp_len;
+  float ref_len = stats.ref_len + smooth.ref_len;
+    
+  if (hyp_len < ref_len)
+    lbp = (hyp_len - ref_len) / hyp_len;
+  log_bleu += lbp ;
+  
+  float bleu = exp(log_bleu);
+  
+  bleu *= (smooth.src_len + stats.src_len);
+    
+  return bleu;
 }  
   
+void SentenceBLEU::UpdateSmoothing(SufficientStats* smooth) {
+   cerr << "Curr Smoothing stats : " << m_currentSmoothing << endl;
+   m_currentSmoothing += *static_cast<BleuSufficientStats*>(smooth);
+   m_currentSmoothing *= 0.9;
+   cerr << "Now Smoothing stats : " << m_currentSmoothing << endl;
 }
+  
+}
+
 

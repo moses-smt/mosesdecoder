@@ -9,11 +9,11 @@
 
 #include "ScoreComponentCollection.h"
 #include "InputSource.h"
-#include "OnlineLearner.h"
 
 namespace Josiah {
   
 class Decoder;
+class OnlineLearner;  
   
 class OnlineLearnerTrainer : public InputSource {
   public:

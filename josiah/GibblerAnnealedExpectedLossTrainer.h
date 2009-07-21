@@ -4,18 +4,19 @@
 #include <utility>
 #include <ext/hash_map>
 
-#include "Gibbler.h"
 #include "ScoreComponentCollection.h"
 #include "Derivation.h"
 #include "GibblerExpectedLossTraining.h"
-#include "GibblerMaxDerivDecoder.h"
 #include "Phrase.h"
+#include "Sampler.h"
+#include "GibblerMaxDerivDecoder.h"
 
 using namespace Moses;
 
 namespace Josiah {
   
   class GainFunction;
+
   
   class GibblerAnnealedExpectedLossCollector : public ExpectedLossCollector {
   public:

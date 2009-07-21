@@ -4,11 +4,8 @@
 #include <utility>
 #include <ext/hash_map>
 
-#include "Gibbler.h"
 #include "ScoreComponentCollection.h"
-#include "Derivation.h"
 #include "CorpusSampler.h"
-#include "GibblerMaxDerivDecoder.h"
 #include "Phrase.h"
 #ifdef MPI_ENABLED
 #include <mpi.h>
@@ -18,8 +15,9 @@
 using namespace Moses;
 
 namespace Josiah {
-  
+  class Derivation;
   class GainFunction;
+  class CorpusSamplerCollector;
   
   class CorpusSamplerAnnealedCollector : public CorpusSamplerCollector {
   public:

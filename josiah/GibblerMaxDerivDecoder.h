@@ -1,9 +1,9 @@
-
 #pragma once
 
 #include <functional>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "Derivation.h"
 #include "GibblerMaxTransDecoder.h"
@@ -20,6 +20,7 @@ namespace Josiah {
       void outputDerivationsByTranslation(std::ostream& out);
       void outputDerivationProbability(const DerivationProbability& dp,size_t n, std::ostream& out);
       void reset();  
+      virtual ~DerivationCollector(){}
     private:
       std::map<std::string,std::set<Derivation> > m_derivByTrans;
       int m_pd;

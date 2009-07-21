@@ -1,4 +1,6 @@
 #include "GibblerMaxDerivDecoder.h"
+#include "StaticData.h"
+#include <iomanip>
 
 using namespace Moses;
 using namespace std;

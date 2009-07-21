@@ -3,14 +3,16 @@
 #include <map>
 #include <utility>
 
-#include "Derivation.h"
-#include "Gibbler.h"
+//#include "Derivation.h"
+//#include "Gibbler.h"
 #include "MpiDebug.h"
 #include "ScoreComponentCollection.h"
 #include "GibblerExpectedLossTraining.h"
 #include "GibblerMaxDerivDecoder.h"
 #include "Phrase.h"
 #include "SentenceBleu.h"
+#include "Sampler.h"
+
 #ifdef MPI_ENABLED
 #include <mpi.h>
 #endif
@@ -20,7 +22,8 @@ using namespace Moses;
 namespace Josiah {
   
   class GainFunction;
-  
+  class Sampler;
+  class Derivation;  
   class CorpusSamplerCollector : public ExpectedLossCollector {
   public:
     CorpusSamplerCollector(int samples, Sampler &sampler) 
