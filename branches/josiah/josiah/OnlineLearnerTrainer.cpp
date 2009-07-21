@@ -8,6 +8,7 @@
 
 #include "Optimizer.h"
 #include "Decoder.h"
+#include "OnlineLearner.h"
 
 using namespace std;
 using namespace Moses;

@@ -5,6 +5,7 @@
 #include "Hypothesis.h"
 #include "Decoder.h"
 #include "SentenceBleu.h"
+#include "GibbsOperator.h"
 #ifdef MPI_ENABLED
 #include <mpi.h>
 #endif

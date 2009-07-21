@@ -1,5 +1,7 @@
 #include "SampleAcceptor.h"
 #include "TranslationDelta.h"
+#include "StaticData.h"
+#include "GibbsOperator.h"
 
 using namespace std;
 
@@ -102,7 +104,7 @@ size_t BestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& delt
   IFVERBOSE(1) {
     if (bestGainIndex > -1) {
       cerr << "best nbr has score " << deltas[bestGainIndex]->getScore() << " and gain " << deltas[bestGainIndex]->getGain() << endl;
-      cerr << "No change has score " << noChangeDelta->getScore() << " and gain " << noChangeDelta->getGain() << endl;    
+      //cerr << "No change has score " << noChangeDelta->getScore() << " and gain " << noChangeDelta->getGain() << endl;    
     }
   }
   return bestGainIndex;
@@ -132,5 +134,27 @@ size_t ClosestBestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*
   }
   return closestBestNbr;
 }
+
+size_t ChiangBestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta) {
+  //Only do best neighbour for the moment
+  float maxCombScore = -1e6;
+  int bestNbr = -1;
+  for (vector<TranslationDelta*>::const_iterator i = deltas.begin(); i != deltas.end(); ++i) {
+    float combScore = (*i)->getGain() + (*i)->getScore();
+    if (combScore > maxCombScore ) {
+      maxCombScore = combScore;
+      bestNbr = i-deltas.begin();
+    }
+  }
+    
+  IFVERBOSE(1) {
+    if(bestNbr > -1) {
+      cerr << "best nbr has score " << deltas[bestNbr]->getScore() << " and gain " << deltas[bestNbr]->getGain() << endl;
+      cerr << "No change has score " << noChangeDelta->getScore() << " and gain " << noChangeDelta->getGain() << endl;     
+    } 
+  }
+  
+  return bestNbr;
+}  
   
 }

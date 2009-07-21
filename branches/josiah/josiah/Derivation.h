@@ -26,17 +26,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 
-#include "Gibbler.h"
-#include "GibblerMaxTransDecoder.h"
 #include "ScoreComponentCollection.h"
 #include "WordsRange.h"
-
+#include "Phrase.h"
+#include "Factor.h"
 
 using namespace Moses;
 
 namespace Josiah {
 
-
+class Sample;
 
 /**
   * Represents a derivation, ie a way of getting from e to f.

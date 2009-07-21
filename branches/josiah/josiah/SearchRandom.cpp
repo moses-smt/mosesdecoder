@@ -1,5 +1,6 @@
 #include "Timer.h"
 #include "SearchRandom.h"
+#include "GibbsOperator.h"
 
 using namespace Moses;
 

@@ -29,20 +29,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 
-#include "DummyScoreProducers.h"
-#include "FeatureFunction.h"
-#include "Gibbler.h"
-#include "Hypothesis.h"
-#include "TranslationDelta.h"
+//#include "DummyScoreProducers.h"
+//#include "FeatureFunction.h"
+/*#include "Hypothesis.h"
 #include "TranslationOptionCollection.h"
-#include "WordsRange.h"
+#include "WordsRange.h"*/
+
+#include "TranslationDelta.h"
+
+namespace Moses {
+  class Hypothesis;
+  class TranslationOptionCollection;
+  class WordsRange;
+}
 
 using namespace Moses;
 
 namespace Josiah {
 
   class Sample;
-  class TranslationDelta;
+  //class TranslationDelta;
   class GainFunction;
   class Sampler;
   class SampleAcceptor;
@@ -75,7 +81,7 @@ namespace Josiah {
       double next() {return m_random();}
       void setSeed(uint32_t seed){
           m_generator.seed(seed);
-          cerr << "Setting random seed to " << seed << endl;
+          std::cerr << "Setting random seed to " << seed << std::endl;
       }
       
     private:
@@ -90,19 +96,18 @@ namespace Josiah {
   /** Abstract base class for gibbs operators **/
   class GibbsOperator {
     public:
-    GibbsOperator(const string& name) : m_name(name), T(1), m_gf(NULL) {}
+        GibbsOperator(const std::string& name) : m_name(name), T(1), m_gf(NULL), m_useApproxDocBleu(false) {}
         /**
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
           **/
+        virtual ~GibbsOperator() {} 
         virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc) = 0;
-        const string& name() const {return m_name;}
-        virtual ~GibbsOperator() {}
-       
+        const std::string& name() const {return m_name;}
         void SetAnnealingTemperature(const double t);
         void Quench() ;
         void SetGainFunction(const GainFunction *gf) {m_gf = gf;}
         const GainFunction* GetGainFunction() {return m_gf;}
-        int chooseTargetAssignment(const vector<TranslationDelta*>& deltas);
+        int chooseTargetAssignment(const std::vector<TranslationDelta*>& deltas);
         void SetSampler(Sampler* sampler) {m_sampler = sampler;}
         Sampler* GetSampler()  {return m_sampler;}
         void disableGainFunction() {
@@ -113,16 +118,17 @@ namespace Josiah {
           m_gf = m_gf_bk;
           m_gf_bk = NULL;
         }
-        void doOnlineLearning(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen);
+        void doOnlineLearning(std::vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen);
         void addSampleAcceptor(SampleAcceptor* acceptor) { m_acceptor = acceptor;}
         void addTargetAssigner(TargetAssigner* assigner) { m_assigner = assigner;}
+        void UseApproxDocBleu(bool use) { m_useApproxDocBleu = use;}
      protected:
         /**
           * Randomly select and apply one of the translation deltas.
           **/
         void doSample(std::vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta);
         
-        string m_name;
+        std::string m_name;
 				double T;  // annealing temperature
         
     private:
@@ -132,6 +138,7 @@ namespace Josiah {
       SampleAcceptor* m_acceptor;
       TargetAssigner* m_assigner;
       Sampler* m_sampler;
+      bool m_useApproxDocBleu;
   };
   
   /**
@@ -163,14 +170,13 @@ namespace Josiah {
   public:
     FlipOperator() : GibbsOperator("flip") {}
     virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
-    virtual const string& name() const {return m_name;}
+    virtual const std::string& name() const {return m_name;}
     virtual ~FlipOperator() {}
     
   private:
-    string m_name;
-    //bool CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTgtHypo, const Hypothesis* leftPrevHypo, const Hypothesis* rightNextHypo, float & totalDistortion);
+    std::string m_name;
     bool CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTgtHypo, const Hypothesis* leftTgtPrevHypo, const Hypothesis* leftTgtNextHypo, const Hypothesis* rightTgtPrevHypo, const Hypothesis* rightTgtNextHypo, float & totalDistortion);
-    void CollectAllSplitPoints(Sample& sample, vector<int> &splitPoints);
+    void CollectAllSplitPoints(Sample& sample, std::vector<int> &splitPoints);
   };
  
 }

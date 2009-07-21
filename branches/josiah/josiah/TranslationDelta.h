@@ -28,12 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <ext/hash_map>
 #endif
 
-#include "DummyScoreProducers.h"
-#include "Gibbler.h"
-#include "Hypothesis.h"
-#include "TranslationOptionCollection.h"
-#include "FeatureFunction.h"
-#include "GainFunction.h"
+//#include "DummyScoreProducers.h"
+#include "SufficientStats.h"
+#include "ScoreComponentCollection.h"
+
 
 #ifdef LM_CACHE
 namespace __gnu_cxx {
@@ -49,9 +47,21 @@ namespace __gnu_cxx {
 }
 #endif
 
+namespace Moses {
+  class TranslationOption;
+  class TranslationOptionCollection;
+  class Hypothesis;
+  class Factor;
+  class WordsRange;
+}
+
+using namespace Moses;
+
 namespace Josiah {
 
 class Sample;
+class GainFunction;  
+struct TargetGap;  
 
 #ifdef LM_CACHE
 /* 
@@ -88,26 +98,30 @@ class TranslationDelta {
       
     }
   
-  /**
+    /**
+      Get the absolute score of this delta
+    **/
+    double getScore() const { return m_score;}
+    /**
     Get the absolute score of this delta
     **/
-  double getScore() const { return m_score;}
-  /**
-   Get the absolute score of this delta
-   **/
-  double getGain() const { return m_gain;}
-  /** 
+    double getGain() const { return m_gain;}
+    /** 
     * Apply to the sample
     **/
-  virtual void apply(const TranslationDelta& noChangeDelta) = 0;
+    virtual void apply(const TranslationDelta& noChangeDelta) = 0;
    
-    const ScoreComponentCollection& getScores() const {return m_scores;}
     Sample& getSample() const {return m_sample;}
     virtual ~TranslationDelta() {}
     void updateWeightedScore();
-    
-  protected:
+    const ScoreComponentCollection& getScores() const { return m_scores;}
+    const BleuSufficientStats & getGainSufficientStats() {return m_sufficientStats;}
   
+  protected:
+    
+  Moses::ScoreComponentCollection m_scores;
+    double m_score;
+    double m_gain;
     //FIXME: The four LM scoring methods should be merged with the three scoring methods for other features.
     /**
       Compute the change in language model score by adding this target phrase
@@ -124,23 +138,21 @@ class TranslationDelta {
     /**
       * Initialise the scores for the case where only one source-target pair needs to be considered.
      **/
-    void initScoresSingleUpdate(const Sample&, const TranslationOption* option, const Josiah::TargetGap& gap);
+    void initScoresSingleUpdate(const Sample&, const TranslationOption* option, const TargetGap& gap);
     /**
      * Initialise the scores for the case where two (target contiguous) source-target pairs need to be considered.
      * Note that left and right refers to the target order.
      **/
     void initScoresContiguousPairedUpdate(const Sample&, const TranslationOption* leftOption,
-                              const TranslationOption* rightOption, const Josiah::TargetGap& gap);
+                              const TranslationOption* rightOption, const TargetGap& gap);
     
     /** Discontiguous version of above. */
     void initScoresDiscontiguousPairedUpdate(const Sample&, const TranslationOption* leftOption,
-                              const TranslationOption* rightOption, const Josiah::TargetGap& leftGap, 
-                              const Josiah::TargetGap& rightGap);
+                              const TranslationOption* rightOption, const TargetGap& leftGap, 
+                              const TargetGap& rightGap);
                               
   
-    ScoreComponentCollection m_scores;
-    double m_score;
-    double m_gain;
+    
     
   private:
 #ifdef LM_CACHE
@@ -148,6 +160,8 @@ class TranslationDelta {
 #endif
     Sample& m_sample;
     const GainFunction* m_gf;
+    void calcSufficientStatsAndGain(const std::vector<const Factor*> & sentence);
+    BleuSufficientStats m_sufficientStats;
 };
  
 /**
@@ -155,7 +169,7 @@ class TranslationDelta {
   **/
 class TranslationUpdateDelta : public virtual TranslationDelta {
   public:
-     TranslationUpdateDelta(Sample& sample, const TranslationOption* option , const Josiah::TargetGap& gap, const GainFunction* gf);
+     TranslationUpdateDelta(Sample& sample, const TranslationOption* option , const TargetGap& gap, const GainFunction* gf);
      virtual void apply(const TranslationDelta& noChangeDelta);
      
   private:
@@ -172,7 +186,7 @@ class MergeDelta : public virtual TranslationDelta {
      * option - the source/target phrase to go into the merged segment
      * targetSegment - the location of the target segment
      **/
-    MergeDelta(Sample& sample, const TranslationOption* option, const Josiah::TargetGap& gap, const GainFunction* gf);
+    MergeDelta(Sample& sample, const TranslationOption* option, const TargetGap& gap, const GainFunction* gf);
     virtual void apply(const TranslationDelta& noChangeDelta);
   
   private:
@@ -188,7 +202,7 @@ class PairedTranslationUpdateDelta : public virtual TranslationDelta {
     /** Options and gaps in target order */
     PairedTranslationUpdateDelta(Sample& sample,
         const TranslationOption* leftOption, const TranslationOption* rightOption, 
-        const Josiah::TargetGap& leftGap, const Josiah::TargetGap& rightGap, const GainFunction* gf);
+        const TargetGap& leftGap, const TargetGap& rightGap, const GainFunction* gf);
     
     virtual void apply(const TranslationDelta& noChangeDelta);
     
@@ -204,7 +218,7 @@ class SplitDelta : public virtual TranslationDelta {
   public:
     /** Options and gaps in target order */
     SplitDelta(Sample& sample, const TranslationOption* leftOption, const TranslationOption* rightOption, 
-    const Josiah::TargetGap& gap, const GainFunction* gf);
+    const TargetGap& gap, const GainFunction* gf);
     virtual void apply(const TranslationDelta& noChangeDelta);
     
   private:
@@ -220,7 +234,7 @@ class FlipDelta : public virtual TranslationDelta {
   public: 
     /**  Options and gaps in target order */
     FlipDelta(Sample& sample, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-              const Josiah::TargetGap& leftGap, const Josiah::TargetGap& rightGap, float distortion, const GainFunction* gf);
+              const TargetGap& leftGap, const TargetGap& rightGap, float distortion, const GainFunction* gf);
     
     virtual void apply(const TranslationDelta& noChangeDelta);
     

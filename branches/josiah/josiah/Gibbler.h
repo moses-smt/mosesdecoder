@@ -2,17 +2,14 @@
 
 #include <map>
 #include <vector>
-
 #include "FeatureFunction.h"
-#include "GibbsOperator.h"
-#include "ScoreComponentCollection.h"
-
 
 namespace Moses {
 class Hypothesis;
 class TranslationOptionCollection;
 class TranslationOption;
 class Word;
+class ScoreComponentCollection;
 }
 
 using namespace Moses;
@@ -20,7 +17,6 @@ namespace Josiah {
 
 class AnnealingSchedule;
 class GibbsOperator;
-class FeatureFunction;
 class Sampler;
 class OnlineLearner;
 class SampleAcceptor;
@@ -88,103 +84,6 @@ class Sample {
   int GetTargetLength()  { return m_targetWords.size(); }
   friend class Sampler;
 };
-
-
-
-/**
- * Used by the operators to collect samples, for example to count ngrams, or just to print
- * them out. 
- **/
-class SampleCollector {
-  public:
-    SampleCollector(): m_totalImportanceWeight(0), m_n(0)  {}
-    virtual void addSample(Sample& sample, double importanceWeight);
-    /** Number of samples */
-    size_t N() const {return m_n;}
-    virtual ~SampleCollector() {}
-    void reset() {
-      m_totalImportanceWeight = 0;
-      m_n = 0;
-      m_importanceWeights.clear();
-      m_normalisedImportanceWeights.clear();
-    }
-  protected:
-    /** The actual collection.*/
-    virtual void collect(Sample& sample) = 0;
-    /** The log of the total importance weight */
-    float getTotalImportanceWeight() const {return m_totalImportanceWeight;}
-    /** Normalised importance weights  - in probability space*/
-    const std::vector<double>& getImportanceWeights() const {return m_normalisedImportanceWeights;}
-    
-    
-  private:
-    double m_totalImportanceWeight; //normalisation factor
-    std::vector<double> m_importanceWeights; //unnormalised weights, in log space
-    std::vector<double> m_normalisedImportanceWeights; //normalised, in prob space
-    size_t m_n;
-};
-
-class PrintSampleCollector  : public virtual SampleCollector {
-  public:
-    virtual void collect(Sample& sample);
-    virtual ~PrintSampleCollector() {}
-};
-
-
-
-/**
- * Used to specify when the sampler should stop.
- **/
-class StopStrategy {
-  public:
-    virtual bool ShouldStop(size_t iterations) = 0;
-    virtual ~StopStrategy() {}
-};
-
-/**
- * Simplest sampler stop strategy, just uses the number of iterations.
- **/
-class CountStopStrategy : public virtual StopStrategy {
-  public:
-    CountStopStrategy(size_t max): m_max(max) {}
-    virtual bool ShouldStop(size_t iterations) {return iterations >= m_max;}
-    virtual ~CountStopStrategy() {}
-  
-  private:
-    size_t m_max;
-};
-
-
-
-
-class Sampler {
- private:
-   std::vector<SampleCollector*> m_collectors;
-   std::vector<GibbsOperator*> m_operators;
-   size_t m_iterations;
-   size_t m_burninIts;
-   size_t m_reheatings;
-   const AnnealingSchedule* m_as;
-   float m_quenchTemp;
-   StopStrategy* m_stopper;
-   OnlineLearner* m_onlineLearner;
- public:
-  Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0) {}
-  void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
-    const std::vector<Word>& source, const feature_vector& extra_fv, SampleAcceptor*) ;
-  void AddOperator(GibbsOperator* o);
-  void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
-  void SetAnnealingSchedule(const AnnealingSchedule* as) {m_as = as;}
-  void SetQuenchingTemperature(float temp) {cerr << "Setting quench temp to " << temp << endl; m_quenchTemp = temp;}
-  void SetIterations(size_t iterations) {m_iterations = iterations;}
-  void SetStopper(StopStrategy* stopper) {m_stopper = stopper;}
-  void SetReheatings(size_t r) {m_reheatings = r;}
-  void SetBurnIn(size_t burnin_its) {m_burninIts = burnin_its;}
-  void AddOnlineLearner(OnlineLearner* learner) {m_onlineLearner = learner;}
-  OnlineLearner* GetOnlineLearner()  {return m_onlineLearner;}
-};
-
-
 
 }
 

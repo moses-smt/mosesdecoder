@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Derivation.h"
 #include "FeatureFunction.h"
 #include "Gibbler.h"
+#include "SentenceBleu.h"
+#include "ScoreComponentCollection.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 
@@ -61,6 +64,18 @@ namespace Josiah {
 
 long TranslationDelta::lmcalls = 0;
 
+  
+void TranslationDelta::calcSufficientStatsAndGain(const vector<const Factor*> & sentence){
+  BleuSufficientStats stats(4);
+  m_gf->GetSufficientStats(sentence,&stats);
+  m_gain = static_cast<SentenceBLEU*>(const_cast<GainFunction*>(m_gf))->CalcBleu(stats, *(static_cast<BleuSufficientStats*>(static_cast<SentenceBLEU*>(const_cast<GainFunction*>(m_gf))->GetCurrentSmoothing())));
+  m_sufficientStats = stats;
+  
+   IFVERBOSE(2) {
+    //cerr << "Sentence: "<< sentence << endl;
+    cerr << "Gain " << m_gain << endl;
+  }  
+}
 
   /**
    Compute the change in language model score by adding this target phrase
@@ -86,12 +101,8 @@ void  TranslationDelta::addSingleOptionLanguageModelScore(const TranslationOptio
     for (size_t i = end; i < getSample().GetTargetWords().size(); ++i) {
       newSentence.push_back(getSample().GetTargetWords()[i][0]);
     }
-    m_gain = m_gf->ComputeGain(newSentence);
     
-    IFVERBOSE(2) {
-      cerr << "Sentence: "<< newSentence << endl;
-      cerr << "Gain " << m_gain << endl;
-    }
+    calcSufficientStatsAndGain(newSentence);
   }
   
   
@@ -417,11 +428,8 @@ void  TranslationDelta::addContiguousPairedOptionLMScore(const TranslationOption
     for (size_t i = end; i < getSample().GetTargetWords().size(); ++i) {
       newSentence.push_back(getSample().GetTargetWords()[i][0]);
     }
-    m_gain = m_gf->ComputeGain(newSentence);
-    IFVERBOSE(2) {
-      cerr << "Sentence: "<< newSentence << endl;
-      cerr << "Gain " << m_gain << endl;
-    }
+    
+    calcSufficientStatsAndGain(newSentence);
   }
   
   
@@ -563,12 +571,8 @@ void  TranslationDelta::addDiscontiguousPairedOptionLMScore(const TranslationOpt
     for (size_t i = end; i < getSample().GetTargetWords().size(); ++i) {
       newSentence.push_back(getSample().GetTargetWords()[i][0]);
     }
-    m_gain = m_gf->ComputeGain(newSentence); 
     
-    IFVERBOSE(2) {
-      cerr << "Sentence: "<< newSentence << endl;
-      cerr << "Gain " << m_gain << endl;
-    }
+    calcSufficientStatsAndGain(newSentence);
     
   }
   
