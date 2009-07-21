@@ -4,6 +4,10 @@
 #include<vector>
 #include<climits>
 #include<iostream>
+#include <map>
+
+#include <boost/thread/mutex.hpp>
+
 
 #include "PrefixTree.h"
 #include "File.h"
