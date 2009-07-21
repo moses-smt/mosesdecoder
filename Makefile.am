@@ -6,4 +6,7 @@ AUTOMAKE_OPTIONS = foreign
 if WITH_MERT
     MERT = mert
 endif
-SUBDIRS = moses/src moses-cmd/src misc $(MERT)
+if WITH_SERVER
+    SERVER = server
+endif
+SUBDIRS = moses/src moses-cmd/src misc $(MERT) $(SERVER)

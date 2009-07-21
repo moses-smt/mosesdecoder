@@ -10,6 +10,7 @@ AC_PROG_RANLIB
 
 AX_BOOST_BASE([1.33.0])
 AX_BOOST_THREAD
+AX_XMLRPC_C
 
 AC_ARG_WITH(protobuf,
             [AC_HELP_STRING([--with-protobuf=PATH], [(optional) path to Google protobuf])],
@@ -139,9 +140,16 @@ AC_CHECK_HEADERS([getopt.h],
             [AM_CONDITIONAL([WITH_MERT],true)],
             [AC_MSG_WARN([Cannot find getopt.h - disabling new mert])])
 
+AM_CONDITIONAL([WITH_SERVER],false)
+if test "x$have_xmlrpc_c" = "xyes"; then
+    AM_CONDITIONAL([WITH_SERVER],true)
+else
+   AC_MSG_WARN([No xmlrpc-c location configured - disabling server])
+fi
+
 LIBS="$LIBS -lz"
 
 
-AC_CONFIG_FILES(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile mert/Makefile)
+AC_CONFIG_FILES(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile)
 
 AC_OUTPUT()
