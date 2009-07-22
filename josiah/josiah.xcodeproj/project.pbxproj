@@ -31,6 +31,20 @@
 		B2283BDA100B33610012E6B5 /* SampleAcceptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2283BD8100B33610012E6B5 /* SampleAcceptor.cpp */; };
 		B2283BDB100B33610012E6B5 /* SampleAcceptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2283BD8100B33610012E6B5 /* SampleAcceptor.cpp */; };
 		B2386CC30FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2386CC20FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp */; };
+		B24768981014CCAF0038140D /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768971014CCAF0038140D /* Sampler.cpp */; };
+		B24768991014CCAF0038140D /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768971014CCAF0038140D /* Sampler.cpp */; };
+		B247689A1014CCAF0038140D /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768971014CCAF0038140D /* Sampler.cpp */; };
+		B24768BA1014D0150038140D /* SampleCollector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768B91014D0150038140D /* SampleCollector.cpp */; };
+		B24768BB1014D0150038140D /* SampleCollector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768B91014D0150038140D /* SampleCollector.cpp */; };
+		B24768BC1014D0150038140D /* SampleCollector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768B91014D0150038140D /* SampleCollector.cpp */; };
+		B24768DF1014D2690038140D /* StopStrategy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768DE1014D2690038140D /* StopStrategy.cpp */; };
+		B24768E01014D2690038140D /* StopStrategy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768DE1014D2690038140D /* StopStrategy.cpp */; };
+		B24768E11014D2690038140D /* StopStrategy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768DE1014D2690038140D /* StopStrategy.cpp */; };
+		B2476D0F1015DBD90038140D /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2476D0E1015DBD90038140D /* Utils.cpp */; };
+		B2476D101015DBD90038140D /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2476D0E1015DBD90038140D /* Utils.cpp */; };
+		B2476D111015DBD90038140D /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2476D0E1015DBD90038140D /* Utils.cpp */; };
+		B2476D581015E2480038140D /* OnlineLearner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F94C600FF5393800998793 /* OnlineLearner.cpp */; };
+		B2476D811015E3EF0038140D /* OnlineLearner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F94C600FF5393800998793 /* OnlineLearner.cpp */; };
 		B25B2AE50F8CDB6D00485047 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B25B2AE40F8CDB6D00485047 /* libmoses.a */; };
 		B26B75EA0F9F8D3A00A06B31 /* Pos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75E80F9F8D3A00A06B31 /* Pos.cpp */; };
 		B26B75F40FA0A5CC00A06B31 /* Dependency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26B75F20FA0A5CC00A06B31 /* Dependency.cpp */; };
@@ -62,6 +76,9 @@
 		B27348330FE5597A0059868D /* CorpusTrainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B27348320FE5597A0059868D /* CorpusTrainer.cpp */; };
 		B2A748890F976BCD00A5DE76 /* MpiDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */; };
 		B2CAFFCA1004F4CF00BADAF6 /* SampleRank.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F94C170FF52AB900998793 /* SampleRank.cpp */; };
+		B2DB42691010D834001B262D /* SufficientStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DB42681010D834001B262D /* SufficientStats.cpp */; };
+		B2DB426A1010D834001B262D /* SufficientStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DB42681010D834001B262D /* SufficientStats.cpp */; };
+		B2DB426B1010D834001B262D /* SufficientStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DB42681010D834001B262D /* SufficientStats.cpp */; };
 		B2E1C311100655D600039083 /* OnlineLearnerTrainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2E1C310100655D600039083 /* OnlineLearnerTrainer.cpp */; };
 		B2F94C1C0FF52AE700998793 /* AnnealingSchedule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */; };
 		B2F94C1D0FF52AE700998793 /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB110F8BBF29000E5EB9 /* Decoder.cpp */; };
@@ -193,6 +210,14 @@
 		B2283BD8100B33610012E6B5 /* SampleAcceptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SampleAcceptor.cpp; sourceTree = "<group>"; };
 		B2386CC20FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CorpusSamplerAnnealed.cpp; sourceTree = "<group>"; };
 		B2386CC40FEF9C3B00B871B9 /* CorpusSamplerAnnealed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CorpusSamplerAnnealed.h; sourceTree = "<group>"; };
+		B24768961014CCAF0038140D /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sampler.h; sourceTree = "<group>"; };
+		B24768971014CCAF0038140D /* Sampler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sampler.cpp; sourceTree = "<group>"; };
+		B24768B81014D0150038140D /* SampleCollector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleCollector.h; sourceTree = "<group>"; };
+		B24768B91014D0150038140D /* SampleCollector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SampleCollector.cpp; sourceTree = "<group>"; };
+		B24768DD1014D2690038140D /* StopStrategy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StopStrategy.h; sourceTree = "<group>"; };
+		B24768DE1014D2690038140D /* StopStrategy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StopStrategy.cpp; sourceTree = "<group>"; };
+		B2476D0D1015DBD90038140D /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
+		B2476D0E1015DBD90038140D /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
 		B25B29F80F8CA15100485047 /* josiah */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = josiah; sourceTree = BUILT_PRODUCTS_DIR; };
 		B25B2A3F0F8CAAF700485047 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
 		B25B2AE40F8CDB6D00485047 /* libmoses.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmoses.a; path = ../moses/build/Development/libmoses.a; sourceTree = SOURCE_ROOT; };
@@ -206,6 +231,7 @@
 		B27348320FE5597A0059868D /* CorpusTrainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CorpusTrainer.cpp; sourceTree = "<group>"; };
 		B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MpiDebug.cpp; sourceTree = "<group>"; };
 		B2A748880F976BCD00A5DE76 /* MpiDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MpiDebug.h; sourceTree = "<group>"; };
+		B2DB42681010D834001B262D /* SufficientStats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SufficientStats.cpp; sourceTree = "<group>"; };
 		B2E1C30F100655D600039083 /* OnlineLearnerTrainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OnlineLearnerTrainer.h; sourceTree = "<group>"; };
 		B2E1C310100655D600039083 /* OnlineLearnerTrainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OnlineLearnerTrainer.cpp; sourceTree = "<group>"; };
 		B2F94C170FF52AB900998793 /* SampleRank.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SampleRank.cpp; sourceTree = "<group>"; };
@@ -257,6 +283,11 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B2476D0D1015DBD90038140D /* Utils.h */,
+				B2476D0E1015DBD90038140D /* Utils.cpp */,
+				B24768DD1014D2690038140D /* StopStrategy.h */,
+				B24768DE1014D2690038140D /* StopStrategy.cpp */,
+				B2DB42681010D834001B262D /* SufficientStats.cpp */,
 				B2283BD7100B33610012E6B5 /* SampleAcceptor.h */,
 				B2283BD8100B33610012E6B5 /* SampleAcceptor.cpp */,
 				B2386CC40FEF9C3B00B871B9 /* CorpusSamplerAnnealed.h */,
@@ -317,6 +348,10 @@
 				B2F94C600FF5393800998793 /* OnlineLearner.cpp */,
 				B2E1C30F100655D600039083 /* OnlineLearnerTrainer.h */,
 				B2E1C310100655D600039083 /* OnlineLearnerTrainer.cpp */,
+				B24768961014CCAF0038140D /* Sampler.h */,
+				B24768971014CCAF0038140D /* Sampler.cpp */,
+				B24768B81014D0150038140D /* SampleCollector.h */,
+				B24768B91014D0150038140D /* SampleCollector.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -448,6 +483,7 @@
 			files = (
 				B218AB390F8BBF29000E5EB9 /* AnnealingSchedule.cpp in Sources */,
 				B218AB3A0F8BBF29000E5EB9 /* Decoder.cpp in Sources */,
+				B2476D811015E3EF0038140D /* OnlineLearner.cpp in Sources */,
 				B218AB3B0F8BBF29000E5EB9 /* Derivation.cpp in Sources */,
 				B218AB3C0F8BBF29000E5EB9 /* FeatureFunction.cpp in Sources */,
 				B218AB3D0F8BBF29000E5EB9 /* GainFunction.cpp in Sources */,
@@ -471,6 +507,11 @@
 				B26B75F40FA0A5CC00A06B31 /* Dependency.cpp in Sources */,
 				B26FFFC50FA7BAF40098700F /* SourceToTargetRatio.cpp in Sources */,
 				B2283BDA100B33610012E6B5 /* SampleAcceptor.cpp in Sources */,
+				B2DB426B1010D834001B262D /* SufficientStats.cpp in Sources */,
+				B24768991014CCAF0038140D /* Sampler.cpp in Sources */,
+				B24768BB1014D0150038140D /* SampleCollector.cpp in Sources */,
+				B24768E01014D2690038140D /* StopStrategy.cpp in Sources */,
+				B2476D101015DBD90038140D /* Utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -484,6 +525,7 @@
 				B27348140FE559030059868D /* FeatureFunction.cpp in Sources */,
 				B27348150FE559030059868D /* GainFunction.cpp in Sources */,
 				B27348160FE559030059868D /* Gibbler.cpp in Sources */,
+				B2476D581015E2480038140D /* OnlineLearner.cpp in Sources */,
 				B27348180FE559030059868D /* GibblerExpectedLossTraining.cpp in Sources */,
 				B27348190FE559030059868D /* GibblerMaxDerivDecoder.cpp in Sources */,
 				B273481A0FE559030059868D /* GibblerMaxTransDecoder.cpp in Sources */,
@@ -504,6 +546,11 @@
 				B27348330FE5597A0059868D /* CorpusTrainer.cpp in Sources */,
 				B2386CC30FEF9C3000B871B9 /* CorpusSamplerAnnealed.cpp in Sources */,
 				B2283BDB100B33610012E6B5 /* SampleAcceptor.cpp in Sources */,
+				B2DB426A1010D834001B262D /* SufficientStats.cpp in Sources */,
+				B247689A1014CCAF0038140D /* Sampler.cpp in Sources */,
+				B24768BC1014D0150038140D /* SampleCollector.cpp in Sources */,
+				B24768E11014D2690038140D /* StopStrategy.cpp in Sources */,
+				B2476D111015DBD90038140D /* Utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -533,6 +580,11 @@
 				B2F94C610FF5393800998793 /* OnlineLearner.cpp in Sources */,
 				B2E1C311100655D600039083 /* OnlineLearnerTrainer.cpp in Sources */,
 				B2283BD9100B33610012E6B5 /* SampleAcceptor.cpp in Sources */,
+				B2DB42691010D834001B262D /* SufficientStats.cpp in Sources */,
+				B24768981014CCAF0038140D /* Sampler.cpp in Sources */,
+				B24768BA1014D0150038140D /* SampleCollector.cpp in Sources */,
+				B24768DF1014D2690038140D /* StopStrategy.cpp in Sources */,
+				B2476D0F1015DBD90038140D /* Utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
