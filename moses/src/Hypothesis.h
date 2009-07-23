@@ -36,7 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "InputType.h"
 #include "ObjectPool.h"
-#include "AlignmentPair.h"
 
 namespace Moses
 {
@@ -83,7 +82,6 @@ protected:
 	std::vector<const FFState*> m_ffStates;
 	const Hypothesis 	*m_winningHypo;
 	ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
-	AlignmentPair     m_alignPair;
 	const TranslationOption *m_transOpt;
   Manager& m_manager;
 
@@ -264,11 +262,7 @@ public:
 	
 	
 	
-	//! vector of what source words were aligned to each target
-	const AlignmentPair &GetAlignmentPair() const
-	{
-		return m_alignPair;
-	}
+	
 	//! target span that trans opt would populate if applied to this hypo. Used for alignment check
 	size_t GetNextStartPos(const TranslationOption &transOpt) const;
 	
