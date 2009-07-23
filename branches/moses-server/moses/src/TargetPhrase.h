@@ -50,7 +50,6 @@ protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 	//float m_ngramScore, m_fullScore;
 	ScoreComponentCollection m_scoreBreakdown;
-	AlignmentPair m_alignmentPair;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
@@ -135,20 +134,9 @@ public:
 	{
 		return m_sourcePhrase;
 	}
-	AlignmentPair &GetAlignmentPair()
-	{
-		return m_alignmentPair;
-	}
-	const AlignmentPair &GetAlignmentPair() const
-	{
-		return m_alignmentPair;
-	}
 	
-	/** Parse the alignment info portion of phrase table string to create alignment info */
-	void CreateAlignmentInfo(const std::string &sourceStr
-													 , const std::string &targetStr);
-	void CreateAlignmentInfo(const WordAlignments &swa
-													 , const WordAlignments &twa);
+	
+	
 	
 	void UseWordAlignment(bool a){
 		wordalignflag=a;
