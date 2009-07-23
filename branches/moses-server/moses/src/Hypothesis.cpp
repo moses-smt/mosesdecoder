@@ -60,7 +60,6 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
 	, m_wordDeleted(false)
 	, m_ffStates(StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions().size())
 	, m_arcList(NULL)
-  , m_alignPair(source.GetSize())
   , m_transOpt(NULL)
   , m_manager(manager)
 
@@ -93,7 +92,6 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
   , m_ffStates(prevHypo.m_ffStates.size())
 	, m_arcList(NULL)
-  , m_alignPair(prevHypo.m_alignPair)
   , m_transOpt(&transOpt)
   , m_manager(prevHypo.GetManager())
 	, m_id(s_HypothesesCreated++)

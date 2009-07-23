@@ -514,24 +514,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 		for (size_t i = 0 ; i < wordVec.size() ; ++i)
 			e.push_back(imp->tv->add(wordVec[i]));
 		
-		if (!PrintWordAlignment()){// word-to-word alignment are not used, create empty word-to-word alignment 
-			EmptyAlignment(sourceAlignString, f.size());
-			EmptyAlignment(targetAlignString, e.size());
-		}
-		else if (numElement==3){
-			stringstream strme;
-			strme << "You are asking for AlignmentInfo, but this info not available in the Phrase Table. Only " <<numElement<<" fields on line " << lnc  << " : " << line;
-
-			strme << endl << "Deleting files " << ofn << " and " << oft << "..." << endl;
-			if( remove( ofn.c_str() ) != 0 )				strme << "Error deleting file " << ofn;
-			else				strme << "File " << ofn << " successfully deleted";
-			strme << endl;
-			if( remove( oft.c_str() ) != 0 )				strme << "Error deleting file " << oft;
-			else				strme << "File " << oft << " successfully deleted";
-			strme << endl;
-			UserMessage::Add(strme.str());
-			exit(1);
-		}
+		
 		
 		//change "()" into "(-1)" for both source and target word-to-word alignments
 		std::string emtpyAlignStr="()";
