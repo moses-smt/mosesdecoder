@@ -43,6 +43,8 @@ public:
             (xmlrpc_c::value_string(si->second)));
 
         cerr << "Input: " << source << endl;
+        si = params.find("align");
+        bool addAlignInfo = (si != params.end());
 
         const StaticData &staticData = StaticData::Instance();
         Sentence sentence(Input);
@@ -54,22 +56,26 @@ public:
         manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
+        vector<xmlrpc_c::value> alignInfo;
         stringstream out;
-        outputHypo(out,hypo);
+        outputHypo(out,hypo,addAlignInfo,alignInfo);
 
         map<string, xmlrpc_c::value> retData;
         pair<string, xmlrpc_c::value> 
             text("text", xmlrpc_c::value_string(out.str()));
         cerr << "Output: " << out.str() << endl;
+        if (addAlignInfo) {
+            retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
+        }
         retData.insert(text);
         
         *retvalP = xmlrpc_c::value_struct(retData);
 
     }
 
-    void outputHypo(ostream& out, const Hypothesis* hypo) {
-        if (hypo != NULL) {
-            outputHypo(out,hypo->GetPrevHypo());
+    void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo) {
+        if (hypo->GetPrevHypo() != NULL) {
+            outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo);
             TargetPhrase p = hypo->GetTargetPhrase();
             for (size_t pos = 0 ; pos < p.GetSize() ; pos++)
             {
@@ -77,8 +83,22 @@ public:
                 out << *factor << " ";
 
             }
+            if (addAlignmentInfo) {
+            /**
+             * Add the alignment info to the array. This is in target order and consists of 
+             *       (tgt-start, src-start, src-end) triples. 
+             **/
+                map<string, xmlrpc_c::value> phraseAlignInfo;
+                phraseAlignInfo["tgt-start"] = xmlrpc_c::value_int(hypo->GetCurrTargetWordsRange().GetStartPos());
+                phraseAlignInfo["src-start"] = xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetStartPos());
+                phraseAlignInfo["src-end"] = xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetEndPos());
+                alignInfo.push_back(xmlrpc_c::value_struct(phraseAlignInfo));
+            }
         }
     }
+    
+    
+    
 };
 
 
