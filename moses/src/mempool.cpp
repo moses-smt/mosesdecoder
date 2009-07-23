@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <cassert>
+#include <cstring>
 #include "mempool.h"
 #include "TypeDef.h"
 #include "Util.h"
