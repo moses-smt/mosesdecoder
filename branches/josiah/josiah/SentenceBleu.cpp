@@ -12,6 +12,7 @@ namespace Josiah {
 
 
 BleuDefaultSmoothingSufficientStats SentenceBLEU::m_currentSmoothing;   
+bool SentenceBLEU::computeApproxDocBLEU = false;
   
 #define  BP_DENUM_HACK 100
 SentenceBLEU::SentenceBLEU(int n, const std::vector<std::string>& refs, const std::string & src, float bp_scale, bool denum_hack) :
@@ -163,8 +164,14 @@ float SentenceBLEU::CalcBleu(const BleuSufficientStats & stats, const BleuSuffic
   
   float bleu = exp(log_bleu);
   
-  bleu *= (smooth.src_len + stats.src_len);
-    
+  if (computeApproxDocBLEU) {
+    cerr << "Smooth src len " << smooth.src_len << ", stats src len " << stats.src_len << endl;
+    bleu *= (smooth.src_len + stats.src_len);  
+  }
+  else {
+    bleu *= 100; 
+  }
+  
   return bleu;
 }  
   
