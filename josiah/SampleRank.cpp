@@ -317,6 +317,7 @@ int main(int argc, char** argv) {
     mso.UseApproxDocBleu(true); 
     tso.UseApproxDocBleu(true); 
     fo.UseApproxDocBleu(true); 
+    SentenceBLEU::SetComputeApproxDocBLEU(true);
   }
   
   //Acceptor

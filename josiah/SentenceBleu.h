@@ -60,6 +60,7 @@ private:
   bool _use_bp_denum_hack;
   static BleuDefaultSmoothingSufficientStats m_currentSmoothing;
   int m_src_len;
+  static bool computeApproxDocBLEU;
   
  public:
   SentenceBLEU(int n, const std::vector<std::string>& refs, const std::string & src, float bp_scale = 1.0, bool use_bp_denum_hack = false);
@@ -90,6 +91,7 @@ private:
   
   static void UpdateSmoothing(SufficientStats* smooth);
   
+  static void SetComputeApproxDocBLEU(bool compute) {computeApproxDocBLEU = compute;}
  };
   
 }
