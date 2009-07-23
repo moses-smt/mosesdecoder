@@ -131,16 +131,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		targetPhrase.SetSourcePhrase(&sourcePhrase);
 		targetPhrase.CreateFromString( output, targetPhraseString, factorDelimiter);
 		
-		// load alignment info only when present and relevant	
-		if (staticData.UseAlignmentInfo()){
-			if (numElement==3){
-				stringstream strme;
-				strme << "You are using AlignmentInfo, but this info not available in the Phrase Table. Only " <<numElement<<" fields on line " << line_num;
-				UserMessage::Add(strme.str());
-				return false;
-			}
-			targetPhrase.CreateAlignmentInfo(sourceAlignString, targetAlignString);
-		}
+		
 		
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());

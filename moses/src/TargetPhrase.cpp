@@ -62,10 +62,7 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const {
 }
 #endif
 
-void TargetPhrase::SetAlignment()
-{
-	m_alignmentPair.SetIdentityAlignment();
-}
+
 
 void TargetPhrase::SetScore(float score) 
 {
@@ -287,59 +284,10 @@ void AddAlignmentElement(AlignmentPhraseInserter &inserter
 	}
 }
 
-void TargetPhrase::CreateAlignmentInfo(const WordAlignments &swa
-																			 , const WordAlignments &twa)
-{
-	AlignmentPhraseInserter sourceInserter = m_alignmentPair.GetInserter(Input);
-	AlignmentPhraseInserter targetInserter = m_alignmentPair.GetInserter(Output);
-	list<size_t> uniformAlignmentSource, uniformAlignmentTarget;
-	
-	if (!UseWordAlignment()){ //build uniform word-to-word alignment to fit the internal structure which requires their presence
-				std::string srcAlignStr,trgAlignStr;
-				UniformAlignment(srcAlignStr, m_sourcePhrase->GetSize(), GetSize());
-				UniformAlignment(trgAlignStr, GetSize(), m_sourcePhrase->GetSize());
-				CreateAlignmentInfo(srcAlignStr,trgAlignStr);
-	}				
-	else{
-		AddAlignmentElement(sourceInserter
-											, swa
-											, m_sourcePhrase->GetSize()
-											, GetSize()
-											, uniformAlignmentSource);
-		AddAlignmentElement(targetInserter
-											, twa
-											, GetSize()
-											, m_sourcePhrase->GetSize()
-											, uniformAlignmentTarget);
-	}
-	// propergate uniform alignments to other side
-//	m_alignmentPair.GetAlignmentPhrase(Output).AddUniformAlignmentElement(uniformAlignmentSource);
-//	m_alignmentPair.GetAlignmentPhrase(Input).AddUniformAlignmentElement(uniformAlignmentTarget);
-}
 
 
 
-void TargetPhrase::CreateAlignmentInfo(const string &sourceStr
-																			 , const string &targetStr)
-{
-	AlignmentPhraseInserter sourceInserter = m_alignmentPair.GetInserter(Input);
-	AlignmentPhraseInserter targetInserter = m_alignmentPair.GetInserter(Output);
-	list<size_t> uniformAlignmentSource, uniformAlignmentTarget;
-	
-	AddAlignmentElement(sourceInserter
-											, sourceStr
-											, m_sourcePhrase->GetSize()
-											, GetSize()
-											, uniformAlignmentSource);
-	AddAlignmentElement(targetInserter
-											, targetStr
-											, GetSize()
-											, m_sourcePhrase->GetSize()
-											, uniformAlignmentTarget);
-	// propergate uniform alignments to other side
-//	m_alignmentPair.GetAlignmentPhrase(Output).AddUniformAlignmentElement(uniformAlignmentSource);
-//	m_alignmentPair.GetAlignmentPhrase(Input).AddUniformAlignmentElement(uniformAlignmentTarget);
-}
+
 
 TO_STRING_BODY(TargetPhrase);
 
@@ -347,8 +295,7 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
   os << static_cast<const Phrase&>(tp);
 	os << ", pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
-	if (tp.PrintAlignmentInfo())
-		os << ", " << tp.GetAlignmentPair();
+	
   return os;
 }
 
