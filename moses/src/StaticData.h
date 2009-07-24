@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <map>
 #include <memory>
+
+#include <boost/thread/mutex.hpp>
+
 #include "TypeDef.h"
 #include "ScoreIndexManager.h"
 #include "FactorCollection.h"
@@ -143,8 +146,11 @@ protected:
 	size_t m_timeout_threshold; //! seconds after which time out is activated
 
 	bool m_useTransOptCache; //! flag indicating, if the persistent translation option cache should be used
-	mutable std::map<std::pair<const DecodeGraph*, Phrase>, pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
+	mutable std::map<std::pair<size_t, Phrase>, pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
 	size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
+    //FIXME: It would be better to use a reader/writer lock for the cache, but this would require boost > 1.35
+    //Also, cache reads have to update the last access time, so rw lock may not buy that much...   
+    mutable boost::mutex m_transOptCacheMutex;
 
 	bool m_isAlwaysCreateDirectTranslationOption;
 	//! constructor. only the 1 static variable can be created
@@ -176,6 +182,7 @@ protected:
 	//! load decoding steps
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
+    void ReduceTransOptCache() const;   
 	
 public:
 
@@ -457,7 +464,7 @@ public:
 	bool GetUseTransOptCache() const { return m_useTransOptCache; }
 
 	void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
-	void ReduceTransOptCache() const;
+	
 
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
 };

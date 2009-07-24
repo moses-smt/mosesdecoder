@@ -133,9 +133,6 @@ int main(int argc, char** argv) {
             ++mosesargc;
         }
     }
-    //disable the translation options cache as it's not threadsafe
-    mosesargv[mosesargc++] = "-use-persistent-cache"; 
-    mosesargv[mosesargc++] = "false"; 
 
     Parameter* params = new Parameter();
     if (!params->LoadParam(mosesargc,mosesargv)) {
@@ -145,11 +142,6 @@ int main(int argc, char** argv) {
     if (!StaticData::LoadDataStatic(params)) {
         exit(1);
     }
-    if (StaticData::Instance().GetUseTransOptCache()) {
-        cerr << "Error: Cannot use translation options cache in server." << endl;
-        exit(1);
-    }
-   
 
     xmlrpc_c::registry myRegistry;
 

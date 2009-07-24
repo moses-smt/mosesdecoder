@@ -421,7 +421,7 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_globalLexicalModels);
 	
 	// delete trans opt
-	map<std::pair<const DecodeGraph*, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
+	map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
 	for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache)
 	{
 		TranslationOptionList *transOptList = iterCache->second.first;
@@ -939,7 +939,7 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 		assert(decodeStep);
 		if (decodeStepVL.size() < vectorList + 1) 
 		{
-			decodeStepVL.push_back(new DecodeGraph());
+			decodeStepVL.push_back(new DecodeGraph(decodeStepVL.size()));
 		}
 		decodeStepVL[vectorList]->Add(decodeStep);
 		prev = decodeStep;
@@ -998,9 +998,9 @@ void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::
 
 const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
 {
-	std::pair<const DecodeGraph*, Phrase> key(&decodeGraph, sourcePhrase);
-	
-	std::map<std::pair<const DecodeGraph*, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
+	std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
+	boost::mutex::scoped_lock lock(m_transOptCacheMutex);
+	std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
 			= m_transOptCache.find(key);
 	if (iter == m_transOptCache.end())
 		return NULL;
@@ -1015,7 +1015,7 @@ void StaticData::ReduceTransOptCache() const
 	
 	// find cutoff for last used time
 	priority_queue< clock_t > lastUsedTimes;
-	std::map<std::pair<const DecodeGraph*, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
+	std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
 	iter = m_transOptCache.begin();
 	while( iter != m_transOptCache.end() )
 	{
@@ -1032,7 +1032,7 @@ void StaticData::ReduceTransOptCache() const
 	{
 		if (iter->second.second < cutoffLastUsedTime)
 		{
-			std::map<std::pair<const DecodeGraph*, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
+			std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
 			delete iterRemove->second.first;
 			m_transOptCache.erase(iterRemove);
 		}
@@ -1043,8 +1043,9 @@ void StaticData::ReduceTransOptCache() const
 
 void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
 {
-	std::pair<const DecodeGraph*, Phrase> key(&decodeGraph, sourcePhrase);
+	std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
 	TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
+    boost::mutex::scoped_lock lock(m_transOptCacheMutex); 
 	m_transOptCache[key] = make_pair( storedTransOptList, clock() );
 	ReduceTransOptCache();
 }
