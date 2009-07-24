@@ -47,30 +47,31 @@ public:
   
 class TargetAssigner {
 public:
-  TargetAssigner(){}
+  TargetAssigner(const std::string& name) : m_name(name) {}
   virtual ~TargetAssigner(){}
   size_t virtual getTarget(const std::vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta) = 0;
+  std::string m_name;
 };
 
 class BestNeighbourTgtAssigner : public TargetAssigner {
 public:
-  BestNeighbourTgtAssigner(){}
+  BestNeighbourTgtAssigner() : TargetAssigner("Best") {}
   virtual ~BestNeighbourTgtAssigner(){}
   size_t virtual getTarget(const std::vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta);
 };
 
 class ClosestBestNeighbourTgtAssigner : public TargetAssigner {
 public:
-  ClosestBestNeighbourTgtAssigner(){}
+  ClosestBestNeighbourTgtAssigner(): TargetAssigner("CBN") {}
   virtual ~ClosestBestNeighbourTgtAssigner(){}
   size_t virtual getTarget(const std::vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta);
 };
 
-class ChiangBestNeighbourTgtAssigner : public TargetAssigner {
-  public:
-    ChiangBestNeighbourTgtAssigner(){}
-    virtual ~ChiangBestNeighbourTgtAssigner(){}
-    size_t virtual getTarget(const std::vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta);
-};
+//class ChiangBestNeighbourTgtAssigner : public TargetAssigner {
+//  public:
+//    ChiangBestNeighbourTgtAssigner(){}
+//    virtual ~ChiangBestNeighbourTgtAssigner(){}
+//    size_t virtual getTarget(const std::vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta);
+//};
   
 }

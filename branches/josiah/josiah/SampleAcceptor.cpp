@@ -110,15 +110,15 @@ size_t BestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& delt
   return bestGainIndex;
 }
 
-size_t ClosestBestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta) {
+size_t ClosestBestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* chosenDelta) {
   //Only do best neighbour for the moment
   float minScoreDiff = 10e10;
   int closestBestNbr = -1;
-  float noChangeGain = noChangeDelta->getGain();
-  float noChangeScore = noChangeDelta->getScore(); 
+  float chosenGain = chosenDelta->getGain();
+  float chosenScore = chosenDelta->getScore(); 
   for (vector<TranslationDelta*>::const_iterator i = deltas.begin(); i != deltas.end(); ++i) {
-    if ((*i)->getGain() > noChangeGain ) {
-      float scoreDiff = noChangeScore -  (*i)->getScore();
+    if ((*i)->getGain() > chosenGain ) {
+      float scoreDiff = chosenScore -  (*i)->getScore();
       if (scoreDiff < minScoreDiff) {
         minScoreDiff = scoreDiff;
         closestBestNbr = i - deltas.begin();
@@ -126,35 +126,35 @@ size_t ClosestBestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*
     }
   }
   
-  IFVERBOSE(1) {
-    if(closestBestNbr > -1) {
-      cerr << "Closest best nbr has score " << deltas[closestBestNbr]->getScore() << " and gain " << deltas[closestBestNbr]->getGain() << endl;
-      cerr << "No change has score " << noChangeDelta->getScore() << " and gain " << noChangeDelta->getGain() << endl;     
-    } 
-  }
+//  IFVERBOSE(1) {
+//    if(closestBestNbr > -1) {
+//      cerr << "Closest best nbr has score " << deltas[closestBestNbr]->getScore() << " and gain " << deltas[closestBestNbr]->getGain() << endl;
+//      cerr << "Chosen has score " << chosenDelta->getScore() << " and gain " << chosenDelta->getGain() << endl;     
+//    } 
+//  }
   return closestBestNbr;
 }
 
-size_t ChiangBestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta) {
-  //Only do best neighbour for the moment
-  float maxCombScore = -1e6;
-  int bestNbr = -1;
-  for (vector<TranslationDelta*>::const_iterator i = deltas.begin(); i != deltas.end(); ++i) {
-    float combScore = (*i)->getGain() + (*i)->getScore();
-    if (combScore > maxCombScore ) {
-      maxCombScore = combScore;
-      bestNbr = i-deltas.begin();
-    }
-  }
-    
-  IFVERBOSE(1) {
-    if(bestNbr > -1) {
-      cerr << "best nbr has score " << deltas[bestNbr]->getScore() << " and gain " << deltas[bestNbr]->getGain() << endl;
-      cerr << "No change has score " << noChangeDelta->getScore() << " and gain " << noChangeDelta->getGain() << endl;     
-    } 
-  }
-  
-  return bestNbr;
-}  
+//size_t ChiangBestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta) {
+//  //Only do best neighbour for the moment
+//  float maxCombScore = -1e6;
+//  int bestNbr = -1;
+//  for (vector<TranslationDelta*>::const_iterator i = deltas.begin(); i != deltas.end(); ++i) {
+//    float combScore = (*i)->getGain() + (*i)->getScore();
+//    if (combScore > maxCombScore ) {
+//      maxCombScore = combScore;
+//      bestNbr = i-deltas.begin();
+//    }
+//  }
+//    
+//  IFVERBOSE(1) {
+//    if(bestNbr > -1) {
+//      cerr << "best nbr has score " << deltas[bestNbr]->getScore() << " and gain " << deltas[bestNbr]->getGain() << endl;
+//      cerr << "No change has score " << noChangeDelta->getScore() << " and gain " << noChangeDelta->getGain() << endl;     
+//    } 
+//  }
+//  
+//  return bestNbr;
+//}  
   
 }

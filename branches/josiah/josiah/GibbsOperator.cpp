@@ -83,6 +83,25 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
   
 }
 
+void GibbsOperator::UpdateGainOptimalSol(const vector<TranslationDelta*>& deltas, int chosen, int target, TranslationDelta* noChangeDelta){
+  int currentBestGainSol = -1;
+  //Store best gain solution
+  if (m_assigner->m_name == "Best") {
+    currentBestGainSol = target;
+  }
+  else {
+    BestNeighbourTgtAssigner assigner;
+    currentBestGainSol = assigner.getTarget(deltas, deltas[chosen]);
+  }
+  
+  float currentBestGain = deltas[currentBestGainSol]->getGain();
+  
+  if (currentBestGain > m_sampler->GetOptimalGain()) {
+    m_sampler->SetOptimalGain(currentBestGain);
+    m_sampler->SetOptimalGainSol(deltas[currentBestGainSol], noChangeDelta);
+    cerr << "New optimal gain " << currentBestGain << endl;
+  }
+}
   
 void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen) {
   bool error = false;
@@ -93,10 +112,15 @@ void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, Translat
   if (m_useApproxDocBleu)
     m_sampler->UpdateGainFunctionStats(deltas[chosen]->getGainSufficientStats());
   
-  int target = m_assigner->getTarget(deltas, noChangeDelta);
+  int target = m_assigner->getTarget(deltas, deltas[chosen]);
   
   if (target == -1)
     return;
+  
+  
+  if (m_sampler->GetOnlineLearner()->GetName() == "MIRA++"){
+    UpdateGainOptimalSol(deltas, chosen, target, noChangeDelta);
+  }
   
   float targetScore = deltas[target]->getScore();
   float targetGain = deltas[target]->getGain();
@@ -105,23 +129,23 @@ void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, Translat
         chosenScore < targetScore && chosenGain > targetGain ) {
     error = true;
     IFVERBOSE(1) {
-      cerr << "There is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl;
+      cerr << "In " << m_name << ", there is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl;
       cerr << "while target sol has model score " <<  targetScore << " and gain " << targetGain << endl;  
     }
   }
   else {
     IFVERBOSE(1) {
-      cerr << "There is no error because chosen sol has model score" <<  chosenScore << " and gain " << chosenGain << endl;
+      cerr << "In " << m_name << ", there is no error because chosen sol has model score" <<  chosenScore << " and gain " << chosenGain << endl;
       cerr << "while target sol has model score " <<  targetScore << " and gain " << targetGain << endl;
     }
   }
     
   if (error) {
     cerr << "Hill-climbed gain function to gain = " << deltas[target]->getGain() << endl;
-    GetSampler()->GetOnlineLearner()->doUpdate(deltas[chosen], deltas[target]);//deltas[target], noChangeDelta  
+    m_sampler->GetOnlineLearner()->doUpdate(deltas[chosen], deltas[target], noChangeDelta, *m_sampler);//deltas[target], noChangeDelta  
   }
   else {
-    GetSampler()->GetOnlineLearner()->UpdateCumul();//deltas[target], noChangeDelta  
+    m_sampler->GetOnlineLearner()->UpdateCumul();//deltas[target], noChangeDelta  
   }
 }
   

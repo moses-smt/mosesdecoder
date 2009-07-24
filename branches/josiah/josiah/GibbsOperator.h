@@ -122,6 +122,7 @@ namespace Josiah {
         void addSampleAcceptor(SampleAcceptor* acceptor) { m_acceptor = acceptor;}
         void addTargetAssigner(TargetAssigner* assigner) { m_assigner = assigner;}
         void UseApproxDocBleu(bool use) { m_useApproxDocBleu = use;}
+    void UpdateGainOptimalSol(const std::vector<TranslationDelta*>& deltas, int chosen, int target, TranslationDelta* noChangeDelta);
      protected:
         /**
           * Randomly select and apply one of the translation deltas.

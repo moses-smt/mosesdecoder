@@ -27,6 +27,15 @@ namespace Josiah {
   void Sampler::ResetGainStats() {
     m_suffStats.Zero();
     m_numSuffStats = 0;
+    m_optimalGain = 0;
+    m_GainOptimalSol.ZeroAll();
+  }
+  
+  void Sampler::SetOptimalGainSol(TranslationDelta* chosen, TranslationDelta* noChangeDelta) {
+    m_GainOptimalSol = chosen->getSample().GetFeatureValues();
+    m_GainOptimalSol.PlusEquals(chosen->getScores());
+    m_GainOptimalSol.MinusEquals(noChangeDelta->getScores());
+    
   }
   
   void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options, const std::vector<Word>& source, const Josiah::feature_vector& extra_fv, SampleAcceptor* acceptor) {
