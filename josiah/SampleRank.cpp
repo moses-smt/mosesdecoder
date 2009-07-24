@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
   int weight_dump_freq;
   string weight_dump_stem;
   bool sampleRank;
-  bool perceptron, mira;
+  bool perceptron, mira, mira_plus;
   float perceptron_lr;
   int epochs;
   bool greedy, fixedTemp;
@@ -179,6 +179,7 @@ int main(int argc, char** argv) {
   ("sample-rank", po::value(&sampleRank)->zero_tokens()->default_value(false), "Train using sample Rank")
   ("perceptron", po::value(&perceptron)->zero_tokens()->default_value(false), "Use perceptron learner")
   ("mira", po::value(&mira)->zero_tokens()->default_value(false), "Use mira learner")
+  ("mira++", po::value(&mira_plus)->zero_tokens()->default_value(false), "Use mira++ learner")
   ("perc-lr", po::value<float>(&perceptron_lr)->default_value(1.0f), "Perceptron learning rate")
   ("epochs", po::value<int>(&epochs)->default_value(1), "Number of training epochs")
   ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
@@ -223,12 +224,12 @@ int main(int argc, char** argv) {
     timer.on();
   }
   
-  if (!mira && !perceptron) {
+  if (!mira && !perceptron && !mira_plus) {
     cerr << "Error: No learning algorithm chosen" << endl;
     return 1;
   }
   
-  if (mira && perceptron) {
+  if (mira && perceptron && mira_plus) {
     cerr << "Error: Choose just one learning algorithm" << endl;
     return 1;
   }
@@ -337,9 +338,9 @@ int main(int argc, char** argv) {
   if (closestBestNeighbour) {
     tgtAssigner.reset(new ClosestBestNeighbourTgtAssigner());
   }
-  else if (chiangBestNeighbour) {
-    tgtAssigner.reset(new ChiangBestNeighbourTgtAssigner());
-  }
+  //else if (chiangBestNeighbour) {
+//    tgtAssigner.reset(new ChiangBestNeighbourTgtAssigner());
+//  }
   else {
     tgtAssigner.reset(new BestNeighbourTgtAssigner());
   }
@@ -352,12 +353,14 @@ int main(int argc, char** argv) {
   
   //Add the learner
   auto_ptr<OnlineLearner> onlineLearner;
-  mira = true;
   if (perceptron) {
     onlineLearner.reset(new PerceptronLearner(StaticData::Instance().GetWeights(), "Perceptron", perceptron_lr));
   }
   else if (mira) {
     onlineLearner.reset(new MiraLearner(StaticData::Instance().GetWeights(), "MIRA"));
+  }
+  else if (mira_plus) {
+    onlineLearner.reset(new MiraPlusLearner(StaticData::Instance().GetWeights(), "MIRA++"));
   }
 
   sampler.AddOnlineLearner(onlineLearner.get());

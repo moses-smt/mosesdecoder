@@ -21,6 +21,7 @@ class GibbsOperator;
 class OnlineLearner;
 class StopStrategy;
 class SampleAcceptor;  
+class TranslationDelta;
 
   
 class Sampler {
@@ -37,6 +38,8 @@ private:
   BleuSufficientStats m_suffStats;
   BleuSufficientStats m_averageSuffStats;
   size_t m_numSuffStats;
+  ScoreComponentCollection m_GainOptimalSol;
+  float m_optimalGain;
 public:
   Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0) {}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
@@ -54,6 +57,10 @@ public:
   void UpdateGainFunctionStats(const BleuSufficientStats& stats);
   BleuSufficientStats* GetSentenceGainFunctionStats();
   void ResetGainStats();
+  void SetOptimalGain(float gain) { m_optimalGain = gain;}
+  float GetOptimalGain() {return m_optimalGain;}
+  void SetOptimalGainSol(TranslationDelta*, TranslationDelta*);
+  const ScoreComponentCollection & GetOptimalGainSol() { return m_GainOptimalSol;}
 };
 
 }
