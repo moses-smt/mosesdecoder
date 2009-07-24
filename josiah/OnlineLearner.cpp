@@ -226,7 +226,11 @@ namespace Josiah {
     vector<float> b;
     float scoreDiff = target->getScore() - curr->getScore();
     float gainDiff = target->getGain() - curr->getGain(); //%BLEU
-    gainDiff = 1; // Enforce this margin
+    
+    if (m_fixMargin) {
+      gainDiff = m_margin;  
+    }
+    
     
     bool doMira = false;
     if (scoreDiff < gainDiff) { //MIRA Constraints not satisfied, run MIRA
@@ -302,10 +306,19 @@ namespace Josiah {
     vector<float> b;
     vector<ScoreComponentCollection> distance;
     
-    float margin = 1;
+    float tgtcurrmargin = target->getGain() - curr->getGain();
+    float opttgtmargin = sampler.GetOptimalGain() - target->getGain();
+    float optcurrmargin = sampler.GetOptimalGain() - curr->getGain();
+    
+    if (m_fixMargin) {
+      tgtcurrmargin = m_margin;
+      opttgtmargin = m_margin;
+      optcurrmargin = m_margin;
+    }
+    
     
     //Score of target - Score of curr >= 1
-    b.push_back(margin - (targetScore - currScore));
+    b.push_back(tgtcurrmargin - (targetScore - currScore));
     ScoreComponentCollection dist(targetFV);
     dist.MinusEquals(currFV);
     distance.push_back(dist);    
@@ -313,13 +326,13 @@ namespace Josiah {
     
     if (sampler.GetOptimalGain() > target->getGain()) {
       //Score of optimal - Score of Target > 1
-      b.push_back(margin - (optimalGainScore - targetScore));
+      b.push_back(opttgtmargin - (optimalGainScore - targetScore));
       dist = OptimalGainFV;
       dist.MinusEquals(targetFV);
       distance.push_back(dist);    
       
       //Score of optimal - Score of curr > 1 
-      b.push_back(margin - (optimalGainScore - currScore));
+      b.push_back(optcurrmargin - (optimalGainScore - currScore));
       dist = OptimalGainFV;
       dist.MinusEquals(currFV);
       distance.push_back(dist);      

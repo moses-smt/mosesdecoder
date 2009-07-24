@@ -32,7 +32,7 @@ namespace Josiah {
 
   class PerceptronLearner : public OnlineLearner {
     public :
-      PerceptronLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, float learning_rate = 1.0) : OnlineLearner(initWeights, "PERCEPTRON"), m_learning_rate(learning_rate), m_numUpdates() {}
+      PerceptronLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, float learning_rate = 1.0) : OnlineLearner(initWeights, name), m_learning_rate(learning_rate), m_numUpdates() {}
       virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler);
       virtual ~PerceptronLearner() {}
       virtual void reset() {m_numUpdates = 0;}
@@ -44,25 +44,21 @@ namespace Josiah {
   
   class MiraLearner : public OnlineLearner {
     public :
-      MiraLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, float learning_rate = 1.0) : OnlineLearner(initWeights, "MIRA"), m_learning_rate(learning_rate), m_numUpdates() {}
+      MiraLearner(const Moses::ScoreComponentCollection& initWeights,  const std::string& name, bool fixMargin, float margin) : OnlineLearner(initWeights, name), m_numUpdates(), m_fixMargin(fixMargin), m_margin(margin) {}
       virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler);
       virtual ~MiraLearner() {}
       virtual void reset() {m_numUpdates = 0;}
       virtual size_t GetNumUpdates() { return m_numUpdates;} 
-    private:
-      float m_learning_rate;
+    protected:
       size_t m_numUpdates;
+      bool m_fixMargin;
+    float m_margin;
   };
   
-  class MiraPlusLearner : public OnlineLearner {
+  class MiraPlusLearner : public MiraLearner {
     public :
-      MiraPlusLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, float learning_rate = 1.0) : OnlineLearner(initWeights, "MIRA++"), m_learning_rate(learning_rate), m_numUpdates() {}
+      MiraPlusLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, bool fixMargin, float margin) : MiraLearner(initWeights, name, fixMargin, margin) {}
       virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler);
       virtual ~MiraPlusLearner() {}
-      virtual void reset() {m_numUpdates = 0;}
-      virtual size_t GetNumUpdates() { return m_numUpdates;} 
-    private:
-      float m_learning_rate;
-      size_t m_numUpdates;
   };
 }
