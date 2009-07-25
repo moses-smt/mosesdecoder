@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
   bool closestBestNeighbour, chiangBestNeighbour;
   bool approxDocBleu;
   bool fix_margin;
-  float margin;
+  float margin, slack;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -191,7 +191,8 @@ int main(int argc, char** argv) {
   ("chiang-best-neighbour", po::value(&chiangBestNeighbour)->zero_tokens()->default_value(false), "Chiang best neighbour")
   ("approx-doc-bleu", po::value(&approxDocBleu)->zero_tokens()->default_value(false), "Compute approx doc bleu as gain")
   ("fix-margin", po::value(&fix_margin)->zero_tokens()->default_value(false), "Do MIRA update with a specified margin")
-  ("margin", po::value<float>(&margin)->default_value(1.0f), "Margin size");
+  ("margin", po::value<float>(&margin)->default_value(1.0f), "Margin size")
+  ("slack", po::value<float>(&slack)->default_value(-1.0f), "Slack");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -361,10 +362,10 @@ int main(int argc, char** argv) {
     onlineLearner.reset(new PerceptronLearner(StaticData::Instance().GetWeights(), "PERCEPTRON", perceptron_lr));
   }
   else if (mira) {
-    onlineLearner.reset(new MiraLearner(StaticData::Instance().GetWeights(), "MIRA", fix_margin, margin));
+    onlineLearner.reset(new MiraLearner(StaticData::Instance().GetWeights(), "MIRA", fix_margin, margin, slack));
   }
   else if (mira_plus) {
-    onlineLearner.reset(new MiraPlusLearner(StaticData::Instance().GetWeights(), "MIRA++", fix_margin, margin));
+    onlineLearner.reset(new MiraPlusLearner(StaticData::Instance().GetWeights(), "MIRA++", fix_margin, margin, slack));
   }
 
   sampler.AddOnlineLearner(onlineLearner.get());

@@ -165,7 +165,6 @@ float SentenceBLEU::CalcBleu(const BleuSufficientStats & stats, const BleuSuffic
   float bleu = exp(log_bleu);
   
   if (computeApproxDocBLEU) {
-    //cerr << "Smooth src len " << smooth.src_len << ", stats src len " << stats.src_len << endl;
     bleu *= (smooth.src_len + stats.src_len);  
   }
   else {
