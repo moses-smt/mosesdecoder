@@ -241,7 +241,12 @@ namespace Josiah {
       dist.MinusEquals(curr->getScores());
       distance.push_back(dist);    
       
-      vector<float> alpha = hildreth(distance,b);
+      vector<float> alpha;
+      
+      if (m_slack == -1)
+        alpha = hildreth(distance,b);
+      else
+        alpha = hildreth(distance,b, m_slack);
       
       for (size_t k = 0; k < alpha.size(); k++) {
         IFVERBOSE(1) { 
@@ -339,7 +344,12 @@ namespace Josiah {
     }
     
     
-    vector<float> alpha = hildreth(distance,b);
+    vector<float> alpha;
+    if (m_slack == -1)
+      alpha = hildreth(distance,b);
+    else
+      alpha = hildreth(distance,b, m_slack);
+    
     
     for (size_t k = 0; k < alpha.size(); k++) {
       ScoreComponentCollection dist = distance[k];

@@ -44,7 +44,7 @@ namespace Josiah {
   
   class MiraLearner : public OnlineLearner {
     public :
-      MiraLearner(const Moses::ScoreComponentCollection& initWeights,  const std::string& name, bool fixMargin, float margin) : OnlineLearner(initWeights, name), m_numUpdates(), m_fixMargin(fixMargin), m_margin(margin) {}
+    MiraLearner(const Moses::ScoreComponentCollection& initWeights,  const std::string& name, bool fixMargin, float margin, float slack) : OnlineLearner(initWeights, name), m_numUpdates(), m_fixMargin(fixMargin), m_margin(margin), m_slack(slack) { std::cerr << "Slack " << m_slack << std::endl;}
       virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler);
       virtual ~MiraLearner() {}
       virtual void reset() {m_numUpdates = 0;}
@@ -53,11 +53,12 @@ namespace Josiah {
       size_t m_numUpdates;
       bool m_fixMargin;
     float m_margin;
+    float m_slack;
   };
   
   class MiraPlusLearner : public MiraLearner {
     public :
-      MiraPlusLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, bool fixMargin, float margin) : MiraLearner(initWeights, name, fixMargin, margin) {}
+      MiraPlusLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, bool fixMargin, float margin, float slack) : MiraLearner(initWeights, name, fixMargin, margin, slack) {}
       virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler);
       virtual ~MiraPlusLearner() {}
   };
