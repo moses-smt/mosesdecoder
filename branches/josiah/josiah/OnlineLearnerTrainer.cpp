@@ -2,6 +2,7 @@
 
 #ifdef MPI_ENABLED
 #include <mpi.h>
+#include "MpiDebug.h"
 #endif
 
 #include <cassert>
@@ -72,6 +73,22 @@ namespace Josiah {
     if (MPI_SUCCESS != MPI_Bcast(&order[0], order.size(), MPI_INT, 0, MPI_COMM_WORLD))
       MPI_Abort(MPI_COMM_WORLD,1);
 #endif
+
+    ScoreComponentCollection avgWeights = m_learner->GetAveragedWeights();
+#ifdef MPI_ENABLED
+    MPI_VERBOSE(1, "for rank " << rank << ", avg weights " << avgWeights << endl)
+    vector <float> avgWeightsVec(avgWeights.size());
+    //Reduce avg weight vector
+    if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&avgWeights.data()[0]), &avgWeightsVec[0], avgWeightsVec.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);    
+    MPI_VERBOSE(1, "for rank " << rank << ", agg weights " << ScoreComponentCollection(avgWeightsVec) << endl)
+    if (rank == 0) {
+      ScoreComponentCollection sumWeights(avgWeightsVec);
+      sumWeights.DivideEquals(size);
+      avgWeights = sumWeights;  
+    }
+    MPI_VERBOSE(1, "for rank " << rank << ", upd avg weights " << avgWeights << endl)
+#endif
+
     if (weight_dump_freq > 0 && rank == 0 && batch_ctr > 0 && (batch_ctr % weight_dump_freq) == 0) {
       stringstream s;
       s << weight_dump_stem;
@@ -80,7 +97,6 @@ namespace Josiah {
       string weight_file = s.str();
       cerr << "Dumping weights to  " << weight_file << endl;
       ofstream out(weight_file.c_str());
-      ScoreComponentCollection avgWeights = m_learner->GetAveragedWeights();
       
       if (out) {
         OutputWeights(avgWeights.data(), out);

@@ -12,6 +12,10 @@
 #include "StaticData.h"
 #include "Sampler.h"
 #include "Gibbler.h"
+#ifdef MPI_ENABLED
+#include <mpi.h>
+#include "MpiDebug.h"
+#endif
 
 namespace Josiah {
   
@@ -24,6 +28,32 @@ namespace Josiah {
   void OnlineLearner::UpdateCumul() { 
     m_cumulWeights.PlusEquals(m_currWeights);
     m_iteration++;
+  }
+  
+  void OnlineLearner::SetRunningWeightVector(int rank, int num_procs) {
+    vector <float> runningWeights(m_currWeights.size());
+    //Reduce running weight vector
+    if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&m_currWeights.data()[0]), &runningWeights[0], runningWeights.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+   
+    MPI_VERBOSE(1,"Rank " << rank << ", My weights : " << m_currWeights << endl)  
+    MPI_VERBOSE(1,"Rank " << rank << ", Agg weights : " << ScoreComponentCollection(runningWeights) << endl)  
+
+    if (rank == 0) {
+      ScoreComponentCollection avgRunningWeights(runningWeights);
+      avgRunningWeights.DivideEquals(num_procs);
+      runningWeights = avgRunningWeights.data();
+      MPI_VERBOSE(1,"Avg weights : " << avgRunningWeights << endl)  
+    } 
+     
+    if (MPI_SUCCESS != MPI_Bcast(const_cast<float*>(&runningWeights[0]), runningWeights.size(), MPI_FLOAT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    
+    ScoreComponentCollection avgRunningWeights(runningWeights);
+    m_currWeights = avgRunningWeights;
+    MPI_VERBOSE(1,"Rank " << rank << ", upd curr weights : " << m_currWeights << endl)  
+    
+    if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+    
+    const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
   }
   
   vector<float> OnlineLearner::hildreth (const vector<ScoreComponentCollection>& a, const vector<float>& b) {

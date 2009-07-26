@@ -2,6 +2,10 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#ifdef MPI_ENABLED
+#include <mpi.h>
+#endif
+
 
 #include "ScoreComponentCollection.h"
 
@@ -20,6 +24,9 @@ namespace Josiah {
       virtual void reset() {}
       virtual size_t GetNumUpdates() = 0;
       const std::string & GetName() {return m_name;}
+#ifdef MPI_ENABLED    
+      void SetRunningWeightVector(int, int);
+#endif
     protected:
       //bool m_averaging;
       Moses::ScoreComponentCollection m_currWeights;

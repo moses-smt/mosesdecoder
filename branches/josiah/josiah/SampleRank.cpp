@@ -343,9 +343,6 @@ int main(int argc, char** argv) {
   if (closestBestNeighbour) {
     tgtAssigner.reset(new ClosestBestNeighbourTgtAssigner());
   }
-  //else if (chiangBestNeighbour) {
-//    tgtAssigner.reset(new ChiangBestNeighbourTgtAssigner());
-//  }
   else {
     tgtAssigner.reset(new BestNeighbourTgtAssigner());
   }
@@ -447,6 +444,9 @@ int main(int argc, char** argv) {
     cerr << "Performed " << sampler.GetOnlineLearner()->GetNumUpdates() << " updates for this sentence" << endl;
     cerr << "Curr Weights : " << StaticData::Instance().GetWeights() << endl;
 
+#ifdef MPI_ENABLED
+    onlineLearner->SetRunningWeightVector(rank, size);
+#endif
     
     ++lineno;
     ++ctr;
