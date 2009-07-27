@@ -185,7 +185,8 @@ class BackwardsEdge
 		BackwardsEdge(const BitmapContainer &prevBitmapContainer
 									, BitmapContainer &parent
 									, const TranslationOptionList &translations
-									, const SquareMatrix &futureScore);
+									, const SquareMatrix &futureScore,
+                                      const InputType& source);
 		~BackwardsEdge();
 
 		bool GetInitialized();
