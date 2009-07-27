@@ -106,7 +106,8 @@ const WordsRange *HypothesisScoreOrdererWithDistortion::transOptRange = NULL;
 BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 							 , BitmapContainer &parent
 							 , const TranslationOptionList &translations
-							 , const SquareMatrix &futureScore)
+							 , const SquareMatrix &futureScore,
+                                const InputType& itype)
   : m_initialized(false)
   , m_prevBitmapContainer(prevBitmapContainer)
   , m_parent(parent)
@@ -133,7 +134,6 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 	}
 
 	const WordsRange &transOptRange = translations.Get(0)->GetSourceWordsRange();
-  const InputType& itype = m_hypotheses.at(0)->GetInput();
 
 	HypothesisSet::const_iterator iterHypo = m_prevBitmapContainer.GetHypotheses().begin();
 	HypothesisSet::const_iterator iterEnd = m_prevBitmapContainer.GetHypotheses().end();

@@ -104,6 +104,7 @@ public:
 	void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
 #endif
 	void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+    const InputType& GetSource() const {return m_source;}   
 
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )

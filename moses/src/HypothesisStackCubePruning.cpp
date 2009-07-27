@@ -275,7 +275,8 @@ void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
 	BackwardsEdge *edge = new BackwardsEdge(bitmapContainer
 																					, *bmContainer
 																					, transOptList
-																					, futureScore);
+																					, futureScore,
+                                                                                      m_manager.GetSource());
 	bmContainer->AddBackwardsEdge(edge);
 }
 
