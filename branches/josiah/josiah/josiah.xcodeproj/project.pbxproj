@@ -37,9 +37,6 @@
 		B24768BA1014D0150038140D /* SampleCollector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768B91014D0150038140D /* SampleCollector.cpp */; };
 		B24768BB1014D0150038140D /* SampleCollector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768B91014D0150038140D /* SampleCollector.cpp */; };
 		B24768BC1014D0150038140D /* SampleCollector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768B91014D0150038140D /* SampleCollector.cpp */; };
-		B24768DF1014D2690038140D /* StopStrategy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768DE1014D2690038140D /* StopStrategy.cpp */; };
-		B24768E01014D2690038140D /* StopStrategy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768DE1014D2690038140D /* StopStrategy.cpp */; };
-		B24768E11014D2690038140D /* StopStrategy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24768DE1014D2690038140D /* StopStrategy.cpp */; };
 		B2476D0F1015DBD90038140D /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2476D0E1015DBD90038140D /* Utils.cpp */; };
 		B2476D101015DBD90038140D /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2476D0E1015DBD90038140D /* Utils.cpp */; };
 		B2476D111015DBD90038140D /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2476D0E1015DBD90038140D /* Utils.cpp */; };
@@ -215,7 +212,6 @@
 		B24768B81014D0150038140D /* SampleCollector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleCollector.h; sourceTree = "<group>"; };
 		B24768B91014D0150038140D /* SampleCollector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SampleCollector.cpp; sourceTree = "<group>"; };
 		B24768DD1014D2690038140D /* StopStrategy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StopStrategy.h; sourceTree = "<group>"; };
-		B24768DE1014D2690038140D /* StopStrategy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StopStrategy.cpp; sourceTree = "<group>"; };
 		B2476D0D1015DBD90038140D /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		B2476D0E1015DBD90038140D /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
 		B25B29F80F8CA15100485047 /* josiah */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = josiah; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -286,7 +282,6 @@
 				B2476D0D1015DBD90038140D /* Utils.h */,
 				B2476D0E1015DBD90038140D /* Utils.cpp */,
 				B24768DD1014D2690038140D /* StopStrategy.h */,
-				B24768DE1014D2690038140D /* StopStrategy.cpp */,
 				B2DB42681010D834001B262D /* SufficientStats.cpp */,
 				B2283BD7100B33610012E6B5 /* SampleAcceptor.h */,
 				B2283BD8100B33610012E6B5 /* SampleAcceptor.cpp */,
@@ -510,7 +505,6 @@
 				B2DB426B1010D834001B262D /* SufficientStats.cpp in Sources */,
 				B24768991014CCAF0038140D /* Sampler.cpp in Sources */,
 				B24768BB1014D0150038140D /* SampleCollector.cpp in Sources */,
-				B24768E01014D2690038140D /* StopStrategy.cpp in Sources */,
 				B2476D101015DBD90038140D /* Utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -549,7 +543,6 @@
 				B2DB426A1010D834001B262D /* SufficientStats.cpp in Sources */,
 				B247689A1014CCAF0038140D /* Sampler.cpp in Sources */,
 				B24768BC1014D0150038140D /* SampleCollector.cpp in Sources */,
-				B24768E11014D2690038140D /* StopStrategy.cpp in Sources */,
 				B2476D111015DBD90038140D /* Utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -583,7 +576,6 @@
 				B2DB42691010D834001B262D /* SufficientStats.cpp in Sources */,
 				B24768981014CCAF0038140D /* Sampler.cpp in Sources */,
 				B24768BA1014D0150038140D /* SampleCollector.cpp in Sources */,
-				B24768DF1014D2690038140D /* StopStrategy.cpp in Sources */,
 				B2476D0F1015DBD90038140D /* Utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
