@@ -40,8 +40,9 @@ private:
   size_t m_numSuffStats;
   ScoreComponentCollection m_GainOptimalSol;
   float m_optimalGain;
+  size_t m_numSamples;
 public:
-  Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0) {}
+  Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0), m_numSamples() {}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
            const std::vector<Word>& source, const feature_vector& extra_fv, SampleAcceptor*) ;
   void AddOperator(GibbsOperator* o);
@@ -61,6 +62,7 @@ public:
   float GetOptimalGain() {return m_optimalGain;}
   void SetOptimalGainSol(TranslationDelta*, TranslationDelta*);
   const ScoreComponentCollection & GetOptimalGainSol() { return m_GainOptimalSol;}
+  void ResetSampleCount();
 };
 
 }
