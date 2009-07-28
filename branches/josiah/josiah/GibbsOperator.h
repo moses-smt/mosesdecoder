@@ -127,7 +127,7 @@ namespace Josiah {
         /**
           * Randomly select and apply one of the translation deltas.
           **/
-        void doSample(std::vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta);
+        void doSample(std::vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, std::vector<SampleCollector*>& m_collectors);
         
         std::string m_name;
 				double T;  // annealing temperature
