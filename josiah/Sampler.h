@@ -62,7 +62,6 @@ public:
   float GetOptimalGain() {return m_optimalGain;}
   void SetOptimalGainSol(TranslationDelta*, TranslationDelta*);
   const ScoreComponentCollection & GetOptimalGainSol() { return m_GainOptimalSol;}
-  void ResetSampleCount();
 };
 
 }
