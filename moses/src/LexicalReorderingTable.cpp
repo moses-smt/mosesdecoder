@@ -306,8 +306,8 @@ void LexicalReorderingTableTree::InitializeForInput(const InputType& input){
   if (!m_Table.get()) {
     //load thread specific table. 
     m_Table.reset(new PrefixTreeMap());
+    m_Table->Read(m_FilePath+".binlexr");
   }
-  m_Table->Read(m_FilePath+".binlexr");
 };
  
 bool LexicalReorderingTableTree::Create(std::istream& inFile, 
