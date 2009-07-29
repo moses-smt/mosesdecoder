@@ -109,8 +109,8 @@ inline FILE* fOpen(const char* fn,const char* m) {
   if(FILE* f=fopen(fn,m)) 
 		return f; 
 	else {
-		assert(false);
 		UserMessage::Add(std::string("ERROR: could not open file ") + fn + " with mode " + m + "\n");
+		assert(false);
 		return NULL;
 	}
 }
