@@ -90,7 +90,13 @@ int PrefixTreeMap::Read(const std::string& fileNameStem, int numVocs){
   fReadVector(ii,srcOffsets);
   fClose(ii);
  
+  if (m_FileSrc) {
+      fClose(m_FileSrc);
+  }
   m_FileSrc = fOpen(ifs.c_str(),"rb");
+  if (m_FileTgt) {
+      fClose(m_FileTgt);
+  }
   m_FileTgt = fOpen(ift.c_str(),"rb");
   
   m_Data.resize(srcOffsets.size());
