@@ -12,7 +12,7 @@
 #include <map>
 #include <string>
 
-typedef unsigned int VocabId;
+typedef int VocabId;
 
 class Vocab
 {

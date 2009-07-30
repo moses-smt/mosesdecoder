@@ -18,7 +18,7 @@ class Phrase
 protected:
 	std::vector<Word>	m_words;
 	
-	typedef std::pair<size_t, size_t>  AlignPair;
+	typedef std::pair<int, int>  AlignPair;
 	typedef std::vector<AlignPair> AlignType;
 	AlignType m_align;
 	std::vector<float>				m_scores;
@@ -34,11 +34,16 @@ public:
 	const Word &GetWord(size_t pos) const
 	{ return m_words[pos]; }
 
-	const std::vector<Word> &GetHeadWords() const
-	{ return m_headWords; }
+	const Word &GetHeadWords(size_t ind) const
+	{ return m_headWords[ind]; }
 
 	
 	const AlignType &GetAlign() const
 	{ return m_align; }
 	size_t GetAlign(size_t sourcePos) const;
+	
+	
+	size_t WriteAlignToMemory(char *mem) const;
+	size_t WriteScoresToMemory(char *mem) const;
+
 };

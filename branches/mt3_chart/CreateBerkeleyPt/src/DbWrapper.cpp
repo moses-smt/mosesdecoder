@@ -14,30 +14,35 @@
 using namespace std;
 
 DbWrapper::DbWrapper()
-:dbMisc(0,0)
-,dbVocab(0, 0)
-,dbSource(0,0)
+:m_dbMisc(0, 0)
+,m_dbVocab(0, 0)
+,m_dbSource(0, 0)
+,m_dbTarget(0, 0)
 ,m_nextSourceId(1)
 {}
 
 DbWrapper::~DbWrapper()
 {
-	dbVocab.close(0);
+	m_dbVocab.close(0);
 }
 
 void DbWrapper::Open(const string &filePath)
 {
-	dbMisc.set_error_stream(&cerr);
-	dbMisc.set_errpfx("SequenceExample");
-	dbMisc.open(NULL, (filePath + "/Misc.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
+	m_dbMisc.set_error_stream(&cerr);
+	m_dbMisc.set_errpfx("SequenceExample");
+	m_dbMisc.open(NULL, (filePath + "/Misc.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 
-	dbVocab.set_error_stream(&cerr);
-	dbVocab.set_errpfx("SequenceExample");
-	dbVocab.open(NULL, (filePath + "/Vocab.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
+	m_dbVocab.set_error_stream(&cerr);
+	m_dbVocab.set_errpfx("SequenceExample");
+	m_dbVocab.open(NULL, (filePath + "/Vocab.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 
-	dbSource.set_error_stream(&cerr);
-	dbSource.set_errpfx("SequenceExample");
-	dbSource.open(NULL, (filePath + "/Source.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
+	m_dbSource.set_error_stream(&cerr);
+	m_dbSource.set_errpfx("SequenceExample");
+	m_dbSource.open(NULL, (filePath + "/Source.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
+
+	m_dbTarget.set_error_stream(&cerr);
+	m_dbTarget.set_errpfx("SequenceExample");
+	m_dbTarget.open(NULL, (filePath + "/Target.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 	
 }
 
@@ -56,10 +61,10 @@ void DbWrapper::Save(const Vocab &vocab)
 		Dbt key(wordChar, word.size() + 1);
 		Dbt data(&vocabId, sizeof(VocabId));
 		
-		int ret = dbVocab.put(NULL, &key, &data, DB_NOOVERWRITE);
+		int ret = m_dbVocab.put(NULL, &key, &data, DB_NOOVERWRITE);
 		if (ret == DB_KEYEXIST) 
 		{
-			dbVocab.err(ret, "Put failed because key %f already exists", wordChar);
+			m_dbVocab.err(ret, "Put failed because key %f already exists", wordChar);
 		}
 		
 		free(wordChar);
@@ -76,7 +81,7 @@ void DbWrapper::GetAllVocab()
 	key.set_data(c);
 	key.set_size(5);
 	
-	dbVocab.get(NULL, &key, &data, 0);
+	m_dbVocab.get(NULL, &key, &data, 0);
 	
 	VocabId *id = (VocabId*) data.get_data();
 	
@@ -84,7 +89,7 @@ void DbWrapper::GetAllVocab()
 	
 	// cursors
 	Dbc *cursorp;
-	dbVocab.cursor(NULL, &cursorp, 0); 
+	m_dbVocab.cursor(NULL, &cursorp, 0); 
 	
 	int ret;
 	
@@ -140,10 +145,10 @@ long DbWrapper::SaveSourceWord(long currSourceId, const Word &word)
 	Dbt data(&nextSourceId, sizeof(long));
 	
 	// save
-	int ret = dbSource.put(NULL, &key, &data, DB_NOOVERWRITE);
+	int ret = m_dbSource.put(NULL, &key, &data, DB_NOOVERWRITE);
 	if (ret == DB_KEYEXIST) 
 	{ // already exist. get node id
-		dbSource.get(NULL, &key, &data, 0);
+		m_dbSource.get(NULL, &key, &data, 0);
 		
 		long *sourceId = (long*) data.get_data();
 		retSourceId = *sourceId;
@@ -159,19 +164,44 @@ long DbWrapper::SaveSourceWord(long currSourceId, const Word &word)
 
 void DbWrapper::SaveTarget(const Phrase &phrase)
 {
-	// head words
+	
+	// allocate mem
 	const Global &global = Global::Instance();
+
+	size_t memNeeded = global.GetSourceWordSize() + global.GetTargetWordSize();
+	memNeeded += sizeof(int) +  global.GetTargetWordSize() * phrase.GetSize(); // phrase
+	memNeeded += sizeof(int) + 2 * sizeof(int) * phrase.GetAlign().size(); // align
+	memNeeded += sizeof(float) * global.GetNumScores(); // scores
 	
-	size_t memNeeded = sizeof(VocabId) * (global.GetNumSourceFactors() + global.GetNumTargetFactors());
-	memNeeded += sizeof(int) + sizeof(int) * phrase.GetAlign().size(); // align
-	memNeeded += sizeof(int) + sizeof(VocabId) * phrase.GetSize(); // phrase
-	memNeeded += sizeof(float) * phrase.GetAlign().size(); // scores
+	char *mem = (char*) malloc(memNeeded);
+
+	size_t memUsed = 0;
+
+	// head words
+	memUsed += phrase.GetHeadWords(0).WriteToMemory(mem);
+	memUsed += phrase.GetHeadWords(1).WriteToMemory(mem + memUsed);
 	
+	// phrase
+	/// size
+	int phraseSize = phrase.GetSize();
+	memcpy(mem + memUsed, &phraseSize, sizeof(int));
+	memUsed += sizeof(int);
+
+	// word
 	for (size_t pos = 0; pos < phrase.GetSize(); ++pos)
 	{
 		const Word &word = phrase.GetWord(pos);
-
+		memUsed += word.WriteToMemory(mem + memUsed);
 	}
+	
+	// align
+	memUsed += phrase.WriteAlignToMemory(mem + memUsed);
+	
+	// scores
+	memUsed += phrase.WriteScoresToMemory(mem + memUsed);
+
+	assert(memNeeded == memUsed);
+	
 }
 
 

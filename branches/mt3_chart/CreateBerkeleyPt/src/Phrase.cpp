@@ -71,3 +71,36 @@ size_t Phrase::GetAlign(size_t sourcePos) const
 	return 0;
 }
 
+size_t Phrase::WriteAlignToMemory(char *mem) const
+{
+	size_t memUsed = 0;
+
+	// num of alignments
+	int numAlign = m_align.size();
+	memcpy(mem, &numAlign, sizeof(int));
+	memUsed += sizeof(int);
+
+	// actual alignments
+	AlignType::const_iterator iter;
+	for (iter = m_align.begin(); iter != m_align.end(); ++iter)
+	{
+		const AlignPair &alignPair = *iter;
+		
+		memcpy(mem + memUsed, &alignPair.first, sizeof(int));
+		memUsed += sizeof(int);
+		
+		memcpy(mem + memUsed, &alignPair.second, sizeof(int));
+		memUsed += sizeof(int);
+	}
+	
+	return memUsed;
+}
+
+size_t Phrase::WriteScoresToMemory(char *mem) const
+{
+	size_t memUsed = sizeof(float) * m_scores.size();
+	memcpy(mem, &m_scores, memUsed);
+
+	return memUsed;
+}
+

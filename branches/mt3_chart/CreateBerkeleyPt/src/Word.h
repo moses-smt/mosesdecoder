@@ -24,5 +24,7 @@ public:
 	{ return m_factors[ind]; }
 	bool IsNonTerminal() const
 	{ return m_isNonTerminal; }
+	
+	size_t WriteToMemory(char *mem) const;
 };
 
