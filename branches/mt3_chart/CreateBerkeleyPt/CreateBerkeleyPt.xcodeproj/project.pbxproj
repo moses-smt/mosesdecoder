@@ -11,6 +11,9 @@
 		1C273BA710206AC000991BD2 /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C273BA610206AC000991BD2 /* Phrase.cpp */; };
 		1C273C0C10206E9200991BD2 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C273C0B10206E8D00991BD2 /* libmoses.a */; };
 		1C273CFF102096CA00991BD2 /* Word.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C273CFE102096CA00991BD2 /* Word.cpp */; };
+		1C2F4AA71021F51A00F03725 /* Global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C2F4AA61021F51A00F03725 /* Global.cpp */; };
+		1C679C1F1020E9A9002AD249 /* DbWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C679C1E1020E9A9002AD249 /* DbWrapper.cpp */; };
+		1CB80C7C1020AD62000B4078 /* Vocab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CB80C7B1020AD62000B4078 /* Vocab.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +52,12 @@
 		1C273C0610206E8D00991BD2 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
 		1C273CFD102096CA00991BD2 /* Word.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Word.h; path = src/Word.h; sourceTree = "<group>"; };
 		1C273CFE102096CA00991BD2 /* Word.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Word.cpp; path = src/Word.cpp; sourceTree = "<group>"; };
+		1C2F4AA51021F51A00F03725 /* Global.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Global.h; path = src/Global.h; sourceTree = "<group>"; };
+		1C2F4AA61021F51A00F03725 /* Global.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Global.cpp; path = src/Global.cpp; sourceTree = "<group>"; };
+		1C679C1D1020E9A9002AD249 /* DbWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DbWrapper.h; path = src/DbWrapper.h; sourceTree = "<group>"; };
+		1C679C1E1020E9A9002AD249 /* DbWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DbWrapper.cpp; path = src/DbWrapper.cpp; sourceTree = "<group>"; };
+		1CB80C7A1020AD62000B4078 /* Vocab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vocab.h; path = src/Vocab.h; sourceTree = "<group>"; };
+		1CB80C7B1020AD62000B4078 /* Vocab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vocab.cpp; path = src/Vocab.cpp; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* CreateBerkeleyPt */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateBerkeleyPt; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -83,6 +92,12 @@
 				1C273BA610206AC000991BD2 /* Phrase.cpp */,
 				1C273CFD102096CA00991BD2 /* Word.h */,
 				1C273CFE102096CA00991BD2 /* Word.cpp */,
+				1CB80C7A1020AD62000B4078 /* Vocab.h */,
+				1CB80C7B1020AD62000B4078 /* Vocab.cpp */,
+				1C679C1D1020E9A9002AD249 /* DbWrapper.h */,
+				1C679C1E1020E9A9002AD249 /* DbWrapper.cpp */,
+				1C2F4AA51021F51A00F03725 /* Global.h */,
+				1C2F4AA61021F51A00F03725 /* Global.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -173,6 +188,9 @@
 				1C273B87102064C300991BD2 /* Main.cpp in Sources */,
 				1C273BA710206AC000991BD2 /* Phrase.cpp in Sources */,
 				1C273CFF102096CA00991BD2 /* Word.cpp in Sources */,
+				1CB80C7C1020AD62000B4078 /* Vocab.cpp in Sources */,
+				1C679C1F1020E9A9002AD249 /* DbWrapper.cpp in Sources */,
+				1C2F4AA71021F51A00F03725 /* Global.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,7 +219,12 @@
 					"_GLIBCXX_DEBUG_PEDANTIC=1",
 				);
 				INSTALL_PATH = /usr/local/bin;
-				OTHER_LDFLAGS = "-lz";
+				LIBRARY_SEARCH_PATHS = /usr/local/BerkeleyDB.4.7/lib;
+				OTHER_LDFLAGS = (
+					"-ldb_cxx",
+					"-ldb",
+					"-lz",
+				);
 				PRODUCT_NAME = CreateBerkeleyPt;
 			};
 			name = Debug;
@@ -213,7 +236,12 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				OTHER_LDFLAGS = "-lz";
+				LIBRARY_SEARCH_PATHS = /usr/local/BerkeleyDB.4.7/lib;
+				OTHER_LDFLAGS = (
+					"-ldb_cxx",
+					"-ldb",
+					"-lz",
+				);
 				PRODUCT_NAME = CreateBerkeleyPt;
 			};
 			name = Release;

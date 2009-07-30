@@ -57,5 +57,17 @@ void Phrase::CreateHeadwordsFromString(const std::string &inString)
 	m_headWords[1].CreateFromString(headWordsStr[1]);
 }
 
-
+size_t Phrase::GetAlign(size_t sourcePos) const
+{
+	AlignType::const_iterator iter;
+	for (iter = m_align.begin(); iter != m_align.end(); ++iter)
+	{
+		const AlignPair &pair = *iter;
+		if (pair.first == sourcePos)
+			return pair.second;
+	}
+	
+	assert(false);
+	return 0;
+}
 

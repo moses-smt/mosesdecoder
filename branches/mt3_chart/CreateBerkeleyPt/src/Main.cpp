@@ -1,21 +1,29 @@
 #include <iostream>
 #include <string>
 #include "Phrase.h"
+#include "Vocab.h"
+#include "DbWrapper.h"
+#include "Global.h"
 #include "../../moses/src/InputFileStream.h"
 #include "../../moses/src/Util.h"
 #include "../../moses/src/UserMessage.h"
-
 
 using namespace std;
 
 int main (int argc, char * const argv[]) {
     // insert code here...
-  std::cout << "Starting\n";
+  std::cerr << "Starting\n";
 	
 	string filePath = "pt.txt";
 	
 	Moses::InputFileStream inStream(filePath);
 
+	DbWrapper dbWrapper;
+	dbWrapper.Open(".");
+
+	Global::Instance().Save(dbWrapper.GetSDbMisc());
+	Global::Instance().Load(dbWrapper.GetSDbMisc());
+	
 	size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
 
 	string line;
@@ -42,9 +50,16 @@ int main (int argc, char * const argv[]) {
 		targetPhrase.CreateAlignFromString(alignStr);
 		targetPhrase.CreateScoresFromString(scoresStr);
 		targetPhrase.CreateHeadwordsFromString(headWordsStr);
+
+		dbWrapper.SaveSource(sourcePhrase, targetPhrase);
 		
 	}
 	
-	std::cout << "Finished\n";
+	dbWrapper.Save(Vocab::Instance());
+	dbWrapper.GetAllVocab();
+	
+	std::cerr << "Finished\n";
   return 0;
 }
+
+
