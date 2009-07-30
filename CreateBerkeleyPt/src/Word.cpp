@@ -36,3 +36,12 @@ void Word::CreateFromString(const std::string &inString)
 	
 }
 
+size_t Word::WriteToMemory(char *mem) const
+{
+	size_t size = sizeof(VocabId) * m_factors.size();
+	memcpy(mem, &m_factors, size);
+	
+	return size;
+}
+
+

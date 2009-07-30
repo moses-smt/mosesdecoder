@@ -39,7 +39,7 @@ class TargetfirKey
 
 class DbWrapper
 {
-	Db dbMisc, dbVocab, dbSource;
+	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget;
 	long m_nextSourceId;
 	
 	long SaveSourceWord(long currSourceId, const Word &word);
@@ -56,5 +56,5 @@ public:
 	void GetAllVocab();
 	
 	Db &GetSDbMisc()
-	{ return dbMisc; }
+	{ return m_dbMisc; }
 };

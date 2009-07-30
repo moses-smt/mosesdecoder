@@ -52,7 +52,7 @@ int main (int argc, char * const argv[]) {
 		targetPhrase.CreateHeadwordsFromString(headWordsStr);
 
 		dbWrapper.SaveSource(sourcePhrase, targetPhrase);
-		
+		dbWrapper.SaveTarget(targetPhrase);
 	}
 	
 	dbWrapper.Save(Vocab::Instance());

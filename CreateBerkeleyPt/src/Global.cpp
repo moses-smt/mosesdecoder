@@ -9,6 +9,7 @@
 
 #include "/usr/local/BerkeleyDB.4.7/include/db_cxx.h"
 #include "Global.h"
+#include "Vocab.h"
 
 Global Global::s_instance;
 
@@ -56,4 +57,12 @@ void Global::Load(Db &dbMisc)
 	s_instance.m_numScores = s_instance.Load(dbMisc, "NumScores");	
 }
 
+size_t Global::GetSourceWordSize() const
+{
+	return m_numSourceFactors * sizeof(VocabId);
+}
+size_t Global::GetTargetWordSize() const
+{
+	return m_numTargetFactors * sizeof(VocabId);
+}
 

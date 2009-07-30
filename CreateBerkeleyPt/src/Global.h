@@ -33,4 +33,8 @@ public:
 	{ return m_numTargetFactors; }
 	int GetNumScores() const
 	{ return m_numScores; }
+
+	size_t GetSourceWordSize() const;
+	size_t GetTargetWordSize() const;
+
 };
