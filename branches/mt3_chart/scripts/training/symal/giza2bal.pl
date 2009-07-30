@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#!/usr/bin/perl
 
 # $Id$
 #Converts direct and inverted alignments into a more compact 

@@ -5,6 +5,7 @@ use strict;
 use Getopt::Long;
 my $help;
 my $lc = 0; # lowercase the corpus?
+my $ignore_ratio = 0;
 my $enc = "utf8"; # encoding of the input and output files
     # set to anything else you wish, but I have not tested it yet
 
@@ -12,6 +13,7 @@ GetOptions(
   "help" => \$help,
   "lowercase|lc" => \$lc,
   "encoding=s" => \$enc,
+  "ignore-ratio" => \$ignore_ratio
 ) or exit(1);
 
 if (scalar(@ARGV) < 6 || $help) {
@@ -102,8 +104,8 @@ while(my $f = <F>) {
   next if scalar(@F) > $max;
   next if scalar(@E) < $min;
   next if scalar(@F) < $min;
-  next if scalar(@E)/scalar(@F) > 9;
-  next if scalar(@F)/scalar(@E) > 9;
+  next if !$ignore_ratio && scalar(@E)/scalar(@F) > 9;
+  next if !$ignore_ratio && scalar(@F)/scalar(@E) > 9;
   
   # An extra check: none of the factors can be blank!
   die "There is a blank factor in $corpus.$l1 on line $innr: $f"
@@ -111,7 +113,6 @@ while(my $f = <F>) {
   die "There is a blank factor in $corpus.$l2 on line $innr: $e"
     if $e =~ /[ \|]\|/;
     
-  
   $outnr++;
   print FO $f."\n";
   print EO $e."\n";
