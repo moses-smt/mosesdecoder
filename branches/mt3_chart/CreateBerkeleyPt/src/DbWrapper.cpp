@@ -18,6 +18,7 @@ DbWrapper::DbWrapper()
 ,m_dbVocab(0, 0)
 ,m_dbSource(0, 0)
 ,m_dbTarget(0, 0)
+,m_dbTargetInd(0, 0)
 ,m_nextSourceId(1)
 {}
 
@@ -25,6 +26,26 @@ DbWrapper::~DbWrapper()
 {
 	m_dbVocab.close(0);
 }
+
+// helper callback fn for target secondary db
+int
+get_sales_rep(Db *sdbp,          // secondary db handle
+              const Dbt *pkey,   // primary db record's key
+              const Dbt *pdata,  // primary db record's data
+              Dbt *skey)         // secondary db record's key
+{
+	VENDOR *vendor;
+	
+	// First, extract the structure contained in the primary's data
+	vendor = (VENDOR *)pdata->get_data();
+	
+	// Now set the secondary key's data to be the representative's name
+	skey->set_data(vendor->sales_rep);
+	skey->set_size(strlen(vendor->sales_rep) + 1);
+	
+	// Return 0 to indicate that the record can be created/updated.
+	return (0);
+} 
 
 void DbWrapper::Open(const string &filePath)
 {
@@ -44,6 +65,9 @@ void DbWrapper::Open(const string &filePath)
 	m_dbTarget.set_errpfx("SequenceExample");
 	m_dbTarget.open(NULL, (filePath + "/Target.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 	
+	m_dbTargetInd.open(NULL, (filePath + "/TargetInd.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
+	
+	m_dbTarget.associate(NULL, &m_dbTargetInd, get_sales_rep, 0);
 }
 
 void DbWrapper::Save(const Vocab &vocab)
@@ -164,44 +188,7 @@ long DbWrapper::SaveSourceWord(long currSourceId, const Word &word)
 
 void DbWrapper::SaveTarget(const Phrase &phrase)
 {
-	
-	// allocate mem
-	const Global &global = Global::Instance();
-
-	size_t memNeeded = global.GetSourceWordSize() + global.GetTargetWordSize();
-	memNeeded += sizeof(int) +  global.GetTargetWordSize() * phrase.GetSize(); // phrase
-	memNeeded += sizeof(int) + 2 * sizeof(int) * phrase.GetAlign().size(); // align
-	memNeeded += sizeof(float) * global.GetNumScores(); // scores
-	
-	char *mem = (char*) malloc(memNeeded);
-
-	size_t memUsed = 0;
-
-	// head words
-	memUsed += phrase.GetHeadWords(0).WriteToMemory(mem);
-	memUsed += phrase.GetHeadWords(1).WriteToMemory(mem + memUsed);
-	
-	// phrase
-	/// size
-	int phraseSize = phrase.GetSize();
-	memcpy(mem + memUsed, &phraseSize, sizeof(int));
-	memUsed += sizeof(int);
-
-	// word
-	for (size_t pos = 0; pos < phrase.GetSize(); ++pos)
-	{
-		const Word &word = phrase.GetWord(pos);
-		memUsed += word.WriteToMemory(mem + memUsed);
-	}
-	
-	// align
-	memUsed += phrase.WriteAlignToMemory(mem + memUsed);
-	
-	// scores
-	memUsed += phrase.WriteScoresToMemory(mem + memUsed);
-
-	assert(memNeeded == memUsed);
-	
+	phrase.SaveTargetPhrase(m_dbTarget);	
 }
 
 

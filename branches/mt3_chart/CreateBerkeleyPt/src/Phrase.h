@@ -13,6 +13,8 @@
 #include <vector>
 #include "Word.h"
 
+class Db;
+
 class Phrase
 {
 protected:
@@ -23,6 +25,11 @@ protected:
 	AlignType m_align;
 	std::vector<float>				m_scores;
 	std::vector<Word>	m_headWords;
+	
+	char *WriteToMemory() const;
+	size_t WriteAlignToMemory(char *mem) const;
+	size_t WriteScoresToMemory(char *mem) const;
+
 public:
 	void CreateFromString(const std::string &phraseString);
 	void CreateAlignFromString(const std::string &alignString);
@@ -42,8 +49,7 @@ public:
 	{ return m_align; }
 	size_t GetAlign(size_t sourcePos) const;
 	
-	
-	size_t WriteAlignToMemory(char *mem) const;
-	size_t WriteScoresToMemory(char *mem) const;
+
+	void SaveTargetPhrase(Db &db) const;
 
 };
