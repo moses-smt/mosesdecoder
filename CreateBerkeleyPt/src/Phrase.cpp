@@ -7,8 +7,10 @@
  *
  */
 
-#include "Phrase.h"
+#include "/usr/local/BerkeleyDB.4.7/include/db_cxx.h"
 #include "../../moses/src/Util.h"
+#include "Phrase.h"
+#include "Global.h"
 
 using namespace std;
 
@@ -103,4 +105,57 @@ size_t Phrase::WriteScoresToMemory(char *mem) const
 
 	return memUsed;
 }
+
+void Phrase::SaveTargetPhrase(Db &db) const
+{
+	char *mem = WriteToMemory();
+	
+	
+	free(mem);
+	
+}
+
+char *Phrase::WriteToMemory() const
+{
+	// allocate mem
+	const Global &global = Global::Instance();
+	
+	size_t memNeeded = global.GetSourceWordSize() + global.GetTargetWordSize();
+	memNeeded += sizeof(int) +  global.GetTargetWordSize() * GetSize(); // phrase
+	memNeeded += sizeof(int) + 2 * sizeof(int) * GetAlign().size(); // align
+	memNeeded += sizeof(float) * global.GetNumScores(); // scores
+	
+	char *mem = (char*) malloc(memNeeded);
+	
+	size_t memUsed = 0;
+	
+	// head words
+	memUsed += GetHeadWords(0).WriteToMemory(mem);
+	memUsed += GetHeadWords(1).WriteToMemory(mem + memUsed);
+	
+	// phrase
+	/// size
+	int phraseSize = GetSize();
+	memcpy(mem + memUsed, &phraseSize, sizeof(int));
+	memUsed += sizeof(int);
+	
+	// word
+	for (size_t pos = 0; pos < GetSize(); ++pos)
+	{
+		const Word &word = GetWord(pos);
+		memUsed += word.WriteToMemory(mem + memUsed);
+	}
+	
+	// align
+	memUsed += WriteAlignToMemory(mem + memUsed);
+	
+	// scores
+	memUsed += WriteScoresToMemory(mem + memUsed);
+	
+	assert(memNeeded == memUsed);
+	return mem;
+}
+
+
+
 

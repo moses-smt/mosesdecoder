@@ -329,7 +329,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lon-disk-phrase-dict",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-chart-cmd";
@@ -377,7 +376,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lon-disk-phrase-dict",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-chart-cmd";
