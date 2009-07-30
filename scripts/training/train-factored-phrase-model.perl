@@ -7,7 +7,7 @@ use File::Spec::Functions;
 use File::Basename;
 
 # Train Factored Phrase Model
-# (c) 2006-2008 Philipp Koehn
+# (c) 2006-2009 Philipp Koehn
 # with contributions from other JHU WS participants
 # Train a phrase model from a parallel corpus
 # -----------------------------------------------------
@@ -28,7 +28,8 @@ $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
 $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
 $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
 @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP, $_HMM_ALIGN, $_CONFIG,
-$_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING);
+$_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,
+$_CONTINUE,$_PROPER_CONDITIONING);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
@@ -49,7 +50,6 @@ $_HELP = 1
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
 		       'model-dir=s' => \$_MODEL_DIR,
 		       'temp-dir=s' => \$_TEMP_DIR,
-		       'file-limit' => \$_FILE_LIMIT,
 		       'extract-file=s' => \$_EXTRACT_FILE,
 		       'alignment=s' => \$_ALIGNMENT,
 		       'alignment-file=s' => \$_ALIGNMENT_FILE,
@@ -82,8 +82,14 @@ $_HELP = 1
 		       'reordering-table=s' => \@_REORDERING_TABLE,
 		       'generation-type=s' => \@_GENERATION_TYPE,
 		       'continue' => \$_CONTINUE,
+		       'hierarchical' => \$_HIERARCHICAL,
+		       'glue-grammar' => \$_GLUE_GRAMMAR,
+		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
+		       'source-syntax' => \$_SOURCE_SYNTAX,
+		       'target-syntax' => \$_TARGET_SYNTAX,
+		       'xml' => \$_XML,
 		       'proper-conditioning' => \$_PROPER_CONDITIONING,
-		       'config=s' => \$_CONFIG		       
+		       'config=s' => \$_CONFIG		       		     
                       );
 
 if ($_HELP) {
@@ -104,24 +110,33 @@ For more, please check manual or contact koehn\@inf.ed.ac.uk\n";
   exit(1);
 }
 
+$_HIERARCHICAL = 1 if $_SOURCE_SYNTAX || $_TARGET_SYNTAX;
+$_XML = 1 if $_SOURCE_SYNTAX || $_TARGET_SYNTAX;
 my $___FACTOR_DELIMITER = $_FACTOR_DELIMITER;
 $___FACTOR_DELIMITER = '|' unless ($_FACTOR_DELIMITER);
 
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 
 # supporting binaries from other packages
-my $GIZA = "$BINDIR/GIZA++";
-my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
-my $MKCLS = "$BINDIR/mkcls";
+if ($BINDIR eq "") {
+  print STDERR "Setting BINDIR by searching for GIZA++\n";
+  $BINDIR = `which GIZA++`;
+  chop($BINDIR);
+  $BINDIR =~ s/\/GIZA\+\+//;
+}
+my $GIZA = $BINDIR."/GIZA++";
+my $SNT2COOC = $BINDIR."/snt2cooc.out"; 
+my $MKCLS = $BINDIR."/mkcls";
 
 # supporting scripts/binaries from this package
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
 my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/training/phrase-extract/score";
+my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/training/phrase-extract/consolidate";
 
 # utilities
-my $ZCAT = "zcat";
+my $ZCAT = "gzip -cd";
 my $BZCAT = "bzcat";
 
 # do a sanity check to make sure we can find the necessary binaries since
@@ -173,12 +188,14 @@ my $___NOTE_ALIGNMENT_DROPS = 1;
 # model dir and alignment/extract file
 my $___MODEL_DIR = $___ROOT_DIR."/model";
 $___MODEL_DIR = $_MODEL_DIR if $_MODEL_DIR;
-my $___ALIGNMENT_FILE = "$___MODEL_DIR/aligned";
+my $___ALIGNMENT_FILE = $___MODEL_DIR."/aligned";
 $___ALIGNMENT_FILE = $_ALIGNMENT_FILE if $_ALIGNMENT_FILE;
 my $___ALIGNMENT_STEM = $___ALIGNMENT_FILE;
 $___ALIGNMENT_STEM = $_ALIGNMENT_STEM if $_ALIGNMENT_STEM;
 my $___EXTRACT_FILE = $___MODEL_DIR."/extract";
 $___EXTRACT_FILE = $_EXTRACT_FILE if $_EXTRACT_FILE;
+my $___GLUE_GRAMMAR_FILE = $___MODEL_DIR."/glue-grammar";
+$___GLUE_GRAMMAR_FILE = $_GLUE_GRAMMAR_FILE if $_GLUE_GRAMMAR_FILE;
 
 my $___CONFIG = $___MODEL_DIR."/moses.ini";
 $___CONFIG = $_CONFIG if $_CONFIG;
@@ -287,7 +304,7 @@ $___REORDERING_FACTORS = "0-0" if defined($_REORDERING) && ! defined($_DECODING_
 $___REORDERING_FACTORS = $_REORDERING_FACTORS if defined($_REORDERING_FACTORS);
 die("ERROR: format for reordering factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___REORDERING_FACTORS\n") 
   if defined $___REORDERING_FACTORS && $___REORDERING_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
-$___NOT_FACTORED = 0 unless defined($_REORDERING) && $___REORDERING_FACTORS eq "0-0";
+$___NOT_FACTORED = 0 if defined($_REORDERING) && $___REORDERING_FACTORS ne "0-0";
 
 my $___GENERATION_FACTORS = undef;
 $___GENERATION_FACTORS = $_GENERATION_FACTORS if defined($_GENERATION_FACTORS);
@@ -320,9 +337,9 @@ sub prepare {
     
     print STDERR "(1.0) selecting factors @ ".`date`;
     my ($factor_f,$factor_e) = split(/\-/,$___ALIGNMENT_FACTORS);
-    my $corpus = $___NOT_FACTORED ? $___CORPUS : $___CORPUS.".".$___ALIGNMENT_FACTORS;    
+    my $corpus = ($___NOT_FACTORED && !$_XML) ? $___CORPUS : $___CORPUS.".".$___ALIGNMENT_FACTORS;    
     if ($___NOFORK) {
-	if (! $___NOT_FACTORED) {
+	if (! $___NOT_FACTORED || $_XML) {
 	    &reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
 	    &reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
 	}
@@ -343,7 +360,7 @@ sub prepare {
     } 
     else {
 	print "Forking...\n";
-	if (! $___NOT_FACTORED) {
+	if (! $___NOT_FACTORED || $_XML) {
 	    my $pid = fork();
 	    die "ERROR: couldn't fork" unless defined $pid;
 	    if (!$pid) {
@@ -424,6 +441,7 @@ sub reduce_factors {
         $nr++;
         print STDERR "." if $nr % 10000 == 0;
         print STDERR "($nr)" if $nr % 100000 == 0;
+	s/<\S[^>]*>//g; # remove xml
 	chomp; s/ +/ /g; s/^ //; s/ $//;
 	my $first = 1;
 	foreach (split) {
@@ -805,7 +823,7 @@ sub word_align {
 
 sub get_lexical_factored {
     print STDERR "(4) generate lexical translation table $___TRANSLATION_FACTORS @ ".`date`;
-    if ($___NOT_FACTORED) {
+    if ($___NOT_FACTORED && !$_XML) {
 	&get_lexical($___CORPUS.".".$___F,
 		     $___CORPUS.".".$___E,
 		     $___LEXICAL_FILE);
@@ -820,9 +838,11 @@ sub get_lexical_factored {
 	    &reduce_factors($___CORPUS.".".$___E,
 			    $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
 			    $factor_e);
+	    my $lexical_file = $___LEXICAL_FILE;
+	    $lexical_file .= ".".$factor if !$___NOT_FACTORED;
 	    &get_lexical($___ALIGNMENT_STEM.".".$factor_f.".".$___F,
 			 $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
-			 $___LEXICAL_FILE.".".$factor);
+			 $lexical_file);
 	}
     }
 }
@@ -947,47 +967,24 @@ sub extract_phrase {
        push @tempfiles, "$f.gz";
      }
     }
-    my $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $___MAX_PHRASE_LENGTH";
-    $cmd .= " --NoFileLimit" unless $_FILE_LIMIT;
+    my $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file";
+    $cmd .= " --MaxSymbolsSource $___MAX_PHRASE_LENGTH";
     $cmd .= " --ProperConditioning" if $_PROPER_CONDITIONING;
-    $cmd .= " orientation" if $REORDERING_LEXICAL;
+    $cmd .= " --Orientation" if $REORDERING_LEXICAL;
+    $cmd .= " --Hierarchical" if $_HIERARCHICAL;
+    $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
+    $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
+    $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
     safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
     foreach my $f (@tempfiles) {
       unlink $f;
     }
-    if (! $_FILE_LIMIT) {
-      if (! $___DONT_ZIP) { 
+    if (! $___DONT_ZIP) { 
         safesystem("gzip $extract_file.o") if -e "$extract_file.o";
         safesystem("gzip $extract_file.inv") or die("ERROR");
         safesystem("gzip $extract_file") or die("ERROR");
-      }
-    }
-    else {
-      if (-e "$extract_file.o.part0001") {
-	if (! $___DONT_ZIP) {
-          safesystem("cat $extract_file.o.part* | gzip > $extract_file.o.gz") or die("ERROR");
-        }
-        else {
-	  safesystem("cat $extract_file.o.part* > $extract_file.o") or die("ERROR");
-        }
-        if (! $debug) { safesystem("rm -f $extract_file.o.part*") or die("ERROR");}
-      }
-      if (! $___DONT_ZIP) {
-        safesystem("cat $extract_file.part* | gzip > $extract_file.gz") or die("ERROR");
-      }
-      else {
-	safesystem("cat $extract_file.part* > $extract_file") or die("ERROR");
-      }
-      if (! $debug) { safesystem("rm -f $extract_file.part*") or die("ERROR");}
-      if (! $___DONT_ZIP) {
-        safesystem("cat $extract_file.inv.part* | gzip > $extract_file.inv.gz") or die("ERROR");
-      }
-      else {
-        safesystem("cat $extract_file.inv.part* > $extract_file.inv") or die("ERROR");
-      }
-      if (! $debug) { safesystem("rm -f $extract_file.inv.part*") or die("ERROR");}
     }
 }
 
@@ -1022,7 +1019,7 @@ sub score_phrase {
 	my $inverse = "";
         my $extract_filename = $extract_file;
 	if ($direction eq "e2f") {
-	    $inverse = " inverse";
+	    $inverse = " --Inverse";
             $extract_filename = $extract_file.".inv";
         }
 	my $extract = "$extract_filename.sorted";
@@ -1040,28 +1037,12 @@ sub score_phrase {
 
 	print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
 
-	if ($_FILE_LIMIT) {
-	    # splitting
-	    my $part_count = &split_extract($extract);
-	    if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
-
-	    # processing extract -> phrase-table-half
-	    for(my $i=0;$i<$part_count;$i++) {
-		my $part = sprintf("%04d",$i);
-		my $cmd = "$PHRASE_SCORE $extract.part$part $lexical_file.$direction $ttable_file.half.$direction.part$part $inverse";
-		print $cmd."\n";
-		safesystem($cmd) or die "ERROR: Scoring of phrases failed";
-		if (! $debug) { safesystem("rm $extract.part$part") or die("ERROR");}
-	    }
-	    safesystem("cat $ttable_file.half.$direction.part* >$ttable_file.half.$direction") or die("ERROR");
-	    if (! $debug) { safesystem("rm -f $ttable_file.half.$direction.part*") or die("ERROR"); }
-	}
-	else {
-	    my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
-	    print $cmd."\n";
-	    safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
-	    if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
-	}
+	my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
+	$cmd .= " --Hierarchical" if $_HIERARCHICAL;
+	$cmd .= " --NegLogProb" if $_HIERARCHICAL; # temporary fix for Hiero format
+	print $cmd."\n";
+	safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
+	if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
     }
 
     # sorting inverse phrase-table-half to sync up with regular one
@@ -1072,68 +1053,16 @@ sub score_phrase {
     }
 
     # merging the two halves
-    return if $___CONTINUE && -e "$ttable_file.gz";
-    print STDERR "(6.6)  consolidating the two halves @ ".`date`;
-    open(F2E,"$ttable_file.half.f2e")
-      or die "ERROR: Can't read $ttable_file.half.f2e";
-    open(E2F,"$ttable_file.half.e2f.sorted")
-      or die "ERROR: Can't read $ttable_file.half.e2f.sorted";
-    open(TABLE,"| gzip >$ttable_file.gz")
-      or die "ERROR: Can't write $ttable_file.gz";
-    my $i=0;
-    my $mismatch = 0;
-    while(my $f2e = <F2E>) {
-	$i++;
-	my $e2f = <E2F>;
-	my ($english, $foreign , $alignEnglish,  $alignForeign,  $p) = split(/ \|\|\| /,$e2f); chop($p);
-	my ($english2,$foreign2, $alignEnglish2, $alignForeign2, $p2) = split(/ \|\|\| /,$f2e); chop($p2);
-	if ($english ne $english2 
-		|| $foreign ne $foreign2)
-	{
-		print STDERR "mismatch line $i: ($english ne $english2 || $foreign ne $foreign2 )\n";
-            $mismatch++;
-            last if $mismatch > 10;
-	    next;
-	}
-	print TABLE "$english ||| $foreign ||| $alignEnglish2 ||| $alignForeign2 ||| $p $p2 2.718\n";
-    }
-    close(E2F);
-    close(F2E);
-    die "ERROR: There were mismatches! (printed only first 10)" if $mismatch;
+    print STDERR "(6.6) consolidating the two halves @ ".`date`;
+    return if $___CONTINUE && -e "$ttable_file.gz";    
+    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e $ttable_file.half.e2f.sorted $ttable_file";
+    $cmd .= " --Hierarchical" if $_HIERARCHICAL;
+    safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
-}
-
-sub split_extract {
-    my ($file) = @_;
-    my $i=0;
-    my $part = 1;
-    my $split_when_possible = 0;
-    my ($first,$dummy);
-    my $partfname = sprintf("%s.part%04d",$file,0);
-    open(PART,">$partfname") or die "ERROR: Can't write $partfname";
-    open(EXTRACT,$file) or die "ERROR: Can't read $file";
-    while(<EXTRACT>) {
-	if ($i>0 && $i % 10000000 == 0) {
-	    $split_when_possible = 1;
-	    ($first,$dummy) = split(/ \|\|\| /);
-	}
-	elsif ($split_when_possible) {
-	    my ($f,$dummy) = split(/ \|\|\| /);
-	    if ($f ne $first) {
-		close(PART) if $i;
-                my $partfname = sprintf("%s.part%04d",$file,$part);
-		open(PART,">$partfname") or die "ERROR: Can't write $partfname";
-		$split_when_possible = 0;
-		$part++;
-	    }
-	}
-	print PART $_;
-	$i++;
+    if (! $___DONT_ZIP) { 
+	safesystem("gzip $ttable_file") || die("ERROR: could not gzip $ttable_file");
     }
-    close(EXTRACT);
-    return $part;
 }
-
 
 ### (7) LEARN REORDERING MODEL
 
@@ -1498,6 +1427,8 @@ sub create_ini {
      }
      $path++;
    }
+   print INI "1 T 1\n" if $_GLUE_GRAMMAR;;
+
    print INI "\n# translation tables: source-factors, target-factors, number of scores, file 
 [ttable-file]\n";
    my $num_of_ttables = 0;
@@ -1508,7 +1439,11 @@ sub create_ini {
      $ff =~ s/\-/ /;
      my $file = "$___MODEL_DIR/phrase-table".($___NOT_FACTORED ? "" : ".$f").".gz";
      $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+     print INI "6 " if $_HIERARCHICAL;
      print INI "$ff 5 $file\n";
+   }
+   if ($_HIERARCHICAL) {
+     print INI "6 0 0 1 $___GLUE_GRAMMAR_FILE\n";
    }
    if ($num_of_ttables != $stepsused{"T"}) {
      print STDERR "WARNING: Your [mapping-steps] require translation steps up to id $stepsused{T} but you defined translation steps 0..$num_of_ttables\n";
@@ -1539,8 +1474,7 @@ sub create_ini {
       print INI "\n# no generation models, no generation-file section\n";
     }
 
-print INI "\n# language models: type(srilm/irstlm), factors, order, file
-[lmodel-file]\n";
+  print INI "\n# language models: type(srilm/irstlm), factors, order, file\n[lmodel-file]\n";
   foreach my $lm (@___LM) {
     my ($f, $o, $fn, $type) = @{$lm};
     if ($fn !~ /^\//) {
@@ -1551,10 +1485,7 @@ print INI "\n# language models: type(srilm/irstlm), factors, order, file
     print INI "$type $f $o $fn\n";
   }
 
-print INI "\n\n\# limit on how many phrase translations e for each phrase f are loaded
-# 0 = all elements loaded
-[ttable-limit]
-20\n";
+  print INI "\n\n\# limit on how many phrase translations e for each phrase f are loaded\n# 0 = all elements loaded\n[ttable-limit]\n20\n";
   foreach(2..$num_of_ttables) {
     print INI "0\n";
   }
@@ -1570,43 +1501,44 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
 	foreach my $type (keys %REORDERING_MODEL) {
 	    next if $type eq "fe" || $type eq "f";
 	    next if $type eq "distance";
-		my $w;
-		if ($type =~ /msd/) { $w = 3; } else { $w = 1; }
-		if ($type =~ /bi/) { $w *= 2; }
-		$weight_d_count += $w;
-
-	        my $table_file = "$___MODEL_DIR/reordering-table";
-	        $table_file .= ".$factor" unless $___NOT_FACTORED;
-                $table_file .= ".$type" if (scalar keys %REORDERING_MODEL) > 2;
-                $table_file .= ".gz";
-		$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-		$type =~ s/\-f/\-unidirectional\-f/ unless $type =~ /\-bi/;
-		$file .= "$factor $type $w $table_file\n";
+	    my $w;
+	    if ($type =~ /msd/) { $w = 3; } else { $w = 1; }
+	    if ($type =~ /bi/) { $w *= 2; }
+	    $weight_d_count += $w;
+	    
+	    my $table_file = "$___MODEL_DIR/reordering-table";
+	    $table_file .= ".$factor" unless $___NOT_FACTORED;
+	    $table_file .= ".$type" if (scalar keys %REORDERING_MODEL) > 2;
+	    $table_file .= ".gz";
+	    $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+	    $type =~ s/\-f/\-unidirectional\-f/ unless $type =~ /\-bi/;
+	    $file .= "$factor $type $w $table_file\n";
 	}
         $factor_i++;
-      }
-      print INI $file."\n";
+    }
+    print INI $file."\n";
   }
   else {
     $weight_d_count = 1;
   }
   
-  print INI "# distortion (reordering) weight\n[weight-d]\n";
-  for(my $i=0;$i<$weight_d_count;$i++) { 
-    print INI "".(0.6/(scalar keys %REORDERING_MODEL))."\n";
+  if (!$_HIERARCHICAL) {
+    print INI "# distortion (reordering) weight\n[weight-d]\n";
+    for(my $i=0;$i<$weight_d_count;$i++) { 
+      print INI "".(0.6/(scalar keys %REORDERING_MODEL))."\n";
+    }
   }
-  print INI "\n# language model weights
-[weight-l]\n";
+  print INI "\n# language model weights\n[weight-l]\n";
   my $lmweighttotal = 0.5;
   foreach(1..scalar @___LM) {
     printf INI "%.4f\n", $lmweighttotal / scalar @___LM;
   }
 
-print INI "\n\n# translation model weights
-[weight-t]\n";
-   foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
+  print INI "\n\n# translation model weights\n[weight-t]\n";
+  foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
      print INI "0.2\n0.2\n0.2\n0.2\n0.2\n";
-   }
+  }
+  print INI "1.0\n" if $_HIERARCHICAL; # glue grammar
 
     if (defined $___GENERATION_FACTORS) {
       print INI "\n# generation model weights\n";
@@ -1620,13 +1552,19 @@ print INI "\n\n# translation model weights
       print INI "\n# no generation models, no weight-generation section\n";
     }
 
-print INI "\n# word penalty
-[weight-w]
--1
+  print INI "\n# word penalty\n[weight-w]\n-1\n\n";
 
-[distortion-limit]
-6
-";
+  if ($_HIERARCHICAL) {
+    print INI "[pop-limit]\n1000\n\n";
+    print INI "[glue-rule-type]\n0\n\n";
+    print INI "[non-terminals]\nX\nS\n\n";
+    print INI "[search-algorithm]\n3\n\n";
+    print INI "[inputtype]\n3\n\n";
+    print INI "[max-chart-span]\n20\n1000\n";
+  }
+  else {
+    print INI "[distortion-limit]\n6\n";
+  }
 
   # only set the factor delimiter if it is non-standard
   unless ($___FACTOR_DELIMITER eq '|') {
