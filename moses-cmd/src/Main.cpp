@@ -61,6 +61,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "hypergraph.pb.h"
 #endif
 
+#include "ThreadPool.h"
+
 using namespace std;
 using namespace Moses;
 
@@ -80,6 +82,22 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 
 int main(int argc, char* argv[])
 {
+    vector<TestTask*> tasks;
+    ThreadPool<int> pool(10);
+    for (int i = 0; i < 50; ++i) {
+        TestTask* task = new TestTask(i);
+        tasks.push_back(task);
+        pool.Submit(task);
+    }
+    
+    for (vector<TestTask*>::iterator i = tasks.begin(); i != tasks.end(); ++i) {
+        cerr << (*i)->Result() << endl;
+    }
+    exit(1);
+    
+    
+
+
 #ifdef HAVE_PROTOBUF
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 #endif
