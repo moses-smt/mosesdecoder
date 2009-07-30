@@ -28,7 +28,7 @@ $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
 $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
 $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
 @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP, $_HMM_ALIGN, $_CONFIG,
-$_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,
+$_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
 $_CONTINUE,$_PROPER_CONDITIONING);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -85,6 +85,8 @@ $_HELP = 1
 		       'hierarchical' => \$_HIERARCHICAL,
 		       'glue-grammar' => \$_GLUE_GRAMMAR,
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
+		       'extract-options=s' => \$_EXTRACT_OPTIONS,
+		       'score-options=s' => \$_SCORE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
 		       'target-syntax' => \$_TARGET_SYNTAX,
 		       'xml' => \$_XML,
@@ -971,7 +973,8 @@ sub extract_phrase {
     $cmd .= " --MaxSymbolsSource $___MAX_PHRASE_LENGTH";
     $cmd .= " --ProperConditioning" if $_PROPER_CONDITIONING;
     $cmd .= " --Orientation" if $REORDERING_LEXICAL;
-    $cmd .= " --Hierarchical" if $_HIERARCHICAL;
+    $cmd .= " --Hierarchical" if defined($_HIERARCHICAL);
+    $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
     $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
     $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
@@ -1040,6 +1043,7 @@ sub score_phrase {
 	my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
 	$cmd .= " --Hierarchical" if $_HIERARCHICAL;
 	$cmd .= " --NegLogProb" if $_HIERARCHICAL; # temporary fix for Hiero format
+        $cmd .= " ".$_SCORE_OPTIONS if defined($_SCORE_OPTIONS);
 	print $cmd."\n";
 	safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
 	if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
