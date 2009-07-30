@@ -110,6 +110,11 @@ public:
 											, const std::string &phraseString
 											, const std::string &factorDelimiter);
 
+	void CreateFromStringNewFormat(FactorDirection direction
+												, const std::vector<FactorType> &factorOrder
+												, const std::string &phraseString
+												, const std::string &factorDelimiter);
+	
 	/**	copy factors from the other phrase to this phrase. 
 		IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten
 	*/
@@ -147,6 +152,11 @@ public:
 	{
 		return m_words[pos];
 	}
+	void SetWord(size_t pos, const Word &word)
+	{
+		m_words[pos] = word;
+	}
+	
 	//! particular factor at a particular position
 	inline const Factor *GetFactor(size_t pos, FactorType factorType) const
 	{
@@ -201,6 +211,8 @@ public:
 	void Clear()
 	{
 		m_words.clear();
+    m_words.resize(0);
+    m_words.reserve(0);
 	}
 	void RemoveWord(size_t pos)
 	{
@@ -210,6 +222,8 @@ public:
 
 	size_t GetArity() const
 	{ return m_arity; }
+	size_t GetNonTerminalPos(size_t index) const;
+	const Word &GetNonTerminal(size_t index) const;
 
 };
 

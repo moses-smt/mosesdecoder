@@ -59,6 +59,18 @@ void TargetPhraseCollection::Prune(bool adhereTableLimit, size_t tableLimit)
 	}
 }
 
+std::ostream& operator<<(std::ostream &out, const TargetPhraseCollection &coll)
+{
+	TargetPhraseCollection::const_iterator iter;
+	for (iter = coll.begin(); iter != coll.end(); ++iter)
+	{
+		const TargetPhrase &phrase = **iter;
+		out << phrase << endl;
+	}
+	
+	return out;
+}
+
 }
 
 

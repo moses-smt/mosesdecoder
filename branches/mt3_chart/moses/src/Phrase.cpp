@@ -267,7 +267,6 @@ void Phrase::Parse(vector< vector<string>* > &output
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 															, const vector< vector<string> > &phraseVector)
 {
-	FactorCollection &factorCollection = FactorCollection::Instance();
 	m_arity = 0;
 
 	for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++)
@@ -306,6 +305,65 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 	vector< vector<string> > phraseVector = Parse(phraseString, factorOrder, factorDelimiter);
 	CreateFromString(factorOrder, phraseVector);
 }
+
+void Phrase::CreateFromStringNewFormat(FactorDirection direction
+															 , const std::vector<FactorType> &factorOrder
+															 , const std::string &phraseString
+															 , const std::string &factorDelimiter)
+{
+	m_arity = 0;
+	
+	// parse
+	vector<string> annotatedWordVector;
+	Tokenize(annotatedWordVector, phraseString);
+	// KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none 
+	//		to
+	// "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
+	
+	for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() ; phrasePos++)
+	{
+		string &annotatedWord = annotatedWordVector[phrasePos];
+		bool isNonTerminal;
+		if (annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]")
+		{ // non-term
+			annotatedWord = annotatedWord.substr(1, annotatedWord.size() - 2);
+			isNonTerminal = true;
+			m_arity++;
+		}
+		else
+		{
+			isNonTerminal = false;
+		}
+		
+		Word &word = AddWord();
+		word.CreateFromString(direction, factorOrder, annotatedWord, isNonTerminal);		
+	}
+}
+
+size_t Phrase::GetNonTerminalPos(size_t index) const
+{
+	assert(index < GetArity());
+	size_t currIndex = 0;
+	for (size_t pos = 0 ; pos < GetSize() ; pos++)
+	{
+		const Word &word = GetWord(pos);
+		if (word.IsNonTerminal())
+		{
+			if (currIndex == index)
+				return pos;
+			currIndex++;
+		}
+	}
+	
+	assert(false);	
+}
+
+const Word &Phrase::GetNonTerminal(size_t index) const
+{
+	size_t pos = GetNonTerminalPos(index);
+	return GetWord(pos);
+}
+
 
 bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
 										, const vector<FactorType> &inputFactor) const

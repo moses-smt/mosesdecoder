@@ -106,7 +106,7 @@ bool PhraseDictionaryJoshua::Load(const std::vector<FactorType> &input
 
 void PhraseDictionaryJoshua::InitializeForInput(InputType const &source)
 {
-	assert(source.GetType() == SentenceInput);
+	assert(source.GetType() == SentenceInput || source.GetType() == ChartSentenceInput);
 
 	// temp file with current sentence
 	std::ofstream sourceSentenceFileStrme;
@@ -139,7 +139,7 @@ void PhraseDictionaryJoshua::InitializeForInput(InputType const &source)
 
 	// call java
 	stringstream strme;
-	strme << string("java -Xmx512m -cp \"")
+	strme << string("java ") << StaticData::Instance().GetJavaArgs() << " -cp \""
 				<< m_joshuaPath
 				<< "\" joshua.sarray.ExtractRules"
 				<< " --source=" + m_sourcePath
@@ -167,6 +167,12 @@ void PhraseDictionaryJoshua::InitializeForInput(InputType const &source)
 
 	DeleteFile(filteredFilePath);
 
+	if (m_collection.GetSize() == 0)
+	{ // nothing loaded. the java extractor is probably wrong
+		TRACE_ERR("ERROR: No phrasees from Joshua pt");
+		assert(false);
+	}
+		
 	MyBase::InitializeForInput(source);
 }
 

@@ -112,7 +112,7 @@ vector<const Factor*> doMBR(const TrellisPathList& nBestList){
   vector< map < vector <const Factor *>, int > > ngram_stats;
 
   TrellisPathList::const_iterator iter;
-  TrellisPath* hyp = NULL;
+  //TrellisPath* hyp = NULL;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
 	{
 		const TrellisPath &path = **iter;

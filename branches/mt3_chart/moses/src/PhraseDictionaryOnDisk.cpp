@@ -36,7 +36,7 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
 	// load vocab
 	InputFileStream vocabFile(filePath + "/vocab.db");
 	string line;
-	int lineNo = 0;
+	//int lineNo = 0;
 
 	while( !getline(vocabFile, line, '\n').eof())
 	{

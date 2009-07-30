@@ -267,10 +267,13 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 	for (size_t numPops = 0; numPops < popLimit && !m_queueUnique.empty(); ++numPops)
 	{
 		QueueEntry *queueEntry = *m_queueUnique.begin();
-
+		
+		queueEntry->GetTranslationOption().GetTotalScore();
 		Hypothesis *hypo = new Hypothesis(*queueEntry);
+		assert(hypo);
+		
 		hypo->CalcScore();
-
+		
 		AddHypothesis(hypo);
 
 		ExpandQueueEntry(*queueEntry);
@@ -310,7 +313,7 @@ void ChartCell::SortHypotheses()
 			std::vector<const Hypothesis*> &vec = m_hyposOrdered[headWord];
 			vec.push_back(hypo);
 		}
-		assert(m_hyposOrdered.size() == 1); // TODO
+		//assert(m_hyposOrdered.size() == 1); // TODO
 
 		// create list of headwords
 		std::map<Moses::Word, OrderHypos>::const_iterator iterMap;

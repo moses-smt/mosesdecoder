@@ -224,7 +224,21 @@ void OutputInput(std::ostream& os, const MosesChart::Hypothesis* hypo)
 }
 */
 
-void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void OutputTranslationOptions(const MosesChart::Hypothesis *hypo, long translationId)
+{ // recursive
+	if (hypo != NULL)
+	  cerr << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << " = " <<  hypo->GetCurrTargetPhrase() << endl;
+
+	const std::vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
+	std::vector<const MosesChart::Hypothesis*>::const_iterator iter;
+	for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter)
+	{
+		const MosesChart::Hypothesis *prevHypo = *iter;
+		OutputTranslationOptions(prevHypo, translationId);
+	}
+}
+
+void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors)
 {
 	if (hypo != NULL)
 	{
@@ -232,6 +246,16 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long /*transl
 		Backtrack(hypo);
 		VERBOSE(3,"0" << std::endl);
 
+		if (StaticData::Instance().GetOutputHypoScore())
+		{
+			cout << hypo->GetTotalScore() << " ";
+		}
+		
+		if (StaticData::Instance().IsDetailedTranslationReportingEnabled())
+		{
+			OutputTranslationOptions(hypo, translationId);
+		}
+		
 		if (!m_surpressSingleBestOutput)
 		{
 			if (StaticData::Instance().IsPathRecoveryEnabled()) {
@@ -246,12 +270,20 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long /*transl
 			outPhrase.RemoveWord(0);
 			outPhrase.RemoveWord(outPhrase.GetSize() - 1);
 
-			cout << outPhrase << endl;
+			const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+			string output = outPhrase.GetStringRep(outputFactorOrder);
+			cout << output << endl;
 		}
 	}
 	else
 	{
 		VERBOSE(1, "NO BEST TRANSLATION" << endl);
+		
+		if (StaticData::Instance().GetOutputHypoScore())
+		{
+			cout << "0 ";
+		}
+		
 		if (!m_surpressSingleBestOutput)
 		{
 			cout << endl;
@@ -262,12 +294,14 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long /*transl
 void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, long translationId)
 {
 	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
-	bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
+	//bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
 
 	MosesChart::TrellisPathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
 	{
 		const MosesChart::TrellisPath &path = **iter;
+		//cerr << path << endl << endl;
+
 		Moses::Phrase outputPhrase = path.GetOutputPhrase();
 
 		// delete 1st & last

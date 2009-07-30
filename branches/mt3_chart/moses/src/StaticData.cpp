@@ -44,6 +44,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryOnDisk.h"
 #include "PhraseDictionaryGlueRule.h"
 #include "PhraseDictionaryJoshua.h"
+#include "PhraseDictionarySourceLabel.h"
+#include "PhraseDictionaryNewFormat.h"
 
 using namespace std;
 
@@ -122,6 +124,24 @@ bool StaticData::LoadData(Parameter *parameter)
 		m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
 	}
 
+	// source label overlap
+	if (m_parameter->GetParam("source-label-overlap").size() > 0) {
+		m_sourceLabelOverlap = (SourceLabelOverlap) Scan<int>(m_parameter->GetParam("source-label-overlap")[0]);
+	}
+	else
+		m_sourceLabelOverlap = SourceLabelOverlapAdd;
+	
+	if (m_parameter->GetParam("java-args").size() > 0) {
+		m_javaArgs = m_parameter->GetParam("java-args")[0];
+	}	
+
+	// source label overlap
+	if (m_parameter->GetParam("glue-rule-type").size() > 0) {
+		m_glueRuleType = (GlueRuleType) Scan<int>(m_parameter->GetParam("glue-rule-type")[0]);
+	}
+	else
+		m_glueRuleType = Left;
+	
 	// to cube or not to cube
 	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
 										(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
@@ -130,6 +150,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	SetBooleanParameter( &m_UseAlignmentInfo, "use-alignment-info", false );
 	SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
 	SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
+
+	SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
 
 	if (!m_UseAlignmentInfo && m_PrintAlignmentInfo){
 		  TRACE_ERR("--print-alignment-info should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
@@ -847,7 +869,8 @@ bool StaticData::LoadPhraseTables()
 			PrintUserTime(string("Start loading PhraseTable ") + filePath);
 		std::cerr << "filePath: " << filePath << std::endl;
 
-		if (m_inputType != SentenceInput && impl != Binary)
+		if ((m_inputType == ConfusionNetworkInput ||  m_inputType == WordLatticeInput)
+				&& impl != Binary)
 		{
 			UserMessage::Add("Must use binary phrase table for this input type");
 			return false;
@@ -918,6 +941,9 @@ bool StaticData::LoadPhraseTables()
 		else if (impl == Joshua)
 		{ // binary phrase table
 			VERBOSE(1, "using on-disk phrase tables for idx "<<currDict<<"\n");
+      
+      cerr << m_joshuaPath << endl;
+      
 			PhraseDictionaryJoshua *pd=new PhraseDictionaryJoshua(numScoreComponent);
 			if (!pd->Load(input,output
 										,m_joshuaPath
@@ -928,6 +954,45 @@ bool StaticData::LoadPhraseTables()
 										,GetWeightWordPenalty()
 										,maxTargetPhrase[index])
 					)
+			{
+				delete pd;
+				return false;
+			}
+			m_phraseDictionary.push_back(pd);
+		}
+		else if (impl == MemorySourceLabel)
+		{	// memory phrase table
+			VERBOSE(2,"using standard phrase tables");
+			string fileBackoffPath = (token.size() >= 6) ? token[5] : "";
+			
+			PhraseDictionarySourceLabel *pd=new PhraseDictionarySourceLabel(numScoreComponent);
+			if (!pd->Load(input
+							 , output
+							 , filePath
+ 							 , fileBackoffPath
+							 , weight
+							 , maxTargetPhrase[index]
+							 , GetAllLM()
+							 , GetWeightWordPenalty()))
+			{
+				delete pd;
+				return false;
+			}
+			m_phraseDictionary.push_back(pd);
+		}
+		else if (impl == NewFormat)
+		{	// memory phrase table
+			VERBOSE(2,"using new format phrase tables");
+			string fileBackoffPath = (token.size() >= 6) ? token[5] : "";
+			
+			PhraseDictionaryNewFormat *pd=new PhraseDictionaryNewFormat(numScoreComponent);
+			if (!pd->Load(input
+										, output
+										, filePath
+										, weight
+										, maxTargetPhrase[index]
+										, GetAllLM()
+										, GetWeightWordPenalty()))
 			{
 				delete pd;
 				return false;

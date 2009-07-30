@@ -29,6 +29,8 @@
 		1C335A970F20F8A200D0D9DF /* ChartTrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A810F20F8A200D0D9DF /* ChartTrellisPathList.h */; };
 		1C335A980F20F8A200D0D9DF /* QueueEntry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A820F20F8A200D0D9DF /* QueueEntry.cpp */; };
 		1C335A990F20F8A200D0D9DF /* QueueEntry.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A830F20F8A200D0D9DF /* QueueEntry.h */; };
+		1C500AC60FB9EC3100DFD24F /* ChartCellCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500AC40FB9EC3100DFD24F /* ChartCellCollection.cpp */; };
+		1C500AC70FB9EC3100DFD24F /* ChartCellCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500AC50FB9EC3100DFD24F /* ChartCellCollection.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,6 +57,8 @@
 		1C335A820F20F8A200D0D9DF /* QueueEntry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = QueueEntry.cpp; path = src/QueueEntry.cpp; sourceTree = "<group>"; };
 		1C335A830F20F8A200D0D9DF /* QueueEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QueueEntry.h; path = src/QueueEntry.h; sourceTree = "<group>"; };
 		1C335AA10F20F8F400D0D9DF /* libmoses-chart.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmoses-chart.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1C500AC40FB9EC3100DFD24F /* ChartCellCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCellCollection.cpp; path = src/ChartCellCollection.cpp; sourceTree = "<group>"; };
+		1C500AC50FB9EC3100DFD24F /* ChartCellCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCellCollection.h; path = src/ChartCellCollection.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +85,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1C500AC40FB9EC3100DFD24F /* ChartCellCollection.cpp */,
+				1C500AC50FB9EC3100DFD24F /* ChartCellCollection.h */,
 				1C335A6E0F20F8A200D0D9DF /* ChartCell.cpp */,
 				1C335A6F0F20F8A200D0D9DF /* ChartCell.h */,
 				1C335A700F20F8A200D0D9DF /* ChartHypothesis.cpp */,
@@ -140,6 +146,7 @@
 				1C335A950F20F8A200D0D9DF /* ChartTrellisPathCollection.h in Headers */,
 				1C335A970F20F8A200D0D9DF /* ChartTrellisPathList.h in Headers */,
 				1C335A990F20F8A200D0D9DF /* QueueEntry.h in Headers */,
+				1C500AC70FB9EC3100DFD24F /* ChartCellCollection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -196,13 +203,14 @@
 				1C335A940F20F8A200D0D9DF /* ChartTrellisPathCollection.cpp in Sources */,
 				1C335A960F20F8A200D0D9DF /* ChartTrellisPathList.cpp in Sources */,
 				1C335A980F20F8A200D0D9DF /* QueueEntry.cpp in Sources */,
+				1C500AC60FB9EC3100DFD24F /* ChartCellCollection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		0396E18D0C0B186F00D95CFF /* Development */ = {
+		0396E18D0C0B186F00D95CFF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -234,9 +242,9 @@
 				REZ_PREPROCESSOR_DEFINITIONS = "";
 				ZERO_LINK = NO;
 			};
-			name = Development;
+			name = Debug;
 		};
-		0396E18E0C0B186F00D95CFF /* Deployment */ = {
+		0396E18E0C0B186F00D95CFF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -265,7 +273,7 @@
 				PRODUCT_NAME = "moses-chart";
 				ZERO_LINK = NO;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		0396E18F0C0B186F00D95CFF /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -283,20 +291,20 @@
 			};
 			name = Default;
 		};
-		0396E1910C0B186F00D95CFF /* Development */ = {
+		0396E1910C0B186F00D95CFF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_OPTIMIZATION_LEVEL = 0;
 				VALID_ARCHS = i386;
 			};
-			name = Development;
+			name = Debug;
 		};
-		0396E1920C0B186F00D95CFF /* Deployment */ = {
+		0396E1920C0B186F00D95CFF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_OPTIMIZATION_LEVEL = 0;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		0396E1930C0B186F00D95CFF /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -311,8 +319,8 @@
 		0396E18C0C0B186F00D95CFF /* Build configuration list for PBXNativeTarget "moses-chart" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0396E18D0C0B186F00D95CFF /* Development */,
-				0396E18E0C0B186F00D95CFF /* Deployment */,
+				0396E18D0C0B186F00D95CFF /* Debug */,
+				0396E18E0C0B186F00D95CFF /* Release */,
 				0396E18F0C0B186F00D95CFF /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -321,8 +329,8 @@
 		0396E1900C0B186F00D95CFF /* Build configuration list for PBXProject "moses-chart" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0396E1910C0B186F00D95CFF /* Development */,
-				0396E1920C0B186F00D95CFF /* Deployment */,
+				0396E1910C0B186F00D95CFF /* Debug */,
+				0396E1920C0B186F00D95CFF /* Release */,
 				0396E1930C0B186F00D95CFF /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;

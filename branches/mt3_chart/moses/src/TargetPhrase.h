@@ -55,13 +55,20 @@ protected:
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
 	Word m_headWord;
+	std::string *m_debugOutput;
+
+	// source non terms, in source order
+	std::vector<Word> m_sourceNonTerm;
 
 	static bool wordalignflag;
 	static bool printalign;
 	
 public:
 		TargetPhrase(FactorDirection direction, size_t reserveSize = ARRAY_SIZE_INCR);
-		~TargetPhrase(){};
+		~TargetPhrase()
+		{
+			delete m_debugOutput;
+		};
 		
 	/** used by the unknown word handler.
 		* Set alignment to 0
@@ -175,6 +182,16 @@ public:
 	const Word &GetHeadWord() const
 	{ return m_headWord; }
 
+	void SetDebugOutput(const std::string &str)
+	{
+		assert(m_debugOutput == NULL);
+		m_debugOutput = new std::string(str);
+	}
+	const std::string *GetDebugOutput() const
+	{
+		return m_debugOutput;
+	}
+	
 	TO_STRING();
 };
 

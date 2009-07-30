@@ -32,6 +32,7 @@ Hypothesis::Hypothesis(const QueueEntry &queueEntry)
 ,m_arcList(NULL)
 {
 	assert(m_targetPhrase.GetSize() == m_wordsConsumedTargetOrder.size());
+	//TRACE_ERR(m_targetPhrase << endl);
 
 	const std::vector<ChildEntry*> &childEntries = queueEntry.GetChildEntries();
 
@@ -190,8 +191,6 @@ int Hypothesis::LMContextCompare(const Hypothesis &other) const
 
 void Hypothesis::CalcScore()
 {
-	const StaticData &staticData = StaticData::Instance();
-
 	// total scores from prev hypos
 	std::vector<const Hypothesis*>::iterator iter;
 	for (iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter)
@@ -332,7 +331,7 @@ struct CompareChartHypothesisTotalScore
 void Hypothesis::CleanupArcList()
 {
 	// point this hypo's main hypo to itself
-	SetWinningHypo(this);
+	m_winningHypo = this;
 
 	if (!m_arcList) return;
 
@@ -344,7 +343,7 @@ void Hypothesis::CleanupArcList()
 	size_t nBestSize = staticData.GetNBestSize();
 	bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph();
 
-	if (!distinctNBest && m_arcList->size() > nBestSize * 5)
+	if (!distinctNBest && m_arcList->size() > nBestSize)
 	{ // prune arc list only if there too many arcs
 		nth_element(m_arcList->begin()
 							, m_arcList->begin() + nBestSize - 1
@@ -369,6 +368,17 @@ void Hypothesis::CleanupArcList()
 		Hypothesis *arc = *iter;
 		arc->SetWinningHypo(this);
 	}
+  
+  //cerr << m_arcList->size() << " ";
+}
+
+void Hypothesis::SetWinningHypo(const Hypothesis *hypo)
+{
+  m_winningHypo = hypo;
+  
+  // never gonna use to recombine. clear prefix & suffix phrases to save mem
+  m_contextPrefix.Clear();
+  m_contextSuffix.Clear();
 }
 
 TO_STRING_BODY(Hypothesis)
@@ -385,16 +395,15 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 			<< " " << hypo.GetTotalScore()
 			<< " " << hypo.m_currSourceWordsRange
 			<< " " << hypo.m_targetPhrase;
-
-/*
 	out << endl;
+	
 	std::vector<const Hypothesis*>::const_iterator iter;
 	for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter)
 	{
 		const Hypothesis &prevHypo = **iter;
 		out << "*    " << prevHypo << endl;
 	}
-*/
+
 
 	return out;
 }

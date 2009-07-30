@@ -100,11 +100,7 @@ int ConfusionNet::Read(std::istream& in,
 void ConfusionNet::String2Word(const std::string& s,Word& w,
 															 const std::vector<FactorType>& factorOrder) 
 {
-	std::vector<std::string> factorStrVector = Tokenize(s, "|");
-	for(size_t i=0;i<factorOrder.size();++i) 
-		w.SetFactor(factorOrder[i],
-								FactorCollection::Instance().AddFactor(Input,factorOrder[i],
-																							factorStrVector[i]));
+	w.CreateFromString(Input, factorOrder, s);
 }
 
 bool ConfusionNet::ReadFormat0(std::istream& in,

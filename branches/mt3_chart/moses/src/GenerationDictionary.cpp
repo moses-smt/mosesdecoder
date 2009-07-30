@@ -44,8 +44,6 @@ bool GenerationDictionary::Load(const std::vector<FactorType> &input
 																			, const std::string &filePath
 																			, FactorDirection direction)
 {	
-	FactorCollection &factorCollection = FactorCollection::Instance();
-
 	const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();
 
 	//factors	
@@ -75,22 +73,8 @@ bool GenerationDictionary::Load(const std::vector<FactorType> &input
 		// create word with certain factors filled out
 
 		// inputs
-		vector<string> factorString = Tokenize( token[0], "|" );
-		for (size_t i = 0 ; i < input.size() ; i++)
-		{
-			FactorType factorType = input[i];
-			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
-			inputWord->SetFactor(factorType, factor);
-		}
-
-		factorString = Tokenize( token[1], "|" );
-		for (size_t i = 0 ; i < output.size() ; i++)
-		{
-			FactorType factorType = output[i];
-			
-			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
-			outputWord.SetFactor(factorType, factor);
-		}
+		inputWord->CreateFromString(direction, input, token[0]);
+		outputWord.CreateFromString(direction, output, token[1]);
 
 		size_t numFeaturesInFile = token.size() - 2;
 		if (numFeaturesInFile < numFeatureValuesInConfig) {

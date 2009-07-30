@@ -11,12 +11,14 @@ namespace Moses
 
 class ProcessedRule
 {
+	friend std::ostream& operator<<(std::ostream&, const ProcessedRule&);
+
 protected:
 	const PhraseDictionaryNode &m_lastNode;
 	const WordConsumed *m_wordsConsumed; // usually contains something, unless its the init processed rule
 public:
 	// used only to init dot stack.
-	ProcessedRule(const PhraseDictionaryNode &lastNode)
+	explicit ProcessedRule(const PhraseDictionaryNode &lastNode)
 		:m_lastNode(lastNode)
 		,m_wordsConsumed(NULL)
 	{}
@@ -60,6 +62,8 @@ public:
 
 class ProcessedRuleColl
 {
+	friend std::ostream& operator<<(std::ostream&, const ProcessedRuleColl&);
+
 protected:
 	typedef std::vector<const ProcessedRule*> CollType;
 	CollType m_coll;
@@ -80,8 +84,15 @@ public:
 	{
 		m_coll.push_back(processedRule);
 	}
+	void Delete(size_t ind)
+	{
+		//delete m_coll[ind];
+		m_coll.erase(m_coll.begin() + ind);
+	}
+	
 	size_t GetSize() const
 	{ return m_coll.size(); }
+	
 };
 
 class SavedNode
@@ -128,6 +139,8 @@ public:
 	~ProcessedRuleStack();
 
 	const ProcessedRuleColl &Get(size_t pos) const
+	{ return *m_coll[pos]; }
+	ProcessedRuleColl &Get(size_t pos)
 	{ return *m_coll[pos]; }
 
 	const ProcessedRuleColl &back() const

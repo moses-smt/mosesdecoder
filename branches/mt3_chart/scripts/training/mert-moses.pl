@@ -134,7 +134,7 @@ my $___CLOSEST = 0;
 my $___NONORM = 0;
 
 # set 0 if input type is text, set 1 if input type is confusion network
-my $___INPUTTYPE = 0; 
+my $___INPUTTYPE = undef; 
 
 # set 1 if using with async decoder
 my $___ASYNC = 0; 
@@ -262,7 +262,7 @@ Options:
 }
 
 # update variables if input is confusion network
-if ($___INPUTTYPE == 1)
+if (defined($___INPUTTYPE) && $___INPUTTYPE == 1)
 {
   $ABBR_FULL_MAP = "$ABBR_FULL_MAP I=weight-i";
   %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
@@ -273,7 +273,7 @@ if ($___INPUTTYPE == 1)
 }
 
 # update variables if input is lattice - handle like conf. net for now
-if ($___INPUTTYPE == 2)
+if (defined($___INPUTTYPE) && $___INPUTTYPE == 2)
 {
     $ABBR_FULL_MAP = "$ABBR_FULL_MAP I=weight-i";
     %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
@@ -477,6 +477,7 @@ if ($___FILTER_PHRASE_TABLE){
   my $___FILTER_F  = $___DEV_F;
   $___FILTER_F = $filterfile if (defined $filterfile);
   my $cmd = "$filtercmd ./filtered $___CONFIG $___FILTER_F";  
+  print $cmd."\n";
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
       or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
@@ -872,9 +873,9 @@ sub run_decoder {
     my $decoder_cmd;
 
     if (defined $___JOBS) {
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-file $filename -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG ".(defined($___INPUTTYPE) ? "-inputtype $___INPUTTYPE " : "")."-qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-file $filename -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      $decoder_cmd = "$___DECODER $parameters  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $parameters  -config $___CONFIG ".(defined($___INPUTTYPE) ? "-inputtype $___INPUTTYPE " : "")." $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
     }
 
     safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
@@ -1075,7 +1076,7 @@ sub scan_config {
 
   # in which field (counting from zero) is the filename to check?
   my %where_is_filename = (
-    "ttable-file" => 3,
+    "ttable-file" => 4,
     "generation-file" => 3,
     "lmodel-file" => 3,
     "distortion-file" => 3,
@@ -1083,7 +1084,7 @@ sub scan_config {
   # by default, each line of each section means one lambda, but some sections
   # explicitly state a custom number of lambdas
   my %where_is_lambda_count = (
-    "ttable-file" => 2,
+    "ttable-file" => 3,
     "generation-file" => 2,
     "distortion-file" => 2,
   );
@@ -1111,7 +1112,9 @@ sub scan_config {
       # this ini section is relevant to lambdas
       chomp;
       my @flds = split / +/;
-      my $fn = $flds[$where_is_filename{$section}];
+      my $flat_phrase_table_offset = 0;
+      $flat_phrase_table_offset = -1 if $section eq "ttable-file" && scalar(@flds) == 4;
+      my $fn = $flds[$where_is_filename{$section}+$flat_phrase_table_offset];
       if (defined $fn && $fn !~ /^\s+$/) {
 	  print "checking weight-count for $section\n";
         # this is a filename! check it
@@ -1129,7 +1132,7 @@ sub scan_config {
 
         # how many lambdas does this model need?
         # either specified explicitly, or the default, i.e. one
-        my $needlambdas = defined $where_is_lambda_count{$section} ? $flds[$where_is_lambda_count{$section}] : 1;
+        my $needlambdas = defined $where_is_lambda_count{$section} ? $flds[$where_is_lambda_count{$section}+$flat_phrase_table_offset] : 1;
 
         print STDERR "Config needs $needlambdas lambdas for $section (i.e. $shortname)\n" if $verbose;
 #if (!defined $___LAMBDA && (!defined $additional_triples->{$shortname} || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)) {

@@ -60,8 +60,6 @@ void LMList::CalcScore(const Phrase &phrase
 { 
 	assert(phrase.GetNumTerminals() == phrase.GetSize());
 
-	FactorCollection &factorCollection = FactorCollection::Instance();
-
 	const_iterator lmIter;
 	for (lmIter = begin(); lmIter != end(); ++lmIter)
 	{
@@ -93,8 +91,6 @@ void LMList::CalcScore(const Phrase &phrase
 										, ScoreComponentCollection *beginningBitsOnly) const
 {
 	assert(phrase.GetNumTerminals() == phrase.GetSize());
-
-	FactorCollection &factorCollection = FactorCollection::Instance();
 
 	const_iterator lmIter;
 	for (lmIter = begin(); lmIter != end(); ++lmIter)

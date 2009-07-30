@@ -52,7 +52,18 @@ string GetTempFolder()
 		str += "\\";
 	return str;
 #else
-	return "/tmp/";
+	char *tmpPath = getenv("TMPDIR");
+	if (tmpPath == NULL)
+	{
+		return "/tmp/";
+	}
+	else
+	{
+		string str(tmpPath);
+		if (str.substr(str.size() - 1, 1) != "/")
+			str += "/";
+		return str;
+	}
 #endif
 }
 

@@ -2,22 +2,8 @@
 //#include "beammain.h"
 #include "tables-core.h"
 
-#define TABLE_LINE_MAX_LENGTH 1000
-#define UNKNOWNSTR	"UNK"
-
-#define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) { \
-                _IS.getline(_LINE, _SIZE, _DELIM); \
-                if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear(); \
-                if (_IS.gcount() == _SIZE-1) { \
-                  cerr << "Line too long! Buffer overflow. Delete lines >=" \
-                    << _SIZE << " chars or raise TABLE_LINE_MAX_LENGTH in phrase-extract/tables-core.cpp" \
-                    << endl; \
-                    exit(1); \
-                } \
-              }
-
 // as in beamdecoder/tables.cpp
-vector<string> tokenize( char input[] ) {
+vector<string> tokenize( const char input[] ) {
   vector< string > token;
   bool betweenWords = true;
   int start=0;
@@ -51,11 +37,12 @@ WORD_ID Vocabulary::storeIfNew( const WORD& word ) {
   return id;  
 }
 
-WORD_ID Vocabulary::getWordID( const WORD& word ) {
+WORD_ID Vocabulary::getWordID( const WORD &word ) {
   map<WORD, WORD_ID>::iterator i = lookup.find( word );
   if( i == lookup.end() )
     return 0;
-  return i->second;
+  WORD_ID w= (WORD_ID) i->second;
+  return w;
 }
 
 PHRASE_ID PhraseTable::storeIfNew( const PHRASE& phrase ) {

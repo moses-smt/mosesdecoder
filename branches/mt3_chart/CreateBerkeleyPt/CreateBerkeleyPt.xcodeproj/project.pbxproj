@@ -1,0 +1,271 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1C273B87102064C300991BD2 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C273B86102064C300991BD2 /* Main.cpp */; };
+		1C273BA710206AC000991BD2 /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C273BA610206AC000991BD2 /* Phrase.cpp */; };
+		1C273C0C10206E9200991BD2 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C273C0B10206E8D00991BD2 /* libmoses.a */; };
+		1C273CFF102096CA00991BD2 /* Word.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C273CFE102096CA00991BD2 /* Word.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1C273C0A10206E8D00991BD2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1C273C0610206E8D00991BD2 /* moses.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = moses;
+		};
+		1C273C0D10206E9C00991BD2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1C273C0610206E8D00991BD2 /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = moses;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8DD76F690486A84900D96B5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1C273B86102064C300991BD2 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
+		1C273BA510206AC000991BD2 /* Phrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Phrase.h; path = src/Phrase.h; sourceTree = "<group>"; };
+		1C273BA610206AC000991BD2 /* Phrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Phrase.cpp; path = src/Phrase.cpp; sourceTree = "<group>"; };
+		1C273C0610206E8D00991BD2 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1C273CFD102096CA00991BD2 /* Word.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Word.h; path = src/Word.h; sourceTree = "<group>"; };
+		1C273CFE102096CA00991BD2 /* Word.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Word.cpp; path = src/Word.cpp; sourceTree = "<group>"; };
+		8DD76F6C0486A84900D96B5E /* CreateBerkeleyPt */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateBerkeleyPt; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76F660486A84900D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C273C0C10206E9200991BD2 /* libmoses.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* CreateBerkeleyPt */ = {
+			isa = PBXGroup;
+			children = (
+				1C273C0610206E8D00991BD2 /* moses.xcodeproj */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6859E8C029090F304C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = CreateBerkeleyPt;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				1C273B86102064C300991BD2 /* Main.cpp */,
+				1C273BA510206AC000991BD2 /* Phrase.h */,
+				1C273BA610206AC000991BD2 /* Phrase.cpp */,
+				1C273CFD102096CA00991BD2 /* Word.h */,
+				1C273CFE102096CA00991BD2 /* Word.cpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8DD76F6C0486A84900D96B5E /* CreateBerkeleyPt */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1C273C0710206E8D00991BD2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1C273C0B10206E8D00991BD2 /* libmoses.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6859E8C029090F304C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76F620486A84900D96B5E /* CreateBerkeleyPt */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "CreateBerkeleyPt" */;
+			buildPhases = (
+				8DD76F640486A84900D96B5E /* Sources */,
+				8DD76F660486A84900D96B5E /* Frameworks */,
+				8DD76F690486A84900D96B5E /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1C273C0E10206E9C00991BD2 /* PBXTargetDependency */,
+			);
+			name = CreateBerkeleyPt;
+			productInstallPath = "$(HOME)/bin";
+			productName = CreateBerkeleyPt;
+			productReference = 8DD76F6C0486A84900D96B5E /* CreateBerkeleyPt */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "CreateBerkeleyPt" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* CreateBerkeleyPt */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1C273C0710206E8D00991BD2 /* Products */;
+					ProjectRef = 1C273C0610206E8D00991BD2 /* moses.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				8DD76F620486A84900D96B5E /* CreateBerkeleyPt */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		1C273C0B10206E8D00991BD2 /* libmoses.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmoses.a;
+			remoteRef = 1C273C0A10206E8D00991BD2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76F640486A84900D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C273B87102064C300991BD2 /* Main.cpp in Sources */,
+				1C273BA710206AC000991BD2 /* Phrase.cpp in Sources */,
+				1C273CFF102096CA00991BD2 /* Word.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1C273C0E10206E9C00991BD2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = moses;
+			targetProxy = 1C273C0D10206E9C00991BD2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB923208733DC60010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_GLIBCXX_DEBUG=1",
+					"_GLIBCXX_DEBUG_PEDANTIC=1",
+				);
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lz";
+				PRODUCT_NAME = CreateBerkeleyPt;
+			};
+			name = Debug;
+		};
+		1DEB923308733DC60010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lz";
+				PRODUCT_NAME = CreateBerkeleyPt;
+			};
+			name = Release;
+		};
+		1DEB923608733DC60010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+			};
+			name = Debug;
+		};
+		1DEB923708733DC60010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "CreateBerkeleyPt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923208733DC60010E9CD /* Debug */,
+				1DEB923308733DC60010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "CreateBerkeleyPt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923608733DC60010E9CD /* Debug */,
+				1DEB923708733DC60010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

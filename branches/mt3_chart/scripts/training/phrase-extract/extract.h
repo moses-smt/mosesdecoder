@@ -2,10 +2,14 @@
 
 #include <vector>
 #include <list>
+#include <map>
+#include <set>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include "SyntaxTree.h"
+#include "XmlTree.h"
 
 class Hole
 {
@@ -34,20 +38,27 @@ public:
 	
 	bool Overlap(const Hole &otherHole) const
 	{
-		if ( otherHole.GetEnd() < GetStart() || otherHole.GetStart() > GetEnd()) return false;
-		
-		return true;
+		return ! ( otherHole.GetEnd()   < GetStart() || 
+							 otherHole.GetStart() > GetEnd() );
 	}
+
+	bool Neighbor(const Hole &otherHole) const
+	{
+		return ( otherHole.GetEnd()+1 == GetStart() || 
+						 otherHole.GetStart() == GetEnd()+1 ); 
+	}
+
 
 };
 
 typedef std::list<Hole> HoleList;
+typedef std::map< int, int > WordIndex;
 
 class HoleCollection
 {
 protected:
 	HoleList m_sourceHoles, m_targetHoles;
-	std::vector<Hole*> m_sortedTargetHoles;
+	std::vector<Hole*> m_sortedSourceHoles;
 
 public:
 	HoleCollection()
@@ -66,29 +77,40 @@ public:
 	{ return m_sourceHoles; }
 	HoleList &GetTargetHoles()
 	{ return m_targetHoles; }
-	std::vector<Hole*> &GetSortedTargetHoles()
-	{ return m_sortedTargetHoles; }
+	std::vector<Hole*> &GetSortedSourceHoles()
+	{ return m_sortedSourceHoles; }
 
-	void Add(int startE, int endE, int startF, int endF)
+	void Add(int startT, int endT, int startS, int endS)
 	{
-		m_sourceHoles.push_back(Hole(startF, endF));
-		m_targetHoles.push_back(Hole(startE, endE));
+		m_sourceHoles.push_back(Hole(startS, endS));
+		m_targetHoles.push_back(Hole(startT, endT));
 	}
 
-	bool OverlapTarget(const Hole &targetHole) const
+	bool OverlapSource(const Hole &sourceHole) const
 	{
 		HoleList::const_iterator iter;
-		for (iter = m_targetHoles.begin(); iter != m_targetHoles.end(); ++iter)
+		for (iter = m_sourceHoles.begin(); iter != m_sourceHoles.end(); ++iter)
 		{
 			const Hole &currHole = *iter;
-			bool overlap = currHole.Overlap(targetHole);
-			if (overlap)
+			if (currHole.Overlap(sourceHole))
+				return true;
+		}
+		return false;
+	}
+	
+	bool ConsecSource(const Hole &sourceHole) const
+	{
+		HoleList::const_iterator iter;
+		for (iter = m_sourceHoles.begin(); iter != m_sourceHoles.end(); ++iter)
+		{
+			const Hole &currHole = *iter;
+			if (currHole.Neighbor(sourceHole))
 				return true;
 		}
 		return false;
 	}
 
-	void SortTargetHoles();
+	void SortSourceHoles();
 	
 };
 
@@ -102,88 +124,144 @@ public:
 	}
 };
 
-void HoleCollection::SortTargetHoles()
+void HoleCollection::SortSourceHoles()
 {
-	assert(m_sortedTargetHoles.size() == 0);
+	assert(m_sortedSourceHoles.size() == 0);
 
 	// add
 	HoleList::iterator iter;
-	for (iter = m_targetHoles.begin(); iter != m_targetHoles.end(); ++iter)
+	for (iter = m_sourceHoles.begin(); iter != m_sourceHoles.end(); ++iter)
 	{
 		Hole &currHole = *iter;
-		m_sortedTargetHoles.push_back(&currHole);
+		m_sortedSourceHoles.push_back(&currHole);
 	}
 
 	// sort
-	std::sort(m_sortedTargetHoles.begin(), m_sortedTargetHoles.end(), HoleOrderer());
+	std::sort(m_sortedSourceHoles.begin(), m_sortedSourceHoles.end(), HoleOrderer());
 }
 
-class PhraseExist
+// reposity of extracted phrase pairs
+// which are potential holes in larger phrase pairs
+class RuleExist
 {
 protected:
 	std::vector< std::vector<HoleList> > m_phraseExist;
-		// indexed by source pos. <int, int> are target pos
+		// indexed by source pos. and source length 
+		// maps to list of holes where <int, int> are target pos
 
 public:
-	PhraseExist(size_t size)
+	RuleExist(size_t size)
 		:m_phraseExist(size)
 	{
+		// size is the length of the source sentence
 		for (size_t pos = 0; pos < size; ++pos)
 		{
+			// create empty hole lists
 			std::vector<HoleList> &endVec = m_phraseExist[pos];
 			endVec.resize(size - pos);
 		}
 	}
 
-	void Add(int startE, int endE, int startF, int endF)
+	void Add(int startT, int endT, int startS, int endS)
 	{
-		m_phraseExist[startF][endF - startF].push_back(Hole(startE, endE));
+		// m_phraseExist[startS][endS - startS].push_back(Hole(startT, endT));
+		m_phraseExist[startT][endT - startT].push_back(Hole(startS, endS));
 	}
-	const HoleList &GetTargetHoles(int startF, int endF) const
+	//const HoleList &GetTargetHoles(int startS, int endS) const
+	//{
+	//	const HoleList &targetHoles = m_phraseExist[startS][endS - startS];
+	//	return targetHoles;
+	//}
+	const HoleList &GetSourceHoles(int startT, int endT) const
 	{
-		const HoleList &targetHoles = m_phraseExist[startF][endF - startF];
-		return targetHoles;
+		const HoleList &sourceHoles = m_phraseExist[startT][endT - startT];
+		return sourceHoles;
 	}
 
 };
 
 class SentenceAlignment {
  public:
-  std::vector<std::string> english;
-  std::vector<std::string> foreign;
-  std::vector<int> alignedCountF;
-  std::vector< std::vector<int> > alignedToE;
+  std::vector<std::string> target;
+  std::vector<std::string> source;
+  std::vector<int> alignedCountS;
+  std::vector< std::vector<int> > alignedToT;
+  SyntaxTree targetTree;
+  SyntaxTree sourceTree;
 
   int create( char[], char[], char[], int );
   //  void clear() { delete(alignment); };
 };
 
+// sentence-level collection of rules
+class ExtractedRule {
+public:
+	std::string source,target,alignment,alignmentInv,orientation,orientationForward;
+	int startT,endT,startS,endS;
+	float count; 
+ExtractedRule( int sT,int eT,int sS,int eS )
+	:startT(sT),endT(eT),startS(sS),endS(eS) {
+		source = "";
+		target = "";
+		alignment = "";
+		alignmentInv = "";
+		orientation = "";
+		orientationForward = "";
+		count = 0;
+		// countInv = 0;
+	}
+};
+
+std::vector< ExtractedRule > extractedRules;
+void extractRules( SentenceAlignment & );
+void addRuleToCollection( ExtractedRule &rule );
+void consolidateRules();
+void writeRulesToFile();
+void writeGlueGrammar( std::string );
+
+typedef std::vector< int > LabelIndex;
+
 // functions
 void openFiles();
-void extractBase( SentenceAlignment & );
-void extract( SentenceAlignment & );
-void addPhrase( SentenceAlignment &, int, int, int, int 
-							, PhraseExist &phraseExist);
-void addHieroPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF 
-							 , PhraseExist &phraseExist, const HoleCollection &holeColl, int numHoles, int initStartF);
+void addRule( SentenceAlignment &, int, int, int, int 
+							, RuleExist &ruleExist);
+void addHieroRule( SentenceAlignment &sentence, int startT, int endT, int startS, int endS 
+									 , RuleExist &ruleExist, const HoleCollection &holeColl, int numHoles, int initStartF, int wordCountT, int wordCountS);
 
-std::vector<std::string> tokenize( char [] );
+std::vector<std::string> tokenize( const char [] );
 bool isAligned ( SentenceAlignment &, int, int );
 
 std::ofstream extractFile;
 std::ofstream extractFileInv;
 std::ofstream extractFileOrientation;
-int maxPhraseLength;
+int maxSpan = 12;
+int minHoleSource = 2;
+int minHoleTarget = 1;
+int minWords = 1;
+int maxSymbolsTarget = 999;
+int maxSymbolsSource = 5;
+// int minHoleSize = 1;
+// int minSubPhraseSize = 1; // minimum size of a remaining lexical phrase 
 int phraseCount = 0;
-char* fileNameExtract;
+bool onlyDirectFlag = false;
 bool orientationFlag = false;
+bool glueGrammarFlag = false;
+std::set< std::string > targetLabelCollection, sourceLabelCollection;
+std::map< std::string, int > targetTopLabelCollection, sourceTopLabelCollection;
+bool hierarchicalFlag = false;
 bool onlyOutputSpanInfo = false;
 bool noFileLimit = false;
-bool zipFiles = false;
+//bool zipFiles = false;
 bool properConditioning = false;
-int maxNonTerm = 0;
-bool nonTermFirstWord = false;
-bool nonTermConsec = false;
+int maxNonTerm = 2;
+bool nonTermFirstWord = true;
+bool nonTermConsecTarget = true;
+bool nonTermConsecSource = false;
+bool requireAlignedWord = true;
+bool sourceSyntax = false;
+bool targetSyntax = false;
+bool duplicateRules = true;
+bool fractionalCounting = true;
 
 #define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) { \
                 _IS.getline(_LINE, _SIZE, _DELIM); \
@@ -196,3 +274,12 @@ bool nonTermConsec = false;
                 } \
               }
 #define LINE_MAX_LENGTH 60000
+
+std::string IntToString( int i )
+{
+	std::string s;
+	std::stringstream out;
+	out << i;
+	return out.str();
+}
+

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="moses-chart-cmd"
 	ProjectGUID="{E8856362-EB59-472F-94DD-254341261648}"
 	RootNamespace="moseschartcmd"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -61,10 +62,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)$(ConfigurationName)\moses-chart.lib&quot; zlib.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)$(ConfigurationName)\moses-chart.lib&quot; zdll.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -84,9 +87,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -137,12 +137,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)$(ConfigurationName)\moses-chart.lib&quot; zlib.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)$(ConfigurationName)\moses-chart.lib&quot; zdll.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -162,9 +164,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -216,10 +215,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)$(ConfigurationName)\moses-chart.lib&quot; zlib.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)$(ConfigurationName)\moses-chart.lib&quot; zdll.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -239,9 +240,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -292,12 +290,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)$(ConfigurationName)\moses-chart.lib&quot; zlib.lib"
+				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; &quot;$(SolutionDir)$(ConfigurationName)\moses-chart.lib&quot; zdll.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -317,9 +317,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"

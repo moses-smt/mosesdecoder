@@ -126,7 +126,6 @@ std::vector<float> LexicalReordering::CalcScore(Hypothesis* hypothesis) const {
 }
 
 Phrase LexicalReordering::auxGetContext(const Hypothesis* hypothesis) const { 
-  const Hypothesis* h = hypothesis;
   Phrase c(Output);
   if(0 == hypothesis->GetId()){
 	return c;

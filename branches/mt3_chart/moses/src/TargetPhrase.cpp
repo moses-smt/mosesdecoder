@@ -48,6 +48,7 @@ TargetPhrase::TargetPhrase(FactorDirection direction, size_t reserveSize)
 , m_ngramScore(0.0)
 , m_fullScore(0.0)
 , m_sourcePhrase(0)
+, m_debugOutput(NULL)
 {
 	assert(direction == Output);
 	wordalignflag=StaticData::Instance().UseAlignmentInfo();
@@ -152,7 +153,6 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 	m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
 
   // Replicated from TranslationOptions.cpp
-	float totalFutureScore = 0;
 	float totalNgramScore  = 0;
 	float totalFullScore   = 0;
 
@@ -249,11 +249,20 @@ TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
-  os << static_cast<const Phrase&>(tp) << ", "
-		<< tp.GetAlignmentInfo() << ","
-		<< " fullScore=" << tp.m_fullScore << " "
-		<< tp.GetScoreBreakdown();
-  return os;
+	const string *str = tp.GetDebugOutput();
+
+	if (str != NULL)
+	{
+		os << *str;
+	}
+	else
+	{
+		os << static_cast<const Phrase&>(tp) << ", "
+			<< tp.GetAlignmentInfo() << ","
+			<< " fullScore=" << tp.m_fullScore << " "
+			<< tp.GetScoreBreakdown();
+	}
+	return os;
 }
 
 }

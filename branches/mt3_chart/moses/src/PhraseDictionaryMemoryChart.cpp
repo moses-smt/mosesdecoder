@@ -38,7 +38,7 @@ const ChartRuleCollection *PhraseDictionaryMemory::GetChartRuleCollection(
 		if (startPos == absEndPos)
 		{
 			const Word &sourceWord = src.GetWord(absEndPos);
-			const PhraseDictionaryNode *node = prevNode.GetChild(sourceWord);
+			const PhraseDictionaryNode *node = static_cast<const PhraseDictionaryNodeMemory&>(prevNode).GetChild(sourceWord);
 			if (node != NULL)
 			{
 				const Word &sourceWord = node->GetSourceWord();
@@ -73,10 +73,10 @@ const ChartRuleCollection *PhraseDictionaryMemory::GetChartRuleCollection(
 		for (iterHeadWords = headWords.begin(); iterHeadWords != headWords.end(); ++iterHeadWords)
 		{
 			const Word &headWord = *iterHeadWords;
-			const PhraseDictionaryNode *node = prevNode.GetChild(headWord);
+			const PhraseDictionaryNode *node = static_cast<const PhraseDictionaryNodeMemory&>(prevNode).GetChild(headWord);
 			if (node != NULL)
 			{
-				const Word &sourceWord = node->GetSourceWord();
+				//const Word &sourceWord = node->GetSourceWord();
 				WordConsumed *newWordConsumed = new WordConsumed(startPos, endPos
 																													, headWord
 																													, prevWordConsumed);

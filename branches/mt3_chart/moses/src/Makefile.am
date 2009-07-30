@@ -3,6 +3,7 @@ AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 libmoses_a_SOURCES = \
 	AlignmentInfo.cpp \
 	BitmapContainer.cpp \
+	ChartInput.cpp \
 	ChartRule.cpp \
 	ChartRuleCollection.cpp \
 	ConfusionNet.cpp \
@@ -49,7 +50,13 @@ libmoses_a_SOURCES = \
 	PhraseDictionary.cpp \
 	PhraseDictionaryMemory.cpp \
 	PhraseDictionaryMemoryChart.cpp \
+	PhraseDictionaryNewFormat.cpp \
+	PhraseDictionaryNewFormatChart.cpp \
 	PhraseDictionaryNode.cpp \
+	PhraseDictionaryNodeMemory.cpp \
+	PhraseDictionaryNodeSourceLabel.cpp \
+	PhraseDictionarySourceLabel.cpp \
+	PhraseDictionarySourceLabelChart.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
 	PhraseDictionaryOnDisk.cpp \

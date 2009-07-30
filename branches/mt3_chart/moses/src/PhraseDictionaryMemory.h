@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include "PhraseDictionary.h"
-#include "PhraseDictionaryNode.h"
+#include "PhraseDictionaryNodeMemory.h"
 #include "ChartRuleCollection.h"
 
 namespace Moses
@@ -39,7 +39,7 @@ class PhraseDictionaryMemory : public PhraseDictionary
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
 
 protected:
-	PhraseDictionaryNode m_collection;
+	PhraseDictionaryNodeMemory m_collection;
 	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
 	mutable std::vector<ProcessedRuleStack*>	m_runningNodesVec;
 

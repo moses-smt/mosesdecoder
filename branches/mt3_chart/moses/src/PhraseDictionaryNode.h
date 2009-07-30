@@ -30,65 +30,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-
-class PhraseDictionaryMemory;
+class PhraseDictionary;
 
 /** One node of the PhraseDictionaryMemory structure
 */
 class PhraseDictionaryNode
 {
-	typedef std::map<Word, PhraseDictionaryNode> NodeMap;
-
-	// only these classes are allowed to instantiate this class
-	friend class PhraseDictionaryMemory;
-	friend class PhraseDictionaryJoshua;
-	friend class std::map<Word, PhraseDictionaryNode>;
-
-protected:
-	NodeMap m_map;
-	TargetPhraseCollection *m_targetPhraseCollection;
-	const Word *m_sourceWord;
-
-	PhraseDictionaryNode()
-		:m_targetPhraseCollection(NULL)
-		,m_sourceWord(NULL)
-	{}
+	friend std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNode &node);
+	
 public:
-	~PhraseDictionaryNode();
-
-	void CleanUp();
-	void Sort(size_t tableLimit);
-	PhraseDictionaryNode *GetOrCreateChild(const Word &word);
-	const PhraseDictionaryNode *GetChild(const Word &word) const;
-	const TargetPhraseCollection *GetTargetPhraseCollection() const
-	{
-		return m_targetPhraseCollection;
-	}
-	TargetPhraseCollection &GetOrCreateTargetPhraseCollection()
-	{
-		if (m_targetPhraseCollection == NULL)
-			m_targetPhraseCollection = new TargetPhraseCollection();
-		return *m_targetPhraseCollection;
-	}
-	size_t GetSize() const
-	{ return m_map.size(); }
+	virtual void CleanUp() = 0;
+	virtual void Sort(size_t tableLimit) = 0;
+	virtual const TargetPhraseCollection *GetTargetPhraseCollection() const = 0;
+	virtual TargetPhraseCollection &GetOrCreateTargetPhraseCollection() = 0;
+	virtual size_t GetSize() const = 0;
 
 	// for mert
-	void SetWeightTransModel(const PhraseDictionaryMemory *phraseDictionary
-													, const std::vector<float> &weightT);
+	virtual void SetWeightTransModel(const PhraseDictionary *phraseDictionary
+													, const std::vector<float> &weightT) = 0;
+	virtual const Word &GetSourceWord() const = 0;
+	virtual void SetSourceWord(const Word &sourceWord) = 0;
 
-	const Word &GetSourceWord() const
-	{ return *m_sourceWord; }
-	void SetSourceWord(const Word &sourceWord)
-	{ m_sourceWord = &sourceWord; }
-
-	// iterators
-	typedef NodeMap::iterator iterator;
-	typedef NodeMap::const_iterator const_iterator;
-	const_iterator begin() const { return m_map.begin(); }
-	const_iterator end() const { return m_map.end(); }
-	iterator begin() { return m_map.begin(); }
-	iterator end() { return m_map.end(); }
+	virtual std::string ToString() const = 0;
 };
 
 }
