@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  *  Word.h
  *  CreateBerkeleyPt
@@ -9,11 +11,18 @@
 
 #include <string>
 #include <vector>
+#include "Vocab.h"
 
 class Word
 {
-	std::vector<std::string> m_factors;
+	bool m_isNonTerminal;
+	std::vector<VocabId> m_factors;
 public:
 	void CreateFromString(const std::string &inString);
+	
+	VocabId GetFactor(size_t ind) const
+	{ return m_factors[ind]; }
+	bool IsNonTerminal() const
+	{ return m_isNonTerminal; }
 };
 

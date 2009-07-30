@@ -10,8 +10,29 @@
 #include "Word.h"
 #include "../../moses/src/Util.h"
 
+using namespace std;
+
 void Word::CreateFromString(const std::string &inString)
 {
-	m_factors = Moses::Tokenize(inString, "|");
+	Vocab &vocab = Vocab::Instance();
+	string str = inString;
+	if (str.substr(0, 1) == "[" && str.substr(str.size() - 1, 1) == "]")
+	{ // non-term
+		str = str.substr(1, str.size() - 2);
+		m_isNonTerminal = true;
+	}
+	else
+	{
+		m_isNonTerminal = false;
+	}
+	
+	std::vector<string> factorsStr = Moses::Tokenize(str, "|");
+	m_factors.resize(factorsStr.size());
+	
+	for (size_t ind = 0; ind < factorsStr.size(); ++ind)
+	{
+		m_factors[ind] = vocab.AddFactor(factorsStr[ind]);
+	}
+	
 }
 
