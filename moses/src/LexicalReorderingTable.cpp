@@ -298,7 +298,7 @@ void LexicalReorderingTableTree::InitializeForInput(const InputType& input){
   ClearCache();
   if(ConfusionNet const* cn = dynamic_cast<ConfusionNet const*>(&input)){
     Cache(*cn);
-  } else if(Sentence const* s = dynamic_cast<Sentence const*>(&input)){
+  } else if(dynamic_cast<Sentence const*>(&input)){
     // Cache(*s); ... this just takes up too much memory, we cache elsewhere
     DisableCache();
   }

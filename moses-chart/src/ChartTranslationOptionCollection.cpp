@@ -61,7 +61,11 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph)
 	{
 		const DecodeGraph &decodeGraph = **iterDecodeGraph;
-		CreateTranslationOptionsForRange(decodeGraph, startPos, endPos, true);
+		size_t maxSpan = decodeGraph.GetMaxChartSpan();
+		if (maxSpan == 0 || (endPos-startPos+1) <= maxSpan)
+		{
+			CreateTranslationOptionsForRange(decodeGraph, startPos, endPos, true);
+		}
 	}
 
 	ProcessUnknownWord(startPos, endPos);
@@ -114,7 +118,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
 	TranslationOptionList &translationOptionList = GetTranslationOptionList(startPos, endPos);
 	const PhraseDictionary &phraseDictionary = decodeStep.GetPhraseDictionary();
-
+	//cerr << phraseDictionary.GetScoreProducerDescription() << endl;
+	
 	const ChartRuleCollection *chartRuleCollection = phraseDictionary.GetChartRuleCollection(
 																															m_source
 																															, wordsRange
@@ -175,7 +180,6 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 																	 , size_t sourcePos, size_t length)
 {
 	// unknown word, add as trans opt
-	FactorCollection &factorCollection = FactorCollection::Instance();
 	const StaticData &staticData = StaticData::Instance();
 	const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
 	const WordPenaltyProducer *wordPenaltyProducer = staticData.GetWordPenaltyProducer();
@@ -205,25 +209,11 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 
 		m_cacheTargetPhrase.push_back(targetPhrase);
 		Word &targetWord = targetPhrase->AddWord();
-
+		targetWord.CreateUnknownWord(sourceWord);
+		
 		// headword
 		Word headWord(true);
-		const string &defaultNonTerm = staticData.GetDefaultNonTerminal();
-
-		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
-		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-
-			const Factor *sourceFactor = sourceWord[currFactor];
-			if (sourceFactor == NULL)
-				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
-			else
-				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
-
-			// headword -- hack
-			sourceFactor = factorCollection.AddFactor(Input, factorType, defaultNonTerm);
-			headWord.SetFactor(factorType, sourceFactor);
-		}
+		headWord.CreateDefaultNonTerminal();
 
 		targetPhrase->SetScore();
 		targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);

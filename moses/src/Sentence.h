@@ -44,7 +44,7 @@ class TranslationOptionCollection;
 class Sentence : public Phrase, public InputType
 {
 
- private:
+protected:
  
 	/**
 	 * Utility method that takes in a string representing an XML tag and the name of the attribute,
@@ -54,7 +54,8 @@ class Sentence : public Phrase, public InputType
 	std::vector <TranslationOption*> m_xmlOptionsList;
 	std::vector <bool> m_xmlCoverageMap;
 
- public:
+	void InitStartEndWord(Word &word, bool start);
+public:
 	Sentence(FactorDirection direction)	: Phrase(direction), InputType()
 	{
 	}

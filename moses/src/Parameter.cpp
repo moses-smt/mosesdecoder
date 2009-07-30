@@ -108,6 +108,11 @@ Parameter::Parameter()
 	AddParam("joshua-path", "root folder where joshua liives, for suffix array phrase table");
 	AddParam("non-terminals", "list of non-term symbols, space separated");
 	AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
+	AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
+	AddParam("java-args", "java args to joshua. Should set to  -Xmx1024m etc");
+	AddParam("glue-rule-type", "Left branching, or both branching. 0=left. 2=both. 1=right(not implemented). Default=0");
+	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
+
 }
 
 Parameter::~Parameter()

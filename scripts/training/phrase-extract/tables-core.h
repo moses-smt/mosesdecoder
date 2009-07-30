@@ -14,7 +14,22 @@
 
 using namespace std;
 
-vector<string> tokenize( char[] );
+#define TABLE_LINE_MAX_LENGTH 1000
+#define UNKNOWNSTR	"UNK"
+
+#define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) { \
+                _IS.getline(_LINE, _SIZE, _DELIM); \
+                if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear(); \
+                if (_IS.gcount() == _SIZE-1) { \
+                  cerr << "Line too long! Buffer overflow. Delete lines >=" \
+                    << _SIZE << " chars or raise TABLE_LINE_MAX_LENGTH in phrase-extract/tables-core.cpp" \
+                    << endl; \
+                    exit(1); \
+                } \
+              }
+
+
+vector<string> tokenize( const char[] );
 
 typedef string WORD;
 typedef unsigned int WORD_ID;
@@ -25,7 +40,7 @@ class Vocabulary {
   vector< WORD > vocab;
   WORD_ID storeIfNew( const WORD& );
   WORD_ID getWordID( const WORD& );
-  inline WORD &getWord( WORD_ID id ) { return vocab[ id ]; }
+  inline WORD &getWord( WORD_ID id ) const { WORD &i = (WORD&) vocab[ id ]; return i; }
 };
 
 typedef vector< WORD_ID > PHRASE;

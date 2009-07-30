@@ -31,6 +31,8 @@ namespace Moses
 //! a list of target phrases that is trsnalated from the same source phrase
 class TargetPhraseCollection
 {
+	friend std::ostream& operator<<(std::ostream&, const TargetPhraseCollection&);
+
 protected:
 	std::vector<TargetPhrase*> m_collection;
 	

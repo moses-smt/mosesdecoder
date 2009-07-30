@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="moses"
 	ProjectGUID="{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}"
 	RootNamespace="moses"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -422,6 +423,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ChartInput.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ChartRule.cpp"
 				>
 			</File>
@@ -696,6 +701,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryNewFormat.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryNewFormatChart.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionaryNode.cpp"
 				>
 				<FileConfiguration
@@ -754,11 +767,27 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryNodeMemory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryNodeSourceLabel.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionaryOnDisk.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionaryOnDiskChart.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionarySourceLabel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionarySourceLabelChart.cpp"
 				>
 			</File>
 			<File
@@ -905,6 +934,10 @@
 			</File>
 			<File
 				RelativePath=".\src\CellCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartInput.h"
 				>
 			</File>
 			<File
@@ -1108,11 +1141,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryNewFormat.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionaryNode.h"
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryNodeMemory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryNodeSourceLabel.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionaryOnDisk.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionarySourceLabel.h"
 				>
 			</File>
 			<File

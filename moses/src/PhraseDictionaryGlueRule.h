@@ -25,6 +25,9 @@ public:
 	~PhraseDictionaryGlueRule()
 	{}
 
+	std::string GetScoreProducerDescription() const
+	{ return "Glue Rule"; }
+
 	PhraseTableImplementation GetPhraseTableImplementation() const
 	{ return GlueRule; }
 

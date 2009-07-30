@@ -286,14 +286,11 @@ public:
 													StringTgtCand::second_type const& scoreVector,
 													Phrase const* srcPtr=0) const
 	{
-		FactorCollection &factorCollection = FactorCollection::Instance();
-
 		for(size_t k=0;k<factorStrings.size();++k)
 		{
-			std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
+			const std::string &str = *factorStrings[k];
 			Word& w=targetPhrase.AddWord();
-			for(size_t l=0;l<m_output.size();++l)
-				w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
+			w.CreateFromString(Output, m_output, str);
 		}
 		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
@@ -309,14 +306,11 @@ public:
 													StringWordAlignmentCand::second_type const& twaVector,
 													Phrase const* srcPtr=0) const
 	{
-		FactorCollection &factorCollection = FactorCollection::Instance();
-
 		for(size_t k=0;k<factorStrings.size();++k)
 			{
-				std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
+				const std::string &str = *factorStrings[k];
 				Word& w=targetPhrase.AddWord();
-				for(size_t l=0;l<m_output.size();++l)
-					w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
+				w.CreateFromString(Output, m_output, str);
 			}
 		targetPhrase.SetScore(m_obj, scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);

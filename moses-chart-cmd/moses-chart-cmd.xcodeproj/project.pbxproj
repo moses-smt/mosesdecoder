@@ -9,13 +9,13 @@
 /* Begin PBXBuildFile section */
 		03306D820C0B249A00CA1311 /* mbr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 03306D800C0B249A00CA1311 /* mbr.cpp */; };
 		03306D830C0B249A00CA1311 /* mbr.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03306D810C0B249A00CA1311 /* mbr.h */; };
-		1C15D62F0F20DF4200E0F06F /* libon-disk-phrase-dict.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C15D62E0F20DF4200E0F06F /* libon-disk-phrase-dict.a */; };
-		1C335ABE0F20FA2200D0D9DF /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C335ABD0F20FA2200D0D9DF /* libmoses-chart.a */; };
 		1C8CFF4D0AD68D3600FA22E2 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF450AD68D3600FA22E2 /* Main.cpp */; };
 		1C8CFF4E0AD68D3600FA22E2 /* Main.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF460AD68D3600FA22E2 /* Main.h */; };
 		1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */; };
 		1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */; };
-		B219B8540E93812700EAB407 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
+		1CCBE9381003C16700EA897E /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
+		1CCBE9391003C16C00EA897E /* libon-disk-phrase-dict.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C12389D0F20C31400F0AB10 /* libon-disk-phrase-dict.a */; };
+		1CCBE93A1003C17200EA897E /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C335ABB0F20F9EA00D0D9DF /* libmoses-chart.a */; };
 		B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8560E9381AC00EAB407 /* IOWrapper.cpp */; };
 /* End PBXBuildFile section */
 
@@ -25,13 +25,6 @@
 			containerPortal = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D2AAC046055464E500DB518D;
-			remoteInfo = moses;
-		};
-		03306D770C0B244800CA1311 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = moses;
 		};
 		1C12389C0F20C31400F0AB10 /* PBXContainerItemProxy */ = {
@@ -45,8 +38,29 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 1C335AA10F20F8F400D0D9DF /* libmoses-chart.a */;
+			remoteGlobalIDString = 1C335AA10F20F8F400D0D9DF;
 			remoteInfo = "moses-chart";
+		};
+		1C6689C4100D3A3900A606B2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "moses-chart";
+		};
+		1C6689C6100D3A3E00A606B2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1C1238980F20C31400F0AB10 /* on-disk-phrase-dict.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "on-disk-phrase-dict";
+		};
+		1C6689C8100D3A4200A606B2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = moses;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -70,9 +84,7 @@
 		03306D800C0B249A00CA1311 /* mbr.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = mbr.cpp; path = src/mbr.cpp; sourceTree = "<group>"; };
 		03306D810C0B249A00CA1311 /* mbr.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = mbr.h; path = src/mbr.h; sourceTree = "<group>"; };
 		1C1238980F20C31400F0AB10 /* on-disk-phrase-dict.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "on-disk-phrase-dict.xcodeproj"; path = "../on-disk-phrase-dict/on-disk-phrase-dict.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		1C15D62E0F20DF4200E0F06F /* libon-disk-phrase-dict.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libon-disk-phrase-dict.a"; path = "../on-disk-phrase-dict/build/Deployment/libon-disk-phrase-dict.a"; sourceTree = SOURCE_ROOT; };
 		1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moses-chart.xcodeproj"; path = "../moses-chart/moses-chart.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		1C335ABD0F20FA2200D0D9DF /* libmoses-chart.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libmoses-chart.a"; path = "../moses-chart/build/Development/libmoses-chart.a"; sourceTree = SOURCE_ROOT; };
 		1C8CFF450AD68D3600FA22E2 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
 		1C8CFF460AD68D3600FA22E2 /* Main.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
 		1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationAnalysis.cpp; path = src/TranslationAnalysis.cpp; sourceTree = "<group>"; };
@@ -87,9 +99,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B219B8540E93812700EAB407 /* libmoses.a in Frameworks */,
-				1C15D62F0F20DF4200E0F06F /* libon-disk-phrase-dict.a in Frameworks */,
-				1C335ABE0F20FA2200D0D9DF /* libmoses-chart.a in Frameworks */,
+				1CCBE93A1003C17200EA897E /* libmoses-chart.a in Frameworks */,
+				1CCBE9391003C16C00EA897E /* libon-disk-phrase-dict.a in Frameworks */,
+				1CCBE9381003C16700EA897E /* libmoses.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,11 +119,9 @@
 		08FB7794FE84155DC02AAC07 /* moses-cmd */ = {
 			isa = PBXGroup;
 			children = (
-				1C335ABD0F20FA2200D0D9DF /* libmoses-chart.a */,
-				1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */,
-				1C15D62E0F20DF4200E0F06F /* libon-disk-phrase-dict.a */,
-				1C1238980F20C31400F0AB10 /* on-disk-phrase-dict.xcodeproj */,
 				03306D5F0C0B240B00CA1311 /* moses.xcodeproj */,
+				1C1238980F20C31400F0AB10 /* on-disk-phrase-dict.xcodeproj */,
+				1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -179,7 +189,9 @@
 			buildRules = (
 			);
 			dependencies = (
-				03306D780C0B244800CA1311 /* PBXTargetDependency */,
+				1C6689C5100D3A3900A606B2 /* PBXTargetDependency */,
+				1C6689C7100D3A3E00A606B2 /* PBXTargetDependency */,
+				1C6689C9100D3A4200A606B2 /* PBXTargetDependency */,
 			);
 			name = "moses-chart-cmd";
 			productInstallPath = "$(HOME)/bin";
@@ -257,15 +269,25 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		03306D780C0B244800CA1311 /* PBXTargetDependency */ = {
+		1C6689C5100D3A3900A606B2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "moses-chart";
+			targetProxy = 1C6689C4100D3A3900A606B2 /* PBXContainerItemProxy */;
+		};
+		1C6689C7100D3A3E00A606B2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "on-disk-phrase-dict";
+			targetProxy = 1C6689C6100D3A3E00A606B2 /* PBXContainerItemProxy */;
+		};
+		1C6689C9100D3A4200A606B2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = moses;
-			targetProxy = 03306D770C0B244800CA1311 /* PBXContainerItemProxy */;
+			targetProxy = 1C6689C8100D3A4200A606B2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		03306D3C0C0B23F200CA1311 /* Development */ = {
+		03306D3C0C0B23F200CA1311 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -313,9 +335,9 @@
 				PRODUCT_NAME = "moses-chart-cmd";
 				ZERO_LINK = NO;
 			};
-			name = Development;
+			name = Debug;
 		};
-		03306D3D0C0B23F200CA1311 /* Deployment */ = {
+		03306D3D0C0B23F200CA1311 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -361,7 +383,7 @@
 				PRODUCT_NAME = "moses-chart-cmd";
 				ZERO_LINK = NO;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		03306D3E0C0B23F200CA1311 /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -384,19 +406,19 @@
 			};
 			name = Default;
 		};
-		03306D400C0B23F200CA1311 /* Development */ = {
+		03306D400C0B23F200CA1311 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH)";
 				VALID_ARCHS = i386;
 			};
-			name = Development;
+			name = Debug;
 		};
-		03306D410C0B23F200CA1311 /* Deployment */ = {
+		03306D410C0B23F200CA1311 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			};
-			name = Deployment;
+			name = Release;
 		};
 		03306D420C0B23F200CA1311 /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -410,8 +432,8 @@
 		03306D3B0C0B23F200CA1311 /* Build configuration list for PBXNativeTarget "moses-chart-cmd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				03306D3C0C0B23F200CA1311 /* Development */,
-				03306D3D0C0B23F200CA1311 /* Deployment */,
+				03306D3C0C0B23F200CA1311 /* Debug */,
+				03306D3D0C0B23F200CA1311 /* Release */,
 				03306D3E0C0B23F200CA1311 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -420,8 +442,8 @@
 		03306D3F0C0B23F200CA1311 /* Build configuration list for PBXProject "moses-chart-cmd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				03306D400C0B23F200CA1311 /* Development */,
-				03306D410C0B23F200CA1311 /* Deployment */,
+				03306D400C0B23F200CA1311 /* Debug */,
+				03306D410C0B23F200CA1311 /* Release */,
 				03306D420C0B23F200CA1311 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;

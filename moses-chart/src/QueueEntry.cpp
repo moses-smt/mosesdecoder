@@ -121,5 +121,22 @@ void QueueEntry::CalcScore()
 
 }
 
+std::ostream& operator<<(std::ostream &out, const ChildEntry &entry)
+{
+	out << *entry.GetOrderHypos()[entry.GetPos()];
+	return out;
+}
+
+std::ostream& operator<<(std::ostream &out, const QueueEntry &entry)
+{
+	out << entry.GetTranslationOption() << endl;
+	std::vector<ChildEntry*>::const_iterator iter;
+	for (iter = entry.GetChildEntries().begin(); iter != entry.GetChildEntries().end(); ++iter)
+	{
+		out << **iter << endl;
+	}
+	return out;
+}
+
 }
 

@@ -77,7 +77,7 @@ public:
 	}
 #endif
 
-	Hypothesis(const QueueEntry &queueEntry);
+	explicit Hypothesis(const QueueEntry &queueEntry);
 	~Hypothesis();
 
 	int GetId()const
@@ -105,10 +105,7 @@ public:
 
 	void AddArc(Hypothesis *loserHypo);
 	void CleanupArcList();
-	void SetWinningHypo(const Hypothesis *hypo)
-	{
-		m_winningHypo = hypo;
-	}
+	void SetWinningHypo(const Hypothesis *hypo);
 
 	const Moses::ScoreComponentCollection &GetScoreBreakDown() const
 	{ return m_scoreBreakdown; }

@@ -55,7 +55,7 @@ inline void TransformString(vector< vector<string>* > &phraseVector
 {
 	for (size_t pos = 0 ; pos < phraseVector.size() ; ++pos)
 	{
-		assert(phraseVector[pos]->size() == 1);
+		//assert(phraseVector[pos]->size() == 1);
 
 		string &str = (*phraseVector[pos])[0];
 		if (str.size() > 3 && str.substr(0, 1) == "[" && str.substr(2, 1) == ",")
@@ -214,6 +214,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		targetPhrase->CreateAlignmentInfo(alignmentInfo);
 		targetPhrase->SetHeadWord(headWord);
 
+		targetPhrase->SetDebugOutput(string("Mem pt " )+ line);
+
 		// remove strings
 		RemoveAllInColl(targetPhraseVector);
 
@@ -247,7 +249,7 @@ TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollectio
 {
 	const size_t size = source.GetSize();
 
-	PhraseDictionaryNode *currNode = &m_collection;
+	PhraseDictionaryNodeMemory *currNode = &m_collection;
 	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
 		const Word& word = source.GetWord(pos);
@@ -267,7 +269,7 @@ const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(
 { // exactly like CreateTargetPhraseCollection, but don't create
 	const size_t size = source.GetSize();
 
-	const PhraseDictionaryNode *currNode = &m_collection;
+	const PhraseDictionaryNodeMemory *currNode = &m_collection;
 	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
 		const Word& word = source.GetWord(pos);
@@ -303,10 +305,10 @@ PhraseDictionaryMemory::~PhraseDictionaryMemory()
 
 void PhraseDictionaryMemory::SetWeightTransModel(const vector<float> &weightT)
 {
-	PhraseDictionaryNode::iterator iterDict;
+	PhraseDictionaryNodeMemory::iterator iterDict;
 	for (iterDict = m_collection.begin() ; iterDict != m_collection.end() ; ++iterDict)
 	{
-		PhraseDictionaryNode &phraseDictionaryNode = iterDict->second;
+		PhraseDictionaryNodeMemory &phraseDictionaryNode = iterDict->second;
 		// recursively set weights in nodes
 		phraseDictionaryNode.SetWeightTransModel(this, weightT);
 	}
@@ -332,8 +334,8 @@ TO_STRING_BODY(PhraseDictionaryMemory);
 // friend
 ostream& operator<<(ostream& out, const PhraseDictionaryMemory& phraseDict)
 {
-	const PhraseDictionaryNode &coll = phraseDict.m_collection;
-	PhraseDictionaryNode::const_iterator iter;
+	const PhraseDictionaryNodeMemory &coll = phraseDict.m_collection;
+	PhraseDictionaryNodeMemory::const_iterator iter;
 	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
 	{
 		const Word &word = (*iter).first;

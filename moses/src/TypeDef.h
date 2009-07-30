@@ -150,6 +150,8 @@ enum PhraseTableImplementation
 	,OnDisk		= 2
 	,GlueRule	= 3
 	,Joshua		= 4
+	,MemorySourceLabel	= 5
+	,NewFormat= 6
 };
 
 enum InputTypeEnum
@@ -157,6 +159,7 @@ enum InputTypeEnum
 	SentenceInput						= 0
 	,ConfusionNetworkInput	= 1
 	,WordLatticeInput				= 2
+	,ChartSentenceInput			= 3
 };
 
 enum XmlInputType
@@ -181,6 +184,20 @@ enum SearchAlgorithm
 	,ChartDecoding= 3
 };
 
+enum SourceLabelOverlap
+{
+	SourceLabelOverlapAdd = 0
+	,SourceLabelOverlapReplace = 1
+	,SourceLabelOverlapDiscard = 2
+};
+
+enum GlueRuleType
+{
+	Left = 0
+	,Right = 1 // not implemented
+	,Unbias = 2
+};
+	
 // typedef
 typedef size_t FactorType;
 

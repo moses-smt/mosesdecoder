@@ -73,7 +73,8 @@ protected:
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	std::set<std::string>		m_nonTerminals;
 	std::string							m_defaultNonTerminals;
-
+	std::string							m_javaArgs;
+	
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
@@ -127,6 +128,7 @@ protected:
 	bool m_UseAlignmentInfo;
 	bool m_PrintAlignmentInfo;
 	bool m_PrintAlignmentInfoNbest;
+	bool m_outputHypoScore;
 		
 	mutable std::auto_ptr<SentenceStats> m_sentenceStats;
 	std::string m_factorDelimiter; //! by default, |, but it can be changed
@@ -150,6 +152,9 @@ protected:
 	bool m_isAlwaysCreateDirectTranslationOption;
 	//! constructor. only the 1 static variable can be created
 
+	SourceLabelOverlap m_sourceLabelOverlap;
+	GlueRuleType m_glueRuleType;
+	
 	bool m_outputWordGraph; //! whether to output word graph
         bool m_outputSearchGraph; //! whether to output search graph
 #ifdef HAVE_PROTOBUF
@@ -478,6 +483,16 @@ public:
 	}
 	size_t GetRuleLimit() const
 	{ return m_ruleLimit; }
+	SourceLabelOverlap GetSourceLabelOverlap() const
+	{ return m_sourceLabelOverlap; }
+	const std::string &GetJavaArgs() const
+	{ return m_javaArgs; }
+	GlueRuleType GetGlueRuleType() const
+	{ return m_glueRuleType; }
+	bool GetOutputHypoScore() const
+	{ return m_outputHypoScore; }
+		
+	
 };
 
 }

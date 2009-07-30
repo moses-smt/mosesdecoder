@@ -100,7 +100,9 @@ void Word::CreateFromString(FactorDirection direction
 	m_isNonTerminal = factor->IsNonTerminal();
 }
 
-void Word::CreateFromString(FactorDirection direction, const std::vector<FactorType> &factorOrder, const string &str)
+void Word::CreateFromString(FactorDirection direction
+														, const std::vector<FactorType> &factorOrder
+														, const string &str)
 {
 	vector<string> wordVec;
 	Tokenize(wordVec, str, "|");
@@ -109,6 +111,61 @@ void Word::CreateFromString(FactorDirection direction, const std::vector<FactorT
 	CreateFromString(direction, factorOrder, wordVec);
 }
 
+void Word::CreateFromString(FactorDirection direction
+											, const std::vector<FactorType> &factorOrder
+											, const std::string &str
+											, bool isNonTerminal)
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
+	vector<string> wordVec;
+	Tokenize(wordVec, str, "|");
+	assert(wordVec.size() == factorOrder.size());
+	
+	const Factor *factor;
+	for (size_t ind = 0; ind < wordVec.size(); ++ind)
+	{
+		FactorType factorType = factorOrder[ind];
+		factor = factorCollection.AddFactor(direction, factorType, wordVec[ind], isNonTerminal); 
+		m_factorArray[factorType] = factor;
+	}
+	
+	// assume term/non-term same for all factors
+	m_isNonTerminal = isNonTerminal;
+}
+
+void Word::CreateUnknownWord(const Word &sourceWord)
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
+	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+	{
+		FactorType factorType = static_cast<FactorType>(currFactor);
+		
+		const Factor *sourceFactor = sourceWord[currFactor];
+		if (sourceFactor == NULL)
+			SetFactor(factorType, factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR));
+		else
+			SetFactor(factorType, factorCollection.AddFactor(Output, factorType, sourceFactor->GetString()));		
+	}	
+}
+
+void Word::CreateDefaultNonTerminal()
+{
+	const StaticData &staticData = StaticData::Instance();
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	const string &defaultNonTerm = staticData.GetDefaultNonTerminal();
+	
+	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+	{
+		FactorType factorType = static_cast<FactorType>(currFactor);
+		
+		// headword -- hack
+		const Factor *sourceFactor = factorCollection.AddFactor(Input, factorType, defaultNonTerm);
+		SetFactor(factorType, sourceFactor);
+	}
+}
+	
 TO_STRING_BODY(Word);
 
 // friend

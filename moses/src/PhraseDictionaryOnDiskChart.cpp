@@ -97,7 +97,6 @@ const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(
 	m_sourcePhrase.push_back(cachedSource);
 
 	// non-terminal word
-	FactorCollection &factorCollection = FactorCollection::Instance();
 
 	assert(m_vocabLookup.find(NON_TERMINAL_FACTOR) != m_vocabLookup.end());
 	MosesOnDiskPt::VocabId vocabIdNonTerm = m_vocabLookup.find(NON_TERMINAL_FACTOR)->second;

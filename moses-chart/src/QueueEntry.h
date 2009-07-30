@@ -5,6 +5,7 @@
 #include <map>
 #include <queue>
 #include <set>
+#include <iostream>
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/Word.h"
 #include "ChartHypothesis.h"
@@ -26,6 +27,8 @@ class QueueEntry;
 
 class ChildEntry
 {
+	friend std::ostream& operator<<(std::ostream&, const ChildEntry&);
+
 protected:
 	size_t m_pos;
 	const OrderHypos &m_orderedHypos;
@@ -50,6 +53,7 @@ public:
 
 class QueueEntry
 {
+	friend std::ostream& operator<<(std::ostream&, const QueueEntry&);
 protected:
 	const TranslationOption &m_transOpt;
 	std::vector<ChildEntry*> m_childEntries;

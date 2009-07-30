@@ -55,7 +55,7 @@ public:
 	}
 
 	/** empty word */
-	Word(bool isNonTerminal = false)
+	explicit Word(bool isNonTerminal = false)
 	{
 		std::memset(m_factorArray, 0, sizeof(FactorArray));
 		m_isNonTerminal = isNonTerminal;
@@ -83,6 +83,8 @@ public:
 
 	inline bool IsNonTerminal() const 
 	{	return m_isNonTerminal;	}
+	inline void SetIsNonTerminal(bool val)
+	{	m_isNonTerminal = val;	}
 
 	/** add the factors from sourceWord into this representation,
 	 * NULL elements in sourceWord will be skipped */
@@ -92,9 +94,15 @@ public:
 											, const std::vector<FactorType> &factorOrder
 											, const std::string &str);
 	void CreateFromString(FactorDirection direction
+												, const std::vector<FactorType> &factorOrder
+												, const std::string &str
+												, bool isNonTerminal);
+	void CreateFromString(FactorDirection direction
 											, const std::vector<FactorType> &factorOrder
 											, const std::vector<std::string> &wordVec);
-
+	void CreateUnknownWord(const Word &sourceWord);
+	void CreateDefaultNonTerminal();
+	
 	/** get string representation of list of factors. Used by PDTimp so supposed 
 	* to be invariant to changes in format of debuggin output, therefore, doesn't 
 	* use streaming output or ToString() from any class so not dependant on 

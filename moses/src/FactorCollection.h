@@ -63,7 +63,19 @@ typedef std::set<Factor> FactorSet;
 class FactorCollection
 {
 	friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
-
+	friend class LanguageModelSRI;
+	friend class LanguageModelIRST;
+	friend class LanguageModelJoint;
+	friend class LanguageModelInternal;
+	friend class LanguageModelSkip;
+	friend class Sentence;
+	friend class TranslationOptionCollection;
+	friend class Word;
+	friend class ChartInput;
+	friend class PhraseDictionaryOnDisk;
+	friend class PhraseDictionarySourceLabel;
+	friend class PhraseDictionaryNewFormat;
+	
 protected:
 	static FactorCollection s_instance;
 
@@ -74,9 +86,9 @@ protected:
 	FactorCollection()
 	:m_factorId(0)
 	{}
+	static FactorCollection& Instance() { return s_instance; }
 
 public:
-	static FactorCollection& Instance() { return s_instance; }
 
 	//! Destructor
 	~FactorCollection();
@@ -87,6 +99,7 @@ public:
 	*	If a factor already exist in the collection, return the existing factor, if not create a new 1
 	*/
 	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);
+	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString, bool isNonTerminal);
 	//! Load list of factors. Deprecated
 	void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &filePath);
 

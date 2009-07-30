@@ -30,12 +30,12 @@ Manager::~Manager()
 
 void Manager::ProcessSentence()
 {
-	TRACE_ERR("Translating: " << m_source << endl);
+	VERBOSE(1,"Translating: " << m_source << endl);
 
 	const StaticData &staticData = StaticData::Instance();
 	staticData.ResetSentenceStats(m_source);
 
-	TRACE_ERR("Decoding: " << endl);
+	VERBOSE(2,"Decoding: " << endl);
 	//Hypothesis::ResetHypoCount();
 
 	// MAIN LOOP
@@ -45,12 +45,13 @@ void Manager::ProcessSentence()
 		for (size_t startPos = 0; startPos <= size-width; ++startPos)
 		{
 			size_t endPos = startPos + width - 1;
-
+			WordsRange range(startPos, endPos);
+			//TRACE_ERR("starting " << range << endl);
+			
 			// create trans opt
 			m_transOptColl.CreateTranslationOptionsForRange(startPos, endPos);
-
-			// decode
-			WordsRange range(startPos, endPos);
+			
+			// decode			
 			ChartCell &cell = m_hypoStackColl.Get(range);
 
 			cell.ProcessSentence(m_transOptColl.GetTranslationOptionList(range)
@@ -58,12 +59,35 @@ void Manager::ProcessSentence()
 			cell.PruneToSize(cell.GetMaxHypoStackSize());
 			cell.CleanupArcList();
 			cell.SortHypotheses();
-
-			TRACE_ERR(range << " = " << cell.GetSize() << endl);
+			
+			VERBOSE(2,range << "=" << cell.GetSize() << " ");
 		}
 	}
 
-	cerr << "Num of hypo = " << Hypothesis::GetHypoCount() << endl;
+	IFVERBOSE(2) {
+		cerr << "Num of hypo = " << Hypothesis::GetHypoCount() << " --- cells:" << endl;
+		
+		for (size_t startPos = 0; startPos < size; ++startPos)
+		{
+			cerr.width(3);
+			cerr << startPos << " ";
+		}
+		cerr << endl;
+		for (size_t width = 1; width <= size; width++)
+		{
+			for( size_t space = 0; space < width-1; space++ )
+			{
+				cerr << "  ";
+			}
+			for (size_t startPos = 0; startPos <= size-width; ++startPos)
+			{
+				WordsRange range(startPos, startPos+width-1);
+				cerr.width(3);
+				cerr << m_hypoStackColl.Get(range).GetSize() << " ";
+			}
+			cerr << endl;
+		}
+	}
 }
 
 const Hypothesis *Manager::GetBestHypothesis() const

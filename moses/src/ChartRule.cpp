@@ -19,7 +19,7 @@ void ChartRule::CreateNonTermIndex()
 	for (iter = alignInfo.begin(); iter != alignInfo.end(); ++iter)
 	{
 		// just for assert
-		size_t sourcePos = iter->first;
+		//size_t sourcePos = iter->first;
 
 		size_t targetPos = iter->second;
 		m_wordsConsumedTargetOrder[targetPos] = nonTermInd;

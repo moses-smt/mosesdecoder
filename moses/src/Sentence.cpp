@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-void InitStartEndWord(Word &word, bool start)
+void Sentence::InitStartEndWord(Word &word, bool start)
 {
 	const StaticData &staticData = StaticData::Instance();
 	FactorCollection &factorCollection = FactorCollection::Instance();
@@ -196,7 +196,6 @@ bool Sentence::XmlOverlap(size_t startPos, size_t endPos) const {
 
 void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const {
 	//iterate over XmlOptions list, find exact source/target matches
-	const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 	
 	for (std::vector<TranslationOption*>::const_iterator iterXMLOpts = m_xmlOptionsList.begin();
 	        iterXMLOpts != m_xmlOptionsList.end(); iterXMLOpts++) {
