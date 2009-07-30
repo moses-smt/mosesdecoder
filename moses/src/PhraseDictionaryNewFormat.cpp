@@ -78,7 +78,6 @@ namespace Moses
 											, const string &factorDelimiter)
 	{
 		vector<string> vec = Tokenize(headString);
-		assert(vec[0] == "[X]");
 		
 		sourceHeadWord.CreateFromString(Input, input,vec[0].substr(1, vec[0].size()-2), true);
 		targetHeadWord.CreateFromString(Output, output, vec[1].substr(1, vec[1].size()-2), true);
