@@ -312,7 +312,7 @@ void computeCountOfCounts( char* fileNameExtract )
 			discountFactor[i] = 1;
 		if (discountFactor[i]<discountFactor[i-1])
 			discountFactor[i] = discountFactor[i-1];
-		cerr << " -> " << discountFactor[i] << endl;
+		cerr << " -> " << discountFactor[i]*i << endl;
 	}
 }
 

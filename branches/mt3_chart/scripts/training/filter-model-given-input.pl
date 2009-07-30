@@ -149,6 +149,9 @@ my %PHRASE_USED;
 open(INPUT,$input) or die "Can't read $input";
 while(my $line = <INPUT>) {
     chomp($line);
+    $line =~ s/<\S[^>]+>//g;
+    $line =~ s/^ +//;
+    $line =~ s/ +$//;
     my @WORD = split(/ +/,$line);
     if ($opt_hierarchical) {
         # Generate the source side of every possible rule given the input
