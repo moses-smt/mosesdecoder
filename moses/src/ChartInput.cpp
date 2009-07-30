@@ -82,6 +82,16 @@ int ChartInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder
 			
 			AddChartLabel(vecSpan[0] + 1, vecSpan[1] + 1, label, factorOrder);
 		}
+
+		string label = staticData.GetDefaultNonTerminal();
+		for (size_t startPos = 0; startPos < sourceSize; ++startPos)
+		{
+			for (size_t endPos = startPos; endPos < sourceSize; ++endPos)
+			{
+				AddChartLabel(startPos, endPos, label, factorOrder);
+			}
+		}
+
 	}
 
 	return 1;
