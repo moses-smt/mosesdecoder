@@ -14,6 +14,7 @@
 		1C2F4AA71021F51A00F03725 /* Global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C2F4AA61021F51A00F03725 /* Global.cpp */; };
 		1C679C1F1020E9A9002AD249 /* DbWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C679C1E1020E9A9002AD249 /* DbWrapper.cpp */; };
 		1CB80C7C1020AD62000B4078 /* Vocab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CB80C7B1020AD62000B4078 /* Vocab.cpp */; };
+		1CEB2928102343310076731C /* TargetPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CEB2927102343310076731C /* TargetPhrase.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,8 @@
 		1C679C1E1020E9A9002AD249 /* DbWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DbWrapper.cpp; path = src/DbWrapper.cpp; sourceTree = "<group>"; };
 		1CB80C7A1020AD62000B4078 /* Vocab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vocab.h; path = src/Vocab.h; sourceTree = "<group>"; };
 		1CB80C7B1020AD62000B4078 /* Vocab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vocab.cpp; path = src/Vocab.cpp; sourceTree = "<group>"; };
+		1CEB2926102343310076731C /* TargetPhrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhrase.h; path = src/TargetPhrase.h; sourceTree = "<group>"; };
+		1CEB2927102343310076731C /* TargetPhrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhrase.cpp; path = src/TargetPhrase.cpp; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* CreateBerkeleyPt */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateBerkeleyPt; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -98,6 +101,8 @@
 				1C679C1E1020E9A9002AD249 /* DbWrapper.cpp */,
 				1C2F4AA51021F51A00F03725 /* Global.h */,
 				1C2F4AA61021F51A00F03725 /* Global.cpp */,
+				1CEB2926102343310076731C /* TargetPhrase.h */,
+				1CEB2927102343310076731C /* TargetPhrase.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -191,6 +196,7 @@
 				1CB80C7C1020AD62000B4078 /* Vocab.cpp in Sources */,
 				1C679C1F1020E9A9002AD249 /* DbWrapper.cpp in Sources */,
 				1C2F4AA71021F51A00F03725 /* Global.cpp in Sources */,
+				1CEB2928102343310076731C /* TargetPhrase.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -16,6 +16,7 @@
 
 class Vocab;
 class Phrase;
+class TargetPhrase;
 class Word;
 
 class SourceKey
@@ -50,8 +51,8 @@ public:
 	void Open(const std::string &filePath);
 
 	void Save(const Vocab &vocab);
-	void SaveSource(const Phrase &phrase, const Phrase &target);
-	void SaveTarget(const Phrase &phrase);
+	void SaveSource(const Phrase &phrase, const TargetPhrase &target);
+	void SaveTarget(const TargetPhrase &phrase);
 
 	void GetAllVocab();
 	
