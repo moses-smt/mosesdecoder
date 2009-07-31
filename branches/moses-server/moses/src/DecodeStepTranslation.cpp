@@ -28,8 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-DecodeStepTranslation::DecodeStepTranslation(PhraseDictionaryHandle dict, const DecodeStep* prev)
-: DecodeStep(dict.get(), prev), m_phraseDictionary(dict)
+DecodeStepTranslation::DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev)
+: DecodeStep(dict, prev), m_phraseDictionary(dict)
 {
 }
 
