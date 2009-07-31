@@ -71,6 +71,9 @@
 		B27348290FE559030059868D /* CorpusSampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21212610FDEFB7500B07445 /* CorpusSampler.cpp */; };
 		B273482B0FE559030059868D /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B25B2AE40F8CDB6D00485047 /* libmoses.a */; };
 		B27348330FE5597A0059868D /* CorpusTrainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B27348320FE5597A0059868D /* CorpusTrainer.cpp */; };
+		B27C123A1021FA0300E44282 /* GibbsOperatorIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B27C12391021FA0300E44282 /* GibbsOperatorIterator.cpp */; };
+		B27C123B1021FA0300E44282 /* GibbsOperatorIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B27C12391021FA0300E44282 /* GibbsOperatorIterator.cpp */; };
+		B27C123C1021FA0300E44282 /* GibbsOperatorIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B27C12391021FA0300E44282 /* GibbsOperatorIterator.cpp */; };
 		B2A748890F976BCD00A5DE76 /* MpiDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */; };
 		B2CAFFCA1004F4CF00BADAF6 /* SampleRank.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F94C170FF52AB900998793 /* SampleRank.cpp */; };
 		B2DB42691010D834001B262D /* SufficientStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DB42681010D834001B262D /* SufficientStats.cpp */; };
@@ -225,6 +228,8 @@
 		B26FFFC40FA7BAF40098700F /* SourceToTargetRatio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SourceToTargetRatio.cpp; sourceTree = "<group>"; };
 		B27348300FE559030059868D /* corpustrainer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = corpustrainer; sourceTree = BUILT_PRODUCTS_DIR; };
 		B27348320FE5597A0059868D /* CorpusTrainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CorpusTrainer.cpp; sourceTree = "<group>"; };
+		B27C12381021FA0300E44282 /* GibbsOperatorIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GibbsOperatorIterator.h; sourceTree = "<group>"; };
+		B27C12391021FA0300E44282 /* GibbsOperatorIterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GibbsOperatorIterator.cpp; sourceTree = "<group>"; };
 		B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MpiDebug.cpp; sourceTree = "<group>"; };
 		B2A748880F976BCD00A5DE76 /* MpiDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MpiDebug.h; sourceTree = "<group>"; };
 		B2DB42681010D834001B262D /* SufficientStats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SufficientStats.cpp; sourceTree = "<group>"; };
@@ -347,6 +352,8 @@
 				B24768971014CCAF0038140D /* Sampler.cpp */,
 				B24768B81014D0150038140D /* SampleCollector.h */,
 				B24768B91014D0150038140D /* SampleCollector.cpp */,
+				B27C12381021FA0300E44282 /* GibbsOperatorIterator.h */,
+				B27C12391021FA0300E44282 /* GibbsOperatorIterator.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -506,6 +513,7 @@
 				B24768991014CCAF0038140D /* Sampler.cpp in Sources */,
 				B24768BB1014D0150038140D /* SampleCollector.cpp in Sources */,
 				B2476D101015DBD90038140D /* Utils.cpp in Sources */,
+				B27C123C1021FA0300E44282 /* GibbsOperatorIterator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -544,6 +552,7 @@
 				B247689A1014CCAF0038140D /* Sampler.cpp in Sources */,
 				B24768BC1014D0150038140D /* SampleCollector.cpp in Sources */,
 				B2476D111015DBD90038140D /* Utils.cpp in Sources */,
+				B27C123A1021FA0300E44282 /* GibbsOperatorIterator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -577,6 +586,7 @@
 				B24768981014CCAF0038140D /* Sampler.cpp in Sources */,
 				B24768BA1014D0150038140D /* SampleCollector.cpp in Sources */,
 				B2476D0F1015DBD90038140D /* Utils.cpp in Sources */,
+				B27C123B1021FA0300E44282 /* GibbsOperatorIterator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -612,6 +622,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LM_IRST,
 					LM_SRI,
+					TRACE_ENABLE,
 				);
 				HEADER_SEARCH_PATHS = (
 					"/usr/local/include/boost-1_37",

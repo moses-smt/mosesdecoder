@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationDelta.h"
 #include "Gibbler.h"
 #include "Sampler.h"
+#include "SampleCollector.h"
+
 
 using namespace std;
 using namespace Moses;
@@ -57,7 +59,8 @@ static float ComputeDistortionDistance(const WordsRange& prev, const WordsRange&
   }
   return - (float) abs(dist);
 }
-  
+ 
+    
 void GibbsOperator::SetAnnealingTemperature(const double t) {
   m_acceptor = new FixedTempAcceptor(t);    
 }  
@@ -149,51 +152,60 @@ void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, Translat
   }
 }
   
-void MergeSplitOperator::doIteration(
+void MergeSplitOperator::scan(
     Sample& sample,
     const TranslationOptionCollection& toc) {
-  size_t sourceSize = sample.GetSourceSize();
-  for (size_t splitIndex = 1; splitIndex < sourceSize; ++splitIndex) {
-    //NB splitIndex n refers to the position between word n-1 and word n. Words are zero indexed
-    VERBOSE(3,"Sampling at source index " << splitIndex << endl);
+  
+  if (m_OpIterator->isStartScan()) {
+    m_OpIterator->init(sample);
+    m_OpIterator->next(); 
+  }
+  
+  m_OpIterator->next(); 
+  
+  size_t splitIndex = static_cast<MergeSplitIterator*>(m_OpIterator)->GetCurPos() ; 
+ 
+  //NB splitIndex n refers to the position between word n-1 and word n. Words are zero indexed
+  VERBOSE(3,"Sampling at source index " << splitIndex << endl);
     
-    Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitIndex);
-    //the delta corresponding to the current translation scores, needs to be subtracted off the delta before applying
-    TranslationDelta* noChangeDelta = NULL; 
-    vector<TranslationDelta*> deltas;
+  Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitIndex);
+  //the delta corresponding to the current translation scores, needs to be subtracted off the delta before applying
+  TranslationDelta* noChangeDelta = NULL; 
+  vector<TranslationDelta*> deltas;
     
-    //find out which source and target segments this split-merge operator should consider
-    //if we're at the left edge of a segment, then we're on a split
-    if (hypothesis->GetCurrSourceWordsRange().GetStartPos() == splitIndex) {
-      VERBOSE(3, "Existing split" << endl);
-      WordsRange rightSourceSegment = hypothesis->GetCurrSourceWordsRange();
-      WordsRange rightTargetSegment = hypothesis->GetCurrTargetWordsRange();
-      const Hypothesis* prev = hypothesis->GetSourcePrevHypo();
-      assert(prev);
-      assert(prev->GetSourcePrevHypo()); //must be a valid hypo
-      WordsRange leftSourceSegment = prev->GetCurrSourceWordsRange();
-      WordsRange leftTargetSegment = prev->GetCurrTargetWordsRange();
-      if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos()) {
-        //contiguous on target side.
-        //In this case source and target order are the same
-        //Add MergeDeltas
-        WordsRange sourceSegment(leftSourceSegment.GetStartPos(), rightSourceSegment.GetEndPos());
-        WordsRange targetSegment(leftTargetSegment.GetStartPos(), rightTargetSegment.GetEndPos());
-        TargetGap gap(prev->GetPrevHypo(), hypothesis->GetNextHypo(), targetSegment);
-        VERBOSE(3, "Creating merge deltas for merging source segments  " << leftSourceSegment << " with " <<
-              rightSourceSegment << " and target segments " << leftTargetSegment << " with " << rightTargetSegment  << endl);
-        const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
-        for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-          TranslationDelta* delta = new MergeDelta(sample,*i,gap, GetGainFunction());
-          deltas.push_back(delta);
-        }
+  //find out which source and target segments this split-merge operator should consider
+  //if we're at the left edge of a segment, then we're on a split
+  if (hypothesis->GetCurrSourceWordsRange().GetStartPos() == splitIndex) {
+    VERBOSE(3, "Existing split" << endl);
+    WordsRange rightSourceSegment = hypothesis->GetCurrSourceWordsRange();
+    WordsRange rightTargetSegment = hypothesis->GetCurrTargetWordsRange();
+    const Hypothesis* prev = hypothesis->GetSourcePrevHypo();
+    assert(prev);
+    assert(prev->GetSourcePrevHypo()); //must be a valid hypo
+    WordsRange leftSourceSegment = prev->GetCurrSourceWordsRange();
+    WordsRange leftTargetSegment = prev->GetCurrTargetWordsRange();
+    if (leftTargetSegment.GetEndPos() + 1 ==  rightTargetSegment.GetStartPos()) {
+      //contiguous on target side.
+      //In this case source and target order are the same
+      //Add MergeDeltas
+      WordsRange sourceSegment(leftSourceSegment.GetStartPos(), rightSourceSegment.GetEndPos());
+      WordsRange targetSegment(leftTargetSegment.GetStartPos(), rightTargetSegment.GetEndPos());
+      TargetGap gap(prev->GetPrevHypo(), hypothesis->GetNextHypo(), targetSegment);
+      VERBOSE(3, "Creating merge deltas for merging source segments  " << leftSourceSegment << " with " <<
+             rightSourceSegment << " and target segments " << leftTargetSegment << " with " << rightTargetSegment  << endl);
+      const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
+      for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
+        TranslationDelta* delta = new MergeDelta(sample,*i,gap, GetGainFunction());
+        deltas.push_back(delta);
       }
-      //make sure that the 'left' and 'right' refer to the target order
-      const TranslationOptionList* leftOptions = NULL;
-      const TranslationOptionList* rightOptions = NULL;
-      auto_ptr<TargetGap> leftGap;
-      auto_ptr<TargetGap> rightGap;
-      if (leftTargetSegment < rightTargetSegment) {
+    }
+    
+    //make sure that the 'left' and 'right' refer to the target order
+    const TranslationOptionList* leftOptions = NULL;
+    const TranslationOptionList* rightOptions = NULL;
+    auto_ptr<TargetGap> leftGap;
+    auto_ptr<TargetGap> rightGap;
+    if (leftTargetSegment < rightTargetSegment) {
         //source and target order same
         leftOptions = &(toc.GetTranslationOptionList(leftSourceSegment));
         rightOptions = &(toc.GetTranslationOptionList(rightSourceSegment));
@@ -203,7 +215,7 @@ void MergeSplitOperator::doIteration(
         noChangeDelta = new   PairedTranslationUpdateDelta(sample,&(prev->GetTranslationOption())
           ,&(hypothesis->GetTranslationOption()),*leftGap, *rightGap, GetGainFunction());
         
-      } else {
+    } else {
         //target in opposite order to source
         leftOptions = &(toc.GetTranslationOptionList(rightSourceSegment));
         rightOptions = &(toc.GetTranslationOptionList(leftSourceSegment));
@@ -212,19 +224,19 @@ void MergeSplitOperator::doIteration(
         rightGap.reset(new TargetGap(prev->GetPrevHypo(), prev->GetNextHypo(), prev->GetCurrTargetWordsRange()));
         noChangeDelta = new   PairedTranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption())
           ,&(prev->GetTranslationOption()),*leftGap, *rightGap, GetGainFunction());
-      }
+    }
       
 
-      //Add PairedTranslationUpdateDeltas
+    //Add PairedTranslationUpdateDeltas
       
-      for (TranslationOptionList::const_iterator ri = rightOptions->begin(); ri != rightOptions->end(); ++ri) {
-        for (TranslationOptionList::const_iterator li = leftOptions->begin(); li != leftOptions->end(); ++li) {
-          TranslationDelta* delta = new PairedTranslationUpdateDelta(sample,*li, *ri, *leftGap, *rightGap, GetGainFunction());
-          deltas.push_back(delta);
-        }
+    for (TranslationOptionList::const_iterator ri = rightOptions->begin(); ri != rightOptions->end(); ++ri) {
+      for (TranslationOptionList::const_iterator li = leftOptions->begin(); li != leftOptions->end(); ++li) {
+        TranslationDelta* delta = new PairedTranslationUpdateDelta(sample,*li, *ri, *leftGap, *rightGap, GetGainFunction());
+        deltas.push_back(delta);
       }
+    }
       //cerr << "Added " << ds << " deltas" << endl;
-    } else {
+  } else {
       VERBOSE(3, "No existing split" << endl);
       WordsRange sourceSegment = hypothesis->GetCurrSourceWordsRange();
       TargetGap gap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), hypothesis->GetCurrTargetWordsRange());
@@ -255,53 +267,55 @@ void MergeSplitOperator::doIteration(
         }
       }
       
-    }
-    
-    
-    
-    VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
-    doSample(deltas, noChangeDelta);
-    
-    
-    
-    
-    //clean up
-    RemoveAllInColl(deltas);
-    delete noChangeDelta;
   }
+    
+  VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
+  doSample(deltas, noChangeDelta);
+    
+  //clean up
+  RemoveAllInColl(deltas);
+  delete noChangeDelta;
+
 }
 
-void TranslationSwapOperator::doIteration(
+void TranslationSwapOperator::scan(
     Sample& sample,
     const TranslationOptionCollection& toc) {
-  const Hypothesis* currHypo = sample.GetHypAtSourceIndex(0);
-  //Iterate in source order
-  while (currHypo) {
-    TargetGap gap(currHypo->GetPrevHypo(), currHypo->GetNextHypo(), currHypo->GetCurrTargetWordsRange());
-    const WordsRange& sourceSegment = currHypo->GetCurrSourceWordsRange();
-    VERBOSE(3, "Considering source segment " << sourceSegment << " and target segment " << gap.segment << endl); 
-    
-    vector<TranslationDelta*> deltas;
-    const TranslationOption* noChangeOption = &(currHypo->GetTranslationOption());
-    TranslationDelta* noChangeDelta = new TranslationUpdateDelta(sample,noChangeOption,gap, GetGainFunction());
-    deltas.push_back(noChangeDelta);
-    
-    
-    const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
-    for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-      if (*i != noChangeOption) {
-        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,gap, GetGainFunction());
-        deltas.push_back(delta);  
-      }
-    }
-    
-    //advance thru the linked list now, before currHypo gets invalidated
-    currHypo = currHypo->GetSourceNextHypo();
-    
-    doSample(deltas, noChangeDelta);
-    
-    RemoveAllInColl(deltas);
+  
+  if (m_OpIterator->isStartScan()) {
+    m_OpIterator->init(sample);
   }
+  else {
+    m_OpIterator->next();
+  }
+  
+  size_t curPos = static_cast<SwapIterator*>(m_OpIterator)->GetCurPos(); 
+  const Hypothesis* currHypo = sample.GetHypAtSourceIndex(curPos);
+  
+  TargetGap gap(currHypo->GetPrevHypo(), currHypo->GetNextHypo(), currHypo->GetCurrTargetWordsRange());
+  const WordsRange& sourceSegment = currHypo->GetCurrSourceWordsRange();
+  VERBOSE(3, "Considering source segment " << sourceSegment << " and target segment " << gap.segment << endl); 
+    
+  vector<TranslationDelta*> deltas;
+  const TranslationOption* noChangeOption = &(currHypo->GetTranslationOption());
+  TranslationDelta* noChangeDelta = new TranslationUpdateDelta(sample,noChangeOption,gap, GetGainFunction());
+  deltas.push_back(noChangeDelta);
+    
+    
+  const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
+  for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
+    if (*i != noChangeOption) {
+      TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,gap, GetGainFunction());
+      deltas.push_back(delta);  
+    }
+  }
+  
+  static_cast<SwapIterator*>(m_OpIterator)->SetNextHypo(const_cast<Hypothesis*>(currHypo->GetSourceNextHypo()));
+  
+  doSample(deltas, noChangeDelta);
+    
+  RemoveAllInColl(deltas);
+  
 }
 
 //FIXME - not doing this properly
@@ -375,209 +389,132 @@ bool FlipOperator::CheckValidReordering(const Hypothesis* leftTgtHypo, const Hyp
   
   return true;
 }
-
-void FlipOperator::CollectAllSplitPoints(Sample& sample, vector<int> &splitPoints) {
+  
+void FlipOperator::CollectAllSplitPoints(Sample& sample) {
+  m_splitPoints.clear();
   size_t sourceSize = sample.GetSourceSize();
   for (size_t splitIndex = 0; splitIndex < sourceSize; ++splitIndex) {
     Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitIndex);
     if (hypothesis->GetCurrSourceWordsRange().GetEndPos() == splitIndex) {
-      splitPoints.push_back(static_cast<int>(splitIndex));
+      m_splitPoints.push_back(splitIndex);
     }
   }
 }
   
   
-void FlipOperator::doIteration(
+void FlipOperator::scan(
     Sample& sample,
     const TranslationOptionCollection&) {
   VERBOSE(2, "Running an iteration of the flip operator" << endl);
-  vector <int> splitPoints;
-  CollectAllSplitPoints(sample, splitPoints);  //collect all split points for this sample
   
-    
-  for (unsigned int i = 0; i < splitPoints.size(); ++i) {
-    for (unsigned int j = i+1; j < splitPoints.size(); ++j) {//let's just look at the source side successors  
-      VERBOSE(2, "Forward Flipping phrases at pos" << splitPoints[i] << " and "  << splitPoints[j] << endl);
-      
-      Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitPoints[i]);
-      WordsRange thisSourceSegment = hypothesis->GetCurrSourceWordsRange();
-      WordsRange thisTargetSegment = hypothesis->GetCurrTargetWordsRange();
-      
-      Hypothesis* followingHyp = sample.GetHypAtSourceIndex(splitPoints[j]);  
-      //would this be a valid reordering?
-      WordsRange followingSourceSegment = followingHyp->GetCurrSourceWordsRange();
-      WordsRange followingTargetSegment = followingHyp->GetCurrTargetWordsRange();  
-      
-      //the delta corresponding to the current translation scores, needs to be subtracted off the delta before applying
-      TranslationDelta* noChangeDelta = NULL; 
-      vector<TranslationDelta*> deltas;
-      
-      
-      if (thisTargetSegment <  followingTargetSegment ) {
-        //source and target order are the same
-        bool contiguous = (thisTargetSegment.GetEndPos() + 1 ==  followingTargetSegment.GetStartPos());
-        
-        /*contiguous on target side, flipping would make this a swap
-        would this be a valid reordering if we flipped?*/
-        float totalDistortion = 0;
-        
-        Hypothesis *newLeftNextHypo, *newRightPrevHypo;
-        if  (contiguous) {
-          newLeftNextHypo = hypothesis;
-          newRightPrevHypo = followingHyp;
-        } 
-        else {
-          newLeftNextHypo = const_cast<Hypothesis*>(hypothesis->GetNextHypo());
-          newRightPrevHypo = const_cast<Hypothesis*>(followingHyp->GetPrevHypo());
-        }
-        
-        bool isValidSwap = CheckValidReordering(followingHyp, hypothesis, hypothesis->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, followingHyp->GetNextHypo(), totalDistortion);
-        if (isValidSwap) {//yes
-          TargetGap leftGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
-          TargetGap rightGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
-          TranslationDelta* delta = new FlipDelta(sample, &(followingHyp->GetTranslationOption()), 
-                                                  &(hypothesis->GetTranslationOption()), 
-                                                  leftGap, rightGap, totalDistortion, GetGainFunction());
-          deltas.push_back(delta);
-          
-          CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
-          
-          noChangeDelta = new   FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                        &(followingHyp->GetTranslationOption()), leftGap, rightGap,
-                                          totalDistortion, GetGainFunction()); 
-          deltas.push_back(noChangeDelta);   
-          
-        }  
-      }
-      else {
-        //swapped on target side, flipping would make this monotone
-        bool contiguous = (thisTargetSegment.GetStartPos() ==  followingTargetSegment.GetEndPos() + 1);
-        float totalDistortion = 0;
-        
-        Hypothesis *newLeftNextHypo, *newRightPrevHypo;
-        if  (contiguous) {
-          newLeftNextHypo = followingHyp; 
-          newRightPrevHypo = hypothesis;
-        } 
-        else {
-          newLeftNextHypo = const_cast<Hypothesis*>(followingHyp->GetNextHypo());
-          newRightPrevHypo = const_cast<Hypothesis*>(hypothesis->GetPrevHypo());
-        }
-        bool isValidSwap = CheckValidReordering(hypothesis, followingHyp, followingHyp->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, hypothesis->GetNextHypo(), totalDistortion);        
-        if (isValidSwap) {//yes
-          TargetGap leftGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
-          TargetGap rightGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
-          
-          
-          TranslationDelta* delta = new FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                                  &(followingHyp->GetTranslationOption()),  leftGap, rightGap,
-                                                   totalDistortion, GetGainFunction());
-          deltas.push_back(delta);
-          
-          
-          CheckValidReordering(followingHyp,hypothesis, followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
-          noChangeDelta = new FlipDelta(sample,&(followingHyp->GetTranslationOption()), 
-                                      &(hypothesis->GetTranslationOption()), leftGap, rightGap, totalDistortion, GetGainFunction());
-          deltas.push_back(noChangeDelta); 
-        }  
-      }
-      
-      VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
-      
-      doSample(deltas, noChangeDelta);
-      
-      //clean up
-      RemoveAllInColl(deltas);
-    }
-    for (int j = i-1; j >= 0; --j) {//let's just look at the source side successors  
-      VERBOSE(2, "Backward Flipping phrases at pos" << splitPoints[j] << " and "  << splitPoints[i] << endl);
-      Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitPoints[j]);
-      WordsRange thisSourceSegment = hypothesis->GetCurrSourceWordsRange();
-      WordsRange thisTargetSegment = hypothesis->GetCurrTargetWordsRange();
-      
-      Hypothesis* followingHyp = sample.GetHypAtSourceIndex(splitPoints[i]);  
-      //would this be a valid reordering?
-      WordsRange followingSourceSegment = followingHyp->GetCurrSourceWordsRange();
-      WordsRange followingTargetSegment = followingHyp->GetCurrTargetWordsRange();  
-      
-      //the delta corresponding to the current translation scores, needs to be subtracted off the delta before applying
-      TranslationDelta* noChangeDelta = NULL; 
-      vector<TranslationDelta*> deltas;
-      
-      
-      if (thisTargetSegment <  followingTargetSegment ) {
-        bool contiguous = (thisTargetSegment.GetEndPos() + 1 ==  followingTargetSegment.GetStartPos());
-        
-        /*contiguous on target side, flipping would make this a swap
-         would this be a valid reordering if we flipped?*/
-        float totalDistortion = 0;
-        
-        Hypothesis *newLeftNextHypo, *newRightPrevHypo;
-        if  (contiguous) {
-          newLeftNextHypo = hypothesis;
-          newRightPrevHypo = followingHyp;
-        } 
-        else {
-          newLeftNextHypo = const_cast<Hypothesis*>(hypothesis->GetNextHypo());
-          newRightPrevHypo = const_cast<Hypothesis*>(followingHyp->GetPrevHypo());
-        }
-        
-        bool isValidSwap = CheckValidReordering(followingHyp, hypothesis, hypothesis->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, followingHyp->GetNextHypo(), totalDistortion);
-        if (isValidSwap) {//yes
-          TargetGap leftGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
-          TargetGap rightGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
-          TranslationDelta* delta = new FlipDelta(sample, &(followingHyp->GetTranslationOption()), 
-                                                  &(hypothesis->GetTranslationOption()),  leftGap, rightGap,
-                                                   totalDistortion, GetGainFunction());
-          deltas.push_back(delta);          
-        
-          CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
-          noChangeDelta = new   FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                        &(followingHyp->GetTranslationOption()),leftGap, rightGap, totalDistortion, GetGainFunction()); 
-          deltas.push_back(noChangeDelta);   
-        }  
-      }
-      else {
-        //swapped on target side, flipping would make this monotone
-        bool contiguous = (thisTargetSegment.GetStartPos() ==  followingTargetSegment.GetEndPos() + 1);
-        float totalDistortion = 0;
-        
-        Hypothesis *newLeftNextHypo, *newRightPrevHypo;
-        if  (contiguous) {
-          newLeftNextHypo = followingHyp; 
-          newRightPrevHypo = hypothesis;
-        } 
-        else {
-          newLeftNextHypo = const_cast<Hypothesis*>(followingHyp->GetNextHypo());
-          newRightPrevHypo = const_cast<Hypothesis*>(hypothesis->GetPrevHypo());
-        }
-        
-        bool isValidSwap = CheckValidReordering(hypothesis, followingHyp, followingHyp->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, hypothesis->GetNextHypo(), totalDistortion);        
-        if (isValidSwap) {//yes
-          TargetGap rightGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
-          TargetGap leftGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
-          TranslationDelta* delta = new FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                                  &(followingHyp->GetTranslationOption()),   leftGap, rightGap,
-                                                   totalDistortion, GetGainFunction());
-          deltas.push_back(delta);
-          
-          CheckValidReordering(followingHyp,hypothesis, followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
-          noChangeDelta = new FlipDelta(sample,&(followingHyp->GetTranslationOption()), 
-                                      &(hypothesis->GetTranslationOption()),  leftGap, rightGap, totalDistortion, GetGainFunction());
-          deltas.push_back(noChangeDelta); 
-        }  
-      }
-      
-      VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
-      
-      doSample(deltas, noChangeDelta);
-      
-      //clean up
-      RemoveAllInColl(deltas);
-    }
-  }  
-    
-}  
+  if (m_OpIterator->isStartScan()) {
+    m_OpIterator->init(sample);
+    CollectAllSplitPoints(sample);
+  }
   
+  if (m_splitPoints.size() < 2)
+    return;
+  
+  m_OpIterator->next();
+    
+  size_t i = static_cast<FlipIterator*>(m_OpIterator)->GetThisPos();
+  size_t j = static_cast<FlipIterator*>(m_OpIterator)->GetThatPos();
+  
+  if (static_cast<FlipIterator*>(m_OpIterator)->GetDirection() == 1)
+    VERBOSE(2, "Forward Flipping phrases at pos" << m_splitPoints[i] << " and "  << m_splitPoints[j] << endl)
+  else
+    VERBOSE(2, "Backward Flipping phrases at pos" << m_splitPoints[i] << " and "  << m_splitPoints[j] << endl)
+    
+  Hypothesis* hypothesis = sample.GetHypAtSourceIndex(m_splitPoints[i]);
+  WordsRange thisSourceSegment = hypothesis->GetCurrSourceWordsRange();
+  WordsRange thisTargetSegment = hypothesis->GetCurrTargetWordsRange();
+  
+  Hypothesis* followingHyp = sample.GetHypAtSourceIndex(m_splitPoints[j]);  
+  //would this be a valid reordering?
+  WordsRange followingSourceSegment = followingHyp->GetCurrSourceWordsRange();
+  WordsRange followingTargetSegment = followingHyp->GetCurrTargetWordsRange();  
+  
+  //the delta corresponding to the current translation scores, needs to be subtracted off the delta before applying
+  TranslationDelta* noChangeDelta = NULL; 
+  vector<TranslationDelta*> deltas;
+  
+  
+  if (thisTargetSegment <  followingTargetSegment ) {
+    //source and target order are the same
+    bool contiguous = (thisTargetSegment.GetEndPos() + 1 ==  followingTargetSegment.GetStartPos());
+    
+    /*contiguous on target side, flipping would make this a swap
+     would this be a valid reordering if we flipped?*/
+    float totalDistortion = 0;
+    
+    Hypothesis *newLeftNextHypo, *newRightPrevHypo;
+    if  (contiguous) {
+      newLeftNextHypo = hypothesis;
+      newRightPrevHypo = followingHyp;
+    } 
+    else {
+      newLeftNextHypo = const_cast<Hypothesis*>(hypothesis->GetNextHypo());
+      newRightPrevHypo = const_cast<Hypothesis*>(followingHyp->GetPrevHypo());
+    }
+    
+    bool isValidSwap = CheckValidReordering(followingHyp, hypothesis, hypothesis->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, followingHyp->GetNextHypo(), totalDistortion);
+    if (isValidSwap) {//yes
+      TargetGap leftGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
+      TargetGap rightGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
+      TranslationDelta* delta = new FlipDelta(sample, &(followingHyp->GetTranslationOption()), 
+                                              &(hypothesis->GetTranslationOption()), 
+                                              leftGap, rightGap, totalDistortion, GetGainFunction());
+      deltas.push_back(delta);
+      
+      CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
+      
+      noChangeDelta = new   FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
+                                      &(followingHyp->GetTranslationOption()), leftGap, rightGap,
+                                      totalDistortion, GetGainFunction()); 
+      deltas.push_back(noChangeDelta);   
+      
+    }  
+  }
+  else {
+    //swapped on target side, flipping would make this monotone
+    bool contiguous = (thisTargetSegment.GetStartPos() ==  followingTargetSegment.GetEndPos() + 1);
+    float totalDistortion = 0;
+    
+    Hypothesis *newLeftNextHypo, *newRightPrevHypo;
+    if  (contiguous) {
+      newLeftNextHypo = followingHyp; 
+      newRightPrevHypo = hypothesis;
+    } 
+    else {
+      newLeftNextHypo = const_cast<Hypothesis*>(followingHyp->GetNextHypo());
+      newRightPrevHypo = const_cast<Hypothesis*>(hypothesis->GetPrevHypo());
+    }
+    bool isValidSwap = CheckValidReordering(hypothesis, followingHyp, followingHyp->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, hypothesis->GetNextHypo(), totalDistortion);        
+    if (isValidSwap) {//yes
+      TargetGap leftGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
+      TargetGap rightGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
+      
+      
+      TranslationDelta* delta = new FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
+                                              &(followingHyp->GetTranslationOption()),  leftGap, rightGap,
+                                              totalDistortion, GetGainFunction());
+      deltas.push_back(delta);
+      
+      
+      CheckValidReordering(followingHyp,hypothesis, followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
+      noChangeDelta = new FlipDelta(sample,&(followingHyp->GetTranslationOption()), 
+                                    &(hypothesis->GetTranslationOption()), leftGap, rightGap, totalDistortion, GetGainFunction());
+      deltas.push_back(noChangeDelta); 
+    }  
+  }
+  
+  VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
+  
+  doSample(deltas, noChangeDelta);
+  
+  //clean up
+  RemoveAllInColl(deltas);
+
+} 
   
 }//namespace

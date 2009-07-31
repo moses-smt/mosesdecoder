@@ -29,7 +29,6 @@ namespace Josiah {
     m_cumulWeights.PlusEquals(m_currWeights);
     m_iteration++;
   }
-
 #ifdef MPI_ENABLED  
   void OnlineLearner::SetRunningWeightVector(int rank, int num_procs) {
     vector <float> runningWeights(m_currWeights.size());
@@ -56,8 +55,8 @@ namespace Josiah {
     
     const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
   }
-#endif
-  
+#endif  
+
   vector<float> OnlineLearner::hildreth (const vector<ScoreComponentCollection>& a, const vector<float>& b) {
     
     size_t i;

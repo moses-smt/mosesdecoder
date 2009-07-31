@@ -149,6 +149,7 @@ int main(int argc, char** argv) {
   string weight_dump_stem;
   bool greedy, fixedTemp;
   float fixed_temperature;
+  bool collectAll;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -217,7 +218,8 @@ int main(int argc, char** argv) {
   ("weight-dump-stem", po::value<string>(&weight_dump_stem)->default_value("weights"), "Stem of filename to use for dumping weights")
  ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
   ("fixed-temp-accept", po::value(&fixedTemp)->zero_tokens()->default_value(false), "Fixed temperature sample acceptor")
-  ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor");
+  ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor")
+  ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -582,18 +584,11 @@ int main(int argc, char** argv) {
     timer.check("Running sampler");
 
     TranslationDelta::lmcalls = 0;
-    sampler.Run(hypothesis,toc,source,extra_features, acceptor.get());
+    sampler.Run(hypothesis,toc,source,extra_features, acceptor.get(), collectAll);  
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
 
     if (expected_sbleu || expected_sbleu_da) {
-//      size_t numFeatures = weights.size();
-//      if (expected_sbleu_da) {
-//        GibblerAnnealedExpectedLossCollector* annealedELCollector = static_cast<GibblerAnnealedExpectedLossCollector*>(elCollector.get());
-//        if (annealedELCollector->ComputeScaleGradient()){
-//          numFeatures += 1;
-//        }
-//      }
       
       ScoreComponentCollection gradient;
       ScoreComponentCollection hessianV;

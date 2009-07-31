@@ -83,6 +83,7 @@ class Sample {
   
   int GetTargetLength()  { return m_targetWords.size(); }
   friend class Sampler;
+  friend class GibbsOperator;
 };
 
 }

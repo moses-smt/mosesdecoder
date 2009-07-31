@@ -40,11 +40,10 @@ private:
   size_t m_numSuffStats;
   ScoreComponentCollection m_GainOptimalSol;
   float m_optimalGain;
-  size_t m_numSamples;
 public:
-  Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0), m_numSamples() {}
+  Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0){}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
-           const std::vector<Word>& source, const feature_vector& extra_fv, SampleAcceptor*) ;
+           const std::vector<Word>& source, const feature_vector& extra_fv, SampleAcceptor*, bool collectAll = false) ;
   void AddOperator(GibbsOperator* o);
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
   void SetAnnealingSchedule(const AnnealingSchedule* as) {m_as = as;}
@@ -62,6 +61,7 @@ public:
   float GetOptimalGain() {return m_optimalGain;}
   void SetOptimalGainSol(TranslationDelta*, TranslationDelta*);
   const ScoreComponentCollection & GetOptimalGainSol() { return m_GainOptimalSol;}
+  void collectSample(Sample& sample, size_t& ctr);
 };
 
 }
