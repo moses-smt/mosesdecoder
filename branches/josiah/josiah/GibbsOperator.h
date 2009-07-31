@@ -29,13 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 
-//#include "DummyScoreProducers.h"
-//#include "FeatureFunction.h"
-/*#include "Hypothesis.h"
-#include "TranslationOptionCollection.h"
-#include "WordsRange.h"*/
 
 #include "TranslationDelta.h"
+#include "GibbsOperatorIterator.h"
+#include "TypeDef.h"
 
 namespace Moses {
   class Hypothesis;
@@ -48,11 +45,12 @@ using namespace Moses;
 namespace Josiah {
 
   class Sample;
-  //class TranslationDelta;
   class GainFunction;
   class Sampler;
   class SampleAcceptor;
   class TargetAssigner;
+  class SampleCollector;
+    
   
   typedef boost::mt19937 base_generator_type;
   
@@ -92,16 +90,18 @@ namespace Josiah {
       boost::variate_generator<base_generator_type&, boost::uniform_real<> > m_random;
       
   };
-
+  
   /** Abstract base class for gibbs operators **/
   class GibbsOperator {
     public:
-        GibbsOperator(const std::string& name) : m_name(name), T(1), m_gf(NULL), m_useApproxDocBleu(false) {}
+        GibbsOperator(const std::string& name) : m_name(name), T(1), m_gf(NULL), m_useApproxDocBleu(false), m_OpIterator(NULL) {}
         /**
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
           **/
-        virtual ~GibbsOperator() {} 
-        virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc) = 0;
+        virtual ~GibbsOperator() {
+          delete m_OpIterator;
+        } 
+        virtual void scan(Sample& sample, const TranslationOptionCollection& toc) = 0;
         const std::string& name() const {return m_name;}
         void SetAnnealingTemperature(const double t);
         void Quench() ;
@@ -110,19 +110,15 @@ namespace Josiah {
         int chooseTargetAssignment(const std::vector<TranslationDelta*>& deltas);
         void SetSampler(Sampler* sampler) {m_sampler = sampler;}
         Sampler* GetSampler()  {return m_sampler;}
-        void disableGainFunction() {
-          m_gf_bk = m_gf;
-          m_gf = NULL;
-        }
-        void enableGainFunction() {
-          m_gf = m_gf_bk;
-          m_gf_bk = NULL;
-        }
+        void disableGainFunction() { m_gf_bk = m_gf; m_gf = NULL; }
+        void enableGainFunction() { m_gf = m_gf_bk; m_gf_bk = NULL; }
         void doOnlineLearning(std::vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen);
         void addSampleAcceptor(SampleAcceptor* acceptor) { m_acceptor = acceptor;}
         void addTargetAssigner(TargetAssigner* assigner) { m_assigner = assigner;}
         void UseApproxDocBleu(bool use) { m_useApproxDocBleu = use;}
-    void UpdateGainOptimalSol(const std::vector<TranslationDelta*>& deltas, int chosen, int target, TranslationDelta* noChangeDelta);
+        void UpdateGainOptimalSol(const std::vector<TranslationDelta*>& deltas, int chosen, int target, TranslationDelta* noChangeDelta);
+        bool keepGoing()  {return m_OpIterator->keepGoing();}
+        void resetIterator() { m_OpIterator->reset();}
      protected:
         /**
           * Randomly select and apply one of the translation deltas.
@@ -131,7 +127,7 @@ namespace Josiah {
         
         std::string m_name;
 				double T;  // annealing temperature
-        
+        GibbsOperatorIterator* m_OpIterator;  
     private:
       static RandomNumberGenerator m_random;
       const GainFunction* m_gf;
@@ -140,6 +136,8 @@ namespace Josiah {
       TargetAssigner* m_assigner;
       Sampler* m_sampler;
       bool m_useApproxDocBleu;
+      
+      
   };
   
   /**
@@ -148,9 +146,9 @@ namespace Josiah {
     **/
   class MergeSplitOperator : public virtual GibbsOperator {
     public:
-        MergeSplitOperator() : GibbsOperator("merge-split") {}
-        virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
-        virtual ~MergeSplitOperator() {}
+      MergeSplitOperator() : GibbsOperator("merge-split") {m_OpIterator = new MergeSplitIterator();}
+      virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
+      
   };
   
   /**
@@ -158,9 +156,9 @@ namespace Josiah {
     **/
   class TranslationSwapOperator : public virtual GibbsOperator {
     public:
-      TranslationSwapOperator() : GibbsOperator("translation-swap") {}
-      virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
-      virtual ~TranslationSwapOperator() {}
+      TranslationSwapOperator() : GibbsOperator("translation-swap") {m_OpIterator = new SwapIterator();}
+      virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
+      
   };
   
   /**
@@ -169,16 +167,20 @@ namespace Josiah {
    **/
   class FlipOperator : public virtual GibbsOperator {
   public:
-    FlipOperator() : GibbsOperator("flip") {}
-    virtual void doIteration(Sample& sample, const TranslationOptionCollection& toc);
+    FlipOperator() : GibbsOperator("flip") {m_OpIterator = new FlipIterator(this);}
+    virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
     virtual const std::string& name() const {return m_name;}
-    virtual ~FlipOperator() {}
     
+    const vector<size_t> & GetSplitPoints() {
+      return m_splitPoints;
+    }
   private:
     std::string m_name;
     bool CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTgtHypo, const Hypothesis* leftTgtPrevHypo, const Hypothesis* leftTgtNextHypo, const Hypothesis* rightTgtPrevHypo, const Hypothesis* rightTgtNextHypo, float & totalDistortion);
-    void CollectAllSplitPoints(Sample& sample, std::vector<int> &splitPoints);
+    void CollectAllSplitPoints(Sample& sample);
+    vector<size_t> m_splitPoints;
   };
- 
+  
+  
 }
 

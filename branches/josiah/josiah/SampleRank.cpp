@@ -137,6 +137,7 @@ int main(int argc, char** argv) {
   bool approxDocBleu;
   bool fix_margin;
   float margin, slack;
+  bool collectAll;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -192,7 +193,8 @@ int main(int argc, char** argv) {
   ("approx-doc-bleu", po::value(&approxDocBleu)->zero_tokens()->default_value(false), "Compute approx doc bleu as gain")
   ("fix-margin", po::value(&fix_margin)->zero_tokens()->default_value(false), "Do MIRA update with a specified margin")
   ("margin", po::value<float>(&margin)->default_value(1.0f), "Margin size")
-  ("slack", po::value<float>(&slack)->default_value(-1.0f), "Slack");
+  ("slack", po::value<float>(&slack)->default_value(-1.0f), "Slack")
+  ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -438,7 +440,7 @@ int main(int argc, char** argv) {
 
     //Reset the online learner stats
     sampler.GetOnlineLearner()->reset();
-    sampler.Run(hypothesis,toc,source,extra_features,acceptor.get());
+    sampler.Run(hypothesis,toc,source,extra_features,acceptor.get(), collectAll);
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
     cerr << "Performed " << sampler.GetOnlineLearner()->GetNumUpdates() << " updates for this sentence" << endl;
