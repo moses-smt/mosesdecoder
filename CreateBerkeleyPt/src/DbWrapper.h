@@ -40,7 +40,7 @@ class TargetfirKey
 class DbWrapper
 {
 	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd;
-	long m_nextSourceId;
+	long m_nextSourceId, m_nextTargetId;
 	
 	long SaveSourceWord(long currSourceId, const Word &word);
 	

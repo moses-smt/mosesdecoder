@@ -20,6 +20,7 @@ DbWrapper::DbWrapper()
 ,m_dbTarget(0, 0)
 ,m_dbTargetInd(0, 0)
 ,m_nextSourceId(1)
+,m_nextTargetId(1)
 {}
 
 DbWrapper::~DbWrapper()
@@ -29,19 +30,17 @@ DbWrapper::~DbWrapper()
 
 // helper callback fn for target secondary db
 int
-get_sales_rep(Db *sdbp,          // secondary db handle
+GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
               const Dbt *pkey,   // primary db record's key
               const Dbt *pdata,  // primary db record's data
               Dbt *skey)         // secondary db record's key
 {
-	VENDOR *vendor;
-	
 	// First, extract the structure contained in the primary's data
-	vendor = (VENDOR *)pdata->get_data();
 	
 	// Now set the secondary key's data to be the representative's name
-	skey->set_data(vendor->sales_rep);
-	skey->set_size(strlen(vendor->sales_rep) + 1);
+	long targetId = *(long*) pdata->get_data();
+	skey->set_data(pdata->get_data());
+	skey->set_size(sizeof(long));
 	
 	// Return 0 to indicate that the record can be created/updated.
 	return (0);
@@ -61,13 +60,16 @@ void DbWrapper::Open(const string &filePath)
 	m_dbSource.set_errpfx("SequenceExample");
 	m_dbSource.open(NULL, (filePath + "/Source.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 
+	// store target phrase -> id
 	m_dbTarget.set_error_stream(&cerr);
 	m_dbTarget.set_errpfx("SequenceExample");
 	m_dbTarget.open(NULL, (filePath + "/Target.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 	
+	// store id -> target phrase
 	m_dbTargetInd.open(NULL, (filePath + "/TargetInd.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 	
-	m_dbTarget.associate(NULL, &m_dbTargetInd, get_sales_rep, 0);
+	m_dbTarget.associate(NULL, &m_dbTargetInd, GetIdFromTargetPhrase, 0);
+
 }
 
 void DbWrapper::Save(const Vocab &vocab)
@@ -188,7 +190,7 @@ long DbWrapper::SaveSourceWord(long currSourceId, const Word &word)
 
 void DbWrapper::SaveTarget(const Phrase &phrase)
 {
-	phrase.SaveTargetPhrase(m_dbTarget);	
+	phrase.SaveTargetPhrase(m_dbTarget, m_nextTargetId);	
 }
 
 

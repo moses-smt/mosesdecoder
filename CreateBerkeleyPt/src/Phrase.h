@@ -26,7 +26,7 @@ protected:
 	std::vector<float>				m_scores;
 	std::vector<Word>	m_headWords;
 	
-	char *WriteToMemory() const;
+	char *WriteToMemory(size_t &memUsed) const;
 	size_t WriteAlignToMemory(char *mem) const;
 	size_t WriteScoresToMemory(char *mem) const;
 
@@ -50,6 +50,6 @@ public:
 	size_t GetAlign(size_t sourcePos) const;
 	
 
-	void SaveTargetPhrase(Db &db) const;
+	long SaveTargetPhrase(Db &dbTarget, long &nextTargetId) const;
 
 };
