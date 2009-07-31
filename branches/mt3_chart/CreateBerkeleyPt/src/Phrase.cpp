@@ -99,10 +99,13 @@ size_t Phrase::WriteAlignToMemory(char *mem) const
 }
 
 size_t Phrase::WriteScoresToMemory(char *mem) const
-{
+{	
+	float *scoreMem = (float*) mem;
+	
+	for (size_t ind = 0; ind < m_scores.size(); ++ind)
+		scoreMem[ind] = m_scores[ind];
+	
 	size_t memUsed = sizeof(float) * m_scores.size();
-	memcpy(mem, &m_scores, memUsed);
-
 	return memUsed;
 }
 
@@ -113,22 +116,26 @@ long Phrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId) const
 	char *mem = WriteToMemory(memUsed);
 		
 	Dbt key(mem, memUsed);
-	Dbt data(&nextTargetId, sizeof(long));
 	
-	// save
-	int ret = dbTarget.put(NULL, &key, &data, DB_NOOVERWRITE);
-	if (ret == DB_KEYEXIST) 
-	{ // already exist. get node id
-		dbTarget.get(NULL, &key, &data, 0);
-		
+	// get
+	Dbt data;
+	int ret = dbTarget.get(NULL, &key, &data, 0);
+	if (ret == 0)
+	{ // existing target
 		targetId = *(long*) data.get_data();
-		cerr << "target phrase exists " << targetId << endl;
+		//cerr << "target phrase exists " << targetId << endl;
 	}
 	else
-	{
+	{ // new target. save
+		data.set_data(&nextTargetId);
+		data.set_size(sizeof(long));
+
+		int ret = dbTarget.put(NULL, &key, &data, DB_NOOVERWRITE);
+		assert(ret == 0);
+		
 		targetId = nextTargetId;
 		++nextTargetId;
-		cerr << "new target phrase " << targetId << endl;
+		//cerr << "new target phrase " << targetId << endl;
 	}
 	
 	free(mem);
@@ -136,10 +143,16 @@ long Phrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId) const
 	return targetId;
 }
 
+void DebugMem(char *mem, size_t size)
+{
+	for (size_t i =0; i < size; i++)
+		printf("%x", mem[i]);
+	printf("\n");
+	
+}
+
 char *Phrase::WriteToMemory(size_t &memUsed) const
 {
-	memUsed = 0;
-
 	// allocate mem
 	const Global &global = Global::Instance();
 	
@@ -149,11 +162,14 @@ char *Phrase::WriteToMemory(size_t &memUsed) const
 	memNeeded += sizeof(float) * global.GetNumScores(); // scores
 	
 	char *mem = (char*) malloc(memNeeded);
-		
+	memset(mem, 0, memNeeded);
+	
 	// head words
+	memUsed = 0;
 	memUsed += GetHeadWords(0).WriteToMemory(mem);
 	memUsed += GetHeadWords(1).WriteToMemory(mem + memUsed);
-	
+
+
 	// phrase
 	/// size
 	int phraseSize = GetSize();
@@ -173,7 +189,9 @@ char *Phrase::WriteToMemory(size_t &memUsed) const
 	// scores
 	memUsed += WriteScoresToMemory(mem + memUsed);
 	
-	assert(memNeeded == memUsed);
+	DebugMem(mem, memNeeded);
+	
+	assert(memNeeded == memUsed);	
 	return mem;
 }
 
