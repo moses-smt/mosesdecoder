@@ -15,6 +15,9 @@
 
 using namespace std;
 
+namespace MosesBerkeleyPt
+{
+
 char *TargetPhrase::WriteToMemory(size_t &memUsed) const
 {
 	// allocate mem
@@ -173,4 +176,5 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId) const
 	return targetId;
 }
 
+}; // namespace
 

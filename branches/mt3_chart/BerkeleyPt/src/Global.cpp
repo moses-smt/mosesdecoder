@@ -11,9 +11,11 @@
 #include "Global.h"
 #include "Vocab.h"
 
-Global Global::s_instance;
-
 using namespace std;
+
+namespace MosesBerkeleyPt
+{
+	Global Global::s_instance;
 
 void Global::Save(Db &dbMisc)
 {
@@ -65,4 +67,5 @@ size_t Global::GetTargetWordSize() const
 {
 	return m_numTargetFactors * sizeof(VocabId);
 }
+}; // namespace
 

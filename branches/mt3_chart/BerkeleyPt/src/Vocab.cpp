@@ -9,6 +9,9 @@
 
 #include "Vocab.h"
 
+namespace MosesBerkeleyPt
+{
+
 Vocab Vocab::s_instance;
 
 Vocab::Vocab()
@@ -30,3 +33,4 @@ VocabId Vocab::AddFactor(const std::string &factorString)
 		return iter->second;
 	}
 }
+}; // namespace

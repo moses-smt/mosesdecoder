@@ -14,11 +14,14 @@
 #include "/usr/local/BerkeleyDB.4.7/include/db_cxx.h"
 //#include <db_cxx.h>
 
+namespace MosesBerkeleyPt
+{
+
 class Vocab;
 class Phrase;
 class TargetPhrase;
 class Word;
-
+	
 class SourceKey
 {
 public:
@@ -59,3 +62,6 @@ public:
 	Db &GetSDbMisc()
 	{ return m_dbMisc; }
 };
+
+}; // namespace
+

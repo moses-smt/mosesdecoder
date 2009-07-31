@@ -12,6 +12,9 @@
 #include <map>
 #include <string>
 
+namespace MosesBerkeleyPt
+{
+
 typedef int VocabId;
 
 class Vocab
@@ -39,3 +42,4 @@ public:
 	void Save(const std::string &filePath);
 	
 };
+}; // namespace

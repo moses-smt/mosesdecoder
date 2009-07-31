@@ -6,7 +6,7 @@
 #include <string>
 #include "PhraseDictionary.h"
 #include "ChartRuleCollection.h"
-#include "../../on-disk-phrase-dict/src/Word.h"
+#include "../../BerkeleyPt/src/Word.h"
 
 namespace Moses
 {
@@ -17,7 +17,11 @@ namespace Moses
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryBerkeleyDb&);
 	
 protected:
-	
+	std::map<std::string, MosesBerkeleyPt::VocabId> m_vocabLookup;
+
+	std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
+	std::vector<float> m_weight;
+
 public:
 	PhraseDictionaryBerkeleyDb(size_t numScoreComponent)
 	: MyBase(numScoreComponent)

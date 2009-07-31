@@ -9,6 +9,9 @@
 
 #include "Phrase.h"
 
+namespace MosesBerkeleyPt
+{
+
 class TargetPhrase : public Phrase
 {
 protected:
@@ -39,4 +42,5 @@ public:
 	long SaveTargetPhrase(Db &dbTarget, long &nextTargetId) const;	
 
 };
+}; // namespace
 

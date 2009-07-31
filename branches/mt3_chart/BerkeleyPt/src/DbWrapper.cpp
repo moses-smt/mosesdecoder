@@ -14,6 +14,9 @@
 
 using namespace std;
 
+namespace MosesBerkeleyPt
+{
+
 DbWrapper::DbWrapper()
 :m_dbMisc(0, 0)
 ,m_dbVocab(0, 0)
@@ -188,5 +191,7 @@ void DbWrapper::SaveTarget(const TargetPhrase &phrase)
 {
 	phrase.SaveTargetPhrase(m_dbTarget, m_nextTargetId);	
 }
+
+}; // namespace
 
 
