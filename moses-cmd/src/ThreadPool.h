@@ -1,4 +1,4 @@
-// $Id: FactorCollection.h 2413 2009-07-29 16:37:29Z bhaddow $
+// $Id: $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 
+#include "Util.h"
+
 
 /**
   * Classes to implement a ThreadPool.
@@ -35,36 +37,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses {
 
-template<typename R> class ThreadPool;
 
 /**
 * A task to be executed by the ThreadPool
 **/
-template<typename R>
 class Task {
     public:
-        Task() : m_completed(false) {}
-        R Result() {
-            Wait();
-            return m_result;
-        }
-        void Run() {m_result = doRun();}
-        
+        virtual void Run() = 0;
         virtual ~Task() {}
-        void Wait();
-        friend class ThreadPool<R>;
-    
-   private:
-        volatile bool m_completed;
-        boost::mutex m_mutex;
-        boost::condition m_condition;
-
-   protected:
-      virtual R doRun() = 0;
-      R m_result;
 }; 
 
-template<typename R>
 class ThreadPool {
     public:
         /**
@@ -76,14 +58,15 @@ class ThreadPool {
          /**
           * Add a job to the threadpool.
           **/
-        void Submit(Task<R>* task);
+        void Submit(Task* task);
         
         /**
-          * Shutdown the ThreadPool
+          * Wait until all queued jobs have completed, and shut down
+          * the ThreadPool.
           **/
-        void Shutdown();  
+        void Stop(bool processRemainingJobs = false);  
           
-        ~ThreadPool() {}
+        ~ThreadPool() { Stop(); }
         
         
         
@@ -93,23 +76,24 @@ class ThreadPool {
           **/
         void Execute();
         
-        std::queue<Task<R>*> m_tasks;
+        std::queue<Task*> m_tasks;
         boost::thread_group m_threads;
         boost::mutex m_mutex;
-        boost::condition m_condition;
-        bool m_terminate;
+        boost::condition m_threadNeeded;
+        boost::condition m_threadAvailable;
+        bool m_stopped;
+        bool m_stopping;
         
 };
 
 #include <pthread.h>
 
-class TestTask : public Task<int> {
+class TestTask : public Task {
     public:
         TestTask(int id) : m_id(id) {}
-        virtual int doRun() {
+        virtual void Run() {
             int tid = (int)pthread_self();
-            std::cerr << "Executing " << m_id << "in thread id " << tid << std::endl;
-            return  m_id;
+            std::cerr << "Executing " << m_id << " in thread id " << tid << std::endl;
         }
         
         virtual ~TestTask() {}

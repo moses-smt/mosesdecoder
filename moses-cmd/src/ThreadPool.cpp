@@ -1,4 +1,4 @@
-// $Id: FactorCollection.h 2413 2009-07-29 16:37:29Z bhaddow $
+// $Id:  $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -25,25 +25,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 using namespace Moses;
 
-template<typename R>
-Moses::ThreadPool<R>::ThreadPool( size_t numThreads ) : m_terminate(false)
+Moses::ThreadPool::ThreadPool( size_t numThreads ) 
+    : m_stopped(false), m_stopping(false)
 {
     for (size_t i = 0; i < numThreads; ++i) {
         m_threads.create_thread(boost::bind(&ThreadPool::Execute,this));
     }
 }
 
-template<typename R>
-void Moses::ThreadPool<R>::Execute()
+void Moses::ThreadPool::Execute()
 {
     do {
-        Task<R>* task = NULL;
+        Task* task = NULL;
         { // Find a job to perform
             boost::mutex::scoped_lock lock(m_mutex);
-            if (m_tasks.empty()) {
-                m_condition.wait(lock);
+            if (m_tasks.empty() && !m_stopped) {
+                m_threadNeeded.wait(lock);
             }
-            if (!m_terminate && !m_tasks.empty()) {
+            if (!m_stopped && !m_tasks.empty()) {
                 task = m_tasks.front();
                 m_tasks.pop();
             }
@@ -51,41 +50,46 @@ void Moses::ThreadPool<R>::Execute()
         //Execute job
         if (task) {
             task->Run();
-            boost::mutex::scoped_lock lock(task->m_mutex);
-            task->m_completed = true;
-            task->m_condition.notify_all();
+            delete task;
         }
-    } while (!m_terminate);
-
+        m_threadAvailable.notify_all();
+    } while (!m_stopped);
+    TRACE_ERR("Thread " << (int)pthread_self() << " exiting" << endl);
 }
 
-template<typename R>
-void Moses::ThreadPool<R>::Submit( Task<R> * task )
+void Moses::ThreadPool::Submit( Task* task )
 {
     boost::mutex::scoped_lock lock(m_mutex);
+    if (m_stopping) {
+        throw runtime_error("ThreadPool stopping - unable to accept new jobs");
+    }
     m_tasks.push(task);
-    m_condition.notify_all();
+    m_threadNeeded.notify_all();
      
 }
 
-template<typename R>
-void Moses::ThreadPool<R>::Shutdown( )
+void Moses::ThreadPool::Stop(bool processRemainingJobs)
 {
     {
+        //prevent more jobs from being added to the queue
         boost::mutex::scoped_lock lock(m_mutex);
-        m_terminate = true;
-        m_condition.notify_all();
+        if (m_stopped) return;
+        m_stopping = true;
     }
+    if (processRemainingJobs) {
+        boost::mutex::scoped_lock lock(m_mutex);
+        //wait for queue to drain.
+        while (!m_tasks.empty() && !m_stopped) {
+            m_threadAvailable.wait(lock);
+        }
+    }
+    //tell all threads to stop
+    {
+        boost::mutex::scoped_lock lock(m_mutex);
+        m_stopped = true;
+    }
+    m_threadNeeded.notify_all();
+    
+    cerr << m_threads.size() << endl;
     m_threads.join_all();
 }
-
-template<typename R>
-void Moses::Task<R>::Wait( )
-{
-    boost::mutex::scoped_lock lock( m_mutex );
-    m_condition.wait( lock, boost::bind( &Task<R>::m_completed, this ) );
-
-}
-
-template class Moses::ThreadPool<int>;
-template class Moses::Task<int>;
