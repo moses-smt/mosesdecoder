@@ -46,6 +46,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryJoshua.h"
 #include "PhraseDictionarySourceLabel.h"
 #include "PhraseDictionaryNewFormat.h"
+#include "PhraseDictionaryBerkeleyDb.h"
 
 using namespace std;
 
@@ -914,6 +915,19 @@ bool StaticData::LoadPhraseTables()
 			PhraseDictionaryOnDisk *pd=new PhraseDictionaryOnDisk(numScoreComponent);
 			if (!pd->Load(input,output,filePath,weight,
 										 maxTargetPhrase[index])
+					)
+			{
+				delete pd;
+				return false;
+			}
+			m_phraseDictionary.push_back(pd);
+		}
+		else if (impl == BerkeleyDb)
+		{ // binary phrase table
+			VERBOSE(1, "using Berkeley Db phrase tables for idx "<<currDict<<"\n");
+			PhraseDictionaryBerkeleyDb *pd=new PhraseDictionaryBerkeleyDb(numScoreComponent);
+			if (!pd->Load(input,output,filePath,weight,
+										maxTargetPhrase[index])
 					)
 			{
 				delete pd;
