@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "Phrase.h"
+#include "TargetPhrase.h"
 #include "Vocab.h"
 #include "DbWrapper.h"
 #include "Global.h"
@@ -44,7 +45,8 @@ int main (int argc, char * const argv[]) {
 								,&alignStr				= tokens[3]
 								,&scoresStr				= tokens[4];
 						
-		Phrase sourcePhrase, targetPhrase;
+		Phrase sourcePhrase;
+		TargetPhrase targetPhrase;
 		sourcePhrase.CreateFromString(sourcePhraseStr);
 		targetPhrase.CreateFromString(targetPhraseStr);
 		targetPhrase.CreateAlignFromString(alignStr);

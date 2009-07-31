@@ -9,6 +9,7 @@
 #include "DbWrapper.h"
 #include "Vocab.h"
 #include "Phrase.h"
+#include "TargetPhrase.h"
 #include "Global.h"
 
 using namespace std;
@@ -135,7 +136,7 @@ void DbWrapper::GetAllVocab()
 		
 }
 
-void DbWrapper::SaveSource(const Phrase &source, const Phrase &target)
+void DbWrapper::SaveSource(const Phrase &source, const TargetPhrase &target)
 {
 	long currSourceId = 0;
 	
@@ -183,7 +184,7 @@ long DbWrapper::SaveSourceWord(long currSourceId, const Word &word)
 	return retSourceId;
 }
 
-void DbWrapper::SaveTarget(const Phrase &phrase)
+void DbWrapper::SaveTarget(const TargetPhrase &phrase)
 {
 	phrase.SaveTargetPhrase(m_dbTarget, m_nextTargetId);	
 }
