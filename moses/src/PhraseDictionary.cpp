@@ -68,7 +68,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
             assert(false);
         }
         
-        boost::shared_ptr<PhraseDictionaryMemory> pdm(new PhraseDictionaryMemory(m_numScoreComponent,this));
+        PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(m_numScoreComponent,this);
         assert(pdm->Load(m_input
                             , m_output
                             , m_filePath
@@ -76,33 +76,37 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
                             , m_tableLimit
                             , staticData.GetAllLM()
                             , staticData.GetWeightWordPenalty()));
-        m_dictionary = pdm;
+        m_memoryDictionary.reset(pdm);
     }
     else 
     {   
-        //don't initialise the dictionary until it's required
+        //don't initialise the tree dictionary until it's required
     }
   
   
   }
   
-  PhraseDictionaryHandle PhraseDictionaryFeature::GetDictionary(const InputType& source) const {
-    if (m_dictionary) {
-        return m_dictionary;
+  PhraseDictionary* PhraseDictionaryFeature::GetDictionary
+        (const InputType& source) {
+    if (m_memoryDictionary.get()) {
+        return m_memoryDictionary.get();
     } else {
-        const StaticData& staticData = StaticData::Instance();
-        boost::shared_ptr<PhraseDictionaryTreeAdaptor> 
-            pdta(new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this));
-        assert(pdta->Load(
-                              m_input
-                            , m_output
-                            , m_filePath
-                            , m_weight
-                            , m_tableLimit
-                            , staticData.GetAllLM()
-                            , staticData.GetWeightWordPenalty()
-                            , source));
-        return pdta;
+        if (!m_treeDictionary.get()) {
+            //load the tree dictionary for this thread   
+            const StaticData& staticData = StaticData::Instance();
+            PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
+            assert(pdta->Load(
+                                  m_input
+                                , m_output
+                                , m_filePath
+                                , m_weight
+                                , m_tableLimit
+                                , staticData.GetAllLM()
+                                , staticData.GetWeightWordPenalty()
+                                , source));
+            m_treeDictionary.reset(pdta);
+        }
+        return m_treeDictionary.get();
     }
   }
 

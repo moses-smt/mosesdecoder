@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <boost/thread/tss.hpp>
 
 #include "Phrase.h"
 #include "TargetPhrase.h"
@@ -72,7 +72,6 @@ class PhraseDictionary: public Dictionary {
     const PhraseDictionaryFeature* m_feature;
 };
 
-typedef boost::shared_ptr<PhraseDictionary> PhraseDictionaryHandle;
 
 /**
  * Represents a feature derived from a phrase table.
@@ -103,7 +102,7 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
 
 	size_t GetNumInputScores() const;
 
-	PhraseDictionaryHandle GetDictionary(const InputType& source) const;
+	PhraseDictionary* GetDictionary(const InputType& source);
     
  private:
     size_t m_numScoreComponent;
@@ -113,7 +112,9 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
     std::string m_filePath;
     std::vector<float> m_weight;
     size_t m_tableLimit;
-    PhraseDictionaryHandle m_dictionary;
+    //Only instantiate one of these
+    std::auto_ptr<PhraseDictionary> m_memoryDictionary;
+    boost::thread_specific_ptr<PhraseDictionary>  m_treeDictionary;
     
 
 };
