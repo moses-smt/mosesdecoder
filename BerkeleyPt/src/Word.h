@@ -13,6 +13,9 @@
 #include <vector>
 #include "Vocab.h"
 
+namespace MosesBerkeleyPt
+{
+
 class Word
 {
 	bool m_isNonTerminal;
@@ -27,4 +30,6 @@ public:
 	
 	size_t WriteToMemory(char *mem) const;
 };
+
+}; // namespace
 

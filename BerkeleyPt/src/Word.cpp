@@ -12,6 +12,9 @@
 
 using namespace std;
 
+namespace MosesBerkeleyPt
+{
+
 void Word::CreateFromString(const std::string &inString)
 {
 	Vocab &vocab = Vocab::Instance();
@@ -47,4 +50,5 @@ size_t Word::WriteToMemory(char *mem) const
 	return size;
 }
 
+}; // namespace
 

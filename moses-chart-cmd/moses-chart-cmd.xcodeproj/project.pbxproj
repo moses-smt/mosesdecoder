@@ -67,14 +67,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1CEB29C810234A520076731C /* BerkeleyPt.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libBerkeleyPt.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = BerkeleyPt;
 		};
 		1CEB29CF10234A750076731C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1CEB29C810234A520076731C /* BerkeleyPt.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* BerkeleyPt */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BerkeleyPt;
 		};
 /* End PBXContainerItemProxy section */

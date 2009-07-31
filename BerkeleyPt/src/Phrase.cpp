@@ -14,6 +14,9 @@
 
 using namespace std;
 
+namespace MosesBerkeleyPt
+{
+
 void Phrase::CreateFromString(const std::string &phraseString)
 {
 	std::vector<std::string> wordsVec = Moses::Tokenize(phraseString);
@@ -36,6 +39,7 @@ void DebugMem(char *mem, size_t size)
 	
 }
 
+}; // namespace
 
 
 

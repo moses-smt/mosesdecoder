@@ -11,6 +11,9 @@
 
 class Db;
 
+namespace MosesBerkeleyPt
+{
+
 class Global
 {
 protected:
@@ -38,3 +41,4 @@ public:
 	size_t GetTargetWordSize() const;
 
 };
+}; // namespace

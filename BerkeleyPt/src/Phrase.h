@@ -15,6 +15,9 @@
 
 class Db;
 
+namespace MosesBerkeleyPt
+{
+
 class Phrase
 {
 protected:
@@ -29,3 +32,5 @@ public:
 	{ return m_words[pos]; }
 
 };
+
+}; // namespace
