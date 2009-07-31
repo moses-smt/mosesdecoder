@@ -28,6 +28,7 @@ josiah_SOURCES = Derivation.cpp \
     SampleCollector.cpp \
     Utils.cpp \
     SufficientStats.cpp \
+    GibbsOperatorIterator.cpp \
     GibblerAnnealedExpectedLossTrainer.cpp 
 
 
@@ -63,6 +64,7 @@ corpustrainer_SOURCES = Derivation.cpp \
     Utils.cpp \
     SufficientStats.cpp \
     OnlineLearner.cpp \
+    GibbsOperatorIterator.cpp \
     CorpusTrainer.cpp 
    
 
@@ -92,6 +94,7 @@ samplerank_SOURCES = Derivation.cpp \
     Utils.cpp \
     SufficientStats.cpp \
    SampleAcceptor.cpp \
+    GibbsOperatorIterator.cpp \
     OnlineLearnerTrainer.cpp 
    
 
