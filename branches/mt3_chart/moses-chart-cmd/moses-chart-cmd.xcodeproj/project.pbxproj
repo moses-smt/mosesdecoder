@@ -16,6 +16,7 @@
 		1CCBE9381003C16700EA897E /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
 		1CCBE9391003C16C00EA897E /* libon-disk-phrase-dict.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C12389D0F20C31400F0AB10 /* libon-disk-phrase-dict.a */; };
 		1CCBE93A1003C17200EA897E /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C335ABB0F20F9EA00D0D9DF /* libmoses-chart.a */; };
+		1CEB29CE10234A6B0076731C /* libBerkeleyPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CEB29CD10234A520076731C /* libBerkeleyPt.a */; };
 		B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8560E9381AC00EAB407 /* IOWrapper.cpp */; };
 /* End PBXBuildFile section */
 
@@ -62,6 +63,20 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = moses;
 		};
+		1CEB29CC10234A520076731C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1CEB29C810234A520076731C /* BerkeleyPt.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D /* libBerkeleyPt.a */;
+			remoteInfo = BerkeleyPt;
+		};
+		1CEB29CF10234A750076731C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1CEB29C810234A520076731C /* BerkeleyPt.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* BerkeleyPt */;
+			remoteInfo = BerkeleyPt;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -89,6 +104,7 @@
 		1C8CFF460AD68D3600FA22E2 /* Main.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
 		1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationAnalysis.cpp; path = src/TranslationAnalysis.cpp; sourceTree = "<group>"; };
 		1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TranslationAnalysis.h; path = src/TranslationAnalysis.h; sourceTree = "<group>"; };
+		1CEB29C810234A520076731C /* BerkeleyPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BerkeleyPt.xcodeproj; path = ../BerkeleyPt/BerkeleyPt.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* moses-chart-cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "moses-chart-cmd"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B219B8560E9381AC00EAB407 /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOWrapper.cpp; path = src/IOWrapper.cpp; sourceTree = "<group>"; };
 		B219B8570E9381AC00EAB407 /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOWrapper.h; path = src/IOWrapper.h; sourceTree = "<group>"; };
@@ -99,6 +115,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1CEB29CE10234A6B0076731C /* libBerkeleyPt.a in Frameworks */,
 				1CCBE93A1003C17200EA897E /* libmoses-chart.a in Frameworks */,
 				1CCBE9391003C16C00EA897E /* libon-disk-phrase-dict.a in Frameworks */,
 				1CCBE9381003C16700EA897E /* libmoses.a in Frameworks */,
@@ -119,6 +136,7 @@
 		08FB7794FE84155DC02AAC07 /* moses-cmd */ = {
 			isa = PBXGroup;
 			children = (
+				1CEB29C810234A520076731C /* BerkeleyPt.xcodeproj */,
 				03306D5F0C0B240B00CA1311 /* moses.xcodeproj */,
 				1C1238980F20C31400F0AB10 /* on-disk-phrase-dict.xcodeproj */,
 				1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */,
@@ -168,6 +186,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		1CEB29C910234A520076731C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1CEB29CD10234A520076731C /* libBerkeleyPt.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		C6859E8C029090F304C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
@@ -192,6 +218,7 @@
 				1C6689C5100D3A3900A606B2 /* PBXTargetDependency */,
 				1C6689C7100D3A3E00A606B2 /* PBXTargetDependency */,
 				1C6689C9100D3A4200A606B2 /* PBXTargetDependency */,
+				1CEB29D010234A750076731C /* PBXTargetDependency */,
 			);
 			name = "moses-chart-cmd";
 			productInstallPath = "$(HOME)/bin";
@@ -210,6 +237,10 @@
 			mainGroup = 08FB7794FE84155DC02AAC07 /* moses-cmd */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = 1CEB29C910234A520076731C /* Products */;
+					ProjectRef = 1CEB29C810234A520076731C /* BerkeleyPt.xcodeproj */;
+				},
 				{
 					ProductGroup = 1C335AB40F20F9EA00D0D9DF /* Products */;
 					ProjectRef = 1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */;
@@ -252,6 +283,13 @@
 			remoteRef = 1C335ABA0F20F9EA00D0D9DF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		1CEB29CD10234A520076731C /* libBerkeleyPt.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libBerkeleyPt.a;
+			remoteRef = 1CEB29CC10234A520076731C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -283,6 +321,11 @@
 			isa = PBXTargetDependency;
 			name = moses;
 			targetProxy = 1C6689C8100D3A4200A606B2 /* PBXContainerItemProxy */;
+		};
+		1CEB29D010234A750076731C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BerkeleyPt;
+			targetProxy = 1CEB29CF10234A750076731C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
