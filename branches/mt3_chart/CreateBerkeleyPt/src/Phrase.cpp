@@ -106,17 +106,40 @@ size_t Phrase::WriteScoresToMemory(char *mem) const
 	return memUsed;
 }
 
-void Phrase::SaveTargetPhrase(Db &db) const
+long Phrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId) const
 {
-	char *mem = WriteToMemory();
+	long targetId;
+	size_t memUsed;
+	char *mem = WriteToMemory(memUsed);
+		
+	Dbt key(mem, memUsed);
+	Dbt data(&nextTargetId, sizeof(long));
 	
+	// save
+	int ret = dbTarget.put(NULL, &key, &data, DB_NOOVERWRITE);
+	if (ret == DB_KEYEXIST) 
+	{ // already exist. get node id
+		dbTarget.get(NULL, &key, &data, 0);
+		
+		targetId = *(long*) data.get_data();
+		cerr << "target phrase exists " << targetId << endl;
+	}
+	else
+	{
+		targetId = nextTargetId;
+		++nextTargetId;
+		cerr << "new target phrase " << targetId << endl;
+	}
 	
 	free(mem);
 	
+	return targetId;
 }
 
-char *Phrase::WriteToMemory() const
+char *Phrase::WriteToMemory(size_t &memUsed) const
 {
+	memUsed = 0;
+
 	// allocate mem
 	const Global &global = Global::Instance();
 	
@@ -126,9 +149,7 @@ char *Phrase::WriteToMemory() const
 	memNeeded += sizeof(float) * global.GetNumScores(); // scores
 	
 	char *mem = (char*) malloc(memNeeded);
-	
-	size_t memUsed = 0;
-	
+		
 	// head words
 	memUsed += GetHeadWords(0).WriteToMemory(mem);
 	memUsed += GetHeadWords(1).WriteToMemory(mem + memUsed);
