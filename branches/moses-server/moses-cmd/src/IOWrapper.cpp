@@ -466,3 +466,51 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 
 	*m_nBestStream<<std::flush;
 }
+
+bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
+{
+	delete source;
+	switch(inputType)
+	{
+		case SentenceInput:         source = ioWrapper.GetInput(new Sentence(Input)); break;
+		case ConfusionNetworkInput: source = ioWrapper.GetInput(new ConfusionNet);    break;
+		case WordLatticeInput:      source = ioWrapper.GetInput(new WordLattice);     break;
+		default: TRACE_ERR("Unknown input type: " << inputType << "\n");
+	}
+	return (source ? true : false);
+}
+
+
+
+IOWrapper *GetIODevice(const StaticData &staticData)
+{
+	IOWrapper *ioWrapper;
+	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
+																,&outputFactorOrder = staticData.GetOutputFactorOrder();
+	FactorMask inputFactorUsed(inputFactorOrder);
+
+	// io
+	if (staticData.GetParam("input-file").size() == 1)
+	{
+	  VERBOSE(2,"IO from File" << endl);
+		string filePath = staticData.GetParam("input-file")[0];
+
+		ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+																	, staticData.GetNBestSize()
+																	, staticData.GetNBestFilePath()
+																	, filePath);
+	}
+	else
+	{
+	  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
+		ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+																	, staticData.GetNBestSize()
+																	, staticData.GetNBestFilePath());
+	}
+	ioWrapper->ResetTranslationId();
+
+	IFVERBOSE(1)
+		PrintUserTime("Created input-output object");
+
+	return ioWrapper;
+}
