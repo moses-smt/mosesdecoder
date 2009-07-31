@@ -168,6 +168,8 @@
 		1CA87AA2100B8F090017FF50 /* PhraseDictionaryNewFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CA87A9F100B8F090017FF50 /* PhraseDictionaryNewFormat.cpp */; };
 		1CA87AA3100B8F090017FF50 /* PhraseDictionaryNewFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CA87AA0100B8F090017FF50 /* PhraseDictionaryNewFormat.h */; };
 		1CA87AA4100B8F090017FF50 /* PhraseDictionaryNewFormatChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CA87AA1100B8F090017FF50 /* PhraseDictionaryNewFormatChart.cpp */; };
+		1CEB29E510234C4D0076731C /* PhraseDictionaryBerkeleyDb.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CEB29E310234C4D0076731C /* PhraseDictionaryBerkeleyDb.h */; };
+		1CEB29E610234C4D0076731C /* PhraseDictionaryBerkeleyDb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CEB29E410234C4D0076731C /* PhraseDictionaryBerkeleyDb.cpp */; };
 		B219B8690E93836100EAB407 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8680E93836100EAB407 /* Timer.cpp */; };
 		B23821380EB73DCB007303C3 /* LanguageModelIRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23821360EB73DCB007303C3 /* LanguageModelIRST.cpp */; };
 		B23821390EB73DCB007303C3 /* LanguageModelIRST.h in Headers */ = {isa = PBXBuildFile; fileRef = B23821370EB73DCB007303C3 /* LanguageModelIRST.h */; };
@@ -369,6 +371,8 @@
 		1CA87A9F100B8F090017FF50 /* PhraseDictionaryNewFormat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNewFormat.cpp; path = src/PhraseDictionaryNewFormat.cpp; sourceTree = "<group>"; };
 		1CA87AA0100B8F090017FF50 /* PhraseDictionaryNewFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNewFormat.h; path = src/PhraseDictionaryNewFormat.h; sourceTree = "<group>"; };
 		1CA87AA1100B8F090017FF50 /* PhraseDictionaryNewFormatChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNewFormatChart.cpp; path = src/PhraseDictionaryNewFormatChart.cpp; sourceTree = "<group>"; };
+		1CEB29E310234C4D0076731C /* PhraseDictionaryBerkeleyDb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryBerkeleyDb.h; path = src/PhraseDictionaryBerkeleyDb.h; sourceTree = "<group>"; };
+		1CEB29E410234C4D0076731C /* PhraseDictionaryBerkeleyDb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryBerkeleyDb.cpp; path = src/PhraseDictionaryBerkeleyDb.cpp; sourceTree = "<group>"; };
 		B219B8680E93836100EAB407 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Timer.cpp; path = src/Timer.cpp; sourceTree = "<group>"; };
 		B23821360EB73DCB007303C3 /* LanguageModelIRST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelIRST.cpp; path = src/LanguageModelIRST.cpp; sourceTree = "<group>"; };
 		B23821370EB73DCB007303C3 /* LanguageModelIRST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelIRST.h; path = src/LanguageModelIRST.h; sourceTree = "<group>"; };
@@ -539,6 +543,8 @@
 				1C8CFE5A0AD67A9700FA22E2 /* Phrase.h */,
 				1C8CFE5B0AD67A9700FA22E2 /* PhraseDictionary.cpp */,
 				1C8CFE5C0AD67A9700FA22E2 /* PhraseDictionary.h */,
+				1CEB29E410234C4D0076731C /* PhraseDictionaryBerkeleyDb.cpp */,
+				1CEB29E310234C4D0076731C /* PhraseDictionaryBerkeleyDb.h */,
 				1C500A400FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp */,
 				1C500A410FB9E68400DFD24F /* PhraseDictionaryGlueRule.h */,
 				1C500A420FB9E68400DFD24F /* PhraseDictionaryJoshua.cpp */,
@@ -756,6 +762,7 @@
 				1C500A810FB9E6B700DFD24F /* LanguageModelRemote.h in Headers */,
 				1C500A840FB9E6B700DFD24F /* WordConsumed.h in Headers */,
 				1CA87AA3100B8F090017FF50 /* PhraseDictionaryNewFormat.h in Headers */,
+				1CEB29E510234C4D0076731C /* PhraseDictionaryBerkeleyDb.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -896,6 +903,7 @@
 				1C500A830FB9E6B700DFD24F /* WordConsumed.cpp in Sources */,
 				1CA87AA2100B8F090017FF50 /* PhraseDictionaryNewFormat.cpp in Sources */,
 				1CA87AA4100B8F090017FF50 /* PhraseDictionaryNewFormatChart.cpp in Sources */,
+				1CEB29E610234C4D0076731C /* PhraseDictionaryBerkeleyDb.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
