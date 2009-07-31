@@ -38,9 +38,12 @@ void Word::CreateFromString(const std::string &inString)
 
 size_t Word::WriteToMemory(char *mem) const
 {
-	size_t size = sizeof(VocabId) * m_factors.size();
-	memcpy(mem, &m_factors, size);
+	VocabId *vocabMem = (VocabId*) mem;
 	
+	for (int ind = 0; ind < m_factors.size(); ind++)
+		vocabMem[ind] = m_factors[ind];
+	
+	size_t size = sizeof(VocabId) * m_factors.size();
 	return size;
 }
 

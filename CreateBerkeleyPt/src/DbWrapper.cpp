@@ -36,6 +36,7 @@ GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
               Dbt *skey)         // secondary db record's key
 {
 	// First, extract the structure contained in the primary's data
+	memset(skey, 0, sizeof(DBT));
 	
 	// Now set the secondary key's data to be the representative's name
 	long targetId = *(long*) pdata->get_data();
@@ -109,8 +110,7 @@ void DbWrapper::GetAllVocab()
 	
 	m_dbVocab.get(NULL, &key, &data, 0);
 	
-	VocabId *id = (VocabId*) data.get_data();
-	
+	VocabId *id = (VocabId*) data.get_data();	
 	cerr << *id << endl;
 	
 	// cursors
@@ -123,12 +123,7 @@ void DbWrapper::GetAllVocab()
 	while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
 	{
 		VocabId *id = (VocabId*) data.get_data();
-		
-		cerr << key.get_size() << " "
-		<< (char*) key.get_data() << " = "
-		<< data.get_size() << " "
-		<< *id << endl;
-		
+		cerr << (char*) key.get_data() << " = " << *id << endl;
 	}
 	if (ret != DB_NOTFOUND) {
 		// ret should be DB_NOTFOUND upon exiting the loop.
