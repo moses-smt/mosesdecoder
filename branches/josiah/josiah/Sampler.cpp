@@ -79,6 +79,7 @@ namespace Josiah {
       }
       
       for (size_t j = 0; j < m_operators.size(); ++j) {
+        m_operators[j]->addSampleAcceptor(acceptor);
         m_operators[j]->enableGainFunction();
         m_operators[j]->resetIterator(); 
       }
