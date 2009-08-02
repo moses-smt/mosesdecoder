@@ -41,7 +41,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
-#include "PhraseDictionaryOnDisk.h"
 #include "PhraseDictionaryGlueRule.h"
 #include "PhraseDictionaryJoshua.h"
 #include "PhraseDictionarySourceLabel.h"
@@ -903,19 +902,6 @@ bool StaticData::LoadPhraseTables()
 								 maxTargetPhrase[index],
 								 GetAllLM(),
 								 GetWeightWordPenalty()))
-			{
-				delete pd;
-				return false;
-			}
-			m_phraseDictionary.push_back(pd);
-		}
-		else if (impl == OnDisk)
-		{ // binary phrase table
-			VERBOSE(1, "using on-disk phrase tables for idx "<<currDict<<"\n");
-			PhraseDictionaryOnDisk *pd=new PhraseDictionaryOnDisk(numScoreComponent);
-			if (!pd->Load(input,output,filePath,weight,
-										 maxTargetPhrase[index])
-					)
 			{
 				delete pd;
 				return false;

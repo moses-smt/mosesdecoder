@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CreateBerkeleyPt", "CreateBerkeleyPt.vcproj", "{39E6E937-CC56-48FE-8A20-AC690685DC16}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BerkeleyPt", "..\BerkeleyPt\BerkeleyPt.vcproj", "{6CB99161-8B5A-46C0-9994-38D0948CE9A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{39E6E937-CC56-48FE-8A20-AC690685DC16}.Debug|Win32.Build.0 = Debug|Win32
 		{39E6E937-CC56-48FE-8A20-AC690685DC16}.Release|Win32.ActiveCfg = Release|Win32
 		{39E6E937-CC56-48FE-8A20-AC690685DC16}.Release|Win32.Build.0 = Release|Win32
+		{6CB99161-8B5A-46C0-9994-38D0948CE9A3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6CB99161-8B5A-46C0-9994-38D0948CE9A3}.Debug|Win32.Build.0 = Debug|Win32
+		{6CB99161-8B5A-46C0-9994-38D0948CE9A3}.Release|Win32.ActiveCfg = Release|Win32
+		{6CB99161-8B5A-46C0-9994-38D0948CE9A3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

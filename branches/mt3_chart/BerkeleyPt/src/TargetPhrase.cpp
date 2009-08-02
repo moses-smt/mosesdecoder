@@ -8,7 +8,7 @@
  */
 
 #include <vector>
-#include "/usr/local/BerkeleyDB.4.7/include/db_cxx.h"
+#include "db_cxx.h"
 #include "../../moses/src/Util.h"
 #include "TargetPhrase.h"
 #include "Global.h"

@@ -45,7 +45,8 @@ bool PhraseDictionaryBerkeleyDb::Load(const std::vector<FactorType> &input
 		m_vocabLookup[ vecStr[0] ] = vocabId;
 	}
 	
-	
+
+	return true;
 }
 
 // PhraseDictionary impl
@@ -59,6 +60,7 @@ void PhraseDictionaryBerkeleyDb::SetWeightTransModel(const std::vector<float> &w
 const TargetPhraseCollection *PhraseDictionaryBerkeleyDb::GetTargetPhraseCollection(const Phrase& src) const
 {
 
+	return NULL;
 }
 
 
