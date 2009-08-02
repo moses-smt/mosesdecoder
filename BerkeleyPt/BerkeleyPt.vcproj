@@ -2,11 +2,11 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="on-disk-phrase-dict-create"
-	ProjectGUID="{A842A5B9-A84E-4F75-B8F9-0B701CA9B222}"
-	RootNamespace="on-disk-phrase-dict-create"
+	Name="BerkeleyPt"
+	ProjectGUID="{6CB99161-8B5A-46C0-9994-38D0948CE9A3}"
+	RootNamespace="BerkeleyPt"
 	Keyword="Win32Proj"
-	TargetFrameworkVersion="131072"
+	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
 		<Platform
@@ -20,7 +20,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="1"
 			>
 			<Tool
@@ -41,14 +41,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -61,21 +59,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; zlib.lib &quot;$(SolutionDir)$(ConfigurationName)\on-disk-phrase-dict.lib&quot;"
-				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="libcmtd"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -87,9 +74,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -97,7 +81,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -118,13 +102,13 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -137,22 +121,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; zlib.lib &quot;$(SolutionDir)$(ConfigurationName)\on-disk-phrase-dict.lib&quot;"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -162,9 +134,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -180,7 +149,27 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\Main.cpp"
+				RelativePath=".\src\DbWrapper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Global.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Phrase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TargetPhrase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Vocab.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Word.cpp"
 				>
 			</File>
 		</Filter>
@@ -189,6 +178,30 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\src\DbWrapper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Global.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Phrase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TargetPhrase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Vocab.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Word.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

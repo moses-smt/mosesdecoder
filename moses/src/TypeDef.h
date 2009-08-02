@@ -147,7 +147,7 @@ enum PhraseTableImplementation
 {
 	Memory			= 0
 	,Binary			= 1
-	,OnDisk			= 2
+	// ,OnDisk			= 2 // deprecated 
 	,GlueRule		= 3
 	,Joshua			= 4
 	,MemorySourceLabel	= 5

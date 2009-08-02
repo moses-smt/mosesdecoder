@@ -7,7 +7,7 @@
  *
  */
 
-#include "/usr/local/BerkeleyDB.4.7/include/db_cxx.h"
+#include "db_cxx.h"
 #include "Global.h"
 #include "Vocab.h"
 

@@ -356,6 +356,7 @@ size_t Phrase::GetNonTerminalPos(size_t index) const
 	}
 	
 	assert(false);	
+	return 0;
 }
 
 const Word &Phrase::GetNonTerminal(size_t index) const

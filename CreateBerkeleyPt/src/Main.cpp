@@ -1,15 +1,16 @@
 #include <iostream>
 #include <string>
-#include "Phrase.h"
-#include "TargetPhrase.h"
-#include "Vocab.h"
-#include "DbWrapper.h"
-#include "Global.h"
+#include "../../BerkeleyPt/src/Phrase.h"
+#include "../../BerkeleyPt/src/TargetPhrase.h"
+#include "../../BerkeleyPt/src/Vocab.h"
+#include "../../BerkeleyPt/src/DbWrapper.h"
+#include "../../BerkeleyPt/src/Global.h"
 #include "../../moses/src/InputFileStream.h"
 #include "../../moses/src/Util.h"
 #include "../../moses/src/UserMessage.h"
 
 using namespace std;
+using namespace MosesBerkeleyPt;
 
 int main (int argc, char * const argv[]) {
     // insert code here...

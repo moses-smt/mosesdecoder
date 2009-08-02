@@ -20,6 +20,7 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 																																					,bool adhereTableLimit
 																																					,const CellCollection &cellColl) const
 {
+	return NULL;
 }
 	
 }; // namespace
