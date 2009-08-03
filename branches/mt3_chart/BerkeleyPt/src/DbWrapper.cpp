@@ -10,6 +10,7 @@
 #include "Vocab.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
+#include "TargetPhraseCollection.h"
 
 using namespace std;
 
@@ -22,6 +23,7 @@ DbWrapper::DbWrapper()
 ,m_dbSource(0, 0)
 ,m_dbTarget(0, 0)
 ,m_dbTargetInd(0, 0)
+,m_dbTargetColl(0, 0)
 ,m_nextSourceNodeId(1)
 ,m_nextTargetNodeId(1)
 ,m_initNode(0)
@@ -92,6 +94,11 @@ void DbWrapper::OpenFiles(const std::string &filePath)
 	m_dbTargetInd.open(NULL, (filePath + "/TargetInd.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 	
 	m_dbTarget.associate(NULL, &m_dbTargetInd, GetIdFromTargetPhrase, 0);
+	
+	// store source id -> target phrase coll
+	m_dbTargetColl.set_error_stream(&cerr);
+	m_dbTargetColl.set_errpfx("SequenceExample");
+	m_dbTargetColl.open(NULL, (filePath + "/TargetPhraseColl.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 	
 }
 
@@ -230,7 +237,7 @@ void DbWrapper::GetAllVocab()
 		
 }
 
-void DbWrapper::SaveSource(const Phrase &source, const TargetPhrase &target)
+long DbWrapper::SaveSource(const Phrase &source, const TargetPhrase &target)
 {
 	long currSourceNodeId = 0;
 	
@@ -247,6 +254,8 @@ void DbWrapper::SaveSource(const Phrase &source, const TargetPhrase &target)
 			currSourceNodeId = SaveSourceWord(currSourceNodeId, targetWord);
 		}
 	}
+
+	return currSourceNodeId;
 }
 
 long DbWrapper::SaveSourceWord(long currSourceNodeId, const Word &word)
@@ -278,7 +287,7 @@ long DbWrapper::SaveSourceWord(long currSourceNodeId, const Word &word)
 	return retSourceNodeId;
 }
 
-void DbWrapper::SaveTarget(const TargetPhrase &phrase)
+void DbWrapper::SaveTarget(TargetPhrase &phrase)
 {
 	phrase.SaveTargetPhrase(m_dbTarget, m_nextTargetNodeId
 													, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
@@ -310,9 +319,15 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 
 const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node) const
 {
-
+	// TODO
 	return NULL;
 }
+
+void DbWrapper::Save(long sourceNodeId, const TargetPhraseCollection &tpColl)
+{
+	tpColl.Save(m_dbTargetColl, sourceNodeId, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
+}
+
 
 }; // namespace
 

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include "../../BerkeleyPt/src/TargetPhraseCollection.h"
 #include "../../BerkeleyPt/src/Phrase.h"
 #include "../../BerkeleyPt/src/TargetPhrase.h"
 #include "../../BerkeleyPt/src/Vocab.h"
@@ -29,7 +30,9 @@ int main (int argc, char * const argv[]) {
 	string line;
 	size_t lineNum = 0;
 	size_t numScores = NOT_FOUND;
-	
+	long sourceNodeIdOld = 0;
+	TargetPhraseCollection *tpColl = new TargetPhraseCollection();
+
 	while(getline(inStream, line))
 	{
 		line = Moses::Trim(line);
@@ -47,14 +50,31 @@ int main (int argc, char * const argv[]) {
 		Phrase sourcePhrase;
 		sourcePhrase.CreateFromString(sourcePhraseStr, vocab);
 		
-		TargetPhrase targetPhrase;
-		targetPhrase.CreateFromString(targetPhraseStr, vocab);
-		targetPhrase.CreateAlignFromString(alignStr);
-		targetPhrase.CreateScoresFromString(scoresStr);
-		targetPhrase.CreateHeadwordsFromString(headWordsStr, vocab);
+		TargetPhrase *targetPhrase = new TargetPhrase();
+		targetPhrase->CreateFromString(targetPhraseStr, vocab);
+		targetPhrase->CreateAlignFromString(alignStr);
+		targetPhrase->CreateScoresFromString(scoresStr);
+		targetPhrase->CreateHeadwordsFromString(headWordsStr, vocab);
 
-		dbWrapper.SaveSource(sourcePhrase, targetPhrase);
-		dbWrapper.SaveTarget(targetPhrase);
+		long sourceNodeId = dbWrapper.SaveSource(sourcePhrase, *targetPhrase);
+		dbWrapper.SaveTarget(*targetPhrase);
+
+		if (sourceNodeIdOld != sourceNodeId)
+		{ // different source from last time. write out target phrase coll
+			dbWrapper.Save(sourceNodeIdOld, *tpColl);
+
+			// new coll
+			delete tpColl;
+			tpColl = new TargetPhraseCollection();
+			tpColl->AddTargetPhrase(targetPhrase);
+
+			sourceNodeIdOld = sourceNodeId;
+		}
+		else
+		{ // same source as last time. do nothing
+			tpColl->AddTargetPhrase(targetPhrase);
+		}
+
 	}
 	
 	dbWrapper.Save(vocab);
