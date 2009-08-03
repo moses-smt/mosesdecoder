@@ -72,7 +72,7 @@ const TargetPhraseCollection *PhraseDictionaryBerkeleyDb::GetTargetPhraseCollect
 	Phrase *cachedSource = new Phrase(src);
 	m_sourcePhrase.push_back(cachedSource);
 	
-	const MosesBerkeleyPt::SourcePhraseNode *nodeOld = new MosesBerkeleyPt::SourcePhraseNode(*m_initNode);
+	const MosesBerkeleyPt::SourcePhraseNode *nodeOld = new MosesBerkeleyPt::SourcePhraseNode(m_dbWrapper.GetInitNode());
 	
 	// find target phrases from tree
 	size_t size = src.GetSize();
@@ -90,7 +90,7 @@ const TargetPhraseCollection *PhraseDictionaryBerkeleyDb::GetTargetPhraseCollect
 		}
 		else
 		{	// search for word in node map
-			nodeNew = nodeOld->GetChild(searchWord, m_sourceFile, m_inputFactorsVec);
+			nodeNew = m_dbWrapper.GetChild(*nodeOld, *searchWord);
 		}
 		
 		delete nodeOld;

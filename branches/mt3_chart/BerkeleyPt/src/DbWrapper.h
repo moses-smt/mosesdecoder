@@ -13,6 +13,7 @@
 #include <db.h>
 #include <db_cxx.h>
 #include "Vocab.h"
+#include "SourcePhraseNode.h"
 #include "../../moses/src/TypeDef.h"
 #include "../../moses/src/Word.h"
 
@@ -48,7 +49,8 @@ class DbWrapper
 	Vocab m_vocab;
 	long m_nextSourceId, m_nextTargetId;
 	int m_numSourceFactors, m_numTargetFactors, m_numScores;
-
+	SourcePhraseNode m_initNode;
+	
 	long SaveSourceWord(long currSourceId, const Word &word);
 	
 	void SetMisc(const std::string &key, int value);
@@ -68,6 +70,9 @@ public:
 	Word *CreateSouceWord() const;
 	Word *CreateTargetWord() const;
 	
+	const SourcePhraseNode &GetInitNode() const
+	{ return m_initNode; }
+	
 	void GetAllVocab();
 	
 	size_t GetSourceWordSize() const
@@ -78,9 +83,8 @@ public:
 	{
 		return m_numTargetFactors * sizeof(VocabId);
 	}
-	
-	Db &GetSDbMisc()
-	{ return m_dbMisc; }
+
+	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word) const;
 };
 
 }; // namespace
