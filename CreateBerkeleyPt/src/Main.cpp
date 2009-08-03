@@ -1,3 +1,8 @@
+#ifdef WIN32
+// Include Visual Leak Detector
+#include <vld.h>
+#endif
+
 #include <iostream>
 #include <string>
 #include "../../BerkeleyPt/src/TargetPhraseCollection.h"
@@ -31,7 +36,7 @@ int main (int argc, char * const argv[]) {
 	size_t lineNum = 0;
 	size_t numScores = NOT_FOUND;
 	long sourceNodeIdOld = 0;
-	TargetPhraseCollection *tpColl = new TargetPhraseCollection();
+	TargetPhraseCollection *tpColl = NULL;
 
 	while(getline(inStream, line))
 	{
@@ -61,7 +66,10 @@ int main (int argc, char * const argv[]) {
 
 		if (sourceNodeIdOld != sourceNodeId)
 		{ // different source from last time. write out target phrase coll
-			dbWrapper.Save(sourceNodeIdOld, *tpColl);
+			if (tpColl)
+			{ // could be 1st. tpColl == NULL
+				dbWrapper.Save(sourceNodeIdOld, *tpColl);
+			}
 
 			// new coll
 			delete tpColl;
@@ -77,6 +85,8 @@ int main (int argc, char * const argv[]) {
 
 	}
 	
+	delete tpColl;
+
 	dbWrapper.Save(vocab);
 	dbWrapper.GetAllVocab();
 	
