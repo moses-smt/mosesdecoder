@@ -65,7 +65,7 @@ void DbWrapper::BeginSave(const string &filePath)
 {
 	OpenFiles(filePath);	
 	m_numSourceFactors = 1;
-	m_numSourceFactors = 1;
+	m_numTargetFactors = 1;
 	m_numScores = 5;
 }
 	
@@ -310,7 +310,8 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 
 const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node) const
 {
-	
+
+	return NULL;
 }
 
 }; // namespace
