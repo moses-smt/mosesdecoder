@@ -12,6 +12,7 @@
 namespace Josiah {
   class TranslationDelta; 
   class Sampler;
+  class WeightNormalizer;
   
   class OnlineLearner {
     public :
@@ -51,22 +52,53 @@ namespace Josiah {
   
   class MiraLearner : public OnlineLearner {
     public :
-    MiraLearner(const Moses::ScoreComponentCollection& initWeights,  const std::string& name, bool fixMargin, float margin, float slack) : OnlineLearner(initWeights, name), m_numUpdates(), m_fixMargin(fixMargin), m_margin(margin), m_slack(slack) { std::cerr << "Slack " << m_slack << std::endl;}
+    MiraLearner(const Moses::ScoreComponentCollection& initWeights,  const std::string& name, bool fixMargin, float margin, float slack, WeightNormalizer* wn = NULL) : OnlineLearner(initWeights, name), m_numUpdates(), m_fixMargin(fixMargin), m_margin(margin), m_slack(slack), m_normalizer(wn) {}
       virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler);
       virtual ~MiraLearner() {}
       virtual void reset() {m_numUpdates = 0;}
       virtual size_t GetNumUpdates() { return m_numUpdates;} 
+      void SetNormalizer(WeightNormalizer* normalizer) {m_normalizer = normalizer;}
     protected:
       size_t m_numUpdates;
       bool m_fixMargin;
-    float m_margin;
-    float m_slack;
+      float m_margin;
+      float m_slack;
+      WeightNormalizer* m_normalizer;
   };
   
   class MiraPlusLearner : public MiraLearner {
     public :
-      MiraPlusLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, bool fixMargin, float margin, float slack) : MiraLearner(initWeights, name, fixMargin, margin, slack) {}
+      MiraPlusLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, bool fixMargin, float margin, float slack, WeightNormalizer* wn = NULL) : MiraLearner(initWeights, name, fixMargin, margin, slack, wn) {}
       virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler);
       virtual ~MiraPlusLearner() {}
+  };
+  
+  class WeightNormalizer {
+    public :
+      WeightNormalizer(float norm) {m_norm = norm;}
+      virtual ~WeightNormalizer() {}
+      virtual void Normalize(Moses::ScoreComponentCollection& ) = 0; 
+    protected :
+      float m_norm;
+  };
+  
+  class L1Normalizer : public WeightNormalizer {
+    public:
+      L1Normalizer (float norm) : WeightNormalizer(norm) {}
+      virtual ~L1Normalizer() {}
+      virtual void Normalize(Moses::ScoreComponentCollection& weights) {
+        float currNorm = weights.GetL1Norm();
+        weights.MultiplyEquals(m_norm/currNorm);
+      } 
+  };
+  
+  class L2Normalizer : public WeightNormalizer {
+    public:
+      L2Normalizer (float norm) : WeightNormalizer(norm) {}
+      virtual ~L2Normalizer() {}
+      virtual void Normalize(Moses::ScoreComponentCollection& weights) {
+        float currNorm = weights.GetL2Norm();
+        weights.MultiplyEquals(m_norm/currNorm);
+      } 
   };
 }
