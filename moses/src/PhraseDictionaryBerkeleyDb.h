@@ -6,12 +6,16 @@
 #include <string>
 #include "PhraseDictionary.h"
 #include "ChartRuleCollection.h"
+#include "../../BerkeleyPt/src/DbWrapper.h"
 #include "../../BerkeleyPt/src/Word.h"
+#include "../../BerkeleyPt/src/SourcePhraseNode.h"
 
 namespace Moses
 {
 
-	class PhraseDictionaryBerkeleyDb : public PhraseDictionary
+	class TargetPhraseCollection;
+	
+class PhraseDictionaryBerkeleyDb : public PhraseDictionary
 {
 	typedef PhraseDictionary MyBase;
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryBerkeleyDb&);
@@ -22,6 +26,15 @@ protected:
 	std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
 	std::vector<float> m_weight;
 
+	MosesBerkeleyPt::DbWrapper m_dbWrapper;
+	MosesBerkeleyPt::SourcePhraseNode *m_initNode;
+
+	mutable std::vector<TargetPhraseCollection*> m_cache;
+	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
+	mutable std::list<Phrase*> m_sourcePhrase;
+
+	void LoadTargetLookup();
+	
 public:
 	PhraseDictionaryBerkeleyDb(size_t numScoreComponent)
 	: MyBase(numScoreComponent)

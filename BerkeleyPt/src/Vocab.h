@@ -19,9 +19,7 @@ typedef int VocabId;
 
 class Vocab
 {
-protected:
-	static Vocab s_instance;
-	
+protected:	
 	typedef std::map<std::string, VocabId> CollType;
 	CollType m_vocabColl;
 	VocabId m_nextId; // starts @ 1
@@ -32,10 +30,7 @@ public:
 	//! iterators
 	const_iterator begin() const { return m_vocabColl.begin(); }
 	const_iterator end() const { return m_vocabColl.end(); }
-	
-	static Vocab &Instance()
-	{ return s_instance; }
-		
+			
 	Vocab();
 	VocabId AddFactor(const std::string &factorString);
 	

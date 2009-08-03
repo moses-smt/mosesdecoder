@@ -8,7 +8,7 @@
  */
 
 #include <vector>
-#include "db_cxx.h"
+#include <db_cxx.h>
 #include "../../moses/src/Util.h"
 #include "TargetPhrase.h"
 #include "Global.h"
@@ -80,7 +80,7 @@ void TargetPhrase::CreateScoresFromString(const std::string &inString)
 	m_scores = Moses::Tokenize<float>(inString);
 }
 
-void TargetPhrase::CreateHeadwordsFromString(const std::string &inString)
+void TargetPhrase::CreateHeadwordsFromString(const std::string &inString, Vocab &vocab)
 {
 	std::vector<string> headWordsStr = Moses::Tokenize(inString);
 	assert(headWordsStr.size());
@@ -88,8 +88,8 @@ void TargetPhrase::CreateHeadwordsFromString(const std::string &inString)
 	m_headWords.push_back(Word());
 	m_headWords.push_back(Word());
 	
-	m_headWords[0].CreateFromString(headWordsStr[0]);
-	m_headWords[1].CreateFromString(headWordsStr[1]);
+	m_headWords[0].CreateFromString(headWordsStr[0], vocab);
+	m_headWords[1].CreateFromString(headWordsStr[1], vocab);
 }
 
 size_t TargetPhrase::GetAlign(size_t sourcePos) const

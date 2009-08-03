@@ -35,9 +35,6 @@
 		1C500A550FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500A460FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h */; };
 		1C500A560FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A470FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.cpp */; };
 		1C500A570FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500A480FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.h */; };
-		1C500A580FB9E68400DFD24F /* PhraseDictionaryOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A490FB9E68400DFD24F /* PhraseDictionaryOnDisk.cpp */; };
-		1C500A590FB9E68400DFD24F /* PhraseDictionaryOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500A4A0FB9E68400DFD24F /* PhraseDictionaryOnDisk.h */; };
-		1C500A5A0FB9E68400DFD24F /* PhraseDictionaryOnDiskChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A4B0FB9E68400DFD24F /* PhraseDictionaryOnDiskChart.cpp */; };
 		1C500A5B0FB9E68400DFD24F /* PhraseDictionarySourceLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A4C0FB9E68400DFD24F /* PhraseDictionarySourceLabel.cpp */; };
 		1C500A5C0FB9E68400DFD24F /* PhraseDictionarySourceLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500A4D0FB9E68400DFD24F /* PhraseDictionarySourceLabel.h */; };
 		1C500A5D0FB9E68400DFD24F /* PhraseDictionarySourceLabelChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A4E0FB9E68400DFD24F /* PhraseDictionarySourceLabelChart.cpp */; };
@@ -236,9 +233,6 @@
 		1C500A460FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeMemory.h; path = src/PhraseDictionaryNodeMemory.h; sourceTree = "<group>"; };
 		1C500A470FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNodeSourceLabel.cpp; path = src/PhraseDictionaryNodeSourceLabel.cpp; sourceTree = "<group>"; };
 		1C500A480FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSourceLabel.h; path = src/PhraseDictionaryNodeSourceLabel.h; sourceTree = "<group>"; };
-		1C500A490FB9E68400DFD24F /* PhraseDictionaryOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDisk.cpp; path = src/PhraseDictionaryOnDisk.cpp; sourceTree = "<group>"; };
-		1C500A4A0FB9E68400DFD24F /* PhraseDictionaryOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryOnDisk.h; path = src/PhraseDictionaryOnDisk.h; sourceTree = "<group>"; };
-		1C500A4B0FB9E68400DFD24F /* PhraseDictionaryOnDiskChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDiskChart.cpp; path = src/PhraseDictionaryOnDiskChart.cpp; sourceTree = "<group>"; };
 		1C500A4C0FB9E68400DFD24F /* PhraseDictionarySourceLabel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySourceLabel.cpp; path = src/PhraseDictionarySourceLabel.cpp; sourceTree = "<group>"; };
 		1C500A4D0FB9E68400DFD24F /* PhraseDictionarySourceLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionarySourceLabel.h; path = src/PhraseDictionarySourceLabel.h; sourceTree = "<group>"; };
 		1C500A4E0FB9E68400DFD24F /* PhraseDictionarySourceLabelChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySourceLabelChart.cpp; path = src/PhraseDictionarySourceLabelChart.cpp; sourceTree = "<group>"; };
@@ -564,9 +558,6 @@
 				1C500A460FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h */,
 				1C500A470FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.cpp */,
 				1C500A480FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.h */,
-				1C500A490FB9E68400DFD24F /* PhraseDictionaryOnDisk.cpp */,
-				1C500A4A0FB9E68400DFD24F /* PhraseDictionaryOnDisk.h */,
-				1C500A4B0FB9E68400DFD24F /* PhraseDictionaryOnDiskChart.cpp */,
 				1C500A4C0FB9E68400DFD24F /* PhraseDictionarySourceLabel.cpp */,
 				1C500A4D0FB9E68400DFD24F /* PhraseDictionarySourceLabel.h */,
 				1C500A4E0FB9E68400DFD24F /* PhraseDictionarySourceLabelChart.cpp */,
@@ -753,7 +744,6 @@
 				1C500A520FB9E68400DFD24F /* PhraseDictionaryJoshua.h in Headers */,
 				1C500A550FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h in Headers */,
 				1C500A570FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.h in Headers */,
-				1C500A590FB9E68400DFD24F /* PhraseDictionaryOnDisk.h in Headers */,
 				1C500A5C0FB9E68400DFD24F /* PhraseDictionarySourceLabel.h in Headers */,
 				1C500A740FB9E6B700DFD24F /* AlignmentInfo.h in Headers */,
 				1C500A750FB9E6B700DFD24F /* CellCollection.h in Headers */,
@@ -892,8 +882,6 @@
 				1C500A530FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp in Sources */,
 				1C500A540FB9E68400DFD24F /* PhraseDictionaryNodeMemory.cpp in Sources */,
 				1C500A560FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.cpp in Sources */,
-				1C500A580FB9E68400DFD24F /* PhraseDictionaryOnDisk.cpp in Sources */,
-				1C500A5A0FB9E68400DFD24F /* PhraseDictionaryOnDiskChart.cpp in Sources */,
 				1C500A5B0FB9E68400DFD24F /* PhraseDictionarySourceLabel.cpp in Sources */,
 				1C500A5D0FB9E68400DFD24F /* PhraseDictionarySourceLabelChart.cpp in Sources */,
 				1C500A730FB9E6B700DFD24F /* AlignmentInfo.cpp in Sources */,

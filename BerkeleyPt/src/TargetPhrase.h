@@ -28,7 +28,7 @@ protected:
 public:
 	void CreateAlignFromString(const std::string &alignString);
 	void CreateScoresFromString(const std::string &inString);
-	void CreateHeadwordsFromString(const std::string &inString);
+	void CreateHeadwordsFromString(const std::string &inString, Vocab &vocab);
 
 	const Word &GetHeadWords(size_t ind) const
 	{ return m_headWords[ind]; }

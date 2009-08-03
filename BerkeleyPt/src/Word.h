@@ -21,7 +21,7 @@ class Word
 	bool m_isNonTerminal;
 	std::vector<VocabId> m_factors;
 public:
-	void CreateFromString(const std::string &inString);
+	void CreateFromString(const std::string &inString, Vocab &vocab);
 	
 	VocabId GetFactor(size_t ind) const
 	{ return m_factors[ind]; }

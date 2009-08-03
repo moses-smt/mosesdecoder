@@ -12,8 +12,6 @@
 namespace MosesBerkeleyPt
 {
 
-Vocab Vocab::s_instance;
-
 Vocab::Vocab()
 :m_nextId(1)
 {}
