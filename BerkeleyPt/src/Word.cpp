@@ -30,10 +30,12 @@ void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 	
 	std::vector<string> factorsStr = Moses::Tokenize(str, "|");
 	m_factors.resize(factorsStr.size());
+	cerr << vocab.GetSize();
 	
 	for (size_t ind = 0; ind < factorsStr.size(); ++ind)
 	{
 		m_factors[ind] = vocab.AddFactor(factorsStr[ind]);
+		cerr << vocab.GetSize();
 	}
 	
 }

@@ -4,7 +4,6 @@
 #include "../../BerkeleyPt/src/TargetPhrase.h"
 #include "../../BerkeleyPt/src/Vocab.h"
 #include "../../BerkeleyPt/src/DbWrapper.h"
-#include "../../BerkeleyPt/src/Global.h"
 #include "../../moses/src/InputFileStream.h"
 #include "../../moses/src/Util.h"
 #include "../../moses/src/UserMessage.h"
@@ -21,10 +20,9 @@ int main (int argc, char * const argv[]) {
 	Moses::InputFileStream inStream(filePath);
 
 	DbWrapper dbWrapper;
-	dbWrapper.Open(".");
+	dbWrapper.BeginSave(".");
 
-	Global::Instance().Save(dbWrapper.GetSDbMisc());
-	Global::Instance().Load(dbWrapper.GetSDbMisc());
+	Vocab vocab;
 	
 	size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
 
@@ -47,18 +45,19 @@ int main (int argc, char * const argv[]) {
 								,&scoresStr				= tokens[4];
 						
 		Phrase sourcePhrase;
+		sourcePhrase.CreateFromString(sourcePhraseStr, vocab);
+		
 		TargetPhrase targetPhrase;
-		sourcePhrase.CreateFromString(sourcePhraseStr);
-		targetPhrase.CreateFromString(targetPhraseStr);
+		targetPhrase.CreateFromString(targetPhraseStr, vocab);
 		targetPhrase.CreateAlignFromString(alignStr);
 		targetPhrase.CreateScoresFromString(scoresStr);
-		targetPhrase.CreateHeadwordsFromString(headWordsStr);
+		targetPhrase.CreateHeadwordsFromString(headWordsStr, vocab);
 
 		dbWrapper.SaveSource(sourcePhrase, targetPhrase);
 		dbWrapper.SaveTarget(targetPhrase);
 	}
 	
-	dbWrapper.Save(Vocab::Instance());
+	dbWrapper.Save(vocab);
 	dbWrapper.GetAllVocab();
 	
 	std::cerr << "Finished\n";

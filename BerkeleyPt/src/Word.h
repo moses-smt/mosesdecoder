@@ -23,6 +23,8 @@ class Word
 public:
 	Word()
 	{}
+	~Word()
+	{}
 	Word(size_t numFactors)
 	:m_factors(numFactors)
 	{}

@@ -51,16 +51,19 @@ class DbWrapper
 	long m_nextSourceNodeId, m_nextTargetNodeId;
 	int m_numSourceFactors, m_numTargetFactors, m_numScores;
 	SourcePhraseNode m_initNode;
+	bool m_openSave;
 	
 	long SaveSourceWord(long currSourceNodeId, const Word &word);
 	
 	void SetMisc(const std::string &key, int value);
 	int GetMisc(const std::string &key);
+	void OpenFiles(const std::string &filePath);
 	
 public:
 	DbWrapper();
 	~DbWrapper();
-	void Open(const std::string &filePath);
+	void BeginSave(const std::string &filePath);
+	void Load(const std::string &filePath);
 
 	void Save(const Vocab &vocab);
 	void SaveSource(const Phrase &phrase, const TargetPhrase &target);
