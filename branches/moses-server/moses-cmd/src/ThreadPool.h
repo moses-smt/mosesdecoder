@@ -79,8 +79,8 @@ class ThreadPool {
         std::queue<Task*> m_tasks;
         boost::thread_group m_threads;
         boost::mutex m_mutex;
-        boost::condition m_threadNeeded;
-        boost::condition m_threadAvailable;
+        boost::condition_variable m_threadNeeded;
+        boost::condition_variable m_threadAvailable;
         bool m_stopped;
         bool m_stopping;
         

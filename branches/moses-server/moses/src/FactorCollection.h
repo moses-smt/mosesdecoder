@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <set>
 #include <string>
 
-#include <boost/thread/mutex.hpp>
+#include <boost/thread/shared_mutex.hpp>
 
 #include "Factor.h"
 
@@ -50,8 +50,8 @@ class FactorCollection
 
 protected:
 	static FactorCollection s_instance;
-    //Should be reader-writer?
-    boost::mutex m_accessLock;
+    //reader-writer lock
+    boost::shared_mutex m_accessLock;
 
 	size_t		m_factorId; /**< unique, contiguous ids, starting from 0, for each factor */	
 	FactorSet m_collection; /**< collection of all factors */

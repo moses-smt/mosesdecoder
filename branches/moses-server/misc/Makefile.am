@@ -4,7 +4,7 @@ processPhraseTable_SOURCES = GenerateTuples.cpp  processPhraseTable.cpp
 processLexicalTable_SOURCES = processLexicalTable.cpp
 queryLexicalTable_SOURCES    = queryLexicalTable.cpp
 
-AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -I$(top_srcdir)/moses/src
+AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -I$(top_srcdir)/moses/src $(BOOST_CPPFLAGS)
 
 processPhraseTable_LDADD = -L$(top_srcdir)/moses/src -lmoses $(BOOST_THREAD_LIB)
 processPhraseTable_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a 
