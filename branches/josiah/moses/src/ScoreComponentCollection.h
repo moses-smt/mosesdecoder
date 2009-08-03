@@ -212,6 +212,14 @@ public:
 		return m_scores[begin];
 	}
 
+  
+  //!Calc L1 Norm
+  float GetL1Norm() const;
+  
+  //!Calc L2 Norm
+  float GetL2Norm() const;
+  
+  
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)

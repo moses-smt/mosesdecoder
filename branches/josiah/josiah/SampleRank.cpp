@@ -138,6 +138,8 @@ int main(int argc, char** argv) {
   bool fix_margin;
   float margin, slack;
   bool collectAll;
+  bool l1Normalize, l2Normalize;
+  float norm;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -194,7 +196,10 @@ int main(int argc, char** argv) {
   ("fix-margin", po::value(&fix_margin)->zero_tokens()->default_value(false), "Do MIRA update with a specified margin")
   ("margin", po::value<float>(&margin)->default_value(1.0f), "Margin size")
   ("slack", po::value<float>(&slack)->default_value(-1.0f), "Slack")
-  ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated");
+  ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated")
+  ("l1normalize", po::value(&l1Normalize)->zero_tokens()->default_value(false), "L1normalize weight vector during MIRA samplerank training")
+  ("l2normalize", po::value(&l2Normalize)->zero_tokens()->default_value(false), "L2normalize weight vector during MIRA samplerank training")
+  ("norm", po::value<float>(&norm)->default_value(1.0f), "Normalize weight vector to this value");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -357,14 +362,25 @@ int main(int argc, char** argv) {
   
   //Add the learner
   auto_ptr<OnlineLearner> onlineLearner;
+  
+  auto_ptr<WeightNormalizer> weightNormalizer;
+  if (mira || mira_plus) {
+    if (l1Normalize) {
+      weightNormalizer.reset(new L1Normalizer(norm));
+    }
+    else if (l2Normalize) {
+      weightNormalizer.reset(new L2Normalizer(norm));
+    }  
+  }
+  
   if (perceptron) {
     onlineLearner.reset(new PerceptronLearner(StaticData::Instance().GetWeights(), "PERCEPTRON", perceptron_lr));
   }
   else if (mira) {
-    onlineLearner.reset(new MiraLearner(StaticData::Instance().GetWeights(), "MIRA", fix_margin, margin, slack));
+    onlineLearner.reset(new MiraLearner(StaticData::Instance().GetWeights(), "MIRA", fix_margin, margin, slack, weightNormalizer.get()));
   }
   else if (mira_plus) {
-    onlineLearner.reset(new MiraPlusLearner(StaticData::Instance().GetWeights(), "MIRA++", fix_margin, margin, slack));
+    onlineLearner.reset(new MiraPlusLearner(StaticData::Instance().GetWeights(), "MIRA++", fix_margin, margin, slack, weightNormalizer.get()));
   }
 
   sampler.AddOnlineLearner(onlineLearner.get());

@@ -279,15 +279,24 @@ namespace Josiah {
       else
         alpha = hildreth(distance,b, m_slack);
       
+      ScoreComponentCollection update;
       for (size_t k = 0; k < alpha.size(); k++) {
         IFVERBOSE(1) { 
           cerr << "alpha " << alpha[k] << endl;
         }  
         ScoreComponentCollection dist = distance[k];
         dist.MultiplyEquals(alpha[k]);
-        m_currWeights.PlusEquals(dist);
+        update.PlusEquals(dist);
         m_numUpdates++;
       }
+      
+      //Normalize
+      cerr << "Update wv " << update << endl;
+      if (m_normalizer)
+        m_normalizer->Normalize(update);
+      cerr << "After norm, Update wv " << update << endl;
+      
+
     }
     else {
       IFVERBOSE(1) { 
@@ -381,17 +390,28 @@ namespace Josiah {
     else
       alpha = hildreth(distance,b, m_slack);
     
-    
+    ScoreComponentCollection update;
     for (size_t k = 0; k < alpha.size(); k++) {
       ScoreComponentCollection dist = distance[k];
       dist.MultiplyEquals(alpha[k]);
-      m_currWeights.PlusEquals(dist);
+      update.PlusEquals(dist);
       IFVERBOSE(1) {
         cerr << "alpha " << alpha[k] << endl;
         cerr << "dist " << dist << endl;
-        cerr << "Curr Weights " << m_currWeights << endl;
       }
     }
+    
+    //Normalize
+    cerr << "Update wv " << update << endl;
+    if (m_normalizer)
+      m_normalizer->Normalize(update);
+    cerr << "After norm, Update wv " << update << endl;
+    
+    m_currWeights.PlusEquals(update);
+    IFVERBOSE(1) {
+      cerr << "Curr Weights " << m_currWeights << endl;
+    }
+    
     
     m_numUpdates++;
     UpdateCumul();
