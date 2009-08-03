@@ -31,8 +31,14 @@ public:
 	const_iterator begin() const { return m_vocabColl.begin(); }
 	const_iterator end() const { return m_vocabColl.end(); }
 			
-	Vocab();
+	Vocab()
+	:m_nextId(1)
+	{}
+	Vocab(const Vocab &copy); // not implemented
 
+	size_t GetSize() const
+	{ return m_vocabColl.size(); }
+	
 	VocabId GetFactor(const std::string &factorString, bool &found) const;
 	VocabId AddFactor(const std::string &factorString);
 	

@@ -12,10 +12,6 @@
 namespace MosesBerkeleyPt
 {
 
-Vocab::Vocab()
-:m_nextId(1)
-{}
-
 VocabId Vocab::GetFactor(const std::string &factorString, bool &found) const
 {
 	// find string id

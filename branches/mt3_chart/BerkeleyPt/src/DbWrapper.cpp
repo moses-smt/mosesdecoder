@@ -51,20 +51,38 @@ GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
 	return (0);
 } 
 
-void DbWrapper::Open(const string &filePath)
+void DbWrapper::Load(const string &filePath)
+{
+	OpenFiles(filePath);
+	
+	m_numSourceFactors = GetMisc("NumSourceFactors");
+	m_numTargetFactors = GetMisc("NumTargetFactors");
+	m_numScores = GetMisc("NumScores");	
+	
+}
+
+void DbWrapper::BeginSave(const string &filePath)
+{
+	OpenFiles(filePath);	
+	m_numSourceFactors = 1;
+	m_numSourceFactors = 1;
+	m_numScores = 5;
+}
+	
+void DbWrapper::OpenFiles(const std::string &filePath)
 {
 	m_dbMisc.set_error_stream(&cerr);
 	m_dbMisc.set_errpfx("SequenceExample");
 	m_dbMisc.open(NULL, (filePath + "/Misc.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
-
+	
 	m_dbVocab.set_error_stream(&cerr);
 	m_dbVocab.set_errpfx("SequenceExample");
 	m_dbVocab.open(NULL, (filePath + "/Vocab.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
-
+	
 	m_dbSource.set_error_stream(&cerr);
 	m_dbSource.set_errpfx("SequenceExample");
 	m_dbSource.open(NULL, (filePath + "/Source.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
-
+	
 	// store target phrase -> id
 	m_dbTarget.set_error_stream(&cerr);
 	m_dbTarget.set_errpfx("SequenceExample");
@@ -75,11 +93,8 @@ void DbWrapper::Open(const string &filePath)
 	
 	m_dbTarget.associate(NULL, &m_dbTargetInd, GetIdFromTargetPhrase, 0);
 	
-	m_numSourceFactors = GetMisc("NumSourceFactors");
-	m_numTargetFactors = GetMisc("NumTargetFactors");
-	m_numScores = GetMisc("NumScores");	
-	
 }
+
 	
 void DbWrapper::SetMisc(const string &key, int value)
 {

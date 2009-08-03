@@ -27,11 +27,18 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = moses;
 		};
+		1CD46B8F10274ABF00B6EFB2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1CEB29A6102349290076731C /* BerkeleyPt.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* BerkeleyPt */;
+			remoteInfo = BerkeleyPt;
+		};
 		1CEB29AA102349290076731C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1CEB29A6102349290076731C /* BerkeleyPt.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libBerkeleyPt.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = BerkeleyPt;
 		};
 /* End PBXContainerItemProxy section */
@@ -134,6 +141,7 @@
 			);
 			dependencies = (
 				1C273C0E10206E9C00991BD2 /* PBXTargetDependency */,
+				1CD46B9010274ABF00B6EFB2 /* PBXTargetDependency */,
 			);
 			name = CreateBerkeleyPt;
 			productInstallPath = "$(HOME)/bin";
@@ -201,6 +209,11 @@
 			isa = PBXTargetDependency;
 			name = moses;
 			targetProxy = 1C273C0D10206E9C00991BD2 /* PBXContainerItemProxy */;
+		};
+		1CD46B9010274ABF00B6EFB2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BerkeleyPt;
+			targetProxy = 1CD46B8F10274ABF00B6EFB2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
