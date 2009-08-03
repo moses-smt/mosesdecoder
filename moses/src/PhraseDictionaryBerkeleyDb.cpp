@@ -80,13 +80,12 @@ const TargetPhraseCollection *PhraseDictionaryBerkeleyDb::GetTargetPhraseCollect
 	{
 		// create on disk word from moses word
 		const Word &origWord = src.GetWord(pos);
-		MosesBerkeleyPt::Word searchWord(m_inputFactorsVec.size());
-		
-		const MosesOnDiskPt::SourcePhraseNode *nodeNew;
-		
-		bool success = searchWord.ConvertFromMoses(m_inputFactorsVec, origWord, m_vocabLookup);
-		if (!success)
-		{
+
+		const MosesBerkeleyPt::SourcePhraseNode *nodeNew;
+
+		MosesBerkeleyPt::Word *searchWord = m_dbWrapper.ConvertFromMosesSource(m_inputFactorsVec, origWord);
+		if (searchWord == NULL)
+		{ // a vocab wasn't in there. definately can't find word in pt
 			nodeNew = NULL;
 		}
 		else

@@ -10,7 +10,7 @@
 #include "Vocab.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
-#include "Global.h"
+#include "../../moses/src/FactorCollection.h"
 
 using namespace std;
 
@@ -74,7 +74,83 @@ void DbWrapper::Open(const string &filePath)
 	m_dbTargetInd.open(NULL, (filePath + "/TargetInd.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 	
 	m_dbTarget.associate(NULL, &m_dbTargetInd, GetIdFromTargetPhrase, 0);
+	
+	m_numSourceFactors = GetMisc("NumSourceFactors");
+	m_numTargetFactors = GetMisc("NumTargetFactors");
+	m_numScores = GetMisc("NumScores");	
+	
+}
+	
+void DbWrapper::SetMisc(const string &key, int value)
+{
+	char *keyData = (char*) malloc(key.size() + 1);
+	strcpy(keyData, key.c_str());
+	Dbt keyDb(keyData, key.size() + 1);
+	
+	Dbt valueDb(&value, sizeof(int));
+	
+	int ret = m_dbMisc.put(NULL, &keyDb, &valueDb, DB_NOOVERWRITE);
+	if (ret == DB_KEYEXIST) 
+	{
+		m_dbMisc.err(ret, "Put failed because key %f already exists", keyData);
+	}	
+}
 
+int DbWrapper::GetMisc(const std::string &key)
+{
+	char *keyData = (char*) malloc(key.size() + 1);
+	strcpy(keyData, key.c_str());
+	Dbt keyDb(keyData, key.size() + 1);
+	
+	Dbt valueDb;
+	
+	m_dbMisc.get(NULL, &keyDb, &valueDb, 0);
+	
+	free(keyData);
+	
+	int *value = (int*) valueDb.get_data();
+	return *value;
+}
+	
+Word *DbWrapper::ConvertFromMosesSource(const std::vector<Moses::FactorType> &inputFactorsVec
+																				, const Moses::Word &origWord) const
+{
+	Word *newWord = CreateSouceWord();
+	
+	for (size_t ind = 0 ; ind < inputFactorsVec.size() ; ++ind)
+	{
+		size_t factorType = inputFactorsVec[ind];
+		
+		const Moses::Factor *factor = origWord.GetFactor(factorType);
+		if (factor != NULL)
+		{
+			const string &str = factor->GetString();
+			bool found;
+			VocabId vocabId = m_vocab.GetFactor(str, found);
+			if (!found)
+			{ // factor not in phrase table -> phrse definately not in. exit
+				delete newWord;
+				return NULL;
+			}
+			else
+			{
+				newWord->SetVocabId(ind, vocabId);
+			}
+		} // if (factor
+	} // for (size_t factorType
+	
+	return newWord;
+	
+}
+
+Word *DbWrapper::CreateSouceWord() const
+{
+	return new Word(m_numSourceFactors);
+}
+
+Word *DbWrapper::CreateTargetWord() const
+{
+	return new Word(m_numTargetFactors);
 }
 
 void DbWrapper::Save(const Vocab &vocab)
@@ -163,7 +239,7 @@ long DbWrapper::SaveSourceWord(long currSourceId, const Word &word)
 	long retSourceId;
 	
 	// create db data
-	SourceKey sourceKey(currSourceId, word.GetFactor(0));
+	SourceKey sourceKey(currSourceId, word.GetVocabId(0));
 	long nextSourceId = m_nextSourceId;
 	
 	Dbt key(&sourceKey, sizeof(SourceKey));
@@ -189,7 +265,8 @@ long DbWrapper::SaveSourceWord(long currSourceId, const Word &word)
 
 void DbWrapper::SaveTarget(const TargetPhrase &phrase)
 {
-	phrase.SaveTargetPhrase(m_dbTarget, m_nextTargetId);	
+	phrase.SaveTargetPhrase(m_dbTarget, m_nextTargetId
+													, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
 
 }; // namespace

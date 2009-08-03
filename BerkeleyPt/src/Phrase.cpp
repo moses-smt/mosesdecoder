@@ -10,7 +10,6 @@
 #include <db_cxx.h>
 #include "../../moses/src/Util.h"
 #include "Phrase.h"
-#include "Global.h"
 
 using namespace std;
 

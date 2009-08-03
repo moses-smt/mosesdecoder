@@ -21,10 +21,19 @@ class Word
 	bool m_isNonTerminal;
 	std::vector<VocabId> m_factors;
 public:
+	Word()
+	{}
+	Word(size_t numFactors)
+	:m_factors(numFactors)
+	{}
+	
 	void CreateFromString(const std::string &inString, Vocab &vocab);
 	
-	VocabId GetFactor(size_t ind) const
+	VocabId GetVocabId(size_t ind) const
 	{ return m_factors[ind]; }
+	void SetVocabId(size_t ind, VocabId vocabId)
+	{ m_factors[ind] = vocabId; }
+
 	bool IsNonTerminal() const
 	{ return m_isNonTerminal; }
 	
