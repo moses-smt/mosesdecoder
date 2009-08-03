@@ -153,11 +153,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Global.cpp"
+				RelativePath=".\src\Phrase.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Phrase.cpp"
+				RelativePath=".\src\SourcePhraseNode.cpp"
 				>
 			</File>
 			<File
@@ -183,11 +183,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Global.h"
+				RelativePath=".\src\Phrase.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Phrase.h"
+				RelativePath=".\src\SourcePhraseNode.h"
 				>
 			</File>
 			<File

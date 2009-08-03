@@ -59,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(NoInherit)"
+				AdditionalDependencies="&quot;$(OutDir)\moses.lib&quot; &quot;$(OutDir)\BerkeleyPt.lib&quot; libdb47.lib zdll.lib $(NOINHERIT)"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
@@ -130,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(NoInherit)"
+				AdditionalDependencies="&quot;$(OutDir)\moses.lib&quot; &quot;$(OutDir)\BerkeleyPt.lib&quot; libdb47.lib zdll.lib $(NOINHERIT)"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				TargetMachine="1"

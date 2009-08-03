@@ -25,8 +25,8 @@ void Phrase::CreateFromString(const std::string &phraseString, Vocab &vocab)
 	{
 		const string &wordStr = *iter;
 		Word word;
-		//word.CreateFromString(wordStr, vocab);
-		//m_words.push_back(word);
+		word.CreateFromString(wordStr, vocab);
+		m_words.push_back(word);
 	}
 }
 
