@@ -465,6 +465,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 	std::vector<OFF_T> vo;
 	size_t lnc=0;
 	size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
+    imp->sv = new WordVoc();
+    imp->tv = new WordVoc();
 	
 	while(getline(inFile, line)) 	
 	{
