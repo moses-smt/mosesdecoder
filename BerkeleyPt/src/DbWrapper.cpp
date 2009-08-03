@@ -10,7 +10,6 @@
 #include "Vocab.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
-#include "../../moses/src/FactorCollection.h"
 
 using namespace std;
 
@@ -23,8 +22,8 @@ DbWrapper::DbWrapper()
 ,m_dbSource(0, 0)
 ,m_dbTarget(0, 0)
 ,m_dbTargetInd(0, 0)
-,m_nextSourceId(1)
-,m_nextTargetId(1)
+,m_nextSourceNodeId(1)
+,m_nextTargetNodeId(1)
 ,m_initNode(0)
 {}
 
@@ -218,30 +217,30 @@ void DbWrapper::GetAllVocab()
 
 void DbWrapper::SaveSource(const Phrase &source, const TargetPhrase &target)
 {
-	long currSourceId = 0;
+	long currSourceNodeId = 0;
 	
 	// SOURCE
 	for (size_t pos = 0; pos < source.GetSize(); ++pos)
 	{
 		const Word &word = source.GetWord(pos);
-		currSourceId = SaveSourceWord(currSourceId, word);
+		currSourceNodeId = SaveSourceWord(currSourceNodeId, word);
 									 		
 		if (word.IsNonTerminal())
 		{ // store the TARGET non-term label straight after source non-term label
 			size_t targetPos = target.GetAlign(pos);
 			const Word &targetWord = target.GetWord(targetPos);
-			currSourceId = SaveSourceWord(currSourceId, targetWord);
+			currSourceNodeId = SaveSourceWord(currSourceNodeId, targetWord);
 		}
 	}
 }
 
-long DbWrapper::SaveSourceWord(long currSourceId, const Word &word)
+long DbWrapper::SaveSourceWord(long currSourceNodeId, const Word &word)
 {
-	long retSourceId;
+	long retSourceNodeId;
 	
 	// create db data
-	SourceKey sourceKey(currSourceId, word.GetVocabId(0));
-	long nextSourceId = m_nextSourceId;
+	SourceKey sourceKey(m_nextSourceNodeId, word.GetVocabId(0));
+	long nextSourceId = m_nextSourceNodeId;
 	
 	Dbt key(&sourceKey, sizeof(SourceKey));
 	Dbt data(&nextSourceId, sizeof(long));
@@ -253,28 +252,51 @@ long DbWrapper::SaveSourceWord(long currSourceId, const Word &word)
 		m_dbSource.get(NULL, &key, &data, 0);
 		
 		long *sourceId = (long*) data.get_data();
-		retSourceId = *sourceId;
+		retSourceNodeId = *sourceId;
 	}
 	else
 	{
-		retSourceId = m_nextSourceId;
-		++m_nextSourceId;
+		retSourceNodeId = m_nextSourceNodeId;
+		++m_nextSourceNodeId;
 	}
 	
-	return retSourceId;
+	return retSourceNodeId;
 }
 
 void DbWrapper::SaveTarget(const TargetPhrase &phrase)
 {
-	phrase.SaveTargetPhrase(m_dbTarget, m_nextTargetId
+	phrase.SaveTargetPhrase(m_dbTarget, m_nextTargetNodeId
 													, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
 
 const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, const Word &word) const
-{
-		
+{	
+	// create db data
+	SourceKey sourceKey(m_nextSourceNodeId, word.GetVocabId(0));
+	long nextSourceId = m_nextSourceNodeId;
+	
+	Dbt key(&sourceKey, sizeof(SourceKey));
+	Dbt data(&nextSourceId, sizeof(long));
+	
+	// save
+	// need to get rid of cast
+	int ret = const_cast<Db&>(m_dbSource).get(NULL, &key, &data, 0);
+	if (ret == 0) 
+	{ // exist. 		
+		long sourceNodeId = *(long*) data.get_data();
+		SourcePhraseNode *node = new SourcePhraseNode(sourceNodeId);
+		return node;
+	}
+	else
+	{
+		return NULL;
+	}	
 }
 
+const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node) const
+{
+	
+}
 
 }; // namespace
 
