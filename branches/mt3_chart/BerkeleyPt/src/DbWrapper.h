@@ -10,9 +10,8 @@
  */
 
 #include <string>
-#include "db.h"
-#include "db_cxx.h"
-//#include <db_cxx.h>
+#include <db.h>
+#include <db_cxx.h>
 
 namespace MosesBerkeleyPt
 {

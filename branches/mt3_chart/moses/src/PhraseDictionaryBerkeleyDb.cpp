@@ -9,6 +9,7 @@
 
 #include "PhraseDictionaryBerkeleyDb.h"
 #include "InputFileStream.h"
+#include "Staticdata.h"
 
 using namespace std;
 
@@ -45,7 +46,10 @@ bool PhraseDictionaryBerkeleyDb::Load(const std::vector<FactorType> &input
 		m_vocabLookup[ vecStr[0] ] = vocabId;
 	}
 	
-
+	LoadTargetLookup();
+	
+	m_dbWrapper.Open(filePath);
+	
 	return true;
 }
 
@@ -53,13 +57,54 @@ bool PhraseDictionaryBerkeleyDb::Load(const std::vector<FactorType> &input
 // for mert
 void PhraseDictionaryBerkeleyDb::SetWeightTransModel(const std::vector<float> &weightT)
 {
+	assert(false);
 }
 
+#include "TargetPhraseCollection.h"
 
 //! find list of translations that can translates src. Only for phrase input
 const TargetPhraseCollection *PhraseDictionaryBerkeleyDb::GetTargetPhraseCollection(const Phrase& src) const
 {
+	const StaticData &staticData = StaticData::Instance();
+	
+	TargetPhraseCollection *ret = new TargetPhraseCollection();
+	m_cache.push_back(ret);
+	Phrase *cachedSource = new Phrase(src);
+	m_sourcePhrase.push_back(cachedSource);
+	
+	const MosesBerkeleyPt::SourcePhraseNode *nodeOld = new MosesBerkeleyPt::SourcePhraseNode(*m_initNode);
+	
+	// find target phrases from tree
+	size_t size = src.GetSize();
+	for (size_t pos = 0; pos < size; ++pos)
+	{
+		// create on disk word from moses word
+		const Word &origWord = src.GetWord(pos);
+		MosesBerkeleyPt::Word searchWord(m_inputFactorsVec.size());
+		
+		const MosesOnDiskPt::SourcePhraseNode *nodeNew;
+		
+		bool success = searchWord.ConvertFromMoses(m_inputFactorsVec, origWord, m_vocabLookup);
+		if (!success)
+		{
+			nodeNew = NULL;
+		}
+		else
+		{	// search for word in node map
+			nodeNew = nodeOld->GetChild(searchWord, m_sourceFile, m_inputFactorsVec);
+		}
+		
+		delete nodeOld;
+		nodeOld = nodeNew;
+		
+		if (nodeNew == NULL)
+		{ // nothing found. end
+			break;
+		}
+	} // for (size_t pos
+	
 
+	
 	return NULL;
 }
 
@@ -74,5 +119,11 @@ void PhraseDictionaryBerkeleyDb::CleanUp()
 
 }
 
+void PhraseDictionaryBerkeleyDb::LoadTargetLookup()
+{
+	// TODO
+}
+
+	
 }
 

@@ -15,9 +15,8 @@ using namespace std;
 namespace MosesBerkeleyPt
 {
 
-void Word::CreateFromString(const std::string &inString)
+void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 {
-	Vocab &vocab = Vocab::Instance();
 	string str = inString;
 	if (str.substr(0, 1) == "[" && str.substr(str.size() - 1, 1) == "]")
 	{ // non-term

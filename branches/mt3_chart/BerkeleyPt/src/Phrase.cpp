@@ -7,7 +7,7 @@
  *
  */
 
-#include "db_cxx.h"
+#include <db_cxx.h>
 #include "../../moses/src/Util.h"
 #include "Phrase.h"
 #include "Global.h"
@@ -17,7 +17,7 @@ using namespace std;
 namespace MosesBerkeleyPt
 {
 
-void Phrase::CreateFromString(const std::string &phraseString)
+void Phrase::CreateFromString(const std::string &phraseString, Vocab &vocab)
 {
 	std::vector<std::string> wordsVec = Moses::Tokenize(phraseString);
 
@@ -26,7 +26,7 @@ void Phrase::CreateFromString(const std::string &phraseString)
 	{
 		const string &wordStr = *iter;
 		Word word;
-		word.CreateFromString(wordStr);
+		word.CreateFromString(wordStr, vocab);
 		m_words.push_back(word);
 	}
 }
