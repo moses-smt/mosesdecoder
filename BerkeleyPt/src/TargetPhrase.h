@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  TargetPhrase.h
  *  CreateBerkeleyPt
@@ -20,8 +21,10 @@ protected:
 	AlignType m_align;
 	std::vector<float>				m_scores;
 	std::vector<Word>	m_headWords;
+	long m_targetId;
 
-	char *WriteToMemory(size_t &memUsed,  int numScores, size_t sourceWordSize, size_t targetWordSize) const;
+	char *WritePhraseToMemory(size_t &memUsed,  int numScores, size_t sourceWordSize, size_t targetWordSize) const;
+
 	size_t WriteAlignToMemory(char *mem) const;
 	size_t WriteScoresToMemory(char *mem) const;
 
@@ -40,8 +43,9 @@ public:
 	
 	
 	long SaveTargetPhrase(Db &dbTarget, long &nextTargetId
-												,int numScores, size_t sourceWordSize, size_t targetWordSize) const;	
+												,int numScores, size_t sourceWordSize, size_t targetWordSize);	
 
+	char *WriteOtherInfoToMemory(size_t &memUsed, int numScores, size_t sourceWordSize, size_t targetWordSize) const;
 };
 }; // namespace
 

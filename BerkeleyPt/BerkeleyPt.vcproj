@@ -165,6 +165,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TargetPhraseCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Vocab.cpp"
 				>
 			</File>
@@ -192,6 +196,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TargetPhrase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TargetPhraseCollection.h"
 				>
 			</File>
 			<File

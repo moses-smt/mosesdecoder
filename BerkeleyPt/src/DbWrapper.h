@@ -22,7 +22,7 @@ namespace MosesBerkeleyPt
 
 class Phrase;
 class TargetPhrase;
-	class TargetPhraseCollection;
+class TargetPhraseCollection;
 class Word;
 	
 class SourceKey
@@ -46,7 +46,7 @@ class TargetfirKey
 
 class DbWrapper
 {
-	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd;
+	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd, m_dbTargetColl;
 	Vocab m_vocab;
 	long m_nextSourceNodeId, m_nextTargetNodeId;
 	int m_numSourceFactors, m_numTargetFactors, m_numScores;
@@ -66,8 +66,9 @@ public:
 	void Load(const std::string &filePath);
 
 	void Save(const Vocab &vocab);
-	void SaveSource(const Phrase &phrase, const TargetPhrase &target);
-	void SaveTarget(const TargetPhrase &phrase);
+	long SaveSource(const Phrase &phrase, const TargetPhrase &target);
+	void SaveTarget(TargetPhrase &phrase);
+	void Save(long sourceNodeId, const TargetPhraseCollection &tpColl);
 
 	Word *ConvertFromMosesSource(const std::vector<Moses::FactorType> &inputFactorsVec
 															 , const Moses::Word &origWord) const;

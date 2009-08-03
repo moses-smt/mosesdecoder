@@ -17,47 +17,6 @@ using namespace std;
 namespace MosesBerkeleyPt
 {
 
-char *TargetPhrase::WriteToMemory(size_t &memUsed, int numScores, size_t sourceWordSize, size_t targetWordSize) const
-{
-	// allocate mem	
-	size_t memNeeded = sourceWordSize + targetWordSize;
-	memNeeded += sizeof(int) +  targetWordSize * GetSize(); // phrase
-	memNeeded += sizeof(int) + 2 * sizeof(int) * GetAlign().size(); // align
-	memNeeded += sizeof(float) * numScores; // scores
-	
-	char *mem = (char*) malloc(memNeeded);
-	//memset(mem, 0, memNeeded);
-	
-	// head words
-	memUsed = 0;
-	memUsed += GetHeadWords(0).WriteToMemory(mem);
-	memUsed += GetHeadWords(1).WriteToMemory(mem + memUsed);
-	
-	
-	// phrase
-	/// size
-	int phraseSize = GetSize();
-	memcpy(mem + memUsed, &phraseSize, sizeof(int));
-	memUsed += sizeof(int);
-	
-	// word
-	for (size_t pos = 0; pos < GetSize(); ++pos)
-	{
-		const Word &word = GetWord(pos);
-		memUsed += word.WriteToMemory(mem + memUsed);
-	}
-	
-	// align
-	memUsed += WriteAlignToMemory(mem + memUsed);
-	
-	// scores
-	memUsed += WriteScoresToMemory(mem + memUsed);
-	
-	//DebugMem(mem, memNeeded);
-	assert(memNeeded == memUsed);	
-	return mem;
-}
-
 void TargetPhrase::CreateAlignFromString(const std::string &alignString)
 {
 	vector<string> alignTok = Moses::Tokenize(alignString);
@@ -103,6 +62,66 @@ size_t TargetPhrase::GetAlign(size_t sourcePos) const
 	return 0;
 }
 
+char *TargetPhrase::WritePhraseToMemory(size_t &memUsed, int numScores, size_t sourceWordSize, size_t targetWordSize) const
+{
+	// allocate mem	
+	size_t memNeeded = sizeof(int) +  targetWordSize * GetSize(); // phrase
+	
+	char *mem = (char*) malloc(memNeeded);
+	//memset(mem, 0, memNeeded);
+	
+	memUsed = 0;
+	
+	// phrase
+	/// size
+	int phraseSize = GetSize();
+	memcpy(mem + memUsed, &phraseSize, sizeof(int));
+	memUsed += sizeof(int);
+	
+	// word
+	for (size_t pos = 0; pos < GetSize(); ++pos)
+	{
+		const Word &word = GetWord(pos);
+		memUsed += word.WriteToMemory(mem + memUsed);
+	}
+	
+	//DebugMem(mem, memNeeded);
+	assert(memNeeded == memUsed);	
+	return mem;
+}
+
+char *TargetPhrase::WriteOtherInfoToMemory(size_t &memUsed, int numScores, size_t sourceWordSize, size_t targetWordSize) const
+{
+	// allocate mem	
+	size_t memNeeded = sizeof(long); // phrase id
+	memNeeded += sourceWordSize + targetWordSize; // LHS words
+	memNeeded += sizeof(int) + 2 * sizeof(int) * GetAlign().size(); // align
+	memNeeded += sizeof(float) * numScores; // scores
+	
+	char *mem = (char*) malloc(memNeeded);
+	//memset(mem, 0, memNeeded);
+	
+	memUsed = 0;
+	
+	// phrase id
+	memcpy(mem, &m_targetId, sizeof(long));
+	memUsed += sizeof(long);
+
+	// LHS words
+	memUsed += GetHeadWords(0).WriteToMemory(mem);
+	memUsed += GetHeadWords(1).WriteToMemory(mem + memUsed);
+	
+	// align
+	memUsed += WriteAlignToMemory(mem + memUsed);
+	
+	// scores
+	memUsed += WriteScoresToMemory(mem + memUsed);
+	
+	//DebugMem(mem, memNeeded);
+	assert(memNeeded == memUsed);	
+	return mem;
+}
+
 size_t TargetPhrase::WriteAlignToMemory(char *mem) const
 {
 	size_t memUsed = 0;
@@ -140,11 +159,10 @@ size_t TargetPhrase::WriteScoresToMemory(char *mem) const
 }
 
 long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId
-																		, int numScores, size_t sourceWordSize, size_t targetWordSize) const
+																		, int numScores, size_t sourceWordSize, size_t targetWordSize)
 {
-	long targetId;
 	size_t memUsed;
-	char *mem = WriteToMemory(memUsed, numScores, sourceWordSize, targetWordSize);
+	char *mem = WritePhraseToMemory(memUsed, numScores, sourceWordSize, targetWordSize);
 	
 	Dbt key(mem, memUsed);
 	
@@ -153,7 +171,7 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId
 	int ret = dbTarget.get(NULL, &key, &data, 0);
 	if (ret == 0)
 	{ // existing target
-		targetId = *(long*) data.get_data();
+		m_targetId = *(long*) data.get_data();
 		//cerr << "target phrase exists " << targetId << endl;
 	}
 	else
@@ -164,14 +182,14 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId
 		int ret = dbTarget.put(NULL, &key, &data, DB_NOOVERWRITE);
 		assert(ret == 0);
 		
-		targetId = nextTargetId;
+		m_targetId = nextTargetId;
 		++nextTargetId;
 		//cerr << "new target phrase " << targetId << endl;
 	}
 	
 	free(mem);
 	
-	return targetId;
+	return m_targetId;
 }
 
 }; // namespace
