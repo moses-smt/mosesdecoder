@@ -25,6 +25,7 @@ DbWrapper::DbWrapper()
 ,m_dbTargetInd(0, 0)
 ,m_nextSourceId(1)
 ,m_nextTargetId(1)
+,m_initNode(0)
 {}
 
 DbWrapper::~DbWrapper()
@@ -268,6 +269,12 @@ void DbWrapper::SaveTarget(const TargetPhrase &phrase)
 	phrase.SaveTargetPhrase(m_dbTarget, m_nextTargetId
 													, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
+
+const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, const Word &word) const
+{
+		
+}
+
 
 }; // namespace
 

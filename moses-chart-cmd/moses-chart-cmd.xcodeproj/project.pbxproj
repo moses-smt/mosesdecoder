@@ -372,6 +372,8 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-ldb_cxx",
+					"-ldb",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-chart-cmd";
@@ -419,6 +421,8 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-ldb",
+					"-ldb_cxx",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-chart-cmd";

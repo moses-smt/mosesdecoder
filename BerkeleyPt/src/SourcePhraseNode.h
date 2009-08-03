@@ -18,11 +18,14 @@ namespace MosesBerkeleyPt
 class SourcePhraseNode
 {
 protected:
-	VocabId m_vocabId;
+	long m_sourceNodeId;
 	
 public:
 	SourcePhraseNode(const SourcePhraseNode &copy)
-	:m_vocabId(copy.m_vocabId)
+	:m_sourceNodeId(copy.m_sourceNodeId)
+	{}
+	SourcePhraseNode(long sourceNodeId)
+	:m_sourceNodeId(sourceNodeId)
 	{}
 };
 	
