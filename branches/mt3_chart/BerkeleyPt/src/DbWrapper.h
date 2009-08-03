@@ -12,11 +12,13 @@
 #include <string>
 #include <db.h>
 #include <db_cxx.h>
+#include "Vocab.h"
+#include "../../moses/src/TypeDef.h"
+#include "../../moses/src/Word.h"
 
 namespace MosesBerkeleyPt
 {
 
-class Vocab;
 class Phrase;
 class TargetPhrase;
 class Word;
@@ -43,9 +45,14 @@ class TargetfirKey
 class DbWrapper
 {
 	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd;
+	Vocab m_vocab;
 	long m_nextSourceId, m_nextTargetId;
-	
+	int m_numSourceFactors, m_numTargetFactors, m_numScores;
+
 	long SaveSourceWord(long currSourceId, const Word &word);
+	
+	void SetMisc(const std::string &key, int value);
+	int GetMisc(const std::string &key);
 	
 public:
 	DbWrapper();
@@ -56,7 +63,21 @@ public:
 	void SaveSource(const Phrase &phrase, const TargetPhrase &target);
 	void SaveTarget(const TargetPhrase &phrase);
 
+	Word *ConvertFromMosesSource(const std::vector<Moses::FactorType> &inputFactorsVec
+															 , const Moses::Word &origWord) const;
+	Word *CreateSouceWord() const;
+	Word *CreateTargetWord() const;
+	
 	void GetAllVocab();
+	
+	size_t GetSourceWordSize() const
+	{
+		return m_numSourceFactors * sizeof(VocabId);
+	}
+	size_t GetTargetWordSize() const
+	{
+		return m_numTargetFactors * sizeof(VocabId);
+	}
 	
 	Db &GetSDbMisc()
 	{ return m_dbMisc; }

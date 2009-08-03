@@ -32,6 +32,8 @@ public:
 	const_iterator end() const { return m_vocabColl.end(); }
 			
 	Vocab();
+
+	VocabId GetFactor(const std::string &factorString, bool &found) const;
 	VocabId AddFactor(const std::string &factorString);
 	
 	void Save(const std::string &filePath);

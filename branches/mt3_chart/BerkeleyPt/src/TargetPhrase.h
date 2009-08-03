@@ -21,7 +21,7 @@ protected:
 	std::vector<float>				m_scores;
 	std::vector<Word>	m_headWords;
 
-	char *WriteToMemory(size_t &memUsed) const;
+	char *WriteToMemory(size_t &memUsed,  int numScores, size_t sourceWordSize, size_t targetWordSize) const;
 	size_t WriteAlignToMemory(char *mem) const;
 	size_t WriteScoresToMemory(char *mem) const;
 
@@ -39,7 +39,8 @@ public:
 	size_t GetAlign(size_t sourcePos) const;
 	
 	
-	long SaveTargetPhrase(Db &dbTarget, long &nextTargetId) const;	
+	long SaveTargetPhrase(Db &dbTarget, long &nextTargetId
+												,int numScores, size_t sourceWordSize, size_t targetWordSize) const;	
 
 };
 }; // namespace

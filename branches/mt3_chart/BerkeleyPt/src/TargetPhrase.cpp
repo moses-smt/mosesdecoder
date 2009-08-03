@@ -11,22 +11,19 @@
 #include <db_cxx.h>
 #include "../../moses/src/Util.h"
 #include "TargetPhrase.h"
-#include "Global.h"
 
 using namespace std;
 
 namespace MosesBerkeleyPt
 {
 
-char *TargetPhrase::WriteToMemory(size_t &memUsed) const
+char *TargetPhrase::WriteToMemory(size_t &memUsed, int numScores, size_t sourceWordSize, size_t targetWordSize) const
 {
-	// allocate mem
-	const Global &global = Global::Instance();
-	
-	size_t memNeeded = global.GetSourceWordSize() + global.GetTargetWordSize();
-	memNeeded += sizeof(int) +  global.GetTargetWordSize() * GetSize(); // phrase
+	// allocate mem	
+	size_t memNeeded = sourceWordSize + targetWordSize;
+	memNeeded += sizeof(int) +  targetWordSize * GetSize(); // phrase
 	memNeeded += sizeof(int) + 2 * sizeof(int) * GetAlign().size(); // align
-	memNeeded += sizeof(float) * global.GetNumScores(); // scores
+	memNeeded += sizeof(float) * numScores; // scores
 	
 	char *mem = (char*) malloc(memNeeded);
 	//memset(mem, 0, memNeeded);
@@ -142,11 +139,12 @@ size_t TargetPhrase::WriteScoresToMemory(char *mem) const
 	return memUsed;
 }
 
-long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId) const
+long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId
+																		, int numScores, size_t sourceWordSize, size_t targetWordSize) const
 {
 	long targetId;
 	size_t memUsed;
-	char *mem = WriteToMemory(memUsed);
+	char *mem = WriteToMemory(memUsed, numScores, sourceWordSize, targetWordSize);
 	
 	Dbt key(mem, memUsed);
 	

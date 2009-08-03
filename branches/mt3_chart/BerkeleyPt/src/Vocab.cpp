@@ -16,6 +16,21 @@ Vocab::Vocab()
 :m_nextId(1)
 {}
 
+VocabId Vocab::GetFactor(const std::string &factorString, bool &found) const
+{
+	// find string id
+	CollType::const_iterator iter = m_vocabColl.find(factorString);
+	if (iter == m_vocabColl.end())
+	{ 
+		found = false;
+		return 0; //return whatever
+	}
+	else
+	{ // return existing entry
+		found = true;
+		return iter->second;
+	}
+}
 
 VocabId Vocab::AddFactor(const std::string &factorString)
 {
