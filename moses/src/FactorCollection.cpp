@@ -39,7 +39,8 @@ void FactorCollection::LoadVocab(FactorDirection direction, FactorType factorTyp
 
 	string line;
 	
-	boost::mutex::scoped_lock lock(m_accessLock);
+	boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
+    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
 	while( !getline(inFile, line, '\n').eof())
 	{
 		vector<string> token = Tokenize( line );
@@ -54,8 +55,8 @@ void FactorCollection::LoadVocab(FactorDirection direction, FactorType factorTyp
 
 bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, const string &factorString)
 {
+	boost::shared_lock<boost::shared_mutex> lock(m_accessLock);
 	// find string id
-	boost::mutex::scoped_lock lock(m_accessLock);
 	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
 
 	FactorSet::const_iterator iterFactor;
@@ -69,8 +70,9 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
 																				, FactorType 			factorType
 																				, const string 		&factorString)
 {
+	boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
+    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
 	// find string id
-	boost::mutex::scoped_lock lock(m_accessLock);
 	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
 	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, ptrString, m_factorId) );
 	if (ret.second)
