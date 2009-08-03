@@ -102,13 +102,43 @@ const TargetPhraseCollection *PhraseDictionaryBerkeleyDb::GetTargetPhraseCollect
 		}
 	} // for (size_t pos
 	
-
+	if (nodeOld)
+	{ // found node. create target phrase collection
+		const MosesBerkeleyPt::TargetPhraseList *diskList = m_dbWrapper.GetTargetPhraseCollection(nodeOld);
+		
+		MosesOnDiskPt::TargetPhraseList::const_iterator iter;
+		for (iter = diskList->begin(); iter != diskList->end(); ++iter)
+		{
+			const MosesOnDiskPt::TargetPhrase &tpDisk = **iter;
+			
+			float weightWP = staticData.GetWeightWordPenalty();
+			const LMList &lmList = staticData.GetAllLM();
+			TargetPhrase *targetPhrase = tpDisk.ConvertToMoses(
+																												 m_outputFactorsVec
+																												 , m_targetLookup
+																												 , *this
+																												 , m_weight
+																												 , weightWP
+																												 , lmList
+																												 , *cachedSource
+																												 , size);
+			
+			ret->Add(targetPhrase);
+		}
+		
+		delete diskList;
+	}
+	
+	delete nodeOld;
+	
+	return ret;
+	
 	
 	return NULL;
 }
-
-
-//! Create entry for translation of source to targetPhrase
+	
+	
+	//! Create entry for translation of source to targetPhrase
 void PhraseDictionaryBerkeleyDb::AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)
 {
 }

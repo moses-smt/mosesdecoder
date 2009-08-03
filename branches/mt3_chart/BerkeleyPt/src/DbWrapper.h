@@ -22,6 +22,7 @@ namespace MosesBerkeleyPt
 
 class Phrase;
 class TargetPhrase;
+	class TargetPhraseCollection;
 class Word;
 	
 class SourceKey
@@ -47,11 +48,11 @@ class DbWrapper
 {
 	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd;
 	Vocab m_vocab;
-	long m_nextSourceId, m_nextTargetId;
+	long m_nextSourceNodeId, m_nextTargetNodeId;
 	int m_numSourceFactors, m_numTargetFactors, m_numScores;
 	SourcePhraseNode m_initNode;
 	
-	long SaveSourceWord(long currSourceId, const Word &word);
+	long SaveSourceWord(long currSourceNodeId, const Word &word);
 	
 	void SetMisc(const std::string &key, int value);
 	int GetMisc(const std::string &key);
@@ -85,6 +86,7 @@ public:
 	}
 
 	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word) const;
+	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node) const;
 };
 
 }; // namespace
