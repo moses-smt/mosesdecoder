@@ -282,9 +282,14 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 	for (size_t ind = 0; ind < sizeColl; ++ind)
 	{
 		TargetPhrase *tp = new TargetPhrase();
-		size_t memUsed = tp->ReadFromMemory(mem[offset]);
+
+		size_t memUsed = tp->ReadOtherInfoFromMemory(&mem[offset]
+																								, m_numSourceFactors, m_numTargetFactors
+																								, m_numScores);
 		offset += memUsed;
-	
+		
+		tp->Load(m_dbTargetColl, m_numTargetFactors);
+
 		ret->AddTargetPhrase(tp);
 	}
 

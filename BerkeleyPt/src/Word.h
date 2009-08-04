@@ -40,6 +40,7 @@ public:
 	{ return m_isNonTerminal; }
 	
 	size_t WriteToMemory(char *mem) const;
+	size_t ReadFromMemory(const char *mem, size_t numFactors);
 };
 
 }; // namespace

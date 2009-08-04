@@ -51,5 +51,18 @@ size_t Word::WriteToMemory(char *mem) const
 	return size;
 }
 
+size_t Word::ReadFromMemory(const char *mem, size_t numFactors)
+{
+	m_factors.resize(numFactors);
+
+	VocabId *vocabMem = (VocabId*) mem;
+	
+	for (int ind = 0; ind < m_factors.size(); ind++)
+		m_factors[ind] = vocabMem[ind];
+
+	size_t size = sizeof(VocabId) * m_factors.size();
+	return size;
+}
+
 }; // namespace
 
