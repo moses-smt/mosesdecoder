@@ -1,4 +1,4 @@
-// $Id: PhraseDictionaryNodeMemory.cpp 2029 2009-01-28 22:11:23Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

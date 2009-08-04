@@ -12,6 +12,7 @@
 #include "TargetPhrase.h"
 #include "TargetPhraseCollection.h"
 #include "../../moses/src/FactorCollection.h"
+#include "../../moses/src/Factor.h"
 
 using namespace std;
 
@@ -241,8 +242,8 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 	Dbt key(&sourceKey, sizeof(SourceKey));
 	Dbt data(&nextSourceId, sizeof(long));
 	
-	// save
-	// need to get rid of cast
+	// get from db
+	// need to get rid of const
 	int ret = const_cast<Db&>(m_dbSource).get(NULL, &key, &data, 0);
 	if (ret == 0) 
 	{ // exist. 		
@@ -258,8 +259,36 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 
 const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node) const
 {
-	// TODO
-	return NULL;
+	TargetPhraseCollection *ret = new TargetPhraseCollection;;
+
+	long sourceNodeId = node.GetSourceNodeId();
+	Dbt key(&sourceNodeId, sizeof(long));
+	Dbt data;
+
+	// get from db
+	// need to get rid of const
+	int dbRet = const_cast<Db&>(m_dbTargetColl).get(NULL, &key, &data, 0);
+	assert(dbRet == 0);
+
+	char *mem = (char*) data.get_data();
+	size_t offset = 0;
+
+	// size
+	int sizeColl;
+	memcpy(&sizeColl, mem, sizeof(int));
+	offset += sizeof(int);
+
+	// phrase
+	for (size_t ind = 0; ind < sizeColl; ++ind)
+	{
+		TargetPhrase *tp = new TargetPhrase();
+		size_t memUsed = tp->ReadFromMemory(mem[offset]);
+		offset += memUsed;
+	
+		ret->AddTargetPhrase(tp);
+	}
+
+	return ret;
 }
 
 const Moses::TargetPhraseCollection *DbWrapper::ConvertToMosesColl(const TargetPhraseCollection &tpColl) const
@@ -310,9 +339,10 @@ Moses::Word *DbWrapper::ConvertToMosesTarget(const std::vector<Moses::FactorType
 	{
 		size_t factorType = outputFactorsVec[ind];
 		VocabId vocabId = origWord.GetVocabId(ind);
-		//m_vocab.
+		const std::string &str = m_vocab.GetString(vocabId);
 
-//		const Factor *factor = factorCollection.AddFactor(Moses::Output, factorType, );
+		const Moses::Factor *factor = factorCollection.AddFactor(Moses::Output, factorType, str);
+		retWord->SetFactor(factorType, factor);
 	}
 	return retWord;
 }
