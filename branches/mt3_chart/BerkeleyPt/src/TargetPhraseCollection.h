@@ -9,10 +9,17 @@ namespace MosesBerkeleyPt
 class TargetPhraseCollection
 {
 protected:
-	std::vector<const TargetPhrase*> m_coll;
+	typedef std::vector<const TargetPhrase*> CollType;
+	CollType m_coll;
 
 	char *WriteToMemory(size_t &totalMemUsed, int numScores, size_t sourceWordSize, size_t targetWordSize) const;
 public:
+	typedef CollType::iterator iterator;
+	typedef CollType::const_iterator const_iterator;
+	//! iterators
+	const_iterator begin() const { return m_coll.begin(); }
+	const_iterator end() const { return m_coll.end(); }
+
 	TargetPhraseCollection()
 	{}
 	~TargetPhraseCollection();

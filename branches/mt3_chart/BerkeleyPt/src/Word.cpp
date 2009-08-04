@@ -41,13 +41,20 @@ void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 }
 
 size_t Word::WriteToMemory(char *mem) const
-{
+{	
 	VocabId *vocabMem = (VocabId*) mem;
 	
+	// factors
 	for (int ind = 0; ind < m_factors.size(); ind++)
 		vocabMem[ind] = m_factors[ind];
 	
 	size_t size = sizeof(VocabId) * m_factors.size();
+
+	// is no-term
+	char bNonTerm = (char) m_isNonTerminal;
+	mem[size] = bNonTerm;
+
+	++size;
 	return size;
 }
 
@@ -61,6 +68,10 @@ size_t Word::ReadFromMemory(const char *mem, size_t numFactors)
 		m_factors[ind] = vocabMem[ind];
 
 	size_t size = sizeof(VocabId) * m_factors.size();
+
+	m_isNonTerminal = (bool) mem[size];
+
+	++size;
 	return size;
 }
 

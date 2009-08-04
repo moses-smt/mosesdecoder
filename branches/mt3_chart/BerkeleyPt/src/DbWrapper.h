@@ -39,12 +39,6 @@ public:
 	
 };
 
-class TargetfirKey
-{
-
-};
-
-
 class DbWrapper
 {
 	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd, m_dbTargetColl;
@@ -84,11 +78,11 @@ public:
 	
 	size_t GetSourceWordSize() const
 	{
-		return m_numSourceFactors * sizeof(VocabId);
+		return m_numSourceFactors * sizeof(VocabId) + sizeof(char);
 	}
 	size_t GetTargetWordSize() const
 	{
-		return m_numTargetFactors * sizeof(VocabId);
+		return m_numTargetFactors * sizeof(VocabId) + sizeof(char);
 	}
 
 	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word) const;

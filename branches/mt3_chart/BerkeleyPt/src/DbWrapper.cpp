@@ -298,8 +298,16 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 
 const Moses::TargetPhraseCollection *DbWrapper::ConvertToMosesColl(const TargetPhraseCollection &tpColl) const
 {
+	Moses::TargetPhraseCollection *ret = new Moses::TargetPhraseCollection();
 
-	return NULL;
+	TargetPhraseCollection::const_iterator iter;
+	for (iter = tpColl.begin(); iter != tpColl.end(); ++iter)
+	{
+		const TargetPhrase &tp = **iter;
+	//	tp.
+	}
+
+	return ret;
 }
 
 Word *DbWrapper::ConvertFromMosesSource(const std::vector<Moses::FactorType> &inputFactorsVec
