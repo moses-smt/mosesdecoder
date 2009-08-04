@@ -29,6 +29,9 @@ public:
 	SourcePhraseNode(long sourceNodeId)
 	:m_sourceNodeId(sourceNodeId)
 	{}
+
+	long GetSourceNodeId() const
+	{ return m_sourceNodeId; }
 };
 	
 	
