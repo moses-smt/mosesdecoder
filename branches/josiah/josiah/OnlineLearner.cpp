@@ -251,6 +251,55 @@ namespace Josiah {
     //cerr << "Curr Weights : " << m_currWeights << endl;
     const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
   }
+	
+  void CWLearner::doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler) {
+		//we consider the following binary classification task: does the target jump have a higher gain than the curr jump?
+
+		//the score for the input features (could also be calculated by m_features * current weights)
+		float scoreDiff = target->getScore() - curr->getScore();
+		
+		//what is the actual gain of target vs current (the gold gain)
+		float gainDiff = target->getGain() - curr->getGain(); 
+		
+		//the gold 1/-1 label
+		float y = gainDiff > 0 ? 1.0 : -1.0;
+		
+		//the mean of margin for this task is y * score
+		float marginMean = y * scoreDiff;	
+
+		//only update at error
+		if (marginMean < 0) {
+		
+			//the input feature vector to this task is (f(target) - f(curr)) 
+			m_features.ZeroAll();
+			m_features.PlusEquals(target->getScores());
+			m_features.MinusEquals(curr->getScores());
+				
+			//the variance is based on the input features
+			float marginVariance = calculateMarginVariance(m_features);
+		
+			//get the kkt multiplier
+			float alpha = kkt(marginMean,marginVariance);
+			
+			//update the mean parameters
+			updateMean(alpha,	y);
+			
+			//update the variance parameters
+			updateVariance(alpha);
+			
+			//remember that we made an update
+			m_numUpdates++;
+
+		}
+		UpdateCumul();
+    //cerr << "Curr Weights : " << m_currWeights << endl;
+    const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
+		
+		
+		
+	}
+	
+	
   
   void MiraLearner::doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler) {
     

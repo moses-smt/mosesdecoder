@@ -15,8 +15,8 @@ namespace Josiah {
   class WeightNormalizer;
   
   class OnlineLearner {
-    public :
-      OnlineLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name) : m_currWeights(initWeights), m_cumulWeights(initWeights), m_name(name), m_iteration(0) {} //, m_averaging(true)
+    public :	
+			OnlineLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name) : m_currWeights(initWeights), m_cumulWeights(initWeights), m_name(name), m_iteration(0) {} //, m_averaging(true)
       virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler)  = 0;
       void UpdateCumul() ;
       const Moses::ScoreComponentCollection& GetCurrWeights() { return m_currWeights; }
@@ -50,6 +50,63 @@ namespace Josiah {
       size_t m_numUpdates;
   };
   
+	class CWLearner : public OnlineLearner {
+		public :
+		CWLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, float confidence = 1.0, float initialVariance) : 
+			OnlineLearner(initWeights, name), m_confidence(confidence), m_numUpdates(), m_epsilon(0.0000001),m_currSigmaDiag(initWeights),m_features(initWeights) {
+				float size = m_currSigmaDiag.data().size();
+				for (size_t i=0; i<size; i++) {
+					m_currSigmaDiag[i] = initialVariance;
+				} 							
+			}
+		virtual void doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler);
+		virtual ~CWLearner() {}
+		virtual void reset() {m_numUpdates = 0;}
+		virtual size_t GetNumUpdates() { return m_numUpdates;}
+    private:
+		Moses::ScoreComponentCollection m_currSigmaDiag;
+		Moses::ScoreComponentCollection m_features;
+		float m_confidence;
+		float m_learning_rate;
+		float m_epsilon;
+		size_t m_numUpdates;	
+		
+		bool sign(float value) { return value > 0.0; } 
+			
+		float kkt(float marginMean, float marginVariance) {
+			if (marginMean >= m_confidence * marginVariance) return 0.0;
+			//margin variance approximately == 0 ? 
+			if (marginVariance < 0.0 + m_epsilon && marginVariance > 0.0 - m_epsilon) return 0.0;
+			float v	= 1.0 + 2.0 * m_confidence * marginMean;
+			float lambda = -v + sqrt(v * v - 8.0 * m_confidence * (marginMean - m_confidence * marginVariance)) / (4.0 * m_confidence * marginVariance);
+			return lambda > 0.0 ? lambda : 0.0;
+		}
+		
+		float calculateMarginVariance(const Moses::ScoreComponentCollection& features) { 
+			float sum = 0.0;
+			float size = features.data().size();
+			for (size_t i=0; i<size; i++) { sum += features.data()[i] * features.data()[i] * m_currSigmaDiag.data()[i]; } 
+			return sum;
+		}
+		
+		void updateMean(float alpha, float y) {
+			float size = m_currWeights.data().size();
+			for (size_t i=0; i<size; i++) { 
+				m_currWeights[i] += alpha * y * m_currSigmaDiag[i] * m_features[i];
+			} 			
+		}
+
+		void updateVariance(float alpha) {
+			float size = m_currSigmaDiag.data().size();
+			for (size_t i=0; i<size; i++) {
+				m_currSigmaDiag[i] += 1.0 / (1.0/m_currSigmaDiag[i] + 2.0 * alpha *	m_confidence * m_features[i]);
+			} 			
+		}
+		
+		
+	}; 
+	
+	
   class MiraLearner : public OnlineLearner {
     public :
     MiraLearner(const Moses::ScoreComponentCollection& initWeights,  const std::string& name, bool fixMargin, float margin, float slack, WeightNormalizer* wn = NULL) : OnlineLearner(initWeights, name), m_numUpdates(), m_fixMargin(fixMargin), m_margin(margin), m_slack(slack), m_normalizer(wn) {}
