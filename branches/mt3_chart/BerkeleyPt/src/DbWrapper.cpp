@@ -11,6 +11,7 @@
 #include "Phrase.h"
 #include "TargetPhrase.h"
 #include "TargetPhraseCollection.h"
+#include "../../moses/src/FactorCollection.h"
 
 using namespace std;
 
@@ -56,7 +57,8 @@ GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
 void DbWrapper::Load(const string &filePath)
 {
 	OpenFiles(filePath);
-	
+	m_vocab.Load(m_dbVocab);
+
 	m_numSourceFactors = GetMisc("NumSourceFactors");
 	m_numTargetFactors = GetMisc("NumTargetFactors");
 	m_numScores = GetMisc("NumScores");	
@@ -77,6 +79,7 @@ void DbWrapper::OpenFiles(const std::string &filePath)
 	m_dbMisc.set_errpfx("SequenceExample");
 	m_dbMisc.open(NULL, (filePath + "/Misc.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 	
+	// store string -> vocab id
 	m_dbVocab.set_error_stream(&cerr);
 	m_dbVocab.set_errpfx("SequenceExample");
 	m_dbVocab.open(NULL, (filePath + "/Vocab.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
@@ -134,37 +137,6 @@ int DbWrapper::GetMisc(const std::string &key)
 	return *value;
 }
 	
-Word *DbWrapper::ConvertFromMosesSource(const std::vector<Moses::FactorType> &inputFactorsVec
-																				, const Moses::Word &origWord) const
-{
-	Word *newWord = CreateSouceWord();
-	
-	for (size_t ind = 0 ; ind < inputFactorsVec.size() ; ++ind)
-	{
-		size_t factorType = inputFactorsVec[ind];
-		
-		const Moses::Factor *factor = origWord.GetFactor(factorType);
-		if (factor != NULL)
-		{
-			const string &str = factor->GetString();
-			bool found;
-			VocabId vocabId = m_vocab.GetFactor(str, found);
-			if (!found)
-			{ // factor not in phrase table -> phrse definately not in. exit
-				delete newWord;
-				return NULL;
-			}
-			else
-			{
-				newWord->SetVocabId(ind, vocabId);
-			}
-		} // if (factor
-	} // for (size_t factorType
-	
-	return newWord;
-	
-}
-
 Word *DbWrapper::CreateSouceWord() const
 {
 	return new Word(m_numSourceFactors);
@@ -184,9 +156,7 @@ void DbWrapper::Save(const Vocab &vocab)
 		char *wordChar = (char*) malloc(word.size() + 1);
 		strcpy(wordChar, word.c_str());
 		VocabId vocabId = iterVocab->second;
-		
-		cerr << word << " = " << vocabId << endl;
-		
+				
 		Dbt key(wordChar, word.size() + 1);
 		Dbt data(&vocabId, sizeof(VocabId));
 		
@@ -199,42 +169,6 @@ void DbWrapper::Save(const Vocab &vocab)
 		free(wordChar);
 	}
 	
-}
-
-void DbWrapper::GetAllVocab()
-{
-	Dbt key, data;
-	
-	// search
-	char *c = "Less";
-	key.set_data(c);
-	key.set_size(5);
-	
-	m_dbVocab.get(NULL, &key, &data, 0);
-	
-	VocabId *id = (VocabId*) data.get_data();	
-	cerr << *id << endl;
-	
-	// cursors
-	Dbc *cursorp;
-	m_dbVocab.cursor(NULL, &cursorp, 0); 
-	
-	int ret;
-	
-	// Iterate over the database, retrieving each record in turn.
-	while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
-	{
-		VocabId *id = (VocabId*) data.get_data();
-		cerr << (char*) key.get_data() << " = " << *id << endl;
-	}
-	if (ret != DB_NOTFOUND) {
-		// ret should be DB_NOTFOUND upon exiting the loop.
-		// Dbc::get() will by default throw an exception if any
-		// significant errors occur, so by default this if block
-		// can never be reached. 
-		cerr << "baar";
-	}
-		
 }
 
 long DbWrapper::SaveSource(const Phrase &source, const TargetPhrase &target)
@@ -293,6 +227,11 @@ void DbWrapper::SaveTarget(TargetPhrase &phrase)
 													, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
 
+void DbWrapper::Save(long sourceNodeId, const TargetPhraseCollection &tpColl)
+{
+	tpColl.Save(m_dbTargetColl, sourceNodeId, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
+}
+
 const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, const Word &word) const
 {	
 	// create db data
@@ -323,11 +262,60 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 	return NULL;
 }
 
-void DbWrapper::Save(long sourceNodeId, const TargetPhraseCollection &tpColl)
+const Moses::TargetPhraseCollection *DbWrapper::ConvertToMosesColl(const TargetPhraseCollection &tpColl) const
 {
-	tpColl.Save(m_dbTargetColl, sourceNodeId, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
+
+	return NULL;
 }
 
+Word *DbWrapper::ConvertFromMosesSource(const std::vector<Moses::FactorType> &inputFactorsVec
+																				, const Moses::Word &origWord) const
+{
+	Word *newWord = CreateSouceWord();
+	
+	for (size_t ind = 0 ; ind < inputFactorsVec.size() ; ++ind)
+	{
+		size_t factorType = inputFactorsVec[ind];
+		
+		const Moses::Factor *factor = origWord.GetFactor(factorType);
+		if (factor != NULL)
+		{
+			const string &str = factor->GetString();
+			bool found;
+			VocabId vocabId = m_vocab.GetVocabId(str, found);
+			if (!found)
+			{ // factor not in phrase table -> phrse definately not in. exit
+				delete newWord;
+				return NULL;
+			}
+			else
+			{
+				newWord->SetVocabId(ind, vocabId);
+			}
+		} // if (factor
+	} // for (size_t factorType
+	
+	return newWord;
+	
+}
+
+Moses::Word *DbWrapper::ConvertToMosesTarget(const std::vector<Moses::FactorType> &outputFactorsVec
+																					 , Word &origWord) const
+{
+	Moses::FactorCollection &factorCollection = Moses::FactorCollection::Instance();
+
+	Moses::Word *retWord = new Moses::Word;
+
+	for (size_t ind = 0 ; ind < outputFactorsVec.size() ; ++ind)
+	{
+		size_t factorType = outputFactorsVec[ind];
+		VocabId vocabId = origWord.GetVocabId(ind);
+		//m_vocab.
+
+//		const Factor *factor = factorCollection.AddFactor(Moses::Output, factorType, );
+	}
+	return retWord;
+}
 
 }; // namespace
 

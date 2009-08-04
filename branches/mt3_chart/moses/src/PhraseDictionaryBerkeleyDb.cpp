@@ -10,6 +10,8 @@
 #include "PhraseDictionaryBerkeleyDb.h"
 #include "InputFileStream.h"
 #include "Staticdata.h"
+#include "TargetPhraseCollection.h"
+#include "DotChartBerkeleyDb.h"
 
 using namespace std;
 
@@ -32,20 +34,7 @@ bool PhraseDictionaryBerkeleyDb::Load(const std::vector<FactorType> &input
 	m_outputFactorsVec	= output;
 	
 	m_weight = weight;
-	
-	// load vocab
-	InputFileStream vocabFile(filePath + "/vocab.db");
-	string line;
-	//int lineNo = 0;
-	
-	while( !getline(vocabFile, line, '\n').eof())
-	{
-		vector<string> vecStr = Tokenize(line);
-		assert(vecStr.size() == 2);
-		MosesBerkeleyPt::VocabId vocabId = Scan<MosesBerkeleyPt::VocabId>(vecStr[1]);
-		m_vocabLookup[ vecStr[0] ] = vocabId;
-	}
-	
+		
 	LoadTargetLookup();
 	
 	m_dbWrapper.Load(filePath);
@@ -60,11 +49,13 @@ void PhraseDictionaryBerkeleyDb::SetWeightTransModel(const std::vector<float> &w
 	assert(false);
 }
 
-#include "TargetPhraseCollection.h"
-
 //! find list of translations that can translates src. Only for phrase input
 const TargetPhraseCollection *PhraseDictionaryBerkeleyDb::GetTargetPhraseCollection(const Phrase& src) const
 {
+	assert(false);
+	return NULL;
+
+	/*
 	const StaticData &staticData = StaticData::Instance();
 	
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
@@ -105,15 +96,29 @@ const TargetPhraseCollection *PhraseDictionaryBerkeleyDb::GetTargetPhraseCollect
 	delete nodeOld;
 	
 	return ret;
-	
-	
-	return NULL;
+	*/	
 }
-	
-	
-	//! Create entry for translation of source to targetPhrase
+		
+//! Create entry for translation of source to targetPhrase
 void PhraseDictionaryBerkeleyDb::AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)
 {
+}
+
+void PhraseDictionaryBerkeleyDb::InitializeForInput(const InputType& input)
+{
+	assert(m_runningNodesVec.size() == 0);
+	size_t sourceSize = input.GetSize();
+	m_runningNodesVec.resize(sourceSize);
+
+	for (size_t ind = 0; ind < m_runningNodesVec.size(); ++ind)
+	{
+		ProcessedRuleBerkeleyDb *initProcessedRule = new ProcessedRuleBerkeleyDb(*m_initNode);
+
+		ProcessedRuleStackBerkeleyDb *processedStack = new ProcessedRuleStackBerkeleyDb(sourceSize - ind + 1);
+		processedStack->Add(0, initProcessedRule); // init rule. stores the top node in tree
+
+		m_runningNodesVec[ind] = processedStack;
+	}
 }
 
 void PhraseDictionaryBerkeleyDb::CleanUp()

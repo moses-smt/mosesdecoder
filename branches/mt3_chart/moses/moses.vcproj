@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;LM_INTERNAL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -103,7 +103,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;LM_INTERNAL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -193,6 +193,10 @@
 			</File>
 			<File
 				RelativePath=".\src\DotChart.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DotChartBerkeleyDb.cpp"
 				>
 			</File>
 			<File
@@ -571,6 +575,10 @@
 			</File>
 			<File
 				RelativePath=".\src\DotChart.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DotChartBerkeleyDb.h"
 				>
 			</File>
 			<File

@@ -7,12 +7,50 @@
  *
  */
 
+#include <iostream>
+#include <cassert>
 #include "Vocab.h"
+
+using namespace std;
 
 namespace MosesBerkeleyPt
 {
 
-VocabId Vocab::GetFactor(const std::string &factorString, bool &found) const
+void Vocab::Load(Db &db)
+{
+	Dbt key, data;
+	
+	// cursors
+	Dbc *cursorp;
+	db.cursor(NULL, &cursorp, 0); 
+	
+	// Iterate over the database, retrieving each record in turn.
+	int ret;
+	while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
+	{
+		VocabId &vocabId= *(VocabId*) data.get_data();
+		char *str = (char*) key.get_data();
+
+		m_vocabColl[str] = vocabId;
+	}
+
+	assert(ret == DB_NOTFOUND);
+		
+	// create lookup
+	// assume contiguous vocab id
+	m_lookup.resize(m_vocabColl.size() + 1);
+	
+	CollType::const_iterator iter;
+	for (iter = m_vocabColl.begin(); iter != m_vocabColl.end(); ++iter)
+	{
+		VocabId vocabId = iter->second;
+		const std::string &word = iter->first;
+
+		m_lookup[vocabId] = word;
+	}
+}
+
+VocabId Vocab::GetVocabId(const std::string &factorString, bool &found) const
 {
 	// find string id
 	CollType::const_iterator iter = m_vocabColl.find(factorString);
@@ -28,7 +66,7 @@ VocabId Vocab::GetFactor(const std::string &factorString, bool &found) const
 	}
 }
 
-VocabId Vocab::AddFactor(const std::string &factorString)
+VocabId Vocab::AddVocabId(const std::string &factorString)
 {
 	// find string id
 	CollType::const_iterator iter = m_vocabColl.find(factorString);
