@@ -52,8 +52,8 @@ namespace Josiah {
   
 	class CWLearner : public OnlineLearner {
 		public :
-		CWLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, float confidence = 1.0, float initialVariance) : 
-			OnlineLearner(initWeights, name), m_confidence(confidence), m_numUpdates(), m_epsilon(0.0000001),m_currSigmaDiag(initWeights),m_features(initWeights) {
+		CWLearner(const Moses::ScoreComponentCollection& initWeights, const std::string& name, float confidence = 1.644854f, float initialVariance = 1.0f) : 
+			OnlineLearner(initWeights, name), m_confidence(confidence), m_numUpdates(), m_epsilon(0.0000001f),m_currSigmaDiag(initWeights),m_features(initWeights) {
 				float size = m_currSigmaDiag.data().size();
 				for (size_t i=0; i<size; i++) {
 					m_currSigmaDiag[i] = initialVariance;
