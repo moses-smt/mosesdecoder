@@ -34,7 +34,7 @@ void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 	
 	for (size_t ind = 0; ind < factorsStr.size(); ++ind)
 	{
-		m_factors[ind] = vocab.AddFactor(factorsStr[ind]);
+		m_factors[ind] = vocab.AddVocabId(factorsStr[ind]);
 		cerr << vocab.GetSize();
 	}
 	

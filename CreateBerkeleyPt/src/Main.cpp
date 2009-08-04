@@ -88,7 +88,6 @@ int main (int argc, char * const argv[]) {
 	delete tpColl;
 
 	dbWrapper.Save(vocab);
-	dbWrapper.GetAllVocab();
 	
 	std::cerr << "Finished\n";
   return 0;

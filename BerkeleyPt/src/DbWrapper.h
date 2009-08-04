@@ -16,6 +16,7 @@
 #include "SourcePhraseNode.h"
 #include "../../moses/src/TypeDef.h"
 #include "../../moses/src/Word.h"
+#include "../../moses/src/TargetPhraseCollection.h"
 
 namespace MosesBerkeleyPt
 {
@@ -72,13 +73,14 @@ public:
 
 	Word *ConvertFromMosesSource(const std::vector<Moses::FactorType> &inputFactorsVec
 															 , const Moses::Word &origWord) const;
+	Moses::Word *ConvertToMosesTarget(const std::vector<Moses::FactorType> &outputFactorsVec
+															 , Word &origWord) const;
+
 	Word *CreateSouceWord() const;
 	Word *CreateTargetWord() const;
 	
 	const SourcePhraseNode &GetInitNode() const
 	{ return m_initNode; }
-	
-	void GetAllVocab();
 	
 	size_t GetSourceWordSize() const
 	{
@@ -91,6 +93,9 @@ public:
 
 	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word) const;
 	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node) const;
+
+	const Moses::TargetPhraseCollection *ConvertToMosesColl(const TargetPhraseCollection &tpColl) const;
+
 };
 
 }; // namespace

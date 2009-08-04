@@ -12,17 +12,15 @@
 
 namespace Moses
 {
+class TargetPhraseCollection;
+class ProcessedRuleStackBerkeleyDb;
 
-	class TargetPhraseCollection;
-	
 class PhraseDictionaryBerkeleyDb : public PhraseDictionary
 {
 	typedef PhraseDictionary MyBase;
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryBerkeleyDb&);
 	
 protected:
-	std::map<std::string, MosesBerkeleyPt::VocabId> m_vocabLookup;
-
 	std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
 	std::vector<float> m_weight;
 
@@ -31,7 +29,7 @@ protected:
 
 	mutable std::vector<TargetPhraseCollection*> m_cache;
 	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
-	mutable std::list<Phrase*> m_sourcePhrase;
+	mutable std::vector<ProcessedRuleStackBerkeleyDb*>	m_runningNodesVec;
 
 	void LoadTargetLookup();
 	
@@ -64,6 +62,7 @@ public:
 																														,bool adhereTableLimit
 																														,const CellCollection &cellColl) const;
 	
+	void InitializeForInput(const InputType& input);
 	void CleanUp();
 	
 };

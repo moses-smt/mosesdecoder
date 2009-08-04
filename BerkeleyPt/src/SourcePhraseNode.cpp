@@ -9,9 +9,16 @@
 
 #include "SourcePhraseNode.h"
 
+using namespace std;
+
 namespace MosesBerkeleyPt
 {
 	
+std::ostream& operator<<(std::ostream &out, const SourcePhraseNode &node)
+{
+
+	return out;
+}
 	
 };
 

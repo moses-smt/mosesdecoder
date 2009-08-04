@@ -8,15 +8,17 @@
  *
  */
 
+#include <iostream>
 #include "SourcePhraseNode.h"
 #include "Vocab.h"
 
 namespace MosesBerkeleyPt
 {
 	
-
 class SourcePhraseNode
 {
+	friend std::ostream& operator<<(std::ostream&, const SourcePhraseNode&);
+
 protected:
 	long m_sourceNodeId;
 	

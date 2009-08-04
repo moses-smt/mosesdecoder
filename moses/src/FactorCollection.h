@@ -86,9 +86,9 @@ protected:
 	FactorCollection()
 	:m_factorId(0)
 	{}
-	static FactorCollection& Instance() { return s_instance; }
 
 public:
+	static FactorCollection& Instance() { return s_instance; }
 
 	//! Destructor
 	~FactorCollection();
