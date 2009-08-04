@@ -108,7 +108,7 @@ char *TargetPhrase::WriteOtherInfoToMemory(size_t &memUsed, int numScores, size_
 	memUsed += sizeof(long);
 
 	// LHS words
-	memUsed += GetHeadWords(0).WriteToMemory(mem);
+	memUsed += GetHeadWords(0).WriteToMemory(mem + memUsed);
 	memUsed += GetHeadWords(1).WriteToMemory(mem + memUsed);
 	
 	// align
@@ -190,6 +190,106 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId
 	free(mem);
 	
 	return m_targetId;
+}
+
+size_t TargetPhrase::ReadPhraseFromMemory(const char *mem, size_t numFactors)
+{
+	size_t memUsed = 0;
+	
+	// size
+	int phraseSize;
+	memcpy(&phraseSize, mem + memUsed, sizeof(int));
+	memUsed += sizeof(int);
+
+	Resize(phraseSize);
+
+	// words
+	for (size_t pos = 0; pos < GetSize(); ++pos)
+	{
+		Word &word = GetWord(pos);
+		memUsed += word.ReadFromMemory(mem + memUsed, numFactors);
+	}
+
+	return memUsed;
+}
+
+size_t TargetPhrase::ReadOtherInfoFromMemory(const char *mem
+																						 , size_t numSourceFactors, size_t numTargetFactors
+																						 , size_t numScores)
+{
+	// allocate mem	
+	size_t memUsed = 0;
+	
+	// phrase id
+	memcpy(&m_targetId, mem, sizeof(long));
+	memUsed += sizeof(long);
+
+	// LHS words
+	memUsed += m_headWords[0].ReadFromMemory(mem + memUsed, numSourceFactors);
+	memUsed += m_headWords[1].ReadFromMemory(mem + memUsed, numTargetFactors);
+	
+	// align
+	memUsed += ReadAlignFromMemory(mem + memUsed);
+	
+	// scores
+	memUsed += ReadScoresFromMemory(mem + memUsed, numScores);
+	
+	return memUsed;
+}
+
+
+size_t TargetPhrase::ReadAlignFromMemory(const char *mem)
+{
+	size_t memUsed = 0;
+	
+	// num of alignments
+	int numAlign;
+	memcpy(&numAlign, mem, sizeof(int));
+	memUsed += sizeof(int);
+	
+	// actual alignments
+	for (size_t ind = 0; ind < numAlign; ++ind)
+	{
+		int sourcePos, targetPos;
+		
+		memcpy(&sourcePos, mem + memUsed, sizeof(int));
+		memUsed += sizeof(int);
+		
+		memcpy(&targetPos, mem + memUsed, sizeof(int));
+		memUsed += sizeof(int);
+
+		AlignPair alignPair(sourcePos, targetPos);
+		m_align.push_back(alignPair);
+	}
+	
+	return memUsed;
+}
+
+size_t TargetPhrase::ReadScoresFromMemory(const char *mem, size_t numScores)
+{
+	m_scores.resize(numScores);
+
+	float *scoreMem = (float*) mem;
+	
+	for (size_t ind = 0; ind < numScores; ++ind)
+		m_scores[ind] = scoreMem[ind];
+
+	size_t memUsed = sizeof(float) * m_scores.size();
+	return memUsed;
+}
+
+void TargetPhrase::Load(const Db &db, size_t numTargetFactors)
+{
+	// create db data	
+	Dbt key(&m_targetId, sizeof(long));
+	Dbt data;
+	
+	// save
+	int dbRet = const_cast<Db&>(db).get(NULL, &key, &data, 0);
+	assert(dbRet == 0);
+
+	size_t memUsed = ReadPhraseFromMemory((char*) data.get_data(), numTargetFactors);
+	assert(memUsed == data.get_size());
 }
 
 }; // namespace

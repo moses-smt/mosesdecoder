@@ -30,6 +30,11 @@ public:
 	{ return m_words.size(); }
 	const Word &GetWord(size_t pos) const
 	{ return m_words[pos]; }
+	Word &GetWord(size_t pos)
+	{ return m_words[pos]; }
+
+	void Resize(size_t newSize)
+	{ m_words.resize(newSize); }
 
 };
 
