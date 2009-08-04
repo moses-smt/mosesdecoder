@@ -128,7 +128,8 @@ int main(int argc, char** argv) {
   int weight_dump_freq;
   string weight_dump_stem;
   bool sampleRank;
-  bool perceptron, mira, mira_plus;
+  bool perceptron, mira, mira_plus, cw;
+	float cwInitialVariance, cwConfidence;
   float perceptron_lr;
   int epochs;
   bool greedy, fixedTemp;
@@ -185,6 +186,9 @@ int main(int argc, char** argv) {
   ("perceptron", po::value(&perceptron)->zero_tokens()->default_value(false), "Use perceptron learner")
   ("mira", po::value(&mira)->zero_tokens()->default_value(false), "Use mira learner")
   ("mira++", po::value(&mira_plus)->zero_tokens()->default_value(false), "Use mira++ learner")
+  ("cw", po::value(&cw)->zero_tokens()->default_value(false), "Use Confidence Weighting learner")
+  ("cw-initial-variance", po::value<float>(&cwInitialVariance)->default_value(1.0f), "Initial variance for CW Learning")
+  ("cw-confidence", po::value<float>(&cwConfidence)->default_value(1.644854f), "Initial confidence value for CW Learning, use value in probit([0.5,1.0])")
   ("perc-lr", po::value<float>(&perceptron_lr)->default_value(1.0f), "Perceptron learning rate")
   ("epochs", po::value<int>(&epochs)->default_value(1), "Number of training epochs")
   ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
@@ -382,7 +386,11 @@ int main(int argc, char** argv) {
   else if (mira_plus) {
     onlineLearner.reset(new MiraPlusLearner(StaticData::Instance().GetWeights(), "MIRA++", fix_margin, margin, slack, weightNormalizer.get()));
   }
-
+  else if (cw) {
+    onlineLearner.reset(new CWLearner(StaticData::Instance().GetWeights(), "CW", cwConfidence, cwInitialVariance));
+  }
+	
+	
   sampler.AddOnlineLearner(onlineLearner.get());
   
   //sampler stopping strategy; TODO: push parsing of config into StoppingStrategy ctor ?
@@ -432,7 +440,7 @@ int main(int argc, char** argv) {
       if (!input->HasMore()) continue;
       assert(!"I don't like empty lines");
     }
-    
+     
     Hypothesis* hypothesis;
     TranslationOptionCollection* toc;
     
