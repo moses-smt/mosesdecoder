@@ -81,7 +81,7 @@ size_t Word::ReadFromMemory(const char *mem, size_t numFactors)
 
 Moses::Word *Word::ConvertToMosesTarget(const std::vector<Moses::FactorType> &outputFactorsVec, const Vocab &vocab) const
 {
-	Moses::Word *ret = new Moses::Word(Moses::Output);
+	Moses::Word *ret = new Moses::Word(m_isNonTerminal);
 
 	for (size_t ind = 0; ind < m_factors.size(); ++ind)
 	{

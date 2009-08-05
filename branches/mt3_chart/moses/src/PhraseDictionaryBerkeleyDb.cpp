@@ -19,6 +19,7 @@ namespace Moses
 {
 PhraseDictionaryBerkeleyDb::~PhraseDictionaryBerkeleyDb()
 {
+	CleanUp();
 }
 
 bool PhraseDictionaryBerkeleyDb::Load(const std::vector<FactorType> &input
@@ -128,7 +129,11 @@ void PhraseDictionaryBerkeleyDb::InitializeForInput(const InputType& input)
 
 void PhraseDictionaryBerkeleyDb::CleanUp()
 {
-
+	RemoveAllInColl(m_cache);
+	RemoveAllInColl(m_sourcePhrase);
+	RemoveAllInColl(m_chartTargetPhraseColl);
+	RemoveAllInColl(m_runningNodesVec);
+	RemoveAllInColl(m_sourcePhraseNode);
 }
 
 void PhraseDictionaryBerkeleyDb::LoadTargetLookup()
