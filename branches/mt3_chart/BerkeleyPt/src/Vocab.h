@@ -13,6 +13,12 @@
 #include <string>
 #include <vector>
 #include <db_cxx.h>
+#include "../../moses/src/TypeDef.h"
+
+namespace Moses
+{
+	class Factor;
+}
 
 namespace MosesBerkeleyPt
 {
@@ -51,6 +57,7 @@ public:
 	
 	const std::string &GetString(VocabId vocabId) const
 	{ return m_lookup[vocabId]; }
+	const Moses::Factor *GetFactor(VocabId vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const;
 
 	void Save(const std::string &filePath);
 	

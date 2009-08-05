@@ -11,11 +11,19 @@
 
 #include <string>
 #include <vector>
+#include "../../moses/src/TypeDef.h"
 #include "Vocab.h"
+
+namespace Moses
+{
+	class Word;
+}
 
 namespace MosesBerkeleyPt
 {
 
+class Vocab;
+	
 class Word
 {
 	bool m_isNonTerminal;
@@ -41,6 +49,9 @@ public:
 	
 	size_t WriteToMemory(char *mem) const;
 	size_t ReadFromMemory(const char *mem, size_t numFactors);
+	
+	Moses::Word *ConvertToMosesTarget(const std::vector<Moses::FactorType> &outputFactorsVec, const Vocab &vocab) const;
+	
 };
 
 }; // namespace

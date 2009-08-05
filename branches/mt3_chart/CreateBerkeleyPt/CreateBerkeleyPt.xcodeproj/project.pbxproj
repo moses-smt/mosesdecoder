@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1C273B87102064C300991BD2 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C273B86102064C300991BD2 /* Main.cpp */; };
-		1C273C0C10206E9200991BD2 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C273C0B10206E8D00991BD2 /* libmoses.a */; };
+		1C4D17541028CBBF00C74752 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C273C0B10206E8D00991BD2 /* libmoses.a */; };
 		1CEB29AC102349360076731C /* libBerkeleyPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CEB29AB102349290076731C /* libBerkeleyPt.a */; };
 /* End PBXBuildFile section */
 
@@ -31,7 +31,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1CEB29A6102349290076731C /* BerkeleyPt.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* BerkeleyPt */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BerkeleyPt;
 		};
 		1CEB29AA102349290076731C /* PBXContainerItemProxy */ = {
@@ -67,8 +67,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1C4D17541028CBBF00C74752 /* libmoses.a in Frameworks */,
 				1CEB29AC102349360076731C /* libBerkeleyPt.a in Frameworks */,
-				1C273C0C10206E9200991BD2 /* libmoses.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,11 +232,20 @@
 					"_GLIBCXX_DEBUG_PEDANTIC=1",
 				);
 				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = /usr/local/BerkeleyDB.4.7/lib;
+				LIBRARY_SEARCH_PATHS = (
+					../srilm/lib/macosx,
+					"../irstlm/lib/i386-apple-darwin9.0/",
+					/usr/local/BerkeleyDB.4.7/lib,
+				);
 				OTHER_LDFLAGS = (
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
 					"-ldb_cxx",
 					"-ldb",
 					"-lz",
+					"-lirstlm",
 				);
 				PRODUCT_NAME = CreateBerkeleyPt;
 			};
@@ -249,11 +258,20 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = /usr/local/BerkeleyDB.4.7/lib;
+				LIBRARY_SEARCH_PATHS = (
+					../srilm/lib/macosx,
+					"../irstlm/lib/i386-apple-darwin9.0/",
+					/usr/local/BerkeleyDB.4.7/lib,
+				);
 				OTHER_LDFLAGS = (
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
 					"-ldb_cxx",
 					"-ldb",
 					"-lz",
+					"-lirstlm",
 				);
 				PRODUCT_NAME = CreateBerkeleyPt;
 			};

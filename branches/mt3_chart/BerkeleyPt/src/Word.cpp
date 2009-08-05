@@ -9,6 +9,7 @@
 
 #include "Word.h"
 #include "../../moses/src/Util.h"
+#include "../../moses/src/Word.h"
 
 using namespace std;
 
@@ -74,6 +75,22 @@ size_t Word::ReadFromMemory(const char *mem, size_t numFactors)
 	++size;
 	return size;
 }
+
+Moses::Word *Word::ConvertToMosesTarget(const std::vector<Moses::FactorType> &outputFactorsVec, const Vocab &vocab) const
+{
+	Moses::Word *ret = new Moses::Word(Moses::Output);
+
+	for (size_t ind = 0; ind < m_factors.size(); ++ind)
+	{
+		Moses::FactorType factorType = outputFactorsVec[ind];
+		VocabId vocabId = m_factors[ind];
+		const Moses::Factor *factor = vocab.GetFactor(vocabId, factorType, Moses::Output, IsNonTerminal());
+		ret->SetFactor(factorType, factor);
+	}
+	
+	return ret;
+}
+
 
 }; // namespace
 
