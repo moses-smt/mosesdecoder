@@ -11,6 +11,8 @@
 
 # Revision history
 
+# 5 Aug 2009  Handling with different reference length policies (shortest, average, closest) for BLEU 
+#             and case-sensistive/insensitive evaluation (Nicola Bertoldi)
 # 5 Jun 2008  Forked previous version to support new mert implementation.
 # 13 Feb 2007 Better handling of default values for lambda, now works with multiple
 #             models and lexicalized reordering
@@ -119,17 +121,20 @@ my $___PREDICTABLE_SEEDS = 0;
 my $___ASYNC = 0; 
 
 # Parameter for effective reference length when computing BLEU score
-# This is used by score-nbest-bleu.py
 # Default is to use shortest reference
+# Use "--shortest" to use shortest reference length
 # Use "--average" to use average reference length
 # Use "--closest" to use closest reference length
-# Only one between --average and --closest can be set
-# If both --average is used
-#TODO: Pass these through to scorer
+# Only one between --shortest, --average and --closest can be set
+# If more than one choice the defualt (--shortest) is used
+my $___SHORTEST = 0;
 my $___AVERAGE = 0;
 my $___CLOSEST = 0;
 
-# Use "--nonorm" to non normalize translation before computing BLEU
+# Use "--nocase" to compute case-insensitive scores
+my $__NOCASE = 0;
+
+# Use "--nonorm" to non normalize translation before computing scores
 my $___NONORM = 0;
 
 # set 0 if input type is text, set 1 if input type is confusion network
@@ -178,8 +183,10 @@ GetOptions(
   "lambdas=s" => \$___LAMBDA,
   "continue" => \$continue,
   "skip-decoder" => \$skip_decoder,
+  "shortest" => \$___SHORTEST,
   "average" => \$___AVERAGE,
   "closest" => \$___CLOSEST,
+  "nocase" => \$___NOCASE,
   "nonorm" => \$___NONORM,
   "help" => \$usage,
   "allow-unknown-lambdas" => \$allow_unknown_lambdas,
@@ -243,10 +250,10 @@ Options:
   --continue  ... continue from the last achieved state
   --skip-decoder ... skip the decoder run for the first time, assuming that
                      we got interrupted during optimization
-  --average ... Use either average or shortest (default) reference
-                  length as effective reference length
-  --closest ... Use either closest or shortest (default) reference
-                  length as effective reference length
+  --shortest ... Use shortest reference length as effective reference length (default is true)
+  --average ... Use average reference length as effective reference length (default is false)
+  --closest ... Use closest reference length as effective reference length (default is false)
+  --nocase ... Do not preserve case information; i.e. case-insensitive evaluation (default is false)
   --nonorm ... Do not use text normalization
   --filtercmd=STRING  ... path to filter-model-given-input.pl
   --rootdir=STRING  ... where do helpers reside (if not given explicitly)
@@ -315,10 +322,45 @@ die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
 
 $mertargs = "" if !defined $mertargs;
+
+my $scconfig = undef;
+if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/){
+  $scconfig=$1;
+  $scconfig =~ s/\,/ /g;
+  $mertargs =~ s/\-\-scconfig\s+(.+?)(\s|$)//;
+}
+
+# handling reference lengh strategy
+if (($___CLOSEST + $___AVERAGE + $___SHORTEST) > 1){
+  die "You can specify just ONE reference length strategy (closest or shortest or average) not both\n";
+}
+
+if ($___SHORTEST){
+  $scconfig .= " reflen:shortest";
+}elsif ($___AVERAGE){
+  $scconfig .= " reflen:average";
+}elsif ($___CLOSEST){
+  $scconfig .= " reflen:closest";
+}
+
+# handling case-insensitive flag
+if ($___NOCASE) {
+  $scconfig .= " case:false";
+}else{
+  $scconfig .= " case:true";
+}
+$scconfig =~ s/^\s+//;
+$scconfig =~ s/\s+$//;
+$scconfig =~ s/\s+/,/g;
+
+$scconfig = "--scconfig $scconfig" if ($scconfig);
+
 my $mert_extract_args=$mertargs;
+$mert_extract_args .=" $scconfig";
+
 my $mert_mert_args=$mertargs;
 $mert_mert_args =~ s/\-+(binary|b)\b//;
-
+$mert_mert_args .=" $scconfig";
 
 my ($just_cmd_filtercmd,$x) = split(/ /,$filtercmd);
 die "Not executable: $just_cmd_filtercmd" if ! -x $just_cmd_filtercmd;
