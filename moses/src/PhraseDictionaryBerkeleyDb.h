@@ -27,9 +27,10 @@ protected:
 	MosesBerkeleyPt::DbWrapper m_dbWrapper;
 	MosesBerkeleyPt::SourcePhraseNode *m_initNode;
 
-	mutable std::vector<TargetPhraseCollection*> m_cache;
+	mutable std::vector<const TargetPhraseCollection*> m_cache;
 	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
 	mutable std::list<Phrase*> m_sourcePhrase;
+	mutable std::list<const MosesBerkeleyPt::SourcePhraseNode*> m_sourcePhraseNode;
 
 	mutable std::vector<ProcessedRuleStackBerkeleyDb*>	m_runningNodesVec;
 	

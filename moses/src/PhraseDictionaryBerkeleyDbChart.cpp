@@ -69,6 +69,9 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 																														, prevWordConsumed);
 					ProcessedRuleBerkeleyDb *processedRule = new ProcessedRuleBerkeleyDb(*node, newWordConsumed);
 					runningNodes.Add(relEndPos+1, processedRule);
+					
+					// cache for cleanup
+					m_sourcePhraseNode.push_back(node);
 				}
 
 				delete sourceWordBerkeleyDb;
@@ -113,6 +116,8 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 					ProcessedRuleBerkeleyDb *processedRule = new ProcessedRuleBerkeleyDb(*node, newWordConsumed);
 					runningNodes.Add(stackInd, processedRule);
 				}
+
+				delete headWordBerkeleyDb;
 			}
 		} // for (iterHeadWords
 	}
@@ -140,12 +145,11 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 																															,lmList
 																															,*cachedSource);
 		delete tpcollBerkeleyDb;
+		
+		assert(targetPhraseCollection);
+		ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
+		m_cache.push_back(targetPhraseCollection);
 
-		if (targetPhraseCollection != NULL)
-		{
-			ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
-			cerr << *ret << endl;
-		}
 	}
 	ret->CreateChartRules(rulesLimit);
 
