@@ -53,7 +53,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles) {
 		string line;
 		size_t sid = 0; //sentence counter
 		while (getline(refin,line)) {
-			//§cerr << line << endl;
+			//cerr << line << endl;
 			if (i == 0) {
 				counts_t* counts = new counts_t(); //these get leaked
 				_refcounts.push_back(counts);
@@ -116,13 +116,19 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 			stats.push_back(mean);
 		} else if (_refLengthStrategy == BLEU_CLOSEST)  {
 			int min_diff = INT_MAX;
+			int min_idx = 0;
 			for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
 				int reflength = _reflengths[sid][i];
-				if (abs(reflength-(int)length) < abs(min_diff)) {
+				if (abs(reflength-(int)length) < abs(min_diff)) { //look for the closest reference
 					min_diff = reflength-length;
-				}
+					min_idx = i;
+				}else if (abs(reflength-(int)length) == abs(min_diff)) { // if two references has the same closest length, take the shortest
+                                        if (reflength < (int)_reflengths[sid][min_idx]){
+                                        	min_idx = i;
+					}
+                                }
 			}
-			stats.push_back(length + min_diff);
+			stats.push_back(_reflengths[sid][min_idx]);
 		} else {
 			throw runtime_error("Unsupported reflength strategy");
 		}
