@@ -72,7 +72,6 @@ class FactorCollection
 	friend class TranslationOptionCollection;
 	friend class Word;
 	friend class ChartInput;
-	friend class PhraseDictionaryOnDisk;
 	friend class PhraseDictionarySourceLabel;
 	friend class PhraseDictionaryNewFormat;
 	

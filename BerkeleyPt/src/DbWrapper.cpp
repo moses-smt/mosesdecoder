@@ -11,8 +11,6 @@
 #include "Phrase.h"
 #include "TargetPhrase.h"
 #include "TargetPhraseCollection.h"
-#include "../../moses/src/FactorCollection.h"
-#include "../../moses/src/Factor.h"
 
 using namespace std;
 
@@ -296,7 +294,13 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 	return ret;
 }
 
-const Moses::TargetPhraseCollection *DbWrapper::ConvertToMosesColl(const TargetPhraseCollection &tpColl) const
+const Moses::TargetPhraseCollection *DbWrapper::ConvertToMoses(const TargetPhraseCollection &tpColl
+																															 , const std::vector<Moses::FactorType> &factors
+																															 , const Moses::ScoreProducer &phraseDict
+																															 , const std::vector<float> &weightT
+																															 , float weightWP
+																															 , const Moses::LMList &lmList
+																															 , const Moses::Phrase &sourcePhrase) const
 {
 	Moses::TargetPhraseCollection *ret = new Moses::TargetPhraseCollection();
 
@@ -304,7 +308,15 @@ const Moses::TargetPhraseCollection *DbWrapper::ConvertToMosesColl(const TargetP
 	for (iter = tpColl.begin(); iter != tpColl.end(); ++iter)
 	{
 		const TargetPhrase &tp = **iter;
-	//	tp.
+		Moses::TargetPhrase *mosePhrase = tp.ConvertToMoses(factors
+																											, m_vocab
+																											, phraseDict
+																											, weightT
+																											, weightWP
+																											, lmList
+																											, sourcePhrase);
+		
+		ret->Add(mosePhrase);
 	}
 
 	return ret;
@@ -339,25 +351,6 @@ Word *DbWrapper::ConvertFromMosesSource(const std::vector<Moses::FactorType> &in
 	
 	return newWord;
 	
-}
-
-Moses::Word *DbWrapper::ConvertToMosesTarget(const std::vector<Moses::FactorType> &outputFactorsVec
-																					 , Word &origWord) const
-{
-	Moses::FactorCollection &factorCollection = Moses::FactorCollection::Instance();
-
-	Moses::Word *retWord = new Moses::Word;
-
-	for (size_t ind = 0 ; ind < outputFactorsVec.size() ; ++ind)
-	{
-		size_t factorType = outputFactorsVec[ind];
-		VocabId vocabId = origWord.GetVocabId(ind);
-		const std::string &str = m_vocab.GetString(vocabId);
-
-		const Moses::Factor *factor = factorCollection.AddFactor(Moses::Output, factorType, str);
-		retWord->SetFactor(factorType, factor);
-	}
-	return retWord;
 }
 
 }; // namespace

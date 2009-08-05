@@ -10,6 +10,7 @@
 #include "StaticData.h"
 #include "DotChartBerkeleyDb.h"
 #include "CellCollection.h"
+#include "../../BerkeleyPt/src/TargetPhraseCollection.h"
 
 using namespace std;
 
@@ -122,7 +123,7 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 
 		const MosesBerkeleyPt::TargetPhraseCollection *tpcollBerkeleyDb = m_dbWrapper.GetTargetPhraseCollection(node);
 
-		const TargetPhraseCollection *targetPhraseCollection = m_dbWrapper.ConvertToMosesColl(*tpcollBerkeleyDb);
+		const TargetPhraseCollection *targetPhraseCollection = m_dbWrapper.ConvertToMoses(*tpcollBerkeleyDb);
 		delete tpcollBerkeleyDb;
 
 		if (targetPhraseCollection != NULL)

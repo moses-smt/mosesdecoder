@@ -10,6 +10,7 @@
 #include <vector>
 #include <db_cxx.h>
 #include "../../moses/src/Util.h"
+#include "../../moses/src/TargetPhrase.h"
 #include "TargetPhrase.h"
 
 using namespace std;
@@ -291,6 +292,42 @@ void TargetPhrase::Load(const Db &db, size_t numTargetFactors)
 	size_t memUsed = ReadPhraseFromMemory((char*) data.get_data(), numTargetFactors);
 	assert(memUsed == data.get_size());
 }
+
+Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> &factors
+																		, const Vocab &vocab
+																		, const Moses::ScoreProducer &phraseDict
+																		, const std::vector<float> &weightT
+																		, float weightWP
+																		, const Moses::LMList &lmList
+																		, const Moses::Phrase &sourcePhrase) const
+{
+	Moses::TargetPhrase *ret = new Moses::TargetPhrase(Moses::Output);
+	
+	// source phrase
+	ret->SetSourcePhrase(&sourcePhrase);
+	
+	// words
+	for (size_t pos = 0; pos < GetSize(); ++pos)
+	{
+		Moses::Word *mosesWord = GetWord(pos).ConvertToMosesTarget(factors, vocab);
+		ret->AddWord(*mosesWord);
+		delete mosesWord;
+	}
+	
+	// scores
+	ret->SetScore(&phraseDict, m_scores, weightT, weightWP, lmList);
+	
+	// alignments
+	for (size_t ind = 0; ind < m_align.size(); ++ind)
+	{
+		const std::pair<size_t, size_t> &entry = m_align[ind];
+		ret->AddAlignment(entry);
+	}
+	
+	return ret;
+	
+}
+
 
 }; // namespace
 

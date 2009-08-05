@@ -26,6 +26,8 @@
 		0396E1B50C0B189200D95CFF /* TrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 0396E1A40C0B189200D95CFF /* TrellisPathList.h */; };
 		0396E1B60C0B189200D95CFF /* WordLattice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0396E1A50C0B189200D95CFF /* WordLattice.cpp */; };
 		0396E1B70C0B189200D95CFF /* WordLattice.h in Headers */ = {isa = PBXBuildFile; fileRef = 0396E1A60C0B189200D95CFF /* WordLattice.h */; };
+		1C4D163A1028BF5600C74752 /* DotChartBerkeleyDb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C4D16381028BF5600C74752 /* DotChartBerkeleyDb.cpp */; };
+		1C4D163B1028BF5600C74752 /* DotChartBerkeleyDb.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C4D16391028BF5600C74752 /* DotChartBerkeleyDb.h */; };
 		1C500A4F0FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A400FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp */; };
 		1C500A500FB9E68400DFD24F /* PhraseDictionaryGlueRule.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500A410FB9E68400DFD24F /* PhraseDictionaryGlueRule.h */; };
 		1C500A510FB9E68400DFD24F /* PhraseDictionaryJoshua.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A420FB9E68400DFD24F /* PhraseDictionaryJoshua.cpp */; };
@@ -224,6 +226,8 @@
 		0396E1A40C0B189200D95CFF /* TrellisPathList.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TrellisPathList.h; path = src/TrellisPathList.h; sourceTree = "<group>"; };
 		0396E1A50C0B189200D95CFF /* WordLattice.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = WordLattice.cpp; path = src/WordLattice.cpp; sourceTree = "<group>"; };
 		0396E1A60C0B189200D95CFF /* WordLattice.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordLattice.h; path = src/WordLattice.h; sourceTree = "<group>"; };
+		1C4D16381028BF5600C74752 /* DotChartBerkeleyDb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChartBerkeleyDb.cpp; path = src/DotChartBerkeleyDb.cpp; sourceTree = "<group>"; };
+		1C4D16391028BF5600C74752 /* DotChartBerkeleyDb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChartBerkeleyDb.h; path = src/DotChartBerkeleyDb.h; sourceTree = "<group>"; };
 		1C500A400FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryGlueRule.cpp; path = src/PhraseDictionaryGlueRule.cpp; sourceTree = "<group>"; };
 		1C500A410FB9E68400DFD24F /* PhraseDictionaryGlueRule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryGlueRule.h; path = src/PhraseDictionaryGlueRule.h; sourceTree = "<group>"; };
 		1C500A420FB9E68400DFD24F /* PhraseDictionaryJoshua.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryJoshua.cpp; path = src/PhraseDictionaryJoshua.cpp; sourceTree = "<group>"; };
@@ -431,6 +435,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1C4D16381028BF5600C74752 /* DotChartBerkeleyDb.cpp */,
+				1C4D16391028BF5600C74752 /* DotChartBerkeleyDb.h */,
 				1C500A5F0FB9E6B700DFD24F /* AlignmentInfo.cpp */,
 				1C500A600FB9E6B700DFD24F /* AlignmentInfo.h */,
 				E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */,
@@ -756,6 +762,7 @@
 				1C500A840FB9E6B700DFD24F /* WordConsumed.h in Headers */,
 				1CA87AA3100B8F090017FF50 /* PhraseDictionaryNewFormat.h in Headers */,
 				1CEB29E510234C4D0076731C /* PhraseDictionaryBerkeleyDb.h in Headers */,
+				1C4D163B1028BF5600C74752 /* DotChartBerkeleyDb.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -896,6 +903,7 @@
 				1CA87AA4100B8F090017FF50 /* PhraseDictionaryNewFormatChart.cpp in Sources */,
 				1CEB29E610234C4D0076731C /* PhraseDictionaryBerkeleyDb.cpp in Sources */,
 				1CA081051023562D00002D9E /* PhraseDictionaryBerkeleyDbChart.cpp in Sources */,
+				1C4D163A1028BF5600C74752 /* DotChartBerkeleyDb.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

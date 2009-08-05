@@ -8,9 +8,17 @@
  *
  */
 
+#include <vector>
 #include "Phrase.h"
+#include "../../moses/src/TypeDef.h"
+#include "../../moses/src/LMList.h"
 
 class Db;
+
+namespace Moses
+{
+	class TargetPhrase;
+}
 
 namespace MosesBerkeleyPt
 {
@@ -56,7 +64,16 @@ public:
 	char *WriteOtherInfoToMemory(size_t &memUsed, int numScores, size_t sourceWordSize, size_t targetWordSize) const;
 
 	void Load(const Db &db, size_t numTargetFactors);
-
+	
+	Moses::TargetPhrase *ConvertToMoses(const std::vector<Moses::FactorType> &factors
+																			, const Vocab &vocab
+																			, const Moses::ScoreProducer &phraseDict
+																			, const std::vector<float> &weightT
+																			, float weightWP
+																			, const Moses::LMList &lmList
+																			, const Moses::Phrase &sourcePhrase) const;
+	
 };
-}; // namespace
+	
+} // namespace
 

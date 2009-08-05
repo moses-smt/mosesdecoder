@@ -67,8 +67,6 @@ public:
 
 	Word *ConvertFromMosesSource(const std::vector<Moses::FactorType> &inputFactorsVec
 															 , const Moses::Word &origWord) const;
-	Moses::Word *ConvertToMosesTarget(const std::vector<Moses::FactorType> &outputFactorsVec
-															 , Word &origWord) const;
 
 	Word *CreateSouceWord() const;
 	Word *CreateTargetWord() const;
@@ -88,7 +86,13 @@ public:
 	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word) const;
 	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node) const;
 
-	const Moses::TargetPhraseCollection *ConvertToMosesColl(const TargetPhraseCollection &tpColl) const;
+	const Moses::TargetPhraseCollection *ConvertToMoses(const TargetPhraseCollection &tpColl
+																											, const std::vector<Moses::FactorType> &factors
+																											, const Moses::ScoreProducer &phraseDict
+																											, const std::vector<float> &weightT
+																											, float weightWP
+																											, const Moses::LMList &lmList
+																											, const Moses::Phrase &sourcePhrase) const;
 
 };
 

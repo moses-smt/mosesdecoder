@@ -10,6 +10,8 @@
 #include <iostream>
 #include <cassert>
 #include "Vocab.h"
+#include "../../moses/src/Util.h"
+#include "../../moses/src/FactorCollection.h"
 
 using namespace std;
 
@@ -80,4 +82,12 @@ VocabId Vocab::AddVocabId(const std::string &factorString)
 		return iter->second;
 	}
 }
+	
+const Moses::Factor *Vocab::GetFactor(VocabId vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const
+{
+	const string &str = GetString(vocabId);
+	const Moses::Factor *factor = Moses::FactorCollection::Instance().AddFactor(direction, factorType, str, isNonTerminal);
+	return factor;
+}
+
 }; // namespace

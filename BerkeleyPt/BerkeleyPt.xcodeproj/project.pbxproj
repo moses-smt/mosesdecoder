@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1C4D16311028BF3500C74752 /* TargetPhraseCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C4D162F1028BF3500C74752 /* TargetPhraseCollection.cpp */; };
+		1C4D16321028BF3500C74752 /* TargetPhraseCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C4D16301028BF3500C74752 /* TargetPhraseCollection.h */; };
 		1CD6E80B1026FBCF0008EA84 /* SourcePhraseNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD6E8091026FBCF0008EA84 /* SourcePhraseNode.h */; };
 		1CD6E80C1026FBCF0008EA84 /* SourcePhraseNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD6E80A1026FBCF0008EA84 /* SourcePhraseNode.cpp */; };
 		1CEB298C1023489A0076731C /* DbWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CEB29801023489A0076731C /* DbWrapper.cpp */; };
@@ -22,6 +24,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1C4D162F1028BF3500C74752 /* TargetPhraseCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhraseCollection.cpp; path = src/TargetPhraseCollection.cpp; sourceTree = "<group>"; };
+		1C4D16301028BF3500C74752 /* TargetPhraseCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhraseCollection.h; path = src/TargetPhraseCollection.h; sourceTree = "<group>"; };
 		1CD6E8091026FBCF0008EA84 /* SourcePhraseNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourcePhraseNode.h; path = src/SourcePhraseNode.h; sourceTree = "<group>"; };
 		1CD6E80A1026FBCF0008EA84 /* SourcePhraseNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourcePhraseNode.cpp; path = src/SourcePhraseNode.cpp; sourceTree = "<group>"; };
 		1CEB29801023489A0076731C /* DbWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DbWrapper.cpp; path = src/DbWrapper.cpp; sourceTree = "<group>"; };
@@ -69,6 +73,8 @@
 				1CD6E8091026FBCF0008EA84 /* SourcePhraseNode.h */,
 				1CEB29861023489A0076731C /* TargetPhrase.cpp */,
 				1CEB29871023489A0076731C /* TargetPhrase.h */,
+				1C4D162F1028BF3500C74752 /* TargetPhraseCollection.cpp */,
+				1C4D16301028BF3500C74752 /* TargetPhraseCollection.h */,
 				1CEB29881023489A0076731C /* Vocab.cpp */,
 				1CEB29891023489A0076731C /* Vocab.h */,
 				1CEB298A1023489A0076731C /* Word.cpp */,
@@ -105,6 +111,7 @@
 				1CEB29951023489A0076731C /* Vocab.h in Headers */,
 				1CEB29971023489A0076731C /* Word.h in Headers */,
 				1CD6E80B1026FBCF0008EA84 /* SourcePhraseNode.h in Headers */,
+				1C4D16321028BF3500C74752 /* TargetPhraseCollection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -156,6 +163,7 @@
 				1CEB29941023489A0076731C /* Vocab.cpp in Sources */,
 				1CEB29961023489A0076731C /* Word.cpp in Sources */,
 				1CD6E80C1026FBCF0008EA84 /* SourcePhraseNode.cpp in Sources */,
+				1C4D16311028BF3500C74752 /* TargetPhraseCollection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
