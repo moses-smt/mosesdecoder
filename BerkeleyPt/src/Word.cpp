@@ -31,12 +31,10 @@ void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 	
 	std::vector<string> factorsStr = Moses::Tokenize(str, "|");
 	m_factors.resize(factorsStr.size());
-	cerr << vocab.GetSize();
 	
 	for (size_t ind = 0; ind < factorsStr.size(); ++ind)
 	{
 		m_factors[ind] = vocab.AddVocabId(factorsStr[ind]);
-		cerr << vocab.GetSize();
 	}
 	
 }
@@ -54,8 +52,11 @@ size_t Word::WriteToMemory(char *mem) const
 	// is no-term
 	char bNonTerm = (char) m_isNonTerminal;
 	mem[size] = bNonTerm;
-
 	++size;
+
+	mem[size] = (char) 0xdc;
+	++size;
+
 	return size;
 }
 
@@ -69,10 +70,12 @@ size_t Word::ReadFromMemory(const char *mem, size_t numFactors)
 		m_factors[ind] = vocabMem[ind];
 
 	size_t size = sizeof(VocabId) * m_factors.size();
-
 	m_isNonTerminal = (bool) mem[size];
-
 	++size;
+
+	assert(mem[size] == (char) 0xdc);
+	++size;
+
 	return size;
 }
 

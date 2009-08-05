@@ -94,8 +94,8 @@ namespace Moses
 			const string &align1 = *iter;
 			vector<size_t> alignPos = Tokenize<size_t>(align1, "-");
 			assert(alignPos.size() == 2);
-			size_t sourcePos	= sourcePhrase.GetNonTerminalPos(alignPos[0])
-						,targetPos	= targetPhrase.GetNonTerminalPos(alignPos[1]);
+			size_t &sourcePos	= alignPos[0]
+						,&targetPos	= alignPos[1];
 			
 			alignmentInfo.push_back(pair<size_t,size_t>(sourcePos, targetPos));
 		}

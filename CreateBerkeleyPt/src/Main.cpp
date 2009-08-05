@@ -17,22 +17,28 @@
 using namespace std;
 using namespace MosesBerkeleyPt;
 
-int main (int argc, char * const argv[]) {
+int main (int argc, char * const argv[])
+{
     // insert code here...
   std::cerr << "Starting\n";
 	
-	string filePath = "pt.txt";
-	
+	assert(argc == 6);
+
+	int numSourceFactors		= Moses::Scan<int>(argv[1])
+			, numTargetFactors	= Moses::Scan<int>(argv[2])
+			, numScores					= Moses::Scan<int>(argv[3]);
+	string filePath = argv[4]
+				,destPath = argv[5];
+
 	Moses::InputFileStream inStream(filePath);
 
 	DbWrapper dbWrapper;
-	dbWrapper.BeginSave(".", 1, 1, 5);
+	dbWrapper.BeginSave(destPath, numSourceFactors, numTargetFactors, numScores);
 	
 	size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
 
 	string line;
 	size_t lineNum = 0;
-	size_t numScores = NOT_FOUND;
 	long sourceNodeIdOld = 0;
 	TargetPhraseCollection *tpColl = NULL;
 
@@ -56,7 +62,7 @@ int main (int argc, char * const argv[]) {
 		TargetPhrase *targetPhrase = new TargetPhrase();
 		targetPhrase->CreateFromString(targetPhraseStr, dbWrapper.GetVocab());
 		targetPhrase->CreateAlignFromString(alignStr);
-		targetPhrase->CreateScoresFromString(scoresStr);
+		targetPhrase->CreateScoresFromString(scoresStr, numScores);
 		targetPhrase->CreateHeadwordsFromString(headWordsStr, dbWrapper.GetVocab());
 
 		long sourceNodeId = dbWrapper.SaveSource(sourcePhrase, *targetPhrase);

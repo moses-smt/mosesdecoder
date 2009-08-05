@@ -62,4 +62,13 @@ public:
 	void Save(const std::string &filePath);
 	
 };
+
+inline void DebugMem(const char *mem, size_t size)
+{
+	for (size_t i =0; i < size; i++)
+		printf("%x ", (const unsigned char) mem[i]);
+	printf("\n");
+	
+}
+
 }; // namespace
