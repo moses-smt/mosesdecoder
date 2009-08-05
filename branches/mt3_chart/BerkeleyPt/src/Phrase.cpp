@@ -30,14 +30,6 @@ void Phrase::CreateFromString(const std::string &phraseString, Vocab &vocab)
 	}
 }
 
-void DebugMem(char *mem, size_t size)
-{
-	for (size_t i =0; i < size; i++)
-		printf("%x", mem[i]);
-	printf("\n");
-	
-}
-
 }; // namespace
 
 

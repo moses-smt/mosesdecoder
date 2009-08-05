@@ -35,8 +35,7 @@ DbWrapper::~DbWrapper()
 }
 
 // helper callback fn for target secondary db
-int
-GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
+int GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
               const Dbt *pkey,   // primary db record's key
               const Dbt *pdata,  // primary db record's data
               Dbt *skey)         // secondary db record's key
@@ -46,9 +45,12 @@ GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
 	
 	// Now set the secondary key's data to be the representative's name
 	long targetId = *(long*) pdata->get_data();
-	skey->set_data(pdata->get_data());
+	skey->set_data(&targetId);
 	skey->set_size(sizeof(long));
 	
+	cerr << targetId << "=";
+	DebugMem((char*) pdata->get_data(), pdata->get_size());
+
 	// Return 0 to indicate that the record can be created/updated.
 	return (0);
 } 
@@ -282,6 +284,9 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 	char *mem = (char*) data.get_data();
 	size_t offset = 0;
 
+	cerr << "tpColl " << sourceNodeId << "=";
+	DebugMem(mem, data.get_size());
+
 	// size
 	int sizeColl;
 	memcpy(&sizeColl, mem, sizeof(int));
@@ -297,7 +302,8 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 																								, m_numScores);
 		offset += memUsed;
 		
-		tp->Load(m_dbTargetColl, m_numTargetFactors);
+		// actual words
+		tp->Load(m_dbTargetInd, m_numTargetFactors);
 
 		ret->AddTargetPhrase(tp);
 	}

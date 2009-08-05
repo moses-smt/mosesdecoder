@@ -340,32 +340,6 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
 	}
 }
 
-size_t Phrase::GetNonTerminalPos(size_t index) const
-{
-	assert(index < GetArity());
-	size_t currIndex = 0;
-	for (size_t pos = 0 ; pos < GetSize() ; pos++)
-	{
-		const Word &word = GetWord(pos);
-		if (word.IsNonTerminal())
-		{
-			if (currIndex == index)
-				return pos;
-			currIndex++;
-		}
-	}
-	
-	assert(false);	
-	return 0;
-}
-
-const Word &Phrase::GetNonTerminal(size_t index) const
-{
-	size_t pos = GetNonTerminalPos(index);
-	return GetWord(pos);
-}
-
-
 bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
 										, const vector<FactorType> &inputFactor) const
 {

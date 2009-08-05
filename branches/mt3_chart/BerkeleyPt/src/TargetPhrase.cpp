@@ -32,19 +32,17 @@ void TargetPhrase::CreateAlignFromString(const std::string &alignString)
 	}
 }
 
-void TargetPhrase::CreateScoresFromString(const std::string &inString)
+void TargetPhrase::CreateScoresFromString(const std::string &inString, size_t numScores)
 {
 	m_scores = Moses::Tokenize<float>(inString);
+	assert(m_scores.size() == numScores);
 }
 
 void TargetPhrase::CreateHeadwordsFromString(const std::string &inString, Vocab &vocab)
 {
 	std::vector<string> headWordsStr = Moses::Tokenize(inString);
 	assert(headWordsStr.size());
-	
-	m_headWords.push_back(Word());
-	m_headWords.push_back(Word());
-	
+		
 	m_headWords[0].CreateFromString(headWordsStr[0], vocab);
 	m_headWords[1].CreateFromString(headWordsStr[1], vocab);
 }
@@ -173,7 +171,6 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId
 	if (ret == 0)
 	{ // existing target
 		m_targetId = *(long*) data.get_data();
-		//cerr << "target phrase exists " << targetId << endl;
 	}
 	else
 	{ // new target. save
@@ -185,9 +182,10 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId
 		
 		m_targetId = nextTargetId;
 		++nextTargetId;
-		//cerr << "new target phrase " << targetId << endl;
 	}
 	
+	cerr << "tp " << m_targetId << "=";
+	DebugMem(mem, memUsed);
 	free(mem);
 	
 	return m_targetId;
@@ -289,8 +287,10 @@ void TargetPhrase::Load(const Db &db, size_t numTargetFactors)
 	int dbRet = const_cast<Db&>(db).get(NULL, &key, &data, 0);
 	assert(dbRet == 0);
 
-	size_t memUsed = ReadPhraseFromMemory((char*) data.get_data(), numTargetFactors);
-	assert(memUsed == data.get_size());
+	cerr << "tp " << m_targetId << "=";
+	DebugMem((const char*) data.get_data(), data.get_size());
+
+	size_t memUsed = ReadPhraseFromMemory((const char*) data.get_data(), numTargetFactors);
 }
 
 Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> &factors

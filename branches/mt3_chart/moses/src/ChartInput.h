@@ -25,8 +25,7 @@ protected:
 public:
 	ChartInput(FactorDirection direction)	
 		: Sentence(direction)
-	{
-	}
+	{}
 
 	InputTypeEnum GetType() const
 	{	return ChartSentenceInput;}

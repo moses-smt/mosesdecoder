@@ -102,6 +102,7 @@ size_t Hypothesis::CalcPrefix(Phrase &ret, size_t size) const
 	for (size_t pos = 0; pos < m_targetPhrase.GetSize(); ++pos)
 	{
 		const Word &word = m_targetPhrase.GetWord(pos);
+		cerr << word << endl;
 		if (word.IsNonTerminal())
 		{
 			size_t nonTermInd = m_wordsConsumedTargetOrder[pos];

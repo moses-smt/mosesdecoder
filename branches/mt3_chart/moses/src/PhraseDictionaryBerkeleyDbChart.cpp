@@ -29,7 +29,6 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 	const LMList &lmList = staticData.GetAllLM();
 
 	// source phrase
-	assert(src.GetType() == SentenceInput);
 	Phrase *cachedSource = new Phrase(src.GetSubString(range));
 	m_sourcePhrase.push_back(cachedSource);
 
@@ -145,6 +144,7 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 		if (targetPhraseCollection != NULL)
 		{
 			ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
+			cerr << *ret << endl;
 		}
 	}
 	ret->CreateChartRules(rulesLimit);

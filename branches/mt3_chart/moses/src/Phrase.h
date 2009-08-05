@@ -222,8 +222,6 @@ public:
 
 	size_t GetArity() const
 	{ return m_arity; }
-	size_t GetNonTerminalPos(size_t index) const;
-	const Word &GetNonTerminal(size_t index) const;
 
 };
 
