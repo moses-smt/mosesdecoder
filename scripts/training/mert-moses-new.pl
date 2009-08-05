@@ -250,11 +250,11 @@ Options:
   --continue  ... continue from the last achieved state
   --skip-decoder ... skip the decoder run for the first time, assuming that
                      we got interrupted during optimization
-  --shortest ... Use shortest reference length as effective reference length (default is true)
-  --average ... Use average reference length as effective reference length (default is false)
-  --closest ... Use closest reference length as effective reference length (default is false)
+  --shortest ... Use shortest reference length as effective reference length (mutually exclusive with --average and --closest)
+  --average ... Use average reference length as effective reference length (mutually exclusive with --shortest and --closest)
+  --closest ... Use closest reference length as effective reference length (mutually exclusive with --shortest and --average)
   --nocase ... Do not preserve case information; i.e. case-insensitive evaluation (default is false)
-  --nonorm ... Do not use text normalization
+  --nonorm ... Do not use text normalization (flag is not active, i.e. text is NOT normalized)
   --filtercmd=STRING  ... path to filter-model-given-input.pl
   --rootdir=STRING  ... where do helpers reside (if not given explicitly)
   --mertdir=STRING ... path to new mert implementation
