@@ -31,7 +31,7 @@ class Scorer {
     
   public:
         
-    Scorer(const string& name, const string& config): _name(name), _scoreData(0),_preserveCase(false){ 
+    Scorer(const string& name, const string& config): _name(name), _scoreData(0), _preserveCase(true){ 
         cerr << "Scorer config string: " << config << endl;
         size_t start = 0;
         while (start < config.size()) {
@@ -196,9 +196,12 @@ class StatisticsBasedScorer : public Scorer {
     //configure regularisation
     static string KEY_TYPE = "regtype";
     static string KEY_WINDOW = "regwin";
+    static string KEY_CASE = "case";
     static string TYPE_NONE = "none";
     static string TYPE_AVERAGE = "average";
     static string TYPE_MINIMUM = "min";
+    static string TRUE = "true";
+    static string FALSE = "false";
     
     
     string type = getConfig(KEY_TYPE,TYPE_NONE);
@@ -217,8 +220,15 @@ class StatisticsBasedScorer : public Scorer {
     _regularisationWindow = atoi(window.c_str());
     cerr << "Using scorer regularisation window: " << _regularisationWindow << endl;
     
+    string preservecase = getConfig(KEY_CASE,TRUE);
+    if (preservecase == TRUE) {
+        _preserveCase = true;
+    }else if (preservecase == FALSE) {
+        _preserveCase = false;
+    }
+    cerr << "Using case preservation: " << _preserveCase << endl;
 
-                
+
   }
     ~StatisticsBasedScorer(){};
     virtual void score(const candidates_t& candidates, const diffs_t& diffs,

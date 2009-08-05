@@ -25,7 +25,26 @@ enum BleuReferenceLengthStrategy { BLEU_AVERAGE, BLEU_SHORTEST, BLEU_CLOSEST };
  **/
 class BleuScorer: public StatisticsBasedScorer {
 	public:
-		BleuScorer(const string& config = "") : StatisticsBasedScorer("BLEU",config),_refLengthStrategy(BLEU_SHORTEST) {}
+		BleuScorer(const string& config = "") : StatisticsBasedScorer("BLEU",config),_refLengthStrategy(BLEU_CLOSEST) {
+    //configure regularisation
+    static string KEY_REFLEN = "reflen";
+    static string REFLEN_AVERAGE = "average";
+    static string REFLEN_SHORTEST = "shortest";
+    static string REFLEN_CLOSEST = "closest";
+    
+    
+    string reflen = getConfig(KEY_REFLEN,REFLEN_CLOSEST);
+    if (reflen == REFLEN_AVERAGE) {
+        _refLengthStrategy = BLEU_AVERAGE;
+    } else if (reflen == REFLEN_SHORTEST) {
+        _refLengthStrategy = BLEU_SHORTEST;
+    } else if (reflen == REFLEN_CLOSEST) {
+        _refLengthStrategy = BLEU_CLOSEST;
+    } else {
+        throw runtime_error("Unknown reference length strategy: " + reflen);
+    }
+    cerr << "Using reference length strategy: " << reflen << endl;
+}
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
 		virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
 		static const int LENGTH;	
