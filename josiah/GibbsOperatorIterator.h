@@ -37,6 +37,7 @@ namespace Josiah {
     virtual void reset() {
       m_size = NOT_FOUND;
     } 
+    size_t GetInputSize() { return m_size;}
   protected:
     size_t  m_size; //Size of input
   };

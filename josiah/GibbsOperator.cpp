@@ -162,6 +162,9 @@ void MergeSplitOperator::scan(
   }
   
   m_OpIterator->next(); 
+
+  if (static_cast<MergeSplitIterator*>(m_OpIterator)->GetCurPos() >= m_OpIterator->GetInputSize())
+    return;
   
   size_t splitIndex = static_cast<MergeSplitIterator*>(m_OpIterator)->GetCurPos() ; 
  
