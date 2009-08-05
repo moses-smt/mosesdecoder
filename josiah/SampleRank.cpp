@@ -138,9 +138,9 @@ int main(int argc, char** argv) {
   bool approxDocBleu;
   bool fix_margin;
   float margin, slack;
-  bool collectAll;
+  bool collectAll, sampleCtrAll;
   bool l1Normalize, l2Normalize;
-  float norm;
+  float norm, scale_margin;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -203,7 +203,9 @@ int main(int argc, char** argv) {
   ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated")
   ("l1normalize", po::value(&l1Normalize)->zero_tokens()->default_value(false), "L1normalize weight vector during MIRA samplerank training")
   ("l2normalize", po::value(&l2Normalize)->zero_tokens()->default_value(false), "L2normalize weight vector during MIRA samplerank training")
-  ("norm", po::value<float>(&norm)->default_value(1.0f), "Normalize weight vector to this value");
+  ("norm", po::value<float>(&norm)->default_value(1.0f), "Normalize weight vector to this value")
+  ("sample-ctr-all", po::value(&sampleCtrAll)->zero_tokens()->default_value(false), "When in CollectAllSamples model, increment collection ctr after each sample has been collected")
+  ("margin-scale", po::value<float>(&scale_margin)->default_value(1.0f), "Scale margin by this factor");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -226,6 +228,8 @@ int main(int argc, char** argv) {
   
   if (translation_distro) translate = true;
   if (derivation_distro) decode = true;
+  
+  bool defaultCtrIncrementer = !sampleCtrAll;
   
   if (mosesini.empty()) {
     cerr << "Error: No moses ini file specified" << endl;
@@ -381,10 +385,10 @@ int main(int argc, char** argv) {
     onlineLearner.reset(new PerceptronLearner(StaticData::Instance().GetWeights(), "PERCEPTRON", perceptron_lr));
   }
   else if (mira) {
-    onlineLearner.reset(new MiraLearner(StaticData::Instance().GetWeights(), "MIRA", fix_margin, margin, slack, weightNormalizer.get()));
+    onlineLearner.reset(new MiraLearner(StaticData::Instance().GetWeights(), "MIRA", fix_margin, margin, slack, scale_margin, weightNormalizer.get()));
   }
   else if (mira_plus) {
-    onlineLearner.reset(new MiraPlusLearner(StaticData::Instance().GetWeights(), "MIRA++", fix_margin, margin, slack, weightNormalizer.get()));
+    onlineLearner.reset(new MiraPlusLearner(StaticData::Instance().GetWeights(), "MIRA++", fix_margin, margin, slack, scale_margin, weightNormalizer.get()));
   }
   else if (cw) {
     onlineLearner.reset(new CWLearner(StaticData::Instance().GetWeights(), "CW", cwConfidence, cwInitialVariance));
@@ -464,7 +468,7 @@ int main(int argc, char** argv) {
 
     //Reset the online learner stats
     sampler.GetOnlineLearner()->reset();
-    sampler.Run(hypothesis,toc,source,extra_features,acceptor.get(), collectAll);
+    sampler.Run(hypothesis,toc,source,extra_features,acceptor.get(), collectAll, defaultCtrIncrementer);
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
     cerr << "Performed " << sampler.GetOnlineLearner()->GetNumUpdates() << " updates for this sentence" << endl;

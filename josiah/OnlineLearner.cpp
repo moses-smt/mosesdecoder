@@ -307,6 +307,10 @@ namespace Josiah {
     float scoreDiff = target->getScore() - curr->getScore();
     float gainDiff = target->getGain() - curr->getGain(); //%BLEU
     
+    //Scale the margin
+    gainDiff *= m_marginScaleFactor;
+  
+    //Or set it to a fixed value
     if (m_fixMargin) {
       gainDiff = m_margin;  
     }
@@ -351,7 +355,7 @@ namespace Josiah {
       IFVERBOSE(1) { 
         cerr << "Not doing updates cos constraints already satisified" << endl;
         cerr << "Target score" << target->getScore() << ", curr score " << curr->getScore() << endl;
-        cerr << "Target gain" << target->getGain() << ", curr gain " << curr->getGain() << endl;
+        cerr << "Target (scaled) gain" << target->getGain() * m_marginScaleFactor << ", curr gain " << curr->getGain() * m_marginScaleFactor << endl;
       }  
     }
     
@@ -365,7 +369,7 @@ namespace Josiah {
       target->updateWeightedScore();
       
      cerr << "Target score - curr score " << target->getScore() - curr->getScore() << endl;
-      cerr << "Target gain - curr gain " << target->getGain() - curr->getGain() << endl;
+      cerr << "Target scaled gain - curr scaled gain " << ((target->getGain() - curr->getGain()) *  m_marginScaleFactor ) << endl;
     }
     }
   }
@@ -392,17 +396,17 @@ namespace Josiah {
     float optimalGainScore = OptimalGainFV.InnerProduct(StaticData::Instance().GetAllWeights());
     
     IFVERBOSE(1) {
-      cerr << "Optimal deriv has gain " << sampler.GetOptimalGain() << " , fv : " << OptimalGainFV << " [ " << optimalGainScore << " ]" << endl;
-      cerr << "target deriv has gain " << target->getGain() << " , fv : " << targetFV << " [ " << targetScore << " ]" << endl;
-      cerr << "curr deriv has gain " << curr->getGain() << " , fv : " << currFV << " [ " << currScore << " ]" << endl;
+      cerr << "Optimal deriv has (scaled) gain " << m_marginScaleFactor * sampler.GetOptimalGain() << " , fv : " << OptimalGainFV << " [ " << optimalGainScore << " ]" << endl;
+      cerr << "target deriv has (scaled) gain " << m_marginScaleFactor * target->getGain() << " , fv : " << targetFV << " [ " << targetScore << " ]" << endl;
+      cerr << "curr deriv has (scaled) gain " << m_marginScaleFactor * curr->getGain() << " , fv : " << currFV << " [ " << currScore << " ]" << endl;
     }
     
     vector<float> b;
     vector<ScoreComponentCollection> distance;
     
-    float tgtcurrmargin = target->getGain() - curr->getGain();
-    float opttgtmargin = sampler.GetOptimalGain() - target->getGain();
-    float optcurrmargin = sampler.GetOptimalGain() - curr->getGain();
+    float tgtcurrmargin = m_marginScaleFactor * (target->getGain() - curr->getGain());
+    float opttgtmargin = m_marginScaleFactor * (sampler.GetOptimalGain() - target->getGain());
+    float optcurrmargin = m_marginScaleFactor * (sampler.GetOptimalGain() - curr->getGain());
     
     if (m_fixMargin) {
       tgtcurrmargin = m_margin;
@@ -451,16 +455,12 @@ namespace Josiah {
     }
     
     //Normalize
-    cerr << "Update wv " << update << endl;
     if (m_normalizer)
       m_normalizer->Normalize(update);
-    cerr << "After norm, Update wv " << update << endl;
-    
     m_currWeights.PlusEquals(update);
     IFVERBOSE(1) {
       cerr << "Curr Weights " << m_currWeights << endl;
     }
-    
     
     m_numUpdates++;
     UpdateCumul();
@@ -475,13 +475,13 @@ namespace Josiah {
       cerr << "Curr Weights : " << StaticData::Instance().GetWeights() << endl;
       
       cerr << "Target score - curr score " << targetScore - currScore << endl;
-      cerr << "Target gain - curr gain " << target->getGain() - curr->getGain() << endl;
+      cerr << "Target gain - curr gain " << m_marginScaleFactor * (target->getGain() - curr->getGain()) << endl;
       
       cerr << "Optimal score - target score " << optimalGainScore - targetScore << endl;
-      cerr << "Optimal gain - target gain " << sampler.GetOptimalGain() - target->getGain() << endl;
+      cerr << "Optimal gain - target gain " << m_marginScaleFactor * (sampler.GetOptimalGain() - target->getGain()) << endl;
       
       cerr << "Optimal score - curr score " << optimalGainScore - currScore << endl;
-      cerr << "Optimal gain - curr gain " << sampler.GetOptimalGain() - curr->getGain() << endl;
+      cerr << "Optimal gain - curr gain " << m_marginScaleFactor * (sampler.GetOptimalGain() - curr->getGain()) << endl;
     }
   }
 }

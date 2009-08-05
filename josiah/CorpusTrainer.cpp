@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
   string weight_dump_stem;
   bool greedy, fixedTemp;
   float fixed_temperature;
-  bool collectAll;
+  bool collectAll, sampleCtrAll;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -217,7 +217,8 @@ int main(int argc, char** argv) {
   ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
   ("fixed-temp-accept", po::value(&fixedTemp)->zero_tokens()->default_value(false), "Fixed temperature sample acceptor")
   ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor")
-  ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated");
+  ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated")
+  ("sample-ctr-all", po::value(&sampleCtrAll)->zero_tokens()->default_value(false), "When in CollectAllSamples model, increment collection ctr after each sample has been collected");
   
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -245,6 +246,7 @@ int main(int argc, char** argv) {
   
   if (translation_distro) translate = true;
   if (derivation_distro) decode = true;
+  bool defaultCtrIncrementer = !sampleCtrAll;
   
   expected_cbleu = false;
   if (expected_cbleu_gradient == true && expected_cbleu_da == false) expected_cbleu = true;
@@ -515,7 +517,7 @@ int main(int argc, char** argv) {
     timer.check("Running sampler");
     
     TranslationDelta::lmcalls = 0;
-    sampler.Run(hypothesis,toc,source,extra_features, acceptor.get(), collectAll);  
+    sampler.Run(hypothesis,toc,source,extra_features, acceptor.get(), collectAll, defaultCtrIncrementer);  
     
     
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);

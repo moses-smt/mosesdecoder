@@ -25,7 +25,8 @@ namespace Josiah {
       //derivations per translation
       Derivation d(sample);
       ostringstream os;
-      const vector<string>& sentence = d.getTargetSentence();
+      vector<string> sentence;
+      d.getTargetSentence(sentence);
       copy(sentence.begin(),sentence.end(),ostream_iterator<string>(os," "));
       m_derivByTrans[os.str()].insert(d);
     }
