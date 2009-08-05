@@ -71,11 +71,11 @@ void CorpusSamplerCollector::resample(int sent) {
     const Derivation* chosenDeriv = derivations[chosen]; 
     m_resampled_p[chosenDeriv] += 1.0/m_samples;
     MPI_VERBOSE(2, "Chosen deriv " << *chosenDeriv << endl)
-    MPI_VERBOSE(2, "Chosen deriv size" << chosenDeriv->getTargetSentence().size() << endl)
+    MPI_VERBOSE(2, "Chosen deriv size" << chosenDeriv->getTargetSentenceSize() << endl)
     
     m_featureVectors.at(j).PlusEquals(chosenDeriv->getFeatureValues());
     MPI_VERBOSE(2, "Feature vector : " << m_featureVectors.at(j) << endl)
-    m_lengths[j] += chosenDeriv->getTargetSentence().size();
+    m_lengths[j] += chosenDeriv->getTargetSentenceSize();
     MPI_VERBOSE(2, "Lengths : " << m_lengths.at(j) << endl)
       
     //Store chosen derivation's gain sufficient stats

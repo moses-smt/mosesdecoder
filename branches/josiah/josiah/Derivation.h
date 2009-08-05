@@ -43,7 +43,8 @@ class Sample;
   class Derivation {
     public:
       Derivation(const Sample& sample);
-      const std::vector<std::string>& getTargetSentence() const {return m_targetWords;}
+      void getTargetSentence(std::vector<std::string>&) const;
+      int getTargetSentenceSize() const;
       const ScoreComponentCollection& getFeatureValues() const {return m_featureValues;}
       float getScore() const {return m_score;}
       void getTargetFactors(std::vector<const Factor*>& sentence) const;
@@ -65,7 +66,7 @@ class Sample;
       std::vector<PhraseAlignment> m_alignments; //in target order
       ScoreComponentCollection m_featureValues;
       float m_score;
-      std::vector<std::string> m_targetWords;
+      //std::vector<std::string> m_targetWords;
   };
   
   struct DerivationLessThan {

@@ -38,7 +38,7 @@ namespace Josiah {
     
   }
   
-  void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options, const std::vector<Word>& source, const Josiah::feature_vector& extra_fv, SampleAcceptor* acceptor, bool collectAll) {
+  void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options, const std::vector<Word>& source, const Josiah::feature_vector& extra_fv, SampleAcceptor* acceptor, bool collectAllSamples, bool defaultCtrIncrementer) {
     Sample sample(starting,source,extra_fv);
     ResetGainStats();
     bool f = false;
@@ -53,7 +53,7 @@ namespace Josiah {
           m_operators[j]->disableGainFunction(); // do not compute gains during burn-in
         } 
       }
-      for (size_t i = 0; i < m_burninIts; ) {
+      for (size_t i = 0; i < m_burninIts; ++i) {
         if ((i+1) % 5 == 0) { VERBOSE(1,'.'); f=true;}
         if ((i+1) % 400 == 0) { VERBOSE(1,endl); f=false;}
         VERBOSE(2,"Gibbs burnin iteration: " << i << endl);
@@ -65,12 +65,8 @@ namespace Josiah {
           
           while (m_operators[j]->keepGoing() && i < m_burninIts) {
             m_operators[j]->scan(sample,*options);  
-            if (collectAll)
-              ++i;
           }
         }
-        if (!collectAll)
-          ++i;
       }
       if (f) VERBOSE(1,endl);
       if (m_as) {
@@ -96,8 +92,10 @@ namespace Josiah {
           VERBOSE(2,"Sampling with operator " << m_operators[j]->name() << endl);
           while (m_operators[j]->keepGoing() && keepGoing) {
             m_operators[j]->scan(sample,*options); 
-            if (collectAll) {
-              collectSample(sample, i);
+            if (collectAllSamples) {
+              collectSample(sample);
+              if (!defaultCtrIncrementer)
+                ++i;
               if (m_stopper->ShouldStop(i)) {
                 keepGoing = false;
                 break;
@@ -105,19 +103,27 @@ namespace Josiah {
             }
           }
         }
-        if (!collectAll) {
-          collectSample(sample, i);
-          if (m_stopper->ShouldStop(i)) {
-            keepGoing = false;
-            break;
-          }
+        if (!collectAllSamples) {
+          collectSample(sample);
+        }  
+        if (defaultCtrIncrementer) {
+          ++i;
+        }
+        if (m_stopper->ShouldStop(i)) {
+          keepGoing = false;
+          break;
         }
       }
       if (f) VERBOSE(1,endl);
     }
+
+    for (size_t j = 0; j < m_collectors.size(); ++j) {
+      cerr << "Collected " << m_collectors[j]->N() << " samples" << endl;
+    }
+
   }
   
-  void Sampler::collectSample(Sample& sample, size_t& ctr) {
+  void Sampler::collectSample(Sample& sample) {
     //currently feature_values contains the approx scores. The true score = imp score + approx score
     //importance weight
     ScoreComponentCollection importanceScores;
@@ -139,6 +145,5 @@ namespace Josiah {
     ScoreComponentCollection minusDeltaFV;
     minusDeltaFV.MinusEquals(importanceScores);
     sample.UpdateFeatureValues(minusDeltaFV);
-    ++ctr;
   }
 }

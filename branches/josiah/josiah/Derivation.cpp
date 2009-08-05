@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "Derivation.h"
 #include "Gibbler.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 using namespace Moses;
@@ -34,17 +35,12 @@ namespace Josiah {
   }
 
   Derivation::Derivation(const Sample& sample) {
-   
     m_featureValues = sample.GetFeatureValues();
-  
     const Hypothesis* currHypo = sample.GetTargetTail();
     while ((currHypo = (currHypo->GetNextHypo()))) {
       TargetPhrase targetPhrase = currHypo->GetTargetPhrase();
       m_alignments.push_back(
         PhraseAlignment(currHypo->GetCurrSourceWordsRange(), Phrase(targetPhrase)));
-      for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-        m_targetWords.push_back(targetPhrase.GetWord(i).GetFactor(0)->GetString());
-      }
     }
     
     const vector<float> & weights = StaticData::Instance().GetAllWeights();
@@ -66,7 +62,20 @@ namespace Josiah {
       }
     }
   }
+  
+  int Derivation::getTargetSentenceSize() const { //shortcut, extract tgt size from feature vector
+    return - m_featureValues.GetScoreForProducer(StaticData::Instance().GetWordPenaltyProducer());
+  }
 
+  void Derivation::getTargetSentence(std::vector<std::string>& targetWords ) const {
+    for (vector<PhraseAlignment>::const_iterator i = m_alignments.begin(); i != m_alignments.end(); ++i) {
+      const Phrase& targetPhrase = i->_target;
+      for (size_t j = 0; j < targetPhrase.GetSize(); ++j) {
+        targetWords.push_back(targetPhrase.GetWord(j).GetFactor(0)->GetString());
+      }
+    }
+  }
+  
   ostream& operator<<(ostream& out, const Derivation& d) {
     out << "Target: << ";
     for (size_t i = 0; i < d.m_alignments.size(); ++i) {
@@ -80,7 +89,5 @@ namespace Josiah {
     return out;
   }
   
-  
-
 }
 //namespace
