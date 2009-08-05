@@ -29,8 +29,10 @@ protected:
 
 	mutable std::vector<TargetPhraseCollection*> m_cache;
 	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
-	mutable std::vector<ProcessedRuleStackBerkeleyDb*>	m_runningNodesVec;
+	mutable std::list<Phrase*> m_sourcePhrase;
 
+	mutable std::vector<ProcessedRuleStackBerkeleyDb*>	m_runningNodesVec;
+	
 	void LoadTargetLookup();
 	
 public:
