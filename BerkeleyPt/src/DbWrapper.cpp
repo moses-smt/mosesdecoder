@@ -31,7 +31,12 @@ DbWrapper::DbWrapper()
 
 DbWrapper::~DbWrapper()
 {
+	m_dbMisc.close(0);
 	m_dbVocab.close(0);
+	m_dbSource.close(0);
+	m_dbTarget.close(0);
+	m_dbTargetInd.close(0);
+	m_dbTargetColl.close(0);
 }
 
 // helper callback fn for target secondary db
@@ -46,6 +51,7 @@ int GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
 	// Now set the secondary key's data to be the representative's name
 	long targetId = *(long*) pdata->get_data();
 	skey->set_data(&targetId);
+	//skey->set_data(pdata->get_data());
 	skey->set_size(sizeof(long));
 	
 	cerr << targetId << "=";
@@ -102,9 +108,11 @@ void DbWrapper::OpenFiles(const std::string &filePath)
 	m_dbTarget.open(NULL, (filePath + "/Target.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 	
 	// store id -> target phrase
+	m_dbTargetInd.set_error_stream(&cerr);
+	m_dbTargetInd.set_errpfx("SequenceExample");
 	m_dbTargetInd.open(NULL, (filePath + "/TargetInd.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
 	
-	m_dbTarget.associate(NULL, &m_dbTargetInd, GetIdFromTargetPhrase, 0);
+//	m_dbTarget.associate(NULL, &m_dbTargetInd, GetIdFromTargetPhrase, 0);
 	
 	// store source id -> target phrase coll
 	m_dbTargetColl.set_error_stream(&cerr);
@@ -235,7 +243,7 @@ long DbWrapper::SaveSourceWord(long currSourceNodeId, const Word &word)
 
 void DbWrapper::SaveTarget(TargetPhrase &phrase)
 {
-	phrase.SaveTargetPhrase(m_dbTarget, m_nextTargetNodeId
+	phrase.SaveTargetPhrase(m_dbTarget, m_dbTargetInd, m_nextTargetNodeId
 													, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
 

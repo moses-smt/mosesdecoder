@@ -157,7 +157,7 @@ size_t TargetPhrase::WriteScoresToMemory(char *mem) const
 	return memUsed;
 }
 
-long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId
+long TargetPhrase::SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, long &nextTargetId
 																		, int numScores, size_t sourceWordSize, size_t targetWordSize)
 {
 	size_t memUsed;
@@ -165,10 +165,10 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId
 	
 	Dbt key(mem, memUsed);
 	
-	// get
+	// see if target phrase already exist
 	Dbt data;
-	int ret = dbTarget.get(NULL, &key, &data, 0);
-	if (ret == 0)
+	int retDb = dbTarget.get(NULL, &key, &data, 0);
+	if (retDb == 0)
 	{ // existing target
 		m_targetId = *(long*) data.get_data();
 	}
@@ -177,10 +177,17 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, long &nextTargetId
 		data.set_data(&nextTargetId);
 		data.set_size(sizeof(long));
 		
-		int ret = dbTarget.put(NULL, &key, &data, DB_NOOVERWRITE);
-		assert(ret == 0);
+		retDb = dbTarget.put(NULL, &key, &data, DB_NOOVERWRITE);
+		assert(retDb == 0);
 		
 		m_targetId = nextTargetId;
+
+		// add to reverse index
+		Dbt keyInd(&m_targetId, sizeof(long))
+				,dataInd(mem, memUsed);
+		retDb = dbTargetInd.put(NULL, &keyInd, &dataInd, DB_NOOVERWRITE);
+		assert(retDb == 0);
+		
 		++nextTargetId;
 	}
 	
@@ -279,18 +286,38 @@ size_t TargetPhrase::ReadScoresFromMemory(const char *mem, size_t numScores)
 
 void TargetPhrase::Load(const Db &db, size_t numTargetFactors)
 {
+	Db &dbUnconst = const_cast<Db&>(db);
+
+	/*
+	// Iterate over the database, retrieving each record in turn.
+	Dbc *cursorp;
+	dbUnconst.cursor(NULL, &cursorp, 0); 
+	Dbt keyCursor, dataCursor;
+
+	int ret;
+	while ((ret = cursorp->get(&keyCursor, &dataCursor, DB_NEXT)) == 0)
+	{
+		assert(keyCursor.get_size() == sizeof(long));
+		long &targetId = *(long*) keyCursor.get_data();
+
+		cerr << "target ind " << targetId << "=";
+		DebugMem((const char*) dataCursor.get_data(), dataCursor.get_size());
+	}
+	*/
+
 	// create db data	
 	Dbt key(&m_targetId, sizeof(long));
 	Dbt data;
 	
 	// save
-	int dbRet = const_cast<Db&>(db).get(NULL, &key, &data, 0);
+	int dbRet = dbUnconst.get(NULL, &key, &data, 0);
 	assert(dbRet == 0);
 
 	cerr << "tp " << m_targetId << "=";
 	DebugMem((const char*) data.get_data(), data.get_size());
 
 	size_t memUsed = ReadPhraseFromMemory((const char*) data.get_data(), numTargetFactors);
+	assert(memUsed == data.get_size());
 }
 
 Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> &factors
