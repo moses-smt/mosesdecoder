@@ -59,7 +59,7 @@ public:
 	{ return m_align; }
 	size_t GetAlign(size_t sourcePos) const;
 	
-	long SaveTargetPhrase(Db &dbTarget, long &nextTargetId
+	long SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, long &nextTargetId
 												,int numScores, size_t sourceWordSize, size_t targetWordSize);	
 
 	size_t ReadOtherInfoFromMemory(const char *mem
