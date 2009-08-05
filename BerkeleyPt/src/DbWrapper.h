@@ -51,19 +51,23 @@ class DbWrapper
 	long SaveSourceWord(long currSourceNodeId, const Word &word);
 	
 	void SetMisc(const std::string &key, int value);
-	int GetMisc(const std::string &key);
 	void OpenFiles(const std::string &filePath);
-	
+
+	void SaveVocab();
+	void SaveMisc();
+
 public:
 	DbWrapper();
 	~DbWrapper();
-	void BeginSave(const std::string &filePath);
+	void BeginSave(const std::string &filePath
+								, int numSourceFactors, int	numTargetFactors, int numScores);
+	void EndSave();
+
 	void Load(const std::string &filePath);
 
-	void Save(const Vocab &vocab);
 	long SaveSource(const Phrase &phrase, const TargetPhrase &target);
 	void SaveTarget(TargetPhrase &phrase);
-	void Save(long sourceNodeId, const TargetPhraseCollection &tpColl);
+	void SaveTargetPhraseCollection(long sourceNodeId, const TargetPhraseCollection &tpColl);
 
 	Word *ConvertFromMosesSource(const std::vector<Moses::FactorType> &inputFactorsVec
 															 , const Moses::Word &origWord) const;
@@ -82,6 +86,11 @@ public:
 	{
 		return m_numTargetFactors * sizeof(VocabId) + sizeof(char);
 	}
+
+	Vocab &GetVocab()
+	{ return m_vocab; }
+
+	int GetMisc(const std::string &key);
 
 	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word) const;
 	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node) const;

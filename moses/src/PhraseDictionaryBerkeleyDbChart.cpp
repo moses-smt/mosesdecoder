@@ -24,6 +24,15 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 																																					,bool adhereTableLimit
 																																					,const CellCollection &cellColl) const
 {
+	const StaticData &staticData = StaticData::Instance();
+	float weightWP = staticData.GetWeightWordPenalty();
+	const LMList &lmList = staticData.GetAllLM();
+
+	// source phrase
+	assert(src.GetType() == SentenceInput);
+	Phrase *cachedSource = new Phrase(src.GetSubString(range));
+	m_sourcePhrase.push_back(cachedSource);
+
 	ChartRuleCollection *ret = new ChartRuleCollection();
 	m_chartTargetPhraseColl.push_back(ret);
 
@@ -123,7 +132,14 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 
 		const MosesBerkeleyPt::TargetPhraseCollection *tpcollBerkeleyDb = m_dbWrapper.GetTargetPhraseCollection(node);
 
-		const TargetPhraseCollection *targetPhraseCollection = m_dbWrapper.ConvertToMoses(*tpcollBerkeleyDb);
+		const TargetPhraseCollection *targetPhraseCollection = m_dbWrapper.ConvertToMoses(
+																															*tpcollBerkeleyDb
+																															,m_outputFactorsVec
+																															,*this
+																															,m_weight
+																															,weightWP
+																															,lmList
+																															,*cachedSource);
 		delete tpcollBerkeleyDb;
 
 		if (targetPhraseCollection != NULL)

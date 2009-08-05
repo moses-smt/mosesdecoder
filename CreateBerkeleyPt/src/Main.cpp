@@ -26,9 +26,7 @@ int main (int argc, char * const argv[]) {
 	Moses::InputFileStream inStream(filePath);
 
 	DbWrapper dbWrapper;
-	dbWrapper.BeginSave(".");
-
-	Vocab vocab;
+	dbWrapper.BeginSave(".", 1, 1, 5);
 	
 	size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
 
@@ -53,13 +51,13 @@ int main (int argc, char * const argv[]) {
 								,&scoresStr				= tokens[4];
 						
 		Phrase sourcePhrase;
-		sourcePhrase.CreateFromString(sourcePhraseStr, vocab);
+		sourcePhrase.CreateFromString(sourcePhraseStr, dbWrapper.GetVocab());
 		
 		TargetPhrase *targetPhrase = new TargetPhrase();
-		targetPhrase->CreateFromString(targetPhraseStr, vocab);
+		targetPhrase->CreateFromString(targetPhraseStr, dbWrapper.GetVocab());
 		targetPhrase->CreateAlignFromString(alignStr);
 		targetPhrase->CreateScoresFromString(scoresStr);
-		targetPhrase->CreateHeadwordsFromString(headWordsStr, vocab);
+		targetPhrase->CreateHeadwordsFromString(headWordsStr, dbWrapper.GetVocab());
 
 		long sourceNodeId = dbWrapper.SaveSource(sourcePhrase, *targetPhrase);
 		dbWrapper.SaveTarget(*targetPhrase);
@@ -68,7 +66,7 @@ int main (int argc, char * const argv[]) {
 		{ // different source from last time. write out target phrase coll
 			if (tpColl)
 			{ // could be 1st. tpColl == NULL
-				dbWrapper.Save(sourceNodeIdOld, *tpColl);
+				dbWrapper.SaveTargetPhraseCollection(sourceNodeIdOld, *tpColl);
 			}
 
 			// new coll
@@ -87,7 +85,7 @@ int main (int argc, char * const argv[]) {
 	
 	delete tpColl;
 
-	dbWrapper.Save(vocab);
+	dbWrapper.EndSave();
 	
 	std::cerr << "Finished\n";
   return 0;

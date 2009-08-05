@@ -64,14 +64,21 @@ void DbWrapper::Load(const string &filePath)
 	
 }
 
-void DbWrapper::BeginSave(const string &filePath)
+void DbWrapper::BeginSave(const string &filePath
+													, int numSourceFactors, int	numTargetFactors, int numScores)
 {
 	OpenFiles(filePath);	
-	m_numSourceFactors = 1;
-	m_numTargetFactors = 1;
-	m_numScores = 5;
+	m_numSourceFactors = numSourceFactors;
+	m_numTargetFactors = numTargetFactors;
+	m_numScores = numScores;
 }
 	
+void DbWrapper::EndSave()
+{
+	SaveVocab();
+	SaveMisc();
+}
+
 void DbWrapper::OpenFiles(const std::string &filePath)
 {
 	m_dbMisc.set_error_stream(&cerr);
@@ -104,7 +111,15 @@ void DbWrapper::OpenFiles(const std::string &filePath)
 	
 }
 
-	
+void DbWrapper::SaveMisc()
+{
+	SetMisc("Version", 1);
+
+	SetMisc("NumSourceFactors", m_numSourceFactors);
+	SetMisc("NumTargetFactors", m_numTargetFactors);
+	SetMisc("NumScores", m_numScores);
+}
+
 void DbWrapper::SetMisc(const string &key, int value)
 {
 	char *keyData = (char*) malloc(key.size() + 1);
@@ -113,11 +128,10 @@ void DbWrapper::SetMisc(const string &key, int value)
 	
 	Dbt valueDb(&value, sizeof(int));
 	
-	int ret = m_dbMisc.put(NULL, &keyDb, &valueDb, DB_NOOVERWRITE);
-	if (ret == DB_KEYEXIST) 
-	{
-		m_dbMisc.err(ret, "Put failed because key %f already exists", keyData);
-	}	
+	int retDb = m_dbMisc.put(NULL, &keyDb, &valueDb, DB_NOOVERWRITE);
+	assert(retDb == retDb);
+
+	free(keyData);
 }
 
 int DbWrapper::GetMisc(const std::string &key)
@@ -132,8 +146,8 @@ int DbWrapper::GetMisc(const std::string &key)
 	
 	free(keyData);
 	
-	int *value = (int*) valueDb.get_data();
-	return *value;
+	int &value = *(int*) valueDb.get_data();
+	return value;
 }
 	
 Word *DbWrapper::CreateSouceWord() const
@@ -146,10 +160,10 @@ Word *DbWrapper::CreateTargetWord() const
 	return new Word(m_numTargetFactors);
 }
 
-void DbWrapper::Save(const Vocab &vocab)
+void DbWrapper::SaveVocab()
 {
 	Vocab::const_iterator iterVocab;
-	for (iterVocab = vocab.begin(); iterVocab != vocab.end(); ++iterVocab)
+	for (iterVocab = m_vocab.begin(); iterVocab != m_vocab.end(); ++iterVocab)
 	{
 		const string &word = iterVocab->first;
 		char *wordChar = (char*) malloc(word.size() + 1);
@@ -159,11 +173,8 @@ void DbWrapper::Save(const Vocab &vocab)
 		Dbt key(wordChar, word.size() + 1);
 		Dbt data(&vocabId, sizeof(VocabId));
 		
-		int ret = m_dbVocab.put(NULL, &key, &data, DB_NOOVERWRITE);
-		if (ret == DB_KEYEXIST) 
-		{
-			m_dbVocab.err(ret, "Put failed because key %f already exists", wordChar);
-		}
+		int retDb = m_dbVocab.put(NULL, &key, &data, DB_NOOVERWRITE);
+		assert(retDb == 0); 
 		
 		free(wordChar);
 	}
@@ -226,7 +237,7 @@ void DbWrapper::SaveTarget(TargetPhrase &phrase)
 													, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
 
-void DbWrapper::Save(long sourceNodeId, const TargetPhraseCollection &tpColl)
+void DbWrapper::SaveTargetPhraseCollection(long sourceNodeId, const TargetPhraseCollection &tpColl)
 {
 	tpColl.Save(m_dbTargetColl, sourceNodeId, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
