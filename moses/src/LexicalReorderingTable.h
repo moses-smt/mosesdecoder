@@ -7,7 +7,9 @@
 #include <string>
 #include <iostream>
 
+#ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
+#endif
 
 //moses dependencies:
 #include "TypeDef.h"
@@ -135,7 +137,11 @@ class LexicalReorderingTableTree : public LexicalReorderingTable {
  private:
   //typedef LexicalReorderingCand          CandType;
   typedef std::map< std::string, Candidates > CacheType;
+  #ifdef WITH_THREADS
   typedef boost::thread_specific_ptr<PrefixTreeMap>        TableType;
+  #else
+  typedef std::auto_ptr<PrefixTreeMap> TableType;
+  #endif
   
   static const int SourceVocId = 0;
   static const int TargetVocId = 1;

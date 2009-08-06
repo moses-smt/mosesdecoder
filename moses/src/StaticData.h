@@ -26,7 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <memory>
 
+#ifdef WITH_THREADS
 #include <boost/thread/mutex.hpp>
+#endif
 
 #include "TypeDef.h"
 #include "ScoreIndexManager.h"
@@ -149,9 +151,10 @@ protected:
 	mutable std::map<std::pair<size_t, Phrase>, pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
 	size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
     //FIXME: It would be better to use a reader/writer lock for the cache, but this would require boost > 1.35
-    //Also, cache reads have to update the last access time, so rw lock may not buy that much...   
+    //Also, cache reads have to update the last access time, so rw lock may not buy that much...
+#ifdef WITH_THREADS   
     mutable boost::mutex m_transOptCacheMutex;
-
+#endif
 	bool m_isAlwaysCreateDirectTranslationOption;
 	//! constructor. only the 1 static variable can be created
 

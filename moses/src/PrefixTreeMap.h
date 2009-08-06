@@ -6,7 +6,9 @@
 #include<iostream>
 #include <map>
 
+#ifdef WITH_THREADS
 #include <boost/thread/mutex.hpp>
+#endif
 
 
 #include "PrefixTree.h"
