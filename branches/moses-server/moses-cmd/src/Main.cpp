@@ -61,7 +61,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "hypergraph.pb.h"
 #endif
 
-#include "ThreadPool.h"
 
 using namespace std;
 using namespace Moses;

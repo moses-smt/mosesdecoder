@@ -999,7 +999,9 @@ void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::
 const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
 {
 	std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
+#ifdef WITH_THREADS   
 	boost::mutex::scoped_lock lock(m_transOptCacheMutex);
+#endif   
 	std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
 			= m_transOptCache.find(key);
 	if (iter == m_transOptCache.end())
@@ -1045,7 +1047,9 @@ void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Ph
 {
 	std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
 	TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
-    boost::mutex::scoped_lock lock(m_transOptCacheMutex); 
+#ifdef WITH_THREADS   
+    boost::mutex::scoped_lock lock(m_transOptCacheMutex);
+#endif
 	m_transOptCache[key] = make_pair( storedTransOptList, clock() );
 	ReduceTransOptCache();
 }

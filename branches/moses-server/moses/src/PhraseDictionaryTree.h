@@ -6,7 +6,9 @@
 #include <vector>
 #include <iostream>
 
+#ifdef WITH_THREADS
 #include <boost/thread/mutex.hpp>
+#endif
 
 #include "TypeDef.h"
 #include "Dictionary.h"

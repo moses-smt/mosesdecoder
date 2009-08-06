@@ -68,8 +68,10 @@ void PrefixTreeMap::FreeMemory() {
 
 static WordVoc* ReadVoc(const std::string& filename) {
     static std::map<std::string,WordVoc*> vocs;
+#ifdef WITH_THREADS
     boost::mutex mutex;
     boost::mutex::scoped_lock lock(mutex);
+#endif
     std::map<std::string,WordVoc*>::iterator vi = vocs.find(filename);
     if (vi == vocs.end()) {
         WordVoc* voc = new WordVoc();

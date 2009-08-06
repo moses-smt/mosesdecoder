@@ -27,7 +27,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <string>
 
+#ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
+#endif
 
 #include "Phrase.h"
 #include "TargetPhrase.h"
@@ -114,8 +116,11 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
     size_t m_tableLimit;
     //Only instantiate one of these
     std::auto_ptr<PhraseDictionary> m_memoryDictionary;
+    #ifdef WITH_THREADS
     boost::thread_specific_ptr<PhraseDictionary>  m_treeDictionary;
-    
+    #else
+    std::auto_ptr<PhraseDictionary> m_treeDictionary;
+    #endif
 
 };
 
