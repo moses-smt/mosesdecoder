@@ -150,8 +150,8 @@ protected:
 	bool m_useTransOptCache; //! flag indicating, if the persistent translation option cache should be used
 	mutable std::map<std::pair<size_t, Phrase>, pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
 	size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
-    //FIXME: It would be better to use a reader/writer lock for the cache, but this would require boost > 1.35
-    //Also, cache reads have to update the last access time, so rw lock may not buy that much...
+    //FIXME: Single lock for cache not most efficient. However using a 
+    //reader-writer for LRU cache is tricky - how to record last used time? 
 #ifdef WITH_THREADS   
     mutable boost::mutex m_transOptCacheMutex;
 #endif
