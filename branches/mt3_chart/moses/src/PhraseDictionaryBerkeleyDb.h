@@ -25,7 +25,6 @@ protected:
 	std::vector<float> m_weight;
 
 	MosesBerkeleyPt::DbWrapper m_dbWrapper;
-	MosesBerkeleyPt::SourcePhraseNode *m_initNode;
 
 	mutable std::vector<const TargetPhraseCollection*> m_cache;
 	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;

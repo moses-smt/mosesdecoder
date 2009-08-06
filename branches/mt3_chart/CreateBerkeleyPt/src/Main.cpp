@@ -88,7 +88,12 @@ int main (int argc, char * const argv[])
 		}
 
 	}
-	
+
+	// save the last coll
+	if (tpColl)
+	{ // could be 1st. tpColl == NULL
+		dbWrapper.SaveTargetPhraseCollection(sourceNodeIdOld, *tpColl);
+	}
 	delete tpColl;
 
 	dbWrapper.EndSave();

@@ -59,6 +59,9 @@ public:
 	{ return m_align; }
 	size_t GetAlign(size_t sourcePos) const;
 	
+	const std::vector<float> &GetScores() const
+	{ return m_scores; }
+
 	long SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, long &nextTargetId
 												,int numScores, size_t sourceWordSize, size_t targetWordSize);	
 

@@ -118,13 +118,14 @@ void PhraseDictionaryBerkeleyDb::InitializeForInput(const InputType& input)
 
 	for (size_t ind = 0; ind < m_runningNodesVec.size(); ++ind)
 	{
-		ProcessedRuleBerkeleyDb *initProcessedRule = new ProcessedRuleBerkeleyDb(*m_initNode);
+		ProcessedRuleBerkeleyDb *initProcessedRule = new ProcessedRuleBerkeleyDb(m_dbWrapper.GetInitNode());
 
 		ProcessedRuleStackBerkeleyDb *processedStack = new ProcessedRuleStackBerkeleyDb(sourceSize - ind + 1);
 		processedStack->Add(0, initProcessedRule); // init rule. stores the top node in tree
 
 		m_runningNodesVec[ind] = processedStack;
 	}
+
 }
 
 void PhraseDictionaryBerkeleyDb::CleanUp()
