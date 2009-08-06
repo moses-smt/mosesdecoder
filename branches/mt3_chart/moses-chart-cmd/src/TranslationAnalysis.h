@@ -1,4 +1,4 @@
-// $Id: TranslationAnalysis.h 552 2009-01-09 14:05:34Z hieu $
+// $Id$
 
 /*
  * also see moses/SentenceStats

@@ -1,4 +1,4 @@
-// $Id: IOWrapper.h 585 2009-01-20 22:24:48Z hieu $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
