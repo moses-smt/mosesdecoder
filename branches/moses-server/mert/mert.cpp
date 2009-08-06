@@ -242,7 +242,4 @@ int main (int argc, char **argv) {
  res<<bestP<<endl;
  
  PrintUserTime("Stopping...");
- /*
-	timer.stop("Stopping...");
-		*/
 }

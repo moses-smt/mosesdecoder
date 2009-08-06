@@ -271,6 +271,8 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 {
   // some stateless score producers cache their values in the translation
 	// option: add these here
+  // language model scores for n-grams completely contained within a target
+  // phrase are also included here
 	m_scoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
 
 	const StaticData &staticData = StaticData::Instance();
