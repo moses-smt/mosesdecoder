@@ -72,7 +72,8 @@ public:
 
 	void Load(const Db &db, size_t numTargetFactors);
 	
-	Moses::TargetPhrase *ConvertToMoses(const std::vector<Moses::FactorType> &factors
+	Moses::TargetPhrase *ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
+																			, const std::vector<Moses::FactorType> &outputFactors
 																			, const Vocab &vocab
 																			, const Moses::ScoreProducer &phraseDict
 																			, const std::vector<float> &weightT

@@ -121,8 +121,8 @@ public:
 		return m_wordsConsumedTargetOrder[pos]; 
 	}
 
-	const Moses::Word &GetHeadWord() const
-	{ return m_targetPhrase.GetHeadWord(); }
+	const Moses::Word &GetTargetLHS() const
+	{ return m_targetPhrase.GetTargetLHS(); }
 
 	size_t GetNumTargetTerminals() const
 	{ 

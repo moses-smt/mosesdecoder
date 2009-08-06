@@ -29,6 +29,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
+Sentence::Sentence(FactorDirection direction)	
+: Phrase(direction)
+, InputType()
+{
+	// TODO hack
+	Word word;
+	const Factor *factor = FactorCollection::Instance().AddFactor(
+														Input
+														, 0
+														, StaticData::Instance().GetDefaultNonTerminal());
+	word.SetFactor(0, factor);
+	m_defaultLabelList.push_back(word);
+}
 
 void Sentence::InitStartEndWord(Word &word, bool start)
 {
@@ -51,7 +64,6 @@ void Sentence::InitStartEndWord(Word &word, bool start)
 		}
 		
 		word.SetFactor(factorType, factor);
-
 	}
 }
 

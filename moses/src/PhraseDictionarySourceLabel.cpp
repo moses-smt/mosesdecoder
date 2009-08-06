@@ -251,7 +251,7 @@ bool PhraseDictionarySourceLabel::Load(const std::vector<FactorType> &input
 		Word headWord;
 		headWord.CreateFromString(Input, input,headString);
 
-		targetPhrase->SetHeadWord(headWord);
+		targetPhrase->SetTargetLHS(headWord);
 
 		// remove strings
 		RemoveAllInColl(targetPhraseVector);
@@ -424,12 +424,12 @@ bool PhraseDictionarySourceLabel::LoadBackoff(const std::vector<FactorType> &inp
 		targetPhrase->CreateAlignmentInfo(alignmentInfo);
 		targetPhrase->SetDebugOutput(string("Backoff pt ") +  line);
 		
-		// head word
+		// lhs
 		headString = headString.substr(1, headString.size() - 2);
 		Word headWord;
 		headWord.CreateFromString(Input, input,headString);
 		
-		targetPhrase->SetHeadWord(headWord);
+		targetPhrase->SetTargetLHS(headWord);
 		
 		// remove strings
 		RemoveAllInColl(targetPhraseVector);

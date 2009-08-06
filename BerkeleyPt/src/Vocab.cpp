@@ -32,8 +32,7 @@ void Vocab::Load(Db &db)
 	{
 		VocabId &vocabId= *(VocabId*) data.get_data();
 		char *str = (char*) key.get_data();
-		cerr << vocabId << "=" << str << endl;
-
+		
 		m_vocabColl[str] = vocabId;
 	}
 

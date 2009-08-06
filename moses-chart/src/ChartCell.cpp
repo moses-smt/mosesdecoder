@@ -309,7 +309,7 @@ void ChartCell::SortHypotheses()
 		for (iter = hyposOrdered.begin(); iter != hyposOrdered.end(); ++iter)
 		{
 			const Hypothesis *hypo = *iter;
-			const Word &headWord = hypo->GetHeadWord();
+			const Word &headWord = hypo->GetTargetLHS();
 			std::vector<const Hypothesis*> &vec = m_hyposOrdered[headWord];
 			vec.push_back(hypo);
 		}

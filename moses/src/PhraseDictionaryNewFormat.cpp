@@ -222,9 +222,9 @@ namespace Moses
 
 			// rest of target phrase
 			targetPhrase->CreateAlignmentInfo(alignmentInfo);
-			targetPhrase->SetHeadWord(targetHeadWord);
+			targetPhrase->SetTargetLHS(targetHeadWord);
 			targetPhrase->SetDebugOutput(string("New Format pt ") + line);
-			targetPhrase->SetHeadWord(targetHeadWord);
+			targetPhrase->SetTargetLHS(targetHeadWord);
 			
 			// component score, for n-best output
 			std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);

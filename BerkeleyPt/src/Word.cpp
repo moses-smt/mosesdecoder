@@ -79,7 +79,9 @@ size_t Word::ReadFromMemory(const char *mem, size_t numFactors)
 	return size;
 }
 
-Moses::Word *Word::ConvertToMosesTarget(const std::vector<Moses::FactorType> &outputFactorsVec, const Vocab &vocab) const
+Moses::Word *Word::ConvertToMoses(Moses::FactorDirection direction
+																	,const std::vector<Moses::FactorType> &outputFactorsVec
+																	, const Vocab &vocab) const
 {
 	Moses::Word *ret = new Moses::Word(m_isNonTerminal);
 
@@ -87,7 +89,7 @@ Moses::Word *Word::ConvertToMosesTarget(const std::vector<Moses::FactorType> &ou
 	{
 		Moses::FactorType factorType = outputFactorsVec[ind];
 		VocabId vocabId = m_factors[ind];
-		const Moses::Factor *factor = vocab.GetFactor(vocabId, factorType, Moses::Output, IsNonTerminal());
+		const Moses::Factor *factor = vocab.GetFactor(vocabId, factorType, direction, IsNonTerminal());
 		ret->SetFactor(factorType, factor);
 	}
 	
