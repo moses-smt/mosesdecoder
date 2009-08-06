@@ -15,9 +15,7 @@
 using namespace std;
 
 namespace Moses
-{
-
-	
+{	
 const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 																																					InputType const& src
 																																					,WordsRange const& range
@@ -54,7 +52,7 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 		if (startPos == absEndPos)
 		{
 			const Word &sourceWord = src.GetWord(absEndPos);
-			MosesBerkeleyPt::Word *sourceWordBerkeleyDb = m_dbWrapper.ConvertFromMosesSource(m_inputFactorsVec, sourceWord);
+			MosesBerkeleyPt::Word *sourceWordBerkeleyDb = m_dbWrapper.ConvertFromMoses(Input, m_inputFactorsVec, sourceWord);
 	
 			if (sourceWordBerkeleyDb != NULL)
 			{
@@ -93,34 +91,64 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 			stackInd = relEndPos + 1;
 		}
 
-		// get headwords in this span from chart
+		// get target headwords in this span from chart
 		const vector<Word> &headWords = cellColl.GetHeadwords(WordsRange(startPos, endPos));
-		vector<Word>::const_iterator iterHeadWords;
 
-		// go thru each headword & see if in phrase table
-		for (iterHeadWords = headWords.begin(); iterHeadWords != headWords.end(); ++iterHeadWords)
+		// go through each SOURCE lhs
+		const Sentence &sentence = static_cast<const Sentence&>(src);
+		const LabelList &labelList = sentence.GetLabelList(startPos, endPos);
+		LabelList::const_iterator iterLabelList;
+		for (iterLabelList = labelList.begin(); iterLabelList != labelList.end(); ++iterLabelList)
 		{
-			const Word &headWord = *iterHeadWords;
-			MosesBerkeleyPt::Word *headWordBerkeleyDb = m_dbWrapper.ConvertFromMosesSource(m_inputFactorsVec, headWord);
-
-			if (headWordBerkeleyDb != NULL)
+			const Word &sourceLabel = *iterLabelList;
+			MosesBerkeleyPt::Word *sourceLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(Input, m_inputFactorsVec, sourceLabel);
+		
+			if (sourceLHSBerkeleyDb == NULL)
 			{
-				const MosesBerkeleyPt::SourcePhraseNode *node = m_dbWrapper.GetChild(prevNode, *headWordBerkeleyDb);
-				if (node != NULL)
-				{
-					//const Word &sourceWord = node->GetSourceWord();
-					WordConsumed *newWordConsumed = new WordConsumed(startPos, endPos
-																														, headWord
-																														, prevWordConsumed);
-
-					ProcessedRuleBerkeleyDb *processedRule = new ProcessedRuleBerkeleyDb(*node, newWordConsumed);
-					runningNodes.Add(stackInd, processedRule);
-				}
-
-				delete headWordBerkeleyDb;
+				delete sourceLHSBerkeleyDb;
+				continue; // vocab not in pt. node definately won't be in there
 			}
-		} // for (iterHeadWords
-	}
+
+			const MosesBerkeleyPt::SourcePhraseNode *sourceNode = m_dbWrapper.GetChild(prevNode, *sourceLHSBerkeleyDb);
+			delete sourceLHSBerkeleyDb;
+
+			if (sourceNode == NULL)
+				continue; // didn't find source node
+
+			// go through each TARGET lhs
+			vector<Word>::const_iterator iterHeadWords;
+			for (iterHeadWords = headWords.begin(); iterHeadWords != headWords.end(); ++iterHeadWords)
+			{
+				const Word &headWord = *iterHeadWords;
+				MosesBerkeleyPt::Word *headWordBerkeleyDb = m_dbWrapper.ConvertFromMoses(Output, m_outputFactorsVec, headWord);
+
+				if (headWordBerkeleyDb == NULL)
+					continue;
+
+				const MosesBerkeleyPt::SourcePhraseNode *node = m_dbWrapper.GetChild(*sourceNode, *headWordBerkeleyDb);
+				delete headWordBerkeleyDb;
+
+				if (node == NULL)
+					continue;
+
+				// found matching entry
+				//const Word &sourceWord = node->GetSourceWord();
+				WordConsumed *newWordConsumed = new WordConsumed(startPos, endPos
+																													, headWord
+																													, prevWordConsumed);
+
+				ProcessedRuleBerkeleyDb *processedRule = new ProcessedRuleBerkeleyDb(*node, newWordConsumed);
+				runningNodes.Add(stackInd, processedRule);
+
+				m_sourcePhraseNode.push_back(node);
+
+			} // for (iterHeadWords
+
+			delete sourceNode;
+
+		} // for (iterLabelList
+	} // for (size_t ind = 0; ind < savedNodeColl.size(); ++ind)
+
 
 	// return list of target phrases
 	const ProcessedRuleCollBerkeleyDb &nodes = runningNodes.Get(relEndPos + 1);
@@ -138,6 +166,7 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 
 		const TargetPhraseCollection *targetPhraseCollection = m_dbWrapper.ConvertToMoses(
 																															*tpcollBerkeleyDb
+																															,m_inputFactorsVec
 																															,m_outputFactorsVec
 																															,*this
 																															,m_weight

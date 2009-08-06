@@ -30,12 +30,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-
 class WordsRange;
 class PhraseDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
 
+typedef std::vector<Word> LabelList;
 
 /***
  * A Phrase class with an ID. Used specifically as source input so contains functionality to read 
@@ -54,11 +54,11 @@ protected:
 	std::vector <TranslationOption*> m_xmlOptionsList;
 	std::vector <bool> m_xmlCoverageMap;
 
+	LabelList m_defaultLabelList;
+
 	void InitStartEndWord(Word &word, bool start);
 public:
-	Sentence(FactorDirection direction)	: Phrase(direction), InputType()
-	{
-	}
+	Sentence(FactorDirection direction);
 
 	InputTypeEnum GetType() const
 	{	return SentenceInput;}
@@ -91,6 +91,10 @@ public:
 	void Print(std::ostream& out) const;
 
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
+
+	virtual const LabelList &GetLabelList(size_t startPos, size_t endPos) const
+	{	return m_defaultLabelList;	}
+
 };
 
 

@@ -50,7 +50,9 @@ public:
 	size_t WriteToMemory(char *mem) const;
 	size_t ReadFromMemory(const char *mem, size_t numFactors);
 	
-	Moses::Word *ConvertToMosesTarget(const std::vector<Moses::FactorType> &outputFactorsVec, const Vocab &vocab) const;
+	Moses::Word *ConvertToMoses(Moses::FactorDirection direction
+														, const std::vector<Moses::FactorType> &outputFactorsVec
+														, const Vocab &vocab) const;
 	
 };
 

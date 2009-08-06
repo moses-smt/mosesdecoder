@@ -18,9 +18,6 @@ void TargetPhraseCollection::Save(Db &db, long sourceNodeId, int numScores, size
 	size_t memUsed;
 	char *mem = WriteToMemory(memUsed, numScores, sourceWordSize, targetWordSize);
 
-	cerr << "tpColl " << sourceNodeId << "=";
-	DebugMem(mem, memUsed);
-
 	Dbt key(&sourceNodeId, sizeof(sourceNodeId));
 	Dbt data(mem, memUsed);
 

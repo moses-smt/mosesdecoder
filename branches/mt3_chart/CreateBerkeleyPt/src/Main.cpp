@@ -65,8 +65,11 @@ int main (int argc, char * const argv[])
 		targetPhrase->CreateScoresFromString(scoresStr, numScores);
 		targetPhrase->CreateHeadwordsFromString(headWordsStr, dbWrapper.GetVocab());
 
+		cerr << line << endl;
 		long sourceNodeId = dbWrapper.SaveSource(sourcePhrase, *targetPhrase);
 		dbWrapper.SaveTarget(*targetPhrase);
+
+		cerr << endl;
 
 		if (sourceNodeIdOld != sourceNodeId)
 		{ // different source from last time. write out target phrase coll

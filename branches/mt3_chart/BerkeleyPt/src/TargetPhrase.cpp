@@ -191,8 +191,6 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, long &nextTar
 		++nextTargetId;
 	}
 	
-	cerr << "tp " << m_targetId << "=";
-	DebugMem(mem, memUsed);
 	free(mem);
 	
 	return m_targetId;
@@ -313,14 +311,12 @@ void TargetPhrase::Load(const Db &db, size_t numTargetFactors)
 	int dbRet = dbUnconst.get(NULL, &key, &data, 0);
 	assert(dbRet == 0);
 
-	cerr << "tp " << m_targetId << "=";
-	DebugMem((const char*) data.get_data(), data.get_size());
-
 	size_t memUsed = ReadPhraseFromMemory((const char*) data.get_data(), numTargetFactors);
 	assert(memUsed == data.get_size());
 }
 
-Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> &factors
+Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
+																		, const std::vector<Moses::FactorType> &outputFactors
 																		, const Vocab &vocab
 																		, const Moses::ScoreProducer &phraseDict
 																		, const std::vector<float> &weightT
@@ -336,7 +332,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 	// words
 	for (size_t pos = 0; pos < GetSize(); ++pos)
 	{
-		Moses::Word *mosesWord = GetWord(pos).ConvertToMosesTarget(factors, vocab);
+		Moses::Word *mosesWord = GetWord(pos).ConvertToMoses(Moses::Output, outputFactors, vocab);
 		ret->AddWord(*mosesWord);
 		delete mosesWord;
 	}
@@ -351,6 +347,15 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 		ret->AddAlignment(entry);
 	}
 	
+	// lhs
+	Moses::Word *lhs = m_headWords[0].ConvertToMoses(Moses::Input, inputFactors, vocab);
+	ret->SetSourceLHS(*lhs);
+	delete lhs;
+
+	lhs = m_headWords[1].ConvertToMoses(Moses::Output, outputFactors, vocab);
+	ret->SetTargetLHS(*lhs);
+	delete lhs;
+
 	return ret;
 	
 }

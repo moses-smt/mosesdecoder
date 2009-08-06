@@ -212,7 +212,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		targetPhrase->CreateFromString( output, targetPhraseVector);
 
 		targetPhrase->CreateAlignmentInfo(alignmentInfo);
-		targetPhrase->SetHeadWord(headWord);
+		targetPhrase->SetTargetLHS(headWord);
 
 		targetPhrase->SetDebugOutput(string("Mem pt " )+ line);
 

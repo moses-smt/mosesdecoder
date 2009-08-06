@@ -54,9 +54,6 @@ int GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
 	//skey->set_data(pdata->get_data());
 	skey->set_size(sizeof(long));
 	
-	cerr << targetId << "=";
-	DebugMem((char*) pdata->get_data(), pdata->get_size());
-
 	// Return 0 to indicate that the record can be created/updated.
 	return (0);
 } 
@@ -200,12 +197,13 @@ long DbWrapper::SaveSource(const Phrase &source, const TargetPhrase &target)
 	{
 		const Word &word = source.GetWord(pos);
 		currSourceNodeId = SaveSourceWord(currSourceNodeId, word);
-									 		
+		
 		if (word.IsNonTerminal())
 		{ // store the TARGET non-term label straight after source non-term label
 			size_t targetPos = target.GetAlign(pos);
 			const Word &targetWord = target.GetWord(targetPos);
 			currSourceNodeId = SaveSourceWord(currSourceNodeId, targetWord);
+
 		}
 	}
 
@@ -294,9 +292,6 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 	char *mem = (char*) data.get_data();
 	size_t offset = 0;
 
-	cerr << "tpColl " << sourceNodeId << "=";
-	DebugMem(mem, data.get_size());
-
 	// size
 	int sizeColl;
 	memcpy(&sizeColl, mem, sizeof(int));
@@ -324,12 +319,13 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 }
 
 const Moses::TargetPhraseCollection *DbWrapper::ConvertToMoses(const TargetPhraseCollection &tpColl
-																															 , const std::vector<Moses::FactorType> &factors
-																															 , const Moses::ScoreProducer &phraseDict
-																															 , const std::vector<float> &weightT
-																															 , float weightWP
-																															 , const Moses::LMList &lmList
-																															 , const Moses::Phrase &sourcePhrase) const
+																															, const std::vector<Moses::FactorType> &inputFactors
+																															, const std::vector<Moses::FactorType> &outputFactors
+																															, const Moses::ScoreProducer &phraseDict
+																															, const std::vector<float> &weightT
+																															, float weightWP
+																															, const Moses::LMList &lmList
+																															, const Moses::Phrase &sourcePhrase) const
 {
 	Moses::TargetPhraseCollection *ret = new Moses::TargetPhraseCollection();
 
@@ -337,7 +333,7 @@ const Moses::TargetPhraseCollection *DbWrapper::ConvertToMoses(const TargetPhras
 	for (iter = tpColl.begin(); iter != tpColl.end(); ++iter)
 	{
 		const TargetPhrase &tp = **iter;
-		Moses::TargetPhrase *mosesPhrase = tp.ConvertToMoses(factors
+		Moses::TargetPhrase *mosesPhrase = tp.ConvertToMoses(inputFactors, outputFactors
 																											, m_vocab
 																											, phraseDict
 																											, weightT
@@ -346,38 +342,37 @@ const Moses::TargetPhraseCollection *DbWrapper::ConvertToMoses(const TargetPhras
 																											, sourcePhrase);
 			// scores
 		mosesPhrase->SetScore(&phraseDict, tp.GetScores(), weightT, weightWP, lmList);
-cerr << *mosesPhrase << endl;
 		ret->Add(mosesPhrase);
 	}
 
 	return ret;
 }
 
-Word *DbWrapper::ConvertFromMosesSource(const std::vector<Moses::FactorType> &inputFactorsVec
-																				, const Moses::Word &origWord) const
+Word *DbWrapper::ConvertFromMoses(Moses::FactorDirection direction
+																	, const std::vector<Moses::FactorType> &factorsVec
+																	, const Moses::Word &origWord) const
 {
-	Word *newWord = CreateSouceWord();
+	Word *newWord = (direction == Moses::Input) ? CreateSouceWord() : CreateTargetWord();
 	
-	for (size_t ind = 0 ; ind < inputFactorsVec.size() ; ++ind)
+	for (size_t ind = 0 ; ind < factorsVec.size() ; ++ind)
 	{
-		size_t factorType = inputFactorsVec[ind];
+		size_t factorType = factorsVec[ind];
 		
 		const Moses::Factor *factor = origWord.GetFactor(factorType);
-		if (factor != NULL)
+		assert(factor);
+
+		const string &str = factor->GetString();
+		bool found;
+		VocabId vocabId = m_vocab.GetVocabId(str, found);
+		if (!found)
+		{ // factor not in phrase table -> phrse definately not in. exit
+			delete newWord;
+			return NULL;
+		}
+		else
 		{
-			const string &str = factor->GetString();
-			bool found;
-			VocabId vocabId = m_vocab.GetVocabId(str, found);
-			if (!found)
-			{ // factor not in phrase table -> phrse definately not in. exit
-				delete newWord;
-				return NULL;
-			}
-			else
-			{
-				newWord->SetVocabId(ind, vocabId);
-			}
-		} // if (factor
+			newWord->SetVocabId(ind, vocabId);
+		}
 	} // for (size_t factorType
 	
 	return newWord;

@@ -219,7 +219,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
 		targetPhrase->SetScore(wordPenaltyProducer, wordPenaltyScore);
 		targetPhrase->SetSourcePhrase(m_unksrc);
-		targetPhrase->SetHeadWord(headWord);
+		targetPhrase->SetTargetLHS(headWord);
 		assert(headWord.GetFactor(0) != NULL);
 
 

@@ -240,11 +240,6 @@ void TargetPhrase::CreateAlignmentInfo(const std::list<std::pair<size_t,size_t> 
 	m_alignmentInfo.AddAlignment(alignmentInfo);
 }
 
-void TargetPhrase::SetHeadWord(const Word &headWord)
-{
-	m_headWord = headWord;
-}
-
 TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)

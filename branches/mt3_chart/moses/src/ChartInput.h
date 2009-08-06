@@ -6,8 +6,6 @@
 
 namespace Moses
 {
-typedef std::vector<Word> LabelList;
-
 class ChartInput : public Sentence
 {
 	friend std::ostream& operator<<(std::ostream&, const ChartInput&);
@@ -39,10 +37,8 @@ public:
 	//! create trans options specific to this InputType
 	virtual TranslationOptionCollection* CreateTranslationOptionCollection() const;
 
-	const LabelList &GetLabelList(size_t startPos, size_t endPos) const
-	{
-		return m_sourceChart[startPos][endPos - startPos];
-	}
+	virtual const LabelList &GetLabelList(size_t startPos, size_t endPos) const
+	{	return m_sourceChart[startPos][endPos - startPos];	}
 
 };
 

@@ -54,7 +54,8 @@ protected:
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
-	Word m_headWord;
+	Word m_lhsSource // not used for anything at the moment
+			, m_lhsTarget;
 	std::string *m_debugOutput;
 
 	// source non terms, in source order
@@ -178,9 +179,13 @@ public:
 		m_alignmentInfo.AddAlignment(entry);
 	}
 
-	void SetHeadWord(const Word &headWord);
-	const Word &GetHeadWord() const
-	{ return m_headWord; }
+	void SetSourceLHS(const Word &lhs)
+	{ 	m_lhsSource = lhs; }
+
+	void SetTargetLHS(const Word &lhs)
+	{ 	m_lhsTarget = lhs; }
+	const Word &GetTargetLHS() const
+	{ return m_lhsTarget; }
 
 	void SetDebugOutput(const std::string &str)
 	{
