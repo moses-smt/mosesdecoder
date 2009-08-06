@@ -217,10 +217,10 @@ long DbWrapper::SaveSourceWord(long currSourceNodeId, const Word &word)
 	long retSourceNodeId;
 	
 	// create db data
-	SourceKey sourceKey(m_nextSourceNodeId, word.GetVocabId(0));
-	long nextSourceId = m_nextSourceNodeId;
-	
+	SourceKey sourceKey(currSourceNodeId, word.GetVocabId(0));
 	Dbt key(&sourceKey, sizeof(SourceKey));
+
+	long nextSourceId = m_nextSourceNodeId;	
 	Dbt data(&nextSourceId, sizeof(long));
 	
 	// save
@@ -230,6 +230,8 @@ long DbWrapper::SaveSourceWord(long currSourceNodeId, const Word &word)
 		m_dbSource.get(NULL, &key, &data, 0);
 		
 		long *sourceId = (long*) data.get_data();
+		assert(data.get_size() == sizeof(long));
+
 		retSourceNodeId = *sourceId;
 	}
 	else
@@ -255,11 +257,11 @@ void DbWrapper::SaveTargetPhraseCollection(long sourceNodeId, const TargetPhrase
 const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, const Word &word) const
 {	
 	// create db data
-	SourceKey sourceKey(m_nextSourceNodeId, word.GetVocabId(0));
-	long nextSourceId = m_nextSourceNodeId;
+	long sourceNodeId = parentNode.GetSourceNodeId();
+	SourceKey sourceKey(sourceNodeId, word.GetVocabId(0));
 	
 	Dbt key(&sourceKey, sizeof(SourceKey));
-	Dbt data(&nextSourceId, sizeof(long));
+	Dbt data;
 	
 	// get from db
 	// need to get rid of const
@@ -316,6 +318,8 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 		ret->AddTargetPhrase(tp);
 	}
 
+	assert(offset == data.get_size());
+
 	return ret;
 }
 
@@ -333,15 +337,17 @@ const Moses::TargetPhraseCollection *DbWrapper::ConvertToMoses(const TargetPhras
 	for (iter = tpColl.begin(); iter != tpColl.end(); ++iter)
 	{
 		const TargetPhrase &tp = **iter;
-		Moses::TargetPhrase *mosePhrase = tp.ConvertToMoses(factors
+		Moses::TargetPhrase *mosesPhrase = tp.ConvertToMoses(factors
 																											, m_vocab
 																											, phraseDict
 																											, weightT
 																											, weightWP
 																											, lmList
 																											, sourcePhrase);
-		
-		ret->Add(mosePhrase);
+			// scores
+		mosesPhrase->SetScore(&phraseDict, tp.GetScores(), weightT, weightWP, lmList);
+cerr << *mosesPhrase << endl;
+		ret->Add(mosesPhrase);
 	}
 
 	return ret;
