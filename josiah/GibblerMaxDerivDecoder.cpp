@@ -1,6 +1,8 @@
 #include "GibblerMaxDerivDecoder.h"
 #include "StaticData.h"
+#include "MpiDebug.h"
 #include <iomanip>
+
 
 using namespace Moses;
 using namespace std;
@@ -34,10 +36,8 @@ namespace Josiah {
     if (m_pd > 0 && n > 0 && n%m_pd == 0) {
       pair<const Derivation*,float> max = getMax();
       if (max.first) {
-        cerr << "MaxDeriv(" << n << "): ";
-        outputDerivationProbability(max,n,cerr);
-        cerr << endl;
-        cerr << "DerivEntropy(" << n << "): " << getEntropy() << endl;
+        MPI_VERBOSE(0, "MaxDeriv(" << n << "): " << std::setprecision(8) << max.second << " " << max.second*n <<" " << *(max.first) << endl) 
+        MPI_VERBOSE(0, "DerivEntropy(" << n << "): " << getEntropy() << endl)
       }
     }
   }
