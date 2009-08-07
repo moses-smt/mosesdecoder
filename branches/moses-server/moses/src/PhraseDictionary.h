@@ -67,6 +67,7 @@ class PhraseDictionary: public Dictionary {
     virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
     //! Create entry for translation of source to targetPhrase
     virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
+    virtual void InitializeForInput(InputType const& source) = 0;
     
     
   protected:

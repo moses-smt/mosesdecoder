@@ -46,8 +46,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 							, const std::vector<float> &weight
 							, size_t tableLimit
 							, const LMList &languageModels
-							, float weightWP
-                            , const InputType& source);
+							, float weightWP);
 
 	// get translation candidates for a given source phrase
 	// returns null pointer if nothing found
@@ -69,6 +68,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	}
 	
 	size_t GetNumInputScores() const;
+    virtual void InitializeForInput(InputType const& source);
 	
 };
 
