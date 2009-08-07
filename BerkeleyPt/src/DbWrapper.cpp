@@ -340,8 +340,6 @@ const Moses::TargetPhraseCollection *DbWrapper::ConvertToMoses(const TargetPhras
 																											, weightWP
 																											, lmList
 																											, sourcePhrase);
-			// scores
-		mosesPhrase->SetScore(&phraseDict, tp.GetScores(), weightT, weightWP, lmList);
 		ret->Add(mosesPhrase);
 	}
 
