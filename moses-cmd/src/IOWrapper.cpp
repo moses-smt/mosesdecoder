@@ -210,47 +210,9 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 	}
 }
 
-void OutputWordAlignment(std::ostream &out, const TargetPhrase &phrase, size_t srcoffset, size_t trgoffset, FactorDirection direction)
-{
-	size_t size = phrase.GetSize();
-	if (size){
-		out << " ";
-		/*		out << phrase;
-		out << " ===> offset: (" << srcoffset << "," << trgoffset << ")";
-		out << " ===> size: (" << phrase.GetAlignmentPair().GetAlignmentPhrase(Input).GetSize() << "," 
-			<< phrase.GetAlignmentPair().GetAlignmentPhrase(Output).GetSize() << ") ===> ";
-*/
-		AlignmentPhrase alignphrase=phrase.GetAlignmentPair().GetAlignmentPhrase(direction);
-/*		alignphrase.print(out,0);
-		out << " ===> ";
-		//		out << alignphrase << " ===> ";
-*/
-		if (direction == Input){
-			alignphrase.Shift(trgoffset);
-			alignphrase.print(out,srcoffset);
-		}
-		else{
-			alignphrase.Shift(srcoffset);
-			alignphrase.print(out,trgoffset);
-		}
-/*
- //		out << alignphrase << " ===> ";
-		out << "\n";
-*/
-	}
-}
 
-void OutputWordAlignment(std::ostream &out, const Hypothesis *hypo, FactorDirection direction)
-{
-	size_t srcoffset, trgoffset;
-	if ( hypo != NULL)
-	{
-		srcoffset=hypo->GetCurrSourceWordsRange().GetStartPos();
-		trgoffset=hypo->GetCurrTargetWordsRange().GetStartPos();
-		OutputWordAlignment(out, hypo->GetPrevHypo(),direction);
-		OutputWordAlignment(out, hypo->GetCurrTargetPhrase(), srcoffset, trgoffset, direction);
-	}
-}
+
+
 
 void IOWrapper::Backtrack(const Hypothesis *hypo){
 
@@ -282,7 +244,7 @@ void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
 
 void OutputInput(std::ostream& os, const Hypothesis* hypo)
 {
-	size_t len = StaticData::Instance().GetInput()->GetSize();
+	size_t len = hypo->GetInput().GetSize();
 	std::vector<const Phrase*> inp_phrases(len, 0);
 	OutputInput(inp_phrases, hypo);
 	for (size_t i=0; i<len; ++i)
@@ -411,11 +373,11 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){  
 			// translation components	for text input
-			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
 					*m_nBestStream << " tm:";
-				vector<PhraseDictionary*>::iterator iter;
+				vector<PhraseDictionaryFeature*>::iterator iter;
 				for (iter = pds.begin(); iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j) 
@@ -427,9 +389,9 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 			// translation components for Confusion Network input
 			// first translation component has GetNumInputScores() scores from the input Confusion Network
 			// at the beginning of the vector
-			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
-				vector<PhraseDictionary*>::iterator iter;
+				vector<PhraseDictionaryFeature*>::iterator iter;
 				
 				iter = pds.begin();
 				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
@@ -496,29 +458,59 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
     }
 		
 				
-		if (includeWordAlignment){			
-			//word-to-word alignment (source-to-target)
-			*m_nBestStream << " |||";
-			for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
-			{
-				const Hypothesis &edge = *edges[currEdge];
-				WordsRange targetRange = path.GetTargetWordsRange(edge);
-				OutputWordAlignment(*m_nBestStream, edge.GetCurrTargetPhrase(),edge.GetCurrSourceWordsRange().GetStartPos(),targetRange.GetStartPos(), Input);
-			}
-
-			//word-to-word alignment (target-to-source)
-			*m_nBestStream << " |||";		
-			for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
-			{
-				const Hypothesis &edge = *edges[currEdge];
-				WordsRange targetRange = path.GetTargetWordsRange(edge);
-				OutputWordAlignment(*m_nBestStream, edge.GetCurrTargetPhrase(),edge.GetCurrSourceWordsRange().GetStartPos(),targetRange.GetStartPos(), Output);
-			}
-		}
+		
 				
 		*m_nBestStream << endl;
 	}
 
 
 	*m_nBestStream<<std::flush;
+}
+
+bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
+{
+	delete source;
+	switch(inputType)
+	{
+		case SentenceInput:         source = ioWrapper.GetInput(new Sentence(Input)); break;
+		case ConfusionNetworkInput: source = ioWrapper.GetInput(new ConfusionNet);    break;
+		case WordLatticeInput:      source = ioWrapper.GetInput(new WordLattice);     break;
+		default: TRACE_ERR("Unknown input type: " << inputType << "\n");
+	}
+	return (source ? true : false);
+}
+
+
+
+IOWrapper *GetIODevice(const StaticData &staticData)
+{
+	IOWrapper *ioWrapper;
+	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
+																,&outputFactorOrder = staticData.GetOutputFactorOrder();
+	FactorMask inputFactorUsed(inputFactorOrder);
+
+	// io
+	if (staticData.GetParam("input-file").size() == 1)
+	{
+	  VERBOSE(2,"IO from File" << endl);
+		string filePath = staticData.GetParam("input-file")[0];
+
+		ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+																	, staticData.GetNBestSize()
+																	, staticData.GetNBestFilePath()
+																	, filePath);
+	}
+	else
+	{
+	  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
+		ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+																	, staticData.GetNBestSize()
+																	, staticData.GetNBestFilePath());
+	}
+	ioWrapper->ResetTranslationId();
+
+	IFVERBOSE(1)
+		PrintUserTime("Created input-output object");
+
+	return ioWrapper;
 }

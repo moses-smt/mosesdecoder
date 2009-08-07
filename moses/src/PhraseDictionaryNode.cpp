@@ -64,8 +64,9 @@ const PhraseDictionaryNode *PhraseDictionaryNode::GetChild(const Word &word) con
 	return NULL;
 }
 
-void PhraseDictionaryNode::SetWeightTransModel(const PhraseDictionaryMemory *phraseDictionary
-																							 , const std::vector<float> &weightT)
+void PhraseDictionaryNode::SetWeightTransModel(
+                             const PhraseDictionaryMemory *phraseDictionary,
+							 const std::vector<float> &weightT)
 {
 	// recursively set weights
 	NodeMap::iterator iterNodeMap;
@@ -84,7 +85,7 @@ void PhraseDictionaryNode::SetWeightTransModel(const PhraseDictionaryMemory *phr
 				++iterTargetPhrase)
 	{
 		TargetPhrase &targetPhrase = **iterTargetPhrase;
-		targetPhrase.SetWeights(phraseDictionary, weightT);
+		targetPhrase.SetWeights(phraseDictionary->GetFeature(), weightT);
 	}
 
 }

@@ -33,6 +33,7 @@ namespace Moses
 
 class BitmapContainer;
 class TranslationOptionList;
+class Manager;
 
 typedef std::map<WordsBitmap, BitmapContainer*> _BMType;
 
@@ -60,7 +61,7 @@ protected:
 	void RemoveAll();
 
 public:
-	HypothesisStackCubePruning();
+	HypothesisStackCubePruning(Manager& manager);
 	~HypothesisStackCubePruning()
 	{
 		RemoveAll();

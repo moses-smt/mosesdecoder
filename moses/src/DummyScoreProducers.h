@@ -16,7 +16,8 @@ class DistortionScoreProducer : public StatefulFeatureFunction {
 public:
 	DistortionScoreProducer(ScoreIndexManager &scoreIndexManager);
 
-	float CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
+	float CalculateDistortionScore(const Hypothesis& hypo,
+                                 const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
 
 	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerDescription() const;

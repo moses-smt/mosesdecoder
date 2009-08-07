@@ -115,18 +115,36 @@ PhraseDictionaryTree::PrefixPtr::operator bool() const
 	return imp && imp->isValid();
 }
 
+typedef LVoc<std::string> WordVoc;
+
+static WordVoc* ReadVoc(const std::string& filename) {
+    static std::map<std::string,WordVoc*> vocs;
+#ifdef HAVE_THREADS
+    boost::mutex mutex;
+    boost::mutex::scoped_lock lock(mutex);
+#endif
+    std::map<std::string,WordVoc*>::iterator vi = vocs.find(filename);
+    if (vi == vocs.end()) {
+        WordVoc* voc = new WordVoc();
+        voc->Read(filename);
+        vocs[filename] = voc;
+    }
+    return vocs[filename];
+}
+
 
 struct PDTimp {
   typedef PrefixTreeF<LabelId,OFF_T> PTF;
 	typedef FilePtr<PTF> CPT;
   typedef std::vector<CPT> Data;
-	typedef LVoc<std::string> WordVoc;
+	
 
   Data data;
   std::vector<OFF_T> srcOffsets;
 
   FILE *os,*ot;
-	WordVoc sv,tv;
+	WordVoc* sv;
+    WordVoc* tv;
 
   ObjectPool<PPimp> pPool; 
 	// a comparison with the Boost MemPools might be useful
@@ -189,7 +207,7 @@ struct PDTimp {
 				std::vector<std::string const*> vs;
 				vs.reserve(iphrase.size());
 				for(size_t j=0;j<iphrase.size();++j)
-					vs.push_back(&tv.symbol(iphrase[j]));
+					vs.push_back(&tv->symbol(iphrase[j]));
 				rv.push_back(StringTgtCand(vs,i->GetScores()));
 			}
 	}
@@ -206,7 +224,7 @@ struct PDTimp {
 			std::vector<std::string const*> vs;
 			vs.reserve(iphrase.size());
 			for(size_t j=0;j<iphrase.size();++j)
-				vs.push_back(&tv.symbol(iphrase[j]));
+				vs.push_back(&tv->symbol(iphrase[j]));
 			rv.push_back(StringTgtCand(vs,i->GetScores()));
 			swa.push_back(StringWordAlignmentCand(vs,(i->GetSourceAlignment())));
 			twa.push_back(StringWordAlignmentCand(vs,(i->GetTargetAlignment())));
@@ -223,7 +241,7 @@ struct PDTimp {
 		assert(p);
 		if(w.empty() || w==EPSILON) return p;
 	
-		LabelId wi=sv.index(w);
+		LabelId wi=sv->index(w);
 		
 		if(wi==InvalidLabelId) return PPtr(); // unknown word
 		else if(p.imp->isRoot()) 
@@ -300,8 +318,10 @@ int PDTimp::Read(const std::string& fn)
 	for(size_t i=0;i<data.size();++i)
 		data[i]=CPT(os,srcOffsets[i]);
   
-	sv.Read(ifsv);
-	tv.Read(iftv);
+    sv = ReadVoc(ifsv);
+    tv = ReadVoc(iftv);
+	//sv.Read(ifsv);
+	//tv.Read(iftv);
   
 	TRACE_ERR("binary phrasefile loaded, default OFF_T: "<<PTF::getDefault()
 					 <<"\n");
@@ -320,7 +340,7 @@ void PDTimp::PrintTgtCand(const TgtCands& tcand,std::ostream& out) const
 		const IPhrase& iphr=tcand[i].GetPhrase();
 
 		out << i << " -- " << sc << " -- ";
-		for(size_t j=0;j<iphr.size();++j)			out << tv.symbol(iphr[j])<<" ";
+		for(size_t j=0;j<iphr.size();++j)			out << tv->symbol(iphr[j])<<" ";
 		out<< " -- ";		
 		for (size_t j=0;j<srcAlign.size();j++)			out << " " << srcAlign[j];
 		out << " -- ";
@@ -370,7 +390,7 @@ GetTargetCandidates(const std::vector<std::string>& src,
 	IPhrase f(src.size());
 	for(size_t i=0;i<src.size();++i) 
 		{
-			f[i]=imp->sv.index(src[i]);
+			f[i]=imp->sv->index(src[i]);
 			if(f[i]==InvalidLabelId) return;
 		}
 
@@ -388,7 +408,7 @@ GetTargetCandidates(const std::vector<std::string>& src,
 	IPhrase f(src.size());
 	for(size_t i=0;i<src.size();++i) 
 		{
-		f[i]=imp->sv.index(src[i]);
+		f[i]=imp->sv->index(src[i]);
 		if(f[i]==InvalidLabelId) return;
 		}
 	
@@ -405,7 +425,7 @@ PrintTargetCandidates(const std::vector<std::string>& src,
 	IPhrase f(src.size());
 	for(size_t i=0;i<src.size();++i)
 	{
-		f[i]=imp->sv.index(src[i]);
+		f[i]=imp->sv->index(src[i]);
 		if(f[i]==InvalidLabelId) 
 			{
 				TRACE_ERR("the source phrase '"<<src<<"' contains an unknown word '"
@@ -447,6 +467,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 	std::vector<OFF_T> vo;
 	size_t lnc=0;
 	size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
+    imp->sv = new WordVoc();
+    imp->tv = new WordVoc();
 	
 	while(getline(inFile, line)) 	
 	{
@@ -490,30 +512,13 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 			
 		std::vector<std::string> wordVec = Tokenize(sourcePhraseString);
 		for (size_t i = 0 ; i < wordVec.size() ; ++i)
-			f.push_back(imp->sv.add(wordVec[i]));
+			f.push_back(imp->sv->add(wordVec[i]));
 		
 		wordVec = Tokenize(targetPhraseString);
 		for (size_t i = 0 ; i < wordVec.size() ; ++i)
-			e.push_back(imp->tv.add(wordVec[i]));
+			e.push_back(imp->tv->add(wordVec[i]));
 		
-		if (!PrintWordAlignment()){// word-to-word alignment are not used, create empty word-to-word alignment 
-			EmptyAlignment(sourceAlignString, f.size());
-			EmptyAlignment(targetAlignString, e.size());
-		}
-		else if (numElement==3){
-			stringstream strme;
-			strme << "You are asking for AlignmentInfo, but this info not available in the Phrase Table. Only " <<numElement<<" fields on line " << lnc  << " : " << line;
-
-			strme << endl << "Deleting files " << ofn << " and " << oft << "..." << endl;
-			if( remove( ofn.c_str() ) != 0 )				strme << "Error deleting file " << ofn;
-			else				strme << "File " << ofn << " successfully deleted";
-			strme << endl;
-			if( remove( oft.c_str() ) != 0 )				strme << "Error deleting file " << oft;
-			else				strme << "File " << oft << " successfully deleted";
-			strme << endl;
-			UserMessage::Add(strme.str());
-			exit(1);
-		}
+		
 		
 		//change "()" into "(-1)" for both source and target word-to-word alignments
 		std::string emtpyAlignStr="()";
@@ -648,8 +653,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
   fWriteVector(oi,vo);
 	fClose(oi);
 
-	imp->sv.Write(ofsv);
-	imp->tv.Write(oftv);
+	imp->sv->Write(ofsv);
+	imp->tv->Write(oftv);
 
   return 1;
 }

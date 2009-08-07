@@ -264,14 +264,14 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
 
 
-		targetPhrase.CreateAlignmentInfo("(0)","(0)");
+		
 		
 	}
 	else 
 	{ 
 		// drop source word. create blank trans opt
 
-		targetPhrase.SetAlignment();
+		//targetPhrase.SetAlignment();
 
 	}
 	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);	

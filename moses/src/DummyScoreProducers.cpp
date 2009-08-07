@@ -51,11 +51,12 @@ std::string DistortionScoreProducer::GetScoreProducerWeightShortName() const
 	return "d";
 }
 
-float DistortionScoreProducer::CalculateDistortionScore(const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
+float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo, 
+      const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
 {
   const int USE_OLD = 1;
   if (USE_OLD) {
-	return - (float) StaticData::Instance().GetInput()->ComputeDistortionDistance(prev, curr);
+	return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);
   }
 
   // Pay distortion score as soon as possible, from Moore and Quirk MT Summit 2007
@@ -85,6 +86,7 @@ FFState* DistortionScoreProducer::Evaluate(
     ScoreComponentCollection* out) const {
   const DistortionState_traditional* prev = static_cast<const DistortionState_traditional*>(prev_state);
   const float distortionScore = CalculateDistortionScore(
+        hypo,
         prev->range,
 	hypo.GetCurrSourceWordsRange(),
 	prev->first_gap);

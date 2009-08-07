@@ -1,4 +1,4 @@
-
+#include "Manager.h"
 #include "Util.h"
 #include "SearchCubePruning.h"
 #include "StaticData.h"
@@ -41,8 +41,9 @@ class BitmapContainerOrderer
 		}
 };
 
-SearchCubePruning::SearchCubePruning(const InputType &source, const TranslationOptionCollection &transOptColl)
-:m_source(source)
+SearchCubePruning::SearchCubePruning(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl)
+  :Search(manager)
+ ,m_source(source)
 ,m_hypoStackColl(source.GetSize() + 1)
 ,m_initialTargetPhrase(Output)
 ,m_start(clock())
@@ -56,7 +57,7 @@ SearchCubePruning::SearchCubePruning(const InputType &source, const TranslationO
 	std::vector < HypothesisStackCubePruning >::iterator iterStack;
 	for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind)
 	{
-		HypothesisStackCubePruning *sourceHypoColl = new HypothesisStackCubePruning();
+		HypothesisStackCubePruning *sourceHypoColl = new HypothesisStackCubePruning(m_manager);
 		sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
 		sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
 
@@ -78,7 +79,7 @@ void SearchCubePruning::ProcessSentence()
 	const StaticData &staticData = StaticData::Instance();
 
 	// initial seed hypothesis: nothing translated, no words produced
-	Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
+	Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTargetPhrase);
 
 	HypothesisStackCubePruning &firstStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
 	firstStack.AddInitial(hypo);
@@ -153,8 +154,8 @@ void SearchCubePruning::ProcessSentence()
 	PrintBitmapContainerGraph();
 
 	// some more logging
-	IFVERBOSE(2) { staticData.GetSentenceStats().SetTimeTotal( clock()-m_start ); }
-	VERBOSE(2, staticData.GetSentenceStats()); 
+	IFVERBOSE(2) { m_manager.GetSentenceStats().SetTimeTotal( clock()-m_start ); }
+	VERBOSE(2, m_manager.GetSentenceStats()); 
 }
 
 void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
