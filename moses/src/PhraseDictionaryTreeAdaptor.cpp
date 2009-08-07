@@ -40,8 +40,7 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 																				 , const std::vector<float> &weight
 																				 , size_t tableLimit
 																				 , const LMList &languageModels
-																				 , float weightWP
-                                                                                 , const InputType& source)
+																				 , float weightWP)
 {
 	if(m_numScoreComponent!=weight.size()) {
 		stringstream strme;
@@ -61,10 +60,14 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 
 	imp->Create(input,output,filePath,
 							weight,languageModels,weightWP);
+	return true;
+}
+
+void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source) {
+    imp->CleanUp();
     // caching only required for confusion net
     if(ConfusionNet const* cn=dynamic_cast<ConfusionNet const*>(&source))
         imp->CacheSource(*cn);                     
-	return true;
 }
 
 TargetPhraseCollection const* 

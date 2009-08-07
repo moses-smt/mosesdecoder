@@ -88,8 +88,9 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   
   PhraseDictionary* PhraseDictionaryFeature::GetDictionary
         (const InputType& source) {
+    PhraseDictionary* dict = NULL;
     if (m_memoryDictionary.get()) {
-        return m_memoryDictionary.get();
+        dict = m_memoryDictionary.get();
     } else {
         if (!m_treeDictionary.get()) {
             //load the tree dictionary for this thread   
@@ -102,12 +103,13 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
                                 , m_weight
                                 , m_tableLimit
                                 , staticData.GetAllLM()
-                                , staticData.GetWeightWordPenalty()
-                                , source));
+                                , staticData.GetWeightWordPenalty()));
             m_treeDictionary.reset(pdta);
         }
-        return m_treeDictionary.get();
+        dict = m_treeDictionary.get();
     }
+    dict->InitializeForInput(source);
+    return dict;
   }
 
 
@@ -126,7 +128,10 @@ size_t PhraseDictionaryFeature::GetNumScoreComponents() const
 	return m_numScoreComponent;
 }
 
-size_t PhraseDictionaryFeature::GetNumInputScores() const { return 0;}
+size_t PhraseDictionaryFeature::GetNumInputScores() const 
+{ 
+      return m_numInputScores;
+}
 
 bool PhraseDictionaryFeature::ComputeValueInTranslationOption() const {
 	return true;
