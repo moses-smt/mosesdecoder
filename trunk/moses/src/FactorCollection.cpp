@@ -38,7 +38,10 @@ void FactorCollection::LoadVocab(FactorDirection direction, FactorType factorTyp
 	ifstream 	inFile(filePath.c_str());
 
 	string line;
-	
+#ifdef WITH_THREADS   
+	boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
+    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+#endif
 	while( !getline(inFile, line, '\n').eof())
 	{
 		vector<string> token = Tokenize( line );
@@ -53,6 +56,9 @@ void FactorCollection::LoadVocab(FactorDirection direction, FactorType factorTyp
 
 bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, const string &factorString)
 {
+#ifdef WITH_THREADS
+	boost::shared_lock<boost::shared_mutex> lock(m_accessLock);
+#endif   
 	// find string id
 	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
 
@@ -67,6 +73,10 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
 																				, FactorType 			factorType
 																				, const string 		&factorString)
 {
+#ifdef WITH_THREADS
+	boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
+    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+#endif
 	// find string id
 	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
 	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, ptrString, m_factorId) );

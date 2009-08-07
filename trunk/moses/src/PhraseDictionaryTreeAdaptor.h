@@ -27,7 +27,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	void operator=(const PhraseDictionaryTreeAdaptor&);
 	
  public:
-	PhraseDictionaryTreeAdaptor(size_t numScoreComponent,unsigned numInputScores);
+	PhraseDictionaryTreeAdaptor(size_t numScoreComponent, unsigned numInputScores, const PhraseDictionaryFeature* feature);
 	virtual ~PhraseDictionaryTreeAdaptor();
 
 	// enable/disable caching
@@ -46,19 +46,14 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 							, const std::vector<float> &weight
 							, size_t tableLimit
 							, const LMList &languageModels
-							, float weightWP
-
-							);
+							, float weightWP);
 
 	// get translation candidates for a given source phrase
 	// returns null pointer if nothing found
 	TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
 	TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
 
-	// clean up temporary memory etc.
-	void CleanUp();
 
-	void InitializeForInput(InputType const& source);
 
 	// change model scaling factors
 	void SetWeightTransModel(const std::vector<float> &weightT);
@@ -73,6 +68,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	}
 	
 	size_t GetNumInputScores() const;
+    virtual void InitializeForInput(InputType const& source);
 	
 };
 
