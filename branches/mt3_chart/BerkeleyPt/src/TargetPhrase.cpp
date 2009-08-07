@@ -8,6 +8,7 @@
  */
 
 #include <vector>
+#include <algorithm>
 #include <db_cxx.h>
 #include "../../moses/src/Util.h"
 #include "../../moses/src/TargetPhrase.h"
@@ -278,6 +279,8 @@ size_t TargetPhrase::ReadScoresFromMemory(const char *mem, size_t numScores)
 	for (size_t ind = 0; ind < numScores; ++ind)
 		m_scores[ind] = scoreMem[ind];
 
+	std::transform(m_scores.begin(),m_scores.end(),m_scores.begin(), Moses::NegateScore);
+
 	size_t memUsed = sizeof(float) * m_scores.size();
 	return memUsed;
 }
@@ -338,7 +341,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 	}
 	
 	// scores
-	ret->SetScore(&phraseDict, m_scores, weightT, weightWP, lmList);
+	ret->SetScoreChart(&phraseDict, m_scores, weightT, lmList, true);
 	
 	// alignments
 	for (size_t ind = 0; ind < m_align.size(); ++ind)

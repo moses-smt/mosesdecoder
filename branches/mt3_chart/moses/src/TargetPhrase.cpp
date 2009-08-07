@@ -179,7 +179,7 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 	if (calcWordPenalty)
 	{
 		size_t wordCount = GetNumTerminals();
-		m_scoreBreakdown.Assign(staticData.GetWordPenaltyProducer(), - (float) wordCount * 0.434294482);
+		m_scoreBreakdown.Assign(staticData.GetWordPenaltyProducer(), - (float) wordCount * 0.434294482); // TODO log -> ln ??
 	}
 
 	m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore;

@@ -50,7 +50,8 @@ void Manager::ProcessSentence()
 			
 			// create trans opt
 			m_transOptColl.CreateTranslationOptionsForRange(startPos, endPos);
-			
+			cerr << m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos));
+
 			// decode			
 			ChartCell &cell = m_hypoStackColl.Get(range);
 
@@ -60,6 +61,8 @@ void Manager::ProcessSentence()
 			cell.CleanupArcList();
 			cell.SortHypotheses();
 			
+			//cerr << cell << endl;
+
 			VERBOSE(2,range << "=" << cell.GetSize() << " ");
 		}
 	}

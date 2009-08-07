@@ -205,8 +205,8 @@ namespace Moses
 			// parse source & find pt node
 			
 			// head word
-			Word sourceHeadWord, targetHeadWord;
-			CreateHeadWord(sourceHeadWord, targetHeadWord, headString, input, output, factorDelimiter);
+			Word sourceLHS, targetLHS;
+			CreateHeadWord(sourceLHS, targetLHS, headString, input, output, factorDelimiter);
 
 			// source
 			Phrase sourcePhrase(Input);
@@ -222,9 +222,9 @@ namespace Moses
 
 			// rest of target phrase
 			targetPhrase->CreateAlignmentInfo(alignmentInfo);
-			targetPhrase->SetTargetLHS(targetHeadWord);
-			targetPhrase->SetDebugOutput(string("New Format pt ") + line);
-			targetPhrase->SetTargetLHS(targetHeadWord);
+			targetPhrase->SetSourceLHS(sourceLHS);
+			targetPhrase->SetTargetLHS(targetLHS);
+			//targetPhrase->SetDebugOutput(string("New Format pt ") + line);
 			
 			// component score, for n-best output
 			std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
