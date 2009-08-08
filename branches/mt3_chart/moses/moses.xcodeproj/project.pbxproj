@@ -30,8 +30,6 @@
 		1C4D163B1028BF5600C74752 /* DotChartBerkeleyDb.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C4D16391028BF5600C74752 /* DotChartBerkeleyDb.h */; };
 		1C500A4F0FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A400FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp */; };
 		1C500A500FB9E68400DFD24F /* PhraseDictionaryGlueRule.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500A410FB9E68400DFD24F /* PhraseDictionaryGlueRule.h */; };
-		1C500A510FB9E68400DFD24F /* PhraseDictionaryJoshua.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A420FB9E68400DFD24F /* PhraseDictionaryJoshua.cpp */; };
-		1C500A520FB9E68400DFD24F /* PhraseDictionaryJoshua.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500A430FB9E68400DFD24F /* PhraseDictionaryJoshua.h */; };
 		1C500A530FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A440FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp */; };
 		1C500A540FB9E68400DFD24F /* PhraseDictionaryNodeMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A450FB9E68400DFD24F /* PhraseDictionaryNodeMemory.cpp */; };
 		1C500A550FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500A460FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h */; };
@@ -230,8 +228,6 @@
 		1C4D16391028BF5600C74752 /* DotChartBerkeleyDb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChartBerkeleyDb.h; path = src/DotChartBerkeleyDb.h; sourceTree = "<group>"; };
 		1C500A400FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryGlueRule.cpp; path = src/PhraseDictionaryGlueRule.cpp; sourceTree = "<group>"; };
 		1C500A410FB9E68400DFD24F /* PhraseDictionaryGlueRule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryGlueRule.h; path = src/PhraseDictionaryGlueRule.h; sourceTree = "<group>"; };
-		1C500A420FB9E68400DFD24F /* PhraseDictionaryJoshua.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryJoshua.cpp; path = src/PhraseDictionaryJoshua.cpp; sourceTree = "<group>"; };
-		1C500A430FB9E68400DFD24F /* PhraseDictionaryJoshua.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryJoshua.h; path = src/PhraseDictionaryJoshua.h; sourceTree = "<group>"; };
 		1C500A440FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryMemoryChart.cpp; path = src/PhraseDictionaryMemoryChart.cpp; sourceTree = "<group>"; };
 		1C500A450FB9E68400DFD24F /* PhraseDictionaryNodeMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNodeMemory.cpp; path = src/PhraseDictionaryNodeMemory.cpp; sourceTree = "<group>"; };
 		1C500A460FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeMemory.h; path = src/PhraseDictionaryNodeMemory.h; sourceTree = "<group>"; };
@@ -550,8 +546,6 @@
 				1CA081041023562D00002D9E /* PhraseDictionaryBerkeleyDbChart.cpp */,
 				1C500A400FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp */,
 				1C500A410FB9E68400DFD24F /* PhraseDictionaryGlueRule.h */,
-				1C500A420FB9E68400DFD24F /* PhraseDictionaryJoshua.cpp */,
-				1C500A430FB9E68400DFD24F /* PhraseDictionaryJoshua.h */,
 				D39BA8290AFBB7090089AE6A /* PhraseDictionaryMemory.cpp */,
 				D39BA82A0AFBB7090089AE6A /* PhraseDictionaryMemory.h */,
 				1C500A440FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp */,
@@ -747,7 +741,6 @@
 				B2639DEB0EF199D400A67519 /* ReorderingConstraint.h in Headers */,
 				B2639DED0EF199D400A67519 /* TranslationOptionList.h in Headers */,
 				1C500A500FB9E68400DFD24F /* PhraseDictionaryGlueRule.h in Headers */,
-				1C500A520FB9E68400DFD24F /* PhraseDictionaryJoshua.h in Headers */,
 				1C500A550FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h in Headers */,
 				1C500A570FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.h in Headers */,
 				1C500A5C0FB9E68400DFD24F /* PhraseDictionarySourceLabel.h in Headers */,
@@ -885,7 +878,6 @@
 				B2639DEA0EF199D400A67519 /* ReorderingConstraint.cpp in Sources */,
 				B2639DEC0EF199D400A67519 /* TranslationOptionList.cpp in Sources */,
 				1C500A4F0FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp in Sources */,
-				1C500A510FB9E68400DFD24F /* PhraseDictionaryJoshua.cpp in Sources */,
 				1C500A530FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp in Sources */,
 				1C500A540FB9E68400DFD24F /* PhraseDictionaryNodeMemory.cpp in Sources */,
 				1C500A560FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.cpp in Sources */,
@@ -929,6 +921,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					/usr/local/BerkeleyDB.4.7/include,
 					../irstlm/include,
 					../srilm/misc/src,
 					../srilm/dstruct/src,
@@ -966,6 +959,7 @@
 					../srilm/dstruct/src,
 					../srilm/include,
 					../srilm/lm/src,
+					/usr/local/BerkeleyDB.4.7/include,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_STYLE = STATIC;

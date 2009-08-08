@@ -14,7 +14,6 @@
 		1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */; };
 		1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */; };
 		1CCBE9381003C16700EA897E /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
-		1CCBE9391003C16C00EA897E /* libon-disk-phrase-dict.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C12389D0F20C31400F0AB10 /* libon-disk-phrase-dict.a */; };
 		1CCBE93A1003C17200EA897E /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C335ABB0F20F9EA00D0D9DF /* libmoses-chart.a */; };
 		1CEB29CE10234A6B0076731C /* libBerkeleyPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CEB29CD10234A520076731C /* libBerkeleyPt.a */; };
 		B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8560E9381AC00EAB407 /* IOWrapper.cpp */; };
@@ -27,13 +26,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = moses;
-		};
-		1C12389C0F20C31400F0AB10 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1C1238980F20C31400F0AB10 /* on-disk-phrase-dict.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D;
-			remoteInfo = "on-disk-phrase-dict";
 		};
 		1C335ABA0F20F9EA00D0D9DF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -48,13 +40,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = "moses-chart";
-		};
-		1C6689C6100D3A3E00A606B2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1C1238980F20C31400F0AB10 /* on-disk-phrase-dict.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = "on-disk-phrase-dict";
 		};
 		1C6689C8100D3A4200A606B2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -98,7 +83,6 @@
 		03306D5F0C0B240B00CA1311 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
 		03306D800C0B249A00CA1311 /* mbr.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = mbr.cpp; path = src/mbr.cpp; sourceTree = "<group>"; };
 		03306D810C0B249A00CA1311 /* mbr.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = mbr.h; path = src/mbr.h; sourceTree = "<group>"; };
-		1C1238980F20C31400F0AB10 /* on-disk-phrase-dict.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "on-disk-phrase-dict.xcodeproj"; path = "../on-disk-phrase-dict/on-disk-phrase-dict.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moses-chart.xcodeproj"; path = "../moses-chart/moses-chart.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		1C8CFF450AD68D3600FA22E2 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
 		1C8CFF460AD68D3600FA22E2 /* Main.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
@@ -117,7 +101,6 @@
 			files = (
 				1CEB29CE10234A6B0076731C /* libBerkeleyPt.a in Frameworks */,
 				1CCBE93A1003C17200EA897E /* libmoses-chart.a in Frameworks */,
-				1CCBE9391003C16C00EA897E /* libon-disk-phrase-dict.a in Frameworks */,
 				1CCBE9381003C16700EA897E /* libmoses.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -138,7 +121,6 @@
 			children = (
 				1CEB29C810234A520076731C /* BerkeleyPt.xcodeproj */,
 				03306D5F0C0B240B00CA1311 /* moses.xcodeproj */,
-				1C1238980F20C31400F0AB10 /* on-disk-phrase-dict.xcodeproj */,
 				1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
@@ -166,14 +148,6 @@
 			isa = PBXGroup;
 			children = (
 				8DD76F6C0486A84900D96B5E /* moses-chart-cmd */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		1C1238990F20C31400F0AB10 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				1C12389D0F20C31400F0AB10 /* libon-disk-phrase-dict.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -216,7 +190,6 @@
 			);
 			dependencies = (
 				1C6689C5100D3A3900A606B2 /* PBXTargetDependency */,
-				1C6689C7100D3A3E00A606B2 /* PBXTargetDependency */,
 				1C6689C9100D3A4200A606B2 /* PBXTargetDependency */,
 				1CEB29D010234A750076731C /* PBXTargetDependency */,
 			);
@@ -249,10 +222,6 @@
 					ProductGroup = 03306D600C0B240B00CA1311 /* Products */;
 					ProjectRef = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
 				},
-				{
-					ProductGroup = 1C1238990F20C31400F0AB10 /* Products */;
-					ProjectRef = 1C1238980F20C31400F0AB10 /* on-disk-phrase-dict.xcodeproj */;
-				},
 			);
 			projectRoot = "";
 			targets = (
@@ -267,13 +236,6 @@
 			fileType = archive.ar;
 			path = libmoses.a;
 			remoteRef = 03306D660C0B240B00CA1311 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		1C12389D0F20C31400F0AB10 /* libon-disk-phrase-dict.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libon-disk-phrase-dict.a";
-			remoteRef = 1C12389C0F20C31400F0AB10 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		1C335ABB0F20F9EA00D0D9DF /* libmoses-chart.a */ = {
@@ -311,11 +273,6 @@
 			isa = PBXTargetDependency;
 			name = "moses-chart";
 			targetProxy = 1C6689C4100D3A3900A606B2 /* PBXContainerItemProxy */;
-		};
-		1C6689C7100D3A3E00A606B2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "on-disk-phrase-dict";
-			targetProxy = 1C6689C6100D3A3E00A606B2 /* PBXContainerItemProxy */;
 		};
 		1C6689C9100D3A4200A606B2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -359,7 +316,7 @@
 					"../irstlm/lib/i386-apple-darwin9.0/",
 					"../moses/build//**",
 					../srilm/lib/macosx,
-					"../on-disk-phrase-dict/build/**",
+					/usr/local/BerkeleyDB.4.7/lib,
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
@@ -408,7 +365,7 @@
 					"../irstlm/lib/i386-apple-darwin9.0/",
 					"../moses/build//**",
 					../srilm/lib/macosx,
-					"../on-disk-phrase-dict/build/**",
+					"/usr/local/BerkeleyDB.4.7/lib/**",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);

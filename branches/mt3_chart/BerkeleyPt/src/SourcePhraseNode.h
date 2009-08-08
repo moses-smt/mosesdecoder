@@ -17,10 +17,7 @@ namespace MosesBerkeleyPt
 	
 class SourcePhraseNode
 {
-	friend std::ostream& operator<<(std::ostream &out, const SourcePhraseNode &node)
-	{
-	  return out;
-	}
+	friend std::ostream& operator<<(std::ostream &out, const SourcePhraseNode &node);
 
 protected:
 	long m_sourceNodeId;
