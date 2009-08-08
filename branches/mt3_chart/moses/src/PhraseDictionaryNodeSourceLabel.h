@@ -65,7 +65,7 @@ protected:
 		,m_sourceWord(NULL)
 	{}
 public:
-	~PhraseDictionaryNodeSourceLabel();
+	virtual ~PhraseDictionaryNodeSourceLabel();
 
 	void CleanUp();
 	void Sort(size_t tableLimit);

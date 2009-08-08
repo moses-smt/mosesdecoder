@@ -39,6 +39,8 @@ class PhraseDictionaryNode
 	friend std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNode &node);
 	
 public:
+	virtual ~PhraseDictionaryNode()
+	  {}
 	virtual void CleanUp() = 0;
 	virtual void Sort(size_t tableLimit) = 0;
 	virtual const TargetPhraseCollection *GetTargetPhraseCollection() const = 0;

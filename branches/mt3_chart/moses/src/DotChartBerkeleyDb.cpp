@@ -24,8 +24,8 @@ ProcessedRuleStackBerkeleyDb::~ProcessedRuleStackBerkeleyDb()
 
 std::ostream& operator<<(std::ostream &out, const ProcessedRuleBerkeleyDb &rule)
 {
-	const MosesBerkeleyPt::SourcePhraseNode &node = rule.GetLastNode();
-	out << node;
+  //const MosesBerkeleyPt::SourcePhraseNode &node = rule.GetLastNode();
+  //out << node;
 	
 	return out;
 }
