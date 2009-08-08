@@ -36,10 +36,18 @@ AC_ARG_ENABLE(optimization,
             [CPPFLAGS="$CPPFLAGS -O3"; LDFLAGS="$LDFLAGS -O3" ]
            )
 
+AC_ARG_WITH(berkeleydb,
+            [AC_HELP_STRING([--with-berkeleydb=PATH], [(optional) path to root of Berkeley Db])],
+            [with_berkeleydb=$withval],
+            [with_berkeleydb=no]
+           )
+
+
 AM_CONDITIONAL([INTERNAL_LM], false)
 AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
+AM_CONDITIONAL([BERKELEYDB], false)
 
 if test "x$with_protobuf" != 'xno'
 then
@@ -103,6 +111,21 @@ then
   AM_CONDITIONAL([IRST_LM], true)
 fi
 
-LIBS="$LIBS -lz -ldb_cxx"
+if test "x$with_berkeleydb" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_berkeleydb}/include"
+
+  AC_CHECK_HEADER(db_cxx.h,
+                 [AC_DEFINE([HAVE_BERKELEYDB], [], [flag for BERKELEYDB])],
+                 [AC_MSG_ERROR([Cannot find Berkeley Db!])])
+
+  LDFLAGS="$LDFLAGS -L${with_berkeleydb}/lib"
+  FMTLIBS="$FMTLIBS libdb_cxx.a"
+  AM_CONDITIONAL([BERKELEYDB], true)
+
+fi
+
+LIBS="$LIBS -lz -ldb_cxx -lpthread"
 
 AC_OUTPUT(Makefile BerkeleyPt/src/Makefile CreateBerkeleyPt/src/Makefile  moses/src/Makefile moses-cmd/src/Makefile misc/Makefile moses-chart/src/Makefile moses-chart-cmd/src/Makefile)
