@@ -13,12 +13,12 @@ using namespace std;
 
 namespace MosesBerkeleyPt
 {
-  /*	
+
 std::ostream& operator<<(std::ostream &out, const SourcePhraseNode &node)
 {
   out << "node";
   return out;
 }
-  */
+
 };
 
