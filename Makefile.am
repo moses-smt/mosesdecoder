@@ -3,5 +3,5 @@
 AUTOMAKE_OPTIONS = foreign
 
 # order is important here: build moses before moses-cmd
-SUBDIRS = moses/src moses-chart/src on-disk-phrase-dict/src  moses-cmd/src misc moses-chart-cmd/src on-disk-phrase-dict-create/src
+SUBDIRS = moses/src moses-chart/src BerkeleyPt/src moses-cmd/src misc moses-chart-cmd/src CreateBerkeleyPt/src
 

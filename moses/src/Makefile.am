@@ -13,6 +13,7 @@ libmoses_a_SOURCES = \
 	DecodeStepTranslation.cpp \
 	Dictionary.cpp \
 	DotChart.cpp \
+	DotChartBerkeleyDb.cpp \
 	DummyScoreProducers.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
@@ -48,6 +49,8 @@ libmoses_a_SOURCES = \
 	PartialTranslOptColl.cpp \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
+	PhraseDictionaryBerkeleyDb.cpp \
+	PhraseDictionaryBerkeleyDbChart.cpp \
 	PhraseDictionaryMemory.cpp \
 	PhraseDictionaryMemoryChart.cpp \
 	PhraseDictionaryNewFormat.cpp \
@@ -59,10 +62,7 @@ libmoses_a_SOURCES = \
 	PhraseDictionarySourceLabelChart.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
-	PhraseDictionaryOnDisk.cpp \
-	PhraseDictionaryOnDiskChart.cpp \
 	PhraseDictionaryGlueRule.cpp \
-	PhraseDictionaryJoshua.cpp \
 	PrefixTreeMap.cpp \
 	ReorderingConstraint.cpp \
 	ScoreComponentCollection.cpp \

@@ -103,6 +103,6 @@ then
   AM_CONDITIONAL([IRST_LM], true)
 fi
 
-LIBS="$LIBS -lz"
+LIBS="$LIBS -lz -ldb_cxx"
 
-AC_OUTPUT(Makefile on-disk-phrase-dict/src/Makefile   moses/src/Makefile moses-cmd/src/Makefile misc/Makefile moses-chart/src/Makefile moses-chart-cmd/src/Makefile on-disk-phrase-dict-create/src/Makefile)
+AC_OUTPUT(Makefile BerkeleyPt/src/Makefile CreateBerkeleyPt/src/Makefile  moses/src/Makefile moses-cmd/src/Makefile misc/Makefile moses-chart/src/Makefile moses-chart-cmd/src/Makefile)

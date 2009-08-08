@@ -42,7 +42,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 #include "PhraseDictionaryGlueRule.h"
-#include "PhraseDictionaryJoshua.h"
 #include "PhraseDictionarySourceLabel.h"
 #include "PhraseDictionaryNewFormat.h"
 #include "PhraseDictionaryBerkeleyDb.h"
@@ -939,26 +938,8 @@ bool StaticData::LoadPhraseTables()
 			m_phraseDictionary.push_back(pd);
 		}
 		else if (impl == Joshua)
-		{ // binary phrase table
-			VERBOSE(1, "using on-disk phrase tables for idx "<<currDict<<"\n");
-      
-      cerr << m_joshuaPath << endl;
-      
-			PhraseDictionaryJoshua *pd=new PhraseDictionaryJoshua(numScoreComponent);
-			if (!pd->Load(input,output
-										,m_joshuaPath
-										,token[4]
-										,token[5]
-										,token[6]
-										,weight
-										,GetWeightWordPenalty()
-										,maxTargetPhrase[index])
-					)
-			{
-				delete pd;
-				return false;
-			}
-			m_phraseDictionary.push_back(pd);
+		{ // delete impl
+		  assert(false);
 		}
 		else if (impl == MemorySourceLabel)
 		{	// memory phrase table

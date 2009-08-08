@@ -9,7 +9,7 @@
 
 #include "PhraseDictionaryBerkeleyDb.h"
 #include "InputFileStream.h"
-#include "Staticdata.h"
+#include "StaticData.h"
 #include "TargetPhraseCollection.h"
 #include "DotChartBerkeleyDb.h"
 
