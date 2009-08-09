@@ -81,11 +81,11 @@ public:
 	
 	size_t GetSourceWordSize() const
 	{
-		return m_numSourceFactors * sizeof(VocabId) + 2 * sizeof(char);
+		return m_numSourceFactors * sizeof(VocabId) + sizeof(char);
 	}
 	size_t GetTargetWordSize() const
 	{
-		return m_numTargetFactors * sizeof(VocabId) + 2 * sizeof(char);
+		return m_numTargetFactors * sizeof(VocabId) + sizeof(char);
 	}
 
 	Vocab &GetVocab()
