@@ -60,12 +60,17 @@ static float ComputeDistortionDistance(const WordsRange& prev, const WordsRange&
   return - (float) abs(dist);
 }
  
-    
+GibbsOperator::~GibbsOperator() {
+  delete m_OpIterator;
+} 
+  
+  
 void GibbsOperator::SetAnnealingTemperature(const double t) {
   m_acceptor = new FixedTempAcceptor(t);    
 }  
 
 void GibbsOperator::Quench() {
+  cerr << "About to delete acceptor" << endl;
   delete m_acceptor;
   m_acceptor = NULL;    
 }  
