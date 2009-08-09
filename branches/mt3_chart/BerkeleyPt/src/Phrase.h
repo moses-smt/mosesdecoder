@@ -24,6 +24,9 @@ protected:
 	std::vector<Word>	m_words;
 		
 public:
+	Phrase();
+	~Phrase();
+	
 	void CreateFromString(const std::string &phraseString, Vocab &vocab);
 
 	size_t GetSize() const

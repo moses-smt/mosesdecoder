@@ -44,10 +44,9 @@ protected:
 	size_t ReadPhraseFromMemory(const char *mem, size_t numFactors);
 
 public:
-	TargetPhrase()
-		:m_headWords(2)
-	{}
-
+	TargetPhrase();
+	virtual ~TargetPhrase();
+	
 	void CreateAlignFromString(const std::string &alignString);
 	void CreateScoresFromString(const std::string &inString, size_t numScores);
 	void CreateHeadwordsFromString(const std::string &inString, Vocab &vocab);

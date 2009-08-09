@@ -15,6 +15,10 @@ using namespace std;
 
 namespace MosesBerkeleyPt
 {
+Phrase::Phrase()
+{}
+Phrase::~Phrase()
+{}
 
 void Phrase::CreateFromString(const std::string &phraseString, Vocab &vocab)
 {

@@ -15,6 +15,11 @@ using namespace std;
 
 namespace MosesBerkeleyPt
 {
+Word::Word()
+{}
+
+Word::~Word()
+{}
 
 void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 {
