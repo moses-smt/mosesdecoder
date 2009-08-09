@@ -29,10 +29,8 @@ class Word
 	bool m_isNonTerminal;
 	std::vector<VocabId> m_factors;
 public:
-	Word()
-	{}
-	~Word()
-	{}
+	Word();
+	virtual ~Word();
 	Word(size_t numFactors)
 	:m_factors(numFactors)
 	{}

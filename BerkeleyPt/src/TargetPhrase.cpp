@@ -18,6 +18,13 @@ using namespace std;
 
 namespace MosesBerkeleyPt
 {
+	
+TargetPhrase::TargetPhrase()
+:m_headWords(2)
+{}
+
+TargetPhrase::~TargetPhrase()
+{}
 
 void TargetPhrase::CreateAlignFromString(const std::string &alignString)
 {
