@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
   int mpidebug;
   string mpidebugfile;
   int burning_its;
-  int mbr_size;
+  int mbr_size, topNsize;
   string inputfile;
   string outputfile;
   string mosesini;
@@ -198,6 +198,7 @@ int main(int argc, char** argv) {
         ("lambda", po::value<float>(&lambda)->default_value(1.0f), "Smoothing parameter for SMD ")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
+        ("topn-size", po::value<int>(&topNsize)->default_value(0),"Number of samples to use for inner loop of MBR decoding")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
         ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
         ("use-metanormalized-egd,N", po::value(&use_metanormalized_egd)->zero_tokens()->default_value(false), "Use metanormalized EGD")
@@ -655,7 +656,7 @@ int main(int argc, char** argv) {
       }
     }
     if (mbr_decoding) {
-      pair<const Translation*,float> maxtrans = transCollector->getMbr(mbr_size);
+      pair<const Translation*,float> maxtrans = transCollector->getMbr(mbr_size, topNsize);
       (*out) << *maxtrans.first;
       (*out) << endl << flush;
     }

@@ -17,13 +17,19 @@ namespace Josiah {
       m_totalImportanceWeight = log_sum(m_totalImportanceWeight,importanceWeight);
     }
     m_importanceWeights.push_back(importanceWeight);
-    //renormalise
-    m_normalisedImportanceWeights.push_back(0);
-    for (size_t i = 0; i < m_importanceWeights.size(); ++i) {
-      double logNormalisedWeight = max(-100.0, m_importanceWeights[i] - m_totalImportanceWeight);
-      m_normalisedImportanceWeights[i] = exp(logNormalisedWeight);
-    }
     collect(sample);
     ++m_n;
+  }
+  
+  const vector<double>& SampleCollector::getImportanceWeights() const {
+    size_t impSize = m_importanceWeights.size();
+    if (m_normalisedImportanceWeights.size() != impSize) {
+      m_normalisedImportanceWeights.resize(impSize,0);
+      for (size_t i = 0; i < impSize; ++i) {
+        double logNormalisedWeight = max(-100.0, m_importanceWeights[i] - m_totalImportanceWeight);
+        m_normalisedImportanceWeights[i] = exp(logNormalisedWeight);
+      }
+    }
+    return m_normalisedImportanceWeights;
   }
 }

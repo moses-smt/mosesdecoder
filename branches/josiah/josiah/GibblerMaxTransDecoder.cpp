@@ -163,12 +163,12 @@ namespace Josiah
     
   }
   
-  pair<const Translation*,float> GibblerMaxTransDecoder::getMbr(size_t mbrSize) const {
+  pair<const Translation*,float> GibblerMaxTransDecoder::getMbr(size_t mbrSize, size_t topNsize) const {
     
   //Posterior probs computed using the whole evidence set
   //MBR decoding outer loop using configurable size
     vector<pair<const Translation*, float> > topNTranslations;
-    getNbest(topNTranslations,0);
+    getNbest(topNTranslations,topNsize);
     
     GainFunctionVector g;
     vector<pair<const Translation*, float> >::iterator it;
@@ -182,7 +182,7 @@ namespace Josiah
     vector<float> mbrLoss;
     int minMBRLossIdx(-1);
     mbrSize = min(mbrSize,  topNTranslations.size());
-    VERBOSE(1, "MBR SIZE " << mbrSize << ", all Translations Size " << topNTranslations.size() << endl);
+    VERBOSE(0, "MBR SIZE " << mbrSize << ", all Translations Size " << topNTranslations.size() << endl);
   
   //Outer loop using only the top #mbrSize samples 
     for(size_t i = 0; i < mbrSize; ++i) {

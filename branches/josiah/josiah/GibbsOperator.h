@@ -94,13 +94,11 @@ namespace Josiah {
   /** Abstract base class for gibbs operators **/
   class GibbsOperator {
     public:
-        GibbsOperator(const std::string& name) : m_name(name), T(1), m_gf(NULL), m_useApproxDocBleu(false), m_OpIterator(NULL) {}
+        GibbsOperator(const std::string& name) : m_name(name), T(1), m_gf(NULL), m_useApproxDocBleu(false), m_OpIterator(NULL), m_acceptor(NULL) {}
         /**
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
           **/
-        virtual ~GibbsOperator() {
-          delete m_OpIterator;
-        } 
+        virtual ~GibbsOperator();
         virtual void scan(Sample& sample, const TranslationOptionCollection& toc) = 0;
         const std::string& name() const {return m_name;}
         void SetAnnealingTemperature(const double t);
@@ -147,6 +145,7 @@ namespace Josiah {
   class MergeSplitOperator : public virtual GibbsOperator {
     public:
       MergeSplitOperator() : GibbsOperator("merge-split") {m_OpIterator = new MergeSplitIterator();}
+      virtual ~MergeSplitOperator() {}
       virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
       
   };
@@ -157,6 +156,7 @@ namespace Josiah {
   class TranslationSwapOperator : public virtual GibbsOperator {
     public:
       TranslationSwapOperator() : GibbsOperator("translation-swap") {m_OpIterator = new SwapIterator();}
+      virtual ~TranslationSwapOperator() {}
       virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
       
   };
@@ -168,6 +168,7 @@ namespace Josiah {
   class FlipOperator : public virtual GibbsOperator {
   public:
     FlipOperator() : GibbsOperator("flip") {m_OpIterator = new FlipIterator(this);}
+    virtual ~FlipOperator() {}
     virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
     virtual const std::string& name() const {return m_name;}
     
