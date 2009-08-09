@@ -59,9 +59,6 @@ size_t Word::WriteToMemory(char *mem) const
 	mem[size] = bNonTerm;
 	++size;
 
-	mem[size] = (char) 0xdc;
-	++size;
-
 	return size;
 }
 
@@ -76,9 +73,6 @@ size_t Word::ReadFromMemory(const char *mem, size_t numFactors)
 
 	size_t size = sizeof(VocabId) * m_factors.size();
 	m_isNonTerminal = (bool) mem[size];
-	++size;
-
-	assert(mem[size] == (char) 0xdc);
 	++size;
 
 	return size;
