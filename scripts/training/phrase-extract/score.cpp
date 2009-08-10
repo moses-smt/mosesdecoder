@@ -80,12 +80,15 @@ void outputPhrasePair( vector< PhraseAlignment * > &, float );
 double computeLexicalTranslation( PHRASE &, PHRASE &, PhraseAlignment * );
 
 ofstream phraseTableFile;
+ofstream wordAlignmentFile;
 
 LexicalTable lexTable;
 PhraseTable phraseTableT;
 PhraseTable phraseTableS;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
+bool newAlignmentFormatFlag = false;
+bool wordAlignmentFlag = false;
 bool onlyDirectFlag = false;
 bool goodTuringFlag = false;
 #define GT_MAX 10
@@ -99,17 +102,18 @@ float discountFactor[GT_MAX+1];
 
 int main(int argc, char* argv[]) 
 {
-  cerr << "Score v2.0 written by Philipp Koehn\n"
-       << "scoring methods for extracted rules\n";
-  time_t starttime = time(NULL);
+	cerr << "Score v2.0 written by Philipp Koehn\n"
+	     << "scoring methods for extracted rules\n";
+	time_t starttime = time(NULL);
 
-  if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--OnlyDirect] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring]\n";
-    exit(1);
-  }
-  char* &fileNameExtract = argv[1];
-  char* &fileNameLex = argv[2];
-  char* &fileNamePhraseTable = argv[3];
+	if (argc < 4) {
+		cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--OnlyDirect] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--WordAlignment file]\n";
+		exit(1);
+	}
+	char* fileNameExtract = argv[1];
+	char* fileNameLex = argv[2];
+	char* fileNamePhraseTable = argv[3];
+	char* fileNameWordAlignment;
 
 	for(int i=4;i<argc;i++) {
 		if (strcmp(argv[i],"inverse") == 0 || strcmp(argv[i],"--Inverse") == 0) {
@@ -126,6 +130,14 @@ int main(int argc, char* argv[])
 			onlyDirectFlag = true;
 			firstWordOutput = 1; // output label separately, so it's good to go
 			cerr << "outputing in correct phrase table format (no merging with inverse)\n";
+		}
+		else if (strcmp(argv[i],"--NewAlignmentFormat") == 0) {
+			newAlignmentFormatFlag = true;
+		}
+		else if (strcmp(argv[i],"--WordAlignment") == 0) {
+			wordAlignmentFlag = true;
+			fileNameWordAlignment = argv[++i];
+			cerr << "outputing word alignment in file " << fileNameWordAlignment << endl;
 		}
 		else if (strcmp(argv[i],"--NoLex") == 0) {
 			lexFlag = false;
@@ -158,23 +170,35 @@ int main(int argc, char* argv[])
 	if (goodTuringFlag)
 		computeCountOfCounts( fileNameExtract );
 
-  // sorted phrase extraction file
-  ifstream extractFile;
-  extractFile.open(fileNameExtract);
-  if (extractFile.fail()) {
-    cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
-    exit(1);
-  }
-  istream &extractFileP = extractFile;
+	// sorted phrase extraction file
+	ifstream extractFile;
+	extractFile.open(fileNameExtract);
+	if (extractFile.fail()) {
+		cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
+		exit(1);
+	}
+	istream &extractFileP = extractFile;
 
-  // output file: phrase translation table
-  phraseTableFile.open(fileNamePhraseTable);
-  if (phraseTableFile.fail()) 
+	// output file: phrase translation table
+	phraseTableFile.open(fileNamePhraseTable);
+	if (phraseTableFile.fail()) 
 	{
-    cerr << "ERROR: could not open file phrase table file " 
+		cerr << "ERROR: could not open file phrase table file " 
 		     << fileNamePhraseTable << endl;
-    exit(1);
-  }
+		exit(1);
+	}
+
+	// output word alignment file
+	if (wordAlignmentFlag)
+	{
+		wordAlignmentFile.open(fileNameWordAlignment);
+		if (wordAlignmentFile.fail())
+		{
+			cerr << "ERROR: could not open word alignment file "
+			     << fileNameWordAlignment << endl;
+			exit(1);
+		}
+	}
   
   // loop through all extracted phrase translations
   int lastSource = -1;
@@ -230,6 +254,8 @@ int main(int argc, char* argv[])
 	}
 	processPhrasePairs( phrasePairsWithSameF );
 	phraseTableFile.close();
+	if (wordAlignmentFlag)
+		wordAlignmentFile.close();
 }
 
 void computeCountOfCounts( char* fileNameExtract )
@@ -319,8 +345,8 @@ void computeCountOfCounts( char* fileNameExtract )
 bool isNonTerminal( string &word ) 
 {
 	return (word.length()>=3 &&
-					word.substr(0,1).compare("[") == 0 && 
-					word.substr(word.length()-1,1).compare("]") == 0);
+		word.substr(0,1).compare("[") == 0 && 
+		word.substr(word.length()-1,1).compare("]") == 0);
 }
 	
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair ) {
@@ -399,6 +425,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	PHRASE phraseT = phraseTableT.getPhrase( phrasePair[0]->target );
 
 	// labels (if hierarchical)
+
 	if (hierarchicalFlag && onlyDirectFlag) 
 	{
 		if (! inverseFlag)
@@ -439,27 +466,41 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 		phraseTableFile << "||| ";
 	}
 	
-	// alignment info
+	// alignment info for non-terminals
 	if (! inverseFlag && hierarchicalFlag) 
 	{
-		map< int, int > NTalignment;
-		int nt = 0;
-		// find positions of source non-terminals
-		for(int j=1;j<phraseS.size();j++)
+		if (newAlignmentFormatFlag)
 		{
-			if (isNonTerminal(vcbS.getWord( phraseS[j] )))
+			for(int j=1;j<phraseT.size();j++)
 			{
-				NTalignment[ j-1 ] = nt++;
+				if (isNonTerminal(vcbT.getWord( phraseT[j] )))
+				{
+					int sourcePos = bestAlignment->alignedToT[ j-1 ][ 0 ];
+					phraseTableFile << sourcePos << "-" << (j-1) << " ";
+				}
 			}
 		}
-		// match with target non-terminals
-		nt=0;
-		for(int j=1;j<phraseT.size();j++)
+		else
 		{
-			if (isNonTerminal(vcbT.getWord( phraseT[j] )))
+			map< int, int > NTalignment;
+			int nt = 0;
+			// find positions of source non-terminals
+			for(int j=1;j<phraseS.size();j++)
 			{
-				int sourcePos = bestAlignment->alignedToT[ j-1 ][ 0 ];
-				phraseTableFile << NTalignment[ sourcePos ] << "-" << nt++ << " ";
+				if (isNonTerminal(vcbS.getWord( phraseS[j] )))
+				{
+					NTalignment[ j-1 ] = nt++;
+				}
+			}
+			// match with target non-terminals
+			nt=0;
+			for(int j=1;j<phraseT.size();j++)
+			{
+				if (isNonTerminal(vcbT.getWord( phraseT[j] )))
+				{
+					int sourcePos = bestAlignment->alignedToT[ j-1 ][ 0 ];
+					phraseTableFile << NTalignment[ sourcePos ] << "-" << nt++ << " ";
+				}
 			}
 		}
 		phraseTableFile << "||| ";
@@ -479,6 +520,43 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	}
 
 	phraseTableFile << endl;
+
+	// optional output of word alignments
+	if (! inverseFlag && wordAlignmentFlag)
+	{
+		// LHS non-terminals, if hierarchical
+		if (hierarchicalFlag)
+		{
+			wordAlignmentFile << vcbS.getWord( phraseS[0] ) << " ";
+			wordAlignmentFile << vcbT.getWord( phraseT[0] ) << " ";
+			wordAlignmentFile << "||| ";
+		}
+
+		// source phrase
+		for(int j=firstWord;j<phraseS.size();j++)
+		{
+			wordAlignmentFile << vcbS.getWord( phraseS[j] ) << " ";
+		}
+		wordAlignmentFile << "||| ";
+	
+		// target phrase
+		for(int j=firstWord;j<phraseT.size();j++)
+		{
+			wordAlignmentFile << vcbT.getWord( phraseT[j] ) << " ";
+		}
+		wordAlignmentFile << "|||";
+
+		// alignment
+		for(int j=firstWord;j<phraseT.size();j++)
+		{
+			vector< size_t > &aligned = bestAlignment->alignedToT[ j-firstWord ];
+			for(int i=0; i<aligned.size(); i++)
+			{
+				wordAlignmentFile << " " << aligned[i] << "-" << (j-firstWord);
+			}
+		}
+		wordAlignmentFile << endl;
+	}
 }
 
 double computeLexicalTranslation( PHRASE &phraseS, PHRASE &phraseT, PhraseAlignment *alignment ) {
