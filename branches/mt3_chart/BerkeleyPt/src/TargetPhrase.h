@@ -70,7 +70,7 @@ public:
 																, size_t numScores);
 	char *WriteOtherInfoToMemory(size_t &memUsed, int numScores, size_t sourceWordSize, size_t targetWordSize) const;
 
-	void Load(const Db &db, size_t numTargetFactors);
+	void Load(Db &db, size_t numTargetFactors);
 	
 	Moses::TargetPhrase *ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
 																			, const std::vector<Moses::FactorType> &outputFactors
