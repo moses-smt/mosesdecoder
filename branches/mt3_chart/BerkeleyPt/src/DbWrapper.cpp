@@ -6,6 +6,7 @@
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */
+#include "../../moses/src/PhraseDictionary.h"
 #include "DbWrapper.h"
 #include "Vocab.h"
 #include "Phrase.h"
@@ -287,41 +288,44 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 	// get from db
 	// need to get rid of const
 	int dbRet = const_cast<Db&>(m_dbTargetColl).get(NULL, &key, &data, 0);
-	assert(dbRet == 0);
+	//assert(dbRet == 0);
 
-	char *mem = (char*) data.get_data();
-	size_t offset = 0;
-
-	// size
-	int sizeColl;
-	memcpy(&sizeColl, mem, sizeof(int));
-	offset += sizeof(int);
-
-	// phrase
-	for (size_t ind = 0; ind < sizeColl; ++ind)
+	if (dbRet == 0)
 	{
-		TargetPhrase *tp = new TargetPhrase();
+		char *mem = (char*) data.get_data();
+		size_t offset = 0;
 
-		size_t memUsed = tp->ReadOtherInfoFromMemory(&mem[offset]
-																								, m_numSourceFactors, m_numTargetFactors
-																								, m_numScores);
-		offset += memUsed;
-		
-		// actual words
-		tp->Load(m_dbTargetInd, m_numTargetFactors);
+		// size
+		int sizeColl;
+		memcpy(&sizeColl, mem, sizeof(int));
+		offset += sizeof(int);
 
-		ret->AddTargetPhrase(tp);
+		// phrase
+		for (size_t ind = 0; ind < sizeColl; ++ind)
+		{
+			TargetPhrase *tp = new TargetPhrase();
+
+			size_t memUsed = tp->ReadOtherInfoFromMemory(&mem[offset]
+																									, m_numSourceFactors, m_numTargetFactors
+																									, m_numScores);
+			offset += memUsed;
+			
+			// actual words
+			tp->Load(m_dbTargetInd, m_numTargetFactors);
+
+			ret->AddTargetPhrase(tp);
+		}
+
+		assert(offset == data.get_size());
 	}
-
-	assert(offset == data.get_size());
-
+	
 	return ret;
 }
 
 const Moses::TargetPhraseCollection *DbWrapper::ConvertToMoses(const TargetPhraseCollection &tpColl
 																															, const std::vector<Moses::FactorType> &inputFactors
 																															, const std::vector<Moses::FactorType> &outputFactors
-																															, const Moses::ScoreProducer &phraseDict
+																															, const Moses::PhraseDictionary &phraseDict
 																															, const std::vector<float> &weightT
 																															, float weightWP
 																															, const Moses::LMList &lmList
@@ -342,6 +346,8 @@ const Moses::TargetPhraseCollection *DbWrapper::ConvertToMoses(const TargetPhras
 																											, sourcePhrase);
 		ret->Add(mosesPhrase);
 	}
+
+	ret->NthElement(phraseDict.GetTableLimit());
 
 	return ret;
 }

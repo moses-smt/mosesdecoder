@@ -7,6 +7,7 @@
 #include <string>
 #include "../../BerkeleyPt/src/TargetPhraseCollection.h"
 #include "../../BerkeleyPt/src/Phrase.h"
+#include "../../BerkeleyPt/src/SourcePhrase.h"
 #include "../../BerkeleyPt/src/TargetPhrase.h"
 #include "../../BerkeleyPt/src/Vocab.h"
 #include "../../BerkeleyPt/src/DbWrapper.h"
@@ -57,7 +58,7 @@ int main (int argc, char * const argv[])
 								,&alignStr				= tokens[3]
 								,&scoresStr				= tokens[4];
 						
-		Phrase sourcePhrase;
+		SourcePhrase sourcePhrase;
 		sourcePhrase.CreateFromString(sourcePhraseStr, dbWrapper.GetVocab());
 		
 		TargetPhrase *targetPhrase = new TargetPhrase();
