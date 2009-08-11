@@ -21,8 +21,9 @@ using namespace MosesBerkeleyPt;
 int main (int argc, char * const argv[])
 {
     // insert code here...
-  std::cerr << "Starting\n";
-	
+	Moses::ResetUserTime();
+	Moses::PrintUserTime("Starting");
+
 	assert(argc == 6);
 
 	int numSourceFactors		= Moses::Scan<int>(argv[1])
@@ -36,16 +37,16 @@ int main (int argc, char * const argv[])
 	DbWrapper dbWrapper;
 	dbWrapper.BeginSave(destPath, numSourceFactors, numTargetFactors, numScores);
 	
-	size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
-
 	string line, prevSourcePhraseStr;
 	size_t lineNum = 0;
-	long sourceNodeIdOld = 0;
 	map<long, TargetPhraseCollection> tpCollMap;
 		// long = sourceNode id
 	
 	while(getline(inStream, line))
 	{
+    if (++lineNum % 10000 == 0) 
+			cerr << lineNum << " " << flush;
+
 		line = Moses::Trim(line);
 		if (line.size() == 0)
 			continue;
@@ -58,7 +59,7 @@ int main (int argc, char * const argv[])
 								,&alignStr				= tokens[3]
 								,&scoresStr				= tokens[4];
 						
-		SourcePhrase sourcePhrase;
+		Phrase sourcePhrase;
 		sourcePhrase.CreateFromString(sourcePhraseStr, dbWrapper.GetVocab());
 		
 		TargetPhrase *targetPhrase = new TargetPhrase();
@@ -111,7 +112,7 @@ int main (int argc, char * const argv[])
 	
 	dbWrapper.EndSave();
 	
-	std::cerr << "Finished\n";
+	Moses::PrintUserTime("Finished");
   return 0;
 }
 

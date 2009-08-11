@@ -46,7 +46,7 @@ void Manager::ProcessSentence()
 		{
 			size_t endPos = startPos + width - 1;
 			WordsRange range(startPos, endPos);
-			TRACE_ERR("starting " << range << endl);
+			//TRACE_ERR("starting " << range << endl);
 			
 			// create trans opt
 			m_transOptColl.CreateTranslationOptionsForRange(startPos, endPos);
@@ -63,7 +63,7 @@ void Manager::ProcessSentence()
 			
 			//cerr << cell << endl;
 
-			VERBOSE(2,range << "=" << cell.GetSize() << " ");
+			VERBOSE(1,range << "=" << cell.GetSize() << " ");
 		}
 	}
 
