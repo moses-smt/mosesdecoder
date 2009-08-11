@@ -38,7 +38,13 @@ public:
 
 	void Resize(size_t newSize)
 	{ m_words.resize(newSize); }
-
+	
+	//! transitive comparison
+	inline bool operator<(const Phrase &compare) const
+	{
+		return m_words < compare.m_words;
+	}
+	
 };
 
 }; // namespace

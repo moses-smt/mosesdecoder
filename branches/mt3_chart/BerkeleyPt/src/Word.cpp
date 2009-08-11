@@ -95,6 +95,20 @@ Moses::Word *Word::ConvertToMoses(Moses::FactorDirection direction
 	return ret;
 }
 
+std::ostream& operator<<(std::ostream &out, const Word &word)
+{
+	out << "[";
+
+	std::vector<VocabId>::const_iterator iter;
+	for (iter = word.m_factors.begin(); iter != word.m_factors.end(); ++iter)
+	{
+		out << *iter << "|";
+	}
+	out << "]";
+
+	return out;
+}
+
 
 }; // namespace
 

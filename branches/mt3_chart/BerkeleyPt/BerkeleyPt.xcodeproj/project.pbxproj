@@ -11,6 +11,8 @@
 		1C4D16321028BF3500C74752 /* TargetPhraseCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C4D16301028BF3500C74752 /* TargetPhraseCollection.h */; };
 		1CD6E80B1026FBCF0008EA84 /* SourcePhraseNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD6E8091026FBCF0008EA84 /* SourcePhraseNode.h */; };
 		1CD6E80C1026FBCF0008EA84 /* SourcePhraseNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD6E80A1026FBCF0008EA84 /* SourcePhraseNode.cpp */; };
+		1CE7F5101031D8E3003D043A /* SourcePhrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CE7F50E1031D8E3003D043A /* SourcePhrase.h */; };
+		1CE7F5111031D8E3003D043A /* SourcePhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE7F50F1031D8E3003D043A /* SourcePhrase.cpp */; };
 		1CEB298C1023489A0076731C /* DbWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CEB29801023489A0076731C /* DbWrapper.cpp */; };
 		1CEB298D1023489A0076731C /* DbWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CEB29811023489A0076731C /* DbWrapper.h */; };
 		1CEB29901023489A0076731C /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CEB29841023489A0076731C /* Phrase.cpp */; };
@@ -28,6 +30,8 @@
 		1C4D16301028BF3500C74752 /* TargetPhraseCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhraseCollection.h; path = src/TargetPhraseCollection.h; sourceTree = "<group>"; };
 		1CD6E8091026FBCF0008EA84 /* SourcePhraseNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourcePhraseNode.h; path = src/SourcePhraseNode.h; sourceTree = "<group>"; };
 		1CD6E80A1026FBCF0008EA84 /* SourcePhraseNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourcePhraseNode.cpp; path = src/SourcePhraseNode.cpp; sourceTree = "<group>"; };
+		1CE7F50E1031D8E3003D043A /* SourcePhrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourcePhrase.h; path = src/SourcePhrase.h; sourceTree = "<group>"; };
+		1CE7F50F1031D8E3003D043A /* SourcePhrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourcePhrase.cpp; path = src/SourcePhrase.cpp; sourceTree = "<group>"; };
 		1CEB29801023489A0076731C /* DbWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DbWrapper.cpp; path = src/DbWrapper.cpp; sourceTree = "<group>"; };
 		1CEB29811023489A0076731C /* DbWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DbWrapper.h; path = src/DbWrapper.h; sourceTree = "<group>"; };
 		1CEB29841023489A0076731C /* Phrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Phrase.cpp; path = src/Phrase.cpp; sourceTree = "<group>"; };
@@ -79,6 +83,8 @@
 				1CEB29891023489A0076731C /* Vocab.h */,
 				1CEB298A1023489A0076731C /* Word.cpp */,
 				1CEB298B1023489A0076731C /* Word.h */,
+				1CE7F50E1031D8E3003D043A /* SourcePhrase.h */,
+				1CE7F50F1031D8E3003D043A /* SourcePhrase.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -112,6 +118,7 @@
 				1CEB29971023489A0076731C /* Word.h in Headers */,
 				1CD6E80B1026FBCF0008EA84 /* SourcePhraseNode.h in Headers */,
 				1C4D16321028BF3500C74752 /* TargetPhraseCollection.h in Headers */,
+				1CE7F5101031D8E3003D043A /* SourcePhrase.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +171,7 @@
 				1CEB29961023489A0076731C /* Word.cpp in Sources */,
 				1CD6E80C1026FBCF0008EA84 /* SourcePhraseNode.cpp in Sources */,
 				1C4D16311028BF3500C74752 /* TargetPhraseCollection.cpp in Sources */,
+				1CE7F5111031D8E3003D043A /* SourcePhrase.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
