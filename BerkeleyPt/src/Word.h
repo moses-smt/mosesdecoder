@@ -9,6 +9,7 @@
  *
  */
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include "../../moses/src/TypeDef.h"
@@ -26,6 +27,9 @@ class Vocab;
 	
 class Word
 {
+	friend std::ostream& operator<<(std::ostream&, const Word&);
+
+protected:	
 	bool m_isNonTerminal;
 	std::vector<VocabId> m_factors;
 public:
@@ -51,6 +55,15 @@ public:
 	Moses::Word *ConvertToMoses(Moses::FactorDirection direction
 														, const std::vector<Moses::FactorType> &outputFactorsVec
 														, const Vocab &vocab) const;
+	
+	//! transitive comparison used for adding objects into FactorCollection
+	inline bool operator<(const Word &compare) const
+	{ 
+		if (m_isNonTerminal != compare.m_isNonTerminal)
+			return m_isNonTerminal < compare.m_isNonTerminal;
+		
+		return m_factors < compare.m_factors;
+	}
 	
 };
 
