@@ -293,10 +293,8 @@ size_t TargetPhrase::ReadScoresFromMemory(const char *mem, size_t numScores)
 	return memUsed;
 }
 
-void TargetPhrase::Load(const Db &db, size_t numTargetFactors)
+void TargetPhrase::Load(Db &db, size_t numTargetFactors)
 {
-	Db &dbUnconst = const_cast<Db&>(db);
-
 	/*
 	// Iterate over the database, retrieving each record in turn.
 	Dbc *cursorp;
@@ -319,7 +317,7 @@ void TargetPhrase::Load(const Db &db, size_t numTargetFactors)
 	Dbt data;
 	
 	// save
-	int dbRet = dbUnconst.get(NULL, &key, &data, 0);
+	int dbRet = db.get(NULL, &key, &data, 0);
 	assert(dbRet == 0);
 
 	size_t memUsed = ReadPhraseFromMemory((const char*) data.get_data(), numTargetFactors);

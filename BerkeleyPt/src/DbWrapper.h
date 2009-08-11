@@ -93,8 +93,8 @@ public:
 
 	int GetMisc(const std::string &key);
 
-	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word) const;
-	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node) const;
+	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word);
+	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node);
 
 	const Moses::TargetPhraseCollection *ConvertToMoses(const TargetPhraseCollection &tpColl
 																											, const std::vector<Moses::FactorType> &inputFactors

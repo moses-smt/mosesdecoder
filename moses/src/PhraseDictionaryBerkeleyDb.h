@@ -24,7 +24,7 @@ protected:
 	std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
 	std::vector<float> m_weight;
 
-	MosesBerkeleyPt::DbWrapper m_dbWrapper;
+	mutable MosesBerkeleyPt::DbWrapper m_dbWrapper;
 
 	mutable std::vector<const TargetPhraseCollection*> m_cache;
 	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;

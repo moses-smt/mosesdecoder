@@ -253,7 +253,7 @@ void DbWrapper::SaveTargetPhraseCollection(long sourceNodeId, const TargetPhrase
 	tpColl.Save(m_dbTargetColl, sourceNodeId, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
 
-const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, const Word &word) const
+const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, const Word &word)
 {	
 	// create db data
 	long sourceNodeId = parentNode.GetSourceNodeId();
@@ -264,7 +264,7 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 	
 	// get from db
 	// need to get rid of const
-	int ret = const_cast<Db&>(m_dbSource).get(NULL, &key, &data, 0);
+	int ret = m_dbSource.get(NULL, &key, &data, 0);
 	if (ret == 0) 
 	{ // exist. 		
 		long sourceNodeId = *(long*) data.get_data();
@@ -277,7 +277,7 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 	}	
 }
 
-const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node) const
+const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node)
 {
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
 
@@ -287,7 +287,7 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 
 	// get from db
 	// need to get rid of const
-	int dbRet = const_cast<Db&>(m_dbTargetColl).get(NULL, &key, &data, 0);
+	int dbRet = m_dbTargetColl.get(NULL, &key, &data, 0);
 	//assert(dbRet == 0);
 
 	if (dbRet == 0)
