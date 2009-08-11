@@ -12,6 +12,7 @@
 #include <db_cxx.h>
 #include "../../moses/src/Util.h"
 #include "../../moses/src/TargetPhrase.h"
+#include "../../moses/src/PhraseDictionary.h"
 #include "TargetPhrase.h"
 
 using namespace std;
@@ -328,7 +329,7 @@ void TargetPhrase::Load(const Db &db, size_t numTargetFactors)
 Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
 																		, const std::vector<Moses::FactorType> &outputFactors
 																		, const Vocab &vocab
-																		, const Moses::ScoreProducer &phraseDict
+																		, const Moses::PhraseDictionary &phraseDict
 																		, const std::vector<float> &weightT
 																		, float weightWP
 																		, const Moses::LMList &lmList
