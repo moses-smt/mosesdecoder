@@ -5,7 +5,7 @@
 #include <string>
 #include "PhraseDictionary.h"
 #include "ChartRuleCollection.h"
-#include "PhraseDictionaryMemory.h"
+#include "PhraseDictionaryNewFormat.h"
 
 namespace Moses
 {
@@ -13,10 +13,10 @@ namespace Moses
 class ChartRuleCollection;
 
 	// hack. just use phrase dict mem to store it
-class PhraseDictionaryGlueRule : public PhraseDictionaryMemory
+class PhraseDictionaryGlueRule : public PhraseDictionaryNewFormat
 {
 protected:
-	typedef PhraseDictionaryMemory MyBase;
+	typedef PhraseDictionaryNewFormat MyBase;
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryGlueRule&);
 
 public:

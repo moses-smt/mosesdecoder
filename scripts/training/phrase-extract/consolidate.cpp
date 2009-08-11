@@ -200,6 +200,8 @@ bool getLine( istream &fileP, vector< string > &item )
 	if (fileP.eof()) 
 		return false;
 
+	//cerr << line << endl;
+	
 	item = splitLine();
 	return true;
 } 
