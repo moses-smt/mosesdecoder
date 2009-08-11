@@ -22,6 +22,10 @@ public:
 
 	TargetPhraseCollection()
 	{}
+	TargetPhraseCollection(const TargetPhraseCollection &copy)
+	{
+		assert(copy.m_coll.size() == 0);
+	}
 	~TargetPhraseCollection();
 
 	void AddTargetPhrase(const TargetPhrase *phrase)

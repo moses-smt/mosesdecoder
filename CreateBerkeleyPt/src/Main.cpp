@@ -37,11 +37,12 @@ int main (int argc, char * const argv[])
 	
 	size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
 
-	string line;
+	string line, prevSourcePhraseStr;
 	size_t lineNum = 0;
 	long sourceNodeIdOld = 0;
-	TargetPhraseCollection *tpColl = NULL;
-
+	map<long, TargetPhraseCollection> tpCollMap;
+		// long = sourceNode id
+	
 	while(getline(inStream, line))
 	{
 		line = Moses::Trim(line);
@@ -68,34 +69,45 @@ int main (int argc, char * const argv[])
 		long sourceNodeId = dbWrapper.SaveSource(sourcePhrase, *targetPhrase);
 		dbWrapper.SaveTarget(*targetPhrase);
 
-		if (sourceNodeIdOld != sourceNodeId)
-		{ // different source from last time. write out target phrase coll
-			if (tpColl)
+		if (prevSourcePhraseStr != sourcePhraseStr)
+		{ // different source from last time. 
+			prevSourcePhraseStr = sourcePhraseStr;
+			
+			//write out all target phrase colls
+			map<long, TargetPhraseCollection>::const_iterator iter;
+			for (iter = tpCollMap.begin(); iter != tpCollMap.end(); ++iter)
 			{ // could be 1st. tpColl == NULL
-				dbWrapper.SaveTargetPhraseCollection(sourceNodeIdOld, *tpColl);
+				long sourceNodeIdColl = iter->first;
+				const TargetPhraseCollection &tpColl = iter->second;
+				dbWrapper.SaveTargetPhraseCollection(sourceNodeIdColl, tpColl);
 			}
 
-			// new coll
-			delete tpColl;
-			tpColl = new TargetPhraseCollection();
-			tpColl->AddTargetPhrase(targetPhrase);
-
-			sourceNodeIdOld = sourceNodeId;
+			// delete all tp coll
+			tpCollMap.clear();			
 		}
 		else
 		{ // same source as last time. do nothing
-			tpColl->AddTargetPhrase(targetPhrase);
 		}
 
+		// new coll
+		TargetPhraseCollection &tpColl = tpCollMap[sourceNodeId];
+		tpColl.AddTargetPhrase(targetPhrase);
+		
 	}
 
 	// save the last coll
-	if (tpColl)
+	//write out all target phrase colls
+	map<long, TargetPhraseCollection>::const_iterator iter;
+	for (iter = tpCollMap.begin(); iter != tpCollMap.end(); ++iter)
 	{ // could be 1st. tpColl == NULL
-		dbWrapper.SaveTargetPhraseCollection(sourceNodeIdOld, *tpColl);
+		long sourceNodeIdColl = iter->first;
+		const TargetPhraseCollection &tpColl = iter->second;
+		dbWrapper.SaveTargetPhraseCollection(sourceNodeIdColl, tpColl);
 	}
-	delete tpColl;
-
+	
+	// delete all tp coll
+	tpCollMap.clear();			
+	
 	dbWrapper.EndSave();
 	
 	std::cerr << "Finished\n";

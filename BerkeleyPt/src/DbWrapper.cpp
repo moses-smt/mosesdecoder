@@ -278,7 +278,7 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 
 const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node) const
 {
-	TargetPhraseCollection *ret = new TargetPhraseCollection;;
+	TargetPhraseCollection *ret = new TargetPhraseCollection();
 
 	long sourceNodeId = node.GetSourceNodeId();
 	Dbt key(&sourceNodeId, sizeof(long));
