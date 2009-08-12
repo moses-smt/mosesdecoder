@@ -67,7 +67,9 @@ int main (int argc, char * const argv[])
 		targetPhrase->CreateAlignFromString(alignStr);
 		targetPhrase->CreateScoresFromString(scoresStr, numScores);
 		targetPhrase->CreateHeadwordsFromString(headWordsStr, dbWrapper.GetVocab());
-
+		
+		dbWrapper.SaveTarget(*targetPhrase);
+		
 		sourcePhrase.SaveTargetNonTerminals(*targetPhrase);
 		
 
