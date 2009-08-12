@@ -157,6 +157,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SourcePhrase.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SourcePhraseNode.cpp"
 				>
 			</File>
@@ -191,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SourcePhrase.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SourcePhraseNode.h"
 				>
 			</File>
@@ -217,6 +225,10 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
+		<File
+			RelativePath=".\src\Makefile.am"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

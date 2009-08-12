@@ -352,10 +352,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseDictionaryJoshua.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\PhraseDictionaryMemory.cpp"
 				>
 			</File>
@@ -747,10 +743,6 @@
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionaryGlueRule.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\PhraseDictionaryJoshua.h"
 				>
 			</File>
 			<File
