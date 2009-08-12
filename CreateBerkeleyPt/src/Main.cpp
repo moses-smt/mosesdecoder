@@ -68,7 +68,6 @@ int main (int argc, char * const argv[])
 		targetPhrase->CreateScoresFromString(scoresStr, numScores);
 		targetPhrase->CreateHeadwordsFromString(headWordsStr, dbWrapper.GetVocab());
 
-		cerr << sourcePhrase.GetNumNonTerminals() << flush;
 		sourcePhrase.SaveTargetNonTerminals(*targetPhrase);
 		
 
@@ -80,12 +79,12 @@ int main (int argc, char * const argv[])
 			map<SourcePhrase, TargetPhraseCollection>::iterator iter;
 			for (iter = tpCollMap.begin(); iter != tpCollMap.end(); ++iter)
 			{ // could be 1st. tpColl == NULL
-				const SourcePhrase &sourcePhrase = iter->first;
-				long sourceNodeId = sourcePhrase.Save(dbWrapper.GetSourceDb(), dbWrapper.GetNextSourceNodeId());
+				const SourcePhrase &sourcePhraseSave = iter->first;
+				long sourceNodeId = sourcePhraseSave.Save(dbWrapper.GetSourceDb(), dbWrapper.GetNextSourceNodeId());
 
 				const TargetPhraseCollection &tpColl = iter->second;
 
-				cerr <<  sourceNodeId << "=" << tpColl.GetSize() << "," << sourcePhrase.GetNumNonTerminals() << " ";
+				//cerr <<  sourceNodeId << "=" << tpColl.GetSize() << "," << sourcePhraseSave.GetNumNonTerminals() << " ";
 				dbWrapper.SaveTargetPhraseCollection(sourceNodeId, tpColl);
 			}
 
@@ -95,8 +94,6 @@ int main (int argc, char * const argv[])
 		else
 		{ // same source as last time. do nothing
 		}
-
-		cerr << sourcePhrase.GetNumNonTerminals() << flush;
 		
 		// new coll
 		TargetPhraseCollection &tpColl = tpCollMap[sourcePhrase];

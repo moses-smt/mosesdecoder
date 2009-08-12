@@ -158,6 +158,11 @@ int DbWrapper::GetMisc(const std::string &key)
 	return value;
 }
 	
+long &DbWrapper::GetNextSourceNodeId()
+{ 
+	return m_nextSourceNodeId; 
+}
+
 Word *DbWrapper::CreateSouceWord() const
 {
 	return new Word(m_numSourceFactors);
