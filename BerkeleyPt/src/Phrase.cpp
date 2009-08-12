@@ -17,6 +17,11 @@ namespace MosesBerkeleyPt
 {
 Phrase::Phrase()
 {}
+
+Phrase::Phrase(const Phrase &copy)
+:m_words(copy.m_words)
+{}
+
 Phrase::~Phrase()
 {}
 
@@ -34,6 +39,12 @@ void Phrase::CreateFromString(const std::string &phraseString, Vocab &vocab)
 	}
 }
 
+//! transitive comparison
+bool Phrase::operator<(const Phrase &compare) const
+{
+	return m_words < compare.m_words;
+}
+	
 }; // namespace
 
 

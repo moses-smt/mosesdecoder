@@ -25,6 +25,7 @@ protected:
 		
 public:
 	Phrase();
+	Phrase(const Phrase &copy);
 	~Phrase();
 	
 	void CreateFromString(const std::string &phraseString, Vocab &vocab);
@@ -40,10 +41,7 @@ public:
 	{ m_words.resize(newSize); }
 	
 	//! transitive comparison
-	inline bool operator<(const Phrase &compare) const
-	{
-		return m_words < compare.m_words;
-	}
+	bool operator<(const Phrase &compare) const;
 	
 };
 

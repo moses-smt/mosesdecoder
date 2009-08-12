@@ -39,7 +39,7 @@ int main (int argc, char * const argv[])
 	
 	string line, prevSourcePhraseStr;
 	size_t lineNum = 0;
-	map<long, TargetPhraseCollection> tpCollMap;
+	map<SourcePhrase, TargetPhraseCollection> tpCollMap;
 		// long = sourceNode id
 	
 	while(getline(inStream, line))
@@ -59,7 +59,7 @@ int main (int argc, char * const argv[])
 								,&alignStr				= tokens[3]
 								,&scoresStr				= tokens[4];
 						
-		Phrase sourcePhrase;
+		SourcePhrase sourcePhrase;
 		sourcePhrase.CreateFromString(sourcePhraseStr, dbWrapper.GetVocab());
 		
 		TargetPhrase *targetPhrase = new TargetPhrase();
@@ -68,20 +68,25 @@ int main (int argc, char * const argv[])
 		targetPhrase->CreateScoresFromString(scoresStr, numScores);
 		targetPhrase->CreateHeadwordsFromString(headWordsStr, dbWrapper.GetVocab());
 
-		long sourceNodeId = dbWrapper.SaveSource(sourcePhrase, *targetPhrase);
-		dbWrapper.SaveTarget(*targetPhrase);
+		cerr << sourcePhrase.GetNumNonTerminals() << flush;
+		sourcePhrase.SaveTargetNonTerminals(*targetPhrase);
+		
 
 		if (prevSourcePhraseStr != sourcePhraseStr)
 		{ // different source from last time. 
 			prevSourcePhraseStr = sourcePhraseStr;
 			
 			//write out all target phrase colls
-			map<long, TargetPhraseCollection>::const_iterator iter;
+			map<SourcePhrase, TargetPhraseCollection>::iterator iter;
 			for (iter = tpCollMap.begin(); iter != tpCollMap.end(); ++iter)
 			{ // could be 1st. tpColl == NULL
-				long sourceNodeIdColl = iter->first;
+				const SourcePhrase &sourcePhrase = iter->first;
+				long sourceNodeId = sourcePhrase.Save(dbWrapper.GetSourceDb(), dbWrapper.GetNextSourceNodeId());
+
 				const TargetPhraseCollection &tpColl = iter->second;
-				dbWrapper.SaveTargetPhraseCollection(sourceNodeIdColl, tpColl);
+
+				cerr <<  sourceNodeId << "=" << tpColl.GetSize() << "," << sourcePhrase.GetNumNonTerminals() << " ";
+				dbWrapper.SaveTargetPhraseCollection(sourceNodeId, tpColl);
 			}
 
 			// delete all tp coll
@@ -91,20 +96,24 @@ int main (int argc, char * const argv[])
 		{ // same source as last time. do nothing
 		}
 
+		cerr << sourcePhrase.GetNumNonTerminals() << flush;
+		
 		// new coll
-		TargetPhraseCollection &tpColl = tpCollMap[sourceNodeId];
+		TargetPhraseCollection &tpColl = tpCollMap[sourcePhrase];
 		tpColl.AddTargetPhrase(targetPhrase);
 		
 	}
 
 	// save the last coll
 	//write out all target phrase colls
-	map<long, TargetPhraseCollection>::const_iterator iter;
+	map<SourcePhrase, TargetPhraseCollection>::iterator iter;
 	for (iter = tpCollMap.begin(); iter != tpCollMap.end(); ++iter)
 	{ // could be 1st. tpColl == NULL
-		long sourceNodeIdColl = iter->first;
+		const SourcePhrase &sourcePhrase = iter->first;
+		long sourceNodeId = sourcePhrase.Save(dbWrapper.GetSourceDb(), dbWrapper.GetNextSourceNodeId());
+		
 		const TargetPhraseCollection &tpColl = iter->second;
-		dbWrapper.SaveTargetPhraseCollection(sourceNodeIdColl, tpColl);
+		dbWrapper.SaveTargetPhraseCollection(sourceNodeId, tpColl);
 	}
 	
 	// delete all tp coll

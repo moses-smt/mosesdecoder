@@ -9,7 +9,9 @@
  */
 
 #include <vector>
+#include <db_cxx.h>
 #include "Phrase.h"
+#include "TargetPhrase.h"
 #include "Word.h"
 
 namespace MosesBerkeleyPt
@@ -21,22 +23,18 @@ protected:
 	std::vector<Word> m_targetNonTerms;
 
 public:
+	SourcePhrase();
+	SourcePhrase(const 	SourcePhrase &copy);
+	~SourcePhrase();
 	
+	size_t GetNumNonTerminals() const;
+	
+	void SaveTargetNonTerminals(const TargetPhrase &targetPhrase);
+	long Save(Db &db, long &nextSourceId) const;
+	long SaveWord(long currSourceNodeId, const Word &word, Db &db, long &nextSourceId) const;
+
 	//! transitive comparison
-	inline bool operator<(const SourcePhrase &compare) const
-	{
-		bool ret = m_targetNonTerms < compare.m_targetNonTerms;
-		if (ret)
-			return true;
-		
-		ret = m_targetNonTerms > compare.m_targetNonTerms;
-		if (ret)
-			return false;
-		
-		// equal, test the underlying source words
-		return m_words < compare.m_words;
-	}
-	
+	bool operator<(const SourcePhrase &compare) const;
 };
 
 }

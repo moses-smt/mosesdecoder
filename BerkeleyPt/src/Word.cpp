@@ -94,6 +94,15 @@ Moses::Word *Word::ConvertToMoses(Moses::FactorDirection direction
 	
 	return ret;
 }
+	
+bool Word::operator<(const Word &compare) const
+{ 
+	if (m_isNonTerminal != compare.m_isNonTerminal)
+		return m_isNonTerminal < compare.m_isNonTerminal;
+	
+	return m_factors < compare.m_factors;
+}
+	
 
 std::ostream& operator<<(std::ostream &out, const Word &word)
 {
