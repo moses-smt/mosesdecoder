@@ -57,13 +57,7 @@ public:
 														, const Vocab &vocab) const;
 	
 	//! transitive comparison used for adding objects into FactorCollection
-	inline bool operator<(const Word &compare) const
-	{ 
-		if (m_isNonTerminal != compare.m_isNonTerminal)
-			return m_isNonTerminal < compare.m_isNonTerminal;
-		
-		return m_factors < compare.m_factors;
-	}
+	bool operator<(const Word &compare) const;
 	
 };
 

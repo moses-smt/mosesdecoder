@@ -73,6 +73,8 @@
 				1CEB29811023489A0076731C /* DbWrapper.h */,
 				1CEB29841023489A0076731C /* Phrase.cpp */,
 				1CEB29851023489A0076731C /* Phrase.h */,
+				1CE7F50F1031D8E3003D043A /* SourcePhrase.cpp */,
+				1CE7F50E1031D8E3003D043A /* SourcePhrase.h */,
 				1CD6E80A1026FBCF0008EA84 /* SourcePhraseNode.cpp */,
 				1CD6E8091026FBCF0008EA84 /* SourcePhraseNode.h */,
 				1CEB29861023489A0076731C /* TargetPhrase.cpp */,
@@ -83,8 +85,6 @@
 				1CEB29891023489A0076731C /* Vocab.h */,
 				1CEB298A1023489A0076731C /* Word.cpp */,
 				1CEB298B1023489A0076731C /* Word.h */,
-				1CE7F50E1031D8E3003D043A /* SourcePhrase.h */,
-				1CE7F50F1031D8E3003D043A /* SourcePhrase.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";

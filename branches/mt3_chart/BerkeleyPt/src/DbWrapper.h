@@ -10,7 +10,6 @@
  */
 
 #include <string>
-#include <db.h>
 #include <db_cxx.h>
 #include "Vocab.h"
 #include "SourcePhraseNode.h"
@@ -48,7 +47,6 @@ class DbWrapper
 	SourcePhraseNode m_initNode;
 	bool m_openSave;
 	
-	long SaveSourceWord(long currSourceNodeId, const Word &word);
 	
 	void SetMisc(const std::string &key, int value);
 	void OpenFiles(const std::string &filePath);
@@ -65,7 +63,6 @@ public:
 
 	void Load(const std::string &filePath);
 
-	long SaveSource(const Phrase &phrase, const TargetPhrase &target);
 	void SaveTarget(TargetPhrase &phrase);
 	void SaveTargetPhraseCollection(long sourceNodeId, const TargetPhraseCollection &tpColl);
 
@@ -75,6 +72,8 @@ public:
 
 	Word *CreateSouceWord() const;
 	Word *CreateTargetWord() const;
+	long &GetNextSourceNodeId() 
+	{ return m_nextSourceNodeId; }
 	
 	const SourcePhraseNode &GetInitNode() const
 	{ return m_initNode; }
@@ -92,6 +91,9 @@ public:
 	{ return m_vocab; }
 
 	int GetMisc(const std::string &key);
+	
+	Db &GetSourceDb()
+	{ return m_dbSource; }
 
 	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word);
 	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node);

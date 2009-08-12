@@ -33,6 +33,9 @@ public:
 		m_coll.push_back(phrase);
 	}
 
+	size_t GetSize() const
+	{ return m_coll.size(); }
+	
 	void Save(Db &db, long sourceNodeId, int numScores, size_t sourceWordSize, size_t targetWordSize) const;
 
 };

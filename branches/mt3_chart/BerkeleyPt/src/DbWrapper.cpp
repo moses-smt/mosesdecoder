@@ -189,59 +189,6 @@ void DbWrapper::SaveVocab()
 	
 }
 
-long DbWrapper::SaveSource(const Phrase &source, const TargetPhrase &target)
-{
-	long currSourceNodeId = 0;
-	
-	// SOURCE
-	for (size_t pos = 0; pos < source.GetSize(); ++pos)
-	{
-		const Word &word = source.GetWord(pos);
-		currSourceNodeId = SaveSourceWord(currSourceNodeId, word);
-		
-		if (word.IsNonTerminal())
-		{ // store the TARGET non-term label straight after source non-term label
-			size_t targetPos = target.GetAlign(pos);
-			const Word &targetWord = target.GetWord(targetPos);
-			currSourceNodeId = SaveSourceWord(currSourceNodeId, targetWord);
-
-		}
-	}
-
-	return currSourceNodeId;
-}
-
-long DbWrapper::SaveSourceWord(long currSourceNodeId, const Word &word)
-{
-	long retSourceNodeId;
-	
-	// create db data
-	SourceKey sourceKey(currSourceNodeId, word.GetVocabId(0));
-	Dbt key(&sourceKey, sizeof(SourceKey));
-
-	long nextSourceId = m_nextSourceNodeId;	
-	Dbt data(&nextSourceId, sizeof(long));
-	
-	// save
-	int ret = m_dbSource.put(NULL, &key, &data, DB_NOOVERWRITE);
-	if (ret == DB_KEYEXIST) 
-	{ // already exist. get node id
-		m_dbSource.get(NULL, &key, &data, 0);
-		
-		long *sourceId = (long*) data.get_data();
-		assert(data.get_size() == sizeof(long));
-
-		retSourceNodeId = *sourceId;
-	}
-	else
-	{
-		retSourceNodeId = m_nextSourceNodeId;
-		++m_nextSourceNodeId;
-	}
-	
-	return retSourceNodeId;
-}
-
 void DbWrapper::SaveTarget(TargetPhrase &phrase)
 {
 	phrase.SaveTargetPhrase(m_dbTarget, m_dbTargetInd, m_nextTargetNodeId
