@@ -42,7 +42,8 @@ class DbWrapper
 {
 	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd, m_dbTargetColl;
 	Vocab m_vocab;
-	long m_nextSourceNodeId, m_nextTargetNodeId;
+	long m_nextSourceNodeId;
+	long m_nextTargetNodeId;
 	int m_numSourceFactors, m_numTargetFactors, m_numScores;
 	SourcePhraseNode m_initNode;
 	bool m_openSave;
@@ -72,8 +73,7 @@ public:
 
 	Word *CreateSouceWord() const;
 	Word *CreateTargetWord() const;
-	long &GetNextSourceNodeId() 
-	{ return m_nextSourceNodeId; }
+	long &GetNextSourceNodeId();
 	
 	const SourcePhraseNode &GetInitNode() const
 	{ return m_initNode; }
