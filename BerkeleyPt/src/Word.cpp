@@ -34,12 +34,14 @@ void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 		m_isNonTerminal = false;
 	}
 	
-	std::vector<string> factorsStr = Moses::Tokenize(str, "|");
+	std::vector<string> factorsStr;
+	Moses::Tokenize(factorsStr, str, "|");
 	m_factors.resize(factorsStr.size());
 	
 	for (size_t ind = 0; ind < factorsStr.size(); ++ind)
 	{
-		m_factors[ind] = vocab.AddVocabId(factorsStr[ind]);
+		const string &str = factorsStr[ind];
+		m_factors[ind] = vocab.AddVocabId(str);
 	}
 	
 }

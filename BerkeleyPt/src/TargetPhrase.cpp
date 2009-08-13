@@ -29,13 +29,15 @@ TargetPhrase::~TargetPhrase()
 
 void TargetPhrase::CreateAlignFromString(const std::string &alignString)
 {
-	vector<string> alignTok = Moses::Tokenize(alignString);
+	vector<string> alignTok;
+	Moses::Tokenize(alignTok, alignString);
 	
 	vector<string>::const_iterator iter;
 	for (iter = alignTok.begin(); iter != alignTok.end(); ++iter)
 	{
 		const string &align1Str = *iter;
-		vector<size_t> alignPoints = Moses::Tokenize<size_t>(align1Str, "-");
+		vector<size_t> alignPoints;
+		Moses::Tokenize<size_t>(alignPoints, align1Str, "-");
 		assert(alignPoints.size() == 2);
 		m_align.push_back(pair<size_t, size_t>(alignPoints[0], alignPoints[1]) );
 	}
@@ -43,13 +45,15 @@ void TargetPhrase::CreateAlignFromString(const std::string &alignString)
 
 void TargetPhrase::CreateScoresFromString(const std::string &inString, size_t numScores)
 {
-	m_scores = Moses::Tokenize<float>(inString);
+	assert(m_scores.size() == 0);
+	Moses::Tokenize<float>(m_scores, inString);
 	assert(m_scores.size() == numScores);
 }
 
 void TargetPhrase::CreateHeadwordsFromString(const std::string &inString, Vocab &vocab)
 {
-	std::vector<string> headWordsStr = Moses::Tokenize(inString);
+	std::vector<string> headWordsStr;
+	Moses::Tokenize(headWordsStr, inString);
 	assert(headWordsStr.size());
 		
 	m_headWords[0].CreateFromString(headWordsStr[0], vocab);
