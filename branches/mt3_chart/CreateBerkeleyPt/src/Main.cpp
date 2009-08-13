@@ -18,6 +18,23 @@
 using namespace std;
 using namespace MosesBerkeleyPt;
 
+void Save(map<SourcePhrase, TargetPhraseCollection> &tpCollMap, DbWrapper &dbWrapper)
+{
+	//write out all target phrase colls
+	map<SourcePhrase, TargetPhraseCollection>::const_iterator iter;
+	for (iter = tpCollMap.begin(); iter != tpCollMap.end(); ++iter)
+	{ // could be 1st. tpColl == NULL
+		const SourcePhrase &sourcePhrase = iter->first;
+		long sourceNodeId = sourcePhrase.Save(dbWrapper.GetSourceDb(), dbWrapper.GetNextSourceNodeId());
+		
+		const TargetPhraseCollection &tpColl = iter->second;
+		dbWrapper.SaveTargetPhraseCollection(sourceNodeId, tpColl);
+	}	
+	
+	// delete all tp coll
+	tpCollMap.clear();			
+}
+
 int main (int argc, char * const argv[])
 {
     // insert code here...
@@ -37,6 +54,7 @@ int main (int argc, char * const argv[])
 	DbWrapper dbWrapper;
 	dbWrapper.BeginSave(destPath, numSourceFactors, numTargetFactors, numScores);
 	
+	vector<string> tokens;
 	string line, prevSourcePhraseStr;
 	size_t lineNum = 0;
 	map<SourcePhrase, TargetPhraseCollection> tpCollMap;
@@ -50,7 +68,9 @@ int main (int argc, char * const argv[])
 		line = Moses::Trim(line);
 		if (line.size() == 0)
 			continue;
-		vector<string> tokens = Moses::TokenizeMultiCharSeparator( line , "|||" );
+		
+		tokens.clear();
+		Moses::TokenizeMultiCharSeparator(tokens, line , "|||" );
 		
 		// words
 		const string &headWordsStr		= tokens[0]
@@ -76,22 +96,7 @@ int main (int argc, char * const argv[])
 		if (prevSourcePhraseStr != sourcePhraseStr)
 		{ // different source from last time. 
 			prevSourcePhraseStr = sourcePhraseStr;
-			
-			//write out all target phrase colls
-			map<SourcePhrase, TargetPhraseCollection>::iterator iter;
-			for (iter = tpCollMap.begin(); iter != tpCollMap.end(); ++iter)
-			{ // could be 1st. tpColl == NULL
-				const SourcePhrase &sourcePhraseSave = iter->first;
-				long sourceNodeId = sourcePhraseSave.Save(dbWrapper.GetSourceDb(), dbWrapper.GetNextSourceNodeId());
-
-				const TargetPhraseCollection &tpColl = iter->second;
-
-				//cerr <<  sourceNodeId << "=" << tpColl.GetSize() << "," << sourcePhraseSave.GetNumNonTerminals() << " ";
-				dbWrapper.SaveTargetPhraseCollection(sourceNodeId, tpColl);
-			}
-
-			// delete all tp coll
-			tpCollMap.clear();			
+			Save(tpCollMap, dbWrapper);
 		}
 		else
 		{ // same source as last time. do nothing
@@ -100,24 +105,12 @@ int main (int argc, char * const argv[])
 		// new coll
 		TargetPhraseCollection &tpColl = tpCollMap[sourcePhrase];
 		tpColl.AddTargetPhrase(targetPhrase);
-		
-	}
+				
+	} // while(getline(inStream, line))
 
 	// save the last coll
-	//write out all target phrase colls
-	map<SourcePhrase, TargetPhraseCollection>::iterator iter;
-	for (iter = tpCollMap.begin(); iter != tpCollMap.end(); ++iter)
-	{ // could be 1st. tpColl == NULL
-		const SourcePhrase &sourcePhrase = iter->first;
-		long sourceNodeId = sourcePhrase.Save(dbWrapper.GetSourceDb(), dbWrapper.GetNextSourceNodeId());
-		
-		const TargetPhraseCollection &tpColl = iter->second;
-		dbWrapper.SaveTargetPhraseCollection(sourceNodeId, tpColl);
-	}
-	
-	// delete all tp coll
-	tpCollMap.clear();			
-	
+	Save(tpCollMap, dbWrapper);
+			
 	dbWrapper.EndSave();
 	
 	Moses::PrintUserTime("Finished");

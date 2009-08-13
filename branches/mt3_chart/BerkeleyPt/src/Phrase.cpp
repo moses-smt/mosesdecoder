@@ -27,7 +27,8 @@ Phrase::~Phrase()
 
 void Phrase::CreateFromString(const std::string &phraseString, Vocab &vocab)
 {
-	std::vector<std::string> wordsVec = Moses::Tokenize(phraseString);
+	vector<string> wordsVec;
+	Moses::Tokenize(wordsVec, phraseString);
 
 	vector<string>::const_iterator iter;
 	for (iter = wordsVec.begin(); iter != wordsVec.end(); ++iter)
