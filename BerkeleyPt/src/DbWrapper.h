@@ -37,10 +37,11 @@ public:
 	int m_vocabId;
 	
 };
-
+	
 class DbWrapper
 {
 	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd, m_dbTargetColl;
+	Db m_dbTargetCollOtherInfo;
 	Vocab m_vocab;
 	long m_nextSourceNodeId;
 	long m_nextTargetNodeId;
@@ -100,7 +101,7 @@ public:
 	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word);
 	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node);
 
-	const Moses::TargetPhraseCollection *ConvertToMoses(const TargetPhraseCollection &tpColl
+	Moses::TargetPhraseCollection *ConvertToMoses(const TargetPhraseCollection &tpColl
 																											, const std::vector<Moses::FactorType> &inputFactors
 																											, const std::vector<Moses::FactorType> &outputFactors
 																											, const Moses::PhraseDictionary &phraseDict

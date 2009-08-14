@@ -153,7 +153,7 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 	// return list of target phrases
 	const ProcessedRuleCollBerkeleyDb &nodes = runningNodes.Get(relEndPos + 1);
 
-	cerr << range << "=" << nodes.GetSize() << " " << flush;
+	cerr << range << "=";
 	
 	size_t rulesLimit = StaticData::Instance().GetRuleLimit();
 	ProcessedRuleCollBerkeleyDb::const_iterator iterNode;
@@ -166,7 +166,7 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 
 		const MosesBerkeleyPt::TargetPhraseCollection *tpcollBerkeleyDb = m_dbWrapper.GetTargetPhraseCollection(node);
 
-		const TargetPhraseCollection *targetPhraseCollection = m_dbWrapper.ConvertToMoses(
+		TargetPhraseCollection *targetPhraseCollection = m_dbWrapper.ConvertToMoses(
 																															*tpcollBerkeleyDb
 																															,m_inputFactorsVec
 																															,m_outputFactorsVec
@@ -175,15 +175,19 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 																															,weightWP
 																															,lmList
 																															,*cachedSource);
+		targetPhraseCollection->SetOtherInfo(tpcollBerkeleyDb->GetOtherInfo());
+		cerr << targetPhraseCollection->GetOtherInfo().m_entropy << "|";
+		
 		delete tpcollBerkeleyDb;
 		
 		assert(targetPhraseCollection);
 		ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
 		m_cache.push_back(targetPhraseCollection);
-
 	}
 	ret->CreateChartRules(rulesLimit);
 
+	cerr << " ";
+	
 	return ret;
 }
 	
