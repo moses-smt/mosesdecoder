@@ -92,7 +92,8 @@ namespace Josiah {
           VERBOSE(2,"Sampling with operator " << m_operators[j]->name() << endl);
           while (m_operators[j]->keepGoing() && keepGoing) {
             m_operators[j]->scan(sample,*options); 
-            if (collectAllSamples) {
+          }
+          if (collectAllSamples) {
               collectSample(sample);
               if (!defaultCtrIncrementer)
                 ++i;
@@ -100,7 +101,6 @@ namespace Josiah {
                 keepGoing = false;
                 break;
               }
-            }
           }
         }
         if (!collectAllSamples) {

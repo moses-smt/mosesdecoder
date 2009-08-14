@@ -475,7 +475,7 @@ int main(int argc, char** argv) {
     cerr << "Curr Weights : " << StaticData::Instance().GetWeights() << endl;
 
 #ifdef MPI_ENABLED
-    SentenceBLEU::UpdateSmoothing();  
+    SentenceBLEU::UpdateSmoothing(rank);  
     onlineLearner->SetRunningWeightVector(rank, size);
 #endif
     
