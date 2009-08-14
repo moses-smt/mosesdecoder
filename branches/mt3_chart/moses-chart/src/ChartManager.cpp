@@ -63,7 +63,7 @@ void Manager::ProcessSentence()
 			
 			//cerr << cell << endl;
 
-			VERBOSE(1,range << "=" << cell.GetSize() << " ");
+			//VERBOSE(1,range << "=" << cell.GetSize() << " ");
 		}
 	}
 
