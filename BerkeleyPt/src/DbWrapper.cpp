@@ -6,6 +6,8 @@
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */
+#include "sys/stat.h"
+
 #include "../../moses/src/PhraseDictionary.h"
 #include "DbWrapper.h"
 #include "Vocab.h"
@@ -59,24 +61,31 @@ int GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
 	return (0);
 } 
 
-void DbWrapper::Load(const string &filePath)
+bool DbWrapper::Load(const string &filePath)
 {
-	OpenFiles(filePath);
+	if (!OpenForLoad(filePath))
+		return false;
+	
 	m_vocab.Load(m_dbVocab);
 
 	m_numSourceFactors = GetMisc("NumSourceFactors");
 	m_numTargetFactors = GetMisc("NumTargetFactors");
 	m_numScores = GetMisc("NumScores");	
 	
+	return true;
 }
 
-void DbWrapper::BeginSave(const string &filePath
+bool DbWrapper::BeginSave(const string &filePath
 													, int numSourceFactors, int	numTargetFactors, int numScores)
 {
-	OpenFiles(filePath);	
+	if (!OpenForSave(filePath))
+		return false;
+	
 	m_numSourceFactors = numSourceFactors;
 	m_numTargetFactors = numTargetFactors;
 	m_numScores = numScores;
+
+	return true;
 }
 	
 void DbWrapper::EndSave()
@@ -85,38 +94,57 @@ void DbWrapper::EndSave()
 	SaveMisc();
 }
 
-void DbWrapper::OpenFiles(const std::string &filePath)
+bool DbWrapper::OpenForSave(const std::string &filePath)
 {
-	m_dbMisc.set_error_stream(&cerr);
-	m_dbMisc.set_errpfx("SequenceExample");
-	m_dbMisc.open(NULL, (filePath + "/Misc.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
+	mkdir(filePath.c_str(), 0777);
 	
-	// store string -> vocab id
-	m_dbVocab.set_error_stream(&cerr);
-	m_dbVocab.set_errpfx("SequenceExample");
-	m_dbVocab.open(NULL, (filePath + "/Vocab.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
-	
-	m_dbSource.set_error_stream(&cerr);
-	m_dbSource.set_errpfx("SequenceExample");
-	m_dbSource.open(NULL, (filePath + "/Source.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
-	
-	// store target phrase -> id
-	m_dbTarget.set_error_stream(&cerr);
-	m_dbTarget.set_errpfx("SequenceExample");
-	m_dbTarget.open(NULL, (filePath + "/Target.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
-	
-	// store id -> target phrase
-	m_dbTargetInd.set_error_stream(&cerr);
-	m_dbTargetInd.set_errpfx("SequenceExample");
-	m_dbTargetInd.open(NULL, (filePath + "/TargetInd.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
-	
-//	m_dbTarget.associate(NULL, &m_dbTargetInd, GetIdFromTargetPhrase, 0);
-	
-	// store source id -> target phrase coll
-	m_dbTargetColl.set_error_stream(&cerr);
-	m_dbTargetColl.set_errpfx("SequenceExample");
-	m_dbTargetColl.open(NULL, (filePath + "/TargetPhraseColl.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0664);
-	
+	if (OpenDb(m_dbMisc, filePath + "/Misc.db", DB_BTREE, DB_CREATE | DB_EXCL, 0664)
+			&& 
+			// store string -> vocab id
+			OpenDb(m_dbVocab, filePath + "/Vocab.db", DB_BTREE, DB_CREATE | DB_EXCL, 0664)
+			&&
+			OpenDb(m_dbSource, filePath + "/Source.db", DB_BTREE, DB_CREATE | DB_EXCL, 0664)
+			&&
+			// store target phrase -> id
+			OpenDb(m_dbTarget, filePath + "/Target.db", DB_BTREE, DB_CREATE | DB_EXCL, 0664)
+			&&
+			// store id -> target phrase
+			OpenDb(m_dbTargetInd, filePath + "/TargetInd.db", DB_BTREE, DB_CREATE | DB_EXCL, 0664)
+			&&
+			// store source node id -> target phrase coll
+			OpenDb(m_dbTargetColl, filePath + "/TargetPhraseColl.db", DB_BTREE, DB_CREATE | DB_EXCL, 0664)
+		)
+		return true;
+	else
+		return false;
+
+	//	m_dbTarget.associate(NULL, &m_dbTargetInd, GetIdFromTargetPhrase, 0);
+}
+
+bool DbWrapper::OpenForLoad(const std::string &filePath)
+{
+	if (OpenDb(m_dbMisc, filePath + "/Misc.db", DB_UNKNOWN, 0, 0)
+			&&
+	OpenDb(m_dbVocab, filePath + "/Vocab.db", DB_UNKNOWN, 0, 0)
+			&&
+	OpenDb(m_dbSource, filePath + "/Source.db", DB_UNKNOWN, 0, 0)
+			&&
+	OpenDb(m_dbTargetInd, filePath + "/TargetInd.db", DB_UNKNOWN, 0, 0)
+			&&
+	OpenDb(m_dbTargetColl, filePath + "/TargetPhraseColl.db", DB_UNKNOWN, 0, 0)
+			)
+		return true;
+	else
+		return false;
+}
+
+bool DbWrapper::OpenDb(Db &db, const std::string &filePath, DBTYPE type, u_int32_t flags, int mode)
+{
+	db.set_error_stream(&cerr);
+	db.set_errpfx("dbError");
+	int retDb = db.open(NULL, filePath.c_str(), NULL, type, flags, mode);	
+
+	return retDb == 0;
 }
 
 void DbWrapper::SaveMisc()
@@ -151,6 +179,7 @@ int DbWrapper::GetMisc(const std::string &key)
 	Dbt valueDb;
 	
 	m_dbMisc.get(NULL, &keyDb, &valueDb, 0);
+	assert(valueDb.get_size() == sizeof(int));
 	
 	free(keyData);
 	

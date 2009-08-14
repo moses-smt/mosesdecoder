@@ -38,7 +38,8 @@ bool PhraseDictionaryBerkeleyDb::Load(const std::vector<FactorType> &input
 		
 	LoadTargetLookup();
 	
-	m_dbWrapper.Load(filePath);
+	if (!m_dbWrapper.Load(filePath))
+		return false;
 
 	assert(m_dbWrapper.GetMisc("Version") == 1);
 	assert(m_dbWrapper.GetMisc("NumSourceFactors") == input.size());
