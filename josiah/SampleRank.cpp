@@ -244,7 +244,7 @@ int main(int argc, char** argv) {
     timer.on();
   }
   
-  if (!mira && !perceptron && !mira_plus) {
+  if (!mira && !perceptron && !mira_plus && !cw) {
     cerr << "Error: No learning algorithm chosen" << endl;
     return 1;
   }

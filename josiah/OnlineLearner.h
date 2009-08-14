@@ -78,14 +78,14 @@ namespace Josiah {
 			//margin variance approximately == 0 ? 
 			if (marginVariance < 0.0 + m_epsilon && marginVariance > 0.0 - m_epsilon) return 0.0;
 			float v	= 1.0 + 2.0 * m_confidence * marginMean;
-			float lambda = -v + sqrt(v * v - 8.0 * m_confidence * (marginMean - m_confidence * marginVariance)) / (4.0 * m_confidence * marginVariance);
+			float lambda = (-v + sqrt(v * v - 8.0 * m_confidence * (marginMean - m_confidence * marginVariance))) / (4.0 * m_confidence * marginVariance);
 			return lambda > 0.0 ? lambda : 0.0;
 		}
 		
 		float calculateMarginVariance(const Moses::ScoreComponentCollection& features) { 
 			float sum = 0.0;
 			float size = features.data().size();
-			for (size_t i=0; i<size; i++) { sum += features.data()[i] * features.data()[i] * m_currSigmaDiag.data()[i]; } 
+			for (size_t i=0; i<size; i++) { sum += features.data()[i] * features.data()[i] * m_currSigmaDiag.data()[i];		} 
 			return sum;
 		}
 		
@@ -99,7 +99,7 @@ namespace Josiah {
 		void updateVariance(float alpha) {
 			float size = m_currSigmaDiag.data().size();
 			for (size_t i=0; i<size; i++) {
-				m_currSigmaDiag[i] += 1.0 / (1.0/m_currSigmaDiag[i] + 2.0 * alpha *	m_confidence * m_features[i]);
+				m_currSigmaDiag[i] = 1.0 / (1.0/m_currSigmaDiag[i] + 2.0 * alpha *	m_confidence * m_features[i] * m_features[i]);
 			} 			
 		}
 		
