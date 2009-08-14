@@ -257,15 +257,20 @@ namespace Josiah {
 
 		//the score for the input features (could also be calculated by m_features * current weights)
 		float scoreDiff = target->getScore() - curr->getScore();
+		cerr << "ScoreDiff: " << scoreDiff << endl;
 		
 		//what is the actual gain of target vs current (the gold gain)
 		float gainDiff = target->getGain() - curr->getGain(); 
+		cerr << "GainDiff: " << gainDiff << endl;
 		
 		//the gold 1/-1 label
 		float y = gainDiff > 0 ? 1.0 : -1.0;
+		cerr << "Label: " << y << endl;
+
 		
 		//the mean of margin for this task is y * score
 		float marginMean = y * scoreDiff;	
+		cerr << "marginMean: " << marginMean << endl;
 
 		//only update at error
 		if (marginMean < 0) {
@@ -274,18 +279,27 @@ namespace Josiah {
 			m_features.ZeroAll();
 			m_features.PlusEquals(target->getScores());
 			m_features.MinusEquals(curr->getScores());
-				
+
+			cerr << "feature delta: " << m_features << endl;
+			
 			//the variance is based on the input features
 			float marginVariance = calculateMarginVariance(m_features);
+			cerr << "marginVariance: " << marginVariance << endl;
 		
 			//get the kkt multiplier
 			float alpha = kkt(marginMean,marginVariance);
+			cerr << "alpha: " << alpha << endl;
 			
 			//update the mean parameters
 			updateMean(alpha,	y);
+
+			cerr << "new weights: " << m_currWeights << endl;
 			
 			//update the variance parameters
 			updateVariance(alpha);
+			
+			cerr << "new variance: " << m_currSigmaDiag << endl;
+
 			
 			//remember that we made an update
 			m_numUpdates++;
