@@ -50,7 +50,9 @@ class DbWrapper
 	
 	
 	void SetMisc(const std::string &key, int value);
-	void OpenFiles(const std::string &filePath);
+	bool OpenForSave(const std::string &filePath);
+	bool OpenForLoad(const std::string &filePath);
+	bool OpenDb(Db &db, const std::string &filePath, DBTYPE type, u_int32_t flags, int mode);
 
 	void SaveVocab();
 	void SaveMisc();
@@ -58,11 +60,11 @@ class DbWrapper
 public:
 	DbWrapper();
 	~DbWrapper();
-	void BeginSave(const std::string &filePath
+	bool BeginSave(const std::string &filePath
 								, int numSourceFactors, int	numTargetFactors, int numScores);
 	void EndSave();
 
-	void Load(const std::string &filePath);
+	bool Load(const std::string &filePath);
 
 	void SaveTarget(TargetPhrase &phrase);
 	void SaveTargetPhraseCollection(long sourceNodeId, const TargetPhraseCollection &tpColl);

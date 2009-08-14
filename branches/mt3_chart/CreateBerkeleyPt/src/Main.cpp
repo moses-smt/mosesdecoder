@@ -52,7 +52,8 @@ int main (int argc, char * const argv[])
 	Moses::InputFileStream inStream(filePath);
 
 	DbWrapper dbWrapper;
-	dbWrapper.BeginSave(destPath, numSourceFactors, numTargetFactors, numScores);
+	bool retDb = dbWrapper.BeginSave(destPath, numSourceFactors, numTargetFactors, numScores);
+	assert(retDb);
 	
 	vector<string> tokens;
 	string line, prevSourcePhraseStr;
@@ -62,9 +63,11 @@ int main (int argc, char * const argv[])
 	
 	while(getline(inStream, line))
 	{
-    if (++lineNum % 10000 == 0) 
-			cerr << lineNum << " " << flush;
-
+		lineNum++;
+    if (lineNum%1000 == 0) cerr << "." << flush;
+    if (lineNum%10000 == 0) cerr << ":" << flush;
+    if (lineNum%100000 == 0) cerr << "!" << flush;
+		
 		line = Moses::Trim(line);
 		if (line.size() == 0)
 			continue;
