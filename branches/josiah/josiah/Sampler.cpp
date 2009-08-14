@@ -113,6 +113,11 @@ namespace Josiah {
           keepGoing = false;
           break;
         }
+        if (collectAllSamples && m_collectors[0]->N() > SAMPLEMAX) {
+          keepGoing = false;
+          break;
+        }
+          
       }
       if (f) VERBOSE(1,endl);
     }

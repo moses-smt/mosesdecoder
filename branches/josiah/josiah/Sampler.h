@@ -23,6 +23,7 @@ class StopStrategy;
 class SampleAcceptor;  
 class TranslationDelta;
 
+#define SAMPLEMAX 1000000
   
 class Sampler {
 private:

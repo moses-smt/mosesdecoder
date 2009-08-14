@@ -70,7 +70,6 @@ void GibbsOperator::SetAnnealingTemperature(const double t) {
 }  
 
 void GibbsOperator::Quench() {
-  cerr << "About to delete acceptor" << endl;
   delete m_acceptor;
   m_acceptor = NULL;    
 }  
