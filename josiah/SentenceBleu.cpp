@@ -180,6 +180,23 @@ void SentenceBLEU::UpdateSmoothing(SufficientStats* smooth) {
    m_currentSmoothing *= 0.9;
    cerr << "Now Smoothing stats : " << m_currentSmoothing << endl;
 }
+
+//#ifdef MPI_ENABLED
+void UpdateSmoothing(int rank) {
+  vector <float> smoothingStats(m_currentSmoothing.data().size());
+  MPI_VERBOSE(1,"Before update, Rank " << rank << ", smoothing stats : " << m_currentSmoothing << endl)  
+  //Reduce smoothing stats
+  //if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&m_currentSmoothing.data()[0]), &smoothingStats[0], smoothingStats.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+  
+  //Broadcast it
+  //if (MPI_SUCCESS != MPI_Bcast(const_cast<float*>(&smoothingStats[0]), smoothingStats.size(), MPI_FLOAT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1); 
+  
+  //Now unpack
+  m_currentSmoothing.initialise(smoothingStats);
+  MPI_VERBOSE(1,"After update, Rank " << rank << ", smoothing stats : " << m_currentSmoothing << endl)  
+}
+  
+//#endif  
   
 }
 

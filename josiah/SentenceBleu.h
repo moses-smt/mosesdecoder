@@ -6,6 +6,9 @@
 #include "GainFunction.h"
 #include "Factor.h"
 #include "SufficientStats.h"
+#ifdef MPI_ENABLED
+#include <mpi.h>
+#endif
 
 
 namespace Josiah {
@@ -92,6 +95,10 @@ private:
   static void UpdateSmoothing(SufficientStats* smooth);
   
   static void SetComputeApproxDocBLEU(bool compute) {computeApproxDocBLEU = compute;}
+  
+//#ifdef MPI_ENABLED
+  static void UpdateSmoothing(int);
+//#endif  
  };
   
 }
