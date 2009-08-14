@@ -182,14 +182,14 @@ void SentenceBLEU::UpdateSmoothing(SufficientStats* smooth) {
 }
 
 //#ifdef MPI_ENABLED
-void UpdateSmoothing(int rank) {
+void SentenceBLEU::UpdateSmoothing(int rank) {
   vector <float> smoothingStats(m_currentSmoothing.data().size());
   MPI_VERBOSE(1,"Before update, Rank " << rank << ", smoothing stats : " << m_currentSmoothing << endl)  
   //Reduce smoothing stats
-  //if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&m_currentSmoothing.data()[0]), &smoothingStats[0], smoothingStats.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
+  if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&m_currentSmoothing.data()[0]), &smoothingStats[0], smoothingStats.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
   
   //Broadcast it
-  //if (MPI_SUCCESS != MPI_Bcast(const_cast<float*>(&smoothingStats[0]), smoothingStats.size(), MPI_FLOAT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1); 
+  if (MPI_SUCCESS != MPI_Bcast(const_cast<float*>(&smoothingStats[0]), smoothingStats.size(), MPI_FLOAT, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1); 
   
   //Now unpack
   m_currentSmoothing.initialise(smoothingStats);
