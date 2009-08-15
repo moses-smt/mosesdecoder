@@ -727,6 +727,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LM_IRST,
 					LM_SRI,
+					TRACE_ENABLE,
 				);
 				HEADER_SEARCH_PATHS = (
 					"/usr/local/include/boost-1_37",
@@ -766,6 +767,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LM_SRI,
 					LM_IRST,
+					TRACE_ENABLE,
 				);
 				HEADER_SEARCH_PATHS = (
 					"/usr/local/include/boost-1_37",
@@ -789,7 +791,7 @@
 					"-lz",
 					"-lirstlm",
 				);
-				PRODUCT_NAME = josiah;
+				PRODUCT_NAME = corpustrainer;
 				VALID_ARCHS = i386;
 			};
 			name = Deployment;
@@ -803,6 +805,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
 					LM_IRST,
 					LM_SRI,
 				);
@@ -844,6 +847,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LM_SRI,
 					LM_IRST,
+					TRACE_ENABLE,
 				);
 				HEADER_SEARCH_PATHS = (
 					"/usr/local/include/boost-1_37",
@@ -867,7 +871,7 @@
 					"-lz",
 					"-lirstlm",
 				);
-				PRODUCT_NAME = josiah;
+				PRODUCT_NAME = samplerank;
 				VALID_ARCHS = i386;
 			};
 			name = Deployment;

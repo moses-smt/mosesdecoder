@@ -181,7 +181,7 @@ void SentenceBLEU::UpdateSmoothing(SufficientStats* smooth) {
    cerr << "Now Smoothing stats : " << m_currentSmoothing << endl;
 }
 
-//#ifdef MPI_ENABLED
+#ifdef MPI_ENABLED
 void SentenceBLEU::UpdateSmoothing(int rank) {
   vector <float> smoothingStats(m_currentSmoothing.data().size());
   MPI_VERBOSE(1,"Before update, Rank " << rank << ", smoothing stats : " << m_currentSmoothing << endl)  
@@ -195,8 +195,7 @@ void SentenceBLEU::UpdateSmoothing(int rank) {
   m_currentSmoothing.initialise(smoothingStats);
   MPI_VERBOSE(1,"After update, Rank " << rank << ", smoothing stats : " << m_currentSmoothing << endl)  
 }
-  
-//#endif  
+#endif  
   
 }
 
