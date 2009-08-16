@@ -124,17 +124,17 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // indirect: source target probabilities
 
 		// consistency checks
-		if ((itemDirect.size() != 4 && hierarchicalFlag) ||
-				(itemDirect.size() != 3 && !hierarchicalFlag))
+		if ((itemDirect.size() != 5 && hierarchicalFlag) ||
+				(itemDirect.size() != 4 && !hierarchicalFlag))
 		{
-			cerr << "ERROR: expected " << (hierarchicalFlag ? "4" : "3") << " items in file " 
+			cerr << "ERROR: expected " << (hierarchicalFlag ? "5" : "4") << " items in file " 
 					 << fileNameDirect << ", line " << i << endl;
 			exit(1);
 		}
 
-		if (itemIndirect.size() != 3)
+		if (itemIndirect.size() != 4)
 		{
-			cerr << "ERROR: expected 3 items in file " 
+			cerr << "ERROR: expected 4 items in file " 
 					 << fileNameIndirect << ", line " << i << endl;
 			exit(1);
 		}
@@ -190,8 +190,8 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 		fileConsolidated << " " << (logProbFlag ? 1 : 2.718); // phrase count feature
 		
 		// counts
-		fileConsolidated << " ||| " << itemDirect.back()      // direct
-																<< " " << itemDirect.back(); // indirect
+		fileConsolidated << " ||| " << itemIndirect.back() << " "      // direct
+																<< itemDirect.back(); // indirect
 		
 		fileConsolidated << endl;
 	}
