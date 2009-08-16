@@ -110,13 +110,16 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
   // loop through all extracted phrase translations
   int i=0;
   while(true) {
-		if (++i % 100000 == 0) cerr << "." << flush;
-
+		i++;
+    if (i%1000 == 0) cerr << "." << flush;
+    if (i%10000 == 0) cerr << ":" << flush;
+    if (i%100000 == 0) cerr << "!" << flush;
+		
 		vector< string > itemDirect, itemIndirect;
 		if (! getLine(fileIndirectP,itemIndirect) ||
 				! getLine(fileDirectP,  itemDirect  ))
 			break;
-
+				
 		// direct: target source alignment probabilities
     // indirect: source target probabilities
 
@@ -184,7 +187,13 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 		else
 			fileConsolidated << itemIndirect[2]      // prob indirect
 											 << " " << itemDirect[2]; // prob direct
-		fileConsolidated << " " << (logProbFlag ? 1 : 2.718) << endl; // phrase count feature
+		fileConsolidated << " " << (logProbFlag ? 1 : 2.718); // phrase count feature
+		
+		// counts
+		fileConsolidated << " ||| " << itemDirect.back()      // direct
+																<< " " << itemDirect.back(); // indirect
+		
+		fileConsolidated << endl;
 	}
 	fileDirect.close();
 	fileIndirect.close();
@@ -203,6 +212,13 @@ bool getLine( istream &fileP, vector< string > &item )
 	//cerr << line << endl;
 	
 	item = splitLine();
+	
+	/*
+	for (size_t i = 0; i < item.size(); i++)
+		cerr << item[i] << "<<";
+	cerr << endl;
+	*/
+	
 	return true;
 } 
 
