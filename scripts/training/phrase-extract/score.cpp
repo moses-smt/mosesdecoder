@@ -519,6 +519,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 		phraseTableFile << " " << ( logProbFlag ? negLogProb*log(lexScore) : lexScore );
 	}
 
+	phraseTableFile << " ||| " << totalCount;
 	phraseTableFile << endl;
 
 	// optional output of word alignments
