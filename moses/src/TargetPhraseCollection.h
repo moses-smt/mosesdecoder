@@ -28,22 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-	
-class TargetPhraseCollectionOtherInfo
-{
-public:
-	TargetPhraseCollectionOtherInfo()
-	{}
-	TargetPhraseCollectionOtherInfo(long count, float entropy)
-	:m_count(count)
-	,m_entropy(entropy)
-	{	}
-	
-	long m_count;
-	float m_entropy;
-	
-};
-	
 //! a list of target phrases that is trsnalated from the same source phrase
 class TargetPhraseCollection
 {
@@ -52,8 +36,6 @@ class TargetPhraseCollection
 protected:
 	std::vector<TargetPhrase*> m_collection;
 	
-	TargetPhraseCollectionOtherInfo m_otherInfo;
-
 public:	
 	// iters
 	typedef std::vector<TargetPhrase*>::iterator iterator;
@@ -89,15 +71,7 @@ public:
 	{
 		m_collection.push_back(targetPhrase);
 	}
-	
-	void SetOtherInfo(const TargetPhraseCollectionOtherInfo &otherInfo)
-	{
-		m_otherInfo = otherInfo;
-	}
-	const TargetPhraseCollectionOtherInfo &GetOtherInfo() const
-	{ return m_otherInfo;	}
-	
-};
+	};
 
 }
 

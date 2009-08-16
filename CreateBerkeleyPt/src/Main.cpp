@@ -80,7 +80,8 @@ int main (int argc, char * const argv[])
 								,&sourcePhraseStr	= tokens[1]
 								,&targetPhraseStr	= tokens[2]
 								,&alignStr				= tokens[3]
-								,&scoresStr				= tokens[4];
+								,&scoresStr				= tokens[4]
+								,&countStr				= tokens[5];
 						
 		SourcePhrase sourcePhrase;
 		sourcePhrase.CreateFromString(sourcePhraseStr, dbWrapper.GetVocab());
@@ -90,6 +91,7 @@ int main (int argc, char * const argv[])
 		targetPhrase->CreateAlignFromString(alignStr);
 		targetPhrase->CreateScoresFromString(scoresStr, numScores);
 		targetPhrase->CreateHeadwordsFromString(headWordsStr, dbWrapper.GetVocab());
+		targetPhrase->CreateCountInfo(countStr);
 		
 		dbWrapper.SaveTarget(*targetPhrase);
 		

@@ -41,7 +41,6 @@ public:
 class DbWrapper
 {
 	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd, m_dbTargetColl;
-	Db m_dbTargetCollOtherInfo;
 	Vocab m_vocab;
 	long m_nextSourceNodeId;
 	long m_nextTargetNodeId;

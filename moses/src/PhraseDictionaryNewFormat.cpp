@@ -169,7 +169,7 @@ namespace Moses
 			if (numElement == NOT_FOUND)
 			{ // init numElement
 				numElement = tokens.size();
-				assert(numElement == 5);
+				assert(numElement == 6);
 			}
 			
 			if (tokens.size() != numElement)
@@ -184,8 +184,9 @@ namespace Moses
 									, &sourcePhraseString	= tokens[1]
 									, &targetPhraseString	= tokens[2]
 									, &alignString				= tokens[3]
-									, &scoreString				= tokens[4];
-			
+									, &scoreString				= tokens[4]
+									, &countString				= tokens[5];
+
 			bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 			if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
 				TRACE_ERR( m_filePath << ":" << count << ": pt entry contains empty target, skipping\n");
@@ -239,6 +240,9 @@ namespace Moses
 				targetPhrase->SetScoreChart(this, scoreVector, weight, languageModels, true);
 			}
 			
+			// count info for backoff
+			targetPhrase->CreateCountInfo(countString);
+
 			TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(sourcePhrase, *targetPhrase, alignmentInfo);
 			AddEquivPhrase(phraseColl, targetPhrase);
 			
