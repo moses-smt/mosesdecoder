@@ -260,5 +260,12 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 	return os;
 }
 
+void TargetPhrase::CreateCountInfo(const std::string &countStr)
+{
+	vector<float> count = Moses::Tokenize<float>(countStr);
+	assert(count.size() == 2);
+	m_countInfo = Moses::CountInfo(count[1], count[0]);
+}
+	
 }
 

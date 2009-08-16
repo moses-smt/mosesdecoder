@@ -175,8 +175,6 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 																															,weightWP
 																															,lmList
 																															,*cachedSource);
-		targetPhraseCollection->SetOtherInfo(tpcollBerkeleyDb->GetOtherInfo());
-		cerr << targetPhraseCollection->GetOtherInfo().m_entropy << "|";
 		
 		delete tpcollBerkeleyDb;
 		

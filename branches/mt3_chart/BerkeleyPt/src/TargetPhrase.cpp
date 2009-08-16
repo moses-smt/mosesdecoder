@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <db_cxx.h>
 #include "../../moses/src/Util.h"
-#include "../../moses/src/TargetPhrase.h"
 #include "../../moses/src/PhraseDictionary.h"
 #include "TargetPhrase.h"
 
@@ -109,6 +108,7 @@ char *TargetPhrase::WriteOtherInfoToMemory(size_t &memUsed, int numScores, size_
 	memNeeded += sourceWordSize + targetWordSize; // LHS words
 	memNeeded += sizeof(int) + 2 * sizeof(int) * GetAlign().size(); // align
 	memNeeded += sizeof(float) * numScores; // scores
+	memNeeded += sizeof(Moses::CountInfo); // count
 	
 	char *mem = (char*) malloc(memNeeded);
 	//memset(mem, 0, memNeeded);
@@ -128,6 +128,9 @@ char *TargetPhrase::WriteOtherInfoToMemory(size_t &memUsed, int numScores, size_
 	
 	// scores
 	memUsed += WriteScoresToMemory(mem + memUsed);
+	
+	// count
+	memUsed += WriteCountsToMemory(mem + memUsed);
 	
 	//DebugMem(mem, memNeeded);
 	assert(memNeeded == memUsed);	
@@ -168,6 +171,18 @@ size_t TargetPhrase::WriteScoresToMemory(char *mem) const
 	
 	size_t memUsed = sizeof(float) * m_scores.size();
 	return memUsed;
+}
+
+size_t TargetPhrase::WriteCountsToMemory(char *mem) const
+{	
+	float *countMem = (float*) mem;
+	
+	countMem[0] = m_countInfo.m_countSource;
+	countMem[1] = m_countInfo.m_countTarget;
+	
+	size_t memUsed = sizeof(m_countInfo);
+	return memUsed;
+	
 }
 
 long TargetPhrase::SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, long &nextTargetId
@@ -250,7 +265,10 @@ size_t TargetPhrase::ReadOtherInfoFromMemory(const char *mem
 	
 	// scores
 	memUsed += ReadScoresFromMemory(mem + memUsed, numScores);
-	
+
+	// counts
+	memUsed += ReadCountsFromMemory(mem + memUsed);
+
 	return memUsed;
 }
 
@@ -295,6 +313,18 @@ size_t TargetPhrase::ReadScoresFromMemory(const char *mem, size_t numScores)
 
 	size_t memUsed = sizeof(float) * m_scores.size();
 	return memUsed;
+}
+
+size_t TargetPhrase::ReadCountsFromMemory(const char *mem)
+{	
+	float *countMem = (float*) mem;
+	
+	m_countInfo.m_countSource = countMem[0];
+	m_countInfo.m_countTarget = countMem[1];
+
+	size_t memUsed = sizeof(m_countInfo);
+	return memUsed;
+	
 }
 
 void TargetPhrase::Load(Db &db, size_t numTargetFactors)
@@ -373,6 +403,12 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 	
 }
 
+void TargetPhrase::CreateCountInfo(const std::string &countStr)
+{
+	vector<float> count = Moses::Tokenize<float>(countStr);
+	assert(count.size() == 2);
+	m_countInfo = Moses::CountInfo(count[1], count[0]);
+}
 
 }; // namespace
 

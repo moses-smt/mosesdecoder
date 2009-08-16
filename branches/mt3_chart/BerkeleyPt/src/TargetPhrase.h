@@ -12,12 +12,12 @@
 #include "Phrase.h"
 #include "../../moses/src/TypeDef.h"
 #include "../../moses/src/LMList.h"
+#include "../../moses/src/TargetPhrase.h"
 
 class Db;
 
 namespace Moses
 {
-	class TargetPhrase;
 	class PhraseDictionary;
 }
 
@@ -34,13 +34,17 @@ protected:
 	std::vector<Word>		m_headWords;
 	long m_targetId; // set when saved to db
 
+	Moses::CountInfo m_countInfo;
+
 	char *WritePhraseToMemory(size_t &memUsed,  int numScores, size_t sourceWordSize, size_t targetWordSize) const;
 
 	size_t WriteAlignToMemory(char *mem) const;
 	size_t WriteScoresToMemory(char *mem) const;
+	size_t WriteCountsToMemory(char *mem) const;
 
 	size_t ReadAlignFromMemory(const char *mem);
 	size_t ReadScoresFromMemory(const char *mem, size_t numScores);
+	size_t ReadCountsFromMemory(const char *mem);
 
 	size_t ReadPhraseFromMemory(const char *mem, size_t numFactors);
 
@@ -81,6 +85,8 @@ public:
 																			, const Moses::LMList &lmList
 																			, const Moses::Phrase &sourcePhrase) const;
 	
+	const  Moses::CountInfo &GetCountInfo() const;
+	void CreateCountInfo(const std::string &countStr);
 };
 	
 } // namespace

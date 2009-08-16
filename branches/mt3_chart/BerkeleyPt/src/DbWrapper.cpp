@@ -27,7 +27,6 @@ DbWrapper::DbWrapper()
 ,m_dbTarget(0, 0)
 ,m_dbTargetInd(0, 0)
 ,m_dbTargetColl(0, 0)
-,m_dbTargetCollOtherInfo(0, 0)
 ,m_nextSourceNodeId(1)
 ,m_nextTargetNodeId(1)
 ,m_initNode(0)
@@ -41,8 +40,6 @@ DbWrapper::~DbWrapper()
 	m_dbTarget.close(0);
 	m_dbTargetInd.close(0);
 	m_dbTargetColl.close(0);
-
-	m_dbTargetCollOtherInfo.close(0);
 }
 
 // helper callback fn for target secondary db
@@ -117,9 +114,6 @@ bool DbWrapper::OpenForSave(const std::string &filePath)
 			// store source node id -> target phrase coll
 			OpenDb(m_dbTargetColl, filePath + "/TargetPhraseColl.db", DB_BTREE, DB_CREATE | DB_EXCL, 0664)
 			
-			&&
-			// store entropy & counts for each node id
-			OpenDb(m_dbTargetCollOtherInfo, filePath + "/TargetPhraseCollOtherInfo.db", DB_BTREE, DB_CREATE | DB_EXCL, 0664)
 		)
 		return true;
 	else
@@ -139,8 +133,6 @@ bool DbWrapper::OpenForLoad(const std::string &filePath)
 			OpenDb(m_dbTargetInd, filePath + "/TargetInd.db", DB_UNKNOWN, 0, 0)
 			&&
 			OpenDb(m_dbTargetColl, filePath + "/TargetPhraseColl.db", DB_UNKNOWN, 0, 0)
-			&&
-			OpenDb(m_dbTargetCollOtherInfo, filePath + "/TargetPhraseCollOtherInfo.db", DB_UNKNOWN, 0, 0)
 			)
 		return true;
 	else
@@ -241,26 +233,6 @@ void DbWrapper::SaveTarget(TargetPhrase &phrase)
 void DbWrapper::SaveTargetPhraseCollection(long sourceNodeId, const TargetPhraseCollection &tpColl)
 {
 	tpColl.Save(m_dbTargetColl, sourceNodeId, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
-
-	// other info
-	// calc entropy
-	float entropy = 0;
-	TargetPhraseCollection::const_iterator iter;
-	for (iter = tpColl.begin(); iter != tpColl.end(); ++iter)
-	{
-		const TargetPhrase &tp = **iter;
-		float prob = tp.GetScores()[2];
-		
-		entropy -= prob * log(prob);
-	}
-	
-	// save
-	Moses::TargetPhraseCollectionOtherInfo info(345, entropy);
-	Dbt key(&sourceNodeId, sizeof(sourceNodeId));
-	Dbt data(&info, sizeof(info));
-	
-	int retDb = m_dbTargetCollOtherInfo.put(NULL, &key, &data, DB_NOOVERWRITE);
-	assert(retDb == 0); 
 }
 
 const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, const Word &word)
@@ -329,14 +301,6 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 		assert(offset == data.get_size());
 	}
 	
-	// other info	
-	dbRet = m_dbTargetCollOtherInfo.get(NULL, &key, &data, 0);
-	assert(dbRet == 0); 
-	assert(data.get_size() == sizeof(Moses::TargetPhraseCollectionOtherInfo)); 
-	
-	Moses::TargetPhraseCollectionOtherInfo *info = (Moses::TargetPhraseCollectionOtherInfo*) data.get_data();
-	ret->SetOtherInfo(*info);
-	
 	return ret;
 }
 
@@ -366,9 +330,6 @@ Moses::TargetPhraseCollection *DbWrapper::ConvertToMoses(const TargetPhraseColle
 	}
 
 	ret->NthElement(phraseDict.GetTableLimit());
-
-	// other info
-	ret->SetOtherInfo(tpColl.GetOtherInfo());
 	
 	return ret;
 }

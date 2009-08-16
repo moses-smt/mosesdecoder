@@ -41,6 +41,21 @@ class PhraseDictionary;
 class GenerationDictionary;
 class ScoreProducer;
 
+class CountInfo
+	{
+	public:
+		CountInfo()
+		{}
+		CountInfo(float countSource, float countTarget)
+		:m_countSource(countSource)
+		,m_countTarget(countTarget)
+		{	}
+		
+		float m_countSource;
+		float m_countTarget;
+		
+	};
+	
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
 class TargetPhrase: public Phrase
@@ -61,6 +76,8 @@ protected:
 	// source non terms, in source order
 	std::vector<Word> m_sourceNonTerm;
 
+	CountInfo m_countInfo;
+	
 	static bool wordalignflag;
 	static bool printalign;
 	
@@ -196,6 +213,11 @@ public:
 	{
 		return m_debugOutput;
 	}
+	
+	const CountInfo &GetOtherInfo() const
+	{ return m_countInfo;	}
+	void CreateCountInfo(const std::string &countStr);
+	
 	
 	TO_STRING();
 };
