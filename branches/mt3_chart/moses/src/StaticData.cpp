@@ -130,10 +130,6 @@ bool StaticData::LoadData(Parameter *parameter)
 	else
 		m_sourceLabelOverlap = SourceLabelOverlapAdd;
 	
-	if (m_parameter->GetParam("java-args").size() > 0) {
-		m_javaArgs = m_parameter->GetParam("java-args")[0];
-	}	
-
 	// source label overlap
 	if (m_parameter->GetParam("glue-rule-type").size() > 0) {
 		m_glueRuleType = (GlueRuleType) Scan<int>(m_parameter->GetParam("glue-rule-type")[0]);
@@ -291,7 +287,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	}
 	else
 	{
-		m_weightUnknownWord				= 0;
+		m_weightUnknownWord				= 1;
 		m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
 		m_allWeights.push_back(m_weightUnknownWord);
 	}
@@ -476,32 +472,40 @@ StaticData::~StaticData()
 
 }
 
-bool StaticData::IsNonTerminal(const std::string symbol) const
-{
-	set<string>::const_iterator iter = m_nonTerminals.find(symbol);
-	return iter != m_nonTerminals.end();
-}
-
 void StaticData::LoadNonTerminals()
 {
 	if (m_parameter->GetParam("non-terminals").size() == 0)
   {
-		m_nonTerminals.insert("X");
-		m_nonTerminals.insert("S");
 		m_defaultNonTerminals = "X";
   }
 	else
 	{
 		vector<std::string> tokens = Tokenize(m_parameter->GetParam("non-terminals")[0]);
-		vector<std::string>::iterator iter;
-		for (iter = tokens.begin(); iter != tokens.end(); ++iter)
-		{
-			string &nonTerm = *iter;
-			m_nonTerminals.insert(nonTerm);
-		}
-
 		m_defaultNonTerminals = tokens[0];
 	}
+	
+	// for unknwon words
+	if (m_parameter->GetParam("unknown-lhs").size() == 0)
+  {
+		UnknownLHSEntry entry(m_defaultNonTerminals, 1.0f);
+		m_unknownLHS.push_back(entry);
+  }
+	else
+	{
+		const string &filePath = m_parameter->GetParam("unknown-lhs")[0];
+		
+		InputFileStream inStream(filePath);
+		string line;
+		while(getline(inStream, line))
+		{
+			vector<string> tokens = Tokenize(line);
+			assert(tokens.size() == 2);
+			UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
+			m_unknownLHS.push_back(entry);	
+		}
+		
+	}
+	
 }
 
 bool StaticData::LoadLexicalReorderingModel()

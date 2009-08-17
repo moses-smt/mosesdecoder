@@ -152,8 +152,6 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 
 	// return list of target phrases
 	const ProcessedRuleCollBerkeleyDb &nodes = runningNodes.Get(relEndPos + 1);
-
-	cerr << range << "=";
 	
 	size_t rulesLimit = StaticData::Instance().GetRuleLimit();
 	ProcessedRuleCollBerkeleyDb::const_iterator iterNode;
@@ -183,8 +181,6 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 		m_cache.push_back(targetPhraseCollection);
 	}
 	ret->CreateChartRules(rulesLimit);
-
-	cerr << " ";
 	
 	return ret;
 }

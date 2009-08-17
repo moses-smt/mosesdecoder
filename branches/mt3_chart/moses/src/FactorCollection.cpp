@@ -64,8 +64,7 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
 																				, FactorType 			factorType
 																				, const string 		&factorString)
 {
-	const StaticData &staticData = StaticData::Instance();
-	bool isNonTerminal = staticData.IsNonTerminal(factorString);
+	bool isNonTerminal = false;
 
 	// find string id
 	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, factorString, isNonTerminal, m_factorId) );

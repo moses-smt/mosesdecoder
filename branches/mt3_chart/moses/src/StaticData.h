@@ -52,6 +52,9 @@ class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 
+typedef std::pair<std::string, float> UnknownLHSEntry;	
+typedef std::vector<UnknownLHSEntry>  UnknownLHSList;	
+
 /** Contains global variables and contants */
 class StaticData
 {
@@ -71,9 +74,7 @@ protected:
 	std::vector<LexicalReordering*>                   m_reorderModels;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
-	std::set<std::string>		m_nonTerminals;
 	std::string							m_defaultNonTerminals;
-	std::string							m_javaArgs;
 	
 	float
 		m_beamWidth,
@@ -164,6 +165,9 @@ protected:
 	size_t m_cubePruningPopLimit;
 	size_t m_cubePruningDiversity;
 	size_t m_ruleLimit;
+	
+	UnknownLHSList m_unknownLHS;
+	
 	StaticData();
 
 	//! helper fn to set bool param from ini file/command line
@@ -474,10 +478,6 @@ public:
 
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
 
-	const std::string &GetJoshuaPath() const
-	{ return m_joshuaPath; }
-
-	bool IsNonTerminal(const std::string symbol) const;
 	const std::string &GetDefaultNonTerminal() const
 	{ return m_defaultNonTerminals; 
 	}
@@ -485,13 +485,13 @@ public:
 	{ return m_ruleLimit; }
 	SourceLabelOverlap GetSourceLabelOverlap() const
 	{ return m_sourceLabelOverlap; }
-	const std::string &GetJavaArgs() const
-	{ return m_javaArgs; }
 	GlueRuleType GetGlueRuleType() const
 	{ return m_glueRuleType; }
 	bool GetOutputHypoScore() const
 	{ return m_outputHypoScore; }
 		
+	const UnknownLHSList &GetUnknownLHS() const
+	{ return m_unknownLHS; }
 	
 };
 
