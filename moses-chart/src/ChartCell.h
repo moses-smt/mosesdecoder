@@ -6,6 +6,7 @@
 #include <queue>
 #include <map>
 #include <vector>
+#include "../../moses/src/Word.h"
 #include "../../moses/src/WordsRange.h"
 #include "ChartHypothesis.h"
 #include "QueueEntry.h"
@@ -28,11 +29,13 @@ public:
 													, &rangeB	= hypoB->GetCurrSourceRange();
 		assert(rangeA == rangeB);
 
-		int ret = hypoA->LMContextCompare(*hypoB);
+		int ret = Moses::Word::Compare(hypoA->GetTargetLHS(), hypoB->GetTargetLHS());
 		if (ret != 0)
-		{
 			return (ret < 0);
-		}
+		
+		ret = hypoA->LMContextCompare(*hypoB);
+		if (ret != 0)
+			return (ret < 0);
 
 		return false;
 	}

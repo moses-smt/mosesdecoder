@@ -73,6 +73,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	Prune(startPos, endPos);
 
 	Sort(startPos, endPos);
+	
 }
 
 //! Force a creation of a translation option where there are none for a particular source position.
@@ -198,45 +199,62 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			isDigit = 1;
 		// modify the starting bitmap
 	}
-	Phrase* m_unksrc = new Phrase(Input); m_unksrc->AddWord() = sourceWord;
+	
+	Phrase* m_unksrc = new Phrase(Input);
+	m_unksrc->AddWord() = sourceWord;
 	m_unksrcs.push_back(m_unksrc);
 
 	TranslationOption *transOpt;
 	if (! staticData.GetDropUnknown() || isDigit)
 	{
-		// add to dictionary
-		TargetPhrase *targetPhrase = new TargetPhrase(Output);
-
-		m_cacheTargetPhrase.push_back(targetPhrase);
-		Word &targetWord = targetPhrase->AddWord();
-		targetWord.CreateUnknownWord(sourceWord);
-		
-		// headword
-		Word headWord(true);
-		headWord.CreateDefaultNonTerminal();
-
-		targetPhrase->SetScore();
-		targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
-		targetPhrase->SetScore(wordPenaltyProducer, wordPenaltyScore);
-		targetPhrase->SetSourcePhrase(m_unksrc);
-		targetPhrase->SetTargetLHS(headWord);
-		assert(headWord.GetFactor(0) != NULL);
-
-
 		// words consumed
 		std::vector<WordConsumed*> *wordsConsumed = new std::vector<WordConsumed*>();
 		m_cachedWordsConsumed.push_back(wordsConsumed);
-		wordsConsumed->push_back(new WordConsumed(sourcePos, sourcePos, sourceWord, NULL));
-
-		// chart rule
+		
+		WordConsumed *wc = new WordConsumed(sourcePos, sourcePos, sourceWord, NULL);
+		wordsConsumed->push_back(wc);
 		assert(wordsConsumed->size());
-		ChartRule *chartRule = new ChartRule(*targetPhrase
-																				, *wordsConsumed->back());
-		chartRule->CreateNonTermIndex();
-		m_cacheChartRule.push_back(chartRule);
 
-		transOpt = new TranslationOption(Moses::WordsRange(sourcePos, sourcePos)
-																	, *chartRule);
+		// loop
+		const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
+		UnknownLHSList::const_iterator iterLHS; 
+		for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS)
+		{
+			const string &lhsStr = iterLHS->first;
+			float prob = iterLHS->second;
+			
+			// headword
+			Word targetLHS(true);
+			targetLHS.CreateFromString(Input, staticData.GetOutputFactorOrder(), lhsStr, true);
+			assert(targetLHS.GetFactor(0) != NULL);
+
+			// add to dictionary
+			TargetPhrase *targetPhrase = new TargetPhrase(Output);
+
+			m_cacheTargetPhrase.push_back(targetPhrase);
+			Word &targetWord = targetPhrase->AddWord();
+			targetWord.CreateUnknownWord(sourceWord);
+			
+			// scores
+			vector<float> unknownScore(1, FloorScore(TransformScore(prob)));
+
+			//targetPhrase->SetScore();
+			targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
+			targetPhrase->SetScore(wordPenaltyProducer, wordPenaltyScore);
+			targetPhrase->SetSourcePhrase(m_unksrc);
+			targetPhrase->SetTargetLHS(targetLHS);
+			
+			// chart rule
+			ChartRule *chartRule = new ChartRule(*targetPhrase
+																					, *wordsConsumed->back());
+			chartRule->CreateNonTermIndex();
+			m_cacheChartRule.push_back(chartRule);
+
+			transOpt = new TranslationOption(wc->GetWordsRange(), *chartRule);
+
+			//transOpt->CalcScore();
+			Add(transOpt, sourcePos);
+		} // for (iterLHS 
 	}
 	else
 	{ // drop source word. create blank trans opt
@@ -259,10 +277,10 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 
 		transOpt = new TranslationOption(Moses::WordsRange(sourcePos, sourcePos)
 															, *chartRule);
+		//transOpt->CalcScore();
+		Add(transOpt, sourcePos);
 	}
 
-	//transOpt->CalcScore();
-	Add(transOpt, sourcePos);
 
 }
 
