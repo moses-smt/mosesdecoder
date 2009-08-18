@@ -327,14 +327,6 @@ void ChartCell::SortHypotheses()
 void ChartCell::AddQueueEntry(QueueEntry *queueEntry)
 {
 	bool inserted = m_queueUnique.Add(queueEntry);
-
-	if (inserted)
-	{ // inserted ok. doing nothing
-	}
-	else
-	{ // already exists. delete
-		delete queueEntry;
-	}
 }
 
 void ChartCell::ExpandQueueEntry(const QueueEntry &queueEntry)
