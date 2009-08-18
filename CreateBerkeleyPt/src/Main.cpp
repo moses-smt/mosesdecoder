@@ -75,13 +75,14 @@ int main (int argc, char * const argv[])
 		tokens.clear();
 		Moses::TokenizeMultiCharSeparator(tokens, line , "|||" );
 		
+		assert(tokens.size() == 5 || tokens.size() == 6);
+		
 		// words
 		const string &headWordsStr		= tokens[0]
 								,&sourcePhraseStr	= tokens[1]
 								,&targetPhraseStr	= tokens[2]
 								,&alignStr				= tokens[3]
-								,&scoresStr				= tokens[4]
-								,&countStr				= tokens[5];
+								,&scoresStr				= tokens[4];
 						
 		SourcePhrase sourcePhrase;
 		sourcePhrase.CreateFromString(sourcePhraseStr, dbWrapper.GetVocab());
@@ -91,7 +92,9 @@ int main (int argc, char * const argv[])
 		targetPhrase->CreateAlignFromString(alignStr);
 		targetPhrase->CreateScoresFromString(scoresStr, numScores);
 		targetPhrase->CreateHeadwordsFromString(headWordsStr, dbWrapper.GetVocab());
-		targetPhrase->CreateCountInfo(countStr);
+		
+		if (tokens.size() >= 6)
+			targetPhrase->CreateCountInfo(tokens[5]);
 		
 		dbWrapper.SaveTarget(*targetPhrase);
 		
