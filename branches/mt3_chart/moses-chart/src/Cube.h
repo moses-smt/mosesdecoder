@@ -19,7 +19,7 @@ class QueueEntryUniqueOrderer
 public:
 	bool operator()(const QueueEntry* entryA, const QueueEntry* entryB) const
 	{
-		return (entryA->GetCombinedScore() > entryB->GetCombinedScore());
+		return (*entryA) < (*entryB);
 	}
 };
 
@@ -44,6 +44,7 @@ protected:
 	
 
 public:
+	~Cube();
 	bool IsEmpty() const
 	{ return m_sortedByScore.empty(); }
 

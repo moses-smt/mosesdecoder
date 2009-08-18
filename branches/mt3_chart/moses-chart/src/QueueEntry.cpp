@@ -125,7 +125,8 @@ bool QueueEntry::operator<(const QueueEntry &compare) const
 	if (&m_transOpt != &compare.m_transOpt)
 		return &m_transOpt < &compare.m_transOpt;
 	
-	return m_childEntries < compare.m_childEntries;
+	bool ret = m_childEntries < compare.m_childEntries;
+	return ret;
 }
 
 	

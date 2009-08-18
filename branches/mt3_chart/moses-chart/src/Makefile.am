@@ -12,6 +12,7 @@ libmoses_chart_a_SOURCES = \
 	ChartTrellisPath.cpp \
 	ChartTrellisPathCollection.cpp \
 	ChartTrellisPathList.cpp \
+	Cube.cpp \
 	QueueEntry.cpp
 
 CLEANFILES = $(BUILT_SOURCES)
