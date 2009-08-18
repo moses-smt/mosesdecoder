@@ -264,7 +264,7 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 	// pluck things out of queue and add to hypo collection
 	const size_t popLimit = staticData.GetCubePruningPopLimit();
 
-	for (size_t numPops = 0; numPops < popLimit && !m_queueUnique.empty(); ++numPops)
+	for (size_t numPops = 0; numPops < popLimit && !m_queueUnique.IsEmpty(); ++numPops)
 	{
 		QueueEntry *queueEntry = *m_queueUnique.begin();
 		
@@ -281,7 +281,7 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 	}
 
 	// empty queue
-	while (!m_queueUnique.empty())
+	while (!m_queueUnique.IsEmpty())
 	{
 		QueueEntry *queueEntry = *m_queueUnique.begin();
 		RemoveQueueEntry(queueEntry);
@@ -326,16 +326,16 @@ void ChartCell::SortHypotheses()
 
 void ChartCell::RemoveQueueEntry(QueueEntry *queueEntry)
 {
-	bool erased = m_queueUnique.erase(queueEntry);
+	bool erased = m_queueUnique.Erase(queueEntry);
 	assert(erased);
 	delete queueEntry;
 }
 
 void ChartCell::AddQueueEntry(QueueEntry *queueEntry)
 {
-	std::pair<set<QueueEntry*, QueueEntryOrderer>::iterator, bool> inserted = m_queueUnique.insert(queueEntry);
+	bool inserted = m_queueUnique.Add(queueEntry);
 
-	if (inserted.second)
+	if (inserted)
 	{ // inserted ok. doing nothing
 	}
 	else
