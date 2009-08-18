@@ -2,7 +2,6 @@
 #pragma once
 
 #include <iostream>
-#include <set>
 #include <queue>
 #include <map>
 #include <vector>
@@ -10,6 +9,7 @@
 #include "../../moses/src/WordsRange.h"
 #include "ChartHypothesis.h"
 #include "QueueEntry.h"
+#include "Cube.h"
 
 namespace MosesChart
 {
@@ -65,7 +65,7 @@ protected:
 	const Hypothesis *m_bestHypo;
 
 	Moses::WordsRange m_coverage;
-	std::set<QueueEntry*, QueueEntryOrderer> m_queueUnique;
+	Cube m_queueUnique;
 
 	float m_bestScore; /**< score of the best hypothesis in collection */
 	float m_beamWidth; /**< minimum score due to threashold pruning */
