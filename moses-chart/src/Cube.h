@@ -6,28 +6,48 @@
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */
+#include <queue>
+#include <vector>
 #include <set>
 #include "QueueEntry.h"
 
 namespace MosesChart
 {
+	
+class QueueEntryUniqueOrderer
+{
+public:
+	bool operator()(const QueueEntry* entryA, const QueueEntry* entryB) const
+	{
+		return (entryA->GetCombinedScore() > entryB->GetCombinedScore());
+	}
+};
+
+class QueueEntryScoreOrderer
+{
+public:
+	bool operator()(const QueueEntry* entryA, const QueueEntry* entryB) const
+	{
+		return (entryA->GetCombinedScore() > entryB->GetCombinedScore());
+	}
+};
+
+	
 class Cube
 {
 protected:	
-	typedef std::set<QueueEntry*, QueueEntryOrderer> CollType;
-	CollType m_coll;
+	typedef std::set<QueueEntry*, QueueEntryUniqueOrderer> UniqueCubeEntry;
+	UniqueCubeEntry m_uniqueEntry;
+	
+	typedef std::priority_queue<QueueEntry*, std::vector<QueueEntry*>, QueueEntryScoreOrderer> SortedByScore;
+	SortedByScore m_sortedByScore;
+	
 
 public:
 	bool IsEmpty() const
-	{ return m_coll.empty(); }
+	{ return m_sortedByScore.empty(); }
 
-	QueueEntry *Pop()
-	{
-		QueueEntry *entry = *m_coll.begin();
-		m_coll.erase(m_coll.begin());
-		return entry;
-	}
-	
+	QueueEntry *Pop();
 	bool Add(QueueEntry *queueEntry);
 };
 

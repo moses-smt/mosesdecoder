@@ -53,7 +53,7 @@ bool QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, cons
 
 		const Moses::Word &nonTerm = wordsConsumed->GetSourceWord();
 		assert(nonTerm.IsNonTerminal());
-		ChildEntry *childEntry = new ChildEntry(0, childCell.GetSortedHypotheses(nonTerm), nonTerm);
+		ChildEntry childEntry(0, childCell.GetSortedHypotheses(nonTerm), nonTerm);
 		m_childEntries.push_back(childEntry);
 	}
 
@@ -65,15 +65,15 @@ QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)
 {
 	// deep copy of child entries
 	//m_childEntries(copy.m_childEntries)
-	std::vector<ChildEntry*>::const_iterator iter;
+	std::vector<ChildEntry>::const_iterator iter;
 	for (iter = copy.m_childEntries.begin(); iter != copy.m_childEntries.end(); ++iter)
 	{
-		const ChildEntry &origEntry = **iter;
-		ChildEntry *newEntry = new ChildEntry(origEntry);
+		const ChildEntry &origEntry = *iter;
+		ChildEntry newEntry(origEntry);
 		m_childEntries.push_back(newEntry);
 	}
 
-	ChildEntry &childEntry = *m_childEntries[childEntryIncr];
+	ChildEntry &childEntry = m_childEntries[childEntryIncr];
 	childEntry.IncrementPos();
 
 	CalcScore();
@@ -81,7 +81,7 @@ QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)
 
 QueueEntry::~QueueEntry()
 {
-	Moses::RemoveAllInColl(m_childEntries);
+	//Moses::RemoveAllInColl(m_childEntries);
 }
 
 void QueueEntry::CreateDeviants(ChartCell &currCell) const
@@ -90,9 +90,9 @@ void QueueEntry::CreateDeviants(ChartCell &currCell) const
 
 	for (size_t ind = 0; ind < m_childEntries.size(); ind++)
 	{
-		const ChildEntry &childEntry = *m_childEntries[ind];
+		const ChildEntry &childEntry = m_childEntries[ind];
 
-		if (childEntry.GetPos() + 1 < childEntry.GetOrderHypos().size())
+		if (childEntry.HasMoreHypo())
 		{
 			QueueEntry *newEntry = new QueueEntry(*this, ind);
 			if (newEntry->m_combinedScore > threshold)
@@ -112,28 +112,36 @@ void QueueEntry::CalcScore()
 	m_combinedScore = m_transOpt.GetTotalScore();
 	for (size_t ind = 0; ind < m_childEntries.size(); ind++)
 	{
-		const ChildEntry &childEntry = *m_childEntries[ind];
-		const Word &headWord = childEntry.GetHeadWord();
+		const ChildEntry &childEntry = m_childEntries[ind];
 
-		const Hypothesis *hypo = childEntry.GetOrderHypos()[childEntry.GetPos()];
+		const Hypothesis *hypo = childEntry.GetHypothesis();
 		m_combinedScore += hypo->GetTotalScore();
 	}
 
 }
 
+bool QueueEntry::operator<(const QueueEntry &compare) const
+{ 
+	if (&m_transOpt != &compare.m_transOpt)
+		return &m_transOpt < &compare.m_transOpt;
+	
+	return m_childEntries < compare.m_childEntries;
+}
+
+	
 std::ostream& operator<<(std::ostream &out, const ChildEntry &entry)
 {
-	out << *entry.GetOrderHypos()[entry.GetPos()];
+	out << *entry.GetHypothesis();
 	return out;
 }
 
 std::ostream& operator<<(std::ostream &out, const QueueEntry &entry)
 {
 	out << entry.GetTranslationOption() << endl;
-	std::vector<ChildEntry*>::const_iterator iter;
+	std::vector<ChildEntry>::const_iterator iter;
 	for (iter = entry.GetChildEntries().begin(); iter != entry.GetChildEntries().end(); ++iter)
 	{
-		out << **iter << endl;
+		out << *iter << endl;
 	}
 	return out;
 }

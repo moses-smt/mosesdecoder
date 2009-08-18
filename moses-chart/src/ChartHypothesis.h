@@ -14,7 +14,6 @@ namespace MosesChart
 class QueueEntry;
 class Hypothesis;
 
-typedef std::vector<const Hypothesis*> OrderHypos; // for chart cell
 typedef std::vector<Hypothesis*> ArcList;
 
 class Hypothesis

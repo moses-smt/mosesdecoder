@@ -15,11 +15,17 @@ namespace MosesChart
 {
 bool Cube::Add(QueueEntry *queueEntry)
 {
-	std::pair<set<QueueEntry*, QueueEntryOrderer>::iterator, bool> inserted = m_coll.insert(queueEntry);
+	m_sortedByScore.push(queueEntry);
 
-	return inserted.second;
+	return true;
 }
 
-
+QueueEntry *Cube::Pop()
+{
+	QueueEntry *entry = m_sortedByScore.top();
+	m_sortedByScore.pop();
+	return entry;
+}
+	
 }
 

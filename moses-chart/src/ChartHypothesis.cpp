@@ -34,17 +34,14 @@ Hypothesis::Hypothesis(const QueueEntry &queueEntry)
 	assert(m_targetPhrase.GetSize() == m_wordsConsumedTargetOrder.size());
 	//TRACE_ERR(m_targetPhrase << endl);
 
-	const std::vector<ChildEntry*> &childEntries = queueEntry.GetChildEntries();
-
 	m_numTargetTerminals = m_targetPhrase.GetNumTerminals();
 
-	vector<ChildEntry*>::const_iterator iter;
+	const std::vector<ChildEntry> &childEntries = queueEntry.GetChildEntries();
+	vector<ChildEntry>::const_iterator iter;
 	for (iter = childEntries.begin(); iter != childEntries.end(); ++iter)
 	{
-		const ChildEntry &childEntry = **iter;
-		const Moses::Word &headWord = childEntry.GetHeadWord();
-		size_t pos = childEntry.GetPos();
-		const Hypothesis *prevHypo = childEntry.GetOrderHypos()[pos];
+		const ChildEntry &childEntry = *iter;
+		const Hypothesis *prevHypo = childEntry.GetHypothesis();
 
 		m_numTargetTerminals += prevHypo->GetNumTargetTerminals();
 
