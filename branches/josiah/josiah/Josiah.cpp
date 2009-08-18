@@ -150,6 +150,7 @@ int main(int argc, char** argv) {
   bool greedy, fixedTemp;
   float fixed_temperature;
   bool collectAll, sampleCtrAll;
+  bool mapdecode;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -221,7 +222,8 @@ int main(int argc, char** argv) {
   ("fixed-temp-accept", po::value(&fixedTemp)->zero_tokens()->default_value(false), "Fixed temperature sample acceptor")
   ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor")
   ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated")
-  ("sample-ctr-all", po::value(&sampleCtrAll)->zero_tokens()->default_value(false), "When in CollectAllSamples model, increment collection ctr after each sample has been collected");
+  ("sample-ctr-all", po::value(&sampleCtrAll)->zero_tokens()->default_value(false), "When in CollectAllSamples model, increment collection ctr after each sample has been collected")
+  ("mapdecode", po::value(&mapdecode)->zero_tokens()->default_value(false), "MAP decoding");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -495,7 +497,7 @@ int main(int argc, char** argv) {
         }
       }
     }
-    if (decode || topn > 0 || periodic_decode > 0) {
+    if (mapdecode || decode || topn > 0 || periodic_decode > 0) {
       DerivationCollector* collector = new DerivationCollector();
       collector->setPeriodicDecode(periodic_decode);
       collector->setCollectDerivationsByTranslation(collect_dbyt);
@@ -627,10 +629,19 @@ int main(int argc, char** argv) {
         derivationCollector->outputDerivationProbability(nbest[i],derivationCollector->N(),cerr);
         cerr << endl;
       }
+      if (mapdecode) {
+        pair<const Derivation*, float> map_soln = derivationCollector->getMAP();
+        vector<string> sentence;
+        map_soln.first->getTargetSentence(sentence);
+        VERBOSE(1, "MAP Soln, model score [" << map_soln.second << "]" << endl)
+        copy(sentence.begin(),sentence.end(),ostream_iterator<string>(*out," "));
+        (*out) << endl << flush;
+      }
       if (decode) {
         pair<const Derivation*, float> max = derivationCollector->getMax();
         vector<string> sentence;
         max.first->getTargetSentence(sentence);
+        VERBOSE(1, "sample Soln, model score [" << max.first->getScore() << "]" << endl)
         copy(sentence.begin(),sentence.end(),ostream_iterator<string>(*out," "));
         (*out) << endl << flush;
       }

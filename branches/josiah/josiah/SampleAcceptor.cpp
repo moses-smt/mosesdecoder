@@ -44,8 +44,19 @@ size_t FixedTempAcceptor::choose(const vector<TranslationDelta*>& deltas) {
   //get the scores
   vector<double> scores;
   getScores(deltas, scores);
+  IFVERBOSE(2) {
+    cerr << "Before annealing, scores are :";
+    copy(scores.begin(),scores.end(),ostream_iterator<double>(cerr," "));
+    cerr << endl;
+  }
   //do annealling
   transform(scores.begin(),scores.end(),scores.begin(),bind2nd(multiplies<double>(), 1.0/m_temp));
+  IFVERBOSE(2) {
+    cerr << "After annealing, scores are :";
+    copy(scores.begin(),scores.end(),ostream_iterator<double>(cerr," "));
+    cerr << endl;
+  }
+  
   normalize(scores);
   
   double random = getRandom();
@@ -126,35 +137,7 @@ size_t ClosestBestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*
     }
   }
   
-//  IFVERBOSE(1) {
-//    if(closestBestNbr > -1) {
-//      cerr << "Closest best nbr has score " << deltas[closestBestNbr]->getScore() << " and gain " << deltas[closestBestNbr]->getGain() << endl;
-//      cerr << "Chosen has score " << chosenDelta->getScore() << " and gain " << chosenDelta->getGain() << endl;     
-//    } 
-//  }
   return closestBestNbr;
 }
-
-//size_t ChiangBestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta) {
-//  //Only do best neighbour for the moment
-//  float maxCombScore = -1e6;
-//  int bestNbr = -1;
-//  for (vector<TranslationDelta*>::const_iterator i = deltas.begin(); i != deltas.end(); ++i) {
-//    float combScore = (*i)->getGain() + (*i)->getScore();
-//    if (combScore > maxCombScore ) {
-//      maxCombScore = combScore;
-//      bestNbr = i-deltas.begin();
-//    }
-//  }
-//    
-//  IFVERBOSE(1) {
-//    if(bestNbr > -1) {
-//      cerr << "best nbr has score " << deltas[bestNbr]->getScore() << " and gain " << deltas[bestNbr]->getGain() << endl;
-//      cerr << "No change has score " << noChangeDelta->getScore() << " and gain " << noChangeDelta->getGain() << endl;     
-//    } 
-//  }
-//  
-//  return bestNbr;
-//}  
-  
 }
+
