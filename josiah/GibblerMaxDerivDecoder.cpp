@@ -64,5 +64,22 @@ namespace Josiah {
            }
          }
     
-  }  
+  }
+  
+  /**argmax and max*/
+  std::pair<const Derivation*,float> DerivationCollector::getMAP() const {
+    const Derivation* argmax = NULL;
+    float max = -10000;
+    map<const Derivation*,double> p;
+    getDistribution(p);
+    for (map<const Derivation*,double>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
+      float score = pi->first->getScore();
+      if (score > max) {
+        max = score;
+        argmax = pi->first;
+      }
+    }
+    
+    return pair<const Derivation*,float>(argmax,max);
+  }
 }
