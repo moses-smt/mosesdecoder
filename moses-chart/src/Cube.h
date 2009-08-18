@@ -18,24 +18,19 @@ protected:
 	CollType m_coll;
 
 public:
-	typedef CollType::iterator iterator;
-	typedef CollType::const_iterator const_iterator;
-	
-	iterator begin() { return m_coll.begin(); }
-	iterator end() { return m_coll.end(); }
-	const_iterator begin() const { return m_coll.begin(); }
-	const_iterator end() const { return m_coll.end(); }
-	
 	bool IsEmpty() const
 	{ return m_coll.empty(); }
 
-	bool Add(QueueEntry *queueEntry);
-
-	bool Erase(QueueEntry *queueEntry)
+	QueueEntry *Pop()
 	{
-		return m_coll.erase(queueEntry);
+		QueueEntry *entry = *m_coll.begin();
+		m_coll.erase(m_coll.begin());
+		return entry;
 	}
+	
+	bool Add(QueueEntry *queueEntry);
 };
 
 
 };
+

@@ -266,7 +266,7 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 
 	for (size_t numPops = 0; numPops < popLimit && !m_queueUnique.IsEmpty(); ++numPops)
 	{
-		QueueEntry *queueEntry = *m_queueUnique.begin();
+		QueueEntry *queueEntry = m_queueUnique.Pop();
 		
 		queueEntry->GetTranslationOption().GetTotalScore();
 		Hypothesis *hypo = new Hypothesis(*queueEntry);
@@ -277,14 +277,14 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 		AddHypothesis(hypo);
 
 		ExpandQueueEntry(*queueEntry);
-		RemoveQueueEntry(queueEntry);
+		delete queueEntry;
 	}
 
 	// empty queue
 	while (!m_queueUnique.IsEmpty())
 	{
-		QueueEntry *queueEntry = *m_queueUnique.begin();
-		RemoveQueueEntry(queueEntry);
+		QueueEntry *queueEntry = m_queueUnique.Pop();
+		delete queueEntry;
 	}
 
 }
@@ -322,13 +322,6 @@ void ChartCell::SortHypotheses()
 			m_headWords.push_back(iterMap->first);
 		}
 	}
-}
-
-void ChartCell::RemoveQueueEntry(QueueEntry *queueEntry)
-{
-	bool erased = m_queueUnique.Erase(queueEntry);
-	assert(erased);
-	delete queueEntry;
 }
 
 void ChartCell::AddQueueEntry(QueueEntry *queueEntry)

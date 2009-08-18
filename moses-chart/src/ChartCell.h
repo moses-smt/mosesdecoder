@@ -73,7 +73,6 @@ protected:
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
 	void ExpandQueueEntry(const QueueEntry &queueEntry);
-	void RemoveQueueEntry(QueueEntry *queueEntry);
 
 	/** add hypothesis to stack. Prune if necessary.
  * Returns false if equiv hypo exists in collection, otherwise returns true

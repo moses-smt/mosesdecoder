@@ -51,6 +51,7 @@ public:
 
 };
 
+
 class QueueEntry
 {
 	friend std::ostream& operator<<(std::ostream&, const QueueEntry&);
