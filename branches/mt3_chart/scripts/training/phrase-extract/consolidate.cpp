@@ -190,8 +190,9 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 		fileConsolidated << " " << (logProbFlag ? 1 : 2.718); // phrase count feature
 		
 		// counts
-		fileConsolidated << " ||| " << itemIndirect.back() << " "      // direct
-																<< itemDirect.back(); // indirect
+		if (itemIndirect.size() == 4 && itemDirect.size() == 5)
+				fileConsolidated << " ||| " << itemIndirect[3] << " "      // direct
+																		<< itemDirect[4]; // indirect
 		
 		fileConsolidated << endl;
 	}

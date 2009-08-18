@@ -157,7 +157,6 @@ namespace Moses
 		
 		string line;
 		size_t count = 0;
-		size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
 		
 		while(getline(inStream, line))
 		{
@@ -165,14 +164,8 @@ namespace Moses
 			vector<float> scoreVector;
 			
 			TokenizeMultiCharSeparator(tokens, line , "|||" );
-			
-			if (numElement == NOT_FOUND)
-			{ // init numElement
-				numElement = tokens.size();
-				assert(numElement == 6);
-			}
-			
-			if (tokens.size() != numElement)
+						
+			if (tokens.size() != 5 && tokens.size() != 6)
 			{
 				stringstream strme;
 				strme << "Syntax error at " << m_filePath << ":" << count;
@@ -184,8 +177,7 @@ namespace Moses
 									, &sourcePhraseString	= tokens[1]
 									, &targetPhraseString	= tokens[2]
 									, &alignString				= tokens[3]
-									, &scoreString				= tokens[4]
-									, &countString				= tokens[5];
+									, &scoreString				= tokens[4];
 
 			bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 			if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
@@ -241,7 +233,8 @@ namespace Moses
 			}
 			
 			// count info for backoff
-			targetPhrase->CreateCountInfo(countString);
+			if (tokens.size() >= 6)
+				targetPhrase->CreateCountInfo(tokens[5]);
 
 			TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(sourcePhrase, *targetPhrase, alignmentInfo);
 			AddEquivPhrase(phraseColl, targetPhrase);
