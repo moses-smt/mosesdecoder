@@ -30,7 +30,7 @@ void Vocab::Load(Db &db)
 	int ret;
 	while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
 	{
-		VocabId &vocabId= *(VocabId*) data.get_data();
+		Moses::UINT32 &vocabId= *(Moses::UINT32*) data.get_data();
 		char *str = (char*) key.get_data();
 		
 		m_vocabColl[str] = vocabId;
@@ -45,14 +45,14 @@ void Vocab::Load(Db &db)
 	CollType::const_iterator iter;
 	for (iter = m_vocabColl.begin(); iter != m_vocabColl.end(); ++iter)
 	{
-		VocabId vocabId = iter->second;
+		Moses::UINT32 vocabId = iter->second;
 		const std::string &word = iter->first;
 
 		m_lookup[vocabId] = word;
 	}
 }
 
-VocabId Vocab::GetVocabId(const std::string &factorString, bool &found) const
+Moses::UINT32 Vocab::GetVocabId(const std::string &factorString, bool &found) const
 {
 	// find string id
 	CollType::const_iterator iter = m_vocabColl.find(factorString);
@@ -68,7 +68,7 @@ VocabId Vocab::GetVocabId(const std::string &factorString, bool &found) const
 	}
 }
 
-VocabId Vocab::AddVocabId(const std::string &factorString)
+Moses::UINT32 Vocab::AddVocabId(const std::string &factorString)
 {
 	// find string id
 	CollType::const_iterator iter = m_vocabColl.find(factorString);
@@ -83,7 +83,7 @@ VocabId Vocab::AddVocabId(const std::string &factorString)
 	}
 }
 	
-const Moses::Factor *Vocab::GetFactor(VocabId vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const
+const Moses::Factor *Vocab::GetFactor(Moses::UINT32 vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const
 {
 	const string &str = GetString(vocabId);
 	const Moses::Factor *factor = Moses::FactorCollection::Instance().AddFactor(direction, factorType, str, isNonTerminal);

@@ -31,7 +31,7 @@ class Word
 
 protected:	
 	bool m_isNonTerminal;
-	std::vector<VocabId> m_factors;
+	std::vector<Moses::UINT32> m_factors;
 public:
 	Word();
 	virtual ~Word();
@@ -41,9 +41,9 @@ public:
 	
 	void CreateFromString(const std::string &inString, Vocab &vocab);
 	
-	VocabId GetVocabId(size_t ind) const
+	Moses::UINT32 GetVocabId(size_t ind) const
 	{ return m_factors[ind]; }
-	void SetVocabId(size_t ind, VocabId vocabId)
+	void SetVocabId(size_t ind, Moses::UINT32 vocabId)
 	{ m_factors[ind] = vocabId; }
 
 	bool IsNonTerminal() const

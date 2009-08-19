@@ -48,13 +48,13 @@ void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 
 size_t Word::WriteToMemory(char *mem) const
 {	
-	VocabId *vocabMem = (VocabId*) mem;
+	Moses::UINT32 *vocabMem = (Moses::UINT32*) mem;
 	
 	// factors
 	for (int ind = 0; ind < m_factors.size(); ind++)
 		vocabMem[ind] = m_factors[ind];
 	
-	size_t size = sizeof(VocabId) * m_factors.size();
+	size_t size = sizeof(Moses::UINT32) * m_factors.size();
 
 	// is no-term
 	char bNonTerm = (char) m_isNonTerminal;
@@ -68,12 +68,12 @@ size_t Word::ReadFromMemory(const char *mem, size_t numFactors)
 {
 	m_factors.resize(numFactors);
 
-	VocabId *vocabMem = (VocabId*) mem;
+	Moses::UINT32 *vocabMem = (Moses::UINT32*) mem;
 	
 	for (int ind = 0; ind < m_factors.size(); ind++)
 		m_factors[ind] = vocabMem[ind];
 
-	size_t size = sizeof(VocabId) * m_factors.size();
+	size_t size = sizeof(Moses::UINT32) * m_factors.size();
 	m_isNonTerminal = (bool) mem[size];
 	++size;
 
@@ -89,7 +89,7 @@ Moses::Word *Word::ConvertToMoses(Moses::FactorDirection direction
 	for (size_t ind = 0; ind < m_factors.size(); ++ind)
 	{
 		Moses::FactorType factorType = outputFactorsVec[ind];
-		VocabId vocabId = m_factors[ind];
+		Moses::UINT32 vocabId = m_factors[ind];
 		const Moses::Factor *factor = vocab.GetFactor(vocabId, factorType, direction, IsNonTerminal());
 		ret->SetFactor(factorType, factor);
 	}
@@ -110,7 +110,7 @@ std::ostream& operator<<(std::ostream &out, const Word &word)
 {
 	out << "[";
 
-	std::vector<VocabId>::const_iterator iter;
+	std::vector<Moses::UINT32>::const_iterator iter;
 	for (iter = word.m_factors.begin(); iter != word.m_factors.end(); ++iter)
 	{
 		out << *iter << "|";

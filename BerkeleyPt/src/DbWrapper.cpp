@@ -211,10 +211,10 @@ void DbWrapper::SaveVocab()
 		const string &word = iterVocab->first;
 		char *wordChar = (char*) malloc(word.size() + 1);
 		strcpy(wordChar, word.c_str());
-		VocabId vocabId = iterVocab->second;
+		Moses::UINT32 vocabId = iterVocab->second;
 				
 		Dbt key(wordChar, word.size() + 1);
-		Dbt data(&vocabId, sizeof(VocabId));
+		Dbt data(&vocabId, sizeof(Moses::UINT32));
 		
 		int retDb = m_dbVocab.put(NULL, &key, &data, DB_NOOVERWRITE);
 		assert(retDb == 0); 
@@ -238,8 +238,10 @@ void DbWrapper::SaveTargetPhraseCollection(long sourceNodeId, const TargetPhrase
 const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, const Word &word)
 {	
 	// create db data
-	long sourceNodeId = parentNode.GetSourceNodeId();
+	Moses::UINT32 sourceNodeId = parentNode.GetSourceNodeId();
 	SourceKey sourceKey(sourceNodeId, word.GetVocabId(0));
+	cerr << "sourceNodeId=" << sourceNodeId << " " << word <<" ";
+	cerr << sizeof(SourceKey) << endl;
 	
 	Dbt key(&sourceKey, sizeof(SourceKey));
 	Dbt data;
@@ -250,11 +252,14 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 	if (ret == 0) 
 	{ // exist. 		
 		long sourceNodeId = *(long*) data.get_data();
+		cerr << "found " << sourceNodeId << endl;
+
 		SourcePhraseNode *node = new SourcePhraseNode(sourceNodeId);
 		return node;
 	}
 	else
 	{
+		cerr << "didn find" << endl;
 		return NULL;
 	}	
 }
@@ -349,7 +354,7 @@ Word *DbWrapper::ConvertFromMoses(Moses::FactorDirection direction
 
 		const string &str = factor->GetString();
 		bool found;
-		VocabId vocabId = m_vocab.GetVocabId(str, found);
+		Moses::UINT32 vocabId = m_vocab.GetVocabId(str, found);
 		if (!found)
 		{ // factor not in phrase table -> phrse definately not in. exit
 			delete newWord;
