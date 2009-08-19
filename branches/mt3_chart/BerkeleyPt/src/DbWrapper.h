@@ -28,13 +28,13 @@ class Word;
 class SourceKey
 {
 public:
-	SourceKey(long sourceId, int vocabId)
+	SourceKey(Moses::UINT32 sourceId, Moses::UINT32 vocabId)
 	:m_sourceId(sourceId)
 	,m_vocabId(vocabId)
 	{	}
 	
-	long m_sourceId;
-	int m_vocabId;
+	Moses::UINT32 m_sourceId;
+	Moses::UINT32 m_vocabId;
 	
 };
 	
@@ -82,11 +82,11 @@ public:
 	
 	size_t GetSourceWordSize() const
 	{
-		return m_numSourceFactors * sizeof(VocabId) + sizeof(char);
+		return m_numSourceFactors * sizeof(Moses::UINT32) + sizeof(char);
 	}
 	size_t GetTargetWordSize() const
 	{
-		return m_numTargetFactors * sizeof(VocabId) + sizeof(char);
+		return m_numTargetFactors * sizeof(Moses::UINT32) + sizeof(char);
 	}
 
 	Vocab &GetVocab()

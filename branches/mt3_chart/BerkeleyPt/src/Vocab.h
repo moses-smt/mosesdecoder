@@ -23,17 +23,15 @@ namespace Moses
 namespace MosesBerkeleyPt
 {
 
-typedef int VocabId;
-
 class Vocab
 {
 protected:	
-	typedef std::map<std::string, VocabId> CollType;
+	typedef std::map<std::string, Moses::UINT32> CollType;
 	CollType m_vocabColl;
 
 	std::vector<std::string> m_lookup; // opposite of m_vocabColl
 
-	VocabId m_nextId; // starts @ 1
+	Moses::UINT32 m_nextId; // starts @ 1
 	
 public:
 	typedef CollType::iterator iterator;
@@ -52,12 +50,12 @@ public:
 	size_t GetSize() const
 	{ return m_vocabColl.size(); }
 	
-	VocabId GetVocabId(const std::string &factorString, bool &found) const;
-	VocabId AddVocabId(const std::string &factorString);
+	Moses::UINT32 GetVocabId(const std::string &factorString, bool &found) const;
+	Moses::UINT32 AddVocabId(const std::string &factorString);
 	
-	const std::string &GetString(VocabId vocabId) const
+	const std::string &GetString(Moses::UINT32 vocabId) const
 	{ return m_lookup[vocabId]; }
-	const Moses::Factor *GetFactor(VocabId vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const;
+	const Moses::Factor *GetFactor(Moses::UINT32 vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const;
 
 	void Save(const std::string &filePath);
 	
