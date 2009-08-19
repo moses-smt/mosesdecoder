@@ -32,7 +32,7 @@ protected:
 	AlignType m_align;
 	std::vector<float>	m_scores;
 	std::vector<Word>		m_headWords;
-	long m_targetId; // set when saved to db
+	Moses::UINT32 m_targetId; // set when saved to db
 
 	Moses::CountInfo m_countInfo;
 
@@ -66,7 +66,7 @@ public:
 	const std::vector<float> &GetScores() const
 	{ return m_scores; }
 
-	long SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, long &nextTargetId
+	Moses::UINT32 SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, Moses::UINT32 &nextTargetId
 												,int numScores, size_t sourceWordSize, size_t targetWordSize);	
 
 	size_t ReadOtherInfoFromMemory(const char *mem

@@ -30,9 +30,9 @@ SourcePhrase::~SourcePhrase()
 size_t SourcePhrase::GetNumNonTerminals() const
 { return m_targetNonTerms.size(); }
 
-long SourcePhrase::Save(Db &db, long &nextSourceId) const
+Moses::UINT32 SourcePhrase::Save(Db &db, Moses::UINT32 &nextSourceId) const
 {
-	long currSourceNodeId = 0;
+	Moses::UINT32 currSourceNodeId = 0;
 	size_t targetInd = 0;
 	
 	// SOURCE
@@ -53,9 +53,9 @@ long SourcePhrase::Save(Db &db, long &nextSourceId) const
 	return currSourceNodeId;	
 }
 
-long SourcePhrase::SaveWord(long currSourceNodeId, const Word &word, Db &db, long &nextSourceId) const
+Moses::UINT32 SourcePhrase::SaveWord(Moses::UINT32 currSourceNodeId, const Word &word, Db &db, Moses::UINT32 &nextSourceId) const
 {
-	long retSourceNodeId;
+	Moses::UINT32 retSourceNodeId;
 	
 	// create db data
 	SourceKey sourceKey(currSourceNodeId, word.GetVocabId(0));

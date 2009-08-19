@@ -11,6 +11,7 @@
 #include <iostream>
 #include "SourcePhraseNode.h"
 #include "Vocab.h"
+#include "../../moses/src/TypeDef.h"
 
 namespace MosesBerkeleyPt
 {
@@ -20,7 +21,7 @@ class SourcePhraseNode
 	friend std::ostream& operator<<(std::ostream &out, const SourcePhraseNode &node);
 
 protected:
-	long m_sourceNodeId;
+	Moses::UINT32 m_sourceNodeId;
 	
 public:
 	SourcePhraseNode(const SourcePhraseNode &copy)
@@ -30,7 +31,7 @@ public:
 	:m_sourceNodeId(sourceNodeId)
 	{}
 
-	long GetSourceNodeId() const
+	Moses::UINT32 GetSourceNodeId() const
 	{ return m_sourceNodeId; }
 };
 	

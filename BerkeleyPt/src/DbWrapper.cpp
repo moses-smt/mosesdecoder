@@ -43,7 +43,7 @@ DbWrapper::~DbWrapper()
 }
 
 // helper callback fn for target secondary db
-int GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
+Moses::UINT32 GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
               const Dbt *pkey,   // primary db record's key
               const Dbt *pdata,  // primary db record's data
               Dbt *skey)         // secondary db record's key
@@ -52,7 +52,7 @@ int GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
 	memset(skey, 0, sizeof(DBT));
 	
 	// Now set the secondary key's data to be the representative's name
-	long targetId = *(long*) pdata->get_data();
+	Moses::UINT32 targetId = *(long*) pdata->get_data();
 	skey->set_data(&targetId);
 	//skey->set_data(pdata->get_data());
 	skey->set_size(sizeof(long));
@@ -188,7 +188,7 @@ int DbWrapper::GetMisc(const std::string &key)
 	return value;
 }
 	
-long &DbWrapper::GetNextSourceNodeId()
+Moses::UINT32 &DbWrapper::GetNextSourceNodeId()
 { 
 	return m_nextSourceNodeId; 
 }
@@ -230,7 +230,7 @@ void DbWrapper::SaveTarget(TargetPhrase &phrase)
 													, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
 
-void DbWrapper::SaveTargetPhraseCollection(long sourceNodeId, const TargetPhraseCollection &tpColl)
+void DbWrapper::SaveTargetPhraseCollection(Moses::UINT32 sourceNodeId, const TargetPhraseCollection &tpColl)
 {
 	tpColl.Save(m_dbTargetColl, sourceNodeId, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
@@ -240,9 +240,7 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 	// create db data
 	Moses::UINT32 sourceNodeId = parentNode.GetSourceNodeId();
 	SourceKey sourceKey(sourceNodeId, word.GetVocabId(0));
-	cerr << "sourceNodeId=" << sourceNodeId << " " << word <<" ";
-	cerr << sizeof(SourceKey) << endl;
-	
+		
 	Dbt key(&sourceKey, sizeof(SourceKey));
 	Dbt data;
 	
@@ -251,15 +249,13 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 	int ret = m_dbSource.get(NULL, &key, &data, 0);
 	if (ret == 0) 
 	{ // exist. 		
-		long sourceNodeId = *(long*) data.get_data();
-		cerr << "found " << sourceNodeId << endl;
-
+		Moses::UINT32 sourceNodeId = *(Moses::UINT32*) data.get_data();
+	
 		SourcePhraseNode *node = new SourcePhraseNode(sourceNodeId);
 		return node;
 	}
 	else
 	{
-		cerr << "didn find" << endl;
 		return NULL;
 	}	
 }
@@ -268,8 +264,8 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 {
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
 
-	long sourceNodeId = node.GetSourceNodeId();
-	Dbt key(&sourceNodeId, sizeof(long));
+	Moses::UINT32 sourceNodeId = node.GetSourceNodeId();
+	Dbt key(&sourceNodeId, sizeof(sourceNodeId));
 	Dbt data;
 
 	// get from db
@@ -305,7 +301,7 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 
 		assert(offset == data.get_size());
 	}
-	
+
 	return ret;
 }
 

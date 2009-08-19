@@ -30,8 +30,8 @@ public:
 	size_t GetNumNonTerminals() const;
 	
 	void SaveTargetNonTerminals(const TargetPhrase &targetPhrase);
-	long Save(Db &db, long &nextSourceId) const;
-	long SaveWord(long currSourceNodeId, const Word &word, Db &db, long &nextSourceId) const;
+	Moses::UINT32 Save(Db &db, Moses::UINT32 &nextSourceId) const;
+	Moses::UINT32 SaveWord(Moses::UINT32 currSourceNodeId, const Word &word, Db &db, Moses::UINT32 &nextSourceId) const;
 
 	//! transitive comparison
 	bool operator<(const SourcePhrase &compare) const;

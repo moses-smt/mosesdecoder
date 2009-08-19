@@ -42,8 +42,8 @@ class DbWrapper
 {
 	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd, m_dbTargetColl;
 	Vocab m_vocab;
-	long m_nextSourceNodeId;
-	long m_nextTargetNodeId;
+	Moses::UINT32 m_nextSourceNodeId;
+	Moses::UINT32 m_nextTargetNodeId;
 	int m_numSourceFactors, m_numTargetFactors, m_numScores;
 	SourcePhraseNode m_initNode;
 	bool m_openSave;
@@ -67,7 +67,7 @@ public:
 	bool Load(const std::string &filePath);
 
 	void SaveTarget(TargetPhrase &phrase);
-	void SaveTargetPhraseCollection(long sourceNodeId, const TargetPhraseCollection &tpColl);
+	void SaveTargetPhraseCollection(Moses::UINT32 sourceNodeId, const TargetPhraseCollection &tpColl);
 
 	Word *ConvertFromMoses(Moses::FactorDirection direction
 												, const std::vector<Moses::FactorType> &factorsVec
@@ -75,7 +75,7 @@ public:
 
 	Word *CreateSouceWord() const;
 	Word *CreateTargetWord() const;
-	long &GetNextSourceNodeId();
+	Moses::UINT32 &GetNextSourceNodeId();
 	
 	const SourcePhraseNode &GetInitNode() const
 	{ return m_initNode; }
