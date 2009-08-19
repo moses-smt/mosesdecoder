@@ -104,9 +104,9 @@ char *TargetPhrase::WritePhraseToMemory(size_t &memUsed, int numScores, size_t s
 char *TargetPhrase::WriteOtherInfoToMemory(size_t &memUsed, int numScores, size_t sourceWordSize, size_t targetWordSize) const
 {
 	// allocate mem	
-	size_t memNeeded = sizeof(long); // phrase id
+	size_t memNeeded = sizeof(Moses::UINT32); // phrase id
 	memNeeded += sourceWordSize + targetWordSize; // LHS words
-	memNeeded += sizeof(int) + 2 * sizeof(int) * GetAlign().size(); // align
+	memNeeded += sizeof(Moses::UINT32) + 2 * sizeof(Moses::UINT32) * GetAlign().size(); // align
 	memNeeded += sizeof(float) * numScores; // scores
 	memNeeded += sizeof(Moses::CountInfo); // count
 	
@@ -116,8 +116,8 @@ char *TargetPhrase::WriteOtherInfoToMemory(size_t &memUsed, int numScores, size_
 	memUsed = 0;
 	
 	// phrase id
-	memcpy(mem, &m_targetId, sizeof(long));
-	memUsed += sizeof(long);
+	memcpy(mem, &m_targetId, sizeof(m_targetId));
+	memUsed += sizeof(m_targetId);
 
 	// LHS words
 	memUsed += GetHeadWords(0).WriteToMemory(mem + memUsed);
@@ -185,7 +185,7 @@ size_t TargetPhrase::WriteCountsToMemory(char *mem) const
 	
 }
 
-long TargetPhrase::SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, long &nextTargetId
+Moses::UINT32 TargetPhrase::SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, Moses::UINT32 &nextTargetId
 																		, int numScores, size_t sourceWordSize, size_t targetWordSize)
 {
 	size_t memUsed;
@@ -198,12 +198,12 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, long &nextTar
 	int retDb = dbTarget.get(NULL, &key, &data, 0);
 	if (retDb == 0)
 	{ // existing target
-		m_targetId = *(long*) data.get_data();
+		m_targetId = *(Moses::UINT32*) data.get_data();
 	}
 	else
 	{ // new target. save
 		data.set_data(&nextTargetId);
-		data.set_size(sizeof(long));
+		data.set_size(sizeof(nextTargetId));
 		
 		retDb = dbTarget.put(NULL, &key, &data, DB_NOOVERWRITE);
 		assert(retDb == 0);
@@ -211,7 +211,7 @@ long TargetPhrase::SaveTargetPhrase(Db &dbTarget, Db &dbTargetInd, long &nextTar
 		m_targetId = nextTargetId;
 
 		// add to reverse index
-		Dbt keyInd(&m_targetId, sizeof(long))
+		Dbt keyInd(&m_targetId, sizeof(m_targetId))
 				,dataInd(mem, memUsed);
 		retDb = dbTargetInd.put(NULL, &keyInd, &dataInd, DB_NOOVERWRITE);
 		assert(retDb == 0);
@@ -253,8 +253,8 @@ size_t TargetPhrase::ReadOtherInfoFromMemory(const char *mem
 	size_t memUsed = 0;
 	
 	// phrase id
-	memcpy(&m_targetId, mem, sizeof(long));
-	memUsed += sizeof(long);
+	memcpy(&m_targetId, mem, sizeof(m_targetId));
+	memUsed += sizeof(m_targetId);
 
 	// LHS words
 	memUsed += m_headWords[0].ReadFromMemory(mem + memUsed, numSourceFactors);
@@ -347,7 +347,7 @@ void TargetPhrase::Load(Db &db, size_t numTargetFactors)
 	*/
 
 	// create db data	
-	Dbt key(&m_targetId, sizeof(long));
+	Dbt key(&m_targetId, sizeof(m_targetId));
 	Dbt data;
 	
 	// save
