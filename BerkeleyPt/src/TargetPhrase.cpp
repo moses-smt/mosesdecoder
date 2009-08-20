@@ -310,8 +310,8 @@ size_t TargetPhrase::ReadScoresFromMemory(const char *mem, size_t numScores)
 		m_scores[ind] = scoreMem[ind];
 
 	std::transform(m_scores.begin(),m_scores.end(),m_scores.begin(), Moses::TransformScore);
-	std::transform(m_scores.begin(),m_scores.end(),m_scores.begin(), Moses::NegateScore);
 	std::transform(m_scores.begin(),m_scores.end(),m_scores.begin(), Moses::FloorScore);
+	std::transform(m_scores.begin(),m_scores.end(),m_scores.begin(), Moses::NegateScore);
 
 	size_t memUsed = sizeof(float) * m_scores.size();
 	return memUsed;
