@@ -29,6 +29,7 @@ bool Cube::Add(QueueEntry *queueEntry)
 	}
 	else
 	{ // already there
+		cerr << "already there\n";
 		delete queueEntry;
 	}
 	
