@@ -277,14 +277,12 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 		AddHypothesis(hypo);
 
 		ExpandQueueEntry(*queueEntry);
-		delete queueEntry;
 	}
 
 	// empty queue
 	while (!m_queueUnique.IsEmpty())
 	{
 		QueueEntry *queueEntry = m_queueUnique.Pop();
-		delete queueEntry;
 	}
 
 }
