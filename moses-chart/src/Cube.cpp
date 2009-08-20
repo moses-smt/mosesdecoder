@@ -15,8 +15,17 @@ namespace MosesChart
 {
 Cube::~Cube()
 {
-	assert(m_uniqueEntry.size() == 0);
 	assert(m_sortedByScore.size() == 0);
+
+	UniqueCubeEntry::iterator iter;
+	for (iter = m_uniqueEntry.begin(); iter != m_uniqueEntry.end(); ++iter)
+	{
+		QueueEntry *entry = *iter;
+		delete entry;
+	}
+	m_uniqueEntry.clear();
+	
+	//assert(m_uniqueEntry.size() == 0);
 }
 
 bool Cube::Add(QueueEntry *queueEntry)
@@ -29,11 +38,11 @@ bool Cube::Add(QueueEntry *queueEntry)
 	}
 	else
 	{ // already there
-		cerr << "already there\n";
+		//cerr << "already there\n";
 		delete queueEntry;
 	}
 	
-	assert(m_uniqueEntry.size() == m_sortedByScore.size());
+	//assert(m_uniqueEntry.size() == m_sortedByScore.size());
 	
 	return inserted.second;
 }
@@ -43,9 +52,9 @@ QueueEntry *Cube::Pop()
 	QueueEntry *entry = m_sortedByScore.top();
 	m_sortedByScore.pop();
 
-	m_uniqueEntry.erase(entry);
+	//m_uniqueEntry.erase(entry);
 	
-	assert(m_uniqueEntry.size() == m_sortedByScore.size());
+	//assert(m_uniqueEntry.size() == m_sortedByScore.size());
 
 	return entry;
 }
