@@ -220,6 +220,7 @@ namespace Moses
 			//targetPhrase->SetDebugOutput(string("New Format pt ") + line);
 			
 			// component score, for n-best output
+			std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
 			std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
 			std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 			
