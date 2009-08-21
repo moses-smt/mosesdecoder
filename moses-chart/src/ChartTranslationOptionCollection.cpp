@@ -184,7 +184,6 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 	const StaticData &staticData = StaticData::Instance();
 	const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
 	const WordPenaltyProducer *wordPenaltyProducer = staticData.GetWordPenaltyProducer();
-	vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
 	vector<float> wordPenaltyScore(1, -0.434294482);
 
 	size_t isDigit = 0;
@@ -251,13 +250,14 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			m_cacheChartRule.push_back(chartRule);
 
 			transOpt = new TranslationOption(wc->GetWordsRange(), *chartRule);
-
 			//transOpt->CalcScore();
 			Add(transOpt, sourcePos);
 		} // for (iterLHS 
 	}
 	else
 	{ // drop source word. create blank trans opt
+		vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
+
 		TargetPhrase *targetPhrase = new TargetPhrase(Output);
 		m_cacheTargetPhrase.push_back(targetPhrase);
 		targetPhrase->SetSourcePhrase(m_unksrc);
