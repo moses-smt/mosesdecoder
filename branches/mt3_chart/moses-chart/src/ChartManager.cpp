@@ -61,8 +61,6 @@ void Manager::ProcessSentence()
 			cell.CleanupArcList();
 			cell.SortHypotheses();
 			
-			//cerr << cell << endl;
-
 			//VERBOSE(1,range << "=" << cell.GetSize() << " ");
 		}
 	}

@@ -487,7 +487,7 @@ void StaticData::LoadNonTerminals()
 	// for unknwon words
 	if (m_parameter->GetParam("unknown-lhs").size() == 0)
   {
-		UnknownLHSEntry entry(m_defaultNonTerminals, 1.0f);
+		UnknownLHSEntry entry(m_defaultNonTerminals, 0.0f);
 		m_unknownLHS.push_back(entry);
   }
 	else

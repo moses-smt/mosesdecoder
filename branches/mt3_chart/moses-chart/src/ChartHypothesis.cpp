@@ -388,10 +388,11 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 	hypo.CreateOutputPhrase(outPhrase);
 
 	// words bitmap
-	out << " " << outPhrase
-			<< " " << hypo.GetId()
-			<< " " << hypo.GetTotalScore()
+	out << " " << hypo.GetId()
+			<< " " << outPhrase
 			<< " " << hypo.m_currSourceWordsRange
+			<< " " << hypo.GetTotalScore()
+			<< " " << hypo.m_scoreBreakdown
 			<< " " << hypo.m_targetPhrase;
 	out << endl;
 	
