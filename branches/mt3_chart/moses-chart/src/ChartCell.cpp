@@ -260,7 +260,7 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 		else
 			delete queueEntry;
 	}
-
+	
 	// pluck things out of queue and add to hypo collection
 	const size_t popLimit = staticData.GetCubePruningPopLimit();
 
@@ -291,28 +291,29 @@ void ChartCell::SortHypotheses()
 {
 	if (m_hypos.size() == 0)
 	{
-		m_bestHypo = NULL;
 	}
 	else
 	{
 		// done everything for this cell. 
 		// sort
-		std::vector<const Hypothesis*> hyposOrdered;
-		std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(hyposOrdered, hyposOrdered.end()));
-		std::sort(hyposOrdered.begin(), hyposOrdered.end(), ChartHypothesisScoreOrderer());
-		m_bestHypo = hyposOrdered.front();
-
 		// put into buckets according to headwords
-		std::vector<const Hypothesis*>::iterator iter;
-		for (iter = hyposOrdered.begin(); iter != hyposOrdered.end(); ++iter)
+		HCType::iterator iter;
+		for (iter = m_hypos.begin(); iter != m_hypos.end(); ++iter)
 		{
 			const Hypothesis *hypo = *iter;
 			const Word &headWord = hypo->GetTargetLHS();
 			std::vector<const Hypothesis*> &vec = m_hyposOrdered[headWord];
 			vec.push_back(hypo);
 		}
-		//assert(m_hyposOrdered.size() == 1); // TODO
 
+		std::map<Moses::Word, OrderHypos>::iterator iterPerLHS;
+		for (iterPerLHS = m_hyposOrdered.begin(); iterPerLHS != m_hyposOrdered.end(); ++iterPerLHS)
+		{
+			OrderHypos &orderHypos = iterPerLHS->second;
+
+			std::sort(orderHypos.begin(), orderHypos.end(), ChartHypothesisScoreOrderer());
+		}
+		
 		// create list of headwords
 		std::map<Moses::Word, OrderHypos>::const_iterator iterMap;
 		for (iterMap = m_hyposOrdered.begin(); iterMap != m_hyposOrdered.end(); ++iterMap)
@@ -320,6 +321,26 @@ void ChartCell::SortHypotheses()
 			m_headWords.push_back(iterMap->first);
 		}
 	}
+}
+
+const Hypothesis *ChartCell::GetBestHypothesis() const
+{
+	const Hypothesis *ret = NULL;
+	float bestScore = -std::numeric_limits<float>::infinity();
+
+
+	std::map<Moses::Word, OrderHypos>::const_iterator iter;
+	for (iter = m_hyposOrdered.begin(); iter != m_hyposOrdered.end(); ++iter)
+	{
+		const Hypothesis *hypo = iter->second[0];
+		if (hypo->GetTotalScore() > bestScore)
+		{
+			bestScore = hypo->GetTotalScore();
+			ret = hypo;
+		};
+	}
+	
+	return ret;
 }
 
 void ChartCell::AddQueueEntry(QueueEntry *queueEntry)

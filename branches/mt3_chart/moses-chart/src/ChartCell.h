@@ -62,7 +62,6 @@ protected:
 
 	std::map<Moses::Word, OrderHypos> m_hyposOrdered;
 	std::vector<Moses::Word> m_headWords;
-	const Hypothesis *m_bestHypo;
 
 	Moses::WordsRange m_coverage;
 	Cube m_queueUnique;
@@ -107,8 +106,7 @@ public:
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
 	void Remove(const HCType::iterator &iter);
 
-	const Hypothesis *GetBestHypothesis() const
-	{ return m_bestHypo; }
+	const Hypothesis *GetBestHypothesis() const;
 
 	bool HeadwordExists(const Moses::Word &headWord) const;
 	const std::vector<Moses::Word> &GetHeadwords() const
