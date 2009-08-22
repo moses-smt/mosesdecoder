@@ -28,7 +28,7 @@ class QueueEntryScoreOrderer
 public:
 	bool operator()(const QueueEntry* entryA, const QueueEntry* entryB) const
 	{
-		return (entryA->GetCombinedScore() > entryB->GetCombinedScore());
+		return (entryA->GetCombinedScore() < entryB->GetCombinedScore());
 	}
 };
 

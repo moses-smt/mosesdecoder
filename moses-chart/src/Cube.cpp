@@ -52,10 +52,6 @@ QueueEntry *Cube::Pop()
 	QueueEntry *entry = m_sortedByScore.top();
 	m_sortedByScore.pop();
 
-	//m_uniqueEntry.erase(entry);
-	
-	//assert(m_uniqueEntry.size() == m_sortedByScore.size());
-
 	return entry;
 }
 	
