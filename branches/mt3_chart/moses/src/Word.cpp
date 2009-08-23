@@ -95,9 +95,6 @@ void Word::CreateFromString(FactorDirection direction
 		factor = factorCollection.AddFactor(direction, factorType, wordVec[ind]); 
 		m_factorArray[factorType] = factor;
 	}
-
-	// assume term/non-term same for all factors
-	m_isNonTerminal = factor->IsNonTerminal();
 }
 
 void Word::CreateFromString(FactorDirection direction
