@@ -882,6 +882,10 @@ bool StaticData::LoadPhraseTables()
 		if (impl == Memory)
 		{	// memory phrase table
 			VERBOSE(2,"using standard phrase tables");
+			
+			if (!FileExists(filePath) && FileExists(filePath + ".gz")) 
+				filePath += ".gz";
+			
 			PhraseDictionaryMemory *pd=new PhraseDictionaryMemory(numScoreComponent);
 			if (!pd->Load(input
 							 , output
@@ -968,6 +972,10 @@ bool StaticData::LoadPhraseTables()
 		else if (impl == NewFormat)
 		{	// memory phrase table
 			VERBOSE(2,"using new format phrase tables");
+
+			if (!FileExists(filePath) && FileExists(filePath + ".gz")) 
+				filePath += ".gz";
+			
 			string fileBackoffPath = (token.size() >= 6) ? token[5] : "";
 			
 			PhraseDictionaryNewFormat *pd=new PhraseDictionaryNewFormat(numScoreComponent);
