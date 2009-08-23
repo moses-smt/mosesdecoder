@@ -67,7 +67,7 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
 	bool isNonTerminal = false;
 
 	// find string id
-	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, factorString, isNonTerminal, m_factorId) );
+	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, factorString, m_factorId) );
 	if (ret.second)
 		++m_factorId; // new factor, make sure next new factor has diffrernt id
 		
@@ -81,7 +81,7 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
 																				, bool isNonTerminal)
 {
 	// find string id
-	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, factorString, isNonTerminal, m_factorId) );
+	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, factorString, m_factorId) );
 	if (ret.second)
 		++m_factorId; // new factor, make sure next new factor has diffrernt id
 		
