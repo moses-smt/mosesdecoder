@@ -45,3 +45,7 @@ training/symal/giza2bal.pl
 recaser/train-recaser.perl
 recaser/recase.perl
 recaser/detokenizer.perl
+recaser/truecase.perl
+recaser/detruecase.perl
+recaser/train-truecaser.perl
+
