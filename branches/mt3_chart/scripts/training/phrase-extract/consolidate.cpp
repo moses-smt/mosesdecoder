@@ -186,7 +186,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 											 << " " << itemDirect[3]; // prob direct
 		else
 			fileConsolidated << itemIndirect[2]      // prob indirect
-											 << " " << itemDirect[2you]; // prob direct
+											 << " " << itemDirect[3]; // prob direct
 		fileConsolidated << " " << (logProbFlag ? 1 : 2.718); // phrase count feature
 		
 		// counts
