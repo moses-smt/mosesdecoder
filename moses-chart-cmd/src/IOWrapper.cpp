@@ -250,7 +250,8 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 
 		if (StaticData::Instance().GetOutputHypoScore())
 		{
-			cout << hypo->GetTotalScore() << " ";
+			cout << hypo->GetTotalScore() << " " 
+					<< MosesChart::Hypothesis::GetHypoCount() << " ";
 		}
 		
 		if (StaticData::Instance().IsDetailedTranslationReportingEnabled())
