@@ -260,8 +260,11 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 	}	
 }
 
-const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node)
+const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node, float &sourceCount, float &entropy)
 {
+	sourceCount = 999999;
+	entropy = 0;
+
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
 
 	Moses::UINT32 sourceNodeId = node.GetSourceNodeId();
@@ -277,7 +280,7 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 	{
 		char *mem = (char*) data.get_data();
 		size_t offset = 0;
-
+		
 		// size
 		int sizeColl;
 		memcpy(&sizeColl, mem, sizeof(int));
@@ -296,10 +299,20 @@ const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourceP
 			// actual words
 			tp->Load(m_dbTargetInd, m_numTargetFactors);
 
+			// pick up other info
+			const  Moses::CountInfo &countInfo = tp->GetCountInfo();
+			
+			sourceCount = countInfo.m_countTarget;
+			
+			float logProb = tp->GetScores()[2];
+			entropy += exp(-logProb) * logProb;
+			
 			ret->AddTargetPhrase(tp);
 		}
 
 		assert(offset == data.get_size());
+		
+		//cerr << sourceCount << "|" << entropy << " ";
 	}
 
 	return ret;

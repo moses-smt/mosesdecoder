@@ -85,7 +85,8 @@ public:
 																			, const Moses::LMList &lmList
 																			, const Moses::Phrase &sourcePhrase) const;
 	
-	const  Moses::CountInfo &GetCountInfo() const;
+	const  Moses::CountInfo &GetCountInfo() const
+	{ return m_countInfo; }
 	void CreateCountInfo(const std::string &countStr);
 };
 	

@@ -98,7 +98,7 @@ public:
 	{ return m_dbSource; }
 
 	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word);
-	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node);
+	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node, float &sourceCount, float &entropy);
 
 	Moses::TargetPhraseCollection *ConvertToMoses(const TargetPhraseCollection &tpColl
 																											, const std::vector<Moses::FactorType> &inputFactors
