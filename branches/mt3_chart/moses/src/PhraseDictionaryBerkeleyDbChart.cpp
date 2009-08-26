@@ -16,6 +16,25 @@ using namespace std;
 
 namespace Moses
 {	
+	
+class TempStore
+	{
+	public:
+		const WordConsumed *m_wordConsumed;
+		const MosesBerkeleyPt::TargetPhraseCollection *m_tpColl;
+		float m_sourceCount, m_entropy;
+		
+		TempStore(const WordConsumed *wordConsumed, 
+							const MosesBerkeleyPt::TargetPhraseCollection *tpColl
+							,float sourceCount, float entropy)
+		:m_wordConsumed(wordConsumed)
+		,m_tpColl(tpColl)
+		,m_sourceCount(sourceCount)
+		,m_entropy(entropy)
+		{}
+	};
+
+	
 const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 																																					InputType const& src
 																																					,WordsRange const& range
@@ -151,7 +170,11 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 
 
 	// return list of target phrases
+	float minEntropy = 99999;
+	
 	const ProcessedRuleCollBerkeleyDb &nodes = runningNodes.Get(relEndPos + 1);
+	
+	vector<TempStore> listTpColl;
 	
 	size_t rulesLimit = StaticData::Instance().GetRuleLimit();
 	ProcessedRuleCollBerkeleyDb::const_iterator iterNode;
@@ -162,24 +185,49 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 		const WordConsumed *wordConsumed = processedRule.GetLastWordConsumed();
 		assert(wordConsumed);
 
-		const MosesBerkeleyPt::TargetPhraseCollection *tpcollBerkeleyDb = m_dbWrapper.GetTargetPhraseCollection(node);
+		float sourceCount, entropy;
+		
+		const MosesBerkeleyPt::TargetPhraseCollection *tpcollBerkeleyDb = m_dbWrapper.GetTargetPhraseCollection(node, sourceCount, entropy);
 
-		TargetPhraseCollection *targetPhraseCollection = m_dbWrapper.ConvertToMoses(
-																															*tpcollBerkeleyDb
-																															,m_inputFactorsVec
-																															,m_outputFactorsVec
-																															,*this
-																															,m_weight
-																															,weightWP
-																															,lmList
-																															,*cachedSource);
+		if (sourceCount > 10)
+		{
+			minEntropy = (entropy<minEntropy) ? entropy : minEntropy;
+		}
+		
+		listTpColl.push_back(TempStore(wordConsumed, tpcollBerkeleyDb, sourceCount, entropy));		
+	}
+	
+	minEntropy *= 2;
+	
+	vector<TempStore>::const_iterator iterListTpColl;
+	for (iterListTpColl = listTpColl.begin(); iterListTpColl != listTpColl.end(); ++iterListTpColl)
+	{
+		const WordConsumed *wordConsumed = iterListTpColl->m_wordConsumed;
+		const MosesBerkeleyPt::TargetPhraseCollection *tpcollBerkeleyDb = iterListTpColl->m_tpColl;
+		float sourceCount = iterListTpColl->m_sourceCount;
+		float entropy = iterListTpColl->m_entropy;
+		
+		//if (true)
+		if (minEntropy > 99999 || (sourceCount > 10 && entropy <= minEntropy))
+		{
+			TargetPhraseCollection *targetPhraseCollection = m_dbWrapper.ConvertToMoses(
+																																								*tpcollBerkeleyDb
+																																								,m_inputFactorsVec
+																																								,m_outputFactorsVec
+																																								,*this
+																																								,m_weight
+																																								,weightWP
+																																								,lmList
+																																								,*cachedSource);
+			assert(targetPhraseCollection);
+			//cerr << *targetPhraseCollection << endl;
+			ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
+			m_cache.push_back(targetPhraseCollection);
+		}
 		
 		delete tpcollBerkeleyDb;
-		
-		assert(targetPhraseCollection);
-		ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
-		m_cache.push_back(targetPhraseCollection);
 	}
+	
 	ret->CreateChartRules(rulesLimit);
 	
 	return ret;
