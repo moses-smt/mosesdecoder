@@ -171,6 +171,7 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 
 	// return list of target phrases
 	float minEntropy = 99999;
+	float minEntropyCount = 0;
 	
 	const ProcessedRuleCollBerkeleyDb &nodes = runningNodes.Get(relEndPos + 1);
 	
@@ -191,6 +192,7 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 
 		if (sourceCount > 10)
 		{
+			minEntropyCount = (entropy<minEntropy) ? sourceCount : minEntropyCount;
 			minEntropy = (entropy<minEntropy) ? entropy : minEntropy;
 		}
 		
@@ -198,6 +200,8 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 	}
 	
 	minEntropy *= 2;
+	
+	cerr << minEntropyCount << "|" << minEntropy << " ";
 	
 	vector<TempStore>::const_iterator iterListTpColl;
 	for (iterListTpColl = listTpColl.begin(); iterListTpColl != listTpColl.end(); ++iterListTpColl)
@@ -207,8 +211,8 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 		float sourceCount = iterListTpColl->m_sourceCount;
 		float entropy = iterListTpColl->m_entropy;
 		
-		//if (true)
-		if (minEntropy > 99999 || (sourceCount > 10 && entropy <= minEntropy))
+		if (true)
+		//if (minEntropy > 99999 || (sourceCount > 10 && entropy <= minEntropy))
 		{
 			TargetPhraseCollection *targetPhraseCollection = m_dbWrapper.ConvertToMoses(
 																																								*tpcollBerkeleyDb
@@ -224,9 +228,15 @@ const ChartRuleCollection *PhraseDictionaryBerkeleyDb::GetChartRuleCollection(
 			ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
 			m_cache.push_back(targetPhraseCollection);
 		}
+		else
+		{
+			cerr << sourceCount << "|" << entropy << " ";
+		}
 		
 		delete tpcollBerkeleyDb;
 	}
+	
+	cerr << endl;
 	
 	ret->CreateChartRules(rulesLimit);
 	
