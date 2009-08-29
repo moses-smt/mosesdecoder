@@ -13,7 +13,7 @@ TargetPhraseCollection::~TargetPhraseCollection()
 	Moses::RemoveAllInColl(m_coll);
 }
 
-void TargetPhraseCollection::Save(Db &db, long sourceNodeId, int numScores, size_t sourceWordSize, size_t targetWordSize) const
+void TargetPhraseCollection::Save(Db &db, Moses::UINT32 sourceNodeId, int numScores, size_t sourceWordSize, size_t targetWordSize) const
 {
 	size_t memUsed;
 	char *mem = WriteToMemory(memUsed, numScores, sourceWordSize, targetWordSize);
