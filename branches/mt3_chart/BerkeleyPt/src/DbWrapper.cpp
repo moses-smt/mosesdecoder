@@ -52,10 +52,10 @@ Moses::UINT32 GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
 	memset(skey, 0, sizeof(DBT));
 	
 	// Now set the secondary key's data to be the representative's name
-	Moses::UINT32 targetId = *(long*) pdata->get_data();
+	Moses::UINT32 targetId = *(Moses::UINT32*) pdata->get_data();
 	skey->set_data(&targetId);
 	//skey->set_data(pdata->get_data());
-	skey->set_size(sizeof(long));
+	skey->set_size(sizeof(Moses::UINT32));
 	
 	// Return 0 to indicate that the record can be created/updated.
 	return (0);
@@ -157,13 +157,13 @@ void DbWrapper::SaveMisc()
 	SetMisc("NumScores", m_numScores);
 }
 
-void DbWrapper::SetMisc(const string &key, int value)
+void DbWrapper::SetMisc(const string &key, Moses::UINT32 value)
 {
 	char *keyData = (char*) malloc(key.size() + 1);
 	strcpy(keyData, key.c_str());
 	Dbt keyDb(keyData, key.size() + 1);
 	
-	Dbt valueDb(&value, sizeof(int));
+	Dbt valueDb(&value, sizeof(value));
 	
 	int retDb = m_dbMisc.put(NULL, &keyDb, &valueDb, DB_NOOVERWRITE);
 	assert(retDb == retDb);
@@ -171,7 +171,7 @@ void DbWrapper::SetMisc(const string &key, int value)
 	free(keyData);
 }
 
-int DbWrapper::GetMisc(const std::string &key)
+Moses::UINT32 DbWrapper::GetMisc(const std::string &key)
 {
 	char *keyData = (char*) malloc(key.size() + 1);
 	strcpy(keyData, key.c_str());
@@ -179,12 +179,13 @@ int DbWrapper::GetMisc(const std::string &key)
 	
 	Dbt valueDb;
 	
-	m_dbMisc.get(NULL, &keyDb, &valueDb, 0);
-	assert(valueDb.get_size() == sizeof(int));
+	int retDb = m_dbMisc.get(NULL, &keyDb, &valueDb, 0);
+	assert(retDb == 0);
+	assert(valueDb.get_size() == sizeof(Moses::UINT32));
 	
 	free(keyData);
 	
-	int &value = *(int*) valueDb.get_data();
+	Moses::UINT32 &value = *(Moses::UINT32*) valueDb.get_data();
 	return value;
 }
 	
@@ -246,8 +247,8 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 	
 	// get from db
 	// need to get rid of const
-	int ret = m_dbSource.get(NULL, &key, &data, 0);
-	if (ret == 0) 
+	int retDb = m_dbSource.get(NULL, &key, &data, 0);
+	if (retDb == 0) 
 	{ // exist. 		
 		Moses::UINT32 sourceNodeId = *(Moses::UINT32*) data.get_data();
 	
@@ -258,6 +259,12 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 	{
 		return NULL;
 	}	
+}
+
+const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node)
+{
+	float sourceCount, entropy;
+	return GetTargetPhraseCollection(node, sourceCount, entropy);
 }
 
 const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node, float &sourceCount, float &entropy)

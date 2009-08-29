@@ -49,7 +49,7 @@ class DbWrapper
 	bool m_openSave;
 	
 	
-	void SetMisc(const std::string &key, int value);
+	void SetMisc(const std::string &key, Moses::UINT32 value);
 	bool OpenForSave(const std::string &filePath);
 	bool OpenForLoad(const std::string &filePath);
 	bool OpenDb(Db &db, const std::string &filePath, DBTYPE type, u_int32_t flags, int mode);
@@ -92,11 +92,12 @@ public:
 	Vocab &GetVocab()
 	{ return m_vocab; }
 
-	int GetMisc(const std::string &key);
+	Moses::UINT32 GetMisc(const std::string &key);
 	
 	Db &GetSourceDb()
 	{ return m_dbSource; }
 
+	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node);
 	const SourcePhraseNode *GetChild(const SourcePhraseNode &parentNode, const Word &word);
 	const TargetPhraseCollection *GetTargetPhraseCollection(const SourcePhraseNode &node, float &sourceCount, float &entropy);
 

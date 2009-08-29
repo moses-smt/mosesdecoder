@@ -116,27 +116,6 @@ const ChartRuleCollection *PhraseDictionaryNewFormat::GetChartRuleCollection(
 					runningNodes.Add(stackInd, processedRule);
 				}
 			} // for (iterHeadWords
-			
-			// backoff 
-			Word backoffLabel = CreateCoveredWord(sourceLabel, src, WordsRange(startPos, endPos));			
-			
-			for (iterHeadWords = headWords.begin(); iterHeadWords != headWords.end(); ++iterHeadWords)
-			{
-				const Word &headWord = *iterHeadWords;
-				
-				const PhraseDictionaryNodeSourceLabel *node = prevNode.GetChild(headWord, backoffLabel);
-				if (node != NULL)
-				{
-					//const Word &sourceWord = node->GetSourceWord();
-					WordConsumed *newWordConsumed = new WordConsumed(startPos, endPos
-																													 , headWord
-																													 , prevWordConsumed);
-					
-					ProcessedRule *processedRule = new ProcessedRule(*node, newWordConsumed);
-					runningNodes.Add(stackInd, processedRule);
-				}
-			} // for (iterHeadWords
-			
 		} // for (iterLabelList 
 	}
 	
